@@ -10,7 +10,7 @@ To integrate it quickly in your tools you can rely on the dedicated Python
 client 
 named [Gazu](https://gazu.cg-wire.com). 
 
-# Features 
+### Features 
 
 Zou can:
 
