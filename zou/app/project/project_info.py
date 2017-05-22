@@ -1,0 +1,76 @@
+from zou.app.models.project import Project
+from zou.app.models.project_status import ProjectStatus
+from zou.app.project.exception import ProjectNotFoundException
+
+from sqlalchemy.exc import StatementError
+
+
+def open_projects():
+    query = ProjectStatus.query
+    query = query.filter(ProjectStatus.name.in_(("Active", "open")))
+    statuses = query.all()
+    status_ids = [x.id for x in statuses]
+
+    query = Project.query.filter(Project.project_status_id.in_(status_ids))
+    return query.all()
+
+
+def get_or_create_status(name):
+    project_status = ProjectStatus.get_by(name=name)
+    if project_status is None:
+        project_status = ProjectStatus(
+            name=name,
+            color="#000000"
+        )
+        project_status.save()
+    return project_status
+
+
+def get_open_status():
+    get_or_create_status("Open")
+
+
+def get_or_create(name):
+    project = Project.get_by(name=name)
+    if project is None:
+        open_status = get_open_status()
+        project = Project(
+            name=name,
+            project_status_id=open_status
+        )
+        project.save()
+    return project
+
+
+def get_project_by_name(project_name):
+    project = Project.get_by(name=project_name)
+
+    if project is None:
+        raise ProjectNotFoundException()
+
+    return project
+
+
+def get_project(project_id):
+    try:
+        project = Project.get(project_id)
+    except StatementError:
+        raise ProjectNotFoundException()
+
+    if project is None:
+        raise ProjectNotFoundException()
+
+    return project
+
+
+def save_project_status(project_statuses):
+    result = []
+    filtered_satuses = (x for x in project_statuses if x is not None)
+
+    for status in filtered_satuses:
+        project_status = ProjectStatus.get_by(name=status)
+        if project_status is None:
+            project_status = ProjectStatus(name=status, color="#000000")
+            project_status.save()
+
+        result.append(project_status)
