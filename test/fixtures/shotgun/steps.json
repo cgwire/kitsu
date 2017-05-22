@@ -1,0 +1,14 @@
+[
+  {
+    "code": "Modeling Shading",
+    "color": "50,149,253",
+    "id": 1,
+    "type": "Step"
+  },
+  {
+    "code": "Animation",
+    "color": "183,0,188",
+    "id": 2,
+    "type": "Step"
+  }
+]

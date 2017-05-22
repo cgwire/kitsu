@@ -1,0 +1,16 @@
+[
+  {
+    "email": "johndoe@gmail.com",
+    "firstname": "John",
+    "id": 1,
+    "lastname": "Doe",
+    "type": "HumanUser"
+  },
+  {
+    "email": "ema.peel@gmail.com",
+    "firstname": "Ema",
+    "id": 2,
+    "lastname": "Peel",
+    "type": "HumanUser"
+  }
+]

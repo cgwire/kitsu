@@ -1,0 +1,32 @@
+[
+  {
+    "code": "S01_animation",
+    "description": "First scene",
+    "entity": {
+      "id": 1,
+      "name": "S01",
+      "type": "Shot"
+    },
+    "frame_range": null,
+    "id": 1,
+    "project": {
+      "id": 1,
+      "name": "Cosmos Landromat",
+      "type": "Project"
+    },
+    "sg_task": {
+      "id": 1,
+      "name": "Animation",
+      "type": "Task"
+    },
+    "sg_uploaded_movie": {
+      "content_type": "video/avi",
+      "id": 1,
+      "link_type": "upload",
+      "name": "movie.avi",
+      "type": "Attachment",
+      "url": "https://sg-media.amazonaws.com/movie.avi"
+    },
+    "type": "Version"
+  }
+]

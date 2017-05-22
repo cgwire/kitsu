@@ -1,0 +1,26 @@
+[
+  {
+    "sg_cut_in": null, 
+    "code": "SH01", 
+    "assets": [
+      {
+        "type": "Character", 
+        "id": 1, 
+        "name": "Black Sheep"
+      }
+    ], 
+    "project": {
+      "type": "Project", 
+      "id": 1, 
+      "name": "Cosmos Landromat"
+    }, 
+    "sg_sequence": {
+      "type": "Project", 
+      "id": 1, 
+      "name": "S01"
+    },
+    "sg_cut_duration": null, 
+    "type": "Shot", 
+    "id": 1
+  }
+]

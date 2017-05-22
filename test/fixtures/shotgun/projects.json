@@ -1,0 +1,14 @@
+[
+  {
+    "id": 1,
+    "name": "Cosmos Landromat",
+    "sg_status": "Active",
+    "type": "Project"
+  },
+  {
+    "id": 2,
+    "name": "Big Buck Bunny",
+    "sg_status": "On Hold",
+    "type": "Project"
+  }
+]

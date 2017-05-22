@@ -1,0 +1,4 @@
+Project,Department,Task Type,Episode,Sequence,Shot,Asset Type,Asset,Name,Assigner,Assignee,Duration,Estimation,Start Date,Real Start Date,End Date,Due Date,Task Status
+Cosmos Landraumat,Animation,Facial,E01,SE01,S01,,,Master,John Doe,John Doe,40,30,2017-03-19,2017-03-20,2017-03-19,2017-03-21,WIP
+Cosmos Landraumat,Compositing,Compositing,E01,SE01,S01,,,Master,John Doe,,50,20,2017-03-19,,2017-03-19,2017-03-21,TODO
+Cosmos Landraumat,Modeling,Texture,,,,Prop,Cassette Player,Master,John Doe,,40,30,2017-03-19,2017-03-20,2017-03-19,2017-03-21,WIP

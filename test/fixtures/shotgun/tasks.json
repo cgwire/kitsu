@@ -1,0 +1,70 @@
+[
+  {
+    "cached_display_name": "Animation",
+    "created_by": {
+      "id": 1,
+      "name": "John Doe",
+      "type": "HumanUser"
+    },
+    "due_date": null,
+    "duration": null,
+    "entity": {
+      "id": 1,
+      "name": "Sheep",
+      "type": "Asset"
+    },
+    "id": 1,
+    "project": {
+      "type": "Project", 
+      "id": 1, 
+      "name": "Cosmos Landraumat"
+    }, 
+    "sg_description": null,
+    "sg_sort_order": 40,
+    "sg_status_list": "wip",
+    "start_date": null,
+    "step": {
+      "id": 1,
+     "name": "Modeling Shading",
+      "type": "Step"
+    },
+    "task_assignees": [],
+    "type": "Task"
+  },
+  {
+    "cached_display_name": "Shading",
+    "created_by": {
+      "id": 1,
+      "name": "John Doe",
+      "type": "HumanUser"
+    },
+    "due_date": null,
+    "duration": null,
+    "entity": {
+      "id": 2,
+      "name": "Sheep",
+      "type": "Asset"
+    },
+    "id": 76,
+    "project": {
+      "type": "Project", 
+      "id": 1, 
+      "name": "Cosmos Landraumat"
+    }, 
+    "sg_description": null,
+    "sg_sort_order": 60,
+    "sg_status_list": "wip",
+    "start_date": null,
+    "step": {
+      "id": 2,
+      "name": "Animation",
+      "type": "Step"
+    },
+    "task_assignees": [{
+      "id": 2,
+      "name": "Ema Peel",
+      "type": "HumanUser"
+    }],
+    "type": "Task"
+  }
+]

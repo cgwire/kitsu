@@ -1,0 +1,74 @@
+[
+  {
+    "bg_color": "29,215,46",
+    "code": "apr",
+    "icon": {
+      "id": 1,
+      "name": "Approved",
+      "type": "Icon"
+    },
+    "id": 1,
+    "name": "Approved",
+    "type": "Status"
+  },
+  {
+    "bg_color": "146,146,146",
+    "code": "cmpt",
+    "icon": {
+      "id": 2,
+      "name": "Complete",
+      "type": "Icon"
+    },
+    "id": 2,
+    "name": "Complete",
+    "type": "Status"
+  },
+  {
+    "bg_color": null,
+    "code": "hld",
+    "icon": {
+      "id": 3,
+      "name": "On Hold",
+      "type": "Icon"
+    },
+    "id": 3,
+    "name": "On Hold",
+    "type": "Status"
+  },
+  {
+    "bg_color": "213,213,213",
+    "code": "wip",
+    "icon": {
+      "id": 4,
+      "name": "In Progress",
+      "type": "Icon"
+    },
+    "id": 4,
+    "name": "WIP",
+    "type": "Status"
+  },
+  {
+    "bg_color": "247,246,206",
+    "code": "rdy",
+    "icon": {
+      "id": 5,
+      "name": "Open",
+      "type": "Icon"
+    },
+    "id": 5,
+    "name": "Ready to Start",
+    "type": "Status"
+  },
+  {
+    "bg_color": "149,227,167",
+    "code": "rev",
+    "icon": {
+      "id": 6,
+      "name": "Pending Review",
+      "type": "Icon"
+    },
+    "id": 6,
+    "name": "Pending Review",
+    "type": "Status"
+  }
+]
