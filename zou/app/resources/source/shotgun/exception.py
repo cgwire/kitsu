@@ -1,0 +1,2 @@
+class ShotgunEntryImportFailed(Exception):
+    pass
