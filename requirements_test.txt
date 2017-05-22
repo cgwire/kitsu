@@ -1,0 +1,3 @@
+mixer
+pytest
+pytest-cov
