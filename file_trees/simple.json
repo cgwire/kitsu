@@ -1,0 +1,44 @@
+{
+    "working": {
+        "mountpoint": "/simple",
+        "root": "productions",
+        "folder_path": {
+            "shot": "<Project>/shots/<Sequence>/<Shot>/<TaskType>",
+            "asset": "<Project>/assets/<AssetType>/<Asset>/<TaskType>",
+            "style": "lowercase"
+        },
+        "file_name": {
+            "shot": "<Project>_<Sequence>_<Shot>_<TaskType>",
+            "asset": "<Project>_<AssetType>_<Asset>_<TaskType>",
+            "style": "lowercase"
+        }
+    },
+    "output": {
+        "mountpoint": "/simple",
+        "root": "productions/export",
+        "folder_path": {
+            "shot": "<Project>/shots/<Sequence>/<Shot>/<TaskType>",
+            "asset": "<Project>/assets/<AssetType>/<Asset>/<TaskType>",
+            "style": "lowercase"
+        },
+        "file_name": {
+            "shot": "<Project>_<Sequence>_<Shot>_<TaskType>",
+            "asset": "<Project>_<AssetType>_<Asset>_<TaskType>",
+            "style": "lowercase"
+        }
+    },
+    "preview": {
+        "mountpoint": "/simple",
+        "root": "productions/previews",
+        "folder_path": {
+            "shot": "<Project>/shots/<Sequence>/<Shot>/<TaskType>",
+            "asset": "<Project>/assets/<AssetType>/<Asset>/<TaskType>",
+            "style": "lowercase"
+        },
+        "file_name": {
+            "shot": "<Project>_<Sequence>_<Shot>_<TaskType>",
+            "asset": "<Project>_<AssetType>_<Asset>_<TaskType>",
+            "style": "lowercase"
+        }
+    }
+}
