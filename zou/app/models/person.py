@@ -1,3 +1,5 @@
+import sys
+
 from zou.app import db
 from zou.app.models.serializer import SerializerMixin
 from zou.app.models.base import BaseMixin
@@ -44,7 +46,13 @@ class Person(db.Model, BaseMixin, SerializerMixin):
         return "<Person %s>" % self.full_name()
 
     def full_name(self):
-        return "%s %s" % (
-            self.first_name,
-            self.last_name
-        )
+        if sys.version_info[0] < 3:
+            return "%s %s" % (
+                self.first_name.encode("utf-8"),
+                self.last_name.encode("utf-8")
+            )
+        else:
+            return "%s %s" % (
+                self.first_name,
+                self.last_name
+            )
