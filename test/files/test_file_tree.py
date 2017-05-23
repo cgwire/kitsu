@@ -77,7 +77,7 @@ class FileTreeTestCase(ApiDBTestCase):
         )
         self.assertEqual(
             file_name,
-            "COSMOS_LANDROMAT_S01_P01_ANIMATION_SUPER_ANIMATION"
+            "cosmos_landromat_s01_p01_animation"
         )
 
     def test_add_version_suffix_to_file_name(self):
