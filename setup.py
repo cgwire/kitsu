@@ -7,10 +7,24 @@ import sys
 from setuptools import setup, find_packages
 
 
-
 def get_requirements_list(file_name):
-    requires = open(file_name, "rb").read().split('\n')
-    return [x for x in requires if len(x) > 0]
+    with open(file_name, 'rb') as fd:
+        requires = fd.readlines()
+        return [x.decode("utf-8") for x in requires if len(x) > 0]
+
+
+def get_file_content(file_name):
+    with open(file_name, 'rb') as fd:
+        return fd.read().decode("utf-8")
+
+
+def get_version():
+    init_file_content = get_file_content("zou/__init__.py")
+    return re.search(
+        r'^__version__\s*=\s*[\'"]([^\'"]*)[\'"]',
+        init_file_content,
+        re.MULTILINE
+    ).group(1)
 
 
 if sys.argv[-1] == 'publish':
@@ -24,19 +38,11 @@ packages = [
 
 requires = get_requirements_list('requirements.txt')
 test_requirements = get_requirements_list('requirements_test.txt')
-
-with open('zou/__init__.py', 'rb') as fd:
-    version = re.search(
-        r'^__version__\s*=\s*[\'"]([^\'"]*)[\'"]',
-        fd.read(),
-        re.MULTILINE
-    ).group(1)
+readme = get_file_content("README.md")
+version = get_version()
 
 if not version:
     raise RuntimeError('Cannot find version information')
-
-with open('README.md', 'rb') as f:
-    readme = f.read()
 
 setup(
     name='zou',
