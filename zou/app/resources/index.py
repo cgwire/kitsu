@@ -1,11 +1,10 @@
 from flask_restful import Resource
-from zou.app.utils import git
+from zou import __version__
 
 
 class IndexResource(Resource):
     def get(self):
-        git_hash = git.get_git_revision_hash()
         return {
             'api': 'Zou API',
-            'git_hash': git_hash.decode("utf-8")
+            'version': __version__
         }
