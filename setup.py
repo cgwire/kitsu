@@ -7,6 +7,7 @@ import sys
 from setuptools import setup, find_packages
 
 
+
 def get_requirements_list(file_name):
     requires = open(file_name).read().split('\n')
     return [x for x in requires if len(x) > 0]
@@ -69,6 +70,7 @@ setup(
     ),
     test_suite='test',
     tests_require=test_requirements,
+    scripts=['bin/zou'],
     extras_require={
     },
 )
