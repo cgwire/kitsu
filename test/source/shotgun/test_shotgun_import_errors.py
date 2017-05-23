@@ -20,7 +20,7 @@ event = {
     },
     "project": {
         "id": 87,
-        "name": "Big Buck Bunny",
+        "name": "Big Buck Bunny",
         "type": "Project"
     },
     "session_uuid": "7a3cce32-d418-11e6-ab65-0242ac110005",
