@@ -9,7 +9,7 @@ from setuptools import setup, find_packages
 
 
 def get_requirements_list(file_name):
-    requires = open(file_name).read().split('\n')
+    requires = open(file_name, "rb").read().split('\n')
     return [x for x in requires if len(x) > 0]
 
 
@@ -25,7 +25,7 @@ packages = [
 requires = get_requirements_list('requirements.txt')
 test_requirements = get_requirements_list('requirements_test.txt')
 
-with open('zou/__init__.py', 'r') as fd:
+with open('zou/__init__.py', 'rb') as fd:
     version = re.search(
         r'^__version__\s*=\s*[\'"]([^\'"]*)[\'"]',
         fd.read(),
@@ -35,7 +35,7 @@ with open('zou/__init__.py', 'r') as fd:
 if not version:
     raise RuntimeError('Cannot find version information')
 
-with open('README.md', 'r') as f:
+with open('README.md', 'rb') as f:
     readme = f.read()
 
 setup(
