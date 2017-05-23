@@ -4,8 +4,11 @@ python:
   - "3.6"
 services:
   - postgresql
+addons:
+  postgresql: "9.4"
 install: 
   - "pip install -r requirements_test.txt"
   - "python setup.py install"
+before_script:
+  - psql -c 'create database zoudb;' -U postgres
 script: py.test
-
