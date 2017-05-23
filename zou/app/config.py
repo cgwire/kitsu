@@ -2,7 +2,7 @@ import os
 
 from zou.app.utils import dbhelpers
 
-APP_NAME = "Unit Image Pipeline API"
+APP_NAME = "Zou"
 APP_SYSTEM_ERROR_SUBJECT_LINE = "%s system error" % APP_NAME
 
 DEBUG = os.getenv('DEBUG', True)
@@ -22,7 +22,7 @@ DATABASE = {
     "port": os.getenv("DB_PORT", "5432"),
     "username": os.getenv("DB_USERNAME", "postgres"),
     "password": os.getenv("DB_PASSWORD", "mysecretpassword"),
-    "database": os.getenv("DB_DATABASE", "pipeline")
+    "database": os.getenv("DB_DATABASE", "zoudb")
 }
 SQLALCHEMY_DATABASE_URI = dbhelpers.get_db_uri()
 SQLALCHEMY_TRACK_MODIFICATIONS = True
