@@ -8,6 +8,7 @@
         <th class="phone">Phone</th>
         <th class="skills">Skills</th>
         <th class="situation">Situation</th>
+        <th></th>
       </tr>
     </thead>
     <tbody>
@@ -26,7 +27,11 @@
           </span>
         </td>
         <td class="situation">{{ entry.active ? 'Active' : 'Unactive'}}</td>
-      </tr>
+        <row-actions
+          :on-edit-clicked="onEditClicked"
+          :on-delete-clicked="onDeleteClicked">
+        </row-actions>
+       </tr>
     </tbody>
   </table>
   <div class="has-text-centered" v-if="isLoading">
@@ -41,16 +46,20 @@
 <script>
 import { mapGetters, mapActions } from 'vuex'
 import PeopleNameCell from '../cells/PeopleNameCell'
+import RowActions from '../widgets/RowActions'
 
 export default {
   name: 'list',
   components: {
-    PeopleNameCell
+    PeopleNameCell,
+    RowActions
   },
   props: [
     'entries',
     'isLoading',
-    'isError'
+    'isError',
+    'onEditClicked',
+    'onDeleteClicked'
   ],
   computed: {
     ...mapGetters([

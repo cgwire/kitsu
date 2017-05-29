@@ -30,9 +30,11 @@
         </div>
       </div>
       <people-list
-        v-bind:entries="people"
-        v-bind:is-loading="isPeopleLoading"
-        v-bind:is-error="isPeopleLoadingError"
+        :entries="people"
+        :is-loading="isPeopleLoading"
+        :is-error="isPeopleLoadingError"
+        :on-edit-clicked="editPeople"
+        :on-delete-clicked="deletePeople"
       ></people-list>
       <p class="has-text-centered nb-persons">
         {{ people.length }} persons
@@ -83,6 +85,12 @@ export default {
     addPersonFilter (newFilter) {
     },
     removePersonFilter (newFilter) {
+    },
+    editPeople () {
+      console.log('edit')
+    },
+    deletePeople () {
+      console.log('delete')
     },
     changeFilterType (type) {
       if (type === 'Assignee') {

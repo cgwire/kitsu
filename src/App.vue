@@ -51,4 +51,13 @@ body {
 td strong {
   font-size: 1.2em;
 }
+
+tr .actions a {
+  display: none;
+  color: #999;
+}
+
+tr:hover .actions a {
+  display: inline-flex;
+}
 </style>
