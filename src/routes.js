@@ -11,8 +11,9 @@ export const routes = [
     component: Main,
     beforeEnter: auth.requireAuth,
     children: [
-      { path: '/', component: People },
-      { path: '/people', component: People }
+      { path: '', component: People },
+      { path: '/people', component: People },
+      { path: '/people/delete/:person_id', component: People }
     ]
   },
   {

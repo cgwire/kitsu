@@ -1,16 +1,16 @@
 <template>
 <td class="actions">
   <p class="field">
-    <a class="button" @click="onEditClicked">
+    <a class="button" @click="onEditClicked(entryId)">
       <span class="icon is-small">
         <i class="fa fa-edit"></i>
       </span>
     </a>
-    <a class="button" @click="onDeleteClicked">
+    <router-link class="button" :to="'/people/delete/' + entryId">
       <span class="icon is-small">
         <i class="fa fa-trash"></i>
       </span>
-    </a>
+    </router-link>
   </p>
 </td>
 </template>
@@ -22,7 +22,8 @@ export default {
   name: 'row-actions',
   props: [
     'onEditClicked',
-    'onDeleteClicked'
+    'onDeleteClicked',
+    'entryId'
   ],
   computed: {
     ...mapGetters([

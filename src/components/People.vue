@@ -34,24 +34,34 @@
         :is-loading="isPeopleLoading"
         :is-error="isPeopleLoadingError"
         :on-edit-clicked="editPeople"
-        :on-delete-clicked="deletePeople"
       ></people-list>
       <p class="has-text-centered nb-persons">
         {{ people.length }} persons
       </p>
     </div>
+    <delete-modal
+      :active="isDeleteModalShown"
+      :text="text"
+      :on-confirm-clicked="confirmDeletePeople"
+      :cancel-route="'/people'"
+      :is-loading="isDeleteLoading"
+      :is-error="isDeleteLoadingError"
+      :error-text="'An error occured while deleting this person. There are probably data linked to it. Are you sure this person has no assignation or wrote no comment?'" >
+    </delete-modal>
   </div>
 </template>
 
 <script>
 import { mapGetters, mapActions } from 'vuex'
 import PeopleList from './lists/PeopleList'
+import DeleteModal from './widgets/DeleteModal'
 import Filters from './widgets/Filters.vue'
 
 export default {
   name: 'menu',
   components: {
     PeopleList,
+    DeleteModal,
     Filters
   },
   data () {
@@ -70,14 +80,45 @@ export default {
     }
   },
   created () {
-    this.$store.dispatch('loadPeople')
+    this.$store.dispatch('loadPeople', () => {
+      const path = this.$store.state.route.path
+      const personId = this.$store.state.route.params
+      if (path.indexOf('delete') > 0) {
+        this.$store.dispatch('showPersonDeleteModal', personId)
+      }
+    })
+  },
+  watch: {
+    '$route' (to, from) {
+      const path = this.$store.state.route.path
+      const personId = this.$store.state.route.params
+      if (path.indexOf('delete') > 0) {
+        this.$store.dispatch('showPersonDeleteModal', personId)
+      } else {
+        this.$store.dispatch('hidePersonDeleteModal', personId)
+      }
+    }
   },
   computed: {
     ...mapGetters([
       'people',
       'isPeopleLoading',
-      'isPeopleLoadingError'
-    ])
+      'isPeopleLoadingError',
+      'isDeleteModalShown',
+      'isDeleteLoading',
+      'isDeleteLoadingError',
+      'personToDelete'
+    ]),
+    text () {
+      const person = this.personToDelete
+      if (person !== undefined) {
+        const personName = `${person.first_name} ${person.last_name}`
+        return `Are you sure you want to remove ${personName} from ` +
+               `your database ?`
+      } else {
+        return ''
+      }
+    }
   },
   methods: {
     ...mapActions([
@@ -89,8 +130,10 @@ export default {
     editPeople () {
       console.log('edit')
     },
-    deletePeople () {
-      console.log('delete')
+    confirmDeletePeople () {
+      this.$store.dispatch('deletePeople', () => {
+        this.$store.push('/people')
+      })
     },
     changeFilterType (type) {
       if (type === 'Assignee') {
@@ -102,7 +145,6 @@ export default {
       }
       return this.choices
     }
-
   }
 }
 </script>

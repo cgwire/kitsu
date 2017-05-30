@@ -7,5 +7,13 @@ export default {
       .end((err, res) => {
         callback(err, res.body)
       })
+  },
+  deletePerson (personId, callback) {
+    superagent
+      .del(`/api/data/persons/${personId}`)
+      .end((err, res) => {
+        callback(err, res.body)
+      })
   }
+
 }

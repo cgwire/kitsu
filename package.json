@@ -1,9 +1,8 @@
 {
   "name": "kitsu",
-  "version": "1.0.0",
+  "version": "0.1.0",
   "description": "Production Management Software (user interface)",
-  "author": "(Frank Rousseau <frank@cg-wire.com",
-  "private": true,
+  "author": "Frank Rousseau <frank@cg-wire.com>",
   "scripts": {
     "dev": "node build/dev-server.js",
     "start": "node build/dev-server.js",
@@ -11,6 +10,7 @@
     "unit": "cross-env BABEL_ENV=test karma start test/unit/karma.conf.js --single-run",
     "e2e": "node test/e2e/runner.js",
     "test": "npm run unit && npm run e2e",
+    "test:store": "cd test && webpack && mocha --reporter spec test-bundle.js",
     "lint": "eslint --ext .js,.vue src test/unit/specs test/e2e/specs"
   },
   "dependencies": {

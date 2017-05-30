@@ -28,6 +28,7 @@
         </td>
         <td class="situation">{{ entry.active ? 'Active' : 'Unactive'}}</td>
         <row-actions
+          :entry-id="entry.id"
           :on-edit-clicked="onEditClicked"
           :on-delete-clicked="onDeleteClicked">
         </row-actions>
