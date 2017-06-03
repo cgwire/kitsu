@@ -4,7 +4,7 @@
       <h1 class="title">People</h1>
       <div class="level">
         <div class="level-left">
-          <div class="level-item">
+          <div class="level-item filters">
             <filters
               :filters="personFilters"
               :addFilter="addPersonFilter"
@@ -20,9 +20,9 @@
             <button class="button level-item">
               Import a .csv file
             </button>
-            <button class="button level-item">
+            <a class="button level-item" href="/api/export/csv/persons.csv">
               Export as a .csv file
-            </button>
+            </a>
             <button class="button level-item">
               Add a new employee
             </button>
@@ -33,7 +33,6 @@
         :entries="people"
         :is-loading="isPeopleLoading"
         :is-error="isPeopleLoadingError"
-        :on-edit-clicked="editPeople"
       ></people-list>
       <p class="has-text-centered nb-persons">
         {{ people.length }} persons
@@ -41,13 +40,22 @@
     </div>
     <delete-modal
       :active="isDeleteModalShown"
-      :text="text"
       :on-confirm-clicked="confirmDeletePeople"
       :cancel-route="'/people'"
       :is-loading="isDeleteLoading"
       :is-error="isDeleteLoadingError"
+      :text="text"
       :error-text="'An error occured while deleting this person. There are probably data linked to it. Are you sure this person has no assignation or wrote no comment?'" >
     </delete-modal>
+    <edit-person-modal
+      :active="isEditModalShown"
+      :on-confirm-clicked="confirmEditPeople"
+      :cancel-route="'/people'"
+      :is-loading="isEditLoading"
+      :is-error="isEditLoadingError"
+      :text="text"
+    >
+    </edit-person-modal>
   </div>
 </template>
 
@@ -55,6 +63,7 @@
 import { mapGetters, mapActions } from 'vuex'
 import PeopleList from './lists/PeopleList'
 import DeleteModal from './widgets/DeleteModal'
+import EditPersonModal from './modals/EditPersonModal'
 import Filters from './widgets/Filters.vue'
 
 export default {
@@ -62,6 +71,7 @@ export default {
   components: {
     PeopleList,
     DeleteModal,
+    EditPersonModal,
     Filters
   },
   data () {
@@ -81,22 +91,12 @@ export default {
   },
   created () {
     this.$store.dispatch('loadPeople', () => {
-      const path = this.$store.state.route.path
-      const personId = this.$store.state.route.params
-      if (path.indexOf('delete') > 0) {
-        this.$store.dispatch('showPersonDeleteModal', personId)
-      }
+      this.handleModalsDisplay()
     })
   },
   watch: {
     '$route' (to, from) {
-      const path = this.$store.state.route.path
-      const personId = this.$store.state.route.params
-      if (path.indexOf('delete') > 0) {
-        this.$store.dispatch('showPersonDeleteModal', personId)
-      } else {
-        this.$store.dispatch('hidePersonDeleteModal', personId)
-      }
+      this.handleModalsDisplay()
     }
   },
   computed: {
@@ -104,9 +104,15 @@ export default {
       'people',
       'isPeopleLoading',
       'isPeopleLoadingError',
+
       'isDeleteModalShown',
       'isDeleteLoading',
       'isDeleteLoadingError',
+
+      'isEditModalShown',
+      'isEditLoading',
+      'isEditLoadingError',
+
       'personToDelete'
     ]),
     text () {
@@ -127,12 +133,19 @@ export default {
     },
     removePersonFilter (newFilter) {
     },
-    editPeople () {
-      console.log('edit')
+    confirmEditPeople (form) {
+      this.$store.dispatch('editPeople', {
+        data: form,
+        callback: (err) => {
+          if (!err) {
+            this.$router.push('/people')
+          }
+        }
+      })
     },
     confirmDeletePeople () {
       this.$store.dispatch('deletePeople', () => {
-        this.$store.push('/people')
+        this.$router.push('/people')
       })
     },
     changeFilterType (type) {
@@ -144,6 +157,26 @@ export default {
         this.choices = []
       }
       return this.choices
+    },
+    showDeleteModalIfNeeded (path, personId) {
+      if (path.indexOf('delete') > 0) {
+        this.$store.dispatch('showPersonDeleteModal', personId)
+      } else {
+        this.$store.dispatch('hidePersonDeleteModal', personId)
+      }
+    },
+    showEditModalIfNeeded (path, personId) {
+      if (path.indexOf('edit') > 0) {
+        this.$store.dispatch('showPersonEditModal', personId)
+      } else {
+        this.$store.dispatch('hidePersonEditModal', personId)
+      }
+    },
+    handleModalsDisplay () {
+      const path = this.$store.state.route.path
+      const personId = this.$store.state.route.params
+      this.showDeleteModalIfNeeded(path, personId)
+      this.showEditModalIfNeeded(path, personId)
     }
   }
 }
@@ -156,5 +189,9 @@ export default {
 
 .nb-persons {
   font-style: italic;
+}
+
+.filters {
+  display: none;
 }
 </style>

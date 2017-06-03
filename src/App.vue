@@ -52,6 +52,10 @@ td strong {
   font-size: 1.2em;
 }
 
+tr .actions p {
+  margin-bottom: 0;
+}
+
 tr .actions a {
   display: none;
   color: #999;
@@ -59,5 +63,21 @@ tr .actions a {
 
 tr:hover .actions a {
   display: inline-flex;
+}
+
+.field {
+  margin-bottom: 2em;
+}
+
+input.input:focus {
+  border-color: #00B242;
+}
+.button.is-primary {
+  border-radius: 2px;
+  background: #00B242;
+}
+
+.button.is-primary:hover {
+  background: #67BE4B;
 }
 </style>

@@ -1,6 +1,7 @@
 <template>
-<span class="avatar level-item has-text-centered">
-  <img :src="'/api/thumbnails/persons/' + person.id + '.png'" />
+<span class="avatar level-item has-text-centered"
+   v-bind:style="{ background: getAvatarColor(person) }">
+     {{ generateAvatar(person) }}
 </span>
 </template>
 
@@ -21,7 +22,6 @@ export default {
     ...mapActions([
     ]),
     generateAvatar (person) {
-      console.log(person)
       if (person !== null) {
         return (person.first_name[0] + person.last_name[0]).toUpperCase()
       } else {
@@ -42,5 +42,10 @@ export default {
 <style scoped>
 .avatar img {
   max-height: 100%;
+}
+.avatar {
+  border-radius: 50%;
+  width: 40px;
+  height: 40px;
 }
 </style>

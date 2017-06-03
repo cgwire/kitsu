@@ -1,12 +1,12 @@
 <template>
 <td class="actions">
   <p class="field">
-    <a class="button" @click="onEditClicked(entryId)">
+    <router-link class="button" :to="editRoute">
       <span class="icon is-small">
         <i class="fa fa-edit"></i>
       </span>
-    </a>
-    <router-link class="button" :to="'/people/delete/' + entryId">
+    </router-link>
+    <router-link class="button" :to="deleteRoute">
       <span class="icon is-small">
         <i class="fa fa-trash"></i>
       </span>
@@ -21,8 +21,8 @@ import { mapGetters, mapActions } from 'vuex'
 export default {
   name: 'row-actions',
   props: [
-    'onEditClicked',
-    'onDeleteClicked',
+    'editRoute',
+    'deleteRoute',
     'entryId'
   ],
   computed: {

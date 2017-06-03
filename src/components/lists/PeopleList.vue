@@ -6,31 +6,19 @@
         <th class="name">Name</th>
         <th class="email">Email</th>
         <th class="phone">Phone</th>
-        <th class="skills">Skills</th>
-        <th class="situation">Situation</th>
         <th></th>
       </tr>
     </thead>
     <tbody>
       <tr v-for="entry in entries">
-        <people-name-cell
-          class="name"
-          v-bind:entry="entry">
-        </people-name-cell>
+        <people-name-cell v-bind:entry="entry"></people-name-cell>
         <td class="email">{{ entry.email }}</td>
         <td class="phone">{{ entry.phone }}</td>
-        <td class="skills">
-          <span
-            class="tag"
-            v-for="department in entry.departments.split(', ')">
-            {{ department }}
-          </span>
-        </td>
-        <td class="situation">{{ entry.active ? 'Active' : 'Unactive'}}</td>
         <row-actions
           :entry-id="entry.id"
-          :on-edit-clicked="onEditClicked"
-          :on-delete-clicked="onDeleteClicked">
+          :edit-route="'/people/edit/' + entry.id"
+          :delete-route="'/people/delete/' + entry.id"
+        >
         </row-actions>
        </tr>
     </tbody>

@@ -13,7 +13,8 @@ export const routes = [
     children: [
       { path: '', component: People },
       { path: '/people', component: People },
-      { path: '/people/delete/:person_id', component: People }
+      { path: '/people/delete/:person_id', component: People },
+      { path: '/people/edit/:person_id', component: People }
     ]
   },
   {
