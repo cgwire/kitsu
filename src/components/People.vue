@@ -1,7 +1,7 @@
 <template>
   <div class="people page">
     <div class="people-list">
-      <h1 class="title">People</h1>
+      <h1 class="title">{{ $t("people.title") }}</h1>
       <div class="level">
         <div class="level-left">
           <div class="level-item filters">
@@ -18,13 +18,13 @@
         <div class="level-right">
           <div class="level-item">
             <button class="button level-item">
-              Import a .csv file
+              {{ $t("people.csv.import_file") }}
             </button>
             <a class="button level-item" href="/api/export/csv/persons.csv">
-              Export as a .csv file
+              {{ $t("people.csv.export_file") }}
             </a>
             <button class="button level-item">
-              Add a new employee
+              {{ $t("people.new_person") }}
             </button>
           </div>
         </div>
@@ -35,7 +35,7 @@
         :is-error="isPeopleLoadingError"
       ></people-list>
       <p class="has-text-centered nb-persons">
-        {{ people.length }} persons
+        {{ people.length }} {{ $t("people.persons") }}
       </p>
     </div>
     <delete-modal
@@ -119,8 +119,7 @@ export default {
       const person = this.personToDelete
       if (person !== undefined) {
         const personName = `${person.first_name} ${person.last_name}`
-        return `Are you sure you want to remove ${personName} from ` +
-               `your database ?`
+        return this.$t('people.delete_text', {personName: personName})
       } else {
         return ''
       }

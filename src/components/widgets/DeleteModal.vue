@@ -15,12 +15,12 @@
             'is-loading': isLoading
           }"
           @click="onConfirmClicked">
-          Confirm
+          {{ $t("main.confirmation") }}
         </a>
         <router-link
           :to="cancelRoute"
           class="button is-primary">
-          Cancel
+          {{ $t("main.cancel") }}
         </router-link>
       </p>
     </div>

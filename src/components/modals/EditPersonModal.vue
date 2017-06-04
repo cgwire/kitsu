@@ -6,11 +6,26 @@
   <div class="modal-background"></div>
   <div class="modal-content">
     <div class="box">
-      <h1 class="title">Edit Person: {{ personName }}</h1>
+      <h1 class="title">
+        {{ $t("people.edit_title") }} {{ personName }}
+      </h1>
       <form>
-        <text-field label="First Name" v-model="form.first_name"></text-field>
-        <text-field label="Last Name" v-model="form.last_name"></text-field>
-        <text-field label="Phone" v-model="form.phone"></text-field>
+        <text-field
+          :label="$t('people.fields.first_name')"
+          v-model="form.first_name">
+        </text-field>
+        <text-field
+          :label="$t('people.fields.last_name')"
+          v-model="form.last_name">
+        </text-field>
+        <text-field
+          :label="$t('people.fields.email')"
+          v-model="form.email">
+        </text-field>
+        <text-field
+          :label="$t('people.fields.phone')"
+          v-model="form.phone">
+        </text-field>
       </form>
       <p class="has-text-right">
         <a
@@ -20,12 +35,12 @@
             'is-loading': isLoading
           }"
           @click="confirmClicked">
-          Confirm
+          {{ $t("main.confirmation") }}
         </a>
         <router-link
           :to="cancelRoute"
           class="button is-link">
-          Cancel
+          {{ $t("main.cancel") }}
         </router-link>
       </p>
     </div>
@@ -37,10 +52,6 @@
 <script>
 import { mapGetters, mapActions } from 'vuex'
 import TextField from '../widgets/TextField'
-/*
-      <multi-field label="skills" choices="departments"></multi-field>
-      <boolean-field label="active" choices="departments"></multi-field>
-*/
 
 export default {
   name: 'delete-modal',
@@ -58,6 +69,7 @@ export default {
       this.form.first_name = this.personToEdit.first_name
       this.form.last_name = this.personToEdit.last_name
       this.form.phone = this.personToEdit.phone
+      this.form.email = this.personToEdit.email
     }
   },
   data () {

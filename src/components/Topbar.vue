@@ -38,11 +38,11 @@
       <ul>
         <li>
           <router-link to="profile">
-            Profile
+            {{ $t("main.profile") }}
           </router-link>
         </li>
         <li @click="logout">
-          Logout
+          {{ $t("main.logout") }}
         </li>
       </ul>
     </nav>

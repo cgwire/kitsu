@@ -1,9 +1,8 @@
 <template>
   <div class="server-down page">
-    <h1 class="title">Kitsu encountered an error while reching its server.</h1>
+    <h1 class="title">{{ $t('server_down.title') }}</h1>
     <p>
-      Sorry but the server is not reachable. Please contact your system
-      administrator or your IT department to understand what is going wrong.
+      {{ $t('server_down.text') }}
     </p>
   </div>
 </template>

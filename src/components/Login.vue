@@ -5,12 +5,19 @@
         <div class="box has-text-left">
           <div class="has-text-centered login-header">
             <img src="../assets/kitsu.png" />
-            <h1 class="title">Log in to Kitsu</h1>
+            <h1 class="title">
+              {{ $t("login.title") }}
+            </h1>
           </div>
           <div class="field">
             <p class="control has-icon">
-              <input class="input is-medium" type="text" placeholder="Email"
-                @input="updateEmail" v-focus @keyup.enter="logIn">
+              <input
+                class="input is-medium"
+                type="text"
+                :placeholder="$t('login.fields.email')"
+                @input="updateEmail"
+                @keyup.enter="logIn"
+                v-focus >
               <span class="icon">
                 <i class="fa fa-envelope"></i>
               </span>
@@ -18,8 +25,12 @@
           </div>
           <div class="field">
             <p class="control has-icon">
-              <input class="input is-medium" type="password" placeholder="Password"
-                @input="updatePassword" @keyup.enter="logIn">
+              <input
+                class="input is-medium"
+                type="password"
+                :placeholder="$t('login.fields.password')"
+                @input="updatePassword"
+                @keyup.enter="logIn">
               <span class="icon">
                 <i class="fa fa-lock"></i>
               </span>
@@ -33,11 +44,11 @@
               'is-loading': isLoginLoading
             }"
                @click="logIn">
-               Log in
+                {{ $t("login.login") }}
             </a>
           </p>
           <p class="control error" v-show="isLoginError">
-            Log in failed, please verify your credentials.
+            {{ $t("login.login_failed") }}
           </p>
         </div>
       </div>

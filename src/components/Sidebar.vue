@@ -9,13 +9,19 @@
         <section>
          <h2>General</h2>
           <p @click="toggleSidebar()">
-            <router-link to="/productions">Productions</router-link>
+            <router-link to="/productions">
+            {{ $t("productions.title") }}
+            </router-link>
           </p>
           <p @click="toggleSidebar()">
-            <router-link to="/people">People</router-link>
+            <router-link to="/people">
+            {{ $t("people.title") }}
+            </router-link>
           </p>
           <p @click="toggleSidebar()">
-            <router-link to="/task-types">Task Types</router-link>
+            <router-link to="/task-types">
+            {{ $t("task_types.title") }}
+            </router-link>
           </p>
         </section>
       </div>

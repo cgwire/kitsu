@@ -3,9 +3,15 @@
   <table class="table">
     <thead>
       <tr>
-        <th class="name">Name</th>
-        <th class="email">Email</th>
-        <th class="phone">Phone</th>
+        <th class="name">
+        {{ $t("people.list.name") }}
+        </th>
+        <th class="email">
+        {{ $t("people.list.email") }}
+        </th>
+        <th class="phone">
+        {{ $t("people.list.phone") }}
+        </th>
         <th></th>
       </tr>
     </thead>
