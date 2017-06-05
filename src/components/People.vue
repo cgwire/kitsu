@@ -23,9 +23,12 @@
             <a class="button level-item" href="/api/export/csv/persons.csv">
               {{ $t("people.csv.export_file") }}
             </a>
-            <button class="button level-item">
+            <router-link
+              class="button level-item"
+              to="/people/new"
+            >
               {{ $t("people.new_person") }}
-            </button>
+            </router-link>
           </div>
         </div>
       </div>
@@ -38,15 +41,6 @@
         {{ people.length }} {{ $t("people.persons") }}
       </p>
     </div>
-    <delete-modal
-      :active="isDeleteModalShown"
-      :on-confirm-clicked="confirmDeletePeople"
-      :cancel-route="'/people'"
-      :is-loading="isDeleteLoading"
-      :is-error="isDeleteLoadingError"
-      :text="text"
-      :error-text="'An error occured while deleting this person. There are probably data linked to it. Are you sure this person has no assignation or wrote no comment?'" >
-    </delete-modal>
     <edit-person-modal
       :active="isEditModalShown"
       :on-confirm-clicked="confirmEditPeople"
@@ -56,6 +50,16 @@
       :text="text"
     >
     </edit-person-modal>
+    <delete-modal
+      :active="isDeleteModalShown"
+      :on-confirm-clicked="confirmDeletePeople"
+      :cancel-route="'/people'"
+      :is-loading="isDeleteLoading"
+      :is-error="isDeleteLoadingError"
+      :text="text"
+      :error-text="$t('people.delete_error')"
+    >
+    </delete-modal>
   </div>
 </template>
 
@@ -113,7 +117,8 @@ export default {
       'isEditLoading',
       'isEditLoadingError',
 
-      'personToDelete'
+      'personToDelete',
+      'personToEdit'
     ]),
     text () {
       const person = this.personToDelete
@@ -133,7 +138,12 @@ export default {
     removePersonFilter (newFilter) {
     },
     confirmEditPeople (form) {
-      this.$store.dispatch('editPeople', {
+      let action = 'editPeople'
+      if (this.personToEdit.id === undefined) {
+        action = 'newPeople'
+      }
+
+      this.$store.dispatch(action, {
         data: form,
         callback: (err) => {
           if (!err) {
@@ -165,7 +175,9 @@ export default {
       }
     },
     showEditModalIfNeeded (path, personId) {
-      if (path.indexOf('edit') > 0) {
+      if (path.indexOf('new') > 0) {
+        this.$store.dispatch('showPersonEditModal')
+      } else if (path.indexOf('edit') > 0) {
         this.$store.dispatch('showPersonEditModal', personId)
       } else {
         this.$store.dispatch('hidePersonEditModal', personId)
@@ -173,7 +185,7 @@ export default {
     },
     handleModalsDisplay () {
       const path = this.$store.state.route.path
-      const personId = this.$store.state.route.params
+      const personId = this.$store.state.route.params.person_id
       this.showDeleteModalIfNeeded(path, personId)
       this.showEditModalIfNeeded(path, personId)
     }

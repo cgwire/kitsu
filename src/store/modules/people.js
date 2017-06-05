@@ -16,6 +16,8 @@ import {
   SHOW_EDIT_PEOPLE_MODAL,
   HIDE_EDIT_PEOPLE_MODAL,
 
+  NEW_PEOPLE_END,
+
   RESET_ALL
 } from '../mutation-types'
 
@@ -51,7 +53,18 @@ const getters = {
   personToEdit: state => state.personToEdit
 }
 
+const sortPeople = (people) => {
+  return people.sort((a, b) => {
+    if (a.first_name !== a.last_name) {
+      return a.first_name.localeCompare(b.first_name)
+    } else {
+      return a.last_name.localeCompare(b.last_name)
+    }
+  })
+}
+
 const actions = {
+
   loadPeople ({ commit, state }, callback) {
     commit(LOAD_PEOPLE_START)
     peopleApi.getPeople((err, people) => {
@@ -64,6 +77,20 @@ const actions = {
         }))
       }
       if (callback) callback(err)
+    })
+  },
+
+  newPeople ({ commit, state }, payload) {
+    commit(EDIT_PEOPLE_START, payload.data)
+    peopleApi.newPerson(state.personToEdit, (err, person) => {
+      if (err) {
+        commit(EDIT_PEOPLE_ERROR)
+      } else {
+        commit(NEW_PEOPLE_END, person.id)
+        commit(EDIT_PEOPLE_END)
+        commit(HIDE_EDIT_PEOPLE_MODAL)
+      }
+      if (payload.callback) payload.callback(err)
     })
   },
 
@@ -124,13 +151,7 @@ const mutations = {
   [LOAD_PEOPLE_END] (state, people) {
     state.isPeopleLoading = false
     state.isPeopleLoadingError = false
-    state.people = people.sort((a, b) => {
-      if (a.first_name !== a.last_name) {
-        return a.first_name.localeCompare(b.first_name)
-      } else {
-        return a.last_name.localeCompare(b.last_name)
-      }
-    })
+    state.people = sortPeople(people)
     state.people.forEach((person) => {
       person.name = `${person.first_name} ${person.last_name}`
     })
@@ -160,7 +181,7 @@ const mutations = {
     state.isDeleteLoadingError = false
     state.isDeleteLoading = false
     state.personToDelete = state.people.find(
-      (person) => person.id === personId.person_id
+      (person) => person.id === personId
     )
   },
 
@@ -175,13 +196,22 @@ const mutations = {
     state.personToEdit = Object.assign(state.personToEdit, data)
   },
 
-  [EDIT_PEOPLE_END] (state) {
+  [NEW_PEOPLE_END] (state, personId) {
+    state.personToEdit.id = personId
+  },
+
+  [EDIT_PEOPLE_END] (state, personId) {
     state.isEditLoading = false
     state.isEditLoadingError = false
     const personToEditIndex = state.people.findIndex(
       (person) => person.id === state.personToEdit.id
     )
-    state.people[personToEditIndex] = state.personToEdit
+    if (personToEditIndex > 0) {
+      state.people[personToEditIndex] = state.personToEdit
+    } else {
+      state.people.push(state.personToEdit)
+      sortPeople(state.people)
+    }
     state.personToEdit = {}
   },
 
@@ -194,9 +224,18 @@ const mutations = {
     state.isEditModalShown = true
     state.isEditLoadingError = false
     state.isEditLoading = false
-    state.personToEdit = state.people.find(
-      (person) => person.id === personId.person_id
-    )
+    if (personId !== undefined) {
+      state.personToEdit = state.people.find(
+        (person) => person.id === personId
+      )
+    } else {
+      state.personToEdit = {
+        first_name: '',
+        last_name: '',
+        phone: '',
+        email: ''
+      }
+    }
   },
 
   [HIDE_EDIT_PEOPLE_MODAL] (state, personId) {

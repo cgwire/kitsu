@@ -17,8 +17,9 @@ import {
   EDIT_PEOPLE_ERROR,
   EDIT_PEOPLE_END,
   SHOW_EDIT_PEOPLE_MODAL,
-  HIDE_EDIT_PEOPLE_MODAL
+  HIDE_EDIT_PEOPLE_MODAL,
 
+  NEW_PEOPLE_END
 } from '../../src/store/mutation-types'
 
 let people = []
@@ -26,6 +27,22 @@ let people = []
 peopleApi.getPeople = (callback) => {
   process.nextTick(() => {
     callback(null, people)
+  })
+}
+
+peopleApi.newPerson = (data, callback) => {
+  const person = {id: 'new-person'}
+  Object.assign(person, data)
+  process.nextTick(() => {
+    callback(null, person)
+  })
+}
+
+peopleApi.updatePerson = (data, callback) => {
+  let person = people.find((person) => person.id == data.id)
+  person = Object.assign(person, data)
+  process.nextTick(() => {
+    callback(null, person)
   })
 }
 
@@ -80,9 +97,53 @@ describe('people', () => {
       expect(store._vm.isPeopleLoadingError).to.equal(false)
     })
 
+    it('editPeople', (done) => {
+      store.commit(LOAD_PEOPLE_END, people)
+      const personId = 'person-2'
+      const data = {last_name: 'Edited'}
+
+      helpers.runAction('showPersonEditModal', personId)
+      helpers.runAction('editPeople', {data: data, callback: (err) => {
+        expect(store._vm.isEditLoading).to.equal(false)
+        expect(store._vm.isEditModalShown).to.equal(false)
+        expect(store._vm.personToEdit.last_name).to.equal(undefined)
+        expect(
+          store._vm.people
+            .find((person) => person.id === personId)
+            .last_name
+        ).to.equal('Edited')
+        done()
+      }})
+      expect(store._vm.isEditLoading).to.equal(true)
+      expect(store._vm.isEditLoadingError).to.equal(false)
+    })
+
+    it('newPeople', (done) => {
+      store.commit(LOAD_PEOPLE_END, people)
+      const data = {first_name: 'New', last_name: 'Person'}
+
+      helpers.runAction('showPersonEditModal')
+      helpers.runAction('newPeople', {data: data, callback: (err) => {
+        expect(store._vm.isEditLoading).to.equal(false)
+        expect(store._vm.isEditModalShown).to.equal(false)
+        expect(store._vm.personToEdit.last_name).to.equal(undefined)
+        expect(
+          store._vm.people
+            .find((person) => person.id === 'new-person')
+            .last_name
+        ).to.equal('Person')
+        expect(store._vm.people.length).to.equal(5)
+        done()
+      }})
+      expect(store._vm.isEditLoading).to.equal(true)
+      expect(store._vm.isEditLoadingError).to.equal(false)
+    })
+
+
+
     it('deletePeople', (done) => {
       store.commit(LOAD_PEOPLE_END, people)
-      const personId = {person_id: 'person-2'}
+      const personId = 'person-2'
 
       helpers.runAction('showPersonDeleteModal', personId)
       helpers.runAction('deletePeople', (err) => {
@@ -100,7 +161,7 @@ describe('people', () => {
 
     it('showPersonDeleteModal / hidePersonDeleteModal', () => {
       store.commit(LOAD_PEOPLE_END, people)
-      const personId = {person_id: 'person-2'}
+      const personId = 'person-2'
 
       helpers.runAction('showPersonDeleteModal', personId)
       expect(store._vm.isDeleteModalShown).to.equal(true)
@@ -115,7 +176,7 @@ describe('people', () => {
 
     it('showPersonEditModal / hidePersonEditModal', () => {
       store.commit(LOAD_PEOPLE_END, people)
-      const personId = {person_id: 'person-2'}
+      const personId = 'person-2'
 
       helpers.runAction('showPersonEditModal', personId)
       expect(store._vm.isEditModalShown).to.equal(true)
@@ -163,7 +224,7 @@ describe('people', () => {
 
     it('DELETE_PEOPLE_END', () => {
       store.commit(LOAD_PEOPLE_END, people)
-      store.commit(SHOW_DELETE_PEOPLE_MODAL, {person_id: 'person-3'})
+      store.commit(SHOW_DELETE_PEOPLE_MODAL, 'person-3')
       store.commit(DELETE_PEOPLE_END)
       expect(store._vm.isDeleteLoading).to.equal(false)
       expect(store._vm.isDeleteLoadingError).to.equal(false)
@@ -181,7 +242,7 @@ describe('people', () => {
 
     it('SHOW_DELETE_PEOPLE MODAL', () => {
       store.commit(LOAD_PEOPLE_END, people)
-      store.commit(SHOW_DELETE_PEOPLE_MODAL, {person_id: 'person-2'})
+      store.commit(SHOW_DELETE_PEOPLE_MODAL, 'person-2')
       expect(store._vm.isDeleteModalShown).to.equal(true)
       expect(store._vm.isDeleteLoadingError).to.equal(false)
       expect(store._vm.isDeleteLoading).to.equal(false)
@@ -203,7 +264,7 @@ describe('people', () => {
 
     it('EDIT_PEOPLE_END', () => {
       store.commit(LOAD_PEOPLE_END, people)
-      store.commit(SHOW_EDIT_PEOPLE_MODAL, {person_id: 'person-3'})
+      store.commit(SHOW_EDIT_PEOPLE_MODAL, 'person-3')
       store.commit(EDIT_PEOPLE_START, {last_name: "Edited"})
       store.commit(EDIT_PEOPLE_END)
       expect(store._vm.isEditLoading).to.equal(false)
@@ -211,6 +272,19 @@ describe('people', () => {
       expect(
         store._vm.people.find((person) => person.id === 'person-3')
       .last_name).to.equal("Edited")
+    })
+
+    it('EDIT_PEOPLE_END creation', () => {
+      store.commit(LOAD_PEOPLE_END, people)
+      store.commit(SHOW_EDIT_PEOPLE_MODAL)
+      store.commit(EDIT_PEOPLE_START, {first_name: 'New', last_name: "Person"})
+      store.commit(NEW_PEOPLE_END, 'new-person')
+      store.commit(EDIT_PEOPLE_END)
+      expect(store._vm.isEditLoading).to.equal(false)
+      expect(store._vm.isEditLoadingError).to.equal(false)
+      expect(
+        store._vm.people.find((person) => person.id === 'new-person')
+      .last_name).to.equal("Person")
     })
 
     it('EDIT_PEOPLE_ERROR', () => {
@@ -221,17 +295,33 @@ describe('people', () => {
 
     it('SHOW_EDIT_PEOPLE MODAL', () => {
       store.commit(LOAD_PEOPLE_END, people)
-      store.commit(SHOW_EDIT_PEOPLE_MODAL, {person_id: 'person-2'})
+      store.commit(SHOW_EDIT_PEOPLE_MODAL, 'person-2')
       expect(store._vm.isEditModalShown).to.equal(true)
       expect(store._vm.isEditLoadingError).to.equal(false)
       expect(store._vm.isEditLoading).to.equal(false)
       expect(store._vm.personToEdit.id).to.equal('person-2')
     })
 
+    it('SHOW_EDIT_PEOPLE MODAL creation', () => {
+      store.commit(LOAD_PEOPLE_END, people)
+      store.commit(SHOW_EDIT_PEOPLE_MODAL)
+      expect(store._vm.isEditModalShown).to.equal(true)
+      expect(store._vm.isEditLoadingError).to.equal(false)
+      expect(store._vm.isEditLoading).to.equal(false)
+      expect(store._vm.personToEdit.id).to.equal(undefined)
+      expect(store._vm.personToEdit.first_name).to.equal('')
+      expect(store._vm.personToEdit.last_name).to.equal('')
+    })
+
     it('HIDE_EDIT_MODAL', () => {
       store.commit(HIDE_EDIT_PEOPLE_MODAL)
       expect(store._vm.isEditModalShown).to.equal(false)
       expect(store._vm.personToEdit.last_name).to.be.undefined
+    })
+
+    it('NEW_PEOPLE_END', () => {
+      store.commit(NEW_PEOPLE_END, 'new-person')
+      expect(store._vm.personToEdit.id).to.equal('new-person')
     })
   })
 

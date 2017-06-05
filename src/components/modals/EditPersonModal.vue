@@ -6,8 +6,11 @@
   <div class="modal-background"></div>
   <div class="modal-content">
     <div class="box">
-      <h1 class="title">
+      <h1 class="title" v-if="personToEdit.id !== undefined">
         {{ $t("people.edit_title") }} {{ personName }}
+      </h1>
+      <h1 class="title" v-else>
+        {{ $t("people.new_person") }}
       </h1>
       <form>
         <text-field
@@ -54,7 +57,7 @@ import { mapGetters, mapActions } from 'vuex'
 import TextField from '../widgets/TextField'
 
 export default {
-  name: 'delete-modal',
+  name: 'edit-modal',
   props: [
     'onConfirmClicked',
     'text',
