@@ -4,10 +4,10 @@ from zou.app import db
 from zou.app.models.serializer import SerializerMixin
 from zou.app.models.base import BaseMixin
 
-from sqlalchemy_utils import EmailType #, UUIDType
+from sqlalchemy_utils import EmailType, UUIDType
+from sqlalchemy.dialects.postgresql import JSONB
 
 
-"""
 department_link = db.Table(
     'department_link',
     db.Column(
@@ -21,7 +21,6 @@ department_link = db.Table(
         db.ForeignKey('department.id')
     )
 )
-"""
 
 
 class Person(db.Model, BaseMixin, SerializerMixin):
@@ -29,18 +28,17 @@ class Person(db.Model, BaseMixin, SerializerMixin):
     first_name = db.Column(db.String(80), nullable=False)
     last_name = db.Column(db.String(80), nullable=False)
     email = db.Column(EmailType, unique=True)
-    # phone = db.Column(db.String(80), unique=True)
+    phone = db.Column(db.String(30))
+    active = db.Column(db.Boolean(), default=True)
+    last_presence = db.Column(db.Date())
     password = db.Column(db.Binary(60))
     shotgun_id = db.Column(db.Integer, unique=True)
+    data = db.Column(JSONB)
 
-    """
-    departments = db.relationship(
+    skills = db.relationship(
         'Department',
-        secondary=department_link,
-        primaryjoin=(id == department_link.c.person_id),
-        secondaryjoin=(id == department_link.c.department_id)
+        secondary=department_link
     )
-    """
 
     def __repr__(self):
         return "<Person %s>" % self.full_name()

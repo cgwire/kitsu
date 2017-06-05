@@ -25,12 +25,15 @@ class BaseCsvImportResource(Resource):
         result = []
 
         self.prepare_import()
-        with open(file_path) as csvfile:
-            reader = csv.DictReader(csvfile)
-            for row in reader:
-                result.append(self.import_row(row))
+        try:
+            with open(file_path) as csvfile:
+                reader = csv.DictReader(csvfile)
+                for row in reader:
+                    result.append(self.import_row(row))
 
-        return fields.serialize_models(result), 201
+            return fields.serialize_models(result), 201
+        except KeyError as e:
+            return {"error": "A column is missing: %s" % e}, 400
 
     def prepare_import(self):
         pass

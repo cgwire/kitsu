@@ -129,9 +129,26 @@ class BaseModelResource(Resource):
         expected. Model performs the validation automatically when fields are
         modified.
         """
-        instance = self.get_model_or_404(instance_id)
-        instance.update(request.json)
-        return instance.serialize(), 200
+        try:
+            instance = self.get_model_or_404(instance_id)
+            instance.update(request.json)
+            return instance.serialize(), 200
+
+        except StatementError:
+            return {"error": "Wrong id format"}, 400
+
+        except TypeError as exception:
+            current_app.logger.error(str(exception))
+            return {"error": str(exception)}, 400
+
+        except IntegrityError as exception:
+            current_app.logger.error(str(exception))
+            return {"error": str(exception)}, 400
+
+        except StatementError as exception:
+            current_app.logger.error(str(exception))
+            return {"error": str(exception)}, 400
+
 
     @login_required
     def delete(self, instance_id):
