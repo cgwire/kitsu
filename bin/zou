@@ -1,8 +1,9 @@
 #!/usr/bin/env python
-from flask_script import Manager
+from flask_script import Manager, prompt_pass, prompt
 
 from zou.app import app
-from zou.app.utils import dbhelpers
+from zou.app.utils import dbhelpers, auth
+from zou.app.project import person_info
 
 manager = Manager(app)
 
@@ -25,6 +26,30 @@ def clear_db():
 def reset_db():
     clear_db()
     init_db()
+
+
+@manager.command
+def create_admin():
+    print("Please enter an email for the new admin to create.")
+    email = prompt("Email")
+
+    print("Please enter a password for the new admin to create.")
+    password = prompt_pass("Password")
+    confirmation_password = prompt_pass("Password confirmation")
+
+    try:
+        auth.validate_email(email)
+        auth.validate_password(password, confirmation_password)
+        password = auth.encrypt_password(password)
+        person_info.create_person(email, password, "Super", "Admin")
+        print("Admin successfully created.")
+
+    except auth.PasswordsNoMatchException:
+        print("Passwords don't match.")
+    except auth.PasswordTooShortException:
+        print("Passwords is too short.")
+    except auth.EmailNotValidException:
+        print("Email is not valid.")
 
 
 if __name__ == '__main__':
