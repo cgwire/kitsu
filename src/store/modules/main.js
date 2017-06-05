@@ -1,6 +1,8 @@
 import {
   TOGGLE_SIDEBAR,
-  TOGGLE_USER_MENU
+  TOGGLE_USER_MENU,
+
+  RESET_ALL
 } from '../mutation-types'
 
 let state = {
@@ -28,6 +30,10 @@ const mutations = {
   },
   [TOGGLE_USER_MENU] (state) {
     state.isUserMenuHidden = !state.isUserMenuHidden
+  },
+  [RESET_ALL] (state) {
+    state.isSidebarHidden = true
+    state.isUserMenuHidden = true
   }
 }
 

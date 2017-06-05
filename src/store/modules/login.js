@@ -6,6 +6,8 @@ import {
   LOGIN_FAILURE,
   LOGOUT_SUCCESS,
   LOGOUT_FAILURE,
+
+  TOGGLE_USER_MENU,
   RESET_ALL
 } from '../mutation-types'
 import auth from '../../lib/auth'
@@ -54,6 +56,7 @@ const actions = {
         callback(null, false)
       } else {
         commit(LOGOUT_SUCCESS)
+        commit(TOGGLE_USER_MENU)
         callback(null, true)
       }
     })

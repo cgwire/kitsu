@@ -6,11 +6,14 @@ import auth from '../../src/lib/auth'
 import {
   CHANGE_EMAIL,
   CHANGE_PASSWORD,
+
   LOGIN_RUN,
   LOGIN_SUCCESS,
   LOGIN_FAILURE,
   LOGOUT_SUCCESS,
-  LOGOUT_FAILURE
+  LOGOUT_FAILURE,
+
+  TOGGLE_USER_MENU
 } from '../../src/store/mutation-types'
 
 const people = [
@@ -65,6 +68,7 @@ describe('login', () => {
       })
     })
     it('logout', (done) => {
+      expect(store._vm.isUserMenuHidden).to.equal(true)
       auth.logout = (callback) => {
         callback()
       }
@@ -73,6 +77,7 @@ describe('login', () => {
         expect(store._vm.isLoginLoading).to.equal(false)
         expect(store._vm.isLoginError).to.equal(false)
         expect(store._vm.password).to.equal('')
+        expect(store._vm.isUserMenuHidden).to.equal(false)
         done()
       })
     })
