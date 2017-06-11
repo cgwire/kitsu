@@ -1,0 +1,25 @@
+{
+  "name": "kitsu-docs",
+  "version": "1.0.0",
+  "description": "Documetation for Kitsu, CG production manager",
+  "main": "index.js",
+  "scripts": {},
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/cgwire/kitsu.git"
+  },
+  "keywords": [
+    "documentation",
+    "cg",
+    "production"
+  ],
+  "author": "Frank Rousseau <gelnior@free.fr> (https://blog.addictedtointer.net/)",
+  "license": "AGPL-3.0",
+  "bugs": {
+    "url": "https://github.com/cgwire/kitsu/issues"
+  },
+  "homepage": "https://github.com/cgwire/kitsu#readme",
+  "devDependencies": {
+    "gitbook-cli": "2.3.0"
+  }
+}
