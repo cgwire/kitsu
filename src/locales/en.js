@@ -8,7 +8,9 @@ export default {
     delete_error: 'An error occured while deleting this person. There are probably data linked to it. Are you sure this person has no assignation or wrote no comment?',
     csv: {
       import_file: 'Import a .csv file',
-      export_file: 'Download as a .csv file'
+      export_file: 'Download as a .csv file',
+      import_title: 'Import employees from a CSV file',
+      required_fields: 'First Name, Last Name'
     },
     list: {
       name: 'Name',

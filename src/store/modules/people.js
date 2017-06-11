@@ -4,11 +4,10 @@ import {
   LOAD_PEOPLE_ERROR,
   LOAD_PEOPLE_END,
 
-  DELETE_PEOPLE_START,
-  DELETE_PEOPLE_ERROR,
-  DELETE_PEOPLE_END,
-  SHOW_DELETE_PEOPLE_MODAL,
-  HIDE_DELETE_PEOPLE_MODAL,
+  NEW_PEOPLE_END,
+
+  SHOW_IMPORT_PEOPLE_MODAL,
+  HIDE_IMPORT_PEOPLE_MODAL,
 
   EDIT_PEOPLE_START,
   EDIT_PEOPLE_ERROR,
@@ -16,7 +15,11 @@ import {
   SHOW_EDIT_PEOPLE_MODAL,
   HIDE_EDIT_PEOPLE_MODAL,
 
-  NEW_PEOPLE_END,
+  DELETE_PEOPLE_START,
+  DELETE_PEOPLE_ERROR,
+  DELETE_PEOPLE_END,
+  SHOW_DELETE_PEOPLE_MODAL,
+  HIDE_DELETE_PEOPLE_MODAL,
 
   RESET_ALL
 } from '../mutation-types'
@@ -26,21 +29,29 @@ const state = {
   isPeopleLoading: false,
   isPeopleLoadingError: true,
 
-  isDeleteModalShown: false,
-  isDeleteLoading: false,
-  isDeleteLoadingError: false,
-  personToDelete: undefined,
+  isImportPeopleModalShown: false,
+  isImportPeopleLoading: false,
+  isImportPeopleLoadingError: false,
 
   isEditModalShown: false,
   isEditLoading: false,
   isEditLoadingError: false,
-  personToEdit: {}
+  personToEdit: {},
+
+  isDeleteModalShown: false,
+  isDeleteLoading: false,
+  isDeleteLoadingError: false,
+  personToDelete: undefined
 }
 
 const getters = {
   people: state => state.people,
   isPeopleLoading: state => state.isPeopleLoading,
   isPeopleLoadingError: state => state.isPeopleLoadingError,
+
+  isImportPeopleModalShown: state => state.isImportPeopleModalShown,
+  isImportPeopleLoading: state => state.isImportPeopleLoading,
+  isImportPeopleLoadingError: state => state.isImportPeopleLoadingError,
 
   isDeleteModalShown: state => state.isDeleteModalShown,
   isDeleteLoading: state => state.isDeleteLoading,
@@ -118,6 +129,14 @@ const actions = {
       }
       if (callback) callback(err)
     })
+  },
+
+  showPersonImportModal ({ commit, state }, personId) {
+    commit(SHOW_IMPORT_PEOPLE_MODAL, personId)
+  },
+
+  hidePersonImportModal ({ commit, state }, personId) {
+    commit(HIDE_IMPORT_PEOPLE_MODAL, personId)
   },
 
   showPersonEditModal ({ commit, state }, personId) {
@@ -238,9 +257,17 @@ const mutations = {
     }
   },
 
-  [HIDE_EDIT_PEOPLE_MODAL] (state, personId) {
+  [HIDE_EDIT_PEOPLE_MODAL] (state) {
     state.isEditModalShown = false
     state.personToEdit = {}
+  },
+
+  [SHOW_IMPORT_PEOPLE_MODAL] (state) {
+    state.isImportPeopleModalShown = true
+  },
+
+  [HIDE_IMPORT_PEOPLE_MODAL] (state) {
+    state.isImportPeopleModalShown = false
   },
 
   [RESET_ALL] (state, people) {

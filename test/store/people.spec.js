@@ -19,6 +19,12 @@ import {
   SHOW_EDIT_PEOPLE_MODAL,
   HIDE_EDIT_PEOPLE_MODAL,
 
+  IMPORT_PEOPLE_START,
+  IMPORT_PEOPLE_ERROR,
+  IMPORT_PEOPLE_END,
+  SHOW_IMPORT_PEOPLE_MODAL,
+  HIDE_IMPORT_PEOPLE_MODAL,
+
   NEW_PEOPLE_END
 } from '../../src/store/mutation-types'
 
@@ -139,8 +145,6 @@ describe('people', () => {
       expect(store._vm.isEditLoadingError).to.equal(false)
     })
 
-
-
     it('deletePeople', (done) => {
       store.commit(LOAD_PEOPLE_END, people)
       const personId = 'person-2'
@@ -157,6 +161,17 @@ describe('people', () => {
       })
       expect(store._vm.isDeleteLoading).to.equal(true)
       expect(store._vm.isDeleteLoadingError).to.equal(false)
+    })
+
+    it('importPeople', (done) => {
+      helpers.runAction('importPeople', csv, (err) => {
+        expect(store._vm.isImportLoading).to.equal(false)
+        expect(store._vm.isImportModalShown).to.equal(false)
+        expect(store._vm.people).to.equal(4)
+        done()
+      })
+      expect(store._vm.isImportLoading).to.equal(true)
+      expect(store._vm.isImportLoadingError).to.equal(false)
     })
 
     it('showPersonDeleteModal / hidePersonDeleteModal', () => {
@@ -322,6 +337,38 @@ describe('people', () => {
     it('NEW_PEOPLE_END', () => {
       store.commit(NEW_PEOPLE_END, 'new-person')
       expect(store._vm.personToEdit.id).to.equal('new-person')
+    })
+
+    it('IMPORT_PEOPLE_START', () => {
+      store.commit(IMPORT_PEOPLE_START)
+      expect(store._vm.isImportLoading).to.equal(true)
+      expect(store._vm.isImportLoadingError).to.equal(false)
+    })
+
+    it('IMPORT_PEOPLE_END', () => {
+      store.commit(SHOW_IMPORT_PEOPLE_MODAL)
+      store.commit(IMPORT_PEOPLE_END)
+      expect(store._vm.isImportLoading).to.equal(false)
+      expect(store._vm.isImportLoadingError).to.equal(false)
+      expect(store._vm.people).to.equal(4)
+    })
+
+    it('IMPORT_PEOPLE_ERROR', () => {
+      store.commit(IMPORT_PEOPLE_ERROR)
+      expect(store._vm.isImportLoading).to.equal(false)
+      expect(store._vm.isImportLoadingError).to.equal(true)
+    })
+
+    it('SHOW_IMPORT_PEOPLE MODAL', () => {
+      store.commit(SHOW_IMPORT_PEOPLE_MODAL)
+      expect(store._vm.isImportModalShown).to.equal(true)
+      expect(store._vm.isImportLoadingError).to.equal(false)
+      expect(store._vm.isImportLoading).to.equal(false)
+    })
+
+    it('HIDE_IMPORT_MODAL', () => {
+      store.commit(HIDE_IMPORT_PEOPLE_MODAL)
+      expect(store._vm.isImportModalShown).to.equal(false)
     })
   })
 

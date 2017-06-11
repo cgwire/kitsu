@@ -8,7 +8,9 @@ export default {
     persons: 'Personnes',
     csv: {
       import_file: 'Importer un fichier .csv',
-      export_file: 'Télécharger en .csv'
+      export_file: 'Télécharger en .csv',
+      import_title: 'Import employees from a CSV file',
+      required_fields: 'First Name, Last Name'
     },
     list: {
       name: 'Nom',

@@ -1,6 +1,10 @@
 <template>
 <span class="avatar level-item has-text-centered"
-   v-bind:style="{ background: getAvatarColor(person) }">
+   :style="{
+     background: getAvatarColor(person),
+     width: (size || 40) +'px',
+     height: (size || 40) + 'px'
+   }">
      {{ generateAvatar(person) }}
 </span>
 </template>
@@ -12,7 +16,8 @@ import { mapGetters, mapActions } from 'vuex'
 export default {
   name: 'person-avatar',
   props: [
-    'person'
+    'person',
+    'size'
   ],
   computed: {
     ...mapGetters([
@@ -45,7 +50,6 @@ export default {
 }
 .avatar {
   border-radius: 50%;
-  width: 40px;
-  height: 40px;
+  color: white;
 }
 </style>
