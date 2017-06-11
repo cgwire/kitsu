@@ -12,7 +12,7 @@ class DateTestCase(ApiDBTestCase):
         super(DateTestCase, self).setUp()
         mixer.init_app(self.flask_app)
         self.now = datetime.datetime.utcnow()
-        self.person = mixer.cycle(1).blend(Person, id=uuid.uuid4)[0]
+        self.generate_fixture_person()
 
     def test_create_date(self):
         self.assertIsNotNone(self.person.created_at)

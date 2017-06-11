@@ -11,9 +11,10 @@ class AuthenticatedResource(Resource):
 
     @login_required
     def get(self):
+        person = person_info.get_person(current_user.id)
         return {
             "authenticated": True,
-            "user": current_user.to_dict()
+            "user": person.serialize()
         }
 
 

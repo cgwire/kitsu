@@ -9,7 +9,7 @@ class PersonTestCase(ApiDBTestCase):
 
     def setUp(self):
         super(PersonTestCase, self).setUp()
-        self.generate_data(Person, 3)
+        self.generate_data(Person, 3, skills=[])
 
     def test_repr(self):
         self.generate_fixture_person()
