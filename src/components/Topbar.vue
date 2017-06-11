@@ -37,7 +37,7 @@
     <nav class="user-menu" ref="user-menu" v-show="!isUserMenuHidden">
       <ul>
         <li>
-          <router-link to="profile">
+          <router-link to="profile" @click.native="toggleUserMenu()">
             {{ $t("main.profile") }}
           </router-link>
         </li>
@@ -121,14 +121,14 @@ export default {
   top: 60px;
   right: 0;
   background-color: white;
+  background: #5e60ba;
+  color: white;
   padding: 1em 1em 1em 1em;
   z-index: 203;
   box-shadow: 2px 3px 3px rgba(0,0,0,0.2);
   transition-property: all;
   transition-duration: .5s;
   transition-timing-function: cubic-bezier(0, 1, 0.5, 1);
-  background: #5e60ba;
-  color: white;
 }
 
 .user-menu li {
