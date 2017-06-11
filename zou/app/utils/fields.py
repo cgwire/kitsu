@@ -2,6 +2,9 @@ import datetime
 import uuid
 import sqlalchemy.orm as orm
 
+from pytz import timezone
+from babel import Locale
+
 
 def serialize_value(value):
     """
@@ -19,6 +22,10 @@ def serialize_value(value):
         return value.decode("utf-8")
     elif isinstance(value, str):
         return value
+    elif isinstance(value, Locale):
+        return str(value)
+    elif isinstance(value, type(timezone("Europe/Paris"))):
+        return str(value)
     else:
         return value
 

@@ -17,3 +17,5 @@ psycopg2==2.7.1
 python-slugify==1.2.4
 
 pillow==4.0.0
+pytz
+babel

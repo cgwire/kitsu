@@ -4,21 +4,24 @@ from zou.app import db
 from zou.app.models.serializer import SerializerMixin
 from zou.app.models.base import BaseMixin
 
-from sqlalchemy_utils import EmailType, UUIDType
+from sqlalchemy_utils import UUIDType, EmailType, LocaleType, TimezoneType
 from sqlalchemy.dialects.postgresql import JSONB
+
+from pytz import timezone as pytz_timezone
+from babel import Locale
 
 
 department_link = db.Table(
-    'department_link',
+    "department_link",
     db.Column(
-        'person_id',
+        "person_id",
         UUIDType(binary=False),
-        db.ForeignKey('person.id')
+        db.ForeignKey("person.id")
     ),
     db.Column(
-        'department_id',
+        "department_id",
         UUIDType(binary=False),
-        db.ForeignKey('department.id')
+        db.ForeignKey("department.id")
     )
 )
 
@@ -33,10 +36,16 @@ class Person(db.Model, BaseMixin, SerializerMixin):
     last_presence = db.Column(db.Date())
     password = db.Column(db.Binary(60))
     shotgun_id = db.Column(db.Integer, unique=True)
+    timezone = db.Column(
+        TimezoneType(backend="pytz"),
+        default=pytz_timezone("Europe/Paris")
+    )
+    locale = db.Column(LocaleType, default=Locale("en", "US"))
+
     data = db.Column(JSONB)
 
     skills = db.relationship(
-        'Department',
+        "Department",
         secondary=department_link
     )
 

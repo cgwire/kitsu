@@ -3,6 +3,9 @@ import datetime
 import unittest
 import uuid
 
+from babel import Locale
+from pytz import timezone
+
 from zou.app.utils import colors, fields, query, fs
 from zou.app.models.person import Person
 from zou.app.models.task import Task
@@ -22,6 +25,14 @@ class UtilsTestCase(unittest.TestCase):
         self.assertEqual(
             {"now": now.isoformat()},
             fields.serialize_value({"now": now})
+        )
+        self.assertEqual(
+            "Europe/Paris",
+            fields.serialize_value(timezone("Europe/Paris"))
+        )
+        self.assertEqual(
+            "en_US",
+            fields.serialize_value(Locale("en_US"))
         )
 
     def test_serialize_dict(self):
