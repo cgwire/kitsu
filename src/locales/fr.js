@@ -24,6 +24,15 @@ export default {
       phone: 'Téléphone'
     }
   },
+  profile: {
+    title: 'Votre Profil',
+    timezone: 'Fuseau horaire',
+    language: 'Langue',
+    save: {
+      button: 'Sauvegardez vos changements',
+      error: 'Une erreur est survenue pendant la sauvegarde de vos changememts.'
+    }
+  },
   main: {
     profile: 'Profil',
     logout: 'Se déconnecter',

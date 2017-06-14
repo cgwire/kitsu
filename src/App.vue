@@ -3,8 +3,15 @@
 </template>
 
 <script>
+import { mapGetters } from 'vuex'
+
 export default {
-  name: 'app'
+  name: 'app',
+  ...mapGetters([
+    'user'
+  ]),
+  mounted () {
+  }
 }
 </script>
 
@@ -79,5 +86,9 @@ input.input:focus {
 
 .button.is-primary:hover {
   background: #67BE4B;
+}
+
+.error {
+  color: #FF1F4B;
 }
 </style>

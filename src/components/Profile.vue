@@ -11,45 +11,35 @@
             </a>
           </p-->
           <h1>
-          Your Profile
+          {{ $t('profile.title') }}
           </h1>
         </div>
       </div>
       <div class="profile-body">
+        <text-field
+          :label="$t('people.fields.first_name')"
+          v-model="form.first_name">
+        </text-field>
+        <text-field
+          :label="$t('people.fields.last_name')"
+          v-model="form.last_name">
+        </text-field>
+        <text-field
+          :label="$t('people.fields.email')"
+          v-model="form.email">
+        </text-field>
+        <text-field
+          :label="$t('people.fields.phone')"
+          v-model="form.phone">
+        </text-field>
         <div class="field">
           <label class="label">
-            First name
+            {{ $t('profile.timezone') }}
+          </h1>
           </label>
-          <input class="input is-medium" type="text" :value="user.first_name" />
-        </div>
-        <div class="field">
-          <label class="label">
-            Last name
-          </label>
-          <input class="input is-medium" type="text" :value="user.last_name" />
-        </div>
-        <div class="field">
-          <label class="label">
-            Email
-          </label>
-          <input class="input is-medium" type="text" :value="user.email" />
-        </div>
-        <div class="field">
-          <label class="label">
-            Phone Number
-          </label>
-          <input class="input is-medium" type="text" :value="user.phone" />
-        </div>
-        <div class="field">
-          <label class="label">
-            Timezone
-          </label>
-          <span class="select is-medium" >
-            <select>
-              <option
-                v-for="timezone in timezones"
-                :selected="timezone === 'Europe/Paris'"
-              >
+          <span class="select is-medium">
+            <select v-model="form.timezone">
+              <option v-for="timezone in timezones">
                 {{ timezone }}
               </option>
             </select>
@@ -57,19 +47,39 @@
         </div>
         <div class="field">
           <label class="label">
-            Language
+            {{ $t('profile.language') }}
           </label>
-          <span class="select is-medium" >
-            <select>
-              <option value="en">English</option>
-              <option value="fr">French</option>
+          <span class="select is-medium">
+            <select
+              v-model="form.locale"
+              :value="form.locale"
+              @change="localeChanged"
+            >
+              <option value="en_US">English</option>
+              <option value="fr_FR">French</option>
             </select>
           </span>
         </div>
 
-        <button class="button save-button is-medium">
-        Save changes
+        <button
+          :class="{
+            button: true,
+            'save-button': true,
+            'is-medium': true,
+            'is-loading': isSaveProfileLoading
+          }"
+          @click="saveProfile({form: form})"
+        >
+          {{ $t('profile.save.button') }}
         </button>
+        <p
+          :class="{
+            error: true,
+            'is-hidden': !isSaveProfileLoadingError
+          }"
+        >
+          {{ $t('profile.save.error') }}
+        </p>
       </div>
     </div>
   </div>
@@ -79,15 +89,36 @@
 import moment from 'moment-timezone'
 import { mapGetters, mapActions } from 'vuex'
 import PeopleAvatar from './widgets/PeopleAvatar'
+import TextField from './widgets/TextField'
 
 export default {
   name: 'profile',
+  data () {
+    return {
+      form: {
+        first_name: '',
+        last_name: '',
+        email: '',
+        phone: '',
+        timezone: 'Europe/Paris',
+        locale: 'French'
+      }
+    }
+  },
   components: {
-    PeopleAvatar
+    PeopleAvatar,
+    TextField
+  },
+  watch: {
+    user () {
+      Object.assign(this.form, this.user)
+    }
   },
   computed: {
     ...mapGetters([
-      'user'
+      'user',
+      'isSaveProfileLoading',
+      'isSaveProfileLoadingError'
     ]),
     departments () {
       return [{name: 'Animation'}, {name: 'Modeling'}]
@@ -98,10 +129,14 @@ export default {
   },
   methods: {
     ...mapActions([
-    ])
+      'saveProfile'
+    ]),
+    localeChanged () {
+      this.$i18n.locale = this.form.locale.substring(0, 2)
+    }
   },
   mounted () {
-    console.log(this.user)
+    this.form = Object.assign(this.form, this.user)
   }
 }
 </script>

@@ -24,6 +24,15 @@ export default {
       phone: 'Phone'
     }
   },
+  profile: {
+    title: 'Your Profile',
+    timezone: 'Timezone',
+    language: 'Language',
+    save: {
+      button: 'Save changes',
+      error: 'An error occured while saving changes'
+    }
+  },
   main: {
     profile: 'Profile',
     logout: 'Logout',

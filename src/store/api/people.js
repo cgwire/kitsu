@@ -30,7 +30,9 @@ export default {
       first_name: person.first_name,
       last_name: person.last_name,
       email: person.email,
-      phone: person.phone
+      phone: person.phone,
+      timezone: person.timezone,
+      locale: person.locale
     }
     superagent
       .put(`/api/data/persons/${person.id}`)

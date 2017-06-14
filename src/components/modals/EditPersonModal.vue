@@ -80,6 +80,7 @@ export default {
       form: {
         first_name: '',
         last_name: '',
+        email: '',
         phone: ''
       }
     }

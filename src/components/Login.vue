@@ -128,10 +128,6 @@ export default {
   margin-bottom: 1em;
 }
 
-.error {
-  color: #FF1F4B;
-}
-
 .main-button {
   background: #5e60ba;
   border-radius: 2px;
