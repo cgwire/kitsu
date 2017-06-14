@@ -1,12 +1,12 @@
 import Vue from 'vue'
 import { sync } from 'vuex-router-sync'
 
-Vue.config.productionTip = false
-
 import i18n from './i18n'
 import router from './router'
 import store from './store'
 import App from './App'
+
+Vue.config.productionTip = false
 
 // Make the current route part of the main state.
 sync(store, router)
@@ -20,8 +20,8 @@ Vue.directive('focus', {
 })
 
 Vue.prototype.$locale = {
-  change (language) {
-    i18n.locale = language
+  change (locale) {
+    i18n.locale = locale
   },
   current () {
     return i18n.locale
