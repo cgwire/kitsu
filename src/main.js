@@ -1,14 +1,12 @@
 import Vue from 'vue'
-import VueI18n from 'vue-i18n'
 import { sync } from 'vuex-router-sync'
 
-import locales from './locales'
+Vue.config.productionTip = false
+
+import i18n from './i18n'
 import router from './router'
 import store from './store'
 import App from './App'
-
-Vue.use(VueI18n)
-Vue.config.productionTip = false
 
 // Make the current route part of the main state.
 sync(store, router)
@@ -21,12 +19,14 @@ Vue.directive('focus', {
   }
 })
 
-// Localisation
-const i18n = new VueI18n({
-  locale: 'fr',
-  fallbackLocale: 'en',
-  messages: locales
-})
+Vue.prototype.$locale = {
+  change (language) {
+    i18n.locale = language
+  },
+  current () {
+    return i18n.locale
+  }
+}
 
 // Start application.
 /* eslint-disable no-new */

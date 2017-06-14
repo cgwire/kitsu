@@ -1,4 +1,5 @@
 import auth from './lib/auth'
+import lang from './lib/lang'
 
 import Login from './components/Login'
 import Main from './components/Main'
@@ -10,7 +11,15 @@ export const routes = [
   {
     path: '/',
     component: Main,
-    beforeEnter: auth.requireAuth,
+    beforeEnter: (to, from, next) => {
+      auth.requireAuth(to, from, (nextPath) => {
+        if (nextPath) {
+          next(nextPath)
+        } else {
+          lang.setLocale(to, from, next)
+        }
+      })
+    },
     children: [
       { path: '', component: People },
       { path: '/people', component: People },
