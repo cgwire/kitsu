@@ -38,11 +38,13 @@
         </div>
 
       </div>
+
       <people-list
         :entries="people"
         :is-loading="isPeopleLoading"
         :is-error="isPeopleLoadingError"
       ></people-list>
+
       <p class="has-text-centered nb-persons">
         {{ people.length }} {{ $t("people.persons") }}
       </p>
@@ -50,32 +52,32 @@
 
     <import-person-modal
       :active="isImportPeopleModalShown"
-      :on-confirm-clicked="confirmImportPeople"
-      :cancel-route="'/people'"
       :is-loading="isImportPeopleLoading"
       :is-error="isImportPeopleLoadingError"
-      :text="text"
+      :cancel-route="'/people'"
+      :form-data="personCsvFormData"
+      @fileselected="selectFile"
+      @confirm="uploadImportFile"
     >
     </import-person-modal>
 
     <edit-person-modal
       :active="isEditModalShown"
-      :on-confirm-clicked="confirmEditPeople"
-      :cancel-route="'/people'"
       :is-loading="isEditLoading"
       :is-error="isEditLoadingError"
-      :text="text"
+      :cancel-route="'/people'"
+      @confirm="confirmEditPeople"
     >
     </edit-person-modal>
 
     <delete-modal
       :active="isDeleteModalShown"
-      :on-confirm-clicked="confirmDeletePeople"
-      :cancel-route="'/people'"
       :is-loading="isDeleteLoading"
       :is-error="isDeleteLoadingError"
-      :text="text"
+      :cancel-route="'/people'"
+      :text="deleteText"
       :error-text="$t('people.delete_error')"
+      @confirm="confirmDeletePeople"
     >
     </delete-modal>
 
@@ -146,10 +148,16 @@ export default {
       'isDeleteLoading',
       'isDeleteLoadingError',
 
+      'isImportModalShown',
+      'isImportLoading',
+      'isImportLoadingError',
+
       'personToDelete',
+      'personCsvFormData',
       'personToEdit'
     ]),
-    text () {
+
+    deleteText () {
       const person = this.personToDelete
       if (person !== undefined) {
         const personName = `${person.first_name} ${person.last_name}`
@@ -163,6 +171,15 @@ export default {
   methods: {
     ...mapActions([
     ]),
+
+    uploadImportFile () {
+      this.$store.dispatch('uploadPersonFile', (err) => {
+        if (!err) {
+          this.$store.dispatch('hidePersonImportModal')
+          this.$store.dispatch('loadPeople')
+        }
+      })
+    },
 
     addPersonFilter (newFilter) {
     },
@@ -185,14 +202,16 @@ export default {
       })
     },
 
-    confirmImportPeople () {
-      console.log('import')
+    confirmDeletePeople () {
+      this.$store.dispatch('deletePeople', (err) => {
+        if (!err) {
+          this.$router.push('/people')
+        }
+      })
     },
 
-    confirmDeletePeople () {
-      this.$store.dispatch('deletePeople', () => {
-        this.$router.push('/people')
-      })
+    selectFile (formData) {
+      this.$store.commit('PERSON_CSV_FILE_SELECTED', formData)
     },
 
     changeFilterType (type) {

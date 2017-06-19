@@ -10,7 +10,8 @@ export default {
       import_file: 'Importer un fichier .csv',
       export_file: 'Télécharger en .csv',
       import_title: 'Import employees from a CSV file',
-      required_fields: 'First Name, Last Name'
+      required_fields: 'Le fichier CSV à importer doit comporter les colonnes suivantes :',
+      select_file: 'Sélectionnez un fichier de votre disque dur :'
     },
     list: {
       name: 'Nom',

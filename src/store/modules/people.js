@@ -4,16 +4,20 @@ import {
   LOAD_PEOPLE_ERROR,
   LOAD_PEOPLE_END,
 
-  NEW_PEOPLE_END,
-
   SHOW_IMPORT_PEOPLE_MODAL,
   HIDE_IMPORT_PEOPLE_MODAL,
+  PERSON_CSV_FILE_SELECTED,
+  IMPORT_PEOPLE_START,
+  IMPORT_PEOPLE_ERROR,
+  IMPORT_PEOPLE_END,
 
   EDIT_PEOPLE_START,
   EDIT_PEOPLE_ERROR,
   EDIT_PEOPLE_END,
   SHOW_EDIT_PEOPLE_MODAL,
   HIDE_EDIT_PEOPLE_MODAL,
+
+  NEW_PEOPLE_END,
 
   DELETE_PEOPLE_START,
   DELETE_PEOPLE_ERROR,
@@ -41,7 +45,9 @@ const state = {
   isDeleteModalShown: false,
   isDeleteLoading: false,
   isDeleteLoadingError: false,
-  personToDelete: undefined
+  personToDelete: undefined,
+
+  personCsvFormData: undefined
 }
 
 const getters = {
@@ -61,7 +67,9 @@ const getters = {
   isEditModalShown: state => state.isEditModalShown,
   isEditLoading: state => state.isEditLoading,
   isEditLoadingError: state => state.isEditLoadingError,
-  personToEdit: state => state.personToEdit
+  personToEdit: state => state.personToEdit,
+
+  personCsvFormData: state => state.personCsvFormData
 }
 
 const sortPeople = (people) => {
@@ -127,6 +135,17 @@ const actions = {
         commit(DELETE_PEOPLE_END)
         commit(HIDE_DELETE_PEOPLE_MODAL)
       }
+      if (callback) callback(err)
+    })
+  },
+
+  uploadPersonFile ({ commit, state }, callback) {
+    commit(IMPORT_PEOPLE_START)
+    peopleApi.postCsv(state.personCsvFormData, (err) => {
+      if (err) {
+        commit(IMPORT_PEOPLE_ERROR)
+      }
+      commit(IMPORT_PEOPLE_END)
       if (callback) callback(err)
     })
   },
@@ -239,6 +258,21 @@ const mutations = {
     state.isEditLoadingError = true
   },
 
+  [IMPORT_PEOPLE_START] (state, data) {
+    state.isImportPeopleLoading = true
+    state.isImportPeopleLoadingError = false
+  },
+
+  [IMPORT_PEOPLE_END] (state, personId) {
+    state.isImportPeopleLoading = false
+    state.isImportPeopleLoadingError = false
+  },
+
+  [IMPORT_PEOPLE_ERROR] (state) {
+    state.isImportPeopleLoading = false
+    state.isImportPeopleLoadingError = true
+  },
+
   [SHOW_EDIT_PEOPLE_MODAL] (state, personId) {
     state.isEditModalShown = true
     state.isEditLoadingError = false
@@ -270,6 +304,10 @@ const mutations = {
     state.isImportPeopleModalShown = false
   },
 
+  [PERSON_CSV_FILE_SELECTED] (state, formData) {
+    state.personCsvFormData = formData
+  },
+
   [RESET_ALL] (state, people) {
     state.isPeopleLoading = false
     state.isPeopleLoadingError = false
@@ -283,6 +321,11 @@ const mutations = {
     state.isEditLoading = false
     state.isEditLoadingError = false
     state.personToEdit = {}
+
+    state.isImportModalShown = false
+    state.isImportLoading = false
+    state.isImportLoadingError = false
+    state.personCsvFormData = null
 
     state.people = []
   }

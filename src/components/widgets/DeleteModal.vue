@@ -14,7 +14,7 @@
             button: true,
             'is-loading': isLoading
           }"
-          @click="onConfirmClicked">
+          @click="$emit('confirm')">
           {{ $t("main.confirmation") }}
         </a>
         <router-link
@@ -25,7 +25,6 @@
       </p>
     </div>
   </div>
-  <button class="modal-close"></button>
 </div>
 </template>
 
@@ -35,7 +34,6 @@ import { mapGetters, mapActions } from 'vuex'
 export default {
   name: 'delete-modal',
   props: [
-    'onConfirmClicked',
     'text',
     'active',
     'cancelRoute',

@@ -48,7 +48,6 @@
       </p>
     </div>
   </div>
-  <button class="modal-close"></button>
 </div>
 </template>
 
@@ -104,7 +103,7 @@ export default {
     ...mapActions([
     ]),
     confirmClicked () {
-      this.onConfirmClicked(this.form)
+      this.$emit('confirm', this.form)
     }
   }
 }

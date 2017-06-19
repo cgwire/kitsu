@@ -5,39 +5,40 @@
 }">
   <div class="modal-background"></div>
   <div class="modal-content">
-    <div class="box">
+
+    <div class="box content">
       <h1 class="title">
         {{ $t("people.csv.import_title") }}
       </h1>
+
       <p class="description">
-        Your CSV file requires the following columns:
         {{ $t("people.csv.required_fields") }}
+        <ul>
+          <li v-for="column in columns">
+            {{ column }}
+          </li>
+        </ul>
       </p>
 
-      <form>
-        <p>
-          <file-upload
-            class="upload-button button is-primary"
-            title="Upload .csv file"
-            extensions=".csv"
-            :events="events"
-            ref="upload"
-            post-action="/api/data/import/csv/persons">
-          </file-upload>
-        </p>
-        <p>
-          {{ this.fileName }}
-        </p>
-      </form>
+      <p>
+        {{ $t("people.csv.select_file") }}
+      </p>
+
+      <file-upload @fileselected="onFileSelected"></file-upload>
+
+      <p class="error" v-if="isError">
+        {{ $t("people.csv.error_upload") }}
+      </p>
 
       <p class="has-text-right">
         <a
           :class="{
             button: true,
             'is-primary': true,
-            'is-loading': isLoading
+            'is-loading': isLoading,
+            'is-disabled': formData == undefined
           }"
-          @click="uploadFile">
+          @click="onConfirmClicked">
           {{ $t("main.confirmation") }}
         </a>
         <router-link
@@ -46,45 +47,35 @@
           {{ $t("main.cancel") }}
         </router-link>
       </p>
+
     </div>
   </div>
-  <button class="modal-close"></button>
 </div>
 </template>
 
 <script>
 import { mapGetters, mapActions } from 'vuex'
-import FileUpload from 'vue-upload-component'
+import FileUpload from '../widgets/FileUpload.vue'
 
 export default {
   name: 'import-people-modal',
   props: [
-    'onConfirmClicked',
-    'text',
     'active',
     'cancelRoute',
     'isLoading',
-    'isError',
-    'errorText'
+    'isError'
   ],
   watch: {
   },
   data () {
     return {
-      fileName: 'test',
-      file: {},
-      events: {
-        add: this.add,
-        progress (file, component) {
-          console.log('progress ' + file.progress)
-        },
-        after (file, component) {
-          console.log('after')
-        },
-        before (file, component) {
-          console.log('before')
-        }
-      }
+      columns: [
+        'First Name',
+        'Last Name',
+        'Email',
+        'Phone'
+      ],
+      formData: null
     }
   },
   components: {
@@ -94,34 +85,19 @@ export default {
     ...mapGetters([
     ])
   },
+  mounted () {
+    this.formData = null
+  },
   methods: {
     ...mapActions([
     ]),
-    add (file, component) {
-      console.log('add')
-      component.active = true
-      if (this.$parent.auto) {
-      }
-      file.headers['X-Filename'] = encodeURIComponent(file.name)
-      file.data.filename = file.name
-      file.postAction = '/api/data/import/csv/persons'
-
-      this.fileName = file.name
-      this.file = file
-      console.log(component)
-      component.files.push(file)
-      component.addFileUpload(file)
-      component._fileUploads()
+    onFileSelected (formData) {
+      this.formData = formData
+      this.$emit('fileselected', formData)
     },
-    uploadFile () {
-      console.log(this.upload)
-      this.file.active = true
-      this.upload.active = true
-      console.log(this.upload)
+    onConfirmClicked () {
+      this.$emit('confirm')
     }
-  },
-  mounted () {
-    this.upload = this.$refs.upload.$data
   }
 }
 </script>
@@ -144,10 +120,6 @@ export default {
 
 .description {
   margin-bottom: 1em;
-}
-
-.upload-button {
-  padding-top: 0.3em;
 }
 
 form {

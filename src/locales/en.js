@@ -10,7 +10,9 @@ export default {
       import_file: 'Import a .csv file',
       export_file: 'Download as a .csv file',
       import_title: 'Import employees from a CSV file',
-      required_fields: 'First Name, Last Name'
+      required_fields: 'Your CSV file requires the following columns',
+      select_file: 'Please select a file from one of your folder:',
+      error_upload: 'An error occured while uploading your CSV file.'
     },
     list: {
       name: 'Name',
