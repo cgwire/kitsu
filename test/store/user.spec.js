@@ -4,7 +4,15 @@ import store from '../../src/store'
 import {
   USER_LOGIN,
   USER_LOGOUT,
-  USER_LOGIN_FAIL
+  USER_LOGIN_FAIL,
+
+  USER_SAVE_PROFILE_LOADING,
+  USER_SAVE_PROFILE_SUCCESS,
+  USER_SAVE_PROFILE_ERROR,
+
+  USER_CHANGE_PASSWORD_LOADING,
+  USER_CHANGE_PASSWORD_SUCCESS,
+  USER_CHANGE_PASSWORD_ERROR
 } from '../../src/store/mutation-types'
 
 const user = {
@@ -19,6 +27,22 @@ describe('user', () => {
   afterEach(helpers.reset)
 
   describe('actions', () => {
+    it('saveProfile', () => {
+
+    })
+
+    it('changePassword', (done) => {
+      helpers.runAction('changePassword', {
+        passwords: {
+          old_password: 'oldPassword',
+          password: 'newPassword',
+          password_2: 'newPassword'
+        },
+        callback: () => {
+          done()
+        }
+      })
+    })
   })
 
   describe('mutations', () => {
@@ -39,5 +63,47 @@ describe('user', () => {
       expect(store._vm.user).to.be.null
       expect(store._vm.isAuthenticated).to.not.be.ok
     })
+
+    it('USER_SAVE_PROFILE_LOADING', () => {
+      store.commit(USER_SAVE_PROFILE_LOADING)
+      expect(store._vm.isSaveProfileLoading).to.be.ok
+      expect(store._vm.isSaveProfileLoadingError).to.not.be.ok
+    })
+
+    it('USER_SAVE_PROFILE_ERROR', () => {
+      store.commit(USER_SAVE_PROFILE_ERROR)
+      expect(store._vm.isSaveProfileLoading).to.not.be.ok
+      expect(store._vm.isSaveProfileLoadingError).to.be.ok
+    })
+
+    it('USER_SAVE_PROFILE_SUCCESS', () => {
+      store.commit(USER_LOGIN, user)
+      store.commit(USER_SAVE_PROFILE_SUCCESS, {phone: "01 02 03 04"})
+      expect(store._vm.isSaveProfileLoading).to.not.be.ok
+      expect(store._vm.isSaveProfileLoadingError).to.not.be.ok
+      expect(store._vm.user.phone).to.equal("01 02 03 04")
+    })
+
+    it('USER_CHANGE_PASSWORD_LOADING', () => {
+      store.commit(USER_CHANGE_PASSWORD_LOADING)
+      expect(store._vm.changePassword.isLoading).to.be.ok
+      expect(store._vm.changePassword.isError).to.not.be.ok
+      expect(store._vm.changePassword.isSuccess).to.not.be.ok
+    })
+
+    it('USER_CHANGE_PASSWORD_ERROR', () => {
+      store.commit(USER_CHANGE_PASSWORD_ERROR)
+      expect(store._vm.changePassword.isLoading).to.not.be.ok
+      expect(store._vm.changePassword.isError).to.be.ok
+      expect(store._vm.changePassword.isSuccess).to.not.be.ok
+    })
+
+    it('USER_CHANGE_PASSWORD_SUCCESS', () => {
+      store.commit(USER_CHANGE_PASSWORD_SUCCESS)
+      expect(store._vm.changePassword.isLoading).to.not.be.ok
+      expect(store._vm.changePassword.isError).to.not.be.ok
+      expect(store._vm.changePassword.isSuccess).to.be.ok
+    })
+
   })
 })
