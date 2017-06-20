@@ -8,6 +8,7 @@ import login from './modules/login'
 import main from './modules/main'
 import people from './modules/people'
 import user from './modules/user'
+import productions from './modules/productions'
 
 Vue.use(Vuex)
 
@@ -15,6 +16,7 @@ let modules = {
   login,
   main,
   people,
+  productions,
   user
 }
 
