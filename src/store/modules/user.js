@@ -8,6 +8,10 @@ import {
   USER_SAVE_PROFILE_ERROR,
   USER_SAVE_PROFILE_SUCCESS,
 
+  USER_CHANGE_PASSWORD_LOADING,
+  USER_CHANGE_PASSWORD_ERROR,
+  USER_CHANGE_PASSWORD_SUCCESS,
+
   RESET_ALL
 } from '../mutation-types'
 
@@ -15,19 +19,28 @@ const state = {
   user: null,
   isAuthenticated: false,
   isSaveProfileLoading: false,
-  isSaveProfileLoadingError: false
+  isSaveProfileLoadingError: false,
+
+  changePassword: {
+    isLoading: false,
+    isError: false,
+    isSuccess: false
+  }
 }
 
 const getters = {
   user: state => state.user,
   isAuthenticated: state => state.isAuthenticated,
+
   isSaveProfileLoading: state => state.isSaveProfileLoading,
-  isSaveProfileLoadingError: state => state.isSaveProfileLoadingError
+  isSaveProfileLoadingError: state => state.isSaveProfileLoadingError,
+
+  changePassword: state => state.changePassword
 }
 
 const actions = {
   saveProfile ({ commit, state }, payload) {
-    commit('USER_SAVE_PROFILE_LOADING')
+    commit(USER_SAVE_PROFILE_LOADING)
     peopleApi.updatePerson(payload.form, (err) => {
       if (err) {
         commit(USER_SAVE_PROFILE_ERROR)
@@ -36,7 +49,20 @@ const actions = {
       }
       if (payload.callback) payload.callback()
     })
+  },
+
+  changeUserPassword ({ commit, state }, payload) {
+    commit(USER_CHANGE_PASSWORD_LOADING)
+    peopleApi.updatePerson(payload.form, (err) => {
+      if (err) {
+        commit(USER_CHANGE_PASSWORD_SUCCESS)
+      } else {
+        commit(USER_CHANGE_PASSWORD_ERROR)
+      }
+      if (payload.callback) payload.callback()
+    })
   }
+
 }
 
 const mutations = {
@@ -67,11 +93,41 @@ const mutations = {
     state.isSaveProfileLoadingError = false
   },
 
+  [USER_CHANGE_PASSWORD_LOADING] (state) {
+    state.changePassword = {
+      isLoading: true,
+      isError: false,
+      isSuccess: false
+    }
+  },
+
+  [USER_CHANGE_PASSWORD_ERROR] (state) {
+    state.changePassword = {
+      isLoading: false,
+      isError: true,
+      isSuccess: false
+    }
+  },
+
+  [USER_CHANGE_PASSWORD_SUCCESS] (state) {
+    state.changePassword = {
+      isLoading: false,
+      isError: false,
+      isSuccess: true
+    }
+  },
+
   [RESET_ALL] (state) {
     state.user = null
     state.isAuthenticated = false
     state.isSaveProfileLoading = false
     state.isSaveProfileLoadingError = false
+
+    state.changePassword = {
+      isLoading: false,
+      isError: false,
+      isSuccess: false
+    }
   }
 }
 

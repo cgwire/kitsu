@@ -5,8 +5,8 @@
     <input
       class="input"
       ref="input"
-      type="text"
-      placeholder=""
+      :placeholder="placeholder"
+      :type="type"
       :value="value"
       @input="updateValue()"
     />
@@ -19,10 +19,24 @@ import { mapGetters, mapActions } from 'vuex'
 
 export default {
   name: 'text-field',
-  props: [
-    'label',
-    'value'
-  ],
+  props: {
+    label: {
+      default: '',
+      type: String
+    },
+    value: {
+      default: '',
+      type: String
+    },
+    placeholder: {
+      default: '',
+      type: String
+    },
+    type: {
+      default: 'text',
+      type: String
+    }
+  },
   computed: {
     ...mapGetters([
     ])

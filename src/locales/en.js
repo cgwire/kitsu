@@ -23,17 +23,26 @@ export default {
       first_name: 'First name',
       last_name: 'Last name',
       email: 'Email',
-      phone: 'Phone'
+      phone: 'Phone',
+      old_password: 'Current password',
+      password: 'New password',
+      password_2: 'New password (repeat)'
     }
   },
 
   profile: {
     title: 'Your Profile',
+    info_title: 'Information',
+    password_title: 'Change password',
     timezone: 'Timezone',
     language: 'Language',
     save: {
       button: 'Save changes',
       error: 'An error occured while saving changes'
+    },
+    change_password: {
+      button: 'Change password',
+      error: 'An error occured while changing password.'
     }
   },
 

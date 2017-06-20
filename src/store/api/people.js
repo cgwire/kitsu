@@ -57,5 +57,15 @@ export default {
       .end((err, res) => {
         callback(err, res.body)
       })
+  },
+
+  changePassword (data, callback) {
+    superagent
+      .post('/api/auth/change-password')
+      .send(data)
+      .end((err, res) => {
+        callback(err, res.body)
+      })
   }
+
 }

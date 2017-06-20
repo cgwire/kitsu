@@ -16,6 +16,9 @@
         </div>
       </div>
       <div class="profile-body">
+        <h2>
+          {{ $t('profile.info_title') }}
+        </h2>
         <text-field
           :label="$t('people.fields.first_name')"
           v-model="form.first_name">
@@ -80,6 +83,46 @@
         >
           {{ $t('profile.save.error') }}
         </p>
+
+        <h2>
+          {{ $t('profile.password_title') }}
+        </h2>
+        <text-field
+          :label="$t('people.fields.old_password')"
+          type="password"
+          v-model="passwordForm.oldPassword">
+        </text-field>
+        <text-field
+          :label="$t('people.fields.password')"
+          type="password"
+          v-model="passwordForm.password">
+        </text-field>
+        <text-field
+          :label="$t('people.fields.password_2')"
+          type="password"
+          v-model="passwordForm.password2">
+        </text-field>
+
+        <button
+          :class="{
+            button: true,
+            'save-button': true,
+            'is-medium': true,
+            'is-loading': changePassword.isLoading
+          }"
+          @click="changeUserPassword({form: passwordForm})"
+        >
+          {{ $t('profile.change_password.button') }}
+        </button>
+        <p
+          :class="{
+            error: true,
+            'is-hidden': !changePassword.isError
+          }"
+        >
+          {{ $t('profile.change_password.error') }}
+        </p>
+
       </div>
     </div>
   </div>
@@ -102,6 +145,11 @@ export default {
         phone: '',
         timezone: 'Europe/Paris',
         locale: 'French'
+      },
+      passwordForm: {
+        oldPassword: '',
+        password: '',
+        password2: ''
       }
     }
   },
@@ -118,7 +166,8 @@ export default {
     ...mapGetters([
       'user',
       'isSaveProfileLoading',
-      'isSaveProfileLoadingError'
+      'isSaveProfileLoadingError',
+      'changePassword'
     ]),
     departments () {
       return [{name: 'Animation'}, {name: 'Modeling'}]
@@ -129,7 +178,8 @@ export default {
   },
   methods: {
     ...mapActions([
-      'saveProfile'
+      'saveProfile',
+      'changeUserPassword'
     ]),
     localeChanged () {
       this.$i18n.locale = this.form.locale.substring(0, 2)
@@ -195,6 +245,17 @@ input, select, span.select {
 }
 
 .profile-header .column {
+}
+
+h2 {
+  border-bottom: 1px solid #DDD;
+  font-size: 1.5em;
+  margin-top: 2em;
+  margin-bottom: 1em;
+}
+
+h2:first-child {
+  margin-top: 0em;
 }
 
 .big-number {
