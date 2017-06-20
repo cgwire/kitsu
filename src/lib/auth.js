@@ -86,6 +86,10 @@ const auth = {
     } else {
       finalize()
     }
+  },
+
+  isPasswordValid (password, password2) {
+    return password.length > 6 && password === password2
   }
 
 }

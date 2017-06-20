@@ -96,4 +96,8 @@ input.input:focus {
 .error {
   color: #FF1F4B;
 }
+
+.success {
+  color: #00B242;
+}
 </style>

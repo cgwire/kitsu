@@ -1,4 +1,5 @@
 import peopleApi from '../api/people'
+import auth from '../../lib/auth'
 import {
   USER_LOGIN,
   USER_LOGOUT,
@@ -8,6 +9,11 @@ import {
   USER_SAVE_PROFILE_ERROR,
   USER_SAVE_PROFILE_SUCCESS,
 
+  USER_CHANGE_PASSWORD_LOADING,
+  USER_CHANGE_PASSWORD_ERROR,
+  USER_CHANGE_PASSWORD_SUCCESS,
+  USER_CHANGE_PASSWORD_UNVALID,
+
   RESET_ALL
 } from '../mutation-types'
 
@@ -15,19 +21,29 @@ const state = {
   user: null,
   isAuthenticated: false,
   isSaveProfileLoading: false,
-  isSaveProfileLoadingError: false
+  isSaveProfileLoadingError: false,
+
+  changePassword: {
+    isLoading: false,
+    isError: false,
+    isSuccess: false,
+    isValid: true
+  }
 }
 
 const getters = {
   user: state => state.user,
   isAuthenticated: state => state.isAuthenticated,
+
   isSaveProfileLoading: state => state.isSaveProfileLoading,
-  isSaveProfileLoadingError: state => state.isSaveProfileLoadingError
+  isSaveProfileLoadingError: state => state.isSaveProfileLoadingError,
+
+  changePassword: state => state.changePassword
 }
 
 const actions = {
   saveProfile ({ commit, state }, payload) {
-    commit('USER_SAVE_PROFILE_LOADING')
+    commit(USER_SAVE_PROFILE_LOADING)
     peopleApi.updatePerson(payload.form, (err) => {
       if (err) {
         commit(USER_SAVE_PROFILE_ERROR)
@@ -36,7 +52,32 @@ const actions = {
       }
       if (payload.callback) payload.callback()
     })
+  },
+
+  checkNewPasswordValidityAndSave ({ commit, state }, payload) {
+    if (auth.isPasswordValid(
+      payload.form.password,
+      payload.form.password2
+    )) {
+      actions.changeUserPassword({ commit, state }, payload)
+    } else {
+      commit(USER_CHANGE_PASSWORD_UNVALID)
+      if (payload.callback) payload.callback()
+    }
+  },
+
+  changeUserPassword ({ commit, state }, payload) {
+    commit(USER_CHANGE_PASSWORD_LOADING)
+    peopleApi.changePassword(payload.form, (err) => {
+      if (err) {
+        commit(USER_CHANGE_PASSWORD_ERROR)
+      } else {
+        commit(USER_CHANGE_PASSWORD_SUCCESS)
+      }
+      if (payload.callback) payload.callback()
+    })
   }
+
 }
 
 const mutations = {
@@ -67,11 +108,51 @@ const mutations = {
     state.isSaveProfileLoadingError = false
   },
 
+  [USER_CHANGE_PASSWORD_LOADING] (state) {
+    state.changePassword = {
+      isLoading: true,
+      isError: false,
+      isSuccess: false,
+      isValid: true
+    }
+  },
+  [USER_CHANGE_PASSWORD_ERROR] (state) {
+    state.changePassword = {
+      isLoading: false,
+      isError: true,
+      isSuccess: false,
+      isValid: true
+    }
+  },
+  [USER_CHANGE_PASSWORD_SUCCESS] (state) {
+    state.changePassword = {
+      isLoading: false,
+      isError: false,
+      isSuccess: true,
+      isValid: true
+    }
+  },
+  [USER_CHANGE_PASSWORD_UNVALID] (state) {
+    state.changePassword = {
+      isLoading: false,
+      isError: false,
+      isSuccess: false,
+      isValid: false
+    }
+  },
+
   [RESET_ALL] (state) {
     state.user = null
     state.isAuthenticated = false
     state.isSaveProfileLoading = false
     state.isSaveProfileLoadingError = false
+
+    state.changePassword = {
+      isLoading: false,
+      isError: false,
+      isSuccess: false,
+      isValid: false
+    }
   }
 }
 
