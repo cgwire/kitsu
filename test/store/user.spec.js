@@ -23,6 +23,14 @@ const user = {
   email: 'john@doe.fr'
 }
 
+peopleApi.updatePerson = (form, callback) => {
+  if (form === undefined) {
+    return callback(new Error('Server error'))
+  } else {
+    return callback()
+  }
+}
+
 peopleApi.changePassword = (form, callback) => {
   if (form.old_password === 'wrongPassword') {
     return callback(new Error('Wrong password'))
@@ -38,8 +46,35 @@ describe('user', () => {
 
   describe('actions', () => {
     it('saveProfile', (done) => {
-      done()
+      store.commit(USER_LOGIN, user)
+      helpers.runAction('saveProfile', {
+        form: {
+          phone: '01 02 03 04'
+        },
+        callback: () => {
+          expect(store._vm.isSaveProfileLoading).to.not.be.ok
+          expect(store._vm.isSaveProfileLoadingError).to.not.be.ok
+          expect(store._vm.user.phone).to.equal("01 02 03 04")
+          done()
+        }
+      })
+      expect(store._vm.isSaveProfileLoading).to.be.ok
+      expect(store._vm.isSaveProfileLoadingError).to.not.be.ok
     })
+
+    it('saveProfile (fail)', (done) => {
+      store.commit(USER_LOGIN, user)
+      helpers.runAction('saveProfile', {
+        callback: () => {
+          expect(store._vm.isSaveProfileLoading).to.not.be.ok
+          expect(store._vm.isSaveProfileLoadingError).to.be.ok
+          done()
+        }
+      })
+      expect(store._vm.isSaveProfileLoading).to.be.ok
+      expect(store._vm.isSaveProfileLoadingError).to.not.be.ok
+    })
+
 
     it('changePasswordValidityAndSave (password unvalid)', (done) => {
       helpers.runAction('changeUserPassword', {
@@ -50,6 +85,7 @@ describe('user', () => {
         },
         callback: done
       })
+          expect(store._vm.isSaveProfileLoading).to.not.be.ok
       expect(store._vm.changePassword.isValid).to.not.be.ok
     })
 
@@ -121,13 +157,11 @@ describe('user', () => {
       expect(store._vm.user.first_name).to.equal('John')
       expect(store._vm.isAuthenticated).to.be.ok
     })
-
     it('USER_LOGOUT', () => {
       store.commit(USER_LOGOUT)
       expect(store._vm.user).to.be.null
       expect(store._vm.isAuthenticated).to.not.be.ok
     })
-
     it('USER_LOGIN_FAIL', () => {
       store.commit(USER_LOGIN_FAIL)
       expect(store._vm.user).to.be.null
@@ -139,13 +173,11 @@ describe('user', () => {
       expect(store._vm.isSaveProfileLoading).to.be.ok
       expect(store._vm.isSaveProfileLoadingError).to.not.be.ok
     })
-
     it('USER_SAVE_PROFILE_ERROR', () => {
       store.commit(USER_SAVE_PROFILE_ERROR)
       expect(store._vm.isSaveProfileLoading).to.not.be.ok
       expect(store._vm.isSaveProfileLoadingError).to.be.ok
     })
-
     it('USER_SAVE_PROFILE_SUCCESS', () => {
       store.commit(USER_LOGIN, user)
       store.commit(USER_SAVE_PROFILE_SUCCESS, {phone: "01 02 03 04"})
