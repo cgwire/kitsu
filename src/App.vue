@@ -30,6 +30,11 @@ export default {
   vertical-align: middle;
 }
 
+.avatar {
+  border-radius: 50%;
+  color: white;
+}
+
 .avatar img {
   border-radius: 50%;
   width: 40px;

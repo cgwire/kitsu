@@ -26,6 +26,7 @@ export default {
       phone: 'Phone'
     }
   },
+
   profile: {
     title: 'Your Profile',
     timezone: 'Timezone',
@@ -35,12 +36,14 @@ export default {
       error: 'An error occured while saving changes'
     }
   },
+
   main: {
     profile: 'Profile',
     logout: 'Logout',
     cancel: 'Cancel',
     confirmation: 'Confirm'
   },
+
   login: {
     title: 'Log in to Kitsu',
     login: 'Log in',
@@ -50,12 +53,24 @@ export default {
       password: 'Password'
     }
   },
+
   productions: {
-    title: 'Productions'
+    title: 'Productions',
+    number: 'production | productions',
+    fields: {
+      name: 'Name',
+      status: 'Status'
+    },
+    status: {
+      open: 'Open',
+      closed: 'Close'
+    }
   },
+
   task_types: {
     title: 'Task Types'
   },
+
   server_down: {
     title: 'Kitsu encountered an error while reaching its data API.',
     text: 'Please contact your vendor support, your system administrator or your IT department to understand what is going wrong.'

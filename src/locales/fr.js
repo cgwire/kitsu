@@ -25,6 +25,7 @@ export default {
       phone: 'Téléphone'
     }
   },
+
   profile: {
     title: 'Votre Profil',
     timezone: 'Fuseau horaire',
@@ -34,12 +35,14 @@ export default {
       error: 'Une erreur est survenue pendant la sauvegarde de vos changememts.'
     }
   },
+
   main: {
     profile: 'Profil',
     logout: 'Se déconnecter',
     cancel: 'Annuler',
     confirmation: 'Confirmer'
   },
+
   login: {
     title: 'Se connecter à Kitsu',
     login: 'Se connecter',
@@ -49,12 +52,24 @@ export default {
       password: 'Mot de passe'
     }
   },
+
   productions: {
-    title: 'Productions'
+    title: 'Productions',
+    number: 'production | productions',
+    fields: {
+      name: 'Nom',
+      status: 'État'
+    },
+    status: {
+      open: 'Ouvert',
+      closed: 'Fermé'
+    }
   },
+
   task_types: {
     title: 'Types de Tâches'
   },
+
   server_down: {
     title: 'Kitsu a rencontré une erreur en communiquant avec son API de données.',
     text: 'Contactez votre fournisseur, votre administrateur système ou votre déartement informatique pour comprendre ce qui ne va pas.'
