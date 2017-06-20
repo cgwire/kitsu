@@ -41,7 +41,9 @@ export default {
     },
     change_password: {
       button: 'Changez de mot de passe',
-      error: 'Une erreur s\'est produite lors du changement de mot de passe.'
+      success: 'Votre mot de passe a été changé avec succès !',
+      unvalid: 'Les nouveaux mots de passe sont différents ou votre mot de passe est trop court (7 caractères minimum).',
+      error: 'Une erreur s\'est produite lors du changement de mot de passe. Veuillez vérifier votre mot de pass actuel.'
     }
   },
 

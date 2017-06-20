@@ -42,7 +42,9 @@ export default {
     },
     change_password: {
       button: 'Change password',
-      error: 'An error occured while changing password.'
+      success: 'Your password was successfully changed!',
+      unvalid: 'Your new password confirmation doesn\'t match or your password is too short (7 chars, at least, is expected).',
+      error: 'An error occured while changing password. Please verify your current password.'
     }
   },
 

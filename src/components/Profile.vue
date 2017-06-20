@@ -110,18 +110,41 @@
             'is-medium': true,
             'is-loading': changePassword.isLoading
           }"
-          @click="changeUserPassword({form: passwordForm})"
+          @click="passwordChangeRequested()"
         >
           {{ $t('profile.change_password.button') }}
         </button>
+
         <p
           :class="{
+            'change-password-message': true,
+            error: true,
+            'is-hidden': changePassword.isValid
+          }"
+        >
+          {{ $t('profile.change_password.unvalid') }}
+        </p>
+
+        <p
+          :class="{
+            'change-password-message': true,
+            success: true,
+            'is-hidden': !changePassword.isSuccess
+          }"
+        >
+          {{ $t('profile.change_password.success') }}
+        </p>
+
+        <p
+          :class="{
+            'change-password-message': true,
             error: true,
             'is-hidden': !changePassword.isError
           }"
         >
           {{ $t('profile.change_password.error') }}
         </p>
+
 
       </div>
     </div>
@@ -179,10 +202,22 @@ export default {
   methods: {
     ...mapActions([
       'saveProfile',
-      'changeUserPassword'
+      'checkNewPasswordValidityAndSave'
     ]),
     localeChanged () {
       this.$i18n.locale = this.form.locale.substring(0, 2)
+    },
+    passwordChangeRequested () {
+      this.checkNewPasswordValidityAndSave({
+        form: this.passwordForm,
+        callback: () => {
+          this.passwordForm = {
+            oldPassword: '',
+            password: '',
+            password2: ''
+          }
+        }
+      })
     }
   },
   mounted () {
@@ -283,5 +318,9 @@ h2:first-child {
   margin: auto;
   font-size: 3em;
   border: 5px solid white;
+}
+
+.change-password-message {
+  margin-top: 1em;
 }
 </style>

@@ -1,5 +1,6 @@
 import { expect } from 'chai'
 import helpers from './helpers'
+import peopleApi from '../../src/store/api/people'
 import store from '../../src/store'
 import {
   USER_LOGIN,
@@ -12,7 +13,8 @@ import {
 
   USER_CHANGE_PASSWORD_LOADING,
   USER_CHANGE_PASSWORD_SUCCESS,
-  USER_CHANGE_PASSWORD_ERROR
+  USER_CHANGE_PASSWORD_ERROR,
+  USER_CHANGE_PASSWORD_UNVALID
 } from '../../src/store/mutation-types'
 
 const user = {
@@ -21,28 +23,96 @@ const user = {
   email: 'john@doe.fr'
 }
 
+peopleApi.changePassword = (form, callback) => {
+  if (form.old_password === 'wrongPassword') {
+    return callback(new Error('Wrong password'))
+  } else {
+    return callback()
+  }
+}
+
 describe('user', () => {
 
   beforeEach(helpers.reset)
   afterEach(helpers.reset)
 
   describe('actions', () => {
-    it('saveProfile', () => {
-
+    it('saveProfile', (done) => {
+      done()
     })
 
-    it('changePassword', (done) => {
-      helpers.runAction('changePassword', {
-        passwords: {
+    it('changePasswordValidityAndSave (password unvalid)', (done) => {
+      helpers.runAction('changeUserPassword', {
+        form: {
+          old_password: 'oldPassword',
+          password: 'newPassword',
+          password_2: 'newPassword'
+        },
+        callback: done
+      })
+      expect(store._vm.changePassword.isValid).to.not.be.ok
+    })
+
+    it('changePasswordValidityAndSave (password valid)', (done) => {
+      helpers.runAction('changeUserPassword', {
+        form: {
           old_password: 'oldPassword',
           password: 'newPassword',
           password_2: 'newPassword'
         },
         callback: () => {
+          expect(store._vm.changePassword.isLoading).to.not.be.ok
+          expect(store._vm.changePassword.isSuccess).to.be.ok
+          expect(store._vm.changePassword.isValid).to.be.ok
           done()
         }
       })
+      expect(store._vm.changePassword.isLoading).to.be.ok
+      expect(store._vm.changePassword.isValid).to.be.ok
     })
+
+    it('changeUserPassword', (done) => {
+      helpers.runAction('changeUserPassword', {
+        form: {
+          old_password: 'oldPassword',
+          password: 'newPassword',
+          password_2: 'newPassword'
+        },
+        callback: () => {
+          expect(store._vm.changePassword.isLoading).to.not.be.ok
+          expect(store._vm.changePassword.isError).to.not.be.ok
+          expect(store._vm.changePassword.isSuccess).to.be.ok
+          expect(store._vm.changePassword.isValid).to.be.ok
+          done()
+        }
+      })
+      expect(store._vm.changePassword.isLoading).to.be.ok
+      expect(store._vm.changePassword.isError).to.not.be.ok
+      expect(store._vm.changePassword.isSuccess).to.not.be.ok
+      expect(store._vm.changePassword.isValid).to.be.ok
+    })
+
+    it('changeUserPassword (fail)', (done) => {
+      helpers.runAction('changeUserPassword', {
+        form: {
+          old_password: 'wrongPassword',
+          password: 'newPassword',
+          password_2: 'newPassword'
+        },
+        callback: () => {
+          expect(store._vm.changePassword.isLoading).to.not.be.ok
+          expect(store._vm.changePassword.isError).to.be.ok
+          expect(store._vm.changePassword.isSuccess).to.not.be.ok
+          expect(store._vm.changePassword.isValid).to.be.ok
+          done()
+        }
+      })
+      expect(store._vm.changePassword.isLoading).to.be.ok
+      expect(store._vm.changePassword.isError).to.not.be.ok
+      expect(store._vm.changePassword.isSuccess).to.not.be.ok
+      expect(store._vm.changePassword.isValid).to.be.ok
+    })
+
   })
 
   describe('mutations', () => {
@@ -89,21 +159,28 @@ describe('user', () => {
       expect(store._vm.changePassword.isLoading).to.be.ok
       expect(store._vm.changePassword.isError).to.not.be.ok
       expect(store._vm.changePassword.isSuccess).to.not.be.ok
+      expect(store._vm.changePassword.isValid).to.be.ok
     })
-
     it('USER_CHANGE_PASSWORD_ERROR', () => {
       store.commit(USER_CHANGE_PASSWORD_ERROR)
       expect(store._vm.changePassword.isLoading).to.not.be.ok
       expect(store._vm.changePassword.isError).to.be.ok
       expect(store._vm.changePassword.isSuccess).to.not.be.ok
+      expect(store._vm.changePassword.isValid).to.be.ok
     })
-
     it('USER_CHANGE_PASSWORD_SUCCESS', () => {
       store.commit(USER_CHANGE_PASSWORD_SUCCESS)
       expect(store._vm.changePassword.isLoading).to.not.be.ok
       expect(store._vm.changePassword.isError).to.not.be.ok
       expect(store._vm.changePassword.isSuccess).to.be.ok
+      expect(store._vm.changePassword.isValid).to.be.ok
     })
-
+    it('USER_CHANGE_PASSWORD_UNVALID', () => {
+      store.commit(USER_CHANGE_PASSWORD_UNVALID)
+      expect(store._vm.changePassword.isLoading).to.not.be.ok
+      expect(store._vm.changePassword.isError).to.not.be.ok
+      expect(store._vm.changePassword.isSuccess).to.not.be.ok
+      expect(store._vm.changePassword.isValid).to.not.be.ok
+    })
   })
 })

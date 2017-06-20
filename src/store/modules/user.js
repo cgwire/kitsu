@@ -1,4 +1,5 @@
 import peopleApi from '../api/people'
+import auth from '../../lib/auth'
 import {
   USER_LOGIN,
   USER_LOGOUT,
@@ -11,6 +12,7 @@ import {
   USER_CHANGE_PASSWORD_LOADING,
   USER_CHANGE_PASSWORD_ERROR,
   USER_CHANGE_PASSWORD_SUCCESS,
+  USER_CHANGE_PASSWORD_UNVALID,
 
   RESET_ALL
 } from '../mutation-types'
@@ -24,7 +26,8 @@ const state = {
   changePassword: {
     isLoading: false,
     isError: false,
-    isSuccess: false
+    isSuccess: false,
+    isValid: true
   }
 }
 
@@ -51,13 +54,25 @@ const actions = {
     })
   },
 
+  checkNewPasswordValidityAndSave ({ commit, state }, payload) {
+    if (auth.isPasswordValid(
+      payload.form.password,
+      payload.form.password2
+    )) {
+      actions.changeUserPassword({ commit, state }, payload)
+    } else {
+      commit(USER_CHANGE_PASSWORD_UNVALID)
+      if (payload.callback) payload.callback()
+    }
+  },
+
   changeUserPassword ({ commit, state }, payload) {
     commit(USER_CHANGE_PASSWORD_LOADING)
-    peopleApi.updatePerson(payload.form, (err) => {
+    peopleApi.changePassword(payload.form, (err) => {
       if (err) {
-        commit(USER_CHANGE_PASSWORD_SUCCESS)
-      } else {
         commit(USER_CHANGE_PASSWORD_ERROR)
+      } else {
+        commit(USER_CHANGE_PASSWORD_SUCCESS)
       }
       if (payload.callback) payload.callback()
     })
@@ -97,23 +112,32 @@ const mutations = {
     state.changePassword = {
       isLoading: true,
       isError: false,
-      isSuccess: false
+      isSuccess: false,
+      isValid: true
     }
   },
-
   [USER_CHANGE_PASSWORD_ERROR] (state) {
     state.changePassword = {
       isLoading: false,
       isError: true,
-      isSuccess: false
+      isSuccess: false,
+      isValid: true
     }
   },
-
   [USER_CHANGE_PASSWORD_SUCCESS] (state) {
     state.changePassword = {
       isLoading: false,
       isError: false,
-      isSuccess: true
+      isSuccess: true,
+      isValid: true
+    }
+  },
+  [USER_CHANGE_PASSWORD_UNVALID] (state) {
+    state.changePassword = {
+      isLoading: false,
+      isError: false,
+      isSuccess: false,
+      isValid: false
     }
   },
 
@@ -126,7 +150,8 @@ const mutations = {
     state.changePassword = {
       isLoading: false,
       isError: false,
-      isSuccess: false
+      isSuccess: false,
+      isValid: false
     }
   }
 }
