@@ -58,6 +58,11 @@ peopleApi.deletePerson = (personId, callback) => {
   })
 }
 
+peopleApi.postCsv = (data, callback) => {
+  process.nextTick(() => {
+    callback()
+  })
+}
 
 describe('people', () => {
 
@@ -163,15 +168,26 @@ describe('people', () => {
       expect(store._vm.isDeleteLoadingError).to.equal(false)
     })
 
-    it('importPeople', (done) => {
-      helpers.runAction('importPeople', new FormData(), (err) => {
-        expect(store._vm.isImporPeopleLoading).to.equal(false)
-        expect(store._vm.isImporPeopleModalShown).to.equal(false)
-        expect(store._vm.people).to.equal(4)
+    it('uploadPersonFile', (done) => {
+      helpers.runAction('uploadPersonFile', (err) => {
+        expect(store._vm.isImportPeopleLoading).to.equal(false)
+        expect(store._vm.isImportPeopleModalShown).to.equal(false)
+        expect(store._vm.isImportPeopleLoadingError).to.equal(false)
         done()
       })
       expect(store._vm.isImportPeopleLoading).to.equal(true)
       expect(store._vm.isImportPeopleLoadingError).to.equal(false)
+    })
+
+
+    it('showPersonImportModal / hidePersonImportModal', () => {
+      helpers.runAction('showPersonImportModal')
+      expect(store._vm.isImportPeopleModalShown).to.equal(true)
+      expect(store._vm.isImportPeopleLoadingError).to.equal(false)
+      expect(store._vm.isImportPeopleLoading).to.equal(false)
+
+      helpers.runAction('hidePersonImportModal')
+      expect(store._vm.isImportPeopleModalShown).to.equal(false)
     })
 
     it('showPersonDeleteModal / hidePersonDeleteModal', () => {
@@ -361,8 +377,6 @@ describe('people', () => {
     it('SHOW_IMPORT_PEOPLE MODAL', () => {
       store.commit(SHOW_IMPORT_PEOPLE_MODAL)
       expect(store._vm.isImportPeopleModalShown).to.equal(true)
-      expect(store._vm.isImportPeopleLoadingError).to.equal(false)
-      expect(store._vm.isImportPeopleLoading).to.equal(false)
     })
 
     it('HIDE_IMPORT_MODAL', () => {

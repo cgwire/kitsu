@@ -151,11 +151,11 @@ const actions = {
   },
 
   showPersonImportModal ({ commit, state }, personId) {
-    commit(SHOW_IMPORT_PEOPLE_MODAL, personId)
+    commit(SHOW_IMPORT_PEOPLE_MODAL)
   },
 
   hidePersonImportModal ({ commit, state }, personId) {
-    commit(HIDE_IMPORT_PEOPLE_MODAL, personId)
+    commit(HIDE_IMPORT_PEOPLE_MODAL)
   },
 
   showPersonEditModal ({ commit, state }, personId) {
@@ -298,6 +298,8 @@ const mutations = {
 
   [SHOW_IMPORT_PEOPLE_MODAL] (state) {
     state.isImportPeopleModalShown = true
+    state.isImportPeopleLoading = false
+    state.isImportPeopleLoadingError = false
   },
 
   [HIDE_IMPORT_PEOPLE_MODAL] (state) {
@@ -323,8 +325,8 @@ const mutations = {
     state.personToEdit = {}
 
     state.isImportModalShown = false
-    state.isImportLoading = false
-    state.isImportLoadingError = false
+    state.isImportPeopleLoading = false
+    state.isImportPeopleLoadingError = false
     state.personCsvFormData = null
 
     state.people = []
