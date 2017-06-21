@@ -1,10 +1,10 @@
 from flask_restful import current_app
 
-from zou.app.models.output_file import OutputFile
+from zou.app.models.preview_file import PreviewFile
 from zou.app.models.task import Task
 from zou.app.models.person import Person
 
-from zou.app.project import file_info, asset_info, shot_info
+from zou.app.project import asset_info, shot_info
 
 from zou.app.resources.source.shotgun.base import (
     BaseImportShotgunResource,
@@ -42,7 +42,6 @@ class ImportShotgunVersionsResource(BaseImportShotgunResource):
             "name": sg_version["code"],
             "shotgun_id": sg_version["id"],
             "description": sg_version["description"],
-            "file_status_id": file_info.get_default_status().id,
             "source": "Shotgun"
         }
 
@@ -80,24 +79,24 @@ class ImportShotgunVersionsResource(BaseImportShotgunResource):
         return entity_id
 
     def import_entry(self, data):
-        output_file = OutputFile.get_by(shotgun_id=data["shotgun_id"])
-        if output_file is None:
-            output_file = OutputFile.get_by(
+        preview_file = PreviewFile.get_by(shotgun_id=data["shotgun_id"])
+        if preview_file is None:
+            preview_file = PreviewFile.get_by(
                 name=data["name"],
                 task_id=data["task_id"]
             )
 
-        if output_file is None:
-            output_file = OutputFile(**data)
-            output_file.save()
-            current_app.logger.info("OutputFile created: %s" % output_file)
+        if preview_file is None:
+            preview_file = PreviewFile(**data)
+            preview_file.save()
+            current_app.logger.info("PreviewFile created: %s" % preview_file)
         else:
-            output_file.update(data)
-            current_app.logger.info("OutputFile updated: %s" % output_file)
-        return output_file
+            preview_file.update(data)
+            current_app.logger.info("PreviewFile updated: %s" % preview_file)
+        return preview_file
 
 
 class ImportRemoveShotgunVersionResource(ImportRemoveShotgunBaseResource):
 
     def __init__(self):
-        ImportRemoveShotgunBaseResource.__init__(self, OutputFile)
+        ImportRemoveShotgunBaseResource.__init__(self, PreviewFile)

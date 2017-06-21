@@ -1,0 +1,36 @@
+from sqlalchemy_utils import UUIDType
+
+from zou.app import db
+from zou.app.models.serializer import SerializerMixin
+from zou.app.models.base import BaseMixin
+
+
+class PreviewFile(db.Model, BaseMixin, SerializerMixin):
+    name = db.Column(db.String(250))
+    description = db.Column(db.Text())
+    source = db.Column(db.String(40))
+    shotgun_id = db.Column(db.Integer, unique=True)
+
+    uploaded_movie_url = db.Column(db.String(600))
+    uploaded_movie_name = db.Column(db.String(150))
+
+    task_id = db.Column(UUIDType(binary=False), db.ForeignKey("task.id"))
+    person_id = db.Column(UUIDType(binary=False), db.ForeignKey("person.id"))
+    entity_id = db.Column(UUIDType(binary=False), db.ForeignKey("entity.id"))
+
+    source_file_id = db.Column(
+        UUIDType(binary=False),
+        db.ForeignKey("output_file.id")
+    )
+
+    __table_args__ = (
+        db.UniqueConstraint(
+            "name",
+            "task_id",
+            "source_file_id",
+            name="preview_uc"
+        ),
+    )
+
+    def __repr__(self):
+        return "<PreviewFile %s>" % self.id

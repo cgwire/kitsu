@@ -127,6 +127,10 @@ from .resources.data.department import DepartmentsResource, DepartmentResource
 from .resources.data.task import TasksResource, TaskResource
 from .resources.data.file_status import FileStatusesResource, FileStatusResource
 from .resources.data.output_file import OutputFilesResource, OutputFileResource
+from .resources.data.preview_file import (
+    PreviewFilesResource,
+    PreviewFileResource
+)
 from .resources.data.working_file import (
     WorkingFilesResource,
     WorkingFileResource
@@ -426,6 +430,8 @@ def configure_api_routes(api):
     api.add_resource(FileStatusResource, "/data/file_status/<instance_id>")
     api.add_resource(OutputFilesResource, "/data/output_files")
     api.add_resource(OutputFileResource, "/data/output_files/<instance_id>")
+    api.add_resource(PreviewFilesResource, "/data/preview_files")
+    api.add_resource(PreviewFileResource, "/data/preview_files/<instance_id>")
     api.add_resource(WorkingFilesResource, "/data/working_files")
     api.add_resource(WorkingFileResource, "/data/working_files/<instance_id>")
     api.add_resource(CommentsResource, "/data/comments")
