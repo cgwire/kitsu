@@ -129,8 +129,10 @@ def create_asset(project, asset_type, name, description):
         description=description
     )
     asset.save()
-    events.emit("asset:creation", {
-        "new_asset": asset.serialize()
+    events.emit("asset:new", {
+        "asset": asset.serialize(),
+        "asset_type": asset_type.serialize(),
+        "project": project.serialize()
     })
     return asset
 
