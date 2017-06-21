@@ -37,9 +37,11 @@ class LoginResource(Resource):
 
             user = auth.get_user_by_email(email)
             login_user(user)
+
+            person = person_info.get_person(current_user.id)
             return {
                 "login": True,
-                "user": user.to_dict()
+                "user": person.serialize()
             }
         except PersonNotFoundException:
             print("not registered")

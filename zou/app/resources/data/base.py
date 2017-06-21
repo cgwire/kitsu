@@ -157,5 +157,11 @@ class BaseModelResource(Resource):
         object.
         """
         instance = self.get_model_or_404(instance_id)
-        instance.delete()
+
+        try:
+            instance.delete()
+        except IntegrityError as exception:
+            current_app.logger.error(str(exception))
+            return {"error": str(exception)}, 400
+
         return {"deletion_success": True}, 204

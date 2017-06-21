@@ -15,6 +15,22 @@ def open_projects():
     return query.all()
 
 
+def all_projects():
+    result = []
+    query = Project.query.join(ProjectStatus)
+    query = query.add_columns(ProjectStatus.name)
+    query = query.order_by(Project.name)
+    entries = query.all()
+
+    for entry in entries:
+        (project, project_status_name) = entry
+        data = project.serialize()
+        data["project_status_name"] = project_status_name
+        result.append(data)
+
+    return result
+
+
 def get_or_create_status(name):
     project_status = ProjectStatus.get_by(name=name)
     if project_status is None:

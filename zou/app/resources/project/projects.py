@@ -10,3 +10,13 @@ class OpenProjectsResource(Resource):
     @login_required
     def get(self):
         return fields.serialize_models(project_info.open_projects())
+
+
+class AllProjectsResource(Resource):
+
+    def __init__(self):
+        Resource.__init__(self)
+
+    @login_required
+    def get(self):
+        return project_info.all_projects(), 200

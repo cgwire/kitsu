@@ -31,6 +31,7 @@ from .resources.project.sequences import (
     SequencesResource,
     SequenceShotsResource
 )
+from .resources.project.projects import AllProjectsResource
 from .resources.project.task_full import TaskFullResource
 from .resources.project.task_assign import TaskAssignResource
 from .resources.project.task_start import (
@@ -242,6 +243,7 @@ def configure_api_routes(api):
 
     # Project routes
     api.add_resource(OpenProjectsResource, "/data/projects/open")
+    api.add_resource(AllProjectsResource, "/data/projects/all")
     api.add_resource(
         ProjectAssetsResource,
         "/data/projects/<project_id>/assets"
