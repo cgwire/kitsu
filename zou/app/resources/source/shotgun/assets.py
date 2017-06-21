@@ -45,6 +45,7 @@ class ImportShotgunAssetsResource(BaseImportShotgunResource):
         }
 
     def import_entry(self, data):
+        entity = None
         try:
             entity = self.save_entity(data)
         except IntegrityError:
