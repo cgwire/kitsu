@@ -31,6 +31,10 @@ def all_projects():
     return result
 
 
+def get_or_create_open_status():
+    return get_or_create_status("Open")
+
+
 def get_or_create_status(name):
     project_status = ProjectStatus.get_by(name=name)
     if project_status is None:
@@ -42,17 +46,23 @@ def get_or_create_status(name):
     return project_status
 
 
-def get_open_status():
-    get_or_create_status("Open")
+def save_project_status(project_statuses):
+    result = []
+    filtered_satuses = (x for x in project_statuses if x is not None)
+
+    for status in filtered_satuses:
+        project_status = get_or_create_status(status)
+        result.append(project_status)
+    return result
 
 
 def get_or_create(name):
     project = Project.get_by(name=name)
     if project is None:
-        open_status = get_open_status()
+        open_status = get_or_create_open_status()
         project = Project(
             name=name,
-            project_status_id=open_status
+            project_status_id=open_status.id
         )
         project.save()
     return project
@@ -77,16 +87,3 @@ def get_project(project_id):
         raise ProjectNotFoundException()
 
     return project
-
-
-def save_project_status(project_statuses):
-    result = []
-    filtered_satuses = (x for x in project_statuses if x is not None)
-
-    for status in filtered_satuses:
-        project_status = ProjectStatus.get_by(name=status)
-        if project_status is None:
-            project_status = ProjectStatus(name=status, color="#000000")
-            project_status.save()
-
-        result.append(project_status)

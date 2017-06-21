@@ -12,7 +12,9 @@ class OpenProjectRouteTestCase(ApiDBTestCase):
         self.generate_fixture_project_closed()
 
     def test_open_projects(self):
-        projects = self.get("data/projects/open/")
+        projects = self.get("data/projects/all/")
 
-        self.assertEqual(len(projects), 1)
+        self.assertEqual(len(projects), 2)
         self.assertEqual(projects[0]["name"], self.project.name)
+        self.assertEqual(projects[0]["project_status_name"], "open")
+        self.assertEqual(projects[1]["project_status_name"], "closed")
