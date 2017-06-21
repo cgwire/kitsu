@@ -49,7 +49,6 @@ class ImportShotgunShotTestCase(ShotgunTestCase):
         self.assertEqual(len(self.assets), 1)
 
         asset = self.assets[0]
-        print(sg_asset["project"]["name"])
         project = Project.get_by(shotgun_id=sg_asset["project"]["id"])
         self.assertEqual(asset["description"], sg_asset["description"])
         self.assertEqual(asset["shotgun_id"], sg_asset["id"])
