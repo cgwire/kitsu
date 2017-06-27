@@ -67,7 +67,9 @@ export default {
 
   productions: {
     title: 'Productions',
+    edit_title: 'Edit production',
     number: 'production | productions',
+    new_production: 'Add a production',
     fields: {
       name: 'Name',
       status: 'Status'
@@ -75,7 +77,9 @@ export default {
     status: {
       open: 'Open',
       closed: 'Close'
-    }
+    },
+    delete_text: 'Are you sure you want to remove {name} from your database?',
+    delete_error: 'An error occured while deleting this production. There are probably data linked to it. Are you sure this production has no task, shot or asset linked to it?'
   },
 
   task_types: {

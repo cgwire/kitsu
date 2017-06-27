@@ -15,35 +15,34 @@
         <td class="td-status">
           {{ $t(getStatusLocale(entry.project_status_name)) }}
         </td>
-        <td class="actions has-text-right">
-          <p class="field">
-				  <a class="button">
-					  <span class="icon is-small">
-						  <i class="fa fa-edit"></i>
-						</span>
-          </a>
-				  <a class="button">
-					  <span class="icon is-small">
-						  <i class="fa fa-trash"></i>
-						</span>
-          </a>
-				  </p>
-        </td>
+        <row-actions
+          :entry-id="entry.id"
+          :edit-route="'/productions/edit/' + entry.id"
+          :delete-route="'/productions/delete/' + entry.id"
+        >
+        </row-actions>
       </tr>
     </tbody>
   </table>
+
   <div class="has-text-centered" v-if="isLoading">
     <img src="../../assets/spinner.svg">
   </div>
   <div class="has-text-centered" v-if="isError">
     <span class="tag is-danger">An error occured while loading data</span>
   </div>
+
+  <p class="has-text-centered nb-productions">
+    {{ entries.length }} {{ $tc('productions.number', entries.length) }}
+  </p>
+
 </div>
 </template>
 
 <script>
 import { mapGetters, mapActions } from 'vuex'
 import ProductionNameCell from '../cells/ProductionNameCell'
+import RowActions from '../widgets/RowActions'
 
 export default {
   name: 'production-list',
@@ -56,7 +55,8 @@ export default {
     return {}
   },
   components: {
-    ProductionNameCell
+    ProductionNameCell,
+    RowActions
   },
   computed: {
     ...mapGetters([

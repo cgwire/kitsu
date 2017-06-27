@@ -1,6 +1,7 @@
 <template>
   <div class="profile page">
     <div class="profile-content">
+
       <div class="has-text-centered profile-header">
         <div class="profile-header-content has-text-centered">
           <people-avatar :person="this.user" size="150">
@@ -15,6 +16,7 @@
           </h1>
         </div>
       </div>
+
       <div class="profile-body">
         <h2>
           {{ $t('profile.info_title') }}
@@ -144,7 +146,6 @@
         >
           {{ $t('profile.change_password.error') }}
         </p>
-
 
       </div>
     </div>

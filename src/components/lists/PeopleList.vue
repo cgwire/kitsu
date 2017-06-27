@@ -12,12 +12,13 @@
         <th class="phone">
         {{ $t("people.list.phone") }}
         </th>
-        <th></th>
+        <th class="actions"></th>
+        <th class="filler"></th>
       </tr>
     </thead>
     <tbody>
       <tr v-for="entry in entries">
-        <people-name-cell v-bind:entry="entry"></people-name-cell>
+        <people-name-cell class="name" v-bind:entry="entry"></people-name-cell>
         <td class="email">{{ entry.email }}</td>
         <td class="phone">{{ entry.phone }}</td>
         <row-actions
@@ -26,6 +27,7 @@
           :delete-route="'/people/delete/' + entry.id"
         >
         </row-actions>
+        <td class="filler"></td>
        </tr>
     </tbody>
   </table>
@@ -77,14 +79,44 @@ export default {
 <style scoped>
 .name {
   width: 230px;
+  min-width: 230px;
 }
 .email {
   width: 210px;
+  min-width: 210px;
 }
 .phone {
   width: 140px;
+  min-width: 140px;
 }
 .skills {
   width: 250px;
+}
+.actions {
+  width: 100px;
+  min-width: 100px;
+}
+.data-list thead {
+  display: block;
+  width: 100%;
+}
+.data-list tbody {
+  display: block;
+  height: 800px;
+  max-height: 800px;
+  width: 100%;
+  overflow-y: scroll;
+}
+
+.data-list table {
+  width: 100%;
+}
+
+.filler {
+  width: 100%;
+}
+
+.data-list {
+  overflow-x: scroll;
 }
 </style>

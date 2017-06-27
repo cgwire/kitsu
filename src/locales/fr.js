@@ -66,6 +66,8 @@ export default {
 
   productions: {
     title: 'Productions',
+    edit_title: 'Modifier la production',
+    new_production: 'Ajouter une production',
     number: 'production | productions',
     fields: {
       name: 'Nom',
@@ -74,7 +76,9 @@ export default {
     status: {
       open: 'Ouvert',
       closed: 'Fermé'
-    }
+    },
+    delete_text: 'Êtes vous sûr de vouloir retirer {name} de la base de données?',
+    delete_error: 'Une erreur est survenue lors de la suppression. Il y a probablement des données liées à cette production. Etes vous sur que cette production n\'a aucune tâche, shot ou asset lié ?'
   },
 
   task_types: {
