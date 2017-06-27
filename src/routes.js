@@ -1,5 +1,6 @@
 import auth from './lib/auth'
 import lang from './lib/lang'
+import store from './store'
 
 import Login from './components/Login'
 import Main from './components/Main'
@@ -17,7 +18,10 @@ export const routes = [
         if (nextPath) {
           next(nextPath)
         } else {
-          lang.setLocale(to, from, next)
+          lang.setLocale(to, from)
+          store.dispatch('loadProductionStatus', () => {
+            next()
+          })
         }
       })
     },
@@ -27,9 +31,12 @@ export const routes = [
       { path: '/people/delete/:person_id', component: People },
       { path: '/people/edit/:person_id', component: People },
       { path: '/people/new', component: People },
-      { path: '/people/import', component: Productions },
+      { path: '/people/import', component: People },
 
       { path: '/productions', component: Productions },
+      { path: '/productions/delete/:production_id', component: Productions },
+      { path: '/productions/edit/:production_id', component: Productions },
+      { path: '/productions/new', component: Productions },
 
       { path: '/profile', component: Profile }
     ]
