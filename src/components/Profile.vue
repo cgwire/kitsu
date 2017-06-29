@@ -230,6 +230,8 @@ export default {
 <style scoped>
 .profile.page {
   background: #EEEEEE;
+  width: 100%;
+  flex: 1 1 auto;
 }
 
 .profile-content {

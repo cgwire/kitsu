@@ -1,21 +1,6 @@
 <template>
 <div class="data-list">
   <table class="table">
-    <thead>
-      <tr>
-        <th class="name">
-        {{ $t("people.list.name") }}
-        </th>
-        <th class="email">
-        {{ $t("people.list.email") }}
-        </th>
-        <th class="phone">
-        {{ $t("people.list.phone") }}
-        </th>
-        <th class="actions"></th>
-        <th class="filler"></th>
-      </tr>
-    </thead>
     <tbody>
       <tr v-for="entry in entries">
         <people-name-cell class="name" v-bind:entry="entry"></people-name-cell>
@@ -37,6 +22,9 @@
   <div class="has-text-centered" v-if="isError">
     <span class="tag is-danger">An error occured while loading data</span>
   </div>
+  <p class="has-text-centered footer-info" v-if="!isLoading">
+    {{ entries.length }} {{ $tc('people.persons', entries.length) }}
+  </p>
 </div>
 </template>
 
@@ -96,27 +84,15 @@ export default {
   width: 100px;
   min-width: 100px;
 }
-.data-list thead {
-  display: block;
-  width: 100%;
-}
-.data-list tbody {
-  display: block;
-  height: 800px;
-  max-height: 800px;
-  width: 100%;
-  overflow-y: scroll;
-}
 
-.data-list table {
-  width: 100%;
+.data-list {
+  flex: 1 1 auto;
+  height: 0px;
+  overflow-y: auto;
 }
 
 .filler {
   width: 100%;
 }
 
-.data-list {
-  overflow-x: scroll;
-}
 </style>

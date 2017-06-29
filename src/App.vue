@@ -21,7 +21,7 @@ export default {
 }
 
 .page {
-  padding: 2em;
+  padding: 0.5em 2em;
   padding-top: 70px;
   background: white;
 }
@@ -48,11 +48,17 @@ body {
   width: 100%;
   background: #EEE;
 }
+
 * {
   box-sizing: border-box;
   margin: 0;
   padding: 0;
   border: 0;
+}
+
+.main {
+  position: fixed;
+  width: 100%;
 }
 
 .th-project {
@@ -84,6 +90,7 @@ tr:hover .actions a {
 input.input:focus {
   border-color: #00B242;
 }
+
 .button.is-primary {
   border-radius: 2px;
   background: #00B242;
@@ -99,5 +106,9 @@ input.input:focus {
 
 .success {
   color: #00B242;
+}
+
+.footer-info {
+  font-style: italic;
 }
 </style>

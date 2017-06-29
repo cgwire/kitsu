@@ -1,10 +1,8 @@
 <template>
 <td class="name">
-  <div class="level">
-    <div class="level-left">
-      <people-avatar class="avatar" :person="entry"></people-avatar>
-      <people-name :person="entry"></people-name>
-    </div>
+  <div class="people-name">
+    <people-avatar class="element avatar" :person="entry"></people-avatar>
+    <people-name class="element" :person="entry"></people-name>
   </div>
 </td>
 </template>
@@ -35,4 +33,17 @@ export default {
 </script>
 
 <style scoped>
+.people-name {
+  display: flex;
+  align-items: center;
+  flex-direction: row;
+}
+
+.avatar {
+  margin-right: 1em;
+}
+
+.element {
+  flex: 1
+}
 </style>

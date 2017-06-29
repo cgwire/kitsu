@@ -1,20 +1,9 @@
 <template>
   <div class="people page">
     <div class="people-list">
-      <h1 class="title">{{ $t("people.title") }}</h1>
       <div class="level">
-
         <div class="level-left">
-          <div class="level-item filters">
-            <filters
-              :filters="personFilters"
-              :addFilter="addPersonFilter"
-              :removeFilter="removePersonFilter"
-              :changeFilterType="changeFilterType"
-              :filterTypes="personFilterTypes"
-              :choices="choices"
-            ></filters>
-          </div>
+          <h1 class="title">{{ $t("people.title") }}</h1>
         </div>
 
         <div class="level-right">
@@ -23,31 +12,62 @@
               class="button level-item"
               to="/people/import"
             >
-              {{ $t("people.csv.import_file") }}
+              <span class="icon is-small">
+                <i class="fa fa-upload"></i>
+              </span>
+              <span class="text is-hidden-touch">
+                {{ $t("people.csv.import_file") }}
+              </span>
             </router-link>
             <a class="button level-item" href="/api/export/csv/persons.csv">
-              {{ $t("people.csv.export_file") }}
+              <span class="icon is-small">
+                <i class="fa fa-download"></i>
+              </span>
+              <span class="text is-hidden-touch">
+                {{ $t("people.csv.export_file") }}
+              </span>
             </a>
             <router-link
               class="button level-item"
               to="/people/new"
             >
-              {{ $t("people.new_person") }}
+              <span class="icon is-small">
+                <i class="fa fa-plus"></i>
+              </span>
+              <span class="text is-hidden-touch">
+                {{ $t("people.new_person") }}
+              </span>
             </router-link>
           </div>
         </div>
-
       </div>
 
-      <people-list
-        :entries="people"
-        :is-loading="isPeopleLoading"
-        :is-error="isPeopleLoadingError"
-      ></people-list>
 
-      <p class="has-text-centered nb-persons">
-        {{ people.length }} {{ $t("people.persons") }}
-      </p>
+      <div style="overflow-x: scroll">
+        <table class="table-header table">
+          <thead>
+            <tr>
+              <th class="name">
+              {{ $t("people.list.name") }}
+              </th>
+              <th class="email">
+              {{ $t("people.list.email") }}
+              </th>
+              <th class="phone">
+              {{ $t("people.list.phone") }}
+              </th>
+              <th class="actions"></th>
+              <th class="filler"></th>
+            </tr>
+          </thead>
+        </table>
+
+        <people-list
+          :entries="people"
+          :is-loading="isPeopleLoading"
+          :is-error="isPeopleLoadingError"
+        ></people-list>
+      </div>
     </div>
 
     <import-person-modal
@@ -263,15 +283,63 @@ export default {
 </script>
 
 <style scoped>
+.people.page {
+  display: flex;
+}
+
 .people-list {
+  display: flex;
+  flex: 1;
   margin-top: 1em;
+  flex-direction: column;
 }
 
 .nb-persons {
   font-style: italic;
 }
 
-.filters {
-  display: none;
+.name {
+  width: 230px;
+  min-width: 230px;
+}
+.email {
+  width: 210px;
+  min-width: 210px;
+}
+.phone {
+  width: 140px;
+  min-width: 140px;
+}
+.skills {
+  width: 250px;
+}
+.actions {
+  width: 100px;
+  min-width: 100px;
+}
+.table-header {
+  margin-bottom: 0px;
+}
+
+@media screen and (max-width: 768px) {
+  .level-left {
+    display: flex;
+  }
+  .people-list .level-left .level-item {
+    display: inline;
+  }
+
+  .level-left + .level-right {
+    display: flex;
+    justify-content: left;
+  }
+
+  .level-item:not(:last-child) {
+     margin-bottom: 0;
+  }
+
+  .button .icon.is-small {
+    margin-right: 0;
+  }
 }
 </style>

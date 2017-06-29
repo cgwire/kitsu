@@ -129,6 +129,7 @@ export default {
   transition-property: all;
   transition-duration: .5s;
   transition-timing-function: cubic-bezier(0, 1, 0.5, 1);
+  width: 200px;
 }
 
 .user-menu li {
@@ -156,5 +157,14 @@ export default {
 #c-mask-user-menu.is-active {
   width: 100%;
   height: 100%;
+}
+
+.nav-right {
+  display: flex;
+  padding-right: 0;
+}
+
+.nav-menu {
+  top: 0;
 }
 </style>

@@ -1,11 +1,13 @@
 <template>
-<span class="avatar level-item has-text-centered"
+<span class="avatar has-text-centered"
    :style="{
      background: getAvatarColor(person),
      width: (size || 40) +'px',
      height: (size || 40) + 'px'
    }">
+   <span>
      {{ generateAvatar(person) }}
+   </span>
 </span>
 </template>
 
@@ -51,5 +53,10 @@ export default {
 .avatar {
   border-radius: 50%;
   color: white;
+  display: flex;
+  align-items: center;
+}
+.avatar span {
+  flex: 1;
 }
 </style>
