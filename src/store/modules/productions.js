@@ -35,7 +35,7 @@ const state = {
   productions: [],
   productionStatus: [],
   isProductionsLoading: false,
-  isProductionsLoadingError: true,
+  isProductionsLoadingError: false,
 
   editProduction: {
     isLoading: false,
@@ -67,7 +67,7 @@ const getters = {
       (productionStatus) => productionStatus.id === id
     )
   },
-  productionStatusOptions: state => state.productionStatus.map(
+  getProductionStatusOptions: state => state.productionStatus.map(
     (status) => { return { label: status.name, value: status.id } }
   )
 }
@@ -94,8 +94,7 @@ const actions = {
 
   newProduction ({ commit, state }, payload) {
     commit(EDIT_PRODUCTION_START, payload.data)
-    const production = state.editProduction.production
-    productionsApi.newProduction(production, (err, production) => {
+    productionsApi.newProduction(payload.data, (err, production) => {
       if (err) {
         commit(EDIT_PRODUCTION_ERROR)
       } else {
@@ -121,7 +120,7 @@ const actions = {
   deleteProduction ({ commit, state }, payload) {
     commit(DELETE_PRODUCTION_START)
     const production = payload.production
-    productionsApi.deleteProduction(production, (err, productions) => {
+    productionsApi.deleteProduction(production, (err) => {
       if (err) {
         commit(DELETE_PRODUCTION_ERROR)
       } else {
@@ -212,10 +211,10 @@ const mutations = {
   },
 
   [RESET_ALL] (state) {
-    state.isProductionsLoading = false
-    state.isProductionsLoadingError = false
     state.productions = []
     state.productionStatus = []
+    state.isProductionsLoading = false
+    state.isProductionsLoadingError = false
 
     state.editProduction = {
       isLoading: false,
