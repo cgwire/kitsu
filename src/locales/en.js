@@ -83,7 +83,15 @@ export default {
   },
 
   task_types: {
-    title: 'Task Types'
+    title: 'Task Types',
+    number: 'task type | task types',
+    new_task_type: 'Add a task type',
+    fields: {
+      name: 'Name',
+      color: 'Color'
+    },
+    delete_text: 'Are you sure you want to remove {name} from your database?',
+    delete_error: 'An error occured while deleting this task type. There are probably data linked to it. Are you sure this production has no task linked to it?'
   },
 
   server_down: {

@@ -7,6 +7,7 @@ import Main from './components/Main'
 import People from './components/People'
 import Productions from './components/Productions'
 import Profile from './components/Profile'
+import TaskTypes from './components/TaskTypes'
 import ServerDown from './components/ServerDown'
 
 export const routes = [
@@ -37,6 +38,11 @@ export const routes = [
       { path: '/productions/delete/:production_id', component: Productions },
       { path: '/productions/edit/:production_id', component: Productions },
       { path: '/productions/new', component: Productions },
+
+      { path: '/task-types', component: TaskTypes },
+      { path: '/task-types/delete/:task_type_id', component: TaskTypes },
+      { path: '/task-types/edit/:task_type_id', component: TaskTypes },
+      { path: '/task-types/new', component: TaskTypes },
 
       { path: '/profile', component: Profile }
     ]
