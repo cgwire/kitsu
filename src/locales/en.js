@@ -84,6 +84,7 @@ export default {
 
   task_types: {
     title: 'Task Types',
+    edit_title: 'Edit task type',
     number: 'task type | task types',
     new_task_type: 'Add a task type',
     fields: {
@@ -91,7 +92,19 @@ export default {
       color: 'Color'
     },
     delete_text: 'Are you sure you want to remove {name} from your database?',
-    delete_error: 'An error occured while deleting this task type. There are probably data linked to it. Are you sure this production has no task linked to it?'
+    delete_error: 'An error occured while deleting this task type. There are probably data linked to it. Are you sure this task type has no task linked to it?'
+  },
+
+  asset_types: {
+    title: 'Asset Types',
+    edit_title: 'Edit asset type',
+    number: 'asset type | asset types',
+    new_asset_type: 'Add an asset type',
+    fields: {
+      name: 'Name'
+    },
+    delete_text: 'Are you sure you want to remove {name} from your database?',
+    delete_error: 'An error occured while deleting this asset type. There are probably data linked to it. Are you sure this asset type has no asset linked to it?'
   },
 
   server_down: {

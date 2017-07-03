@@ -23,6 +23,12 @@
             {{ $t("task_types.title") }}
             </router-link>
           </p>
+          <p @click="toggleSidebar()">
+            <router-link to="/asset-types">
+            {{ $t("asset_types.title") }}
+            </router-link>
+          </p>
+
         </section>
       </div>
     </aside>

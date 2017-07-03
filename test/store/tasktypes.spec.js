@@ -195,7 +195,7 @@ describe('taskTypes', () => {
       store.commit(LOAD_TASK_TYPES_END, taskTypes)
       store.commit(EDIT_TASK_TYPE_END, {
         id: 4,
-        name: 'New taskType'
+        name: 'New task type'
       })
       expect(state.taskTypes.length).to.equal(4)
       store.commit(EDIT_TASK_TYPE_END, {
