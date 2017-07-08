@@ -93,11 +93,7 @@ export default {
 
 <style scoped>
 .login {
-  background-color: #BfBfBf;
-  background: #3CB371;
-  background: url(../assets/3dbackground.png) no-repeat;
-  background-size: cover;
-  background-position: center center;
+  background-color: #CFCFCF;
 }
 
 .login-header {
