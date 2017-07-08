@@ -56,11 +56,6 @@ body {
   border: 0;
 }
 
-.main {
-  position: fixed;
-  width: 100%;
-}
-
 .th-project {
   width: 30px;
   border-radius: 50%;

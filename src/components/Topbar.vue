@@ -18,7 +18,7 @@
         </router-link>
       </div>
 
-      <div class="nav-right nav-menu">
+      <div class="nav-right">
         <div
           :class="{
             'nav-item': true,
@@ -160,11 +160,16 @@ export default {
 }
 
 .nav-right {
-  display: flex;
   padding-right: 0;
 }
 
 .nav-menu {
-  top: 0;
 }
+
+@media screen and (max-width: 768px) {
+  .nav-right {
+    display: flex;
+  }
+}
+
 </style>

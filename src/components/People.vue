@@ -321,6 +321,12 @@ export default {
   margin-bottom: 0px;
 }
 
+@media screen and (max-width: 1000px) {
+  .button .icon.is-small {
+    margin-right: 0;
+  }
+}
+
 @media screen and (max-width: 768px) {
   .level-left {
     display: flex;
