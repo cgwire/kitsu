@@ -7,6 +7,14 @@
           <h2 class="subtitle sidebar-title">Kitsu</h2>
         </p>
         <section>
+         <h2>Fabrication</h2>
+         <p @click="toggleSidebar()">
+            <router-link to="/assets">
+            {{ $t("assets.title") }}
+            </router-link>
+          </p>
+
+
          <h2>General</h2>
           <p @click="toggleSidebar()">
             <router-link to="/productions">

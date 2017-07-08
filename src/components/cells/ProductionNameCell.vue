@@ -14,7 +14,7 @@
       }">
         {{ generateAvatar(entry) }}
       </span>
-      <span class="level-item">
+      <span class="level-item" v-if="!short">
         {{ entry.name }}
       </span>
     </div>
@@ -36,6 +36,10 @@ export default {
     size: {
       default: 40,
       type: Number
+    },
+    short: {
+      default: false,
+      type: Boolean
     }
   },
   computed: {

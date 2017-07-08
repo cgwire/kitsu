@@ -6,25 +6,25 @@
   <div class="modal-background"></div>
   <div class="modal-content">
     <div class="box">
-      <h1 class="title" v-if="productionToEdit">
-        {{ $t("productions.edit_title") }} {{ productionToEdit.name }}
+      <h1 class="title" v-if="assetToEdit">
+        {{ $t("assets.edit_title") }} {{ assetToEdit.name }}
       </h1>
       <h1 class="title" v-else>
-        {{ $t("productions.new_production") }}
+        {{ $t("assets.new_asset") }}
       </h1>
       <form>
         <text-field
           ref="nameField"
-          :label="$t('productions.fields.name')"
+          :label="$t('assets.fields.name')"
           v-model="form.name"
           v-focus
         >
         </text-field>
         <combobox
-          :label="$t('productions.fields.status')"
-          :options="getProductionStatusOptions"
-          localeKeyPrefix="productions.status."
-          v-model="form.project_status_id"
+          :label="$t('assets.fields.type')"
+          :options="getAssetTypeOptions"
+          localeKeyPrefix="assets.type."
+          v-model="form.asset_type_id"
         >
         </combobox>
       </form>
@@ -55,7 +55,7 @@ import TextField from '../widgets/TextField'
 import Combobox from '../widgets/Combobox'
 
 export default {
-  name: 'edit-production-modal',
+  name: 'edit-asset-modal',
   components: {
     TextField,
     Combobox
@@ -69,31 +69,31 @@ export default {
     'isLoading',
     'isError',
     'errorText',
-    'productionToEdit'
+    'assetToEdit'
   ],
 
   watch: {
-    productionToEdit () {
-      if (this.productionToEdit) {
-        this.form.name = this.productionToEdit.name
-        this.form.project_status_id = this.productionToEdit.project_status_id
+    assetToEdit () {
+      if (this.assetToEdit) {
+        this.form.name = this.assetToEdit.name
+        this.form.asset_type_id = this.assetToEdit.asset_type_id
       }
     }
   },
 
   data () {
-    if (this.productionToEdit) {
+    if (this.assetToEdit) {
       return {
         form: {
           name: '',
-          project_status_id: this.productionToEdit.project_status_id
+          asset_type_id: this.assetToEdit.asset_type_id
         }
       }
     } else {
       return {
         form: {
           name: '',
-          project_status_id: ''
+          asset_type_id: ''
         }
       }
     }
@@ -101,8 +101,8 @@ export default {
 
   computed: {
     ...mapGetters([
-      'productions',
-      'getProductionStatusOptions'
+      'assets',
+      'getAssetTypeOptions'
     ])
   },
 

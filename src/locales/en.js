@@ -107,6 +107,20 @@ export default {
     delete_error: 'An error occured while deleting this asset type. There are probably data linked to it. Are you sure this asset type has no asset linked to it?'
   },
 
+  assets: {
+    title: 'Asset',
+    edit_title: 'Edit asset',
+    number: 'asset | asset',
+    new_asset: 'Add an asset',
+    fields: {
+      name: 'Name',
+      asset_type: 'Type',
+      project: 'Project'
+    },
+    delete_text: 'Are you sure you want to remove {name} from your database?',
+    delete_error: 'An error occured while deleting this asset. There are probably data linked to it. Are you sure this asset type has no task linked to it?'
+  },
+
   server_down: {
     title: 'Kitsu encountered an error while reaching its data API.',
     text: 'Please contact your vendor support, your system administrator or your IT department to understand what is going wrong.'

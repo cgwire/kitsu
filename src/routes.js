@@ -8,6 +8,7 @@ import People from './components/People'
 import Productions from './components/Productions'
 import Profile from './components/Profile'
 import TaskTypes from './components/TaskTypes'
+import Assets from './components/Assets'
 import AssetTypes from './components/AssetTypes'
 import ServerDown from './components/ServerDown'
 
@@ -22,7 +23,9 @@ export const routes = [
         } else {
           lang.setLocale(to, from)
           store.dispatch('loadProductionStatus', () => {
-            next()
+            store.dispatch('loadAssetTypes', () => {
+              next()
+            })
           })
         }
       })
@@ -40,15 +43,25 @@ export const routes = [
       { path: '/productions/edit/:production_id', component: Productions },
       { path: '/productions/new', component: Productions },
 
-      { path: '/task-types', component: TaskTypes },
-      { path: '/task-types/delete/:task_type_id', component: TaskTypes },
-      { path: '/task-types/edit/:task_type_id', component: TaskTypes },
-      { path: '/task-types/new', component: TaskTypes },
+      { path: '/tasks', component: TaskTypes },
+      { path: '/tasks/delete/:task_type_id', component: TaskTypes },
+      { path: '/tasks/edit/:task_type_id', component: TaskTypes },
+      { path: '/tasks/new', component: TaskTypes },
+
+      { path: '/assets', component: Assets },
+      { path: '/assets/delete/:asset_type_id', component: Assets },
+      { path: '/assets/edit/:asset_type_id', component: Assets },
+      { path: '/assets/new', component: Assets },
 
       { path: '/asset-types', component: AssetTypes },
       { path: '/asset-types/delete/:asset_type_id', component: AssetTypes },
       { path: '/asset-types/edit/:asset_type_id', component: AssetTypes },
       { path: '/asset-types/new', component: AssetTypes },
+
+      { path: '/task-types', component: TaskTypes },
+      { path: '/task-types/delete/:task_type_id', component: TaskTypes },
+      { path: '/task-types/edit/:task_type_id', component: TaskTypes },
+      { path: '/task-types/new', component: TaskTypes },
 
       { path: '/profile', component: Profile }
     ]
@@ -59,6 +72,10 @@ export const routes = [
   },
   {
     path: '/server-down',
+    component: ServerDown
+  },
+  {
+    path: '/*',
     component: ServerDown
   }
 ]
