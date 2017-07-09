@@ -238,13 +238,13 @@ const mutations = {
     state.personToEdit.id = personId
   },
 
-  [EDIT_PEOPLE_END] (state, personId) {
+  [EDIT_PEOPLE_END] (state) {
     state.isEditLoading = false
     state.isEditLoadingError = false
     const personToEditIndex = state.people.findIndex(
       (person) => person.id === state.personToEdit.id
     )
-    if (personToEditIndex > 0) {
+    if (personToEditIndex >= 0) {
       state.people[personToEditIndex] = state.personToEdit
     } else {
       state.people.push(state.personToEdit)
