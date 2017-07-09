@@ -30,6 +30,20 @@ class AssetTypesResource(Resource):
         return EntityType.serialize_list(asset_types)
 
 
+class AllAssetsResource(Resource):
+
+    def __init__(self):
+        Resource.__init__(self)
+
+    @login_required
+    def get(self):
+        """
+        Retrieve all entities that are not shot or sequence.
+        Adds project name and asset type name.
+        """
+        return asset_info.all_assets()
+
+
 class ProjectAssetsResource(Resource):
 
     def __init__(self):

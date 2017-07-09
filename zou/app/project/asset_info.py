@@ -4,6 +4,7 @@ from zou.app.utils import events
 
 from zou.app.models.entity import Entity
 from zou.app.models.entity_type import EntityType
+from zou.app.models.project import Project
 
 from zou.app.project import shot_info
 
@@ -39,6 +40,34 @@ def get_assets(criterions={}):
             episode_type.id
         ])
     ).all()
+
+
+def all_assets(criterions={}):
+    shot_type = shot_info.get_shot_type()
+    sequence_type = shot_info.get_sequence_type()
+    episode_type = shot_info.get_episode_type()
+    query = Entity.query.filter_by(**criterions)
+    query = query.filter(
+        ~Entity.entity_type_id.in_([
+            shot_type.id,
+            sequence_type.id,
+            episode_type.id
+        ])
+    )
+    query = query.join(Project)
+    query = query.join(EntityType)
+    query = query.add_columns(Project.name)
+    query = query.add_columns(EntityType.name)
+
+    data = query.all()
+    assets = []
+    for (asset_model, project_name, asset_type_name) in data:
+        asset = asset_model.serialize()
+        asset["project_name"] = project_name
+        asset["asset_type_name"] = asset_type_name
+        assets.append(asset)
+
+    return assets
 
 
 def get_asset(entity_id):
