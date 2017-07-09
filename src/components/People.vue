@@ -43,7 +43,7 @@
       </div>
 
 
-      <div style="overflow-x: scroll">
+      <div>
         <table class="table-header table">
           <thead>
             <tr>
@@ -328,13 +328,6 @@ export default {
 }
 
 @media screen and (max-width: 768px) {
-  .level-left {
-    display: flex;
-  }
-  .people-list .level-left .level-item {
-    display: inline;
-  }
-
   .level-left + .level-right {
     display: flex;
     justify-content: left;
@@ -342,10 +335,6 @@ export default {
 
   .level-item:not(:last-child) {
      margin-bottom: 0;
-  }
-
-  .button .icon.is-small {
-    margin-right: 0;
   }
 }
 </style>

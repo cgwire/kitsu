@@ -29,7 +29,7 @@
           @click="toggleUserMenu"
         >
           <people-avatar class="avatar" v-bind:person="user"></people-avatar>
-          <people-name v-bind:person="user"></people-name>
+          <people-name class="user-name" :person="user"></people-name>
         </div>
       </div>
     </nav>
@@ -63,7 +63,8 @@ export default {
   mounted () {
     const userNameWidth = this.$refs['user-name'].clientWidth
     const userMenu = this.$refs['user-menu']
-    userMenu.style.width = `${userNameWidth}px`
+
+    if (userNameWidth > 100) userMenu.style.width = `${userNameWidth}px`
   },
   computed: {
     ...mapGetters([
@@ -163,13 +164,23 @@ export default {
   padding-right: 0;
 }
 
-.nav-menu {
-}
-
 @media screen and (max-width: 768px) {
   .nav-right {
     display: flex;
   }
+
+  .user-name {
+    display: none;
+  }
+
+  .avatar {
+    margin-right: 0;
+  }
+
+  .user-menu {
+    right: -160;
+  }
+
 }
 
 </style>

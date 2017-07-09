@@ -24,6 +24,7 @@ export default {
   padding: 0.5em 2em;
   padding-top: 70px;
   background: white;
+  overflow-x: auto;
 }
 
 .table td {

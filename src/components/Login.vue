@@ -1,56 +1,54 @@
 <template>
   <div class="login hero is-fullheight">
-    <div class="">
-      <div class="container has-text-centered">
-        <div class="box has-text-left">
-          <div class="has-text-centered login-header">
-            <img src="../assets/kitsu.png" />
-            <h1 class="title">
-              {{ $t("login.title") }}
-            </h1>
-          </div>
-          <div class="field">
-            <p class="control has-icon">
-              <input
-                class="input is-medium"
-                type="text"
-                :placeholder="$t('login.fields.email')"
-                @input="updateEmail"
-                @keyup.enter="logIn"
-                v-focus >
-              <span class="icon">
-                <i class="fa fa-envelope"></i>
-              </span>
-            </p>
-          </div>
-          <div class="field">
-            <p class="control has-icon">
-              <input
-                class="input is-medium"
-                type="password"
-                :placeholder="$t('login.fields.password')"
-                @input="updatePassword"
-                @keyup.enter="logIn">
-              <span class="icon">
-                <i class="fa fa-lock"></i>
-              </span>
-            </p>
-          </div>
-          <p class="control">
-            <a v-bind:class="{
-              button: true,
-              'main-button': true,
-              'is-fullwidth': true,
-              'is-loading': isLoginLoading
-            }"
-               @click="logIn">
-                {{ $t("login.login") }}
-            </a>
-          </p>
-          <p class="control error" v-show="isLoginError">
-            {{ $t("login.login_failed") }}
+    <div class="container has-text-centered">
+      <div class="box has-text-left">
+        <div class="has-text-centered login-header">
+          <img src="../assets/kitsu.png" />
+          <h1 class="title">
+            {{ $t("login.title") }}
+          </h1>
+        </div>
+        <div class="field">
+          <p class="control has-icon">
+            <input
+              class="input is-medium"
+              type="text"
+              :placeholder="$t('login.fields.email')"
+              @input="updateEmail"
+              @keyup.enter="logIn"
+              v-focus >
+            <span class="icon">
+              <i class="fa fa-envelope"></i>
+            </span>
           </p>
         </div>
+        <div class="field">
+          <p class="control has-icon">
+            <input
+              class="input is-medium"
+              type="password"
+              :placeholder="$t('login.fields.password')"
+              @input="updatePassword"
+              @keyup.enter="logIn">
+            <span class="icon">
+              <i class="fa fa-lock"></i>
+            </span>
+          </p>
+        </div>
+        <p class="control">
+          <a v-bind:class="{
+            button: true,
+            'main-button': true,
+            'is-fullwidth': true,
+            'is-loading': isLoginLoading
+          }"
+             @click="logIn">
+              {{ $t("login.login") }}
+          </a>
+        </p>
+        <p class="control error" v-show="isLoginError">
+          {{ $t("login.login_failed") }}
+        </p>
       </div>
     </div>
   </div>
@@ -103,7 +101,6 @@ export default {
 .container {
   max-width: 400px;
   color: #4a4a4a;
-
 }
 
 .box {
@@ -148,9 +145,6 @@ export default {
   border: 1px solid #00B242;
 }
 
-
-/* active */
-
 .button {
   padding: 24px 24px 24px 12px;
   margin: .3em 0 0em 0;
@@ -167,5 +161,35 @@ export default {
 
 img {
   margin-bottom: 2em;
+}
+
+@media (min-width: 500px) {
+  .container {
+    margin: 0 auto;
+  }
+}
+
+@media (max-width: 500px) {
+  .login .container {
+    flex: 1;
+    width: 100%;
+    max-width: 100%;
+    display: flex;
+  }
+
+  .login .box {
+    flex: 1;
+  }
+
+  .hero {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .box {
+    margin: 0;
+    width: 100%;
+    min-width: 100%;
+  }
 }
 </style>
