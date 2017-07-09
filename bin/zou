@@ -3,7 +3,13 @@ from flask_script import Manager, prompt_pass, prompt
 
 from zou.app import app
 from zou.app.utils import dbhelpers, auth
-from zou.app.project import person_info
+from zou.app.project import (
+    asset_info,
+    person_info,
+    project_info,
+    task_info,
+    shot_info
+)
 
 manager = Manager(app)
 
@@ -51,6 +57,42 @@ def create_admin():
     except auth.EmailNotValidException:
         print("Email is not valid.")
 
+@manager.command
+def init_data():
+    project_info.get_open_status()
+    project_info.get_closed_status()
+    print("Project status initialized.")
+
+    asset_info.get_or_create_type("Characters")
+    asset_info.get_or_create_type("Props")
+    asset_info.get_or_create_type("Environment")
+    asset_info.get_or_create_type("FX")
+    print("Asset Types initialized.")
+
+    shot_info.get_episode_type()
+    shot_info.get_sequence_type()
+    shot_info.get_shot_type()
+    print("Shot types initialized.")
+
+    modeling = task_info.get_or_create_department("Modeling")
+    animation = task_info.get_or_create_department("Animation")
+    fx = task_info.get_or_create_department("FX")
+    compositing = task_info.get_or_create_department("Compositiing")
+    concept = task_info.get_or_create_department("Concept")
+
+    task_info.get_or_create_task_type(concept, "Concept")
+    task_info.get_or_create_task_type(concept, "Storyboard")
+    task_info.get_or_create_task_type(modeling, "Texture")
+    task_info.get_or_create_task_type(modeling, "Modeling")
+    task_info.get_or_create_task_type(compositing, "Layout")
+    task_info.get_or_create_task_type(animation, "Animation")
+    task_info.get_or_create_task_type(animation, "Setup")
+    task_info.get_or_create_task_type(fx, "FX")
+    task_info.get_or_create_task_type(compositing, "Lightning")
+    task_info.get_or_create_task_type(compositing, "Render")
+    task_info.get_or_create_task_type(compositing, "Compositiing")
+
+    print("Task types initialized.")
 
 if __name__ == '__main__':
     manager.run()

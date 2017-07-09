@@ -56,6 +56,10 @@ def save_project_status(project_statuses):
     return result
 
 
+def get_closed_status():
+    get_or_create_status("Closed")
+
+
 def get_or_create(name):
     project = Project.get_by(name=name)
     if project is None:
