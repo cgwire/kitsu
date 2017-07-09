@@ -134,7 +134,8 @@ class BaseModelResource(Resource):
             instance.update(request.json)
             return instance.serialize(), 200
 
-        except StatementError:
+        except StatementError as exception:
+            current_app.logger.error(str(exception))
             return {"error": "Wrong id format"}, 400
 
         except TypeError as exception:
