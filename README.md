@@ -4,8 +4,8 @@
 
 Kitsu is a web tool to improve validation tracking in CG productions. By
 offering a clean UI and a shared database, it allows you to communicate
-efficiently with all the shareholders of the production: graphic designers,
-TDs, supervisors and clients.
+efficiently with all the shareholders of the production: CG artists,
+production managers, TDs, supervisors and clients.
 
 This application is still a work in progress. To be kept up to date of incoming
 releases follow our [blog](https://medium.com/@cgwire).
@@ -42,7 +42,7 @@ A screen to quickly know the state of all your shots.
 
 ### Validation
 
-The history of all discussions about the validation of a task.
+The history of all discussions about task validations.
 
 ![Validation mockup](img/validation.jpg)
 
