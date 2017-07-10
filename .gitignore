@@ -39,7 +39,6 @@ jspm_packages
 # Vue template artifacts to ignore
 .DS_Store
 node_modules/
-dist/
 npm-debug.log
 test/unit/coverage
 test/e2e/reports
