@@ -26,4 +26,4 @@ focus more on the artistic work.
 
 Visit [cg-wire.com](https://cg-wire.com) for more information.
 
-[![CG Wire Logo](img/cgwire.png)](https://cg-wire.com)
+[![CGWire Logo](https://zou.cg-wire.com/cgwire.png)](https://cgwire.com)
