@@ -42,7 +42,7 @@
             'is-fullwidth': true,
             'is-loading': isLoginLoading
           }"
-             @click="logIn">
+            @click="logIn">
               {{ $t("login.login") }}
           </a>
         </p>
@@ -59,11 +59,6 @@ import { mapGetters, mapActions } from 'vuex'
 
 export default {
   name: 'login',
-  data () {
-    return {
-      msg: 'Welcome to Your Vue.js App'
-    }
-  },
   computed: {
     ...mapGetters([
       'isLoginLoading',

@@ -12,7 +12,6 @@
           :delete-route="'/people/delete/' + entry.id"
         >
         </row-actions>
-        <td class="filler"></td>
        </tr>
     </tbody>
   </table>
@@ -80,19 +79,10 @@ export default {
 .skills {
   width: 250px;
 }
-.actions {
-  width: 100px;
-  min-width: 100px;
-}
 
 .data-list {
   flex: 1 1 auto;
   height: 0px;
   overflow-y: auto;
 }
-
-.filler {
-  width: 100%;
-}
-
 </style>
