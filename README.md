@@ -1,30 +1,29 @@
-# kitsu
+[![Kitsu](https://kitsu.cg-wire.com/img/kitsu.png)](https://kitsu.cg-wire.com)
 
-Production Management Software (user interface sources)
+# Kitsu, CG Production Manager
 
-More information soon...
+Kitsu is a web tool to improve validation tracking in CG productions. By
+offering a clean UI and a shared database, it allows you to communicate
+efficiently with all the shareholders of the production: CG artists, 
+production managers, TDs, supervisors and clients
 
-## Build Setup
+# Documentation 
 
-``` bash
-# install dependencies
-npm install
+For further information about features and installation, please refer to the
+documentation website.
 
-# serve with hot reload at localhost:8080
-npm run dev
+![Documentation](https://kitsu.cg-wire.com/)
 
-# build for production with minification
-npm run build
+## About authors
 
-# build for production and view the bundle analyzer report
-npm run build --report
+Kitsu is written by CG Wire, a company based in France. We help small to
+midsize CG studios to manage their production and build pipeline efficiently.
 
-# run unit tests
-npm run unit
+We apply software craftmanship principles as much as possible. We love coding
+and consider that strong quality and good developer experience matter a lot.
+Our extensive experience allows studios to get better at doing software and
+focus more on the artistic work.
 
-# run e2e tests
-npm run e2e
+Visit [cg-wire.com](https://cg-wire.com) for more information.
 
-# run all tests
-npm test
-```
+[![CG Wire Logo](img/cgwire.png)](https://cg-wire.com)
