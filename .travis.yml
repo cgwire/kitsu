@@ -1,0 +1,9 @@
+language: node_js
+node_js:
+    - "6"
+env:
+    global:
+        - NODE_ENV=test
+script:
+    - npm install gitbook -g
+    - gitbook build
