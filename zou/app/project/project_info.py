@@ -7,7 +7,7 @@ from sqlalchemy.exc import StatementError
 
 def open_projects():
     query = ProjectStatus.query
-    query = query.filter(ProjectStatus.name.in_(("Active", "open")))
+    query = query.filter(ProjectStatus.name.in_(("Active", "open", "Open")))
     statuses = query.all()
     status_ids = [x.id for x in statuses]
 
