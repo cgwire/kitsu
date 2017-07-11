@@ -72,7 +72,7 @@ def init_data():
     shot_info.get_episode_type()
     shot_info.get_sequence_type()
     shot_info.get_shot_type()
-    print("Shot types initialized.")
+    print("Shot types initialized.")
 
     modeling = task_info.get_or_create_department("Modeling")
     animation = task_info.get_or_create_department("Animation")
