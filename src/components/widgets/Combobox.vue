@@ -12,7 +12,7 @@
           :value="option.value || option.label"
           :selected="value === option.value"
         >
-          {{ $t(localeKeyPrefix + option.label.toLowerCase()) }}
+          {{ getOptionLabel(option) }}
         </option>
       </select>
     </span>
@@ -46,6 +46,13 @@ export default {
   methods: {
     updateValue () {
       this.$emit('input', this.$refs.select.value)
+    },
+    getOptionLabel (option) {
+      if (this.localeKeyPrefix.length > 0) {
+        return this.$t(this.localeKeyPrefix + option.label.toLowerCase())
+      } else {
+        return option.label
+      }
     }
   }
 }
