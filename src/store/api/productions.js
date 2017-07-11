@@ -9,6 +9,14 @@ export default {
       })
   },
 
+  getOpenProductions (callback) {
+    superagent
+      .get('/api/data/projects/open')
+      .end((err, res) => {
+        callback(err, res.body)
+      })
+  },
+
   getProductionStatus (callback) {
     superagent
       .get('/api/data/project_status')

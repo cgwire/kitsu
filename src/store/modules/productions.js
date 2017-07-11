@@ -4,6 +4,10 @@ import {
   LOAD_PRODUCTIONS_ERROR,
   LOAD_PRODUCTIONS_END,
 
+  LOAD_OPEN_PRODUCTIONS_START,
+  LOAD_OPEN_PRODUCTIONS_ERROR,
+  LOAD_OPEN_PRODUCTIONS_END,
+
   LOAD_PRODUCTION_STATUS_START,
   LOAD_PRODUCTION_STATUS_ERROR,
   LOAD_PRODUCTION_STATUS_END,
@@ -11,8 +15,6 @@ import {
   EDIT_PRODUCTION_START,
   EDIT_PRODUCTION_ERROR,
   EDIT_PRODUCTION_END,
-
-  NEW_PRODUCTION_END,
 
   DELETE_PRODUCTION_START,
   DELETE_PRODUCTION_ERROR,
@@ -33,7 +35,9 @@ const sortProductions = (productions) => {
 
 const state = {
   productions: [],
+  openProductions: [],
   productionStatus: [],
+
   isProductionsLoading: false,
   isProductionsLoadingError: false,
 
@@ -50,6 +54,8 @@ const state = {
 
 const getters = {
   productions: state => state.productions,
+  openProductions: state => state.openProductions,
+  productionStatus: state => state.productionStatus,
 
   isProductionsLoading: state => state.isProductionsLoading,
   isProductionsLoadingError: state => state.isProductionsLoadingError,
@@ -69,6 +75,9 @@ const getters = {
   },
   getProductionStatusOptions: state => state.productionStatus.map(
     (status) => { return { label: status.name, value: status.id } }
+  ),
+  getOpenProductionOptions: state => state.openProductions.map(
+    (production) => { return { label: production.name, value: production.id } }
   )
 }
 
@@ -79,6 +88,15 @@ const actions = {
     productionsApi.getProductionStatus((err, productionStatus) => {
       if (err) commit(LOAD_PRODUCTION_STATUS_ERROR)
       else commit(LOAD_PRODUCTION_STATUS_END, productionStatus)
+      if (callback) callback(err)
+    })
+  },
+
+  loadOpenProductions ({ commit, state }, callback) {
+    commit(LOAD_OPEN_PRODUCTIONS_START)
+    productionsApi.getOpenProductions((err, productions) => {
+      if (err) commit(LOAD_OPEN_PRODUCTIONS_ERROR)
+      else commit(LOAD_OPEN_PRODUCTIONS_END, productions)
       if (callback) callback(err)
     })
   },
@@ -98,7 +116,6 @@ const actions = {
       if (err) {
         commit(EDIT_PRODUCTION_ERROR)
       } else {
-        commit(NEW_PRODUCTION_END, production.id)
         commit(EDIT_PRODUCTION_END, production)
       }
       if (payload.callback) payload.callback(err)
@@ -149,7 +166,17 @@ const mutations = {
     state.productions = sortProductions(state.productions)
   },
 
+  [LOAD_OPEN_PRODUCTIONS_START] (state) {
+    state.openProductions = []
+  },
+  [LOAD_OPEN_PRODUCTIONS_ERROR] (state) {
+  },
+  [LOAD_OPEN_PRODUCTIONS_END] (state, productions) {
+    state.openProductions = productions
+  },
+
   [LOAD_PRODUCTION_STATUS_START] (state) {
+    state.productionStatus = []
   },
   [LOAD_PRODUCTION_STATUS_ERROR] (state) {
   },
