@@ -24,7 +24,9 @@ export const routes = [
           lang.setLocale(to, from)
           store.dispatch('loadProductionStatus', () => {
             store.dispatch('loadAssetTypes', () => {
-              next()
+              store.dispatch('loadOpenProductions', () => {
+                next()
+              })
             })
           })
         }
