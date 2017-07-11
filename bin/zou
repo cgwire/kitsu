@@ -67,7 +67,7 @@ def init_data():
     asset_info.get_or_create_type("Props")
     asset_info.get_or_create_type("Environment")
     asset_info.get_or_create_type("FX")
-    print("Asset Types initialized.")
+    print("Asset types initialized.")
 
     shot_info.get_episode_type()
     shot_info.get_sequence_type()
@@ -91,7 +91,6 @@ def init_data():
     task_info.get_or_create_task_type(compositing, "Lightning")
     task_info.get_or_create_task_type(compositing, "Render")
     task_info.get_or_create_task_type(compositing, "Compositiing")
-
     print("Task types initialized.")
 
 if __name__ == '__main__':
