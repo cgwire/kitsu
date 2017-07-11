@@ -23,10 +23,16 @@
         <combobox
           :label="$t('assets.fields.type')"
           :options="getAssetTypeOptions"
-          localeKeyPrefix="assets.type."
           v-model="form.asset_type_id"
         >
         </combobox>
+        <combobox
+          :label="$t('assets.fields.production')"
+          :options="getOpenProductionOptions"
+          v-model="form.project_id"
+        >
+        </combobox>
+
       </form>
       <p class="has-text-right">
         <a
@@ -77,6 +83,7 @@ export default {
       if (this.assetToEdit) {
         this.form.name = this.assetToEdit.name
         this.form.asset_type_id = this.assetToEdit.asset_type_id
+        this.form.production_id = this.assetToEdit.production_id
       }
     }
   },
@@ -85,15 +92,17 @@ export default {
     if (this.assetToEdit) {
       return {
         form: {
-          name: '',
-          asset_type_id: this.assetToEdit.asset_type_id
+          name: this.assetToEdit.name,
+          asset_type_id: this.assetToEdit.asset_type_id,
+          production_id: this.assetToEdit.production_id
         }
       }
     } else {
       return {
         form: {
           name: '',
-          asset_type_id: ''
+          asset_type_id: '',
+          production_id: ''
         }
       }
     }
@@ -102,7 +111,10 @@ export default {
   computed: {
     ...mapGetters([
       'assets',
-      'getAssetTypeOptions'
+      'assetTypes',
+      'openProductions',
+      'getAssetTypeOptions',
+      'getOpenProductionOptions'
     ])
   },
 
@@ -110,7 +122,17 @@ export default {
     ...mapActions([
     ]),
     confirmClicked () {
+      console.log(this.form)
       this.$emit('confirm', this.form)
+    }
+  },
+
+  mounted () {
+    if (this.assetTypes.length > 0) {
+      this.form.asset_type_id = this.assetTypes[0].id
+    }
+    if (this.openProductions.length > 0) {
+      this.form.production_id = this.openProductions[0].id
     }
   }
 }

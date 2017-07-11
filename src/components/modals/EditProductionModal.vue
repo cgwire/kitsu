@@ -102,6 +102,7 @@ export default {
   computed: {
     ...mapGetters([
       'productions',
+      'productionStatus',
       'getProductionStatusOptions'
     ])
   },
@@ -111,6 +112,12 @@ export default {
     ]),
     confirmClicked () {
       this.$emit('confirm', this.form)
+    }
+  },
+
+  mounted () {
+    if (this.productionStatus.length > 0) {
+      this.form.project_status_id = this.productionStatus[0].id
     }
   }
 }

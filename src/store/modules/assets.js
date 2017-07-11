@@ -59,10 +59,9 @@ const getters = {
   deleteAsset: state => state.deleteAsset,
 
   getAsset: (state, getters) => (id) => {
-    return state.assets.find(
-      (asset) => asset.id === id
-    )
+    return state.assets.find((asset) => asset.id === id)
   },
+
   getAssetTypeOptions: state => state.assetType.map(
     (type) => { return { label: type.name, value: type.id } }
   )

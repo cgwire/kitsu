@@ -20,7 +20,8 @@ export default {
   newAsset (asset, callback) {
     const data = {
       name: asset.name,
-      asset_type_id: asset.asset_type_id
+      entity_type_id: asset.asset_type_id,
+      project_id: asset.production_id
     }
     superagent
       .post(`/api/data/entities/`)
@@ -33,7 +34,7 @@ export default {
   updateAsset (asset, callback) {
     const data = {
       name: asset.name,
-      asset_type_id: asset.asset_type_id
+      entity_type_id: asset.asset_type_id
     }
     superagent
       .put(`/api/data/entities/${asset.id}`)
