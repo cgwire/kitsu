@@ -56,6 +56,10 @@ def save_project_status(project_statuses):
     return result
 
 
+def get_open_status():
+    get_or_create_status("Open")
+
+
 def get_closed_status():
     get_or_create_status("Closed")
 
