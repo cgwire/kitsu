@@ -3,18 +3,25 @@
   <table class="table">
     <thead>
       <tr>
-        <th class="name">{{ $t('assets.fields.name') }}</th>
+        <th class="project">{{ $t('assets.fields.production') }}</th>
         <th class="type">{{ $t('assets.fields.type') }}</th>
+        <th class="name">{{ $t('assets.fields.name') }}</th>
         <th class="actions"></th>
       </tr>
     </thead>
     <tbody>
       <tr v-for="entry in entries">
+        <production-name-cell
+          class="project"
+          :only-avatar="true"
+          :entry="{name: entry.project_name}"
+        >
+        </production-name-cell>
+        <td class="type">
+          {{ entry.asset_type_name }}
+        </td>
         <td class="name">
           {{ entry.name }}
-        </td>
-        <td class="type">
-          {{ entry.task_type_name }}
         </td>
         <row-actions
           :entry-id="entry.id"
@@ -42,6 +49,7 @@
 
 <script>
 import { mapGetters, mapActions } from 'vuex'
+import ProductionNameCell from '../cells/ProductionNameCell'
 import RowActions from '../widgets/RowActions'
 
 export default {
@@ -55,6 +63,7 @@ export default {
     return {}
   },
   components: {
+    ProductionNameCell,
     RowActions
   },
   computed: {
@@ -69,11 +78,15 @@ export default {
 </script>
 
 <style scoped>
+.project {
+  width: 50px;
+}
+
 .name {
-  width: 300px;
+  width: 200px;
 }
 
 .type {
-  width: 100px;
+  width: 150px;
 }
 </style>

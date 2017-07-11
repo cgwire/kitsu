@@ -1,5 +1,5 @@
 <template>
-<td class="name">
+<td class="production-name">
   <div class="level">
     <div class="level-left">
       <!--span class="avatar level-item has-text-centered">
@@ -14,7 +14,7 @@
       }">
         {{ generateAvatar(entry) }}
       </span>
-      <span class="level-item" v-if="!short">
+      <span class="level-item" v-if="!onlyAvatar">
         {{ entry.name }}
       </span>
     </div>
@@ -37,7 +37,7 @@ export default {
       default: 40,
       type: Number
     },
-    short: {
+    onlyAvatar: {
       default: false,
       type: Boolean
     }
