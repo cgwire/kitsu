@@ -9,6 +9,7 @@
       :type="type"
       :value="value"
       @input="updateValue()"
+      @keyup.enter="emitEnter()"
     />
   </p>
 </div>
@@ -44,6 +45,9 @@ export default {
   methods: {
     ...mapActions([
     ]),
+    emitEnter () {
+      this.$emit('enter', this.$refs.input.value)
+    },
     updateValue () {
       this.$emit('input', this.$refs.input.value)
     }
