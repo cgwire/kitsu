@@ -51,8 +51,8 @@ export const routes = [
       { path: '/tasks/new', component: TaskTypes },
 
       { path: '/assets', component: Assets },
-      { path: '/assets/delete/:asset_type_id', component: Assets },
-      { path: '/assets/edit/:asset_type_id', component: Assets },
+      { path: '/assets/delete/:asset_id', component: Assets },
+      { path: '/assets/edit/:asset_id', component: Assets },
       { path: '/assets/new', component: Assets },
 
       { path: '/asset-types', component: AssetTypes },
@@ -69,12 +69,12 @@ export const routes = [
     ]
   },
   {
-    path: '/login',
-    component: Login
-  },
-  {
     path: '/server-down',
     component: ServerDown
+  },
+  {
+    path: '/login',
+    component: Login
   },
   {
     path: '/*',
