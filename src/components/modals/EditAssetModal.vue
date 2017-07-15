@@ -6,42 +6,57 @@
   <div class="modal-background"></div>
   <div class="modal-content">
     <div class="box">
+
       <h1 class="title" v-if="assetToEdit">
         {{ $t("assets.edit_title") }} {{ assetToEdit.name }}
       </h1>
       <h1 class="title" v-else>
         {{ $t("assets.new_asset") }}
       </h1>
-      <form>
-        <text-field
-          ref="nameField"
-          :label="$t('assets.fields.name')"
-          v-model="form.name"
-          v-focus
-        >
-        </text-field>
-        <combobox
-          :label="$t('assets.fields.type')"
-          :options="getAssetTypeOptions"
-          v-model="form.asset_type_id"
-        >
-        </combobox>
+
+      <form v-on:submit.prevent>
         <combobox
           :label="$t('assets.fields.production')"
           :options="getOpenProductionOptions"
           v-model="form.project_id"
         >
         </combobox>
-
+        <combobox
+          :label="$t('assets.fields.type')"
+          :options="getAssetTypeOptions"
+          v-model="form.asset_type_id"
+        >
+        </combobox>
+        <text-field
+          ref="nameField"
+          :label="$t('assets.fields.name')"
+          v-model="form.name"
+          @enter="confirmAndStayClicked"
+          v-focus
+        >
+        </text-field>
       </form>
+
       <p class="has-text-right">
+        <a
+          :class="{
+            button: true,
+            'is-primary': true,
+            'is-loading': isLoadingStay
+          }"
+          @click="confirmAndStayClicked"
+          v-if="!assetToEdit || !assetToEdit.id"
+        >
+          {{ $t("main.confirmation_and_stay") }}
+        </a>
         <a
           :class="{
             button: true,
             'is-primary': true,
             'is-loading': isLoading
           }"
-          @click="confirmClicked">
+          @click="confirmClicked"
+        >
           {{ $t("main.confirmation") }}
         </a>
         <router-link
@@ -49,6 +64,12 @@
           class="button is-link">
           {{ $t("main.cancel") }}
         </router-link>
+        <p class="error has-text-right info-message" v-if="isError">
+          {{ $t("assets.edit_fail") }}
+        </p>
+        <p class="success has-text-right info-message" v-if="isSuccess">
+          {{ $t("assets.new_success", {name: assetCreated}) }}
+        </p>
       </p>
     </div>
   </div>
@@ -72,24 +93,27 @@ export default {
     'text',
     'active',
     'cancelRoute',
-    'isLoading',
     'isError',
-    'errorText',
-    'assetToEdit'
+    'isLoading',
+    'isLoadingStay',
+    'isSuccess',
+    'assetCreated',
+    'assetToEdit',
+    'errorText'
   ],
 
   watch: {
     assetToEdit () {
       if (this.assetToEdit) {
         this.form.name = this.assetToEdit.name
-        this.form.asset_type_id = this.assetToEdit.asset_type_id
-        this.form.production_id = this.assetToEdit.production_id
+        this.form.asset_type_id = this.assetToEdit.entity_type_id
+        this.form.production_id = this.assetToEdit.project_id
       }
     }
   },
 
   data () {
-    if (this.assetToEdit) {
+    if (this.assetToEdit && this.assetToEdit.id) {
       return {
         form: {
           name: this.assetToEdit.name,
@@ -121,18 +145,22 @@ export default {
   methods: {
     ...mapActions([
     ]),
+    confirmAndStayClicked () {
+      this.$emit('confirmAndStay', this.form)
+    },
     confirmClicked () {
-      console.log(this.form)
       this.$emit('confirm', this.form)
     }
   },
 
   mounted () {
-    if (this.assetTypes.length > 0) {
-      this.form.asset_type_id = this.assetTypes[0].id
-    }
-    if (this.openProductions.length > 0) {
-      this.form.production_id = this.openProductions[0].id
+    if (!this.assetToEdit || !this.assetToEdit.id) {
+      if (this.assetTypes.length > 0) {
+        this.form.asset_type_id = this.assetTypes[0].id
+      }
+      if (this.openProductions.length > 0) {
+        this.form.production_id = this.openProductions[0].id
+      }
     }
   }
 }
@@ -150,5 +178,8 @@ export default {
   border-bottom: 2px solid #DDD;
   padding-bottom: 0.5em;
   margin-bottom: 1.2em;
+}
+.info-message {
+  margin-top: 1em;
 }
 </style>

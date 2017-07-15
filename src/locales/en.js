@@ -52,7 +52,8 @@ export default {
     profile: 'Profile',
     logout: 'Logout',
     cancel: 'Cancel',
-    confirmation: 'Confirm'
+    confirmation: 'Confirm',
+    confirmation_and_stay: 'Confirm and stay'
   },
 
   login: {
@@ -108,10 +109,12 @@ export default {
   },
 
   assets: {
-    title: 'Asset',
+    title: 'Assets',
     edit_title: 'Edit asset',
     number: 'asset | asset',
     new_asset: 'Add an asset',
+    edit_fail: 'Creation or edition failed, an error occured.',
+    new_success: 'Asset {name} successfully created.',
     fields: {
       name: 'Name',
       type: 'Type',

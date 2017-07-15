@@ -1,6 +1,6 @@
 <template>
   <div class="assets page">
-    <div class="assets-list">
+   <div class="assets-list">
       <h1 class="title">{{ $t('assets.title') }}</h1>
 
       <div class="level">
@@ -27,18 +27,22 @@
 
     <edit-asset-modal
       :active="modals.isNewDisplayed"
-      :is-loading="editAsset.isLoading"
-      :is-error="editAsset.isError"
+      :is-loading="loading.edit"
+      :is-loading-stay="loading.stay"
+      :is-error="editAsset.isCreateError"
+      :is-success="editAsset.isSuccess"
+      :asset-created="editAsset.assetCreated"
       :cancel-route="'/assets'"
       :asset-to-edit="assetToEdit"
       @confirm="confirmEditAsset"
+      @confirmAndStay="confirmNewAssetStay"
     >
     </edit-asset-modal>
 
     <delete-modal
       :active="modals.isDeleteDisplayed"
       :is-loading="deleteAsset.isLoading"
-      :is-error="deleteAsset.isError"
+      :is-error="deleteAsset.isCreateError"
       :cancel-route="'/assets'"
       :text="deleteText()"
       :error-text="$t('assets.delete_error')"
@@ -74,6 +78,10 @@ export default {
         isNewDisplayed: false,
         isDeleteDisplayed: false
       },
+      loading: {
+        edit: false,
+        stay: false
+      },
       assetToDelete: null,
       assetToEdit: null,
       choices: [],
@@ -92,6 +100,8 @@ export default {
   computed: {
     ...mapGetters([
       'assets',
+      'assetTypes',
+      'openProductions',
       'isAssetsLoading',
       'isAssetsLoadingError',
       'editAsset',
@@ -111,9 +121,33 @@ export default {
       'loadAssets'
     ]),
 
+    confirmNewAssetStay (form) {
+      let action = 'newAsset'
+      this.loading.stay = true
+      this.editAsset.isSuccess = false
+      this.editAsset.isError = false
+
+      this.$store.dispatch(action, {
+        data: form,
+        callback: (err) => {
+          this.loading.stay = false
+          if (!err) {
+            this.resetEditModal()
+            this.editAsset.assetCreated = form.name
+            this.editAsset.isSuccess = true
+          } else {
+            this.loading.edit = false
+            this.editAsset.isCreateError = true
+          }
+        }
+      })
+    },
+
     confirmEditAsset (form) {
       let action = 'newAsset'
-      if (this.assetToEdit) {
+      this.loading.edit = true
+      this.editAsset.isCreateError = false
+      if (this.assetToEdit && this.assetToEdit.id) {
         action = 'editAsset'
         form.id = this.assetToEdit.id
       }
@@ -122,8 +156,12 @@ export default {
         data: form,
         callback: (err) => {
           if (!err) {
+            this.loading.edit = false
             this.modals.isNewDisplayed = false
             this.$router.push('/assets')
+          } else {
+            this.loading.edit = false
+            this.editAsset.isCreateError = true
           }
         }
       })
@@ -138,6 +176,17 @@ export default {
       })
     },
 
+    resetEditModal () {
+      const form = { name: '' }
+      if (this.assetTypes.length > 0) {
+        form.asset_type_id = this.assetTypes[0].id
+      }
+      if (this.openProductions.length > 0) {
+        form.production_id = this.openProductions[0].id
+      }
+      this.assetToEdit = form
+    },
+
     deleteText () {
       const asset = this.assetToDelete
       if (asset) {
@@ -150,8 +199,11 @@ export default {
     handleModalsDisplay () {
       const path = this.$store.state.route.path
       const assetId = this.$store.state.route.params.asset_id
+      this.editAsset.isSuccess = false
+      this.editAsset.isError = false
 
       if (path.indexOf('new') > 0) {
+        this.resetEditModal()
         this.modals.isNewDisplayed = true
       } else if (path.indexOf('edit') > 0) {
         this.assetToEdit = this.getAsset(assetId)
