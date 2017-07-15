@@ -8,11 +8,11 @@ import {
   LOAD_ASSET_TYPES_ERROR,
   LOAD_ASSET_TYPES_END,
 
+  LOAD_OPEN_PRODUCTIONS_END,
+
   EDIT_ASSET_START,
   EDIT_ASSET_ERROR,
   EDIT_ASSET_END,
-
-  NEW_ASSET_END,
 
   DELETE_ASSET_START,
   DELETE_ASSET_ERROR,
@@ -35,6 +35,8 @@ const sortAssets = (assets) => {
 
 const state = {
   assets: [],
+  assetTypes: [],
+  openProductions: [],
   isAssetsLoading: false,
   isAssetsLoadingError: false,
 
@@ -62,7 +64,11 @@ const getters = {
     return state.assets.find((asset) => asset.id === id)
   },
 
-  getAssetTypeOptions: state => state.assetType.map(
+  getOpenProduction: (state, getters) => (id) => {
+    return state.openProductions.find((project) => project.id === id)
+  },
+
+  getAssetTypeOptions: state => state.assetTypes.map(
     (type) => { return { label: type.name, value: type.id } }
   )
 }
@@ -84,7 +90,6 @@ const actions = {
       if (err) {
         commit(EDIT_ASSET_ERROR)
       } else {
-        commit(NEW_ASSET_END, asset.id)
         commit(EDIT_ASSET_END, asset)
       }
       if (payload.callback) payload.callback(err)
@@ -139,8 +144,11 @@ const mutations = {
   },
   [LOAD_ASSET_TYPES_ERROR] (state) {
   },
-  [LOAD_ASSET_TYPES_END] (state, assetType) {
-    state.assetType = assetType
+  [LOAD_ASSET_TYPES_END] (state, assetTypes) {
+    state.assetTypes = assetTypes
+  },
+  [LOAD_OPEN_PRODUCTIONS_END] (state, projects) {
+    state.openProductions = projects
   },
 
   [EDIT_ASSET_START] (state, data) {
@@ -155,10 +163,15 @@ const mutations = {
 
   [EDIT_ASSET_END] (state, newAsset) {
     const asset = getters.getAsset(state)(newAsset.id)
-    const assetType = getters.getAssetType(state)(
-      newAsset.project_type_id
+    const assetType = state.assetTypes.find(
+      (assetType) => assetType.id === newAsset.entity_type_id
     )
-    newAsset.project_type_name = assetType.name
+    newAsset.asset_type_name = assetType.name
+
+    const production = state.openProductions.find(
+      (production) => production.id === newAsset.project_id
+    )
+    newAsset.project_name = production.name
 
     if (asset) {
       Object.assign(asset, newAsset)
@@ -198,7 +211,7 @@ const mutations = {
 
   [RESET_ALL] (state) {
     state.assets = []
-    state.assetType = []
+    state.assetTypes = []
     state.isAssetsLoading = false
     state.isAssetsLoadingError = false
 
