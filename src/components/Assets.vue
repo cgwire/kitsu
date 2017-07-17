@@ -15,14 +15,13 @@
               path="/assets/import"
             >
             </button-link>
-            <a class="button level-item" href="/api/export/csv/assets.csv">
-              <span class="icon is-small">
-                <i class="fa fa-download"></i>
-              </span>
-              <span class="text is-hidden-touch">
-                {{ $t("main.csv.export_file") }}
-              </span>
-            </a>
+            <button-href-link
+              class="level-item"
+              :text="$t('main.csv.export_file')"
+              icon="fa-download"
+              path="/api/export/csv/assets.csv"
+            >
+            </button-href-link>
             <button-link
               class="level-item"
               :text="$t('assets.new_asset')"
