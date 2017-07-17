@@ -8,40 +8,30 @@
 
         <div class="level-right">
           <div class="level-item">
-            <router-link
-              class="button level-item"
-              to="/people/import"
+           <button-link
+              class="level-item"
+              :text="$t('main.csv.import_file')"
+              icon="fa-upload"
+              path="/people/import"
             >
-              <span class="icon is-small">
-                <i class="fa fa-upload"></i>
-              </span>
-              <span class="text is-hidden-touch">
-                {{ $t("people.csv.import_file") }}
-              </span>
-            </router-link>
-            <a class="button level-item" href="/api/export/csv/persons.csv">
-              <span class="icon is-small">
-                <i class="fa fa-download"></i>
-              </span>
-              <span class="text is-hidden-touch">
-                {{ $t("people.csv.export_file") }}
-              </span>
-            </a>
-            <router-link
-              class="button level-item"
-              to="/people/new"
+            </button-link>
+            <button-href-link
+              class="level-item"
+              :text="$t('main.csv.export_file')"
+              icon="fa-download"
+              path="/api/export/csv/persons.csv"
             >
-              <span class="icon is-small">
-                <i class="fa fa-plus"></i>
-              </span>
-              <span class="text is-hidden-touch">
-                {{ $t("people.new_person") }}
-              </span>
-            </router-link>
+            </button-href-link>
+            <button-link
+              class="level-item"
+              :text="$t('people.new_person')"
+              icon="fa-plus"
+              path="/people/new"
+            >
+            </button-link>
           </div>
         </div>
       </div>
-
 
       <div>
         <table class="table-header table">
@@ -111,7 +101,9 @@ import PeopleList from './lists/PeopleList'
 import DeleteModal from './widgets/DeleteModal'
 import EditPersonModal from './modals/EditPersonModal'
 import ImportModal from './modals/ImportModal'
-import Filters from './widgets/Filters.vue'
+import Filters from './widgets/Filters'
+import ButtonLink from './widgets/ButtonLink'
+import ButtonHrefLink from './widgets/ButtonHrefLink'
 
 export default {
   name: 'menu',
@@ -120,6 +112,8 @@ export default {
     DeleteModal,
     EditPersonModal,
     ImportModal,
+    ButtonLink,
+    ButtonHrefLink,
     Filters
   },
 
