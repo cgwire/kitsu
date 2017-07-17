@@ -11,6 +11,7 @@ import TaskTypes from './components/TaskTypes'
 import Assets from './components/Assets'
 import AssetTypes from './components/AssetTypes'
 import ServerDown from './components/ServerDown'
+import NotFound from './components/NotFound'
 
 export const routes = [
   {
@@ -78,6 +79,6 @@ export const routes = [
   },
   {
     path: '/*',
-    component: ServerDown
+    component: NotFound
   }
 ]
