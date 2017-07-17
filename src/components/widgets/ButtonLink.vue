@@ -3,6 +3,9 @@
   class="button"
   :to="path"
 >
+  <span class="icon is-small" v-if="icon.length > 0">
+    <i :class="'fa ' + icon"></i>
+  </span>
   {{ text }}
 </router-link>
 </template>
@@ -16,6 +19,10 @@ export default {
       type: String
     },
     path: {
+      default: '',
+      type: String
+    },
+    icon: {
       default: '',
       type: String
     }
