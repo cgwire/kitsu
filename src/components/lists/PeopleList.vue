@@ -1,6 +1,21 @@
 <template>
 <div class="data-list">
   <table class="table">
+    <thead>
+      <tr>
+        <th class="name">
+        {{ $t("people.list.name") }}
+        </th>
+        <th class="email">
+        {{ $t("people.list.email") }}
+        </th>
+        <th class="phone">
+        {{ $t("people.list.phone") }}
+        </th>
+        <th class="actions"></th>
+      </tr>
+    </thead>
+
     <tbody>
       <tr v-for="entry in entries">
         <people-name-cell class="name" v-bind:entry="entry"></people-name-cell>

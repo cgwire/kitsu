@@ -8,7 +8,7 @@
 
         <div class="level-right">
           <div class="level-item">
-           <button-link
+            <button-link
               class="level-item"
               :text="$t('main.csv.import_file')"
               icon="fa-upload"
@@ -34,24 +34,6 @@
       </div>
 
       <div>
-        <table class="table-header table">
-          <thead>
-            <tr>
-              <th class="name">
-              {{ $t("people.list.name") }}
-              </th>
-              <th class="email">
-              {{ $t("people.list.email") }}
-              </th>
-              <th class="phone">
-              {{ $t("people.list.phone") }}
-              </th>
-              <th class="actions"></th>
-              <th class="filler"></th>
-            </tr>
-          </thead>
-        </table>
-
         <people-list
           :entries="people"
           :is-loading="isPeopleLoading"
