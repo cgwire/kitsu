@@ -6,7 +6,9 @@
   <span class="icon is-small" v-if="icon.length > 0">
     <i :class="'fa ' + icon"></i>
   </span>
-  {{ text }}
+  <span class="text is-hidden-touch">
+    {{ text }}
+  </span>
 </router-link>
 </template>
 
