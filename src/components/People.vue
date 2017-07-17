@@ -294,10 +294,6 @@ export default {
   flex-direction: column;
 }
 
-.nb-persons {
-  font-style: italic;
-}
-
 .name {
   width: 230px;
   min-width: 230px;
@@ -319,22 +315,5 @@ export default {
 }
 .table-header {
   margin-bottom: 0px;
-}
-
-@media screen and (max-width: 1000px) {
-  .button .icon.is-small {
-    margin-right: 0;
-  }
-}
-
-@media screen and (max-width: 768px) {
-  .level-left + .level-right {
-    display: flex;
-    justify-content: left;
-  }
-
-  .level-item:not(:last-child) {
-     margin-bottom: 0;
-  }
 }
 </style>

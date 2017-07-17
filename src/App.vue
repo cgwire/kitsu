@@ -107,4 +107,29 @@ input.input:focus {
 .footer-info {
   font-style: italic;
 }
+
+.button .icon.is-small:first-child:last-child {
+  margin-right: 0.5em;
+}
+
+.actions .button .icon.is-small:first-child:last-child {
+  margin-right: 0em;
+}
+
+@media screen and (max-width: 1000px) {
+  .button .icon.is-small {
+    margin-right: 0;
+  }
+}
+
+@media screen and (max-width: 768px) {
+  .level-left + .level-right {
+    display: flex;
+    justify-content: left;
+  }
+
+  .level-item:not(:last-child) {
+     margin-bottom: 0;
+  }
+}
 </style>
