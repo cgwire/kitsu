@@ -60,7 +60,6 @@ export default {
   },
 
   changePassword (form, callback) {
-    console.log('hello')
     const data = {
       old_password: form.oldPassword,
       password: form.password,
