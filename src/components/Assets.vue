@@ -88,6 +88,7 @@ import DeleteModal from './widgets/DeleteModal'
 import ImportModal from './modals/ImportModal'
 import Filters from './widgets/Filters'
 import ButtonLink from './widgets/ButtonLink'
+import ButtonHrefLink from './widgets/ButtonHrefLink'
 
 export default {
   name: 'menu',
@@ -98,7 +99,8 @@ export default {
     ImportModal,
     EditAssetModal,
     Filters,
-    ButtonLink
+    ButtonLink,
+    ButtonHrefLink
   },
 
   data () {
