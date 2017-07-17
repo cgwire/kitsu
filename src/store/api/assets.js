@@ -51,5 +51,14 @@ export default {
       .end((err, res) => {
         callback(err, res.body)
       })
+  },
+
+  postCsv (formData, callback) {
+    superagent
+      .post('/api/data/import/csv/assets')
+      .send(formData)
+      .end((err, res) => {
+        callback(err, res.body)
+      })
   }
 }

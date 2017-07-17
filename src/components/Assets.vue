@@ -10,7 +10,23 @@
           <div class="level-item">
             <button-link
               class="level-item"
+              :text="$t('main.csv.import_file')"
+              icon="fa-upload"
+              path="/assets/import"
+            >
+            </button-link>
+            <a class="button level-item" href="/api/export/csv/assets.csv">
+              <span class="icon is-small">
+                <i class="fa fa-download"></i>
+              </span>
+              <span class="text is-hidden-touch">
+                {{ $t("main.csv.export_file") }}
+              </span>
+            </a>
+            <button-link
+              class="level-item"
               :text="$t('assets.new_asset')"
+              icon="fa-plus"
               path="/assets/new"
             >
             </button-link>
@@ -50,6 +66,18 @@
     >
     </delete-modal>
 
+    <import-modal
+      :active="modals.isImportDisplayed"
+      :is-loading="loading.importing"
+      :is-error="errors.importing"
+      :cancel-route="'/assets'"
+      :form-data="assetsCsvFormData"
+      :columns="columns"
+      @fileselected="selectFile"
+      @confirm="uploadImportFile"
+    >
+    </import-modal>
+
   </div>
 </template>
 
@@ -58,8 +86,9 @@ import { mapGetters, mapActions } from 'vuex'
 import AssetList from './lists/AssetList.vue'
 import EditAssetModal from './modals/EditAssetModal'
 import DeleteModal from './widgets/DeleteModal'
-import Filters from './widgets/Filters.vue'
-import ButtonLink from './widgets/ButtonLink.vue'
+import ImportModal from './modals/ImportModal'
+import Filters from './widgets/Filters'
+import ButtonLink from './widgets/ButtonLink'
 
 export default {
   name: 'menu',
@@ -67,6 +96,7 @@ export default {
   components: {
     AssetList,
     DeleteModal,
+    ImportModal,
     EditAssetModal,
     Filters,
     ButtonLink
@@ -76,11 +106,16 @@ export default {
     return {
       modals: {
         isNewDisplayed: false,
-        isDeleteDisplayed: false
+        isDeleteDisplayed: false,
+        isImportDisplayed: false
       },
       loading: {
+        importing: false,
         edit: false,
         stay: false
+      },
+      errors: {
+        importing: false
       },
       assetToDelete: null,
       assetToEdit: null,
@@ -91,6 +126,11 @@ export default {
           name: 'open'
         }
       }],
+      columns: [
+        'Project',
+        'Category',
+        'Name'
+      ],
       assetFilterTypes: [
         'Type'
       ]
@@ -100,6 +140,7 @@ export default {
   computed: {
     ...mapGetters([
       'assets',
+      'assetsCsvFormData',
       'assetTypes',
       'openProductions',
       'isAssetsLoading',
@@ -211,10 +252,33 @@ export default {
       } else if (path.indexOf('delete') > 0) {
         this.assetToDelete = this.getAsset(assetId)
         this.modals.isDeleteDisplayed = true
+      } else if (path.indexOf('import') > 0) {
+        this.modals.isImportDisplayed = true
       } else {
         this.modals.isNewDisplayed = false
         this.modals.isDeleteDisplayed = false
+        this.modals.isImportDisplayed = false
       }
+    },
+
+    selectFile (formData) {
+      this.$store.commit('ASSET_CSV_FILE_SELECTED', formData)
+    },
+
+    uploadImportFile () {
+      this.loading.importing = true
+      this.errors.importing = false
+
+      this.$store.dispatch('uploadAssetFile', (err) => {
+        if (!err) {
+          this.loading.importing = false
+          this.modals.isImportDisplayed = false
+          this.$store.dispatch('loadAssets')
+        } else {
+          this.loading.importing = false
+          this.errors.importing = true
+        }
+      })
     }
   },
 

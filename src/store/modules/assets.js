@@ -4,6 +4,10 @@ import {
   LOAD_ASSETS_ERROR,
   LOAD_ASSETS_END,
 
+  ASSET_CSV_FILE_SELECTED,
+  IMPORT_ASSETS_START,
+  IMPORT_ASSETS_END,
+
   LOAD_ASSET_TYPES_START,
   LOAD_ASSET_TYPES_ERROR,
   LOAD_ASSET_TYPES_END,
@@ -39,6 +43,7 @@ const state = {
   openProductions: [],
   isAssetsLoading: false,
   isAssetsLoadingError: false,
+  assetsCsvFormData: null,
 
   editAsset: {
     isLoading: false,
@@ -59,6 +64,8 @@ const getters = {
 
   editAsset: state => state.editAsset,
   deleteAsset: state => state.deleteAsset,
+
+  assetsCsvFormData: state => state.assetsCsvFormData,
 
   getAsset: (state, getters) => (id) => {
     return state.assets.find((asset) => asset.id === id)
@@ -119,7 +126,16 @@ const actions = {
       }
       if (payload.callback) payload.callback(err)
     })
+  },
+
+  uploadAssetFile ({ commit, state }, callback) {
+    commit(IMPORT_ASSETS_START)
+    assetsApi.postCsv(state.assetsCsvFormData, (err) => {
+      commit(IMPORT_ASSETS_END)
+      if (callback) callback(err)
+    })
   }
+
 }
 
 const mutations = {
@@ -140,10 +156,16 @@ const mutations = {
     state.assets = sortAssets(state.assets)
   },
 
-  [LOAD_ASSET_TYPES_START] (state) {
+  [ASSET_CSV_FILE_SELECTED] (state, formData) {
+    state.assetsCsvFormData = formData
   },
-  [LOAD_ASSET_TYPES_ERROR] (state) {
+  [IMPORT_ASSETS_START] (state) {},
+  [IMPORT_ASSETS_END] (state) {
+    state.assetsCsvFormData = null
   },
+
+  [LOAD_ASSET_TYPES_START] (state) {},
+  [LOAD_ASSET_TYPES_ERROR] (state) {},
   [LOAD_ASSET_TYPES_END] (state, assetTypes) {
     state.assetTypes = assetTypes
   },
@@ -214,6 +236,7 @@ const mutations = {
     state.assetTypes = []
     state.isAssetsLoading = false
     state.isAssetsLoadingError = false
+    state.assetsCsvFormData = null
 
     state.editAsset = {
       isLoading: false,

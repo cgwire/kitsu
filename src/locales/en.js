@@ -9,7 +9,7 @@ export default {
     csv: {
       import_file: 'Import a .csv file',
       export_file: 'Download as a .csv file',
-      import_title: 'Import employees from a CSV file',
+      import_title: 'Import data from a CSV file',
       required_fields: 'Your CSV file requires the following columns',
       select_file: 'Please select a file from one of your folder:',
       error_upload: 'An error occured while uploading your CSV file.'
@@ -53,7 +53,15 @@ export default {
     logout: 'Logout',
     cancel: 'Cancel',
     confirmation: 'Confirm',
-    confirmation_and_stay: 'Confirm and stay'
+    confirmation_and_stay: 'Confirm and stay',
+    csv: {
+      import_file: 'Import a .csv file',
+      export_file: 'Download as a .csv file',
+      import_title: 'Import data from a CSV file',
+      required_fields: 'Your CSV file requires the following columns',
+      select_file: 'Please select a file from one of your folder:',
+      error_upload: 'An error occured while uploading your CSV file.'
+    }
   },
 
   login: {

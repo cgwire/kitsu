@@ -55,6 +55,7 @@ export const routes = [
       { path: '/assets/delete/:asset_id', component: Assets },
       { path: '/assets/edit/:asset_id', component: Assets },
       { path: '/assets/new', component: Assets },
+      { path: '/assets/import', component: Assets },
 
       { path: '/asset-types', component: AssetTypes },
       { path: '/asset-types/delete/:asset_type_id', component: AssetTypes },
