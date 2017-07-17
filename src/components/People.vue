@@ -70,16 +70,17 @@
       </div>
     </div>
 
-    <import-person-modal
+    <import-modal
       :active="isImportPeopleModalShown"
       :is-loading="isImportPeopleLoading"
       :is-error="isImportPeopleLoadingError"
       :cancel-route="'/people'"
       :form-data="personCsvFormData"
+      :columns="csvColumns"
       @fileselected="selectFile"
       @confirm="uploadImportFile"
     >
-    </import-person-modal>
+    </import-modal>
 
     <edit-person-modal
       :active="isEditModalShown"
@@ -109,7 +110,7 @@ import { mapGetters, mapActions } from 'vuex'
 import PeopleList from './lists/PeopleList'
 import DeleteModal from './widgets/DeleteModal'
 import EditPersonModal from './modals/EditPersonModal'
-import ImportPersonModal from './modals/ImportPersonModal'
+import ImportModal from './modals/ImportModal'
 import Filters from './widgets/Filters.vue'
 
 export default {
@@ -118,7 +119,7 @@ export default {
     PeopleList,
     DeleteModal,
     EditPersonModal,
-    ImportPersonModal,
+    ImportModal,
     Filters
   },
 
@@ -134,6 +135,12 @@ export default {
       personFilterTypes: [
         'Situation',
         'Skill'
+      ],
+      csvColumns: [
+        'First Name',
+        'Last Name',
+        'Email',
+        'Phone'
       ]
     }
   },
