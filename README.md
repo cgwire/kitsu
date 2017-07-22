@@ -33,7 +33,6 @@ directly to the full documentation:
 
 [https://zou.cg-wire.com/](https://zou.cg-wire.com)
 
-
 ### About authors
 
 Gazu is written by CG Wire, a company based in France. We help small to
