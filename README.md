@@ -17,7 +17,7 @@ documentation website.
 ![Documentation](https://kitsu.cg-wire.com/)
 
 
-## Contributing
+## Contributing
 
 All contributions are welcome as long as they respect the [C4
 contract](https://rfc.zeromq.org/spec:42/C4).
@@ -26,12 +26,12 @@ All the frontend code is written with Javascript (ES6) and is based on the
 [VueJS](https://vuejs.org/v2/guide/) framework extended with 
 the [Vuex](https://vuex.vuejs.org) plugin.
 
-We chosed this technology for its very clear and exhaustive documentation.
+We chosed this technology for its clear and exhaustive documentation.
 
 ### Setting up a development environment
 
 Prior to setting up the Kitsu development environment make sure you have to
-grab this:
+the following elements installed:
 
 * Node.js 6.x
 * A Zou development instance up and running on port 5000
@@ -48,7 +48,7 @@ Then install dependencies (make sure you have Node.js 6.x installed):
 npm install
 ```
 
-Then start the to run the development server:
+Then start the development server:
 
 ```bash
 npm run dev
