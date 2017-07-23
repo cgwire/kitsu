@@ -33,6 +33,18 @@ directly to the full documentation:
 
 [https://zou.cg-wire.com/](https://zou.cg-wire.com)
 
+
+## Contributing
+
+All contributions are welcome as long as they respect the [C4
+contract](https://rfc.zeromq.org/spec:42/C4).
+
+Zou is based on Python and the [Flask](http://flask.pocoo.org/) framework.
+
+Instruction for setting up a development environment are available in 
+[the documentation](https://zou.cg-wire.com/development/)
+
+
 ### About authors
 
 Gazu is written by CG Wire, a company based in France. We help small to
