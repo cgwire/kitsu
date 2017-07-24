@@ -5,7 +5,7 @@ Vue.use(VueI18n)
 import locales from './locales'
 
 const i18n = new VueI18n({
-  locale: 'fr',
+  locale: 'en',
   fallbackLocale: 'en',
   messages: locales
 })
