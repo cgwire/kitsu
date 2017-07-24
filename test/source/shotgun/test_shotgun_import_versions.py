@@ -17,6 +17,7 @@ class ImportShotgunVersionTestCase(ShotgunTestCase):
         self.load_fixture('status')
         self.load_fixture('steps')
         self.load_fixture('assets')
+        self.load_fixture('sequences')
         self.load_fixture('shots')
         self.load_fixture('tasks')
 

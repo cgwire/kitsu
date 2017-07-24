@@ -36,5 +36,4 @@ class SequenceShotsResource(Resource):
         """
         criterions = query.get_query_criterions_from_request(request)
         criterions["parent_id"] = instance_id
-        shots = shot_info.get_shots(criterions)
-        return Entity.serialize_list(shots)
+        return shot_info.get_shots(criterions)

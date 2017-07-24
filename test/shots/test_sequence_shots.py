@@ -12,6 +12,11 @@ class SequenceShotsTestCase(ApiDBTestCase):
         self.generate_fixture_entity_type()
         self.generate_fixture_sequence()
         self.generate_fixture_shot()
+
+        self.shot_dict = self.shot.serialize()
+        self.shot_dict["project_name"] = self.project.name
+        self.shot_dict["sequence_name"] = self.sequence.name
+
         self.generate_data(Entity, 3,
                            entities_out=[],
                            project_id=self.project.id,
@@ -24,4 +29,4 @@ class SequenceShotsTestCase(ApiDBTestCase):
     def test_get_shots_for_sequence(self):
         shots = self.get("data/sequences/%s/shots" % self.sequence.id)
         self.assertEquals(len(shots), 1)
-        self.assertDictEqual(shots[0], self.shot.serialize())
+        self.assertDictEqual(shots[0], self.shot_dict)

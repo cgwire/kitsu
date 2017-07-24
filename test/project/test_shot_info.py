@@ -48,9 +48,13 @@ class ShotUtilsTestCase(ApiDBTestCase):
 
     def test_get_shots(self):
         shots = shot_info.get_shots()
+        self.shot_dict = self.shot.serialize()
+        self.shot_dict["project_name"] = self.project.name
+        self.shot_dict["sequence_name"] = self.sequence.name
+
         self.assertDictEqual(
-            shots[0].serialize(),
-            self.shot.serialize()
+            shots[0],
+            self.shot_dict
         )
 
     def test_is_shot(self):

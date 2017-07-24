@@ -44,11 +44,10 @@ class TasksCsvImportResource(BaseCsvImportResource):
 
         for shot in shot_info.get_shots():
             self.shots["%s%s%s" % (
-                shot.project_id,
-                shot.parent_id,
-                shot.name
+                shot["project_id"],
+                shot["parent_id"],
+                shot["name"]
             )] = shot
-        print(self.shots)
 
         for entity_type in EntityType.query.all():
             self.entity_types[entity_type.name] = entity_type
@@ -121,8 +120,7 @@ class TasksCsvImportResource(BaseCsvImportResource):
             if len(shot_name) > 0:
                 episode_id = self.episodes[str(project_id) + episode_name].id
                 sequence_id = self.sequences[str(project_id) + str(episode_id) + sequence_name].id
-                sequence = self.sequences[str(project_id) + str(episode_id) + sequence_name]
-                entity_id = self.shots[str(project_id) + str(sequence_id) + shot_name].id
+                entity_id = self.shots[str(project_id) + str(sequence_id) + shot_name]["id"]
             else:
                 entity_type_id = self.entity_types[entity_type_name].id
                 entity_id = self.entities[str(project_id) + str(entity_type_id) + entity_name].id

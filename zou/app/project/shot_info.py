@@ -1,3 +1,6 @@
+from sqlalchemy.orm import aliased
+
+from zou.app.models.project import Project
 from zou.app.models.entity import Entity
 from zou.app.models.entity_type import EntityType
 from zou.app.project.exception import (
@@ -52,8 +55,22 @@ def get_sequences(criterions={}):
 def get_shots(criterions={}):
     shot_type = get_shot_type()
     criterions["entity_type_id"] = shot_type.id
+    Sequence = aliased(Entity, name='sequence')
+    query = Entity.query.filter_by(**criterions)
+    query = query.join(Project)
+    query = query.join(Sequence, Sequence.id == Entity.parent_id)
+    query = query.add_columns(Project.name)
+    query = query.add_columns(Sequence.name)
+    data = query.all()
 
-    return Entity.query.filter_by(**criterions).all()
+    shots = []
+    for (shot_model, project_name, sequence_name) in data:
+        shot = shot_model.serialize()
+        shot["project_name"] = project_name
+        shot["sequence_name"] = sequence_name
+        shots.append(shot)
+
+    return shots
 
 
 def get_shot(instance_id):

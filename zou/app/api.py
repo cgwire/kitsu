@@ -206,7 +206,7 @@ def configure_api_routes(api):
     api.add_resource(IndexResource, "/")
 
     # Shot routes
-    api.add_resource(ShotsResource, "/data/shots")
+    api.add_resource(ShotsResource, "/data/shots/all")
     api.add_resource(SequencesResource, "/data/sequences")
     api.add_resource(EpisodesResource, "/data/episodes")
     api.add_resource(
