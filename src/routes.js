@@ -10,6 +10,7 @@ import Profile from './components/Profile'
 import TaskTypes from './components/TaskTypes'
 import Assets from './components/Assets'
 import AssetTypes from './components/AssetTypes'
+import Shots from './components/Shots'
 import ServerDown from './components/ServerDown'
 import NotFound from './components/NotFound'
 
@@ -22,7 +23,7 @@ export const routes = [
         if (nextPath) {
           next(nextPath)
         } else {
-          lang.setLocale(to, from)
+          lang.setLocale()
           store.dispatch('loadProductionStatus', () => {
             store.dispatch('loadAssetTypes', () => {
               store.dispatch('loadOpenProductions', () => {
@@ -56,6 +57,8 @@ export const routes = [
       { path: '/assets/edit/:asset_id', component: Assets },
       { path: '/assets/new', component: Assets },
       { path: '/assets/import', component: Assets },
+
+      { path: '/shots', component: Shots },
 
       { path: '/asset-types', component: AssetTypes },
       { path: '/asset-types/delete/:asset_type_id', component: AssetTypes },
