@@ -14,8 +14,8 @@ export const sortShots = (shots) => {
   return shots.sort((a, b) => {
     if (a.project_name !== b.project_name) {
       return a.project_name.localeCompare(b.project_name)
-    } else if (a.shot_type_name !== b.shot_type_name) {
-      return a.shot_type_name.localeCompare(b.shot_type_name)
+    } else if (a.sequence_name !== b.sequence_name) {
+      return a.sequence_name.localeCompare(b.sequence_name)
     } else {
       return a.name.localeCompare(b.name)
     }
