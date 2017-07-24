@@ -51,7 +51,15 @@ export default {
     profile: 'Profil',
     logout: 'Se déconnecter',
     cancel: 'Annuler',
-    confirmation: 'Confirmer'
+    confirmation: 'Confirmer',
+    csv: {
+      import_file: 'Importer un fichier .csv',
+      export_file: 'Télécharger en .csv',
+      import_title: 'Importer depuis un .csv',
+      required_fields: 'Le fichier CSV à importer doit comporter les colonnes suivantes :',
+      select_file: 'Sélectionner un fichier depuis votre dossier :',
+      error_upload: 'Une erreur est survenue en téleversant votre fichier .csv.'
+    }
   },
 
   login: {
@@ -79,6 +87,39 @@ export default {
     },
     delete_text: 'Êtes vous sûr de vouloir retirer {name} de la base de données?',
     delete_error: 'Une erreur est survenue lors de la suppression. Il y a probablement des données liées à cette production. Etes vous sur que cette production n\'a aucune tâche, shot ou asset lié ?'
+  },
+
+  assets: {
+    title: 'Assets',
+    edit_title: 'Modifier asset',
+    number: 'asset | assets',
+    new_asset: 'Ajouter un asset',
+    edit_fail: 'La création ou l\'édition a échoué, une erreur est survenue.',
+    new_success: 'Asset {name} créé avec succès.',
+    fields: {
+      name: 'Asset',
+      type: 'Type',
+      production: 'Prod'
+    },
+    delete_text: 'Etes vous sûr de vouloir retirer {name} de la base de données ?',
+    delete_error: 'Une erreur est survenue en créant l\'asset, êtes vous sûr de vouloir que l\'asset n\'a plus aucun lien ?'
+  },
+
+  shots: {
+    title: 'Plans',
+    edit_title: 'Modifier plan',
+    number: 'plan | plans',
+    new_shot: 'Ajouter un plan',
+    edit_fail: 'La création ou l\'édition a échoué, une erreur est survenue.',
+    new_success: 'Plan {name} créé avec succès.',
+    fields: {
+      name: 'Plan',
+      episode: 'Épisode',
+      sequence: 'Séquence',
+      production: 'Prod'
+    },
+    delete_text: 'Etes vous sûr de vouloir retirer {name} de la base de données ?',
+    delete_error: 'Une erreur est survenue en créant le plant, êtes vous sûr que le plan n\'a plus aucun lien ?'
   },
 
   task_types: {
