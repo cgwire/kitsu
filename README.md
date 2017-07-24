@@ -21,7 +21,7 @@ documentation website.
 All contributions are welcome as long as they respect the [C4
 contract](https://rfc.zeromq.org/spec:42/C4).
 
-All the frontend code is written with Javascript (ES6) and is based on the 
+The Kitsu code is written with Javascript (ES6) and is based on the 
 [VueJS](https://vuejs.org/v2/guide/) framework extended with 
 the [Vuex](https://vuex.vuejs.org) plugin.
 

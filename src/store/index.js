@@ -6,6 +6,7 @@ import * as getters from './getters'
 
 import assetTypes from './modules/assettypes'
 import assets from './modules/assets'
+import shots from './modules/shots'
 import login from './modules/login'
 import main from './modules/main'
 import people from './modules/people'
@@ -22,6 +23,7 @@ let modules = {
   main,
   people,
   productions,
+  shots,
   taskTypes,
   user
 }

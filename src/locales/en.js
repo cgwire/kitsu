@@ -119,17 +119,34 @@ export default {
   assets: {
     title: 'Assets',
     edit_title: 'Edit asset',
-    number: 'asset | asset',
+    number: 'asset | assets',
     new_asset: 'Add an asset',
     edit_fail: 'Creation or edition failed, an error occured.',
     new_success: 'Asset {name} successfully created.',
     fields: {
-      name: 'Name',
+      name: 'Asset',
       type: 'Type',
       production: 'Prod'
     },
     delete_text: 'Are you sure you want to remove {name} from your database?',
     delete_error: 'An error occured while deleting this asset. There are probably data linked to it. Are you sure this asset type has no task linked to it?'
+  },
+
+  shots: {
+    title: 'Shots',
+    edit_title: 'Edit shot',
+    number: 'shot | shots',
+    new_shot: 'Add an shot',
+    edit_fail: 'Creation or edition failed, an error occured.',
+    new_success: 'Shot {name} successfully created.',
+    fields: {
+      name: 'Shot',
+      episode: 'Episode',
+      sequence: 'Sequence',
+      production: 'Prod'
+    },
+    delete_text: 'Are you sure you want to remove {name} from your database?',
+    delete_error: 'An error occured while deleting this shot. There are probably data linked to it. Are you sure this shot type has no task linked to it?'
   },
 
   server_down: {

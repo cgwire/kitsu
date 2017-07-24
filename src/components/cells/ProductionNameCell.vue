@@ -50,7 +50,8 @@ export default {
     ...mapActions([
     ]),
     generateAvatar (entry) {
-      return entry.name[0].toUpperCase()
+      const firstLetter = entry.name.length > 0 ? entry.name[0] : 'P'
+      return firstLetter.toUpperCase()
     },
     getAvatarColor (entry) {
       return colors.fromString(entry.name)

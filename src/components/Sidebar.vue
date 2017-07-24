@@ -8,12 +8,18 @@
         </p>
         <section>
          <h2>Fabrication</h2>
-         <p @click="toggleSidebar()">
-            <router-link to="/assets">
-            {{ $t("assets.title") }}
-            </router-link>
-          </p>
 
+         <p @click="toggleSidebar()">
+           <router-link to="/assets">
+             {{ $t("assets.title") }}
+           </router-link>
+         </p>
+
+         <p @click="toggleSidebar()">
+           <router-link to="/shots">
+             {{ $t("shots.title") }}
+           </router-link>
+         </p>
 
          <h2>General</h2>
           <p @click="toggleSidebar()">
