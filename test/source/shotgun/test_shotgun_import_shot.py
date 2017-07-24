@@ -46,7 +46,7 @@ class ImportShotgunShotTestCase(ShotgunTestCase):
         self.shots = self.post(api_path, [self.sg_shot], 200)
         self.assertEqual(len(self.shots), 1)
 
-        self.shots = self.get("data/shots")
+        self.shots = self.get("data/shots/all")
         self.assertEqual(len(self.shots), 1)
 
         shot = self.shots[0]
@@ -74,7 +74,7 @@ class ImportShotgunShotTestCase(ShotgunTestCase):
         self.shots = self.post(api_path, [self.sg_shot], 200)
         self.assertEqual(len(self.shots), 1)
 
-        self.shots = self.get("data/shots")
+        self.shots = self.get("data/shots/all")
         self.assertEqual(len(self.shots), 1)
 
     def test_import_shot_update(self):
@@ -87,7 +87,7 @@ class ImportShotgunShotTestCase(ShotgunTestCase):
 
         self.sg_shot["sg_custom_field_2"] = "test 2"
         self.post(api_path, [self.sg_shot], 200)
-        self.shots = self.get("data/shots")
+        self.shots = self.get("data/shots/all")
         shot = self.shots[0]
         self.assertEqual(shot["data"]["sg_custom_field"], "test")
         self.assertEqual(shot["data"]["sg_custom_field_2"], "test 2")

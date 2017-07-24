@@ -30,7 +30,7 @@ class ImportShotgunTasksResource(BaseImportShotgunResource):
 
     def get_shot_map(self):
         shots = shot_info.get_shots()
-        return {shot.shotgun_id: shot.id for shot in shots}
+        return {shot["shotgun_id"]: shot["id"] for shot in shots}
 
     def filtered_entries(self):
         return [x for x in self.sg_entries if self.is_valid_task(x)]

@@ -27,7 +27,7 @@ class ShotsResource(Resource):
         """
         criterions = query.get_query_criterions_from_request(request)
         shots = shot_info.get_shots(criterions)
-        return Entity.serialize_list(shots)
+        return shots
 
 
 class ShotAssetsResource(Resource):

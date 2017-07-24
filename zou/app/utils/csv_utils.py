@@ -29,8 +29,6 @@ def build_csv_string(csv_content):
     string_wrapper = StringIO()
     csv_writer = csv.writer(string_wrapper)
     csv_writer.writerows(csv_content)
-    print(csv_content)
-    print(string_wrapper.getvalue())
     return string_wrapper.getvalue()
 
 
