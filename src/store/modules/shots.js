@@ -111,6 +111,7 @@ const actions = {
 
   uploadShotFile ({ commit, state }, callback) {
     commit(IMPORT_SHOTS_START)
+    console.log(state.shotsCsvFormData)
     shotsApi.postCsv(state.shotsCsvFormData, (err) => {
       commit(IMPORT_SHOTS_END)
       if (callback) callback(err)

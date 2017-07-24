@@ -122,8 +122,12 @@ export default {
       }],
       columns: [
         'Project',
-        'Category',
-        'Name'
+        'Episode',
+        'Sequence',
+        'Description',
+        'FPS',
+        'Frame In',
+        'Frame Out'
       ],
       shotFilterTypes: [
         'Type'
@@ -256,7 +260,7 @@ export default {
     },
 
     selectFile (formData) {
-      this.$store.commit('ASSET_CSV_FILE_SELECTED', formData)
+      this.$store.commit('SHOT_CSV_FILE_SELECTED', formData)
     },
 
     uploadImportFile () {
