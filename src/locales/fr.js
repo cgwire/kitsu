@@ -1,4 +1,5 @@
 export default {
+
   people: {
     title: 'Employés',
     edit_title: 'Modifier les informations de',
@@ -52,6 +53,7 @@ export default {
     logout: 'Se déconnecter',
     cancel: 'Annuler',
     confirmation: 'Confirmer',
+    confirmation_and_stay: 'Confirmer et rester',
     csv: {
       import_file: 'Importer un fichier .csv',
       export_file: 'Télécharger en .csv',
@@ -89,6 +91,31 @@ export default {
     delete_error: 'Une erreur est survenue lors de la suppression. Il y a probablement des données liées à cette production. Etes vous sur que cette production n\'a aucune tâche, shot ou asset lié ?'
   },
 
+  task_types: {
+    title: 'Types de tâches',
+    edit_title: 'Modifier le type de tâches',
+    number: 'type de tâche | types de tâches',
+    new_task_type: 'Ajouter un type de tâche',
+    fields: {
+      name: 'Nom',
+      color: 'Couleur'
+    },
+    delete_text: 'Êtes vous sur de vouloir retirer {name} de la base de données ?',
+    delete_error: 'Une erreur est survenue lors de la suppression du type de tâche. Êtes vous sûr qu\'aucune tâche n\'est lié à ce type de tâche ?'
+  },
+
+  asset_types: {
+    title: 'Types d\'assets',
+    edit_title: 'Modifier le type d\'asset',
+    number: 'type d\'asset | types d\'assets',
+    new_asset_type: 'Ajouter un type d\'asset',
+    fields: {
+      name: 'Nom'
+    },
+    delete_text: 'Êtes vous sur de vouloir enlever {name} de la base de données ?',
+    delete_error: 'Une erreur est survenue en supprimant un type d\'asset. Êtes vous sûr qu\'aucun asset est lié à ce type d\'asset?'
+  },
+
   assets: {
     title: 'Assets',
     edit_title: 'Modifier asset',
@@ -122,12 +149,9 @@ export default {
     delete_error: 'Une erreur est survenue en créant le plant, êtes vous sûr que le plan n\'a plus aucun lien ?'
   },
 
-  task_types: {
-    title: 'Types de Tâches'
-  },
-
   server_down: {
     title: 'Kitsu a rencontré une erreur en communiquant avec son API de données.',
     text: 'Contactez votre fournisseur, votre administrateur système ou votre déartement informatique pour comprendre ce qui ne va pas.'
   }
+
 }
