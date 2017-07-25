@@ -33,20 +33,6 @@
       ></shot-list>
     </div>
 
-    <edit-shot-modal
-      :active="modals.isNewDisplayed"
-      :is-loading="loading.edit"
-      :is-loading-stay="loading.stay"
-      :is-error="editShot.isCreateError"
-      :is-success="editShot.isSuccess"
-      :shot-created="editShot.shotCreated"
-      :cancel-route="'/shots'"
-      :shot-to-edit="shotToEdit"
-      @confirm="confirmEditShot"
-      @confirmAndStay="confirmNewShotStay"
-    >
-    </edit-shot-modal>
-
     <delete-modal
       :active="modals.isDeleteDisplayed"
       :is-loading="deleteShot.isLoading"
@@ -76,7 +62,6 @@
 <script>
 import { mapGetters, mapActions } from 'vuex'
 import ShotList from './lists/ShotList.vue'
-import EditShotModal from './modals/EditShotModal'
 import DeleteModal from './widgets/DeleteModal'
 import ImportModal from './modals/ImportModal'
 import Filters from './widgets/Filters'
@@ -90,7 +75,6 @@ export default {
     ShotList,
     DeleteModal,
     ImportModal,
-    EditShotModal,
     Filters,
     ButtonLink,
     ButtonHrefLink
@@ -122,8 +106,12 @@ export default {
       }],
       columns: [
         'Project',
-        'Category',
-        'Name'
+        'Episode',
+        'Sequence',
+        'Description',
+        'FPS',
+        'Frame In',
+        'Frame Out'
       ],
       shotFilterTypes: [
         'Type'
@@ -256,7 +244,7 @@ export default {
     },
 
     selectFile (formData) {
-      this.$store.commit('ASSET_CSV_FILE_SELECTED', formData)
+      this.$store.commit('SHOT_CSV_FILE_SELECTED', formData)
     },
 
     uploadImportFile () {
