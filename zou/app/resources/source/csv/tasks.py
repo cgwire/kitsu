@@ -88,7 +88,7 @@ class TasksCsvImportResource(BaseCsvImportResource):
         try:
             self.add_to_cache_if_absent(
                 self.task_statuses,
-                task_info.get_or_create_task_status,
+                task_info.get_or_create_status,
                 task_status_name
             )
             task_status_id = self.get_id_from_cache(
@@ -106,11 +106,14 @@ class TasksCsvImportResource(BaseCsvImportResource):
                 department_name
             )
 
-            task_type_key = "%s-%s" % (department_id, sequence_name)
+            task_type_key = "%s-%s" % (department_id, task_type_name)
             if task_type_key not in self.task_types:
                 department = self.departments[department_name]
                 self.task_types[task_type_key] = \
-                    task_info.get_or_create_task_type(department, task_type_name)
+                    task_info.get_or_create_task_type(
+                        department,
+                        task_type_name
+                    )
 
             task_type_id = self.get_id_from_cache(self.task_types, task_type_key)
             project_id = self.projects[project_name].id

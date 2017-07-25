@@ -5,6 +5,9 @@ from zou.app.utils import events
 from zou.app.models.entity import Entity
 from zou.app.models.entity_type import EntityType
 from zou.app.models.project import Project
+from zou.app.models.task import Task
+from zou.app.models.task_status import TaskStatus
+from zou.app.models.task_type import TaskType
 
 from zou.app.project import shot_info
 
@@ -66,6 +69,40 @@ def all_assets(criterions={}):
         asset["project_name"] = project_name
         asset["asset_type_name"] = asset_type_name
         assets.append(asset)
+
+    return assets
+
+
+def all_assets_and_tasks(criterions={}):
+    assets = all_assets(criterions)
+    asset_ids = [asset["id"] for asset in assets]
+    tasks = Task.query.filter(Entity.id.in_(asset_ids)).all()
+
+    task_map = {}
+    task_status_map = {
+        status.id: status for status in TaskStatus.query.all()
+    }
+    task_type_map = {
+        task_type.id: task_type for task_type in TaskType.query.all()
+    }
+
+    for task in tasks:
+        asset_id = str(task.entity_id)
+        if asset_id not in task_map:
+            task_map[asset_id] = []
+        task_dict = task.serialize()
+        task_status = task_status_map[task.task_status_id]
+        task_type = task_type_map[task.task_type_id]
+        task_dict.update({
+            "task_status_name": task_status.short_name,
+            "task_status_color": task_status.color,
+            "task_type_name": task_type.name,
+            "task_type_color": task_type.color
+        })
+        task_map[asset_id].append(task_dict)
+
+    for asset in assets:
+        asset["tasks"] = task_map.get(asset["id"], [])
 
     return assets
 

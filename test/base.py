@@ -388,12 +388,12 @@ class ApiDBTestCase(ApiTestCase):
         self.assigner = Person(first_name="Ema", last_name="Peel")
         self.assigner.save()
 
-    def generate_fixture_task(self):
+    def generate_fixture_task(self, name="Master"):
         start_date = fields.get_date_object("2017-02-20")
         due_date = fields.get_date_object("2017-02-28")
         real_start_date = fields.get_date_object("2017-02-22")
         self.task = Task(
-            name="Super modeling",
+            name=name,
             project_id=self.project.id,
             task_type_id=self.task_type.id,
             task_status_id=self.task_status.id,

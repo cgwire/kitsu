@@ -19,31 +19,12 @@ from zou.app.project.exception import TaskNotFoundException
 from zou.app.project import shot_info, asset_info
 
 
-def get_status(status_name, short_name=""):
-    status = TaskStatus.get_by(
-        name=app.config[status_name]
-    )
-    if status is None:
-        status = TaskStatus.get_by(
-            short_name=short_name
-        )
-
-    if status is None:
-        status = TaskStatus(
-            name=app.config[status_name],
-            short_name=short_name,
-            color="#FFFFFF"
-        )
-        status.save()
-    return status
-
-
 def get_wip_status():
-    return get_status("WIP_TASK_STATUS", "wip")
+    return get_or_create_status(app.config["WIP_TASK_STATUS"], "WIP")
 
 
 def get_to_review_status():
-    return get_status("TO_REVIEW_TASK_STATUS", "pndng")
+    return get_or_create_status(app.config["TO_REVIEW_TASK_STATUS"], "WFA")
 
 
 def start_task(task):
@@ -180,28 +161,31 @@ def get_task_dicts_for_entity(entity_id):
     return results
 
 
-def get_or_create_task_type(departmemt, name, color="#888888"):
+def get_or_create_task_type(department, name, color="#888888"):
     task_type = TaskType.get_by(name=name)
     if task_type is None:
         task_type = TaskType(
             name=name,
-            department_id=departmemt.id,
+            department_id=department.id,
             color=color
         )
         task_type.save()
     return task_type
 
 
-def get_or_create_task_status(name):
-    task_status = TaskStatus.get_by(name=name)
-    if task_status is None:
-        task_status = TaskStatus(
-            name=name,
-            short_name=name,
-            color="#000000"
+def get_or_create_status(status_name, short_name="", color="#f5f5f5"):
+    status = TaskStatus.get_by(name=status_name)
+    if status is None:
+        status = TaskStatus.get_by(short_name=short_name)
+
+    if status is None:
+        status = TaskStatus(
+            name=status_name,
+            short_name=short_name,
+            color=color
         )
-        task_status.save()
-    return task_status
+        status.save()
+    return status
 
 
 def get_or_create_department(name):
