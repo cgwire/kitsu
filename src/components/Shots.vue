@@ -30,6 +30,7 @@
         :entries="shots"
         :is-loading="isShotsLoading"
         :is-error="isShotsLoadingError"
+        :validation-columns="shotValidationColumns"
       ></shot-list>
     </div>
 
@@ -129,7 +130,8 @@ export default {
       'isShotsLoadingError',
       'editShot',
       'deleteShot',
-      'getShot'
+      'getShot',
+      'shotValidationColumns'
     ])
   },
 
@@ -274,4 +276,5 @@ export default {
 .shots-list {
   margin-top: 2em;
 }
+
 </style>

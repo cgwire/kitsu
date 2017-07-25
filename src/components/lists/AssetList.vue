@@ -110,11 +110,22 @@ table {
 
 .name {
   width: 200px;
+  font-weight: bold;
+}
+
+td.name {
+  font-size: 1.2em;
 }
 
 .type {
   width: 150px;
+  font-weight: bold;
 }
+
+td.type {
+  font-size: 1.2em;
+}
+
 
 .validation {
   width: 150px;

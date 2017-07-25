@@ -6,6 +6,14 @@
         <th class="project">{{ $t('shots.fields.production') }}</th>
         <th class="sequence">{{ $t('shots.fields.sequence') }}</th>
         <th class="name">{{ $t('shots.fields.name') }}</th>
+        <th
+          class="validation"
+          :style="{
+            border: '2px solid ' + column.color
+          }"
+          v-for="column in validationColumns">
+          {{ column.name }}
+        </th>
         <th class="actions"></th>
       </tr>
     </thead>
@@ -22,6 +30,19 @@
         </td>
         <td class="name">
           {{ entry.name }}
+        </td>
+        <td
+          class="validation"
+          :style="{
+            'border': '2px solid ' + column.color,
+          }"
+          v-for="column in validationColumns"
+        >
+          <validation-tag
+            :task="entry.validations[column.name]"
+            v-if="entry.validations[column.name]"
+          >
+          </validation-tag>
         </td>
         <td class="actions">
         </td>
@@ -46,6 +67,7 @@
 <script>
 import { mapGetters, mapActions } from 'vuex'
 import ProductionNameCell from '../cells/ProductionNameCell'
+import ValidationTag from '../widgets/ValidationTag'
 import RowActions from '../widgets/RowActions'
 
 export default {
@@ -53,13 +75,15 @@ export default {
   props: [
     'entries',
     'isLoading',
-    'isError'
+    'isError',
+    'validationColumns'
   ],
   data () {
     return {}
   },
   components: {
     ProductionNameCell,
+    ValidationTag,
     RowActions
   },
   computed: {
@@ -79,14 +103,29 @@ export default {
 }
 
 .name {
-  width: 200px;
+  width: 100px;
+  font-weight: bold;
+}
+
+td.name {
+  font-size: 1.2em;
 }
 
 .sequence {
   width: 50px;
+  font-weight: bold;
+}
+
+td.sequence {
+  font-size: 1.2em;
 }
 
 .episode {
   width: 50px;
+}
+
+.validation {
+  width: 150px;
+  margin-right: 1em;
 }
 </style>

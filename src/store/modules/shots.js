@@ -25,6 +25,8 @@ import {
 const state = {
   shots: [],
   sequences: [],
+  shotValidationColumns: [],
+
   isShotsLoading: false,
   isShotsLoadingError: false,
   shotsCsvFormData: null,
@@ -43,6 +45,7 @@ const state = {
 const getters = {
   shots: state => state.shots,
   sequences: state => state.sequences,
+  shotValidationColumns: state => state.shotValidationColumns,
 
   isShotsLoading: state => state.isShotsLoading,
   isShotsLoadingError: state => state.isShotsLoadingError,
@@ -134,8 +137,22 @@ const mutations = {
   [LOAD_SHOTS_END] (state, shots) {
     state.isShotsLoading = false
     state.isShotsLoadingError = false
+
+    const validationColumns = {}
+    shots = sortShots(shots)
+    shots = shots.map((shot) => {
+      shot.validations = {}
+      shot.tasks.forEach((task) => {
+        shot.validations[task.task_type_name] = task
+        validationColumns[task.task_type_name] = {
+          name: task.task_type_name,
+          color: task.task_type_color
+        }
+      })
+      return shot
+    })
     state.shots = shots
-    state.shots = sortShots(state.shots)
+    state.shotValidationColumns = validationColumns
   },
 
   [SHOT_CSV_FILE_SELECTED] (state, formData) {
