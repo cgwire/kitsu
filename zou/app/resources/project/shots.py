@@ -30,6 +30,21 @@ class ShotsResource(Resource):
         return shots
 
 
+class ShotsAndTasksResource(Resource):
+
+    def __init__(self):
+        Resource.__init__(self)
+
+    @login_required
+    def get(self):
+        """
+        Retrieve all shots, adds project name and asset type name and all
+        related tasks.
+        """
+        criterions = query.get_query_criterions_from_request(request)
+        return shot_info.get_shots_and_tasks(criterions)
+
+
 class ShotAssetsResource(Resource):
 
     def __init__(self):
