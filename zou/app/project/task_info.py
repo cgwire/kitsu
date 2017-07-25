@@ -173,18 +173,17 @@ def get_or_create_task_type(department, name, color="#888888"):
     return task_type
 
 
-def get_or_create_status(status_name, short_name="", color="#f5f5f5"):
-    status = TaskStatus.get_by(name=status_name)
-    if status is None:
+def get_or_create_status(name, short_name="", color="#f5f5f5"):
+    status = TaskStatus.get_by(name=name)
+    if status is None and len(short_name) > 0:
         status = TaskStatus.get_by(short_name=short_name)
 
     if status is None:
-        status = TaskStatus(
-            name=status_name,
-            short_name=short_name,
+        status = TaskStatus.create(
+            name=name,
+            short_name=short_name or name.lower(),
             color=color
         )
-        status.save()
     return status
 
 
