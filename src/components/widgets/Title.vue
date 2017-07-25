@@ -7,7 +7,7 @@ export default {
   name: 'title',
   props: {
     text: {
-      default: 'button',
+      default: '',
       type: String
     }
   }
