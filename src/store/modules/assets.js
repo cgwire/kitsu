@@ -150,12 +150,15 @@ const mutations = {
       asset.validations = {}
       asset.tasks.forEach((task) => {
         asset.validations[task.task_type_name] = task
-        validationColumns[task.task_type_name] = true
+        validationColumns[task.task_type_name] = {
+          name: task.task_type_name,
+          color: task.task_type_color
+        }
       })
       return asset
     })
 
-    state.assetValidationColumns = Object.keys(validationColumns)
+    state.assetValidationColumns = validationColumns
     state.assets = assets
     state.isAssetsLoading = false
     state.isAssetsLoadingError = false

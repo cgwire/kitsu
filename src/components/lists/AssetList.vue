@@ -6,8 +6,13 @@
         <th class="project">{{ $t('assets.fields.production') }}</th>
         <th class="type">{{ $t('assets.fields.type') }}</th>
         <th class="name">{{ $t('assets.fields.name') }}</th>
-        <th class="validation" v-for="column in validationColumns">
-          {{ column }}
+        <th
+          class="validation"
+          :style="{
+            border: '2px solid ' + column.color
+          }"
+          v-for="column in validationColumns">
+          {{ column.name }}
         </th>
         <th class="actions"></th>
       </tr>
@@ -26,10 +31,16 @@
         <td class="name">
           {{ entry.name }}
         </td>
-        <td class="validation" v-for="column in validationColumns">
+        <td
+          class="validation"
+          :style="{
+            'border': '2px solid ' + column.color,
+          }"
+          v-for="column in validationColumns"
+        >
           <validation-tag
-            :task="entry.validations[column]"
-            v-if="entry.validations[column]"
+            :task="entry.validations[column.name]"
+            v-if="entry.validations[column.name]"
           >
           </validation-tag>
         </td>
@@ -91,6 +102,8 @@ export default {
 </script>
 
 <style scoped>
+table {
+}
 .project {
   width: 50px;
 }
@@ -104,6 +117,7 @@ export default {
 }
 
 .validation {
-  width: 100px;
+  width: 150px;
+  margin-right: 1em;
 }
 </style>
