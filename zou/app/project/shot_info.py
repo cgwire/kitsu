@@ -1,6 +1,9 @@
 from sqlalchemy.orm import aliased
 
 from zou.app.models.project import Project
+from zou.app.models.task import Task
+from zou.app.models.task_status import TaskStatus
+from zou.app.models.task_type import TaskType
 from zou.app.models.entity import Entity
 from zou.app.models.entity_type import EntityType
 from zou.app.project.exception import (
@@ -69,6 +72,41 @@ def get_shots(criterions={}):
         shot["project_name"] = project_name
         shot["sequence_name"] = sequence_name
         shots.append(shot)
+
+    return shots
+
+
+def get_shots_and_tasks(criterions={}):
+    shots = get_shots(criterions)
+    shot_ids = [shot["id"] for shot in shots]
+    tasks = Task.query.filter(Entity.id.in_(shot_ids)).all()
+
+    task_map = {}
+    task_status_map = {
+        status.id: status for status in TaskStatus.query.all()
+    }
+    task_type_map = {
+        task_type.id: task_type for task_type in TaskType.query.all()
+    }
+
+    for task in tasks:
+        shot_id = str(task.entity_id)
+        if shot_id not in task_map:
+            task_map[shot_id] = []
+        task_dict = task.serialize()
+        task_status = task_status_map[task.task_status_id]
+        task_type = task_type_map[task.task_type_id]
+        task_dict.update({
+            "task_status_name": task_status.name,
+            "task_status_short_name": task_status.short_name,
+            "task_status_color": task_status.color,
+            "task_type_name": task_type.name,
+            "task_type_color": task_type.color
+        })
+        task_map[shot_id].append(task_dict)
+
+    for shot in shots:
+        shot["tasks"] = task_map.get(shot["id"], [])
 
     return shots
 

@@ -428,9 +428,9 @@ class ApiDBTestCase(ApiTestCase):
         )
         self.task_standard.save()
 
-    def generate_fixture_shot_task(self):
+    def generate_fixture_shot_task(self, name="Master"):
         self.shot_task = Task(
-            name="Super animation",
+            name="Master",
             project_id=self.project.id,
             task_type_id=self.task_type_animation.id,
             task_status_id=self.task_status.id,

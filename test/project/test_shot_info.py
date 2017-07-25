@@ -57,6 +57,24 @@ class ShotUtilsTestCase(ApiDBTestCase):
             self.shot_dict
         )
 
+    def test_get_shots_and_tasks(self):
+        self.generate_fixture_person()
+        self.generate_fixture_assigner()
+        self.generate_fixture_department()
+        self.generate_fixture_task_status()
+        self.generate_fixture_task_type()
+        self.generate_fixture_shot_task()
+        self.generate_fixture_shot_task(name="Secondary")
+        shots = shot_info.get_shots_and_tasks()
+        self.assertEqual(len(shots), 1)
+        self.assertEqual(len(shots[0]["tasks"]), 2)
+        self.assertEqual(
+            shots[0]["tasks"][0]["task_status_name"], "Open"
+        )
+        self.assertEqual(
+            shots[0]["tasks"][0]["task_type_name"], "Animation"
+        )
+
     def test_is_shot(self):
         self.assertTrue(shot_info.is_shot(self.shot))
         self.assertFalse(shot_info.is_shot(self.entity))

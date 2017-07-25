@@ -18,6 +18,7 @@ from .resources.project.assets import (
 )
 from .resources.project.shots import (
     ShotsResource,
+    ShotsAndTasksResource,
     ShotAssetsResource,
     ShotTaskTypesResource,
     ShotTasksResource,
@@ -229,6 +230,10 @@ def configure_api_routes(api):
     api.add_resource(
         ShotTasksResource,
         "/data/shots/<instance_id>/tasks"
+    )
+    api.add_resource(
+        ShotsAndTasksResource,
+        "/data/shots/with-tasks"
     )
 
     # Asset routes
