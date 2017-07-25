@@ -3,7 +3,7 @@ import superagent from 'superagent'
 export default {
   getShots (callback) {
     superagent
-      .get('/api/data/shots/all')
+      .get('/api/data/shots/with-tasks')
       .end((err, res) => {
         callback(err, res.body)
       })

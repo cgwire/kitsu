@@ -3,9 +3,9 @@
   class="tag"
   :style="{
     background: task.task_status_color,
-    color: task.task_status_name !== 'todo' ? 'white' : '#333'
+    color: task.task_status_short_name !== 'todo' ? 'white' : '#333'
 }">
-  {{ task.task_status_name }}
+  {{ task.task_status_short_name }}
 </span>
 </template>
 
