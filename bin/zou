@@ -1,4 +1,6 @@
 #!/usr/bin/env python
+import sys
+
 from flask_script import Manager, prompt_pass, prompt
 
 from zou.app import app
@@ -52,10 +54,13 @@ def create_admin():
 
     except auth.PasswordsNoMatchException:
         print("Passwords don't match.")
+        sys.exit(1)
     except auth.PasswordTooShortException:
         print("Passwords is too short.")
+        sys.exit(1)
     except auth.EmailNotValidException:
         print("Email is not valid.")
+        sys.exit(1)
 
 @manager.command
 def init_data():
@@ -80,18 +85,27 @@ def init_data():
     compositing = task_info.get_or_create_department("Compositiing")
     concept = task_info.get_or_create_department("Concept")
 
-    task_info.get_or_create_task_type(concept, "Concept")
-    task_info.get_or_create_task_type(concept, "Storyboard")
-    task_info.get_or_create_task_type(modeling, "Texture")
-    task_info.get_or_create_task_type(modeling, "Modeling")
-    task_info.get_or_create_task_type(compositing, "Layout")
-    task_info.get_or_create_task_type(animation, "Animation")
-    task_info.get_or_create_task_type(animation, "Setup")
-    task_info.get_or_create_task_type(fx, "FX")
-    task_info.get_or_create_task_type(compositing, "Lightning")
-    task_info.get_or_create_task_type(compositing, "Render")
-    task_info.get_or_create_task_type(compositing, "Compositiing")
+    task_info.get_or_create_task_type(concept, "Concept", '#8D6E63')
+    task_info.get_or_create_task_type(concept, "Storyboard", '#43A047')
+    task_info.get_or_create_task_type(modeling, "Texture", '#64B5F6')
+    task_info.get_or_create_task_type(modeling, "Modeling", '#78909C')
+    task_info.get_or_create_task_type(compositing, "Layout", '#7CB342')
+    task_info.get_or_create_task_type(animation, "Animation", '#009688')
+    task_info.get_or_create_task_type(animation, "Setup", '#9CCC65')
+    task_info.get_or_create_task_type(fx, "FX", '#26C6DA')
+    task_info.get_or_create_task_type(compositing, "Lightning", '#F9A825')
+    task_info.get_or_create_task_type(compositing, "Render", '#F06292')
+    task_info.get_or_create_task_type(compositing, "Compositiing", '#ff5252')
     print("Task types initialized.")
+
+    task_info.get_or_create_status("Todo", "todo", "#f5f5f5")
+    task_info.get_or_create_status("Work In Progress", "wip", "#3273dc")
+    task_info.get_or_create_status(
+        "Waiting For Approval", "wfa", "#ab26ff"
+    )
+    task_info.get_or_create_status("Retake", "retake", "#ff3860")
+    task_info.get_or_create_status("Done", "done", "#22d160")
+    print("Task status initialized.")
 
 if __name__ == '__main__':
     manager.run()
