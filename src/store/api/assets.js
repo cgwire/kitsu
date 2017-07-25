@@ -3,7 +3,7 @@ import superagent from 'superagent'
 export default {
   getAssets (callback) {
     superagent
-      .get('/api/data/assets/all')
+      .get('/api/data/assets/with-tasks')
       .end((err, res) => {
         callback(err, res.body)
       })
