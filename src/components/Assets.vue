@@ -37,6 +37,7 @@
         :entries="assets"
         :is-loading="isAssetsLoading"
         :is-error="isAssetsLoadingError"
+        :validation-columns="assetValidationColumns"
       ></asset-list>
     </div>
 
@@ -148,7 +149,8 @@ export default {
       'isAssetsLoadingError',
       'editAsset',
       'deleteAsset',
-      'getAsset'
+      'getAsset',
+      'assetValidationColumns'
     ])
   },
 

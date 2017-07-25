@@ -6,6 +6,9 @@
         <th class="project">{{ $t('assets.fields.production') }}</th>
         <th class="type">{{ $t('assets.fields.type') }}</th>
         <th class="name">{{ $t('assets.fields.name') }}</th>
+        <th class="validation" v-for="column in validationColumns">
+          {{ column }}
+        </th>
         <th class="actions"></th>
       </tr>
     </thead>
@@ -22,6 +25,13 @@
         </td>
         <td class="name">
           {{ entry.name }}
+        </td>
+        <td class="validation" v-for="column in validationColumns">
+          <validation-tag
+            :task="entry.validations[column]"
+            v-if="entry.validations[column]"
+          >
+          </validation-tag>
         </td>
         <row-actions
           :entry-id="entry.id"
@@ -51,20 +61,23 @@
 import { mapGetters, mapActions } from 'vuex'
 import ProductionNameCell from '../cells/ProductionNameCell'
 import RowActions from '../widgets/RowActions'
+import ValidationTag from '../widgets/ValidationTag'
 
 export default {
   name: 'asset-list',
   props: [
     'entries',
     'isLoading',
-    'isError'
+    'isError',
+    'validationColumns'
   ],
   data () {
     return {}
   },
   components: {
     ProductionNameCell,
-    RowActions
+    RowActions,
+    ValidationTag
   },
   computed: {
     ...mapGetters([
@@ -88,5 +101,9 @@ export default {
 
 .type {
   width: 150px;
+}
+
+.validation {
+  width: 100px;
 }
 </style>

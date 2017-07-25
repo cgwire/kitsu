@@ -29,6 +29,7 @@ import {
 const state = {
   assets: [],
   assetTypes: [],
+  assetValidationColumns: [],
   openProductions: [],
   isAssetsLoading: false,
   isAssetsLoadingError: false,
@@ -47,6 +48,9 @@ const state = {
 
 const getters = {
   assets: state => state.assets,
+  assetValidationColumns: (state) => {
+    return state.assetValidationColumns
+  },
 
   isAssetsLoading: state => state.isAssetsLoading,
   isAssetsLoadingError: state => state.isAssetsLoadingError,
@@ -139,10 +143,22 @@ const mutations = {
   },
 
   [LOAD_ASSETS_END] (state, assets) {
+    const validationColumns = {}
+
+    assets = sortAssets(assets)
+    assets = assets.map((asset) => {
+      asset.validations = {}
+      asset.tasks.forEach((task) => {
+        asset.validations[task.task_type_name] = task
+        validationColumns[task.task_type_name] = true
+      })
+      return asset
+    })
+
+    state.assetValidationColumns = Object.keys(validationColumns)
+    state.assets = assets
     state.isAssetsLoading = false
     state.isAssetsLoadingError = false
-    state.assets = assets
-    state.assets = sortAssets(state.assets)
   },
 
   [ASSET_CSV_FILE_SELECTED] (state, formData) {
