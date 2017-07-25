@@ -26,6 +26,24 @@ class AssetInfoTestCase(ApiDBTestCase):
         self.assertEqual(len(assets), 1)
         self.assertEqual(assets[0].name, "Tree")
 
+    def test_get_assets_and_tasks(self):
+        self.generate_fixture_person()
+        self.generate_fixture_assigner()
+        self.generate_fixture_department()
+        self.generate_fixture_task_status()
+        self.generate_fixture_task_type()
+        self.generate_fixture_task()
+        self.generate_fixture_task(name="Secondary")
+        assets = asset_info.all_assets_and_tasks()
+        self.assertEqual(len(assets), 1)
+        self.assertEqual(len(assets[0]["tasks"]), 2)
+        self.assertEqual(
+            assets[0]["tasks"][0]["task_status_name"], "Open"
+        )
+        self.assertEqual(
+            assets[0]["tasks"][0]["task_type_name"], "Shaders"
+        )
+
     def test_get_asset(self):
         asset = asset_info.get_asset(self.entity.id)
         self.assertEqual(asset.id, self.entity.id)

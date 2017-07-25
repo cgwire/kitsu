@@ -41,7 +41,23 @@ class AllAssetsResource(Resource):
         Retrieve all entities that are not shot or sequence.
         Adds project name and asset type name.
         """
-        return asset_info.all_assets()
+        criterions = query.get_query_criterions_from_request(request)
+        return asset_info.all_assets(criterions)
+
+
+class AssetsAndTasksResource(Resource):
+
+    def __init__(self):
+        Resource.__init__(self)
+
+    @login_required
+    def get(self):
+        """
+        Retrieve all entities that are not shot or sequence.
+        Adds project name and asset type name and all related tasks.
+        """
+        criterions = query.get_query_criterions_from_request(request)
+        return asset_info.all_assets_and_tasks(criterions)
 
 
 class ProjectAssetsResource(Resource):

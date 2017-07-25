@@ -87,7 +87,7 @@ class FileTreeTestCase(ApiDBTestCase):
         task = file_tree.guess_task(
             self.entity,
             self.task_type,
-            "Super modeling"
+            "Master"
         )
         self.assertEqual(task.id, self.task.id)
 

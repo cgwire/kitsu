@@ -70,7 +70,7 @@ class TaskInfoTestCase(ApiDBTestCase):
         self.assertTrue(self.is_event_fired)
 
     def test_get_status(self):
-        task_status = task_info.get_status("WIP_TASK_STATUS", "wip")
+        task_status = task_info.get_or_create_status("WIP", "wip")
         self.assertEqual(task_status.name, "WIP")
 
     def test_get_wip_status(self):

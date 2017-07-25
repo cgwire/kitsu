@@ -8,6 +8,7 @@ from zou.app.utils import events, auth
 from .resources.index import IndexResource
 from .resources.project.assets import (
     AllAssetsResource,
+    AssetsAndTasksResource,
     AssetTypesResource,
     NewAssetResource,
     RemoveAssetResource,
@@ -239,6 +240,10 @@ def configure_api_routes(api):
     api.add_resource(
         AssetTasksResource,
         "/data/assets/<instance_id>/tasks"
+    )
+    api.add_resource(
+        AssetsAndTasksResource,
+        "/data/assets/with-tasks"
     )
 
     # Task routes
