@@ -12,6 +12,8 @@ named [Gazu](https://gazu.cg-wire.com). 
 
 ![Build badge](https://travis-ci.org/cgwire/zou.svg?branch=master)
 
+[![Gitter badge](https://badges.gitter.im/cgwire/Lobby.png)](https://gitter.im/cgwire/Lobby)
+
 ### Features 
 
 Zou can:
