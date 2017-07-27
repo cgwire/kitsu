@@ -9,6 +9,8 @@ production managers, TDs, supervisors and clients
 
 ![Build badge](https://travis-ci.org/cgwire/kitsu.svg?branch=master)
 
+[![Gitter badge](https://badges.gitter.im/cgwire/Lobby.png)](https://gitter.im/gitterHQ/gitter)
+
 # Documentation 
 
 For further information about features and installation, please refer to the
