@@ -189,9 +189,14 @@ const mutations = {
   [EDIT_ASSET_ERROR] (state) {
     state.editAsset.isLoading = false
     state.editAsset.isError = true
+    state.editAsset.isCreateError = true
   },
 
   [EDIT_ASSET_END] (state, newAsset) {
+    state.editAsset.isCreateError = false
+    state.editAsset.isSuccess = true
+    state.editAsset.assetCreated = newAsset.name
+
     const asset = getters.getAsset(state)(newAsset.id)
     const assetType = state.assetTypes.find(
       (assetType) => assetType.id === newAsset.entity_type_id
@@ -202,6 +207,8 @@ const mutations = {
       (production) => production.id === newAsset.project_id
     )
     newAsset.project_name = production.name
+    newAsset.tasks = []
+    newAsset.validations = {}
 
     if (asset) {
       Object.assign(asset, newAsset)

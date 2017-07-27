@@ -12,6 +12,7 @@ import Assets from './components/Assets'
 import AssetTypes from './components/AssetTypes'
 import Shots from './components/Shots'
 import ServerDown from './components/ServerDown'
+import Task from './components/Task'
 import NotFound from './components/NotFound'
 
 export const routes = [
@@ -51,6 +52,7 @@ export const routes = [
       { path: '/tasks/delete/:task_type_id', component: TaskTypes },
       { path: '/tasks/edit/:task_type_id', component: TaskTypes },
       { path: '/tasks/new', component: TaskTypes },
+      { path: '/tasks/:task_id', component: Task },
 
       { path: '/assets', component: Assets },
       { path: '/assets/delete/:asset_id', component: Assets },

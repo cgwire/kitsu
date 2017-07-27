@@ -1,12 +1,13 @@
 <template>
-<span
+<router-link
+  :to="'/tasks/' + task.id"
   class="tag"
   :style="{
     background: task.task_status_color,
     color: task.task_status_short_name !== 'todo' ? 'white' : '#333'
 }">
   {{ task.task_status_short_name }}
-</span>
+</router-link>
 </template>
 
 <script>

@@ -24,7 +24,7 @@
         <combobox
           :label="$t('assets.fields.type')"
           :options="getAssetTypeOptions"
-          v-model="form.asset_type_id"
+          v-model="form.entity_type_id"
         >
         </combobox>
         <text-field
@@ -117,16 +117,16 @@ export default {
       return {
         form: {
           name: this.assetToEdit.name,
-          asset_type_id: this.assetToEdit.asset_type_id,
-          production_id: this.assetToEdit.production_id
+          asset_type_id: this.assetToEdit.entity_type_id,
+          production_id: this.assetToEdit.project_id
         }
       }
     } else {
       return {
         form: {
           name: '',
-          asset_type_id: '',
-          production_id: ''
+          entity_type_id: '',
+          project_id: ''
         }
       }
     }
@@ -156,10 +156,10 @@ export default {
   mounted () {
     if (!this.assetToEdit || !this.assetToEdit.id) {
       if (this.assetTypes.length > 0) {
-        this.form.asset_type_id = this.assetTypes[0].id
+        this.form.entity_type_id = this.assetTypes[0].id
       }
       if (this.openProductions.length > 0) {
-        this.form.production_id = this.openProductions[0].id
+        this.form.project_id = this.openProductions[0].id
       }
     }
   }
