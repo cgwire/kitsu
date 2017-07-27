@@ -177,11 +177,8 @@ export default {
           this.loading.stay = false
           if (!err) {
             this.resetEditModal()
-            this.editAsset.assetCreated = form.name
-            this.editAsset.isSuccess = true
           } else {
             this.loading.edit = false
-            this.editAsset.isCreateError = true
           }
         }
       })
