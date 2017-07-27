@@ -9,7 +9,7 @@ production managers, TDs, supervisors and clients
 
 ![Build badge](https://travis-ci.org/cgwire/kitsu.svg?branch=master)
 
-[![Gitter badge](https://badges.gitter.im/cgwire/Lobby.png)](https://gitter.im/gitterHQ/gitter)
+[![Gitter badge](https://badges.gitter.im/cgwire/Lobby.png)](https://gitter.im/cgwire/Lobby)
 
 # Documentation 
 
