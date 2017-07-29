@@ -21,11 +21,12 @@
         </textarea>
         <span class="select">
           <select>
-            <option>Waiting For Approval</option>
-            <option>Validated (done)</option>
-            <option>Retake</option>
-            <option>Work In Progress</option>
-            <option>Todo</option>
+            <option
+              v-for="option in taskStatusOptions"
+              value="option.value"
+            >
+              {{ option.label }}
+            </option>
           </select>
         </span>
         <button
@@ -57,6 +58,7 @@ export default {
     'updateComment',
     'taskCommentText',
     'isAddCommentLoading',
+    'taskStatusOptions',
     'withButton'
   ]
 }
