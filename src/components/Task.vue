@@ -1,34 +1,22 @@
 <template>
-  <div class="home page">
+  <div class="page">
     <h1 class="title">
        <div class="level">
          <div class="level-left">
            <div class="level-item">
-             {{ task.loaded ? task.name : 'loading' }}
+             {{ currentTask ? currentTask.entity_name : 'Loading...'}}
            </div>
-           <div class="level-item">
+           <div class="level-item" v-if="currentTask">
              <span class="tag animation is-medium">
-             {{ task.task_type ? task.task_type.name : ''}}
+               {{ currentTask.task_type_name }}
              </span>
            </div>
-           <div class="level-item">
-             <span
-               :class="'tag is-medium ' + this.getStatusClass(task)">
-               {{ getTaskStatus(task) }}
-             </span>
+           <div class="level-item" v-if="currentTask">
+             <validation-tag
+               :task="currentTask"
+               class="is-medium"
+             ></validation-tag>
            </div>
-           <div class="level-item">
-             <span :class="{
-               tag: true,
-               'is-medium': true,
-               'is-danger': (task.nb_retakes > 3)
-             }"
-               v-if="task.nb_retakes > 0"
-             >
-               {{ task.nb_retakes }}
-             </span>
-           </div>
-
          </div>
        </div>
     </h1>
@@ -41,7 +29,7 @@
       <div class="column">
         <h2 class="subtitle validation-title">Infos</h2>
 
-        <div v-if="task.loaded">
+        <div v-if="currentTask">
           <div class="tabs">
             <ul>
               <li :class="(this.selectedTab === 'validation') ? 'is-active' : '' ">
@@ -66,9 +54,9 @@
               :isAddCommentLoading="isAddCommentLoading"
               :user="user"
               :withButton="true"
+              :taskStatusOptions="taskStatusOptions"
             >
             </add-comment>
-            </comment>
           </div>
 
           <table
@@ -79,51 +67,41 @@
           >
             <tr>
               <td><strong>Project</strong></td>
-              <td>{{ task.project.name }}</td>
+              <td>{{ currentTask.project_name }}</td>
             </tr>
             <tr>
               <td><strong>Due date</strong></td>
-              <td>{{ task.due_date ? task.due_date.substring(0, 10) : '' }}</td>
+              <td>{{ currentTask.due_date ? currentTask.due_date.substring(0, 10) : '' }}</td>
             </tr>
             <tr>
               <td><strong>Start date</strong></td>
-              <td>{{ task.start_date ? task.start_date.substring(0, 10) : '' }}</td>
+              <td>{{ currentTask.start_date ? currentTask.start_date.substring(0, 10) : '' }}</td>
             </tr>
 
             <tr>
               <td><strong>Real start date</strong></td>
-              <td>{{ task.real_start_date ? task.real_start_date.substring(0, 10) : '' }}</td>
+              <td>{{ currentTask.real_start_date ? currentTask.real_start_date.substring(0, 10) : '' }}</td>
             </tr>
 
             <tr>
               <td><strong>End date</strong></td>
-              <td>{{ task.end_date ? task.end_date.substring(0, 10) : '' }}</td>
-            </tr>
-            <tr>
-              <td><strong>Duration since last retake</strong></td>
-              <td>10 hours</td>
+              <td>{{ currentTask.end_date ? currentTask.end_date.substring(0, 10) : '' }}</td>
             </tr>
             <tr>
               <td><strong>Duration</strong></td>
-              <td>{{ task.duration ? (task.duration - 3600) / 3600 : '' }} hours</td>
+              <td>{{ currentTask.duration ? (currentTask.duration - 3600) / 3600 : '' }} hours</td>
             </tr>
             <tr>
               <td><strong>Estimation</strong></td>
-              <td>{{ task.duration ? task.duration / 3600 : '' }} hours</td>
-            </tr>
-            <tr>
-              <td><strong>Status</strong></td>
-              <td>
-              </td>
+              <td>{{ currentTask.duration ? currentTask.duration / 3600 : '' }} hours</td>
             </tr>
           </table>
+
         </div>
 
         <div class="has-text-centered" v-else>
           <img src="../assets/spinner.svg" />
         </div>
-      </div>
-
 
 			</div>
     </div>
@@ -147,23 +125,50 @@ export default {
     ValidationTag,
     PeopleName
   },
+
   data () {
     return {
-      selectedTab: 'validation'
+      selectedTab: 'validation',
+      taskLoading: {
+        isLoading: true,
+        isError: false
+      },
+      isAddCommentLoading: false,
+      taskCommentText: '',
+      currentTask: null
     }
   },
+
   created () {
-    if (!this.isAddCommentLoading) {
-      const taskId = { id: this.route.params.task_id }
-      if (!this.task.loaded) {
-        this.$store.dispatch('loadTask', taskId)
-      } else {
-        this.$store.dispatch('loadComments', { objectId:
-          this.route.params.task_id
-        })
+    let task = this.getCurrentTask()
+    if (!task) {
+      this.taskLoading = {
+        isLoading: true,
+        isError: false
       }
+      this.$store.dispatch('loadTask', {
+        taskId: this.route.params.task_id,
+        callback: (err) => {
+          if (err) {
+            this.taskLoading = {
+              isLoading: false,
+              isError: true
+            }
+          } else {
+            this.taskLoading = {
+              isLoading: true,
+              isError: false
+            }
+            task = this.getCurrentTask()
+            this.currentTask = task
+          }
+        }
+      })
+    } else {
+      this.currentTask = task
     }
   },
+
   computed: {
     ...mapGetters([
       'tasks',
@@ -171,81 +176,23 @@ export default {
       'commentTexts',
       'route',
       'user',
-      'isAddCommentLoading'
-    ]),
-    task () {
-      let task = this.tasks.find((todo) => {
-        return todo.id === this.route.params.task_id
-      })
-
-      if (task === undefined) {
-        task = {loaded: false}
-      } else {
-        task.loaded = true
-      }
-      return task
-    },
-    taskComments () {
-      return this.comments[this.route.params.task_id] || []
-    },
-    taskCommentText () {
-      return this.commentTexts[this.route.params.task_id]
-    }
+      'taskStatusOptions',
+      'getTask'
+    ])
   },
   methods: {
     ...mapActions([
     ]),
     changeTab (tab) {
       this.selectedTab = tab
-      console.log(tab)
     },
-    updateComment (event) {
-      const taskId = this.route.params.task_id
-      this.$store.dispatch('updateComment', {
-        objectId: taskId,
-        text: event.target.value
-      })
+    getCurrentTask () {
+      return this.getTask(this.route.params.task_id)
     },
-    addComment (event) {
-      const taskId = this.route.params.task_id
-      this.$store.dispatch('addComment', {
-        objectId: taskId,
-        user: this.user
-      })
+    updateComment () {
     },
-    renderAssignees (task) {
-      let personNames = []
-      for (let person of task.persons) {
-        personNames.push(person.first_name + ' ' + person.last_name)
-      }
-      return personNames.join(', ')
-    },
-    getTaskStatus (task) {
-      if (task && task.task_status_name) {
-        return task.task_status_name
-      } else if (task && task.task_status) {
-        return task.task_status.name
-      } else {
-        return ''
-      }
-    },
-    getStatusClass (task) {
-      const taskStatus = this.getTaskStatus(task)
-      if (taskStatus === 'WIP') {
-        return 'is-info'
-      } else if (taskStatus === 'Ready for Next Stage') {
-        return 'is-success'
-      } else if (taskStatus === 'Confirmed') {
-        return 'is-warning'
-      } else if (taskStatus === 'DONE') {
-        return 'is-success'
-      } else if (taskStatus === 'WFA') {
-        return 'is-primary'
-      } else {
-        return ''
-      }
+    addComment () {
     }
-
   }
 }
 </script>
@@ -278,5 +225,9 @@ video {
   margin-bottom: 0.3em;
   border-width: 2px;
   font-weight: bold;
+}
+
+.page {
+  overflow: hidden;
 }
 </style>
