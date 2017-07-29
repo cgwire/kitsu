@@ -26,9 +26,11 @@ export const routes = [
         } else {
           lang.setLocale()
           store.dispatch('loadProductionStatus', () => {
-            store.dispatch('loadAssetTypes', () => {
-              store.dispatch('loadOpenProductions', () => {
-                next()
+            store.dispatch('loadTaskStatuses', () => {
+              store.dispatch('loadAssetTypes', () => {
+                store.dispatch('loadOpenProductions', () => {
+                  next()
+                })
               })
             })
           })
