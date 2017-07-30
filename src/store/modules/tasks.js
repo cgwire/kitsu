@@ -7,12 +7,15 @@ import {
   LOAD_TASK_END,
   LOAD_TASK_STATUSES_END,
 
+  NEW_TASK_COMMENT_END,
+
   RESET_ALL
 } from '../mutation-types'
 
 const state = {
   taskMap: {},
-  taskStatuses: []
+  taskStatuses: [],
+  taskComments: {}
 }
 
 const getters = {
@@ -36,6 +39,13 @@ const getters = {
 }
 
 const actions = {
+  loadTaskStatuses ({ commit, state }, callback) {
+    tasksApi.getTaskStatuses((err, taskStatus) => {
+      if (!err) commit(LOAD_TASK_STATUSES_END, taskStatus)
+      if (callback) callback(err)
+    })
+  },
+
   loadTask ({ commit, state }, payload) {
     tasksApi.getTask(payload.taskId, (err, task) => {
       if (!err) {
@@ -45,10 +55,12 @@ const actions = {
     })
   },
 
-  loadTaskStatuses ({ commit, state }, callback) {
-    tasksApi.getTaskStatuses((err, taskStatus) => {
-      if (!err) commit(LOAD_TASK_STATUSES_END, taskStatus)
-      if (callback) callback(err)
+  commentTask ({ commit, state }, payload) {
+    tasksApi.commentTask(payload, (err, comment) => {
+      if (!err) {
+        commit(NEW_TASK_COMMENT_END, {comment, taskId: payload.taskId})
+      }
+      if (payload.callback) payload.callback(err)
     })
   }
 }
@@ -91,6 +103,11 @@ const mutations = {
 
   [LOAD_TASK_STATUSES_END] (state, taskStatuses) {
     state.taskStatuses = sortByName(taskStatuses)
+  },
+
+  [NEW_TASK_COMMENT_END] (state, {comment, taskId}) {
+    if (!state.taskComments[taskId]) state.taskComments[taskId] = []
+    state.taskComments[taskId].unshift(comment)
   },
 
   [RESET_ALL] (state, shots) {

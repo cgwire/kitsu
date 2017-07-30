@@ -15,5 +15,19 @@ export default {
       .end((err, res) => {
         callback(err, res.body)
       })
+  },
+
+  commentTask (data, callback) {
+    const commentData = {
+      task_status_id: data.taskStatusId,
+      comment: data.comment
+    }
+    superagent
+      .post(`/api/project/tasks/${data.taskId}/comment`)
+      .send(commentData)
+      .end((err, res) => {
+        callback(err, res.body)
+      })
   }
+
 }

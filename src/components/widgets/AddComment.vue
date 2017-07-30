@@ -13,29 +13,31 @@
         <textarea
           class="textarea"
           placeholder="Add a comment..."
-          :value="taskCommentText"
-          @input="updateComment"
           @keyup.enter.ctrl="addComment"
           :disabled="isAddCommentLoading"
+          v-model="text"
           v-focus>
         </textarea>
         <span class="select">
-          <select>
+          <select
+            ref="statusSelect"
+            @change="updateValue"
+          >
             <option
               v-for="option in taskStatusOptions"
-              value="option.value"
+              :value="option.value"
+              :selected="option.value === task_status_id"
             >
               {{ option.label }}
             </option>
           </select>
         </span>
         <button
-          v-if="withButton"
           v-bind:class="{
             'button': true,
             'is-loading': isAddCommentLoading
           }"
-          @click="addComment"
+          @click="addComment(text, task_status_id)"
         >
           Post status
         </button>
@@ -49,18 +51,42 @@ import PeopleAvatar from './PeopleAvatar.vue'
 
 export default {
   name: 'add-comment',
+  data () {
+    return {
+      text: '',
+      task_status_id: this.task.task_status_id
+    }
+  },
   components: {
     PeopleAvatar
   },
-  props: [
-    'user',
-    'addComment',
-    'updateComment',
-    'taskCommentText',
-    'isAddCommentLoading',
-    'taskStatusOptions',
-    'withButton'
-  ]
+  props: {
+    user: {
+      type: Object,
+      default: {}
+    },
+    addComment: {
+      type: Function,
+      default: null
+    },
+    isAddCommentLoading: {
+      type: Boolean,
+      default: null
+    },
+    taskStatusOptions: {
+      type: Array,
+      default: []
+    },
+    task: {
+      type: Object,
+      default: []
+    }
+  },
+  methods: {
+    updateValue (value) {
+      this.task_status_id = this.$refs.statusSelect.value
+    }
+  }
 }
 </script>
 

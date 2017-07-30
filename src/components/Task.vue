@@ -48,12 +48,10 @@
             }"
           >
             <add-comment
-              :taskCommentText="taskCommentText"
-              :updateComment="updateComment"
               :addComment="addComment"
-              :isAddCommentLoading="isAddCommentLoading"
+              :isAddCommentLoading="addCommentLoading.isLoading"
               :user="user"
-              :withButton="true"
+              :task="currentTask"
               :taskStatusOptions="taskStatusOptions"
             >
             </add-comment>
@@ -133,7 +131,10 @@ export default {
         isLoading: true,
         isError: false
       },
-      isAddCommentLoading: false,
+      addCommentLoading: {
+        isLoading: false,
+        isError: false
+      },
       taskCommentText: '',
       currentTask: null
     }
@@ -156,7 +157,7 @@ export default {
             }
           } else {
             this.taskLoading = {
-              isLoading: true,
+              isLoading: false,
               isError: false
             }
             task = this.getCurrentTask()
@@ -191,7 +192,29 @@ export default {
     },
     updateComment () {
     },
-    addComment () {
+    addComment (comment, taskStatusId) {
+      this.addCommentLoading = {
+        isLoading: true,
+        isError: false
+      }
+      this.$store.dispatch('commentTask', {
+        taskId: this.route.params.task_id,
+        taskStatusId: taskStatusId,
+        comment: comment,
+        callback: (err) => {
+          if (err) {
+            this.addCommentLoading = {
+              isLoading: false,
+              isError: true
+            }
+          } else {
+            this.addCommentLoading = {
+              isLoading: false,
+              isError: false
+            }
+          }
+        }
+      })
     }
   }
 }
