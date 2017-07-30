@@ -1,4 +1,5 @@
 import tasksApi from '../api/tasks'
+import { sortByName } from '../../lib/sorting'
 import {
   LOAD_ASSETS_END,
   LOAD_SHOTS_END,
@@ -35,7 +36,6 @@ const getters = {
 }
 
 const actions = {
-
   loadTask ({ commit, state }, payload) {
     tasksApi.getTask(payload.taskId, (err, task) => {
       if (!err) {
@@ -90,7 +90,7 @@ const mutations = {
   },
 
   [LOAD_TASK_STATUSES_END] (state, taskStatuses) {
-    state.taskStatuses = taskStatuses
+    state.taskStatuses = sortByName(taskStatuses)
   },
 
   [RESET_ALL] (state, shots) {

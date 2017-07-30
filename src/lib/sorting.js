@@ -21,3 +21,7 @@ export const sortShots = (shots) => {
     }
   })
 }
+
+export const sortByName = (entries) => {
+  return entries.sort((a, b) => a.name.localeCompare(b.name))
+}
