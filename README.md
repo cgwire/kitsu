@@ -11,12 +11,10 @@ production managers, TDs, supervisors and clients
 
 [![Gitter badge](https://badges.gitter.im/cgwire/Lobby.png)](https://gitter.im/cgwire/Lobby)
 
-# Documentation 
+## Documentation 
 
 For further information about features and installation, please refer to the
-documentation website.
-
-![Documentation](https://kitsu.cg-wire.com/)
+[documentation website](https://kitsu.cg-wire.com/).
 
 ## Contributing
 
