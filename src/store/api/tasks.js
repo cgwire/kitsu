@@ -17,6 +17,14 @@ export default {
       })
   },
 
+  getTaskComments (taskId, callback) {
+    superagent
+      .get(`/api/data/tasks/${taskId}/comments`)
+      .end((err, res) => {
+        callback(err, res.body)
+      })
+  },
+
   commentTask (data, callback) {
     const commentData = {
       task_status_id: data.taskStatusId,

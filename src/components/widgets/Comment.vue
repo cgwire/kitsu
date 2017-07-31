@@ -1,5 +1,10 @@
 <template>
-<article :class="'media comment ' + getStatusClass(comment.task_status.name)">
+<article
+  class="media comment"
+  :style="{
+    'border-left': '3px solid ' + comment.task_status.color
+  }"
+>
   <figure class="media-left">
     <div class="level">
       <div class="level-left">
@@ -17,15 +22,22 @@
         </strong>
         <span class="comment-date">{{ formatDate(comment.created_at) }}</span>
       </p>
-      <p v-if="comment.task_status.name === 'RETAKE'">
-        <span class="is-danger">RETAKE</span>
-        <span class="version">version 01</span>
+      <p v-if="comment.task_status.name === 'Retake'">
+        <span :style="{'color': comment.task_status.color}">
+        RETAKE
+        </span>
       </p>
-      <p v-if="comment.task_status.name === 'WFA'">
-        <span class="is-wfa">Validation Needed</span>
-        <span class="version">version 01</span>
+      <p v-if="comment.task_status.name === 'Waiting For Approval'">
+        <span :style="{'color': comment.task_status.color}">
+        Validation Required
+        </span>
       </p>
-      <p class="version" v-if="comment.task_status.name === 'RETAKE'">
+      <p v-if="comment.task_status.name === 'Done'">
+        <span :style="{'color': comment.task_status.color}">
+        Validated
+        </span>
+      </p>
+      <p class="version" v-if="comment.task_status_name === 'RETAKE'">
       </p>
       <p v-html="compileMarkdown(comment.text)" class="comment-text">
       </p>
@@ -52,29 +64,15 @@ export default {
   props: [
     'comment'
   ],
+  created () {
+    console.log(this.comment)
+  },
   methods: {
     formatDate (date) {
       return moment(date).fromNow()
     },
     compileMarkdown (input) {
       return marked(input || '')
-    },
-    getStatusClass (taskStatus) {
-      if (taskStatus === 'WIP') {
-        return 'is-info'
-      } else if (taskStatus === 'DONE') {
-        return 'is-success'
-      } else if (taskStatus === 'Confirmed') {
-        return 'is-warning'
-      } else if (taskStatus === 'DONE') {
-        return 'is-success'
-      } else if (taskStatus === 'WFA') {
-        return 'is-primary'
-      } else if (taskStatus === 'RETAKE') {
-        return 'is-danger'
-      } else {
-        return ''
-      }
     }
   }
 }

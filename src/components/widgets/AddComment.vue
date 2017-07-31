@@ -13,7 +13,7 @@
         <textarea
           class="textarea"
           placeholder="Add a comment..."
-          @keyup.enter.ctrl="addComment"
+          @keyup.enter.ctrl="addComment(text, task_status_id)"
           :disabled="isAddCommentLoading"
           v-model="text"
           v-focus>

@@ -27,10 +27,10 @@
 			</div>
 
       <div class="column">
-        <h2 class="subtitle validation-title">Infos</h2>
+        <h2 class="subtitle validation-title">Validation</h2>
 
         <div v-if="currentTask">
-          <div class="tabs">
+          <div class="tabs hidden">
             <ul>
               <li :class="(this.selectedTab === 'validation') ? 'is-active' : '' ">
                 <a @click="changeTab('validation')">Validation</a>
@@ -55,6 +55,12 @@
               :taskStatusOptions="taskStatusOptions"
             >
             </add-comment>
+            <comment
+              :comment="comment"
+              :key="comment.id"
+              v-for="comment in currentTaskComments"
+            >
+            </comment>
           </div>
 
           <table
@@ -135,8 +141,8 @@ export default {
         isLoading: false,
         isError: false
       },
-      taskCommentText: '',
-      currentTask: null
+      currentTask: null,
+      currentTaskComments: []
     }
   },
 
@@ -162,11 +168,29 @@ export default {
             }
             task = this.getCurrentTask()
             this.currentTask = task
+            this.$store.dispatch('loadTaskComments', {
+              taskId: this.route.params.task_id,
+              callback: (err) => {
+                if (err) {
+                } else {
+                  this.currentTaskComments = this.getCurrentTaskComments()
+                }
+              }
+            })
           }
         }
       })
     } else {
       this.currentTask = task
+      this.$store.dispatch('loadTaskComments', {
+        taskId: this.route.params.task_id,
+        callback: (err) => {
+          if (err) {
+          } else {
+            this.currentTaskComments = this.getCurrentTaskComments()
+          }
+        }
+      })
     }
   },
 
@@ -178,7 +202,8 @@ export default {
       'route',
       'user',
       'taskStatusOptions',
-      'getTask'
+      'getTask',
+      'getTaskComments'
     ])
   },
   methods: {
@@ -189,6 +214,9 @@ export default {
     },
     getCurrentTask () {
       return this.getTask(this.route.params.task_id)
+    },
+    getCurrentTaskComments () {
+      return this.getTaskComments(this.route.params.task_id)
     },
     updateComment () {
     },
@@ -212,6 +240,8 @@ export default {
               isLoading: false,
               isError: false
             }
+            this.currentTaskComments = this.getCurrentTaskComments()
+            this.currentTask = this.getCurrentTask()
           }
         }
       })
