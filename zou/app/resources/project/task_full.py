@@ -5,6 +5,7 @@ from zou.app.models.task import Task
 from zou.app.models.project import Project
 from zou.app.models.person import Person
 from zou.app.models.entity import Entity
+from zou.app.models.entity_type import EntityType
 from zou.app.models.task_status import TaskStatus
 from zou.app.models.task_type import TaskType
 
@@ -38,6 +39,11 @@ class TaskFullResource(BaseModelResource):
         result["task_status"] = task_status.serialize()
         entity = Entity.get(task.entity_id)
         result["entity"] = entity.serialize()
+        if entity.parent_id is not None:
+            parent = Entity.get(entity.parent_id)
+            result["entity_parent"] = parent.serialize()
+        entity_type = EntityType.get(entity.entity_type_id)
+        result["entity_type"] = entity_type.serialize()
         assignees = []
         for assignee in task.assignees:
             assignees.append(assignee.serialize())
