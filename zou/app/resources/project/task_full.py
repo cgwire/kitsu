@@ -39,8 +39,8 @@ class TaskFullResource(BaseModelResource):
         result["task_status"] = task_status.serialize()
         entity = Entity.get(task.entity_id)
         result["entity"] = entity.serialize()
-        parent = Entity.get(entity.parent_id)
-        if parent is not None:
+        if entity.parent_id is not None:
+            parent = Entity.get(entity.parent_id)
             result["entity_parent"] = parent.serialize()
         entity_type = EntityType.get(entity.entity_type_id)
         result["entity_type"] = entity_type.serialize()
