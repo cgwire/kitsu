@@ -41,6 +41,10 @@ from .resources.project.task_start import (
     TaskStartResource,
     StartTaskFromShotAssetResource
 )
+from .resources.project.tasks import (
+    CommentTaskResource,
+    TaskCommentsResource
+)
 from .resources.project.files import (
     FolderPathResource,
     FilePathResource,
@@ -253,6 +257,8 @@ def configure_api_routes(api):
 
     # Task routes
     api.add_resource(TaskFullResource, "/data/tasks/<instance_id>/full")
+    api.add_resource(CommentTaskResource, "/project/tasks/<task_id>/comment")
+    api.add_resource(TaskCommentsResource, "/data/tasks/<task_id>/comments")
     api.add_resource(TaskAssignResource, "/data/tasks/<instance_id>/assign")
     api.add_resource(TaskStartResource, "/data/tasks/<instance_id>/start")
     api.add_resource(

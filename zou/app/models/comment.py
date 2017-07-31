@@ -14,6 +14,8 @@ class Comment(db.Model, BaseMixin, SerializerMixin):
     text = db.Column(db.Text())
     data = db.Column(JSONB)
 
+    task_status_id = db.Column(
+        UUIDType(binary=False), db.ForeignKey("task_status.id"))
     person_id = db.Column(
         UUIDType(binary=False), db.ForeignKey("person.id"), nullable=False)
 
