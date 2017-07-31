@@ -27,10 +27,10 @@
 			</div>
 
       <div class="column">
-        <h2 class="subtitle validation-title">Infos</h2>
+        <h2 class="subtitle validation-title">Validation</h2>
 
         <div v-if="currentTask">
-          <div class="tabs">
+          <div class="tabs hidden">
             <ul>
               <li :class="(this.selectedTab === 'validation') ? 'is-active' : '' ">
                 <a @click="changeTab('validation')">Validation</a>
@@ -48,15 +48,19 @@
             }"
           >
             <add-comment
-              :taskCommentText="taskCommentText"
-              :updateComment="updateComment"
               :addComment="addComment"
-              :isAddCommentLoading="isAddCommentLoading"
+              :isAddCommentLoading="addCommentLoading.isLoading"
               :user="user"
-              :withButton="true"
+              :task="currentTask"
               :taskStatusOptions="taskStatusOptions"
             >
             </add-comment>
+            <comment
+              :comment="comment"
+              :key="comment.id"
+              v-for="comment in currentTaskComments"
+            >
+            </comment>
           </div>
 
           <table
@@ -133,9 +137,12 @@ export default {
         isLoading: true,
         isError: false
       },
-      isAddCommentLoading: false,
-      taskCommentText: '',
-      currentTask: null
+      addCommentLoading: {
+        isLoading: false,
+        isError: false
+      },
+      currentTask: null,
+      currentTaskComments: []
     }
   },
 
@@ -156,16 +163,34 @@ export default {
             }
           } else {
             this.taskLoading = {
-              isLoading: true,
+              isLoading: false,
               isError: false
             }
             task = this.getCurrentTask()
             this.currentTask = task
+            this.$store.dispatch('loadTaskComments', {
+              taskId: this.route.params.task_id,
+              callback: (err) => {
+                if (err) {
+                } else {
+                  this.currentTaskComments = this.getCurrentTaskComments()
+                }
+              }
+            })
           }
         }
       })
     } else {
       this.currentTask = task
+      this.$store.dispatch('loadTaskComments', {
+        taskId: this.route.params.task_id,
+        callback: (err) => {
+          if (err) {
+          } else {
+            this.currentTaskComments = this.getCurrentTaskComments()
+          }
+        }
+      })
     }
   },
 
@@ -177,7 +202,8 @@ export default {
       'route',
       'user',
       'taskStatusOptions',
-      'getTask'
+      'getTask',
+      'getTaskComments'
     ])
   },
   methods: {
@@ -189,9 +215,36 @@ export default {
     getCurrentTask () {
       return this.getTask(this.route.params.task_id)
     },
+    getCurrentTaskComments () {
+      return this.getTaskComments(this.route.params.task_id)
+    },
     updateComment () {
     },
-    addComment () {
+    addComment (comment, taskStatusId) {
+      this.addCommentLoading = {
+        isLoading: true,
+        isError: false
+      }
+      this.$store.dispatch('commentTask', {
+        taskId: this.route.params.task_id,
+        taskStatusId: taskStatusId,
+        comment: comment,
+        callback: (err) => {
+          if (err) {
+            this.addCommentLoading = {
+              isLoading: false,
+              isError: true
+            }
+          } else {
+            this.addCommentLoading = {
+              isLoading: false,
+              isError: false
+            }
+            this.currentTaskComments = this.getCurrentTaskComments()
+            this.currentTask = this.getCurrentTask()
+          }
+        }
+      })
     }
   }
 }

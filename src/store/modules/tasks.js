@@ -1,22 +1,31 @@
 import tasksApi from '../api/tasks'
+import { sortByName } from '../../lib/sorting'
 import {
   LOAD_ASSETS_END,
   LOAD_SHOTS_END,
 
   LOAD_TASK_END,
   LOAD_TASK_STATUSES_END,
+  LOAD_TASK_COMMENTS_END,
+
+  NEW_TASK_COMMENT_END,
 
   RESET_ALL
 } from '../mutation-types'
 
 const state = {
   taskMap: {},
-  taskStatuses: []
+  taskStatuses: [],
+  taskComments: {}
 }
 
 const getters = {
   getTask: (state, getters) => (id) => {
     return state.taskMap[id]
+  },
+
+  getTaskComments: (state, getters) => (id) => {
+    return state.taskComments[id]
   },
 
   getTaskStatus: (state, getters) => (id) => {
@@ -35,6 +44,12 @@ const getters = {
 }
 
 const actions = {
+  loadTaskStatuses ({ commit, state }, callback) {
+    tasksApi.getTaskStatuses((err, taskStatus) => {
+      if (!err) commit(LOAD_TASK_STATUSES_END, taskStatus)
+      if (callback) callback(err)
+    })
+  },
 
   loadTask ({ commit, state }, payload) {
     tasksApi.getTask(payload.taskId, (err, task) => {
@@ -45,10 +60,21 @@ const actions = {
     })
   },
 
-  loadTaskStatuses ({ commit, state }, callback) {
-    tasksApi.getTaskStatuses((err, taskStatus) => {
-      if (!err) commit(LOAD_TASK_STATUSES_END, taskStatus)
-      if (callback) callback(err)
+  loadTaskComments ({ commit, state }, payload) {
+    tasksApi.getTaskComments(payload.taskId, (err, comments) => {
+      if (!err) {
+        commit(LOAD_TASK_COMMENTS_END, {comments, taskId: payload.taskId})
+      }
+      if (payload.callback) payload.callback(err)
+    })
+  },
+
+  commentTask ({ commit, state }, payload) {
+    tasksApi.commentTask(payload, (err, comment) => {
+      if (!err) {
+        commit(NEW_TASK_COMMENT_END, {comment, taskId: payload.taskId})
+      }
+      if (payload.callback) payload.callback(err, comment)
     })
   }
 }
@@ -89,8 +115,22 @@ const mutations = {
     state.taskMap[task.id] = task
   },
 
+  [LOAD_TASK_COMMENTS_END] (state, {taskId, comments}) {
+    state.taskComments[taskId] = comments
+  },
+
   [LOAD_TASK_STATUSES_END] (state, taskStatuses) {
-    state.taskStatuses = taskStatuses
+    state.taskStatuses = sortByName(taskStatuses)
+  },
+
+  [NEW_TASK_COMMENT_END] (state, {comment, taskId}) {
+    if (!state.taskComments[taskId]) state.taskComments[taskId] = []
+    state.taskComments[taskId].unshift(comment)
+    state.taskMap[taskId].task_status_id = comment.task_status_id
+    state.taskMap[taskId].task_status_name = comment.task_status.name
+    state.taskMap[taskId].task_status_short_name =
+      comment.task_status.short_name
+    state.taskMap[taskId].task_status_color = comment.task_status.color
   },
 
   [RESET_ALL] (state, shots) {
