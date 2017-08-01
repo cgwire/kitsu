@@ -12,7 +12,8 @@
       <h1 class="title" v-else>
         {{ $t("productions.new_production") }}
       </h1>
-      <form>
+
+      <form v-on:submit.prevent>
         <text-field
           ref="nameField"
           :label="$t('productions.fields.name')"
@@ -28,6 +29,7 @@
         >
         </combobox>
       </form>
+
       <p class="has-text-right">
         <a
           :class="{
