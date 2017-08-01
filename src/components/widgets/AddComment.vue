@@ -12,7 +12,7 @@
       <p class="control">
         <textarea
           class="textarea"
-          placeholder="Add a comment..."
+          :placeholder="$t('comments.add_comment')"
           @keyup.enter.ctrl="addComment(text, task_status_id)"
           :disabled="isAddCommentLoading"
           v-model="text"
@@ -39,7 +39,7 @@
           }"
           @click="addComment(text, task_status_id)"
         >
-          Post status
+          {{ $t('comments.post_status') }}
         </button>
       </p>
     </div>

@@ -91,7 +91,17 @@ export default {
     delete_error: 'Une erreur est survenue lors de la suppression. Il y a probablement des données liées à cette production. Etes vous sur que cette production n\'a aucune tâche, shot ou asset lié ?'
   },
 
+  comments: {
+    retake: 'Reprise',
+    validated: 'Validé !',
+    validation_required: 'Validation requise',
+    add_comment: 'Ajouter un commentaire...',
+    post_status: 'Envoyer l\'état'
+  },
+
   tasks: {
+    preview: 'Pré-visualisation',
+    validation: 'Validation',
     create_tasks: 'Ajouter des tâches',
     create_tasks_shot: 'Ajouter des tâches pour les plans affichés',
     create_tasks_shot_explaination: 'Vous allez créer une nouvelle tâche pour chaque plan de la liste affichée. Est-ce que vous voulez continuer ?',

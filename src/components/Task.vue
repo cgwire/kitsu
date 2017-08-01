@@ -23,11 +23,15 @@
 
     <div class="columns">
       <div class="column">
-        <h2 class="subtitle">Preview</h2>
+        <h2 class="subtitle">
+          {{ $t('tasks.preview') }}
+        </h2>
 			</div>
 
       <div class="column">
-        <h2 class="subtitle validation-title">Validation</h2>
+        <h2 class="subtitle validation-title">
+          {{ $t('tasks.validation') }}
+        </h2>
 
         <div v-if="currentTask">
           <div class="tabs hidden">
