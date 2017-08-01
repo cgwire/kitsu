@@ -1,7 +1,7 @@
 <template>
   <div class="shots page">
    <div class="shots-list">
-      <h1 class="title">{{ $t('shots.title') }}</h1>
+      <page-title :text="$t('shots.title')"></page-title>
 
       <div class="level">
         <div class="level-left">
@@ -37,7 +37,7 @@
     <delete-modal
       :active="modals.isDeleteDisplayed"
       :is-loading="deleteShot.isLoading"
-      :is-error="deleteShot.isCreateError"
+      :is-error="deleteShot.isError"
       :cancel-route="'/shots'"
       :text="deleteText()"
       :error-text="$t('shots.delete_error')"
@@ -57,6 +57,18 @@
     >
     </import-modal>
 
+    <create-tasks-modal
+      :active="modals.isCreateTasksDisplayed"
+      :is-loading="loading.creatingTasks"
+      :is-error="errors.creatingTasks"
+      :cancel-route="'/shots'"
+      :title="$t('tasks.create_tasks_shot')"
+      :text="$t('tasks.create_tasks_shot_explaination')"
+      :error-text="$t('tasks.create_tasks_shot_failed')"
+      @confirm="confirmCreateTasks"
+    >
+    </create-tasks-modal>
+
   </div>
 </template>
 
@@ -65,9 +77,11 @@ import { mapGetters, mapActions } from 'vuex'
 import ShotList from './lists/ShotList.vue'
 import DeleteModal from './widgets/DeleteModal'
 import ImportModal from './modals/ImportModal'
+import CreateTasksModal from './modals/CreateTasksModal'
 import Filters from './widgets/Filters'
 import ButtonLink from './widgets/ButtonLink'
 import ButtonHrefLink from './widgets/ButtonHrefLink'
+import PageTitle from './widgets/PageTitle'
 
 export default {
   name: 'menu',
@@ -76,9 +90,11 @@ export default {
     ShotList,
     DeleteModal,
     ImportModal,
+    CreateTasksModal,
     Filters,
     ButtonLink,
-    ButtonHrefLink
+    ButtonHrefLink,
+    PageTitle
   },
 
   data () {
@@ -86,14 +102,17 @@ export default {
       modals: {
         isNewDisplayed: false,
         isDeleteDisplayed: false,
-        isImportDisplayed: false
+        isImportDisplayed: false,
+        isCreateTasksDisplayed: false
       },
       loading: {
-        importing: false,
+        creatingTasks: false,
         edit: false,
+        importing: false,
         stay: false
       },
       errors: {
+        creatingTasks: false,
         importing: false
       },
       shotToDelete: null,
@@ -201,6 +220,24 @@ export default {
       })
     },
 
+    confirmCreateTasks (form) {
+      this.loading.creatingTasks = true
+      this.errors.creatingTasks = false
+      this.$store.dispatch('createTasks', {
+        task_type_id: form.task_type_id,
+        callback: (err) => {
+          this.loading.creatingTasks = false
+          if (err) {
+            this.errors.creatingTasks = true
+          } else {
+            this.modals.isCreateTasks = false
+            this.$router.push('/shots')
+            this.$store.dispatch('loadShots')
+          }
+        }
+      })
+    },
+
     resetEditModal () {
       const form = { name: '' }
       if (this.sequences.length > 0) {
@@ -238,10 +275,15 @@ export default {
         this.modals.isDeleteDisplayed = true
       } else if (path.indexOf('import') > 0) {
         this.modals.isImportDisplayed = true
+      } else if (path.indexOf('create-tasks') > 0) {
+        this.modals.isCreateTasksDisplayed = true
       } else {
-        this.modals.isNewDisplayed = false
-        this.modals.isDeleteDisplayed = false
-        this.modals.isImportDisplayed = false
+        this.modals = {
+          isNewDisplayed: false,
+          isDeleteDisplayed: false,
+          isImportDisplayed: false,
+          isCreateTasksDisplayed: false
+        }
       }
     },
 
@@ -276,5 +318,4 @@ export default {
 .shots-list {
   margin-top: 2em;
 }
-
 </style>

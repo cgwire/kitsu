@@ -28,8 +28,10 @@ export const routes = [
           store.dispatch('loadProductionStatus', () => {
             store.dispatch('loadTaskStatuses', () => {
               store.dispatch('loadAssetTypes', () => {
-                store.dispatch('loadOpenProductions', () => {
-                  next()
+                store.dispatch('loadTaskTypes', () => {
+                  store.dispatch('loadOpenProductions', () => {
+                    next()
+                  })
                 })
               })
             })
@@ -61,9 +63,11 @@ export const routes = [
       { path: '/assets/edit/:asset_id', component: Assets },
       { path: '/assets/new', component: Assets },
       { path: '/assets/import', component: Assets },
+      { path: '/assets/create-tasks', component: Assets },
 
       { path: '/shots', component: Shots },
       { path: '/shots/import', component: Shots },
+      { path: '/shots/create-tasks', component: Shots },
 
       { path: '/asset-types', component: AssetTypes },
       { path: '/asset-types/delete/:asset_type_id', component: AssetTypes },

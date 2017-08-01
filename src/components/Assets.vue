@@ -78,6 +78,18 @@
     >
     </import-modal>
 
+    <create-tasks-modal
+      :active="modals.isCreateTasksDisplayed"
+      :is-loading="loading.creatingTasks"
+      :is-error="errors.creatingTasks"
+      :cancel-route="'/assets'"
+      :title="$t('tasks.create_tasks_asset')"
+      :text="$t('tasks.create_tasks_asset_explaination')"
+      :error-text="$t('tasks.create_tasks_asset_failed')"
+      @confirm="confirmCreateTasks"
+    >
+    </create-tasks-modal>
+
   </div>
 </template>
 
@@ -90,12 +102,14 @@ import ImportModal from './modals/ImportModal'
 import Filters from './widgets/Filters'
 import ButtonLink from './widgets/ButtonLink'
 import ButtonHrefLink from './widgets/ButtonHrefLink'
+import CreateTasksModal from './modals/CreateTasksModal'
 
 export default {
   name: 'menu',
 
   components: {
     AssetList,
+    CreateTasksModal,
     DeleteModal,
     ImportModal,
     EditAssetModal,
@@ -107,16 +121,19 @@ export default {
   data () {
     return {
       modals: {
+        isCreateTasksDisplayed: false,
+        isImportDisplayed: false,
         isNewDisplayed: false,
-        isDeleteDisplayed: false,
-        isImportDisplayed: false
+        isDeleteDisplayed: false
       },
       loading: {
+        creatingTasks: false,
         importing: false,
         edit: false,
         stay: false
       },
       errors: {
+        creatingTasks: false,
         importing: false
       },
       assetToDelete: null,
@@ -217,6 +234,25 @@ export default {
       })
     },
 
+    confirmCreateTasks (form) {
+      this.loading.creatingTasks = true
+      this.errors.creatingTasks = false
+      this.$store.dispatch('createTasks', {
+        task_type_id: form.task_type_id,
+        type: 'assets',
+        callback: (err) => {
+          this.loading.creatingTasks = false
+          if (err) {
+            this.errors.creatingTasks = true
+          } else {
+            this.modals.isCreateTasks = false
+            this.$router.push('/assets')
+            this.loadAssets()
+          }
+        }
+      })
+    },
+
     resetEditModal () {
       const form = { name: '' }
       if (this.assetTypes.length > 0) {
@@ -254,10 +290,15 @@ export default {
         this.modals.isDeleteDisplayed = true
       } else if (path.indexOf('import') > 0) {
         this.modals.isImportDisplayed = true
+      } else if (path.indexOf('create-tasks') > 0) {
+        this.modals.isCreateTasksDisplayed = true
       } else {
-        this.modals.isNewDisplayed = false
-        this.modals.isDeleteDisplayed = false
-        this.modals.isImportDisplayed = false
+        this.modals = {
+          isNewDisplayed: false,
+          isDeleteDisplayed: false,
+          isImportDisplayed: false,
+          isCreateTasksDisplayed: false
+        }
       }
     },
 

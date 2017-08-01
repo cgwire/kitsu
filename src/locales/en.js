@@ -91,6 +91,19 @@ export default {
     delete_error: 'An error occured while deleting this production. There are probably data linked to it. Are you sure this production has no task, shot or asset linked to it?'
   },
 
+  tasks: {
+    create_tasks: 'Add tasks',
+    create_tasks_shot: 'Add tasks for current shots',
+    create_tasks_shot_explaination: 'You are going to create a new task for each shot of current list for the given task type. Do you want to continue?',
+    create_tasks_shot_failed: 'A server error occured while proceeding creations.',
+    create_tasks_asset: 'Add tasks for current assets',
+    create_tasks_asset_explaination: 'You are going to create a new task for each asset of current list for the given task type. Do you want to continue?',
+    create_tasks_asset_failed: 'A server error occured while proceeding creations.',
+    fields: {
+      task_type: 'Task Type'
+    }
+  },
+
   task_types: {
     title: 'Task Types',
     edit_title: 'Edit task type',
