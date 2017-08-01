@@ -83,7 +83,7 @@ const actions = {
   createTasks ({ commit, state }, payload) {
     const data = {
       task_type_id: payload.task_type_id,
-      type: 'shots'
+      type: payload.type
     }
     tasksApi.createTasks(data, (err, tasks) => {
       if (!err) {
@@ -116,12 +116,14 @@ const mutations = {
   },
 
   [LOAD_TASK_END] (state, task) {
-    task.project_name = task.project.name
-    task.task_status_name = task.task_status.name
-    task.task_status_short_name = task.task_status.short_name
-    task.task_type_name = task.task_type.name
-    task.task_status_color = task.task_status.color
-    task.task_type_color = task.task_type.color
+    Object.assign(task, {
+      project_name: task.project.name,
+      task_status_name: task.task_status.name,
+      task_status_short_name: task.task_status.short_name,
+      task_type_name: task.task_type.name,
+      task_status_color: task.task_status.color,
+      task_type_color: task.task_type.color
+    })
     if (task.entity_type.name === 'Shot') {
       task.entity_name = `${task.entity_parent.name} / ${task.entity.name}`
     } else {
@@ -141,15 +143,16 @@ const mutations = {
   [NEW_TASK_COMMENT_END] (state, {comment, taskId}) {
     if (!state.taskComments[taskId]) state.taskComments[taskId] = []
     state.taskComments[taskId].unshift(comment)
-    state.taskMap[taskId].task_status_id = comment.task_status_id
-    state.taskMap[taskId].task_status_name = comment.task_status.name
-    state.taskMap[taskId].task_status_short_name =
-      comment.task_status.short_name
-    state.taskMap[taskId].task_status_color = comment.task_status.color
+
+    Object.assign(state.taskMap[taskId], {
+      task_status_id: comment.task_status_id,
+      task_status_name: comment.task_status.name,
+      task_status_short_name: comment.task_status.short_name,
+      task_status_color: comment.task_status.color
+    })
   },
 
-  [CREATE_TASKS_END] (state, shots) {
-  },
+  [CREATE_TASKS_END] (state, shots) {},
 
   [RESET_ALL] (state, shots) {
     state.taskMap = {}

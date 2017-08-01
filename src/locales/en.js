@@ -94,8 +94,11 @@ export default {
   tasks: {
     create_tasks: 'Add tasks',
     create_tasks_shot: 'Add tasks for current shots',
-    create_tasks_shot_explaination: 'You are going to create a new task for each shot of current list. Do you want to continue?',
+    create_tasks_shot_explaination: 'You are going to create a new task for each shot of current list for the given task type. Do you want to continue?',
     create_tasks_shot_failed: 'A server error occured while proceeding creations.',
+    create_tasks_asset: 'Add tasks for current assets',
+    create_tasks_asset_explaination: 'You are going to create a new task for each asset of current list for the given task type. Do you want to continue?',
+    create_tasks_asset_failed: 'A server error occured while proceeding creations.',
     fields: {
       task_type: 'Task Type'
     }

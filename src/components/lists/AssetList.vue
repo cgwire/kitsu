@@ -14,7 +14,16 @@
           v-for="column in validationColumns">
           {{ column.name }}
         </th>
-        <th class="actions"></th>
+
+        <th class="actions">
+          <button-link
+            class="is-small"
+            :text="$t('tasks.create_tasks')"
+            path="/assets/create-tasks"
+          >
+          </button-link>
+        </th>
+
       </tr>
     </thead>
     <tbody>
@@ -73,6 +82,7 @@ import { mapGetters, mapActions } from 'vuex'
 import ProductionNameCell from '../cells/ProductionNameCell'
 import RowActions from '../widgets/RowActions'
 import ValidationTag from '../widgets/ValidationTag'
+import ButtonLink from '../widgets/ButtonLink'
 
 export default {
   name: 'asset-list',
@@ -88,6 +98,7 @@ export default {
   components: {
     ProductionNameCell,
     RowActions,
+    ButtonLink,
     ValidationTag
   },
   computed: {
@@ -102,8 +113,10 @@ export default {
 </script>
 
 <style scoped>
-table {
+th.actions {
+  padding: 0.4em;
 }
+
 .project {
   width: 50px;
 }
@@ -125,7 +138,6 @@ td.name {
 td.type {
   font-size: 1.2em;
 }
-
 
 .validation {
   width: 150px;

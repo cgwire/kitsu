@@ -91,6 +91,19 @@ export default {
     delete_error: 'Une erreur est survenue lors de la suppression. Il y a probablement des données liées à cette production. Etes vous sur que cette production n\'a aucune tâche, shot ou asset lié ?'
   },
 
+  tasks: {
+    create_tasks: 'Ajouter des tâches',
+    create_tasks_shot: 'Ajouter des tâches pour les plans affichés',
+    create_tasks_shot_explaination: 'Vous allez créer une nouvelle tâche pour chaque plan de la liste affichée. Est-ce que vous voulez continuer ?',
+    create_tasks_shot_failed: 'Une erreur serveur est survenue pendant la création des tâches.',
+    create_tasks_asset: 'Ajouter des tâches pour les assets affichés',
+    create_tasks_asset_explaination: 'Vous allez créer une nouvelle tâche pour chaque asset de la liste affichée. Est-ce que vous voulez continuer ?',
+    create_tasks_asset_failed: 'Une erreur serveur est survenue pendant la création des tâches.',
+    fields: {
+      task_type: 'Type de tâche'
+    }
+  },
+
   task_types: {
     title: 'Types de tâches',
     edit_title: 'Modifier le type de tâches',

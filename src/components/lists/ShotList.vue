@@ -14,6 +14,7 @@
           v-for="column in validationColumns">
           {{ column.name }}
         </th>
+
         <th class="actions">
           <button-link
             class="level-item is-small"

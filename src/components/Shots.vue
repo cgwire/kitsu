@@ -62,6 +62,7 @@
       :is-loading="loading.creatingTasks"
       :is-error="errors.creatingTasks"
       :cancel-route="'/shots'"
+      :title="$t('tasks.create_tasks_shot')"
       :text="$t('tasks.create_tasks_shot_explaination')"
       :error-text="$t('tasks.create_tasks_shot_failed')"
       @confirm="confirmCreateTasks"
@@ -277,10 +278,12 @@ export default {
       } else if (path.indexOf('create-tasks') > 0) {
         this.modals.isCreateTasksDisplayed = true
       } else {
-        this.modals.isNewDisplayed = false
-        this.modals.isDeleteDisplayed = false
-        this.modals.isImportDisplayed = false
-        this.modals.isCreateTasksDisplayed = false
+        this.modals = {
+          isNewDisplayed: false,
+          isDeleteDisplayed: false,
+          isImportDisplayed: false,
+          isCreateTasksDisplayed: false
+        }
       }
     },
 
@@ -315,5 +318,4 @@ export default {
 .shots-list {
   margin-top: 2em;
 }
-
 </style>

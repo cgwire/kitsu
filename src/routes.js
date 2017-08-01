@@ -63,6 +63,7 @@ export const routes = [
       { path: '/assets/edit/:asset_id', component: Assets },
       { path: '/assets/new', component: Assets },
       { path: '/assets/import', component: Assets },
+      { path: '/assets/create-tasks', component: Assets },
 
       { path: '/shots', component: Shots },
       { path: '/shots/import', component: Shots },

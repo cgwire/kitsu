@@ -5,12 +5,11 @@
 }">
   <div class="modal-background"></div>
   <div class="modal-content">
-    <div class="box">
+    <div class="box content">
 
-      <page-title
-        :text="$t('tasks.create_tasks_shot')"
-      >
-      </page-title>
+      <page-title :text="title"></page-title>
+
+      <p>{{ text }}</p>
 
       <form v-on:submit.prevent>
         <combobox
@@ -20,10 +19,6 @@
         >
         </combobox>
       </form>
-
-      <p>
-        {{ text }}
-      </p>
 
       <p class="has-text-right">
         <a
@@ -58,7 +53,7 @@ import Combobox from '../widgets/Combobox'
 import PageTitle from '../widgets/PageTitle'
 
 export default {
-  name: 'edit-asset-modal',
+  name: 'create-task-modal',
   components: {
     PageTitle,
     Combobox
@@ -67,6 +62,7 @@ export default {
   props: [
     'onConfirmClicked',
     'text',
+    'title',
     'active',
     'cancelRoute',
     'isError',
@@ -96,6 +92,7 @@ export default {
     confirmClicked () {
       this.$emit('confirm', this.form)
     }
+
   },
 
   mounted () {
@@ -107,10 +104,6 @@ export default {
 </script>
 
 <style scoped>
-.modal-content .box p.text {
-  margin-bottom: 1em;
-}
-
 .info-message {
   margin-top: 1em;
 }
