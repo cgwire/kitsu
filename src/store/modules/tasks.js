@@ -10,6 +10,8 @@ import {
 
   NEW_TASK_COMMENT_END,
 
+  CREATE_TASKS_END,
+
   RESET_ALL
 } from '../mutation-types'
 
@@ -76,6 +78,19 @@ const actions = {
       }
       if (payload.callback) payload.callback(err, comment)
     })
+  },
+
+  createTasks ({ commit, state }, payload) {
+    const data = {
+      task_type_id: payload.task_type_id,
+      type: 'shots'
+    }
+    tasksApi.createTasks(data, (err, tasks) => {
+      if (!err) {
+        commit(CREATE_TASKS_END, tasks)
+      }
+      if (payload.callback) payload.callback(err, tasks)
+    })
   }
 }
 
@@ -133,8 +148,13 @@ const mutations = {
     state.taskMap[taskId].task_status_color = comment.task_status.color
   },
 
+  [CREATE_TASKS_END] (state, shots) {
+  },
+
   [RESET_ALL] (state, shots) {
     state.taskMap = {}
+    state.taskStatuses = []
+    state.taskComments = {}
   }
 }
 

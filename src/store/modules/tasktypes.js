@@ -1,4 +1,6 @@
 import taskTypesApi from '../api/tasktypes'
+import { sortByName } from '../../lib/sorting'
+
 import {
   LOAD_TASK_TYPES_START,
   LOAD_TASK_TYPES_ERROR,
@@ -14,12 +16,6 @@ import {
 
   RESET_ALL
 } from '../mutation-types'
-
-const sortTaskTypes = (taskTypes) => {
-  return taskTypes.sort((a, b) => {
-    return a.name.localeCompare(b.name)
-  })
-}
 
 const state = {
   taskTypes: [],
@@ -50,7 +46,11 @@ const getters = {
     return state.taskTypes.find(
       (taskType) => taskType.id === id
     )
-  }
+  },
+
+  getTaskTypeOptions: state => state.taskTypes.map(
+    (type) => { return { label: type.name, value: type.id } }
+  )
 }
 
 const actions = {
@@ -117,7 +117,7 @@ const mutations = {
     state.isTaskTypesLoading = false
     state.isTaskTypesLoadingError = false
     state.taskTypes = taskTypes
-    state.taskTypes = sortTaskTypes(state.taskTypes)
+    state.taskTypes = sortByName(state.taskTypes)
   },
 
   [EDIT_TASK_TYPE_START] (state, data) {
@@ -137,7 +137,7 @@ const mutations = {
       Object.assign(taskType, newTaskType)
     } else {
       state.taskTypes.push(newTaskType)
-      state.taskTypes = sortTaskTypes(state.taskTypes)
+      state.taskTypes = sortByName(state.taskTypes)
     }
     state.editTaskType = {
       isLoading: false,

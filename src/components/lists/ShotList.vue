@@ -14,7 +14,14 @@
           v-for="column in validationColumns">
           {{ column.name }}
         </th>
-        <th class="actions"></th>
+        <th class="actions">
+          <button-link
+            class="level-item is-small"
+            :text="$t('tasks.create_tasks')"
+            path="/shots/create-tasks"
+          >
+          </button-link>
+        </th>
       </tr>
     </thead>
     <tbody>
@@ -69,6 +76,7 @@ import { mapGetters, mapActions } from 'vuex'
 import ProductionNameCell from '../cells/ProductionNameCell'
 import ValidationTag from '../widgets/ValidationTag'
 import RowActions from '../widgets/RowActions'
+import ButtonLink from '../widgets/ButtonLink'
 
 export default {
   name: 'shot-list',
@@ -82,9 +90,10 @@ export default {
     return {}
   },
   components: {
+    ButtonLink,
     ProductionNameCell,
-    ValidationTag,
-    RowActions
+    RowActions,
+    ValidationTag
   },
   computed: {
     ...mapGetters([
@@ -100,6 +109,10 @@ export default {
 <style scoped>
 .project {
   width: 50px;
+}
+
+th.actions {
+  padding: 0.4em;
 }
 
 .name {

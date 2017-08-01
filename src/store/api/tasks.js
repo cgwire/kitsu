@@ -36,6 +36,16 @@ export default {
       .end((err, res) => {
         callback(err, res.body)
       })
-  }
+  },
 
+  createTasks (data, callback) {
+    const taskTypeId = data.task_type_id
+    const type = data.type
+    superagent
+      .post(`/api/project/${type}/task-types/${taskTypeId}/create-tasks`)
+      .send({})
+      .end((err, res) => {
+        callback(err, res.body)
+      })
+  }
 }
