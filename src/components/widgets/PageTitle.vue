@@ -4,7 +4,7 @@
 
 <script>
 export default {
-  name: 'title',
+  name: 'page-title',
   props: {
     text: {
       default: '',
