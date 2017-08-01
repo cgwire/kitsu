@@ -43,7 +43,9 @@ from .resources.project.task_start import (
 )
 from .resources.project.tasks import (
     CommentTaskResource,
-    TaskCommentsResource
+    TaskCommentsResource,
+    CreateShotTasksResource,
+    CreateAssetTasksResource
 )
 from .resources.project.files import (
     FolderPathResource,
@@ -264,6 +266,14 @@ def configure_api_routes(api):
     api.add_resource(
         StartTaskFromShotAssetResource,
         "/data/tasks/task-type/<task_type_id>/entity/<entity_id>/start"
+    )
+    api.add_resource(
+        CreateShotTasksResource,
+        "/project/shots/task-types/<task_type_id>/create-tasks"
+    )
+    api.add_resource(
+        CreateAssetTasksResource,
+        "/project/assets/task-types/<task_type_id>/create-tasks"
     )
 
     # Project routes

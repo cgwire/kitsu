@@ -1,4 +1,4 @@
-from flask import abort
+from flask import abort, request
 from flask_restful import Resource, reqparse
 from flask_login import login_required, current_user
 
@@ -7,8 +7,12 @@ from zou.app.models.task_status import TaskStatus
 from zou.app.models.comment import Comment
 from zou.app.models.person import Person
 
-from zou.app.project.exception import TaskNotFoundException
-from zou.app.project import task_info
+from zou.app.project.exception import (
+    TaskNotFoundException,
+    TaskTypeNotFoundException
+)
+from zou.app.project import task_info, shot_info, asset_info
+from zou.app.utils import query
 
 
 class CommentTaskResource(Resource):
@@ -106,3 +110,44 @@ class TaskCommentsResource(Resource):
             abort(404)
 
         return comments
+
+
+class CreateShotTasksResource(Resource):
+
+    def __init__(self):
+        Resource.__init__(self)
+
+    @login_required
+    def post(self, task_type_id):
+        try:
+            criterions = query.get_query_criterions_from_request(request)
+            shots = shot_info.get_shots(criterions)
+            task_type = task_info.get_task_type(task_type_id)
+            tasks = [task_info.create_task(task_type, shot) for shot in shots]
+
+        except TaskTypeNotFoundException:
+            abort(404)
+
+        return tasks, 201
+
+
+class CreateAssetTasksResource(Resource):
+
+    def __init__(self):
+        Resource.__init__(self)
+
+    @login_required
+    def post(self, task_type_id):
+        try:
+            criterions = query.get_query_criterions_from_request(request)
+            assets = asset_info.get_assets(criterions)
+            task_type = task_info.get_task_type(task_type_id)
+            tasks = [
+                task_info.create_task(task_type, asset.serialize())
+                for asset in assets
+            ]
+
+        except TaskTypeNotFoundException:
+            abort(404)
+
+        return tasks, 201

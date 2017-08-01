@@ -1,6 +1,8 @@
 import datetime
 
-from sqlalchemy.exc import StatementError
+from flask_login import current_user
+
+from sqlalchemy.exc import StatementError, IntegrityError
 
 from zou.app import app
 from zou.app.utils import events
@@ -14,9 +16,12 @@ from zou.app.models.project import Project
 from zou.app.models.person import Person
 from zou.app.models.entity_type import EntityType
 
-from zou.app.project.exception import TaskNotFoundException
+from zou.app.project.exception import (
+    TaskNotFoundException,
+    TaskTypeNotFoundException
+)
 
-from zou.app.project import shot_info, asset_info
+from zou.app.project import shot_info, asset_info, person_info
 
 
 def get_wip_status():
@@ -25,6 +30,10 @@ def get_wip_status():
 
 def get_to_review_status():
     return get_or_create_status(app.config["TO_REVIEW_TASK_STATUS"], "WFA")
+
+
+def get_todo_status():
+    return get_or_create_status("Todo")
 
 
 def start_task(task):
@@ -88,6 +97,42 @@ def get_task(task_id):
         raise TaskNotFoundException()
 
     return task
+
+
+def get_task_type(task_type_id):
+    try:
+        task_type = TaskType.get(task_type_id)
+    except StatementError:
+        raise TaskTypeNotFoundException()
+
+    if task_type is None:
+        raise TaskTypeNotFoundException()
+
+    return task_type.serialize()
+
+
+def create_task(task_type, entity, name="main"):
+    task_status = get_todo_status()
+    try:
+        task = Task.create(
+            name=name,
+            duration=0,
+            estimation=0,
+            completion_rate=0,
+            start_date=None,
+            end_date=None,
+            due_date=None,
+            real_start_date=None,
+            project_id=entity["project_id"],
+            task_type_id=task_type["id"],
+            task_status_id=task_status.id,
+            entity_id=entity["id"],
+            assigner_id=person_info.get_current_user().id,
+            assignees=[]
+        )
+        return task.serialize()
+    except IntegrityError:
+        pass  # Tasks already exists, no need to create it.
 
 
 def delete_task(task):
