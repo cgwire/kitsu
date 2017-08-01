@@ -1,4 +1,5 @@
 import productionsApi from '../api/productions'
+import { sortProductions } from '../../lib/sorting'
 import {
   LOAD_PRODUCTIONS_START,
   LOAD_PRODUCTIONS_ERROR,
@@ -22,16 +23,6 @@ import {
 
   RESET_ALL
 } from '../mutation-types'
-
-const sortProductions = (productions) => {
-  return productions.sort((a, b) => {
-    if (a.project_status_name === b.project_status_name) {
-      return a.name.localeCompare(b.name)
-    } else {
-      return -1 * a.project_status_name.localeCompare(b.project_status_name)
-    }
-  })
-}
 
 const state = {
   productions: [],
