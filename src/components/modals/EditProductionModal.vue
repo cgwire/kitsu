@@ -18,6 +18,7 @@
           ref="nameField"
           :label="$t('productions.fields.name')"
           v-model="form.name"
+          @enter="confirmClicked"
           v-focus
         >
         </text-field>

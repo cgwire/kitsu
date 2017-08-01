@@ -1,5 +1,5 @@
 import productionsApi from '../api/productions'
-import { sortProductions } from '../../lib/sorting'
+import { sortProductions, sortByName } from '../../lib/sorting'
 import {
   LOAD_PRODUCTIONS_START,
   LOAD_PRODUCTIONS_ERROR,
@@ -163,7 +163,7 @@ const mutations = {
   [LOAD_OPEN_PRODUCTIONS_ERROR] (state) {
   },
   [LOAD_OPEN_PRODUCTIONS_END] (state, productions) {
-    state.openProductions = productions
+    state.openProductions = sortByName(productions)
   },
 
   [LOAD_PRODUCTION_STATUS_START] (state) {
@@ -196,7 +196,9 @@ const mutations = {
       Object.assign(production, newProduction)
     } else {
       state.productions.push(newProduction)
+      state.openProductions.push(newProduction)
       state.productions = sortProductions(state.productions)
+      state.openProductions = sortByName(state.openProductions)
     }
     state.editProduction = {
       isLoading: false,
