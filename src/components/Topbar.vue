@@ -37,7 +37,7 @@
     <nav class="user-menu" ref="user-menu" v-show="!isUserMenuHidden">
       <ul>
         <li>
-          <router-link to="profile" @click.native="toggleUserMenu()">
+          <router-link to="/profile" @click.native="toggleUserMenu()">
             {{ $t("main.profile") }}
           </router-link>
         </li>
