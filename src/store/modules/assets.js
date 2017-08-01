@@ -208,11 +208,11 @@ const mutations = {
     )
     newAsset.project_name = production.name
     newAsset.tasks = []
-    newAsset.validations = {}
 
     if (asset) {
       Object.assign(asset, newAsset)
     } else {
+      newAsset.validations = {}
       state.assets.push(newAsset)
       state.assets = sortAssets(state.assets)
     }

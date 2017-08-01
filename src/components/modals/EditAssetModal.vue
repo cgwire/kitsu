@@ -104,10 +104,17 @@ export default {
 
   watch: {
     assetToEdit () {
+      this.resetForm()
       if (this.assetToEdit) {
-        this.form.name = this.assetToEdit.name
         this.form.asset_type_id = this.assetToEdit.entity_type_id
         this.form.production_id = this.assetToEdit.project_id
+      } else {
+        if (this.assetTypes.length > 0) {
+          this.form.entity_type_id = this.assetTypes[0].id
+        }
+        if (this.openProductions.length > 0) {
+          this.form.project_id = this.openProductions[0].id
+        }
       }
     }
   },
@@ -150,18 +157,28 @@ export default {
     },
     confirmClicked () {
       this.$emit('confirm', this.form)
+    },
+    resetForm () {
+      if (!this.assetToEdit || !this.assetToEdit.id) {
+        if (this.assetTypes.length > 0) {
+          this.form.entity_type_id = this.assetTypes[0].id
+        }
+        if (this.openProductions.length > 0) {
+          this.form.project_id = this.openProductions[0].id
+        }
+        this.form.name = ''
+      } else {
+        this.form = {
+          entity_type_id: this.assetToEdit.entity_type_id,
+          project_id: this.assetToEdit.project_id,
+          name: this.assetToEdit.name
+        }
+      }
     }
   },
 
   mounted () {
-    if (!this.assetToEdit || !this.assetToEdit.id) {
-      if (this.assetTypes.length > 0) {
-        this.form.entity_type_id = this.assetTypes[0].id
-      }
-      if (this.openProductions.length > 0) {
-        this.form.project_id = this.openProductions[0].id
-      }
-    }
+    this.resetForm()
   }
 }
 </script>
