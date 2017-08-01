@@ -47,7 +47,6 @@
       :is-loading-stay="loading.stay"
       :is-error="editAsset.isCreateError"
       :is-success="editAsset.isSuccess"
-      :asset-created="editAsset.assetCreated"
       :cancel-route="'/assets'"
       :asset-to-edit="assetToEdit"
       @confirm="confirmEditAsset"
@@ -194,6 +193,7 @@ export default {
           this.loading.stay = false
           if (!err) {
             this.resetEditModal()
+            this.editAsset.isSuccess = true
           } else {
             this.loading.edit = false
           }

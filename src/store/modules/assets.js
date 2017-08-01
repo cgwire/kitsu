@@ -35,6 +35,7 @@ const state = {
   isAssetsLoadingError: false,
   assetsCsvFormData: null,
 
+  assetCreated: '',
   editAsset: {
     isLoading: false,
     isError: false
@@ -57,6 +58,7 @@ const getters = {
 
   editAsset: state => state.editAsset,
   deleteAsset: state => state.deleteAsset,
+  assetCreated: state => state.assetCreated,
 
   assetsCsvFormData: state => state.assetsCsvFormData,
 
@@ -195,7 +197,7 @@ const mutations = {
   [EDIT_ASSET_END] (state, newAsset) {
     state.editAsset.isCreateError = false
     state.editAsset.isSuccess = true
-    state.editAsset.assetCreated = newAsset.name
+    state.assetCreated = newAsset.name
 
     const asset = getters.getAsset(state)(newAsset.id)
     const assetType = state.assetTypes.find(
