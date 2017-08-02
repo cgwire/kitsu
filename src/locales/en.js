@@ -91,7 +91,17 @@ export default {
     delete_error: 'An error occured while deleting this production. There are probably data linked to it. Are you sure this production has no task, shot or asset linked to it?'
   },
 
+  comments: {
+    retake: 'Retake',
+    validated: 'Validated!',
+    validation_required: 'Validation Required',
+    add_comment: 'Add a comment...',
+    post_status: 'Post status'
+  },
+
   tasks: {
+    preview: 'Preview',
+    validation: 'Validation',
     create_tasks: 'Add tasks',
     create_tasks_shot: 'Add tasks for current shots',
     create_tasks_shot_explaination: 'You are going to create a new task for each shot of current list for the given task type. Do you want to continue?',

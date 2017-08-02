@@ -6,13 +6,15 @@
   <div class="modal-background"></div>
   <div class="modal-content">
     <div class="box">
+
       <h1 class="title" v-if="personToEdit.id !== undefined">
         {{ $t("people.edit_title") }} {{ personName }}
       </h1>
       <h1 class="title" v-else>
         {{ $t("people.new_person") }}
       </h1>
-      <form>
+
+      <form v-on:submit.prevent>
         <text-field
           :label="$t('people.fields.first_name')"
           v-model="form.first_name">
@@ -30,6 +32,7 @@
           v-model="form.phone">
         </text-field>
       </form>
+
       <p class="has-text-right">
         <a
           :class="{

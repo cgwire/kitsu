@@ -15,7 +15,7 @@
         {{ $t("asset_types.new_asset_type") }}
       </h1>
 
-      <form>
+      <form v-on:submit.prevent>
         <text-field
           ref="nameField"
           :label="$t('asset_types.fields.name')"

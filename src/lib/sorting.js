@@ -22,6 +22,16 @@ export const sortShots = (shots) => {
   })
 }
 
+export const sortProductions = (productions) => {
+  return productions.sort((a, b) => {
+    if (a.project_status_name === b.project_status_name) {
+      return a.name.localeCompare(b.name)
+    } else {
+      return -1 * a.project_status_name.localeCompare(b.project_status_name)
+    }
+  })
+}
+
 export const sortByName = (entries) => {
   return entries.sort((a, b) => a.name.localeCompare(b.name))
 }

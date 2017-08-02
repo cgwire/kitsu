@@ -67,8 +67,8 @@
         <p class="error has-text-right info-message" v-if="isError">
           {{ $t("assets.edit_fail") }}
         </p>
-        <p class="success has-text-right info-message" v-if="isSuccess">
-          {{ $t("assets.new_success", {name: assetCreated}) }}
+        <p class="success has-text-right info-message">
+          {{ assetSuccessText }}
         </p>
       </p>
     </div>
@@ -102,16 +102,6 @@ export default {
     'errorText'
   ],
 
-  watch: {
-    assetToEdit () {
-      if (this.assetToEdit) {
-        this.form.name = this.assetToEdit.name
-        this.form.asset_type_id = this.assetToEdit.entity_type_id
-        this.form.production_id = this.assetToEdit.project_id
-      }
-    }
-  },
-
   data () {
     if (this.assetToEdit && this.assetToEdit.id) {
       return {
@@ -119,7 +109,8 @@ export default {
           name: this.assetToEdit.name,
           asset_type_id: this.assetToEdit.entity_type_id,
           production_id: this.assetToEdit.project_id
-        }
+        },
+        assetSuccessText: ''
       }
     } else {
       return {
@@ -127,7 +118,8 @@ export default {
           name: '',
           entity_type_id: '',
           project_id: ''
-        }
+        },
+        assetSuccessText: ''
       }
     }
   },
@@ -135,6 +127,7 @@ export default {
   computed: {
     ...mapGetters([
       'assets',
+      'assetCreated',
       'assetTypes',
       'openProductions',
       'getAssetTypeOptions',
@@ -150,19 +143,43 @@ export default {
     },
     confirmClicked () {
       this.$emit('confirm', this.form)
+    },
+    resetForm () {
+      this.assetSuccessText = ''
+      if (!this.assetToEdit || !this.assetToEdit.id) {
+        if (this.assetTypes.length > 0) {
+          this.form.entity_type_id = this.assetTypes[0].id
+        }
+        if (this.openProductions.length > 0) {
+          this.form.project_id = this.openProductions[0].id
+        }
+        this.form.name = ''
+      } else {
+        this.form = {
+          entity_type_id: this.assetToEdit.entity_type_id,
+          project_id: this.assetToEdit.project_id,
+          name: this.assetToEdit.name
+        }
+      }
     }
   },
 
   mounted () {
-    if (!this.assetToEdit || !this.assetToEdit.id) {
-      if (this.assetTypes.length > 0) {
-        this.form.entity_type_id = this.assetTypes[0].id
-      }
-      if (this.openProductions.length > 0) {
-        this.form.project_id = this.openProductions[0].id
-      }
+    this.resetForm()
+  },
+
+  watch: {
+    assetToEdit () {
+      this.resetForm()
+    },
+    assetCreated () {
+      console.log('cool')
+      this.assetSuccessText = this.$t('assets.new_success', {
+        name: this.assetCreated
+      })
     }
   }
+
 }
 </script>
 

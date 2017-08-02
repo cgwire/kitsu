@@ -11,7 +11,7 @@
         {{ $t("main.csv.import_title") }}
       </h1>
 
-      <p class="description">
+      <p class="description" v-on:submit.prevent>
         {{ $t("main.csv.required_fields") }}
         <ul>
           <li v-for="column in columns">

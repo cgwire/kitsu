@@ -24,17 +24,17 @@
       </p>
       <p v-if="comment.task_status.name === 'Retake'">
         <span :style="{'color': comment.task_status.color}">
-        RETAKE
+        {{ $t('comments.retake').toUpperCase }}
         </span>
       </p>
       <p v-if="comment.task_status.name === 'Waiting For Approval'">
         <span :style="{'color': comment.task_status.color}">
-        Validation Required
+        {{ $t('comments.validation_required') }}
         </span>
       </p>
       <p v-if="comment.task_status.name === 'Done'">
         <span :style="{'color': comment.task_status.color}">
-        Validated
+        {{ $t('comments.validated') }}
         </span>
       </p>
       <p class="version" v-if="comment.task_status_name === 'RETAKE'">
