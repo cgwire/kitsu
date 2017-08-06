@@ -57,6 +57,14 @@ export const routes = [
       { path: '/tasks/edit/:task_type_id', component: TaskTypes },
       { path: '/tasks/new', component: TaskTypes },
       { path: '/tasks/:task_id', component: Task },
+      {
+        path: '/tasks/:task_id/comments/:comment_id/add-preview',
+        component: Task
+      },
+      {
+        path: '/tasks/:task_id/previews/:preview_id',
+        component: Task
+      },
 
       { path: '/assets', component: Assets },
       { path: '/assets/delete/:asset_id', component: Assets },
