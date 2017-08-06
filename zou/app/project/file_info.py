@@ -3,10 +3,12 @@ from zou.app import app
 
 from zou.app.models.working_file import WorkingFile
 from zou.app.models.output_file import OutputFile
+from zou.app.models.preview_file import PreviewFile
 
 from zou.app.project.exception import (
     WorkingFileNotFoundException,
     OutputFileNotFoundException,
+    PreviewFileNotFoundException,
     NoOutputFileException
 )
 
@@ -122,3 +124,15 @@ def get_next_output_revision_number(task):
         revision = 1
 
     return revision
+
+
+def get_preview_file(preview_file_id):
+    try:
+        preview_file = PreviewFile.get(preview_file_id)
+    except StatementError:
+        raise PreviewFileNotFoundException()
+
+    if preview_file is None:
+        raise PreviewFileNotFoundException()
+
+    return preview_file

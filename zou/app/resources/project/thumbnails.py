@@ -25,6 +25,7 @@ class BaseCreateThumbnailResource(Resource):
             abort(404)
 
         uploaded_file = request.files["file"]
+        print(self.size)
         thumbnail_utils.save_file(
             self.data_type,
             instance_id,
@@ -50,7 +51,7 @@ class BaseThumbnailResource(Resource):
 
     @login_required
     def get(self, instance_id):
-        if self.is_exist(instance_id) is None:
+        if not self.is_exist(instance_id):
             abort(404)
 
         return send_from_directory(
@@ -158,3 +159,26 @@ class WorkingFileThumbnailResource(BaseThumbnailResource):
 
     def is_exist(self, working_file_id):
         return file_info.get_working_file(working_file_id) is not None
+
+
+class CreatePreviewFileThumbnailResource(BaseCreateThumbnailResource):
+
+    def __init__(self):
+        BaseCreateThumbnailResource.__init__(
+            self,
+            "preview-files",
+            thumbnail_utils.PREVIEW_SIZE
+        )
+
+    def is_exist(self, preview_file_id):
+        return file_info.get_preview_file(preview_file_id) is not None
+
+
+class PreviewFileThumbnailResource(BaseThumbnailResource):
+
+    def __init__(self):
+        BaseThumbnailResource.__init__(self, "preview-files")
+
+    def is_exist(self, preview_file_id):
+        print(preview_file_id)
+        return file_info.get_preview_file(preview_file_id) is not None

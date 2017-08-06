@@ -42,6 +42,10 @@ class OutputFileNotFoundException(Exception):
     pass
 
 
+class PreviewFileNotFoundException(Exception):
+    pass
+
+
 class WrongFileTreeFileException(Exception):
     pass
 

@@ -44,6 +44,8 @@ from .resources.project.task_start import (
 from .resources.project.tasks import (
     CommentTaskResource,
     TaskCommentsResource,
+    TaskPreviewsResource,
+    AddPreviewResource,
     CreateShotTasksResource,
     CreateAssetTasksResource
 )
@@ -66,7 +68,9 @@ from .resources.project.thumbnails import (
     CreatePersonThumbnailResource,
     PersonThumbnailResource,
     CreateWorkingFileThumbnailResource,
-    WorkingFileThumbnailResource
+    WorkingFileThumbnailResource,
+    CreatePreviewFileThumbnailResource,
+    PreviewFileThumbnailResource
 )
 from .resources.project.projects import OpenProjectsResource
 
@@ -261,6 +265,7 @@ def configure_api_routes(api):
     api.add_resource(TaskFullResource, "/data/tasks/<instance_id>/full")
     api.add_resource(CommentTaskResource, "/project/tasks/<task_id>/comment")
     api.add_resource(TaskCommentsResource, "/data/tasks/<task_id>/comments")
+    api.add_resource(TaskPreviewsResource, "/data/tasks/<task_id>/previews")
     api.add_resource(TaskAssignResource, "/data/tasks/<instance_id>/assign")
     api.add_resource(TaskStartResource, "/data/tasks/<instance_id>/start")
     api.add_resource(
@@ -274,6 +279,10 @@ def configure_api_routes(api):
     api.add_resource(
         CreateAssetTasksResource,
         "/project/assets/task-types/<task_type_id>/create-tasks"
+    )
+    api.add_resource(
+        AddPreviewResource,
+        "/project/tasks/<task_id>/comments/<comment_id>/add-preview"
     )
 
     # Project routes
@@ -362,6 +371,14 @@ def configure_api_routes(api):
     api.add_resource(
         WorkingFileThumbnailResource,
         "/thumbnails/working-files/<instance_id>.png"
+    )
+    api.add_resource(
+        CreatePreviewFileThumbnailResource,
+        "/thumbnails/preview-files/<instance_id>"
+    )
+    api.add_resource(
+        PreviewFileThumbnailResource,
+        "/thumbnails/preview-files/<instance_id>.png"
     )
 
     # Shotgun Import routes
