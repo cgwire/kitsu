@@ -430,7 +430,7 @@ class ApiDBTestCase(ApiTestCase):
 
     def generate_fixture_shot_task(self, name="Master"):
         self.shot_task = Task(
-            name="Master",
+            name=name,
             project_id=self.project.id,
             task_type_id=self.task_type_animation.id,
             task_status_id=self.task_status.id,

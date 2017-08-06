@@ -22,6 +22,10 @@ class TaskNotFoundException(Exception):
     pass
 
 
+class TaskTypeNotFoundException(Exception):
+    pass
+
+
 class PersonNotFoundException(Exception):
     pass
 

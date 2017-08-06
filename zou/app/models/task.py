@@ -40,5 +40,15 @@ class Task(db.Model, BaseMixin, SerializerMixin):
         secondary=association_table
     )
 
+    __table_args__ = (
+        db.UniqueConstraint(
+            'name',
+            'project_id',
+            'task_type_id',
+            'entity_id',
+            name='task_uc'
+        ),
+    )
+
     def assignees_as_string(self):
         return ", ".join([x.full_name() for x in self.assignees])

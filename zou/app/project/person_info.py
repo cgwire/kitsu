@@ -1,5 +1,7 @@
 from sqlalchemy.exc import StatementError
 
+from flask_login import current_user
+
 from zou.app.models.person import Person
 from zou.app.project.exception import PersonNotFoundException
 
@@ -40,3 +42,10 @@ def get_by_email(email):
     if person is None:
         raise PersonNotFoundException()
     return person
+
+
+def get_current_user():
+    if current_user:
+        return current_user
+    else:
+        return Person.query.first()
