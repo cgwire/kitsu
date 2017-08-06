@@ -425,14 +425,6 @@ export default {
 </script>
 
 <style scoped>
-.shots-list {
-  margin-top: 2em;
-}
-</style>
-}
-</script>
-
-<style scoped>
 .title {
   margin-top: 1em;
 }
