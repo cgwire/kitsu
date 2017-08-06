@@ -25,6 +25,14 @@ export default {
       })
   },
 
+  getTaskPreviews (taskId, callback) {
+    superagent
+      .get(`/api/data/tasks/${taskId}/previews`)
+      .end((err, res) => {
+        callback(err, res.body)
+      })
+  },
+
   commentTask (data, callback) {
     const commentData = {
       task_status_id: data.taskStatusId,
@@ -44,6 +52,26 @@ export default {
     superagent
       .post(`/api/project/${type}/task-types/${taskTypeId}/create-tasks`)
       .send({})
+      .end((err, res) => {
+        callback(err, res.body)
+      })
+  },
+
+  addPreview (data, callback) {
+    const taskId = data.taskId
+    const commentId = data.commentId
+    superagent
+      .post(`/api/project/tasks/${taskId}/comments/${commentId}/add-preview`)
+      .send({})
+      .end((err, res) => {
+        callback(err, res.body)
+      })
+  },
+
+  uploadPreview (previewId, formData, callback) {
+    superagent
+      .post(`/api/thumbnails/preview-files/${previewId}`)
+      .send(formData)
       .end((err, res) => {
         callback(err, res.body)
       })
