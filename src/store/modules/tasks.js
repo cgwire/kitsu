@@ -12,13 +12,19 @@ import {
 
   CREATE_TASKS_END,
 
+  PREVIEW_FILE_SELECTED,
+  ADD_PREVIEW_END,
+
   RESET_ALL
 } from '../mutation-types'
 
 const state = {
   taskMap: {},
   taskStatuses: [],
-  taskComments: {}
+  taskComments: {},
+  taskPreviews: {},
+
+  previewFormData: null
 }
 
 const getters = {
@@ -28,6 +34,16 @@ const getters = {
 
   getTaskComments: (state, getters) => (id) => {
     return state.taskComments[id]
+  },
+
+  getTaskPreviews: (state, getters) => (id) => {
+    return state.taskPreviews[id]
+  },
+
+  getTaskComment: (state, getters) => (taskId, commentId) => {
+    return state.taskComments[taskId].find(
+      (comment) => comment.id === commentId
+    )
   },
 
   getTaskStatus: (state, getters) => (id) => {
@@ -91,7 +107,29 @@ const actions = {
       }
       if (payload.callback) payload.callback(err, tasks)
     })
+  },
+
+  addPreview ({ commit, state }, payload) {
+    tasksApi.addPreview(payload, (err, preview) => {
+      if (err && payload.callback) {
+        payload.callback(err)
+      } else {
+        tasksApi.uploadPreview(preview.id, state.previewFormData, (err) => {
+          if (!err) {
+            commit(ADD_PREVIEW_END, preview)
+          }
+          if (payload.callback) {
+            payload.callback(err, {
+              preview,
+              taskId: payload.taskId,
+              commentId: payload.commentId
+            })
+          }
+        })
+      }
+    })
   }
+
 }
 
 const mutations = {
@@ -134,6 +172,10 @@ const mutations = {
 
   [LOAD_TASK_COMMENTS_END] (state, {taskId, comments}) {
     state.taskComments[taskId] = comments
+    state.taskPreviews[taskId] = comments.reduce((previews, comment) => {
+      if (comment.preview) previews.push(comment.preview)
+      return previews
+    }, [])
   },
 
   [LOAD_TASK_STATUSES_END] (state, taskStatuses) {
@@ -152,12 +194,23 @@ const mutations = {
     })
   },
 
-  [CREATE_TASKS_END] (state, shots) {},
+  [CREATE_TASKS_END] (state, tasks) {},
+
+  [PREVIEW_FILE_SELECTED] (state, formData) {
+    state.previewFormData = formData
+  },
+  [ADD_PREVIEW_END] (state, {preview, taskId, commentId}) {
+    state.taskPreviews[taskId] = [preview].concat(state.taskPreviews[taskId])
+    const comment = getters.getTaskComment(taskId, commentId)
+    comment.preview = preview
+  },
 
   [RESET_ALL] (state, shots) {
     state.taskMap = {}
     state.taskStatuses = []
     state.taskComments = {}
+    state.taskPreviews = {}
+    state.previewFormData = null
   }
 }
 

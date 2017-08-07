@@ -7,7 +7,12 @@
              {{ currentTask ? currentTask.entity_name : 'Loading...'}}
            </div>
            <div class="level-item" v-if="currentTask">
-             <span class="tag animation is-medium">
+             <span
+               class="tag is-medium"
+               :style="{
+                 'background-color': currentTask.task_type_color,
+                 color: 'white'
+               }">
                {{ currentTask.task_type_name }}
              </span>
            </div>
@@ -26,7 +31,22 @@
         <h2 class="subtitle">
           {{ $t('tasks.preview') }}
         </h2>
+        <div class="preview-picture">
+          <img
+            v-if="currentTaskPreviews.length > 0"
+            :src="getPreviewPath()" />
+        </div>
+        <div class="preview-list">
+          <preview-row
+            :preview="preview"
+            :taskId="currentTask.id"
+            :key="preview.id"
+            v-for="preview in currentTaskPreviews"
+          >
+          </preview-row>
+        </div>
 			</div>
+
 
       <div class="column">
         <h2 class="subtitle validation-title">
@@ -113,6 +133,18 @@
 
 			</div>
     </div>
+
+    <add-preview-modal
+      :active="display.addPreview"
+      :is-loading="loading.addPreview"
+      :is-error="errors.addPreview"
+      :cancel-route="currentTask ? '/tasks/' + currentTask.id : ''"
+      :form-data="addPreviewFormData"
+      @fileselected="selectFile"
+      @confirm="createPreview"
+    >
+    </add-preview-modal>
+
   </div>
 </template>
 
@@ -122,7 +154,9 @@ import PeopleAvatar from './widgets/PeopleAvatar'
 import PeopleName from './widgets/PeopleName'
 import AddComment from './widgets/AddComment'
 import Comment from './widgets/Comment'
+import PreviewRow from './widgets/PreviewRow'
 import ValidationTag from './widgets/ValidationTag.vue'
+import AddPreviewModal from './modals/AddPreviewModal.vue'
 
 export default {
   name: 'task',
@@ -131,7 +165,9 @@ export default {
     PeopleAvatar,
     Comment,
     ValidationTag,
-    PeopleName
+    PeopleName,
+    PreviewRow,
+    AddPreviewModal
   },
 
   data () {
@@ -145,8 +181,19 @@ export default {
         isLoading: false,
         isError: false
       },
+      display: {
+        addPreview: false
+      },
+      loading: {
+        addPreview: false
+      },
+      errors: {
+        addPreview: false
+      },
       currentTask: null,
-      currentTaskComments: []
+      currentTaskComments: [],
+      currentTaskPreviews: [],
+      addPreviewFormData: null
     }
   },
 
@@ -178,6 +225,8 @@ export default {
                 if (err) {
                 } else {
                   this.currentTaskComments = this.getCurrentTaskComments()
+                  this.currentTaskPreviews = this.getCurrentTaskPreviews()
+                  this.currentComment = this.getCurrentComment()
                 }
               }
             })
@@ -192,6 +241,8 @@ export default {
           if (err) {
           } else {
             this.currentTaskComments = this.getCurrentTaskComments()
+            this.currentTaskPreviews = this.getCurrentTaskPreviews()
+            this.currentComment = this.getCurrentComment()
           }
         }
       })
@@ -207,9 +258,12 @@ export default {
       'user',
       'taskStatusOptions',
       'getTask',
-      'getTaskComments'
+      'getTaskComments',
+      'getTaskPreviews',
+      'getTaskComment'
     ])
   },
+
   methods: {
     ...mapActions([
     ]),
@@ -219,10 +273,27 @@ export default {
     getCurrentTask () {
       return this.getTask(this.route.params.task_id)
     },
+    getCurrentComment () {
+      if (this.route.params.comment_id) {
+        return this.getTaskComment(
+          this.route.params.task_id,
+          this.route.params.comment_id
+        )
+      }
+    },
     getCurrentTaskComments () {
       return this.getTaskComments(this.route.params.task_id)
     },
-    updateComment () {
+    getCurrentTaskPreviews () {
+      return this.getTaskPreviews(this.route.params.task_id)
+    },
+    getPreviewPath () {
+      const previewId = this.route.params.preview_id
+      if (previewId) {
+        return `/api/thumbnails/preview-files/${previewId}.png`
+      } else {
+        return `/api/thumbnails/preview-files/${this.currentTaskPreviews[0].id}.png`
+      }
     },
     addComment (comment, taskStatusId) {
       this.addCommentLoading = {
@@ -245,21 +316,58 @@ export default {
               isError: false
             }
             this.currentTaskComments = this.getCurrentTaskComments()
+            this.currentTaskPreviews = this.getCurrentTaskPreviews()
             this.currentTask = this.getCurrentTask()
           }
         }
       })
+    },
+    handleModalsDisplay () {
+      const path = this.$store.state.route.path
+
+      if (path.indexOf('add-preview') > 0) {
+        this.display.addPreview = true
+      } else {
+        this.display.addPreview = false
+        this.currentComment = null
+      }
+    },
+    selectFile (formData) {
+      this.$store.commit('PREVIEW_FILE_SELECTED', formData)
+    },
+    createPreview () {
+      this.errors.addPreview = false
+      this.loading.addPreview = true
+      this.$store.dispatch('addPreview', {
+        taskId: this.route.params.task_id,
+        commentId: this.route.params.comment_id,
+        callback: (err) => {
+          if (err) {
+            this.errors.addPreview = true
+          } else {
+            this.$router.push(`/tasks/${this.route.params.task_id}`)
+          }
+          this.loading.addPreview = false
+        }
+      })
     }
+  },
+  mounted () { this.handleModalsDisplay() },
+  watch: {
+    $route () { this.handleModalsDisplay() }
   }
 }
 </script>
 
 <style scoped>
-.animation {
-  background-color: #7986CB;
-  color: white;
+.shots-list {
+  margin-top: 2em;
 }
+</style>
+}
+</script>
 
+<style scoped>
 .title {
   margin-top: 1em;
 }

@@ -109,6 +109,9 @@ export default {
     create_tasks_asset: 'Add tasks for current assets',
     create_tasks_asset_explaination: 'You are going to create a new task for each asset of current list for the given task type. Do you want to continue?',
     create_tasks_asset_failed: 'A server error occured while proceeding creations.',
+    add_preview: 'Add preview',
+    add_preview_error: 'An error occured while adding preview.',
+    select_preview_file: 'Please select a picture from your hard drive to be used as a preview for the current task:',
     fields: {
       task_type: 'Task Type'
     }
@@ -159,7 +162,7 @@ export default {
     title: 'Shots',
     edit_title: 'Edit shot',
     number: 'shot | shots',
-    new_shot: 'Add an shot',
+    new_shot: 'Add a shot',
     edit_fail: 'Creation or edition failed, an error occured.',
     new_success: 'Shot {name} successfully created.',
     fields: {
@@ -175,5 +178,10 @@ export default {
   server_down: {
     title: 'Kitsu encountered an error while reaching its data API.',
     text: 'Please contact your vendor support, your system administrator or your IT department to understand what is going wrong.'
+  },
+
+  not_found: {
+    title: 'Page not found... are your looking for something you deleted?',
+    text: 'There was something wrong with the link you clicked on, we encourage you to come back on the home page.'
   }
 }
