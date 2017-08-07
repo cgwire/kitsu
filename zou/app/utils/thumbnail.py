@@ -7,6 +7,7 @@ from PIL import Image
 
 RECTANGLE_SIZE = 150, 100
 SQUARE_SIZE = 100, 100
+PREVIEW_SIZE = 1200, 675
 
 
 def save_file(data_type, instance_id, file_to_save, size=RECTANGLE_SIZE):

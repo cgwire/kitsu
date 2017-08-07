@@ -6,6 +6,7 @@ from zou.app.models.task import Task
 from zou.app.models.task_status import TaskStatus
 from zou.app.models.comment import Comment
 from zou.app.models.person import Person
+from zou.app.models.preview_file import PreviewFile
 
 from zou.app.project.exception import (
     TaskNotFoundException,
@@ -60,6 +61,54 @@ class CommentTaskResource(Resource):
         )
 
 
+class AddPreviewResource(Resource):
+
+    def __init__(self):
+        Resource.__init__(self)
+
+    @login_required
+    def post(self, task_id, comment_id):
+        task = Task.get(task_id)
+        comment = Comment.get(comment_id)
+        task_status = TaskStatus.get(comment.task_status_id)
+        person = Person.get(current_user.id)
+
+        if task_status.short_name != "wfa":
+            return {"error": "Comment status is not waiting for approval."}, 400
+
+        revision = task_info.get_next_preview_revision(task_id)
+        preview = PreviewFile.create(
+            name=task.name,
+            revision=revision,
+            source="webgui",
+            task_id=task.id,
+            person_id=person.id
+        )
+        comment.update({"preview_file_id": preview.id})
+
+        return preview.serialize(), 201
+
+
+class TaskPreviewsResource(Resource):
+
+    def __init__(self):
+        Resource.__init__(self)
+
+    @login_required
+    def get(self, task_id):
+        try:
+            task = task_info.get_task(task_id)
+            previews = PreviewFile.filter_by(
+                task_id=task.id
+            ).order_by(
+                PreviewFile.revision.desc()
+            )
+        except TaskNotFoundException:
+            abort(404)
+
+        return PreviewFile.serialize_list(previews)
+
+
 class TaskCommentsResource(Resource):
 
     def __init__(self):
@@ -92,6 +141,7 @@ class TaskCommentsResource(Resource):
                     person_first_name,
                     person_last_name
                 ) = result
+
                 comment_dict = comment.serialize()
                 comment_dict["person"] = {
                     "first_name": person_first_name,
@@ -104,6 +154,14 @@ class TaskCommentsResource(Resource):
                     "color": task_status_color,
                     "id": str(comment.task_status_id)
                 }
+
+                if comment.preview_file_id is not None:
+                    preview = PreviewFile.get(comment.preview_file_id)
+                    comment_dict["preview"] = {
+                        "id": str(preview.id),
+                        "revision": preview.revision
+                    }
+
                 comments.append(comment_dict)
 
         except TaskNotFoundException:

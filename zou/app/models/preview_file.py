@@ -7,10 +7,13 @@ from zou.app.models.base import BaseMixin
 
 class PreviewFile(db.Model, BaseMixin, SerializerMixin):
     name = db.Column(db.String(250))
+    revision = db.Column(db.Integer(), default=1)
     description = db.Column(db.Text())
+
     source = db.Column(db.String(40))
     shotgun_id = db.Column(db.Integer, unique=True)
 
+    url = db.Column(db.String(600))
     uploaded_movie_url = db.Column(db.String(600))
     uploaded_movie_name = db.Column(db.String(150))
 
@@ -27,7 +30,7 @@ class PreviewFile(db.Model, BaseMixin, SerializerMixin):
         db.UniqueConstraint(
             "name",
             "task_id",
-            "source_file_id",
+            "revision",
             name="preview_uc"
         ),
     )

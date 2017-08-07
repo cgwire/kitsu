@@ -15,6 +15,7 @@ from zou.app.models.task_status import TaskStatus
 from zou.app.models.project import Project
 from zou.app.models.person import Person
 from zou.app.models.entity_type import EntityType
+from zou.app.models.preview_file import PreviewFile
 
 from zou.app.project.exception import (
     TaskNotFoundException,
@@ -241,3 +242,17 @@ def get_or_create_department(name):
         )
         departmemt.save()
     return departmemt
+
+
+def get_next_preview_revision(task_id):
+    preview_files = PreviewFile.query.filter_by(
+        task_id=task_id
+    ).order_by(
+        PreviewFile.revision.desc()
+    ).all()
+
+    revision = 1
+    if len(preview_files) > 0:
+        revision = preview_files[0].revision + 1
+
+    return revision
