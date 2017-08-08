@@ -127,14 +127,14 @@ const actions = {
       } else {
         tasksApi.uploadPreview(preview.id, state.previewFormData, (err) => {
           if (!err) {
-            commit(ADD_PREVIEW_END, preview)
-          }
-          if (payload.callback) {
-            payload.callback(err, {
+            commit(ADD_PREVIEW_END, {
               preview,
               taskId: payload.taskId,
               commentId: payload.commentId
             })
+          }
+          if (payload.callback) {
+            payload.callback(err, preview)
           }
         })
       }
@@ -213,14 +213,13 @@ const mutations = {
 
   [CREATE_TASKS_END] (state, tasks) {},
 
-  [CREATE_TASKS_END] (state, tasks) {},
-
   [PREVIEW_FILE_SELECTED] (state, formData) {
     state.previewFormData = formData
   },
   [ADD_PREVIEW_END] (state, {preview, taskId, commentId}) {
     state.taskPreviews[taskId] = [preview].concat(state.taskPreviews[taskId])
-    const comment = getters.getTaskComment(taskId, commentId)
+    const getTaskComment = getters.getTaskComment(state, getters)
+    const comment = getTaskComment(taskId, commentId)
     comment.preview = preview
   },
 

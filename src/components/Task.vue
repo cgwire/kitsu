@@ -92,7 +92,7 @@
               :taskStatusOptions="taskStatusOptions"
             >
             </add-comment>
-            <div v-if="currentTaskComments.length > 0">
+            <div class="comments" v-if="currentTaskComments.length > 0">
               <comment
                 :comment="comment"
                 :key="comment.id"
@@ -393,20 +393,23 @@ export default {
         this.currentComment = null
       }
     },
+
     selectFile (formData) {
       this.$store.commit('PREVIEW_FILE_SELECTED', formData)
     },
+
     createPreview () {
       this.errors.addPreview = false
       this.loading.addPreview = true
       this.$store.dispatch('addPreview', {
         taskId: this.route.params.task_id,
         commentId: this.route.params.comment_id,
-        callback: (err) => {
+        callback: (err, preview) => {
           if (err) {
             this.errors.addPreview = true
           } else {
-            this.$router.push(`/tasks/${this.route.params.task_id}`)
+            this.$router.push(`/tasks/${this.route.params.task_id}` +
+                              `/previews/${preview.id}`)
           }
           this.loading.addPreview = false
         }
@@ -465,6 +468,11 @@ video {
   overflow: hidden;
 }
 
+.preview-row {
+  margin-bottom: 0.5em;
+}
+
+.comments,
 .no-comment {
   margin-top: 2em;
 }

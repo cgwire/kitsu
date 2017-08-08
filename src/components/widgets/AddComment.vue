@@ -13,9 +13,10 @@
         <textarea
           class="textarea"
           :placeholder="$t('comments.add_comment')"
-          @keyup.enter.ctrl="addComment(text, task_status_id)"
+          @keyup.enter.ctrl="runAddComment(text, task_status_id)"
           :disabled="isAddCommentLoading"
           v-model="text"
+          ref="commentTextarea"
           v-focus>
         </textarea>
         <span class="select">
@@ -37,7 +38,7 @@
             'button': true,
             'is-loading': isAddCommentLoading
           }"
-          @click="addComment(text, task_status_id)"
+          @click="runAddComment(text, task_status_id)"
         >
           {{ $t('comments.post_status') }}
         </button>
@@ -83,6 +84,10 @@ export default {
     }
   },
   methods: {
+    runAddComment (text, taskStatusId) {
+      this.addComment(text, taskStatusId)
+      this.text = ''
+    },
     updateValue (value) {
       this.task_status_id = this.$refs.statusSelect.value
     }
