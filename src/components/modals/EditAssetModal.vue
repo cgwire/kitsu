@@ -97,7 +97,6 @@ export default {
     'isLoading',
     'isLoadingStay',
     'isSuccess',
-    'assetCreated',
     'assetToEdit',
     'errorText'
   ],
@@ -128,6 +127,7 @@ export default {
     ...mapGetters([
       'assets',
       'assetCreated',
+
       'assetTypes',
       'openProductions',
       'getAssetTypeOptions',
@@ -173,7 +173,6 @@ export default {
       this.resetForm()
     },
     assetCreated () {
-      console.log('cool')
       this.assetSuccessText = this.$t('assets.new_success', {
         name: this.assetCreated
       })
