@@ -45,7 +45,7 @@
             v-if="currentTaskPreviews.length > 0"
             :src="getPreviewPath()" />
         </div>
-        <div class="preview-list">
+        <div class="preview-list" v-if="currentTaskPreviews.length > 0">
           <preview-row
             :preview="preview"
             :taskId="currentTask ? currentTask.id : ''"
@@ -53,6 +53,11 @@
             v-for="preview in currentTaskPreviews"
           >
           </preview-row>
+        </div>
+        <div v-else>
+          <em>
+            {{ $t('tasks.no_preview')}}
+          </em>
         </div>
 			</div>
 
@@ -87,12 +92,19 @@
               :taskStatusOptions="taskStatusOptions"
             >
             </add-comment>
-            <comment
-              :comment="comment"
-              :key="comment.id"
-              v-for="comment in currentTaskComments"
-            >
-            </comment>
+            <div v-if="currentTaskComments.length > 0">
+              <comment
+                :comment="comment"
+                :key="comment.id"
+                v-for="comment in currentTaskComments"
+              >
+              </comment>
+            </div>
+            <div class="no-comment" v-else>
+              <em>
+                {{ $t('tasks.no_comment')}}
+              </em>
+            </div>
           </div>
 
           <table
@@ -451,5 +463,9 @@ video {
 
 .page {
   overflow: hidden;
+}
+
+.no-comment {
+  margin-top: 2em;
 }
 </style>

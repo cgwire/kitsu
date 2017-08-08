@@ -101,7 +101,9 @@ export default {
   },
 
   tasks: {
-    preview: 'Preview',
+    preview: 'Previews',
+    no_preview: 'There is currently no preview for this task.',
+    no_comment: 'There is currently no comment for this task.',
     validation: 'Validation',
     create_tasks: 'Add tasks',
     create_tasks_shot: 'Add tasks for current shots',
