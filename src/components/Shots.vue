@@ -128,6 +128,7 @@ export default {
         'Project',
         'Episode',
         'Sequence',
+        'Name',
         'Description',
         'FPS',
         'Frame In',
