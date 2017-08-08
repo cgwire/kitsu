@@ -147,7 +147,8 @@ export default {
       columns: [
         'Project',
         'Category',
-        'Name'
+        'Name',
+        'Description'
       ],
       assetFilterTypes: [
         'Type'
