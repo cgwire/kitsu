@@ -178,8 +178,8 @@ export default {
     uploadImportFile () {
       this.$store.dispatch('uploadPersonFile', (err) => {
         if (!err) {
-          this.$store.dispatch('hidePersonImportModal')
           this.$store.dispatch('loadPeople')
+          this.$router.push('/people')
         }
       })
     },

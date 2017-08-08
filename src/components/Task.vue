@@ -23,6 +23,15 @@
              ></validation-tag>
            </div>
          </div>
+         <div class="level-right">
+           <button-link
+             class="level-item"
+             text=""
+             icon="fa-trash"
+             :path="currentTask ? `/tasks/${currentTask.id}/delete` : ''"
+           >
+           </button-link>
+         </div>
        </div>
     </h1>
 
@@ -39,7 +48,7 @@
         <div class="preview-list">
           <preview-row
             :preview="preview"
-            :taskId="currentTask.id"
+            :taskId="currentTask ? currentTask.id : ''"
             :key="preview.id"
             v-for="preview in currentTaskPreviews"
           >
@@ -57,8 +66,7 @@
           <div class="tabs hidden">
             <ul>
               <li :class="(this.selectedTab === 'validation') ? 'is-active' : '' ">
-                <a @click="changeTab('validation')">Validation</a>
-              </li>
+                <a @click="changeTab('validation')">Validation</a> </li>
               <li :class="(this.selectedTab === 'metadatas') ? 'is-active' : '' ">
                 <a @click="changeTab('metadatas')">Metadatas</a></li>
               </li>
@@ -145,6 +153,17 @@
     >
     </add-preview-modal>
 
+    <delete-modal
+      :active="display.deleteTask"
+      :is-loading="loading.deleteTask"
+      :is-error="errors.deleteTask"
+      :cancel-route="currentTask ? `/tasks/${currentTask.id}` : ''"
+      :text="deleteText"
+      :error-text="$t('tasks.delete_error')"
+      @confirm="confirmDeleteTask"
+    >
+    </delete-modal>
+
   </div>
 </template>
 
@@ -155,19 +174,23 @@ import PeopleName from './widgets/PeopleName'
 import AddComment from './widgets/AddComment'
 import Comment from './widgets/Comment'
 import PreviewRow from './widgets/PreviewRow'
-import ValidationTag from './widgets/ValidationTag.vue'
-import AddPreviewModal from './modals/AddPreviewModal.vue'
+import ValidationTag from './widgets/ValidationTag'
+import AddPreviewModal from './modals/AddPreviewModal'
+import DeleteModal from './widgets/DeleteModal'
+import ButtonLink from './widgets/ButtonLink'
 
 export default {
   name: 'task',
   components: {
     AddComment,
+    ButtonLink,
     PeopleAvatar,
     Comment,
     ValidationTag,
     PeopleName,
     PreviewRow,
-    AddPreviewModal
+    AddPreviewModal,
+    DeleteModal
   },
 
   data () {
@@ -182,13 +205,16 @@ export default {
         isError: false
       },
       display: {
-        addPreview: false
+        addPreview: false,
+        deleteTask: false
       },
       loading: {
-        addPreview: false
+        addPreview: false,
+        deleteTask: false
       },
       errors: {
-        addPreview: false
+        addPreview: false,
+        deleteTask: false
       },
       currentTask: null,
       currentTaskComments: [],
@@ -261,7 +287,17 @@ export default {
       'getTaskComments',
       'getTaskPreviews',
       'getTaskComment'
-    ])
+    ]),
+    deleteText () {
+      if (this.currentTask) {
+        return this.$t('main.delete_text', {
+          name: `${this.currentTask.entity_name}` +
+                ` / ${this.currentTask.task_type_name}`
+        })
+      } else {
+        return ''
+      }
+    }
   },
 
   methods: {
@@ -286,6 +322,13 @@ export default {
     },
     getCurrentTaskPreviews () {
       return this.getTaskPreviews(this.route.params.task_id)
+    },
+    getCurrentTaskPath () {
+      if (this.currentTask) {
+        return `/tasks/${this.currentTask.id}`
+      } else {
+        return ''
+      }
     },
     getPreviewPath () {
       const previewId = this.route.params.preview_id
@@ -327,8 +370,14 @@ export default {
 
       if (path.indexOf('add-preview') > 0) {
         this.display.addPreview = true
+        this.display.deleteTask = false
+      } else if (path.indexOf('delete') > 0) {
+        this.display.deleteTask = true
+        this.display.addPreview = false
+        this.currentComment = null
       } else {
         this.display.addPreview = false
+        this.display.deleteTask = false
         this.currentComment = null
       }
     },
@@ -348,6 +397,22 @@ export default {
             this.$router.push(`/tasks/${this.route.params.task_id}`)
           }
           this.loading.addPreview = false
+        }
+      })
+    },
+
+    confirmDeleteTask () {
+      this.loading.deleteTask = true
+      this.errors.deleteTask = false
+      this.$store.dispatch('deleteTask', {
+        task: this.currentTask,
+        callback: (err) => {
+          if (err) {
+            this.loading.deleteTask = false
+            this.errors.deleteTask = true
+          } else {
+            this.$router.push('/assets')
+          }
         }
       })
     }

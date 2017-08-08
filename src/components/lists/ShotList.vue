@@ -6,6 +6,7 @@
         <th class="project">{{ $t('shots.fields.production') }}</th>
         <th class="sequence">{{ $t('shots.fields.sequence') }}</th>
         <th class="name">{{ $t('shots.fields.name') }}</th>
+        <th class="description">{{ $t('shots.fields.description') }}</th>
         <th
           class="validation"
           :style="{
@@ -38,6 +39,9 @@
         </td>
         <td class="name">
           {{ entry.name }}
+        </td>
+        <td class="description">
+          {{ entry.description }}
         </td>
         <td
           class="validation"
@@ -136,6 +140,10 @@ td.sequence {
 
 .episode {
   width: 50px;
+}
+
+.description {
+  width: 200px;
 }
 
 .validation {

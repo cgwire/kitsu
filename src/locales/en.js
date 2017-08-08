@@ -54,6 +54,7 @@ export default {
     cancel: 'Cancel',
     confirmation: 'Confirm',
     confirmation_and_stay: 'Confirm and stay',
+    delete_text: 'Are you sure you want to remove {name} from your database?',
     csv: {
       import_file: 'Import a .csv file',
       export_file: 'Download as a .csv file',
@@ -112,6 +113,7 @@ export default {
     add_preview: 'Add preview',
     add_preview_error: 'An error occured while adding preview.',
     select_preview_file: 'Please select a picture from your hard drive to be used as a preview for the current task:',
+    delete_error: 'An error occured while deleting task.',
     fields: {
       task_type: 'Task Type'
     }
@@ -152,7 +154,8 @@ export default {
     fields: {
       name: 'Asset',
       type: 'Type',
-      production: 'Prod'
+      production: 'Prod',
+      description: 'Description'
     },
     delete_text: 'Are you sure you want to remove {name} from your database?',
     delete_error: 'An error occured while deleting this asset. There are probably data linked to it. Are you sure this asset type has no task linked to it?'
@@ -169,7 +172,8 @@ export default {
       name: 'Shot',
       episode: 'Episode',
       sequence: 'Sequence',
-      production: 'Prod'
+      production: 'Prod',
+      description: 'Description'
     },
     delete_text: 'Are you sure you want to remove {name} from your database?',
     delete_error: 'An error occured while deleting this shot. There are probably data linked to it. Are you sure this shot type has no task linked to it?'

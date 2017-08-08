@@ -6,6 +6,7 @@
         <th class="project">{{ $t('assets.fields.production') }}</th>
         <th class="type">{{ $t('assets.fields.type') }}</th>
         <th class="name">{{ $t('assets.fields.name') }}</th>
+        <th class="description">{{ $t('assets.fields.description') }}</th>
         <th
           class="validation"
           :style="{
@@ -39,6 +40,9 @@
         </td>
         <td class="name">
           {{ entry.name }}
+        </td>
+        <td class="description">
+          {{ entry.description }}
         </td>
         <td
           class="validation"
@@ -126,6 +130,10 @@ th.actions {
   font-weight: bold;
 }
 
+.description {
+  width: 200px;
+}
+
 td.name {
   font-size: 1.2em;
 }
@@ -138,7 +146,6 @@ td.name {
 td.type {
   font-size: 1.2em;
 }
-
 .validation {
   width: 150px;
   margin-right: 1em;

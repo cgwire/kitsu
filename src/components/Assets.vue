@@ -147,7 +147,8 @@ export default {
       columns: [
         'Project',
         'Category',
-        'Name'
+        'Name',
+        'Description'
       ],
       assetFilterTypes: [
         'Type'
@@ -313,8 +314,8 @@ export default {
       this.$store.dispatch('uploadAssetFile', (err) => {
         if (!err) {
           this.loading.importing = false
-          this.modals.isImportDisplayed = false
           this.$store.dispatch('loadAssets')
+          this.$router.push('/assets')
         } else {
           this.loading.importing = false
           this.errors.importing = true
