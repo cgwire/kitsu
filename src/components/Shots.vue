@@ -226,6 +226,7 @@ export default {
       this.errors.creatingTasks = false
       this.$store.dispatch('createTasks', {
         task_type_id: form.task_type_id,
+        type: 'shots',
         callback: (err) => {
           this.loading.creatingTasks = false
           if (err) {
