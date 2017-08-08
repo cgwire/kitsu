@@ -23,6 +23,8 @@ import {
   DELETE_ASSET_ERROR,
   DELETE_ASSET_END,
 
+  DELETE_TASK_END,
+
   RESET_ALL
 } from '../mutation-types'
 
@@ -248,6 +250,19 @@ const mutations = {
     }
   },
 
+  [DELETE_TASK_END] (state, task) {
+    const asset = state.assets.find(
+      (asset) => asset.id === task.entity_id
+    )
+    if (asset) {
+      asset.validations[task.task_type_name] = null
+      const taskIndex = asset.tasks.findIndex(
+        (assetTask) => assetTask.id === task.entity_id
+      )
+      asset.tasks.splice(taskIndex, 1)
+    }
+  },
+
   [RESET_ALL] (state) {
     state.assets = []
     state.assetTypes = []
@@ -259,7 +274,6 @@ const mutations = {
       isLoading: false,
       isError: false
     }
-
     state.deleteAsset = {
       isLoading: false,
       isError: false

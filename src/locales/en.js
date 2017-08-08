@@ -54,6 +54,7 @@ export default {
     cancel: 'Cancel',
     confirmation: 'Confirm',
     confirmation_and_stay: 'Confirm and stay',
+    delete_text: 'Are you sure you want to remove {name} from your database?',
     csv: {
       import_file: 'Import a .csv file',
       export_file: 'Download as a .csv file',
@@ -112,6 +113,7 @@ export default {
     add_preview: 'Add preview',
     add_preview_error: 'An error occured while adding preview.',
     select_preview_file: 'Please select a picture from your hard drive to be used as a preview for the current task:',
+    delete_error: 'An error occured while deleting task.',
     fields: {
       task_type: 'Task Type'
     }

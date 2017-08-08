@@ -11,6 +11,7 @@ import {
   NEW_TASK_COMMENT_END,
 
   CREATE_TASKS_END,
+  DELETE_TASK_END,
 
   PREVIEW_FILE_SELECTED,
   ADD_PREVIEW_END,
@@ -109,6 +110,16 @@ const actions = {
     })
   },
 
+  deleteTask ({ commit, state }, payload) {
+    const task = payload.task
+    tasksApi.deleteTask(task, (err) => {
+      if (!err) {
+        commit(DELETE_TASK_END, task)
+      }
+      if (payload.callback) payload.callback(err)
+    })
+  },
+
   addPreview ({ commit, state }, payload) {
     tasksApi.addPreview(payload, (err, preview) => {
       if (err && payload.callback) {
@@ -193,6 +204,14 @@ const mutations = {
       task_status_color: comment.task_status.color
     })
   },
+
+  [DELETE_TASK_END] (state, task) {
+    state.taskComments[task.id] = undefined
+    state.taskPreviews[task.id] = undefined
+    state.taskMap[task.id] = undefined
+  },
+
+  [CREATE_TASKS_END] (state, tasks) {},
 
   [CREATE_TASKS_END] (state, tasks) {},
 

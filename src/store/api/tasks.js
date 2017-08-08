@@ -57,6 +57,14 @@ export default {
       })
   },
 
+  deleteTask (task, callback) {
+    superagent
+      .del(`/api/data/tasks/${task.id}`)
+      .end((err, res) => {
+        callback(err, res.body)
+      })
+  },
+
   addPreview (data, callback) {
     const taskId = data.taskId
     const commentId = data.commentId
