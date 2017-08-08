@@ -36,17 +36,20 @@ class AssetsCsvImportResource(BaseCsvImportResource):
         )
 
         try:
-            entity = Entity.create(
-                name=name,
-                description=description,
-                project_id=project_id,
-                entity_type_id=entity_type_id
-            )
-        except IntegrityError:
             entity = Entity.get_by(
                 name=name,
                 project_id=project_id,
                 entity_type_id=entity_type_id
             )
+
+            if entity is None:
+                entity = Entity.create(
+                    name=name,
+                    description=description,
+                    project_id=project_id,
+                    entity_type_id=entity_type_id
+                )
+        except IntegrityError:
+            pass
 
         return entity

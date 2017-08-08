@@ -27,3 +27,15 @@ class ImportCsvAssetsTestCase(ApiDBTestCase):
 
         entity_types = EntityType.query.all()
         self.assertEqual(len(entity_types), 2)
+
+    def test_import_assets_duplicates(self):
+        path = "/data/import/csv/assets"
+
+        file_path_fixture = self.get_fixture_file_path(
+            os.path.join("csv", "assets.csv")
+        )
+        self.upload_file(path, file_path_fixture)
+        self.upload_file(path, file_path_fixture)
+
+        entities = Entity.query.all()
+        self.assertEqual(len(entities), 3)
