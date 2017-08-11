@@ -178,7 +178,7 @@ export default {
       description: 'Description'
     },
     delete_text: 'Are you sure you want to remove {name} from your database?',
-    delete_error: 'An error occured while deleting this shot. There are probably data linked to it. Are you sure this shot type has no task linked to it?'
+    delete_error: 'An error occured while deleting this shot. There are probably data linked to it. Are you sure this shot has no task linked to it?'
   },
 
   server_down: {
