@@ -216,7 +216,7 @@ export default {
       this.$store.dispatch('deleteShot', {
         shot: this.shotToDelete,
         callback: (err) => {
-          if (!err) this.modals.isDeleteDisplayed = false
+          if (!err) this.$router.push('/shots')
         }
       })
     },

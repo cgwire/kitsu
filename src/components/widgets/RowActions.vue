@@ -1,7 +1,7 @@
 <template>
 <td class="actions">
   <p class="field">
-    <router-link class="button" :to="editRoute">
+    <router-link class="button" :to="editRoute" v-if="!hideEdit">
       <span class="icon is-small">
         <i class="fa fa-edit"></i>
       </span>
@@ -23,7 +23,8 @@ export default {
   props: [
     'editRoute',
     'deleteRoute',
-    'entryId'
+    'entryId',
+    'hideEdit'
   ],
   computed: {
     ...mapGetters([

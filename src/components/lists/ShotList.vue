@@ -56,8 +56,13 @@
           >
           </validation-tag>
         </td>
-        <td class="actions">
-        </td>
+        <row-actions
+          :entry-id="entry.id"
+          :edit-route="'/shots/edit/' + entry.id"
+          :delete-route="'/shots/delete/' + entry.id"
+          :hide-edit="true"
+        >
+        </row-actions>
       </tr>
     </tbody>
   </table>

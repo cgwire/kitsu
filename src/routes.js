@@ -77,6 +77,7 @@ export const routes = [
       { path: '/shots', component: Shots },
       { path: '/shots/import', component: Shots },
       { path: '/shots/create-tasks', component: Shots },
+      { path: '/shots/delete/:shot_id', component: Shots },
 
       { path: '/asset-types', component: AssetTypes },
       { path: '/asset-types/delete/:asset_type_id', component: AssetTypes },
