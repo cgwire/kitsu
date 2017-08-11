@@ -149,6 +149,7 @@ const mutations = {
       asset.tasks.forEach((task) => {
         task.project_name = asset.project_name
         task.entity_name = `${asset.asset_type_name} / ${asset.name}`
+        task.entity_type_name = asset.entity_type_name
         state.taskMap[task.id] = task
       })
     })
@@ -159,6 +160,7 @@ const mutations = {
       shot.tasks.forEach((task) => {
         task.project_name = shot.project_name
         task.entity_name = `${shot.sequence_name} / ${shot.name}`
+        task.entity_type_name = 'Shot'
         state.taskMap[task.id] = task
       })
     })
@@ -171,7 +173,8 @@ const mutations = {
       task_status_short_name: task.task_status.short_name,
       task_type_name: task.task_type.name,
       task_status_color: task.task_status.color,
-      task_type_color: task.task_type.color
+      task_type_color: task.task_type.color,
+      entity_type_name: task.entity_type.name
     })
     if (task.entity_type.name === 'Shot') {
       task.entity_name = `${task.entity_parent.name} / ${task.entity.name}`

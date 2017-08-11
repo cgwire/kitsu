@@ -419,6 +419,8 @@ export default {
     confirmDeleteTask () {
       this.loading.deleteTask = true
       this.errors.deleteTask = false
+      const type = this.currentTask.entity_type_name
+
       this.$store.dispatch('deleteTask', {
         task: this.currentTask,
         callback: (err) => {
@@ -426,13 +428,19 @@ export default {
             this.loading.deleteTask = false
             this.errors.deleteTask = true
           } else {
-            this.$router.push('/assets')
+            if (type === 'Shot') {
+              this.$router.push('/shots')
+            } else {
+              this.$router.push('/assets')
+            }
           }
         }
       })
     }
   },
-  mounted () { this.handleModalsDisplay() },
+  mounted () {
+    this.handleModalsDisplay()
+  },
   watch: {
     $route () { this.handleModalsDisplay() }
   }
