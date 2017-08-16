@@ -73,7 +73,7 @@ class AddPreviewResource(Resource):
         task_status = TaskStatus.get(comment.task_status_id)
         person = Person.get(current_user.id)
 
-        if task_status.short_name != "wfa":
+        if task_status.short_name not in ["wfa", "retake"]:
             return {"error": "Comment status is not waiting for approval."}, 400
 
         revision = task_info.get_next_preview_revision(task_id)
