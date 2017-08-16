@@ -1,7 +1,7 @@
 <template>
 <div class="preview-row has-text-center">
   <button-link
-    :text="'Preview ' + preview.revision"
+    :text="label"
     icon="fa-eye"
     :path="'/tasks/' + taskId + '/previews/' + preview.id"
   >
@@ -21,6 +21,15 @@ export default {
     'preview',
     'taskId'
   ],
+  computed: {
+    label () {
+      let label = `Preview ${this.preview.revision}`
+      if (this.preview.feedback) {
+        label = `${label} (${this.$tc('tasks.feedback')})`
+      }
+      return label
+    }
+  },
   methods: {
   }
 }
