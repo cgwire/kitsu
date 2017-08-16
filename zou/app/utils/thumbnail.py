@@ -1,4 +1,5 @@
 import os
+import math
 
 from zou.app import app
 from zou.app.utils import fs
@@ -7,7 +8,7 @@ from PIL import Image
 
 RECTANGLE_SIZE = 150, 100
 SQUARE_SIZE = 100, 100
-PREVIEW_SIZE = 1200, 675
+PREVIEW_SIZE = 1200, 0
 
 
 def save_file(data_type, instance_id, file_to_save, size=RECTANGLE_SIZE):
@@ -41,8 +42,13 @@ def create_type_folder(data_type):
 
 
 def turn_into_thumbnail(file_path, size=RECTANGLE_SIZE):
+    (width, height) = size
     im = Image.open(file_path)
-    im = im.resize(size)
+    if height == 0:
+        im_width, im_height = im.size
+        ratio = im_height / im_width
+        height = math.ceil(width * ratio)
+    im = im.resize((width, height))
     im.save(file_path)
 
 
