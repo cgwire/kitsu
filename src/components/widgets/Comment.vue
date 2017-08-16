@@ -25,11 +25,28 @@
         <span class="comment-date">{{ formatDate(comment.created_at) }}</span>
       </p>
 
-      <p v-if="comment.task_status.name === 'Retake'">
-        <span :style="{'color': comment.task_status.color}">
-        {{ $t('comments.retake').toUpperCase }}
-        </span>
-      </p>
+      <div class="level" v-if="comment.task_status.short_name === 'retake'">
+        <div class="level-left">
+          <span class="level-item" :style="{'color': comment.task_status.color}">
+            {{ $t('comments.retake').toUpperCase() }}
+          </span>
+          <span
+            class="revision"
+            v-if="comment.preview"
+          >
+            revision {{ comment.preview.revision }}
+          </span>
+          <button-link
+            class="level-item"
+            :text="$t('tasks.add_preview')"
+            icon="fa-upload"
+            :path="'/tasks/' + comment.object_id + '/comments/' + comment.id + '/add-preview'"
+            v-else
+          >
+          </button-link>
+        </div>
+        </button-link>
+      </div>
 
       <div class="level" v-if="comment.task_status.name === 'Waiting For Approval'">
         <div class="level-left">

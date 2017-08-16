@@ -116,6 +116,7 @@ export default {
     add_preview_error: 'An error occured while adding preview.',
     select_preview_file: 'Please select a picture from your hard drive to be used as a preview for the current task:',
     delete_error: 'An error occured while deleting task.',
+    feedback: 'feedback',
     fields: {
       task_type: 'Task Type'
     }
