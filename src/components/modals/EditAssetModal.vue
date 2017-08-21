@@ -35,6 +35,14 @@
           v-focus
         >
         </text-field>
+        <text-field
+          ref="descriptionField"
+          :label="$t('assets.fields.description')"
+          v-model="form.description"
+          @enter="confirmAndStayClicked"
+          v-focus
+        >
+        </text-field>
       </form>
 
       <p class="has-text-right">
@@ -106,7 +114,8 @@ export default {
       return {
         form: {
           name: this.assetToEdit.name,
-          asset_type_id: this.assetToEdit.entity_type_id,
+          description: this.assetToEdit.description,
+          entity_type_id: this.assetToEdit.entity_type_id,
           production_id: this.assetToEdit.project_id
         },
         assetSuccessText: ''
@@ -115,6 +124,7 @@ export default {
       return {
         form: {
           name: '',
+          description: '',
           entity_type_id: '',
           project_id: ''
         },
@@ -154,11 +164,13 @@ export default {
           this.form.project_id = this.openProductions[0].id
         }
         this.form.name = ''
+        this.form.description = ''
       } else {
         this.form = {
           entity_type_id: this.assetToEdit.entity_type_id,
           project_id: this.assetToEdit.project_id,
-          name: this.assetToEdit.name
+          name: this.assetToEdit.name,
+          description: this.assetToEdit.description
         }
       }
     }

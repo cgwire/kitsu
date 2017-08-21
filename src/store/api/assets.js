@@ -34,7 +34,8 @@ export default {
   updateAsset (asset, callback) {
     const data = {
       name: asset.name,
-      entity_type_id: asset.asset_type_id,
+      description: asset.description,
+      entity_type_id: asset.entity_type_id,
       project_id: asset.project_id
     }
     superagent
