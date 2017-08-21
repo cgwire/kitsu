@@ -154,6 +154,7 @@ export default {
     new_asset: 'Add an asset',
     edit_fail: 'Creation or edition failed, an error occured.',
     new_success: 'Asset {name} successfully created.',
+    edit_success: 'Asset {name} successfully edited.',
     fields: {
       name: 'Asset',
       type: 'Type',

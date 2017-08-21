@@ -282,8 +282,10 @@ export default {
 
       if (path.indexOf('new') > 0) {
         this.resetEditModal()
+        this.editAsset.isSuccess = false
         this.modals.isNewDisplayed = true
       } else if (path.indexOf('edit') > 0) {
+        this.editAsset.isSuccess = false
         this.assetToEdit = this.getAsset(assetId)
         this.modals.isNewDisplayed = true
       } else if (path.indexOf('delete') > 0) {

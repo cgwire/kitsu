@@ -20,6 +20,7 @@ export default {
   newAsset (asset, callback) {
     const data = {
       name: asset.name,
+      description: asset.description,
       entity_type_id: asset.entity_type_id,
       project_id: asset.project_id
     }

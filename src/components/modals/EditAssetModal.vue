@@ -31,7 +31,7 @@
           ref="nameField"
           :label="$t('assets.fields.name')"
           v-model="form.name"
-          @enter="confirmAndStayClicked"
+          @enter="runConfirmation"
           v-focus
         >
         </text-field>
@@ -39,7 +39,7 @@
           ref="descriptionField"
           :label="$t('assets.fields.description')"
           v-model="form.description"
-          @enter="confirmAndStayClicked"
+          @enter="runConfirmation"
           v-focus
         >
         </text-field>
@@ -148,15 +148,28 @@ export default {
   methods: {
     ...mapActions([
     ]),
+
+    runConfirmation () {
+      if (this.isEditing()) {
+        this.confirmClicked()
+      } else {
+        this.confirmAndStayClicked()
+      }
+    },
     confirmAndStayClicked () {
       this.$emit('confirmAndStay', this.form)
     },
     confirmClicked () {
       this.$emit('confirm', this.form)
     },
+
+    isEditing () {
+      return this.assetToEdit && this.assetToEdit.id
+    },
+
     resetForm () {
       this.assetSuccessText = ''
-      if (!this.assetToEdit || !this.assetToEdit.id) {
+      if (!this.isEditing()) {
         if (this.assetTypes.length > 0) {
           this.form.entity_type_id = this.assetTypes[0].id
         }
@@ -185,9 +198,15 @@ export default {
       this.resetForm()
     },
     assetCreated () {
-      this.assetSuccessText = this.$t('assets.new_success', {
-        name: this.assetCreated
-      })
+      if (this.isEditing()) {
+        this.assetSuccessText = this.$t('assets.edit_success', {
+          name: this.assetCreated
+        })
+      } else {
+        this.assetSuccessText = this.$t('assets.new_success', {
+          name: this.assetCreated
+        })
+      }
     }
   }
 
