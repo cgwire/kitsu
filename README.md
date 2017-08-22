@@ -10,7 +10,7 @@ To integrate it quickly in your tools you can rely on the dedicated Python
 client 
 named [Gazu](https://gazu.cg-wire.com). 
 
-![Build badge](https://travis-ci.org/cgwire/zou.svg?branch=master)
+[![Build badge](https://travis-ci.org/cgwire/zou.svg?branch=master)](https://travis-ci.org/cgwire/zou)
 
 [![Gitter badge](https://badges.gitter.im/cgwire/Lobby.png)](https://gitter.im/cgwire/Lobby)
 
