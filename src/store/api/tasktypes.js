@@ -12,7 +12,9 @@ export default {
   newTaskType (taskType, callback) {
     const data = {
       name: taskType.name,
-      color: taskType.color
+      color: taskType.color,
+      priority: Number(taskType.priority),
+      for_shots: Boolean(taskType.for_shots)
     }
     superagent
       .post('/api/data/task_types/')
@@ -25,7 +27,9 @@ export default {
   updateTaskType (taskType, callback) {
     const data = {
       name: taskType.name,
-      color: taskType.color
+      color: taskType.color,
+      priority: Number(taskType.priority),
+      for_shots: Boolean(taskType.for_shots === 'true')
     }
     superagent
       .put(`/api/data/task_types/${taskType.id}`)

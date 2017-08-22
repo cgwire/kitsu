@@ -8,7 +8,7 @@
 
     <div class="box">
 
-      <h1 class="title" v-if="taskTypeToEdit && taskTypeToEdit.id">
+      <h1 class="title" v-if="isEditing()">
         {{ $t("task_types.edit_title") }} {{ taskTypeToEdit.name }}
       </h1>
       <h1 class="title" v-else>
@@ -23,6 +23,18 @@
           v-focus
         >
         </text-field>
+        <combobox
+          :label="$t('task_types.fields.priority')"
+          :options="priorityOptions"
+          v-model="form.priority"
+        >
+        </combobox>
+        <combobox
+          :label="$t('task_types.fields.dedicated_to')"
+          :options="dedicatedToOptions"
+          v-model="form.for_shots"
+        >
+        </combobox>
         <color-field
           ref="colorField"
           :label="$t('task_types.fields.color')"
@@ -57,11 +69,13 @@
 <script>
 import { mapGetters, mapActions } from 'vuex'
 import TextField from '../widgets/TextField'
+import Combobox from '../widgets/Combobox.vue'
 import ColorField from '../widgets/ColorField'
 
 export default {
   name: 'edit-task-type-modal',
   components: {
+    Combobox,
     TextField,
     ColorField
   },
@@ -80,27 +94,48 @@ export default {
   watch: {
     taskTypeToEdit () {
       if (this.taskTypeToEdit) {
-        this.form.name = this.taskTypeToEdit.name
-        this.form.color = this.taskTypeToEdit.color
+        this.form = {
+          name: this.taskTypeToEdit.name,
+          color: this.taskTypeToEdit.color,
+          priority: String(this.taskTypeToEdit.priority),
+          for_shots: String(this.taskTypeToEdit.for_shots)
+        }
       }
     }
   },
 
   data () {
-    return {}
+    return {
+      form: {
+        name: '',
+        color: '#000000',
+        priority: '',
+        for_shots: 'false'
+      },
+      priorityOptions: [
+        {label: '1', value: '1'},
+        {label: '2', value: '2'},
+        {label: '3', value: '3'},
+        {label: '4', value: '4'},
+        {label: '5', value: '5'},
+        {label: '6', value: '6'},
+        {label: '7', value: '7'},
+        {label: '8', value: '8'},
+        {label: '9', value: '9'},
+        {label: '10', value: '10'}
+      ],
+      dedicatedToOptions: [
+        {label: this.$tc('shots.title'), value: 'false'},
+        {label: this.$tc('assets.title'), value: 'true'}
+      ]
+    }
   },
 
   computed: {
     ...mapGetters([
       'taskTypes',
       'taskTypeStatusOptions'
-    ]),
-    form () {
-      return {
-        name: '',
-        color: '#FFFFFF'
-      }
-    }
+    ])
   },
 
   methods: {
@@ -108,7 +143,8 @@ export default {
     ]),
     confirmClicked () {
       this.$emit('confirm', this.form)
-    }
+    },
+    isEditing: () => this.taskTypeToEdit && this.taskTypeToEdit.id
   }
 }
 </script>

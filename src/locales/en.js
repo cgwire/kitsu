@@ -129,7 +129,9 @@ export default {
     new_task_type: 'Add a task type',
     fields: {
       name: 'Name',
-      color: 'Color'
+      color: 'Color',
+      priority: 'Priority',
+      dedicated_to: 'For'
     },
     delete_text: 'Are you sure you want to remove {name} from your database?',
     delete_error: 'An error occured while deleting this task type. There are probably data linked to it. Are you sure this task type has no task linked to it?'

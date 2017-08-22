@@ -122,7 +122,9 @@ export default {
     new_task_type: 'Ajouter un type de tâche',
     fields: {
       name: 'Nom',
-      color: 'Couleur'
+      color: 'Couleur',
+      priority: 'Priorité',
+      dedicated_to: 'Pour'
     },
     delete_text: 'Êtes vous sur de vouloir retirer {name} de la base de données ?',
     delete_error: 'Une erreur est survenue lors de la suppression du type de tâche. Êtes vous sûr qu\'aucune tâche n\'est lié à ce type de tâche ?'
