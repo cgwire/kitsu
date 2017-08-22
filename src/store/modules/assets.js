@@ -1,5 +1,5 @@
 import assetsApi from '../api/assets'
-import { sortAssets } from '../../lib/sorting'
+import { sortAssets, sortValidationColumns } from '../../lib/sorting'
 import {
   LOAD_ASSETS_START,
   LOAD_ASSETS_ERROR,
@@ -31,7 +31,7 @@ import {
 const state = {
   assets: [],
   assetTypes: [],
-  assetValidationColumns: [],
+  validationColumns: {},
   openProductions: [],
   isAssetsLoading: false,
   isAssetsLoadingError: false,
@@ -52,7 +52,7 @@ const state = {
 const getters = {
   assets: state => state.assets,
   assetValidationColumns: (state) => {
-    return state.assetValidationColumns
+    return sortValidationColumns(Object.values(state.validationColumns))
   },
 
   isAssetsLoading: state => state.isAssetsLoading,
@@ -156,13 +156,14 @@ const mutations = {
         asset.validations[task.task_type_name] = task
         validationColumns[task.task_type_name] = {
           name: task.task_type_name,
-          color: task.task_type_color
+          color: task.task_type_color,
+          priority: task.task_type_priority
         }
       })
       return asset
     })
 
-    state.assetValidationColumns = validationColumns
+    state.validationColumns = validationColumns
     state.assets = assets
     state.isAssetsLoading = false
     state.isAssetsLoadingError = false

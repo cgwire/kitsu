@@ -14,7 +14,7 @@
       <form v-on:submit.prevent>
         <combobox
           :label="$t('tasks.fields.task_type')"
-          :options="getTaskTypeOptions"
+          :options="isAssetTasks ? getAssetTaskTypeOptions : getShotTaskTypeOptions"
           v-model="form.task_type_id"
         >
         </combobox>
@@ -82,8 +82,12 @@ export default {
   computed: {
     ...mapGetters([
       'taskTypes',
-      'getTaskTypeOptions'
-    ])
+      'getAssetTaskTypeOptions',
+      'getShotTaskTypeOptions'
+    ]),
+    isAssetTasks () {
+      return this.cancelRoute.indexOf('assets') > 0
+    }
   },
 
   methods: {

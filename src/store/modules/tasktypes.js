@@ -50,7 +50,17 @@ const getters = {
 
   getTaskTypeOptions: state => state.taskTypes.map(
     (type) => { return { label: type.name, value: type.id } }
-  )
+  ),
+  getAssetTaskTypeOptions: state => state.taskTypes
+    .filter((taskType) => !taskType.for_shots)
+    .map(
+      (type) => { return { label: type.name, value: type.id } }
+    ),
+  getShotTaskTypeOptions: state => state.taskTypes
+    .filter((taskType) => taskType.for_shots)
+    .map(
+      (type) => { return { label: type.name, value: type.id } }
+    )
 }
 
 const actions = {

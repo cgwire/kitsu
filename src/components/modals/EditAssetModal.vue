@@ -31,7 +31,15 @@
           ref="nameField"
           :label="$t('assets.fields.name')"
           v-model="form.name"
-          @enter="confirmAndStayClicked"
+          @enter="runConfirmation"
+          v-focus
+        >
+        </text-field>
+        <text-field
+          ref="descriptionField"
+          :label="$t('assets.fields.description')"
+          v-model="form.description"
+          @enter="runConfirmation"
           v-focus
         >
         </text-field>
@@ -106,7 +114,8 @@ export default {
       return {
         form: {
           name: this.assetToEdit.name,
-          asset_type_id: this.assetToEdit.entity_type_id,
+          description: this.assetToEdit.description,
+          entity_type_id: this.assetToEdit.entity_type_id,
           production_id: this.assetToEdit.project_id
         },
         assetSuccessText: ''
@@ -115,6 +124,7 @@ export default {
       return {
         form: {
           name: '',
+          description: '',
           entity_type_id: '',
           project_id: ''
         },
@@ -138,15 +148,28 @@ export default {
   methods: {
     ...mapActions([
     ]),
+
+    runConfirmation () {
+      if (this.isEditing()) {
+        this.confirmClicked()
+      } else {
+        this.confirmAndStayClicked()
+      }
+    },
     confirmAndStayClicked () {
       this.$emit('confirmAndStay', this.form)
     },
     confirmClicked () {
       this.$emit('confirm', this.form)
     },
+
+    isEditing () {
+      return this.assetToEdit && this.assetToEdit.id
+    },
+
     resetForm () {
       this.assetSuccessText = ''
-      if (!this.assetToEdit || !this.assetToEdit.id) {
+      if (!this.isEditing()) {
         if (this.assetTypes.length > 0) {
           this.form.entity_type_id = this.assetTypes[0].id
         }
@@ -154,11 +177,13 @@ export default {
           this.form.project_id = this.openProductions[0].id
         }
         this.form.name = ''
+        this.form.description = ''
       } else {
         this.form = {
           entity_type_id: this.assetToEdit.entity_type_id,
           project_id: this.assetToEdit.project_id,
-          name: this.assetToEdit.name
+          name: this.assetToEdit.name,
+          description: this.assetToEdit.description
         }
       }
     }
@@ -173,9 +198,15 @@ export default {
       this.resetForm()
     },
     assetCreated () {
-      this.assetSuccessText = this.$t('assets.new_success', {
-        name: this.assetCreated
-      })
+      if (this.isEditing()) {
+        this.assetSuccessText = this.$t('assets.edit_success', {
+          name: this.assetCreated
+        })
+      } else {
+        this.assetSuccessText = this.$t('assets.new_success', {
+          name: this.assetCreated
+        })
+      }
     }
   }
 

@@ -7,7 +7,8 @@ offering a clean UI and a shared database, it allows you to communicate
 efficiently with all the shareholders of the production: CG artists, 
 production managers, TDs, supervisors and clients
 
-![Build badge](https://travis-ci.org/cgwire/kitsu.svg?branch=master)
+[![Build
+badge](https://travis-ci.org/cgwire/kitsu.svg?branch=master)](https://travis-ci.org/cgwire/kitsu)
 
 [![Gitter badge](https://badges.gitter.im/cgwire/Lobby.png)](https://gitter.im/cgwire/Lobby)
 

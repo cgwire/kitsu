@@ -35,3 +35,13 @@ export const sortProductions = (productions) => {
 export const sortByName = (entries) => {
   return entries.sort((a, b) => a.name.localeCompare(b.name))
 }
+
+export const sortValidationColumns = (columns) => {
+  return columns.sort((a, b) => {
+    if (a.priority !== b.priority) {
+      return a.priority > b.priority
+    } else {
+      return a.name.localeCompare(b.name)
+    }
+  })
+}

@@ -1,5 +1,5 @@
 import shotsApi from '../api/shots'
-import { sortShots } from '../../lib/sorting'
+import { sortShots, sortValidationColumns } from '../../lib/sorting'
 import {
   LOAD_SHOTS_START,
   LOAD_SHOTS_ERROR,
@@ -25,7 +25,7 @@ import {
 const state = {
   shots: [],
   sequences: [],
-  shotValidationColumns: [],
+  validationColumns: {},
 
   isShotsLoading: false,
   isShotsLoadingError: false,
@@ -45,7 +45,9 @@ const state = {
 const getters = {
   shots: state => state.shots,
   sequences: state => state.sequences,
-  shotValidationColumns: state => state.shotValidationColumns,
+  shotValidationColumns: state => {
+    return sortValidationColumns(Object.values(state.validationColumns))
+  },
 
   isShotsLoading: state => state.isShotsLoading,
   isShotsLoadingError: state => state.isShotsLoadingError,
@@ -114,7 +116,6 @@ const actions = {
 
   uploadShotFile ({ commit, state }, callback) {
     commit(IMPORT_SHOTS_START)
-    console.log(state.shotsCsvFormData)
     shotsApi.postCsv(state.shotsCsvFormData, (err) => {
       commit(IMPORT_SHOTS_END)
       if (callback) callback(err)
@@ -146,13 +147,14 @@ const mutations = {
         shot.validations[task.task_type_name] = task
         validationColumns[task.task_type_name] = {
           name: task.task_type_name,
-          color: task.task_type_color
+          color: task.task_type_color,
+          priority: task.task_type_priority
         }
       })
       return shot
     })
     state.shots = shots
-    state.shotValidationColumns = validationColumns
+    state.validationColumns = validationColumns
   },
 
   [SHOT_CSV_FILE_SELECTED] (state, formData) {

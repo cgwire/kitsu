@@ -4,13 +4,16 @@
     <thead>
       <tr>
         <th class="name">{{ $t('task_types.fields.name') }}</th>
+        <th class="priority">{{ $t('task_types.fields.priority') }}</th>
+        <th class="dedicated">{{ $t('task_types.fields.dedicated_to') }}</th>
         <th class="actions"></th>
       </tr>
     </thead>
     <tbody>
       <tr v-for="entry in entries">
-        <task-type-name class="name" :entry="entry">
-        </task-type-name>
+        <task-type-name class="name" :entry="entry"></task-type-name>
+        <td class="priority">{{ entry.priority }}</td>
+        <td class="dedicated">{{ renderForShots(entry) }}</td>
         <row-actions
           :entry-id="entry.id"
           :edit-route="'/task-types/edit/' + entry.id"
@@ -60,14 +63,31 @@ export default {
   },
   methods: {
     ...mapActions([
-    ])
+    ]),
+    renderForShots (entry) {
+      if (entry.for_shots) {
+        return this.$tc('shots.title')
+      } else {
+        return this.$tc('assets.title')
+      }
+    }
   }
 }
 </script>
 
 <style scoped>
 .name {
-  width: 300px;
+  width: 200px;
+}
+
+.priority {
+  width: 80px;
+  font-weight: normal;
+}
+
+.dedicated {
+  width: 100px;
+  font-weight: normal;
 }
 
 .color {
