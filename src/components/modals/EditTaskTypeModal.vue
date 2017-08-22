@@ -125,8 +125,8 @@ export default {
         {label: '10', value: '10'}
       ],
       dedicatedToOptions: [
-        {label: this.$tc('shots.title'), value: 'false'},
-        {label: this.$tc('assets.title'), value: 'true'}
+        {label: this.$tc('assets.title'), value: 'false'},
+        {label: this.$tc('shots.title'), value: 'true'}
       ]
     }
   },
