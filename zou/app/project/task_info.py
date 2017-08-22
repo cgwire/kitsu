@@ -207,13 +207,21 @@ def get_task_dicts_for_entity(entity_id):
     return results
 
 
-def get_or_create_task_type(department, name, color="#888888"):
+def get_or_create_task_type(
+    department,
+    name,
+    color="#888888",
+    priority=1,
+    for_shots=False
+):
     task_type = TaskType.get_by(name=name)
     if task_type is None:
         task_type = TaskType(
             name=name,
             department_id=department.id,
-            color=color
+            color=color,
+            priority=priority,
+            for_shots=for_shots
         )
         task_type.save()
     return task_type

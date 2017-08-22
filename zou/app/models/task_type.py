@@ -8,6 +8,8 @@ from zou.app.models.base import BaseMixin
 class TaskType(db.Model, BaseMixin, SerializerMixin):
     name = db.Column(db.String(40), nullable=False)
     color = db.Column(db.String(7), default="#FFFFFF")
+    priority = db.Column(db.Integer, default=1)
+    for_shots = db.Column(db.Boolean, default=False)
     shotgun_id = db.Column(db.Integer)
 
     department_id = \

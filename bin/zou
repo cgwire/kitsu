@@ -85,17 +85,20 @@ def init_data():
     compositing = task_info.get_or_create_department("Compositiing")
     concept = task_info.get_or_create_department("Concept")
 
-    task_info.get_or_create_task_type(concept, "Concept", '#8D6E63')
-    task_info.get_or_create_task_type(concept, "Storyboard", '#43A047')
-    task_info.get_or_create_task_type(modeling, "Texture", '#64B5F6')
-    task_info.get_or_create_task_type(modeling, "Modeling", '#78909C')
-    task_info.get_or_create_task_type(compositing, "Layout", '#7CB342')
-    task_info.get_or_create_task_type(animation, "Animation", '#009688')
-    task_info.get_or_create_task_type(animation, "Setup", '#9CCC65')
-    task_info.get_or_create_task_type(fx, "FX", '#26C6DA')
-    task_info.get_or_create_task_type(compositing, "Lightning", '#F9A825')
-    task_info.get_or_create_task_type(compositing, "Render", '#F06292')
-    task_info.get_or_create_task_type(compositing, "Compositiing", '#ff5252')
+    task_info.get_or_create_task_type(concept, "Concept", '#8D6E63', 1)
+    task_info.get_or_create_task_type(modeling, "Texture", '#64B5F6', 2)
+    task_info.get_or_create_task_type(modeling, "Modeling", '#78909C', 3)
+    task_info.get_or_create_task_type(animation, "Setup", '#9CCC65', 4)
+    task_info.get_or_create_task_type(concept, "Storyboard", '#43A047', 1, True)
+    task_info.get_or_create_task_type(animation, "Layout", '#7CB342', 2, True)
+    task_info.get_or_create_task_type(
+        animation, "Animation", '#009688', 3, True)
+    task_info.get_or_create_task_type(
+        compositing, "Lighting", '#F9A825', 4, True)
+    task_info.get_or_create_task_type(fx, "FX", '#26C6DA', 5, True)
+    task_info.get_or_create_task_type(compositing, "Render", '#F06292', 6, True)
+    task_info.get_or_create_task_type(
+        compositing, "Compositing", '#ff5252', 7, True)
     print("Task types initialized.")
 
     task_info.get_or_create_status("Todo", "todo", "#f5f5f5")

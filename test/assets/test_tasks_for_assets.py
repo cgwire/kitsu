@@ -35,3 +35,6 @@ class AssetTasksTestCase(ApiDBTestCase):
         self.assertEqual(
             assets[0]["tasks"][0]["task_type_name"], "Shaders"
         )
+        self.assertEqual(
+            assets[0]["tasks"][0]["task_type_priority"], 1
+        )
