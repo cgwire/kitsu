@@ -1,3 +1,4 @@
+from flask import request
 from flask_restful import Resource, reqparse
 from flask_login import login_required, logout_user, login_user, current_user
 
@@ -198,3 +199,19 @@ class ChangePasswordResource(Resource):
             args["password"],
             args["password_2"]
         )
+
+
+class NewPersonResource(Resource):
+
+    @login_required
+    def post(self):
+        data = request.json
+        person = person_info.create_person(
+            data["email"],
+            auth.encrypt_password("default"),
+            data["first_name"],
+            data["last_name"],
+            data["phone"]
+        )
+
+        return person.serialize(), 201

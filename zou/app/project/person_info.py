@@ -6,12 +6,13 @@ from zou.app.models.person import Person
 from zou.app.project.exception import PersonNotFoundException
 
 
-def create_person(email, password, first_name, last_name):
+def create_person(email, password, first_name, last_name, phone=""):
     person = Person(
         email=email,
         password=password,
         first_name=first_name,
-        last_name=last_name
+        last_name=last_name,
+        phone=phone
     )
     person.save()
     return person
