@@ -18,7 +18,7 @@ export default {
       phone: person.phone
     }
     superagent
-      .post(`/api/data/persons/`)
+      .post(`/api/data/persons/new`)
       .send(data)
       .end((err, res) => {
         callback(err, res.body)
