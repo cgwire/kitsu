@@ -164,7 +164,8 @@ from .resources.auth import (
     LogoutResource,
     AuthenticatedResource,
     ChangePasswordResource,
-    RegistrationResource
+    RegistrationResource,
+    NewPersonResource
 )
 
 
@@ -490,6 +491,7 @@ def configure_api_routes(api):
     api.add_resource(AuthenticatedResource, "/auth/authenticated")
     api.add_resource(RegistrationResource, "/auth/register")
     api.add_resource(ChangePasswordResource, "/auth/change-password")
+    api.add_resource(NewPersonResource, "/data/persons/new")
 
     return api
 
