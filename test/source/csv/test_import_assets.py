@@ -15,7 +15,7 @@ class ImportCsvAssetsTestCase(ApiDBTestCase):
         self.generate_fixture_project()
 
     def test_import_assets(self):
-        path = "/data/import/csv/assets"
+        path = "/import/csv/assets"
 
         file_path_fixture = self.get_fixture_file_path(
             os.path.join("csv", "assets.csv")
@@ -29,7 +29,7 @@ class ImportCsvAssetsTestCase(ApiDBTestCase):
         self.assertEqual(len(entity_types), 2)
 
     def test_import_assets_duplicates(self):
-        path = "/data/import/csv/assets"
+        path = "/import/csv/assets"
 
         file_path_fixture = self.get_fixture_file_path(
             os.path.join("csv", "assets.csv")

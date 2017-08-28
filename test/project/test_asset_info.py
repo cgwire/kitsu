@@ -1,7 +1,7 @@
 from test.base import ApiDBTestCase
 
-from zou.app.project import asset_info
-from zou.app.project.exception import AssetNotFoundException
+from zou.app.services import assets_service
+from zou.app.services.exception import AssetNotFoundException
 
 
 class AssetInfoTestCase(ApiDBTestCase):
@@ -17,12 +17,24 @@ class AssetInfoTestCase(ApiDBTestCase):
         self.generate_fixture_shot()
 
     def test_get_asset_types(self):
-        asset_types = asset_info.get_asset_types()
+        asset_types = assets_service.get_asset_types()
+        self.assertEqual(len(asset_types), 1)
+        self.assertEqual(asset_types[0].name, "Props")
+
+    def test_get_asset_types_for_project(self):
+        asset_types = assets_service.get_asset_types_for_project(self.project.id)
+        self.assertEqual(len(asset_types), 1)
+        self.assertEqual(asset_types[0].name, "Props")
+
+    def test_get_asset_types_for_shot(self):
+        self.shot.entities_out = [self.entity]
+        self.shot.save()
+        asset_types = assets_service.get_asset_types_for_shot(self.shot.id)
         self.assertEqual(len(asset_types), 1)
         self.assertEqual(asset_types[0].name, "Props")
 
     def test_get_assets(self):
-        assets = asset_info.get_assets()
+        assets = assets_service.get_assets()
         self.assertEqual(len(assets), 1)
         self.assertEqual(assets[0].name, "Tree")
 
@@ -34,7 +46,7 @@ class AssetInfoTestCase(ApiDBTestCase):
         self.generate_fixture_task_type()
         self.generate_fixture_task()
         self.generate_fixture_task(name="Secondary")
-        assets = asset_info.all_assets_and_tasks()
+        assets = assets_service.all_assets_and_tasks()
         self.assertEqual(len(assets), 1)
         self.assertEqual(len(assets[0]["tasks"]), 2)
         self.assertEqual(
@@ -45,15 +57,15 @@ class AssetInfoTestCase(ApiDBTestCase):
         )
 
     def test_get_asset(self):
-        asset = asset_info.get_asset(self.entity.id)
+        asset = assets_service.get_asset(self.entity.id)
         self.assertEqual(asset.id, self.entity.id)
         asset.delete()
         self.assertRaises(
             AssetNotFoundException,
-            asset_info.get_asset,
+            assets_service.get_asset,
             self.entity.id
         )
 
     def test_is_asset(self):
-        self.assertTrue(asset_info.is_asset(self.entity))
-        self.assertFalse(asset_info.is_asset(self.shot))
+        self.assertTrue(assets_service.is_asset(self.entity))
+        self.assertFalse(assets_service.is_asset(self.shot))

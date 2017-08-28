@@ -10,6 +10,12 @@ class ShotTestCase(ApiDBTestCase):
         self.generate_fixture_project()
         self.generate_fixture_entity_type()
         self.generate_fixture_sequence()
+        self.generate_fixture_shot()
+
+        self.shot_dict = self.shot.serialize(obj_type="Shot")
+        self.shot_dict["project_name"] = self.project.name
+        self.shot_dict["sequence_name"] = self.sequence.name
+
         self.generate_data(Entity, 3,
                            entities_out=[],
                            project_id=self.project.id,
@@ -21,5 +27,15 @@ class ShotTestCase(ApiDBTestCase):
                            entity_type_id=self.shot_type.id)
 
     def test_get_shots(self):
-        entities = self.get("data/shots/all")
-        self.assertEquals(len(entities), 2)
+        shots = self.get("data/shots/all")
+
+        self.assertEquals(len(shots), 3)
+        self.assertDictEqual(shots[0], self.shot_dict)
+
+    def test_get_shot(self):
+        shot = self.get("data/shots/%s" % self.shot.id)
+        self.assertEquals(shot["id"], str(self.shot.id))
+        self.assertDictEqual(
+            shot,
+            self.shot.serialize(obj_type="Shot")
+        )

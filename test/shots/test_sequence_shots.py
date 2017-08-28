@@ -13,7 +13,7 @@ class SequenceShotsTestCase(ApiDBTestCase):
         self.generate_fixture_sequence()
         self.generate_fixture_shot()
 
-        self.shot_dict = self.shot.serialize()
+        self.shot_dict = self.shot.serialize(obj_type="Shot")
         self.shot_dict["project_name"] = self.project.name
         self.shot_dict["sequence_name"] = self.sequence.name
 

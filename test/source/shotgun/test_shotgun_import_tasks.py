@@ -5,7 +5,7 @@ from zou.app.models.person import Person
 from zou.app.models.task_type import TaskType
 from zou.app.models.task_status import TaskStatus
 
-from zou.app.project import asset_info
+from zou.app.services import assets_service
 
 
 class ImportShotgunTaskTestCase(ShotgunTestCase):
@@ -57,7 +57,7 @@ class ImportShotgunTaskTestCase(ShotgunTestCase):
             "type": "Task"
         }
 
-        api_path = "data/import/shotgun/tasks"
+        api_path = "/import/shotgun/tasks"
         self.tasks = self.post(api_path, [self.sg_task], 200)
 
     def test_import_tasks(self):
@@ -83,10 +83,10 @@ class ImportShotgunTaskTestCase(ShotgunTestCase):
         task = self.tasks[0]
         project = Project.get_by(name=self.sg_task["project"]["name"])
         task_type = \
-            TaskType.get_by(name=self.sg_task["step"]["name"].split(" ")[1])
+            TaskType.get_by(name=self.sg_task["step"]["name"])
         task_status = TaskStatus.get_by(
             short_name=self.sg_task["sg_status_list"])
-        assets = asset_info.get_assets(
+        assets = assets_service.get_assets(
             {"shotgun_id": self.sg_task["entity"]["id"]})
         entity = assets[0]
         assigner = Person.get_by(
@@ -106,7 +106,7 @@ class ImportShotgunTaskTestCase(ShotgunTestCase):
 
     def test_import_remove_task(self):
         self.load_task()
-        api_path = "data/import/shotgun/remove/task"
+        api_path = "/import/shotgun/remove/task"
         sg_task = {"id": self.sg_task["id"]}
         self.tasks = self.get("data/tasks?shotgun_id=%s" % self.sg_task["id"])
         task = self.tasks[0]

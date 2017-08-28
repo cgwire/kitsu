@@ -2,6 +2,8 @@ from test.base import ApiDBTestCase
 
 from zou.app.utils import events
 
+from zou.app.services import files_service, tasks_service
+
 
 class PublishFileTestCase(ApiDBTestCase):
 
@@ -22,83 +24,91 @@ class PublishFileTestCase(ApiDBTestCase):
         self.generate_fixture_assigner()
         self.generate_fixture_task()
         self.generate_fixture_shot_task()
+        self.generate_fixture_software()
         self.generate_fixture_working_file()
         self.generate_fixture_shot_working_file()
+        self.task_id = self.task.id
+        self.tx_type_id = str(
+            files_service.get_or_create_output_type("tx").id
+        )
+        self.cache_type_id = str(
+            files_service.get_or_create_output_type("Cache").id
+        )
+        self.person_id = self.person.id
+        self.working_file_id = str(self.working_file.id)
 
         events.unregister_all()
 
-    def test_publish(self):
-        publish_data = {
-            "task_id": self.task.id,
-            "person_id": self.person.id,
+    def new_output(self, data, code=201):
+        return self.post(
+            "data/tasks/%s/working-files/%s/output-files/new" % (
+                self.task_id,
+                self.working_file_id
+            ),
+            data,
+            code
+        )
+
+    def test_to_review(self):
+        data = {"person_id": str(self.person_id)}
+        status_id = str(tasks_service.get_to_review_status().id)
+        self.put("/actions/tasks/%s/to-review" % self.task_id, data)
+        task = self.get("data/tasks/%s" % self.task_id)
+        self.assertEquals(task["task_status_id"], status_id)
+
+    def test_new_output(self):
+        data = {
+            "person_id": self.person_id,
             "comment": "test working file publish",
-            "working_file_revision": 15
+            "output_type_id": self.tx_type_id
         }
-        result = self.post(
-            "project/files/working-files/publish",
-            publish_data
-        )
+        result = self.new_output(data)
 
         self.assertEqual(
-            result["output_file"]["folder_path"],
-            "/simple/productions/export/cosmos_landromat/assets/props/tree/shaders"
+            result["folder_path"],
+            "/simple/productions/export/cosmos_landromat/assets/props/tree/"
+            "shaders/tx"
         )
         self.assertEqual(
-            result["output_file"]["file_name"],
-            "cosmos_landromat_props_tree_shaders_v001_test_working_file_publish"
+            result["file_name"],
+            "cosmos_landromat_props_tree_shaders_tx_v001"
         )
 
-        output_file_id = result["output_file"]["id"]
-        output_file = self.get("data/output_files/%s" % output_file_id)
+        output_file_id = result["id"]
+        output_file = self.get("/data/output-files/%s" % output_file_id)
 
-        self.assertEqual(output_file["comment"], publish_data["comment"])
+        self.assertEqual(output_file["comment"], data["comment"])
         self.assertEqual(output_file["revision"], 1)
+        self.assertEqual(output_file["source_file_id"], self.working_file_id)
+
+    def test_new_output_again(self):
+        data = {
+            "person_id": self.person_id,
+            "comment": "test working file publish",
+            "output_type_id": self.tx_type_id
+        }
+        result = self.new_output(data)
+        result = self.new_output(data)
 
         self.assertEqual(
-            result["working_file"]["folder_path"],
-            "/simple/productions/cosmos_landromat/assets/props/tree/shaders"
+            result["folder_path"],
+            "/simple/productions/export/cosmos_landromat/assets/props/tree/"
+            "shaders/tx"
         )
         self.assertEqual(
-            result["working_file"]["file_name"],
-            "cosmos_landromat_props_tree_shaders_v015_test_working_file_publish"
+            result["file_name"],
+            "cosmos_landromat_props_tree_shaders_tx_v002"
         )
 
-        working_file_id = result["working_file"]["id"]
-        working_file = self.get("data/working_files/%s" % working_file_id)
+        output_file_id = result["id"]
+        output_file = self.get("/data/output-files/%s" % output_file_id)
 
-        self.assertEqual(working_file["revision"], 15)
+        self.assertEqual(output_file["comment"], data["comment"])
+        self.assertEqual(output_file["revision"], 2)
+        self.assertEqual(output_file["source_file_id"], self.working_file_id)
 
-        self.assertEqual(
-            output_file["source_file_id"],
-            working_file["id"]
-        )
-
-    def test_publish_wrong_data(self):
-        publish_data = {
+    def test_new_output_wrong_data(self):
+        data = {
             "comment_wrong": "test file publish"
         }
-        self.post(
-            "project/files/working-files/publish",
-            publish_data,
-            400
-        )
-
-    def test_publish_new_revision(self):
-        publish_data = {
-            "task_id": self.task.id,
-            "person_id": self.person.id,
-            "comment": "test working file publish"
-        }
-        self.post("project/files/working-files/publish", publish_data)
-        result = self.post(
-            "project/files/working-files/publish",
-            publish_data
-        )
-        working_file_id = result["working_file"]["id"]
-        output_file_id = result["output_file"]["id"]
-
-        working_file = self.get("data/working_files/%s" % working_file_id)
-        self.assertEqual(working_file["revision"], 3)
-
-        output_file = self.get("data/output_files/%s" % output_file_id)
-        self.assertEqual(output_file["revision"], 2)
+        self.new_output(data, 400)

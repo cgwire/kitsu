@@ -32,15 +32,15 @@ class OutputFileTestCase(ApiDBTestCase):
         )
 
     def test_get_output_files(self):
-        output_files = self.get("data/output_files")
+        output_files = self.get("data/output-files")
         self.assertEquals(len(output_files), 3)
 
     def test_get_output_file(self):
-        output_file = self.get_first("data/output_files")
+        output_file = self.get_first("data/output-files")
         output_file_again = self.get(
-            "data/output_files/%s" % output_file["id"])
+            "data/output-files/%s" % output_file["id"])
         self.assertEquals(output_file, output_file_again)
-        self.get_404("data/output_files/%s" % fields.gen_uuid())
+        self.get_404("data/output-files/%s" % fields.gen_uuid())
 
     def test_create_output_file(self):
         data = {
@@ -52,28 +52,28 @@ class OutputFileTestCase(ApiDBTestCase):
             "file_status_id": self.file_status.id
         }
         self.file_status_id = self.file_status.id
-        self.output_file = self.post("data/output_files", data)
+        self.output_file = self.post("data/output-files", data)
         self.assertIsNotNone(self.output_file["id"])
 
-        output_files = self.get("data/output_files")
+        output_files = self.get("data/output-files")
         self.assertEquals(len(output_files), 4)
 
     def test_update_output_file(self):
-        output_file = self.get_first("data/output_files")
+        output_file = self.get_first("data/output-files")
         data = {
             "name": "Super modeling output_file 2"
         }
-        self.put("data/output_files/%s" % output_file["id"], data)
+        self.put("data/output-files/%s" % output_file["id"], data)
         output_file_again = self.get(
-            "data/output_files/%s" % output_file["id"])
+            "data/output-files/%s" % output_file["id"])
         self.assertEquals(data["name"], output_file_again["name"])
-        self.put_404("data/output_files/%s" % fields.gen_uuid(), data)
+        self.put_404("data/output-files/%s" % fields.gen_uuid(), data)
 
     def test_delete_output_file(self):
-        output_files = self.get("data/output_files")
+        output_files = self.get("data/output-files")
         self.assertEquals(len(output_files), 3)
         output_file = output_files[0]
-        self.delete("data/output_files/%s" % output_file["id"])
-        output_files = self.get("data/output_files")
+        self.delete("data/output-files/%s" % output_file["id"])
+        output_files = self.get("data/output-files")
         self.assertEquals(len(output_files), 2)
-        self.delete_404("data/output_files/%s" % fields.gen_uuid())
+        self.delete_404("data/output-files/%s" % fields.gen_uuid())

@@ -23,4 +23,7 @@ class ShotAssetsTestCase(ApiDBTestCase):
     def test_get_assets_for_shots(self):
         assets = self.get("data/shots/%s/assets" % self.shot.id)
         self.assertEquals(len(assets), 3)
-        self.assertDictEqual(assets[0], self.entities[0].serialize())
+        self.assertDictEqual(
+            assets[0],
+            self.entities[0].serialize(obj_type="Asset")
+        )

@@ -5,10 +5,10 @@ from test.base import ApiDBTestCase
 
 from zou.app.models.task import Task
 from zou.app.models.task_type import TaskType
-from zou.app.project import task_info
+from zou.app.services import tasks_service
 from zou.app.utils import events, fields
 
-from zou.app.project.exception import TaskNotFoundException
+from zou.app.services.exception import TaskNotFoundException
 
 
 class ToReviewHandler(object):
@@ -44,7 +44,9 @@ class TaskInfoTestCase(ApiDBTestCase):
         self.generate_fixture_task()
         self.generate_fixture_shot_task()
         self.generate_fixture_file_status()
+        self.generate_fixture_software()
         self.generate_fixture_working_file()
+        self.generate_fixture_output_type()
         self.generate_fixture_output_file()
 
         self.task_id = self.task.id
@@ -70,20 +72,31 @@ class TaskInfoTestCase(ApiDBTestCase):
         self.assertTrue(self.is_event_fired)
 
     def test_get_status(self):
-        task_status = task_info.get_or_create_status("WIP", "wip")
+        task_status = tasks_service.get_or_create_status("WIP", "wip")
         self.assertEqual(task_status.name, "WIP")
 
     def test_get_wip_status(self):
-        task_status = task_info.get_wip_status()
+        task_status = tasks_service.get_wip_status()
         self.assertEqual(task_status.name, "WIP")
 
+    def test_get_todo_status(self):
+        task_status = tasks_service.get_todo_status()
+        self.assertEqual(task_status.name, "Todo")
+
     def test_get_to_review_status(self):
-        task_status = task_info.get_to_review_status()
+        task_status = tasks_service.get_to_review_status()
         self.assertEqual(task_status.name, "To review")
 
-    def test_get_todo_status(self):
-        task_status = task_info.get_todo_status()
-        self.assertEqual(task_status.name, "Todo")
+    def test_create_task(self):
+        shot = self.shot.serialize()
+        task_type = self.task_type.serialize()
+        status = tasks_service.get_todo_status().serialize()
+        task = tasks_service.create_task(task_type, shot)
+        task = tasks_service.get_task(task["id"]).serialize()
+        self.assertEquals(task["entity_id"], shot["id"])
+        self.assertEquals(task["task_type_id"], task_type["id"])
+        self.assertEquals(task["project_id"], shot["project_id"])
+        self.assertEquals(task["task_status_id"], status["id"])
 
     def test_status_to_wip(self):
         events.register(
@@ -94,7 +107,7 @@ class TaskInfoTestCase(ApiDBTestCase):
 
         now = datetime.datetime.now()
         self.task.update({"real_start_date": None})
-        task_info.start_task(self.task)
+        tasks_service.start_task(self.task)
 
         task = Task.get(self.task.id)
         self.assertEqual(task.task_status_id, self.wip_status_id)
@@ -102,14 +115,14 @@ class TaskInfoTestCase(ApiDBTestCase):
         self.assert_event_is_fired()
 
     def test_status_to_wip_twice(self):
-        task_info.start_task(self.task)
+        tasks_service.start_task(self.task)
         task = Task.get(self.task.id)
         real_start_date = task.real_start_date
         task.update({
             "task_status_id": self.task_status.id
         })
 
-        task_info.start_task(self.task)
+        tasks_service.start_task(self.task)
         task = Task.get(self.task.id)
         self.assertEqual(task.real_start_date, real_start_date)
 
@@ -120,7 +133,7 @@ class TaskInfoTestCase(ApiDBTestCase):
             "mark_event_as_fired",
             handler
         )
-        task_info.to_review_task(self.task, self.output_file.serialize())
+        tasks_service.task_to_review(self.task, self.person, "my comment")
         self.is_event_fired = handler.is_event_fired
         data = handler.data
 
@@ -158,37 +171,23 @@ class TaskInfoTestCase(ApiDBTestCase):
             str(self.person.id)
         )
 
-        self.assertTrue(
-            data["task_after"]["output_file"]["id"],
-            str(self.output_file.id)
-        )
+        self.assertEquals(data["task_after"]["comment"], "my comment")
 
     def test_assign_task(self):
-        task_info.assign_task(self.task, self.assigner)
+        tasks_service.assign_task(self.task, self.assigner)
         self.assertEqual(self.task.assignees[1].id, self.assigner.id)
 
     def test_get_department_from_task_type(self):
-        department = task_info.get_department_from_task_type(self.task_type)
+        department = tasks_service.get_department_from_task_type(self.task_type)
         self.assertEqual(department.name, "Modeling")
-
-    def test_create_task(self):
-        shot = self.shot.serialize()
-        task_type = self.task_type.serialize()
-        status = task_info.get_todo_status().serialize()
-        task = task_info.create_task(task_type, shot)
-        task = task_info.get_task(task["id"]).serialize()
-        self.assertEquals(task["entity_id"], shot["id"])
-        self.assertEquals(task["task_type_id"], task_type["id"])
-        self.assertEquals(task["project_id"], shot["project_id"])
-        self.assertEquals(task["task_status_id"], status["id"])
 
     def test_get_task(self):
         self.assertRaises(
             TaskNotFoundException,
-            task_info.get_task,
+            tasks_service.get_task,
             "wrong-id"
         )
-        task = task_info.get_task(self.task_id)
+        task = tasks_service.get_task(self.task_id)
         self.assertEqual(self.task_id, task.id)
         self.output_file.delete()
         self.working_file.delete()
@@ -196,22 +195,22 @@ class TaskInfoTestCase(ApiDBTestCase):
 
         self.assertRaises(
             TaskNotFoundException,
-            task_info.get_task,
+            tasks_service.get_task,
             self.task_id
         )
 
     def test_get_task_dicts_for_shot(self):
-        tasks = task_info.get_task_dicts_for_shot(self.shot.id)
+        tasks = tasks_service.get_task_dicts_for_shot(self.shot.id)
         self.assertEqual(len(tasks), 1)
         self.assertEqual(tasks[0]["id"], str(self.shot_task.id))
 
     def test_get_task_dicts_for_asset(self):
-        tasks = task_info.get_task_dicts_for_asset(self.entity.id)
+        tasks = tasks_service.get_task_dicts_for_asset(self.entity.id)
         self.assertEqual(len(tasks), 1)
         self.assertEqual(tasks[0]["id"], str(self.task.id))
 
     def test_get_task_dicts_for_entity(self):
-        tasks = task_info.get_task_dicts_for_entity(self.entity.id)
+        tasks = tasks_service.get_task_dicts_for_entity(self.entity.id)
         self.assertEqual(len(tasks), 1)
         self.assertEqual(tasks[0]["id"], str(self.task.id))
         self.assertEqual(tasks[0]["task_type_name"], str("Shaders"))
@@ -246,7 +245,7 @@ class TaskInfoTestCase(ApiDBTestCase):
         )
         self.task.save()
 
-        tasks = task_info.get_task_dicts_for_entity(self.entity.id)
+        tasks = tasks_service.get_task_dicts_for_entity(self.entity.id)
         self.assertEqual(len(tasks), 1)
         self.assertEqual(tasks[0]["name"], u"Première Tâche")
         self.assertEqual(tasks[0]["task_type_name"], u"Modélisation")

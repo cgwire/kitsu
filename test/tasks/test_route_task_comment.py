@@ -24,7 +24,7 @@ class RouteTaskChangeTestCase(ApiDBTestCase):
         self.person_id = self.person.id
 
     def test_comment_task(self):
-        path = "project/tasks/%s/comment/" % self.task.id
+        path = "/actions/tasks/%s/comment/" % self.task.id
         data = {
             "task_status_id": self.wip_status_id,
             "comment": "comment test"
@@ -37,11 +37,11 @@ class RouteTaskChangeTestCase(ApiDBTestCase):
         )
         self.assertEqual(comment["task_status"]["short_name"], "wip")
 
-        tasks = self.get("data/tasks")
+        tasks = self.get("/data/tasks")
         self.assertEqual(len(tasks), 1)
         self.assertEqual(tasks[0]["task_status_id"], str(self.wip_status_id))
 
-        comments = self.get("data/comments/")
+        comments = self.get("/data/comments/")
         self.assertEqual(len(comments), 1)
         self.assertEqual(comments[0]["text"], data["comment"])
         self.assertEqual(comments[0]["person_id"], str(self.user.id))
@@ -54,7 +54,7 @@ class RouteTaskChangeTestCase(ApiDBTestCase):
         self.task_id = str(self.task.id)
         self.task_2_id = str(self.task_standard.id)
 
-        path = "project/tasks/%s/comment/" % self.task_id
+        path = "/actions/tasks/%s/comment/" % self.task_id
         data = {
             "task_status_id": self.wip_status_id,
             "comment": "comment test"
@@ -66,10 +66,10 @@ class RouteTaskChangeTestCase(ApiDBTestCase):
         }
         self.post(path, data)
 
-        path = "project/tasks/%s/comment/" % self.task_2_id
+        path = "/actions/tasks/%s/comment/" % self.task_2_id
         self.post(path, data)
 
-        path = "data/tasks/%s/comments/" % self.task_id
+        path = "/data/tasks/%s/comments/" % self.task_id
         comments = self.get(path)
         self.assertEqual(len(comments), 2)
         self.assertEqual(comments[0]["text"], data["comment"])
@@ -79,5 +79,5 @@ class RouteTaskChangeTestCase(ApiDBTestCase):
         )
         self.assertEqual(comments[0]["task_status"]["short_name"], "wip")
 
-        path = "data/tasks/unknown/comments/"
+        path = "/actions/tasks/unknown/comments/"
         comments = self.get(path, 404)

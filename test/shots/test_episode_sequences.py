@@ -20,7 +20,7 @@ class EpisodeSequencesTestCase(ApiDBTestCase):
             entity_type_id=self.sequence_type.id
         )
         self.episode_id = self.episode.id
-        self.serialized_sequence = self.sequence.serialize()
+        self.serialized_sequence = self.sequence.serialize(obj_type="Sequence")
 
     def test_get_sequences_for_episode(self):
         sequences = self.get("data/episodes/%s/sequences" % self.episode_id)

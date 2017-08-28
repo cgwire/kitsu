@@ -20,6 +20,7 @@ class PersonTestCase(ApiDBTestCase):
     def test_get_persons(self):
         persons = self.get("data/persons")
         self.assertEquals(len(persons), 4)
+        self.assertEquals(persons[0]["type"], "Person")
 
     def test_get_person(self):
         person = self.get_first("data/persons")

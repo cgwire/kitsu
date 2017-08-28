@@ -20,7 +20,7 @@ class OutputFileTestCase(ApiDBTestCase):
         self.generate_fixture_task()
 
     def test_get_output_files(self):
-        csv_projects = self.get_raw("export/csv/shots.csv")
+        csv_projects = self.get_raw("/export/csv/shots.csv")
         expected_result = """Project,Sequence,Name,Description,FPS,Frame In,Frame Out\r
 Cosmos Landromat,S01,P01,Description Shot 01,25,0,100\r\n"""
         self.assertEqual(csv_projects, expected_result)

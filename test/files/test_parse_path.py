@@ -2,7 +2,7 @@ from test.base import ApiDBTestCase
 
 from zou.app.models.entity import Entity
 
-from zou.app.project import file_tree
+from zou.app.services import file_tree
 
 
 class FileTreeTestCase(ApiDBTestCase):
@@ -46,7 +46,10 @@ class FileTreeTestCase(ApiDBTestCase):
     def test_get_shot_path_template(self):
         tree = file_tree.get_tree_from_project(self.project)
         path = file_tree.get_shot_path_template(tree)
-        self.assertEqual(path, "<Project>/shots/<Sequence>/<Shot>/<TaskType>")
+        self.assertEqual(
+            path,
+            "<Project>/shots/<Sequence>/<Shot>/<TaskType>/<Software>"
+        )
 
     def test_get_shot_template_folders(self):
         folders = file_tree.get_shot_template_folders(self.project)
@@ -55,7 +58,8 @@ class FileTreeTestCase(ApiDBTestCase):
             u"shots",
             u"<Sequence>",
             u"<Shot>",
-            u"<TaskType>"
+            u"<TaskType>",
+            u"<Software>",
         ])
 
     def test_get_path_folders(self):

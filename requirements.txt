@@ -5,8 +5,10 @@ flask_script==2.0.5
 flask_restful==0.3.5
 flask_fixtures==0.3.7
 flask_sqlalchemy==2.1.0
-flask_login==0.4.0
 flask_bcrypt==0.7.1
+flask-jwt-extended==2.4.1
+simplekv==0.10.0
+ldap3
 
 email_validator==1.0.2
 
@@ -18,4 +20,4 @@ python-slugify==1.2.4
 
 pillow==4.0.0
 pytz
-babel
+babel==2.4.0

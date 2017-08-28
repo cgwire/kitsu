@@ -26,6 +26,10 @@ class ProjectSequencesTestCase(ApiDBTestCase):
     def test_get_sequences_for_project(self):
         sequences = self.get("data/projects/%s/sequences" % self.project.id)
         self.assertEquals(len(sequences), 4)
+        self.assertDictEqual(
+            sequences[0],
+            self.sequence.serialize(obj_type="Sequence")
+        )
 
     def test_get_sequences_for_project_404(self):
         self.get("data/projects/unknown/sequences", 404)

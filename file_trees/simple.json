@@ -3,13 +3,13 @@
         "mountpoint": "/simple",
         "root": "productions",
         "folder_path": {
-            "shot": "<Project>/shots/<Sequence>/<Shot>/<TaskType>",
-            "asset": "<Project>/assets/<AssetType>/<Asset>/<TaskType>",
+            "shot": "<Project>/shots/<Sequence>/<Shot>/<TaskType>/<Software>",
+            "asset": "<Project>/assets/<AssetType>/<Asset>/<TaskType>/<Software>",
             "style": "lowercase"
         },
         "file_name": {
-            "shot": "<Project>_<Sequence>_<Shot>_<TaskType>",
-            "asset": "<Project>_<AssetType>_<Asset>_<TaskType>",
+            "shot": "<Project>_<Sequence>_<Shot>_<TaskType>_<Name>",
+            "asset": "<Project>_<AssetType>_<Asset>_<TaskType>_<Name>",
             "style": "lowercase"
         }
     },
@@ -17,13 +17,13 @@
         "mountpoint": "/simple",
         "root": "productions/export",
         "folder_path": {
-            "shot": "<Project>/shots/<Sequence>/<Shot>/<TaskType>",
-            "asset": "<Project>/assets/<AssetType>/<Asset>/<TaskType>",
+            "shot": "<Project>/shots/<Sequence>/<Shot>/<TaskType>/<OutputType>",
+            "asset": "<Project>/assets/<AssetType>/<Asset>/<TaskType>/<OutputType>",
             "style": "lowercase"
         },
         "file_name": {
-            "shot": "<Project>_<Sequence>_<Shot>_<TaskType>",
-            "asset": "<Project>_<AssetType>_<Asset>_<TaskType>",
+            "shot": "<Project>_<Sequence>_<Shot>_<TaskType>_<OutputType>",
+            "asset": "<Project>_<AssetType>_<Asset>_<TaskType>_<OutputType>",
             "style": "lowercase"
         }
     },

@@ -41,7 +41,7 @@ class ImportShotgunShotTestCase(ShotgunTestCase):
             "id": 3
         }
 
-        api_path = "data/import/shotgun/assets"
+        api_path = "/import/shotgun/assets"
         self.assets = self.post(api_path, [sg_asset], 200)
         self.assertEqual(len(self.assets), 1)
 

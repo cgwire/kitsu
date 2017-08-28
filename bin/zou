@@ -4,13 +4,13 @@ import sys
 from flask_script import Manager, prompt_pass, prompt
 
 from zou.app import app
-from zou.app.utils import dbhelpers, auth
-from zou.app.project import (
-    asset_info,
-    person_info,
-    project_info,
-    task_info,
-    shot_info
+from zou.app.utils import dbhelpers, auth, commands
+from zou.app.services import (
+    assets_service,
+    persons_service,
+    projects_service,
+    tasks_service,
+    shots_service
 )
 
 manager = Manager(app)
@@ -37,6 +37,12 @@ def reset_db():
 
 
 @manager.command
+def clean_auth_tokens():
+    "Remove revoked and expired tokens."
+    commands.clean_auth_tokens()
+
+
+@manager.command
 def create_admin():
     print("Please enter an email for the new admin to create.")
     email = prompt("Email")
@@ -49,7 +55,7 @@ def create_admin():
         auth.validate_email(email)
         auth.validate_password(password, confirmation_password)
         password = auth.encrypt_password(password)
-        person_info.create_person(email, password, "Super", "Admin")
+        persons_service.create_person(email, password, "Super", "Admin")
         print("Admin successfully created.")
 
     except auth.PasswordsNoMatchException:
@@ -62,52 +68,53 @@ def create_admin():
         print("Email is not valid.")
         sys.exit(1)
 
+
 @manager.command
 def init_data():
-    project_info.get_open_status()
-    project_info.get_closed_status()
+    projects_service.get_open_status()
+    projects_service.get_closed_status()
     print("Project status initialized.")
 
-    asset_info.get_or_create_type("Characters")
-    asset_info.get_or_create_type("Props")
-    asset_info.get_or_create_type("Environment")
-    asset_info.get_or_create_type("FX")
+    assets_service.get_or_create_type("Characters")
+    assets_service.get_or_create_type("Props")
+    assets_service.get_or_create_type("Environment")
+    assets_service.get_or_create_type("FX")
     print("Asset types initialized.")
 
-    shot_info.get_episode_type()
-    shot_info.get_sequence_type()
-    shot_info.get_shot_type()
+    shots_service.get_episode_type()
+    shots_service.get_sequence_type()
+    shots_service.get_shot_type()
     print("Shot types initialized.")
 
-    modeling = task_info.get_or_create_department("Modeling")
-    animation = task_info.get_or_create_department("Animation")
-    fx = task_info.get_or_create_department("FX")
-    compositing = task_info.get_or_create_department("Compositiing")
-    concept = task_info.get_or_create_department("Concept")
+    modeling = tasks_service.get_or_create_department("Modeling")
+    animation = tasks_service.get_or_create_department("Animation")
+    fx = tasks_service.get_or_create_department("FX")
+    compositing = tasks_service.get_or_create_department("Compositiing")
+    concept = tasks_service.get_or_create_department("Concept")
 
-    task_info.get_or_create_task_type(concept, "Concept", '#8D6E63', 1)
-    task_info.get_or_create_task_type(modeling, "Texture", '#64B5F6', 2)
-    task_info.get_or_create_task_type(modeling, "Modeling", '#78909C', 3)
-    task_info.get_or_create_task_type(animation, "Setup", '#9CCC65', 4)
-    task_info.get_or_create_task_type(concept, "Storyboard", '#43A047', 1, True)
-    task_info.get_or_create_task_type(animation, "Layout", '#7CB342', 2, True)
-    task_info.get_or_create_task_type(
+    tasks_service.get_or_create_task_type(concept, "Concept", '#8D6E63', 1)
+    tasks_service.get_or_create_task_type(modeling, "Texture", '#64B5F6', 2)
+    tasks_service.get_or_create_task_type(modeling, "Modeling", '#78909C', 3)
+    tasks_service.get_or_create_task_type(animation, "Setup", '#9CCC65', 4)
+    tasks_service.get_or_create_task_type(concept, "Storyboard", '#43A047', 1, True)
+    tasks_service.get_or_create_task_type(animation, "Layout", '#7CB342', 2, True)
+    tasks_service.get_or_create_task_type(
         animation, "Animation", '#009688', 3, True)
-    task_info.get_or_create_task_type(
+    tasks_service.get_or_create_task_type(
         compositing, "Lighting", '#F9A825', 4, True)
-    task_info.get_or_create_task_type(fx, "FX", '#26C6DA', 5, True)
-    task_info.get_or_create_task_type(compositing, "Render", '#F06292', 6, True)
-    task_info.get_or_create_task_type(
+    tasks_service.get_or_create_task_type(fx, "FX", '#26C6DA', 5, True)
+    tasks_service.get_or_create_task_type(compositing, "Render", '#F06292', 6, True)
+    tasks_service.get_or_create_task_type(
         compositing, "Compositing", '#ff5252', 7, True)
     print("Task types initialized.")
 
-    task_info.get_or_create_status("Todo", "todo", "#f5f5f5")
-    task_info.get_or_create_status("Work In Progress", "wip", "#3273dc")
-    task_info.get_or_create_status(
+    tasks_service.get_or_create_status("Todo", "todo", "#f5f5f5")
+    tasks_service.get_or_create_status("Work In Progress", "wip", "#3273dc")
+    tasks_service.get_or_create_status(
         "Waiting For Approval", "wfa", "#ab26ff"
     )
-    task_info.get_or_create_status("Retake", "retake", "#ff3860")
-    task_info.get_or_create_status("Done", "done", "#22d160")
+    tasks_service.get_or_create_status("Retake", "retake", "#ff3860")
+    tasks_service.get_or_create_status("Done", "done", "#22d160")
     print("Task status initialized.")
 
 if __name__ == '__main__':

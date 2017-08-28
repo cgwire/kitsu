@@ -63,7 +63,7 @@ class ImportShotgunTaskTestCase(ShotgunTestCase):
             "reply_content": "Test reply content."
         }
 
-        api_path = "data/import/shotgun/notes"
+        api_path = "/import/shotgun/notes"
         self.notes = self.post(api_path, [self.sg_note], 200)
 
     def test_import_note(self):
@@ -89,7 +89,7 @@ class ImportShotgunTaskTestCase(ShotgunTestCase):
 
     def test_import_remove_note(self):
         self.load_note()
-        api_path = "data/import/shotgun/remove/note"
+        api_path = "/import/shotgun/remove/note"
         sg_note = {"id": self.sg_note["id"]}
         self.notes = self.get(
             "data/comments?shotgun_id=%s" % self.sg_note["id"])

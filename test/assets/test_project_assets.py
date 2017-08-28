@@ -16,7 +16,7 @@ class ProjectAssetsTestCase(ApiDBTestCase):
         self.generate_fixture_entity_standard()
         self.generate_fixture_sequence()
         self.generate_fixture_shot()
-        self.entity_dict = self.entity.serialize()
+        self.entity_dict = self.entity.serialize(obj_type="Asset")
 
     def test_get_project_assets(self):
         assets = self.get("data/projects/%s/assets" % self.project.id)
@@ -35,7 +35,7 @@ class ProjectAssetsTestCase(ApiDBTestCase):
         )
         entity.save()
         path_ids = (self.project.id, self.entity_type.id)
-        path = "data/projects/%s/asset_types/%s/assets" % path_ids
+        path = "data/projects/%s/asset-types/%s/assets" % path_ids
         assets = self.get(path)
         self.assertEquals(len(assets), 1)
         self.assertDictEqual(assets[0], self.entity_dict)

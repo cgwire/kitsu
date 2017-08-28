@@ -1,6 +1,6 @@
 from test.base import ApiDBTestCase
 
-from zou.app.project import task_info
+from zou.app.services import tasks_service
 
 
 class RouteCreateTasksTestCase(ApiDBTestCase):
@@ -19,13 +19,13 @@ class RouteCreateTasksTestCase(ApiDBTestCase):
         self.generate_fixture_task_status()
         self.generate_fixture_person()
         self.generate_fixture_assigner()
-        self.todo_status = task_info.get_or_create_status("Todo")
+        self.todo_status = tasks_service.get_or_create_status("Todo")
         self.entity_id = str(self.entity.id)
         self.shot_id = str(self.shot.id)
         self.task_type_id = str(self.task_type.id)
 
     def test_create_asset_tasks(self):
-        path = "/project/assets/task-types/%s/create-tasks" % self.task_type_id
+        path = "/actions/task-types/%s/assets/create-tasks" % self.task_type_id
         tasks = self.post(path, {})
         self.assertEqual(len(tasks), 1)
 
@@ -37,7 +37,7 @@ class RouteCreateTasksTestCase(ApiDBTestCase):
         self.assertEqual(task["entity_id"], self.entity_id)
 
     def test_create_shot_tasks(self):
-        path = "/project/shots/task-types/%s/create-tasks" % self.task_type_id
+        path = "/actions/task-types/%s/shots/create-tasks" % self.task_type_id
         tasks = self.post(path, {})
         self.assertEqual(len(tasks), 1)
 

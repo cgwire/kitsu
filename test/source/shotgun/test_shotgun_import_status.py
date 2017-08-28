@@ -19,7 +19,7 @@ class ImportShotgunStatusTestCase(ShotgunTestCase):
         data = [
             {"bad": "wrong"}
         ]
-        self.status = self.post("data/import/shotgun/status", data, 200)
+        self.status = self.post("/import/shotgun/status", data, 200)
         self.assertEqual(len(self.status), 0)
 
     def test_import_a_status(self):
@@ -36,11 +36,11 @@ class ImportShotgunStatusTestCase(ShotgunTestCase):
             "type": "Status"
         }
 
-        api_path = "data/import/shotgun/status"
+        api_path = "/import/shotgun/status"
         self.statuses = self.post(api_path, [sg_status], 200)
         self.assertEqual(len(self.statuses), 1)
 
-        self.statuses = self.get("data/task_status")
+        self.statuses = self.get("data/task-status")
         self.assertEqual(len(self.statuses), 1)
 
         status = self.statuses[0]
@@ -51,7 +51,7 @@ class ImportShotgunStatusTestCase(ShotgunTestCase):
 
     def test_import_a_status_with_same_name(self):
         self.status = self.load_fixture('status')
-        self.statuses = self.get("data/task_status")
+        self.statuses = self.get("data/task-status")
 
         self.assertEqual(len(self.statuses), 6)
         sg_status = {
@@ -66,8 +66,8 @@ class ImportShotgunStatusTestCase(ShotgunTestCase):
             "name": "Approved",
             "type": "Status"
         }
-        api_path = "data/import/shotgun/status"
+        api_path = "/import/shotgun/status"
         self.statuses = self.post(api_path, [sg_status], 200)
 
-        self.statuses = self.get("data/task_status")
+        self.statuses = self.get("data/task-status")
         self.assertEqual(len(self.statuses), 7)

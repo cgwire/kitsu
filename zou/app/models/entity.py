@@ -31,7 +31,7 @@ class Entity(db.Model, BaseMixin, SerializerMixin):
     )
 
     name = db.Column(db.String(160), nullable=False)
-    description = db.Column(db.String(300))
+    description = db.Column(db.String(600))
     shotgun_id = db.Column(db.Integer)
 
     project_id = db.Column(

@@ -30,7 +30,7 @@ class ImportShotgunPersonTestCase(ShotgunTestCase):
             "type": "HumanUser"
         }
 
-        api_path = "data/import/shotgun/persons"
+        api_path = "/import/shotgun/persons"
         self.persons = self.post(api_path, [sg_person], 200)
         self.assertEqual(len(self.persons), 1)
 

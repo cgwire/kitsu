@@ -19,7 +19,7 @@ class ShotTaskTypesTestCase(ApiDBTestCase):
         self.generate_fixture_shot_task()
 
     def test_get_task_types_for_shot(self):
-        task_types = self.get("data/shots/%s/task_types" % self.shot.id)
+        task_types = self.get("/data/shots/%s/task-types" % self.shot.id)
         self.assertEquals(len(task_types), 1)
         self.assertDictEqual(
             task_types[0],
