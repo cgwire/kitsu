@@ -22,12 +22,27 @@ def serialize_value(value):
         return value.decode("utf-8")
     elif isinstance(value, str):
         return value
+    elif isinstance(value, int):
+        return value
     elif isinstance(value, Locale):
         return str(value)
     elif isinstance(value, type(timezone("Europe/Paris"))):
         return str(value)
+    elif isinstance(value, list):
+        return serialize_list(value)
+    elif value is None:
+        return None
+    elif isinstance(value, object):
+        if hasattr(value, 'serialize'):
+            return value.serialize()
+        else:
+            return value
     else:
         return value
+
+
+def serialize_list(list_value):
+    return [serialize_value(value) for value in list_value]
 
 
 def serialize_dict(dict_value):
