@@ -1,3 +1,4 @@
+from sqlalchemy.orm import relationship
 from sqlalchemy_utils import UUIDType
 
 from zou.app import db
@@ -14,11 +15,18 @@ class WorkingFile(db.Model, BaseMixin, SerializerMixin):
     revision = db.Column(db.Integer())
     size = db.Column(db.Integer())
     checksum = db.Column(db.Integer())
+    path = db.Column(db.String(400))
 
     task_id = db.Column(UUIDType(binary=False), db.ForeignKey("task.id"))
     entity_id = db.Column(UUIDType(binary=False), db.ForeignKey("entity.id"))
     person_id = \
         db.Column(UUIDType(binary=False), db.ForeignKey("person.id"))
+    software_id = \
+        db.Column(UUIDType(binary=False), db.ForeignKey("software.id"))
+    outputs = relationship(
+        "OutputFile",
+        back_populates="source_file"
+    )
 
     __table_args__ = (
         db.UniqueConstraint(
