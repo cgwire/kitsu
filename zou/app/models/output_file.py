@@ -1,3 +1,4 @@
+from sqlalchemy.orm import relationship
 from sqlalchemy_utils import UUIDType
 
 from zou.app import db
@@ -15,6 +16,7 @@ class OutputFile(db.Model, BaseMixin, SerializerMixin):
     size = db.Column(db.Integer())
     checksum = db.Column(db.Integer())
     source = db.Column(db.String(40))
+    path = db.Column(db.String(400))
 
     uploaded_movie_url = db.Column(db.String(600))
     uploaded_movie_name = db.Column(db.String(150))
@@ -29,17 +31,26 @@ class OutputFile(db.Model, BaseMixin, SerializerMixin):
     task_id = db.Column(UUIDType(binary=False), db.ForeignKey("task.id"))
     entity_id = db.Column(UUIDType(binary=False), db.ForeignKey("entity.id"))
     person_id = db.Column(UUIDType(binary=False), db.ForeignKey("person.id"))
+    output_type_id = db.Column(
+        UUIDType(binary=False),
+        db.ForeignKey("output_type.id")
+    )
     source_file_id = \
         db.Column(
             UUIDType(binary=False),
-            db.ForeignKey("working_file.id")
+            db.ForeignKey("working_file.id"),
         )
+    source_file = relationship(
+        "WorkingFile",
+        back_populates="outputs"
+    )
 
     __table_args__ = (
         db.UniqueConstraint(
             "name",
             "task_id",
             "entity_id",
+            "output_type_id",
             "revision",
             name="output_file_uc"
         ),
