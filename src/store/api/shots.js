@@ -11,7 +11,7 @@ export default {
 
   getShotType (callback) {
     superagent
-      .get('/api/data/shot_type')
+      .get('/api/data/shot-type')
       .end((err, res) => {
         callback(err, res.body)
       })
@@ -55,7 +55,7 @@ export default {
 
   postCsv (formData, callback) {
     superagent
-      .post('/api/data/import/csv/shots')
+      .post('/api/import/csv/shots')
       .send(formData)
       .end((err, res) => {
         callback(err, res.body)

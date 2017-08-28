@@ -3,7 +3,7 @@ import superagent from 'superagent'
 export default {
   getAssetTypes (callback) {
     superagent
-      .get('/api/data/asset_types')
+      .get('/api/data/asset-types')
       .end((err, res) => {
         callback(err, res.body)
       })
@@ -14,7 +14,7 @@ export default {
       name: assetType.name
     }
     superagent
-      .post('/api/data/entity_types/')
+      .post('/api/data/entity-types')
       .send(data)
       .end((err, res) => {
         callback(err, res.body)
@@ -26,7 +26,7 @@ export default {
       name: assetType.name
     }
     superagent
-      .put(`/api/data/entity_types/${assetType.id}`)
+      .put(`/api/data/entity-types/${assetType.id}`)
       .send(data)
       .end((err, res) => {
         callback(err, res.body)
@@ -35,7 +35,7 @@ export default {
 
   deleteAssetType (assetType, callback) {
     superagent
-      .del(`/api/data/entity_types/${assetType.id}`)
+      .del(`/api/data/entity-types/${assetType.id}`)
       .end((err, res) => {
         callback(err, res.body)
       })
