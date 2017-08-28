@@ -44,11 +44,14 @@ def create_type_folder(data_type):
 def turn_into_thumbnail(file_path, size=RECTANGLE_SIZE):
     (width, height) = size
     im = Image.open(file_path)
+
     if height == 0:
         im_width, im_height = im.size
         ratio = im_height / im_width
         height = math.ceil(width * ratio)
-    im = im.resize((width, height))
+        size = (width, height)
+
+    im = im.resize(size)
     im.save(file_path)
 
 
