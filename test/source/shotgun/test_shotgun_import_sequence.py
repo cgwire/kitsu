@@ -39,7 +39,7 @@ class ImportShotgunSequence(ShotgunTestCase):
             "id": 4,
             "description": "test description"
         }
-        api_path = "data/import/shotgun/sequences"
+        api_path = "/import/shotgun/sequences"
         self.sequences = self.post(api_path, [sg_sequence], 200)
         self.assertEqual(len(self.sequences), 1)
 

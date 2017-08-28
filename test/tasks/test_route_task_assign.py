@@ -25,7 +25,7 @@ class RouteTaskChangeTestCase(ApiDBTestCase):
         data = {
             "person_id": person_id
         }
-        self.put("data/tasks/%s/assign" % self.task.id, data, 200)
+        self.put("/actions/tasks/%s/assign" % self.task.id, data, 200)
         task = self.get("data/tasks/%s" % self.task.id)
 
         self.assertEqual(task["assignees"][0], person_id)
@@ -35,11 +35,11 @@ class RouteTaskChangeTestCase(ApiDBTestCase):
         data = {
             "person_id": person_id
         }
-        self.put("data/tasks/%s/assign" % "wrong-id", data, 404)
+        self.put("/actions/tasks/%s/assign" % "wrong-id", data, 404)
 
     def test_task_assign_400(self):
         person_id = "wrong-id"
         data = {
             "person_id": person_id
         }
-        self.put("data/tasks/%s/assign" % self.task.id, data, 400)
+        self.put("/actions/tasks/%s/assign" % self.task.id, data, 400)

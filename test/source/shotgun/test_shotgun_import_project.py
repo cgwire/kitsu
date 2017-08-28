@@ -1,7 +1,7 @@
 from test.source.shotgun.base import ShotgunTestCase
 
 from zou.app.config import DEFAULT_FILE_TREE
-from zou.app.project import file_tree
+from zou.app.services import file_tree
 from zou.app.models.project_status import ProjectStatus
 
 
@@ -17,7 +17,7 @@ class ImportShotgunProjectTestCase(ShotgunTestCase):
         self.projects = self.get("data/projects")
         self.assertEqual(len(self.projects), 2)
 
-        self.project_status = self.get("data/project_status")
+        self.project_status = self.get("data/project-status")
         self.project_status = [
             x for x in self.project_status if x["name"] == "Active"
         ]
@@ -43,7 +43,7 @@ class ImportShotgunProjectTestCase(ShotgunTestCase):
             "type": "Project"
         }
 
-        api_path = "data/import/shotgun/projects"
+        api_path = "/import/shotgun/projects"
         self.projects = self.post(api_path, [sg_project], 200)
         self.assertEqual(len(self.projects), 1)
 

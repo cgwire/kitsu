@@ -4,7 +4,7 @@ from zou.app.models.entity import Entity
 from zou.app.models.task import Task
 from zou.app.models.person import Person
 
-from zou.app.project import shot_info
+from zou.app.services import shots_service
 
 
 class ImportShotgunVersionTestCase(ShotgunTestCase):
@@ -25,7 +25,7 @@ class ImportShotgunVersionTestCase(ShotgunTestCase):
         self.preview_files = self.load_fixture('versions')
         self.assertEqual(len(self.preview_files), 1)
 
-        self.preview_files = self.get("data/preview_files")
+        self.preview_files = self.get("data/preview-files")
         self.assertEqual(len(self.preview_files), 1)
 
     def test_import_preview_files_twice(self):
@@ -33,7 +33,7 @@ class ImportShotgunVersionTestCase(ShotgunTestCase):
         self.preview_files = self.load_fixture('versions')
         self.assertEqual(len(self.preview_files), 1)
 
-        self.preview_files = self.get("data/preview_files")
+        self.preview_files = self.get("data/preview-files")
         self.assertEqual(len(self.preview_files), 1)
 
     def test_import_version(self):
@@ -72,11 +72,11 @@ class ImportShotgunVersionTestCase(ShotgunTestCase):
             "type": "Version"
         }
 
-        api_path = "data/import/shotgun/versions"
+        api_path = "/import/shotgun/versions"
         self.preview_files = self.post(api_path, [sg_version], 200)
         self.assertEqual(len(self.preview_files), 1)
 
-        self.preview_files = self.get("data/preview_files")
+        self.preview_files = self.get("data/preview-files")
         self.assertEqual(len(self.preview_files), 1)
         preview_file = self.preview_files[0]
 
@@ -84,7 +84,7 @@ class ImportShotgunVersionTestCase(ShotgunTestCase):
         person = Person.get_by(shotgun_id=sg_version["user"]["id"])
         entity = Entity.get_by(
             shotgun_id=sg_version["entity"]["id"],
-            entity_type_id=shot_info.get_shot_type().id
+            entity_type_id=shots_service.get_shot_type().id
         )
 
         self.assertEqual(preview_file["name"], sg_version["code"])

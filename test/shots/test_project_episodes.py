@@ -25,6 +25,10 @@ class ProjectEpisodesTestCase(ApiDBTestCase):
     def test_get_episodes_for_project(self):
         episodes = self.get("data/projects/%s/episodes" % self.project.id)
         self.assertEquals(len(episodes), 4)
+        self.assertDictEqual(
+            episodes[0],
+            self.episode.serialize(obj_type="Episode")
+        )
 
     def test_get_episodes_for_project_404(self):
         self.get("data/projects/unknown/episodes", 404)

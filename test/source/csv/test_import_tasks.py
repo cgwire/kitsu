@@ -23,14 +23,14 @@ class ImportCsvTasksTestCase(ApiDBTestCase):
         self.generate_fixture_project()
 
     def load_csv(self, data_type):
-        path = "/data/import/csv/%s" % data_type
+        path = "/import/csv/%s" % data_type
         file_path_fixture = self.get_fixture_file_path(
             os.path.join("csv", "%s.csv" % data_type)
         )
         self.upload_file(path, file_path_fixture)
 
     def test_import_tasks(self):
-        path = "/data/import/csv/tasks"
+        path = "/import/csv/tasks"
         file_path_fixture = self.get_fixture_file_path(
             os.path.join("csv", "tasks.csv")
         )

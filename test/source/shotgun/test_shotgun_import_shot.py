@@ -3,7 +3,7 @@ from test.source.shotgun.base import ShotgunTestCase
 from zou.app.models.entity import Entity
 from zou.app.models.project import Project
 
-from zou.app.project import shot_info
+from zou.app.services import shots_service
 
 
 class ImportShotgunShotTestCase(ShotgunTestCase):
@@ -42,7 +42,7 @@ class ImportShotgunShotTestCase(ShotgunTestCase):
         self.load_fixture('sequences')
         self.load_fixture('assets')
 
-        api_path = "data/import/shotgun/shots"
+        api_path = "/import/shotgun/shots"
         self.shots = self.post(api_path, [self.sg_shot], 200)
         self.assertEqual(len(self.shots), 1)
 
@@ -52,7 +52,7 @@ class ImportShotgunShotTestCase(ShotgunTestCase):
         shot = self.shots[0]
         sequence = Entity.get_by(
             shotgun_id=self.sg_shot["sg_sequence"]["id"],
-            entity_type_id=shot_info.get_sequence_type().id
+            entity_type_id=shots_service.get_sequence_type().id
         )
         entity = Entity.get_by(name=self.sg_shot["assets"][0]["name"])
         project = Project.get_by(name=self.sg_shot["project"]["name"])
@@ -69,7 +69,7 @@ class ImportShotgunShotTestCase(ShotgunTestCase):
         self.load_fixture('sequences')
         self.load_fixture('assets')
 
-        api_path = "data/import/shotgun/shots"
+        api_path = "/import/shotgun/shots"
         self.shots = self.post(api_path, [self.sg_shot], 200)
         self.shots = self.post(api_path, [self.sg_shot], 200)
         self.assertEqual(len(self.shots), 1)
@@ -82,7 +82,7 @@ class ImportShotgunShotTestCase(ShotgunTestCase):
         self.load_fixture('sequences')
         self.load_fixture('assets')
 
-        api_path = "data/import/shotgun/shots"
+        api_path = "/import/shotgun/shots"
         self.shots = self.post(api_path, [self.sg_shot], 200)
 
         self.sg_shot["sg_custom_field_2"] = "test 2"

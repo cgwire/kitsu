@@ -45,13 +45,13 @@ class DataImportErrorTestCase(ShotgunTestCase):
         self.error_id = self.error.id
 
     def test_list_event_errors(self):
-        errors = self.get("data/import/shotgun/errors")
+        errors = self.get("/import/shotgun/errors")
         self.assertEqual(len(errors), 1)
         self.assertDictEqual(errors[0], self.error.serialize())
 
     def test_create_event_error(self):
-        self.post("data/import/shotgun/errors", event)
-        errors = self.get("data/import/shotgun/errors")
+        self.post("/import/shotgun/errors", event)
+        errors = self.get("/import/shotgun/errors")
         self.assertEqual(len(errors), 2)
         self.error = DataImportError.get(self.error_id)
         self.assertEqual(errors[1]["source"], "shotgun")
@@ -62,18 +62,18 @@ class DataImportErrorTestCase(ShotgunTestCase):
 
     def test_delete_event_error(self):
         errors = self.delete(
-            "data/import/shotgun/errors/%s" % self.error.id)
-        errors = self.get("data/import/shotgun/errors")
+            "/import/shotgun/errors/%s" % self.error.id)
+        errors = self.get("/import/shotgun/errors")
         self.assertEqual(len(errors), 0)
 
     def test_delete_event_error_wrong_id_format(self):
         errors = self.delete(
-            "data/import/shotgun/errors/unknown", 404)
-        errors = self.get("data/import/shotgun/errors")
+            "/import/shotgun/errors/unknown", 404)
+        errors = self.get("/import/shotgun/errors")
         self.assertEqual(len(errors), 1)
 
     def test_delete_event_error_404(self):
         errors = self.delete(
-            "data/import/shotgun/errors%s" % uuid.uuid4(), 404)
-        errors = self.get("data/import/shotgun/errors")
+            "/import/shotgun/errors%s" % uuid.uuid4(), 404)
+        errors = self.get("/import/shotgun/errors")
         self.assertEqual(len(errors), 1)

@@ -15,7 +15,7 @@ class ImportCsvProjectsTestCase(ApiDBTestCase):
         super(ImportCsvProjectsTestCase, self).tearDown()
 
     def test_import_projects(self):
-        path = "/data/import/csv/projects"
+        path = "/import/csv/projects"
 
         file_path_fixture = self.get_fixture_file_path(
             os.path.join("csv", "projects.csv")

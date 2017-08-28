@@ -19,6 +19,7 @@ class CommentWorkingFileTestCase(ApiDBTestCase):
         self.generate_fixture_person()
         self.generate_fixture_assigner()
         self.generate_fixture_task()
+        self.generate_fixture_software()
         self.generate_fixture_working_file()
 
     def test_comment_working_file(self):
@@ -26,10 +27,10 @@ class CommentWorkingFileTestCase(ApiDBTestCase):
             "comment": "test working file comment"
         }
         self.put(
-            "project/files/working-files/%s/comment" % self.working_file.id,
+            "/actions/working-files/%s/comment" % self.working_file.id,
             comment_data
         )
-        working_file = self.get("data/working_files/%s" % self.working_file.id)
+        working_file = self.get("data/working-files/%s" % self.working_file.id)
         self.assertEqual(working_file["comment"], comment_data["comment"])
 
     def test_comment_working_wrong_data(self):
@@ -37,7 +38,7 @@ class CommentWorkingFileTestCase(ApiDBTestCase):
             "comment_wrong": "test working file comment"
         }
         self.put(
-            "project/files/working-files/%s/comment" % self.working_file.id,
+            "/actions/working-files/%s/comment" % self.working_file.id,
             comment_data,
             400
         )

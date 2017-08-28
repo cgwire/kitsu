@@ -1,6 +1,6 @@
 from test.base import ApiDBTestCase
 
-from zou.app.project import asset_info
+from zou.app.services import assets_service
 
 from zou.app.utils import events
 
@@ -47,7 +47,7 @@ class CreateAssetsTestCase(ApiDBTestCase):
             self.entity_type.id
         )
         asset = self.post(path, self.asset_data)
-        assets = asset_info.get_assets()
+        assets = assets_service.get_assets()
         self.assertIsNotNone(asset.get("id", None))
         self.assertEquals(len(assets), 1)
         self.assertEquals(assets[0].name, self.asset_data["name"].capitalize())
@@ -64,5 +64,5 @@ class CreateAssetsTestCase(ApiDBTestCase):
             self.entity.id
         )
         self.delete(path)
-        assets = asset_info.get_assets()
+        assets = assets_service.get_assets()
         self.assertEquals(len(assets), 0)

@@ -1,3 +1,5 @@
+import json
+
 from test.base import ApiDBTestCase
 
 from zou.app.utils import auth
@@ -18,53 +20,68 @@ class AuthTestCase(ApiDBTestCase):
             "email": self.person_dict["email"],
             "password": "secretpassword"
         }
-
         self.get("auth/logout")
 
-    def assertIsAuthenticated(self):
-        is_authenticated = self.get("auth/authenticated")
-        self.assertEquals(is_authenticated["authenticated"], True)
+    def get_auth_headers(self, tokens):
+        return {"Authorization": "Bearer %s" % tokens.get("access_token", None)}
 
-    def assertIsNotAuthenticated(self):
-        self.get("auth/authenticated", 401)
+    def logout(self, tokens):
+        headers = self.get_auth_headers(tokens)
+        self.app.get("auth/logout", headers=headers)
+
+    def assertIsAuthenticated(self, tokens):
+        headers = self.get_auth_headers(tokens)
+        response = self.app.get("auth/authenticated", headers=headers)
+        self.assertEqual(response.status_code, 200)
+        data = json.loads(response.data.decode("utf-8"))
+        self.assertEquals(data["authenticated"], True)
+
+    def assertIsNotAuthenticated(self, tokens, code=401):
+        headers = self.get_auth_headers(tokens)
+        response = self.app.get("auth/authenticated", headers=headers)
+        self.assertEqual(response.status_code, code)
 
     def test_login(self):
-        self.assertIsNotAuthenticated()
-        self.post("auth/login", self.credentials, 200)
-        self.assertIsAuthenticated()
-        self.get("auth/logout")
+        tokens = self.post("auth/login", self.credentials, 200)
+
+        self.assertIsAuthenticated(tokens)
+        self.logout(tokens)
 
     def test_login_wrong_credentials(self):
-        self.post("auth/login", {}, 400)
-        self.get("auth/authenticated", 401)
+        result = self.post("auth/login", {}, 400)
+        self.assertIsNotAuthenticated(result, 422)
 
         credentials = {
             "email": self.person_dict["email"],
             "password": "wrongpassword"
         }
-        self.post("auth/login", credentials, 400)
-        self.assertIsNotAuthenticated()
+        result = self.post("auth/login", credentials, 400)
+        self.assertFalse(result["login"])
+        self.assertIsNotAuthenticated(result, 422)
 
     def test_logout(self):
-        self.post("auth/login", self.credentials, 200)
-        self.assertIsAuthenticated()
-        self.get("auth/logout")
-        self.assertIsNotAuthenticated()
+        tokens = self.post("auth/login", self.credentials, 200)
+        self.assertIsAuthenticated(tokens)
+        self.logout(tokens)
+        self.assertIsNotAuthenticated(tokens)
 
     def test_register(self):
-        credentials = {
+        subscription_data = {
             "email": "alice@doe.com",
             "password": "123456",
             "password_2": "123456",
             "first_name": "Alice",
             "last_name": "Doe"
         }
-        self.post("auth/register", credentials, 201)
+        self.post("auth/register", subscription_data, 201)
 
-        self.assertIsNotAuthenticated()
-        self.post("auth/login", credentials, 200)
-        self.assertIsAuthenticated()
-        self.get("auth/logout")
+        credentials = {
+            "email": subscription_data["email"],
+            "password": subscription_data["password"]
+        }
+        tokens = self.post("auth/login", credentials, 200)
+        self.assertIsAuthenticated(tokens)
+        self.logout(tokens)
 
     def test_register_bad_email(self):
         credentials = {
@@ -109,7 +126,8 @@ class AuthTestCase(ApiDBTestCase):
             "password": "123456",
         }
         self.post("auth/register", user_data, 201)
-        self.post("auth/login", credentials, 200)
+        tokens = self.post("auth/login", credentials, 200)
+        self.assertIsAuthenticated(tokens)
 
         new_password = {
             "old_password": "123456",
@@ -118,10 +136,39 @@ class AuthTestCase(ApiDBTestCase):
         }
         credentials = {
             "email": "alice@doe.com",
-            "password": "654321",
+            "password": "654321"
         }
 
-        self.post("auth/change-password", new_password, 200)
-        self.get("auth/logout")
-        self.post("auth/login", credentials, 200)
-        self.assertIsAuthenticated()
+        headers = self.get_auth_headers(tokens)
+        response = self.app.post(
+            "auth/change-password",
+            data=new_password,
+            headers=headers
+        )
+        self.assertEqual(response.status_code, 200)
+        self.logout(tokens)
+
+        tokens = self.post("auth/login", credentials, 200)
+        self.assertIsAuthenticated(tokens)
+        self.logout(tokens)
+
+    def test_refresh_token(self):
+        tokens = self.post("auth/login", self.credentials, 200)
+        self.assertIsAuthenticated(tokens)
+
+        headers = {
+            "Authorization": "Bearer %s" % tokens.get("refresh_token", None)
+        }
+        result = self.app.get("auth/refresh-token", headers=headers)
+        tokens_string = result.data.decode("utf-8")
+        tokens = json.loads("%s" % tokens_string)
+        self.assertIsAuthenticated(tokens)
+
+        self.logout(tokens)
+        self.assertIsNotAuthenticated(tokens)
+
+    def test_person_list(self):
+        self.assertIsNotAuthenticated({}, code=422)
+        persons = self.get("auth/person-list")
+        self.assertEquals(len(persons), 2)
+

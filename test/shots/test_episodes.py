@@ -9,6 +9,7 @@ class EpisodeTestCase(ApiDBTestCase):
         self.generate_fixture_project_status()
         self.generate_fixture_project()
         self.generate_fixture_entity_type()
+        self.generate_fixture_episode()
         self.generate_data(Entity, 3,
                            entities_out=[],
                            project_id=self.project.id,
@@ -24,4 +25,15 @@ class EpisodeTestCase(ApiDBTestCase):
 
     def test_get_episodes(self):
         episodes = self.get("data/episodes")
-        self.assertEquals(len(episodes), 2)
+        self.assertEquals(len(episodes), 3)
+        self.assertDictEqual(
+            episodes[0],
+            self.episode.serialize(obj_type="Episode")
+        )
+
+    def test_get_episode(self):
+        episode = self.get("data/episodes/%s" % self.episode.id)
+        self.assertDictEqual(
+            episode,
+            self.episode.serialize(obj_type="Episode")
+        )

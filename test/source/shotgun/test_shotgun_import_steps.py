@@ -17,7 +17,7 @@ class ImportShotgunStepTestCase(ShotgunTestCase):
         data = [
             {"bad": "wrong"}
         ]
-        self.step = self.post("data/import/shotgun/steps", data, 200)
+        self.step = self.post("/import/shotgun/steps", data, 200)
         self.assertEqual(len(self.step), 0)
 
     def test_import_step(self):
@@ -35,13 +35,13 @@ class ImportShotgunStepTestCase(ShotgunTestCase):
         }
         sg_steps = [sg_step_animation, sg_step_modeling]
 
-        api_path = "data/import/shotgun/steps"
+        api_path = "/import/shotgun/steps"
         task_types = self.post(api_path, sg_steps, 200)
         self.assertEqual(len(task_types), 2)
 
         departments = self.get("data/departments")
         self.assertEqual(len(departments), 2)
-        task_types = self.get("data/task_types")
+        task_types = self.get("data/task-types")
         self.assertEqual(len(task_types), 2)
 
         department = departments[0]
@@ -61,14 +61,14 @@ class ImportShotgunStepTestCase(ShotgunTestCase):
             "type": "Step"
         }
 
-        api_path = "data/import/shotgun/steps"
+        api_path = "/import/shotgun/steps"
         task_types = self.post(api_path, [sg_step], 200)
         self.assertEqual(len(task_types), 1)
 
         departments = self.get("data/departments")
         self.assertEqual(len(departments), 1)
 
-        task_types = self.get("data/task_types")
+        task_types = self.get("data/task-types")
         self.assertEqual(len(task_types), 1)
 
         department = departments[0]
@@ -76,7 +76,7 @@ class ImportShotgunStepTestCase(ShotgunTestCase):
         self.assertEqual(department["color"], "#3295fd")
 
         task_type = task_types[0]
-        self.assertEqual(task_type["name"], "Shaders")
+        self.assertEqual(task_type["name"], "Modeling Shaders")
 
     def test_import_step_twice(self):
         sg_step_animation = {
@@ -93,7 +93,7 @@ class ImportShotgunStepTestCase(ShotgunTestCase):
         }
         sg_steps = [sg_step_animation, sg_step_modeling]
 
-        api_path = "data/import/shotgun/steps"
+        api_path = "/import/shotgun/steps"
         task_types = self.post(api_path, sg_steps, 200)
         task_types = self.post(api_path, sg_steps, 200)
         self.assertEqual(len(task_types), 2)

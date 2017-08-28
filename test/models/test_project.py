@@ -56,12 +56,12 @@ class ProjectTestCase(ApiDBTestCase):
             "name": "open",
             "color": "#FFFFFF"
         }
-        self.open_status = self.post("data/project_status", data)
+        self.open_status = self.post("data/project-status", data)
         data = {
             "name": "close",
             "color": "#000000"
         }
-        self.close_status = self.post("data/project_status", data)
+        self.close_status = self.post("data/project-status", data)
         data = {
             "name": "Cosmos Landromat",
             "description": "Video game trailer.",

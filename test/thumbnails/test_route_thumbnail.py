@@ -7,10 +7,10 @@ from zou.app.utils import fs
 from PIL import Image
 
 
-class RouteTaskChangeTestCase(ApiDBTestCase):
+class RouteThumbnailTestCase(ApiDBTestCase):
 
     def setUp(self):
-        super(RouteTaskChangeTestCase, self).setUp()
+        super(RouteThumbnailTestCase, self).setUp()
 
         self.delete_thumbnail_folders()
         self.generate_fixture_project_status()
@@ -26,10 +26,11 @@ class RouteTaskChangeTestCase(ApiDBTestCase):
         self.generate_fixture_person()
         self.generate_fixture_assigner()
         self.generate_fixture_task()
+        self.generate_fixture_software()
         self.generate_fixture_working_file()
 
     def tearDown(self):
-        super(RouteTaskChangeTestCase, self).tearDown()
+        super(RouteThumbnailTestCase, self).tearDown()
 
         self.delete_thumbnail_folders()
 

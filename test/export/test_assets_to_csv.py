@@ -17,7 +17,7 @@ class AssetsCsvExportTestCase(ApiDBTestCase):
         self.generate_fixture_shot()
 
     def test_get_asset_csv(self):
-        csv_assets = self.get_raw("export/csv/assets.csv")
+        csv_assets = self.get_raw("/export/csv/assets.csv")
         expected_result = """Project,Category,Name,Description\r
 Cosmos Landromat,Props,Tree,Description Tree\r\n"""
         self.assertEqual(csv_assets, expected_result)

@@ -9,6 +9,7 @@ from pytz import timezone
 from zou.app.utils import colors, fields, query, fs
 from zou.app.models.person import Person
 from zou.app.models.task import Task
+from zou.app.models.working_file import WorkingFile
 
 
 class UtilsTestCase(unittest.TestCase):
