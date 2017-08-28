@@ -169,6 +169,9 @@ export default {
       name: 'Plan',
       episode: 'Épisode',
       sequence: 'Séquence',
+      frame_in: 'In',
+      frame_out: 'Out',
+      description: 'Description',
       production: 'Prod'
     },
     delete_text: 'Etes vous sûr de vouloir retirer {name} de la base de données ?',

@@ -19,7 +19,7 @@ export default {
 
   getProductionStatus (callback) {
     superagent
-      .get('/api/data/project_status')
+      .get('/api/data/project-status')
       .end((err, res) => {
         callback(err, res.body)
       })

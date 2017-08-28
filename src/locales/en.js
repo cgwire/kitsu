@@ -179,6 +179,8 @@ export default {
       episode: 'Episode',
       sequence: 'Sequence',
       production: 'Prod',
+      frame_in: 'In',
+      frame_out: 'Out',
       description: 'Description'
     },
     delete_text: 'Are you sure you want to remove {name} from your database?',

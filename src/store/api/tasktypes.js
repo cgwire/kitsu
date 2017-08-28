@@ -3,7 +3,7 @@ import superagent from 'superagent'
 export default {
   getTaskTypes (callback) {
     superagent
-      .get('/api/data/task_types')
+      .get('/api/data/task-types')
       .end((err, res) => {
         callback(err, res.body)
       })
@@ -17,7 +17,7 @@ export default {
       for_shots: Boolean(taskType.for_shots)
     }
     superagent
-      .post('/api/data/task_types/')
+      .post('/api/data/task-types/')
       .send(data)
       .end((err, res) => {
         callback(err, res.body)
@@ -32,7 +32,7 @@ export default {
       for_shots: Boolean(taskType.for_shots === 'true')
     }
     superagent
-      .put(`/api/data/task_types/${taskType.id}`)
+      .put(`/api/data/task-types/${taskType.id}`)
       .send(data)
       .end((err, res) => {
         callback(err, res.body)
@@ -41,7 +41,7 @@ export default {
 
   deleteTaskType (taskType, callback) {
     superagent
-      .del(`/api/data/task_types/${taskType.id}`)
+      .del(`/api/data/task-types/${taskType.id}`)
       .end((err, res) => {
         callback(err, res.body)
       })

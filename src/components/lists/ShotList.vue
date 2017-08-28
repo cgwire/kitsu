@@ -6,6 +6,8 @@
         <th class="project">{{ $t('shots.fields.production') }}</th>
         <th class="sequence">{{ $t('shots.fields.sequence') }}</th>
         <th class="name">{{ $t('shots.fields.name') }}</th>
+        <th class="framein">{{ $t('shots.fields.frame_in') }}</th>
+        <th class="frameout">{{ $t('shots.fields.frame_out') }}</th>
         <th class="description">{{ $t('shots.fields.description') }}</th>
         <th
           class="validation"
@@ -39,6 +41,12 @@
         </td>
         <td class="name">
           {{ entry.name }}
+        </td>
+        <td class="framein">
+          {{ entry.data.frame_in }}
+        </td>
+        <td class="frameout">
+          {{ entry.data.frame_out }}
         </td>
         <td class="description">
           {{ entry.description }}
@@ -144,6 +152,14 @@ td.sequence {
 }
 
 .episode {
+  width: 50px;
+}
+
+.framein {
+  width: 50px;
+}
+
+.frameout {
   width: 50px;
 }
 

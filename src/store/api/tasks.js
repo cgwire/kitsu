@@ -11,7 +11,7 @@ export default {
 
   getTaskStatuses (callback) {
     superagent
-      .get(`/api/data/task_status`)
+      .get(`/api/data/task-status`)
       .end((err, res) => {
         callback(err, res.body)
       })
@@ -39,7 +39,7 @@ export default {
       comment: data.comment
     }
     superagent
-      .post(`/api/project/tasks/${data.taskId}/comment`)
+      .post(`/api/actions/tasks/${data.taskId}/comment`)
       .send(commentData)
       .end((err, res) => {
         callback(err, res.body)
@@ -50,7 +50,7 @@ export default {
     const taskTypeId = data.task_type_id
     const type = data.type
     superagent
-      .post(`/api/project/${type}/task-types/${taskTypeId}/create-tasks`)
+      .post(`/api/actions/${type}/task-types/${taskTypeId}/create-tasks`)
       .send({})
       .end((err, res) => {
         callback(err, res.body)
@@ -69,7 +69,7 @@ export default {
     const taskId = data.taskId
     const commentId = data.commentId
     superagent
-      .post(`/api/project/tasks/${taskId}/comments/${commentId}/add-preview`)
+      .post(`/api/actions/tasks/${taskId}/comments/${commentId}/add-preview`)
       .send({})
       .end((err, res) => {
         callback(err, res.body)
