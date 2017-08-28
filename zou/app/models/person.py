@@ -27,7 +27,6 @@ department_link = db.Table(
 
 
 class Person(db.Model, BaseMixin, SerializerMixin):
-
     first_name = db.Column(db.String(80), nullable=False)
     last_name = db.Column(db.String(80), nullable=False)
     email = db.Column(EmailType, unique=True)
@@ -41,7 +40,6 @@ class Person(db.Model, BaseMixin, SerializerMixin):
         default=pytz_timezone("Europe/Paris")
     )
     locale = db.Column(LocaleType, default=Locale("en", "US"))
-
     data = db.Column(JSONB)
 
     skills = db.relationship(
@@ -63,3 +61,8 @@ class Person(db.Model, BaseMixin, SerializerMixin):
                 self.first_name,
                 self.last_name
             )
+
+    def serialize(self, obj_type=None):
+        data = SerializerMixin.serialize(self, obj_type)
+        del data["password"]
+        return data
