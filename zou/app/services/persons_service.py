@@ -1,25 +1,28 @@
 from sqlalchemy.exc import StatementError
 
-from flask_login import current_user
+from flask_jwt_extended import get_jwt_identity
 
 from zou.app.models.person import Person
-from zou.app.project.exception import PersonNotFoundException
+from zou.app.services.exception import PersonNotFoundException
+
+
+def all():
+    return Person.query.all()
 
 
 def create_person(email, password, first_name, last_name, phone=""):
-    person = Person(
+    person = Person.create(
         email=email,
         password=password,
         first_name=first_name,
         last_name=last_name,
         phone=phone
     )
-    person.save()
     return person
 
 
-def update_password(user, password):
-    person = get_person(user.id)
+def update_password(email, password):
+    person = get_by_email(email)
     person.update({"password": password})
 
 
@@ -46,7 +49,4 @@ def get_by_email(email):
 
 
 def get_current_user():
-    if current_user:
-        return current_user
-    else:
-        return Person.query.first()
+    return get_by_email(get_jwt_identity())

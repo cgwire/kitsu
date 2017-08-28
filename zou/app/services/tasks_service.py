@@ -1,7 +1,5 @@
 import datetime
 
-from flask_login import current_user
-
 from sqlalchemy.exc import StatementError, IntegrityError
 
 from zou.app import app
@@ -13,24 +11,36 @@ from zou.app.models.department import Department
 from zou.app.models.entity import Entity
 from zou.app.models.task_status import TaskStatus
 from zou.app.models.project import Project
-from zou.app.models.person import Person
 from zou.app.models.entity_type import EntityType
 from zou.app.models.preview_file import PreviewFile
 
-from zou.app.project.exception import (
+from zou.app.services.exception import (
     TaskNotFoundException,
     TaskTypeNotFoundException
 )
 
-from zou.app.project import shot_info, asset_info, person_info
+from zou.app.services import shots_service, assets_service, persons_service
+
+
+def get_task_types_for_asset(asset):
+    tasks = Task.query.filter_by(entity_id=asset.id).all()
+
+    task_types = []
+    if len(tasks) > 0:
+        task_type_ids = [task.task_type_id for task in tasks]
+        task_types = TaskType.query.filter(
+            TaskType.id.in_(task_type_ids)
+        )
+
+    return TaskType.serialize_list(task_types)
 
 
 def get_wip_status():
-    return get_or_create_status(app.config["WIP_TASK_STATUS"], "WIP")
+    return get_or_create_status(app.config["WIP_TASK_STATUS"], "wip")
 
 
 def get_to_review_status():
-    return get_or_create_status(app.config["TO_REVIEW_TASK_STATUS"], "WFA")
+    return get_or_create_status(app.config["TO_REVIEW_TASK_STATUS"], "pndng")
 
 
 def get_todo_status():
@@ -61,7 +71,7 @@ def start_task(task):
     return task
 
 
-def to_review_task(task, output_file_dict):
+def task_to_review(task, person, comment, preview_path=""):
     to_review_status = get_to_review_status()
     task_dict_before = task.serialize()
 
@@ -71,21 +81,21 @@ def to_review_task(task, output_file_dict):
     project = Project.get(task.project_id)
     entity = Entity.get(task.entity_id)
     entity_type = EntityType.get(entity.entity_type_id)
-    person = Person.get(output_file_dict["person_id"])
 
     task_dict_after = task.serialize()
-    task_dict_after["output_file"] = output_file_dict
     task_dict_after["project"] = project.serialize()
     task_dict_after["entity"] = entity.serialize()
     task_dict_after["entity_type"] = entity_type.serialize()
     task_dict_after["person"] = person.serialize()
+    task_dict_after["comment"] = comment
+    task_dict_after["preview_path"] = preview_path
 
     events.emit("task:to-review", {
         "task_before": task_dict_before,
         "task_after": task_dict_after
     })
 
-    return task
+    return task_dict_after
 
 
 def get_task(task_id):
@@ -128,7 +138,7 @@ def create_task(task_type, entity, name="main"):
             task_type_id=task_type["id"],
             task_status_id=task_status.id,
             entity_id=entity["id"],
-            assigner_id=person_info.get_current_user().id,
+            assigner_id=persons_service.get_current_user().id,
             assignees=[]
         )
         return task.serialize()
@@ -151,12 +161,12 @@ def get_department_from_task_type(task_type):
 
 
 def get_task_dicts_for_shot(shot_id):
-    shot = shot_info.get_shot(shot_id)
+    shot = shots_service.get_shot(shot_id)
     return get_task_dicts_for_entity(shot.id)
 
 
 def get_task_dicts_for_asset(asset_id):
-    asset = asset_info.get_asset(asset_id)
+    asset = assets_service.get_asset(asset_id)
     return get_task_dicts_for_entity(asset.id)
 
 
@@ -203,7 +213,6 @@ def get_task_dicts_for_entity(entity_id):
         task["entity_type_name"] = entity_type_name
         task["entity_name"] = entity_name
         results.append(task)
-
     return results
 
 
@@ -264,3 +273,14 @@ def get_next_preview_revision(task_id):
         revision = preview_files[0].revision + 1
 
     return revision
+
+
+def get_task_types_for_shot(shot):
+    tasks = Task.query.filter_by(entity_id=shot.id).all()
+    task_types = []
+
+    if len(tasks) > 0:
+        task_type_ids = [task.task_type_id for task in tasks]
+        task_types = TaskType.query.filter(TaskType.id.in_(task_type_ids))
+
+    return TaskType.serialize_list(task_types)

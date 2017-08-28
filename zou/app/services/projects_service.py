@@ -1,6 +1,6 @@
 from zou.app.models.project import Project
 from zou.app.models.project_status import ProjectStatus
-from zou.app.project.exception import ProjectNotFoundException
+from zou.app.services.exception import ProjectNotFoundException
 
 from sqlalchemy.exc import StatementError
 
@@ -35,6 +35,14 @@ def get_or_create_open_status():
     return get_or_create_status("Open")
 
 
+def get_open_status():
+    get_or_create_status("Open")
+
+
+def get_closed_status():
+    get_or_create_status("Closed")
+
+
 def get_or_create_status(name):
     project_status = ProjectStatus.get_by(name=name)
     if project_status is None:
@@ -54,14 +62,6 @@ def save_project_status(project_statuses):
         project_status = get_or_create_status(status)
         result.append(project_status)
     return result
-
-
-def get_open_status():
-    get_or_create_status("Open")
-
-
-def get_closed_status():
-    get_or_create_status("Closed")
 
 
 def get_or_create(name):

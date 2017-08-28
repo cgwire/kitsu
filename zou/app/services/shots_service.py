@@ -1,12 +1,14 @@
 from sqlalchemy.orm import aliased
 
+from zou.app.models.entity import Entity
+from zou.app.models.entity_type import EntityType
 from zou.app.models.project import Project
 from zou.app.models.task import Task
 from zou.app.models.task_status import TaskStatus
 from zou.app.models.task_type import TaskType
-from zou.app.models.entity import Entity
-from zou.app.models.entity_type import EntityType
-from zou.app.project.exception import (
+
+from zou.app.services.exception import (
+    EpisodeNotFoundException,
     SequenceNotFoundException,
     ShotNotFoundException
 )
@@ -18,6 +20,14 @@ def get_sequence_from_shot(shot):
     except:
         raise SequenceNotFoundException('Wrong parent_id for given shot.')
     return sequence
+
+
+def get_episode_from_sequence(sequence):
+    try:
+        episode = Entity.get(sequence.parent_id)
+    except:
+        raise EpisodeNotFoundException('Wrong parent_id for given sequence.')
+    return episode
 
 
 def get_episode_type():
@@ -68,7 +78,7 @@ def get_shots(criterions={}):
 
     shots = []
     for (shot_model, project_name, sequence_name) in data:
-        shot = shot_model.serialize()
+        shot = shot_model.serialize(obj_type="Shot")
         shot["project_name"] = project_name
         shot["sequence_name"] = sequence_name
         shots.append(shot)
@@ -102,7 +112,7 @@ def get_shots_and_tasks(criterions={}):
             "task_status_color": task_status.color,
             "task_type_name": task_type.name,
             "task_type_color": task_type.color,
-            "task_type_priority": task_type.priority
+            "task_type_color": task_type.priority
         })
         task_map[shot_id].append(task_dict)
 
@@ -124,9 +134,34 @@ def get_shot(instance_id):
     return shot
 
 
+def get_sequence(instance_id):
+    sequence_type = get_sequence_type()
+    sequence = Entity.get_by(
+        entity_type_id=sequence_type.id,
+        id=instance_id
+    )
+    if sequence is None:
+        raise SequenceNotFoundException
+
+    return sequence
+
+
+def get_episode(instance_id):
+    episode_type = get_episode_type()
+    episode = Entity.get_by(
+        entity_type_id=episode_type.id,
+        id=instance_id
+    )
+    if episode is None:
+        raise EpisodeNotFoundException
+
+    return episode
+
+
 def is_shot(entity):
     shot_type = get_shot_type()
     return entity.entity_type_id == shot_type.id
+
 
 def get_or_create_episode(project, name):
     episode_type = get_episode_type()

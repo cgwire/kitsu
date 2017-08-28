@@ -1,3 +1,7 @@
+class EpisodeNotFoundException(Exception):
+    pass
+
+
 class SequenceNotFoundException(Exception):
     pass
 
@@ -39,6 +43,14 @@ class WorkingFileNotFoundException(Exception):
 
 
 class OutputFileNotFoundException(Exception):
+    pass
+
+
+class SoftwareNotFoundException(Exception):
+    pass
+
+
+class OutputTypeNotFoundException(Exception):
     pass
 
 

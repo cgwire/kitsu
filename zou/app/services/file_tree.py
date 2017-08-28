@@ -13,8 +13,8 @@ from zou.app.models.task_type import TaskType
 from zou.app.models.task import Task
 from zou.app.models.department import Department
 
-from zou.app.project import shot_info, task_info
-from zou.app.project.exception import (
+from zou.app.services import shots_service, tasks_service, files_service
+from zou.app.services.exception import (
     MalformedFileTreeException,
     WrongFileTreeFileException,
     WrongPathFormatException,
@@ -22,26 +22,75 @@ from zou.app.project.exception import (
 )
 
 
-def get_file_path(task, mode="working", version=1, comment="", sep=os.sep):
-    file_name = get_file_name(task, mode, version, comment)
-    folder = get_folder_path(task, mode, sep)
+def get_file_path(
+    task,
+    mode="working",
+    software=None,
+    output_type=None,
+    scene=1,
+    name="",
+    version=1,
+    sep=os.sep
+):
+    file_name = get_file_name(
+        task,
+        mode=mode,
+        software=software,
+        output_type=output_type,
+        scene=scene,
+        name=name,
+        version=version,
+    )
+    folder = get_folder_path(
+        task,
+        mode,
+        software=software,
+        output_type=output_type,
+        scene=scene,
+        name=name,
+        sep=sep
+    )
 
     return join_path(folder, file_name, sep)
 
 
-def get_file_name(task, mode="output", version=1, comment=""):
+def get_file_name(
+    task,
+    mode="working",
+    software="3dsmax",
+    output_type=None,
+    scene=1,
+    name="",
+    version=1
+):
     entity = Entity.get(task.entity_id)
     project = get_project(entity)
     tree = get_tree_from_project(project)
 
-    file_name = get_file_name_root(tree, mode, entity, task)
+    file_name = get_file_name_root(
+        tree,
+        mode,
+        entity,
+        task,
+        software,
+        output_type,
+        scene,
+        name
+    )
     file_name = add_version_suffix_to_file_name(file_name, version)
-    file_name = add_comment_suffix_to_file_name(file_name, comment)
 
     return u"%s" % file_name
 
 
-def get_folder_path(task, mode="working", sep=os.sep):
+def get_folder_path(
+    task,
+    mode="working",
+    software="3dsmax",
+    output_type=None,
+    scene=1,
+    name="",
+    sep=os.sep
+):
     entity = Entity.get(task.entity_id)
     project = get_project(entity)
     tree = get_tree_from_project(project)
@@ -49,7 +98,16 @@ def get_folder_path(task, mode="working", sep=os.sep):
     style = tree[mode]["folder_path"].get("style", "")
 
     folder_template = get_folder_path_template(tree, mode, entity)
-    folder_path = update_variable(folder_template, entity, task, style)
+    folder_path = update_variable(
+        folder_template,
+        entity,
+        task,
+        software,
+        output_type,
+        scene,
+        name,
+        style
+    )
     folder_path = change_folder_path_separators(folder_path, sep)
 
     return join_path(root_path, folder_path, "")
@@ -74,22 +132,39 @@ def get_tree_from_file(tree_name):
 
 
 def get_folder_path_template(tree, mode, entity):
-    if shot_info.is_shot(entity):
+    if shots_service.is_shot(entity):
         return tree[mode]["folder_path"]["shot"]
     else:
         return tree[mode]["folder_path"]["asset"]
 
 
 def get_file_name_template(tree, mode, entity):
-    if shot_info.is_shot(entity):
+    if shots_service.is_shot(entity):
         return tree[mode]["file_name"]["shot"]
     else:
         return tree[mode]["file_name"]["asset"]
 
 
-def get_file_name_root(tree, mode, entity, task):
+def get_file_name_root(
+    tree,
+    mode,
+    entity,
+    task,
+    software,
+    output_type,
+    scene,
+    name
+):
     file_name = get_file_name_template(tree, mode, entity)
-    file_name = update_variable(file_name, entity, task)
+    file_name = update_variable(
+        file_name,
+        entity,
+        task,
+        software,
+        output_type,
+        scene,
+        name
+    )
     file_name = slugify(file_name, separator="_")
     file_name = apply_style(file_name, tree[mode]["file_name"].get("style", ""))
     return file_name
@@ -97,12 +172,6 @@ def get_file_name_root(tree, mode, entity, task):
 
 def add_version_suffix_to_file_name(file_name, version=1):
     file_name = "%s_v%s" % (file_name, str(version).zfill(3))
-    return file_name
-
-
-def add_comment_suffix_to_file_name(file_name, comment=""):
-    if len(comment) > 0:
-        file_name = "%s_%s" % (file_name, slugify(comment, separator="_"))
     return file_name
 
 
@@ -115,24 +184,52 @@ def get_root_path(tree, mode, sep):
         mountpoint = tree[mode]["mountpoint"]
         root = tree[mode]["root"]
     except KeyError:
-        raise MalformedFileTreeException("Can't find given mode in given tree.")
+        raise MalformedFileTreeException(
+            "Can't find given mode (%s) in given tree." % mode
+        )
     return "%s%s%s%s" % (mountpoint, sep, root, sep)
 
 
-def update_variable(name, entity, task, style="lowercase"):
-    variables = re.findall('<(\w*)>', name)
+def update_variable(
+    template,
+    entity,
+    task,
+    software="3dsmax",
+    output_type=None,
+    scene=1,
+    name="",
+    style="lowercase"
+):
+    variables = re.findall('<(\w*)>', template)
 
+    render = template
     for variable in variables:
-        value = get_folder_from_datatype(variable, entity, task)
-        name = name.replace(
+        data = get_folder_from_datatype(
+            variable,
+            entity,
+            task,
+            software,
+            output_type,
+            scene,
+            name
+        )
+        render = render.replace(
             "<%s>" % variable,
-            apply_style(slugify(value, separator="_"), style)
+            apply_style(slugify(data, separator="_"), style)
         )
 
-    return name
+    return render
 
 
-def get_folder_from_datatype(datatype, entity, task):
+def get_folder_from_datatype(
+    datatype,
+    entity,
+    task,
+    software="3dsmax",
+    output_type=None,
+    scene=1,
+    name=""
+):
     if datatype == "Project":
         folder = get_folder_from_project(entity)
     elif datatype == "Task":
@@ -147,10 +244,20 @@ def get_folder_from_datatype(datatype, entity, task):
         folder = get_folder_from_asset_type(entity)
     elif datatype == "Sequence":
         folder = get_folder_from_sequence(entity)
+    elif datatype == "Episode":
+        folder = get_folder_from_episode(entity)
     elif datatype == "Asset":
         folder = get_folder_from_asset(entity)
+    elif datatype == "Software":
+        folder = get_folder_from_software(software)
+    elif datatype == "OutputType":
+        folder = get_folder_from_output_type(output_type)
+    elif datatype == "Scene":
+        folder = get_folder_from_scene(scene)
+    elif datatype == "Name":
+        folder = name
     else:
-        raise MalformedFileTreeException("Unknown data type.")
+        raise MalformedFileTreeException("Unknown data type: %s." % datatype)
 
     return folder
 
@@ -168,11 +275,18 @@ def get_folder_from_shot(shot):
     return shot.name
 
 
+def get_folder_from_output_type(output_type):
+    if output_type is None:
+        output_type = files_service.get_or_create_output_type("Geometry")
+
+    return output_type.name.lower()
+
+
 def get_folder_from_department(task):
     folder = ""
     task_type = TaskType.get(task.task_type_id)
     if task_type is not None:
-        task_type = task_info.get_department_from_task_type(task_type)
+        task_type = tasks_service.get_department_from_task_type(task_type)
         folder = task_type.name
     return folder
 
@@ -193,12 +307,23 @@ def get_folder_from_asset(asset):
 
 
 def get_folder_from_sequence(shot):
-    sequence = shot_info.get_sequence_from_shot(shot)
+    sequence = shots_service.get_sequence_from_shot(shot)
     sequence_name = sequence.name
     if "Seq" in sequence_name:
         sequence_number = sequence.name[3:]
         sequence_name = "S%s" % sequence_number.zfill(3)
     return sequence_name
+
+
+def get_folder_from_episode(shot):
+    sequence = shots_service.get_sequence_from_shot(shot)
+    try:
+        episode = shots_service.get_episode_from_sequence(sequence)
+        episode_name = episode.name
+    except:
+        episode_name = "e001"
+
+    return episode_name
 
 
 def get_folder_from_asset_type(asset):
@@ -208,6 +333,14 @@ def get_folder_from_asset_type(asset):
     else:
         raise MalformedFileTreeException("Given asset is null.")
     return folder
+
+
+def get_folder_from_software(software):
+    return software.name
+
+
+def get_folder_from_scene(scene):
+    return "scene%s" % scene.zfill(2)
 
 
 def join_path(left, right, sep=os.sep):
@@ -360,7 +493,7 @@ def guess_shot(project, episode_name, sequence_name, shot_name):
     if len(episode_name) > 0:
         episode = Entity.get_by(
             name=episode_name,
-            entity_type_id=shot_info.get_episode_type().id,
+            entity_type_id=shots_service.get_episode_type().id,
             project_id=project.id
         )
         if episode is not None:
@@ -370,7 +503,7 @@ def guess_shot(project, episode_name, sequence_name, shot_name):
     if len(sequence_name) > 0:
         sequence = Entity.get_by(
             name=sequence_name,
-            entity_type_id=shot_info.get_sequence_type().id,
+            entity_type_id=shots_service.get_sequence_type().id,
             parent_id=episode_id,
             project_id=project.id
         )
@@ -382,7 +515,7 @@ def guess_shot(project, episode_name, sequence_name, shot_name):
     if len(shot_name) > 0:
         shot = Entity.get_by(
             name=shot_name,
-            entity_type_id=shot_info.get_shot_type().id,
+            entity_type_id=shots_service.get_shot_type().id,
             parent_id=sequence_id,
             project_id=project.id
         )
