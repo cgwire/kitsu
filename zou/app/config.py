@@ -1,16 +1,22 @@
 import os
+import datetime
+from simplekv import fs
 
 from zou.app.utils import dbhelpers
 
 APP_NAME = "Zou"
 APP_SYSTEM_ERROR_SUBJECT_LINE = "%s system error" % APP_NAME
 
-DEBUG = os.getenv('DEBUG', True)
+DEBUG = os.getenv("DEBUG", True)
 
 SECRET_KEY = os.getenv("SECRET_KEY", "mysecretkey")
-SESSION_COOKIE_NAME = os.getenv("SESSION_NAME", "pipeline-session")
-SESSION_TYPE = os.getenv("SESSION_TYPE", "filesystem")
-LOGIN_DISABLED = os.getenv("LOGIN_DISABLED", False)
+AUTH_STRATEGY = os.getenv("AUTH_STRATEGY", "auth_local_classic")
+
+JWT_TOKEN_FOLDER = "./sessions"
+JWT_BLACKLIST_ENABLED = True
+JWT_BLACKLIST_STORE = fs.FilesystemStore(JWT_TOKEN_FOLDER)
+JWT_BLACKLIST_TOKEN_CHECKS = "all"
+JWT_ACCESS_TOKEN_EXPIRES = datetime.timedelta(days=7)
 
 RESTFUL_JSON = {
     "ensure_ascii": False
