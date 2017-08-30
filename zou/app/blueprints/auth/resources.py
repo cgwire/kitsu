@@ -1,3 +1,4 @@
+from flask import request, jsonify
 from flask_restful import Resource, reqparse, current_app
 from zou.app.services.exception import PersonNotFoundException
 
@@ -13,8 +14,31 @@ from flask_jwt_extended import (
     create_refresh_token,
     revoke_token,
     get_jwt_identity,
-    get_raw_jwt
+    get_raw_jwt,
+    set_access_cookies,
+    set_refresh_cookies,
+    unset_jwt_cookies
 )
+
+
+def is_from_browser(user_agent):
+    return user_agent.browser in [
+        "camino",
+        "chrome",
+        "firefox",
+        "galeon",
+        "kmeleon",
+        "konqueror",
+        "links",
+        "lynx",
+        "msie",
+        "msn",
+        "netscape",
+        "opera",
+        "safari",
+        "seamonkey",
+        "webkit"
+    ]
 
 
 class AuthenticatedResource(Resource):
@@ -40,9 +64,17 @@ class LogoutResource(Resource):
             return {
                 "Access token not found."
             }, 500
-        return {
+
+        logout_data = {
             "logout": True
         }
+
+        if is_from_browser(request.user_agent):
+            response = jsonify(logout_data)
+            unset_jwt_cookies(response)
+            return response
+        else:
+            return logout_data
 
 
 class LoginResource(Resource):
@@ -59,11 +91,26 @@ class LoginResource(Resource):
                 user = auth.active_directory_auth_strategy(email, password)
             else:
                 raise auth.NoAuthStrategyConfigured
-            return {
-                "user": user,
-                "access_token": create_access_token(identity=email),
-                "refresh_token": create_refresh_token(identity=email)
-            }
+
+            access_token = create_access_token(identity=email)
+            refresh_token = create_refresh_token(identity=email)
+
+            if is_from_browser(request.user_agent):
+                response = jsonify({
+                    "user": user,
+                    "login": True
+                })
+                set_access_cookies(response, access_token)
+                set_refresh_cookies(response, refresh_token)
+            else:
+                response = {
+                    "login": True,
+                    "user": user,
+                    "access_token": access_token,
+                    "refresh_token": refresh_token
+                }
+
+            return response
         except PersonNotFoundException:
             current_app.logger.info("User is not registered.")
             return {"login": False}, 400
@@ -97,9 +144,14 @@ class RefreshTokenResource(Resource):
     @jwt_refresh_token_required
     def get(self):
         email = get_jwt_identity()
-        return {
-            "access_token": create_access_token(identity=email)
-        }
+        access_token = create_access_token(identity=email)
+        if is_from_browser(request.user_agent):
+            response = jsonify({'refresh': True})
+            set_access_cookies(response, access_token)
+        else:
+            return {
+                "access_token": access_token
+            }
 
 
 class RegistrationResource(Resource):
@@ -117,7 +169,12 @@ class RegistrationResource(Resource):
             email = auth.validate_email(email)
             auth.validate_password(password, password_2)
             password = auth.encrypt_password(password)
-            persons_service.create_person(email, password, first_name, last_name)
+            persons_service.create_person(
+                email,
+                password,
+                first_name,
+                last_name
+            )
             return {"registration_success": True}, 201
         except auth.PasswordsNoMatchException:
             return {

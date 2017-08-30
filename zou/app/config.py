@@ -17,6 +17,8 @@ JWT_BLACKLIST_ENABLED = True
 JWT_BLACKLIST_STORE = fs.FilesystemStore(JWT_TOKEN_FOLDER)
 JWT_BLACKLIST_TOKEN_CHECKS = "all"
 JWT_ACCESS_TOKEN_EXPIRES = datetime.timedelta(days=7)
+JWT_TOKEN_LOCATION = ['cookies', 'headers']
+JWT_REFRESH_COOKIE_PATH = '/auth/refresh-token'
 
 RESTFUL_JSON = {
     "ensure_ascii": False
