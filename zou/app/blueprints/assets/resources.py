@@ -14,6 +14,7 @@ from zou.app.services.exception import (
     AssetNotFoundException
 )
 
+from sqlalchemy.exc import IntegrityError
 
 class AssetResource(Resource):
 
@@ -270,5 +271,8 @@ class RemoveAssetResource(Resource):
             abort(404)
         except AssetNotFoundException:
             abort(404)
+        except IntegrityError:
+            asset.update({"canceled": True})
+            deleted_asset = asset.serialize()
 
         return deleted_asset, 204
