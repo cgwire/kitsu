@@ -1,7 +1,5 @@
 import sys
 
-from flask_jwt_extended import JWTManager
-
 from zou.app.utils import events
 
 from .blueprints.assets import blueprint as assets_blueprint
@@ -25,7 +23,6 @@ def configure(app):
     app.url_map.strict_slashes = False
     configure_api_routes(app)
     register_event_handlers(app)
-    configure_auth(app)
     return app
 
 
@@ -48,10 +45,4 @@ def register_event_handlers(app):
     sys.path.append(app.config["EVENT_HANDLERS_FOLDER"])
     import event_handlers
     events.register_all(event_handlers.event_map)
-    return app
-
-
-def configure_auth(app):
-    app.secret_key = app.config["SECRET_KEY"]
-    JWTManager(app)
     return app

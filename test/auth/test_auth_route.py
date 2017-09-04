@@ -2,7 +2,7 @@ import json
 
 from test.base import ApiDBTestCase
 
-from zou.app.utils import auth
+from zou.app.utils import auth, fields
 
 
 class AuthTestCase(ApiDBTestCase):
@@ -20,7 +20,16 @@ class AuthTestCase(ApiDBTestCase):
             "email": self.person_dict["email"],
             "password": "secretpassword"
         }
-        self.get("auth/logout")
+        try:
+            self.get("auth/logout")
+        except AssertionError:
+            pass
+
+    def tearDown(self):
+        try:
+            self.get("auth/logout")
+        except AssertionError:
+            pass
 
     def get_auth_headers(self, tokens):
         return {"Authorization": "Bearer %s" % tokens.get("access_token", None)}
@@ -172,3 +181,22 @@ class AuthTestCase(ApiDBTestCase):
         persons = self.get("auth/person-list")
         self.assertEquals(len(persons), 2)
 
+    def test_cookies_auth(self):
+        user_agent = "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_10_1)" \
+                     " AppleWebKit/537.36 (KHTML, like Gecko)" \
+                     " Chrome/39.0.2171.95 Safari/537.36'}"
+        headers = {
+            "User-Agent": user_agent
+        }
+
+        response = self.app.get("data/persons")
+        self.assertEquals(response.status_code, 401)
+        response = self.app.post(
+            "auth/login",
+            data=fields.serialize_value(self.credentials),
+            headers=headers
+        )
+        self.assertTrue("access_token" in response.headers["Set-Cookie"])
+        response = self.app.get("data/persons")
+        self.assertEquals(response.status_code, 200)
+        response = self.app.get("auth/logout", headers=headers)

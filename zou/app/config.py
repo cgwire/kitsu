@@ -1,6 +1,5 @@
 import os
 import datetime
-from simplekv import fs
 
 from zou.app.utils import dbhelpers
 
@@ -8,15 +7,20 @@ APP_NAME = "Zou"
 APP_SYSTEM_ERROR_SUBJECT_LINE = "%s system error" % APP_NAME
 
 DEBUG = os.getenv("DEBUG", True)
-
 SECRET_KEY = os.getenv("SECRET_KEY", "mysecretkey")
+
 AUTH_STRATEGY = os.getenv("AUTH_STRATEGY", "auth_local_classic")
 
-JWT_TOKEN_FOLDER = "./sessions"
+KEY_VALUE_STORE = {
+  "host": os.getenv("KV_HOST", "localhost"),
+  "port": os.getenv("KV_PORT", "6379"),
+}
+AUTH_TOKEN_BLACKLIST_KV_INDEX = 0
+
 JWT_BLACKLIST_ENABLED = True
-JWT_BLACKLIST_STORE = fs.FilesystemStore(JWT_TOKEN_FOLDER)
-JWT_BLACKLIST_TOKEN_CHECKS = "all"
+JWT_BLACKLIST_TOKEN_CHECKS = ["access", "refresh"]
 JWT_ACCESS_TOKEN_EXPIRES = datetime.timedelta(days=7)
+JWT_REFRESH_TOKEN_EXPIRES = datetime.timedelta(days=15)
 JWT_TOKEN_LOCATION = ['cookies', 'headers']
 JWT_REFRESH_COOKIE_PATH = '/auth/refresh-token'
 

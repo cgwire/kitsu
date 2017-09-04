@@ -68,3 +68,11 @@ class WrongPathFormatException(Exception):
 
 class NoOutputFileException(Exception):
     pass
+
+
+class NoAuthStrategyConfigured(Exception):
+    pass
+
+
+class WrongPasswordException(Exception):
+    pass
