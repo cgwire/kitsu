@@ -5,10 +5,10 @@ from zou.app.services import projects_service
 from zou.app.services.exception import ProjectNotFoundException
 
 
-class ProjectInfoTestCase(ApiDBTestCase):
+class ProjectServiceTestCase(ApiDBTestCase):
 
     def setUp(self):
-        super(ProjectInfoTestCase, self).setUp()
+        super(ProjectServiceTestCase, self).setUp()
 
         self.generate_fixture_project_status()
         self.generate_fixture_project_closed_status()
