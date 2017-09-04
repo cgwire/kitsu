@@ -26,9 +26,10 @@ class BaseImportShotgunResource(Resource):
                 data = self.extract_data(sg_entry)
                 result_entry = self.import_entry(data)
                 results.append(result_entry)
-            except ShotgunEntryImportFailed as exc:
-                current_app.logger.warn(exc.message)
-            except KeyError:
+            except ShotgunEntryImportFailed as exception:
+                current_app.logger.warn(exception.message)
+            except KeyError as exception:
+                current_app.logger.warn(exception.message)
                 current_app.logger.error(
                     "Your data is not properly formatted: %s" % sg_entry
                 )
@@ -36,6 +37,8 @@ class BaseImportShotgunResource(Resource):
                 current_app.logger.error(
                     "Data information are duplicated or wrong: %s" % sg_entry
                 )
+
+            self.post_processing()
 
         return fields.serialize_models(results), 200
 
@@ -49,6 +52,9 @@ class BaseImportShotgunResource(Resource):
         pass
 
     def import_entry(self, data):
+        pass
+
+    def post_processing(self):
         pass
 
 
