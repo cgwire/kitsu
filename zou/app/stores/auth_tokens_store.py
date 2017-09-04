@@ -38,6 +38,6 @@ def keys():
 
 
 def is_revoked(decrypted_token):
-    jti = decrypted_token['jti']
+    jti = decrypted_token["jti"]
     is_revoked = get(jti)
-    return (is_revoked is None) or (is_revoked == 'true')
+    return (is_revoked is None) or (is_revoked.decode("utf-8") == "true")
