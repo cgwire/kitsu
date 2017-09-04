@@ -120,7 +120,6 @@ def get_next_working_revision(task_id, name):
         task_id=task_id,
         name=name
     ).order_by(desc(WorkingFile.revision)).all()
-    print(len(working_files))
     if len(working_files) > 0:
         revision = working_files[0].revision + 1
     else:
