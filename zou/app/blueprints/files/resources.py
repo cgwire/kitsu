@@ -1,4 +1,5 @@
 import os
+import datetime
 
 from flask import request, abort
 from flask_restful import Resource, reqparse
@@ -520,7 +521,6 @@ class NewWorkingFileResource(Resource):
             revision = files_service.get_next_working_revision(task_id, name)
             software = files_service.get_software(software_id)
             path = self.build_path(task, name, revision, software, sep)
-            print(path)
 
             working_file = files_service.create_new_working_revision(
                 task_id,
@@ -576,3 +576,19 @@ class NewWorkingFileResource(Resource):
             args["software_id"],
             args["sep"]
         )
+
+
+class ModifiedFileResource(Resource):
+
+    def __init__(self):
+        Resource.__init__(self)
+
+    @jwt_required
+    def put(self, working_file_id):
+        try:
+            working_file = files_service.get_working_file(working_file_id)
+            working_file.update({"updated_at": datetime.datetime.now()})
+        except WorkingFileNotFoundException:
+            abort(404)
+
+        return working_file.serialize()
