@@ -1,3 +1,5 @@
+import slugify
+
 from sqlalchemy.exc import StatementError
 
 from flask_jwt_extended import get_jwt_identity
@@ -35,6 +37,19 @@ def get_person(person_id):
     if person is None:
         raise PersonNotFoundException()
     return person
+
+
+def get_person_by_email_username(email):
+    username = email.split("@")[0]
+
+    for person in all():
+        first_name = slugify.slugify(person.first_name)
+        last_name = slugify.slugify(person.last_name)
+        person_username = "%s.%s" % (first_name, last_name)
+        if person_username == username:
+            return person.serialize()
+
+    raise PersonNotFoundException
 
 
 def get_by_email(email):

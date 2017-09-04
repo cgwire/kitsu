@@ -5,13 +5,16 @@ from .resources import (
     FolderPathResource,
     FilePathResource,
     SetTreeResource,
-    GetTaskFromPathResource,
+    GetTaskFromPathResource
+)
+from .resources import (
     CommentWorkingFileResource,
     GetNextOutputFileResource,
+    LastWorkingFilesResource,
+    ModifiedFileResource,
     NewOutputFileResource,
     NewWorkingFileResource,
-    TaskWorkingFilesResource,
-    LastWorkingFilesResource
+    TaskWorkingFilesResource
 )
 
 routes = [
@@ -36,6 +39,7 @@ routes = [
         "/actions/working-files/<working_file_id>/comment",
         CommentWorkingFileResource
     ),
+    ("/actions/working-files/<working_file_id>/modified", ModifiedFileResource)
 ]
 
 blueprint = Blueprint("files", "files")

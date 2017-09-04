@@ -5,10 +5,10 @@ from zou.app.services import persons_service
 from zou.app.services.exception import PersonNotFoundException
 
 
-class PersonInfoTestCase(ApiDBTestCase):
+class PersonServiceTestCase(ApiDBTestCase):
 
     def setUp(self):
-        super(PersonInfoTestCase, self).setUp()
+        super(PersonServiceTestCase, self).setUp()
 
         self.generate_fixture_person()
         self.person_id = self.person.id
@@ -44,4 +44,13 @@ class PersonInfoTestCase(ApiDBTestCase):
             PersonNotFoundException,
             persons_service.get_by_email,
             self.person_email
+        )
+
+    def test_get_person_by_username(self):
+        person = persons_service.get_person_by_email_username("john.doe@gmail.com")
+        self.assertEquals(person["first_name"], "John")
+        self.assertRaises(
+            PersonNotFoundException,
+            persons_service.get_person_by_email_username,
+            "ema.doe@yahoo.com"
         )

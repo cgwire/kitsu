@@ -1,18 +1,21 @@
 from flask import request, jsonify
 from flask_restful import Resource, reqparse, current_app
-from zou.app.services.exception import PersonNotFoundException
 
 from zou.app.utils import auth
-from zou.app.services import persons_service
-
+from zou.app.services.exception import PersonNotFoundException
+from zou.app.services import persons_service, auth_service
 from zou.app import app
+from zou.app.services.exception import (
+    NoAuthStrategyConfigured,
+    WrongPasswordException
+)
+
 
 from flask_jwt_extended import (
     jwt_required,
     jwt_refresh_token_required,
     create_access_token,
     create_refresh_token,
-    revoke_token,
     get_jwt_identity,
     get_raw_jwt,
     set_access_cookies,
@@ -59,7 +62,7 @@ class LogoutResource(Resource):
         try:
             current_token = get_raw_jwt()
             jti = current_token['jti']
-            revoke_token(jti)
+            auth_service.revoke_tokens(app, jti)
         except KeyError:
             return {
                 "Access token not found."
@@ -82,18 +85,10 @@ class LoginResource(Resource):
     def post(self):
         (email, password) = self.get_arguments()
         try:
-            strategy = app.config["AUTH_STRATEGY"]
-            if strategy == "auth_local_classic":
-                user = auth.local_auth_strategy(email, password)
-            elif strategy == "auth_local_no_password":
-                user = auth.no_password_auth_strategy(email)
-            elif strategy == "auth_remote_active_directory":
-                user = auth.active_directory_auth_strategy(email, password)
-            else:
-                raise auth.NoAuthStrategyConfigured
-
+            user = auth_service.check_auth(app, email, password)
             access_token = create_access_token(identity=email)
             refresh_token = create_refresh_token(identity=email)
+            auth_service.register_tokens(app, access_token, refresh_token)
 
             if is_from_browser(request.user_agent):
                 response = jsonify({
@@ -102,6 +97,7 @@ class LoginResource(Resource):
                 })
                 set_access_cookies(response, access_token)
                 set_refresh_cookies(response, refresh_token)
+
             else:
                 response = {
                     "login": True,
@@ -114,10 +110,10 @@ class LoginResource(Resource):
         except PersonNotFoundException:
             current_app.logger.info("User is not registered.")
             return {"login": False}, 400
-        except auth.WrongPasswordException:
+        except WrongPasswordException:
             current_app.logger.info("User gave a wrong password.")
             return {"login": False}, 400
-        except auth.NoAuthStrategyConfigured:
+        except NoAuthStrategyConfigured:
             current_app.logger.info(
                 "Authentication strategy is not properly configured."
             )
@@ -130,7 +126,7 @@ class LoginResource(Resource):
             required=True,
             help="User email is missing."
         )
-        parser.add_argument("password", default="")
+        parser.add_argument("password", default="default")
         args = parser.parse_args()
 
         return (
@@ -145,6 +141,7 @@ class RefreshTokenResource(Resource):
     def get(self):
         email = get_jwt_identity()
         access_token = create_access_token(identity=email)
+        auth_service.register_tokens(app, access_token)
         if is_from_browser(request.user_agent):
             response = jsonify({'refresh': True})
             set_access_cookies(response, access_token)
@@ -241,7 +238,7 @@ class ChangePasswordResource(Resource):
         ) = self.get_arguments()
 
         try:
-            auth.check_credentials(get_jwt_identity(), old_password)
+            auth_service.check_auth(app, get_jwt_identity(), old_password)
             auth.validate_password(password, password_2)
             password = auth.encrypt_password(password)
             persons_service.update_password(get_jwt_identity(), password)

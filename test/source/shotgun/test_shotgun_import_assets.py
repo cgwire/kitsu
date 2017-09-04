@@ -2,6 +2,7 @@
 from test.source.shotgun.base import ShotgunTestCase
 
 from zou.app.models.project import Project
+from zou.app.models.entity import Entity
 
 
 class ImportShotgunShotTestCase(ShotgunTestCase):
@@ -28,6 +29,7 @@ class ImportShotgunShotTestCase(ShotgunTestCase):
 
     def test_import_asset(self):
         self.load_fixture('projects')
+        self.load_fixture('assets')
         sg_asset = {
             "code": "Cake",
             "description": "yellow cake",
@@ -38,6 +40,7 @@ class ImportShotgunShotTestCase(ShotgunTestCase):
             },
             "sg_asset_type": "Props",
             "type": "Asset",
+            "parents": [{"type": "Asset", "id": 1}],
             "id": 3
         }
 
@@ -46,10 +49,14 @@ class ImportShotgunShotTestCase(ShotgunTestCase):
         self.assertEqual(len(self.assets), 1)
 
         self.assets = self.get("data/entities")
-        self.assertEqual(len(self.assets), 1)
+        self.assertEqual(len(self.assets), 3)
 
-        asset = self.assets[0]
+        asset = self.assets[2]
         project = Project.get_by(shotgun_id=sg_asset["project"]["id"])
         self.assertEqual(asset["description"], sg_asset["description"])
         self.assertEqual(asset["shotgun_id"], sg_asset["id"])
         self.assertEqual(asset["project_id"], str(project.id))
+        self.assertEqual(len(asset["entities_out"]), 0)
+
+        parent = Entity.get_by(shotgun_id=1)
+        self.assertEqual(str(parent.entities_out[0].id), asset["id"])

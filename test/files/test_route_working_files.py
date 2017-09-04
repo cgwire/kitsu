@@ -93,3 +93,10 @@ class TaskLastWorkingFilesTestCase(ApiDBTestCase):
             "/simple/productions/cosmos_landromat/assets/props/tree/shaders/"
             "3ds_max/cosmos_landromat_props_tree_shaders_main_v003"
         )
+
+    def test_update_modification_date(self):
+        path = "/actions/working-files/%s/modified" % self.working_file.id
+        previous_date = self.working_file.serialize()["updated_at"]
+        working_file = self.put(path, {})
+        current_date = working_file["updated_at"]
+        self.assertTrue(previous_date < current_date)

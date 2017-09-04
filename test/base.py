@@ -2,12 +2,11 @@ import unittest
 import json
 import os
 import ntpath
-import shutil
 
 from mixer.backend.flask import mixer
 
 from zou.app import app
-from zou.app.utils import fields, auth, fs
+from zou.app.utils import fields, auth
 from zou.app.services import file_tree
 
 from zou.app.models.project import Project
@@ -42,11 +41,6 @@ class ApiTestCase(unittest.TestCase):
         self.app = app.test_client()
         self.base_headers = {}
         self.post_headers = {"Content-type": "application/json"}
-        try:
-            shutil.rmtree(self.flask_app.config["JWT_TOKEN_FOLDER"])
-        except OSError:
-            pass
-        fs.mkdir_p(self.flask_app.config["JWT_TOKEN_FOLDER"])
 
     def log_in(self, email):
         tokens = self.post("auth/login", {
@@ -181,10 +175,7 @@ class ApiTestCase(unittest.TestCase):
         return open(target_file_path, "rb").read()
 
     def tearDown(self):
-        try:
-            shutil.rmtree(self.flask_app.config["JWT_TOKEN_FOLDER"])
-        except OSError:
-            pass
+        pass
 
 
 class ApiDBTestCase(ApiTestCase):

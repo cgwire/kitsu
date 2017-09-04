@@ -10,10 +10,10 @@ from zou.app.services.exception import (
 )
 
 
-class FileInfoTestCase(ApiDBTestCase):
+class FileServiceTestCase(ApiDBTestCase):
 
     def setUp(self):
-        super(FileInfoTestCase, self).setUp()
+        super(FileServiceTestCase, self).setUp()
 
         self.generate_fixture_project_status()
         self.generate_fixture_project()

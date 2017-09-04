@@ -1,13 +1,12 @@
 import json
 import datetime
 
-from simplekv import fs
+from zou.app.stores import auth_tokens_store as store
 
 
 def clean_auth_tokens():
-    store = fs.FilesystemStore("./sessions")
 
-    for key in store.iter_keys():
+    for key in store.keys():
         value = json.loads(store.get(key).decode("utf-8"))
 
         is_revoked = value["revoked"] == True

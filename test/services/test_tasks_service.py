@@ -23,10 +23,10 @@ class ToReviewHandler(object):
         self.data = data
 
 
-class TaskInfoTestCase(ApiDBTestCase):
+class TaskServiceTestCase(ApiDBTestCase):
 
     def setUp(self):
-        super(TaskInfoTestCase, self).setUp()
+        super(TaskServiceTestCase, self).setUp()
 
         self.generate_fixture_project_status()
         self.generate_fixture_project()
