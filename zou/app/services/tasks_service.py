@@ -19,7 +19,11 @@ from zou.app.services.exception import (
     TaskTypeNotFoundException
 )
 
-from zou.app.services import shots_service, assets_service, persons_service
+from zou.app.services import (
+    shots_service,
+    assets_service,
+    persons_service
+)
 
 
 def get_task_types_for_asset(asset):
@@ -125,6 +129,10 @@ def get_task_type(task_type_id):
 def create_task(task_type, entity, name="main"):
     task_status = get_todo_status()
     try:
+        try:
+            current_user_id = persons_service.get_current_user().id
+        except RuntimeError:
+            current_user_id = None
         task = Task.create(
             name=name,
             duration=0,
@@ -138,7 +146,7 @@ def create_task(task_type, entity, name="main"):
             task_type_id=task_type["id"],
             task_status_id=task_status.id,
             entity_id=entity["id"],
-            assigner_id=persons_service.get_current_user().id,
+            assigner_id=current_user_id,
             assignees=[]
         )
         return task.serialize()
