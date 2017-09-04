@@ -46,7 +46,7 @@ def check_credentials(email, password):
 
 
 def no_password_auth_strategy(email):
-    return persons_service.get_person_by_username(email)
+    return persons_service.get_person_by_email_username(email)
 
 
 def local_auth_strategy(email, password):
@@ -81,7 +81,7 @@ def active_directory_auth_strategy(email, password):
                 attributes=ALL_ATTRIBUTES,
                 get_operational_attributes=True
             )
-            return persons_service.get_person_by_username(email)
+            return persons_service.get_person_by_email_username(email)
     except:
         raise PersonNotFoundException
 
