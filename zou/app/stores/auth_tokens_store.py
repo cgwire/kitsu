@@ -28,7 +28,7 @@ def add(key, token, ttl=None):
 def get(key):
     value = revoked_tokens_store.get(key)
     if value is not None and hasattr(value, 'decode'):
-        value = is_revoked.decode("utf-8")
+        value = value.decode("utf-8")
     return value
 
 
