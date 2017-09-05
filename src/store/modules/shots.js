@@ -219,7 +219,13 @@ const mutations = {
     const shotToDeleteIndex = state.shots.findIndex(
       (shot) => shot.id === shotToDelete.id
     )
-    state.shots.splice(shotToDeleteIndex, 1)
+    const shot = state.shots[shotToDeleteIndex]
+
+    if (shot.tasks.length > 0) {
+      shot.canceled = true
+    } else {
+      state.shots.splice(shotToDeleteIndex, 1)
+    }
 
     state.deleteShot = {
       isLoading: false,

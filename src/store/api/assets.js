@@ -49,7 +49,7 @@ export default {
 
   deleteAsset (asset, callback) {
     superagent
-      .del(`/api/data/entities/${asset.id}`)
+      .del(`/api/data/assets/${asset.id}`)
       .end((err, res) => {
         callback(err, res.body)
       })

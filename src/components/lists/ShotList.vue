@@ -29,17 +29,21 @@
       </tr>
     </thead>
     <tbody>
-      <tr v-for="entry in entries">
+      <tr
+        key="entry.id"
+        :class="{canceled: entry.canceled}"
+        v-for="entry in entries"
+      >
         <production-name-cell
           class="project"
           :only-avatar="true"
           :entry="{name: entry.project_name || ''}"
         >
         </production-name-cell>
-        <td class="sequence">
+        <td :class="{name: !entry.canceled}">
           {{ entry.sequence_name }}
         </td>
-        <td class="name">
+        <td :class="{name: !entry.canceled}">
           {{ entry.name }}
         </td>
         <td class="framein">
@@ -170,5 +174,9 @@ td.sequence {
 .validation {
   width: 150px;
   margin-right: 1em;
+}
+
+.canceled {
+  text-decoration: line-through;
 }
 </style>

@@ -50,7 +50,7 @@ export default {
     const taskTypeId = data.task_type_id
     const type = data.type
     superagent
-      .post(`/api/actions/${type}/task-types/${taskTypeId}/create-tasks`)
+      .post(`/api/actions/task-types/${taskTypeId}/${type}/create-tasks`)
       .send({})
       .end((err, res) => {
         callback(err, res.body)
