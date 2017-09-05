@@ -243,7 +243,13 @@ const mutations = {
     const assetToDeleteIndex = state.assets.findIndex(
       (asset) => asset.id === assetToDelete.id
     )
-    state.assets.splice(assetToDeleteIndex, 1)
+    const asset = state.assets[assetToDeleteIndex]
+
+    if (asset.tasks.length > 0) {
+      asset.canceled = true
+    } else {
+      state.assets.splice(assetToDeleteIndex, 1)
+    }
 
     state.deleteAsset = {
       isLoading: false,
