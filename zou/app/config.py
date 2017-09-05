@@ -23,6 +23,7 @@ JWT_ACCESS_TOKEN_EXPIRES = datetime.timedelta(days=7)
 JWT_REFRESH_TOKEN_EXPIRES = datetime.timedelta(days=15)
 JWT_TOKEN_LOCATION = ['cookies', 'headers']
 JWT_REFRESH_COOKIE_PATH = '/auth/refresh-token'
+JWT_COOKIE_CSRF_PROTECT = False
 
 RESTFUL_JSON = {
     "ensure_ascii": False
