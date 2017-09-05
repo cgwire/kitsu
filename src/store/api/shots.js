@@ -47,7 +47,7 @@ export default {
 
   deleteShot (shot, callback) {
     superagent
-      .del(`/api/data/entities/${shot.id}`)
+      .del(`/api/data/shots/${shot.id}`)
       .end((err, res) => {
         callback(err, res.body)
       })
