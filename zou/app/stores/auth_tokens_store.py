@@ -22,22 +22,34 @@ except:
 
 
 def add(key, token, ttl=None):
-    return revoked_tokens_store.set(key, token, ex=ttl)
+    return revoked_tokens_store.set(key.encode("utf-8"), token, ex=ttl)
 
 
 def get(key):
-    return revoked_tokens_store.get(key)
+    value = revoked_tokens_store.get(key)
+    if value is not None and hasattr(value, 'decode'):
+        value = is_revoked.decode("utf-8")
+    return value
 
 
 def delete(key):
-    return revoked_tokens_store.delete(key)
+    return revoked_tokens_store.delete(key.encode("utf-8"))
 
 
 def keys():
-    return revoked_tokens_store.keys()
+    keys = revoked_tokens_store.keys()
+    if len(keys) > 0 and hasattr(keys[0], 'decode'):
+        return [x.decode("utf-8") for x in revoked_tokens_store.keys()]
+    else:
+        return [x for x in revoked_tokens_store.keys()]
+
+
+def clear():
+    for key in keys():
+        delete(key)
 
 
 def is_revoked(decrypted_token):
     jti = decrypted_token["jti"]
     is_revoked = get(jti)
-    return (is_revoked is None) or (is_revoked.decode("utf-8") == "true")
+    return (is_revoked is None) or (is_revoked == "true")

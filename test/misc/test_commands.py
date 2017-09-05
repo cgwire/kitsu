@@ -39,7 +39,7 @@ class CommandsTestCase(ApiTestCase):
             print(self.store.get(key))
         commands.clean_auth_tokens()
         self.assertEquals(len(self.store.keys()), 1)
-        self.assertEquals(self.store.keys()[0], b"testkey")
+        self.assertEquals(self.store.keys()[0], "testkey")
 
     def test_clean_auth_tokens_expired(self):
         now = datetime.datetime.now()
@@ -59,4 +59,4 @@ class CommandsTestCase(ApiTestCase):
         self.assertEquals(len(self.store.keys()), 2)
         commands.clean_auth_tokens()
         self.assertEquals(len(self.store.keys()), 1)
-        self.assertEquals(self.store.keys()[0], b"testkey2")
+        self.assertEquals(self.store.keys()[0], "testkey2")
