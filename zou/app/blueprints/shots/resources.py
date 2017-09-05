@@ -25,15 +25,24 @@ class ShotResource(Resource):
         Resource.__init__(self)
 
     @jwt_required
-    def get(self, instance_id):
+    def get(self, shot_id):
         """
         Retrieve given shot.
         """
         try:
-            shot = shots_service.get_shot(instance_id)
+            shot = shots_service.get_shot(shot_id)
         except ShotNotFoundException:
             abort(404)
         return shot.serialize(obj_type="Shot")
+
+    @jwt_required
+    def delete(self, shot_id):
+        try:
+            deleted_shot = shots_service.remove_shot(shot_id)
+        except ShotNotFoundException:
+            abort(404)
+
+        return deleted_shot, 204
 
 
 class ShotsResource(Resource):

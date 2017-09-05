@@ -11,7 +11,6 @@ from .resources import (
     ProjectAssetTypesResource,
     ShotAssetTypesResource,
     NewAssetResource,
-    RemoveAssetResource,
     ProjectAssetsResource,
     ProjectAssetTypeAssetsResource,
     AssetTasksResource,
@@ -25,7 +24,7 @@ routes = [
     ("/data/assets", AssetsResource),
     ("/data/assets/all", AllAssetsResource),
     ("/data/assets/with-tasks", AssetsAndTasksResource),
-    ("/data/assets/<instance_id>", AssetResource),
+    ("/data/assets/<asset_id>", AssetResource),
     ("/data/assets/<instance_id>/tasks", AssetTasksResource),
     ("/data/assets/<instance_id>/task-types", AssetTaskTypesResource),
     (
@@ -35,11 +34,6 @@ routes = [
     (
         "/data/projects/<project_id>/asset-types/<asset_type_id>/assets/new",
         NewAssetResource
-    ),
-    (
-        "/data/projects/<project_id>/asset-types/<asset_type_id>/"
-        "assets/<asset_id>",
-        RemoveAssetResource
     ),
     (
         "/data/projects/<project_id>/asset-types",

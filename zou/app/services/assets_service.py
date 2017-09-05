@@ -1,4 +1,4 @@
-from sqlalchemy.exc import StatementError
+from sqlalchemy.exc import StatementError, IntegrityError
 
 from zou.app.utils import events
 
@@ -170,8 +170,11 @@ def create_asset(project, asset_type, name, description):
 
 def remove_asset(asset_id):
     asset = get_asset(asset_id)
+    try:
+        asset.delete()
+    except IntegrityError:
+        asset.update({"canceled": True})
     deleted_asset = asset.serialize(obj_type="Asset")
-    asset.delete()
     events.emit("asset:deletion", {
         "deleted_asset": deleted_asset
     })

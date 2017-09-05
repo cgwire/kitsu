@@ -58,16 +58,12 @@ class CreateAssetsTestCase(ApiDBTestCase):
 
     def test_remove_asset(self):
         self.generate_fixture_entity()
-        path = "data/projects/%s/asset-types/%s/assets/%s" % (
-            self.project.id,
-            self.entity_type.id,
-            self.entity.id
-        )
+        path = "data/assets/%s" % self.entity.id
         self.delete(path)
         assets = assets_service.get_assets()
         self.assertEquals(len(assets), 0)
 
-    def test_remove_linked_asset(self):
+    def test_remove_asset_with_tasks(self):
         self.generate_fixture_entity()
         self.generate_fixture_person()
         self.generate_fixture_assigner()
@@ -75,11 +71,7 @@ class CreateAssetsTestCase(ApiDBTestCase):
         self.generate_fixture_task_type()
         self.generate_fixture_task_status()
         self.generate_fixture_task()
-        path = "data/projects/%s/asset-types/%s/assets/%s" % (
-            self.project.id,
-            self.entity_type.id,
-            self.entity.id
-        )
+        path = "data/assets/%s" % self.entity.id
         self.delete(path)
         assets = assets_service.get_assets()
         self.assertEquals(len(assets), 1)
