@@ -1,6 +1,8 @@
 export const sortAssets = (assets) => {
   return assets.sort((a, b) => {
-    if (a.project_name !== b.project_name) {
+    if (a.canceled !== b.canceled) {
+      return a.canceled ? 1 : -1
+    } if (a.project_name !== b.project_name) {
       return a.project_name.localeCompare(b.project_name)
     } else if (a.asset_type_name !== b.asset_type_name) {
       return a.asset_type_name.localeCompare(b.asset_type_name)
@@ -12,7 +14,9 @@ export const sortAssets = (assets) => {
 
 export const sortShots = (shots) => {
   return shots.sort((a, b) => {
-    if (a.project_name !== b.project_name) {
+    if (a.canceled !== b.canceled) {
+      return a.canceled ? 1 : -1
+    } if (a.project_name !== b.project_name) {
       return a.project_name.localeCompare(b.project_name)
     } else if (a.sequence_name !== b.sequence_name) {
       return a.sequence_name.localeCompare(b.sequence_name)
