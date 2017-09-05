@@ -24,7 +24,8 @@ from .resources import (
 
 routes = [
     ("/data/shots/all", ShotsResource),
-    ("/data/shots/<instance_id>", ShotResource),
+    ("/data/shots/with-tasks", ShotsAndTasksResource),
+    ("/data/shots/<shot_id>", ShotResource),
     ("/data/episodes", EpisodesResource),
     ("/data/episodes/<instance_id>", EpisodeResource),
     ("/data/episodes/<instance_id>/sequences", EpisodeSequencesResource),
@@ -34,7 +35,6 @@ routes = [
     ("/data/shots/<instance_id>/assets", ShotAssetsResource),
     ("/data/shots/<shot_id>/task-types", ShotTaskTypesResource),
     ("/data/shots/<instance_id>/tasks", ShotTasksResource),
-    ("/data/shots/with-tasks", ShotsAndTasksResource),
     ("/data/projects/<project_id>/shots", ProjectShotsResource),
     ("/data/projects/<project_id>/sequences", ProjectSequencesResource),
     ("/data/projects/<project_id>/episodes", ProjectEpisodesResource)

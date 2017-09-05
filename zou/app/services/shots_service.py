@@ -1,4 +1,7 @@
 from sqlalchemy.orm import aliased
+from sqlalchemy.exc import IntegrityError
+
+from zou.app.utils import events
 
 from zou.app.models.entity import Entity
 from zou.app.models.entity_type import EntityType
@@ -223,3 +226,14 @@ def get_shots_for_project(project):
         entity_type_id=shot_type.id,
         project_id=project.id
     )
+
+
+def remove_shot(shot_id):
+    shot = get_shot(shot_id)
+    try:
+        shot.delete()
+    except IntegrityError:
+        shot.update({"canceled": True})
+    deleted_shot = shot.serialize(obj_type="Shot")
+    events.emit("shot:deletion", {"deleted_shot": deleted_shot})
+    return deleted_shot

@@ -21,15 +21,24 @@ class AssetResource(Resource):
         Resource.__init__(self)
 
     @jwt_required
-    def get(self, instance_id):
+    def get(self, asset_id):
         """
         Retrieve given asset.
         """
         try:
-            asset = assets_service.get_asset(instance_id)
+            asset = assets_service.get_asset(asset_id)
         except AssetNotFoundException:
             abort(404)
         return asset.serialize(obj_type="Asset")
+
+    @jwt_required
+    def delete(self, asset_id):
+        try:
+            deleted_asset = assets_service.remove_asset(asset_id)
+        except AssetNotFoundException:
+            abort(404)
+        print(deleted_asset["canceled"])
+        return deleted_asset, 204
 
 
 class AssetsResource(Resource):
@@ -246,29 +255,3 @@ class NewAssetResource(Resource):
             args["name"],
             args.get("description", ""),
         )
-
-
-class RemoveAssetResource(Resource):
-
-    @jwt_required
-    def delete(self, project_id, asset_type_id, asset_id):
-        try:
-            project = projects_service.get_project(project_id)
-            asset_type = assets_service.get_asset_type(asset_type_id)
-            asset = assets_service.get_asset(asset_id)
-
-            if asset.project_id != project.id:
-                abort(404)
-
-            if asset.entity_type_id != asset_type.id:
-                abort(404)
-
-            deleted_asset = assets_service.remove_asset(asset_id)
-        except ProjectNotFoundException:
-            abort(404)
-        except AssetTypeNotFoundException:
-            abort(404)
-        except AssetNotFoundException:
-            abort(404)
-
-        return deleted_asset, 204

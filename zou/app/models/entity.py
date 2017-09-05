@@ -33,6 +33,7 @@ class Entity(db.Model, BaseMixin, SerializerMixin):
     name = db.Column(db.String(160), nullable=False)
     description = db.Column(db.String(600))
     shotgun_id = db.Column(db.Integer)
+    canceled = db.Column(db.Boolean, default=False)
 
     project_id = db.Column(
         UUIDType(binary=False), db.ForeignKey('project.id'), nullable=False)
