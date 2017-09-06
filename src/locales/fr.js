@@ -54,6 +54,7 @@ export default {
     cancel: 'Annuler',
     confirmation: 'Confirmer',
     confirmation_and_stay: 'Confirmer et rester',
+    delete_text: 'Etes vous sûr de vouloir supprimer {name} de la base de données ?',
     csv: {
       import_file: 'Importer un fichier .csv',
       export_file: 'Télécharger en .csv',
@@ -102,6 +103,8 @@ export default {
   tasks: {
     preview: 'Pré-visualisation',
     validation: 'Validation',
+    no_preview: 'Il n\'y a pas de previz pour cette tâche..',
+    no_comment: 'Il n\'y a pas de commentaires pour cette tâche.',
     create_tasks: 'Ajouter des tâches',
     create_tasks_shot: 'Ajouter des tâches pour les plans affichés',
     create_tasks_shot_explaination: 'Vous allez créer une nouvelle tâche pour chaque plan de la liste affichée. Est-ce que vous voulez continuer ?',
@@ -109,6 +112,10 @@ export default {
     create_tasks_asset: 'Ajouter des tâches pour les assets affichés',
     create_tasks_asset_explaination: 'Vous allez créer une nouvelle tâche pour chaque asset de la liste affichée. Est-ce que vous voulez continuer ?',
     create_tasks_asset_failed: 'Une erreur serveur est survenue pendant la création des tâches.',
+    add_preview: 'Ajouter une previz',
+    add_preview_error: 'Une erreur est survenue en ajoutant la preview.',
+    select_preview_file: 'Choisissez une preview sur votre disque dur:',
+    delete_error: 'Une erreur est survenue en supprimant la tâche.',
     feedback: 'retours',
     fields: {
       task_type: 'Type de tâche'
@@ -152,7 +159,8 @@ export default {
     fields: {
       name: 'Asset',
       type: 'Type',
-      production: 'Prod'
+      production: 'Prod',
+      description: 'Description'
     },
     delete_text: 'Etes vous sûr de vouloir retirer {name} de la base de données ?',
     delete_error: 'Une erreur est survenue en créant l\'asset, êtes vous sûr de vouloir que l\'asset n\'a plus aucun lien ?'
@@ -165,6 +173,7 @@ export default {
     new_shot: 'Ajouter un plan',
     edit_fail: 'La création ou l\'édition a échoué, une erreur est survenue.',
     new_success: 'Plan {name} créé avec succès.',
+    description: 'Description',
     fields: {
       name: 'Plan',
       episode: 'Épisode',

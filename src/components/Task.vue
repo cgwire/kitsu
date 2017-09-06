@@ -4,7 +4,7 @@
        <div class="level">
          <div class="level-left">
            <div class="level-item">
-             {{ currentTask ? currentTask.entity_name : 'Loading...'}}
+             {{ currentTask ? title : 'Loading...'}}
            </div>
            <div class="level-item" v-if="currentTask">
              <span
@@ -300,6 +300,13 @@ export default {
       'getTaskPreviews',
       'getTaskComment'
     ]),
+    title () {
+      if (this.currentTask) {
+        return `${this.currentTask.project_name} / ${this.currentTask.entity_name}`
+      } else {
+        return 'Loading...'
+      }
+    },
     deleteText () {
       if (this.currentTask) {
         return this.$t('main.delete_text', {
