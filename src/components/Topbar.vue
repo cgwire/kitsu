@@ -61,10 +61,14 @@ export default {
     PeopleAvatar
   },
   mounted () {
-    const userNameWidth = this.$refs['user-name'].clientWidth
     const userMenu = this.$refs['user-menu']
+    const userName = this.$refs['user-name']
+    const userNameWidth = userName.clientWidth
 
-    if (userNameWidth > 100) userMenu.style.width = `${userNameWidth}px`
+    if (userNameWidth > 100) {
+      userMenu.style.width = `${userNameWidth}px`
+      userName.style.width = `${userNameWidth}px`
+    }
   },
   computed: {
     ...mapGetters([
