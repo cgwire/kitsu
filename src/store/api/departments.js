@@ -1,11 +1,7 @@
-import superagent from 'superagent'
+import client from './client'
 
 export default {
   getDepartments (callback) {
-    superagent
-      .get('/api/data/departments')
-      .end((err, res) => {
-        callback(err, res.body)
-      })
+    client.get('/api/data/departments', callback)
   }
 }

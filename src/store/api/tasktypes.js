@@ -1,12 +1,8 @@
-import superagent from 'superagent'
+import client from './client'
 
 export default {
   getTaskTypes (callback) {
-    superagent
-      .get('/api/data/task-types')
-      .end((err, res) => {
-        callback(err, res.body)
-      })
+    client.get('/api/data/task-types', callback)
   },
 
   newTaskType (taskType, callback) {
@@ -16,12 +12,7 @@ export default {
       priority: Number(taskType.priority),
       for_shots: Boolean(taskType.for_shots)
     }
-    superagent
-      .post('/api/data/task-types/')
-      .send(data)
-      .end((err, res) => {
-        callback(err, res.body)
-      })
+    client.post('/api/data/task-types/', data, callback)
   },
 
   updateTaskType (taskType, callback) {
@@ -31,19 +22,10 @@ export default {
       priority: Number(taskType.priority),
       for_shots: Boolean(taskType.for_shots === 'true')
     }
-    superagent
-      .put(`/api/data/task-types/${taskType.id}`)
-      .send(data)
-      .end((err, res) => {
-        callback(err, res.body)
-      })
+    client.put(`/api/data/task-types/${taskType.id}`, data, callback)
   },
 
   deleteTaskType (taskType, callback) {
-    superagent
-      .del(`/api/data/task-types/${taskType.id}`)
-      .end((err, res) => {
-        callback(err, res.body)
-      })
+    client.del(`/api/data/task-types/${taskType.id}`, callback)
   }
 }

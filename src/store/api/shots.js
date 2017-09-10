@@ -1,20 +1,12 @@
-import superagent from 'superagent'
+import client from './client'
 
 export default {
   getShots (callback) {
-    superagent
-      .get('/api/data/shots/with-tasks')
-      .end((err, res) => {
-        callback(err, res.body)
-      })
+    client.get('/api/data/shots/with-tasks', callback)
   },
 
   getShotType (callback) {
-    superagent
-      .get('/api/data/shot-type')
-      .end((err, res) => {
-        callback(err, res.body)
-      })
+    client.get('/api/data/shot-type', callback)
   },
 
   newShot (shot, callback) {
@@ -23,12 +15,7 @@ export default {
       entity_type_id: shot.shot_type_id,
       project_id: shot.production_id
     }
-    superagent
-      .post(`/api/data/entities/`)
-      .send(data)
-      .end((err, res) => {
-        callback(err, res.body)
-      })
+    client.post(`/api/data/entities/`, data, callback)
   },
 
   updateShot (shot, callback) {
@@ -37,28 +24,14 @@ export default {
       entity_type_id: shot.shot_type_id,
       project_id: shot.project_id
     }
-    superagent
-      .put(`/api/data/entities/${shot.id}`)
-      .send(data)
-      .end((err, res) => {
-        callback(err, res.body)
-      })
+    client.put(`/api/data/entities/${shot.id}`, data, callback)
   },
 
   deleteShot (shot, callback) {
-    superagent
-      .del(`/api/data/shots/${shot.id}`)
-      .end((err, res) => {
-        callback(err, res.body)
-      })
+    client.del(`/api/data/shots/${shot.id}`, callback)
   },
 
   postCsv (formData, callback) {
-    superagent
-      .post('/api/import/csv/shots')
-      .send(formData)
-      .end((err, res) => {
-        callback(err, res.body)
-      })
+    client.post('/api/import/csv/shots', formData, callback)
   }
 }

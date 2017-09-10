@@ -1,13 +1,9 @@
-import superagent from 'superagent'
+import client from './client'
 
 export default {
 
   getPeople (callback) {
-    superagent
-      .get('/api/data/persons')
-      .end((err, res) => {
-        callback(err, res.body)
-      })
+    client.get('/api/data/persons', callback)
   },
 
   newPerson (person, callback) {
@@ -17,12 +13,7 @@ export default {
       email: person.email,
       phone: person.phone
     }
-    superagent
-      .post(`/api/data/persons/new`)
-      .send(data)
-      .end((err, res) => {
-        callback(err, res.body)
-      })
+    client.post(`/api/data/persons/new`, data, callback)
   },
 
   updatePerson (person, callback) {
@@ -34,29 +25,15 @@ export default {
       timezone: person.timezone,
       locale: person.locale
     }
-    superagent
-      .put(`/api/data/persons/${person.id}`)
-      .send(data)
-      .end((err, res) => {
-        callback(err, res.body)
-      })
+    client.put(`/api/data/persons/${person.id}`, data, callback)
   },
 
   deletePerson (personId, callback) {
-    superagent
-      .del(`/api/data/persons/${personId}`)
-      .end((err, res) => {
-        callback(err, res.body)
-      })
+    client.del(`/api/data/persons/${personId}`, callback)
   },
 
   postCsv (formData, callback) {
-    superagent
-      .post('/api/import/csv/persons')
-      .send(formData)
-      .end((err, res) => {
-        callback(err, res.body)
-      })
+    client.post('/api/import/csv/persons', formData, callback)
   },
 
   changePassword (form, callback) {
@@ -65,12 +42,7 @@ export default {
       password: form.password,
       password2: form.password2
     }
-    superagent
-      .post('/api/auth/change-password')
-      .send(data)
-      .end((err, res) => {
-        callback(err, res.body)
-      })
+    client.post('/api/auth/change-password', data, callback)
   }
 
 }

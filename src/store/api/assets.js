@@ -1,20 +1,12 @@
-import superagent from 'superagent'
+import client from './client'
 
 export default {
   getAssets (callback) {
-    superagent
-      .get('/api/data/assets/with-tasks')
-      .end((err, res) => {
-        callback(err, res.body)
-      })
+    client.get('/api/data/assets/with-tasks', callback)
   },
 
   getAssetType (callback) {
-    superagent
-      .get('/api/data/asset_type')
-      .end((err, res) => {
-        callback(err, res.body)
-      })
+    client.get('/api/data/asset_type', callback)
   },
 
   newAsset (asset, callback) {
@@ -24,12 +16,7 @@ export default {
       entity_type_id: asset.entity_type_id,
       project_id: asset.project_id
     }
-    superagent
-      .post(`/api/data/entities/`)
-      .send(data)
-      .end((err, res) => {
-        callback(err, res.body)
-      })
+    client.post(`/api/data/entities/`, data, callback)
   },
 
   updateAsset (asset, callback) {
@@ -39,28 +26,14 @@ export default {
       entity_type_id: asset.entity_type_id,
       project_id: asset.project_id
     }
-    superagent
-      .put(`/api/data/entities/${asset.id}`)
-      .send(data)
-      .end((err, res) => {
-        callback(err, res.body)
-      })
+    client.put(`/api/data/entities/${asset.id}`, data, callback)
   },
 
   deleteAsset (asset, callback) {
-    superagent
-      .del(`/api/data/assets/${asset.id}`)
-      .end((err, res) => {
-        callback(err, res.body)
-      })
+    client.del(`/api/data/assets/${asset.id}`, callback)
   },
 
   postCsv (formData, callback) {
-    superagent
-      .post('/api/import/csv/assets')
-      .send(formData)
-      .end((err, res) => {
-        callback(err, res.body)
-      })
+    client.post('/api/import/csv/assets', formData, callback)
   }
 }
