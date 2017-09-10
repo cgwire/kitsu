@@ -19,6 +19,7 @@ Vue.directive('focus', {
   }
 })
 
+// Allow access to i18n object from vue instance.
 Vue.prototype.$locale = {
   change (locale) {
     i18n.locale = locale
@@ -38,3 +39,13 @@ new Vue({
   router,
   store
 })
+
+/*
+// Realtime update conifguration.
+const source = new EventSource('/events')
+source.addEventListener('comment:new', function (event) {
+  const data = JSON.parse(event.data)
+  const commentId = data.data.id
+  console.log(commentId)
+}, false)
+*/
