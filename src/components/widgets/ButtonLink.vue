@@ -6,7 +6,7 @@
   <span class="icon is-small" v-if="icon.length > 0">
     <i :class="'fa ' + icon"></i>
   </span>
-  <span class="text is-hidden-touch">
+   <span class="text is-hidden-touch" v-if="text.length > 0">
     {{ text }}
   </span>
 </router-link>
@@ -17,7 +17,7 @@ export default {
   name: 'button-link',
   props: {
     text: {
-      default: 'button',
+      default: '',
       type: String
     },
     path: {
