@@ -17,7 +17,7 @@
           :entry="entry"
         >
         </production-name-cell>
-        <td :class="name">
+        <td class="name">
           {{ entry.name }}
         </td>
         <td class="td-status">

@@ -1,6 +1,8 @@
 import Vue from 'vue'
 import Vuex from 'vuex'
 
+import * as getters from './getters'
+
 import assetTypes from './modules/assettypes'
 import assets from './modules/assets'
 import shots from './modules/shots'
@@ -28,6 +30,7 @@ let modules = {
 }
 
 export default new Vuex.Store({
+  getters,
   strict: true,
   modules: modules
 })

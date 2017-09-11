@@ -1,8 +1,8 @@
 import Vue from 'vue'
 import { sync } from 'vuex-router-sync'
 
-import i18n from './lib/i18n'
 import router from './router'
+import i18n from './lib/i18n'
 import store from './store'
 import App from './App'
 
