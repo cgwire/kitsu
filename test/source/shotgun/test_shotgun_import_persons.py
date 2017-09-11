@@ -12,6 +12,7 @@ class ImportShotgunPersonTestCase(ShotgunTestCase):
 
         self.persons = self.get("data/persons")
         self.assertEqual(len(self.persons), 3)
+        self.assertEqual(self.persons[0]["active"], True)
 
     def test_import_persons_twice(self):
         self.persons = self.load_fixture('persons')
@@ -26,7 +27,9 @@ class ImportShotgunPersonTestCase(ShotgunTestCase):
             "email": "james.doe@gmail.com",
             "firstname": "James",
             "lastname": "Doe",
+            "login": "jamie",
             "id": 3,
+            "sg_status_list": "dis",
             "type": "HumanUser"
         }
 
@@ -41,3 +44,5 @@ class ImportShotgunPersonTestCase(ShotgunTestCase):
         self.assertEqual(person["first_name"], sg_person["firstname"])
         self.assertEqual(person["last_name"], sg_person["lastname"])
         self.assertEqual(person["shotgun_id"], sg_person["id"])
+        self.assertEqual(person["desktop_login"], sg_person["login"])
+        self.assertEqual(person["active"], False)

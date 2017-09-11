@@ -56,6 +56,16 @@ class AuthTestCase(ApiDBTestCase):
         self.assertIsAuthenticated(tokens)
         self.logout(tokens)
 
+    def test_login_with_desktop_login(self):
+        self.credentials = {
+            "email": self.person_dict["desktop_login"],
+            "password": "secretpassword"
+        }
+        tokens = self.post("auth/login", self.credentials, 200)
+
+        self.assertIsAuthenticated(tokens)
+        self.logout(tokens)
+
     def test_login_wrong_credentials(self):
         result = self.post("auth/login", {}, 400)
         self.assertIsNotAuthenticated(result, 422)
