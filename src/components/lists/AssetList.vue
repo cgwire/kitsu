@@ -39,7 +39,7 @@
           :entry="{name: entry.project_name}"
         >
         </production-name-cell>
-        <td :class="{name: !entry.canceled}">
+        <td :class="{type: !entry.canceled}">
           {{ entry.asset_type_name }}
         </td>
         <td :class="{name: !entry.canceled}">
@@ -121,38 +121,50 @@ export default {
 </script>
 
 <style scoped>
-th.actions {
+.actions {
+  min-width: 150px;
   padding: 0.4em;
 }
 
 .project {
+  min-width: 50px;
+  max-width: 50px;
   width: 50px;
 }
 
 .name {
+  min-width: 200px;
+  max-width: 200px;
   width: 200px;
   font-weight: bold;
 }
 
+.type {
+  min-width: 100px;
+  max-width: 100px;
+  width: 100px;
+  font-weight: bold;
+}
+
 .description {
+  min-width: 200px;
+  max-width: 200px;
   width: 200px;
+}
+
+.validation {
+  min-width: 120px;
+  max-width: 120px;
+  width: 120px;
+  margin-right: 1em;
 }
 
 td.name {
   font-size: 1.2em;
 }
 
-.type {
-  width: 150px;
-  font-weight: bold;
-}
-
 td.type {
   font-size: 1.2em;
-}
-.validation {
-  width: 150px;
-  margin-right: 1em;
 }
 
 .canceled {

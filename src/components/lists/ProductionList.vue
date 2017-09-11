@@ -3,6 +3,7 @@
   <table class="table">
     <thead>
       <tr>
+        <th class="project">&nbsp;</th>
         <th class="name">{{ $t('productions.fields.name') }}</th>
         <th class="status">{{ $t('productions.fields.status') }}</th>
         <th class="actions"></th>
@@ -10,8 +11,15 @@
     </thead>
     <tbody>
       <tr v-for="entry in entries">
-        <production-name-cell class="name" v-bind:entry="entry">
+        <production-name-cell
+          class="project"
+          :only-avatar="true"
+          :entry="entry"
+        >
         </production-name-cell>
+        <td :class="name">
+          {{ entry.name }}
+        </td>
         <td class="td-status">
           {{ $t(getStatusLocale(entry.project_status_name)) }}
         </td>
@@ -79,11 +87,22 @@ export default {
 </script>
 
 <style scoped>
+.project {
+  min-width: 60px;
+  width: 60px;
+}
+
 .name {
-  width: 300px;
+  min-width: 250px;
+  width: 250px;
 }
 
 .status {
+  min-width: 100px;
   width: 100px;
+}
+
+.actions {
+  min-width: 100px;
 }
 </style>
