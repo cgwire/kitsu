@@ -1,5 +1,7 @@
 import assetsApi from '../api/assets'
 import { sortAssets, sortValidationColumns } from '../../lib/sorting'
+import tasksStore from './tasks'
+
 import {
   LOAD_ASSETS_START,
   LOAD_ASSETS_ERROR,
@@ -24,6 +26,8 @@ import {
   DELETE_ASSET_END,
 
   DELETE_TASK_END,
+
+  NEW_TASK_COMMENT_END,
 
   RESET_ALL
 } from '../mutation-types'
@@ -267,6 +271,17 @@ const mutations = {
         (assetTask) => assetTask.id === task.entity_id
       )
       asset.tasks.splice(taskIndex, 1)
+    }
+  },
+
+  [NEW_TASK_COMMENT_END] (state, {comment, taskId}) {
+    const getTask = tasksStore.getters.getTask(
+      tasksStore.state, tasksStore.getters
+    )
+    const task = getTask(taskId)
+    const asset = getters.getAsset(state)(task.entity_id)
+    if (asset) {
+      asset.validations[task.task_type_name] = task
     }
   },
 

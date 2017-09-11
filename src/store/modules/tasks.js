@@ -1,5 +1,7 @@
 import tasksApi from '../api/tasks'
 import { sortByName } from '../../lib/sorting'
+import personStore from './people'
+
 import {
   LOAD_ASSETS_END,
   LOAD_SHOTS_END,
@@ -65,6 +67,7 @@ const getters = {
 const actions = {
   loadTaskStatuses ({ commit, state }, callback) {
     tasksApi.getTaskStatuses((err, taskStatus) => {
+      console.log(taskStatus)
       if (!err) commit(LOAD_TASK_STATUSES_END, taskStatus)
       if (callback) callback(err)
     })
@@ -92,6 +95,15 @@ const actions = {
     tasksApi.commentTask(payload, (err, comment) => {
       if (!err) {
         commit(NEW_TASK_COMMENT_END, {comment, taskId: payload.taskId})
+      }
+      if (payload.callback) payload.callback(err, comment)
+    })
+  },
+
+  loadComment ({ commit, state }, payload) {
+    tasksApi.getTaskComment(payload, (err, comment) => {
+      if (!err) {
+        commit(NEW_TASK_COMMENT_END, {comment, taskId: comment.object_id})
       }
       if (payload.callback) payload.callback(err, comment)
     })
@@ -204,8 +216,22 @@ const mutations = {
   },
 
   [NEW_TASK_COMMENT_END] (state, {comment, taskId}) {
+    if (comment.task_status === undefined) {
+      const getTaskStatus = getters.getTaskStatus(state, getters)
+      comment.task_status = getTaskStatus(comment.task_status_id)
+    }
+
+    if (comment.person === undefined) {
+      const getPerson = personStore.getters.getPerson(
+        personStore.state, personStore.getters
+      )
+      comment.person = getPerson(comment.person_id)
+    }
+
     if (!state.taskComments[taskId]) state.taskComments[taskId] = []
-    state.taskComments[taskId].unshift(comment)
+    if (!state.taskComments[taskId].find((cmt) => cmt.id === comment.id)) {
+      state.taskComments[taskId].unshift(comment)
+    }
 
     Object.assign(state.taskMap[taskId], {
       task_status_id: comment.task_status_id,

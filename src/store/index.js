@@ -24,8 +24,8 @@ let modules = {
   people,
   productions,
   shots,
-  taskTypes,
   tasks,
+  taskTypes,
   user
 }
 

@@ -1,4 +1,6 @@
 import shotsApi from '../api/shots'
+import tasksStore from './tasks'
+
 import { sortShots, sortValidationColumns } from '../../lib/sorting'
 import {
   LOAD_SHOTS_START,
@@ -18,6 +20,8 @@ import {
   DELETE_SHOT_START,
   DELETE_SHOT_ERROR,
   DELETE_SHOT_END,
+
+  NEW_TASK_COMMENT_END,
 
   RESET_ALL
 } from '../mutation-types'
@@ -230,6 +234,17 @@ const mutations = {
     state.deleteShot = {
       isLoading: false,
       isError: false
+    }
+  },
+
+  [NEW_TASK_COMMENT_END] (state, {comment, taskId}) {
+    const getTask = tasksStore.getters.getTask(
+      tasksStore.state, tasksStore.getters
+    )
+    const task = getTask(taskId)
+    const shot = getters.getShot(state)(task.entity_id)
+    if (shot) {
+      shot.validations[task.task_type_name] = task
     }
   },
 
