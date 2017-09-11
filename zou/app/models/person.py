@@ -31,9 +31,12 @@ class Person(db.Model, BaseMixin, SerializerMixin):
     last_name = db.Column(db.String(80), nullable=False)
     email = db.Column(EmailType, unique=True)
     phone = db.Column(db.String(30))
+
     active = db.Column(db.Boolean(), default=True)
     last_presence = db.Column(db.Date())
+
     password = db.Column(db.Binary(60))
+    desktop_login = db.Column(db.String(80))
     shotgun_id = db.Column(db.Integer, unique=True)
     timezone = db.Column(
         TimezoneType(backend="pytz"),

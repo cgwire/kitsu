@@ -3,10 +3,12 @@ from flask_restful import Resource, reqparse
 from flask_jwt_extended import jwt_required
 
 from zou.app.utils import query
-from zou.app.services import assets_service, tasks_service, projects_service
-
-from zou.app.models.entity_type import EntityType
 from zou.app.models.entity import Entity
+from zou.app.services import (
+    assets_service,
+    tasks_service,
+    projects_service
+)
 
 from zou.app.services.exception import (
     ProjectNotFoundException,
@@ -37,7 +39,6 @@ class AssetResource(Resource):
             deleted_asset = assets_service.remove_asset(asset_id)
         except AssetNotFoundException:
             abort(404)
-        print(deleted_asset["canceled"])
         return deleted_asset, 204
 
 
@@ -92,12 +93,12 @@ class AssetTypeResource(Resource):
         Resource.__init__(self)
 
     @jwt_required
-    def get(self, instance_id):
+    def get(self, asset_type_id):
         """
         Retrieve given asset type.
         """
         try:
-            asset_type = assets_service.get_asset_type(instance_id)
+            asset_type = assets_service.get_asset_type(asset_type_id)
         except AssetTypeNotFoundException:
             abort(404)
         return asset_type.serialize(obj_type="AssetType")
@@ -115,8 +116,7 @@ class AssetTypesResource(Resource):
         episode).
         """
         criterions = query.get_query_criterions_from_request(request)
-        asset_types = assets_service.get_asset_types(criterions)
-        return EntityType.serialize_list(asset_types, obj_type="AssetType")
+        return assets_service.get_asset_types(criterions)
 
 
 class ProjectAssetTypesResource(Resource):
@@ -186,12 +186,12 @@ class AssetTasksResource(Resource):
         Resource.__init__(self)
 
     @jwt_required
-    def get(self, instance_id):
+    def get(self, asset_id):
         """
         Retrieve all tasks related to a given shot.
         """
         try:
-            return tasks_service.get_task_dicts_for_asset(instance_id)
+            return tasks_service.get_task_dicts_for_asset(asset_id)
         except AssetNotFoundException:
             abort(404)
 
@@ -202,12 +202,12 @@ class AssetTaskTypesResource(Resource):
         Resource.__init__(self)
 
     @jwt_required
-    def get(self, instance_id):
+    def get(self, asset_id):
         """
         Retrieve all task types related to a given asset.
         """
         try:
-            asset = assets_service.get_asset(instance_id)
+            asset = assets_service.get_asset(asset_id)
             return tasks_service.get_task_types_for_asset(asset)
         except AssetNotFoundException:
             abort(404)

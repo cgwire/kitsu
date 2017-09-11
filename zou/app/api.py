@@ -9,11 +9,11 @@ from .blueprints.files import blueprint as files_blueprint
 from .blueprints.export import blueprint as export_blueprint
 from .blueprints.source import blueprint as import_blueprint
 from .blueprints.index import blueprint as index_blueprint
-from .blueprints.persons import blueprint as persons_blueprint
 from .blueprints.projects import blueprint as projects_blueprint
 from .blueprints.shots import blueprint as shots_blueprint
 from .blueprints.tasks import blueprint as tasks_blueprint
 from .blueprints.thumbnails import blueprint as thumbnails_blueprint
+from .blueprints.user import blueprint as user_blueprint
 
 
 def configure(app):
@@ -36,10 +36,10 @@ def configure_api_routes(app):
     app.register_blueprint(import_blueprint)
     app.register_blueprint(index_blueprint)
     app.register_blueprint(projects_blueprint)
-    app.register_blueprint(persons_blueprint)
     app.register_blueprint(shots_blueprint)
     app.register_blueprint(tasks_blueprint)
     app.register_blueprint(thumbnails_blueprint)
+    app.register_blueprint(user_blueprint)
     return app
 
 

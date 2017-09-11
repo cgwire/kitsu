@@ -35,10 +35,14 @@ def check_auth(app, email, password):
 def check_credentials(email, password):
     try:
         person = persons_service.get_by_email(email)
+    except PersonNotFoundException:
+        person = persons_service.get_by_desktop_login(email)
+
+    try:
         password_hash = person.password or u''
 
         if bcrypt.check_password_hash(password_hash, password):
-            return True
+            return person.serialize()
         else:
             raise WrongPasswordException()
     except ValueError:
@@ -50,9 +54,7 @@ def no_password_auth_strategy(email):
 
 
 def local_auth_strategy(email, password):
-    check_credentials(email, password)
-    person = persons_service.get_by_email(email)
-    return person.serialize()
+    return check_credentials(email, password)
 
 
 def active_directory_auth_strategy(email, password):

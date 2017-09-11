@@ -1,8 +1,12 @@
 from zou.app.models.project import Project
+from zou.app.models.task import Task
 from zou.app.models.project_status import ProjectStatus
 from zou.app.services.exception import ProjectNotFoundException
 
 from sqlalchemy.exc import StatementError
+
+from zou.app.services import persons_service
+from zou.app.utils import fields
 
 
 def open_projects():

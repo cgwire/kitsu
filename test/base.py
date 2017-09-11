@@ -264,6 +264,15 @@ class ApiDBTestCase(ApiTestCase):
         )
         self.entity.save()
 
+    def generate_fixture_entity_character(self):
+        self.entity_character = Entity(
+            name="Rabbit",
+            description="Main character",
+            project_id=self.project.id,
+            entity_type_id=self.entity_type_character.id
+        )
+        self.entity_character.save()
+
     def generate_fixture_entity_standard(self):
         self.entity_standard = Entity(
             name="Car",
@@ -351,6 +360,7 @@ class ApiDBTestCase(ApiTestCase):
         self.person = Person(
             first_name="John",
             last_name="Doe",
+            desktop_login="john.doe",
             email=u"john.doe@gmail.com",
             password=auth.encrypt_password("mypassword")
         )
@@ -365,6 +375,12 @@ class ApiDBTestCase(ApiTestCase):
         self.sequence_type.save()
         self.episode_type = EntityType(name="Episode")
         self.episode_type.save()
+
+    def generate_fixture_asset_types(self):
+        self.entity_type_character = EntityType(name="Character")
+        self.entity_type_character .save()
+        self.entity_type_environment = EntityType(name="Environment")
+        self.entity_type_environment.save()
 
     def generate_fixture_department(self):
         self.department = Department(name="Modeling", color="#FFFFFF")
@@ -417,7 +433,10 @@ class ApiDBTestCase(ApiTestCase):
         self.assigner = Person(first_name="Ema", last_name="Peel")
         self.assigner.save()
 
-    def generate_fixture_task(self, name="Master"):
+    def generate_fixture_task(self, name="Master", entity_id=None):
+        if entity_id is None:
+            entity_id = self.entity.id
+
         start_date = fields.get_date_object("2017-02-20")
         due_date = fields.get_date_object("2017-02-28")
         real_start_date = fields.get_date_object("2017-02-22")
@@ -426,7 +445,7 @@ class ApiDBTestCase(ApiTestCase):
             project_id=self.project.id,
             task_type_id=self.task_type.id,
             task_status_id=self.task_status.id,
-            entity_id=self.entity.id,
+            entity_id=entity_id,
             assignees=[self.person],
             assigner_id=self.assigner.id,
             duration=50,

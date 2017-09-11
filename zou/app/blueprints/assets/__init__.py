@@ -20,13 +20,13 @@ from .resources import (
 
 routes = [
     ("/data/asset-types", AssetTypesResource),
-    ("/data/asset-types/<instance_id>", AssetTypeResource),
+    ("/data/asset-types/<asset_type_id>", AssetTypeResource),
     ("/data/assets", AssetsResource),
     ("/data/assets/all", AllAssetsResource),
     ("/data/assets/with-tasks", AssetsAndTasksResource),
     ("/data/assets/<asset_id>", AssetResource),
-    ("/data/assets/<instance_id>/tasks", AssetTasksResource),
-    ("/data/assets/<instance_id>/task-types", AssetTaskTypesResource),
+    ("/data/assets/<asset_id>/tasks", AssetTasksResource),
+    ("/data/assets/<asset_id>/task-types", AssetTaskTypesResource),
     (
         "/data/projects/<project_id>/asset-types/<asset_type_id>/assets",
         ProjectAssetTypeAssetsResource
