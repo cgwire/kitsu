@@ -12,6 +12,10 @@ def all():
     return Person.query.all()
 
 
+def all_active():
+    return Person.query.filter_by(active=True).all()
+
+
 def create_person(email, password, first_name, last_name, phone=""):
     person = Person.create(
         email=email,
@@ -55,6 +59,17 @@ def get_person_by_email_username(email):
 def get_by_email(email):
     try:
         person = Person.get_by(email=email)
+    except StatementError:
+        raise PersonNotFoundException()
+
+    if person is None:
+        raise PersonNotFoundException()
+    return person
+
+
+def get_by_desktop_login(desktop_login):
+    try:
+        person = Person.get_by(desktop_login=desktop_login)
     except StatementError:
         raise PersonNotFoundException()
 
