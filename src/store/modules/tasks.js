@@ -67,7 +67,6 @@ const getters = {
 const actions = {
   loadTaskStatuses ({ commit, state }, callback) {
     tasksApi.getTaskStatuses((err, taskStatus) => {
-      console.log(taskStatus)
       if (!err) commit(LOAD_TASK_STATUSES_END, taskStatus)
       if (callback) callback(err)
     })
