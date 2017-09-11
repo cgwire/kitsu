@@ -25,7 +25,7 @@ from zou.app.services import (
     persons_service,
     file_tree
 )
-from zou.app.utils import query
+from zou.app.utils import query, events
 
 from zou.app.blueprints.crud.base import BaseModelResource
 
@@ -56,6 +56,7 @@ class CommentTaskResource(Resource):
         comment_dict = comment.serialize()
         comment_dict["task_status"] = task_status.serialize()
         comment_dict["person"] = person.serialize()
+        events.emit("comment:new", {"id": comment_dict["id"]})
 
         return comment_dict, 201
 
