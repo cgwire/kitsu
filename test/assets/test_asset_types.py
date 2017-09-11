@@ -17,7 +17,7 @@ class AssetTypesTestCase(ApiDBTestCase):
         self.assertEquals(len(asset_types), 1)
         self.assertDictEqual(
             asset_types[0],
-            self.entity_type.serialize("AssetType")
+            self.entity_type.serialize(obj_type="AssetType")
         )
 
     def test_get_asset_type(self):

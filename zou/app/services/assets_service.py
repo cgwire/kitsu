@@ -29,7 +29,7 @@ def get_asset_types(criterions={}):
     query = EntityType.query \
         .filter_by(**criterions) \
         .filter(asset_type_filter)
-    return EntityType.serialize_list(query.all())
+    return EntityType.serialize_list(query.all(), obj_type="AssetType")
 
 
 def get_asset_types_for_project(project_id):
