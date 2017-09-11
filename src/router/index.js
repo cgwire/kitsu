@@ -1,15 +1,19 @@
 import Vue from 'vue'
-import Router from 'vue-router'
-import Hello from '@/components/Hello'
+import VueRouter from 'vue-router'
+import { routes } from './routes'
 
-Vue.use(Router)
+Vue.use(VueRouter)
 
-export default new Router({
-  routes: [
-    {
-      path: '/',
-      name: 'Hello',
-      component: Hello
-    }
-  ]
+const loadSavedScrollPosition = (to, from, savedPosition) => {
+  if (savedPosition) {
+    return savedPosition
+  } else {
+    return {x: 0, y: 0}
+  }
+}
+
+export default new VueRouter({
+  mode: 'history',
+  scrollBehavior: loadSavedScrollPosition,
+  routes
 })

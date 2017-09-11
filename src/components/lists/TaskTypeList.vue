@@ -78,16 +78,23 @@ export default {
 <style scoped>
 .name {
   width: 200px;
+  min-width: 200px;
 }
 
 .priority {
   width: 80px;
+  min-width: 80px;
   font-weight: normal;
 }
 
 .dedicated {
   width: 100px;
+  min-width: 100px;
   font-weight: normal;
+}
+
+.actions {
+  min-width: 100px;
 }
 
 .color {

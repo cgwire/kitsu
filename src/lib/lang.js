@@ -1,6 +1,7 @@
-import store from '../store'
-import i18n from '../i18n'
 import moment from 'moment'
+
+import store from '../store'
+import i18n from './i18n'
 
 const lang = {
   setLocale () {

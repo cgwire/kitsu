@@ -130,7 +130,13 @@ export default {
 
 <style scoped>
 .project {
-  width: 50px;
+  min-width: 60px;
+  max-width: 60px;
+  width: 60px;
+}
+
+.actions {
+  min-width: 100px;
 }
 
 th.actions {
@@ -138,42 +144,56 @@ th.actions {
 }
 
 .name {
+  min-width: 100px;
+  max-width: 100px;
   width: 100px;
   font-weight: bold;
+}
+
+.sequence {
+  min-width: 50px;
+  max-width: 50px;
+  width: 50px;
+  font-weight: bold;
+}
+
+.episode {
+  min-width: 50px;
+  max-width: 50px;
+  width: 50px;
+}
+
+.framein {
+  min-width: 50px;
+  max-width: 50px;
+  width: 50px;
+}
+
+.frameout {
+  min-width: 50px;
+  max-width: 50px;
+  width: 50px;
+}
+
+.description {
+  min-width: 200px;
+  max-width: 200px;
+  width: 200px;
+}
+
+.validation {
+  min-width: 150px;
+  max-width: 150px;
+  width: 150px;
+  margin-right: 1em;
 }
 
 td.name {
   font-size: 1.2em;
 }
 
-.sequence {
-  width: 50px;
-  font-weight: bold;
-}
-
 td.sequence {
   font-size: 1.2em;
-}
-
-.episode {
-  width: 50px;
-}
-
-.framein {
-  width: 50px;
-}
-
-.frameout {
-  width: 50px;
-}
-
-.description {
-  width: 200px;
-}
-
-.validation {
-  width: 150px;
-  margin-right: 1em;
 }
 
 .canceled {

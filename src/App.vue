@@ -3,15 +3,8 @@
 </template>
 
 <script>
-import { mapGetters } from 'vuex'
-
 export default {
-  name: 'app',
-  ...mapGetters([
-    'user'
-  ]),
-  mounted () {
-  }
+  name: 'app'
 }
 </script>
 

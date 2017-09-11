@@ -1,43 +1,25 @@
-import superagent from 'superagent'
+import client from './client'
 
 export default {
   getAssetTypes (callback) {
-    superagent
-      .get('/api/data/asset-types')
-      .end((err, res) => {
-        callback(err, res.body)
-      })
+    client.get('/api/data/asset-types', callback)
   },
 
   newAssetType (assetType, callback) {
     const data = {
       name: assetType.name
     }
-    superagent
-      .post('/api/data/entity-types')
-      .send(data)
-      .end((err, res) => {
-        callback(err, res.body)
-      })
+    client.post('/api/data/entity-types', data, callback)
   },
 
   updateAssetType (assetType, callback) {
     const data = {
       name: assetType.name
     }
-    superagent
-      .put(`/api/data/entity-types/${assetType.id}`)
-      .send(data)
-      .end((err, res) => {
-        callback(err, res.body)
-      })
+    client.put(`/api/data/entity-types/${assetType.id}`, data, callback)
   },
 
   deleteAssetType (assetType, callback) {
-    superagent
-      .del(`/api/data/entity-types/${assetType.id}`)
-      .end((err, res) => {
-        callback(err, res.body)
-      })
+    client.del(`/api/data/entity-types/${assetType.id}`, callback)
   }
 }

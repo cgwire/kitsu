@@ -91,8 +91,8 @@ export default {
   width: 140px;
   min-width: 140px;
 }
-.skills {
-  width: 250px;
+.actions {
+  min-width: 100px;
 }
 
 .data-list {

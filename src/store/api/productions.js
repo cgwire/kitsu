@@ -1,28 +1,16 @@
-import superagent from 'superagent'
+import client from './client'
 
 export default {
   getProductions (callback) {
-    superagent
-      .get('/api/data/projects/all')
-      .end((err, res) => {
-        callback(err, res.body)
-      })
+    client.get('/api/data/projects/all', callback)
   },
 
   getOpenProductions (callback) {
-    superagent
-      .get('/api/data/projects/open')
-      .end((err, res) => {
-        callback(err, res.body)
-      })
+    client.get('/api/data/projects/open', callback)
   },
 
   getProductionStatus (callback) {
-    superagent
-      .get('/api/data/project-status')
-      .end((err, res) => {
-        callback(err, res.body)
-      })
+    client.get('/api/data/project-status', callback)
   },
 
   newProduction (production, callback) {
@@ -30,12 +18,7 @@ export default {
       name: production.name,
       project_status_id: production.project_status_id
     }
-    superagent
-      .post(`/api/data/projects/`)
-      .send(data)
-      .end((err, res) => {
-        callback(err, res.body)
-      })
+    client.post(`/api/data/projects/`, data, callback)
   },
 
   updateProduction (production, callback) {
@@ -43,19 +26,10 @@ export default {
       name: production.name,
       project_status_id: production.project_status_id
     }
-    superagent
-      .put(`/api/data/projects/${production.id}`)
-      .send(data)
-      .end((err, res) => {
-        callback(err, res.body)
-      })
+    client.put(`/api/data/projects/${production.id}`, data, callback)
   },
 
   deleteProduction (production, callback) {
-    superagent
-      .del(`/api/data/projects/${production.id}`)
-      .end((err, res) => {
-        callback(err, res.body)
-      })
+    client.del(`/api/data/projects/${production.id}`, callback)
   }
 }

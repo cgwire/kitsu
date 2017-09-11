@@ -14,6 +14,7 @@
     "lint": "eslint --ext .js,.vue src test/unit/specs test/e2e/specs"
   },
   "dependencies": {
+    "async": "2.5.0",
     "bulma": "0.4.2",
     "color-hash": "1.0.3",
     "email-validator": "1.0.7",
