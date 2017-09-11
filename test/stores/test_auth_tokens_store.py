@@ -33,6 +33,5 @@ class CommandsTestCase(ApiTestCase):
     def test_keys(self):
         self.store.add("key-1", "true")
         self.store.add("key-2", "true")
-        self.assertEquals(
-            self.store.keys(), ["key-1", "key-2"]
-        )
+        self.assertTrue("key-1" in self.store.keys())
+        self.assertTrue("key-2" in self.store.keys())
