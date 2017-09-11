@@ -294,11 +294,11 @@ class ToReviewResource(Resource):
 class TaskAssignResource(Resource):
 
     @jwt_required
-    def put(self, instance_id):
+    def put(self, task_id):
         (person_id) = self.get_arguments()
 
         try:
-            task = self.assign_task(instance_id, person_id)
+            task = self.assign_task(task_id, person_id)
         except TaskNotFoundException:
             abort(404)
         except PersonNotFoundException:
@@ -328,9 +328,9 @@ class TaskAssignResource(Resource):
 class TaskFullResource(Resource):
 
     @jwt_required
-    def get(self, instance_id):
+    def get(self, task_id):
         try:
-            task = tasks_service.get_task(instance_id)
+            task = tasks_service.get_task(task_id)
         except TaskNotFoundException:
             abort(404)
 
@@ -365,8 +365,8 @@ class TaskStartResource(BaseModelResource):
         BaseModelResource.__init__(self, Task)
 
     @jwt_required
-    def put(self, instance_id):
-        task = self.get_model_or_404(instance_id)
+    def put(self, task_id):
+        task = self.get_model_or_404(task_id)
         task = tasks_service.start_task(task)
         return task.serialize(), 200
 

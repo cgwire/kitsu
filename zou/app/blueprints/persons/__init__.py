@@ -4,8 +4,8 @@ from zou.app.utils.api import configure_api_from_blueprint
 from .resources import NewPersonResource
 
 routes = [
-    ("/data/persons/new", NewPersonResource)
+    (NewPersonResource, "/data/persons/new")
 ]
 
-blueprint = Blueprint("persons", "persons")
+blueprint = Blueprint("index", "index")
 api = configure_api_from_blueprint(blueprint, routes)

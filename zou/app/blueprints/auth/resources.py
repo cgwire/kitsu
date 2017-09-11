@@ -86,8 +86,8 @@ class LoginResource(Resource):
         (email, password) = self.get_arguments()
         try:
             user = auth_service.check_auth(app, email, password)
-            access_token = create_access_token(identity=email)
-            refresh_token = create_refresh_token(identity=email)
+            access_token = create_access_token(identity=user["email"])
+            refresh_token = create_refresh_token(identity=user["email"])
             auth_service.register_tokens(app, access_token, refresh_token)
 
             if is_from_browser(request.user_agent):
@@ -295,11 +295,12 @@ class PersonListResource(Resource):
 
     def get(self):
         person_names = []
-        for person in persons_service.all():
+        for person in persons_service.all_active():
             person_names.append({
                 "id": str(person.id),
                 "email": person.email,
                 "first_name": person.first_name,
-                "last_name": person.last_name
+                "last_name": person.last_name,
+                "desktop_login": person.desktop_login
             })
         return person_names

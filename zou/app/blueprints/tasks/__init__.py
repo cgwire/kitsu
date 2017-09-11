@@ -19,10 +19,10 @@ from .resources import (
 routes = [
     ("/data/tasks/<task_id>/comments", TaskCommentsResource),
     ("/data/tasks/<task_id>/previews", TaskPreviewsResource),
-    ("/data/tasks/<instance_id>/full", TaskFullResource),
+    ("/data/tasks/<task_id>/full", TaskFullResource),
     ("/actions/tasks/<task_id>/comment", CommentTaskResource),
-    ("/actions/tasks/<instance_id>/assign", TaskAssignResource),
-    ("/actions/tasks/<instance_id>/start", TaskStartResource),
+    ("/actions/tasks/<task_id>/assign", TaskAssignResource),
+    ("/actions/tasks/<task_id>/start", TaskStartResource),
     (
         "/actions/tasks/<task_id>/comments/<comment_id>/add-preview",
         AddPreviewResource

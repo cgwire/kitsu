@@ -21,14 +21,15 @@ def get_asset_types(criterions={}):
     shot_type = shots_service.get_shot_type()
     sequence_type = shots_service.get_sequence_type()
     episode_type = shots_service.get_episode_type()
-    query = EntityType.query.filter_by(**criterions)
-    return query.filter(
-        ~EntityType.id.in_([
-            shot_type.id,
-            sequence_type.id,
-            episode_type.id,
-        ])
-    ).all()
+    asset_type_filter = ~EntityType.id.in_([
+        shot_type.id,
+        sequence_type.id,
+        episode_type.id,
+    ])
+    query = EntityType.query \
+        .filter_by(**criterions) \
+        .filter(asset_type_filter)
+    return EntityType.serialize_list(query.all())
 
 
 def get_asset_types_for_project(project_id):

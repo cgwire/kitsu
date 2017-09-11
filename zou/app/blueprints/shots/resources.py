@@ -65,12 +65,12 @@ class ShotAssetsResource(Resource):
         Resource.__init__(self)
 
     @jwt_required
-    def get(self, instance_id):
+    def get(self, shot_id):
         """
         Retrieve all assets for a given shot.
         """
         try:
-            shot = shots_service.get_shot(instance_id)
+            shot = shots_service.get_shot(shot_id)
         except ShotNotFoundException:
             abort(404)
 
@@ -102,12 +102,12 @@ class ShotTasksResource(Resource):
         Resource.__init__(self)
 
     @jwt_required
-    def get(self, instance_id):
+    def get(self, shot_id):
         """
         Retrieve all tasks related to a given shot.
         """
         try:
-            return tasks_service.get_task_dicts_for_shot(instance_id)
+            return tasks_service.get_task_dicts_for_shot(shot_id)
         except ShotNotFoundException:
             abort(404)
 
@@ -193,12 +193,12 @@ class EpisodeResource(Resource):
         Resource.__init__(self)
 
     @jwt_required
-    def get(self, instance_id):
+    def get(self, episode_id):
         """
         Retrieve given episode.
         """
         try:
-            episode = shots_service.get_episode(instance_id)
+            episode = shots_service.get_episode(episode_id)
         except EpisodeNotFoundException:
             abort(404)
         return episode.serialize(obj_type="Episode")
@@ -226,13 +226,13 @@ class EpisodeSequencesResource(Resource):
         Resource.__init__(self)
 
     @jwt_required
-    def get(self, instance_id):
+    def get(self, episode_id):
         """
         Retrieve all sequence entries for a given episode.
         Filters can be specified in the query string.
         """
         criterions = query.get_query_criterions_from_request(request)
-        criterions["parent_id"] = instance_id
+        criterions["parent_id"] = episode_id
         sequences = shots_service.get_sequences(criterions)
         return Entity.serialize_list(sequences, obj_type="Sequence")
 
@@ -243,12 +243,12 @@ class SequenceResource(Resource):
         Resource.__init__(self)
 
     @jwt_required
-    def get(self, instance_id):
+    def get(self, sequence_id):
         """
         Retrieve given sequence.
         """
         try:
-            sequence = shots_service.get_sequence(instance_id)
+            sequence = shots_service.get_sequence(sequence_id)
         except SequenceNotFoundException:
             abort(404)
         return sequence.serialize(obj_type="Sequence")
@@ -276,11 +276,11 @@ class SequenceShotsResource(Resource):
         Resource.__init__(self)
 
     @jwt_required
-    def get(self, instance_id):
+    def get(self, sequence_id):
         """
         Retrieve all shot entries for a given sequence.
         Filters can be specified in the query string.
         """
         criterions = query.get_query_criterions_from_request(request)
-        criterions["parent_id"] = instance_id
+        criterions["parent_id"] = sequence_id
         return shots_service.get_shots(criterions)

@@ -19,10 +19,12 @@ class AssetServiceTestCase(ApiDBTestCase):
     def test_get_asset_types(self):
         asset_types = assets_service.get_asset_types()
         self.assertEqual(len(asset_types), 1)
-        self.assertEqual(asset_types[0].name, "Props")
+        self.assertEqual(asset_types[0]["name"], "Props")
 
     def test_get_asset_types_for_project(self):
-        asset_types = assets_service.get_asset_types_for_project(self.project.id)
+        asset_types = assets_service.get_asset_types_for_project(
+            self.project.id
+        )
         self.assertEqual(len(asset_types), 1)
         self.assertEqual(asset_types[0].name, "Props")
 
