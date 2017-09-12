@@ -1,18 +1,13 @@
 from collections import OrderedDict
 from zou.app import config
+from zou.app.stores import publisher_store
 
-import redis
 import json
 
 handlers = {}
 
-publisher = redis.StrictRedis(
-    host=config.KEY_VALUE_STORE["host"],
-    port=config.KEY_VALUE_STORE["port"],
-    db=2,
-    decode_responses=True
-)
-publisher.get(None)
+publisher = publisher_store.new()
+
 
 def register(event, name, handler):
     if event not in handlers:
