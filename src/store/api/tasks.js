@@ -1,36 +1,20 @@
-import superagent from 'superagent'
+import client from './client'
 
 export default {
   getTask (taskId, callback) {
-    superagent
-      .get(`/api/data/tasks/${taskId}/full`)
-      .end((err, res) => {
-        callback(err, res.body)
-      })
+    client.get(`/api/data/tasks/${taskId}/full`, callback)
   },
 
   getTaskStatuses (callback) {
-    superagent
-      .get(`/api/data/task-status`)
-      .end((err, res) => {
-        callback(err, res.body)
-      })
+    client.get(`/api/data/task-status`, callback)
   },
 
   getTaskComments (taskId, callback) {
-    superagent
-      .get(`/api/data/tasks/${taskId}/comments`)
-      .end((err, res) => {
-        callback(err, res.body)
-      })
+    client.get(`/api/data/tasks/${taskId}/comments`, callback)
   },
 
   getTaskPreviews (taskId, callback) {
-    superagent
-      .get(`/api/data/tasks/${taskId}/previews`)
-      .end((err, res) => {
-        callback(err, res.body)
-      })
+    client.get(`/api/data/tasks/${taskId}/previews`, callback)
   },
 
   commentTask (data, callback) {
@@ -38,50 +22,46 @@ export default {
       task_status_id: data.taskStatusId,
       comment: data.comment
     }
-    superagent
-      .post(`/api/actions/tasks/${data.taskId}/comment`)
-      .send(commentData)
-      .end((err, res) => {
-        callback(err, res.body)
-      })
+    client.post(
+      `/api/actions/tasks/${data.taskId}/comment`,
+      commentData,
+      callback
+    )
+  },
+
+  getTaskComment (data, callback) {
+    client.get(`/api/data/comments/${data.id}`, callback)
   },
 
   createTasks (data, callback) {
     const taskTypeId = data.task_type_id
     const type = data.type
-    superagent
-      .post(`/api/actions/task-types/${taskTypeId}/${type}/create-tasks`)
-      .send({})
-      .end((err, res) => {
-        callback(err, res.body)
-      })
+    client.post(
+      `/api/actions/task-types/${taskTypeId}/${type}/create-tasks`,
+      {},
+      callback
+    )
   },
 
   deleteTask (task, callback) {
-    superagent
-      .del(`/api/data/tasks/${task.id}`)
-      .end((err, res) => {
-        callback(err, res.body)
-      })
+    client.del(`/api/data/tasks/${task.id}`, callback)
   },
 
   addPreview (data, callback) {
     const taskId = data.taskId
     const commentId = data.commentId
-    superagent
-      .post(`/api/actions/tasks/${taskId}/comments/${commentId}/add-preview`)
-      .send({})
-      .end((err, res) => {
-        callback(err, res.body)
-      })
+    client.post(
+      `/api/actions/tasks/${taskId}/comments/${commentId}/add-preview`,
+      {},
+      callback
+    )
   },
 
   uploadPreview (previewId, formData, callback) {
-    superagent
-      .post(`/api/thumbnails/preview-files/${previewId}`)
-      .send(formData)
-      .end((err, res) => {
-        callback(err, res.body)
-      })
+    client.post(
+      `/api/thumbnails/preview-files/${previewId}`,
+      formData,
+      callback
+    )
   }
 }

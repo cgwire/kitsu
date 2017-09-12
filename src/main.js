@@ -3,6 +3,7 @@ import { sync } from 'vuex-router-sync'
 
 import router from './router'
 import i18n from './lib/i18n'
+import realtime from './lib/realtime'
 import store from './store'
 import App from './App'
 
@@ -40,12 +41,6 @@ new Vue({
   store
 })
 
-/*
-// Realtime update conifguration.
-const source = new EventSource('/events')
-source.addEventListener('comment:new', function (event) {
-  const data = JSON.parse(event.data)
-  const commentId = data.data.id
-  console.log(commentId)
-}, false)
-*/
+// Realtime update configuration.
+const source = realtime.createNewSource()
+realtime.init(source)

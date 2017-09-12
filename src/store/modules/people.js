@@ -69,7 +69,13 @@ const getters = {
   isEditLoadingError: state => state.isEditLoadingError,
   personToEdit: state => state.personToEdit,
 
-  personCsvFormData: state => state.personCsvFormData
+  personCsvFormData: state => state.personCsvFormData,
+
+  getPerson: (state, getters) => (id) => {
+    return state.people.find(
+      (taskStatus) => taskStatus.id === id
+    )
+  }
 }
 
 const sortPeople = (people) => {
