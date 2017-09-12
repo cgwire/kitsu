@@ -41,5 +41,6 @@ new Vue({
   store
 })
 
-// Realtime update conifguration.
-realtime.init()
+// Realtime update configuration.
+const source = realtime.createNewSource()
+realtime.init(source)
