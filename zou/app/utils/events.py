@@ -1,6 +1,12 @@
 from collections import OrderedDict
+from zou.app import config
+from zou.app.stores import publisher_store
+
+import json
 
 handlers = {}
+
+publisher = publisher_store.new()
 
 
 def register(event, name, handler):
@@ -28,5 +34,9 @@ def unregister_all():
 
 def emit(event, data={}):
     event_handlers = handlers.get(event, {})
+    publisher.publish('sse', json.dumps({
+        "type": event,
+        "data": {"data": data}})
+    )
     for func in event_handlers.values():
         func.handle_event(data)
