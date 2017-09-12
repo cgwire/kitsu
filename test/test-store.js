@@ -7,3 +7,5 @@ import './store/user.spec'
 import './store/productions.spec.js'
 import './store/tasktypes.spec.js'
 import './store/assettypes.spec.js'
+
+import './store/lib/sorting.spec.js'
