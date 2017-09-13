@@ -42,7 +42,6 @@ def reset_db():
     init_db()
 
 
-@manager.option("-e", "--email", help="Email that will serve as username")
 @manager.command
 def create_admin(email):
     "Create an admin user to allow usage of the API when database is empty."
