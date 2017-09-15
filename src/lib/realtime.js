@@ -14,7 +14,7 @@ const realtime = {
   },
 
   subscribe: (source, eventName, listener) => {
-    return source.addEventListener(eventName, (event) => {
+    source.addEventListener(eventName, (event) => {
       const data = JSON.parse(event.data)
       listener(data.data)
     }, false)
