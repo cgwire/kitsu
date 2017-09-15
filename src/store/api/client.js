@@ -20,7 +20,7 @@ const client = {
 
   put (path, data, callback) {
     superagent
-      .post(path)
+      .put(path)
       .send(data)
       .end((err, res) => {
         callback(err, res.body)
