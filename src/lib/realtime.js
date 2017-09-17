@@ -6,7 +6,7 @@ const realtime = {
   },
 
   init: (source) => {
-    realtime.subscribe('comment:new', (eventData) => {
+    realtime.subscribe(source, 'comment:new', (eventData) => {
       const commentId = eventData.id
       store.dispatch('loadComment', {id: commentId})
     })
