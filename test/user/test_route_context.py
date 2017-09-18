@@ -112,6 +112,31 @@ class UserContextRoutesTestCase(ApiDBTestCase):
         tasks = self.get(path)
         self.assertEquals(len(tasks), 1)
 
+    def test_get_asset_task_types(self):
+        path = "data/user/assets/%s/task-types" % self.entity.id
+        task_id = self.task.id
+        task_type_id = self.task_type.id
+
+        task_types = self.get(path)
+        self.assertEquals(len(task_types), 0)
+
+        self.assign_user(task_id)
+        task_types = self.get(path)
+        self.assertEquals(len(task_types), 1)
+        self.assertEquals(task_types[0]["id"], str(task_type_id))
+
+    def test_get_shot_task_types(self):
+        self.generate_fixture_shot_task()
+        path = "data/user/shots/%s/task-types" % self.shot.id
+        shot_task_id = self.shot_task.id
+
+        task_types = self.get(path)
+        self.assertEquals(len(task_types), 0)
+
+        self.assign_user(shot_task_id)
+        task_types = self.get(path)
+        self.assertEquals(len(task_types), 1)
+
     def test_get_open_projects(self):
         projects = self.get("data/user/projects/open")
         self.assertEquals(len(projects), 0)

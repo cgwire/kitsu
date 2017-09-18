@@ -30,6 +30,30 @@ class AssetTasksResource(Resource):
         return tasks
 
 
+class AssetTaskTypesResource(Resource):
+
+    @jwt_required
+    def get(self, asset_id):
+        try:
+            assets_service.get_asset(asset_id)
+            tasks = user_service.get_entity_task_types(asset_id)
+        except AssetNotFoundException:
+            abort(404)
+        return tasks
+
+
+class ShotTaskTypesResource(Resource):
+
+    @jwt_required
+    def get(self, shot_id):
+        try:
+            shots_service.get_shot(shot_id)
+            tasks = user_service.get_entity_task_types(shot_id)
+        except AssetNotFoundException:
+            abort(404)
+        return tasks
+
+
 class AssetTypeAssetsResource(Resource):
 
     @jwt_required
