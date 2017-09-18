@@ -486,6 +486,20 @@ class LastWorkingFilesResource(Resource):
         return result
 
 
+class LastOutputFilesResource(Resource):
+
+    @jwt_required
+    def get(self, task_id):
+        result = {}
+        try:
+            task = tasks_service.get_task(task_id)
+            result = files_service.get_last_output_files_for_task(task.id)
+        except TaskNotFoundException:
+            abort(404)
+
+        return result
+
+
 class TaskWorkingFilesResource(Resource):
 
     @jwt_required
