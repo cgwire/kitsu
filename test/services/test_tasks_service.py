@@ -199,22 +199,44 @@ class TaskServiceTestCase(ApiDBTestCase):
             self.task_id
         )
 
-    def test_get_task_dicts_for_shot(self):
-        tasks = tasks_service.get_task_dicts_for_shot(self.shot.id)
+    def test_get_tasks_for_sequence(self):
+        self.generate_fixture_sequence_task()
+        tasks = tasks_service.get_tasks_for_sequence(self.sequence.id)
+        self.assertEqual(len(tasks), 1)
+        self.assertEqual(tasks[0]["id"], str(self.sequence_task.id))
+
+    def test_get_tasks_for_shot(self):
+        tasks = tasks_service.get_tasks_for_shot(self.shot.id)
         self.assertEqual(len(tasks), 1)
         self.assertEqual(tasks[0]["id"], str(self.shot_task.id))
 
-    def test_get_task_dicts_for_asset(self):
-        tasks = tasks_service.get_task_dicts_for_asset(self.entity.id)
+    def test_get_tasks_for_asset(self):
+        tasks = tasks_service.get_tasks_for_asset(self.entity.id)
         self.assertEqual(len(tasks), 1)
         self.assertEqual(tasks[0]["id"], str(self.task.id))
 
-    def test_get_task_dicts_for_entity(self):
+    def test_get_tasks_for_entity(self):
         tasks = tasks_service.get_task_dicts_for_entity(self.entity.id)
         self.assertEqual(len(tasks), 1)
         self.assertEqual(tasks[0]["id"], str(self.task.id))
         self.assertEqual(tasks[0]["task_type_name"], str("Shaders"))
         self.assertEqual(tasks[0]["entity_name"], str("Tree"))
+
+    def test_get_task_types_for_shot(self):
+        task_types = tasks_service.get_task_types_for_shot(self.shot)
+        self.assertEqual(len(task_types), 1)
+        self.assertEqual(task_types[0]["id"], str(self.task_type_animation.id))
+
+    def test_get_task_types_for_sequence(self):
+        self.generate_fixture_sequence_task()
+        task_types = tasks_service.get_task_types_for_sequence(self.sequence.id)
+        self.assertEqual(len(task_types), 1)
+        self.assertEqual(task_types[0]["id"], str(self.task_type_animation.id))
+
+    def test_get_task_types_for_entity(self):
+        task_types = tasks_service.get_task_types_for_asset(self.entity)
+        self.assertEqual(len(task_types), 1)
+        self.assertEqual(task_types[0]["id"], str(self.task_type.id))
 
     def test_get_task_dicts_for_entity_utf8(self):
         start_date = fields.get_date_object("2017-02-20")
