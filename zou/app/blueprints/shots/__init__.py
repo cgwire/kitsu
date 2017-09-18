@@ -18,7 +18,9 @@ from .resources import (
 
     SequenceResource,
     SequencesResource,
-    SequenceShotsResource
+    SequenceShotsResource,
+    SequenceTasksResource,
+    SequenceTaskTypesResource
 )
 
 
@@ -32,6 +34,8 @@ routes = [
     ("/data/sequences", SequencesResource),
     ("/data/sequences/<sequence_id>", SequenceResource),
     ("/data/sequences/<sequence_id>/shots", SequenceShotsResource),
+    ("/data/sequences/<sequence_id>/tasks", SequenceTasksResource),
+    ("/data/sequences/<sequence_id>/task-types", SequenceTaskTypesResource),
     ("/data/shots/<shot_id>/assets", ShotAssetsResource),
     ("/data/shots/<shot_id>/task-types", ShotTaskTypesResource),
     ("/data/shots/<shot_id>/tasks", ShotTasksResource),

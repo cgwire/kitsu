@@ -58,7 +58,6 @@ class ShotTestCase(ApiDBTestCase):
         self.generate_fixture_task_status()
         self.generate_fixture_shot_task()
         path = "data/shots/%s" % self.shot.id
-        print(path)
         self.delete(path)
         shots = shots_service.get_shots()
         self.assertEquals(len(shots), 3)
