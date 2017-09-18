@@ -20,8 +20,6 @@ think about it.
 
 This is the list of the people involved in the studio.
 
-[![People module mockup](img/people.png)](img/people.png)
-
 ### Productions
 
 You will find an overview of your production in this module.
