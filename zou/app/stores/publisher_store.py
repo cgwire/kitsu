@@ -13,7 +13,7 @@ def new():
             decode_responses=True
         )
         publisher.get(None)
-    except:
+    except redis.ConnectionError:
         try:
             import fakeredis
             publisher = fakeredis.FakeStrictRedis()

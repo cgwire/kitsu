@@ -12,7 +12,7 @@ try:
         decode_responses=True
     )
     revoked_tokens_store.get(None)
-except:
+except redis.ConnectionError:
     try:
         import fakeredis
         revoked_tokens_store = fakeredis.FakeStrictRedis()
