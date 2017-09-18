@@ -100,3 +100,6 @@ class TaskLastWorkingFilesTestCase(ApiDBTestCase):
         working_file = self.put(path, {})
         current_date = working_file["updated_at"]
         self.assertTrue(previous_date < current_date)
+
+        now = fields.serialize_value(datetime.datetime.utcnow())
+        self.assertTrue(current_date < now)

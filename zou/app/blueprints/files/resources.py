@@ -601,7 +601,7 @@ class ModifiedFileResource(Resource):
     def put(self, working_file_id):
         try:
             working_file = files_service.get_working_file(working_file_id)
-            working_file.update({"updated_at": datetime.datetime.now()})
+            working_file.update({"updated_at": datetime.datetime.utcnow()})
         except WorkingFileNotFoundException:
             abort(404)
 
