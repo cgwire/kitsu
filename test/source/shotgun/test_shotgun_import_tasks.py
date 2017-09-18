@@ -5,7 +5,7 @@ from zou.app.models.person import Person
 from zou.app.models.task_type import TaskType
 from zou.app.models.task_status import TaskStatus
 
-from zou.app.services import assets_service
+from zou.app.services import assets_service, shots_service
 
 
 class ImportShotgunTaskTestCase(ShotgunTestCase):
@@ -18,6 +18,7 @@ class ImportShotgunTaskTestCase(ShotgunTestCase):
         self.load_fixture('steps')
         self.load_fixture('assets')
         self.load_fixture('shots')
+        self.load_fixture('sequences')
 
     def load_task(self):
         self.sg_task = {
@@ -33,6 +34,47 @@ class ImportShotgunTaskTestCase(ShotgunTestCase):
                 "id": 1,
                 "name": "Sheep",
                 "type": "Asset"
+            },
+            "id": 20,
+            "project": {
+                "id": 1,
+                "name": "Cosmos Landromat",
+                "type": "Project"
+            },
+            "sg_description": "test description",
+            "sg_sort_order": None,
+            "sg_status_list": "wip",
+            "start_date": None,
+            "step": {
+                "id": 1,
+                "name": "Modeling Shading",
+                "type": "Step"
+            },
+            "task_assignees": [{
+                "id": 2,
+                "name": "Ema Peel",
+                "type": "HumanUser"
+            }],
+            "type": "Task"
+        }
+
+        api_path = "/import/shotgun/tasks"
+        self.tasks = self.post(api_path, [self.sg_task], 200)
+
+    def load_sequence_task(self):
+        self.sg_task = {
+            "cached_display_name": "Previz",
+            "created_by": {
+                "id": 1,
+                "name": "John Doe",
+                "type": "HumanUser"
+            },
+            "due_date": None,
+            "duration": 7200,
+            "entity": {
+                "id": 1,
+                "name": "S01",
+                "type": "Sequence"
             },
             "id": 20,
             "project": {
@@ -103,6 +145,12 @@ class ImportShotgunTaskTestCase(ShotgunTestCase):
         self.assertEqual(task["entity_id"], str(entity.id))
         self.assertEqual(task["assigner_id"], str(assigner.id))
         self.assertEqual(task["assignees"][0], str(assignee.id))
+
+    def test_import_sequence_task(self):
+        self.load_sequence_task()
+        sequences = shots_service.get_sequences({"shotgun_id": 1})
+        self.tasks = self.get("data/tasks?entity_id=%s" % sequences[0].id)
+        self.assertEqual(len(self.tasks), 1)
 
     def test_import_remove_task(self):
         self.load_task()

@@ -1,4 +1,7 @@
+import datetime
+
 from test.base import ApiDBTestCase
+from zou.app.utils import fields
 
 
 class TaskLastWorkingFilesTestCase(ApiDBTestCase):
@@ -94,9 +97,25 @@ class TaskLastWorkingFilesTestCase(ApiDBTestCase):
             "3ds_max/cosmos_landromat_props_tree_shaders_main_v003"
         )
 
+        working_file = self.post(path, {
+            "name": "main",
+            "description": "description test",
+            "comment": "comment test",
+            "revision": 66
+        })
+        self.assertEqual(working_file["revision"], 66)
+        self.assertEqual(
+            working_file["path"],
+            "/simple/productions/cosmos_landromat/assets/props/tree/shaders/"
+            "3ds_max/cosmos_landromat_props_tree_shaders_main_v066"
+        )
+
     def test_update_modification_date(self):
         path = "/actions/working-files/%s/modified" % self.working_file.id
         previous_date = self.working_file.serialize()["updated_at"]
         working_file = self.put(path, {})
         current_date = working_file["updated_at"]
         self.assertTrue(previous_date < current_date)
+
+        now = fields.serialize_value(datetime.datetime.utcnow())
+        self.assertTrue(current_date < now)

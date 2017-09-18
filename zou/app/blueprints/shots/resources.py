@@ -107,8 +107,40 @@ class ShotTasksResource(Resource):
         Retrieve all tasks related to a given shot.
         """
         try:
-            return tasks_service.get_task_dicts_for_shot(shot_id)
+            return tasks_service.get_tasks_for_shot(shot_id)
         except ShotNotFoundException:
+            abort(404)
+
+
+class SequenceTasksResource(Resource):
+
+    def __init__(self):
+        Resource.__init__(self)
+
+    @jwt_required
+    def get(self, sequence_id):
+        """
+        Retrieve all tasks related to a given shot.
+        """
+        try:
+            return tasks_service.get_tasks_for_sequence(sequence_id)
+        except SequenceNotFoundException:
+            abort(404)
+
+
+class SequenceTaskTypesResource(Resource):
+
+    def __init__(self):
+        Resource.__init__(self)
+
+    @jwt_required
+    def get(self, sequence_id):
+        """
+        Retrieve all task types related to a given shot.
+        """
+        try:
+            return tasks_service.get_task_types_for_sequence(sequence_id)
+        except SequenceNotFoundException:
             abort(404)
 
 

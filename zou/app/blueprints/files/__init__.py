@@ -5,12 +5,11 @@ from .resources import (
     FolderPathResource,
     FilePathResource,
     SetTreeResource,
-    GetTaskFromPathResource
-)
-from .resources import (
+    GetTaskFromPathResource,
     CommentWorkingFileResource,
     GetNextOutputFileResource,
     LastWorkingFilesResource,
+    LastOutputFilesResource,
     ModifiedFileResource,
     NewOutputFileResource,
     NewWorkingFileResource,
@@ -21,6 +20,7 @@ routes = [
     ("/data/tasks/<task_id>/working-files", TaskWorkingFilesResource),
     ("/data/tasks/<task_id>/working-files/new", NewWorkingFileResource),
     ("/data/tasks/<task_id>/last-working-files", LastWorkingFilesResource),
+    ("/data/tasks/<task_id>/last-output-files", LastOutputFilesResource),
     ("/data/tasks/<task_id>/folder-path", FolderPathResource),
     ("/data/tasks/<task_id>/file-path", FilePathResource),
     ("/data/tasks/from-path", GetTaskFromPathResource),

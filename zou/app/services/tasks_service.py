@@ -26,19 +26,6 @@ from zou.app.services import (
 )
 
 
-def get_task_types_for_asset(asset):
-    tasks = Task.query.filter_by(entity_id=asset.id).all()
-
-    task_types = []
-    if len(tasks) > 0:
-        task_type_ids = [task.task_type_id for task in tasks]
-        task_types = TaskType.query.filter(
-            TaskType.id.in_(task_type_ids)
-        )
-
-    return TaskType.serialize_list(task_types)
-
-
 def get_wip_status():
     return get_or_create_status(app.config["WIP_TASK_STATUS"], "wip")
 
@@ -168,12 +155,17 @@ def get_department_from_task_type(task_type):
     return Department.get(task_type.department_id)
 
 
-def get_task_dicts_for_shot(shot_id):
+def get_tasks_for_shot(shot_id):
     shot = shots_service.get_shot(shot_id)
     return get_task_dicts_for_entity(shot.id)
 
 
-def get_task_dicts_for_asset(asset_id):
+def get_tasks_for_sequence(sequence_id):
+    sequence = shots_service.get_sequence(sequence_id)
+    return get_task_dicts_for_entity(sequence.id)
+
+
+def get_tasks_for_asset(asset_id):
     asset = assets_service.get_asset(asset_id)
     return get_task_dicts_for_entity(asset.id)
 
@@ -284,11 +276,21 @@ def get_next_preview_revision(task_id):
 
 
 def get_task_types_for_shot(shot):
-    tasks = Task.query.filter_by(entity_id=shot.id).all()
-    task_types = []
+    return get_task_types_for_entity(shot.id)
 
-    if len(tasks) > 0:
-        task_type_ids = [task.task_type_id for task in tasks]
-        task_types = TaskType.query.filter(TaskType.id.in_(task_type_ids))
+
+def get_task_types_for_sequence(sequence_id):
+    return get_task_types_for_entity(sequence_id)
+
+
+def get_task_types_for_asset(asset):
+    return get_task_types_for_entity(asset.id)
+
+
+def get_task_types_for_entity(entity_id):
+    task_types = TaskType.query \
+        .join(Task, Entity) \
+        .filter(Entity.id == entity_id) \
+        .all()
 
     return TaskType.serialize_list(task_types)

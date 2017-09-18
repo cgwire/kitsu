@@ -6,7 +6,11 @@ from zou.app.models.project import Project
 from zou.app.models.person import Person
 from zou.app.models.task import Task
 
-from zou.app.services import tasks_service, assets_service, shots_service
+from zou.app.services import (
+    tasks_service,
+    assets_service,
+    shots_service
+)
 
 from zou.app.blueprints.source.shotgun.base import (
     BaseImportShotgunResource,
@@ -23,6 +27,7 @@ class ImportShotgunTasksResource(BaseImportShotgunResource):
         self.task_status_ids = TaskStatus.get_id_map(field="short_name")
         self.asset_ids = self.get_asset_map()
         self.shot_ids = self.get_shot_map()
+        self.sequence_ids = self.get_sequence_map()
 
     def get_asset_map(self):
         assets = assets_service.get_assets()
@@ -32,6 +37,12 @@ class ImportShotgunTasksResource(BaseImportShotgunResource):
         shots = shots_service.get_shots()
         return {shot["shotgun_id"]: shot["id"] for shot in shots}
 
+    def get_sequence_map(self):
+        sequences = shots_service.get_sequences()
+        return {
+            sequence.shotgun_id: sequence.id for sequence in sequences
+        }
+
     def filtered_entries(self):
         return [x for x in self.sg_entries if self.is_valid_task(x)]
 
@@ -39,11 +50,7 @@ class ImportShotgunTasksResource(BaseImportShotgunResource):
         return sg_task["step"] is not None and sg_task["project"] is not None
 
     def extract_data(self, sg_task):
-        entity_id = self.get_entity_id(
-            sg_task["entity"],
-            self.asset_ids,
-            self.shot_ids
-        )
+        entity_id = self.get_entity_id(sg_task["entity"])
         task_status_id = self.task_status_ids.get(
             sg_task["sg_status_list"], None
         )
@@ -68,15 +75,17 @@ class ImportShotgunTasksResource(BaseImportShotgunResource):
             "assignees": assignees
         }
 
-    def get_entity_id(self, sg_entity, asset_ids, shot_ids):
+    def get_entity_id(self, sg_entity):
         entity_id = None
         if sg_entity is not None:
             entity_sg_id = sg_entity["id"]
             entity_type = sg_entity["type"]
             if entity_type == "Asset":
                 entity_id = self.asset_ids.get(entity_sg_id, None)
-            else:
+            elif entity_type == "Shot":
                 entity_id = self.shot_ids.get(entity_sg_id, None)
+            else:
+                entity_id = self.sequence_ids.get(entity_sg_id, None)
 
         return entity_id
 

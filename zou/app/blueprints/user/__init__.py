@@ -3,17 +3,21 @@ from zou.app.utils.api import configure_api_from_blueprint
 
 from .resources import (
     AssetTasksResource,
+    AssetTaskTypesResource,
     AssetTypeAssetsResource,
     OpenProjectsResource,
     ProjectSequencesResource,
     ProjectAssetTypesResource,
     SequenceShotsResource,
-    ShotTasksResource
+    ShotTasksResource,
+    ShotTaskTypesResource,
 )
 
 routes = [
     ("/data/user/assets/<asset_id>/tasks", AssetTasksResource),
     ("/data/user/shots/<shot_id>/tasks", ShotTasksResource),
+    ("/data/user/assets/<asset_id>/task-types", AssetTaskTypesResource),
+    ("/data/user/shots/<shot_id>/task-types", ShotTaskTypesResource),
     ("/data/user/projects/open", OpenProjectsResource),
     ("/data/user/projects/<project_id>/asset-types", ProjectAssetTypesResource),
     ("/data/user/projects/<project_id>/asset-types/<asset_type_id>/assets",

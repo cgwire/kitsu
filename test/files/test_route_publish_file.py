@@ -107,6 +107,24 @@ class PublishFileTestCase(ApiDBTestCase):
         self.assertEqual(output_file["revision"], 2)
         self.assertEqual(output_file["source_file_id"], self.working_file_id)
 
+    def test_new_output_revision_forced(self):
+        data = {
+            "person_id": self.person_id,
+            "comment": "test working file publish",
+            "output_type_id": self.tx_type_id,
+            "revision": 66
+        }
+        result = self.new_output(data)
+
+        self.assertEqual(
+            result["file_name"],
+            "cosmos_landromat_props_tree_shaders_tx_v066"
+        )
+
+        output_file_id = result["id"]
+        output_file = self.get("/data/output-files/%s" % output_file_id)
+        self.assertEqual(output_file["revision"], 66)
+
     def test_new_output_wrong_data(self):
         data = {
             "comment_wrong": "test file publish"

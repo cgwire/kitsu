@@ -23,6 +23,7 @@ from zou.app.services import (
     shots_service,
     assets_service,
     persons_service,
+    files_service,
     file_tree
 )
 from zou.app.utils import query, events
@@ -239,19 +240,31 @@ class ToReviewResource(Resource):
 
     @jwt_required
     def put(self, task_id):
-        (person_id, comment, revision) = self.get_arguments()
+        (person_id, comment, working_file_id) = self.get_arguments()
 
         try:
             task = tasks_service.get_task(task_id)
             person = persons_service.get_person(person_id)
-            preview_path = self.get_preview_path(task, revision)
+
+            preview_path = ""
+            if working_file_id is not None:
+                working_file = files_service.get_working_file(working_file_id)
+                software = files_service.get_software(working_file.software_id)
+                revision = working_file.revision
+
+                preview_path = self.get_preview_path(
+                    task,
+                    working_file.name,
+                    revision,
+                    software
+                )
+
             task = tasks_service.task_to_review(
                 task,
                 person,
                 comment,
                 preview_path
             )
-
         except TaskNotFoundException:
             abort(404)
         except PersonNotFoundException:
@@ -259,15 +272,18 @@ class ToReviewResource(Resource):
 
         return task
 
-    def get_preview_path(self, task, revision):
+    def get_preview_path(self, task, name, revision, software):
         try:
             folder_path = file_tree.get_folder_path(
                 task,
-                mode="preview"
+                mode="preview",
+                software=software
             )
             file_name = file_tree.get_file_name(
                 task,
+                name=name,
                 mode="preview",
+                software=software,
                 version=revision
             )
         except MalformedFileTreeException:  # No template for preview files.
@@ -282,13 +298,13 @@ class ToReviewResource(Resource):
         parser = reqparse.RequestParser()
         parser.add_argument("person_id", default="")
         parser.add_argument("comment", default="")
-        parser.add_argument("revision", default=1)
+        parser.add_argument("working_file_id", default=None)
         args = parser.parse_args()
 
         return (
             args["person_id"],
             args["comment"],
-            args["revision"],
+            args["working_file_id"]
         )
 
 

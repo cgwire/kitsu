@@ -488,6 +488,18 @@ class ApiDBTestCase(ApiTestCase):
         )
         self.shot_task.save()
 
+    def generate_fixture_sequence_task(self, name="Master"):
+        self.sequence_task = Task(
+            name=name,
+            project_id=self.project.id,
+            task_type_id=self.task_type_animation.id,
+            task_status_id=self.task_status.id,
+            entity_id=self.sequence.id,
+            assignees=[self.person],
+            assigner_id=self.assigner.id,
+        )
+        self.sequence_task.save()
+
     def generate_fixture_shot_task_standard(self):
         self.shot_task_standard = Task(
             name="Super animation",
@@ -532,23 +544,27 @@ class ApiDBTestCase(ApiTestCase):
         )
         self.working_file.save()
 
-    def generate_fixture_output_file(self):
+    def generate_fixture_output_file(self, output_type=None, revision=1):
+        if output_type is None:
+            output_type = self.output_type
+
         self.output_file = OutputFile.create(
             comment="",
-            revision=1,
+            revision=revision,
             task_id=self.task.id,
             entity_id=self.entity.id,
             person_id=self.person.id,
             file_status_id=self.file_status.id,
-            output_type_id=self.output_type.id
+            output_type_id=output_type.id
         )
         return self.output_file
 
-    def generate_fixture_output_type(self):
+    def generate_fixture_output_type(self, name="Geometry", short_name="Geo"):
         self.output_type = OutputType.create(
-            name="Geometry",
-            short_name="Geo"
+            name=name,
+            short_name=short_name
         )
+        return self.output_type
 
     def generate_fixture_software(self):
         self.software = Software.create(

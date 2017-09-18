@@ -5,6 +5,7 @@ from zou.app.models.entity_type import EntityType
 from zou.app.models.project import Project
 from zou.app.models.project_status import ProjectStatus
 from zou.app.models.task import Task
+from zou.app.models.task_type import TaskType
 
 from zou.app.services import persons_service, shots_service
 from zou.app.utils import fields
@@ -33,6 +34,16 @@ def asset_type_filter():
 def get_entity_tasks(entity_id):
     query = Task.query \
         .join(Project, ProjectStatus) \
+        .filter(Task.entity_id == entity_id) \
+        .filter(assignee_filter()) \
+        .filter(open_project_filter())
+
+    return fields.serialize_value(query.all())
+
+
+def get_entity_task_types(entity_id):
+    query = TaskType.query \
+        .join(Task, Project, ProjectStatus) \
         .filter(Task.entity_id == entity_id) \
         .filter(assignee_filter()) \
         .filter(open_project_filter())
