@@ -1,4 +1,7 @@
+import datetime
+
 from test.base import ApiDBTestCase
+from zou.app.utils import fields
 
 
 class TaskLastWorkingFilesTestCase(ApiDBTestCase):
@@ -92,6 +95,19 @@ class TaskLastWorkingFilesTestCase(ApiDBTestCase):
             working_file["path"],
             "/simple/productions/cosmos_landromat/assets/props/tree/shaders/"
             "3ds_max/cosmos_landromat_props_tree_shaders_main_v003"
+        )
+
+        working_file = self.post(path, {
+            "name": "main",
+            "description": "description test",
+            "comment": "comment test",
+            "revision": 66
+        })
+        self.assertEqual(working_file["revision"], 66)
+        self.assertEqual(
+            working_file["path"],
+            "/simple/productions/cosmos_landromat/assets/props/tree/shaders/"
+            "3ds_max/cosmos_landromat_props_tree_shaders_main_v066"
         )
 
     def test_update_modification_date(self):

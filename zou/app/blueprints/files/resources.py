@@ -350,6 +350,7 @@ class NewOutputFileResource(Resource):
             person_id,
             output_type_id,
             scene,
+            revision,
             separator
         ) = self.get_arguments()
         separator = "/"
@@ -367,7 +368,8 @@ class NewOutputFileResource(Resource):
                 output_type.id,
                 person.id,
                 comment,
-                name=working_file.name
+                name=working_file.name,
+                revision=revision
             )
 
             output_file_dict = self.add_path_info(
@@ -400,6 +402,7 @@ class NewOutputFileResource(Resource):
         parser.add_argument("person_id", default="")
         parser.add_argument("comment", default="")
         parser.add_argument("scene", default=1)
+        parser.add_argument("revision", default=0, type=int)
         parser.add_argument("separator", default="/")
         args = parser.parse_args()
 
@@ -408,6 +411,7 @@ class NewOutputFileResource(Resource):
             args["person_id"],
             args["output_type_id"],
             args["scene"],
+            args["revision"],
             args["separator"]
         )
 
@@ -527,13 +531,20 @@ class NewWorkingFileResource(Resource):
             comment,
             person_id,
             software_id,
+            revision,
             sep
         ) = self.get_arguments()
 
         try:
             task = tasks_service.get_task(task_id)
-            revision = files_service.get_next_working_revision(task_id, name)
             software = files_service.get_software(software_id)
+
+            if revision == 0:
+                revision = files_service.get_next_working_revision(
+                    task_id,
+                    name
+                )
+
             path = self.build_path(task, name, revision, software, sep)
 
             working_file = files_service.create_new_working_revision(
@@ -578,7 +589,7 @@ class NewWorkingFileResource(Resource):
         parser.add_argument("comment", default="")
         parser.add_argument("person_id", default=person.id)
         parser.add_argument("software_id", default=maxsoft.id)
-
+        parser.add_argument("revision", default=0, type=int)
         parser.add_argument("sep", default="/")
         args = parser.parse_args()
 
@@ -588,6 +599,7 @@ class NewWorkingFileResource(Resource):
             args["comment"],
             args["person_id"],
             args["software_id"],
+            args["revision"],
             args["sep"]
         )
 
