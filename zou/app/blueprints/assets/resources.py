@@ -191,7 +191,7 @@ class AssetTasksResource(Resource):
         Retrieve all tasks related to a given shot.
         """
         try:
-            return tasks_service.get_task_dicts_for_asset(asset_id)
+            return tasks_service.get_tasks_for_asset(asset_id)
         except AssetNotFoundException:
             abort(404)
 
