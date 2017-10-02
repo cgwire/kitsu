@@ -21,6 +21,8 @@ import {
   DELETE_PRODUCTION_ERROR,
   DELETE_PRODUCTION_END,
 
+  SET_CURRENT_PRODUCTION,
+
   RESET_ALL
 } from '../mutation-types'
 
@@ -28,6 +30,7 @@ const state = {
   productions: [],
   openProductions: [],
   productionStatus: [],
+  currentProduction: null,
 
   isProductionsLoading: false,
   isProductionsLoadingError: false,
@@ -189,7 +192,6 @@ const mutations = {
     state.editProduction.isLoading = true
     state.editProduction.isError = false
   },
-
   [EDIT_PRODUCTION_ERROR] (state) {
     state.editProduction.isLoading = false
     state.editProduction.isError = true
@@ -255,11 +257,19 @@ const mutations = {
     }
   },
 
+  [SET_CURRENT_PRODUCTION] (state, currentProductionId) {
+    const production = state.openProductions.find(
+      (production) => production.id === currentProductionId
+    )
+    state.currentProduction = production
+  },
+
   [RESET_ALL] (state) {
     state.productions = []
     state.productionStatus = []
     state.isProductionsLoading = false
     state.isProductionsLoadingError = false
+    state.currentProduction = null
 
     state.editProduction = {
       isLoading: false,
