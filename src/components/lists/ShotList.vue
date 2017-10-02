@@ -151,9 +151,9 @@ th.actions {
 }
 
 .sequence {
-  min-width: 50px;
-  max-width: 50px;
-  width: 50px;
+  min-width: 100px;
+  max-width: 100px;
+  width: 100px;
   font-weight: bold;
 }
 
