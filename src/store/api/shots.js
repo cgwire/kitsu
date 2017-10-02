@@ -1,8 +1,12 @@
 import client from './client'
 
 export default {
-  getShots (callback) {
-    client.get('/api/data/shots/with-tasks', callback)
+  getShots (currentProduction, callback) {
+    let path = '/api/data/shots/with-tasks'
+    if (currentProduction) {
+      path += `?project_id=${currentProduction.id}`
+    }
+    client.get(path, callback)
   },
 
   getShotType (callback) {

@@ -1,12 +1,12 @@
 import client from './client'
 
 export default {
-  getAssets (callback) {
-    client.get('/api/data/assets/with-tasks', callback)
-  },
-
-  getAssetType (callback) {
-    client.get('/api/data/asset_type', callback)
+  getAssets (currentProduction, callback) {
+    let path = '/api/data/assets/with-tasks'
+    if (currentProduction) {
+      path += `?project_id=${currentProduction.id}`
+    }
+    client.get(path, callback)
   },
 
   newAsset (asset, callback) {
