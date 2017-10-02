@@ -9,6 +9,9 @@ export default {
 </script>
 
 <style>
+:focus {outline:none;}
+::-moz-focus-inner {border:0;}
+
 #app .router-link-active {
   color: #00d1b2;
 }
