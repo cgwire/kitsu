@@ -1,21 +1,12 @@
 import assetsApi from '../api/assets'
 import { sortAssets, sortValidationColumns } from '../../lib/sorting'
 import tasksStore from './tasks'
+import productionsStore from './productions'
 
 import {
   LOAD_ASSETS_START,
   LOAD_ASSETS_ERROR,
   LOAD_ASSETS_END,
-
-  ASSET_CSV_FILE_SELECTED,
-  IMPORT_ASSETS_START,
-  IMPORT_ASSETS_END,
-
-  LOAD_ASSET_TYPES_START,
-  LOAD_ASSET_TYPES_ERROR,
-  LOAD_ASSET_TYPES_END,
-
-  LOAD_OPEN_PRODUCTIONS_END,
 
   EDIT_ASSET_START,
   EDIT_ASSET_ERROR,
@@ -24,6 +15,16 @@ import {
   DELETE_ASSET_START,
   DELETE_ASSET_ERROR,
   DELETE_ASSET_END,
+
+  LOAD_ASSET_TYPES_START,
+  LOAD_ASSET_TYPES_ERROR,
+  LOAD_ASSET_TYPES_END,
+
+  ASSET_CSV_FILE_SELECTED,
+  IMPORT_ASSETS_START,
+  IMPORT_ASSETS_END,
+
+  LOAD_OPEN_PRODUCTIONS_END,
 
   DELETE_TASK_END,
 
@@ -43,6 +44,7 @@ const state = {
 
   assetCreated: '',
   editAsset: {
+    isCreateError: false,
     isLoading: false,
     isError: false
   },
@@ -83,9 +85,12 @@ const getters = {
 
 const actions = {
 
-  loadAssets ({ commit, state }, callback) {
+  loadAssets ({ commit, state, rootState }, callback) {
+    const currentProduction = productionsStore.getters.getCurrentProduction(
+      rootState.productions
+    )
     commit(LOAD_ASSETS_START)
-    assetsApi.getAssets((err, assets) => {
+    assetsApi.getAssets(currentProduction, (err, assets) => {
       if (err) commit(LOAD_ASSETS_ERROR)
       else commit(LOAD_ASSETS_END, assets)
       if (callback) callback(err)
@@ -141,6 +146,8 @@ const actions = {
 
 const mutations = {
   [LOAD_ASSETS_START] (state) {
+    state.assets = []
+    state.validationColumns = {}
     state.isAssetsLoading = true
     state.isAssetsLoadingError = false
   },
@@ -210,12 +217,12 @@ const mutations = {
     const assetType = state.assetTypes.find(
       (assetType) => assetType.id === newAsset.entity_type_id
     )
-    newAsset.asset_type_name = assetType.name
+    if (assetType) newAsset.asset_type_name = assetType.name
 
     const production = state.openProductions.find(
       (production) => production.id === newAsset.project_id
     )
-    newAsset.project_name = production.name
+    if (production) newAsset.project_name = production.name
     newAsset.tasks = []
 
     if (asset) {
@@ -293,6 +300,7 @@ const mutations = {
     state.assetsCsvFormData = null
 
     state.editAsset = {
+      isCreateError: false,
       isLoading: false,
       isError: false
     }

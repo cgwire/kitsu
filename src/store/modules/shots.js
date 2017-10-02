@@ -1,5 +1,6 @@
 import shotsApi from '../api/shots'
 import tasksStore from './tasks'
+import productionsStore from './productions'
 
 import { sortShots, sortValidationColumns } from '../../lib/sorting'
 import {
@@ -72,9 +73,12 @@ const getters = {
 
 const actions = {
 
-  loadShots ({ commit, state }, callback) {
+  loadShots ({ commit, state, rootState }, callback) {
+    const currentProduction = productionsStore.getters.getCurrentProduction(
+      rootState.productions
+    )
     commit(LOAD_SHOTS_START)
-    shotsApi.getShots((err, shots) => {
+    shotsApi.getShots(currentProduction, (err, shots) => {
       if (err) commit(LOAD_SHOTS_ERROR)
       else commit(LOAD_SHOTS_END, shots)
       if (callback) callback(err)
