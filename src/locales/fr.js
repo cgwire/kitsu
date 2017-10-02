@@ -80,6 +80,12 @@ export default {
     edit_title: 'Modifier la production',
     new_production: 'Ajouter une production',
     number: 'production | productions',
+    home: {
+      title: 'Productions en cours',
+      welcome: 'Bienvenu sur Kitsu',
+      empty: 'Vous n\'avez pas de production ouverte, voulez vous en créer une nouvelle ?',
+      create_new: 'Créer une nouvelle production'
+    },
     fields: {
       name: 'Nom',
       status: 'État'

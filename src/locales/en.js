@@ -77,6 +77,12 @@ export default {
 
   productions: {
     title: 'Productions',
+    home: {
+      title: 'Running productions',
+      welcome: 'Welcome to Kitsu',
+      empty: 'You don\'t have any production open. What about creating a new one?',
+      create_new: 'Create a new production'
+    },
     edit_title: 'Edit production',
     number: 'production | productions',
     new_production: 'Add a production',

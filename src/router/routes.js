@@ -9,6 +9,7 @@ import Main from '../components/Main'
 import NotFound from '../components/NotFound'
 import People from '../components/People'
 import Productions from '../components/Productions'
+import OpenProductions from '../components/OpenProductions'
 import Profile from '../components/Profile'
 import Task from '../components/Task'
 import TaskTypes from '../components/TaskTypes'
@@ -32,7 +33,7 @@ export const routes = [
     },
 
     children: [
-      { path: '', component: People },
+      { path: '', component: OpenProductions },
       { path: '/people', component: People },
       { path: '/people/new', component: People },
       { path: '/people/edit/:person_id', component: People },
