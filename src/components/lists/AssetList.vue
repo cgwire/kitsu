@@ -128,6 +128,7 @@ export default {
   },
   computed: {
     ...mapGetters([
+      'getCurrentProduction'
     ])
   },
   methods: {
@@ -157,9 +158,9 @@ export default {
 }
 
 .type {
-  min-width: 100px;
-  max-width: 100px;
-  width: 100px;
+  min-width: 120px;
+  max-width: 120px;
+  width: 120px;
   font-weight: bold;
 }
 
