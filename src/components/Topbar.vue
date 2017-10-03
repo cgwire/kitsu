@@ -120,7 +120,6 @@ export default {
     },
     isProductionContext () {
       const path = this.$store.state.route.path
-      console.log(path)
       return path.indexOf('assets') > 0 || path.indexOf('shots') > 0
     }
   },
