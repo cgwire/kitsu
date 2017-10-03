@@ -83,6 +83,7 @@ export default {
       empty: 'You don\'t have any production open. What about creating a new one?',
       create_new: 'Create a new production'
     },
+    current: 'Selected production',
     edit_title: 'Edit production',
     number: 'production | productions',
     new_production: 'Add a production',

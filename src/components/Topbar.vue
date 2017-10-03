@@ -20,13 +20,19 @@
           'nav-item': true,
           hidden: !isProductionContext()
         }">
-          Production:
-          <combobox
-            :label="$t('assets.fields.production')"
-            :options="getOpenProductionOptions"
-            v-model="currentProductionId"
-          >
-          </combobox>
+          <div class="level">
+            <div class="level-item production-selector-label">
+              {{ $t('productions.current') }}:
+            </div>
+            <div class="level-item">
+              <combobox
+                class="production-selector"
+                :options="getOpenProductionOptions"
+                v-model="currentProductionId"
+              >
+              </combobox>
+            </div>
+          </div>
         </div>
       </div>
 
@@ -229,5 +235,13 @@ export default {
 
 .hidden {
   display: none;
+}
+
+.production-selector-label {
+  margin-right: 1em;
+}
+
+.production-selector {
+  margin-top: 1.9em;
 }
 </style>
