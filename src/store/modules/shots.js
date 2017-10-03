@@ -1,6 +1,7 @@
 import shotsApi from '../api/shots'
 import tasksStore from './tasks'
 import productionsStore from './productions'
+import { buildNameIndex, indexSearch } from '../../lib/indexing'
 
 import { sortShots, sortValidationColumns } from '../../lib/sorting'
 import {
@@ -24,6 +25,8 @@ import {
 
   NEW_TASK_COMMENT_END,
 
+  SET_SHOT_SEARCH,
+
   RESET_ALL
 } from '../mutation-types'
 
@@ -31,6 +34,9 @@ const state = {
   shots: [],
   sequences: [],
   validationColumns: {},
+
+  displayedShots: [],
+  shotIndex: {},
 
   isShotsLoading: false,
   isShotsLoadingError: false,
@@ -53,6 +59,8 @@ const getters = {
   shotValidationColumns: state => {
     return sortValidationColumns(Object.values(state.validationColumns))
   },
+
+  displayedShots: state => state.displayedShots,
 
   isShotsLoading: state => state.isShotsLoading,
   isShotsLoadingError: state => state.isShotsLoadingError,
@@ -163,6 +171,9 @@ const mutations = {
     })
     state.shots = shots
     state.validationColumns = validationColumns
+
+    state.shotIndex = buildNameIndex(shots)
+    state.displayedShots = state.shots
   },
 
   [SHOT_CSV_FILE_SELECTED] (state, formData) {
@@ -209,6 +220,7 @@ const mutations = {
       isLoading: false,
       isError: false
     }
+    state.shotIndex = buildNameIndex(state.shots)
   },
 
   [DELETE_SHOT_START] (state) {
@@ -239,6 +251,7 @@ const mutations = {
       isLoading: false,
       isError: false
     }
+    state.shotIndex = buildNameIndex(state.shots)
   },
 
   [NEW_TASK_COMMENT_END] (state, {comment, taskId}) {
@@ -252,12 +265,20 @@ const mutations = {
     }
   },
 
+  [SET_SHOT_SEARCH] (state, shotSearch) {
+    state.displayedShots =
+      indexSearch(state.shotIndex, shotSearch) || state.shots
+  },
+
   [RESET_ALL] (state) {
     state.shots = []
     state.sequences = []
     state.isShotsLoading = false
     state.isShotsLoadingError = false
     state.shotsCsvFormData = null
+
+    state.shotIndex = {}
+    state.displayedShots = []
 
     state.editShot = {
       isLoading: false,

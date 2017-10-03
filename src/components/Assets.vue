@@ -42,7 +42,7 @@
       </div>
 
       <asset-list
-        :entries="assets"
+        :entries="displayedAssets"
         :is-loading="isAssetsLoading"
         :is-error="isAssetsLoadingError"
         :validation-columns="assetValidationColumns"
@@ -181,6 +181,7 @@ export default {
   computed: {
     ...mapGetters([
       'assets',
+      'displayedAssets',
       'assetsCsvFormData',
       'assetTypes',
       'openProductions',

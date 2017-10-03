@@ -1,5 +1,30 @@
 <template>
 <div class="data-list">
+
+  <div class="filters-area">
+    <div class="level">
+      <div class="level-right">
+        <div class="level-item">
+          <search-icon></search-icon>
+        </div>
+        <div class="level-item">
+          <input
+            class="input search-input"
+            type="text"
+            @input="onSearchChange"
+            v-focus
+          />
+        </div>
+        <div class="level-item">
+          <filter-icon></filter-icon>
+        </div>
+        <div class="level-item">
+          No filter set.
+        </div>
+      </div>
+    </div>
+  </div>
+
   <table class="table">
     <thead>
       <tr>
@@ -108,6 +133,7 @@ import ProductionNameCell from '../cells/ProductionNameCell'
 import RowActions from '../widgets/RowActions'
 import ValidationTag from '../widgets/ValidationTag'
 import ButtonLink from '../widgets/ButtonLink'
+import { SearchIcon, FilterIcon } from 'vue-feather-icons'
 
 export default {
   name: 'asset-list',
@@ -124,21 +150,32 @@ export default {
     ProductionNameCell,
     RowActions,
     ButtonLink,
-    ValidationTag
+    ValidationTag,
+    FilterIcon,
+    SearchIcon
   },
   computed: {
     ...mapGetters([
-      'getCurrentProduction'
+      'getCurrentProduction',
+      'assetSearchValue'
     ])
   },
   methods: {
     ...mapActions([
-    ])
+    ]),
+    onSearchChange (event) {
+      const searchQuery = event.target.value
+      this.$store.commit('SET_ASSET_SEARCH', searchQuery)
+    }
   }
 }
 </script>
 
 <style scoped>
+.table {
+  min-width: 1000px;
+}
+
 .actions {
   min-width: 150px;
   padding: 0.4em;

@@ -30,7 +30,7 @@
       </div>
 
       <shot-list
-        :entries="shots"
+        :entries="displayedShots"
         :is-loading="isShotsLoading"
         :is-error="isShotsLoadingError"
         :validation-columns="shotValidationColumns"
@@ -156,6 +156,7 @@ export default {
     ...mapGetters([
       'shots',
       'shotsCsvFormData',
+      'displayedShots',
       'sequences',
       'openProductions',
       'isShotsLoading',

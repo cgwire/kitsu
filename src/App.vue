@@ -112,6 +112,17 @@ input.input:focus {
   margin-right: 0em;
 }
 
+.search-input {
+  border: 0;
+  box-shadow: none;
+  border-radius: 0;
+  border-bottom: 2px solid #CCC
+}
+
+.filters-area {
+  margin-bottom: 2em;
+}
+
 @media screen and (max-width: 1000px) {
   .button .icon.is-small {
     margin-right: 0;

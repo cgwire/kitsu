@@ -1,5 +1,30 @@
 <template>
 <div class="data-list">
+
+  <div class="filters-area">
+    <div class="level">
+      <div class="level-right">
+        <div class="level-item">
+          <search-icon></search-icon>
+        </div>
+        <div class="level-item">
+          <input
+            class="input search-input"
+            type="text"
+            @input="onSearchChange"
+            v-focus
+          />
+        </div>
+        <div class="level-item">
+          <filter-icon></filter-icon>
+        </div>
+        <div class="level-item">
+          No filter set.
+        </div>
+      </div>
+    </div>
+  </div>
+
   <table class="table">
     <thead>
       <tr>
@@ -106,6 +131,7 @@
 
 <script>
 import { mapGetters, mapActions } from 'vuex'
+import { SearchIcon, FilterIcon } from 'vue-feather-icons'
 import ProductionNameCell from '../cells/ProductionNameCell'
 import ValidationTag from '../widgets/ValidationTag'
 import RowActions from '../widgets/RowActions'
@@ -126,7 +152,9 @@ export default {
     ButtonLink,
     ProductionNameCell,
     RowActions,
-    ValidationTag
+    ValidationTag,
+    SearchIcon,
+    FilterIcon
   },
   computed: {
     ...mapGetters([
@@ -135,7 +163,11 @@ export default {
   },
   methods: {
     ...mapActions([
-    ])
+    ]),
+    onSearchChange (event) {
+      const searchQuery = event.target.value
+      this.$store.commit('SET_SHOT_SEARCH', searchQuery)
+    }
   }
 }
 </script>

@@ -1,5 +1,6 @@
 import assetsApi from '../api/assets'
 import { sortAssets, sortValidationColumns } from '../../lib/sorting'
+import { buildNameIndex, indexSearch } from '../../lib/indexing'
 import tasksStore from './tasks'
 import productionsStore from './productions'
 
@@ -25,10 +26,10 @@ import {
   IMPORT_ASSETS_END,
 
   LOAD_OPEN_PRODUCTIONS_END,
-
   DELETE_TASK_END,
-
   NEW_TASK_COMMENT_END,
+
+  SET_ASSET_SEARCH,
 
   RESET_ALL
 } from '../mutation-types'
@@ -36,6 +37,10 @@ import {
 const state = {
   assets: [],
   assetTypes: [],
+
+  assetIndex: {},
+  displayedAssets: [],
+
   validationColumns: {},
   openProductions: [],
   isAssetsLoading: false,
@@ -63,6 +68,8 @@ const getters = {
 
   isAssetsLoading: state => state.isAssetsLoading,
   isAssetsLoadingError: state => state.isAssetsLoadingError,
+
+  displayedAssets: state => state.displayedAssets,
 
   editAsset: state => state.editAsset,
   deleteAsset: state => state.deleteAsset,
@@ -150,6 +157,9 @@ const mutations = {
     state.validationColumns = {}
     state.isAssetsLoading = true
     state.isAssetsLoadingError = false
+
+    state.assetIndex = {}
+    state.displayedAssets = []
   },
 
   [LOAD_ASSETS_ERROR] (state) {
@@ -178,6 +188,9 @@ const mutations = {
     state.assets = assets
     state.isAssetsLoading = false
     state.isAssetsLoadingError = false
+
+    state.assetIndex = buildNameIndex(assets)
+    state.displayedAssets = state.assets
   },
 
   [ASSET_CSV_FILE_SELECTED] (state, formData) {
@@ -236,6 +249,7 @@ const mutations = {
       isLoading: false,
       isError: false
     }
+    state.assetIndex = buildNameIndex(state.assets)
   },
 
   [DELETE_ASSET_START] (state) {
@@ -266,6 +280,7 @@ const mutations = {
       isLoading: false,
       isError: false
     }
+    state.assetIndex = buildNameIndex(state.assets)
   },
 
   [DELETE_TASK_END] (state, task) {
@@ -292,12 +307,20 @@ const mutations = {
     }
   },
 
+  [SET_ASSET_SEARCH] (state, assetSearch) {
+    state.displayedAssets =
+      indexSearch(state.assetIndex, assetSearch) || state.assets
+  },
+
   [RESET_ALL] (state) {
     state.assets = []
     state.assetTypes = []
     state.isAssetsLoading = false
     state.isAssetsLoadingError = false
     state.assetsCsvFormData = null
+
+    state.assetIndex = {}
+    state.displayedAssets = []
 
     state.editAsset = {
       isCreateError: false,
