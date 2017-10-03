@@ -21,8 +21,7 @@ export default {
       type: String
     },
     path: {
-      default: '',
-      type: String
+      default: ''
     },
     icon: {
       default: '',
