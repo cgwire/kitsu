@@ -1,10 +1,10 @@
 <template>
   <div class="shots page">
-   <div class="shots-list">
-      <page-title :text="$t('shots.title')"></page-title>
 
+   <div class="shots-list">
       <div class="level">
         <div class="level-left">
+          <page-title :text="$t('shots.title')"></page-title>
         </div>
         <div class="level-right">
           <div class="level-item">
