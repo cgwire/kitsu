@@ -7,7 +7,7 @@
   <div class="modal-content">
     <div class="box">
 
-      <h1 class="title" v-if="assetToEdit">
+      <h1 class="title" v-if="assetToEdit && this.assetToEdit.id">
         {{ $t("assets.edit_title") }} {{ assetToEdit.name }}
       </h1>
       <h1 class="title" v-else>
@@ -141,7 +141,8 @@ export default {
       'assetTypes',
       'openProductions',
       'getAssetTypeOptions',
-      'getOpenProductionOptions'
+      'getOpenProductionOptions',
+      'getCurrentProduction'
     ])
   },
 
@@ -174,7 +175,7 @@ export default {
           this.form.entity_type_id = this.assetTypes[0].id
         }
         if (this.openProductions.length > 0) {
-          this.form.project_id = this.openProductions[0].id
+          this.form.project_id = this.getCurrentProduction.id
         }
         this.form.name = ''
         this.form.description = ''
