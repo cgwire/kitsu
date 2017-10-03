@@ -20,7 +20,12 @@
           <button-link
             class="is-small"
             :text="$t('tasks.create_tasks')"
-            path="/assets/create-tasks"
+            :path="{
+              name: 'create-asset-tasks',
+              params: {
+                production_id: getCurrentProduction.id
+              }
+            }"
           >
           </button-link>
         </th>
@@ -63,8 +68,20 @@
         </td>
         <row-actions
           :entry-id="entry.id"
-          :edit-route="'/assets/edit/' + entry.id"
-          :delete-route="'/assets/delete/' + entry.id"
+          :edit-route="{
+            name: 'edit-asset',
+            params: {
+              production_id: getCurrentProduction.id,
+              asset_id: entry.id
+            }
+          }"
+          :delete-route="{
+            name: 'delete-asset',
+            params: {
+              production_id: getCurrentProduction.id,
+              asset_id: entry.id
+            }
+          }"
         >
         </row-actions>
       </tr>

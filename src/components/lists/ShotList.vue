@@ -22,7 +22,12 @@
           <button-link
             class="level-item is-small"
             :text="$t('tasks.create_tasks')"
-            path="/shots/create-tasks"
+            :path="{
+              name: 'create-shot-tasks',
+              params: {
+                production_id: getCurrentProduction.id
+              }
+            }"
           >
           </button-link>
         </th>
@@ -70,8 +75,14 @@
         </td>
         <row-actions
           :entry-id="entry.id"
-          :edit-route="'/shots/edit/' + entry.id"
-          :delete-route="'/shots/delete/' + entry.id"
+          edit-route=""
+          :delete-route="{
+            name: 'delete-shots',
+            params: {
+              shot_id: entry.id,
+              production_id: getCurrentProduction.id
+            }
+          }"
           :hide-edit="true"
         >
         </row-actions>

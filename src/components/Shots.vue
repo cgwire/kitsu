@@ -12,14 +12,17 @@
               class="level-item"
               :text="$t('main.csv.import_file')"
               icon="fa-upload"
-              path="/shots/import"
+              :path="{
+                name: 'import-shots',
+                params: {production_id: getCurrentProduction.id}
+              }"
             >
             </button-link>
             <button-href-link
               class="level-item"
               :text="$t('main.csv.export_file')"
               icon="fa-download"
-              path="/api/export/csv/shots.csv"
+              :path="'/api/export/csv/shots.csv?project_id=' + getCurrentProduction.id"
             >
             </button-href-link>
           </div>
@@ -38,7 +41,10 @@
       :active="modals.isDeleteDisplayed"
       :is-loading="deleteShot.isLoading"
       :is-error="deleteShot.isError"
-      :cancel-route="'/shots'"
+      :cancel-route="{
+        name: 'shots',
+        params: {production_id: getCurrentProduction.id}
+      }"
       :text="deleteText()"
       :error-text="$t('shots.delete_error')"
       @confirm="confirmDeleteShot"
@@ -49,7 +55,10 @@
       :active="modals.isImportDisplayed"
       :is-loading="loading.importing"
       :is-error="errors.importing"
-      :cancel-route="'/shots'"
+      :cancel-route="{
+        name: 'shots',
+        params: {production_id: getCurrentProduction.id}
+      }"
       :form-data="shotsCsvFormData"
       :columns="columns"
       @fileselected="selectFile"
@@ -61,7 +70,10 @@
       :active="modals.isCreateTasksDisplayed"
       :is-loading="loading.creatingTasks"
       :is-error="errors.creatingTasks"
-      :cancel-route="'/shots'"
+      :cancel-route="{
+        name: 'shots',
+        params: {production_id: getCurrentProduction.id}
+      }"
       :title="$t('tasks.create_tasks_shot')"
       :text="$t('tasks.create_tasks_shot_explaination')"
       :error-text="$t('tasks.create_tasks_shot_failed')"
@@ -203,7 +215,10 @@ export default {
           if (!err) {
             this.loading.edit = false
             this.modals.isNewDisplayed = false
-            this.$router.push('/shots')
+            this.$router.push({
+              name: 'shots',
+              params: {production_id: this.getCurrentProduction.id}
+            })
           } else {
             this.loading.edit = false
             this.editShot.isCreateError = true
@@ -216,7 +231,12 @@ export default {
       this.$store.dispatch('deleteShot', {
         shot: this.shotToDelete,
         callback: (err) => {
-          if (!err) this.$router.push('/shots')
+          if (!err) {
+            this.$router.push({
+              name: 'shots',
+              params: {production_id: this.getCurrentProduction.id}
+            })
+          }
         }
       })
     },
@@ -233,7 +253,10 @@ export default {
             this.errors.creatingTasks = true
           } else {
             this.modals.isCreateTasks = false
-            this.$router.push('/shots')
+            this.$router.push({
+              name: 'shots',
+              params: {production_id: this.getCurrentProduction.id}
+            })
             this.$store.dispatch('loadShots')
           }
         }

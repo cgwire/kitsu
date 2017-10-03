@@ -12,21 +12,27 @@
               class="level-item"
               :text="$t('main.csv.import_file')"
               icon="fa-upload"
-              path="/assets/import"
+              :path="{
+                name: 'import-assets',
+                params: {production_id: getCurrentProduction.id}
+              }"
             >
             </button-link>
             <button-href-link
               class="level-item"
               :text="$t('main.csv.export_file')"
               icon="fa-download"
-              path="/api/export/csv/assets.csv"
+              :path="'/api/export/csv/assets.csv?project_id=' + getCurrentProduction.id"
             >
             </button-href-link>
             <button-link
               class="level-item"
               :text="$t('assets.new_asset')"
               icon="fa-plus"
-              path="/assets/new"
+              :path="{
+                name: 'new-asset',
+                params: {production_id: getCurrentProduction.id}
+              }"
             >
             </button-link>
           </div>
@@ -47,7 +53,10 @@
       :is-loading-stay="loading.stay"
       :is-error="editAsset.isCreateError"
       :is-success="editAsset.isSuccess"
-      :cancel-route="'/assets'"
+      :cancel-route="{
+        name: 'assets',
+        params: {production_id: getCurrentProduction.id}
+      }"
       :asset-to-edit="assetToEdit"
       @confirm="confirmEditAsset"
       @confirmAndStay="confirmNewAssetStay"
@@ -58,7 +67,10 @@
       :active="modals.isDeleteDisplayed"
       :is-loading="deleteAsset.isLoading"
       :is-error="deleteAsset.isCreateError"
-      :cancel-route="'/assets'"
+      :cancel-route="{
+        name: 'assets',
+        params: {production_id: getCurrentProduction.id}
+      }"
       :text="deleteText()"
       :error-text="$t('assets.delete_error')"
       @confirm="confirmDeleteAsset"
@@ -69,7 +81,10 @@
       :active="modals.isImportDisplayed"
       :is-loading="loading.importing"
       :is-error="errors.importing"
-      :cancel-route="'/assets'"
+      :cancel-route="{
+        name: 'assets',
+        params: {production_id: getCurrentProduction.id}
+      }"
       :form-data="assetsCsvFormData"
       :columns="columns"
       @fileselected="selectFile"
@@ -81,7 +96,10 @@
       :active="modals.isCreateTasksDisplayed"
       :is-loading="loading.creatingTasks"
       :is-error="errors.creatingTasks"
-      :cancel-route="'/assets'"
+      :cancel-route="{
+        name: 'assets',
+        params: {production_id: getCurrentProduction.id}
+      }"
       :title="$t('tasks.create_tasks_asset')"
       :text="$t('tasks.create_tasks_asset_explaination')"
       :error-text="$t('tasks.create_tasks_asset_failed')"
@@ -217,7 +235,10 @@ export default {
           if (!err) {
             this.loading.edit = false
             this.modals.isNewDisplayed = false
-            this.$router.push('/assets')
+            this.$router.push({
+              name: 'assets',
+              params: {production_id: this.getCurrentProduction.id}
+            })
           } else {
             this.loading.edit = false
             this.editAsset.isCreateError = true
@@ -247,7 +268,10 @@ export default {
             this.errors.creatingTasks = true
           } else {
             this.modals.isCreateTasks = false
-            this.$router.push('/assets')
+            this.$router.push({
+              name: 'assets',
+              params: {production_id: this.getCurrentProduction.id}
+            })
             this.loadAssets()
           }
         }
@@ -317,7 +341,10 @@ export default {
         if (!err) {
           this.loading.importing = false
           this.$store.dispatch('loadAssets')
-          this.$router.push('/assets')
+          this.$router.push({
+            name: 'assets',
+            params: {production_id: this.getCurrentProduction.id}
+          })
         } else {
           this.loading.importing = false
           this.errors.importing = true
