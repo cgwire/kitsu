@@ -1,10 +1,12 @@
 <template>
   <div class="assets page">
    <div class="assets-list">
-      <h1 class="title">{{ $t('assets.title') }}</h1>
-
       <div class="level">
+
         <div class="level-left">
+          <div class="level-item">
+            <page-title :text="$t('assets.title')"></page-title>
+          </div>
         </div>
         <div class="level-right">
           <div class="level-item">
@@ -119,6 +121,7 @@ import ImportModal from './modals/ImportModal'
 import Filters from './widgets/Filters'
 import ButtonLink from './widgets/ButtonLink'
 import ButtonHrefLink from './widgets/ButtonHrefLink'
+import PageTitle from './widgets/PageTitle'
 import CreateTasksModal from './modals/CreateTasksModal'
 
 export default {
@@ -132,7 +135,8 @@ export default {
     EditAssetModal,
     Filters,
     ButtonLink,
-    ButtonHrefLink
+    ButtonHrefLink,
+    PageTitle
   },
 
   data () {
