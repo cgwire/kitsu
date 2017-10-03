@@ -130,6 +130,7 @@ export default {
   },
   computed: {
     ...mapGetters([
+      'getCurrentProduction'
     ])
   },
   methods: {
