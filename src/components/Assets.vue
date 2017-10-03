@@ -190,6 +190,11 @@ export default {
   },
 
   created () {
+    const productionId = this.$store.state.route.params.production_id
+    this.$store.commit(
+      'SET_CURRENT_PRODUCTION',
+      productionId
+    )
     this.loadAssets((err) => {
       if (!err) this.handleModalsDisplay()
     })
@@ -354,7 +359,16 @@ export default {
   },
 
   watch: {
-    $route () { this.handleModalsDisplay() }
+    $route () { this.handleModalsDisplay() },
+    currentProduction () {
+      const newPath = {
+        name: 'assets',
+        params: {production_id: this.getCurrentProduction.id}
+      }
+      if (this.$route.path.length === 56) this.$router.push(newPath)
+
+      this.$store.dispatch('loadAssets')
+    }
   }
 }
 </script>
