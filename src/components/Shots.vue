@@ -346,10 +346,10 @@ export default {
     $route () { this.handleModalsDisplay() },
     currentProduction () {
       const newPath = {
-        name: 'assets',
+        name: 'shots',
         params: {production_id: this.getCurrentProduction.id}
       }
-      if (this.$route.path.length === 56) this.$router.push(newPath)
+      if (this.$route.path.length === 55) this.$router.push(newPath)
       this.$store.dispatch('loadShots')
     }
   }
