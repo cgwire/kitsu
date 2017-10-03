@@ -163,7 +163,9 @@ export default {
       'editShot',
       'deleteShot',
       'getShot',
-      'shotValidationColumns'
+      'shotValidationColumns',
+      'currentProduction',
+      'getCurrentProduction'
     ])
   },
 
@@ -252,6 +254,7 @@ export default {
       this.errors.creatingTasks = false
       this.$store.dispatch('createTasks', {
         task_type_id: form.task_type_id,
+        project_id: this.getCurrentProduction.id,
         type: 'shots',
         callback: (err) => {
           this.loading.creatingTasks = false

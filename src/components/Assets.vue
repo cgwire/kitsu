@@ -185,7 +185,9 @@ export default {
       'editAsset',
       'deleteAsset',
       'getAsset',
-      'assetValidationColumns'
+      'assetValidationColumns',
+      'currentProduction',
+      'getCurrentProduction'
     ])
   },
 
@@ -267,6 +269,7 @@ export default {
       this.$store.dispatch('createTasks', {
         task_type_id: form.task_type_id,
         type: 'assets',
+        project_id: this.getCurrentProduction.id,
         callback: (err) => {
           this.loading.creatingTasks = false
           if (err) {
