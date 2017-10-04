@@ -2,10 +2,17 @@
   <div class="navbar">
     <aside v-bind:class="{'hidden': isSidebarHidden}">
       <div>
-        <p class="company-logo has-text-centered">
-          <img src="../assets/kitsu.png" />
-          <h2 class="subtitle sidebar-title">Kitsu</h2>
-        </p>
+        <router-link
+           to="/"
+        >
+          <p
+            class="company-logo has-text-centered"
+            @click="toggleSidebar()"
+          >
+            <img src="../assets/kitsu.png" />
+            <h2 class="subtitle sidebar-title">Kitsu</h2>
+          </p>
+        </router-link>
         <section>
          <h2>Fabrication</h2>
 
