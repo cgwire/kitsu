@@ -56,8 +56,8 @@ export default {
     confirmation_and_stay: 'Confirm and stay',
     delete_text: 'Are you sure you want to remove {name} from your database?',
     csv: {
-      import_file: 'Import a .csv file',
-      export_file: 'Download as a .csv file',
+      import_file: 'Import',
+      export_file: 'Export',
       import_title: 'Import data from a CSV file',
       required_fields: 'Your CSV file requires the following columns',
       select_file: 'Please select a file from one of your folder:',
@@ -78,7 +78,7 @@ export default {
   productions: {
     title: 'Productions',
     home: {
-      title: 'Running productions',
+      title: 'Running Productions',
       welcome: 'Welcome to Kitsu',
       empty: 'You don\'t have any production open. What about creating a new one?',
       create_new: 'Create a new production'
