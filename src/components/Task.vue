@@ -27,7 +27,7 @@
            <button-link
              class="level-item"
              text=""
-             icon="fa-trash"
+             icon="delete"
              :path="currentTask ? `/tasks/${currentTask.id}/delete` : ''"
            >
            </button-link>
