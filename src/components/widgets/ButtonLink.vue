@@ -10,6 +10,8 @@
   <plus-icon class="icon is-small" v-if="icon === 'plus'"></plus-icon>
   <download-icon class="icon is-small" v-if="icon === 'download'"></download-icon>
   <upload-icon class="icon is-small" v-if="icon === 'upload'"></upload-icon>
+  <Edit-icon class="icon is-small" v-if="icon === 'edit'"></edit-icon>
+  <trash-icon class="icon is-small" v-if="icon === 'delete'"></trash-icon>
 
   <span class="text is-hidden-touch" v-if="text.length > 0">
     {{ text }}
@@ -18,13 +20,21 @@
 </template>
 
 <script>
-import { PlusIcon, DownloadIcon, UploadIcon } from 'vue-feather-icons'
+import {
+  DownloadIcon,
+  EditIcon,
+  PlusIcon,
+  TrashIcon,
+  UploadIcon
+} from 'vue-feather-icons'
 
 export default {
   name: 'button-link',
   components: {
-    PlusIcon,
     DownloadIcon,
+    EditIcon,
+    PlusIcon,
+    TrashIcon,
     UploadIcon
   },
   props: {
