@@ -26,4 +26,9 @@ export default {
 .tag {
   text-transform: uppercase;
 }
+
+.tag:hover {
+  transform: scale(1.15);
+  transition: all 0.1s ease-in-out
+}
 </style>
