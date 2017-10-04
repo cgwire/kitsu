@@ -111,7 +111,8 @@ const actions = {
   createTasks ({ commit, state }, payload) {
     const data = {
       task_type_id: payload.task_type_id,
-      type: payload.type
+      type: payload.type,
+      project_id: payload.project_id
     }
     tasksApi.createTasks(data, (err, tasks) => {
       if (!err) {

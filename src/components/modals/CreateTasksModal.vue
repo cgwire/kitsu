@@ -86,7 +86,7 @@ export default {
       'getShotTaskTypeOptions'
     ]),
     isAssetTasks () {
-      return this.cancelRoute.indexOf('assets') > 0
+      return this.cancelRoute.name.indexOf('assets') >= 0
     }
   },
 

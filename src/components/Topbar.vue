@@ -16,6 +16,24 @@
            to="/">
           <img src="../assets/logo.png" />
         </router-link>
+        <div :class="{
+          'nav-item': true,
+          hidden: !isProductionContext()
+        }">
+          <div class="level">
+            <div class="level-item production-selector-label">
+              {{ $t('productions.current') }}:
+            </div>
+            <div class="level-item">
+              <combobox
+                class="production-selector"
+                :options="getOpenProductionOptions"
+                v-model="currentProductionId"
+              >
+              </combobox>
+            </div>
+          </div>
+        </div>
       </div>
 
       <div class="nav-right">
@@ -53,12 +71,19 @@
 import { mapGetters, mapActions } from 'vuex'
 import PeopleAvatar from './widgets/PeopleAvatar'
 import PeopleName from './widgets/PeopleName'
+import Combobox from './widgets/Combobox'
 
 export default {
   name: 'topbar',
   components: {
+    Combobox,
     PeopleName,
     PeopleAvatar
+  },
+  data () {
+    return {
+      currentProductionId: null
+    }
   },
   mounted () {
     const userMenu = this.$refs['user-menu']
@@ -74,7 +99,11 @@ export default {
     ...mapGetters([
       'isSidebarHidden',
       'isUserMenuHidden',
-      'user'
+      'user',
+      'openProductions',
+      'getOpenProductionOptions',
+      'getCurrentProduction',
+      'currentProduction'
     ])
   },
   methods: {
@@ -88,6 +117,23 @@ export default {
         if (err) console.log(err)
         if (success) this.$router.push('/login')
       })
+    },
+    isProductionContext () {
+      const path = this.$store.state.route.path
+      return path.indexOf('assets') > 0 || path.indexOf('shots') > 0
+    }
+  },
+  watch: {
+    openProductions () {
+      if (this.openProductions.length > 0) {
+        this.currentProduction = this.openProductions[0].id
+      }
+    },
+    currentProductionId () {
+      this.$store.commit('SET_CURRENT_PRODUCTION', this.currentProductionId)
+    },
+    currentProduction () {
+      this.currentProductionId = this.getCurrentProduction.id
     }
   }
 }
@@ -124,6 +170,7 @@ export default {
 .user-menu {
   position: fixed;
   top: 60px;
+  width: 200px;
   right: 0;
   background-color: white;
   background: #5e60ba;
@@ -134,7 +181,6 @@ export default {
   transition-property: all;
   transition-duration: .5s;
   transition-timing-function: cubic-bezier(0, 1, 0.5, 1);
-  width: 200px;
 }
 
 .user-menu li {
@@ -184,7 +230,17 @@ export default {
   .user-menu {
     right: -160;
   }
-
 }
 
+.hidden {
+  display: none;
+}
+
+.production-selector-label {
+  margin-right: 1em;
+}
+
+.production-selector {
+  margin-top: 1.9em;
+}
 </style>

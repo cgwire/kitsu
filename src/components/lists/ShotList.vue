@@ -1,83 +1,153 @@
 <template>
 <div class="data-list">
-  <table class="table">
-    <thead>
-      <tr>
-        <th class="project">{{ $t('shots.fields.production') }}</th>
-        <th class="sequence">{{ $t('shots.fields.sequence') }}</th>
-        <th class="name">{{ $t('shots.fields.name') }}</th>
-        <th class="framein">{{ $t('shots.fields.frame_in') }}</th>
-        <th class="frameout">{{ $t('shots.fields.frame_out') }}</th>
-        <th class="description">{{ $t('shots.fields.description') }}</th>
-        <th
-          class="validation"
-          :style="{
-            border: '2px solid ' + column.color
-          }"
-          v-for="column in validationColumns">
-          {{ column.name }}
-        </th>
 
-        <th class="actions">
+  <div class="shot-list-header">
+    <div class="level header-title">
+      <div class="level-left">
+        <div class="level-item">
+          <page-title :text="$t('shots.title')"></page-title>
+        </div>
+      </div>
+
+      <div class="level-right">
+        <div class="level-item">
           <button-link
-            class="level-item is-small"
-            :text="$t('tasks.create_tasks')"
-            path="/shots/create-tasks"
+            class="level-item"
+            :text="$t('main.csv.import_file')"
+            icon="upload"
+            :path="{
+              name: 'import-shots',
+              params: {production_id: getCurrentProduction.id}
+            }"
           >
           </button-link>
-        </th>
-      </tr>
-    </thead>
-    <tbody>
-      <tr
-        key="entry.id"
-        :class="{canceled: entry.canceled}"
-        v-for="entry in entries"
-      >
-        <production-name-cell
-          class="project"
-          :only-avatar="true"
-          :entry="{name: entry.project_name || ''}"
-        >
-        </production-name-cell>
-        <td :class="{name: !entry.canceled}">
-          {{ entry.sequence_name }}
-        </td>
-        <td :class="{name: !entry.canceled}">
-          {{ entry.name }}
-        </td>
-        <td class="framein">
-          {{ entry.data.frame_in }}
-        </td>
-        <td class="frameout">
-          {{ entry.data.frame_out }}
-        </td>
-        <td class="description">
-          {{ entry.description }}
-        </td>
-        <td
-          class="validation"
-          :style="{
-            'border': '2px solid ' + column.color,
-          }"
-          v-for="column in validationColumns"
-        >
-          <validation-tag
-            :task="entry.validations[column.name]"
-            v-if="entry.validations[column.name]"
+          <button-href-link
+            class="level-item"
+            :text="$t('main.csv.export_file')"
+            icon="download"
+            :path="'/api/export/csv/shots.csv?project_id=' + getCurrentProduction.id"
           >
-          </validation-tag>
-        </td>
-        <row-actions
-          :entry-id="entry.id"
-          :edit-route="'/shots/edit/' + entry.id"
-          :delete-route="'/shots/delete/' + entry.id"
-          :hide-edit="true"
+          </button-href-link>
+        </div>
+      </div>
+    </div>
+
+    <div class="filters-area">
+      <div class="level">
+        <div class="level-right">
+          <div class="level-item">
+            <search-icon></search-icon>
+          </div>
+          <div class="level-item">
+            <input
+              class="input search-input"
+              type="text"
+              @input="onSearchChange"
+              v-focus
+            />
+          </div>
+          <div class="level-item">
+            <filter-icon></filter-icon>
+          </div>
+          <div class="level-item">
+            No filter set.
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="table-header-wrapper" v-scroll="onHeaderScroll">
+      <table class="table table-header">
+        <thead>
+          <tr>
+            <th class="sequence">{{ $t('shots.fields.sequence') }}</th>
+            <th class="name">{{ $t('shots.fields.name') }}</th>
+            <th class="framein">{{ $t('shots.fields.frame_in') }}</th>
+            <th class="frameout">{{ $t('shots.fields.frame_out') }}</th>
+            <th class="description">{{ $t('shots.fields.description') }}</th>
+            <th
+              class="validation"
+              :style="{
+                'border-left': '2px solid ' + column.color
+              }"
+              v-for="column in validationColumns">
+              {{ column.name }}
+            </th>
+
+            <th class="actions">
+              <button-link
+                class="is-small"
+                icon="plus"
+                :text="$t('tasks.create_tasks')"
+                :path="{
+                  name: 'create-shot-tasks',
+                  params: {
+                    production_id: getCurrentProduction.id
+                  }
+                }"
+              >
+              </button-link>
+            </th>
+
+          </tr>
+        </thead>
+      </table>
+    </div>
+  </div>
+
+  <div class="table-wrapper" ref="tableWrapper">
+    <table class="table table-data">
+      <tbody>
+        <tr
+          key="entry.id"
+          :class="{canceled: entry.canceled}"
+          v-for="entry in entries"
         >
-        </row-actions>
-      </tr>
-    </tbody>
-  </table>
+          <td :class="{name: !entry.canceled}">
+            {{ entry.sequence_name }}
+          </td>
+          <td :class="{name: !entry.canceled}">
+            {{ entry.name }}
+          </td>
+          <td class="framein">
+            {{ entry.data.frame_in }}
+          </td>
+          <td class="frameout">
+            {{ entry.data.frame_out }}
+          </td>
+          <td class="description">
+            {{ entry.description }}
+          </td>
+          <td
+            class="validation"
+            :style="{
+              'border-left': '2px solid ' + column.color,
+            }"
+            v-for="column in validationColumns"
+          >
+            <validation-tag
+              :task="entry.validations[column.name]"
+              v-if="entry.validations[column.name]"
+            >
+            </validation-tag>
+          </td>
+          <row-actions
+            :entry-id="entry.id"
+            edit-route=""
+            :delete-route="{
+              name: 'delete-shots',
+              params: {
+                shot_id: entry.id,
+                production_id: getCurrentProduction.id
+              }
+            }"
+            :hide-edit="true"
+          >
+          </row-actions>
+        </tr>
+      </tbody>
+    </table>
+  </div>
 
   <div class="has-text-centered" v-if="isLoading">
     <img src="../../assets/spinner.svg">
@@ -95,10 +165,12 @@
 
 <script>
 import { mapGetters, mapActions } from 'vuex'
-import ProductionNameCell from '../cells/ProductionNameCell'
+import { SearchIcon, FilterIcon } from 'vue-feather-icons'
 import ValidationTag from '../widgets/ValidationTag'
 import RowActions from '../widgets/RowActions'
 import ButtonLink from '../widgets/ButtonLink'
+import ButtonHrefLink from '../widgets/ButtonHrefLink'
+import PageTitle from '../widgets/PageTitle'
 
 export default {
   name: 'shot-list',
@@ -113,17 +185,28 @@ export default {
   },
   components: {
     ButtonLink,
-    ProductionNameCell,
+    ButtonHrefLink,
+    FilterIcon,
+    PageTitle,
     RowActions,
+    SearchIcon,
     ValidationTag
   },
   computed: {
     ...mapGetters([
+      'getCurrentProduction'
     ])
   },
   methods: {
     ...mapActions([
-    ])
+    ]),
+    onSearchChange (event) {
+      const searchQuery = event.target.value
+      this.$store.commit('SET_SHOT_SEARCH', searchQuery)
+    },
+    onHeaderScroll (event, position) {
+      this.$refs.tableWrapper.scrollLeft = position.scrollLeft
+    }
   }
 }
 </script>
@@ -151,9 +234,9 @@ th.actions {
 }
 
 .sequence {
-  min-width: 50px;
-  max-width: 50px;
-  width: 50px;
+  min-width: 100px;
+  max-width: 100px;
+  width: 100px;
   font-weight: bold;
 }
 
@@ -198,5 +281,49 @@ td.sequence {
 
 .canceled {
   text-decoration: line-through;
+}
+
+.shot-list-header {
+  position: fixed;
+  height: 16tpx;
+  min-height: 163px;
+  max-height: 163px;
+  padding: 1em 2em 0 2em;
+  margin-top: 0;
+  right: 0;
+  left: 0;
+  z-index: 100;
+  background: white;
+}
+
+.filters-area {
+  background: white;
+  padding-top: 1em;
+  padding-bottom: 1em;
+  margin-bottom: 0;
+}
+
+.table-header-wrapper {
+  overflow-x: auto;
+}
+
+.table-header {
+  margin-bottom: 0;
+}
+
+.table-wrapper {
+  overflow-x: auto;
+}
+
+table.table-data {
+  margin-top: 181px;
+}
+
+.data-list {
+  width: 100%;
+}
+
+.search-input:focus {
+  border-color: #8F91EB;
 }
 </style>

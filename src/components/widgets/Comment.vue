@@ -39,7 +39,7 @@
           <button-link
             class="level-item"
             :text="$t('tasks.add_preview')"
-            icon="fa-upload"
+            icon="upload"
             :path="'/tasks/' + comment.object_id + '/comments/' + comment.id + '/add-preview'"
             v-else
           >
@@ -66,7 +66,7 @@
           <button-link
             class="level-item"
             :text="$t('tasks.add_preview')"
-            icon="fa-upload"
+            icon="upload"
             :path="'/tasks/' + comment.object_id + '/comments/' + comment.id + '/add-preview'"
             v-else
           >

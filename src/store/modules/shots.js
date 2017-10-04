@@ -1,5 +1,7 @@
 import shotsApi from '../api/shots'
 import tasksStore from './tasks'
+import productionsStore from './productions'
+import { buildNameIndex, indexSearch } from '../../lib/indexing'
 
 import { sortShots, sortValidationColumns } from '../../lib/sorting'
 import {
@@ -23,6 +25,8 @@ import {
 
   NEW_TASK_COMMENT_END,
 
+  SET_SHOT_SEARCH,
+
   RESET_ALL
 } from '../mutation-types'
 
@@ -30,6 +34,9 @@ const state = {
   shots: [],
   sequences: [],
   validationColumns: {},
+
+  displayedShots: [],
+  shotIndex: {},
 
   isShotsLoading: false,
   isShotsLoadingError: false,
@@ -53,6 +60,8 @@ const getters = {
     return sortValidationColumns(Object.values(state.validationColumns))
   },
 
+  displayedShots: state => state.displayedShots,
+
   isShotsLoading: state => state.isShotsLoading,
   isShotsLoadingError: state => state.isShotsLoadingError,
 
@@ -72,11 +81,20 @@ const getters = {
 
 const actions = {
 
-  loadShots ({ commit, state }, callback) {
+  loadShots ({ commit, state, rootState }, callback) {
+    const currentProduction = productionsStore.getters.getCurrentProduction(
+      rootState.productions
+    )
     commit(LOAD_SHOTS_START)
-    shotsApi.getShots((err, shots) => {
+    shotsApi.getShots(currentProduction, (err, shots) => {
       if (err) commit(LOAD_SHOTS_ERROR)
-      else commit(LOAD_SHOTS_END, shots)
+      else {
+        shots.forEach((shot) => {
+          shot.project_name = currentProduction.name
+          return shot
+        })
+        commit(LOAD_SHOTS_END, shots)
+      }
       if (callback) callback(err)
     })
   },
@@ -159,6 +177,9 @@ const mutations = {
     })
     state.shots = shots
     state.validationColumns = validationColumns
+
+    state.shotIndex = buildNameIndex(shots)
+    state.displayedShots = state.shots
   },
 
   [SHOT_CSV_FILE_SELECTED] (state, formData) {
@@ -190,11 +211,6 @@ const mutations = {
     )
     newShot.shot_type_name = shotType.name
 
-    const production = state.openProductions.find(
-      (production) => production.id === newShot.project_id
-    )
-    newShot.project_name = production.name
-
     if (shot) {
       Object.assign(shot, newShot)
     } else {
@@ -205,6 +221,7 @@ const mutations = {
       isLoading: false,
       isError: false
     }
+    state.shotIndex = buildNameIndex(state.shots)
   },
 
   [DELETE_SHOT_START] (state) {
@@ -235,6 +252,7 @@ const mutations = {
       isLoading: false,
       isError: false
     }
+    state.shotIndex = buildNameIndex(state.shots)
   },
 
   [NEW_TASK_COMMENT_END] (state, {comment, taskId}) {
@@ -248,12 +266,20 @@ const mutations = {
     }
   },
 
+  [SET_SHOT_SEARCH] (state, shotSearch) {
+    state.displayedShots =
+      indexSearch(state.shotIndex, shotSearch) || state.shots
+  },
+
   [RESET_ALL] (state) {
     state.shots = []
     state.sequences = []
     state.isShotsLoading = false
     state.isShotsLoadingError = false
     state.shotsCsvFormData = null
+
+    state.shotIndex = {}
+    state.displayedShots = []
 
     state.editShot = {
       isLoading: false,

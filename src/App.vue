@@ -9,6 +9,9 @@ export default {
 </script>
 
 <style>
+:focus {outline:none;}
+::-moz-focus-inner {border:0;}
+
 #app .router-link-active {
   color: #00d1b2;
 }
@@ -17,7 +20,6 @@ export default {
   padding: 0.5em 2em;
   padding-top: 70px;
   background: white;
-  overflow-x: auto;
 }
 
 .table td {
@@ -63,13 +65,20 @@ tr .actions p {
   margin-bottom: 0;
 }
 
+tr .actions {
+}
+
 tr .actions a {
-  display: none;
+  opacity: 0;
   color: #999;
 }
 
 tr:hover .actions a {
-  display: inline-flex;
+  opacity: 1
+}
+
+.canceled td:not(.actions) {
+  text-decoration: line-through;
 }
 
 .field {
@@ -107,6 +116,17 @@ input.input:focus {
 
 .actions .button .icon.is-small:first-child:last-child {
   margin-right: 0em;
+}
+
+.search-input {
+  border: 0;
+  box-shadow: none;
+  border-radius: 0;
+  border-bottom: 2px solid #CCC
+}
+
+.filters-area {
+  margin-bottom: 2em;
 }
 
 @media screen and (max-width: 1000px) {

@@ -1,15 +1,15 @@
 <template>
   <div class="task-types page">
     <div class="task-types-list">
-      <h1 class="title">{{ $t('task_types.title') }}</h1>
-
       <div class="level">
         <div class="level-left">
+          <page-title :text="$t('task_types.title')"></page-title>
         </div>
         <div class="level-right">
           <div class="level-item">
             <button-link
               class="level-item"
+              icon="plus"
               :text="$t('task_types.new_task_type')"
               path="/task-types/new"
             >
@@ -54,16 +54,18 @@ import { mapGetters, mapActions } from 'vuex'
 import TaskTypeList from './lists/TaskTypeList'
 import EditTaskTypeModal from './modals/EditTaskTypeModal'
 import DeleteModal from './widgets/DeleteModal'
+import PageTitle from './widgets/PageTitle'
 import ButtonLink from './widgets/ButtonLink'
 
 export default {
   name: 'menu',
 
   components: {
-    TaskTypeList,
+    ButtonLink,
     DeleteModal,
     EditTaskTypeModal,
-    ButtonLink
+    PageTitle,
+    TaskTypeList
   },
 
   data () {

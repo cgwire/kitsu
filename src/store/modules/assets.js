@@ -1,21 +1,13 @@
 import assetsApi from '../api/assets'
 import { sortAssets, sortValidationColumns } from '../../lib/sorting'
+import { buildNameIndex, indexSearch } from '../../lib/indexing'
 import tasksStore from './tasks'
+import productionsStore from './productions'
 
 import {
   LOAD_ASSETS_START,
   LOAD_ASSETS_ERROR,
   LOAD_ASSETS_END,
-
-  ASSET_CSV_FILE_SELECTED,
-  IMPORT_ASSETS_START,
-  IMPORT_ASSETS_END,
-
-  LOAD_ASSET_TYPES_START,
-  LOAD_ASSET_TYPES_ERROR,
-  LOAD_ASSET_TYPES_END,
-
-  LOAD_OPEN_PRODUCTIONS_END,
 
   EDIT_ASSET_START,
   EDIT_ASSET_ERROR,
@@ -25,9 +17,19 @@ import {
   DELETE_ASSET_ERROR,
   DELETE_ASSET_END,
 
-  DELETE_TASK_END,
+  LOAD_ASSET_TYPES_START,
+  LOAD_ASSET_TYPES_ERROR,
+  LOAD_ASSET_TYPES_END,
 
+  ASSET_CSV_FILE_SELECTED,
+  IMPORT_ASSETS_START,
+  IMPORT_ASSETS_END,
+
+  LOAD_OPEN_PRODUCTIONS_END,
+  DELETE_TASK_END,
   NEW_TASK_COMMENT_END,
+
+  SET_ASSET_SEARCH,
 
   RESET_ALL
 } from '../mutation-types'
@@ -35,6 +37,10 @@ import {
 const state = {
   assets: [],
   assetTypes: [],
+
+  assetIndex: {},
+  displayedAssets: [],
+
   validationColumns: {},
   openProductions: [],
   isAssetsLoading: false,
@@ -43,6 +49,7 @@ const state = {
 
   assetCreated: '',
   editAsset: {
+    isCreateError: false,
     isLoading: false,
     isError: false
   },
@@ -61,6 +68,8 @@ const getters = {
 
   isAssetsLoading: state => state.isAssetsLoading,
   isAssetsLoadingError: state => state.isAssetsLoadingError,
+
+  displayedAssets: state => state.displayedAssets,
 
   editAsset: state => state.editAsset,
   deleteAsset: state => state.deleteAsset,
@@ -83,11 +92,20 @@ const getters = {
 
 const actions = {
 
-  loadAssets ({ commit, state }, callback) {
+  loadAssets ({ commit, state, rootState }, callback) {
+    const currentProduction = productionsStore.getters.getCurrentProduction(
+      rootState.productions
+    )
     commit(LOAD_ASSETS_START)
-    assetsApi.getAssets((err, assets) => {
+    assetsApi.getAssets(currentProduction, (err, assets) => {
       if (err) commit(LOAD_ASSETS_ERROR)
-      else commit(LOAD_ASSETS_END, assets)
+      else {
+        assets.forEach((asset) => {
+          asset.project_name = currentProduction.name
+          return asset
+        })
+        commit(LOAD_ASSETS_END, assets)
+      }
       if (callback) callback(err)
     })
   },
@@ -141,8 +159,13 @@ const actions = {
 
 const mutations = {
   [LOAD_ASSETS_START] (state) {
+    state.assets = []
+    state.validationColumns = {}
     state.isAssetsLoading = true
     state.isAssetsLoadingError = false
+
+    state.assetIndex = {}
+    state.displayedAssets = []
   },
 
   [LOAD_ASSETS_ERROR] (state) {
@@ -171,6 +194,9 @@ const mutations = {
     state.assets = assets
     state.isAssetsLoading = false
     state.isAssetsLoadingError = false
+
+    state.assetIndex = buildNameIndex(assets)
+    state.displayedAssets = state.assets
   },
 
   [ASSET_CSV_FILE_SELECTED] (state, formData) {
@@ -210,12 +236,8 @@ const mutations = {
     const assetType = state.assetTypes.find(
       (assetType) => assetType.id === newAsset.entity_type_id
     )
-    newAsset.asset_type_name = assetType.name
+    if (assetType) newAsset.asset_type_name = assetType.name
 
-    const production = state.openProductions.find(
-      (production) => production.id === newAsset.project_id
-    )
-    newAsset.project_name = production.name
     newAsset.tasks = []
 
     if (asset) {
@@ -229,6 +251,7 @@ const mutations = {
       isLoading: false,
       isError: false
     }
+    state.assetIndex = buildNameIndex(state.assets)
   },
 
   [DELETE_ASSET_START] (state) {
@@ -259,6 +282,7 @@ const mutations = {
       isLoading: false,
       isError: false
     }
+    state.assetIndex = buildNameIndex(state.assets)
   },
 
   [DELETE_TASK_END] (state, task) {
@@ -285,6 +309,11 @@ const mutations = {
     }
   },
 
+  [SET_ASSET_SEARCH] (state, assetSearch) {
+    state.displayedAssets =
+      indexSearch(state.assetIndex, assetSearch) || state.assets
+  },
+
   [RESET_ALL] (state) {
     state.assets = []
     state.assetTypes = []
@@ -292,7 +321,11 @@ const mutations = {
     state.isAssetsLoadingError = false
     state.assetsCsvFormData = null
 
+    state.assetIndex = {}
+    state.displayedAssets = []
+
     state.editAsset = {
+      isCreateError: false,
       isLoading: false,
       isError: false
     }

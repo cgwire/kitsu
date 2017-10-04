@@ -21,6 +21,8 @@ import {
   DELETE_PRODUCTION_ERROR,
   DELETE_PRODUCTION_END,
 
+  SET_CURRENT_PRODUCTION,
+
   RESET_ALL
 } from '../mutation-types'
 
@@ -28,6 +30,7 @@ const state = {
   productions: [],
   openProductions: [],
   productionStatus: [],
+  currentProduction: null,
 
   isProductionsLoading: false,
   isProductionsLoadingError: false,
@@ -54,6 +57,16 @@ const getters = {
   editProduction: state => state.editProduction,
   deleteProduction: state => state.deleteProduction,
 
+  currentProduction: (state) => state.currentProduction,
+  getCurrentProduction: (state) => {
+    if (state.currentProduction) {
+      return state.currentProduction
+    } else if (state.openProductions.length > 0) {
+      return state.openProductions[0]
+    } else {
+      return null
+    }
+  },
   getProduction: (state, getters) => (id) => {
     return state.productions.find(
       (production) => production.id === id
@@ -179,7 +192,6 @@ const mutations = {
     state.editProduction.isLoading = true
     state.editProduction.isError = false
   },
-
   [EDIT_PRODUCTION_ERROR] (state) {
     state.editProduction.isLoading = false
     state.editProduction.isError = true
@@ -193,6 +205,21 @@ const mutations = {
     newProduction.project_status_name = productionStatus.name
 
     if (production) {
+      const openProductionIndex = state.openProductions.findIndex(
+        (openProduction) => openProduction.id === newProduction.id
+      )
+      if (newProduction.project_status_id) {
+        if (
+          openProductionIndex >= 0 &&
+          production.project_status_id !== newProduction.project_status_id
+        ) {
+          state.openProductions.splice(openProductionIndex, 1)
+        } else {
+          state.openProductions.push(production)
+          state.openProductions = sortByName(state.openProductions)
+        }
+      }
+
       Object.assign(production, newProduction)
     } else {
       state.productions.push(newProduction)
@@ -230,11 +257,19 @@ const mutations = {
     }
   },
 
+  [SET_CURRENT_PRODUCTION] (state, currentProductionId) {
+    const production = state.openProductions.find(
+      (production) => production.id === currentProductionId
+    )
+    state.currentProduction = production
+  },
+
   [RESET_ALL] (state) {
     state.productions = []
     state.productionStatus = []
     state.isProductionsLoading = false
     state.isProductionsLoadingError = false
+    state.currentProduction = null
 
     state.editProduction = {
       isLoading: false,

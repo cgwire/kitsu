@@ -36,8 +36,9 @@ export default {
   createTasks (data, callback) {
     const taskTypeId = data.task_type_id
     const type = data.type
+    const projectId = data.project_id
     client.post(
-      `/api/actions/task-types/${taskTypeId}/${type}/create-tasks`,
+      `/api/actions/task-types/${taskTypeId}/${type}/create-tasks?project_id=${projectId}`,
       {},
       callback
     )

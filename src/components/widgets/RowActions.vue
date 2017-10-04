@@ -1,29 +1,31 @@
 <template>
-<td class="actions">
-  <p class="field">
-    <router-link class="button" :to="editRoute" v-if="!hideEdit">
-      <span class="icon is-small">
-        <i class="fa fa-edit"></i>
-      </span>
-    </router-link>
-    <router-link class="button" :to="deleteRoute">
-      <span class="icon is-small">
-        <i class="fa fa-trash"></i>
-      </span>
-    </router-link>
-  </p>
+<td class="actions has-text-right">
+  <button-link
+    icon="edit"
+    :path="editRoute"
+    v-if="!hideEdit"
+  >
+  </button-link>
+  <button-link
+    icon="delete"
+    :path="deleteRoute"
+  >
+  </button-link>
 </td>
 </template>
 
 <script>
 import { mapGetters, mapActions } from 'vuex'
+import ButtonLink from './ButtonLink'
 
 export default {
   name: 'row-actions',
+  components: {
+    ButtonLink
+  },
   props: [
     'editRoute',
     'deleteRoute',
-    'entryId',
     'hideEdit'
   ],
   computed: {
@@ -38,7 +40,4 @@ export default {
 </script>
 
 <style scoped>
-.actions {
-  text-align: right;
-}
 </style>

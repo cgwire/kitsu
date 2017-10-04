@@ -2,21 +2,28 @@
   <div class="navbar">
     <aside v-bind:class="{'hidden': isSidebarHidden}">
       <div>
-        <p class="company-logo has-text-centered">
-          <img src="../assets/kitsu.png" />
-          <h2 class="subtitle sidebar-title">Kitsu</h2>
-        </p>
+        <router-link
+           to="/"
+        >
+          <p
+            class="company-logo has-text-centered"
+            @click="toggleSidebar()"
+          >
+            <img src="../assets/kitsu.png" />
+            <h2 class="subtitle sidebar-title">Kitsu</h2>
+          </p>
+        </router-link>
         <section>
          <h2>Fabrication</h2>
 
          <p @click="toggleSidebar()">
-           <router-link to="/assets">
+           <router-link :to="assetsPath">
              {{ $t("assets.title") }}
            </router-link>
          </p>
 
          <p @click="toggleSidebar()">
-           <router-link to="/shots">
+           <router-link :to="shotsPath">
              {{ $t("shots.title") }}
            </router-link>
          </p>
@@ -60,13 +67,41 @@ export default {
   name: 'menu',
   computed: {
     ...mapGetters([
-      'isSidebarHidden'
+      'isSidebarHidden',
+      'currentProduction',
+      'getCurrentProduction'
     ])
+  },
+  data () {
+    return {
+      assetsPath: this.getAssetsPath(),
+      shotsPath: this.getShotsPath()
+    }
   },
   methods: {
     ...mapActions([
       'toggleSidebar'
-    ])
+    ]),
+    getAssetsPath () {
+      if (this.getCurrentProduction) {
+        return `/productions/${this.getCurrentProduction.id}/assets`
+      } else {
+        return '/assets'
+      }
+    },
+    getShotsPath () {
+      if (this.getCurrentProduction) {
+        return `/productions/${this.getCurrentProduction.id}/shots`
+      } else {
+        return '/shots'
+      }
+    }
+  },
+  watch: {
+    currentProduction () {
+      this.assetsPath = this.getAssetsPath()
+      this.shotsPath = this.getShotsPath()
+    }
   }
 }
 </script>

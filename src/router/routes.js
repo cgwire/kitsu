@@ -9,6 +9,7 @@ import Main from '../components/Main'
 import NotFound from '../components/NotFound'
 import People from '../components/People'
 import Productions from '../components/Productions'
+import OpenProductions from '../components/OpenProductions'
 import Profile from '../components/Profile'
 import Task from '../components/Task'
 import TaskTypes from '../components/TaskTypes'
@@ -32,7 +33,7 @@ export const routes = [
     },
 
     children: [
-      { path: '', component: People },
+      { path: '', component: OpenProductions },
       { path: '/people', component: People },
       { path: '/people/new', component: People },
       { path: '/people/edit/:person_id', component: People },
@@ -45,16 +46,59 @@ export const routes = [
       { path: '/productions/delete/:production_id', component: Productions },
 
       { path: '/assets', component: Assets },
-      { path: '/assets/new', component: Assets },
-      { path: '/assets/edit/:asset_id', component: Assets },
-      { path: '/assets/delete/:asset_id', component: Assets },
-      { path: '/assets/import', component: Assets },
-      { path: '/assets/create-tasks', component: Assets },
+      {
+        path: '/productions/:production_id/assets',
+        component: Assets,
+        name: 'assets'
+      },
+      {
+        path: '/productions/:production_id/assets/new',
+        component: Assets,
+        name: 'new-asset'
+      },
+      {
+        path:
+        '/productions/:production_id/assets/edit/:asset_id',
+        component: Assets,
+        name: 'edit-asset'
+      },
+      {
+        path: '/productions/:production_id/assets/delete/:asset_id',
+        component: Assets,
+        name: 'delete-asset'
+      },
+      {
+        path: '/productions/:production_id/assets/import',
+        component: Assets,
+        name: 'import-assets'
+      },
+      {
+        path: '/productions/:production_id/assets/create-tasks',
+        component: Assets,
+        name: 'create-asset-tasks'
+      },
 
       { path: '/shots', component: Shots },
-      { path: '/shots/import', component: Shots },
-      { path: '/shots/create-tasks', component: Shots },
-      { path: '/shots/delete/:shot_id', component: Shots },
+      {
+        path: '/productions/:production_id/shots',
+        component: Shots,
+        name: 'shots'
+      },
+      {
+        path: '/productions/:production_id/shots/import',
+        component: Shots,
+        name: 'import-shots'
+      },
+      {
+        path: '/productions/:production_id/shots/create-tasks',
+        component: Shots,
+        name: 'create-shot-tasks'
+      },
+      {
+        path: '/productions/:production_id/shots/delete/:shot_id',
+        component: Shots,
+        name: 'delete-shots'
+      },
 
       { path: '/tasks/:task_id', component: Task },
       { path: '/tasks/:task_id/delete', component: Task },

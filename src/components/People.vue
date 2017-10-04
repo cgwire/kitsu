@@ -3,7 +3,7 @@
     <div class="people-list">
       <div class="level">
         <div class="level-left">
-          <h1 class="title">{{ $t("people.title") }}</h1>
+          <page-title :text="$t('people.title')"></page-title>
         </div>
 
         <div class="level-right">
@@ -11,21 +11,21 @@
             <button-link
               class="level-item"
               :text="$t('main.csv.import_file')"
-              icon="fa-upload"
+              icon="upload"
               path="/people/import"
             >
             </button-link>
             <button-href-link
               class="level-item"
               :text="$t('main.csv.export_file')"
-              icon="fa-download"
+              icon="download"
               path="/api/export/csv/persons.csv"
             >
             </button-href-link>
             <button-link
               class="level-item"
               :text="$t('people.new_person')"
-              icon="fa-plus"
+              icon="plus"
               path="/people/new"
             >
             </button-link>
@@ -86,6 +86,7 @@ import ImportModal from './modals/ImportModal'
 import Filters from './widgets/Filters'
 import ButtonLink from './widgets/ButtonLink'
 import ButtonHrefLink from './widgets/ButtonHrefLink'
+import PageTitle from './widgets/PageTitle'
 
 export default {
   name: 'menu',
@@ -96,6 +97,7 @@ export default {
     ImportModal,
     ButtonLink,
     ButtonHrefLink,
+    PageTitle,
     Filters
   },
 
