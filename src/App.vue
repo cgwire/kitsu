@@ -20,7 +20,6 @@ export default {
   padding: 0.5em 2em;
   padding-top: 70px;
   background: white;
-  overflow-x: auto;
 }
 
 .table td {
@@ -66,13 +65,20 @@ tr .actions p {
   margin-bottom: 0;
 }
 
+tr .actions {
+}
+
 tr .actions a {
-  display: none;
+  opacity: 0;
   color: #999;
 }
 
 tr:hover .actions a {
-  display: inline-flex;
+  opacity: 1
+}
+
+.canceled {
+  text-decoration: line-through;
 }
 
 .field {
