@@ -8,8 +8,8 @@ export default {
     delete_error: 'Une erreur est survenue lors de la suppression. Il y a probablement des données liées à elle. Etes vous sur que cette personne n\'a aucune tâche assignée et n\'a fait aucun commentaire ?',
     persons: 'Personnes',
     csv: {
-      import_file: 'Importer un fichier .csv',
-      export_file: 'Télécharger en .csv',
+      import_file: 'Importer',
+      export_file: 'Télécharger',
       import_title: 'Import employees from a CSV file',
       required_fields: 'Le fichier CSV à importer doit comporter les colonnes suivantes :',
       select_file: 'Sélectionnez un fichier de votre disque dur :'
@@ -56,8 +56,8 @@ export default {
     confirmation_and_stay: 'Confirmer et rester',
     delete_text: 'Etes vous sûr de vouloir supprimer {name} de la base de données ?',
     csv: {
-      import_file: 'Importer un fichier .csv',
-      export_file: 'Télécharger en .csv',
+      import_file: 'Importer',
+      export_file: 'Exporter',
       import_title: 'Importer depuis un .csv',
       required_fields: 'Le fichier CSV à importer doit comporter les colonnes suivantes :',
       select_file: 'Sélectionner un fichier depuis votre dossier :',
