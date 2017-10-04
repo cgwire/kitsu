@@ -1,41 +1,12 @@
 <template>
   <div class="shots page">
 
-   <div class="shots-list">
-      <div class="level">
-        <div class="level-left">
-          <page-title :text="$t('shots.title')"></page-title>
-        </div>
-        <div class="level-right">
-          <div class="level-item">
-            <button-link
-              class="level-item"
-              :text="$t('main.csv.import_file')"
-              icon="fa-upload"
-              :path="{
-                name: 'import-shots',
-                params: {production_id: getCurrentProduction.id}
-              }"
-            >
-            </button-link>
-            <button-href-link
-              class="level-item"
-              :text="$t('main.csv.export_file')"
-              icon="fa-download"
-              :path="'/api/export/csv/shots.csv?project_id=' + getCurrentProduction.id"
-            >
-            </button-href-link>
-          </div>
-        </div>
-      </div>
-
-      <shot-list
-        :entries="displayedShots"
-        :is-loading="isShotsLoading"
-        :is-error="isShotsLoadingError"
-        :validation-columns="shotValidationColumns"
-      ></shot-list>
-    </div>
+    <shot-list
+      :entries="displayedShots"
+      :is-loading="isShotsLoading"
+      :is-error="isShotsLoadingError"
+      :validation-columns="shotValidationColumns"
+    ></shot-list>
 
     <delete-modal
       :active="modals.isDeleteDisplayed"
@@ -358,7 +329,13 @@ export default {
 </script>
 
 <style scoped>
-.shots-list {
-  margin-top: 2em;
+.shots.page {
+  margin: 0;
+  display: flex;
+  flex-direction: row;
+  justify-content: flex-start;
+  flex-wrap: wrap;
+  padding-top: 60px;
 }
+
 </style>

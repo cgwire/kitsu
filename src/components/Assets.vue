@@ -1,115 +1,74 @@
 <template>
-  <div class="assets page">
-   <div class="assets-list">
-      <div class="level">
+<div class="assets page">
 
-        <div class="level-left">
-          <div class="level-item">
-            <page-title :text="$t('assets.title')"></page-title>
-          </div>
-        </div>
-        <div class="level-right">
-          <div class="level-item">
-            <button-link
-              class="level-item"
-              :text="$t('main.csv.import_file')"
-              icon="fa-upload"
-              :path="{
-                name: 'import-assets',
-                params: {production_id: getCurrentProduction.id}
-              }"
-            >
-            </button-link>
-            <button-href-link
-              class="level-item"
-              :text="$t('main.csv.export_file')"
-              icon="fa-download"
-              :path="'/api/export/csv/assets.csv?project_id=' + getCurrentProduction.id"
-            >
-            </button-href-link>
-            <button-link
-              class="level-item"
-              :text="$t('assets.new_asset')"
-              icon="fa-plus"
-              :path="{
-                name: 'new-asset',
-                params: {production_id: getCurrentProduction.id}
-              }"
-            >
-            </button-link>
-          </div>
-        </div>
-      </div>
+  <asset-list
+    :entries="displayedAssets"
+    :is-loading="isAssetsLoading"
+    :is-error="isAssetsLoadingError"
+    :validation-columns="assetValidationColumns"
+  ></asset-list>
 
-      <asset-list
-        :entries="displayedAssets"
-        :is-loading="isAssetsLoading"
-        :is-error="isAssetsLoadingError"
-        :validation-columns="assetValidationColumns"
-      ></asset-list>
-    </div>
+  <edit-asset-modal
+    :active="modals.isNewDisplayed"
+    :is-loading="loading.edit"
+    :is-loading-stay="loading.stay"
+    :is-error="editAsset.isCreateError"
+    :is-success="editAsset.isSuccess"
+    :cancel-route="{
+      name: 'assets',
+      params: {production_id: getCurrentProduction.id}
+    }"
+    :asset-to-edit="assetToEdit"
+    @confirm="confirmEditAsset"
+    @confirmAndStay="confirmNewAssetStay"
+  >
+  </edit-asset-modal>
 
-    <edit-asset-modal
-      :active="modals.isNewDisplayed"
-      :is-loading="loading.edit"
-      :is-loading-stay="loading.stay"
-      :is-error="editAsset.isCreateError"
-      :is-success="editAsset.isSuccess"
-      :cancel-route="{
-        name: 'assets',
-        params: {production_id: getCurrentProduction.id}
-      }"
-      :asset-to-edit="assetToEdit"
-      @confirm="confirmEditAsset"
-      @confirmAndStay="confirmNewAssetStay"
-    >
-    </edit-asset-modal>
+  <delete-modal
+    :active="modals.isDeleteDisplayed"
+    :is-loading="deleteAsset.isLoading"
+    :is-error="deleteAsset.isCreateError"
+    :cancel-route="{
+      name: 'assets',
+      params: {production_id: getCurrentProduction.id}
+    }"
+    :text="deleteText()"
+    :error-text="$t('assets.delete_error')"
+    @confirm="confirmDeleteAsset"
+  >
+  </delete-modal>
 
-    <delete-modal
-      :active="modals.isDeleteDisplayed"
-      :is-loading="deleteAsset.isLoading"
-      :is-error="deleteAsset.isCreateError"
-      :cancel-route="{
-        name: 'assets',
-        params: {production_id: getCurrentProduction.id}
-      }"
-      :text="deleteText()"
-      :error-text="$t('assets.delete_error')"
-      @confirm="confirmDeleteAsset"
-    >
-    </delete-modal>
+  <import-modal
+    :active="modals.isImportDisplayed"
+    :is-loading="loading.importing"
+    :is-error="errors.importing"
+    :cancel-route="{
+      name: 'assets',
+      params: {production_id: getCurrentProduction.id}
+    }"
+    :form-data="assetsCsvFormData"
+    :columns="columns"
+    @fileselected="selectFile"
+    @confirm="uploadImportFile"
+  >
+  </import-modal>
 
-    <import-modal
-      :active="modals.isImportDisplayed"
-      :is-loading="loading.importing"
-      :is-error="errors.importing"
-      :cancel-route="{
-        name: 'assets',
-        params: {production_id: getCurrentProduction.id}
-      }"
-      :form-data="assetsCsvFormData"
-      :columns="columns"
-      @fileselected="selectFile"
-      @confirm="uploadImportFile"
-    >
-    </import-modal>
+  <create-tasks-modal
+    :active="modals.isCreateTasksDisplayed"
+    :is-loading="loading.creatingTasks"
+    :is-error="errors.creatingTasks"
+    :cancel-route="{
+      name: 'assets',
+      params: {production_id: getCurrentProduction.id}
+    }"
+    :title="$t('tasks.create_tasks_asset')"
+    :text="$t('tasks.create_tasks_asset_explaination')"
+    :error-text="$t('tasks.create_tasks_asset_failed')"
+    @confirm="confirmCreateTasks"
+  >
+  </create-tasks-modal>
 
-    <create-tasks-modal
-      :active="modals.isCreateTasksDisplayed"
-      :is-loading="loading.creatingTasks"
-      :is-error="errors.creatingTasks"
-      :cancel-route="{
-        name: 'assets',
-        params: {production_id: getCurrentProduction.id}
-      }"
-      :title="$t('tasks.create_tasks_asset')"
-      :text="$t('tasks.create_tasks_asset_explaination')"
-      :error-text="$t('tasks.create_tasks_asset_failed')"
-      @confirm="confirmCreateTasks"
-    >
-    </create-tasks-modal>
-
-  </div>
+</div>
 </template>
 
 <script>
@@ -382,7 +341,12 @@ export default {
 </script>
 
 <style scoped>
-.assets-list {
-  margin-top: 2em;
+.assets.page {
+g margin: 0;
+  display: flex;
+  flex-direction: row;
+  justify-content: flex-start;
+  flex-wrap: wrap;
+  padding-top: 60px;
 }
 </style>
