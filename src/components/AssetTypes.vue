@@ -1,15 +1,15 @@
 <template>
   <div class="asset-types page">
     <div class="asset-types-list">
-      <h1 class="title">{{ $t('asset_types.title') }}</h1>
-
       <div class="level">
         <div class="level-left">
+          <page-title :text="$t('asset_types.title')"></page-title>
         </div>
         <div class="level-right">
           <div class="level-item">
             <button-link
               class="level-item"
+              icon="plus"
               :text="$t('asset_types.new_asset_type')"
               path="/asset-types/new"
             >
@@ -55,15 +55,17 @@ import AssetTypeList from './lists/AssetTypeList'
 import EditAssetTypeModal from './modals/EditAssetTypeModal'
 import DeleteModal from './widgets/DeleteModal'
 import ButtonLink from './widgets/ButtonLink'
+import PageTitle from './widgets/PageTitle'
 
 export default {
   name: 'menu',
 
   components: {
     AssetTypeList,
+    ButtonLink,
     DeleteModal,
     EditAssetTypeModal,
-    ButtonLink
+    PageTitle
   },
 
   data () {

@@ -1,16 +1,16 @@
 <template>
   <div class="productions page">
     <div class="productions-list">
-      <h1 class="title">{{ $t('productions.title') }}</h1>
-
       <div class="level">
         <div class="level-left">
+          <page-title :text="$t('productions.title')"></page-title>
         </div>
         <div class="level-right">
           <div class="level-item">
             <button-link
               class="level-item"
               :text="$t('productions.new_production')"
+              icon="plus"
               path="/productions/new"
             >
             </button-link>
@@ -56,16 +56,18 @@ import EditProductionModal from './modals/EditProductionModal'
 import DeleteModal from './widgets/DeleteModal'
 import Filters from './widgets/Filters.vue'
 import ButtonLink from './widgets/ButtonLink.vue'
+import PageTitle from './widgets/PageTitle.vue'
 
 export default {
   name: 'menu',
 
   components: {
-    ProductionList,
+    ButtonLink,
     DeleteModal,
     EditProductionModal,
     Filters,
-    ButtonLink
+    PageTitle,
+    ProductionList
   },
 
   data () {
