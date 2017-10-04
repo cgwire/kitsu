@@ -86,6 +86,7 @@
             <th class="actions">
               <button-link
                 class="is-small"
+                icon="plus"
                 :text="$t('tasks.create_tasks')"
                 :path="{
                   name: 'create-asset-tasks',

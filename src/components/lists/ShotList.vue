@@ -76,7 +76,8 @@
 
             <th class="actions">
               <button-link
-                class="level-item is-small"
+                class="is-small"
+                icon="plus"
                 :text="$t('tasks.create_tasks')"
                 :path="{
                   name: 'create-shot-tasks',
@@ -87,6 +88,7 @@
               >
               </button-link>
             </th>
+
           </tr>
         </thead>
       </table>

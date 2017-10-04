@@ -77,7 +77,7 @@ tr:hover .actions a {
   opacity: 1
 }
 
-.canceled {
+.canceled td:not(.actions) {
   text-decoration: line-through;
 }
 
