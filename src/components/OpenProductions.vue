@@ -3,6 +3,7 @@
 
     <div v-if="openProductions.length > 0">
       <h1 class="title has-text-centered">
+        <activity-icon></activity-icon>
         {{ $t('productions.home.title') }}
       </h1>
       <div class="open-productions-list">
@@ -54,14 +55,17 @@
 </template>
 
 <script>
-import colors from '../lib/colors.js'
 import { mapGetters, mapActions } from 'vuex'
-import ButtonLink from './widgets/ButtonLink.vue'
+import { ActivityIcon } from 'vue-feather-icons'
+
+import colors from '../lib/colors.js'
+import ButtonLink from './widgets/ButtonLink'
 
 export default {
   name: 'menu',
 
   components: {
+    ActivityIcon,
     ButtonLink
   },
 
