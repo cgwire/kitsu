@@ -317,12 +317,14 @@ export default {
   watch: {
     $route () { this.handleModalsDisplay() },
     currentProduction () {
+      const oldPath = `${this.$route.path}`
       const newPath = {
         name: 'shots',
         params: {production_id: this.getCurrentProduction.id}
       }
       if (this.$route.path.length === 55) this.$router.push(newPath)
-      this.$store.dispatch('loadShots')
+      const path = this.$route.path
+      if (oldPath !== path) this.$store.dispatch('loadShots')
     }
   }
 }

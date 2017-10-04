@@ -88,7 +88,13 @@ const actions = {
     commit(LOAD_SHOTS_START)
     shotsApi.getShots(currentProduction, (err, shots) => {
       if (err) commit(LOAD_SHOTS_ERROR)
-      else commit(LOAD_SHOTS_END, shots)
+      else {
+        shots.forEach((shot) => {
+          shot.project_name = currentProduction.name
+          return shot
+        })
+        commit(LOAD_SHOTS_END, shots)
+      }
       if (callback) callback(err)
     })
   },
@@ -204,11 +210,6 @@ const mutations = {
       (shotType) => shotType.id === newShot.entity_type_id
     )
     newShot.shot_type_name = shotType.name
-
-    const production = state.openProductions.find(
-      (production) => production.id === newShot.project_id
-    )
-    newShot.project_name = production.name
 
     if (shot) {
       Object.assign(shot, newShot)

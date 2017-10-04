@@ -3,7 +3,6 @@ import firstBy from 'thenby'
 export const sortAssets = (assets) => {
   return assets.sort(
     firstBy('canceled')
-      .thenBy((a, b) => a.project_name.localeCompare(b.project_name))
       .thenBy((a, b) => a.asset_type_name.localeCompare(b.asset_type_name))
       .thenBy((a, b) => a.name.localeCompare(b.name))
   )
@@ -12,7 +11,6 @@ export const sortAssets = (assets) => {
 export const sortShots = (shots) => {
   return shots.sort(
     firstBy('canceled')
-      .thenBy((a, b) => a.project_name.localeCompare(b.project_name))
       .thenBy((a, b) => a.sequence_name.localeCompare(b.sequence_name))
       .thenBy((a, b) => a.name.localeCompare(b.name))
   )

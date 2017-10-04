@@ -99,7 +99,13 @@ const actions = {
     commit(LOAD_ASSETS_START)
     assetsApi.getAssets(currentProduction, (err, assets) => {
       if (err) commit(LOAD_ASSETS_ERROR)
-      else commit(LOAD_ASSETS_END, assets)
+      else {
+        assets.forEach((asset) => {
+          asset.project_name = currentProduction.name
+          return asset
+        })
+        commit(LOAD_ASSETS_END, assets)
+      }
       if (callback) callback(err)
     })
   },
@@ -232,10 +238,6 @@ const mutations = {
     )
     if (assetType) newAsset.asset_type_name = assetType.name
 
-    const production = state.openProductions.find(
-      (production) => production.id === newAsset.project_id
-    )
-    if (production) newAsset.project_name = production.name
     newAsset.tasks = []
 
     if (asset) {

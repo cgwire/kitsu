@@ -323,4 +323,7 @@ table.table-data {
   width: 100%;
 }
 
+.search-input:focus {
+  border-color: #8F91EB;
+}
 </style>

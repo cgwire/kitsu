@@ -328,13 +328,15 @@ export default {
   watch: {
     $route () { this.handleModalsDisplay() },
     currentProduction () {
+      const oldPath = `${this.$route.path}`
       const newPath = {
         name: 'assets',
         params: {production_id: this.getCurrentProduction.id}
       }
       if (this.$route.path.length === 56) this.$router.push(newPath)
+      const path = this.$route.path
 
-      this.$store.dispatch('loadAssets')
+      if (oldPath !== path) this.$store.dispatch('loadAssets')
     }
   }
 }
@@ -342,7 +344,7 @@ export default {
 
 <style scoped>
 .assets.page {
-g margin: 0;
+  margin: 0;
   display: flex;
   flex-direction: row;
   justify-content: flex-start;
