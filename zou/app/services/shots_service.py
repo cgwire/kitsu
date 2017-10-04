@@ -1,7 +1,7 @@
 from sqlalchemy.orm import aliased
 from sqlalchemy.exc import IntegrityError
 
-from zou.app.utils import events
+from zou.app.utils import events, fields
 
 from zou.app.models.entity import Entity
 from zou.app.models.entity_type import EntityType
@@ -89,24 +89,59 @@ def get_shots(criterions={}):
     return shots
 
 
-def get_shots_and_tasks(criterions={}):
-    shots = get_shots(criterions)
-    shot_ids = [shot["id"] for shot in shots]
-    tasks = Task.query.filter(Entity.id.in_(shot_ids)).all()
-
-    task_map = {}
-    task_status_map = {
+def get_task_status_map():
+    return {
         status.id: status for status in TaskStatus.query.all()
     }
-    task_type_map = {
+
+
+def get_task_type_map():
+    return {
         task_type.id: task_type for task_type in TaskType.query.all()
     }
 
-    for task in tasks:
+
+def get_shots_and_tasks(criterions={}):
+    shot_type = get_shot_type()
+    task_status_map = get_task_status_map()
+    task_type_map = get_task_type_map()
+    task_map = {}
+    shot_map = {}
+
+    Sequence = aliased(Entity, name='sequence')
+    query = Task.query \
+        .join(Entity) \
+        .filter(Entity.entity_type_id == shot_type.id) \
+        .join(Sequence, Sequence.id == Entity.parent_id) \
+        .add_columns(Sequence.name) \
+        .add_columns(Entity.name) \
+        .add_columns(Entity.description) \
+        .add_columns(Entity.data)
+
+    if "project_id" in criterions:
+        query = query.filter(Entity.project_id == criterions["project_id"])
+
+    tasks = query.all()
+
+    for (
+        task,
+        sequence_name,
+        entity_name,
+        entity_description,
+        entity_data
+    ) in tasks:
         shot_id = str(task.entity_id)
+        if task.entity_id not in shot_map:
+            shot_map[shot_id] = {
+                "id": shot_id,
+                "name": entity_name,
+                "sequence_name": sequence_name,
+                "data": fields.serialize_dict(entity_data)
+            }
+
         if shot_id not in task_map:
             task_map[shot_id] = []
-        task_dict = task.serialize()
+        task_dict = {"id": str(task.id)}
         task_status = task_status_map[task.task_status_id]
         task_type = task_type_map[task.task_type_id]
         task_dict.update({
@@ -119,8 +154,10 @@ def get_shots_and_tasks(criterions={}):
         })
         task_map[shot_id].append(task_dict)
 
-    for shot in shots:
+    shots = []
+    for shot in shot_map.values():
         shot["tasks"] = task_map.get(shot["id"], [])
+        shots.append(shot)
 
     return shots
 

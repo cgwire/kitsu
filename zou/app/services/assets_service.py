@@ -1,6 +1,6 @@
 from sqlalchemy.exc import StatementError, IntegrityError
 
-from zou.app.utils import events
+from zou.app.utils import events, fields
 
 from zou.app.models.entity import Entity
 from zou.app.models.entity_type import EntityType
@@ -233,24 +233,66 @@ def all_assets(criterions={}):
     return assets
 
 
-def all_assets_and_tasks(criterions={}):
-    assets = all_assets(criterions)
-    asset_ids = [asset["id"] for asset in assets]
-    tasks = Task.query.filter(Entity.id.in_(asset_ids)).all()
-
-    task_map = {}
-    task_status_map = {
+def get_task_status_map():
+    return {
         status.id: status for status in TaskStatus.query.all()
     }
-    task_type_map = {
+
+
+def get_task_type_map():
+    return {
         task_type.id: task_type for task_type in TaskType.query.all()
     }
 
-    for task in tasks:
+
+def all_assets_and_tasks(criterions={}):
+    shot_type = shots_service.get_shot_type()
+    sequence_type = shots_service.get_sequence_type()
+    episode_type = shots_service.get_episode_type()
+    task_status_map = get_task_status_map()
+    task_type_map = get_task_type_map()
+    task_map = {}
+    asset_map = {}
+
+    query = Task.query \
+        .join(Entity) \
+        .join(EntityType) \
+        .filter(
+            ~Entity.entity_type_id.in_([
+                shot_type.id,
+                sequence_type.id,
+                episode_type.id
+            ])
+        ) \
+        .add_columns(EntityType.name) \
+        .add_columns(Entity.name) \
+        .add_columns(Entity.description) \
+        .add_columns(Entity.data)
+
+    if "project_id" in criterions:
+        query = query.filter(Entity.project_id == criterions["project_id"])
+
+    tasks = query.all()
+
+    for (
+        task,
+        entity_type_name,
+        entity_name,
+        entity_description,
+        entity_data
+    ) in tasks:
         asset_id = str(task.entity_id)
+        if task.entity_id not in asset_map:
+            asset_map[asset_id] = {
+                "id": asset_id,
+                "name": entity_name,
+                "asset_type_name": entity_type_name,
+                "data": fields.serialize_value(entity_data)
+            }
+
         if asset_id not in task_map:
             task_map[asset_id] = []
-        task_dict = task.serialize()
+        task_dict = {"id": str(task.id)}
         task_status = task_status_map[task.task_status_id]
         task_type = task_type_map[task.task_type_id]
         task_dict.update({
@@ -263,7 +305,9 @@ def all_assets_and_tasks(criterions={}):
         })
         task_map[asset_id].append(task_dict)
 
-    for asset in assets:
+    assets = []
+    for asset in asset_map.values():
         asset["tasks"] = task_map.get(asset["id"], [])
+        assets.append(asset)
 
     return assets
