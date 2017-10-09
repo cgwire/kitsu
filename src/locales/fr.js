@@ -194,6 +194,10 @@ export default {
     delete_error: 'Une erreur est survenue en créant le plant, êtes vous sûr que le plan n\'a plus aucun lien ?'
   },
 
+  breakdown: {
+    title: 'Breakdown'
+  },
+
   server_down: {
     title: 'Kitsu a rencontré une erreur en communiquant avec son API de données.',
     text: 'Contactez votre fournisseur, votre administrateur système ou votre déartement informatique pour comprendre ce qui ne va pas.'

@@ -194,6 +194,10 @@ export default {
     delete_error: 'An error occured while deleting this shot. There are probably data linked to it. Are you sure this shot has no task linked to it?'
   },
 
+  breakdown: {
+    title: 'Breakdown'
+  },
+
   server_down: {
     title: 'Kitsu encountered an error while reaching its data API.',
     text: 'Please contact your vendor support, your system administrator or your IT department to understand what is going wrong.'
