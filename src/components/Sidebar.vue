@@ -17,6 +17,12 @@
          <h2>Fabrication</h2>
 
          <p @click="toggleSidebar()">
+           <router-link :to="breakdownPath">
+             {{ $t("breakdown.title") }}
+           </router-link>
+         </p>
+
+         <p @click="toggleSidebar()">
            <router-link :to="assetsPath">
              {{ $t("assets.title") }}
            </router-link>
@@ -65,6 +71,13 @@ import { mapGetters, mapActions } from 'vuex'
 
 export default {
   name: 'menu',
+  data () {
+    return {
+      breakdownPath: this.getProductionComponentPath('breakdown'),
+      assetsPath: this.getProductionComponentPath('assets'),
+      shotsPath: this.getProductionComponentPath('shots')
+    }
+  },
   computed: {
     ...mapGetters([
       'isSidebarHidden',
@@ -72,35 +85,26 @@ export default {
       'getCurrentProduction'
     ])
   },
-  data () {
-    return {
-      assetsPath: this.getAssetsPath(),
-      shotsPath: this.getShotsPath()
-    }
-  },
   methods: {
     ...mapActions([
       'toggleSidebar'
     ]),
-    getAssetsPath () {
+    getProductionComponentPath (routeName) {
       if (this.getCurrentProduction) {
-        return `/productions/${this.getCurrentProduction.id}/assets`
+        return {
+          name: routeName,
+          production_id: this.getCurrentProduction.id
+        }
       } else {
-        return '/assets'
-      }
-    },
-    getShotsPath () {
-      if (this.getCurrentProduction) {
-        return `/productions/${this.getCurrentProduction.id}/shots`
-      } else {
-        return '/shots'
+        return {name: 'home'}
       }
     }
   },
   watch: {
     currentProduction () {
-      this.assetsPath = this.getAssetsPath()
-      this.shotsPath = this.getShotsPath()
+      this.breakdownPath = this.getProductionComponentPath('breakdown')
+      this.assetsPath = this.getProductionComponentPath('assets')
+      this.shotsPath = this.getProductionComponentPath('shots')
     }
   }
 }
