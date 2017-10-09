@@ -4,6 +4,7 @@ import init from '../lib/init'
 
 import Assets from '../components/Assets'
 import AssetTypes from '../components/AssetTypes'
+import Breakdown from '../components/Breakdown'
 import Login from '../components/Login'
 import Main from '../components/Main'
 import NotFound from '../components/NotFound'
@@ -33,7 +34,10 @@ export const routes = [
     },
 
     children: [
-      { path: '', component: OpenProductions },
+      { path: '',
+        component: OpenProductions,
+        name: 'home'
+      },
       { path: '/people', component: People },
       { path: '/people/new', component: People },
       { path: '/people/edit/:person_id', component: People },
@@ -45,7 +49,11 @@ export const routes = [
       { path: '/productions/edit/:production_id', component: Productions },
       { path: '/productions/delete/:production_id', component: Productions },
 
-      { path: '/assets', component: Assets },
+      {
+        path: '/productions/:production_id/breakdown',
+        component: Breakdown,
+        name: 'breakdown'
+      },
       {
         path: '/productions/:production_id/assets',
         component: Assets,
@@ -77,8 +85,6 @@ export const routes = [
         component: Assets,
         name: 'create-asset-tasks'
       },
-
-      { path: '/shots', component: Shots },
       {
         path: '/productions/:production_id/shots',
         component: Shots,
