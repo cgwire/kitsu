@@ -36,6 +36,7 @@ import {
 
 const state = {
   assets: [],
+  assetMap: {},
   assetTypes: [],
 
   assetIndex: {},
@@ -62,6 +63,7 @@ const state = {
 
 const getters = {
   assets: state => state.assets,
+  assetMap: state => state.assetMap,
   assetValidationColumns: (state) => {
     return sortValidationColumns(Object.values(state.validationColumns))
   },
@@ -70,6 +72,25 @@ const getters = {
   isAssetsLoadingError: state => state.isAssetsLoadingError,
 
   displayedAssets: state => state.displayedAssets,
+  assetsByType: state => {
+    const assetsBySequence = []
+    let assetTypeAssets = []
+    let previousAsset = null
+
+    for (let asset of state.assets) {
+      if (
+        previousAsset && asset.asset_type_name !== previousAsset.asset_type_name
+      ) {
+        assetsBySequence.push(assetTypeAssets.slice(0))
+        assetTypeAssets = []
+      }
+      assetTypeAssets.push(asset)
+      previousAsset = asset
+    }
+    assetsBySequence.push(assetTypeAssets)
+
+    return assetsBySequence
+  },
 
   editAsset: state => state.editAsset,
   deleteAsset: state => state.deleteAsset,
@@ -189,6 +210,9 @@ const mutations = {
       })
       return asset
     })
+    assets.forEach((asset) => {
+      state.assetMap[asset.id] = asset
+    })
 
     state.validationColumns = validationColumns
     state.assets = assets
@@ -252,6 +276,7 @@ const mutations = {
       isError: false
     }
     state.assetIndex = buildNameIndex(state.assets)
+    state.assetMap[newAsset.id] = asset
   },
 
   [DELETE_ASSET_START] (state) {
@@ -283,6 +308,7 @@ const mutations = {
       isError: false
     }
     state.assetIndex = buildNameIndex(state.assets)
+    state.assetMap[assetToDelete.id] = undefined
   },
 
   [DELETE_TASK_END] (state, task) {
@@ -316,6 +342,7 @@ const mutations = {
 
   [RESET_ALL] (state) {
     state.assets = []
+    state.assetMap = {}
     state.assetTypes = []
     state.isAssetsLoading = false
     state.isAssetsLoadingError = false

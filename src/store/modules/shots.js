@@ -61,6 +61,23 @@ const getters = {
   },
 
   displayedShots: state => state.displayedShots,
+  shotsBySequence: state => {
+    const shotsBySequence = []
+    let sequenceShots = []
+    let previousShot = null
+
+    for (let shot of state.shots) {
+      if (previousShot && shot.sequence_name !== previousShot.sequence_name) {
+        shotsBySequence.push(sequenceShots.slice(0))
+        sequenceShots = []
+      }
+      sequenceShots.push(shot)
+      previousShot = shot
+    }
+    shotsBySequence.push(sequenceShots)
+
+    return shotsBySequence
+  },
 
   isShotsLoading: state => state.isShotsLoading,
   isShotsLoadingError: state => state.isShotsLoadingError,
