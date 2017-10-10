@@ -22,14 +22,17 @@
       </div>
 
       <div class="breakdown-column" style="{background: green}">
-        <h2 class="subtitle">
-          Asset in {{ selectedShotId }}
+        <h2 class="subtitle" v-if="currentShot">
+          {{ $t('breakdown.selected_shot', {name: currentShot.name}) }}
+        </h2>
+        <h2 class="subtitle" v-else>
+          {{ $t('breakdown.select_shot') }}
         </h2>
       </div>
 
       <div class="breakdown-column" style="{background: red}">
         <h2 class="subtitle">
-          All assets
+          {{ $t('breakdown.all_assets') }}
         </h2>
         <div v-for="typeAssets in assetsByType">
           <div class="asset-type">
@@ -70,6 +73,7 @@ export default {
   data () {
     return {
       selectedShotId: 0,
+      currentShot: null,
       casting: {}
     }
   },
@@ -78,6 +82,7 @@ export default {
     ...mapGetters([
       'displayedShots',
       'shots',
+      'shotMap',
       'shotsBySequence',
       'assets',
       'assetsByType',
@@ -91,10 +96,7 @@ export default {
 
   created () {
     const productionId = this.$store.state.route.params.production_id
-    this.$store.commit(
-      'SET_CURRENT_PRODUCTION',
-      productionId
-    )
+    this.$store.commit('SET_CURRENT_PRODUCTION', productionId)
 
     if (this.shots.length === 0) this.loadShots()
     if (this.assets.length === 0) this.loadAssets()
@@ -102,20 +104,15 @@ export default {
 
   methods: {
     ...mapActions([
-      'loadShots'
+      'loadShots',
+      'loadAssets'
     ]),
     selectShot (event) {
       this.selectedShotId = event.target.id
+      this.currentShot = this.shotMap[this.selectedShotId]
       this.casting = {}
     },
     selectAsset (event) {
-      this.selectedShotId = event.target.id
-    },
-    loadAssets () {
-      this.$store.dispatch('loadAssets')
-    },
-    loadShots () {
-      this.$store.dispatch('loadShots')
     }
   },
 
@@ -218,5 +215,9 @@ export default {
 
 .asset.casted {
   background: #c1f0c1;
+}
+
+.breakdown-column {
+  padding: 1em;
 }
 </style>
