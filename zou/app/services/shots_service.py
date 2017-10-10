@@ -116,7 +116,8 @@ def get_shots_and_tasks(criterions={}):
         .add_columns(Sequence.name) \
         .add_columns(Entity.name) \
         .add_columns(Entity.description) \
-        .add_columns(Entity.data)
+        .add_columns(Entity.data) \
+        .add_columns(Entity.canceled)
 
     if "project_id" in criterions:
         query = query.filter(Entity.project_id == criterions["project_id"])
@@ -128,7 +129,8 @@ def get_shots_and_tasks(criterions={}):
         sequence_name,
         entity_name,
         entity_description,
-        entity_data
+        entity_data,
+        entity_canceled
     ) in tasks:
         shot_id = str(task.entity_id)
         if task.entity_id not in shot_map:
@@ -136,6 +138,7 @@ def get_shots_and_tasks(criterions={}):
                 "id": shot_id,
                 "name": entity_name,
                 "sequence_name": sequence_name,
+                "canceled": entity_canceled,
                 "data": fields.serialize_dict(entity_data)
             }
 
