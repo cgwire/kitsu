@@ -85,7 +85,7 @@ export default {
       'isShotsLoading',
       'isShotsLoadingError',
       'currentProduction',
-      'getCurrentProduction'
+      'currentProduction'
     ])
   },
 
@@ -124,9 +124,9 @@ export default {
       const oldPath = `${this.$route.path}`
       const newPath = {
         name: 'breakdown',
-        params: {production_id: this.getCurrentProduction.id}
+        params: {production_id: this.currentProduction.id}
       }
-      if (this.$route.path.length === 55) this.$router.push(newPath)
+      if (this.$route.path.length === 59) this.$router.push(newPath)
       const path = this.$route.path
       if (oldPath !== path) {
         this.loadAssets()

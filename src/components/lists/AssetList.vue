@@ -18,7 +18,7 @@
             icon="upload"
             :path="{
               name: 'import-assets',
-              params: {production_id: getCurrentProduction.id}
+              params: {production_id: currentProduction.id}
             }"
           >
           </button-link>
@@ -26,7 +26,7 @@
             class="level-item"
             :text="$t('main.csv.export_file')"
             icon="download"
-            :path="'/api/export/csv/assets.csv?project_id=' + getCurrentProduction.id"
+            :path="'/api/export/csv/assets.csv?project_id=' + currentProduction.id"
           >
           </button-href-link>
           <button-link
@@ -35,7 +35,7 @@
             icon="plus"
             :path="{
               name: 'new-asset',
-              params: {production_id: getCurrentProduction.id}
+              params: {production_id: currentProduction.id}
             }"
           >
           </button-link>
@@ -91,7 +91,7 @@
                 :path="{
                   name: 'create-asset-tasks',
                   params: {
-                    production_id: getCurrentProduction.id
+                    production_id: currentProduction.id
                   }
                 }"
               >
@@ -140,14 +140,14 @@
             :edit-route="{
               name: 'edit-asset',
               params: {
-                production_id: getCurrentProduction.id,
+                production_id: currentProduction.id,
                 asset_id: entry.id
               }
             }"
             :delete-route="{
               name: 'delete-asset',
               params: {
-                production_id: getCurrentProduction.id,
+                production_id: currentProduction.id,
                 asset_id: entry.id
               }
             }"
@@ -205,7 +205,7 @@ export default {
   },
   computed: {
     ...mapGetters([
-      'getCurrentProduction',
+      'currentProduction',
       'assetSearchValue'
     ])
   },

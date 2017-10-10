@@ -99,7 +99,7 @@ const getters = {
 const actions = {
 
   loadShots ({ commit, state, rootState }, callback) {
-    const currentProduction = productionsStore.getters.getCurrentProduction(
+    const currentProduction = productionsStore.getters.currentProduction(
       rootState.productions
     )
     commit(LOAD_SHOTS_START)
@@ -165,8 +165,13 @@ const actions = {
 
 const mutations = {
   [LOAD_SHOTS_START] (state) {
+    state.shots = []
+    state.validationColumns = {}
     state.isShotsLoading = true
     state.isShotsLoadingError = false
+
+    state.shotIndex = {}
+    state.displayedShots = []
   },
 
   [LOAD_SHOTS_ERROR] (state) {

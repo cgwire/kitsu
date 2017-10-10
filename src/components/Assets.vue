@@ -16,7 +16,7 @@
     :is-success="editAsset.isSuccess"
     :cancel-route="{
       name: 'assets',
-      params: {production_id: getCurrentProduction.id}
+      params: {production_id: currentProduction.id}
     }"
     :asset-to-edit="assetToEdit"
     @confirm="confirmEditAsset"
@@ -30,7 +30,7 @@
     :is-error="deleteAsset.isCreateError"
     :cancel-route="{
       name: 'assets',
-      params: {production_id: getCurrentProduction.id}
+      params: {production_id: currentProduction.id}
     }"
     :text="deleteText()"
     :error-text="$t('assets.delete_error')"
@@ -44,7 +44,7 @@
     :is-error="errors.importing"
     :cancel-route="{
       name: 'assets',
-      params: {production_id: getCurrentProduction.id}
+      params: {production_id: currentProduction.id}
     }"
     :form-data="assetsCsvFormData"
     :columns="columns"
@@ -59,7 +59,7 @@
     :is-error="errors.creatingTasks"
     :cancel-route="{
       name: 'assets',
-      params: {production_id: getCurrentProduction.id}
+      params: {production_id: currentProduction.id}
     }"
     :title="$t('tasks.create_tasks_asset')"
     :text="$t('tasks.create_tasks_asset_explaination')"
@@ -151,7 +151,7 @@ export default {
       'getAsset',
       'assetValidationColumns',
       'currentProduction',
-      'getCurrentProduction'
+      'currentProduction'
     ])
   },
 
@@ -208,7 +208,7 @@ export default {
             this.modals.isNewDisplayed = false
             this.$router.push({
               name: 'assets',
-              params: {production_id: this.getCurrentProduction.id}
+              params: {production_id: this.currentProduction.id}
             })
           } else {
             this.loading.edit = false
@@ -233,7 +233,7 @@ export default {
       this.$store.dispatch('createTasks', {
         task_type_id: form.task_type_id,
         type: 'assets',
-        project_id: this.getCurrentProduction.id,
+        project_id: this.currentProduction.id,
         callback: (err) => {
           this.loading.creatingTasks = false
           if (err) {
@@ -242,7 +242,7 @@ export default {
             this.modals.isCreateTasks = false
             this.$router.push({
               name: 'assets',
-              params: {production_id: this.getCurrentProduction.id}
+              params: {production_id: this.currentProduction.id}
             })
             this.loadAssets()
           }
@@ -315,7 +315,7 @@ export default {
           this.$store.dispatch('loadAssets')
           this.$router.push({
             name: 'assets',
-            params: {production_id: this.getCurrentProduction.id}
+            params: {production_id: this.currentProduction.id}
           })
         } else {
           this.loading.importing = false
@@ -331,7 +331,7 @@ export default {
       const oldPath = `${this.$route.path}`
       const newPath = {
         name: 'assets',
-        params: {production_id: this.getCurrentProduction.id}
+        params: {production_id: this.currentProduction.id}
       }
       if (this.$route.path.length === 56) this.$router.push(newPath)
       const path = this.$route.path

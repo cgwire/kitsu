@@ -114,7 +114,7 @@ const getters = {
 const actions = {
 
   loadAssets ({ commit, state, rootState }, callback) {
-    const currentProduction = productionsStore.getters.getCurrentProduction(
+    const currentProduction = productionsStore.getters.currentProduction(
       rootState.productions
     )
     commit(LOAD_ASSETS_START)
