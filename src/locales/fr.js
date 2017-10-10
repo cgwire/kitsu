@@ -195,7 +195,10 @@ export default {
   },
 
   breakdown: {
-    title: 'Breakdown'
+    title: 'Casting',
+    select_shot: 'Sélectionnez un shot à gauche pour gérer son casting',
+    selected_shot: 'Assets présents dans le casting de {name}',
+    all_assets: 'Tous les assets disponibles'
   },
 
   server_down: {
