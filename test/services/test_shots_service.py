@@ -51,13 +51,22 @@ class ShotUtilsTestCase(ApiDBTestCase):
             self.sequence.serialize()
         )
 
+    def test_get_shot_map(self):
+        self.generate_fixture_shot("P02")
+        shot_map = shots_service.get_shot_map()
+        self.assertEquals(len(shot_map.keys()), 2)
+        self.assertEquals(
+            shot_map[str(self.shot.id)]["name"],
+            self.shot.name
+        )
+
     def test_get_shots(self):
         shots = shots_service.get_shots()
         self.shot_dict = self.shot.serialize(obj_type="Shot")
         self.shot_dict["project_name"] = self.project.name
         self.shot_dict["sequence_name"] = self.sequence.name
-
         self.assertDictEqual(shots[0], self.shot_dict)
+
 
     def test_get_shots_and_tasks(self):
         self.generate_fixture_person()
@@ -67,11 +76,14 @@ class ShotUtilsTestCase(ApiDBTestCase):
         self.generate_fixture_task_type()
         self.generate_fixture_shot_task()
         self.generate_fixture_shot_task(name="Secondary")
+        self.generate_fixture_shot("P02")
         shots = shots_service.get_shots_and_tasks()
-        self.assertEqual(len(shots), 1)
+        shots = sorted(shots, key=lambda s: s["name"])
+        self.assertEqual(len(shots), 2)
         self.assertEqual(len(shots[0]["tasks"]), 2)
+        self.assertEqual(len(shots[1]["tasks"]), 0)
         self.assertEqual(
-            shots[0]["tasks"][0]["task_status_name"], "Open"
+            shots[0]["tasks"][1]["task_status_name"], "Open"
         )
         self.assertEqual(
             shots[0]["tasks"][0]["task_type_name"], "Animation"
