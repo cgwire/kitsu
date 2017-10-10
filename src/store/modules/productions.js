@@ -43,6 +43,16 @@ const state = {
   deleteProduction: {
     isLoading: false,
     isError: false
+  },
+
+  assetsPath: {name: 'home'},
+  shotsPath: {name: 'home'},
+  breakdownPath: {name: 'home'}
+}
+
+const helpers = {
+  getProductionComponentPath (routeName, productionId) {
+    return `/productions/${productionId}/${routeName}`
   }
 }
 
@@ -57,8 +67,10 @@ const getters = {
   editProduction: state => state.editProduction,
   deleteProduction: state => state.deleteProduction,
 
-  currentProduction: (state) => state.currentProduction,
-  getCurrentProduction: (state) => {
+  assetsPath: state => state.assetsPath,
+  shotsPath: state => state.shotsPath,
+  breakdownPath: state => state.breakdownPath,
+  currentProduction: (state) => {
     if (state.currentProduction) {
       return state.currentProduction
     } else if (state.openProductions.length > 0) {
@@ -262,6 +274,12 @@ const mutations = {
       (production) => production.id === currentProductionId
     )
     state.currentProduction = production
+    state.assetsPath = helpers.getProductionComponentPath(
+      'assets', currentProductionId)
+    state.shotsPath = helpers.getProductionComponentPath(
+      'shots', currentProductionId)
+    state.breakdownPath = helpers.getProductionComponentPath(
+      'breakdown', currentProductionId)
   },
 
   [RESET_ALL] (state) {

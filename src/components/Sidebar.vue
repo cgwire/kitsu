@@ -73,39 +73,22 @@ export default {
   name: 'menu',
   data () {
     return {
-      breakdownPath: this.getProductionComponentPath('breakdown'),
-      assetsPath: this.getProductionComponentPath('assets'),
-      shotsPath: this.getProductionComponentPath('shots')
     }
   },
   computed: {
     ...mapGetters([
       'isSidebarHidden',
+      'rawCurrentProduction',
       'currentProduction',
-      'getCurrentProduction'
+      'breakdownPath',
+      'assetsPath',
+      'shotsPath'
     ])
   },
   methods: {
     ...mapActions([
       'toggleSidebar'
-    ]),
-    getProductionComponentPath (routeName) {
-      if (this.getCurrentProduction) {
-        return {
-          name: routeName,
-          production_id: this.getCurrentProduction.id
-        }
-      } else {
-        return {name: 'home'}
-      }
-    }
-  },
-  watch: {
-    currentProduction () {
-      this.breakdownPath = this.getProductionComponentPath('breakdown')
-      this.assetsPath = this.getProductionComponentPath('assets')
-      this.shotsPath = this.getProductionComponentPath('shots')
-    }
+    ])
   }
 }
 </script>
