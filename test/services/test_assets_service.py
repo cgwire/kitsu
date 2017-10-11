@@ -40,7 +40,19 @@ class AssetServiceTestCase(ApiDBTestCase):
         self.assertEqual(len(assets), 1)
         self.assertEqual(assets[0].name, "Tree")
 
+    def test_get_asset_map(self):
+        self.generate_fixture_asset_types()
+        self.generate_fixture_entity_character()
+        asset_map = assets_service.get_asset_map()
+        self.assertEquals(len(asset_map.keys()), 2)
+        self.assertEquals(
+            asset_map[str(self.entity.id)]["name"],
+            self.entity.name
+        )
+
     def test_get_assets_and_tasks(self):
+        self.generate_fixture_asset_types()
+        self.generate_fixture_entity_character()
         self.generate_fixture_person()
         self.generate_fixture_assigner()
         self.generate_fixture_department()
@@ -49,7 +61,7 @@ class AssetServiceTestCase(ApiDBTestCase):
         self.generate_fixture_task()
         self.generate_fixture_task(name="Secondary")
         assets = assets_service.all_assets_and_tasks()
-        self.assertEqual(len(assets), 1)
+        self.assertEqual(len(assets), 2)
         self.assertEqual(len(assets[0]["tasks"]), 2)
         self.assertEqual(
             assets[0]["tasks"][0]["task_status_name"], "Open"

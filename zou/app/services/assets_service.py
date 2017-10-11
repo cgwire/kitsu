@@ -245,14 +245,51 @@ def get_task_type_map():
     }
 
 
+def get_asset_map(criterions={}):
+    asset_map = {}
+
+    shot_type = shots_service.get_shot_type()
+    sequence_type = shots_service.get_sequence_type()
+    episode_type = shots_service.get_episode_type()
+    asset_query = Entity.query \
+        .join(EntityType) \
+        .filter(
+            ~Entity.entity_type_id.in_([
+                shot_type.id,
+                sequence_type.id,
+                episode_type.id
+            ])
+        ) \
+        .add_columns(EntityType.name)
+
+    if "project_id" in criterions:
+        asset_query = \
+            asset_query.filter(Entity.project_id == criterions["project_id"])
+
+    assets = asset_query.all()
+
+    for (asset, entity_type_name) in assets:
+        asset_id = str(asset.id)
+        asset_map[asset_id] = {
+            "id": str(asset.id),
+            "name": asset.name,
+            "description": asset.description,
+            "asset_type_name": entity_type_name,
+            "canceled": asset.canceled,
+            "data": fields.serialize_value(asset.data)
+        }
+
+    return asset_map
+
+
 def all_assets_and_tasks(criterions={}):
     shot_type = shots_service.get_shot_type()
     sequence_type = shots_service.get_sequence_type()
     episode_type = shots_service.get_episode_type()
     task_status_map = get_task_status_map()
     task_type_map = get_task_type_map()
+    asset_map = get_asset_map(criterions)
     task_map = {}
-    asset_map = {}
 
     query = Task.query \
         .join(Entity) \
@@ -263,35 +300,19 @@ def all_assets_and_tasks(criterions={}):
                 sequence_type.id,
                 episode_type.id
             ])
-        ) \
-        .add_columns(EntityType.name) \
-        .add_columns(Entity.name) \
-        .add_columns(Entity.description) \
-        .add_columns(Entity.data)
+        )
 
     if "project_id" in criterions:
         query = query.filter(Entity.project_id == criterions["project_id"])
 
     tasks = query.all()
 
-    for (
-        task,
-        entity_type_name,
-        entity_name,
-        entity_description,
-        entity_data
-    ) in tasks:
+    for task in tasks:
         asset_id = str(task.entity_id)
-        if task.entity_id not in asset_map:
-            asset_map[asset_id] = {
-                "id": asset_id,
-                "name": entity_name,
-                "asset_type_name": entity_type_name,
-                "data": fields.serialize_value(entity_data)
-            }
 
         if asset_id not in task_map:
             task_map[asset_id] = []
+
         task_dict = {"id": str(task.id)}
         task_status = task_status_map[task.task_status_id]
         task_type = task_type_map[task.task_type_id]

@@ -311,9 +311,9 @@ class ApiDBTestCase(ApiTestCase):
         )
         self.episode.save()
 
-    def generate_fixture_shot(self):
+    def generate_fixture_shot(self, name="P01"):
         self.shot = Entity(
-            name="P01",
+            name=name,
             description="Description Shot 01",
             data={
                 "fps": 25,
@@ -378,7 +378,7 @@ class ApiDBTestCase(ApiTestCase):
 
     def generate_fixture_asset_types(self):
         self.entity_type_character = EntityType(name="Character")
-        self.entity_type_character .save()
+        self.entity_type_character.save()
         self.entity_type_environment = EntityType(name="Environment")
         self.entity_type_environment.save()
 

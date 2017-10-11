@@ -101,46 +101,57 @@ def get_task_type_map():
     }
 
 
+def get_shot_map(criterions={}):
+    shot_map = {}
+
+    shot_type = get_shot_type()
+    Sequence = aliased(Entity, name='sequence')
+    shot_query = Entity.query \
+        .join(EntityType) \
+        .join(Sequence, Sequence.id == Entity.parent_id) \
+        .add_columns(Sequence.name) \
+        .filter(Entity.entity_type_id == shot_type.id)
+    if "project_id" in criterions:
+        shot_query = \
+            shot_query.filter(Entity.project_id == criterions["project_id"])
+    shots = shot_query.all()
+
+    for (shot, sequence_name) in shots:
+        shot_id = str(shot.id)
+        shot_map[shot_id] = {
+            "id": str(shot.id),
+            "name": shot.name,
+            "description": shot.description,
+            "sequence_name": sequence_name,
+            "canceled": shot.canceled,
+            "data": fields.serialize_value(shot.data)
+        }
+
+    return shot_map
+
+
 def get_shots_and_tasks(criterions={}):
     shot_type = get_shot_type()
     task_status_map = get_task_status_map()
     task_type_map = get_task_type_map()
+    shot_map = get_shot_map(criterions)
     task_map = {}
-    shot_map = {}
 
-    Sequence = aliased(Entity, name='sequence')
     query = Task.query \
         .join(Entity) \
-        .filter(Entity.entity_type_id == shot_type.id) \
-        .join(Sequence, Sequence.id == Entity.parent_id) \
-        .add_columns(Sequence.name) \
-        .add_columns(Entity.name) \
-        .add_columns(Entity.description) \
-        .add_columns(Entity.data)
+        .filter(Entity.entity_type_id == shot_type.id)
 
     if "project_id" in criterions:
         query = query.filter(Entity.project_id == criterions["project_id"])
 
     tasks = query.all()
 
-    for (
-        task,
-        sequence_name,
-        entity_name,
-        entity_description,
-        entity_data
-    ) in tasks:
+    for task in tasks:
         shot_id = str(task.entity_id)
-        if task.entity_id not in shot_map:
-            shot_map[shot_id] = {
-                "id": shot_id,
-                "name": entity_name,
-                "sequence_name": sequence_name,
-                "data": fields.serialize_dict(entity_data)
-            }
 
         if shot_id not in task_map:
             task_map[shot_id] = []
+
         task_dict = {"id": str(task.id)}
         task_status = task_status_map[task.task_status_id]
         task_type = task_type_map[task.task_type_id]
