@@ -3,8 +3,8 @@
     <page-title :text="$t('breakdown.title')"></page-title>
     <div class="breakdown-columns">
 
-      <div class="breakdown-column" style="{background: blue}">
-        <div v-for="sequenceShots in shotsBySequence">
+      <div class="breakdown-column shot-column">
+        <div class="sequence-shots" v-for="sequenceShots in shotsBySequence">
           <div class="sequence">
             {{ sequenceShots[0] ? sequenceShots[0].sequence_name : '' }}
           </div>
@@ -21,29 +21,49 @@
         </div>
       </div>
 
-      <div class="breakdown-column" style="{background: green}">
+      <div class="breakdown-column casting-column">
         <h2 class="subtitle" v-if="currentShot">
           {{ $t('breakdown.selected_shot', {name: currentShot.name}) }}
         </h2>
         <h2 class="subtitle" v-else>
           {{ $t('breakdown.select_shot') }}
         </h2>
+        <div class="type-assets" v-for="typeAssets in castingAssetsByType">
+          <div class="asset-type">
+            {{ typeAssets[0] ? typeAssets[0].asset_type_name : '' }}
+          </div>
+          <div class="asset-list">
+            <div
+              :id="'casting-' + asset.id"
+              class="asset big"
+              @click="removeAsset"
+              v-for="asset in typeAssets"
+            >
+              {{ asset.name }}
+            </div>
+          </div>
+        </div>
       </div>
 
-      <div class="breakdown-column" style="{background: red}">
+      <div class="breakdown-column assets-column">
         <h2 class="subtitle">
           {{ $t('breakdown.all_assets') }}
         </h2>
-        <div v-for="typeAssets in assetsByType">
+        <div class="type-assets" v-for="typeAssets in assetsByType">
           <div class="asset-type">
             {{ typeAssets[0] ? typeAssets[0].asset_type_name : '' }}
           </div>
           <div class="asset-list">
             <div
               :id="asset.id"
-              class="asset"
-              draggable="true"
-              @click="selectAsset"
+              :class="{
+                asset: true,
+                casted: casting[asset.id] !== undefined
+              }"
+              :style="{
+                cursor: currentShot ? 'pointer' : 'default'
+              }"
+              @click="addAsset"
               v-for="asset in typeAssets"
             >
               {{ asset.name }}
@@ -59,6 +79,7 @@
 
 <script>
 import { mapGetters, mapActions } from 'vuex'
+import { sortAssets } from '../lib/sorting'
 import ShotList from './lists/ShotList'
 import PageTitle from './widgets/PageTitle'
 
@@ -74,7 +95,8 @@ export default {
     return {
       selectedShotId: 0,
       currentShot: null,
-      casting: {}
+      casting: {},
+      castingAssetsByType: []
     }
   },
 
@@ -85,6 +107,7 @@ export default {
       'shotMap',
       'shotsBySequence',
       'assets',
+      'assetMap',
       'assetsByType',
       'sequences',
       'isShotsLoading',
@@ -111,8 +134,51 @@ export default {
       this.selectedShotId = event.target.id
       this.currentShot = this.shotMap[this.selectedShotId]
       this.casting = {}
+      if (!this.currentShot.entities_out) this.currentShot.entities_out = []
+      this.currentShot.entities_out.forEach((assetId) => {
+        this.casting[assetId] = this.assetMap[assetId]
+      })
+      this.castingAssetsByType = this.getCastingAssetsByType()
     },
-    selectAsset (event) {
+    addAsset (event) {
+      if (this.currentShot) {
+        const assetId = event.target.id
+        const asset = this.assetMap[assetId]
+        this.casting[asset.id] = asset
+        this.castingAssetsByType = this.getCastingAssetsByType()
+        this.currentShot.entities_out = Object.values(this.casting).map(
+          (asset) => asset.id
+        )
+      }
+    },
+    removeAsset (event) {
+      if (this.currentShot) {
+        const assetId = event.target.id.substring('casting-'.length)
+        delete this.casting[assetId]
+        this.castingAssetsByType = this.getCastingAssetsByType()
+        this.currentShot.entities_out = Object.values(this.casting).map(
+          (asset) => asset.id
+        )
+      }
+    },
+    getCastingAssetsByType () {
+      const assetsBySequence = []
+      let assetTypeAssets = []
+      let previousAsset = null
+
+      for (let asset of sortAssets(Object.values(this.casting))) {
+        if (
+          previousAsset && asset.asset_type_name !== previousAsset.asset_type_name
+        ) {
+          assetsBySequence.push(assetTypeAssets.slice(0))
+          assetTypeAssets = []
+        }
+        assetTypeAssets.push(asset)
+        previousAsset = asset
+      }
+      assetsBySequence.push(assetTypeAssets)
+
+      return assetsBySequence
     }
   },
 
@@ -173,8 +239,8 @@ export default {
   margin-bottom: 1em;
 }
 
-.asset-type:not(first-child),
-.sequence:not(first-child) {
+.type-assets:not(:first-child),
+.sequence-shots:not(:first-child) {
   margin-top: 2em;
 }
 
@@ -213,11 +279,25 @@ export default {
   background: #EEE;
 }
 
+.asset.big {
+  width: 80px;
+  height: 80px;
+}
+
 .asset.casted {
   background: #c1f0c1;
 }
 
-.breakdown-column {
-  padding: 1em;
+.shot-column {
+  padding: 0 1em 0 0;
+}
+
+.casting-column {
+  padding: 0 1em;
+}
+
+.assets-column {
+  border-left: 4px solid #EEE;
+  padding-left: 1em;
 }
 </style>
