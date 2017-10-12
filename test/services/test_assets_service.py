@@ -83,3 +83,18 @@ class AssetServiceTestCase(ApiDBTestCase):
     def test_is_asset(self):
         self.assertTrue(assets_service.is_asset(self.entity))
         self.assertFalse(assets_service.is_asset(self.shot))
+
+    def test_cancel_asset(self):
+        asset_id = self.entity.id
+        assets_service.cancel_asset(asset_id)
+        asset = assets_service.get_asset(asset_id)
+        self.assertTrue(asset.canceled)
+
+    def test_remove_asset(self):
+        asset_id = self.entity.id
+        assets_service.remove_asset(asset_id)
+        self.assertRaises(
+            AssetNotFoundException,
+            assets_service.get_asset,
+            asset_id
+        )
