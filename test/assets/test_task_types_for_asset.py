@@ -27,3 +27,6 @@ class AssetTaskTypesTestCase(ApiDBTestCase):
             task_types[0],
             self.task_type_dict
         )
+
+    def test_get_task_types_for_asset_not_found(self):
+        self.get("data/assets/no-asset/task-types", 404)
