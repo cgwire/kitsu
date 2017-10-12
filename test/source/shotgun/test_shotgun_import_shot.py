@@ -22,7 +22,7 @@ class ImportShotgunShotTestCase(ShotgunTestCase):
             "project": {
                 "type": "Project",
                 "id": 1,
-                "name": "Cosmos Landromat"
+                "name": "Agent327"
             },
             "assets": [
                 {
