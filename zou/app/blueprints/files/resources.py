@@ -382,6 +382,7 @@ class NewOutputFileResource(Resource):
                 task,
                 output_type,
                 scene,
+                working_file.name,
                 separator
             )
 
@@ -542,6 +543,7 @@ class NewWorkingFileResource(Resource):
         try:
             task = tasks_service.get_task(task_id)
             software = files_service.get_software(software_id)
+            tasks_service.assign_task(task, persons_service.get_current_user())
 
             if revision == 0:
                 revision = files_service.get_next_working_revision(
