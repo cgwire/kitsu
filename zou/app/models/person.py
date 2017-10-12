@@ -44,6 +44,7 @@ class Person(db.Model, BaseMixin, SerializerMixin):
     )
     locale = db.Column(LocaleType, default=Locale("en", "US"))
     data = db.Column(JSONB)
+    role = db.Column(db.String(30), default="user")
 
     skills = db.relationship(
         "Department",
