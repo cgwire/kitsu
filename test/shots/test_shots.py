@@ -18,15 +18,23 @@ class ShotTestCase(ApiDBTestCase):
         self.shot_dict["project_name"] = self.project.name
         self.shot_dict["sequence_name"] = self.sequence.name
 
-        self.generate_data(Entity, 3,
-                           entities_out=[],
-                           project_id=self.project.id,
-                           entity_type_id=self.entity_type.id)
-        self.generate_data(Entity, 2,
-                           entities_out=[],
-                           parent_id=self.sequence.id,
-                           project_id=self.project.id,
-                           entity_type_id=self.shot_type.id)
+        self.generate_data(
+            Entity,
+            3,
+            entities_out=[],
+            entities_in=[],
+            project_id=self.project.id,
+            entity_type_id=self.entity_type.id
+        )
+        self.generate_data(
+            Entity,
+            2,
+            entities_out=[],
+            entities_in=[],
+            parent_id=self.sequence.id,
+            project_id=self.project.id,
+            entity_type_id=self.shot_type.id
+        )
 
     def test_get_shots(self):
         shots = self.get("data/shots/all")
