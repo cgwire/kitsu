@@ -5,6 +5,7 @@ from test.base import ApiDBTestCase
 
 from zou.app.models.task import Task
 from zou.app.models.task_type import TaskType
+from zou.app.models.time_spent import TimeSpent
 from zou.app.services import tasks_service
 from zou.app.utils import events, fields
 
@@ -199,6 +200,16 @@ class TaskServiceTestCase(ApiDBTestCase):
             self.task_id
         )
 
+    def test_remove_task(self):
+        self.working_file.delete()
+        self.output_file.delete()
+        tasks_service.remove_task(self.task_id)
+        self.assertRaises(
+            TaskNotFoundException,
+            tasks_service.get_task,
+            self.task_id
+        )
+
     def test_get_tasks_for_sequence(self):
         self.generate_fixture_sequence_task()
         tasks = tasks_service.get_tasks_for_sequence(self.sequence.id)
@@ -223,7 +234,7 @@ class TaskServiceTestCase(ApiDBTestCase):
         self.assertEqual(tasks[0]["entity_name"], str("Tree"))
 
     def test_get_task_types_for_shot(self):
-        task_types = tasks_service.get_task_types_for_shot(self.shot)
+        task_types = tasks_service.get_task_types_for_shot(self.shot.id)
         self.assertEqual(len(task_types), 1)
         self.assertEqual(task_types[0]["id"], str(self.task_type_animation.id))
 
@@ -234,7 +245,7 @@ class TaskServiceTestCase(ApiDBTestCase):
         self.assertEqual(task_types[0]["id"], str(self.task_type_animation.id))
 
     def test_get_task_types_for_entity(self):
-        task_types = tasks_service.get_task_types_for_asset(self.entity)
+        task_types = tasks_service.get_task_types_for_asset(self.entity.id)
         self.assertEqual(len(task_types), 1)
         self.assertEqual(task_types[0]["id"], str(self.task_type.id))
 
@@ -271,3 +282,59 @@ class TaskServiceTestCase(ApiDBTestCase):
         self.assertEqual(len(tasks), 1)
         self.assertEqual(tasks[0]["name"], u"Première Tâche")
         self.assertEqual(tasks[0]["task_type_name"], u"Modélisation")
+
+    def test_get_or_create_time_spents(self):
+        person_id = self.person.id
+        task_id = self.task.id
+
+        duration = 3600
+        time_spent = tasks_service.create_or_update_time_spent(
+            person_id=person_id,
+            task_id=task_id,
+            date="2017-09-23",
+            duration=duration
+        )
+        self.assertEquals(time_spent["duration"], duration)
+
+        duration = 7200
+        time_spent = tasks_service.create_or_update_time_spent(
+            person_id=person_id,
+            task_id=task_id,
+            date="2017-09-23",
+            duration=duration
+        )
+        self.assertEquals(time_spent["duration"], duration)
+
+        duration = 7200
+        time_spent = tasks_service.create_or_update_time_spent(
+            person_id=person_id,
+            task_id=task_id,
+            date="2017-09-23",
+            duration=duration,
+            add=True
+        )
+        self.assertEquals(time_spent["duration"], 2 * duration)
+
+
+    def test_get_time_spents(self):
+        person_id = self.person.id
+        user_id = self.user.id
+        task_id = self.task.id
+        TimeSpent.create(
+            person_id=person_id,
+            task_id=task_id,
+            date=datetime.date(2017, 9, 23),
+            duration=3600
+        )
+        TimeSpent.create(
+            person_id=user_id,
+            task_id=task_id,
+            date=datetime.date(2017, 9, 23),
+            duration=7200
+        )
+        time_spents = self.get(
+            "/actions/tasks/%s/time-spents/2017-09-23/" % task_id
+        )
+        self.assertEquals(time_spents["total"], 10800)
+        self.assertEquals(time_spents[str(user_id)]["duration"], 7200)
+        self.assertEquals(time_spents[str(person_id)]["duration"], 3600)
