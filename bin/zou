@@ -50,7 +50,13 @@ def create_admin(email):
     try:
         auth.validate_email(email)
         password = auth.encrypt_password("default")
-        persons_service.create_person(email, password, "Super", "Admin")
+        persons_service.create_person(
+            email,
+            password,
+            "Super",
+            "Admin",
+            role="admin"
+        )
         print("Admin successfully created.")
 
     except auth.PasswordsNoMatchException:
