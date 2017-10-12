@@ -88,8 +88,8 @@ class ShotTaskTypesResource(Resource):
         Retrieve all task types related to a given shot.
         """
         try:
-            shot = shots_service.get_shot(shot_id)
-            task_types = tasks_service.get_task_types_for_shot(shot)
+            shots_service.get_shot(shot_id)
+            task_types = tasks_service.get_task_types_for_shot(shot_id)
         except ShotNotFoundException:
             abort(404)
 
