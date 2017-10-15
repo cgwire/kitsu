@@ -4,7 +4,12 @@
     <div class="breakdown-columns">
 
       <div class="breakdown-column shot-column">
-        <div class="sequence-shots" v-for="sequenceShots in shotsBySequence">
+        <spinner v-if="isShotsLoading"></spinner>
+        <div
+          class="sequence-shots"
+          v-for="sequenceShots in shotsBySequence"
+          v-else
+        >
           <div class="sequence">
             {{ sequenceShots[0] ? sequenceShots[0].sequence_name : '' }}
           </div>
@@ -38,7 +43,12 @@
           </div>
           <div class="level-right">
             <button
-              class="button save-button is-success"
+              :class="{
+                button: true,
+                'save-button': true,
+                'is-success': true,
+                'is-loading': isSaving
+              }"
               :disabled="!isCastingDirty"
               @click="saveCasting"
             >
@@ -46,7 +56,19 @@
             </button>
           </div>
         </div>
-        <div class="type-assets" v-for="typeAssets in castingAssetsByType">
+        <p :class="{
+          'error':true,
+          'has-text-right': true,
+          'is-hidden': !isSavingError
+        }">
+          {{ $t('breakdown.save_error') }}
+        </p>
+        <spinner v-if="isLoading"></spinner>
+        <div
+          class="type-assets"
+          v-for="typeAssets in castingAssetsByType"
+          v-else
+        >
           <div class="asset-type">
             {{ typeAssets[0] ? typeAssets[0].asset_type_name : '' }}
           </div>
@@ -67,7 +89,8 @@
         <h2 class="subtitle">
           {{ $t('breakdown.all_assets') }}
         </h2>
-        <div class="type-assets" v-for="typeAssets in assetsByType">
+        <spinner v-if="isAssetsLoading"></spinner>
+        <div class="type-assets" v-for="typeAssets in assetsByType" v-else>
           <div class="asset-type">
             {{ typeAssets[0] ? typeAssets[0].asset_type_name : '' }}
           </div>
@@ -97,17 +120,17 @@
 import { mapGetters, mapActions } from 'vuex'
 import { sortAssets } from '../lib/sorting'
 import shotsApi from '../store/api/shots'
-import ShotList from './lists/ShotList'
 import PageTitle from './widgets/PageTitle'
+import Spinner from './widgets/Spinner'
 import { SaveIcon } from 'vue-feather-icons'
 
 export default {
   name: 'menu',
 
   components: {
-    ShotList,
     PageTitle,
-    SaveIcon
+    SaveIcon,
+    Spinner
   },
 
   data () {
@@ -117,6 +140,7 @@ export default {
       casting: {},
       castingAssetsByType: [],
       isCastingDirty: false,
+      isLoading: false,
       isSaving: false,
       isSavingError: false
     }
@@ -129,6 +153,8 @@ export default {
       'assetsByType',
       'currentProduction',
       'displayedShots',
+      'isAssetsLoading',
+      'isShotsLoading',
       'sequences',
       'shots',
       'shotMap',
@@ -156,8 +182,11 @@ export default {
 
     selectShot (event) {
       this.selectedShotId = event.target.id
+
+      this.isLoading = true
       shotsApi.getShot(this.selectedShotId, (err, shot) => {
         if (err) console.log(err)
+        this.isLoading = false
         this.currentShot = this.shotMap[this.selectedShotId]
         this.casting = {}
         if (!this.currentShot.entities_out) {
@@ -172,9 +201,16 @@ export default {
     },
 
     saveCasting () {
+      this.isSaving = true
+      this.isSavingError = false
       shotsApi.updateCasting(this.currentShot, (err) => {
-        if (err) console.log(err)
-        this.isCastingDirty = false
+        if (err) {
+          console.log(err)
+          this.isSavingError = true
+        } else {
+          this.isCastingDirty = false
+        }
+        this.isSaving = false
       })
     },
 
@@ -345,5 +381,9 @@ export default {
 
 .active {
   cursor: pointer;
+}
+
+.level-right {
+  display-flex: row;
 }
 </style>

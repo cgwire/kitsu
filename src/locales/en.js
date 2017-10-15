@@ -199,7 +199,8 @@ export default {
     title: 'Breakdown',
     select_shot: 'Please select a shot on the left to manage its casting.',
     selected_shot: 'Assets in {sequence_name} / {name} casting',
-    all_assets: 'All available assets'
+    all_assets: 'All available assets',
+    save_error: 'An error occured while saving breakdown.'
   },
 
   server_down: {
