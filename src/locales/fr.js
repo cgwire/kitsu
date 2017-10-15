@@ -199,7 +199,8 @@ export default {
     title: 'Casting',
     select_shot: 'Sélectionnez un shot à gauche pour gérer son casting',
     selected_shot: 'Assets présents dans le casting de {sequence_name} / {name}',
-    all_assets: 'Tous les assets disponibles'
+    all_assets: 'Tous les assets disponibles',
+    save_error: 'Une erreur est survenue en sauvegardant le casting.'
   },
 
   server_down: {
