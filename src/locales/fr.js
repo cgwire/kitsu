@@ -51,6 +51,7 @@ export default {
   main: {
     profile: 'Profil',
     logout: 'Se déconnecter',
+    save: 'Enregistrer',
     cancel: 'Annuler',
     confirmation: 'Confirmer',
     confirmation_and_stay: 'Confirmer et rester',
@@ -197,13 +198,13 @@ export default {
   breakdown: {
     title: 'Casting',
     select_shot: 'Sélectionnez un shot à gauche pour gérer son casting',
-    selected_shot: 'Assets présents dans le casting de {name}',
+    selected_shot: 'Assets présents dans le casting de {sequence_name} / {name}',
     all_assets: 'Tous les assets disponibles'
   },
 
   server_down: {
     title: 'Kitsu a rencontré une erreur en communiquant avec son API de données.',
-    text: 'Contactez votre fournisseur, votre administrateur système ou votre déartement informatique pour comprendre ce qui ne va pas.'
+    text: 'Contactez votre fournisseur, votre administrateur système ou votre département informatique pour comprendre ce qui ne va pas.'
   }
 
 }
