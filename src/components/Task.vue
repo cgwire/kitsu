@@ -368,6 +368,7 @@ export default {
         comment: comment,
         callback: (err) => {
           if (err) {
+            console.log(err)
             this.addCommentLoading = {
               isLoading: false,
               isError: true
@@ -377,8 +378,8 @@ export default {
               isLoading: false,
               isError: false
             }
-            this.currentTaskComments = this.getCurrentTaskComments()
             this.currentTaskPreviews = this.getCurrentTaskPreviews()
+            this.currentTaskComments = this.getCurrentTaskComments()
             this.currentTask = this.getCurrentTask()
           }
         }
@@ -419,6 +420,9 @@ export default {
                               `/previews/${preview.id}`)
           }
           this.loading.addPreview = false
+          this.currentTaskPreviews = this.getCurrentTaskPreviews()
+          this.currentTaskComments = this.getCurrentTaskComments()
+          console.log(this.currentTaskComments)
         }
       })
     },
