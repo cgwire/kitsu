@@ -25,10 +25,12 @@
         <div class="level">
           <div class="level-left">
             <h2 class="subtitle" v-if="currentShot">
-              {{ $t('breakdown.selected_shot', {
-                sequence_name: currentShot.sequence_name,
-                name: currentShot.name
-              }) }}
+              {{
+                $t('breakdown.selected_shot', {
+                  sequence_name: currentShot.sequence_name,
+                  name: currentShot.name
+                })
+              }}
             </h2>
             <em v-else>
               {{ $t('breakdown.select_shot') }}
@@ -51,7 +53,7 @@
           <div class="asset-list">
             <div
               :id="'casting-' + asset.id"
-              class="asset big casted"
+              class="asset big casted active"
               @click="removeAsset"
               v-for="asset in typeAssets"
             >
@@ -74,10 +76,8 @@
               :id="asset.id"
               :class="{
                 asset: true,
-                casted: casting[asset.id] !== undefined
-              }"
-              :style="{
-                cursor: currentShot ? 'pointer' : 'default'
+                casted: casting[asset.id] !== undefined,
+                active: currentShot ? true :  false
               }"
               @click="addAsset"
               v-for="asset in typeAssets"
@@ -116,23 +116,23 @@ export default {
       currentShot: null,
       casting: {},
       castingAssetsByType: [],
-      isCastingDirty: false
+      isCastingDirty: false,
+      isSaving: false,
+      isSavingError: false
     }
   },
 
   computed: {
     ...mapGetters([
-      'displayedShots',
-      'shots',
-      'shotMap',
-      'shotsBySequence',
       'assets',
       'assetMap',
       'assetsByType',
+      'currentProduction',
+      'displayedShots',
       'sequences',
-      'isShotsLoading',
-      'isShotsLoadingError',
-      'currentProduction'
+      'shots',
+      'shotMap',
+      'shotsBySequence'
     ])
   },
 
@@ -204,23 +204,24 @@ export default {
     },
 
     getCastingAssetsByType () {
-      const assetsBySequence = []
+      const assetsByType = []
+      const casting = sortAssets(Object.values(this.casting))
       let assetTypeAssets = []
-      let previousAsset = null
+      let previousAsset = casting.length > 0 ? casting[0] : null
 
-      for (let asset of sortAssets(Object.values(this.casting))) {
-        if (
-          previousAsset && asset.asset_type_name !== previousAsset.asset_type_name
-        ) {
-          assetsBySequence.push(assetTypeAssets.slice(0))
+      for (let asset of casting) {
+        const isChange =
+          asset.asset_type_name !== previousAsset.asset_type_name
+        if (previousAsset && isChange) {
+          assetsByType.push(assetTypeAssets.slice(0))
           assetTypeAssets = []
         }
         assetTypeAssets.push(asset)
         previousAsset = asset
       }
-      assetsBySequence.push(assetTypeAssets)
+      assetsByType.push(assetTypeAssets)
 
-      return assetsBySequence
+      return assetsByType
     }
   },
 
@@ -272,6 +273,19 @@ export default {
   max-width: 250px;
 }
 
+.shot-column {
+  padding: 0 1em 0 0;
+}
+
+.casting-column {
+  padding: 0 1em;
+}
+
+.assets-column {
+  border-left: 4px solid #EEE;
+  padding-left: 1em;
+}
+
 .asset-type,
 .sequence {
   text-transform: uppercase;
@@ -285,7 +299,6 @@ export default {
 .sequence-shots:not(:first-child) {
   margin-top: 2em;
 }
-
 
 .shot {
   font-size: 1.1em;
@@ -317,7 +330,7 @@ export default {
   font-size: 0.8em;
   align-items: center;
   justify-content: center;
-  cursor: pointer;
+  cursor: default;
   background: #EEE;
 }
 
@@ -330,16 +343,7 @@ export default {
   background: #D1C4E9;
 }
 
-.shot-column {
-  padding: 0 1em 0 0;
-}
-
-.casting-column {
-  padding: 0 1em;
-}
-
-.assets-column {
-  border-left: 4px solid #EEE;
-  padding-left: 1em;
+.active {
+  cursor: pointer;
 }
 </style>
