@@ -55,6 +55,12 @@ export const routes = [
         name: 'breakdown'
       },
       {
+        path: '/productions/:production_id/breakdown/shots/:shot_id',
+        component: Breakdown,
+        name: 'breakdown-shot'
+      },
+
+      {
         path: '/productions/:production_id/assets',
         component: Assets,
         name: 'assets'

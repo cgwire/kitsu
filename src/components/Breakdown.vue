@@ -166,8 +166,16 @@ export default {
     const productionId = this.$store.state.route.params.production_id
     this.$store.commit('SET_CURRENT_PRODUCTION', productionId)
 
-    if (this.shots.length === 0) this.loadShots()
-    if (this.assets.length === 0) this.loadAssets()
+    if (this.shots.length === 0) {
+      this.loadShots(() => {
+        if (this.assets.length === 0) {
+          this.loadAssets(() => {
+            const shotId = this.$route.params.shot_id
+            if (shotId) this.setShot(shotId)
+          })
+        }
+      })
+    }
   },
 
   methods: {
@@ -181,8 +189,17 @@ export default {
     },
 
     selectShot (event) {
-      this.selectedShotId = event.target.id
+      this.$router.push({
+        name: 'breakdown-shot',
+        params: {
+          production_id: this.currentProduction.id,
+          shot_id: event.target.id
+        }
+      })
+    },
 
+    setShot (shotId) {
+      this.selectedShotId = shotId
       this.isLoading = true
       shotsApi.getShot(this.selectedShotId, (err, shot) => {
         if (err) console.log(err)
@@ -262,15 +279,24 @@ export default {
   },
 
   watch: {
+    $route () {
+      const shotId = this.$route.params.shot_id
+      if (shotId) this.setShot(shotId)
+    },
     currentProduction () {
       const oldPath = `${this.$route.path}`
       const newPath = {
         name: 'breakdown',
         params: {production_id: this.currentProduction.id}
       }
-      if (this.$route.path.length === 59) this.$router.push(newPath)
+      console.log(this.$route.path.length)
+      if (this.$route.path.length === 59 || this.$route.path.length === 102) {
+        this.$router.push(newPath)
+      }
       const path = this.$route.path
       if (oldPath !== path) {
+        this.selectedShotId = null
+        this.currentShot = null
         this.loadAssets()
         this.loadShots()
       }
