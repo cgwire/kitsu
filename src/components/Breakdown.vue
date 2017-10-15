@@ -22,12 +22,28 @@
       </div>
 
       <div class="breakdown-column casting-column">
-        <h2 class="subtitle" v-if="currentShot">
-          {{ $t('breakdown.selected_shot', {name: currentShot.name}) }}
-        </h2>
-        <h2 class="subtitle" v-else>
-          {{ $t('breakdown.select_shot') }}
-        </h2>
+        <div class="level">
+          <div class="level-left">
+            <h2 class="subtitle" v-if="currentShot">
+              {{ $t('breakdown.selected_shot', {
+                sequence_name: currentShot.sequence_name,
+                name: currentShot.name
+              }) }}
+            </h2>
+            <em v-else>
+              {{ $t('breakdown.select_shot') }}
+            </em>
+          </div>
+          <div class="level-right">
+            <button
+              class="button save-button is-success"
+              :disabled="!isCastingDirty"
+              @click="saveCasting"
+            >
+              {{ $t('main.save') }}
+            </button>
+          </div>
+        </div>
         <div class="type-assets" v-for="typeAssets in castingAssetsByType">
           <div class="asset-type">
             {{ typeAssets[0] ? typeAssets[0].asset_type_name : '' }}
@@ -35,7 +51,7 @@
           <div class="asset-list">
             <div
               :id="'casting-' + asset.id"
-              class="asset big"
+              class="asset big casted"
               @click="removeAsset"
               v-for="asset in typeAssets"
             >
@@ -80,15 +96,18 @@
 <script>
 import { mapGetters, mapActions } from 'vuex'
 import { sortAssets } from '../lib/sorting'
+import shotsApi from '../store/api/shots'
 import ShotList from './lists/ShotList'
 import PageTitle from './widgets/PageTitle'
+import { SaveIcon } from 'vue-feather-icons'
 
 export default {
   name: 'menu',
 
   components: {
     ShotList,
-    PageTitle
+    PageTitle,
+    SaveIcon
   },
 
   data () {
@@ -96,7 +115,8 @@ export default {
       selectedShotId: 0,
       currentShot: null,
       casting: {},
-      castingAssetsByType: []
+      castingAssetsByType: [],
+      isCastingDirty: false
     }
   },
 
@@ -112,7 +132,6 @@ export default {
       'sequences',
       'isShotsLoading',
       'isShotsLoadingError',
-      'currentProduction',
       'currentProduction'
     ])
   },
@@ -130,16 +149,35 @@ export default {
       'loadShots',
       'loadAssets'
     ]),
+
+    isSaveActive: () => {
+      return this.currentShot && this.isCastingDirty
+    },
+
     selectShot (event) {
       this.selectedShotId = event.target.id
-      this.currentShot = this.shotMap[this.selectedShotId]
-      this.casting = {}
-      if (!this.currentShot.entities_out) this.currentShot.entities_out = []
-      this.currentShot.entities_out.forEach((assetId) => {
-        this.casting[assetId] = this.assetMap[assetId]
+      shotsApi.getShot(this.selectedShotId, (err, shot) => {
+        if (err) console.log(err)
+        this.currentShot = this.shotMap[this.selectedShotId]
+        this.casting = {}
+        if (!this.currentShot.entities_out) {
+          this.currentShot.entities_out = shot.entities_out
+        }
+        this.currentShot.entities_out.forEach((assetId) => {
+          this.casting[assetId] = this.assetMap[assetId]
+        })
+        this.castingAssetsByType = this.getCastingAssetsByType()
+        this.isCastingDirty = false
       })
-      this.castingAssetsByType = this.getCastingAssetsByType()
     },
+
+    saveCasting () {
+      shotsApi.updateCasting(this.currentShot, (err) => {
+        if (err) console.log(err)
+        this.isCastingDirty = false
+      })
+    },
+
     addAsset (event) {
       if (this.currentShot) {
         const assetId = event.target.id
@@ -149,8 +187,10 @@ export default {
         this.currentShot.entities_out = Object.values(this.casting).map(
           (asset) => asset.id
         )
+        this.isCastingDirty = true
       }
     },
+
     removeAsset (event) {
       if (this.currentShot) {
         const assetId = event.target.id.substring('casting-'.length)
@@ -159,8 +199,10 @@ export default {
         this.currentShot.entities_out = Object.values(this.casting).map(
           (asset) => asset.id
         )
+        this.isCastingDirty = true
       }
     },
+
     getCastingAssetsByType () {
       const assetsBySequence = []
       let assetTypeAssets = []
@@ -258,7 +300,7 @@ export default {
 }
 
 .shot.selected {
-  background: #c1f0c1;
+  background: #D1C4E9;
 }
 
 .asset-list {
@@ -285,7 +327,7 @@ export default {
 }
 
 .asset.casted {
-  background: #c1f0c1;
+  background: #D1C4E9;
 }
 
 .shot-column {
