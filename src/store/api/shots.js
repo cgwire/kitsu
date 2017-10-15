@@ -1,6 +1,11 @@
 import client from './client'
 
 export default {
+  getShot (shotId, callback) {
+    const path = `/api/data/shots/${shotId}`
+    client.get(path, callback)
+  },
+
   getShots (currentProduction, callback) {
     let path = '/api/data/shots/with-tasks'
     if (currentProduction) {
@@ -29,6 +34,11 @@ export default {
       project_id: shot.project_id
     }
     client.put(`/api/data/entities/${shot.id}`, data, callback)
+  },
+
+  updateCasting (shot, callback) {
+    const data = shot.entities_out
+    client.put(`/api/actions/shots/${shot.id}/casting`, data, callback)
   },
 
   deleteShot (shot, callback) {
