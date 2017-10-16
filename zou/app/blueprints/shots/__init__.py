@@ -45,7 +45,11 @@ routes = [
     ("/data/projects/<project_id>/sequences", ProjectSequencesResource),
     ("/data/projects/<project_id>/episodes", ProjectEpisodesResource),
 
+<<<<<<< a015f5e6804538fe6d1732a40fcf6b93b5cdc8f4
     ("/data/shots/<shot_id>/casting", CastingResource)
+=======
+    ("/actions/shots/<shot_id>/casting", CastingResource)
+>>>>>>> Add breakdown routes and helpers
 ]
 
 
