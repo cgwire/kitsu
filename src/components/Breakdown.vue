@@ -79,7 +79,26 @@
               @click="removeAsset"
               v-for="asset in typeAssets"
             >
-              {{ asset.name }}
+              <div
+                class="asset-add"
+                @click="removeOneAsset"
+              >
+              - 1
+              </div>
+              <div
+                class="asset-add-10"
+                @click="removeTenAssets"
+                >
+              - 10
+              </div>
+              <div class="asset-name">
+                <span>
+                {{ asset.name }}
+                </span>
+                <span class="nb-occurences" v-if="asset.nb_occurences > 1">
+                ({{ asset.nb_occurences }})
+                </span>
+              </div>
             </div>
           </div>
         </div>
@@ -102,10 +121,23 @@
                 casted: casting[asset.id] !== undefined,
                 active: currentShot ? true :  false
               }"
-              @click="addAsset"
               v-for="asset in typeAssets"
             >
+              <div
+                class="asset-add"
+                @click="addOneAsset"
+              >
+              + 1
+              </div>
+              <div
+                class="asset-add-10"
+                @click="addTenAssets"
+                >
+              + 10
+              </div>
+              <div class="asset-name">
               {{ asset.name }}
+              </div>
             </div>
           </div>
         </div>
@@ -200,17 +232,15 @@ export default {
 
     setShot (shotId) {
       this.selectedShotId = shotId
+      this.currentShot = this.shotMap[this.selectedShotId]
       this.isLoading = true
-      shotsApi.getShot(this.selectedShotId, (err, shot) => {
+      shotsApi.getCasting(this.currentShot, (err, casting) => {
         if (err) console.log(err)
         this.isLoading = false
-        this.currentShot = this.shotMap[this.selectedShotId]
         this.casting = {}
-        if (!this.currentShot.entities_out) {
-          this.currentShot.entities_out = shot.entities_out
-        }
-        this.currentShot.entities_out.forEach((assetId) => {
-          this.casting[assetId] = this.assetMap[assetId]
+        casting.forEach((cast) => {
+          this.casting[cast.asset_id] = this.assetMap[cast.asset_id]
+          this.casting[cast.asset_id].nb_occurences = cast.nb_occurences
         })
         this.castingAssetsByType = this.getCastingAssetsByType()
         this.isCastingDirty = false
@@ -218,9 +248,18 @@ export default {
     },
 
     saveCasting () {
+      const casting = []
+      Object.values(this.casting).forEach((asset) => {
+        casting.push({
+          asset_id: asset.id,
+          nb_occurences: asset.nb_occurences || 1
+        })
+      })
+
       this.isSaving = true
       this.isSavingError = false
-      shotsApi.updateCasting(this.currentShot, (err) => {
+
+      shotsApi.updateCasting(this.currentShot, casting, (err) => {
         if (err) {
           console.log(err)
           this.isSavingError = true
@@ -231,27 +270,49 @@ export default {
       })
     },
 
-    addAsset (event) {
+    addOneAsset (event) {
+      const assetId = event.target.parentElement.id
+      this.addAsset(assetId, 1)
+    },
+
+    addTenAssets (event) {
+      const assetId = event.target.parentElement.id
+      this.addAsset(assetId, 10)
+    },
+
+    addAsset (assetId, number) {
       if (this.currentShot) {
-        const assetId = event.target.id
         const asset = this.assetMap[assetId]
-        this.casting[asset.id] = asset
+        if (this.casting[asset.id]) {
+          this.casting[asset.id].nb_occurences += number
+        } else {
+          this.casting[asset.id] = asset
+          this.casting[asset.id].nb_occurences = number
+        }
         this.castingAssetsByType = this.getCastingAssetsByType()
-        this.currentShot.entities_out = Object.values(this.casting).map(
-          (asset) => asset.id
-        )
         this.isCastingDirty = true
       }
     },
 
-    removeAsset (event) {
-      if (this.currentShot) {
-        const assetId = event.target.id.substring('casting-'.length)
-        delete this.casting[assetId]
+    removeOneAsset (event) {
+      let assetId = event.target.parentElement.id
+      assetId = assetId.substring('casting-'.length)
+      this.removeAsset(assetId, 1)
+    },
+
+    removeTenAssets (event) {
+      let assetId = event.target.parentElement.id
+      assetId = assetId.substring('casting-'.length)
+      this.removeAsset(assetId, 10)
+    },
+
+    removeAsset (assetId, number) {
+      if (this.currentShot && this.casting[assetId]) {
+        this.casting[assetId].nb_occurences -= number
+        if (this.casting[assetId].nb_occurences < 1) {
+          delete this.casting[assetId]
+        }
         this.castingAssetsByType = this.getCastingAssetsByType()
-        this.currentShot.entities_out = Object.values(this.casting).map(
-          (asset) => asset.id
-        )
         this.isCastingDirty = true
       }
     },
@@ -269,6 +330,7 @@ export default {
           assetsByType.push(assetTypeAssets.slice(0))
           assetTypeAssets = []
         }
+        if (!asset.nb_occurences) asset.nb_occurences = 1
         assetTypeAssets.push(asset)
         previousAsset = asset
       }
@@ -289,16 +351,18 @@ export default {
         name: 'breakdown',
         params: {production_id: this.currentProduction.id}
       }
-      console.log(this.$route.path.length)
-      if (this.$route.path.length === 59 || this.$route.path.length === 102) {
+      if (this.currentProduction.id !== this.$route.params.production_id) {
         this.$router.push(newPath)
-      }
-      const path = this.$route.path
-      if (oldPath !== path) {
-        this.selectedShotId = null
-        this.currentShot = null
-        this.loadAssets()
-        this.loadShots()
+        const path = this.$route.path
+        if (oldPath !== path) {
+          this.selectedShotId = null
+          this.currentShot = null
+          this.currentShot = null
+          this.casting = {}
+          this.castingAssetsByType = this.getCastingAssetsByType()
+          this.loadAssets()
+          this.loadShots()
+        }
       }
     }
   }
@@ -383,15 +447,15 @@ export default {
   flex-direction: row;
 }
 
+.level-right {
+  display-flex: row;
+}
+
 .asset {
   width: 60px;
   height: 60px;
   margin-right: 1em;
-  display: flex;
-  text-align: center;
   font-size: 0.8em;
-  align-items: center;
-  justify-content: center;
   cursor: default;
   background: #EEE;
 }
@@ -409,7 +473,74 @@ export default {
   cursor: pointer;
 }
 
-.level-right {
-  display-flex: row;
+.asset-add {
+  position: relative;
+  top: 0;
+  left: 0;
+  width: 60px;
+  height: 30px;
+  background: #F1E4FF;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: bold;
+  font-size: 1.2em;
+  opacity: 0;
+  z-index: 3;
+}
+
+.asset-add-10 {
+  position: relative;
+  top: 0;
+  left: 0;
+  margin-top: 0px;
+  width: 60px;
+  height: 30px;
+  background: #E1D4F9;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: bold;
+  font-size: 1.2em;
+  opacity: 0;
+  z-index: 3;
+}
+
+.big .asset-add {
+  width: 80px;
+  height: 40px;
+}
+
+.big .asset-add-10 {
+  width: 80px;
+  height: 40px;
+}
+
+.asset:hover .asset-add,
+.asset:hover .asset-add-10 {
+  opacity: 1;
+}
+
+.asset-name {
+  position: relative;
+  top: -60px;
+  left: 0;
+  display: flex;
+  text-align: center;
+  justify-content: center;
+  align-items: center;
+  width: 60px;
+  height: 60px;
+  z-index: 2;
+}
+
+.big .asset-name {
+  top: -80px;
+  width: 80px;
+  height: 80px;
+}
+
+.nb-occurences {
+  margin-left: 0.4em;
 }
 </style>

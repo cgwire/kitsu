@@ -36,9 +36,12 @@ export default {
     client.put(`/api/data/entities/${shot.id}`, data, callback)
   },
 
-  updateCasting (shot, callback) {
-    const data = shot.entities_out
-    client.put(`/api/actions/shots/${shot.id}/casting`, data, callback)
+  getCasting (shot, callback) {
+    client.get(`/api/data/shots/${shot.id}/casting`, callback)
+  },
+
+  updateCasting (shot, casting, callback) {
+    client.put(`/api/data/shots/${shot.id}/casting`, casting, callback)
   },
 
   deleteShot (shot, callback) {
