@@ -20,7 +20,9 @@ from .resources import (
     SequencesResource,
     SequenceShotsResource,
     SequenceTasksResource,
-    SequenceTaskTypesResource
+    SequenceTaskTypesResource,
+
+    CastingResource
 )
 
 
@@ -41,7 +43,9 @@ routes = [
     ("/data/shots/<shot_id>/tasks", ShotTasksResource),
     ("/data/projects/<project_id>/shots", ProjectShotsResource),
     ("/data/projects/<project_id>/sequences", ProjectSequencesResource),
-    ("/data/projects/<project_id>/episodes", ProjectEpisodesResource)
+    ("/data/projects/<project_id>/episodes", ProjectEpisodesResource),
+
+    ("/actions/shots/<shot_id>/casting", CastingResource)
 ]
 
 
