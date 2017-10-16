@@ -102,7 +102,6 @@ export default {
       'user',
       'openProductions',
       'getOpenProductionOptions',
-      'getCurrentProduction',
       'currentProduction'
     ])
   },
@@ -120,20 +119,22 @@ export default {
     },
     isProductionContext () {
       const path = this.$store.state.route.path
-      return path.indexOf('assets') > 0 || path.indexOf('shots') > 0
+      return path.indexOf('assets') > 0 ||
+        path.indexOf('shots') > 0 ||
+        path.indexOf('breakdown') > 0
     }
   },
   watch: {
-    openProductions () {
-      if (this.openProductions.length > 0) {
-        this.currentProduction = this.openProductions[0].id
-      }
-    },
     currentProductionId () {
-      this.$store.commit('SET_CURRENT_PRODUCTION', this.currentProductionId)
+      this.$store.commit(
+        'SET_CURRENT_PRODUCTION',
+        `${this.currentProductionId}`
+      )
     },
     currentProduction () {
-      this.currentProductionId = this.getCurrentProduction.id
+      if (this.currentProductionId !== this.currentProduction.id) {
+        this.currentProductionId = this.currentProduction.id
+      }
     }
   }
 }

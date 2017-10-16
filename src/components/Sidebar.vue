@@ -17,6 +17,12 @@
          <h2>Fabrication</h2>
 
          <p @click="toggleSidebar()">
+           <router-link :to="breakdownPath">
+             {{ $t("breakdown.title") }}
+           </router-link>
+         </p>
+
+         <p @click="toggleSidebar()">
            <router-link :to="assetsPath">
              {{ $t("assets.title") }}
            </router-link>
@@ -65,43 +71,24 @@ import { mapGetters, mapActions } from 'vuex'
 
 export default {
   name: 'menu',
+  data () {
+    return {
+    }
+  },
   computed: {
     ...mapGetters([
       'isSidebarHidden',
+      'rawCurrentProduction',
       'currentProduction',
-      'getCurrentProduction'
+      'breakdownPath',
+      'assetsPath',
+      'shotsPath'
     ])
-  },
-  data () {
-    return {
-      assetsPath: this.getAssetsPath(),
-      shotsPath: this.getShotsPath()
-    }
   },
   methods: {
     ...mapActions([
       'toggleSidebar'
-    ]),
-    getAssetsPath () {
-      if (this.getCurrentProduction) {
-        return `/productions/${this.getCurrentProduction.id}/assets`
-      } else {
-        return '/assets'
-      }
-    },
-    getShotsPath () {
-      if (this.getCurrentProduction) {
-        return `/productions/${this.getCurrentProduction.id}/shots`
-      } else {
-        return '/shots'
-      }
-    }
-  },
-  watch: {
-    currentProduction () {
-      this.assetsPath = this.getAssetsPath()
-      this.shotsPath = this.getShotsPath()
-    }
+    ])
   }
 }
 </script>

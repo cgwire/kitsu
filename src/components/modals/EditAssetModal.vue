@@ -142,7 +142,7 @@ export default {
       'openProductions',
       'getAssetTypeOptions',
       'getOpenProductionOptions',
-      'getCurrentProduction'
+      'currentProduction'
     ])
   },
 
@@ -175,7 +175,7 @@ export default {
           this.form.entity_type_id = this.assetTypes[0].id
         }
         if (this.openProductions.length > 0) {
-          this.form.project_id = this.getCurrentProduction.id
+          this.form.project_id = this.currentProduction.id
         }
         this.form.name = ''
         this.form.description = ''

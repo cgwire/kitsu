@@ -37,6 +37,7 @@ const state = {
 
   displayedShots: [],
   shotIndex: {},
+  shotMap: {},
 
   isShotsLoading: false,
   isShotsLoadingError: false,
@@ -55,12 +56,30 @@ const state = {
 
 const getters = {
   shots: state => state.shots,
+  shotMap: state => state.shotMap,
   sequences: state => state.sequences,
   shotValidationColumns: state => {
     return sortValidationColumns(Object.values(state.validationColumns))
   },
 
   displayedShots: state => state.displayedShots,
+  shotsBySequence: state => {
+    const shotsBySequence = []
+    let sequenceShots = []
+    let previousShot = null
+
+    for (let shot of state.shots) {
+      if (previousShot && shot.sequence_name !== previousShot.sequence_name) {
+        shotsBySequence.push(sequenceShots.slice(0))
+        sequenceShots = []
+      }
+      sequenceShots.push(shot)
+      previousShot = shot
+    }
+    shotsBySequence.push(sequenceShots)
+
+    return shotsBySequence
+  },
 
   isShotsLoading: state => state.isShotsLoading,
   isShotsLoadingError: state => state.isShotsLoadingError,
@@ -82,7 +101,7 @@ const getters = {
 const actions = {
 
   loadShots ({ commit, state, rootState }, callback) {
-    const currentProduction = productionsStore.getters.getCurrentProduction(
+    const currentProduction = productionsStore.getters.currentProduction(
       rootState.productions
     )
     commit(LOAD_SHOTS_START)
@@ -148,8 +167,14 @@ const actions = {
 
 const mutations = {
   [LOAD_SHOTS_START] (state) {
+    state.shots = []
+    state.validationColumns = {}
     state.isShotsLoading = true
     state.isShotsLoadingError = false
+
+    state.shotIndex = {}
+    state.shotMap = {}
+    state.displayedShots = []
   },
 
   [LOAD_SHOTS_ERROR] (state) {
@@ -179,6 +204,11 @@ const mutations = {
     state.validationColumns = validationColumns
 
     state.shotIndex = buildNameIndex(shots)
+    const shotMap = {}
+    state.shots.forEach((shot) => {
+      shotMap[shot.id] = shot
+    })
+    state.shotMap = shotMap
     state.displayedShots = state.shots
   },
 
@@ -216,6 +246,7 @@ const mutations = {
     } else {
       state.shots.push(newShot)
       state.shots = sortShots(state.shots)
+      state.shotMap[newShot.id] = newShot
     }
     state.editShot = {
       isLoading: false,
@@ -253,6 +284,7 @@ const mutations = {
       isError: false
     }
     state.shotIndex = buildNameIndex(state.shots)
+    state.shotMap[shotToDelete.id] = undefined
   },
 
   [NEW_TASK_COMMENT_END] (state, {comment, taskId}) {
@@ -279,6 +311,7 @@ const mutations = {
     state.shotsCsvFormData = null
 
     state.shotIndex = {}
+    state.shotMap = {}
     state.displayedShots = []
 
     state.editShot = {

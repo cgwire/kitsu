@@ -253,10 +253,20 @@ const mutations = {
     state.previewFormData = formData
   },
   [ADD_PREVIEW_END] (state, {preview, taskId, commentId}) {
-    state.taskPreviews[taskId] = [preview].concat(state.taskPreviews[taskId])
     const getTaskComment = getters.getTaskComment(state, getters)
-    const comment = getTaskComment(taskId, commentId)
-    comment.preview = preview
+    const comment =
+      JSON.parse(JSON.stringify(getTaskComment(taskId, commentId)))
+    const newPreview = {
+      id: preview.id,
+      feedback: false,
+      revision: preview.revision
+    }
+    state.taskPreviews[taskId] =
+      [newPreview].concat(state.taskPreviews[taskId])
+    comment.preview = newPreview
+    state.taskComments[taskId].shift()
+    state.taskComments[taskId] =
+      [comment].concat(state.taskComments[taskId])
   },
 
   [RESET_ALL] (state, shots) {

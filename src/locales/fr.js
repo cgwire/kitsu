@@ -51,6 +51,7 @@ export default {
   main: {
     profile: 'Profil',
     logout: 'Se déconnecter',
+    save: 'Enregistrer',
     cancel: 'Annuler',
     confirmation: 'Confirmer',
     confirmation_and_stay: 'Confirmer et rester',
@@ -194,9 +195,17 @@ export default {
     delete_error: 'Une erreur est survenue en créant le plant, êtes vous sûr que le plan n\'a plus aucun lien ?'
   },
 
+  breakdown: {
+    title: 'Casting',
+    select_shot: 'Sélectionnez un shot à gauche pour gérer son casting',
+    selected_shot: 'Assets présents dans le casting de {sequence_name} / {name}',
+    all_assets: 'Tous les assets disponibles',
+    save_error: 'Une erreur est survenue en sauvegardant le casting.'
+  },
+
   server_down: {
     title: 'Kitsu a rencontré une erreur en communiquant avec son API de données.',
-    text: 'Contactez votre fournisseur, votre administrateur système ou votre déartement informatique pour comprendre ce qui ne va pas.'
+    text: 'Contactez votre fournisseur, votre administrateur système ou votre département informatique pour comprendre ce qui ne va pas.'
   }
 
 }

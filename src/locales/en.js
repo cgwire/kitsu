@@ -51,6 +51,7 @@ export default {
   main: {
     profile: 'Profile',
     logout: 'Logout',
+    save: 'Save',
     cancel: 'Cancel',
     confirmation: 'Confirm',
     confirmation_and_stay: 'Confirm and stay',
@@ -192,6 +193,14 @@ export default {
     },
     delete_text: 'Are you sure you want to remove {name} from your database?',
     delete_error: 'An error occured while deleting this shot. There are probably data linked to it. Are you sure this shot has no task linked to it?'
+  },
+
+  breakdown: {
+    title: 'Breakdown',
+    select_shot: 'Please select a shot on the left to manage its casting.',
+    selected_shot: 'Assets in {sequence_name} / {name} casting',
+    all_assets: 'All available assets',
+    save_error: 'An error occured while saving breakdown.'
   },
 
   server_down: {

@@ -17,7 +17,7 @@
             icon="upload"
             :path="{
               name: 'import-shots',
-              params: {production_id: getCurrentProduction.id}
+              params: {production_id: currentProduction.id}
             }"
           >
           </button-link>
@@ -25,7 +25,7 @@
             class="level-item"
             :text="$t('main.csv.export_file')"
             icon="download"
-            :path="'/api/export/csv/shots.csv?project_id=' + getCurrentProduction.id"
+            :path="'/api/export/csv/shots.csv?project_id=' + currentProduction.id"
           >
           </button-href-link>
         </div>
@@ -82,7 +82,7 @@
                 :path="{
                   name: 'create-shot-tasks',
                   params: {
-                    production_id: getCurrentProduction.id
+                    production_id: currentProduction.id
                   }
                 }"
               >
@@ -138,7 +138,7 @@
               name: 'delete-shots',
               params: {
                 shot_id: entry.id,
-                production_id: getCurrentProduction.id
+                production_id: currentProduction.id
               }
             }"
             :hide-edit="true"
@@ -194,7 +194,7 @@ export default {
   },
   computed: {
     ...mapGetters([
-      'getCurrentProduction'
+      'currentProduction'
     ])
   },
   methods: {

@@ -14,7 +14,7 @@
       :is-error="deleteShot.isError"
       :cancel-route="{
         name: 'shots',
-        params: {production_id: getCurrentProduction.id}
+        params: {production_id: currentProduction.id}
       }"
       :text="deleteText()"
       :error-text="$t('shots.delete_error')"
@@ -28,7 +28,7 @@
       :is-error="errors.importing"
       :cancel-route="{
         name: 'shots',
-        params: {production_id: getCurrentProduction.id}
+        params: {production_id: currentProduction.id}
       }"
       :form-data="shotsCsvFormData"
       :columns="columns"
@@ -43,7 +43,7 @@
       :is-error="errors.creatingTasks"
       :cancel-route="{
         name: 'shots',
-        params: {production_id: getCurrentProduction.id}
+        params: {production_id: currentProduction.id}
       }"
       :title="$t('tasks.create_tasks_shot')"
       :text="$t('tasks.create_tasks_shot_explaination')"
@@ -137,7 +137,7 @@ export default {
       'getShot',
       'shotValidationColumns',
       'currentProduction',
-      'getCurrentProduction'
+      'currentProduction'
     ])
   },
 
@@ -197,7 +197,7 @@ export default {
             this.modals.isNewDisplayed = false
             this.$router.push({
               name: 'shots',
-              params: {production_id: this.getCurrentProduction.id}
+              params: {production_id: this.currentProduction.id}
             })
           } else {
             this.loading.edit = false
@@ -214,7 +214,7 @@ export default {
           if (!err) {
             this.$router.push({
               name: 'shots',
-              params: {production_id: this.getCurrentProduction.id}
+              params: {production_id: this.currentProduction.id}
             })
           }
         }
@@ -226,7 +226,7 @@ export default {
       this.errors.creatingTasks = false
       this.$store.dispatch('createTasks', {
         task_type_id: form.task_type_id,
-        project_id: this.getCurrentProduction.id,
+        project_id: this.currentProduction.id,
         type: 'shots',
         callback: (err) => {
           this.loading.creatingTasks = false
@@ -236,7 +236,7 @@ export default {
             this.modals.isCreateTasks = false
             this.$router.push({
               name: 'shots',
-              params: {production_id: this.getCurrentProduction.id}
+              params: {production_id: this.currentProduction.id}
             })
             this.$store.dispatch('loadShots')
           }
@@ -320,7 +320,7 @@ export default {
       const oldPath = `${this.$route.path}`
       const newPath = {
         name: 'shots',
-        params: {production_id: this.getCurrentProduction.id}
+        params: {production_id: this.currentProduction.id}
       }
       if (this.$route.path.length === 55) this.$router.push(newPath)
       const path = this.$route.path
