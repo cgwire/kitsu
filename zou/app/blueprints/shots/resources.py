@@ -325,6 +325,18 @@ class CastingResource(Resource):
         Resource.__init__(self)
 
     @jwt_required
+    def get(self, shot_id):
+        """
+        Resource to retrieve the casting of a given shot.
+        """
+        try:
+            print("hello")
+            shot = shots_service.get_shot(shot_id)
+            return breakdown_service.get_casting(shot)
+        except ShotNotFoundException:
+            abort(404)
+
+    @jwt_required
     def put(self, shot_id):
         """
         Resource to allow the modification of assets linked to a shot.

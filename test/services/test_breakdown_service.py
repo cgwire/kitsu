@@ -1,10 +1,12 @@
 from test.base import ApiDBTestCase
 
+from zou.app.services import breakdown_service
 
-class BreakdownTestCase(ApiDBTestCase):
+
+class BreakdownServiceTestCase(ApiDBTestCase):
 
     def setUp(self):
-        super(BreakdownTestCase, self).setUp()
+        super(BreakdownServiceTestCase, self).setUp()
         self.generate_fixture_project_status()
         self.generate_fixture_project()
         self.generate_fixture_entity_type()
@@ -20,7 +22,7 @@ class BreakdownTestCase(ApiDBTestCase):
         self.entity_id = str(self.entity.id)
         self.entity_character_id = str(self.entity_character.id)
 
-        casting = self.get("/data/shots/%s/casting" % self.shot_id)
+        casting = breakdown_service.get_casting(self.shot)
         self.assertListEqual(casting, [])
         newCasting = [
             {
@@ -32,7 +34,16 @@ class BreakdownTestCase(ApiDBTestCase):
                 "nb_occurences": 3
             }
         ]
-        path = "/data/shots/%s/casting" % str(self.shot_id)
-        self.put(path, newCasting, 200)
-        casting = self.get("/data/shots/%s/casting" % self.shot_id)
-        self.assertListEqual(casting, newCasting)
+        breakdown_service.update_casting(self.shot, newCasting)
+        casting = breakdown_service.get_casting(self.shot)
+        casting = sorted(casting, key=lambda x: x["nb_occurences"])
+        self.assertEquals(casting[0]["asset_id"], newCasting[0]["asset_id"])
+        self.assertEquals(
+            casting[0]["nb_occurences"],
+            newCasting[0]["nb_occurences"]
+        )
+        self.assertEquals(casting[1]["asset_id"], newCasting[1]["asset_id"])
+        self.assertEquals(
+            casting[1]["nb_occurences"],
+            newCasting[1]["nb_occurences"]
+        )
