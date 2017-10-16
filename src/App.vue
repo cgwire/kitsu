@@ -125,6 +125,10 @@ input.input:focus {
   border-bottom: 2px solid #CCC
 }
 
+input.search-input:focus {
+  border-color: #8F91EB;
+}
+
 .filters-area {
   margin-bottom: 2em;
 }

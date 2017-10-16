@@ -307,8 +307,4 @@ table.table-data {
 .data-list {
   width: 100%;
 }
-
-.search-input:focus {
-  border-color: #8F91EB;
-}
 </style>
