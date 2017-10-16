@@ -5,6 +5,7 @@ from flask_jwt_extended import jwt_required
 from zou.app.models.entity import Entity
 
 from zou.app.services import (
+    breakdown_service,
     shots_service,
     tasks_service,
     projects_service
@@ -316,3 +317,21 @@ class SequenceShotsResource(Resource):
         criterions = query.get_query_criterions_from_request(request)
         criterions["parent_id"] = sequence_id
         return shots_service.get_shots(criterions)
+
+
+class CastingResource(Resource):
+
+    def __init__(self):
+        Resource.__init__(self)
+
+    @jwt_required
+    def put(self, shot_id):
+        """
+        Resource to allow the modification of assets linked to a shot.
+        """
+        casting = request.json
+        try:
+            shot = shots_service.get_shot(shot_id)
+            return breakdown_service.update_casting(shot, casting)
+        except ShotNotFoundException:
+            abort(404)
