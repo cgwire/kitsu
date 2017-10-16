@@ -1,4 +1,4 @@
-from flask import request, jsonify
+from flask import request, jsonify, abort
 from flask_restful import Resource, reqparse, current_app
 from flask_principal import (
     Identity,
@@ -76,11 +76,14 @@ class AuthenticatedResource(Resource):
 
     @jwt_required
     def get(self):
-        person = persons_service.get_by_email(get_jwt_identity())
-        return {
-            "authenticated": True,
-            "user": person.serialize()
-        }
+        try:
+            person = persons_service.get_by_email(get_jwt_identity())
+            return {
+                "authenticated": True,
+                "user": person.serialize()
+            }
+        except PersonNotFoundException:
+            abort(401)
 
 
 class LogoutResource(Resource):
