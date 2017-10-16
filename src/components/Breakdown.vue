@@ -92,12 +92,12 @@
               - 10
               </div>
               <div class="asset-name">
-                <span>
+                <p>
                 {{ asset.name }}
-                </span>
-                <span class="nb-occurences" v-if="asset.nb_occurences > 1">
+                <span v-if="asset.nb_occurences > 1">
                 ({{ asset.nb_occurences }})
                 </span>
+                </p>
               </div>
             </div>
           </div>
@@ -108,6 +108,25 @@
         <h2 class="subtitle">
           {{ $t('breakdown.all_assets') }}
         </h2>
+
+        <div class="filters-area">
+          <div class="level">
+            <div class="level-right">
+              <div class="level-item">
+                <search-icon></search-icon>
+              </div>
+              <div class="level-item">
+                <input
+                  class="input search-input"
+                  type="text"
+                  @input="onSearchChange"
+                  v-focus
+                />
+              </div>
+            </div>
+          </div>
+        </div>
+
         <spinner v-if="isAssetsLoading"></spinner>
         <div class="type-assets" v-for="typeAssets in assetsByType" v-else>
           <div class="asset-type">
@@ -154,7 +173,7 @@ import { sortAssets } from '../lib/sorting'
 import shotsApi from '../store/api/shots'
 import PageTitle from './widgets/PageTitle'
 import Spinner from './widgets/Spinner'
-import { SaveIcon } from 'vue-feather-icons'
+import { SaveIcon, SearchIcon } from 'vue-feather-icons'
 
 export default {
   name: 'menu',
@@ -162,6 +181,7 @@ export default {
   components: {
     PageTitle,
     SaveIcon,
+    SearchIcon,
     Spinner
   },
 
@@ -198,16 +218,12 @@ export default {
     const productionId = this.$store.state.route.params.production_id
     this.$store.commit('SET_CURRENT_PRODUCTION', productionId)
 
-    if (this.shots.length === 0) {
-      this.loadShots(() => {
-        if (this.assets.length === 0) {
-          this.loadAssets(() => {
-            const shotId = this.$route.params.shot_id
-            if (shotId) this.setShot(shotId)
-          })
-        }
+    this.loadShots(() => {
+      this.loadAssets(() => {
+        const shotId = this.$route.params.shot_id
+        if (shotId) this.setShot(shotId)
       })
-    }
+    })
   },
 
   methods: {
@@ -218,6 +234,11 @@ export default {
 
     isSaveActive: () => {
       return this.currentShot && this.isCastingDirty
+    },
+
+    onSearchChange () {
+      const searchQuery = event.target.value
+      this.$store.commit('SET_ASSET_SEARCH', searchQuery)
     },
 
     selectShot (event) {
@@ -516,8 +537,8 @@ export default {
   height: 40px;
 }
 
-.asset:hover .asset-add,
-.asset:hover .asset-add-10 {
+.asset.active:hover .asset-add,
+.asset.active:hover .asset-add-10 {
   opacity: 1;
 }
 
