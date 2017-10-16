@@ -330,6 +330,7 @@ class CastingResource(Resource):
         Resource to retrieve the casting of a given shot.
         """
         try:
+
             shot = shots_service.get_shot(shot_id)
             return breakdown_service.get_casting(shot)
         except ShotNotFoundException:
