@@ -8,19 +8,19 @@ from zou.app.utils import fields
 from sqlalchemy.dialects.postgresql import JSONB
 
 
-entity_link = db.Table(
-    'entity_link',
-    db.Column(
-        'entity_in_id',
+class EntityLink(db.Model, BaseMixin):
+    __tablename__ = 'entity_link'
+    entity_in_id = db.Column(
         UUIDType(binary=False),
-        db.ForeignKey('entity.id')
-    ),
-    db.Column(
-        'entity_out_id',
-        UUIDType(binary=False),
-        db.ForeignKey('entity.id')
+        db.ForeignKey('entity.id'),
+        primary_key=True
     )
-)
+    entity_out_id = db.Column(
+        UUIDType(binary=False),
+        db.ForeignKey('entity.id'),
+        primary_key=True
+    )
+    nb_occurences = db.Column(db.Integer, default=1)
 
 
 class Entity(db.Model, BaseMixin, SerializerMixin):
@@ -45,9 +45,9 @@ class Entity(db.Model, BaseMixin, SerializerMixin):
 
     entities_out = db.relationship(
         'Entity',
-        secondary=entity_link,
-        primaryjoin=(id == entity_link.c.entity_in_id),
-        secondaryjoin=(id == entity_link.c.entity_out_id),
+        secondary='entity_link',
+        primaryjoin=(id == EntityLink.entity_in_id),
+        secondaryjoin=(id == EntityLink.entity_out_id),
         backref="entities_in"
     )
 

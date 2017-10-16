@@ -45,7 +45,7 @@ routes = [
     ("/data/projects/<project_id>/sequences", ProjectSequencesResource),
     ("/data/projects/<project_id>/episodes", ProjectEpisodesResource),
 
-    ("/actions/shots/<shot_id>/casting", CastingResource)
+    ("/data/shots/<shot_id>/casting", CastingResource)
 ]
 
 
