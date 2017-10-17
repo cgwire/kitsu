@@ -11,16 +11,15 @@
             :options="getSequenceOptions"
             v-model="selectedSequenceId"
           ></combobox>
-          <div
-            :id="shot.id"
-            :class="{
-              shot: true,
-              selected: selectedShotId && shot.id === selectedShotId
-            }"
+          <p class="shots-title">{{ $t('shots.title')}}</p>
+          <shot-line
+            :key="shot.id"
+            :shot-id="shot.id"
+            :selected="selectedShotId && shot.id === selectedShotId"
+            :name="shot.name"
             @click="selectShot"
             v-for="shot in sequenceShots">
-            {{ shot.name }}
-          </div>
+          </shot-line>
         </div>
       </div>
 
@@ -250,12 +249,12 @@ export default {
       this.$store.commit('SET_ASSET_SEARCH', searchQuery)
     },
 
-    selectShot (event) {
+    selectShot (shotId) {
       this.$router.push({
         name: 'breakdown-shot',
         params: {
           production_id: this.currentProduction.id,
-          shot_id: event.target.id
+          shot_id: shotId
         }
       })
     },
@@ -465,22 +464,6 @@ export default {
 .type-assets:not(:first-child),
 .sequence-shots:not(:first-child) {
   margin-top: 2em;
-}
-
-.shot {
-  font-size: 1.1em;
-  padding: 0.5em 0 0.2em 0.2em;
-  margin-left: 1em;
-  border-bottom: 1px solid #CCC;
-  cursor: pointer;
-}
-
-.shot:hover {
-  background: #ecfaec;
-}
-
-.shot.selected {
-  background: #D1C4E9;
 }
 
 .asset-list {
