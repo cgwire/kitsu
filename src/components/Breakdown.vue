@@ -53,13 +53,12 @@
             </button>
           </div>
         </div>
-        <p :class="{
-          'error':true,
-          'has-text-right': true,
-          'is-hidden': !isSavingError
-        }">
-          {{ $t('breakdown.save_error') }}
-        </p>
+        <error-text
+          :align-right="true"
+          :hidden="!isSavingError"
+          :text="$t('breakdown.save_error')"
+        >
+        </error-text>
         <spinner v-if="isLoading"></spinner>
         <div
           class="type-assets"
