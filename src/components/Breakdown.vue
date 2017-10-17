@@ -5,14 +5,12 @@
 
       <div class="breakdown-column shot-column">
         <spinner v-if="isShotsLoading"></spinner>
-        <div
-          class="sequence-shots"
-          v-for="sequenceShots in shotsBySequence"
-          v-else
-        >
-          <div class="sequence">
-            {{ sequenceShots[0] ? sequenceShots[0].sequence_name : '' }}
-          </div>
+        <div v-else>
+          <combobox
+            :label="$t('shots.fields.sequence')"
+            :options="getSequenceOptions"
+            v-model="selectedSequenceId"
+          ></combobox>
           <div
             :id="shot.id"
             :class="{
@@ -173,12 +171,14 @@ import { sortAssets } from '../lib/sorting'
 import shotsApi from '../store/api/shots'
 import PageTitle from './widgets/PageTitle'
 import Spinner from './widgets/Spinner'
+import Combobox from './widgets/Combobox'
 import { SaveIcon, SearchIcon } from 'vue-feather-icons'
 
 export default {
   name: 'menu',
 
   components: {
+    Combobox,
     PageTitle,
     SaveIcon,
     SearchIcon,
@@ -187,7 +187,9 @@ export default {
 
   data () {
     return {
+      selectedSequenceId: '',
       selectedShotId: 0,
+      sequenceShots: [],
       currentShot: null,
       casting: {},
       castingAssetsByType: [],
@@ -205,9 +207,9 @@ export default {
       'assetsByType',
       'currentProduction',
       'displayedShots',
+      'getSequenceOptions',
       'isAssetsLoading',
       'isShotsLoading',
-      'sequences',
       'shots',
       'shotMap',
       'shotsBySequence'
@@ -221,7 +223,14 @@ export default {
     this.loadShots(() => {
       this.loadAssets(() => {
         const shotId = this.$route.params.shot_id
-        if (shotId) this.setShot(shotId)
+        if (shotId) {
+          this.setShot(shotId)
+        } else {
+          this.selectedSequenceId = this.getSequenceOptions[0].value
+        }
+        this.sequenceShots = this.shots.filter((shot) => {
+          return shot.sequence_id === this.selectedSequenceId
+        })
       })
     })
   },
@@ -236,7 +245,7 @@ export default {
       return this.currentShot && this.isCastingDirty
     },
 
-    onSearchChange () {
+    onSearchChange (event) {
       const searchQuery = event.target.value
       this.$store.commit('SET_ASSET_SEARCH', searchQuery)
     },
@@ -255,6 +264,7 @@ export default {
       this.selectedShotId = shotId
       this.currentShot = this.shotMap[this.selectedShotId]
       this.isLoading = true
+      this.selectedSequenceId = this.currentShot.sequence_id
       shotsApi.getCasting(this.currentShot, (err, casting) => {
         if (err) console.log(err)
         this.isLoading = false
@@ -366,6 +376,13 @@ export default {
       const shotId = this.$route.params.shot_id
       if (shotId) this.setShot(shotId)
     },
+    selectedSequenceId () {
+      if (this.selectedSequenceId) {
+        this.sequenceShots = this.shots.filter((shot) => {
+          return shot.sequence_id === this.selectedSequenceId
+        })
+      }
+    },
     currentProduction () {
       const oldPath = `${this.$route.path}`
       const newPath = {
@@ -378,11 +395,14 @@ export default {
         if (oldPath !== path) {
           this.selectedShotId = null
           this.currentShot = null
-          this.currentShot = null
           this.casting = {}
           this.castingAssetsByType = this.getCastingAssetsByType()
-          this.loadAssets()
-          this.loadShots()
+          this.loadShots(() => {
+            if (this.getSequenceOptions.length > 0) {
+              this.selectedSequenceId = this.getSequenceOptions[0].id
+            }
+            this.loadAssets()
+          })
         }
       }
     }
@@ -466,6 +486,7 @@ export default {
 .asset-list {
   display: flex;
   flex-direction: row;
+  flex-wrap: wrap;
 }
 
 .level-right {
@@ -476,6 +497,7 @@ export default {
   width: 60px;
   height: 60px;
   margin-right: 1em;
+  margin-bottom: 1em;
   font-size: 0.8em;
   cursor: default;
   background: #EEE;

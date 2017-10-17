@@ -3,7 +3,11 @@ import tasksStore from './tasks'
 import productionsStore from './productions'
 import { buildNameIndex, indexSearch } from '../../lib/indexing'
 
-import { sortShots, sortValidationColumns } from '../../lib/sorting'
+import {
+  sortShots,
+  sortValidationColumns,
+  sortByName
+} from '../../lib/sorting'
 import {
   LOAD_SHOTS_START,
   LOAD_SHOTS_ERROR,
@@ -94,7 +98,7 @@ const getters = {
   },
 
   getSequenceOptions: state => state.sequences.map(
-    (type) => { return { label: type.name, value: type.id } }
+    (sequence) => { return { label: sequence.name, value: sequence.id } }
   )
 }
 
@@ -205,9 +209,16 @@ const mutations = {
 
     state.shotIndex = buildNameIndex(shots)
     const shotMap = {}
+    const sequenceMap = {}
     state.shots.forEach((shot) => {
       shotMap[shot.id] = shot
+      sequenceMap[shot.sequence_id] = {
+        id: shot.sequence_id,
+        name: shot.sequence_name
+      }
     })
+    state.sequences = sortByName(Object.values(sequenceMap))
+    console.log(state.sequences)
     state.shotMap = shotMap
     state.displayedShots = state.shots
   },
