@@ -69,33 +69,15 @@
             {{ typeAssets[0] ? typeAssets[0].asset_type_name : '' }}
           </div>
           <div class="asset-list">
-            <div
-              :id="'casting-' + asset.id"
-              class="asset big casted active"
-              @click="removeAsset"
+            <asset-block
+              :key="asset.id"
+              :asset="asset"
+              :nb-occurences="asset.nb_occurences"
+              @remove-one="removeOneAsset"
+              @remove-ten="removeTenAssets"
               v-for="asset in typeAssets"
             >
-              <div
-                class="asset-add"
-                @click="removeOneAsset"
-              >
-              - 1
-              </div>
-              <div
-                class="asset-add-10"
-                @click="removeTenAssets"
-                >
-              - 10
-              </div>
-              <div class="asset-name">
-                <p>
-                {{ asset.name }}
-                <span v-if="asset.nb_occurences > 1">
-                ({{ asset.nb_occurences }})
-                </span>
-                </p>
-              </div>
-            </div>
+            </asset-block>
           </div>
         </div>
       </div>
@@ -129,34 +111,18 @@
             {{ typeAssets[0] ? typeAssets[0].asset_type_name : '' }}
           </div>
           <div class="asset-list">
-            <div
-              :id="asset.id"
-              :class="{
-                asset: true,
-                casted: casting[asset.id] !== undefined,
-                active: currentShot ? true :  false
-              }"
+            <available-asset-block
+              :key="asset.id"
+              :asset="asset"
+              :casted="casting[asset.id] !== undefined"
+              :active="currentShot ? true :  false"
+              @add-one="addOneAsset"
+              @add-ten="addTenAssets"
               v-for="asset in typeAssets"
             >
-              <div
-                class="asset-add"
-                @click="addOneAsset"
-              >
-              + 1
-              </div>
-              <div
-                class="asset-add-10"
-                @click="addTenAssets"
-                >
-              + 10
-              </div>
-              <div class="asset-name">
-              {{ asset.name }}
-              </div>
-            </div>
+            </available-asset-block>
           </div>
         </div>
-
       </div>
 
     </div>
@@ -170,16 +136,26 @@ import shotsApi from '../store/api/shots'
 import PageTitle from './widgets/PageTitle'
 import Spinner from './widgets/Spinner'
 import Combobox from './widgets/Combobox'
+import SearchField from './widgets/SearchField.vue'
+import ErrorText from './widgets/ErrorText'
+import ShotLine from './breakdown/ShotLine'
+import AssetBlock from './breakdown/AssetBlock'
+import AvailableAssetBlock from './breakdown/AvailableAssetBlock'
 import { SaveIcon, SearchIcon } from 'vue-feather-icons'
 
 export default {
   name: 'menu',
 
   components: {
+    AssetBlock,
+    AvailableAssetBlock,
     Combobox,
+    ErrorText,
     PageTitle,
     SaveIcon,
     SearchIcon,
+    SearchField,
+    ShotLine,
     Spinner
   },
 
@@ -299,13 +275,12 @@ export default {
       })
     },
 
-    addOneAsset (event) {
-      const assetId = event.target.parentElement.id
+    addOneAsset (assetId) {
+      console.log(assetId)
       this.addAsset(assetId, 1)
     },
 
-    addTenAssets (event) {
-      const assetId = event.target.parentElement.id
+    addTenAssets (assetId) {
       this.addAsset(assetId, 10)
     },
 
@@ -323,14 +298,12 @@ export default {
       }
     },
 
-    removeOneAsset (event) {
-      let assetId = event.target.parentElement.id
+    removeOneAsset (assetId) {
       assetId = assetId.substring('casting-'.length)
       this.removeAsset(assetId, 1)
     },
 
-    removeTenAssets (event) {
-      let assetId = event.target.parentElement.id
+    removeTenAssets (assetId) {
       assetId = assetId.substring('casting-'.length)
       this.removeAsset(assetId, 10)
     },
@@ -475,97 +448,7 @@ export default {
   display-flex: row;
 }
 
-.asset {
-  width: 60px;
-  height: 60px;
-  margin-right: 1em;
-  margin-bottom: 1em;
-  font-size: 0.8em;
-  cursor: default;
-  background: #EEE;
-}
-
-.asset.big {
-  width: 80px;
-  height: 80px;
-}
-
-.asset.casted {
-  background: #D1C4E9;
-}
-
-.active {
-  cursor: pointer;
-}
-
-.asset-add {
-  position: relative;
-  top: 0;
-  left: 0;
-  width: 60px;
-  height: 30px;
-  background: #F1E4FF;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+.shots-title {
   font-weight: bold;
-  font-size: 1.2em;
-  opacity: 0;
-  z-index: 3;
-}
-
-.asset-add-10 {
-  position: relative;
-  top: 0;
-  left: 0;
-  margin-top: 0px;
-  width: 60px;
-  height: 30px;
-  background: #E1D4F9;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-weight: bold;
-  font-size: 1.2em;
-  opacity: 0;
-  z-index: 3;
-}
-
-.big .asset-add {
-  width: 80px;
-  height: 40px;
-}
-
-.big .asset-add-10 {
-  width: 80px;
-  height: 40px;
-}
-
-.asset.active:hover .asset-add,
-.asset.active:hover .asset-add-10 {
-  opacity: 1;
-}
-
-.asset-name {
-  position: relative;
-  top: -60px;
-  left: 0;
-  display: flex;
-  text-align: center;
-  justify-content: center;
-  align-items: center;
-  width: 60px;
-  height: 60px;
-  z-index: 2;
-}
-
-.big .asset-name {
-  top: -80px;
-  width: 80px;
-  height: 80px;
-}
-
-.nb-occurences {
-  margin-left: 0.4em;
 }
 </style>

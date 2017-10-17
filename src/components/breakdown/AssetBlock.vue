@@ -1,0 +1,154 @@
+<template>
+<div
+  :id="'casting-' + asset.id"
+  class="asset big casted active"
+>
+  <div
+    class="asset-add"
+    @click="removeOneAsset"
+  >
+  - 1
+  </div>
+  <div
+    class="asset-add-10"
+    @click="removeTenAssets"
+    >
+  - 10
+  </div>
+  <div class="asset-name">
+    <p>
+    {{ asset.name }}
+    <span v-if="nbOccurences > 1">
+    ({{ nbOccurences }})
+    </span>
+    </p>
+  </div>
+</div>
+</template>
+
+<script>
+export default {
+  name: 'asset-block',
+  props: {
+    asset: {
+      default: {
+        id: '',
+        name: ''
+      },
+      type: Object
+    },
+    nbOccurences: {
+      default: 1,
+      type: Number
+    }
+  },
+  computed: {
+  },
+  methods: {
+    removeOneAsset (event) {
+      let assetId = event.target.parentElement.id
+      this.$emit('remove-one', assetId)
+    },
+    removeTenAssets (event) {
+      let assetId = event.target.parentElement.id
+      this.$emit('remove-ten', assetId)
+    }
+  }
+}
+</script>
+
+<style scoped>
+.asset {
+  width: 60px;
+  height: 60px;
+  margin-right: 1em;
+  margin-bottom: 1em;
+  font-size: 0.8em;
+  cursor: default;
+  background: #EEE;
+}
+
+.asset.big {
+  width: 80px;
+  height: 80px;
+}
+
+.asset-add {
+  position: relative;
+  top: 0;
+  left: 0;
+  width: 60px;
+  height: 30px;
+  background: #F1E4FF;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: bold;
+  font-size: 1.2em;
+  opacity: 0;
+  z-index: 3;
+}
+
+.asset-add-10 {
+  position: relative;
+  top: 0;
+  left: 0;
+  margin-top: 0px;
+  width: 60px;
+  height: 30px;
+  background: #E1D4F9;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: bold;
+  font-size: 1.2em;
+  opacity: 0;
+  z-index: 3;
+}
+
+.big .asset-add {
+  width: 80px;
+  height: 40px;
+  cursor: pointer;
+}
+
+.big .asset-add-10 {
+  width: 80px;
+  height: 40px;
+  cursor: pointer;
+}
+
+.asset.active:hover .asset-add,
+.asset.active:hover .asset-add-10 {
+  opacity: 1;
+}
+
+.asset-name {
+  position: relative;
+  top: -60px;
+  left: 0;
+  display: flex;
+  text-align: center;
+  justify-content: center;
+  align-items: center;
+  width: 60px;
+  height: 60px;
+  z-index: 2;
+}
+
+.big .asset-name {
+  top: -80px;
+  width: 80px;
+  height: 80px;
+}
+
+.nb-occurences {
+  margin-left: 0.4em;
+}
+
+.asset.casted {
+  background: #D1C4E9;
+}
+
+
+</style>
