@@ -89,19 +89,10 @@
 
         <div class="filters-area">
           <div class="level">
-            <div class="level-right">
-              <div class="level-item">
-                <search-icon></search-icon>
-              </div>
-              <div class="level-item">
-                <input
-                  class="input search-input"
-                  type="text"
-                  @input="onSearchChange"
-                  v-focus
-                />
-              </div>
-            </div>
+            <search-field
+              @change="onSearchChange"
+            >
+            </search-field>
           </div>
         </div>
 
@@ -219,8 +210,7 @@ export default {
       return this.currentShot && this.isCastingDirty
     },
 
-    onSearchChange (event) {
-      const searchQuery = event.target.value
+    onSearchChange (searchQuery) {
       this.$store.commit('SET_ASSET_SEARCH', searchQuery)
     },
 
