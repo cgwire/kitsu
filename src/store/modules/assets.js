@@ -174,8 +174,11 @@ const actions = {
       commit(IMPORT_ASSETS_END)
       if (callback) callback(err)
     })
-  }
+  },
 
+  setAssetSearch ({commit}, searchQuery) {
+    commit('SET_ASSET_SEARCH', searchQuery)
+  }
 }
 
 const mutations = {

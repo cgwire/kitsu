@@ -218,7 +218,6 @@ const mutations = {
       }
     })
     state.sequences = sortByName(Object.values(sequenceMap))
-    console.log(state.sequences)
     state.shotMap = shotMap
     state.displayedShots = state.shots
   },

@@ -9,16 +9,16 @@
           <combobox
             :label="$t('shots.fields.sequence')"
             :options="getSequenceOptions"
-            v-model="selectedSequenceId"
+            v-model="sequenceId"
           ></combobox>
           <p class="shots-title">{{ $t('shots.title')}}</p>
           <shot-line
             :key="shot.id"
             :shot-id="shot.id"
-            :selected="selectedShotId && shot.id === selectedShotId"
+            :selected="castingCurrentShot && castingCurrentShot.id === shot.id"
             :name="shot.name"
             @click="selectShot"
-            v-for="shot in sequenceShots">
+            v-for="shot in castingSequenceShots">
           </shot-line>
         </div>
       </div>
@@ -26,11 +26,11 @@
       <div class="breakdown-column casting-column">
         <div class="level">
           <div class="level-left">
-            <h2 class="subtitle" v-if="currentShot">
+            <h2 class="subtitle" v-if="castingCurrentShot">
               {{
                 $t('breakdown.selected_shot', {
-                  sequence_name: currentShot.sequence_name,
-                  name: currentShot.name
+                  sequence_name: castingCurrentShot.sequence_name,
+                  name: castingCurrentShot.name
                 })
               }}
             </h2>
@@ -47,7 +47,7 @@
                 'is-loading': isSaving
               }"
               :disabled="!isCastingDirty"
-              @click="saveCasting"
+              @click="onSaveClicked"
             >
               {{ $t('main.save') }}
             </button>
@@ -106,7 +106,7 @@
               :key="asset.id"
               :asset="asset"
               :casted="casting[asset.id] !== undefined"
-              :active="currentShot ? true :  false"
+              :active="isCastingSaveActive ? true :  false"
               @add-one="addOneAsset"
               @add-ten="addTenAssets"
               v-for="asset in typeAssets"
@@ -122,8 +122,6 @@
 
 <script>
 import { mapGetters, mapActions } from 'vuex'
-import { sortAssets } from '../lib/sorting'
-import shotsApi from '../store/api/shots'
 import PageTitle from './widgets/PageTitle'
 import Spinner from './widgets/Spinner'
 import Combobox from './widgets/Combobox'
@@ -152,16 +150,10 @@ export default {
 
   data () {
     return {
-      selectedSequenceId: '',
-      selectedShotId: 0,
-      sequenceShots: [],
-      currentShot: null,
-      casting: {},
-      castingAssetsByType: [],
-      isCastingDirty: false,
       isLoading: false,
       isSaving: false,
-      isSavingError: false
+      isSavingError: false,
+      sequenceId: ''
     }
   },
 
@@ -172,46 +164,64 @@ export default {
       'assetsByType',
       'currentProduction',
       'displayedShots',
+
       'getSequenceOptions',
       'isAssetsLoading',
       'isShotsLoading',
       'shots',
       'shotMap',
-      'shotsBySequence'
+      'shotsBySequence',
+
+      'castingSequenceId',
+      'castingCurrentShot',
+      'castingSequenceShots',
+      'isCastingSaveActive',
+      'casting',
+      'castingAssetsByType',
+      'isCastingDirty',
+      'isCastingSaveActive'
     ])
   },
 
   created () {
-    const productionId = this.$store.state.route.params.production_id
-    this.$store.commit('SET_CURRENT_PRODUCTION', productionId)
-
-    this.loadShots(() => {
-      this.loadAssets(() => {
-        const shotId = this.$route.params.shot_id
-        if (shotId) {
-          this.setShot(shotId)
-        } else {
-          this.selectedSequenceId = this.getSequenceOptions[0].value
-        }
-        this.sequenceShots = this.shots.filter((shot) => {
-          return shot.sequence_id === this.selectedSequenceId
-        })
-      })
-    })
+    this.reset()
   },
 
   methods: {
     ...mapActions([
       'loadShots',
-      'loadAssets'
+      'loadAssets',
+      'saveCasting',
+      'setAssetSearch',
+      'setProduction',
+      'setCastingSequence',
+      'setCastingShot',
+      'addAssetToCasting',
+      'removeAssetFromCasting'
     ]),
 
-    isSaveActive: () => {
-      return this.currentShot && this.isCastingDirty
+    reset () {
+      const productionId = this.$store.state.route.params.production_id
+      const shotId = this.$route.params.shot_id
+
+      this.setProduction(productionId)
+      this.loadShots(() => {
+        this.loadAssets(() => {
+          this.isLoading = true
+          this.setCastingShot({
+            shotId,
+            callback: () => {
+              this.isLoading = false
+              this.setCastingSequence(this.castingSequenceId)
+              this.sequenceId = this.castingSequenceId
+            }
+          })
+        })
+      })
     },
 
     onSearchChange (searchQuery) {
-      this.$store.commit('SET_ASSET_SEARCH', searchQuery)
+      this.setAssetSearch(searchQuery)
     },
 
     selectShot (shotId) {
@@ -224,147 +234,56 @@ export default {
       })
     },
 
-    setShot (shotId) {
-      this.selectedShotId = shotId
-      this.currentShot = this.shotMap[this.selectedShotId]
-      this.isLoading = true
-      this.selectedSequenceId = this.currentShot.sequence_id
-      shotsApi.getCasting(this.currentShot, (err, casting) => {
-        if (err) console.log(err)
-        this.isLoading = false
-        this.casting = {}
-        casting.forEach((cast) => {
-          this.casting[cast.asset_id] = this.assetMap[cast.asset_id]
-          this.casting[cast.asset_id].nb_occurences = cast.nb_occurences
-        })
-        this.castingAssetsByType = this.getCastingAssetsByType()
-        this.isCastingDirty = false
-      })
-    },
-
-    saveCasting () {
-      const casting = []
-      Object.values(this.casting).forEach((asset) => {
-        casting.push({
-          asset_id: asset.id,
-          nb_occurences: asset.nb_occurences || 1
-        })
-      })
-
+    onSaveClicked () {
       this.isSaving = true
       this.isSavingError = false
-
-      shotsApi.updateCasting(this.currentShot, casting, (err) => {
-        if (err) {
-          console.log(err)
-          this.isSavingError = true
-        } else {
-          this.isCastingDirty = false
-        }
+      this.saveCasting((err) => {
+        if (err) this.isSavingError = true
         this.isSaving = false
       })
     },
 
     addOneAsset (assetId) {
-      console.log(assetId)
-      this.addAsset(assetId, 1)
+      this.addAssetToCasting({assetId, nbOccurences: 1})
     },
 
     addTenAssets (assetId) {
-      this.addAsset(assetId, 10)
-    },
-
-    addAsset (assetId, number) {
-      if (this.currentShot) {
-        const asset = this.assetMap[assetId]
-        if (this.casting[asset.id]) {
-          this.casting[asset.id].nb_occurences += number
-        } else {
-          this.casting[asset.id] = asset
-          this.casting[asset.id].nb_occurences = number
-        }
-        this.castingAssetsByType = this.getCastingAssetsByType()
-        this.isCastingDirty = true
-      }
+      this.addAssetToCasting({assetId, nbOccurences: 10})
     },
 
     removeOneAsset (assetId) {
-      assetId = assetId.substring('casting-'.length)
-      this.removeAsset(assetId, 1)
+      this.removeAssetFromCasting({assetId, nbOccurences: 1})
     },
 
     removeTenAssets (assetId) {
-      assetId = assetId.substring('casting-'.length)
-      this.removeAsset(assetId, 10)
-    },
-
-    removeAsset (assetId, number) {
-      if (this.currentShot && this.casting[assetId]) {
-        this.casting[assetId].nb_occurences -= number
-        if (this.casting[assetId].nb_occurences < 1) {
-          delete this.casting[assetId]
-        }
-        this.castingAssetsByType = this.getCastingAssetsByType()
-        this.isCastingDirty = true
-      }
-    },
-
-    getCastingAssetsByType () {
-      const assetsByType = []
-      const casting = sortAssets(Object.values(this.casting))
-      let assetTypeAssets = []
-      let previousAsset = casting.length > 0 ? casting[0] : null
-
-      for (let asset of casting) {
-        const isChange =
-          asset.asset_type_name !== previousAsset.asset_type_name
-        if (previousAsset && isChange) {
-          assetsByType.push(assetTypeAssets.slice(0))
-          assetTypeAssets = []
-        }
-        if (!asset.nb_occurences) asset.nb_occurences = 1
-        assetTypeAssets.push(asset)
-        previousAsset = asset
-      }
-      assetsByType.push(assetTypeAssets)
-
-      return assetsByType
+      this.removeAssetFromCasting({assetId, nbOccurences: 10})
     }
   },
 
   watch: {
     $route () {
       const shotId = this.$route.params.shot_id
-      if (shotId) this.setShot(shotId)
-    },
-    selectedSequenceId () {
-      if (this.selectedSequenceId) {
-        this.sequenceShots = this.shots.filter((shot) => {
-          return shot.sequence_id === this.selectedSequenceId
+      if (shotId) {
+        this.isLoading = true
+        this.setCastingShot({
+          shotId,
+          callback: () => {
+            this.isLoading = false
+          }
         })
       }
     },
+    sequenceId () {
+      this.setCastingSequence(this.sequenceId)
+    },
     currentProduction () {
-      const oldPath = `${this.$route.path}`
       const newPath = {
         name: 'breakdown',
         params: {production_id: this.currentProduction.id}
       }
       if (this.currentProduction.id !== this.$route.params.production_id) {
         this.$router.push(newPath)
-        const path = this.$route.path
-        if (oldPath !== path) {
-          this.selectedShotId = null
-          this.currentShot = null
-          this.casting = {}
-          this.castingAssetsByType = this.getCastingAssetsByType()
-          this.loadShots(() => {
-            if (this.getSequenceOptions.length > 0) {
-              this.selectedSequenceId = this.getSequenceOptions[0].id
-            }
-            this.loadAssets()
-          })
-        }
+        this.reset()
       }
     }
   }

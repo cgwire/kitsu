@@ -5,6 +5,7 @@ import * as getters from './getters'
 
 import assetTypes from './modules/assettypes'
 import assets from './modules/assets'
+import breakdown from './modules/breakdown'
 import shots from './modules/shots'
 import login from './modules/login'
 import main from './modules/main'
@@ -19,6 +20,7 @@ Vue.use(Vuex)
 let modules = {
   assetTypes,
   assets,
+  breakdown,
   login,
   main,
   people,

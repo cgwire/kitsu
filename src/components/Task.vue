@@ -422,7 +422,6 @@ export default {
           this.loading.addPreview = false
           this.currentTaskPreviews = this.getCurrentTaskPreviews()
           this.currentTaskComments = this.getCurrentTaskComments()
-          console.log(this.currentTaskComments)
         }
       })
     },
