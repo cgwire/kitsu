@@ -122,6 +122,7 @@ def get_shot_map(criterions={}):
             "id": str(shot.id),
             "name": shot.name,
             "description": shot.description,
+            "sequence_id": str(shot.parent_id),
             "sequence_name": sequence_name,
             "canceled": shot.canceled,
             "data": fields.serialize_value(shot.data)
