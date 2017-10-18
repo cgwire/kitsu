@@ -6,6 +6,7 @@ from flask_sqlalchemy import SQLAlchemy
 
 from . import config
 from .stores import auth_tokens_store
+from .services.exception import PersonNotFoundException
 
 
 app = Flask(__name__)
@@ -27,12 +28,15 @@ def configure_auth():
 
     @jwt.user_loader_callback_loader
     def add_permissions(callback):
-        user = persons_service.get_current_user()
-        identity_changed.send(
-            current_app._get_current_object(),
-            identity=Identity(user.id)
-        )
-        return user
+        try:
+            user = persons_service.get_current_user()
+            identity_changed.send(
+                current_app._get_current_object(),
+                identity=Identity(user.id)
+            )
+            return user
+        except PersonNotFoundException:
+            return None
 
 
 def load_api():
