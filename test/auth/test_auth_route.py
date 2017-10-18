@@ -56,6 +56,13 @@ class AuthTestCase(ApiDBTestCase):
         self.assertIsAuthenticated(tokens)
         self.logout(tokens)
 
+    def test_unactive_login(self):
+        self.person.update({"active": False})
+        self.person.save()
+        tokens = self.post("auth/login", self.credentials, 400)
+        self.assertIsNotAuthenticated(tokens, 422)
+        self.logout(tokens)
+
     def test_login_with_desktop_login(self):
         self.credentials = {
             "email": self.person_dict["desktop_login"],

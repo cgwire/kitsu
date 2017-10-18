@@ -34,7 +34,7 @@ class PersonTestCase(ApiDBTestCase):
             "last_name": "Doe",
             "email": "john.doe@gmail.com"
         }
-        self.person = self.post("data/persons", data)
+        self.person = self.post("data/persons/new", data)
         self.assertIsNotNone(self.person["id"])
 
         persons = self.get("data/persons")
@@ -42,25 +42,15 @@ class PersonTestCase(ApiDBTestCase):
 
     def test_create_person_with_no_data(self):
         data = {}
-        self.person = self.post("data/persons", data, 400)
+        self.person = self.post("data/persons/new", data, 400)
 
     def test_create_person_with_wrong_data(self):
         data = {
             "name": "John Doe",
             "first_name": "John",
             "last_name": "Doe",
-            "email": "john.doe@gmail.com"
         }
-        self.person = self.post("data/persons", data, 400)
-
-    def test_create_person_with_wrong_data_2(self):
-        data = {
-            "id": 1,
-            "first_name": "John",
-            "last_name": "Doe",
-            "email": "john.doe@gmail.com"
-        }
-        self.person = self.post("data/persons", data, 400)
+        self.person = self.post("data/persons/new", data, 400)
 
     def test_update_person(self):
         person = self.get_first("data/persons")

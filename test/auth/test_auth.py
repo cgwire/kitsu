@@ -121,9 +121,9 @@ class AuthTestCase(ApiDBTestCase):
         self.assertEquals(person["first_name"], "John")
 
     def test_register_tokens(self):
-        # Complex to test, jwt extended requires a proper falsk context to run.
+        # Complex to test, jwt extended requires a proper flask context to run.
         pass
 
     def test_revoke_tokens(self):
-        # Complex to test, jwt extended requires a proper falsk context to run.
+        # Complex to test, jwt extended requires a proper flask context to run.
         pass

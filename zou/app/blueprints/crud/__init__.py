@@ -32,6 +32,7 @@ from .entity_type import (
     EntityTypeResource
 )
 from .comments import CommentsResource, CommentResource
+from .time_spent import TimeSpentsResource, TimeSpentResource
 
 
 routes = [
@@ -66,7 +67,9 @@ routes = [
     ("/data/working-files", WorkingFilesResource),
     ("/data/working-files/<instance_id>", WorkingFileResource),
     ("/data/comments", CommentsResource),
-    ("/data/comments/<instance_id>", CommentResource)
+    ("/data/comments/<instance_id>", CommentResource),
+    ("/data/time-spents/", TimeSpentsResource),
+    ("/data/time-spents/<instance_id>", TimeSpentResource)
 ]
 
 blueprint = Blueprint("/data", "data")

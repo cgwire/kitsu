@@ -32,7 +32,7 @@ class ImportShotgunSequence(ShotgunTestCase):
             "project": {
                 "type": "Project",
                 "id": 1,
-                "name": "Cosmos Landromat"
+                "name": "Agent327"
             },
             "code": "S04",
             "type": "Sequence",
@@ -47,7 +47,7 @@ class ImportShotgunSequence(ShotgunTestCase):
         self.assertEqual(len(self.sequences), 1)
 
         sequence = self.sequences[0]
-        project = Project.get_by(name="Cosmos Landromat")
+        project = Project.get_by(name="Agent327")
         self.assertEqual(sequence["name"], sg_sequence["code"])
         self.assertEqual(sequence["description"], sg_sequence["description"])
         self.assertEqual(sequence["shotgun_id"], sg_sequence["id"])

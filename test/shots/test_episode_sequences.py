@@ -15,6 +15,7 @@ class EpisodeSequencesTestCase(ApiDBTestCase):
         self.sequences = self.generate_data(
             Entity, 3,
             entities_out=[],
+            entities_in=[],
             project_id=self.project.id,
             parent_id=self.episode.id,
             entity_type_id=self.sequence_type.id

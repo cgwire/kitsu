@@ -1,5 +1,13 @@
 from flask import request, jsonify, abort
 from flask_restful import Resource, reqparse, current_app
+from flask_principal import (
+    Identity,
+    AnonymousIdentity,
+    RoleNeed,
+    UserNeed,
+    identity_changed,
+    identity_loaded
+)
 
 from zou.app.utils import auth
 from zou.app.services.exception import PersonNotFoundException
@@ -7,7 +15,8 @@ from zou.app.services import persons_service, auth_service
 from zou.app import app
 from zou.app.services.exception import (
     NoAuthStrategyConfigured,
-    WrongPasswordException
+    WrongPasswordException,
+    UnactiveUserException
 )
 
 
@@ -44,6 +53,25 @@ def is_from_browser(user_agent):
     ]
 
 
+@identity_loaded.connect_via(app)
+def on_identity_loaded(sender, identity):
+    if identity.id is not None:
+        from zou.app.services import persons_service
+        identity.user = persons_service.get_person(identity.id)
+
+        if hasattr(identity.user, "id"):
+            identity.provides.add(UserNeed(identity.user.id))
+
+        if identity.user.role == "admin":
+            identity.provides.add(RoleNeed("admin"))
+            identity.provides.add(RoleNeed("manager"))
+
+        if identity.user.role == "manager":
+            identity.provides.add(RoleNeed("manager"))
+
+        return identity
+
+
 class AuthenticatedResource(Resource):
 
     @jwt_required
@@ -66,6 +94,10 @@ class LogoutResource(Resource):
             current_token = get_raw_jwt()
             jti = current_token['jti']
             auth_service.revoke_tokens(app, jti)
+            identity_changed.send(
+                current_app._get_current_object(),
+                identity=AnonymousIdentity()
+            )
         except KeyError:
             return {
                 "Access token not found."
@@ -92,6 +124,10 @@ class LoginResource(Resource):
             access_token = create_access_token(identity=user["email"])
             refresh_token = create_refresh_token(identity=user["email"])
             auth_service.register_tokens(app, access_token, refresh_token)
+            identity_changed.send(
+                current_app._get_current_object(),
+                identity=Identity(user["id"])
+            )
 
             if is_from_browser(request.user_agent):
                 response = jsonify({
@@ -121,6 +157,11 @@ class LoginResource(Resource):
                 "Authentication strategy is not properly configured."
             )
             return {"login": False}, 400
+        except UnactiveUserException:
+            return {
+                "error": True,
+                "message": "Old password is wrong."
+            }, 400
 
     def get_arguments(self):
         parser = reqparse.RequestParser()
@@ -257,10 +298,15 @@ class ChangePasswordResource(Resource):
                 "error": True,
                 "message": "Password is too short."
             }, 400
-        except auth.WrongPasswordException:
+        except UnactiveUserException:
             return {
                 "error": True,
                 "message": "Old password is wrong."
+            }, 400
+        except auth.WrongPasswordException:
+            return {
+                "error": True,
+                "message": "User is unactive."
             }, 400
 
     def get_arguments(self):

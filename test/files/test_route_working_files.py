@@ -3,6 +3,8 @@ import datetime
 from test.base import ApiDBTestCase
 from zou.app.utils import fields
 
+from zou.app.models.task import Task
+
 
 class TaskLastWorkingFilesTestCase(ApiDBTestCase):
 
@@ -69,6 +71,10 @@ class TaskLastWorkingFilesTestCase(ApiDBTestCase):
         )
 
     def test_new_working_file(self):
+        task = Task.get(self.task_id)
+        self.assertEquals(len(task.assignees), 1)
+        self.assertNotEquals(str(self.user), str(task.assignees[0]))
+
         path = "/data/tasks/%s/working-files/new" % self.task_id
         working_file = self.post(path, {
             "name": "main",
@@ -76,7 +82,14 @@ class TaskLastWorkingFilesTestCase(ApiDBTestCase):
             "comment": "comment test"
         })
         self.assertEqual(working_file["revision"], 1)
+        task = Task.get(self.task_id)
 
+        assignees = [person.serialize() for person in task.assignees]
+        assignees = sorted(assignees, key=lambda x: x["last_name"])
+
+        self.assertEquals(str(self.user.id), assignees[0]["id"])
+
+        task = Task.get(self.task_id)
         path = "/data/tasks/%s/working-files/new" % self.task_id
         working_file = self.post(path, {
             "name": "main",

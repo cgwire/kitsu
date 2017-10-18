@@ -76,3 +76,11 @@ class NoAuthStrategyConfigured(Exception):
 
 class WrongPasswordException(Exception):
     pass
+
+
+class UnactiveUserException(Exception):
+    pass
+
+
+class WrongDateFormatException(Exception):
+    pass

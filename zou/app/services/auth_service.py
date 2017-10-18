@@ -14,7 +14,8 @@ from zou.app.services import persons_service
 from zou.app.services.exception import (
     PersonNotFoundException,
     WrongPasswordException,
-    NoAuthStrategyConfigured
+    NoAuthStrategyConfigured,
+    UnactiveUserException
 )
 from zou.app.stores import auth_tokens_store
 
@@ -29,6 +30,10 @@ def check_auth(app, email, password):
         user = active_directory_auth_strategy(email, password)
     else:
         raise NoAuthStrategyConfigured
+
+    if not user.get("active", False):
+        raise UnactiveUserException(user["email"])
+
     return user
 
 
@@ -50,7 +55,11 @@ def check_credentials(email, password):
 
 
 def no_password_auth_strategy(email):
-    return persons_service.get_person_by_email_username(email)
+    try:
+        person = persons_service.get_by_email(email)
+    except PersonNotFoundException:
+        person = persons_service.get_by_desktop_login(email)
+    return person.serialize()
 
 
 def local_auth_strategy(email, password):

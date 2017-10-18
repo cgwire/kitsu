@@ -1,10 +1,10 @@
 from test.base import ApiDBTestCase
 
 
-class AssetTaskTypesTestCase(ApiDBTestCase):
+class ShotTaskTypesTestCase(ApiDBTestCase):
 
     def setUp(self):
-        super(AssetTaskTypesTestCase, self).setUp()
+        super(ShotTaskTypesTestCase, self).setUp()
         self.generate_fixture_project_status()
         self.generate_fixture_project()
         self.generate_fixture_entity_type()
@@ -16,17 +16,12 @@ class AssetTaskTypesTestCase(ApiDBTestCase):
         self.generate_fixture_task_status()
         self.generate_fixture_department()
         self.generate_fixture_task_type()
-        self.generate_fixture_task()
-        self.asset_id = self.entity.id
-        self.task_type_dict = self.task_type.serialize()
+        self.generate_fixture_shot_task()
 
-    def test_get_task_types_for_asset(self):
-        task_types = self.get("data/assets/%s/task-types" % self.asset_id)
+    def test_get_task_types_for_shot(self):
+        task_types = self.get("/data/shots/%s/task-types" % self.shot.id)
         self.assertEquals(len(task_types), 1)
         self.assertDictEqual(
             task_types[0],
-            self.task_type_dict
+            self.task_type_animation.serialize()
         )
-
-    def test_get_task_types_for_asset_not_found(self):
-        self.get("data/assets/no-asset/task-types", 404)

@@ -22,8 +22,8 @@
             "style": "lowercase"
         },
         "file_name": {
-            "shot": "<Project>_<Sequence>_<Shot>_<TaskType>_<OutputType>",
-            "asset": "<Project>_<AssetType>_<Asset>_<TaskType>_<OutputType>",
+            "shot": "<Project>_<Sequence>_<Shot>_<TaskType>_<OutputType>_<Name>",
+            "asset": "<Project>_<AssetType>_<Asset>_<TaskType>_<OutputType>_<Name>",
             "style": "lowercase"
         }
     },

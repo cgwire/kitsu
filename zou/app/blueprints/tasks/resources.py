@@ -16,7 +16,8 @@ from zou.app.services.exception import (
     TaskNotFoundException,
     TaskTypeNotFoundException,
     PersonNotFoundException,
-    MalformedFileTreeException
+    MalformedFileTreeException,
+    WrongDateFormatException
 )
 from zou.app.services import (
     tasks_service,
@@ -404,3 +405,86 @@ class StartTaskFromShotAssetResource(BaseModelResource):
 
         task = tasks_service.start_task(task)
         return task.serialize(), 200
+
+
+class SetTimeSpentResource(Resource):
+
+    def __init__(self):
+        Resource.__init__(self)
+
+    @jwt_required
+    def post(self, task_id, date, person_id):
+        args = self.get_arguments()
+
+        try:
+            tasks_service.get_task(task_id)
+            persons_service.get_person(person_id)
+            time_spent = tasks_service.create_or_update_time_spent(
+                task_id,
+                person_id,
+                date,
+                args["duration"]
+            )
+            return time_spent, 200
+        except TaskNotFoundException:
+            abort(404)
+        except PersonNotFoundException:
+            abort(404)
+        except WrongDateFormatException:
+            abort(404)
+
+    def get_arguments(self):
+        parser = reqparse.RequestParser()
+        parser.add_argument("duration", default=0)
+        args = parser.parse_args()
+        return args
+
+
+class AddTimeSpentResource(Resource):
+
+    def __init__(self):
+        Resource.__init__(self)
+
+    @jwt_required
+    def post(self, task_id, date, person_id):
+        args = self.get_arguments()
+
+        try:
+            tasks_service.get_task(task_id)
+            persons_service.get_person(person_id)
+            time_spent = tasks_service.create_or_update_time_spent(
+                task_id,
+                person_id,
+                date,
+                args["duration"],
+                add=True
+            )
+            return time_spent, 200
+        except TaskNotFoundException:
+            abort(404)
+        except PersonNotFoundException:
+            abort(404)
+        except WrongDateFormatException:
+            abort(404)
+
+    def get_arguments(self):
+        parser = reqparse.RequestParser()
+        parser.add_argument("duration", default=0, type=int)
+        args = parser.parse_args()
+        return args
+
+
+class GetTimeSpentResource(Resource):
+
+    def __init__(self):
+        Resource.__init__(self)
+
+    @jwt_required
+    def get(self, task_id, date):
+        try:
+            tasks_service.get_task(task_id)
+            return tasks_service.get_time_spents(task_id)
+        except TaskNotFoundException:
+            abort(404)
+        except WrongDateFormatException:
+            abort(404)

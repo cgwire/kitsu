@@ -47,7 +47,8 @@ class Entity(db.Model, BaseMixin, SerializerMixin):
         'Entity',
         secondary='entity_link',
         primaryjoin=(id == EntityLink.entity_in_id),
-        secondaryjoin=(id == EntityLink.entity_out_id)
+        secondaryjoin=(id == EntityLink.entity_out_id),
+        backref="entities_in"
     )
 
     __table_args__ = (

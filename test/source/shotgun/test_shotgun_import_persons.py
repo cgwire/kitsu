@@ -46,3 +46,26 @@ class ImportShotgunPersonTestCase(ShotgunTestCase):
         self.assertEqual(person["shotgun_id"], sg_person["id"])
         self.assertEqual(person["desktop_login"], sg_person["login"])
         self.assertEqual(person["active"], False)
+        self.assertEqual(person["role"], "user")
+
+    def test_import_admin(self):
+        sg_person = {
+            "email": "james.doe@gmail.com",
+            "firstname": "James",
+            "lastname": "Doe",
+            "login": "jamie",
+            "id": 3,
+            "sg_status_list": "dis",
+            "type": "HumanUser",
+            "permission_rule_set": {"name": "Admin"}
+        }
+
+        api_path = "/import/shotgun/persons"
+        self.persons = self.post(api_path, [sg_person], 200)
+        self.assertEqual(len(self.persons), 1)
+
+        self.persons = self.get("data/persons")
+        self.assertEqual(len(self.persons), 2)
+
+        person = self.persons[1]
+        self.assertEqual(person["role"], "admin")

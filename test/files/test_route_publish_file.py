@@ -71,7 +71,7 @@ class PublishFileTestCase(ApiDBTestCase):
         )
         self.assertEqual(
             result["file_name"],
-            "cosmos_landromat_props_tree_shaders_tx_v001"
+            "cosmos_landromat_props_tree_shaders_tx_main_v001"
         )
 
         output_file_id = result["id"]
@@ -97,7 +97,7 @@ class PublishFileTestCase(ApiDBTestCase):
         )
         self.assertEqual(
             result["file_name"],
-            "cosmos_landromat_props_tree_shaders_tx_v002"
+            "cosmos_landromat_props_tree_shaders_tx_main_v002"
         )
 
         output_file_id = result["id"]
@@ -118,7 +118,7 @@ class PublishFileTestCase(ApiDBTestCase):
 
         self.assertEqual(
             result["file_name"],
-            "cosmos_landromat_props_tree_shaders_tx_v066"
+            "cosmos_landromat_props_tree_shaders_tx_main_v066"
         )
 
         output_file_id = result["id"]

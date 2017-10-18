@@ -38,7 +38,7 @@ class ImportShotgunTaskTestCase(ShotgunTestCase):
             "id": 20,
             "project": {
                 "id": 1,
-                "name": "Cosmos Landromat",
+                "name": "Agent327",
                 "type": "Project"
             },
             "sg_description": "test description",
@@ -79,7 +79,7 @@ class ImportShotgunTaskTestCase(ShotgunTestCase):
             "id": 20,
             "project": {
                 "id": 1,
-                "name": "Cosmos Landromat",
+                "name": "Agent327",
                 "type": "Project"
             },
             "sg_description": "test description",

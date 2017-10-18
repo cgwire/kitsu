@@ -15,14 +15,22 @@ class SequenceTestCase(ApiDBTestCase):
         self.generate_fixture_task_status()
         self.generate_fixture_assigner()
         self.generate_fixture_person()
-        self.generate_data(Entity, 3,
-                           entities_out=[],
-                           project_id=self.project.id,
-                           entity_type_id=self.entity_type.id)
-        self.generate_data(Entity, 2,
-                           entities_out=[],
-                           project_id=self.project.id,
-                           entity_type_id=self.sequence_type.id)
+        self.generate_data(
+            Entity,
+            3,
+            entities_out=[],
+            entities_in=[],
+            project_id=self.project.id,
+            entity_type_id=self.entity_type.id,
+        )
+        self.generate_data(
+            Entity,
+            2,
+            entities_out=[],
+            entities_in=[],
+            project_id=self.project.id,
+            entity_type_id=self.sequence_type.id
+        )
 
     def test_get_sequences(self):
         sequences = self.get("data/sequences")

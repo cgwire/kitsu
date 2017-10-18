@@ -5,6 +5,7 @@ from flask import request, abort
 from flask_restful import Resource, reqparse
 from flask_jwt_extended import jwt_required
 
+from zou.app.utils import permissions
 from zou.app.services import (
     file_tree,
     files_service,
@@ -211,12 +212,15 @@ class SetTreeResource(Resource):
         (tree_name) = self.get_arguments()
 
         try:
+            permissions.check_manager_permissions()
             project = projects_service.get_project(project_id)
             tree = file_tree.get_tree_from_file(tree_name)
         except ProjectNotFoundException:
             abort(404)
         except WrongFileTreeFileException:
             abort(400, "Selected tree is not available")
+        except permissions.PermissionDenied:
+            abort(403)
 
         project.update({"file_tree": tree})
         return project.serialize()
@@ -378,6 +382,7 @@ class NewOutputFileResource(Resource):
                 task,
                 output_type,
                 scene,
+                working_file.name,
                 separator
             )
 
@@ -538,6 +543,7 @@ class NewWorkingFileResource(Resource):
         try:
             task = tasks_service.get_task(task_id)
             software = files_service.get_software(software_id)
+            tasks_service.assign_task(task, persons_service.get_current_user())
 
             if revision == 0:
                 revision = files_service.get_next_working_revision(
