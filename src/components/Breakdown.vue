@@ -106,7 +106,7 @@
               :key="asset.id"
               :asset="asset"
               :casted="casting[asset.id] !== undefined"
-              :active="isCastingSaveActive ? true :  false"
+              :active="castingCurrentShot ? true :  false"
               @add-one="addOneAsset"
               @add-ten="addTenAssets"
               v-for="asset in typeAssets"
