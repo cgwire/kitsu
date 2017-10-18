@@ -73,23 +73,23 @@ const getters = {
 
   displayedAssets: state => state.displayedAssets,
   assetsByType: state => {
-    const assetsBySequence = []
+    const assetsByType = []
     let assetTypeAssets = []
     let previousAsset = null
 
-    for (let asset of state.assets) {
+    for (let asset of state.displayedAssets) {
       if (
         previousAsset && asset.asset_type_name !== previousAsset.asset_type_name
       ) {
-        assetsBySequence.push(assetTypeAssets.slice(0))
+        assetsByType.push(assetTypeAssets.slice(0))
         assetTypeAssets = []
       }
       assetTypeAssets.push(asset)
       previousAsset = asset
     }
-    assetsBySequence.push(assetTypeAssets)
+    assetsByType.push(assetTypeAssets)
 
-    return assetsBySequence
+    return assetsByType
   },
 
   editAsset: state => state.editAsset,
@@ -174,8 +174,11 @@ const actions = {
       commit(IMPORT_ASSETS_END)
       if (callback) callback(err)
     })
-  }
+  },
 
+  setAssetSearch ({commit}, searchQuery) {
+    commit('SET_ASSET_SEARCH', searchQuery)
+  }
 }
 
 const mutations = {
