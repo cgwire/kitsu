@@ -161,6 +161,10 @@ const actions = {
       }
       if (payload.callback) payload.callback(err)
     })
+  },
+
+  setProduction ({commit}, productionId) {
+    commit(SET_CURRENT_PRODUCTION, productionId)
   }
 }
 

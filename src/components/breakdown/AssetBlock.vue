@@ -46,11 +46,11 @@ export default {
   },
   methods: {
     removeOneAsset (event) {
-      let assetId = event.target.parentElement.id
+      let assetId = event.target.parentElement.id.substring('casting-'.length)
       this.$emit('remove-one', assetId)
     },
     removeTenAssets (event) {
-      let assetId = event.target.parentElement.id
+      let assetId = event.target.parentElement.id.substring('casting-'.length)
       this.$emit('remove-ten', assetId)
     }
   }
