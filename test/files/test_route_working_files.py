@@ -1,9 +1,9 @@
 import datetime
 
 from test.base import ApiDBTestCase
-from pipelineapi.app.utils import fields
+from zou.app.utils import fields
 
-from pipelineapi.app.models.task import Task
+from zou.app.models.task import Task
 
 
 class TaskLastWorkingFilesTestCase(ApiDBTestCase):
