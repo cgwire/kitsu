@@ -11,7 +11,8 @@ export default {
       first_name: person.first_name,
       last_name: person.last_name,
       email: person.email,
-      phone: person.phone
+      phone: person.phone,
+      role: person.role
     }
     client.post(`/api/data/persons/new`, data, callback)
   },
@@ -23,7 +24,8 @@ export default {
       email: person.email,
       phone: person.phone,
       timezone: person.timezone,
-      locale: person.locale
+      locale: person.locale,
+      role: person.role
     }
     client.put(`/api/data/persons/${person.id}`, data, callback)
   },
@@ -44,5 +46,4 @@ export default {
     }
     client.post('/api/auth/change-password', data, callback)
   }
-
 }

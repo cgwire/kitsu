@@ -17,16 +17,23 @@ export default {
     list: {
       name: 'Name',
       email: 'Email',
-      phone: 'Phone'
+      phone: 'Phone',
+      role: 'Role'
     },
     fields: {
       first_name: 'First name',
       last_name: 'Last name',
       email: 'Email',
       phone: 'Phone',
+      role: 'Role',
       old_password: 'Current password',
       password: 'New password',
       password_2: 'New password (repeat)'
+    },
+    role: {
+      admin: 'Administrator',
+      manager: 'Manager',
+      user: 'User'
     }
   },
 

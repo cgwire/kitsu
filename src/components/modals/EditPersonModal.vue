@@ -31,6 +31,12 @@
           :label="$t('people.fields.phone')"
           v-model="form.phone">
         </text-field>
+        <combobox
+          :label="$t('people.fields.role')"
+          :options="roleOptions"
+          localeKeyPrefix="people.role."
+          v-model="form.role">
+        </combobox>
       </form>
 
       <p class="has-text-right">
@@ -57,6 +63,7 @@
 <script>
 import { mapGetters, mapActions } from 'vuex'
 import TextField from '../widgets/TextField'
+import Combobox from '../widgets/Combobox'
 
 export default {
   name: 'edit-modal',
@@ -75,6 +82,7 @@ export default {
       this.form.last_name = this.personToEdit.last_name
       this.form.phone = this.personToEdit.phone
       this.form.email = this.personToEdit.email
+      this.form.role = this.personToEdit.role
     }
   },
   data () {
@@ -83,12 +91,19 @@ export default {
         first_name: '',
         last_name: '',
         email: '',
-        phone: ''
-      }
+        phone: '',
+        role: 'user'
+      },
+      roleOptions: [
+        {label: 'admin', value: 'admin'},
+        {label: 'manager', value: 'admin'},
+        {label: 'user', value: 'admin'}
+      ]
     }
   },
   components: {
-    TextField
+    TextField,
+    Combobox
   },
   computed: {
     ...mapGetters([
