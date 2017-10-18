@@ -2,12 +2,12 @@ import uuid
 import os
 import csv
 
-from flask import request
+from flask import request, abort
 from flask_restful import Resource
 from flask_jwt_extended import jwt_required
 
 from zou.app import app
-from zou.app.utils import fields
+from zou.app.utils import fields, permissions
 
 
 class BaseCsvImportResource(Resource):
@@ -24,8 +24,9 @@ class BaseCsvImportResource(Resource):
         uploaded_file.save(file_path)
         result = []
 
-        self.prepare_import()
         try:
+            self.check_permissions()
+            self.prepare_import()
             with open(file_path) as csvfile:
                 reader = csv.DictReader(csvfile)
                 for row in reader:
@@ -34,9 +35,14 @@ class BaseCsvImportResource(Resource):
             return fields.serialize_models(result), 201
         except KeyError as e:
             return {"error": "A column is missing: %s" % e}, 400
+        except permissions.PermissionDenied:
+            abort(403)
 
     def prepare_import(self):
         pass
+
+    def check_permissions(self):
+        return permissions.check_manager_permissions()
 
     def import_row(self):
         pass

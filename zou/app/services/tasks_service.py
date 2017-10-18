@@ -1,6 +1,6 @@
 import datetime
 
-from sqlalchemy.exc import StatementError, IntegrityError
+from sqlalchemy.exc import StatementError, IntegrityError, DataError
 
 from zou.app import app
 from zou.app.utils import events
@@ -10,13 +10,15 @@ from zou.app.models.task_type import TaskType
 from zou.app.models.department import Department
 from zou.app.models.entity import Entity
 from zou.app.models.task_status import TaskStatus
+from zou.app.models.time_spent import TimeSpent
 from zou.app.models.project import Project
 from zou.app.models.entity_type import EntityType
 from zou.app.models.preview_file import PreviewFile
 
 from zou.app.services.exception import (
     TaskNotFoundException,
-    TaskTypeNotFoundException
+    TaskTypeNotFoundException,
+    WrongDateFormatException
 )
 
 from zou.app.services import (
@@ -142,6 +144,11 @@ def create_task(task_type, entity, name="main"):
 
 
 def delete_task(task):
+    task.delete()
+
+
+def remove_task(task_id):
+    task = Task.get(task_id)
     task.delete()
 
 
@@ -271,20 +278,19 @@ def get_next_preview_revision(task_id):
     revision = 1
     if len(preview_files) > 0:
         revision = preview_files[0].revision + 1
-
     return revision
 
 
-def get_task_types_for_shot(shot):
-    return get_task_types_for_entity(shot.id)
+def get_task_types_for_shot(shot_id):
+    return get_task_types_for_entity(shot_id)
 
 
 def get_task_types_for_sequence(sequence_id):
     return get_task_types_for_entity(sequence_id)
 
 
-def get_task_types_for_asset(asset):
-    return get_task_types_for_entity(asset.id)
+def get_task_types_for_asset(asset_id):
+    return get_task_types_for_entity(asset_id)
 
 
 def get_task_types_for_entity(entity_id):
@@ -292,5 +298,38 @@ def get_task_types_for_entity(entity_id):
         .join(Task, Entity) \
         .filter(Entity.id == entity_id) \
         .all()
-
     return TaskType.serialize_list(task_types)
+
+
+def create_or_update_time_spent(task_id, person_id, date, duration, add=False):
+    try:
+        time_spent = TimeSpent.get_by(
+            task_id=task_id,
+            person_id=person_id,
+            date=date
+        )
+    except DataError:
+        raise WrongDateFormatException
+
+    if time_spent is not None:
+        if add:
+            time_spent.update({"duration": time_spent.duration + duration})
+        else:
+            time_spent.update({"duration": duration})
+    else:
+        time_spent = TimeSpent.create(
+            task_id=task_id,
+            person_id=person_id,
+            date=date,
+            duration=duration
+        )
+    return time_spent.serialize()
+
+
+def get_time_spents(task_id):
+    result = {"total": 0}
+    time_spents = TimeSpent.query.filter_by(task_id=task_id).all()
+    for time_spent in time_spents:
+        result[str(time_spent.person_id)] = time_spent.serialize()
+        result["total"] += time_spent.duration
+    return result

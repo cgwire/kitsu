@@ -16,13 +16,21 @@ def all_active():
     return Person.query.filter_by(active=True).all()
 
 
-def create_person(email, password, first_name, last_name, phone=""):
+def create_person(
+    email,
+    password,
+    first_name,
+    last_name,
+    phone="",
+    role="user"
+):
     person = Person.create(
         email=email,
         password=password,
         first_name=first_name,
         last_name=last_name,
-        phone=phone
+        phone=phone,
+        role=role
     )
     return person
 

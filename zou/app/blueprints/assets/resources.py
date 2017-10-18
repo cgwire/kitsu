@@ -191,6 +191,7 @@ class AssetTasksResource(Resource):
         Retrieve all tasks related to a given shot.
         """
         try:
+            assets_service.get_asset(asset_id)
             return tasks_service.get_tasks_for_asset(asset_id)
         except AssetNotFoundException:
             abort(404)
@@ -207,8 +208,8 @@ class AssetTaskTypesResource(Resource):
         Retrieve all task types related to a given asset.
         """
         try:
-            asset = assets_service.get_asset(asset_id)
-            return tasks_service.get_task_types_for_asset(asset)
+            assets_service.get_asset(asset_id)
+            return tasks_service.get_task_types_for_asset(asset_id)
         except AssetNotFoundException:
             abort(404)
 

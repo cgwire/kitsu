@@ -12,7 +12,10 @@ from .resources import (
     AddPreviewResource,
     CreateShotTasksResource,
     CreateAssetTasksResource,
-    ToReviewResource
+    ToReviewResource,
+    GetTimeSpentResource,
+    SetTimeSpentResource,
+    AddTimeSpentResource
 )
 
 
@@ -23,6 +26,15 @@ routes = [
     ("/actions/tasks/<task_id>/comment", CommentTaskResource),
     ("/actions/tasks/<task_id>/assign", TaskAssignResource),
     ("/actions/tasks/<task_id>/start", TaskStartResource),
+    ("/actions/tasks/<task_id>/time-spents/<date>", GetTimeSpentResource),
+    (
+        "/actions/tasks/<task_id>/time-spents/<date>/persons/<person_id>",
+        SetTimeSpentResource
+    ),
+    (
+        "/actions/tasks/<task_id>/time-spents/<date>/persons/<person_id>/add",
+        AddTimeSpentResource
+    ),
     (
         "/actions/tasks/<task_id>/comments/<comment_id>/add-preview",
         AddPreviewResource

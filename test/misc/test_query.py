@@ -24,10 +24,12 @@ class QueryTestCase(ApiDBTestCase):
 
         self.generate_data(Entity, 3,
                            entities_out=[],
+                           entities_in=[],
                            project_id=self.project_id,
                            entity_type_id=self.entity_type.id)
         self.generate_data(Entity, 2,
                            entities_out=[],
+                           entities_in=[],
                            project_id=self.project2_id,
                            entity_type_id=self.entity_type.id)
 

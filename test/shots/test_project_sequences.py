@@ -14,14 +14,22 @@ class ProjectSequencesTestCase(ApiDBTestCase):
         self.generate_fixture_entity_type()
         self.generate_fixture_sequence()
         self.generate_fixture_shot()
-        self.generate_data(Entity, 3,
-                           entities_out=[],
-                           project_id=self.project.id,
-                           entity_type_id=self.sequence_type.id)
-        self.generate_data(Entity, 2,
-                           entities_out=[],
-                           project_id=self.project_standard.id,
-                           entity_type_id=self.sequence_type.id)
+        self.generate_data(
+            Entity,
+            3,
+            entities_out=[],
+            entities_in=[],
+            project_id=self.project.id,
+            entity_type_id=self.sequence_type.id
+        )
+        self.generate_data(
+            Entity,
+            2,
+            entities_out=[],
+            entities_in=[],
+            project_id=self.project_standard.id,
+            entity_type_id=self.sequence_type.id
+        )
 
     def test_get_sequences_for_project(self):
         sequences = self.get("data/projects/%s/sequences" % self.project.id)

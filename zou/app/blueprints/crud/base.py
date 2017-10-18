@@ -8,6 +8,8 @@ from flask_jwt_extended import jwt_required
 
 from sqlalchemy.exc import IntegrityError, StatementError
 
+from zou.app.utils import permissions
+
 
 class BaseModelsResource(Resource):
 
@@ -87,6 +89,9 @@ class BaseModelsResource(Resource):
 
         return query
 
+    def check_create_permissions(self, data):
+        return permissions.check_manager_permissions()
+
     @jwt_required
     def get(self):
         """
@@ -114,8 +119,11 @@ class BaseModelsResource(Resource):
         expected. The model performs the validation automatically when
         instantiated.
         """
+
         try:
-            instance = self.model(**request.json)
+            data = request.json
+            self.check_create_permissions(data)
+            instance = self.model(**data)
             instance.save()
             return instance.serialize(), 201
 
@@ -131,6 +139,9 @@ class BaseModelsResource(Resource):
             current_app.logger.error(str(exception))
             return {"error": str(exception)}, 400
 
+        except permissions.PermissionDenied:
+            abort(403)
+
 
 class BaseModelResource(Resource):
 
@@ -144,6 +155,18 @@ class BaseModelResource(Resource):
             abort(404)
         return instance
 
+    def check_read_permissions(self, instance):
+        return True
+
+    def check_update_permissions(self, instance, data):
+        return permissions.check_manager_permissions()
+
+    def check_delete_permissions(self, instance):
+        return permissions.check_manager_permissions()
+
+    def get_arguments(self):
+        return request.json
+
     @jwt_required
     def get(self, instance_id):
         """
@@ -152,6 +175,7 @@ class BaseModelResource(Resource):
         """
         try:
             instance = self.get_model_or_404(instance_id)
+            self.check_read_permissions(instance.serialize())
         except StatementError:
             return {"error": "Wrong id format"}, 400
         return instance.serialize(), 200
@@ -164,8 +188,10 @@ class BaseModelResource(Resource):
         modified.
         """
         try:
+            data = self.get_arguments()
             instance = self.get_model_or_404(instance_id)
-            instance.update(request.json)
+            self.check_update_permissions(instance.serialize(), data)
+            instance.update(data)
             return instance.serialize(), 200
 
         except StatementError:
@@ -183,6 +209,9 @@ class BaseModelResource(Resource):
             current_app.logger.error(str(exception))
             return {"error": str(exception)}, 400
 
+        except permissions.PermissionDenied:
+            abort(403)
+
     @jwt_required
     def delete(self, instance_id):
         """
@@ -192,9 +221,14 @@ class BaseModelResource(Resource):
         instance = self.get_model_or_404(instance_id)
 
         try:
+            self.check_delete_permissions(instance.serialize())
             instance.delete()
+
         except IntegrityError as exception:
             current_app.logger.error(str(exception))
             return {"error": str(exception)}, 400
+
+        except permissions.PermissionDenied:
+            abort(403)
 
         return {"deletion_success": True}, 204

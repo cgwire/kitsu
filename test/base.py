@@ -53,6 +53,21 @@ class ApiTestCase(unittest.TestCase):
         self.base_headers.update(self.auth_headers)
         self.post_headers.update(self.auth_headers)
 
+    def log_in_admin(self):
+        self.log_in(self.user.email)
+
+    def log_in_manager(self):
+        self.log_in(self.user_manager.email)
+
+    def log_in_cg_artist(self):
+        self.log_in(self.user_manager.email)
+
+    def log_out(self):
+        try:
+            self.get("auth/logout")
+        except AssertionError:
+            pass
+
     def get(self, path, code=200):
         """
         Get data provided at given path. Format depends on the path.
@@ -348,13 +363,34 @@ class ApiDBTestCase(ApiTestCase):
         self.shot_standard.save()
 
     def generate_fixture_user(self):
-        self.user = Person(
+        self.user = Person.create(
             first_name="John",
             last_name="Did",
+            role="admin",
             email=u"john.did@gmail.com",
             password=auth.encrypt_password("mypassword")
         )
-        self.user.save()
+        return self.user
+
+    def generate_fixture_user_manager(self):
+        self.user_manager = Person.create(
+            first_name="John",
+            last_name="Did2",
+            role="manager",
+            email=u"john.did.manager@gmail.com",
+            password=auth.encrypt_password("mypassword")
+        )
+        return self.user_manager
+
+    def generate_fixture_user_cg_artist(self):
+        self.user_cg_artist = Person.create(
+            first_name="John",
+            last_name="Did3",
+            email=u"john.did.cg.artist@gmail.com",
+            role="user",
+            password=auth.encrypt_password("mypassword")
+        )
+        return self.user_cg_artist
 
     def generate_fixture_person(self):
         self.person = Person(

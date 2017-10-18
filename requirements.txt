@@ -8,6 +8,7 @@ flask_sqlalchemy==2.1.0
 flask_bcrypt==0.7.1
 flask-jwt-extended==3.3.0
 flask-sse
+flask_principal
 redis==2.10.6
 ldap3
 

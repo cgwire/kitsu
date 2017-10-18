@@ -57,7 +57,7 @@ def get_file_path(
 def get_file_name(
     task,
     mode="working",
-    software="3dsmax",
+    software=None,
     output_type=None,
     scene=1,
     name="",
@@ -85,7 +85,7 @@ def get_file_name(
 def get_folder_path(
     task,
     mode="working",
-    software="3dsmax",
+    software=None,
     output_type=None,
     scene=1,
     name="",
@@ -127,7 +127,9 @@ def get_tree_from_file(tree_name):
             app.config["FILE_TREE_FOLDER"], "%s.json" % tree_name)
         tree_string = open(tree_path).read()
     except IOError:
-        raise WrongFileTreeFileException("File Tree file not found.")
+        raise WrongFileTreeFileException(
+            "File Tree file not found: %s." % tree_path
+        )
     return json.loads(tree_string)
 
 
@@ -194,7 +196,7 @@ def update_variable(
     template,
     entity,
     task,
-    software="3dsmax",
+    software=None,
     output_type=None,
     scene=1,
     name="",
@@ -225,7 +227,7 @@ def get_folder_from_datatype(
     datatype,
     entity,
     task,
-    software="3dsmax",
+    software=None,
     output_type=None,
     scene=1,
     name=""
@@ -336,6 +338,8 @@ def get_folder_from_asset_type(asset):
 
 
 def get_folder_from_software(software):
+    if software is None:
+        software = files_service.get_or_create_software("3dsmax", "max", ".max")
     return software.name
 
 

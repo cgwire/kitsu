@@ -18,6 +18,7 @@ class CommentTestCase(ApiDBTestCase):
             Entity,
             3,
             entities_out=[],
+            entities_in=[],
             project_id=self.project.id,
             entity_type_id=self.entity_type.id
         )

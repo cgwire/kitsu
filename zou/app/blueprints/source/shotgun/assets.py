@@ -11,7 +11,11 @@ from zou.app.blueprints.source.shotgun.base import (
     ImportRemoveShotgunBaseResource
 )
 
-from zou.app.services import assets_service
+from zou.app.services import (
+    assets_service,
+    tasks_service,
+    files_service
+)
 
 
 class ImportShotgunAssetsResource(BaseImportShotgunResource):
@@ -100,4 +104,25 @@ class ImportShotgunAssetsResource(BaseImportShotgunResource):
 class ImportRemoveShotgunAssetResource(ImportRemoveShotgunBaseResource):
 
     def __init__(self):
-        ImportRemoveShotgunBaseResource.__init__(self, Entity)
+        ImportRemoveShotgunBaseResource.__init__(self, Entity, self.delete_func)
+
+    def delete_func(self, asset):
+        tasks = tasks_service.get_tasks_for_asset(asset.id)
+        if self.is_working_files_linked(tasks):
+            assets_service.cancel_asset(asset.id)
+        else:
+            for task in tasks:
+                tasks_service.remove_task(task["id"])
+            assets_service.remove_asset(asset.id)
+        return asset
+
+    def is_working_files_linked(self, tasks):
+        is_working_files = False
+        for task in tasks:
+            working_files = files_service.get_working_files_for_task(
+                task["id"]
+            )
+            if len(working_files) > 0:
+                is_working_files = True
+                break
+        return is_working_files

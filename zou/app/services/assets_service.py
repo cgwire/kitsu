@@ -74,7 +74,11 @@ def get_assets(criterions={}):
 
 
 def get_asset(entity_id):
-    entity = Entity.get(entity_id)
+    try:
+        entity = Entity.get(entity_id)
+    except StatementError:
+        raise AssetNotFoundException
+
     if entity is None or not is_asset(entity):
         raise AssetNotFoundException
 
@@ -332,3 +336,13 @@ def all_assets_and_tasks(criterions={}):
         assets.append(asset)
 
     return assets
+
+
+def cancel_asset(asset_id):
+    asset = get_asset(asset_id)
+    asset.update({"canceled": True})
+    asset = asset.serialize(obj_type="Asset")
+    events.emit("asset:deletion", {
+        "deleted_asset": asset
+    })
+    return asset
