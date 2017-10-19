@@ -5,11 +5,13 @@
         "folder_path": {
             "shot": "<Project>/shots/<Sequence>/<Shot>/<TaskType>/<Software>",
             "asset": "<Project>/assets/<AssetType>/<Asset>/<TaskType>/<Software>",
+            "sequence": "<Project>/sequences/<Sequence>/<TaskType>/<Software>",
             "style": "lowercase"
         },
         "file_name": {
             "shot": "<Project>_<Sequence>_<Shot>_<TaskType>_<Name>",
             "asset": "<Project>_<AssetType>_<Asset>_<TaskType>_<Name>",
+            "sequence": "<Project>_<Sequence>_<TaskType>_<Name>",
             "style": "lowercase"
         }
     },
@@ -19,11 +21,13 @@
         "folder_path": {
             "shot": "<Project>/shots/<Sequence>/<Shot>/<TaskType>/<OutputType>",
             "asset": "<Project>/assets/<AssetType>/<Asset>/<TaskType>/<OutputType>",
+            "sequence": "<Project>/sequences/<Sequence>/<TaskType>/<OutputType>",
             "style": "lowercase"
         },
         "file_name": {
             "shot": "<Project>_<Sequence>_<Shot>_<TaskType>_<OutputType>_<Name>",
             "asset": "<Project>_<AssetType>_<Asset>_<TaskType>_<OutputType>_<Name>",
+            "sequence": "<Project>_<Sequence>_<TaskType>_<OutputType>_<Name>",
             "style": "lowercase"
         }
     },
@@ -33,11 +37,13 @@
         "folder_path": {
             "shot": "<Project>/shots/<Sequence>/<Shot>/<TaskType>",
             "asset": "<Project>/assets/<AssetType>/<Asset>/<TaskType>",
+            "sequence": "<Project>/sequences/<Sequence>/<TaskType>",
             "style": "lowercase"
         },
         "file_name": {
             "shot": "<Project>_<Sequence>_<Shot>_<TaskType>",
             "asset": "<Project>_<AssetType>_<Asset>_<TaskType>",
+            "sequence": "<Project>_<Sequence>_<TaskType>",
             "style": "lowercase"
         }
     }

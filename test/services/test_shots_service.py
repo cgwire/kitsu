@@ -93,6 +93,10 @@ class ShotUtilsTestCase(ApiDBTestCase):
         self.assertTrue(shots_service.is_shot(self.shot))
         self.assertFalse(shots_service.is_shot(self.entity))
 
+    def test_is_sequence(self):
+        self.assertTrue(shots_service.is_sequence(self.sequence))
+        self.assertFalse(shots_service.is_sequence(self.entity))
+
     def test_get_shot(self):
         self.assertEquals(self.shot.id, shots_service.get_shot(self.shot.id).id)
 

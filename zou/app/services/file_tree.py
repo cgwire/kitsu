@@ -136,6 +136,8 @@ def get_tree_from_file(tree_name):
 def get_folder_path_template(tree, mode, entity):
     if shots_service.is_shot(entity):
         return tree[mode]["folder_path"]["shot"]
+    elif shots_service.is_sequence(entity):
+        return tree[mode]["folder_path"]["sequence"]
     else:
         return tree[mode]["folder_path"]["asset"]
 
@@ -143,6 +145,8 @@ def get_folder_path_template(tree, mode, entity):
 def get_file_name_template(tree, mode, entity):
     if shots_service.is_shot(entity):
         return tree[mode]["file_name"]["shot"]
+    elif shots_service.is_sequence(entity):
+        return tree[mode]["file_name"]["sequence"]
     else:
         return tree[mode]["file_name"]["asset"]
 
@@ -308,17 +312,27 @@ def get_folder_from_asset(asset):
     return folder
 
 
-def get_folder_from_sequence(shot):
-    sequence = shots_service.get_sequence_from_shot(shot)
-    sequence_name = sequence.name
+def get_folder_from_sequence(entity):
+    if shots_service.is_shot(entity):
+        sequence = shots_service.get_sequence_from_shot(entity)
+        sequence_name = sequence.name
+    elif shots_service.is_sequence(entity):
+        sequence_name = entity.name
+    else:
+        sequence_name = ""
+
     if "Seq" in sequence_name:
         sequence_number = sequence.name[3:]
         sequence_name = "S%s" % sequence_number.zfill(3)
     return sequence_name
 
 
-def get_folder_from_episode(shot):
-    sequence = shots_service.get_sequence_from_shot(shot)
+def get_folder_from_episode(entity):
+    if shots_service.is_shot(entity):
+        sequence = shots_service.get_sequence_from_shot(entity)
+    elif shots_service.is_sequence(entity):
+        sequence = entity
+
     try:
         episode = shots_service.get_episode_from_sequence(sequence)
         episode_name = episode.name

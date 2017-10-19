@@ -95,6 +95,12 @@ class FileTreeTestCase(ApiDBTestCase):
             self.entity
         )
         self.assertEqual(template, tree["working"]["file_name"]["asset"])
+        template = file_tree.get_file_name_template(
+            tree,
+            "working",
+            self.sequence
+        )
+        self.assertEqual(template, tree["working"]["file_name"]["sequence"])
 
     def test_get_folder_path_template(self):
         tree = file_tree.get_tree_from_file("simple")
@@ -110,6 +116,12 @@ class FileTreeTestCase(ApiDBTestCase):
             self.entity
         )
         self.assertEqual(template, tree["working"]["folder_path"]["asset"])
+        template = file_tree.get_folder_path_template(
+            tree,
+            "working",
+            self.sequence
+        )
+        self.assertEqual(template, tree["working"]["folder_path"]["sequence"])
 
     def test_get_folder_from_datatype_project(self):
         path = file_tree.get_folder_from_datatype(
@@ -127,10 +139,18 @@ class FileTreeTestCase(ApiDBTestCase):
         )
         self.assertEquals(path, self.shot.name)
 
-    def test_get_folder_from_datatype_sequence(self):
+    def test_get_folder_from_datatype_sequence_shot(self):
         path = file_tree.get_folder_from_datatype(
             "Sequence",
             self.shot,
+            self.shot_task
+        )
+        self.assertEquals(path, self.sequence.name)
+
+    def test_get_folder_from_datatype_sequence_sequence(self):
+        path = file_tree.get_folder_from_datatype(
+            "Sequence",
+            self.sequence,
             self.shot_task
         )
         self.assertEquals(path, self.sequence.name)
@@ -139,6 +159,12 @@ class FileTreeTestCase(ApiDBTestCase):
         path = file_tree.get_folder_from_datatype(
             "Episode",
             self.shot,
+            self.task
+        )
+        self.assertEquals(path, "E01")
+        path = file_tree.get_folder_from_datatype(
+            "Episode",
+            self.sequence,
             self.task
         )
         self.assertEquals(path, "E01")

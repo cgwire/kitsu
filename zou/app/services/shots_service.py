@@ -215,6 +215,11 @@ def is_shot(entity):
     return entity.entity_type_id == shot_type.id
 
 
+def is_sequence(entity):
+    sequence_type = get_sequence_type()
+    return entity.entity_type_id == sequence_type.id
+
+
 def get_or_create_episode(project, name):
     episode_type = get_episode_type()
     episode = Entity.get_by(
