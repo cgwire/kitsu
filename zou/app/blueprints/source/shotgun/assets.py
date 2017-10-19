@@ -17,6 +17,8 @@ from zou.app.services import (
     files_service
 )
 
+from zou.app.services.exception import AssetNotFoundException
+
 
 class ImportShotgunAssetsResource(BaseImportShotgunResource):
 
@@ -74,19 +76,14 @@ class ImportShotgunAssetsResource(BaseImportShotgunResource):
         return entity
 
     def save_entity(self, data):
-        entity = None
-        entities = assets_service.get_assets({"shotgun_id": data["shotgun_id"]})
-        if len(entities) > 0:
-            entity = entities[0]
-
-        if entity is None:
+        try:
+            entity = assets_service.get_asset_by_shotgun_id(data["shotgun_id"])
+            entity.update(data)
+            current_app.logger.info("Entity updated: %s" % entity)
+        except AssetNotFoundException:
             entity = Entity(**data)
             entity.save()
             current_app.logger.info("Entity created: %s" % entity)
-        else:
-            entity.update(data)
-            current_app.logger.info("Entity updated: %s" % entity)
-
         return entity
 
     def post_processing(self):
@@ -107,14 +104,18 @@ class ImportRemoveShotgunAssetResource(ImportRemoveShotgunBaseResource):
         ImportRemoveShotgunBaseResource.__init__(self, Entity, self.delete_func)
 
     def delete_func(self, asset):
-        tasks = tasks_service.get_tasks_for_asset(asset.id)
-        if self.is_working_files_linked(tasks):
-            assets_service.cancel_asset(asset.id)
-        else:
-            for task in tasks:
-                tasks_service.remove_task(task["id"])
-            assets_service.remove_asset(asset.id)
-        return asset
+        try:
+            asset = assets_service.get_asset_by_shotgun_id(asset.shotgun_id)
+            tasks = tasks_service.get_tasks_for_asset(asset.id)
+            if self.is_working_files_linked(tasks):
+                assets_service.cancel_asset(asset.id)
+            else:
+                for task in tasks:
+                    tasks_service.remove_task(task["id"])
+                assets_service.remove_asset(asset.id)
+            return asset
+        except AssetNotFoundException:
+            return None
 
     def is_working_files_linked(self, tasks):
         is_working_files = False

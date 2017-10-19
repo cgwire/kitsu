@@ -15,7 +15,7 @@ class ImportShotgunAssetTestCase(ShotgunTestCase):
         self.entities = self.load_fixture('assets')
         self.assertEqual(len(self.entities), 2)
 
-        self.entities = self.get("data/entities")
+        self.entities = self.get("data/assets")
         self.assertEqual(len(self.entities), 2)
 
     def test_import_twice_assets(self):
@@ -24,10 +24,17 @@ class ImportShotgunAssetTestCase(ShotgunTestCase):
         self.entities = self.load_fixture('assets')
         self.assertEqual(len(self.entities), 2)
 
-        self.entities = self.get("data/entities")
+        self.entities = self.get("data/assets")
         self.assertEqual(len(self.entities), 2)
 
     def test_import_asset(self):
+        self.generate_fixture_entity_type()
+        self.generate_fixture_project_status()
+        self.generate_fixture_project()
+        self.generate_fixture_sequence()
+        self.generate_fixture_shot()
+        self.shot.update({"shotgun_id": 3})
+
         self.load_fixture('projects')
         self.load_fixture('assets')
         sg_asset = {
@@ -48,7 +55,7 @@ class ImportShotgunAssetTestCase(ShotgunTestCase):
         self.assets = self.post(api_path, [sg_asset], 200)
         self.assertEqual(len(self.assets), 1)
 
-        self.assets = self.get("data/entities")
+        self.assets = self.get("data/assets")
         self.assertEqual(len(self.assets), 3)
 
         asset = self.assets[2]
@@ -82,16 +89,16 @@ class ImportShotgunAssetTestCase(ShotgunTestCase):
         self.assets = self.post(api_path, [sg_asset], 200)
         asset = self.assets[0]
 
-        self.assets = self.get("data/entities")
+        self.assets = self.get("data/assets")
         self.assertEqual(len(self.assets), 3)
 
         api_path = "/import/shotgun/remove/asset"
         self.assets = self.post(api_path, {"id": sg_asset["id"]}, 200)
 
-        self.assets = self.get("data/entities")
+        self.assets = self.get("data/assets")
         self.assertEqual(len(self.assets), 2)
 
-        self.get("data/entities/%s" % asset["id"], 404)
+        self.get("data/assets/%s" % asset["id"], 404)
 
     def test_remove_asset_with_working_files(self):
         self.load_fixture('projects')
@@ -127,16 +134,16 @@ class ImportShotgunAssetTestCase(ShotgunTestCase):
         self.generate_fixture_task()
         self.generate_fixture_working_file()
 
-        self.assets = self.get("data/entities")
+        self.assets = self.get("data/assets")
         self.assertEqual(len(self.assets), 3)
 
         api_path = "/import/shotgun/remove/asset"
         self.assets = self.post(api_path, {"id": sg_asset["id"]}, 200)
 
-        self.assets = self.get("data/entities")
+        self.assets = self.get("data/assets")
         self.assertEqual(len(self.assets), 3)
 
-        asset = self.get("data/entities/%s" % asset["id"], 200)
+        asset = self.get("data/assets/%s" % asset["id"], 200)
         self.assertTrue(asset["canceled"])
 
     def test_remove_subasset(self):
@@ -160,13 +167,13 @@ class ImportShotgunAssetTestCase(ShotgunTestCase):
         self.assets = self.post(api_path, [sg_asset], 200)
         asset = self.assets[0]
 
-        self.assets = self.get("data/entities")
+        self.assets = self.get("data/assets")
         self.assertEqual(len(self.assets), 3)
 
         api_path = "/import/shotgun/remove/asset"
         self.assets = self.post(api_path, {"id": sg_asset["id"]}, 200)
 
-        self.assets = self.get("data/entities")
+        self.assets = self.get("data/assets")
         self.assertEqual(len(self.assets), 2)
 
-        self.get("data/entities/%s" % asset["id"], 404)
+        self.get("data/assets/%s" % asset["id"], 404)

@@ -85,6 +85,14 @@ def get_asset(entity_id):
     return entity
 
 
+def get_asset_by_shotgun_id(shotgun_id):
+    assets = get_assets({"shotgun_id": shotgun_id})
+    if len(assets) > 0:
+        return assets[0]
+    else:
+        raise AssetNotFoundException
+
+
 def is_asset(entity):
     shot_type = shots_service.get_shot_type()
     sequence_type = shots_service.get_sequence_type()
