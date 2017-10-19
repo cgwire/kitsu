@@ -1,5 +1,7 @@
 from test.base import ApiDBTestCase
 
+from zou.app.services import user_service
+
 
 class PermissionTestCase(ApiDBTestCase):
 
@@ -91,3 +93,23 @@ class PermissionTestCase(ApiDBTestCase):
     def test_manager_cannot_delete_admin(self):
         self.log_in_manager()
         self.delete("data/persons/%s" % self.user.id, 403)
+
+    def test_user_projects(self):
+        self.generate_fixture_project_standard()
+        self.generate_fixture_project_closed_status()
+        self.generate_fixture_project_closed()
+        self.generate_assigned_task()
+        self.task.assignees.append(self.user_cg_artist)
+        self.task.save()
+        self.log_in_cg_artist()
+        self.get("data/projects", 403)
+        projects = self.get("data/projects/all")
+        self.assertEquals(len(projects), 1)
+        projects = self.get("data/projects/open")
+        self.assertEquals(len(projects), 1)
+
+    def test_has_task_related(self):
+        self.generate_assigned_task()
+        self.get("data/assets/%s" % self.entity.id, 403)
+        self.task.assignees.append(self.user_cg_artist)
+        self.task.save()

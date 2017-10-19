@@ -9,7 +9,7 @@ class PermissionDenied(Exception):
 
 
 def check_manager_permissions():
-    if admin_permission.can() and manager_permission.can():
+    if admin_permission.can() or manager_permission.can():
         return True
     else:
         raise PermissionDenied
@@ -20,3 +20,7 @@ def check_admin_permissions():
         return True
     else:
         raise PermissionDenied
+
+
+def has_manager_permissions():
+    return admin_permission.can() or manager_permission.can()
