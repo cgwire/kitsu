@@ -30,17 +30,32 @@ class GetNextRevisionTestCase(ApiDBTestCase):
         self.generate_fixture_output_file()
 
     def test_get_next_revision(self):
-        result = self.get(
+        result = self.post(
             "/data/tasks/%s/output-types/%s/next-revision" % (
                 self.task.id,
                 self.output_type.id
-            )
+            ),
+            {"name": "main"},
+            200
         )
         self.assertEqual(result["next_revision"], 2)
 
+    def test_get_next_revision_for_name(self):
+        self.generate_fixture_output_file(revision=5, name="other-output")
+        result = self.post(
+            "/data/tasks/%s/output-types/%s/next-revision" % (
+                self.task.id,
+                self.output_type.id
+            ),
+            {"name": "other-output"},
+            200
+        )
+        self.assertEqual(result["next_revision"], 6)
+
     def test_get_next_revision_wrong_data(self):
-        self.get(
+        self.post(
             "/data/tasks/unknown/output-types/unknown/next-revision",
+            {"name": "main"},
             404
         )
 
@@ -53,10 +68,12 @@ class GetNextRevisionTestCase(ApiDBTestCase):
         )
         output_file.save()
 
-        result = self.get(
+        result = self.post(
             "/data/tasks/%s/output-types/%s/next-revision" % (
                 self.task.id,
                 self.output_type.id
-            )
+            ),
+            {"name": "main"},
+            200
         )
         self.assertEqual(result["next_revision"], 2)

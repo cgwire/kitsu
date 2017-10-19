@@ -580,7 +580,12 @@ class ApiDBTestCase(ApiTestCase):
         )
         self.working_file.save()
 
-    def generate_fixture_output_file(self, output_type=None, revision=1):
+    def generate_fixture_output_file(
+        self,
+        output_type=None,
+        revision=1,
+        name="main"
+    ):
         if output_type is None:
             output_type = self.output_type
 
@@ -591,7 +596,8 @@ class ApiDBTestCase(ApiTestCase):
             entity_id=self.entity.id,
             person_id=self.person.id,
             file_status_id=self.file_status.id,
-            output_type_id=output_type.id
+            output_type_id=output_type.id,
+            name=name
         )
         return self.output_file
 

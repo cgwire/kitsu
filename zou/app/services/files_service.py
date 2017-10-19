@@ -219,10 +219,11 @@ def get_working_files_for_task(task_id):
     return WorkingFile.serialize_list(working_files)
 
 
-def get_next_output_file_revision(task_id, output_type_id):
+def get_next_output_file_revision(task_id, output_type_id, name="main"):
     output_files = OutputFile.query.filter_by(
         task_id=task_id,
-        output_type_id=output_type_id
+        output_type_id=output_type_id,
+        name=name
     ).filter(
         OutputFile.revision >= 0
     ).order_by(
