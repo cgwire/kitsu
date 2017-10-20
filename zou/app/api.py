@@ -46,7 +46,7 @@ def configure_api_routes(app):
 
 
 def register_event_handlers(app):
-    sys.path.append(app.config["EVENT_HANDLERS_FOLDER"])
+    sys.path.insert(0, app.config["EVENT_HANDLERS_FOLDER"])
     import event_handlers
     events.register_all(event_handlers.event_map)
     return app
