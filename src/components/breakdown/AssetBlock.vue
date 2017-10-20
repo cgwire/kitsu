@@ -66,6 +66,7 @@ export default {
   font-size: 0.8em;
   cursor: default;
   background: #EEE;
+  word-wrap: break-word;
 }
 
 .asset.big {
@@ -134,6 +135,8 @@ export default {
   width: 60px;
   height: 60px;
   z-index: 2;
+  word-break: break-all;
+  padding: 0.5em;
 }
 
 .big .asset-name {
@@ -149,6 +152,4 @@ export default {
 .asset.casted {
   background: #D1C4E9;
 }
-
-
 </style>
