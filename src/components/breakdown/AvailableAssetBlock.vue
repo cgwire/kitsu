@@ -124,6 +124,8 @@ export default {
   width: 60px;
   height: 60px;
   z-index: 2;
+  word-break: break-all;
+  padding: 0.5em;
 }
 
 .asset {
