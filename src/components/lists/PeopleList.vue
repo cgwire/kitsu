@@ -12,6 +12,9 @@
         <th class="phone">
         {{ $t("people.list.phone") }}
         </th>
+        <th class="role">
+        {{ $t("people.list.role") }}
+        </th>
         <th class="actions"></th>
       </tr>
     </thead>
@@ -21,6 +24,7 @@
         <people-name-cell class="name" v-bind:entry="entry"></people-name-cell>
         <td class="email">{{ entry.email }}</td>
         <td class="phone">{{ entry.phone }}</td>
+        <td class="role">{{ $t('people.role.' + entry.role) }}</td>
         <row-actions
           :entry-id="entry.id"
           :edit-route="'/people/edit/' + entry.id"
@@ -90,6 +94,9 @@ export default {
 .phone {
   width: 140px;
   min-width: 140px;
+}
+.role {
+  min-width: 100px;
 }
 .actions {
   min-width: 100px;
