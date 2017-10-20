@@ -3,8 +3,8 @@
   :to="'/tasks/' + task.id"
   class="tag"
   :style="{
-    background: task.task_status_color,
-    color: task.task_status_short_name !== 'todo' ? 'white' : '#333'
+    background: this.backgroundColor,
+    color: this.color
 }">
   {{ task.task_status_short_name }}
 </router-link>
@@ -17,6 +17,34 @@ export default {
     task: {
       default: 'button',
       type: Object
+    }
+  },
+  computed: {
+    backgroundColor () {
+      if (this.task.task_status_short_name === 'wtg') {
+        return '#f5f5f5'
+      } else if (this.task.task_status_short_name === 'ip') {
+        return '#3273dc'
+      } else if (this.task.task_status_short_name === 'pndng') {
+        return '#ab26ff'
+      } else if (this.task.task_status_short_name === 'fin') {
+        return '#22d160'
+      } else if (this.task.task_status_short_name === 'rtk') {
+        return '#ff3860'
+      } else if (this.task.task_status_short_name === 'cfrm') {
+        return '#f1c40f'
+      } else if (this.task.task_status_short_name === 'recd') {
+        return '#1abc9c'
+      }
+      return this.task.task_status_color
+    },
+    color () {
+      if (this.task.task_status_short_name !== 'todo' &&
+          this.task.task_status_short_name !== 'wtg') {
+        return 'white'
+      } else {
+        return '#333'
+      }
     }
   }
 }
