@@ -36,16 +36,21 @@ export default {
     client.put(`/api/data/entities/${shot.id}`, data, callback)
   },
 
+  deleteShot (shot, callback) {
+    client.del(`/api/data/shots/${shot.id}`, callback)
+  },
+
+  restoreShot (shot, callback) {
+    const data = { canceled: false }
+    client.put(`/api/data/entities/${shot.id}`, data, callback)
+  },
+
   getCasting (shot, callback) {
     client.get(`/api/data/shots/${shot.id}/casting`, callback)
   },
 
   updateCasting (shot, casting, callback) {
     client.put(`/api/data/shots/${shot.id}/casting`, casting, callback)
-  },
-
-  deleteShot (shot, callback) {
-    client.del(`/api/data/shots/${shot.id}`, callback)
   },
 
   postCsv (formData, callback) {

@@ -27,6 +27,10 @@ import {
   DELETE_SHOT_ERROR,
   DELETE_SHOT_END,
 
+  RESTORE_SHOT_START,
+  RESTORE_SHOT_ERROR,
+  RESTORE_SHOT_END,
+
   NEW_TASK_COMMENT_END,
 
   SET_SHOT_SEARCH,
@@ -53,6 +57,11 @@ const state = {
   },
 
   deleteShot: {
+    isLoading: false,
+    isError: false
+  },
+
+  restoreShot: {
     isLoading: false,
     isError: false
   }
@@ -90,6 +99,7 @@ const getters = {
 
   editShot: state => state.editShot,
   deleteShot: state => state.deleteShot,
+  restoreShot: state => state.restoreShot,
 
   shotsCsvFormData: state => state.shotsCsvFormData,
 
@@ -154,6 +164,19 @@ const actions = {
         commit(DELETE_SHOT_ERROR)
       } else {
         commit(DELETE_SHOT_END, shot)
+      }
+      if (payload.callback) payload.callback(err)
+    })
+  },
+
+  restoreShot ({ commit, state }, payload) {
+    commit(RESTORE_SHOT_START)
+    const shot = payload.shot
+    shotsApi.restoreShot(shot, (err) => {
+      if (err) {
+        commit(RESTORE_SHOT_ERROR)
+      } else {
+        commit(RESTORE_SHOT_END, shot)
       }
       if (payload.callback) payload.callback(err)
     })
@@ -281,12 +304,13 @@ const mutations = {
     const shotToDeleteIndex = state.shots.findIndex(
       (shot) => shot.id === shotToDelete.id
     )
-    const shot = state.shots[shotToDeleteIndex]
+    const shot = state.shotMap[shotToDelete.id]
 
     if (shot.tasks.length > 0) {
       shot.canceled = true
     } else {
       state.shots.splice(shotToDeleteIndex, 1)
+      state.shotMap[shotToDelete.id] = undefined
     }
 
     state.deleteShot = {
@@ -294,7 +318,28 @@ const mutations = {
       isError: false
     }
     state.shotIndex = buildNameIndex(state.shots)
-    state.shotMap[shotToDelete.id] = undefined
+  },
+
+  [RESTORE_SHOT_START] (state) {
+    state.restoreShot = {
+      isLoading: true,
+      isError: false
+    }
+  },
+  [RESTORE_SHOT_ERROR] (state) {
+    state.restoreShot = {
+      isLoading: false,
+      isError: true
+    }
+  },
+  [RESTORE_SHOT_END] (state, shotToRestore) {
+    const shot = state.shotMap[shotToRestore.id]
+    shot.canceled = false
+    state.restoreShot = {
+      isLoading: false,
+      isError: false
+    }
+    state.shotIndex = buildNameIndex(state.shots)
   },
 
   [NEW_TASK_COMMENT_END] (state, {comment, taskId}) {
@@ -330,6 +375,11 @@ const mutations = {
     }
 
     state.deleteShot = {
+      isLoading: false,
+      isError: false
+    }
+
+    state.restoreShot = {
       isLoading: false,
       isError: false
     }

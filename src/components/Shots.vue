@@ -22,6 +22,20 @@
     >
     </delete-modal>
 
+    <delete-modal
+      :active="modals.isRestoreDisplayed"
+      :is-loading="restoreShot.isLoading"
+      :is-error="restoreShot.isError"
+      :cancel-route="{
+        name: 'shots',
+        params: {production_id: currentProduction.id}
+      }"
+      :text="restoreText()"
+      :error-text="$t('shots.restore_error')"
+      @confirm="confirmRestoreShot"
+    >
+    </delete-modal>
+
     <import-modal
       :active="modals.isImportDisplayed"
       :is-loading="loading.importing"
@@ -85,6 +99,7 @@ export default {
       modals: {
         isNewDisplayed: false,
         isDeleteDisplayed: false,
+        isRestoreDisplayed: false,
         isImportDisplayed: false,
         isCreateTasksDisplayed: false
       },
@@ -134,6 +149,7 @@ export default {
       'isShotsLoadingError',
       'editShot',
       'deleteShot',
+      'restoreShot',
       'getShot',
       'shotValidationColumns',
       'currentProduction',
@@ -221,6 +237,20 @@ export default {
       })
     },
 
+    confirmRestoreShot () {
+      this.$store.dispatch('restoreShot', {
+        shot: this.shotToRestore,
+        callback: (err) => {
+          if (!err) {
+            this.$router.push({
+              name: 'shots',
+              params: {production_id: this.currentProduction.id}
+            })
+          }
+        }
+      })
+    },
+
     confirmCreateTasks (form) {
       this.loading.creatingTasks = true
       this.errors.creatingTasks = false
@@ -264,6 +294,15 @@ export default {
       }
     },
 
+    restoreText () {
+      const shot = this.shotToRestore
+      if (shot) {
+        return this.$t('shots.restore_text', {name: shot.name})
+      } else {
+        return ''
+      }
+    },
+
     handleModalsDisplay () {
       const path = this.$store.state.route.path
       const shotId = this.$store.state.route.params.shot_id
@@ -279,6 +318,9 @@ export default {
       } else if (path.indexOf('delete') > 0) {
         this.shotToDelete = this.getShot(shotId)
         this.modals.isDeleteDisplayed = true
+      } else if (path.indexOf('restore') > 0) {
+        this.shotToRestore = this.getShot(shotId)
+        this.modals.isRestoreDisplayed = true
       } else if (path.indexOf('import') > 0) {
         this.modals.isImportDisplayed = true
       } else if (path.indexOf('create-tasks') > 0) {
@@ -286,6 +328,7 @@ export default {
       } else {
         this.modals = {
           isNewDisplayed: false,
+          isRestoreDisplayed: false,
           isDeleteDisplayed: false,
           isImportDisplayed: false,
           isCreateTasksDisplayed: false
