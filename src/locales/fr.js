@@ -178,7 +178,9 @@ export default {
       description: 'Description'
     },
     delete_text: 'Etes vous sûr de vouloir retirer {name} de la base de données ?',
-    delete_error: 'Une erreur est survenue en créant l\'asset, êtes vous sûr de vouloir que l\'asset n\'a plus aucun lien ?'
+    delete_error: 'Une erreur est survenue en créant l\'asset, êtes vous sûr de vouloir que l\'asset n\'ait plus aucun lien ?',
+    restore_text: 'Êtes vous sûr de vouloir restorer {name} dans votre base de données ?',
+    restore_error: 'Une erreur est survenue en restorant l\'asset.'
   },
 
   shots: {
