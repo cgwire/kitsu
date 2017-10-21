@@ -179,7 +179,9 @@ export default {
       description: 'Description'
     },
     delete_text: 'Are you sure you want to remove {name} from your database?',
-    delete_error: 'An error occured while deleting this asset. There are probably data linked to it. Are you sure this asset type has no task linked to it?'
+    delete_error: 'An error occured while deleting this asset. There are probably data linked to it. Are you sure this asset type has no task linked to it?',
+    restore_text: 'Are you sure you want to restore {name} into your database?',
+    restore_error: 'An error occured while restoring this asset.'
   },
 
   shots: {
