@@ -332,6 +332,7 @@ export default {
         this.modals = {
           isNewDisplayed: false,
           isDeleteDisplayed: false,
+          isRestoreDisplayed: false,
           isImportDisplayed: false,
           isCreateTasksDisplayed: false
         }
