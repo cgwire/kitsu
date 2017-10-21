@@ -27,8 +27,14 @@
         <td class="role">{{ $t('people.role.' + entry.role) }}</td>
         <row-actions
           :entry-id="entry.id"
-          :edit-route="'/people/edit/' + entry.id"
-          :delete-route="'/people/delete/' + entry.id"
+          :edit-route="{
+            name: 'edit-person',
+            params: {person_id: entry.id}
+          }"
+          :delete-route="{
+            name: 'delete-person',
+            params: {person_id: entry.id}
+          }"
         >
         </row-actions>
        </tr>

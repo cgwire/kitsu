@@ -40,14 +40,30 @@ export const routes = [
       },
       { path: '/people', component: People },
       { path: '/people/new', component: People },
-      { path: '/people/edit/:person_id', component: People },
-      { path: '/people/delete/:person_id', component: People },
+      {
+        name: 'edit-person',
+        path: '/people/edit/:person_id',
+        component: People
+      },
+      {
+        name: 'delete-person',
+        path: '/people/delete/:person_id',
+        component: People
+      },
       { path: '/people/import', component: People },
 
       { path: '/productions', component: Productions },
       { path: '/productions/new', component: Productions },
-      { path: '/productions/edit/:production_id', component: Productions },
-      { path: '/productions/delete/:production_id', component: Productions },
+      {
+        name: 'edit-production',
+        path: '/productions/edit/:production_id',
+        component: Productions
+      },
+      {
+        name: 'delete-production',
+        path: '/productions/delete/:production_id',
+        component: Productions
+      },
 
       {
         path: '/productions/:production_id/breakdown',
@@ -82,6 +98,11 @@ export const routes = [
         name: 'delete-asset'
       },
       {
+        path: '/productions/:production_id/assets/restore/:asset_id',
+        component: Assets,
+        name: 'restore-asset'
+      },
+      {
         path: '/productions/:production_id/assets/import',
         component: Assets,
         name: 'import-assets'
@@ -111,6 +132,11 @@ export const routes = [
         component: Shots,
         name: 'delete-shots'
       },
+      {
+        path: '/productions/:production_id/shots/restore/:shot_id',
+        component: Shots,
+        name: 'restore-shots'
+      },
 
       { path: '/tasks/:task_id', component: Task },
       { path: '/tasks/:task_id/delete', component: Task },
@@ -125,13 +151,29 @@ export const routes = [
 
       { path: '/asset-types', component: AssetTypes },
       { path: '/asset-types/new', component: AssetTypes },
-      { path: '/asset-types/edit/:asset_type_id', component: AssetTypes },
-      { path: '/asset-types/delete/:asset_type_id', component: AssetTypes },
+      {
+        name: 'edit-asset-type',
+        path: '/asset-types/edit/:asset_type_id',
+        component: AssetTypes
+      },
+      {
+        name: 'delete-asset-type',
+        path: '/asset-types/delete/:asset_type_id',
+        component: AssetTypes
+      },
 
       { path: '/task-types', component: TaskTypes },
       { path: '/task-types/new', component: TaskTypes },
-      { path: '/task-types/edit/:task_type_id', component: TaskTypes },
-      { path: '/task-types/delete/:task_type_id', component: TaskTypes },
+      {
+        name: 'edit-task-type',
+        path: '/task-types/edit/:task_type_id',
+        component: TaskTypes
+      },
+      {
+        name: 'delete-task-type',
+        path: '/task-types/delete/:task_type_id',
+        component: TaskTypes
+      },
 
       { path: '/profile', component: Profile }
     ]

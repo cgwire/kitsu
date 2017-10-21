@@ -135,8 +135,8 @@
             >
             </validation-tag>
           </td>
-          <row-actions v-if="!entry.canceled"
-            :entry-id="entry.id"
+          <row-actions
+            :entry="entry"
             :edit-route="{
               name: 'edit-asset',
               params: {
@@ -151,11 +151,6 @@
                 asset_id: entry.id
               }
             }"
-          >
-          </row-actions>
-          <row-actions v-else
-            :entry-id="entry.id"
-            :hide-edit="true"
             :restore-route="{
               name: 'restore-asset',
               params: {
@@ -164,7 +159,6 @@
               }
             }"
           >
-          aa
           </row-actions>
         </tr>
       </tbody>

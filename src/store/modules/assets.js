@@ -327,6 +327,7 @@ const mutations = {
       asset.canceled = true
     } else {
       state.assets.splice(assetToDeleteIndex, 1)
+      state.assetMap[assetToDelete.id] = undefined
     }
 
     state.deleteAsset = {
@@ -334,7 +335,6 @@ const mutations = {
       isError: false
     }
     state.assetIndex = buildNameIndex(state.assets)
-    state.assetMap[assetToDelete.id] = undefined
   },
 
   [RESTORE_ASSET_START] (state) {
@@ -404,7 +404,13 @@ const mutations = {
       isLoading: false,
       isError: false
     }
+
     state.deleteAsset = {
+      isLoading: false,
+      isError: false
+    }
+
+    state.restoreAsset = {
       isLoading: false,
       isError: false
     }
