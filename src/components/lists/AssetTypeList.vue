@@ -14,8 +14,14 @@
         </td>
         <row-actions
           :entry-id="entry.id"
-          :edit-route="'/asset-types/edit/' + entry.id"
-          :delete-route="'/asset-types/delete/' + entry.id"
+          :edit-route="{
+            name: 'edit-asset-type',
+            params: {asset_type_id: entry.id}
+          }"
+          :delete-route="{
+            name: 'delete-asset-type',
+            params: {asset_type_id: entry.id}
+          }"
         >
         </row-actions>
       </tr>
