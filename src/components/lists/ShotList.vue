@@ -132,8 +132,21 @@
             </validation-tag>
           </td>
           <row-actions
-            :entry-id="entry.id"
-            edit-route=""
+            :entry="entry"
+            :edit-route="{
+              name: 'edit-shots',
+              params: {
+                shot_id: entry.id,
+                production_id: currentProduction.id
+              }
+            }"
+            :restore-route="{
+              name: 'restore-shots',
+              params: {
+                shot_id: entry.id,
+                production_id: currentProduction.id
+              }
+            }"
             :delete-route="{
               name: 'delete-shots',
               params: {

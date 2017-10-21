@@ -201,7 +201,9 @@ export default {
       production: 'Prod'
     },
     delete_text: 'Etes vous sûr de vouloir retirer {name} de la base de données ?',
-    delete_error: 'Une erreur est survenue en créant le plant, êtes vous sûr que le plan n\'a plus aucun lien ?'
+    delete_error: 'Une erreur est survenue en créant le plan, êtes vous sûr que le plan n\'a plus aucun lien ?',
+    restore_text: 'Etes vous sûr de vouloir restorer {name} dans la base de données ?',
+    restore_error: 'Une erreur est survenue en restorant le plant.'
   },
 
   breakdown: {
