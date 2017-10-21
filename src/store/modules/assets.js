@@ -360,6 +360,28 @@ const mutations = {
     state.assetIndex = buildNameIndex(state.assets)
   },
 
+  [RESTORE_ASSET_START] (state) {
+    state.restoreAsset = {
+      isLoading: true,
+      isError: false
+    }
+  },
+  [RESTORE_ASSET_ERROR] (state) {
+    state.restoreAsset = {
+      isLoading: false,
+      isError: true
+    }
+  },
+  [RESTORE_ASSET_END] (state, assetToRestore) {
+    const asset = state.assetMap[assetToRestore.id]
+    asset.canceled = false
+    state.restoreAsset = {
+      isLoading: false,
+      isError: false
+    }
+    state.assetIndex = buildNameIndex(state.assets)
+  },
+
   [DELETE_TASK_END] (state, task) {
     const asset = state.assets.find(
       (asset) => asset.id === task.entity_id
