@@ -12,6 +12,7 @@
   <upload-icon class="icon is-small" v-if="icon === 'upload'"></upload-icon>
   <Edit-icon class="icon is-small" v-if="icon === 'edit'"></edit-icon>
   <trash-icon class="icon is-small" v-if="icon === 'delete'"></trash-icon>
+  <rotate-ccw-icon class="icon is-small" v-if="icon === 'restore'"></rotate-ccw-icon>
 
   <span class="text is-hidden-touch" v-if="text.length > 0">
     {{ text }}
@@ -24,6 +25,7 @@ import {
   DownloadIcon,
   EditIcon,
   PlusIcon,
+  RotateCcwIcon,
   TrashIcon,
   UploadIcon
 } from 'vue-feather-icons'
@@ -34,6 +36,7 @@ export default {
     DownloadIcon,
     EditIcon,
     PlusIcon,
+    RotateCcwIcon,
     TrashIcon,
     UploadIcon
   },

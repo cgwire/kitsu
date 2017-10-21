@@ -3,10 +3,15 @@
   <button-link
     icon="edit"
     :path="editRoute"
-    v-if="!hideEdit"
+    v-if="!hideEdit && !entry.canceled"
   >
   </button-link>
-  <button-link
+  <button-link v-if="entry.canceled"
+    icon="restore"
+    :path="restoreRoute"
+  >
+  </button-link>
+  <button-link v-else
     icon="delete"
     :path="deleteRoute"
   >
@@ -23,11 +28,34 @@ export default {
   components: {
     ButtonLink
   },
-  props: [
-    'editRoute',
-    'deleteRoute',
-    'hideEdit'
-  ],
+  props: {
+    entry: {
+      type: Object,
+      default: () => {
+        return {}
+      }
+    },
+    editRoute: {
+      type: Object,
+      default: () => {
+        return { name: 'home' }
+      }
+    },
+    deleteRoute: {
+      type: Object,
+      default: () => {
+        return { name: 'home' }
+      }
+    },
+    restoreRoute: {
+      type: Object,
+      default: null
+    },
+    hideEdit: {
+      type: Boolean,
+      default: false
+    }
+  },
   computed: {
     ...mapGetters([
     ])
