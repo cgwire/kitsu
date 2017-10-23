@@ -8,6 +8,22 @@
       :validation-columns="shotValidationColumns"
     ></shot-list>
 
+    <edit-shot-modal
+      :active="modals.isNewDisplayed"
+      :is-loading="loading.edit"
+      :is-loading-stay="loading.stay"
+      :is-error="editShot.isCreateError"
+      :is-success="editShot.isSuccess"
+      :cancel-route="{
+        name: 'shots',
+        params: {production_id: currentProduction.id}
+      }"
+      :shot-to-edit="shotToEdit"
+      @confirm="confirmEditShot"
+      @confirmAndStay="confirmNewShotStay"
+    >
+    </edit-shot-modal>
+
     <delete-modal
       :active="modals.isDeleteDisplayed"
       :is-loading="deleteShot.isLoading"
@@ -73,6 +89,7 @@
 import { mapGetters, mapActions } from 'vuex'
 import ShotList from './lists/ShotList.vue'
 import DeleteModal from './widgets/DeleteModal'
+import EditShotModal from './modals/EditShotModal'
 import ImportModal from './modals/ImportModal'
 import CreateTasksModal from './modals/CreateTasksModal'
 import Filters from './widgets/Filters'
@@ -85,6 +102,7 @@ export default {
 
   components: {
     ShotList,
+    EditShotModal,
     DeleteModal,
     ImportModal,
     CreateTasksModal,

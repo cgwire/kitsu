@@ -154,7 +154,6 @@
                 production_id: currentProduction.id
               }
             }"
-            :hide-edit="true"
           >
           </row-actions>
         </tr>

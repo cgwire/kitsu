@@ -46,6 +46,7 @@ const state = {
   displayedShots: [],
   shotIndex: {},
   shotMap: {},
+  shotCreated: '',
 
   isShotsLoading: false,
   isShotsLoadingError: false,
@@ -100,6 +101,7 @@ const getters = {
   editShot: state => state.editShot,
   deleteShot: state => state.deleteShot,
   restoreShot: state => state.restoreShot,
+  shotCreated: state => state.shotCreated,
 
   shotsCsvFormData: state => state.shotsCsvFormData,
 
@@ -138,7 +140,7 @@ const actions = {
       if (err) {
         commit(EDIT_SHOT_ERROR)
       } else {
-        commit(EDIT_SHOT_END, shot)
+        commit(EDIT_SHOT_END, payload.data)
       }
       if (payload.callback) payload.callback(err)
     })
@@ -269,10 +271,10 @@ const mutations = {
 
   [EDIT_SHOT_END] (state, newShot) {
     const shot = getters.getShot(state)(newShot.id)
-    const shotType = state.sequences.find(
-      (shotType) => shotType.id === newShot.entity_type_id
+    const sequence = state.sequences.find(
+      (sequence) => sequence.id === newShot.parent_id
     )
-    newShot.shot_type_name = shotType.name
+    newShot.sequence_name = sequence.name
 
     if (shot) {
       Object.assign(shot, newShot)
@@ -286,6 +288,7 @@ const mutations = {
       isError: false
     }
     state.shotIndex = buildNameIndex(state.shots)
+    state.shotCreated = newShot.name
   },
 
   [DELETE_SHOT_START] (state) {

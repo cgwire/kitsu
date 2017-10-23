@@ -30,8 +30,8 @@ export default {
   updateShot (shot, callback) {
     const data = {
       name: shot.name,
-      entity_type_id: shot.shot_type_id,
-      project_id: shot.project_id
+      parent_id: shot.sequence_id,
+      description: shot.description
     }
     client.put(`/api/data/entities/${shot.id}`, data, callback)
   },

@@ -88,7 +88,8 @@ const getters = {
 
     for (let asset of state.displayedAssets) {
       if (
-        previousAsset && asset.asset_type_name !== previousAsset.asset_type_name
+        previousAsset &&
+        asset.asset_type_name !== previousAsset.asset_type_name
       ) {
         assetsByType.push(assetTypeAssets.slice(0))
         assetTypeAssets = []
