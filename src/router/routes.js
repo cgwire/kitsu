@@ -128,6 +128,11 @@ export const routes = [
         name: 'create-shot-tasks'
       },
       {
+        path: '/productions/:production_id/shots/edit/:shot_id',
+        component: Shots,
+        name: 'edit-shots'
+      },
+      {
         path: '/productions/:production_id/shots/delete/:shot_id',
         component: Shots,
         name: 'delete-shots'

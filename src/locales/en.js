@@ -191,6 +191,7 @@ export default {
     new_shot: 'Add a shot',
     edit_fail: 'Creation or edition failed, an error occured.',
     new_success: 'Shot {name} successfully created.',
+    edit_success: 'Shot {name} successfully edited.',
     fields: {
       name: 'Shot',
       episode: 'Episode',
