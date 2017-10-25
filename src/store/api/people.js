@@ -45,5 +45,9 @@ export default {
       password2: form.password2
     }
     client.post('/api/auth/change-password', data, callback)
+  },
+
+  loadTodos (callback) {
+    client.get('/api/data/user/tasks', callback)
   }
 }
