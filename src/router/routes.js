@@ -14,6 +14,7 @@ import OpenProductions from '../components/OpenProductions'
 import Profile from '../components/Profile'
 import Task from '../components/Task'
 import TaskTypes from '../components/TaskTypes'
+import Todos from '../components/Todos'
 import ServerDown from '../components/ServerDown'
 import Shots from '../components/Shots'
 
@@ -180,7 +181,8 @@ export const routes = [
         component: TaskTypes
       },
 
-      { path: '/profile', component: Profile }
+      { path: '/todos', component: Todos, name: 'todos' },
+      { path: '/profile', component: Profile, name: 'profile' }
     ]
   },
   {
