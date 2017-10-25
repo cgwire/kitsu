@@ -2,9 +2,6 @@
 <td class="production-name">
   <div class="level">
     <div class="level-left">
-      <!--span class="avatar level-item has-text-centered">
-        <img :src="'/api/thumbnails/projects/' + entry.id + '.png'" />
-      </span-->
       <span
          class="level-item avatar has-text-centered"
          v-bind:style="{
