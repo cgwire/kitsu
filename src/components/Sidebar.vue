@@ -14,6 +14,13 @@
           </p>
         </router-link>
         <section>
+
+         <p @click="toggleSidebar()">
+           <router-link :to="{name: 'todos'}">
+             My tasks
+           </router-link>
+         </p>
+
          <h2>Fabrication</h2>
 
          <p @click="toggleSidebar()">
