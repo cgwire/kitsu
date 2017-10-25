@@ -64,5 +64,22 @@ export default {
       formData,
       callback
     )
+  },
+
+  assignTasks (personId, selectedTaskIds, callback) {
+    client.put(
+      `/api/actions/persons/${personId}/assign`,
+      {task_ids: selectedTaskIds},
+      callback
+    )
+  },
+
+  unassignTasks (selectedTaskIds, callback) {
+    client.put(
+      `/api/actions/tasks/clear-assignation`,
+      {task_ids: selectedTaskIds},
+      callback
+    )
   }
+
 }

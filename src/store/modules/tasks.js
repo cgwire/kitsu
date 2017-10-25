@@ -18,6 +18,12 @@ import {
   PREVIEW_FILE_SELECTED,
   ADD_PREVIEW_END,
 
+  ADD_SELECTED_TASK,
+  REMOVE_SELECTED_TASK,
+  CLEAR_SELECTED_TASKS,
+  ASSIGN_TASKS,
+  UNASSIGN_TASKS,
+
   RESET_ALL
 } from '../mutation-types'
 
@@ -26,6 +32,8 @@ const state = {
   taskStatuses: [],
   taskComments: {},
   taskPreviews: {},
+  selectedTasks: {},
+  nbSelectedTasks: 0,
 
   previewFormData: null
 }
@@ -61,7 +69,10 @@ const getters = {
       value: status.id,
       color: status.color
     }
-  })
+  }),
+
+  selectedTasks: state => state.selectedTasks,
+  nbSelectedTasks: state => state.nbSelectedTasks
 }
 
 const actions = {
@@ -151,8 +162,23 @@ const actions = {
         })
       }
     })
-  }
+  },
 
+  assignSelectedTasks ({ commit, state }, { personId, callback }) {
+    const selectedTaskIds = Object.keys(state.selectedTasks)
+    tasksApi.assignTasks(personId, selectedTaskIds, (err) => {
+      if (!err) commit(ASSIGN_TASKS, { selectedTaskIds, personId })
+      if (callback) callback(err)
+    })
+  },
+
+  unassignSelectedTasks ({ commit, state }, { personId, callback }) {
+    const selectedTaskIds = Object.keys(state.selectedTasks)
+    tasksApi.unassignTasks(selectedTaskIds, (err) => {
+      if (!err) commit(UNASSIGN_TASKS, selectedTaskIds)
+      if (callback) callback(err)
+    })
+  }
 }
 
 const mutations = {
@@ -269,11 +295,39 @@ const mutations = {
       [comment].concat(state.taskComments[taskId])
   },
 
+  [ADD_SELECTED_TASK] (state, task) {
+    state.selectedTasks[task.id] = task
+    state.nbSelectedTasks = Object.keys(state.selectedTasks).length
+  },
+  [REMOVE_SELECTED_TASK] (state, task) {
+    delete state.selectedTasks[task.id]
+    state.nbSelectedTasks = Object.keys(state.selectedTasks).length
+  },
+  [CLEAR_SELECTED_TASKS] (state, task) {
+    state.selectedTasks = {}
+    state.nbSelectedTasks = 0
+  },
+  [ASSIGN_TASKS] (state, { selectedTaskIds, personId }) {
+    selectedTaskIds.forEach((taskId) => {
+      const task = state.taskMap[taskId]
+      if (!task.assignees.find((assigneeId) => assigneeId === personId)) {
+        task.assignees.push(personId)
+      }
+    })
+  },
+  [UNASSIGN_TASKS] (state, selectedTaskIds) {
+    selectedTaskIds.forEach((taskId) => {
+      const task = state.taskMap[taskId]
+      task.assignees = []
+    })
+  },
+
   [RESET_ALL] (state, shots) {
     state.taskMap = {}
     state.taskStatuses = []
     state.taskComments = {}
     state.taskPreviews = {}
+    state.selectedTasks = {}
     state.previewFormData = null
   }
 }
