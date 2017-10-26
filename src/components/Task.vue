@@ -22,6 +22,13 @@
                class="is-medium"
              ></validation-tag>
            </div>
+           <div v-if="currentTask">
+             <people-avatar
+               :key="personId"
+               :person="personMap[personId]"
+               v-for="personId in currentTask.assignees">
+             </people-avatar>
+           </div>
          </div>
          <div class="level-right">
            <button-link
@@ -236,6 +243,7 @@ export default {
   },
 
   created () {
+    this.$store.commit('CLEAR_SELECTED_TASKS')
     let task = this.getCurrentTask()
     if (!task) {
       this.taskLoading = {
@@ -298,7 +306,8 @@ export default {
       'getTask',
       'getTaskComments',
       'getTaskPreviews',
-      'getTaskComment'
+      'getTaskComment',
+      'personMap'
     ]),
     title () {
       if (this.currentTask) {
