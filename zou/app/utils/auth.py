@@ -15,6 +15,9 @@ class EmailNotValidException(BaseException):
 
 
 def encrypt_password(password):
+    """
+    Encrypt given string password using bcrypt algorithm.
+    """
     return bcrypt.generate_password_hash(password)
 
 
