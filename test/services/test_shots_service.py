@@ -67,7 +67,6 @@ class ShotUtilsTestCase(ApiDBTestCase):
         self.shot_dict["sequence_name"] = self.sequence.name
         self.assertDictEqual(shots[0], self.shot_dict)
 
-
     def test_get_shots_and_tasks(self):
         self.generate_fixture_person()
         self.generate_fixture_assigner()
@@ -87,6 +86,9 @@ class ShotUtilsTestCase(ApiDBTestCase):
         )
         self.assertEqual(
             shots[0]["tasks"][0]["task_type_name"], "Animation"
+        )
+        self.assertEqual(
+            shots[0]["tasks"][0]["assignees"][0], str(self.person.id)
         )
 
     def test_is_shot(self):
