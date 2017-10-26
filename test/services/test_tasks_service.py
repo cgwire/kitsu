@@ -80,6 +80,10 @@ class TaskServiceTestCase(ApiDBTestCase):
         task_status = tasks_service.get_wip_status()
         self.assertEqual(task_status.name, "WIP")
 
+    def test_get_done_status(self):
+        task_status = tasks_service.get_done_status()
+        self.assertEqual(task_status.name, "Done")
+
     def test_get_todo_status(self):
         task_status = tasks_service.get_todo_status()
         self.assertEqual(task_status.name, "Todo")
@@ -315,7 +319,6 @@ class TaskServiceTestCase(ApiDBTestCase):
         )
         self.assertEquals(time_spent["duration"], 2 * duration)
 
-
     def test_get_time_spents(self):
         person_id = self.person.id
         user_id = self.user.id
@@ -338,3 +341,10 @@ class TaskServiceTestCase(ApiDBTestCase):
         self.assertEquals(time_spents["total"], 10800)
         self.assertEquals(time_spents[str(user_id)]["duration"], 7200)
         self.assertEquals(time_spents[str(person_id)]["duration"], 3600)
+
+    def test_clear_assignation(self):
+        task_id = self.task.id
+        tasks_service.assign_task(self.task, self.person)
+        tasks_service.clear_assignation(task_id)
+        task = Task.get(task_id)
+        self.assertEquals(len(task.assignees), 0)
