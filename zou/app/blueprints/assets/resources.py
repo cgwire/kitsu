@@ -16,7 +16,7 @@ from zou.app.services.exception import (
     ProjectNotFoundException,
     AssetTypeNotFoundException,
     AssetNotFoundException,
-    ShotNoFoundException
+    ShotNotFoundException
 )
 
 
@@ -32,7 +32,8 @@ class AssetResource(Resource):
         """
         try:
             asset = assets_service.get_asset(asset_id)
-            user_service.check_has_task_related(asset["project_id"])
+            if not permissions.has_manager_permissions():
+                user_service.check_has_task_related(asset.project_id)
         except AssetNotFoundException:
             abort(404)
         except permissions.PermissionDenied:
@@ -43,11 +44,12 @@ class AssetResource(Resource):
     def delete(self, asset_id):
         try:
             permissions.check_manager_permissions()
-            deleted_asset = assets_service.remove_asset(asset_id)
+            if not permissions.has_manager_permissions():
+                deleted_asset = assets_service.remove_asset(asset_id)
         except AssetNotFoundException:
             abort(404)
         except permissions.PermissionDenied:
-            abort(404)
+            abort(403)
         return deleted_asset, 204
 
 
@@ -158,7 +160,7 @@ class ShotAssetTypesResource(Resource):
                 user_service.check_has_task_related(shot["project_id"])
             asset_types = assets_service.get_asset_types_for_shot(shot_id)
             return Entity.serialize_list(asset_types, obj_type="AssetType")
-        except ShotNoFoundException:
+        except ShotNotFoundException:
             abort(404)
         except permissions.PermissionDenied:
             abort(403)
@@ -217,7 +219,7 @@ class AssetTasksResource(Resource):
         try:
             asset = assets_service.get_asset(asset_id)
             if not permissions.has_manager_permissions():
-                user_service.check_has_task_related(asset["project_id"])
+                user_service.check_has_task_related(asset.project_id)
             return tasks_service.get_tasks_for_asset(asset_id)
         except AssetNotFoundException:
             abort(404)
@@ -238,7 +240,7 @@ class AssetTaskTypesResource(Resource):
         try:
             asset = assets_service.get_asset(asset_id)
             if not permissions.has_manager_permissions():
-                user_service.check_has_task_related(asset["project_id"])
+                user_service.check_has_task_related(asset.project_id)
             return tasks_service.get_task_types_for_asset(asset_id)
         except AssetNotFoundException:
             abort(404)
