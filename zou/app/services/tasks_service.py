@@ -401,6 +401,10 @@ def get_entity(entity_id):
     return Entity.get(entity_id)
 
 
+def get_entity_type(entity_type_id):
+    return EntityType.get(entity_type_id)
+
+
 def get_comment(comment_id):
     try:
         comment = Comment.get(comment_id)

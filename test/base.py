@@ -205,7 +205,7 @@ class ApiDBTestCase(ApiTestCase):
         dbhelpers.drop_all()
         dbhelpers.create_all()
         self.generate_fixture_user()
-        self.log_in(self.user.email)
+        self.log_in_admin()
 
     def tearDown(self):
         """

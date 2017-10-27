@@ -12,7 +12,8 @@ class AuthTestCase(ApiDBTestCase):
 
         self.generate_fixture_person()
         self.person.update({
-            "password": auth.encrypt_password("secretpassword")
+            "password": auth.encrypt_password("secretpassword"),
+            "role": "admin"
         })
 
         self.person_dict = self.person.serialize()

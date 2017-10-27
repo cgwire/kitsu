@@ -44,8 +44,7 @@ class AssetResource(Resource):
     def delete(self, asset_id):
         try:
             permissions.check_manager_permissions()
-            if not permissions.has_manager_permissions():
-                deleted_asset = assets_service.remove_asset(asset_id)
+            deleted_asset = assets_service.remove_asset(asset_id)
         except AssetNotFoundException:
             abort(404)
         except permissions.PermissionDenied:

@@ -331,7 +331,7 @@ class TaskFullResource(Resource):
 
         result = task.serialize()
         task_type = tasks_service.get_task_type(task.task_type_id)
-        result["task_type"] = task_type.serialize()
+        result["task_type"] = task_type
         assigner = persons_service.get_person(task.assigner_id)
         result["assigner"] = assigner.serialize()
         project = projects_service.get_project(task.project_id)
@@ -343,7 +343,7 @@ class TaskFullResource(Resource):
         if entity.parent_id is not None:
             parent = tasks_service.get_entity(entity.parent_id)
             result["entity_parent"] = parent.serialize()
-        entity_type = assets_service.get_entity_type(entity.entity_type_id)
+        entity_type = tasks_service.get_entity_type(entity.entity_type_id)
         result["entity_type"] = entity_type.serialize()
         assignees = []
         for assignee in task.assignees:
