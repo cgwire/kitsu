@@ -5,7 +5,6 @@ from .resources import (
     TaskFullResource,
     TaskAssignResource,
     TaskStartResource,
-    StartTaskFromShotAssetResource,
     CommentTaskResource,
     TaskCommentsResource,
     TaskPreviewsResource,
@@ -47,10 +46,6 @@ routes = [
     (
         "/actions/task-types/<task_type_id>/assets/create-tasks",
         CreateAssetTasksResource
-    ),
-    (
-        "/actions/task-types/<task_type_id>/entity/<entity_id>/start",
-        StartTaskFromShotAssetResource
     )
 ]
 

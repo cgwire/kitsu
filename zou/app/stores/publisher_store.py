@@ -5,6 +5,11 @@ from zou.app import config
 
 
 def new():
+    """
+    Initialize key value store that will be used for the event publishing.
+    That way the main API takes advantage of Redis pub/sub capabilities to push
+    events to the event stream API.
+    """
     try:
         publisher = redis.StrictRedis(
             host=config.KEY_VALUE_STORE["host"],
