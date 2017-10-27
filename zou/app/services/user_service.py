@@ -119,6 +119,17 @@ def get_projects():
     return fields.serialize_value(query.all())
 
 
+def check_assigned(task_id):
+    query = Task.query \
+        .filter(assignee_filter()) \
+        .filter(Task.id == task_id)
+
+    if query.first() is None:
+        raise permissions.PermissionDenied
+
+    return True
+
+
 def check_has_task_related(project_id):
     query = Project.query \
         .join(Task) \
@@ -133,5 +144,6 @@ def check_has_task_related(project_id):
 def check_criterions_has_task_related(criterions):
     if "project_id" in criterions:
         check_has_task_related(criterions["project_id"])
+        return True
     else:
         raise permissions.PermissionDenied
