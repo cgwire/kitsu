@@ -25,8 +25,14 @@
         </td>
         <row-actions
           :entry-id="entry.id"
-          :edit-route="'/productions/edit/' + entry.id"
-          :delete-route="'/productions/delete/' + entry.id"
+          :edit-route="{
+            name: 'edit-production',
+            params: {production_id: entry.id}
+          }"
+          :delete-route="{
+            name: 'delete-production',
+            params: {production_id: entry.id}
+          }"
         >
         </row-actions>
       </tr>

@@ -60,9 +60,12 @@ export default {
     logout: 'Se déconnecter',
     save: 'Enregistrer',
     cancel: 'Annuler',
+    or: 'ou',
     confirmation: 'Confirmer',
     confirmation_and_stay: 'Confirmer et rester',
+    clear_selection: 'Effacer la sélection',
     delete_text: 'Etes vous sûr de vouloir supprimer {name} de la base de données ?',
+    loading_error: 'Une erreur est survenue en chargeant les données.',
     csv: {
       import_file: 'Importer',
       export_file: 'Exporter',
@@ -118,8 +121,10 @@ export default {
   tasks: {
     preview: 'Pré-visualisation',
     validation: 'Validation',
+    assign: 'Assigner {nbSelectedTasks} à :',
     no_preview: 'Il n\'y a pas de previz pour cette tâche..',
     no_comment: 'Il n\'y a pas de commentaires pour cette tâche.',
+    clear_assignations: 'effacer les assignations',
     create_tasks: 'Ajouter des tâches',
     create_tasks_shot: 'Ajouter des tâches pour les plans affichés',
     create_tasks_shot_explaination: 'Vous allez créer une nouvelle tâche pour chaque plan de la liste affichée. Est-ce que vous voulez continuer ?',
@@ -133,7 +138,10 @@ export default {
     delete_error: 'Une erreur est survenue en supprimant la tâche.',
     feedback: 'retours',
     fields: {
-      task_type: 'Type de tâche'
+      task_type: 'Type de tâche',
+      prodution: 'Prod',
+      entity: 'Entité',
+      task_status: 'Statut'
     }
   },
 
@@ -178,7 +186,9 @@ export default {
       description: 'Description'
     },
     delete_text: 'Etes vous sûr de vouloir retirer {name} de la base de données ?',
-    delete_error: 'Une erreur est survenue en créant l\'asset, êtes vous sûr de vouloir que l\'asset n\'a plus aucun lien ?'
+    delete_error: 'Une erreur est survenue en créant l\'asset, êtes vous sûr de vouloir que l\'asset n\'ait plus aucun lien ?',
+    restore_text: 'Êtes vous sûr de vouloir restorer {name} dans votre base de données ?',
+    restore_error: 'Une erreur est survenue en restorant l\'asset.'
   },
 
   shots: {
@@ -199,7 +209,9 @@ export default {
       production: 'Prod'
     },
     delete_text: 'Etes vous sûr de vouloir retirer {name} de la base de données ?',
-    delete_error: 'Une erreur est survenue en créant le plant, êtes vous sûr que le plan n\'a plus aucun lien ?'
+    delete_error: 'Une erreur est survenue en créant le plan, êtes vous sûr que le plan n\'a plus aucun lien ?',
+    restore_text: 'Etes vous sûr de vouloir restorer {name} dans la base de données ?',
+    restore_error: 'Une erreur est survenue en restorant le plant.'
   },
 
   breakdown: {

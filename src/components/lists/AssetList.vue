@@ -122,21 +122,17 @@
           <td class="description">
             {{ entry.description }}
           </td>
-          <td
-            class="validation"
-            :style="{
-              'border-left': '2px solid ' + column.color
-            }"
+          <validation-cell
+            :key="column.name + '-' + entry.id"
+            :column="column"
+            :entity="entry"
+            @select="onTaskSelected"
+            @unselect="onTaskUnselected"
             v-for="column in validationColumns"
           >
-            <validation-tag
-              :task="entry.validations[column.name]"
-              v-if="entry.validations[column.name]"
-            >
-            </validation-tag>
-          </td>
+          </validation-cell>
           <row-actions
-            :entry-id="entry.id"
+            :entry="entry"
             :edit-route="{
               name: 'edit-asset',
               params: {
@@ -146,6 +142,13 @@
             }"
             :delete-route="{
               name: 'delete-asset',
+              params: {
+                production_id: currentProduction.id,
+                asset_id: entry.id
+              }
+            }"
+            :restore-route="{
+              name: 'restore-asset',
               params: {
                 production_id: currentProduction.id,
                 asset_id: entry.id
@@ -176,7 +179,7 @@
 import { mapGetters, mapActions } from 'vuex'
 import ProductionNameCell from '../cells/ProductionNameCell'
 import RowActions from '../widgets/RowActions'
-import ValidationTag from '../widgets/ValidationTag'
+import ValidationCell from '../cells/ValidationCell'
 import ButtonLink from '../widgets/ButtonLink'
 import ButtonHrefLink from '../widgets/ButtonHrefLink'
 import PageTitle from '../widgets/PageTitle.vue'
@@ -201,17 +204,24 @@ export default {
     PageTitle,
     ProductionNameCell,
     SearchIcon,
-    ValidationTag
+    ValidationCell
   },
   computed: {
     ...mapGetters([
       'currentProduction',
-      'assetSearchValue'
+      'assetSearchValue',
+      'selectedTasks'
     ])
   },
   methods: {
     ...mapActions([
     ]),
+    onTaskSelected (task) {
+      this.$store.commit('ADD_SELECTED_TASK', task)
+    },
+    onTaskUnselected (task) {
+      this.$store.commit('REMOVE_SELECTED_TASK', task)
+    },
     onSearchChange (event) {
       const searchQuery = event.target.value
       this.$store.commit('SET_ASSET_SEARCH', searchQuery)

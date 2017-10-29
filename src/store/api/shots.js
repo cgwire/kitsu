@@ -30,9 +30,18 @@ export default {
   updateShot (shot, callback) {
     const data = {
       name: shot.name,
-      entity_type_id: shot.shot_type_id,
-      project_id: shot.project_id
+      parent_id: shot.sequence_id,
+      description: shot.description
     }
+    client.put(`/api/data/entities/${shot.id}`, data, callback)
+  },
+
+  deleteShot (shot, callback) {
+    client.del(`/api/data/shots/${shot.id}`, callback)
+  },
+
+  restoreShot (shot, callback) {
+    const data = { canceled: false }
     client.put(`/api/data/entities/${shot.id}`, data, callback)
   },
 
@@ -42,10 +51,6 @@ export default {
 
   updateCasting (shot, casting, callback) {
     client.put(`/api/data/shots/${shot.id}/casting`, casting, callback)
-  },
-
-  deleteShot (shot, callback) {
-    client.del(`/api/data/shots/${shot.id}`, callback)
   },
 
   postCsv (formData, callback) {

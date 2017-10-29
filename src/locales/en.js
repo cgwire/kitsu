@@ -60,9 +60,12 @@ export default {
     logout: 'Logout',
     save: 'Save',
     cancel: 'Cancel',
+    or: 'or',
     confirmation: 'Confirm',
     confirmation_and_stay: 'Confirm and stay',
+    clear_selection: 'Clear current selection',
     delete_text: 'Are you sure you want to remove {name} from your database?',
+    loading_error: 'An error occured while loading data.',
     csv: {
       import_file: 'Import',
       export_file: 'Export',
@@ -117,9 +120,11 @@ export default {
 
   tasks: {
     preview: 'Previews',
+    assign: 'Assign {nbSelectedTasks} tasks to:',
     no_preview: 'There is currently no preview for this task.',
     no_comment: 'There is currently no comment for this task.',
     validation: 'Validation',
+    clear_assignations: 'clear assignations',
     create_tasks: 'Add tasks',
     create_tasks_shot: 'Add tasks for current shots',
     create_tasks_shot_explaination: 'You are going to create a new task for each shot of current list for the given task type. Do you want to continue?',
@@ -133,7 +138,10 @@ export default {
     delete_error: 'An error occured while deleting task.',
     feedback: 'feedback',
     fields: {
-      task_type: 'Task Type'
+      production: 'Prod',
+      entity: 'Entity',
+      task_status: 'Status',
+      task_type: 'Type'
     }
   },
 
@@ -179,7 +187,9 @@ export default {
       description: 'Description'
     },
     delete_text: 'Are you sure you want to remove {name} from your database?',
-    delete_error: 'An error occured while deleting this asset. There are probably data linked to it. Are you sure this asset type has no task linked to it?'
+    delete_error: 'An error occured while deleting this asset. There are probably data linked to it. Are you sure this asset type has no task linked to it?',
+    restore_text: 'Are you sure you want to restore {name} into your database?',
+    restore_error: 'An error occured while restoring this asset.'
   },
 
   shots: {
@@ -189,6 +199,7 @@ export default {
     new_shot: 'Add a shot',
     edit_fail: 'Creation or edition failed, an error occured.',
     new_success: 'Shot {name} successfully created.',
+    edit_success: 'Shot {name} successfully edited.',
     fields: {
       name: 'Shot',
       episode: 'Episode',
@@ -199,7 +210,9 @@ export default {
       description: 'Description'
     },
     delete_text: 'Are you sure you want to remove {name} from your database?',
-    delete_error: 'An error occured while deleting this shot. There are probably data linked to it. Are you sure this shot has no task linked to it?'
+    delete_error: 'An error occured while deleting this shot. There are probably data linked to it. Are you sure this shot has no task linked to it?',
+    restore_text: 'Are you sure you want to restore {name} into your database?',
+    restore_error: 'An error occured while restoring this shot.'
   },
 
   breakdown: {

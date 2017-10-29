@@ -8,6 +8,22 @@
       :validation-columns="shotValidationColumns"
     ></shot-list>
 
+    <edit-shot-modal
+      :active="modals.isNewDisplayed"
+      :is-loading="loading.edit"
+      :is-loading-stay="loading.stay"
+      :is-error="editShot.isCreateError"
+      :is-success="editShot.isSuccess"
+      :cancel-route="{
+        name: 'shots',
+        params: {production_id: currentProduction.id}
+      }"
+      :shot-to-edit="shotToEdit"
+      @confirm="confirmEditShot"
+      @confirmAndStay="confirmNewShotStay"
+    >
+    </edit-shot-modal>
+
     <delete-modal
       :active="modals.isDeleteDisplayed"
       :is-loading="deleteShot.isLoading"
@@ -19,6 +35,20 @@
       :text="deleteText()"
       :error-text="$t('shots.delete_error')"
       @confirm="confirmDeleteShot"
+    >
+    </delete-modal>
+
+    <delete-modal
+      :active="modals.isRestoreDisplayed"
+      :is-loading="restoreShot.isLoading"
+      :is-error="restoreShot.isError"
+      :cancel-route="{
+        name: 'shots',
+        params: {production_id: currentProduction.id}
+      }"
+      :text="restoreText()"
+      :error-text="$t('shots.restore_error')"
+      @confirm="confirmRestoreShot"
     >
     </delete-modal>
 
@@ -59,6 +89,7 @@
 import { mapGetters, mapActions } from 'vuex'
 import ShotList from './lists/ShotList.vue'
 import DeleteModal from './widgets/DeleteModal'
+import EditShotModal from './modals/EditShotModal'
 import ImportModal from './modals/ImportModal'
 import CreateTasksModal from './modals/CreateTasksModal'
 import Filters from './widgets/Filters'
@@ -71,6 +102,7 @@ export default {
 
   components: {
     ShotList,
+    EditShotModal,
     DeleteModal,
     ImportModal,
     CreateTasksModal,
@@ -85,6 +117,7 @@ export default {
       modals: {
         isNewDisplayed: false,
         isDeleteDisplayed: false,
+        isRestoreDisplayed: false,
         isImportDisplayed: false,
         isCreateTasksDisplayed: false
       },
@@ -134,6 +167,7 @@ export default {
       'isShotsLoadingError',
       'editShot',
       'deleteShot',
+      'restoreShot',
       'getShot',
       'shotValidationColumns',
       'currentProduction',
@@ -221,6 +255,20 @@ export default {
       })
     },
 
+    confirmRestoreShot () {
+      this.$store.dispatch('restoreShot', {
+        shot: this.shotToRestore,
+        callback: (err) => {
+          if (!err) {
+            this.$router.push({
+              name: 'shots',
+              params: {production_id: this.currentProduction.id}
+            })
+          }
+        }
+      })
+    },
+
     confirmCreateTasks (form) {
       this.loading.creatingTasks = true
       this.errors.creatingTasks = false
@@ -264,6 +312,15 @@ export default {
       }
     },
 
+    restoreText () {
+      const shot = this.shotToRestore
+      if (shot) {
+        return this.$t('shots.restore_text', {name: shot.name})
+      } else {
+        return ''
+      }
+    },
+
     handleModalsDisplay () {
       const path = this.$store.state.route.path
       const shotId = this.$store.state.route.params.shot_id
@@ -279,6 +336,9 @@ export default {
       } else if (path.indexOf('delete') > 0) {
         this.shotToDelete = this.getShot(shotId)
         this.modals.isDeleteDisplayed = true
+      } else if (path.indexOf('restore') > 0) {
+        this.shotToRestore = this.getShot(shotId)
+        this.modals.isRestoreDisplayed = true
       } else if (path.indexOf('import') > 0) {
         this.modals.isImportDisplayed = true
       } else if (path.indexOf('create-tasks') > 0) {
@@ -286,6 +346,7 @@ export default {
       } else {
         this.modals = {
           isNewDisplayed: false,
+          isRestoreDisplayed: false,
           isDeleteDisplayed: false,
           isImportDisplayed: false,
           isCreateTasksDisplayed: false

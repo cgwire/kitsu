@@ -14,11 +14,20 @@ import {
   USER_CHANGE_PASSWORD_SUCCESS,
   USER_CHANGE_PASSWORD_UNVALID,
 
+  USER_LOAD_TODOS_START,
+  USER_LOAD_TODOS_END,
+  USER_LOAD_TODOS_ERROR,
+
   RESET_ALL
 } from '../mutation-types'
 
 const state = {
   user: null,
+
+  isTodosLoading: false,
+  isTodosLoadingError: false,
+  todos: [],
+
   isAuthenticated: false,
   isSaveProfileLoading: false,
   isSaveProfileLoadingError: false,
@@ -34,9 +43,13 @@ const state = {
 const getters = {
   user: state => state.user,
   isAuthenticated: state => state.isAuthenticated,
+  todos: state => state.todos,
 
   isSaveProfileLoading: state => state.isSaveProfileLoading,
   isSaveProfileLoadingError: state => state.isSaveProfileLoadingError,
+
+  isTodosLoading: state => state.isTodosLoading,
+  isTodosLoadingError: state => state.isTodosLoadingError,
 
   changePassword: state => state.changePassword
 }
@@ -73,6 +86,18 @@ const actions = {
         commit(USER_CHANGE_PASSWORD_ERROR)
       } else {
         commit(USER_CHANGE_PASSWORD_SUCCESS)
+      }
+      if (payload.callback) payload.callback()
+    })
+  },
+
+  loadTodos ({ commit, state }, payload) {
+    commit(USER_LOAD_TODOS_START)
+    peopleApi.loadTodos((err, tasks) => {
+      if (err) {
+        commit(USER_LOAD_TODOS_ERROR)
+      } else {
+        commit(USER_LOAD_TODOS_END, tasks)
       }
       if (payload.callback) payload.callback()
     })
@@ -141,11 +166,27 @@ const mutations = {
     }
   },
 
+  [USER_LOAD_TODOS_START] (state) {
+    state.isTodosLoadingError = false
+    state.isTodosLoading = true
+  },
+  [USER_LOAD_TODOS_END] (state, tasks) {
+    state.isTodosLoading = false
+    state.todos = tasks
+  },
+  [USER_LOAD_TODOS_ERROR] (state, tasks) {
+    state.isTodosLoadingError = true
+  },
+
   [RESET_ALL] (state) {
     state.user = null
     state.isAuthenticated = false
     state.isSaveProfileLoading = false
     state.isSaveProfileLoadingError = false
+
+    state.isTodosLoading = false
+    state.isTodosLoadingError = false
+    state.todos = []
 
     state.changePassword = {
       isLoading: false,

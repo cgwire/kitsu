@@ -1,6 +1,8 @@
 <template>
 <div class="field">
-  <label class="label">{{ label }}</label>
+  <label class="label" v-if="label.length > 0">
+    {{ label }}
+  </label>
   <p class="control">
     <span class="select">
       <select
@@ -33,7 +35,7 @@ export default {
       type: String
     },
     options: {
-      default: [],
+      default: () => [],
       type: Array
     },
     localeKeyPrefix: {

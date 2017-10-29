@@ -33,6 +33,11 @@ export default {
     client.del(`/api/data/assets/${asset.id}`, callback)
   },
 
+  restoreAsset (asset, callback) {
+    const data = { canceled: false }
+    client.put(`/api/data/entities/${asset.id}`, data, callback)
+  },
+
   postCsv (formData, callback) {
     client.post('/api/import/csv/assets', formData, callback)
   }

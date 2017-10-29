@@ -118,22 +118,31 @@
           <td class="description">
             {{ entry.description }}
           </td>
-          <td
-            class="validation"
-            :style="{
-              'border-left': '2px solid ' + column.color,
-            }"
+          <validation-cell
+            :key="column.name + '-' + entry.id"
+            :column="column"
+            :entity="entry"
+            @select="onTaskSelected"
+            @unselect="onTaskUnselected"
             v-for="column in validationColumns"
           >
-            <validation-tag
-              :task="entry.validations[column.name]"
-              v-if="entry.validations[column.name]"
-            >
-            </validation-tag>
-          </td>
+          </validation-cell>
           <row-actions
-            :entry-id="entry.id"
-            edit-route=""
+            :entry="entry"
+            :edit-route="{
+              name: 'edit-shots',
+              params: {
+                shot_id: entry.id,
+                production_id: currentProduction.id
+              }
+            }"
+            :restore-route="{
+              name: 'restore-shots',
+              params: {
+                shot_id: entry.id,
+                production_id: currentProduction.id
+              }
+            }"
             :delete-route="{
               name: 'delete-shots',
               params: {
@@ -141,7 +150,6 @@
                 production_id: currentProduction.id
               }
             }"
-            :hide-edit="true"
           >
           </row-actions>
         </tr>
@@ -166,7 +174,7 @@
 <script>
 import { mapGetters, mapActions } from 'vuex'
 import { SearchIcon, FilterIcon } from 'vue-feather-icons'
-import ValidationTag from '../widgets/ValidationTag'
+import ValidationCell from '../cells/ValidationCell'
 import RowActions from '../widgets/RowActions'
 import ButtonLink from '../widgets/ButtonLink'
 import ButtonHrefLink from '../widgets/ButtonHrefLink'
@@ -190,7 +198,7 @@ export default {
     PageTitle,
     RowActions,
     SearchIcon,
-    ValidationTag
+    ValidationCell
   },
   computed: {
     ...mapGetters([
@@ -206,6 +214,12 @@ export default {
     },
     onHeaderScroll (event, position) {
       this.$refs.tableWrapper.scrollLeft = position.scrollLeft
+    },
+    onTaskSelected (task) {
+      this.$store.commit('ADD_SELECTED_TASK', task)
+    },
+    onTaskUnselected (task) {
+      this.$store.commit('REMOVE_SELECTED_TASK', task)
     }
   }
 }

@@ -27,7 +27,7 @@
   <delete-modal
     :active="modals.isDeleteDisplayed"
     :is-loading="deleteAsset.isLoading"
-    :is-error="deleteAsset.isCreateError"
+    :is-error="deleteAsset.isDeleteError"
     :cancel-route="{
       name: 'assets',
       params: {production_id: currentProduction.id}
@@ -35,6 +35,20 @@
     :text="deleteText()"
     :error-text="$t('assets.delete_error')"
     @confirm="confirmDeleteAsset"
+  >
+  </delete-modal>
+
+  <delete-modal
+    :active="modals.isRestoreDisplayed"
+    :is-loading="restoreAsset.isLoading"
+    :is-error="restoreAsset.isRestoreError"
+    :cancel-route="{
+      name: 'assets',
+      params: {production_id: currentProduction.id}
+    }"
+    :text="restoreText()"
+    :error-text="$t('assets.restore_error')"
+    @confirm="confirmRestoreAsset"
   >
   </delete-modal>
 
@@ -117,6 +131,7 @@ export default {
         importing: false
       },
       assetToDelete: null,
+      assetToRestore: null,
       assetToEdit: null,
       choices: [],
       assetFilters: [{
@@ -148,6 +163,7 @@ export default {
       'isAssetsLoadingError',
       'editAsset',
       'deleteAsset',
+      'restoreAsset',
       'getAsset',
       'assetValidationColumns',
       'currentProduction',
@@ -227,6 +243,15 @@ export default {
       })
     },
 
+    confirmRestoreAsset () {
+      this.$store.dispatch('restoreAsset', {
+        asset: this.assetToRestore,
+        callback: (err) => {
+          if (!err) this.modals.isRestoreDisplayed = false
+        }
+      })
+    },
+
     confirmCreateTasks (form) {
       this.loading.creatingTasks = true
       this.errors.creatingTasks = false
@@ -270,6 +295,15 @@ export default {
       }
     },
 
+    restoreText () {
+      const asset = this.assetToRestore
+      if (asset) {
+        return this.$t('assets.restore_text', {name: asset.name})
+      } else {
+        return ''
+      }
+    },
+
     handleModalsDisplay () {
       const path = this.$store.state.route.path
       const assetId = this.$store.state.route.params.asset_id
@@ -287,6 +321,9 @@ export default {
       } else if (path.indexOf('delete') > 0) {
         this.assetToDelete = this.getAsset(assetId)
         this.modals.isDeleteDisplayed = true
+      } else if (path.indexOf('restore') > 0) {
+        this.assetToRestore = this.getAsset(assetId)
+        this.modals.isRestoreDisplayed = true
       } else if (path.indexOf('import') > 0) {
         this.modals.isImportDisplayed = true
       } else if (path.indexOf('create-tasks') > 0) {
@@ -295,6 +332,7 @@ export default {
         this.modals = {
           isNewDisplayed: false,
           isDeleteDisplayed: false,
+          isRestoreDisplayed: false,
           isImportDisplayed: false,
           isCreateTasksDisplayed: false
         }

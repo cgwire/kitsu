@@ -15,7 +15,7 @@ export default {
   name: 'title',
   props: {
     task: {
-      default: 'button',
+      default: () => {},
       type: Object
     }
   },

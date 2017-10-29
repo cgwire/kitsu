@@ -30,6 +30,7 @@ import {
 
 const state = {
   people: [],
+  personMap: {},
   isPeopleLoading: false,
   isPeopleLoadingError: true,
 
@@ -52,6 +53,7 @@ const state = {
 
 const getters = {
   people: state => state.people,
+  personMap: state => state.personMap,
   isPeopleLoading: state => state.isPeopleLoading,
   isPeopleLoadingError: state => state.isPeopleLoadingError,
 
@@ -75,7 +77,15 @@ const getters = {
     return state.people.find(
       (taskStatus) => taskStatus.id === id
     )
-  }
+  },
+  getPersonOptions: state => state.people.map(
+    (person) => {
+      return {
+        label: `${person.first_name} ${person.last_name}`,
+        value: person.id
+      }
+    }
+  )
 }
 
 const sortPeople = (people) => {
@@ -185,6 +195,7 @@ const mutations = {
   [LOAD_PEOPLE_START] (state) {
     state.isPeopleLoading = true
     state.isPeopleLoadingError = false
+    state.personMap = {}
   },
 
   [LOAD_PEOPLE_ERROR] (state) {
@@ -197,6 +208,7 @@ const mutations = {
     state.isPeopleLoadingError = false
     state.people = sortPeople(people)
     state.people.forEach((person) => {
+      state.personMap[person.id] = person
       person.name = `${person.first_name} ${person.last_name}`
     })
   },
@@ -212,6 +224,7 @@ const mutations = {
       (person) => person.id === state.personToDelete.id
     )
     state.people.splice(personToDeleteIndex, 1)
+    delete state.personMap[state.personToDelete.id]
     state.personToDelete = undefined
   },
 
@@ -254,6 +267,7 @@ const mutations = {
       state.people[personToEditIndex] = state.personToEdit
     } else {
       state.people.push(state.personToEdit)
+      state.personMap[state.personToEdit.id] = state.personToEdit
       sortPeople(state.people)
     }
     state.personToEdit = {}
@@ -336,6 +350,7 @@ const mutations = {
     state.personCsvFormData = null
 
     state.people = []
+    state.personMap = {}
   }
 }
 

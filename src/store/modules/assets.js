@@ -17,6 +17,10 @@ import {
   DELETE_ASSET_ERROR,
   DELETE_ASSET_END,
 
+  RESTORE_ASSET_START,
+  RESTORE_ASSET_ERROR,
+  RESTORE_ASSET_END,
+
   LOAD_ASSET_TYPES_START,
   LOAD_ASSET_TYPES_ERROR,
   LOAD_ASSET_TYPES_END,
@@ -58,6 +62,11 @@ const state = {
   deleteAsset: {
     isLoading: false,
     isError: false
+  },
+
+  restoreAsset: {
+    isLoading: false,
+    isError: false
   }
 }
 
@@ -79,7 +88,8 @@ const getters = {
 
     for (let asset of state.displayedAssets) {
       if (
-        previousAsset && asset.asset_type_name !== previousAsset.asset_type_name
+        previousAsset &&
+        asset.asset_type_name !== previousAsset.asset_type_name
       ) {
         assetsByType.push(assetTypeAssets.slice(0))
         assetTypeAssets = []
@@ -94,6 +104,7 @@ const getters = {
 
   editAsset: state => state.editAsset,
   deleteAsset: state => state.deleteAsset,
+  restoreAsset: state => state.restoreAsset,
   assetCreated: state => state.assetCreated,
 
   assetsCsvFormData: state => state.assetsCsvFormData,
@@ -163,6 +174,19 @@ const actions = {
         commit(DELETE_ASSET_ERROR)
       } else {
         commit(DELETE_ASSET_END, asset)
+      }
+      if (payload.callback) payload.callback(err)
+    })
+  },
+
+  restoreAsset ({ commit, state }, payload) {
+    commit(RESTORE_ASSET_START)
+    const asset = payload.asset
+    assetsApi.restoreAsset(asset, (err) => {
+      if (err) {
+        commit(RESTORE_ASSET_ERROR)
+      } else {
+        commit(RESTORE_ASSET_END, asset)
       }
       if (payload.callback) payload.callback(err)
     })
@@ -304,6 +328,7 @@ const mutations = {
       asset.canceled = true
     } else {
       state.assets.splice(assetToDeleteIndex, 1)
+      state.assetMap[assetToDelete.id] = undefined
     }
 
     state.deleteAsset = {
@@ -311,7 +336,28 @@ const mutations = {
       isError: false
     }
     state.assetIndex = buildNameIndex(state.assets)
-    state.assetMap[assetToDelete.id] = undefined
+  },
+
+  [RESTORE_ASSET_START] (state) {
+    state.restoreAsset = {
+      isLoading: true,
+      isError: false
+    }
+  },
+  [RESTORE_ASSET_ERROR] (state) {
+    state.restoreAsset = {
+      isLoading: false,
+      isError: true
+    }
+  },
+  [RESTORE_ASSET_END] (state, assetToRestore) {
+    const asset = state.assetMap[assetToRestore.id]
+    asset.canceled = false
+    state.restoreAsset = {
+      isLoading: false,
+      isError: false
+    }
+    state.assetIndex = buildNameIndex(state.assets)
   },
 
   [DELETE_TASK_END] (state, task) {
@@ -359,7 +405,13 @@ const mutations = {
       isLoading: false,
       isError: false
     }
+
     state.deleteAsset = {
+      isLoading: false,
+      isError: false
+    }
+
+    state.restoreAsset = {
       isLoading: false,
       isError: false
     }

@@ -1,6 +1,7 @@
 <template>
   <div class="main">
     <topbar></topbar>
+    <action-topbar></action-topbar>
     <sidebar></sidebar>
     <router-view></router-view>
   </div>
@@ -8,11 +9,13 @@
 
 <script>
 import Topbar from './Topbar'
+import ActionTopbar from './ActionTopbar'
 import Sidebar from './Sidebar'
 
 export default {
   name: 'main',
   components: {
+    ActionTopbar,
     Topbar,
     Sidebar
   }
