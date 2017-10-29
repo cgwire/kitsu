@@ -60,9 +60,12 @@ export default {
     logout: 'Logout',
     save: 'Save',
     cancel: 'Cancel',
+    or: 'or',
     confirmation: 'Confirm',
     confirmation_and_stay: 'Confirm and stay',
+    clear_selection: 'Clear current selection',
     delete_text: 'Are you sure you want to remove {name} from your database?',
+    loading_error: 'An error occured while loading data.',
     csv: {
       import_file: 'Import',
       export_file: 'Export',
@@ -117,9 +120,11 @@ export default {
 
   tasks: {
     preview: 'Previews',
+    assign: 'Assign {nbSelectedTasks} tasks to:',
     no_preview: 'There is currently no preview for this task.',
     no_comment: 'There is currently no comment for this task.',
     validation: 'Validation',
+    clear_assignations: 'clear assignations',
     create_tasks: 'Add tasks',
     create_tasks_shot: 'Add tasks for current shots',
     create_tasks_shot_explaination: 'You are going to create a new task for each shot of current list for the given task type. Do you want to continue?',
@@ -133,7 +138,10 @@ export default {
     delete_error: 'An error occured while deleting task.',
     feedback: 'feedback',
     fields: {
-      task_type: 'Task Type'
+      production: 'Prod',
+      entity: 'Entity',
+      task_status: 'Status',
+      task_type: 'Type'
     }
   },
 
