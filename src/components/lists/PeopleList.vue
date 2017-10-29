@@ -1,45 +1,52 @@
 <template>
 <div class="data-list">
-  <table class="table">
-    <thead>
-      <tr>
-        <th class="name">
-        {{ $t("people.list.name") }}
-        </th>
-        <th class="email">
-        {{ $t("people.list.email") }}
-        </th>
-        <th class="phone">
-        {{ $t("people.list.phone") }}
-        </th>
-        <th class="role">
-        {{ $t("people.list.role") }}
-        </th>
-        <th class="actions"></th>
-      </tr>
-    </thead>
+  <div style="overflow: hidden">
+    <table class="table table-header" ref="headerWrapper">
+      <thead>
+        <tr>
+          <th class="name">
+          {{ $t("people.list.name") }}
+          </th>
+          <th class="email">
+          {{ $t("people.list.email") }}
+          </th>
+          <th class="phone">
+          {{ $t("people.list.phone") }}
+          </th>
+          <th class="role">
+          {{ $t("people.list.role") }}
+          </th>
+          <th class="actions"></th>
+        </tr>
+      </thead>
+    </table>
+  </div>
 
-    <tbody>
-      <tr v-for="entry in entries">
-        <people-name-cell class="name" v-bind:entry="entry"></people-name-cell>
-        <td class="email">{{ entry.email }}</td>
-        <td class="phone">{{ entry.phone }}</td>
-        <td class="role">{{ $t('people.role.' + entry.role) }}</td>
-        <row-actions
-          :entry-id="entry.id"
-          :edit-route="{
-            name: 'edit-person',
-            params: {person_id: entry.id}
-          }"
-          :delete-route="{
-            name: 'delete-person',
-            params: {person_id: entry.id}
-          }"
-        >
-        </row-actions>
-       </tr>
-    </tbody>
-  </table>
+  <div class="table-body" v-scroll="onBodyScroll">
+    <table class="table">
+      <tbody>
+        <tr v-for="entry in entries">
+          <people-name-cell class="name" v-bind:entry="entry"></people-name-cell>
+          <td class="email">{{ entry.email }}</td>
+          <td class="phone">{{ entry.phone }}</td>
+          <td class="role">{{ $t('people.role.' + entry.role) }}</td>
+          <row-actions
+            :entry-id="entry.id"
+            :edit-route="{
+              name: 'edit-person',
+              params: {person_id: entry.id}
+            }"
+            :delete-route="{
+              name: 'delete-person',
+              params: {person_id: entry.id}
+            }"
+          >
+          </row-actions>
+         </tr>
+      </tbody>
+    </table>
+  </div>
+
   <div class="has-text-centered" v-if="isLoading">
     <img src="../../assets/spinner.svg">
   </div>
@@ -83,6 +90,9 @@ export default {
       } else {
         return ''
       }
+    },
+    onBodyScroll (event, position) {
+      this.$refs.headerWrapper.style.left = `-${position.scrollLeft}px`
     }
   }
 }
@@ -109,8 +119,6 @@ export default {
 }
 
 .data-list {
-  flex: 1 1 auto;
-  height: 0px;
-  overflow-y: auto;
+  margin-top: 2em;
 }
 </style>

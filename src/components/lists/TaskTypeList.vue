@@ -1,34 +1,41 @@
 <template>
 <div class="data-list">
-  <table class="table">
-    <thead>
-      <tr>
-        <th class="name">{{ $t('task_types.fields.name') }}</th>
-        <th class="priority">{{ $t('task_types.fields.priority') }}</th>
-        <th class="dedicated">{{ $t('task_types.fields.dedicated_to') }}</th>
-        <th class="actions"></th>
-      </tr>
-    </thead>
-    <tbody>
-      <tr v-for="entry in entries">
-        <task-type-name class="name" :entry="entry"></task-type-name>
-        <td class="priority">{{ entry.priority }}</td>
-        <td class="dedicated">{{ renderForShots(entry) }}</td>
-        <row-actions
-          :entry-id="entry.id"
-          :edit-route="{
-            name: 'edit-production',
-            params: {production_id: entry.id}
-          }"
-          :delete-route="{
-            name: 'delete-production',
-            params: {production_id: entry.id}
-          }"
-        >
-        </row-actions>
-      </tr>
-    </tbody>
-  </table>
+  <div style="overflow: hidden">
+    <table class="table table-header" ref="headerWrapper">
+      <thead>
+        <tr>
+          <th class="name">{{ $t('task_types.fields.name') }}</th>
+          <th class="priority">{{ $t('task_types.fields.priority') }}</th>
+          <th class="dedicated">{{ $t('task_types.fields.dedicated_to') }}</th>
+          <th class="actions"></th>
+        </tr>
+      </thead>
+    </table>
+  </div>
+
+  <div class="table-body" v-scroll="onBodyScroll">
+    <table class="table">
+      <tbody>
+        <tr v-for="entry in entries">
+          <task-type-name class="name" :entry="entry"></task-type-name>
+          <td class="priority">{{ entry.priority }}</td>
+          <td class="dedicated">{{ renderForShots(entry) }}</td>
+          <row-actions
+            :entry-id="entry.id"
+            :edit-route="{
+              name: 'edit-production',
+              params: {production_id: entry.id}
+            }"
+            :delete-route="{
+              name: 'delete-production',
+              params: {production_id: entry.id}
+            }"
+          >
+          </row-actions>
+        </tr>
+      </tbody>
+    </table>
+  </div>
 
   <div class="has-text-centered" v-if="isLoading">
     <img src="../../assets/spinner.svg">
@@ -76,6 +83,9 @@ export default {
       } else {
         return this.$tc('assets.title')
       }
+    },
+    onBodyScroll (event, position) {
+      this.$refs.headerWrapper.style.left = `-${position.scrollLeft}px`
     }
   }
 }

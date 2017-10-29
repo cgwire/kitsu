@@ -1,47 +1,52 @@
 <template>
 <div class="data-list">
-  <table class="table">
-    <thead>
-      <tr>
-        <th class="project">&nbsp;</th>
-        <th class="name">{{ $t('productions.fields.name') }}</th>
-        <th class="status">{{ $t('productions.fields.status') }}</th>
-        <th class="actions"></th>
-      </tr>
-    </thead>
-    <tbody>
-      <tr v-for="entry in entries">
-        <production-name-cell
-          class="project"
-          :only-avatar="true"
-          :entry="entry"
-        >
-        </production-name-cell>
-        <td class="name">
-          {{ entry.name }}
-        </td>
-        <td class="td-status">
-          {{ $t(getStatusLocale(entry.project_status_name)) }}
-        </td>
-        <row-actions
-          :entry-id="entry.id"
-          :edit-route="{
-            name: 'edit-production',
-            params: {production_id: entry.id}
-          }"
-          :delete-route="{
-            name: 'delete-production',
-            params: {production_id: entry.id}
-          }"
-        >
-        </row-actions>
-      </tr>
-    </tbody>
-  </table>
-
-  <div class="has-text-centered" v-if="isLoading">
-    <img src="../../assets/spinner.svg">
+  <div style="overflow: hidden">
+    <table class="table table-header" ref="headerWrapper">
+      <thead>
+        <tr>
+          <th class="project">&nbsp;</th>
+          <th class="name">{{ $t('productions.fields.name') }}</th>
+          <th class="status">{{ $t('productions.fields.status') }}</th>
+          <th class="actions"></th>
+        </tr>
+      </thead>
+    </table>
   </div>
+
+  <div class="table-body" v-scroll="onBodyScroll">
+    <table class="table">
+      <tbody>
+        <tr v-for="entry in entries">
+          <production-name-cell
+            class="project"
+            :only-avatar="true"
+            :entry="entry"
+          >
+          </production-name-cell>
+          <td class="name">
+            {{ entry.name }}
+          </td>
+          <td class="td-status">
+            {{ $t(getStatusLocale(entry.project_status_name)) }}
+          </td>
+          <row-actions
+            :entry-id="entry.id"
+            :edit-route="{
+              name: 'edit-production',
+              params: {production_id: entry.id}
+            }"
+            :delete-route="{
+              name: 'delete-production',
+              params: {production_id: entry.id}
+            }"
+          >
+          </row-actions>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <spinner v-if="isLoading"></spinner>
   <div class="has-text-centered" v-if="isError">
     <span class="tag is-danger">An error occured while loading data</span>
   </div>
@@ -57,6 +62,7 @@
 import { mapGetters, mapActions } from 'vuex'
 import ProductionNameCell from '../cells/ProductionNameCell'
 import RowActions from '../widgets/RowActions'
+import Spinner from '../widgets/Spinner'
 
 export default {
   name: 'production-list',
@@ -70,7 +76,8 @@ export default {
   },
   components: {
     ProductionNameCell,
-    RowActions
+    RowActions,
+    Spinner
   },
   computed: {
     ...mapGetters([
@@ -87,6 +94,9 @@ export default {
         Closed: 'productions.status.closed'
       }
       return statusMap[originalStatus]
+    },
+    onBodyScroll (event, position) {
+      this.$refs.headerWrapper.style.left = `-${position.scrollLeft}px`
     }
   }
 }
