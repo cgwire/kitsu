@@ -70,6 +70,9 @@ class AssetServiceTestCase(ApiDBTestCase):
         self.assertEqual(
             assets[1]["tasks"][0]["task_type_name"], "Shaders"
         )
+        self.assertEqual(
+            assets[1]["tasks"][0]["assignees"][0], str(self.person.id)
+        )
 
     def test_get_asset(self):
         asset = assets_service.get_asset(self.entity.id)

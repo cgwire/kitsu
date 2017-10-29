@@ -28,6 +28,10 @@ from zou.app.services import (
 )
 
 
+def get_done_status():
+    return get_or_create_status(app.config["DONE_TASK_STATUS"], "done")
+
+
 def get_wip_status():
     return get_or_create_status(app.config["WIP_TASK_STATUS"], "wip")
 
@@ -150,6 +154,12 @@ def delete_task(task):
 def remove_task(task_id):
     task = Task.get(task_id)
     task.delete()
+
+
+def clear_assignation(task_id):
+    task = get_task(task_id)
+    task.update({"assignees": []})
+    return task.serialize()
 
 
 def assign_task(task, person):

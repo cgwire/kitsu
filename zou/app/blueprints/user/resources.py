@@ -125,3 +125,10 @@ class ShotTasksResource(Resource):
         except ShotNotFoundException:
             abort(404)
         return tasks
+
+
+class TodosResource(Resource):
+
+    @jwt_required
+    def get(self):
+        return user_service.get_todos()

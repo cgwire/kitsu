@@ -309,6 +309,72 @@ class ToReviewResource(Resource):
         )
 
 
+class ClearAssignationResource(Resource):
+
+    @jwt_required
+    def put(self):
+        (task_ids) = self.get_arguments()
+
+        print(task_ids)
+        for task_id in task_ids:
+            try:
+                print(task_id)
+                tasks_service.clear_assignation(task_id)
+            except TaskNotFoundException:
+                pass
+        return task_ids
+
+    def get_arguments(self):
+        parser = reqparse.RequestParser()
+        parser.add_argument(
+            "task_ids",
+            help="Tasks list required.",
+            required=True,
+            action="appened"
+        )
+        args = parser.parse_args()
+        return (
+            args["task_ids"]
+        )
+
+
+class TasksAssignResource(Resource):
+
+    @jwt_required
+    def put(self, person_id):
+        (task_ids) = self.get_arguments()
+
+        tasks = []
+        for task_id in task_ids:
+            try:
+                task = self.assign_task(task_id, person_id)
+                tasks.append(task.serialize())
+            except TaskNotFoundException:
+                pass
+            except PersonNotFoundException:
+                return {"error": "Assignee doesn't exist in database."}, 400
+
+        return tasks
+
+    def get_arguments(self):
+        parser = reqparse.RequestParser()
+        parser.add_argument(
+            "task_ids",
+            help="Tasks list required.",
+            required=True,
+            action="append"
+        )
+        args = parser.parse_args()
+        return (
+            args["task_ids"]
+        )
+
+    def assign_task(self, task_id, person_id):
+        task = tasks_service.get_task(task_id)
+        person = persons_service.get_person(person_id)
+        return tasks_service.assign_task(task, person)
+
+
 class TaskAssignResource(Resource):
 
     @jwt_required

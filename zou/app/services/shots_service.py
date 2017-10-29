@@ -162,7 +162,9 @@ def get_shots_and_tasks(criterions={}):
             "task_status_color": task_status.color,
             "task_type_name": task_type.name,
             "task_type_color": task_type.color,
-            "task_type_priority": task_type.priority
+            "task_type_priority": task_type.priority,
+            "assignees": fields.serialize_value(task.assignees)
+
         })
         task_map[shot_id].append(task_dict)
 
