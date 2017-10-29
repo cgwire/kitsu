@@ -22,7 +22,7 @@
       :person="personMap[personId]"
       :size="20"
       v-if="nbSelectedTasks > 0"
-      v-for="personId in task.assignees"
+      v-for="personId in assignees"
     >
     </people-avatar>
   </div>
@@ -57,6 +57,13 @@ export default {
     ]),
     task () {
       return this.entity.validations[this.column.name]
+    },
+    assignees () {
+      if (this.task) {
+        return this.task.assignees
+      } else {
+        return []
+      }
     }
   },
   methods: {

@@ -7,7 +7,7 @@
       <div class="level-left">
         <div class="level-item assignation">
           <chevron-right-icon></chevron-right-icon>
-          Assign {{ nbSelectedTasks }} tasks to:
+          {{ $t('tasks.assign', {nbSelectedTasks}) }}
         </div>
         <div class="level-item">
           <combobox
@@ -24,14 +24,14 @@
             class="button is-success confirm-button"
             @click="confirmAssign"
           >
-            confirm
+          {{ $t('main.confirmation') }}
           </button>
-          or
+          {{ $t('main.or') }}
           <button
             class="button is-link clear-assignation-button"
             @click="clearAssignation"
           >
-            clear all assignations
+            {{ $t('tasks.clear_assignations') }}
           </button>
         </div>
       </div>
@@ -42,7 +42,7 @@
         >
           <x-icon>
           </x-icon>
-          clear selection
+          {{ $t('main.clear_selection') }}
         </div>
       </div>
     </div>

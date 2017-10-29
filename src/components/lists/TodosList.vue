@@ -5,16 +5,16 @@
     <thead>
       <tr>
         <th class="production">
-          {{ $t("tasks.fields.production") }}
+          {{ $t('tasks.fields.production') }}
         </th>
         <th class="name">
-          {{ $t("tasks.fields.entity") }}
+          {{ $t('tasks.fields.entity') }}
         </th>
         <th class="type">
-          {{ $t("tasks.fields.task_type") }}
+          {{ $t('tasks.fields.task_type') }}
         </th>
         <th class="status">
-          {{ $t("tasks.fields.task_status") }}
+          {{ $t('tasks.fields.task_status') }}
         </th>
         <th class="actions">
         </th>
@@ -60,7 +60,7 @@
   </spinner>
   <div class="has-text-centered" v-if="isError">
     <span class="tag is-danger">
-      An error occured while loading data
+      {{ $t('main.loading_error') }}
     </span>
   </div>
   <p class="has-text-centered footer-info" v-if="!isLoading">
