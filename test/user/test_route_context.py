@@ -1,6 +1,7 @@
 from test.base import ApiDBTestCase
 
 from zou.app.models.task import Task
+from zou.app.services import tasks_service
 
 
 class UserContextRoutesTestCase(ApiDBTestCase):
@@ -152,3 +153,30 @@ class UserContextRoutesTestCase(ApiDBTestCase):
         task.save()
         projects = self.get("data/user/projects/open")
         self.assertEquals(len(projects), 0)
+
+    def test_get_todos(self):
+        self.generate_fixture_shot_task()
+        task_id = self.task.id
+        shot_task_id = self.shot_task.id
+
+        path = "data/user/tasks/"
+        tasks = self.get(path)
+        self.assertEquals(len(tasks), 0)
+
+        self.assign_user(task_id)
+        self.assign_user(shot_task_id)
+
+        path = "data/user/tasks/"
+        tasks = self.get(path)
+        self.assertEquals(len(tasks), 2)
+
+        task = Task.get(shot_task_id)
+        task.task_status_id = tasks_service.get_done_status().id
+        task.save()
+
+        self.assign_user(task_id)
+        self.assign_user(shot_task_id)
+
+        path = "data/user/tasks/"
+        tasks = self.get(path)
+        self.assertEquals(len(tasks), 1)

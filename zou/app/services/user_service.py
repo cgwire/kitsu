@@ -6,8 +6,9 @@ from zou.app.models.project import Project
 from zou.app.models.project_status import ProjectStatus
 from zou.app.models.task import Task
 from zou.app.models.task_type import TaskType
+from zou.app.models.task_status import TaskStatus
 
-from zou.app.services import persons_service, shots_service
+from zou.app.services import persons_service, shots_service, tasks_service
 from zou.app.utils import fields
 
 
@@ -29,6 +30,58 @@ def asset_type_filter():
         sequence_type.id,
         episode_type.id,
     ])
+
+
+def get_todos():
+    done_status = tasks_service.get_done_status()
+
+    Sequence = aliased(Entity, name='sequence')
+    query = Task.query \
+        .join(Project, ProjectStatus, TaskType, TaskStatus) \
+        .join(Entity, Entity.id == Task.entity_id) \
+        .join(EntityType, EntityType.id == Entity.entity_type_id) \
+        .outerjoin(Sequence, Sequence.id == Entity.parent_id) \
+        .filter(assignee_filter()) \
+        .filter(open_project_filter()) \
+        .filter(Task.task_status_id != done_status.id) \
+        .add_columns(
+            Project.name,
+            Entity.name,
+            EntityType.name,
+            Sequence.name,
+            TaskType.name,
+            TaskStatus.name,
+            TaskType.color,
+            TaskStatus.color,
+            TaskStatus.short_name
+        )
+
+    tasks = []
+    for (
+        task,
+        project_name,
+        entity_name,
+        entity_type_name,
+        sequence_name,
+        task_type_name,
+        task_status_name,
+        task_type_color,
+        task_status_color,
+        task_status_short_name
+    ) in query.all():
+        task_dict = task.serialize()
+        task_dict["project_name"] = project_name
+        task_dict["entity_name"] = entity_name
+        task_dict["entity_type_name"] = entity_type_name
+        task_dict["sequence_name"] = sequence_name
+        task_dict["task_type_name"] = task_type_name
+        task_dict["task_status_name"] = task_status_name
+        task_dict["task_type_color"] = task_type_color
+        task_dict["task_status_color"] = task_status_color
+        task_dict["task_status_short_name"] = task_status_short_name
+        tasks.append(task_dict)
+
+    return tasks
 
 
 def get_entity_tasks(entity_id):
