@@ -1,5 +1,71 @@
 <template>
-<div class="assets page">
+<div class="assets page fixed-page">
+
+  <div class="asset-list-header">
+    <div class="level header-title">
+      <div class="level-left">
+        <div class="level-item">
+          <page-title :text="$t('assets.title')"></page-title>
+        </div>
+      </div>
+
+      <div class="level-right">
+        <div class="level-item">
+          <button-link
+            class="level-item"
+            :text="$t('main.csv.import_file')"
+            icon="upload"
+            :path="{
+              name: 'import-assets',
+              params: {production_id: currentProduction.id}
+            }"
+          >
+          </button-link>
+          <button-href-link
+            class="level-item"
+            :text="$t('main.csv.export_file')"
+            icon="download"
+            :path="'/api/export/csv/assets.csv?project_id=' + currentProduction.id"
+          >
+          </button-href-link>
+          <button-link
+            class="level-item"
+            :text="$t('assets.new_asset')"
+            icon="plus"
+            :path="{
+              name: 'new-asset',
+              params: {production_id: currentProduction.id}
+            }"
+          >
+          </button-link>
+        </div>
+      </div>
+    </div>
+
+    <div class="filters-area">
+      <div class="level">
+        <div class="level-right">
+          <div class="level-item">
+            <search-icon></search-icon>
+          </div>
+          <div class="level-item">
+            <input
+              class="input search-input"
+              type="text"
+              @input="onSearchChange"
+              v-focus
+            />
+          </div>
+          <!--div class="level-item">
+            <filter-icon></filter-icon>
+          </div>
+          <div class="level-item">
+            No filter set.
+          </div-->
+        </div>
+      </div>
+    </div>
+  </div>
 
   <asset-list
     :entries="displayedAssets"
@@ -87,6 +153,8 @@
 
 <script>
 import { mapGetters, mapActions } from 'vuex'
+import { SearchIcon, FilterIcon } from 'vue-feather-icons'
+
 import AssetList from './lists/AssetList.vue'
 import EditAssetModal from './modals/EditAssetModal'
 import DeleteModal from './widgets/DeleteModal'
@@ -104,12 +172,14 @@ export default {
     AssetList,
     CreateTasksModal,
     DeleteModal,
+    FilterIcon,
     ImportModal,
     EditAssetModal,
     Filters,
     ButtonLink,
     ButtonHrefLink,
-    PageTitle
+    PageTitle,
+    SearchIcon
   },
 
   data () {
@@ -360,6 +430,11 @@ export default {
           this.errors.importing = true
         }
       })
+    },
+
+    onSearchChange (event) {
+      const searchQuery = event.target.value
+      this.$store.commit('SET_ASSET_SEARCH', searchQuery)
     }
   },
 
@@ -381,12 +456,7 @@ export default {
 </script>
 
 <style scoped>
-.assets.page {
-  margin: 0;
-  display: flex;
-  flex-direction: row;
-  justify-content: flex-start;
-  flex-wrap: wrap;
-  padding-top: 60px;
+.data-list {
+  min-height: 200px;
 }
 </style>
