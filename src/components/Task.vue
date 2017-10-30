@@ -1,5 +1,5 @@
 <template>
-  <div class="page">
+  <div class="page fixed-page">
     <h1 class="title">
        <div class="level">
          <div class="level-left">
@@ -44,8 +44,8 @@
        </div>
     </h1>
 
-    <div class="columns">
-      <div class="column">
+    <div class="column-container">
+      <div class="task-column">
         <h2 class="subtitle">
           {{ $t('tasks.preview') }}
         </h2>
@@ -71,7 +71,7 @@
 			</div>
 
 
-      <div class="column">
+      <div class="task-column">
         <h2 class="subtitle validation-title">
           {{ $t('tasks.validation') }}
         </h2>
@@ -504,5 +504,16 @@ video {
 .comments,
 .no-comment {
   margin-top: 2em;
+}
+
+.column-container {
+  display: flex;
+  flex-direction: row;
+}
+
+.task-column {
+  width: 50%;
+  padding: 1em;
+  overflow-y: auto;
 }
 </style>
