@@ -21,6 +21,7 @@
       key="task.id + '-' + personId"
       :person="personMap[personId]"
       :size="20"
+      :font-size="10"
       v-if="nbSelectedTasks > 0"
       v-for="personId in assignees"
     >
@@ -114,6 +115,5 @@ td.selected.validation:hover {
 
 .person-avatar {
   margin-left: 3px;
-  font-size: 10px;
 }
 </style>
