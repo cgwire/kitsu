@@ -1,5 +1,5 @@
 <template>
-  <div class="asset-types page">
+  <div class="asset-types page fixed-page">
     <div class="asset-types-list">
       <div class="level">
         <div class="level-left">
@@ -17,13 +17,13 @@
           </div>
         </div>
       </div>
-
-      <asset-type-list
-        :entries="assetTypes"
-        :is-loading="isAssetTypesLoading"
-        :is-error="isAssetTypesLoadingError"
-      ></asset-type-list>
     </div>
+
+    <asset-type-list
+      :entries="assetTypes"
+      :is-loading="isAssetTypesLoading"
+      :is-error="isAssetTypesLoadingError"
+    ></asset-type-list>
 
     <edit-asset-type-modal
       :active="modals.isNewDisplayed"

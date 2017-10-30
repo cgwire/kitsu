@@ -1,5 +1,5 @@
 <template>
-  <div class="productions page">
+  <div class="productions page fixed-page">
     <div class="productions-list">
       <div class="level">
         <div class="level-left">
@@ -17,13 +17,13 @@
           </div>
         </div>
       </div>
-
-      <production-list
-        :entries="productions"
-        :is-loading="isProductionsLoading"
-        :is-error="isProductionsLoadingError"
-      ></production-list>
     </div>
+
+    <production-list
+      :entries="productions"
+      :is-loading="isProductionsLoading"
+      :is-error="isProductionsLoadingError"
+    ></production-list>
 
     <edit-production-modal
       :active="modals.isNewDisplayed"

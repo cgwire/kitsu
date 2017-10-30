@@ -1,5 +1,5 @@
 <template>
-  <div class="people page">
+  <div class="people page fixed-page">
     <div class="people-list">
       <div class="level">
         <div class="level-left">
@@ -32,15 +32,13 @@
           </div>
         </div>
       </div>
-
-      <div>
-        <people-list
-          :entries="people"
-          :is-loading="isPeopleLoading"
-          :is-error="isPeopleLoadingError"
-        ></people-list>
-      </div>
     </div>
+
+    <people-list
+      :entries="people"
+      :is-loading="isPeopleLoading"
+      :is-error="isPeopleLoadingError"
+    ></people-list>
 
     <import-modal
       :active="isImportPeopleModalShown"
@@ -268,17 +266,6 @@ export default {
 </script>
 
 <style scoped>
-.people.page {
-  display: flex;
-}
-
-.people-list {
-  display: flex;
-  flex: 1;
-  margin-top: 1em;
-  flex-direction: column;
-}
-
 .name {
   width: 230px;
   min-width: 230px;
@@ -294,11 +281,9 @@ export default {
 .skills {
   width: 250px;
 }
+
 .actions {
   width: 100px;
   min-width: 100px;
-}
-.table-header {
-  margin-bottom: 0px;
 }
 </style>

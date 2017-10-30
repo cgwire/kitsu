@@ -133,6 +133,48 @@ input.search-input:focus {
   margin-bottom: 2em;
 }
 
+.fixed-page {
+  position: fixed;
+  left: 0;
+  right: 0;
+  top: 0;
+  bottom: 0;
+  display: flex;
+  flex-direction: column;
+
+  min-height: 0;
+}
+
+.data-list {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  margin-top: 2em;
+}
+
+.table-header {
+  display: block;
+  width: 100%;
+  margin-bottom: 0;
+  flex-wrap: wrap;
+  position: relative;
+}
+
+.table-header th.actions {
+  width: 100%;
+}
+
+.table-body {
+  flex: 1;
+  overflow: auto;
+  min-height: 1px;
+}
+
+.table {
+  margin-bottom: 0;
+}
+
 @media screen and (max-width: 1000px) {
   .button .icon.is-small {
     margin-right: 0;

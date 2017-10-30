@@ -1,26 +1,26 @@
 <template>
 <div class="data-list">
   <div style="overflow: hidden">
-  <table class="table table-header" ref="headerWrapper">
-    <thead>
-      <tr>
-        <th class="production">
-          {{ $t('tasks.fields.production') }}
-        </th>
-        <th class="name">
-          {{ $t('tasks.fields.entity') }}
-        </th>
-        <th class="type">
-          {{ $t('tasks.fields.task_type') }}
-        </th>
-        <th class="status">
-          {{ $t('tasks.fields.task_status') }}
-        </th>
-        <th class="actions">
-        </th>
-      </tr>
-    </thead>
-  </table>
+    <table class="table table-header" ref="headerWrapper">
+      <thead>
+        <tr>
+          <th class="production">
+            {{ $t('tasks.fields.production') }}
+          </th>
+          <th class="name">
+            {{ $t('tasks.fields.entity') }}
+          </th>
+          <th class="type">
+            {{ $t('tasks.fields.task_type') }}
+          </th>
+          <th class="status">
+            {{ $t('tasks.fields.task_status') }}
+          </th>
+          <th class="actions">
+          </th>
+        </tr>
+      </thead>
+    </table>
   </div>
 
   <div class="table-body" v-scroll="onBodyScroll">
@@ -105,8 +105,6 @@ export default {
       }
     },
     onBodyScroll (event, position) {
-      console.log(this.$refs.headerWrapper.style.left)
-      console.log(`${position.scrollLeft}px`)
       this.$refs.headerWrapper.style.left = `-${position.scrollLeft}px`
     }
   }
@@ -132,27 +130,5 @@ export default {
 .status {
   width: 100px;
   min-width: 100px;
-}
-
-.table-header {
-  display: block;
-  width: 100%;
-  margin-bottom: 0;
-  flex-wrap: wrap;
-  position: relative;
-}
-
-.table-header th.actions {
-  width: 100%;
-}
-
-.table-body {
-  flex: 1;
-  overflow: auto;
-  min-height: 1px;
-}
-
-.table {
-  margin-bottom: 0;
 }
 </style>

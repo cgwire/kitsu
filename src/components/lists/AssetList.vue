@@ -1,112 +1,43 @@
 <template>
 <div class="data-list">
-
-  <div class="asset-list-header">
-
-    <div class="level header-title">
-      <div class="level-left">
-        <div class="level-item">
-          <page-title :text="$t('assets.title')"></page-title>
-        </div>
-      </div>
-
-      <div class="level-right">
-        <div class="level-item">
-          <button-link
-            class="level-item"
-            :text="$t('main.csv.import_file')"
-            icon="upload"
-            :path="{
-              name: 'import-assets',
-              params: {production_id: currentProduction.id}
+  <div class="table-header-wrapper">
+    <table class="table table-header" ref="headerWrapper">
+      <thead>
+        <tr>
+          <th class="type">{{ $t('assets.fields.type') }}</th>
+          <th class="name">{{ $t('assets.fields.name') }}</th>
+          <th class="description">{{ $t('assets.fields.description') }}</th>
+          <th
+            class="validation"
+            :style="{
+              'border-left': '2px solid ' + column.color
             }"
-          >
-          </button-link>
-          <button-href-link
-            class="level-item"
-            :text="$t('main.csv.export_file')"
-            icon="download"
-            :path="'/api/export/csv/assets.csv?project_id=' + currentProduction.id"
-          >
-          </button-href-link>
-          <button-link
-            class="level-item"
-            :text="$t('assets.new_asset')"
-            icon="plus"
-            :path="{
-              name: 'new-asset',
-              params: {production_id: currentProduction.id}
-            }"
-          >
-          </button-link>
-        </div>
-      </div>
-    </div>
+            v-for="column in validationColumns">
+            {{ column.name }}
+          </th>
 
-    <div class="filters-area">
-      <div class="level">
-        <div class="level-right">
-          <div class="level-item">
-            <search-icon></search-icon>
-          </div>
-          <div class="level-item">
-            <input
-              class="input search-input"
-              type="text"
-              @input="onSearchChange"
-              v-focus
-            />
-          </div>
-          <div class="level-item">
-            <filter-icon></filter-icon>
-          </div>
-          <div class="level-item">
-            No filter set.
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <div class="table-header-wrapper" v-scroll="onHeaderScroll">
-      <table class="table table-header">
-        <thead>
-          <tr>
-            <th class="type">{{ $t('assets.fields.type') }}</th>
-            <th class="name">{{ $t('assets.fields.name') }}</th>
-            <th class="description">{{ $t('assets.fields.description') }}</th>
-            <th
-              class="validation"
-              :style="{
-                'border-left': '2px solid ' + column.color
+          <th class="actions">
+            <button-link
+              class="is-small"
+              icon="plus"
+              :text="$t('tasks.create_tasks')"
+              :path="{
+                name: 'create-asset-tasks',
+                params: {
+                  production_id: currentProduction.id
+                }
               }"
-              v-for="column in validationColumns">
-              {{ column.name }}
-            </th>
-
-            <th class="actions">
-              <button-link
-                class="is-small"
-                icon="plus"
-                :text="$t('tasks.create_tasks')"
-                :path="{
-                  name: 'create-asset-tasks',
-                  params: {
-                    production_id: currentProduction.id
-                  }
-                }"
-              >
-              </button-link>
-            </th>
-          </tr>
-        </thead>
-      </table>
-    </div>
-
+            >
+            </button-link>
+          </th>
+        </tr>
+      </thead>
+    </table>
   </div>
 
 
-  <div class="table-wrapper" ref="tableWrapper">
-    <table class="table table-data">
+  <div class="table-body" v-scroll="onBodyScroll">
+    <table class="table">
       <tbody>
         <tr
           key="entry.id"
@@ -183,7 +114,6 @@ import ValidationCell from '../cells/ValidationCell'
 import ButtonLink from '../widgets/ButtonLink'
 import ButtonHrefLink from '../widgets/ButtonHrefLink'
 import PageTitle from '../widgets/PageTitle.vue'
-import { SearchIcon, FilterIcon } from 'vue-feather-icons'
 
 export default {
   name: 'asset-list',
@@ -199,11 +129,9 @@ export default {
   components: {
     ButtonLink,
     ButtonHrefLink,
-    FilterIcon,
     RowActions,
     PageTitle,
     ProductionNameCell,
-    SearchIcon,
     ValidationCell
   },
   computed: {
@@ -222,12 +150,8 @@ export default {
     onTaskUnselected (task) {
       this.$store.commit('REMOVE_SELECTED_TASK', task)
     },
-    onSearchChange (event) {
-      const searchQuery = event.target.value
-      this.$store.commit('SET_ASSET_SEARCH', searchQuery)
-    },
-    onHeaderScroll (event, position) {
-      this.$refs.tableWrapper.scrollLeft = position.scrollLeft
+    onBodyScroll (event, position) {
+      this.$refs.headerWrapper.style.left = `-${position.scrollLeft}px`
     }
   }
 }
@@ -276,45 +200,5 @@ td.name {
 
 td.type {
   font-size: 1.2em;
-}
-
-.asset-list-header {
-  position: fixed;
-  height: 163px;
-  min-height: 163px;
-  max-height: 163px;
-  padding: 1em 2em 0 2em;
-  margin-top: 0;
-  right: 0;
-  left: 0;
-  z-index: 100;
-  background: white;
-}
-
-.filters-area {
-  background: white;
-  padding-top: 1em;
-  padding-bottom: 1em;
-  margin-bottom: 0;
-}
-
-.table-header-wrapper {
-  overflow-x: auto;
-}
-
-.table-header {
-  margin-bottom: 0;
-}
-
-.table-wrapper {
-  overflow-x: auto;
-}
-
-table.table-data {
-  margin-top: 181px;
-}
-
-.data-list {
-  width: 100%;
 }
 </style>

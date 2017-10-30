@@ -137,6 +137,8 @@ export default {
     select_preview_file: 'Please select a picture from your hard drive to be used as a preview for the current task:',
     delete_error: 'An error occured while deleting task.',
     feedback: 'feedback',
+    my_tasks: 'My tasks',
+    tasks: 'Tasks',
     fields: {
       production: 'Prod',
       entity: 'Entity',

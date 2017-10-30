@@ -1,5 +1,60 @@
 <template>
-  <div class="shots page">
+  <div class="shots page fixed-page">
+    <div class="shot-list-header">
+      <div class="level header-title">
+        <div class="level-left">
+          <div class="level-item">
+            <page-title :text="$t('shots.title')"></page-title>
+          </div>
+        </div>
+
+        <div class="level-right">
+          <div class="level-item">
+            <button-link
+              class="level-item"
+              :text="$t('main.csv.import_file')"
+              icon="upload"
+              :path="{
+                name: 'import-shots',
+                params: {production_id: currentProduction.id}
+              }"
+            >
+            </button-link>
+            <button-href-link
+              class="level-item"
+              :text="$t('main.csv.export_file')"
+              icon="download"
+              :path="'/api/export/csv/shots.csv?project_id=' + currentProduction.id"
+            >
+            </button-href-link>
+          </div>
+        </div>
+      </div>
+
+      <div class="filters-area">
+        <div class="level">
+          <div class="level-right">
+            <div class="level-item">
+              <search-icon></search-icon>
+            </div>
+            <div class="level-item">
+              <input
+                class="input search-input"
+                type="text"
+                @input="onSearchChange"
+                v-focus
+              />
+            </div>
+            <!--div class="level-item">
+              <filter-icon></filter-icon>
+            </div>
+            <div class="level-item">
+              No filter set.
+            </div-->
+          </div>
+        </div>
+      </div>
+    </div>
 
     <shot-list
       :entries="displayedShots"
@@ -87,6 +142,7 @@
 
 <script>
 import { mapGetters, mapActions } from 'vuex'
+import { SearchIcon } from 'vue-feather-icons'
 import ShotList from './lists/ShotList.vue'
 import DeleteModal from './widgets/DeleteModal'
 import EditShotModal from './modals/EditShotModal'
@@ -109,7 +165,8 @@ export default {
     Filters,
     ButtonLink,
     ButtonHrefLink,
-    PageTitle
+    PageTitle,
+    SearchIcon
   },
 
   data () {
@@ -372,6 +429,10 @@ export default {
           this.errors.importing = true
         }
       })
+    },
+    onSearchChange (event) {
+      const searchQuery = event.target.value
+      this.$store.commit('SET_SHOT_SEARCH', searchQuery)
     }
   },
 
@@ -392,13 +453,4 @@ export default {
 </script>
 
 <style scoped>
-.shots.page {
-  margin: 0;
-  display: flex;
-  flex-direction: row;
-  justify-content: flex-start;
-  flex-wrap: wrap;
-  padding-top: 60px;
-}
-
 </style>

@@ -1,5 +1,5 @@
 <template>
-  <div class="task-types page">
+  <div class="task-types page fixed-page">
     <div class="task-types-list">
       <div class="level">
         <div class="level-left">
@@ -17,13 +17,13 @@
           </div>
         </div>
       </div>
-
-      <task-type-list
-        :entries="taskTypes"
-        :is-loading="isTaskTypesLoading"
-        :is-error="isTaskTypesLoadingError"
-      ></task-type-list>
     </div>
+
+    <task-type-list
+      :entries="taskTypes"
+      :is-loading="isTaskTypesLoading"
+      :is-error="isTaskTypesLoadingError"
+    ></task-type-list>
 
     <edit-task-type-modal
       :active="modals.isNewDisplayed"
@@ -165,7 +165,4 @@ export default {
 </script>
 
 <style scoped>
-.task-types-list {
-  margin-top: 2em;
-}
 </style>

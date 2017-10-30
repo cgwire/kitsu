@@ -121,7 +121,7 @@ export default {
   tasks: {
     preview: 'Pré-visualisation',
     validation: 'Validation',
-    assign: 'Assigner {nbSelectedTasks} à :',
+    assign: 'Assigner {nbSelectedTasks} tâches à :',
     no_preview: 'Il n\'y a pas de previz pour cette tâche..',
     no_comment: 'Il n\'y a pas de commentaires pour cette tâche.',
     clear_assignations: 'effacer les assignations',
@@ -137,9 +137,11 @@ export default {
     select_preview_file: 'Choisissez une preview sur votre disque dur:',
     delete_error: 'Une erreur est survenue en supprimant la tâche.',
     feedback: 'retours',
+    my_tasks: 'Mes tâches',
+    tasks: 'Tâches',
     fields: {
-      task_type: 'Type de tâche',
-      prodution: 'Prod',
+      task_type: 'Type',
+      production: 'Prod',
       entity: 'Entité',
       task_status: 'Statut'
     }
