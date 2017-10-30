@@ -144,13 +144,23 @@ export const routes = [
         name: 'restore-shots'
       },
 
-      { path: '/tasks/:task_id', component: Task },
-      { path: '/tasks/:task_id/delete', component: Task },
       {
+        name: 'task',
+        path: '/tasks/:task_id',
+        component: Task
+      },
+      {
+        name: 'task-delete',
+        path: '/tasks/:task_id/delete',
+        component: Task
+      },
+      {
+        name: 'task-add-preview',
         path: '/tasks/:task_id/comments/:comment_id/add-preview',
         component: Task
       },
       {
+        name: 'task-preview',
         path: '/tasks/:task_id/previews/:preview_id',
         component: Task
       },

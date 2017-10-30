@@ -89,6 +89,10 @@ input.input:focus {
   border-color: #00B242;
 }
 
+.button:focus {
+  box-shadow: none;
+}
+
 .button.is-primary {
   border-radius: 2px;
   background: #00B242;
