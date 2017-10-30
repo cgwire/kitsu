@@ -1,8 +1,11 @@
 <template>
-<div class="preview-row has-text-center">
+<div :class="{
+  'preview-row': true,
+  'has-text-center': true,
+  selected: selected
+}">
   <button-link
     :text="label"
-    icon="fa-eye"
     :path="'/tasks/' + taskId + '/previews/' + preview.id"
   >
   </button-link>
@@ -17,16 +20,23 @@ export default {
   components: {
     ButtonLink
   },
-  props: [
-    'preview',
-    'taskId'
-  ],
+  props: {
+    preview: {
+      type: Object,
+      default: () => {}
+    },
+    selected: {
+      type: Boolean,
+      default: false
+    },
+    taskId: {
+      type: String,
+      default: ''
+    }
+  },
   computed: {
     label () {
-      let label = `Preview ${this.preview.revision}`
-      if (this.preview.feedback) {
-        label = `${label} (${this.$tc('tasks.feedback')})`
-      }
+      let label = `v${this.preview.revision}`
       return label
     }
   },
@@ -36,10 +46,19 @@ export default {
 </script>
 
 <style scoped>
+.preview-row {
+  margin-right: 0.5em;
+}
+
 .preview-row a {
-  display: block;
-  width: 100%;
-  display: flex;
-  margin-bottom: 1em;
+  border: 3px solid #CCC;
+}
+
+.preview-row:hover a {
+  border: 3px solid #E1D4F9;
+}
+
+.preview-row.selected a {
+  border: 3px solid #8F91EB;
 }
 </style>
