@@ -3,7 +3,8 @@
    :style="{
      background: getAvatarColor(person),
      width: (size || 40) +'px',
-     height: (size || 40) + 'px'
+     height: (size || 40) + 'px',
+     'font-size': (fontSize || 18) + 'px'
    }">
    <span>
      {{ generateAvatar(person) }}
@@ -18,6 +19,7 @@ import { mapGetters, mapActions } from 'vuex'
 export default {
   name: 'person-avatar',
   props: [
+    'font-size',
     'person',
     'size'
   ],
