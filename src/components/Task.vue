@@ -26,6 +26,8 @@
              <people-avatar
                :key="personId"
                :person="personMap[personId]"
+               :size="30"
+               :font-size="16"
                v-for="personId in currentTask.assignees">
              </people-avatar>
            </div>
