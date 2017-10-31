@@ -60,7 +60,7 @@ export default {
 
   uploadPreview (previewId, formData, callback) {
     client.post(
-      `/api/thumbnails/preview-files/${previewId}`,
+      `/api/pictures/preview-files/${previewId}`,
       formData,
       callback
     )

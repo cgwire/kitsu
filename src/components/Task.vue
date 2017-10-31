@@ -66,9 +66,11 @@
         </div>
 
         <div class="preview-picture">
-          <img
-            v-if="currentTaskPreviews.length > 0"
-            :src="getPreviewPath()" />
+          <a :href="getOriginalPath()" target="_blank">
+            <img
+              v-if="currentTaskPreviews.length > 0"
+              :src="getPreviewPath()" />
+          </a>
         </div>
 			</div>
 
@@ -366,13 +368,19 @@ export default {
         return ''
       }
     },
-    getPreviewPath () {
-      const previewId = this.route.params.preview_id
-      if (previewId) {
-        return `/api/thumbnails/preview-files/${previewId}.png`
-      } else {
-        return `/api/thumbnails/preview-files/${this.currentTaskPreviews[0].id}.png`
+    getOriginalPath () {
+      let previewId = this.route.params.preview_id
+      if (!previewId && this.currentTaskPreviews.length > 0) {
+        previewId = this.currentTaskPreviews[0].id
       }
+      return `/api/pictures/originals/preview-files/${previewId}.png`
+    },
+    getPreviewPath () {
+      let previewId = this.route.params.preview_id
+      if (!previewId && this.currentTaskPreviews.length > 0) {
+        previewId = this.currentTaskPreviews[0].id
+      }
+      return `/api/pictures/previews/preview-files/${previewId}.png`
     },
     addComment (comment, taskStatusId) {
       this.addCommentLoading = {
@@ -529,5 +537,6 @@ video {
 
 .preview-list {
   display: flex;
+  flex-wrap: wrap;
 }
 </style>
