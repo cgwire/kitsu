@@ -38,7 +38,12 @@ class TaskServiceTestCase(ApiDBTestCase):
         self.wip_status_id = self.task_status_wip.id
         self.to_review_status_id = self.task_status_to_review.id
 
+        self.old_get_current_user = persons_service.get_current_user
         persons_service.get_current_user = self.get_current_user
+
+    def tearDown(self):
+        super(TaskServiceTestCase, self).tearDown()
+        persons_service.get_current_user = self.old_get_current_user
 
     def get_current_user(self):
         return self.user
