@@ -315,10 +315,8 @@ class ClearAssignationResource(Resource):
     def put(self):
         (task_ids) = self.get_arguments()
 
-        print(task_ids)
         for task_id in task_ids:
             try:
-                print(task_id)
                 tasks_service.clear_assignation(task_id)
             except TaskNotFoundException:
                 pass
@@ -330,7 +328,7 @@ class ClearAssignationResource(Resource):
             "task_ids",
             help="Tasks list required.",
             required=True,
-            action="appened"
+            action="append"
         )
         args = parser.parse_args()
         return (
