@@ -2,6 +2,12 @@ from flask import Blueprint
 from zou.app.utils.api import configure_api_from_blueprint
 
 from .resources import (
+    CreatePreviewFilePictureResource,
+    PreviewFileThumbnailResource,
+    PreviewFileThumbnailSquareResource,
+    PreviewFilePreviewResource,
+    PreviewFileOriginalResource,
+
     CreateShotThumbnailResource,
     ShotThumbnailResource,
     CreateProjectThumbnailResource,
@@ -9,33 +15,62 @@ from .resources import (
     CreatePersonThumbnailResource,
     PersonThumbnailResource,
     CreateWorkingFileThumbnailResource,
-    WorkingFileThumbnailResource,
-    CreatePreviewFileThumbnailResource,
-    PreviewFileThumbnailResource
+    WorkingFileThumbnailResource
 )
 
 routes = [
-    ("/thumbnails/shots/<instance_id>", CreateShotThumbnailResource),
-    ("/thumbnails/shots/<instance_id>.png", ShotThumbnailResource),
-    ("/thumbnails/persons/<instance_id>", CreatePersonThumbnailResource),
-    ("/thumbnails/persons/<instance_id>.png", PersonThumbnailResource),
-    ("/thumbnails/projects/<instance_id>", CreateProjectThumbnailResource),
-    ("/thumbnails/projects/<instance_id>.png", ProjectThumbnailResource),
     (
-        "/thumbnails/working-files/<instance_id>",
+        "/pictures/preview-files/<instance_id>",
+        CreatePreviewFilePictureResource
+    ),
+    (
+        "/pictures/thumbnails/preview-files/<instance_id>.png",
+        PreviewFileThumbnailResource
+    ),
+    (
+        "/pictures/thumbnails-square/preview-files/<instance_id>.png",
+        PreviewFileThumbnailSquareResource
+    ),
+    (
+        "/pictures/originals/preview-files/<instance_id>.png",
+        PreviewFileOriginalResource
+    ),
+    (
+        "/pictures/previews/preview-files/<instance_id>.png",
+        PreviewFilePreviewResource
+    ),
+
+    (
+        "/pictures/thumbnails/shots/<instance_id>",
+        CreateShotThumbnailResource
+    ),
+    (
+        "/pictures/thumbnails/shots/<instance_id>.png",
+        ShotThumbnailResource
+    ),
+    (
+        "/pictures/thumbnails/persons/<instance_id>",
+        CreatePersonThumbnailResource
+    ),
+    (
+        "/pictures/thumbnails/persons/<instance_id>.png",
+        PersonThumbnailResource
+    ),
+    (
+        "/pictures/thumbnails/projects/<instance_id>",
+        CreateProjectThumbnailResource
+    ),
+    (
+        "/pictures/thumbnails/projects/<instance_id>.png",
+        ProjectThumbnailResource
+    ),
+    (
+        "/pictures/thumbnails/working-files/<instance_id>",
         CreateWorkingFileThumbnailResource
     ),
     (
-        "/thumbnails/working-files/<instance_id>.png",
+        "/pictures/thumbnails/working-files/<instance_id>.png",
         WorkingFileThumbnailResource
-    ),
-    (
-        "/thumbnails/preview-files/<instance_id>",
-        CreatePreviewFileThumbnailResource
-    ),
-    (
-        "/thumbnails/preview-files/<instance_id>.png",
-        PreviewFileThumbnailResource
     )
 ]
 
