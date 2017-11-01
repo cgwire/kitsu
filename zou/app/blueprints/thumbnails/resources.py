@@ -74,7 +74,7 @@ class BasePreviewPictureResource(Resource):
         if not self.is_exist(instance_id):
             abort(404)
 
-        if not self.is_allowed():
+        if not self.is_allowed(instance_id):
             abort(403)
 
         folder_path = thumbnail_utils.get_preview_folder_name(
@@ -127,7 +127,7 @@ class BaseCreatePictureResource(Resource):
         self.data_type = data_type
         self.size = size
 
-    def check_permissions():
+    def check_permissions(self, instance_id):
         permissions.check_admin_permissions()
 
     @jwt_required
