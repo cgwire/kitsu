@@ -13,10 +13,12 @@ from .resources import (
     ModifiedFileResource,
     NewOutputFileResource,
     NewWorkingFileResource,
-    TaskWorkingFilesResource
+    TaskWorkingFilesResource,
+    FileResource
 )
 
 routes = [
+    ("/data/files/<file_id>", FileResource),
     ("/data/tasks/<task_id>/working-files", TaskWorkingFilesResource),
     ("/data/tasks/<task_id>/working-files/new", NewWorkingFileResource),
     ("/data/tasks/<task_id>/last-working-files", LastWorkingFilesResource),

@@ -682,3 +682,25 @@ class ModifiedFileResource(Resource):
             abort(403)
 
         return working_file.serialize()
+
+
+class FileResource(Resource):
+
+    @jwt_required
+    def get(self, file_id):
+        try:
+            file_dict = files_service.get_working_file(file_id).serialize()
+        except WorkingFileNotFoundException:
+            try:
+                file_dict = files_service.get_output_file(file_id).serialize()
+            except OutputFileNotFoundException:
+                abort(404)
+
+        try:
+            if not permissions.has_manager_permissions():
+                task = tasks_service.get_task(file_dict["task_id"])
+                user_service.check_has_task_related(task.project_id)
+        except permissions.PermissionDenied:
+            abort(403)
+
+        return file_dict
