@@ -14,6 +14,7 @@ from zou.app.models.person import Person
 from zou.app.models.department import Department
 from zou.app.models.working_file import WorkingFile
 from zou.app.models.output_file import OutputFile
+from zou.app.models.preview_file import PreviewFile
 from zou.app.models.output_type import OutputType
 from zou.app.models.software import Software
 from zou.app.models.project_status import ProjectStatus
@@ -619,6 +620,18 @@ class ApiDBTestCase(ApiTestCase):
             short_name="max",
             file_extension=".max"
         )
+
+    def generate_fixture_preview_file(self, revision=1):
+        self.preview = PreviewFile.create(
+            name="main",
+            revision=revision,
+            description="test description",
+            source="pytest",
+            task_id=self.task.id,
+            person_id=self.person.id,
+            entity_id=self.entity.id
+        )
+        return self.preview
 
     def get_fixture_file_path(self, relative_path):
         current_path = os.getcwd()

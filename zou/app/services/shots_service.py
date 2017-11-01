@@ -157,6 +157,7 @@ def get_shots_and_tasks(criterions={}):
         task_status = task_status_map[task.task_status_id]
         task_type = task_type_map[task.task_type_id]
         task_dict.update({
+            "task_status_id": str(task_status.id),
             "task_status_name": task_status.name,
             "task_status_short_name": task_status.short_name,
             "task_status_color": task_status.color,

@@ -17,3 +17,7 @@ def mkdir_p(path):
 def rm_rf(path):
     if os.path.exists(path):
         shutil.rmtree(path)
+
+
+def copyfile(src, dest):
+    shutil.copyfile(src, dest)
