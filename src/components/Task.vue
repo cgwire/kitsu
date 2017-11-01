@@ -66,10 +66,19 @@
         </div>
 
         <div class="preview-picture">
-          <a :href="getOriginalPath()" target="_blank">
-            <img
-              v-if="currentTaskPreviews.length > 0"
-              :src="getPreviewPath()" />
+          <div v-if="currentTaskPreviews.length > 0 && isMovie">
+            <video
+              :src="moviePath"
+              controls
+              :poster="getPreviewPath()" />
+            </video>
+          </div>
+          <a
+            :href="getOriginalPath()"
+            target="_blank"
+            v-else-if="currentTaskPreviews.length > 0 && !isMovie"
+          >
+            <img :src="getPreviewPath()" />
           </a>
         </div>
 			</div>
@@ -335,6 +344,29 @@ export default {
       } else {
         return ''
       }
+    },
+
+    isMovie () {
+      if (this.currentTaskPreviews.length > 0) {
+        let previewId = this.route.params.preview_id
+        let currentPreview = this.currentTaskPreviews[0]
+        if (previewId) {
+          currentPreview = this.currentTaskPreviews.find((preview) => {
+            return preview.id === previewId
+          })
+        }
+        return currentPreview.is_movie
+      } else {
+        return false
+      }
+    },
+
+    moviePath () {
+      let previewId = this.route.params.preview_id
+      if (!previewId && this.currentTaskPreviews.length > 0) {
+        previewId = this.currentTaskPreviews[0].id
+      }
+      return `/api/movies/originals/preview-files/${previewId}.mp4`
     }
   },
 

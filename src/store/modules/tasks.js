@@ -144,6 +144,8 @@ const actions = {
   },
 
   addPreview ({ commit, state }, payload) {
+    payload.isMovie =
+      state.previewFormData.get('file').name.indexOf('.mp4') > 0
     tasksApi.addPreview(payload, (err, preview) => {
       if (err && payload.callback) {
         payload.callback(err)
@@ -285,7 +287,8 @@ const mutations = {
     const newPreview = {
       id: preview.id,
       feedback: false,
-      revision: preview.revision
+      revision: preview.revision,
+      is_movie: preview.is_movie
     }
     state.taskPreviews[taskId] =
       [newPreview].concat(state.taskPreviews[taskId])

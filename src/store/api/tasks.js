@@ -53,7 +53,7 @@ export default {
     const commentId = data.commentId
     client.post(
       `/api/actions/tasks/${taskId}/comments/${commentId}/add-preview`,
-      {},
+      {is_movie: data.isMovie},
       callback
     )
   },
