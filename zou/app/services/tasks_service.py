@@ -401,7 +401,8 @@ def get_comments(task):
             preview = PreviewFile.get(comment.preview_file_id)
             comment_dict["preview"] = {
                 "id": str(preview.id),
-                "revision": preview.revision
+                "revision": preview.revision,
+                "is_movie": preview.is_movie
             }
         comments.append(comment_dict)
     return comments

@@ -83,6 +83,7 @@ class AddPreviewResource(Resource):
 
     @jwt_required
     def post(self, task_id, comment_id):
+        is_movie = self.get_arguments()
         try:
             task = tasks_service.get_task(task_id)
             if not permissions.has_manager_permissions():
@@ -101,7 +102,8 @@ class AddPreviewResource(Resource):
                 task.name,
                 revision,
                 task.id,
-                person.id
+                person.id,
+                is_movie
             )
             comment.update({"preview_file_id": preview.id})
         except TaskStatusNotFoundException:
@@ -110,6 +112,13 @@ class AddPreviewResource(Resource):
             abort(403)
 
         return preview.serialize(), 201
+
+    def get_arguments(self):
+        parser = reqparse.RequestParser()
+        parser.add_argument("is_movie", type=bool, default=False)
+        args = parser.parse_args()
+
+        return args["is_movie"]
 
 
 class TaskPreviewsResource(Resource):
