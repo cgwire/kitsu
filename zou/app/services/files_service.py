@@ -280,11 +280,19 @@ def get_preview_files_for_task(task_id):
     return PreviewFile.serialize_list(previews)
 
 
-def create_preview_file(name, revision, task_id, person_id, source="webgui"):
+def create_preview_file(
+    name,
+    revision,
+    task_id,
+    person_id,
+    is_movie,
+    source="webgui"
+):
     return PreviewFile.create(
         name=name,
         revision=revision,
         source=source,
         task_id=task_id,
-        person_id=person_id
+        person_id=person_id,
+        is_movie=is_movie
     )

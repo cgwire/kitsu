@@ -4,6 +4,8 @@ from flask import abort, request, send_from_directory
 from flask_restful import Resource
 from flask_jwt_extended import jwt_required
 
+from moviepy.editor import VideoFileClip
+
 from zou.app.services import (
     shots_service,
     files_service,
@@ -27,19 +29,38 @@ class CreatePreviewFilePictureResource(Resource):
             abort(403)
 
         uploaded_file = request.files["file"]
+
         folder_path = thumbnail_utils.get_preview_folder_name(
             "originals",
             instance_id
         )
-        thumbnail_utils.save_file(
-            folder_path,
-            instance_id,
-            uploaded_file,
-            size=None
-        )
-        thumbnail_utils.generate_preview_variants(instance_id)
+        if ".png" in uploaded_file.filename:
+            thumbnail_utils.save_file(
+                folder_path,
+                instance_id,
+                uploaded_file,
+                size=None
+            )
+            thumbnail_utils.generate_preview_variants(instance_id)
 
-        return thumbnail_utils.get_preview_url_path(instance_id), 201
+            return thumbnail_utils.get_preview_url_path(instance_id), 201
+
+        elif ".mp4" in uploaded_file.filename:
+            file_name = "%s.mp4" % instance_id
+            folder = thumbnail_utils.create_folder(folder_path)
+            file_path = os.path.join(folder, file_name)
+            picture_path = os.path.join(folder, "%s.png" % instance_id)
+            uploaded_file.save(file_path + '.tmp')
+            clip = VideoFileClip(file_path + '.tmp')
+            clip = clip.resize(height=720)
+            clip.save_frame(picture_path, round(clip.duration / 2))
+            thumbnail_utils.generate_preview_variants(instance_id)
+            clip.write_videofile(file_path)
+
+            return {}, 201
+
+        else:
+            abort(400, "Wrong file format")
 
     def is_allowed(self, preview_file_id):
         if permissions.has_manager_permissions():
@@ -50,6 +71,42 @@ class CreatePreviewFilePictureResource(Resource):
 
     def is_exist(self, preview_file_id):
         return files_service.get_preview_file(preview_file_id) is not None
+
+
+class PreviewFileMovieResource(Resource):
+
+    def __init__(self):
+        Resource.__init__(self)
+
+    def is_exist(self, preview_file_id):
+        return files_service.get_preview_file(preview_file_id) is not None
+
+    def is_allowed(self, preview_file_id):
+        if permissions.has_manager_permissions():
+            return True
+        else:
+            preview_file = files_service.get_preview_file(preview_file_id)
+            task = tasks_service.get_task(preview_file.task_id)
+            return user_service.has_task_related(task["project_id"])
+
+    @jwt_required
+    def get(self, instance_id):
+        if not self.is_exist(instance_id):
+            abort(404)
+
+        if not self.is_allowed(instance_id):
+            abort(403)
+
+        folder_path = thumbnail_utils.get_preview_folder_name(
+            "originals",
+            instance_id
+        )
+        file_name = "%s.mp4" % instance_id
+
+        return send_from_directory(
+            directory=folder_path,
+            filename=file_name
+        )
 
 
 class BasePreviewPictureResource(Resource):

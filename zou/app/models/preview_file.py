@@ -13,6 +13,8 @@ class PreviewFile(db.Model, BaseMixin, SerializerMixin):
     source = db.Column(db.String(40))
     shotgun_id = db.Column(db.Integer, unique=True)
 
+    is_movie = db.Column(db.Boolean, default=False)
+
     url = db.Column(db.String(600))
     uploaded_movie_url = db.Column(db.String(600))
     uploaded_movie_name = db.Column(db.String(150))
