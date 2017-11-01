@@ -2,18 +2,21 @@ from flask import request, abort
 from flask_restful import Resource, reqparse
 from flask_jwt_extended import jwt_required
 
-from zou.app.utils import query
+from zou.app.utils import query, permissions
 from zou.app.models.entity import Entity
 from zou.app.services import (
     assets_service,
+    shots_service,
     tasks_service,
-    projects_service
+    projects_service,
+    user_service
 )
 
 from zou.app.services.exception import (
     ProjectNotFoundException,
     AssetTypeNotFoundException,
-    AssetNotFoundException
+    AssetNotFoundException,
+    ShotNotFoundException
 )
 
 
@@ -29,32 +32,24 @@ class AssetResource(Resource):
         """
         try:
             asset = assets_service.get_asset(asset_id)
+            if not permissions.has_manager_permissions():
+                user_service.check_has_task_related(asset.project_id)
         except AssetNotFoundException:
             abort(404)
+        except permissions.PermissionDenied:
+            abort(403)
         return asset.serialize(obj_type="Asset")
 
     @jwt_required
     def delete(self, asset_id):
         try:
+            permissions.check_manager_permissions()
             deleted_asset = assets_service.remove_asset(asset_id)
         except AssetNotFoundException:
             abort(404)
+        except permissions.PermissionDenied:
+            abort(403)
         return deleted_asset, 204
-
-
-class AssetsResource(Resource):
-
-    def __init__(self):
-        Resource.__init__(self)
-
-    @jwt_required
-    def get(self):
-        """
-        Retrieve all assets.
-        """
-        criterions = query.get_query_criterions_from_request(request)
-        assets = assets_service.get_assets(criterions)
-        return Entity.serialize_list(assets, obj_type="Asset")
 
 
 class AllAssetsResource(Resource):
@@ -68,8 +63,13 @@ class AllAssetsResource(Resource):
         Retrieve all entities that are not shot or sequence.
         Adds project name and asset type name.
         """
-        criterions = query.get_query_criterions_from_request(request)
-        return assets_service.all_assets(criterions)
+        try:
+            criterions = query.get_query_criterions_from_request(request)
+            if not permissions.has_manager_permissions():
+                user_service.check_criterions_has_task_related(criterions)
+            return assets_service.all_assets(criterions)
+        except permissions.PermissionDenied:
+            abort(403)
 
 
 class AssetsAndTasksResource(Resource):
@@ -83,8 +83,13 @@ class AssetsAndTasksResource(Resource):
         Retrieve all entities that are not shot or sequence.
         Adds project name and asset type name and all related tasks.
         """
-        criterions = query.get_query_criterions_from_request(request)
-        return assets_service.all_assets_and_tasks(criterions)
+        try:
+            criterions = query.get_query_criterions_from_request(request)
+            if not permissions.has_manager_permissions():
+                user_service.check_criterions_has_task_related(criterions)
+            return assets_service.all_assets_and_tasks(criterions)
+        except permissions.PermissionDenied:
+            abort(403)
 
 
 class AssetTypeResource(Resource):
@@ -129,8 +134,13 @@ class ProjectAssetTypesResource(Resource):
         """
         Retrieve all asset types for given project.
         """
-        asset_types = assets_service.get_asset_types_for_project(project_id)
-        return Entity.serialize_list(asset_types, obj_type="AssetType")
+        try:
+            if not permissions.has_manager_permissions():
+                user_service.check_has_task_related(project_id)
+            asset_types = assets_service.get_asset_types_for_project(project_id)
+            return Entity.serialize_list(asset_types, obj_type="AssetType")
+        except permissions.PermissionDenied:
+            abort(403)
 
 
 class ShotAssetTypesResource(Resource):
@@ -143,8 +153,16 @@ class ShotAssetTypesResource(Resource):
         """
         Retrieve all asset shots for given soht.
         """
-        asset_types = assets_service.get_asset_types_for_shot(shot_id)
-        return Entity.serialize_list(asset_types, obj_type="AssetType")
+        try:
+            shot = shots_service.get_shot(shot_id)
+            if not permissions.has_manager_permissions():
+                user_service.check_has_task_related(shot["project_id"])
+            asset_types = assets_service.get_asset_types_for_shot(shot_id)
+            return Entity.serialize_list(asset_types, obj_type="AssetType")
+        except ShotNotFoundException:
+            abort(404)
+        except permissions.PermissionDenied:
+            abort(403)
 
 
 class ProjectAssetsResource(Resource):
@@ -157,6 +175,8 @@ class ProjectAssetsResource(Resource):
         """
         Retrieve all assets for given project.
         """
+        if not permissions.has_manager_permissions():
+            user_service.check_has_task_related(project_id)
         criterions = query.get_query_criterions_from_request(request)
         criterions["project_id"] = project_id
         assets = assets_service.get_assets(criterions)
@@ -173,11 +193,16 @@ class ProjectAssetTypeAssetsResource(Resource):
         """
         Retrieve all assets for given project and entity type.
         """
-        criterions = query.get_query_criterions_from_request(request)
-        criterions["project_id"] = project_id
-        criterions["entity_type_id"] = asset_type_id
-        assets = assets_service.get_assets(criterions)
-        return Entity.serialize_list(assets, obj_type="Asset")
+        try:
+            if not permissions.has_manager_permissions():
+                user_service.check_has_task_related(project_id)
+            criterions = query.get_query_criterions_from_request(request)
+            criterions["project_id"] = project_id
+            criterions["entity_type_id"] = asset_type_id
+            assets = assets_service.get_assets(criterions)
+            return Entity.serialize_list(assets, obj_type="Asset")
+        except permissions.PermissionDenied:
+            abort(403)
 
 
 class AssetTasksResource(Resource):
@@ -191,10 +216,14 @@ class AssetTasksResource(Resource):
         Retrieve all tasks related to a given shot.
         """
         try:
-            assets_service.get_asset(asset_id)
+            asset = assets_service.get_asset(asset_id)
+            if not permissions.has_manager_permissions():
+                user_service.check_has_task_related(asset.project_id)
             return tasks_service.get_tasks_for_asset(asset_id)
         except AssetNotFoundException:
             abort(404)
+        except permissions.PermissionDenied:
+            abort(403)
 
 
 class AssetTaskTypesResource(Resource):
@@ -208,10 +237,14 @@ class AssetTaskTypesResource(Resource):
         Retrieve all task types related to a given asset.
         """
         try:
-            assets_service.get_asset(asset_id)
+            asset = assets_service.get_asset(asset_id)
+            if not permissions.has_manager_permissions():
+                user_service.check_has_task_related(asset.project_id)
             return tasks_service.get_task_types_for_asset(asset_id)
         except AssetNotFoundException:
             abort(404)
+        except permissions.PermissionDenied:
+            abort(403)
 
 
 class NewAssetResource(Resource):
@@ -227,6 +260,7 @@ class NewAssetResource(Resource):
         ) = self.get_arguments()
 
         try:
+            permissions.check_manager_permissions()
             project = projects_service.get_project(project_id)
             asset_type = assets_service.get_asset_type(asset_type_id)
             asset = assets_service.create_asset(
@@ -239,6 +273,8 @@ class NewAssetResource(Resource):
             abort(404)
         except AssetTypeNotFoundException:
             abort(404)
+        except permissions.PermissionDenied:
+            abort(403)
 
         return asset.serialize(obj_type="Asset"), 201
 

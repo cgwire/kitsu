@@ -9,7 +9,7 @@ from zou.app.models.task_type import TaskType
 from zou.app.models.task_status import TaskStatus
 
 from zou.app.services import persons_service, shots_service, tasks_service
-from zou.app.utils import fields
+from zou.app.utils import fields, permissions
 
 
 def assignee_filter():
@@ -170,3 +170,33 @@ def get_projects():
         .filter(open_project_filter())
 
     return fields.serialize_value(query.all())
+
+
+def check_assigned(task_id):
+    query = Task.query \
+        .filter(assignee_filter()) \
+        .filter(Task.id == task_id)
+
+    if query.first() is None:
+        raise permissions.PermissionDenied
+
+    return True
+
+
+def check_has_task_related(project_id):
+    query = Project.query \
+        .join(Task) \
+        .filter(assignee_filter()) \
+
+    if query.first() is None:
+        raise permissions.PermissionDenied
+
+    return True
+
+
+def check_criterions_has_task_related(criterions):
+    if "project_id" in criterions:
+        check_has_task_related(criterions["project_id"])
+        return True
+    else:
+        raise permissions.PermissionDenied

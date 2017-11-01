@@ -26,6 +26,10 @@ class TaskNotFoundException(Exception):
     pass
 
 
+class TaskStatusNotFoundException(Exception):
+    pass
+
+
 class TaskTypeNotFoundException(Exception):
     pass
 
@@ -83,4 +87,8 @@ class UnactiveUserException(Exception):
 
 
 class WrongDateFormatException(Exception):
+    pass
+
+
+class CommentNotFoundException(Exception):
     pass

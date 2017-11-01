@@ -69,17 +69,3 @@ class RouteTaskChangeTestCase(ApiDBTestCase):
         self.put("/actions/tasks/%s/start" % self.task.id, {})
         task = self.get("data/tasks/%s" % self.task.id)
         self.assertEquals(real_start_date.isoformat(), task["real_start_date"])
-
-    def test_turn_guessed_task_to_wip(self):
-        self.task.real_start_date = None
-        now = datetime.datetime.now()
-        self.put("/actions/task-types/%s/entity/%s/start" % (
-                self.task_type.id,
-                self.entity.id
-            ),
-            {}
-        )
-        task = self.get("/data/tasks/%s" % self.task.id)
-
-        self.assertEqual(task["task_status_id"], self.wip_status_id)
-        self.assertGreater(task["real_start_date"], now.isoformat())

@@ -29,6 +29,10 @@ def configure(app):
 
 
 def configure_api_routes(app):
+    """
+    Register blueprints (modules). Each blueprint describe routes and
+    associated resources (controllers).
+    """
     app.register_blueprint(auth_blueprint)
     app.register_blueprint(assets_blueprint)
     app.register_blueprint(crud_blueprint)
@@ -46,6 +50,10 @@ def configure_api_routes(app):
 
 
 def register_event_handlers(app):
+    """
+    Load code from event handlers folder. Then it registers in the event manager
+    each event handler listed in the __init_.py.
+    """
     sys.path.insert(0, app.config["EVENT_HANDLERS_FOLDER"])
     import event_handlers
     events.register_all(event_handlers.event_map)

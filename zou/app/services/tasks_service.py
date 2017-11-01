@@ -5,6 +5,8 @@ from sqlalchemy.exc import StatementError, IntegrityError, DataError
 from zou.app import app
 from zou.app.utils import events
 
+from zou.app.models.comment import Comment
+from zou.app.models.person import Person
 from zou.app.models.task import Task
 from zou.app.models.task_type import TaskType
 from zou.app.models.department import Department
@@ -16,7 +18,9 @@ from zou.app.models.entity_type import EntityType
 from zou.app.models.preview_file import PreviewFile
 
 from zou.app.services.exception import (
+    CommentNotFoundException,
     TaskNotFoundException,
+    TaskStatusNotFoundException,
     TaskTypeNotFoundException,
     WrongDateFormatException
 )
@@ -42,6 +46,17 @@ def get_to_review_status():
 
 def get_todo_status():
     return get_or_create_status("Todo")
+
+
+def get_task_status(task_status_id):
+    try:
+        task_status = TaskStatus.get(task_status_id)
+    except StatementError:
+        raise TaskStatusNotFoundException()
+
+    if task_status is None:
+        raise TaskStatusNotFoundException()
+    return task_status
 
 
 def start_task(task):
@@ -343,3 +358,85 @@ def get_time_spents(task_id):
         result[str(time_spent.person_id)] = time_spent.serialize()
         result["total"] += time_spent.duration
     return result
+
+
+def get_comments(task):
+    comments = []
+
+    query = Comment.query.order_by(Comment.created_at.desc()) \
+        .filter_by(object_id=task.id) \
+        .join(Person, TaskStatus) \
+        .add_columns(
+            TaskStatus.name,
+            TaskStatus.short_name,
+            TaskStatus.color,
+            Person.first_name,
+            Person.last_name
+        )
+
+    for result in query.all():
+        (
+            comment,
+            task_status_name,
+            task_status_short_name,
+            task_status_color,
+            person_first_name,
+            person_last_name
+        ) = result
+
+        comment_dict = comment.serialize()
+        comment_dict["person"] = {
+            "first_name": person_first_name,
+            "last_name": person_last_name,
+            "id": str(comment.person_id)
+        }
+        comment_dict["task_status"] = {
+            "name": task_status_name,
+            "short_name": task_status_short_name,
+            "color": task_status_color,
+            "id": str(comment.task_status_id)
+        }
+
+        if comment.preview_file_id is not None:
+            preview = PreviewFile.get(comment.preview_file_id)
+            comment_dict["preview"] = {
+                "id": str(preview.id),
+                "revision": preview.revision
+            }
+        comments.append(comment_dict)
+    return comments
+
+
+def get_entity(entity_id):
+    return Entity.get(entity_id)
+
+
+def get_entity_type(entity_type_id):
+    return EntityType.get(entity_type_id)
+
+
+def get_comment(comment_id):
+    try:
+        comment = Comment.get(comment_id)
+    except StatementError:
+        raise CommentNotFoundException()
+
+    if comment is None:
+        raise CommentNotFoundException()
+    return comment
+
+
+def create_comment(
+    object_id,
+    task_status_id,
+    person_id,
+    text,
+    object_type="Task"
+):
+    return Comment.create(
+        object_id=object_id,
+        object_type=object_type,
+        task_status_id=task_status_id,
+        person_id=person_id,
+        text=text
+    )

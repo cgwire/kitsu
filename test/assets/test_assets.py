@@ -15,9 +15,9 @@ class AssetsTestCase(ApiDBTestCase):
         self.maxDiff = None
 
     def test_get_assets(self):
-        assets = self.get("data/assets")
+        assets = self.get("data/assets/all")
         self.assertEquals(len(assets), 1)
-        self.assertDictEqual(assets[0], self.entity_dict)
+        self.assertEquals(assets[0]["name"], self.entity_dict["name"])
 
     def test_get_asset(self):
         asset = self.get("data/assets/%s" % self.entity.id)
