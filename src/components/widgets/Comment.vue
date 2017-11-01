@@ -1,6 +1,10 @@
 <template>
 <article
-  class="media comment"
+  :class="{
+    media: true,
+    comment: true,
+    highlighted: highlighted
+  }"
   :style="{
     'border-left': '3px solid ' + comment.task_status.color
   }"
@@ -30,12 +34,13 @@
           <span class="level-item" :style="{'color': comment.task_status.color}">
             {{ $t('comments.retake').toUpperCase() }}
           </span>
-          <span
+          <router-link
+            :to="previewRoute"
             class="revision"
             v-if="comment.preview"
           >
             revision {{ comment.preview.revision }}
-          </span>
+          </router-link>
           <button-link
             class="level-item"
             :text="$t('tasks.add_preview')"
@@ -57,12 +62,13 @@
             {{ $t('comments.validation_required') }}
           </span>
 
-          <span
+          <router-link
+            :to="previewRoute"
             class="revision"
             v-if="comment.preview"
           >
             revision {{ comment.preview.revision }}
-          </span>
+          </router-link>
           <button-link
             class="level-item"
             :text="$t('tasks.add_preview')"
@@ -108,9 +114,31 @@ export default {
     PeopleName,
     ButtonLink
   },
-  props: [
-    'comment'
-  ],
+  props: {
+    comment: {
+      type: Object,
+      default: () => {}
+    },
+    highlighted: {
+      type: Boolean,
+      default: false
+    }
+  },
+  computed: {
+    previewRoute () {
+      if (this.comment.preview) {
+        return {
+          name: 'task-preview',
+          params: {
+            task_id: this.comment.object_id,
+            preview_id: this.comment.preview.id
+          }
+        }
+      } else {
+        return {name: 'task', params: {task_id: this.comment.object_id}}
+      }
+    }
+  },
   methods: {
     formatDate (date) {
       return moment(date).fromNow()
@@ -128,16 +156,28 @@ export default {
   border-left: 3px solid #CCC;
 }
 
+.comment.highlighted {
+  background: #F1EEFF;
+}
+
+.comment:first-child {
+  padding-top: 1em;
+}
+
 .comment-date {
   color: #999;
   font-style: italic;
   margin-left: 0.5em;
 }
 
-span.revision {
+a.revision {
   color: #999;
   font-size: 0.8em;
   font-style: italic;
   margin: 0;
+}
+
+a.revision:hover {
+  text-decoration: underline;
 }
 </style>

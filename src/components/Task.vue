@@ -1,5 +1,5 @@
 <template>
-  <div class="page">
+  <div class="page fixed-page">
     <h1 class="title">
        <div class="level">
          <div class="level-left">
@@ -26,6 +26,8 @@
              <people-avatar
                :key="personId"
                :person="personMap[personId]"
+               :size="30"
+               :font-size="16"
                v-for="personId in currentTask.assignees">
              </people-avatar>
            </div>
@@ -42,21 +44,17 @@
        </div>
     </h1>
 
-    <div class="columns">
-      <div class="column">
+    <div class="task-columns">
+      <div class="task-column">
         <h2 class="subtitle">
           {{ $t('tasks.preview') }}
         </h2>
-        <div class="preview-picture">
-          <img
-            v-if="currentTaskPreviews.length > 0"
-            :src="getPreviewPath()" />
-        </div>
         <div class="preview-list" v-if="currentTaskPreviews.length > 0">
           <preview-row
+            :key="preview.id"
             :preview="preview"
             :taskId="currentTask ? currentTask.id : ''"
-            :key="preview.id"
+            :selected="preview.id === currentPreviewId"
             v-for="preview in currentTaskPreviews"
           >
           </preview-row>
@@ -66,10 +64,18 @@
             {{ $t('tasks.no_preview')}}
           </em>
         </div>
+
+        <div class="preview-picture">
+          <a :href="getOriginalPath()" target="_blank">
+            <img
+              v-if="currentTaskPreviews.length > 0"
+              :src="getPreviewPath()" />
+          </a>
+        </div>
 			</div>
 
 
-      <div class="column">
+      <div class="task-column">
         <h2 class="subtitle validation-title">
           {{ $t('tasks.validation') }}
         </h2>
@@ -102,6 +108,7 @@
             <div class="comments" v-if="currentTaskComments.length > 0">
               <comment
                 :comment="comment"
+                :highlighted="comment.preview && comment.preview.id === currentPreviewId"
                 :key="comment.id"
                 v-for="comment in currentTaskComments"
               >
@@ -309,6 +316,9 @@ export default {
       'getTaskComment',
       'personMap'
     ]),
+    currentPreviewId () {
+      return this.route.params.preview_id
+    },
     title () {
       if (this.currentTask) {
         return `${this.currentTask.project_name} / ${this.currentTask.entity_name}`
@@ -358,13 +368,19 @@ export default {
         return ''
       }
     },
-    getPreviewPath () {
-      const previewId = this.route.params.preview_id
-      if (previewId) {
-        return `/api/thumbnails/preview-files/${previewId}.png`
-      } else {
-        return `/api/thumbnails/preview-files/${this.currentTaskPreviews[0].id}.png`
+    getOriginalPath () {
+      let previewId = this.route.params.preview_id
+      if (!previewId && this.currentTaskPreviews.length > 0) {
+        previewId = this.currentTaskPreviews[0].id
       }
+      return `/api/pictures/originals/preview-files/${previewId}.png`
+    },
+    getPreviewPath () {
+      let previewId = this.route.params.preview_id
+      if (!previewId && this.currentTaskPreviews.length > 0) {
+        previewId = this.currentTaskPreviews[0].id
+      }
+      return `/api/pictures/previews/preview-files/${previewId}.png`
     },
     addComment (comment, taskStatusId) {
       this.addCommentLoading = {
@@ -502,5 +518,25 @@ video {
 .comments,
 .no-comment {
   margin-top: 2em;
+}
+
+.task-columns {
+  display: flex;
+  flex-direction: row;
+}
+
+.task-column {
+  width: 50%;
+  padding: 1em;
+  overflow-y: auto;
+}
+
+.task-column:first-child {
+  padding-left: 0;
+}
+
+.preview-list {
+  display: flex;
+  flex-wrap: wrap;
 }
 </style>
