@@ -1,12 +1,10 @@
 from zou.app.models.project import Project
-from zou.app.models.task import Task
 from zou.app.models.project_status import ProjectStatus
 from zou.app.services.exception import ProjectNotFoundException
 
-from sqlalchemy.exc import StatementError
-
-from zou.app.services import persons_service
 from zou.app.utils import fields
+
+from sqlalchemy.exc import StatementError
 
 
 def open_projects():
@@ -16,7 +14,7 @@ def open_projects():
     status_ids = [x.id for x in statuses]
 
     query = Project.query.filter(Project.project_status_id.in_(status_ids))
-    return query.all()
+    return fields.serialize_value(query.all())
 
 
 def all_projects():

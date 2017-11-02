@@ -4,6 +4,7 @@ from test.base import ApiDBTestCase
 from zou.app.utils import fields
 
 from zou.app.models.task import Task
+from zou.app.services import tasks_service
 
 
 class TaskLastWorkingFilesTestCase(ApiDBTestCase):
@@ -132,3 +133,30 @@ class TaskLastWorkingFilesTestCase(ApiDBTestCase):
 
         now = fields.serialize_value(datetime.datetime.utcnow())
         self.assertTrue(current_date < now)
+
+    def test_get_untyped_file(self):
+        working_file_id = str(self.working_file.id)
+        output_file_id = str(self.output_file.id)
+
+        path = "/data/files/%s" % working_file_id
+        remote_file = self.get(path)
+        self.assertEquals(remote_file["id"], working_file_id)
+        self.assertEquals(remote_file["type"], "WorkingFile")
+
+        path = "/data/files/%s" % output_file_id
+        remote_file = self.get(path)
+        self.assertEquals(remote_file["id"], output_file_id)
+        self.assertEquals(remote_file["type"], "OutputFile")
+
+        path = "/data/files/%s" % self.task.id
+        self.get(path, 404)
+
+        self.generate_fixture_user_cg_artist()
+        self.log_in_cg_artist()
+        path = "/data/files/%s" % output_file_id
+        self.get(path, 403)
+
+        task = tasks_service.get_task(remote_file["task_id"])
+        task.assignees.append(self.user_cg_artist)
+        task.save()
+        remote_file = self.get(path)

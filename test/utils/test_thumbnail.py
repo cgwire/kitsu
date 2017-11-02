@@ -5,7 +5,7 @@ from PIL import Image
 
 from werkzeug.datastructures import FileStorage
 
-from zou.app import app
+from zou.app import app, config
 from zou.app.utils import thumbnail, fs
 
 
@@ -46,8 +46,7 @@ class ThumbnailTestCase(unittest.TestCase):
         path = thumbnail.get_preview_folder_name("originals", "123413-12312")
         self.assertEquals(
             path,
-            "/media/storage/frankrousseau/Projets/"
-            "cg-wire/products/zou/thumbnails/preview-files/originals/123"
+            os.path.join(config.THUMBNAIL_FOLDER, "preview-files/originals/123")
         )
 
     def test_get_file_path(self):

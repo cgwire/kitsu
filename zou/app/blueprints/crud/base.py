@@ -89,6 +89,9 @@ class BaseModelsResource(Resource):
 
         return query
 
+    def check_read_permissions(self):
+        return permissions.check_manager_permissions()
+
     def check_create_permissions(self, data):
         return permissions.check_manager_permissions()
 
@@ -98,19 +101,23 @@ class BaseModelsResource(Resource):
         Retrieve all entries for given model. Filters can be specified in the
         query string.
         """
-        query = self.model.query
-        if not request.args:
-            return self.all_entries(query)
-        else:
-            options = request.args
-            query = self.apply_filters(options)
-            page = int(options.get("page", "-1"))
-            is_paginated = page > -1
-
-            if is_paginated:
-                return self.paginated_entries(query, page)
-            else:
+        try:
+            self.check_read_permissions()
+            query = self.model.query
+            if not request.args:
                 return self.all_entries(query)
+            else:
+                options = request.args
+                query = self.apply_filters(options)
+                page = int(options.get("page", "-1"))
+                is_paginated = page > -1
+
+                if is_paginated:
+                    return self.paginated_entries(query, page)
+                else:
+                    return self.all_entries(query)
+        except permissions.PermissionDenied:
+            abort(403)
 
     @jwt_required
     def post(self):
@@ -156,7 +163,7 @@ class BaseModelResource(Resource):
         return instance
 
     def check_read_permissions(self, instance):
-        return True
+        return permissions.check_manager_permissions()
 
     def check_update_permissions(self, instance, data):
         return permissions.check_manager_permissions()

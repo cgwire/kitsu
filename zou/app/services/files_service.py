@@ -269,3 +269,30 @@ def get_preview_file(preview_file_id):
         raise PreviewFileNotFoundException()
 
     return preview_file
+
+
+def get_preview_files_for_task(task_id):
+    previews = PreviewFile.filter_by(
+        task_id=task_id
+    ).order_by(
+        PreviewFile.revision.desc()
+    )
+    return PreviewFile.serialize_list(previews)
+
+
+def create_preview_file(
+    name,
+    revision,
+    task_id,
+    person_id,
+    is_movie,
+    source="webgui"
+):
+    return PreviewFile.create(
+        name=name,
+        revision=revision,
+        source=source,
+        task_id=task_id,
+        person_id=person_id,
+        is_movie=is_movie
+    )

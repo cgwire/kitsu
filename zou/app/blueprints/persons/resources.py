@@ -11,7 +11,7 @@ class NewPersonResource(Resource):
     @jwt_required
     def post(self):
         try:
-            permissions.check_manager_permissions()
+            permissions.check_admin_permissions()
             data = self.get_arguments()
             person = persons_service.create_person(
                 data["email"],

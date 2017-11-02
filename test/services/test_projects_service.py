@@ -18,7 +18,7 @@ class ProjectServiceTestCase(ApiDBTestCase):
     def test_get_open_projects(self):
         projects = projects_service.open_projects()
         self.assertEqual(len(projects), 1)
-        self.assertEqual("Cosmos Landromat", projects[0].name)
+        self.assertEqual("Cosmos Landromat", projects[0]["name"])
 
     def test_get_all_projects(self):
         projects = projects_service.all_projects()

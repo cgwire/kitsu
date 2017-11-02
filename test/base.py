@@ -61,7 +61,7 @@ class ApiTestCase(unittest.TestCase):
         self.log_in(self.user_manager.email)
 
     def log_in_cg_artist(self):
-        self.log_in(self.user_manager.email)
+        self.log_in(self.user_cg_artist.email)
 
     def log_out(self):
         try:
@@ -206,7 +206,7 @@ class ApiDBTestCase(ApiTestCase):
         dbhelpers.drop_all()
         dbhelpers.create_all()
         self.generate_fixture_user()
-        self.log_in(self.user.email)
+        self.log_in_admin()
 
     def tearDown(self):
         """
@@ -642,3 +642,13 @@ class ApiDBTestCase(ApiTestCase):
             relative_path
         )
         return file_path_fixture
+
+    def generate_assigned_task(self):
+        self.generate_fixture_entity_type()
+        self.generate_fixture_entity()
+        self.generate_fixture_department()
+        self.generate_fixture_task_type()
+        self.generate_fixture_task_status()
+        self.generate_fixture_person()
+        self.generate_fixture_assigner()
+        self.generate_fixture_task()

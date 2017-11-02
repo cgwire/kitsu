@@ -8,9 +8,10 @@ from zou.app.services import (
     breakdown_service,
     shots_service,
     tasks_service,
-    projects_service
+    projects_service,
+    user_service
 )
-from zou.app.utils import query
+from zou.app.utils import query, permissions
 
 from zou.app.services.exception import (
     EpisodeNotFoundException,
@@ -32,16 +33,24 @@ class ShotResource(Resource):
         """
         try:
             shot = shots_service.get_shot(shot_id)
+            if not permissions.has_manager_permissions():
+                user_service.check_has_task_related(shot["project_id"])
         except ShotNotFoundException:
             abort(404)
+        except permissions.PermissionDenied:
+            abort(403)
+
         return shot.serialize(obj_type="Shot")
 
     @jwt_required
     def delete(self, shot_id):
         try:
+            permissions.check_manager_permissions()
             deleted_shot = shots_service.remove_shot(shot_id)
         except ShotNotFoundException:
             abort(404)
+        except permissions.PermissionDenied:
+            abort(403)
 
         return deleted_shot, 204
 
@@ -56,7 +65,13 @@ class ShotsResource(Resource):
         """
         Retrieve all shot entries. Filters can be specified in the query string.
         """
-        criterions = query.get_query_criterions_from_request(request)
+        try:
+            criterions = query.get_query_criterions_from_request(request)
+            if not permissions.has_manager_permissions():
+                user_service.check_criterions_has_task_related(criterions)
+        except permissions.PermissionDenied:
+            abort(403)
+
         return shots_service.get_shots(criterions)
 
 
@@ -72,8 +87,12 @@ class ShotAssetsResource(Resource):
         """
         try:
             shot = shots_service.get_shot(shot_id)
+            if not permissions.has_manager_permissions():
+                user_service.check_has_task_related(shot["project_id"])
         except ShotNotFoundException:
             abort(404)
+        except permissions.PermissionDenied:
+            abort(403)
 
         return Entity.serialize_list(shot.entities_out, obj_type="Asset")
 
@@ -89,10 +108,14 @@ class ShotTaskTypesResource(Resource):
         Retrieve all task types related to a given shot.
         """
         try:
-            shots_service.get_shot(shot_id)
+            shot = shots_service.get_shot(shot_id)
+            if not permissions.has_manager_permissions():
+                user_service.check_has_task_related(shot["project_id"])
             task_types = tasks_service.get_task_types_for_shot(shot_id)
         except ShotNotFoundException:
             abort(404)
+        except permissions.PermissionDenied:
+            abort(403)
 
         return task_types
 
@@ -108,9 +131,15 @@ class ShotTasksResource(Resource):
         Retrieve all tasks related to a given shot.
         """
         try:
-            return tasks_service.get_tasks_for_shot(shot_id)
+            shot = shots_service.get_shot(shot_id)
+            if not permissions.has_manager_permissions():
+                user_service.check_has_task_related(shot["project_id"])
         except ShotNotFoundException:
             abort(404)
+        except permissions.PermissionDenied:
+            abort(403)
+
+        return tasks_service.get_tasks_for_shot(shot_id)
 
 
 class SequenceTasksResource(Resource):
@@ -124,9 +153,15 @@ class SequenceTasksResource(Resource):
         Retrieve all tasks related to a given shot.
         """
         try:
-            return tasks_service.get_tasks_for_sequence(sequence_id)
+            sequence = shots_service.get_sequence(sequence_id)
+            if not permissions.has_manager_permissions():
+                user_service.check_has_task_related(sequence["project_id"])
         except SequenceNotFoundException:
             abort(404)
+        except permissions.PermissionDenied:
+            abort(403)
+
+        return tasks_service.get_tasks_for_sequence(sequence_id)
 
 
 class SequenceTaskTypesResource(Resource):
@@ -140,9 +175,15 @@ class SequenceTaskTypesResource(Resource):
         Retrieve all task types related to a given shot.
         """
         try:
-            return tasks_service.get_task_types_for_sequence(sequence_id)
+            sequence = shots_service.get_sequenc(sequence_id)
+            if not permissions.has_manager_permissions():
+                user_service.check_has_task_related(sequence["project_id"])
         except SequenceNotFoundException:
             abort(404)
+        except permissions.PermissionDenied:
+            abort(403)
+
+        return tasks_service.get_task_types_for_sequence(sequence_id)
 
 
 class ShotsAndTasksResource(Resource):
@@ -156,7 +197,13 @@ class ShotsAndTasksResource(Resource):
         Retrieve all shots, adds project name and asset type name and all
         related tasks.
         """
-        criterions = query.get_query_criterions_from_request(request)
+        try:
+            criterions = query.get_query_criterions_from_request(request)
+            if not permissions.has_manager_permissions():
+                user_service.check_criterions_has_task_related(criterions)
+        except permissions.PermissionDenied:
+            abort(403)
+
         return shots_service.get_shots_and_tasks(criterions)
 
 
@@ -172,12 +219,17 @@ class ProjectShotsResource(Resource):
         """
         try:
             project = projects_service.get_project(project_id)
-            return Entity.serialize_list(
-                shots_service.get_shots_for_project(project),
-                obj_type="Shot"
-            )
+            if not permissions.has_manager_permissions():
+                user_service.check_has_task_related(project_id)
         except ProjectNotFoundException:
             abort(404)
+        except permissions.PermissionDenied:
+            abort(403)
+
+        return Entity.serialize_list(
+            shots_service.get_shots_for_project(project),
+            obj_type="Shot"
+        )
 
 
 class ProjectSequencesResource(Resource):
@@ -192,12 +244,17 @@ class ProjectSequencesResource(Resource):
         """
         try:
             project = projects_service.get_project(project_id)
-            return Entity.serialize_list(
-                shots_service.get_sequences_for_project(project),
-                obj_type="Sequence"
-            )
+            if not permissions.has_manager_permissions():
+                user_service.check_has_task_related(project_id)
         except ProjectNotFoundException:
             abort(404)
+        except permissions.PermissionDenied:
+            abort(403)
+
+        return Entity.serialize_list(
+            shots_service.get_sequences_for_project(project),
+            obj_type="Sequence"
+        )
 
 
 class ProjectEpisodesResource(Resource):
@@ -212,12 +269,17 @@ class ProjectEpisodesResource(Resource):
         """
         try:
             project = projects_service.get_project(project_id)
-            return Entity.serialize_list(
-                shots_service.get_episodes_for_project(project),
-                obj_type="Episode"
-            )
+            if not permissions.has_manager_permissions():
+                user_service.check_has_task_related(project_id)
         except ProjectNotFoundException:
             abort(404)
+        except permissions.PermissionDenied:
+            abort(403)
+
+        return Entity.serialize_list(
+            shots_service.get_episodes_for_project(project),
+            obj_type="Episode"
+        )
 
 
 class EpisodeResource(Resource):
@@ -232,8 +294,12 @@ class EpisodeResource(Resource):
         """
         try:
             episode = shots_service.get_episode(episode_id)
+            if not permissions.has_manager_permissions():
+                user_service.check_has_task_related(episode["project_id"])
         except EpisodeNotFoundException:
             abort(404)
+        except permissions.PermissionDenied:
+            abort(403)
         return episode.serialize(obj_type="Episode")
 
 
@@ -248,8 +314,13 @@ class EpisodesResource(Resource):
         Retrieve all episode entries. Filters can be specified in the query
         string.
         """
-        criterions = query.get_query_criterions_from_request(request)
-        episodes = shots_service.get_episodes(criterions)
+        try:
+            criterions = query.get_query_criterions_from_request(request)
+            if not permissions.has_manager_permissions():
+                user_service.check_criterions_has_task_related(criterions)
+            episodes = shots_service.get_episodes(criterions)
+        except permissions.PermissionDenied:
+            abort(403)
         return Entity.serialize_list(episodes, obj_type="Episode")
 
 
@@ -264,9 +335,16 @@ class EpisodeSequencesResource(Resource):
         Retrieve all sequence entries for a given episode.
         Filters can be specified in the query string.
         """
-        criterions = query.get_query_criterions_from_request(request)
-        criterions["parent_id"] = episode_id
-        sequences = shots_service.get_sequences(criterions)
+        try:
+            episode = shots_service.get_episode(episode_id)
+            if not permissions.has_manager_permissions():
+                user_service.check_has_task_related(episode["project_id"])
+
+            criterions = query.get_query_criterions_from_request(request)
+            criterions["parent_id"] = episode_id
+            sequences = shots_service.get_sequences(criterions)
+        except permissions.PermissionDenied:
+            abort(403)
         return Entity.serialize_list(sequences, obj_type="Sequence")
 
 
@@ -282,8 +360,13 @@ class SequenceResource(Resource):
         """
         try:
             sequence = shots_service.get_sequence(sequence_id)
+            if not permissions.has_manager_permissions():
+                user_service.check_has_task_related(sequence["project_id"])
         except SequenceNotFoundException:
             abort(404)
+        except permissions.PermissionDenied:
+            abort(403)
+
         return sequence.serialize(obj_type="Sequence")
 
 
@@ -298,8 +381,14 @@ class SequencesResource(Resource):
         Retrieve all sequence entries. Filters can be specified in the query
         string.
         """
-        criterions = query.get_query_criterions_from_request(request)
-        sequences = shots_service.get_sequences(criterions)
+        try:
+            criterions = query.get_query_criterions_from_request(request)
+            if not permissions.has_manager_permissions():
+                user_service.check_criterions_has_task_related(criterions)
+            sequences = shots_service.get_sequences(criterions)
+        except permissions.PermissionDenied:
+            abort(403)
+
         return Entity.serialize_list(sequences, obj_type="Sequence")
 
 
@@ -314,8 +403,15 @@ class SequenceShotsResource(Resource):
         Retrieve all shot entries for a given sequence.
         Filters can be specified in the query string.
         """
-        criterions = query.get_query_criterions_from_request(request)
-        criterions["parent_id"] = sequence_id
+        try:
+            sequence = shots_service.get_sequence(sequence_id)
+            if not permissions.has_manager_permissions():
+                user_service.check_has_task_related(sequence["project_id"])
+            criterions = query.get_query_criterions_from_request(request)
+            criterions["parent_id"] = sequence_id
+        except permissions.PermissionDenied:
+            abort(403)
+
         return shots_service.get_shots(criterions)
 
 
@@ -330,11 +426,15 @@ class CastingResource(Resource):
         Resource to retrieve the casting of a given shot.
         """
         try:
-
             shot = shots_service.get_shot(shot_id)
-            return breakdown_service.get_casting(shot)
+            if not permissions.has_manager_permissions():
+                user_service.check_has_task_related(shot["project_id"])
         except ShotNotFoundException:
             abort(404)
+        except permissions.PermissionDenied:
+            abort(403)
+
+        return breakdown_service.get_casting(shot)
 
     @jwt_required
     def put(self, shot_id):
@@ -344,6 +444,10 @@ class CastingResource(Resource):
         casting = request.json
         try:
             shot = shots_service.get_shot(shot_id)
-            return breakdown_service.update_casting(shot, casting)
+            permissions.check_manager_permissions()
         except ShotNotFoundException:
             abort(404)
+        except permissions.PermissionDenied:
+            abort(403)
+
+        return breakdown_service.update_casting(shot, casting)

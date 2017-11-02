@@ -26,3 +26,5 @@ babel==2.4.0
 
 gunicorn
 gevent
+
+moviepy

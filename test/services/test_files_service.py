@@ -183,7 +183,6 @@ class FileServiceTestCase(ApiDBTestCase):
             short_name="cch"
         )
 
-        self.generate_fixture_output_file(geometry, 1)
         self.generate_fixture_output_file(geometry, 2)
         self.generate_fixture_output_file(geometry, 3)
         self.generate_fixture_output_file(geometry, 4)

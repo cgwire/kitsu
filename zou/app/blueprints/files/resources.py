@@ -12,6 +12,7 @@ from zou.app.services import (
     persons_service,
     projects_service,
     tasks_service,
+    user_service
 )
 
 from zou.app.services.exception import (
@@ -29,6 +30,10 @@ from zou.app.services.exception import (
 
 
 class FolderPathResource(Resource):
+    """
+    Return folder path corresponding at given task and parameters. Path is built
+    from file templae.
+    """
 
     def __init__(self):
         Resource.__init__(self)
@@ -46,6 +51,8 @@ class FolderPathResource(Resource):
 
         try:
             task = tasks_service.get_task(task_id)
+            if not permissions.has_manager_permissions():
+                user_service.check_has_task_related(task.project_id)
             output_type = files_service.get_output_type(output_type_id)
             software = files_service.get_software(software_id)
             path = file_tree.get_folder_path(
@@ -57,31 +64,29 @@ class FolderPathResource(Resource):
                 name=name,
                 sep=separator
             )
-
         except TaskNotFoundException:
             return {
                 "error": "Given task does not exist.",
                 "received_data": request.json,
             }, 404
-
         except OutputTypeNotFoundException:
             return {
                 "error": "Given output type does not exist.",
                 "received_data": request.json,
             }, 400
-
         except SoftwareNotFoundException:
             return {
                 "error": "Given software does not exist.",
                 "received_data": request.json,
             }, 400
-
         except MalformedFileTreeException:
             return {
                 "error":
                     "Tree is not properly written, check modes and variables",
                 "received_data": request.json,
             }, 400
+        except permissions.PermissionDenied:
+            abort(403)
 
         return {"path": path}, 200
 
@@ -128,6 +133,9 @@ class FilePathResource(Resource):
 
         try:
             task = tasks_service.get_task(task_id)
+            if not permissions.has_manager_permissions():
+                user_service.check_has_task_related(task.project_id)
+
             output_type = files_service.get_output_type(output_type_id)
             software = files_service.get_software(software_id)
             is_version_set_by_user = version == 0
@@ -152,19 +160,19 @@ class FilePathResource(Resource):
                 scene=scene,
                 name=name
             )
-
         except TaskNotFoundException:
             return {
                 "error": "Given task does not exist.",
                 "received_data": request.json,
             }, 404
-
         except MalformedFileTreeException:
             return {
                 "error":
                     "Tree is not properly written, check modes and variables",
                 "received_data": request.json,
             }, 400
+        except permissions.PermissionDenied:
+            abort(403)
 
         return {"path": file_path, "name": file_name}, 200
 
@@ -253,13 +261,9 @@ class GetTaskFromPathResource(Resource):
 
         try:
             project = projects_service.get_project(project_id)
-        except ProjectNotFoundException:
-            return {
-                "error": "Given project does not exist.",
-                "received_data": request.json,
-            }, 400
+            if not permissions.has_manager_permissions():
+                user_service.check_has_task_related(project_id)
 
-        try:
             if path_type == "shot":
                 task = file_tree.get_shot_task_from_path(
                     file_path,
@@ -275,6 +279,12 @@ class GetTaskFromPathResource(Resource):
                     sep
                 )
 
+        except ProjectNotFoundException:
+            return {
+                "error": "Given project does not exist.",
+                "received_data": request.json,
+            }, 400
+
         except WrongPathFormatException:
             return {
                 "error": "The given path lacks of information..",
@@ -285,6 +295,8 @@ class GetTaskFromPathResource(Resource):
                 "error": "No task exist for this path.",
                 "received_data": request.json
             }, 400
+        except permissions.PermissionDenied:
+            abort(403)
 
         return task.serialize()
 
@@ -323,7 +335,17 @@ class CommentWorkingFileResource(Resource):
     @jwt_required
     def put(self, working_file_id):
         comment = self.get_comment_from_args()
-        working_file = self.update_comment(working_file_id, comment)
+        try:
+            working_file = files_service.get_working_file(working_file_id)
+            task = tasks_service.get_task(working_file.task_id)
+            if not permissions.has_manager_permissions():
+                task = user_service.check_has_task_related(task.project_id)
+            working_file = self.update_comment(working_file_id, comment)
+        except WorkingFileNotFoundException:
+            abort(404)
+        except permissions.PermissionDenied:
+            abort(403)
+
         return working_file.serialize(), 200
 
     def get_comment_from_args(self):
@@ -361,6 +383,8 @@ class NewOutputFileResource(Resource):
 
         try:
             task = tasks_service.get_task(task_id)
+            if not permissions.has_manager_permissions():
+                task = user_service.check_has_task_related(task.project_id)
             output_type = files_service.get_output_type(output_type_id)
             working_file = files_service.get_working_file(working_file_id)
             person = persons_service.get_person(person_id)
@@ -388,13 +412,12 @@ class NewOutputFileResource(Resource):
 
         except TaskNotFoundException:
             abort(404)
-
         except WorkingFileNotFoundException:
             abort(404)
-
+        except permissions.PermissionDenied:
+            abort(403)
         except OutputTypeNotFoundException:
             return {"error": "Cannot find given output type."}, 400
-
         except PersonNotFoundException:
             return {"error": "Cannot find given person."}, 400
 
@@ -468,11 +491,15 @@ class GetNextOutputFileResource(Resource):
         try:
             name = self.get_arguments()
             task = tasks_service.get_task(task_id)
+            if not permissions.has_manager_permissions():
+                task = user_service.check_has_task_related(task.project_id)
             output_type = files_service.get_output_type(output_type_id)
         except TaskNotFoundException:
             abort(404)
         except OutputFileNotFoundException:
             abort(404)
+        except permissions.PermissionDenied:
+            abort(403)
 
         next_revision_number = \
             files_service.get_next_output_file_revision(
@@ -498,9 +525,13 @@ class LastWorkingFilesResource(Resource):
         result = {}
         try:
             task = tasks_service.get_task(task_id)
+            if not permissions.has_manager_permissions():
+                task = user_service.check_has_task_related(task.project_id)
             result = files_service.get_last_working_files_for_task(task.id)
         except TaskNotFoundException:
             abort(404)
+        except permissions.PermissionDenied:
+            abort(403)
 
         return result
 
@@ -512,9 +543,13 @@ class LastOutputFilesResource(Resource):
         result = {}
         try:
             task = tasks_service.get_task(task_id)
+            if not permissions.has_manager_permissions():
+                task = user_service.check_has_task_related(task.project_id)
             result = files_service.get_last_output_files_for_task(task.id)
         except TaskNotFoundException:
             abort(404)
+        except permissions.PermissionDenied:
+            abort(403)
 
         return result
 
@@ -526,9 +561,13 @@ class TaskWorkingFilesResource(Resource):
         result = {}
         try:
             task = tasks_service.get_task(task_id)
+            if not permissions.has_manager_permissions():
+                task = user_service.check_has_task_related(task.project_id)
             result = files_service.get_working_files_for_task(task.id)
         except TaskNotFoundException:
             abort(404)
+        except permissions.PermissionDenied:
+            abort(403)
 
         return result
 
@@ -552,6 +591,8 @@ class NewWorkingFileResource(Resource):
 
         try:
             task = tasks_service.get_task(task_id)
+            if not permissions.has_manager_permissions():
+                task = user_service.check_has_task_related(task.project_id)
             software = files_service.get_software(software_id)
             tasks_service.assign_task(task, persons_service.get_current_user())
 
@@ -574,6 +615,8 @@ class NewWorkingFileResource(Resource):
             )
         except TaskNotFoundException:
             abort(404)
+        except permissions.PermissionDenied:
+            abort(403)
 
         return working_file, 201
 
@@ -629,8 +672,35 @@ class ModifiedFileResource(Resource):
     def put(self, working_file_id):
         try:
             working_file = files_service.get_working_file(working_file_id)
+            task = tasks_service.get_task(working_file.task_id)
+            if not permissions.has_manager_permissions():
+                task = user_service.check_has_task_related(task.project_id)
             working_file.update({"updated_at": datetime.datetime.utcnow()})
         except WorkingFileNotFoundException:
             abort(404)
+        except permissions.PermissionDenied:
+            abort(403)
 
         return working_file.serialize()
+
+
+class FileResource(Resource):
+
+    @jwt_required
+    def get(self, file_id):
+        try:
+            file_dict = files_service.get_working_file(file_id).serialize()
+        except WorkingFileNotFoundException:
+            try:
+                file_dict = files_service.get_output_file(file_id).serialize()
+            except OutputFileNotFoundException:
+                abort(404)
+
+        try:
+            if not permissions.has_manager_permissions():
+                task = tasks_service.get_task(file_dict["task_id"])
+                user_service.check_has_task_related(task.project_id)
+        except permissions.PermissionDenied:
+            abort(403)
+
+        return file_dict
