@@ -1,5 +1,6 @@
 import peopleApi from '../api/people'
 import auth from '../../lib/auth'
+import { sortTasks } from '../../lib/sorting'
 import {
   USER_LOGIN,
   USER_LOGOUT,
@@ -172,7 +173,7 @@ const mutations = {
   },
   [USER_LOAD_TODOS_END] (state, tasks) {
     state.isTodosLoading = false
-    state.todos = tasks
+    state.todos = sortTasks(tasks)
   },
   [USER_LOAD_TODOS_ERROR] (state, tasks) {
     state.isTodosLoadingError = true

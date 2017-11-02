@@ -26,6 +26,14 @@ export const sortProductions = (productions) => {
   })
 }
 
+export const sortTasks = (tasks) => {
+  return tasks.sort(
+    firstBy((a, b) => a.project_name.localeCompare(b.project_name))
+      .thenBy((a, b) => a.entity_name.localeCompare(b.entity_name))
+      .thenBy((a, b) => a.task_type_name.localeCompare(b.task_type_name))
+  )
+}
+
 export const sortByName = (entries) => {
   return entries.sort((a, b) => a.name.localeCompare(b.name))
 }
