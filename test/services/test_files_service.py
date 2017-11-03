@@ -1,3 +1,5 @@
+import pytest
+
 from test.base import ApiDBTestCase
 
 from zou.app import app
@@ -6,7 +8,8 @@ from zou.app.models.software import Software
 from zou.app.services.exception import (
     WorkingFileNotFoundException,
     SoftwareNotFoundException,
-    OutputFileNotFoundException
+    OutputFileNotFoundException,
+    EntryAlreadyExistsException
 )
 
 
@@ -124,6 +127,16 @@ class FileServiceTestCase(ApiDBTestCase):
         working_files = files_service.get_working_files_for_task(self.task.id)
         self.assertEqual(working_file["revision"], 2)
         self.assertEquals(len(working_files), 2)
+
+        with pytest.raises(EntryAlreadyExistsException):
+            working_file = files_service.create_new_working_revision(
+                self.task.id,
+                self.person.id,
+                self.software.id,
+                "main",
+                "/path",
+                revision=2
+            )
 
     def test_get_last_output_revision(self):
         output_file = files_service.create_new_output_revision(

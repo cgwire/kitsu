@@ -96,3 +96,7 @@ class CommentNotFoundException(Exception):
 
 class EntityNotFoundException(Exception):
     pass
+
+
+class EntryAlreadyExistsException(Exception):
+    pass

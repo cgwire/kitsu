@@ -124,6 +124,21 @@ class TaskLastWorkingFilesTestCase(ApiDBTestCase):
             "3ds_max/cosmos_landromat_props_tree_shaders_main_v066"
         )
 
+    def test_create_same_working_file(self):
+        path = "/data/tasks/%s/working-files/new" % self.task_id
+        self.post(path, {
+            "name": "main",
+            "description": "description test",
+            "comment": "comment test",
+            "revision": 66
+        })
+        self.post(path, {
+            "name": "main",
+            "description": "description test",
+            "comment": "comment test",
+            "revision": 66
+        }, 400)
+
     def test_update_modification_date(self):
         path = "/actions/working-files/%s/modified" % self.working_file.id
         previous_date = self.working_file.serialize()["updated_at"]

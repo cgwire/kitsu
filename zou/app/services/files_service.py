@@ -14,11 +14,12 @@ from zou.app.services.exception import (
     OutputTypeNotFoundException,
     PreviewFileNotFoundException,
     SoftwareNotFoundException,
-    NoOutputFileException
+    NoOutputFileException,
+    EntryAlreadyExistsException
 )
 
 from sqlalchemy import desc
-from sqlalchemy.exc import StatementError
+from sqlalchemy.exc import StatementError, IntegrityError
 
 
 def get_default_status():
@@ -140,16 +141,19 @@ def create_new_working_revision(
     if revision == 0:
         revision = get_next_working_revision(task_id, name)
 
-    working_file = WorkingFile.create(
-        comment=comment,
-        name=name,
-        revision=revision,
-        path=path,
-        task_id=task.id,
-        software_id=software_id,
-        entity_id=task.entity_id,
-        person_id=person_id
-    )
+    try:
+        working_file = WorkingFile.create(
+            comment=comment,
+            name=name,
+            revision=revision,
+            path=path,
+            task_id=task.id,
+            software_id=software_id,
+            entity_id=task.entity_id,
+            person_id=person_id
+        )
+    except IntegrityError:
+        raise EntryAlreadyExistsException
 
     return working_file.serialize()
 

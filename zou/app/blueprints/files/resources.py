@@ -25,7 +25,8 @@ from zou.app.services.exception import (
     TaskNotFoundException,
     WrongFileTreeFileException,
     WrongPathFormatException,
-    MalformedFileTreeException
+    MalformedFileTreeException,
+    EntryAlreadyExistsException
 )
 
 
@@ -613,6 +614,8 @@ class NewWorkingFileResource(Resource):
                 comment=comment,
                 revision=revision
             )
+        except EntryAlreadyExistsException:
+            return {"error": "The given working_file already exists."}, 400
         except TaskNotFoundException:
             abort(404)
         except permissions.PermissionDenied:
