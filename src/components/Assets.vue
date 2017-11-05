@@ -1,7 +1,7 @@
 <template>
 <div class="assets page fixed-page">
 
-  <div class="asset-list-header">
+  <div class="asset-list-header page-header">
     <div class="level header-title">
       <div class="level-left">
         <div class="level-item">
@@ -457,6 +457,6 @@ export default {
 
 <style scoped>
 .data-list {
-  min-height: 200px;
+  margin-top: 0;
 }
 </style>

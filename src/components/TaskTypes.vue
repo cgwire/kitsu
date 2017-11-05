@@ -1,20 +1,18 @@
 <template>
   <div class="task-types page fixed-page">
-    <div class="task-types-list">
-      <div class="level">
-        <div class="level-left">
-          <page-title :text="$t('task_types.title')"></page-title>
-        </div>
-        <div class="level-right">
-          <div class="level-item">
-            <button-link
-              class="level-item"
-              icon="plus"
-              :text="$t('task_types.new_task_type')"
-              path="/task-types/new"
-            >
-            </button-link>
-          </div>
+    <div class="level page-header">
+      <div class="level-left">
+        <page-title :text="$t('task_types.title')"></page-title>
+      </div>
+      <div class="level-right">
+        <div class="level-item">
+          <button-link
+            class="level-item"
+            icon="plus"
+            :text="$t('task_types.new_task_type')"
+            path="/task-types/new"
+          >
+          </button-link>
         </div>
       </div>
     </div>

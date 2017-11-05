@@ -145,8 +145,15 @@ input.search-input:focus {
   bottom: 0;
   display: flex;
   flex-direction: column;
+  padding-top: 60px;
 
   min-height: 0;
+}
+
+.page-header,
+.page-header.level {
+  margin-top: 2em;
+  margin-bottom: 0;
 }
 
 .data-list {

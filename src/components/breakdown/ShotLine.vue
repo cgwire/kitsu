@@ -49,5 +49,6 @@ export default {
 
 .shot.selected {
   background: #D1C4E9;
+  border: 0;
 }
 </style>

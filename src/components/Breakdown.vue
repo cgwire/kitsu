@@ -1,6 +1,7 @@
 <template>
   <div class="breakdown page">
-    <page-title :text="$t('breakdown.title')"></page-title>
+    <page-title :text="$t('breakdown.title')" class="page-header">
+    </page-title>
     <div class="breakdown-columns">
 
       <div class="breakdown-column shot-column">
