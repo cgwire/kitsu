@@ -1,5 +1,5 @@
 from sqlalchemy.orm import aliased
-from sqlalchemy.exc import IntegrityError
+from sqlalchemy.exc import IntegrityError, StatementError
 
 from zou.app.utils import events, fields
 
@@ -213,10 +213,13 @@ def get_shot(instance_id):
 
 def get_sequence(instance_id):
     sequence_type = get_sequence_type()
-    sequence = Entity.get_by(
-        entity_type_id=sequence_type.id,
-        id=instance_id
-    )
+    try:
+        sequence = Entity.get_by(
+            entity_type_id=sequence_type.id,
+            id=instance_id
+        )
+    except StatementError:
+        raise SequenceNotFoundException
     if sequence is None:
         raise SequenceNotFoundException
 
@@ -249,10 +252,14 @@ def get_sequence_by_shotgun_id(shotgun_id):
 
 def get_episode(instance_id):
     episode_type = get_episode_type()
-    episode = Entity.get_by(
-        entity_type_id=episode_type.id,
-        id=instance_id
-    )
+    try:
+        episode = Entity.get_by(
+            entity_type_id=episode_type.id,
+            id=instance_id
+        )
+    except StatementError:
+        raise EpisodeNotFoundException
+
     if episode is None:
         raise EpisodeNotFoundException
 

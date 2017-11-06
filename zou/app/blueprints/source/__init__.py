@@ -21,6 +21,10 @@ from .shotgun.sequence import (
     ImportShotgunSequencesResource,
     ImportRemoveShotgunSequenceResource
 )
+from .shotgun.episode import (
+    ImportShotgunEpisodesResource,
+    ImportRemoveShotgunEpisodeResource
+)
 from .shotgun.assets import (
     ImportShotgunAssetsResource,
     ImportRemoveShotgunAssetResource
@@ -60,6 +64,7 @@ routes = [
     ("/import/shotgun/persons", ImportShotgunPersonsResource),
     ("/import/shotgun/projects", ImportShotgunProjectsResource),
     ("/import/shotgun/shots", ImportShotgunShotsResource),
+    ("/import/shotgun/episodes", ImportShotgunEpisodesResource),
     ("/import/shotgun/sequences", ImportShotgunSequencesResource),
     ("/import/shotgun/assets", ImportShotgunAssetsResource),
     ("/import/shotgun/steps", ImportShotgunStepsResource),
@@ -72,6 +77,7 @@ routes = [
     ("/import/shotgun/remove/project", ImportRemoveShotgunProjectResource),
     ("/import/shotgun/remove/person", ImportRemoveShotgunPersonResource),
     ("/import/shotgun/remove/shot", ImportRemoveShotgunShotResource),
+    ("/import/shotgun/remove/episode", ImportRemoveShotgunEpisodeResource),
     ("/import/shotgun/remove/sequence", ImportRemoveShotgunSequenceResource),
     ("/import/shotgun/remove/asset", ImportRemoveShotgunAssetResource),
     ("/import/shotgun/remove/step", ImportRemoveShotgunStepResource),

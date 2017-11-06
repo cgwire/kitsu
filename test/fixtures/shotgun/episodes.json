@@ -1,0 +1,35 @@
+[
+  {
+    "project": {
+      "type": "Project", 
+      "id": 1, 
+      "name": "Agent327"
+    }, 
+    "code": "E01", 
+    "type": "Episode", 
+    "id": 1, 
+    "description": null
+  },  
+  {
+    "project": {
+      "type": "Project", 
+      "id": 1, 
+      "name": "Agent327"
+    }, 
+    "code": "E02", 
+    "type": "Episode", 
+    "id": 2, 
+    "description": null
+  },
+  {
+    "project": {
+      "type": "Project", 
+      "id": 1, 
+      "name": "Agent327"
+    }, 
+    "code": "E03", 
+    "type": "Episode", 
+    "id": 3, 
+    "description": null
+  }
+]
