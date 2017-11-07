@@ -29,10 +29,10 @@ class PublishFileTestCase(ApiDBTestCase):
         self.generate_fixture_shot_working_file()
         self.task_id = self.task.id
         self.tx_type_id = str(
-            files_service.get_or_create_output_type("tx").id
+            files_service.get_or_create_output_type("tx")["id"]
         )
         self.cache_type_id = str(
-            files_service.get_or_create_output_type("Cache").id
+            files_service.get_or_create_output_type("Cache")["id"]
         )
         self.person_id = self.person.id
         self.working_file_id = str(self.working_file.id)

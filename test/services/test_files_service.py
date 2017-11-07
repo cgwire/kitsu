@@ -41,11 +41,11 @@ class FileServiceTestCase(ApiDBTestCase):
 
     def test_get_default_status(self):
         file_status = files_service.get_default_status()
-        self.assertEqual(file_status.name, app.config["DEFAULT_FILE_STATUS"])
+        self.assertEqual(file_status["name"], app.config["DEFAULT_FILE_STATUS"])
 
     def test_get_working_file(self):
         working_file = files_service.get_working_file(self.working_file.id)
-        self.assertEqual(working_file.id, self.working_file.id)
+        self.assertEqual(working_file["id"], str(self.working_file.id))
         self.assertRaises(
             WorkingFileNotFoundException,
             files_service.get_working_file,
@@ -54,7 +54,7 @@ class FileServiceTestCase(ApiDBTestCase):
 
     def test_get_output_file(self):
         output_file = files_service.get_output_file(self.output_file.id)
-        self.assertEqual(output_file.id, self.output_file.id)
+        self.assertEqual(output_file["id"], str(self.output_file.id))
         self.assertRaises(
             OutputFileNotFoundException,
             files_service.get_output_file,
@@ -63,7 +63,7 @@ class FileServiceTestCase(ApiDBTestCase):
 
     def test_get_software(self):
         software = files_service.get_software(self.software.id)
-        self.assertEqual(software.id, self.software.id)
+        self.assertEqual(software["id"], str(self.software.id))
         self.assertRaises(
             SoftwareNotFoundException,
             files_service.get_software,
@@ -74,8 +74,10 @@ class FileServiceTestCase(ApiDBTestCase):
         self.assertIsNone(Software.get_by(name="Maya"))
         software = files_service.get_or_create_software("Maya", "may", ".ma")
         self.assertIsNotNone(Software.get_by(name="Maya"))
-        software_again = files_service.get_or_create_software("Maya", "may", ".ma")
-        self.assertEqual(software.id, software_again.id)
+        software_again = files_service.get_or_create_software(
+            "Maya", "may", ".ma"
+        )
+        self.assertEqual(software["id"], software_again["id"])
 
     def test_get_working_files_for_task(self):
         self.generate_fixture_working_file(name="main", revision=2)
@@ -155,7 +157,7 @@ class FileServiceTestCase(ApiDBTestCase):
             self.person.id,
             "comment"
         )
-        self.assertEqual(output_file.revision, 3)
+        self.assertEqual(output_file["revision"], 3)
 
     def test_get_next_output_file_revision(self):
         revision = files_service.get_next_output_file_revision(
@@ -174,7 +176,7 @@ class FileServiceTestCase(ApiDBTestCase):
             self.output_type.id,
             self.person.id
         )
-        self.assertEqual(output_file.revision, 1)
+        self.assertEqual(output_file["revision"], 1)
         output_file = files_service.create_new_output_revision(
             self.entity.id,
             self.task.id,
@@ -182,12 +184,12 @@ class FileServiceTestCase(ApiDBTestCase):
             self.output_type.id,
             self.person.id
         )
-        self.assertEqual(output_file.revision, 2)
+        self.assertEqual(output_file["revision"], 2)
         output_file = files_service.get_last_output_revision(
             self.task.id,
             self.output_type.id
         )
-        self.assertEqual(output_file.revision, 2)
+        self.assertEqual(output_file["revision"], 2)
 
     def test_get_last_output_files_for_task(self):
         geometry = self.output_type

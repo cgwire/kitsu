@@ -98,8 +98,8 @@ class FolderPathResource(Resource):
 
         parser.add_argument("mode", default="working")
         parser.add_argument("sep", default="/")
-        parser.add_argument("software_id", default=maxsoft.id)
-        parser.add_argument("output_type_id", default=geometry_type.id)
+        parser.add_argument("software_id", default=maxsoft["id"])
+        parser.add_argument("output_type_id", default=geometry_type["id"])
         parser.add_argument("scene", default=1)
         parser.add_argument("name", default="name")
         args = parser.parse_args()
@@ -195,8 +195,8 @@ class FilePathResource(Resource):
         parser.add_argument("mode", default="working")
         parser.add_argument("comment", default="")
         parser.add_argument("version", default=0)
-        parser.add_argument("software_id", default=maxsoft.id)
-        parser.add_argument("output_type_id", default=geometry_type.id)
+        parser.add_argument("software_id", default=maxsoft["id"])
+        parser.add_argument("output_type_id", default=geometry_type["id"])
         parser.add_argument("scene", default=1)
         parser.add_argument("name", default="")
         parser.add_argument("sep", default="/")
@@ -338,7 +338,7 @@ class CommentWorkingFileResource(Resource):
         comment = self.get_comment_from_args()
         try:
             working_file = files_service.get_working_file(working_file_id)
-            task = tasks_service.get_task(working_file.task_id)
+            task = tasks_service.get_task(working_file["task_id"])
             if not permissions.has_manager_permissions():
                 task = user_service.check_has_task_related(task.project_id)
             working_file = self.update_comment(working_file_id, comment)
@@ -347,7 +347,7 @@ class CommentWorkingFileResource(Resource):
         except permissions.PermissionDenied:
             abort(403)
 
-        return working_file.serialize(), 200
+        return working_file, 200
 
     def get_comment_from_args(self):
         parser = reqparse.RequestParser()
@@ -361,10 +361,10 @@ class CommentWorkingFileResource(Resource):
         return comment
 
     def update_comment(self, working_file_id, comment):
-        working_file = files_service.get_working_file(working_file_id)
-        working_file.update({
-            "comment": comment
-        })
+        working_file = files_service.update_working_file(
+            working_file_id,
+            {"comment": comment}
+        )
         return working_file
 
 
@@ -393,11 +393,11 @@ class NewOutputFileResource(Resource):
             output_file = files_service.create_new_output_revision(
                 task.entity_id,
                 task.id,
-                working_file.id,
-                output_type.id,
+                working_file["id"],
+                output_type["id"],
                 person["id"],
                 comment,
-                name=working_file.name,
+                name=working_file["name"],
                 revision=revision
             )
 
@@ -407,7 +407,7 @@ class NewOutputFileResource(Resource):
                 task,
                 output_type,
                 scene,
-                working_file.name,
+                working_file["name"],
                 separator
             )
 
@@ -427,7 +427,7 @@ class NewOutputFileResource(Resource):
     def get_arguments(self):
         parser = reqparse.RequestParser()
         output_type = files_service.get_or_create_output_type("Geometry")
-        parser.add_argument("output_type_id", default=output_type.id)
+        parser.add_argument("output_type_id", default=output_type["id"])
         parser.add_argument("person_id", default="")
         parser.add_argument("comment", default="")
         parser.add_argument("scene", default=1)
@@ -446,7 +446,7 @@ class NewOutputFileResource(Resource):
 
     def add_path_info(
         self,
-        file_model,
+        output_file,
         mode,
         task,
         output_type,
@@ -454,8 +454,6 @@ class NewOutputFileResource(Resource):
         name,
         separator=os.sep
     ):
-        file_dict = file_model.serialize()
-
         folder_path = file_tree.get_folder_path(
             task,
             mode=mode,
@@ -467,22 +465,22 @@ class NewOutputFileResource(Resource):
         file_name = file_tree.get_file_name(
             task,
             mode=mode,
-            version=file_dict["revision"],
+            version=output_file["revision"],
             output_type=output_type,
             name=name,
             scene=scene
         )
 
-        file_dict.update({
+        output_file.update({
             "folder_path": folder_path,
             "file_name": file_name
         })
 
-        file_model.update({
-            "path": "%s%s%s" % (folder_path, separator, file_name)
-        })
-
-        return file_dict
+        files_service.update_output_file(
+            output_file["id"],
+            {"path": "%s%s%s" % (folder_path, separator, file_name)}
+        )
+        return output_file
 
 
 class GetNextOutputFileResource(Resource):
@@ -505,7 +503,7 @@ class GetNextOutputFileResource(Resource):
         next_revision_number = \
             files_service.get_next_output_file_revision(
                 task.id,
-                output_type.id,
+                output_type["id"],
                 name
             )
 
@@ -653,7 +651,7 @@ class NewWorkingFileResource(Resource):
         parser.add_argument("description", default="")
         parser.add_argument("comment", default="")
         parser.add_argument("person_id", default=person["id"])
-        parser.add_argument("software_id", default=maxsoft.id)
+        parser.add_argument("software_id", default=maxsoft["id"])
         parser.add_argument("revision", default=0, type=int)
         parser.add_argument("sep", default="/")
         args = parser.parse_args()
@@ -678,16 +676,19 @@ class ModifiedFileResource(Resource):
     def put(self, working_file_id):
         try:
             working_file = files_service.get_working_file(working_file_id)
-            task = tasks_service.get_task(working_file.task_id)
+            task = tasks_service.get_task(working_file["task_id"])
             if not permissions.has_manager_permissions():
                 task = user_service.check_has_task_related(task.project_id)
-            working_file.update({"updated_at": datetime.datetime.utcnow()})
+            working_file = files_service.update_working_file(
+                working_file_id,
+                {"updated_at": datetime.datetime.utcnow()}
+            )
         except WorkingFileNotFoundException:
             abort(404)
         except permissions.PermissionDenied:
             abort(403)
 
-        return working_file.serialize()
+        return working_file
 
 
 class FileResource(Resource):
@@ -695,10 +696,10 @@ class FileResource(Resource):
     @jwt_required
     def get(self, file_id):
         try:
-            file_dict = files_service.get_working_file(file_id).serialize()
+            file_dict = files_service.get_working_file(file_id)
         except WorkingFileNotFoundException:
             try:
-                file_dict = files_service.get_output_file(file_id).serialize()
+                file_dict = files_service.get_output_file(file_id)
             except OutputFileNotFoundException:
                 abort(404)
 

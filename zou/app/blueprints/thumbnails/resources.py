@@ -72,7 +72,7 @@ class CreatePreviewFilePictureResource(Resource):
             return True
         else:
             preview_file = files_service.get_preview_file(preview_file_id)
-            return user_service.check_assigned(preview_file.task_id)
+            return user_service.check_assigned(preview_file["task_id"])
 
     def is_exist(self, preview_file_id):
         return files_service.get_preview_file(preview_file_id) is not None
@@ -91,9 +91,9 @@ class PreviewFileMovieResource(Resource):
             return True
         else:
             preview_file = files_service.get_preview_file(preview_file_id)
-            task = tasks_service.get_task(preview_file.task_id)
+            task = tasks_service.get_task(preview_file["task_id"])
             try:
-                user_service.check_has_task_related(task.project_id)
+                user_service.check_has_task_related(task["project_id"])
                 return True
             except permissions.PermissionDenied:
                 return False
@@ -132,9 +132,9 @@ class BasePreviewPictureResource(Resource):
             return True
         else:
             preview_file = files_service.get_preview_file(preview_file_id)
-            task = tasks_service.get_task(preview_file.task_id)
+            task = tasks_service.get_task(preview_file["task_id"])
             try:
-                user_service.check_has_task_related(task.project_id)
+                user_service.check_has_task_related(task["project_id"])
                 return True
             except permissions.PermissionDenied:
                 return False
@@ -385,7 +385,7 @@ class WorkingFileThumbnailResource(BasePictureResource):
 
     def is_allowed(self, working_file_id):
         working_file = files_service.get_working_file(working_file_id)
-        task = tasks_service.get_task(working_file.task_id)
+        task = tasks_service.get_task(working_file["task_id"])
         try:
             if not permissions.has_manager_permissions():
                 user_service.check_has_task_related(task.project_id)

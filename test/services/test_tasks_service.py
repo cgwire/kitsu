@@ -179,7 +179,7 @@ class TaskServiceTestCase(ApiDBTestCase):
         self.assertEquals(data["task_after"]["comment"], "my comment")
 
     def test_assign_task(self):
-        tasks_service.assign_task(self.task, self.assigner)
+        tasks_service.assign_task(self.task.id, self.assigner.id)
         self.assertEqual(self.task.assignees[1].id, self.assigner.id)
 
     def test_get_department_from_task_type(self):
@@ -344,7 +344,7 @@ class TaskServiceTestCase(ApiDBTestCase):
 
     def test_clear_assignation(self):
         task_id = self.task.id
-        tasks_service.assign_task(self.task, self.person)
+        tasks_service.assign_task(self.task.id, self.person.id)
         tasks_service.clear_assignation(task_id)
         task = Task.get(task_id)
         self.assertEquals(len(task.assignees), 0)

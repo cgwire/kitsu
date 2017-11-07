@@ -22,12 +22,10 @@ class FolderPathTestCase(ApiDBTestCase):
         self.generate_fixture_shot_task()
         self.generate_fixture_task()
         self.generate_fixture_software()
-        self.cache_type_id = str(
-            files_service.get_or_create_output_type("Cache").id
-        )
-        self.render_type_id = str(
-            files_service.get_or_create_output_type("Render").id
-        )
+        self.cache_type_id = \
+            files_service.get_or_create_output_type("Cache")["id"]
+        self.render_type_id = \
+            files_service.get_or_create_output_type("Render")["id"]
 
     def test_get_path_shot(self):
         data = {

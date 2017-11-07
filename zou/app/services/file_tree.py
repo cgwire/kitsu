@@ -285,7 +285,7 @@ def get_folder_from_output_type(output_type):
     if output_type is None:
         output_type = files_service.get_or_create_output_type("Geometry")
 
-    return output_type.name.lower()
+    return output_type["name"].lower()
 
 
 def get_folder_from_department(task):
@@ -354,7 +354,7 @@ def get_folder_from_asset_type(asset):
 def get_folder_from_software(software):
     if software is None:
         software = files_service.get_or_create_software("3dsmax", "max", ".max")
-    return software.name
+    return software["name"]
 
 
 def get_folder_from_scene(scene):
