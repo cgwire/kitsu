@@ -130,4 +130,8 @@ class ImportShotgunShotsResource(BaseImportShotgunResource):
 class ImportRemoveShotgunShotResource(ImportRemoveShotgunBaseResource):
 
     def __init__(self):
-        ImportRemoveShotgunBaseResource.__init__(self, Entity)
+        ImportRemoveShotgunBaseResource.__init__(
+            self,
+            Entity,
+            entity_type_id=shots_service.get_shot_type().id
+        )

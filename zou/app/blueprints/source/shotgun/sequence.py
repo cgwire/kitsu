@@ -75,4 +75,8 @@ class ImportShotgunSequencesResource(BaseImportShotgunResource):
 class ImportRemoveShotgunSequenceResource(ImportRemoveShotgunBaseResource):
 
     def __init__(self):
-        ImportRemoveShotgunBaseResource.__init__(self, Entity)
+        ImportRemoveShotgunBaseResource.__init__(
+            self,
+            Entity,
+            entity_type_id=shots_service.get_sequence_type().id
+        )

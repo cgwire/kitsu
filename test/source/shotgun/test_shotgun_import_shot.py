@@ -34,7 +34,7 @@ class ImportShotgunShotTestCase(ShotgunTestCase):
             "sg_cut_duration": 122,
             "sg_custom_field": "test",
             "type": "Shot",
-            "id": 4
+            "id": 1
         }
 
     def test_import_shot(self):
@@ -91,3 +91,23 @@ class ImportShotgunShotTestCase(ShotgunTestCase):
         shot = self.shots[0]
         self.assertEqual(shot["data"]["sg_custom_field"], "test")
         self.assertEqual(shot["data"]["sg_custom_field_2"], "test 2")
+
+    def test_remove_shots(self):
+        self.load_fixture('projects')
+        self.load_fixture('sequences')
+        self.load_fixture('assets')
+
+        api_path = "/import/shotgun/shots"
+        self.post(api_path, [self.sg_shot], 200)
+
+        self.shots = self.get("data/shots/all")
+        self.assertEqual(len(self.shots), 1)
+        shot = self.shots[0]
+
+        api_path = "/import/shotgun/remove/shot"
+        self.shots = self.post(api_path, {"id": shot["shotgun_id"]}, 200)
+
+        self.shots = self.get("data/shots/all")
+        self.assertEqual(len(self.shots), 0)
+
+        self.get("data/shots/%s" % shot["id"], 404)
