@@ -98,7 +98,7 @@ def task_to_review(task, person, comment, preview_path=""):
     task_dict_after["project"] = project.serialize()
     task_dict_after["entity"] = entity.serialize()
     task_dict_after["entity_type"] = entity_type.serialize()
-    task_dict_after["person"] = person.serialize()
+    task_dict_after["person"] = person
     task_dict_after["comment"] = comment
     task_dict_after["preview_path"] = preview_path
 
@@ -138,7 +138,7 @@ def create_task(task_type, entity, name="main"):
     task_status = get_todo_status()
     try:
         try:
-            current_user_id = persons_service.get_current_user().id
+            current_user_id = persons_service.get_current_user()["id"]
         except RuntimeError:
             current_user_id = None
         task = Task.create(
@@ -179,7 +179,9 @@ def clear_assignation(task_id):
     return task_dict
 
 
-def assign_task(task, person):
+def assign_task(task_id, person_id):
+    task = get_task(task_id)
+    person = persons_service.get_person_raw(person_id)
     task.assignees.append(person)
     task.save()
     task_dict = task.serialize()

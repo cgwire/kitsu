@@ -264,7 +264,8 @@ class CreatePersonThumbnailResource(BaseCreatePictureResource):
         return persons_service.get_person(person_id) is not None
 
     def check_permissions(instance_id):
-        is_current_user = persons_service.get_current_user().id != instance_id
+        is_current_user = \
+            persons_service.get_current_user()["id"] != instance_id
         if is_current_user and not permissions.has_manager_permissions():
             raise permissions.PermissionDenied
 

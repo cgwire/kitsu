@@ -13,7 +13,7 @@ from zou.app.utils import fields, permissions
 
 
 def assignee_filter():
-    current_user = persons_service.get_current_user()
+    current_user = persons_service.get_current_user_raw()
     return Task.assignees.contains(current_user)
 
 

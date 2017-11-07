@@ -60,13 +60,13 @@ def on_identity_loaded(sender, identity):
         identity.user = persons_service.get_person(identity.id)
 
         if hasattr(identity.user, "id"):
-            identity.provides.add(UserNeed(identity.user.id))
+            identity.provides.add(UserNeed(identity.user["id"]))
 
-        if identity.user.role == "admin":
+        if identity.user["role"] == "admin":
             identity.provides.add(RoleNeed("admin"))
             identity.provides.add(RoleNeed("manager"))
 
-        if identity.user.role == "manager":
+        if identity.user["role"] == "manager":
             identity.provides.add(RoleNeed("manager"))
 
         return identity
@@ -80,7 +80,7 @@ class AuthenticatedResource(Resource):
             person = persons_service.get_by_email(get_jwt_identity())
             return {
                 "authenticated": True,
-                "user": person.serialize()
+                "user": person
             }
         except PersonNotFoundException:
             abort(401)
@@ -303,7 +303,7 @@ class ChangePasswordResource(Resource):
                 "error": True,
                 "message": "Old password is wrong."
             }, 400
-        except auth.WrongPasswordException:
+        except WrongPasswordException:
             return {
                 "error": True,
                 "message": "User is unactive."
@@ -346,10 +346,10 @@ class PersonListResource(Resource):
         person_names = []
         for person in persons_service.all_active():
             person_names.append({
-                "id": str(person.id),
-                "email": person.email,
-                "first_name": person.first_name,
-                "last_name": person.last_name,
-                "desktop_login": person.desktop_login
+                "id": person["id"],
+                "email": person["email"],
+                "first_name": person["first_name"],
+                "last_name": person["last_name"],
+                "desktop_login": person["desktop_login"]
             })
         return person_names

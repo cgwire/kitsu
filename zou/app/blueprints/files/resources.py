@@ -395,7 +395,7 @@ class NewOutputFileResource(Resource):
                 task.id,
                 working_file.id,
                 output_type.id,
-                person.id,
+                person["id"],
                 comment,
                 name=working_file.name,
                 revision=revision
@@ -595,7 +595,10 @@ class NewWorkingFileResource(Resource):
             if not permissions.has_manager_permissions():
                 task = user_service.check_has_task_related(task.project_id)
             software = files_service.get_software(software_id)
-            tasks_service.assign_task(task, persons_service.get_current_user())
+            tasks_service.assign_task(
+                task_id,
+                persons_service.get_current_user()["id"]
+            )
 
             if revision == 0:
                 revision = files_service.get_next_working_revision(
@@ -649,7 +652,7 @@ class NewWorkingFileResource(Resource):
         )
         parser.add_argument("description", default="")
         parser.add_argument("comment", default="")
-        parser.add_argument("person_id", default=person.id)
+        parser.add_argument("person_id", default=person["id"])
         parser.add_argument("software_id", default=maxsoft.id)
         parser.add_argument("revision", default=0, type=int)
         parser.add_argument("sep", default="/")

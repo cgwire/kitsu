@@ -23,7 +23,7 @@ class NewPersonResource(Resource):
         except permissions.PermissionDenied:
             abort(403)
 
-        return person.serialize(), 201
+        return person, 201
 
     def get_arguments(self):
         parser = reqparse.RequestParser()

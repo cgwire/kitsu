@@ -11,7 +11,7 @@ class PersonServiceTestCase(ApiDBTestCase):
         super(PersonServiceTestCase, self).setUp()
 
         self.generate_fixture_person()
-        self.person_id = self.person.id
+        self.person_id = str(self.person.id)
         self.person_email = self.person.email
         self.person_desktop_login = self.person.desktop_login
 
@@ -27,8 +27,8 @@ class PersonServiceTestCase(ApiDBTestCase):
             "wrong-id"
         )
         person = persons_service.get_person(self.person_id)
-        self.assertEqual(self.person_id, person.id)
-        person.delete()
+        self.assertEqual(self.person_id, person["id"])
+        persons_service.delete_person(self.person_id)
 
         self.assertRaises(
             PersonNotFoundException,
@@ -43,8 +43,8 @@ class PersonServiceTestCase(ApiDBTestCase):
             "wrong-email"
         )
         person = persons_service.get_by_email(self.person_email)
-        self.assertEqual(self.person_id, person.id)
-        person.delete()
+        self.assertEqual(self.person_id, person["id"])
+        persons_service.delete_person(person["id"])
 
         self.assertRaises(
             PersonNotFoundException,
@@ -59,8 +59,8 @@ class PersonServiceTestCase(ApiDBTestCase):
             "wrong-login"
         )
         person = persons_service.get_by_desktop_login(self.person_desktop_login)
-        self.assertEqual(self.person_id, person.id)
-        person.delete()
+        self.assertEqual(self.person_id, person["id"])
+        persons_service.delete_person(person["id"])
 
         self.assertRaises(
             PersonNotFoundException,

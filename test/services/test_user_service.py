@@ -40,12 +40,17 @@ class TaskServiceTestCase(ApiDBTestCase):
 
         self.old_get_current_user = persons_service.get_current_user
         persons_service.get_current_user = self.get_current_user
+        self.old_get_current_user_raw = persons_service.get_current_user_raw
+        persons_service.get_current_user_raw = self.get_current_user_raw
 
     def tearDown(self):
         super(TaskServiceTestCase, self).tearDown()
         persons_service.get_current_user = self.old_get_current_user
 
     def get_current_user(self):
+        return self.user.serialize()
+
+    def get_current_user_raw(self):
         return self.user
 
     def test_check_assigned(self):
