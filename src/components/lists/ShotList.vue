@@ -40,7 +40,7 @@
     </table>
   </div>
 
-  <div class="table-body" v-scroll="onBodyScroll">
+  <div class="table-body" v-scroll="onBodyScroll" v-if="entries.length > 0">
     <table class="table">
       <tbody>
         <tr
@@ -105,10 +105,11 @@
     </table>
   </div>
 
-  <div class="has-text-centered" v-if="isLoading">
+  <div class="has-text-centered table-info" v-if="isLoading">
     <img src="../../assets/spinner.svg">
   </div>
-  <div class="has-text-centered" v-if="isError">
+
+  <div class="has-text-centered table-info" v-if="isError">
     <span class="tag is-danger">An error occured while loading data</span>
   </div>
 
@@ -240,5 +241,9 @@ td.sequence {
 
 .canceled {
   text-decoration: line-through;
+}
+
+.table-info {
+  margin-top: 1em;
 }
 </style>
