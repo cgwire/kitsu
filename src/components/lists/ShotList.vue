@@ -105,13 +105,11 @@
     </table>
   </div>
 
-  <div class="has-text-centered table-info" v-if="isLoading">
-    <img src="../../assets/spinner.svg">
-  </div>
-
-  <div class="has-text-centered table-info" v-if="isError">
-    <span class="tag is-danger">An error occured while loading data</span>
-  </div>
+  <table-info
+    :is-loading="isLoading"
+    :is-error="isError"
+  >
+  </table-info>
 
   <p class="has-text-centered nb-shots">
     {{ entries.length }} {{ $tc('shots.number', entries.length) }}
@@ -127,6 +125,7 @@ import RowActions from '../widgets/RowActions'
 import ButtonLink from '../widgets/ButtonLink'
 import ButtonHrefLink from '../widgets/ButtonHrefLink'
 import PageTitle from '../widgets/PageTitle'
+import TableInfo from '../widgets/TableInfo'
 
 export default {
   name: 'shot-list',
@@ -144,6 +143,7 @@ export default {
     ButtonHrefLink,
     PageTitle,
     RowActions,
+    TableInfo,
     ValidationCell
   },
   computed: {
@@ -241,9 +241,5 @@ td.sequence {
 
 .canceled {
   text-decoration: line-through;
-}
-
-.table-info {
-  margin-top: 1em;
 }
 </style>

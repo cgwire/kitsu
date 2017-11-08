@@ -47,12 +47,12 @@
     </table>
   </div>
 
-  <div class="has-text-centered" v-if="isLoading">
-    <img src="../../assets/spinner.svg">
-  </div>
-  <div class="has-text-centered" v-if="isError">
-    <span class="tag is-danger">An error occured while loading data</span>
-  </div>
+  <table-info
+    :is-loading="isLoading"
+    :is-error="isError"
+  >
+  </table-info>
+
   <p class="has-text-centered footer-info" v-if="!isLoading">
     {{ entries.length }} {{ $tc('people.persons', entries.length) }}
   </p>
@@ -63,12 +63,14 @@
 import { mapGetters, mapActions } from 'vuex'
 import PeopleNameCell from '../cells/PeopleNameCell'
 import RowActions from '../widgets/RowActions'
+import TableInfo from '../widgets/TableInfo'
 
 export default {
   name: 'list',
   components: {
     PeopleNameCell,
-    RowActions
+    RowActions,
+    TableInfo
   },
   props: [
     'entries',

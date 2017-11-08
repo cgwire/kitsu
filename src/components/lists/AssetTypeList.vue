@@ -11,7 +11,7 @@
     </table>
   </div>
 
-  <div class="table-body" v-scroll="onBodyScroll">
+  <div class="table-body" v-scroll="onBodyScroll" v-if="entries.length > 0">
     <table class="table">
       <tbody>
         <tr v-for="entry in entries">
@@ -35,10 +35,11 @@
     </table>
   </div>
 
-  <spinner v-if="isLoading"></spinner>
-  <div class="has-text-centered" v-if="isError">
-    <span class="tag is-danger">An error occured while loading data</span>
-  </div>
+  <table-info
+    :is-loading="isLoading"
+    :is-error="isError"
+  >
+  </table-info>
 
   <p class="has-text-centered nb-asset-types">
     {{ entries.length }} {{ $tc('asset_types.number', entries.length) }}
@@ -50,7 +51,7 @@
 <script>
 import { mapGetters, mapActions } from 'vuex'
 import RowActions from '../widgets/RowActions'
-import Spinner from '../widgets/Spinner'
+import TableInfo from '../widgets/TableInfo'
 
 export default {
   name: 'asset-type-list',
@@ -64,7 +65,7 @@ export default {
   },
   components: {
     RowActions,
-    Spinner
+    TableInfo
   },
   computed: {
     ...mapGetters([

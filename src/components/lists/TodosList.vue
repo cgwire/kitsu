@@ -56,13 +56,13 @@
       </tbody>
     </table>
   </div>
-  <spinner v-if="isLoading">
-  </spinner>
-  <div class="has-text-centered" v-if="isError">
-    <span class="tag is-danger">
-      {{ $t('main.loading_error') }}
-    </span>
-  </div>
+
+  <table-info
+    :is-loading="isLoading"
+    :is-error="isError"
+  >
+  </table-info>
+
   <p class="has-text-centered footer-info" v-if="!isLoading">
     {{ entries.length }} {{ $tc('tasks.tasks', entries.length) }}
   </p>
@@ -74,14 +74,14 @@ import { mapGetters, mapActions } from 'vuex'
 
 import ProductionNameCell from '../cells/ProductionNameCell'
 import TaskTypeName from '../cells/TaskTypeName'
-import Spinner from '../widgets/Spinner'
+import TableInfo from '../widgets/TableInfo'
 import ValidationTag from '../widgets/ValidationTag'
 
 export default {
   name: 'todos-list',
   components: {
     ProductionNameCell,
-    Spinner,
+    TableInfo,
     TaskTypeName,
     ValidationTag
   },
