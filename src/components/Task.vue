@@ -22,7 +22,7 @@
                class="is-medium"
              ></validation-tag>
            </div>
-           <div v-if="currentTask">
+           <div class="assignees" v-if="currentTask">
              <people-avatar
                :key="personId"
                :person="personMap[personId]"
@@ -573,5 +573,13 @@ video {
 .preview-list {
   display: flex;
   flex-wrap: wrap;
+}
+
+.assignees {
+  display: flex;
+}
+
+.assignees span {
+  margin-right: 0.2em;
 }
 </style>
