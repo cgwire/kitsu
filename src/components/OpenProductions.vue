@@ -38,19 +38,26 @@
       <h1 class="title has-text-centered">
         {{ $t('productions.home.welcome') }}
       </h1>
-      <p class="has-text-centered">
-        {{ $t('productions.home.empty') }}
-      </p>
-      <p class="has-text-centered">
-        <button-link
-          class="level-item big-button"
-          :text="$t('productions.home.create_new')"
-          path="/productions/new"
-        >
-        </button-link>
-      </p>
-
+      <div v-if="isCurrentUserManager">
+        <p class="has-text-centered">
+          {{ $t('productions.home.empty') }}
+        </p>
+        <p class="has-text-centered">
+          <button-link
+            class="level-item big-button"
+            :text="$t('productions.home.create_new')"
+            path="/productions/new"
+          >
+          </button-link>
+        </p>
+      </div>
+      <div v-else>
+        <p class="has-text-centered">
+          {{ $t('productions.home.no_task') }}
+        </p>
+      </div>
     </div>
+
   </div>
 </template>
 
@@ -77,7 +84,8 @@ export default {
 
   computed: {
     ...mapGetters([
-      'openProductions'
+      'openProductions',
+      'isCurrentUserManager'
     ])
   },
 

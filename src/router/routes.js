@@ -47,7 +47,11 @@ export const routes = [
           }
         }
       },
-      { path: '/open-productions', component: OpenProductions },
+      {
+        path: '/open-productions',
+        component: OpenProductions,
+        name: 'open-productions'
+      },
       { path: '/people', component: People },
       { path: '/people/new', component: People },
       {

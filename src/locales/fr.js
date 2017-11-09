@@ -96,7 +96,8 @@ export default {
       title: 'Productions en cours',
       welcome: 'Bienvenue sur Kitsu',
       empty: 'Vous n\'avez pas de production ouverte, voulez vous en créer une nouvelle ?',
-      create_new: 'Créer une nouvelle production'
+      create_new: 'Créer une nouvelle production',
+      no_task: 'Vous n\'avez pas de tâches assignées. Demandez à votre superviseur ce que vous pouvez faire !'
     },
     fields: {
       name: 'Nom',
@@ -125,6 +126,7 @@ export default {
     no_preview: 'Il n\'y a pas de previz pour cette tâche..',
     no_comment: 'Il n\'y a pas de commentaires pour cette tâche.',
     clear_assignations: 'effacer les assignations',
+    no_assignation_right: 'vous n\'êtes pas autorisé à gérer les assigations.',
     create_tasks: 'Ajouter des tâches',
     create_tasks_shot: 'Ajouter des tâches pour les plans affichés',
     create_tasks_shot_explaination: 'Vous allez créer une nouvelle tâche pour chaque plan de la liste affichée. Est-ce que vous voulez continuer ?',
