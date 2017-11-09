@@ -152,7 +152,7 @@ class TaskCommentsResource(Resource):
             comments = []
             task = tasks_service.get_task(task_id)
             if not permissions.has_manager_permissions():
-                user_service.check_assigned(task_id)
+                user_service.check_has_task_related(task_id)
 
             comments = tasks_service.get_comments(task)
         except TaskNotFoundException:

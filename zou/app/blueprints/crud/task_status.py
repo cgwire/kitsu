@@ -7,6 +7,9 @@ class TaskStatusesResource(BaseModelsResource):
     def __init__(self):
         BaseModelsResource.__init__(self, TaskStatus)
 
+    def check_read_permissions(self):
+        return True
+
 
 class TaskStatusResource(BaseModelResource):
 
