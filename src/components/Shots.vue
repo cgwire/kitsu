@@ -1,6 +1,6 @@
 <template>
   <div class="shots page fixed-page">
-    <div class="shot-list-header">
+    <div class="shot-list-header page-header">
       <div class="level header-title">
         <div class="level-left">
           <div class="level-item">
@@ -8,7 +8,7 @@
           </div>
         </div>
 
-        <div class="level-right">
+        <div class="level-right" v-if="isCurrentUserManager">
           <div class="level-item">
             <button-link
               class="level-item"
@@ -228,7 +228,7 @@ export default {
       'getShot',
       'shotValidationColumns',
       'currentProduction',
-      'currentProduction'
+      'isCurrentUserManager'
     ])
   },
 
@@ -453,4 +453,7 @@ export default {
 </script>
 
 <style scoped>
+.data-list {
+  margin-top: 0;
+}
 </style>

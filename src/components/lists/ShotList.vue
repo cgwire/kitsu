@@ -4,6 +4,9 @@
     <table class="table table-header" ref="headerWrapper">
       <thead>
         <tr>
+          <th class="episode" v-if="entries.length > 0 && entries[0].episode_name.length > 0">
+            {{ $t('shots.fields.episode') }}
+          </th>
           <th class="sequence">{{ $t('shots.fields.sequence') }}</th>
           <th class="name">{{ $t('shots.fields.name') }}</th>
           <th class="framein">{{ $t('shots.fields.frame_in') }}</th>
@@ -29,6 +32,7 @@
                   production_id: currentProduction.id
                 }
               }"
+              v-if="isCurrentUserManager"
             >
             </button-link>
           </th>
@@ -37,7 +41,7 @@
     </table>
   </div>
 
-  <div class="table-body" v-scroll="onBodyScroll">
+  <div class="table-body" v-scroll="onBodyScroll" v-if="entries.length > 0">
     <table class="table">
       <tbody>
         <tr
@@ -45,6 +49,9 @@
           :class="{canceled: entry.canceled}"
           v-for="entry in entries"
         >
+          <td :class="{name: !entry.canceled}" v-if="entries[0].episode_name.length > 0">
+            {{ entry.episode_name }}
+          </td>
           <td :class="{name: !entry.canceled}">
             {{ entry.sequence_name }}
           </td>
@@ -69,7 +76,7 @@
             v-for="column in validationColumns"
           >
           </validation-cell>
-          <row-actions
+          <row-actions v-if="isCurrentUserManager"
             :entry="entry"
             :edit-route="{
               name: 'edit-shots',
@@ -94,17 +101,18 @@
             }"
           >
           </row-actions>
+          <td class="actions" v-else>
+          </td>
         </tr>
       </tbody>
     </table>
   </div>
 
-  <div class="has-text-centered" v-if="isLoading">
-    <img src="../../assets/spinner.svg">
-  </div>
-  <div class="has-text-centered" v-if="isError">
-    <span class="tag is-danger">An error occured while loading data</span>
-  </div>
+  <table-info
+    :is-loading="isLoading"
+    :is-error="isError"
+  >
+  </table-info>
 
   <p class="has-text-centered nb-shots">
     {{ entries.length }} {{ $tc('shots.number', entries.length) }}
@@ -120,6 +128,7 @@ import RowActions from '../widgets/RowActions'
 import ButtonLink from '../widgets/ButtonLink'
 import ButtonHrefLink from '../widgets/ButtonHrefLink'
 import PageTitle from '../widgets/PageTitle'
+import TableInfo from '../widgets/TableInfo'
 
 export default {
   name: 'shot-list',
@@ -137,11 +146,13 @@ export default {
     ButtonHrefLink,
     PageTitle,
     RowActions,
+    TableInfo,
     ValidationCell
   },
   computed: {
     ...mapGetters([
-      'currentProduction'
+      'currentProduction',
+      'isCurrentUserManager'
     ])
   },
   methods: {
@@ -186,17 +197,17 @@ th.actions {
   font-weight: bold;
 }
 
+.episode {
+  min-width: 100px;
+  max-width: 100px;
+  width: 100px;
+}
+
 .sequence {
   min-width: 100px;
   max-width: 100px;
   width: 100px;
   font-weight: bold;
-}
-
-.episode {
-  min-width: 50px;
-  max-width: 50px;
-  width: 50px;
 }
 
 .framein {

@@ -92,7 +92,8 @@ export default {
       title: 'Running Productions',
       welcome: 'Welcome to Kitsu',
       empty: 'You don\'t have any production open. What about creating a new one?',
-      create_new: 'Create a new production'
+      create_new: 'Create a new production',
+      no_task: 'You have no task assigned. See your supervisor to see what you can do!'
     },
     current: 'Selected production',
     edit_title: 'Edit production',
@@ -125,6 +126,7 @@ export default {
     no_comment: 'There is currently no comment for this task.',
     validation: 'Validation',
     clear_assignations: 'clear assignations',
+    no_assignation_right: 'you are no allowed to manage assignations',
     create_tasks: 'Add tasks',
     create_tasks_shot: 'Add tasks for current shots',
     create_tasks_shot_explaination: 'You are going to create a new task for each shot of current list for the given task type. Do you want to continue?',

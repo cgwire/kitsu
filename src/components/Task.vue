@@ -22,7 +22,7 @@
                class="is-medium"
              ></validation-tag>
            </div>
-           <div v-if="currentTask">
+           <div class="assignees" v-if="currentTask">
              <people-avatar
                :key="personId"
                :person="personMap[personId]"
@@ -32,7 +32,7 @@
              </people-avatar>
            </div>
          </div>
-         <div class="level-right">
+         <div class="level-right" v-if="isCurrentUserManager">
            <button-link
              class="level-item"
              text=""
@@ -112,6 +112,7 @@
               :user="user"
               :task="currentTask"
               :taskStatusOptions="taskStatusOptions"
+              v-if="isCurrentUserManager || currentTask.assignees.find((personId) => personId === user.id)"
             >
             </add-comment>
             <div class="comments" v-if="currentTaskComments.length > 0">
@@ -323,7 +324,9 @@ export default {
       'getTaskComments',
       'getTaskPreviews',
       'getTaskComment',
-      'personMap'
+      'personMap',
+      'user',
+      'isCurrentUserManager'
     ]),
     currentPreviewId () {
       return this.route.params.preview_id
@@ -570,5 +573,13 @@ video {
 .preview-list {
   display: flex;
   flex-wrap: wrap;
+}
+
+.assignees {
+  display: flex;
+}
+
+.assignees span {
+  margin-right: 0.2em;
 }
 </style>

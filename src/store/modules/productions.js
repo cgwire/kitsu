@@ -45,9 +45,9 @@ const state = {
     isError: false
   },
 
-  assetsPath: {name: 'home'},
-  shotsPath: {name: 'home'},
-  breakdownPath: {name: 'home'}
+  assetsPath: {name: 'open-productions'},
+  shotsPath: {name: 'open-productions'},
+  breakdownPath: {name: 'open-productions'}
 }
 
 const helpers = {

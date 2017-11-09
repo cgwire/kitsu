@@ -145,8 +145,15 @@ input.search-input:focus {
   bottom: 0;
   display: flex;
   flex-direction: column;
+  padding-top: 60px;
 
   min-height: 0;
+}
+
+.page-header,
+.page-header.level {
+  margin-top: 2em;
+  margin-bottom: 0;
 }
 
 .data-list {
@@ -177,6 +184,10 @@ input.search-input:focus {
 
 .table {
   margin-bottom: 0;
+}
+
+.table-info {
+  margin-top: 1em;
 }
 
 @media screen and (max-width: 1000px) {

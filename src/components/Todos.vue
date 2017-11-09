@@ -1,6 +1,6 @@
 <template>
   <div class="todos page fixed-page">
-    <page-title :text="$t('tasks.my_tasks')">
+    <page-title :text="$t('tasks.my_tasks')" class="page-header">
     </page-title>
     <todos-list
       :entries="todos"

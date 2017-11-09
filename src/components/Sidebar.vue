@@ -41,27 +41,29 @@
            </router-link>
          </p>
 
-         <h2>General</h2>
-          <p @click="toggleSidebar()">
-            <router-link to="/productions">
-            {{ $t("productions.title") }}
-            </router-link>
-          </p>
-          <p @click="toggleSidebar()">
-            <router-link to="/people">
-            {{ $t("people.title") }}
-            </router-link>
-          </p>
-          <p @click="toggleSidebar()">
-            <router-link to="/task-types">
-            {{ $t("task_types.title") }}
-            </router-link>
-          </p>
-          <p @click="toggleSidebar()">
-            <router-link to="/asset-types">
-            {{ $t("asset_types.title") }}
-            </router-link>
-          </p>
+         <div v-if="isCurrentUserManager">
+           <h2>General</h2>
+           <p @click="toggleSidebar()">
+             <router-link to="/productions">
+             {{ $t("productions.title") }}
+             </router-link>
+           </p>
+           <p @click="toggleSidebar()">
+             <router-link to="/people">
+             {{ $t("people.title") }}
+             </router-link>
+           </p>
+           <p @click="toggleSidebar()">
+             <router-link to="/task-types">
+             {{ $t("task_types.title") }}
+             </router-link>
+           </p>
+           <p @click="toggleSidebar()">
+             <router-link to="/asset-types">
+             {{ $t("asset_types.title") }}
+             </router-link>
+           </p>
+         </div>
 
         </section>
       </div>
@@ -89,7 +91,8 @@ export default {
       'currentProduction',
       'breakdownPath',
       'assetsPath',
-      'shotsPath'
+      'shotsPath',
+      'isCurrentUserManager'
     ])
   },
   methods: {

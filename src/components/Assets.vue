@@ -1,7 +1,7 @@
 <template>
 <div class="assets page fixed-page">
 
-  <div class="asset-list-header">
+  <div class="asset-list-header page-header">
     <div class="level header-title">
       <div class="level-left">
         <div class="level-item">
@@ -9,7 +9,7 @@
         </div>
       </div>
 
-      <div class="level-right">
+      <div class="level-right" v-if="isCurrentUserManager">
         <div class="level-item">
           <button-link
             class="level-item"
@@ -237,7 +237,8 @@ export default {
       'getAsset',
       'assetValidationColumns',
       'currentProduction',
-      'currentProduction'
+      'currentProduction',
+      'isCurrentUserManager'
     ])
   },
 
@@ -457,6 +458,6 @@ export default {
 
 <style scoped>
 .data-list {
-  min-height: 200px;
+  margin-top: 0;
 }
 </style>

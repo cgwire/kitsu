@@ -37,12 +37,11 @@
     </table>
   </div>
 
-  <div class="has-text-centered" v-if="isLoading">
-    <img src="../../assets/spinner.svg">
-  </div>
-  <div class="has-text-centered" v-if="isError">
-    <span class="tag is-danger">An error occured while loading data</span>
-  </div>
+  <table-info
+    :is-loading="isLoading"
+    :is-error="isError"
+  >
+  </table-info>
 
   <p class="has-text-centered nb-task-types">
     {{ entries.length }} {{ $tc('task_types.number', entries.length) }}
@@ -54,6 +53,7 @@
 <script>
 import { mapGetters, mapActions } from 'vuex'
 import RowActions from '../widgets/RowActions'
+import TableInfo from '../widgets/TableInfo'
 import TaskTypeName from '../cells/TaskTypeName'
 
 export default {
@@ -68,7 +68,8 @@ export default {
   },
   components: {
     RowActions,
-    TaskTypeName
+    TaskTypeName,
+    TableInfo
   },
   computed: {
     ...mapGetters([

@@ -27,6 +27,7 @@
                   production_id: currentProduction.id
                 }
               }"
+              v-if="isCurrentUserManager"
             >
             </button-link>
           </th>
@@ -36,7 +37,7 @@
   </div>
 
 
-  <div class="table-body" v-scroll="onBodyScroll">
+  <div class="table-body" v-scroll="onBodyScroll" v-if="entries.length > 0">
     <table class="table">
       <tbody>
         <tr
@@ -62,7 +63,7 @@
             v-for="column in validationColumns"
           >
           </validation-cell>
-          <row-actions
+          <row-actions v-if="isCurrentUserManager"
             :entry="entry"
             :edit-route="{
               name: 'edit-asset',
@@ -87,17 +88,18 @@
             }"
           >
           </row-actions>
+          <td class="actions" v-else>
+          </td>
         </tr>
       </tbody>
     </table>
   </div>
 
-  <div class="has-text-centered" v-if="isLoading">
-    <img src="../../assets/spinner.svg">
-  </div>
-  <div class="has-text-centered" v-if="isError">
-    <span class="tag is-danger">An error occured while loading data</span>
-  </div>
+  <table-info
+    :is-loading="isLoading"
+    :is-error="isError"
+  >
+  </table-info>
 
   <p class="has-text-centered nb-assets">
     {{ entries.length }} {{ $tc('assets.number', entries.length) }}
@@ -113,7 +115,8 @@ import RowActions from '../widgets/RowActions'
 import ValidationCell from '../cells/ValidationCell'
 import ButtonLink from '../widgets/ButtonLink'
 import ButtonHrefLink from '../widgets/ButtonHrefLink'
-import PageTitle from '../widgets/PageTitle.vue'
+import PageTitle from '../widgets/PageTitle'
+import TableInfo from '../widgets/TableInfo'
 
 export default {
   name: 'asset-list',
@@ -132,13 +135,15 @@ export default {
     RowActions,
     PageTitle,
     ProductionNameCell,
+    TableInfo,
     ValidationCell
   },
   computed: {
     ...mapGetters([
       'currentProduction',
       'assetSearchValue',
-      'selectedTasks'
+      'selectedTasks',
+      'isCurrentUserManager'
     ])
   },
   methods: {

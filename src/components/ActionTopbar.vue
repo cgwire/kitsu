@@ -4,7 +4,7 @@
     'hidden': isHidden
   }">
     <div class="level">
-      <div class="level-left">
+      <div class="level-left" v-if="isCurrentUserManager">
         <div class="level-item assignation">
           <chevron-right-icon></chevron-right-icon>
           {{ $t('tasks.assign', {nbSelectedTasks}) }}
@@ -34,6 +34,9 @@
             {{ $t('tasks.clear_assignations') }}
           </button>
         </div>
+      </div>
+      <div style="padding-left: 1em;" v-else>
+        {{ $t('tasks.no_assignation_right') }}
       </div>
       <div class="level-right">
         <div
@@ -77,7 +80,8 @@ export default {
     ...mapGetters([
       'getPersonOptions',
       'selectedTasks',
-      'nbSelectedTasks'
+      'nbSelectedTasks',
+      'isCurrentUserManager'
     ]),
     isHidden () {
       return this.nbSelectedTasks === 0

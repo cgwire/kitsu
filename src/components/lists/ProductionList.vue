@@ -46,10 +46,11 @@
     </table>
   </div>
 
-  <spinner v-if="isLoading"></spinner>
-  <div class="has-text-centered" v-if="isError">
-    <span class="tag is-danger">An error occured while loading data</span>
-  </div>
+  <table-info
+    :is-loading="isLoading"
+    :is-error="isError"
+  >
+  </table-info>
 
   <p class="has-text-centered nb-productions">
     {{ entries.length }} {{ $tc('productions.number', entries.length) }}
@@ -62,7 +63,7 @@
 import { mapGetters, mapActions } from 'vuex'
 import ProductionNameCell from '../cells/ProductionNameCell'
 import RowActions from '../widgets/RowActions'
-import Spinner from '../widgets/Spinner'
+import TableInfo from '../widgets/TableInfo'
 
 export default {
   name: 'production-list',
@@ -77,7 +78,7 @@ export default {
   components: {
     ProductionNameCell,
     RowActions,
-    Spinner
+    TableInfo
   },
   computed: {
     ...mapGetters([

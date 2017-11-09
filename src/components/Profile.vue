@@ -4,7 +4,7 @@
 
       <div class="has-text-centered profile-header">
         <div class="profile-header-content has-text-centered">
-          <people-avatar :person="this.user" size="150">
+          <people-avatar :person="this.user" size="150" font-size="60">
           </people-avatar>
           <!--p>
             <a class="button is-link">

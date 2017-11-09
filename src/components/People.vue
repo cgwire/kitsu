@@ -1,35 +1,33 @@
 <template>
   <div class="people page fixed-page">
-    <div class="people-list">
-      <div class="level">
-        <div class="level-left">
-          <page-title :text="$t('people.title')"></page-title>
-        </div>
+    <div class="level page-header">
+      <div class="level-left">
+        <page-title :text="$t('people.title')"></page-title>
+      </div>
 
-        <div class="level-right">
-          <div class="level-item">
-            <button-link
-              class="level-item"
-              :text="$t('main.csv.import_file')"
-              icon="upload"
-              path="/people/import"
-            >
-            </button-link>
-            <button-href-link
-              class="level-item"
-              :text="$t('main.csv.export_file')"
-              icon="download"
-              path="/api/export/csv/persons.csv"
-            >
-            </button-href-link>
-            <button-link
-              class="level-item"
-              :text="$t('people.new_person')"
-              icon="plus"
-              path="/people/new"
-            >
-            </button-link>
-          </div>
+      <div class="level-right">
+        <div class="level-item">
+          <button-link v-if="isCurrentUserAdmin"
+            class="level-item"
+            :text="$t('main.csv.import_file')"
+            icon="upload"
+            path="/people/import"
+          >
+          </button-link>
+          <button-href-link
+            class="level-item"
+            :text="$t('main.csv.export_file')"
+            icon="download"
+            path="/api/export/csv/persons.csv"
+          >
+          </button-href-link>
+          <button-link v-if="isCurrentUserAdmin"
+            class="level-item"
+            :text="$t('people.new_person')"
+            icon="plus"
+            path="/people/new"
+          >
+          </button-link>
         </div>
       </div>
     </div>
@@ -157,7 +155,9 @@ export default {
 
       'personToDelete',
       'personCsvFormData',
-      'personToEdit'
+      'personToEdit',
+
+      'isCurrentUserAdmin'
     ]),
 
     deleteText () {
@@ -280,10 +280,5 @@ export default {
 }
 .skills {
   width: 250px;
-}
-
-.actions {
-  width: 100px;
-  min-width: 100px;
 }
 </style>

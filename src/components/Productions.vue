@@ -1,20 +1,18 @@
 <template>
   <div class="productions page fixed-page">
-    <div class="productions-list">
-      <div class="level">
-        <div class="level-left">
-          <page-title :text="$t('productions.title')"></page-title>
-        </div>
-        <div class="level-right">
-          <div class="level-item">
-            <button-link
-              class="level-item"
-              :text="$t('productions.new_production')"
-              icon="plus"
-              path="/productions/new"
-            >
-            </button-link>
-          </div>
+    <div class="level page-header">
+      <div class="level-left">
+        <page-title :text="$t('productions.title')"></page-title>
+      </div>
+      <div class="level-right">
+        <div class="level-item">
+          <button-link
+            class="level-item"
+            :text="$t('productions.new_production')"
+            icon="plus"
+            path="/productions/new"
+          >
+          </button-link>
         </div>
       </div>
     </div>
@@ -175,7 +173,4 @@ export default {
 </script>
 
 <style scoped>
-.productions-list {
-  margin-top: 2em;
-}
 </style>
