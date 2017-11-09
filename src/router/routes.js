@@ -2,6 +2,8 @@ import auth from '../lib/auth'
 import lang from '../lib/lang'
 import init from '../lib/init'
 
+import userStore from '../store/modules/user'
+
 import Assets from '../components/Assets'
 import AssetTypes from '../components/AssetTypes'
 import Breakdown from '../components/Breakdown'
@@ -36,9 +38,16 @@ export const routes = [
 
     children: [
       { path: '',
-        component: OpenProductions,
-        name: 'home'
+        name: 'home',
+        redirect: to => {
+          if (userStore.getters.isCurrentUserManager(userStore.state)) {
+            return '/open-productions'
+          } else {
+            return '/todos'
+          }
+        }
       },
+      { path: '/open-productions', component: OpenProductions },
       { path: '/people', component: People },
       { path: '/people/new', component: People },
       {

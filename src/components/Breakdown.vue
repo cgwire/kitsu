@@ -39,7 +39,7 @@
               {{ $t('breakdown.select_shot') }}
             </em>
           </div>
-          <div class="level-right">
+          <div class="level-right" v-if="isCurrentUserManager">
             <button
               :class="{
                 button: true,
@@ -83,7 +83,7 @@
         </div>
       </div>
 
-      <div class="breakdown-column assets-column">
+      <div class="breakdown-column assets-column" v-if="isCurrentUserManager">
         <h2 class="subtitle">
           {{ $t('breakdown.all_assets') }}
         </h2>
@@ -180,7 +180,9 @@ export default {
       'casting',
       'castingAssetsByType',
       'isCastingDirty',
-      'isCastingSaveActive'
+      'isCastingSaveActive',
+
+      'isCurrentUserManager'
     ])
   },
 

@@ -44,6 +44,8 @@ const state = {
 const getters = {
   user: state => state.user,
   isAuthenticated: state => state.isAuthenticated,
+  isCurrentUserManager: state => state.user && state.user.role !== 'user',
+  isCurrentUserAdmin: state => state.user && state.user.role === 'admin',
   todos: state => state.todos,
 
   isSaveProfileLoading: state => state.isSaveProfileLoading,

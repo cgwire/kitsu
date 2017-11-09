@@ -9,7 +9,7 @@
         </div>
       </div>
 
-      <div class="level-right">
+      <div class="level-right" v-if="isCurrentUserManager">
         <div class="level-item">
           <button-link
             class="level-item"
@@ -237,7 +237,8 @@ export default {
       'getAsset',
       'assetValidationColumns',
       'currentProduction',
-      'currentProduction'
+      'currentProduction',
+      'isCurrentUserManager'
     ])
   },
 

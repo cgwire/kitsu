@@ -7,7 +7,7 @@
 
       <div class="level-right">
         <div class="level-item">
-          <button-link
+          <button-link v-if="isCurrentUserAdmin"
             class="level-item"
             :text="$t('main.csv.import_file')"
             icon="upload"
@@ -21,7 +21,7 @@
             path="/api/export/csv/persons.csv"
           >
           </button-href-link>
-          <button-link
+          <button-link v-if="isCurrentUserAdmin"
             class="level-item"
             :text="$t('people.new_person')"
             icon="plus"
@@ -155,7 +155,9 @@ export default {
 
       'personToDelete',
       'personCsvFormData',
-      'personToEdit'
+      'personToEdit',
+
+      'isCurrentUserAdmin'
     ]),
 
     deleteText () {

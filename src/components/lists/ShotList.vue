@@ -32,6 +32,7 @@
                   production_id: currentProduction.id
                 }
               }"
+              v-if="isCurrentUserManager"
             >
             </button-link>
           </th>
@@ -75,7 +76,7 @@
             v-for="column in validationColumns"
           >
           </validation-cell>
-          <row-actions
+          <row-actions v-if="isCurrentUserManager"
             :entry="entry"
             :edit-route="{
               name: 'edit-shots',
@@ -100,6 +101,8 @@
             }"
           >
           </row-actions>
+          <td class="actions" v-else>
+          </td>
         </tr>
       </tbody>
     </table>
@@ -148,7 +151,8 @@ export default {
   },
   computed: {
     ...mapGetters([
-      'currentProduction'
+      'currentProduction',
+      'isCurrentUserManager'
     ])
   },
   methods: {
