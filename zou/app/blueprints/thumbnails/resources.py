@@ -87,7 +87,11 @@ class PreviewFileMovieResource(Resource):
         else:
             preview_file = files_service.get_preview_file(preview_file_id)
             task = tasks_service.get_task(preview_file.task_id)
-            return user_service.has_task_related(task["project_id"])
+            try:
+                user_service.check_has_task_related(task.project_id)
+                return True
+            except permissions.PermissionDenied:
+                return False
 
     @jwt_required
     def get(self, instance_id):
@@ -124,7 +128,11 @@ class BasePreviewPictureResource(Resource):
         else:
             preview_file = files_service.get_preview_file(preview_file_id)
             task = tasks_service.get_task(preview_file.task_id)
-            return user_service.has_task_related(task["project_id"])
+            try:
+                user_service.check_has_task_related(task.project_id)
+                return True
+            except permissions.PermissionDenied:
+                return False
 
     @jwt_required
     def get(self, instance_id):

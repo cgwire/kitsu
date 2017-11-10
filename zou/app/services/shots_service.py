@@ -101,29 +101,44 @@ def get_task_type_map():
     }
 
 
+def get_episode_map(criterions={}):
+    episodes = get_episodes(criterions)
+    episode_map = {}
+    for episode in episodes:
+        episode_map[episode.id] = episode
+    return episode_map
+
+
 def get_shot_map(criterions={}):
     shot_map = {}
+    episode_map = get_episode_map(criterions)
 
     shot_type = get_shot_type()
     Sequence = aliased(Entity, name='sequence')
     shot_query = Entity.query \
         .join(EntityType) \
         .join(Sequence, Sequence.id == Entity.parent_id) \
-        .add_columns(Sequence.name) \
+        .add_columns(Sequence.name, Sequence.parent_id) \
         .filter(Entity.entity_type_id == shot_type.id)
     if "project_id" in criterions:
         shot_query = \
             shot_query.filter(Entity.project_id == criterions["project_id"])
     shots = shot_query.all()
 
-    for (shot, sequence_name) in shots:
+    for (shot, sequence_name, sequence_parent_id) in shots:
         shot_id = str(shot.id)
+        episode_name = ""
+        episode = episode_map.get(sequence_parent_id, None)
+        if episode is not None:
+            episode_name = episode.name
         shot_map[shot_id] = {
             "id": str(shot.id),
             "name": shot.name,
             "description": shot.description,
             "sequence_id": str(shot.parent_id),
             "sequence_name": sequence_name,
+            "episode_id": str(sequence_parent_id),
+            "episode_name": episode_name,
             "canceled": shot.canceled,
             "data": fields.serialize_value(shot.data)
         }
@@ -165,7 +180,6 @@ def get_shots_and_tasks(criterions={}):
             "task_type_color": task_type.color,
             "task_type_priority": task_type.priority,
             "assignees": fields.serialize_value(task.assignees)
-
         })
         task_map[shot_id].append(task_dict)
 

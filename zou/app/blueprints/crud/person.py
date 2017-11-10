@@ -17,6 +17,9 @@ class PersonsResource(BaseModelsResource):
     def post(self):
         abort(405)
 
+    def check_read_permissions(self):
+        return True
+
 
 class PersonResource(BaseModelResource):
 
