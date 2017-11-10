@@ -49,7 +49,7 @@
           <td class="thumbnail">
             <img
               class="thumbnail-picture"
-              :src="'/api/pictures/thumbnails/preview-files/' + entry.preview_file_id + '.png'"
+              v-lazy="'/api/pictures/thumbnails/preview-files/' + entry.preview_file_id + '.png'"
               v-if="entry.preview_file_id.length > 0"
             />
             <span class="thumbnail-picture thumbnail-empty" v-else>
