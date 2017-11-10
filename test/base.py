@@ -319,9 +319,9 @@ class ApiDBTestCase(ApiTestCase):
         )
         self.sequence_standard.save()
 
-    def generate_fixture_episode(self):
+    def generate_fixture_episode(self, name="E01"):
         self.episode = Entity(
-            name="E01",
+            name=name,
             project_id=self.project.id,
             entity_type_id=self.episode_type.id
         )

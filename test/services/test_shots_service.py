@@ -51,6 +51,15 @@ class ShotUtilsTestCase(ApiDBTestCase):
             self.sequence.serialize()
         )
 
+    def test_get_episode_map(self):
+        self.generate_fixture_episode("E02")
+        episode_map = shots_service.get_episode_map()
+        self.assertEquals(len(episode_map.keys()), 2)
+        self.assertEquals(
+            episode_map[self.episode.id].name,
+            self.episode.name
+        )
+
     def test_get_shot_map(self):
         self.generate_fixture_shot("P02")
         shot_map = shots_service.get_shot_map()
@@ -76,6 +85,7 @@ class ShotUtilsTestCase(ApiDBTestCase):
         self.generate_fixture_shot_task()
         self.generate_fixture_shot_task(name="Secondary")
         self.generate_fixture_shot("P02")
+
         shots = shots_service.get_shots_and_tasks()
         shots = sorted(shots, key=lambda s: s["name"])
         self.assertEqual(len(shots), 2)
@@ -90,6 +100,7 @@ class ShotUtilsTestCase(ApiDBTestCase):
         self.assertEqual(
             shots[0]["tasks"][0]["assignees"][0], str(self.person.id)
         )
+        self.assertEqual(shots[0]["episode_name"], "E01")
 
     def test_is_shot(self):
         self.assertTrue(shots_service.is_shot(self.shot))

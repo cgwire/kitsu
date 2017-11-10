@@ -8,6 +8,7 @@ class ShotTasksTestCase(ApiDBTestCase):
         self.generate_fixture_project_status()
         self.generate_fixture_project()
         self.generate_fixture_entity_type()
+        self.generate_fixture_episode()
         self.generate_fixture_sequence()
         self.generate_fixture_shot()
         self.generate_fixture_entity()
@@ -34,3 +35,4 @@ class ShotTasksTestCase(ApiDBTestCase):
         self.assertEqual(
             shots[0]["tasks"][0]["task_type_name"], "Animation"
         )
+        self.assertEqual(shots[0]["episode_name"], "E01")
