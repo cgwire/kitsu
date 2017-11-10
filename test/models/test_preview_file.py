@@ -28,7 +28,6 @@ class PreviewFileTestCase(ApiDBTestCase):
             PreviewFile,
             3,
             task_id=self.task.id,
-            entity_id=self.entity.id,
             person_id=self.person.id,
             source_file_id=self.output_file.id
         )
@@ -49,7 +48,6 @@ class PreviewFileTestCase(ApiDBTestCase):
             "name": "Modeling preview_file 1",
             "person_id": self.person.id,
             "task_id": self.task.id,
-            "entity_id": self.entity.id,
             "source_file_id": self.output_file.id
         }
         self.file_status_id = self.file_status.id

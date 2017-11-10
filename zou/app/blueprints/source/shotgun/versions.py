@@ -51,9 +51,6 @@ class ImportShotgunVersionsResource(BaseImportShotgunResource):
                 None
             )
 
-        if sg_version["entity"] is not None:
-            data["entity_id"] = self.get_entity_id(sg_version["entity"])
-
         if sg_version["sg_task"] is not None:
             data["task_id"] = self.task_ids.get(
                 sg_version["sg_task"]["id"],
@@ -67,16 +64,6 @@ class ImportShotgunVersionsResource(BaseImportShotgunResource):
                 sg_version["sg_uploaded_movie"]["name"]
 
         return data
-
-    def get_entity_id(self, sg_entity):
-        entity_sg_id = sg_entity["id"]
-        entity_type = sg_entity["type"]
-        entity_id = None
-        if entity_type == "Asset":
-            entity_id = self.asset_ids.get(entity_sg_id, None)
-        else:
-            entity_id = self.shot_ids.get(entity_sg_id, None)
-        return entity_id
 
     def import_entry(self, data):
         preview_file = PreviewFile.get_by(shotgun_id=data["shotgun_id"])

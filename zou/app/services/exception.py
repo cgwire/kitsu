@@ -92,3 +92,7 @@ class WrongDateFormatException(Exception):
 
 class CommentNotFoundException(Exception):
     pass
+
+
+class EntityNotFoundException(Exception):
+    pass

@@ -1,10 +1,7 @@
 from test.source.shotgun.base import ShotgunTestCase
 
-from zou.app.models.entity import Entity
 from zou.app.models.task import Task
 from zou.app.models.person import Person
-
-from zou.app.services import shots_service
 
 
 class ImportShotgunVersionTestCase(ShotgunTestCase):
@@ -82,14 +79,9 @@ class ImportShotgunVersionTestCase(ShotgunTestCase):
 
         task = Task.get_by(shotgun_id=sg_version["sg_task"]["id"])
         person = Person.get_by(shotgun_id=sg_version["user"]["id"])
-        entity = Entity.get_by(
-            shotgun_id=sg_version["entity"]["id"],
-            entity_type_id=shots_service.get_shot_type().id
-        )
 
         self.assertEqual(preview_file["name"], sg_version["code"])
         self.assertEqual(preview_file["source"], "Shotgun")
-        self.assertEqual(preview_file["entity_id"], str(entity.id))
         self.assertEqual(preview_file["task_id"], str(task.id))
 
         self.assertEqual(preview_file["name"], sg_version["code"])

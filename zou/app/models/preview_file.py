@@ -21,7 +21,6 @@ class PreviewFile(db.Model, BaseMixin, SerializerMixin):
 
     task_id = db.Column(UUIDType(binary=False), db.ForeignKey("task.id"))
     person_id = db.Column(UUIDType(binary=False), db.ForeignKey("person.id"))
-    entity_id = db.Column(UUIDType(binary=False), db.ForeignKey("entity.id"))
 
     source_file_id = db.Column(
         UUIDType(binary=False),

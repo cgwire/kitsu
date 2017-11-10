@@ -622,16 +622,15 @@ class ApiDBTestCase(ApiTestCase):
         )
 
     def generate_fixture_preview_file(self, revision=1):
-        self.preview = PreviewFile.create(
+        self.preview_file = PreviewFile.create(
             name="main",
             revision=revision,
             description="test description",
             source="pytest",
             task_id=self.task.id,
-            person_id=self.person.id,
-            entity_id=self.entity.id
+            person_id=self.person.id
         )
-        return self.preview
+        return self.preview_file
 
     def get_fixture_file_path(self, relative_path):
         current_path = os.getcwd()

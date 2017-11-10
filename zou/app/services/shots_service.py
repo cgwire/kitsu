@@ -129,12 +129,20 @@ def get_shot_map(criterions={}):
         shot_id = str(shot.id)
         episode_name = ""
         episode = episode_map.get(sequence_parent_id, None)
+
         if episode is not None:
             episode_name = episode.name
+
+        if shot.preview_file_id is not None:
+            preview_file_id = str(shot.preview_file_id)
+        else:
+            preview_file_id = ""
+
         shot_map[shot_id] = {
             "id": str(shot.id),
             "name": shot.name,
             "description": shot.description,
+            "preview_file_id": preview_file_id,
             "sequence_id": str(shot.parent_id),
             "sequence_name": sequence_name,
             "episode_id": str(sequence_parent_id),

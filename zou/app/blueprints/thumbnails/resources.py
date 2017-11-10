@@ -13,7 +13,12 @@ from zou.app.services import (
     assets_service,
     projects_service,
     tasks_service,
-    user_service
+    user_service,
+    entities_service
+)
+from zou.app.services.exception import (
+    EntityNotFoundException,
+    PreviewFileNotFoundException
 )
 from zou.app.utils import thumbnail as thumbnail_utils, permissions
 
@@ -386,3 +391,21 @@ class WorkingFileThumbnailResource(BasePictureResource):
             return True
         except permissions.PermissionDenied:
             return False
+
+
+class SetMainPreviewResource(Resource):
+
+    @jwt_required
+    def put(self, entity_id, preview_file_id):
+        try:
+            permissions.check_manager_permissions()
+            return entities_service.update_entity_preview(
+                entity_id,
+                preview_file_id
+            )
+        except permissions.PermissionDenied:
+            abort(403)
+        except EntityNotFoundException:
+            abort(404)
+        except PreviewFileNotFoundException:
+            abort(404)

@@ -16,7 +16,9 @@ from .resources import (
     CreatePersonThumbnailResource,
     PersonThumbnailResource,
     CreateWorkingFileThumbnailResource,
-    WorkingFileThumbnailResource
+    WorkingFileThumbnailResource,
+
+    SetMainPreviewResource
 )
 
 routes = [
@@ -76,8 +78,12 @@ routes = [
     (
         "/pictures/thumbnails/working-files/<instance_id>.png",
         WorkingFileThumbnailResource
+    ),
+    (
+        "/actions/entities/<entity_id>/set-main-preview/<preview_file_id>",
+        SetMainPreviewResource
     )
-]
 
+]
 blueprint = Blueprint("thumbnails", "thumbnails")
 api = configure_api_from_blueprint(blueprint, routes)

@@ -41,6 +41,10 @@ class Entity(db.Model, BaseMixin, SerializerMixin):
         UUIDType(binary=False), db.ForeignKey('entity_type.id'), nullable=False)
     parent_id = db.Column(
         UUIDType(binary=False), db.ForeignKey('entity.id'))
+    preview_file_id = db.Column(
+        UUIDType(binary=False),
+        db.ForeignKey('preview_file.id', name="fk_main_preview")
+    )
     data = db.Column(JSONB)
 
     entities_out = db.relationship(

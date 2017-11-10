@@ -47,6 +47,7 @@ def get_todos():
         .add_columns(
             Project.name,
             Entity.name,
+            Entity.preview_file_id,
             EntityType.name,
             Sequence.name,
             TaskType.name,
@@ -61,6 +62,7 @@ def get_todos():
         task,
         project_name,
         entity_name,
+        entity_preview_file_id,
         entity_type_name,
         sequence_name,
         task_type_name,
@@ -69,9 +71,13 @@ def get_todos():
         task_status_color,
         task_status_short_name
     ) in query.all():
+        if entity_preview_file_id is None:
+            entity_preview_file_id = ""
+
         task_dict = task.serialize()
         task_dict["project_name"] = project_name
         task_dict["entity_name"] = entity_name
+        task_dict["entity_preview_file_id"] = str(entity_preview_file_id)
         task_dict["entity_type_name"] = entity_type_name
         task_dict["sequence_name"] = sequence_name
         task_dict["task_type_name"] = task_type_name

@@ -282,9 +282,15 @@ def get_asset_map(criterions={}):
 
     for (asset, entity_type_name) in assets:
         asset_id = str(asset.id)
+        if asset.preview_file_id is not None:
+            preview_file_id = str(asset.preview_file_id)
+        else:
+            preview_file_id = ""
+
         asset_map[asset_id] = {
             "id": str(asset.id),
             "name": asset.name,
+            "preview_file_id": preview_file_id,
             "description": asset.description,
             "asset_type_name": entity_type_name,
             "canceled": asset.canceled,
@@ -325,7 +331,10 @@ def all_assets_and_tasks(criterions={}):
         if asset_id not in task_map:
             task_map[asset_id] = []
 
-        task_dict = {"id": str(task.id)}
+        task_dict = {
+            "id": str(task.id),
+            "entity_id": asset_id
+        }
         task_status = task_status_map[task.task_status_id]
         task_type = task_type_map[task.task_type_id]
         task_dict.update({
