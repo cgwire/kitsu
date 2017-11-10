@@ -4,6 +4,7 @@
     <table class="table table-header" ref="headerWrapper">
       <thead>
         <tr>
+          <th class="thumbnail"></th>
           <th class="type">{{ $t('assets.fields.type') }}</th>
           <th class="name">{{ $t('assets.fields.name') }}</th>
           <th class="description">{{ $t('assets.fields.description') }}</th>
@@ -45,6 +46,15 @@
           :class="{canceled: entry.canceled}"
           v-for="entry in entries"
         >
+          <td class="thumbnail">
+            <img
+              class="thumbnail-picture"
+              v-lazy="'/api/pictures/thumbnails/preview-files/' + entry.preview_file_id + '.png'"
+              v-if="entry.preview_file_id.length > 0"
+            />
+            <span class="thumbnail-picture thumbnail-empty" v-else>
+            </span>
+          </td>
           <td :class="{type: !entry.canceled}">
             {{ entry.asset_type_name }}
           </td>
@@ -205,5 +215,13 @@ td.name {
 
 td.type {
   font-size: 1.2em;
+}
+
+.thumbnail {
+  min-width: 50px;
+  max-width: 50px;
+  width: 50px;
+  padding: 0;
+  padding-top: 7px;
 }
 </style>

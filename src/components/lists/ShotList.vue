@@ -4,6 +4,7 @@
     <table class="table table-header" ref="headerWrapper">
       <thead>
         <tr>
+          <th class="thumbnail"></th>
           <th class="episode" v-if="entries.length > 0 && entries[0].episode_name.length > 0">
             {{ $t('shots.fields.episode') }}
           </th>
@@ -49,6 +50,15 @@
           :class="{canceled: entry.canceled}"
           v-for="entry in entries"
         >
+          <td class="thumbnail">
+            <img
+              class="thumbnail-picture"
+              v-lazy="'/api/pictures/thumbnails/preview-files/' + entry.preview_file_id + '.png'"
+              v-if="entry.preview_file_id.length > 0"
+            />
+            <span class="thumbnail-picture thumbnail-empty" v-else>
+            </span>
+          </td>
           <td :class="{name: !entry.canceled}" v-if="entries[0].episode_name.length > 0">
             {{ entry.episode_name }}
           </td>
@@ -245,5 +255,13 @@ td.sequence {
 
 .canceled {
   text-decoration: line-through;
+}
+
+.thumbnail {
+  min-width: 50px;
+  max-width: 50px;
+  width: 50px;
+  padding: 0;
+  padding-top: 7px;
 }
 </style>

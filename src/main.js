@@ -7,9 +7,11 @@ import i18n from './lib/i18n'
 import realtime from './lib/realtime'
 import store from './store'
 import App from './App'
+import VueLazyload from 'vue-lazyload'
 
 Vue.config.productionTip = false
 Vue.use(vuescroll)
+Vue.use(VueLazyload)
 
 // Make the current route part of the main state.
 sync(store, router)
