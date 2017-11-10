@@ -190,6 +190,15 @@ input.search-input:focus {
   margin-top: 1em;
 }
 
+.flexrow {
+  display: flex;
+  align-items: center;
+}
+
+.flexrow-item {
+  margin-right: 1em;
+}
+
 @media screen and (max-width: 1000px) {
   .button .icon.is-small {
     margin-right: 0;

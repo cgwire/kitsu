@@ -3,11 +3,16 @@
     <h1 class="title">
        <div class="level">
          <div class="level-left">
+           <img
+             class="thumbnail-picture"
+             :src="'/api/pictures/thumbnails/preview-files/' + currentTask.entity.preview_file_id + '.png'"
+             v-if="currentTask && currentTask.entity.preview_file_id.length > 0"
+           />
            <div class="level-item">
              {{ currentTask ? title : 'Loading...'}}
            </div>
            <div class="level-item" v-if="currentTask">
-             <span
+            <span
                class="tag is-medium"
                :style="{
                  'background-color': currentTask.task_type_color,
@@ -81,8 +86,32 @@
             <img :src="getPreviewPath()" />
           </a>
         </div>
+        <div
+          class="flexrow"
+           v-if="currentTask && currentTask.entity.preview_file_id !== currentPreviewId"
+          >
+          <button
+            :class="{
+              button: true,
+              'flexrow-item': true,
+              'is-loading': loading.setPreview
+            }"
+            @click="setPreview"
+            v-if="currentTaskPreviews.length > 0"
+          >
+            <image-icon class="icon"></image-icon>
+            <span class="text">
+              {{ $t('tasks.set_preview')}}
+            </span>
+          </button>
+          <span class="error flexrow-item" v-if="errors.setPreview">
+            {{ $t('tasks.set_preview_error')}}
+          </span>
+        </div>
+        <div v-else>
+          <em>{{ $t('tasks.set_preview_done')}}</em>
+        </div>
 			</div>
-
 
       <div class="task-column">
         <h2 class="subtitle validation-title">
@@ -205,6 +234,8 @@
 
 <script>
 import { mapGetters, mapActions } from 'vuex'
+import { ImageIcon } from 'vue-feather-icons'
+
 import PeopleAvatar from './widgets/PeopleAvatar'
 import PeopleName from './widgets/PeopleName'
 import AddComment from './widgets/AddComment'
@@ -219,14 +250,15 @@ export default {
   name: 'task',
   components: {
     AddComment,
+    AddPreviewModal,
     ButtonLink,
-    PeopleAvatar,
     Comment,
+    DeleteModal,
+    ImageIcon,
+    PeopleAvatar,
     ValidationTag,
     PeopleName,
-    PreviewRow,
-    AddPreviewModal,
-    DeleteModal
+    PreviewRow
   },
 
   data () {
@@ -246,10 +278,12 @@ export default {
       },
       loading: {
         addPreview: false,
+        setPreview: false,
         deleteTask: false
       },
       errors: {
         addPreview: false,
+        setPreview: false,
         deleteTask: false
       },
       currentTask: null,
@@ -329,7 +363,12 @@ export default {
       'isCurrentUserManager'
     ]),
     currentPreviewId () {
-      return this.route.params.preview_id
+      let previewId = this.route.params.preview_id
+
+      if (!previewId && this.currentTaskPreviews.length > 0) {
+        previewId = this.currentTaskPreviews[0].id
+      }
+      return previewId
     },
     title () {
       if (this.currentTask) {
@@ -486,6 +525,22 @@ export default {
       })
     },
 
+    setPreview () {
+      this.loading.setPreview = true
+      this.errors.setPreview = true
+      this.$store.dispatch('setPreview', {
+        taskId: this.currentTask.id,
+        entityId: this.currentTask.entity_id,
+        previewId: this.currentPreviewId,
+        callback: (err) => {
+          if (err) {
+            this.errors.setPreview = true
+          }
+          this.loading.setPreview = false
+        }
+      })
+    },
+
     confirmDeleteTask () {
       this.loading.deleteTask = true
       this.errors.deleteTask = false
@@ -581,5 +636,10 @@ video {
 
 .assignees span {
   margin-right: 0.2em;
+}
+
+.thumbnail-picture {
+  width: 70px;
+  margin-right: 0.3em;
 }
 </style>

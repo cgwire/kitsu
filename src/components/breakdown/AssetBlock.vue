@@ -3,6 +3,7 @@
   :id="'casting-' + asset.id"
   class="asset big casted active"
 >
+
   <div
     class="asset-add"
     @click="removeOneAsset"
@@ -15,14 +16,24 @@
     >
   - 10
   </div>
-  <div class="asset-name">
-    <p>
+
+  <div class="asset-picture" v-if="asset.preview_file_id.length > 0">
+    <img
+      :src="'/api/pictures/thumbnails-square/preview-files/' + asset.preview_file_id + '.png'"
+    />
+  </div>
+  <div class="asset-picture" v-else>
+    <span class="empty-picture">
+      no pic
+    </span>
+  </div>
+  <p class="asset-name">
     {{ asset.name }}
     <span v-if="nbOccurences > 1">
     ({{ nbOccurences }})
     </span>
-    </p>
-  </div>
+  </p>
+
 </div>
 </template>
 
@@ -124,26 +135,27 @@ export default {
   opacity: 1;
 }
 
-.asset-name {
+
+.asset-picture {
   position: relative;
-  top: -60px;
+  top: -80px;
   left: 0;
   display: flex;
   text-align: center;
   justify-content: center;
   align-items: center;
-  width: 60px;
-  height: 60px;
   z-index: 2;
   word-break: break-all;
-  padding: 0.5em;
-}
-
-.big .asset-name {
-  top: -80px;
   width: 80px;
   height: 80px;
 }
+
+.asset-name {
+  text-align: center;
+  position: relative;
+  top: -75px;
+}
+
 
 .nb-occurences {
   margin-left: 0.4em;

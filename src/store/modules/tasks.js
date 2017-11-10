@@ -24,6 +24,8 @@ import {
   ASSIGN_TASKS,
   UNASSIGN_TASKS,
 
+  SET_PREVIEW,
+
   RESET_ALL
 } from '../mutation-types'
 
@@ -162,6 +164,17 @@ const actions = {
             payload.callback(err, preview)
           }
         })
+      }
+    })
+  },
+
+  setPreview ({ commit, state }, {taskId, entityId, previewId, callback}) {
+    tasksApi.setPreview(entityId, previewId, (err, entity) => {
+      if (err && callback) {
+        callback(err)
+      } else if (callback) {
+        commit(SET_PREVIEW, {taskId, previewId})
+        callback(err, entity)
       }
     })
   },
@@ -323,6 +336,10 @@ const mutations = {
       const task = state.taskMap[taskId]
       task.assignees = []
     })
+  },
+
+  [SET_PREVIEW] (state, {taskId, previewId}) {
+    state.taskMap[taskId].entity.preview_file_id = previewId
   },
 
   [RESET_ALL] (state, shots) {

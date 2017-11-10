@@ -58,6 +58,14 @@ export default {
     )
   },
 
+  setPreview (entityId, previewId, callback) {
+    client.put(
+      `/api/actions/entities/${entityId}/set-main-preview/${previewId}`,
+      {},
+      callback
+    )
+  },
+
   uploadPreview (previewId, formData, callback) {
     client.post(
       `/api/pictures/preview-files/${previewId}`,

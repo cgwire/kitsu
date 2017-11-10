@@ -10,6 +10,8 @@
           <th class="name">
             {{ $t('tasks.fields.entity') }}
           </th>
+          <th class="thumbnail">
+          </th>
           <th class="type">
             {{ $t('tasks.fields.task_type') }}
           </th>
@@ -36,7 +38,18 @@
             :only-avatar="true"
           >
           </production-name-cell>
-          <td class="name">{{ entityName(entry) }}</td>
+          <td class="name">
+            {{ entityName(entry) }}
+          </td>
+          <td class="thumbnail">
+            <img
+              class="thumbnail-picture"
+              :src="'/api/pictures/thumbnails/preview-files/' + entry.entity_preview_file_id + '.png'"
+              v-if="entry.entity_preview_file_id.length > 0"
+            />
+            <span class="thumbnail-picture thumbnail-empty" v-else>
+            </span>
+          </td>
           <task-type-name
             class="type"
             :entry="{
@@ -130,5 +143,15 @@ export default {
 .status {
   width: 100px;
   min-width: 100px;
+}
+
+.thumbnail-picture {
+}
+
+.thumbnail {
+  min-width: 60px;
+  max-width: 60px;
+  width: 60px;
+  padding: 0.5em 0 0 0;
 }
 </style>

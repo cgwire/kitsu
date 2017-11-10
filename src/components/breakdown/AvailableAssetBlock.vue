@@ -19,11 +19,19 @@
     >
   + 10
   </div>
-  <div class="asset-name">
-    <p>
-    {{ asset.name }}
-    </p>
+  <div class="asset-picture" v-if="asset.preview_file_id.length > 0">
+    <img
+      :src="'/api/pictures/thumbnails-square/preview-files/' + asset.preview_file_id + '.png'"
+    />
   </div>
+  <div class="asset-picture" v-else>
+    <span class="empty-picture">
+      no pic
+    </span>
+  </div>
+  <p class="asset-name">
+    {{ asset.name }}
+  </p>
 </div>
 </template>
 
@@ -96,24 +104,23 @@ export default {
   z-index: 3;
 }
 
-.big .asset-add {
-  width: 80px;
-  height: 40px;
-  cursor: pointer;
-}
-
-.big .asset-add-10 {
-  width: 80px;
-  height: 40px;
-  cursor: pointer;
-}
 
 .asset.active:hover .asset-add,
 .asset.active:hover .asset-add-10 {
   opacity: 1;
 }
 
-.asset-name {
+.asset {
+  width: 60px;
+  height: 60px;
+  margin-right: 1em;
+  margin-bottom: 3.5em;
+  font-size: 0.8em;
+  cursor: default;
+  background: #EEE;
+}
+
+.asset-picture {
   position: relative;
   top: -60px;
   left: 0;
@@ -121,21 +128,16 @@ export default {
   text-align: center;
   justify-content: center;
   align-items: center;
-  width: 60px;
-  height: 60px;
   z-index: 2;
   word-break: break-all;
-  padding: 0.5em;
-}
-
-.asset {
   width: 60px;
   height: 60px;
-  margin-right: 1em;
-  margin-bottom: 1em;
-  font-size: 0.8em;
-  cursor: default;
-  background: #EEE;
+}
+
+.asset-name {
+  text-align: center;
+  position: relative;
+  top: -55px;
 }
 
 .asset.casted {
