@@ -50,7 +50,7 @@
             <img
               class="thumbnail-picture"
               v-lazy="'/api/pictures/thumbnails/preview-files/' + entry.preview_file_id + '.png'"
-              v-if="entry.preview_file_id.length > 0"
+              v-if="entry.preview_file_id && entry.preview_file_id.length > 0"
             />
             <span class="thumbnail-picture thumbnail-empty" v-else>
             </span>

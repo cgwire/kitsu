@@ -6,7 +6,7 @@
            <img
              class="thumbnail-picture"
              :src="'/api/pictures/thumbnails/preview-files/' + currentTask.entity.preview_file_id + '.png'"
-             v-if="currentTask && currentTask.entity.preview_file_id.length > 0"
+             v-if="currentTask && currentTask.entity && currentTask.entity.preview_file_id && currentTask.entity.preview_file_id.length > 0"
            />
            <div class="level-item">
              {{ currentTask ? title : 'Loading...'}}
@@ -54,7 +54,7 @@
         <h2 class="subtitle">
           {{ $t('tasks.preview') }}
         </h2>
-        <div class="preview-list" v-if="currentTaskPreviews.length > 0">
+        <div class="preview-list" v-if="currentTaskPreviews && currentTaskPreviews.length > 0">
           <preview-row
             :key="preview.id"
             :preview="preview"
@@ -71,7 +71,7 @@
         </div>
 
         <div class="preview-picture">
-          <div v-if="currentTaskPreviews.length > 0 && isMovie">
+          <div v-if="currentTaskPreviews && currentTaskPreviews.length > 0 && isMovie">
             <video
               :src="moviePath"
               controls
@@ -88,7 +88,7 @@
         </div>
         <div
           class="flexrow"
-           v-if="currentTask && currentTask.entity.preview_file_id !== currentPreviewId"
+           v-if="currentTask && currentTask.entity && currentTask.entity.preview_file_id !== currentPreviewId"
           >
           <button
             :class="{
