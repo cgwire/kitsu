@@ -1,5 +1,5 @@
 from flask import request, abort
-from flask_restful import Resource
+from flask_restful import Resource, reqparse
 from flask_jwt_extended import jwt_required
 
 from zou.app.models.entity import Entity
@@ -232,6 +232,37 @@ class ProjectShotsResource(Resource):
         )
 
 
+    @jwt_required
+    def post(self, project_id):
+        """
+        Create a shot for given project.
+        """
+        try:
+            (sequence_id, name) = self.get_arguments()
+            projects_service.get_project(project_id)
+            permissions.check_manager_permissions()
+            shot = shots_service.create_shot(
+                project_id,
+                sequence_id,
+                name
+            )
+            return shot, 201
+        except ProjectNotFoundException:
+            abort(404)
+        except SequenceNotFoundException:
+            abort(404)
+        except permissions.PermissionDenied:
+            abort(403)
+
+    def get_arguments(self):
+        parser = reqparse.RequestParser()
+        parser.add_argument("name", required=True)
+        parser.add_argument("sequence_id", default=None)
+        args = parser.parse_args()
+        return (args["sequence_id"], args["name"])
+
+
+
 class ProjectSequencesResource(Resource):
 
     def __init__(self):
@@ -255,6 +286,35 @@ class ProjectSequencesResource(Resource):
             shots_service.get_sequences_for_project(project),
             obj_type="Sequence"
         )
+
+    @jwt_required
+    def post(self, project_id):
+        """
+        Create a sequence for given project.
+        """
+        try:
+            (episode_id, name) = self.get_arguments()
+            projects_service.get_project(project_id)
+            permissions.check_manager_permissions()
+            sequence = shots_service.create_sequence(
+                project_id,
+                episode_id,
+                name
+            )
+            return sequence, 201
+        except ProjectNotFoundException:
+            abort(404)
+        except EpisodeNotFoundException:
+            abort(404)
+        except permissions.PermissionDenied:
+            abort(403)
+
+    def get_arguments(self):
+        parser = reqparse.RequestParser()
+        parser.add_argument("name", required=True)
+        parser.add_argument("episode_id", default=None)
+        args = parser.parse_args()
+        return (args["episode_id"], args["name"])
 
 
 class ProjectEpisodesResource(Resource):
@@ -280,6 +340,27 @@ class ProjectEpisodesResource(Resource):
             shots_service.get_episodes_for_project(project),
             obj_type="Episode"
         )
+
+    @jwt_required
+    def post(self, project_id):
+        """
+        Create an episode for given project.
+        """
+        try:
+            name = self.get_arguments()
+            projects_service.get_project(project_id)
+            permissions.check_manager_permissions()
+            return shots_service.create_episode(project_id, name), 201
+        except ProjectNotFoundException:
+            abort(404)
+        except permissions.PermissionDenied:
+            abort(403)
+
+    def get_arguments(self):
+        parser = reqparse.RequestParser()
+        parser.add_argument("name", required=True)
+        args = parser.parse_args()
+        return args["name"]
 
 
 class EpisodeResource(Resource):

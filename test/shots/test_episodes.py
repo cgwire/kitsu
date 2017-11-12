@@ -49,3 +49,10 @@ class EpisodeTestCase(ApiDBTestCase):
             episode,
             self.episode.serialize(obj_type="Episode")
         )
+
+    def test_create_episode(self):
+        episode_name = "NE01"
+        data = {"name": episode_name}
+        episode = self.post("data/projects/%s/episodes" % self.project.id, data)
+        episode = self.get("data/episodes/%s" % episode["id"])
+        self.assertEquals(episode["name"], episode_name)

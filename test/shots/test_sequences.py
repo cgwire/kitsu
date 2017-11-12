@@ -52,3 +52,17 @@ class SequenceTestCase(ApiDBTestCase):
         tasks = self.get("data/sequences/%s/tasks" % self.sequence.id)
         self.assertEquals(len(tasks), 1)
         self.assertEqual(tasks[0]["id"], str(self.sequence_task.id))
+
+    def test_create_sequence(self):
+        self.generate_fixture_episode()
+        sequence_name = "NSE01"
+        project_id = str(self.project.id)
+        episode_id = str(self.episode.id)
+        data = {"name": sequence_name, "episode_id": episode_id}
+        sequence = self.post(
+            "data/projects/%s/sequences" % project_id,
+            data
+        )
+        sequence = self.get("data/sequences/%s" % sequence["id"])
+        self.assertEquals(sequence["name"], sequence_name)
+        self.assertEquals(sequence["parent_id"], episode_id)

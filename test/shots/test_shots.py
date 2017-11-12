@@ -70,3 +70,16 @@ class ShotTestCase(ApiDBTestCase):
         shots = shots_service.get_shots()
         self.assertEquals(len(shots), 3)
         self.assertEquals(shots[2]["canceled"], True)
+
+    def test_create_shot(self):
+        shot_name = "NSH01"
+        project_id = str(self.project.id)
+        sequence_id = str(self.sequence.id)
+        data = {"name": shot_name, "sequence_id": sequence_id}
+        shot = self.post(
+            "data/projects/%s/shots" % project_id,
+            data
+        )
+        shot = self.get("data/shots/%s" % shot["id"])
+        self.assertEquals(shot["name"], shot_name)
+        self.assertEquals(shot["parent_id"], sequence_id)

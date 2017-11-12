@@ -124,3 +124,33 @@ class ShotUtilsTestCase(ApiDBTestCase):
             self.episode.id,
             shots_service.get_episode(self.episode.id).id
         )
+
+    def test_create_episode(self):
+        episode_name = "NE01"
+        episode = shots_service.create_episode(
+            self.project.id,
+            episode_name
+        )
+        self.assertEquals(episode["name"], episode_name)
+
+    def test_create_sequence(self):
+        sequence_name = "NSE01"
+        parent_id = str(self.episode.id)
+        sequence = shots_service.create_sequence(
+            self.project.id,
+            parent_id,
+            sequence_name
+        )
+        self.assertEquals(sequence["name"], sequence_name)
+        self.assertEquals(sequence["parent_id"], parent_id)
+
+    def test_create_shot(self):
+        shot_name = "NSH01"
+        parent_id = str(self.sequence.id)
+        shot = shots_service.create_shot(
+            self.project.id,
+            parent_id,
+            shot_name
+        )
+        self.assertEquals(shot["name"], shot_name)
+        self.assertEquals(shot["parent_id"], parent_id)
