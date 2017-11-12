@@ -414,8 +414,12 @@ class TaskFullResource(Resource):
         entity = tasks_service.get_entity(task.entity_id)
         result["entity"] = entity.serialize()
         if entity.parent_id is not None:
-            parent = tasks_service.get_entity(entity.parent_id)
-            result["entity_parent"] = parent.serialize()
+            sequence = shots_service.get_sequence(entity.parent_id)
+            result["sequence"] = sequence.serialize()
+            if sequence.parent_id is not None:
+                episode = shots_service.get_episode(sequence.parent_id)
+                result["episode"] = episode.serialize()
+
         entity_type = tasks_service.get_entity_type(entity.entity_type_id)
         result["entity_type"] = entity_type.serialize()
         assignees = []
