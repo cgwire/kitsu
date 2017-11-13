@@ -96,7 +96,9 @@ class FileTreeTestCase(ApiDBTestCase):
         self.assertEqual(task.id, self.task.id)
 
     def test_get_task_from_shot_path(self):
-        file_path = file_tree.get_folder_path(self.shot_task_standard)
+        file_path = file_tree.get_folder_path(
+            self.shot_task_standard.serialize()
+        )
         task = file_tree.get_shot_task_from_path(
             file_path,
             self.project_standard
@@ -105,7 +107,7 @@ class FileTreeTestCase(ApiDBTestCase):
         self.assertTrue(task.id, self.shot_task_standard.id)
 
     def test_get_task_from_asset_path(self):
-        file_path = file_tree.get_folder_path(self.task_standard)
+        file_path = file_tree.get_folder_path(self.task_standard.serialize())
         task = file_tree.get_asset_task_from_path(
             file_path,
             self.project_standard

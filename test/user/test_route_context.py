@@ -171,7 +171,7 @@ class UserContextRoutesTestCase(ApiDBTestCase):
         self.assertEquals(len(tasks), 2)
 
         task = Task.get(shot_task_id)
-        task.task_status_id = tasks_service.get_done_status().id
+        task.task_status_id = tasks_service.get_done_status()["id"]
         task.save()
 
         self.assign_user(task_id)

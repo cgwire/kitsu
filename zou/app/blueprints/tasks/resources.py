@@ -36,7 +36,7 @@ class CommentTaskResource(Resource):
         ) = self.get_arguments()
 
         try:
-            task = tasks_service.get_task(task_id)
+            tasks_service.get_task(task_id)
             if not permissions.has_manager_permissions():
                 user_service.check_assigned(task_id)
             task_status = tasks_service.get_task_status(task_status_id)
@@ -48,7 +48,10 @@ class CommentTaskResource(Resource):
                 person_id=person["id"],
                 text=comment
             )
-            task.update({"task_status_id": task_status_id})
+            tasks_service.update_task(
+                task_id,
+                {"task_status_id": task_status_id}
+            )
             comment["task_status"] = task_status
             comment["person"] = person
             events.emit("comment:new", {"id": comment["id"]})

@@ -170,6 +170,12 @@ def create_task(task_type, entity, name="main"):
         pass  # Tasks already exists, no need to create it.
 
 
+def update_task(task_id, data):
+    task = Task.get(task_id)
+    task.update(data)
+    return task.serialize()
+
+
 def delete_task(task_id):
     task = Task.get(task_id)
     task.delete()
@@ -454,10 +460,11 @@ def create_comment(
     text,
     object_type="Task"
 ):
-    return Comment.create(
+    comment = Comment.create(
         object_id=object_id,
         object_type=object_type,
         task_status_id=task_status_id,
         person_id=person_id,
         text=text
-    ).serialize()
+    )
+    return comment.serialize()

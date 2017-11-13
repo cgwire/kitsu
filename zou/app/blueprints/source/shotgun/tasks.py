@@ -118,5 +118,8 @@ class ImportRemoveShotgunTaskResource(ImportRemoveShotgunBaseResource):
         ImportRemoveShotgunBaseResource.__init__(
             self,
             Task,
-            tasks_service.delete_task
+            self.delete_func
         )
+
+    def delete_func(self, entity):
+        tasks_service.delete_task(entity.id)
