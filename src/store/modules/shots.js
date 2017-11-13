@@ -12,12 +12,26 @@ import {
   LOAD_SHOTS_START,
   LOAD_SHOTS_ERROR,
   LOAD_SHOTS_END,
+  LOAD_EPISODES_END,
+  LOAD_SEQUENCES_END,
 
   SHOT_CSV_FILE_SELECTED,
   IMPORT_SHOTS_START,
   IMPORT_SHOTS_END,
 
   LOAD_OPEN_PRODUCTIONS_END,
+
+  NEW_SHOT_START,
+  NEW_SHOT_ERROR,
+  NEW_SHOT_END,
+
+  NEW_SEQUENCE_START,
+  NEW_SEQUENCE_ERROR,
+  NEW_SEQUENCE_END,
+
+  NEW_EPISODE_START,
+  NEW_EPISODE_ERROR,
+  NEW_EPISODE_END,
 
   EDIT_SHOT_START,
   EDIT_SHOT_ERROR,
@@ -41,11 +55,14 @@ import {
 const state = {
   shots: [],
   sequences: [],
+  episodes: [],
   validationColumns: {},
 
   displayedShots: [],
   shotIndex: {},
   shotMap: {},
+  sequenceMap: {},
+  episodeMap: {},
   shotCreated: '',
 
   isShotsLoading: false,
@@ -72,6 +89,7 @@ const getters = {
   shots: state => state.shots,
   shotMap: state => state.shotMap,
   sequences: state => state.sequences,
+  episodes: state => state.episodes,
   shotValidationColumns: state => {
     return sortValidationColumns(Object.values(state.validationColumns))
   },
@@ -111,6 +129,10 @@ const getters = {
 
   getSequenceOptions: state => state.sequences.map(
     (sequence) => { return { label: sequence.name, value: sequence.id } }
+  ),
+
+  getEpisodeOptions: state => state.episodes.map(
+    (episode) => { return { label: episode.name, value: episode.id } }
   )
 }
 
@@ -121,28 +143,64 @@ const actions = {
       rootState.productions
     )
     commit(LOAD_SHOTS_START)
-    shotsApi.getShots(currentProduction, (err, shots) => {
+    shotsApi.getEpisodes(currentProduction, (err, episodes) => {
+      commit(LOAD_EPISODES_END, episodes)
       if (err) commit(LOAD_SHOTS_ERROR)
       else {
-        shots.forEach((shot) => {
-          shot.project_name = currentProduction.name
-          return shot
+        shotsApi.getSequences(currentProduction, (err, sequences) => {
+          if (err) commit(LOAD_SHOTS_ERROR)
+          else {
+            commit(LOAD_SEQUENCES_END, sequences)
+            shotsApi.getShots(currentProduction, (err, shots) => {
+              if (err) commit(LOAD_SHOTS_ERROR)
+              else {
+                shots.forEach((shot) => {
+                  shot.project_name = currentProduction.name
+                  return shot
+                })
+                commit(LOAD_SHOTS_END, shots)
+              }
+              if (callback) callback(err)
+            })
+          }
         })
-        commit(LOAD_SHOTS_END, shots)
       }
-      if (callback) callback(err)
     })
   },
 
   newShot ({ commit, state }, payload) {
-    commit(EDIT_SHOT_START, payload.data)
-    shotsApi.newShot(payload.data, (err, shot) => {
+    commit(NEW_SHOT_START)
+    shotsApi.newShot(payload.shot, (err, shot) => {
       if (err) {
-        commit(EDIT_SHOT_ERROR)
+        commit(NEW_SHOT_ERROR)
       } else {
-        commit(EDIT_SHOT_END, payload.data)
+        commit(NEW_SHOT_END, shot)
       }
-      if (payload.callback) payload.callback(err)
+      if (payload.callback) payload.callback(err, shot)
+    })
+  },
+
+  newSequence ({ commit, state }, payload) {
+    commit(NEW_SEQUENCE_START)
+    shotsApi.newSequence(payload.sequence, (err, sequence) => {
+      if (err) {
+        commit(NEW_SEQUENCE_ERROR)
+      } else {
+        commit(NEW_SEQUENCE_END, sequence)
+      }
+      if (payload.callback) payload.callback(err, sequence)
+    })
+  },
+
+  newEpisode ({ commit, state }, payload) {
+    commit(NEW_EPISODE_START)
+    shotsApi.newEpisode(payload.episode, (err, episode) => {
+      if (err) {
+        commit(NEW_EPISODE_ERROR)
+      } else {
+        commit(NEW_EPISODE_END, episode)
+      }
+      if (payload.callback) payload.callback(err, episode)
     })
   },
 
@@ -197,6 +255,8 @@ const actions = {
 const mutations = {
   [LOAD_SHOTS_START] (state) {
     state.shots = []
+    state.sequences = []
+    state.episoded = []
     state.validationColumns = {}
     state.isShotsLoading = true
     state.isShotsLoadingError = false
@@ -234,17 +294,27 @@ const mutations = {
 
     state.shotIndex = buildNameIndex(shots)
     const shotMap = {}
-    const sequenceMap = {}
     state.shots.forEach((shot) => {
       shotMap[shot.id] = shot
-      sequenceMap[shot.sequence_id] = {
-        id: shot.sequence_id,
-        name: shot.sequence_name
-      }
     })
-    state.sequences = sortByName(Object.values(sequenceMap))
     state.shotMap = shotMap
     state.displayedShots = state.shots
+  },
+  [LOAD_SEQUENCES_END] (state, sequences) {
+    const sequenceMap = {}
+    sequences.forEach((sequence) => {
+      sequenceMap[sequence.id] = sequence
+    })
+    state.sequenceMap = sequenceMap
+    state.sequences = sortByName(sequences)
+  },
+  [LOAD_EPISODES_END] (state, episodes) {
+    const episodeMap = {}
+    episodes.forEach((episode) => {
+      episodeMap[episode.id] = episode
+    })
+    state.episodeMap = episodeMap
+    state.episodes = sortByName(episodes)
   },
 
   [SHOT_CSV_FILE_SELECTED] (state, formData) {
@@ -361,9 +431,47 @@ const mutations = {
       indexSearch(state.shotIndex, shotSearch) || state.shots
   },
 
+  [NEW_SHOT_START] (state) {},
+  [NEW_SHOT_ERROR] (state) {},
+  [NEW_SHOT_END] (state, shot) {
+    const sequence = state.sequenceMap[shot.parent_id]
+    const episode = state.episodeMap[sequence.parent_id]
+    shot.sequence_name = sequence.name
+    shot.sequence_id = sequence.id
+    shot.episode_name = episode.name
+    shot.episode_id = episode.id
+    shot.preview_file_id = ''
+
+    shot.tasks = []
+    shot.validations = []
+    shot.data = {}
+
+    state.shots.push(shot)
+    state.shots = sortShots(state.shots)
+    state.shotMap[shot.id] = shot
+    state.shotIndex = buildNameIndex(state.shots)
+  },
+
+  [NEW_SEQUENCE_START] (state) {},
+  [NEW_SEQUENCE_ERROR] (state) {},
+  [NEW_SEQUENCE_END] (state, sequence) {
+    state.sequences.push(sequence)
+    state.sequences = sortByName(state.sequences)
+    state.sequenceMap[sequence.id] = sequence
+  },
+
+  [NEW_EPISODE_START] (state) {},
+  [NEW_EPISODE_ERROR] (state) {},
+  [NEW_EPISODE_END] (state, episode) {
+    state.episodes.push(episode)
+    state.episodes = sortByName(state.episodes)
+    state.episodeMap[episode.id] = episode
+  },
+
   [RESET_ALL] (state) {
     state.shots = []
     state.sequences = []
+    state.episoded = []
     state.isShotsLoading = false
     state.isShotsLoadingError = false
     state.shotsCsvFormData = null

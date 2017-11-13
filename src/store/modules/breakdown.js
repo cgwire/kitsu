@@ -6,8 +6,10 @@ import {
 import {
   CASTING_SET_SHOT,
   CASTING_SET_SEQUENCE,
+  CASTING_SET_EPISODE,
   CASTING_SET_CASTING,
   CASTING_SET_SHOTS,
+  CASTING_SET_SEQUENCES,
   CASTING_SET_ISDIRTY,
 
   CASTING_ADD_TO_CASTING,
@@ -20,6 +22,9 @@ const state = {
   castingSequenceId: '',
   castingShotId: 0,
   castingSequenceShots: [],
+  castingEpisodeSequences: [],
+  castingSequenceOptions: [],
+
   castingCurrentShot: null,
   casting: {},
   castingAssetsByType: [],
@@ -30,6 +35,9 @@ const getters = {
   castingSequenceId: state => state.castingSequenceId,
   castingShotId: state => state.castingShotId,
   castingSequenceShots: state => state.castingSequenceShots,
+  castingEpisodeSequences: state => state.castingEpisodeSequences,
+  castingSequenceOptions: state => state.castingSequenceOptions,
+
   castingCurrentShot: state => state.castingCurrentShot,
   casting: state => state.casting,
   castingAssetsByType: state => state.castingAssetsByType,
@@ -65,8 +73,7 @@ const getters = {
 
 const actions = {
 
-  setCastingShot ({commit, state, rootState}, payload) {
-    const shotId = payload.shotId
+  setCastingShot ({commit, state, rootState}, {shotId, callback}) {
     if (shotId) {
       const shot = rootState.shots.shotMap[shotId]
       const assetMap = rootState.assets.assetMap
@@ -83,16 +90,17 @@ const actions = {
           commit(CASTING_SET_CASTING, castingMap)
         }
 
-        if (payload.callback) payload.callback(err)
+        if (callback) callback(err)
       })
     } else {
       commit(CASTING_SET_CASTING, [])
       commit(CASTING_SET_SHOT, null)
-      if (payload.callback) payload.callback()
+      if (callback) callback()
     }
   },
 
   setCastingSequence ({commit, state, rootState, rootGetters}, sequenceId) {
+    console.log('héhé', sequenceId)
     if (!sequenceId) {
       if (state.castingCurrentShot) {
         sequenceId = state.castingCurrentShot.sequence_id
@@ -107,6 +115,24 @@ const actions = {
     })
     commit(CASTING_SET_SEQUENCE, sequenceId)
     commit(CASTING_SET_SHOTS, castingSequenceShots)
+  },
+
+  setCastingEpisode ({commit, state, rootState, rootGetters}, episodeId) {
+    if (!episodeId) {
+      if (state.castingCurrentShot) {
+        episodeId = state.castingCurrentShot.episode_id
+      } else {
+        const episodeOption = rootGetters.getEpisodeOptions[0]
+        if (episodeOption) episodeId = episodeOption.value
+      }
+    }
+
+    const castingSequenceShots = rootState.shots.sequences.filter((sequence) => {
+      return sequence.parent_id === episodeId
+    })
+
+    commit(CASTING_SET_SEQUENCES, castingSequenceShots)
+    commit(CASTING_SET_EPISODE, episodeId)
   },
 
   addAssetToCasting ({commit, state, rootState}, {assetId, nbOccurences}) {
@@ -151,11 +177,13 @@ const mutations = {
     if (shot) {
       state.castingCurrentShot = shot
       state.castingShotId = shot.id
+      state.castingEpisodeId = shot.episode_id
       state.castingSequenceId = shot.sequence_id
     } else {
       state.castingCurrentShot = null
       state.castingShotId = null
       state.castingSequenceId = null
+      state.episodeSequenceId = null
     }
   },
 
@@ -163,8 +191,22 @@ const mutations = {
     state.castingSequenceShots = shots
   },
 
+  [CASTING_SET_SEQUENCES] (state, sequences) {
+    state.castingEpisodeSequences = sequences
+    state.castingSequenceOptions = sequences.map((sequence) => {
+      return {
+        label: sequence.name,
+        value: sequence.id
+      }
+    })
+  },
+
   [CASTING_SET_SEQUENCE] (state, sequenceId) {
     state.castingSequenceId = sequenceId
+  },
+
+  [CASTING_SET_EPISODE] (state, episodeId) {
+    state.castingEpisodeId = episodeId
   },
 
   [CASTING_SET_CASTING] (state, casting) {
@@ -204,6 +246,10 @@ const mutations = {
     state.castingSequenceId = ''
     state.castingShotId = ''
     state.castingSequenceShots = []
+    state.castingEpisodeSequences = []
+    state.castingEpisodeOptions = []
+    state.castingSequenceOptions = []
+
     state.castingCurrentShot = null
     state.casting = {}
     state.castingAssetsByType = []

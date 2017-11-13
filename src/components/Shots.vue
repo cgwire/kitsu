@@ -12,6 +12,16 @@
           <div class="level-item">
             <button-link
               class="level-item"
+              :text="$t('shots.manage')"
+              icon="plus"
+              :path="{
+                name: 'manage-shots',
+                params: {production_id: currentProduction.id}
+              }"
+            >
+            </button-link>
+            <button-link
+              class="level-item"
               :text="$t('main.csv.import_file')"
               icon="upload"
               :path="{
@@ -62,6 +72,18 @@
       :is-error="isShotsLoadingError"
       :validation-columns="shotValidationColumns"
     ></shot-list>
+
+    <manage-shots-modal
+      :active="modals.isManageDisplayed"
+      :is-loading="loading.manage"
+      :is-error="false"
+      :is-success="false"
+      :cancel-route="{
+        name: 'shots',
+        params: {production_id: currentProduction.id}
+      }"
+    >
+    </manage-shots-modal>
 
     <edit-shot-modal
       :active="modals.isNewDisplayed"
@@ -147,6 +169,7 @@ import ShotList from './lists/ShotList.vue'
 import DeleteModal from './widgets/DeleteModal'
 import EditShotModal from './modals/EditShotModal'
 import ImportModal from './modals/ImportModal'
+import ManageShotsModal from './modals/ManageShotsModal'
 import CreateTasksModal from './modals/CreateTasksModal'
 import Filters from './widgets/Filters'
 import ButtonLink from './widgets/ButtonLink'
@@ -158,6 +181,7 @@ export default {
 
   components: {
     ShotList,
+    ManageShotsModal,
     EditShotModal,
     DeleteModal,
     ImportModal,
@@ -384,6 +408,15 @@ export default {
       this.editShot.isSuccess = false
       this.editShot.isError = false
 
+      this.modals = {
+        isNewDisplayed: false,
+        isRestoreDisplayed: false,
+        isDeleteDisplayed: false,
+        isImportDisplayed: false,
+        isCreateTasksDisplayed: false,
+        isManagedDisplayed: false
+      }
+
       if (path.indexOf('new') > 0) {
         this.resetEditModal()
         this.modals.isNewDisplayed = true
@@ -400,14 +433,8 @@ export default {
         this.modals.isImportDisplayed = true
       } else if (path.indexOf('create-tasks') > 0) {
         this.modals.isCreateTasksDisplayed = true
-      } else {
-        this.modals = {
-          isNewDisplayed: false,
-          isRestoreDisplayed: false,
-          isDeleteDisplayed: false,
-          isImportDisplayed: false,
-          isCreateTasksDisplayed: false
-        }
+      } else if (path.indexOf('manage') > 0) {
+        this.modals.isManageDisplayed = true
       }
     },
 

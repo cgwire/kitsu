@@ -56,10 +56,12 @@ export default {
   },
 
   main: {
+    add: 'add',
     profile: 'Profile',
     logout: 'Logout',
     save: 'Save',
     cancel: 'Cancel',
+    close: 'Close',
     or: 'or',
     confirmation: 'Confirm',
     confirmation_and_stay: 'Confirm and stay',
@@ -204,6 +206,7 @@ export default {
     edit_title: 'Edit shot',
     number: 'shot | shots',
     new_shot: 'Add a shot',
+    manage: 'Manage shots',
     edit_fail: 'Creation or edition failed, an error occured.',
     new_success: 'Shot {name} successfully created.',
     edit_success: 'Shot {name} successfully edited.',

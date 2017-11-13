@@ -8,8 +8,13 @@
         <spinner v-if="isShotsLoading"></spinner>
         <div v-else>
           <combobox
+            :label="$t('shots.fields.episode')"
+            :options="getEpisodeOptions"
+            v-model="episodeId"
+          ></combobox>
+          <combobox
             :label="$t('shots.fields.sequence')"
-            :options="getSequenceOptions"
+            :options="castingSequenceOptions"
             v-model="sequenceId"
           ></combobox>
           <p class="shots-title">{{ $t('shots.title')}}</p>
@@ -154,7 +159,9 @@ export default {
       isLoading: false,
       isSaving: false,
       isSavingError: false,
-      sequenceId: ''
+      sequenceId: '',
+      episodeId: '',
+      shotId: ''
     }
   },
 
@@ -166,10 +173,12 @@ export default {
       'currentProduction',
       'displayedShots',
 
-      'getSequenceOptions',
+      'getEpisodeOptions',
+      'castingSequenceOptions',
       'isAssetsLoading',
       'isShotsLoading',
       'shots',
+      'sequences',
       'shotMap',
       'shotsBySequence',
 
@@ -197,6 +206,7 @@ export default {
       'saveCasting',
       'setAssetSearch',
       'setProduction',
+      'setCastingEpisode',
       'setCastingSequence',
       'setCastingShot',
       'addAssetToCasting',
@@ -205,18 +215,24 @@ export default {
 
     reset () {
       const productionId = this.$store.state.route.params.production_id
-      const shotId = this.$route.params.shot_id
+      this.shotId = this.$route.params.shot_id
 
       this.setProduction(productionId)
       this.loadShots(() => {
         this.loadAssets(() => {
           this.isLoading = true
           this.setCastingShot({
-            shotId,
+            shotId: this.shotId,
             callback: () => {
               this.isLoading = false
-              this.setCastingSequence(this.castingSequenceId)
-              this.sequenceId = this.castingSequenceId
+              if (this.getEpisodeOptions.length > 0) {
+                const shot = this.shotMap[this.shotId]
+                if (this.shotId && shot) {
+                  this.episodeId = shot.episode_id
+                } else {
+                  this.episodeId = this.getEpisodeOptions[0].value
+                }
+              }
             }
           })
         })
@@ -276,9 +292,28 @@ export default {
         })
       }
     },
+
+    episodeId () {
+      this.setCastingEpisode(this.episodeId)
+    },
+
     sequenceId () {
       this.setCastingSequence(this.sequenceId)
     },
+
+    castingSequenceOptions () {
+      if (this.castingSequenceOptions.length > 0) {
+        const shot = this.shotMap[this.shotId]
+        if (this.shotId && shot) {
+          this.sequenceId = shot.sequence_id
+        } else {
+          this.sequenceId = this.castingSequenceOptions[0].value
+        }
+      } else {
+        this.sequenceId = ''
+      }
+    },
+
     currentProduction () {
       const newPath = {
         name: 'breakdown',

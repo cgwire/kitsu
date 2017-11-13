@@ -313,18 +313,20 @@ const mutations = {
     const getTaskComment = getters.getTaskComment(state, getters)
     const comment =
       JSON.parse(JSON.stringify(getTaskComment(taskId, commentId)))
-    const newPreview = {
-      id: preview.id,
-      feedback: false,
-      revision: preview.revision,
-      is_movie: preview.is_movie
+    if (!comment.preview) {
+      const newPreview = {
+        id: preview.id,
+        feedback: false,
+        revision: preview.revision,
+        is_movie: preview.is_movie
+      }
+      state.taskPreviews[taskId] =
+        [newPreview].concat(state.taskPreviews[taskId])
+      comment.preview = newPreview
+      state.taskComments[taskId].shift()
+      state.taskComments[taskId] =
+        [comment].concat(state.taskComments[taskId])
     }
-    state.taskPreviews[taskId] =
-      [newPreview].concat(state.taskPreviews[taskId])
-    comment.preview = newPreview
-    state.taskComments[taskId].shift()
-    state.taskComments[taskId] =
-      [comment].concat(state.taskComments[taskId])
   },
 
   [ADD_SELECTED_TASK] (state, task) {

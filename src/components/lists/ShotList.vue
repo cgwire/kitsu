@@ -69,10 +69,10 @@
             {{ entry.name }}
           </td>
           <td class="framein">
-            {{ entry.data.frame_in }}
+            {{ entry.data ? entry.data.frame_in : ''}}
           </td>
           <td class="frameout">
-            {{ entry.data.frame_out }}
+            {{ entry.data ? entry.data.frame_out : ''}}
           </td>
           <td class="description">
             {{ entry.description }}

@@ -132,6 +132,11 @@ export const routes = [
         name: 'shots'
       },
       {
+        path: '/productions/:production_id/shots/manage',
+        component: Shots,
+        name: 'manage-shots'
+      },
+      {
         path: '/productions/:production_id/shots/import',
         component: Shots,
         name: 'import-shots'

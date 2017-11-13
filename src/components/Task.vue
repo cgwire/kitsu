@@ -108,7 +108,7 @@
             {{ $t('tasks.set_preview_error')}}
           </span>
         </div>
-        <div v-else>
+        <div v-if="currentTask && currentTask.entity && currentTask.entity.preview_file_id === currentPreviewId">
           <em>{{ $t('tasks.set_preview_done')}}</em>
         </div>
 			</div>
@@ -527,10 +527,10 @@ export default {
 
     setPreview () {
       this.loading.setPreview = true
-      this.errors.setPreview = true
+      this.errors.setPreview = false
       this.$store.dispatch('setPreview', {
         taskId: this.currentTask.id,
-        entityId: this.currentTask.entity_id,
+        entityId: this.currentTask.entity.id,
         previewId: this.currentPreviewId,
         callback: (err) => {
           if (err) {
