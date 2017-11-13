@@ -1,6 +1,7 @@
 from flask import abort
 
 from zou.app.models.person import Person
+from zou.app.services import persons_service
 from zou.app.utils import permissions
 
 from .base import (
@@ -27,7 +28,8 @@ class PersonResource(BaseModelResource):
         BaseModelResource.__init__(self, Person)
 
     def check_update_permissions(self, instance, data):
-        self.check_escalation_permissions(instance, data)
+        if (instance["id"] != str(persons_service.get_current_user().id)):
+            self.check_escalation_permissions(instance, data)
 
     def check_delete_permissions(self, instance):
         self.check_escalation_permissions(instance)
