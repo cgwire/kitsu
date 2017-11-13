@@ -100,8 +100,14 @@ export default {
   },
 
   mounted () {
-    if (this.taskTypes.length > 0) {
-      this.form.task_type_id = this.taskTypes[0].id
+    if (this.isAssetTasks) {
+      if (this.getAssetTaskTypeOptions.length > 0) {
+        this.form.task_type_id = this.getAssetTaskTypeOptions[0].value
+      }
+    } else {
+      if (this.getShotTaskTypeOptions.length > 0) {
+        this.form.task_type_id = this.getShotTaskTypeOptions[0].value
+      }
     }
   }
 }

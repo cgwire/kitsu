@@ -8,9 +8,17 @@ export default {
 
   getShots (currentProduction, callback) {
     let path = '/api/data/shots/with-tasks'
-    if (currentProduction) {
-      path += `?project_id=${currentProduction.id}`
-    }
+    if (currentProduction) path += `?project_id=${currentProduction.id}`
+    client.get(path, callback)
+  },
+
+  getSequences (currentProduction, callback) {
+    let path = `/api/data/projects/${currentProduction.id}/sequences`
+    client.get(path, callback)
+  },
+
+  getEpisodes (currentProduction, callback) {
+    let path = `/api/data/projects/${currentProduction.id}/episodes`
     client.get(path, callback)
   },
 
@@ -21,10 +29,32 @@ export default {
   newShot (shot, callback) {
     const data = {
       name: shot.name,
-      entity_type_id: shot.shot_type_id,
-      project_id: shot.production_id
+      sequence_id: shot.sequence_id
     }
-    client.post(`/api/data/entities/`, data, callback)
+    client.post(`/api/data/projects/${shot.project_id}/shots`, data, callback)
+  },
+
+  newSequence (sequence, callback) {
+    const data = {
+      name: sequence.name,
+      episode_id: sequence.episode_id
+    }
+    client.post(
+      `/api/data/projects/${sequence.project_id}/sequences`,
+      data,
+      callback
+    )
+  },
+
+  newEpisode (episode, callback) {
+    const data = {
+      name: episode.name
+    }
+    client.post(
+      `/api/data/projects/${episode.project_id}/episodes`,
+      data,
+      callback
+    )
   },
 
   updateShot (shot, callback) {

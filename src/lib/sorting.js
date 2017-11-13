@@ -11,6 +11,7 @@ export const sortAssets = (assets) => {
 export const sortShots = (shots) => {
   return shots.sort(
     firstBy('canceled')
+      .thenBy((a, b) => a.episode_name.localeCompare(b.episode_name))
       .thenBy((a, b) => a.sequence_name.localeCompare(b.sequence_name))
       .thenBy((a, b) => a.name.localeCompare(b.name))
   )
@@ -29,8 +30,8 @@ export const sortProductions = (productions) => {
 export const sortTasks = (tasks) => {
   return tasks.sort(
     firstBy((a, b) => a.project_name.localeCompare(b.project_name))
-      .thenBy((a, b) => a.entity_name.localeCompare(b.entity_name))
       .thenBy((a, b) => a.task_type_name.localeCompare(b.task_type_name))
+      .thenBy((a, b) => a.entity_name.localeCompare(b.entity_name))
   )
 }
 

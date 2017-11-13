@@ -10,6 +10,17 @@ const realtime = {
       const commentId = eventData.id
       store.dispatch('loadComment', {id: commentId})
     })
+    realtime.subscribe(source, 'task:assign', (eventData) => {
+      store.dispatch('loadTodos')
+    })
+    realtime.subscribe(source, 'preview:add', (eventData) => {
+      store.commit('ADD_PREVIEW_END', {
+        preview: eventData.preview,
+        taskId: eventData.task_id,
+        commentId: eventData.comment_id
+      })
+    })
+
     return source
   },
 

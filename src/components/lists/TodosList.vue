@@ -25,7 +25,7 @@
     </table>
   </div>
 
-  <div class="table-body" v-scroll="onBodyScroll">
+  <div class="table-body" v-scroll="onBodyScroll" v-if="entries.length > 0">
     <table class="table">
       <tbody>
         <tr v-for="entry in entries">
@@ -112,7 +112,11 @@ export default {
     ]),
     entityName (entry) {
       if (entry.entity_type_name === 'Shot') {
-        return `${entry.sequence_name} / ${entry.entity_name}`
+        if (entry.episode_name) {
+          return `${entry.episode_name} / ${entry.sequence_name} / ${entry.entity_name}`
+        } else {
+          return `${entry.sequence_name} / ${entry.entity_name}`
+        }
       } else {
         return `${entry.entity_type_name} / ${entry.entity_name}`
       }

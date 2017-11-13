@@ -56,10 +56,12 @@ export default {
   },
 
   main: {
+    add: 'Ajouter',
     profile: 'Profil',
     logout: 'Se déconnecter',
     save: 'Enregistrer',
     cancel: 'Annuler',
+    close: 'Fermer',
     or: 'ou',
     confirmation: 'Confirmer',
     confirmation_and_stay: 'Confirmer et rester',
@@ -203,6 +205,7 @@ export default {
     edit_title: 'Modifier plan',
     number: 'plan | plans',
     new_shot: 'Ajouter un plan',
+    manage: 'Gérer les plans',
     edit_fail: 'La création ou l\'édition a échoué, une erreur est survenue.',
     new_success: 'Plan {name} créé avec succès.',
     description: 'Description',

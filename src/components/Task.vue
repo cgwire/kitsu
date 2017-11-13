@@ -6,7 +6,7 @@
            <img
              class="thumbnail-picture"
              :src="'/api/pictures/thumbnails/preview-files/' + currentTask.entity.preview_file_id + '.png'"
-             v-if="currentTask && currentTask.entity.preview_file_id.length > 0"
+             v-if="currentTask && currentTask.entity && currentTask.entity.preview_file_id && currentTask.entity.preview_file_id.length > 0"
            />
            <div class="level-item">
              {{ currentTask ? title : 'Loading...'}}
@@ -54,7 +54,7 @@
         <h2 class="subtitle">
           {{ $t('tasks.preview') }}
         </h2>
-        <div class="preview-list" v-if="currentTaskPreviews.length > 0">
+        <div class="preview-list" v-if="currentTaskPreviews && currentTaskPreviews.length > 0">
           <preview-row
             :key="preview.id"
             :preview="preview"
@@ -71,7 +71,7 @@
         </div>
 
         <div class="preview-picture">
-          <div v-if="currentTaskPreviews.length > 0 && isMovie">
+          <div v-if="currentTaskPreviews && currentTaskPreviews.length > 0 && isMovie">
             <video
               :src="moviePath"
               controls
@@ -88,7 +88,7 @@
         </div>
         <div
           class="flexrow"
-           v-if="currentTask && currentTask.entity.preview_file_id !== currentPreviewId"
+           v-if="currentTask && currentTask.entity && currentTask.entity.preview_file_id !== currentPreviewId"
           >
           <button
             :class="{
@@ -108,7 +108,7 @@
             {{ $t('tasks.set_preview_error')}}
           </span>
         </div>
-        <div v-else>
+        <div v-if="currentTask && currentTask.entity && currentTask.entity.preview_file_id === currentPreviewId">
           <em>{{ $t('tasks.set_preview_done')}}</em>
         </div>
 			</div>
@@ -527,10 +527,10 @@ export default {
 
     setPreview () {
       this.loading.setPreview = true
-      this.errors.setPreview = true
+      this.errors.setPreview = false
       this.$store.dispatch('setPreview', {
         taskId: this.currentTask.id,
-        entityId: this.currentTask.entity_id,
+        entityId: this.currentTask.entity.id,
         previewId: this.currentPreviewId,
         callback: (err) => {
           if (err) {
