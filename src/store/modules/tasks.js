@@ -203,6 +203,10 @@ const mutations = {
         task.project_name = asset.project_name
         task.entity_name = `${asset.asset_type_name} / ${asset.name}`
         task.entity_type_name = asset.entity_type_name
+        task.entity = {
+          id: asset.id,
+          preview_file_id: asset.preview_file_id
+        }
         state.taskMap[task.id] = task
       })
     })
@@ -212,8 +216,16 @@ const mutations = {
     shots.forEach((shot) => {
       shot.tasks.forEach((task) => {
         task.project_name = shot.project_name
-        task.entity_name = `${shot.sequence_name} / ${shot.name}`
+        if (shot.episode_name) {
+          task.entity_name = `${shot.episode_name} / ${shot.sequence_name} / ${shot.name}`
+        } else {
+          task.entity_name = `${shot.sequence_name} / ${shot.name}`
+        }
         task.entity_type_name = 'Shot'
+        task.entity = {
+          id: shot.id,
+          preview_file_id: shot.preview_file_id
+        }
         state.taskMap[task.id] = task
       })
     })
@@ -230,7 +242,11 @@ const mutations = {
       entity_type_name: task.entity_type.name
     })
     if (task.entity_type.name === 'Shot') {
-      task.entity_name = `${task.entity_parent.name} / ${task.entity.name}`
+      if (task.episode) {
+        task.entity_name = `${task.episode.name} / ${task.sequence.name} / ${task.entity.name}`
+      } else {
+        task.entity_name = `${task.sequence.name} / ${task.entity.name}`
+      }
     } else {
       task.entity_name = `${task.entity_type.name} / ${task.entity.name}`
     }
