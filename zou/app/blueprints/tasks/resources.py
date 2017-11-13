@@ -106,6 +106,11 @@ class AddPreviewResource(Resource):
                 is_movie
             )
             comment.update({"preview_file_id": preview.id})
+            events.emit("preview:add", {
+                "comment_id": comment_id,
+                "task_id": task_id,
+                "preview": preview.serialize()
+            })
         except TaskStatusNotFoundException:
             abort(400)
         except permissions.PermissionDenied:

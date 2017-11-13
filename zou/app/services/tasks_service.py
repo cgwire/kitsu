@@ -174,12 +174,19 @@ def remove_task(task_id):
 def clear_assignation(task_id):
     task = get_task(task_id)
     task.update({"assignees": []})
-    return task.serialize()
+    task_dict = task.serialize()
+    events.emit("task:clear-assignation", task_dict)
+    return task_dict
 
 
 def assign_task(task, person):
     task.assignees.append(person)
     task.save()
+    task_dict = task.serialize()
+    events.emit("task:assign", {
+        "task": task_dict,
+        "person": person.serialize()
+    })
     return task
 
 

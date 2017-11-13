@@ -1,3 +1,5 @@
+from zou.app.utils import events
+
 from zou.app.models.entity import Entity
 from zou.app.models.preview_file import PreviewFile
 
@@ -17,4 +19,8 @@ def update_entity_preview(entity_id, preview_file_id):
         raise PreviewFileNotFoundException
 
     entity.update({"preview_file_id": preview_file.id})
+    events.emit("preview-file:set-main", {
+        "entity_id": entity_id,
+        "preview_file_id": preview_file_id
+    })
     return entity.serialize()
