@@ -172,6 +172,5 @@ class TaskLastWorkingFilesTestCase(ApiDBTestCase):
         self.get(path, 403)
 
         task = tasks_service.get_task(remote_file["task_id"])
-        task.assignees.append(self.user_cg_artist)
-        task.save()
+        tasks_service.assign_task(task["id"], self.user_cg_artist.id)
         remote_file = self.get(path)

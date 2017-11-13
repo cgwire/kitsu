@@ -391,8 +391,8 @@ class NewOutputFileResource(Resource):
             person = persons_service.get_person(person_id)
 
             output_file = files_service.create_new_output_revision(
-                task.entity_id,
-                task.id,
+                task["entity_id"],
+                task["id"],
                 working_file["id"],
                 output_type["id"],
                 person["id"],
@@ -502,7 +502,7 @@ class GetNextOutputFileResource(Resource):
 
         next_revision_number = \
             files_service.get_next_output_file_revision(
-                task.id,
+                task["id"],
                 output_type["id"],
                 name
             )
@@ -526,7 +526,7 @@ class LastWorkingFilesResource(Resource):
             task = tasks_service.get_task(task_id)
             if not permissions.has_manager_permissions():
                 task = user_service.check_has_task_related(task.project_id)
-            result = files_service.get_last_working_files_for_task(task.id)
+            result = files_service.get_last_working_files_for_task(task["id"])
         except TaskNotFoundException:
             abort(404)
         except permissions.PermissionDenied:
@@ -544,7 +544,7 @@ class LastOutputFilesResource(Resource):
             task = tasks_service.get_task(task_id)
             if not permissions.has_manager_permissions():
                 task = user_service.check_has_task_related(task.project_id)
-            result = files_service.get_last_output_files_for_task(task.id)
+            result = files_service.get_last_output_files_for_task(task["id"])
         except TaskNotFoundException:
             abort(404)
         except permissions.PermissionDenied:
@@ -562,7 +562,7 @@ class TaskWorkingFilesResource(Resource):
             task = tasks_service.get_task(task_id)
             if not permissions.has_manager_permissions():
                 task = user_service.check_has_task_related(task.project_id)
-            result = files_service.get_working_files_for_task(task.id)
+            result = files_service.get_working_files_for_task(task["id"])
         except TaskNotFoundException:
             abort(404)
         except permissions.PermissionDenied:
@@ -678,7 +678,7 @@ class ModifiedFileResource(Resource):
             working_file = files_service.get_working_file(working_file_id)
             task = tasks_service.get_task(working_file["task_id"])
             if not permissions.has_manager_permissions():
-                task = user_service.check_has_task_related(task.project_id)
+                task = user_service.check_has_task_related(task["project_id"])
             working_file = files_service.update_working_file(
                 working_file_id,
                 {"updated_at": datetime.datetime.utcnow()}
@@ -706,7 +706,7 @@ class FileResource(Resource):
         try:
             if not permissions.has_manager_permissions():
                 task = tasks_service.get_task(file_dict["task_id"])
-                user_service.check_has_task_related(task.project_id)
+                user_service.check_has_task_related(task["project_id"])
         except permissions.PermissionDenied:
             abort(403)
 

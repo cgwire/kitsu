@@ -27,14 +27,14 @@ class PublishFileTestCase(ApiDBTestCase):
         self.generate_fixture_software()
         self.generate_fixture_working_file()
         self.generate_fixture_shot_working_file()
-        self.task_id = self.task.id
+        self.task_id = str(self.task.id)
         self.tx_type_id = str(
             files_service.get_or_create_output_type("tx")["id"]
         )
         self.cache_type_id = str(
             files_service.get_or_create_output_type("Cache")["id"]
         )
-        self.person_id = self.person.id
+        self.person_id = str(self.person.id)
         self.working_file_id = str(self.working_file.id)
 
         events.unregister_all()
@@ -51,7 +51,7 @@ class PublishFileTestCase(ApiDBTestCase):
 
     def test_to_review(self):
         data = {"person_id": str(self.person_id)}
-        status_id = str(tasks_service.get_to_review_status().id)
+        status_id = str(tasks_service.get_to_review_status()["id"])
         self.put("/actions/tasks/%s/to-review" % self.task_id, data)
         task = self.get("data/tasks/%s" % self.task_id)
         self.assertEquals(task["task_status_id"], status_id)

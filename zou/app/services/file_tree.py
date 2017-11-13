@@ -63,7 +63,7 @@ def get_file_name(
     name="",
     version=1
 ):
-    entity = Entity.get(task.entity_id)
+    entity = Entity.get(task["entity_id"])
     project = get_project(entity)
     tree = get_tree_from_project(project)
 
@@ -91,7 +91,7 @@ def get_folder_path(
     name="",
     sep=os.sep
 ):
-    entity = Entity.get(task.entity_id)
+    entity = Entity.get(task["entity_id"])
     project = get_project(entity)
     tree = get_tree_from_project(project)
     root_path = get_root_path(tree, mode, sep)
@@ -290,7 +290,7 @@ def get_folder_from_output_type(output_type):
 
 def get_folder_from_department(task):
     folder = ""
-    task_type = TaskType.get(task.task_type_id)
+    task_type = TaskType.get(task["task_type_id"])
     if task_type is not None:
         task_type = tasks_service.get_department_from_task_type(task_type)
         folder = task_type.name
@@ -299,7 +299,7 @@ def get_folder_from_department(task):
 
 def get_folder_from_task_type(task):
     folder = ""
-    task_type = TaskType.get(task.task_type_id)
+    task_type = TaskType.get(task["task_type_id"])
     if task_type is not None:
         folder = task_type.name
     return folder

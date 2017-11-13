@@ -45,7 +45,7 @@ def get_todos():
         .outerjoin(Episode, Episode.id == Sequence.parent_id) \
         .filter(assignee_filter()) \
         .filter(open_project_filter()) \
-        .filter(Task.task_status_id != done_status.id) \
+        .filter(Task.task_status_id != done_status["id"]) \
         .add_columns(
             Project.name,
             Entity.name,

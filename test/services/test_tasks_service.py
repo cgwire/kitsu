@@ -74,30 +74,30 @@ class TaskServiceTestCase(ApiDBTestCase):
 
     def test_get_status(self):
         task_status = tasks_service.get_or_create_status("WIP", "wip")
-        self.assertEqual(task_status.name, "WIP")
+        self.assertEqual(task_status["name"], "WIP")
 
     def test_get_wip_status(self):
         task_status = tasks_service.get_wip_status()
-        self.assertEqual(task_status.name, "WIP")
+        self.assertEqual(task_status["name"], "WIP")
 
     def test_get_done_status(self):
         task_status = tasks_service.get_done_status()
-        self.assertEqual(task_status.name, "Done")
+        self.assertEqual(task_status["name"], "Done")
 
     def test_get_todo_status(self):
         task_status = tasks_service.get_todo_status()
-        self.assertEqual(task_status.name, "Todo")
+        self.assertEqual(task_status["name"], "Todo")
 
     def test_get_to_review_status(self):
         task_status = tasks_service.get_to_review_status()
-        self.assertEqual(task_status.name, "To review")
+        self.assertEqual(task_status["name"], "To review")
 
     def test_create_task(self):
         shot = self.shot.serialize()
         task_type = self.task_type.serialize()
-        status = tasks_service.get_todo_status().serialize()
+        status = tasks_service.get_todo_status()
         task = tasks_service.create_task(task_type, shot)
-        task = tasks_service.get_task(task["id"]).serialize()
+        task = tasks_service.get_task(task["id"])
         self.assertEquals(task["entity_id"], shot["id"])
         self.assertEquals(task["task_type_id"], task_type["id"])
         self.assertEquals(task["project_id"], shot["project_id"])
@@ -112,7 +112,7 @@ class TaskServiceTestCase(ApiDBTestCase):
 
         now = datetime.datetime.now()
         self.task.update({"real_start_date": None})
-        tasks_service.start_task(self.task)
+        tasks_service.start_task(self.task.id)
 
         task = Task.get(self.task.id)
         self.assertEqual(task.task_status_id, self.wip_status_id)
@@ -120,14 +120,14 @@ class TaskServiceTestCase(ApiDBTestCase):
         self.assert_event_is_fired()
 
     def test_status_to_wip_twice(self):
-        tasks_service.start_task(self.task)
+        tasks_service.start_task(self.task.id)
         task = Task.get(self.task.id)
         real_start_date = task.real_start_date
         task.update({
             "task_status_id": self.task_status.id
         })
 
-        tasks_service.start_task(self.task)
+        tasks_service.start_task(self.task.id)
         task = Task.get(self.task.id)
         self.assertEqual(task.real_start_date, real_start_date)
 
@@ -138,7 +138,11 @@ class TaskServiceTestCase(ApiDBTestCase):
             "mark_event_as_fired",
             handler
         )
-        tasks_service.task_to_review(self.task, self.person, "my comment")
+        tasks_service.task_to_review(
+            self.task.id,
+            self.person.serialize(),
+            "my comment"
+        )
         self.is_event_fired = handler.is_event_fired
         data = handler.data
 
@@ -193,10 +197,10 @@ class TaskServiceTestCase(ApiDBTestCase):
             "wrong-id"
         )
         task = tasks_service.get_task(self.task_id)
-        self.assertEqual(self.task_id, task.id)
+        self.assertEqual(str(self.task_id), task["id"])
         self.output_file.delete()
         self.working_file.delete()
-        task.delete()
+        tasks_service.delete_task(task["id"])
 
         self.assertRaises(
             TaskNotFoundException,
@@ -347,4 +351,4 @@ class TaskServiceTestCase(ApiDBTestCase):
         tasks_service.assign_task(self.task.id, self.person.id)
         tasks_service.clear_assignation(task_id)
         task = Task.get(task_id)
-        self.assertEquals(len(task.assignees), 0)
+        self.assertEquals(len(task["assignees"]), 0)

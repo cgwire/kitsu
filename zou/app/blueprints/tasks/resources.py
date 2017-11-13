@@ -49,16 +49,15 @@ class CommentTaskResource(Resource):
                 text=comment
             )
             task.update({"task_status_id": task_status_id})
-            comment_dict = comment.serialize()
-            comment_dict["task_status"] = task_status.serialize()
-            comment_dict["person"] = person
-            events.emit("comment:new", {"id": comment_dict["id"]})
+            comment["task_status"] = task_status
+            comment["person"] = person
+            events.emit("comment:new", {"id": comment["id"]})
         except TaskStatusNotFoundException:
             abort(400)
         except permissions.PermissionDenied:
             abort(403)
 
-        return comment_dict, 201
+        return comment, 201
 
     def get_arguments(self):
         parser = reqparse.RequestParser()
@@ -89,7 +88,9 @@ class AddPreviewResource(Resource):
             if not permissions.has_manager_permissions():
                 user_service.check_assigned(task_id)
             comment = tasks_service.get_comment(comment_id)
-            task_status = tasks_service.get_task_status(comment.task_status_id)
+            task_status = tasks_service.get_task_status(
+                comment["task_status_id"]
+            )
             person = persons_service.get_current_user()
 
             if task_status.short_name not in ["wfa", "retake"]:
@@ -116,7 +117,7 @@ class AddPreviewResource(Resource):
         except permissions.PermissionDenied:
             abort(403)
 
-        return preview.serialize(), 201
+        return preview, 201
 
     def get_arguments(self):
         parser = reqparse.RequestParser()
@@ -136,7 +137,7 @@ class TaskPreviewsResource(Resource):
         try:
             task = tasks_service.get_task(task_id)
             if not permissions.has_manager_permissions():
-                user_service.check_has_task_related(task.project_id)
+                user_service.check_has_task_related(task["project_id"])
             previews = files_service.get_preview_files_for_task(task_id)
         except TaskNotFoundException:
             abort(404)
@@ -155,11 +156,10 @@ class TaskCommentsResource(Resource):
     def get(self, task_id):
         try:
             comments = []
-            task = tasks_service.get_task(task_id)
             if not permissions.has_manager_permissions():
                 user_service.check_has_task_related(task_id)
 
-            comments = tasks_service.get_comments(task)
+            comments = tasks_service.get_comments(task_id)
         except TaskNotFoundException:
             abort(404)
         except permissions.PermissionDenied:
@@ -243,7 +243,7 @@ class ToReviewResource(Resource):
                 )
 
             task = tasks_service.task_to_review(
-                task,
+                task["id"],
                 person,
                 comment,
                 preview_path
@@ -330,7 +330,7 @@ class TasksAssignResource(Resource):
         for task_id in task_ids:
             try:
                 task = self.assign_task(task_id, person_id)
-                tasks.append(task.serialize())
+                tasks.append(task)
             except TaskNotFoundException:
                 pass
             except PersonNotFoundException:
@@ -371,7 +371,7 @@ class TaskAssignResource(Resource):
         except permissions.PermissionDenied:
             abort(403)
 
-        return task.serialize()
+        return task
 
     def get_arguments(self):
         parser = reqparse.RequestParser()
@@ -403,29 +403,28 @@ class TaskFullResource(Resource):
         except permissions.PermissionDenied:
             abort(403)
 
-        result = task.serialize()
-        task_type = tasks_service.get_task_type(task.task_type_id)
+        result = task
+        task_type = tasks_service.get_task_type(task["task_type_id"])
         result["task_type"] = task_type
-        assigner = persons_service.get_person(task.assigner_id)
+        assigner = persons_service.get_person(task["assigner_id"])
         result["assigner"] = assigner
-        project = projects_service.get_project(task.project_id)
+        project = projects_service.get_project(task["project_id"])
         result["project"] = project.serialize()
-        task_status = tasks_service.get_task_status(task.task_status_id)
-        result["task_status"] = task_status.serialize()
-        entity = tasks_service.get_entity(task.entity_id)
+        task_status = tasks_service.get_task_status(task["task_status_id"])
+        result["task_status"] = task_status
+        entity = tasks_service.get_entity(task["entity_id"])
         result["entity"] = entity.serialize()
         if entity.parent_id is not None:
-            sequence = shots_service.get_sequence(entity.parent_id)
+            sequence = shots_service.get_sequence(entity["parent_id"])
             result["sequence"] = sequence.serialize()
             if sequence.parent_id is not None:
-                episode = shots_service.get_episode(sequence.parent_id)
+                episode = shots_service.get_episode(sequence["parent_id"])
                 result["episode"] = episode.serialize()
-
         entity_type = tasks_service.get_entity_type(entity.entity_type_id)
         result["entity_type"] = entity_type.serialize()
         assignees = []
-        for assignee in task.assignees:
-            assignees.append(assignee.serialize())
+        for assignee_id in task["assignees"]:
+            assignees.append(persons_service.get_person(assignee_id))
         result["persons"] = assignees
         result["type"] = "Task"
 
@@ -440,13 +439,13 @@ class TaskStartResource(Resource):
             task = tasks_service.get_task(task_id)
             if not permissions.has_manager_permissions():
                 user_service.check_assigned(task_id)
-            task = tasks_service.start_task(task)
+            task = tasks_service.start_task(task["id"])
         except TaskNotFoundException:
             abort(404)
         except permissions.PermissionDenied:
             abort(403)
 
-        return task.serialize(), 200
+        return task, 200
 
 
 class SetTimeSpentResource(Resource):

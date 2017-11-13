@@ -55,9 +55,9 @@ class RouteTaskChangeTestCase(ApiDBTestCase):
         self.put("/actions/persons/%s/assign" % person_id, data)
 
         task = tasks_service.get_task(task_id)
-        self.assertEquals(len(task.assignees), 1)
+        self.assertEquals(len(task["assignees"]), 1)
         task = tasks_service.get_task(shot_task_id)
-        self.assertEquals(len(task.assignees), 1)
+        self.assertEquals(len(task["assignees"]), 1)
 
     def test_clear_assignation(self):
         task_id = str(self.task.id)
@@ -68,6 +68,6 @@ class RouteTaskChangeTestCase(ApiDBTestCase):
         self.put("/actions/tasks/clear-assignation", data)
 
         task = tasks_service.get_task(task_id)
-        self.assertEquals(len(task.assignees), 0)
+        self.assertEquals(len(task["assignees"]), 0)
         task = tasks_service.get_task(shot_task_id)
-        self.assertEquals(len(task.assignees), 0)
+        self.assertEquals(len(task["assignees"]), 0)

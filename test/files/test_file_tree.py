@@ -214,7 +214,7 @@ class FileTreeTestCase(ApiDBTestCase):
             "Software",
             self.entity,
             self.task,
-            software=self.software
+            software=self.software.serialize()
         )
         self.assertEquals(path, "Blender")
 
@@ -240,7 +240,7 @@ class FileTreeTestCase(ApiDBTestCase):
         path = file_tree.get_folder_path(
             self.shot_task,
             mode="working",
-            software=self.software_max
+            software=self.software_max.serialize()
         )
         self.assertEquals(
             path,
@@ -252,7 +252,7 @@ class FileTreeTestCase(ApiDBTestCase):
         path = file_tree.get_folder_path(
             self.shot_task,
             mode="working",
-            software=self.software_max,
+            software=self.software_max.serialize(),
             sep="\\"
         )
         self.assertEquals(
@@ -278,7 +278,7 @@ class FileTreeTestCase(ApiDBTestCase):
         path = file_tree.get_folder_path(
             self.task,
             mode="working",
-            software=self.software
+            software=self.software.serialize()
         )
         self.assertEquals(
             path,
@@ -316,7 +316,7 @@ class FileTreeTestCase(ApiDBTestCase):
     def test_get_file_path_asset(self):
         file_name = file_tree.get_file_path(
             self.task,
-            software=self.software,
+            software=self.software.serialize(),
             version=3
         )
         self.assertEquals(

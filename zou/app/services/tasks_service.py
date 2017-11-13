@@ -17,6 +17,8 @@ from zou.app.models.project import Project
 from zou.app.models.entity_type import EntityType
 from zou.app.models.preview_file import PreviewFile
 
+from zou.app.utils import fields
+
 from zou.app.services.exception import (
     CommentNotFoundException,
     TaskNotFoundException,
@@ -56,19 +58,20 @@ def get_task_status(task_status_id):
 
     if task_status is None:
         raise TaskStatusNotFoundException()
-    return task_status
+    return task_status.serialize()
 
 
-def start_task(task):
+def start_task(task_id):
+    task = get_task_raw(task_id)
     wip_status = get_wip_status()
     task_is_not_already_wip = \
         task.task_status_id is None \
-        or task.task_status_id != wip_status.id
+        or task.task_status_id != wip_status["id"]
 
     if task_is_not_already_wip:
         task_dict_before = task.serialize()
 
-        new_data = {"task_status_id": wip_status.id}
+        new_data = {"task_status_id": wip_status["id"]}
         if task.real_start_date is None:
             new_data["real_start_date"] = datetime.datetime.now()
 
@@ -80,14 +83,15 @@ def start_task(task):
             "task_after": task_dict_after
         })
 
-    return task
+    return task.serialize()
 
 
-def task_to_review(task, person, comment, preview_path=""):
+def task_to_review(task_id, person, comment, preview_path=""):
+    task = get_task_raw(task_id)
     to_review_status = get_to_review_status()
     task_dict_before = task.serialize()
 
-    task.update({"task_status_id": to_review_status.id})
+    task.update({"task_status_id": to_review_status["id"]})
     task.save()
 
     project = Project.get(task.project_id)
@@ -110,7 +114,7 @@ def task_to_review(task, person, comment, preview_path=""):
     return task_dict_after
 
 
-def get_task(task_id):
+def get_task_raw(task_id):
     try:
         task = Task.get(task_id)
     except StatementError:
@@ -120,6 +124,10 @@ def get_task(task_id):
         raise TaskNotFoundException()
 
     return task
+
+
+def get_task(task_id):
+    return get_task_raw(task_id).serialize()
 
 
 def get_task_type(task_type_id):
@@ -152,7 +160,7 @@ def create_task(task_type, entity, name="main"):
             real_start_date=None,
             project_id=entity["project_id"],
             task_type_id=task_type["id"],
-            task_status_id=task_status.id,
+            task_status_id=task_status["id"],
             entity_id=entity["id"],
             assigner_id=current_user_id,
             assignees=[]
@@ -162,17 +170,20 @@ def create_task(task_type, entity, name="main"):
         pass  # Tasks already exists, no need to create it.
 
 
-def delete_task(task):
+def delete_task(task_id):
+    task = Task.get(task_id)
     task.delete()
+    return task.serialize()
 
 
 def remove_task(task_id):
     task = Task.get(task_id)
     task.delete()
+    return task.serialize()
 
 
 def clear_assignation(task_id):
-    task = get_task(task_id)
+    task = get_task_raw(task_id)
     task.update({"assignees": []})
     task_dict = task.serialize()
     events.emit("task:clear-assignation", task_dict)
@@ -180,7 +191,7 @@ def clear_assignation(task_id):
 
 
 def assign_task(task_id, person_id):
-    task = get_task(task_id)
+    task = get_task_raw(task_id)
     person = persons_service.get_person_raw(person_id)
     task.assignees.append(person)
     task.save()
@@ -268,13 +279,13 @@ def get_or_create_task_type(
     if task_type is None:
         task_type = TaskType(
             name=name,
-            department_id=department.id,
+            department_id=department["id"],
             color=color,
             priority=priority,
             for_shots=for_shots
         )
         task_type.save()
-    return task_type
+    return task_type.serialize()
 
 
 def get_or_create_status(name, short_name="", color="#f5f5f5"):
@@ -288,7 +299,7 @@ def get_or_create_status(name, short_name="", color="#f5f5f5"):
             short_name=short_name or name.lower(),
             color=color
         )
-    return status
+    return status.serialize()
 
 
 def get_or_create_department(name):
@@ -299,7 +310,7 @@ def get_or_create_department(name):
             color="#000000"
         )
         departmemt.save()
-    return departmemt
+    return departmemt.serialize()
 
 
 def get_next_preview_revision(task_id):
@@ -332,7 +343,7 @@ def get_task_types_for_entity(entity_id):
         .join(Task, Entity) \
         .filter(Entity.id == entity_id) \
         .all()
-    return TaskType.serialize_list(task_types)
+    return fields.serialize_models(task_types)
 
 
 def create_or_update_time_spent(task_id, person_id, date, duration, add=False):
@@ -369,11 +380,11 @@ def get_time_spents(task_id):
     return result
 
 
-def get_comments(task):
+def get_comments(task_id):
     comments = []
 
     query = Comment.query.order_by(Comment.created_at.desc()) \
-        .filter_by(object_id=task.id) \
+        .filter_by(object_id=task_id) \
         .join(Person, TaskStatus) \
         .add_columns(
             TaskStatus.name,
@@ -449,4 +460,4 @@ def create_comment(
         task_status_id=task_status_id,
         person_id=person_id,
         text=text
-    )
+    ).serialize()
