@@ -51,20 +51,20 @@ class EntityServiceTestCase(ApiDBTestCase):
 
     def test_set_main_preview(self):
         entities_service.update_entity_preview(
-            self.entity.id,
-            self.preview_file.id
+            str(self.entity.id),
+            str(self.preview_file.id)
         )
         asset = assets_service.get_asset(self.entity.id)
         self.assertEquals(asset.preview_file_id, self.preview_file.id)
 
         with pytest.raises(EntityNotFoundException):
             entities_service.update_entity_preview(
-                self.preview_file.id,
-                self.preview_file.id
+                str(self.preview_file.id),
+                str(self.preview_file.id)
             )
 
         with pytest.raises(PreviewFileNotFoundException):
             entities_service.update_entity_preview(
-                self.entity.id,
-                self.entity.id
+                str(self.entity.id),
+                str(self.entity.id)
             )
