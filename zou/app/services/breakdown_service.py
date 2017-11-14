@@ -1,9 +1,10 @@
 from zou.app.models.entity import Entity, EntityLink
+from zou.app.services import shots_service
 
 
 def get_casting(shot):
     casting = []
-    links = EntityLink.get_all_by(entity_in_id=shot.id)
+    links = EntityLink.get_all_by(entity_in_id=shot["id"])
     for link in links:
         casting.append({
             "asset_id": str(link.entity_out_id),
@@ -12,7 +13,8 @@ def get_casting(shot):
     return casting
 
 
-def update_casting(shot, casting):
+def update_casting(shot_id, casting):
+    shot = shots_service.get_shot_raw(shot_id)
     shot.update({"entities_out": []})
     for cast in casting:
         EntityLink.create(

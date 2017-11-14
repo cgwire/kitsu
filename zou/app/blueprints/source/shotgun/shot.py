@@ -25,13 +25,13 @@ class ImportShotgunShotsResource(BaseImportShotgunResource):
     def get_asset_map(self):
         assets = assets_service.get_assets()
         return {
-            asset.shotgun_id: asset.id for asset in assets
+            asset["shotgun_id"]: asset["id"] for asset in assets
         }
 
     def get_sequence_map(self):
         sequences = shots_service.get_sequences()
         return {
-            sequence.shotgun_id: sequence.id for sequence in sequences
+            sequence["shotgun_id"]: sequence["id"] for sequence in sequences
         }
 
     def extract_status_names(self, sg_projects):
@@ -50,7 +50,7 @@ class ImportShotgunShotsResource(BaseImportShotgunResource):
             "name": sg_shot["code"],
             "shotgun_id": sg_shot["id"],
             "project_id": project_id,
-            "entity_type_id": shot_type.id,
+            "entity_type_id": shot_type["id"],
             "parent_id": sequence_id,
             "entities_out": assets
         }
@@ -107,7 +107,7 @@ class ImportShotgunShotsResource(BaseImportShotgunResource):
     def import_entry(self, data):
         shot = Entity.get_by(
             shotgun_id=data["shotgun_id"],
-            entity_type_id=shots_service.get_shot_type().id
+            entity_type_id=shots_service.get_shot_type()["id"]
         )
 
         if shot is None:
@@ -133,5 +133,5 @@ class ImportRemoveShotgunShotResource(ImportRemoveShotgunBaseResource):
         ImportRemoveShotgunBaseResource.__init__(
             self,
             Entity,
-            entity_type_id=shots_service.get_shot_type().id
+            entity_type_id=shots_service.get_shot_type()["id"]
         )

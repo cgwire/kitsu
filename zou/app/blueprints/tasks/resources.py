@@ -207,7 +207,7 @@ class CreateAssetTasksResource(Resource):
             assets = assets_service.get_assets(criterions)
             task_type = tasks_service.get_task_type(task_type_id)
             tasks = [
-                tasks_service.create_task(task_type, asset.serialize())
+                tasks_service.create_task(task_type, asset)
                 for asset in assets
             ]
 
@@ -412,19 +412,19 @@ class TaskFullResource(Resource):
         assigner = persons_service.get_person(task["assigner_id"])
         result["assigner"] = assigner
         project = projects_service.get_project(task["project_id"])
-        result["project"] = project.serialize()
+        result["project"] = project
         task_status = tasks_service.get_task_status(task["task_status_id"])
         result["task_status"] = task_status
         entity = tasks_service.get_entity(task["entity_id"])
-        result["entity"] = entity.serialize()
-        if entity.parent_id is not None:
+        result["entity"] = entity
+        if entity["parent_id"] is not None:
             sequence = shots_service.get_sequence(entity["parent_id"])
-            result["sequence"] = sequence.serialize()
-            if sequence.parent_id is not None:
+            result["sequence"] = sequence()
+            if sequence["parent_id"] is not None:
                 episode = shots_service.get_episode(sequence["parent_id"])
-                result["episode"] = episode.serialize()
-        entity_type = tasks_service.get_entity_type(entity.entity_type_id)
-        result["entity_type"] = entity_type.serialize()
+                result["episode"] = episode()
+        entity_type = tasks_service.get_entity_type(entity["entity_type_id"])
+        result["entity_type"] = entity_type
         assignees = []
         for assignee_id in task["assignees"]:
             assignees.append(persons_service.get_person(assignee_id))

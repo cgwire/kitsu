@@ -26,7 +26,7 @@ class ImportShotgunEpisodesResource(BaseImportShotgunResource):
             "shotgun_id": sg_episode["id"],
             "description": sg_episode["description"],
             "project_id": project_id,
-            "entity_type_id": self.episode_type.id
+            "entity_type_id": self.episode_type["id"]
         }
 
     def get_project(self, sg_episode):
@@ -39,7 +39,7 @@ class ImportShotgunEpisodesResource(BaseImportShotgunResource):
     def import_entry(self, data):
         episode = Entity.get_by(
             shotgun_id=data["shotgun_id"],
-            entity_type_id=self.episode_type.id
+            entity_type_id=self.episode_type["id"]
         )
 
         if episode is None:
@@ -61,5 +61,5 @@ class ImportRemoveShotgunEpisodeResource(ImportRemoveShotgunBaseResource):
         ImportRemoveShotgunBaseResource.__init__(
             self,
             Entity,
-            entity_type_id=shots_service.get_episode_type().id
+            entity_type_id=shots_service.get_episode_type()["id"]
         )

@@ -142,14 +142,14 @@ class ImportShotgunTaskTestCase(ShotgunTestCase):
         self.assertEqual(task["project_id"], str(project.id))
         self.assertEqual(task["task_type_id"], str(task_type.id))
         self.assertEqual(task["task_status_id"], str(task_status.id))
-        self.assertEqual(task["entity_id"], str(entity.id))
+        self.assertEqual(task["entity_id"], entity["id"])
         self.assertEqual(task["assigner_id"], str(assigner.id))
         self.assertEqual(task["assignees"][0], str(assignee.id))
 
     def test_import_sequence_task(self):
         self.load_sequence_task()
         sequences = shots_service.get_sequences({"shotgun_id": 1})
-        self.tasks = self.get("data/tasks?entity_id=%s" % sequences[0].id)
+        self.tasks = self.get("data/tasks?entity_id=%s" % sequences[0]["id"])
         self.assertEqual(len(self.tasks), 1)
 
     def test_import_remove_task(self):

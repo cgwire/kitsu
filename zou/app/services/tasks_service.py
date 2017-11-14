@@ -215,17 +215,17 @@ def get_department_from_task_type(task_type):
 
 def get_tasks_for_shot(shot_id):
     shot = shots_service.get_shot(shot_id)
-    return get_task_dicts_for_entity(shot.id)
+    return get_task_dicts_for_entity(shot["id"])
 
 
 def get_tasks_for_sequence(sequence_id):
     sequence = shots_service.get_sequence(sequence_id)
-    return get_task_dicts_for_entity(sequence.id)
+    return get_task_dicts_for_entity(sequence["id"])
 
 
 def get_tasks_for_asset(asset_id):
-    asset = assets_service.get_asset(asset_id)
-    return get_task_dicts_for_entity(asset.id)
+    asset = assets_service.get_asset_raw(asset_id)
+    return get_task_dicts_for_entity(asset["id"])
 
 
 def get_task_dicts_for_entity(entity_id):
@@ -435,11 +435,11 @@ def get_comments(task_id):
 
 
 def get_entity(entity_id):
-    return Entity.get(entity_id)
+    return Entity.get(entity_id).serialize()
 
 
 def get_entity_type(entity_type_id):
-    return EntityType.get(entity_type_id)
+    return EntityType.get(entity_type_id).serialize()
 
 
 def get_comment(comment_id):

@@ -222,8 +222,11 @@ class SetTreeResource(Resource):
 
         try:
             permissions.check_manager_permissions()
-            project = projects_service.get_project(project_id)
             tree = file_tree.get_tree_from_file(tree_name)
+            project = projects_service.update_project(
+                project_id,
+                {"file_tree": tree}
+            )
         except ProjectNotFoundException:
             abort(404)
         except WrongFileTreeFileException:
@@ -231,8 +234,7 @@ class SetTreeResource(Resource):
         except permissions.PermissionDenied:
             abort(403)
 
-        project.update({"file_tree": tree})
-        return project.serialize()
+        return project
 
     def get_arguments(self):
         parser = reqparse.RequestParser()
@@ -299,7 +301,7 @@ class GetTaskFromPathResource(Resource):
         except permissions.PermissionDenied:
             abort(403)
 
-        return task.serialize()
+        return task
 
     def get_arguments(self):
         parser = reqparse.RequestParser()

@@ -9,7 +9,7 @@ from zou.app.models.task import Task
 from zou.app.models.task_status import TaskStatus
 from zou.app.models.task_type import TaskType
 
-from zou.app.services import shots_service
+from zou.app.services import shots_service, projects_service
 
 from zou.app.services.exception import (
     AssetNotFoundException,
@@ -22,9 +22,9 @@ def get_asset_types(criterions={}):
     sequence_type = shots_service.get_sequence_type()
     episode_type = shots_service.get_episode_type()
     asset_type_filter = ~EntityType.id.in_([
-        shot_type.id,
-        sequence_type.id,
-        episode_type.id,
+        shot_type["id"],
+        sequence_type["id"],
+        episode_type["id"],
     ])
     query = EntityType.query \
         .filter_by(**criterions) \
@@ -34,7 +34,7 @@ def get_asset_types(criterions={}):
 
 def get_asset_types_for_project(project_id):
     asset_type_ids = [
-        x.entity_type_id for x in get_assets({"project_id": project_id})
+        x["entity_type_id"] for x in get_assets({"project_id": project_id})
     ]
 
     if len(asset_type_ids) > 0:
@@ -43,7 +43,7 @@ def get_asset_types_for_project(project_id):
         result = query.all()
     else:
         result = []
-    return result
+    return EntityType.serialize_list(result, obj_type="AssetType")
 
 
 def get_asset_types_for_shot(shot_id):
@@ -56,7 +56,7 @@ def get_asset_types_for_shot(shot_id):
         result = query.all()
     else:
         result = []
-    return result
+    return EntityType.serialize_list(result, obj_type="AssetType")
 
 
 def get_assets(criterions={}):
@@ -64,16 +64,17 @@ def get_assets(criterions={}):
     sequence_type = shots_service.get_sequence_type()
     episode_type = shots_service.get_episode_type()
     query = Entity.query.filter_by(**criterions)
-    return query.filter(
+    result = query.filter(
         ~Entity.entity_type_id.in_([
-            shot_type.id,
-            sequence_type.id,
-            episode_type.id
+            shot_type["id"],
+            sequence_type["id"],
+            episode_type["id"]
         ])
     ).all()
+    return EntityType.serialize_list(result, obj_type="Asset")
 
 
-def get_asset(entity_id):
+def get_asset_raw(entity_id):
     try:
         entity = Entity.get(entity_id)
     except StatementError:
@@ -85,49 +86,11 @@ def get_asset(entity_id):
     return entity
 
 
-def get_asset_by_shotgun_id(shotgun_id):
-    assets = get_assets({"shotgun_id": shotgun_id})
-    if len(assets) > 0:
-        return assets[0]
-    else:
-        raise AssetNotFoundException
+def get_asset(entity_id):
+    return get_asset_raw(entity_id).serialize(obj_type="Asset")
 
 
-def is_asset(entity):
-    shot_type = shots_service.get_shot_type()
-    sequence_type = shots_service.get_sequence_type()
-    episode_type = shots_service.get_episode_type()
-
-    return entity.entity_type_id not in [
-        shot_type.id,
-        sequence_type.id,
-        episode_type.id,
-    ]
-
-
-def is_asset_type(asset_type):
-    shot_type = shots_service.get_shot_type()
-    sequence_type = shots_service.get_sequence_type()
-    episode_type = shots_service.get_episode_type()
-
-    return asset_type.id not in [
-        shot_type.id,
-        sequence_type.id,
-        episode_type.id,
-    ]
-
-
-def get_or_create_type(name):
-    asset_type = EntityType.get_by(name=name)
-    if asset_type is None:
-        asset_type = EntityType(
-            name=name
-        )
-        asset_type.save()
-    return asset_type
-
-
-def get_asset_type(asset_type_id):
+def get_asset_type_raw(asset_type_id):
     try:
         asset_type = EntityType.get(asset_type_id)
     except StatementError:
@@ -139,13 +102,64 @@ def get_asset_type(asset_type_id):
     return asset_type
 
 
+def get_asset_type(asset_type_id):
+    return get_asset_type_raw(asset_type_id).serialize(obj_type="AssetType")
+
+
+def get_asset_by_shotgun_id(shotgun_id):
+    assets = get_assets({"shotgun_id": shotgun_id})
+    if len(assets) > 0:
+        return assets[0]
+    else:
+        raise AssetNotFoundException
+
+
+def get_raw_asset_by_shotgun_id(shotgun_id):
+    asset = get_asset_by_shotgun_id(shotgun_id)
+    return get_asset_raw(asset["id"])
+
+
+def is_asset(entity):
+    shot_type = shots_service.get_shot_type()
+    sequence_type = shots_service.get_sequence_type()
+    episode_type = shots_service.get_episode_type()
+
+    return str(entity.entity_type_id) not in [
+        shot_type["id"],
+        sequence_type["id"],
+        episode_type["id"],
+    ]
+
+
+def is_asset_type(asset_type):
+    shot_type = shots_service.get_shot_type()
+    sequence_type = shots_service.get_sequence_type()
+    episode_type = shots_service.get_episode_type()
+
+    return str(asset_type.id) not in [
+        shot_type["id"],
+        sequence_type["id"],
+        episode_type["id"],
+    ]
+
+
+def get_or_create_type(name):
+    asset_type = EntityType.get_by(name=name)
+    if asset_type is None:
+        asset_type = EntityType(
+            name=name
+        )
+        asset_type.save()
+    return asset_type.serialize(obj_type="AssetType")
+
+
 def get_asset_type_by_name(asset_type_name):
     asset_type = EntityType.get_by(name=asset_type_name)
 
     if asset_type is None or not is_asset_type(asset_type):
         raise AssetTypeNotFoundException
 
-    return asset_type
+    return asset_type.serialize(obj_type="AssetType")
 
 
 def save_asset_types(asset_type_names):
@@ -159,30 +173,33 @@ def save_asset_types(asset_type_names):
 def save_asset_type(asset_type_name):
     asset_type = EntityType.get_by(name=asset_type_name)
     if asset_type is None:
-        asset_type = EntityType(name=asset_type_name)
-        asset_type.save()
-    return asset_type
+        asset_type = EntityType.create(name=asset_type_name)
+    return asset_type.serialize(obj_type="AssetType")
 
 
-def create_asset(project, asset_type, name, description):
+def create_asset(project_id, asset_type_id, name, description):
+    project = projects_service.get_project_raw(project_id)
+    asset_type = get_asset_type_raw(asset_type_id)
+
     name = name.capitalize()
     asset = Entity(
-        project_id=project.id,
-        entity_type_id=asset_type.id,
+        project_id=project_id,
+        entity_type_id=asset_type_id,
         name=name,
         description=description
     )
     asset.save()
+    asset_dict = asset.serialize(obj_type="Asset")
     events.emit("asset:new", {
-        "asset": asset.serialize(obj_type="Asset"),
-        "asset_type": asset_type.serialize(obj_type="Asset"),
+        "asset": asset_dict,
+        "asset_type": asset_type.serialize(obj_type="AssetType"),
         "project": project.serialize()
     })
-    return asset
+    return asset_dict
 
 
 def remove_asset(asset_id):
-    asset = get_asset(asset_id)
+    asset = get_asset_raw(asset_id)
     try:
         asset.delete()
     except IntegrityError:
@@ -194,7 +211,10 @@ def remove_asset(asset_id):
     return deleted_asset
 
 
-def add_asset_link(asset_in, asset_out):
+def add_asset_link(asset_in_id, asset_out_id):
+    asset_in = get_asset_raw(asset_in_id)
+    asset_out = get_asset_raw(asset_out_id)
+
     if asset_out not in asset_in.entities_out:
         asset_in.entities_out.append(asset_out)
         asset_in.save()
@@ -202,10 +222,13 @@ def add_asset_link(asset_in, asset_out):
             "asset_in": asset_in.serialize(obj_type="Asset"),
             "asset_out": asset_out.serialize(obj_type="Asset")
         })
-    return asset_in
+    return asset_in.serialize(obj_type="Asset")
 
 
-def remove_asset_link(asset_in, asset_out):
+def remove_asset_link(asset_in_id, asset_out_id):
+    asset_in = get_asset_raw(asset_in_id)
+    asset_out = get_asset_raw(asset_out_id)
+
     if asset_out in asset_in.entities_out:
         asset_in.entities_out = \
             [x for x in asset_in.entities_out if x.id != asset_out]
@@ -214,7 +237,7 @@ def remove_asset_link(asset_in, asset_out):
             "asset_in": asset_in.serialize(obj_type="Asset"),
             "asset_out": asset_out.serialize(obj_type="Asset")
         })
-    return asset_in
+    return asset_in.serialize(obj_type="Asset")
 
 
 def all_assets(criterions={}):
@@ -224,9 +247,9 @@ def all_assets(criterions={}):
     query = Entity.query.filter_by(**criterions)
     query = query.filter(
         ~Entity.entity_type_id.in_([
-            shot_type.id,
-            sequence_type.id,
-            episode_type.id
+            shot_type["id"],
+            sequence_type["id"],
+            episode_type["id"]
         ])
     )
     query = query.join(Project)
@@ -247,13 +270,15 @@ def all_assets(criterions={}):
 
 def get_task_status_map():
     return {
-        status.id: status for status in TaskStatus.query.all()
+        status.id: status.serialize()
+        for status in TaskStatus.query.all()
     }
 
 
 def get_task_type_map():
     return {
-        task_type.id: task_type for task_type in TaskType.query.all()
+        task_type.id: task_type.serialize()
+        for task_type in TaskType.query.all()
     }
 
 
@@ -267,9 +292,9 @@ def get_asset_map(criterions={}):
         .join(EntityType) \
         .filter(
             ~Entity.entity_type_id.in_([
-                shot_type.id,
-                sequence_type.id,
-                episode_type.id
+                shot_type["id"],
+                sequence_type["id"],
+                episode_type["id"]
             ])
         ) \
         .add_columns(EntityType.name)
@@ -314,9 +339,9 @@ def all_assets_and_tasks(criterions={}):
         .join(EntityType) \
         .filter(
             ~Entity.entity_type_id.in_([
-                shot_type.id,
-                sequence_type.id,
-                episode_type.id
+                shot_type["id"],
+                sequence_type["id"],
+                episode_type["id"]
             ])
         )
 
@@ -338,13 +363,13 @@ def all_assets_and_tasks(criterions={}):
         task_status = task_status_map[task.task_status_id]
         task_type = task_type_map[task.task_type_id]
         task_dict.update({
-            "task_status_id": str(task_status.id),
-            "task_status_name": task_status.name,
-            "task_status_short_name": task_status.short_name,
-            "task_status_color": task_status.color,
-            "task_type_name": task_type.name,
-            "task_type_color": task_type.color,
-            "task_type_priority": task_type.priority,
+            "task_status_id": task_status["id"],
+            "task_status_name": task_status["name"],
+            "task_status_short_name": task_status["short_name"],
+            "task_status_color": task_status["color"],
+            "task_type_name": task_type["name"],
+            "task_type_color": task_type["color"],
+            "task_type_priority": task_type["priority"],
             "assignees": fields.serialize_value(task.assignees)
         })
         task_map[asset_id].append(task_dict)
@@ -358,10 +383,10 @@ def all_assets_and_tasks(criterions={}):
 
 
 def cancel_asset(asset_id):
-    asset = get_asset(asset_id)
+    asset = get_asset_raw(asset_id)
     asset.update({"canceled": True})
-    asset = asset.serialize(obj_type="Asset")
+    asset_dict = asset.serialize(obj_type="Asset")
     events.emit("asset:deletion", {
-        "deleted_asset": asset
+        "deleted_asset": asset_dict
     })
-    return asset
+    return asset_dict

@@ -34,14 +34,18 @@ class ShotsCsvImportResource(BaseCsvImportResource):
         if episode_key not in self.episodes:
             project = self.projects[project_name]
             self.episodes[episode_key] = \
-                shots_service.get_or_create_episode(project, episode_name)
+                shots_service.get_or_create_episode(project["id"], episode_name)
 
         sequence_key = "%s-%s" % (project_id, sequence_name)
         if sequence_key not in self.sequences:
             project = self.projects[project_name]
             episode = self.episodes[episode_key]
             self.sequences[sequence_key] = \
-                shots_service.get_or_create_sequence(project, episode, sequence_name)
+                shots_service.get_or_create_sequence(
+                    project["id"],
+                    episode.id,
+                    sequence_name
+                )
         sequence_id = self.get_id_from_cache(self.sequences, sequence_key)
 
         shot_type = shots_service.get_shot_type()
@@ -51,7 +55,7 @@ class ShotsCsvImportResource(BaseCsvImportResource):
                 description=description,
                 project_id=project_id,
                 parent_id=sequence_id,
-                entity_type_id=shot_type.id,
+                entity_type_id=shot_type["id"],
                 data={
                     "fps": fps,
                     "frame_in": frame_in,

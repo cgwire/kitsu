@@ -6,14 +6,19 @@ from slugify import slugify
 
 from zou.app import app
 
-from zou.app.models.project import Project
 from zou.app.models.entity import Entity
 from zou.app.models.entity_type import EntityType
 from zou.app.models.task_type import TaskType
 from zou.app.models.task import Task
 from zou.app.models.department import Department
 
-from zou.app.services import shots_service, tasks_service, files_service
+from zou.app.services import (
+    assets_service,
+    files_service,
+    shots_service,
+    projects_service,
+    tasks_service
+)
 from zou.app.services.exception import (
     MalformedFileTreeException,
     WrongFileTreeFileException,
@@ -63,7 +68,7 @@ def get_file_name(
     name="",
     version=1
 ):
-    entity = Entity.get(task["entity_id"])
+    entity = tasks_service.get_entity(task["entity_id"])
     project = get_project(entity)
     tree = get_tree_from_project(project)
 
@@ -91,7 +96,7 @@ def get_folder_path(
     name="",
     sep=os.sep
 ):
-    entity = Entity.get(task["entity_id"])
+    entity = tasks_service.get_entity(task["entity_id"])
     project = get_project(entity)
     tree = get_tree_from_project(project)
     root_path = get_root_path(tree, mode, sep)
@@ -114,11 +119,11 @@ def get_folder_path(
 
 
 def get_project(entity):
-    return Project.get(entity.project_id)
+    return projects_service.get_project(entity["project_id"])
 
 
 def get_tree_from_project(project):
-    return project.file_tree
+    return project["file_tree"]
 
 
 def get_tree_from_file(tree_name):
@@ -270,15 +275,15 @@ def get_folder_from_datatype(
 
 def get_folder_from_project(entity):
     project = get_project(entity)
-    return project.name
+    return project["name"]
 
 
 def get_folder_from_task(task):
-    return task.name
+    return task["name"]
 
 
 def get_folder_from_shot(shot):
-    return shot.name
+    return shot["name"]
 
 
 def get_folder_from_output_type(output_type):
@@ -293,31 +298,31 @@ def get_folder_from_department(task):
     task_type = TaskType.get(task["task_type_id"])
     if task_type is not None:
         task_type = tasks_service.get_department_from_task_type(task_type)
-        folder = task_type.name
+        folder = task_type["name"]
     return folder
 
 
 def get_folder_from_task_type(task):
     folder = ""
-    task_type = TaskType.get(task["task_type_id"])
+    task_type = tasks_service.get_task_type(task["task_type_id"])
     if task_type is not None:
-        folder = task_type.name
+        folder = task_type["name"]
     return folder
 
 
 def get_folder_from_asset(asset):
     folder = ""
     if asset is not None:
-        folder = asset.name
+        folder = asset["name"]
     return folder
 
 
 def get_folder_from_sequence(entity):
     if shots_service.is_shot(entity):
         sequence = shots_service.get_sequence_from_shot(entity)
-        sequence_name = sequence.name
+        sequence_name = sequence["name"]
     elif shots_service.is_sequence(entity):
-        sequence_name = entity.name
+        sequence_name = entity["name"]
     else:
         sequence_name = ""
 
@@ -335,7 +340,7 @@ def get_folder_from_episode(entity):
 
     try:
         episode = shots_service.get_episode_from_sequence(sequence)
-        episode_name = episode.name
+        episode_name = episode["name"]
     except:
         episode_name = "e001"
 
@@ -344,8 +349,8 @@ def get_folder_from_episode(entity):
 
 def get_folder_from_asset_type(asset):
     if asset is not None:
-        asset_type = EntityType.get(asset.entity_type_id)
-        folder = asset_type.name
+        asset_type = assets_service.get_asset_type(asset["entity_type_id"])
+        folder = asset_type["name"]
     else:
         raise MalformedFileTreeException("Given asset is null.")
     return folder
@@ -424,7 +429,7 @@ def get_shot_task_from_path(file_path, project, mode="working", sep="/"):
         data_names.get(PathTokens.TASK, ""),
     )
 
-    return task
+    return task.serialize()
 
 
 def get_asset_task_from_path(file_path, project, mode="working", sep="/"):
@@ -458,7 +463,7 @@ def get_asset_task_from_path(file_path, project, mode="working", sep="/"):
         data_names.get(PathTokens.TASK, ""),
     )
 
-    return task
+    return task.serialize()
 
 
 def extract_variable_values_from_path(elements, template_elements):
@@ -511,8 +516,8 @@ def guess_shot(project, episode_name, sequence_name, shot_name):
     if len(episode_name) > 0:
         episode = Entity.get_by(
             name=episode_name,
-            entity_type_id=shots_service.get_episode_type().id,
-            project_id=project.id
+            entity_type_id=shots_service.get_episode_type()["id"],
+            project_id=project["id"]
         )
         if episode is not None:
             episode_id = episode.id
@@ -521,9 +526,9 @@ def guess_shot(project, episode_name, sequence_name, shot_name):
     if len(sequence_name) > 0:
         sequence = Entity.get_by(
             name=sequence_name,
-            entity_type_id=shots_service.get_sequence_type().id,
+            entity_type_id=shots_service.get_sequence_type()["id"],
             parent_id=episode_id,
-            project_id=project.id
+            project_id=project["id"]
         )
         if sequence is not None:
             sequence_id = sequence.id
@@ -533,9 +538,9 @@ def guess_shot(project, episode_name, sequence_name, shot_name):
     if len(shot_name) > 0:
         shot = Entity.get_by(
             name=shot_name,
-            entity_type_id=shots_service.get_shot_type().id,
+            entity_type_id=shots_service.get_shot_type()["id"],
             parent_id=sequence_id,
-            project_id=project.id
+            project_id=project["id"]
         )
     else:
         raise WrongPathFormatException(
@@ -558,7 +563,7 @@ def guess_asset(project, asset_type_name, asset_name):
         asset = Entity.get_by(
             name=asset_name,
             entity_type_id=asset_type_id,
-            project_id=project.id
+            project_id=project["id"]
         )
     else:
         raise WrongPathFormatException(

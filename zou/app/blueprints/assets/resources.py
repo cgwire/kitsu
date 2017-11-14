@@ -3,12 +3,10 @@ from flask_restful import Resource, reqparse
 from flask_jwt_extended import jwt_required
 
 from zou.app.utils import query, permissions
-from zou.app.models.entity import Entity
 from zou.app.services import (
     assets_service,
     shots_service,
     tasks_service,
-    projects_service,
     user_service
 )
 
@@ -33,12 +31,12 @@ class AssetResource(Resource):
         try:
             asset = assets_service.get_asset(asset_id)
             if not permissions.has_manager_permissions():
-                user_service.check_has_task_related(asset.project_id)
+                user_service.check_has_task_related(asset["project_id"])
         except AssetNotFoundException:
             abort(404)
         except permissions.PermissionDenied:
             abort(403)
-        return asset.serialize(obj_type="Asset")
+        return asset
 
     @jwt_required
     def delete(self, asset_id):
@@ -106,7 +104,7 @@ class AssetTypeResource(Resource):
             asset_type = assets_service.get_asset_type(asset_type_id)
         except AssetTypeNotFoundException:
             abort(404)
-        return asset_type.serialize(obj_type="AssetType")
+        return asset_type
 
 
 class AssetTypesResource(Resource):
@@ -138,7 +136,7 @@ class ProjectAssetTypesResource(Resource):
             if not permissions.has_manager_permissions():
                 user_service.check_has_task_related(project_id)
             asset_types = assets_service.get_asset_types_for_project(project_id)
-            return Entity.serialize_list(asset_types, obj_type="AssetType")
+            return asset_types
         except permissions.PermissionDenied:
             abort(403)
 
@@ -158,7 +156,7 @@ class ShotAssetTypesResource(Resource):
             if not permissions.has_manager_permissions():
                 user_service.check_has_task_related(shot["project_id"])
             asset_types = assets_service.get_asset_types_for_shot(shot_id)
-            return Entity.serialize_list(asset_types, obj_type="AssetType")
+            return asset_types
         except ShotNotFoundException:
             abort(404)
         except permissions.PermissionDenied:
@@ -180,7 +178,7 @@ class ProjectAssetsResource(Resource):
         criterions = query.get_query_criterions_from_request(request)
         criterions["project_id"] = project_id
         assets = assets_service.get_assets(criterions)
-        return Entity.serialize_list(assets, obj_type="Asset")
+        return assets
 
 
 class ProjectAssetTypeAssetsResource(Resource):
@@ -200,7 +198,7 @@ class ProjectAssetTypeAssetsResource(Resource):
             criterions["project_id"] = project_id
             criterions["entity_type_id"] = asset_type_id
             assets = assets_service.get_assets(criterions)
-            return Entity.serialize_list(assets, obj_type="Asset")
+            return assets
         except permissions.PermissionDenied:
             abort(403)
 
@@ -218,7 +216,7 @@ class AssetTasksResource(Resource):
         try:
             asset = assets_service.get_asset(asset_id)
             if not permissions.has_manager_permissions():
-                user_service.check_has_task_related(asset.project_id)
+                user_service.check_has_task_related(asset["project_id"])
             return tasks_service.get_tasks_for_asset(asset_id)
         except AssetNotFoundException:
             abort(404)
@@ -239,7 +237,7 @@ class AssetTaskTypesResource(Resource):
         try:
             asset = assets_service.get_asset(asset_id)
             if not permissions.has_manager_permissions():
-                user_service.check_has_task_related(asset.project_id)
+                user_service.check_has_task_related(asset["project_id"])
             return tasks_service.get_task_types_for_asset(asset_id)
         except AssetNotFoundException:
             abort(404)
@@ -261,11 +259,9 @@ class NewAssetResource(Resource):
 
         try:
             permissions.check_manager_permissions()
-            project = projects_service.get_project(project_id)
-            asset_type = assets_service.get_asset_type(asset_type_id)
             asset = assets_service.create_asset(
-                project,
-                asset_type,
+                project_id,
+                asset_type_id,
                 name,
                 description
             )
@@ -276,7 +272,7 @@ class NewAssetResource(Resource):
         except permissions.PermissionDenied:
             abort(403)
 
-        return asset.serialize(obj_type="Asset"), 201
+        return asset, 201
 
     def get_arguments(self):
         parser = reqparse.RequestParser()

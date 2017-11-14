@@ -26,9 +26,9 @@ class AssetsCsvExport(BaseCsvExport):
         episode_type = shots_service.get_episode_type()
         query = self.model.query.filter(
             ~Entity.entity_type_id.in_([
-                shot_type.id,
-                sequence_type.id,
-                episode_type.id
+                shot_type["id"],
+                sequence_type["id"],
+                episode_type["id"]
             ])
         )
         query = query.join(Project)

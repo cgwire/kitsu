@@ -31,7 +31,7 @@ class ImportShotgunTasksResource(BaseImportShotgunResource):
 
     def get_asset_map(self):
         assets = assets_service.get_assets()
-        return {asset.shotgun_id: asset.id for asset in assets}
+        return {asset["shotgun_id"]: asset["id"] for asset in assets}
 
     def get_shot_map(self):
         shots = shots_service.get_shots()
@@ -40,7 +40,7 @@ class ImportShotgunTasksResource(BaseImportShotgunResource):
     def get_sequence_map(self):
         sequences = shots_service.get_sequences()
         return {
-            sequence.shotgun_id: sequence.id for sequence in sequences
+            sequence["shotgun_id"]: sequence["id"] for sequence in sequences
         }
 
     def filtered_entries(self):

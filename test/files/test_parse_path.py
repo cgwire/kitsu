@@ -44,7 +44,7 @@ class FileTreeTestCase(ApiDBTestCase):
         self.shot_standard.save()
 
     def test_get_shot_path_template(self):
-        tree = file_tree.get_tree_from_project(self.project)
+        tree = file_tree.get_tree_from_project(self.project.serialize())
         path = file_tree.get_shot_path_template(tree)
         self.assertEqual(
             path,
@@ -52,7 +52,7 @@ class FileTreeTestCase(ApiDBTestCase):
         )
 
     def test_get_shot_template_folders(self):
-        folders = file_tree.get_shot_template_folders(self.project)
+        folders = file_tree.get_shot_template_folders(self.project.serialize())
         self.assertEqual(folders, [
             u"<Project>",
             u"shots",
@@ -64,7 +64,7 @@ class FileTreeTestCase(ApiDBTestCase):
 
     def test_get_path_folders(self):
         folders = file_tree.get_path_folders(
-            self.project,
+            self.project.serialize(),
             "/simple/productions/the_crew/shots/s01/p01/animation"
         )
         self.assertEqual(folders, [
@@ -76,11 +76,14 @@ class FileTreeTestCase(ApiDBTestCase):
         ])
 
     def test_guess_shot(self):
-        shot = file_tree.guess_shot(self.project, "E01", "S01", "P01")
+        shot = file_tree.guess_shot(
+            self.project.serialize(), "E01", "S01", "P01"
+        )
         self.assertEqual(shot.id, self.shot.id)
 
     def test_guess_asset(self):
-        asset = file_tree.guess_asset(self.project, "Props", "Tree")
+        asset = file_tree.guess_asset(
+            self.project.serialize(), "Props", "Tree")
         self.assertEqual(asset.id, self.entity.id)
 
     def test_guess_task_type(self):
@@ -101,16 +104,16 @@ class FileTreeTestCase(ApiDBTestCase):
         )
         task = file_tree.get_shot_task_from_path(
             file_path,
-            self.project_standard
+            self.project_standard.serialize()
         )
 
-        self.assertTrue(task.id, self.shot_task_standard.id)
+        self.assertTrue(task["id"], self.shot_task_standard.id)
 
     def test_get_task_from_asset_path(self):
         file_path = file_tree.get_folder_path(self.task_standard.serialize())
         task = file_tree.get_asset_task_from_path(
             file_path,
-            self.project_standard
+            self.project_standard.serialize()
         )
 
-        self.assertTrue(task.id, self.shot_task_standard.id)
+        self.assertTrue(task["id"], self.shot_task_standard.id)

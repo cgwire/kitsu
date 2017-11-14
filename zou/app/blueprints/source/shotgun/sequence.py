@@ -20,7 +20,7 @@ class ImportShotgunSequencesResource(BaseImportShotgunResource):
     def get_episode_map(self):
         episodes = shots_service.get_episodes()
         return {
-            episode.shotgun_id: episode.id for episode in episodes
+            episode["shotgun_id"]: episode["id"] for episode in episodes
         }
 
     def get_episode(self, sg_sequence):
@@ -43,7 +43,7 @@ class ImportShotgunSequencesResource(BaseImportShotgunResource):
             "description": sg_sequence["description"],
             "project_id": project_id,
             "parent_id": episode_id,
-            "entity_type_id": self.sequence_type.id
+            "entity_type_id": self.sequence_type["id"]
         }
 
     def get_project(self, sg_sequence):
@@ -56,7 +56,7 @@ class ImportShotgunSequencesResource(BaseImportShotgunResource):
     def import_entry(self, data):
         sequence = Entity.get_by(
             shotgun_id=data["shotgun_id"],
-            entity_type_id=self.sequence_type.id
+            entity_type_id=self.sequence_type["id"]
         )
 
         if sequence is None:

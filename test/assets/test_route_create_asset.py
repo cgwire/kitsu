@@ -50,9 +50,12 @@ class CreateAssetsTestCase(ApiDBTestCase):
         assets = assets_service.get_assets()
         self.assertIsNotNone(asset.get("id", None))
         self.assertEquals(len(assets), 1)
-        self.assertEquals(assets[0].name, self.asset_data["name"].capitalize())
         self.assertEquals(
-            assets[0].description,
+            assets[0]["name"],
+            self.asset_data["name"].capitalize()
+        )
+        self.assertEquals(
+            assets[0]["description"],
             self.asset_data["description"]
         )
 
@@ -75,4 +78,4 @@ class CreateAssetsTestCase(ApiDBTestCase):
         self.delete(path)
         assets = assets_service.get_assets()
         self.assertEquals(len(assets), 1)
-        self.assertEquals(assets[0].canceled, True)
+        self.assertEquals(assets[0]["canceled"], True)

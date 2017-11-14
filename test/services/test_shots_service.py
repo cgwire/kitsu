@@ -18,12 +18,14 @@ class ShotUtilsTestCase(ApiDBTestCase):
         self.generate_fixture_entity()
 
     def test_get_sequence_from_shot(self):
-        sequence = shots_service.get_sequence_from_shot(self.shot)
-        self.assertEquals(sequence.name, 'S01')
+        sequence = shots_service.get_sequence_from_shot(self.shot.serialize())
+        self.assertEquals(sequence["name"], 'S01')
 
     def test_get_episode_from_shot(self):
-        episode = shots_service.get_episode_from_sequence(self.sequence)
-        self.assertEquals(episode.name, 'E01')
+        episode = shots_service.get_episode_from_sequence(
+            self.sequence.serialize()
+        )
+        self.assertEquals(episode["name"], 'E01')
 
     def test_get_sequence_from_shot_no_sequence(self):
         self.assertRaises(
@@ -34,21 +36,21 @@ class ShotUtilsTestCase(ApiDBTestCase):
 
     def test_get_sequence_type(self):
         sequence_type = shots_service.get_sequence_type()
-        self.assertEqual(sequence_type.name, "Sequence")
+        self.assertEqual(sequence_type["name"], "Sequence")
 
     def test_get_shot_type(self):
         shot_type = shots_service.get_shot_type()
-        self.assertEqual(shot_type.name, "Shot")
+        self.assertEqual(shot_type["name"], "Shot")
 
     def test_get_episode_type(self):
         episode_type = shots_service.get_episode_type()
-        self.assertEqual(episode_type.name, "Episode")
+        self.assertEqual(episode_type["name"], "Episode")
 
     def test_get_sequences(self):
         sequences = shots_service.get_sequences()
         self.assertDictEqual(
-            sequences[0].serialize(),
-            self.sequence.serialize()
+            sequences[0],
+            self.sequence.serialize(obj_type="Sequence")
         )
 
     def test_get_episode_map(self):
@@ -56,7 +58,7 @@ class ShotUtilsTestCase(ApiDBTestCase):
         episode_map = shots_service.get_episode_map()
         self.assertEquals(len(episode_map.keys()), 2)
         self.assertEquals(
-            episode_map[self.episode.id].name,
+            episode_map[str(self.episode.id)]["name"],
             self.episode.name
         )
 
@@ -103,20 +105,23 @@ class ShotUtilsTestCase(ApiDBTestCase):
         self.assertEqual(shots[0]["episode_name"], "E01")
 
     def test_is_shot(self):
-        self.assertTrue(shots_service.is_shot(self.shot))
-        self.assertFalse(shots_service.is_shot(self.entity))
+        self.assertTrue(shots_service.is_shot(self.shot.serialize()))
+        self.assertFalse(shots_service.is_shot(self.entity.serialize()))
 
     def test_is_sequence(self):
-        self.assertTrue(shots_service.is_sequence(self.sequence))
-        self.assertFalse(shots_service.is_sequence(self.entity))
+        self.assertTrue(shots_service.is_sequence(self.sequence.serialize()))
+        self.assertFalse(shots_service.is_sequence(self.entity.serialize()))
 
     def test_get_shot(self):
-        self.assertEquals(self.shot.id, shots_service.get_shot(self.shot.id).id)
+        self.assertEquals(
+            str(self.shot.id),
+            shots_service.get_shot(self.shot.id)["id"]
+        )
 
     def test_get_sequence(self):
         self.assertEquals(
-            self.sequence.id,
-            shots_service.get_sequence(self.sequence.id).id
+            str(self.sequence.id),
+            shots_service.get_sequence(self.sequence.id)["id"]
         )
 
     def test_get_episode(self):

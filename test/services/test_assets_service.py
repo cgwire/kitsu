@@ -26,19 +26,19 @@ class AssetServiceTestCase(ApiDBTestCase):
             self.project.id
         )
         self.assertEqual(len(asset_types), 1)
-        self.assertEqual(asset_types[0].name, "Props")
+        self.assertEqual(asset_types[0]["name"], "Props")
 
     def test_get_asset_types_for_shot(self):
         self.shot.entities_out = [self.entity]
         self.shot.save()
         asset_types = assets_service.get_asset_types_for_shot(self.shot.id)
         self.assertEqual(len(asset_types), 1)
-        self.assertEqual(asset_types[0].name, "Props")
+        self.assertEqual(asset_types[0]["name"], "Props")
 
     def test_get_assets(self):
         assets = assets_service.get_assets()
         self.assertEqual(len(assets), 1)
-        self.assertEqual(assets[0].name, "Tree")
+        self.assertEqual(assets[0]["name"], "Tree")
 
     def test_get_asset_map(self):
         self.generate_fixture_asset_types()
@@ -76,8 +76,8 @@ class AssetServiceTestCase(ApiDBTestCase):
 
     def test_get_asset(self):
         asset = assets_service.get_asset(self.entity.id)
-        self.assertEqual(asset.id, self.entity.id)
-        asset.delete()
+        self.assertEqual(asset["id"], str(self.entity.id))
+        assets_service.remove_asset(asset["id"])
         self.assertRaises(
             AssetNotFoundException,
             assets_service.get_asset,
@@ -88,8 +88,8 @@ class AssetServiceTestCase(ApiDBTestCase):
         self.shot.update({"shotgun_id": 1})
         self.entity.update({"shotgun_id": 1})
         asset = assets_service.get_asset_by_shotgun_id(1)
-        self.assertEqual(asset.id, self.entity.id)
-        asset.delete()
+        self.assertEqual(asset["id"], str(self.entity.id))
+        assets_service.remove_asset(asset["id"])
         self.assertRaises(
             AssetNotFoundException,
             assets_service.get_asset_by_shotgun_id,
@@ -104,7 +104,7 @@ class AssetServiceTestCase(ApiDBTestCase):
         asset_id = self.entity.id
         assets_service.cancel_asset(asset_id)
         asset = assets_service.get_asset(asset_id)
-        self.assertTrue(asset.canceled)
+        self.assertTrue(asset["canceled"])
 
     def test_remove_asset(self):
         asset_id = self.entity.id

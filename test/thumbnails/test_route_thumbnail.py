@@ -127,7 +127,7 @@ class RouteThumbnailTestCase(ApiDBTestCase):
         ), {})
 
         asset = assets_service.get_asset(self.entity_id)
-        self.assertEquals(asset.preview_file_id, self.preview_file_id)
+        self.assertEquals(asset["preview_file_id"], str(self.preview_file_id))
 
         self.put("/actions/entities/%s/set-main-preview/%s" % (
             self.preview_file_id,

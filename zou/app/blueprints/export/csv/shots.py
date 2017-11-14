@@ -27,7 +27,7 @@ class ShotsCsvExport(BaseCsvExport):
     def build_query(self):
         shot_type = shots_service.get_shot_type()
         Sequence = aliased(Entity, name='sequence')
-        query = self.model.query.filter_by(entity_type_id=shot_type.id)
+        query = self.model.query.filter_by(entity_type_id=shot_type["id"])
         query = query.join(Project)
         query = query.join(Sequence, Sequence.id == Entity.parent_id)
         query = query.add_columns(Project.name)

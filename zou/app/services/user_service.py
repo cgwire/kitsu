@@ -26,9 +26,9 @@ def asset_type_filter():
     sequence_type = shots_service.get_sequence_type()
     episode_type = shots_service.get_episode_type()
     return ~EntityType.id.in_([
-        shot_type.id,
-        sequence_type.id,
-        episode_type.id,
+        shot_type["id"],
+        sequence_type["id"],
+        episode_type["id"]
     ])
 
 
@@ -153,8 +153,8 @@ def get_project_sequences(project_id):
         .join(EntityType, EntityType.id == Entity.entity_type_id) \
         .join(Project, Project.id == Entity.project_id) \
         .join(ProjectStatus) \
-        .filter(Shot.entity_type_id == shot_type.id) \
-        .filter(Entity.entity_type_id == sequence_type.id) \
+        .filter(Shot.entity_type_id == shot_type["id"]) \
+        .filter(Entity.entity_type_id == sequence_type["id"]) \
         .filter(Project.id == project_id) \
         .filter(assignee_filter()) \
         .filter(open_project_filter())
@@ -166,7 +166,7 @@ def get_sequence_shots(sequence_id):
     shot_type = shots_service.get_shot_type()
     query = Entity.query \
         .join(Task, Project, ProjectStatus, EntityType) \
-        .filter(Entity.entity_type_id == shot_type.id) \
+        .filter(Entity.entity_type_id == shot_type["id"]) \
         .filter(Entity.parent_id == sequence_id) \
         .filter(assignee_filter()) \
         .filter(open_project_filter())
