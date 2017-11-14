@@ -160,7 +160,7 @@ class LoginResource(Resource):
         except UnactiveUserException:
             return {
                 "error": True,
-                "message": "Old password is wrong."
+                "message": "User is unactive, he cannot log in."
             }, 400
 
     def get_arguments(self):
