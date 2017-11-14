@@ -26,6 +26,10 @@ class TaskNotFoundException(Exception):
     pass
 
 
+class DepartmentNotFoundException(Exception):
+    pass
+
+
 class TaskStatusNotFoundException(Exception):
     pass
 

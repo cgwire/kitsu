@@ -487,13 +487,12 @@ class CastingResource(Resource):
         try:
             shot = shots_service.get_shot(shot_id)
             if not permissions.has_manager_permissions():
-                user_service.check_has_task_related(shot.project_id)
+                user_service.check_has_task_related(shot["project_id"])
+            return breakdown_service.get_casting(shot_id)
         except ShotNotFoundException:
             abort(404)
         except permissions.PermissionDenied:
             abort(403)
-
-        return breakdown_service.get_casting(shot)
 
     @jwt_required
     def put(self, shot_id):

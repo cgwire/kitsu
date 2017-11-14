@@ -126,8 +126,8 @@ class ShotUtilsTestCase(ApiDBTestCase):
 
     def test_get_episode(self):
         self.assertEquals(
-            self.episode.id,
-            shots_service.get_episode(self.episode.id).id
+            str(self.episode.id),
+            shots_service.get_episode(self.episode.id)["id"]
         )
 
     def test_create_episode(self):

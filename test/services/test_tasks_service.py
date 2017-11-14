@@ -186,9 +186,9 @@ class TaskServiceTestCase(ApiDBTestCase):
         tasks_service.assign_task(self.task.id, self.assigner.id)
         self.assertEqual(self.task.assignees[1].id, self.assigner.id)
 
-    def test_get_department_from_task_type(self):
-        department = tasks_service.get_department_from_task_type(self.task_type)
-        self.assertEqual(department.name, "Modeling")
+    def test_get_department_from_task(self):
+        department = tasks_service.get_department_from_task(self.task.id)
+        self.assertEqual(department["name"], "Modeling")
 
     def test_get_task(self):
         self.assertRaises(

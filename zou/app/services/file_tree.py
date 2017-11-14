@@ -295,10 +295,8 @@ def get_folder_from_output_type(output_type):
 
 def get_folder_from_department(task):
     folder = ""
-    task_type = TaskType.get(task["task_type_id"])
-    if task_type is not None:
-        task_type = tasks_service.get_department_from_task_type(task_type)
-        folder = task_type["name"]
+    department = tasks_service.get_department_from_task(task["id"])
+    folder = department["name"]
     return folder
 
 

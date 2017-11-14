@@ -134,7 +134,7 @@ class FileTreeTestCase(ApiDBTestCase):
     def test_get_folder_from_datatype_shot(self):
         path = file_tree.get_folder_from_datatype(
             "Shot",
-            self.shot,
+            self.shot.serialize(),
             self.shot_task.serialize()
         )
         self.assertEquals(path, self.shot.name)
@@ -334,7 +334,7 @@ class FileTreeTestCase(ApiDBTestCase):
     def test_update_variable(self):
         name = file_tree.update_variable(
             "<AssetType>_<Asset>",
-            self.entity,
+            self.entity.serialize(),
             self.task.serialize()
         )
         self.assertEquals(name, "props_tree")
