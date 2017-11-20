@@ -53,6 +53,7 @@ def get_preview_file_path(subfolder, instance_id):
         get_file_name(instance_id)
     )
 
+
 def create_folder(subfolder):
     thumbnail_folder = get_folder_name(subfolder)
     fs.mkdir_p(thumbnail_folder)
@@ -70,8 +71,8 @@ def get_image_size(file_path):
 
 def get_full_size_from_width(im, width):
     im_width, im_height = im.size
-    ratio = im_height / im_width
-    height = math.ceil(width * ratio)
+    ratio = float(im_height) / float(im_width)
+    height = int(math.ceil(width * ratio))
     return (width, height)
 
 
@@ -99,13 +100,13 @@ def prepare_image_for_thumbnail(im, size):
 
     im_width, im_height = im.size
     width, height = size
-    original_ratio = im_width / im_height
-    target_ratio = width / height
+    original_ratio = float(im_width) / float(im_height)
+    target_ratio = float(width) / float(height)
     if target_ratio > original_ratio:
         # image is too tall: take some off the top and bottom
-        scale_factor = target_ratio / original_ratio
+        scale_factor = float(target_ratio) / float(original_ratio)
         crop_width = im_width
-        crop_height = im_height / scale_factor
+        crop_height = math.floor(float(im_height) / scale_factor)
         top_cut_line = (im_height - crop_height) / 2
         im = im.crop(flat(
             0,
@@ -115,10 +116,10 @@ def prepare_image_for_thumbnail(im, size):
         ))
     else:
         # image is too wide: take some off the sides
-        scale_factor = original_ratio / target_ratio
-        crop_width = im_width / scale_factor
+        scale_factor = float(original_ratio) / float(target_ratio)
+        crop_width = math.ceil(float(im_width) / scale_factor)
         crop_height = im_height
-        side_cut_line = (im_width - crop_width) / 2
+        side_cut_line = int(float(im_width - crop_width) / 2)
         im = im.crop(flat(
             side_cut_line,
             0,

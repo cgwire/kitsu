@@ -1,0 +1,28 @@
+stages:
+  - test
+
+tests:python:
+  stage: test
+  image: python:3
+  services:
+    - postgres:9
+  variables:
+    POSTGRES_DB: zoudb
+    POSTGRES_USER: postgres
+    POSTGRES_PASSWORD: mysecretpassword
+    DB_HOST: postgres
+  script:
+    # Update
+    - echo "deb http://www.deb-multimedia.org jessie main non-free" | tee -a /etc/apt/sources.list
+    - apt update
+    - apt install -y python-dev libpq-dev
+    - apt install -y --force-yes ffmpeg
+
+    # Install requirements
+    - pip install -r requirements.txt
+    - pip install -r requirements_test.txt
+
+    # Run Tests
+    - PYTHONPATH=. py.test
+  tags:
+    - test

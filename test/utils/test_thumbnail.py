@@ -126,7 +126,7 @@ class ThumbnailTestCase(unittest.TestCase):
         file_path_fixture = self.get_fixture_file_path("thumbnails/th01.png")
         im = Image.open(file_path_fixture)
         im = thumbnail.prepare_image_for_thumbnail(im, thumbnail.SQUARE_SIZE)
-        self.assertEquals(im.size, (100, 101))
+        self.assertEquals(im.size, (101, 101))
 
     def test_generate_preview_variants(self):
         preview_id = "123413-12312"

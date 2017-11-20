@@ -7,6 +7,11 @@ services:
   - postgresql
 addons:
   postgresql: "9.4"
+  apt:
+    sources:
+      - sourceline: 'ppa:jonathonf/ffmpeg-3'
+    packages: 
+      - ffmpeg
 install: 
   - "pip install -r requirements_test.txt"
   - "python setup.py install"
