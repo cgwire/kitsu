@@ -15,6 +15,7 @@ class ShotUtilsTestCase(ApiDBTestCase):
         self.generate_fixture_episode()
         self.generate_fixture_sequence()
         self.generate_fixture_shot()
+        self.generate_fixture_scene()
         self.generate_fixture_entity()
 
     def test_get_sequence_from_shot(self):
@@ -45,6 +46,10 @@ class ShotUtilsTestCase(ApiDBTestCase):
     def test_get_episode_type(self):
         episode_type = shots_service.get_episode_type()
         self.assertEqual(episode_type["name"], "Episode")
+
+    def test_get_scene_type(self):
+        scene_type = shots_service.get_scene_type()
+        self.assertEqual(scene_type["name"], "Scene")
 
     def test_get_sequences(self):
         sequences = shots_service.get_sequences()
@@ -118,6 +123,12 @@ class ShotUtilsTestCase(ApiDBTestCase):
             shots_service.get_shot(self.shot.id)["id"]
         )
 
+    def test_get_scene(self):
+        self.assertEquals(
+            str(self.scene.id),
+            shots_service.get_scene(self.scene.id)["id"]
+        )
+
     def test_get_sequence(self):
         self.assertEquals(
             str(self.sequence.id),
@@ -159,3 +170,23 @@ class ShotUtilsTestCase(ApiDBTestCase):
         )
         self.assertEquals(shot["name"], shot_name)
         self.assertEquals(shot["parent_id"], parent_id)
+
+    def test_get_scenes_for_project(self):
+        self.generate_fixture_project_standard()
+        self.generate_fixture_scene(
+            project_id=self.project_standard.id,
+            sequence_id=self.sequence.id
+        )
+        scenes = shots_service.get_scenes_for_project(self.project.id)
+        self.assertEquals(len(scenes), 1)
+
+    def test_get_scenes_for_sequence(self):
+        self.generate_fixture_project_standard()
+        self.generate_fixture_sequence_standard()
+        self.generate_fixture_sequence(name="SQ02")
+        self.generate_fixture_scene(
+            project_id=self.project_standard.id,
+            sequence_id=self.sequence.id
+        )
+        scenes = shots_service.get_scenes_for_sequence(self.sequence.id)
+        self.assertEquals(len(scenes), 1)

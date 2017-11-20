@@ -53,6 +53,27 @@ class ShotResource(Resource):
         return deleted_shot, 204
 
 
+class SceneResource(Resource):
+
+    @jwt_required
+    def get(self, scene_id):
+        """
+        Retrieve given scene.
+        """
+        scene = shots_service.get_scene(scene_id)
+        if not permissions.has_manager_permissions():
+            user_service.check_has_task_related(scene["project_id"])
+
+        return scene
+
+    @jwt_required
+    def delete(self, scene_id):
+        permissions.check_manager_permissions()
+        deleted_scene = shots_service.remove_scene(scene_id)
+
+        return deleted_scene, 204
+
+
 class ShotsResource(Resource):
 
     def __init__(self):
@@ -507,3 +528,77 @@ class CastingResource(Resource):
             abort(404)
         except permissions.PermissionDenied:
             abort(403)
+
+
+class ProjectScenesResource(Resource):
+
+    @jwt_required
+    def get(self, project_id):
+        """
+        Retrieve all shots related to a given project.
+        """
+        projects_service.get_project(project_id)
+        if not permissions.has_manager_permissions():
+            user_service.check_has_task_related(project_id)
+        return shots_service.get_scenes_for_project(project_id)
+
+    @jwt_required
+    def post(self, project_id):
+        """
+        Create a shot for given project.
+        """
+        (sequence_id, name) = self.get_arguments()
+        projects_service.get_project(project_id)
+        permissions.check_manager_permissions()
+        scene = shots_service.create_scene(
+            project_id,
+            sequence_id,
+            name
+        )
+        return scene, 201
+
+    def get_arguments(self):
+        parser = reqparse.RequestParser()
+        parser.add_argument("name", required=True)
+        parser.add_argument("sequence_id", default=None)
+        args = parser.parse_args()
+        return (args["sequence_id"], args["name"])
+
+
+class SequenceScenesResource(Resource):
+
+    @jwt_required
+    def get(self, sequence_id):
+        """
+        Retrieve all scenes related to a given sequence.
+        """
+        sequence = shots_service.get_sequence(sequence_id)
+        if not permissions.has_manager_permissions():
+            user_service.check_has_task_related(sequence["project_id"])
+        return shots_service.get_scenes_for_sequence(sequence_id)
+
+
+class SceneTaskTypesResource(Resource):
+
+    @jwt_required
+    def get(self, scene_id):
+        """
+        Retrieve all task types related to a given scene.
+        """
+        scene = shots_service.get_scene(scene_id)
+        if not permissions.has_manager_permissions():
+            user_service.check_has_task_related(scene["project_id"])
+        return tasks_service.get_task_types_for_scene(scene_id)
+
+
+class SceneTasksResource(Resource):
+
+    @jwt_required
+    def get(self, scene_id):
+        """
+        Retrieve all tasks related to a given scene.
+        """
+        scene = shots_service.get_scene(scene_id)
+        if not permissions.has_manager_permissions():
+            user_service.check_has_task_related(scene["project_id"])
+        return tasks_service.get_tasks_for_scene(scene_id)

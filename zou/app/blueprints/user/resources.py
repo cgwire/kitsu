@@ -46,12 +46,16 @@ class ShotTaskTypesResource(Resource):
 
     @jwt_required
     def get(self, shot_id):
-        try:
-            shots_service.get_shot(shot_id)
-            tasks = user_service.get_entity_task_types(shot_id)
-        except AssetNotFoundException:
-            abort(404)
-        return tasks
+        shots_service.get_shot(shot_id)
+        return user_service.get_entity_task_types(shot_id)
+
+
+class SceneTaskTypesResource(Resource):
+
+    @jwt_required
+    def get(self, scene_id):
+        shots_service.get_scene(scene_id)
+        return user_service.get_entity_task_types(scene_id)
 
 
 class AssetTypeAssetsResource(Resource):
@@ -125,6 +129,14 @@ class ShotTasksResource(Resource):
         except ShotNotFoundException:
             abort(404)
         return tasks
+
+
+class SceneTasksResource(Resource):
+
+    @jwt_required
+    def get(self, scene_id):
+        shots_service.get_scene(scene_id)
+        return user_service.get_entity_tasks(scene_id)
 
 
 class TodosResource(Resource):

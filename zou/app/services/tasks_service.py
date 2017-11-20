@@ -219,6 +219,11 @@ def get_tasks_for_shot(shot_id):
     return get_task_dicts_for_entity(shot["id"])
 
 
+def get_tasks_for_scene(scene_id):
+    scene = shots_service.get_scene(scene_id)
+    return get_task_dicts_for_entity(scene["id"])
+
+
 def get_tasks_for_sequence(sequence_id):
     sequence = shots_service.get_sequence(sequence_id)
     return get_task_dicts_for_entity(sequence["id"])
@@ -353,6 +358,10 @@ def get_next_preview_revision(task_id):
 
 def get_task_types_for_shot(shot_id):
     return get_task_types_for_entity(shot_id)
+
+
+def get_task_types_for_scene(scene_id):
+    return get_task_types_for_entity(scene_id)
 
 
 def get_task_types_for_sequence(sequence_id):
