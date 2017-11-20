@@ -297,14 +297,14 @@ class ApiDBTestCase(ApiTestCase):
         )
         self.entity_standard.save()
 
-    def generate_fixture_sequence(self):
+    def generate_fixture_sequence(self, name="S01"):
         if hasattr(self, "episode"):
             episode_id = self.episode.id
         else:
             episode_id = None
 
         self.sequence = Entity(
-            name="S01",
+            name=name,
             project_id=self.project.id,
             entity_type_id=self.sequence_type.id,
             parent_id=episode_id
@@ -347,6 +347,28 @@ class ApiDBTestCase(ApiTestCase):
             entity_type_id=self.shot_type.id
         )
         self.shot_noseq.save()
+
+    def generate_fixture_scene(
+        self,
+        name="SC01",
+        project_id=None,
+        sequence_id=None
+    ):
+        if project_id is None:
+            project_id = self.project.id
+
+        if sequence_id is None:
+            sequence_id = self.sequence.id
+
+        self.scene = Entity(
+            name=name,
+            description="Description Scene 01",
+            data={},
+            project_id=project_id,
+            entity_type_id=self.scene_type.id,
+            parent_id=self.sequence.id
+        )
+        self.scene.save()
 
     def generate_fixture_shot_standard(self):
         self.shot_standard = Entity(
@@ -412,6 +434,8 @@ class ApiDBTestCase(ApiTestCase):
         self.sequence_type.save()
         self.episode_type = EntityType(name="Episode")
         self.episode_type.save()
+        self.scene_type = EntityType(name="Scene")
+        self.scene_type.save()
 
     def generate_fixture_asset_types(self):
         self.entity_type_character = EntityType(name="Character")
@@ -523,7 +547,19 @@ class ApiDBTestCase(ApiTestCase):
             assignees=[self.person],
             assigner_id=self.assigner.id,
         )
-        self.shot_task.save()
+        return self.shot_task.save()
+
+    def generate_fixture_scene_task(self, name="Master"):
+        self.scene_task = Task(
+            name=name,
+            project_id=self.project.id,
+            task_type_id=self.task_type_animation.id,
+            task_status_id=self.task_status.id,
+            entity_id=self.scene.id,
+            assignees=[self.person],
+            assigner_id=self.assigner.id,
+        )
+        self.scene_task.save()
 
     def generate_fixture_sequence_task(self, name="Master"):
         self.sequence_task = Task(
@@ -643,7 +679,6 @@ class ApiDBTestCase(ApiTestCase):
         return file_path_fixture
 
     def generate_assigned_task(self):
-        self.generate_fixture_entity_type()
         self.generate_fixture_entity()
         self.generate_fixture_department()
         self.generate_fixture_task_type()
@@ -651,3 +686,12 @@ class ApiDBTestCase(ApiTestCase):
         self.generate_fixture_person()
         self.generate_fixture_assigner()
         self.generate_fixture_task()
+
+    def generate_shot_suite(self):
+        self.generate_fixture_entity_type()
+        self.generate_fixture_project_status()
+        self.generate_fixture_project()
+        self.generate_fixture_episode()
+        self.generate_fixture_sequence()
+        self.generate_fixture_shot()
+        self.generate_fixture_scene()
