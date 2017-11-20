@@ -1,6 +1,5 @@
 from test.base import ApiDBTestCase
 
-from zou.app.models.task import Task
 from zou.app.services import tasks_service
 
 
@@ -29,8 +28,7 @@ class UserContextRoutesTestCase(ApiDBTestCase):
         self.project_closed_id = self.project_closed.id
 
     def assign_user(self, task_id):
-        task = Task.get(task_id)
-        task.assignees.append(self.user)
+        tasks_service.assign_task(task_id, self.user.id)
 
     def test_get_project_sequences(self):
         self.generate_fixture_shot_task()
@@ -142,15 +140,16 @@ class UserContextRoutesTestCase(ApiDBTestCase):
         projects = self.get("data/user/projects/open")
         self.assertEquals(len(projects), 0)
 
-        task = Task.get(self.task_id)
-        task.assignees = [self.user]
-        task.save()
+        tasks_service.update_task(self.task_id, {
+            "assignees": [self.user]
+        })
 
         projects = self.get("data/user/projects/open")
         self.assertEquals(len(projects), 1)
 
-        task.project_id = self.project_closed_id
-        task.save()
+        tasks_service.update_task(self.task_id, {
+            "project_id": self.project_closed_id
+        })
         projects = self.get("data/user/projects/open")
         self.assertEquals(len(projects), 0)
 
@@ -170,9 +169,9 @@ class UserContextRoutesTestCase(ApiDBTestCase):
         tasks = self.get(path)
         self.assertEquals(len(tasks), 2)
 
-        task = Task.get(shot_task_id)
-        task.task_status_id = tasks_service.get_done_status()["id"]
-        task.save()
+        tasks_service.update_task(shot_task_id, {
+            "task_status_id": tasks_service.get_done_status()["id"]
+        })
 
         self.assign_user(task_id)
         self.assign_user(shot_task_id)
