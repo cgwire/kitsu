@@ -13,8 +13,7 @@ addons:
     packages: 
       - ffmpeg
 install: 
-  - "pip install -r requirements_test.txt"
-  - "python setup.py install"
+  - "pip install -r requirements.txt"
 before_script:
   - psql -c 'create database zoudb;' -U postgres
 script: py.test
