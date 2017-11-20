@@ -1,7 +1,10 @@
 from flask import request, current_app
 from sqlalchemy.exc import IntegrityError
+
 from zou.app.models.task import Task
 from zou.app.models.person import Person
+from zou.app.services import user_service
+
 from .base import BaseModelsResource, BaseModelResource
 
 
@@ -41,3 +44,6 @@ class TaskResource(BaseModelResource):
 
     def __init__(self):
         BaseModelResource.__init__(self, Task)
+
+    def check_read_permissions(self, task):
+        user_service.check_project_access(task["project_id"])

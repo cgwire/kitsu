@@ -211,3 +211,8 @@ def check_criterions_has_task_related(criterions):
         return True
     else:
         raise permissions.PermissionDenied
+
+
+def check_project_access(project_id):
+    return permissions.has_manager_permissions() or \
+        check_has_task_related(project_id)

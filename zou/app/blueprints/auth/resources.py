@@ -337,17 +337,16 @@ class ChangePasswordResource(Resource):
 
 class PersonListResource(Resource):
     """
-    Resource used to list people available in the database without being logged.
-    It is used currently by some studios that rely on authentication without
-    password.
+    Resource used to list people available in the database without
+    having too much information.
     """
 
+    @jwt_required
     def get(self):
         person_names = []
         for person in persons_service.all_active():
             person_names.append({
                 "id": person["id"],
-                "email": person["email"],
                 "first_name": person["first_name"],
                 "last_name": person["last_name"],
                 "desktop_login": person["desktop_login"]
