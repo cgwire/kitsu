@@ -1,68 +1,83 @@
-class EpisodeNotFoundException(Exception):
+from werkzeug.exceptions import NotFound
+
+
+class EpisodeNotFoundException(NotFound):
     pass
 
 
-class SequenceNotFoundException(Exception):
+class SequenceNotFoundException(NotFound):
+    pass
+
+
+class ShotNotFoundException(NotFound):
+    pass
+
+
+class SceneNotFoundException(NotFound):
+    pass
+
+
+class AssetNotFoundException(NotFound):
+    pass
+
+
+class AssetTypeNotFoundException(NotFound):
+    pass
+
+
+class TaskNotFoundException(NotFound):
+    pass
+
+
+class DepartmentNotFoundException(NotFound):
+    pass
+
+
+class TaskStatusNotFoundException(NotFound):
+    pass
+
+
+class TaskTypeNotFoundException(NotFound):
+    pass
+
+
+class PersonNotFoundException(NotFound):
+    pass
+
+
+class ProjectNotFoundException(NotFound):
+    pass
+
+
+class WorkingFileNotFoundException(NotFound):
+    pass
+
+
+class OutputFileNotFoundException(NotFound):
+    pass
+
+
+class SoftwareNotFoundException(NotFound):
+    pass
+
+
+class OutputTypeNotFoundException(NotFound):
+    pass
+
+
+class PreviewFileNotFoundException(NotFound):
+    pass
+
+
+class CommentNotFoundException(NotFound):
+    pass
+
+
+class EntityNotFoundException(NotFound):
     pass
 
 
 class MalformedFileTreeException(Exception):
-    pass
-
-
-class ShotNotFoundException(Exception):
-    pass
-
-
-class AssetNotFoundException(Exception):
-    pass
-
-
-class AssetTypeNotFoundException(Exception):
-    pass
-
-
-class TaskNotFoundException(Exception):
-    pass
-
-
-class DepartmentNotFoundException(Exception):
-    pass
-
-
-class TaskStatusNotFoundException(Exception):
-    pass
-
-
-class TaskTypeNotFoundException(Exception):
-    pass
-
-
-class PersonNotFoundException(Exception):
-    pass
-
-
-class ProjectNotFoundException(Exception):
-    pass
-
-
-class WorkingFileNotFoundException(Exception):
-    pass
-
-
-class OutputFileNotFoundException(Exception):
-    pass
-
-
-class SoftwareNotFoundException(Exception):
-    pass
-
-
-class OutputTypeNotFoundException(Exception):
-    pass
-
-
-class PreviewFileNotFoundException(Exception):
     pass
 
 
@@ -91,14 +106,6 @@ class UnactiveUserException(Exception):
 
 
 class WrongDateFormatException(Exception):
-    pass
-
-
-class CommentNotFoundException(Exception):
-    pass
-
-
-class EntityNotFoundException(Exception):
     pass
 
 
