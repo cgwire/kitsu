@@ -357,7 +357,7 @@ def get_entities_for_project(project_id, entity_type_id, obj_type="Entity"):
 def get_episodes_for_project(project_id):
     return get_entities_for_project(
         project_id,
-        get_sequence_type()["id"],
+        get_episode_type()["id"],
         "Episode"
     )
 
@@ -374,7 +374,7 @@ def get_shots_for_project(project_id):
     return get_entities_for_project(
         project_id,
         get_shot_type()["id"],
-        "shot"
+        "Shot"
     )
 
 

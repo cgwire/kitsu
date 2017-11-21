@@ -21,10 +21,12 @@ def get_asset_types(criterions={}):
     shot_type = shots_service.get_shot_type()
     sequence_type = shots_service.get_sequence_type()
     episode_type = shots_service.get_episode_type()
+    scene_type = shots_service.get_scene_type()
     asset_type_filter = ~EntityType.id.in_([
         shot_type["id"],
         sequence_type["id"],
         episode_type["id"],
+        scene_type["id"],
     ])
     query = EntityType.query \
         .filter_by(**criterions) \
@@ -61,12 +63,14 @@ def get_asset_types_for_shot(shot_id):
 
 def get_assets(criterions={}):
     shot_type = shots_service.get_shot_type()
+    scene_type = shots_service.get_scene_type()
     sequence_type = shots_service.get_sequence_type()
     episode_type = shots_service.get_episode_type()
     query = Entity.query.filter_by(**criterions)
     result = query.filter(
         ~Entity.entity_type_id.in_([
             shot_type["id"],
+            scene_type["id"],
             sequence_type["id"],
             episode_type["id"]
         ])
@@ -122,10 +126,12 @@ def get_raw_asset_by_shotgun_id(shotgun_id):
 def is_asset(entity):
     shot_type = shots_service.get_shot_type()
     sequence_type = shots_service.get_sequence_type()
+    scene_type = shots_service.get_scene_type()
     episode_type = shots_service.get_episode_type()
 
     return str(entity.entity_type_id) not in [
         shot_type["id"],
+        scene_type["id"],
         sequence_type["id"],
         episode_type["id"],
     ]
@@ -134,11 +140,13 @@ def is_asset(entity):
 def is_asset_type(asset_type):
     shot_type = shots_service.get_shot_type()
     sequence_type = shots_service.get_sequence_type()
+    scene_type = shots_service.get_scene_type()
     episode_type = shots_service.get_episode_type()
 
     return str(asset_type.id) not in [
         shot_type["id"],
         sequence_type["id"],
+        scene_type["id"],
         episode_type["id"],
     ]
 
@@ -242,12 +250,14 @@ def remove_asset_link(asset_in_id, asset_out_id):
 
 def all_assets(criterions={}):
     shot_type = shots_service.get_shot_type()
+    scene_type = shots_service.get_scene_type()
     sequence_type = shots_service.get_sequence_type()
     episode_type = shots_service.get_episode_type()
     query = Entity.query.filter_by(**criterions)
     query = query.filter(
         ~Entity.entity_type_id.in_([
             shot_type["id"],
+            scene_type["id"],
             sequence_type["id"],
             episode_type["id"]
         ])
@@ -286,6 +296,7 @@ def get_asset_map(criterions={}):
     asset_map = {}
 
     shot_type = shots_service.get_shot_type()
+    scene_type = shots_service.get_scene_type()
     sequence_type = shots_service.get_sequence_type()
     episode_type = shots_service.get_episode_type()
     asset_query = Entity.query \
@@ -293,6 +304,7 @@ def get_asset_map(criterions={}):
         .filter(
             ~Entity.entity_type_id.in_([
                 shot_type["id"],
+                scene_type["id"],
                 sequence_type["id"],
                 episode_type["id"]
             ])
@@ -329,6 +341,7 @@ def all_assets_and_tasks(criterions={}):
     shot_type = shots_service.get_shot_type()
     sequence_type = shots_service.get_sequence_type()
     episode_type = shots_service.get_episode_type()
+    scene_type = shots_service.get_scene_type()
     task_status_map = get_task_status_map()
     task_type_map = get_task_type_map()
     asset_map = get_asset_map(criterions)
@@ -340,6 +353,7 @@ def all_assets_and_tasks(criterions={}):
         .filter(
             ~Entity.entity_type_id.in_([
                 shot_type["id"],
+                scene_type["id"],
                 sequence_type["id"],
                 episode_type["id"]
             ])

@@ -2,11 +2,13 @@ import os
 
 from test.base import ApiDBTestCase
 
+from zou.app import config
 from zou.app.utils import fs, thumbnail
-
 from zou.app.services import assets_service
 
 from PIL import Image
+
+TEST_FOLDER = os.path.join("test", "tmp")
 
 
 class RouteThumbnailTestCase(ApiDBTestCase):
@@ -40,8 +42,8 @@ class RouteThumbnailTestCase(ApiDBTestCase):
         self.delete_thumbnail_folders()
 
     def delete_thumbnail_folders(self):
-        fs.rm_rf("test/tmp")
-        fs.rm_rf("thumbnails")
+        fs.rm_rf(TEST_FOLDER)
+        fs.rm_rf(config.THUMBNAIL_FOLDER)
 
     def test_add_thumbnail(self):
         path = "/pictures/thumbnails/shots/%s" % self.shot.id
@@ -52,11 +54,11 @@ class RouteThumbnailTestCase(ApiDBTestCase):
 
         path = "/pictures/thumbnails/shots/%s.png" % self.shot.id
         current_path = os.path.dirname(__file__)
-        result_file_path = "test/tmp/th01.png"
+        result_file_path = os.path.join(TEST_FOLDER, "th01.png")
         result_file_path = os.path.join(
             current_path, "..", "..", result_file_path)
 
-        os.mkdir("test/tmp")
+        os.mkdir(TEST_FOLDER)
         self.download_file(path, result_file_path)
         result_image = Image.open(result_file_path)
 
@@ -73,11 +75,11 @@ class RouteThumbnailTestCase(ApiDBTestCase):
         path = "/pictures/thumbnails/working-files/%s.png" \
                % self.working_file.id
         current_path = os.path.dirname(__file__)
-        result_file_path = "test/tmp/th01.png"
+        result_file_path = os.path.join(TEST_FOLDER, "th01.png")
         result_file_path = os.path.join(
             current_path, "..", "..", result_file_path)
 
-        os.mkdir("test/tmp")
+        os.mkdir(TEST_FOLDER)
         self.download_file(path, result_file_path)
         result_image = Image.open(result_file_path)
 
@@ -91,10 +93,10 @@ class RouteThumbnailTestCase(ApiDBTestCase):
         self.upload_file(path, file_path_fixture)
 
         current_path = os.path.dirname(__file__)
-        result_file_path = "test/tmp/th01.png"
+        result_file_path = os.path.join(TEST_FOLDER, "th01.png")
         result_file_path = os.path.join(
             current_path, "..", "..", result_file_path)
-        os.mkdir("test/tmp")
+        os.mkdir(TEST_FOLDER)
 
         path = "/pictures/previews/preview-files/%s.png" % self.preview_file_id
         self.download_file(path, result_file_path)

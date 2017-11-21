@@ -196,8 +196,12 @@ class AuthTestCase(ApiDBTestCase):
 
     def test_person_list(self):
         self.assertIsNotAuthenticated({}, code=422)
+        self.get("auth/person-list", 401)
+        self.generate_fixture_user_cg_artist()
+        self.log_in_cg_artist()
         persons = self.get("auth/person-list")
-        self.assertEquals(len(persons), 2)
+        self.assertEquals(len(persons), 3)
+        self.log_out()
 
     def test_cookies_auth(self):
         user_agent = "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_10_1)" \
