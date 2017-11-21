@@ -382,7 +382,7 @@ class PathTokens(object):
     PROJECT = "Project"
     EPISODE = "Episode"
     SEQUENCE = "Sequence"
-    SrQUENCE = "Scene"
+    SCENE = "Scene"
     SHOT = "Shot"
     ASSET_TYPE = "AssetType"
     ASSET = "Asset"
