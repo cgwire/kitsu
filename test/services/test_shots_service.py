@@ -1,7 +1,12 @@
+import pytest
+
 from test.base import ApiDBTestCase
 
 from zou.app.services import shots_service
-from zou.app.services.exception import SequenceNotFoundException
+from zou.app.services.exception import (
+    SceneNotFoundException,
+    SequenceNotFoundException
+)
 
 
 class ShotUtilsTestCase(ApiDBTestCase):
@@ -113,6 +118,10 @@ class ShotUtilsTestCase(ApiDBTestCase):
         self.assertTrue(shots_service.is_shot(self.shot.serialize()))
         self.assertFalse(shots_service.is_shot(self.entity.serialize()))
 
+    def test_is_scene(self):
+        self.assertTrue(shots_service.is_scene(self.scene.serialize()))
+        self.assertFalse(shots_service.is_scene(self.entity.serialize()))
+
     def test_is_sequence(self):
         self.assertTrue(shots_service.is_sequence(self.sequence.serialize()))
         self.assertFalse(shots_service.is_sequence(self.entity.serialize()))
@@ -170,6 +179,23 @@ class ShotUtilsTestCase(ApiDBTestCase):
         )
         self.assertEquals(shot["name"], shot_name)
         self.assertEquals(shot["parent_id"], parent_id)
+
+    def test_create_scene(self):
+        scene_name = "NSC01"
+        parent_id = str(self.sequence.id)
+        scene = shots_service.create_scene(
+            str(self.project.id),
+            parent_id,
+            scene_name
+        )
+        self.assertEquals(scene["name"], scene_name)
+        self.assertEquals(scene["parent_id"], parent_id)
+
+    def test_remove_scene(self):
+        scene_id = self.scene.id
+        shots_service.remove_scene(scene_id)
+        with pytest.raises(SceneNotFoundException):
+            shots_service.get_scene(scene_id)
 
     def test_get_scenes_for_project(self):
         self.generate_fixture_project_standard()

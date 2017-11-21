@@ -19,7 +19,7 @@ from .resources import (
 routes = [
     ("/data/user/assets/<asset_id>/tasks", AssetTasksResource),
     ("/data/user/shots/<shot_id>/tasks", ShotTasksResource),
-    ("/data/user/scenes/<scene_id>/scenes", SceneTasksResource),
+    ("/data/user/scenes/<scene_id>/tasks", SceneTasksResource),
     ("/data/user/assets/<asset_id>/task-types", AssetTaskTypesResource),
     ("/data/user/shots/<shot_id>/task-types", ShotTaskTypesResource),
     ("/data/user/scenes/<scene_id>/task-types", SceneTaskTypesResource),

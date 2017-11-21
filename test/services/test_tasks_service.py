@@ -229,6 +229,13 @@ class TaskServiceTestCase(ApiDBTestCase):
         self.assertEqual(len(tasks), 1)
         self.assertEqual(tasks[0]["id"], str(self.shot_task.id))
 
+    def test_get_tasks_for_scene(self):
+        self.generate_fixture_scene()
+        self.generate_fixture_scene_task()
+        tasks = tasks_service.get_tasks_for_scene(self.scene.id)
+        self.assertEqual(len(tasks), 1)
+        self.assertEqual(tasks[0]["id"], str(self.scene_task.id))
+
     def test_get_tasks_for_asset(self):
         tasks = tasks_service.get_tasks_for_asset(self.entity.id)
         self.assertEqual(len(tasks), 1)
@@ -243,6 +250,13 @@ class TaskServiceTestCase(ApiDBTestCase):
 
     def test_get_task_types_for_shot(self):
         task_types = tasks_service.get_task_types_for_shot(self.shot.id)
+        self.assertEqual(len(task_types), 1)
+        self.assertEqual(task_types[0]["id"], str(self.task_type_animation.id))
+
+    def test_get_task_types_for_scene(self):
+        self.generate_fixture_scene()
+        self.generate_fixture_scene_task()
+        task_types = tasks_service.get_task_types_for_scene(self.scene.id)
         self.assertEqual(len(task_types), 1)
         self.assertEqual(task_types[0]["id"], str(self.task_type_animation.id))
 
