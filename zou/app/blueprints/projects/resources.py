@@ -18,9 +18,6 @@ class OpenProjectsResource(Resource):
 
 class AllProjectsResource(Resource):
 
-    def __init__(self):
-        Resource.__init__(self)
-
     @jwt_required
     def get(self):
         try:

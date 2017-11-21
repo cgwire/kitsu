@@ -10,19 +10,15 @@ class NewPersonResource(Resource):
 
     @jwt_required
     def post(self):
-        try:
-            permissions.check_admin_permissions()
-            data = self.get_arguments()
-            person = persons_service.create_person(
-                data["email"],
-                auth.encrypt_password("default"),
-                data["first_name"],
-                data["last_name"],
-                data["phone"]
-            )
-        except permissions.PermissionDenied:
-            abort(403)
-
+        permissions.check_admin_permissions()
+        data = self.get_arguments()
+        person = persons_service.create_person(
+            data["email"],
+            auth.encrypt_password("default"),
+            data["first_name"],
+            data["last_name"],
+            data["phone"]
+        )
         return person, 201
 
     def get_arguments(self):

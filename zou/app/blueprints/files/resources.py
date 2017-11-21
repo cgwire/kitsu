@@ -36,9 +36,6 @@ class FolderPathResource(Resource):
     from file template.
     """
 
-    def __init__(self):
-        Resource.__init__(self)
-
     @jwt_required
     def post(self, task_id):
         (
@@ -63,11 +60,6 @@ class FolderPathResource(Resource):
                 name=name,
                 sep=separator
             )
-        except TaskNotFoundException:
-            return {
-                "error": "Given task does not exist.",
-                "received_data": request.json,
-            }, 404
         except OutputTypeNotFoundException:
             return {
                 "error": "Given output type does not exist.",
@@ -84,8 +76,6 @@ class FolderPathResource(Resource):
                     "Tree is not properly written, check modes and variables",
                 "received_data": request.json,
             }, 400
-        except permissions.PermissionDenied:
-            abort(403)
 
         return {"path": path}, 200
 
@@ -111,9 +101,6 @@ class FolderPathResource(Resource):
 
 
 class FilePathResource(Resource):
-
-    def __init__(self):
-        Resource.__init__(self)
 
     @jwt_required
     def post(self, task_id):
@@ -154,19 +141,12 @@ class FilePathResource(Resource):
                 output_type=output_type,
                 name=name
             )
-        except TaskNotFoundException:
-            return {
-                "error": "Given task does not exist.",
-                "received_data": request.json,
-            }, 404
         except MalformedFileTreeException:
             return {
                 "error":
                     "Tree is not properly written, check modes and variables",
                 "received_data": request.json,
             }, 400
-        except permissions.PermissionDenied:
-            abort(403)
 
         return {"path": file_path, "name": file_name}, 200
 
@@ -218,12 +198,8 @@ class SetTreeResource(Resource):
                 project_id,
                 {"file_tree": tree}
             )
-        except ProjectNotFoundException:
-            abort(404)
         except WrongFileTreeFileException:
             abort(400, "Selected tree is not available")
-        except permissions.PermissionDenied:
-            abort(403)
 
         return project
 
@@ -289,8 +265,6 @@ class GetTaskFromPathResource(Resource):
                 "error": "No task exist for this path.",
                 "received_data": request.json
             }, 400
-        except permissions.PermissionDenied:
-            abort(403)
 
         return task
 
@@ -329,18 +303,12 @@ class CommentWorkingFileResource(Resource):
     @jwt_required
     def put(self, working_file_id):
         comment = self.get_comment_from_args()
-        try:
-            working_file = files_service.get_working_file(working_file_id)
-            task = tasks_service.get_task(working_file["task_id"])
-            if not permissions.has_manager_permissions():
-                task = user_service.check_has_task_related(task.project_id)
-            working_file = self.update_comment(working_file_id, comment)
-        except WorkingFileNotFoundException:
-            abort(404)
-        except permissions.PermissionDenied:
-            abort(403)
-
-        return working_file, 200
+        working_file = files_service.get_working_file(working_file_id)
+        task = tasks_service.get_task(working_file["task_id"])
+        if not permissions.has_manager_permissions():
+            task = user_service.check_has_task_related(task.project_id)
+        working_file = self.update_comment(working_file_id, comment)
+        return working_file
 
     def get_comment_from_args(self):
         parser = reqparse.RequestParser()
@@ -401,13 +369,6 @@ class NewOutputFileResource(Resource):
                 working_file["name"],
                 separator
             )
-
-        except TaskNotFoundException:
-            abort(404)
-        except WorkingFileNotFoundException:
-            abort(404)
-        except permissions.PermissionDenied:
-            abort(403)
         except OutputTypeNotFoundException:
             return {"error": "Cannot find given output type."}, 400
         except PersonNotFoundException:
@@ -473,18 +434,11 @@ class GetNextOutputFileResource(Resource):
 
     @jwt_required
     def post(self, task_id, output_type_id):
-        try:
-            name = self.get_arguments()
-            task = tasks_service.get_task(task_id)
-            if not permissions.has_manager_permissions():
-                task = user_service.check_has_task_related(task.project_id)
-            output_type = files_service.get_output_type(output_type_id)
-        except TaskNotFoundException:
-            abort(404)
-        except OutputFileNotFoundException:
-            abort(404)
-        except permissions.PermissionDenied:
-            abort(403)
+        name = self.get_arguments()
+        task = tasks_service.get_task(task_id)
+        if not permissions.has_manager_permissions():
+            task = user_service.check_has_task_related(task.project_id)
+        output_type = files_service.get_output_type(output_type_id)
 
         next_revision_number = \
             files_service.get_next_output_file_revision(
@@ -508,15 +462,10 @@ class LastWorkingFilesResource(Resource):
     @jwt_required
     def get(self, task_id):
         result = {}
-        try:
-            task = tasks_service.get_task(task_id)
-            if not permissions.has_manager_permissions():
-                task = user_service.check_has_task_related(task.project_id)
-            result = files_service.get_last_working_files_for_task(task["id"])
-        except TaskNotFoundException:
-            abort(404)
-        except permissions.PermissionDenied:
-            abort(403)
+        task = tasks_service.get_task(task_id)
+        if not permissions.has_manager_permissions():
+            task = user_service.check_has_task_related(task.project_id)
+        result = files_service.get_last_working_files_for_task(task["id"])
 
         return result
 
@@ -526,15 +475,10 @@ class LastOutputFilesResource(Resource):
     @jwt_required
     def get(self, task_id):
         result = {}
-        try:
-            task = tasks_service.get_task(task_id)
-            if not permissions.has_manager_permissions():
-                task = user_service.check_has_task_related(task.project_id)
-            result = files_service.get_last_output_files_for_task(task["id"])
-        except TaskNotFoundException:
-            abort(404)
-        except permissions.PermissionDenied:
-            abort(403)
+        task = tasks_service.get_task(task_id)
+        if not permissions.has_manager_permissions():
+            task = user_service.check_has_task_related(task.project_id)
+        result = files_service.get_last_output_files_for_task(task["id"])
 
         return result
 
@@ -544,23 +488,15 @@ class TaskWorkingFilesResource(Resource):
     @jwt_required
     def get(self, task_id):
         result = {}
-        try:
-            task = tasks_service.get_task(task_id)
-            if not permissions.has_manager_permissions():
-                task = user_service.check_has_task_related(task.project_id)
-            result = files_service.get_working_files_for_task(task["id"])
-        except TaskNotFoundException:
-            abort(404)
-        except permissions.PermissionDenied:
-            abort(403)
+        task = tasks_service.get_task(task_id)
+        if not permissions.has_manager_permissions():
+            task = user_service.check_has_task_related(task.project_id)
+        result = files_service.get_working_files_for_task(task["id"])
 
         return result
 
 
 class NewWorkingFileResource(Resource):
-
-    def __init__(self):
-        Resource.__init__(self)
 
     @jwt_required
     def post(self, task_id):
@@ -603,10 +539,6 @@ class NewWorkingFileResource(Resource):
             )
         except EntryAlreadyExistsException:
             return {"error": "The given working_file already exists."}, 400
-        except TaskNotFoundException:
-            abort(404)
-        except permissions.PermissionDenied:
-            abort(403)
 
         return working_file, 201
 
@@ -655,25 +587,16 @@ class NewWorkingFileResource(Resource):
 
 class ModifiedFileResource(Resource):
 
-    def __init__(self):
-        Resource.__init__(self)
-
     @jwt_required
     def put(self, working_file_id):
-        try:
-            working_file = files_service.get_working_file(working_file_id)
-            task = tasks_service.get_task(working_file["task_id"])
-            if not permissions.has_manager_permissions():
-                task = user_service.check_has_task_related(task["project_id"])
-            working_file = files_service.update_working_file(
-                working_file_id,
-                {"updated_at": datetime.datetime.utcnow()}
-            )
-        except WorkingFileNotFoundException:
-            abort(404)
-        except permissions.PermissionDenied:
-            abort(403)
-
+        working_file = files_service.get_working_file(working_file_id)
+        task = tasks_service.get_task(working_file["task_id"])
+        if not permissions.has_manager_permissions():
+            task = user_service.check_has_task_related(task["project_id"])
+        working_file = files_service.update_working_file(
+            working_file_id,
+            {"updated_at": datetime.datetime.utcnow()}
+        )
         return working_file
 
 
@@ -689,11 +612,7 @@ class FileResource(Resource):
             except OutputFileNotFoundException:
                 abort(404)
 
-        try:
-            if not permissions.has_manager_permissions():
-                task = tasks_service.get_task(file_dict["task_id"])
-                user_service.check_has_task_related(task["project_id"])
-        except permissions.PermissionDenied:
-            abort(403)
-
+        if not permissions.has_manager_permissions():
+            task = tasks_service.get_task(file_dict["task_id"])
+            user_service.check_has_task_related(task["project_id"])
         return file_dict

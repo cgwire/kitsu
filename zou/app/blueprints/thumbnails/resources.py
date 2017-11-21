@@ -16,10 +16,6 @@ from zou.app.services import (
     user_service,
     entities_service
 )
-from zou.app.services.exception import (
-    EntityNotFoundException,
-    PreviewFileNotFoundException
-)
 from zou.app.utils import thumbnail as thumbnail_utils, permissions
 
 
@@ -205,27 +201,22 @@ class BaseCreatePictureResource(Resource):
         if not self.is_exist(instance_id):
             abort(404)
 
-        try:
-            self.check_permissions(instance_id)
-            uploaded_file = request.files["file"]
-            thumbnail_utils.save_file(
+        self.check_permissions(instance_id)
+        uploaded_file = request.files["file"]
+        thumbnail_utils.save_file(
+            self.data_type,
+            instance_id,
+            uploaded_file,
+            size=self.size
+        )
+
+        thumbnail_url_path = \
+            thumbnail_utils.url_path(
                 self.data_type,
-                instance_id,
-                uploaded_file,
-                size=self.size
+                instance_id
             )
 
-            thumbnail_url_path = \
-                thumbnail_utils.url_path(
-                    self.data_type,
-                    instance_id
-                )
-
-            result = {"thumbnail_path": thumbnail_url_path}
-        except permissions.PermissionDenied:
-            abort(403)
-
-        return result, 201
+        return {"thumbnail_path": thumbnail_url_path}, 201
 
 
 class BasePictureResource(Resource):
@@ -398,15 +389,8 @@ class SetMainPreviewResource(Resource):
 
     @jwt_required
     def put(self, entity_id, preview_file_id):
-        try:
-            permissions.check_manager_permissions()
-            return entities_service.update_entity_preview(
-                entity_id,
-                preview_file_id
-            )
-        except permissions.PermissionDenied:
-            abort(403)
-        except EntityNotFoundException:
-            abort(404)
-        except PreviewFileNotFoundException:
-            abort(404)
+        permissions.check_manager_permissions()
+        return entities_service.update_entity_preview(
+            entity_id,
+            preview_file_id
+        )
