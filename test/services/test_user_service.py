@@ -46,6 +46,7 @@ class TaskServiceTestCase(ApiDBTestCase):
     def tearDown(self):
         super(TaskServiceTestCase, self).tearDown()
         persons_service.get_current_user = self.old_get_current_user
+        persons_service.get_current_user_raw = self.old_get_current_user_raw
 
     def get_current_user(self):
         return self.user.serialize()
