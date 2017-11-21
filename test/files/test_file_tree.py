@@ -21,6 +21,7 @@ class FileTreeTestCase(ApiDBTestCase):
         self.generate_fixture_episode()
         self.generate_fixture_sequence()
         self.generate_fixture_shot()
+        self.generate_fixture_scene()
         self.generate_fixture_sequence_standard()
         self.generate_fixture_shot_standard()
         self.generate_fixture_person()
@@ -324,6 +325,20 @@ class FileTreeTestCase(ApiDBTestCase):
             "/simple/productions/cosmos_landromat/assets/props/tree/shaders/"
             "blender/"
             "cosmos_landromat_props_tree_shaders_v003"
+        )
+
+    def test_get_file_path_scene(self):
+        scene_task = self.generate_fixture_scene_task()
+        file_name = file_tree.get_file_path(
+            scene_task.serialize(),
+            software=self.software_max.serialize(),
+            version=3
+        )
+        self.assertEquals(
+            file_name,
+            "/simple/productions/cosmos_landromat/scenes/s01/sc01/animation/"
+            "3dsmax/"
+            "cosmos_landromat_sc01_animation_v003"
         )
 
     def test_change_folder_path_separators(self):

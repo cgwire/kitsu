@@ -40,6 +40,24 @@ class FolderPathTestCase(ApiDBTestCase):
             "3ds_max"
         )
 
+    def test_get_path_scene(self):
+        self.generate_fixture_scene()
+        self.generate_fixture_scene_task()
+        data = {
+            "mode": "working",
+            "software": self.software_max.id
+        }
+        result = self.post(
+            "/data/tasks/%s/folder-path" % self.scene_task.id,
+            data,
+            200
+        )
+        self.assertEquals(
+            result["path"],
+            "/simple/productions/cosmos_landromat/scenes/s01/sc01/animation/"
+            "3ds_max"
+        )
+
     def test_get_file_path_asset(self):
         self.generate_fixture_working_file("hotfix", revision=1)
         self.generate_fixture_working_file("hotfix", revision=2)
@@ -174,7 +192,11 @@ class FolderPathTestCase(ApiDBTestCase):
             "mode": "working",
             "sep": "\\"
         }
-        result = self.post("data/tasks/%s/folder-path" % self.task.id, data, 200)
+        result = self.post(
+            "data/tasks/%s/folder-path" % self.task.id,
+            data,
+            200
+        )
         self.assertEquals(
             result["path"],
             "/simple\\productions\\cosmos_landromat\\assets\\props\\tree\\"

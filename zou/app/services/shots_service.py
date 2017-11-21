@@ -299,6 +299,11 @@ def is_shot(entity):
     return str(entity["entity_type_id"]) == shot_type["id"]
 
 
+def is_scene(entity):
+    scene_type = get_scene_type()
+    return str(entity["entity_type_id"]) == scene_type["id"]
+
+
 def is_sequence(entity):
     sequence_type = get_sequence_type()
     return str(entity["entity_type_id"]) == sequence_type["id"]

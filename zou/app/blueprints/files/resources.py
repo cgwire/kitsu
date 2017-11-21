@@ -33,7 +33,7 @@ from zou.app.services.exception import (
 class FolderPathResource(Resource):
     """
     Return folder path corresponding at given task and parameters. Path is built
-    from file templae.
+    from file template.
     """
 
     def __init__(self):
@@ -45,7 +45,6 @@ class FolderPathResource(Resource):
             mode,
             software_id,
             output_type_id,
-            scene,
             name,
             separator
         ) = self.get_arguments()
@@ -61,7 +60,6 @@ class FolderPathResource(Resource):
                 mode=mode,
                 software=software,
                 output_type=output_type,
-                scene=scene,
                 name=name,
                 sep=separator
             )
@@ -100,7 +98,6 @@ class FolderPathResource(Resource):
         parser.add_argument("sep", default="/")
         parser.add_argument("software_id", default=maxsoft["id"])
         parser.add_argument("output_type_id", default=geometry_type["id"])
-        parser.add_argument("scene", default=1)
         parser.add_argument("name", default="name")
         args = parser.parse_args()
 
@@ -108,7 +105,6 @@ class FolderPathResource(Resource):
             args["mode"],
             args["software_id"],
             args["output_type_id"],
-            args["scene"],
             args["name"],
             args["sep"],
         )
@@ -127,7 +123,6 @@ class FilePathResource(Resource):
             comment,
             software_id,
             output_type_id,
-            scene,
             name,
             separator
         ) = self.get_arguments()
@@ -148,7 +143,6 @@ class FilePathResource(Resource):
                 mode=mode,
                 software=software,
                 output_type=output_type,
-                scene=scene,
                 name=name,
                 sep=separator
             )
@@ -158,7 +152,6 @@ class FilePathResource(Resource):
                 version=version,
                 software=software,
                 output_type=output_type,
-                scene=scene,
                 name=name
             )
         except TaskNotFoundException:
@@ -197,7 +190,6 @@ class FilePathResource(Resource):
         parser.add_argument("version", default=0)
         parser.add_argument("software_id", default=maxsoft["id"])
         parser.add_argument("output_type_id", default=geometry_type["id"])
-        parser.add_argument("scene", default=1)
         parser.add_argument("name", default="")
         parser.add_argument("sep", default="/")
         args = parser.parse_args()
@@ -208,7 +200,6 @@ class FilePathResource(Resource):
             args["comment"],
             args["software_id"],
             args["output_type_id"],
-            args["scene"],
             args["name"],
             args["sep"]
         )
@@ -378,7 +369,6 @@ class NewOutputFileResource(Resource):
             comment,
             person_id,
             output_type_id,
-            scene,
             revision,
             separator
         ) = self.get_arguments()
@@ -408,7 +398,6 @@ class NewOutputFileResource(Resource):
                 "output",
                 task,
                 output_type,
-                scene,
                 working_file["name"],
                 separator
             )
@@ -432,7 +421,6 @@ class NewOutputFileResource(Resource):
         parser.add_argument("output_type_id", default=output_type["id"])
         parser.add_argument("person_id", default="")
         parser.add_argument("comment", default="")
-        parser.add_argument("scene", default=1)
         parser.add_argument("revision", default=0, type=int)
         parser.add_argument("separator", default="/")
         args = parser.parse_args()
@@ -441,7 +429,6 @@ class NewOutputFileResource(Resource):
             args["comment"],
             args["person_id"],
             args["output_type_id"],
-            args["scene"],
             args["revision"],
             args["separator"]
         )
@@ -452,7 +439,6 @@ class NewOutputFileResource(Resource):
         mode,
         task,
         output_type,
-        scene,
         name,
         separator=os.sep
     ):
@@ -460,7 +446,6 @@ class NewOutputFileResource(Resource):
             task,
             mode=mode,
             output_type=output_type,
-            scene=scene,
             name=name,
             sep=separator
         )
@@ -470,7 +455,6 @@ class NewOutputFileResource(Resource):
             version=output_file["revision"],
             output_type=output_type,
             name=name,
-            scene=scene
         )
 
         output_file.update({

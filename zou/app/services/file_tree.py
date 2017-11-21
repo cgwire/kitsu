@@ -32,7 +32,6 @@ def get_file_path(
     mode="working",
     software=None,
     output_type=None,
-    scene=1,
     name="",
     version=1,
     sep=os.sep
@@ -42,7 +41,6 @@ def get_file_path(
         mode=mode,
         software=software,
         output_type=output_type,
-        scene=scene,
         name=name,
         version=version,
     )
@@ -51,7 +49,6 @@ def get_file_path(
         mode,
         software=software,
         output_type=output_type,
-        scene=scene,
         name=name,
         sep=sep
     )
@@ -64,7 +61,6 @@ def get_file_name(
     mode="working",
     software=None,
     output_type=None,
-    scene=1,
     name="",
     version=1
 ):
@@ -79,7 +75,6 @@ def get_file_name(
         task,
         software,
         output_type,
-        scene,
         name
     )
     file_name = add_version_suffix_to_file_name(file_name, version)
@@ -92,7 +87,6 @@ def get_folder_path(
     mode="working",
     software=None,
     output_type=None,
-    scene=1,
     name="",
     sep=os.sep
 ):
@@ -109,7 +103,6 @@ def get_folder_path(
         task,
         software,
         output_type,
-        scene,
         name,
         style
     )
@@ -143,6 +136,8 @@ def get_folder_path_template(tree, mode, entity):
         return tree[mode]["folder_path"]["shot"]
     elif shots_service.is_sequence(entity):
         return tree[mode]["folder_path"]["sequence"]
+    elif shots_service.is_scene(entity):
+        return tree[mode]["folder_path"]["scene"]
     else:
         return tree[mode]["folder_path"]["asset"]
 
@@ -152,6 +147,8 @@ def get_file_name_template(tree, mode, entity):
         return tree[mode]["file_name"]["shot"]
     elif shots_service.is_sequence(entity):
         return tree[mode]["file_name"]["sequence"]
+    elif shots_service.is_scene(entity):
+        return tree[mode]["file_name"]["scene"]
     else:
         return tree[mode]["file_name"]["asset"]
 
@@ -163,7 +160,6 @@ def get_file_name_root(
     task,
     software,
     output_type,
-    scene,
     name
 ):
     file_name = get_file_name_template(tree, mode, entity)
@@ -173,7 +169,6 @@ def get_file_name_root(
         task,
         software,
         output_type,
-        scene,
         name
     )
     file_name = slugify(file_name, separator="_")
@@ -207,7 +202,6 @@ def update_variable(
     task,
     software=None,
     output_type=None,
-    scene=1,
     name="",
     style="lowercase"
 ):
@@ -221,7 +215,6 @@ def update_variable(
             task,
             software,
             output_type,
-            scene,
             name
         )
         render = render.replace(
@@ -238,7 +231,6 @@ def get_folder_from_datatype(
     task,
     software=None,
     output_type=None,
-    scene=1,
     name=""
 ):
     if datatype == "Project":
@@ -264,7 +256,7 @@ def get_folder_from_datatype(
     elif datatype == "OutputType":
         folder = get_folder_from_output_type(output_type)
     elif datatype == "Scene":
-        folder = get_folder_from_scene(scene)
+        folder = get_folder_from_scene(entity)
     elif datatype == "Name":
         folder = name
     else:
@@ -316,7 +308,7 @@ def get_folder_from_asset(asset):
 
 
 def get_folder_from_sequence(entity):
-    if shots_service.is_shot(entity):
+    if shots_service.is_shot(entity) or shots_service.is_scene(entity):
         sequence = shots_service.get_sequence_from_shot(entity)
         sequence_name = sequence["name"]
     elif shots_service.is_sequence(entity):
@@ -331,7 +323,7 @@ def get_folder_from_sequence(entity):
 
 
 def get_folder_from_episode(entity):
-    if shots_service.is_shot(entity):
+    if shots_service.is_shot(entity) or shots_service.is_scene(entity):
         sequence = shots_service.get_sequence_from_shot(entity)
     elif shots_service.is_sequence(entity):
         sequence = entity
@@ -361,7 +353,10 @@ def get_folder_from_software(software):
 
 
 def get_folder_from_scene(scene):
-    return "scene%s" % scene.zfill(2)
+    folder = ""
+    if scene is not None:
+        folder = scene["name"]
+    return folder
 
 
 def join_path(left, right, sep=os.sep):
@@ -387,6 +382,7 @@ class PathTokens(object):
     PROJECT = "Project"
     EPISODE = "Episode"
     SEQUENCE = "Sequence"
+    SrQUENCE = "Scene"
     SHOT = "Shot"
     ASSET_TYPE = "AssetType"
     ASSET = "Asset"
