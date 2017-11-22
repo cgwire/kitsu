@@ -23,12 +23,12 @@
           <row-actions
             :entry-id="entry.id"
             :edit-route="{
-              name: 'edit-production',
-              params: {production_id: entry.id}
+              name: 'edit-task-type',
+              params: {task_type_id: entry.id}
             }"
             :delete-route="{
-              name: 'delete-production',
-              params: {production_id: entry.id}
+              name: 'delete-task-type',
+              params: {task_type_id: entry.id}
             }"
           >
           </row-actions>
