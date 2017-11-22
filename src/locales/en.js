@@ -68,6 +68,9 @@ export default {
     clear_selection: 'Clear current selection',
     delete_text: 'Are you sure you want to remove {name} from your database?',
     loading_error: 'An error occured while loading data.',
+    user: 'User',
+    production: 'Production',
+    studio: 'Studio',
     csv: {
       import_file: 'Import',
       export_file: 'Export',

@@ -68,6 +68,9 @@ export default {
     clear_selection: 'Effacer la sélection',
     delete_text: 'Etes vous sûr de vouloir supprimer {name} de la base de données ?',
     loading_error: 'Une erreur est survenue en chargeant les données.',
+    user: 'Utilisateur',
+    production: 'Production',
+    studio: 'Studio',
     csv: {
       import_file: 'Importer',
       export_file: 'Exporter',

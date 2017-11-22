@@ -15,19 +15,15 @@
         </router-link>
         <section>
 
+         <h2>{{ $t('main.user')}}</h2>
+
          <p @click="toggleSidebar()">
            <router-link :to="{name: 'todos'}">
-             My tasks
+             Tasks
            </router-link>
          </p>
 
-         <h2>Fabrication</h2>
-
-         <p @click="toggleSidebar()">
-           <router-link :to="breakdownPath">
-             {{ $t("breakdown.title") }}
-           </router-link>
-         </p>
+         <h2>{{ $t('main.production')}}</h2>
 
          <p @click="toggleSidebar()">
            <router-link :to="assetsPath">
@@ -41,8 +37,15 @@
            </router-link>
          </p>
 
+         <p @click="toggleSidebar()">
+           <router-link :to="breakdownPath">
+             {{ $t("breakdown.title") }}
+           </router-link>
+         </p>
+
          <div v-if="isCurrentUserManager">
-           <h2>General</h2>
+           <h2>{{ $t('main.studio')}}</h2>
+
            <p @click="toggleSidebar()">
              <router-link to="/productions">
              {{ $t("productions.title") }}
