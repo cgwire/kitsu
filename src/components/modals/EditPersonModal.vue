@@ -96,8 +96,8 @@ export default {
       },
       roleOptions: [
         {label: 'admin', value: 'admin'},
-        {label: 'manager', value: 'admin'},
-        {label: 'user', value: 'admin'}
+        {label: 'manager', value: 'manager'},
+        {label: 'user', value: 'user'}
       ]
     }
   },
