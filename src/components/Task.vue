@@ -15,8 +15,9 @@
             <span
                class="tag is-medium"
                :style="{
-               'border-left': '3px solid ' + currentTask.task_type_color,
+                 'border-left': '4px solid ' + currentTask.task_type_color,
                  'border-radius': '0',
+                 'font-weight': 'bold',
                  color: '#666'
                }">
                {{ currentTask.task_type_name }}
@@ -51,6 +52,7 @@
           <validation-tag
             :task="currentTask"
             class="is-medium"
+            is-static="true"
             v-if="currentTask"
           ></validation-tag>
         </h2>
@@ -574,6 +576,10 @@ export default {
 <style scoped>
 .title {
   margin-top: 1em;
+}
+
+.selected {
+  border: 0;
 }
 
 .source {

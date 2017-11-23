@@ -365,9 +365,14 @@ export default {
 
 .entity-line.selected {
   background: #D1C4E9;
+  border: 0;
 }
 
 .modal-footer {
   margin-top: 1em;
+}
+
+input::placeholder {
+  color: #999;
 }
 </style>

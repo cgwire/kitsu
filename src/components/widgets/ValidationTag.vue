@@ -1,10 +1,13 @@
 <template>
 <router-link
   :to="'/tasks/' + task.id"
-  class="tag"
+  :class="{
+    tag: true,
+    dynamic: !isStatic
+  }"
   :style="{
     background: this.backgroundColor,
-    color: this.color
+    color: this.color,
 }">
   {{ task.task_status_short_name }}
 </router-link>
@@ -17,6 +20,10 @@ export default {
     task: {
       default: () => {},
       type: Object
+    },
+    isStatic: {
+      default: false,
+      type: Boolean
     }
   },
   computed: {
@@ -53,9 +60,11 @@ export default {
 <style scoped>
 .tag {
   text-transform: uppercase;
+  cursor: default;
 }
 
-.tag:hover {
+.tag.dynamic:hover {
+  cursor: pointer;
   transform: scale(1.15);
   transition: all 0.1s ease-in-out
 }
