@@ -51,69 +51,6 @@
 
     <div class="task-columns">
       <div class="task-column">
-        <h2 class="subtitle">
-          {{ $t('tasks.preview') }}
-        </h2>
-        <div class="preview-list" v-if="currentTaskPreviews && currentTaskPreviews.length > 0">
-          <preview-row
-            :key="preview.id"
-            :preview="preview"
-            :taskId="currentTask ? currentTask.id : ''"
-            :selected="preview.id === currentPreviewId"
-            v-for="preview in currentTaskPreviews"
-          >
-          </preview-row>
-        </div>
-        <div v-else>
-          <em>
-            {{ $t('tasks.no_preview')}}
-          </em>
-        </div>
-
-        <div class="preview-picture">
-          <div v-if="currentTaskPreviews && currentTaskPreviews.length > 0 && isMovie">
-            <video
-              :src="moviePath"
-              controls
-              :poster="getPreviewPath()" />
-            </video>
-          </div>
-          <a
-            :href="getOriginalPath()"
-            target="_blank"
-            v-else-if="currentTaskPreviews.length > 0 && !isMovie"
-          >
-            <img :src="getPreviewPath()" />
-          </a>
-        </div>
-        <div
-          class="flexrow"
-           v-if="currentTask && currentTask.entity && currentTask.entity.preview_file_id !== currentPreviewId"
-          >
-          <button
-            :class="{
-              button: true,
-              'flexrow-item': true,
-              'is-loading': loading.setPreview
-            }"
-            @click="setPreview"
-            v-if="currentTaskPreviews.length > 0"
-          >
-            <image-icon class="icon"></image-icon>
-            <span class="text">
-              {{ $t('tasks.set_preview')}}
-            </span>
-          </button>
-          <span class="error flexrow-item" v-if="errors.setPreview">
-            {{ $t('tasks.set_preview_error')}}
-          </span>
-        </div>
-        <div v-if="currentTask && currentTask.entity && currentTask.entity.preview_file_id === currentPreviewId">
-          <em>{{ $t('tasks.set_preview_done')}}</em>
-        </div>
-			</div>
-
-      <div class="task-column">
         <h2 class="subtitle validation-title">
           {{ $t('tasks.validation') }}
         </h2>
@@ -203,8 +140,70 @@
         <div class="has-text-centered" v-else>
           <img src="../assets/spinner.svg" />
         </div>
+	  </div>
 
-			</div>
+      <div class="task-column">
+        <h2 class="subtitle">
+          {{ $t('tasks.preview') }}
+        </h2>
+        <div class="preview-list" v-if="currentTaskPreviews && currentTaskPreviews.length > 0">
+          <preview-row
+            :key="preview.id"
+            :preview="preview"
+            :taskId="currentTask ? currentTask.id : ''"
+            :selected="preview.id === currentPreviewId"
+            v-for="preview in currentTaskPreviews"
+          >
+          </preview-row>
+        </div>
+        <div v-else>
+          <em>
+            {{ $t('tasks.no_preview')}}
+          </em>
+        </div>
+
+        <div class="preview-picture">
+          <div v-if="currentTaskPreviews && currentTaskPreviews.length > 0 && isMovie">
+            <video
+              :src="moviePath"
+              controls
+              :poster="getPreviewPath()" />
+            </video>
+          </div>
+          <a
+            :href="getOriginalPath()"
+            target="_blank"
+            v-else-if="currentTaskPreviews.length > 0 && !isMovie"
+          >
+            <img :src="getPreviewPath()" />
+          </a>
+        </div>
+        <div
+          class="flexrow"
+           v-if="currentTask && currentTask.entity && currentTask.entity.preview_file_id !== currentPreviewId"
+          >
+          <button
+            :class="{
+              button: true,
+              'flexrow-item': true,
+              'is-loading': loading.setPreview
+            }"
+            @click="setPreview"
+            v-if="currentTaskPreviews.length > 0"
+          >
+            <image-icon class="icon"></image-icon>
+            <span class="text">
+              {{ $t('tasks.set_preview')}}
+            </span>
+          </button>
+          <span class="error flexrow-item" v-if="errors.setPreview">
+            {{ $t('tasks.set_preview_error')}}
+          </span>
+        </div>
+        <div v-if="currentTask && currentTask.entity && currentTask.entity.preview_file_id === currentPreviewId">
+          <em>{{ $t('tasks.set_preview_done')}}</em>
+        </div>
+      </div>
     </div>
 
     <add-preview-modal
