@@ -139,6 +139,7 @@ export default {
     create_tasks_asset: 'Add tasks for current assets',
     create_tasks_asset_explaination: 'You are going to create a new task for each asset of current list for the given task type. Do you want to continue?',
     create_tasks_asset_failed: 'A server error occured while proceeding creations.',
+    current_status: 'Current status :',
     add_preview: 'Add preview',
     add_preview_error: 'An error occured while adding preview.',
     set_preview: 'Set this preview as thumbnail',

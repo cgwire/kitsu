@@ -15,17 +15,12 @@
             <span
                class="tag is-medium"
                :style="{
-                 'background-color': currentTask.task_type_color,
-                 color: 'white'
+               'border-left': '3px solid ' + currentTask.task_type_color,
+                 'border-radius': '0',
+                 color: '#666'
                }">
                {{ currentTask.task_type_name }}
              </span>
-           </div>
-           <div class="level-item" v-if="currentTask">
-             <validation-tag
-               :task="currentTask"
-               class="is-medium"
-             ></validation-tag>
            </div>
            <div class="assignees" v-if="currentTask">
              <people-avatar
@@ -52,7 +47,12 @@
     <div class="task-columns">
       <div class="task-column">
         <h2 class="subtitle validation-title">
-          {{ $t('tasks.validation') }}
+          {{ $t('tasks.current_status') }}
+          <validation-tag
+            :task="currentTask"
+            class="is-medium"
+            v-if="currentTask"
+          ></validation-tag>
         </h2>
 
         <div v-if="currentTask">
