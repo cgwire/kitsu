@@ -191,7 +191,7 @@
               'is-loading': loading.setPreview
             }"
             @click="setPreview"
-            v-if="currentTaskPreviews.length > 0"
+            v-if="currentTaskPreviews.length > 0 && isCurrentUserManager"
           >
             <image-icon class="icon"></image-icon>
             <span class="text">
