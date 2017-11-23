@@ -47,6 +47,7 @@
             class="level-item big-button"
             :text="$t('productions.home.create_new')"
             path="/productions/new"
+            :is-responsive="false"
           >
           </button-link>
         </p>

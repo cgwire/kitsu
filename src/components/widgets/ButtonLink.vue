@@ -14,7 +14,11 @@
   <trash-icon class="icon is-small" v-if="icon === 'delete'"></trash-icon>
   <rotate-ccw-icon class="icon is-small" v-if="icon === 'restore'"></rotate-ccw-icon>
 
-  <span class="text is-hidden-touch" v-if="text.length > 0">
+  <span
+    :class="{
+      text: true,
+      'is-hidden-touch': isResponsive
+    }" v-if="text.length > 0">
     {{ text }}
   </span>
 </router-link>
@@ -51,6 +55,10 @@ export default {
     icon: {
       default: '',
       type: String
+    },
+    isResponsive: {
+      default: false,
+      type: Boolean
     }
   }
 }
