@@ -638,6 +638,7 @@ video {
 .task-columns {
   display: flex;
   flex-direction: row;
+  overflow-y: auto;
 }
 
 .task-column {
