@@ -475,7 +475,14 @@ export default {
       const path = this.$route.path
       if (oldPath !== path) this.$store.dispatch('loadShots')
     }
+  },
+
+  metaInfo () {
+    return {
+      title: `${this.currentProduction.name} ${this.$t('shots.title')} - Kitsu`
+    }
   }
+
 }
 </script>
 

@@ -363,6 +363,7 @@ export default {
       'user',
       'isCurrentUserManager'
     ]),
+
     currentPreviewId () {
       let previewId = this.route.params.preview_id
 
@@ -371,13 +372,26 @@ export default {
       }
       return previewId
     },
+
     title () {
       if (this.currentTask) {
-        return `${this.currentTask.project_name} / ${this.currentTask.entity_name}`
+        const projectName = this.currentTask.project_name
+        const entityName = this.currentTask.entity_name
+        return `${projectName} / ${entityName}`
       } else {
         return 'Loading...'
       }
     },
+
+    windowTitle () {
+      if (this.currentTask) {
+        const taskTypeName = this.currentTask.task_type_name
+        return `${this.title} / ${taskTypeName}`
+      } else {
+        return 'Loading...'
+      }
+    },
+
     deleteText () {
       if (this.currentTask) {
         return this.$t('main.delete_text', {
@@ -569,6 +583,12 @@ export default {
   },
   watch: {
     $route () { this.handleModalsDisplay() }
+  },
+
+  metaInfo () {
+    return {
+      title: this.currentTask ? `${this.title} / ${this.currentTask.task_type_name}- Kitsu` : `Loading task... - Kitsu`
+    }
   }
 }
 </script>

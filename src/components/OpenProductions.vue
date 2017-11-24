@@ -105,6 +105,12 @@ export default {
     getPath (production) {
       return `/productions/${production.id}/assets`
     }
+  },
+
+  metaInfo () {
+    return {
+      title: `${this.$t('productions.home.title')} - Kitsu`
+    }
   }
 }
 </script>

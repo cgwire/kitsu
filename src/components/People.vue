@@ -261,6 +261,12 @@ export default {
       this.showEditModalIfNeeded(path, personId)
       this.showImportModalIfNeeded(path, personId)
     }
+  },
+
+  metaInfo () {
+    return {
+      title: `${this.$t('people.title')} - Kitsu`
+    }
   }
 }
 </script>

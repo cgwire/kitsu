@@ -46,6 +46,12 @@ export default {
     ...mapActions([
       'loadTodos'
     ])
+  },
+
+  metaInfo () {
+    return {
+      title: `${this.$t('tasks.my_tasks')} - Kitsu`
+    }
   }
 }
 </script>

@@ -168,6 +168,12 @@ export default {
 
   watch: {
     $route () { this.handleModalsDisplay() }
+  },
+
+  metaInfo () {
+    return {
+      title: `${this.$t('productions.title')} - Kitsu`
+    }
   }
 }
 </script>
