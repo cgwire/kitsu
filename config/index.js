@@ -36,7 +36,7 @@ module.exports = {
         }
       },
       '/events': {
-        target: 'http://127.0.0.1:8000'
+        target: 'http://127.0.0.1:5001'
       }
     },
     // CSS Sourcemaps off by default because relative paths are "buggy"
