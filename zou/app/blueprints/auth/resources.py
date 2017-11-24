@@ -57,19 +57,22 @@ def is_from_browser(user_agent):
 def on_identity_loaded(sender, identity):
     if identity.id is not None:
         from zou.app.services import persons_service
-        identity.user = persons_service.get_person(identity.id)
+        try:
+            identity.user = persons_service.get_person(identity.id)
 
-        if hasattr(identity.user, "id"):
-            identity.provides.add(UserNeed(identity.user["id"]))
+            if hasattr(identity.user, "id"):
+                identity.provides.add(UserNeed(identity.user["id"]))
 
-        if identity.user["role"] == "admin":
-            identity.provides.add(RoleNeed("admin"))
-            identity.provides.add(RoleNeed("manager"))
+            if identity.user["role"] == "admin":
+                identity.provides.add(RoleNeed("admin"))
+                identity.provides.add(RoleNeed("manager"))
 
-        if identity.user["role"] == "manager":
-            identity.provides.add(RoleNeed("manager"))
+            if identity.user["role"] == "manager":
+                identity.provides.add(RoleNeed("manager"))
 
-        return identity
+            return identity
+        except PersonNotFoundException:
+            return None
 
 
 class AuthenticatedResource(Resource):
