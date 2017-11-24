@@ -78,6 +78,20 @@ class ShotsResource(Resource):
         return shots_service.get_shots(criterions)
 
 
+class ScenesResource(Resource):
+
+    @jwt_required
+    def get(self):
+        """
+        Retrieve all scene entries. Filters can be specified in the query
+        string.
+        """
+        criterions = query.get_query_criterions_from_request(request)
+        if not permissions.has_manager_permissions():
+            user_service.check_criterions_has_task_related(criterions)
+        return shots_service.get_scenes(criterions)
+
+
 class ShotAssetsResource(Resource):
 
     @jwt_required

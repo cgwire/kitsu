@@ -10,6 +10,7 @@ from .resources import (
     ShotTasksResource,
 
     SceneResource,
+    ScenesResource,
     SceneTasksResource,
 
     ProjectShotsResource,
@@ -39,6 +40,7 @@ routes = [
     ("/data/shots/<shot_id>/assets", ShotAssetsResource),
     ("/data/shots/<shot_id>/task-types", ShotTaskTypesResource),
     ("/data/shots/<shot_id>/tasks", ShotTasksResource),
+    ("/data/scenes/all", ScenesResource),
     ("/data/scenes/<scene_id>", SceneResource),
     ("/data/scenes/<scene_id>/tasks", SceneTasksResource),
     ("/data/episodes", EpisodesResource),

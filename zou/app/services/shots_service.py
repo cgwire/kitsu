@@ -93,6 +93,27 @@ def get_shots(criterions={}):
     return shots
 
 
+def get_scenes(criterions={}):
+    scene_type = get_scene_type()
+    criterions["entity_type_id"] = scene_type["id"]
+    Sequence = aliased(Entity, name='sequence')
+    query = Entity.query.filter_by(**criterions)
+    query = query.join(Project)
+    query = query.join(Sequence, Sequence.id == Entity.parent_id)
+    query = query.add_columns(Project.name)
+    query = query.add_columns(Sequence.name)
+    data = query.all()
+
+    scenes = []
+    for (scene_model, project_name, sequence_name) in data:
+        scene = scene_model.serialize(obj_type="Scene")
+        scene["project_name"] = project_name
+        scene["sequence_name"] = sequence_name
+        scenes.append(scene)
+
+    return scenes
+
+
 def get_task_status_map():
     return {
         status.id: status for status in TaskStatus.query.all()
