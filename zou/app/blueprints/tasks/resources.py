@@ -81,24 +81,24 @@ class AddPreviewResource(Resource):
 
         comment = tasks_service.get_comment(comment_id)
         task_status = tasks_service.get_task_status(
-            comment["task_status_id"]
+            comment.task_status_id
         )
         person = persons_service.get_current_user()
 
-        if task_status.short_name not in ["wfa", "retake"]:
+        if task_status["short_name"] not in ["wfa", "retake"]:
             return {
                 "error": "Comment status is not waiting for approval."
             }, 400
 
         revision = tasks_service.get_next_preview_revision(task_id)
         preview = files_service.create_preview_file(
-            task.name,
+            task["name"],
             revision,
             task["id"],
             person["id"],
             is_movie
         )
-        comment.update({"preview_file_id": preview.id})
+        comment.update({"preview_file_id": preview["id"]})
         events.emit("preview:add", {
             "comment_id": comment_id,
             "task_id": task_id,
@@ -335,7 +335,7 @@ class TaskFullResource(Resource):
     def get(self, task_id):
         task = tasks_service.get_task(task_id)
         if not permissions.has_manager_permissions():
-            user_service.check_has_task_related(task.project_id)
+            user_service.check_has_task_related(task["project_id"])
 
         result = task
         task_type = tasks_service.get_task_type(task["task_type_id"])
@@ -350,10 +350,10 @@ class TaskFullResource(Resource):
         result["entity"] = entity
         if entity["parent_id"] is not None:
             sequence = shots_service.get_sequence(entity["parent_id"])
-            result["sequence"] = sequence()
+            result["sequence"] = sequence
             if sequence["parent_id"] is not None:
                 episode = shots_service.get_episode(sequence["parent_id"])
-                result["episode"] = episode()
+                result["episode"] = episode
         entity_type = tasks_service.get_entity_type(entity["entity_type_id"])
         result["entity_type"] = entity_type
         assignees = []
