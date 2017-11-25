@@ -211,7 +211,7 @@ def assign_task(task_id, person_id):
         "task": task_dict,
         "person": person.serialize()
     })
-    return task
+    return task_dict
 
 
 def get_tasks_for_shot(shot_id):
