@@ -32,7 +32,7 @@ def configure_auth():
             user = persons_service.get_current_user()
             identity_changed.send(
                 current_app._get_current_object(),
-                identity=Identity(user.id)
+                identity=Identity(user["id"])
             )
             return user
         except PersonNotFoundException:

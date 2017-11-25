@@ -41,13 +41,16 @@ def check_credentials(email, password):
     try:
         person = persons_service.get_by_email(email)
     except PersonNotFoundException:
-        person = persons_service.get_by_desktop_login(email)
+        try:
+            person = persons_service.get_by_desktop_login(email)
+        except PersonNotFoundException:
+            raise WrongPasswordException()
 
     try:
-        password_hash = person.password or u''
+        password_hash = person["password"] or u''
 
         if bcrypt.check_password_hash(password_hash, password):
-            return person.serialize()
+            return person
         else:
             raise WrongPasswordException()
     except ValueError:
@@ -58,8 +61,11 @@ def no_password_auth_strategy(email):
     try:
         person = persons_service.get_by_email(email)
     except PersonNotFoundException:
-        person = persons_service.get_by_desktop_login(email)
-    return person.serialize()
+        try:
+            person = persons_service.get_by_desktop_login(email)
+        except PersonNotFoundException:
+            return None
+    return person
 
 
 def local_auth_strategy(email, password):

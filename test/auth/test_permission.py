@@ -1,6 +1,6 @@
 from test.base import ApiDBTestCase
 
-from zou.app.services import user_service, tasks_service
+from zou.app.services import tasks_service
 
 
 class PermissionTestCase(ApiDBTestCase):
@@ -98,9 +98,10 @@ class PermissionTestCase(ApiDBTestCase):
         self.generate_fixture_project_standard()
         self.generate_fixture_project_closed_status()
         self.generate_fixture_project_closed()
+        self.generate_fixture_entity_type()
+        self.generate_fixture_entity()
         self.generate_assigned_task()
-        self.task.assignees.append(self.user_cg_artist)
-        self.task.save()
+        tasks_service.assign_task(self.task.id, self.user_cg_artist.id)
         self.log_in_cg_artist()
         self.get("data/projects", 403)
         projects = self.get("data/projects/all")
@@ -110,11 +111,12 @@ class PermissionTestCase(ApiDBTestCase):
 
     def test_has_task_related(self):
         self.log_in_cg_artist()
+        self.generate_fixture_entity_type()
+        self.generate_fixture_entity()
         self.generate_assigned_task()
         task_id = self.task.id
         self.get("data/assets/%s" % self.entity.id, 403)
 
         self.task = tasks_service.get_task(task_id)
-        self.task.assignees.append(self.user_cg_artist)
-        self.task.save()
+        tasks_service.assign_task(self.task["id"], self.user_cg_artist.id)
         self.get("data/assets/%s" % self.entity.id, 200)

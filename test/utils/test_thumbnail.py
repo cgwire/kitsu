@@ -8,6 +8,8 @@ from werkzeug.datastructures import FileStorage
 from zou.app import app, config
 from zou.app.utils import thumbnail, fs
 
+TEST_FOLDER = os.path.join("test", "tmp")
+
 
 class ThumbnailTestCase(unittest.TestCase):
 
@@ -30,8 +32,8 @@ class ThumbnailTestCase(unittest.TestCase):
         super(ThumbnailTestCase, self).tearDown()
         folder_name = thumbnail.get_folder_name("shots")
         fs.rm_rf(folder_name)
-        fs.rm_rf("test/tmp")
-        fs.rm_rf("thumbnails")
+        fs.rm_rf(TEST_FOLDER)
+        fs.rm_rf(config.THUMBNAIL_FOLDER)
 
     def test_get_file_name(self):
         file_name = thumbnail.get_file_name("instance-id")

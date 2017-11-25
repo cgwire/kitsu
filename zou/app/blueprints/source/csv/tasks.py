@@ -1,7 +1,5 @@
 import datetime
 
-from sqlalchemy.exc import IntegrityError
-
 from zou.app.models.project import Project
 from zou.app.models.entity import Entity
 from zou.app.models.entity_type import EntityType
@@ -33,13 +31,15 @@ class TasksCsvImportResource(BaseCsvImportResource):
             self.persons[person.first_name + " " + person.last_name] = person
 
         for episode in shots_service.get_episodes():
-            self.episodes[str(episode.project_id) + episode.name] = episode
+            self.episodes[
+                str(episode["project_id"]) + episode["name"]
+            ] = episode
 
         for sequence in shots_service.get_sequences():
             self.sequences["%s%s%s" % (
-                sequence.project_id,
-                sequence.parent_id,
-                sequence.name
+                sequence["project_id"],
+                sequence["parent_id"],
+                sequence["name"]
             )] = sequence
 
         for shot in shots_service.get_shots():
@@ -85,72 +85,73 @@ class TasksCsvImportResource(BaseCsvImportResource):
         due_date = self.normalize_date(row["Due Date"])
         end_date = self.normalize_date(row["End Date"])
 
-        try:
-            self.add_to_cache_if_absent(
-                self.task_statuses,
-                tasks_service.get_or_create_status,
-                task_status_name
-            )
-            task_status_id = self.get_id_from_cache(
-                self.task_statuses,
-                task_status_name
-            )
+        self.add_to_cache_if_absent(
+            self.task_statuses,
+            tasks_service.get_or_create_status,
+            task_status_name
+        )
+        task_status_id = self.get_id_from_cache(
+            self.task_statuses,
+            task_status_name
+        )
 
-            self.add_to_cache_if_absent(
-                self.departments,
-                tasks_service.get_or_create_department,
-                department_name
-            )
-            department_id = self.get_id_from_cache(
-                self.departments,
-                department_name
-            )
+        self.add_to_cache_if_absent(
+            self.departments,
+            tasks_service.get_or_create_department,
+            department_name
+        )
+        department_id = self.get_id_from_cache(
+            self.departments,
+            department_name
+        )
 
-            task_type_key = "%s-%s" % (department_id, task_type_name)
-            if task_type_key not in self.task_types:
-                department = self.departments[department_name]
-                self.task_types[task_type_key] = \
-                    tasks_service.get_or_create_task_type(
-                        department,
-                        task_type_name
-                    )
+        task_type_key = "%s-%s" % (department_id, task_type_name)
+        if task_type_key not in self.task_types:
+            department = self.departments[department_name]
+            self.task_types[task_type_key] = \
+                tasks_service.get_or_create_task_type(
+                    department,
+                    task_type_name
+                )
 
-            task_type_id = self.get_id_from_cache(self.task_types, task_type_key)
-            project_id = self.projects[project_name].id
-            assigner_id = self.persons[assigner_name].id
-            assignee = self.persons.get(assignee_name, None)
+        task_type_id = self.get_id_from_cache(
+            self.task_types,
+            task_type_key
+        )
+        project_id = self.projects[project_name].id
+        assigner_id = self.persons[assigner_name].id
+        assignee = self.persons.get(assignee_name, None)
 
-            if len(shot_name) > 0:
-                episode_id = self.episodes[str(project_id) + episode_name].id
-                sequence_id = self.sequences[str(project_id) + str(episode_id) + sequence_name].id
-                entity_id = self.shots[str(project_id) + str(sequence_id) + shot_name]["id"]
-            else:
-                entity_type_id = self.entity_types[entity_type_name].id
-                entity_id = self.entities[str(project_id) + str(entity_type_id) + entity_name].id
+        if len(shot_name) > 0:
+            episode_id = self.episodes[str(project_id) + episode_name]["id"]
+            sequence_id = self.sequences[
+                str(project_id) + str(episode_id) + sequence_name
+            ]["id"]
+            entity_id = self.shots[
+                str(project_id) + str(sequence_id) + shot_name
+            ]["id"]
+        else:
+            entity_type_id = self.entity_types[entity_type_name].id
+            entity_id = self.entities[
+                str(project_id) + str(entity_type_id) + entity_name
+            ].id
 
-            task = Task.create(
-                name=name,
-                project_id=project_id,
-                task_type_id=task_type_id,
-                entity_id=entity_id,
-                task_status_id=task_status_id,
-                assigner_id=assigner_id,
-                duration=duration,
-                estimation=estimation,
-                start_date=start_date,
-                end_date=end_date,
-                real_start_date=real_start_date,
-                due_date=due_date
-            )
-            if assignee is not None:
-                task.assignees.append(assignee)
-            task.save()
-
-        except TypeError:
-            return None
-        except KeyError:
-            return None
-        except IntegrityError:
-            return None
+        task = Task.create(
+            name=name,
+            project_id=project_id,
+            task_type_id=task_type_id,
+            entity_id=entity_id,
+            task_status_id=task_status_id,
+            assigner_id=assigner_id,
+            duration=duration,
+            estimation=estimation,
+            start_date=start_date,
+            end_date=end_date,
+            real_start_date=real_start_date,
+            due_date=due_date
+        )
+        if assignee is not None:
+            task.assignees.append(assignee)
+        task.save()
 
         return task

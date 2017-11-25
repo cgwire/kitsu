@@ -17,9 +17,17 @@ from .shotgun.shot import (
     ImportShotgunShotsResource,
     ImportRemoveShotgunShotResource
 )
+from .shotgun.scene import (
+    ImportShotgunScenesResource,
+    ImportRemoveShotgunSceneResource
+)
 from .shotgun.sequence import (
     ImportShotgunSequencesResource,
     ImportRemoveShotgunSequenceResource
+)
+from .shotgun.episode import (
+    ImportShotgunEpisodesResource,
+    ImportRemoveShotgunEpisodeResource
 )
 from .shotgun.assets import (
     ImportShotgunAssetsResource,
@@ -59,8 +67,10 @@ from .csv.tasks import TasksCsvImportResource
 routes = [
     ("/import/shotgun/persons", ImportShotgunPersonsResource),
     ("/import/shotgun/projects", ImportShotgunProjectsResource),
-    ("/import/shotgun/shots", ImportShotgunShotsResource),
+    ("/import/shotgun/episodes", ImportShotgunEpisodesResource),
     ("/import/shotgun/sequences", ImportShotgunSequencesResource),
+    ("/import/shotgun/shots", ImportShotgunShotsResource),
+    ("/import/shotgun/scenes", ImportShotgunScenesResource),
     ("/import/shotgun/assets", ImportShotgunAssetsResource),
     ("/import/shotgun/steps", ImportShotgunStepsResource),
     ("/import/shotgun/status", ImportShotgunStatusResource),
@@ -72,6 +82,8 @@ routes = [
     ("/import/shotgun/remove/project", ImportRemoveShotgunProjectResource),
     ("/import/shotgun/remove/person", ImportRemoveShotgunPersonResource),
     ("/import/shotgun/remove/shot", ImportRemoveShotgunShotResource),
+    ("/import/shotgun/remove/scene", ImportRemoveShotgunSceneResource),
+    ("/import/shotgun/remove/episode", ImportRemoveShotgunEpisodeResource),
     ("/import/shotgun/remove/sequence", ImportRemoveShotgunSequenceResource),
     ("/import/shotgun/remove/asset", ImportRemoveShotgunAssetResource),
     ("/import/shotgun/remove/step", ImportRemoveShotgunStepResource),

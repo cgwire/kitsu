@@ -77,7 +77,9 @@ class ImportShotgunAssetsResource(BaseImportShotgunResource):
 
     def save_entity(self, data):
         try:
-            entity = assets_service.get_asset_by_shotgun_id(data["shotgun_id"])
+            entity = assets_service.get_raw_asset_by_shotgun_id(
+                data["shotgun_id"]
+            )
             entity.update(data)
             current_app.logger.info("Entity updated: %s" % entity)
         except AssetNotFoundException:
@@ -106,13 +108,13 @@ class ImportRemoveShotgunAssetResource(ImportRemoveShotgunBaseResource):
     def delete_func(self, asset):
         try:
             asset = assets_service.get_asset_by_shotgun_id(asset.shotgun_id)
-            tasks = tasks_service.get_tasks_for_asset(asset.id)
+            tasks = tasks_service.get_tasks_for_asset(asset["id"])
             if self.is_working_files_linked(tasks):
-                assets_service.cancel_asset(asset.id)
+                assets_service.cancel_asset(asset["id"])
             else:
                 for task in tasks:
                     tasks_service.remove_task(task["id"])
-                assets_service.remove_asset(asset.id)
+                assets_service.remove_asset(asset["id"])
             return asset
         except AssetNotFoundException:
             return None

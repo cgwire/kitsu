@@ -22,7 +22,7 @@ class BreakdownServiceTestCase(ApiDBTestCase):
         self.entity_id = str(self.entity.id)
         self.entity_character_id = str(self.entity_character.id)
 
-        casting = breakdown_service.get_casting(self.shot)
+        casting = breakdown_service.get_casting(self.shot.id)
         self.assertListEqual(casting, [])
         newCasting = [
             {
@@ -34,8 +34,8 @@ class BreakdownServiceTestCase(ApiDBTestCase):
                 "nb_occurences": 3
             }
         ]
-        breakdown_service.update_casting(self.shot, newCasting)
-        casting = breakdown_service.get_casting(self.shot)
+        breakdown_service.update_casting(self.shot.id, newCasting)
+        casting = breakdown_service.get_casting(self.shot.id)
         casting = sorted(casting, key=lambda x: x["nb_occurences"])
         self.assertEquals(casting[0]["asset_id"], newCasting[0]["asset_id"])
         self.assertEquals(

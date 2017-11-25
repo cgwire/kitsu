@@ -13,7 +13,7 @@ from zou.app.utils import fields, permissions
 
 
 def assignee_filter():
-    current_user = persons_service.get_current_user()
+    current_user = persons_service.get_current_user_raw()
     return Task.assignees.contains(current_user)
 
 
@@ -26,9 +26,9 @@ def asset_type_filter():
     sequence_type = shots_service.get_sequence_type()
     episode_type = shots_service.get_episode_type()
     return ~EntityType.id.in_([
-        shot_type.id,
-        sequence_type.id,
-        episode_type.id,
+        shot_type["id"],
+        sequence_type["id"],
+        episode_type["id"]
     ])
 
 
@@ -45,7 +45,7 @@ def get_todos():
         .outerjoin(Episode, Episode.id == Sequence.parent_id) \
         .filter(assignee_filter()) \
         .filter(open_project_filter()) \
-        .filter(Task.task_status_id != done_status.id) \
+        .filter(Task.task_status_id != done_status["id"]) \
         .add_columns(
             Project.name,
             Entity.name,
@@ -153,8 +153,8 @@ def get_project_sequences(project_id):
         .join(EntityType, EntityType.id == Entity.entity_type_id) \
         .join(Project, Project.id == Entity.project_id) \
         .join(ProjectStatus) \
-        .filter(Shot.entity_type_id == shot_type.id) \
-        .filter(Entity.entity_type_id == sequence_type.id) \
+        .filter(Shot.entity_type_id == shot_type["id"]) \
+        .filter(Entity.entity_type_id == sequence_type["id"]) \
         .filter(Project.id == project_id) \
         .filter(assignee_filter()) \
         .filter(open_project_filter())
@@ -166,7 +166,7 @@ def get_sequence_shots(sequence_id):
     shot_type = shots_service.get_shot_type()
     query = Entity.query \
         .join(Task, Project, ProjectStatus, EntityType) \
-        .filter(Entity.entity_type_id == shot_type.id) \
+        .filter(Entity.entity_type_id == shot_type["id"]) \
         .filter(Entity.parent_id == sequence_id) \
         .filter(assignee_filter()) \
         .filter(open_project_filter())
@@ -211,3 +211,8 @@ def check_criterions_has_task_related(criterions):
         return True
     else:
         raise permissions.PermissionDenied
+
+
+def check_project_access(project_id):
+    return permissions.has_manager_permissions() or \
+        check_has_task_related(project_id)

@@ -14,11 +14,14 @@ from zou.app.services.exception import (
     OutputTypeNotFoundException,
     PreviewFileNotFoundException,
     SoftwareNotFoundException,
-    NoOutputFileException
+    NoOutputFileException,
+    EntryAlreadyExistsException
 )
 
+from zou.app.utils import fields
+
 from sqlalchemy import desc
-from sqlalchemy.exc import StatementError
+from sqlalchemy.exc import StatementError, IntegrityError
 
 
 def get_default_status():
@@ -31,7 +34,7 @@ def get_default_status():
             color="#FFFFFF"
         )
         default_status.save()
-    return default_status
+    return default_status.serialize()
 
 
 def get_instance(model, instance_id, exception):
@@ -50,10 +53,10 @@ def get_or_create_instance_by_name(model, **kwargs):
     instance = model.get_by(name=kwargs["name"])
     if instance is None:
         instance = model.create(**kwargs)
-    return instance
+    return instance.serialize()
 
 
-def get_working_file(working_file_id):
+def get_working_file_raw(working_file_id):
     return get_instance(
         WorkingFile,
         working_file_id,
@@ -61,7 +64,11 @@ def get_working_file(working_file_id):
     )
 
 
-def get_output_file(output_file_id):
+def get_working_file(working_file_id):
+    return get_working_file_raw(working_file_id).serialize()
+
+
+def get_output_file_raw(output_file_id):
     return get_instance(
         OutputFile,
         output_file_id,
@@ -69,7 +76,11 @@ def get_output_file(output_file_id):
     )
 
 
-def get_software(software_id):
+def get_output_file(output_file_id):
+    return get_output_file_raw(output_file_id).serialize()
+
+
+def get_software_raw(software_id):
     return get_instance(
         Software,
         software_id,
@@ -77,12 +88,20 @@ def get_software(software_id):
     )
 
 
-def get_output_type(output_type_id):
+def get_software(software_id):
+    return get_software_raw(software_id).serialize()
+
+
+def get_output_type_raw(output_type_id):
     return get_instance(
         OutputType,
         output_type_id,
         OutputTypeNotFoundException
     )
+
+
+def get_output_type(output_type_id):
+    return get_output_type_raw(output_type_id).serialize()
 
 
 def get_or_create_output_type(name, short_name=""):
@@ -140,16 +159,19 @@ def create_new_working_revision(
     if revision == 0:
         revision = get_next_working_revision(task_id, name)
 
-    working_file = WorkingFile.create(
-        comment=comment,
-        name=name,
-        revision=revision,
-        path=path,
-        task_id=task.id,
-        software_id=software_id,
-        entity_id=task.entity_id,
-        person_id=person_id
-    )
+    try:
+        working_file = WorkingFile.create(
+            comment=comment,
+            name=name,
+            revision=revision,
+            path=path,
+            task_id=task.id,
+            software_id=software_id,
+            entity_id=task.entity_id,
+            person_id=person_id
+        )
+    except IntegrityError:
+        raise EntryAlreadyExistsException
 
     return working_file.serialize()
 
@@ -170,11 +192,11 @@ def create_new_output_revision(
                 task_id,
                 output_type_id
             )
-            revision = output_file.revision + 1
+            revision = output_file["revision"] + 1
         except NoOutputFileException:
             revision = 1
 
-    file_status_id = get_default_status().id
+    file_status_id = get_default_status()["id"]
 
     output_file = OutputFile(
         name=name,
@@ -189,7 +211,7 @@ def create_new_output_revision(
     )
     output_file.save()
 
-    return output_file
+    return output_file.serialize()
 
 
 def get_last_output_revision(task_id, output_type_id):
@@ -205,7 +227,7 @@ def get_last_output_revision(task_id, output_type_id):
     if len(output_files) == 0:
         raise NoOutputFileException()
 
-    return output_files[0]
+    return output_files[0].serialize()
 
 
 def get_working_files_for_task(task_id):
@@ -216,7 +238,7 @@ def get_working_files_for_task(task_id):
     ).order_by(
         desc(WorkingFile.revision)
     ).all()
-    return WorkingFile.serialize_list(working_files)
+    return fields.serialize_models(working_files)
 
 
 def get_next_output_file_revision(task_id, output_type_id, name="main"):
@@ -243,7 +265,7 @@ def get_output_files_for_task(task_id):
     ).order_by(
         desc(OutputFile.revision)
     ).all()
-    return OutputFile.serialize_list(output_files)
+    return fields.serialize_models(output_files)
 
 
 def get_last_output_files_for_task(task_id):
@@ -268,7 +290,7 @@ def get_preview_file(preview_file_id):
     if preview_file is None:
         raise PreviewFileNotFoundException()
 
-    return preview_file
+    return preview_file.serialize()
 
 
 def get_preview_files_for_task(task_id):
@@ -277,7 +299,7 @@ def get_preview_files_for_task(task_id):
     ).order_by(
         PreviewFile.revision.desc()
     )
-    return PreviewFile.serialize_list(previews)
+    return fields.serialize_models(previews)
 
 
 def create_preview_file(
@@ -295,4 +317,16 @@ def create_preview_file(
         task_id=task_id,
         person_id=person_id,
         is_movie=is_movie
-    )
+    ).serialize()
+
+
+def update_working_file(working_file_id, data):
+    working_file = get_working_file_raw(working_file_id)
+    working_file.update(data)
+    return working_file.serialize()
+
+
+def update_output_file(output_file_id, data):
+    output_file = get_output_file_raw(output_file_id)
+    output_file.update(data)
+    return output_file.serialize()

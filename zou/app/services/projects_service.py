@@ -53,7 +53,7 @@ def get_or_create_status(name):
             color="#000000"
         )
         project_status.save()
-    return project_status
+    return project_status.serialize()
 
 
 def save_project_status(project_statuses):
@@ -72,10 +72,10 @@ def get_or_create(name):
         open_status = get_or_create_open_status()
         project = Project(
             name=name,
-            project_status_id=open_status.id
+            project_status_id=open_status["id"]
         )
         project.save()
-    return project
+    return project.serialize()
 
 
 def get_project_by_name(project_name):
@@ -84,10 +84,10 @@ def get_project_by_name(project_name):
     if project is None:
         raise ProjectNotFoundException()
 
-    return project
+    return project.serialize()
 
 
-def get_project(project_id):
+def get_project_raw(project_id):
     try:
         project = Project.get(project_id)
     except StatementError:
@@ -97,3 +97,13 @@ def get_project(project_id):
         raise ProjectNotFoundException()
 
     return project
+
+
+def get_project(project_id):
+    return get_project_raw(project_id).serialize()
+
+
+def update_project(project_id, data):
+    project = get_project_raw(project_id)
+    project.update(data)
+    return project.serialize()

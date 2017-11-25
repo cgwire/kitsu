@@ -53,4 +53,8 @@ class BaseCsvImportResource(Resource):
         return cache[name]
 
     def get_id_from_cache(self, cache, name):
-        return cache[name].id
+        cached_object = cache[name]
+        if type(cached_object) is dict:
+            return cached_object["id"]
+        else:
+            return cached_object.id

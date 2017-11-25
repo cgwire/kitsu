@@ -25,9 +25,6 @@ from zou.app.utils import query, events, permissions
 
 class CommentTaskResource(Resource):
 
-    def __init__(self):
-        Resource.__init__(self)
-
     @jwt_required
     def post(self, task_id):
         (
@@ -35,30 +32,26 @@ class CommentTaskResource(Resource):
             comment
         ) = self.get_arguments()
 
-        try:
-            task = tasks_service.get_task(task_id)
-            if not permissions.has_manager_permissions():
-                user_service.check_assigned(task_id)
-            task_status = tasks_service.get_task_status(task_status_id)
-            person = persons_service.get_current_user()
-            comment = tasks_service.create_comment(
-                object_id=task_id,
-                object_type="Task",
-                task_status_id=task_status_id,
-                person_id=persons_service.get_current_user().id,
-                text=comment
-            )
-            task.update({"task_status_id": task_status_id})
-            comment_dict = comment.serialize()
-            comment_dict["task_status"] = task_status.serialize()
-            comment_dict["person"] = person.serialize()
-            events.emit("comment:new", {"id": comment_dict["id"]})
-        except TaskStatusNotFoundException:
-            abort(400)
-        except permissions.PermissionDenied:
-            abort(403)
-
-        return comment_dict, 201
+        tasks_service.get_task(task_id)
+        if not permissions.has_manager_permissions():
+            user_service.check_assigned(task_id)
+        task_status = tasks_service.get_task_status(task_status_id)
+        person = persons_service.get_current_user()
+        comment = tasks_service.create_comment(
+            object_id=task_id,
+            object_type="Task",
+            task_status_id=task_status_id,
+            person_id=person["id"],
+            text=comment
+        )
+        tasks_service.update_task(
+            task_id,
+            {"task_status_id": task_status_id}
+        )
+        comment["task_status"] = task_status
+        comment["person"] = person
+        events.emit("comment:new", {"id": comment["id"]})
+        return comment, 201
 
     def get_arguments(self):
         parser = reqparse.RequestParser()
@@ -78,45 +71,41 @@ class CommentTaskResource(Resource):
 
 class AddPreviewResource(Resource):
 
-    def __init__(self):
-        Resource.__init__(self)
-
     @jwt_required
     def post(self, task_id, comment_id):
         is_movie = self.get_arguments()
-        try:
-            task = tasks_service.get_task(task_id)
-            if not permissions.has_manager_permissions():
-                user_service.check_assigned(task_id)
-            comment = tasks_service.get_comment(comment_id)
-            task_status = tasks_service.get_task_status(comment.task_status_id)
-            person = persons_service.get_current_user()
 
-            if task_status.short_name not in ["wfa", "retake"]:
-                return {
-                    "error": "Comment status is not waiting for approval."
-                }, 400
+        task = tasks_service.get_task(task_id)
+        if not permissions.has_manager_permissions():
+            user_service.check_assigned(task_id)
 
-            revision = tasks_service.get_next_preview_revision(task_id)
-            preview = files_service.create_preview_file(
-                task.name,
-                revision,
-                task.id,
-                person.id,
-                is_movie
-            )
-            comment.update({"preview_file_id": preview.id})
-            events.emit("preview:add", {
-                "comment_id": comment_id,
-                "task_id": task_id,
-                "preview": preview.serialize()
-            })
-        except TaskStatusNotFoundException:
-            abort(400)
-        except permissions.PermissionDenied:
-            abort(403)
+        comment = tasks_service.get_comment(comment_id)
+        task_status = tasks_service.get_task_status(
+            comment.task_status_id
+        )
+        person = persons_service.get_current_user()
 
-        return preview.serialize(), 201
+        if task_status["short_name"] not in ["wfa", "retake"]:
+            return {
+                "error": "Comment status is not waiting for approval."
+            }, 400
+
+        revision = tasks_service.get_next_preview_revision(task_id)
+        preview = files_service.create_preview_file(
+            task["name"],
+            revision,
+            task["id"],
+            person["id"],
+            is_movie
+        )
+        comment.update({"preview_file_id": preview["id"]})
+        events.emit("preview:add", {
+            "comment_id": comment_id,
+            "task_id": task_id,
+            "preview": preview.serialize()
+        })
+
+        return preview, 201
 
     def get_arguments(self):
         parser = reqparse.RequestParser()
@@ -128,91 +117,49 @@ class AddPreviewResource(Resource):
 
 class TaskPreviewsResource(Resource):
 
-    def __init__(self):
-        Resource.__init__(self)
-
     @jwt_required
     def get(self, task_id):
-        try:
-            task = tasks_service.get_task(task_id)
-            if not permissions.has_manager_permissions():
-                user_service.check_has_task_related(task.project_id)
-            previews = files_service.get_preview_files_for_task(task_id)
-        except TaskNotFoundException:
-            abort(404)
-        except permissions.PermissionDenied:
-            abort(403)
-
-        return previews
+        task = tasks_service.get_task(task_id)
+        if not permissions.has_manager_permissions():
+            user_service.check_has_task_related(task["project_id"])
+        return files_service.get_preview_files_for_task(task_id)
 
 
 class TaskCommentsResource(Resource):
 
-    def __init__(self):
-        Resource.__init__(self)
-
     @jwt_required
     def get(self, task_id):
-        try:
-            comments = []
-            task = tasks_service.get_task(task_id)
-            if not permissions.has_manager_permissions():
-                user_service.check_has_task_related(task_id)
-
-            comments = tasks_service.get_comments(task)
-        except TaskNotFoundException:
-            abort(404)
-        except permissions.PermissionDenied:
-            abort(403)
-
-        return comments
+        if not permissions.has_manager_permissions():
+            user_service.check_has_task_related(task_id)
+        return tasks_service.get_comments(task_id)
 
 
 class CreateShotTasksResource(Resource):
 
-    def __init__(self):
-        Resource.__init__(self)
-
     @jwt_required
     def post(self, task_type_id):
-        try:
-            permissions.check_manager_permissions()
-            criterions = query.get_query_criterions_from_request(request)
-            shots = shots_service.get_shots(criterions)
-            task_type = tasks_service.get_task_type(task_type_id)
-            tasks = [
-                tasks_service.create_task(task_type, shot) for shot in shots
-            ]
-        except TaskTypeNotFoundException:
-            abort(404)
-        except permissions.PermissionDenied:
-            abort(403)
-
+        permissions.check_manager_permissions()
+        criterions = query.get_query_criterions_from_request(request)
+        shots = shots_service.get_shots(criterions)
+        task_type = tasks_service.get_task_type(task_type_id)
+        tasks = [
+            tasks_service.create_task(task_type, shot) for shot in shots
+        ]
         return tasks, 201
 
 
 class CreateAssetTasksResource(Resource):
 
-    def __init__(self):
-        Resource.__init__(self)
-
     @jwt_required
     def post(self, task_type_id):
-        try:
-            permissions.check_manager_permissions()
-            criterions = query.get_query_criterions_from_request(request)
-            assets = assets_service.get_assets(criterions)
-            task_type = tasks_service.get_task_type(task_type_id)
-            tasks = [
-                tasks_service.create_task(task_type, asset.serialize())
-                for asset in assets
-            ]
-
-        except TaskTypeNotFoundException:
-            abort(404)
-        except permissions.PermissionDenied:
-            abort(403)
-
+        permissions.check_manager_permissions()
+        criterions = query.get_query_criterions_from_request(request)
+        assets = assets_service.get_assets(criterions)
+        task_type = tasks_service.get_task_type(task_type_id)
+        tasks = [
+            tasks_service.create_task(task_type, asset)
+            for asset in assets
+        ]
         return tasks, 201
 
 
@@ -243,15 +190,11 @@ class ToReviewResource(Resource):
                 )
 
             task = tasks_service.task_to_review(
-                task,
+                task["id"],
                 person,
                 comment,
                 preview_path
             )
-        except TaskNotFoundException:
-            abort(404)
-        except permissions.PermissionDenied:
-            abort(403)
         except PersonNotFoundException:
             return {"error": "Cannot find given person."}, 400
 
@@ -330,7 +273,7 @@ class TasksAssignResource(Resource):
         for task_id in task_ids:
             try:
                 task = self.assign_task(task_id, person_id)
-                tasks.append(task.serialize())
+                tasks.append(task)
             except TaskNotFoundException:
                 pass
             except PersonNotFoundException:
@@ -352,9 +295,7 @@ class TasksAssignResource(Resource):
         )
 
     def assign_task(self, task_id, person_id):
-        task = tasks_service.get_task(task_id)
-        person = persons_service.get_person(person_id)
-        return tasks_service.assign_task(task, person)
+        return tasks_service.assign_task(task_id, person_id)
 
 
 class TaskAssignResource(Resource):
@@ -366,14 +307,10 @@ class TaskAssignResource(Resource):
         try:
             permissions.check_manager_permissions()
             task = self.assign_task(task_id, person_id)
-        except TaskNotFoundException:
-            abort(404)
         except PersonNotFoundException:
             return {"error": "Assignee doesn't exist in database."}, 400
-        except permissions.PermissionDenied:
-            abort(403)
 
-        return task.serialize()
+        return task
 
     def get_arguments(self):
         parser = reqparse.RequestParser()
@@ -389,47 +326,39 @@ class TaskAssignResource(Resource):
         )
 
     def assign_task(self, task_id, person_id):
-        task = tasks_service.get_task(task_id)
-        person = persons_service.get_person(person_id)
-        return tasks_service.assign_task(task, person)
+        return tasks_service.assign_task(task_id, person_id)
 
 
 class TaskFullResource(Resource):
 
     @jwt_required
     def get(self, task_id):
-        try:
-            task = tasks_service.get_task(task_id)
-            if not permissions.has_manager_permissions():
-                user_service.check_has_task_related(task.project_id)
-        except TaskNotFoundException:
-            abort(404)
-        except permissions.PermissionDenied:
-            abort(403)
+        task = tasks_service.get_task(task_id)
+        if not permissions.has_manager_permissions():
+            user_service.check_has_task_related(task["project_id"])
 
-        result = task.serialize()
-        task_type = tasks_service.get_task_type(task.task_type_id)
+        result = task
+        task_type = tasks_service.get_task_type(task["task_type_id"])
         result["task_type"] = task_type
-        assigner = persons_service.get_person(task.assigner_id)
-        result["assigner"] = assigner.serialize()
-        project = projects_service.get_project(task.project_id)
-        result["project"] = project.serialize()
-        task_status = tasks_service.get_task_status(task.task_status_id)
-        result["task_status"] = task_status.serialize()
-        entity = tasks_service.get_entity(task.entity_id)
-        result["entity"] = entity.serialize()
-        if entity.parent_id is not None:
-            sequence = shots_service.get_sequence(entity.parent_id)
-            result["sequence"] = sequence.serialize()
-            if sequence.parent_id is not None:
-                episode = shots_service.get_episode(sequence.parent_id)
-                result["episode"] = episode.serialize()
-
-        entity_type = tasks_service.get_entity_type(entity.entity_type_id)
-        result["entity_type"] = entity_type.serialize()
+        assigner = persons_service.get_person(task["assigner_id"])
+        result["assigner"] = assigner
+        project = projects_service.get_project(task["project_id"])
+        result["project"] = project
+        task_status = tasks_service.get_task_status(task["task_status_id"])
+        result["task_status"] = task_status
+        entity = tasks_service.get_entity(task["entity_id"])
+        result["entity"] = entity
+        if entity["parent_id"] is not None:
+            sequence = shots_service.get_sequence(entity["parent_id"])
+            result["sequence"] = sequence
+            if sequence["parent_id"] is not None:
+                episode = shots_service.get_episode(sequence["parent_id"])
+                result["episode"] = episode
+        entity_type = tasks_service.get_entity_type(entity["entity_type_id"])
+        result["entity_type"] = entity_type
         assignees = []
-        for assignee in task.assignees:
-            assignees.append(assignee.serialize())
+        for assignee_id in task["assignees"]:
+            assignees.append(persons_service.get_person(assignee_id))
         result["persons"] = assignees
         result["type"] = "Task"
 
@@ -440,23 +369,13 @@ class TaskStartResource(Resource):
 
     @jwt_required
     def put(self, task_id):
-        try:
-            task = tasks_service.get_task(task_id)
-            if not permissions.has_manager_permissions():
-                user_service.check_assigned(task_id)
-            task = tasks_service.start_task(task)
-        except TaskNotFoundException:
-            abort(404)
-        except permissions.PermissionDenied:
-            abort(403)
-
-        return task.serialize(), 200
+        task = tasks_service.get_task(task_id)
+        if not permissions.has_manager_permissions():
+            user_service.check_assigned(task_id)
+        return tasks_service.start_task(task["id"])
 
 
 class SetTimeSpentResource(Resource):
-
-    def __init__(self):
-        Resource.__init__(self)
 
     @jwt_required
     def post(self, task_id, date, person_id):
@@ -474,14 +393,8 @@ class SetTimeSpentResource(Resource):
                 args["duration"]
             )
             return time_spent, 200
-        except TaskNotFoundException:
-            abort(404)
-        except PersonNotFoundException:
-            abort(404)
         except WrongDateFormatException:
             abort(404)
-        except permissions.PermissionDenied:
-            abort(403)
 
     def get_arguments(self):
         parser = reqparse.RequestParser()
@@ -491,9 +404,6 @@ class SetTimeSpentResource(Resource):
 
 
 class AddTimeSpentResource(Resource):
-
-    def __init__(self):
-        Resource.__init__(self)
 
     @jwt_required
     def post(self, task_id, date, person_id):
@@ -513,14 +423,8 @@ class AddTimeSpentResource(Resource):
                 add=True
             )
             return time_spent, 200
-        except TaskNotFoundException:
-            abort(404)
-        except PersonNotFoundException:
-            abort(404)
         except WrongDateFormatException:
             abort(404)
-        except permissions.PermissionDenied:
-            abort(403)
 
     def get_arguments(self):
         parser = reqparse.RequestParser()
@@ -531,9 +435,6 @@ class AddTimeSpentResource(Resource):
 
 class GetTimeSpentResource(Resource):
 
-    def __init__(self):
-        Resource.__init__(self)
-
     @jwt_required
     def get(self, task_id, date):
         try:
@@ -541,9 +442,5 @@ class GetTimeSpentResource(Resource):
             if not permissions.has_manager_permissions():
                 user_service.check_has_task_related(task.project_id)
             return tasks_service.get_time_spents(task_id)
-        except TaskNotFoundException:
-            abort(404)
         except WrongDateFormatException:
             abort(404)
-        except permissions.PermissionDenied:
-            abort(403)

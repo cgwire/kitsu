@@ -21,6 +21,7 @@ class FileTreeTestCase(ApiDBTestCase):
         self.generate_fixture_episode()
         self.generate_fixture_sequence()
         self.generate_fixture_shot()
+        self.generate_fixture_scene()
         self.generate_fixture_sequence_standard()
         self.generate_fixture_shot_standard()
         self.generate_fixture_person()
@@ -58,7 +59,7 @@ class FileTreeTestCase(ApiDBTestCase):
         self.assertIsNotNone(simple_tree["working"])
 
     def test_get_tree_from_project(self):
-        simple_tree = file_tree.get_tree_from_project(self.project)
+        simple_tree = file_tree.get_tree_from_project(self.project.serialize())
         self.assertIsNotNone(simple_tree["working"])
 
     def test_join_path(self):
@@ -78,27 +79,27 @@ class FileTreeTestCase(ApiDBTestCase):
         self.assertEqual(file_name, "COSMOS_LANDROMAT_S01_P01_v003")
 
     def test_get_project(self):
-        project = file_tree.get_project(self.entity)
-        self.assertEqual(project, self.project)
+        project = file_tree.get_project(self.entity.serialize())
+        self.assertEqual(project["name"], self.project.name)
 
     def test_get_file_name_template(self):
         tree = file_tree.get_tree_from_file("standard")
         template = file_tree.get_file_name_template(
             tree,
             "working",
-            self.shot
+            self.shot.serialize()
         )
         self.assertEqual(template, tree["working"]["file_name"]["shot"])
         template = file_tree.get_file_name_template(
             tree,
             "working",
-            self.entity
+            self.entity.serialize()
         )
         self.assertEqual(template, tree["working"]["file_name"]["asset"])
         template = file_tree.get_file_name_template(
             tree,
             "working",
-            self.sequence
+            self.sequence.serialize()
         )
         self.assertEqual(template, tree["working"]["file_name"]["sequence"])
 
@@ -107,122 +108,122 @@ class FileTreeTestCase(ApiDBTestCase):
         template = file_tree.get_folder_path_template(
             tree,
             "working",
-            self.shot
+            self.shot.serialize()
         )
         self.assertEqual(template, tree["working"]["folder_path"]["shot"])
         template = file_tree.get_folder_path_template(
             tree,
             "working",
-            self.entity
+            self.entity.serialize()
         )
         self.assertEqual(template, tree["working"]["folder_path"]["asset"])
         template = file_tree.get_folder_path_template(
             tree,
             "working",
-            self.sequence
+            self.sequence.serialize()
         )
         self.assertEqual(template, tree["working"]["folder_path"]["sequence"])
 
     def test_get_folder_from_datatype_project(self):
         path = file_tree.get_folder_from_datatype(
             "Project",
-            self.shot,
-            self.shot_task
+            self.shot.serialize(),
+            self.shot_task.serialize()
         )
         self.assertEquals(path, self.project.name)
 
     def test_get_folder_from_datatype_shot(self):
         path = file_tree.get_folder_from_datatype(
             "Shot",
-            self.shot,
-            self.shot_task
+            self.shot.serialize(),
+            self.shot_task.serialize()
         )
         self.assertEquals(path, self.shot.name)
 
     def test_get_folder_from_datatype_sequence_shot(self):
         path = file_tree.get_folder_from_datatype(
             "Sequence",
-            self.shot,
-            self.shot_task
+            self.shot.serialize(),
+            self.shot_task.serialize()
         )
         self.assertEquals(path, self.sequence.name)
 
     def test_get_folder_from_datatype_sequence_sequence(self):
         path = file_tree.get_folder_from_datatype(
             "Sequence",
-            self.sequence,
-            self.shot_task
+            self.sequence.serialize(),
+            self.shot_task.serialize()
         )
         self.assertEquals(path, self.sequence.name)
 
     def test_get_folder_from_datatype_episode(self):
         path = file_tree.get_folder_from_datatype(
             "Episode",
-            self.shot,
-            self.task
+            self.shot.serialize(),
+            self.task.serialize()
         )
         self.assertEquals(path, "E01")
         path = file_tree.get_folder_from_datatype(
             "Episode",
-            self.sequence,
-            self.task
+            self.sequence.serialize(),
+            self.task.serialize()
         )
         self.assertEquals(path, "E01")
 
     def test_get_folder_from_datatype_asset(self):
         path = file_tree.get_folder_from_datatype(
             "Asset",
-            self.entity,
-            self.task
+            self.entity.serialize(),
+            self.task.serialize()
         )
         self.assertEquals(path, self.entity.name)
 
     def test_get_folder_from_datatype_asset_type(self):
         path = file_tree.get_folder_from_datatype(
             "AssetType",
-            self.entity,
-            self.task
+            self.entity.serialize(),
+            self.task.serialize()
         )
         self.assertEquals(path, self.entity_type.name)
 
     def test_get_folder_from_datatype_department(self):
         path = file_tree.get_folder_from_datatype(
             "Department",
-            self.entity,
-            self.task
+            self.entity.serialize(),
+            self.task.serialize()
         )
         self.assertEquals(path, self.department.name)
 
     def test_get_folder_from_datatype_task(self):
         path = file_tree.get_folder_from_datatype(
             "Task",
-            self.entity,
-            self.task
+            self.entity.serialize(),
+            self.task.serialize()
         )
         self.assertEquals(path, self.task.name)
 
     def test_get_folder_from_datatype_task_type(self):
         path = file_tree.get_folder_from_datatype(
             "TaskType",
-            self.entity,
-            self.task
+            self.entity.serialize(),
+            self.task.serialize()
         )
         self.assertEquals(path, self.task_type.name)
 
     def test_get_folder_from_datatype_software(self):
         path = file_tree.get_folder_from_datatype(
             "Software",
-            self.entity,
-            self.task,
-            software=self.software
+            self.entity.serialize(),
+            self.task.serialize(),
+            software=self.software.serialize()
         )
         self.assertEquals(path, "Blender")
 
     def test_get_folder_from_datatype_output_type(self):
         path = file_tree.get_folder_from_datatype(
             "OutputType",
-            self.entity,
-            self.task,
+            self.entity.serialize(),
+            self.task.serialize(),
             output_type=self.output_type_cache
         )
         self.assertEquals(path, "cache")
@@ -232,15 +233,15 @@ class FileTreeTestCase(ApiDBTestCase):
             MalformedFileTreeException,
             file_tree.get_folder_from_datatype,
             "Unknown",
-            self.entity,
-            self.task
+            self.entity.serialize(),
+            self.task.serialize()
         )
 
     def test_get_folder_path_shot(self):
         path = file_tree.get_folder_path(
-            self.shot_task,
+            self.shot_task.serialize(),
             mode="working",
-            software=self.software_max
+            software=self.software_max.serialize()
         )
         self.assertEquals(
             path,
@@ -250,9 +251,9 @@ class FileTreeTestCase(ApiDBTestCase):
 
     def test_get_folder_path_with_separator(self):
         path = file_tree.get_folder_path(
-            self.shot_task,
+            self.shot_task.serialize(),
             mode="working",
-            software=self.software_max,
+            software=self.software_max.serialize(),
             sep="\\"
         )
         self.assertEquals(
@@ -263,7 +264,7 @@ class FileTreeTestCase(ApiDBTestCase):
 
     def test_get_folder_path_with_outputtype(self):
         path = file_tree.get_folder_path(
-            self.shot_task,
+            self.shot_task.serialize(),
             mode="output",
             output_type=self.output_type_cache,
             sep="/"
@@ -276,9 +277,9 @@ class FileTreeTestCase(ApiDBTestCase):
 
     def test_get_folder_path_asset(self):
         path = file_tree.get_folder_path(
-            self.task,
+            self.task.serialize(),
             mode="working",
-            software=self.software
+            software=self.software.serialize()
         )
         self.assertEquals(
             path,
@@ -288,7 +289,7 @@ class FileTreeTestCase(ApiDBTestCase):
 
     def test_get_file_name_asset(self):
         file_name = file_tree.get_file_name(
-            self.task,
+            self.task.serialize(),
             mode="working",
             version=3
         )
@@ -296,7 +297,7 @@ class FileTreeTestCase(ApiDBTestCase):
 
     def test_get_file_name_output_asset(self):
         file_name = file_tree.get_file_name(
-            self.task,
+            self.task.serialize(),
             mode="output",
             version=3
         )
@@ -307,7 +308,7 @@ class FileTreeTestCase(ApiDBTestCase):
 
     def test_get_file_name_shot(self):
         file_name = file_tree.get_file_name(
-            self.shot_task,
+            self.shot_task.serialize(),
             mode="working",
             version=3
         )
@@ -315,8 +316,8 @@ class FileTreeTestCase(ApiDBTestCase):
 
     def test_get_file_path_asset(self):
         file_name = file_tree.get_file_path(
-            self.task,
-            software=self.software,
+            self.task.serialize(),
+            software=self.software.serialize(),
             version=3
         )
         self.assertEquals(
@@ -324,6 +325,20 @@ class FileTreeTestCase(ApiDBTestCase):
             "/simple/productions/cosmos_landromat/assets/props/tree/shaders/"
             "blender/"
             "cosmos_landromat_props_tree_shaders_v003"
+        )
+
+    def test_get_file_path_scene(self):
+        scene_task = self.generate_fixture_scene_task()
+        file_name = file_tree.get_file_path(
+            scene_task.serialize(),
+            software=self.software_max.serialize(),
+            version=3
+        )
+        self.assertEquals(
+            file_name,
+            "/simple/productions/cosmos_landromat/scenes/s01/sc01/animation/"
+            "3dsmax/"
+            "cosmos_landromat_sc01_animation_v003"
         )
 
     def test_change_folder_path_separators(self):
@@ -334,8 +349,8 @@ class FileTreeTestCase(ApiDBTestCase):
     def test_update_variable(self):
         name = file_tree.update_variable(
             "<AssetType>_<Asset>",
-            self.entity,
-            self.task
+            self.entity.serialize(),
+            self.task.serialize()
         )
         self.assertEquals(name, "props_tree")
 

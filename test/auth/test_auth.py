@@ -31,8 +31,8 @@ class AuthTestCase(ApiDBTestCase):
 
     def test_load_user(self):
         person = persons_service.get_person(self.person.id)
-        self.assertEqual(person.id, self.person.id)
-        person.delete()
+        self.assertEqual(person["id"], str(self.person.id))
+        persons_service.delete_person(person["id"])
         self.assertRaises(
             PersonNotFoundException,
             persons_service.get_person,
@@ -85,7 +85,7 @@ class AuthTestCase(ApiDBTestCase):
             "mypassword2"
         )
         self.assertRaises(
-            PersonNotFoundException,
+            WrongPasswordException,
             auth_service.check_credentials,
             "john.doe@yahoo.com",
             "mypassword2"
@@ -109,7 +109,7 @@ class AuthTestCase(ApiDBTestCase):
             "mypassword2"
         )
         self.assertRaises(
-            PersonNotFoundException,
+            WrongPasswordException,
             auth_service.local_auth_strategy,
             "john.doe@yahoo.com",
             "mypassword2"

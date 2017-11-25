@@ -1,6 +1,5 @@
 from test.base import ApiDBTestCase
 
-from zou.app.models.task import Task
 from zou.app.services import tasks_service
 
 
@@ -29,8 +28,7 @@ class UserContextRoutesTestCase(ApiDBTestCase):
         self.project_closed_id = self.project_closed.id
 
     def assign_user(self, task_id):
-        task = Task.get(task_id)
-        task.assignees.append(self.user)
+        tasks_service.assign_task(task_id, self.user.id)
 
     def test_get_project_sequences(self):
         self.generate_fixture_shot_task()
@@ -113,6 +111,19 @@ class UserContextRoutesTestCase(ApiDBTestCase):
         tasks = self.get(path)
         self.assertEquals(len(tasks), 1)
 
+    def test_get_scene_tasks(self):
+        self.generate_fixture_scene()
+        self.generate_fixture_scene_task()
+        scene_task_id = self.scene_task.id
+        path = "data/user/scenes/%s/tasks" % self.scene.id
+
+        tasks = self.get(path)
+        self.assertEquals(len(tasks), 0)
+
+        self.assign_user(scene_task_id)
+        tasks = self.get(path)
+        self.assertEquals(len(tasks), 1)
+
     def test_get_asset_task_types(self):
         path = "data/user/assets/%s/task-types" % self.entity.id
         task_id = self.task.id
@@ -138,19 +149,33 @@ class UserContextRoutesTestCase(ApiDBTestCase):
         task_types = self.get(path)
         self.assertEquals(len(task_types), 1)
 
+    def test_get_scene_task_types(self):
+        self.generate_fixture_scene()
+        self.generate_fixture_scene_task()
+        path = "data/user/scenes/%s/task-types" % self.scene.id
+        scene_task_id = self.scene_task.id
+
+        task_types = self.get(path)
+        self.assertEquals(len(task_types), 0)
+
+        self.assign_user(scene_task_id)
+        task_types = self.get(path)
+        self.assertEquals(len(task_types), 1)
+
     def test_get_open_projects(self):
         projects = self.get("data/user/projects/open")
         self.assertEquals(len(projects), 0)
 
-        task = Task.get(self.task_id)
-        task.assignees = [self.user]
-        task.save()
+        tasks_service.update_task(self.task_id, {
+            "assignees": [self.user]
+        })
 
         projects = self.get("data/user/projects/open")
         self.assertEquals(len(projects), 1)
 
-        task.project_id = self.project_closed_id
-        task.save()
+        tasks_service.update_task(self.task_id, {
+            "project_id": self.project_closed_id
+        })
         projects = self.get("data/user/projects/open")
         self.assertEquals(len(projects), 0)
 
@@ -170,9 +195,9 @@ class UserContextRoutesTestCase(ApiDBTestCase):
         tasks = self.get(path)
         self.assertEquals(len(tasks), 2)
 
-        task = Task.get(shot_task_id)
-        task.task_status_id = tasks_service.get_done_status().id
-        task.save()
+        tasks_service.update_task(shot_task_id, {
+            "task_status_id": tasks_service.get_done_status()["id"]
+        })
 
         self.assign_user(task_id)
         self.assign_user(shot_task_id)

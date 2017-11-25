@@ -57,19 +57,22 @@ def is_from_browser(user_agent):
 def on_identity_loaded(sender, identity):
     if identity.id is not None:
         from zou.app.services import persons_service
-        identity.user = persons_service.get_person(identity.id)
+        try:
+            identity.user = persons_service.get_person(identity.id)
 
-        if hasattr(identity.user, "id"):
-            identity.provides.add(UserNeed(identity.user.id))
+            if hasattr(identity.user, "id"):
+                identity.provides.add(UserNeed(identity.user["id"]))
 
-        if identity.user.role == "admin":
-            identity.provides.add(RoleNeed("admin"))
-            identity.provides.add(RoleNeed("manager"))
+            if identity.user["role"] == "admin":
+                identity.provides.add(RoleNeed("admin"))
+                identity.provides.add(RoleNeed("manager"))
 
-        if identity.user.role == "manager":
-            identity.provides.add(RoleNeed("manager"))
+            if identity.user["role"] == "manager":
+                identity.provides.add(RoleNeed("manager"))
 
-        return identity
+            return identity
+        except PersonNotFoundException:
+            return None
 
 
 class AuthenticatedResource(Resource):
@@ -80,7 +83,7 @@ class AuthenticatedResource(Resource):
             person = persons_service.get_by_email(get_jwt_identity())
             return {
                 "authenticated": True,
-                "user": person.serialize()
+                "user": person
             }
         except PersonNotFoundException:
             abort(401)
@@ -160,7 +163,7 @@ class LoginResource(Resource):
         except UnactiveUserException:
             return {
                 "error": True,
-                "message": "Old password is wrong."
+                "message": "User is unactive, he cannot log in."
             }, 400
 
     def get_arguments(self):
@@ -303,7 +306,7 @@ class ChangePasswordResource(Resource):
                 "error": True,
                 "message": "Old password is wrong."
             }, 400
-        except auth.WrongPasswordException:
+        except WrongPasswordException:
             return {
                 "error": True,
                 "message": "User is unactive."
@@ -337,19 +340,18 @@ class ChangePasswordResource(Resource):
 
 class PersonListResource(Resource):
     """
-    Resource used to list people available in the database without being logged.
-    It is used currently by some studios that rely on authentication without
-    password.
+    Resource used to list people available in the database without
+    having too much information.
     """
 
+    @jwt_required
     def get(self):
         person_names = []
         for person in persons_service.all_active():
             person_names.append({
-                "id": str(person.id),
-                "email": person.email,
-                "first_name": person.first_name,
-                "last_name": person.last_name,
-                "desktop_login": person.desktop_login
+                "id": person["id"],
+                "first_name": person["first_name"],
+                "last_name": person["last_name"],
+                "desktop_login": person["desktop_login"]
             })
         return person_names

@@ -69,15 +69,23 @@ class BaseImportShotgunResource(Resource):
 
 class ImportRemoveShotgunBaseResource(Resource):
 
-    def __init__(self, model, delete_func=None):
+    def __init__(self, model, delete_func=None, entity_type_id=None):
         Resource.__init__(self)
         self.model = model
         self.delete_func = delete_func
+        self.entity_type_id = entity_type_id
 
     @jwt_required
     def post(self):
         sg_model = request.json
-        instance = self.model.get_by(shotgun_id=sg_model["id"])
+        if self.entity_type_id is not None:
+            instance = self.model.get_by(
+                shotgun_id=sg_model["id"],
+                entity_type_id=self.entity_type_id
+            )
+        else:
+            instance = self.model.get_by(shotgun_id=sg_model["id"])
+
         result = {"success": True}
 
         if instance is not None:

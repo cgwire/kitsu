@@ -16,10 +16,6 @@ from zou.app.services import (
     user_service,
     entities_service
 )
-from zou.app.services.exception import (
-    EntityNotFoundException,
-    PreviewFileNotFoundException
-)
 from zou.app.utils import thumbnail as thumbnail_utils, permissions
 
 
@@ -72,7 +68,7 @@ class CreatePreviewFilePictureResource(Resource):
             return True
         else:
             preview_file = files_service.get_preview_file(preview_file_id)
-            return user_service.check_assigned(preview_file.task_id)
+            return user_service.check_assigned(preview_file["task_id"])
 
     def is_exist(self, preview_file_id):
         return files_service.get_preview_file(preview_file_id) is not None
@@ -91,9 +87,9 @@ class PreviewFileMovieResource(Resource):
             return True
         else:
             preview_file = files_service.get_preview_file(preview_file_id)
-            task = tasks_service.get_task(preview_file.task_id)
+            task = tasks_service.get_task(preview_file["task_id"])
             try:
-                user_service.check_has_task_related(task.project_id)
+                user_service.check_has_task_related(task["project_id"])
                 return True
             except permissions.PermissionDenied:
                 return False
@@ -132,9 +128,9 @@ class BasePreviewPictureResource(Resource):
             return True
         else:
             preview_file = files_service.get_preview_file(preview_file_id)
-            task = tasks_service.get_task(preview_file.task_id)
+            task = tasks_service.get_task(preview_file["task_id"])
             try:
-                user_service.check_has_task_related(task.project_id)
+                user_service.check_has_task_related(task["project_id"])
                 return True
             except permissions.PermissionDenied:
                 return False
@@ -205,27 +201,22 @@ class BaseCreatePictureResource(Resource):
         if not self.is_exist(instance_id):
             abort(404)
 
-        try:
-            self.check_permissions(instance_id)
-            uploaded_file = request.files["file"]
-            thumbnail_utils.save_file(
+        self.check_permissions(instance_id)
+        uploaded_file = request.files["file"]
+        thumbnail_utils.save_file(
+            self.data_type,
+            instance_id,
+            uploaded_file,
+            size=self.size
+        )
+
+        thumbnail_url_path = \
+            thumbnail_utils.url_path(
                 self.data_type,
-                instance_id,
-                uploaded_file,
-                size=self.size
+                instance_id
             )
 
-            thumbnail_url_path = \
-                thumbnail_utils.url_path(
-                    self.data_type,
-                    instance_id
-                )
-
-            result = {"thumbnail_path": thumbnail_url_path}
-        except permissions.PermissionDenied:
-            abort(403)
-
-        return result, 201
+        return {"thumbnail_path": thumbnail_url_path}, 201
 
 
 class BasePictureResource(Resource):
@@ -264,7 +255,8 @@ class CreatePersonThumbnailResource(BaseCreatePictureResource):
         return persons_service.get_person(person_id) is not None
 
     def check_permissions(instance_id):
-        is_current_user = persons_service.get_current_user().id != instance_id
+        is_current_user = \
+            persons_service.get_current_user()["id"] != instance_id
         if is_current_user and not permissions.has_manager_permissions():
             raise permissions.PermissionDenied
 
@@ -384,7 +376,7 @@ class WorkingFileThumbnailResource(BasePictureResource):
 
     def is_allowed(self, working_file_id):
         working_file = files_service.get_working_file(working_file_id)
-        task = tasks_service.get_task(working_file.task_id)
+        task = tasks_service.get_task(working_file["task_id"])
         try:
             if not permissions.has_manager_permissions():
                 user_service.check_has_task_related(task.project_id)
@@ -397,15 +389,8 @@ class SetMainPreviewResource(Resource):
 
     @jwt_required
     def put(self, entity_id, preview_file_id):
-        try:
-            permissions.check_manager_permissions()
-            return entities_service.update_entity_preview(
-                entity_id,
-                preview_file_id
-            )
-        except permissions.PermissionDenied:
-            abort(403)
-        except EntityNotFoundException:
-            abort(404)
-        except PreviewFileNotFoundException:
-            abort(404)
+        permissions.check_manager_permissions()
+        return entities_service.update_entity_preview(
+            entity_id,
+            preview_file_id
+        )

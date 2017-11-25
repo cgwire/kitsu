@@ -22,12 +22,10 @@ class FolderPathTestCase(ApiDBTestCase):
         self.generate_fixture_shot_task()
         self.generate_fixture_task()
         self.generate_fixture_software()
-        self.cache_type_id = str(
-            files_service.get_or_create_output_type("Cache").id
-        )
-        self.render_type_id = str(
-            files_service.get_or_create_output_type("Render").id
-        )
+        self.cache_type_id = \
+            files_service.get_or_create_output_type("Cache")["id"]
+        self.render_type_id = \
+            files_service.get_or_create_output_type("Render")["id"]
 
     def test_get_path_shot(self):
         data = {
@@ -39,6 +37,24 @@ class FolderPathTestCase(ApiDBTestCase):
         self.assertEquals(
             result["path"],
             "/simple/productions/cosmos_landromat/shots/s01/p01/animation/"
+            "3ds_max"
+        )
+
+    def test_get_path_scene(self):
+        self.generate_fixture_scene()
+        self.generate_fixture_scene_task()
+        data = {
+            "mode": "working",
+            "software": self.software_max.id
+        }
+        result = self.post(
+            "/data/tasks/%s/folder-path" % self.scene_task.id,
+            data,
+            200
+        )
+        self.assertEquals(
+            result["path"],
+            "/simple/productions/cosmos_landromat/scenes/s01/sc01/animation/"
             "3ds_max"
         )
 
@@ -176,7 +192,11 @@ class FolderPathTestCase(ApiDBTestCase):
             "mode": "working",
             "sep": "\\"
         }
-        result = self.post("data/tasks/%s/folder-path" % self.task.id, data, 200)
+        result = self.post(
+            "data/tasks/%s/folder-path" % self.task.id,
+            data,
+            200
+        )
         self.assertEquals(
             result["path"],
             "/simple\\productions\\cosmos_landromat\\assets\\props\\tree\\"

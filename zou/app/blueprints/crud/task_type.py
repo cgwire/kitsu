@@ -15,3 +15,6 @@ class TaskTypeResource(BaseModelResource):
 
     def __init__(self):
         BaseModelResource.__init__(self, TaskType)
+
+    def check_read_permissions(self, instance):
+        return True

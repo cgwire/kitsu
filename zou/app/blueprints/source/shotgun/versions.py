@@ -25,7 +25,7 @@ class ImportShotgunVersionsResource(BaseImportShotgunResource):
 
     def get_asset_map(self):
         assets = assets_service.get_assets()
-        return {asset.shotgun_id: asset.id for asset in assets}
+        return {asset["shotgun_id"]: asset["id"] for asset in assets}
 
     def get_shot_map(self):
         shots = shots_service.get_shots()

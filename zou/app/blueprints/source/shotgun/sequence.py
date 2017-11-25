@@ -15,9 +15,25 @@ class ImportShotgunSequencesResource(BaseImportShotgunResource):
     def prepare_import(self):
         self.sequence_type = shots_service.get_sequence_type()
         self.project_map = Project.get_id_map(field="name")
+        self.episode_map = self.get_episode_map()
+
+    def get_episode_map(self):
+        episodes = shots_service.get_episodes()
+        return {
+            episode["shotgun_id"]: episode["id"] for episode in episodes
+        }
+
+    def get_episode(self, sg_sequence):
+        sg_episode = sg_sequence.get("sg_episode", {"id": None})
+        if sg_episode is not None:
+            episode_sg_id = sg_episode.get("id", None)
+            return self.episode_map.get(episode_sg_id, None)
+        else:
+            return None
 
     def extract_data(self, sg_sequence):
         project_id = self.get_project(sg_sequence)
+        episode_id = self.get_episode(sg_sequence)
         if project_id is None:
             raise ShotgunEntryImportFailed
 
@@ -26,7 +42,8 @@ class ImportShotgunSequencesResource(BaseImportShotgunResource):
             "shotgun_id": sg_sequence["id"],
             "description": sg_sequence["description"],
             "project_id": project_id,
-            "entity_type_id": self.sequence_type.id
+            "parent_id": episode_id,
+            "entity_type_id": self.sequence_type["id"]
         }
 
     def get_project(self, sg_sequence):
@@ -39,7 +56,7 @@ class ImportShotgunSequencesResource(BaseImportShotgunResource):
     def import_entry(self, data):
         sequence = Entity.get_by(
             shotgun_id=data["shotgun_id"],
-            entity_type_id=self.sequence_type.id
+            entity_type_id=self.sequence_type["id"]
         )
 
         if sequence is None:
@@ -58,4 +75,8 @@ class ImportShotgunSequencesResource(BaseImportShotgunResource):
 class ImportRemoveShotgunSequenceResource(ImportRemoveShotgunBaseResource):
 
     def __init__(self):
-        ImportRemoveShotgunBaseResource.__init__(self, Entity)
+        ImportRemoveShotgunBaseResource.__init__(
+            self,
+            Entity,
+            entity_type_id=shots_service.get_sequence_type().id
+        )

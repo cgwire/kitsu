@@ -28,16 +28,16 @@ class ProjectServiceTestCase(ApiDBTestCase):
     def test_get_or_create_status(self):
         project_status = projects_service.get_or_create_status("Frozen")
         statuses = ProjectStatus.query.all()
-        self.assertEqual(project_status.name, "Frozen")
+        self.assertEqual(project_status["name"], "Frozen")
         self.assertEqual(len(statuses), 3)
 
         project_status = projects_service.get_or_create_status("Frozen")
-        self.assertEqual(project_status.name, "Frozen")
+        self.assertEqual(project_status["name"], "Frozen")
         self.assertEqual(len(statuses), 3)
 
     def test_get_or_create_open_status(self):
         project_status = projects_service.get_or_create_open_status()
-        self.assertEqual(project_status.name, "Open")
+        self.assertEqual(project_status["name"], "Open")
 
     def test_save_project_status(self):
         statuses = projects_service.save_project_status(["Frozen", "Postponed"])
@@ -53,13 +53,13 @@ class ProjectServiceTestCase(ApiDBTestCase):
     def test_get_or_create(self):
         project = projects_service.get_or_create("Agent 327")
         projects = projects_service.all_projects()
-        self.assertIsNotNone(project.id)
-        self.assertEqual(project.name, "Agent 327")
+        self.assertIsNotNone(project["id"])
+        self.assertEqual(project["name"], "Agent 327")
         self.assertEqual(len(projects), 3)
 
     def test_get_project_by_name(self):
         project = projects_service.get_project_by_name(self.project.name)
-        self.assertEqual(project.name, self.project.name)
+        self.assertEqual(project["name"], self.project.name)
         self.assertRaises(
             ProjectNotFoundException,
             projects_service.get_project_by_name,
@@ -68,7 +68,7 @@ class ProjectServiceTestCase(ApiDBTestCase):
 
     def test_get_project(self):
         project = projects_service.get_project(self.project.id)
-        self.assertEqual(project.name, self.project.name)
+        self.assertEqual(project["name"], self.project.name)
         self.assertRaises(
             ProjectNotFoundException,
             projects_service.get_project,
