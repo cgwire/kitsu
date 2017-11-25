@@ -223,7 +223,14 @@ export default {
   },
   mounted () {
     this.form = Object.assign(this.form, this.user)
+  },
+
+  metaInfo () {
+    return {
+      title: `${this.$t('profile.title')} - Kitsu`
+    }
   }
+
 }
 </script>
 

@@ -12,16 +12,6 @@
           <div class="level-item">
             <button-link
               class="level-item"
-              :text="$t('shots.manage')"
-              icon="plus"
-              :path="{
-                name: 'manage-shots',
-                params: {production_id: currentProduction.id}
-              }"
-            >
-            </button-link>
-            <button-link
-              class="level-item"
               :text="$t('main.csv.import_file')"
               icon="upload"
               :path="{
@@ -37,6 +27,16 @@
               :path="'/api/export/csv/shots.csv?project_id=' + currentProduction.id"
             >
             </button-href-link>
+            <button-link
+              class="level-item"
+              :text="$t('shots.manage')"
+              icon="plus"
+              :path="{
+                name: 'manage-shots',
+                params: {production_id: currentProduction.id}
+              }"
+            >
+            </button-link>
           </div>
         </div>
       </div>
@@ -475,7 +475,14 @@ export default {
       const path = this.$route.path
       if (oldPath !== path) this.$store.dispatch('loadShots')
     }
+  },
+
+  metaInfo () {
+    return {
+      title: `${this.currentProduction.name} ${this.$t('shots.title')} - Kitsu`
+    }
   }
+
 }
 </script>
 

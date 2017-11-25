@@ -248,6 +248,7 @@ export default {
       'SET_CURRENT_PRODUCTION',
       productionId
     )
+
     this.loadAssets((err) => {
       if (!err) this.handleModalsDisplay()
     })
@@ -452,7 +453,14 @@ export default {
 
       if (oldPath !== path) this.$store.dispatch('loadAssets')
     }
+  },
+
+  metaInfo () {
+    return {
+      title: `${this.currentProduction.name} ${this.$t('assets.title')} - Kitsu`
+    }
   }
+
 }
 </script>
 

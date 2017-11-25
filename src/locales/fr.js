@@ -68,6 +68,9 @@ export default {
     clear_selection: 'Effacer la sélection',
     delete_text: 'Etes vous sûr de vouloir supprimer {name} de la base de données ?',
     loading_error: 'Une erreur est survenue en chargeant les données.',
+    user: 'Utilisateur',
+    production: 'Production',
+    studio: 'Studio',
     csv: {
       import_file: 'Importer',
       export_file: 'Exporter',
@@ -136,6 +139,7 @@ export default {
     create_tasks_asset: 'Ajouter des tâches pour les assets affichés',
     create_tasks_asset_explaination: 'Vous allez créer une nouvelle tâche pour chaque asset de la liste affichée. Est-ce que vous voulez continuer ?',
     create_tasks_asset_failed: 'Une erreur serveur est survenue pendant la création des tâches.',
+    current_status: 'Statut actuel :',
     add_preview: 'Ajouter une previz',
     add_preview_error: 'Une erreur est survenue en ajoutant la preview.',
     set_preview: 'Utilisez cette previz comme vignette',

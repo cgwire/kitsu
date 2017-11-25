@@ -35,6 +35,14 @@ export const sortTasks = (tasks) => {
   )
 }
 
+export const sortTaskTypes = (taskTypes) => {
+  return taskTypes.sort(
+    firstBy('for_shots')
+      .thenBy('priority')
+      .thenBy('name')
+  )
+}
+
 export const sortByName = (entries) => {
   return entries.sort((a, b) => a.name.localeCompare(b.name))
 }

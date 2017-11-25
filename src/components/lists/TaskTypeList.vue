@@ -4,9 +4,9 @@
     <table class="table table-header" ref="headerWrapper">
       <thead>
         <tr>
-          <th class="name">{{ $t('task_types.fields.name') }}</th>
-          <th class="priority">{{ $t('task_types.fields.priority') }}</th>
           <th class="dedicated">{{ $t('task_types.fields.dedicated_to') }}</th>
+          <th class="priority">{{ $t('task_types.fields.priority') }}</th>
+          <th class="name">{{ $t('task_types.fields.name') }}</th>
           <th class="actions"></th>
         </tr>
       </thead>
@@ -17,18 +17,18 @@
     <table class="table">
       <tbody>
         <tr v-for="entry in entries">
-          <task-type-name class="name" :entry="entry"></task-type-name>
-          <td class="priority">{{ entry.priority }}</td>
           <td class="dedicated">{{ renderForShots(entry) }}</td>
+          <td class="priority">{{ entry.priority }}</td>
+          <task-type-name class="name" :entry="entry"></task-type-name>
           <row-actions
             :entry-id="entry.id"
             :edit-route="{
-              name: 'edit-production',
-              params: {production_id: entry.id}
+              name: 'edit-task-type',
+              params: {task_type_id: entry.id}
             }"
             :delete-route="{
-              name: 'delete-production',
-              params: {production_id: entry.id}
+              name: 'delete-task-type',
+              params: {task_type_id: entry.id}
             }"
           >
           </row-actions>

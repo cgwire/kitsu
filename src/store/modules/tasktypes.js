@@ -1,5 +1,5 @@
 import taskTypesApi from '../api/tasktypes'
-import { sortByName } from '../../lib/sorting'
+import { sortByName, sortTaskTypes } from '../../lib/sorting'
 
 import {
   LOAD_TASK_TYPES_START,
@@ -127,7 +127,7 @@ const mutations = {
     state.isTaskTypesLoading = false
     state.isTaskTypesLoadingError = false
     state.taskTypes = taskTypes
-    state.taskTypes = sortByName(state.taskTypes)
+    state.taskTypes = sortTaskTypes(state.taskTypes)
   },
 
   [EDIT_TASK_TYPE_START] (state, data) {

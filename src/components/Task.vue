@@ -15,17 +15,13 @@
             <span
                class="tag is-medium"
                :style="{
-                 'background-color': currentTask.task_type_color,
-                 color: 'white'
+                 'border-left': '4px solid ' + currentTask.task_type_color,
+                 'border-radius': '0',
+                 'font-weight': 'bold',
+                 color: '#666'
                }">
                {{ currentTask.task_type_name }}
              </span>
-           </div>
-           <div class="level-item" v-if="currentTask">
-             <validation-tag
-               :task="currentTask"
-               class="is-medium"
-             ></validation-tag>
            </div>
            <div class="assignees" v-if="currentTask">
              <people-avatar
@@ -51,71 +47,14 @@
 
     <div class="task-columns">
       <div class="task-column">
-        <h2 class="subtitle">
-          {{ $t('tasks.preview') }}
-        </h2>
-        <div class="preview-list" v-if="currentTaskPreviews && currentTaskPreviews.length > 0">
-          <preview-row
-            :key="preview.id"
-            :preview="preview"
-            :taskId="currentTask ? currentTask.id : ''"
-            :selected="preview.id === currentPreviewId"
-            v-for="preview in currentTaskPreviews"
-          >
-          </preview-row>
-        </div>
-        <div v-else>
-          <em>
-            {{ $t('tasks.no_preview')}}
-          </em>
-        </div>
-
-        <div class="preview-picture">
-          <div v-if="currentTaskPreviews && currentTaskPreviews.length > 0 && isMovie">
-            <video
-              :src="moviePath"
-              controls
-              :poster="getPreviewPath()" />
-            </video>
-          </div>
-          <a
-            :href="getOriginalPath()"
-            target="_blank"
-            v-else-if="currentTaskPreviews.length > 0 && !isMovie"
-          >
-            <img :src="getPreviewPath()" />
-          </a>
-        </div>
-        <div
-          class="flexrow"
-           v-if="currentTask && currentTask.entity && currentTask.entity.preview_file_id !== currentPreviewId"
-          >
-          <button
-            :class="{
-              button: true,
-              'flexrow-item': true,
-              'is-loading': loading.setPreview
-            }"
-            @click="setPreview"
-            v-if="currentTaskPreviews.length > 0"
-          >
-            <image-icon class="icon"></image-icon>
-            <span class="text">
-              {{ $t('tasks.set_preview')}}
-            </span>
-          </button>
-          <span class="error flexrow-item" v-if="errors.setPreview">
-            {{ $t('tasks.set_preview_error')}}
-          </span>
-        </div>
-        <div v-if="currentTask && currentTask.entity && currentTask.entity.preview_file_id === currentPreviewId">
-          <em>{{ $t('tasks.set_preview_done')}}</em>
-        </div>
-			</div>
-
-      <div class="task-column">
         <h2 class="subtitle validation-title">
-          {{ $t('tasks.validation') }}
+          {{ $t('tasks.current_status') }}
+          <validation-tag
+            :task="currentTask"
+            class="is-medium"
+            is-static="true"
+            v-if="currentTask"
+          ></validation-tag>
         </h2>
 
         <div v-if="currentTask">
@@ -203,8 +142,70 @@
         <div class="has-text-centered" v-else>
           <img src="../assets/spinner.svg" />
         </div>
+	  </div>
 
-			</div>
+      <div class="task-column">
+        <h2 class="subtitle">
+          {{ $t('tasks.preview') }}
+        </h2>
+        <div class="preview-list" v-if="currentTaskPreviews && currentTaskPreviews.length > 0">
+          <preview-row
+            :key="preview.id"
+            :preview="preview"
+            :taskId="currentTask ? currentTask.id : ''"
+            :selected="preview.id === currentPreviewId"
+            v-for="preview in currentTaskPreviews"
+          >
+          </preview-row>
+        </div>
+        <div v-else>
+          <em>
+            {{ $t('tasks.no_preview')}}
+          </em>
+        </div>
+
+        <div class="preview-picture">
+          <div v-if="currentTaskPreviews && currentTaskPreviews.length > 0 && isMovie">
+            <video
+              :src="moviePath"
+              controls
+              :poster="getPreviewPath()" />
+            </video>
+          </div>
+          <a
+            :href="getOriginalPath()"
+            target="_blank"
+            v-else-if="currentTaskPreviews.length > 0 && !isMovie"
+          >
+            <img :src="getPreviewPath()" />
+          </a>
+        </div>
+        <div
+          class="flexrow"
+           v-if="currentTask && currentTask.entity && currentTask.entity.preview_file_id !== currentPreviewId"
+          >
+          <button
+            :class="{
+              button: true,
+              'flexrow-item': true,
+              'is-loading': loading.setPreview
+            }"
+            @click="setPreview"
+            v-if="currentTaskPreviews.length > 0 && isCurrentUserManager"
+          >
+            <image-icon class="icon"></image-icon>
+            <span class="text">
+              {{ $t('tasks.set_preview')}}
+            </span>
+          </button>
+          <span class="error flexrow-item" v-if="errors.setPreview">
+            {{ $t('tasks.set_preview_error')}}
+          </span>
+        </div>
+        <div v-if="currentTask && currentTask.entity && currentTask.entity.preview_file_id === currentPreviewId">
+          <em>{{ $t('tasks.set_preview_done')}}</em>
+        </div>
+      </div>
     </div>
 
     <add-preview-modal
@@ -362,6 +363,7 @@ export default {
       'user',
       'isCurrentUserManager'
     ]),
+
     currentPreviewId () {
       let previewId = this.route.params.preview_id
 
@@ -370,13 +372,26 @@ export default {
       }
       return previewId
     },
+
     title () {
       if (this.currentTask) {
-        return `${this.currentTask.project_name} / ${this.currentTask.entity_name}`
+        const projectName = this.currentTask.project_name
+        const entityName = this.currentTask.entity_name
+        return `${projectName} / ${entityName}`
       } else {
         return 'Loading...'
       }
     },
+
+    windowTitle () {
+      if (this.currentTask) {
+        const taskTypeName = this.currentTask.task_type_name
+        return `${this.title} / ${taskTypeName}`
+      } else {
+        return 'Loading...'
+      }
+    },
+
     deleteText () {
       if (this.currentTask) {
         return this.$t('main.delete_text', {
@@ -568,6 +583,12 @@ export default {
   },
   watch: {
     $route () { this.handleModalsDisplay() }
+  },
+
+  metaInfo () {
+    return {
+      title: this.currentTask ? `${this.title} / ${this.currentTask.task_type_name}- Kitsu` : `Loading task... - Kitsu`
+    }
   }
 }
 </script>
@@ -575,6 +596,10 @@ export default {
 <style scoped>
 .title {
   margin-top: 1em;
+}
+
+.selected {
+  border: 0;
 }
 
 .source {
@@ -613,6 +638,7 @@ video {
 .task-columns {
   display: flex;
   flex-direction: row;
+  overflow-y: auto;
 }
 
 .task-column {

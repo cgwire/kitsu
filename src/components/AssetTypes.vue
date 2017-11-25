@@ -158,7 +158,14 @@ export default {
 
   watch: {
     $route () { this.handleModalsDisplay() }
+  },
+
+  metaInfo () {
+    return {
+      title: `${this.$t('asset_types.title')} - Kitsu`
+    }
   }
+
 }
 </script>
 

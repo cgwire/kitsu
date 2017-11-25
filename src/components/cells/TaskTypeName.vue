@@ -2,7 +2,7 @@
 <td class="name">
   <div
     class="tag task-type-name"
-    :style="{ 'background-color': color }"
+    :style="{ 'border-left': '4px solid ' + color }"
   >
     {{ entry.name }}
   </div>
@@ -38,7 +38,9 @@ export default {
 .tag {
   margin: 0.7em;
   padding: 1em;
-  font-size: 0.8em;
-  color: white;
+  font-size: 1em;
+  color: #666;
+  border-radius: 0;
+  font-weight: bold;
 }
 </style>

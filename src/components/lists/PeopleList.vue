@@ -110,8 +110,8 @@ export default {
   min-width: 230px;
 }
 .email {
-  width: 210px;
-  min-width: 210px;
+  width: 300px;
+  min-width: 300px;
 }
 .phone {
   width: 140px;

@@ -14,6 +14,7 @@
       <div class="shot-columns">
 
         <div class="shot-column">
+
           <h2 class="subtitle">Episodes</h2>
           <div class="list">
             <div
@@ -31,9 +32,13 @@
           <div class="field">
             <input
               class="input"
+              ref="addEpisodeInput"
+              placeholder="EP01"
               type="text"
+              @keyup.tab="focusAddSequence"
               @keyup.enter="addEpisode"
               v-model="names.episode"
+              v-focus
             >
             </input>
             <button
@@ -42,6 +47,7 @@
                 'is-success': true,
                 'is-loading': loading.addEpisode
               }"
+              :disabled="isAddEpisodeAllowed"
               @click="addEpisode"
             >
               {{ $t('main.add')}}
@@ -58,6 +64,7 @@
                 selected: sequence.id === selectedSequenceId
               }"
               :key="sequence.id"
+              @keyup.tab="focusAddShot"
               @click="selectSequence(sequence.id)"
               v-for="sequence in displayedSequences">
               {{ sequence.name }}
@@ -66,6 +73,8 @@
           <div class="field">
             <input
               class="input"
+              ref="addSequenceInput"
+              placeholder="SQ01"
               type="text"
               @keyup.enter="addSequence"
               v-model="names.sequence"
@@ -77,6 +86,7 @@
                 'is-success': true,
                 'is-loading': loading.addSequence
               }"
+              :disabled="isAddSequenceAllowed"
               @click="addSequence"
             >
               {{ $t('main.add')}}
@@ -98,6 +108,8 @@
           <div class="field">
             <input
               class="input"
+              placeholder="SH01"
+              ref="addShotInput"
               type="text"
               @keyup.enter="addShot"
               v-model="names.shot"
@@ -108,6 +120,7 @@
                 'is-success': true,
                 'is-loading': loading.addShot
               }"
+              :disabled="isAddShotAllowed"
               @click="addShot"
             >
               {{ $t('main.add')}}
@@ -116,7 +129,7 @@
         </div>
       </div>
 
-      <p class="has-text-right">
+      <p class="has-text-right modal-footer">
         <router-link
           :to="cancelRoute"
           class="button is-link">
@@ -147,9 +160,6 @@ export default {
     'errorText'
   ],
 
-  watch: {
-  },
-
   data () {
     return {
       names: {
@@ -169,13 +179,51 @@ export default {
     }
   },
 
+  watch: {
+    active () {
+      if (this.active) {
+        console.log(this.$refs.addEpisodeInput.$el)
+        console.log(this.$refs.addEpisodeInput.children)
+        console.log(this.$refs.addEpisodeInput.focus)
+        console.log(this.$refs.addEpisodeInput)
+        setTimeout(() => {
+          this.$refs.addEpisodeInput.focus()
+        }, 100)
+      }
+    }
+  },
+
   computed: {
     ...mapGetters([
       'episodes',
       'sequences',
       'shots',
       'currentProduction'
-    ])
+    ]),
+
+    isAddEpisodeAllowed () {
+      const isEmpty = this.names.episode === ''
+      const isExist = this.episodes.find((episode) => {
+        return this.names.episode === episode.name
+      })
+      return isEmpty || isExist
+    },
+
+    isAddSequenceAllowed () {
+      const isEmpty = this.names.sequence === ''
+      const isExist = this.displayedSequences.find((sequence) => {
+        return this.names.sequence === sequence.name
+      })
+      return isEmpty || isExist
+    },
+
+    isAddShotAllowed () {
+      const isEmpty = this.names.shot === ''
+      const isExist = this.displayedShots.find((shot) => {
+        return this.names.shot === shot.name
+      })
+      return isEmpty || isExist
+    }
   },
 
   methods: {
@@ -184,6 +232,14 @@ export default {
       'newSequence',
       'newShot'
     ]),
+
+    focusAddSequence () {
+      this.$refs.addSequenceInput.focus()
+    },
+
+    focusAddShot () {
+      this.$refs.addShotInput.focus()
+    },
 
     selectEpisode (episodeId) {
       this.selectedEpisodeId = episodeId
@@ -283,12 +339,20 @@ export default {
   margin-right: 10px;
   overflow-y: scroll;
   flex: 1;
+  border: 1px solid #CCC;
+  border-bottom: 0;
 }
 
 .shot-column .field {
   display: flex;
   margin-bottom: 0;
   margin-right: 10px;
+  flex-direction: column;
+}
+
+.shot-column .button,
+.shot-column .input {
+  border-radius: 0;
 }
 
 .entity-line {
@@ -301,5 +365,14 @@ export default {
 
 .entity-line.selected {
   background: #D1C4E9;
+  border: 0;
+}
+
+.modal-footer {
+  margin-top: 1em;
+}
+
+input::placeholder {
+  color: #999;
 }
 </style>

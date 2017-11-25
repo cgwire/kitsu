@@ -324,6 +324,12 @@ export default {
         this.reset()
       }
     }
+  },
+
+  metaInfo () {
+    return {
+      title: `${this.currentProduction.name} ${this.$t('breakdown.title')} - Kitsu`
+    }
   }
 }
 </script>

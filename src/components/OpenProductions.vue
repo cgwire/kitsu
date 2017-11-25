@@ -47,6 +47,7 @@
             class="level-item big-button"
             :text="$t('productions.home.create_new')"
             path="/productions/new"
+            :is-responsive="false"
           >
           </button-link>
         </p>
@@ -103,6 +104,12 @@ export default {
     },
     getPath (production) {
       return `/productions/${production.id}/assets`
+    }
+  },
+
+  metaInfo () {
+    return {
+      title: `${this.$t('productions.home.title')} - Kitsu`
     }
   }
 }

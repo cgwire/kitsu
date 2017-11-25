@@ -8,10 +8,12 @@ import realtime from './lib/realtime'
 import store from './store'
 import App from './App'
 import VueLazyload from 'vue-lazyload'
+import Meta from 'vue-meta'
 
 Vue.config.productionTip = false
 Vue.use(vuescroll)
 Vue.use(VueLazyload)
+Vue.use(Meta)
 
 // Make the current route part of the main state.
 sync(store, router)
