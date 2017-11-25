@@ -85,7 +85,7 @@ class AuthTestCase(ApiDBTestCase):
             "mypassword2"
         )
         self.assertRaises(
-            PersonNotFoundException,
+            WrongPasswordException,
             auth_service.check_credentials,
             "john.doe@yahoo.com",
             "mypassword2"
@@ -109,7 +109,7 @@ class AuthTestCase(ApiDBTestCase):
             "mypassword2"
         )
         self.assertRaises(
-            PersonNotFoundException,
+            WrongPasswordException,
             auth_service.local_auth_strategy,
             "john.doe@yahoo.com",
             "mypassword2"
