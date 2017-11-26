@@ -16,12 +16,6 @@
 
       <form v-on:submit.prevent>
         <combobox
-          :label="$t('assets.fields.production')"
-          :options="getOpenProductionOptions"
-          v-model="form.project_id"
-        >
-        </combobox>
-        <combobox
           :label="$t('assets.fields.type')"
           :options="getAssetTypeOptions"
           v-model="form.entity_type_id"
@@ -70,7 +64,7 @@
         <router-link
           :to="cancelRoute"
           class="button is-link">
-          {{ $t("main.cancel") }}
+          {{ $t("main.close") }}
         </router-link>
         <p class="error has-text-right info-message" v-if="isError">
           {{ $t("assets.edit_fail") }}
@@ -116,7 +110,7 @@ export default {
           name: this.assetToEdit.name,
           description: this.assetToEdit.description,
           entity_type_id: this.assetToEdit.entity_type_id,
-          production_id: this.assetToEdit.project_id
+          production_id: this.currentProduction.id
         },
         assetSuccessText: ''
       }
@@ -208,9 +202,16 @@ export default {
           name: this.assetCreated
         })
       }
+    },
+
+    active () {
+      if (this.active) {
+        setTimeout(() => {
+          this.$refs.nameField.focus()
+        }, 100)
+      }
     }
   }
-
 }
 </script>
 
