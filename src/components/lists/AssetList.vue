@@ -222,6 +222,16 @@ td.type {
   max-width: 50px;
   width: 50px;
   padding: 0;
-  padding-top: 7px;
+}
+
+.thumbnail img {
+  margin-top: 5px;
+}
+
+span.thumbnail-empty {
+  display: block;
+  width: 50px;
+  height: 30px;
+  background: #F3F3F3;
 }
 </style>
