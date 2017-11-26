@@ -43,7 +43,6 @@ const actions = {
           commit(LOGIN_FAILURE)
           callback(null, false)
         } else {
-          commit(LOGIN_SUCCESS)
           callback(null, true)
         }
       }

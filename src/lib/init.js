@@ -15,6 +15,7 @@ const init = (callback) => {
     if (err) {
       console.log('Init failed', err)
     }
+    store.commit('LOGIN_SUCCESS')
     callback()
   })
 }
