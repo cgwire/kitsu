@@ -80,6 +80,12 @@ export default {
         if (success) this.$router.push('/')
       })
     }
+  },
+
+  metaInfo () {
+    return {
+      title: this.$t('login.title')
+    }
   }
 }
 </script>
