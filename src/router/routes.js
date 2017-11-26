@@ -52,6 +52,12 @@ export const routes = [
         component: OpenProductions,
         name: 'open-productions'
       },
+      {
+        path: '/open-productions/new',
+        component: OpenProductions,
+        name: 'open-productions-new'
+      },
+
       { path: '/people', component: People },
       { path: '/people/new', component: People },
       {

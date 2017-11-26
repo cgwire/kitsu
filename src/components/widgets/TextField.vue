@@ -50,6 +50,9 @@ export default {
     },
     updateValue () {
       this.$emit('input', this.$refs.input.value)
+    },
+    focus () {
+      this.$refs.input.focus()
     }
   }
 }

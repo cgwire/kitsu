@@ -18,8 +18,6 @@
                class="avatar has-text-centered"
                v-bind:style="{
                background: getAvatarColor(production),
-               width: size + 'px',
-               height: size + 'px'
             }">
               {{ generateAvatar(production) }}
             </div>
@@ -46,7 +44,7 @@
           <button-link
             class="level-item big-button"
             :text="$t('productions.home.create_new')"
-            path="/productions/new"
+            :path="{name: 'open-productions-new'}"
             :is-responsive="false"
           >
           </button-link>
@@ -59,6 +57,16 @@
       </div>
     </div>
 
+
+    <edit-production-modal
+      :active="modals.isNewDisplayed"
+      :is-loading="editProduction.isLoading"
+      :is-error="editProduction.isError"
+      :cancel-route="'/open-productions'"
+      @confirm="confirmEditProduction"
+    >
+    </edit-production-modal>
+
   </div>
 </template>
 
@@ -68,31 +76,37 @@ import { ActivityIcon } from 'vue-feather-icons'
 
 import colors from '../lib/colors.js'
 import ButtonLink from './widgets/ButtonLink'
+import EditProductionModal from './modals/EditProductionModal'
 
 export default {
   name: 'menu',
 
   components: {
     ActivityIcon,
-    ButtonLink
+    ButtonLink,
+    EditProductionModal
   },
 
   data () {
     return {
-      size: 100
+      modals: {
+        isNewDisplayed: false
+      }
     }
   },
 
   computed: {
     ...mapGetters([
       'openProductions',
-      'isCurrentUserManager'
+      'isCurrentUserManager',
+      'editProduction'
     ])
   },
 
   methods: {
     ...mapActions([
-      'loadProductions'
+      'loadProductions',
+      'newProduction'
     ]),
 
     generateAvatar (production) {
@@ -104,7 +118,37 @@ export default {
     },
     getPath (production) {
       return `/productions/${production.id}/assets`
+    },
+
+    confirmEditProduction (form) {
+      this.newProduction({
+        data: form,
+        callback: (err) => {
+          if (!err) {
+            this.modals.isNewDisplayed = false
+            this.$router.push('/')
+          }
+        }
+      })
+    },
+
+    handleModalsDisplay () {
+      const path = this.$store.state.route.path
+
+      if (path.indexOf('new') > 0) {
+        this.modals.isNewDisplayed = true
+      } else {
+        this.modals.isNewDisplayed = false
+      }
     }
+  },
+
+  watch: {
+    $route () { this.handleModalsDisplay() }
+  },
+
+  created () {
+    this.handleModalsDisplay()
   },
 
   metaInfo () {
@@ -119,6 +163,11 @@ export default {
 h1 {
   margin-top: 3em;
   margin-bottom: 3em;
+}
+
+.avatar {
+  width: 100px;
+  height: 100px;
 }
 
 .open-productions-list {

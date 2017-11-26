@@ -81,6 +81,14 @@ export default {
         this.form.name = this.productionToEdit.name
         this.form.project_status_id = this.productionToEdit.project_status_id
       }
+    },
+
+    active () {
+      if (this.active) {
+        setTimeout(() => {
+          this.$refs.nameField.focus()
+        }, 100)
+      }
     }
   },
 
