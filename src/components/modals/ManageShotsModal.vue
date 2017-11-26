@@ -182,10 +182,6 @@ export default {
   watch: {
     active () {
       if (this.active) {
-        console.log(this.$refs.addEpisodeInput.$el)
-        console.log(this.$refs.addEpisodeInput.children)
-        console.log(this.$refs.addEpisodeInput.focus)
-        console.log(this.$refs.addEpisodeInput)
         setTimeout(() => {
           this.$refs.addEpisodeInput.focus()
         }, 100)
