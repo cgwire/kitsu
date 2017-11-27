@@ -52,7 +52,7 @@
           <validation-tag
             :task="currentTask"
             class="is-medium"
-            is-static="true"
+            :is-static="true"
             v-if="currentTask"
           ></validation-tag>
         </h2>
@@ -361,6 +361,7 @@ export default {
       'getTaskComment',
       'personMap',
       'user',
+      'currentProduction',
       'isCurrentUserManager'
     ]),
 
@@ -569,9 +570,15 @@ export default {
             this.errors.deleteTask = true
           } else {
             if (type === 'Shot') {
-              this.$router.push('/shots')
+              this.$router.push({
+                name: 'shots',
+                params: {production_id: this.currentProduction.id}
+              })
             } else {
-              this.$router.push('/assets')
+              this.$router.push({
+                name: 'assets',
+                params: {production_id: this.currentProduction.id}
+              })
             }
           }
         }
