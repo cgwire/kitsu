@@ -18,14 +18,14 @@ class RouteCreateTasksTestCase(ApiDBTestCase):
         task_type_animation_id = self.task_type_animation.id
         entity_id = self.entity.id
 
-        tasks = self.get("/data/entities/%s/task-types/%s" % (
+        tasks = self.get("/data/entities/%s/task-types/%s/tasks" % (
             entity_id,
             task_type_id
         ))
         self.assertEquals(len(tasks), 1)
         self.assertDictEqual(tasks[0], self.task.serialize())
 
-        tasks = self.get("/data/entities/%s/task-types/%s" % (
+        tasks = self.get("/data/entities/%s/task-types/%s/tasks" % (
             entity_id,
             task_type_animation_id
         ))

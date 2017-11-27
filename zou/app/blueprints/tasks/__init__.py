@@ -31,7 +31,7 @@ routes = [
     ("/data/tasks/<task_id>/previews", TaskPreviewsResource),
     ("/data/tasks/<task_id>/full", TaskFullResource),
     (
-        "/data/entities/<entity_id>/task-types/<task_type_id>",
+        "/data/entities/<entity_id>/task-types/<task_type_id>/tasks",
         TaskForEntityResource
     ),
 
