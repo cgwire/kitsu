@@ -102,7 +102,7 @@ class AddPreviewResource(Resource):
         events.emit("preview:add", {
             "comment_id": comment_id,
             "task_id": task_id,
-            "preview": preview.serialize()
+            "preview": preview
         })
 
         return preview, 201
