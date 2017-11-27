@@ -1,6 +1,6 @@
 import assetsApi from '../api/assets'
 import { sortAssets, sortValidationColumns } from '../../lib/sorting'
-import { buildNameIndex, indexSearch } from '../../lib/indexing'
+import { buildAssetIndex, indexSearch } from '../../lib/indexing'
 import tasksStore from './tasks'
 import productionsStore from './productions'
 
@@ -248,7 +248,7 @@ const mutations = {
     state.isAssetsLoading = false
     state.isAssetsLoadingError = false
 
-    state.assetIndex = buildNameIndex(assets)
+    state.assetIndex = buildAssetIndex(assets)
     state.displayedAssets = state.assets
   },
 
@@ -304,7 +304,7 @@ const mutations = {
       isLoading: false,
       isError: false
     }
-    state.assetIndex = buildNameIndex(state.assets)
+    state.assetIndex = buildAssetIndex(state.assets)
     state.assetMap[newAsset.id] = asset
   },
 
@@ -337,7 +337,7 @@ const mutations = {
       isLoading: false,
       isError: false
     }
-    state.assetIndex = buildNameIndex(state.assets)
+    state.assetIndex = buildAssetIndex(state.assets)
   },
 
   [RESTORE_ASSET_START] (state) {
@@ -359,7 +359,7 @@ const mutations = {
       isLoading: false,
       isError: false
     }
-    state.assetIndex = buildNameIndex(state.assets)
+    state.assetIndex = buildAssetIndex(state.assets)
   },
 
   [RESTORE_ASSET_START] (state) {
@@ -381,7 +381,7 @@ const mutations = {
       isLoading: false,
       isError: false
     }
-    state.assetIndex = buildNameIndex(state.assets)
+    state.assetIndex = buildAssetIndex(state.assets)
   },
 
   [DELETE_TASK_END] (state, task) {
