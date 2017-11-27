@@ -151,7 +151,7 @@ class SequenceTaskTypesResource(Resource):
         """
         Retrieve all task types related to a given shot.
         """
-        sequence = shots_service.get_sequenc(sequence_id)
+        sequence = shots_service.get_sequence(sequence_id)
         if not permissions.has_manager_permissions():
             user_service.check_has_task_related(sequence["project_id"])
         return tasks_service.get_task_types_for_sequence(sequence_id)
