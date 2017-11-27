@@ -43,6 +43,8 @@ const actions = {
           commit(LOGIN_FAILURE)
           callback(null, false)
         } else {
+          // Login end is commited at the end of the init phase, initiated
+          // after login through this callback.
           callback(null, true)
         }
       }

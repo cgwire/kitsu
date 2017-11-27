@@ -61,9 +61,6 @@ describe('login', () => {
       }
       helpers.runAction('logIn', (err) => {
         expect(err).to.be.null
-        expect(store._vm.isLoginLoading).to.equal(false)
-        expect(store._vm.isLoginError).to.equal(false)
-        expect(store._vm.password).to.equal('')
         done()
       })
     })
