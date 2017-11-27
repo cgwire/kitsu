@@ -18,7 +18,8 @@ from zou.app.services import (
     projects_service,
     files_service,
     file_tree,
-    user_service
+    user_service,
+    entities_service
 )
 from zou.app.utils import query, events, permissions
 
@@ -373,6 +374,19 @@ class TaskStartResource(Resource):
         if not permissions.has_manager_permissions():
             user_service.check_assigned(task_id)
         return tasks_service.start_task(task["id"])
+
+
+class TaskForEntityResource(Resource):
+
+    @jwt_required
+    def get(self, entity_id, task_type_id):
+        entity = entities_service.get_entity(entity_id)
+        if not permissions.has_manager_permissions():
+            user_service.check_has_task_related(entity["project_id"])
+        return tasks_service.get_tasks_for_entity_and_task_type(
+            entity_id,
+            task_type_id
+        )
 
 
 class SetTimeSpentResource(Resource):

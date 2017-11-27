@@ -1,4 +1,5 @@
 from zou.app.utils import events
+from sqlalchemy.exc import StatementError
 
 from zou.app.models.entity import Entity
 from zou.app.models.preview_file import PreviewFile
@@ -7,6 +8,26 @@ from zou.app.services.exception import (
     PreviewFileNotFoundException,
     EntityNotFoundException
 )
+
+
+def get_model_raw(model, instance_id, exception):
+    try:
+        instance = model.get(instance_id)
+    except StatementError:
+        raise exception
+
+    if instance is None:
+        raise exception
+
+    return instance
+
+
+def get_entity(entity_id):
+    return get_model_raw(
+        Entity,
+        entity_id,
+        EntityNotFoundException
+    ).serialize()
 
 
 def update_entity_preview(entity_id, preview_file_id):

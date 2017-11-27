@@ -496,3 +496,11 @@ def create_comment(
         text=text
     )
     return comment.serialize()
+
+
+def get_tasks_for_entity_and_task_type(entity_id, task_type_id):
+    tasks = Task.query \
+       .filter_by(entity_id=entity_id, task_type_id=task_type_id) \
+       .order_by(Task.name) \
+       .all()
+    return Task.serialize_list(tasks)
