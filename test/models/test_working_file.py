@@ -3,6 +3,7 @@ from test.base import ApiDBTestCase
 from zou.app.models.working_file import WorkingFile
 
 from zou.app.utils import fields
+from zou.app.services import tasks_service
 
 
 class WorkingFileTestCase(ApiDBTestCase):
@@ -35,11 +36,22 @@ class WorkingFileTestCase(ApiDBTestCase):
         self.assertEquals(len(working_files), 3)
 
     def test_get_working_file(self):
+        self.generate_fixture_user_cg_artist()
+        task_id = self.task.id
+        user_cg_artist_id = self.user_cg_artist.id
+
         working_file = self.get_first("data/working-files")
         working_file_again = self.get(
             "data/working-files/%s" % working_file["id"])
         self.assertEquals(working_file, working_file_again)
         self.get_404("data/working-files/%s" % fields.gen_uuid())
+
+        self.log_in_cg_artist()
+        working_file_again = self.get(
+            "data/working-files/%s" % working_file["id"], 403)
+        tasks_service.assign_task(task_id, user_cg_artist_id)
+        working_file_again = self.get(
+            "data/working-files/%s" % working_file["id"])
 
     def test_create_working_file(self):
         data = {
