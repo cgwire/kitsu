@@ -306,7 +306,7 @@ class CommentWorkingFileResource(Resource):
         working_file = files_service.get_working_file(working_file_id)
         task = tasks_service.get_task(working_file["task_id"])
         if not permissions.has_manager_permissions():
-            task = user_service.check_has_task_related(task["project_id"])
+            user_service.check_has_task_related(task["project_id"])
         working_file = self.update_comment(working_file_id, comment)
         return working_file
 
@@ -345,7 +345,7 @@ class NewOutputFileResource(Resource):
         try:
             task = tasks_service.get_task(task_id)
             if not permissions.has_manager_permissions():
-                task = user_service.check_has_task_related(task["project_id"])
+                user_service.check_has_task_related(task["project_id"])
             output_type = files_service.get_output_type(output_type_id)
             working_file = files_service.get_working_file(working_file_id)
             person = persons_service.get_person(person_id)
@@ -437,7 +437,7 @@ class GetNextOutputFileResource(Resource):
         name = self.get_arguments()
         task = tasks_service.get_task(task_id)
         if not permissions.has_manager_permissions():
-            task = user_service.check_has_task_related(task["project_id"])
+            user_service.check_has_task_related(task["project_id"])
         output_type = files_service.get_output_type(output_type_id)
 
         next_revision_number = \
@@ -464,7 +464,7 @@ class LastWorkingFilesResource(Resource):
         result = {}
         task = tasks_service.get_task(task_id)
         if not permissions.has_manager_permissions():
-            task = user_service.check_has_task_related(task["project_id"])
+            user_service.check_has_task_related(task["project_id"])
         result = files_service.get_last_working_files_for_task(task["id"])
 
         return result
@@ -477,7 +477,7 @@ class LastOutputFilesResource(Resource):
         result = {}
         task = tasks_service.get_task(task_id)
         if not permissions.has_manager_permissions():
-            task = user_service.check_has_task_related(task["project_id"])
+            user_service.check_has_task_related(task["project_id"])
         result = files_service.get_last_output_files_for_task(task["id"])
 
         return result
@@ -490,7 +490,7 @@ class TaskWorkingFilesResource(Resource):
         result = {}
         task = tasks_service.get_task(task_id)
         if not permissions.has_manager_permissions():
-            task = user_service.check_has_task_related(task["project_id"])
+            user_service.check_has_task_related(task["project_id"])
         result = files_service.get_working_files_for_task(task["id"])
 
         return result
@@ -513,7 +513,7 @@ class NewWorkingFileResource(Resource):
         try:
             task = tasks_service.get_task(task_id)
             if not permissions.has_manager_permissions():
-                task = user_service.check_has_task_related(task["project_id"])
+                user_service.check_has_task_related(task["project_id"])
             software = files_service.get_software(software_id)
             tasks_service.assign_task(
                 task_id,
@@ -592,7 +592,7 @@ class ModifiedFileResource(Resource):
         working_file = files_service.get_working_file(working_file_id)
         task = tasks_service.get_task(working_file["task_id"])
         if not permissions.has_manager_permissions():
-            task = user_service.check_has_task_related(task["project_id"])
+            user_service.check_has_task_related(task["project_id"])
         working_file = files_service.update_working_file(
             working_file_id,
             {"updated_at": datetime.datetime.utcnow()}
