@@ -7,8 +7,14 @@ class EntityTypesResource(BaseModelsResource):
     def __init__(self):
         BaseModelsResource.__init__(self, EntityType)
 
+    def check_read_permissions(self, instance):
+        return True
+
 
 class EntityTypeResource(BaseModelResource):
 
     def __init__(self):
         BaseModelResource.__init__(self, EntityType)
+
+    def check_read_permissions(self, instance):
+        return True
