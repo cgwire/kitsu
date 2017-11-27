@@ -190,8 +190,10 @@ export default {
     edit_title: 'Modifier asset',
     number: 'asset | assets',
     new_asset: 'Ajouter un asset',
+    new_assets: 'Ajouter des assets',
     edit_fail: 'La création ou l\'édition a échoué, une erreur est survenue.',
     new_success: 'Asset {name} créé avec succès.',
+    empty_list: 'Il n\'y a pas d\'assets dans la production. Voulez vous en créer ?',
     fields: {
       name: 'Asset',
       type: 'Type',
@@ -209,10 +211,12 @@ export default {
     edit_title: 'Modifier plan',
     number: 'plan | plans',
     new_shot: 'Ajouter un plan',
+    new_shots: 'Ajouter des plans',
     manage: 'Gérer les plans',
     edit_fail: 'La création ou l\'édition a échoué, une erreur est survenue.',
     new_success: 'Plan {name} créé avec succès.',
     description: 'Description',
+    empty_list: 'Il n\'y a pas de shots dans la production. Voulez vous en créer ?',
     fields: {
       name: 'Plan',
       episode: 'Épisode',

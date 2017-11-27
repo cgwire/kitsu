@@ -45,6 +45,7 @@ const state = {
 
   assetIndex: {},
   displayedAssets: [],
+  assetSearchText: '',
 
   validationColumns: {},
   openProductions: [],
@@ -76,6 +77,7 @@ const getters = {
   assetValidationColumns: (state) => {
     return sortValidationColumns(Object.values(state.validationColumns))
   },
+  assetSearchText: state => state.assetSearchText,
 
   isAssetsLoading: state => state.isAssetsLoading,
   isAssetsLoadingError: state => state.isAssetsLoadingError,
@@ -409,6 +411,7 @@ const mutations = {
   [SET_ASSET_SEARCH] (state, assetSearch) {
     state.displayedAssets =
       indexSearch(state.assetIndex, assetSearch) || state.assets
+    state.assetSearchText = assetSearch
   },
 
   [RESET_ALL] (state) {

@@ -57,6 +57,7 @@ const state = {
   sequences: [],
   episodes: [],
   validationColumns: {},
+  shotSearchText: '',
 
   displayedShots: [],
   shotIndex: {},
@@ -90,6 +91,9 @@ const getters = {
   shotMap: state => state.shotMap,
   sequences: state => state.sequences,
   episodes: state => state.episodes,
+
+  shotSearchText: state => state.shotSearchText,
+
   shotValidationColumns: state => {
     return sortValidationColumns(Object.values(state.validationColumns))
   },
@@ -429,6 +433,7 @@ const mutations = {
   [SET_SHOT_SEARCH] (state, shotSearch) {
     state.displayedShots =
       indexSearch(state.shotIndex, shotSearch) || state.shots
+    state.shotSearchText = shotSearch
   },
 
   [NEW_SHOT_START] (state) {},

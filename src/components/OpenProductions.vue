@@ -216,14 +216,4 @@ h1 {
 .welcome h1 {
   margin-top: 1em;
 }
-
-.big-button {
-  border-radius: 2px;
-  background: #00B242;
-  border-color: #00B242;
-  color: white;
-  font-size: 1.3em;
-  max-width: 280px;
-  margin: 1em auto;
-}
 </style>

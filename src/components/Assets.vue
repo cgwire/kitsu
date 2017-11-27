@@ -243,6 +243,7 @@ export default {
   },
 
   created () {
+    this.$store.commit('SET_ASSET_SEARCH', '')
     const productionId = this.$store.state.route.params.production_id
     this.$store.commit(
       'SET_CURRENT_PRODUCTION',

@@ -42,7 +42,26 @@
     </table>
   </div>
 
-  <div class="table-body" v-scroll="onBodyScroll" v-if="entries.length > 0">
+  <table-info
+    :is-loading="isLoading"
+    :is-error="isError"
+  >
+  </table-info>
+
+  <div class="has-text-centered" v-if="isEmptyList">
+    <p class="info">{{ $t('shots.empty_list') }}</p>
+    <button-link
+      class="level-item big-button"
+      :text="$t('shots.new_shots')"
+      :path="{
+        name: 'manage-shots',
+        params: {production_id: currentProduction.id}
+      }"
+    >
+    </button-link>
+  </div>
+
+  <div class="table-body" v-scroll="onBodyScroll">
     <table class="table">
       <tbody>
         <tr
@@ -118,13 +137,7 @@
     </table>
   </div>
 
-  <table-info
-    :is-loading="isLoading"
-    :is-error="isError"
-  >
-  </table-info>
-
-  <p class="has-text-centered nb-shots">
+  <p class="has-text-centered nb-shots" v-if="!isEmptyList">
     {{ entries.length }} {{ $tc('shots.number', entries.length) }}
   </p>
 
@@ -162,9 +175,17 @@ export default {
   computed: {
     ...mapGetters([
       'currentProduction',
-      'isCurrentUserManager'
-    ])
+      'isCurrentUserManager',
+      'shotSearchText'
+    ]),
+    isEmptyList () {
+      return this.entries.length === 0 &&
+             !this.isLoading &&
+             !this.isError &&
+             (!this.shotSearchText || this.shotSearchText.length === 0)
+    }
   },
+
   methods: {
     ...mapActions([
     ]),
@@ -275,4 +296,7 @@ span.thumbnail-empty {
   background: #F3F3F3;
 }
 
+.info {
+  margin-top: 2em;
+}
 </style>

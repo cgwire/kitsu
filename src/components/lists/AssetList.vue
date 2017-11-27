@@ -28,7 +28,7 @@
                   production_id: currentProduction.id
                 }
               }"
-              v-if="isCurrentUserManager"
+              v-if="isCurrentUserManager && entries.length > 0"
             >
             </button-link>
           </th>
@@ -37,8 +37,26 @@
     </table>
   </div>
 
+  <table-info
+    :is-loading="isLoading"
+    :is-error="isError"
+  >
+  </table-info>
 
-  <div class="table-body" v-scroll="onBodyScroll" v-if="entries.length > 0">
+  <div class="has-text-centered" v-if="isEmptyList">
+    <p class="info">{{ $t('assets.empty_list') }}</p>
+    <button-link
+      class="level-item big-button"
+      :text="$t('assets.new_assets')"
+      :path="{
+        name: 'new-asset',
+        params: {production_id: currentProduction.id}
+      }"
+    >
+    </button-link>
+  </div>
+
+  <div class="table-body" v-scroll="onBodyScroll">
     <table class="table">
       <tbody>
         <tr
@@ -105,13 +123,7 @@
     </table>
   </div>
 
-  <table-info
-    :is-loading="isLoading"
-    :is-error="isError"
-  >
-  </table-info>
-
-  <p class="has-text-centered nb-assets">
+  <p class="has-text-centered nb-assets" v-if="!isEmptyList">
     {{ entries.length }} {{ $tc('assets.number', entries.length) }}
   </p>
 
@@ -151,10 +163,16 @@ export default {
   computed: {
     ...mapGetters([
       'currentProduction',
-      'assetSearchValue',
+      'assetSearchText',
       'selectedTasks',
       'isCurrentUserManager'
-    ])
+    ]),
+    isEmptyList () {
+      return this.entries.length === 0 &&
+             !this.isLoading &&
+             !this.isError &&
+             (!this.assetSearchText || this.assetSearchText.length === 0)
+    }
   },
   methods: {
     ...mapActions([
@@ -233,5 +251,9 @@ span.thumbnail-empty {
   width: 50px;
   height: 30px;
   background: #F3F3F3;
+}
+
+.info {
+  margin-top: 2em;
 }
 </style>

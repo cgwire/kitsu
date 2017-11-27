@@ -7,10 +7,10 @@
           <th class="production">
             {{ $t('tasks.fields.production') }}
           </th>
+          <th class="thumbnail">
+          </th>
           <th class="name">
             {{ $t('tasks.fields.entity') }}
-          </th>
-          <th class="thumbnail">
           </th>
           <th class="type">
             {{ $t('tasks.fields.task_type') }}
@@ -38,9 +38,6 @@
             :only-avatar="true"
           >
           </production-name-cell>
-          <td class="name">
-            {{ entityName(entry) }}
-          </td>
           <td class="thumbnail">
             <img
               class="thumbnail-picture"
@@ -49,6 +46,9 @@
             />
             <span class="thumbnail-picture thumbnail-empty" v-else>
             </span>
+          </td>
+          <td class="name">
+            {{ entityName(entry) }}
           </td>
           <task-type-name
             class="type"
@@ -140,8 +140,8 @@ export default {
 }
 
 .type {
-  width: 100px;
-  min-width: 100px;
+  width: 150px;
+  min-width: 150px;
 }
 
 .status {
@@ -156,6 +156,17 @@ export default {
   min-width: 60px;
   max-width: 60px;
   width: 60px;
-  padding: 0.5em 0 0 0;
+  padding: 0 0 0 0;
+}
+
+.thumbnail img {
+  margin-top: 5px;
+}
+
+span.thumbnail-empty {
+  display: block;
+  width: 60px;
+  height: 40px;
+  background: #F3F3F3;
 }
 </style>

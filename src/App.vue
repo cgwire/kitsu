@@ -65,11 +65,12 @@ tr .actions p {
   margin-bottom: 0;
 }
 
-tr .actions {
+tr td.actions a {
+  opacity: 0;
+  color: #999;
 }
 
-tr .actions a {
-  opacity: 0;
+tr th.actions a {
   color: #999;
 }
 
@@ -99,6 +100,21 @@ input.input:focus {
 }
 
 .button.is-primary:hover {
+  background: #67BE4B;
+}
+
+.big-button {
+  border-radius: 2px;
+  background: #00B242;
+  border-color: #00B242;
+  color: white;
+  font-size: 1.3em;
+  max-width: 280px;
+  margin: 1em auto;
+}
+
+.big-button:hover {
+  color: white;
   background: #67BE4B;
 }
 

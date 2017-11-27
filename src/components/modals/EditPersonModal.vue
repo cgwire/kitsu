@@ -1,4 +1,5 @@
 <template>
+
 <div :class="{
   'modal': true,
   'is-active': active
@@ -95,9 +96,9 @@ export default {
         role: 'user'
       },
       roleOptions: [
-        {label: 'admin', value: 'admin'},
+        {label: 'user', value: 'user'},
         {label: 'manager', value: 'manager'},
-        {label: 'user', value: 'user'}
+        {label: 'admin', value: 'admin'}
       ]
     }
   },
