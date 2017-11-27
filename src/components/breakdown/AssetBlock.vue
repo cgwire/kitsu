@@ -145,7 +145,6 @@ export default {
   justify-content: center;
   align-items: center;
   z-index: 2;
-  word-break: break-all;
   width: 80px;
   height: 80px;
 }
@@ -153,6 +152,7 @@ export default {
 .asset-name {
   text-align: center;
   position: relative;
+  word-break: break-all;
   top: -75px;
 }
 
