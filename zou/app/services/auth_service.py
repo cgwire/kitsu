@@ -31,7 +31,10 @@ def check_auth(app, email, password):
     else:
         raise NoAuthStrategyConfigured
 
-    if not user.get("active", False):
+    if user is None:
+        current_app.logger.error("No user found for: %s" % email)
+
+    if user is None or not user.get("active", False):
         raise UnactiveUserException(user["email"])
 
     return user
@@ -44,6 +47,7 @@ def check_credentials(email, password):
         try:
             person = persons_service.get_by_desktop_login(email)
         except PersonNotFoundException:
+            current_app.logger.error("Person not found: %s" % (email))
             raise WrongPasswordException()
 
     try:
@@ -52,8 +56,10 @@ def check_credentials(email, password):
         if bcrypt.check_password_hash(password_hash, password):
             return person
         else:
+            current_app.logger.error("Wrong password for person: %s" % person)
             raise WrongPasswordException()
     except ValueError:
+        current_app.logger.error("Wrong password for: %s" % person)
         raise WrongPasswordException()
 
 
