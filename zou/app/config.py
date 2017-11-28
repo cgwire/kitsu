@@ -51,14 +51,8 @@ DEFAULT_FILE_STATUS = "To review"
 
 
 DEFAULT_FILE_TREE = os.getenv("DEFAULT_FILE_TREE", "standard")
-FILE_TREE_FOLDER = os.getenv(
-    "FILE_TREE_FOLDER",
-    os.path.join(os.getcwd(), "file_trees")
-)
-THUMBNAIL_FOLDER = os.getenv(
-    "THUMBNAIL_FOLDER",
-    os.path.join(os.getcwd(), "thumbnails")
-)
+FILE_TREE_FOLDER = os.getenv("FILE_TREE_FOLDER")
+THUMBNAIL_FOLDER = os.getenv("THUMBNAIL_FOLDER")
 
 EVENT_MAP = {}
 TMP_DIR = os.getenv("TMP_DIR", os.path.join(os.sep, "tmp"))
