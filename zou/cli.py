@@ -1,9 +1,6 @@
 #!/usr/bin/env python
 import sys
 
-from flask_script import Manager
-
-from zou.app import app
 from zou.app.utils import dbhelpers, auth, commands
 from zou.app.services import (
     assets_service,
@@ -13,10 +10,13 @@ from zou.app.services import (
     tasks_service
 )
 
-manager = Manager(app)
+import click
 
+@click.group()
+def cli():
+    pass
 
-@manager.command
+@cli.command()
 def init_db():
     "Creates datababase table (database must be created through PG client)."
 
@@ -25,7 +25,7 @@ def init_db():
     print("Database and tables created.")
 
 
-@manager.command
+@cli.command()
 def clear_db():
     "Drop all tables from database"
 
@@ -34,7 +34,7 @@ def clear_db():
     print("Database and tables deleted.")
 
 
-@manager.command
+@cli.command()
 def reset_db():
     "Drop all tables then recreates them."
 
@@ -42,7 +42,7 @@ def reset_db():
     init_db()
 
 
-@manager.command
+@cli.command()
 def create_admin(email):
     "Create an admin user to allow usage of the API when database is empty."
     "Set password is 'default'"
@@ -70,13 +70,13 @@ def create_admin(email):
         sys.exit(1)
 
 
-@manager.command
+@cli.command('clean_auth_tokens')
 def clean_auth_tokens():
     "Remove revoked and expired tokens."
     commands.clean_auth_tokens()
 
 
-@manager.command
+@cli.command('init_data')
 def init_data():
     projects_service.get_open_status()
     projects_service.get_closed_status()
@@ -123,7 +123,3 @@ def init_data():
     tasks_service.get_or_create_status("Retake", "retake", "#ff3860")
     tasks_service.get_or_create_status("Done", "done", "#22d160")
     print("Task status initialized.")
-
-
-if __name__ == "__main__":
-    manager.run()
