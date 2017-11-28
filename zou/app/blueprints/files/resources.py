@@ -1,4 +1,3 @@
-import os
 import datetime
 
 from flask import request, abort
@@ -338,7 +337,8 @@ class NewOutputFileResource(Resource):
             person_id,
             output_type_id,
             revision,
-            separator
+            separator,
+            extension
         ) = self.get_arguments()
         separator = "/"
 
@@ -358,7 +358,8 @@ class NewOutputFileResource(Resource):
                 person["id"],
                 comment,
                 name=working_file["name"],
-                revision=revision
+                revision=revision,
+                extension=extension
             )
 
             output_file_dict = self.add_path_info(
@@ -367,6 +368,7 @@ class NewOutputFileResource(Resource):
                 task,
                 output_type,
                 working_file["name"],
+                extension,
                 separator
             )
         except OutputTypeNotFoundException:
@@ -384,6 +386,7 @@ class NewOutputFileResource(Resource):
         parser.add_argument("comment", default="")
         parser.add_argument("revision", default=0, type=int)
         parser.add_argument("separator", default="/")
+        parser.add_argument("extension", default="")
         args = parser.parse_args()
 
         return (
@@ -391,7 +394,8 @@ class NewOutputFileResource(Resource):
             args["person_id"],
             args["output_type_id"],
             args["revision"],
-            args["separator"]
+            args["separator"],
+            args["extension"]
         )
 
     def add_path_info(
@@ -401,7 +405,8 @@ class NewOutputFileResource(Resource):
         task,
         output_type,
         name,
-        separator=os.sep
+        extension,
+        separator
     ):
         folder_path = file_tree.get_folder_path(
             task,
@@ -425,7 +430,14 @@ class NewOutputFileResource(Resource):
 
         files_service.update_output_file(
             output_file["id"],
-            {"path": "%s%s%s" % (folder_path, separator, file_name)}
+            {
+                "path": "%s%s%s%s" % (
+                    folder_path,
+                    separator,
+                    file_name,
+                    extension
+                )
+            }
         )
         return output_file
 

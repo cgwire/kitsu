@@ -184,7 +184,8 @@ def create_new_output_revision(
     person_id,
     comment="",
     revision=0,
-    name=""
+    name="",
+    extension=""
 ):
     if revision < 1:
         try:
@@ -201,6 +202,7 @@ def create_new_output_revision(
     output_file = OutputFile(
         name=name,
         comment=comment,
+        extension=extension,
         revision=revision,
         task_id=task_id,
         entity_id=entity_id,
