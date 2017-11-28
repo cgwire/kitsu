@@ -11,6 +11,7 @@ from zou.app.services import (
     persons_service,
     projects_service,
     tasks_service,
+    entities_service,
     user_service
 )
 
@@ -628,3 +629,12 @@ class FileResource(Resource):
             task = tasks_service.get_task(file_dict["task_id"])
             user_service.check_has_task_related(task["project_id"])
         return file_dict
+
+
+class EntityOutputTypesResource(Resource):
+
+    @jwt_required
+    def get(self, entity_id):
+        entity = entities_service.get_entity(entity_id)
+        user_service.check_project_access(entity["project_id"])
+        return files_service.get_output_types_for_entity(entity_id)

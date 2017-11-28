@@ -332,3 +332,12 @@ def update_output_file(output_file_id, data):
     output_file = get_output_file_raw(output_file_id)
     output_file.update(data)
     return output_file.serialize()
+
+
+def get_output_types_for_entity(entity_id):
+    output_types = OutputType.query \
+        .join(OutputFile) \
+        .filter(OutputFile.entity_id == entity_id) \
+        .order_by("name") \
+        .all()
+    return OutputType.serialize_list(output_types)

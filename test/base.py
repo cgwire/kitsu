@@ -621,16 +621,20 @@ class ApiDBTestCase(ApiTestCase):
         self,
         output_type=None,
         revision=1,
-        name="main"
+        name="main",
+        task=None
     ):
         if output_type is None:
             output_type = self.output_type
 
+        if task is None:
+            task = self.task
+
         self.output_file = OutputFile.create(
             comment="",
             revision=revision,
-            task_id=self.task.id,
-            entity_id=self.entity.id,
+            task_id=task.id,
+            entity_id=task.entity_id,
             person_id=self.person.id,
             file_status_id=self.file_status.id,
             output_type_id=output_type.id,
