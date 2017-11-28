@@ -54,7 +54,5 @@ def register_event_handlers(app):
     Load code from event handlers folder. Then it registers in the event manager
     each event handler listed in the __init_.py.
     """
-    sys.path.insert(0, app.config["EVENT_HANDLERS_FOLDER"])
-    import event_handlers
-    events.register_all(event_handlers.event_map)
+    events.register_all(app.config["EVENT_MAP"])
     return app

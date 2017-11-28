@@ -59,8 +59,6 @@ THUMBNAIL_FOLDER = os.getenv(
     "THUMBNAIL_FOLDER",
     os.path.join(os.getcwd(), "thumbnails")
 )
-EVENT_HANDLERS_FOLDER = os.getenv(
-    "EVENT_HANDLERS_FOLDER",
-    os.path.join(os.getcwd(), "event_handlers")
-)
+
+EVENT_MAP = {}
 TMP_DIR = os.getenv("TMP_DIR", os.path.join(os.sep, "tmp"))
