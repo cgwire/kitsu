@@ -338,6 +338,15 @@ def get_output_types_for_entity(entity_id):
     output_types = OutputType.query \
         .join(OutputFile) \
         .filter(OutputFile.entity_id == entity_id) \
-        .order_by("name") \
+        .order_by(OutputFile.name) \
         .all()
     return OutputType.serialize_list(output_types)
+
+
+def get_output_files_for_output_types_and_entity(entity_id, output_type_id):
+    output_files = OutputFile.query \
+        .filter(OutputFile.entity_id == entity_id) \
+        .filter(OutputFile.output_type_id == output_type_id) \
+        .order_by(desc(OutputFile.revision)) \
+        .all()
+    return OutputFile.serialize_list(output_files)

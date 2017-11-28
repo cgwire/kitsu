@@ -84,3 +84,14 @@ class TaskOutputFilesTestCase(ApiDBTestCase):
         )
         self.assertEquals(len(output_types), 3)
         self.assertEquals(output_types[0]["name"], "Geometry")
+
+    def test_get_entity_output_type_output_files(self):
+        self.generate_output_files()
+        output_files = self.get(
+            "/data/entities/%s/output-types/%s/output-files" % (
+                self.entity.id,
+                self.cache_id
+            )
+        )
+        self.assertEquals(len(output_files), 3)
+        self.assertEquals(output_files[0]["output_type_id"], self.cache_id)

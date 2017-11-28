@@ -638,3 +638,16 @@ class EntityOutputTypesResource(Resource):
         entity = entities_service.get_entity(entity_id)
         user_service.check_project_access(entity["project_id"])
         return files_service.get_output_types_for_entity(entity_id)
+
+
+class EntityOutputTypeOutputFilesResource(Resource):
+
+    @jwt_required
+    def get(self, entity_id, output_type_id):
+        entity = entities_service.get_entity(entity_id)
+        files_service.get_output_type(output_type_id)
+        user_service.check_project_access(entity["project_id"])
+        return files_service.get_output_files_for_output_types_and_entity(
+            entity_id,
+            output_type_id
+        )
