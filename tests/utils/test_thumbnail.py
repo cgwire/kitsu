@@ -5,7 +5,7 @@ from PIL import Image
 
 from werkzeug.datastructures import FileStorage
 
-from zou.app import app, config
+from zou.app import app
 from zou.app.utils import thumbnail, fs
 
 TEST_FOLDER = os.path.join("tests", "tmp")
@@ -33,7 +33,7 @@ class ThumbnailTestCase(unittest.TestCase):
         folder_name = thumbnail.get_folder_name("shots")
         fs.rm_rf(folder_name)
         fs.rm_rf(TEST_FOLDER)
-        fs.rm_rf(config.THUMBNAIL_FOLDER)
+        fs.rm_rf(app.config["THUMBNAIL_FOLDER"])
 
     def test_get_file_name(self):
         file_name = thumbnail.get_file_name("instance-id")
@@ -48,7 +48,7 @@ class ThumbnailTestCase(unittest.TestCase):
         path = thumbnail.get_preview_folder_name("originals", "123413-12312")
         self.assertEquals(
             path,
-            os.path.join(config.THUMBNAIL_FOLDER, "preview-files/originals/123")
+            os.path.join(app.config["THUMBNAIL_FOLDER"], "preview-files/originals/123")
         )
 
     def test_get_file_path(self):

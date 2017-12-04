@@ -2,7 +2,7 @@ import os
 
 from tests.base import ApiDBTestCase
 
-from zou.app import config
+from zou.app import app
 from zou.app.utils import fs, thumbnail
 from zou.app.services import assets_service
 
@@ -43,7 +43,7 @@ class RouteThumbnailTestCase(ApiDBTestCase):
 
     def delete_thumbnail_folders(self):
         fs.rm_rf(TEST_FOLDER)
-        fs.rm_rf(config.THUMBNAIL_FOLDER)
+        fs.rm_rf(app.config["THUMBNAIL_FOLDER"])
 
     def test_add_thumbnail(self):
         path = "/pictures/thumbnails/shots/%s" % self.shot.id
