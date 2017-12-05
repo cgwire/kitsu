@@ -184,7 +184,8 @@ def create_new_output_revision(
     person_id,
     comment="",
     revision=0,
-    name=""
+    name="",
+    extension=""
 ):
     if revision < 1:
         try:
@@ -201,6 +202,7 @@ def create_new_output_revision(
     output_file = OutputFile(
         name=name,
         comment=comment,
+        extension=extension,
         revision=revision,
         task_id=task_id,
         entity_id=entity_id,
@@ -330,3 +332,21 @@ def update_output_file(output_file_id, data):
     output_file = get_output_file_raw(output_file_id)
     output_file.update(data)
     return output_file.serialize()
+
+
+def get_output_types_for_entity(entity_id):
+    output_types = OutputType.query \
+        .join(OutputFile) \
+        .filter(OutputFile.entity_id == entity_id) \
+        .order_by(OutputFile.name) \
+        .all()
+    return OutputType.serialize_list(output_types)
+
+
+def get_output_files_for_output_types_and_entity(entity_id, output_type_id):
+    output_files = OutputFile.query \
+        .filter(OutputFile.entity_id == entity_id) \
+        .filter(OutputFile.output_type_id == output_type_id) \
+        .order_by(desc(OutputFile.revision)) \
+        .all()
+    return OutputFile.serialize_list(output_files)

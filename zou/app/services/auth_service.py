@@ -1,7 +1,6 @@
 import flask_bcrypt as bcrypt
 
 from flask_jwt_extended import get_jti
-from flask_restful import current_app
 from ldap3 import (
     Server,
     Connection,
@@ -23,27 +22,32 @@ from zou.app.stores import auth_tokens_store
 def check_auth(app, email, password):
     strategy = app.config["AUTH_STRATEGY"]
     if strategy == "auth_local_classic":
-        user = local_auth_strategy(email, password)
+        user = local_auth_strategy(email, password, app)
     elif strategy == "auth_local_no_password":
         user = no_password_auth_strategy(email)
     elif strategy == "auth_remote_active_directory":
-        user = active_directory_auth_strategy(email, password)
+        user = active_directory_auth_strategy(email, password, app)
     else:
         raise NoAuthStrategyConfigured
 
-    if not user.get("active", False):
+    if user is None:
+        app.logger.error("No user found for: %s" % email)
+
+    if user is None or not user.get("active", False):
         raise UnactiveUserException(user["email"])
 
     return user
 
 
-def check_credentials(email, password):
+def check_credentials(email, password, app=None):
     try:
         person = persons_service.get_by_email(email)
     except PersonNotFoundException:
         try:
             person = persons_service.get_by_desktop_login(email)
         except PersonNotFoundException:
+            if app is not None:
+                app.logger.error("Person not found: %s" % (email))
             raise WrongPasswordException()
 
     try:
@@ -52,8 +56,12 @@ def check_credentials(email, password):
         if bcrypt.check_password_hash(password_hash, password):
             return person
         else:
+            if app is not None:
+                app.logger.error("Wrong password for person: %s" % person)
             raise WrongPasswordException()
     except ValueError:
+        if app is not None:
+            app.logger.error("Wrong password for: %s" % person)
         raise WrongPasswordException()
 
 
@@ -68,17 +76,17 @@ def no_password_auth_strategy(email):
     return person
 
 
-def local_auth_strategy(email, password):
-    return check_credentials(email, password)
+def local_auth_strategy(email, password, app=None):
+    return check_credentials(email, password, app)
 
 
-def active_directory_auth_strategy(email, password):
+def active_directory_auth_strategy(email, password, app):
     username = email.split("@")[0]
-    domain = current_app.config["AUTH_AD_DOMAIN"]
+    domain = app.config["AUTH_AD_DOMAIN"]
     user = "%s\\%s" % (domain, username)
 
-    server_ip = current_app.config["AUTH_AD_HOST"]
-    server_port = current_app.config["AUTH_AD_PORT"]
+    server_ip = app.config["AUTH_AD_HOST"]
+    server_port = app.config["AUTH_AD_PORT"]
     server = Server(server_ip, port=server_port, use_ssl=False)
 
     try:

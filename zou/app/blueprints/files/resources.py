@@ -1,4 +1,3 @@
-import os
 import datetime
 
 from flask import request, abort
@@ -12,6 +11,7 @@ from zou.app.services import (
     persons_service,
     projects_service,
     tasks_service,
+    entities_service,
     user_service
 )
 
@@ -49,7 +49,7 @@ class FolderPathResource(Resource):
         try:
             task = tasks_service.get_task(task_id)
             if not permissions.has_manager_permissions():
-                user_service.check_has_task_related(task.project_id)
+                user_service.check_has_task_related(task["project_id"])
             output_type = files_service.get_output_type(output_type_id)
             software = files_service.get_software(software_id)
             path = file_tree.get_folder_path(
@@ -117,7 +117,7 @@ class FilePathResource(Resource):
         try:
             task = tasks_service.get_task(task_id)
             if not permissions.has_manager_permissions():
-                user_service.check_has_task_related(task.project_id)
+                user_service.check_has_task_related(task["project_id"])
 
             output_type = files_service.get_output_type(output_type_id)
             software = files_service.get_software(software_id)
@@ -306,7 +306,7 @@ class CommentWorkingFileResource(Resource):
         working_file = files_service.get_working_file(working_file_id)
         task = tasks_service.get_task(working_file["task_id"])
         if not permissions.has_manager_permissions():
-            task = user_service.check_has_task_related(task.project_id)
+            user_service.check_has_task_related(task["project_id"])
         working_file = self.update_comment(working_file_id, comment)
         return working_file
 
@@ -338,14 +338,15 @@ class NewOutputFileResource(Resource):
             person_id,
             output_type_id,
             revision,
-            separator
+            separator,
+            extension
         ) = self.get_arguments()
         separator = "/"
 
         try:
             task = tasks_service.get_task(task_id)
             if not permissions.has_manager_permissions():
-                task = user_service.check_has_task_related(task.project_id)
+                user_service.check_has_task_related(task["project_id"])
             output_type = files_service.get_output_type(output_type_id)
             working_file = files_service.get_working_file(working_file_id)
             person = persons_service.get_person(person_id)
@@ -358,7 +359,8 @@ class NewOutputFileResource(Resource):
                 person["id"],
                 comment,
                 name=working_file["name"],
-                revision=revision
+                revision=revision,
+                extension=extension
             )
 
             output_file_dict = self.add_path_info(
@@ -367,6 +369,7 @@ class NewOutputFileResource(Resource):
                 task,
                 output_type,
                 working_file["name"],
+                extension,
                 separator
             )
         except OutputTypeNotFoundException:
@@ -384,6 +387,7 @@ class NewOutputFileResource(Resource):
         parser.add_argument("comment", default="")
         parser.add_argument("revision", default=0, type=int)
         parser.add_argument("separator", default="/")
+        parser.add_argument("extension", default="")
         args = parser.parse_args()
 
         return (
@@ -391,7 +395,8 @@ class NewOutputFileResource(Resource):
             args["person_id"],
             args["output_type_id"],
             args["revision"],
-            args["separator"]
+            args["separator"],
+            args["extension"]
         )
 
     def add_path_info(
@@ -401,7 +406,8 @@ class NewOutputFileResource(Resource):
         task,
         output_type,
         name,
-        separator=os.sep
+        extension,
+        separator
     ):
         folder_path = file_tree.get_folder_path(
             task,
@@ -425,7 +431,14 @@ class NewOutputFileResource(Resource):
 
         files_service.update_output_file(
             output_file["id"],
-            {"path": "%s%s%s" % (folder_path, separator, file_name)}
+            {
+                "path": "%s%s%s%s" % (
+                    folder_path,
+                    separator,
+                    file_name,
+                    extension
+                )
+            }
         )
         return output_file
 
@@ -437,7 +450,7 @@ class GetNextOutputFileResource(Resource):
         name = self.get_arguments()
         task = tasks_service.get_task(task_id)
         if not permissions.has_manager_permissions():
-            task = user_service.check_has_task_related(task.project_id)
+            user_service.check_has_task_related(task["project_id"])
         output_type = files_service.get_output_type(output_type_id)
 
         next_revision_number = \
@@ -464,7 +477,7 @@ class LastWorkingFilesResource(Resource):
         result = {}
         task = tasks_service.get_task(task_id)
         if not permissions.has_manager_permissions():
-            task = user_service.check_has_task_related(task.project_id)
+            user_service.check_has_task_related(task["project_id"])
         result = files_service.get_last_working_files_for_task(task["id"])
 
         return result
@@ -477,7 +490,7 @@ class LastOutputFilesResource(Resource):
         result = {}
         task = tasks_service.get_task(task_id)
         if not permissions.has_manager_permissions():
-            task = user_service.check_has_task_related(task.project_id)
+            user_service.check_has_task_related(task["project_id"])
         result = files_service.get_last_output_files_for_task(task["id"])
 
         return result
@@ -490,7 +503,7 @@ class TaskWorkingFilesResource(Resource):
         result = {}
         task = tasks_service.get_task(task_id)
         if not permissions.has_manager_permissions():
-            task = user_service.check_has_task_related(task.project_id)
+            user_service.check_has_task_related(task["project_id"])
         result = files_service.get_working_files_for_task(task["id"])
 
         return result
@@ -513,7 +526,7 @@ class NewWorkingFileResource(Resource):
         try:
             task = tasks_service.get_task(task_id)
             if not permissions.has_manager_permissions():
-                task = user_service.check_has_task_related(task.project_id)
+                user_service.check_has_task_related(task["project_id"])
             software = files_service.get_software(software_id)
             tasks_service.assign_task(
                 task_id,
@@ -592,7 +605,7 @@ class ModifiedFileResource(Resource):
         working_file = files_service.get_working_file(working_file_id)
         task = tasks_service.get_task(working_file["task_id"])
         if not permissions.has_manager_permissions():
-            task = user_service.check_has_task_related(task["project_id"])
+            user_service.check_has_task_related(task["project_id"])
         working_file = files_service.update_working_file(
             working_file_id,
             {"updated_at": datetime.datetime.utcnow()}
@@ -616,3 +629,25 @@ class FileResource(Resource):
             task = tasks_service.get_task(file_dict["task_id"])
             user_service.check_has_task_related(task["project_id"])
         return file_dict
+
+
+class EntityOutputTypesResource(Resource):
+
+    @jwt_required
+    def get(self, entity_id):
+        entity = entities_service.get_entity(entity_id)
+        user_service.check_project_access(entity["project_id"])
+        return files_service.get_output_types_for_entity(entity_id)
+
+
+class EntityOutputTypeOutputFilesResource(Resource):
+
+    @jwt_required
+    def get(self, entity_id, output_type_id):
+        entity = entities_service.get_entity(entity_id)
+        files_service.get_output_type(output_type_id)
+        user_service.check_project_access(entity["project_id"])
+        return files_service.get_output_files_for_output_types_and_entity(
+            entity_id,
+            output_type_id
+        )

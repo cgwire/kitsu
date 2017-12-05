@@ -10,6 +10,7 @@ class OutputFile(db.Model, BaseMixin, SerializerMixin):
     shotgun_id = db.Column(db.Integer())
 
     name = db.Column(db.String(250))
+    extension = db.Column(db.String(10))
     description = db.Column(db.Text())
     comment = db.Column(db.Text())
     revision = db.Column(db.Integer())

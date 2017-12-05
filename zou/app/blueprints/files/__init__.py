@@ -14,7 +14,9 @@ from .resources import (
     NewOutputFileResource,
     NewWorkingFileResource,
     TaskWorkingFilesResource,
-    FileResource
+    FileResource,
+    EntityOutputTypesResource,
+    EntityOutputTypeOutputFilesResource
 )
 
 routes = [
@@ -35,6 +37,12 @@ routes = [
         "new",
         NewOutputFileResource
     ),
+    ("/data/entities/<entity_id>/output-types", EntityOutputTypesResource),
+    (
+        "/data/entities/<entity_id>/output-types/<output_type_id>/output-files",
+        EntityOutputTypeOutputFilesResource
+    ),
+
 
     ("/actions/projects/<project_id>/set-file-tree", SetTreeResource),
     (

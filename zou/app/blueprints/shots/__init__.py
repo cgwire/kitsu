@@ -12,6 +12,7 @@ from .resources import (
     SceneResource,
     ScenesResource,
     SceneTasksResource,
+    SceneTaskTypesResource,
 
     ProjectShotsResource,
     ProjectScenesResource,
@@ -43,6 +44,7 @@ routes = [
     ("/data/scenes/all", ScenesResource),
     ("/data/scenes/<scene_id>", SceneResource),
     ("/data/scenes/<scene_id>/tasks", SceneTasksResource),
+    ("/data/scenes/<scene_id>/task-types", SceneTaskTypesResource),
     ("/data/episodes", EpisodesResource),
     ("/data/episodes/<episode_id>", EpisodeResource),
     ("/data/episodes/<episode_id>/sequences", EpisodeSequencesResource),
