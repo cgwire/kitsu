@@ -77,3 +77,10 @@ class SequenceTestCase(ApiDBTestCase):
         tasks = self.get("data/scenes/%s/tasks" % self.scene.id)
         self.assertEquals(len(tasks), 1)
         self.assertEqual(tasks[0]["id"], str(self.scene_task.id))
+
+    def test_get_scene_task_types(self):
+        self.generate_fixture_scene_task()
+        task_type_id = str(self.scene_task.task_type_id)
+        task_types = self.get("data/scenes/%s/task-types" % self.scene.id)
+        self.assertEquals(len(task_types), 1)
+        self.assertEqual(task_types[0]["id"], task_type_id)
