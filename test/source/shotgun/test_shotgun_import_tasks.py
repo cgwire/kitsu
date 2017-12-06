@@ -17,8 +17,9 @@ class ImportShotgunTaskTestCase(ShotgunTestCase):
         self.load_fixture('status')
         self.load_fixture('steps')
         self.load_fixture('assets')
-        self.load_fixture('shots')
         self.load_fixture('sequences')
+        self.load_fixture('shots')
+        self.load_fixture('scenes')
 
     def load_task(self):
         self.sg_task = {
@@ -57,7 +58,6 @@ class ImportShotgunTaskTestCase(ShotgunTestCase):
             }],
             "type": "Task"
         }
-
         api_path = "/import/shotgun/tasks"
         self.tasks = self.post(api_path, [self.sg_task], 200)
 
@@ -99,6 +99,46 @@ class ImportShotgunTaskTestCase(ShotgunTestCase):
             "type": "Task"
         }
 
+        api_path = "/import/shotgun/tasks"
+        self.tasks = self.post(api_path, [self.sg_task], 200)
+
+    def load_scene_task(self):
+        self.sg_task = {
+            "cached_display_name": "Layout",
+            "created_by": {
+                "id": 1,
+                "name": "John Doe",
+                "type": "HumanUser"
+            },
+            "due_date": None,
+            "duration": 7200,
+            "entity": {
+                "id": 1,
+                "name": "SC01",
+                "type": "Scene"
+            },
+            "id": 20,
+            "project": {
+                "id": 1,
+                "name": "Agent327",
+                "type": "Project"
+            },
+            "sg_description": "test description",
+            "sg_sort_order": None,
+            "sg_status_list": "wip",
+            "start_date": None,
+            "step": {
+                "id": 3,
+                "name": "Layout",
+                "type": "Step"
+            },
+            "task_assignees": [{
+                "id": 2,
+                "name": "Ema Peel",
+                "type": "HumanUser"
+            }],
+            "type": "Task"
+        }
         api_path = "/import/shotgun/tasks"
         self.tasks = self.post(api_path, [self.sg_task], 200)
 
@@ -150,6 +190,13 @@ class ImportShotgunTaskTestCase(ShotgunTestCase):
         self.load_sequence_task()
         sequences = shots_service.get_sequences({"shotgun_id": 1})
         self.tasks = self.get("data/tasks?entity_id=%s" % sequences[0]["id"])
+        self.assertEqual(len(self.tasks), 1)
+
+    def test_import_scene_task(self):
+        self.load_scene_task()
+        print(shots_service.get_scenes())
+        scenes = shots_service.get_scenes({"shotgun_id": 1})
+        self.tasks = self.get("data/tasks?entity_id=%s" % scenes[0]["id"])
         self.assertEqual(len(self.tasks), 1)
 
     def test_import_remove_task(self):

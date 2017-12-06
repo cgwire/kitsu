@@ -27,6 +27,7 @@ class ImportShotgunTasksResource(BaseImportShotgunResource):
         self.task_status_ids = TaskStatus.get_id_map(field="short_name")
         self.asset_ids = self.get_asset_map()
         self.shot_ids = self.get_shot_map()
+        self.scene_ids = self.get_scene_map()
         self.sequence_ids = self.get_sequence_map()
 
     def get_asset_map(self):
@@ -36,6 +37,10 @@ class ImportShotgunTasksResource(BaseImportShotgunResource):
     def get_shot_map(self):
         shots = shots_service.get_shots()
         return {shot["shotgun_id"]: shot["id"] for shot in shots}
+
+    def get_scene_map(self):
+        scenes = shots_service.get_scenes()
+        return {scene["shotgun_id"]: scene["id"] for scene in scenes}
 
     def get_sequence_map(self):
         sequences = shots_service.get_sequences()
@@ -84,6 +89,8 @@ class ImportShotgunTasksResource(BaseImportShotgunResource):
                 entity_id = self.asset_ids.get(entity_sg_id, None)
             elif entity_type == "Shot":
                 entity_id = self.shot_ids.get(entity_sg_id, None)
+            elif entity_type == "Scene":
+                entity_id = self.scene_ids.get(entity_sg_id, None)
             else:
                 entity_id = self.sequence_ids.get(entity_sg_id, None)
 
