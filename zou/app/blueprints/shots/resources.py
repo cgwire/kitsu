@@ -11,12 +11,7 @@ from zou.app.services import (
 )
 from zou.app.utils import query, permissions
 
-from zou.app.services.exception import (
-    EpisodeNotFoundException,
-    SequenceNotFoundException,
-    ShotNotFoundException,
-    ProjectNotFoundException
-)
+from zou.app.services.exception import ShotNotFoundException
 
 
 class ShotResource(Resource):

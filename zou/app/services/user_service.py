@@ -197,6 +197,18 @@ def get_sequence_shots(sequence_id):
     return Entity.serialize_list(query.all(), obj_type="Shot")
 
 
+def get_sequence_scenes(sequence_id):
+    scene_type = shots_service.get_scene_type()
+    query = Entity.query \
+        .join(Task, Project, ProjectStatus, EntityType) \
+        .filter(Entity.entity_type_id == scene_type["id"]) \
+        .filter(Entity.parent_id == sequence_id) \
+        .filter(assignee_filter()) \
+        .filter(open_project_filter())
+
+    return Entity.serialize_list(query.all(), obj_type="Scene")
+
+
 def get_projects():
     query = Project.query \
         .join(Task, ProjectStatus) \

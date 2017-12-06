@@ -47,12 +47,24 @@ class UserContextRoutesTestCase(ApiDBTestCase):
         )
         self.assertEquals(len(episodes), 1)
         self.assertEquals(episodes[0]["name"], "E01")
+        self.assertEquals(episodes[0]["type"], "Episode")
 
     def test_get_sequence_shots(self):
         self.generate_fixture_shot_task()
         self.assign_user(self.shot_task.id)
         shots = self.get("data/user/sequences/%s/shots" % self.sequence.id)
         self.assertEquals(len(shots), 1)
+        self.assertEquals(shots[0]["type"], "Shot")
+        self.assertEquals(shots[0]["name"], "SH01")
+
+    def test_get_sequence_scenes(self):
+        self.generate_fixture_scene()
+        self.generate_fixture_scene_task()
+        self.assign_user(self.scene_task.id)
+        scenes = self.get("data/user/sequences/%s/scenes" % self.sequence.id)
+        self.assertEquals(len(scenes), 1)
+        self.assertEquals(scenes[0]["type"], "Scene")
+        self.assertEquals(scenes[0]["name"], "SC01")
 
     def test_get_project_asset_types(self):
         task_id = self.task.id

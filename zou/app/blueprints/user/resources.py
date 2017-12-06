@@ -92,6 +92,14 @@ class SequenceShotsResource(Resource):
         return user_service.get_sequence_shots(sequence_id)
 
 
+class SequenceScenesResource(Resource):
+
+    @jwt_required
+    def get(self, sequence_id):
+        shots_service.get_sequence(sequence_id)
+        return user_service.get_sequence_scenes(sequence_id)
+
+
 class ShotTasksResource(Resource):
 
     @jwt_required
