@@ -14,6 +14,7 @@ class UserContextRoutesTestCase(ApiDBTestCase):
         self.generate_fixture_project_closed()
         self.generate_fixture_entity_type()
         self.generate_fixture_entity()
+        self.generate_fixture_episode()
         self.generate_fixture_sequence()
         self.generate_fixture_shot()
         self.generate_fixture_department()
@@ -37,6 +38,15 @@ class UserContextRoutesTestCase(ApiDBTestCase):
             "data/user/projects/%s/sequences" % self.project.id
         )
         self.assertEquals(len(sequences), 1)
+
+    def test_get_project_episodes(self):
+        self.generate_fixture_shot_task()
+        self.assign_user(self.shot_task.id)
+        episodes = self.get(
+            "data/user/projects/%s/episodes" % self.project.id
+        )
+        self.assertEquals(len(episodes), 1)
+        self.assertEquals(episodes[0]["name"], "E01")
 
     def test_get_sequence_shots(self):
         self.generate_fixture_shot_task()

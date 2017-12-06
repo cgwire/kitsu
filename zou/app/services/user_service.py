@@ -162,6 +162,29 @@ def get_project_sequences(project_id):
     return Entity.serialize_list(query.all(), obj_type="Sequence")
 
 
+def get_project_episodes(project_id):
+    shot_type = shots_service.get_shot_type()
+    sequence_type = shots_service.get_sequence_type()
+    episode_type = shots_service.get_episode_type()
+
+    Shot = aliased(Entity, name='shot')
+    Sequence = aliased(Entity, name='sequence')
+    query = Entity.query \
+        .join(Sequence, Sequence.parent_id == Entity.id) \
+        .join(Shot, Shot.parent_id == Sequence.id) \
+        .join(Task, Task.entity_id == Shot.id) \
+        .join(Project, Project.id == Entity.project_id) \
+        .join(ProjectStatus) \
+        .filter(Shot.entity_type_id == shot_type["id"]) \
+        .filter(Sequence.entity_type_id == sequence_type["id"]) \
+        .filter(Entity.entity_type_id == episode_type["id"]) \
+        .filter(Project.id == project_id) \
+        .filter(assignee_filter()) \
+        .filter(open_project_filter())
+
+    return Entity.serialize_list(query.all(), obj_type="Episode")
+
+
 def get_sequence_shots(sequence_id):
     shot_type = shots_service.get_shot_type()
     query = Entity.query \

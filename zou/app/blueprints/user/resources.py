@@ -68,6 +68,14 @@ class ProjectSequencesResource(Resource):
         return user_service.get_project_sequences(project_id)
 
 
+class ProjectEpisodesResource(Resource):
+
+    @jwt_required
+    def get(self, project_id):
+        projects_service.get_project(project_id)
+        return user_service.get_project_episodes(project_id)
+
+
 class ProjectAssetTypesResource(Resource):
 
     @jwt_required
