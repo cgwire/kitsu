@@ -55,7 +55,7 @@ class UserContextRoutesTestCase(ApiDBTestCase):
         shots = self.get("data/user/sequences/%s/shots" % self.sequence.id)
         self.assertEquals(len(shots), 1)
         self.assertEquals(shots[0]["type"], "Shot")
-        self.assertEquals(shots[0]["name"], "SH01")
+        self.assertEquals(shots[0]["name"], "P01")
 
     def test_get_sequence_scenes(self):
         self.generate_fixture_scene()
