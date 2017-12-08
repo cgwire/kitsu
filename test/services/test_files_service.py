@@ -96,7 +96,9 @@ class FileServiceTestCase(ApiDBTestCase):
         self.generate_fixture_working_file(name="hotfix", revision=1)
         self.generate_fixture_working_file(name="hotfix", revision=2)
         self.generate_fixture_working_file(name="hotfix", revision=3)
-        working_files = files_service.get_last_working_files_for_task(self.task.id)
+        working_files = files_service.get_last_working_files_for_task(
+            self.task.id
+        )
         self.assertEquals(working_files["main"]["revision"], 5)
         self.assertEquals(working_files["hotfix"]["revision"], 3)
 
@@ -185,11 +187,22 @@ class FileServiceTestCase(ApiDBTestCase):
             self.person.id
         )
         self.assertEqual(output_file["revision"], 2)
+
         output_file = files_service.get_last_output_revision(
             self.task.id,
             self.output_type.id
         )
         self.assertEqual(output_file["revision"], 2)
+
+        with pytest.raises(EntryAlreadyExistsException):
+            output_file = files_service.create_new_output_revision(
+                self.entity.id,
+                self.task.id,
+                self.working_file.id,
+                self.output_type.id,
+                self.person.id,
+                revision=1
+            )
 
     def test_get_last_output_files_for_task(self):
         geometry = self.output_type

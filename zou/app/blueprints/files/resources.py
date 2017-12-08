@@ -376,6 +376,8 @@ class NewOutputFileResource(Resource):
             return {"error": "Cannot find given output type."}, 400
         except PersonNotFoundException:
             return {"error": "Cannot find given person."}, 400
+        except EntryAlreadyExistsException:
+            return {"error": "The given output file already exists."}, 400
 
         return output_file_dict, 201
 
@@ -551,7 +553,7 @@ class NewWorkingFileResource(Resource):
                 revision=revision
             )
         except EntryAlreadyExistsException:
-            return {"error": "The given working_file already exists."}, 400
+            return {"error": "The given working file already exists."}, 400
 
         return working_file, 201
 

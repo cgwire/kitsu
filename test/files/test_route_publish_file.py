@@ -149,3 +149,13 @@ class PublishFileTestCase(ApiDBTestCase):
             "comment_wrong": "test file publish"
         }
         self.new_output(data, 400)
+
+    def test_create_same_output_file(self):
+        data = {
+            "person_id": self.person_id,
+            "comment": "test working file publish",
+            "output_type_id": self.tx_type_id,
+            "revision": 66
+        }
+        self.new_output(data)
+        self.new_output(data, 400)
