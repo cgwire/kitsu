@@ -24,7 +24,7 @@ class ImportShotgunSequencesResource(BaseImportShotgunResource):
         }
 
     def get_episode(self, sg_sequence):
-        sg_episode = sg_sequence.get("sg_episode", {"id": None})
+        sg_episode = sg_sequence.get("episode", {"id": None})
         if sg_episode is not None:
             episode_sg_id = sg_episode.get("id", None)
             return self.episode_map.get(episode_sg_id, None)
