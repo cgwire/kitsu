@@ -1,10 +1,14 @@
 from test.base import ApiDBTestCase
 
+from zou.app.models.output_type import OutputType
 
-class TaskOutputFilesTestCase(ApiDBTestCase):
+from zou.app.services import files_service, tasks_service
+
+
+class RouteOutputFilesTestCase(ApiDBTestCase):
 
     def setUp(self):
-        super(TaskOutputFilesTestCase, self).setUp()
+        super(RouteOutputFilesTestCase, self).setUp()
 
         self.generate_fixture_project_status()
         self.generate_fixture_project()
@@ -23,16 +27,34 @@ class TaskOutputFilesTestCase(ApiDBTestCase):
         self.generate_fixture_software()
         self.generate_fixture_shot_working_file()
         self.generate_fixture_file_status()
+
+        self.task_id = str(self.task.id)
+        self.tx_type_id = str(
+            files_service.get_or_create_output_type("Texture", "tx")["id"]
+        )
+        self.cache_type_id = str(
+            files_service.get_or_create_output_type("Cache", "cch")["id"]
+        )
         self.maxDiff = None
         self.task_id = self.task.id
+        self.person_id = str(self.person.id)
+        self.working_file_id = str(self.working_file.id)
+
+    def new_output(self, data, code=201):
+        return self.post(
+            "data/tasks/%s/working-files/%s/output-files/new" % (
+                self.task_id,
+                self.working_file_id
+            ),
+            data,
+            code
+        )
 
     def generate_output_files(self):
         geometry = self.generate_fixture_output_type()
         self.geometry_id = str(geometry.id)
-        cache = self.generate_fixture_output_type("Cache", "cch")
-        self.cache_id = str(cache.id)
-        texture = self.generate_fixture_output_type("Texture", "tx")
-        self.texture_id = str(texture.id)
+        cache = OutputType.get(self.cache_type_id)
+        texture = OutputType.get(self.tx_type_id)
 
         self.generate_fixture_output_file(geometry, 1)
         self.generate_fixture_output_file(geometry, 2)
@@ -63,11 +85,11 @@ class TaskOutputFilesTestCase(ApiDBTestCase):
             self.output_file_geometry.serialize()
         )
         self.assertEqual(
-            output_files[str(self.cache_id)],
+            output_files[str(self.cache_type_id)],
             self.output_file_cache.serialize()
         )
         self.assertEqual(
-            output_files[str(self.texture_id)],
+            output_files[str(self.tx_type_id)],
             self.output_file_texture.serialize()
         )
 
@@ -90,8 +112,122 @@ class TaskOutputFilesTestCase(ApiDBTestCase):
         output_files = self.get(
             "/data/entities/%s/output-types/%s/output-files" % (
                 self.entity.id,
-                self.cache_id
+                self.cache_type_id
             )
         )
         self.assertEquals(len(output_files), 3)
-        self.assertEquals(output_files[0]["output_type_id"], self.cache_id)
+        self.assertEquals(
+            output_files[0]["output_type_id"],
+            self.cache_type_id
+        )
+
+    def test_new_output(self):
+        data = {
+            "person_id": self.person_id,
+            "comment": "test working file publish",
+            "output_type_id": self.tx_type_id
+        }
+        result = self.new_output(data)
+
+        self.assertEqual(
+            result["folder_path"],
+            "/simple/productions/export/cosmos_landromat/assets/props/tree/"
+            "shaders/texture"
+        )
+        self.assertEqual(
+            result["file_name"],
+            "cosmos_landromat_props_tree_shaders_texture_main_v001"
+        )
+
+        output_file_id = result["id"]
+        output_file = self.get("/data/output-files/%s" % output_file_id)
+
+        self.assertEqual(output_file["comment"], data["comment"])
+        self.assertEqual(output_file["revision"], 1)
+        self.assertEqual(output_file["source_file_id"], self.working_file_id)
+
+    def test_new_output_with_extension(self):
+        data = {
+            "person_id": self.person_id,
+            "comment": "test working file publish with extension",
+            "output_type_id": self.tx_type_id,
+            "extension": ".tx"
+        }
+        result = self.new_output(data)
+        output_file_id = result["id"]
+        output_file = self.get("/data/output-files/%s" % output_file_id)
+
+        self.assertEqual(output_file["extension"], ".tx")
+        self.assertEqual(
+            output_file["path"],
+            "/simple/productions/export/cosmos_landromat/assets/props/tree/"
+            "shaders/texture/"
+            "cosmos_landromat_props_tree_shaders_texture_main_v001.tx"
+        )
+
+    def test_new_output_again(self):
+        data = {
+            "person_id": self.person_id,
+            "comment": "test working file publish",
+            "output_type_id": self.tx_type_id
+        }
+        result = self.new_output(data)
+        result = self.new_output(data)
+
+        self.assertEqual(
+            result["folder_path"],
+            "/simple/productions/export/cosmos_landromat/assets/props/tree/"
+            "shaders/texture"
+        )
+        self.assertEqual(
+            result["file_name"],
+            "cosmos_landromat_props_tree_shaders_texture_main_v002"
+        )
+
+        output_file_id = result["id"]
+        output_file = self.get("/data/output-files/%s" % output_file_id)
+
+        self.assertEqual(output_file["comment"], data["comment"])
+        self.assertEqual(output_file["revision"], 2)
+        self.assertEqual(output_file["source_file_id"], self.working_file_id)
+
+    def test_new_output_revision_forced(self):
+        data = {
+            "person_id": self.person_id,
+            "comment": "test working file publish",
+            "output_type_id": self.tx_type_id,
+            "revision": 66
+        }
+        result = self.new_output(data)
+
+        self.assertEqual(
+            result["file_name"],
+            "cosmos_landromat_props_tree_shaders_texture_main_v066"
+        )
+
+        output_file_id = result["id"]
+        output_file = self.get("/data/output-files/%s" % output_file_id)
+        self.assertEqual(output_file["revision"], 66)
+
+    def test_new_output_wrong_data(self):
+        data = {
+            "comment_wrong": "test file publish"
+        }
+        self.new_output(data, 400)
+
+    def test_create_same_output_file(self):
+        data = {
+            "person_id": self.person_id,
+            "comment": "test working file publish",
+            "output_type_id": self.tx_type_id,
+            "revision": 66
+        }
+        self.new_output(data)
+        self.new_output(data, 400)
+
+    def test_to_review(self):
+        data = {"person_id": str(self.person_id)}
+        status_id = str(tasks_service.get_to_review_status()["id"])
+        self.put("/actions/tasks/%s/to-review" % self.task_id, data)
+        task = self.get("data/tasks/%s" % self.task_id)
+        self.assertEquals(task["task_status_id"], status_id)
