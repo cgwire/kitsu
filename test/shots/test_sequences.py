@@ -9,6 +9,7 @@ class SequenceTestCase(ApiDBTestCase):
         self.generate_fixture_project_status()
         self.generate_fixture_project()
         self.generate_fixture_entity_type()
+        self.generate_fixture_episode()
         self.generate_fixture_sequence()
         self.generate_fixture_department()
         self.generate_fixture_task_type()
@@ -42,10 +43,11 @@ class SequenceTestCase(ApiDBTestCase):
 
     def test_get_sequence(self):
         sequence = self.get("data/sequences/%s" % self.sequence.id)
-        self.assertDictEqual(
-            sequence,
-            self.sequence.serialize(obj_type="Sequence")
-        )
+        self.assertEquals(sequence["id"], str(self.sequence.id))
+        self.assertEquals(sequence["name"], self.sequence.name)
+        self.assertEquals(sequence["episode_name"], self.episode.name)
+        self.assertEquals(sequence["episode_id"], str(self.episode.id))
+        self.assertEquals(sequence["project_name"], self.project.name)
 
     def test_get_sequence_tasks(self):
         self.generate_fixture_sequence_task()
