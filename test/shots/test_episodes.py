@@ -1,4 +1,5 @@
 from test.base import ApiDBTestCase
+
 from zou.app.models.entity import Entity
 
 
@@ -45,10 +46,9 @@ class EpisodeTestCase(ApiDBTestCase):
 
     def test_get_episode(self):
         episode = self.get("data/episodes/%s" % self.episode.id)
-        self.assertDictEqual(
-            episode,
-            self.episode.serialize(obj_type="Episode")
-        )
+        self.assertEquals(episode["id"], str(self.episode.id))
+        self.assertEquals(episode["name"], self.episode.name)
+        self.assertEquals(episode["project_name"], self.project.name)
 
     def test_create_episode(self):
         episode_name = "NE01"

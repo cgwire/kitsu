@@ -26,7 +26,7 @@ class ShotResource(Resource):
         """
         Retrieve given shot.
         """
-        shot = shots_service.get_shot(shot_id)
+        shot = shots_service.get_full_shot(shot_id)
         if not permissions.has_manager_permissions():
             user_service.check_has_task_related(shot["project_id"])
         return shot
@@ -51,7 +51,7 @@ class SceneResource(Resource):
         """
         Retrieve given scene.
         """
-        scene = shots_service.get_scene(scene_id)
+        scene = shots_service.get_full_scene(scene_id)
         if not permissions.has_manager_permissions():
             user_service.check_has_task_related(scene["project_id"])
 
@@ -277,7 +277,7 @@ class EpisodeResource(Resource):
         """
         Retrieve given episode.
         """
-        episode = shots_service.get_episode(episode_id)
+        episode = shots_service.get_full_episode(episode_id)
         if not permissions.has_manager_permissions():
             user_service.check_has_task_related(episode["project_id"])
         return episode
@@ -321,7 +321,7 @@ class SequenceResource(Resource):
         """
         Retrieve given sequence.
         """
-        sequence = shots_service.get_sequence(sequence_id)
+        sequence = shots_service.get_full_sequence(sequence_id)
         if not permissions.has_manager_permissions():
             user_service.check_has_task_related(sequence["project_id"])
         return sequence

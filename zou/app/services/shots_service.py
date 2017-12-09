@@ -209,6 +209,7 @@ def get_shots_and_tasks(criterions={}):
             "task_status_name": task_status.name,
             "task_status_short_name": task_status.short_name,
             "task_status_color": task_status.color,
+            "task_type_id": str(task_type.id),
             "task_type_name": task_type.name,
             "task_type_color": task_type.color,
             "task_type_priority": task_type.priority,
@@ -224,44 +225,84 @@ def get_shots_and_tasks(criterions={}):
     return shots
 
 
-def get_shot_raw(instance_id):
+def get_shot_raw(shot_id):
     shot_type = get_shot_type()
-    shot = Entity.get_by(
-        entity_type_id=shot_type["id"],
-        id=instance_id
-    )
+    try:
+        shot = Entity.get_by(
+            entity_type_id=shot_type["id"],
+            id=shot_id
+        )
+    except StatementError:
+        raise SequenceNotFoundException
+
     if shot is None:
         raise ShotNotFoundException
 
     return shot
 
 
-def get_shot(instance_id):
-    return get_shot_raw(instance_id).serialize(obj_type="Shot")
+def get_shot(shot_id):
+    return get_shot_raw(shot_id).serialize(obj_type="Shot")
 
 
-def get_scene_raw(instance_id):
+def get_full_shot(shot_id):
+    shot = get_shot(shot_id)
+    project = Project.get(shot["project_id"])
+    sequence = Entity.get(shot["parent_id"])
+    shot["project_name"] = project.name
+    shot["sequence_id"] = str(sequence.id)
+    shot["sequence_name"] = sequence.name
+
+    if sequence.parent_id is not None:
+        episode = Entity.get(sequence.parent_id)
+        shot["episode_id"] = str(episode.id)
+        shot["episode_name"] = episode.name
+
+    return shot
+
+
+def get_scene_raw(scene_id):
     scene_type = get_scene_type()
-    scene = Entity.get_by(
-        entity_type_id=scene_type["id"],
-        id=instance_id
-    )
+    try:
+        scene = Entity.get_by(
+            entity_type_id=scene_type["id"],
+            id=scene_id
+        )
+    except StatementError:
+        raise SequenceNotFoundException
+
     if scene is None:
         raise SceneNotFoundException
 
     return scene
 
 
-def get_scene(instance_id):
-    return get_scene_raw(instance_id).serialize(obj_type="Scene")
+def get_scene(scene_id):
+    return get_scene_raw(scene_id).serialize(obj_type="Scene")
 
 
-def get_sequence(instance_id):
+def get_full_scene(scene_id):
+    scene = get_scene(scene_id)
+    project = Project.get(scene["project_id"])
+    sequence = Entity.get(scene["parent_id"])
+    scene["project_name"] = project.name
+    scene["sequence_id"] = str(sequence.id)
+    scene["sequence_name"] = sequence.name
+
+    if sequence.parent_id is not None:
+        episode = Entity.get(sequence.parent_id)
+        scene["episode_id"] = str(episode.id)
+        scene["episode_name"] = episode.name
+
+    return scene
+
+
+def get_sequence_raw(sequence_id):
     sequence_type = get_sequence_type()
     try:
         sequence = Entity.get_by(
             entity_type_id=sequence_type["id"],
-            id=instance_id
+            id=sequence_id
         )
     except StatementError:
         raise SequenceNotFoundException
@@ -269,7 +310,50 @@ def get_sequence(instance_id):
     if sequence is None:
         raise SequenceNotFoundException
 
-    return sequence.serialize(obj_type="Sequence")
+    return sequence
+
+
+def get_sequence(sequence_id):
+    return get_sequence_raw(sequence_id).serialize(obj_type="Sequence")
+
+
+def get_full_sequence(sequence_id):
+    sequence = get_sequence(sequence_id)
+    project = Project.get(sequence["project_id"])
+    sequence["project_name"] = project.name
+
+    if sequence["parent_id"] is not None:
+        episode = Entity.get(sequence["parent_id"])
+        sequence["episode_id"] = str(episode.id)
+        sequence["episode_name"] = episode.name
+
+    return sequence
+
+
+def get_episode_raw(episode_id):
+    episode_type = get_episode_type()
+    try:
+        episode = Entity.get_by(
+            entity_type_id=episode_type["id"],
+            id=episode_id
+        )
+    except StatementError:
+        raise EpisodeNotFoundException
+
+    if episode is None:
+        raise EpisodeNotFoundException
+    return episode
+
+
+def get_episode(episode_id):
+    return get_episode_raw(episode_id).serialize(obj_type="Episode")
+
+
+def get_full_episode(episode_id):
+    episode = get_episode(episode_id)
+    project = Project.get(episode["project_id"])
+    episode["project_name"] = project.name
+    return episode
 
 
 def get_shot_by_shotgun_id(shotgun_id):
@@ -294,25 +378,6 @@ def get_sequence_by_shotgun_id(shotgun_id):
         raise SequenceNotFoundException
 
     return sequence
-
-
-def get_episode_raw(episode_id):
-    episode_type = get_episode_type()
-    try:
-        episode = Entity.get_by(
-            entity_type_id=episode_type["id"],
-            id=episode_id
-        )
-    except StatementError:
-        raise EpisodeNotFoundException
-
-    if episode is None:
-        raise EpisodeNotFoundException
-    return episode
-
-
-def get_episode(episode_id):
-    return get_episode_raw(episode_id).serialize(obj_type="Episode")
 
 
 def is_shot(entity):

@@ -3,10 +3,10 @@ from test.base import ApiDBTestCase
 from zou.app.models.entity import Entity
 
 
-class SequenceTestCase(ApiDBTestCase):
+class SceneTestCase(ApiDBTestCase):
 
     def setUp(self):
-        super(SequenceTestCase, self).setUp()
+        super(SceneTestCase, self).setUp()
         self.generate_shot_suite()
         self.generate_assigned_task()
 
@@ -52,10 +52,13 @@ class SequenceTestCase(ApiDBTestCase):
 
     def test_get_scene(self):
         scene = self.get("data/scenes/%s" % self.scene.id)
-        self.assertDictEqual(
-            scene,
-            self.scene.serialize(obj_type="Scene")
-        )
+        self.assertEquals(scene["id"], str(self.scene.id))
+        self.assertEquals(scene["name"], self.scene.name)
+        self.assertEquals(scene["sequence_name"], self.sequence.name)
+        self.assertEquals(scene["sequence_id"], str(self.sequence.id))
+        self.assertEquals(scene["episode_name"], self.episode.name)
+        self.assertEquals(scene["episode_id"], str(self.episode.id))
+        self.assertEquals(scene["project_name"], self.project.name)
 
     def test_create_scene(self):
         scene_name = "NSC01"

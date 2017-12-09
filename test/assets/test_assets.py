@@ -21,6 +21,9 @@ class AssetsTestCase(ApiDBTestCase):
 
     def test_get_asset(self):
         asset = self.get("data/assets/%s" % self.entity.id)
+        self.entity_dict["project_name"] = self.project.name
+        self.entity_dict["asset_type_id"] = str(self.entity_type.id)
+        self.entity_dict["asset_type_name"] = self.entity_type.name
         self.assertDictEqual(asset, self.entity_dict)
 
     def test_get_project_assets(self):

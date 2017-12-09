@@ -94,6 +94,16 @@ def get_asset(entity_id):
     return get_asset_raw(entity_id).serialize(obj_type="Asset")
 
 
+def get_full_asset(asset_id):
+    asset = get_asset(asset_id)
+    project = Project.get(asset["project_id"])
+    asset_type = get_asset_type_raw(asset["entity_type_id"])
+    asset["project_name"] = project.name
+    asset["asset_type_id"] = str(asset_type.id)
+    asset["asset_type_name"] = asset_type.name
+    return asset
+
+
 def get_asset_type_raw(asset_type_id):
     try:
         asset_type = EntityType.get(asset_type_id)
@@ -381,6 +391,7 @@ def all_assets_and_tasks(criterions={}):
             "task_status_name": task_status["name"],
             "task_status_short_name": task_status["short_name"],
             "task_status_color": task_status["color"],
+            "task_type_id": task_type["id"],
             "task_type_name": task_type["name"],
             "task_type_color": task_type["color"],
             "task_type_priority": task_type["priority"],
