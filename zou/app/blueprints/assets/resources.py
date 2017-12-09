@@ -18,7 +18,7 @@ class AssetResource(Resource):
         """
         Retrieve given asset.
         """
-        asset = assets_service.get_asset(asset_id)
+        asset = assets_service.get_full_asset(asset_id)
         if not permissions.has_manager_permissions():
             user_service.check_has_task_related(asset["project_id"])
         return asset
