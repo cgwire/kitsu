@@ -347,11 +347,12 @@ class PersonListResource(Resource):
     @jwt_required
     def get(self):
         person_names = []
-        for person in persons_service.all_active():
+        for person in persons_service.all():
             person_names.append({
                 "id": person["id"],
                 "first_name": person["first_name"],
                 "last_name": person["last_name"],
-                "desktop_login": person["desktop_login"]
+                "desktop_login": person["desktop_login"],
+                "active": person["active"]
             })
         return person_names

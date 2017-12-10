@@ -180,12 +180,14 @@ class ToReviewResource(Resource):
             preview_path = ""
             if working_file_id is not None:
                 working_file = files_service.get_working_file(working_file_id)
-                software = files_service.get_software(working_file.software_id)
-                revision = working_file.revision
+                software = files_service.get_software(
+                    working_file["software_id"]
+                )
+                revision = working_file["revision"]
 
                 preview_path = self.get_preview_path(
                     task,
-                    working_file.name,
+                    working_file["name"],
                     revision,
                     software
                 )

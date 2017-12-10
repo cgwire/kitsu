@@ -36,7 +36,7 @@ class ImportShotgunSequence(ShotgunTestCase):
                 "id": 1,
                 "name": "Agent327"
             },
-            "sg_episode": {
+            "episode": {
                 "type": "Episode",
                 "id": 1,
                 "name": "E01"

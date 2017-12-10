@@ -5,6 +5,11 @@
       "id": 1, 
       "name": "Agent327"
     }, 
+    "episode": {
+      "type": "Episode", 
+      "id": 1, 
+      "name": "E01"
+    },
     "code": "S01", 
     "type": "Sequence", 
     "id": 1, 
