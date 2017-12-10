@@ -123,3 +123,7 @@ def init_data():
     tasks_service.get_or_create_status("Retake", "retake", "#ff3860")
     tasks_service.get_or_create_status("Done", "done", "#22d160")
     print("Task status initialized.")
+
+
+if __name__ == '__main__':
+    cli()
