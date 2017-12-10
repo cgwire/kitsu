@@ -10,5 +10,11 @@
     "color": "183,0,188",
     "id": 2,
     "type": "Step"
+  },
+  {
+    "code": "Layout",
+    "color": "173,240,108",
+    "id": 3,
+    "type": "Step"
   }
 ]

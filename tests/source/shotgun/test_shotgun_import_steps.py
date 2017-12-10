@@ -8,10 +8,10 @@ class ImportShotgunStepTestCase(ShotgunTestCase):
 
     def test_import_steps(self):
         self.steps = self.load_fixture('steps')
-        self.assertEqual(len(self.steps), 2)
+        self.assertEqual(len(self.steps), 3)
 
         self.departments = self.get("data/departments")
-        self.assertEqual(len(self.departments), 2)
+        self.assertEqual(len(self.departments), 3)
 
     def test_import_wrong_step(self):
         data = [

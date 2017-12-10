@@ -199,19 +199,22 @@ def create_new_output_revision(
 
     file_status_id = get_default_status()["id"]
 
-    output_file = OutputFile(
-        name=name,
-        comment=comment,
-        extension=extension,
-        revision=revision,
-        task_id=task_id,
-        entity_id=entity_id,
-        person_id=person_id,
-        source_file_id=working_file_id,
-        output_type_id=output_type_id,
-        file_status_id=file_status_id
-    )
-    output_file.save()
+    try:
+        output_file = OutputFile.create(
+            name=name,
+            comment=comment,
+            extension=extension,
+            revision=revision,
+            task_id=task_id,
+            entity_id=entity_id,
+            person_id=person_id,
+            source_file_id=working_file_id,
+            output_type_id=output_type_id,
+            file_status_id=file_status_id
+        )
+        output_file.save()
+    except IntegrityError:
+        raise EntryAlreadyExistsException
 
     return output_file.serialize()
 

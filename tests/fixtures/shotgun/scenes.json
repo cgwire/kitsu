@@ -1,0 +1,19 @@
+[
+  {
+    "sg_cut_in": null, 
+    "code": "SC01",
+    "project": {
+      "type": "Project", 
+      "id": 1, 
+      "name": "Agent327"
+    }, 
+    "sequence_sg_scenes_1_sequences": [{
+        "type": "Sequence",
+        "id": 1,
+        "name": "S01"
+    }],
+    "sg_cut_duration": null, 
+    "type": "Scene", 
+    "id": 1
+  }
+]

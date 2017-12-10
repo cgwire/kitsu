@@ -68,6 +68,14 @@ class ProjectSequencesResource(Resource):
         return user_service.get_project_sequences(project_id)
 
 
+class ProjectEpisodesResource(Resource):
+
+    @jwt_required
+    def get(self, project_id):
+        projects_service.get_project(project_id)
+        return user_service.get_project_episodes(project_id)
+
+
 class ProjectAssetTypesResource(Resource):
 
     @jwt_required
@@ -82,6 +90,14 @@ class SequenceShotsResource(Resource):
     def get(self, sequence_id):
         shots_service.get_sequence(sequence_id)
         return user_service.get_sequence_shots(sequence_id)
+
+
+class SequenceScenesResource(Resource):
+
+    @jwt_required
+    def get(self, sequence_id):
+        shots_service.get_sequence(sequence_id)
+        return user_service.get_sequence_scenes(sequence_id)
 
 
 class ShotTasksResource(Resource):

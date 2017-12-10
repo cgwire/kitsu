@@ -6,9 +6,11 @@ from .resources import (
     AssetTaskTypesResource,
     AssetTypeAssetsResource,
     OpenProjectsResource,
+    ProjectEpisodesResource,
     ProjectSequencesResource,
     ProjectAssetTypesResource,
     SequenceShotsResource,
+    SequenceScenesResource,
     ShotTasksResource,
     ShotTaskTypesResource,
     SceneTasksResource,
@@ -26,11 +28,15 @@ routes = [
 
     ("/data/user/projects/open", OpenProjectsResource),
     ("/data/user/projects/<project_id>/asset-types", ProjectAssetTypesResource),
-    ("/data/user/projects/<project_id>/asset-types/<asset_type_id>/assets",
-     AssetTypeAssetsResource),
+    (
+        "/data/user/projects/<project_id>/asset-types/<asset_type_id>/assets",
+        AssetTypeAssetsResource
+    ),
     ("/data/user/projects/<project_id>/sequences", ProjectSequencesResource),
+    ("/data/user/projects/<project_id>/episodes", ProjectEpisodesResource),
 
     ("/data/user/sequences/<sequence_id>/shots", SequenceShotsResource),
+    ("/data/user/sequences/<sequence_id>/scenes", SequenceScenesResource),
 
     ("/data/user/tasks", TodosResource),
 ]
