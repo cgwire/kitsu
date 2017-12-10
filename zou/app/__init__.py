@@ -1,3 +1,5 @@
+import os
+
 from flask import Flask
 from flask_restful import current_app
 from flask_jwt_extended import JWTManager
@@ -11,6 +13,16 @@ from .services.exception import PersonNotFoundException
 
 app = Flask(__name__)
 app.config.from_object(config)
+
+if not app.config["FILE_TREE_FOLDER"]:
+    # file_trees are included in Python package: use root_path
+    app.config["FILE_TREE_FOLDER"] = os.path.join(app.root_path,
+                                                  'file_trees')
+
+if not app.config["THUMBNAIL_FOLDER"]:
+    app.config["THUMBNAIL_FOLDER"] = os.path.join(app.instance_path,
+                                                  'thumbnails')
+
 
 db = SQLAlchemy(app)
 

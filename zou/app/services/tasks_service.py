@@ -170,7 +170,19 @@ def create_task(task_type, entity, name="main"):
             assigner_id=current_user_id,
             assignees=[]
         )
-        return task.serialize()
+        task_dict = task.serialize()
+        task_dict.update({
+            "task_status_id": task_status["id"],
+            "task_status_name": task_status["name"],
+            "task_status_short_name": task_status["short_name"],
+            "task_status_color": task_status["color"],
+            "task_type_id": task_type["id"],
+            "task_type_name": task_type["name"],
+            "task_type_color": task_type["color"],
+            "task_type_priority": task_type["priority"]
+        })
+        return task_dict
+
     except IntegrityError:
         pass  # Tasks already exists, no need to create it.
 

@@ -53,7 +53,10 @@ routes = [
         "/actions/tasks/<task_id>/comments/<comment_id>/add-preview",
         AddPreviewResource
     ),
-    ("/actions/tasks/<task_id>/to-review", ToReviewResource),
+    (
+        "/actions/tasks/<task_id>/to-review",
+        ToReviewResource
+    ),
     (
         "/actions/task-types/<task_type_id>/shots/create-tasks",
         CreateShotTasksResource
