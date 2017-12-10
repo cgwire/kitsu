@@ -55,6 +55,12 @@ def register_event_handlers(app):
     each event handler listed in the __init_.py.
     """
     sys.path.insert(0, app.config["EVENT_HANDLERS_FOLDER"])
-    import event_handlers
-    events.register_all(event_handlers.event_map)
+    try:
+        import event_handlers
+        events.register_all(event_handlers.event_map)
+    except ImportError:
+        # Event handlers folder is not properly configured.
+        # Handlers are optional, that's why this error is ignored.
+        pass
+
     return app
