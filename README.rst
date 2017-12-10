@@ -1,8 +1,6 @@
 .. figure:: https://zou.cg-wire.com/zou.png
    :alt: Zou Logo
 
-   Zou Logo
-
 Zou is the memory of your CG production
 ---------------------------------------
 
