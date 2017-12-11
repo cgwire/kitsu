@@ -368,7 +368,7 @@ export default {
               name: 'shots',
               params: {production_id: this.currentProduction.id}
             })
-            this.$store.dispatch('loadShots')
+            // this.$store.dispatch('loadShots')
           }
         }
       })

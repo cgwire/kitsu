@@ -144,7 +144,7 @@ export default {
 
   tasks: {
     preview: 'Previews',
-    assign: 'Assign {nbSelectedTasks} tasks to:',
+    assign: 'Assign one task to: | Assign {nbSelectedTasks} tasks to:',
     no_preview: 'There is currently no preview for this task.',
     no_comment: 'There is currently no comment for this task.',
     validation: 'Validation',

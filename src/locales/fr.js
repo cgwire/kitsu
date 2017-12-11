@@ -127,7 +127,7 @@ export default {
   tasks: {
     preview: 'Pré-visualisation',
     validation: 'Validation',
-    assign: 'Assigner {nbSelectedTasks} tâches à :',
+    assign: 'Assigner une tâche à : | Assigner {nbSelectedTasks} tâches à :',
     no_preview: 'Il n\'y a pas de previz pour cette tâche..',
     no_comment: 'Il n\'y a pas de commentaires pour cette tâche.',
     clear_assignations: 'effacer les assignations',

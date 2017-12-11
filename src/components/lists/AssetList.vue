@@ -177,11 +177,11 @@ export default {
   methods: {
     ...mapActions([
     ]),
-    onTaskSelected (task) {
-      this.$store.commit('ADD_SELECTED_TASK', task)
+    onTaskSelected (validationInfo) {
+      this.$store.commit('ADD_SELECTED_TASK', validationInfo)
     },
-    onTaskUnselected (task) {
-      this.$store.commit('REMOVE_SELECTED_TASK', task)
+    onTaskUnselected (validationInfo) {
+      this.$store.commit('REMOVE_SELECTED_TASK', validationInfo)
     },
     onBodyScroll (event, position) {
       this.$refs.headerWrapper.style.left = `-${position.scrollLeft}px`

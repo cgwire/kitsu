@@ -1,55 +1,125 @@
 <template>
-  <div :class="{
-    'action-topbar': true,
-    'hidden': isHidden
-  }">
-    <div class="level">
-      <div class="level-left" v-if="isCurrentUserManager">
-        <div class="level-item assignation">
-          <chevron-right-icon></chevron-right-icon>
-          {{ $t('tasks.assign', {nbSelectedTasks}) }}
-        </div>
-        <div class="level-item">
-          <combobox
-            :options="getPersonOptions"
-            v-model="personId"
+  <div>
+    <div :class="{
+      'action-topbar': true,
+      'hidden': isHidden
+    }">
+      <div class="level">
+        <div class="level-left">
+          <div class="level-item more-menu-icon" @click="toggleMenu">
+            <more-vertical-icon></more-vertical-icon>
+          </div>
+
+          <div class="level-item" v-if="selectedBar === 'assignation'">
+            <div class="flexrow" v-if="isCurrentUserManager">
+              <div class="assignation flexrow-item">
+                {{ $tc('tasks.assign', nbSelectedTasks, {nbSelectedTasks}) }}
+              </div>
+              <div class="flexrow-item">
+                <combobox
+                  :options="getPersonOptions"
+                  v-model="personId"
+                >
+                </combobox>
+              </div>
+              <div class="" v-if="isAssignationLoading">
+                <spinner :is-white="true"></spinner>
+              </div>
+              <div class="flexrow-item" v-if="!isAssignationLoading">
+                <button
+                  class="button is-success confirm-button"
+                  @click="confirmAssign"
+                >
+                {{ $t('main.confirmation') }}
+                </button>
+              </div>
+              <div class="flexrow-item" v-if="!isAssignationLoading">
+                {{ $t('main.or') }}
+              </div>
+              <div class="flexrow-item" v-if="!isAssignationLoading">
+                <button
+                  class="button is-link clear-assignation-button"
+                  @click="clearAssignation"
+                >
+                  {{ $t('tasks.clear_assignations') }}
+                </button>
+              </div>
+            </div>
+            <div style="padding-left: 1em;" v-else>
+              {{ $t('tasks.no_assignation_right') }}
+            </div>
+          </div>
+
+          <div
+            class="level-item"
+            v-if="selectedBar === 'tasks'"
           >
-          </combobox>
+            <div class="flexrow">
+              <div class="flexrow-item strong bigger">
+                Create new tasks for selection:
+              </div>
+              <div class="flexrow-item" v-if="!isCreationLoading">
+                <button
+                  class="button is-success confirm-button"
+                  @click="confirmTaskCreation"
+                >
+                  {{ $t('main.confirmation') }}
+                </button>
+
+                <div class="" v-if="isCreationLoading">
+                  <spinner :is-white="true"></spinner>
+                </div>
+              </div>
+            </div>
+          </div>
+
         </div>
-        <div class="level-item" v-if="isAssignationLoading">
-          <spinner :is-white="true"></spinner>
-        </div>
-        <div class="level-item" v-else>
-          <button
-            class="button is-success confirm-button"
-            @click="confirmAssign"
+
+        <div class="level-right">
+          <div
+            class="level-item clear-selection"
+            @click="clearSelection"
           >
-          {{ $t('main.confirmation') }}
-          </button>
-          {{ $t('main.or') }}
-          <button
-            class="button is-link clear-assignation-button"
-            @click="clearAssignation"
-          >
-            {{ $t('tasks.clear_assignations') }}
-          </button>
+            <x-icon>
+            </x-icon>
+            {{ $t('main.clear_selection') }}
+          </div>
         </div>
       </div>
-      <div style="padding-left: 1em;" v-else>
-        {{ $t('tasks.no_assignation_right') }}
-      </div>
-      <div class="level-right">
+
+      <div
+        ref="moreMenu"
+        :class="{
+          'more-menu': true,
+          'is-hidden': isMoreMenuDisplayed
+        }"
+      >
         <div
-          class="level-item clear-selection"
-          @click="clearSelection"
+          class="more-menu-item"
+          @click="selectBar('assignation')"
         >
-          <x-icon>
-          </x-icon>
-          {{ $t('main.clear_selection') }}
+        Assign tasks
+        </div>
+
+        <div
+          class="more-menu-item"
+          @click="selectBar('tasks')"
+        >
+        Create tasks
         </div>
       </div>
     </div>
+
+    <div
+      :class="{
+        'menu-mask': true,
+        'is-hidden': isMoreMenuDisplayed
+      }"
+      @click="toggleMenu"
+    >
+    </div>
   </div>
+
 </template>
 
 <script>
@@ -58,13 +128,14 @@ import PeopleAvatar from './widgets/PeopleAvatar'
 import PeopleName from './widgets/PeopleName'
 import Combobox from './widgets/Combobox'
 import Spinner from './widgets/Spinner'
-import { ChevronRightIcon, XIcon } from 'vue-feather-icons'
+import { ChevronRightIcon, XIcon, MoreVerticalIcon } from 'vue-feather-icons'
 
 export default {
   name: 'topbar',
   components: {
     ChevronRightIcon,
     Combobox,
+    MoreVerticalIcon,
     PeopleName,
     PeopleAvatar,
     Spinner,
@@ -72,7 +143,10 @@ export default {
   },
   data () {
     return {
+      isMoreMenuDisplayed: true,
       isAssignationLoading: false,
+      isCreationLoading: false,
+      selectedBar: 'assignation',
       personId: ''
     }
   },
@@ -81,7 +155,8 @@ export default {
       'getPersonOptions',
       'selectedTasks',
       'nbSelectedTasks',
-      'isCurrentUserManager'
+      'isCurrentUserManager',
+      'currentProduction'
     ]),
     isHidden () {
       return this.nbSelectedTasks === 0
@@ -90,11 +165,14 @@ export default {
   methods: {
     ...mapActions([
       'assignSelectedTasks',
+      'createSelectedTasks',
       'unassignSelectedTasks'
     ]),
+
     clearSelection () {
       this.$store.commit('CLEAR_SELECTED_TASKS')
     },
+
     getSelectedPersonId () {
       if (this.getPersonOptions.length > 0) {
         const defaultChoice = this.getPersonOptions[0].value
@@ -103,6 +181,7 @@ export default {
         return null
       }
     },
+
     confirmAssign () {
       this.isAssignationLoading = true
       this.assignSelectedTasks({
@@ -112,6 +191,19 @@ export default {
         }
       })
     },
+
+    confirmTaskCreation () {
+      const type = this.$route.path.indexOf('shots') > 0 ? 'shots' : 'assets'
+      this.isCreationLoading = true
+      this.createSelectedTasks({
+        type: type,
+        project_id: this.currentProduction.id,
+        callback: () => {
+          this.isCreationLoading = false
+        }
+      })
+    },
+
     clearAssignation () {
       this.isAssignationLoading = true
       this.unassignSelectedTasks({
@@ -119,8 +211,18 @@ export default {
           this.isAssignationLoading = false
         }
       })
+    },
+
+    selectBar (barName) {
+      this.selectedBar = barName
+      this.toggleMenu()
+    },
+
+    toggleMenu () {
+      this.isMoreMenuDisplayed = !this.isMoreMenuDisplayed
     }
   },
+
   watch: {
   }
 }
@@ -146,14 +248,13 @@ export default {
 }
 
 div.assignation {
-  font-size: 1.3em;
   font-weight: bold;
-  margin-right: 0;
+  margin-right: 0.4em;
   padding-right: 0;
 }
 
 .level-item {
-  padding: 1em;
+  padding: 0.5em;
 }
 
 .hidden {
@@ -182,6 +283,34 @@ div.assignation {
   box-shadow: none;
   background: transparent;
   color: white;
+}
+
+.more-menu-icon {
+  cursor: pointer;
+}
+
+.more-menu {
+  position: fixed;
+  width: 200px;
+  z-index: 200;
+  left: 0;
+  top: 60px;
+  background: #5e60ba;
+  color: white;
+  box-shadow: 0px 0px 6px rgba(0,0,0,0.2);
+}
+
+.more-menu-item {
+  padding: 0.4em 1em;
+  font-size: 1.2em;
+  cursor: pointer;
+}
+
+.more-menu-item:hover {
+  background: #9f7fdf;
+}
+
+.flexrow-item {
 }
 
 @media screen and (max-width: 768px) {
