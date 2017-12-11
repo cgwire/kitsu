@@ -66,7 +66,7 @@ def create_admin(email):
         print("Passwords don't match.")
         sys.exit(1)
     except auth.PasswordTooShortException:
-        print("Passwords is too short.")
+        print("Password is too short.")
         sys.exit(1)
     except auth.EmailNotValidException:
         print("Email is not valid.")
@@ -99,7 +99,7 @@ def init_data():
     modeling = tasks_service.get_or_create_department("Modeling")
     animation = tasks_service.get_or_create_department("Animation")
     fx = tasks_service.get_or_create_department("FX")
-    compositing = tasks_service.get_or_create_department("Compositiing")
+    compositing = tasks_service.get_or_create_department("Compositing")
     concept = tasks_service.get_or_create_department("Concept")
 
     tasks_service.get_or_create_task_type(concept, "Concept", "#8D6E63", 1)
