@@ -12,9 +12,11 @@ from zou.app.services import (
 
 import click
 
+
 @click.group()
 def cli():
     pass
+
 
 @cli.command()
 def init_db():
@@ -43,9 +45,10 @@ def reset_db():
 
 
 @cli.command()
+@click.argument("email")
 def create_admin(email):
     "Create an admin user to allow usage of the API when database is empty."
-    "Set password is 'default'"
+    "Set password is 'default'."
 
     try:
         auth.validate_email(email)
