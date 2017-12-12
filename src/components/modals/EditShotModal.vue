@@ -37,6 +37,25 @@
           v-focus
         >
         </text-field>
+        <text-field
+          ref="frameInField"
+          :label="$t('shots.fields.frame_in')"
+          v-model="form.frameIn"
+          type="number"
+          @enter="runConfirmation"
+          v-focus
+        >
+        </text-field>
+        <text-field
+          ref="frameOutField"
+          :label="$t('shots.fields.frame_out')"
+          v-model="form.frameOut"
+          type="number"
+          @enter="runConfirmation"
+          v-focus
+        >
+        </text-field>
+
       </form>
 
       <p class="has-text-right">
@@ -110,7 +129,9 @@ export default {
           name: this.shotToEdit.name,
           description: this.shotToEdit.description,
           sequence_id: this.shotToEdit.sequence_id,
-          production_id: this.shotToEdit.project_id
+          production_id: this.shotToEdit.project_id,
+          frameIn: this.frameIn,
+          frameOut: this.frameOut
         },
         shotSuccessText: ''
       }
@@ -120,7 +141,9 @@ export default {
           name: '',
           description: '',
           entity_type_id: '',
-          project_id: ''
+          project_id: '',
+          frameIn: '',
+          frameOut: ''
         },
         shotSuccessText: ''
       }
@@ -137,7 +160,15 @@ export default {
       'getSequenceOptions',
       'getOpenProductionOptions',
       'currentProduction'
-    ])
+    ]),
+
+    frameIn () {
+      return this.shotToEdit.data ? this.shotToEdit.data.frame_in : ''
+    },
+
+    frameOut () {
+      return this.shotToEdit.data ? this.shotToEdit.data.frame_out : ''
+    }
   },
 
   methods: {
@@ -178,7 +209,9 @@ export default {
           sequence_id: this.shotToEdit.sequence_id,
           project_id: this.shotToEdit.project_id,
           name: this.shotToEdit.name,
-          description: this.shotToEdit.description
+          description: this.shotToEdit.description,
+          frameIn: this.frameIn,
+          frameOut: this.frameOut
         }
       }
     }
@@ -189,6 +222,10 @@ export default {
   },
 
   watch: {
+    active () {
+      this.resetForm()
+    },
+
     shotToEdit () {
       this.resetForm()
     },

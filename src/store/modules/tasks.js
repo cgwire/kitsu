@@ -35,6 +35,7 @@ const state = {
   taskComments: {},
   taskPreviews: {},
   selectedTasks: {},
+  selectedValidations: {},
   nbSelectedTasks: 0,
 
   previewFormData: null
@@ -329,18 +330,35 @@ const mutations = {
     }
   },
 
-  [ADD_SELECTED_TASK] (state, task) {
-    state.selectedTasks[task.id] = task
-    state.nbSelectedTasks = Object.keys(state.selectedTasks).length
+  [ADD_SELECTED_TASK] (state, validationInfo) {
+    if (validationInfo.task) {
+      state.selectedTasks[validationInfo.task.id] = validationInfo.task
+      state.nbSelectedTasks = Object.keys(state.selectedTasks).length
+    } else {
+      const commentId = validationInfo.comment.id
+      const entityId = validationInfo.entity.id
+      const validationKey = `${commentId}-${entityId}`
+      state.selectedValidations[validationKey] = validationInfo
+    }
   },
-  [REMOVE_SELECTED_TASK] (state, task) {
-    delete state.selectedTasks[task.id]
-    state.nbSelectedTasks = Object.keys(state.selectedTasks).length
+
+  [REMOVE_SELECTED_TASK] (state, validationInfo) {
+    if (validationInfo.task) {
+      delete state.selectedTasks[validationInfo.task.id]
+      state.nbSelectedTasks = Object.keys(state.selectedTasks).length
+    } else {
+      const commentId = validationInfo.comment.id
+      const entityId = validationInfo.entity.id
+      const validationKey = `${commentId}-${entityId}`
+      delete state.selectedValidations[validationKey]
+    }
   },
+
   [CLEAR_SELECTED_TASKS] (state, task) {
     state.selectedTasks = {}
     state.nbSelectedTasks = 0
   },
+
   [ASSIGN_TASKS] (state, { selectedTaskIds, personId }) {
     selectedTaskIds.forEach((taskId) => {
       const task = state.taskMap[taskId]
@@ -366,6 +384,7 @@ const mutations = {
     state.taskComments = {}
     state.taskPreviews = {}
     state.selectedTasks = {}
+    state.selectedValidations = {}
     state.previewFormData = null
   }
 }

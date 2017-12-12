@@ -7,6 +7,7 @@ const init = (callback) => {
     'loadTaskStatuses',
     'loadAssetTypes',
     'loadTaskTypes',
+    'loadCustomActions',
     'loadPeople',
     'loadOpenProductions'
   ]

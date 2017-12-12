@@ -3,10 +3,12 @@ import lang from '../lib/lang'
 import init from '../lib/init'
 
 import userStore from '../store/modules/user'
+import taskTypeStore from '../store/modules/tasktypes'
 
 import Assets from '../components/Assets'
 import AssetTypes from '../components/AssetTypes'
 import Breakdown from '../components/Breakdown'
+import CustomActions from '../components/CustomActions'
 import Login from '../components/Login'
 import Main from '../components/Main'
 import NotFound from '../components/NotFound'
@@ -21,6 +23,33 @@ import ServerDown from '../components/ServerDown'
 import Shots from '../components/Shots'
 
 export const routes = [
+
+  {
+    path: '',
+    component: Main,
+
+    beforeEnter: (to, from, next) => {
+      auth.requireAuth(to, from, (nextPath) => {
+        if (nextPath) {
+          next(nextPath)
+        } else {
+          lang.setLocale()
+          init((err) => {
+            if (err) {
+              next({name: 'server-down'})
+            } else {
+              if (userStore.getters.isCurrentUserManager(userStore.state)) {
+                next({name: 'open-productions'})
+              } else {
+                next({name: 'todos'})
+              }
+            }
+          })
+        }
+      })
+    }
+  },
+
   {
     path: '/',
     component: Main,
@@ -31,21 +60,19 @@ export const routes = [
           next(nextPath)
         } else {
           lang.setLocale()
-          init(next)
+          if (taskTypeStore.state.taskTypes.length === 0) {
+            init(next)
+          } else {
+            next()
+          }
         }
       })
     },
 
     children: [
-      { path: '',
-        name: 'home',
-        redirect: to => {
-          if (userStore.getters.isCurrentUserManager(userStore.state)) {
-            return '/open-productions'
-          } else {
-            return '/todos'
-          }
-        }
+      {
+        path: '',
+        name: 'home'
       },
       {
         path: '/open-productions',
@@ -215,20 +242,44 @@ export const routes = [
         component: TaskTypes
       },
 
+      {
+        name: 'custom-actions',
+        path: '/custom-actions',
+        component: CustomActions
+      },
+      {
+        name: 'custom-actions-new',
+        path: '/custom-actions/new',
+        component: CustomActions
+      },
+      {
+        name: 'edit-custom-action',
+        path: '/custom-actions/edit/:custom_action_id',
+        component: CustomActions
+      },
+      {
+        name: 'delete-custom-action',
+        path: '/custom-actions/delete/:custom_action_id',
+        component: CustomActions
+      },
+
       { path: '/todos', component: Todos, name: 'todos' },
       { path: '/profile', component: Profile, name: 'profile' }
     ]
   },
   {
     path: '/login',
-    component: Login
+    component: Login,
+    name: 'login'
   },
   {
     path: '/server-down',
-    component: ServerDown
+    component: ServerDown,
+    name: 'server-down'
   },
   {
     path: '/*',
-    component: NotFound
+    component: NotFound,
+    name: 'not-found'
   }
 ]

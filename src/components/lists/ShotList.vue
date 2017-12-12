@@ -5,7 +5,7 @@
       <thead>
         <tr>
           <th class="thumbnail"></th>
-          <th class="episode" v-if="entries.length > 0 && entries[0].episode_name.length > 0">
+          <th class="episode" v-if="entries && entries.length > 0 && entries[0].episode_name.length > 0">
             {{ $t('shots.fields.episode') }}
           </th>
           <th class="sequence">{{ $t('shots.fields.sequence') }}</th>
@@ -73,7 +73,7 @@
             <img
               class="thumbnail-picture"
               v-lazy="'/api/pictures/thumbnails/preview-files/' + entry.preview_file_id + '.png'"
-              v-if="entry.preview_file_id.length > 0"
+              v-if="entry.preview_file_id && entry.preview_file_id.length > 0"
             />
             <span class="thumbnail-picture thumbnail-empty" v-else>
             </span>
@@ -88,10 +88,10 @@
             {{ entry.name }}
           </td>
           <td class="framein">
-            {{ entry.data ? entry.data.frame_in : ''}}
+            {{ entry.data && entry.data.frame_in ? entry.data.frame_in : ''}}
           </td>
           <td class="frameout">
-            {{ entry.data ? entry.data.frame_out : ''}}
+            {{ entry.data && entry.data.frame_out ? entry.data.frame_out : ''}}
           </td>
           <td class="description">
             {{ entry.description }}
@@ -138,7 +138,7 @@
   </div>
 
   <p class="has-text-centered nb-shots" v-if="!isEmptyList">
-    {{ entries.length }} {{ $tc('shots.number', entries.length) }}
+    {{ entries ? entries.length : 0 }} {{ $tc('shots.number', entries ? entries.length :0 ) }}
   </p>
 
 </div>
@@ -179,7 +179,8 @@ export default {
       'shotSearchText'
     ]),
     isEmptyList () {
-      return this.entries.length === 0 &&
+      return this.entries &&
+             this.entries.length === 0 &&
              !this.isLoading &&
              !this.isError &&
              (!this.shotSearchText || this.shotSearchText.length === 0)
