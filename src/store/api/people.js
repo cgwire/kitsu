@@ -42,7 +42,7 @@ export default {
     const data = {
       old_password: form.oldPassword,
       password: form.password,
-      password2: form.password2
+      password_2: form.password2
     }
     client.post('/api/auth/change-password', data, callback)
   },
