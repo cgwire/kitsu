@@ -167,6 +167,8 @@ def get_shot_map(criterions={}):
             "id": str(shot.id),
             "name": shot.name,
             "description": shot.description,
+            "frame_in": shot.data.get("frame_in", None),
+            "frame_out": shot.data.get("frame_out", None),
             "preview_file_id": preview_file_id,
             "sequence_id": str(shot.parent_id),
             "sequence_name": sequence_name,
