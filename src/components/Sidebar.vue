@@ -66,6 +66,11 @@
              {{ $t("asset_types.title") }}
              </router-link>
            </p>
+           <p @click="toggleSidebar()">
+             <router-link :to="{name: 'custom-actions'}">
+             {{ $t("custom_actions.title") }}
+             </router-link>
+           </p>
          </div>
 
         </section>

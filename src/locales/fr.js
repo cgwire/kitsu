@@ -173,6 +173,19 @@ export default {
     delete_error: 'Une erreur est survenue lors de la suppression du type de tâche. Êtes vous sûr qu\'aucune tâche n\'est lié à ce type de tâche ?'
   },
 
+  custom_actions: {
+    title: 'Actions',
+    new_custom_action: 'Ajouter une action personnalisée',
+    number: 'action pesonnalisée | actions personnalisées',
+    fields: {
+      name: 'Nom',
+      url: 'URL',
+      entity_type: 'Type d\'entité'
+    },
+    delete_text: 'Êtes-vous sûr de supprimer l\'action personnalisée {name} de la base de données?',
+    delete_error: 'Une erreur est survenue en supprimant l\'action personnalisée.'
+  },
+
   asset_types: {
     title: 'Types d\'assets',
     edit_title: 'Modifier le type d\'asset',
