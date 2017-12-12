@@ -77,7 +77,6 @@ describe('customActions', () => {
   describe('getters', () => {
     it('customAction', () => {
       store.commit(LOAD_CUSTOM_ACTIONS_END, customActions)
-      console.log(getters)
       const customAction = getters.customAction(state)(2)
       expect(customAction.id).to.equal(2)
       expect(customAction.name).to.equal('Build Playlist')
