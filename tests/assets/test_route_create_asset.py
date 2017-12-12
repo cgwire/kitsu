@@ -21,7 +21,7 @@ class CreateAssetsTestCase(ApiDBTestCase):
         self.is_event_fired = True
         self.assertEqual(
             data["asset"]["name"],
-            self.asset_data["name"].capitalize()
+            self.asset_data["name"]
         )
         self.assertEqual(
             data["asset_type"]["id"],
@@ -52,7 +52,7 @@ class CreateAssetsTestCase(ApiDBTestCase):
         self.assertEquals(len(assets), 1)
         self.assertEquals(
             assets[0]["name"],
-            self.asset_data["name"].capitalize()
+            self.asset_data["name"]
         )
         self.assertEquals(
             assets[0]["description"],
