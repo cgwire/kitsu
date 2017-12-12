@@ -126,7 +126,7 @@ export default {
         callback: (err) => {
           if (!err) {
             this.modals.isNewDisplayed = false
-            this.$router.push('/')
+            this.$router.push({name: 'open-productions'})
           }
         }
       })

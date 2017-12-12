@@ -132,7 +132,8 @@ export default {
       )
     },
     currentProduction () {
-      if (this.currentProductionId !== this.currentProduction.id) {
+      if (this.currentProduction &&
+          this.currentProductionId !== this.currentProduction.id) {
         this.currentProductionId = this.currentProduction.id
       }
     }
