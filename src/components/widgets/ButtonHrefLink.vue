@@ -1,7 +1,8 @@
 <template>
 <a
-  class="button"
+  :class="'button ' + styleclass"
   :href="path"
+  :target="target"
 >
   <span class="icon is-small" v-if="icon.length > 0 && icon.startsWith('fa')">
     <i :class="'fa ' + icon"></i>
@@ -39,6 +40,14 @@ export default {
     },
     icon: {
       default: '',
+      type: String
+    },
+    styleclass: {
+      default: '',
+      type: String
+    },
+    target: {
+      default: '_self',
       type: String
     }
   }

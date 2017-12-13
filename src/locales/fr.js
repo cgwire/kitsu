@@ -81,6 +81,12 @@ export default {
     }
   },
 
+  menu: {
+    assign_tasks: 'Assigner des tâches',
+    create_tasks: 'Créer des tâches',
+    run_custom_action: 'Lancer des actions'
+  },
+
   login: {
     title: 'Se connecter à Kitsu',
     login: 'Se connecter',
@@ -150,6 +156,7 @@ export default {
     feedback: 'retours',
     my_tasks: 'Mes tâches',
     tasks: 'Tâches',
+    create_for_selection: 'Créer une tâche pour chaque cellule vide :',
     fields: {
       task_type: 'Type',
       production: 'Prod',
@@ -177,13 +184,14 @@ export default {
     title: 'Actions',
     new_custom_action: 'Ajouter une action personnalisée',
     number: 'action pesonnalisée | actions personnalisées',
+    run_for_selection: 'Lancer une action personnalisée pour les tâche sélectionnées :',
+    delete_text: 'Êtes-vous sûr de supprimer l\'action personnalisée {name} de la base de données?',
+    delete_error: 'Une erreur est survenue en supprimant l\'action personnalisée.',
     fields: {
       name: 'Nom',
       url: 'URL',
       entity_type: 'Type d\'entité'
-    },
-    delete_text: 'Êtes-vous sûr de supprimer l\'action personnalisée {name} de la base de données?',
-    delete_error: 'Une erreur est survenue en supprimant l\'action personnalisée.'
+    }
   },
 
   asset_types: {

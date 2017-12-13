@@ -15,7 +15,7 @@
               <div class="assignation flexrow-item">
                 {{ $tc('tasks.assign', nbSelectedTasks, {nbSelectedTasks}) }}
               </div>
-              <div class="flexrow-item">
+              <div class="flexrow-item combobox-item">
                 <combobox
                   :options="getPersonOptions"
                   v-model="personId"
@@ -56,7 +56,7 @@
           >
             <div class="flexrow">
               <div class="flexrow-item strong bigger">
-                Create new tasks for selection:
+                {{ $t('tasks.create_for_selection') }}
               </div>
               <div class="flexrow-item" v-if="!isCreationLoading">
                 <button
@@ -69,6 +69,45 @@
                 <div class="" v-if="isCreationLoading">
                   <spinner :is-white="true"></spinner>
                 </div>
+              </div>
+            </div>
+          </div>
+
+
+          <div
+            class="level-item"
+            v-if="selectedBar === 'custom-actions'"
+          >
+            <div class="flexrow">
+              <div class="flexrow-item strong bigger">
+                {{ $t('custom_actions.run_for_selection') }}
+              </div>
+              <div class="flexrow-item combobox-item">
+                <combobox
+                  :options="customActionOptions"
+                  v-model="customActionUrl"
+                >
+                </combobox>
+              </div>
+              <div class="flexrow-item">
+                <form
+                  target="_blank"
+                  :action="customActionUrl"
+                  :personid="user.id"
+                  :personemail="user.email"
+                  :projectid="currentProduction.id"
+                  :currentpath="currentUrl"
+                  :currentserver="currentHost"
+                  :selection="selectedTaskIds"
+                  :entity_type="currentEntityType"
+                >
+                <button
+                  class="button is-success"
+                  type="submit"
+                >
+                  {{ $t('main.confirmation') }}
+                </button>
+                </form>
               </div>
             </div>
           </div>
@@ -98,15 +137,23 @@
           class="more-menu-item"
           @click="selectBar('assignation')"
         >
-        Assign tasks
+          {{ $t('menu.assign_tasks') }}
         </div>
 
         <div
           class="more-menu-item"
           @click="selectBar('tasks')"
         >
-        Create tasks
+          {{ $t('menu.create_tasks') }}
         </div>
+
+        <div
+          class="more-menu-item"
+          @click="selectBar('custom-actions')"
+        >
+          {{ $t('menu.run_custom_action') }}
+        </div>
+
       </div>
     </div>
 
@@ -127,6 +174,7 @@ import { mapGetters, mapActions } from 'vuex'
 import PeopleAvatar from './widgets/PeopleAvatar'
 import PeopleName from './widgets/PeopleName'
 import Combobox from './widgets/Combobox'
+import ButtonHrefLink from './widgets/ButtonHrefLink'
 import Spinner from './widgets/Spinner'
 import { ChevronRightIcon, XIcon, MoreVerticalIcon } from 'vue-feather-icons'
 
@@ -139,6 +187,7 @@ export default {
     PeopleName,
     PeopleAvatar,
     Spinner,
+    ButtonHrefLink,
     XIcon
   },
   data () {
@@ -147,7 +196,9 @@ export default {
       isAssignationLoading: false,
       isCreationLoading: false,
       selectedBar: 'assignation',
-      personId: ''
+      personId: '',
+      customActionUrl: '',
+      selectedTaskIds: ''
     }
   },
   computed: {
@@ -156,12 +207,57 @@ export default {
       'selectedTasks',
       'nbSelectedTasks',
       'isCurrentUserManager',
-      'currentProduction'
+      'currentProduction',
+      'assetCustomActionOptions',
+      'shotCustomActionOptions',
+      'user'
     ]),
+
     isHidden () {
-      return this.nbSelectedTasks === 0
+      return this.nbSelectedTasks === 0 ||
+        !(
+            this.isCurrentViewShot ||
+            this.isCurrentViewShot
+        )
+    },
+
+    currentUrl () {
+      return this.$route.path
+    },
+
+    currentHost () {
+      return window.location.host
+    },
+
+    currentEntityType () {
+      return this.isCurrentViewAsset ? 'asset' : 'shot'
+    },
+
+    defaultCustomActionUrl () {
+      if (this.customActionOptions.length > 0) {
+        return this.customActionOptions[0].value
+      } else {
+        return ''
+      }
+    },
+
+    isCurrentViewAsset () {
+      return this.$route.path.indexOf('asset') > 0
+    },
+
+    isCurrentViewShot () {
+      return this.$route.path.indexOf('shot') > 0
+    },
+
+    customActionOptions () {
+      if (this.isCurrentViewAsset) {
+        return this.assetCustomActionOptions
+      } else {
+        return this.shotCustomActionOptions
+      }
     }
   },
+
   methods: {
     ...mapActions([
       'assignSelectedTasks',
@@ -223,7 +319,14 @@ export default {
     }
   },
 
+  mounted () {
+    this.customActionUrl = this.defaultCustomActionUrl
+  },
+
   watch: {
+    nbSelectedTasks () {
+      this.selectedTaskIds = Object.keys(this.selectedTasks)
+    }
   }
 }
 </script>
@@ -249,8 +352,12 @@ export default {
 
 div.assignation {
   font-weight: bold;
-  margin-right: 0.4em;
+  margin-right: 1em;
   padding-right: 0;
+}
+
+div.combobox-item {
+  padding-top: 3px;
 }
 
 .level-item {
@@ -285,8 +392,9 @@ div.assignation {
   color: white;
 }
 
-.more-menu-icon {
+.level .more-menu-icon {
   cursor: pointer;
+  margin-right: 0;
 }
 
 .more-menu {
