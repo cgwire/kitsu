@@ -206,6 +206,7 @@ export default {
       'getPersonOptions',
       'selectedTasks',
       'nbSelectedTasks',
+      'nbSelectedValidations',
       'isCurrentUserManager',
       'currentProduction',
       'assetCustomActionOptions',
@@ -214,11 +215,14 @@ export default {
     ]),
 
     isHidden () {
-      return this.nbSelectedTasks === 0 ||
-        !(
-            this.isCurrentViewShot ||
-            this.isCurrentViewShot
-        )
+      return (
+        this.nbSelectedTasks === 0 &&
+        this.nbSelectedValidations === 0
+      ) ||
+      !(
+        this.isCurrentViewAsset ||
+        this.isCurrentViewShot
+      )
     },
 
     currentUrl () {

@@ -418,15 +418,20 @@ const mutations = {
 
   [CREATE_TASKS_END] (state, tasks) {
     tasks.forEach((task) => {
-      const asset = state.assetMap[task.entity_id]
-      if (asset) {
-        asset.validations[task.task_type_name] = task
-        if (!state.validationColumns[task.task_type_name]) {
-          state.validationColumns[task.task_type_name] = {
-            id: task.task_type_id,
-            name: task.task_type_name,
-            color: task.task_type_color,
-            priority: task.task_type_priority
+      if (task) {
+        const asset = state.assetMap[task.entity_id]
+        if (asset) {
+          const validations = {...asset.validations}
+          validations[task.task_type_name] = task
+          asset.validations = validations
+
+          if (!state.validationColumns[task.task_type_name]) {
+            state.validationColumns[task.task_type_name] = {
+              id: task.task_type_id,
+              name: task.task_type_name,
+              color: task.task_type_color,
+              priority: task.task_type_priority
+            }
           }
         }
       }

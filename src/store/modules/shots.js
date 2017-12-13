@@ -477,26 +477,28 @@ const mutations = {
 
   [CREATE_TASKS_END] (state, tasks) {
     tasks.forEach((task) => {
-      const shot = getters.getShot(state)(task.entity_id)
-      if (shot) {
-        const validations = shot.validations
-        validations[task.task_type_name] = task
-        Object.assign(shot, {validations})
+      if (task) {
+        const shot = getters.getShot(state)(task.entity_id)
+        if (shot) {
+          const validations = {...shot.validations}
+          validations[task.task_type_name] = task
+          shot.validations = validations
 
-        if (!state.validationColumns[task.task_type_name]) {
-          state.validationColumns[task.task_type_name] = {
-            id: task.task_type_id,
-            name: task.task_type_name,
-            color: task.task_type_color,
-            priority: task.task_type_priority
+          if (!state.validationColumns[task.task_type_name]) {
+            state.validationColumns[task.task_type_name] = {
+              id: task.task_type_id,
+              name: task.task_type_name,
+              color: task.task_type_color,
+              priority: task.task_type_priority
+            }
           }
-        }
 
-        const shotIndex = state.shots.findIndex(
-          (currentShot) => currentShot.id === shot.id
-        )
-        state.shots.splice(shotIndex, 1)
-        state.shots.splice(shotIndex, 0, shot)
+          const shotIndex = state.shots.findIndex(
+            (currentShot) => currentShot.id === shot.id
+          )
+          state.shots.splice(shotIndex, 1)
+          state.shots.splice(shotIndex, 0, shot)
+        }
       }
     })
   },
