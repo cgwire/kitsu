@@ -4,12 +4,11 @@ from tests.base import ApiDBTestCase
 
 from zou.app.utils import auth
 
-from flask_jwt_extended import get_jti, create_access_token
-
 from zou.app.services import persons_service, auth_service
 from zou.app.services.exception import (
     PersonNotFoundException,
-    WrongPasswordException
+    WrongPasswordException,
+    WrongUserException
 )
 
 

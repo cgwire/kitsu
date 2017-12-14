@@ -97,6 +97,10 @@ class NoAuthStrategyConfigured(Exception):
     pass
 
 
+class WrongUserException(Exception):
+    pass
+
+
 class WrongPasswordException(Exception):
     pass
 
