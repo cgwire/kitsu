@@ -132,25 +132,31 @@ def get_tree_from_file(tree_name):
 
 
 def get_folder_path_template(tree, mode, entity):
-    if shots_service.is_shot(entity):
-        return tree[mode]["folder_path"]["shot"]
-    elif shots_service.is_sequence(entity):
-        return tree[mode]["folder_path"]["sequence"]
-    elif shots_service.is_scene(entity):
-        return tree[mode]["folder_path"]["scene"]
-    else:
-        return tree[mode]["folder_path"]["asset"]
+    try:
+        if shots_service.is_shot(entity):
+            return tree[mode]["folder_path"]["shot"]
+        elif shots_service.is_sequence(entity):
+            return tree[mode]["folder_path"]["sequence"]
+        elif shots_service.is_scene(entity):
+            return tree[mode]["folder_path"]["scene"]
+        else:
+            return tree[mode]["folder_path"]["asset"]
+    except KeyError:
+        raise MalformedFileTreeException
 
 
 def get_file_name_template(tree, mode, entity):
-    if shots_service.is_shot(entity):
-        return tree[mode]["file_name"]["shot"]
-    elif shots_service.is_sequence(entity):
-        return tree[mode]["file_name"]["sequence"]
-    elif shots_service.is_scene(entity):
-        return tree[mode]["file_name"]["scene"]
-    else:
-        return tree[mode]["file_name"]["asset"]
+    try:
+        if shots_service.is_shot(entity):
+            return tree[mode]["file_name"]["shot"]
+        elif shots_service.is_sequence(entity):
+            return tree[mode]["file_name"]["sequence"]
+        elif shots_service.is_scene(entity):
+            return tree[mode]["file_name"]["scene"]
+        else:
+            return tree[mode]["file_name"]["asset"]
+    except KeyError:
+        raise MalformedFileTreeException
 
 
 def get_file_name_root(
