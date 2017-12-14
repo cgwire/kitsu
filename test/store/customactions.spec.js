@@ -61,26 +61,50 @@ describe('customActions', () => {
     customActions = [
       {
         id: 1,
-        name: 'Send to render farm'
+        name: 'Send to render farm',
+        url: 'http://render-farm/',
+        entity_type: 'asset'
       },
       {
         id: 2,
-        name: 'Build Playlist'
+        name: 'Build Playlist',
+        url: 'http://build-playlist/',
+        entity_type: 'shot'
       },
       {
         id: 3,
-        name: 'Change status'
+        name: 'Change status',
+        url: 'http://change-status/',
+        entity_type: 'all'
       }
     ]
   })
 
   describe('getters', () => {
-    it('customAction', () => {
+    beforeEach(() => {
       store.commit(LOAD_CUSTOM_ACTIONS_END, customActions)
+    })
+
+    it('customAction', () => {
       const customAction = getters.customAction(state)(2)
       expect(customAction.id).to.equal(2)
       expect(customAction.name).to.equal('Build Playlist')
     })
+
+    it('assetCustomActionOptions', () => {
+      const customActions = getters.assetCustomActionOptions(state)
+      expect(customActions.length).to.equal(2)
+      expect(customActions[0].label).to.equal('Change status')
+      expect(customActions[1].label).to.equal('Send to render farm')
+    })
+
+    it('shotCustomActionOptions', () => {
+      const customActions = getters.shotCustomActionOptions(state)
+      expect(customActions.length).to.equal(2)
+      expect(customActions[0].label).to.equal('Build Playlist')
+      expect(customActions[1].label).to.equal('Change status')
+    })
+
   })
 
   describe('actions', () => {

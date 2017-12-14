@@ -48,9 +48,29 @@ const getters = {
     )
   },
 
-  customActionOptions: state => state.customActions.map(
-    (type) => { return { label: type.name, value: type.id } }
-  )
+  assetCustomActionOptions: state => state.customActions
+      .filter((customAction) => {
+        return customAction.entity_type === 'asset' ||
+               customAction.entity_type === 'all'
+      })
+      .map((customAction) => {
+        return {
+          label: customAction.name,
+          value: customAction.url
+        }
+      }),
+
+  shotCustomActionOptions: state => state.customActions
+    .filter((customAction) => {
+      return customAction.entity_type === 'shot' ||
+             customAction.entity_type === 'all'
+    })
+    .map((customAction) => {
+      return {
+        label: customAction.name,
+        value: customAction.url
+      }
+    })
 }
 
 const actions = {

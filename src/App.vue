@@ -126,6 +126,10 @@ input.input:focus {
   color: #00B242;
 }
 
+.strong {
+  font-weight: bold;
+}
+
 .footer-info {
   font-style: italic;
 }
@@ -213,6 +217,19 @@ input.search-input:focus {
 
 .flexrow-item {
   margin-right: 1em;
+}
+
+.menu-mask {
+  position: fixed;
+  background: blue;
+  z-index: 100;
+  top: 0;
+  left: 0;
+  opacity: 0;
+  overflow: hidden;
+  background-color: #000;
+  width: 100%;
+  height: 100%;
 }
 
 @media screen and (max-width: 1000px) {

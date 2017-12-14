@@ -16,7 +16,7 @@ export default {
   updateCustomAction (customAction, callback) {
     const data = {
       name: customAction.name,
-      url: customAction.color,
+      url: customAction.url,
       entity_type: customAction.entityType
     }
     client.put(`/api/data/custom-actions/${customAction.id}`, data, callback)

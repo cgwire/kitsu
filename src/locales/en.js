@@ -91,12 +91,19 @@ export default {
     }
   },
 
+  menu: {
+    assign_tasks: 'Assign tasks',
+    create_tasks: 'Create tasks',
+    run_custom_action: 'Run custom action'
+  },
+
   custom_actions: {
     title: 'Custom Actions',
     new_custom_action: 'Add a custom action',
     number: 'custom action | custom actions',
     delete_text: 'Are you sure you want to remove custom action {name} from your database?',
     delete_error: 'An error occured while deleting this custom custom action.',
+    run_for_selection: 'Run custom action for selected tasks:',
     fields: {
       name: 'Name',
       url: 'URL',
@@ -144,7 +151,7 @@ export default {
 
   tasks: {
     preview: 'Previews',
-    assign: 'Assign {nbSelectedTasks} tasks to:',
+    assign: 'Assign one task to: | Assign {nbSelectedTasks} tasks to:',
     no_preview: 'There is currently no preview for this task.',
     no_comment: 'There is currently no comment for this task.',
     validation: 'Validation',
@@ -167,6 +174,7 @@ export default {
     delete_error: 'An error occured while deleting task.',
     feedback: 'feedback',
     my_tasks: 'My tasks',
+    create_for_selection: 'Create task for each empty cell:',
     tasks: 'Tasks',
     fields: {
       production: 'Prod',

@@ -1,3 +1,5 @@
+import async from 'async'
+
 import tasksApi from '../api/tasks'
 import { sortByName } from '../../lib/sorting'
 import personStore from './people'
@@ -37,6 +39,7 @@ const state = {
   selectedTasks: {},
   selectedValidations: {},
   nbSelectedTasks: 0,
+  nbSelectedValidations: 0,
 
   previewFormData: null
 }
@@ -75,7 +78,8 @@ const getters = {
   }),
 
   selectedTasks: state => state.selectedTasks,
-  nbSelectedTasks: state => state.nbSelectedTasks
+  nbSelectedTasks: state => state.nbSelectedTasks,
+  nbSelectedValidations: state => state.nbSelectedValidations
 }
 
 const actions = {
@@ -134,6 +138,22 @@ const actions = {
       }
       if (payload.callback) payload.callback(err, tasks)
     })
+  },
+
+  createSelectedTasks ({ commit, state }, {type, project_id, callback}) {
+    async.eachSeries(Object.keys(state.selectedValidations), (key, next) => {
+      const validationInfo = state.selectedValidations[key]
+      const data = {
+        entity_id: validationInfo.entity.id,
+        task_type_id: validationInfo.column.id,
+        type: type,
+        project_id: project_id
+      }
+      tasksApi.createTask(data, (err, tasks) => {
+        commit(CREATE_TASKS_END, tasks)
+        next(err, tasks[0])
+      })
+    }, callback)
   },
 
   deleteTask ({ commit, state }, payload) {
@@ -305,7 +325,11 @@ const mutations = {
     state.taskMap[task.id] = undefined
   },
 
-  [CREATE_TASKS_END] (state, tasks) {},
+  [CREATE_TASKS_END] (state, tasks) {
+    tasks.forEach((task) => {
+      if (task) state.taskMap[task.id] = task
+    })
+  },
 
   [PREVIEW_FILE_SELECTED] (state, formData) {
     state.previewFormData = formData
@@ -335,10 +359,11 @@ const mutations = {
       state.selectedTasks[validationInfo.task.id] = validationInfo.task
       state.nbSelectedTasks = Object.keys(state.selectedTasks).length
     } else {
-      const commentId = validationInfo.comment.id
+      const taskTypeId = validationInfo.column.id
       const entityId = validationInfo.entity.id
-      const validationKey = `${commentId}-${entityId}`
+      const validationKey = `${entityId}-${taskTypeId}`
       state.selectedValidations[validationKey] = validationInfo
+      state.nbSelectedValidations = Object.keys(state.selectedValidations).length
     }
   },
 
@@ -347,16 +372,19 @@ const mutations = {
       delete state.selectedTasks[validationInfo.task.id]
       state.nbSelectedTasks = Object.keys(state.selectedTasks).length
     } else {
-      const commentId = validationInfo.comment.id
+      const taskTypeId = validationInfo.column.id
       const entityId = validationInfo.entity.id
-      const validationKey = `${commentId}-${entityId}`
+      const validationKey = `${entityId}-${taskTypeId}`
       delete state.selectedValidations[validationKey]
+      state.nbSelectedValidations = Object.keys(state.selectedValidations).length
     }
   },
 
   [CLEAR_SELECTED_TASKS] (state, task) {
     state.selectedTasks = {}
     state.nbSelectedTasks = 0
+    state.selectedValidations = {}
+    state.nbSelectedValidations = 0
   },
 
   [ASSIGN_TASKS] (state, { selectedTaskIds, personId }) {
@@ -385,6 +413,8 @@ const mutations = {
     state.taskPreviews = {}
     state.selectedTasks = {}
     state.selectedValidations = {}
+    state.nbSelectedTasks = 0
+    state.nbSelectedValidations = 0
     state.previewFormData = null
   }
 }

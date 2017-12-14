@@ -57,6 +57,7 @@ export default {
   computed: {
     ...mapGetters([
       'selectedTasks',
+      'selectedValidations',
       'nbSelectedTasks',
       'personMap'
     ]),
@@ -95,12 +96,23 @@ export default {
           task: this.task
         })
       }
-    },
-
-    isSelected () {
-      return this.task !== undefined &&
-             this.selectedTasks[this.task.id] !== undefined
     }
+
+    /*
+      isSelected () {
+      let isSelected = false
+      if (this.task) {
+        isSelected = this.task !== undefined &&
+                     this.selectedTasks[this.task.id] !== undefined
+      } else {
+        const commentId = this.comment.id
+        const entityId = this.entity.id
+        const validationKey = `${commentId}-${entityId}`
+        isSelected = this.selectedValidations[validationKey] !== undefined
+      }
+      return isSelected
+    }
+    */
   },
 
   watch: {

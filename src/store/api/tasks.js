@@ -44,6 +44,18 @@ export default {
     )
   },
 
+  createTask (data, callback) {
+    const entityId = data.entity_id
+    const taskTypeId = data.task_type_id
+    const type = data.type
+    const projectId = data.project_id
+    client.post(
+      `/api/actions/task-types/${taskTypeId}/${type}/create-tasks?project_id=${projectId}&id=${entityId}`,
+      {},
+      callback
+    )
+  },
+
   deleteTask (task, callback) {
     client.del(`/api/data/tasks/${task.id}`, callback)
   },

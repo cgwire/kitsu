@@ -48,6 +48,7 @@ import {
   NEW_TASK_COMMENT_END,
 
   SET_SHOT_SEARCH,
+  CREATE_TASKS_END,
 
   RESET_ALL
 } from '../mutation-types'
@@ -286,6 +287,7 @@ const mutations = {
       shot.tasks.forEach((task) => {
         shot.validations[task.task_type_name] = task
         validationColumns[task.task_type_name] = {
+          id: task.task_type_id,
           name: task.task_type_name,
           color: task.task_type_color,
           priority: task.task_type_priority
@@ -471,6 +473,34 @@ const mutations = {
     state.episodes.push(episode)
     state.episodes = sortByName(state.episodes)
     state.episodeMap[episode.id] = episode
+  },
+
+  [CREATE_TASKS_END] (state, tasks) {
+    tasks.forEach((task) => {
+      if (task) {
+        const shot = getters.getShot(state)(task.entity_id)
+        if (shot) {
+          const validations = {...shot.validations}
+          validations[task.task_type_name] = task
+          shot.validations = validations
+
+          if (!state.validationColumns[task.task_type_name]) {
+            state.validationColumns[task.task_type_name] = {
+              id: task.task_type_id,
+              name: task.task_type_name,
+              color: task.task_type_color,
+              priority: task.task_type_priority
+            }
+          }
+
+          const shotIndex = state.shots.findIndex(
+            (currentShot) => currentShot.id === shot.id
+          )
+          state.shots.splice(shotIndex, 1)
+          state.shots.splice(shotIndex, 0, shot)
+        }
+      }
+    })
   },
 
   [RESET_ALL] (state) {

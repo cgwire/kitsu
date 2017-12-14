@@ -65,7 +65,7 @@
     <table class="table">
       <tbody>
         <tr
-          key="entry.id"
+          :key="entry.id"
           :class="{canceled: entry.canceled}"
           v-for="entry in entries"
         >
