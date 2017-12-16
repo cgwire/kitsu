@@ -13,6 +13,7 @@ from zou.app.services import persons_service
 from zou.app.services.exception import (
     PersonNotFoundException,
     WrongPasswordException,
+    WrongUserException,
     NoAuthStrategyConfigured,
     UnactiveUserException
 )
@@ -32,8 +33,9 @@ def check_auth(app, email, password):
 
     if user is None:
         app.logger.error("No user found for: %s" % email)
+        raise WrongUserException(email)
 
-    if user is None or not user.get("active", False):
+    if not user.get("active", False):
         raise UnactiveUserException(user["email"])
 
     return user

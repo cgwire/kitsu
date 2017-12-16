@@ -16,6 +16,7 @@ from zou.app import app
 from zou.app.services.exception import (
     NoAuthStrategyConfigured,
     WrongPasswordException,
+    WrongUserException,
     UnactiveUserException
 )
 
@@ -150,6 +151,9 @@ class LoginResource(Resource):
 
             return response
         except PersonNotFoundException:
+            current_app.logger.info("User is not registered.")
+            return {"login": False}, 400
+        except WrongUserException:
             current_app.logger.info("User is not registered.")
             return {"login": False}, 400
         except WrongPasswordException:
