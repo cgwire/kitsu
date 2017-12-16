@@ -183,13 +183,14 @@ class ProjectShotsResource(Resource):
         """
         Create a shot for given project.
         """
-        (sequence_id, name) = self.get_arguments()
+        (sequence_id, name, data) = self.get_arguments()
         projects_service.get_project(project_id)
         permissions.check_manager_permissions()
         shot = shots_service.create_shot(
             project_id,
             sequence_id,
-            name
+            name,
+            data=data
         )
         return shot, 201
 
@@ -197,8 +198,9 @@ class ProjectShotsResource(Resource):
         parser = reqparse.RequestParser()
         parser.add_argument("name", required=True)
         parser.add_argument("sequence_id", default=None)
+        parser.add_argument("data", type=dict)
         args = parser.parse_args()
-        return (args["sequence_id"], args["name"])
+        return (args["sequence_id"], args["name"], args["data"])
 
 
 class ProjectSequencesResource(Resource):

@@ -78,7 +78,14 @@ class ShotTestCase(ApiDBTestCase):
         shot_name = "NSH01"
         project_id = str(self.project.id)
         sequence_id = str(self.sequence.id)
-        data = {"name": shot_name, "sequence_id": sequence_id}
+        data = {
+            "name": shot_name,
+            "sequence_id": sequence_id,
+            "data": {
+                "frame_in": 10,
+                "frame_out": 20
+            }
+        }
         shot = self.post(
             "data/projects/%s/shots" % project_id,
             data
@@ -86,3 +93,4 @@ class ShotTestCase(ApiDBTestCase):
         shot = self.get("data/shots/%s" % shot["id"])
         self.assertEquals(shot["name"], shot_name)
         self.assertEquals(shot["parent_id"], sequence_id)
+        self.assertDictEqual(shot["data"], data["data"])

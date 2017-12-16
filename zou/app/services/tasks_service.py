@@ -265,34 +265,30 @@ def get_tasks_for_asset(asset_id):
 
 
 def get_task_dicts_for_entity(entity_id):
-    query = Task.query.order_by(Task.name)
-    query = query.filter_by(entity_id=entity_id)
-    query = query.join(Project)
-    query = query.join(TaskType)
-    query = query.join(Department)
-    query = query.join(TaskStatus)
-    query = query.join(Entity, Task.entity_id == Entity.id)
-    query = query.join(EntityType)
-    query = query.add_columns(Project.name)
-    query = query.add_columns(Department.name)
-    query = query.add_columns(TaskType.name)
-    query = query.add_columns(TaskStatus.name)
-    query = query.add_columns(EntityType.name)
-    query = query.add_columns(Entity.name)
-    query = query.order_by(
-        Project.name,
-        Department.name,
-        TaskType.name,
-        EntityType.name,
-        Entity.name
-    )
+    query = Task.query.order_by(Task.name) \
+        .filter_by(entity_id=entity_id) \
+        .join(Project) \
+        .join(TaskType) \
+        .join(TaskStatus) \
+        .join(Entity, Task.entity_id == Entity.id) \
+        .join(EntityType) \
+        .add_columns(Project.name) \
+        .add_columns(TaskType.name) \
+        .add_columns(TaskStatus.name) \
+        .add_columns(EntityType.name) \
+        .add_columns(Entity.name) \
+        .order_by(
+            Project.name,
+            TaskType.name,
+            EntityType.name,
+            Entity.name
+        )
     results = []
 
     for entry in query.all():
         (
             task_object,
             project_name,
-            department_name,
             task_type_name,
             task_status_name,
             entity_type_name,
@@ -301,7 +297,6 @@ def get_task_dicts_for_entity(entity_id):
 
         task = task_object.serialize()
         task["project_name"] = project_name
-        task["department_name"] = department_name
         task["task_type_name"] = task_type_name
         task["task_status_name"] = task_status_name
         task["entity_type_name"] = entity_type_name

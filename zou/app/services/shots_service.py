@@ -548,7 +548,7 @@ def create_sequence(project_id, episode_id, name):
     return sequence.serialize(obj_type="Sequence")
 
 
-def create_shot(project_id, sequence_id, name):
+def create_shot(project_id, sequence_id, name, data={}):
     shot_type = get_shot_type()
 
     if sequence_id is not None:
@@ -566,7 +566,7 @@ def create_shot(project_id, sequence_id, name):
             project_id=project_id,
             parent_id=sequence_id,
             name=name,
-            data={}
+            data=data
         )
     return shot.serialize(obj_type="Shot")
 
