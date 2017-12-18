@@ -87,7 +87,7 @@
 import { mapGetters, mapActions } from 'vuex'
 
 export default {
-  name: 'menu',
+  name: 'sidebar',
   data () {
     return {
     }

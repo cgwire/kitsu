@@ -13,7 +13,7 @@ import ActionTopbar from './ActionTopbar'
 import Sidebar from './Sidebar'
 
 export default {
-  name: 'main',
+  name: 'main-wrapper',
   components: {
     ActionTopbar,
     Topbar,

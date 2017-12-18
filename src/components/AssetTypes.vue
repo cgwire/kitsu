@@ -56,7 +56,7 @@ import ButtonLink from './widgets/ButtonLink'
 import PageTitle from './widgets/PageTitle'
 
 export default {
-  name: 'menu',
+  name: 'asset-types',
 
   components: {
     AssetTypeList,

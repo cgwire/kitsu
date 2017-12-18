@@ -79,7 +79,7 @@ import ButtonLink from './widgets/ButtonLink'
 import EditProductionModal from './modals/EditProductionModal'
 
 export default {
-  name: 'menu',
+  name: 'open-productions',
 
   components: {
     ActivityIcon,

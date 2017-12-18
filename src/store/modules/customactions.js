@@ -49,16 +49,16 @@ const getters = {
   },
 
   assetCustomActionOptions: state => state.customActions
-      .filter((customAction) => {
-        return customAction.entity_type === 'asset' ||
-               customAction.entity_type === 'all'
-      })
-      .map((customAction) => {
-        return {
-          label: customAction.name,
-          value: customAction.url
-        }
-      }),
+    .filter((customAction) => {
+      return customAction.entity_type === 'asset' ||
+             customAction.entity_type === 'all'
+    })
+    .map((customAction) => {
+      return {
+        label: customAction.name,
+        value: customAction.url
+      }
+    }),
 
   shotCustomActionOptions: state => state.customActions
     .filter((customAction) => {

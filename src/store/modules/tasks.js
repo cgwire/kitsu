@@ -140,14 +140,14 @@ const actions = {
     })
   },
 
-  createSelectedTasks ({ commit, state }, {type, project_id, callback}) {
+  createSelectedTasks ({ commit, state }, {type, projectId, callback}) {
     async.eachSeries(Object.keys(state.selectedValidations), (key, next) => {
       const validationInfo = state.selectedValidations[key]
       const data = {
         entity_id: validationInfo.entity.id,
         task_type_id: validationInfo.column.id,
         type: type,
-        project_id: project_id
+        project_id: projectId
       }
       tasksApi.createTask(data, (err, tasks) => {
         commit(CREATE_TASKS_END, tasks)

@@ -60,7 +60,7 @@
     <table class="table">
       <tbody>
         <tr
-          key="entry.id"
+          :key="entry.id"
           :class="{canceled: entry.canceled}"
           v-for="entry in entries"
         >
@@ -132,7 +132,6 @@
 
 <script>
 import { mapGetters, mapActions } from 'vuex'
-import ProductionNameCell from '../cells/ProductionNameCell'
 import RowActions from '../widgets/RowActions'
 import ValidationCell from '../cells/ValidationCell'
 import ButtonLink from '../widgets/ButtonLink'
@@ -156,7 +155,6 @@ export default {
     ButtonHrefLink,
     RowActions,
     PageTitle,
-    ProductionNameCell,
     TableInfo,
     ValidationCell
   },
