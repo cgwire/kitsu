@@ -1,33 +1,36 @@
-<template>
+<template functional>
 <td class="actions has-text-right">
-  <button-link
-    icon="edit"
-    :path="editRoute"
-    v-if="!hideEdit && !entry.canceled"
+  <router-link
+    class="button"
+    :to="props.editRoute"
+    v-if="!props.hideEdit && !props.entry.canceled"
   >
-  </button-link>
-  <button-link v-if="entry.canceled"
-    icon="restore"
-    :path="restoreRoute"
+    <img src="../../assets/icons/edit.svg" class="icon is-small" />
+  </router-link>
+
+  <router-link
+    class="button"
+    :to="props.restoreRoute"
+    v-if="props.entry.canceled"
   >
-  </button-link>
-  <button-link v-else
-    icon="delete"
-    :path="deleteRoute"
+    <img src="../../assets/icons/rotate-ccw.svg" class="icon is-small" />
+  </router-link>
+
+  <router-link
+    class="button"
+    :to="props.deleteRoute"
+    v-else
   >
-  </button-link>
+    <img src="../../assets/icons/trash.svg" class="icon is-small" />
+  </router-link>
 </td>
 </template>
 
 <script>
 import { mapGetters, mapActions } from 'vuex'
-import ButtonLink from './ButtonLink'
 
 export default {
   name: 'row-actions',
-  components: {
-    ButtonLink
-  },
   props: {
     entry: {
       type: Object,
