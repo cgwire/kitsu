@@ -35,7 +35,7 @@ const shot2 = {
   sequence_id: 'sequence-1'
 }
 
-const casting = {}
+let casting = {}
 
 const shots = [shot, shot2]
 
