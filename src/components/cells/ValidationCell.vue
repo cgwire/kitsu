@@ -97,26 +97,13 @@ export default {
         })
       }
     }
-
-    /*
-      isSelected () {
-      let isSelected = false
-      if (this.task) {
-        isSelected = this.task !== undefined &&
-                     this.selectedTasks[this.task.id] !== undefined
-      } else {
-        const commentId = this.comment.id
-        const entityId = this.entity.id
-        const validationKey = `${commentId}-${entityId}`
-        isSelected = this.selectedValidations[validationKey] !== undefined
-      }
-      return isSelected
-    }
-    */
   },
 
   watch: {
     nbSelectedTasks () {
+      if (this.nbSelectedTasks === 0) this.selected = false
+    },
+    nbSelectedValidations () {
       if (this.nbSelectedTasks === 0) this.selected = false
     }
   }

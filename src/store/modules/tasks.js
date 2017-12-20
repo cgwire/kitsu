@@ -159,6 +159,12 @@ const actions = {
       }
       tasksApi.createTask(data, (err, tasks) => {
         commit(CREATE_TASKS_END, tasks)
+        tasks.forEach((task) => {
+          commit(REMOVE_SELECTED_TASK, validationInfo)
+          task.assigneesInfo = []
+          validationInfo.task = task
+          commit(ADD_SELECTED_TASK, validationInfo)
+        })
         next(err, tasks[0])
       })
     }, callback)
@@ -414,7 +420,8 @@ const mutations = {
   [ASSIGN_TASKS] (state, { selectedTaskIds, personId }) {
     selectedTaskIds.forEach((taskId) => {
       const task = state.taskMap[taskId]
-      if (!task.assignees.find((assigneeId) => assigneeId === personId)) {
+      if (task &&
+          !task.assignees.find((assigneeId) => assigneeId === personId)) {
         task.assignees.push(personId)
       }
     })
