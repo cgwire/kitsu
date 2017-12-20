@@ -1,4 +1,5 @@
 import peopleApi from '../api/people'
+import colors from '../../lib/colors'
 import {
   LOAD_PEOPLE_START,
   LOAD_PEOPLE_ERROR,
@@ -27,6 +28,27 @@ import {
 
   RESET_ALL
 } from '../mutation-types'
+
+const helpers = {
+  addAdditionalInformation (person) {
+    if (person.first_name && person.last_name) {
+      person.name = `${person.first_name} ${person.last_name}`
+      person.initials = `${person.first_name[0]}${person.last_name[0]}`
+    } else if (person.first_name) {
+      person.name = person.first_name
+      person.initials = person.first_name[0]
+    } else if (person.last_name) {
+      person.name = person.last_name
+      person.initials = person.last_name[0]
+    } else {
+      person.name = person.email
+      person.initials = person.email[0]
+    }
+    person.initials = person.initials.toUpperCase()
+    person.color = colors.fromString(person.name)
+    return person
+  }
+}
 
 const state = {
   people: [],
@@ -73,11 +95,7 @@ const getters = {
 
   personCsvFormData: state => state.personCsvFormData,
 
-  getPerson: (state, getters) => (id) => {
-    return state.people.find(
-      (taskStatus) => taskStatus.id === id
-    )
-  },
+  getPerson: (state, getters) => (id) => state.personMap[id],
   getPersonOptions: state => state.people.map(
     (person) => {
       return {
@@ -208,8 +226,8 @@ const mutations = {
     state.isPeopleLoadingError = false
     state.people = sortPeople(people)
     state.people.forEach((person) => {
+      person = helpers.addAdditionalInformation(person)
       state.personMap[person.id] = person
-      person.name = `${person.first_name} ${person.last_name}`
     })
   },
 
@@ -263,6 +281,7 @@ const mutations = {
     const personToEditIndex = state.people.findIndex(
       (person) => person.id === state.personToEdit.id
     )
+    state.personToEdit = helpers.addAdditionalInformation(state.personToEdit)
     if (personToEditIndex >= 0) {
       state.people[personToEditIndex] = state.personToEdit
     } else {
@@ -358,5 +377,6 @@ export default {
   state,
   getters,
   actions,
-  mutations
+  mutations,
+  helpers
 }

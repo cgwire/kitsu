@@ -56,7 +56,7 @@ import PageTitle from './widgets/PageTitle'
 import ButtonLink from './widgets/ButtonLink'
 
 export default {
-  name: 'menu',
+  name: 'task-types',
 
   components: {
     ButtonLink,

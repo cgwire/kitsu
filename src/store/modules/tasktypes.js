@@ -19,6 +19,7 @@ import {
 
 const state = {
   taskTypes: [],
+  taskTypeMap: {},
   isTaskTypesLoading: false,
   isTaskTypesLoadingError: false,
 
@@ -35,6 +36,7 @@ const state = {
 
 const getters = {
   taskTypes: state => state.taskTypes,
+  taskTypeMap: state => state.taskTypeMap,
 
   isTaskTypesLoading: state => state.isTaskTypesLoading,
   isTaskTypesLoadingError: state => state.isTaskTypesLoadingError,
@@ -128,6 +130,10 @@ const mutations = {
     state.isTaskTypesLoadingError = false
     state.taskTypes = taskTypes
     state.taskTypes = sortTaskTypes(state.taskTypes)
+    state.taskTypeMap = {}
+    taskTypes.forEach((taskType) => {
+      state.taskTypeMap[taskType.id] = taskType
+    })
   },
 
   [EDIT_TASK_TYPE_START] (state, data) {
@@ -149,6 +155,7 @@ const mutations = {
       state.taskTypes.push(newTaskType)
       state.taskTypes = sortByName(state.taskTypes)
     }
+    state.taskTypeMap[newTaskType.id] = newTaskType
     state.editTaskType = {
       isLoading: false,
       isError: false
@@ -172,6 +179,7 @@ const mutations = {
       (taskType) => taskType.id === taskTypeToDelete.id
     )
     state.taskTypes.splice(taskTypeToDeleteIndex, 1)
+    delete state.taskTypeMap[taskTypeToDelete.id]
 
     state.deleteTaskType = {
       isLoading: false,
@@ -181,6 +189,7 @@ const mutations = {
 
   [RESET_ALL] (state) {
     state.taskTypes = []
+    state.taskTypeMap = {}
     state.isTaskTypesLoading = false
     state.isTaskTypesLoadingError = false
 

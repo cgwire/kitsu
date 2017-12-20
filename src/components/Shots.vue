@@ -177,7 +177,7 @@ import ButtonHrefLink from './widgets/ButtonHrefLink'
 import PageTitle from './widgets/PageTitle'
 
 export default {
-  name: 'menu',
+  name: 'shots',
 
   components: {
     ShotList,
@@ -368,7 +368,7 @@ export default {
               name: 'shots',
               params: {production_id: this.currentProduction.id}
             })
-            // this.$store.dispatch('loadShots')
+            this.$store.dispatch('loadShots')
           }
         }
       })

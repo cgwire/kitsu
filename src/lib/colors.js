@@ -4,5 +4,38 @@ export default {
   fromString (str) {
     let colorHash = new ColorHash({lightness: 0.7, saturation: 0.8})
     return colorHash.hex(str)
+  },
+
+  validationBackgroundColor (task) {
+    if (task) {
+      if (task.task_status_short_name === 'wtg') {
+        return '#f5f5f5'
+      } else if (task.task_status_short_name === 'ip') {
+        return '#3273dc'
+      } else if (task.task_status_short_name === 'pndng') {
+        return '#ab26ff'
+      } else if (task.task_status_short_name === 'fin') {
+        return '#22d160'
+      } else if (task.task_status_short_name === 'rtk') {
+        return '#ff3860'
+      } else if (task.task_status_short_name === 'cfrm') {
+        return '#f1c40f'
+      } else if (task.task_status_short_name === 'recd') {
+        return '#1abc9c'
+      }
+      return task.task_status_color
+    } else {
+      return '#ffffff'
+    }
+  },
+
+  validationTextColor (task) {
+    if (task &&
+        task.task_status_short_name !== 'todo' &&
+        task.task_status_short_name !== 'wtg') {
+      return 'white'
+    } else {
+      return '#333'
+    }
   }
 }

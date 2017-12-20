@@ -139,7 +139,7 @@ import AvailableAssetBlock from './breakdown/AvailableAssetBlock'
 import { SaveIcon, SearchIcon } from 'vue-feather-icons'
 
 export default {
-  name: 'menu',
+  name: 'asset-types',
 
   components: {
     AssetBlock,

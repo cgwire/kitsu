@@ -92,15 +92,16 @@
               <div class="flexrow-item">
                 <form
                   target="_blank"
+                  method="POST"
                   :action="customActionUrl"
-                  :personid="user.id"
-                  :personemail="user.email"
-                  :projectid="currentProduction.id"
-                  :currentpath="currentUrl"
-                  :currentserver="currentHost"
-                  :selection="selectedTaskIds"
-                  :entity_type="currentEntityType"
                 >
+                  <input type="hidden" id="personid" name="personid" :value="user.id">
+                  <input type="hidden" id="personemail" name="personemail" :value="user.email">
+                  <input type="hidden" id="projectid" name="projectid" :value="currentProduction.id">
+                  <input type="hidden" id="currentpath" name="currentpath" :value="currentUrl">
+                  <input type="hidden" id="currentserver" name="currentserver" :value="currentHost">
+                  <input type="hidden" id="selection" name="selection" :value="selectedTaskIds">
+                  <input type="hidden" id="entity_type" name="entity_type" :value="currentEntityType">
                 <button
                   class="button is-success"
                   type="submit"
@@ -297,7 +298,7 @@ export default {
       this.isCreationLoading = true
       this.createSelectedTasks({
         type: type,
-        project_id: this.currentProduction.id,
+        projectId: this.currentProduction.id,
         callback: () => {
           this.isCreationLoading = false
         }

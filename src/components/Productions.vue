@@ -49,15 +49,15 @@
 
 <script>
 import { mapGetters, mapActions } from 'vuex'
-import ProductionList from './lists/ProductionList.vue'
+import ProductionList from './lists/ProductionList'
 import EditProductionModal from './modals/EditProductionModal'
 import DeleteModal from './widgets/DeleteModal'
-import Filters from './widgets/Filters.vue'
-import ButtonLink from './widgets/ButtonLink.vue'
-import PageTitle from './widgets/PageTitle.vue'
+import Filters from './widgets/Filters'
+import ButtonLink from './widgets/ButtonLink'
+import PageTitle from './widgets/PageTitle'
 
 export default {
-  name: 'menu',
+  name: 'productions',
 
   components: {
     ButtonLink,

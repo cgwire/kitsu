@@ -166,7 +166,7 @@ import PageTitle from './widgets/PageTitle'
 import CreateTasksModal from './modals/CreateTasksModal'
 
 export default {
-  name: 'menu',
+  name: 'assets',
 
   components: {
     AssetList,

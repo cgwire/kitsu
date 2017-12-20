@@ -16,7 +16,7 @@ import TodosList from './lists/TodosList'
 import PageTitle from './widgets/PageTitle'
 
 export default {
-  name: 'menu',
+  name: 'todos',
   components: {
     TodosList,
     PageTitle

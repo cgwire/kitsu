@@ -47,3 +47,4 @@ selenium-debug.log
 test/test-bundle.js
 
 TODO
+.package-lock.json

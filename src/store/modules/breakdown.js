@@ -100,7 +100,6 @@ const actions = {
   },
 
   setCastingSequence ({commit, state, rootState, rootGetters}, sequenceId) {
-    console.log('héhé', sequenceId)
     if (!sequenceId) {
       if (state.castingCurrentShot) {
         sequenceId = state.castingCurrentShot.sequence_id

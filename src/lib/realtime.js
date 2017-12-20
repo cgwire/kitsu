@@ -1,8 +1,9 @@
 import store from '../store'
+import ReconnectingEventSource from 'reconnecting-eventsource'
 
 const realtime = {
   createNewSource: () => {
-    return new EventSource('/events')
+    return new ReconnectingEventSource('/events')
   },
 
   init: (source) => {
@@ -21,6 +22,20 @@ const realtime = {
       })
     })
 
+    /*
+    source.onerror((event) => {
+      switch (event.target.readyState) {
+        case EventSource.CONNECTING:
+          console.log('Reconnecting...')
+          break
+        case EventSource.CLOSED:
+          console.log('Reinitializing...')
+          const evtSource = realtime.createNewSource()
+          realtime.init(evtSource)
+          break
+      }
+    })
+    */
     return source
   },
 

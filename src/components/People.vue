@@ -85,7 +85,7 @@ import ButtonHrefLink from './widgets/ButtonHrefLink'
 import PageTitle from './widgets/PageTitle'
 
 export default {
-  name: 'menu',
+  name: 'people',
   components: {
     PeopleList,
     DeleteModal,
