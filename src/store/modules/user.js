@@ -1,4 +1,5 @@
 import peopleApi from '../api/people'
+import peopleStore from './people'
 import auth from '../../lib/auth'
 import { sortTasks } from '../../lib/sorting'
 import {
@@ -102,7 +103,7 @@ const actions = {
       } else {
         commit(USER_LOAD_TODOS_END, tasks)
       }
-      if (payload.callback) payload.callback()
+      if (payload && payload.callback) payload.callback()
     })
   }
 
@@ -110,7 +111,7 @@ const actions = {
 
 const mutations = {
   [USER_LOGIN] (state, user) {
-    state.user = user
+    state.user = peopleStore.helpers.addAdditionalInformation(user)
     state.isAuthenticated = true
   },
   [USER_LOGOUT] (state, user) {

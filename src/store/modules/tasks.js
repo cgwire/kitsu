@@ -44,6 +44,14 @@ const state = {
   previewFormData: null
 }
 
+const helpers = {
+  getPerson (personId) {
+    return personStore.getters.getPerson(
+      personStore.state, personStore.getters
+    )(personId)
+  }
+}
+
 const getters = {
   getTask: (state, getters) => (id) => {
     return state.taskMap[id]
@@ -222,12 +230,16 @@ const mutations = {
     assets.forEach((asset) => {
       asset.tasks.forEach((task) => {
         task.project_name = asset.project_name
+
+        task.assigneesInfo = task.assignees.map(helpers.getPerson)
+
         task.entity_name = `${asset.asset_type_name} / ${asset.name}`
         task.entity_type_name = asset.entity_type_name
         task.entity = {
           id: asset.id,
           preview_file_id: asset.preview_file_id
         }
+
         state.taskMap[task.id] = task
       })
     })
@@ -237,6 +249,9 @@ const mutations = {
     shots.forEach((shot) => {
       shot.tasks.forEach((task) => {
         task.project_name = shot.project_name
+
+        task.assigneesInfo = task.assignees.map(helpers.getPerson)
+
         if (shot.episode_name) {
           task.entity_name = `${shot.episode_name} / ${shot.sequence_name} / ${shot.name}`
         } else {
@@ -275,6 +290,11 @@ const mutations = {
   },
 
   [LOAD_TASK_COMMENTS_END] (state, {taskId, comments}) {
+    comments.forEach((comment) => {
+      comment.person = personStore.helpers.addAdditionalInformation(
+        comment.person
+      )
+    })
     state.taskComments[taskId] = comments
     state.taskPreviews[taskId] = comments.reduce((previews, comment) => {
       if (comment.preview) {
@@ -305,6 +325,10 @@ const mutations = {
       )
       comment.person = getPerson(comment.person_id)
     }
+
+    comment.person = personStore.helpers.addAdditionalInformation(
+      comment.person
+    )
 
     if (!state.taskComments[taskId]) state.taskComments[taskId] = []
     if (!state.taskComments[taskId].find((cmt) => cmt.id === comment.id)) {
@@ -399,6 +423,7 @@ const mutations = {
     selectedTaskIds.forEach((taskId) => {
       const task = state.taskMap[taskId]
       task.assignees = []
+      task.assigneesInfo = []
     })
   },
 
