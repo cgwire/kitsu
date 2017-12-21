@@ -21,17 +21,17 @@
         "mountpoint": "/simple",
         "root": "productions/export",
         "folder_path": {
-            "shot": "<Project>/shots/<Sequence>/<Shot>/<TaskType>",
-            "asset": "<Project>/assets/<AssetType>/<Asset>/<TaskType>",
-            "sequence": "<Project>/sequences/<Sequence>/<TaskType>",
-            "scene": "<Project>/scenes/<Sequence>/<Scene>/<TaskType>",
+            "shot": "<Project>/shots/<Sequence>/<Shot>/<OutputType>",
+            "asset": "<Project>/assets/<AssetType>/<Asset>/<OutputType>",
+            "sequence": "<Project>/sequences/<Sequence>/<OutputType>",
+            "scene": "<Project>/scenes/<Sequence>/<Scene>/<OutputType>",
             "style": "lowercase"
         },
         "file_name": {
-            "shot": "<Project>_<Sequence>_<Shot>_<TaskType>",
-            "asset": "<Project>_<AssetType>_<Asset>_<TaskType>",
-            "sequence": "<Project>_<Sequence>_<TaskType>",
-            "scene": "<Project>_<Scene>_<TaskType>",
+            "shot": "<Project>_<Sequence>_<Shot>_<OutputType>_<OutputFile>",
+            "asset": "<Project>_<AssetType>_<Asset>_<OutputType>_<OutputFile>",
+            "sequence": "<Project>_<Sequence>_<OuputType>_<OutputFile>",
+            "scene": "<Project>_<Scene>_<OutputType>_<OutputFile>",
             "style": "lowercase"
         }
     },

@@ -163,6 +163,9 @@ def get_shot_map(criterions={}):
         else:
             preview_file_id = ""
 
+        if shot.data is None:
+            shot.data = {}
+
         shot_map[shot_id] = {
             "id": str(shot.id),
             "name": shot.name,

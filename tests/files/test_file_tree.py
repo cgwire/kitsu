@@ -272,7 +272,7 @@ class FileTreeTestCase(ApiDBTestCase):
         self.assertEquals(
             path,
             "/simple/productions/export/cosmos_landromat/shots/s01/p01/"
-            "animation/cache"
+            "cache"
         )
 
     def test_get_folder_path_asset(self):
@@ -299,11 +299,12 @@ class FileTreeTestCase(ApiDBTestCase):
         file_name = file_tree.get_file_name(
             self.task.serialize(),
             mode="output",
+            name="main",
             version=3
         )
         self.assertEquals(
             file_name,
-            "cosmos_landromat_props_tree_shaders_geometry_v003"
+            "cosmos_landromat_props_tree_geometry_main_v003"
         )
 
     def test_get_file_name_shot(self):
