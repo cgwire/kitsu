@@ -332,7 +332,7 @@ class CommentWorkingFileResource(Resource):
 class NewOutputFileResource(Resource):
 
     @jwt_required
-    def post(self, task_id, working_file_id):
+    def post(self, working_file_id):
         (
             comment,
             person_id,
@@ -344,16 +344,15 @@ class NewOutputFileResource(Resource):
         separator = "/"
 
         try:
-            task = tasks_service.get_task(task_id)
+            working_file = files_service.get_working_file(working_file_id)
+            task = tasks_service.get_task(working_file["task_id"])
             if not permissions.has_manager_permissions():
                 user_service.check_has_task_related(task["project_id"])
             output_type = files_service.get_output_type(output_type_id)
-            working_file = files_service.get_working_file(working_file_id)
             person = persons_service.get_person(person_id)
 
             output_file = files_service.create_new_output_revision(
                 task["entity_id"],
-                task["id"],
                 working_file["id"],
                 output_type["id"],
                 person["id"],
@@ -448,16 +447,16 @@ class NewOutputFileResource(Resource):
 class GetNextOutputFileResource(Resource):
 
     @jwt_required
-    def post(self, task_id, output_type_id):
+    def post(self, entity_id, output_type_id):
         name = self.get_arguments()
-        task = tasks_service.get_task(task_id)
+        entity = entities_service.get_entity(entity_id)
         if not permissions.has_manager_permissions():
-            user_service.check_has_task_related(task["project_id"])
+            user_service.check_has_task_related(entity["project_id"])
         output_type = files_service.get_output_type(output_type_id)
 
         next_revision_number = \
             files_service.get_next_output_file_revision(
-                task["id"],
+                entity["id"],
                 output_type["id"],
                 name
             )
@@ -488,12 +487,12 @@ class LastWorkingFilesResource(Resource):
 class LastOutputFilesResource(Resource):
 
     @jwt_required
-    def get(self, task_id):
+    def get(self, entity_id):
         result = {}
-        task = tasks_service.get_task(task_id)
+        entity = entities_service.get_entity(entity_id)
         if not permissions.has_manager_permissions():
-            user_service.check_has_task_related(task["project_id"])
-        result = files_service.get_last_output_files_for_task(task["id"])
+            user_service.check_has_task_related(entity["project_id"])
+        result = files_service.get_last_output_files_for_entity(entity["id"])
 
         return result
 

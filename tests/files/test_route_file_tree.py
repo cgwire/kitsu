@@ -1,7 +1,5 @@
 from tests.base import ApiDBTestCase
 
-from zou.app.services import files_service
-
 
 class FolderPathTestCase(ApiDBTestCase):
 
@@ -22,10 +20,6 @@ class FolderPathTestCase(ApiDBTestCase):
         self.generate_fixture_shot_task()
         self.generate_fixture_task()
         self.generate_fixture_software()
-        self.cache_type_id = \
-            files_service.get_or_create_output_type("Cache")["id"]
-        self.render_type_id = \
-            files_service.get_or_create_output_type("Render")["id"]
 
     def test_get_path_shot(self):
         data = {
@@ -101,19 +95,6 @@ class FolderPathTestCase(ApiDBTestCase):
             "cosmos_landromat_props_tree_shaders_hotfix_v003"
         )
 
-    def test_get_path_shot_output(self):
-        data = {
-            "mode": "output",
-            "output_type_id": self.cache_type_id
-        }
-        result = self.post(
-            "/data/tasks/%s/folder-path" % self.shot_task.id, data, 200)
-        self.assertEquals(
-            result["path"],
-            "/simple/productions/export/cosmos_landromat/shots/s01/p01/"
-            "animation/cache"
-        )
-
     def test_get_path_asset(self):
         data = {
             "mode": "working"
@@ -139,37 +120,6 @@ class FolderPathTestCase(ApiDBTestCase):
             "/simple/productions/cosmos_landromat/assets/props/tree/shaders/"
             "blender"
         )
-
-    def test_get_path_asset_outputtype(self):
-        data = {
-            "mode": "output",
-            "output_type_id": self.render_type_id
-        }
-        result = self.post(
-            "/data/tasks/%s/folder-path" % self.task.id, data, 200)
-        self.assertEquals(
-            result["path"],
-            "/simple/productions/export/cosmos_landromat/assets/props/tree/"
-            "shaders/render"
-        )
-
-    def test_get_file_path_asset_outputtype(self):
-        data = {
-            "mode": "output",
-            "output_type_id": self.render_type_id
-        }
-        result = self.post("/data/tasks/%s/file-path" % self.task.id, data, 200)
-        self.assertEquals(
-            result["path"],
-            "/simple/productions/export/cosmos_landromat/assets/props/tree/"
-            "shaders/render"
-        )
-
-    def test_get_path_asset_wrong_data(self):
-        data = {
-            "output_type_id": self.task_type.id
-        }
-        self.post("/data/tasks/%s/folder-path" % self.task.id, data, 400)
 
     def test_get_file_path_asset_with_version(self):
         data = {

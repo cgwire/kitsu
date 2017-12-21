@@ -199,7 +199,7 @@ class FileServiceTestCase(ApiDBTestCase):
                 revision=1
             )
 
-    def test_get_last_output_files_for_task(self):
+    def test_get_last_output_files_for_entity(self):
         geometry = self.output_type
         cache = self.generate_fixture_output_type(
             name="Cache",
@@ -209,13 +209,19 @@ class FileServiceTestCase(ApiDBTestCase):
         self.generate_fixture_output_file(geometry, 2)
         self.generate_fixture_output_file(geometry, 3)
         self.generate_fixture_output_file(geometry, 4)
-        self.generate_fixture_output_file(geometry, 5)
+        geometry_file = self.generate_fixture_output_file(geometry, 5)
         self.generate_fixture_output_file(cache, 1)
         self.generate_fixture_output_file(cache, 2)
-        self.generate_fixture_output_file(cache, 3)
+        cache_file = self.generate_fixture_output_file(cache, 3)
 
-        last_output_files = files_service.get_last_output_files_for_task(
-            self.task.id
+        last_output_files = files_service.get_last_output_files_for_entity(
+            self.entity.id
         )
-        self.assertEquals(last_output_files[str(geometry.id)]["revision"], 5)
-        self.assertEquals(last_output_files[str(cache.id)]["revision"], 3)
+        self.assertEquals(
+            last_output_files[str(geometry.id)][geometry_file.name]["revision"],
+            5
+        )
+        self.assertEquals(
+            last_output_files[str(cache.id)][cache_file.name]["revision"],
+            3
+        )
