@@ -19,3 +19,6 @@ class AssetInstance(db.Model, BaseMixin, SerializerMixin):
             name='asset_instance_uc'
         ),
     )
+
+    def __repr__(self):
+        return "<AssetInstance %s>" % self.id

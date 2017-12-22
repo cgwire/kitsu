@@ -6,6 +6,7 @@ from zou.app.utils import query, permissions
 from zou.app.services import (
     assets_service,
     shots_service,
+    breakdown_service,
     tasks_service,
     user_service
 )
@@ -195,3 +196,15 @@ class NewAssetResource(Resource):
             args["name"],
             args.get("description", ""),
         )
+
+
+class AssetAssetInstancesResource(Resource):
+
+    @jwt_required
+    def get(self, asset_id):
+        """
+        Retrieve all asset instances linked to asset.
+        """
+        asset = assets_service.get_asset(asset_id)
+        user_service.check_project_access(asset["project_id"])
+        return breakdown_service.get_asset_instances_for_asset(asset_id)

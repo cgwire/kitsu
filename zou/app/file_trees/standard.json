@@ -10,10 +10,10 @@
             "style": "lowercase"
         },
         "file_name": {
-            "shot": "<Project>_<Sequence>_<Shot>_<TaskType>",
+            "shot": "<Project>_<Shot>_<TaskType>",
             "asset": "<Project>_<AssetType>_<Asset>_<TaskType>",
             "sequence": "<Project>_<Sequence>_<TaskType>",
-            "scene": "<Project>_<Scene>_<TaskType>",
+            "scene": "<Project>_<Sequence>_<Scene>_<TaskType>",
             "style": "lowercase"
         }
     },
@@ -31,7 +31,7 @@
             "shot": "<Project>_<Sequence>_<Shot>_<OutputType>_<OutputFile>",
             "asset": "<Project>_<AssetType>_<Asset>_<OutputType>_<OutputFile>",
             "sequence": "<Project>_<Sequence>_<OuputType>_<OutputFile>",
-            "scene": "<Project>_<Scene>_<OutputType>_<OutputFile>",
+            "scene": "<Project>_<Sequence>_<Scene>_<OutputType>_<OutputFile>",
             "style": "lowercase"
         }
     },

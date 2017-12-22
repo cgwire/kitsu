@@ -14,6 +14,17 @@ from zou.app.utils import query, permissions
 from zou.app.services.exception import ShotNotFoundException
 
 
+class ArgsMixin(object):
+    def get_args(self, descriptors):
+        parser = reqparse.RequestParser()
+        for (name, default, required) in descriptors:
+            if required is None:
+                required = False
+            parser.add_argument(name, required=required, default=default)
+
+        return parser.parse_args()
+
+
 class ShotResource(Resource):
 
     @jwt_required
@@ -448,3 +459,33 @@ class SceneTasksResource(Resource):
         if not permissions.has_manager_permissions():
             user_service.check_has_task_related(scene["project_id"])
         return tasks_service.get_tasks_for_scene(scene_id)
+
+
+class ShotAssetInstancesResource(Resource, ArgsMixin):
+
+    @jwt_required
+    def get(self, shot_id):
+        """
+        Retrieve all asset instances linked to shot.
+        """
+        shot = shots_service.get_shot(shot_id)
+        user_service.check_project_access(shot["project_id"])
+        return breakdown_service.get_asset_instances_for_shot(shot_id)
+
+    @jwt_required
+    def post(self, shot_id):
+        """
+        Create an asset instance on given shot.
+        """
+        args = self.get_args([
+            ("asset_id", None, True),
+            ("description", None, False)
+        ])
+        shot = shots_service.get_shot(shot_id)
+        permissions.check_manager_permissions()
+        shot = breakdown_service.add_asset_instance_to_shot(
+            shot_id,
+            args["asset_id"],
+            args["description"]
+        )
+        return shot, 201

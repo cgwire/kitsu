@@ -14,6 +14,7 @@ from .resources import (
     ProjectAssetTypeAssetsResource,
     AssetTasksResource,
     AssetTaskTypesResource,
+    AssetAssetInstancesResource
 )
 
 
@@ -25,6 +26,7 @@ routes = [
     ("/data/assets/<asset_id>", AssetResource),
     ("/data/assets/<asset_id>/tasks", AssetTasksResource),
     ("/data/assets/<asset_id>/task-types", AssetTaskTypesResource),
+    ("/data/assets/<asset_id>/asset-instances", AssetAssetInstancesResource),
     (
         "/data/projects/<project_id>/asset-types/<asset_type_id>/assets",
         ProjectAssetTypeAssetsResource

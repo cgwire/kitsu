@@ -216,6 +216,3 @@ class ShotUtilsTestCase(ApiDBTestCase):
         )
         scenes = shots_service.get_scenes_for_sequence(self.sequence.id)
         self.assertEquals(len(scenes), 1)
-
-    def test_get_asset_instances_for_shot(self):
-        pass

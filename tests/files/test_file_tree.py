@@ -347,6 +347,31 @@ class FileTreeTestCase(ApiDBTestCase):
             "/simple/big_buck_bunny/props", "\\")
         self.assertEqual(result, "\\simple\\big_buck_bunny\\props")
 
+    def test_get_folder_path_asset_instance(self):
+        self.generate_fixture_asset_instance(
+            asset=self.entity, shot=self.shot
+        )
+        path = file_tree.get_folder_path(
+            mode="output",
+            output_type=self.output_type_cache.serialize()
+        )
+        self.assertEquals(
+            path,
+            "/simple/productions/cosmos_landromat/shots/s01/sc01/animation/"
+            "tree/cache/instance_1"
+        )
+
+    def test_get_file_name_asset_instance(self):
+        file_name = file_tree.get_file_name(
+            self.task.serialize(),
+            mode="output",
+            version=3
+        )
+        self.assertEquals(
+            file_name,
+            "cosmos_landromat_props_tree_cache_main_instance_1_v003"
+        )
+
     def test_update_variable(self):
         name = file_tree.update_variable(
             "<AssetType>_<Asset>",
