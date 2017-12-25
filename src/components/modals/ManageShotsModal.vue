@@ -27,7 +27,7 @@
               v-for="episode in episodes"
             >
               {{ episode.name }}
-            </div">
+            </div>
           </div">
           <div class="field">
             <input
@@ -47,7 +47,7 @@
                 'is-success': true,
                 'is-loading': loading.addEpisode
               }"
-              :disabled="isAddEpisodeAllowed"
+              :disabled="!isAddEpisodeAllowed"
               @click="addEpisode"
             >
               {{ $t('main.add')}}
@@ -86,7 +86,7 @@
                 'is-success': true,
                 'is-loading': loading.addSequence
               }"
-              :disabled="isAddSequenceAllowed"
+              :disabled="!isAddSequenceAllowed"
               @click="addSequence"
             >
               {{ $t('main.add')}}
@@ -120,7 +120,7 @@
                 'is-success': true,
                 'is-loading': loading.addShot
               }"
-              :disabled="isAddShotAllowed"
+              :disabled="!isAddShotAllowed"
               @click="addShot"
             >
               {{ $t('main.add')}}
@@ -202,7 +202,7 @@ export default {
       const isExist = this.episodes.find((episode) => {
         return this.names.episode === episode.name
       })
-      return isEmpty || isExist
+      return !isEmpty && !isExist
     },
 
     isAddSequenceAllowed () {
@@ -210,7 +210,7 @@ export default {
       const isExist = this.displayedSequences.find((sequence) => {
         return this.names.sequence === sequence.name
       })
-      return isEmpty || isExist
+      return !isEmpty && !isExist
     },
 
     isAddShotAllowed () {
@@ -218,7 +218,7 @@ export default {
       const isExist = this.displayedShots.find((shot) => {
         return this.names.shot === shot.name
       })
-      return isEmpty || isExist
+      return !isEmpty && !isExist
     }
   },
 
@@ -253,66 +253,72 @@ export default {
     },
 
     addEpisode () {
-      const episodeName = this.names.episode
-      if (episodeName.length > 0) {
-        this.loading.addEpisode = true
-        const episode = {
-          name: this.names.episode,
-          project_id: this.currentProduction.id
-        }
-        this.newEpisode({
-          episode,
-          callback: (err, episode) => {
-            if (err) console.log(err)
-            this.loading.addEpisode = false
-            this.selectEpisode(episode.id)
-            this.names.episode = ''
+      if (this.isAddEpisodeAllowed) {
+        const episodeName = this.names.episode
+        if (episodeName.length > 0) {
+          this.loading.addEpisode = true
+          const episode = {
+            name: this.names.episode,
+            project_id: this.currentProduction.id
           }
-        })
+          this.newEpisode({
+            episode,
+            callback: (err, episode) => {
+              if (err) console.log(err)
+              this.loading.addEpisode = false
+              this.selectEpisode(episode.id)
+              this.names.episode = ''
+            }
+          })
+        }
       }
     },
 
     addSequence () {
-      const sequenceName = this.names.sequence
-      if (sequenceName.length > 0 && this.selectedEpisodeId) {
-        this.loading.addSequence = true
-        const sequence = {
-          name: this.names.sequence,
-          episode_id: this.selectedEpisodeId,
-          project_id: this.currentProduction.id
-        }
-        this.newSequence({
-          sequence,
-          callback: (err, sequence) => {
-            if (err) console.log(err)
-            this.loading.addSequence = false
-            this.selectEpisode(this.selectedEpisodeId)
-            this.selectSequence(sequence.id)
-            this.names.sequence = ''
+      if (this.isAddSequenceAllowed) {
+        const sequenceName = this.names.sequence
+        if (sequenceName.length > 0 && this.selectedEpisodeId) {
+          this.loading.addSequence = true
+          const sequence = {
+            name: this.names.sequence,
+            episode_id: this.selectedEpisodeId,
+            project_id: this.currentProduction.id
           }
-        })
+          this.newSequence({
+            sequence,
+            callback: (err, sequence) => {
+              if (err) console.log(err)
+              this.loading.addSequence = false
+              this.selectEpisode(this.selectedEpisodeId)
+              this.selectSequence(sequence.id)
+              this.names.sequence = ''
+            }
+          })
+        }
       }
     },
 
     addShot () {
-      const shotName = this.names.shot
-      this.loading.addShot = true
-      if (shotName.length > 0 && this.selectedSequenceId) {
-        const shot = {
-          name: this.names.shot,
-          sequence_id: this.selectedSequenceId,
-          project_id: this.currentProduction.id
-        }
-        this.loading.addShot = false
-        this.newShot({
-          shot,
-          callback: (err) => {
-            if (err) console.log(err)
-            this.loading.addShot = false
-            this.selectSequence(this.selectedSequenceId)
-            this.names.shot = ''
+      if (this.isAddShotAllowed) {
+        const shotName = this.names.shot
+        this.loading.addShot = true
+        if (shotName.length > 0 && this.selectedSequenceId) {
+          const shot = {
+            name: this.names.shot,
+            sequence_id: this.selectedSequenceId,
+            project_id: this.currentProduction.id
           }
-        })
+          this.loading.addShot = false
+          this.newShot({
+            shot,
+            callback: (err) => {
+              if (err) console.log(err)
+              this.loading.addShot = false
+              this.selectSequence(this.selectedSequenceId)
+              this.names.shot = ''
+            }
+          })
+        }
       }
     }
   }
