@@ -20,6 +20,10 @@ import {
   USER_LOAD_TODOS_END,
   USER_LOAD_TODOS_ERROR,
 
+  UPLOAD_AVATAR_END,
+
+  CHANGE_AVATAR_FILE,
+
   RESET_ALL
 } from '../mutation-types'
 
@@ -29,6 +33,8 @@ const state = {
   isTodosLoading: false,
   isTodosLoadingError: false,
   todos: [],
+
+  avatarFormData: null,
 
   isAuthenticated: false,
   isSaveProfileLoading: false,
@@ -105,8 +111,14 @@ const actions = {
       }
       if (payload && payload.callback) payload.callback()
     })
-  }
+  },
 
+  uploadAvatar ({ commit, state }, callback) {
+    peopleApi.postAvatar(state.user.id, state.avatarFormData, (err) => {
+      if (!err) commit(UPLOAD_AVATAR_END, state.user.id)
+      if (callback) callback(err)
+    })
+  }
 }
 
 const mutations = {
@@ -180,6 +192,18 @@ const mutations = {
   },
   [USER_LOAD_TODOS_ERROR] (state, tasks) {
     state.isTodosLoadingError = true
+  },
+
+  [CHANGE_AVATAR_FILE] (state, formData) {
+    state.avatarFormData = formData
+  },
+
+  [UPLOAD_AVATAR_END] (state) {
+    const randomHash = Math.random().toString(36).substring(7)
+    state.user.has_avatar = true
+    state.user.avatarPath =
+      `/api/pictures/thumbnails/persons/${state.user.id}` +
+      `.png?unique=${randomHash}`
   },
 
   [RESET_ALL] (state) {

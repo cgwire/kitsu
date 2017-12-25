@@ -4,13 +4,18 @@
 
       <div class="has-text-centered profile-header">
         <div class="profile-header-content has-text-centered">
-          <people-avatar :person="this.user" size="150" font-size="60">
-          </people-avatar>
-          <!--p>
-            <a class="button is-link">
+            <people-avatar :person="this.user" size="150" font-size="60">
+            </people-avatar>
+          </router-link>
+
+          <p>
+            <router-link
+              class="button is-link"
+              :to="{name: 'change-avatar'}"
+            >
             change avatar
-            </a>
-          </p-->
+            </router-link>
+          </p>
           <h1>
           {{ $t('profile.title') }}
           </h1>
@@ -149,12 +154,25 @@
 
       </div>
     </div>
+
+    <change-avatar-modal
+      :active="changeAvatar.isModalShown"
+      :is-loading="changeAvatar.isLoading"
+      :is-error="changeAvatar.isLoadingError"
+      :cancel-route="{name: 'profile'}"
+      :form-data="changeAvatar.formData"
+      @fileselected="selectFile"
+      @confirm="uploadAvatarFile"
+    >
+    </change-avatar-modal>
+
   </div>
 </template>
 
 <script>
 import moment from 'moment-timezone'
 import { mapGetters, mapActions } from 'vuex'
+import ChangeAvatarModal from './modals/ChangeAvatarModal'
 import PeopleAvatar from './widgets/PeopleAvatar'
 import TextField from './widgets/TextField'
 
@@ -174,23 +192,36 @@ export default {
         oldPassword: '',
         password: '',
         password2: ''
+      },
+      changeAvatar: {
+        isModalShown: false,
+        isLoading: false,
+        isLoadingError: false,
+        formData: null
       }
     }
   },
+
   components: {
     PeopleAvatar,
+    ChangeAvatarModal,
     TextField
   },
+
   watch: {
     user () {
       Object.assign(this.form, this.user)
-    }
+    },
+
+    $route () { this.handleModalsDisplay() }
   },
+
   computed: {
     ...mapGetters([
       'user',
       'isSaveProfileLoading',
       'isSaveProfileLoadingError',
+      'isCurrentUserAdmin',
       'changePassword'
     ]),
     departments () {
@@ -200,14 +231,18 @@ export default {
       return moment.tz.names()
     }
   },
+
   methods: {
     ...mapActions([
       'saveProfile',
-      'checkNewPasswordValidityAndSave'
+      'checkNewPasswordValidityAndSave',
+      'uploadAvatar'
     ]),
+
     localeChanged () {
       this.$i18n.locale = this.form.locale.substring(0, 2)
     },
+
     passwordChangeRequested () {
       this.checkNewPasswordValidityAndSave({
         form: this.passwordForm,
@@ -219,10 +254,37 @@ export default {
           }
         }
       })
+    },
+
+    selectFile (formData) {
+      this.$store.commit('CHANGE_AVATAR_FILE', formData)
+    },
+
+    uploadAvatarFile () {
+      this.changeAvatar.isLoading = true
+      this.changeAvatar.isError = false
+      this.uploadAvatar((err) => {
+        if (err) {
+          this.changeAvatar.isError = true
+        }
+        this.changeAvatar.isLoading = false
+        this.$router.push({name: 'profile'})
+      })
+    },
+
+    handleModalsDisplay () {
+      const path = this.$store.state.route.path
+      if (path.indexOf('change-avatar') > 0) {
+        this.changeAvatar.isModalShown = true
+      } else {
+        this.changeAvatar.isModalShown = false
+      }
     }
   },
+
   mounted () {
     this.form = Object.assign(this.form, this.user)
+    this.handleModalsDisplay()
   },
 
   metaInfo () {
@@ -230,7 +292,6 @@ export default {
       title: `${this.$t('profile.title')} - Kitsu`
     }
   }
-
 }
 </script>
 

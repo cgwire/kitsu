@@ -6,7 +6,11 @@
      height: (size || 40) + 'px',
      'font-size': (fontSize || 18) + 'px'
    }">
-   <span>
+   <img
+     v-lazy="person.avatarPath"
+     v-if="person.has_avatar"
+    />
+   <span v-else>
      {{ person.initials }}
    </span>
 </span>
@@ -26,6 +30,8 @@ export default {
 <style scoped>
 .avatar img {
   max-height: 100%;
+  height: 100%;
+  width: 100%;
 }
 .avatar {
   border-radius: 50%;

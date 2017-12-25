@@ -26,6 +26,8 @@ import {
   SHOW_DELETE_PEOPLE_MODAL,
   HIDE_DELETE_PEOPLE_MODAL,
 
+  UPLOAD_AVATAR_END,
+
   RESET_ALL
 } from '../mutation-types'
 
@@ -46,6 +48,12 @@ const helpers = {
     }
     person.initials = person.initials.toUpperCase()
     person.color = colors.fromString(person.name)
+    if (person.has_avatar) {
+      const randomHash = Math.random().toString(36).substring(7)
+      person.avatarPath =
+        `/api/pictures/thumbnails/persons/${person.id}` +
+        `.png?unique=${randomHash}`
+    }
     return person
   }
 }
@@ -347,6 +355,15 @@ const mutations = {
 
   [PERSON_CSV_FILE_SELECTED] (state, formData) {
     state.personCsvFormData = formData
+  },
+
+  [UPLOAD_AVATAR_END] (state, personId) {
+    const randomHash = Math.random().toString(36).substring(7)
+    const person = state.personMap[personId]
+    person.has_avatar = true
+    person.avatarPath =
+      `/api/pictures/thumbnails/persons/${person.id}` +
+      `.png?unique=${randomHash}`
   },
 
   [RESET_ALL] (state, people) {

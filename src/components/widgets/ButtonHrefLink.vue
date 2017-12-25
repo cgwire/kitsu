@@ -10,9 +10,6 @@
   <plus-icon class="icon is-small" v-if="icon === 'plus'"></plus-icon>
   <download-icon class="icon is-small" v-if="icon === 'download'"></download-icon>
   <upload-icon class="icon is-small" v-if="icon === 'upload'"></upload-icon>
-
-
-
   <span class="text is-hidden-touch">
     {{ text }}
   </span>

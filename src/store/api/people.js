@@ -38,6 +38,14 @@ export default {
     client.post('/api/import/csv/persons', formData, callback)
   },
 
+  postAvatar (userId, formData, callback) {
+    client.post(
+      `/api/pictures/thumbnails/persons/${userId}`,
+      formData,
+      callback
+    )
+  },
+
   changePassword (form, callback) {
     const data = {
       old_password: form.oldPassword,
