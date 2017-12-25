@@ -9,7 +9,7 @@ class PersonsCsvExport(BaseCsvExport):
         BaseCsvExport.__init__(self, Person)
 
     def build_headers(self):
-        return ["Last Name", "First Name", "Email"]
+        return ["Last Name", "First Name", "Email", "Phone", "Role"]
 
     def build_query(self):
         return self.model.query.order_by(Person.last_name, Person.first_name)
@@ -18,5 +18,7 @@ class PersonsCsvExport(BaseCsvExport):
         return [
             person.last_name,
             person.first_name,
-            person.email
+            person.email,
+            person.phone,
+            person.role
         ]
