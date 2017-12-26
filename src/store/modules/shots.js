@@ -3,11 +3,7 @@ import tasksStore from './tasks'
 import productionsStore from './productions'
 import { buildNameIndex, indexSearch } from '../../lib/indexing'
 
-import {
-  sortShots,
-  sortValidationColumns,
-  sortByName
-} from '../../lib/sorting'
+import {sortShots, sortByName} from '../../lib/sorting'
 import {
   LOAD_SHOTS_START,
   LOAD_SHOTS_ERROR,
@@ -100,10 +96,6 @@ const getters = {
   episodes: state => state.episodes,
 
   shotSearchText: state => state.shotSearchText,
-
-  shotValidationColumns: state => {
-    return sortValidationColumns(Object.values(state.validationColumns))
-  },
 
   displayedShots: state => state.displayedShots,
   shotsBySequence: state => {
@@ -269,7 +261,6 @@ const mutations = {
     state.shots = []
     state.sequences = []
     state.episoded = []
-    state.validationColumns = {}
     state.isShotsLoading = true
     state.isShotsLoadingError = false
 
@@ -287,30 +278,11 @@ const mutations = {
     state.isShotsLoading = false
     state.isShotsLoadingError = false
 
-    const validationColumns = {}
-    shots = sortShots(shots)
-    shots = shots.map((shot) => {
-      shot.validations = {}
-      shot.tasks.forEach((task) => {
-        shot.validations[task.task_type_name] = task
-        validationColumns[task.task_type_name] = {
-          id: task.task_type_id,
-          name: task.task_type_name,
-          color: task.task_type_color,
-          priority: task.task_type_priority
-        }
-      })
-      return shot
+    state.shots = sortShots(shots)
+    state.shotIndex = buildNameIndex(state.shots)
+    state.shotMap = state.shots.forEach((shot) => {
+      state.shotMap[shot.id] = shot
     })
-    state.shots = shots
-    state.validationColumns = validationColumns
-
-    state.shotIndex = buildNameIndex(shots)
-    const shotMap = {}
-    state.shots.forEach((shot) => {
-      shotMap[shot.id] = shot
-    })
-    state.shotMap = shotMap
     state.displayedShots = state.shots
   },
   [LOAD_SEQUENCES_END] (state, sequences) {

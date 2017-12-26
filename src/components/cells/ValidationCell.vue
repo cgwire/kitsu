@@ -18,7 +18,7 @@
     </validation-tag>
     <people-avatar
       class="person-avatar"
-      key="task.id + '-' + personId"
+      :key="task.id + '-' + personId"
       :person="personMap[personId]"
       :size="20"
       :font-size="10"

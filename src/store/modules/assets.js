@@ -1,5 +1,5 @@
 import assetsApi from '../api/assets'
-import { sortAssets, sortValidationColumns } from '../../lib/sorting'
+import { sortAssets } from '../../lib/sorting'
 import { buildAssetIndex, indexSearch } from '../../lib/indexing'
 import tasksStore from './tasks'
 import productionsStore from './productions'
@@ -54,7 +54,6 @@ const state = {
   displayedAssets: [],
   assetSearchText: '',
 
-  validationColumns: {},
   openProductions: [],
   isAssetsLoading: false,
   isAssetsLoadingError: false,
@@ -81,9 +80,6 @@ const state = {
 const getters = {
   assets: state => state.assets,
   assetMap: state => state.assetMap,
-  assetValidationColumns: (state) => {
-    return sortValidationColumns(Object.values(state.validationColumns))
-  },
   assetSearchText: state => state.assetSearchText,
 
   isAssetsLoading: state => state.isAssetsLoading,
@@ -218,7 +214,6 @@ const actions = {
 const mutations = {
   [LOAD_ASSETS_START] (state) {
     state.assets = []
-    state.validationColumns = {}
     state.isAssetsLoading = true
     state.isAssetsLoadingError = false
 
@@ -232,27 +227,11 @@ const mutations = {
   },
 
   [LOAD_ASSETS_END] (state, assets) {
-    const validationColumns = {}
-
     assets = sortAssets(assets)
-    assets = assets.map((asset) => {
-      asset.validations = {}
-      asset.tasks.forEach((task) => {
-        asset.validations[task.task_type_name] = task
-        validationColumns[task.task_type_name] = {
-          id: task.task_type_id,
-          name: task.task_type_name,
-          color: task.task_type_color,
-          priority: task.task_type_priority
-        }
-      })
-      return asset
-    })
     assets.forEach((asset) => {
       state.assetMap[asset.id] = asset
     })
 
-    state.validationColumns = validationColumns
     state.assets = assets
     state.isAssetsLoading = false
     state.isAssetsLoadingError = false
@@ -452,6 +431,7 @@ const mutations = {
     state.isAssetsLoading = false
     state.isAssetsLoadingError = false
     state.assetsCsvFormData = null
+    state.assetValidationColumns = {}
 
     state.assetIndex = {}
     state.displayedAssets = []
