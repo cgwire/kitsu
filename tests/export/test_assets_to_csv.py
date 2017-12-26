@@ -15,9 +15,14 @@ class AssetsCsvExportTestCase(ApiDBTestCase):
         self.generate_fixture_entity()
         self.generate_fixture_sequence()
         self.generate_fixture_shot()
+        self.generate_fixture_person()
+        self.generate_fixture_assigner()
+        self.generate_fixture_task()
 
     def test_get_asset_csv(self):
-        csv_assets = self.get_raw("/export/csv/assets.csv")
-        expected_result = """Project,Category,Name,Description\r
-Cosmos Landromat,Props,Tree,Description Tree\r\n"""
+        csv_assets = self.get_raw(
+            "/export/csv/projects/%s/assets.csv" % self.project.id
+        )
+        expected_result = """Project,Type,Name,Description,Shaders\r
+Cosmos Landromat,Props,Tree,Description Tree,opn\r\n"""
         self.assertEqual(csv_assets, expected_result)

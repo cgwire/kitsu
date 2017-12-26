@@ -62,7 +62,6 @@ from .csv.projects import ProjectsCsvImportResource
 from .csv.persons import PersonsCsvImportResource
 from .csv.assets import AssetsCsvImportResource
 from .csv.shots import ShotsCsvImportResource
-from .csv.tasks import TasksCsvImportResource
 
 routes = [
     ("/import/shotgun/persons", ImportShotgunPersonsResource),
@@ -94,9 +93,8 @@ routes = [
 
     ("/import/csv/projects", ProjectsCsvImportResource),
     ("/import/csv/persons", PersonsCsvImportResource),
-    ("/import/csv/assets", AssetsCsvImportResource),
-    ("/import/csv/shots", ShotsCsvImportResource),
-    ("/import/csv/tasks", TasksCsvImportResource)
+    ("/import/csv/projects/<project_id>/assets", AssetsCsvImportResource),
+    ("/import/csv/projects/<project_id>/shots", ShotsCsvImportResource)
 ]
 
 blueprint = Blueprint("/import", "import")

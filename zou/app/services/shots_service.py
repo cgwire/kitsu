@@ -163,6 +163,9 @@ def get_shot_map(criterions={}):
         else:
             preview_file_id = ""
 
+        if shot.data is None:
+            shot.data = {}
+
         shot_map[shot_id] = {
             "id": str(shot.id),
             "name": shot.name,
@@ -416,7 +419,7 @@ def get_or_create_episode(project_id, name):
             name=name
         )
         episode.save()
-    return episode
+    return episode.serialize()
 
 
 def get_or_create_sequence(project_id, episode_id, name):
@@ -435,7 +438,7 @@ def get_or_create_sequence(project_id, episode_id, name):
             name=name
         )
         sequence.save()
-    return sequence
+    return sequence.serialize()
 
 
 def get_entities_for_project(project_id, entity_type_id, obj_type="Entity"):

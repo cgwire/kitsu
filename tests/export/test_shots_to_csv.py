@@ -13,14 +13,17 @@ class OutputFileTestCase(ApiDBTestCase):
         self.generate_fixture_task_type()
         self.generate_fixture_task_status()
         self.generate_fixture_entity()
+        self.generate_fixture_episode()
         self.generate_fixture_sequence()
         self.generate_fixture_shot()
         self.generate_fixture_person()
         self.generate_fixture_assigner()
-        self.generate_fixture_task()
+        self.generate_fixture_shot_task()
 
     def test_get_output_files(self):
-        csv_projects = self.get_raw("/export/csv/shots.csv")
-        expected_result = """Project,Sequence,Name,Description,FPS,Frame In,Frame Out\r
-Cosmos Landromat,S01,P01,Description Shot 01,25,0,100\r\n"""
+        csv_projects = self.get_raw(
+            "/export/csv/projects/%s/shots.csv" % self.project.id
+        )
+        expected_result = """Project,Episode,Sequence,Name,Description,Frame In,Frame Out,Animation\r
+Cosmos Landromat,E01,S01,P01,Description Shot 01,0,100,opn\r\n"""
         self.assertEqual(csv_projects, expected_result)
