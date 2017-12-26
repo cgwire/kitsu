@@ -53,6 +53,12 @@ import {
   RESET_ALL
 } from '../mutation-types'
 
+const helpers = {
+  getCurrentProduction () {
+    return productionsStore.getters.currentProduction(productionsStore.state)
+  }
+}
+
 const state = {
   shots: [],
   sequences: [],
@@ -249,7 +255,8 @@ const actions = {
 
   uploadShotFile ({ commit, state }, callback) {
     commit(IMPORT_SHOTS_START)
-    shotsApi.postCsv(state.shotsCsvFormData, (err) => {
+    const currentProduction = helpers.getCurrentProduction()
+    shotsApi.postCsv(currentProduction, state.shotsCsvFormData, (err) => {
       commit(IMPORT_SHOTS_END)
       if (callback) callback(err)
     })

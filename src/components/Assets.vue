@@ -25,7 +25,7 @@
             class="level-item"
             :text="$t('main.csv.export_file')"
             icon="download"
-            :path="'/api/export/csv/assets.csv?project_id=' + currentProduction.id"
+            :path="'/api/export/csv/projects/' + currentProduction.id + '/assets.csv'"
           >
           </button-href-link>
           <button-link
@@ -211,8 +211,7 @@ export default {
         }
       }],
       columns: [
-        'Project',
-        'Category',
+        'Type',
         'Name',
         'Description'
       ],
