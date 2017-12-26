@@ -145,6 +145,7 @@
 <script>
 import { mapGetters, mapActions } from 'vuex'
 import PageTitle from '../widgets/PageTitle'
+import stringHelpers from '../../lib/string'
 
 export default {
   name: 'manage-shot-modal',
@@ -267,7 +268,7 @@ export default {
               if (err) console.log(err)
               this.loading.addEpisode = false
               this.selectEpisode(episode.id)
-              this.names.episode = ''
+              this.names.episode = stringHelpers.generateNextName(episode.name)
             }
           })
         }
@@ -291,7 +292,9 @@ export default {
               this.loading.addSequence = false
               this.selectEpisode(this.selectedEpisodeId)
               this.selectSequence(sequence.id)
-              this.names.sequence = ''
+              this.names.sequence = stringHelpers.generateNextName(
+                sequence.name
+              )
             }
           })
         }
@@ -315,7 +318,7 @@ export default {
               if (err) console.log(err)
               this.loading.addShot = false
               this.selectSequence(this.selectedSequenceId)
-              this.names.shot = ''
+              this.names.shot = stringHelpers.generateNextName(shot.name)
             }
           })
         }
@@ -371,10 +374,9 @@ export default {
 }
 
 .modal-footer {
-  margin-top: 1em;
 }
 
 input::placeholder {
-  color: #999;
+  color: #BBB;
 }
 </style>
