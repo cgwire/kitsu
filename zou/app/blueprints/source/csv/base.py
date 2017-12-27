@@ -78,6 +78,7 @@ class BaseCsvProjectImportResource(BaseCsvImportResource):
 
             return fields.serialize_models(result), 201
         except KeyError as e:
+            print(e)
             return {"error": "A column is missing: %s" % e}, 400
 
     def import_row(self, project_id):

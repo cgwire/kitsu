@@ -7,8 +7,7 @@ from zou.app.models.entity import Entity
 from zou.app.models.entity_type import EntityType
 from zou.app.models.project import Project
 from zou.app.models.task import Task
-from zou.app.models.task_status import TaskStatus
-from zou.app.models.task_type import TaskType
+from zou.app.models.task import association_table as assignees_table
 
 from zou.app.services import projects_service
 from zou.app.services.exception import (
@@ -114,18 +113,6 @@ def get_scenes(criterions={}):
     return scenes
 
 
-def get_task_status_map():
-    return {
-        status.id: status for status in TaskStatus.query.all()
-    }
-
-
-def get_task_type_map():
-    return {
-        task_type.id: task_type for task_type in TaskType.query.all()
-    }
-
-
 def get_episode_map(criterions={}):
     episodes = get_episodes(criterions)
     episode_map = {}
@@ -134,100 +121,84 @@ def get_episode_map(criterions={}):
     return episode_map
 
 
-def get_shot_map(criterions={}):
-    shot_map = {}
-    episode_map = get_episode_map(criterions)
-
-    shot_type = get_shot_type()
-    Sequence = aliased(Entity, name='sequence')
-    shot_query = Entity.query \
-        .join(EntityType) \
-        .join(Sequence, Sequence.id == Entity.parent_id) \
-        .add_columns(Sequence.name, Sequence.parent_id) \
-        .filter(Entity.entity_type_id == shot_type["id"])
-    if "project_id" in criterions:
-        shot_query = \
-            shot_query.filter(Entity.project_id == criterions["project_id"])
-    shots = shot_query.all()
-
-    for (shot, sequence_name, sequence_parent_id) in shots:
-        shot_id = str(shot.id)
-        episode_name = ""
-        episode = episode_map.get(str(sequence_parent_id), None)
-
-        if episode is not None:
-            episode_name = episode["name"]
-
-        if shot.preview_file_id is not None:
-            preview_file_id = str(shot.preview_file_id)
-        else:
-            preview_file_id = ""
-
-        if shot.data is None:
-            shot.data = {}
-
-        shot_map[shot_id] = {
-            "id": str(shot.id),
-            "name": shot.name,
-            "description": shot.description,
-            "frame_in": shot.data.get("frame_in", None),
-            "frame_out": shot.data.get("frame_out", None),
-            "preview_file_id": preview_file_id,
-            "sequence_id": str(shot.parent_id),
-            "sequence_name": sequence_name,
-            "episode_id": str(sequence_parent_id),
-            "episode_name": episode_name,
-            "canceled": shot.canceled,
-            "data": fields.serialize_value(shot.data)
-        }
-
-    return shot_map
-
-
 def get_shots_and_tasks(criterions={}):
     shot_type = get_shot_type()
-    task_status_map = get_task_status_map()
-    task_type_map = get_task_type_map()
-    shot_map = get_shot_map(criterions)
+    shot_map = {}
     task_map = {}
 
-    query = Task.query \
-        .join(Entity) \
-        .filter(Entity.entity_type_id == shot_type["id"])
+    Sequence = aliased(Entity, name='sequence')
+    Episode = aliased(Entity, name='episode')
+
+    query = Entity.query \
+        .join(Sequence, Sequence.id == Entity.parent_id) \
+        .outerjoin(Episode, Episode.id == Sequence.parent_id) \
+        .outerjoin(Task, Task.entity_id == Entity.id) \
+        .outerjoin(assignees_table) \
+        .add_columns(
+            Episode.name,
+            Episode.parent_id,
+            Sequence.name,
+            Sequence.parent_id,
+            Task.id,
+            Task.task_type_id,
+            Task.task_status_id,
+            assignees_table.columns.person
+        ) \
+        .filter(Entity.entity_type_id == shot_type["id"]) \
 
     if "project_id" in criterions:
-        query = query.filter(Entity.project_id == criterions["project_id"])
+        query = query.filter(Entity.project_id == criterions["project_id"]) \
 
-    tasks = query.all()
+    for (
+        shot,
+        episode_name,
+        episode_id,
+        sequence_name,
+        sequence_id,
+        task_id,
+        task_type_id,
+        task_status_id,
+        person_id
+    ) in query.all():
+        shot_id = str(shot.id)
 
-    for task in tasks:
-        shot_id = str(task.entity_id)
+        shot.data = shot.data or {}
 
-        if shot_id not in task_map:
-            task_map[shot_id] = []
+        if shot_id not in shot_map:
+            shot_map[shot_id] = {
+                "id": str(shot.id),
+                "name": shot.name,
+                "description": shot.description,
+                "frame_in": shot.data.get("frame_in", None),
+                "frame_out": shot.data.get("frame_out", None),
+                "preview_file_id": str(shot.preview_file_id or ""),
+                "episode_id": str(episode_id),
+                "episode_name": episode_name,
+                "sequence_id": str(sequence_id),
+                "sequence_name": sequence_name,
+                "canceled": shot.canceled,
+                "data": fields.serialize_value(shot.data),
+                "tasks": []
+            }
 
-        task_dict = {"id": str(task.id)}
-        task_status = task_status_map[task.task_status_id]
-        task_type = task_type_map[task.task_type_id]
-        task_dict.update({
-            "task_status_id": str(task_status.id),
-            "task_status_name": task_status.name,
-            "task_status_short_name": task_status.short_name,
-            "task_status_color": task_status.color,
-            "task_type_id": str(task_type.id),
-            "task_type_name": task_type.name,
-            "task_type_color": task_type.color,
-            "task_type_priority": task_type.priority,
-            "assignees": fields.serialize_value(task.assignees)
-        })
-        task_map[shot_id].append(task_dict)
+        if task_id is not None:
 
-    shots = []
-    for shot in shot_map.values():
-        shot["tasks"] = task_map.get(shot["id"], [])
-        shots.append(shot)
+            if task_id not in task_map:
+                task_dict = {
+                    "id": str(task_id),
+                    "entity_id": shot_id,
+                    "task_status_id": str(task_status_id),
+                    "task_type_id": str(task_type_id),
+                    "assignees": []
+                }
+                task_map[task_id] = task_dict
+                shot_dict = shot_map[shot_id]
+                shot_dict["tasks"].append(task_dict)
 
-    return shots
+            if person_id:
+                task_map[task_id]["assignees"].append(str(person_id))
+
+    return list(shot_map.values())
 
 
 def get_shot_raw(shot_id):

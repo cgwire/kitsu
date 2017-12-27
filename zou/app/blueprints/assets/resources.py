@@ -53,9 +53,10 @@ class AssetsAndTasksResource(Resource):
         Adds project name and asset type name and all related tasks.
         """
         criterions = query.get_query_criterions_from_request(request)
+        page = query.get_page_from_request(request)
         if not permissions.has_manager_permissions():
             user_service.check_criterions_has_task_related(criterions)
-        return assets_service.all_assets_and_tasks(criterions)
+        return assets_service.all_assets_and_tasks(criterions, page)
 
 
 class AssetTypeResource(Resource):

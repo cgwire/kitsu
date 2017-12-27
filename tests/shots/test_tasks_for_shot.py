@@ -18,6 +18,7 @@ class ShotTasksTestCase(ApiDBTestCase):
         self.generate_fixture_department()
         self.generate_fixture_task_type()
         self.generate_fixture_shot_task()
+        self.person_id = str(self.person.id)
 
     def test_get_tasks_for_shot(self):
         tasks = self.get("data/shots/%s/tasks" % self.shot.id)
@@ -29,10 +30,6 @@ class ShotTasksTestCase(ApiDBTestCase):
         shots = self.get("data/shots/with-tasks")
         self.assertEqual(len(shots), 1)
         self.assertEqual(len(shots[0]["tasks"]), 2)
-        self.assertEqual(
-            shots[0]["tasks"][0]["task_status_name"], "Open"
-        )
-        self.assertEqual(
-            shots[0]["tasks"][0]["task_type_name"], "Animation"
-        )
+        self.assertEqual(shots[0]["tasks"][0]["assignees"][0], self.person_id)
         self.assertEqual(shots[0]["episode_name"], "E01")
+        self.assertEqual(shots[0]["sequence_name"], "S01")

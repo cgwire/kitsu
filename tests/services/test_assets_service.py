@@ -40,16 +40,6 @@ class AssetServiceTestCase(ApiDBTestCase):
         self.assertEqual(len(assets), 1)
         self.assertEqual(assets[0]["name"], "Tree")
 
-    def test_get_asset_map(self):
-        self.generate_fixture_asset_types()
-        self.generate_fixture_entity_character()
-        asset_map = assets_service.get_asset_map()
-        self.assertEquals(len(asset_map.keys()), 2)
-        self.assertEquals(
-            asset_map[str(self.entity.id)]["name"],
-            self.entity.name
-        )
-
     def test_get_assets_and_tasks(self):
         self.generate_fixture_asset_types()
         self.generate_fixture_entity_character()
@@ -64,12 +54,6 @@ class AssetServiceTestCase(ApiDBTestCase):
         self.assertEqual(len(assets), 2)
         assets = sorted(assets, key=lambda asset: asset["name"])
         self.assertEqual(len(assets[1]["tasks"]), 2)
-        self.assertEqual(
-            assets[1]["tasks"][0]["task_status_name"], "Open"
-        )
-        self.assertEqual(
-            assets[1]["tasks"][0]["task_type_name"], "Shaders"
-        )
         self.assertEqual(
             assets[1]["tasks"][0]["assignees"][0], str(self.person.id)
         )

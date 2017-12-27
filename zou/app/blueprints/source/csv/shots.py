@@ -17,7 +17,6 @@ class ShotsCsvImportResource(BaseCsvProjectImportResource):
         sequence_name = row["Sequence"]
         shot_name = row["Name"]
         description = row["Description"]
-        fps = row["FPS"]
         frame_in = row["Frame In"]
         frame_out = row["Frame Out"]
 
@@ -46,7 +45,6 @@ class ShotsCsvImportResource(BaseCsvProjectImportResource):
                 parent_id=sequence_id,
                 entity_type_id=shot_type["id"],
                 data={
-                    "fps": fps,
                     "frame_in": frame_in,
                     "frame_out": frame_out
                 }

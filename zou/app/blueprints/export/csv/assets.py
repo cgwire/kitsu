@@ -1,7 +1,12 @@
 from flask_restful import Resource
 from flask_jwt_extended import jwt_required
 
-from zou.app.services import assets_service, user_service, projects_service
+from zou.app.services import (
+    assets_service,
+    projects_service,
+    user_service,
+    tasks_service
+)
 from zou.app.utils import csv_utils
 
 
@@ -9,6 +14,9 @@ class AssetsCsvExport(Resource):
 
     @jwt_required
     def get(self, project_id):
+        self.task_type_map = tasks_service.get_task_type_map()
+        self.task_status_map = tasks_service.get_task_status_map()
+
         project = projects_service.get_project(project_id)
         self.check_permissions(project["id"])
 
@@ -44,10 +52,15 @@ class AssetsCsvExport(Resource):
             result["description"]
         ]
         task_map = {}
+
         for task in result["tasks"]:
-            task_map[task["task_type_name"]] = task["task_status_short_name"]
+            task_status = self.task_status_map[task["task_status_id"]]
+            task_type = self.task_type_map[task["task_type_id"]]
+            task_map[task_type["name"]] = task_status["short_name"]
+
         for column in validation_columns:
             row.append(task_map.get(column, ""))
+
         return row
 
     def get_assets_data(self, project_id):
@@ -64,9 +77,10 @@ class AssetsCsvExport(Resource):
 
         for result in results:
             for task in result["tasks"]:
-                task_type_map[task["task_type_name"]] = {
-                    "name": task["task_type_name"],
-                    "priority": task["task_type_priority"]
+                task_type = self.task_type_map[task["task_type_id"]]
+                task_type_map[task_type["name"]] = {
+                    "name": task_type["name"],
+                    "priority": task_type["priority"]
                 }
 
         validation_columns = [

@@ -18,6 +18,7 @@ class AssetTasksTestCase(ApiDBTestCase):
         self.generate_fixture_task_type()
         self.generate_fixture_shot_task()
         self.generate_fixture_task()
+        self.person_id = str(self.person.id)
 
     def test_get_tasks_for_asset(self):
         tasks = self.get("data/assets/%s/tasks" % self.entity.id)
@@ -30,11 +31,5 @@ class AssetTasksTestCase(ApiDBTestCase):
         self.assertEqual(len(assets), 1)
         self.assertEqual(len(assets[0]["tasks"]), 2)
         self.assertEqual(
-            assets[0]["tasks"][0]["task_status_name"], "Open"
-        )
-        self.assertEqual(
-            assets[0]["tasks"][0]["task_type_name"], "Shaders"
-        )
-        self.assertEqual(
-            assets[0]["tasks"][0]["task_type_priority"], 1
+            assets[0]["tasks"][0]["assignees"][0], str(self.person_id)
         )
