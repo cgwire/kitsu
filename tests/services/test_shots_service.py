@@ -94,6 +94,8 @@ class ShotUtilsTestCase(ApiDBTestCase):
         self.assertEqual(len(shots), 2)
         self.assertEqual(len(shots[0]["tasks"]), 2)
         self.assertEqual(len(shots[1]["tasks"]), 0)
+        self.assertEqual(shots[0]["episode_id"], str(self.episode.id))
+        self.assertEqual(shots[0]["sequence_id"], str(self.sequence.id))
         self.assertEqual(
             shots[0]["tasks"][0]["assignees"][0], str(self.person.id)
         )

@@ -136,9 +136,9 @@ def get_shots_and_tasks(criterions={}):
         .outerjoin(assignees_table) \
         .add_columns(
             Episode.name,
-            Episode.parent_id,
+            Episode.id,
             Sequence.name,
-            Sequence.parent_id,
+            Sequence.id,
             Task.id,
             Task.task_type_id,
             Task.task_status_id,
