@@ -4,6 +4,7 @@ from zou.app.utils.api import configure_api_from_blueprint
 from .resources import (
     FolderPathResource,
     FilePathResource,
+    InstanceFilePathResource,
     SetTreeResource,
     GetTaskFromPathResource,
     CommentWorkingFileResource,
@@ -27,6 +28,7 @@ routes = [
 
     ("/data/tasks/<task_id>/folder-path", FolderPathResource),
     ("/data/tasks/<task_id>/file-path", FilePathResource),
+    ("/data/asset-instances/<instance_id>/output-types/<output_type_id>/file-path", InstanceFilePathResource),
     ("/data/tasks/from-path", GetTaskFromPathResource),
 
     ("/data/working-files/<working_file_id>/output-files/new", NewOutputFileResource),

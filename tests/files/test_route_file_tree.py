@@ -1,5 +1,7 @@
 from tests.base import ApiDBTestCase
 
+from zou.app.services import files_service
+
 
 class FolderPathTestCase(ApiDBTestCase):
 
@@ -95,7 +97,7 @@ class FolderPathTestCase(ApiDBTestCase):
             "cosmos_landromat_props_tree_shaders_hotfix_v003"
         )
 
-    def test_get_path_asset(self):
+    def test_get_folder_path_asset(self):
         data = {
             "mode": "working"
         }
@@ -106,6 +108,34 @@ class FolderPathTestCase(ApiDBTestCase):
             result["path"],
             "/simple/productions/cosmos_landromat/assets/props/tree/"
             "shaders/3ds_max"
+        )
+
+    def test_get_path_asset_instance(self):
+        self.output_type = files_service.get_or_create_output_type("Cache")
+        self.generate_fixture_asset_instance(
+            asset=self.entity,
+            shot=self.shot
+        )
+        data = {
+            "name": "main",
+            "version": 3
+        }
+        result = self.post(
+            "/data/asset-instances/%s/output-types/%s/file-path" % (
+                self.asset_instance.id,
+                self.output_type["id"]
+            ),
+            data,
+            200
+        )
+        self.assertEquals(
+            result["path"],
+            "/simple/productions/export/cosmos_landromat/shots/s01/p01/cache/"
+            "props/tree/instance_1"
+        )
+        self.assertEquals(
+            result["name"],
+            "cosmos_landromat_s01_p01_cache_main_props_tree_instance_1_v003"
         )
 
     def test_get_path_asset_software(self):

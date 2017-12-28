@@ -10,6 +10,7 @@ from zou.app.services import (
     files_service,
     persons_service,
     projects_service,
+    assets_service,
     tasks_service,
     entities_service,
     user_service
@@ -99,7 +100,6 @@ class FolderPathResource(Resource):
             args["sep"],
         )
 
-
 class FilePathResource(Resource):
 
     @jwt_required
@@ -183,6 +183,62 @@ class FilePathResource(Resource):
             args["name"],
             args["sep"]
         )
+
+class InstanceFilePathResource(Resource):
+
+    @jwt_required
+    def post(self, instance_id, output_type_id):
+        (
+            mode,
+            version,
+            name,
+            separator
+        ) = self.get_arguments()
+
+        try:
+            asset_instance = assets_service.get_asset_instance(instance_id)
+            asset = assets_service.get_asset(asset_instance["asset_id"])
+            output_type = files_service.get_output_type(output_type_id)
+            if not permissions.has_manager_permissions():
+                user_service.check_has_task_related(asset["project_id"])
+
+            folder_path = file_tree.get_instance_folder_path(
+                asset_instance,
+                mode=mode,
+                output_type=output_type,
+                sep=separator
+            )
+            file_name = file_tree.get_instance_file_name(
+                asset_instance,
+                mode=mode,
+                version=version,
+                output_type=output_type,
+                name=name
+            )
+        except MalformedFileTreeException:
+            return {
+                "error":
+                    "Tree is not properly written, check modes and variables",
+                "received_data": request.json,
+            }, 400
+
+        return {"path": folder_path, "name": file_name}, 200
+
+    def get_arguments(self):
+        parser = reqparse.RequestParser()
+        parser.add_argument("mode", default="output")
+        parser.add_argument("version", default=1)
+        parser.add_argument("name", default="")
+        parser.add_argument("sep", default="/")
+        args = parser.parse_args()
+
+        return (
+            args["mode"],
+            args["version"],
+            args["name"],
+            args["sep"]
+        )
+
 
 
 class SetTreeResource(Resource):

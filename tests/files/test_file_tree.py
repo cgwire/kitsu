@@ -23,7 +23,7 @@ class FileTreeTestCase(ApiDBTestCase):
         self.generate_fixture_shot()
         self.generate_fixture_scene()
         self.generate_fixture_sequence_standard()
-        self.generate_fixture_shot_standard()
+        Self.generate_fixture_shot_standard()
         self.generate_fixture_person()
         self.generate_fixture_department()
         self.generate_fixture_task_type()
@@ -349,27 +349,34 @@ class FileTreeTestCase(ApiDBTestCase):
 
     def test_get_folder_path_asset_instance(self):
         self.generate_fixture_asset_instance(
-            asset=self.entity, shot=self.shot
+            asset=self.entity,
+            shot=self.shot
         )
-        path = file_tree.get_folder_path(
-            mode="output",
-            output_type=self.output_type_cache.serialize()
+        path = file_tree.get_instance_folder_path(
+            self.asset_instance.serialize(),
+            output_type=self.output_type_cache
         )
         self.assertEquals(
             path,
-            "/simple/productions/cosmos_landromat/shots/s01/sc01/animation/"
-            "tree/cache/instance_1"
+            "/simple/productions/export/cosmos_landromat/shots/s01/p01/cache/"
+            "props/tree/instance_1"
         )
 
     def test_get_file_name_asset_instance(self):
-        file_name = file_tree.get_file_name(
-            self.task.serialize(),
-            mode="output",
+        self.generate_fixture_asset_instance(
+            asset=self.entity,
+            shot=self.shot
+        )
+        file_name = file_tree.get_instance_file_name(
+            self.asset_instance.serialize(),
+            output_type=self.output_type_cache,
+            name="main",
             version=3
         )
+
         self.assertEquals(
             file_name,
-            "cosmos_landromat_props_tree_cache_main_instance_1_v003"
+            "cosmos_landromat_s01_p01_cache_main_props_tree_instance_1_v003"
         )
 
     def test_update_variable(self):
