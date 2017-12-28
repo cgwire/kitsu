@@ -263,9 +263,11 @@ export default {
       productionId
     )
 
-    this.loadShots((err) => {
-      if (!err) this.handleModalsDisplay()
-    })
+    if (this.shots.length === 0) {
+      this.loadShots((err) => {
+        if (!err) this.handleModalsDisplay()
+      })
+    }
   },
 
   methods: {
