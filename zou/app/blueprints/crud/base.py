@@ -146,9 +146,6 @@ class BaseModelsResource(Resource):
             current_app.logger.error(str(exception))
             return {"error": str(exception)}, 400
 
-        except permissions.PermissionDenied:
-            abort(403)
-
 
 class BaseModelResource(Resource):
 
@@ -216,9 +213,6 @@ class BaseModelResource(Resource):
             current_app.logger.error(str(exception))
             return {"error": str(exception)}, 400
 
-        except permissions.PermissionDenied:
-            abort(403)
-
     @jwt_required
     def delete(self, instance_id):
         """
@@ -234,8 +228,5 @@ class BaseModelResource(Resource):
         except IntegrityError as exception:
             current_app.logger.error(str(exception))
             return {"error": str(exception)}, 400
-
-        except permissions.PermissionDenied:
-            abort(403)
 
         return {"deletion_success": True}, 204
