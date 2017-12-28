@@ -87,12 +87,21 @@ const getters = {
   isAssetsLoadingError: state => state.isAssetsLoadingError,
 
   displayedAssets: state => state.displayedAssets,
+  displayedAssetsLength: state => state.displayedAssetsLength,
+
   assetsByType: state => {
     const assetsByType = []
     let assetTypeAssets = []
     let previousAsset = null
+    let assets = []
 
-    for (let asset of state.displayedAssets) {
+    if (state.assetSearchText.length === 0) {
+      assets = state.assets.slice(0, 100)
+    } else {
+      assets = state.displayedAssets.slice(0, 100)
+    }
+
+    for (let asset of assets) {
       if (
         previousAsset &&
         asset.asset_type_name !== previousAsset.asset_type_name
@@ -239,6 +248,7 @@ const mutations = {
     state.isAssetsLoadingError = false
 
     state.assetIndex = buildAssetIndex(assets)
+    state.displayedAssets = state.assets.slice(0, 30)
     state.displayedAssetsLength = state.assets ? state.assets.length : 0
   },
 
@@ -399,6 +409,8 @@ const mutations = {
   },
 
   [SET_ASSET_SEARCH] (state, assetSearch) {
+    const result = indexSearch(state.assetIndex, assetSearch) || state.assets
+    state.displayedAssets = result.slice(0, 30)
     state.displayedAssetsLength = result ? result.length : 0
     state.assetSearchText = assetSearch
   },
@@ -411,15 +423,6 @@ const mutations = {
           const validations = {...asset.validations}
           validations[task.task_type_name] = task
           asset.validations = validations
-
-          if (!state.validationColumns[task.task_type_name]) {
-            state.validationColumns[task.task_type_name] = {
-              id: task.task_type_id,
-              name: task.task_type_name,
-              color: task.task_type_color,
-              priority: task.task_type_priority
-            }
-          }
         }
       }
     })

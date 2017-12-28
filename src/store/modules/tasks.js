@@ -6,6 +6,8 @@ import personStore from './people'
 import taskTypeStore from './tasktypes'
 
 import {
+  LOAD_ASSETS_START,
+  LOAD_SHOTS_START,
   LOAD_ASSETS_END,
   LOAD_SHOTS_END,
 
@@ -158,9 +160,6 @@ const actions = {
       project_id: payload.project_id
     }
     tasksApi.createTasks(data, (err, tasks) => {
-      if (!err) {
-        commit(CREATE_TASKS_END, tasks)
-      }
       if (payload.callback) payload.callback(err, tasks)
     })
   },
@@ -249,6 +248,11 @@ const actions = {
 }
 
 const mutations = {
+  [LOAD_ASSETS_START] (state, assets) {
+    state.assetValidationColumns = {}
+    state.taskMap = {}
+  },
+
   [LOAD_ASSETS_END] (state, assets) {
     const validationColumns = {}
     assets.forEach((asset) => {
@@ -292,6 +296,11 @@ const mutations = {
       })
     })
     state.assetValidationColumns = validationColumns
+  },
+
+  [LOAD_SHOTS_START] (state, assets) {
+    state.shotValidationColumns = {}
+    state.taskMap = {}
   },
 
   [LOAD_SHOTS_END] (state, shots) {
@@ -429,12 +438,6 @@ const mutations = {
     state.taskMap[task.id] = undefined
   },
 
-  [CREATE_TASKS_END] (state, tasks) {
-    tasks.forEach((task) => {
-      if (task) state.taskMap[task.id] = task
-    })
-  },
-
   [PREVIEW_FILE_SELECTED] (state, formData) {
     state.previewFormData = formData
   },
@@ -489,6 +492,12 @@ const mutations = {
     state.nbSelectedTasks = 0
     state.selectedValidations = {}
     state.nbSelectedValidations = 0
+  },
+
+  [CREATE_TASKS_END] (state, tasks) {
+    tasks.forEach((task) => {
+      state.taskMap[task.id] = task
+    })
   },
 
   [ASSIGN_TASKS] (state, { selectedTaskIds, personId }) {

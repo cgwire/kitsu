@@ -1,7 +1,7 @@
 import shotsApi from '../api/shots'
 import tasksStore from './tasks'
 import productionsStore from './productions'
-import { buildNameIndex, indexSearch } from '../../lib/indexing'
+import { buildShotIndex, indexSearch } from '../../lib/indexing'
 
 import {sortShots, sortByName} from '../../lib/sorting'
 import {
@@ -261,6 +261,7 @@ const actions = {
 const mutations = {
   [LOAD_SHOTS_START] (state) {
     state.shots = []
+    state.shotValidationColumns = []
     state.sequences = []
     state.episoded = []
     state.isShotsLoading = true
@@ -282,10 +283,12 @@ const mutations = {
     state.isShotsLoadingError = false
 
     state.shots = sortShots(shots)
-    state.shotIndex = buildNameIndex(state.shots)
-    state.shotMap = state.shots.forEach((shot) => {
+    state.shotIndex = buildShotIndex(state.shots)
+    state.shotMap = {}
+    state.shots.forEach((shot) => {
       state.shotMap[shot.id] = shot
     })
+    state.displayedShots = state.shots.slice(0, 30)
     state.displayedShotsLength = state.shots.length
   },
   [LOAD_SEQUENCES_END] (state, sequences) {
@@ -345,7 +348,7 @@ const mutations = {
       isLoading: false,
       isError: false
     }
-    state.shotIndex = buildNameIndex(state.shots)
+    state.shotIndex = buildShotIndex(state.shots)
     state.shotCreated = newShot.name
   },
 
@@ -378,7 +381,7 @@ const mutations = {
       isLoading: false,
       isError: false
     }
-    state.shotIndex = buildNameIndex(state.shots)
+    state.shotIndex = buildShotIndex(state.shots)
   },
 
   [RESTORE_SHOT_START] (state) {
@@ -400,7 +403,7 @@ const mutations = {
       isLoading: false,
       isError: false
     }
-    state.shotIndex = buildNameIndex(state.shots)
+    state.shotIndex = buildShotIndex(state.shots)
   },
 
   [NEW_TASK_COMMENT_END] (state, {comment, taskId}) {
@@ -439,7 +442,7 @@ const mutations = {
     state.shots.push(shot)
     state.shots = sortShots(state.shots)
     state.shotMap[shot.id] = shot
-    state.shotIndex = buildNameIndex(state.shots)
+    state.shotIndex = buildShotIndex(state.shots)
   },
 
   [NEW_SEQUENCE_START] (state) {},
@@ -461,26 +464,11 @@ const mutations = {
   [CREATE_TASKS_END] (state, tasks) {
     tasks.forEach((task) => {
       if (task) {
-        const shot = getters.getShot(state)(task.entity_id)
+        const shot = state.shotMap[task.entity_id]
         if (shot) {
           const validations = {...shot.validations}
           validations[task.task_type_name] = task
           shot.validations = validations
-
-          if (!state.validationColumns[task.task_type_name]) {
-            state.validationColumns[task.task_type_name] = {
-              id: task.task_type_id,
-              name: task.task_type_name,
-              color: task.task_type_color,
-              priority: task.task_type_priority
-            }
-          }
-
-          const shotIndex = state.shots.findIndex(
-            (currentShot) => currentShot.id === shot.id
-          )
-          state.shots.splice(shotIndex, 1)
-          state.shots.splice(shotIndex, 0, shot)
         }
       }
     })
