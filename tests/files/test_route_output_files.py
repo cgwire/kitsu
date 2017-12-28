@@ -25,7 +25,7 @@ class RouteOutputFilesTestCase(ApiDBTestCase):
         self.generate_fixture_task()
         self.generate_fixture_shot_task()
         self.generate_fixture_software()
-        self.generate_fixture_shot_working_file()
+        self.generate_fixture_working_file()
         self.generate_fixture_file_status()
 
         self.task_id = str(self.task.id)
@@ -35,6 +35,9 @@ class RouteOutputFilesTestCase(ApiDBTestCase):
         self.cache_type_id = str(
             files_service.get_or_create_output_type("Cache", "cch")["id"]
         )
+        self.render_id = str(
+            files_service.get_or_create_output_type("Render", "rdr")["id"]
+        )
         self.maxDiff = None
         self.task_id = self.task.id
         self.person_id = str(self.person.id)
@@ -42,10 +45,7 @@ class RouteOutputFilesTestCase(ApiDBTestCase):
 
     def new_output(self, data, code=201):
         return self.post(
-            "data/tasks/%s/working-files/%s/output-files/new" % (
-                self.task_id,
-                self.working_file_id
-            ),
+            "data/working-files/%s/output-files/new" % self.working_file_id,
             data,
             code
         )
@@ -55,6 +55,7 @@ class RouteOutputFilesTestCase(ApiDBTestCase):
         self.geometry_id = str(geometry.id)
         cache = OutputType.get(self.cache_type_id)
         texture = OutputType.get(self.tx_type_id)
+        render = OutputType.get(self.render_id)
 
         self.generate_fixture_output_file(geometry, 1)
         self.generate_fixture_output_file(geometry, 2)
@@ -75,22 +76,41 @@ class RouteOutputFilesTestCase(ApiDBTestCase):
             1
         )
 
+        self.generate_fixture_output_file(render, 1)
+        self.output_file_render_1 = self.generate_fixture_output_file(
+            render,
+            2
+        )
+        self.output_file_render_2 = self.generate_fixture_output_file(
+            render,
+            1,
+            "variant-1"
+        )
+
     def test_get_last_output_files(self):
         self.generate_output_files()
         output_files = self.get(
-            "/data/tasks/%s/last-output-files" % self.task.id
+            "/data/entities/%s/last-output-files" % self.entity.id
         )
         self.assertEqual(
-            output_files[str(self.geometry_id)],
+            output_files[str(self.geometry_id)]["main"],
             self.output_file_geometry.serialize()
         )
         self.assertEqual(
-            output_files[str(self.cache_type_id)],
+            output_files[str(self.cache_type_id)]["main"],
             self.output_file_cache.serialize()
         )
         self.assertEqual(
-            output_files[str(self.tx_type_id)],
+            output_files[str(self.tx_type_id)]["main"],
             self.output_file_texture.serialize()
+        )
+        self.assertEqual(
+            output_files[str(self.render_id)]["main"],
+            self.output_file_render_1.serialize()
+        )
+        self.assertEqual(
+            output_files[str(self.render_id)]["variant-1"],
+            self.output_file_render_2.serialize()
         )
 
     def test_get_entity_output_types(self):
@@ -104,7 +124,7 @@ class RouteOutputFilesTestCase(ApiDBTestCase):
         output_types = self.get(
             "/data/entities/%s/output-types" % self.entity.id
         )
-        self.assertEquals(len(output_types), 3)
+        self.assertEquals(len(output_types), 4)
         self.assertEquals(output_types[0]["name"], "Geometry")
 
     def test_get_entity_output_type_output_files(self):
@@ -132,11 +152,11 @@ class RouteOutputFilesTestCase(ApiDBTestCase):
         self.assertEqual(
             result["folder_path"],
             "/simple/productions/export/cosmos_landromat/assets/props/tree/"
-            "shaders/texture"
+            "texture"
         )
         self.assertEqual(
             result["file_name"],
-            "cosmos_landromat_props_tree_shaders_texture_main_v001"
+            "cosmos_landromat_props_tree_texture_main_v001"
         )
 
         output_file_id = result["id"]
@@ -161,8 +181,28 @@ class RouteOutputFilesTestCase(ApiDBTestCase):
         self.assertEqual(
             output_file["path"],
             "/simple/productions/export/cosmos_landromat/assets/props/tree/"
-            "shaders/texture/"
-            "cosmos_landromat_props_tree_shaders_texture_main_v001.tx"
+            "texture/"
+            "cosmos_landromat_props_tree_texture_main_v001.tx"
+        )
+
+    def test_new_output_with_name(self):
+        data = {
+            "person_id": self.person_id,
+            "comment": "test working file publish with extension",
+            "output_type_id": self.tx_type_id,
+            "extension": ".tx",
+            "name": ""
+        }
+        result = self.new_output(data)
+        output_file_id = result["id"]
+        output_file = self.get("/data/output-files/%s" % output_file_id)
+
+        self.assertEqual(output_file["extension"], ".tx")
+        self.assertEqual(
+            output_file["path"],
+            "/simple/productions/export/cosmos_landromat/assets/props/tree/"
+            "texture/"
+            "cosmos_landromat_props_tree_texture_main_v001.tx"
         )
 
     def test_new_output_again(self):
@@ -177,11 +217,11 @@ class RouteOutputFilesTestCase(ApiDBTestCase):
         self.assertEqual(
             result["folder_path"],
             "/simple/productions/export/cosmos_landromat/assets/props/tree/"
-            "shaders/texture"
+            "texture"
         )
         self.assertEqual(
             result["file_name"],
-            "cosmos_landromat_props_tree_shaders_texture_main_v002"
+            "cosmos_landromat_props_tree_texture_main_v002"
         )
 
         output_file_id = result["id"]
@@ -202,7 +242,7 @@ class RouteOutputFilesTestCase(ApiDBTestCase):
 
         self.assertEqual(
             result["file_name"],
-            "cosmos_landromat_props_tree_shaders_texture_main_v066"
+            "cosmos_landromat_props_tree_texture_main_v066"
         )
 
         output_file_id = result["id"]

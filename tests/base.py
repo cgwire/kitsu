@@ -24,6 +24,7 @@ from zou.app.models.task import Task
 from zou.app.models.task_type import TaskType
 from zou.app.models.task_status import TaskStatus
 from zou.app.models.file_status import FileStatus
+from zou.app.models.asset_instance import AssetInstance
 
 
 class ApiTestCase(unittest.TestCase):
@@ -384,6 +385,19 @@ class ApiDBTestCase(ApiTestCase):
             parent_id=self.sequence_standard.id
         )
         self.shot_standard.save()
+
+    def generate_fixture_asset_instance(self, asset=None, shot=None, number=1):
+        if asset is None:
+            asset = self.entity
+        if shot is None:
+            shot = self.shot
+
+        self.asset_instance = AssetInstance.create(
+            asset_id=asset.id,
+            shot_id=shot.id,
+            number=number,
+            description="Asset instance description"
+        )
 
     def generate_fixture_user(self):
         self.user = Person.create(

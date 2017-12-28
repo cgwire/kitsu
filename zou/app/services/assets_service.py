@@ -8,11 +8,13 @@ from zou.app.models.project import Project
 from zou.app.models.task import Task
 from zou.app.models.task_status import TaskStatus
 from zou.app.models.task_type import TaskType
+from zou.app.models.asset_instance import AssetInstance
 
 from zou.app.services import shots_service, projects_service
 
 from zou.app.services.exception import (
     AssetNotFoundException,
+    AssetInstanceNotFoundException,
     AssetTypeNotFoundException
 )
 
@@ -92,6 +94,22 @@ def get_asset_raw(entity_id):
 
 def get_asset(entity_id):
     return get_asset_raw(entity_id).serialize(obj_type="Asset")
+
+
+def get_asset_instance_raw(asset_instance_id):
+    try:
+        asset_instance = AssetInstance.get(asset_instance_id)
+    except StatementError:
+        raise AssetInstanceNotFoundException
+
+    if asset_instance is None:
+        raise AssetInstanceNotFoundException
+
+    return asset_instance
+
+
+def get_asset_instance(asset_instance_id):
+    return get_asset_instance_raw(asset_instance_id).serialize()
 
 
 def get_full_asset(asset_id):

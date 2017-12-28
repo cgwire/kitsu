@@ -178,19 +178,18 @@ def create_new_working_revision(
 
 def create_new_output_revision(
     entity_id,
-    task_id,
     working_file_id,
     output_type_id,
     person_id,
     comment="",
     revision=0,
-    name="",
+    name="main",
     extension=""
 ):
     if revision < 1:
         try:
             output_file = get_last_output_revision(
-                task_id,
+                entity_id,
                 output_type_id
             )
             revision = output_file["revision"] + 1
@@ -199,13 +198,15 @@ def create_new_output_revision(
 
     file_status_id = get_default_status()["id"]
 
+    working_file = get_working_file(working_file_id) or {}
+
     try:
         output_file = OutputFile.create(
             name=name,
             comment=comment,
             extension=extension,
             revision=revision,
-            task_id=task_id,
+            task_id=working_file.get("task_id", None),
             entity_id=entity_id,
             person_id=person_id,
             source_file_id=working_file_id,
@@ -219,10 +220,10 @@ def create_new_output_revision(
     return output_file.serialize()
 
 
-def get_last_output_revision(task_id, output_type_id):
+def get_last_output_revision(entity_id, output_type_id):
     output_files = OutputFile.query.filter_by(
         output_type_id=output_type_id,
-        task_id=task_id
+        entity_id=entity_id
     ).filter(
         OutputFile.revision > 0
     ).order_by(
@@ -246,9 +247,9 @@ def get_working_files_for_task(task_id):
     return fields.serialize_models(working_files)
 
 
-def get_next_output_file_revision(task_id, output_type_id, name="main"):
+def get_next_output_file_revision(entity_id, output_type_id, name="main"):
     output_files = OutputFile.query.filter_by(
-        task_id=task_id,
+        entity_id=entity_id,
         output_type_id=output_type_id,
         name=name
     ).filter(
@@ -262,9 +263,9 @@ def get_next_output_file_revision(task_id, output_type_id, name="main"):
         return 1
 
 
-def get_output_files_for_task(task_id):
+def get_output_files_for_entity(entity_id):
     output_files = OutputFile.query.filter_by(
-        task_id=task_id
+        entity_id=entity_id
     ).filter(
         OutputFile.revision >= 0
     ).order_by(
@@ -273,16 +274,21 @@ def get_output_files_for_task(task_id):
     return fields.serialize_models(output_files)
 
 
-def get_last_output_files_for_task(task_id):
+def get_last_output_files_for_entity(entity_id):
     result = {}
-    max_revisions = {}
-    output_files = get_output_files_for_task(task_id)
+    output_files = get_output_files_for_entity(entity_id)
+
+    # We assume here that output files are returned in the right order
     for output_file in output_files:
         output_type_id = output_file["output_type_id"]
-        revision = output_file["revision"]
+        name = output_file["name"]
+
         if output_type_id not in result:
-            max_revisions[output_type_id] = revision
-            result[output_type_id] = output_file
+            result[output_type_id] = {}
+
+        if name not in result[output_type_id]:
+            result[output_type_id][name] = output_file
+
     return result
 
 

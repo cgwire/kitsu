@@ -82,6 +82,34 @@ def get_file_name(
     return u"%s" % file_name
 
 
+def get_instance_file_name(
+    asset_instance,
+    output_type,
+    mode="output",
+    name="",
+    version=1
+):
+    shot = tasks_service.get_entity(asset_instance["shot_id"])
+    asset = tasks_service.get_entity(asset_instance["asset_id"])
+    project = get_project(shot)
+    tree = get_tree_from_project(project)
+
+    file_name = get_file_name_root(
+        tree,
+        mode,
+        shot,
+        None,
+        None,
+        output_type,
+        name,
+        asset_instance=asset_instance,
+        asset=asset
+    )
+    file_name = add_version_suffix_to_file_name(file_name, version)
+
+    return u"%s" % file_name
+
+
 def get_folder_path(
     task,
     mode="working",
@@ -111,6 +139,41 @@ def get_folder_path(
     return join_path(root_path, folder_path, "")
 
 
+def get_instance_folder_path(
+    asset_instance,
+    output_type,
+    mode="output",
+    sep=os.sep,
+):
+    shot = tasks_service.get_entity(asset_instance["shot_id"])
+    asset = tasks_service.get_entity(asset_instance["asset_id"])
+    project = get_project(shot)
+    tree = get_tree_from_project(project)
+    root_path = get_root_path(tree, mode, sep)
+    style = tree[mode]["folder_path"].get("style", "")
+
+    folder_template = get_folder_path_template(
+        tree,
+        mode,
+        asset_instance
+    )
+
+    folder_path = update_variable(
+        folder_template,
+        shot,
+        None,
+        None,
+        output_type,
+        "",
+        style,
+        asset_instance=asset_instance,
+        asset=asset
+    )
+    folder_path = change_folder_path_separators(folder_path, sep)
+
+    return join_path(root_path, folder_path, "")
+
+
 def get_project(entity):
     return projects_service.get_project(entity["project_id"])
 
@@ -133,7 +196,9 @@ def get_tree_from_file(tree_name):
 
 def get_folder_path_template(tree, mode, entity):
     try:
-        if shots_service.is_shot(entity):
+        if entity["type"] == "AssetInstance":
+            return tree[mode]["folder_path"]["instance"]
+        elif shots_service.is_shot(entity):
             return tree[mode]["folder_path"]["shot"]
         elif shots_service.is_sequence(entity):
             return tree[mode]["folder_path"]["sequence"]
@@ -147,7 +212,9 @@ def get_folder_path_template(tree, mode, entity):
 
 def get_file_name_template(tree, mode, entity):
     try:
-        if shots_service.is_shot(entity):
+        if entity["type"] == "AssetInstance":
+            return tree[mode]["file_name"]["instance"]
+        elif shots_service.is_shot(entity):
             return tree[mode]["file_name"]["shot"]
         elif shots_service.is_sequence(entity):
             return tree[mode]["file_name"]["sequence"]
@@ -166,16 +233,24 @@ def get_file_name_root(
     task,
     software,
     output_type,
-    name
+    name,
+    asset_instance=None,
+    asset=None
 ):
-    file_name = get_file_name_template(tree, mode, entity)
+    if asset_instance is None:
+        file_name_template = get_file_name_template(tree, mode, entity)
+    else:
+        file_name_template = get_file_name_template(tree, mode, asset_instance)
+
     file_name = update_variable(
-        file_name,
+        file_name_template,
         entity,
         task,
         software,
         output_type,
-        name
+        name,
+        asset_instance=asset_instance,
+        asset=asset
     )
     file_name = slugify(file_name, separator="_")
     file_name = apply_style(file_name, tree[mode]["file_name"].get("style", ""))
@@ -209,7 +284,9 @@ def update_variable(
     software=None,
     output_type=None,
     name="",
-    style="lowercase"
+    style="lowercase",
+    asset_instance=None,
+    asset=None
 ):
     variables = re.findall('<(\w*)>', template)
 
@@ -221,7 +298,9 @@ def update_variable(
             task,
             software,
             output_type,
-            name
+            name,
+            asset_instance,
+            asset
         )
         render = render.replace(
             "<%s>" % variable,
@@ -237,7 +316,9 @@ def get_folder_from_datatype(
     task,
     software=None,
     output_type=None,
-    name=""
+    name="",
+    instance=None,
+    asset=None
 ):
     if datatype == "Project":
         folder = get_folder_from_project(entity)
@@ -250,19 +331,27 @@ def get_folder_from_datatype(
     elif datatype == "Shot":
         folder = get_folder_from_shot(entity)
     elif datatype == "AssetType":
-        folder = get_folder_from_asset_type(entity)
+        if asset is None:
+            folder = get_folder_from_asset_type(entity)
+        else:
+            folder = get_folder_from_asset_type(asset)
     elif datatype == "Sequence":
         folder = get_folder_from_sequence(entity)
     elif datatype == "Episode":
         folder = get_folder_from_episode(entity)
     elif datatype == "Asset":
-        folder = get_folder_from_asset(entity)
+        if asset is None:
+            folder = get_folder_from_asset(entity)
+        else:
+            folder = get_folder_from_asset(asset)
     elif datatype == "Software":
         folder = get_folder_from_software(software)
     elif datatype == "OutputType":
         folder = get_folder_from_output_type(output_type)
     elif datatype == "Scene":
         folder = get_folder_from_scene(entity)
+    elif datatype == "Instance":
+        folder = get_folder_from_instance(instance)
     elif datatype == "Name":
         folder = name
     else:
@@ -363,6 +452,13 @@ def get_folder_from_scene(scene):
     if scene is not None:
         folder = scene["name"]
     return folder
+
+
+def get_folder_from_instance(instance):
+    if instance is not None:
+        return str(instance["number"])
+    else:
+        return ""
 
 
 def join_path(left, right, sep=os.sep):
