@@ -63,6 +63,7 @@ const state = {
   shotSearchText: '',
 
   displayedShots: [],
+  displayedShotsLength: 0,
   shotIndex: {},
   shotMap: {},
   sequenceMap: {},
@@ -98,6 +99,7 @@ const getters = {
   shotSearchText: state => state.shotSearchText,
 
   displayedShots: state => state.displayedShots,
+  displayedShotsLength: state => state.displayedShotsLength,
   shotsBySequence: state => {
     const shotsBySequence = []
     let sequenceShots = []
@@ -267,6 +269,7 @@ const mutations = {
     state.shotIndex = {}
     state.shotMap = {}
     state.displayedShots = []
+    state.displayedShotsLength = 0
   },
 
   [LOAD_SHOTS_ERROR] (state) {
@@ -283,7 +286,7 @@ const mutations = {
     state.shotMap = state.shots.forEach((shot) => {
       state.shotMap[shot.id] = shot
     })
-    state.displayedShots = state.shots
+    state.displayedShotsLength = state.shots.length
   },
   [LOAD_SEQUENCES_END] (state, sequences) {
     const sequenceMap = {}
@@ -412,8 +415,9 @@ const mutations = {
   },
 
   [SET_SHOT_SEARCH] (state, shotSearch) {
-    state.displayedShots =
-      indexSearch(state.shotIndex, shotSearch) || state.shots
+    const result = indexSearch(state.shotIndex, shotSearch) || state.shots
+    state.displayedShots = result.slice(0, 30)
+    state.displayedShotsLength = result.length
     state.shotSearchText = shotSearch
   },
 
@@ -493,6 +497,7 @@ const mutations = {
     state.shotIndex = {}
     state.shotMap = {}
     state.displayedShots = []
+    state.displayedShotsLength = 0
 
     state.editShot = {
       isLoading: false,

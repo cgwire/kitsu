@@ -124,7 +124,7 @@
   </div>
 
   <p class="has-text-centered nb-assets" v-if="!isEmptyList">
-    {{ entries.length }} {{ $tc('assets.number', entries.length) }}
+    {{ displayedAssetsLength }} {{ $tc('assets.number', displayedAssetsLength) }}
   </p>
 
 </div>
@@ -163,7 +163,8 @@ export default {
       'currentProduction',
       'assetSearchText',
       'selectedTasks',
-      'isCurrentUserManager'
+      'isCurrentUserManager',
+      'displayedAssetsLength'
     ]),
     isEmptyList () {
       return this.entries.length === 0 &&

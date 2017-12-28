@@ -138,7 +138,7 @@
   </div>
 
   <p class="has-text-centered nb-shots" v-if="!isEmptyList">
-    {{ entries ? entries.length : 0 }} {{ $tc('shots.number', entries ? entries.length :0 ) }}
+    {{ displayedShotsLength }} {{ $tc('shots.number', displayedShotsLength) }}
   </p>
 
 </div>
@@ -176,6 +176,7 @@ export default {
     ...mapGetters([
       'currentProduction',
       'isCurrentUserManager',
+      'displayedShotsLength',
       'shotSearchText'
     ]),
     isEmptyList () {

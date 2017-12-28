@@ -52,6 +52,7 @@ const state = {
 
   assetIndex: {},
   displayedAssets: [],
+  displayedAssetsLength: 0,
   assetSearchText: '',
 
   openProductions: [],
@@ -219,6 +220,7 @@ const mutations = {
 
     state.assetIndex = {}
     state.displayedAssets = []
+    state.displayedAssetsLength = 0
   },
 
   [LOAD_ASSETS_ERROR] (state) {
@@ -237,7 +239,7 @@ const mutations = {
     state.isAssetsLoadingError = false
 
     state.assetIndex = buildAssetIndex(assets)
-    state.displayedAssets = state.assets
+    state.displayedAssetsLength = state.assets ? state.assets.length : 0
   },
 
   [ASSET_CSV_FILE_SELECTED] (state, formData) {
@@ -397,8 +399,7 @@ const mutations = {
   },
 
   [SET_ASSET_SEARCH] (state, assetSearch) {
-    state.displayedAssets =
-      indexSearch(state.assetIndex, assetSearch) || state.assets
+    state.displayedAssetsLength = result ? result.length : 0
     state.assetSearchText = assetSearch
   },
 
