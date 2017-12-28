@@ -1,3 +1,5 @@
+import copy
+
 from flask import current_app
 from flask_jwt_extended import jwt_required
 
@@ -35,7 +37,6 @@ class EntityResource(BaseModelResource):
             entity = self.get_model_or_404(instance_id)
             self.check_update_permissions(entity.serialize(), data)
 
-            import copy
             extra_data = copy.copy(entity.data) or {}
             if "data" not in data or data["data"] is None:
                 data["data"] = {}
