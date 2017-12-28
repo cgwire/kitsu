@@ -23,7 +23,7 @@ class FileTreeTestCase(ApiDBTestCase):
         self.generate_fixture_shot()
         self.generate_fixture_scene()
         self.generate_fixture_sequence_standard()
-        Self.generate_fixture_shot_standard()
+        self.generate_fixture_shot_standard()
         self.generate_fixture_person()
         self.generate_fixture_department()
         self.generate_fixture_task_type()

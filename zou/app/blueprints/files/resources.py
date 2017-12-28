@@ -100,6 +100,7 @@ class FolderPathResource(Resource):
             args["sep"],
         )
 
+
 class FilePathResource(Resource):
 
     @jwt_required
@@ -184,6 +185,7 @@ class FilePathResource(Resource):
             args["sep"]
         )
 
+
 class InstanceFilePathResource(Resource):
 
     @jwt_required
@@ -238,7 +240,6 @@ class InstanceFilePathResource(Resource):
             args["name"],
             args["sep"]
         )
-
 
 
 class SetTreeResource(Resource):
