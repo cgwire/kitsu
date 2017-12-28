@@ -11,26 +11,42 @@ export const buildNameIndex = (entries) => {
   return index
 }
 
-export const buildAssetIndex = (entries) => {
-  const index = {}
-  entries.forEach((entry) => {
+const indexWords = (index, entryIndex, entry, words) => {
+  for (let word of words) {
     let currentString = ''
-
-    for (let character of entry.name) {
+    for (let character of word) {
       currentString += character.toLowerCase()
-      if (index[currentString] === undefined) index[currentString] = []
-      index[currentString].push(entry)
-    }
+      if (index[currentString] === undefined) {
+        index[currentString] = []
+        entryIndex[currentString] = {}
+      }
 
-    currentString = ''
-    for (let character of entry.asset_type_name) {
-      currentString += character.toLowerCase()
-      if (index[currentString] === undefined) index[currentString] = []
-
-      if (!index[currentString].find((asset) => asset.id === entry.id)) {
+      if (!entryIndex[currentString][entry.id]) {
         index[currentString].push(entry)
+        entryIndex[currentString][entry.id] = true
       }
     }
+  }
+  return index
+}
+
+export const buildAssetIndex = (entries) => {
+  const index = {}
+  const assetIndex = {}
+  entries.forEach((asset) => {
+    let stringToIndex = asset.name.replace(/_/g, ' ').replace(/-/g, ' ')
+    let words = stringToIndex.split(' ').concat([asset.asset_type_name])
+    indexWords(index, assetIndex, asset, words)
+  })
+  return index
+}
+
+export const buildShotIndex = (shots) => {
+  const index = {}
+  const shotIndex = {}
+  shots.forEach((shot) => {
+    let words = [shot.name, shot.sequence_name, shot.episode_name]
+    indexWords(index, shotIndex, shot, words)
   })
   return index
 }
