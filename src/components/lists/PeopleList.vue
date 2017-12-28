@@ -22,6 +22,12 @@
     </table>
   </div>
 
+  <table-info
+    :is-loading="isLoading"
+    :is-error="isError"
+  >
+  </table-info>
+
   <div class="table-body" v-scroll="onBodyScroll">
     <table class="table">
       <tbody>
@@ -49,12 +55,6 @@
       </tbody>
     </table>
   </div>
-
-  <table-info
-    :is-loading="isLoading"
-    :is-error="isError"
-  >
-  </table-info>
 
   <p class="has-text-centered footer-info" v-if="!isLoading">
     {{ entries.length }} {{ $tc('people.persons', entries.length) }}
