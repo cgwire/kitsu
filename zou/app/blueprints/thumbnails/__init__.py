@@ -10,14 +10,10 @@ from .resources import (
     PreviewFilePreviewResource,
     PreviewFileOriginalResource,
 
-    CreateShotThumbnailResource,
-    ShotThumbnailResource,
     CreateProjectThumbnailResource,
     ProjectThumbnailResource,
     CreatePersonThumbnailResource,
     PersonThumbnailResource,
-    CreateWorkingFileThumbnailResource,
-    WorkingFileThumbnailResource,
 
     SetMainPreviewResource
 )
@@ -54,14 +50,6 @@ routes = [
 
 
     (
-        "/pictures/thumbnails/shots/<instance_id>",
-        CreateShotThumbnailResource
-    ),
-    (
-        "/pictures/thumbnails/shots/<instance_id>.png",
-        ShotThumbnailResource
-    ),
-    (
         "/pictures/thumbnails/persons/<instance_id>",
         CreatePersonThumbnailResource
     ),
@@ -77,14 +65,7 @@ routes = [
         "/pictures/thumbnails/projects/<instance_id>.png",
         ProjectThumbnailResource
     ),
-    (
-        "/pictures/thumbnails/working-files/<instance_id>",
-        CreateWorkingFileThumbnailResource
-    ),
-    (
-        "/pictures/thumbnails/working-files/<instance_id>.png",
-        WorkingFileThumbnailResource
-    ),
+
     (
         "/actions/entities/<entity_id>/set-main-preview/<preview_file_id>",
         SetMainPreviewResource

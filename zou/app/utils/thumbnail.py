@@ -2,7 +2,7 @@ import os
 import shutil
 import math
 
-from zou.app import app
+from zou.app import app, config
 from zou.app.utils import fs
 
 from PIL import Image
@@ -19,6 +19,17 @@ def save_file(subfolder, instance_id, file_to_save, size=None):
     thumbnail_folder = create_folder(subfolder)
 
     file_path = os.path.join(thumbnail_folder, file_name)
+    file_to_save.save(file_path)
+
+    if size is not None:
+        turn_into_thumbnail(file_path, size=size)
+
+    return file_path
+
+
+def generate_thumbnail(instance_id, file_to_save, size=None):
+    file_name = get_file_name(instance_id)
+    file_path = os.path.join(config.TMP_DIR, file_name)
     file_to_save.save(file_path)
 
     if size is not None:
