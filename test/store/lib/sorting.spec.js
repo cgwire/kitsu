@@ -36,52 +36,36 @@ describe('sorting', () => {
         project_name: 'Big Buck Bunny',
         asset_type_name: 'Props',
         name: 'Tree',
-        id: 5
-      },
-      {
-        canceled: false,
-        project_name: 'Big Buck Bunny',
-        asset_type_name: 'Props',
-        name: 'Table',
         id: 4
       },
       {
         canceled: false,
         project_name: 'Big Buck Bunny',
         asset_type_name: 'Props',
-        name: 'Chair',
+        name: 'Table',
         id: 3
       },
       {
-        canceled: true,
-        project_name: 'Agent 327',
+        canceled: false,
+        project_name: 'Big Buck Bunny',
         asset_type_name: 'Props',
-        name: 'Gun',
-        id: 6
+        name: 'Chair',
+        id: 2
       },
       {
         canceled: false,
         project_name: 'Big Buck Bunny',
         asset_type_name: 'Characters',
         name: 'Bunny',
-        id: 2
-      },
-      {
-        canceled: false,
-        project_name: 'Agent 327',
-        asset_type_name: 'Props',
-        name: 'Mirror',
         id: 1
       }
     ]
     let results = sortAssets(entries)
-    expect(results.length).to.equal(6)
+    expect(results.length).to.equal(4)
     expect(results[0].id).to.equal(1)
     expect(results[1].id).to.equal(2)
     expect(results[2].id).to.equal(3)
     expect(results[3].id).to.equal(4)
-    expect(results[4].id).to.equal(5)
-    expect(results[5].id).to.equal(6)
 
     results = sortAssets([])
     expect(results.length).to.equal(0)
@@ -133,6 +117,7 @@ describe('sorting', () => {
       }
     ]
     let results = sortShots(entries)
+
     expect(results.length).to.equal(6)
     expect(results[0].id).to.equal(1)
     expect(results[1].id).to.equal(2)

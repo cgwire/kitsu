@@ -68,7 +68,6 @@ assetsApi.postCsv = (formData, callback) => {
 }
 
 
-
 const getters = assetsStore.getters
 const state = store.state.assets
 

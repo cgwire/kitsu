@@ -11,7 +11,12 @@ export const sortAssets = (assets) => {
 export const sortShots = (shots) => {
   return shots.sort(
     firstBy('canceled')
-      .thenBy((a, b) => a.episode_name.localeCompare(b.episode_name))
+      .thenBy((a, b) => {
+        if (a.episode_name) {
+          a.episode_name.localeCompare(b.episode_name)
+        }
+        return 1
+      })
       .thenBy((a, b) => a.sequence_name.localeCompare(b.sequence_name))
       .thenBy((a, b) => a.name.localeCompare(b.name))
   )
