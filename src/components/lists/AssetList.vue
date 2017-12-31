@@ -56,7 +56,14 @@
     </button-link>
   </div>
 
-  <div class="table-body" v-scroll="onBodyScroll">
+  <div
+    class="table-body"
+    v-scroll="onBodyScroll"
+    v-infinite-scroll="loadMoreAssets"
+    infinite-scroll-disabled="busy"
+    infinite-scroll-distance="120"
+  >
+
     <table class="table">
       <tbody>
         <tr
@@ -148,7 +155,9 @@ export default {
     'validationColumns'
   ],
   data () {
-    return {}
+    return {
+      busy: false
+    }
   },
   components: {
     ButtonLink,
@@ -175,15 +184,23 @@ export default {
   },
   methods: {
     ...mapActions([
+      'displayMoreAssets'
     ]),
+
     onTaskSelected (validationInfo) {
       this.$store.commit('ADD_SELECTED_TASK', validationInfo)
     },
+
     onTaskUnselected (validationInfo) {
       this.$store.commit('REMOVE_SELECTED_TASK', validationInfo)
     },
+
     onBodyScroll (event, position) {
       this.$refs.headerWrapper.style.left = `-${position.scrollLeft}px`
+    },
+
+    loadMoreAssets () {
+      this.displayMoreAssets()
     }
   }
 }

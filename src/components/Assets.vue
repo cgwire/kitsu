@@ -249,7 +249,8 @@ export default {
       productionId
     )
 
-    if (this.assets.length === 0) {
+    if (this.assets.length === 0 ||
+        this.assets[0].production_id !== this.currentProduction.id) {
       this.loadAssets((err) => {
         if (!err) this.handleModalsDisplay()
       })

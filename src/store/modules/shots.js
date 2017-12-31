@@ -1,9 +1,11 @@
 import shotsApi from '../api/shots'
 import tasksStore from './tasks'
 import productionsStore from './productions'
+
+import {PAGE_SIZE} from '../../lib/pagination'
+import {sortShots, sortByName} from '../../lib/sorting'
 import { buildShotIndex, indexSearch } from '../../lib/indexing'
 
-import {sortShots, sortByName} from '../../lib/sorting'
 import {
   LOAD_SHOTS_START,
   LOAD_SHOTS_ERROR,
@@ -45,6 +47,7 @@ import {
 
   SET_SHOT_SEARCH,
   CREATE_TASKS_END,
+  DISPLAY_MORE_SHOTS,
 
   RESET_ALL
 } from '../mutation-types'
@@ -254,6 +257,10 @@ const actions = {
       commit(IMPORT_SHOTS_END)
       if (callback) callback(err)
     })
+  },
+
+  displayMoreShots ({commit}) {
+    commit(DISPLAY_MORE_SHOTS)
   }
 
 }
@@ -288,7 +295,7 @@ const mutations = {
     state.shots.forEach((shot) => {
       state.shotMap[shot.id] = shot
     })
-    state.displayedShots = state.shots.slice(0, 30)
+    state.displayedShots = state.shots.slice(0, PAGE_SIZE)
     state.displayedShotsLength = state.shots.length
   },
   [LOAD_SEQUENCES_END] (state, sequences) {
@@ -365,15 +372,19 @@ const mutations = {
     }
   },
   [DELETE_SHOT_END] (state, shotToDelete) {
-    const shotToDeleteIndex = state.shots.findIndex(
-      (shot) => shot.id === shotToDelete.id
-    )
     const shot = state.shotMap[shotToDelete.id]
 
     if (shot.tasks.length > 0) {
       shot.canceled = true
     } else {
+      const shotToDeleteIndex = state.shots.findIndex(
+        (shot) => shot.id === shotToDelete.id
+      )
+      const displayedShotToDeleteIndex = state.shots.findIndex(
+        (shot) => shot.id === shotToDelete.id
+      )
       state.shots.splice(shotToDeleteIndex, 1)
+      state.displayedShots.splice(displayedShotToDeleteIndex, 1)
       state.shotMap[shotToDelete.id] = undefined
     }
 
@@ -419,7 +430,7 @@ const mutations = {
 
   [SET_SHOT_SEARCH] (state, shotSearch) {
     const result = indexSearch(state.shotIndex, shotSearch) || state.shots
-    state.displayedShots = result.slice(0, 30)
+    state.displayedShots = result.slice(0, PAGE_SIZE)
     state.displayedShotsLength = result.length
     state.shotSearchText = shotSearch
   },
@@ -441,6 +452,7 @@ const mutations = {
 
     state.shots.push(shot)
     state.shots = sortShots(state.shots)
+    state.displayedShots = state.shots.slice(0, PAGE_SIZE)
     state.shotMap[shot.id] = shot
     state.shotIndex = buildShotIndex(state.shots)
   },
@@ -472,6 +484,19 @@ const mutations = {
         }
       }
     })
+  },
+
+  [DISPLAY_MORE_SHOTS] (state, tasks) {
+    let shots
+    if (state.shotSearchText.length > 0) {
+      shots = indexSearch(state.shotIndex, state.shotSearchText)
+    } else {
+      shots = state.shots
+    }
+    state.displayedShots = shots.slice(
+      0,
+      state.displayedShots.length + PAGE_SIZE
+    )
   },
 
   [RESET_ALL] (state) {

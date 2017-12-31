@@ -1,8 +1,10 @@
 import assetsApi from '../api/assets'
-import { sortAssets } from '../../lib/sorting'
-import { buildAssetIndex, indexSearch } from '../../lib/indexing'
 import tasksStore from './tasks'
 import productionsStore from './productions'
+
+import {PAGE_SIZE} from '../../lib/pagination'
+import { sortAssets } from '../../lib/sorting'
+import { buildAssetIndex, indexSearch } from '../../lib/indexing'
 
 import {
   LOAD_ASSETS_START,
@@ -35,6 +37,8 @@ import {
 
   SET_ASSET_SEARCH,
   CREATE_TASKS_END,
+
+  DISPLAY_MORE_ASSETS,
 
   RESET_ALL
 } from '../mutation-types'
@@ -217,8 +221,13 @@ const actions = {
   },
 
   setAssetSearch ({commit}, searchQuery) {
-    commit('SET_ASSET_SEARCH', searchQuery)
+    commit(SET_ASSET_SEARCH, searchQuery)
+  },
+
+  displayMoreAssets ({commit}) {
+    commit(DISPLAY_MORE_ASSETS)
   }
+
 }
 
 const mutations = {
@@ -248,7 +257,7 @@ const mutations = {
     state.isAssetsLoadingError = false
 
     state.assetIndex = buildAssetIndex(assets)
-    state.displayedAssets = state.assets.slice(0, 30)
+    state.displayedAssets = state.assets.slice(0, PAGE_SIZE)
     state.displayedAssetsLength = state.assets ? state.assets.length : 0
   },
 
@@ -299,6 +308,7 @@ const mutations = {
       newAsset.validations = {}
       state.assets.push(newAsset)
       state.assets = sortAssets(state.assets)
+      state.displayedAssets.unshift(newAsset)
     }
     state.editAsset = {
       isLoading: false,
@@ -321,15 +331,19 @@ const mutations = {
     }
   },
   [DELETE_ASSET_END] (state, assetToDelete) {
-    const assetToDeleteIndex = state.assets.findIndex(
-      (asset) => asset.id === assetToDelete.id
-    )
-    const asset = state.assets[assetToDeleteIndex]
+    const asset = state.assetMap[assetToDelete.id]
 
     if (asset.tasks.length > 0) {
       asset.canceled = true
     } else {
+      const assetToDeleteIndex = state.assets.findIndex(
+        (asset) => asset.id === assetToDelete.id
+      )
+      const displayAssetToDeleteIndex = state.assets.findIndex(
+        (asset) => asset.id === assetToDelete.id
+      )
       state.assets.splice(assetToDeleteIndex, 1)
+      state.displayedAssets.splice(displayAssetToDeleteIndex, 1)
       state.assetMap[assetToDelete.id] = undefined
     }
 
@@ -410,7 +424,7 @@ const mutations = {
 
   [SET_ASSET_SEARCH] (state, assetSearch) {
     const result = indexSearch(state.assetIndex, assetSearch) || state.assets
-    state.displayedAssets = result.slice(0, 30)
+    state.displayedAssets = result.slice(0, PAGE_SIZE)
     state.displayedAssetsLength = result ? result.length : 0
     state.assetSearchText = assetSearch
   },
@@ -426,6 +440,19 @@ const mutations = {
         }
       }
     })
+  },
+
+  [DISPLAY_MORE_ASSETS] (state, tasks) {
+    let assets
+    if (state.assetSearchText.length > 0) {
+      assets = indexSearch(state.assetIndex, state.assetSearchText)
+    } else {
+      assets = state.assets
+    }
+    state.displayedAssets = assets.slice(
+      0,
+      state.displayedAssets.length + PAGE_SIZE
+    )
   },
 
   [RESET_ALL] (state) {

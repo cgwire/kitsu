@@ -263,7 +263,8 @@ export default {
       productionId
     )
 
-    if (this.shots.length === 0) {
+    if (this.shots.length === 0 ||
+        this.shots[0].production_id !== this.currentProduction.id) {
       this.loadShots((err) => {
         if (!err) this.handleModalsDisplay()
       })

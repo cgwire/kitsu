@@ -9,11 +9,13 @@ import store from './store'
 import App from './App'
 import VueLazyload from 'vue-lazyload'
 import Meta from 'vue-meta'
+import infiniteScroll from 'vue-infinite-scroll'
 
 Vue.config.productionTip = false
 Vue.use(vuescroll)
 Vue.use(VueLazyload)
 Vue.use(Meta)
+Vue.use(infiniteScroll)
 
 // Make the current route part of the main state.
 sync(store, router)
