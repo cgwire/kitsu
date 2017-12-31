@@ -1,13 +1,12 @@
+import Vue from 'vue'
 import shotsApi from '../api/shots'
 import tasksStore from './tasks'
 import productionsStore from './productions'
-import { buildNameIndex, indexSearch } from '../../lib/indexing'
 
-import {
-  sortShots,
-  sortValidationColumns,
-  sortByName
-} from '../../lib/sorting'
+import {PAGE_SIZE} from '../../lib/pagination'
+import {sortShots, sortByName} from '../../lib/sorting'
+import { buildShotIndex, indexSearch } from '../../lib/indexing'
+
 import {
   LOAD_SHOTS_START,
   LOAD_SHOTS_ERROR,
@@ -49,9 +48,16 @@ import {
 
   SET_SHOT_SEARCH,
   CREATE_TASKS_END,
+  DISPLAY_MORE_SHOTS,
 
   RESET_ALL
 } from '../mutation-types'
+
+const helpers = {
+  getCurrentProduction () {
+    return productionsStore.getters.currentProduction(productionsStore.state)
+  }
+}
 
 const state = {
   shots: [],
@@ -61,6 +67,7 @@ const state = {
   shotSearchText: '',
 
   displayedShots: [],
+  displayedShotsLength: 0,
   shotIndex: {},
   shotMap: {},
   sequenceMap: {},
@@ -95,11 +102,8 @@ const getters = {
 
   shotSearchText: state => state.shotSearchText,
 
-  shotValidationColumns: state => {
-    return sortValidationColumns(Object.values(state.validationColumns))
-  },
-
   displayedShots: state => state.displayedShots,
+  displayedShotsLength: state => state.displayedShotsLength,
   shotsBySequence: state => {
     const shotsBySequence = []
     let sequenceShots = []
@@ -249,10 +253,15 @@ const actions = {
 
   uploadShotFile ({ commit, state }, callback) {
     commit(IMPORT_SHOTS_START)
-    shotsApi.postCsv(state.shotsCsvFormData, (err) => {
+    const currentProduction = helpers.getCurrentProduction()
+    shotsApi.postCsv(currentProduction, state.shotsCsvFormData, (err) => {
       commit(IMPORT_SHOTS_END)
       if (callback) callback(err)
     })
+  },
+
+  displayMoreShots ({commit}) {
+    commit(DISPLAY_MORE_SHOTS)
   }
 
 }
@@ -260,15 +269,16 @@ const actions = {
 const mutations = {
   [LOAD_SHOTS_START] (state) {
     state.shots = []
+    state.shotValidationColumns = []
     state.sequences = []
     state.episoded = []
-    state.validationColumns = {}
     state.isShotsLoading = true
     state.isShotsLoadingError = false
 
     state.shotIndex = {}
     state.shotMap = {}
     state.displayedShots = []
+    state.displayedShotsLength = 0
   },
 
   [LOAD_SHOTS_ERROR] (state) {
@@ -280,31 +290,14 @@ const mutations = {
     state.isShotsLoading = false
     state.isShotsLoadingError = false
 
-    const validationColumns = {}
-    shots = sortShots(shots)
-    shots = shots.map((shot) => {
-      shot.validations = {}
-      shot.tasks.forEach((task) => {
-        shot.validations[task.task_type_name] = task
-        validationColumns[task.task_type_name] = {
-          id: task.task_type_id,
-          name: task.task_type_name,
-          color: task.task_type_color,
-          priority: task.task_type_priority
-        }
-      })
-      return shot
-    })
-    state.shots = shots
-    state.validationColumns = validationColumns
-
-    state.shotIndex = buildNameIndex(shots)
-    const shotMap = {}
+    state.shots = sortShots(shots)
+    state.shotIndex = buildShotIndex(state.shots)
+    state.shotMap = {}
     state.shots.forEach((shot) => {
-      shotMap[shot.id] = shot
+      state.shotMap[shot.id] = shot
     })
-    state.shotMap = shotMap
-    state.displayedShots = state.shots
+    state.displayedShots = state.shots.slice(0, PAGE_SIZE)
+    state.displayedShotsLength = state.shots.length
   },
   [LOAD_SEQUENCES_END] (state, sequences) {
     const sequenceMap = {}
@@ -363,7 +356,7 @@ const mutations = {
       isLoading: false,
       isError: false
     }
-    state.shotIndex = buildNameIndex(state.shots)
+    state.shotIndex = buildShotIndex(state.shots)
     state.shotCreated = newShot.name
   },
 
@@ -380,15 +373,19 @@ const mutations = {
     }
   },
   [DELETE_SHOT_END] (state, shotToDelete) {
-    const shotToDeleteIndex = state.shots.findIndex(
-      (shot) => shot.id === shotToDelete.id
-    )
     const shot = state.shotMap[shotToDelete.id]
 
     if (shot.tasks.length > 0) {
       shot.canceled = true
     } else {
+      const shotToDeleteIndex = state.shots.findIndex(
+        (shot) => shot.id === shotToDelete.id
+      )
+      const displayedShotToDeleteIndex = state.shots.findIndex(
+        (shot) => shot.id === shotToDelete.id
+      )
       state.shots.splice(shotToDeleteIndex, 1)
+      state.displayedShots.splice(displayedShotToDeleteIndex, 1)
       state.shotMap[shotToDelete.id] = undefined
     }
 
@@ -396,7 +393,7 @@ const mutations = {
       isLoading: false,
       isError: false
     }
-    state.shotIndex = buildNameIndex(state.shots)
+    state.shotIndex = buildShotIndex(state.shots)
   },
 
   [RESTORE_SHOT_START] (state) {
@@ -418,7 +415,7 @@ const mutations = {
       isLoading: false,
       isError: false
     }
-    state.shotIndex = buildNameIndex(state.shots)
+    state.shotIndex = buildShotIndex(state.shots)
   },
 
   [NEW_TASK_COMMENT_END] (state, {comment, taskId}) {
@@ -433,8 +430,9 @@ const mutations = {
   },
 
   [SET_SHOT_SEARCH] (state, shotSearch) {
-    state.displayedShots =
-      indexSearch(state.shotIndex, shotSearch) || state.shots
+    const result = indexSearch(state.shotIndex, shotSearch) || state.shots
+    state.displayedShots = result.slice(0, PAGE_SIZE)
+    state.displayedShotsLength = result.length
     state.shotSearchText = shotSearch
   },
 
@@ -455,8 +453,9 @@ const mutations = {
 
     state.shots.push(shot)
     state.shots = sortShots(state.shots)
+    state.displayedShots = state.shots.slice(0, PAGE_SIZE)
     state.shotMap[shot.id] = shot
-    state.shotIndex = buildNameIndex(state.shots)
+    state.shotIndex = buildShotIndex(state.shots)
   },
 
   [NEW_SEQUENCE_START] (state) {},
@@ -478,29 +477,28 @@ const mutations = {
   [CREATE_TASKS_END] (state, tasks) {
     tasks.forEach((task) => {
       if (task) {
-        const shot = getters.getShot(state)(task.entity_id)
+        const shot = state.shotMap[task.entity_id]
         if (shot) {
           const validations = {...shot.validations}
-          validations[task.task_type_name] = task
-          shot.validations = validations
-
-          if (!state.validationColumns[task.task_type_name]) {
-            state.validationColumns[task.task_type_name] = {
-              id: task.task_type_id,
-              name: task.task_type_name,
-              color: task.task_type_color,
-              priority: task.task_type_priority
-            }
-          }
-
-          const shotIndex = state.shots.findIndex(
-            (currentShot) => currentShot.id === shot.id
-          )
-          state.shots.splice(shotIndex, 1)
-          state.shots.splice(shotIndex, 0, shot)
+          Vue.set(validations, task.task_type_name, task)
+          delete shot.validations
+          Vue.set(shot, 'validations', validations)
         }
       }
     })
+  },
+
+  [DISPLAY_MORE_SHOTS] (state, tasks) {
+    let shots
+    if (state.shotSearchText.length > 0) {
+      shots = indexSearch(state.shotIndex, state.shotSearchText)
+    } else {
+      shots = state.shots
+    }
+    state.displayedShots = shots.slice(
+      0,
+      state.displayedShots.length + PAGE_SIZE
+    )
   },
 
   [RESET_ALL] (state) {
@@ -514,6 +512,7 @@ const mutations = {
     state.shotIndex = {}
     state.shotMap = {}
     state.displayedShots = []
+    state.displayedShotsLength = 0
 
     state.editShot = {
       isLoading: false,

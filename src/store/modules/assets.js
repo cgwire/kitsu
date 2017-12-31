@@ -1,8 +1,11 @@
+import Vue from 'vue'
 import assetsApi from '../api/assets'
-import { sortAssets, sortValidationColumns } from '../../lib/sorting'
-import { buildAssetIndex, indexSearch } from '../../lib/indexing'
 import tasksStore from './tasks'
 import productionsStore from './productions'
+
+import {PAGE_SIZE} from '../../lib/pagination'
+import { sortAssets } from '../../lib/sorting'
+import { buildAssetIndex, indexSearch } from '../../lib/indexing'
 
 import {
   LOAD_ASSETS_START,
@@ -36,8 +39,16 @@ import {
   SET_ASSET_SEARCH,
   CREATE_TASKS_END,
 
+  DISPLAY_MORE_ASSETS,
+
   RESET_ALL
 } from '../mutation-types'
+
+const helpers = {
+  getCurrentProduction () {
+    return productionsStore.getters.currentProduction(productionsStore.state)
+  }
+}
 
 const state = {
   assets: [],
@@ -46,9 +57,9 @@ const state = {
 
   assetIndex: {},
   displayedAssets: [],
+  displayedAssetsLength: 0,
   assetSearchText: '',
 
-  validationColumns: {},
   openProductions: [],
   isAssetsLoading: false,
   isAssetsLoadingError: false,
@@ -75,21 +86,27 @@ const state = {
 const getters = {
   assets: state => state.assets,
   assetMap: state => state.assetMap,
-  assetValidationColumns: (state) => {
-    return sortValidationColumns(Object.values(state.validationColumns))
-  },
   assetSearchText: state => state.assetSearchText,
 
   isAssetsLoading: state => state.isAssetsLoading,
   isAssetsLoadingError: state => state.isAssetsLoadingError,
 
   displayedAssets: state => state.displayedAssets,
+  displayedAssetsLength: state => state.displayedAssetsLength,
+
   assetsByType: state => {
     const assetsByType = []
     let assetTypeAssets = []
     let previousAsset = null
+    let assets = []
 
-    for (let asset of state.displayedAssets) {
+    if (state.assetSearchText.length === 0) {
+      assets = state.assets.slice(0, 100)
+    } else {
+      assets = state.displayedAssets.slice(0, 100)
+    }
+
+    for (let asset of assets) {
       if (
         previousAsset &&
         asset.asset_type_name !== previousAsset.asset_type_name
@@ -196,27 +213,33 @@ const actions = {
   },
 
   uploadAssetFile ({ commit, state }, callback) {
+    const currentProduction = helpers.getCurrentProduction()
     commit(IMPORT_ASSETS_START)
-    assetsApi.postCsv(state.assetsCsvFormData, (err) => {
+    assetsApi.postCsv(currentProduction, state.assetsCsvFormData, (err) => {
       commit(IMPORT_ASSETS_END)
       if (callback) callback(err)
     })
   },
 
   setAssetSearch ({commit}, searchQuery) {
-    commit('SET_ASSET_SEARCH', searchQuery)
+    commit(SET_ASSET_SEARCH, searchQuery)
+  },
+
+  displayMoreAssets ({commit}) {
+    commit(DISPLAY_MORE_ASSETS)
   }
+
 }
 
 const mutations = {
   [LOAD_ASSETS_START] (state) {
     state.assets = []
-    state.validationColumns = {}
     state.isAssetsLoading = true
     state.isAssetsLoadingError = false
 
     state.assetIndex = {}
     state.displayedAssets = []
+    state.displayedAssetsLength = 0
   },
 
   [LOAD_ASSETS_ERROR] (state) {
@@ -225,33 +248,18 @@ const mutations = {
   },
 
   [LOAD_ASSETS_END] (state, assets) {
-    const validationColumns = {}
-
     assets = sortAssets(assets)
-    assets = assets.map((asset) => {
-      asset.validations = {}
-      asset.tasks.forEach((task) => {
-        asset.validations[task.task_type_name] = task
-        validationColumns[task.task_type_name] = {
-          id: task.task_type_id,
-          name: task.task_type_name,
-          color: task.task_type_color,
-          priority: task.task_type_priority
-        }
-      })
-      return asset
-    })
     assets.forEach((asset) => {
       state.assetMap[asset.id] = asset
     })
 
-    state.validationColumns = validationColumns
     state.assets = assets
     state.isAssetsLoading = false
     state.isAssetsLoadingError = false
 
     state.assetIndex = buildAssetIndex(assets)
-    state.displayedAssets = state.assets
+    state.displayedAssets = state.assets.slice(0, PAGE_SIZE)
+    state.displayedAssetsLength = state.assets ? state.assets.length : 0
   },
 
   [ASSET_CSV_FILE_SELECTED] (state, formData) {
@@ -301,6 +309,7 @@ const mutations = {
       newAsset.validations = {}
       state.assets.push(newAsset)
       state.assets = sortAssets(state.assets)
+      state.displayedAssets.unshift(newAsset)
     }
     state.editAsset = {
       isLoading: false,
@@ -323,15 +332,19 @@ const mutations = {
     }
   },
   [DELETE_ASSET_END] (state, assetToDelete) {
-    const assetToDeleteIndex = state.assets.findIndex(
-      (asset) => asset.id === assetToDelete.id
-    )
-    const asset = state.assets[assetToDeleteIndex]
+    const asset = state.assetMap[assetToDelete.id]
 
     if (asset.tasks.length > 0) {
       asset.canceled = true
     } else {
+      const assetToDeleteIndex = state.assets.findIndex(
+        (asset) => asset.id === assetToDelete.id
+      )
+      const displayAssetToDeleteIndex = state.assets.findIndex(
+        (asset) => asset.id === assetToDelete.id
+      )
       state.assets.splice(assetToDeleteIndex, 1)
+      state.displayedAssets.splice(displayAssetToDeleteIndex, 1)
       state.assetMap[assetToDelete.id] = undefined
     }
 
@@ -411,8 +424,9 @@ const mutations = {
   },
 
   [SET_ASSET_SEARCH] (state, assetSearch) {
-    state.displayedAssets =
-      indexSearch(state.assetIndex, assetSearch) || state.assets
+    const result = indexSearch(state.assetIndex, assetSearch) || state.assets
+    state.displayedAssets = result.slice(0, PAGE_SIZE)
+    state.displayedAssetsLength = result ? result.length : 0
     state.assetSearchText = assetSearch
   },
 
@@ -422,20 +436,25 @@ const mutations = {
         const asset = state.assetMap[task.entity_id]
         if (asset) {
           const validations = {...asset.validations}
-          validations[task.task_type_name] = task
-          asset.validations = validations
-
-          if (!state.validationColumns[task.task_type_name]) {
-            state.validationColumns[task.task_type_name] = {
-              id: task.task_type_id,
-              name: task.task_type_name,
-              color: task.task_type_color,
-              priority: task.task_type_priority
-            }
-          }
+          Vue.set(validations, task.task_type_name, task)
+          delete asset.validations
+          Vue.set(asset, 'validations', validations)
         }
       }
     })
+  },
+
+  [DISPLAY_MORE_ASSETS] (state, tasks) {
+    let assets
+    if (state.assetSearchText.length > 0) {
+      assets = indexSearch(state.assetIndex, state.assetSearchText)
+    } else {
+      assets = state.assets
+    }
+    state.displayedAssets = assets.slice(
+      0,
+      state.displayedAssets.length + PAGE_SIZE
+    )
   },
 
   [RESET_ALL] (state) {
@@ -445,6 +464,7 @@ const mutations = {
     state.isAssetsLoading = false
     state.isAssetsLoadingError = false
     state.assetsCsvFormData = null
+    state.assetValidationColumns = {}
 
     state.assetIndex = {}
     state.displayedAssets = []

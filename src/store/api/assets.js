@@ -38,7 +38,9 @@ export default {
     client.put(`/api/data/entities/${asset.id}`, data, callback)
   },
 
-  postCsv (formData, callback) {
-    client.post('/api/import/csv/assets', formData, callback)
+  postCsv (production, formData, callback) {
+    client.post(
+      `/api/import/csv/projects/${production.id}/assets`, formData, callback
+    )
   }
 }

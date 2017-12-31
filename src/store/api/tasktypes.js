@@ -10,7 +10,7 @@ export default {
       name: taskType.name,
       color: taskType.color,
       priority: Number(taskType.priority),
-      for_shots: Boolean(taskType.for_shots)
+      for_shots: Boolean(taskType.for_shots === 'true')
     }
     client.post('/api/data/task-types/', data, callback)
   },

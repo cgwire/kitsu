@@ -1,10 +1,13 @@
 import async from 'async'
 
 import tasksApi from '../api/tasks'
-import { sortByName } from '../../lib/sorting'
+import { sortByName, sortValidationColumns } from '../../lib/sorting'
 import personStore from './people'
+import taskTypeStore from './tasktypes'
 
 import {
+  LOAD_ASSETS_START,
+  LOAD_SHOTS_START,
   LOAD_ASSETS_END,
   LOAD_SHOTS_END,
 
@@ -33,6 +36,10 @@ import {
 
 const state = {
   taskMap: {},
+  taskStatusMap: {},
+  assetValidationColumns: [],
+  shotValidationColumns: [],
+
   taskStatuses: [],
   taskComments: {},
   taskPreviews: {},
@@ -49,6 +56,10 @@ const helpers = {
     return personStore.getters.getPerson(
       personStore.state, personStore.getters
     )(personId)
+  },
+
+  getTaskType (taskTypeId) {
+    return taskTypeStore.state.taskTypeMap[taskTypeId]
   }
 }
 
@@ -87,7 +98,15 @@ const getters = {
 
   selectedTasks: state => state.selectedTasks,
   nbSelectedTasks: state => state.nbSelectedTasks,
-  nbSelectedValidations: state => state.nbSelectedValidations
+  nbSelectedValidations: state => state.nbSelectedValidations,
+
+  assetValidationColumns: (state) => {
+    return sortValidationColumns(Object.values(state.assetValidationColumns))
+  },
+
+  shotValidationColumns: (state) => {
+    return sortValidationColumns(Object.values(state.shotValidationColumns))
+  }
 }
 
 const actions = {
@@ -141,9 +160,6 @@ const actions = {
       project_id: payload.project_id
     }
     tasksApi.createTasks(data, (err, tasks) => {
-      if (!err) {
-        commit(CREATE_TASKS_END, tasks)
-      }
       if (payload.callback) payload.callback(err, tasks)
     })
   },
@@ -232,45 +248,109 @@ const actions = {
 }
 
 const mutations = {
+  [LOAD_ASSETS_START] (state, assets) {
+    state.assetValidationColumns = {}
+    state.taskMap = {}
+  },
+
   [LOAD_ASSETS_END] (state, assets) {
+    const validationColumns = {}
     assets.forEach((asset) => {
+      asset.validations = {}
       asset.tasks.forEach((task) => {
-        task.project_name = asset.project_name
+        const taskStatus = state.taskStatusMap[task.task_status_id]
+        const taskType = helpers.getTaskType(task.task_type_id)
 
-        task.assigneesInfo = task.assignees.map(helpers.getPerson)
+        Object.assign(task, {
+          task_status_name: taskStatus.name,
+          task_status_short_name: taskStatus.short_name,
+          task_status_color: taskStatus.color,
 
-        task.entity_name = `${asset.asset_type_name} / ${asset.name}`
-        task.entity_type_name = asset.entity_type_name
-        task.entity = {
-          id: asset.id,
-          preview_file_id: asset.preview_file_id
+          task_type_name: taskType.name,
+          task_type_color: taskType.color,
+          task_type_priority: taskType.priority,
+
+          project_name: asset.project_name,
+
+          entity_name: `${asset.asset_type_name} / ${asset.name}`,
+          entity_type_name: asset.entity_type_name,
+          entity: {
+            id: asset.id,
+            preview_file_id: asset.preview_file_id
+          },
+
+          assigneesInfo: task.assignees.map(helpers.getPerson)
+        })
+
+        if (!validationColumns[task.task_type_name]) {
+          validationColumns[task.task_type_name] = {
+            id: task.task_type_id,
+            name: task.task_type_name,
+            color: task.task_type_color,
+            priority: task.task_type_priority
+          }
         }
 
+        asset.validations[task.task_type_name] = task
         state.taskMap[task.id] = task
       })
     })
+    state.assetValidationColumns = validationColumns
+  },
+
+  [LOAD_SHOTS_START] (state, assets) {
+    state.shotValidationColumns = {}
+    state.taskMap = {}
   },
 
   [LOAD_SHOTS_END] (state, shots) {
+    const validationColumns = {}
     shots.forEach((shot) => {
+      shot.validations = {}
       shot.tasks.forEach((task) => {
-        task.project_name = shot.project_name
+        const taskStatus = state.taskStatusMap[task.task_status_id]
+        const taskType = helpers.getTaskType(task.task_type_id)
 
-        task.assigneesInfo = task.assignees.map(helpers.getPerson)
+        Object.assign(task, {
+          task_status_name: taskStatus.name,
+          task_status_short_name: taskStatus.short_name,
+          task_status_color: taskStatus.color,
+
+          task_type_name: taskType.name,
+          task_type_color: taskType.color,
+          task_type_priority: taskType.priority,
+
+          project_name: shot.project_name,
+
+          entity_type_name: shot.entity_type_name,
+          entity: {
+            id: shot.id,
+            preview_file_id: shot.preview_file_id
+          },
+
+          assigneesInfo: task.assignees.map(helpers.getPerson)
+        })
 
         if (shot.episode_name) {
           task.entity_name = `${shot.episode_name} / ${shot.sequence_name} / ${shot.name}`
         } else {
           task.entity_name = `${shot.sequence_name} / ${shot.name}`
         }
-        task.entity_type_name = 'Shot'
-        task.entity = {
-          id: shot.id,
-          preview_file_id: shot.preview_file_id
+
+        if (!validationColumns[task.task_type_name]) {
+          validationColumns[task.task_type_name] = {
+            id: task.task_type_id,
+            name: task.task_type_name,
+            color: task.task_type_color,
+            priority: task.task_type_priority
+          }
         }
+
+        shot.validations[task.task_type_name] = task
         state.taskMap[task.id] = task
       })
     })
+    state.shotValidationColumns = validationColumns
   },
 
   [LOAD_TASK_END] (state, task) {
@@ -317,6 +397,9 @@ const mutations = {
 
   [LOAD_TASK_STATUSES_END] (state, taskStatuses) {
     state.taskStatuses = sortByName(taskStatuses)
+    state.taskStatuses.forEach((taskStatus) => {
+      state.taskStatusMap[taskStatus.id] = taskStatus
+    })
   },
 
   [NEW_TASK_COMMENT_END] (state, {comment, taskId}) {
@@ -353,12 +436,6 @@ const mutations = {
     state.taskComments[task.id] = undefined
     state.taskPreviews[task.id] = undefined
     state.taskMap[task.id] = undefined
-  },
-
-  [CREATE_TASKS_END] (state, tasks) {
-    tasks.forEach((task) => {
-      if (task) state.taskMap[task.id] = task
-    })
   },
 
   [PREVIEW_FILE_SELECTED] (state, formData) {
@@ -417,6 +494,12 @@ const mutations = {
     state.nbSelectedValidations = 0
   },
 
+  [CREATE_TASKS_END] (state, tasks) {
+    tasks.forEach((task) => {
+      state.taskMap[task.id] = task
+    })
+  },
+
   [ASSIGN_TASKS] (state, { selectedTaskIds, personId }) {
     selectedTaskIds.forEach((taskId) => {
       const task = state.taskMap[taskId]
@@ -440,8 +523,11 @@ const mutations = {
 
   [RESET_ALL] (state, shots) {
     state.taskMap = {}
+    state.taskStatusMap = {}
+
     state.taskStatuses = []
     state.taskComments = {}
+
     state.taskPreviews = {}
     state.selectedTasks = {}
     state.selectedValidations = {}

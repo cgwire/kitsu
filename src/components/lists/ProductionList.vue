@@ -13,6 +13,12 @@
     </table>
   </div>
 
+  <table-info
+    :is-loading="isLoading"
+    :is-error="isError"
+  >
+  </table-info>
+
   <div class="table-body" v-scroll="onBodyScroll">
     <table class="table">
       <tbody>
@@ -45,12 +51,6 @@
       </tbody>
     </table>
   </div>
-
-  <table-info
-    :is-loading="isLoading"
-    :is-error="isError"
-  >
-  </table-info>
 
   <p class="has-text-centered nb-productions">
     {{ entries.length }} {{ $tc('productions.number', entries.length) }}

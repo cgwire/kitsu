@@ -15,7 +15,7 @@
 
 <script>
 export default {
-  name: 'title',
+  name: 'validation-tag',
   props: {
     task: {
       default: () => {},

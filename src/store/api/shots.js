@@ -89,7 +89,11 @@ export default {
     client.put(`/api/data/shots/${shot.id}/casting`, casting, callback)
   },
 
-  postCsv (formData, callback) {
-    client.post('/api/import/csv/shots', formData, callback)
+  postCsv (production, formData, callback) {
+    client.post(
+      `/api/import/csv/projects/${production.id}/shots`,
+      formData,
+      callback
+    )
   }
 }

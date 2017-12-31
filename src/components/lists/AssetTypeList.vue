@@ -11,6 +11,12 @@
     </table>
   </div>
 
+  <table-info
+    :is-loading="isLoading"
+    :is-error="isError"
+  >
+  </table-info>
+
   <div class="table-body" v-scroll="onBodyScroll" v-if="entries.length > 0">
     <table class="table">
       <tbody>
@@ -34,12 +40,6 @@
       </tbody>
     </table>
   </div>
-
-  <table-info
-    :is-loading="isLoading"
-    :is-error="isError"
-  >
-  </table-info>
 
   <p class="has-text-centered nb-asset-types">
     {{ entries.length }} {{ $tc('asset_types.number', entries.length) }}

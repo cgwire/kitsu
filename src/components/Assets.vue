@@ -25,7 +25,7 @@
             class="level-item"
             :text="$t('main.csv.export_file')"
             icon="download"
-            :path="'/api/export/csv/assets.csv?project_id=' + currentProduction.id"
+            :path="'/api/export/csv/projects/' + currentProduction.id + '/assets.csv'"
           >
           </button-href-link>
           <button-link
@@ -211,8 +211,7 @@ export default {
         }
       }],
       columns: [
-        'Project',
-        'Category',
+        'Type',
         'Name',
         'Description'
       ],
@@ -250,9 +249,12 @@ export default {
       productionId
     )
 
-    this.loadAssets((err) => {
-      if (!err) this.handleModalsDisplay()
-    })
+    if (this.assets.length === 0 ||
+        this.assets[0].production_id !== this.currentProduction.id) {
+      this.loadAssets((err) => {
+        if (!err) this.handleModalsDisplay()
+      })
+    }
   },
 
   methods: {
@@ -443,6 +445,7 @@ export default {
 
   watch: {
     $route () { this.handleModalsDisplay() },
+
     currentProduction () {
       const oldPath = `${this.$route.path}`
       const newPath = {

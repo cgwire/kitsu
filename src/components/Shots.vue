@@ -24,7 +24,7 @@
               class="level-item"
               :text="$t('main.csv.export_file')"
               icon="download"
-              :path="'/api/export/csv/shots.csv?project_id=' + currentProduction.id"
+              :path="'/api/export/csv/projects/' + currentProduction.id + '/shots.csv'"
             >
             </button-href-link>
             <button-link
@@ -222,7 +222,6 @@ export default {
         }
       }],
       columns: [
-        'Project',
         'Episode',
         'Sequence',
         'Name',
@@ -264,9 +263,12 @@ export default {
       productionId
     )
 
-    this.loadShots((err) => {
-      if (!err) this.handleModalsDisplay()
-    })
+    if (this.shots.length === 0 ||
+        this.shots[0].production_id !== this.currentProduction.id) {
+      this.loadShots((err) => {
+        if (!err) this.handleModalsDisplay()
+      })
+    }
   },
 
   methods: {

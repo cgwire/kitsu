@@ -9,7 +9,7 @@
             {{ $t('shots.fields.episode') }}
           </th>
           <th class="sequence">{{ $t('shots.fields.sequence') }}</th>
-          <th class="name">{{ $t('shots.fields.name') }}</th>
+          <th class="shot-name">{{ $t('shots.fields.name') }}</th>
           <th class="framein">{{ $t('shots.fields.frame_in') }}</th>
           <th class="frameout">{{ $t('shots.fields.frame_out') }}</th>
           <th class="description">{{ $t('shots.fields.description') }}</th>
@@ -61,7 +61,12 @@
     </button-link>
   </div>
 
-  <div class="table-body" v-scroll="onBodyScroll">
+  <div class="table-body"
+    v-infinite-scroll="loadMoreShots"
+    infinite-scroll-disabled="busy"
+    infinite-scroll-distance="120"
+    v-scroll="onBodyScroll">
+
     <table class="table">
       <tbody>
         <tr
@@ -84,7 +89,7 @@
           <td :class="{name: !entry.canceled}">
             {{ entry.sequence_name }}
           </td>
-          <td :class="{name: !entry.canceled}">
+          <td :class="{'shot-name': !entry.canceled}">
             {{ entry.name }}
           </td>
           <td class="framein">
@@ -138,7 +143,7 @@
   </div>
 
   <p class="has-text-centered nb-shots" v-if="!isEmptyList">
-    {{ entries ? entries.length : 0 }} {{ $tc('shots.number', entries ? entries.length :0 ) }}
+    {{ displayedShotsLength }} {{ $tc('shots.number', displayedShotsLength) }}
   </p>
 
 </div>
@@ -162,7 +167,9 @@ export default {
     'validationColumns'
   ],
   data () {
-    return {}
+    return {
+      busy: false
+    }
   },
   components: {
     ButtonLink,
@@ -176,6 +183,7 @@ export default {
     ...mapGetters([
       'currentProduction',
       'isCurrentUserManager',
+      'displayedShotsLength',
       'shotSearchText'
     ]),
     isEmptyList () {
@@ -189,20 +197,28 @@ export default {
 
   methods: {
     ...mapActions([
+      'displayMoreShots'
     ]),
+
     onHeaderScroll (event, position) {
       this.$refs.tableWrapper.scrollLeft = position.scrollLeft
     },
+
     onTaskSelected (task) {
       this.$store.commit('ADD_SELECTED_TASK', task)
     },
+
     onTaskUnselected (task) {
       this.$store.commit('REMOVE_SELECTED_TASK', task)
     },
+
     onBodyScroll (event, position) {
       this.$refs.headerWrapper.style.left = `-${position.scrollLeft}px`
-    }
+    },
 
+    loadMoreShots () {
+      this.displayMoreShots()
+    }
   }
 }
 </script>
@@ -224,8 +240,13 @@ th.actions {
 
 .name {
   min-width: 100px;
-  max-width: 100px;
   width: 100px;
+  font-weight: bold;
+}
+
+.shot-name {
+  min-width: 110px;
+  width: 110px;
   font-weight: bold;
 }
 
