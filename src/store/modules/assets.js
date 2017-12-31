@@ -1,3 +1,4 @@
+import Vue from 'vue'
 import assetsApi from '../api/assets'
 import tasksStore from './tasks'
 import productionsStore from './productions'
@@ -435,8 +436,9 @@ const mutations = {
         const asset = state.assetMap[task.entity_id]
         if (asset) {
           const validations = {...asset.validations}
-          validations[task.task_type_name] = task
-          asset.validations = validations
+          Vue.set(validations, task.task_type_name, task)
+          delete asset.validations
+          Vue.set(asset, 'validations', validations)
         }
       }
     })

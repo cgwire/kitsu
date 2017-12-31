@@ -1,3 +1,4 @@
+import Vue from 'vue'
 import shotsApi from '../api/shots'
 import tasksStore from './tasks'
 import productionsStore from './productions'
@@ -479,8 +480,9 @@ const mutations = {
         const shot = state.shotMap[task.entity_id]
         if (shot) {
           const validations = {...shot.validations}
-          validations[task.task_type_name] = task
-          shot.validations = validations
+          Vue.set(validations, task.task_type_name, task)
+          delete shot.validations
+          Vue.set(shot, 'validations', validations)
         }
       }
     })
