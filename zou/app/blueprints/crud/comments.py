@@ -23,4 +23,4 @@ class CommentResource(BaseModelResource):
         else:
             comment = self.get_model_or_404(instance["id"])
             task = tasks_service.get_task(comment.object_id)
-            return user_service.check_has_task_related(task.project_id)
+            return user_service.check_has_task_related(task["project_id"])

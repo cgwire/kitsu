@@ -2,7 +2,7 @@ import uuid
 import os
 import csv
 
-from flask import request, abort
+from flask import request
 from flask_restful import Resource
 from flask_jwt_extended import jwt_required
 
@@ -35,8 +35,6 @@ class BaseCsvImportResource(Resource):
             return fields.serialize_models(result), 201
         except KeyError as e:
             return {"error": "A column is missing: %s" % e}, 400
-        except permissions.PermissionDenied:
-            abort(403)
 
     def prepare_import(self):
         pass
@@ -58,3 +56,30 @@ class BaseCsvImportResource(Resource):
             return cached_object["id"]
         else:
             return cached_object.id
+
+
+class BaseCsvProjectImportResource(BaseCsvImportResource):
+
+    @jwt_required
+    def post(self, project_id):
+        uploaded_file = request.files["file"]
+        file_name = "%s.csv" % uuid.uuid4()
+        file_path = os.path.join(app.config["TMP_DIR"], file_name)
+        uploaded_file.save(file_path)
+        result = []
+
+        try:
+            self.check_permissions()
+            self.prepare_import()
+            with open(file_path) as csvfile:
+                reader = csv.DictReader(csvfile)
+                for row in reader:
+                    result.append(self.import_row(row, project_id))
+
+            return fields.serialize_models(result), 201
+        except KeyError as e:
+            print(e)
+            return {"error": "A column is missing: %s" % e}, 400
+
+    def import_row(self, project_id):
+        pass

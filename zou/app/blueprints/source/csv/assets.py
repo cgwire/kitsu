@@ -1,29 +1,20 @@
-from zou.app.blueprints.source.csv.base import BaseCsvImportResource
+from zou.app.blueprints.source.csv.base import BaseCsvProjectImportResource
 
-from zou.app.services import projects_service, assets_service
+from zou.app.services import assets_service
 from zou.app.models.entity import Entity
 
 from sqlalchemy.exc import IntegrityError
 
 
-class AssetsCsvImportResource(BaseCsvImportResource):
+class AssetsCsvImportResource(BaseCsvProjectImportResource):
 
     def prepare_import(self):
-        self.projects = {}
         self.entity_types = {}
 
-    def import_row(self, row):
+    def import_row(self, row, project_id):
         name = row["Name"]
-        project_name = row["Project"]
-        entity_type_name = row["Category"]
+        entity_type_name = row["Type"]
         description = row["Description"]
-
-        self.add_to_cache_if_absent(
-            self.projects,
-            projects_service.get_or_create,
-            project_name
-        )
-        project_id = self.get_id_from_cache(self.projects, project_name)
 
         self.add_to_cache_if_absent(
             self.entity_types,

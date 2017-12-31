@@ -30,7 +30,6 @@ JWT_SESSION_COOKIE = False
 RESTFUL_JSON = {
     "ensure_ascii": False
 }
-
 DATABASE = {
     "drivername": os.getenv("DB_DRIVER", "postgres"),
     "host": os.getenv("DB_HOST", "localhost"),

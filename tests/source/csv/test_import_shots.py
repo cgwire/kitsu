@@ -15,7 +15,7 @@ class ImportCsvShotsTestCase(ApiDBTestCase):
         self.generate_fixture_project()
 
     def test_import_shots(self):
-        path = "/import/csv/shots"
+        path = "/import/csv/projects/%s/shots" % self.project.id
 
         file_path_fixture = self.get_fixture_file_path(
             os.path.join("csv", "shots.csv")

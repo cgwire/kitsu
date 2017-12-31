@@ -1,52 +1,93 @@
-from zou.app.blueprints.export.csv.base import BaseCsvExport
+from flask_restful import Resource
+from flask_jwt_extended import jwt_required
 
-from zou.app.models.project import Project
-from zou.app.models.entity import Entity
-from zou.app.models.entity_type import EntityType
+from zou.app.services import (
+    assets_service,
+    projects_service,
+    user_service,
+    tasks_service
+)
+from zou.app.utils import csv_utils
 
-from zou.app.services import shots_service
 
+class AssetsCsvExport(Resource):
 
-class AssetsCsvExport(BaseCsvExport):
+    @jwt_required
+    def get(self, project_id):
+        self.task_type_map = tasks_service.get_task_type_map()
+        self.task_status_map = tasks_service.get_task_status_map()
 
-    def __init__(self):
-        BaseCsvExport.__init__(self, Entity)
+        project = projects_service.get_project(project_id)
+        self.check_permissions(project["id"])
 
-    def build_headers(self):
-        return [
+        csv_content = []
+        results = self.get_assets_data(project_id)
+        validation_columns = self.get_validation_columns(results)
+        csv_content.append(self.build_headers(validation_columns))
+
+        for result in results:
+            result["project_name"] = project["name"]
+            csv_content.append(self.build_row(result, validation_columns))
+
+        file_name = "%s assets" % project["name"]
+        return csv_utils.build_csv_response(csv_content, file_name)
+
+    def check_permissions(self, project_id):
+        user_service.check_project_access(project_id)
+
+    def build_headers(self, validation_columns):
+        headers = [
             "Project",
-            "Category",
+            "Type",
             "Name",
             "Description",
         ]
+        return headers + validation_columns
 
-    def build_query(self):
-        shot_type = shots_service.get_shot_type()
-        sequence_type = shots_service.get_sequence_type()
-        episode_type = shots_service.get_episode_type()
-        query = self.model.query.filter(
-            ~Entity.entity_type_id.in_([
-                shot_type["id"],
-                sequence_type["id"],
-                episode_type["id"]
-            ])
-        )
-        query = query.join(Project)
-        query = query.join(EntityType)
-        query = query.add_columns(Project.name)
-        query = query.add_columns(EntityType.name)
-        query = query.order_by(Project.name, EntityType.name, Entity.name)
-        return query
-
-    def build_row(self, asset_data):
-        (asset, project_name, category_name) = asset_data
-
-        if asset.description is None:
-            asset.description = ""
-
-        return [
-            project_name,
-            category_name,
-            asset.name,
-            asset.description
+    def build_row(self, result, validation_columns):
+        row = [
+            result["project_name"],
+            result["asset_type_name"],
+            result["name"],
+            result["description"]
         ]
+        task_map = {}
+
+        for task in result["tasks"]:
+            task_status = self.task_status_map[task["task_status_id"]]
+            task_type = self.task_type_map[task["task_type_id"]]
+            task_map[task_type["name"]] = task_status["short_name"]
+
+        for column in validation_columns:
+            row.append(task_map.get(column, ""))
+
+        return row
+
+    def get_assets_data(self, project_id):
+        results = assets_service.all_assets_and_tasks({
+            "project_id": project_id
+        })
+        return sorted(
+            results,
+            key=lambda asset: (asset["asset_type_name"], asset["name"])
+        )
+
+    def get_validation_columns(self, results):
+        task_type_map = {}
+
+        for result in results:
+            for task in result["tasks"]:
+                task_type = self.task_type_map[task["task_type_id"]]
+                task_type_map[task_type["name"]] = {
+                    "name": task_type["name"],
+                    "priority": task_type["priority"]
+                }
+
+        validation_columns = [
+            task_type["name"] for task_type in sorted(
+                task_type_map.values(),
+                key=lambda task_type: (task_type["priority"], task_type["name"])
+            )
+        ]
+
+        return validation_columns

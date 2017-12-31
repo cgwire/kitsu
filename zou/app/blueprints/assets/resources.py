@@ -6,6 +6,7 @@ from zou.app.utils import query, permissions
 from zou.app.services import (
     assets_service,
     shots_service,
+    breakdown_service,
     tasks_service,
     user_service
 )
@@ -53,9 +54,10 @@ class AssetsAndTasksResource(Resource):
         Adds project name and asset type name and all related tasks.
         """
         criterions = query.get_query_criterions_from_request(request)
+        page = query.get_page_from_request(request)
         if not permissions.has_manager_permissions():
             user_service.check_criterions_has_task_related(criterions)
-        return assets_service.all_assets_and_tasks(criterions)
+        return assets_service.all_assets_and_tasks(criterions, page)
 
 
 class AssetTypeResource(Resource):
@@ -195,3 +197,15 @@ class NewAssetResource(Resource):
             args["name"],
             args.get("description", ""),
         )
+
+
+class AssetAssetInstancesResource(Resource):
+
+    @jwt_required
+    def get(self, asset_id):
+        """
+        Retrieve all asset instances linked to asset.
+        """
+        asset = assets_service.get_asset(asset_id)
+        user_service.check_project_access(asset["project_id"])
+        return breakdown_service.get_asset_instances_for_asset(asset_id)

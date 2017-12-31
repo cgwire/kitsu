@@ -21,6 +21,10 @@ class AssetNotFoundException(NotFound):
     pass
 
 
+class AssetInstanceNotFoundException(NotFound):
+    pass
+
+
 class AssetTypeNotFoundException(NotFound):
     pass
 

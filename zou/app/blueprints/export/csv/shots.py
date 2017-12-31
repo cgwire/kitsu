@@ -1,48 +1,106 @@
-from sqlalchemy.orm import aliased
+from flask_restful import Resource
+from flask_jwt_extended import jwt_required
 
-from zou.app.blueprints.export.csv.base import BaseCsvExport
+from zou.app.services import (
+    shots_service,
+    projects_service,
+    tasks_service,
+    user_service
+)
+from zou.app.utils import csv_utils
 
-from zou.app.models.project import Project
-from zou.app.models.entity import Entity
 
-from zou.app.services import shots_service
+class ShotsCsvExport(Resource):
 
+    @jwt_required
+    def get(self, project_id):
+        project = projects_service.get_project(project_id)
+        self.check_permissions(project["id"])
 
-class ShotsCsvExport(BaseCsvExport):
+        self.task_status_map = tasks_service.get_task_status_map()
+        self.task_type_map = tasks_service.get_task_type_map()
 
-    def __init__(self):
-        BaseCsvExport.__init__(self, Entity)
+        csv_content = []
+        results = self.get_shots_data(project_id)
+        validation_columns = self.get_validation_columns(results)
+        csv_content.append(self.build_headers(validation_columns))
 
-    def build_headers(self):
-        return [
+        for result in results:
+            result["project_name"] = project["name"]
+            csv_content.append(self.build_row(result, validation_columns))
+
+        file_name = "%s shots" % project["name"]
+        return csv_utils.build_csv_response(csv_content, file_name)
+
+    def check_permissions(self, project_id):
+        user_service.check_project_access(project_id)
+
+    def build_headers(self, validation_columns):
+        headers = [
             "Project",
+            "Episode",
             "Sequence",
             "Name",
             "Description",
-            "FPS",
             "Frame In",
             "Frame Out"
         ]
+        return headers + validation_columns
 
-    def build_query(self):
-        shot_type = shots_service.get_shot_type()
-        Sequence = aliased(Entity, name='sequence')
-        query = self.model.query.filter_by(entity_type_id=shot_type["id"])
-        query = query.join(Project)
-        query = query.join(Sequence, Sequence.id == Entity.parent_id)
-        query = query.add_columns(Project.name)
-        query = query.add_columns(Sequence.name)
-        query = query.order_by(Project.name, Sequence.name, Entity.name)
-        return query
+    def get_shots_data(self, project_id):
+        results = shots_service.get_shots_and_tasks({
+            "project_id": project_id
+        })
+        return sorted(
+            results,
+            key=lambda shot: (
+                shot["episode_name"],
+                shot["sequence_name"],
+                shot["name"]
+            )
+        )
 
-    def build_row(self, shot_data):
-        (shot, project_name, sequence_name) = shot_data
-        return [
-            project_name,
-            sequence_name,
-            shot.name,
-            shot.description,
-            shot.data.get("fps", ""),
-            shot.data.get("frame_in", ""),
-            shot.data.get("frame_out", "")
+    def get_validation_columns(self, results):
+        validation_map = {}
+
+        for result in results:
+            for task in result["tasks"]:
+                task_type = self.task_type_map[task["task_type_id"]]
+                validation_map[task_type["name"]] = {
+                    "name": task_type["name"],
+                    "priority": task_type["priority"]
+                }
+
+        validation_columns = [
+            validation["name"] for validation in sorted(
+                validation_map.values(),
+                key=lambda validation: (
+                    validation["priority"],
+                    validation["name"]
+                )
+            )
         ]
+
+        return validation_columns
+
+    def build_row(self, result, validation_columns):
+        row = [
+            result["project_name"],
+            result["episode_name"],
+            result["sequence_name"],
+            result["name"],
+            result["description"],
+            result.get("data", {}).get("frame_in", ""),
+            result.get("data", {}).get("frame_out", "")
+        ]
+        task_map = {}
+
+        for task in result["tasks"]:
+            task_status = self.task_status_map[task["task_status_id"]]
+            task_type = self.task_type_map[task["task_type_id"]]
+            task_map[task_type["name"]] = task_status["short_name"]
+
+        for column in validation_columns:
+            row.append(task_map.get(column, ""))
+
+        return row

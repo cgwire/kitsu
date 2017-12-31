@@ -47,11 +47,28 @@ class EntityTestCase(ApiDBTestCase):
     def test_update_entity(self):
         entity = self.get_first("data/entities")
         data = {
-            "name": "Cosmos Landromat 2"
+            "name": "Cosmos Landromat 2",
+            "data": {
+                "extra_work": True
+            }
         }
         self.put("data/entities/%s" % entity["id"], data)
         entity_again = self.get("data/entities/%s" % entity["id"])
-        self.assertEquals(data["name"], entity_again["name"])
+        self.assertEquals(entity_again["name"], data["name"])
+        self.assertEquals(entity_again["data"], data["data"])
+
+        data = {
+            "data": {
+                "extra_field": True
+            }
+        }
+        self.put("data/entities/%s" % entity["id"], data)
+        entity_again = self.get("data/entities/%s" % entity["id"])
+        self.assertEquals(entity_again["data"], {
+            "extra_work": True,
+            "extra_field": True
+        })
+
         self.put_404("data/entities/%s" % fields.gen_uuid(), data)
 
     def test_delete_entity(self):

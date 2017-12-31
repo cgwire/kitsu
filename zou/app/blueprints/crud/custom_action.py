@@ -8,6 +8,9 @@ class CustomActionsResource(BaseModelsResource):
     def __init__(self):
         BaseModelsResource.__init__(self, CustomAction)
 
+    def check_permissions(self):
+        return True
+
 
 class CustomActionResource(BaseModelResource):
 

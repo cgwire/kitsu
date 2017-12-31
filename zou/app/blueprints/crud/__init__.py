@@ -34,6 +34,7 @@ from .entity_type import (
 from .comments import CommentsResource, CommentResource
 from .time_spent import TimeSpentsResource, TimeSpentResource
 from .custom_action import CustomActionsResource, CustomActionResource
+from .asset_instance import AssetInstanceResource, AssetInstancesResource
 
 
 routes = [
@@ -72,7 +73,9 @@ routes = [
     ("/data/time-spents/", TimeSpentsResource),
     ("/data/time-spents/<instance_id>", TimeSpentResource),
     ("/data/custom-actions/", CustomActionsResource),
-    ("/data/custom-actions/<instance_id>", CustomActionResource)
+    ("/data/custom-actions/<instance_id>", CustomActionResource),
+    ("/data/asset-instances/", AssetInstanceResource),
+    ("/data/asset-instances/<instance_id>", AssetInstancesResource)
 ]
 
 blueprint = Blueprint("/data", "data")

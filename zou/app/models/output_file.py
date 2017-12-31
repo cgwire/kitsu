@@ -49,7 +49,6 @@ class OutputFile(db.Model, BaseMixin, SerializerMixin):
     __table_args__ = (
         db.UniqueConstraint(
             "name",
-            "task_id",
             "entity_id",
             "output_type_id",
             "revision",

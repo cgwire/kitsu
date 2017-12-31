@@ -16,6 +16,14 @@ class BreakdownServiceTestCase(ApiDBTestCase):
         self.generate_fixture_shot()
         self.generate_fixture_entity()
         self.generate_fixture_entity_character()
+        self.shot_id = str(self.shot.id)
+        self.entity_id = str(self.entity.id)
+        self.entity_character_id = str(self.entity_character.id)
+
+    def new_instance(self, asset_id):
+        return breakdown_service.add_asset_instance_to_shot(
+            self.shot_id, asset_id
+        )
 
     def test_update_casting(self):
         self.shot_id = str(self.shot.id)
@@ -47,3 +55,32 @@ class BreakdownServiceTestCase(ApiDBTestCase):
             casting[1]["nb_occurences"],
             newCasting[1]["nb_occurences"]
         )
+
+    def test_add_instance_to_shot(self):
+        instances = breakdown_service.get_asset_instances_for_shot(self.shot.id)
+        self.assertEquals(instances, {})
+
+        self.new_instance(self.entity_id)
+        self.new_instance(self.entity_id)
+        self.new_instance(self.entity_character_id)
+
+        instances = breakdown_service.get_asset_instances_for_shot(self.shot.id)
+        self.assertEquals(len(instances[self.entity_id]), 2)
+        self.assertEquals(len(instances[self.entity_character_id]), 1)
+        self.assertEquals(instances[self.entity_id][0]["number"], 1)
+        self.assertEquals(instances[self.entity_id][1]["number"], 2)
+        self.assertEquals(instances[self.entity_character_id][0]["number"], 1)
+
+    def test_get_instances_for_asset(self):
+        instances = breakdown_service.get_asset_instances_for_asset(
+            self.entity.id
+        )
+        self.assertEquals(instances, {})
+
+        self.new_instance(self.entity.id)
+        self.new_instance(self.entity.id)
+        self.new_instance(self.entity_character.id)
+        instances = breakdown_service.get_asset_instances_for_asset(
+            self.entity.id
+        )
+        self.assertEquals(len(instances[self.shot_id]), 2)

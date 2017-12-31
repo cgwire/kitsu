@@ -31,8 +31,8 @@ class GetNextRevisionTestCase(ApiDBTestCase):
 
     def test_get_next_revision(self):
         result = self.post(
-            "/data/tasks/%s/output-types/%s/next-revision" % (
-                self.task.id,
+            "/data/entities/%s/output-types/%s/next-revision" % (
+                self.entity.id,
                 self.output_type.id
             ),
             {"name": "main"},
@@ -43,8 +43,8 @@ class GetNextRevisionTestCase(ApiDBTestCase):
     def test_get_next_revision_for_name(self):
         self.generate_fixture_output_file(revision=5, name="other-output")
         result = self.post(
-            "/data/tasks/%s/output-types/%s/next-revision" % (
-                self.task.id,
+            "/data/entities/%s/output-types/%s/next-revision" % (
+                self.entity.id,
                 self.output_type.id
             ),
             {"name": "other-output"},
@@ -62,15 +62,14 @@ class GetNextRevisionTestCase(ApiDBTestCase):
     def test_get_next_revision_with_empty_revision(self):
         output_file = OutputFile(
             name="test",
-            task_id=self.task.id,
             entity_id=self.entity.id,
             file_status_id=self.file_status.id
         )
         output_file.save()
 
         result = self.post(
-            "/data/tasks/%s/output-types/%s/next-revision" % (
-                self.task.id,
+            "/data/entities/%s/output-types/%s/next-revision" % (
+                self.entity.id,
                 self.output_type.id
             ),
             {"name": "main"},

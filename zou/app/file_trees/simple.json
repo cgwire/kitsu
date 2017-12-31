@@ -21,17 +21,19 @@
         "mountpoint": "/simple",
         "root": "productions/export",
         "folder_path": {
-            "shot": "<Project>/shots/<Sequence>/<Shot>/<TaskType>/<OutputType>",
-            "asset": "<Project>/assets/<AssetType>/<Asset>/<TaskType>/<OutputType>",
-            "sequence": "<Project>/sequences/<Sequence>/<TaskType>/<OutputType>",
-            "scene": "<Project>/scenes/<Sequence>/<Scene>/<TaskType>/<OutputType>",
+            "shot": "<Project>/shots/<Sequence>/<Shot>/<OutputType>",
+            "asset": "<Project>/assets/<AssetType>/<Asset>/<OutputType>",
+            "sequence": "<Project>/sequences/<Sequence>/<OutputType>",
+            "scene": "<Project>/scenes/<Sequence>/<Scene>/<OutputType>",
+            "instance": "<Project>/shots/<Sequence>/<Shot>/<OutputType>/<AssetType>/<Asset>/instance_<Instance>",
             "style": "lowercase"
         },
         "file_name": {
-            "shot": "<Project>_<Sequence>_<Shot>_<TaskType>_<OutputType>_<Name>",
-            "asset": "<Project>_<AssetType>_<Asset>_<TaskType>_<OutputType>_<Name>",
-            "sequence": "<Project>_<Sequence>_<TaskType>_<OutputType>_<Name>",
-            "scene": "<Project>_<Scene>_<TaskType>_<OutputType>_<Name>",
+            "shot": "<Project>_<Sequence>_<Shot>_<OutputType>_<Name>",
+            "asset": "<Project>_<AssetType>_<Asset>_<OutputType>_<Name>",
+            "sequence": "<Project>_<Sequence>_<OutputType>_<Name>",
+            "scene": "<Project>_<Scene>_<OutputType>_<Name>",
+            "instance": "<Project>_<Sequence>_<Shot>_<OutputType>_<Name>_<AssetType>_<Asset>_instance_<Instance>",
             "style": "lowercase"
         }
     },

@@ -511,3 +511,16 @@ def get_tasks_for_entity_and_task_type(entity_id, task_type_id):
        .order_by(Task.name) \
        .all()
     return Task.serialize_list(tasks)
+
+
+def get_task_status_map():
+    return {
+        str(status.id): status.serialize() for status in TaskStatus.query.all()
+    }
+
+
+def get_task_type_map():
+    task_types = TaskType.query.all()
+    return {
+        str(task_type.id): task_type.serialize() for task_type in task_types
+    }
