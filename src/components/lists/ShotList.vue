@@ -9,7 +9,7 @@
             {{ $t('shots.fields.episode') }}
           </th>
           <th class="sequence">{{ $t('shots.fields.sequence') }}</th>
-          <th class="shot-name">{{ $t('shots.fields.name') }}</th>
+          <th class="name shot-name">{{ $t('shots.fields.name') }}</th>
           <th class="framein">{{ $t('shots.fields.frame_in') }}</th>
           <th class="frameout">{{ $t('shots.fields.frame_out') }}</th>
           <th class="description">{{ $t('shots.fields.description') }}</th>
@@ -89,7 +89,7 @@
           <td :class="{name: !entry.canceled}">
             {{ entry.sequence_name }}
           </td>
-          <td :class="{'shot-name': !entry.canceled}">
+          <td :class="{'shot-name': true, 'name': !entry.canceled}">
             {{ entry.name }}
           </td>
           <td class="framein">
@@ -244,10 +244,9 @@ th.actions {
   font-weight: bold;
 }
 
-.shot-name {
+.name.shot-name {
   min-width: 110px;
   width: 110px;
-  font-weight: bold;
 }
 
 .episode {

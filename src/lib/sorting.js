@@ -13,9 +13,10 @@ export const sortShots = (shots) => {
     firstBy('canceled')
       .thenBy((a, b) => {
         if (a.episode_name) {
-          a.episode_name.localeCompare(b.episode_name)
+          return a.episode_name.localeCompare(b.episode_name)
+        } else {
+          return 1
         }
-        return 1
       })
       .thenBy((a, b) => a.sequence_name.localeCompare(b.sequence_name))
       .thenBy((a, b) => a.name.localeCompare(b.name))
