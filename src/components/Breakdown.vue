@@ -197,6 +197,7 @@ export default {
 
   created () {
     this.reset()
+    this.setLastProductionScreen('breakdown')
   },
 
   methods: {
@@ -210,7 +211,8 @@ export default {
       'setCastingSequence',
       'setCastingShot',
       'addAssetToCasting',
-      'removeAssetFromCasting'
+      'removeAssetFromCasting',
+      'setLastProductionScreen'
     ]),
 
     reset () {

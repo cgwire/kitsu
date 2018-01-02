@@ -257,6 +257,8 @@ export default {
 
   created () {
     this.$store.commit('SET_SHOT_SEARCH', '')
+    this.setLastProductionScreen('shots')
+
     const productionId = this.$store.state.route.params.production_id
     this.$store.commit(
       'SET_CURRENT_PRODUCTION',
@@ -273,7 +275,8 @@ export default {
 
   methods: {
     ...mapActions([
-      'loadShots'
+      'loadShots',
+      'setLastProductionScreen'
     ]),
 
     confirmNewShotStay (form) {

@@ -99,7 +99,8 @@ export default {
     ...mapGetters([
       'openProductions',
       'isCurrentUserManager',
-      'editProduction'
+      'editProduction',
+      'lastProductionScreen'
     ])
   },
 
@@ -117,7 +118,10 @@ export default {
       return colors.fromString(production.name)
     },
     getPath (production) {
-      return `/productions/${production.id}/assets`
+      return {
+        name: this.lastProductionScreen,
+        params: {production_id: production.id}
+      }
     },
 
     confirmEditProduction (form) {
