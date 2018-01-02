@@ -2,10 +2,17 @@ import store from '../store'
 import ReconnectingEventSource from 'reconnecting-eventsource'
 
 const realtime = {
+
+  /*
+   * Create a new event stream source (listener).
+   */
   createNewSource: () => {
     return new ReconnectingEventSource('/events')
   },
 
+  /*
+   * Configure realtime events to listen to.
+   */
   init: (source) => {
     realtime.subscribe(source, 'comment:new', (eventData) => {
       const commentId = eventData.id
@@ -22,23 +29,13 @@ const realtime = {
       })
     })
 
-    /*
-    source.onerror((event) => {
-      switch (event.target.readyState) {
-        case EventSource.CONNECTING:
-          console.log('Reconnecting...')
-          break
-        case EventSource.CLOSED:
-          console.log('Reinitializing...')
-          const evtSource = realtime.createNewSource()
-          realtime.init(evtSource)
-          break
-      }
-    })
-    */
     return source
   },
 
+  /*
+   * Set on a event stream source, a listener by linking a function
+   * to an event name.
+   */
   subscribe: (source, eventName, listener) => {
     source.addEventListener(eventName, (event) => {
       const data = JSON.parse(event.data)
