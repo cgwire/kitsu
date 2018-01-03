@@ -196,12 +196,16 @@ class BaseCreatePictureResource(Resource):
     def check_permissions(self, instance_id):
         permissions.check_admin_permissions()
 
+    def prepare_creation(self, instance_id):
+        pass
+
     @jwt_required
     def post(self, instance_id):
         if not self.is_exist(instance_id):
             abort(404)
 
         self.check_permissions(instance_id)
+        self.prepare_creation(instance_id)
         uploaded_file = request.files["file"]
         thumbnail_utils.save_file(
             self.data_type,
@@ -248,7 +252,7 @@ class CreatePersonThumbnailResource(BaseCreatePictureResource):
         BaseCreatePictureResource.__init__(
             self,
             "persons",
-            thumbnail_utils.SQUARE_SIZE
+            thumbnail_utils.BIG_SQUARE_SIZE
         )
 
     def is_exist(self, person_id):
@@ -259,6 +263,12 @@ class CreatePersonThumbnailResource(BaseCreatePictureResource):
             persons_service.get_current_user()["id"] != instance_id
         if is_current_user and not permissions.has_manager_permissions():
             raise permissions.PermissionDenied
+
+    def prepare_creation(self, instance_id):
+        return persons_service.update_person(
+            instance_id,
+            {"has_avatar": True}
+        )
 
 
 class PersonThumbnailResource(BasePictureResource):

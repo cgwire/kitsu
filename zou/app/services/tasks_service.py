@@ -432,7 +432,8 @@ def get_comments(task_id):
             TaskStatus.short_name,
             TaskStatus.color,
             Person.first_name,
-            Person.last_name
+            Person.last_name,
+            Person.has_avatar
         )
 
     for result in query.all():
@@ -442,13 +443,15 @@ def get_comments(task_id):
             task_status_short_name,
             task_status_color,
             person_first_name,
-            person_last_name
+            person_last_name,
+            person_has_avatar
         ) = result
 
         comment_dict = comment.serialize()
         comment_dict["person"] = {
             "first_name": person_first_name,
             "last_name": person_last_name,
+            "has_avatar": person_has_avatar,
             "id": str(comment.person_id)
         }
         comment_dict["task_status"] = {

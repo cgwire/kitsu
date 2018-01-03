@@ -10,6 +10,7 @@ from PIL import Image
 RECTANGLE_SIZE = 150, 100
 SQUARE_SIZE = 100, 100
 PREVIEW_SIZE = 1200, 0
+BIG_SQUARE_SIZE = 400, 400
 
 
 def save_file(subfolder, instance_id, file_to_save, size=None):

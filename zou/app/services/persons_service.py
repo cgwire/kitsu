@@ -106,6 +106,12 @@ def get_current_user_raw():
     return get_by_email_raw(get_jwt_identity())
 
 
+def update_person(person_id, changes):
+    person = Person.get(person_id)
+    person.update(changes)
+    return person.serialize()
+
+
 def delete_person(person_id):
     person = Person.get(person_id)
     person.delete()
