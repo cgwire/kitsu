@@ -1,11 +1,18 @@
 import ColorHash from 'color-hash'
 
 export default {
+  /*
+   * Convert a string (it can be anything) into a HTML color hash.
+   */
   fromString (str) {
     let colorHash = new ColorHash({lightness: 0.7, saturation: 0.8})
     return colorHash.hex(str)
   },
 
+  /*
+   * This function is needed to convert Shotgun colors to one that are better
+   * suited for CGWire skin.
+   */
   validationBackgroundColor (task) {
     if (task) {
       if (task.task_status_short_name === 'wtg') {
@@ -29,6 +36,10 @@ export default {
     }
   },
 
+  /*
+   * Quick and dirty function to change the text color in case the status color
+   * is too dark.
+   */
   validationTextColor (task) {
     if (task &&
         task.task_status_short_name !== 'todo' &&

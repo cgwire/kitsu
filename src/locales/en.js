@@ -47,6 +47,9 @@ export default {
       button: 'Save changes',
       error: 'An error occured while saving changes'
     },
+    avatar: {
+      title: 'Change avatar'
+    },
     change_password: {
       button: 'Change password',
       success: 'Your password was successfully changed!',

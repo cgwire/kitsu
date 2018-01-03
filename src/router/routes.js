@@ -264,7 +264,12 @@ export const routes = [
       },
 
       { path: '/todos', component: Todos, name: 'todos' },
-      { path: '/profile', component: Profile, name: 'profile' }
+      { path: '/profile', component: Profile, name: 'profile' },
+      {
+        path: '/profile/change-avatar',
+        component: Profile,
+        name: 'change-avatar'
+      }
     ]
   },
   {

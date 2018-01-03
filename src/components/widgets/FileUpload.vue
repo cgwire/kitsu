@@ -4,6 +4,7 @@
       <div class="dropbox">
         <input
           type="file"
+          ref="uploadInput"
           :accept="accept"
           :name="uploadFieldName"
           :disabled="isSaving"
@@ -46,6 +47,7 @@ export default {
       this.isSaving = false
       this.isInitial = true
       this.uploadedFiles = []
+      this.$refs.uploadInput.value = ''
     }
   },
   mounted () {

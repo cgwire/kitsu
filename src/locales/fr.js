@@ -47,6 +47,9 @@ export default {
       button: 'Sauvegardez vos changements',
       error: 'Une erreur est survenue pendant la sauvegarde de vos changememts.'
     },
+    avatar: {
+      title: 'Changer votre avatar'
+    },
     change_password: {
       button: 'Changez de mot de passe',
       success: 'Votre mot de passe a été changé avec succès !',
