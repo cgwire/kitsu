@@ -1,5 +1,6 @@
 import expect from 'chai'
 
+/*
 import './store/login.spec'
 import './store/main.spec'
 import './store/people.spec'
@@ -9,6 +10,7 @@ import './store/tasktypes.spec.js'
 import './store/assettypes.spec.js'
 import './store/customactions.spec.js'
 import './store/breakdown.spec.js'
+*/
 
 import './store/lib/sorting.spec.js'
 import './store/lib/string.spec.js'
