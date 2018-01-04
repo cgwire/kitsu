@@ -191,7 +191,7 @@ class RouteOutputFilesTestCase(ApiDBTestCase):
             "comment": "test working file publish with extension",
             "output_type_id": self.tx_type_id,
             "extension": ".tx",
-            "name": ""
+            "name": "special"
         }
         result = self.new_output(data)
         output_file_id = result["id"]
@@ -202,7 +202,7 @@ class RouteOutputFilesTestCase(ApiDBTestCase):
             output_file["path"],
             "/simple/productions/export/cosmos_landromat/assets/props/tree/"
             "texture/"
-            "cosmos_landromat_props_tree_texture_main_v001.tx"
+            "cosmos_landromat_props_tree_texture_special_v001.tx"
         )
 
     def test_new_output_again(self):

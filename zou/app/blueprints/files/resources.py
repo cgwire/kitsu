@@ -396,7 +396,8 @@ class NewOutputFileResource(Resource):
             output_type_id,
             revision,
             separator,
-            extension
+            extension,
+            name
         ) = self.get_arguments()
         separator = "/"
 
@@ -414,7 +415,7 @@ class NewOutputFileResource(Resource):
                 output_type["id"],
                 person["id"],
                 comment,
-                name=working_file["name"],
+                name=name,
                 revision=revision,
                 extension=extension
             )
@@ -424,7 +425,7 @@ class NewOutputFileResource(Resource):
                 "output",
                 task,
                 output_type,
-                working_file["name"],
+                name,
                 extension,
                 separator
             )
@@ -446,6 +447,7 @@ class NewOutputFileResource(Resource):
         parser.add_argument("revision", default=0, type=int)
         parser.add_argument("separator", default="/")
         parser.add_argument("extension", default="")
+        parser.add_argument("name", default="main")
         args = parser.parse_args()
 
         return (
@@ -454,7 +456,8 @@ class NewOutputFileResource(Resource):
             args["output_type_id"],
             args["revision"],
             args["separator"],
-            args["extension"]
+            args["extension"],
+            args["name"]
         )
 
     def add_path_info(
