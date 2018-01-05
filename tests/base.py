@@ -386,7 +386,12 @@ class ApiDBTestCase(ApiTestCase):
         )
         self.shot_standard.save()
 
-    def generate_fixture_asset_instance(self, asset=None, shot=None, number=1):
+    def generate_fixture_shot_asset_instance(
+        self,
+        asset=None,
+        shot=None,
+        number=1
+    ):
         if asset is None:
             asset = self.entity
         if shot is None:
@@ -395,6 +400,23 @@ class ApiDBTestCase(ApiTestCase):
         self.asset_instance = AssetInstance.create(
             asset_id=asset.id,
             shot_id=shot.id,
+            number=number,
+            description="Asset instance description"
+        )
+
+    def generate_fixture_scene_asset_instance(
+        self,
+        asset=None,
+        scene=None,
+        number=1
+    ):
+        if asset is None:
+            asset = self.entity
+        if scene is None:
+            scene = self.scene
+        self.asset_instance = AssetInstance.create(
+            asset_id=asset.id,
+            scene_id=scene.id,
             number=number,
             description="Asset instance description"
         )

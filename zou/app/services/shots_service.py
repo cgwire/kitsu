@@ -4,12 +4,11 @@ from sqlalchemy.exc import IntegrityError, StatementError
 from zou.app.utils import events, fields
 
 from zou.app.models.entity import Entity
-from zou.app.models.entity_type import EntityType
 from zou.app.models.project import Project
 from zou.app.models.task import Task
 from zou.app.models.task import association_table as assignees_table
 
-from zou.app.services import projects_service
+from zou.app.services import projects_service, entities_service
 from zou.app.services.exception import (
     EpisodeNotFoundException,
     SequenceNotFoundException,
@@ -34,27 +33,24 @@ def get_episode_from_sequence(sequence):
     return episode.serialize(obj_type="Episode")
 
 
-def get_entity_type(name):
-    entity_type = EntityType.get_by(name=name)
-    if entity_type is None:
-        entity_type = EntityType.create(name=name)
-    return entity_type.serialize()
-
-
 def get_episode_type():
-    return get_entity_type("Episode")
+    return entities_service.get_entity_type("Episode")
 
 
 def get_sequence_type():
-    return get_entity_type("Sequence")
+    return entities_service.get_entity_type("Sequence")
 
 
 def get_shot_type():
-    return get_entity_type("Shot")
+    return entities_service.get_entity_type("Shot")
 
 
 def get_scene_type():
-    return get_entity_type("Scene")
+    return entities_service.get_entity_type("Scene")
+
+
+def get_camera_type():
+    return entities_service.get_entity_type("Camera")
 
 
 def get_episodes(criterions={}):
