@@ -7,7 +7,7 @@ class BaseModelTestCase(ApiDBTestCase):
     def test_repr(self):
         self.generate_fixture_project_status()
         self.generate_fixture_project()
-        self.assertEqual(str(self.project), "<Project %s>" % self.project.id)
+        self.assertEqual(str(self.project), "<Project %s>" % self.project.name)
 
     def test_query(self):
         pass

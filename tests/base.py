@@ -396,10 +396,10 @@ class ApiDBTestCase(ApiTestCase):
             asset = self.entity
         if shot is None:
             shot = self.shot
-
         self.asset_instance = AssetInstance.create(
             asset_id=asset.id,
-            shot_id=shot.id,
+            entity_id=shot.id,
+            entity_type_id=self.shot_type.id,
             number=number,
             description="Asset instance description"
         )
@@ -416,7 +416,8 @@ class ApiDBTestCase(ApiTestCase):
             scene = self.scene
         self.asset_instance = AssetInstance.create(
             asset_id=asset.id,
-            scene_id=scene.id,
+            entity_id=scene.id,
+            entity_type_id=self.scene_type.id,
             number=number,
             description="Asset instance description"
         )

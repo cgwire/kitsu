@@ -16,10 +16,12 @@ class FolderPathTestCase(ApiDBTestCase):
         self.generate_fixture_entity()
         self.generate_fixture_sequence()
         self.generate_fixture_shot()
+        self.generate_fixture_scene()
         self.generate_fixture_department()
         self.generate_fixture_task_type()
         self.generate_fixture_task_status()
         self.generate_fixture_shot_task()
+        self.generate_fixture_scene_task()
         self.generate_fixture_task()
         self.generate_fixture_software()
 
@@ -37,8 +39,6 @@ class FolderPathTestCase(ApiDBTestCase):
         )
 
     def test_get_path_scene(self):
-        self.generate_fixture_scene()
-        self.generate_fixture_scene_task()
         data = {
             "mode": "working",
             "software": self.software_max.id
@@ -110,9 +110,9 @@ class FolderPathTestCase(ApiDBTestCase):
             "shaders/3ds_max"
         )
 
-    def test_get_path_asset_instance(self):
+    def test_get_path_shot_asset_instance(self):
         self.output_type = files_service.get_or_create_output_type("Cache")
-        self.generate_fixture_asset_instance(
+        self.generate_fixture_shot_asset_instance(
             asset=self.entity,
             shot=self.shot
         )
@@ -136,6 +136,34 @@ class FolderPathTestCase(ApiDBTestCase):
         self.assertEquals(
             result["name"],
             "cosmos_landromat_s01_p01_cache_main_props_tree_instance_1_v003"
+        )
+
+    def test_get_path_scene_asset_instance(self):
+        self.output_type = files_service.get_or_create_output_type("Cache")
+        self.generate_fixture_scene_asset_instance(
+            asset=self.entity,
+            scene=self.scene
+        )
+        data = {
+            "name": "main",
+            "version": 3
+        }
+        result = self.post(
+            "/data/asset-instances/%s/output-types/%s/file-path" % (
+                self.asset_instance.id,
+                self.output_type["id"]
+            ),
+            data,
+            200
+        )
+        self.assertEquals(
+            result["path"],
+            "/simple/productions/export/cosmos_landromat/scenes/s01/sc01/cache/"
+            "props/tree/instance_1"
+        )
+        self.assertEquals(
+            result["name"],
+            "cosmos_landromat_s01_sc01_cache_main_props_tree_instance_1_v003"
         )
 
     def test_get_path_asset_software(self):

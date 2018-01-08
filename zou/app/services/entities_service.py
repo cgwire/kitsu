@@ -7,7 +7,8 @@ from zou.app.models.preview_file import PreviewFile
 
 from zou.app.services.exception import (
     PreviewFileNotFoundException,
-    EntityNotFoundException
+    EntityNotFoundException,
+    EntityTypeNotFoundException
 )
 
 
@@ -28,6 +29,14 @@ def get_entity_type(name):
     if entity_type is None:
         entity_type = EntityType.create(name=name)
     return entity_type.serialize()
+
+
+def get_entity_type_by_id(entity_type_id):
+    return get_model_raw(
+        EntityType,
+        entity_type_id,
+        EntityTypeNotFoundException
+    ).serialize()
 
 
 def get_entity_raw(entity_id):

@@ -25,7 +25,7 @@
             "asset": "<Project>/assets/<AssetType>/<Asset>/<OutputType>",
             "sequence": "<Project>/sequences/<Sequence>/<OutputType>",
             "scene": "<Project>/scenes/<Sequence>/<Scene>/<OutputType>",
-            "instance": "<Project>/shots/<Sequence>/<Shot>/<OutputType>/<AssetType>/<Asset>/instance_<Instance>",
+            "instance": "<Project>/<TemporalEntityType>/<Sequence>/<TemporalEntity>/<OutputType>/<AssetType>/<Asset>/instance_<Instance>",
             "style": "lowercase"
         },
         "file_name": {
@@ -33,7 +33,7 @@
             "asset": "<Project>_<AssetType>_<Asset>_<OutputType>_<Name>",
             "sequence": "<Project>_<Sequence>_<OutputType>_<Name>",
             "scene": "<Project>_<Scene>_<OutputType>_<Name>",
-            "instance": "<Project>_<Sequence>_<Shot>_<OutputType>_<Name>_<AssetType>_<Asset>_instance_<Instance>",
+            "instance": "<Project>_<Sequence>_<TemporalEntity>_<OutputType>_<Name>_<AssetType>_<Asset>_instance_<Instance>",
             "style": "lowercase"
         }
     },

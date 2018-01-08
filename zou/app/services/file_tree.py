@@ -14,6 +14,7 @@ from zou.app.models.department import Department
 
 from zou.app.services import (
     assets_service,
+    entities_service,
     files_service,
     shots_service,
     projects_service,
@@ -89,7 +90,7 @@ def get_instance_file_name(
     name="",
     version=1
 ):
-    shot = tasks_service.get_entity(asset_instance["shot_id"])
+    shot = tasks_service.get_entity(asset_instance["entity_id"])
     asset = tasks_service.get_entity(asset_instance["asset_id"])
     project = get_project(shot)
     tree = get_tree_from_project(project)
@@ -145,7 +146,7 @@ def get_instance_folder_path(
     mode="output",
     sep=os.sep,
 ):
-    shot = tasks_service.get_entity(asset_instance["shot_id"])
+    shot = tasks_service.get_entity(asset_instance["entity_id"])
     asset = tasks_service.get_entity(asset_instance["asset_id"])
     project = get_project(shot)
     tree = get_tree_from_project(project)
@@ -330,6 +331,10 @@ def get_folder_from_datatype(
         folder = get_folder_from_department(task)
     elif datatype == "Shot":
         folder = get_folder_from_shot(entity)
+    elif datatype == "TemporalEntity":
+        folder = get_folder_from_temporal_entity(entity)
+    elif datatype == "TemporalEntityType":
+        folder = get_folder_from_temporal_entity_type(entity)
     elif datatype == "AssetType":
         if asset is None:
             folder = get_folder_from_asset_type(entity)
@@ -430,6 +435,26 @@ def get_folder_from_episode(entity):
         episode_name = "e001"
 
     return episode_name
+
+
+def get_folder_from_temporal_entity(entity):
+    if entity is not None:
+        entity_type = entities_service.get_entity(entity["id"])
+        folder = entity_type["name"]
+    else:
+        raise MalformedFileTreeException("Given temporal entity is null.")
+    return folder
+
+
+def get_folder_from_temporal_entity_type(entity):
+    if entity is not None:
+        entity_type = entities_service.get_entity_type_by_id(
+            entity["entity_type_id"]
+        )
+        folder = entity_type["name"].lower() + "s"
+    else:
+        raise MalformedFileTreeException("Given temporal entity type is null.")
+    return folder
 
 
 def get_folder_from_asset_type(asset):

@@ -197,7 +197,6 @@ def create_new_output_revision(
             revision = 1
 
     file_status_id = get_default_status()["id"]
-
     working_file = get_working_file(working_file_id) or {}
 
     try:
