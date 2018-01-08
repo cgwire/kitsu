@@ -40,7 +40,8 @@ class CreateAssetsTestCase(ApiDBTestCase):
         )
         self.asset_data = {
             "name": "car",
-            "description": "Test description"
+            "description": "Test description",
+            "data": {"extra": "test extra"}
         }
         path = "data/projects/%s/asset-types/%s/assets/new" % (
             self.project.id,
@@ -57,6 +58,10 @@ class CreateAssetsTestCase(ApiDBTestCase):
         self.assertEquals(
             assets[0]["description"],
             self.asset_data["description"]
+        )
+        self.assertDictEqual(
+            assets[0]["data"],
+            self.asset_data["data"]
         )
 
     def test_remove_asset(self):

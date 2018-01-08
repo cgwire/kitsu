@@ -172,7 +172,8 @@ class NewAssetResource(Resource):
     def post(self, project_id, asset_type_id):
         (
             name,
-            description
+            description,
+            data
         ) = self.get_arguments()
 
         permissions.check_manager_permissions()
@@ -180,7 +181,8 @@ class NewAssetResource(Resource):
             project_id,
             asset_type_id,
             name,
-            description
+            description,
+            data
         )
         return asset, 201
 
@@ -192,10 +194,12 @@ class NewAssetResource(Resource):
             required=True
         )
         parser.add_argument("description")
+        parser.add_argument("data", type=dict, default={})
         args = parser.parse_args()
         return (
             args["name"],
             args.get("description", ""),
+            args["data"]
         )
 
 
