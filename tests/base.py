@@ -290,6 +290,15 @@ class ApiDBTestCase(ApiTestCase):
         )
         self.entity_character.save()
 
+    def generate_fixture_entity_camera(self):
+        self.entity_camera = Entity(
+            name="Main camera",
+            description="Description Camera",
+            project_id=self.project.id,
+            entity_type_id=self.entity_type_camera.id
+        )
+        self.entity_camera.save()
+
     def generate_fixture_entity_standard(self):
         self.entity_standard = Entity(
             name="Car",
@@ -463,22 +472,16 @@ class ApiDBTestCase(ApiTestCase):
         self.person.save()
 
     def generate_fixture_entity_type(self):
-        self.entity_type = EntityType(name="Props")
-        self.entity_type.save()
-        self.shot_type = EntityType(name="Shot")
-        self.shot_type.save()
-        self.sequence_type = EntityType(name="Sequence")
-        self.sequence_type.save()
-        self.episode_type = EntityType(name="Episode")
-        self.episode_type.save()
-        self.scene_type = EntityType(name="Scene")
-        self.scene_type.save()
+        self.entity_type = EntityType.create(name="Props")
+        self.shot_type = EntityType.create(name="Shot")
+        self.sequence_type = EntityType.create(name="Sequence")
+        self.episode_type = EntityType.create(name="Episode")
+        self.scene_type = EntityType.create(name="Scene")
 
     def generate_fixture_asset_types(self):
-        self.entity_type_character = EntityType(name="Character")
-        self.entity_type_character.save()
-        self.entity_type_environment = EntityType(name="Environment")
-        self.entity_type_environment.save()
+        self.entity_type_character = EntityType.create(name="Character")
+        self.entity_type_environment = EntityType.create(name="Environment")
+        self.entity_type_camera = EntityType.create(name="Camera")
 
     def generate_fixture_department(self):
         self.department = Department(name="Modeling", color="#FFFFFF")

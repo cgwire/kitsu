@@ -5,8 +5,13 @@ from zou.app.models.asset_instance import AssetInstance
 from zou.app.models.entity import Entity, EntityLink
 from zou.app.models.entity_type import EntityType
 
-from zou.app.services import shots_service, entities_service
 from zou.app.utils import fields
+
+from zou.app.services import (
+    assets_service,
+    shots_service,
+    entities_service
+)
 
 
 def get_casting(shot_id):
@@ -41,7 +46,6 @@ def update_casting(shot_id, casting):
     return casting
 
 
-<<<<<<< d0bf40f9c9d8e666551dfae096faa47a1e3f0d89
 def get_cast_in(asset_id):
     cast_in = []
     Sequence = aliased(Entity, name="sequence")
@@ -82,11 +86,16 @@ def get_cast_in(asset_id):
     return cast_in
 
 
-def get_asset_instances_for_entity(entity_id):
-    instances = AssetInstance.query \
+def get_asset_instances_for_entity(entity_id, entity_type_id=None):
+    query = AssetInstance.query \
         .filter(AssetInstance.entity_id == entity_id) \
         .order_by(AssetInstance.asset_id, AssetInstance.number) \
-        .all()
+
+    if entity_type_id is not None:
+        query = query \
+            .join(Entity, AssetInstance.asset_id == Entity.id) \
+            .filter(Entity.entity_type_id == entity_type_id)
+    instances = query.all()
 
     result = {}
     for instance in instances:
@@ -152,6 +161,11 @@ def add_asset_instance_to_shot(shot_id, asset_id, description=""):
 
 def get_asset_instances_for_scene(scene_id):
     return get_asset_instances_for_entity(scene_id)
+
+
+def get_camera_instances_for_scene(scene_id):
+    camera_entity_type = assets_service.get_or_create_type("Camera")
+    return get_asset_instances_for_entity(scene_id, camera_entity_type["id"])
 
 
 def get_scene_asset_instances_for_asset(asset_id):

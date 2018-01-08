@@ -32,6 +32,7 @@ from .resources import (
 
     ShotAssetInstancesResource,
     SceneAssetInstancesResource,
+    SceneCameraInstancesResource,
 
     CastingResource
 )
@@ -64,6 +65,7 @@ routes = [
 
     ("/data/shots/<shot_id>/asset-instances", ShotAssetInstancesResource),
     ("/data/scenes/<scene_id>/asset-instances", SceneAssetInstancesResource),
+    ("/data/scenes/<scene_id>/camera-instances", SceneCameraInstancesResource),
     ("/data/shots/<shot_id>/casting", CastingResource)
 ]
 

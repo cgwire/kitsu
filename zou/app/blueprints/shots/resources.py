@@ -519,3 +519,15 @@ class SceneAssetInstancesResource(Resource, ArgsMixin):
             args["description"]
         )
         return scene, 201
+
+
+class SceneCameraInstancesResource(Resource):
+
+    @jwt_required
+    def get(self, scene_id):
+        """
+        Retrieve all asset instances linked to scene.
+        """
+        scene = shots_service.get_scene(scene_id)
+        user_service.check_project_access(scene["project_id"])
+        return breakdown_service.get_camera_instances_for_scene(scene_id)
