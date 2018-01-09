@@ -451,7 +451,7 @@ def get_folder_from_temporal_entity_type(entity):
         entity_type = entities_service.get_entity_type_by_id(
             entity["entity_type_id"]
         )
-        folder = entity_type["name"].lower() + "s"
+        folder = entity_type["name"].lower()
     else:
         raise MalformedFileTreeException("Given temporal entity type is null.")
     return folder
