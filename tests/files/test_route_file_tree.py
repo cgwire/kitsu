@@ -130,7 +130,7 @@ class FolderPathTestCase(ApiDBTestCase):
         )
         self.assertEquals(
             result["path"],
-            "/simple/productions/export/cosmos_landromat/shots/s01/p01/cache/"
+            "/simple/productions/export/cosmos_landromat/shot/s01/p01/cache/"
             "props/tree/instance_1"
         )
         self.assertEquals(
@@ -158,7 +158,7 @@ class FolderPathTestCase(ApiDBTestCase):
         )
         self.assertEquals(
             result["path"],
-            "/simple/productions/export/cosmos_landromat/scenes/s01/sc01/cache/"
+            "/simple/productions/export/cosmos_landromat/scene/s01/sc01/cache/"
             "props/tree/instance_1"
         )
         self.assertEquals(

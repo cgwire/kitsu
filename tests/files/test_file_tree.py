@@ -71,11 +71,6 @@ class FileTreeTestCase(ApiDBTestCase):
         path = file_tree.get_root_path(tree, "working", "/")
         self.assertEqual(path, "/simple/productions/")
 
-    def test_add_version_suffix_to_file_name(self):
-        file_name = "COSMOS_LANDROMAT_S01_P01"
-        file_name = file_tree.add_version_suffix_to_file_name(file_name, 3)
-        self.assertEqual(file_name, "COSMOS_LANDROMAT_S01_P01_v003")
-
     def test_get_project(self):
         project = file_tree.get_project(self.entity.serialize())
         self.assertEqual(project["name"], self.project.name)
@@ -356,7 +351,7 @@ class FileTreeTestCase(ApiDBTestCase):
         )
         self.assertEquals(
             path,
-            "/simple/productions/export/cosmos_landromat/shots/s01/p01/cache/"
+            "/simple/productions/export/cosmos_landromat/shot/s01/p01/cache/"
             "props/tree/instance_1"
         )
 
@@ -387,7 +382,7 @@ class FileTreeTestCase(ApiDBTestCase):
         )
         self.assertEquals(
             path,
-            "/simple/productions/export/cosmos_landromat/scenes/s01/sc01/cache/"
+            "/simple/productions/export/cosmos_landromat/scene/s01/sc01/cache/"
             "props/tree/instance_1"
         )
 

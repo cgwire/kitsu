@@ -51,9 +51,9 @@ def get_file_path(
         software=software,
         output_type=output_type,
         name=name,
+        version=version,
         sep=sep
     )
-
     return join_path(folder, file_name, sep)
 
 
@@ -76,9 +76,9 @@ def get_file_name(
         task,
         software,
         output_type,
-        name
+        name,
+        version=version
     )
-    file_name = add_version_suffix_to_file_name(file_name, version)
 
     return u"%s" % file_name
 
@@ -104,9 +104,9 @@ def get_instance_file_name(
         output_type,
         name,
         asset_instance=asset_instance,
-        asset=asset
+        asset=asset,
+        version=version
     )
-    file_name = add_version_suffix_to_file_name(file_name, version)
 
     return u"%s" % file_name
 
@@ -117,6 +117,7 @@ def get_folder_path(
     software=None,
     output_type=None,
     name="",
+    version=1,
     sep=os.sep
 ):
     entity = tasks_service.get_entity(task["entity_id"])
@@ -133,7 +134,8 @@ def get_folder_path(
         software,
         output_type,
         name,
-        style
+        version=version,
+        style=style
     )
     folder_path = change_folder_path_separators(folder_path, sep)
 
@@ -163,10 +165,10 @@ def get_instance_folder_path(
         folder_template,
         shot,
         None,
-        None,
-        output_type,
-        "",
-        style,
+        software=None,
+        output_type=output_type,
+        name="",
+        style=style,
         asset_instance=asset_instance,
         asset=asset
     )
@@ -236,7 +238,8 @@ def get_file_name_root(
     output_type,
     name,
     asset_instance=None,
-    asset=None
+    asset=None,
+    version=1
 ):
     if asset_instance is None:
         file_name_template = get_file_name_template(tree, mode, entity)
@@ -247,19 +250,15 @@ def get_file_name_root(
         file_name_template,
         entity,
         task,
-        software,
-        output_type,
-        name,
+        software=software,
+        output_type=output_type,
+        name=name,
         asset_instance=asset_instance,
-        asset=asset
+        asset=asset,
+        version=version
     )
     file_name = slugify(file_name, separator="_")
     file_name = apply_style(file_name, tree[mode]["file_name"].get("style", ""))
-    return file_name
-
-
-def add_version_suffix_to_file_name(file_name, version=1):
-    file_name = "%s_v%s" % (file_name, str(version).zfill(3))
     return file_name
 
 
@@ -284,10 +283,11 @@ def update_variable(
     task,
     software=None,
     output_type=None,
-    name="",
-    style="lowercase",
     asset_instance=None,
-    asset=None
+    asset=None,
+    name="",
+    version=1,
+    style="lowercase"
 ):
     variables = re.findall('<(\w*)>', template)
 
@@ -301,7 +301,8 @@ def update_variable(
             output_type,
             name,
             asset_instance,
-            asset
+            asset,
+            version
         )
         render = render.replace(
             "<%s>" % variable,
@@ -319,7 +320,8 @@ def get_folder_from_datatype(
     output_type=None,
     name="",
     instance=None,
-    asset=None
+    asset=None,
+    version=1
 ):
     if datatype == "Project":
         folder = get_folder_from_project(entity)
@@ -359,6 +361,8 @@ def get_folder_from_datatype(
         folder = get_folder_from_instance(instance)
     elif datatype == "Name":
         folder = name
+    elif datatype == "Version":
+        folder = get_folder_from_version(version)
     else:
         raise MalformedFileTreeException("Unknown data type: %s." % datatype)
 
@@ -486,6 +490,10 @@ def get_folder_from_instance(instance):
         return ""
 
 
+def get_folder_from_version(version):
+    return str(version).zfill(3)
+
+
 def join_path(left, right, sep=os.sep):
     if left is "":
         return right
@@ -588,7 +596,6 @@ def get_asset_task_from_path(file_path, project, mode="working", sep="/"):
 
 
 def extract_variable_values_from_path(elements, template_elements):
-    # TODO: add prefix / suffix handle
     data_names = {}
 
     for i, template_element in enumerate(template_elements):
