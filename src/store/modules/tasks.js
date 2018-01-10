@@ -197,8 +197,10 @@ const actions = {
   },
 
   addPreview ({ commit, state }, payload) {
-    payload.isMovie =
-      state.previewFormData.get('file').name.indexOf('.mp4') > 0
+    const fileName = state.previewFormData.get('file').name
+    const extension = fileName.slice(fileName.length - 4)
+    payload.isMovie = ['.mp4', '.mov'].includes(extension)
+
     tasksApi.addPreview(payload, (err, preview) => {
       if (err && payload.callback) {
         payload.callback(err)
