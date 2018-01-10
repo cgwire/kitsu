@@ -1,5 +1,5 @@
 import os
-import flask_fs as fs
+import flask_fs
 
 from flask import Flask
 from flask_restful import current_app
@@ -12,6 +12,7 @@ from flask_mail import Mail
 from . import config
 from .stores import auth_tokens_store
 from .services.exception import PersonNotFoundException
+from .utils import fs
 
 from zou.app.utils import cache
 
@@ -35,7 +36,7 @@ app.secret_key = app.config["SECRET_KEY"]
 jwt = JWTManager(app)  # JWT auth tokens
 Principal(app)  # Permissions
 cache.cache.init_app(app)  # Function caching
-fs.init_app(app)  # To save files in object storage
+flask_fs.init_app(app)  # To save files in object storage
 mail = Mail()
 mail.init_app(app)  # To send emails
 
@@ -74,6 +75,7 @@ def configure_auth():
 def load_api():
     from . import api
     api.configure(app)
+    fs.mkdir_p(app.config["TMP_DIR"])
     configure_auth()
 
 load_api()

@@ -1,10 +1,8 @@
 import os
 
-from flask import abort, request, send_from_directory, send_file, current_app
+from flask import abort, request, send_file, current_app
 from flask_restful import Resource
 from flask_jwt_extended import jwt_required
-
-from moviepy.editor import VideoFileClip
 
 from zou.app.stores import file_store
 from zou.app.services import (
@@ -15,8 +13,7 @@ from zou.app.services import (
     user_service,
     entities_service
 )
-from zou.app.utils import thumbnail as thumbnail_utils, permissions, events
-
+from zou.app.utils import thumbnail as thumbnail_utils, movie_utils, permissions
 
 class CreatePreviewFilePictureResource(Resource):
 
@@ -53,17 +50,10 @@ class CreatePreviewFilePictureResource(Resource):
             return thumbnail_utils.get_preview_url_path(instance_id), 201
 
         elif extension in [".mp4", ".mov"]:
-            from moviepy.editor import VideoFileClip
-            file_name = "%s%s" % (instance_id, extension)
-            folder = thumbnail_utils.create_folder(folder_path)
-            file_path = os.path.join(folder, file_name)
-            picture_path = os.path.join(folder, "%s.png" % instance_id)
-            uploaded_file.save(file_path + '.tmp')
-            clip = VideoFileClip(file_path + '.tmp')
 
-            movie_path = os.path.join(current_app.TMP_DIR, file_name)
+            movie_path = os.path.join(tmp_dir, file_name)
             original_path = os.path.join(
-                current_app.config.TMP_DIR, "%s.png" % instance_id
+                tmp_dir, "%s.png" % instance_id
             )
 
             file_name = "%s%s" % (instance_id, extension)
@@ -71,12 +61,20 @@ class CreatePreviewFilePictureResource(Resource):
             files_service.update_preview_file(instance_id, {"extension": "mp4"})
             self.emit_app_preview_event(instance_id)
 
-            file_store.add_movie("original", instance_id, movie_path)
+            movie_utils.normalize_movie(
+                movie_path,
+                thumbnail_path=original_path
+            )
+            file_store.add_movie("previews", instance_id, movie_path)
             os.remove(movie_path)
 
             file_store.add_picture("original", instance_id, original_path)
-            variants = \
-                thumbnail_utils.generate_preview_variants(original_path)
+
+            variants = thumbnail_utils.generate_preview_variants(
+                original_path,
+                instance_id
+            )
+            variants.append(("original", original_path))
 
             for (name, path) in variants:
                 file_store.add_picture(name, instance_id, path)
@@ -155,7 +153,10 @@ class PreviewFileMovieResource(Resource):
         if not self.is_allowed(instance_id):
             abort(403)
 
-        return send_file(file_store.open_movie("previews", instance_id))
+        return send_file(
+            file_store.open_movie("previews", instance_id),
+            mimetype="video/mp4"
+        )
 
 
 class PreviewFileResource(Resource):
@@ -227,7 +228,13 @@ class BasePreviewPictureResource(Resource):
         if not self.is_allowed(instance_id):
             abort(403)
 
-        return send_file(file_store.open_picture("previews", instance_id))
+        return send_file(
+            file_store.open_picture(
+                self.subfolder,
+                instance_id
+            ),
+            mimetype="image/png"
+        )
 
 
 class PreviewFileThumbnailResource(BasePreviewPictureResource):
@@ -312,7 +319,10 @@ class BasePictureResource(Resource):
         if not self.is_allowed(instance_id):
             abort(403)
 
-        return send_file(file_store.open_picture("thumbnails", instance_id))
+        return send_file(
+            file_store.open_picture("thumbnails", instance_id),
+            mimetype="image/png"
+        )
 
 
 class CreatePersonThumbnailResource(BaseCreatePictureResource):

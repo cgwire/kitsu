@@ -60,7 +60,8 @@ def get_file_path(subfolder, instance_id):
 
 
 def get_folder_name(subfolder):
-    thumbnail_folder = app.config["THUMBNAIL_FOLDER"]
+    thumbnail_folder = app.config["TMP_DIR"]
+    print(thumbnail_folder, subfolder)
     return os.path.join(thumbnail_folder, subfolder)
 
 
@@ -84,6 +85,7 @@ def get_preview_file_path(subfolder, instance_id):
 
 def create_folder(subfolder):
     thumbnail_folder = get_folder_name(subfolder)
+    print(thumbnail_folder)
     fs.mkdir_p(thumbnail_folder)
     return thumbnail_folder
 
@@ -162,22 +164,26 @@ def url_path(data_type, instance_id):
     return "pictures/thumbnails/%s/%s.png" % (data_type, instance_id)
 
 
-def generate_preview_variants(instance_id):
+def generate_preview_variants(original_path, instance_id):
     file_name = get_file_name(instance_id)
-    original_path = get_preview_file_path("originals", instance_id)
     variants = [
         ("thumbnails", RECTANGLE_SIZE),
         ("thumbnails-square", SQUARE_SIZE),
         ("previews", PREVIEW_SIZE)
     ]
 
+    result = []
     for picture_data in variants:
         (picture_type, size) = picture_data
-        folder_path = get_preview_folder_name(picture_type, instance_id)
-        full_folder_path = create_folder(folder_path)
-        picture_path = os.path.join(full_folder_path, file_name)
+        folder_path = os.path.dirname(original_path)
+        picture_path = os.path.join(
+            folder_path,
+            "%s-%s" % (picture_type, file_name)
+        )
         shutil.copyfile(original_path, picture_path)
         turn_into_thumbnail(picture_path, size)
+        result.append((picture_type, picture_path))
+    return result
 
 
 def get_preview_url_path(instance_id):
