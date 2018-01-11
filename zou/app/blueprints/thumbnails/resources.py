@@ -35,7 +35,8 @@ class CreatePreviewFilePictureResource(Resource):
             "originals",
             instance_id
         )
-        if ".png" in uploaded_file.filename:
+        extension = uploaded_file.filename[-4:]
+        if extension == ".png":
             thumbnail_utils.save_file(
                 folder_path,
                 instance_id,
@@ -46,17 +47,20 @@ class CreatePreviewFilePictureResource(Resource):
 
             return thumbnail_utils.get_preview_url_path(instance_id), 201
 
-        elif ".mp4" in uploaded_file.filename:
-            file_name = "%s.mp4" % instance_id
+        elif extension in [".mp4", ".mov"]:
+            file_name = "%s%s" % (instance_id, extension)
             folder = thumbnail_utils.create_folder(folder_path)
             file_path = os.path.join(folder, file_name)
             picture_path = os.path.join(folder, "%s.png" % instance_id)
             uploaded_file.save(file_path + '.tmp')
             clip = VideoFileClip(file_path + '.tmp')
+
             clip = clip.resize(height=720)
             clip.save_frame(picture_path, round(clip.duration / 2))
             thumbnail_utils.generate_preview_variants(instance_id)
-            clip.write_videofile(file_path)
+
+            file_name = "%s%s" % (instance_id, extension)
+            clip.write_videofile(os.path.join(folder, instance_id + ".mp4"))
 
             return {}, 201
 
