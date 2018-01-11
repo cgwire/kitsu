@@ -20,7 +20,7 @@
     "email-validator": "1.1.1",
     "eslint-plugin-import": "2.8.0",
     "eslint-plugin-node": "5.2.1",
-    "marked": "0.3.7",
+    "marked": "0.3.12",
     "moment": "2.20.1",
     "moment-timezone": "0.5.14",
     "ncu": "0.2.1",
