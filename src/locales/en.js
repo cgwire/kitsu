@@ -97,6 +97,7 @@ export default {
   menu: {
     assign_tasks: 'Assign tasks',
     create_tasks: 'Create tasks',
+    change_status: 'Change status',
     run_custom_action: 'Run custom action'
   },
 
@@ -155,6 +156,7 @@ export default {
   tasks: {
     preview: 'Previews',
     assign: 'Assign one task to: | Assign {nbSelectedTasks} tasks to:',
+    change_status_to: 'Change task status to:',
     no_preview: 'There is currently no preview for this task.',
     no_comment: 'There is currently no comment for this task.',
     validation: 'Validation',

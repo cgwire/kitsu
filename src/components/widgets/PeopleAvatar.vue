@@ -1,14 +1,14 @@
 <template>
 <span class="avatar has-text-centered"
    :style="{
-     background: person.color,
+     background: person ? person.color : '#333',
      width: (size || 40) +'px',
      height: (size || 40) + 'px',
      'font-size': (fontSize || 18) + 'px'
    }">
    <img
-     v-lazy="person.avatarPath"
-     v-if="person.has_avatar"
+     v-lazy="person ? person.avatarPath : ''"
+     v-if="person ? person.has_avatar : false"
     />
    <span v-else>
      {{ person.initials }}

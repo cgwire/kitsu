@@ -87,6 +87,7 @@ export default {
   menu: {
     assign_tasks: 'Assigner des tâches',
     create_tasks: 'Créer des tâches',
+    change_status: 'Changer le statut',
     run_custom_action: 'Lancer des actions'
   },
 
@@ -137,6 +138,7 @@ export default {
     preview: 'Pré-visualisation',
     validation: 'Validation',
     assign: 'Assigner une tâche à : | Assigner {nbSelectedTasks} tâches à :',
+    change_status_to: 'Changer le statut de la tâche à : ',
     no_preview: 'Il n\'y a pas de previz pour cette tâche..',
     no_comment: 'Il n\'y a pas de commentaires pour cette tâche.',
     clear_assignations: 'effacer les assignations',

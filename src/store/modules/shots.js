@@ -423,9 +423,17 @@ const mutations = {
       tasksStore.state, tasksStore.getters
     )
     const task = getTask(taskId)
-    const shot = getters.getShot(state)(task.entity_id)
+    const shot = state.shotMap[task.entity_id]
+
     if (shot) {
-      shot.validations[task.task_type_name] = task
+      const validations = {...shot.validations}
+
+      delete validations[task.task_type_name]
+      Vue.set(task, 'task_status_id', comment.task_status_id)
+      Vue.set(validations, task.task_type_name, {...task})
+
+      delete shot.validations
+      Vue.set(shot, 'validations', validations)
     }
   },
 

@@ -417,9 +417,17 @@ const mutations = {
       tasksStore.state, tasksStore.getters
     )
     const task = getTask(taskId)
-    const asset = getters.getAsset(state)(task.entity_id)
+    const asset = state.assetMap[task.entity_id]
+
     if (asset) {
-      asset.validations[task.task_type_name] = task
+      const validations = {...asset.validations}
+
+      delete validations[task.task_type_name]
+      Vue.set(task, 'task_status_id', comment.task_status_id)
+      Vue.set(validations, task.task_type_name, {...task})
+
+      delete asset.validations
+      Vue.set(asset, 'validations', validations)
     }
   },
 

@@ -135,12 +135,12 @@ const actions = {
     })
   },
 
-  commentTask ({ commit, state }, payload) {
-    tasksApi.commentTask(payload, (err, comment) => {
+  commentTask ({ commit, state }, {taskId, taskStatusId, comment, callback}) {
+    tasksApi.commentTask({taskId, taskStatusId, comment}, (err, comment) => {
       if (!err) {
-        commit(NEW_TASK_COMMENT_END, {comment, taskId: payload.taskId})
+        commit(NEW_TASK_COMMENT_END, {comment, taskId})
       }
-      if (payload.callback) payload.callback(err, comment)
+      if (callback) callback(err, comment)
     })
   },
 
@@ -184,6 +184,28 @@ const actions = {
         next(err, tasks[0])
       })
     }, callback)
+  },
+
+  changeSelectedTaskStatus ({ commit, state }, {taskStatusId, callback}) {
+    async.eachSeries(Object.keys(state.selectedTasks), (taskId, next) => {
+      const task = state.taskMap[taskId]
+
+      if (task && task.task_status_id !== taskStatusId) {
+        actions.commentTask({ commit, state }, {
+          taskId: taskId,
+          taskStatusId: taskStatusId,
+          comment: '',
+          callback: (err) => {
+            next(err)
+          }
+        })
+      } else {
+        next()
+      }
+    }, (err) => {
+      commit(CLEAR_SELECTED_TASKS)
+      callback(err)
+    })
   },
 
   deleteTask ({ commit, state }, payload) {
