@@ -148,22 +148,6 @@ describe('lib/sorting', () => {
     expect(results.length).to.equal(0)
   })
 
-  it('sortProductions', () => {
-    const entries = [
-      {project_status_name: 'closed', name: 'Big Buck Bunny', id: 3},
-      {project_status_name: 'open', name: 'Cosmos Landromat', id: 2},
-      {project_status_name: 'open', name: 'Agent 327', id: 1}
-    ]
-    let results = sortProductions(entries)
-    expect(results.length).to.equal(3)
-    expect(results[0].id).to.equal(1)
-    expect(results[1].id).to.equal(2)
-    expect(results[2].id).to.equal(3)
-
-    results = sortProductions([])
-    expect(results.length).to.equal(0)
-  })
-
   it('sortTaskTypes', () => {
     const entries = [
       {for_shots: false, priority: 1, name: 'Modeling', id: 2},
