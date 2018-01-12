@@ -82,3 +82,13 @@ class TaskServiceTestCase(ApiDBTestCase):
         self.assertTrue(user_service.check_criterions_has_task_related({
             "project_id": self.project_id
         }))
+
+    def test_related_projects(self):
+        projects = user_service.related_projects()
+        self.assertEqual(len(projects), 0)
+
+        self.task.assignees.append(self.user)
+        self.task.save()
+        projects = user_service.related_projects()
+        self.assertEqual(len(projects), 1)
+        self.assertEqual(projects[0]["id"], str(self.project_id))

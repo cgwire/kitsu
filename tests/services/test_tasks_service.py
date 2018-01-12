@@ -366,3 +366,15 @@ class TaskServiceTestCase(ApiDBTestCase):
         tasks_service.clear_assignation(task_id)
         task = tasks_service.get_task(task_id)
         self.assertEquals(len(task["assignees"]), 0)
+
+    def test_get_tasks_for_person(self):
+        projects = [self.project.serialize()]
+        tasks = tasks_service.get_person_tasks(self.user.id, projects)
+        self.assertEqual(len(tasks), 0)
+
+        tasks_service.assign_task(self.task.id, self.user.id)
+        tasks = tasks_service.get_person_tasks(self.user.id, projects)
+        self.assertEqual(len(tasks), 1)
+
+        tasks = tasks_service.get_person_tasks(self.person.id, projects)
+        self.assertEqual(len(tasks), 2)

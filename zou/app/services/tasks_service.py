@@ -1,6 +1,7 @@
 import datetime
 
 from sqlalchemy.exc import StatementError, IntegrityError, DataError
+from sqlalchemy.orm import aliased
 
 from zou.app import app
 from zou.app.utils import events
@@ -207,9 +208,14 @@ def remove_task(task_id):
 
 def clear_assignation(task_id):
     task = get_task_raw(task_id)
+    assignees = [person.serialize() for person in task.assignees]
     task.update({"assignees": []})
     task_dict = task.serialize()
-    events.emit("task:clear-assignation", task_dict)
+    for assignee in assignees:
+        events.emit("task:unassign", {
+            "person": assignee,
+            "task": task_dict
+        })
     return task_dict
 
 
@@ -527,3 +533,70 @@ def get_task_type_map():
     return {
         str(task_type.id): task_type.serialize() for task_type in task_types
     }
+
+
+def get_person_tasks(person_id, projects):
+    person = Person.get(person_id)
+    project_ids = [project["id"] for project in projects]
+    done_status = get_done_status()
+
+    Sequence = aliased(Entity, name='sequence')
+    Episode = aliased(Entity, name='episode')
+    query = Task.query \
+        .join(Project, TaskType, TaskStatus) \
+        .join(Entity, Entity.id == Task.entity_id) \
+        .join(EntityType, EntityType.id == Entity.entity_type_id) \
+        .outerjoin(Sequence, Sequence.id == Entity.parent_id) \
+        .outerjoin(Episode, Episode.id == Sequence.parent_id) \
+        .filter(Task.assignees.contains(person)) \
+        .filter(Project.id.in_(project_ids)) \
+        .filter(Task.task_status_id != done_status["id"]) \
+        .add_columns(
+            Project.name,
+            Entity.name,
+            Entity.preview_file_id,
+            EntityType.name,
+            Sequence.name,
+            Episode.name,
+            TaskType.name,
+            TaskStatus.name,
+            TaskType.color,
+            TaskStatus.color,
+            TaskStatus.short_name
+        )
+
+    tasks = []
+    for (
+        task,
+        project_name,
+        entity_name,
+        entity_preview_file_id,
+        entity_type_name,
+        sequence_name,
+        episode_name,
+        task_type_name,
+        task_status_name,
+        task_type_color,
+        task_status_color,
+        task_status_short_name
+    ) in query.all():
+        if entity_preview_file_id is None:
+            entity_preview_file_id = ""
+
+        task_dict = task.serialize()
+        task_dict.update({
+            "project_name": project_name,
+            "entity_name": entity_name,
+            "entity_preview_file_id": str(entity_preview_file_id),
+            "entity_type_name": entity_type_name,
+            "sequence_name": sequence_name,
+            "episode_name": episode_name,
+            "task_type_name": task_type_name,
+            "task_status_name": task_status_name,
+            "task_type_color": task_type_color,
+            "task_status_color": task_status_color,
+            "task_status_short_name": task_status_short_name
+        })
+        tasks.append(task_dict)
+
+    return tasks

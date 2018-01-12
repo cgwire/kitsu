@@ -6,7 +6,6 @@ from zou.app.models.project import Project
 from zou.app.models.project_status import ProjectStatus
 from zou.app.models.task import Task
 from zou.app.models.task_type import TaskType
-from zou.app.models.task_status import TaskStatus
 
 from zou.app.services import persons_service, shots_service, tasks_service
 from zou.app.utils import fields, permissions
@@ -21,6 +20,15 @@ def open_project_filter():
     return ProjectStatus.name.in_(("Active", "open", "Open"))
 
 
+def related_projects():
+    projects = Project.query \
+        .join(Task) \
+        .filter(assignee_filter()) \
+        .filter(open_project_filter()) \
+        .all()
+    return Project.serialize_list(projects)
+
+
 def asset_type_filter():
     shot_type = shots_service.get_shot_type()
     sequence_type = shots_service.get_sequence_type()
@@ -33,66 +41,9 @@ def asset_type_filter():
 
 
 def get_todos():
-    done_status = tasks_service.get_done_status()
-
-    Sequence = aliased(Entity, name='sequence')
-    Episode = aliased(Entity, name='episode')
-    query = Task.query \
-        .join(Project, ProjectStatus, TaskType, TaskStatus) \
-        .join(Entity, Entity.id == Task.entity_id) \
-        .join(EntityType, EntityType.id == Entity.entity_type_id) \
-        .outerjoin(Sequence, Sequence.id == Entity.parent_id) \
-        .outerjoin(Episode, Episode.id == Sequence.parent_id) \
-        .filter(assignee_filter()) \
-        .filter(open_project_filter()) \
-        .filter(Task.task_status_id != done_status["id"]) \
-        .add_columns(
-            Project.name,
-            Entity.name,
-            Entity.preview_file_id,
-            EntityType.name,
-            Sequence.name,
-            Episode.name,
-            TaskType.name,
-            TaskStatus.name,
-            TaskType.color,
-            TaskStatus.color,
-            TaskStatus.short_name
-        )
-
-    tasks = []
-    for (
-        task,
-        project_name,
-        entity_name,
-        entity_preview_file_id,
-        entity_type_name,
-        sequence_name,
-        episode_name,
-        task_type_name,
-        task_status_name,
-        task_type_color,
-        task_status_color,
-        task_status_short_name
-    ) in query.all():
-        if entity_preview_file_id is None:
-            entity_preview_file_id = ""
-
-        task_dict = task.serialize()
-        task_dict["project_name"] = project_name
-        task_dict["entity_name"] = entity_name
-        task_dict["entity_preview_file_id"] = str(entity_preview_file_id)
-        task_dict["entity_type_name"] = entity_type_name
-        task_dict["sequence_name"] = sequence_name
-        task_dict["episode_name"] = episode_name
-        task_dict["task_type_name"] = task_type_name
-        task_dict["task_status_name"] = task_status_name
-        task_dict["task_type_color"] = task_type_color
-        task_dict["task_status_color"] = task_status_color
-        task_dict["task_status_short_name"] = task_status_short_name
-        tasks.append(task_dict)
-
-    return tasks
+    current_user = persons_service.get_current_user_raw()
+    projects = related_projects()
+    return tasks_service.get_person_tasks(current_user.id, projects)
 
 
 def get_entity_tasks(entity_id):
