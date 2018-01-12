@@ -1,29 +1,51 @@
 <template>
-<span class="avatar has-text-centered"
+<router-link :to="'/people/' + person.id" v-if="isLink">
+  <span class="avatar has-text-centered"
+     :style="{
+       background: person.color,
+       width: size +'px',
+       height: size + 'px',
+       'font-size': fontSize + 'px'
+     }">
+     <img
+       v-lazy="person.avatarPath"
+       v-if="person.has_avatar"
+      />
+     <span v-else>
+       {{ person.initials }}
+     </span>
+  </span>
+</router-link>
+
+<span
+   class="avatar has-text-centered"
    :style="{
-     background: person ? person.color : '#333',
-     width: (size || 40) +'px',
-     height: (size || 40) + 'px',
-     'font-size': (fontSize || 18) + 'px'
-   }">
-   <img
-     v-lazy="person ? person.avatarPath : ''"
-     v-if="person ? person.has_avatar : false"
-    />
-   <span v-else>
-     {{ person.initials }}
-   </span>
+     background: person.color,
+     width: size +'px',
+     height: size + 'px',
+     'font-size': fontSize + 'px'
+   }"
+   v-else
+>
+  <img
+    v-lazy="person.avatarPath"
+    v-if="person.has_avatar"
+  />
+  <span v-else>
+    {{ person.initials }}
+  </span>
 </span>
 </template>
 
 <script>
 export default {
   name: 'person-avatar',
-  props: [
-    'font-size',
-    'person',
-    'size'
-  ]
+  props: {
+    person: { type: Object, default: () => { return { color: '#FFF' } } },
+    size: { type: Number, default: 40 },
+    'font-size': { type: Number, default: 18 },
+    'is-link': { type: Boolean, default: true }
+  }
 }
 </script>
 

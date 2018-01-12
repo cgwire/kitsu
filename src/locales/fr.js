@@ -7,6 +7,7 @@ export default {
     delete_text: 'Êtes vous sûr de vouloir retirer {personName} de la base de données?',
     delete_error: 'Une erreur est survenue lors de la suppression. Il y a probablement des données liées à elle. Etes vous sur que cette personne n\'a aucune tâche assignée et n\'a fait aucun commentaire ?',
     persons: 'Personnes',
+    running_tasks: 'Tâches en cours',
     csv: {
       import_file: 'Importer',
       export_file: 'Télécharger',

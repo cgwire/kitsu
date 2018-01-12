@@ -13,6 +13,7 @@ import Login from '../components/Login'
 import Main from '../components/Main'
 import NotFound from '../components/NotFound'
 import People from '../components/People'
+import Person from '../components/Person'
 import Productions from '../components/Productions'
 import OpenProductions from '../components/OpenProductions'
 import Profile from '../components/Profile'
@@ -88,16 +89,25 @@ export const routes = [
       { path: '/people', component: People },
       { path: '/people/new', component: People },
       {
-        name: 'edit-person',
         path: '/people/edit/:person_id',
-        component: People
+        component: People,
+        name: 'edit-person'
       },
       {
         name: 'delete-person',
         path: '/people/delete/:person_id',
         component: People
       },
-      { path: '/people/import', component: People },
+      {
+        path: '/people/import',
+        component: People,
+        name: 'people'
+      },
+      {
+        path: '/people/:person_id',
+        component: Person,
+        name: 'person'
+      },
 
       { path: '/productions', component: Productions },
       { path: '/productions/new', component: Productions },

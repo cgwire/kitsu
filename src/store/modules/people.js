@@ -1,5 +1,6 @@
 import peopleApi from '../api/people'
 import colors from '../../lib/colors'
+import { sortTasks } from '../../lib/sorting'
 import {
   LOAD_PEOPLE_START,
   LOAD_PEOPLE_ERROR,
@@ -27,6 +28,8 @@ import {
   HIDE_DELETE_PEOPLE_MODAL,
 
   UPLOAD_AVATAR_END,
+
+  LOAD_PERSON_TASKS_END,
 
   RESET_ALL
 } from '../mutation-types'
@@ -78,7 +81,9 @@ const state = {
   isDeleteLoadingError: false,
   personToDelete: undefined,
 
-  personCsvFormData: undefined
+  personCsvFormData: undefined,
+
+  personTasks: []
 }
 
 const getters = {
@@ -102,6 +107,8 @@ const getters = {
   personToEdit: state => state.personToEdit,
 
   personCsvFormData: state => state.personCsvFormData,
+
+  personTasks: state => state.personTasks,
 
   getPerson: (state, getters) => (id) => state.personMap[id],
   getPersonOptions: state => state.people.map(
@@ -188,6 +195,15 @@ const actions = {
         commit(IMPORT_PEOPLE_ERROR)
       }
       commit(IMPORT_PEOPLE_END)
+      if (callback) callback(err)
+    })
+  },
+
+  loadPersonTasks ({ commit, state }, { personId, callback }) {
+    commit(LOAD_PERSON_TASKS_END, [])
+    peopleApi.loadPersonTasks(personId, (err, tasks) => {
+      if (err) tasks = []
+      commit(LOAD_PERSON_TASKS_END, tasks)
       if (callback) callback(err)
     })
   },
@@ -364,6 +380,10 @@ const mutations = {
     person.avatarPath =
       `/api/pictures/thumbnails/persons/${person.id}` +
       `.png?unique=${randomHash}`
+  },
+
+  [LOAD_PERSON_TASKS_END] (state, tasks) {
+    state.personTasks = sortTasks(tasks)
   },
 
   [RESET_ALL] (state, people) {

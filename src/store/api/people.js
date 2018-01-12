@@ -57,5 +57,9 @@ export default {
 
   loadTodos (callback) {
     client.get('/api/data/user/tasks', callback)
+  },
+
+  loadPersonTasks (personId, callback) {
+    client.get(`/api/data/persons/${personId}/tasks`, callback)
   }
 }
