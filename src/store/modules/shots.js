@@ -56,6 +56,12 @@ import {
 const helpers = {
   getCurrentProduction () {
     return productionsStore.getters.currentProduction(productionsStore.state)
+  },
+  getTaskStatus (taskStatusId) {
+    return tasksStore.state.taskStatusMap[taskStatusId]
+  },
+  getTask (taskId) {
+    return tasksStore.state.taskMap[taskId]
   }
 }
 
@@ -419,17 +425,18 @@ const mutations = {
   },
 
   [NEW_TASK_COMMENT_END] (state, {comment, taskId}) {
-    const getTask = tasksStore.getters.getTask(
-      tasksStore.state, tasksStore.getters
-    )
-    const task = getTask(taskId)
+    const task = helpers.getTask(taskId)
     const shot = state.shotMap[task.entity_id]
+    const taskStatus = helpers.getTaskStatus(comment.task_status_id)
 
     if (shot) {
       const validations = {...shot.validations}
 
       delete validations[task.task_type_name]
-      Vue.set(task, 'task_status_id', comment.task_status_id)
+      Vue.set(task, 'task_status_id', taskStatus.id)
+      Vue.set(task, 'task_status_color', taskStatus.color)
+      Vue.set(task, 'task_status_name', taskStatus.name)
+      Vue.set(task, 'task_status_short_name', taskStatus.short_name)
       Vue.set(validations, task.task_type_name, {...task})
 
       delete shot.validations
