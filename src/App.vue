@@ -184,6 +184,10 @@ input.search-input:focus {
   margin-top: 2em;
 }
 
+.table-header-wrapper {
+  overflow: hidden;
+}
+
 .table-header {
   display: block;
   width: 100%;
@@ -204,6 +208,10 @@ input.search-input:focus {
 
 .table {
   margin-bottom: 0;
+}
+
+.table td.actions {
+  min-width: 145px;
 }
 
 .table-info {
