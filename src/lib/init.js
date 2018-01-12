@@ -7,14 +7,17 @@ const init = (callback) => {
     'loadTaskStatuses',
     'loadAssetTypes',
     'loadTaskTypes',
-    'loadCustomActions',
     'loadPeople',
     'loadOpenProductions'
   ]
 
+  if (store.getters.isCurrentUserManager) {
+    storeActions.push('loadCustomActions')
+  }
+
   async.mapSeries(storeActions, store.dispatch, (err) => {
     if (err) {
-      console.log('Init failed', err)
+      console.log('An init operation failed: ', err)
     }
     store.commit('LOGIN_SUCCESS')
     callback()
