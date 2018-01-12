@@ -199,11 +199,13 @@ const mutations = {
   },
 
   [UPLOAD_AVATAR_END] (state) {
-    const randomHash = Math.random().toString(36).substring(7)
-    state.user.has_avatar = true
-    state.user.avatarPath =
-      `/api/pictures/thumbnails/persons/${state.user.id}` +
-      `.png?unique=${randomHash}`
+    if (state.user) {
+      const randomHash = Math.random().toString(36).substring(7)
+      state.user.has_avatar = true
+      state.user.avatarPath =
+        `/api/pictures/thumbnails/persons/${state.user.id}` +
+        `.png?unique=${randomHash}`
+    }
   },
 
   [RESET_ALL] (state) {

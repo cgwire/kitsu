@@ -25,10 +25,15 @@ import {
   SHOW_IMPORT_PEOPLE_MODAL,
   HIDE_IMPORT_PEOPLE_MODAL,
 
+  PERSON_CSV_FILE_SELECTED,
+  UPLOAD_AVATAR_END,
+  LOAD_PERSON_TASKS_END,
+
   NEW_PEOPLE_END
 } from '../../src/store/mutation-types'
 
 let people = []
+let tasks = []
 
 peopleApi.getPeople = (callback) => {
   process.nextTick(() => {
@@ -64,6 +69,12 @@ peopleApi.postCsv = (data, callback) => {
   })
 }
 
+peopleApi.getPersonTasks = (data, callback) => {
+  process.nextTick(() => {
+    callback(null, tasks)
+  })
+}
+
 describe('people', () => {
 
   beforeEach(helpers.reset)
@@ -89,6 +100,22 @@ describe('people', () => {
         id: 'person-4',
         first_name: 'Chris',
         last_name: 'Peel'
+      }
+    ]
+    tasks = [
+      {
+        project_name: 'Agent327',
+        task_type_name: 'Modeling',
+        entity_name: 'Tree',
+        entity_id: 'asset-1',
+        id: 'task-1'
+      },
+      {
+        project_name: 'Agent327',
+        task_type_name: 'Setup',
+        entity_name: 'Tree',
+        entity_id: 'asset-1',
+        id: 'task-2'
       }
     ]
   })
@@ -220,6 +247,16 @@ describe('people', () => {
       expect(store._vm.personToEdit.id).to.equal(undefined)
     })
 
+    it('loadPersonTasks', (done) => {
+      helpers.runAction('loadPersonTasks', {
+        personId: 'person-1',
+        callback: (err) => {
+          expect(err).to.be.null
+          expect(store._vm.personTasks).to.deep.equal(tasks)
+          done()
+        }
+      })
+    })
   })
 
   describe('mutations', () => {
@@ -227,6 +264,7 @@ describe('people', () => {
       store.commit(LOAD_PEOPLE_START)
       expect(store._vm.isPeopleLoading).to.equal(true)
       expect(store._vm.isPeopleLoadingError).to.equal(false)
+      expect(store._vm.personMap).to.deep.equal({})
     })
 
     it('LOAD_PEOPLE_ERROR', () => {
@@ -245,6 +283,7 @@ describe('people', () => {
       expect(store._vm.people[1].first_name).to.equal('Chris')
       expect(store._vm.people[2].first_name).to.equal('Ema')
       expect(store._vm.people[3].first_name).to.equal('John')
+      expect(store._vm.personMap['person-3']).to.equal(people[0])
     })
 
     it('DELETE_PEOPLE_START', () => {
@@ -263,6 +302,7 @@ describe('people', () => {
       expect(
         store._vm.people.find((person) => person.id === 'person-3')
       ).to.equal(undefined)
+      expect(store._vm.personMap['person-3']).to.equal(undefined)
     })
 
     it('DELETE_PEOPLE_ERROR', () => {
@@ -384,6 +424,26 @@ describe('people', () => {
       store.commit(HIDE_IMPORT_PEOPLE_MODAL)
       expect(store._vm.isImportPeopleModalShown).to.equal(false)
     })
-  })
 
+    it('PERSON_CSV_FILE_SELECTED', () => {
+      const formData = {file: {}}
+      store.commit(PERSON_CSV_FILE_SELECTED, formData)
+      expect(store._vm.personCsvFormData).to.deep.equal(formData)
+    })
+
+    it('UPLOAD_AVATAR_END', () => {
+      store.commit(LOAD_PEOPLE_END, people)
+      store.commit(UPLOAD_AVATAR_END, 'person-1')
+      const urlMain = '/api/pictures/thumbnails/persons/person-1.png?unique='
+      const avatarPath = store._vm.personMap['person-1'].avatarPath
+      expect(avatarPath.slice(0, urlMain.length))
+        .to.equal(urlMain)
+      expect(store._vm.personMap['person-1'].has_avatar).to.be.ok
+    })
+
+    it('LOAD_PERSON_TASKS_END', () => {
+      store.commit(LOAD_PERSON_TASKS_END, tasks)
+      expect(store._vm.personTasks).to.deep.equal(tasks)
+    })
+  })
 })

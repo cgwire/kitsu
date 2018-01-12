@@ -201,7 +201,7 @@ const actions = {
 
   loadPersonTasks ({ commit, state }, { personId, callback }) {
     commit(LOAD_PERSON_TASKS_END, [])
-    peopleApi.loadPersonTasks(personId, (err, tasks) => {
+    peopleApi.getPersonTasks(personId, (err, tasks) => {
       if (err) tasks = []
       commit(LOAD_PERSON_TASKS_END, tasks)
       if (callback) callback(err)
