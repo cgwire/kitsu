@@ -426,21 +426,24 @@ const mutations = {
 
   [NEW_TASK_COMMENT_END] (state, {comment, taskId}) {
     const task = helpers.getTask(taskId)
-    const shot = state.shotMap[task.entity_id]
-    const taskStatus = helpers.getTaskStatus(comment.task_status_id)
 
-    if (shot) {
-      const validations = {...shot.validations}
+    if (task) {
+      const shot = state.shotMap[task.entity_id]
+      const taskStatus = helpers.getTaskStatus(comment.task_status_id)
 
-      delete validations[task.task_type_name]
-      Vue.set(task, 'task_status_id', taskStatus.id)
-      Vue.set(task, 'task_status_color', taskStatus.color)
-      Vue.set(task, 'task_status_name', taskStatus.name)
-      Vue.set(task, 'task_status_short_name', taskStatus.short_name)
-      Vue.set(validations, task.task_type_name, {...task})
+      if (shot) {
+        const validations = {...shot.validations}
 
-      delete shot.validations
-      Vue.set(shot, 'validations', validations)
+        delete validations[task.task_type_name]
+        Vue.set(task, 'task_status_id', taskStatus.id)
+        Vue.set(task, 'task_status_color', taskStatus.color)
+        Vue.set(task, 'task_status_name', taskStatus.name)
+        Vue.set(task, 'task_status_short_name', taskStatus.short_name)
+        Vue.set(validations, task.task_type_name, {...task})
+
+        delete shot.validations
+        Vue.set(shot, 'validations', validations)
+      }
     }
   },
 

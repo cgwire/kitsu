@@ -59,7 +59,7 @@ export default {
     client.get('/api/data/user/tasks', callback)
   },
 
-  loadPersonTasks (personId, callback) {
+  getPersonTasks (personId, callback) {
     client.get(`/api/data/persons/${personId}/tasks`, callback)
   }
 }

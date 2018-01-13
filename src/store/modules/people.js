@@ -1,6 +1,7 @@
 import peopleApi from '../api/people'
 import colors from '../../lib/colors'
 import { sortTasks } from '../../lib/sorting'
+import taskStatusStore from './taskstatus'
 import {
   LOAD_PEOPLE_START,
   LOAD_PEOPLE_ERROR,
@@ -30,6 +31,7 @@ import {
   UPLOAD_AVATAR_END,
 
   LOAD_PERSON_TASKS_END,
+  NEW_TASK_COMMENT_END,
 
   RESET_ALL
 } from '../mutation-types'
@@ -58,6 +60,10 @@ const helpers = {
         `.png?unique=${randomHash}`
     }
     return person
+  },
+
+  getTaskStatus (taskStatusId) {
+    return taskStatusStore.state.taskStatusMap[taskStatusId]
   }
 }
 
@@ -384,6 +390,21 @@ const mutations = {
 
   [LOAD_PERSON_TASKS_END] (state, tasks) {
     state.personTasks = sortTasks(tasks)
+  },
+
+  [NEW_TASK_COMMENT_END] (state, {comment, taskId}) {
+    const task = state.personTasks.find((task) => task.id === taskId)
+
+    if (task) {
+      const taskStatus = helpers.getTaskStatus(comment.task_status_id)
+
+      Object.assign(task, {
+        task_status_id: taskStatus.id,
+        task_status_name: taskStatus.name,
+        task_status_short_name: taskStatus.short_name,
+        task_status_color: taskStatus.color
+      })
+    }
   },
 
   [RESET_ALL] (state, people) {

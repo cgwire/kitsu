@@ -31,6 +31,9 @@ import {
 
   SET_PREVIEW,
 
+  LOAD_PERSON_TASKS_END,
+  USER_LOAD_TODOS_END,
+
   RESET_ALL
 } from '../mutation-types'
 
@@ -427,6 +430,7 @@ const mutations = {
   },
 
   [NEW_TASK_COMMENT_END] (state, {comment, taskId}) {
+    const task = state.taskMap[taskId]
     if (comment.task_status === undefined) {
       const getTaskStatus = getters.getTaskStatus(state, getters)
       comment.task_status = getTaskStatus(comment.task_status_id)
@@ -448,7 +452,7 @@ const mutations = {
       state.taskComments[taskId].unshift(comment)
     }
 
-    Object.assign(state.taskMap[taskId], {
+    Object.assign(task, {
       task_status_id: comment.task_status_id,
       task_status_name: comment.task_status.name,
       task_status_short_name: comment.task_status.short_name,
@@ -543,6 +547,18 @@ const mutations = {
 
   [SET_PREVIEW] (state, {taskId, previewId}) {
     state.taskMap[taskId].entity.preview_file_id = previewId
+  },
+
+  [LOAD_PERSON_TASKS_END] (state, tasks) {
+    tasks.forEach((task) => {
+      state.taskMap[task.id] = task
+    })
+  },
+
+  [USER_LOAD_TODOS_END] (state, tasks) {
+    tasks.forEach((task) => {
+      state.taskMap[task.id] = task
+    })
   },
 
   [RESET_ALL] (state, shots) {

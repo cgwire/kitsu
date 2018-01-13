@@ -115,7 +115,6 @@ const actions = {
       else {
         commit(LOAD_OPEN_PRODUCTIONS_END, productions)
         if (!state.currentProduction && productions.length > 0) {
-          console.log('loadProductions', 'ok')
           commit(SET_CURRENT_PRODUCTION, productions[0].id)
         }
       }

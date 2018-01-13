@@ -1,5 +1,6 @@
 import peopleApi from '../api/people'
 import peopleStore from './people'
+import taskStatusStore from './taskstatus'
 import auth from '../../lib/auth'
 import { sortTasks } from '../../lib/sorting'
 import {
@@ -24,8 +25,16 @@ import {
 
   CHANGE_AVATAR_FILE,
 
+  NEW_TASK_COMMENT_END,
+
   RESET_ALL
 } from '../mutation-types'
+
+const helpers = {
+  getTaskStatus (taskStatusId) {
+    return taskStatusStore.state.taskStatusMap[taskStatusId]
+  }
+}
 
 const state = {
   user: null,
@@ -205,6 +214,21 @@ const mutations = {
       state.user.avatarPath =
         `/api/pictures/thumbnails/persons/${state.user.id}` +
         `.png?unique=${randomHash}`
+    }
+  },
+
+  [NEW_TASK_COMMENT_END] (state, {comment, taskId}) {
+    const task = state.todos.find((task) => task.id === taskId)
+
+    if (task) {
+      const taskStatus = helpers.getTaskStatus(comment.task_status_id)
+
+      Object.assign(task, {
+        task_status_id: taskStatus.id,
+        task_status_name: taskStatus.name,
+        task_status_short_name: taskStatus.short_name,
+        task_status_color: taskStatus.color
+      })
     }
   },
 

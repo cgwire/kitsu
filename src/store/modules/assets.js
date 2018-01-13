@@ -86,7 +86,9 @@ const state = {
   restoreAsset: {
     isLoading: false,
     isError: false
-  }
+  },
+
+  personTasks: []
 }
 
 const getters = {
@@ -420,21 +422,23 @@ const mutations = {
 
   [NEW_TASK_COMMENT_END] (state, {comment, taskId}) {
     const task = helpers.getTask(taskId)
-    const asset = state.assetMap[task.entity_id]
-    const taskStatus = helpers.getTaskStatus(comment.task_status_id)
+    if (task) {
+      const asset = state.assetMap[task.entity_id]
+      const taskStatus = helpers.getTaskStatus(comment.task_status_id)
 
-    if (asset) {
-      const validations = {...asset.validations}
+      if (asset) {
+        const validations = {...asset.validations}
 
-      delete validations[task.task_type_name]
-      Vue.set(task, 'task_status_id', taskStatus.id)
-      Vue.set(task, 'task_status_color', taskStatus.color)
-      Vue.set(task, 'task_status_name', taskStatus.name)
-      Vue.set(task, 'task_status_short_name', taskStatus.short_name)
-      Vue.set(validations, task.task_type_name, {...task})
+        delete validations[task.task_type_name]
+        Vue.set(task, 'task_status_id', taskStatus.id)
+        Vue.set(task, 'task_status_color', taskStatus.color)
+        Vue.set(task, 'task_status_name', taskStatus.name)
+        Vue.set(task, 'task_status_short_name', taskStatus.short_name)
+        Vue.set(validations, task.task_type_name, {...task})
 
-      delete asset.validations
-      Vue.set(asset, 'validations', validations)
+        delete asset.validations
+        Vue.set(asset, 'validations', validations)
+      }
     }
   },
 
