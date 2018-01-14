@@ -30,3 +30,11 @@ class RouteCreateTasksTestCase(ApiDBTestCase):
             task_type_animation_id
         ))
         self.assertEquals(len(tasks), 0)
+
+    def test_get_tasks_for_person(self):
+        tasks = self.get("/data/persons/%s/tasks" % self.person.id)
+        self.assertEquals(len(tasks), 1)
+        self.assertTrue(str(self.person.id) in tasks[0]["assignees"])
+
+        tasks = self.get("/data/persons/%s/tasks" % self.user.id)
+        self.assertEquals(len(tasks), 0)

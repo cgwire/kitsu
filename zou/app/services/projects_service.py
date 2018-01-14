@@ -17,6 +17,7 @@ def open_projects():
     return fields.serialize_value(query.all())
 
 
+
 def all_projects():
     result = []
     query = Project.query.join(ProjectStatus)

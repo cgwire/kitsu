@@ -4,8 +4,6 @@ from flask_jwt_extended import jwt_required
 
 from zou.app.services.exception import (
     TaskNotFoundException,
-    TaskStatusNotFoundException,
-    TaskTypeNotFoundException,
     PersonNotFoundException,
     MalformedFileTreeException,
     WrongDateFormatException
@@ -133,6 +131,17 @@ class TaskCommentsResource(Resource):
         if not permissions.has_manager_permissions():
             user_service.check_has_task_related(task_id)
         return tasks_service.get_comments(task_id)
+
+
+class PersonTasksResource(Resource):
+
+    @jwt_required
+    def get(self, person_id):
+        if not permissions.has_manager_permissions():
+            projects = user_service.related_projects()
+        else:
+            projects = projects_service.open_projects()
+        return tasks_service.get_person_tasks(person_id, projects)
 
 
 class CreateShotTasksResource(Resource):
