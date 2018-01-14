@@ -4,6 +4,7 @@ export default {
     new_person: 'Add a new employee',
     edit_title: 'Edit person',
     persons: 'person | persons',
+    running_tasks: 'Running tasks',
     delete_text: 'Are you sure you want to remove {personName} from your database?',
     delete_error: 'An error occured while deleting this person. There are probably data linked to it. Are you sure this person has no assignation or wrote no comment?',
     csv: {
@@ -97,6 +98,7 @@ export default {
   menu: {
     assign_tasks: 'Assign tasks',
     create_tasks: 'Create tasks',
+    change_status: 'Change status',
     run_custom_action: 'Run custom action'
   },
 
@@ -155,6 +157,7 @@ export default {
   tasks: {
     preview: 'Previews',
     assign: 'Assign one task to: | Assign {nbSelectedTasks} tasks to:',
+    change_status_to: 'Change task status to:',
     no_preview: 'There is currently no preview for this task.',
     no_comment: 'There is currently no comment for this task.',
     validation: 'Validation',

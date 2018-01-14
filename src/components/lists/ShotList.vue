@@ -1,6 +1,6 @@
 <template>
 <div class="data-list">
-  <div style="overflow: hidden">
+  <div class="table-header-wrapper">
     <table class="table table-header" ref="headerWrapper">
       <thead>
         <tr>

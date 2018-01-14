@@ -73,6 +73,58 @@
             </div>
           </div>
 
+          <div
+            class="level-item"
+            v-if="selectedBar === 'change-status'"
+          >
+            <div class="flexrow">
+              <div class="flexrow-item strong bigger">
+                {{ $t('tasks.change_status_to') }}
+              </div>
+              <div class="flexrow-item combobox-item">
+                <combobox
+                  :options="taskStatusOptions"
+                  v-model="taskStatusId"
+                >
+                </combobox>
+              </div>
+              <div class="flexrow-item" v-if="!isChangeStatusLoading">
+                <button
+                  class="button is-success confirm-button"
+                  @click="confirmTaskStatusChange"
+                >
+                  {{ $t('main.confirmation') }}
+                </button>
+
+                <div class="" v-if="isChangeStatusLoading">
+                  <spinner :is-white="true"></spinner>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div
+            class="level-item"
+            v-if="selectedBar === 'tasks'"
+          >
+            <div class="flexrow">
+              <div class="flexrow-item strong bigger">
+                {{ $t('tasks.create_for_selection') }}
+              </div>
+              <div class="flexrow-item" v-if="!isCreationLoading">
+                <button
+                  class="button is-success confirm-button"
+                  @click="confirmTaskCreation"
+                >
+                  {{ $t('main.confirmation') }}
+                </button>
+
+                <div class="" v-if="isCreationLoading">
+                  <spinner :is-white="true"></spinner>
+                </div>
+              </div>
+            </div>
+          </div>
 
           <div
             class="level-item"
@@ -143,6 +195,13 @@
 
         <div
           class="more-menu-item"
+          @click="selectBar('change-status')"
+        >
+          {{ $t('menu.change_status') }}
+        </div>
+
+        <div
+          class="more-menu-item"
           @click="selectBar('tasks')"
         >
           {{ $t('menu.create_tasks') }}
@@ -196,15 +255,18 @@ export default {
       isMoreMenuDisplayed: true,
       isAssignationLoading: false,
       isCreationLoading: false,
+      isChangeStatusLoading: false,
       selectedBar: 'assignation',
       personId: '',
+      taskStatusId: '',
       customActionUrl: '',
-      selectedTaskIds: ''
+      selectedTaskIds: []
     }
   },
   computed: {
     ...mapGetters([
       'getPersonOptions',
+      'taskStatusOptions',
       'selectedTasks',
       'nbSelectedTasks',
       'nbSelectedValidations',
@@ -267,7 +329,8 @@ export default {
     ...mapActions([
       'assignSelectedTasks',
       'createSelectedTasks',
-      'unassignSelectedTasks'
+      'unassignSelectedTasks',
+      'changeSelectedTaskStatus'
     ]),
 
     clearSelection () {
@@ -289,6 +352,16 @@ export default {
         personId: this.getSelectedPersonId(),
         callback: () => {
           this.isAssignationLoading = false
+        }
+      })
+    },
+
+    confirmTaskStatusChange () {
+      this.isChangeStatusLoading = true
+      this.changeSelectedTaskStatus({
+        taskStatusId: this.taskStatusId,
+        callback: () => {
+          this.isChangeStatusLoading = false
         }
       })
     },

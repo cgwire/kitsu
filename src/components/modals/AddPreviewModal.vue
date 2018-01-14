@@ -16,7 +16,7 @@
       </p>
 
       <file-upload
-        accept=".png,.mp4"
+        accept=".png,.mp4,.mov"
         @fileselected="onFileSelected"
       ></file-upload>
 

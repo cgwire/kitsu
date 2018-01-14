@@ -31,6 +31,9 @@ import {
 
   SET_PREVIEW,
 
+  LOAD_PERSON_TASKS_END,
+  USER_LOAD_TODOS_END,
+
   RESET_ALL
 } from '../mutation-types'
 
@@ -135,12 +138,12 @@ const actions = {
     })
   },
 
-  commentTask ({ commit, state }, payload) {
-    tasksApi.commentTask(payload, (err, comment) => {
+  commentTask ({ commit, state }, {taskId, taskStatusId, comment, callback}) {
+    tasksApi.commentTask({taskId, taskStatusId, comment}, (err, comment) => {
       if (!err) {
-        commit(NEW_TASK_COMMENT_END, {comment, taskId: payload.taskId})
+        commit(NEW_TASK_COMMENT_END, {comment, taskId})
       }
-      if (payload.callback) payload.callback(err, comment)
+      if (callback) callback(err, comment)
     })
   },
 
@@ -186,6 +189,28 @@ const actions = {
     }, callback)
   },
 
+  changeSelectedTaskStatus ({ commit, state }, {taskStatusId, callback}) {
+    async.eachSeries(Object.keys(state.selectedTasks), (taskId, next) => {
+      const task = state.taskMap[taskId]
+
+      if (task && task.task_status_id !== taskStatusId) {
+        actions.commentTask({ commit, state }, {
+          taskId: taskId,
+          taskStatusId: taskStatusId,
+          comment: '',
+          callback: (err) => {
+            next(err)
+          }
+        })
+      } else {
+        next()
+      }
+    }, (err) => {
+      commit(CLEAR_SELECTED_TASKS)
+      callback(err)
+    })
+  },
+
   deleteTask ({ commit, state }, payload) {
     const task = payload.task
     tasksApi.deleteTask(task, (err) => {
@@ -197,8 +222,10 @@ const actions = {
   },
 
   addPreview ({ commit, state }, payload) {
-    payload.isMovie =
-      state.previewFormData.get('file').name.indexOf('.mp4') > 0
+    const fileName = state.previewFormData.get('file').name
+    const extension = fileName.slice(fileName.length - 4)
+    payload.isMovie = ['.mp4', '.mov'].includes(extension)
+
     tasksApi.addPreview(payload, (err, preview) => {
       if (err && payload.callback) {
         payload.callback(err)
@@ -403,6 +430,7 @@ const mutations = {
   },
 
   [NEW_TASK_COMMENT_END] (state, {comment, taskId}) {
+    const task = state.taskMap[taskId]
     if (comment.task_status === undefined) {
       const getTaskStatus = getters.getTaskStatus(state, getters)
       comment.task_status = getTaskStatus(comment.task_status_id)
@@ -424,7 +452,7 @@ const mutations = {
       state.taskComments[taskId].unshift(comment)
     }
 
-    Object.assign(state.taskMap[taskId], {
+    Object.assign(task, {
       task_status_id: comment.task_status_id,
       task_status_name: comment.task_status.name,
       task_status_short_name: comment.task_status.short_name,
@@ -519,6 +547,18 @@ const mutations = {
 
   [SET_PREVIEW] (state, {taskId, previewId}) {
     state.taskMap[taskId].entity.preview_file_id = previewId
+  },
+
+  [LOAD_PERSON_TASKS_END] (state, tasks) {
+    tasks.forEach((task) => {
+      state.taskMap[task.id] = task
+    })
+  },
+
+  [USER_LOAD_TODOS_END] (state, tasks) {
+    tasks.forEach((task) => {
+      state.taskMap[task.id] = task
+    })
   },
 
   [RESET_ALL] (state, shots) {

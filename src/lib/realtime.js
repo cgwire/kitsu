@@ -18,9 +18,17 @@ const realtime = {
       const commentId = eventData.id
       store.dispatch('loadComment', {id: commentId})
     })
-    realtime.subscribe(source, 'task:assign', (eventData) => {
-      store.dispatch('loadTodos')
-    })
+    const assignationEventListener = (eventData) => {
+      if (store.getters.user.id === eventData.person.id) {
+        store.dispatch('loadTodos')
+      }
+      if (store.getters.route.path.indexOf(eventData.person.id) > 0) {
+        store.dispatch('loadPersonTasks', {personId: eventData.person.id})
+      }
+    }
+    realtime.subscribe(source, 'task:assign', assignationEventListener)
+    realtime.subscribe(source, 'task:unassign', assignationEventListener)
+
     realtime.subscribe(source, 'preview:add', (eventData) => {
       store.commit('ADD_PREVIEW_END', {
         preview: eventData.preview,

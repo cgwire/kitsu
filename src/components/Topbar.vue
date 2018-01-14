@@ -46,7 +46,11 @@
           ref="user-name"
           @click="toggleUserMenu"
         >
-          <people-avatar class="avatar" v-bind:person="user"></people-avatar>
+          <people-avatar
+            class="avatar"
+            :person="user"
+            :is-link="false"
+          ></people-avatar>
           <people-name class="user-name" :person="user"></people-name>
         </div>
       </div>

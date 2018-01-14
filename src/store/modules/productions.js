@@ -112,7 +112,12 @@ const actions = {
     commit(LOAD_OPEN_PRODUCTIONS_START)
     productionsApi.getOpenProductions((err, productions) => {
       if (err) commit(LOAD_OPEN_PRODUCTIONS_ERROR)
-      else commit(LOAD_OPEN_PRODUCTIONS_END, productions)
+      else {
+        commit(LOAD_OPEN_PRODUCTIONS_END, productions)
+        if (!state.currentProduction && productions.length > 0) {
+          commit(SET_CURRENT_PRODUCTION, productions[0].id)
+        }
+      }
       if (callback) callback(err)
     })
   },
@@ -182,8 +187,7 @@ const mutations = {
   [LOAD_PRODUCTIONS_END] (state, productions) {
     state.isProductionsLoading = false
     state.isProductionsLoadingError = false
-    state.productions = productions
-    state.productions = sortProductions(state.productions)
+    state.productions = sortProductions(productions)
   },
 
   [LOAD_OPEN_PRODUCTIONS_START] (state) {

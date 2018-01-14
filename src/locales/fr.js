@@ -7,6 +7,7 @@ export default {
     delete_text: 'Êtes vous sûr de vouloir retirer {personName} de la base de données?',
     delete_error: 'Une erreur est survenue lors de la suppression. Il y a probablement des données liées à elle. Etes vous sur que cette personne n\'a aucune tâche assignée et n\'a fait aucun commentaire ?',
     persons: 'Personnes',
+    running_tasks: 'Tâches en cours',
     csv: {
       import_file: 'Importer',
       export_file: 'Télécharger',
@@ -87,6 +88,7 @@ export default {
   menu: {
     assign_tasks: 'Assigner des tâches',
     create_tasks: 'Créer des tâches',
+    change_status: 'Changer le statut',
     run_custom_action: 'Lancer des actions'
   },
 
@@ -137,6 +139,7 @@ export default {
     preview: 'Pré-visualisation',
     validation: 'Validation',
     assign: 'Assigner une tâche à : | Assigner {nbSelectedTasks} tâches à :',
+    change_status_to: 'Changer le statut de la tâche à : ',
     no_preview: 'Il n\'y a pas de previz pour cette tâche..',
     no_comment: 'Il n\'y a pas de commentaires pour cette tâche.',
     clear_assignations: 'effacer les assignations',

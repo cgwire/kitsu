@@ -12,5 +12,6 @@ import './store/breakdown.spec.js'
 
 import './store/lib/sorting.spec.js'
 import './store/lib/string.spec.js'
+import './store/lib/indexing.spec.js'
 
 // import './store/assets.spec.js'
