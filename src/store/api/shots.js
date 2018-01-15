@@ -63,10 +63,11 @@ export default {
       parent_id: shot.sequence_id,
       description: shot.description
     }
-    if (shot.frameIn || shot.frameOut) {
+    if (shot.frameIn || shot.frameOut || shot.fps) {
       data.data = {
         frame_in: shot.frameIn,
-        frame_out: shot.frameOut
+        frame_out: shot.frameOut,
+        fps: shot.fps
       }
     }
     client.put(`/api/data/entities/${shot.id}`, data, callback)

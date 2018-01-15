@@ -55,7 +55,15 @@
           v-focus
         >
         </text-field>
-
+        <text-field
+          ref="fpsField"
+          :label="$t('shots.fields.fps')"
+          v-model="form.fps"
+          type="number"
+          @enter="runConfirmation"
+          v-focus
+        >
+        </text-field>
       </form>
 
       <p class="has-text-right">
@@ -131,7 +139,8 @@ export default {
           sequence_id: this.shotToEdit.sequence_id,
           production_id: this.shotToEdit.project_id,
           frameIn: this.frameIn,
-          frameOut: this.frameOut
+          frameOut: this.frameOut,
+          fps: this.fps
         },
         shotSuccessText: ''
       }
@@ -143,7 +152,8 @@ export default {
           entity_type_id: '',
           project_id: '',
           frameIn: '',
-          frameOut: ''
+          frameOut: '',
+          fps: ''
         },
         shotSuccessText: ''
       }
@@ -168,6 +178,10 @@ export default {
 
     frameOut () {
       return this.shotToEdit.data ? this.shotToEdit.data.frame_out : ''
+    },
+
+    fps () {
+      return this.shotToEdit.data ? this.shotToEdit.data.fps : ''
     }
   },
 
@@ -211,7 +225,8 @@ export default {
           name: this.shotToEdit.name,
           description: this.shotToEdit.description,
           frameIn: this.frameIn,
-          frameOut: this.frameOut
+          frameOut: this.frameOut,
+          fps: this.fps
         }
       }
     }
