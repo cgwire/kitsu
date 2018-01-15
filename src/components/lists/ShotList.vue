@@ -12,6 +12,7 @@
           <th class="name shot-name">{{ $t('shots.fields.name') }}</th>
           <th class="framein">{{ $t('shots.fields.frame_in') }}</th>
           <th class="frameout">{{ $t('shots.fields.frame_out') }}</th>
+          <th class="fps">{{ $t('shots.fields.fps') }}</th>
           <th class="description">{{ $t('shots.fields.description') }}</th>
           <th
             class="validation"
@@ -97,6 +98,9 @@
           </td>
           <td class="frameout">
             {{ entry.data && entry.data.frame_out ? entry.data.frame_out : ''}}
+          </td>
+          <td class="fps">
+            {{ entry.data && entry.data.fps ? entry.data.fps : ''}}
           </td>
           <td class="description">
             {{ entry.description }}
@@ -269,6 +273,12 @@ th.actions {
 }
 
 .frameout {
+  min-width: 50px;
+  max-width: 50px;
+  width: 50px;
+}
+
+.fps {
   min-width: 50px;
   max-width: 50px;
   width: 50px;

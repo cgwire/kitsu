@@ -250,6 +250,7 @@ export default {
       sequence: 'Séquence',
       frame_in: 'In',
       frame_out: 'Out',
+      fps: 'FPS',
       description: 'Description',
       production: 'Prod'
     },
