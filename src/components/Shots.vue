@@ -51,6 +51,7 @@
               <input
                 class="input search-input"
                 type="text"
+                ref="shot-search-field"
                 @input="onSearchChange"
                 v-focus
               />
@@ -251,19 +252,21 @@ export default {
       'getShot',
       'shotValidationColumns',
       'currentProduction',
-      'isCurrentUserManager'
+      'isCurrentUserManager',
+      'shotSearchText'
     ])
   },
 
   created () {
-    this.$store.commit('SET_SHOT_SEARCH', '')
     this.setLastProductionScreen('shots')
 
     const productionId = this.$store.state.route.params.production_id
-    this.$store.commit(
-      'SET_CURRENT_PRODUCTION',
-      productionId
-    )
+    if (this.currentProduction.id !== productionId) {
+      this.$store.commit(
+        'SET_CURRENT_PRODUCTION',
+        productionId
+      )
+    }
 
     if (this.shots.length === 0 ||
         this.shots[0].production_id !== this.currentProduction.id) {
@@ -273,10 +276,17 @@ export default {
     }
   },
 
+  mounted () {
+    if (this.shotSearchText.length > 0) {
+      this.$refs['shot-search-field'].value = this.shotSearchText
+    }
+  },
+
   methods: {
     ...mapActions([
       'loadShots',
-      'setLastProductionScreen'
+      'setLastProductionScreen',
+      'setShotSearch'
     ]),
 
     confirmNewShotStay (form) {
@@ -464,8 +474,8 @@ export default {
       })
     },
     onSearchChange (event) {
-      const searchQuery = event.target.value
-      this.$store.commit('SET_SHOT_SEARCH', searchQuery)
+      const searchQuery = this.$refs['shot-search-field'].value
+      this.setShotSearch(searchQuery)
     }
   },
 
@@ -479,7 +489,10 @@ export default {
       }
       if (this.$route.path.length === 55) this.$router.push(newPath)
       const path = this.$route.path
-      if (oldPath !== path) this.$store.dispatch('loadShots')
+      if (oldPath !== path) {
+        this.$refs['shot-search-field'].value = ''
+        this.$store.dispatch('loadShots')
+      }
     }
   },
 

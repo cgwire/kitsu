@@ -38,6 +38,7 @@ import {
 
   SET_ASSET_SEARCH,
   CREATE_TASKS_END,
+  SET_CURRENT_PRODUCTION,
 
   DISPLAY_MORE_ASSETS,
 
@@ -259,6 +260,7 @@ const mutations = {
     assets = sortAssets(assets)
     assets.forEach((asset) => {
       state.assetMap[asset.id] = asset
+      asset.production_id = helpers.getCurrentProduction().id
     })
 
     state.assets = assets
@@ -474,6 +476,10 @@ const mutations = {
       0,
       state.displayedAssets.length + PAGE_SIZE
     )
+  },
+
+  [SET_CURRENT_PRODUCTION] (state, production) {
+    state.assetSearchText = ''
   },
 
   [RESET_ALL] (state) {
