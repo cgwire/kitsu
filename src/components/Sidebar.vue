@@ -19,7 +19,7 @@
 
          <p @click="toggleSidebar()">
            <router-link :to="{name: 'todos'}">
-             Tasks
+             {{ $t("tasks.my_tasks") }}
            </router-link>
          </p>
 
@@ -56,9 +56,18 @@
              {{ $t("people.title") }}
              </router-link>
            </p>
+         </div>
+
+         <div v-if="isCurrentUserAdmin">
+           <h2>{{ $t('main.admin')}}</h2>
            <p @click="toggleSidebar()">
              <router-link to="/task-types">
              {{ $t("task_types.title") }}
+             </router-link>
+           </p>
+           <p @click="toggleSidebar()">
+             <router-link to="/task-status">
+             {{ $t("task_status.title") }}
              </router-link>
            </p>
            <p @click="toggleSidebar()">
@@ -100,7 +109,8 @@ export default {
       'breakdownPath',
       'assetsPath',
       'shotsPath',
-      'isCurrentUserManager'
+      'isCurrentUserManager',
+      'isCurrentUserAdmin'
     ])
   },
   methods: {

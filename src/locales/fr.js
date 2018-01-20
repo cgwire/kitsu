@@ -67,6 +67,8 @@ export default {
     cancel: 'Annuler',
     close: 'Fermer',
     or: 'ou',
+    yes: 'oui',
+    no: 'non',
     confirmation: 'Confirmer',
     confirmation_and_stay: 'Confirmer et rester',
     clear_selection: 'Effacer la sélection',
@@ -75,6 +77,7 @@ export default {
     user: 'Utilisateur',
     production: 'Production',
     studio: 'Studio',
+    admin: 'Admin',
     csv: {
       import_file: 'Importer',
       export_file: 'Exporter',
@@ -184,6 +187,21 @@ export default {
     },
     delete_text: 'Êtes vous sur de vouloir retirer {name} de la base de données ?',
     delete_error: 'Une erreur est survenue lors de la suppression du type de tâche. Êtes vous sûr qu\'aucune tâche n\'est lié à ce type de tâche ?'
+  },
+
+  task_status: {
+    title: 'Statut des tâches',
+    edit_title: 'Modifier statut',
+    number: 'statut | task statuts',
+    new_task_status: 'Ajouter un statut de tâche',
+    fields: {
+      name: 'Nom',
+      short_name: 'Nom court',
+      color: 'Couleur',
+      is_reviewable: 'Est vérifiable'
+    },
+    delete_text: 'Êtes vous sur de vouloir retirer {name} de la base de données ?',
+    delete_error: 'Une erreur est survenue lors de la suppression du statut de tâche. Êtes vous sûr qu\'aucune tâche n\'est lié à ce statut de tâche ?'
   },
 
   custom_actions: {
