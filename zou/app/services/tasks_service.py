@@ -331,7 +331,12 @@ def get_or_create_task_type(
     return task_type.serialize()
 
 
-def get_or_create_status(name, short_name="", color="#f5f5f5"):
+def get_or_create_status(
+    name,
+    short_name="",
+    color="#f5f5f5",
+    is_reviewable=False
+):
     status = TaskStatus.get_by(name=name)
     if status is None and len(short_name) > 0:
         status = TaskStatus.get_by(short_name=short_name)
@@ -340,7 +345,8 @@ def get_or_create_status(name, short_name="", color="#f5f5f5"):
         status = TaskStatus.create(
             name=name,
             short_name=short_name or name.lower(),
-            color=color
+            color=color,
+            is_reviewable=is_reviewable
         )
     return status.serialize()
 
@@ -437,6 +443,7 @@ def get_comments(task_id):
             TaskStatus.name,
             TaskStatus.short_name,
             TaskStatus.color,
+            TaskStatus.is_reviewable,
             Person.first_name,
             Person.last_name,
             Person.has_avatar
@@ -448,6 +455,7 @@ def get_comments(task_id):
             task_status_name,
             task_status_short_name,
             task_status_color,
+            task_status_is_reviewable,
             person_first_name,
             person_last_name,
             person_has_avatar
@@ -464,6 +472,7 @@ def get_comments(task_id):
             "name": task_status_name,
             "short_name": task_status_short_name,
             "color": task_status_color,
+            "is_reviewable": task_status_is_reviewable,
             "id": str(comment.task_status_id)
         }
 

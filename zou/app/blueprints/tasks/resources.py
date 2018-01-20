@@ -84,9 +84,10 @@ class AddPreviewResource(Resource):
         )
         person = persons_service.get_current_user()
 
-        if task_status["short_name"] not in ["wfa", "retake"]:
+        if not task_status["is_reviewable"]:
             return {
-                "error": "Comment status is not waiting for approval."
+                "error": "Comment status is not reviewable, you cannot link a "
+                         "preview to it."
             }, 400
 
         revision = tasks_service.get_next_preview_revision(task_id)
