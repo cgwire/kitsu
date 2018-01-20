@@ -2681,6 +2681,11 @@
       "integrity": "sha1-s2nW+128E+7PUk+RsHD+7cNXzzQ=",
       "dev": true
     },
+    "deepmerge": {
+      "version": "2.0.1",
+      "resolved": "https://registry.npmjs.org/deepmerge/-/deepmerge-2.0.1.tgz",
+      "integrity": "sha512-VIPwiMJqJ13ZQfaCsIFnp5Me9tnjURiaIFxfz7EH0Ci0dTSQpZtSLrqOicXqEd/z2r+z+Klk9GzmnRsgpgbOsQ=="
+    },
     "defined": {
       "version": "1.0.0",
       "resolved": "https://registry.npmjs.org/defined/-/defined-1.0.0.tgz",
@@ -7725,9 +7730,9 @@
       }
     },
     "marked": {
-      "version": "0.3.7",
-      "resolved": "https://registry.npmjs.org/marked/-/marked-0.3.7.tgz",
-      "integrity": "sha512-zBEP4qO1YQp5aXHt8S5wTiOv9i2X74V/LQL0zhUNvVaklt6Ywa6lChxIvS+ibYlCGgADwKwZFhjC3+XfpsvQvQ=="
+      "version": "0.3.12",
+      "resolved": "https://registry.npmjs.org/marked/-/marked-0.3.12.tgz",
+      "integrity": "sha512-k4NaW+vS7ytQn6MgJn3fYpQt20/mOgYM5Ft9BYMfQJDz2QT6yEeS9XJ8k2Nw8JTeWK/znPPW2n3UJGzyYEiMoA=="
     },
     "material-colors": {
       "version": "1.2.5",
@@ -12067,20 +12072,15 @@
       }
     },
     "vue-meta": {
-      "version": "1.4.0",
-      "resolved": "https://registry.npmjs.org/vue-meta/-/vue-meta-1.4.0.tgz",
-      "integrity": "sha512-ofyH98HZBL6M4mViuEOaf0aizqpcXuEsZOVTjN5xV849u+N2plGuV7glSF6uDuf4rE68QwS92bsxiuW0qQDMyw==",
+      "version": "1.3.1",
+      "resolved": "https://registry.npmjs.org/vue-meta/-/vue-meta-1.3.1.tgz",
+      "integrity": "sha512-jOIEJiowPaZJuz4121dTyDzg5KIgHlkEunLiUmvjzfCe+5f5GgcIdBfQRgvBO47LLSYsW7WEzzJdHoR0sKjLTw==",
       "requires": {
         "deepmerge": "2.0.1",
         "lodash.isplainobject": "4.0.6",
         "object-assign": "4.1.1"
       },
       "dependencies": {
-        "deepmerge": {
-          "version": "2.0.1",
-          "resolved": "https://registry.npmjs.org/deepmerge/-/deepmerge-2.0.1.tgz",
-          "integrity": "sha512-VIPwiMJqJ13ZQfaCsIFnp5Me9tnjURiaIFxfz7EH0Ci0dTSQpZtSLrqOicXqEd/z2r+z+Klk9GzmnRsgpgbOsQ=="
-        },
         "lodash.isplainobject": {
           "version": "4.0.6",
           "resolved": "https://registry.npmjs.org/lodash.isplainobject/-/lodash.isplainobject-4.0.6.tgz",
