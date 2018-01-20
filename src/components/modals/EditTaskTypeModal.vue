@@ -108,7 +108,7 @@ export default {
     return {
       form: {
         name: '',
-        color: '#000000',
+        color: '#999999',
         priority: '',
         for_shots: 'false'
       },
