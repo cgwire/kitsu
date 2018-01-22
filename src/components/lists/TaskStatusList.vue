@@ -47,7 +47,7 @@
               name: 'delete-task-status',
               params: {task_status_id: entry.id}
             }"
-            v-if="!['done', 'retake', 'todo'].includes(entry.short_name)"
+            v-if="!['done', 'todo'].includes(entry.short_name)"
           >
           </row-actions>
           <td class="actions" v-else></td>
