@@ -76,13 +76,7 @@
           v-for="entry in entries"
         >
           <td class="thumbnail">
-            <img
-              class="thumbnail-picture"
-              v-lazy="'/api/pictures/thumbnails/preview-files/' + entry.preview_file_id + '.png'"
-              v-if="entry.preview_file_id && entry.preview_file_id.length > 0"
-            />
-            <span class="thumbnail-picture thumbnail-empty" v-else>
-            </span>
+            <entity-thumbnail :entity="entry"></entity-thumbnail>
           </td>
           <td :class="{name: !entry.canceled}" v-if="entries[0].episode_name.length > 0">
             {{ entry.episode_name }}
@@ -161,6 +155,7 @@ import ButtonLink from '../widgets/ButtonLink'
 import ButtonHrefLink from '../widgets/ButtonHrefLink'
 import PageTitle from '../widgets/PageTitle'
 import TableInfo from '../widgets/TableInfo'
+import EntityThumbnail from '../widgets/EntityThumbnail'
 
 export default {
   name: 'shot-list',
@@ -178,6 +173,7 @@ export default {
   components: {
     ButtonLink,
     ButtonHrefLink,
+    EntityThumbnail,
     PageTitle,
     RowActions,
     TableInfo,

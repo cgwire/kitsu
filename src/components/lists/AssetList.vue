@@ -72,13 +72,7 @@
           v-for="entry in entries"
         >
           <td class="thumbnail">
-            <img
-              class="thumbnail-picture"
-              v-lazy="'/api/pictures/thumbnails/preview-files/' + entry.preview_file_id + '.png'"
-              v-if="entry.preview_file_id && entry.preview_file_id.length > 0"
-            />
-            <span class="thumbnail-picture thumbnail-empty" v-else>
-            </span>
+            <entity-thumbnail :entity="entry"></entity-thumbnail>
           </td>
           <td :class="{type: !entry.canceled}">
             {{ entry.asset_type_name }}
@@ -140,11 +134,12 @@
 <script>
 import { mapGetters, mapActions } from 'vuex'
 import RowActions from '../widgets/RowActions'
-import ValidationCell from '../cells/ValidationCell'
 import ButtonLink from '../widgets/ButtonLink'
 import ButtonHrefLink from '../widgets/ButtonHrefLink'
+import EntityThumbnail from '../widgets/EntityThumbnail'
 import PageTitle from '../widgets/PageTitle'
 import TableInfo from '../widgets/TableInfo'
+import ValidationCell from '../cells/ValidationCell'
 
 export default {
   name: 'asset-list',
@@ -162,8 +157,9 @@ export default {
   components: {
     ButtonLink,
     ButtonHrefLink,
-    RowActions,
+    EntityThumbnail,
     PageTitle,
+    RowActions,
     TableInfo,
     ValidationCell
   },
@@ -260,13 +256,6 @@ td.type {
 
 .thumbnail img {
   margin-top: 5px;
-}
-
-span.thumbnail-empty {
-  display: block;
-  width: 50px;
-  height: 30px;
-  background: #F3F3F3;
 }
 
 .info {
