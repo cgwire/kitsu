@@ -19,6 +19,7 @@ import OpenProductions from '../components/OpenProductions'
 import Profile from '../components/Profile'
 import Task from '../components/Task'
 import TaskTypes from '../components/TaskTypes'
+import TaskStatus from '../components/TaskStatus'
 import Todos from '../components/Todos'
 import ServerDown from '../components/ServerDown'
 import Shots from '../components/Shots'
@@ -250,6 +251,27 @@ export const routes = [
         name: 'delete-task-type',
         path: '/task-types/delete/:task_type_id',
         component: TaskTypes
+      },
+
+      {
+        name: 'task-status',
+        path: '/task-status',
+        component: TaskStatus
+      },
+      {
+        name: 'new-task-status',
+        path: '/task-status/new',
+        component: TaskStatus
+      },
+      {
+        name: 'edit-task-status',
+        path: '/task-status/edit/:task_status_id',
+        component: TaskStatus
+      },
+      {
+        name: 'delete-task-status',
+        path: '/task-status/delete/:task_status_id',
+        component: TaskStatus
       },
 
       {

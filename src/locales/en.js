@@ -67,6 +67,8 @@ export default {
     cancel: 'Cancel',
     close: 'Close',
     or: 'or',
+    yes: 'yes',
+    no: 'no',
     confirmation: 'Confirm',
     confirmation_and_stay: 'Confirm and stay',
     clear_selection: 'Clear current selection',
@@ -75,6 +77,7 @@ export default {
     user: 'User',
     production: 'Production',
     studio: 'Studio',
+    admin: 'Admin',
     csv: {
       import_file: 'Import',
       export_file: 'Export',
@@ -203,6 +206,21 @@ export default {
     },
     delete_text: 'Are you sure you want to remove {name} from your database?',
     delete_error: 'An error occured while deleting this task type. There are probably data linked to it. Are you sure this task type has no task linked to it?'
+  },
+
+  task_status: {
+    title: 'Task Status',
+    edit_title: 'Edit task status',
+    number: 'task status | task status',
+    new_task_status: 'Add a task status',
+    fields: {
+      name: 'Name',
+      short_name: 'Short name',
+      color: 'Color',
+      is_reviewable: 'Is reviewable'
+    },
+    delete_text: 'Are you sure you want to remove {name} from your database?',
+    delete_error: 'An error occured while deleting this task status. There are probably data linked to it. Are you sure this task status has no task linked to it?'
   },
 
   asset_types: {

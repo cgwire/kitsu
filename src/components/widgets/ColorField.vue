@@ -1,15 +1,15 @@
 <template>
 <div class="field">
-  <label class="label">{{ label }}</label>
+  <label class="label">{{ label }} {{ value }}</label>
   <p class="control">
     <div
       :class="{
         color: true,
-        selected: selectedIndex == index
+        selected: value === color
       }"
       :ref="'color-' + index"
       v-for="(color, index) in colors"
-      @click="colorChanged(color, index)"
+      @click="colorChanged(color)"
     >
       <span
         :style="{ background: color }"
@@ -22,7 +22,6 @@
 
 <script>
 import { mapGetters, mapActions } from 'vuex'
-import { Compact } from 'vue-color'
 
 export default {
   name: 'text-field',
@@ -32,7 +31,7 @@ export default {
       type: String
     },
     value: {
-      default: '',
+      default: '#999999',
       type: String
     },
     placeholder: {
@@ -42,11 +41,9 @@ export default {
     type: {
       default: 'text',
       type: String
-    }
-  },
-  data () {
-    return {
-      colors: [
+    },
+    colors: {
+      default: () => [
         '#999999',
         '#8D6E63',
         '#43A047',
@@ -64,12 +61,13 @@ export default {
         '#26C6DA',
         '#64B5F6',
         '#78909C'
-      ],
-      selectedIndex: -1
+      ]
     }
   },
-  components: {
-    'color-picker': Compact
+  data () {
+    return {
+      selectedColor: '#999999'
+    }
   },
   computed: {
     ...mapGetters([
@@ -79,7 +77,6 @@ export default {
     ...mapActions([
     ]),
     colorChanged (color, index) {
-      this.selectedIndex = index
       this.$emit('input', color)
     }
   }

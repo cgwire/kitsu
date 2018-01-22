@@ -174,8 +174,9 @@ export default {
         this.form.name = ''
         this.form.description = ''
       } else {
+        console.log(this.assetToEdit)
         this.form = {
-          entity_type_id: this.assetToEdit.entity_type_id,
+          entity_type_id: this.assetToEdit.asset_type_id,
           project_id: this.assetToEdit.project_id,
           name: this.assetToEdit.name,
           description: this.assetToEdit.description

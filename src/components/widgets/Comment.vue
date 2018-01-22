@@ -23,16 +23,16 @@
     <div class="content">
       <p class="comment-person">
         <strong>
-          <people-name class="" :person="comment.person">
-          </people-name>
+          <people-name class="" :person="comment.person"></people-name>
         </strong>
         <span class="comment-date">{{ formatDate(comment.created_at) }}</span>
       </p>
 
-      <div class="level" v-if="comment.task_status.short_name === 'retake'">
+      <div class="level" v-if="comment.task_status.is_reviewable">
+
         <div class="level-left">
           <span class="level-item" :style="{'color': comment.task_status.color}">
-            {{ $t('comments.retake').toUpperCase() }}
+            {{ comment.task_status.name.toUpperCase() + '!' }}
           </span>
           <router-link
             :to="previewRoute"
@@ -51,33 +51,6 @@
           </button-link>
         </div>
         </button-link>
-      </div>
-
-      <div class="level" v-if="comment.task_status.name === 'Waiting For Approval'">
-        <div class="level-left">
-          <span
-            class="level-item"
-            :style="{'color': comment.task_status.color}"
-          >
-            {{ $t('comments.validation_required') }}
-          </span>
-
-          <router-link
-            :to="previewRoute"
-            class="revision"
-            v-if="comment.preview"
-          >
-            revision {{ comment.preview.revision }}
-          </router-link>
-          <button-link
-            class="level-item"
-            :text="$t('tasks.add_preview')"
-            icon="upload"
-            :path="'/tasks/' + comment.object_id + '/comments/' + comment.id + '/add-preview'"
-            v-else
-          >
-          </button-link>
-        </div>
       </div>
 
       <p v-if="comment.task_status.name === 'Done'">

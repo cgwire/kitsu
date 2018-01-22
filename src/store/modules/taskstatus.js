@@ -41,70 +41,71 @@ const actions = {
     })
   },
 
-  newTaskStatus ({ commit, state }, payload) {
-    commit(EDIT_TASK_STATUS_START, payload.data)
-    taskStatusApi.newTaskStatus(payload.data, (err, taskStatus) => {
+  newTaskStatus ({ commit, state }, {form, callback}) {
+    commit(EDIT_TASK_STATUS_START, form)
+    taskStatusApi.newTaskStatus(form, (err, taskStatus) => {
       if (err) {
         commit(EDIT_TASK_STATUS_ERROR)
       } else {
         commit(EDIT_TASK_STATUS_END, taskStatus)
       }
-      if (payload.callback) payload.callback(err)
+      if (callback) callback(err, taskStatus)
     })
   },
 
-  editTaskStatus ({ commit, state }, payload) {
+  saveTaskStatus ({ commit, state }, {form, callback}) {
     commit(EDIT_TASK_STATUS_START)
-    taskStatusApi.updateTaskStatus(payload.data, (err, taskStatus) => {
+    taskStatusApi.updateTaskStatus(form, (err, taskStatus) => {
       if (err) {
         commit(EDIT_TASK_STATUS_ERROR)
       } else {
         commit(EDIT_TASK_STATUS_END, taskStatus)
       }
-      if (payload.callback) payload.callback(err)
+      if (callback) callback(err)
     })
   },
 
-  deleteTaskStatus ({ commit, state }, payload) {
+  deleteTaskStatus ({ commit, state }, {taskStatus, callback}) {
     commit(DELETE_TASK_STATUS_START)
-    const taskStatus = payload.taskStatus
     taskStatusApi.deleteTaskStatus(taskStatus, (err) => {
       if (err) {
         commit(DELETE_TASK_STATUS_ERROR)
       } else {
         commit(DELETE_TASK_STATUS_END, taskStatus)
       }
-      if (payload.callback) payload.callback(err)
+      if (callback) callback(err)
     })
   }
 }
 
 const mutations = {
   [LOAD_TASK_STATUSES_START] (state) {
+    state.taskStatus = []
+    state.taskStatusMap = {}
   },
 
   [LOAD_TASK_STATUSES_ERROR] (state) {
+    state.taskStatus = []
+    state.taskStatusMap = {}
   },
 
   [LOAD_TASK_STATUSES_END] (state, taskStatus) {
-    state.taskStatus = sortByName(state.taskStatus)
+    state.taskStatus = sortByName(taskStatus)
     state.taskStatusMap = {}
     taskStatus.forEach((taskStatus) => {
       state.taskStatusMap[taskStatus.id] = taskStatus
     })
   },
 
-  [EDIT_TASK_STATUS_START] (state, data) {
+  [EDIT_TASK_STATUS_START] (state, form) {
   },
-
   [EDIT_TASK_STATUS_ERROR] (state) {
   },
-
   [EDIT_TASK_STATUS_END] (state, newTaskStatus) {
-    const taskStatus = getters.getTaskStatus(state)(newTaskStatus.id)
+    const taskStatus = state.taskStatusMap[newTaskStatus.id]
 
     if (taskStatus && taskStatus.id) {
-      Object.asign(taskStatus, newTaskStatus)
+      Object.assign(taskStatus, newTaskStatus)
     } else {
       state.taskStatus.push(newTaskStatus)
       state.taskStatus = sortByName(state.taskStatus)

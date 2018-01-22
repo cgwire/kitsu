@@ -47,6 +47,7 @@ import {
   NEW_TASK_COMMENT_END,
 
   SET_SHOT_SEARCH,
+  SET_CURRENT_PRODUCTION,
   CREATE_TASKS_END,
   DISPLAY_MORE_SHOTS,
 
@@ -268,8 +269,11 @@ const actions = {
 
   displayMoreShots ({commit}) {
     commit(DISPLAY_MORE_SHOTS)
-  }
+  },
 
+  setShotSearch ({commit}, searchQuery) {
+    commit(SET_SHOT_SEARCH, searchQuery)
+  }
 }
 
 const mutations = {
@@ -301,6 +305,7 @@ const mutations = {
     state.shotMap = {}
     state.shots.forEach((shot) => {
       state.shotMap[shot.id] = shot
+      shot.production_id = helpers.getCurrentProduction().id
     })
     state.displayedShots = state.shots.slice(0, PAGE_SIZE)
     state.displayedShotsLength = state.shots.length
@@ -517,6 +522,10 @@ const mutations = {
       0,
       state.displayedShots.length + PAGE_SIZE
     )
+  },
+
+  [SET_CURRENT_PRODUCTION] (state, production) {
+    state.assetSearchText = ''
   },
 
   [RESET_ALL] (state) {

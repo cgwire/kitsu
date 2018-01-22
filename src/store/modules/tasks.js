@@ -411,11 +411,6 @@ const mutations = {
     state.taskComments[taskId] = comments
     state.taskPreviews[taskId] = comments.reduce((previews, comment) => {
       if (comment.preview) {
-        if (comment.task_status.short_name === 'retake') {
-          comment.preview.feedback = true
-        } else {
-          comment.preview.feedback = false
-        }
         previews.push(comment.preview)
       }
       return previews

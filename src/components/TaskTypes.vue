@@ -141,7 +141,7 @@ export default {
       const taskTypeId = this.$store.state.route.params.task_type_id
 
       if (path.indexOf('new') > 0) {
-        this.taskTypeToEdit = {color: '#FFFFFF'}
+        this.taskTypeToEdit = {color: '#999999'}
         this.modals.isNewDisplayed = true
       } else if (path.indexOf('edit') > 0) {
         this.taskTypeToEdit = this.getTaskType(taskTypeId)

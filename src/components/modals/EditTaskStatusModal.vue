@@ -4,40 +4,42 @@
   'is-active': active
 }">
   <div class="modal-background"></div>
-  <div class="modal-content">
 
+  <div class="modal-content">
     <div class="box">
 
       <h1 class="title" v-if="isEditing()">
-        {{ $t("task_types.edit_title") }} {{ taskTypeToEdit.name }}
+        {{ $t("task_status.edit_title") }} {{ taskStatusToEdit.name }}
       </h1>
       <h1 class="title" v-else>
-        {{ $t("task_types.new_task_type") }}
+        {{ $t("task_status.new_task_status") }}
       </h1>
 
       <form v-on:submit.prevent>
         <text-field
           ref="nameField"
-          :label="$t('task_types.fields.name')"
+          :label="$t('task_status.fields.name')"
           v-model="form.name"
           v-focus
         >
         </text-field>
-        <combobox
-          :label="$t('task_types.fields.priority')"
-          :options="priorityOptions"
-          v-model="form.priority"
+        <text-field
+          ref="shortNameField"
+          :label="$t('task_status.fields.short_name')"
+          v-model="form.short_name"
+          v-focus
         >
-        </combobox>
+        </text-field>
         <combobox
-          :label="$t('task_types.fields.dedicated_to')"
-          :options="dedicatedToOptions"
-          v-model="form.for_shots"
+          :label="$t('task_status.fields.is_reviewable')"
+          :options="isReviewableOptions"
+          v-model="form.is_reviewable"
         >
         </combobox>
         <color-field
           ref="colorField"
-          :label="$t('task_types.fields.color')"
+          :label="$t('task_status.fields.color')"
+          :colors="colors"
           v-model="form.color"
         >
         </color-field>
@@ -73,7 +75,7 @@ import Combobox from '../widgets/Combobox.vue'
 import ColorField from '../widgets/ColorField'
 
 export default {
-  name: 'edit-task-type-modal',
+  name: 'edit-task-status-modal',
   components: {
     Combobox,
     TextField,
@@ -88,18 +90,25 @@ export default {
     'isLoading',
     'isError',
     'errorText',
-    'taskTypeToEdit'
+    'taskStatusToEdit'
   ],
 
   watch: {
-    taskTypeToEdit () {
-      if (this.taskTypeToEdit) {
+    taskStatusToEdit () {
+      if (this.taskStatusToEdit) {
         this.form = {
-          name: this.taskTypeToEdit.name,
-          color: this.taskTypeToEdit.color,
-          priority: String(this.taskTypeToEdit.priority),
-          for_shots: String(this.taskTypeToEdit.for_shots)
+          name: this.taskStatusToEdit.name,
+          short_name: this.taskStatusToEdit.short_name,
+          color: this.taskStatusToEdit.color,
+          is_reviewable: String(this.taskStatusToEdit.is_reviewable)
         }
+      }
+    },
+    active () {
+      if (this.active) {
+        setTimeout(() => {
+          this.$refs.nameField.focus()
+        }, 100)
       }
     }
   },
@@ -108,33 +117,36 @@ export default {
     return {
       form: {
         name: '',
+        short_name: '',
         color: '#999999',
-        priority: '',
-        for_shots: 'false'
+        is_reviewable: 'false'
       },
-      priorityOptions: [
-        {label: '1', value: '1'},
-        {label: '2', value: '2'},
-        {label: '3', value: '3'},
-        {label: '4', value: '4'},
-        {label: '5', value: '5'},
-        {label: '6', value: '6'},
-        {label: '7', value: '7'},
-        {label: '8', value: '8'},
-        {label: '9', value: '9'},
-        {label: '10', value: '10'}
+      isReviewableOptions: [
+        {label: this.$tc('main.yes'), value: 'true'},
+        {label: this.$tc('main.no'), value: 'false'}
       ],
-      dedicatedToOptions: [
-        {label: this.$tc('assets.title'), value: 'false'},
-        {label: this.$tc('shots.title'), value: 'true'}
+      colors: [
+        '#000000',
+        '#E81123',
+        '#ff3860',
+        '#FF5722',
+        '#FFA000',
+        '#AFB42B',
+        '#22d160',
+        '#43A047',
+        '#498205',
+        '#607D8B',
+        '#3273dc',
+        '#8764B8',
+        '#ab26ff'
       ]
     }
   },
 
   computed: {
     ...mapGetters([
-      'taskTypes',
-      'taskTypeStatusOptions'
+      'taskStatus',
+      'taskStatusStatusOptions'
     ])
   },
 
@@ -144,7 +156,7 @@ export default {
     confirmClicked () {
       this.$emit('confirm', this.form)
     },
-    isEditing: () => this.taskTypeToEdit && this.taskTypeToEdit.id
+    isEditing: () => this.taskStatusToEdit && this.taskStatusToEdit.id
   }
 }
 </script>
@@ -152,10 +164,6 @@ export default {
 <style scoped>
 .modal-content .box p.text {
   margin-bottom: 1em;
-}
-.is-danger {
-  color: #ff3860;
-  font-style: italic;
 }
 .title {
   border-bottom: 2px solid #DDD;

@@ -52,6 +52,7 @@
             <input
               class="input search-input"
               type="text"
+              ref="asset-search-field"
               @input="onSearchChange"
               v-focus
             />
@@ -226,6 +227,7 @@ export default {
       'assets',
       'displayedAssets',
       'assetsCsvFormData',
+      'assetSearchText',
       'assetTypes',
       'openProductions',
       'isAssetsLoading',
@@ -242,14 +244,15 @@ export default {
   },
 
   created () {
-    this.$store.commit('SET_ASSET_SEARCH', '')
     this.setLastProductionScreen('assets')
 
     const productionId = this.$store.state.route.params.production_id
-    this.$store.commit(
-      'SET_CURRENT_PRODUCTION',
-      productionId
-    )
+    if (this.currentProduction.id !== productionId) {
+      this.$store.commit(
+        'SET_CURRENT_PRODUCTION',
+        productionId
+      )
+    }
 
     if (this.assets.length === 0 ||
         this.assets[0].production_id !== this.currentProduction.id) {
@@ -259,10 +262,17 @@ export default {
     }
   },
 
+  mounted () {
+    if (this.assetSearchText.length > 0) {
+      this.$refs['asset-search-field'].value = this.assetSearchText
+    }
+  },
+
   methods: {
     ...mapActions([
       'loadAssets',
-      'setLastProductionScreen'
+      'setLastProductionScreen',
+      'setAssetSearch'
     ]),
 
     confirmNewAssetStay (form) {
@@ -440,9 +450,9 @@ export default {
       })
     },
 
-    onSearchChange (event) {
-      const searchQuery = event.target.value
-      this.$store.commit('SET_ASSET_SEARCH', searchQuery)
+    onSearchChange () {
+      const searchQuery = this.$refs['asset-search-field'].value
+      this.setAssetSearch(searchQuery)
     }
   },
 
@@ -458,7 +468,10 @@ export default {
       if (this.$route.path.length === 56) this.$router.push(newPath)
       const path = this.$route.path
 
-      if (oldPath !== path) this.$store.dispatch('loadAssets')
+      if (oldPath !== path) {
+        this.$refs['asset-search-field'].value = ''
+        this.$store.dispatch('loadAssets')
+      }
     }
   },
 
