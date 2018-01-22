@@ -118,13 +118,34 @@ def init_data():
         compositing, "Compositing", "#ff5252", 7, True)
     print("Task types initialized.")
 
-    tasks_service.get_or_create_status("Todo", "todo", "#f5f5f5")
-    tasks_service.get_or_create_status("Work In Progress", "wip", "#3273dc")
     tasks_service.get_or_create_status(
-        "Waiting For Approval", "wfa", "#ab26ff"
+        "Todo",
+        "todo",
+        "#f5f5f5"
     )
-    tasks_service.get_or_create_status("Retake", "retake", "#ff3860")
-    tasks_service.get_or_create_status("Done", "done", "#22d160")
+    tasks_service.get_or_create_status(
+        "Work In Progress",
+        "wip",
+        "#3273dc"
+    )
+    tasks_service.get_or_create_status(
+        "Waiting For Approval",
+        "wfa",
+        "#ab26ff",
+        is_reviewable=True
+    )
+    tasks_service.get_or_create_status(
+        "Retake",
+        "retake",
+        "#ff3860",
+        is_reviewable=True
+    )
+    tasks_service.get_or_create_status(
+        "Done",
+        "done",
+        "#22d160",
+        is_reviewable=True
+    )
     print("Task status initialized.")
 
 

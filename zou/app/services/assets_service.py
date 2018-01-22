@@ -355,6 +355,7 @@ def all_assets_and_tasks(criterions={}, page=1):
                 "preview_file_id": str(asset.preview_file_id or ""),
                 "description": asset.description,
                 "asset_type_name": entity_type_name,
+                "asset_type_id": str(asset.entity_type_id),
                 "canceled": asset.canceled,
                 "data": fields.serialize_value(asset.data),
                 "tasks": []
