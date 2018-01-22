@@ -92,7 +92,7 @@ export default {
   computed: {
     ...mapGetters([
       'taskStatus',
-      'getTaskStatus'
+      'taskStatusMap'
     ])
   },
 
@@ -162,10 +162,10 @@ export default {
         this.taskStatusToEdit = {color: '#000000'}
         this.modals.isNewDisplayed = true
       } else if (path.indexOf('edit') > 0) {
-        this.taskStatusToEdit = this.getTaskStatus(taskStatusId)
+        this.taskStatusToEdit = this.taskStatusMap[taskStatusId]
         this.modals.isNewDisplayed = true
       } else if (path.indexOf('delete') > 0) {
-        this.taskStatusToDelete = this.getTaskStatus(taskStatusId)
+        this.taskStatusToDelete = this.taskStatusMap[taskStatusId]
         this.modals.isDeleteDisplayed = true
       } else {
         this.modals.isNewDisplayed = false

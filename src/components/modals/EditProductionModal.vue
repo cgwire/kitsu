@@ -6,7 +6,7 @@
   <div class="modal-background"></div>
   <div class="modal-content">
     <div class="box">
-      <h1 class="title" v-if="productionToEdit">
+      <h1 class="title" v-if="productionToEdit && productionToEdit.id">
         {{ $t("productions.edit_title") }} {{ productionToEdit.name }}
       </h1>
       <h1 class="title" v-else>
@@ -18,7 +18,7 @@
           ref="nameField"
           :label="$t('productions.fields.name')"
           v-model="form.name"
-          @enter="confirmClicked"
+          @enter="runConfirmation"
           v-focus
         >
         </text-field>
@@ -26,6 +26,7 @@
           :label="$t('productions.fields.status')"
           :options="getProductionStatusOptions"
           localeKeyPrefix="productions.status."
+          @enter="runConfirmation"
           v-model="form.project_status_id"
         >
         </combobox>
@@ -38,7 +39,7 @@
             'is-primary': true,
             'is-loading': isLoading
           }"
-          @click="confirmClicked">
+          @click="runConfirmation">
           {{ $t("main.confirmation") }}
         </a>
         <router-link
@@ -46,6 +47,9 @@
           class="button is-link">
           {{ $t("main.cancel") }}
         </router-link>
+      </p>
+      <p class="error has-text-right info-message" v-if="isError">
+        {{ $t("assets.edit_fail") }}
       </p>
     </div>
   </div>
@@ -77,9 +81,14 @@ export default {
 
   watch: {
     productionToEdit () {
-      if (this.productionToEdit) {
+      if (this.productionToEdit && this.productionToEdit.id) {
         this.form.name = this.productionToEdit.name
         this.form.project_status_id = this.productionToEdit.project_status_id
+      } else {
+        this.form = {
+          name: '',
+          project_status_id: this.getProductionStatusOptions[0].value
+        }
       }
     },
 
@@ -93,10 +102,10 @@ export default {
   },
 
   data () {
-    if (this.productionToEdit) {
+    if (this.productionToEdit && this.productionToEdit.id) {
       return {
         form: {
-          name: '',
+          name: this.productionToEdit.name,
           project_status_id: this.productionToEdit.project_status_id
         }
       }
@@ -121,7 +130,7 @@ export default {
   methods: {
     ...mapActions([
     ]),
-    confirmClicked () {
+    runConfirmation () {
       this.$emit('confirm', this.form)
     }
   },

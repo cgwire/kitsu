@@ -15,7 +15,7 @@ export const sortShots = (shots) => {
         if (a.episode_name) {
           return a.episode_name.localeCompare(b.episode_name)
         } else {
-          return 1
+          return 0
         }
       })
       .thenBy((a, b) => a.sequence_name.localeCompare(b.sequence_name))

@@ -113,7 +113,7 @@ export default {
 
     confirmEditProduction (form) {
       let action = 'newProduction'
-      if (this.productionToEdit) {
+      if (this.productionToEdit && this.productionToEdit.id) {
         action = 'editProduction'
         form.id = this.productionToEdit.id
       }
@@ -152,6 +152,7 @@ export default {
       const productionId = this.$store.state.route.params.production_id
 
       if (path.indexOf('new') > 0) {
+        this.productionToEdit = {}
         this.modals.isNewDisplayed = true
       } else if (path.indexOf('edit') > 0) {
         this.productionToEdit = this.getProduction(productionId)

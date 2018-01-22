@@ -93,33 +93,13 @@ export default {
     'taskStatusToEdit'
   ],
 
-  watch: {
-    taskStatusToEdit () {
-      if (this.taskStatusToEdit) {
-        this.form = {
-          name: this.taskStatusToEdit.name,
-          short_name: this.taskStatusToEdit.short_name,
-          color: this.taskStatusToEdit.color,
-          is_reviewable: String(this.taskStatusToEdit.is_reviewable)
-        }
-      }
-    },
-    active () {
-      if (this.active) {
-        setTimeout(() => {
-          this.$refs.nameField.focus()
-        }, 100)
-      }
-    }
-  },
-
   data () {
     return {
       form: {
         name: '',
         short_name: '',
         color: '#999999',
-        is_reviewable: 'false'
+        is_reviewable: 'true'
       },
       isReviewableOptions: [
         {label: this.$tc('main.yes'), value: 'true'},
@@ -156,7 +136,30 @@ export default {
     confirmClicked () {
       this.$emit('confirm', this.form)
     },
-    isEditing: () => this.taskStatusToEdit && this.taskStatusToEdit.id
+    isEditing: () => this.taskStatusToEdit && this.taskStatusToEdit.id,
+    resetForm () {
+      if (this.taskStatusToEdit) {
+        this.form = {
+          name: this.taskStatusToEdit.name,
+          short_name: this.taskStatusToEdit.short_name,
+          color: this.taskStatusToEdit.color,
+          is_reviewable: String(this.taskStatusToEdit.is_reviewable)
+        }
+      }
+    }
+  },
+
+  watch: {
+    taskStatusToEdit () {
+      this.resetForm()
+    },
+    active () {
+      if (this.active) {
+        setTimeout(() => {
+          this.$refs.nameField.focus()
+        }, 100)
+      }
+    }
   }
 }
 </script>

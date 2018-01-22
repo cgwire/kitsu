@@ -42,6 +42,8 @@ import {
 
   DISPLAY_MORE_ASSETS,
 
+  SET_PREVIEW,
+
   RESET_ALL
 } from '../mutation-types'
 
@@ -480,6 +482,13 @@ const mutations = {
 
   [SET_CURRENT_PRODUCTION] (state, production) {
     state.assetSearchText = ''
+  },
+
+  [SET_PREVIEW] (state, {entityId, taskId, previewId}) {
+    const asset = state.assetMap[entityId]
+    if (asset) {
+      asset.preview_file_id = previewId
+    }
   },
 
   [RESET_ALL] (state) {
