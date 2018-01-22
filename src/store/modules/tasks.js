@@ -251,7 +251,7 @@ const actions = {
       if (err && callback) {
         callback(err)
       } else if (callback) {
-        commit(SET_PREVIEW, {taskId, previewId})
+        commit(SET_PREVIEW, {taskId, entityId, previewId})
         callback(err, entity)
       }
     })
