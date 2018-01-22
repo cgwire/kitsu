@@ -170,7 +170,8 @@ export default {
       task_type: 'Type',
       production: 'Prod',
       entity: 'Entité',
-      task_status: 'Statut'
+      task_status: 'Statut',
+      last_comment: 'Dernier commentaire'
     }
   },
 

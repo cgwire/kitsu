@@ -1,5 +1,4 @@
-<template>
-<div class="data-list">
+<template> <div class="data-list">
   <div style="overflow: hidden">
     <table class="table table-header" ref="headerWrapper">
       <thead>
@@ -17,6 +16,9 @@
           </th>
           <th class="status">
             {{ $t('tasks.fields.task_status') }}
+          </th>
+          <th class="last-comment">
+            {{ $t('tasks.fields.last_comment') }}
           </th>
           <th class="actions">
           </th>
@@ -64,6 +66,11 @@
             >
             </validation-tag>
           </td>
+          <last-comment-cell
+            class="last-comment"
+            :task="entry"
+          >
+          </last-comment-cell>
           <td class="actions"></td>
        </tr>
       </tbody>
@@ -86,6 +93,7 @@
 import { mapGetters, mapActions } from 'vuex'
 
 import ProductionNameCell from '../cells/ProductionNameCell'
+import LastCommentCell from '../cells/LastCommentCell'
 import TaskTypeName from '../cells/TaskTypeName'
 import TableInfo from '../widgets/TableInfo'
 import ValidationTag from '../widgets/ValidationTag'
@@ -93,6 +101,7 @@ import ValidationTag from '../widgets/ValidationTag'
 export default {
   name: 'todos-list',
   components: {
+    LastCommentCell,
     ProductionNameCell,
     TableInfo,
     TaskTypeName,
@@ -147,6 +156,11 @@ export default {
 .status {
   width: 100px;
   min-width: 100px;
+}
+
+.last-comment {
+  width: 500px;
+  min-width: 500px;
 }
 
 .thumbnail-picture {

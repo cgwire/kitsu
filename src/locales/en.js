@@ -189,7 +189,8 @@ export default {
       production: 'Prod',
       entity: 'Entity',
       task_status: 'Status',
-      task_type: 'Type'
+      task_type: 'Type',
+      last_comment: 'Last comment'
     }
   },
 
