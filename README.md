@@ -2,52 +2,47 @@
 
 # Kitsu, CG Production Manager
 
-Kitsu is a web tool to improve validation tracking in CG productions. By
+Kitsu is a web application for validation tracking in CG productions. By
 offering a clean UI and a shared database, it allows you to communicate
 efficiently with all the shareholders of the production: CG artists,
 production managers, TDs, supervisors and clients.
 
-This application is still a work in progress. To be kept up to date of incoming
-releases follow our [blog](https://medium.com/@cgwire).
-
-## Main modules
-
-We already have mockups of the user interfaces. We share them in this section.
-Feel free to drop us [an email](mailto:contact@cg-wire.com) to tell us what you
-think about it. 
-
-### People
-
-This is the list of the people involved in the studio.
-
-### Productions
-
-You will find an overview of your production in this module.
-
-![Productions module mockup](img/prods.png)
-
-### Task List
-
-The list of all the tasks to assign.
-
-![Task list module mockup](img/tasks.png)
-
-### Shot overview
-
-A screen to quickly know the state of all your shots.
+To be kept up to date of incoming releases follow our
+[blog](https://medium.com/@cgwire).
 
 ![Shot module mockup](img/shots.png)
 
-### Validation
+## Main modules
 
-The history of all discussions about task validations.
+To start with Kitsu we recommend you to understand what every modules does.
+There are three kinds of modules:
 
-![Validation mockup](img/validation.jpg)
+* Production modules related to current production (assets and shots).
+* Studio modules related to all productions (people, task types, etc.).
+* You profile, the module to set your own preferences.
 
-## Source code
+They are accessible through the sidebar located on the left. You can display
+the sidebar by clicking on the upper left button.
 
-Kitsu is free and open source. All the code is available on
-[Github](https://github.com/cgwire/kitsu).
+## Studio modules
+
+* People: This is the list of the people involved in the studio.
+* Productions: create, open and close productions.
+* Task types: manage your task types, your fabrication steps. 
+* Asset types: manage your asset types. 
+
+## Production modules
+
+* Shot tasks: see the status of every tasks related to shots.
+* Asset tasks: see the status of every tasks related to assets.
+* Casting: link assets and shots together.
+* Task validation: comment and change task status, add preview to comments.
+
+## Profile
+
+* Set your name
+* Chose your locale
+* Change password
 
 ## About authors
 

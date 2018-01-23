@@ -2,6 +2,14 @@
 
 * [Introduction](README.md)
 
-* [Installation](chapter-1/README.md)
+* [Installation](installation/README.md)
 
-* [Development Environment](chapter-2/README.md)
+* [Production Modules](production-modules/README.md)
+
+* [Studio Modules](studio-modules/README.md)
+
+* [User Modules](user-modules/README.md)
+
+* [Permissions](permissions/README.md)
+
+* [Development Environment](development-environment/README.md)
