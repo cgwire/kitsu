@@ -4,7 +4,15 @@
 
 <script>
 export default {
-  name: 'app'
+  name: 'app',
+  metaInfo: {
+    link: [
+      {
+        rel: 'favicon',
+        href: '/static/favicon.ico'
+      }
+    ]
+  }
 }
 </script>
 
