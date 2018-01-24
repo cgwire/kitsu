@@ -1,5 +1,7 @@
 from tests.base import ApiDBTestCase
 
+from zou.app.services import tasks_service
+
 
 class RouteCreateTasksTestCase(ApiDBTestCase):
 
@@ -32,7 +34,25 @@ class RouteCreateTasksTestCase(ApiDBTestCase):
         self.assertEquals(len(tasks), 0)
 
     def test_get_tasks_for_person(self):
+        tasks_service.create_comment(
+            self.task.id,
+            self.task_status.id,
+            self.person.id,
+            "first comment"
+        )
+        tasks_service.create_comment(
+            self.task.id,
+            self.task_status.id,
+            self.person.id,
+            "last comment"
+        )
         tasks = self.get("/data/persons/%s/tasks" % self.person.id)
+        self.assertEqual(len(tasks), 1)
+        self.assertEqual(tasks[0]["last_comment"]["text"], "last comment")
+        self.assertEqual(
+            tasks[0]["last_comment"]["person_id"],
+            str(self.person.id)
+        )
         self.assertEquals(len(tasks), 1)
         self.assertTrue(str(self.person.id) in tasks[0]["assignees"])
 
