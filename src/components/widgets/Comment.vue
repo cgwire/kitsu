@@ -32,7 +32,7 @@
 
         <div class="level-left">
           <span class="level-item" :style="{'color': comment.task_status.color}">
-            {{ comment.task_status.name.toUpperCase() + '!' }}
+            {{ comment.task_status.name }}
           </span>
           <router-link
             :to="previewRoute"

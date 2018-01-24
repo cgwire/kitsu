@@ -14,11 +14,14 @@
       </div>
     </div>
 
-    <div class="page-header">
     <page-subtitle :text="$t('people.running_tasks')"></page-subtitle>
-    </div>
+    <search-field
+      ref="person-tasks-search-field"
+      @change="onSearchChange"
+    >
+    </search-field>
     <todos-list
-      :entries="personTasks"
+      :entries="displayedPersonTasks"
       :is-loading="isTasksLoading"
       :is-error="isTasksLoadingError"
     ></todos-list>
@@ -31,6 +34,7 @@ import { mapGetters, mapActions } from 'vuex'
 import PageTitle from './widgets/PageTitle'
 import PageSubtitle from './widgets/PageSubtitle'
 import PeopleAvatar from './widgets/PeopleAvatar'
+import SearchField from './widgets/SearchField'
 import TodosList from './lists/TodosList'
 
 export default {
@@ -39,6 +43,7 @@ export default {
     PageTitle,
     PageSubtitle,
     PeopleAvatar,
+    SearchField,
     TodosList
   },
 
@@ -63,23 +68,33 @@ export default {
     })
   },
 
-  watch: {
-    '$route' (to, from) {
-      console.log('route changed')
+  mounted () {
+    if (this.personTasksSearchText.length > 0) {
+      this.$refs['person-tasks-search-field'].setValue(
+        this.personTasksSearchText
+      )
     }
+    setTimeout(() => {
+      this.$refs['person-tasks-search-field'].focus()
+    }, 100)
   },
 
   computed: {
     ...mapGetters([
       'personMap',
-      'personTasks'
+      'displayedPersonTasks',
+      'personTasksSearchText'
     ])
   },
 
   methods: {
     ...mapActions([
-      'loadPersonTasks'
-    ])
+      'loadPersonTasks',
+      'setPersonTasksSearch'
+    ]),
+    onSearchChange (text) {
+      this.setPersonTasksSearch(text)
+    }
   },
 
   metaInfo () {

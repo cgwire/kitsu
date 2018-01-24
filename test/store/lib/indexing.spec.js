@@ -4,6 +4,7 @@ import {
   buildNameIndex,
   buildAssetIndex,
   buildShotIndex,
+  buildTaskIndex,
   indexSearch
 } from '../../../src/lib/indexing'
 
@@ -54,6 +55,45 @@ describe('lib/string', () => {
     expect(index['e01'].length).to.equal(3)
     expect(index['s01'].length).to.equal(4)
     expect(index['sh01'].length).to.equal(3)
+  })
+
+  it('buildTaskIndex', () => {
+    const entries = [
+      {
+        full_entity_name: 'E01 / SQ01 / SH01',
+        task_status_short_name: 'wfa',
+        task_type_name: 'Animation',
+        id: 1
+      },
+      {
+        full_entity_name: 'E01 / SQ01 / SH02',
+        task_status_short_name: 'wip',
+        task_type_name: 'Animation',
+        id: 2
+      },
+      {
+        full_entity_name: 'Characters / Agent327',
+        task_status_short_name: 'wip',
+        task_type_name: 'Modeling',
+        id: 3
+      },
+      {
+        full_entity_name: 'Characters / SuperEvil',
+        task_status_short_name: 'todo',
+        task_type_name: 'Modeling',
+        id: 4
+      },
+      {
+        full_entity_name: 'Props / Tree',
+        task_status_short_name: 'wip',
+        task_type_name: 'Modeling',
+        id: 5
+      }
+    ]
+    const index = buildTaskIndex(entries)
+    expect(index['e01'].length).to.equal(2)
+    expect(index['wip'].length).to.equal(3)
+    expect(index['agent327'].length).to.equal(1)
   })
 
   it('indexSearch', () => {

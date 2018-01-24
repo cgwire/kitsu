@@ -2,7 +2,9 @@ import peopleApi from '../api/people'
 import peopleStore from './people'
 import taskStatusStore from './taskstatus'
 import auth from '../../lib/auth'
+import { populateTask } from '../../lib/helpers'
 import { sortTasks } from '../../lib/sorting'
+import { indexSearch, buildTaskIndex } from '../../lib/indexing'
 import {
   USER_LOGIN,
   USER_LOGOUT,
@@ -27,6 +29,8 @@ import {
 
   NEW_TASK_COMMENT_END,
 
+  SET_TODOS_SEARCH,
+
   RESET_ALL
 } from '../mutation-types'
 
@@ -42,6 +46,9 @@ const state = {
   isTodosLoading: false,
   isTodosLoadingError: false,
   todos: [],
+  displayedTodos: [],
+  todosIndex: {},
+  todosSearchText: '',
 
   avatarFormData: null,
 
@@ -62,7 +69,8 @@ const getters = {
   isAuthenticated: state => state.isAuthenticated,
   isCurrentUserManager: state => state.user && state.user.role !== 'user',
   isCurrentUserAdmin: state => state.user && state.user.role === 'admin',
-  todos: state => state.todos,
+  displayedTodos: state => state.displayedTodos,
+  todosSearchText: state => state.todosSearchText,
 
   isSaveProfileLoading: state => state.isSaveProfileLoading,
   isSaveProfileLoadingError: state => state.isSaveProfileLoadingError,
@@ -110,16 +118,20 @@ const actions = {
     })
   },
 
-  loadTodos ({ commit, state }, payload) {
-    commit(USER_LOAD_TODOS_START)
-    peopleApi.loadTodos((err, tasks) => {
-      if (err) {
-        commit(USER_LOAD_TODOS_ERROR)
-      } else {
-        commit(USER_LOAD_TODOS_END, tasks)
-      }
-      if (payload && payload.callback) payload.callback()
-    })
+  loadTodos ({ commit, state }, { callback, forced }) {
+    if (state.todos.length === 0 || forced) {
+      commit(USER_LOAD_TODOS_START)
+      peopleApi.loadTodos((err, tasks) => {
+        if (err) {
+          commit(USER_LOAD_TODOS_ERROR)
+        } else {
+          commit(USER_LOAD_TODOS_END, tasks)
+        }
+        if (callback) callback()
+      })
+    } else {
+      if (callback) callback()
+    }
   },
 
   uploadAvatar ({ commit, state }, callback) {
@@ -127,6 +139,10 @@ const actions = {
       if (!err) commit(UPLOAD_AVATAR_END, state.user.id)
       if (callback) callback(err)
     })
+  },
+
+  setTodosSearch ({ commit, state }, searchText) {
+    commit(SET_TODOS_SEARCH, searchText)
   }
 }
 
@@ -197,7 +213,12 @@ const mutations = {
   },
   [USER_LOAD_TODOS_END] (state, tasks) {
     state.isTodosLoading = false
+    tasks.forEach(populateTask)
     state.todos = sortTasks(tasks)
+
+    state.todosIndex = buildTaskIndex(tasks)
+    const searchResult = indexSearch(state.todosIndex, state.todosSearchText)
+    state.displayedTodos = searchResult || state.todos
   },
   [USER_LOAD_TODOS_ERROR] (state, tasks) {
     state.isTodosLoadingError = true
@@ -230,6 +251,12 @@ const mutations = {
         task_status_color: taskStatus.color
       })
     }
+  },
+
+  [SET_TODOS_SEARCH] (state, searchText) {
+    const searchResult = indexSearch(state.todosIndex, searchText)
+    state.todosSearchText = searchText
+    state.displayedTodos = searchResult || state.todos
   },
 
   [RESET_ALL] (state) {

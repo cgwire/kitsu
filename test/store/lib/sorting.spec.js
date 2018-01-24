@@ -179,7 +179,6 @@ describe('lib/sorting', () => {
     ]
     let results = sortShots(entries)
 
-    console.log(results)
     expect(results.length).to.equal(7)
     expect(results[0].id).to.equal(1)
     expect(results[1].id).to.equal(2)
