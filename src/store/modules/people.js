@@ -1,6 +1,8 @@
 import peopleApi from '../api/people'
 import colors from '../../lib/colors'
+import { populateTask } from '../../lib/helpers'
 import { sortTasks } from '../../lib/sorting'
+import { indexSearch, buildTaskIndex } from '../../lib/indexing'
 import taskStatusStore from './taskstatus'
 import {
   LOAD_PEOPLE_START,
@@ -31,6 +33,7 @@ import {
   UPLOAD_AVATAR_END,
 
   LOAD_PERSON_TASKS_END,
+  SET_PERSON_TASKS_SEARCH,
   NEW_TASK_COMMENT_END,
 
   RESET_ALL
@@ -89,7 +92,10 @@ const state = {
 
   personCsvFormData: undefined,
 
-  personTasks: []
+  personTasks: [],
+  displayedPersonTasks: [],
+  personTasksIndex: {},
+  personTasksSearchText: ''
 }
 
 const getters = {
@@ -114,7 +120,8 @@ const getters = {
 
   personCsvFormData: state => state.personCsvFormData,
 
-  personTasks: state => state.personTasks,
+  displayedPersonTasks: state => state.displayedPersonTasks,
+  personTasksSearchText: state => state.personTasksSearchText,
 
   getPerson: (state, getters) => (id) => state.personMap[id],
   getPersonOptions: state => state.people.map(
@@ -205,13 +212,17 @@ const actions = {
     })
   },
 
-  loadPersonTasks ({ commit, state }, { personId, callback }) {
-    commit(LOAD_PERSON_TASKS_END, [])
-    peopleApi.getPersonTasks(personId, (err, tasks) => {
-      if (err) tasks = []
-      commit(LOAD_PERSON_TASKS_END, tasks)
-      if (callback) callback(err)
-    })
+  loadPersonTasks ({ commit, state }, { personId, forced, callback }) {
+    if (state.personTasks.length === 0 || forced) {
+      commit(LOAD_PERSON_TASKS_END, [])
+      peopleApi.getPersonTasks(personId, (err, tasks) => {
+        if (err) tasks = []
+        commit(LOAD_PERSON_TASKS_END, tasks)
+        if (callback) callback(err)
+      })
+    } else {
+      if (callback) callback()
+    }
   },
 
   showPersonImportModal ({ commit, state }, personId) {
@@ -236,6 +247,10 @@ const actions = {
 
   hidePersonDeleteModal ({ commit, state }, personId) {
     commit(HIDE_DELETE_PEOPLE_MODAL, personId)
+  },
+
+  setPersonTasksSearch ({ commit, state }, searchText) {
+    commit(SET_PERSON_TASKS_SEARCH, searchText)
   }
 }
 
@@ -389,7 +404,21 @@ const mutations = {
   },
 
   [LOAD_PERSON_TASKS_END] (state, tasks) {
+    tasks.forEach(populateTask)
     state.personTasks = sortTasks(tasks)
+
+    state.personTasksIndex = buildTaskIndex(tasks)
+    const searchResult = indexSearch(
+      state.personTasksIndex,
+      state.personTasksSearchText
+    )
+    state.displayedPersonTasks = searchResult || state.personTasks
+  },
+
+  [SET_PERSON_TASKS_SEARCH] (state, searchText) {
+    const searchResult = indexSearch(state.personTasksIndex, searchText)
+    state.personTasksSearchText = searchText
+    state.displayedPersonTasks = searchResult || state.personTasks
   },
 
   [NEW_TASK_COMMENT_END] (state, {comment, taskId}) {

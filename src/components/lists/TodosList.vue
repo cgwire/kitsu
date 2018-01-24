@@ -50,7 +50,7 @@
             </span>
           </td>
           <td class="name">
-            {{ entityName(entry) }}
+            {{ entry.full_entity_name }}
           </td>
           <task-type-name
             class="type"
@@ -119,17 +119,6 @@ export default {
   methods: {
     ...mapActions([
     ]),
-    entityName (entry) {
-      if (entry.entity_type_name === 'Shot') {
-        if (entry.episode_name) {
-          return `${entry.episode_name} / ${entry.sequence_name} / ${entry.entity_name}`
-        } else {
-          return `${entry.sequence_name} / ${entry.entity_name}`
-        }
-      } else {
-        return `${entry.entity_type_name} / ${entry.entity_name}`
-      }
-    },
     onBodyScroll (event, position) {
       this.$refs.headerWrapper.style.left = `-${position.scrollLeft}px`
     }

@@ -1,9 +1,9 @@
 <template>
-<div class="level-right">
-  <div class="level-item">
+<div class="flexrow">
+  <div class="flexrow-item">
     <search-icon></search-icon>
   </div>
-  <div class="level-item">
+  <div class="flexrow-item">
     <input
       ref="input"
       class="input search-input"
@@ -29,6 +29,12 @@ export default {
   methods: {
     onSearchChange  () {
       this.$emit('change', this.$refs.input.value)
+    },
+    setValue (value) {
+      this.$refs.input.value = value
+    },
+    focus () {
+      this.$refs.input.focus()
     }
   }
 }

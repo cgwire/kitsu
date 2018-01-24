@@ -2,8 +2,13 @@
   <div class="todos page fixed-page">
     <page-title :text="$t('tasks.my_tasks')" class="page-header">
     </page-title>
+    <search-field
+      ref="todos-search-field"
+      @change="onSearchChange"
+    >
+    </search-field>
     <todos-list
-      :entries="todos"
+      :entries="displayedTodos"
       :is-loading="isTodosLoading"
       :is-error="isTodosLoadingError"
     ></todos-list>
@@ -14,12 +19,14 @@
 import { mapGetters, mapActions } from 'vuex'
 import TodosList from './lists/TodosList'
 import PageTitle from './widgets/PageTitle'
+import SearchField from './widgets/SearchField'
 
 export default {
   name: 'todos',
   components: {
     TodosList,
-    PageTitle
+    PageTitle,
+    SearchField
   },
 
   data () {
@@ -30,13 +37,16 @@ export default {
     this.loadTodos({})
   },
 
-  watch: {
-    '$route' (to, from) {}
+  mounted () {
+    if (this.todosSearchText.length > 0) {
+      this.$refs['todos-search-field'].setValue(this.todosSearchText)
+    }
   },
 
   computed: {
     ...mapGetters([
-      'todos',
+      'displayedTodos',
+      'todosSearchText',
       'isTodosLoading',
       'isTodosLoadingError'
     ])
@@ -44,8 +54,12 @@ export default {
 
   methods: {
     ...mapActions([
-      'loadTodos'
-    ])
+      'loadTodos',
+      'setTodosSearch'
+    ]),
+    onSearchChange (text) {
+      this.setTodosSearch(text)
+    }
   },
 
   metaInfo () {

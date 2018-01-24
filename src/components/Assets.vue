@@ -57,12 +57,6 @@
               v-focus
             />
           </div>
-          <!--div class="level-item">
-            <filter-icon></filter-icon>
-          </div>
-          <div class="level-item">
-            No filter set.
-          </div-->
         </div>
       </div>
     </div>
