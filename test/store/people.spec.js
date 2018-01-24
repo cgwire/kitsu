@@ -28,6 +28,7 @@ import {
   PERSON_CSV_FILE_SELECTED,
   UPLOAD_AVATAR_END,
   LOAD_PERSON_TASKS_END,
+  SET_PERSON_TASKS_SEARCH,
 
   NEW_PEOPLE_END
 } from '../../src/store/mutation-types'
@@ -107,14 +108,23 @@ describe('people', () => {
         project_name: 'Agent327',
         task_type_name: 'Modeling',
         entity_name: 'Tree',
+        entity_type_name: 'Props',
         entity_id: 'asset-1',
+        task_status_short_name: 'wip',
+        last_comment: {},
         id: 'task-1'
       },
       {
         project_name: 'Agent327',
         task_type_name: 'Setup',
         entity_name: 'Tree',
+        entity_type_name: 'Props',
         entity_id: 'asset-1',
+        task_status_short_name: 'todo',
+        last_comment: {
+          text: "last comment",
+          person_id: "person-1"
+        },
         id: 'task-2'
       }
     ]
@@ -252,10 +262,24 @@ describe('people', () => {
         personId: 'person-1',
         callback: (err) => {
           expect(err).to.be.null
-          expect(store._vm.personTasks).to.deep.equal(tasks)
+          expect(store._vm.displayedPersonTasks).to.deep.equal(tasks)
+          expect(
+            store._vm.displayedPersonTasks[0].full_entity_name
+          ).to.equal('Props / Tree')
           done()
         }
       })
+    })
+
+    it('setPersonTasksSearch', () => {
+      store.commit(LOAD_PERSON_TASKS_END, tasks)
+      helpers.runAction('setPersonTasksSearch', 'wip')
+
+      expect(store._vm.personTasksSearchText).to.equal('wip')
+      expect(store._vm.displayedPersonTasks[0]).to.deep.equal(tasks[0])
+      expect(store._vm.displayedPersonTasks.length).to.equal(1)
+
+      helpers.runAction('setPersonTasksSearch', '')
     })
   })
 
@@ -443,7 +467,21 @@ describe('people', () => {
 
     it('LOAD_PERSON_TASKS_END', () => {
       store.commit(LOAD_PERSON_TASKS_END, tasks)
-      expect(store._vm.personTasks).to.deep.equal(tasks)
+      expect(store._vm.displayedPersonTasks).to.deep.equal(tasks)
+      expect(store._vm.displayedPersonTasks).to.deep.equal(tasks)
+      expect(
+        store._vm.displayedPersonTasks[0].full_entity_name
+      ).to.equal('Props / Tree')
     })
+
+    it('SET_PERSON_TASK_SEARCH', () => {
+      store.commit(LOAD_PERSON_TASKS_END, tasks)
+      store.commit(SET_PERSON_TASKS_SEARCH, 'wip')
+
+      expect(store._vm.personTasksSearchText).to.equal('wip')
+      expect(store._vm.displayedPersonTasks[0]).to.deep.equal(tasks[0])
+      expect(store._vm.displayedPersonTasks.length).to.equal(1)
+    })
+
   })
 })

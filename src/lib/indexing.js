@@ -23,7 +23,8 @@ export const buildTaskIndex = (tasks) => {
   const index = {}
   const taskIndex = {}
   tasks.forEach((task) => {
-    let stringToIndex = task.full_entity_name.replace(/_/g, ' ').replace(/-/g, ' ')
+    let stringToIndex =
+      task.full_entity_name.replace(/_/g, ' ').replace(/-/g, ' ')
     let words = stringToIndex.split(' ').concat([
       task.task_type_name,
       task.task_status_short_name
