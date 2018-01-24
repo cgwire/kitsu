@@ -15,6 +15,25 @@ export const buildNameIndex = (entries) => {
 }
 
 /*
+ * Generate an index to find task easily. Search will be based on the task
+ * entity name and words appearing into it.
+ * The result is an array of tasks.
+ */
+export const buildTaskIndex = (tasks) => {
+  const index = {}
+  const taskIndex = {}
+  tasks.forEach((task) => {
+    let stringToIndex = task.full_entity_name.replace(/_/g, ' ').replace(/-/g, ' ')
+    let words = stringToIndex.split(' ').concat([
+      task.task_type_name,
+      task.task_status_short_name
+    ])
+    indexWords(index, taskIndex, task, words)
+  })
+  return index
+}
+
+/*
  * Generate an index to find asset easily. Search will be based on the asse
  * type name, and words appearing in the asset name.
  * Results are arrays of assets.
