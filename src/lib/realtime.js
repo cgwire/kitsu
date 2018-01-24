@@ -20,10 +20,13 @@ const realtime = {
     })
     const assignationEventListener = (eventData) => {
       if (store.getters.user.id === eventData.person.id) {
-        store.dispatch('loadTodos')
+        store.dispatch('loadTodos', {forced: true})
       }
       if (store.getters.route.path.indexOf(eventData.person.id) > 0) {
-        store.dispatch('loadPersonTasks', {personId: eventData.person.id})
+        store.dispatch('loadPersonTasks', {
+          personId: eventData.person.id,
+          forced: true
+        })
       }
     }
     realtime.subscribe(source, 'task:assign', assignationEventListener)
