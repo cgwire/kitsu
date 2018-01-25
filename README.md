@@ -8,35 +8,49 @@ efficiently with all the shareholders of the production: CG artists,
 production managers, TDs, supervisors and clients.
 
 To be kept up to date of incoming releases follow our
-[blog](https://medium.com/@cgwire).
+[forum](https://forum.cg-wire.com).
 
 ![Shot module mockup](img/shots.png)
 
 ## Main modules
 
 To start with Kitsu we recommend you to understand what every modules does.
-There are three kinds of modules:
+There are four kinds of modules:
 
 * Production modules related to current production (assets and shots).
-* Studio modules related to all productions (people, task types, etc.).
-* You profile, the module to set your own preferences.
-
-They are accessible through the sidebar located on the left. You can display
-the sidebar by clicking on the upper left button.
+* Studio modules related to all productions (people and running productions).
+* Admin modules related to configuration (task types, task status, ...).
+* Your profile, the module to set your own preferences.
 
 ## Studio modules
 
+Studio modules allow managers to deal with common data that is shared by all
+productions.
+
 * People: This is the list of the people involved in the studio.
 * Productions: create, open and close productions.
-* Task types: manage your task types, your fabrication steps. 
-* Asset types: manage your asset types. 
 
 ## Production modules
+
+Production modules are used in the context of given production.
 
 * Shot tasks: see the status of every tasks related to shots.
 * Asset tasks: see the status of every tasks related to assets.
 * Casting: link assets and shots together.
 * Task validation: comment and change task status, add preview to comments.
+
+## Admin modules
+
+Admin modules are here to deal with overall configuration. It allows to adapt
+the software to your studio.
+
+* Task types: manage your task types, your fabrication steps. 
+* Task status: manage your task status, to adapt the review workflow to your
+  needs. 
+* Asset types: manage your asset types, for a better organization of your
+  assets. 
+* Custom actions: manage custom actions, urls to send information to your
+  in-house tools
 
 ## Profile
 

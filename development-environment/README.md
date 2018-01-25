@@ -5,7 +5,7 @@
 Prior to setting up the Kitsu development environment make sure you have
 the following elements installed:
 
-* Node.js 6.x
+* Node.js 6.x or superior
 * A [Zou development instance](https://zou.cg-wire.com/development/) up and running on port 5000
 * A [Zou Events development instance](https://zou.cg-wire.com/development/) up and running on port 5001 (optional)
 

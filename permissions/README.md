@@ -1,7 +1,7 @@
 # Permissions
 
 Kitsu proposes a simple permission scheme to manage your productions. They can
-be set via the People studio module
+be set via the People studio module.
 
 ## Admin
 
@@ -9,7 +9,7 @@ Admin have read and write access on everything.
 
 ## Manager
 
-Admin have read and write access on everything except on people. They are not
+Managers have read and write access on everything about studio and production modules except on people. They are not
 allowed to managed the studio team (no write access on the people page).
 
 ## User

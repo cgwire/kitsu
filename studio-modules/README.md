@@ -2,8 +2,4 @@
 
 ## Productions
 
-## Task types
-
 ## People
-
-## Productions
