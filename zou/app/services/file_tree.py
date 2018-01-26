@@ -28,42 +28,74 @@ from zou.app.services.exception import (
 )
 
 
-def get_file_path(
+def get_working_file_path(
     task,
     mode="working",
     software=None,
     output_type=None,
     name="",
-    version=1,
+    revision=1,
     sep=os.sep
 ):
-    file_name = get_file_name(
+    file_name = get_working_file_name(
         task,
         mode=mode,
         software=software,
         output_type=output_type,
         name=name,
-        version=version,
+        revision=revision
     )
-    folder = get_folder_path(
+    folder = get_working_folder_path(
         task,
         mode,
         software=software,
         output_type=output_type,
         name=name,
-        version=version,
+        revision=revision,
         sep=sep
     )
     return join_path(folder, file_name, sep)
 
 
-def get_file_name(
+def get_output_file_path(
+    entity,
+    mode="output",
+    software=None,
+    output_type=None,
+    task_type=None,
+    name="",
+    revision=1,
+    sep=os.sep
+):
+    file_name = get_output_file_name(
+        entity,
+        mode=mode,
+        software=software,
+        output_type=output_type,
+        task_type=task_type,
+        name=name,
+        revision=revision,
+    )
+    folder = get_output_folder_path(
+        entity,
+        mode,
+        software=software,
+        output_type=output_type,
+        task_type=task_type,
+        name=name,
+        revision=revision,
+        sep=sep
+    )
+    return join_path(folder, file_name, sep)
+
+
+def get_working_file_name(
     task,
     mode="working",
     software=None,
     output_type=None,
     name="",
-    version=1
+    revision=1
 ):
     entity = tasks_service.get_entity(task["entity_id"])
     project = get_project(entity)
@@ -72,12 +104,37 @@ def get_file_name(
     file_name = get_file_name_root(
         tree,
         mode,
-        entity,
-        task,
-        software,
-        output_type,
-        name,
-        version=version
+        entity=entity,
+        task=task,
+        software=software,
+        name=name,
+        revision=revision
+    )
+
+    return u"%s" % file_name
+
+
+def get_output_file_name(
+    entity,
+    mode="output",
+    software=None,
+    output_type=None,
+    task_type=None,
+    name="",
+    revision=1
+):
+    project = get_project(entity)
+    tree = get_tree_from_project(project)
+
+    file_name = get_file_name_root(
+        tree,
+        mode,
+        entity=entity,
+        task_type=task_type,
+        software=software,
+        output_type=output_type,
+        name=name,
+        revision=revision
     )
 
     return u"%s" % file_name
@@ -88,7 +145,7 @@ def get_instance_file_name(
     output_type,
     mode="output",
     name="",
-    version=1
+    revision=1
 ):
     shot = tasks_service.get_entity(asset_instance["entity_id"])
     asset = tasks_service.get_entity(asset_instance["asset_id"])
@@ -98,26 +155,24 @@ def get_instance_file_name(
     file_name = get_file_name_root(
         tree,
         mode,
-        shot,
-        None,
-        None,
-        output_type,
-        name,
+        entity=shot,
+        outputy_type=output_type,
+        name=name,
         asset_instance=asset_instance,
         asset=asset,
-        version=version
+        revision=revision
     )
 
     return u"%s" % file_name
 
 
-def get_folder_path(
+def get_working_folder_path(
     task,
     mode="working",
     software=None,
     output_type=None,
     name="",
-    version=1,
+    revision=1,
     sep=os.sep
 ):
     entity = tasks_service.get_entity(task["entity_id"])
@@ -129,12 +184,42 @@ def get_folder_path(
     folder_template = get_folder_path_template(tree, mode, entity)
     folder_path = update_variable(
         folder_template,
-        entity,
-        task,
-        software,
-        output_type,
-        name,
-        version=version,
+        entity=entity,
+        task=task,
+        software=software,
+        name=name,
+        revision=revision,
+        style=style
+    )
+    folder_path = change_folder_path_separators(folder_path, sep)
+
+    return join_path(root_path, folder_path, "")
+
+
+def get_output_folder_path(
+    entity,
+    mode="output",
+    software=None,
+    output_type=None,
+    task_type=None,
+    name="",
+    revision=1,
+    sep=os.sep
+):
+    project = get_project(entity)
+    tree = get_tree_from_project(project)
+    root_path = get_root_path(tree, mode, sep)
+    style = tree[mode]["folder_path"].get("style", "")
+
+    folder_template = get_folder_path_template(tree, mode, entity)
+    folder_path = update_variable(
+        folder_template,
+        entity=entity,
+        task_type=task_type,
+        software=software,
+        output_type=output_type,
+        name=name,
+        revision=revision,
         style=style
     )
     folder_path = change_folder_path_separators(folder_path, sep)
@@ -163,8 +248,7 @@ def get_instance_folder_path(
 
     folder_path = update_variable(
         folder_template,
-        shot,
-        None,
+        entity=shot,
         software=None,
         output_type=output_type,
         name="",
@@ -232,14 +316,15 @@ def get_file_name_template(tree, mode, entity):
 def get_file_name_root(
     tree,
     mode,
-    entity,
-    task,
-    software,
-    output_type,
-    name,
+    entity=None,
+    task=None,
+    task_type=None,
+    software=None,
+    output_type=None,
+    name="main",
     asset_instance=None,
     asset=None,
-    version=1
+    revision=1
 ):
     if asset_instance is None:
         file_name_template = get_file_name_template(tree, mode, entity)
@@ -248,14 +333,14 @@ def get_file_name_root(
 
     file_name = update_variable(
         file_name_template,
-        entity,
-        task,
+        entity=entity,
+        task=task,
         software=software,
         output_type=output_type,
         name=name,
         asset_instance=asset_instance,
         asset=asset,
-        version=version
+        revision=revision
     )
     file_name = slugify(file_name, separator="_")
     file_name = apply_style(file_name, tree[mode]["file_name"].get("style", ""))
@@ -279,14 +364,15 @@ def get_root_path(tree, mode, sep):
 
 def update_variable(
     template,
-    entity,
-    task,
+    entity=None,
+    task=None,
+    task_type=None,
     software=None,
     output_type=None,
     asset_instance=None,
     asset=None,
     name="",
-    version=1,
+    revision=1,
     style="lowercase"
 ):
     variables = re.findall('<(\w*)>', template)
@@ -295,14 +381,15 @@ def update_variable(
     for variable in variables:
         data = get_folder_from_datatype(
             variable,
-            entity,
-            task,
-            software,
-            output_type,
-            name,
-            asset_instance,
-            asset,
-            version
+            entity=entity,
+            task=task,
+            task_type=task_type,
+            software=software,
+            output_type=output_type,
+            name=name,
+            instance=asset_instance,
+            asset=asset,
+            revision=revision
         )
         render = render.replace(
             "<%s>" % variable,
@@ -314,21 +401,22 @@ def update_variable(
 
 def get_folder_from_datatype(
     datatype,
-    entity,
-    task,
+    entity=None,
+    task=None,
+    task_type=None,
     software=None,
     output_type=None,
     name="",
     instance=None,
     asset=None,
-    version=1
+    revision=1
 ):
     if datatype == "Project":
         folder = get_folder_from_project(entity)
     elif datatype == "Task":
         folder = get_folder_from_task(task)
     elif datatype == "TaskType":
-        folder = get_folder_from_task_type(task)
+        folder = get_folder_from_task_type(task, task_type)
     elif datatype == "Department":
         folder = get_folder_from_department(task)
     elif datatype == "Shot":
@@ -362,7 +450,7 @@ def get_folder_from_datatype(
     elif datatype == "Name":
         folder = name
     elif datatype == "Version":
-        folder = get_folder_from_version(version)
+        folder = get_folder_from_revision(revision)
     else:
         raise MalformedFileTreeException("Unknown data type: %s." % datatype)
 
@@ -396,10 +484,13 @@ def get_folder_from_department(task):
     return folder
 
 
-def get_folder_from_task_type(task):
+def get_folder_from_task_type(task, task_type):
     folder = ""
-    task_type = tasks_service.get_task_type(task["task_type_id"])
-    if task_type is not None:
+    if task_type is None and task is not None:
+        task_type = tasks_service.get_task_type(task["task_type_id"])
+        if task_type is not None:
+            folder = task_type["name"]
+    elif task_type is not None:
         folder = task_type["name"]
     return folder
 
@@ -490,8 +581,8 @@ def get_folder_from_instance(instance):
         return ""
 
 
-def get_folder_from_version(version):
-    return str(version).zfill(3)
+def get_folder_from_revision(revision):
+    return str(revision).zfill(3)
 
 
 def join_path(left, right, sep=os.sep):

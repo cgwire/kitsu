@@ -15,7 +15,7 @@ class OutputFile(db.Model, BaseMixin, SerializerMixin):
     comment = db.Column(db.Text())
     revision = db.Column(db.Integer())
     size = db.Column(db.Integer())
-    checksum = db.Column(db.Integer())
+    checksum = db.Column(db.String(32))
     source = db.Column(db.String(40))
     path = db.Column(db.String(400))
 
@@ -29,13 +29,20 @@ class OutputFile(db.Model, BaseMixin, SerializerMixin):
             nullable=False
         )
 
-    task_id = db.Column(UUIDType(binary=False), db.ForeignKey("task.id"))
     entity_id = db.Column(UUIDType(binary=False), db.ForeignKey("entity.id"))
-    person_id = db.Column(UUIDType(binary=False), db.ForeignKey("person.id"))
+    asset_instance_id = db.Column(
+        UUIDType(binary=False),
+        db.ForeignKey("asset_instance.id")
+    )
     output_type_id = db.Column(
         UUIDType(binary=False),
         db.ForeignKey("output_type.id")
     )
+    task_type_id = db.Column(
+        UUIDType(binary=False),
+        db.ForeignKey("task_type.id")
+    )
+    person_id = db.Column(UUIDType(binary=False), db.ForeignKey("person.id"))
     source_file_id = \
         db.Column(
             UUIDType(binary=False),

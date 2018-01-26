@@ -42,10 +42,12 @@ class RouteOutputFilesTestCase(ApiDBTestCase):
         self.task_id = self.task.id
         self.person_id = str(self.person.id)
         self.working_file_id = str(self.working_file.id)
+        self.asset_id = str(self.entity.id)
+        self.task_type_id = str(self.task_type.id)
 
     def new_output(self, data, code=201):
         return self.post(
-            "data/working-files/%s/output-files/new" % self.working_file_id,
+            "data/entities/%s/output-files/new" % self.asset_id,
             data,
             code
         )
@@ -90,7 +92,7 @@ class RouteOutputFilesTestCase(ApiDBTestCase):
     def test_get_last_output_files(self):
         self.generate_output_files()
         output_files = self.get(
-            "/data/entities/%s/last-output-files" % self.entity.id
+            "/data/entities/%s/output-files/last-revisions" % self.entity.id
         )
         self.assertEqual(
             output_files[str(self.geometry_id)]["main"],
@@ -145,14 +147,16 @@ class RouteOutputFilesTestCase(ApiDBTestCase):
         data = {
             "person_id": self.person_id,
             "comment": "test working file publish",
-            "output_type_id": self.tx_type_id
+            "output_type_id": self.tx_type_id,
+            "task_type_id": self.task_type_id,
+            "working_file_id": self.working_file_id,
         }
         result = self.new_output(data)
 
         self.assertEqual(
             result["folder_path"],
             "/simple/productions/export/cosmos_landromat/assets/props/tree/"
-            "texture"
+            "shaders/texture"
         )
         self.assertEqual(
             result["file_name"],
@@ -171,6 +175,8 @@ class RouteOutputFilesTestCase(ApiDBTestCase):
             "person_id": self.person_id,
             "comment": "test working file publish with extension",
             "output_type_id": self.tx_type_id,
+            "task_type_id": self.task_type_id,
+            "working_file_id": self.working_file_id,
             "extension": ".tx"
         }
         result = self.new_output(data)
@@ -181,7 +187,7 @@ class RouteOutputFilesTestCase(ApiDBTestCase):
         self.assertEqual(
             output_file["path"],
             "/simple/productions/export/cosmos_landromat/assets/props/tree/"
-            "texture/"
+            "shaders/texture/"
             "cosmos_landromat_props_tree_texture_main_v001.tx"
         )
 
@@ -190,6 +196,8 @@ class RouteOutputFilesTestCase(ApiDBTestCase):
             "person_id": self.person_id,
             "comment": "test working file publish with extension",
             "output_type_id": self.tx_type_id,
+            "task_type_id": self.task_type_id,
+            "working_file_id": self.working_file_id,
             "extension": ".tx",
             "name": "special"
         }
@@ -201,7 +209,7 @@ class RouteOutputFilesTestCase(ApiDBTestCase):
         self.assertEqual(
             output_file["path"],
             "/simple/productions/export/cosmos_landromat/assets/props/tree/"
-            "texture/"
+            "shaders/texture/"
             "cosmos_landromat_props_tree_texture_special_v001.tx"
         )
 
@@ -209,7 +217,9 @@ class RouteOutputFilesTestCase(ApiDBTestCase):
         data = {
             "person_id": self.person_id,
             "comment": "test working file publish",
-            "output_type_id": self.tx_type_id
+            "output_type_id": self.tx_type_id,
+            "task_type_id": self.task_type_id,
+            "working_file_id": self.working_file_id
         }
         result = self.new_output(data)
         result = self.new_output(data)
@@ -217,7 +227,7 @@ class RouteOutputFilesTestCase(ApiDBTestCase):
         self.assertEqual(
             result["folder_path"],
             "/simple/productions/export/cosmos_landromat/assets/props/tree/"
-            "texture"
+            "shaders/texture"
         )
         self.assertEqual(
             result["file_name"],
@@ -236,6 +246,8 @@ class RouteOutputFilesTestCase(ApiDBTestCase):
             "person_id": self.person_id,
             "comment": "test working file publish",
             "output_type_id": self.tx_type_id,
+            "task_type_id": self.task_type_id,
+            "working_file_id": self.working_file_id,
             "revision": 66
         }
         result = self.new_output(data)
@@ -260,6 +272,8 @@ class RouteOutputFilesTestCase(ApiDBTestCase):
             "person_id": self.person_id,
             "comment": "test working file publish",
             "output_type_id": self.tx_type_id,
+            "task_type_id": self.task_type_id,
+            "working_file_id": self.working_file_id,
             "revision": 66
         }
         self.new_output(data)
@@ -271,3 +285,55 @@ class RouteOutputFilesTestCase(ApiDBTestCase):
         self.put("/actions/tasks/%s/to-review" % self.task_id, data)
         task = self.get("data/tasks/%s" % self.task_id)
         self.assertEquals(task["task_status_id"], status_id)
+
+    def test_get_next_revision(self):
+        self.generate_fixture_output_type()
+        self.generate_fixture_output_file()
+        result = self.post(
+            "/data/entities/%s/output-files/next-revision" % self.entity.id,
+            {
+                "output_type_id": self.output_type.id,
+                "task_type_id": self.task_type_id
+            },
+            200
+        )
+        self.assertEqual(result["next_revision"], 2)
+
+    def test_get_next_revision_with_name(self):
+        self.generate_fixture_output_type()
+        self.generate_fixture_output_file(revision=5, name="other-output")
+        result = self.post(
+            "/data/entities/%s/output-files/next-revision" % self.entity.id,
+            {
+                "name": "other-output",
+                "output_type_id": self.output_type.id,
+                "task_type_id": self.task_type_id
+            },
+            200
+        )
+        self.assertEqual(result["next_revision"], 6)
+
+    def test_get_next_revision_wrong_data(self):
+        self.generate_fixture_output_type()
+        self.post(
+            "/data/tasks/unknown/output-files/next-revision",
+            {
+                "name": "main",
+                "output_type_id": self.output_type.id,
+                "task_type_id": self.task_type_id
+            },
+            404
+        )
+
+    def test_get_next_revision_with_empty_revision(self):
+        self.generate_fixture_output_type()
+        result = self.post(
+            "/data/entities/%s/output-files/next-revision" % self.entity.id,
+            {
+                "name": "main",
+                "output_type_id": self.output_type.id,
+                "task_type_id": self.task_type_id
+            },
+            200
+        )
+        self.assertEqual(result["next_revision"], 1)

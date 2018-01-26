@@ -9,20 +9,11 @@ from zou.app.services import (
     projects_service,
     user_service
 )
+
+from zou.app.mixin import ArgsMixin
 from zou.app.utils import query, permissions
 
 from zou.app.services.exception import ShotNotFoundException
-
-
-class ArgsMixin(object):
-    def get_args(self, descriptors):
-        parser = reqparse.RequestParser()
-        for (name, default, required) in descriptors:
-            if required is None:
-                required = False
-            parser.add_argument(name, required=required, default=default)
-
-        return parser.parse_args()
 
 
 class ShotResource(Resource):

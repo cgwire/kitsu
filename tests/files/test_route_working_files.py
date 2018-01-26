@@ -7,10 +7,10 @@ from zou.app.models.task import Task
 from zou.app.services import tasks_service
 
 
-class TaskLastWorkingFilesTestCase(ApiDBTestCase):
+class WorkingFilesTestCase(ApiDBTestCase):
 
     def setUp(self):
-        super(TaskLastWorkingFilesTestCase, self).setUp()
+        super(WorkingFilesTestCase, self).setUp()
 
         self.generate_fixture_project_status()
         self.generate_fixture_project()
@@ -56,7 +56,7 @@ class TaskLastWorkingFilesTestCase(ApiDBTestCase):
         )
 
         working_files = self.get(
-            "/data/tasks/%s/last-working-files" % self.task.id
+            "/data/tasks/%s/working-files/last-revisions" % self.task.id
         )
         self.assertEqual(
             working_files["main"],
@@ -171,6 +171,26 @@ class TaskLastWorkingFilesTestCase(ApiDBTestCase):
         path = "/data/files/%s" % output_file_id
         self.get(path, 403)
 
-        task = tasks_service.get_task(remote_file["task_id"])
-        tasks_service.assign_task(task["id"], self.user_cg_artist.id)
+        tasks_service.assign_task(self.task.id, self.user_cg_artist.id)
         remote_file = self.get(path)
+
+    def test_comment_working_file(self):
+        comment_data = {
+            "comment": "test working file comment"
+        }
+        self.put(
+            "/actions/working-files/%s/comment" % self.working_file.id,
+            comment_data
+        )
+        working_file = self.get("data/working-files/%s" % self.working_file.id)
+        self.assertEqual(working_file["comment"], comment_data["comment"])
+
+    def test_comment_working_wrong_data(self):
+        comment_data = {
+            "comment_wrong": "test working file comment"
+        }
+        self.put(
+            "/actions/working-files/%s/comment" % self.working_file.id,
+            comment_data,
+            400
+        )

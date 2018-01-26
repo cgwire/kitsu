@@ -1,7 +1,7 @@
 import os
 
 from flask import Flask
-from flask_restful import current_app
+from flask_restful import current_app, reqparse
 from flask_jwt_extended import JWTManager
 from flask_principal import Principal, identity_changed, Identity
 from flask_sqlalchemy import SQLAlchemy
