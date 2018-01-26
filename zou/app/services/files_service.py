@@ -182,6 +182,7 @@ def create_new_output_revision(
     output_type_id,
     person_id,
     task_type_id,
+    asset_instance_id=None,
     revision=0,
     name="main",
     comment="",
@@ -191,8 +192,12 @@ def create_new_output_revision(
         try:
             output_file = get_last_output_revision(
                 entity_id,
-                output_type_id
+                output_type_id,
+                task_type_id,
+                name=name,
+                asset_instance_id=asset_instance_id
             )
+
             revision = output_file["revision"] + 1
         except NoOutputFileException:
             revision = 1
@@ -206,32 +211,18 @@ def create_new_output_revision(
             extension=extension,
             revision=revision,
             entity_id=entity_id,
+            asset_instance_id=asset_instance_id,
             person_id=person_id,
             source_file_id=working_file_id,
             output_type_id=output_type_id,
-            file_status_id=file_status_id
+            file_status_id=file_status_id,
+            task_type_id=task_type_id
         )
         output_file.save()
     except IntegrityError:
         raise EntryAlreadyExistsException
 
     return output_file.serialize()
-
-
-def get_last_output_revision(entity_id, output_type_id):
-    output_files = OutputFile.query.filter_by(
-        output_type_id=output_type_id,
-        entity_id=entity_id
-    ).filter(
-        OutputFile.revision > 0
-    ).order_by(
-        desc(OutputFile.revision)
-    ).all()
-
-    if len(output_files) == 0:
-        raise NoOutputFileException()
-
-    return output_files[0].serialize()
 
 
 def get_working_files_for_task(task_id):
@@ -259,22 +250,50 @@ def get_next_output_file_revision(
     entity_id,
     output_type_id,
     task_type_id,
-    name="main"
+    name="main",
+    asset_instance_id=None
 ):
-    output_files = OutputFile.query.filter_by(
-        entity_id=entity_id,
+    try:
+        last_output = get_last_output_revision(
+            output_type_id=output_type_id,
+            task_type_id=task_type_id,
+            entity_id=entity_id,
+            name=name,
+            asset_instance_id=asset_instance_id
+        )
+        return last_output["revision"] + 1
+    except NoOutputFileException:
+        return 1
+
+
+def get_last_output_revision(
+    entity_id,
+    output_type_id,
+    task_type_id,
+    name="main",
+    asset_instance_id=None
+):
+    query = OutputFile.query.filter_by(
         output_type_id=output_type_id,
         task_type_id=task_type_id,
         name=name
     ).filter(
-        OutputFile.revision >= 0
+        OutputFile.revision > 0
     ).order_by(
         desc(OutputFile.revision)
-    ).all()
-    if len(output_files) > 0:
-        return output_files[0].revision + 1
+    )
+
+    if asset_instance_id is None:
+        query = query.filter(OutputFile.entity_id == entity_id)
     else:
-        return 1
+        query = query.filter(OutputFile.asset_instance_id == asset_instance_id)
+
+    output_files = query.all()
+
+    if len(output_files) == 0:
+        raise NoOutputFileException()
+
+    return output_files[0].serialize()
 
 
 def get_output_files_for_entity(entity_id):
@@ -288,11 +307,40 @@ def get_output_files_for_entity(entity_id):
     return fields.serialize_models(output_files)
 
 
+def get_output_files_for_instance(asset_instance_id):
+    output_files = OutputFile.query.filter_by(
+        asset_instance_id=asset_instance_id
+    ).filter(
+        OutputFile.revision >= 0
+    ).order_by(
+        desc(OutputFile.revision)
+    ).all()
+    return fields.serialize_models(output_files)
+
+
 def get_last_output_files_for_entity(entity_id):
     result = {}
     output_files = get_output_files_for_entity(entity_id)
 
-    # We assume here that output files are returned in the right order
+    # We assume here that output files are returned in the right order.
+    for output_file in output_files:
+        output_type_id = output_file["output_type_id"]
+        name = output_file["name"]
+
+        if output_type_id not in result:
+            result[output_type_id] = {}
+
+        if name not in result[output_type_id]:
+            result[output_type_id][name] = output_file
+
+    return result
+
+
+def get_last_output_files_for_instance(asset_instance_id):
+    result = {}
+    output_files = get_output_files_for_instance(asset_instance_id)
+
+    # We assume here that output files are returned in the right order.
     for output_file in output_files:
         output_type_id = output_file["output_type_id"]
         name = output_file["name"]
@@ -361,7 +409,16 @@ def get_output_types_for_entity(entity_id):
     output_types = OutputType.query \
         .join(OutputFile) \
         .filter(OutputFile.entity_id == entity_id) \
-        .order_by(OutputFile.name) \
+        .order_by(OutputType.name) \
+        .all()
+    return OutputType.serialize_list(output_types)
+
+
+def get_output_types_for_instance(asset_instance_id):
+    output_types = OutputType.query \
+        .join(OutputFile) \
+        .filter(OutputFile.asset_instance_id == asset_instance_id) \
+        .order_by(OutputType.name) \
         .all()
     return OutputType.serialize_list(output_types)
 
@@ -369,6 +426,18 @@ def get_output_types_for_entity(entity_id):
 def get_output_files_for_output_types_and_entity(entity_id, output_type_id):
     output_files = OutputFile.query \
         .filter(OutputFile.entity_id == entity_id) \
+        .filter(OutputFile.output_type_id == output_type_id) \
+        .order_by(desc(OutputFile.revision)) \
+        .all()
+    return OutputFile.serialize_list(output_files)
+
+
+def get_output_files_for_output_type_and_asset_instance(
+    asset_instance_id,
+    output_type_id
+):
+    output_files = OutputFile.query \
+        .filter(OutputFile.asset_instance_id == asset_instance_id) \
         .filter(OutputFile.output_type_id == output_type_id) \
         .order_by(desc(OutputFile.revision)) \
         .all()

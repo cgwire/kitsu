@@ -142,9 +142,10 @@ def get_output_file_name(
 
 def get_instance_file_name(
     asset_instance,
-    output_type,
+    output_type=None,
+    task_type=None,
     mode="output",
-    name="",
+    name="main",
     revision=1
 ):
     shot = tasks_service.get_entity(asset_instance["entity_id"])
@@ -156,7 +157,8 @@ def get_instance_file_name(
         tree,
         mode,
         entity=shot,
-        outputy_type=output_type,
+        output_type=output_type,
+        task_type=task_type,
         name=name,
         asset_instance=asset_instance,
         asset=asset,
@@ -229,8 +231,11 @@ def get_output_folder_path(
 
 def get_instance_folder_path(
     asset_instance,
-    output_type,
+    output_type=None,
+    task_type=None,
+    name="name",
     mode="output",
+    revision=1,
     sep=os.sep,
 ):
     shot = tasks_service.get_entity(asset_instance["entity_id"])
@@ -254,6 +259,7 @@ def get_instance_folder_path(
         name="",
         style=style,
         asset_instance=asset_instance,
+        task_type=task_type,
         asset=asset
     )
     folder_path = change_folder_path_separators(folder_path, sep)
@@ -335,6 +341,7 @@ def get_file_name_root(
         file_name_template,
         entity=entity,
         task=task,
+        task_type=task_type,
         software=software,
         output_type=output_type,
         name=name,
@@ -447,7 +454,7 @@ def get_folder_from_datatype(
         folder = get_folder_from_scene(entity)
     elif datatype == "Instance":
         folder = get_folder_from_instance(instance)
-    elif datatype == "Name":
+    elif datatype in ["Name", "OutputFile", "WorkingFile"]:
         folder = name
     elif datatype == "Version":
         folder = get_folder_from_revision(revision)

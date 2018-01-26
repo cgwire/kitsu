@@ -18,6 +18,7 @@ class OutputFile(db.Model, BaseMixin, SerializerMixin):
     checksum = db.Column(db.String(32))
     source = db.Column(db.String(40))
     path = db.Column(db.String(400))
+    canceled = db.Column(db.Boolean(), default=False, nullable=False)
 
     uploaded_movie_url = db.Column(db.String(600))
     uploaded_movie_name = db.Column(db.String(150))
@@ -58,6 +59,7 @@ class OutputFile(db.Model, BaseMixin, SerializerMixin):
             "name",
             "entity_id",
             "output_type_id",
+            "task_type_id",
             "revision",
             name="output_file_uc"
         ),

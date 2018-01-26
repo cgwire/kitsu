@@ -13,19 +13,19 @@ from .resources import (
     GetNextEntityOutputFileRevisionResource,
     NewEntityOutputFileResource,
     LastEntityOutputFilesResource,
+    EntityOutputTypesResource,
+    EntityOutputTypeOutputFilesResource,
 
     InstanceOutputFilePathResource,
     NewInstanceOutputFileResource,
-    GetNextInstanceOutputFileResource,
+    GetNextInstanceOutputFileRevisionResource,
     LastInstanceOutputFilesResource,
     InstanceOutputTypesResource,
+    InstanceOutputTypeOutputFilesResource,
 
     SetTreeResource,
 
-    FileResource,
-
-    EntityOutputTypesResource,
-    EntityOutputTypeOutputFilesResource
+    FileResource
 )
 
 routes = [
@@ -36,11 +36,12 @@ routes = [
     ("/data/tasks/<task_id>/working-files/last-revisions", LastWorkingFilesResource),
     ("/data/tasks/<task_id>/working-file-path", WorkingFilePathResource),
 
-    ("/data/asset-instances/<instance_id>/output-files/new", NewInstanceOutputFileResource),
-    ("/data/asset-instances/<instance_id>/output-files/next-revision", GetNextInstanceOutputFileResource),
-    ("/data/asset-instances/<instance_id>/output-files/last-revisions", LastInstanceOutputFilesResource),
-    ("/data/asset-instances/<instance_id>/output-types", InstanceOutputTypesResource),
-    ("/data/asset-instances/<instance_id>/output-file-path", InstanceOutputFilePathResource),
+    ("/data/asset-instances/<asset_instance_id>/output-files/new", NewInstanceOutputFileResource),
+    ("/data/asset-instances/<asset_instance_id>/output-files/next-revision", GetNextInstanceOutputFileRevisionResource),
+    ("/data/asset-instances/<asset_instance_id>/output-files/last-revisions", LastInstanceOutputFilesResource),
+    ("/data/asset-instances/<asset_instance_id>/output-types/<output_type_id>/output-files", InstanceOutputTypeOutputFilesResource),
+    ("/data/asset-instances/<asset_instance_id>/output-types", InstanceOutputTypesResource),
+    ("/data/asset-instances/<asset_instance_id>/output-file-path", InstanceOutputFilePathResource),
 
     ("/data/entities/<entity_id>/output-files/new", NewEntityOutputFileResource),
     ("/data/entities/<entity_id>/output-files/next-revision", GetNextEntityOutputFileRevisionResource),

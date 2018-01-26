@@ -107,7 +107,6 @@ class FolderPathTestCase(ApiDBTestCase):
             "shaders/3ds_max"
         )
 
-    '''
     def test_get_path_shot_asset_instance(self):
         self.output_type = files_service.get_or_create_output_type("Cache")
         self.generate_fixture_shot_asset_instance(
@@ -116,24 +115,24 @@ class FolderPathTestCase(ApiDBTestCase):
         )
         data = {
             "name": "main",
+            "output_type_id": self.output_type["id"],
+            "task_type_id": self.task_type_animation.id,
             "revision": 3
         }
         result = self.post(
-            "/data/asset-instances/%s/output-types/%s/file-path" % (
-                self.asset_instance.id,
-                self.output_type["id"]
-            ),
+            "/data/asset-instances/%s/output-file-path" %
+            self.asset_instance.id,
             data,
             200
         )
         self.assertEquals(
             result["path"],
-            "/simple/productions/export/cosmos_landromat/shot/s01/p01/cache/"
-            "props/tree/instance_1"
+            "/simple/productions/export/cosmos_landromat/shot/s01/p01/"
+            "animation/cache/props/tree/instance_1"
         )
         self.assertEquals(
             result["name"],
-            "cosmos_landromat_s01_p01_cache_main_props_tree_instance_1_v003"
+            "cosmos_landromat_s01_p01_animation_cache_main_props_tree_instance_1_v003"
         )
 
     def test_get_path_scene_asset_instance(self):
@@ -144,26 +143,25 @@ class FolderPathTestCase(ApiDBTestCase):
         )
         data = {
             "name": "main",
+            "output_type_id": self.output_type["id"],
+            "task_type_id": self.task_type_animation.id,
             "revision": 3
         }
         result = self.post(
-            "/data/asset-instances/%s/output-types/%s/file-path" % (
-                self.asset_instance.id,
-                self.output_type["id"]
-            ),
+            "/data/asset-instances/%s/output-file-path" %
+            self.asset_instance.id,
             data,
             200
         )
         self.assertEquals(
             result["path"],
-            "/simple/productions/export/cosmos_landromat/scene/s01/sc01/cache/"
-            "props/tree/instance_1"
+            "/simple/productions/export/cosmos_landromat/scene/s01/sc01/"
+            "animation/cache/props/tree/instance_1"
         )
         self.assertEquals(
             result["name"],
-            "cosmos_landromat_s01_sc01_cache_main_props_tree_instance_1_v003"
+            "cosmos_landromat_s01_sc01_animation_cache_main_props_tree_instance_1_v003"
         )
-    '''
 
     def test_get_path_asset_software(self):
         data = {

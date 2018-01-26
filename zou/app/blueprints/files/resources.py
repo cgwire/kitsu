@@ -1,6 +1,6 @@
 import datetime
 
-from flask import request, abort
+from flask import request, abort, current_app
 from flask_restful import Resource, reqparse
 from flask_jwt_extended import jwt_required
 
@@ -97,44 +97,50 @@ class WorkingFilePathResource(Resource):
         )
 
 
-class EntityOutputFilePathResource(Resource):
+class EntityOutputFilePathResource(Resource, ArgsMixin):
 
     @jwt_required
     def post(self, entity_id):
-        (
-            name,
-            mode,
-            software_id,
-            comment,
-            revision,
-            separator
-        ) = self.get_arguments()
+        args = self.get_arguments()
 
         try:
             entity = entities_service.get_entity(entity_id)
             if not permissions.has_manager_permissions():
                 user_service.check_has_task_related(entity["project_id"])
 
-            software = files_service.get_software(software_id)
-            is_revision_set_by_user = revision != 0
+            output_type = files_service.get_output_type(
+                args["output_type_id"]
+            )
+            task_type = tasks_service.get_task_type(args["task_type_id"])
+            entity = entities_service.get_entity(entity_id)
+            if not permissions.has_manager_permissions():
+                user_service.check_has_task_related(entity["project_id"])
+
+            is_revision_set_by_user = args["revision"] != 0
             if not is_revision_set_by_user:
                 revision = files_service.get_next_output_file_revision(
                     entity_id,
-                    name
+                    args["name"]
                 )
-            file_path = file_tree.get_output_folder_path(
+            else:
+                revision = args["revision"]
+
+            folder_path = file_tree.get_output_folder_path(
                 entity,
-                mode=mode,
-                software=software,
-                name=name,
-                sep=separator
+                mode=args["mode"],
+                output_type=output_type,
+                task_type=task_type,
+                name=args["name"],
+                sep=args["separator"],
+                revision=args["revision"]
             )
             file_name = file_tree.get_output_file_name(
                 entity,
-                mode=mode,
+                mode=args["mode"],
                 revision=revision,
-                software=software,
-                name=name
+                output_type=output_type,
+                task_type=task_type,
+                name=args["name"]
             )
         except MalformedFileTreeException:
             return {
@@ -143,28 +149,18 @@ class EntityOutputFilePathResource(Resource):
                 "received_data": request.json,
             }, 400
 
-        return {"path": file_path, "name": file_name}, 200
+        return {"folder_path": folder_path, "file_name": file_name}, 200
 
     def get_arguments(self):
-        maxsoft = files_service.get_or_create_software("3ds Max", "max", ".max")
-
-        parser = reqparse.RequestParser()
-        parser.add_argument("name", default="main")
-        parser.add_argument("mode", default="working")
-        parser.add_argument("software_id", default=maxsoft["id"])
-        parser.add_argument("comment", default="")
-        parser.add_argument("revision", default=0)
-        parser.add_argument("sep", default="/")
-        args = parser.parse_args()
-
-        return (
-            args["name"],
-            args["mode"],
-            args["software_id"],
-            args["comment"],
-            args["revision"],
-            args["sep"]
-        )
+        return self.get_args([
+            ("name", "main", False),
+            ("mode", "output", False),
+            ("output_type_id", None, True),
+            ("task_type_id", None, True),
+            ("revision", 0, False),
+            ("extension", "", False),
+            ("separator", "/", False)
+        ])
 
 
 class LastWorkingFilesResource(Resource):
@@ -327,10 +323,10 @@ class CommentWorkingFileResource(Resource):
         return working_file
 
 
-class OutputFilePathResource(Resource, ArgsMixin):
+class InstanceOutputFilePathResource(Resource, ArgsMixin):
 
     @jwt_required
-    def post(self, entity_id):
+    def post(self, asset_instance_id):
         (
             name,
             mode,
@@ -341,81 +337,8 @@ class OutputFilePathResource(Resource, ArgsMixin):
         ) = self.get_arguments()
 
         try:
-            entity = entities_service.get_entity(entity_id)
-            output_type = files_service.get_output_type(output_type_id)
-            task_type = tasks_service.get_task_type(task_type_id)
-            if not permissions.has_manager_permissions():
-                user_service.check_has_task_related(entity["project_id"])
-
-            is_revision_set_by_user = revision != 0
-            if not is_revision_set_by_user:
-                revision = files_service.get_next_output_file_revision(
-                    entity,
-                    output_type,
-                    task_type,
-                    name
-                )
-            file_path = file_tree.get_output_folder_path(
-                entity,
-                output_type,
-                task_type,
-                mode=mode,
-                name=name,
-                revision=revision,
-                sep=separator
-            )
-            file_name = file_tree.get_output_file_name(
-                entity,
-                output_type,
-                task_type,
-                mode=mode,
-                name=name,
-                revision=revision,
-                sep=separator
-            )
-        except MalformedFileTreeException:
-            return {
-                "error":
-                    "Tree is not properly written, check modes and variables",
-                "received_data": request.json,
-            }, 400
-
-        return {"path": file_path, "name": file_name}, 200
-
-    def get_arguments(self):
-        args = self.get_args([
-            ("name", "main", False),
-            ("mode", "output", False)
-            ("output_type_id", None, True)
-            ("task_type_id", None, True)
-            ("revision", 0, False)
-            ("sep", "/", False)
-        ])
-        return (
-            args["name"],
-            args["mode"],
-            args["output_type_id"],
-            args["task_type_id"],
-            args["revision"],
-            args["sep"]
-        )
-
-
-class InstanceOutputFilePathResource(Resource):
-
-    @jwt_required
-    def post(self, instance_id):
-        (
-            mode,
-            name,
-            output_type_id,
-            task_type_id,
-            revision,
-            separator
-        ) = self.get_arguments()
-
-        try:
-            asset_instance = assets_service.get_asset_instance(instance_id)
+            asset_instance = assets_service.get_asset_instance(
+                asset_instance_id)
             asset = assets_service.get_asset(asset_instance["asset_id"])
             output_type = files_service.get_output_type(output_type_id)
             task_type = tasks_service.get_task_type(task_type_id)
@@ -424,8 +347,8 @@ class InstanceOutputFilePathResource(Resource):
 
             folder_path = file_tree.get_instance_folder_path(
                 asset_instance,
-                output_type,
-                task_type,
+                output_type=output_type,
+                task_type=task_type,
                 mode=mode,
                 name=name,
                 revision=revision,
@@ -433,14 +356,14 @@ class InstanceOutputFilePathResource(Resource):
             )
             file_name = file_tree.get_instance_file_name(
                 asset_instance,
-                output_type,
-                task_type,
+                output_type=output_type,
+                task_type=task_type,
                 mode=mode,
                 name=name,
-                revision=revision,
-                sep=separator
+                revision=revision
             )
-        except MalformedFileTreeException:
+        except MalformedFileTreeException as e:
+            current_app.logger.error(e)
             return {
                 "error":
                     "Tree is not properly written, check modes and variables",
@@ -452,10 +375,10 @@ class InstanceOutputFilePathResource(Resource):
     def get_arguments(self):
         args = self.get_args([
             ("name", "main", False),
-            ("mode", "output", False)
-            ("output_type_id", None, True)
-            ("task_type_id", None, True)
-            ("revision", 0, False)
+            ("mode", "output", False),
+            ("output_type_id", None, True),
+            ("task_type_id", None, True),
+            ("revision", 0, False),
             ("sep", "/", False)
         ])
         return (
@@ -508,6 +431,7 @@ class NewEntityOutputFileResource(Resource, ArgsMixin):
 
         try:
             revision = int(args["revision"])
+
             try:
                 working_file = files_service.get_working_file(
                     args["working_file_id"]
@@ -516,20 +440,23 @@ class NewEntityOutputFileResource(Resource, ArgsMixin):
             except WorkingFileNotFoundException:
                 pass
 
-            task = tasks_service.get_task(working_file["task_id"])
-            if not permissions.has_manager_permissions():
-                user_service.check_has_task_related(task["project_id"])
-            output_type = files_service.get_output_type(args["output_type_id"])
-            person = persons_service.get_person(args["person_id"])
             entity = entities_service.get_entity(entity_id)
-            task_type = tasks_service.get_task_type(task["task_type_id"])
+            if not permissions.has_manager_permissions():
+                user_service.check_has_task_related(entity["project_id"])
+            output_type = files_service.get_output_type(args["output_type_id"])
+            task_type = tasks_service.get_task_type(args["task_type_id"])
+
+            if args["person_id"] is None:
+                person = persons_service.get_current_user()
+            else:
+                person = persons_service.get_person(args["person_id"])
 
             output_file = files_service.create_new_output_revision(
-                task["entity_id"],
+                entity_id,
                 working_file_id,
                 output_type["id"],
                 person["id"],
-                task["task_type_id"],
+                args["task_type_id"],
                 revision=revision,
                 name=args["name"],
                 comment=args["comment"],
@@ -561,7 +488,7 @@ class NewEntityOutputFileResource(Resource, ArgsMixin):
             ("mode", "output", False),
             ("output_type_id", None, True),
             ("task_type_id", None, True),
-            ("person_id", "", True),
+            ("person_id", None, False),
             ("working_file_id", "", True),
             ("comment", "", True),
             ("revision", 0, False),
@@ -590,6 +517,129 @@ class NewEntityOutputFileResource(Resource, ArgsMixin):
         )
         file_name = file_tree.get_output_file_name(
             entity,
+            mode=mode,
+            revision=output_file["revision"],
+            output_type=output_type,
+            task_type=task_type,
+            name=name
+        )
+
+        output_file.update({
+            "folder_path": folder_path,
+            "file_name": file_name
+        })
+
+        files_service.update_output_file(
+            output_file["id"],
+            {
+                "path": "%s%s%s%s" % (
+                    folder_path,
+                    separator,
+                    file_name,
+                    extension
+                )
+            }
+        )
+        return output_file
+
+
+class NewInstanceOutputFileResource(Resource, ArgsMixin):
+
+    @jwt_required
+    def post(self, asset_instance_id):
+        args = self.get_arguments()
+
+        try:
+            revision = int(args["revision"])
+            try:
+                working_file = files_service.get_working_file(
+                    args["working_file_id"]
+                )
+                working_file_id = working_file["id"]
+            except WorkingFileNotFoundException:
+                pass
+            asset_instance = assets_service.get_asset_instance(
+                asset_instance_id
+            )
+
+            entity = assets_service.get_asset(asset_instance["asset_id"])
+            if not permissions.has_manager_permissions():
+                user_service.check_has_task_related(entity["project_id"])
+
+            output_type = files_service.get_output_type(args["output_type_id"])
+            task_type = tasks_service.get_task_type(args["task_type_id"])
+            if args["person_id"] is None:
+                person = persons_service.get_current_user()
+            else:
+                person = persons_service.get_person(args["person_id"])
+
+            output_file = files_service.create_new_output_revision(
+                asset_instance["asset_id"],
+                working_file_id,
+                output_type["id"],
+                person["id"],
+                task_type["id"],
+                asset_instance_id=asset_instance["id"],
+                revision=revision,
+                name=args["name"],
+                comment=args["comment"],
+                extension=args["extension"]
+            )
+
+            output_file_dict = self.add_path_info(
+                output_file,
+                "output",
+                asset_instance,
+                output_type,
+                task_type=task_type,
+                name=args["name"],
+                extension=args["extension"],
+                separator=args["sep"]
+            )
+        except OutputTypeNotFoundException:
+            return {"message": "Cannot find given output type."}, 400
+        except PersonNotFoundException:
+            return {"message": "Cannot find given person."}, 400
+        except EntryAlreadyExistsException:
+            return {"message": "The given output file already exists."}, 400
+
+        return output_file_dict, 201
+
+    def get_arguments(self):
+        return self.get_args([
+            ("name", "main", False),
+            ("mode", "output", False),
+            ("output_type_id", None, True),
+            ("task_type_id", None, True),
+            ("person_id", None, False),
+            ("working_file_id", "", True),
+            ("comment", "", True),
+            ("revision", 0, False),
+            ("extension", "", False),
+            ("sep", "/", False)
+        ])
+
+    def add_path_info(
+        self,
+        output_file,
+        mode,
+        asset_instance,
+        output_type,
+        task_type=None,
+        name="main",
+        extension="",
+        separator="/"
+    ):
+        folder_path = file_tree.get_instance_folder_path(
+            asset_instance,
+            mode=mode,
+            output_type=output_type,
+            task_type=task_type,
+            name=name,
+            sep=separator
+        )
+        file_name = file_tree.get_instance_file_name(
+            asset_instance,
             mode=mode,
             revision=output_file["revision"],
             output_type=output_type,
@@ -647,6 +697,40 @@ class GetNextEntityOutputFileRevisionResource(Resource, ArgsMixin):
         ])
 
 
+class GetNextInstanceOutputFileRevisionResource(Resource, ArgsMixin):
+
+    @jwt_required
+    def post(self, asset_instance_id):
+        args = self.get_arguments()
+
+        asset_instance = assets_service.get_asset_instance(asset_instance_id)
+        entity = entities_service.get_entity(asset_instance["asset_id"])
+        output_type = files_service.get_output_type(args["output_type_id"])
+        task_type = tasks_service.get_task_type(args["task_type_id"])
+        if not permissions.has_manager_permissions():
+            user_service.check_has_task_related(entity["project_id"])
+
+        next_revision_number = \
+            files_service.get_next_output_file_revision(
+                entity["id"],
+                output_type["id"],
+                task_type["id"],
+                args["name"],
+                asset_instance_id=asset_instance["id"]
+            )
+
+        return {
+            "next_revision": next_revision_number
+        }, 200
+
+    def get_arguments(self):
+        return self.get_args([
+            ("name", "main", False),
+            ("output_type_id", None, True),
+            ("task_type_id", None, True)
+        ])
+
+
 class LastEntityOutputFilesResource(Resource):
 
     @jwt_required
@@ -655,6 +739,66 @@ class LastEntityOutputFilesResource(Resource):
         if not permissions.has_manager_permissions():
             user_service.check_has_task_related(entity["project_id"])
         return files_service.get_last_output_files_for_entity(entity["id"])
+
+
+class LastInstanceOutputFilesResource(Resource):
+
+    @jwt_required
+    def get(self, asset_instance_id):
+        asset_instance = assets_service.get_asset_instance(asset_instance_id)
+        entity = entities_service.get_entity(asset_instance["asset_id"])
+        if not permissions.has_manager_permissions():
+            user_service.check_has_task_related(entity["project_id"])
+        return files_service.get_last_output_files_for_instance(
+            asset_instance["id"]
+        )
+
+
+class EntityOutputTypesResource(Resource):
+
+    @jwt_required
+    def get(self, entity_id):
+        entity = entities_service.get_entity(entity_id)
+        user_service.check_project_access(entity["project_id"])
+        return files_service.get_output_types_for_entity(entity_id)
+
+
+class InstanceOutputTypesResource(Resource):
+
+    @jwt_required
+    def get(self, asset_instance_id):
+        asset_instance = assets_service.get_asset_instance(asset_instance_id)
+        entity = entities_service.get_entity(asset_instance["asset_id"])
+        user_service.check_project_access(entity["project_id"])
+        return files_service.get_output_types_for_instance(asset_instance_id)
+
+
+class EntityOutputTypeOutputFilesResource(Resource):
+
+    @jwt_required
+    def get(self, entity_id, output_type_id):
+        entity = entities_service.get_entity(entity_id)
+        files_service.get_output_type(output_type_id)
+        user_service.check_project_access(entity["project_id"])
+        return files_service.get_output_files_for_output_types_and_entity(
+            entity_id,
+            output_type_id
+        )
+
+
+class InstanceOutputTypeOutputFilesResource(Resource):
+
+    @jwt_required
+    def get(self, asset_instance_id, output_type_id):
+        asset_instance = assets_service.get_asset_instance(asset_instance_id)
+        asset = assets_service.get_asset(asset_instance["asset_id"])
+        user_service.check_project_access(asset["project_id"])
+
+        files_service.get_output_type(output_type_id)
+        return files_service.get_output_files_for_output_type_and_asset_instance(
+            asset_instance_id,
+            output_type_id
+        )
 
 
 class FileResource(Resource):
@@ -673,25 +817,3 @@ class FileResource(Resource):
         if not permissions.has_manager_permissions():
             user_service.check_has_task_related(project_id)
         return file_dict
-
-
-class EntityOutputTypesResource(Resource):
-
-    @jwt_required
-    def get(self, entity_id):
-        entity = entities_service.get_entity(entity_id)
-        user_service.check_project_access(entity["project_id"])
-        return files_service.get_output_types_for_entity(entity_id)
-
-
-class EntityOutputTypeOutputFilesResource(Resource):
-
-    @jwt_required
-    def get(self, entity_id, output_type_id):
-        entity = entities_service.get_entity(entity_id)
-        files_service.get_output_type(output_type_id)
-        user_service.check_project_access(entity["project_id"])
-        return files_service.get_output_files_for_output_types_and_entity(
-            entity_id,
-            output_type_id
-        )
