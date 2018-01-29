@@ -66,7 +66,7 @@
              </router-link>
            </p>
            <p @click="toggleSidebar()">
-             <router-link to="/task-status">
+             <router-link to="/task-status" class="task-status-link">
              {{ $t("task_status.title") }}
              </router-link>
            </p>

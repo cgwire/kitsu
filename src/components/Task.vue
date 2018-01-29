@@ -144,7 +144,7 @@
         </div>
 	  </div>
 
-      <div class="task-column">
+      <div class="task-column preview-column">
         <h2 class="subtitle">
           {{ $t('tasks.preview') }}
         </h2>
@@ -654,6 +654,10 @@ video {
   overflow-y: auto;
 }
 
+.preview-column {
+  overflow-y: hidden;
+}
+
 .task-column:first-child {
   padding-left: 0;
 }
@@ -674,5 +678,17 @@ video {
 .thumbnail-picture {
   width: 70px;
   margin-right: 0.3em;
+}
+
+.preview-picture {
+  text-align: center;
+  margin-top: 1em;
+  flex: 1;
+  display: flex;
+  max-height: 100%;
+}
+
+.preview-picture img {
+  max-height: 100%;
 }
 </style>

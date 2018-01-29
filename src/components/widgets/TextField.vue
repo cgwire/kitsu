@@ -4,6 +4,7 @@
   <p class="control">
     <input
       class="input"
+      :class="'input ' + inputClass"
       ref="input"
       :placeholder="placeholder"
       :type="type"
@@ -35,6 +36,10 @@ export default {
     },
     type: {
       default: 'text',
+      type: String
+    },
+    inputClass: {
+      default: '',
       type: String
     }
   },

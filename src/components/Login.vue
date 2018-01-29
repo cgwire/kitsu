@@ -11,7 +11,7 @@
         <div class="field">
           <p class="control has-icon">
             <input
-              class="input is-medium"
+              class="input is-medium email"
               type="text"
               :placeholder="$t('login.fields.email')"
               @input="updateEmail"
@@ -25,7 +25,7 @@
         <div class="field">
           <p class="control has-icon">
             <input
-              class="input is-medium"
+              class="input is-medium password"
               type="password"
               :placeholder="$t('login.fields.password')"
               @input="updatePassword"

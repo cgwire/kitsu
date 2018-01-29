@@ -1,6 +1,11 @@
 import async from 'async'
 import store from '../store'
 
+import { LOGIN_SUCCESS } from '../store/mutation-types'
+
+/**
+ * Load base data required to display properly all information.
+ */
 const init = (callback) => {
   const storeActions = [
     'loadProductionStatus',
@@ -8,18 +13,19 @@ const init = (callback) => {
     'loadAssetTypes',
     'loadTaskTypes',
     'loadPeople',
-    'loadOpenProductions'
+    'loadOpenProductions',
+    'loadCustomActions'
   ]
-
-  if (store.getters.isCurrentUserManager) {
-    storeActions.push('loadCustomActions')
-  }
 
   async.mapSeries(storeActions, store.dispatch, (err) => {
     if (err) {
       console.log('An init operation failed: ', err)
     }
-    store.commit('LOGIN_SUCCESS')
+
+    // We run login success mutation when done because init
+    // happens either after successful login or at first connexion
+    // when the user have an active session.
+    store.commit(LOGIN_SUCCESS)
     callback()
   })
 }

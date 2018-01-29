@@ -1,6 +1,7 @@
 <template>
 <div :class="{
   'modal': true,
+  'delete-modal': true,
   'is-active': active
 }">
   <div class="modal-background"></div>
