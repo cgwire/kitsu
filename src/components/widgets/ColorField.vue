@@ -1,7 +1,7 @@
 <template>
 <div class="field">
-  <label class="label">{{ label }} {{ value }}</label>
-  <p class="control">
+  <label class="label">{{ label }}</label>
+  <div class="control colors">
     <div
       :class="{
         color: true,
@@ -16,7 +16,7 @@
       >
       </span>
     </div>
-  </p>
+  </div>
 </div>
 </template>
 

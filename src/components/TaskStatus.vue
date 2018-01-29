@@ -7,7 +7,7 @@
       <div class="level-right">
         <div class="level-item">
           <button-link
-            class="level-item"
+            class="level-item task-status-new"
             icon="plus"
             :text="$t('task_status.new_task_status')"
             path="/task-status/new"

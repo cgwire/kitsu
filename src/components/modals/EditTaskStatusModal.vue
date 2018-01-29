@@ -18,6 +18,7 @@
       <form v-on:submit.prevent>
         <text-field
           ref="nameField"
+          input-class="task-status-name"
           :label="$t('task_status.fields.name')"
           v-model="form.name"
           v-focus
@@ -25,6 +26,7 @@
         </text-field>
         <text-field
           ref="shortNameField"
+          input-class="task-status-short-name"
           :label="$t('task_status.fields.short_name')"
           v-model="form.short_name"
           v-focus
@@ -49,6 +51,7 @@
         <a
           :class="{
             button: true,
+            'confirm-edit-task-status': true,
             'is-primary': true,
             'is-loading': isLoading
           }"
