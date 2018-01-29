@@ -8,7 +8,7 @@ export default {
   metaInfo: {
     link: [
       {
-        rel: 'favicon',
+        rel: 'icon',
         href: '/static/favicon.ico'
       }
     ]
