@@ -19,5 +19,10 @@ def rm_rf(path):
         shutil.rmtree(path)
 
 
+def rm_file(path):
+    if os.path.exists(path):
+        os.remove(path)
+
+
 def copyfile(src, dest):
     shutil.copyfile(src, dest)

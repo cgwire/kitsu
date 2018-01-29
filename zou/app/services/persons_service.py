@@ -2,6 +2,7 @@ import slugify
 
 from sqlalchemy.exc import StatementError
 
+from flask import current_app
 from flask_jwt_extended import get_jwt_identity
 
 from zou.app.models.person import Person
@@ -72,10 +73,7 @@ def get_person_by_email_username(email):
 
 
 def get_by_email_raw(email):
-    try:
-        person = Person.get_by(email=email)
-    except StatementError:
-        raise PersonNotFoundException()
+    person = Person.get_by(email=email)
 
     if person is None:
         raise PersonNotFoundException()
