@@ -14,14 +14,30 @@ BIG_SQUARE_SIZE = 400, 400
 
 
 def save_file(subfolder, instance_id, file_to_save, size=None):
-    file_name = get_file_name(instance_id)
+    extension = file_to_save.filename[-4:]
+    file_name = instance_id + extension
     thumbnail_folder = create_folder(subfolder)
 
     file_path = os.path.join(thumbnail_folder, file_name)
     file_to_save.save(file_path)
-    turn_into_thumbnail(file_path, size=size)
+
+    if size is not None:
+        turn_into_thumbnail(file_path, size=size)
 
     return file_path
+
+
+def convert_jpg_to_png(subfolder, instance_id):
+    file_source_name = "%s.jpg" % instance_id
+    file_target_name = "%s.png" % instance_id
+    thumbnail_folder = create_folder(subfolder)
+    file_source_path = os.path.join(thumbnail_folder, file_source_name)
+    file_target_path = os.path.join(thumbnail_folder, file_target_name)
+
+    im = Image.open(file_source_path)
+    im.save(file_target_path)
+    fs.rm_file(file_source_path)
+    return file_target_path
 
 
 def get_file_name(instance_id):

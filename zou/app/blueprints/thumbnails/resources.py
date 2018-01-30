@@ -36,13 +36,19 @@ class CreatePreviewFilePictureResource(Resource):
             instance_id
         )
         extension = uploaded_file.filename[-4:]
-        if extension == ".png":
+        if extension in [".png", ".jpg"]:
             thumbnail_utils.save_file(
                 folder_path,
                 instance_id,
                 uploaded_file,
                 size=None
             )
+            if extension == ".jpg":
+                thumbnail_utils.convert_jpg_to_png(
+                    folder_path,
+                    instance_id
+                )
+
             thumbnail_utils.generate_preview_variants(instance_id)
 
             return thumbnail_utils.get_preview_url_path(instance_id), 201
