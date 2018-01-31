@@ -213,16 +213,12 @@ const actions = {
   },
 
   loadPersonTasks ({ commit, state }, { personId, forced, callback }) {
-    if (state.personTasks.length === 0 || forced) {
-      commit(LOAD_PERSON_TASKS_END, [])
-      peopleApi.getPersonTasks(personId, (err, tasks) => {
-        if (err) tasks = []
-        commit(LOAD_PERSON_TASKS_END, tasks)
-        if (callback) callback(err)
-      })
-    } else {
-      if (callback) callback()
-    }
+    commit(LOAD_PERSON_TASKS_END, [])
+    peopleApi.getPersonTasks(personId, (err, tasks) => {
+      if (err) tasks = []
+      commit(LOAD_PERSON_TASKS_END, tasks)
+      if (callback) callback(err)
+    })
   },
 
   showPersonImportModal ({ commit, state }, personId) {
