@@ -1,21 +1,26 @@
 <template>
-<router-link :to="'/people/' + person.id" v-if="isLink">
-  <span class="avatar has-text-centered"
-     :style="{
-       background: person.color,
-       width: size +'px',
-       height: size + 'px',
-       'font-size': fontSize + 'px'
-     }">
-     <img
-       v-lazy="person.avatarPath"
-       v-if="person.has_avatar"
-      />
-     <span v-else>
-       {{ person.initials }}
-     </span>
+  <span
+    class="avatar has-text-centered"
+    :style="{
+      background: person.color,
+      width: size +'px',
+      height: size + 'px',
+      'font-size': person.has_avatar ? 0 : fontSize + 'px'
+    }"
+    v-if="isLink"
+  >
+    <router-link :to="'/people/' + person.id" class="avatar-link">
+    <img
+      v-lazy="person.avatarPath"
+      v-if="person.has_avatar"
+    />
+    <span
+      v-if="!person.has_avatar"
+    >
+     {{ person.initials }}
+    </span>
+    </router-link>
   </span>
-</router-link>
 
 <span
    class="avatar has-text-centered"
@@ -60,8 +65,14 @@ export default {
   color: white;
   display: flex;
   align-items: center;
+  justify-content: center;
 }
 .avatar span {
   flex: 1;
+}
+.avatar a {
+  padding: 0;
+  margin: 0;
+  color: white;
 }
 </style>
