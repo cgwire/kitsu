@@ -33,8 +33,8 @@ export default {
     },
     role: {
       admin: 'Administrator',
-      manager: 'Manager',
-      user: 'User'
+      manager: 'Supervisor',
+      user: 'CG Artist'
     }
   },
 
