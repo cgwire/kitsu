@@ -28,14 +28,18 @@ class CommentTaskResource(Resource):
     def post(self, task_id):
         (
             task_status_id,
-            comment
+            comment,
+            person_id
         ) = self.get_arguments()
 
         tasks_service.get_task(task_id)
         if not permissions.has_manager_permissions():
             user_service.check_assigned(task_id)
         task_status = tasks_service.get_task_status(task_status_id)
-        person = persons_service.get_current_user()
+        if person_id:
+            person = persons_service.get_person(person_id)
+        else:
+            person = persons_service.get_current_user()
         comment = tasks_service.create_comment(
             object_id=task_id,
             object_type="Task",
@@ -60,11 +64,13 @@ class CommentTaskResource(Resource):
             help="Task Status ID is missing"
         )
         parser.add_argument("comment", default="")
+        parser.add_argument("person_id", default="")
         args = parser.parse_args()
 
         return (
             args["task_status_id"],
-            args["comment"]
+            args["comment"],
+            args["person_id"]
         )
 
 
