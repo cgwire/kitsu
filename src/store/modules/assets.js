@@ -456,7 +456,7 @@ const mutations = {
   [SET_ASSET_SEARCH] (state, assetSearch) {
     let result = indexSearch(state.assetIndex, assetSearch) || state.assets
     const taskTypes = extractTaskTypes(state.assets)
-    result = applyFilters(taskTypes, result, assetSearch)
+    result = applyFilters(taskTypes, result, assetSearch) || []
 
     state.displayedAssets = result.slice(0, PAGE_SIZE)
     state.displayedAssetsLength = result ? result.length : 0

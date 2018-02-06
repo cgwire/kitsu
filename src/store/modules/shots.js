@@ -467,7 +467,7 @@ const mutations = {
   [SET_SHOT_SEARCH] (state, shotSearch) {
     const taskTypes = extractTaskTypes(state.shots)
     let result = indexSearch(state.shotIndex, shotSearch) || state.shots
-    result = applyFilters(taskTypes, result, shotSearch)
+    result = applyFilters(taskTypes, result, shotSearch) || []
     state.displayedShots = result.slice(0, PAGE_SIZE)
     state.displayedShotsLength = result.length
     state.shotSearchText = shotSearch
