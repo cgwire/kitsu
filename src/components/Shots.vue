@@ -42,28 +42,12 @@
       </div>
 
       <div class="filters-area">
-        <div class="level">
-          <div class="level-right">
-            <div class="level-item">
-              <search-icon></search-icon>
-            </div>
-            <div class="level-item">
-              <input
-                class="input search-input"
-                type="text"
-                ref="shot-search-field"
-                @input="onSearchChange"
-                v-focus
-              />
-            </div>
-            <!--div class="level-item">
-              <filter-icon></filter-icon>
-            </div>
-            <div class="level-item">
-              No filter set.
-            </div-->
-          </div>
-        </div>
+        <search-field
+          ref="shot-search-field"
+          @change="onSearchChange"
+          placeholder="ex: e01 s01, anim:wip"
+        >
+        </search-field>
       </div>
     </div>
 
@@ -176,6 +160,7 @@ import Filters from './widgets/Filters'
 import ButtonLink from './widgets/ButtonLink'
 import ButtonHrefLink from './widgets/ButtonHrefLink'
 import PageTitle from './widgets/PageTitle'
+import SearchField from './widgets/SearchField'
 
 export default {
   name: 'shots',
@@ -191,6 +176,7 @@ export default {
     ButtonLink,
     ButtonHrefLink,
     PageTitle,
+    SearchField,
     SearchIcon
   },
 
@@ -278,7 +264,7 @@ export default {
 
   mounted () {
     if (this.shotSearchText.length > 0) {
-      this.$refs['shot-search-field'].value = this.shotSearchText
+      this.$refs['shot-search-field'].setValue(this.shotSearchText)
     }
   },
 
@@ -474,7 +460,7 @@ export default {
       })
     },
     onSearchChange (event) {
-      const searchQuery = this.$refs['shot-search-field'].value
+      const searchQuery = this.$refs['shot-search-field'].getValue()
       this.setShotSearch(searchQuery)
     }
   },
@@ -490,7 +476,7 @@ export default {
       if (this.$route.path.length === 55) this.$router.push(newPath)
       const path = this.$route.path
       if (oldPath !== path) {
-        this.$refs['shot-search-field'].value = ''
+        this.$refs['shot-search-field'].setValue('')
         this.$store.dispatch('loadShots')
       }
     }
