@@ -4,8 +4,18 @@ import tasksStore from './tasks'
 import productionsStore from './productions'
 
 import {PAGE_SIZE} from '../../lib/pagination'
-import {sortShots, sortByName} from '../../lib/sorting'
-import { buildShotIndex, indexSearch } from '../../lib/indexing'
+import {
+  sortShots,
+  sortByName
+} from '../../lib/sorting'
+import {
+  buildShotIndex,
+  indexSearch
+} from '../../lib/indexing'
+import {
+  applyFilters,
+  extractTaskTypes
+} from '../../lib/filtering'
 
 import {
   LOAD_SHOTS_START,
@@ -455,7 +465,9 @@ const mutations = {
   },
 
   [SET_SHOT_SEARCH] (state, shotSearch) {
-    const result = indexSearch(state.shotIndex, shotSearch) || state.shots
+    const taskTypes = extractTaskTypes(state.shots)
+    let result = indexSearch(state.shotIndex, shotSearch) || state.shots
+    result = applyFilters(taskTypes, result, shotSearch)
     state.displayedShots = result.slice(0, PAGE_SIZE)
     state.displayedShotsLength = result.length
     state.shotSearchText = shotSearch

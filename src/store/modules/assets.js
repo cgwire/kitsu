@@ -5,7 +5,14 @@ import productionsStore from './productions'
 
 import {PAGE_SIZE} from '../../lib/pagination'
 import { sortAssets } from '../../lib/sorting'
-import { buildAssetIndex, indexSearch } from '../../lib/indexing'
+import {
+  buildAssetIndex,
+  indexSearch
+} from '../../lib/indexing'
+import {
+  applyFilters,
+  extractTaskTypes
+} from '../../lib/filtering'
 
 import {
   LOAD_ASSETS_START,
@@ -447,7 +454,10 @@ const mutations = {
   },
 
   [SET_ASSET_SEARCH] (state, assetSearch) {
-    const result = indexSearch(state.assetIndex, assetSearch) || state.assets
+    let result = indexSearch(state.assetIndex, assetSearch) || state.assets
+    const taskTypes = extractTaskTypes(state.assets)
+    result = applyFilters(taskTypes, result, assetSearch)
+
     state.displayedAssets = result.slice(0, PAGE_SIZE)
     state.displayedAssetsLength = result ? result.length : 0
     state.assetSearchText = assetSearch
