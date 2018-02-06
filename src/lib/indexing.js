@@ -100,7 +100,7 @@ const resultIntersection = (a, b) => {
  * type queries are returned as null.
  */
 const indexSearchWord = (index, word) => {
-  if (word && word.indexOf(':') < 0) {
+  if (word && word.indexOf('=') < 0) {
     if (index[word.toLowerCase()]) {
       return new Set(index[word.toLowerCase()])
     } else {

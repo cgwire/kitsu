@@ -46,7 +46,7 @@
       <search-field
         ref="asset-search-field"
         @change="onSearchChange"
-        placeholder="ex: props, modeling:wip"
+        placeholder="ex: props, modeling=wip"
       >
       </search-field>
     </div>

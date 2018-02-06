@@ -15,7 +15,7 @@ export const findFilter = (taskTypeIndex, query) => {
   let result = {}
   const words = query.split(' ')
   for (const word of words) {
-    const filter = word.split(':')
+    const filter = word.split('=')
     if (filter.length === 2) {
       if (taskTypeIndex[filter[0].toLowerCase()]) {
         result = {

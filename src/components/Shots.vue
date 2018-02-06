@@ -45,7 +45,7 @@
         <search-field
           ref="shot-search-field"
           @change="onSearchChange"
-          placeholder="ex: e01 s01, anim:wip"
+          placeholder="ex: e01 s01, anim=wip"
         >
         </search-field>
       </div>
