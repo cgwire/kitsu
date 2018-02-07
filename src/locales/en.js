@@ -190,7 +190,8 @@ export default {
       entity: 'Entity',
       task_status: 'Status',
       task_type: 'Type',
-      last_comment: 'Last comment'
+      last_comment: 'Last comment',
+      assignees: 'Assignees'
     }
   },
 
@@ -246,6 +247,7 @@ export default {
     new_success: 'Asset {name} successfully created.',
     edit_success: 'Asset {name} successfully edited.',
     empty_list: 'There is no asset in the production. What about creating some?',
+    tasks: 'Asset tasks',
     fields: {
       name: 'Asset',
       type: 'Type',

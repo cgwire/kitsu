@@ -5,6 +5,7 @@ import init from '../lib/init'
 import userStore from '../store/modules/user'
 import taskTypeStore from '../store/modules/tasktypes'
 
+import Asset from '../components/Asset'
 import Assets from '../components/Assets'
 import AssetTypes from '../components/AssetTypes'
 import Breakdown from '../components/Breakdown'
@@ -140,6 +141,12 @@ export const routes = [
         name: 'assets'
       },
       {
+        path:
+        '/productions/:production_id/assets/:asset_id',
+        component: Asset,
+        name: 'asset'
+      },
+      {
         path: '/productions/:production_id/assets/new',
         component: Assets,
         name: 'new-asset'
@@ -170,6 +177,7 @@ export const routes = [
         component: Assets,
         name: 'create-asset-tasks'
       },
+
       {
         path: '/productions/:production_id/shots',
         component: Shots,

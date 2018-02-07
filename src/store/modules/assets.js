@@ -1,10 +1,12 @@
 import Vue from 'vue'
 import assetsApi from '../api/assets'
 import tasksStore from './tasks'
+import taskTypesStore from './tasktypes'
 import productionsStore from './productions'
+import peopleStore from './people'
 
 import {PAGE_SIZE} from '../../lib/pagination'
-import { sortAssets } from '../../lib/sorting'
+import { sortAssets, sortByName } from '../../lib/sorting'
 import {
   buildAssetIndex,
   indexSearch
@@ -18,6 +20,7 @@ import {
   LOAD_ASSETS_START,
   LOAD_ASSETS_ERROR,
   LOAD_ASSETS_END,
+  LOAD_ASSET_END,
 
   EDIT_ASSET_START,
   EDIT_ASSET_ERROR,
@@ -61,8 +64,28 @@ const helpers = {
   getTaskStatus (taskStatusId) {
     return tasksStore.state.taskStatusMap[taskStatusId]
   },
+  getTaskType (taskTypeId) {
+    return taskTypesStore.state.taskTypeMap[taskTypeId]
+  },
   getTask (taskId) {
     return tasksStore.state.taskMap[taskId]
+  },
+  getPerson (personId) {
+    return peopleStore.state.personMap[personId]
+  },
+  populateTask (task) {
+    task.persons = []
+
+    task.taskType = helpers.getTaskType(task.task_type_id)
+    task.taskStatus = helpers.getTaskStatus(task.task_status_id)
+    task.assignees.forEach((personId) => {
+      task.persons.push(helpers.getPerson(personId))
+    })
+
+    // Hacks for proper render
+    task.task_status_short_name = task.taskStatus.short_name
+    task.task_status_color = task.taskStatus.color
+    task.name = task.taskType.priority.toString()
   }
 }
 
@@ -180,6 +203,16 @@ const actions = {
     })
   },
 
+  loadAsset ({ commit, state }, { assetId, callback }) {
+    assetsApi.getAsset(assetId, (err, asset) => {
+      console.log(err, asset)
+      if (!err) {
+        commit(LOAD_ASSET_END, asset)
+      }
+      if (callback) callback(err)
+    })
+  },
+
   newAsset ({ commit, state }, payload) {
     commit(EDIT_ASSET_START, payload.data)
     assetsApi.newAsset(payload.data, (err, asset) => {
@@ -270,6 +303,8 @@ const mutations = {
     assets.forEach((asset) => {
       state.assetMap[asset.id] = asset
       asset.production_id = helpers.getCurrentProduction().id
+
+      asset.tasks.forEach(helpers.populateTask)
     })
 
     state.assets = assets
@@ -279,6 +314,12 @@ const mutations = {
     state.assetIndex = buildAssetIndex(assets)
     state.displayedAssets = state.assets.slice(0, PAGE_SIZE)
     state.displayedAssetsLength = state.assets ? state.assets.length : 0
+  },
+
+  [LOAD_ASSET_END] (state, asset) {
+    asset.tasks.forEach(helpers.populateTask)
+    asset.tasks = sortByName(asset.tasks)
+    state.assetMap[asset.id] = asset
   },
 
   [ASSET_CSV_FILE_SELECTED] (state, formData) {
