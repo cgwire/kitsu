@@ -32,6 +32,4 @@ span.thumbnail-empty {
   height: 30px;
   background: #F3F3F3;
 }
-
-
 </style>
