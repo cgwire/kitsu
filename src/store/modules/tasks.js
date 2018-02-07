@@ -271,6 +271,10 @@ const actions = {
       if (!err) commit(UNASSIGN_TASKS, selectedTaskIds)
       if (callback) callback(err)
     })
+  },
+
+  clearSelectedTasks ({ commit, state }) {
+    commit(CLEAR_SELECTED_TASKS)
   }
 }
 
