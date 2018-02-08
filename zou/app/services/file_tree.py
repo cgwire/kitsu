@@ -256,10 +256,11 @@ def get_instance_folder_path(
         entity=shot,
         software=None,
         output_type=output_type,
-        name="",
+        name=name,
         style=style,
         asset_instance=asset_instance,
         task_type=task_type,
+        revision=revision,
         asset=asset
     )
     folder_path = change_folder_path_separators(folder_path, sep)

@@ -634,6 +634,7 @@ class NewInstanceOutputFileResource(Resource, ArgsMixin):
             asset_instance,
             mode=mode,
             output_type=output_type,
+            revision=output_file["revision"],
             task_type=task_type,
             name=name,
             sep=separator
@@ -647,12 +648,7 @@ class NewInstanceOutputFileResource(Resource, ArgsMixin):
             name=name
         )
 
-        output_file.update({
-            "folder_path": folder_path,
-            "file_name": file_name
-        })
-
-        files_service.update_output_file(
+        output_file = files_service.update_output_file(
             output_file["id"],
             {
                 "path": "%s%s%s%s" % (
@@ -663,6 +659,11 @@ class NewInstanceOutputFileResource(Resource, ArgsMixin):
                 )
             }
         )
+
+        output_file.update({
+            "folder_path": folder_path,
+            "file_name": file_name
+        })
         return output_file
 
 

@@ -362,6 +362,12 @@ class RouteOutputFilesTestCase(ApiDBTestCase):
             "cosmos_landromat_s01_p01_animation_cache_main_props_tree_instance_"
             "1_v001"
         )
+        self.assertEqual(
+            result["path"],
+            "/simple/productions/export/cosmos_landromat/shot/s01/p01/"
+            "animation/cache/props/tree/instance_1/cosmos_landromat_s01_"
+            "p01_animation_cache_main_props_tree_instance_1_v001"
+        )
 
         output_file_id = result["id"]
         output_file = self.get("/data/output-files/%s" % output_file_id)
