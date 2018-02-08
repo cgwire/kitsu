@@ -8,7 +8,7 @@ from zou.app.models.preview_file import PreviewFile
 from zou.app.models.software import Software
 from zou.app.models.task import Task
 
-from zou.app.services import (
+from zou.app.services.base_service import (
     get_instance,
     get_or_create_instance_by_name
 )
