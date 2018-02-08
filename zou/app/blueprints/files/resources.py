@@ -28,6 +28,11 @@ from zou.app.services.exception import (
 
 
 class WorkingFilePathResource(Resource):
+    """
+    Generate from file tree template a working file path based on several
+    parameters: task, software, mode, revision and separator. Revision can be
+    computed automatically as next revision if not given.
+    """
 
     @jwt_required
     def post(self, task_id):
@@ -98,23 +103,22 @@ class WorkingFilePathResource(Resource):
 
 
 class EntityOutputFilePathResource(Resource, ArgsMixin):
-
+    """
+    Generate from file tree template an output file path based on several
+    parameters: entity, output type, task type, revision, mode, revision, name
+    and separator. Revision can be computed automatically as next revision if
+    not given.
+    """
     @jwt_required
     def post(self, entity_id):
         args = self.get_arguments()
-
         try:
             entity = entities_service.get_entity(entity_id)
             if not permissions.has_manager_permissions():
                 user_service.check_has_task_related(entity["project_id"])
-
-            output_type = files_service.get_output_type(
-                args["output_type_id"]
-            )
+            output_type = files_service.get_output_type(args["output_type_id"])
             task_type = tasks_service.get_task_type(args["task_type_id"])
             entity = entities_service.get_entity(entity_id)
-            if not permissions.has_manager_permissions():
-                user_service.check_has_task_related(entity["project_id"])
 
             is_revision_set_by_user = args["revision"] != 0
             if not is_revision_set_by_user:
@@ -163,7 +167,84 @@ class EntityOutputFilePathResource(Resource, ArgsMixin):
         ])
 
 
+class InstanceOutputFilePathResource(Resource, ArgsMixin):
+    """
+    Generate from file tree template an output file path based on several
+    parameters: asset instance, output type, task type, revision, mode,
+    revision, name and separator. Revision can be computed automatically as next
+    revision in case no revision is given in parameter.
+    """
+
+    @jwt_required
+    def post(self, asset_instance_id):
+        (
+            name,
+            mode,
+            output_type_id,
+            task_type_id,
+            revision,
+            separator
+        ) = self.get_arguments()
+
+        try:
+            asset_instance = assets_service.get_asset_instance(
+                asset_instance_id)
+            asset = assets_service.get_asset(asset_instance["asset_id"])
+            output_type = files_service.get_output_type(output_type_id)
+            task_type = tasks_service.get_task_type(task_type_id)
+            if not permissions.has_manager_permissions():
+                user_service.check_has_task_related(asset["project_id"])
+
+            folder_path = file_tree.get_instance_folder_path(
+                asset_instance,
+                output_type=output_type,
+                task_type=task_type,
+                mode=mode,
+                name=name,
+                revision=revision,
+                sep=separator
+            )
+            file_name = file_tree.get_instance_file_name(
+                asset_instance,
+                output_type=output_type,
+                task_type=task_type,
+                mode=mode,
+                name=name,
+                revision=revision
+            )
+        except MalformedFileTreeException as e:
+            current_app.logger.error(e)
+            return {
+                "error":
+                    "Tree is not properly written, check modes and variables",
+                "received_data": request.json,
+            }, 400
+
+        return {"path": folder_path, "name": file_name}, 200
+
+    def get_arguments(self):
+        args = self.get_args([
+            ("name", "main", False),
+            ("mode", "output", False),
+            ("output_type_id", None, True),
+            ("task_type_id", None, True),
+            ("revision", 0, False),
+            ("sep", "/", False)
+        ])
+        return (
+            args["name"],
+            args["mode"],
+            args["output_type_id"],
+            args["task_type_id"],
+            args["revision"],
+            args["sep"]
+        )
+
+
 class LastWorkingFilesResource(Resource):
+    """
+    Return last working files revision for each file name for given task.
+    """
 
     @jwt_required
     def get(self, task_id):
@@ -177,6 +258,9 @@ class LastWorkingFilesResource(Resource):
 
 
 class TaskWorkingFilesResource(Resource):
+    """
+    Return all working file revisions for a given task.
+    """
 
     @jwt_required
     def get(self, task_id):
@@ -190,6 +274,13 @@ class TaskWorkingFilesResource(Resource):
 
 
 class NewWorkingFileResource(Resource):
+    """
+    A working file is a file used to produce output files. It is the file the CG
+    artist is working on. It is versioned, tied to a task and a software and
+    requires a comment each time it is created.
+    A path is generated for each file created. The path format is defined
+    in the file tree template file.
+    """
 
     @jwt_required
     def post(self, task_id):
@@ -278,6 +369,9 @@ class NewWorkingFileResource(Resource):
 
 
 class ModifiedFileResource(Resource):
+    """
+    Update working file modification date with current date.
+    """
 
     @jwt_required
     def put(self, working_file_id):
@@ -293,6 +387,9 @@ class ModifiedFileResource(Resource):
 
 
 class CommentWorkingFileResource(Resource):
+    """
+    Update comment on given working file.
+    """
 
     @jwt_required
     def put(self, working_file_id):
@@ -323,107 +420,18 @@ class CommentWorkingFileResource(Resource):
         return working_file
 
 
-class InstanceOutputFilePathResource(Resource, ArgsMixin):
-
-    @jwt_required
-    def post(self, asset_instance_id):
-        (
-            name,
-            mode,
-            output_type_id,
-            task_type_id,
-            revision,
-            separator
-        ) = self.get_arguments()
-
-        try:
-            asset_instance = assets_service.get_asset_instance(
-                asset_instance_id)
-            asset = assets_service.get_asset(asset_instance["asset_id"])
-            output_type = files_service.get_output_type(output_type_id)
-            task_type = tasks_service.get_task_type(task_type_id)
-            if not permissions.has_manager_permissions():
-                user_service.check_has_task_related(asset["project_id"])
-
-            folder_path = file_tree.get_instance_folder_path(
-                asset_instance,
-                output_type=output_type,
-                task_type=task_type,
-                mode=mode,
-                name=name,
-                revision=revision,
-                sep=separator
-            )
-            file_name = file_tree.get_instance_file_name(
-                asset_instance,
-                output_type=output_type,
-                task_type=task_type,
-                mode=mode,
-                name=name,
-                revision=revision
-            )
-        except MalformedFileTreeException as e:
-            current_app.logger.error(e)
-            return {
-                "error":
-                    "Tree is not properly written, check modes and variables",
-                "received_data": request.json,
-            }, 400
-
-        return {"path": folder_path, "name": file_name}, 200
-
-    def get_arguments(self):
-        args = self.get_args([
-            ("name", "main", False),
-            ("mode", "output", False),
-            ("output_type_id", None, True),
-            ("task_type_id", None, True),
-            ("revision", 0, False),
-            ("sep", "/", False)
-        ])
-        return (
-            args["name"],
-            args["mode"],
-            args["output_type_id"],
-            args["task_type_id"],
-            args["revision"],
-            args["sep"]
-        )
-
-
-class SetTreeResource(Resource):
-
-    @jwt_required
-    def post(self, project_id):
-        (tree_name) = self.get_arguments()
-
-        try:
-            permissions.check_manager_permissions()
-            tree = file_tree.get_tree_from_file(tree_name)
-            project = projects_service.update_project(
-                project_id,
-                {"file_tree": tree}
-            )
-        except WrongFileTreeFileException:
-            abort(400, "Selected tree is not available")
-
-        return project
-
-    def get_arguments(self):
-        parser = reqparse.RequestParser()
-        parser.add_argument(
-            "tree_name",
-            help="The name of the tree to set is required.",
-            required=True
-        )
-        args = parser.parse_args()
-
-        return (
-            args.get("tree_name", ""),
-        )
-
-
 class NewEntityOutputFileResource(Resource, ArgsMixin):
+    """
+    Output files are linked to entities. Each time a CG artist is satisfied
+    by what he did on a working file, he can create an output file that
+    will be linked to a target entity (an asset, a shot, a sequence, ...).
+    It keeps track of the working file at the origin of the output file.
+    An output type is required for better categorization (textures, caches,
+    ...). A task type can be set too to give the department related to the
+    output file.
+
+    Revision is automatically set.
+    """
 
     @jwt_required
     def post(self, entity_id):
@@ -544,6 +552,16 @@ class NewEntityOutputFileResource(Resource, ArgsMixin):
 
 
 class NewInstanceOutputFileResource(Resource, ArgsMixin):
+    """
+    Some output files are linked to assets through an instance of this asset
+    for a give shot. Each time a CG artist is satisfied by what he did on a
+    working file, he can create an output file that
+    will be linked to a target instance.
+    It keeps track of the working file at the origin of the output file.
+    An output type is required for better categorization (textures, caches,
+    ...). A task type can be set too to give the department related to the
+    output file.
+    """
 
     @jwt_required
     def post(self, asset_instance_id):
@@ -668,6 +686,9 @@ class NewInstanceOutputFileResource(Resource, ArgsMixin):
 
 
 class GetNextEntityOutputFileRevisionResource(Resource, ArgsMixin):
+    """
+    Get next revision for given entity, output type, task type and name.
+    """
 
     @jwt_required
     def post(self, entity_id):
@@ -699,6 +720,9 @@ class GetNextEntityOutputFileRevisionResource(Resource, ArgsMixin):
 
 
 class GetNextInstanceOutputFileRevisionResource(Resource, ArgsMixin):
+    """
+    Get next revision for given asset instance, output type, task type and name.
+    """
 
     @jwt_required
     def post(self, asset_instance_id):
@@ -733,6 +757,10 @@ class GetNextInstanceOutputFileRevisionResource(Resource, ArgsMixin):
 
 
 class LastEntityOutputFilesResource(Resource):
+    """
+    Last revisions of output files for given entity grouped by output type
+    and file name.
+    """
 
     @jwt_required
     def get(self, entity_id):
@@ -743,6 +771,10 @@ class LastEntityOutputFilesResource(Resource):
 
 
 class LastInstanceOutputFilesResource(Resource):
+    """
+    Last revisions of output files for given instance grouped by output type
+    and file name.
+    """
 
     @jwt_required
     def get(self, asset_instance_id):
@@ -756,6 +788,9 @@ class LastInstanceOutputFilesResource(Resource):
 
 
 class EntityOutputTypesResource(Resource):
+    """
+    Return all types of output generated for given entity.
+    """
 
     @jwt_required
     def get(self, entity_id):
@@ -765,6 +800,9 @@ class EntityOutputTypesResource(Resource):
 
 
 class InstanceOutputTypesResource(Resource):
+    """
+    Return all types of output generated for given instance.
+    """
 
     @jwt_required
     def get(self, asset_instance_id):
@@ -775,6 +813,9 @@ class InstanceOutputTypesResource(Resource):
 
 
 class EntityOutputTypeOutputFilesResource(Resource):
+    """
+    Get all output files for given entity and given output type.
+    """
 
     @jwt_required
     def get(self, entity_id, output_type_id):
@@ -788,6 +829,9 @@ class EntityOutputTypeOutputFilesResource(Resource):
 
 
 class InstanceOutputTypeOutputFilesResource(Resource):
+    """
+    Get all output files for given asset instance and given output type.
+    """
 
     @jwt_required
     def get(self, asset_instance_id, output_type_id):
@@ -803,6 +847,10 @@ class InstanceOutputTypeOutputFilesResource(Resource):
 
 
 class FileResource(Resource):
+    """
+    Get information about a file that could be a working file as much as an
+    output file.
+    """
 
     @jwt_required
     def get(self, file_id):
@@ -818,3 +866,40 @@ class FileResource(Resource):
         if not permissions.has_manager_permissions():
             user_service.check_has_task_related(project_id)
         return file_dict
+
+
+class SetTreeResource(Resource):
+    """
+    Define a template file to use for given project. Template files are located
+    on the server side. Each template has a name which means that you just have
+    to give a name to "select" the template to link with the project.
+    """
+
+    @jwt_required
+    def post(self, project_id):
+        (tree_name) = self.get_arguments()
+
+        try:
+            permissions.check_manager_permissions()
+            tree = file_tree.get_tree_from_file(tree_name)
+            project = projects_service.update_project(
+                project_id,
+                {"file_tree": tree}
+            )
+        except WrongFileTreeFileException:
+            abort(400, "Selected tree is not available")
+
+        return project
+
+    def get_arguments(self):
+        parser = reqparse.RequestParser()
+        parser.add_argument(
+            "tree_name",
+            help="The name of the tree to set is required.",
+            required=True
+        )
+        args = parser.parse_args()
+
+        return (
+            args.get("tree_name", ""),
+        )

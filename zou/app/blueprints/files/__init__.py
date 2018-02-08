@@ -39,8 +39,8 @@ routes = [
     ("/data/asset-instances/<asset_instance_id>/output-files/new", NewInstanceOutputFileResource),
     ("/data/asset-instances/<asset_instance_id>/output-files/next-revision", GetNextInstanceOutputFileRevisionResource),
     ("/data/asset-instances/<asset_instance_id>/output-files/last-revisions", LastInstanceOutputFilesResource),
-    ("/data/asset-instances/<asset_instance_id>/output-types/<output_type_id>/output-files", InstanceOutputTypeOutputFilesResource),
     ("/data/asset-instances/<asset_instance_id>/output-types", InstanceOutputTypesResource),
+    ("/data/asset-instances/<asset_instance_id>/output-types/<output_type_id>/output-files", InstanceOutputTypeOutputFilesResource),
     ("/data/asset-instances/<asset_instance_id>/output-file-path", InstanceOutputFilePathResource),
 
     ("/data/entities/<entity_id>/output-files/new", NewEntityOutputFileResource),
