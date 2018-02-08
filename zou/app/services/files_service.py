@@ -8,6 +8,11 @@ from zou.app.models.preview_file import PreviewFile
 from zou.app.models.software import Software
 from zou.app.models.task import Task
 
+from zou.app.services import (
+    get_instance,
+    get_or_create_instance_by_name
+)
+
 from zou.app.services.exception import (
     WorkingFileNotFoundException,
     OutputFileNotFoundException,
@@ -25,6 +30,9 @@ from sqlalchemy.exc import StatementError, IntegrityError
 
 
 def get_default_status():
+    """
+    Return default file status to set on a file when it is created.
+    """
     default_status = FileStatus.get_by(
         name=app.config["DEFAULT_FILE_STATUS"]
     )
@@ -37,26 +45,10 @@ def get_default_status():
     return default_status.serialize()
 
 
-def get_instance(model, instance_id, exception):
-    try:
-        instance = model.get(instance_id)
-    except StatementError:
-        raise exception()
-
-    if instance is None:
-        raise exception()
-
-    return instance
-
-
-def get_or_create_instance_by_name(model, **kwargs):
-    instance = model.get_by(name=kwargs["name"])
-    if instance is None:
-        instance = model.create(**kwargs)
-    return instance.serialize()
-
-
 def get_working_file_raw(working_file_id):
+    """
+    Return given working file as active record.
+    """
     return get_instance(
         WorkingFile,
         working_file_id,
@@ -65,10 +57,16 @@ def get_working_file_raw(working_file_id):
 
 
 def get_working_file(working_file_id):
+    """
+    Return given working file as dict.
+    """
     return get_working_file_raw(working_file_id).serialize()
 
 
 def get_output_file_raw(output_file_id):
+    """
+    Return given output file as active record.
+    """
     return get_instance(
         OutputFile,
         output_file_id,
@@ -77,10 +75,16 @@ def get_output_file_raw(output_file_id):
 
 
 def get_output_file(output_file_id):
+    """
+    Return given output file as a dict.
+    """
     return get_output_file_raw(output_file_id).serialize()
 
 
 def get_software_raw(software_id):
+    """
+    Return given software as active record.
+    """
     return get_instance(
         Software,
         software_id,
@@ -89,10 +93,16 @@ def get_software_raw(software_id):
 
 
 def get_software(software_id):
+    """
+    Return given software as dict.
+    """
     return get_software_raw(software_id).serialize()
 
 
 def get_output_type_raw(output_type_id):
+    """
+    Return given output type as active record.
+    """
     return get_instance(
         OutputType,
         output_type_id,
@@ -101,6 +111,9 @@ def get_output_type_raw(output_type_id):
 
 
 def get_output_type(output_type_id):
+    """
+    Return given output type as dict.
+    """
     return get_output_type_raw(output_type_id).serialize()
 
 
@@ -122,6 +135,9 @@ def get_or_create_software(name, short_name, file_extension):
 
 
 def get_last_working_files_for_task(task_id):
+    """
+    Get last revisions for given task grouped by file name.
+    """
     result = {}
     max_revisions = {}
     working_files = get_working_files_for_task(task_id)
@@ -135,6 +151,9 @@ def get_last_working_files_for_task(task_id):
 
 
 def get_next_working_revision(task_id, name):
+    """
+    Get next working file revision for given task and name.
+    """
     working_files = WorkingFile.query.filter_by(
         task_id=task_id,
         name=name
@@ -155,6 +174,10 @@ def create_new_working_revision(
     comment="",
     revision=0
 ):
+    """
+    Create a new working file revision for given task. An author (user) and
+    a software are required.
+    """
     task = Task.get(task_id)
     if revision == 0:
         revision = get_next_working_revision(task_id, name)
@@ -188,6 +211,16 @@ def create_new_output_revision(
     comment="",
     extension=""
 ):
+    """
+    Create a new ouput file for given entity. Output type, task type, author
+    and source file are required.
+
+    The revision is set as next revision available but it can be forced.
+    An extension and a name can be set too.
+
+    An asset instance can be given too. In that case, the output file is
+    linked to the asset instance.
+    """
     if revision < 1:
         try:
             output_file = get_last_output_revision(
@@ -226,6 +259,10 @@ def create_new_output_revision(
 
 
 def get_working_files_for_task(task_id):
+    """
+    Retrieve all working files for a given task ordered by revision from
+    biggest to smallest revision.
+    """
     working_files = WorkingFile.query.filter_by(
         task_id=task_id
     ).filter(
@@ -237,6 +274,9 @@ def get_working_files_for_task(task_id):
 
 
 def get_next_working_file_revision(task_id, name):
+    """
+    Get next working file revision available for given task and given name.
+    """
     last_working_files = get_last_working_files_for_task(task_id)
     working_file = last_working_files.get(name, None)
     if working_file is not None:
@@ -253,6 +293,12 @@ def get_next_output_file_revision(
     name="main",
     asset_instance_id=None
 ):
+    """
+    Get next output file revision available for given entity, output type, task
+    type and name.
+    Asset instance can be set, in that case, it looks for next revision
+    available for it instead of entity.
+    """
     try:
         last_output = get_last_output_revision(
             output_type_id=output_type_id,
@@ -273,6 +319,12 @@ def get_last_output_revision(
     name="main",
     asset_instance_id=None
 ):
+    """
+    Get output with highest revision created for given entity, output type, task
+    type and name.
+    If an asset instance is given, it will look for last output file for this
+    instance instead of given entity.
+    """
     query = OutputFile.query.filter_by(
         output_type_id=output_type_id,
         task_type_id=task_type_id,
@@ -297,6 +349,9 @@ def get_last_output_revision(
 
 
 def get_output_files_for_entity(entity_id):
+    """
+    Return output files for given entity ordered by revision.
+    """
     output_files = OutputFile.query.filter_by(
         entity_id=entity_id
     ).filter(
@@ -308,6 +363,9 @@ def get_output_files_for_entity(entity_id):
 
 
 def get_output_files_for_instance(asset_instance_id):
+    """
+    Return output files for given instance ordered by revision.
+    """
     output_files = OutputFile.query.filter_by(
         asset_instance_id=asset_instance_id
     ).filter(
@@ -319,6 +377,9 @@ def get_output_files_for_instance(asset_instance_id):
 
 
 def get_last_output_files_for_entity(entity_id):
+    """
+    Get last output files for given entity grouped by output type and name.
+    """
     result = {}
     output_files = get_output_files_for_entity(entity_id)
 
@@ -337,6 +398,9 @@ def get_last_output_files_for_entity(entity_id):
 
 
 def get_last_output_files_for_instance(asset_instance_id):
+    """
+    Get last output files for given instance grouped by output type and name.
+    """
     result = {}
     output_files = get_output_files_for_instance(asset_instance_id)
 
@@ -355,6 +419,9 @@ def get_last_output_files_for_instance(asset_instance_id):
 
 
 def get_preview_file(preview_file_id):
+    """
+    Get preview file as dict.
+    """
     try:
         preview_file = PreviewFile.get(preview_file_id)
     except StatementError:
@@ -367,6 +434,9 @@ def get_preview_file(preview_file_id):
 
 
 def get_preview_files_for_task(task_id):
+    """
+    Get all preview files for given task.
+    """
     previews = PreviewFile.filter_by(
         task_id=task_id
     ).order_by(
@@ -406,6 +476,9 @@ def update_output_file(output_file_id, data):
 
 
 def get_output_types_for_entity(entity_id):
+    """
+    Get output types from all output files created for given entity.
+    """
     output_types = OutputType.query \
         .join(OutputFile) \
         .filter(OutputFile.entity_id == entity_id) \
@@ -415,6 +488,9 @@ def get_output_types_for_entity(entity_id):
 
 
 def get_output_types_for_instance(asset_instance_id):
+    """
+    Get output types from all output files created for given instance.
+    """
     output_types = OutputType.query \
         .join(OutputFile) \
         .filter(OutputFile.asset_instance_id == asset_instance_id) \
@@ -424,6 +500,9 @@ def get_output_types_for_instance(asset_instance_id):
 
 
 def get_output_files_for_output_types_and_entity(entity_id, output_type_id):
+    """
+    Get output files created for given entity and output type.
+    """
     output_files = OutputFile.query \
         .filter(OutputFile.entity_id == entity_id) \
         .filter(OutputFile.output_type_id == output_type_id) \
@@ -436,6 +515,9 @@ def get_output_files_for_output_type_and_asset_instance(
     asset_instance_id,
     output_type_id
 ):
+    """
+    Get output files created for given asset instance and output type.
+    """
     output_files = OutputFile.query \
         .filter(OutputFile.asset_instance_id == asset_instance_id) \
         .filter(OutputFile.output_type_id == output_type_id) \
