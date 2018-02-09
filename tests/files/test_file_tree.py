@@ -343,12 +343,13 @@ class FileTreeTestCase(ApiDBTestCase):
         path = file_tree.get_instance_folder_path(
             self.asset_instance.serialize(),
             output_type=self.output_type_cache,
-            task_type=self.task_type_animation.serialize()
+            task_type=self.task_type_animation.serialize(),
+            representation="abc"
         )
         self.assertEquals(
             path,
             "/simple/productions/export/cosmos_landromat/shot/s01/p01/"
-            "animation/cache/props/tree/instance_1"
+            "animation/cache/props/tree/instance_0001/abc"
         )
 
     def test_get_file_name_shot_asset_instance(self):
@@ -365,7 +366,7 @@ class FileTreeTestCase(ApiDBTestCase):
         )
         self.assertEquals(
             file_name,
-            "cosmos_landromat_s01_p01_animation_cache_main_props_tree_instance_1_v003"
+            "cosmos_landromat_s01_p01_animation_cache_main_props_tree_instance_0001_v003"
         )
 
     def test_get_folder_path_scene_asset_instance(self):
@@ -376,12 +377,13 @@ class FileTreeTestCase(ApiDBTestCase):
         path = file_tree.get_instance_folder_path(
             self.asset_instance.serialize(),
             task_type=self.task_type_animation.serialize(),
-            output_type=self.output_type_cache
+            output_type=self.output_type_cache,
+            representation="abc"
         )
         self.assertEquals(
             path,
             "/simple/productions/export/cosmos_landromat/scene/s01/sc01/"
-            "animation/cache/props/tree/instance_1"
+            "animation/cache/props/tree/instance_0001/abc"
         )
 
     def test_get_file_name_scene_asset_instance(self):
@@ -400,8 +402,26 @@ class FileTreeTestCase(ApiDBTestCase):
         self.assertEquals(
             file_name,
             "cosmos_landromat_s01_sc01_animation_cache_main_props_"
-            "tree_instance_1_v003"
+            "tree_instance_0001_v003"
         )
+
+    def test_get_folder_path_representation(self):
+        self.generate_fixture_scene_asset_instance(
+            asset=self.entity,
+            scene=self.scene
+        )
+        path = file_tree.get_instance_folder_path(
+            self.asset_instance.serialize(),
+            task_type=self.task_type_animation.serialize(),
+            output_type=self.output_type_cache,
+            representation="abc"
+        )
+        self.assertEquals(
+            path,
+            "/simple/productions/export/cosmos_landromat/scene/s01/sc01/"
+            "animation/cache/props/tree/instance_0001/abc"
+        )
+
 
     def test_change_folder_path_separators(self):
         result = file_tree.change_folder_path_separators(

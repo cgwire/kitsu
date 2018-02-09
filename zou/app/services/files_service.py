@@ -207,6 +207,7 @@ def create_new_output_revision(
     task_type_id,
     asset_instance_id=None,
     revision=0,
+    representation="",
     name="main",
     comment="",
     extension=""
@@ -242,6 +243,7 @@ def create_new_output_revision(
             name=name,
             comment=comment,
             extension=extension,
+            representation=representation,
             revision=revision,
             entity_id=entity_id,
             asset_instance_id=asset_instance_id,

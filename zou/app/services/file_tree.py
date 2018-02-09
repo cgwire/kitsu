@@ -205,6 +205,7 @@ def get_output_folder_path(
     output_type=None,
     task_type=None,
     name="",
+    representation="",
     revision=1,
     sep=os.sep
 ):
@@ -221,6 +222,7 @@ def get_output_folder_path(
         software=software,
         output_type=output_type,
         name=name,
+        representation=representation,
         revision=revision,
         style=style
     )
@@ -235,6 +237,7 @@ def get_instance_folder_path(
     task_type=None,
     name="name",
     mode="output",
+    representation="",
     revision=1,
     sep=os.sep,
 ):
@@ -261,6 +264,7 @@ def get_instance_folder_path(
         asset_instance=asset_instance,
         task_type=task_type,
         revision=revision,
+        representation=representation,
         asset=asset
     )
     folder_path = change_folder_path_separators(folder_path, sep)
@@ -380,6 +384,7 @@ def update_variable(
     asset_instance=None,
     asset=None,
     name="",
+    representation="",
     revision=1,
     style="lowercase"
 ):
@@ -395,8 +400,9 @@ def update_variable(
             software=software,
             output_type=output_type,
             name=name,
-            instance=asset_instance,
+            asset_instance=asset_instance,
             asset=asset,
+            representation=representation,
             revision=revision
         )
         render = render.replace(
@@ -415,8 +421,9 @@ def get_folder_from_datatype(
     software=None,
     output_type=None,
     name="",
-    instance=None,
+    asset_instance=None,
     asset=None,
+    representation="",
     revision=1
 ):
     if datatype == "Project":
@@ -454,7 +461,9 @@ def get_folder_from_datatype(
     elif datatype == "Scene":
         folder = get_folder_from_scene(entity)
     elif datatype == "Instance":
-        folder = get_folder_from_instance(instance)
+        folder = get_folder_from_asset_instance(asset_instance)
+    elif datatype == "Representation":
+        folder = get_folder_from_representation(representation)
     elif datatype in ["Name", "OutputFile", "WorkingFile"]:
         folder = name
     elif datatype == "Version" or datatype == "Revision":
@@ -582,11 +591,15 @@ def get_folder_from_scene(scene):
     return folder
 
 
-def get_folder_from_instance(instance):
-    if instance is not None:
-        return str(instance["number"]).zfill(4)
+def get_folder_from_asset_instance(asset_instance):
+    if asset_instance is not None:
+        return str(asset_instance["number"]).zfill(4)
     else:
         return ""
+
+
+def get_folder_from_representation(representation):
+    return representation
 
 
 def get_folder_from_revision(revision):

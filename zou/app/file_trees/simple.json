@@ -25,7 +25,7 @@
             "asset": "<Project>/assets/<AssetType>/<Asset>/<TaskType>/<OutputType>",
             "sequence": "<Project>/sequences/<Sequence>/<TaskType>/<OutputType>",
             "scene": "<Project>/scenes/<Sequence>/<Scene>/<TaskType>/<OutputType>",
-            "instance": "<Project>/<TemporalEntityType>/<Sequence>/<TemporalEntity>/<TaskType>/<OutputType>/<AssetType>/<Asset>/instance_<Instance>",
+            "instance": "<Project>/<TemporalEntityType>/<Sequence>/<TemporalEntity>/<TaskType>/<OutputType>/<AssetType>/<Asset>/instance_<Instance>/<Representation>",
             "style": "lowercase"
         },
         "file_name": {

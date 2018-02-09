@@ -345,7 +345,8 @@ class RouteOutputFilesTestCase(ApiDBTestCase):
             "comment": "test working file publish",
             "output_type_id": self.cache_type_id,
             "task_type_id": self.task_type_animation.id,
-            "working_file_id": self.working_file_id
+            "working_file_id": self.working_file_id,
+            "representation": "abc"
         }
         result = self.post(
             "data/asset-instances/%s/output-files/new" % self.asset_instance.id,
@@ -355,18 +356,18 @@ class RouteOutputFilesTestCase(ApiDBTestCase):
         self.assertEqual(
             result["folder_path"],
             "/simple/productions/export/cosmos_landromat/shot/s01/p01/"
-            "animation/cache/props/tree/instance_1"
+            "animation/cache/props/tree/instance_0001/abc"
         )
         self.assertEqual(
             result["file_name"],
             "cosmos_landromat_s01_p01_animation_cache_main_props_tree_instance_"
-            "1_v001"
+            "0001_v001"
         )
         self.assertEqual(
             result["path"],
             "/simple/productions/export/cosmos_landromat/shot/s01/p01/"
-            "animation/cache/props/tree/instance_1/cosmos_landromat_s01_"
-            "p01_animation_cache_main_props_tree_instance_1_v001"
+            "animation/cache/props/tree/instance_0001/abc/cosmos_landromat_s01_"
+            "p01_animation_cache_main_props_tree_instance_0001_v001"
         )
 
         output_file_id = result["id"]

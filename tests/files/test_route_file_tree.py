@@ -117,6 +117,7 @@ class FolderPathTestCase(ApiDBTestCase):
             "name": "main",
             "output_type_id": self.output_type["id"],
             "task_type_id": self.task_type_animation.id,
+            "representation": "abc",
             "revision": 3
         }
         result = self.post(
@@ -128,11 +129,11 @@ class FolderPathTestCase(ApiDBTestCase):
         self.assertEquals(
             result["path"],
             "/simple/productions/export/cosmos_landromat/shot/s01/p01/"
-            "animation/cache/props/tree/instance_1"
+            "animation/cache/props/tree/instance_0001/abc"
         )
         self.assertEquals(
             result["name"],
-            "cosmos_landromat_s01_p01_animation_cache_main_props_tree_instance_1_v003"
+            "cosmos_landromat_s01_p01_animation_cache_main_props_tree_instance_0001_v003"
         )
 
     def test_get_path_scene_asset_instance(self):
@@ -145,6 +146,7 @@ class FolderPathTestCase(ApiDBTestCase):
             "name": "main",
             "output_type_id": self.output_type["id"],
             "task_type_id": self.task_type_animation.id,
+            "representation": "abc",
             "revision": 3
         }
         result = self.post(
@@ -156,11 +158,11 @@ class FolderPathTestCase(ApiDBTestCase):
         self.assertEquals(
             result["path"],
             "/simple/productions/export/cosmos_landromat/scene/s01/sc01/"
-            "animation/cache/props/tree/instance_1"
+            "animation/cache/props/tree/instance_0001/abc"
         )
         self.assertEquals(
             result["name"],
-            "cosmos_landromat_s01_sc01_animation_cache_main_props_tree_instance_1_v003"
+            "cosmos_landromat_s01_sc01_animation_cache_main_props_tree_instance_0001_v003"
         )
 
     def test_get_path_asset_software(self):

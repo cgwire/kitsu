@@ -18,6 +18,7 @@ class OutputFile(db.Model, BaseMixin, SerializerMixin):
     checksum = db.Column(db.String(32))
     source = db.Column(db.String(40))
     path = db.Column(db.String(400))
+    representation = db.Column(db.String(20))
     canceled = db.Column(db.Boolean(), default=False, nullable=False)
 
     uploaded_movie_url = db.Column(db.String(600))

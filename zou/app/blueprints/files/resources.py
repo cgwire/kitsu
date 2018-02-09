@@ -135,6 +135,7 @@ class EntityOutputFilePathResource(Resource, ArgsMixin):
                 output_type=output_type,
                 task_type=task_type,
                 name=args["name"],
+                representation=args["representation"],
                 sep=args["separator"],
                 revision=args["revision"]
             )
@@ -163,6 +164,7 @@ class EntityOutputFilePathResource(Resource, ArgsMixin):
             ("task_type_id", None, True),
             ("revision", 0, False),
             ("extension", "", False),
+            ("representation", "", False),
             ("separator", "/", False)
         ])
 
@@ -177,21 +179,14 @@ class InstanceOutputFilePathResource(Resource, ArgsMixin):
 
     @jwt_required
     def post(self, asset_instance_id):
-        (
-            name,
-            mode,
-            output_type_id,
-            task_type_id,
-            revision,
-            separator
-        ) = self.get_arguments()
+        args = self.get_arguments()
 
         try:
             asset_instance = assets_service.get_asset_instance(
                 asset_instance_id)
             asset = assets_service.get_asset(asset_instance["asset_id"])
-            output_type = files_service.get_output_type(output_type_id)
-            task_type = tasks_service.get_task_type(task_type_id)
+            output_type = files_service.get_output_type(args["output_type_id"])
+            task_type = tasks_service.get_task_type(args["task_type_id"])
             if not permissions.has_manager_permissions():
                 user_service.check_has_task_related(asset["project_id"])
 
@@ -199,18 +194,19 @@ class InstanceOutputFilePathResource(Resource, ArgsMixin):
                 asset_instance,
                 output_type=output_type,
                 task_type=task_type,
-                mode=mode,
-                name=name,
-                revision=revision,
-                sep=separator
+                mode=args["mode"],
+                name=args["name"],
+                representation=args["representation"],
+                revision=args["revision"],
+                sep=args["separator"]
             )
             file_name = file_tree.get_instance_file_name(
                 asset_instance,
                 output_type=output_type,
                 task_type=task_type,
-                mode=mode,
-                name=name,
-                revision=revision
+                mode=args["mode"],
+                name=args["name"],
+                revision=args["revision"]
             )
         except MalformedFileTreeException as e:
             current_app.logger.error(e)
@@ -223,22 +219,16 @@ class InstanceOutputFilePathResource(Resource, ArgsMixin):
         return {"path": folder_path, "name": file_name}, 200
 
     def get_arguments(self):
-        args = self.get_args([
+        return self.get_args([
             ("name", "main", False),
             ("mode", "output", False),
             ("output_type_id", None, True),
             ("task_type_id", None, True),
             ("revision", 0, False),
-            ("sep", "/", False)
+            ("extension", "", False),
+            ("representation", "", False),
+            ("separator", "/", False)
         ])
-        return (
-            args["name"],
-            args["mode"],
-            args["output_type_id"],
-            args["task_type_id"],
-            args["revision"],
-            args["sep"]
-        )
 
 
 class LastWorkingFilesResource(Resource):
@@ -468,6 +458,7 @@ class NewEntityOutputFileResource(Resource, ArgsMixin):
                 revision=revision,
                 name=args["name"],
                 comment=args["comment"],
+                representation=args["representation"],
                 extension=args["extension"]
             )
 
@@ -479,6 +470,7 @@ class NewEntityOutputFileResource(Resource, ArgsMixin):
                 task_type=task_type,
                 name=args["name"],
                 extension=args["extension"],
+                representation=args["representation"],
                 separator=args["sep"]
             )
         except OutputTypeNotFoundException:
@@ -501,6 +493,7 @@ class NewEntityOutputFileResource(Resource, ArgsMixin):
             ("comment", "", True),
             ("revision", 0, False),
             ("extension", "", False),
+            ("representation", "", False),
             ("sep", "/", False)
         ])
 
@@ -513,6 +506,7 @@ class NewEntityOutputFileResource(Resource, ArgsMixin):
         task_type=None,
         name="main",
         extension="",
+        representation="",
         separator="/"
     ):
         folder_path = file_tree.get_output_folder_path(
@@ -520,6 +514,7 @@ class NewEntityOutputFileResource(Resource, ArgsMixin):
             mode=mode,
             output_type=output_type,
             task_type=task_type,
+            representation=representation,
             name=name,
             sep=separator
         )
@@ -600,6 +595,7 @@ class NewInstanceOutputFileResource(Resource, ArgsMixin):
                 asset_instance_id=asset_instance["id"],
                 revision=revision,
                 name=args["name"],
+                representation=args["representation"],
                 comment=args["comment"],
                 extension=args["extension"]
             )
@@ -612,6 +608,7 @@ class NewInstanceOutputFileResource(Resource, ArgsMixin):
                 task_type=task_type,
                 name=args["name"],
                 extension=args["extension"],
+                representation=args["representation"],
                 separator=args["sep"]
             )
         except OutputTypeNotFoundException:
@@ -634,6 +631,7 @@ class NewInstanceOutputFileResource(Resource, ArgsMixin):
             ("comment", "", True),
             ("revision", 0, False),
             ("extension", "", False),
+            ("representation", "", False),
             ("sep", "/", False)
         ])
 
@@ -646,6 +644,7 @@ class NewInstanceOutputFileResource(Resource, ArgsMixin):
         task_type=None,
         name="main",
         extension="",
+        representation="",
         separator="/"
     ):
         folder_path = file_tree.get_instance_folder_path(
@@ -654,6 +653,7 @@ class NewInstanceOutputFileResource(Resource, ArgsMixin):
             output_type=output_type,
             revision=output_file["revision"],
             task_type=task_type,
+            representation=representation,
             name=name,
             sep=separator
         )
