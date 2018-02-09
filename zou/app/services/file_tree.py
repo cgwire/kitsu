@@ -457,7 +457,7 @@ def get_folder_from_datatype(
         folder = get_folder_from_instance(instance)
     elif datatype in ["Name", "OutputFile", "WorkingFile"]:
         folder = name
-    elif datatype == "Version":
+    elif datatype == "Version" or datatype == "Revision":
         folder = get_folder_from_revision(revision)
     else:
         raise MalformedFileTreeException("Unknown data type: %s." % datatype)
