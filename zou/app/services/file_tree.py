@@ -584,7 +584,7 @@ def get_folder_from_scene(scene):
 
 def get_folder_from_instance(instance):
     if instance is not None:
-        return str(instance["number"])
+        return str(instance["number"]).zfill(4)
     else:
         return ""
 
