@@ -85,7 +85,15 @@
             {{ entry.sequence_name }}
           </td>
           <td :class="{'shot-name': true, 'name': !entry.canceled}">
-            {{ entry.name }}
+            <router-link :to="{
+              name: 'shot',
+              params: {
+                production_id: entry.production_id,
+                shot_id: entry.id
+              }
+            }">
+              {{ entry.name }}
+            </router-link>
           </td>
           <td class="framein">
             {{ entry.data && entry.data.frame_in ? entry.data.frame_in : ''}}
@@ -242,6 +250,10 @@ th.actions {
   min-width: 100px;
   width: 100px;
   font-weight: bold;
+}
+
+.name a {
+  color: inherit;
 }
 
 .name.shot-name {

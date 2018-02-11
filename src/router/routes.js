@@ -23,6 +23,7 @@ import TaskTypes from '../components/TaskTypes'
 import TaskStatus from '../components/TaskStatus'
 import Todos from '../components/Todos'
 import ServerDown from '../components/ServerDown'
+import Shot from '../components/Shot'
 import Shots from '../components/Shots'
 
 export const routes = [
@@ -182,6 +183,11 @@ export const routes = [
         path: '/productions/:production_id/shots',
         component: Shots,
         name: 'shots'
+      },
+      {
+        path: '/productions/:production_id/shots/:shot_id',
+        component: Shot,
+        name: 'shot'
       },
       {
         path: '/productions/:production_id/shots/manage',
