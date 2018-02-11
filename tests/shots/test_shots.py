@@ -14,7 +14,6 @@ class ShotTestCase(ApiDBTestCase):
         self.generate_fixture_episode()
         self.generate_fixture_sequence()
         self.generate_fixture_shot()
-
         self.shot_dict = self.shot.serialize(obj_type="Shot")
         self.shot_dict["project_name"] = self.project.name
         self.shot_dict["sequence_name"] = self.sequence.name
@@ -43,7 +42,23 @@ class ShotTestCase(ApiDBTestCase):
         self.assertEquals(len(shots), 3)
         self.assertDictEqual(shots[0], self.shot_dict)
 
+    def test_remove_shot(self):
+        self.generate_fixture_entity()
+        path = "data/shots/%s" % self.shot.id
+        shots = shots_service.get_shots()
+        self.assertEquals(len(shots), 3)
+        self.delete(path)
+        shots = shots_service.get_shots()
+        self.assertEquals(len(shots), 2)
+
     def test_get_shot(self):
+        self.generate_fixture_person()
+        self.generate_fixture_assigner()
+        self.generate_fixture_department()
+        self.generate_fixture_task_status()
+        self.generate_fixture_task_type()
+        self.generate_fixture_shot_task()
+
         shot = self.get("data/shots/%s" % self.shot.id)
         self.assertEquals(shot["id"], str(self.shot.id))
         self.assertEquals(shot["name"], self.shot.name)
@@ -52,22 +67,16 @@ class ShotTestCase(ApiDBTestCase):
         self.assertEquals(shot["episode_name"], self.episode.name)
         self.assertEquals(shot["episode_id"], str(self.episode.id))
         self.assertEquals(shot["project_name"], self.project.name)
-
-    def test_remove_shot(self):
-        self.generate_fixture_entity()
-        path = "data/shots/%s" % self.shot.id
-        self.delete(path)
-        shots = shots_service.get_shots()
-        self.assertEquals(len(shots), 2)
+        self.assertEquals(len(shot["tasks"]), 1)
 
     def test_remove_shot_with_tasks(self):
-        self.generate_fixture_entity()
         self.generate_fixture_person()
         self.generate_fixture_assigner()
         self.generate_fixture_department()
-        self.generate_fixture_task_type()
         self.generate_fixture_task_status()
+        self.generate_fixture_task_type()
         self.generate_fixture_shot_task()
+
         path = "data/shots/%s" % self.shot.id
         self.delete(path)
         shots = shots_service.get_shots()

@@ -11,6 +11,13 @@ class AssetsTestCase(ApiDBTestCase):
         self.generate_fixture_entity()
         self.generate_fixture_sequence()
         self.generate_fixture_shot()
+        self.generate_fixture_person()
+        self.generate_fixture_assigner()
+        self.generate_fixture_department()
+        self.generate_fixture_task_status()
+        self.generate_fixture_task_type()
+        self.generate_fixture_task()
+        self.generate_fixture_task(name="Secondary")
         self.entity_dict = self.entity.serialize(obj_type="Asset")
         self.maxDiff = None
 
@@ -21,10 +28,11 @@ class AssetsTestCase(ApiDBTestCase):
 
     def test_get_asset(self):
         asset = self.get("data/assets/%s" % self.entity.id)
-        self.entity_dict["project_name"] = self.project.name
-        self.entity_dict["asset_type_id"] = str(self.entity_type.id)
-        self.entity_dict["asset_type_name"] = self.entity_type.name
-        self.assertDictEqual(asset, self.entity_dict)
+        self.assertEquals(asset["id"], str(self.entity.id))
+        self.assertEquals(asset["project_name"], self.project.name)
+        self.assertEquals(asset["asset_type_id"], str(self.entity_type.id))
+        self.assertEquals(asset["asset_type_name"], str(self.entity_type.name))
+        self.assertEquals(len(asset["tasks"]), 2)
 
     def test_get_project_assets(self):
         assets = self.get("data/projects/%s/assets" % self.project.id)

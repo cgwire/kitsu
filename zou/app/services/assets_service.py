@@ -113,11 +113,26 @@ def get_asset_instance(asset_instance_id):
 
 def get_full_asset(asset_id):
     asset = get_asset(asset_id)
-    project = Project.get(asset["project_id"])
     asset_type = get_asset_type_raw(asset["entity_type_id"])
+    project = Project.get(asset["project_id"])
+
     asset["project_name"] = project.name
     asset["asset_type_id"] = str(asset_type.id)
     asset["asset_type_name"] = asset_type.name
+
+    tasks = Task.query \
+        .filter_by(entity_id=asset_id) \
+        .all()
+    task_dicts = []
+    for task in tasks:
+        task_dicts.append({
+            "id": str(task.id),
+            "task_status_id": str(task.task_status_id),
+            "task_type_id": str(task.task_type_id),
+            "assignees": [str(assignee.id) for assignee in task.assignees]
+        })
+    asset["tasks"] = task_dicts
+
     return asset
 
 
