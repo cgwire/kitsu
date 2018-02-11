@@ -1,3 +1,4 @@
+import Vue from 'vue'
 import shotsApi from '../api/shots'
 import {
   sortAssets
@@ -15,8 +16,57 @@ import {
   CASTING_ADD_TO_CASTING,
   CASTING_REMOVE_FROM_CASTING,
 
+  LOAD_SHOT_CASTING_END,
+  LOAD_ASSET_CAST_IN_END,
+
   RESET_ALL
 } from '../mutation-types'
+
+const helpers = {
+  buildCastingAssetsByType (casting) {
+    const assetsByType = []
+
+    let assetTypeAssets = []
+    let previousAsset = casting.length > 0 ? casting[0] : null
+
+    for (let asset of casting) {
+      const isChange = asset.asset_type_name !== previousAsset.asset_type_name
+      if (!asset.name) asset.name = asset.asset_name
+      if (previousAsset && isChange) {
+        assetsByType.push(assetTypeAssets.slice(0))
+        assetTypeAssets = []
+      }
+      if (!asset.nb_occurences) asset.nb_occurences = 1
+      assetTypeAssets.push(asset)
+      previousAsset = asset
+    }
+    assetsByType.push(assetTypeAssets)
+
+    return assetsByType
+  },
+
+  buildCastInShotsBySequence (castIn) {
+    const shotsBySequence = []
+
+    let sequenceShots = []
+    let previousShot = castIn.length > 0 ? castIn[0] : null
+
+    for (let shot of castIn) {
+      const isChange = shot.sequence_name !== previousShot.sequence_name
+      if (!shot.name) shot.name = shot.shot_name
+      if (previousShot && isChange) {
+        shotsBySequence.push(sequenceShots.slice(0))
+        sequenceShots = []
+      }
+      if (!shot.nb_occurences) shot.nb_occurences = 1
+      sequenceShots.push(shot)
+      previousShot = shot
+    }
+    shotsBySequence.push(sequenceShots)
+
+    return shotsBySequence
+  }
+}
 
 const state = {
   castingSequenceId: '',
@@ -48,26 +98,8 @@ const getters = {
   },
 
   getCastingAssetsByType (state) {
-    const assetsByType = []
     const casting = sortAssets(Object.values(state.casting))
-
-    let assetTypeAssets = []
-    let previousAsset = casting.length > 0 ? casting[0] : null
-
-    for (let asset of casting) {
-      const isChange =
-        asset.asset_type_name !== previousAsset.asset_type_name
-      if (previousAsset && isChange) {
-        assetsByType.push(assetTypeAssets.slice(0))
-        assetTypeAssets = []
-      }
-      if (!asset.nb_occurences) asset.nb_occurences = 1
-      assetTypeAssets.push(asset)
-      previousAsset = asset
-    }
-    assetsByType.push(assetTypeAssets)
-
-    return assetsByType
+    return helpers.buildCastingAssetsByType(casting)
   }
 }
 
@@ -239,6 +271,29 @@ const mutations = {
     }
     state.castingAssetsByType = getters.getCastingAssetsByType(state)
     state.isCastingDirty = true
+  },
+
+  [LOAD_SHOT_CASTING_END] ({state, rootState}, {shot, casting}) {
+    shot.casting = casting
+    Vue.set(
+      shot,
+      'castingAssetsByType',
+      helpers.buildCastingAssetsByType(casting)
+    )
+  },
+
+  [LOAD_ASSET_CAST_IN_END] ({state, rootState}, {asset, castIn}) {
+    castIn.forEach((shot) => {
+      if (shot.episode_name) {
+        shot.sequence_name = `${shot.episode_name} / ${shot.sequence_name}`
+      }
+    })
+    asset.castIn = castIn
+    Vue.set(
+      asset,
+      'castInShotsBySequence',
+      helpers.buildCastInShotsBySequence(castIn)
+    )
   },
 
   [RESET_ALL] (state) {

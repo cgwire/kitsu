@@ -21,6 +21,7 @@ import {
   LOAD_ASSETS_ERROR,
   LOAD_ASSETS_END,
   LOAD_ASSET_END,
+  LOAD_ASSET_CAST_IN_END,
 
   EDIT_ASSET_START,
   EDIT_ASSET_ERROR,
@@ -210,6 +211,16 @@ const actions = {
         commit(LOAD_ASSET_END, asset)
       }
       if (callback) callback(err)
+    })
+  },
+
+  loadAssetCastIn ({ commit, state, rootState }, { asset, callback }) {
+    const shotMap = rootState.shots.shotMap
+    assetsApi.getCastIn(asset, (err, castIn) => {
+      if (!err) {
+        commit(LOAD_ASSET_CAST_IN_END, { asset, castIn, shotMap })
+      }
+      if (callback) callback(err, castIn)
     })
   },
 

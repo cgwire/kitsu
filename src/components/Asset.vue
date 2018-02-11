@@ -1,5 +1,5 @@
 <template>
-<div class="page fixed-page">
+<div class="page">
   <div class="page-header">
     <div class="level">
       <div class="level-left">
@@ -27,6 +27,53 @@
     ></entity-task-list>
   </div>
 
+  <page-subtitle :text="$t('assets.cast_in')"></page-subtitle>
+  <div v-if="currentAsset">
+    <div
+      class="sequence-shots"
+        v-for="sequenceShots in currentAsset.castInShotsBySequence"
+        v-if="currentAsset.castInShotsBySequence[0].length > 0"
+    >
+      <div class="shot-sequence">
+        {{ sequenceShots[0] ? sequenceShots[0].sequence_name : '' }}
+      </div>
+      <div class="shot-list">
+        <router-link
+          class="shot-link"
+          :key="shot.shot_id"
+          :to="{
+            name: 'shot',
+            params: {
+              production_id: currentAsset.project_id,
+              shot_id: shot.shot_id
+            }
+          }"
+          v-for="shot in sequenceShots"
+        >
+          <entity-thumbnail
+            :entity="shot"
+            :square="true"
+          >
+          </entity-thumbnail>
+          <div>
+            <span>{{ shot.name }}</span>
+            <span v-if="shot.nb_occurences > 1">
+              ({{ shot.nb_occurences }})
+            </span>
+          </div>
+        </router-link>
+      </div>
+    </div>
+    <div v-else>
+      {{ $t('assets.no_cast_in') }}
+    </div>
+  </div>
+  <table-info
+    :is-loading="castIn.isLoadin"
+    :is-error="castIn.isError"
+    v-else
+  >
+  </table-info>
 </div>
 </template>
 
@@ -36,6 +83,7 @@ import { mapGetters, mapActions } from 'vuex'
 import PageTitle from './widgets/PageTitle'
 import PageSubtitle from './widgets/PageSubtitle'
 import EntityThumbnail from './widgets/EntityThumbnail'
+import TableInfo from './widgets/TableInfo'
 import EntityTaskList from './lists/EntityTaskList'
 
 export default {
@@ -44,25 +92,57 @@ export default {
     EntityThumbnail,
     EntityTaskList,
     PageSubtitle,
-    PageTitle
+    PageTitle,
+    TableInfo
   },
 
   data () {
     return {
-      currentAsset: null
+      currentAsset: null,
+      castIn: {
+        isLoading: false,
+        isError: false
+      }
     }
   },
 
   created () {
     this.clearSelectedTasks()
-
     this.currentAsset = this.getCurrentAsset()
+
+    this.castIn.isLoading = true
+    this.castIn.isError = false
+
     if (!this.currentAsset) {
       this.loadAsset({
         assetId: this.route.params.asset_id,
         callback: (err) => {
-          if (!err) this.currentAsset = this.getCurrentAsset()
-          console.log(this.currentAsset.tasks)
+          if (!err) {
+            this.currentAsset = this.getCurrentAsset()
+            this.loadAssetCastIn({
+              asset: this.currentAsset,
+              callback: (err, castIn) => {
+                if (err) {
+                  this.castIn.isError = true
+                } else {
+                  this.castIn.isError = false
+                }
+                this.castIn.isLoading = true
+              }
+            })
+          }
+        }
+      })
+    } else {
+      this.loadAssetCastIn({
+        asset: this.currentAsset,
+        callback: (err, castIn) => {
+          if (err) {
+            this.castIn.isError = true
+          } else {
+            this.castIn.isError = false
+          }
+          this.castIn.isLoading = true
         }
       })
     }
@@ -99,6 +179,7 @@ export default {
   methods: {
     ...mapActions([
       'loadAsset',
+      'loadAssetCastIn',
       'clearSelectedTasks'
     ]),
     changeTab (tab) {
@@ -124,5 +205,25 @@ export default {
 <style scoped>
 .asset-thumbnail {
   max-width: 100px;
+}
+
+.shot-sequence {
+  text-transform: uppercase;
+  font-size: 1.2em;
+  color: #999;
+  margin-top: 2em;
+  margin-bottom: 0.4em;
+}
+
+.shot-list {
+  display: flex;
+}
+
+.shot-link {
+  color: inherit;
+  margin-right: 1em;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
 }
 </style>
