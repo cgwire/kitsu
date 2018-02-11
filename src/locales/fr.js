@@ -171,7 +171,8 @@ export default {
       production: 'Prod',
       entity: 'Entité',
       task_status: 'Statut',
-      last_comment: 'Dernier commentaire'
+      last_comment: 'Dernier commentaire',
+      assignees: 'Assignation'
     }
   },
 
@@ -249,7 +250,9 @@ export default {
     delete_text: 'Etes vous sûr de vouloir retirer {name} de la base de données ?',
     delete_error: 'Une erreur est survenue en créant l\'asset, êtes vous sûr de vouloir que l\'asset n\'ait plus aucun lien ?',
     restore_text: 'Êtes vous sûr de vouloir restorer {name} dans votre base de données ?',
-    restore_error: 'Une erreur est survenue en restorant l\'asset.'
+    restore_error: 'Une erreur est survenue en restorant l\'asset.',
+    tasks: 'Tâches de fabrication',
+    cast_in: 'Présent dans'
   },
 
   shots: {
@@ -276,7 +279,9 @@ export default {
     delete_text: 'Etes vous sûr de vouloir retirer {name} de la base de données ?',
     delete_error: 'Une erreur est survenue en créant le plan, êtes vous sûr que le plan n\'a plus aucun lien ?',
     restore_text: 'Etes vous sûr de vouloir restorer {name} dans la base de données ?',
-    restore_error: 'Une erreur est survenue en restorant le plant.'
+    restore_error: 'Une erreur est survenue en restorant le plan.',
+    tasks: 'Tâches de fabrication',
+    casting: 'Casting'
   },
 
   breakdown: {
