@@ -1,15 +1,19 @@
 <template>
 <a
-  :href="'/api/pictures/originals/preview-files/' + entity.preview_file_id + '.png'"
+  :href="originalPath"
   target="_blank"
-  v-if="entity.preview_file_id && entity.preview_file_id.length > 0"
+  v-if="isPreview"
 >
   <img
     class="thumbnail-picture"
-    v-lazy="'/api/pictures/thumbnails/preview-files/' + entity.preview_file_id + '.png'"
+    v-lazy="thumbnailPath"
   />
 </a>
-<span class="thumbnail-picture thumbnail-empty" v-else>
+<span :class="{
+  'thumbnail-picture': true,
+  'thumbnail-empty': true,
+  square: square
+}" v-else>
 </span>
 </template>
 
@@ -20,6 +24,29 @@ export default {
     entity: {
       default: () => {},
       type: Object
+    },
+    square: {
+      default: false,
+      type: Boolean
+    }
+  },
+  computed: {
+    originalPath () {
+      return '/api/pictures/originals/preview-files/' +
+             this.entity.preview_file_id + '.png'
+    },
+    isPreview () {
+      return this.entity.preview_file_id &&
+             this.entity.preview_file_id.length > 0
+    },
+    thumbnailPath () {
+      if (this.square) {
+        return '/api/pictures/thumbnails-square/preview-files/' +
+               this.entity.preview_file_id + '.png'
+      } else {
+        return '/api/pictures/thumbnails/preview-files/' +
+               this.entity.preview_file_id + '.png'
+      }
     }
   }
 }
@@ -27,9 +54,13 @@ export default {
 
 <style scoped>
 span.thumbnail-empty {
-  display: block;
   width: 50px;
   height: 30px;
   background: #F3F3F3;
+}
+
+span.square {
+  width: 100px;
+  height: 100px;
 }
 </style>
