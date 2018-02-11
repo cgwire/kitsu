@@ -272,19 +272,4 @@ export default {
 </script>
 
 <style scoped>
-.name {
-  width: 230px;
-  min-width: 230px;
-}
-.email {
-  width: 210px;
-  min-width: 210px;
-}
-.phone {
-  width: 140px;
-  min-width: 140px;
-}
-.skills {
-  width: 250px;
-}
 </style>
