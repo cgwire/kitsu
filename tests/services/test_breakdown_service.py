@@ -43,6 +43,7 @@ class BreakdownServiceTestCase(ApiDBTestCase):
             }
         ]
         breakdown_service.update_casting(self.shot.id, newCasting)
+
         casting = breakdown_service.get_casting(self.shot.id)
         casting = sorted(casting, key=lambda x: x["nb_occurences"])
         self.assertEquals(casting[0]["asset_id"], newCasting[0]["asset_id"])
@@ -55,6 +56,19 @@ class BreakdownServiceTestCase(ApiDBTestCase):
             casting[1]["nb_occurences"],
             newCasting[1]["nb_occurences"]
         )
+        self.assertEquals(
+            casting[1]["asset_name"],
+            self.entity_character.name
+        )
+        self.assertEquals(
+            casting[1]["asset_type_name"],
+            self.entity_type_character.name
+        )
+
+        cast_in = breakdown_service.get_cast_in(self.entity_character.id)
+        self.assertEquals(cast_in[0]["shot_name"], self.shot.name)
+        self.assertEquals(cast_in[0]["sequence_name"], self.sequence.name)
+        self.assertEquals(cast_in[0]["episode_name"], self.episode.name)
 
     def test_add_instance_to_shot(self):
         instances = breakdown_service.get_asset_instances_for_shot(self.shot.id)

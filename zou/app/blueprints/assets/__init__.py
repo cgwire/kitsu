@@ -7,6 +7,7 @@ from .resources import (
     AssetResource,
     AllAssetsResource,
     AssetsAndTasksResource,
+    CastInResource,
     ProjectAssetTypesResource,
     ShotAssetTypesResource,
     NewAssetResource,
@@ -27,6 +28,8 @@ routes = [
     ("/data/assets/<asset_id>/tasks", AssetTasksResource),
     ("/data/assets/<asset_id>/task-types", AssetTaskTypesResource),
     ("/data/assets/<asset_id>/asset-instances", AssetAssetInstancesResource),
+    ("/data/assets/<asset_id>/cast-in", CastInResource),
+
     (
         "/data/projects/<project_id>/asset-types/<asset_type_id>/assets",
         ProjectAssetTypeAssetsResource
@@ -46,7 +49,7 @@ routes = [
     (
         "/data/projects/<project_id>/assets",
         ProjectAssetsResource
-    ),
+    )
 ]
 
 blueprint = Blueprint("assets", "assets")
