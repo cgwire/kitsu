@@ -224,8 +224,8 @@ def get_shot(shot_id):
 
 def get_full_shot(shot_id):
     shot = get_shot(shot_id)
-    project = Project.get(shot["project_id"])
     sequence = Entity.get(shot["parent_id"])
+    project = Project.get(shot["project_id"])
     shot["project_name"] = project.name
     shot["sequence_id"] = str(sequence.id)
     shot["sequence_name"] = sequence.name
@@ -235,6 +235,18 @@ def get_full_shot(shot_id):
         shot["episode_id"] = str(episode.id)
         shot["episode_name"] = episode.name
 
+    tasks = Task.query \
+        .filter_by(entity_id=shot_id) \
+        .all()
+    task_dicts = []
+    for task in tasks:
+        task_dicts.append({
+            "id": str(task.id),
+            "task_status_id": str(task.task_status_id),
+            "task_type_id": str(task.task_type_id),
+            "assignees": [str(assignee.id) for assignee in task.assignees]
+        })
+    shot["tasks"] = task_dicts
     return shot
 
 

@@ -57,10 +57,17 @@ class AssetServiceTestCase(ApiDBTestCase):
         self.assertEqual(
             assets[1]["tasks"][0]["assignees"][0], str(self.person.id)
         )
+        self.assertEqual(
+            assets[1]["tasks"][0]["task_status_id"], str(self.task_status.id)
+        )
+        self.assertEqual(
+            assets[1]["tasks"][0]["task_type_id"], str(self.task_type.id)
+        )
 
     def test_get_asset(self):
         asset = assets_service.get_asset(self.entity.id)
         self.assertEqual(asset["id"], str(self.entity.id))
+
         assets_service.remove_asset(asset["id"])
         self.assertRaises(
             AssetNotFoundException,

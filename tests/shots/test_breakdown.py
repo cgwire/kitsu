@@ -17,22 +17,50 @@ class BreakdownTestCase(ApiDBTestCase):
 
     def test_update_casting(self):
         self.shot_id = str(self.shot.id)
-        self.entity_id = str(self.entity.id)
-        self.entity_character_id = str(self.entity_character.id)
+        self.asset_id = str(self.entity.id)
+        self.asset_character_id = str(self.entity_character.id)
+        self.asset_type_character_id = str(self.entity_type_character.id)
+        self.shot_name = self.shot.name
+        self.sequence_name = self.sequence.name
+        self.episode_name = self.episode.name
 
         casting = self.get("/data/shots/%s/casting" % self.shot_id)
         self.assertListEqual(casting, [])
         newCasting = [
             {
-                "asset_id": self.entity_id,
+                "asset_id": self.asset_id,
                 "nb_occurences": 1
             },
             {
-                "asset_id": self.entity_character_id,
+                "asset_id": self.asset_character_id,
                 "nb_occurences": 3
             }
         ]
         path = "/data/shots/%s/casting" % str(self.shot_id)
         self.put(path, newCasting, 200)
+
         casting = self.get("/data/shots/%s/casting" % self.shot_id)
-        self.assertListEqual(casting, newCasting)
+        casting = sorted(casting, key=lambda x: x["nb_occurences"])
+        self.assertEquals(casting[0]["asset_id"], newCasting[0]["asset_id"])
+        self.assertEquals(
+            casting[0]["nb_occurences"],
+            newCasting[0]["nb_occurences"]
+        )
+        self.assertEquals(casting[1]["asset_id"], newCasting[1]["asset_id"])
+        self.assertEquals(
+            casting[1]["nb_occurences"],
+            newCasting[1]["nb_occurences"]
+        )
+        self.assertEquals(
+            casting[1]["asset_name"],
+            self.entity_character.name
+        )
+        self.assertEquals(
+            casting[1]["asset_type_name"],
+            self.entity_type_character.name
+        )
+
+        cast_in = self.get("/data/assets/%s/cast-in" % self.asset_id)
+        self.assertEquals(cast_in[0]["shot_name"], self.shot.name)
+        self.assertEquals(cast_in[0]["sequence_name"], self.sequence.name)
+        self.assertEquals(cast_in[0]["episode_name"], self.episode.name)

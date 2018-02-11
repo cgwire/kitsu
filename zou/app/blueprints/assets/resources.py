@@ -209,3 +209,16 @@ class AssetAssetInstancesResource(Resource):
         asset = assets_service.get_asset(asset_id)
         user_service.check_project_access(asset["project_id"])
         return breakdown_service.get_asset_instances_for_asset(asset_id)
+
+
+class CastInResource(Resource):
+
+    @jwt_required
+    def get(self, asset_id):
+        """
+        Resource to retrieve the casting of a given asset.
+        """
+        asset = assets_service.get_asset(asset_id)
+        if not permissions.has_manager_permissions():
+            user_service.check_has_task_related(asset["project_id"])
+        return breakdown_service.get_cast_in(asset_id)

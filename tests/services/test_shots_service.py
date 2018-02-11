@@ -99,6 +99,14 @@ class ShotUtilsTestCase(ApiDBTestCase):
         self.assertEqual(
             shots[0]["tasks"][0]["assignees"][0], str(self.person.id)
         )
+        self.assertEqual(
+            shots[0]["tasks"][0]["task_status_id"],
+            str(self.shot_task.task_status_id)
+        )
+        self.assertEqual(
+            shots[0]["tasks"][0]["task_type_id"],
+            str(self.shot_task.task_type_id)
+        )
 
     def test_is_shot(self):
         self.assertTrue(shots_service.is_shot(self.shot.serialize()))
