@@ -56,16 +56,7 @@ export default {
   },
 
   created () {
-    this.person = this.personMap[this.$route.params.person_id]
-    this.isTasksLoading = true
-    this.loadPersonTasks({
-      personId: this.person.id,
-      callback: (err) => {
-        if (err) console.log(err)
-        this.isTasksLoading = false
-        this.isTasksLoadingError = false
-      }
-    })
+    this.loadPerson(this.$route.params.person_id)
   },
 
   mounted () {
@@ -92,14 +83,34 @@ export default {
       'loadPersonTasks',
       'setPersonTasksSearch'
     ]),
+
     onSearchChange (text) {
       this.setPersonTasksSearch(text)
+    },
+
+    loadPerson (personId) {
+      this.person = this.personMap[personId]
+      this.isTasksLoading = true
+      this.loadPersonTasks({
+        personId: this.person.id,
+        callback: (err) => {
+          if (err) console.log(err)
+          this.isTasksLoading = false
+          this.isTasksLoadingError = false
+        }
+      })
     }
   },
 
   metaInfo () {
     return {
       title: this.person ? `${this.person.name} - Kitsu` : '... - Kitsu'
+    }
+  },
+
+  watch: {
+    $route () {
+      this.loadPerson(this.$route.params.person_id)
     }
   }
 }
