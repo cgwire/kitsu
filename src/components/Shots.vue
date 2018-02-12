@@ -52,10 +52,12 @@
     </div>
 
     <shot-list
+      ref="shot-list"
       :entries="displayedShots"
       :is-loading="isShotsLoading"
       :is-error="isShotsLoadingError"
       :validation-columns="shotValidationColumns"
+      @scroll="saveScrollPosition"
     ></shot-list>
 
     <manage-shots-modal
@@ -239,7 +241,8 @@ export default {
       'shotValidationColumns',
       'currentProduction',
       'isCurrentUserManager',
-      'shotSearchText'
+      'shotSearchText',
+      'shotListScrollPosition'
     ])
   },
 
@@ -266,6 +269,9 @@ export default {
     if (this.shotSearchText.length > 0) {
       this.$refs['shot-search-field'].setValue(this.shotSearchText)
     }
+    this.$refs['shot-list'].setScrollPosition(
+      this.shotListScrollPosition
+    )
   },
 
   methods: {
@@ -459,9 +465,17 @@ export default {
         }
       })
     },
+
     onSearchChange (event) {
       const searchQuery = this.$refs['shot-search-field'].getValue()
       this.setShotSearch(searchQuery)
+    },
+
+    saveScrollPosition (scrollPosition) {
+      this.$store.commit(
+        'SET_SHOT_LIST_SCROLL_POSITION',
+        scrollPosition
+      )
     }
   },
 
@@ -477,6 +491,7 @@ export default {
       const path = this.$route.path
       if (oldPath !== path) {
         this.$refs['shot-search-field'].setValue('')
+        this.$store.commit('SET_SHOT_LIST_SCROLL_POSITION', 0)
         this.$store.dispatch('loadShots')
       }
     }

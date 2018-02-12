@@ -57,6 +57,7 @@
   </div>
 
   <div
+    ref="body"
     class="table-body"
     v-scroll="onBodyScroll"
     v-infinite-scroll="loadMoreAssets"
@@ -210,6 +211,10 @@ export default {
 
     loadMoreAssets () {
       this.displayMoreAssets()
+    },
+
+    setScrollPosition (scrollPosition) {
+      this.$refs.body.scrollTop = scrollPosition
     }
   }
 }

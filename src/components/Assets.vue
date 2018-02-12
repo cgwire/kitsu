@@ -53,10 +53,12 @@
   </div>
 
   <asset-list
+    ref="asset-list"
     :entries="displayedAssets"
     :is-loading="isAssetsLoading"
     :is-error="isAssetsLoadingError"
     :validation-columns="assetValidationColumns"
+    @scroll="saveScrollPosition"
   ></asset-list>
 
   <edit-asset-modal
@@ -210,11 +212,12 @@ export default {
 
   computed: {
     ...mapGetters([
+      'assetListScrollPosition',
       'assets',
-      'displayedAssets',
       'assetsCsvFormData',
       'assetSearchText',
       'assetTypes',
+      'displayedAssets',
       'openProductions',
       'isAssetsLoading',
       'isAssetsLoadingError',
@@ -252,6 +255,9 @@ export default {
     if (this.assetSearchText.length > 0) {
       this.$refs['asset-search-field'].setValue(this.assetSearchText)
     }
+    this.$refs['asset-list'].setScrollPosition(
+      this.assetListScrollPosition
+    )
   },
 
   methods: {
@@ -439,6 +445,10 @@ export default {
     onSearchChange () {
       const searchQuery = this.$refs['asset-search-field'].getValue()
       this.setAssetSearch(searchQuery)
+    },
+
+    saveScrollPosition (scrollPosition) {
+      this.$store.commit('SET_ASSET_LIST_SCROLL_POSITION', scrollPosition)
     }
   },
 
@@ -456,6 +466,7 @@ export default {
 
       if (oldPath !== path) {
         this.$refs['asset-search-field'].value = ''
+        this.$store.commit('SET_ASSET_LIST_SCROLL_POSITION', 0)
         this.$store.dispatch('loadAssets')
       }
     }

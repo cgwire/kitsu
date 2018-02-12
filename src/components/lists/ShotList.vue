@@ -62,12 +62,12 @@
     </button-link>
   </div>
 
-  <div class="table-body"
+  <div
+    ref="body"
+    class="table-body"
     v-infinite-scroll="loadMoreShots"
-    infinite-scroll-disabled="busy"
-    infinite-scroll-distance="120"
-    v-scroll="onBodyScroll">
-
+    v-scroll="onBodyScroll"
+  >
     <table class="table">
       <tbody>
         <tr
@@ -222,10 +222,15 @@ export default {
 
     onBodyScroll (event, position) {
       this.$refs.headerWrapper.style.left = `-${position.scrollLeft}px`
+      this.$emit('scroll', position.scrollTop)
     },
 
     loadMoreShots () {
       this.displayMoreShots()
+    },
+
+    setScrollPosition (scrollPosition) {
+      this.$refs.body.scrollTop = scrollPosition
     }
   }
 }

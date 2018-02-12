@@ -66,6 +66,8 @@ import {
   CREATE_TASKS_END,
   DISPLAY_MORE_SHOTS,
 
+  SET_SHOT_LIST_SCROLL_POSITION,
+
   SET_PREVIEW,
 
   RESET_ALL
@@ -135,7 +137,9 @@ const state = {
   restoreShot: {
     isLoading: false,
     isError: false
-  }
+  },
+
+  shotListScrollPosition: 0
 }
 
 const getters = {
@@ -175,6 +179,7 @@ const getters = {
   shotCreated: state => state.shotCreated,
 
   shotsCsvFormData: state => state.shotsCsvFormData,
+  shotListScrollPosition: state => state.shotListScrollPosition,
 
   getShot: (state, getters) => (id) => {
     return state.shots.find((shot) => shot.id === id)
@@ -600,6 +605,10 @@ const mutations = {
     if (shot) {
       shot.preview_file_id = previewId
     }
+  },
+
+  [SET_SHOT_LIST_SCROLL_POSITION] (state, scrollPosition) {
+    state.shotListScrollPosition = scrollPosition
   },
 
   [RESET_ALL] (state) {

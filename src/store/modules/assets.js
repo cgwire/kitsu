@@ -55,6 +55,8 @@ import {
 
   SET_PREVIEW,
 
+  SET_ASSET_LIST_SCROLL_POSITION,
+
   RESET_ALL
 } from '../mutation-types'
 
@@ -122,7 +124,8 @@ const state = {
     isError: false
   },
 
-  personTasks: []
+  personTasks: [],
+  assetListScrollPosition: 0
 }
 
 const getters = {
@@ -135,6 +138,8 @@ const getters = {
 
   displayedAssets: state => state.displayedAssets,
   displayedAssetsLength: state => state.displayedAssetsLength,
+
+  assetListScrollPosition: state => state.assetListScrollPosition,
 
   assetsByType: state => {
     const assetsByType = []
@@ -551,6 +556,10 @@ const mutations = {
     if (asset) {
       asset.preview_file_id = previewId
     }
+  },
+
+  [SET_ASSET_LIST_SCROLL_POSITION] (state, scrollPosition) {
+    state.assetListScrollPosition = scrollPosition
   },
 
   [RESET_ALL] (state) {
