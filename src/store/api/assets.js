@@ -9,6 +9,15 @@ export default {
     client.get(path, callback)
   },
 
+  getAsset (assetId, callback) {
+    const path = `/api/data/assets/${assetId}`
+    client.get(path, callback)
+  },
+
+  getCastIn (asset, callback) {
+    client.get(`/api/data/assets/${asset.id}/cast-in`, callback)
+  },
+
   newAsset (asset, callback) {
     const data = {
       name: asset.name,

@@ -1,7 +1,12 @@
 <template>
 <div
   :id="'casting-' + asset.id"
-  class="asset big casted active"
+  :class="{
+    asset: true,
+    big: true,
+    casted: true,
+    active: active
+  }"
 >
 
   <div
@@ -51,6 +56,10 @@ export default {
     nbOccurences: {
       default: 1,
       type: Number
+    },
+    active: {
+      default: true,
+      type: Boolean
     }
   },
   computed: {
@@ -121,12 +130,14 @@ export default {
 .big .asset-add {
   width: 80px;
   height: 40px;
-  cursor: pointer;
 }
 
 .big .asset-add-10 {
   width: 80px;
   height: 40px;
+}
+
+.asset.active {
   cursor: pointer;
 }
 

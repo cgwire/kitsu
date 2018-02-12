@@ -1,11 +1,23 @@
 import Vue from 'vue'
 import shotsApi from '../api/shots'
 import tasksStore from './tasks'
+import peopleStore from './people'
+import taskTypesStore from './tasktypes'
 import productionsStore from './productions'
 
 import {PAGE_SIZE} from '../../lib/pagination'
-import {sortShots, sortByName} from '../../lib/sorting'
-import { buildShotIndex, indexSearch } from '../../lib/indexing'
+import {
+  sortShots,
+  sortByName
+} from '../../lib/sorting'
+import {
+  buildShotIndex,
+  indexSearch
+} from '../../lib/indexing'
+import {
+  applyFilters,
+  extractTaskTypes
+} from '../../lib/filtering'
 
 import {
   LOAD_SHOTS_START,
@@ -13,6 +25,9 @@ import {
   LOAD_SHOTS_END,
   LOAD_EPISODES_END,
   LOAD_SEQUENCES_END,
+
+  LOAD_SHOT_END,
+  LOAD_SHOT_CASTING_END,
 
   SHOT_CSV_FILE_SELECTED,
   IMPORT_SHOTS_START,
@@ -51,6 +66,8 @@ import {
   CREATE_TASKS_END,
   DISPLAY_MORE_SHOTS,
 
+  SET_SHOT_LIST_SCROLL_POSITION,
+
   SET_PREVIEW,
 
   RESET_ALL
@@ -60,11 +77,31 @@ const helpers = {
   getCurrentProduction () {
     return productionsStore.getters.currentProduction(productionsStore.state)
   },
+  getTask (taskId) {
+    return tasksStore.state.taskMap[taskId]
+  },
   getTaskStatus (taskStatusId) {
     return tasksStore.state.taskStatusMap[taskStatusId]
   },
-  getTask (taskId) {
-    return tasksStore.state.taskMap[taskId]
+  getTaskType (taskTypeId) {
+    return taskTypesStore.state.taskTypeMap[taskTypeId]
+  },
+  getPerson (personId) {
+    return peopleStore.state.personMap[personId]
+  },
+  populateTask (task) {
+    task.persons = []
+
+    task.taskType = helpers.getTaskType(task.task_type_id)
+    task.taskStatus = helpers.getTaskStatus(task.task_status_id)
+    task.assignees.forEach((personId) => {
+      task.persons.push(helpers.getPerson(personId))
+    })
+
+    // Hacks for proper render
+    task.task_status_short_name = task.taskStatus.short_name
+    task.task_status_color = task.taskStatus.color
+    task.name = task.taskType.priority.toString()
   }
 }
 
@@ -100,7 +137,9 @@ const state = {
   restoreShot: {
     isLoading: false,
     isError: false
-  }
+  },
+
+  shotListScrollPosition: 0
 }
 
 const getters = {
@@ -140,6 +179,7 @@ const getters = {
   shotCreated: state => state.shotCreated,
 
   shotsCsvFormData: state => state.shotsCsvFormData,
+  shotListScrollPosition: state => state.shotListScrollPosition,
 
   getShot: (state, getters) => (id) => {
     return state.shots.find((shot) => shot.id === id)
@@ -183,6 +223,25 @@ const actions = {
           }
         })
       }
+    })
+  },
+
+  loadShot ({ commit, state }, { shotId, callback }) {
+    shotsApi.getShot(shotId, (err, shot) => {
+      if (!err) {
+        commit(LOAD_SHOT_END, shot)
+      }
+      if (callback) callback(err)
+    })
+  },
+
+  loadShotCasting ({ commit, state, rootState }, { shot, callback }) {
+    const assetMap = rootState.assets.assetMap
+    shotsApi.getCasting(shot, (err, casting) => {
+      if (!err) {
+        commit(LOAD_SHOT_CASTING_END, { shot, casting, assetMap })
+      }
+      if (callback) callback(err, casting)
     })
   },
 
@@ -308,10 +367,12 @@ const mutations = {
     state.shots.forEach((shot) => {
       state.shotMap[shot.id] = shot
       shot.production_id = helpers.getCurrentProduction().id
+      shot.tasks.forEach(helpers.populateTask)
     })
     state.displayedShots = state.shots.slice(0, PAGE_SIZE)
     state.displayedShotsLength = state.shots.length
   },
+
   [LOAD_SEQUENCES_END] (state, sequences) {
     const sequenceMap = {}
     sequences.forEach((sequence) => {
@@ -320,6 +381,7 @@ const mutations = {
     state.sequenceMap = sequenceMap
     state.sequences = sortByName(sequences)
   },
+
   [LOAD_EPISODES_END] (state, episodes) {
     const episodeMap = {}
     episodes.forEach((episode) => {
@@ -327,6 +389,12 @@ const mutations = {
     })
     state.episodeMap = episodeMap
     state.episodes = sortByName(episodes)
+  },
+
+  [LOAD_SHOT_END] (state, shot) {
+    shot.tasks.forEach(helpers.populateTask)
+    shot.tasks = sortByName(shot.tasks)
+    state.shotMap[shot.id] = shot
   },
 
   [SHOT_CSV_FILE_SELECTED] (state, formData) {
@@ -455,7 +523,9 @@ const mutations = {
   },
 
   [SET_SHOT_SEARCH] (state, shotSearch) {
-    const result = indexSearch(state.shotIndex, shotSearch) || state.shots
+    const taskTypes = extractTaskTypes(state.shots)
+    let result = indexSearch(state.shotIndex, shotSearch) || state.shots
+    result = applyFilters(taskTypes, result, shotSearch) || []
     state.displayedShots = result.slice(0, PAGE_SIZE)
     state.displayedShotsLength = result.length
     state.shotSearchText = shotSearch
@@ -535,6 +605,10 @@ const mutations = {
     if (shot) {
       shot.preview_file_id = previewId
     }
+  },
+
+  [SET_SHOT_LIST_SCROLL_POSITION] (state, scrollPosition) {
+    state.shotListScrollPosition = scrollPosition
   },
 
   [RESET_ALL] (state) {

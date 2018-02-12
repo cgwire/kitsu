@@ -1,16 +1,27 @@
 import Vue from 'vue'
 import assetsApi from '../api/assets'
 import tasksStore from './tasks'
+import taskTypesStore from './tasktypes'
 import productionsStore from './productions'
+import peopleStore from './people'
 
 import {PAGE_SIZE} from '../../lib/pagination'
-import { sortAssets } from '../../lib/sorting'
-import { buildAssetIndex, indexSearch } from '../../lib/indexing'
+import { sortAssets, sortByName } from '../../lib/sorting'
+import {
+  buildAssetIndex,
+  indexSearch
+} from '../../lib/indexing'
+import {
+  applyFilters,
+  extractTaskTypes
+} from '../../lib/filtering'
 
 import {
   LOAD_ASSETS_START,
   LOAD_ASSETS_ERROR,
   LOAD_ASSETS_END,
+  LOAD_ASSET_END,
+  LOAD_ASSET_CAST_IN_END,
 
   EDIT_ASSET_START,
   EDIT_ASSET_ERROR,
@@ -44,6 +55,8 @@ import {
 
   SET_PREVIEW,
 
+  SET_ASSET_LIST_SCROLL_POSITION,
+
   RESET_ALL
 } from '../mutation-types'
 
@@ -54,8 +67,28 @@ const helpers = {
   getTaskStatus (taskStatusId) {
     return tasksStore.state.taskStatusMap[taskStatusId]
   },
+  getTaskType (taskTypeId) {
+    return taskTypesStore.state.taskTypeMap[taskTypeId]
+  },
   getTask (taskId) {
     return tasksStore.state.taskMap[taskId]
+  },
+  getPerson (personId) {
+    return peopleStore.state.personMap[personId]
+  },
+  populateTask (task) {
+    task.persons = []
+
+    task.taskType = helpers.getTaskType(task.task_type_id)
+    task.taskStatus = helpers.getTaskStatus(task.task_status_id)
+    task.assignees.forEach((personId) => {
+      task.persons.push(helpers.getPerson(personId))
+    })
+
+    // Hacks for proper render
+    task.task_status_short_name = task.taskStatus.short_name
+    task.task_status_color = task.taskStatus.color
+    task.name = task.taskType.priority.toString()
   }
 }
 
@@ -91,7 +124,8 @@ const state = {
     isError: false
   },
 
-  personTasks: []
+  personTasks: [],
+  assetListScrollPosition: 0
 }
 
 const getters = {
@@ -104,6 +138,8 @@ const getters = {
 
   displayedAssets: state => state.displayedAssets,
   displayedAssetsLength: state => state.displayedAssetsLength,
+
+  assetListScrollPosition: state => state.assetListScrollPosition,
 
   assetsByType: state => {
     const assetsByType = []
@@ -170,6 +206,26 @@ const actions = {
         commit(LOAD_ASSETS_END, assets)
       }
       if (callback) callback(err)
+    })
+  },
+
+  loadAsset ({ commit, state }, { assetId, callback }) {
+    assetsApi.getAsset(assetId, (err, asset) => {
+      console.log(err, asset)
+      if (!err) {
+        commit(LOAD_ASSET_END, asset)
+      }
+      if (callback) callback(err)
+    })
+  },
+
+  loadAssetCastIn ({ commit, state, rootState }, { asset, callback }) {
+    const shotMap = rootState.shots.shotMap
+    assetsApi.getCastIn(asset, (err, castIn) => {
+      if (!err) {
+        commit(LOAD_ASSET_CAST_IN_END, { asset, castIn, shotMap })
+      }
+      if (callback) callback(err, castIn)
     })
   },
 
@@ -263,6 +319,8 @@ const mutations = {
     assets.forEach((asset) => {
       state.assetMap[asset.id] = asset
       asset.production_id = helpers.getCurrentProduction().id
+
+      asset.tasks.forEach(helpers.populateTask)
     })
 
     state.assets = assets
@@ -272,6 +330,12 @@ const mutations = {
     state.assetIndex = buildAssetIndex(assets)
     state.displayedAssets = state.assets.slice(0, PAGE_SIZE)
     state.displayedAssetsLength = state.assets ? state.assets.length : 0
+  },
+
+  [LOAD_ASSET_END] (state, asset) {
+    asset.tasks.forEach(helpers.populateTask)
+    asset.tasks = sortByName(asset.tasks)
+    state.assetMap[asset.id] = asset
   },
 
   [ASSET_CSV_FILE_SELECTED] (state, formData) {
@@ -447,7 +511,10 @@ const mutations = {
   },
 
   [SET_ASSET_SEARCH] (state, assetSearch) {
-    const result = indexSearch(state.assetIndex, assetSearch) || state.assets
+    let result = indexSearch(state.assetIndex, assetSearch) || state.assets
+    const taskTypes = extractTaskTypes(state.assets)
+    result = applyFilters(taskTypes, result, assetSearch) || []
+
     state.displayedAssets = result.slice(0, PAGE_SIZE)
     state.displayedAssetsLength = result ? result.length : 0
     state.assetSearchText = assetSearch
@@ -489,6 +556,10 @@ const mutations = {
     if (asset) {
       asset.preview_file_id = previewId
     }
+  },
+
+  [SET_ASSET_LIST_SCROLL_POSITION] (state, scrollPosition) {
+    state.assetListScrollPosition = scrollPosition
   },
 
   [RESET_ALL] (state) {

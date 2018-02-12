@@ -2,7 +2,7 @@
 <td>
   <div class="flexrow">
     <people-avatar
-      class="flexrow-item"
+      class="flexrow-item avatar-wrapper"
       :size="25"
       :font-size="14"
       :person="task.last_comment.person"
@@ -10,7 +10,7 @@
     >
     </people-avatar>
     <span
-      class="flexrow-item"
+      class="flexrow-item last-comment"
     >
       {{ commentText }}
     </span>
@@ -53,4 +53,7 @@ export default {
 </script>
 
 <style scoped>
+.last-comment {
+  margin-left: 0.6em;
+}
 </style>

@@ -5,6 +5,7 @@ import init from '../lib/init'
 import userStore from '../store/modules/user'
 import taskTypeStore from '../store/modules/tasktypes'
 
+import Asset from '../components/Asset'
 import Assets from '../components/Assets'
 import AssetTypes from '../components/AssetTypes'
 import Breakdown from '../components/Breakdown'
@@ -22,6 +23,7 @@ import TaskTypes from '../components/TaskTypes'
 import TaskStatus from '../components/TaskStatus'
 import Todos from '../components/Todos'
 import ServerDown from '../components/ServerDown'
+import Shot from '../components/Shot'
 import Shots from '../components/Shots'
 
 export const routes = [
@@ -140,6 +142,12 @@ export const routes = [
         name: 'assets'
       },
       {
+        path:
+        '/productions/:production_id/assets/:asset_id',
+        component: Asset,
+        name: 'asset'
+      },
+      {
         path: '/productions/:production_id/assets/new',
         component: Assets,
         name: 'new-asset'
@@ -170,10 +178,16 @@ export const routes = [
         component: Assets,
         name: 'create-asset-tasks'
       },
+
       {
         path: '/productions/:production_id/shots',
         component: Shots,
         name: 'shots'
+      },
+      {
+        path: '/productions/:production_id/shots/:shot_id',
+        component: Shot,
+        name: 'shot'
       },
       {
         path: '/productions/:production_id/shots/manage',

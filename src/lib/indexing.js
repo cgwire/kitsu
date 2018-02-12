@@ -66,15 +66,48 @@ export const buildShotIndex = (shots) => {
 }
 
 /*
- * Run a non case sensitive search on given index.
+ * Run a non case sensitive search on given index. It accepts different search
+ * terms separated by spaces. Terms dedicated to task status filtering (like
+ * modeling:wip) are ignored. The result is the intersection of queries.
  */
-export const indexSearch = (index, query) => {
-  if (query.length === 0) {
+export const indexSearch = (index, queryText) => {
+  if (queryText.length === 0) {
     return null
-  } else if (index[query.toLowerCase()]) {
-    return index[query.toLowerCase()]
   } else {
-    return []
+    const queries = queryText.split(' ')
+    const results = queries
+      .map((query) => indexSearchWord(index, query))
+      .filter((result) => result !== null)
+
+    if (results.length > 0) {
+      return results.reduce(resultIntersection, [...results[0]])
+    } else {
+      return null
+    }
+  }
+}
+
+/*
+ * Turn an array of sets in an array which is the intersection of elements of
+ * all sets.
+ */
+const resultIntersection = (a, b) => {
+  return a.filter(x => b.has(x))
+}
+
+/*
+ * Return search result for a given word and a given index. Empty word or task
+ * type queries are returned as null.
+ */
+const indexSearchWord = (index, word) => {
+  if (word && word.indexOf('=') < 0) {
+    if (index[word.toLowerCase()]) {
+      return new Set(index[word.toLowerCase()])
+    } else {
+      return new Set([])
+    }
+  } else {
+    return null
   }
 }
 

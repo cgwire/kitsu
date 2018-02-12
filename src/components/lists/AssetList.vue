@@ -57,6 +57,7 @@
   </div>
 
   <div
+    ref="body"
     class="table-body"
     v-scroll="onBodyScroll"
     v-infinite-scroll="loadMoreAssets"
@@ -76,9 +77,20 @@
           </td>
           <td :class="{type: !entry.canceled}">
             {{ entry.asset_type_name }}
+            </router-link>
           </td>
           <td :class="{name: !entry.canceled}">
+            <router-link
+              class="asset-link"
+              :to="{
+                name: 'asset',
+                params: {
+                  production_id: entry.production_id,
+                  asset_id: entry.id
+                }
+              }">
             {{ entry.name }}
+            </router-link>
           </td>
           <td class="description">
             {{ entry.description }}
@@ -151,7 +163,8 @@ export default {
   ],
   data () {
     return {
-      busy: false
+      busy: false,
+      scrollPostion: 0
     }
   },
   components: {
@@ -193,10 +206,15 @@ export default {
 
     onBodyScroll (event, position) {
       this.$refs.headerWrapper.style.left = `-${position.scrollLeft}px`
+      this.$emit('scroll', position.scrollTop)
     },
 
     loadMoreAssets () {
       this.displayMoreAssets()
+    },
+
+    setScrollPosition (scrollPosition) {
+      this.$refs.body.scrollTop = scrollPosition
     }
   }
 }
@@ -260,5 +278,9 @@ td.type {
 
 .info {
   margin-top: 2em;
+}
+
+.asset-link {
+  color: inherit
 }
 </style>

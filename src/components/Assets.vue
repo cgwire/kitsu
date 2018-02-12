@@ -43,30 +43,22 @@
     </div>
 
     <div class="filters-area">
-      <div class="level">
-        <div class="level-right">
-          <div class="level-item">
-            <search-icon></search-icon>
-          </div>
-          <div class="level-item">
-            <input
-              class="input search-input"
-              type="text"
-              ref="asset-search-field"
-              @input="onSearchChange"
-              v-focus
-            />
-          </div>
-        </div>
-      </div>
+      <search-field
+        ref="asset-search-field"
+        @change="onSearchChange"
+        placeholder="ex: props, modeling=wip"
+      >
+      </search-field>
     </div>
   </div>
 
   <asset-list
+    ref="asset-list"
     :entries="displayedAssets"
     :is-loading="isAssetsLoading"
     :is-error="isAssetsLoadingError"
     :validation-columns="assetValidationColumns"
+    @scroll="saveScrollPosition"
   ></asset-list>
 
   <edit-asset-modal
@@ -154,6 +146,7 @@ import AssetList from './lists/AssetList.vue'
 import EditAssetModal from './modals/EditAssetModal'
 import DeleteModal from './widgets/DeleteModal'
 import ImportModal from './modals/ImportModal'
+import SearchField from './widgets/SearchField'
 import Filters from './widgets/Filters'
 import ButtonLink from './widgets/ButtonLink'
 import ButtonHrefLink from './widgets/ButtonHrefLink'
@@ -174,7 +167,8 @@ export default {
     ButtonLink,
     ButtonHrefLink,
     PageTitle,
-    SearchIcon
+    SearchIcon,
+    SearchField
   },
 
   data () {
@@ -218,11 +212,12 @@ export default {
 
   computed: {
     ...mapGetters([
+      'assetListScrollPosition',
       'assets',
-      'displayedAssets',
       'assetsCsvFormData',
       'assetSearchText',
       'assetTypes',
+      'displayedAssets',
       'openProductions',
       'isAssetsLoading',
       'isAssetsLoadingError',
@@ -258,8 +253,11 @@ export default {
 
   mounted () {
     if (this.assetSearchText.length > 0) {
-      this.$refs['asset-search-field'].value = this.assetSearchText
+      this.$refs['asset-search-field'].setValue(this.assetSearchText)
     }
+    this.$refs['asset-list'].setScrollPosition(
+      this.assetListScrollPosition
+    )
   },
 
   methods: {
@@ -445,8 +443,12 @@ export default {
     },
 
     onSearchChange () {
-      const searchQuery = this.$refs['asset-search-field'].value
+      const searchQuery = this.$refs['asset-search-field'].getValue()
       this.setAssetSearch(searchQuery)
+    },
+
+    saveScrollPosition (scrollPosition) {
+      this.$store.commit('SET_ASSET_LIST_SCROLL_POSITION', scrollPosition)
     }
   },
 
@@ -464,6 +466,7 @@ export default {
 
       if (oldPath !== path) {
         this.$refs['asset-search-field'].value = ''
+        this.$store.commit('SET_ASSET_LIST_SCROLL_POSITION', 0)
         this.$store.dispatch('loadAssets')
       }
     }

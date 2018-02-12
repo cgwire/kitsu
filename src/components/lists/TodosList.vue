@@ -50,7 +50,9 @@
             </span>
           </td>
           <td class="name">
-            {{ entry.full_entity_name }}
+            <router-link :to="entry.entity_path">
+              {{ entry.full_entity_name }}
+            </router-link>
           </td>
           <task-type-name
             class="type"
@@ -130,6 +132,10 @@ export default {
 .name {
   width: 230px;
   min-width: 230px;
+}
+
+.name a {
+  color: inherit;
 }
 
 .production {

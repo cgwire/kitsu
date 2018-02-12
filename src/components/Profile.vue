@@ -4,9 +4,8 @@
 
       <div class="has-text-centered profile-header">
         <div class="profile-header-content has-text-centered">
-            <people-avatar :person="this.user" size="150" font-size="60">
-            </people-avatar>
-          </router-link>
+          <people-avatar :person="this.user" :size="150" :font-size="60">
+          </people-avatar>
 
           <p>
             <router-link
@@ -339,13 +338,6 @@ input, select, span.select {
   margin-top: 0.5em;
 }
 
-.profile-header img {
-  background: white;
-  border-radius: 50%;
-  border: 3px solid white;
-  max-width: 200px;
-	box-shadow: rgba(0,0,0,0.15) 0px 1px 4px 2px;
-}
 .profile-header, .profile-header a {
   color: white;
 }
@@ -387,7 +379,6 @@ h2:first-child {
 
 .avatar {
   margin: auto;
-  font-size: 3em;
   border: 5px solid white;
 }
 

@@ -1,8 +1,8 @@
 <template>
 <td class="name">
   <div class="people-name">
-    <people-avatar class="element avatar" :person="entry"></people-avatar>
-    <people-name class="element" :person="entry"></people-name>
+    <people-avatar class="avatar" :person="entry"></people-avatar>
+    <people-name class="people-name" :person="entry"></people-name>
   </div>
 </td>
 </template>
@@ -39,11 +39,7 @@ export default {
   flex-direction: row;
 }
 
-.avatar {
-  margin-right: 1em;
-}
-
-.element {
-  flex: 1
+.people-name {
+  margin-left: 0.6em;
 }
 </style>
