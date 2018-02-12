@@ -355,6 +355,7 @@ export default {
   flex: 1;
   display: flex;
   flex-direction: row;
+  overflow-y: auto;
 }
 
 .breakdown-column {
