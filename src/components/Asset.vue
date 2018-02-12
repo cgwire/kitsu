@@ -218,6 +218,7 @@ export default {
 
 .shot-list {
   display: flex;
+  flex-wrap: wrap;
 }
 
 .shot-link {
@@ -226,5 +227,14 @@ export default {
   display: flex;
   flex-direction: column;
   align-items: center;
+  font-size: 0.8em;
+}
+
+.shot-link div {
+  max-width: 100px;
+}
+
+.shot-link span {
+  word-wrap: break-word;
 }
 </style>

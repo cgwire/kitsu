@@ -228,6 +228,7 @@ export default {
 
 .asset-list {
   display: flex;
+  flex-wrap: wrap;
 }
 
 .asset-link {
@@ -236,5 +237,15 @@ export default {
   display: flex;
   flex-direction: column;
   align-items: center;
+  font-size: 0.8em;
 }
+
+.asset-link div {
+  max-width: 100px;
+}
+
+.asset-link span {
+  word-wrap: break-word;
+}
+
 </style>
