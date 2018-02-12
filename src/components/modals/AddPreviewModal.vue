@@ -16,6 +16,7 @@
       </p>
 
       <file-upload
+        ref="preview-field"
         accept=".png,.jpg,.mp4,.mov"
         @fileselected="onFileSelected"
       ></file-upload>
@@ -60,6 +61,9 @@ export default {
     'isError'
   ],
   watch: {
+    active () {
+      this.reset()
+    }
   },
   data () {
     return {
@@ -79,10 +83,17 @@ export default {
   methods: {
     ...mapActions([
     ]),
+
     onFileSelected (formData) {
       this.formData = formData
       this.$emit('fileselected', formData)
     },
+
+    reset () {
+      this.$refs['preview-field'].reset()
+      this.formData = null
+    },
+
     onConfirmClicked () {
       this.$emit('confirm')
     }

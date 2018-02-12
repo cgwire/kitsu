@@ -223,6 +223,7 @@
     </div>
 
     <add-preview-modal
+      ref="add-preview-modal"
       :active="display.addPreview"
       :is-loading="loading.addPreview"
       :is-error="errors.addPreview"
@@ -550,6 +551,7 @@ export default {
             this.$router.push(`/tasks/${this.route.params.task_id}` +
                               `/previews/${preview.id}`)
           }
+          this.$refs['add-preview-modal'].reset()
           this.loading.addPreview = false
           this.currentTaskPreviews = this.getCurrentTaskPreviews()
           this.currentTaskComments = this.getCurrentTaskComments()
