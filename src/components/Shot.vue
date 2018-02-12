@@ -45,7 +45,7 @@
             :to="{
               name: 'asset',
               params: {
-                production_id: currentShot.project_id,
+                production_id: currentProduction.id,
                 asset_id: asset.asset_id
               }
             }"
@@ -153,8 +153,9 @@ export default {
 
   computed: {
     ...mapGetters([
-      'shotMap',
-      'route'
+      'currentProduction',
+      'route',
+      'shotMap'
     ]),
 
     title () {
