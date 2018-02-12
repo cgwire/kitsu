@@ -248,6 +248,11 @@ input.search-input:focus {
   height: 100%;
 }
 
+.button:focus,
+.button:active {
+  border-color: #666;
+}
+
 @media screen and (max-width: 1000px) {
   .button .icon.is-small {
     margin-right: 0;

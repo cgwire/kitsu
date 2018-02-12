@@ -10,6 +10,8 @@
 
         <div class="level-right" v-if="isCurrentUserManager">
           <div class="level-item">
+            <show-assignations-button>
+            </show-assignations-button>
             <button-link
               class="level-item"
               :text="$t('main.csv.import_file')"
@@ -163,6 +165,7 @@ import ButtonLink from './widgets/ButtonLink'
 import ButtonHrefLink from './widgets/ButtonHrefLink'
 import PageTitle from './widgets/PageTitle'
 import SearchField from './widgets/SearchField'
+import ShowAssignationsButton from './widgets/ShowAssignationsButton'
 
 export default {
   name: 'shots',
@@ -179,6 +182,7 @@ export default {
     ButtonHrefLink,
     PageTitle,
     SearchField,
+    ShowAssignationsButton,
     SearchIcon
   },
 
@@ -242,7 +246,8 @@ export default {
       'currentProduction',
       'isCurrentUserManager',
       'shotSearchText',
-      'shotListScrollPosition'
+      'shotListScrollPosition',
+      'isShowAssignations'
     ])
   },
 
@@ -278,7 +283,9 @@ export default {
     ...mapActions([
       'loadShots',
       'setLastProductionScreen',
-      'setShotSearch'
+      'setShotSearch',
+      'showAssignations',
+      'hideAssignations'
     ]),
 
     confirmNewShotStay (form) {

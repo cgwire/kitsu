@@ -30,6 +30,7 @@ import {
   UNASSIGN_TASKS,
 
   SET_PREVIEW,
+  SET_IS_SHOW_ASSIGNATIONS,
 
   LOAD_PERSON_TASKS_END,
   USER_LOAD_TODOS_END,
@@ -50,6 +51,7 @@ const state = {
   selectedValidations: {},
   nbSelectedTasks: 0,
   nbSelectedValidations: 0,
+  isShowAssignations: true,
 
   previewFormData: null
 }
@@ -102,6 +104,7 @@ const getters = {
   selectedTasks: state => state.selectedTasks,
   nbSelectedTasks: state => state.nbSelectedTasks,
   nbSelectedValidations: state => state.nbSelectedValidations,
+  isShowAssignations: state => state.isShowAssignations,
 
   assetValidationColumns: (state) => {
     return sortValidationColumns(Object.values(state.assetValidationColumns))
@@ -271,6 +274,14 @@ const actions = {
       if (!err) commit(UNASSIGN_TASKS, selectedTaskIds)
       if (callback) callback(err)
     })
+  },
+
+  showAssignations ({ commit, state }) {
+    commit(SET_IS_SHOW_ASSIGNATIONS, true)
+  },
+
+  hideAssignations ({ commit, state }) {
+    commit(SET_IS_SHOW_ASSIGNATIONS, false)
   },
 
   clearSelectedTasks ({ commit, state }) {
@@ -546,6 +557,10 @@ const mutations = {
 
   [SET_PREVIEW] (state, {taskId, previewId}) {
     state.taskMap[taskId].entity.preview_file_id = previewId
+  },
+
+  [SET_IS_SHOW_ASSIGNATIONS] (state, isShowAssignations) {
+    state.isShowAssignations = isShowAssignations
   },
 
   [LOAD_PERSON_TASKS_END] (state, tasks) {

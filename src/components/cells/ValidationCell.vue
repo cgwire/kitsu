@@ -22,7 +22,7 @@
       :person="personMap[personId]"
       :size="20"
       :font-size="10"
-      v-if="nbSelectedTasks > 0"
+      v-if="isShowAssignations"
       v-for="personId in assignees"
     >
     </people-avatar>
@@ -59,6 +59,7 @@ export default {
       'selectedTasks',
       'selectedValidations',
       'nbSelectedTasks',
+      'isShowAssignations',
       'personMap'
     ]),
 
