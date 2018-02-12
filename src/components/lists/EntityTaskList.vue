@@ -45,15 +45,16 @@
           </td>
           <td class="assignees">
             <div class="flexrow">
-              <people-avatar
-                class="person-avatar flexrow-item"
-                :key="entry.id + '-' + person.id"
-                :person="person"
-                :size="30"
-                :font-size="15"
-                v-for="person in entry.persons"
-              >
-              </people-avatar>
+              <div class="avatar-wrapper" v-for="person in entry.persons">
+                <people-avatar
+                  class="person-avatar flexrow-item"
+                  :key="entry.id + '-' + person.id"
+                  :person="person"
+                  :size="30"
+                  :font-size="15"
+                >
+                </people-avatar>
+              </div>
             </div>
           </td>
        </tr>
@@ -120,5 +121,9 @@ export default {
 
 .flexrow-item {
   margin-right: 0.3em;
+}
+
+.avatar-wrapper {
+  margin-right: 0.5em;
 }
 </style>
