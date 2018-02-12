@@ -15,16 +15,47 @@
             :to="getPath(production)"
           >
             <div
-               class="avatar has-text-centered"
-               v-bind:style="{
-               background: getAvatarColor(production),
-            }">
+              class="avatar has-text-centered"
+              v-bind:style="{
+                background: getAvatarColor(production)
+              }"
+            >
               {{ generateAvatar(production) }}
             </div>
             <div class="production-name">
               {{ production.name }}
             </div>
           </router-link>
+          <router-link
+            class="secondary"
+            :to="{
+              name: 'assets',
+              params: {production_id: production.id}
+            }"
+          >
+            {{ $t('assets.title') }}
+          </router-link>
+          -
+          <router-link
+            class="secondary"
+            :to="{
+              name: 'shots',
+              params: {production_id: production.id}
+            }"
+          >
+            {{ $t('shots.title') }}
+          </router-link>
+          -
+          <router-link
+            class="secondary"
+            :to="{
+              name: 'breakdown',
+              params: {production_id: production.id}
+            }"
+          >
+            {{ $t('breakdown.title') }}
+          </router-link>
+
         </div>
       </div>
     </div>
@@ -219,5 +250,13 @@ h1 {
 
 .welcome h1 {
   margin-top: 1em;
+}
+
+a.secondary {
+  color: #BBB;
+}
+
+a.secondary:hover {
+  text-decoration: underline
 }
 </style>
