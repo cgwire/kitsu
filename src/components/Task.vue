@@ -3,16 +3,8 @@
     <h1 class="title">
        <div class="level">
          <div class="level-left">
-           <img
-             class="thumbnail-picture"
-             :src="'/api/pictures/thumbnails/preview-files/' + currentTask.entity.preview_file_id + '.png'"
-             v-if="currentTask && currentTask.entity && currentTask.entity.preview_file_id && currentTask.entity.preview_file_id.length > 0"
-           />
-           <div class="level-item">
-             {{ currentTask ? title : 'Loading...'}}
-           </div>
            <div class="level-item" v-if="currentTask">
-            <span
+             <span
                class="tag is-medium"
                :style="{
                  'border-left': '4px solid ' + currentTask.task_type_color,
@@ -23,14 +15,14 @@
                {{ currentTask.task_type_name }}
              </span>
            </div>
-           <div class="assignees" v-if="currentTask">
-             <people-avatar
-               :key="personId"
-               :person="personMap[personId]"
-               :size="30"
-               :font-size="16"
-               v-for="personId in currentTask.assignees">
-             </people-avatar>
+           <entity-thumbnail
+             class="entity-thumbnail"
+             :entity="currentTask.entity"
+             v-if="currentTask && currentTask.entity"
+           />
+           </entity-thumbnail>
+           <div class="level-item">
+             {{ currentTask ? title : 'Loading...'}}
            </div>
          </div>
          <div class="level-right" v-if="isCurrentUserManager">
@@ -47,15 +39,32 @@
 
     <div class="task-columns">
       <div class="task-column">
-        <h2 class="subtitle validation-title">
-          {{ $t('tasks.current_status') }}
+        <div
+          class="flexrow task-information"
+          v-if="currentTask"
+        >
+          <span class="flexrow-item">{{ $t('tasks.current_status') }}</span>
           <validation-tag
             :task="currentTask"
-            class="is-medium"
+            class="is-medium flexrow-item"
             :is-static="true"
             v-if="currentTask"
           ></validation-tag>
-        </h2>
+          <span class="flexrow-item">{{ $t('tasks.fields.assignees') }}:</span>
+          <span
+            class="flexrow-item avatar-wrapper"
+            v-for="personId in currentTask.assignees"
+          >
+            <people-avatar
+              :key="personId"
+              :person="personMap[personId]"
+              class="flexrow-item"
+              :size="30"
+              :font-size="16"
+            >
+            </people-avatar>
+         </span>
+        </div>
 
         <div v-if="currentTask">
           <div class="tabs hidden">
@@ -148,7 +157,10 @@
         <h2 class="subtitle">
           {{ $t('tasks.preview') }}
         </h2>
-        <div class="preview-list" v-if="currentTaskPreviews && currentTaskPreviews.length > 0">
+        <div
+          class="preview-list"
+          v-if="currentTaskPreviews && currentTaskPreviews.length > 0"
+        >
           <preview-row
             :key="preview.id"
             :preview="preview"
@@ -195,15 +207,17 @@
           >
             <image-icon class="icon"></image-icon>
             <span class="text">
-              {{ $t('tasks.set_preview')}}
+              {{ $t('tasks.set_preview') }}
             </span>
           </button>
           <span class="error flexrow-item" v-if="errors.setPreview">
-            {{ $t('tasks.set_preview_error')}}
+            {{ $t('tasks.set_preview_error') }}
           </span>
         </div>
-        <div v-if="currentTask && currentTask.entity && currentTask.entity.preview_file_id === currentPreviewId">
-          <em>{{ $t('tasks.set_preview_done')}}</em>
+        <div
+          class="set-main-preview"
+          v-if="currentTask && currentTask.entity && currentTask.entity.preview_file_id === currentPreviewId">
+          <em>{{ $t('tasks.set_preview_done') }}</em>
         </div>
       </div>
     </div>
@@ -246,6 +260,7 @@ import ValidationTag from './widgets/ValidationTag'
 import AddPreviewModal from './modals/AddPreviewModal'
 import DeleteModal from './widgets/DeleteModal'
 import ButtonLink from './widgets/ButtonLink'
+import EntityThumbnail from './widgets/EntityThumbnail'
 
 export default {
   name: 'task',
@@ -255,6 +270,7 @@ export default {
     ButtonLink,
     Comment,
     DeleteModal,
+    EntityThumbnail,
     ImageIcon,
     PeopleAvatar,
     ValidationTag,
@@ -603,6 +619,11 @@ export default {
 <style scoped>
 .title {
   margin-top: 1em;
+  margin-bottom: 0;
+}
+
+.task-information {
+  margin-bottom: 2em;
 }
 
 .selected {
@@ -655,7 +676,6 @@ video {
 }
 
 .preview-column {
-  overflow-y: hidden;
 }
 
 .task-column:first-child {
@@ -675,20 +695,20 @@ video {
   margin-right: 0.2em;
 }
 
-.thumbnail-picture {
-  width: 70px;
-  margin-right: 0.3em;
-}
-
 .preview-picture {
   text-align: center;
-  margin-top: 1em;
-  flex: 1;
-  display: flex;
-  max-height: 100%;
 }
 
 .preview-picture img {
-  max-height: 100%;
+  max-height: 700px;
+}
+
+.avatar-wrapper {
+  margin-right: 0.5em;
+}
+
+.entity-thumbnail {
+  width: 70px;
+  margin-right: 0.3em;
 }
 </style>
