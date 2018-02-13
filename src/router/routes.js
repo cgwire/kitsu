@@ -142,15 +142,15 @@ export const routes = [
         name: 'assets'
       },
       {
+        path: '/productions/:production_id/assets/new',
+        component: Assets,
+        name: 'new-asset'
+      },
+      {
         path:
         '/productions/:production_id/assets/:asset_id',
         component: Asset,
         name: 'asset'
-      },
-      {
-        path: '/productions/:production_id/assets/new',
-        component: Assets,
-        name: 'new-asset'
       },
       {
         path:

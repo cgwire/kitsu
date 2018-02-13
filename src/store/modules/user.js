@@ -22,6 +22,7 @@ import {
   USER_LOAD_TODOS_START,
   USER_LOAD_TODOS_END,
   USER_LOAD_TODOS_ERROR,
+  USER_LOAD_DONE_TASKS_END,
 
   UPLOAD_AVATAR_END,
 
@@ -47,6 +48,7 @@ const state = {
   isTodosLoadingError: false,
   todos: [],
   displayedTodos: [],
+  displayedDoneTasks: [],
   todosIndex: {},
   todosSearchText: '',
 
@@ -70,6 +72,7 @@ const getters = {
   isCurrentUserManager: state => state.user && state.user.role !== 'user',
   isCurrentUserAdmin: state => state.user && state.user.role === 'admin',
   displayedTodos: state => state.displayedTodos,
+  displayedDoneTasks: state => state.displayedDoneTasks,
   todosSearchText: state => state.todosSearchText,
 
   isSaveProfileLoading: state => state.isSaveProfileLoading,
@@ -124,10 +127,18 @@ const actions = {
       peopleApi.loadTodos((err, tasks) => {
         if (err) {
           commit(USER_LOAD_TODOS_ERROR)
+          if (callback) callback(err)
         } else {
-          commit(USER_LOAD_TODOS_END, tasks)
+          peopleApi.loadDone((err, doneTasks) => {
+            if (err) {
+              commit(USER_LOAD_TODOS_ERROR)
+            } else {
+              commit(USER_LOAD_TODOS_END, tasks)
+              commit(USER_LOAD_DONE_TASKS_END, doneTasks)
+            }
+            if (callback) callback(err)
+          })
         }
-        if (callback) callback()
       })
     } else {
       if (callback) callback()
@@ -211,6 +222,7 @@ const mutations = {
     state.isTodosLoadingError = false
     state.isTodosLoading = true
   },
+
   [USER_LOAD_TODOS_END] (state, tasks) {
     state.isTodosLoading = false
     tasks.forEach(populateTask)
@@ -220,6 +232,12 @@ const mutations = {
     const searchResult = indexSearch(state.todosIndex, state.todosSearchText)
     state.displayedTodos = searchResult || state.todos
   },
+
+  [USER_LOAD_DONE_TASKS_END] (state, tasks) {
+    tasks.forEach(populateTask)
+    state.displayedDoneTasks = tasks
+  },
+
   [USER_LOAD_TODOS_ERROR] (state, tasks) {
     state.isTodosLoadingError = true
   },

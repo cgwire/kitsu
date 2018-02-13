@@ -15,15 +15,50 @@
     </div>
 
     <page-subtitle :text="$t('people.running_tasks')"></page-subtitle>
+    <div class="task-tabs tabs">
+      <ul>
+        <li
+          :class="{'is-active': isCurrentActive}"
+          @click="selectCurrent"
+        >
+          <a>
+            {{ $t('tasks.current')}}
+          </a>
+        </li>
+        <li
+          :class="{'is-active': isDoneActive}"
+          @click="selectDone"
+        >
+          <a>
+            {{ $t('tasks.done') }} ({{ displayedPersonDoneTasks.length }})
+          </a>
+        </li>
+      </ul>
+    </div>
+
     <search-field
+      :class="{
+        'search-field': true,
+        'is-hidden': !isCurrentActive
+      }"
       ref="person-tasks-search-field"
       @change="onSearchChange"
     >
     </search-field>
+
     <todos-list
       :entries="displayedPersonTasks"
       :is-loading="isTasksLoading"
       :is-error="isTasksLoadingError"
+      v-if="isCurrentActive"
+    ></todos-list>
+
+    <todos-list
+      :entries="displayedPersonDoneTasks"
+      :is-loading="isTasksLoading"
+      :is-error="isTasksLoadingError"
+      :done="true"
+      v-if="isDoneActive"
     ></todos-list>
   </div>
 </template>
@@ -51,7 +86,8 @@ export default {
     return {
       isTasksLoading: false,
       isTasksLoadingError: false,
-      person: {}
+      person: {},
+      activeTab: 'current'
     }
   },
 
@@ -66,7 +102,9 @@ export default {
       )
     }
     setTimeout(() => {
-      this.$refs['person-tasks-search-field'].focus()
+      if (this.$refs['person-tasks-search-field']) {
+        this.$refs['person-tasks-search-field'].focus()
+      }
     }, 100)
   },
 
@@ -74,8 +112,17 @@ export default {
     ...mapGetters([
       'personMap',
       'displayedPersonTasks',
+      'displayedPersonDoneTasks',
       'personTasksSearchText'
-    ])
+    ]),
+
+    isCurrentActive () {
+      return this.activeTab === 'current'
+    },
+
+    isDoneActive () {
+      return this.activeTab === 'done'
+    }
   },
 
   methods: {
@@ -99,6 +146,17 @@ export default {
           this.isTasksLoadingError = false
         }
       })
+    },
+
+    selectCurrent () {
+      this.activeTab = 'current'
+      setTimeout(() => {
+        this.$refs['person-tasks-search-field'].focus()
+      }, 100)
+    },
+
+    selectDone () {
+      this.activeTab = 'done'
     }
   },
 

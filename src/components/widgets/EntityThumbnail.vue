@@ -57,6 +57,7 @@ span.thumbnail-empty {
   width: 50px;
   height: 30px;
   background: #F3F3F3;
+  display: block;
 }
 
 span.square {

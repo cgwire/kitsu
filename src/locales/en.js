@@ -185,13 +185,16 @@ export default {
     my_tasks: 'My tasks',
     create_for_selection: 'Create task for each empty cell:',
     tasks: 'Tasks',
+    current: 'Current',
+    done: 'Done',
     fields: {
       production: 'Prod',
       entity: 'Entity',
       task_status: 'Status',
       task_type: 'Type',
       last_comment: 'Last comment',
-      assignees: 'Assignees'
+      assignees: 'Assignees',
+      end_date: 'End date'
     }
   },
 
@@ -258,7 +261,8 @@ export default {
     delete_error: 'An error occured while deleting this asset. There are probably data linked to it. Are you sure this asset type has no task linked to it?',
     restore_text: 'Are you sure you want to restore {name} into your database?',
     restore_error: 'An error occured while restoring this asset.',
-    cast_in: 'Cast in'
+    cast_in: 'Cast in',
+    no_cast_in: 'This asset is not cast in any shot.'
   },
 
   shots: {
@@ -287,7 +291,8 @@ export default {
     restore_text: 'Are you sure you want to restore {name} into your database?',
     restore_error: 'An error occured while restoring this shot.',
     tasks: 'Shot Tasks',
-    casting: 'Shot casting'
+    casting: 'Shot casting',
+    no_casting: 'The shot casting is empty.'
   },
 
   breakdown: {

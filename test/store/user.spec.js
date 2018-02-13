@@ -17,6 +17,8 @@ import {
   USER_CHANGE_PASSWORD_UNVALID,
 
   USER_LOAD_TODOS_END,
+  USER_LOAD_DONE_TASKS_END,
+
   SET_TODOS_SEARCH
 } from '../../src/store/mutation-types'
 
@@ -26,6 +28,7 @@ const user = {
   email: 'john@doe.fr'
 }
 let tasks = null
+let doneTasks = []
 
 peopleApi.updatePerson = (form, callback) => {
   if (form === undefined) {
@@ -47,6 +50,9 @@ peopleApi.loadTodos = (callback) => {
   return callback(null, tasks)
 }
 
+peopleApi.loadDone = (callback) => {
+  return callback(null, doneTasks)
+}
 
 describe('user', () => {
 
@@ -79,6 +85,17 @@ describe('user', () => {
         id: 'task-2'
       }
     ]
+
+    doneTasks = [{
+        project_name: 'Agent327',
+        task_type_name: 'Concept',
+        entity_name: 'Tree',
+        entity_type_name: 'Props',
+        entity_id: 'asset-1',
+        task_status_short_name: 'done',
+        last_comment: {},
+        id: 'task-1'
+    }]
   })
 
   describe('actions', () => {
@@ -194,6 +211,7 @@ describe('user', () => {
           expect(
             store._vm.displayedTodos[0].full_entity_name
           ).to.equal('Props / Tree')
+          expect(store._vm.displayedDoneTasks).to.deep.equal(doneTasks)
           done()
         }
       })
@@ -278,10 +296,14 @@ describe('user', () => {
     it('USER_LOAD_TODOS_END', () => {
       store.commit(USER_LOAD_TODOS_END, tasks)
       expect(store._vm.displayedTodos).to.deep.equal(tasks)
-      expect(store._vm.displayedTodos).to.deep.equal(tasks)
       expect(
         store._vm.displayedTodos[0].full_entity_name
       ).to.equal('Props / Tree')
+    })
+
+    it('USER_LOAD_DONE_TASKS_END', () => {
+      store.commit(USER_LOAD_DONE_TASKS_END, doneTasks)
+      expect(store._vm.displayedDoneTasks).to.deep.equal(doneTasks)
     })
 
     it('SET_TODOS_SEARCH', () => {

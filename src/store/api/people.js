@@ -59,7 +59,15 @@ export default {
     client.get('/api/data/user/tasks', callback)
   },
 
+  loadDone (callback) {
+    client.get('/api/data/user/done-tasks', callback)
+  },
+
   getPersonTasks (personId, callback) {
     client.get(`/api/data/persons/${personId}/tasks`, callback)
+  },
+
+  getPersonDoneTasks (personId, callback) {
+    client.get(`/api/data/persons/${personId}/done-tasks`, callback)
   }
 }

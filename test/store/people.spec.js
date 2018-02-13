@@ -28,6 +28,7 @@ import {
   PERSON_CSV_FILE_SELECTED,
   UPLOAD_AVATAR_END,
   LOAD_PERSON_TASKS_END,
+  LOAD_PERSON_DONE_TASKS_END,
   SET_PERSON_TASKS_SEARCH,
 
   NEW_PEOPLE_END
@@ -35,6 +36,7 @@ import {
 
 let people = []
 let tasks = []
+let doneTasks = []
 
 peopleApi.getPeople = (callback) => {
   process.nextTick(() => {
@@ -73,6 +75,12 @@ peopleApi.postCsv = (data, callback) => {
 peopleApi.getPersonTasks = (data, callback) => {
   process.nextTick(() => {
     callback(null, tasks)
+  })
+}
+
+peopleApi.getPersonDoneTasks = (data, callback) => {
+  process.nextTick(() => {
+    callback(null, doneTasks)
   })
 }
 
@@ -128,6 +136,16 @@ describe('people', () => {
         id: 'task-2'
       }
     ]
+    doneTasks = [{
+        project_name: 'Agent327',
+        task_type_name: 'Concept',
+        entity_name: 'Tree',
+        entity_type_name: 'Props',
+        entity_id: 'asset-1',
+        task_status_short_name: 'done',
+        last_comment: {},
+        id: 'task-1'
+    }]
   })
 
   describe('actions', () => {
@@ -266,6 +284,7 @@ describe('people', () => {
           expect(
             store._vm.displayedPersonTasks[0].full_entity_name
           ).to.equal('Props / Tree')
+            expect(store._vm.displayedPersonDoneTasks).to.deep.equal(doneTasks)
           done()
         }
       })
@@ -468,10 +487,14 @@ describe('people', () => {
     it('LOAD_PERSON_TASKS_END', () => {
       store.commit(LOAD_PERSON_TASKS_END, tasks)
       expect(store._vm.displayedPersonTasks).to.deep.equal(tasks)
-      expect(store._vm.displayedPersonTasks).to.deep.equal(tasks)
       expect(
         store._vm.displayedPersonTasks[0].full_entity_name
       ).to.equal('Props / Tree')
+    })
+
+    it('LOAD_PERSON_DONE_TASKS_END', () => {
+      store.commit(LOAD_PERSON_DONE_TASKS_END, doneTasks)
+      expect(store._vm.displayedPersonDoneTasks).to.deep.equal(doneTasks)
     })
 
     it('SET_PERSON_TASK_SEARCH', () => {

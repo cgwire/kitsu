@@ -17,8 +17,11 @@
           <th class="status">
             {{ $t('tasks.fields.task_status') }}
           </th>
-          <th class="last-comment">
+          <th class="last-comment" v-if="!done">
             {{ $t('tasks.fields.last_comment') }}
+          </th>
+          <th class="end-date" v-else>
+            {{ $t('tasks.fields.end_date') }}
           </th>
           <th class="actions">
           </th>
@@ -71,8 +74,12 @@
           <last-comment-cell
             class="last-comment"
             :task="entry"
+            v-if="!done"
           >
           </last-comment-cell>
+          <td class="end-date" v-else>
+            {{ formatDate(entry.end_date) }}
+          </td>
           <td class="actions"></td>
        </tr>
       </tbody>
@@ -93,6 +100,7 @@
 
 <script>
 import { mapGetters, mapActions } from 'vuex'
+import moment from 'moment-timezone'
 
 import ProductionNameCell from '../cells/ProductionNameCell'
 import LastCommentCell from '../cells/LastCommentCell'
@@ -112,7 +120,8 @@ export default {
   props: [
     'entries',
     'isLoading',
-    'isError'
+    'isError',
+    'done'
   ],
   computed: {
     ...mapGetters([
@@ -121,8 +130,13 @@ export default {
   methods: {
     ...mapActions([
     ]),
+
     onBodyScroll (event, position) {
       this.$refs.headerWrapper.style.left = `-${position.scrollLeft}px`
+    },
+
+    formatDate (date) {
+      return date ? moment(date).fromNow() : ''
     }
   }
 }
@@ -158,7 +172,10 @@ export default {
   min-width: 500px;
 }
 
-.thumbnail-picture {
+.end-date {
+  width: 150px;
+  min-width: 150px;
+  color: #999;
 }
 
 .thumbnail {

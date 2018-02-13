@@ -165,6 +165,8 @@ export default {
     feedback: 'retours',
     my_tasks: 'Mes tâches',
     tasks: 'Tâches',
+    current: 'En cours',
+    done: 'Terminées',
     create_for_selection: 'Créer une tâche pour chaque cellule vide :',
     fields: {
       task_type: 'Type',
@@ -172,7 +174,8 @@ export default {
       entity: 'Entité',
       task_status: 'Statut',
       last_comment: 'Dernier commentaire',
-      assignees: 'Assignation'
+      assignees: 'Assignation',
+      end_date: 'Date de fin'
     }
   },
 
@@ -252,7 +255,8 @@ export default {
     restore_text: 'Êtes vous sûr de vouloir restorer {name} dans votre base de données ?',
     restore_error: 'Une erreur est survenue en restorant l\'asset.',
     tasks: 'Tâches de fabrication',
-    cast_in: 'Présent dans'
+    cast_in: 'Présent dans',
+    no_cast_in: 'Cet asset n\'apparait dans aucun shot.'
   },
 
   shots: {
@@ -281,7 +285,8 @@ export default {
     restore_text: 'Etes vous sûr de vouloir restorer {name} dans la base de données ?',
     restore_error: 'Une erreur est survenue en restorant le plan.',
     tasks: 'Tâches de fabrication',
-    casting: 'Casting'
+    casting: 'Casting',
+    no_cast_in: 'Le casting du plan est vide.'
   },
 
   breakdown: {

@@ -33,6 +33,8 @@ import {
   UPLOAD_AVATAR_END,
 
   LOAD_PERSON_TASKS_END,
+  LOAD_PERSON_DONE_TASKS_END,
+
   SET_PERSON_TASKS_SEARCH,
   NEW_TASK_COMMENT_END,
 
@@ -94,6 +96,7 @@ const state = {
 
   personTasks: [],
   displayedPersonTasks: [],
+  displayedPersonDoneTasks: [],
   personTasksIndex: {},
   personTasksSearchText: ''
 }
@@ -121,6 +124,7 @@ const getters = {
   personCsvFormData: state => state.personCsvFormData,
 
   displayedPersonTasks: state => state.displayedPersonTasks,
+  displayedPersonDoneTasks: state => state.displayedPersonDoneTasks,
   personTasksSearchText: state => state.personTasksSearchText,
 
   getPerson: (state, getters) => (id) => state.personMap[id],
@@ -214,10 +218,15 @@ const actions = {
 
   loadPersonTasks ({ commit, state }, { personId, forced, callback }) {
     commit(LOAD_PERSON_TASKS_END, [])
+    commit(LOAD_PERSON_DONE_TASKS_END, [])
     peopleApi.getPersonTasks(personId, (err, tasks) => {
       if (err) tasks = []
-      commit(LOAD_PERSON_TASKS_END, tasks)
-      if (callback) callback(err)
+      peopleApi.getPersonDoneTasks(personId, (err, doneTasks) => {
+        if (err) doneTasks = []
+        commit(LOAD_PERSON_TASKS_END, tasks)
+        commit(LOAD_PERSON_DONE_TASKS_END, doneTasks)
+        if (callback) callback(err)
+      })
     })
   },
 
@@ -409,6 +418,11 @@ const mutations = {
       state.personTasksSearchText
     )
     state.displayedPersonTasks = searchResult || state.personTasks
+  },
+
+  [LOAD_PERSON_DONE_TASKS_END] (state, tasks) {
+    tasks.forEach(populateTask)
+    state.displayedPersonDoneTasks = tasks
   },
 
   [SET_PERSON_TASKS_SEARCH] (state, searchText) {
