@@ -121,3 +121,10 @@ class TodosResource(Resource):
     @jwt_required
     def get(self):
         return user_service.get_todos()
+
+
+class DoneResource(Resource):
+
+    @jwt_required
+    def get(self):
+        return user_service.get_done_tasks()

@@ -47,10 +47,12 @@ class CommentTaskResource(Resource):
             person_id=person["id"],
             text=comment
         )
+
         tasks_service.update_task(
             task_id,
             {"task_status_id": task_status_id}
         )
+
         comment["task_status"] = task_status
         comment["person"] = person
         events.emit("comment:new", {"id": comment["id"]})
@@ -149,6 +151,17 @@ class PersonTasksResource(Resource):
         else:
             projects = projects_service.open_projects()
         return tasks_service.get_person_tasks(person_id, projects)
+
+
+class PersonDoneTasksResource(Resource):
+
+    @jwt_required
+    def get(self, person_id):
+        if not permissions.has_manager_permissions():
+            projects = user_service.related_projects()
+        else:
+            projects = projects_service.open_projects()
+        return tasks_service.get_person_done_tasks(person_id, projects)
 
 
 class CreateShotTasksResource(Resource):

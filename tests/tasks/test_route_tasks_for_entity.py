@@ -58,3 +58,16 @@ class RouteCreateTasksTestCase(ApiDBTestCase):
 
         tasks = self.get("/data/persons/%s/tasks" % self.user.id)
         self.assertEquals(len(tasks), 0)
+
+    def test_get_done_tasks_for_person(self):
+        self.task_id = self.task.id
+        tasks = self.get("/data/persons/%s/done-tasks" % self.person.id)
+        self.assertEqual(len(tasks), 0)
+
+        done_status = tasks_service.get_done_status()
+        tasks_service.update_task(self.task_id, {
+            "task_status_id": done_status["id"]
+        })
+
+        tasks = self.get("/data/persons/%s/done-tasks" % self.person.id)
+        self.assertEquals(len(tasks), 1)

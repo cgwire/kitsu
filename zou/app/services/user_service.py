@@ -46,6 +46,12 @@ def get_todos():
     return tasks_service.get_person_tasks(current_user.id, projects)
 
 
+def get_done_tasks():
+    current_user = persons_service.get_current_user_raw()
+    projects = related_projects()
+    return tasks_service.get_person_done_tasks(current_user.id, projects)
+
+
 def get_entity_tasks(entity_id):
     query = Task.query \
         .join(Project, ProjectStatus) \

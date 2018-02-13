@@ -396,6 +396,23 @@ class TaskServiceTestCase(ApiDBTestCase):
             str(self.person.id)
         )
 
+    def test_get_done_tasks_for_person(self):
+        projects = [self.project.serialize()]
+        tasks = tasks_service.get_person_done_tasks(self.user.id, projects)
+        self.assertEqual(len(tasks), 0)
+
+        tasks_service.assign_task(self.task.id, self.user.id)
+        tasks = tasks_service.get_person_done_tasks(self.user.id, projects)
+        self.assertEqual(len(tasks), 0)
+
+        done_status = tasks_service.get_done_status()
+        tasks_service.update_task(
+            self.task.id,
+            {"task_status_id": done_status["id"]}
+        )
+        tasks = tasks_service.get_person_done_tasks(self.user.id, projects)
+        self.assertEqual(len(tasks), 1)
+
     def test_update_task(self):
         done_status = tasks_service.get_done_status()
         tasks_service.update_task(

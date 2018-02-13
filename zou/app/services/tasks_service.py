@@ -556,10 +556,18 @@ def get_task_type_map():
     }
 
 
-def get_person_tasks(person_id, projects):
+def get_person_done_tasks(person_id, projects):
+    done_status = get_done_status()
+    return get_person_tasks(
+        person_id,
+        projects,
+        task_status_id=done_status["id"]
+    )
+
+
+def get_person_tasks(person_id, projects, task_status_id=None):
     person = Person.get(person_id)
     project_ids = [project["id"] for project in projects]
-    done_status = get_done_status()
 
     Sequence = aliased(Entity, name='sequence')
     Episode = aliased(Entity, name='episode')
@@ -571,7 +579,6 @@ def get_person_tasks(person_id, projects):
         .outerjoin(Episode, Episode.id == Sequence.parent_id) \
         .filter(Task.assignees.contains(person)) \
         .filter(Project.id.in_(project_ids)) \
-        .filter(Task.task_status_id != done_status["id"]) \
         .add_columns(
             Project.name,
             Entity.name,
@@ -585,6 +592,14 @@ def get_person_tasks(person_id, projects):
             TaskStatus.color,
             TaskStatus.short_name
         )
+
+    if task_status_id is None:
+        done_status = get_done_status()
+        query = query.filter(Task.task_status_id != done_status["id"])
+    else:
+        query = query \
+            .filter(Task.task_status_id == task_status_id) \
+            .order_by(Task.end_date.desc(), TaskType.name, Entity.name)
 
     tasks = []
     for (
