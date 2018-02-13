@@ -190,6 +190,10 @@ def create_task(task_type, entity, name="main"):
 
 def update_task(task_id, data):
     task = Task.get(task_id)
+
+    if is_finished(task, data):
+        data["end_date"] = datetime.datetime.now()
+
     task.update(data)
     return task.serialize()
 
@@ -204,6 +208,14 @@ def remove_task(task_id):
     task = Task.get(task_id)
     task.delete()
     return task.serialize()
+
+
+def is_finished(task, data):
+    done_status = get_done_status()
+    return \
+        str(task.task_status_id) != done_status["id"] and \
+        "task_status_id" in data and \
+        data["task_status_id"] == done_status["id"]
 
 
 def clear_assignation(task_id):

@@ -395,3 +395,13 @@ class TaskServiceTestCase(ApiDBTestCase):
             tasks[0]["last_comment"]["person_id"],
             str(self.person.id)
         )
+
+    def test_update_task(self):
+        done_status = tasks_service.get_done_status()
+        tasks_service.update_task(
+            self.task.id,
+            {"task_status_id": done_status["id"]}
+        )
+        self.assertEquals(str(self.task.task_status_id), done_status["id"])
+        self.assertIsNotNone(self.task.end_date)
+        self.assertLess(self.task.end_date, datetime.datetime.now())
