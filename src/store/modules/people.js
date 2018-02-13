@@ -85,7 +85,9 @@ const state = {
   isEditModalShown: false,
   isEditLoading: false,
   isEditLoadingError: false,
-  personToEdit: {},
+  personToEdit: {
+    role: 'user'
+  },
 
   isDeleteModalShown: false,
   isDeleteLoading: false,
@@ -339,7 +341,9 @@ const mutations = {
       state.personMap[state.personToEdit.id] = state.personToEdit
       sortPeople(state.people)
     }
-    state.personToEdit = {}
+    state.personToEdit = {
+      role: 'user'
+    }
   },
 
   [EDIT_PEOPLE_ERROR] (state) {
@@ -375,7 +379,8 @@ const mutations = {
         first_name: '',
         last_name: '',
         phone: '',
-        email: ''
+        email: '',
+        role: 'user'
       }
     }
   },
