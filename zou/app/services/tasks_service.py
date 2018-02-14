@@ -190,6 +190,10 @@ def create_task(task_type, entity, name="main"):
 
 def update_task(task_id, data):
     task = Task.get(task_id)
+
+    if is_finished(task, data):
+        data["end_date"] = datetime.datetime.now()
+
     task.update(data)
     return task.serialize()
 
@@ -204,6 +208,14 @@ def remove_task(task_id):
     task = Task.get(task_id)
     task.delete()
     return task.serialize()
+
+
+def is_finished(task, data):
+    done_status = get_done_status()
+    return \
+        str(task.task_status_id) != done_status["id"] and \
+        "task_status_id" in data and \
+        data["task_status_id"] == done_status["id"]
 
 
 def clear_assignation(task_id):
@@ -544,10 +556,18 @@ def get_task_type_map():
     }
 
 
-def get_person_tasks(person_id, projects):
+def get_person_done_tasks(person_id, projects):
+    done_status = get_done_status()
+    return get_person_tasks(
+        person_id,
+        projects,
+        task_status_id=done_status["id"]
+    )
+
+
+def get_person_tasks(person_id, projects, task_status_id=None):
     person = Person.get(person_id)
     project_ids = [project["id"] for project in projects]
-    done_status = get_done_status()
 
     Sequence = aliased(Entity, name='sequence')
     Episode = aliased(Entity, name='episode')
@@ -559,7 +579,6 @@ def get_person_tasks(person_id, projects):
         .outerjoin(Episode, Episode.id == Sequence.parent_id) \
         .filter(Task.assignees.contains(person)) \
         .filter(Project.id.in_(project_ids)) \
-        .filter(Task.task_status_id != done_status["id"]) \
         .add_columns(
             Project.name,
             Entity.name,
@@ -573,6 +592,14 @@ def get_person_tasks(person_id, projects):
             TaskStatus.color,
             TaskStatus.short_name
         )
+
+    if task_status_id is None:
+        done_status = get_done_status()
+        query = query.filter(Task.task_status_id != done_status["id"])
+    else:
+        query = query \
+            .filter(Task.task_status_id == task_status_id) \
+            .order_by(Task.end_date.desc(), TaskType.name, Entity.name)
 
     tasks = []
     for (

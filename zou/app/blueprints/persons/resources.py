@@ -17,7 +17,8 @@ class NewPersonResource(Resource):
             auth.encrypt_password("default"),
             data["first_name"],
             data["last_name"],
-            data["phone"]
+            data["phone"],
+            role=data["role"]
         )
         return person, 201
 
@@ -39,5 +40,6 @@ class NewPersonResource(Resource):
             required=True
         )
         parser.add_argument("phone", default="")
+        parser.add_argument("role", default="user")
         args = parser.parse_args()
         return args

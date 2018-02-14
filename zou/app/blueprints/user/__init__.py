@@ -15,7 +15,8 @@ from .resources import (
     ShotTaskTypesResource,
     SceneTasksResource,
     SceneTaskTypesResource,
-    TodosResource
+    TodosResource,
+    DoneResource
 )
 
 routes = [
@@ -39,6 +40,7 @@ routes = [
     ("/data/user/sequences/<sequence_id>/scenes", SequenceScenesResource),
 
     ("/data/user/tasks", TodosResource),
+    ("/data/user/done-tasks", DoneResource)
 ]
 
 blueprint = Blueprint("user", "user")

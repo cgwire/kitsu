@@ -227,3 +227,25 @@ class UserContextRoutesTestCase(ApiDBTestCase):
         path = "data/user/tasks/"
         tasks = self.get(path)
         self.assertEquals(len(tasks), 1)
+
+    def test_get_done_tasks(self):
+        task_id = self.task.id
+
+        path = "data/user/done-tasks/"
+        tasks = self.get(path)
+        self.assertEquals(len(tasks), 0)
+
+        self.assign_user(task_id)
+
+        path = "data/user/done-tasks/"
+        tasks = self.get(path)
+        self.assertEquals(len(tasks), 0)
+
+        done_status = tasks_service.get_done_status()
+        tasks_service.update_task(task_id, {
+            "task_status_id": done_status["id"]
+        })
+
+        path = "data/user/done-tasks/"
+        tasks = self.get(path)
+        self.assertEquals(len(tasks), 1)
