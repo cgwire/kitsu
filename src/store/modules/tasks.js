@@ -315,7 +315,7 @@ const mutations = {
           project_name: asset.project_name,
 
           entity_name: `${asset.asset_type_name} / ${asset.name}`,
-          entity_type_name: asset.entity_type_name,
+          entity_type_name: asset.asset_type_name,
           entity: {
             id: asset.id,
             preview_file_id: asset.preview_file_id
@@ -364,7 +364,8 @@ const mutations = {
 
           project_name: shot.project_name,
 
-          entity_type_name: shot.entity_type_name,
+          entity_type_name: 'Shot',
+          sequence_name: shot.sequence_name,
           entity: {
             id: shot.id,
             preview_file_id: shot.preview_file_id

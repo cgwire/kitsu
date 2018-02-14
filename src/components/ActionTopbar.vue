@@ -170,7 +170,7 @@
         <div class="level-right">
           <div
             class="level-item clear-selection"
-            @click="clearSelection"
+            @click="clearSelectedTasks"
           >
             <x-icon>
             </x-icon>
@@ -262,11 +262,13 @@ export default {
       personId: '',
       taskStatusId: '',
       customActionUrl: '',
-      selectedTaskIds: []
+      selectedTaskIds: [],
+      customActionOptions: []
     }
   },
   computed: {
     ...mapGetters([
+      'assetMap',
       'getPersonOptions',
       'taskStatusOptions',
       'selectedTasks',
@@ -274,6 +276,7 @@ export default {
       'nbSelectedValidations',
       'isCurrentUserManager',
       'currentProduction',
+      'allCustomActionOptions',
       'assetCustomActionOptions',
       'shotCustomActionOptions',
       'user'
@@ -326,14 +329,6 @@ export default {
 
     isCurrentViewPersonTasks () {
       return this.$route.path.indexOf('todos') > 0
-    },
-
-    customActionOptions () {
-      if (this.isCurrentViewAsset) {
-        return this.assetCustomActionOptions
-      } else {
-        return this.shotCustomActionOptions
-      }
     }
   },
 
@@ -342,12 +337,9 @@ export default {
       'assignSelectedTasks',
       'createSelectedTasks',
       'unassignSelectedTasks',
-      'changeSelectedTaskStatus'
+      'changeSelectedTaskStatus',
+      'clearSelectedTasks'
     ]),
-
-    clearSelection () {
-      this.$store.commit('CLEAR_SELECTED_TASKS')
-    },
 
     getSelectedPersonId () {
       if (this.getPersonOptions.length > 0) {
@@ -426,6 +418,32 @@ export default {
 
     nbSelectedTasks () {
       this.selectedTaskIds = Object.keys(this.selectedTasks)
+
+      if (this.nbSelectedTasks > 0) {
+        let isShotSelected = false
+        let isAssetSelected = false
+
+        for (let taskId of Object.keys(this.selectedTasks)) {
+          const task = this.selectedTasks[taskId]
+          if (task.sequence_name) {
+            isShotSelected = true
+          } else {
+            isAssetSelected = true
+          }
+        }
+
+        if (isShotSelected && isAssetSelected) {
+          this.customActionOptions = this.allCustomActionOptions
+        } else if (isShotSelected) {
+          this.customActionOptions = this.shotCustomActionOptions
+        } else {
+          this.customActionOptions = this.assetCustomActionOptions
+        }
+      }
+    },
+
+    $route () {
+      this.clearSelectedTasks()
     }
   }
 }
