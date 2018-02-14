@@ -1,7 +1,9 @@
 <template>
   <div class="open-productions page">
-
-    <div v-if="openProductions.length > 0">
+    <div class="has-text-centered" v-if="isOpenProductionsLoading">
+      <spinner></spinner>
+    </div>
+    <div v-else-if="openProductions.length > 0">
       <h1 class="title has-text-centered">
         <activity-icon></activity-icon>
         {{ $t('productions.home.title') }}
@@ -55,7 +57,6 @@
           >
             {{ $t('breakdown.title') }}
           </router-link>
-
         </div>
       </div>
     </div>
@@ -108,6 +109,7 @@ import { ActivityIcon } from 'vue-feather-icons'
 import colors from '../lib/colors.js'
 import ButtonLink from './widgets/ButtonLink'
 import EditProductionModal from './modals/EditProductionModal'
+import Spinner from './widgets/Spinner'
 
 export default {
   name: 'open-productions',
@@ -115,7 +117,8 @@ export default {
   components: {
     ActivityIcon,
     ButtonLink,
-    EditProductionModal
+    EditProductionModal,
+    Spinner
   },
 
   data () {
@@ -131,13 +134,13 @@ export default {
       'openProductions',
       'isCurrentUserManager',
       'editProduction',
-      'lastProductionScreen'
+      'lastProductionScreen',
+      'isOpenProductionsLoading'
     ])
   },
 
   methods: {
     ...mapActions([
-      'loadProductions',
       'newProduction'
     ]),
 
@@ -145,9 +148,11 @@ export default {
       const firstLetter = production.name.length > 0 ? production.name[0] : 'P'
       return firstLetter.toUpperCase()
     },
+
     getAvatarColor (production) {
       return colors.fromString(production.name)
     },
+
     getPath (production) {
       return {
         name: this.lastProductionScreen,

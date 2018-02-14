@@ -34,6 +34,7 @@ const state = {
 
   isProductionsLoading: false,
   isProductionsLoadingError: false,
+  isOpenProductionsLoading: false,
 
   editProduction: {
     isLoading: false,
@@ -63,6 +64,7 @@ const getters = {
 
   isProductionsLoading: state => state.isProductionsLoading,
   isProductionsLoadingError: state => state.isProductionsLoadingError,
+  isOpenProductionsLoading: state => state.isOpenProductionsLoading,
 
   editProduction: state => state.editProduction,
   deleteProduction: state => state.deleteProduction,
@@ -191,11 +193,14 @@ const mutations = {
   },
 
   [LOAD_OPEN_PRODUCTIONS_START] (state) {
+    state.isOpenProductionsLoading = true
     state.openProductions = []
   },
   [LOAD_OPEN_PRODUCTIONS_ERROR] (state) {
+    state.isOpenProductionsLoading = false
   },
   [LOAD_OPEN_PRODUCTIONS_END] (state, productions) {
+    state.isOpenProductionsLoading = false
     state.openProductions = sortByName(productions)
   },
 
