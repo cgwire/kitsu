@@ -226,6 +226,11 @@ const mutations = {
   [USER_LOAD_TODOS_END] (state, tasks) {
     state.isTodosLoading = false
     tasks.forEach(populateTask)
+    tasks.forEach((task) => {
+      const taskStatus = helpers.getTaskStatus(task.task_status_id)
+      task.taskStatus = taskStatus
+    })
+
     state.todos = sortTasks(tasks)
 
     state.todosIndex = buildTaskIndex(tasks)
@@ -235,6 +240,10 @@ const mutations = {
 
   [USER_LOAD_DONE_TASKS_END] (state, tasks) {
     tasks.forEach(populateTask)
+    tasks.forEach((task) => {
+      const taskStatus = helpers.getTaskStatus(task.task_status_id)
+      task.taskStatus = taskStatus
+    })
     state.displayedDoneTasks = tasks
   },
 
@@ -268,6 +277,7 @@ const mutations = {
         task_status_short_name: taskStatus.short_name,
         task_status_color: taskStatus.color
       })
+      state.todosIndex = buildTaskIndex(state.todos)
     }
   },
 

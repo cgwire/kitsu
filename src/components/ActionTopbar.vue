@@ -188,6 +188,7 @@
       >
         <div
           class="more-menu-item"
+          v-if="isCurrentViewAsset || isCurrentViewShot"
           @click="selectBar('assignation')"
         >
           {{ $t('menu.assign_tasks') }}
@@ -202,6 +203,7 @@
 
         <div
           class="more-menu-item"
+          v-if="isCurrentViewAsset || isCurrentViewShot"
           @click="selectBar('tasks')"
         >
           {{ $t('menu.create_tasks') }}
@@ -284,6 +286,7 @@ export default {
       ) ||
       !(
         this.isCurrentViewAsset ||
+        this.isCurrentViewTodos ||
         this.isCurrentViewShot
       )
     },
@@ -314,6 +317,15 @@ export default {
 
     isCurrentViewShot () {
       return this.$route.path.indexOf('shot') > 0
+    },
+
+    isCurrentViewTodos () {
+      return this.$route.path.indexOf('todos') > 0 ||
+             this.$route.path.indexOf('people/') > 0
+    },
+
+    isCurrentViewPersonTasks () {
+      return this.$route.path.indexOf('todos') > 0
     },
 
     customActionOptions () {
@@ -402,6 +414,16 @@ export default {
   },
 
   watch: {
+    isHidden () {
+      if (!this.isHidden) {
+        if (this.isCurrentViewAsset || this.isCurrentViewShot) {
+          this.selectedBar = 'assignation'
+        } else {
+          this.selectedBar = 'change-status'
+        }
+      }
+    },
+
     nbSelectedTasks () {
       this.selectedTaskIds = Object.keys(this.selectedTasks)
     }

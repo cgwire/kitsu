@@ -448,6 +448,8 @@ const mutations = {
         task_status_short_name: taskStatus.short_name,
         task_status_color: taskStatus.color
       })
+
+      state.personTasksIndex = buildTaskIndex(state.personTasks)
     }
   },
 

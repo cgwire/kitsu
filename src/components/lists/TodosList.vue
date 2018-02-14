@@ -65,12 +65,17 @@
             }"
           >
           </task-type-name>
-          <td class="status">
-            <validation-tag
-              :task="entry"
-            >
-            </validation-tag>
-          </td>
+          <validation-cell
+            class="status"
+            :task-test="entry"
+            :is-border="false"
+            :is-assignees="false"
+            :selectable="!done"
+            @select="onTaskSelected"
+            @unselect="onTaskUnselected"
+            :column="entry.taskStatus"
+          >
+          </validation-cell>
           <last-comment-cell
             class="last-comment"
             :task="entry"
@@ -105,6 +110,7 @@ import moment from 'moment-timezone'
 import ProductionNameCell from '../cells/ProductionNameCell'
 import LastCommentCell from '../cells/LastCommentCell'
 import TaskTypeName from '../cells/TaskTypeName'
+import ValidationCell from '../cells/ValidationCell'
 import TableInfo from '../widgets/TableInfo'
 import ValidationTag from '../widgets/ValidationTag'
 
@@ -115,6 +121,7 @@ export default {
     ProductionNameCell,
     TableInfo,
     TaskTypeName,
+    ValidationCell,
     ValidationTag
   },
   props: [
@@ -137,6 +144,14 @@ export default {
 
     formatDate (date) {
       return date ? moment(date).fromNow() : ''
+    },
+
+    onTaskSelected (validationInfo) {
+      this.$store.commit('ADD_SELECTED_TASK', validationInfo)
+    },
+
+    onTaskUnselected (validationInfo) {
+      this.$store.commit('REMOVE_SELECTED_TASK', validationInfo)
     }
   }
 }
@@ -163,8 +178,8 @@ export default {
 }
 
 .status {
-  width: 100px;
-  min-width: 100px;
+  width: 80px;
+  min-width: 80px;
 }
 
 .last-comment {

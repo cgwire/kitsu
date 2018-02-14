@@ -2,11 +2,11 @@
 <td
   ref="cell"
   :class="{
-    validation: true,
-    selected: selected
+    validation: selectable,
+    selected: selectable & selected
   }"
   :style="{
-    'border-left': '2px solid ' + column.color,
+    'border-left': isBorder ? '2px solid ' + column.color : 'none',
   }"
   @click="select"
 >
@@ -22,7 +22,7 @@
       :person="personMap[personId]"
       :size="20"
       :font-size="10"
-      v-if="isShowAssignations"
+      v-if="isAssignees && isShowAssignations"
       v-for="personId in assignees"
     >
     </people-avatar>
@@ -49,10 +49,32 @@ export default {
     PeopleAvatar
   },
 
-  props: [
-    'column',
-    'entity'
-  ],
+  props: {
+    column: {
+      default: null,
+      type: Object
+    },
+    entity: {
+      default: null,
+      type: Object
+    },
+    taskTest: {
+      default: null,
+      type: Object
+    },
+    isBorder: {
+      default: true,
+      type: Boolean
+    },
+    isAssignees: {
+      default: true,
+      type: Boolean
+    },
+    selectable: {
+      default: true,
+      type: Boolean
+    }
+  },
 
   computed: {
     ...mapGetters([
@@ -64,7 +86,7 @@ export default {
     ]),
 
     task () {
-      return this.entity.validations[this.column.name]
+      return this.taskTest || this.entity.validations[this.column.name]
     },
 
     assignees () {
@@ -81,21 +103,23 @@ export default {
     ]),
 
     select () {
-      if (this.$refs.cell &&
-          this.$refs.cell.className.indexOf('selected') < 0) {
-        this.selected = true
-        this.$emit('select', {
-          entity: this.entity,
-          column: this.column,
-          task: this.task
-        })
-      } else {
-        this.selected = false
-        this.$emit('unselect', {
-          entity: this.entity,
-          column: this.column,
-          task: this.task
-        })
+      if (this.selectable) {
+        if (this.$refs.cell &&
+            this.$refs.cell.className.indexOf('selected') < 0) {
+          this.selected = true
+          this.$emit('select', {
+            entity: this.entity,
+            column: this.column,
+            task: this.task
+          })
+        } else {
+          this.selected = false
+          this.$emit('unselect', {
+            entity: this.entity,
+            column: this.column,
+            task: this.task
+          })
+        }
       }
     }
   },
