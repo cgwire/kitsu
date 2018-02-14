@@ -467,7 +467,8 @@ const mutations = {
       task_status_id: comment.task_status_id,
       task_status_name: comment.task_status.name,
       task_status_short_name: comment.task_status.short_name,
-      task_status_color: comment.task_status.color
+      task_status_color: comment.task_status.color,
+      last_comment: comment
     })
   },
 
