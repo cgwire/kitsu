@@ -528,11 +528,6 @@ class NewEntityOutputFileResource(Resource, ArgsMixin):
             name=name
         )
 
-        output_file.update({
-            "folder_path": folder_path,
-            "file_name": file_name
-        })
-
         output_file = files_service.update_output_file(
             output_file["id"],
             {
@@ -544,6 +539,12 @@ class NewEntityOutputFileResource(Resource, ArgsMixin):
                 )
             }
         )
+
+        output_file.update({
+            "folder_path": folder_path,
+            "file_name": file_name
+        })
+
         return output_file
 
 
@@ -679,10 +680,11 @@ class NewInstanceOutputFileResource(Resource, ArgsMixin):
             }
         )
 
-        output_file = output_file.update({
+        output_file.update({
             "folder_path": folder_path,
             "file_name": file_name
         })
+
         return output_file
 
 
