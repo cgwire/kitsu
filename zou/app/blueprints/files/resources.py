@@ -514,6 +514,7 @@ class NewEntityOutputFileResource(Resource, ArgsMixin):
             mode=mode,
             output_type=output_type,
             task_type=task_type,
+            revision=output_file["revision"],
             representation=representation,
             name=name,
             sep=separator
@@ -532,7 +533,7 @@ class NewEntityOutputFileResource(Resource, ArgsMixin):
             "file_name": file_name
         })
 
-        files_service.update_output_file(
+        output_file = files_service.update_output_file(
             output_file["id"],
             {
                 "path": "%s%s%s%s" % (
