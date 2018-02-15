@@ -57,8 +57,17 @@ class TaskTestCase(ApiDBTestCase):
             str(self.person.id),
             self.task["assignees"][0]
         )
+        self.assertEquals(
+            str(self.person.id),
+            self.task["assignees"][0]
+        )
 
         tasks = self.get("data/tasks")
+        self.assertEquals(len(tasks), 4)
+
+        del self.task["assignees"]
+        data["name"] = "Task without assignees"
+        self.task = self.post("data/tasks", data)
         self.assertEquals(len(tasks), 4)
 
     def test_update_task(self):
