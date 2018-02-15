@@ -1,7 +1,7 @@
 from sqlalchemy.orm import aliased
 from sqlalchemy.exc import IntegrityError, StatementError
 
-from zou.app.utils import events, fields
+from zou.app.utils import events, fields, cache
 
 from zou.app.models.entity import Entity
 from zou.app.models.project import Project
@@ -33,22 +33,27 @@ def get_episode_from_sequence(sequence):
     return episode.serialize(obj_type="Episode")
 
 
+@cache.memoize_function(120)
 def get_episode_type():
     return entities_service.get_entity_type("Episode")
 
 
+@cache.memoize_function(120)
 def get_sequence_type():
     return entities_service.get_entity_type("Sequence")
 
 
+@cache.memoize_function(120)
 def get_shot_type():
     return entities_service.get_entity_type("Shot")
 
 
+@cache.memoize_function(120)
 def get_scene_type():
     return entities_service.get_entity_type("Scene")
 
 
+@cache.memoize_function(120)
 def get_camera_type():
     return entities_service.get_entity_type("Camera")
 

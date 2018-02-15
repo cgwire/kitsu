@@ -43,6 +43,8 @@ class ApiTestCase(unittest.TestCase):
         self.app = app.test_client()
         self.base_headers = {}
         self.post_headers = {"Content-type": "application/json"}
+        from zou.app.utils import cache
+        cache.clear()
 
     def log_in(self, email):
         tokens = self.post("auth/login", {

@@ -1,7 +1,7 @@
 import os
 
 from flask import Flask
-from flask_restful import current_app, reqparse
+from flask_restful import current_app
 from flask_jwt_extended import JWTManager
 from flask_principal import Principal, identity_changed, Identity
 from flask_sqlalchemy import SQLAlchemy
@@ -9,6 +9,8 @@ from flask_sqlalchemy import SQLAlchemy
 from . import config
 from .stores import auth_tokens_store
 from .services.exception import PersonNotFoundException
+
+from zou.app.utils import cache
 
 
 app = Flask(__name__)
@@ -29,6 +31,7 @@ db = SQLAlchemy(app)
 app.secret_key = app.config["SECRET_KEY"]
 jwt = JWTManager(app)
 Principal(app)
+cache.cache.init_app(app)
 
 
 def configure_auth():
