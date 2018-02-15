@@ -679,7 +679,7 @@ class NewInstanceOutputFileResource(Resource, ArgsMixin):
             }
         )
 
-        output_file.update({
+        output_file = output_file.update({
             "folder_path": folder_path,
             "file_name": file_name
         })
