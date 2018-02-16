@@ -148,6 +148,13 @@ def get_task_type(task_type_id):
     return get_task_type_raw(task_type_id).serialize()
 
 
+def get_task_by_shotgun_id(shotgun_id):
+    task = Task.get_by(shotgun_id=shotgun_id)
+    if task is None:
+        raise TaskNotFoundException
+    return task.serialize()
+
+
 def create_task(task_type, entity, name="main"):
     task_status = get_todo_status()
     try:

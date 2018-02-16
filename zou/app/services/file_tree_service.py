@@ -37,6 +37,12 @@ def get_working_file_path(
     revision=1,
     sep=os.sep
 ):
+    """
+    Return working file path based on given paramaters. The task is mandatory
+    to get the whole context. The mode matches a template described in the
+    file tree file. Software, output type and name are required only if they
+    are set in the template.
+    """
     file_name = get_working_file_name(
         task,
         mode=mode,

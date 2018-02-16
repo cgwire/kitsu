@@ -6,11 +6,7 @@ from zou.app.models.project import Project
 from zou.app.models.person import Person
 from zou.app.models.task import Task
 
-from zou.app.services import (
-    tasks_service,
-    assets_service,
-    shots_service
-)
+from zou.app.services import tasks_service
 
 from zou.app.blueprints.source.shotgun.base import (
     BaseImportShotgunResource,
@@ -25,28 +21,6 @@ class ImportShotgunTasksResource(BaseImportShotgunResource):
         self.person_ids = Person.get_id_map()
         self.task_type_ids = TaskType.get_id_map(field="name")
         self.task_status_ids = TaskStatus.get_id_map(field="short_name")
-        self.asset_ids = self.get_asset_map()
-        self.shot_ids = self.get_shot_map()
-        self.scene_ids = self.get_scene_map()
-        self.sequence_ids = self.get_sequence_map()
-
-    def get_asset_map(self):
-        assets = assets_service.get_assets()
-        return {asset["shotgun_id"]: asset["id"] for asset in assets}
-
-    def get_shot_map(self):
-        shots = shots_service.get_shots()
-        return {shot["shotgun_id"]: shot["id"] for shot in shots}
-
-    def get_scene_map(self):
-        scenes = shots_service.get_scenes()
-        return {scene["shotgun_id"]: scene["id"] for scene in scenes}
-
-    def get_sequence_map(self):
-        sequences = shots_service.get_sequences()
-        return {
-            sequence["shotgun_id"]: sequence["id"] for sequence in sequences
-        }
 
     def filtered_entries(self):
         return [x for x in self.sg_entries if self.is_valid_task(x)]
@@ -86,13 +60,13 @@ class ImportShotgunTasksResource(BaseImportShotgunResource):
             entity_sg_id = sg_entity["id"]
             entity_type = sg_entity["type"]
             if entity_type == "Asset":
-                entity_id = self.asset_ids.get(entity_sg_id, None)
+                entity_id = self.get_asset_id(entity_sg_id)
             elif entity_type == "Shot":
-                entity_id = self.shot_ids.get(entity_sg_id, None)
+                entity_id = self.get_shot_id(entity_sg_id)
             elif entity_type == "Scene":
-                entity_id = self.scene_ids.get(entity_sg_id, None)
+                entity_id = self.get_scene_id(entity_sg_id)
             else:
-                entity_id = self.sequence_ids.get(entity_sg_id, None)
+                entity_id = self.get_sequence_id(entity_sg_id)
 
         return entity_id
 

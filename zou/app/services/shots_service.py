@@ -358,6 +358,18 @@ def get_shot_by_shotgun_id(shotgun_id):
     return shot.serialize(obj_type="Shot")
 
 
+def get_scene_by_shotgun_id(shotgun_id):
+    scene_type = get_scene_type()
+    scene = Entity.get_by(
+        entity_type_id=scene_type["id"],
+        shotgun_id=shotgun_id
+    )
+    if scene is None:
+        raise SceneNotFoundException
+
+    return scene.serialize(obj_type="Scene")
+
+
 def get_sequence_by_shotgun_id(shotgun_id):
     sequence_type = get_sequence_type()
     sequence = Entity.get_by(
@@ -367,7 +379,19 @@ def get_sequence_by_shotgun_id(shotgun_id):
     if sequence is None:
         raise SequenceNotFoundException
 
-    return sequence
+    return sequence.serialize(obj_type="Sequence")
+
+
+def get_episode_by_shotgun_id(shotgun_id):
+    episode_type = get_episode_type()
+    episode = Entity.get_by(
+        entity_type_id=episode_type["id"],
+        shotgun_id=shotgun_id
+    )
+    if episode is None:
+        raise EpisodeNotFoundException
+
+    return episode.serialize(obj_type="Episode")
 
 
 def is_shot(entity):

@@ -1,10 +1,8 @@
 from flask_restful import current_app
 
 from zou.app.models.preview_file import PreviewFile
-from zou.app.models.task import Task
 from zou.app.models.person import Person
 
-from zou.app.services import assets_service, shots_service
 
 from zou.app.blueprints.source.shotgun.base import (
     BaseImportShotgunResource,
@@ -19,17 +17,6 @@ class ImportShotgunVersionsResource(BaseImportShotgunResource):
 
     def prepare_import(self):
         self.person_ids = Person.get_id_map()
-        self.task_ids = Task.get_id_map()
-        self.asset_ids = self.get_asset_map()
-        self.shot_ids = self.get_shot_map()
-
-    def get_asset_map(self):
-        assets = assets_service.get_assets()
-        return {asset["shotgun_id"]: asset["id"] for asset in assets}
-
-    def get_shot_map(self):
-        shots = shots_service.get_shots()
-        return {shot["shotgun_id"]: shot["id"] for shot in shots}
 
     def filtered_entries(self):
         return (x for x in self.sg_entries if self.is_version_linked_to_task(x))
@@ -52,10 +39,7 @@ class ImportShotgunVersionsResource(BaseImportShotgunResource):
             )
 
         if sg_version["sg_task"] is not None:
-            data["task_id"] = self.task_ids.get(
-                sg_version["sg_task"]["id"],
-                None
-            )
+            data["task_id"] = self.get_task_id(sg_version["sg_task"]["id"])
 
         if sg_version["sg_uploaded_movie"] is not None:
             data["uploaded_movie_url"] = \

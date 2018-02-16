@@ -41,9 +41,7 @@ class ImportShotgunProjectsResource(BaseImportShotgunResource):
             project = Project(**data)
 
             tree_name = current_app.config["DEFAULT_FILE_TREE"]
-            project.file_tree_service = file_tree_service.get_tree_from_file(
-                tree_name
-            )
+            project.file_tree = file_tree_service.get_tree_from_file(tree_name)
 
             project.save()
             current_app.logger.info("Project created: %s" % project)

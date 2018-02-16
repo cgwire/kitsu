@@ -3,7 +3,7 @@ from flask_restful import current_app
 from zou.app.models.project import Project
 from zou.app.models.entity import Entity
 
-from zou.app.services import assets_service, shots_service
+from zou.app.services import shots_service
 
 from zou.app.blueprints.source.shotgun.base import (
     BaseImportShotgunResource,
@@ -19,20 +19,6 @@ class ImportShotgunShotsResource(BaseImportShotgunResource):
     def prepare_import(self):
         self.shot_type = shots_service.get_shot_type()
         self.project_map = Project.get_id_map(field="name")
-        self.asset_map = self.get_asset_map()
-        self.sequence_map = self.get_sequence_map()
-
-    def get_asset_map(self):
-        assets = assets_service.get_assets()
-        return {
-            asset["shotgun_id"]: asset["id"] for asset in assets
-        }
-
-    def get_sequence_map(self):
-        sequences = shots_service.get_sequences()
-        return {
-            sequence["shotgun_id"]: sequence["id"] for sequence in sequences
-        }
 
     def extract_status_names(self, sg_projects):
         return {x["sg_status"] for x in sg_projects}
@@ -41,8 +27,8 @@ class ImportShotgunShotsResource(BaseImportShotgunResource):
         (frame_in, frame_out) = self.extract_frame_range(sg_shot)
         custom_fields = self.extract_custom_data(sg_shot)
         project_id = self.get_project(sg_shot, self.project_map)
-        sequence_id = self.get_sequence(sg_shot, self.sequence_map)
-        assets = self.extract_assets(sg_shot, self.asset_map)
+        sequence_id = self.get_sequence(sg_shot)
+        assets = self.extract_assets(sg_shot)
 
         shot_type = shots_service.get_shot_type()
 
@@ -68,10 +54,10 @@ class ImportShotgunShotsResource(BaseImportShotgunResource):
             project_id = project_map.get(sg_shot["project"]["name"], None)
         return project_id
 
-    def get_sequence(self, sg_shot, sequence_map):
+    def get_sequence(self, sg_shot):
         sequence_id = None
         if "sg_sequence" in sg_shot and sg_shot["sg_sequence"] is not None:
-            sequence_id = sequence_map.get(sg_shot["sg_sequence"]["id"], None)
+            sequence_id = self.get_sequence_id(sg_shot["sg_sequence"]["id"])
         return sequence_id
 
     def extract_frame_range(self, sg_shot):
@@ -81,11 +67,11 @@ class ImportShotgunShotsResource(BaseImportShotgunResource):
             frame_out = sg_shot["sg_cut_in"] + sg_shot["sg_cut_duration"]
         return (frame_in, frame_out)
 
-    def extract_assets(self, sg_shot, asset_map):
+    def extract_assets(self, sg_shot):
         assets = []
         if "assets" in sg_shot and len(sg_shot["assets"]) > 0:
             for sg_asset in sg_shot["assets"]:
-                entity_id = asset_map[sg_asset["id"]]
+                entity_id = self.get_asset_id(sg_asset["id"])
                 asset = Entity.get(entity_id)
                 assets.append(asset)
         return assets
