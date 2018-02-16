@@ -7,7 +7,7 @@ from mixer.backend.flask import mixer
 
 from zou.app import app
 from zou.app.utils import fields, auth
-from zou.app.services import file_tree
+from zou.app.services import file_tree_service
 
 from zou.app.models.project import Project
 from zou.app.models.person import Person
@@ -244,7 +244,7 @@ class ApiDBTestCase(ApiTestCase):
         )
         self.project.save()
         self.project.update({
-            "file_tree": file_tree.get_tree_from_file("simple")
+            "file_tree": file_tree_service.get_tree_from_file("simple")
         })
 
     def generate_fixture_project_closed(self):
@@ -261,7 +261,7 @@ class ApiDBTestCase(ApiTestCase):
         )
         self.project_standard.save()
         self.project_standard.update({
-            "file_tree": file_tree.get_tree_from_file("standard")
+            "file_tree": file_tree_service.get_tree_from_file("standard")
         })
 
     def generate_fixture_project_no_preview_tree(self):
@@ -271,7 +271,7 @@ class ApiDBTestCase(ApiTestCase):
         )
         self.project_no_preview_tree.save()
         self.project_no_preview_tree.update({
-            "file_tree": file_tree.get_tree_from_file("no_preview")
+            "file_tree": file_tree_service.get_tree_from_file("no_preview")
         })
 
     def generate_fixture_entity(self):

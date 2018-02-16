@@ -3,7 +3,7 @@ from flask_restful import current_app
 from zou.app.models.project import Project
 from zou.app.models.project_status import ProjectStatus
 
-from zou.app.services import file_tree, projects_service
+from zou.app.services import file_tree_service, projects_service
 
 from zou.app.blueprints.source.shotgun.base import (
     BaseImportShotgunResource,
@@ -41,7 +41,9 @@ class ImportShotgunProjectsResource(BaseImportShotgunResource):
             project = Project(**data)
 
             tree_name = current_app.config["DEFAULT_FILE_TREE"]
-            project.file_tree = file_tree.get_tree_from_file(tree_name)
+            project.file_tree_service = file_tree_service.get_tree_from_file(
+                tree_name
+            )
 
             project.save()
             current_app.logger.info("Project created: %s" % project)
