@@ -24,6 +24,11 @@ class EntityLink(db.Model, BaseMixin):
 
 
 class Entity(db.Model, BaseMixin, SerializerMixin):
+    """
+    Base model to represent assets, shots, sequences, episodes and scenes.
+    They have different meaning but they share the same behaviour toward
+    tasks and files.
+    """
     id = db.Column(
         UUIDType(binary=False),
         primary_key=True,

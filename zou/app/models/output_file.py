@@ -7,6 +7,11 @@ from zou.app.models.base import BaseMixin
 
 
 class OutputFile(db.Model, BaseMixin, SerializerMixin):
+    """
+    Describe a file generated from a CG artist scene. It is the result of a
+    publication.
+    It is linked to a working file, an entity and a task type.
+    """
     shotgun_id = db.Column(db.Integer())
 
     name = db.Column(db.String(250))

@@ -9,6 +9,9 @@ def get_db_uri():
 
 
 def create_all():
+    """
+    Create all database tables.
+    """
     from zou.app import db
     engine = create_engine(get_db_uri())
     if not database_exists(engine.url):
@@ -17,6 +20,9 @@ def create_all():
 
 
 def drop_all():
+    """
+    Drop all database tables.
+    """
     from zou.app import db
     db.session.flush()
     db.session.close()

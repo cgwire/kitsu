@@ -1,10 +1,16 @@
+"""
+This module is a wrapper for flask_caching. It configures it and rename
+the memoize function. The aim with that cache is to minimize the requests
+made on the target database.
+"""
+
 import redis
+
 from zou.app import config
 
 from flask_caching import Cache
 
-cache=None
-
+cache = None
 
 try:
     redis_cache = redis.StrictRedis(

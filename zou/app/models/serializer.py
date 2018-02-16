@@ -3,6 +3,9 @@ from zou.app.utils.fields import serialize_value
 
 
 class SerializerMixin(object):
+    """
+    Helpers to facilitate JSON serialization of models.
+    """
 
     def serialize(self, obj_type=None):
         attrs = inspect(self).attrs.keys()

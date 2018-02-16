@@ -11,6 +11,11 @@ association_table = db.Table(
 
 
 class Task(db.Model, BaseMixin, SerializerMixin):
+    """
+    Describes a task done by a CG artist on an entity of the CG production.
+    The task has a state and assigned to people. It handls notion of time like
+    duration, start date and end date.
+    """
     name = db.Column(db.String(80), nullable=False)
     description = db.Column(db.String(200))
 
