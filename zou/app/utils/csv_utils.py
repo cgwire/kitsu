@@ -33,7 +33,7 @@ def build_csv_file_name(file_name):
 
 def build_csv_string(csv_content):
     """
-    Build a CSV formatted string from an array.
+    Build a CSV formatted string from an array.
     """
     string_wrapper = StringIO()
     csv_writer = csv.writer(string_wrapper)
@@ -43,7 +43,7 @@ def build_csv_string(csv_content):
 
 def build_csv_headers(csv_response, file_name):
     """
-    Build HTTP response headers needed to return CSV content as a file.
+    Build HTTP response headers needed to return CSV content as a file.
     """
     csv_response.headers["Content-Disposition"] = \
         "attachment; filename=%s.csv" % file_name
