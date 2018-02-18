@@ -37,7 +37,11 @@ from zou.app.services import (
 
 
 def get_done_status():
-    return get_or_create_status(app.config["DONE_TASK_STATUS"], "done")
+    return get_or_create_status(
+        app.config["DONE_TASK_STATUS"],
+        "done",
+        is_done=True
+    )
 
 
 def get_wip_status():
@@ -45,14 +49,18 @@ def get_wip_status():
 
 
 def get_to_review_status():
-    return get_or_create_status(app.config["TO_REVIEW_TASK_STATUS"], "pndng")
+    return get_or_create_status(
+        app.config["TO_REVIEW_TASK_STATUS"],
+        "pndng",
+        is_reviewable=True
+    )
 
 
 def get_todo_status():
     return get_or_create_status("Todo")
 
 
-def get_task_status(task_status_id):
+def get_task_status_raw(task_status_id):
     try:
         task_status = TaskStatus.get(task_status_id)
     except StatementError:
@@ -60,6 +68,16 @@ def get_task_status(task_status_id):
 
     if task_status is None:
         raise TaskStatusNotFoundException()
+    return task_status
+
+
+def get_task_status(task_status_id):
+    return get_task_status_raw(task_status_id).serialize()
+
+
+def update_task_status(task_status_id, data):
+    task_status = get_task_status_raw(task_status_id)
+    task_status.update(data)
     return task_status.serialize()
 
 
@@ -354,7 +372,8 @@ def get_or_create_status(
     name,
     short_name="",
     color="#f5f5f5",
-    is_reviewable=False
+    is_reviewable=False,
+    is_done=False
 ):
     status = TaskStatus.get_by(name=name)
     if status is None and len(short_name) > 0:
@@ -365,7 +384,8 @@ def get_or_create_status(
             name=name,
             short_name=short_name or name.lower(),
             color=color,
-            is_reviewable=is_reviewable
+            is_reviewable=is_reviewable,
+            is_done=is_done
         )
     return status.serialize()
 
@@ -550,6 +570,10 @@ def get_tasks_for_entity_and_task_type(entity_id, task_type_id):
     return Task.serialize_list(tasks)
 
 
+def get_task_statuses():
+    return fields.serialize_list(TaskStatus.query.all())
+
+
 def get_task_status_map():
     return {
         str(status.id): status.serialize() for status in TaskStatus.query.all()
@@ -564,15 +588,14 @@ def get_task_type_map():
 
 
 def get_person_done_tasks(person_id, projects):
-    done_status = get_done_status()
     return get_person_tasks(
         person_id,
         projects,
-        task_status_id=done_status["id"]
+        is_done=True
     )
 
 
-def get_person_tasks(person_id, projects, task_status_id=None):
+def get_person_tasks(person_id, projects, is_done=None):
     person = Person.get(person_id)
     project_ids = [project["id"] for project in projects]
 
@@ -600,13 +623,12 @@ def get_person_tasks(person_id, projects, task_status_id=None):
             TaskStatus.short_name
         )
 
-    if task_status_id is None:
-        done_status = get_done_status()
-        query = query.filter(Task.task_status_id != done_status["id"])
-    else:
+    if is_done:
         query = query \
-            .filter(Task.task_status_id == task_status_id) \
+            .filter(TaskStatus.is_done == True) \
             .order_by(Task.end_date.desc(), TaskType.name, Entity.name)
+    else:
+        query = query.filter(TaskStatus.is_done == False)
 
     tasks = []
     for (
