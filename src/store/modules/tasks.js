@@ -69,17 +69,9 @@ const helpers = {
 }
 
 const getters = {
-  getTask: (state, getters) => (id) => {
-    return state.taskMap[id]
-  },
-
-  getTaskComments: (state, getters) => (id) => {
-    return state.taskComments[id]
-  },
-
-  getTaskPreviews: (state, getters) => (id) => {
-    return state.taskPreviews[id]
-  },
+  getTask: (state, getters) => (id) => state.taskMap[id],
+  getTaskComments: (state, getters) => (id) => state.taskComments[id],
+  getTaskPreviews: (state, getters) => (id) => state.taskPreviews[id],
 
   getTaskComment: (state, getters) => (taskId, commentId) => {
     return state.taskComments[taskId].find(

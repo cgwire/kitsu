@@ -38,6 +38,12 @@
           v-model="form.is_reviewable"
         >
         </combobox>
+        <combobox
+          :label="$t('task_status.fields.is_done')"
+          :options="isDoneOptions"
+          v-model="form.is_done"
+        >
+        </combobox>
         <color-field
           ref="colorField"
           :label="$t('task_status.fields.color')"
@@ -108,6 +114,10 @@ export default {
         {label: this.$tc('main.yes'), value: 'true'},
         {label: this.$tc('main.no'), value: 'false'}
       ],
+      isDoneOptions: [
+        {label: this.$tc('main.yes'), value: 'true'},
+        {label: this.$tc('main.no'), value: 'false'}
+      ],
       colors: [
         '#000000',
         '#E81123',
@@ -146,7 +156,8 @@ export default {
           name: this.taskStatusToEdit.name,
           short_name: this.taskStatusToEdit.short_name,
           color: this.taskStatusToEdit.color,
-          is_reviewable: String(this.taskStatusToEdit.is_reviewable)
+          is_reviewable: String(this.taskStatusToEdit.is_reviewable),
+          is_done: String(this.taskStatusToEdit.is_done)
         }
       }
     }

@@ -222,7 +222,8 @@ export default {
       name: 'Name',
       short_name: 'Short name',
       color: 'Color',
-      is_reviewable: 'Is reviewable'
+      is_reviewable: 'Is reviewable',
+      is_done: 'Is done'
     },
     delete_text: 'Are you sure you want to remove {name} from your database?',
     delete_error: 'An error occured while deleting this task status. There are probably data linked to it. Are you sure this task status has no task linked to it?'

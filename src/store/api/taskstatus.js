@@ -5,6 +5,7 @@ const sanitizeTaskStatus = (taskStatus) => {
     name: taskStatus.name,
     short_name: taskStatus.short_name,
     is_reviewable: Boolean(taskStatus.is_reviewable === 'true'),
+    is_done: Boolean(taskStatus.is_done === 'true'),
     color: taskStatus.color
   }
 }
