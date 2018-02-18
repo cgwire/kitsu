@@ -15,7 +15,7 @@ from zou.app.services import (
     persons_service,
     projects_service,
     files_service,
-    file_tree,
+    file_tree_service,
     user_service,
     entities_service
 )
@@ -234,12 +234,12 @@ class ToReviewResource(Resource):
 
     def get_preview_path(self, task, name, revision, software):
         try:
-            folder_path = file_tree.get_folder_path(
+            folder_path = file_tree_service.get_folder_path(
                 task,
                 mode="preview",
                 software=software
             )
-            file_name = file_tree.get_file_name(
+            file_name = file_tree_service.get_file_name(
                 task,
                 name=name,
                 mode="preview",

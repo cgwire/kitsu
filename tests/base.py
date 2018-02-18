@@ -7,7 +7,7 @@ from mixer.backend.flask import mixer
 
 from zou.app import app
 from zou.app.utils import fields, auth
-from zou.app.services import file_tree
+from zou.app.services import file_tree_service
 
 from zou.app.models.project import Project
 from zou.app.models.person import Person
@@ -43,6 +43,8 @@ class ApiTestCase(unittest.TestCase):
         self.app = app.test_client()
         self.base_headers = {}
         self.post_headers = {"Content-type": "application/json"}
+        from zou.app.utils import cache
+        cache.clear()
 
     def log_in(self, email):
         tokens = self.post("auth/login", {
@@ -242,7 +244,7 @@ class ApiDBTestCase(ApiTestCase):
         )
         self.project.save()
         self.project.update({
-            "file_tree": file_tree.get_tree_from_file("simple")
+            "file_tree": file_tree_service.get_tree_from_file("simple")
         })
 
     def generate_fixture_project_closed(self):
@@ -259,7 +261,7 @@ class ApiDBTestCase(ApiTestCase):
         )
         self.project_standard.save()
         self.project_standard.update({
-            "file_tree": file_tree.get_tree_from_file("standard")
+            "file_tree": file_tree_service.get_tree_from_file("standard")
         })
 
     def generate_fixture_project_no_preview_tree(self):
@@ -269,7 +271,7 @@ class ApiDBTestCase(ApiTestCase):
         )
         self.project_no_preview_tree.save()
         self.project_no_preview_tree.update({
-            "file_tree": file_tree.get_tree_from_file("no_preview")
+            "file_tree": file_tree_service.get_tree_from_file("no_preview")
         })
 
     def generate_fixture_entity(self):
@@ -289,6 +291,15 @@ class ApiDBTestCase(ApiTestCase):
             entity_type_id=self.entity_type_character.id
         )
         self.entity_character.save()
+
+    def generate_fixture_entity_camera(self):
+        self.entity_camera = Entity(
+            name="Main camera",
+            description="Description Camera",
+            project_id=self.project.id,
+            entity_type_id=self.entity_type_camera.id
+        )
+        self.entity_camera.save()
 
     def generate_fixture_entity_standard(self):
         self.entity_standard = Entity(
@@ -386,15 +397,38 @@ class ApiDBTestCase(ApiTestCase):
         )
         self.shot_standard.save()
 
-    def generate_fixture_asset_instance(self, asset=None, shot=None, number=1):
+    def generate_fixture_shot_asset_instance(
+        self,
+        asset=None,
+        shot=None,
+        number=1
+    ):
         if asset is None:
             asset = self.entity
         if shot is None:
             shot = self.shot
-
         self.asset_instance = AssetInstance.create(
             asset_id=asset.id,
-            shot_id=shot.id,
+            entity_id=shot.id,
+            entity_type_id=self.shot_type.id,
+            number=number,
+            description="Asset instance description"
+        )
+
+    def generate_fixture_scene_asset_instance(
+        self,
+        asset=None,
+        scene=None,
+        number=1
+    ):
+        if asset is None:
+            asset = self.entity
+        if scene is None:
+            scene = self.scene
+        self.asset_instance = AssetInstance.create(
+            asset_id=asset.id,
+            entity_id=scene.id,
+            entity_type_id=self.scene_type.id,
             number=number,
             description="Asset instance description"
         )
@@ -440,22 +474,16 @@ class ApiDBTestCase(ApiTestCase):
         self.person.save()
 
     def generate_fixture_entity_type(self):
-        self.entity_type = EntityType(name="Props")
-        self.entity_type.save()
-        self.shot_type = EntityType(name="Shot")
-        self.shot_type.save()
-        self.sequence_type = EntityType(name="Sequence")
-        self.sequence_type.save()
-        self.episode_type = EntityType(name="Episode")
-        self.episode_type.save()
-        self.scene_type = EntityType(name="Scene")
-        self.scene_type.save()
+        self.entity_type = EntityType.create(name="Props")
+        self.shot_type = EntityType.create(name="Shot")
+        self.sequence_type = EntityType.create(name="Sequence")
+        self.episode_type = EntityType.create(name="Episode")
+        self.scene_type = EntityType.create(name="Scene")
 
     def generate_fixture_asset_types(self):
-        self.entity_type_character = EntityType(name="Character")
-        self.entity_type_character.save()
-        self.entity_type_environment = EntityType(name="Environment")
-        self.entity_type_environment.save()
+        self.entity_type_character = EntityType.create(name="Character")
+        self.entity_type_environment = EntityType.create(name="Environment")
+        self.entity_type_camera = EntityType.create(name="Camera")
 
     def generate_fixture_department(self):
         self.department = Department(name="Modeling", color="#FFFFFF")
@@ -642,13 +670,17 @@ class ApiDBTestCase(ApiTestCase):
             output_type = self.output_type
 
         if task is None:
-            task = self.task
+            task_type_id = self.task_type.id
+            entity_id = self.entity.id
+        else:
+            task_type_id = task.task_type_id
+            entity_id = task.entity_id
 
         self.output_file = OutputFile.create(
             comment="",
             revision=revision,
-            task_id=task.id,
-            entity_id=task.entity_id,
+            task_type_id=task_type_id,
+            entity_id=entity_id,
             person_id=self.person.id,
             file_status_id=self.file_status.id,
             output_type_id=output_type.id,

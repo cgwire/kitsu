@@ -6,6 +6,10 @@ from zou.app.models.base import BaseMixin
 
 
 class PreviewFile(db.Model, BaseMixin, SerializerMixin):
+    """
+    Describes a file which is aimed at being reviewed. It is not a publication
+    neither a working file.
+    """
     name = db.Column(db.String(250))
     revision = db.Column(db.Integer(), default=1)
     description = db.Column(db.Text())

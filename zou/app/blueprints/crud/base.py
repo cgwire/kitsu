@@ -136,15 +136,15 @@ class BaseModelsResource(Resource):
 
         except TypeError as exception:
             current_app.logger.error(str(exception))
-            return {"error": str(exception)}, 400
+            return {"message": str(exception)}, 400
 
         except IntegrityError as exception:
             current_app.logger.error(str(exception))
-            return {"error": str(exception)}, 400
+            return {"message": str(exception)}, 400
 
         except StatementError as exception:
             current_app.logger.error(str(exception))
-            return {"error": str(exception)}, 400
+            return {"message": str(exception)}, 400
 
 
 class BaseModelResource(Resource):
@@ -181,7 +181,7 @@ class BaseModelResource(Resource):
             instance = self.get_model_or_404(instance_id)
             self.check_read_permissions(instance.serialize())
         except StatementError:
-            return {"error": "Wrong id format"}, 400
+            return {"message": "Wrong id format"}, 400
         return instance.serialize(), 200
 
     @jwt_required
@@ -199,19 +199,19 @@ class BaseModelResource(Resource):
             return instance.serialize(), 200
 
         except StatementError:
-            return {"error": "Wrong id format"}, 400
+            return {"message": "Wrong id format"}, 400
 
         except TypeError as exception:
             current_app.logger.error(str(exception))
-            return {"error": str(exception)}, 400
+            return {"message": str(exception)}, 400
 
         except IntegrityError as exception:
             current_app.logger.error(str(exception))
-            return {"error": str(exception)}, 400
+            return {"message": str(exception)}, 400
 
         except StatementError as exception:
             current_app.logger.error(str(exception))
-            return {"error": str(exception)}, 400
+            return {"message": str(exception)}, 400
 
     @jwt_required
     def delete(self, instance_id):
@@ -227,6 +227,6 @@ class BaseModelResource(Resource):
 
         except IntegrityError as exception:
             current_app.logger.error(str(exception))
-            return {"error": str(exception)}, 400
+            return {"message": str(exception)}, 400
 
         return {"deletion_success": True}, 204

@@ -1,10 +1,25 @@
-from flask import request, abort
+from flask import request
 from flask_restful import Resource, current_app
 from flask_jwt_extended import jwt_required
 
 from zou.app.utils import fields, permissions
 from zou.app.blueprints.source.shotgun.exception import (
     ShotgunEntryImportFailed
+)
+
+from zou.app.services import (
+    assets_service,
+    shots_service,
+    tasks_service
+)
+
+from zou.app.services.exception import (
+    AssetNotFoundException,
+    EpisodeNotFoundException,
+    SceneNotFoundException,
+    SequenceNotFoundException,
+    ShotNotFoundException,
+    TaskNotFoundException
 )
 
 from sqlalchemy.exc import IntegrityError
@@ -20,31 +35,28 @@ class BaseImportShotgunResource(Resource):
         results = []
         self.sg_entries = request.json
 
-        try:
-            self.check_permissions()
-            self.prepare_import()
+        self.check_permissions()
+        self.prepare_import()
 
-            for sg_entry in self.filtered_entries():
-                try:
-                    data = self.extract_data(sg_entry)
-                    result_entry = self.import_entry(data)
-                    results.append(result_entry)
-                except ShotgunEntryImportFailed as exception:
-                    current_app.logger.warn(exception)
-                except KeyError as exception:
-                    current_app.logger.warn(exception)
-                    current_app.logger.error(
-                        "Your data is not properly formatted: %s" % sg_entry
-                    )
-                except IntegrityError:
-                    current_app.logger.error(
-                        "Data information are duplicated or wrong: %s" %
-                        sg_entry
-                    )
+        for sg_entry in self.filtered_entries():
+            try:
+                data = self.extract_data(sg_entry)
+                result_entry = self.import_entry(data)
+                results.append(result_entry)
+            except ShotgunEntryImportFailed as exception:
+                current_app.logger.warn(exception)
+            except KeyError as exception:
+                current_app.logger.warn(exception)
+                current_app.logger.error(
+                    "Your data is not properly formatted: %s" % sg_entry
+                )
+            except IntegrityError:
+                current_app.logger.error(
+                    "Data information are duplicated or wrong: %s" %
+                    sg_entry
+                )
 
-                self.post_processing()
-        except permissions.PermissionDenied:
-            abort(403)
+            self.post_processing()
 
         return fields.serialize_models(results), 200
 
@@ -66,6 +78,54 @@ class BaseImportShotgunResource(Resource):
     def post_processing(self):
         pass
 
+    def get_instance_id(self, get_by_sg_id_func, sg_id, exception):
+        try:
+            return get_by_sg_id_func(sg_id)["id"]
+        except exception:
+            return None
+
+    def get_task_id(self, task_sg_id):
+        return self.get_instance_id(
+            tasks_service.get_task_by_shotgun_id,
+            task_sg_id,
+            TaskNotFoundException
+        )
+
+    def get_asset_id(self, asset_sg_id):
+        return self.get_instance_id(
+            assets_service.get_asset_by_shotgun_id,
+            asset_sg_id,
+            AssetNotFoundException
+        )
+
+    def get_shot_id(self, shot_sg_id):
+        return self.get_instance_id(
+            shots_service.get_shot_by_shotgun_id,
+            shot_sg_id,
+            ShotNotFoundException
+        )
+
+    def get_scene_id(self, scene_sg_id):
+        return self.get_instance_id(
+            shots_service.get_scene_by_shotgun_id,
+            scene_sg_id,
+            SceneNotFoundException
+        )
+
+    def get_sequence_id(self, sequence_sg_id):
+        return self.get_instance_id(
+            shots_service.get_sequence_by_shotgun_id,
+            sequence_sg_id,
+            SequenceNotFoundException
+        )
+
+    def get_episode_id(self, episode_sg_id):
+        return self.get_instance_id(
+            shots_service.get_episode_by_shotgun_id,
+            episode_sg_id,
+            EpisodeNotFoundException
+        )
+
 
 class ImportRemoveShotgunBaseResource(Resource):
 
@@ -78,6 +138,19 @@ class ImportRemoveShotgunBaseResource(Resource):
     @jwt_required
     def post(self):
         sg_model = request.json
+        instance = self.get_instance(sg_model)
+
+        if instance is not None:
+            result = {
+                "removed_instance_id": str(instance.id),
+                "success": self.delete_instance(instance)
+            }
+        else:
+            result = {"success": True}
+
+        return result
+
+    def get_instance(self, sg_model):
         if self.entity_type_id is not None:
             instance = self.model.get_by(
                 shotgun_id=sg_model["id"],
@@ -85,21 +158,20 @@ class ImportRemoveShotgunBaseResource(Resource):
             )
         else:
             instance = self.model.get_by(shotgun_id=sg_model["id"])
+        return instance
 
-        result = {"success": True}
-
-        if instance is not None:
-            result["removed_instance_id"] = str(instance.id)
-            try:
-                if self.delete_func is not None:
-                    self.delete_func(instance)
-                else:
-                    instance.delete()
-            except IntegrityError as exception:
-                current_app.logger.error(str(exception))
-                current_app.logger.error(
-                    "An error occured while deleting model %s." % sg_model["id"]
-                )
-                result = {"success": False}
-
-        return result
+    def delete_instance(self, instance):
+        is_success = True
+        try:
+            if self.delete_func is not None:
+                self.delete_func(instance)
+            else:
+                instance.delete()
+        except IntegrityError as exception:
+            sg_id = instance.shotgun_id
+            current_app.logger.error(str(exception))
+            current_app.logger.error(
+                "An error occured while deleting model %s." % sg_id
+            )
+            is_success = False
+        return is_success

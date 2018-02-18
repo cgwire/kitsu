@@ -1,15 +1,14 @@
 from sqlalchemy.orm import aliased
 from sqlalchemy.exc import IntegrityError, StatementError
 
-from zou.app.utils import events, fields
+from zou.app.utils import events, fields, cache
 
 from zou.app.models.entity import Entity
-from zou.app.models.entity_type import EntityType
 from zou.app.models.project import Project
 from zou.app.models.task import Task
 from zou.app.models.task import association_table as assignees_table
 
-from zou.app.services import projects_service
+from zou.app.services import projects_service, entities_service
 from zou.app.services.exception import (
     EpisodeNotFoundException,
     SequenceNotFoundException,
@@ -34,27 +33,29 @@ def get_episode_from_sequence(sequence):
     return episode.serialize(obj_type="Episode")
 
 
-def get_entity_type(name):
-    entity_type = EntityType.get_by(name=name)
-    if entity_type is None:
-        entity_type = EntityType.create(name=name)
-    return entity_type.serialize()
-
-
+@cache.memoize_function(120)
 def get_episode_type():
-    return get_entity_type("Episode")
+    return entities_service.get_entity_type("Episode")
 
 
+@cache.memoize_function(120)
 def get_sequence_type():
-    return get_entity_type("Sequence")
+    return entities_service.get_entity_type("Sequence")
 
 
+@cache.memoize_function(120)
 def get_shot_type():
-    return get_entity_type("Shot")
+    return entities_service.get_entity_type("Shot")
 
 
+@cache.memoize_function(120)
 def get_scene_type():
-    return get_entity_type("Scene")
+    return entities_service.get_entity_type("Scene")
+
+
+@cache.memoize_function(120)
+def get_camera_type():
+    return entities_service.get_entity_type("Camera")
 
 
 def get_episodes(criterions={}):
@@ -357,6 +358,18 @@ def get_shot_by_shotgun_id(shotgun_id):
     return shot.serialize(obj_type="Shot")
 
 
+def get_scene_by_shotgun_id(shotgun_id):
+    scene_type = get_scene_type()
+    scene = Entity.get_by(
+        entity_type_id=scene_type["id"],
+        shotgun_id=shotgun_id
+    )
+    if scene is None:
+        raise SceneNotFoundException
+
+    return scene.serialize(obj_type="Scene")
+
+
 def get_sequence_by_shotgun_id(shotgun_id):
     sequence_type = get_sequence_type()
     sequence = Entity.get_by(
@@ -366,7 +379,19 @@ def get_sequence_by_shotgun_id(shotgun_id):
     if sequence is None:
         raise SequenceNotFoundException
 
-    return sequence
+    return sequence.serialize(obj_type="Sequence")
+
+
+def get_episode_by_shotgun_id(shotgun_id):
+    episode_type = get_episode_type()
+    episode = Entity.get_by(
+        entity_type_id=episode_type["id"],
+        shotgun_id=shotgun_id
+    )
+    if episode is None:
+        raise EpisodeNotFoundException
+
+    return episode.serialize(obj_type="Episode")
 
 
 def is_shot(entity):

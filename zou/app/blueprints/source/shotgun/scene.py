@@ -19,17 +19,10 @@ class ImportShotgunScenesResource(BaseImportShotgunResource):
     def prepare_import(self):
         self.scene_type = shots_service.get_shot_type()
         self.project_map = Project.get_id_map(field="name")
-        self.sequence_map = self.get_sequence_map()
-
-    def get_sequence_map(self):
-        sequences = shots_service.get_sequences()
-        return {
-            sequence["shotgun_id"]: sequence["id"] for sequence in sequences
-        }
 
     def extract_data(self, sg_scene):
         project_id = self.get_project(sg_scene, self.project_map)
-        sequence_id = self.get_sequence(sg_scene, self.sequence_map)
+        sequence_id = self.get_sequence(sg_scene)
         scene_type = shots_service.get_scene_type()
 
         data = {
@@ -47,16 +40,13 @@ class ImportShotgunScenesResource(BaseImportShotgunResource):
             project_id = project_map.get(sg_scene["project"]["name"], None)
         return project_id
 
-    def get_sequence(self, sg_scene, sequence_map):
+    def get_sequence(self, sg_scene):
         sequence_id = None
         sequence_key = "sequence_sg_scenes_1_sequences"
         if sequence_key in sg_scene and \
            sg_scene[sequence_key] is not None and \
            len(sg_scene[sequence_key]) > 0:
-            sequence_id = sequence_map.get(
-                sg_scene[sequence_key][0]["id"],
-                None
-            )
+            sequence_id = self.get_sequence_id(sg_scene[sequence_key][0]["id"])
         return sequence_id
 
     def import_entry(self, data):

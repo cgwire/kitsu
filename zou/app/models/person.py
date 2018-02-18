@@ -27,6 +27,9 @@ department_link = db.Table(
 
 
 class Person(db.Model, BaseMixin, SerializerMixin):
+    """
+    Describe a member of the studio (and an API user).
+    """
     first_name = db.Column(db.String(80), nullable=False)
     last_name = db.Column(db.String(80), nullable=False)
     email = db.Column(EmailType, unique=True)

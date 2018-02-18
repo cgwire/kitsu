@@ -42,10 +42,12 @@ class RouteOutputFilesTestCase(ApiDBTestCase):
         self.task_id = self.task.id
         self.person_id = str(self.person.id)
         self.working_file_id = str(self.working_file.id)
+        self.asset_id = str(self.entity.id)
+        self.task_type_id = str(self.task_type.id)
 
     def new_output(self, data, code=201):
         return self.post(
-            "data/working-files/%s/output-files/new" % self.working_file_id,
+            "data/entities/%s/output-files/new" % self.asset_id,
             data,
             code
         )
@@ -90,7 +92,7 @@ class RouteOutputFilesTestCase(ApiDBTestCase):
     def test_get_last_output_files(self):
         self.generate_output_files()
         output_files = self.get(
-            "/data/entities/%s/last-output-files" % self.entity.id
+            "/data/entities/%s/output-files/last-revisions" % self.entity.id
         )
         self.assertEqual(
             output_files[str(self.geometry_id)]["main"],
@@ -125,7 +127,7 @@ class RouteOutputFilesTestCase(ApiDBTestCase):
             "/data/entities/%s/output-types" % self.entity.id
         )
         self.assertEquals(len(output_types), 4)
-        self.assertEquals(output_types[0]["name"], "Geometry")
+        self.assertEquals(output_types[0]["name"], "Cache")
 
     def test_get_entity_output_type_output_files(self):
         self.generate_output_files()
@@ -145,18 +147,20 @@ class RouteOutputFilesTestCase(ApiDBTestCase):
         data = {
             "person_id": self.person_id,
             "comment": "test working file publish",
-            "output_type_id": self.tx_type_id
+            "output_type_id": self.tx_type_id,
+            "task_type_id": self.task_type_id,
+            "working_file_id": self.working_file_id,
         }
         result = self.new_output(data)
 
         self.assertEqual(
             result["folder_path"],
             "/simple/productions/export/cosmos_landromat/assets/props/tree/"
-            "texture"
+            "shaders/texture"
         )
         self.assertEqual(
             result["file_name"],
-            "cosmos_landromat_props_tree_texture_main_v001"
+            "cosmos_landromat_props_tree_shaders_texture_main_v001"
         )
 
         output_file_id = result["id"]
@@ -171,6 +175,8 @@ class RouteOutputFilesTestCase(ApiDBTestCase):
             "person_id": self.person_id,
             "comment": "test working file publish with extension",
             "output_type_id": self.tx_type_id,
+            "task_type_id": self.task_type_id,
+            "working_file_id": self.working_file_id,
             "extension": ".tx"
         }
         result = self.new_output(data)
@@ -181,8 +187,8 @@ class RouteOutputFilesTestCase(ApiDBTestCase):
         self.assertEqual(
             output_file["path"],
             "/simple/productions/export/cosmos_landromat/assets/props/tree/"
-            "texture/"
-            "cosmos_landromat_props_tree_texture_main_v001.tx"
+            "shaders/texture/"
+            "cosmos_landromat_props_tree_shaders_texture_main_v001.tx"
         )
 
     def test_new_output_with_name(self):
@@ -190,8 +196,10 @@ class RouteOutputFilesTestCase(ApiDBTestCase):
             "person_id": self.person_id,
             "comment": "test working file publish with extension",
             "output_type_id": self.tx_type_id,
+            "task_type_id": self.task_type_id,
+            "working_file_id": self.working_file_id,
             "extension": ".tx",
-            "name": ""
+            "name": "special"
         }
         result = self.new_output(data)
         output_file_id = result["id"]
@@ -201,15 +209,17 @@ class RouteOutputFilesTestCase(ApiDBTestCase):
         self.assertEqual(
             output_file["path"],
             "/simple/productions/export/cosmos_landromat/assets/props/tree/"
-            "texture/"
-            "cosmos_landromat_props_tree_texture_main_v001.tx"
+            "shaders/texture/"
+            "cosmos_landromat_props_tree_shaders_texture_special_v001.tx"
         )
 
     def test_new_output_again(self):
         data = {
-            "person_id": self.person_id,
             "comment": "test working file publish",
-            "output_type_id": self.tx_type_id
+            "person_id": self.person_id,
+            "output_type_id": self.tx_type_id,
+            "task_type_id": self.task_type_id,
+            "working_file_id": self.working_file_id
         }
         result = self.new_output(data)
         result = self.new_output(data)
@@ -217,11 +227,11 @@ class RouteOutputFilesTestCase(ApiDBTestCase):
         self.assertEqual(
             result["folder_path"],
             "/simple/productions/export/cosmos_landromat/assets/props/tree/"
-            "texture"
+            "shaders/texture"
         )
         self.assertEqual(
             result["file_name"],
-            "cosmos_landromat_props_tree_texture_main_v002"
+            "cosmos_landromat_props_tree_shaders_texture_main_v002"
         )
 
         output_file_id = result["id"]
@@ -236,13 +246,15 @@ class RouteOutputFilesTestCase(ApiDBTestCase):
             "person_id": self.person_id,
             "comment": "test working file publish",
             "output_type_id": self.tx_type_id,
+            "task_type_id": self.task_type_id,
+            "working_file_id": self.working_file_id,
             "revision": 66
         }
         result = self.new_output(data)
 
         self.assertEqual(
             result["file_name"],
-            "cosmos_landromat_props_tree_texture_main_v066"
+            "cosmos_landromat_props_tree_shaders_texture_main_v066"
         )
 
         output_file_id = result["id"]
@@ -260,6 +272,8 @@ class RouteOutputFilesTestCase(ApiDBTestCase):
             "person_id": self.person_id,
             "comment": "test working file publish",
             "output_type_id": self.tx_type_id,
+            "task_type_id": self.task_type_id,
+            "working_file_id": self.working_file_id,
             "revision": 66
         }
         self.new_output(data)
@@ -271,3 +285,179 @@ class RouteOutputFilesTestCase(ApiDBTestCase):
         self.put("/actions/tasks/%s/to-review" % self.task_id, data)
         task = self.get("data/tasks/%s" % self.task_id)
         self.assertEquals(task["task_status_id"], status_id)
+
+    def test_get_next_revision(self):
+        self.generate_fixture_output_type()
+        self.generate_fixture_output_file()
+        result = self.post(
+            "/data/entities/%s/output-files/next-revision" % self.entity.id,
+            {
+                "output_type_id": self.output_type.id,
+                "task_type_id": self.task_type_id
+            },
+            200
+        )
+        self.assertEqual(result["next_revision"], 2)
+
+    def test_get_next_revision_with_name(self):
+        self.generate_fixture_output_type()
+        self.generate_fixture_output_file(revision=5, name="other-output")
+        result = self.post(
+            "/data/entities/%s/output-files/next-revision" % self.entity.id,
+            {
+                "name": "other-output",
+                "output_type_id": self.output_type.id,
+                "task_type_id": self.task_type_id
+            },
+            200
+        )
+        self.assertEqual(result["next_revision"], 6)
+
+    def test_get_next_revision_wrong_data(self):
+        self.generate_fixture_output_type()
+        self.post(
+            "/data/tasks/unknown/output-files/next-revision",
+            {
+                "name": "main",
+                "output_type_id": self.output_type.id,
+                "task_type_id": self.task_type_id
+            },
+            404
+        )
+
+    def test_get_next_revision_with_empty_revision(self):
+        self.generate_fixture_output_type()
+        result = self.post(
+            "/data/entities/%s/output-files/next-revision" % self.entity.id,
+            {
+                "name": "main",
+                "output_type_id": self.output_type.id,
+                "task_type_id": self.task_type_id
+            },
+            200
+        )
+        self.assertEqual(result["next_revision"], 1)
+
+    def test_new_instance_output(self):
+        self.generate_fixture_shot_asset_instance()
+        data = {
+            "person_id": self.person_id,
+            "comment": "test working file publish",
+            "output_type_id": self.cache_type_id,
+            "task_type_id": self.task_type_animation.id,
+            "working_file_id": self.working_file_id,
+            "representation": "abc"
+        }
+        result = self.post(
+            "data/asset-instances/%s/output-files/new" % self.asset_instance.id,
+            data
+        )
+
+        self.assertEqual(
+            result["folder_path"],
+            "/simple/productions/export/cosmos_landromat/shot/s01/p01/"
+            "animation/cache/props/tree/instance_0001/abc"
+        )
+        self.assertEqual(
+            result["file_name"],
+            "cosmos_landromat_s01_p01_animation_cache_main_props_tree_instance_"
+            "0001_v001"
+        )
+        self.assertEqual(
+            result["path"],
+            "/simple/productions/export/cosmos_landromat/shot/s01/p01/"
+            "animation/cache/props/tree/instance_0001/abc/cosmos_landromat_s01_"
+            "p01_animation_cache_main_props_tree_instance_0001_v001"
+        )
+
+        output_file_id = result["id"]
+        output_file = self.get("/data/output-files/%s" % output_file_id)
+
+        self.assertEqual(output_file["comment"], data["comment"])
+        self.assertEqual(output_file["revision"], 1)
+        self.assertEqual(output_file["source_file_id"], self.working_file_id)
+
+    def test_get_next_instance_revision(self):
+        self.generate_fixture_shot_asset_instance()
+        self.task_type_animation_id = self.task_type_animation.id
+        self.asset_instance_id = self.asset_instance.id
+
+        data = {
+            "person_id": self.person_id,
+            "comment": "test working file publish",
+            "output_type_id": self.cache_type_id,
+            "task_type_id": self.task_type_animation.id,
+            "working_file_id": self.working_file_id
+        }
+        result = self.post(
+            "data/asset-instances/%s/output-files/new" % self.asset_instance.id,
+            data
+        )
+
+        data = {
+            "output_type_id": self.cache_type_id,
+            "task_type_id": self.task_type_animation_id,
+            "name": "main"
+        }
+        result = self.post(
+            "data/asset-instances/%s/output-files/next-revision" %
+            self.asset_instance_id,
+            data,
+            200
+        )
+        self.assertEquals(result["next_revision"], 2)
+
+    def test_get_last_instance_outputs(self):
+        self.generate_fixture_shot_asset_instance()
+        self.task_type_animation_id = str(self.task_type_animation.id)
+        self.asset_instance_id = str(self.asset_instance.id)
+
+        data = {
+            "person_id": self.person_id,
+            "comment": "test working file publish",
+            "output_type_id": self.cache_type_id,
+            "task_type_id": self.task_type_animation.id,
+            "working_file_id": self.working_file_id
+        }
+        output_file = self.post(
+            "data/asset-instances/%s/output-files/new" % self.asset_instance.id,
+            data
+        )
+
+        result = self.get(
+            "data/asset-instances/%s/output-files/last-revisions" %
+            self.asset_instance_id,
+            200
+        )
+        self.assertEquals(
+            result[self.cache_type_id]["main"]["id"],
+            output_file["id"]
+        )
+
+    def test_get_output_types(self):
+        self.generate_fixture_shot_asset_instance()
+        self.task_type_animation_id = str(self.task_type_animation.id)
+        self.asset_instance_id = str(self.asset_instance.id)
+
+        data = {
+            "person_id": self.person_id,
+            "comment": "test working file publish",
+            "output_type_id": self.cache_type_id,
+            "task_type_id": self.task_type_animation.id,
+            "working_file_id": self.working_file_id
+        }
+        self.post(
+            "data/asset-instances/%s/output-files/new" % self.asset_instance.id,
+            data
+        )
+
+        result = self.get(
+            "data/asset-instances/%s/output-types" %
+            self.asset_instance_id,
+            200
+        )
+        print(result)
+        self.assertEquals(
+            result[0]["id"],
+            self.cache_type_id
+        )

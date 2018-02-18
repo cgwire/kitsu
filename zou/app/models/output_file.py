@@ -7,6 +7,11 @@ from zou.app.models.base import BaseMixin
 
 
 class OutputFile(db.Model, BaseMixin, SerializerMixin):
+    """
+    Describe a file generated from a CG artist scene. It is the result of a
+    publication.
+    It is linked to a working file, an entity and a task type.
+    """
     shotgun_id = db.Column(db.Integer())
 
     name = db.Column(db.String(250))
@@ -15,9 +20,11 @@ class OutputFile(db.Model, BaseMixin, SerializerMixin):
     comment = db.Column(db.Text())
     revision = db.Column(db.Integer())
     size = db.Column(db.Integer())
-    checksum = db.Column(db.Integer())
+    checksum = db.Column(db.String(32))
     source = db.Column(db.String(40))
     path = db.Column(db.String(400))
+    representation = db.Column(db.String(20))
+    canceled = db.Column(db.Boolean(), default=False, nullable=False)
 
     uploaded_movie_url = db.Column(db.String(600))
     uploaded_movie_name = db.Column(db.String(150))
@@ -29,13 +36,20 @@ class OutputFile(db.Model, BaseMixin, SerializerMixin):
             nullable=False
         )
 
-    task_id = db.Column(UUIDType(binary=False), db.ForeignKey("task.id"))
     entity_id = db.Column(UUIDType(binary=False), db.ForeignKey("entity.id"))
-    person_id = db.Column(UUIDType(binary=False), db.ForeignKey("person.id"))
+    asset_instance_id = db.Column(
+        UUIDType(binary=False),
+        db.ForeignKey("asset_instance.id")
+    )
     output_type_id = db.Column(
         UUIDType(binary=False),
         db.ForeignKey("output_type.id")
     )
+    task_type_id = db.Column(
+        UUIDType(binary=False),
+        db.ForeignKey("task_type.id")
+    )
+    person_id = db.Column(UUIDType(binary=False), db.ForeignKey("person.id"))
     source_file_id = \
         db.Column(
             UUIDType(binary=False),
@@ -51,6 +65,7 @@ class OutputFile(db.Model, BaseMixin, SerializerMixin):
             "name",
             "entity_id",
             "output_type_id",
+            "task_type_id",
             "revision",
             name="output_file_uc"
         ),

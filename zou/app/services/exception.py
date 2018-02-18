@@ -81,6 +81,10 @@ class EntityNotFoundException(NotFound):
     pass
 
 
+class EntityTypeNotFoundException(NotFound):
+    pass
+
+
 class MalformedFileTreeException(Exception):
     pass
 

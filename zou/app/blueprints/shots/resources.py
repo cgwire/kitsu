@@ -9,20 +9,11 @@ from zou.app.services import (
     projects_service,
     user_service
 )
+
+from zou.app.mixin import ArgsMixin
 from zou.app.utils import query, permissions
 
 from zou.app.services.exception import ShotNotFoundException
-
-
-class ArgsMixin(object):
-    def get_args(self, descriptors):
-        parser = reqparse.RequestParser()
-        for (name, default, required) in descriptors:
-            if required is None:
-                required = False
-            parser.add_argument(name, required=required, default=default)
-
-        return parser.parse_args()
 
 
 class ShotResource(Resource):
@@ -489,3 +480,45 @@ class ShotAssetInstancesResource(Resource, ArgsMixin):
             args["description"]
         )
         return shot, 201
+
+
+class SceneAssetInstancesResource(Resource, ArgsMixin):
+
+    @jwt_required
+    def get(self, scene_id):
+        """
+        Retrieve all asset instances linked to scene.
+        """
+        scene = shots_service.get_scene(scene_id)
+        user_service.check_project_access(scene["project_id"])
+        return breakdown_service.get_asset_instances_for_scene(scene_id)
+
+    @jwt_required
+    def post(self, scene_id):
+        """
+        Create an asset instance on given scene.
+        """
+        args = self.get_args([
+            ("asset_id", None, True),
+            ("description", None, False)
+        ])
+        scene = shots_service.get_scene(scene_id)
+        permissions.check_manager_permissions()
+        scene = breakdown_service.add_asset_instance_to_scene(
+            scene_id,
+            args["asset_id"],
+            args["description"]
+        )
+        return scene, 201
+
+
+class SceneCameraInstancesResource(Resource):
+
+    @jwt_required
+    def get(self, scene_id):
+        """
+        Retrieve all asset instances linked to scene.
+        """
+        scene = shots_service.get_scene(scene_id)
+        user_service.check_project_access(scene["project_id"])
+        return breakdown_service.get_camera_instances_for_scene(scene_id)

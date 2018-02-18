@@ -10,6 +10,8 @@ from . import config
 from .stores import auth_tokens_store
 from .services.exception import PersonNotFoundException
 
+from zou.app.utils import cache
+
 
 app = Flask(__name__)
 app.config.from_object(config)
@@ -29,6 +31,7 @@ db = SQLAlchemy(app)
 app.secret_key = app.config["SECRET_KEY"]
 jwt = JWTManager(app)
 Principal(app)
+cache.cache.init_app(app)
 
 
 def configure_auth():

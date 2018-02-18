@@ -1,7 +1,7 @@
 from tests.source.shotgun.base import ShotgunTestCase
 
 from zou.app.config import DEFAULT_FILE_TREE
-from zou.app.services import file_tree
+from zou.app.services import file_tree_service
 from zou.app.models.project_status import ProjectStatus
 
 
@@ -24,7 +24,7 @@ class ImportShotgunProjectTestCase(ShotgunTestCase):
         active_id = self.project_status[0]["id"]
         self.assertEqual(self.projects[0]["project_status_id"], active_id)
 
-        tree = file_tree.get_tree_from_file(DEFAULT_FILE_TREE)
+        tree = file_tree_service.get_tree_from_file(DEFAULT_FILE_TREE)
         self.assertDictEqual(self.projects[0]["file_tree"], tree)
 
     def test_import_projects_twice(self):

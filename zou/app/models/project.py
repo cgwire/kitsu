@@ -7,6 +7,9 @@ from zou.app.models.base import BaseMixin
 
 
 class Project(db.Model, BaseMixin, SerializerMixin):
+    """
+    Describes a CG production the studio works on.
+    """
     name = db.Column(db.String(80), nullable=False, unique=True)
     description = db.Column(db.String(200))
     shotgun_id = db.Column(db.Integer)

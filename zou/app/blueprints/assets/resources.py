@@ -172,7 +172,8 @@ class NewAssetResource(Resource):
     def post(self, project_id, asset_type_id):
         (
             name,
-            description
+            description,
+            data
         ) = self.get_arguments()
 
         permissions.check_manager_permissions()
@@ -180,7 +181,8 @@ class NewAssetResource(Resource):
             project_id,
             asset_type_id,
             name,
-            description
+            description,
+            data
         )
         return asset, 201
 
@@ -192,23 +194,13 @@ class NewAssetResource(Resource):
             required=True
         )
         parser.add_argument("description")
+        parser.add_argument("data", type=dict, default={})
         args = parser.parse_args()
         return (
             args["name"],
             args.get("description", ""),
+            args["data"]
         )
-
-
-class AssetAssetInstancesResource(Resource):
-
-    @jwt_required
-    def get(self, asset_id):
-        """
-        Retrieve all asset instances linked to asset.
-        """
-        asset = assets_service.get_asset(asset_id)
-        user_service.check_project_access(asset["project_id"])
-        return breakdown_service.get_asset_instances_for_asset(asset_id)
 
 
 class CastInResource(Resource):
@@ -222,3 +214,27 @@ class CastInResource(Resource):
         if not permissions.has_manager_permissions():
             user_service.check_has_task_related(asset["project_id"])
         return breakdown_service.get_cast_in(asset_id)
+
+
+class AssetShotAssetInstancesResource(Resource):
+
+    @jwt_required
+    def get(self, asset_id):
+        """
+        Retrieve all asset instances linked to asset.
+        """
+        asset = assets_service.get_asset(asset_id)
+        user_service.check_project_access(asset["project_id"])
+        return breakdown_service.get_shot_asset_instances_for_asset(asset_id)
+
+
+class AssetSceneAssetInstancesResource(Resource):
+
+    @jwt_required
+    def get(self, asset_id):
+        """
+        Retrieve all asset instances linked to asset.
+        """
+        asset = assets_service.get_asset(asset_id)
+        user_service.check_project_access(asset["project_id"])
+        return breakdown_service.get_scene_asset_instances_for_asset(asset_id)

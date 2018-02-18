@@ -227,7 +227,7 @@ def save_asset_type(asset_type_name):
     return asset_type.serialize(obj_type="AssetType")
 
 
-def create_asset(project_id, asset_type_id, name, description):
+def create_asset(project_id, asset_type_id, name, description, data):
     project = projects_service.get_project_raw(project_id)
     asset_type = get_asset_type_raw(asset_type_id)
 
@@ -235,7 +235,8 @@ def create_asset(project_id, asset_type_id, name, description):
         project_id=project_id,
         entity_type_id=asset_type_id,
         name=name,
-        description=description
+        description=description,
+        data=data
     )
     asset.save()
     asset_dict = asset.serialize(obj_type="Asset")

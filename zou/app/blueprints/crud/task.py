@@ -21,23 +21,27 @@ class TasksResource(BaseModelsResource):
         """
         try:
             data = request.json
-            assignees = data['assignees']
-            del data['assignees']
-            persons = Person.query.filter(Person.id.in_(assignees)).all()
+            is_assignees = "assignees" in data
+
+            if is_assignees:
+                assignees = data['assignees']
+                persons = Person.query.filter(Person.id.in_(assignees)).all()
+                del data["assignees"]
 
             instance = self.model(**data)
-            instance.assignees = persons
+            if assignees:
+                instance.assignees = persons
             instance.save()
 
             return instance.serialize(), 201
 
         except TypeError as exception:
-            current_app.logger.error(exception.message)
-            return {"error": exception.message}, 400
+            current_app.logger.error(str(exception))
+            return {"message": exception.message}, 400
 
         except IntegrityError as exception:
-            current_app.logger.error(exception.message)
-            return {"error": exception.message}, 400
+            current_app.logger.error(str(exception))
+            return {"message": exception.message}, 400
 
 
 class TaskResource(BaseModelResource):

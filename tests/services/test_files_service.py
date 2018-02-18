@@ -142,27 +142,11 @@ class FileServiceTestCase(ApiDBTestCase):
                 revision=2
             )
 
-    def test_get_last_output_revision(self):
-        output_file = files_service.create_new_output_revision(
-            self.entity.id,
-            self.working_file.id,
-            self.output_type.id,
-            self.person.id,
-            "comment"
-        )
-        output_file = files_service.create_new_output_revision(
-            self.entity.id,
-            self.working_file.id,
-            self.output_type.id,
-            self.person.id,
-            "comment"
-        )
-        self.assertEqual(output_file["revision"], 3)
-
     def test_get_next_output_file_revision(self):
         revision = files_service.get_next_output_file_revision(
             self.entity.id,
-            self.output_type.id
+            self.output_type.id,
+            self.task_type.id
         )
 
         self.assertEqual(revision, 2)
@@ -173,20 +157,23 @@ class FileServiceTestCase(ApiDBTestCase):
             self.entity.id,
             self.working_file.id,
             self.output_type.id,
-            self.person.id
+            self.person.id,
+            self.task_type.id
         )
         self.assertEqual(output_file["revision"], 1)
         output_file = files_service.create_new_output_revision(
             self.entity.id,
             self.working_file.id,
             self.output_type.id,
-            self.person.id
+            self.person.id,
+            self.task_type.id
         )
         self.assertEqual(output_file["revision"], 2)
 
         output_file = files_service.get_last_output_revision(
             self.entity.id,
-            self.output_type.id
+            self.output_type.id,
+            self.task_type.id
         )
         self.assertEqual(output_file["revision"], 2)
 
@@ -196,6 +183,7 @@ class FileServiceTestCase(ApiDBTestCase):
                 self.working_file.id,
                 self.output_type.id,
                 self.person.id,
+                self.task_type.id,
                 revision=1
             )
 

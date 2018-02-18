@@ -6,6 +6,9 @@ from zou.app.models.base import BaseMixin
 
 
 class TaskType(db.Model, BaseMixin, SerializerMixin):
+    """
+    Categorize tasks in domain areas: modeling, animation, etc.
+    """
     name = db.Column(db.String(40), nullable=False)
     color = db.Column(db.String(7), default="#FFFFFF")
     priority = db.Column(db.Integer, default=1)

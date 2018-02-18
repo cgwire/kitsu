@@ -4,11 +4,6 @@ from tests.base import ApiDBTestCase
 
 class BaseModelTestCase(ApiDBTestCase):
 
-    def test_repr(self):
-        self.generate_fixture_project_status()
-        self.generate_fixture_project()
-        self.assertEqual(str(self.project), "<Project %s>" % self.project.id)
-
     def test_query(self):
         pass
 

@@ -74,8 +74,8 @@ routes = [
     ("/data/time-spents/<instance_id>", TimeSpentResource),
     ("/data/custom-actions/", CustomActionsResource),
     ("/data/custom-actions/<instance_id>", CustomActionResource),
-    ("/data/asset-instances/", AssetInstanceResource),
-    ("/data/asset-instances/<instance_id>", AssetInstancesResource)
+    ("/data/asset-instances/", AssetInstancesResource),
+    ("/data/asset-instances/<instance_id>", AssetInstanceResource)
 ]
 
 blueprint = Blueprint("/data", "data")

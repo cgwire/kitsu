@@ -8,7 +8,8 @@ from babel import Locale
 
 def serialize_value(value):
     """
-    Utility function to handle the parsing of specific fields.
+    Utility function to handle the normalizing of specific fields.
+    The aim is to make the result JSON serializable
     """
     if isinstance(value, datetime.datetime):
         return value.isoformat()
@@ -44,12 +45,17 @@ def serialize_value(value):
 
 
 def serialize_list(list_value):
+    """
+    Serialize a list of any kind of objects into data structures JSON
+    serializable.
+    """
     return [serialize_value(value) for value in list_value]
 
 
 def serialize_dict(dict_value):
     """
-    Serialize a dict into simple data structures (useful for json dumping).
+    Serialize a dict of any kind of objects into data structures JSON
+    serializable.
     """
     result = {}
     for key in dict_value.keys():
@@ -70,20 +76,20 @@ def serialize_orm_arrays(array_value):
 
 def serialize_models(models):
     """
-    Serialize a list of models
+    Serialize a list of models (useful for json dumping)
     """
     return [model.serialize() for model in models if model is not None]
 
 
 def gen_uuid():
     """
-    Generate a unique identifier.
+    Generate a unique identifier (useful for json dumping).
     """
     return uuid.uuid4()
 
 
 def get_date_object(date_string, date_format="%Y-%m-%d"):
     """
-    Shortcut for date parsing.
+    Shortcut for date parsing (useful for json dumping).
     """
     return datetime.datetime.strptime(date_string, date_format)
