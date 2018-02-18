@@ -38,10 +38,10 @@
           <task-status-name class="short-name" :entry="entry">
           </task-status-name>
           <td class="is-reviewable">
-            {{ entry.is_reviewable }}
+            {{ translateBoolean(entry.is_reviewable) }}
           </td>
           <td class="is-done">
-            {{ entry.is_done }}
+            {{ translateBoolean(entry.is_done) }}
           </td>
           <row-actions
             :entry-id="entry.id"
@@ -99,6 +99,9 @@ export default {
     ]),
     onBodyScroll (event, position) {
       this.$refs.headerWrapper.style.left = `-${position.scrollLeft}px`
+    },
+    translateBoolean (booleanValue) {
+      return booleanValue ? this.$t('yes') : this.$t('no')
     }
   }
 }
