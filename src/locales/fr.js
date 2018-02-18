@@ -203,7 +203,8 @@ export default {
       name: 'Nom',
       short_name: 'Nom court',
       color: 'Couleur',
-      is_reviewable: 'Est vérifiable'
+      is_reviewable: 'Est vérifiable',
+      is_done: 'Est terminé'
     },
     delete_text: 'Êtes vous sur de vouloir retirer {name} de la base de données ?',
     delete_error: 'Une erreur est survenue lors de la suppression du statut de tâche. Êtes vous sûr qu\'aucune tâche n\'est lié à ce statut de tâche ?'

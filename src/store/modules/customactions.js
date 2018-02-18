@@ -33,6 +33,16 @@ const state = {
   }
 }
 
+const helpers = {
+  getOptions (customAction) {
+    return {
+      label: customAction.name,
+      value: customAction.url,
+      entity_type: customAction.entity_type
+    }
+  }
+}
+
 const getters = {
   customActions: state => state.customActions,
 
@@ -42,35 +52,32 @@ const getters = {
   editCustomAction: state => state.editCustomAction,
   deleteCustomAction: state => state.deleteCustomAction,
 
-  customAction: (state, getters) => (id) => {
+  customAction: (state, getters, rootState) => (id) => {
     return state.customActions.find(
       (customAction) => customAction.id === id
     )
   },
 
-  assetCustomActionOptions: state => state.customActions
-    .filter((customAction) => {
-      return customAction.entity_type === 'asset' ||
-             customAction.entity_type === 'all'
-    })
-    .map((customAction) => {
-      return {
-        label: customAction.name,
-        value: customAction.url
-      }
-    }),
+  allCustomActionOptions: (state) => {
+    return state
+      .customActions
+      .map(helpers.getOptions)
+      .filter((action) => action.entity_type === 'all')
+  },
 
-  shotCustomActionOptions: state => state.customActions
-    .filter((customAction) => {
-      return customAction.entity_type === 'shot' ||
-             customAction.entity_type === 'all'
-    })
-    .map((customAction) => {
-      return {
-        label: customAction.name,
-        value: customAction.url
-      }
-    })
+  assetCustomActionOptions: (state) => {
+    return state
+      .customActions
+      .map(helpers.getOptions)
+      .filter((action) => ['all', 'asset'].includes(action.entity_type))
+  },
+
+  shotCustomActionOptions: (state) => {
+    return state
+      .customActions
+      .map(helpers.getOptions)
+      .filter((action) => ['all', 'shot'].includes(action.entity_type))
+  }
 }
 
 const actions = {

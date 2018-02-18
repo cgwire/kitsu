@@ -60,6 +60,7 @@ export default {
   height: 100%;
   width: 100%;
 }
+
 .avatar {
   border-radius: 50%;
   color: white;
@@ -67,12 +68,18 @@ export default {
   align-items: center;
   justify-content: center;
 }
+
 .avatar span {
   flex: 1;
 }
+
 .avatar a {
   padding: 0;
   margin: 0;
   color: white;
+}
+
+.flexrow-item {
+  margin-right: 10px;
 }
 </style>

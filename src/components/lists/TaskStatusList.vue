@@ -13,6 +13,9 @@
           <th class="is-reviewable">
             {{ $t('task_status.fields.is_reviewable') }}
           </th>
+          <th class="is-done">
+            {{ $t('task_status.fields.is_done') }}
+          </th>
           <th class="actions"></th>
         </tr>
       </thead>
@@ -35,7 +38,10 @@
           <task-status-name class="short-name" :entry="entry">
           </task-status-name>
           <td class="is-reviewable">
-            {{ entry.is_reviewable }}
+            {{ translateBoolean(entry.is_reviewable) }}
+          </td>
+          <td class="is-done">
+            {{ translateBoolean(entry.is_done) }}
           </td>
           <row-actions
             :entry-id="entry.id"
@@ -93,6 +99,9 @@ export default {
     ]),
     onBodyScroll (event, position) {
       this.$refs.headerWrapper.style.left = `-${position.scrollLeft}px`
+    },
+    translateBoolean (booleanValue) {
+      return booleanValue ? this.$t('yes') : this.$t('no')
     }
   }
 }
@@ -110,6 +119,11 @@ export default {
 }
 
 .is-reviewable {
+  width: 120px;
+  min-width: 120px;
+}
+
+.is-done {
   width: 120px;
   min-width: 120px;
 }

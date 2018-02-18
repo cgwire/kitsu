@@ -69,17 +69,9 @@ const helpers = {
 }
 
 const getters = {
-  getTask: (state, getters) => (id) => {
-    return state.taskMap[id]
-  },
-
-  getTaskComments: (state, getters) => (id) => {
-    return state.taskComments[id]
-  },
-
-  getTaskPreviews: (state, getters) => (id) => {
-    return state.taskPreviews[id]
-  },
+  getTask: (state, getters) => (id) => state.taskMap[id],
+  getTaskComments: (state, getters) => (id) => state.taskComments[id],
+  getTaskPreviews: (state, getters) => (id) => state.taskPreviews[id],
 
   getTaskComment: (state, getters) => (taskId, commentId) => {
     return state.taskComments[taskId].find(
@@ -315,7 +307,7 @@ const mutations = {
           project_name: asset.project_name,
 
           entity_name: `${asset.asset_type_name} / ${asset.name}`,
-          entity_type_name: asset.entity_type_name,
+          entity_type_name: asset.asset_type_name,
           entity: {
             id: asset.id,
             preview_file_id: asset.preview_file_id
@@ -364,7 +356,8 @@ const mutations = {
 
           project_name: shot.project_name,
 
-          entity_type_name: shot.entity_type_name,
+          entity_type_name: 'Shot',
+          sequence_name: shot.sequence_name,
           entity: {
             id: shot.id,
             preview_file_id: shot.preview_file_id
@@ -466,7 +459,8 @@ const mutations = {
       task_status_id: comment.task_status_id,
       task_status_name: comment.task_status.name,
       task_status_short_name: comment.task_status.short_name,
-      task_status_color: comment.task_status.color
+      task_status_color: comment.task_status.color,
+      last_comment: comment
     })
   },
 

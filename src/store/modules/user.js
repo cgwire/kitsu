@@ -275,7 +275,8 @@ const mutations = {
         task_status_id: taskStatus.id,
         task_status_name: taskStatus.name,
         task_status_short_name: taskStatus.short_name,
-        task_status_color: taskStatus.color
+        task_status_color: taskStatus.color,
+        last_comment: comment
       })
       state.todosIndex = buildTaskIndex(state.todos)
     }
