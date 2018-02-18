@@ -146,9 +146,17 @@ def init_data():
         "Done",
         "done",
         "#22d160",
-        is_reviewable=True
+        is_done=True
     )
     print("Task status initialized.")
+
+
+@cli.command()
+def patch_set_done_flag_on_task_status():
+    for task_status in tasks_service.get_task_statuses():
+        tasks_service.update_task_status(task_status["id"], {
+            "is_done": task_status["short_name"] == "done"
+        })
 
 
 if __name__ == '__main__':
