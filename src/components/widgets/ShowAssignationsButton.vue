@@ -5,7 +5,7 @@
   v-if="isShowAssignations"
 >
   <eye-off-icon class="icon is-small"></eye-off-icon>
-  <span class="text">Hide assignations</span>
+  <span class="text is-hidden-touch">Hide assignations</span>
 </button>
 <button
   class="level-item button"
@@ -13,7 +13,7 @@
   v-else
 >
   <eye-icon class="icon is-small"></eye-icon>
-  <span class="text">Show assignations</span>
+  <span class="text is-hidden-touch">Show assignations</span>
 </button>
 </template>
 

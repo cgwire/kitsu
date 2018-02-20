@@ -76,6 +76,12 @@ export default {
   width: 300px;
 }
 
+@media screen and (max-width: 768px) {
+  .search-input {
+    width: 200px;
+  }
+}
+
 .search-input::placeholder {
   color: #CCC;
 }

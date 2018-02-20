@@ -3,6 +3,7 @@
     <aside v-bind:class="{'hidden': isSidebarHidden}">
       <div>
         <router-link
+           class="home-link"
            to="/"
         >
           <p
@@ -181,5 +182,23 @@ aside section {
 
 h2 {
   margin-top: 2em;
+}
+
+@media screen and (max-width: 768px) {
+  .company-logo img {
+    width: 40px;
+    margin: 0;
+    flex: 1;
+  }
+
+  .home-link {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+  }
+
+  .home-link h2 {
+    margin-bottom: 0;
+  }
 }
 </style>

@@ -34,6 +34,10 @@ export default {
   vertical-align: middle;
 }
 
+th.actions {
+  min-width: 200px;
+}
+
 .avatar {
   border-radius: 50%;
   color: white;

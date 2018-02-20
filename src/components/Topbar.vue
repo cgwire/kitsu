@@ -12,7 +12,7 @@
            v-bind:class="{'selected': !isSidebarHidden}">
           ≡
         </a>
-        <router-link class="nav-item current-project"
+        <router-link class="nav-item home-button"
            to="/">
           <img src="../assets/logo.png" />
         </router-link>
@@ -223,8 +223,17 @@ export default {
 }
 
 @media screen and (max-width: 768px) {
+  .home-button {
+    display: none;
+  }
+
   .nav-right {
     display: flex;
+    flex:0;
+  }
+
+  .nav-item {
+    justify-content: right;
   }
 
   .user-name {
@@ -237,6 +246,15 @@ export default {
 
   .user-menu {
     right: -160;
+  }
+
+  .production-selector-label {
+    display: none;
+  }
+
+  .field.production-selector {
+    padding: 0;
+    margin-top: 2em;
   }
 }
 
