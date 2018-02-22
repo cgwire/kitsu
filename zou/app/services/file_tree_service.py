@@ -129,7 +129,8 @@ def get_output_file_name(
     output_type=None,
     task_type=None,
     name="",
-    revision=1
+    revision=1,
+    nb_elements=1
 ):
     project = get_project(entity)
     tree = get_tree_from_project(project)
@@ -145,6 +146,9 @@ def get_output_file_name(
         revision=revision
     )
 
+    if nb_elements > 1:
+        file_name += "_[1-%s]" % nb_elements
+
     return u"%s" % file_name
 
 
@@ -154,7 +158,8 @@ def get_instance_file_name(
     task_type=None,
     mode="output",
     name="main",
-    revision=1
+    revision=1,
+    nb_elements=1
 ):
     shot = tasks_service.get_entity(asset_instance["entity_id"])
     asset = tasks_service.get_entity(asset_instance["asset_id"])
@@ -172,6 +177,9 @@ def get_instance_file_name(
         asset=asset,
         revision=revision
     )
+
+    if nb_elements > 1:
+        file_name += "_[1-%s]" % nb_elements
 
     return u"%s" % file_name
 

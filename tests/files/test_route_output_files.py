@@ -213,6 +213,31 @@ class RouteOutputFilesTestCase(ApiDBTestCase):
             "cosmos_landromat_props_tree_shaders_texture_special_v001.tx"
         )
 
+    def test_new_output_with_extension_and_elements(self):
+        data = {
+            "person_id": self.person_id,
+            "comment": "test working file publish with extension",
+            "output_type_id": self.tx_type_id,
+            "task_type_id": self.task_type_id,
+            "working_file_id": self.working_file_id,
+            "extension": ".jpg",
+            "nb_elements": 50,
+            "name": "special"
+        }
+        result = self.new_output(data)
+        output_file_id = result["id"]
+        output_file = self.get("/data/output-files/%s" % output_file_id)
+
+        self.assertEqual(output_file["extension"], ".jpg")
+        self.assertEqual(output_file["nb_elements"], 50)
+        self.assertEqual(
+            output_file["path"],
+            "/simple/productions/export/cosmos_landromat/assets/props/tree/"
+            "shaders/texture/"
+            "cosmos_landromat_props_tree_shaders_"
+            "texture_special_v001_[1-50].jpg"
+        )
+
     def test_new_output_again(self):
         data = {
             "comment": "test working file publish",

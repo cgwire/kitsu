@@ -51,6 +51,8 @@ class FileTreeTestCase(ApiDBTestCase):
         self.shot_standard.save()
         self.output_type_cache = files_service.get_or_create_output_type(
             "Cache")
+        self.output_type_image = files_service.get_or_create_output_type(
+            "Images")
 
     def test_get_tree_from_file(self):
         simple_tree = file_tree_service.get_tree_from_file("simple")
@@ -302,6 +304,19 @@ class FileTreeTestCase(ApiDBTestCase):
         self.assertEquals(
             file_name,
             "cosmos_landromat_props_tree_geometry_main_v003"
+        )
+
+    def test_get_output_file_name_shot_image_sequence(self):
+        file_name = file_tree_service.get_output_file_name(
+            self.shot.serialize(),
+            name="main",
+            revision=3,
+            output_type=self.output_type_image,
+            nb_elements=50
+        )
+        self.assertEquals(
+            file_name,
+            "cosmos_landromat_s01_p01_images_main_v003_[1-50]"
         )
 
     def test_get_working_file_name_shot(self):

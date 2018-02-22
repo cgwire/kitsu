@@ -459,7 +459,8 @@ class NewEntityOutputFileResource(Resource, ArgsMixin):
                 name=args["name"],
                 comment=args["comment"],
                 representation=args["representation"],
-                extension=args["extension"]
+                extension=args["extension"],
+                nb_elements=int(args["nb_elements"])
             )
 
             output_file_dict = self.add_path_info(
@@ -471,7 +472,8 @@ class NewEntityOutputFileResource(Resource, ArgsMixin):
                 name=args["name"],
                 extension=args["extension"],
                 representation=args["representation"],
-                separator=args["sep"]
+                separator=args["sep"],
+                nb_elements=int(args["nb_elements"])
             )
         except OutputTypeNotFoundException:
             return {"error": "Cannot find given output type."}, 400
@@ -494,6 +496,7 @@ class NewEntityOutputFileResource(Resource, ArgsMixin):
             ("revision", 0, False),
             ("extension", "", False),
             ("representation", "", False),
+            ("nb_elements", 1, False),
             ("sep", "/", False)
         ])
 
@@ -507,6 +510,7 @@ class NewEntityOutputFileResource(Resource, ArgsMixin):
         name="main",
         extension="",
         representation="",
+        nb_elements=1,
         separator="/"
     ):
         folder_path = file_tree_service.get_output_folder_path(
@@ -525,7 +529,8 @@ class NewEntityOutputFileResource(Resource, ArgsMixin):
             revision=output_file["revision"],
             output_type=output_type,
             task_type=task_type,
-            name=name
+            name=name,
+            nb_elements=nb_elements
         )
 
         output_file = files_service.update_output_file(
@@ -599,6 +604,7 @@ class NewInstanceOutputFileResource(Resource, ArgsMixin):
                 name=args["name"],
                 representation=args["representation"],
                 comment=args["comment"],
+                nb_elements=int(args["nb_elements"]),
                 extension=args["extension"]
             )
 
@@ -611,6 +617,7 @@ class NewInstanceOutputFileResource(Resource, ArgsMixin):
                 name=args["name"],
                 extension=args["extension"],
                 representation=args["representation"],
+                nb_elements=int(args["nb_elements"]),
                 separator=args["sep"]
             )
         except OutputTypeNotFoundException:
@@ -634,6 +641,8 @@ class NewInstanceOutputFileResource(Resource, ArgsMixin):
             ("revision", 0, False),
             ("extension", "", False),
             ("representation", "", False),
+            ("is_sequence", False, False),
+            ("nb_elements", 1, False),
             ("sep", "/", False)
         ])
 
@@ -647,6 +656,7 @@ class NewInstanceOutputFileResource(Resource, ArgsMixin):
         name="main",
         extension="",
         representation="",
+        nb_elements=1,
         separator="/"
     ):
         folder_path = file_tree_service.get_instance_folder_path(

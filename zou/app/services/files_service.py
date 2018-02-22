@@ -210,7 +210,8 @@ def create_new_output_revision(
     representation="",
     name="main",
     comment="",
-    extension=""
+    extension="",
+    nb_elements=1
 ):
     """
     Create a new ouput file for given entity. Output type, task type, author
@@ -251,7 +252,8 @@ def create_new_output_revision(
             source_file_id=working_file_id,
             output_type_id=output_type_id,
             file_status_id=file_status_id,
-            task_type_id=task_type_id
+            task_type_id=task_type_id,
+            nb_elements=nb_elements
         )
         output_file.save()
     except IntegrityError:
