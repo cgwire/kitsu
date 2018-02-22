@@ -10,6 +10,7 @@ class TaskType(db.Model, BaseMixin, SerializerMixin):
     Categorize tasks in domain areas: modeling, animation, etc.
     """
     name = db.Column(db.String(40), nullable=False)
+    short_name = db.Column(db.String(10))
     color = db.Column(db.String(7), default="#FFFFFF")
     priority = db.Column(db.Integer, default=1)
     for_shots = db.Column(db.Boolean, default=False)

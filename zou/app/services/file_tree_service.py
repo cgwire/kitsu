@@ -27,6 +27,8 @@ from zou.app.services.exception import (
     TaskNotFoundException
 )
 
+ALLOWED_FIELDS = ["short_name"]
+
 
 def get_working_file_path(
     task,
@@ -394,12 +396,22 @@ def update_variable(
     revision=1,
     style="lowercase"
 ):
-    variables = re.findall('<(\w*)>', template)
+    variables = re.findall('<([\w\.]*)>', template)
 
     render = template
     for variable in variables:
+        variable_infos = variable.split(".")
+        data_type = variable_infos[0]
+        is_field_given = len(variable_infos) > 1
+        if is_field_given:
+            field = variable_infos[1]
+            if field not in ALLOWED_FIELDS:
+                field = "name"
+        else:
+            field = "name"
+
         data = get_folder_from_datatype(
-            variable,
+            data_type,
             entity=entity,
             task=task,
             task_type=task_type,
@@ -409,13 +421,13 @@ def update_variable(
             asset_instance=asset_instance,
             asset=asset,
             representation=representation,
-            revision=revision
+            revision=revision,
+            field=field
         )
         render = render.replace(
             "<%s>" % variable,
             apply_style(slugify(data, separator="_"), style)
         )
-
     return render
 
 
@@ -430,16 +442,17 @@ def get_folder_from_datatype(
     asset_instance=None,
     asset=None,
     representation="",
-    revision=1
+    revision=1,
+    field="name"
 ):
     if datatype == "Project":
         folder = get_folder_from_project(entity)
     elif datatype == "Task":
         folder = get_folder_from_task(task)
     elif datatype == "TaskType":
-        folder = get_folder_from_task_type(task, task_type)
+        folder = get_folder_from_task_type(task, task_type, field)
     elif datatype == "Department":
-        folder = get_folder_from_department(task)
+        folder = get_folder_from_department(task, field)
     elif datatype == "Shot":
         folder = get_folder_from_shot(entity)
     elif datatype == "TemporalEntity":
@@ -461,9 +474,9 @@ def get_folder_from_datatype(
         else:
             folder = get_folder_from_asset(asset)
     elif datatype == "Software":
-        folder = get_folder_from_software(software)
+        folder = get_folder_from_software(software, field)
     elif datatype == "OutputType":
-        folder = get_folder_from_output_type(output_type)
+        folder = get_folder_from_output_type(output_type, field)
     elif datatype == "Scene":
         folder = get_folder_from_scene(entity)
     elif datatype == "Instance":
@@ -493,28 +506,28 @@ def get_folder_from_shot(shot):
     return shot["name"]
 
 
-def get_folder_from_output_type(output_type):
+def get_folder_from_output_type(output_type, field="name"):
     if output_type is None:
         output_type = files_service.get_or_create_output_type("Geometry")
 
-    return output_type["name"].lower()
+    return output_type[field].lower()
 
 
-def get_folder_from_department(task):
+def get_folder_from_department(task, field="name"):
     folder = ""
     department = tasks_service.get_department_from_task(task["id"])
-    folder = department["name"]
+    folder = department[field]
     return folder
 
 
-def get_folder_from_task_type(task, task_type):
+def get_folder_from_task_type(task, task_type, field="name"):
     folder = ""
     if task_type is None and task is not None:
         task_type = tasks_service.get_task_type(task["task_type_id"])
         if task_type is not None:
-            folder = task_type["name"]
+            folder = task_type[field]
     elif task_type is not None:
-        folder = task_type["name"]
+        folder = task_type[field]
     return folder
 
 
@@ -584,10 +597,10 @@ def get_folder_from_asset_type(asset):
     return folder
 
 
-def get_folder_from_software(software):
+def get_folder_from_software(software, field="name"):
     if software is None:
         software = files_service.get_or_create_software("3dsmax", "max", ".max")
-    return software["name"]
+    return software[field]
 
 
 def get_folder_from_scene(scene):

@@ -20,6 +20,7 @@ class ImportShotgunStepsResource(BaseImportShotgunResource):
         department_name = self.extract_department_name(sg_step)
         return {
             "name": sg_step["code"],
+            "short_name": sg_step.get("sg_short_name", ""),
             "shotgun_id": sg_step["id"],
             "color": color,
             "department_name": department_name

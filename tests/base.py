@@ -497,12 +497,14 @@ class ApiDBTestCase(ApiTestCase):
     def generate_fixture_task_type(self):
         self.task_type = TaskType(
             name="Shaders",
+            short_name="shd",
             color="#FFFFFF",
             department_id=self.department.id
         )
         self.task_type.save()
         self.task_type_animation = TaskType(
             name="Animation",
+            short_name="anim",
             color="#FFFFFF",
             department_id=self.department_animation.id
         )
