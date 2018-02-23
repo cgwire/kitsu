@@ -30,6 +30,9 @@ class ShotResource(Resource):
 
     @jwt_required
     def delete(self, shot_id):
+        """
+        Delete given shot.
+        """
         try:
             permissions.check_manager_permissions()
             deleted_shot = shots_service.remove_shot(shot_id)
@@ -56,6 +59,9 @@ class SceneResource(Resource):
 
     @jwt_required
     def delete(self, scene_id):
+        """
+        Delete given scene.
+        """
         permissions.check_manager_permissions()
         deleted_scene = shots_service.remove_scene(scene_id)
 

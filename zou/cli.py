@@ -153,6 +153,9 @@ def init_data():
 
 @cli.command()
 def patch_set_done_flag_on_task_status():
+    """
+    Patch to run after upgrade from 0.4.8 or lower to 0.4.9 or superior.
+    """
     for task_status in tasks_service.get_task_statuses():
         tasks_service.update_task_status(task_status["id"], {
             "is_done": task_status["short_name"] == "done"
