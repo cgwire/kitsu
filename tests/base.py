@@ -255,7 +255,6 @@ class ApiDBTestCase(ApiTestCase):
             FileStatus,
             DataImportError
         ]
-        from zou.app import db
         for model in models:
             model_instances = model.query.all()
 
@@ -733,6 +732,8 @@ class ApiDBTestCase(ApiTestCase):
         output_type=None,
         revision=1,
         name="main",
+        representation="",
+        asset_instance=None,
         task=None
     ):
         if output_type is None:
@@ -745,6 +746,11 @@ class ApiDBTestCase(ApiTestCase):
             task_type_id = task.task_type_id
             entity_id = task.entity_id
 
+        if asset_instance is None:
+            asset_instance_id = None
+        else:
+            asset_instance_id = asset_instance.id
+
         self.output_file = OutputFile.create(
             comment="",
             revision=revision,
@@ -753,6 +759,8 @@ class ApiDBTestCase(ApiTestCase):
             person_id=self.person.id,
             file_status_id=self.file_status.id,
             output_type_id=output_type.id,
+            asset_instance_id=asset_instance_id,
+            representation=representation,
             name=name
         )
         return self.output_file

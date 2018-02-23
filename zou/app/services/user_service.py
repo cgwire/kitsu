@@ -33,7 +33,9 @@ def asset_type_filter():
     shot_type = shots_service.get_shot_type()
     sequence_type = shots_service.get_sequence_type()
     episode_type = shots_service.get_episode_type()
+    scene_type = shots_service.get_scene_type()
     return ~EntityType.id.in_([
+        scene_type["id"],
         shot_type["id"],
         sequence_type["id"],
         episode_type["id"]

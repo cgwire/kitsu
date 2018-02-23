@@ -832,13 +832,19 @@ class EntityOutputTypeOutputFilesResource(Resource):
 
     @jwt_required
     def get(self, entity_id, output_type_id):
+        representation = request.args.get("representation", None)
+
         entity = entities_service.get_entity(entity_id)
         files_service.get_output_type(output_type_id)
         user_service.check_project_access(entity["project_id"])
-        return files_service.get_output_files_for_output_types_and_entity(
-            entity_id,
-            output_type_id
-        )
+        output_files = \
+            files_service.get_output_files_for_output_type_and_entity(
+                entity_id,
+                output_type_id,
+                representation=representation
+            )
+
+        return output_files
 
 
 class InstanceOutputTypeOutputFilesResource(Resource):
@@ -848,15 +854,19 @@ class InstanceOutputTypeOutputFilesResource(Resource):
 
     @jwt_required
     def get(self, asset_instance_id, output_type_id):
+        representation = request.args.get("representation", None)
+
         asset_instance = assets_service.get_asset_instance(asset_instance_id)
         asset = assets_service.get_asset(asset_instance["asset_id"])
         user_service.check_project_access(asset["project_id"])
 
         files_service.get_output_type(output_type_id)
-        return files_service.get_output_files_for_output_type_and_asset_instance(
-            asset_instance_id,
-            output_type_id
-        )
+        return \
+            files_service.get_output_files_for_output_type_and_asset_instance(
+                asset_instance_id,
+                output_type_id,
+                representation=representation
+            )
 
 
 class FileResource(Resource):

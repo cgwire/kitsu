@@ -67,6 +67,7 @@ class OutputFile(db.Model, BaseMixin, SerializerMixin):
             "entity_id",
             "output_type_id",
             "task_type_id",
+            "representation",
             "revision",
             name="output_file_uc"
         ),

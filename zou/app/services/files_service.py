@@ -503,28 +503,41 @@ def get_output_types_for_instance(asset_instance_id):
     return OutputType.serialize_list(output_types)
 
 
-def get_output_files_for_output_types_and_entity(entity_id, output_type_id):
+def get_output_files_for_output_type_and_entity(
+    entity_id,
+    output_type_id,
+    representation=None
+):
     """
     Get output files created for given entity and output type.
     """
-    output_files = OutputFile.query \
+    query = OutputFile.query \
         .filter(OutputFile.entity_id == entity_id) \
         .filter(OutputFile.output_type_id == output_type_id) \
         .order_by(desc(OutputFile.revision)) \
-        .all()
+
+    if representation is not None:
+        query = query.filter(OutputFile.representation == representation)
+
+    output_files = query.all()
     return OutputFile.serialize_list(output_files)
 
 
 def get_output_files_for_output_type_and_asset_instance(
     asset_instance_id,
-    output_type_id
+    output_type_id,
+    representation=None
 ):
     """
     Get output files created for given asset instance and output type.
     """
-    output_files = OutputFile.query \
+    query = OutputFile.query \
         .filter(OutputFile.asset_instance_id == asset_instance_id) \
         .filter(OutputFile.output_type_id == output_type_id) \
-        .order_by(desc(OutputFile.revision)) \
-        .all()
+        .order_by(desc(OutputFile.revision))
+
+    if representation is not None:
+        query = query.filter(OutputFile.representation == representation)
+
+    output_files = query.all()
     return OutputFile.serialize_list(output_files)

@@ -213,3 +213,85 @@ class FileServiceTestCase(ApiDBTestCase):
             last_output_files[str(cache.id)][cache_file.name]["revision"],
             3
         )
+
+    def test_get_output_files_for_output_type_and_entity(self):
+        geometry = self.output_type
+        self.generate_fixture_output_file(geometry, 1, representation="obj")
+        self.generate_fixture_output_file(geometry, 2, representation="obj")
+        self.generate_fixture_output_file(geometry, 3, representation="obj")
+        self.generate_fixture_output_file(geometry, 4, representation="obj")
+
+        self.generate_fixture_output_file(geometry, 1, representation="max")
+        self.generate_fixture_output_file(geometry, 2, representation="max")
+        self.generate_fixture_output_file(geometry, 3, representation="max")
+
+        output_files = \
+            files_service.get_output_files_for_output_type_and_entity(
+                self.entity.id,
+                geometry.id
+            )
+        self.assertEquals(len(output_files), 8)
+
+        output_files = \
+            files_service.get_output_files_for_output_type_and_entity(
+                str(self.entity.id),
+                geometry.id,
+                representation="obj"
+            )
+        self.assertEquals(len(output_files), 4)
+
+        output_files = \
+            files_service.get_output_files_for_output_type_and_entity(
+                str(self.entity.id),
+                geometry.id,
+                representation="max"
+            )
+        self.assertEquals(len(output_files), 3)
+
+    def test_get_output_files_for_output_type_and_asset_instance(self):
+        asset_instance = self.generate_fixture_shot_asset_instance(
+            asset=self.entity,
+            shot=self.shot
+        )
+        geometry = self.output_type
+        self.generate_fixture_output_file(
+            geometry, 1, representation="obj", asset_instance=asset_instance)
+        self.generate_fixture_output_file(
+            geometry, 2, representation="obj", asset_instance=asset_instance)
+        self.generate_fixture_output_file(
+            geometry, 3, representation="obj", asset_instance=asset_instance)
+        self.generate_fixture_output_file(
+            geometry, 4, representation="obj", asset_instance=asset_instance)
+
+        self.generate_fixture_output_file(
+            geometry, 1, representation="max", asset_instance=asset_instance)
+        self.generate_fixture_output_file(
+            geometry, 2, representation="max", asset_instance=asset_instance)
+        self.generate_fixture_output_file(
+            geometry, 3, representation="max", asset_instance=asset_instance)
+
+        output_files = \
+            files_service.get_output_files_for_output_type_and_asset_instance(
+                self.entity.id,
+                geometry.id,
+                asset_instance_id=asset_instance.id
+            )
+        self.assertEquals(len(output_files), 8)
+
+        output_files = \
+            files_service.get_output_files_for_output_type_and_asset_instance(
+                str(self.entity.id),
+                geometry.id,
+                representation="obj",
+                asset_instance_id=asset_instance.id
+            )
+        self.assertEquals(len(output_files), 4)
+
+        output_files = \
+            files_service.get_output_files_for_output_type_and_asset_instance(
+                str(self.entity.id),
+                geometry.id,
+                representation="max",
+                asset_instance_id=asset_instance.id
+            )
+        self.assertEquals(len(output_files), 3)
