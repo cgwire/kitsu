@@ -479,7 +479,7 @@ class ShotAssetInstancesResource(Resource, ArgsMixin):
             ("description", None, False)
         ])
         shot = shots_service.get_shot(shot_id)
-        user_service.check_project_access(scene["project_id"])
+        user_service.check_project_access(shot["project_id"])
         shot = breakdown_service.add_asset_instance_to_shot(
             shot_id,
             args["asset_id"],

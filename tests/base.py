@@ -462,6 +462,7 @@ class ApiDBTestCase(ApiTestCase):
             number=number,
             description="Asset instance description"
         )
+        return self.asset_instance
 
     def generate_fixture_scene_asset_instance(
         self,
@@ -480,6 +481,7 @@ class ApiDBTestCase(ApiTestCase):
             number=number,
             description="Asset instance description"
         )
+        return self.asset_instance
 
     def generate_fixture_user(self):
         self.user = Person.create(
