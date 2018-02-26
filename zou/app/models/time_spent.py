@@ -12,9 +12,12 @@ class TimeSpent(db.Model, BaseMixin, SerializerMixin):
     date = db.Column(db.Date, nullable=False)
 
     task_id = \
-        db.Column(UUIDType(binary=False), db.ForeignKey('task.id'))
-    person_id = \
-        db.Column(UUIDType(binary=False), db.ForeignKey('person.id'))
+        db.Column(UUIDType(binary=False), db.ForeignKey('task.id'), index=True)
+    person_id = db.Column(
+        UUIDType(binary=False),
+        db.ForeignKey('person.id'),
+        index=True
+    )
 
     __table_args__ = (
         db.UniqueConstraint(

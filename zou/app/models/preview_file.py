@@ -23,7 +23,11 @@ class PreviewFile(db.Model, BaseMixin, SerializerMixin):
     uploaded_movie_url = db.Column(db.String(600))
     uploaded_movie_name = db.Column(db.String(150))
 
-    task_id = db.Column(UUIDType(binary=False), db.ForeignKey("task.id"))
+    task_id = db.Column(
+        UUIDType(binary=False),
+        db.ForeignKey("task.id"),
+        index=True
+    )
     person_id = db.Column(UUIDType(binary=False), db.ForeignKey("person.id"))
 
     source_file_id = db.Column(
