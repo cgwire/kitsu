@@ -7,12 +7,10 @@ from mixer.backend.flask import mixer
 
 from zou.app import app
 from zou.app.utils import fields, auth
-from zou.app.services import file_tree_service, shots_service
+from zou.app.services import file_tree_service
 
 from zou.app.models.project import Project
 from zou.app.models.person import Person
-from zou.app.models.comment import Comment
-from zou.app.models.custom_action import CustomAction
 from zou.app.models.department import Department
 from zou.app.models.working_file import WorkingFile
 from zou.app.models.output_file import OutputFile
@@ -27,8 +25,6 @@ from zou.app.models.task_type import TaskType
 from zou.app.models.task_status import TaskStatus
 from zou.app.models.file_status import FileStatus
 from zou.app.models.asset_instance import AssetInstance
-from zou.app.models.time_spent import TimeSpent
-from zou.app.models.data_import_error import DataImportError
 
 
 class ApiTestCase(unittest.TestCase):
@@ -203,19 +199,15 @@ class ApiTestCase(unittest.TestCase):
 
 class ApiDBTestCase(ApiTestCase):
 
-    @classmethod
-    def setUpClass(cls):
-        from zou.app.utils import dbhelpers
-        if not dbhelpers.is_db_exists():
-            dbhelpers.drop_all()
-            dbhelpers.create_all()
-
     def setUp(self):
         """
         Reset database before each test.
         """
         super(ApiDBTestCase, self).setUp()
-        self.delete_all()
+
+        from zou.app.utils import dbhelpers
+        dbhelpers.drop_all()
+        dbhelpers.create_all()
         self.generate_fixture_user()
         self.log_in_admin()
 
@@ -223,65 +215,8 @@ class ApiDBTestCase(ApiTestCase):
         """
         Delete database after each test.
         """
-        self.delete_all()
-
-    def delete_all(self):
-        """
-        Function that aims at clearing the database faster than by
-        dropping and creating the tables.
-        """
-
-        # Here, the list order matters. It ensures that deletion
-        # respects data dependencies (foreign keys).
-        models = [
-            PreviewFile,
-            OutputFile,
-            WorkingFile,
-            AssetInstance,
-            Comment,
-            TimeSpent,
-            Task,
-            Entity,
-            EntityType,
-            Project,
-            Person,
-            TaskType,
-            OutputType,
-            Department,
-            Software,
-            CustomAction,
-            ProjectStatus,
-            TaskStatus,
-            FileStatus,
-            DataImportError
-        ]
-        from zou.app.utils import cache
-
-        cache.clear()
-        for model in models:
-            model_instances = model.query.all()
-
-            if model == Entity:
-                episode_type = shots_service.get_episode_type()
-                sequence_type = shots_service.get_sequence_type()
-
-                for model_instance in model_instances:
-                    if str(model_instance.entity_type_id) not in [
-                        episode_type["id"],
-                        sequence_type["id"]
-                    ]:
-                        model_instance.delete()
-
-                for model_instance in model_instances:
-                    if str(model_instance.entity_type_id) != episode_type["id"]:
-                        model_instance.delete()
-
-                for model_instance in model_instances:
-                    model_instance.delete()
-            else:
-                for model_instance in model_instances:
-                    model_instance.delete()
-        cache.clear()
+        from zou.app.utils import dbhelpers
+        dbhelpers.drop_all()
 
     def generate_data(self, cls, number, **kwargs):
         """
