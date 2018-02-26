@@ -255,12 +255,13 @@ class ApiDBTestCase(ApiTestCase):
             FileStatus,
             DataImportError
         ]
+        from zou.app.utils import cache
+
+        cache.clear()
         for model in models:
             model_instances = model.query.all()
 
             if model == Entity:
-                from zou.app.utils import cache
-                cache.clear()
                 episode_type = shots_service.get_episode_type()
                 sequence_type = shots_service.get_sequence_type()
 
@@ -280,8 +281,6 @@ class ApiDBTestCase(ApiTestCase):
             else:
                 for model_instance in model_instances:
                     model_instance.delete()
-
-        from zou.app.utils import cache
         cache.clear()
 
     def generate_data(self, cls, number, **kwargs):
@@ -296,84 +295,74 @@ class ApiDBTestCase(ApiTestCase):
         )
 
     def generate_fixture_project_status(self):
-        self.open_status = ProjectStatus(name="open", color="#FFFFFF")
-        self.open_status.save()
+        self.open_status = ProjectStatus.create(name="open", color="#FFFFFF")
 
     def generate_fixture_project_closed_status(self):
-        self.closed_status = ProjectStatus(name="closed", color="#FFFFFF")
-        self.closed_status.save()
+        self.closed_status = ProjectStatus.create(name="closed", color="#FFFFFF")
 
     def generate_fixture_project(self):
-        self.project = Project(
+        self.project = Project.create(
             name="Cosmos Landromat",
             project_status_id=self.open_status.id
         )
-        self.project.save()
         self.project.update({
             "file_tree": file_tree_service.get_tree_from_file("simple")
         })
 
     def generate_fixture_project_closed(self):
-        self.project_closed = Project(
+        self.project_closed = Project.create(
             name="Old Project",
             project_status_id=self.closed_status.id
         )
-        self.project_closed.save()
 
     def generate_fixture_project_standard(self):
-        self.project_standard = Project(
+        self.project_standard = Project.create(
             name="Big Buck Bunny",
             project_status_id=self.open_status.id
         )
-        self.project_standard.save()
         self.project_standard.update({
-            "file_tree": file_tree_service.get_tree_from_file("standard")
+            "file_tree": file_tree_service.get_tree_from_file("default")
         })
 
     def generate_fixture_project_no_preview_tree(self):
-        self.project_no_preview_tree = Project(
+        self.project_no_preview_tree = Project.create(
             name="Agent 327",
             project_status_id=self.open_status.id
         )
-        self.project_no_preview_tree.save()
         self.project_no_preview_tree.update({
             "file_tree": file_tree_service.get_tree_from_file("no_preview")
         })
 
     def generate_fixture_entity(self):
-        self.entity = Entity(
+        self.entity = Entity.create(
             name="Tree",
             description="Description Tree",
             project_id=self.project.id,
             entity_type_id=self.entity_type.id
         )
-        self.entity.save()
 
     def generate_fixture_entity_character(self):
-        self.entity_character = Entity(
+        self.entity_character = Entity.create(
             name="Rabbit",
             description="Main character",
             project_id=self.project.id,
             entity_type_id=self.entity_type_character.id
         )
-        self.entity_character.save()
 
     def generate_fixture_entity_camera(self):
-        self.entity_camera = Entity(
+        self.entity_camera = Entity.create(
             name="Main camera",
             description="Description Camera",
             project_id=self.project.id,
             entity_type_id=self.entity_type_camera.id
         )
-        self.entity_camera.save()
 
     def generate_fixture_entity_standard(self):
-        self.entity_standard = Entity(
+        self.entity_standard = Entity.create(
             name="Car",
             project_id=self.project_standard.id,
             entity_type_id=self.entity_type.id
         )
-        self.entity_standard.save()
 
     def generate_fixture_sequence(self, name="S01"):
         if hasattr(self, "episode"):
@@ -381,32 +370,29 @@ class ApiDBTestCase(ApiTestCase):
         else:
             episode_id = None
 
-        self.sequence = Entity(
+        self.sequence = Entity.create(
             name=name,
             project_id=self.project.id,
             entity_type_id=self.sequence_type.id,
             parent_id=episode_id
         )
-        self.sequence.save()
 
     def generate_fixture_sequence_standard(self):
-        self.sequence_standard = Entity(
+        self.sequence_standard = Entity.create(
             name="S01",
             project_id=self.project_standard.id,
             entity_type_id=self.sequence_type.id
         )
-        self.sequence_standard.save()
 
     def generate_fixture_episode(self, name="E01"):
-        self.episode = Entity(
+        self.episode = Entity.create(
             name=name,
             project_id=self.project.id,
             entity_type_id=self.episode_type.id
         )
-        self.episode.save()
 
     def generate_fixture_shot(self, name="P01"):
-        self.shot = Entity(
+        self.shot = Entity.create(
             name=name,
             description="Description Shot 01",
             data={
@@ -418,13 +404,11 @@ class ApiDBTestCase(ApiTestCase):
             entity_type_id=self.shot_type.id,
             parent_id=self.sequence.id
         )
-        self.shot.save()
-        self.shot_noseq = Entity(
+        self.shot_noseq = Entity.create(
             name="P01NOSEQ",
             project_id=self.project.id,
             entity_type_id=self.shot_type.id
         )
-        self.shot_noseq.save()
 
     def generate_fixture_scene(
         self,
@@ -438,7 +422,7 @@ class ApiDBTestCase(ApiTestCase):
         if sequence_id is None:
             sequence_id = self.sequence.id
 
-        self.scene = Entity(
+        self.scene = Entity.create(
             name=name,
             description="Description Scene 01",
             data={},
@@ -446,10 +430,9 @@ class ApiDBTestCase(ApiTestCase):
             entity_type_id=self.scene_type.id,
             parent_id=self.sequence.id
         )
-        self.scene.save()
 
     def generate_fixture_shot_standard(self):
-        self.shot_standard = Entity(
+        self.shot_standard = Entity.create(
             name="P01",
             description="Description Shot 01",
             data={
@@ -461,7 +444,6 @@ class ApiDBTestCase(ApiTestCase):
             entity_type_id=self.shot_type.id,
             parent_id=self.sequence_standard.id
         )
-        self.shot_standard.save()
 
     def generate_fixture_shot_asset_instance(
         self,
@@ -530,14 +512,13 @@ class ApiDBTestCase(ApiTestCase):
         return self.user_cg_artist
 
     def generate_fixture_person(self):
-        self.person = Person(
+        self.person = Person.create(
             first_name="John",
             last_name="Doe",
             desktop_login="john.doe",
             email=u"john.doe@gmail.com",
             password=auth.encrypt_password("mypassword")
         )
-        self.person.save()
 
     def generate_fixture_entity_type(self):
         self.entity_type = EntityType.create(name="Props")
@@ -552,57 +533,49 @@ class ApiDBTestCase(ApiTestCase):
         self.entity_type_camera = EntityType.create(name="Camera")
 
     def generate_fixture_department(self):
-        self.department = Department(name="Modeling", color="#FFFFFF")
-        self.department.save()
-        self.department_animation = Department(
+        self.department = Department.create(name="Modeling", color="#FFFFFF")
+        self.department_animation = Department.create(
             name="Animation",
             color="#FFFFFF"
         )
-        self.department_animation.save()
 
     def generate_fixture_task_type(self):
-        self.task_type = TaskType(
+        self.task_type = TaskType.create(
             name="Shaders",
             short_name="shd",
             color="#FFFFFF",
             department_id=self.department.id
         )
-        self.task_type.save()
-        self.task_type_animation = TaskType(
+        self.task_type_animation = TaskType.create(
             name="Animation",
             short_name="anim",
             color="#FFFFFF",
             department_id=self.department_animation.id
         )
-        self.task_type_animation.save()
 
     def generate_fixture_task_status(self):
-        self.task_status = TaskStatus(
+        self.task_status = TaskStatus.create(
             name="Open",
             short_name="opn",
             color="#FFFFFF"
         )
-        self.task_status.save()
 
     def generate_fixture_task_status_wip(self):
-        self.task_status_wip = TaskStatus(
+        self.task_status_wip = TaskStatus.create(
             name="WIP",
             short_name="wip",
             color="#FFFFFF"
         )
-        self.task_status_wip.save()
 
     def generate_fixture_task_status_to_review(self):
-        self.task_status_to_review = TaskStatus(
+        self.task_status_to_review = TaskStatus.create(
             name="To review",
             short_name="pndng",
             color="#FFFFFF"
         )
-        self.task_status_to_review.save()
 
     def generate_fixture_assigner(self):
-        self.assigner = Person(first_name="Ema", last_name="Peel")
-        self.assigner.save()
+        self.assigner = Person.create(first_name="Ema", last_name="Peel")
 
     def generate_fixture_task(self, name="Master", entity_id=None):
         if entity_id is None:
@@ -611,7 +584,7 @@ class ApiDBTestCase(ApiTestCase):
         start_date = fields.get_date_object("2017-02-20")
         due_date = fields.get_date_object("2017-02-28")
         real_start_date = fields.get_date_object("2017-02-22")
-        self.task = Task(
+        self.task = Task.create(
             name=name,
             project_id=self.project.id,
             task_type_id=self.task_type.id,
@@ -625,13 +598,12 @@ class ApiDBTestCase(ApiTestCase):
             due_date=due_date,
             real_start_date=real_start_date
         )
-        self.task.save()
 
     def generate_fixture_task_standard(self):
         start_date = fields.get_date_object("2017-02-20")
         due_date = fields.get_date_object("2017-02-28")
         real_start_date = fields.get_date_object("2017-02-22")
-        self.task_standard = Task(
+        self.task_standard = Task.create(
             name="Super modeling",
             project_id=self.project_standard.id,
             task_type_id=self.task_type.id,
@@ -645,10 +617,9 @@ class ApiDBTestCase(ApiTestCase):
             due_date=due_date,
             real_start_date=real_start_date
         )
-        self.task_standard.save()
 
     def generate_fixture_shot_task(self, name="Master"):
-        self.shot_task = Task(
+        self.shot_task = Task.create(
             name=name,
             project_id=self.project.id,
             task_type_id=self.task_type_animation.id,
@@ -657,7 +628,6 @@ class ApiDBTestCase(ApiTestCase):
             assignees=[self.person],
             assigner_id=self.assigner.id,
         )
-        return self.shot_task.save()
 
     def generate_fixture_scene_task(self, name="Master"):
         self.scene_task = Task.create(
@@ -672,7 +642,7 @@ class ApiDBTestCase(ApiTestCase):
         return self.scene_task
 
     def generate_fixture_sequence_task(self, name="Master"):
-        self.sequence_task = Task(
+        self.sequence_task = Task.create(
             name=name,
             project_id=self.project.id,
             task_type_id=self.task_type_animation.id,
@@ -681,10 +651,9 @@ class ApiDBTestCase(ApiTestCase):
             assignees=[self.person],
             assigner_id=self.assigner.id,
         )
-        self.sequence_task.save()
 
     def generate_fixture_shot_task_standard(self):
-        self.shot_task_standard = Task(
+        self.shot_task_standard = Task.create(
             name="Super animation",
             project_id=self.project_standard.id,
             task_type_id=self.task_type_animation.id,
@@ -693,17 +662,15 @@ class ApiDBTestCase(ApiTestCase):
             assignees=[self.person],
             assigner_id=self.assigner.id
         )
-        self.shot_task_standard.save()
 
     def generate_fixture_file_status(self):
-        self.file_status = FileStatus(
+        self.file_status = FileStatus.create(
             name="To review",
             color="#FFFFFF"
         )
-        self.file_status.save()
 
     def generate_fixture_working_file(self, name="main", revision=1):
-        self.working_file = WorkingFile(
+        self.working_file = WorkingFile.create(
             name=name,
             comment="",
             revision=revision,
@@ -712,11 +679,10 @@ class ApiDBTestCase(ApiTestCase):
             person_id=self.person.id,
             software_id=self.software.id
         )
-        self.working_file.save()
         return self.working_file
 
     def generate_fixture_shot_working_file(self):
-        self.working_file = WorkingFile(
+        self.working_file = WorkingFile.create(
             name="main",
             comment="",
             revision=1,
@@ -725,7 +691,6 @@ class ApiDBTestCase(ApiTestCase):
             person_id=self.person.id,
             software_id=self.software.id
         )
-        self.working_file.save()
 
     def generate_fixture_output_file(
         self,

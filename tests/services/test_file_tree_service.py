@@ -81,7 +81,7 @@ class FileTreeTestCase(ApiDBTestCase):
         self.assertEqual(project["name"], self.project.name)
 
     def test_get_file_name_template(self):
-        tree = file_tree_service.get_tree_from_file("standard")
+        tree = file_tree_service.get_tree_from_file("default")
         template = file_tree_service.get_file_name_template(
             tree,
             "working",

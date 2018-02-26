@@ -272,26 +272,23 @@ class FileServiceTestCase(ApiDBTestCase):
 
         output_files = \
             files_service.get_output_files_for_output_type_and_asset_instance(
-                self.entity.id,
-                geometry.id,
-                asset_instance_id=asset_instance.id
+                asset_instance.id,
+                geometry.id
             )
-        self.assertEquals(len(output_files), 8)
+        self.assertEquals(len(output_files), 7)
 
         output_files = \
             files_service.get_output_files_for_output_type_and_asset_instance(
-                str(self.entity.id),
+                asset_instance.id,
                 geometry.id,
-                representation="obj",
-                asset_instance_id=asset_instance.id
+                representation="obj"
             )
         self.assertEquals(len(output_files), 4)
 
         output_files = \
             files_service.get_output_files_for_output_type_and_asset_instance(
-                str(self.entity.id),
+                asset_instance.id,
                 geometry.id,
-                representation="max",
-                asset_instance_id=asset_instance.id
+                representation="max"
             )
         self.assertEquals(len(output_files), 3)
