@@ -479,7 +479,7 @@ class ShotAssetInstancesResource(Resource, ArgsMixin):
             ("description", None, False)
         ])
         shot = shots_service.get_shot(shot_id)
-        permissions.check_manager_permissions()
+        user_service.check_project_access(scene["project_id"])
         shot = breakdown_service.add_asset_instance_to_shot(
             shot_id,
             args["asset_id"],
@@ -509,7 +509,7 @@ class SceneAssetInstancesResource(Resource, ArgsMixin):
             ("description", None, False)
         ])
         scene = shots_service.get_scene(scene_id)
-        permissions.check_manager_permissions()
+        user_service.check_project_access(scene["project_id"])
         scene = breakdown_service.add_asset_instance_to_scene(
             scene_id,
             args["asset_id"],
