@@ -48,3 +48,4 @@ test/test-bundle.js
 
 TODO
 .package-lock.json
+.idea/
