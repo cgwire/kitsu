@@ -2848,9 +2848,9 @@
       "dev": true
     },
     "cypress": {
-      "version": "1.4.1",
-      "resolved": "https://registry.npmjs.org/cypress/-/cypress-1.4.1.tgz",
-      "integrity": "sha1-YvQHSgDm8S4t/jiKf06BaknOsD8=",
+      "version": "2.0.4",
+      "resolved": "https://registry.npmjs.org/cypress/-/cypress-2.0.4.tgz",
+      "integrity": "sha512-mxC2yLCHbU16WGIXOoeb9iDGyCxQh+upbhQXJorVyH3suBVHMWC9wrZburNy7M1MJgorY0HYeD540zH+wOlb7A==",
       "dev": true,
       "requires": {
         "@cypress/listr-verbose-renderer": "0.4.1",
