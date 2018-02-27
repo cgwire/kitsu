@@ -13,7 +13,17 @@ from zou.app.services import (
     user_service,
     entities_service
 )
-from zou.app.utils import thumbnail as thumbnail_utils, movie_utils, permissions
+from zou.app.utils import (
+    events,
+    movie_utils,
+    permissions,
+    thumbnail as thumbnail_utils
+)
+
+
+ALLOWED_PICTURE_EXTENSION = [".png", ".jpg", ".PNG", ".JPG"]
+ALLOWED_MOVIE_EXTENSION = [".mp4", ".mov", ".MP4", ".MOV"]
+
 
 class CreatePreviewFilePictureResource(Resource):
 
@@ -26,63 +36,22 @@ class CreatePreviewFilePictureResource(Resource):
             abort(403)
 
         uploaded_file = request.files["file"]
-        folder_path = thumbnail_utils.get_preview_folder_name(
-            "originals",
-            instance_id
-        )
+
         extension = "." + uploaded_file.filename.split(".")[-1].lower()
-        if extension in [".png", ".jpg"]:
-            original_path = thumbnail_utils.generate_thumbnail(
-                instance_id,
-                uploaded_file,
-                size=None
-            )
-            if extension == ".jpg":
-                thumbnail_utils.convert_jpg_to_png(
-                    folder_path,
-                    instance_id
-                )
+        extension = uploaded_file.filename[-4:]
 
-            thumbnail_utils.generate_preview_variants(instance_id)
-            self.emit_app_preview_event(instance_id)
+        if extension in ALLOWED_PICTURE_EXTENSION:
+            self.save_picture_preview(instance_id, uploaded_file)
             files_service.update_preview_file(instance_id, {"extension": "png"})
+            self.emit_app_preview_event(instance_id)
 
-            return thumbnail_utils.get_preview_url_path(instance_id), 201
-
-        elif extension in [".mp4", ".mov"]:
-
-            movie_path = os.path.join(tmp_dir, file_name)
-            original_path = os.path.join(
-                tmp_dir, "%s.png" % instance_id
-            )
-
-            file_name = "%s%s" % (instance_id, extension)
-            clip.write_videofile(os.path.join(folder, instance_id + ".mp4"))
+        elif extension in ALLOWED_MOVIE_EXTENSION:
+            self.save_movie_preview(instance_id, uploaded_file)
             files_service.update_preview_file(instance_id, {"extension": "mp4"})
             self.emit_app_preview_event(instance_id)
 
-            movie_utils.normalize_movie(
-                movie_path,
-                thumbnail_path=original_path
-            )
-            file_store.add_movie("previews", instance_id, movie_path)
-            os.remove(movie_path)
-
-            file_store.add_picture("original", instance_id, original_path)
-
-            variants = thumbnail_utils.generate_preview_variants(
-                original_path,
-                instance_id
-            )
-            variants.append(("original", original_path))
-
-            for (name, path) in variants:
-                file_store.add_picture(name, instance_id, path)
-                os.remove(path)
-            return {}, 201
-
         elif extension in [".obj", ".pdf", ".ma", ".mb"]:
-            from moviepy.editor import VideoFileClip
+            folder_path = ""
             file_name = "%s%s" % (instance_id, extension)
             folder = thumbnail_utils.create_folder(folder_path)
             file_path = os.path.join(folder, file_name)
@@ -90,11 +59,55 @@ class CreatePreviewFilePictureResource(Resource):
             files_service.update_preview_file(instance_id, {
                 "extension": extension[1:]
             })
+            self.emit_app_preview_event(instance_id)
             return {}, 201
 
         else:
-            current_app.logger.info("Wrong file format, extension: %s", extension)
+            current_app.logger.info(
+                "Wrong file format, extension: %s", extension)
             abort(400, "Wrong file format, extension: %s" % extension)
+
+    def save_picture_preview(self, instance_id, uploaded_file):
+        tmp_folder = current_app.config["TMP_DIR"]
+        original_tmp_path = thumbnail_utils.save_file(
+            tmp_folder,
+            instance_id,
+            uploaded_file
+        )
+        variants = thumbnail_utils.generate_preview_variants(
+            original_tmp_path,
+            instance_id
+        )
+        variants.append(("original", original_tmp_path))
+
+        for (name, path) in variants:
+            file_store.add_picture(name, instance_id, path)
+            os.remove(path)
+
+        return {}, 201
+
+    def save_movie_preview(self, instance_id, uploaded_file):
+        tmp_folder = current_app.config["TMP_DIR"]
+
+        uploaded_movie_path = movie_utils.save_file(
+            tmp_folder,
+            instance_id,
+            uploaded_file
+        )
+        normalized_movie_path = movie_utils.normalize_movie(uploaded_movie_path)
+        original_tmp_path = movie_utils.generate_thumbnail(
+            normalized_movie_path
+        )
+
+        file_store.add_movie("previews", instance_id, normalized_movie_path)
+        os.remove(uploaded_movie_path)
+        os.remove(normalized_movie_path)
+
+        variants = thumbnail_utils.generate_preview_variants(
+            original_tmp_path,
+            instance_id
+        )
+        variants.append(("original", original_tmp_path))
 
     def emit_app_preview_event(self, preview_file_id):
         preview_file = files_service.get_preview_file(preview_file_id)
@@ -201,9 +214,9 @@ class PreviewFileResource(Resource):
 
 class BasePreviewPictureResource(Resource):
 
-    def __init__(self, subfolder):
+    def __init__(self, picture_type):
         Resource.__init__(self)
-        self.subfolder = subfolder
+        self.picture_type = picture_type
 
     def is_exist(self, preview_file_id):
         return files_service.get_preview_file(preview_file_id) is not None
@@ -230,7 +243,7 @@ class BasePreviewPictureResource(Resource):
 
         return send_file(
             file_store.open_picture(
-                self.subfolder,
+                self.picture_type,
                 instance_id
             ),
             mimetype="image/png"

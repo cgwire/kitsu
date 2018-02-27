@@ -2,7 +2,7 @@ import os
 import shutil
 import math
 
-from zou.app import app, config
+from zou.app import app
 from zou.app.utils import fs
 
 from PIL import Image
@@ -13,37 +13,19 @@ PREVIEW_SIZE = 1200, 0
 BIG_SQUARE_SIZE = 400, 400
 
 
-def save_file(subfolder, instance_id, file_to_save, size=None):
+def save_file(tmp_folder, instance_id, file_to_save):
     extension = "." + file_to_save.filename.split(".")[-1].lower()
-    file_name = instance_id + extension
-    thumbnail_folder = create_folder(subfolder)
-
-    file_path = os.path.join(thumbnail_folder, file_name)
+    file_name = instance_id + extension.lower()
+    file_path = os.path.join(tmp_folder, file_name)
     file_to_save.save(file_path)
-
-    if size is not None:
-        turn_into_thumbnail(file_path, size=size)
-
     return file_path
 
 
-def generate_thumbnail(instance_id, file_to_save, size=None):
-    file_name = get_file_name(instance_id)
-    file_path = os.path.join(config.TMP_DIR, file_name)
-    file_to_save.save(file_path)
-
-    if size is not None:
-        turn_into_thumbnail(file_path, size=size)
-
-    return file_path
-
-
-def convert_jpg_to_png(subfolder, instance_id):
-    file_source_name = "%s.jpg" % instance_id
-    file_target_name = "%s.png" % instance_id
-    thumbnail_folder = create_folder(subfolder)
-    file_source_path = os.path.join(thumbnail_folder, file_source_name)
-    file_target_path = os.path.join(thumbnail_folder, file_target_name)
+def convert_jpg_to_png(file_source_path):
+    folder_path = os.path.dirname(file_source_path)
+    file_source_name = os.path.basename(file_source_path)
+    file_target_name = "%s.png" % file_source_name[:-4]
+    file_target_path = os.path.join(folder_path, file_target_name)
 
     im = Image.open(file_source_path)
     im.save(file_target_path)
