@@ -18,7 +18,20 @@ describe('Testing production page', function () {
     })
 
     it('click to add production', function () {
-      cy.log('test')
+      cy.get('div.level-item > .button').contains('Add a production').click().wait(500)
     })
+
+    const productionName = `Agent 327-${Math.floor((Math.random() * 1000) + 1)}`
+
+    it('type production form', function () {
+      cy.get('.input').type(productionName)
+      cy.get('.is-active > .modal-content > .box > .has-text-right > .is-primary').contains('Confirm').click()
+    })
+
+    it('Verify the new production', function () {
+      cy.wait(500)
+      cy.get('.table-body').contains(productionName)
+    })
+
   })
 })
