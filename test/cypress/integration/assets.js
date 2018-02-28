@@ -83,13 +83,24 @@ describe('Testing assets page', function () {
       cy.get('.flexrow > :nth-child(3) > .button').contains('Confirm').click()
     })
 
-    it('confirm that Diane Pierce have a assigned', function () {
+    it('confirm that Diane Pierce is assigned', function () {
       cy.get('.avatar-link > span').contains('DP')
     })
   })
 
-  context.only('Change status of 1er assigment in WFA', function(){
+  context('Change status of 1er assigment in WFA', function () {
+    it('click on todo', function () {
+      cy.get('tbody > tr').contains('Agent 327').parent().parent().children().then(($children) => {
+        cy.wrap($children[4]).contains('todo').click()
+      })
+    })
 
+    it('select WFA', function () {
+      cy.get('.media-content > .control > .select > select').select('Waiting For Approval')
+    })
 
+    it('post the status', function () {
+      cy.get('.control > .button').contains('Post status').click()
+    })
   })
 })
