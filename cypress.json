@@ -3,5 +3,7 @@
   "fixturesFolder": "./test/cypress/fixtures",
   "pluginsFile": "./test/cypress/plugins/index.js",
   "supportFile": "./test/cypress/support/index.js",
-  "watchForFileChanges" : false
+  "watchForFileChanges" : false,
+  "viewportWidth": 1200,
+  "viewportHeight": 800
 }
