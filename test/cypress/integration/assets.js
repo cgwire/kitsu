@@ -67,4 +67,29 @@ describe('Testing assets page', function () {
       })
     })
   })
+
+  context('Assignment to the created artist', function () {
+    it('click on modeling', function () {
+      cy.get('tbody > tr').contains('Agent 327').parent().parent().children().then(($children) => {
+        $children[4].click()
+      })
+    })
+
+    it('select a user: Diane Pierce', function () {
+      cy.get('.combobox-item > .field > .control > .select > select').select('Diane Pierce')
+    })
+
+    it('valid the assignment', function () {
+      cy.get('.flexrow > :nth-child(3) > .button').contains('Confirm').click()
+    })
+
+    it('confirm that Diane Pierce have a assigned', function () {
+      cy.get('.avatar-link > span').contains('DP')
+    })
+  })
+
+  context.only('Change status of 1er assigment in WFA', function(){
+
+
+  })
 })
