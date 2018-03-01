@@ -75,8 +75,8 @@ describe('Testing assets page', function () {
       })
     })
 
-    it('select a user: Diane Pierce', function () {
-      cy.get('.combobox-item > .field > .control > .select > select').select('Diane Pierce')
+    it('select a user: Curtis Parker', function () {
+      cy.get('.combobox-item > .field > .control > .select > select').select('Curtis Parker')
     })
 
     it('valid the assignment', function () {
@@ -84,7 +84,7 @@ describe('Testing assets page', function () {
     })
 
     it('confirm that Diane Pierce is assigned', function () {
-      cy.get('.avatar-link > span').contains('DP')
+      cy.get('.avatar-link > span').contains('CP')
     })
   })
 
