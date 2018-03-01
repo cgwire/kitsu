@@ -15,7 +15,7 @@
             class="level-item"
             :text="$t('main.csv.import_file')"
             icon="upload"
-            is-responsive="true"
+            :is-responsive="true"
             :path="{
               name: 'import-assets',
               params: {production_id: currentProduction.id}
@@ -26,7 +26,7 @@
             class="level-item"
             :text="$t('main.csv.export_file')"
             icon="download"
-            is-responsive="true"
+            :is-responsive="true"
             :path="'/api/export/csv/projects/' + currentProduction.id + '/assets.csv'"
           >
           </button-href-link>
@@ -34,7 +34,7 @@
             class="level-item"
             :text="$t('assets.new_asset')"
             icon="plus"
-            is-responsive="true"
+            :is-responsive="true"
             :path="{
               name: 'new-asset',
               params: {production_id: currentProduction.id}
