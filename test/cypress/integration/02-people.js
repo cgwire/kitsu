@@ -17,7 +17,6 @@ describe('Testing people page', function () {
   })
 
   context('Create user', function () {
-
     it('creating user', function () {
       cy.fixture('users').then((users) => {
         users.forEach(function (user) {
@@ -44,5 +43,9 @@ describe('Testing people page', function () {
         })
       })
     })
+  })
+
+  after(function () {
+    cy.get('ul > :nth-child(2)').contains('Logout').click({force: true})
   })
 })

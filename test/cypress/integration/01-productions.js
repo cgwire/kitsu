@@ -32,6 +32,9 @@ describe('Testing production page', function () {
       cy.wait(500)
       cy.get('.table-body').contains(productionName)
     })
+  })
 
+  after(function () {
+    cy.get('ul > :nth-child(2)').contains('Logout').click({force: true})
   })
 })

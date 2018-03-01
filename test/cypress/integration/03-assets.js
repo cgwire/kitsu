@@ -103,4 +103,8 @@ describe('Testing assets page', function () {
       cy.get('.control > .button').contains('Post status').click()
     })
   })
+
+  after(function () {
+    cy.get('ul > :nth-child(2)').contains('Logout').click({force: true})
+  })
 })

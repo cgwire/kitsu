@@ -49,4 +49,8 @@ describe('Checking task with superviseur', function () {
       cy.get('.flexrow > .is-medium').contains('done')
     })
   })
+
+  after(function () {
+    cy.get('ul > :nth-child(2)').contains('Logout').click({force: true})
+  })
 })
