@@ -11,6 +11,10 @@ import {
   sortByName
 } from '../../lib/sorting'
 import {
+  buildSelectionGrid,
+  clearSelectionGrid
+} from '../../lib/helpers'
+import {
   buildShotIndex,
   indexSearch
 } from '../../lib/indexing'
@@ -68,6 +72,10 @@ import {
 
   SET_SHOT_LIST_SCROLL_POSITION,
 
+  REMOVE_SELECTED_TASK,
+  ADD_SELECTED_TASK,
+  CLEAR_SELECTED_TASKS,
+
   SET_PREVIEW,
 
   RESET_ALL
@@ -109,7 +117,6 @@ const state = {
   shots: [],
   sequences: [],
   episodes: [],
-  validationColumns: {},
   shotSearchText: '',
 
   displayedShots: [],
@@ -119,6 +126,7 @@ const state = {
   sequenceMap: {},
   episodeMap: {},
   shotCreated: '',
+  shotSelectionGrid: {},
 
   isShotsLoading: false,
   isShotsLoadingError: false,
@@ -149,6 +157,7 @@ const getters = {
   episodes: state => state.episodes,
 
   shotSearchText: state => state.shotSearchText,
+  shotSelectionGrid: state => state.shotSelectionGrid,
 
   displayedShots: state => state.displayedShots,
   displayedShotsLength: state => state.displayedShotsLength,
@@ -358,17 +367,29 @@ const mutations = {
   },
 
   [LOAD_SHOTS_END] (state, shots) {
-    state.isShotsLoading = false
-    state.isShotsLoadingError = false
+    const validationColumns = {}
 
-    state.shots = sortShots(shots)
-    state.shotIndex = buildShotIndex(state.shots)
     state.shotMap = {}
+    state.shots = sortShots(shots)
     state.shots.forEach((shot) => {
       state.shotMap[shot.id] = shot
       shot.production_id = helpers.getCurrentProduction().id
-      shot.tasks.forEach(helpers.populateTask)
+      shot.tasks.forEach((task) => {
+        helpers.populateTask(task)
+        validationColumns[task.task_type_id] = true
+      })
     })
+
+    state.isShotsLoading = false
+    state.isShotsLoadingError = false
+    state.nbValidationColumns = Object.keys(validationColumns).length
+
+    state.shotIndex = buildShotIndex(state.shots)
+
+    const maxX = shots.length
+    const maxY = state.nbValidationColumns
+    state.shotSelectionGrid = buildSelectionGrid(maxX, maxY)
+
     state.displayedShots = state.shots.slice(0, PAGE_SIZE)
     state.displayedShotsLength = state.shots.length
   },
@@ -526,6 +547,11 @@ const mutations = {
     const taskTypes = extractTaskTypes(state.shots)
     let result = indexSearch(state.shotIndex, shotSearch) || state.shots
     result = applyFilters(taskTypes, result, shotSearch) || []
+
+    const maxX = result.length
+    const maxY = state.nbValidationColumns
+    state.shotSelectionGrid = buildSelectionGrid(maxX, maxY)
+
     state.displayedShots = result.slice(0, PAGE_SIZE)
     state.displayedShotsLength = result.length
     state.shotSearchText = shotSearch
@@ -597,7 +623,7 @@ const mutations = {
   },
 
   [SET_CURRENT_PRODUCTION] (state, production) {
-    state.assetSearchText = ''
+    state.shotSearchText = ''
   },
 
   [SET_PREVIEW] (state, {entityId, taskId, previewId}) {
@@ -611,10 +637,22 @@ const mutations = {
     state.shotListScrollPosition = scrollPosition
   },
 
+  [REMOVE_SELECTED_TASK] (state, validationInfo) {
+    state.shotSelectionGrid[validationInfo.x][validationInfo.y] = false
+  },
+
+  [ADD_SELECTED_TASK] (state, validationInfo) {
+    state.shotSelectionGrid[validationInfo.x][validationInfo.y] = true
+  },
+
+  [CLEAR_SELECTED_TASKS] (state, validationInfo) {
+    state.shotSelectionGrid = clearSelectionGrid(state.shotSelectionGrid)
+  },
+
   [RESET_ALL] (state) {
     state.shots = []
     state.sequences = []
-    state.episoded = []
+    state.episodes = []
     state.isShotsLoading = false
     state.isShotsLoadingError = false
     state.shotsCsvFormData = null

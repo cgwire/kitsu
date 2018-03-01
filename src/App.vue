@@ -257,6 +257,10 @@ input.search-input:focus {
   border-color: #666;
 }
 
+.unselectable {
+  user-select: none;
+}
+
 @media screen and (max-width: 1000px) {
   .button .icon.is-small {
     margin-right: 0;
