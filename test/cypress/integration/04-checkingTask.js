@@ -7,8 +7,7 @@ describe('Checking task with superviseur', function () {
     cy.visit('http://localhost:8080')
   })
 
-  context.only('checking assets', function () {
-
+  context('checking assets', function () {
     it('log in with Diane', function () {
       cy.fixture('users').then((users) => {
         cy.get('.email').type(users[1].email)
@@ -32,16 +31,22 @@ describe('Checking task with superviseur', function () {
   })
 
   context('edit task in done', function () {
-    it('click on todo button', function () {
-      cy.get(':nth-child(2) > .status > .tag').contains('todo')
+    it('click on WFA button', function () {
+      cy.get('tbody > tr').contains('Agent 327').parent().parent().children().then(($children) => {
+        cy.wrap($children[4]).contains('wfa').click()
+      })
     })
 
-    it('select done status', function(){
+    it('select done status', function () {
       cy.get('.media-content > .control > .select > select').select('Done')
     })
 
     it('post the status', function () {
       cy.get('.control > .button').contains('Post status').click()
+    })
+
+    it('check task in done', function () {
+      cy.get('.flexrow > .is-medium').contains('done')
     })
   })
 })
