@@ -49,6 +49,7 @@ const state = {
   taskPreviews: {},
   selectedTasks: {},
   selectedValidations: {},
+
   nbSelectedTasks: 0,
   nbSelectedValidations: 0,
   isShowAssignations: true,
@@ -283,7 +284,7 @@ const actions = {
 
 const mutations = {
   [LOAD_ASSETS_START] (state, assets) {
-    state.assetValidationColumns = {}
+    state.assetValidationColumns = []
     state.taskMap = {}
   },
 
@@ -519,7 +520,7 @@ const mutations = {
     }
   },
 
-  [CLEAR_SELECTED_TASKS] (state, task) {
+  [CLEAR_SELECTED_TASKS] (state) {
     state.selectedTasks = {}
     state.nbSelectedTasks = 0
     state.selectedValidations = {}
