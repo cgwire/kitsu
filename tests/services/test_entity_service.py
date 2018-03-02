@@ -68,3 +68,5 @@ class EntityServiceTestCase(ApiDBTestCase):
                 str(self.entity.id),
                 str(self.entity.id)
             )
+
+        self.entity.preview_file_id = None

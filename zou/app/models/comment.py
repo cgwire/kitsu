@@ -16,8 +16,8 @@ class Comment(db.Model, BaseMixin, SerializerMixin):
     """
     shotgun_id = db.Column(db.Integer)
 
-    object_id = db.Column(UUIDType(binary=False), nullable=False)
-    object_type = db.Column(db.String(80), nullable=False)
+    object_id = db.Column(UUIDType(binary=False), nullable=False, index=True)
+    object_type = db.Column(db.String(80), nullable=False, index=True)
     text = db.Column(db.Text())
     data = db.Column(JSONB)
 

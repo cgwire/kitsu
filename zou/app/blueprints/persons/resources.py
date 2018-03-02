@@ -1,4 +1,3 @@
-from flask import abort
 from flask_restful import Resource, reqparse
 from flask_jwt_extended import jwt_required
 
@@ -7,6 +6,10 @@ from zou.app.utils import auth, permissions
 
 
 class NewPersonResource(Resource):
+    """
+    Create a new user in the database. Set "default" as password.
+    User role can be set but only admins can create admin users.
+    """
 
     @jwt_required
     def post(self):

@@ -1,7 +1,5 @@
 from tests.base import ApiDBTestCase
 
-from zou.app.models.entity import Entity
-
 
 class ProjectEpisodesTestCase(ApiDBTestCase):
 
@@ -12,31 +10,19 @@ class ProjectEpisodesTestCase(ApiDBTestCase):
         self.generate_fixture_project()
         self.generate_fixture_project_standard()
         self.generate_fixture_entity_type()
-        self.generate_fixture_episode()
-        self.generate_data(
-            Entity,
-            3,
-            entities_out=[],
-            entities_in=[],
-            project_id=self.project.id,
-            entity_type_id=self.episode_type.id
-        )
-        self.generate_data(
-            Entity,
-            2,
-            entities_out=[],
-            entities_in=[],
-            project_id=self.project_standard.id,
-            entity_type_id=self.episode_type.id
-        )
+        self.generate_fixture_episode("E01")
+        self.serialized_episode = self.episode.serialize(obj_type="Episode")
+        self.generate_fixture_episode("E02")
+        self.generate_fixture_episode("E03")
+        self.generate_fixture_episode(
+            "E01", project_id=self.project_standard.id)
+        self.generate_fixture_episode(
+            "E02", project_id=self.project_standard.id)
 
     def test_get_episodes_for_project(self):
         episodes = self.get("data/projects/%s/episodes" % self.project.id)
-        self.assertEquals(len(episodes), 4)
-        self.assertDictEqual(
-            episodes[0],
-            self.episode.serialize(obj_type="Episode")
-        )
+        self.assertEquals(len(episodes), 3)
+        self.assertDictEqual(episodes[0], self.serialized_episode)
 
     def test_get_episodes_for_project_404(self):
         self.get("data/projects/unknown/episodes", 404)

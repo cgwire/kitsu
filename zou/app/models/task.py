@@ -5,15 +5,25 @@ from zou.app.models.base import BaseMixin
 
 association_table = db.Table(
     'assignations',
-    db.Column('task', UUIDType(binary=False), db.ForeignKey('task.id')),
-    db.Column('person', UUIDType(binary=False), db.ForeignKey('person.id'))
+    db.Column(
+        'task',
+        UUIDType(binary=False),
+        db.ForeignKey('task.id'),
+        primary_key=True
+    ),
+    db.Column(
+        'person',
+        UUIDType(binary=False),
+        db.ForeignKey('person.id'),
+        primary_key=True
+    )
 )
 
 
 class Task(db.Model, BaseMixin, SerializerMixin):
     """
     Describes a task done by a CG artist on an entity of the CG production.
-    The task has a state and assigned to people. It handls notion of time like
+    The task has a state and assigned to people. It handles notion of time like
     duration, start date and end date.
     """
     name = db.Column(db.String(80), nullable=False)
@@ -29,16 +39,28 @@ class Task(db.Model, BaseMixin, SerializerMixin):
     real_start_date = db.Column(db.DateTime)
     shotgun_id = db.Column(db.Integer)
 
-    project_id = \
-        db.Column(UUIDType(binary=False), db.ForeignKey('project.id'))
-    task_type_id = \
-        db.Column(UUIDType(binary=False), db.ForeignKey('task_type.id'))
-    task_status_id = \
-        db.Column(UUIDType(binary=False), db.ForeignKey('task_status.id'))
-    entity_id = \
-        db.Column(UUIDType(binary=False), db.ForeignKey('entity.id'))
-    assigner_id = \
-        db.Column(UUIDType(binary=False), db.ForeignKey('person.id'))
+    project_id = db.Column(
+        UUIDType(binary=False),
+        db.ForeignKey('project.id'),
+        index=True
+    )
+    task_type_id = db.Column(
+        UUIDType(binary=False),
+        db.ForeignKey('task_type.id')
+    )
+    task_status_id = db.Column(
+        UUIDType(binary=False),
+        db.ForeignKey('task_status.id')
+    )
+    entity_id = db.Column(
+        UUIDType(binary=False),
+        db.ForeignKey('entity.id'),
+        index=True
+    )
+    assigner_id = db.Column(
+        UUIDType(binary=False),
+        db.ForeignKey('person.id')
+    )
 
     assignees = db.relationship(
         'Person',

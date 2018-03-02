@@ -8,6 +8,22 @@ def get_db_uri():
     return URL(**DATABASE)
 
 
+def is_db_exists():
+    """
+    Check that database exist.
+    """
+    engine = create_engine(get_db_uri())
+    return database_exists(engine.url)
+
+
+def reset_all():
+    """
+    Check that database exist.
+    """
+    drop_all()
+    return create_all()
+
+
 def create_all():
     """
     Create all database tables.
@@ -16,7 +32,7 @@ def create_all():
     engine = create_engine(get_db_uri())
     if not database_exists(engine.url):
         create_database(engine.url)
-    db.create_all()
+    return db.create_all()
 
 
 def drop_all():
@@ -26,4 +42,4 @@ def drop_all():
     from zou.app import db
     db.session.flush()
     db.session.close()
-    db.drop_all()
+    return db.drop_all()

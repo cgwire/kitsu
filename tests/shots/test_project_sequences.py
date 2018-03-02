@@ -1,7 +1,5 @@
 from tests.base import ApiDBTestCase
 
-from zou.app.models.entity import Entity
-
 
 class ProjectSequencesTestCase(ApiDBTestCase):
 
@@ -12,31 +10,21 @@ class ProjectSequencesTestCase(ApiDBTestCase):
         self.generate_fixture_project()
         self.generate_fixture_project_standard()
         self.generate_fixture_entity_type()
-        self.generate_fixture_sequence()
-        self.generate_fixture_shot()
-        self.generate_data(
-            Entity,
-            3,
-            entities_out=[],
-            entities_in=[],
-            project_id=self.project.id,
-            entity_type_id=self.sequence_type.id
-        )
-        self.generate_data(
-            Entity,
-            2,
-            entities_out=[],
-            entities_in=[],
-            project_id=self.project_standard.id,
-            entity_type_id=self.sequence_type.id
-        )
+        self.generate_fixture_sequence("SE01")
+        self.serialized_sequence = self.sequence.serialize(obj_type="Sequence")
+        self.generate_fixture_sequence("SE02")
+        self.generate_fixture_sequence("SE03")
+        self.generate_fixture_sequence(
+            "SE01", project_id=self.project_standard.id)
+        self.generate_fixture_sequence(
+            "SE02", project_id=self.project_standard.id)
 
     def test_get_sequences_for_project(self):
         sequences = self.get("data/projects/%s/sequences" % self.project.id)
-        self.assertEquals(len(sequences), 4)
+        self.assertEquals(len(sequences), 3)
         self.assertDictEqual(
             sequences[0],
-            self.sequence.serialize(obj_type="Sequence")
+            self.serialized_sequence
         )
 
     def test_get_sequences_for_project_404(self):

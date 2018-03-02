@@ -1,6 +1,5 @@
 from tests.base import ApiDBTestCase
 
-from zou.app.models.entity import Entity
 from zou.app.services import shots_service
 
 
@@ -13,32 +12,17 @@ class ShotTestCase(ApiDBTestCase):
         self.generate_fixture_entity_type()
         self.generate_fixture_episode()
         self.generate_fixture_sequence()
-        self.generate_fixture_shot()
+        self.generate_fixture_shot("SH01")
         self.shot_dict = self.shot.serialize(obj_type="Shot")
         self.shot_dict["project_name"] = self.project.name
         self.shot_dict["sequence_name"] = self.sequence.name
 
-        self.generate_data(
-            Entity,
-            3,
-            entities_out=[],
-            entities_in=[],
-            project_id=self.project.id,
-            entity_type_id=self.entity_type.id
-        )
-        self.generate_data(
-            Entity,
-            2,
-            entities_out=[],
-            entities_in=[],
-            parent_id=self.sequence.id,
-            project_id=self.project.id,
-            entity_type_id=self.shot_type.id
-        )
+        self.generate_fixture_shot("SH02")
+        self.generate_fixture_shot("SH03")
+        self.generate_fixture_entity()
 
     def test_get_shots(self):
         shots = self.get("data/shots/all")
-
         self.assertEquals(len(shots), 3)
         self.assertDictEqual(shots[0], self.shot_dict)
 
