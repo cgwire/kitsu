@@ -22,5 +22,5 @@ class AssetInstanceResource(BaseModelResource):
             return True
         else:
             asset_instance = self.get_model_or_404(instance["id"])
-            asset = assets_service.get_asset(asset_instance.id)
+            asset = assets_service.get_asset(asset_instance.asset_id)
             return user_service.check_has_task_related(asset["project_id"])

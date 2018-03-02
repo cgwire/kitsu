@@ -299,15 +299,21 @@ class ApiDBTestCase(ApiTestCase):
             entity_type_id=self.entity_type.id
         )
 
-    def generate_fixture_sequence(self, name="S01"):
-        if hasattr(self, "episode"):
+    def generate_fixture_sequence(
+        self,
+        name="S01",
+        episode_id=None,
+        project_id=None
+    ):
+        if episode_id is None and hasattr(self, "episode"):
             episode_id = self.episode.id
-        else:
-            episode_id = None
+
+        if project_id is None:
+            project_id = self.project.id
 
         self.sequence = Entity.create(
             name=name,
-            project_id=self.project.id,
+            project_id=project_id,
             entity_type_id=self.sequence_type.id,
             parent_id=episode_id
         )
@@ -319,12 +325,15 @@ class ApiDBTestCase(ApiTestCase):
             entity_type_id=self.sequence_type.id
         )
 
-    def generate_fixture_episode(self, name="E01"):
+    def generate_fixture_episode(self, name="E01", project_id=None):
+        if project_id is None:
+            project_id = self.project.id
         self.episode = Entity.create(
             name=name,
-            project_id=self.project.id,
+            project_id=project_id,
             entity_type_id=self.episode_type.id
         )
+        return self.episode
 
     def generate_fixture_shot(self, name="P01"):
         self.shot = Entity.create(
@@ -339,11 +348,7 @@ class ApiDBTestCase(ApiTestCase):
             entity_type_id=self.shot_type.id,
             parent_id=self.sequence.id
         )
-        self.shot_noseq = Entity.create(
-            name="P01NOSEQ",
-            project_id=self.project.id,
-            entity_type_id=self.shot_type.id
-        )
+        return self.shot
 
     def generate_fixture_scene(
         self,
@@ -365,10 +370,11 @@ class ApiDBTestCase(ApiTestCase):
             entity_type_id=self.scene_type.id,
             parent_id=self.sequence.id
         )
+        return self.scene
 
-    def generate_fixture_shot_standard(self):
+    def generate_fixture_shot_standard(self, name="SH01"):
         self.shot_standard = Entity.create(
-            name="P01",
+            name=name,
             description="Description Shot 01",
             data={
                 "fps": 25,
@@ -379,6 +385,7 @@ class ApiDBTestCase(ApiTestCase):
             entity_type_id=self.shot_type.id,
             parent_id=self.sequence_standard.id
         )
+        return self.shot_standard
 
     def generate_fixture_shot_asset_instance(
         self,
