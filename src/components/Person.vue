@@ -50,6 +50,7 @@
       :entries="displayedPersonTasks"
       :is-loading="isTasksLoading"
       :is-error="isTasksLoadingError"
+      :selection-grid="personTaskSelectionGrid"
       v-if="isCurrentActive"
     ></todos-list>
 
@@ -58,6 +59,7 @@
       :is-loading="isTasksLoading"
       :is-error="isTasksLoadingError"
       :done="true"
+      :selectionGrid="personTaskSelectionGrid"
       v-if="isDoneActive"
     ></todos-list>
   </div>
@@ -113,7 +115,8 @@ export default {
       'personMap',
       'displayedPersonTasks',
       'displayedPersonDoneTasks',
-      'personTasksSearchText'
+      'personTasksSearchText',
+      'personTaskSelectionGrid'
     ]),
 
     isCurrentActive () {

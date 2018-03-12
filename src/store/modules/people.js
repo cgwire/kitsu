@@ -1,6 +1,6 @@
 import peopleApi from '../api/people'
 import colors from '../../lib/colors'
-import { populateTask } from '../../lib/helpers'
+import { populateTask, clearSelectionGrid } from '../../lib/helpers'
 import { sortTasks } from '../../lib/sorting'
 import { indexSearch, buildTaskIndex } from '../../lib/indexing'
 import taskStatusStore from './taskstatus'
@@ -37,6 +37,10 @@ import {
 
   SET_PERSON_TASKS_SEARCH,
   NEW_TASK_COMMENT_END,
+
+  ADD_SELECTED_TASK,
+  REMOVE_SELECTED_TASK,
+  CLEAR_SELECTED_TASKS,
 
   RESET_ALL
 } from '../mutation-types'
@@ -100,7 +104,8 @@ const state = {
   displayedPersonTasks: [],
   displayedPersonDoneTasks: [],
   personTasksIndex: {},
-  personTasksSearchText: ''
+  personTasksSearchText: '',
+  personTaskSelectionGrid: {}
 }
 
 const getters = {
@@ -128,6 +133,7 @@ const getters = {
   displayedPersonTasks: state => state.displayedPersonTasks,
   displayedPersonDoneTasks: state => state.displayedPersonDoneTasks,
   personTasksSearchText: state => state.personTasksSearchText,
+  personTaskSelectionGrid: state => state.personTaskSelectionGrid,
 
   getPerson: (state, getters) => (id) => state.personMap[id],
   getPersonOptions: state => state.people.map(
@@ -415,6 +421,11 @@ const mutations = {
 
   [LOAD_PERSON_TASKS_END] (state, tasks) {
     tasks.forEach(populateTask)
+    const personTaskSelectionGrid = {}
+    for (let i = 0; i < tasks.length; i++) {
+      personTaskSelectionGrid[i] = { 0: false }
+    }
+    state.personTaskSelectionGrid = personTaskSelectionGrid
     state.personTasks = sortTasks(tasks)
 
     state.personTasksIndex = buildTaskIndex(tasks)
@@ -451,6 +462,24 @@ const mutations = {
 
       state.personTasksIndex = buildTaskIndex(state.personTasks)
     }
+  },
+
+  [REMOVE_SELECTED_TASK] (state, validationInfo) {
+    if (state.personTaskSelectionGrid[validationInfo.x]) {
+      state.personTaskSelectionGrid[validationInfo.x][0] = false
+    }
+  },
+
+  [ADD_SELECTED_TASK] (state, validationInfo) {
+    if (state.personTaskSelectionGrid[validationInfo.x]) {
+      state.personTaskSelectionGrid[validationInfo.x][0] = true
+    }
+  },
+
+  [CLEAR_SELECTED_TASKS] (state, validationInfo) {
+    state.personTaskSelectionGrid = clearSelectionGrid(
+      state.personTaskSelectionGrid
+    )
   },
 
   [RESET_ALL] (state, people) {

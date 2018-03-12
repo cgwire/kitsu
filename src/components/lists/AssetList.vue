@@ -103,7 +103,7 @@
             :selected="assetSelectionGrid[i][j]"
             :rowX="i"
             :columnY="j"
-            class="unselectable"
+            class="unselectable toto"
             @select="onTaskSelected"
             @unselect="onTaskUnselected"
             v-for="(column, j) in validationColumns"

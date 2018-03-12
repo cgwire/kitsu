@@ -638,11 +638,15 @@ const mutations = {
   },
 
   [REMOVE_SELECTED_TASK] (state, validationInfo) {
-    state.shotSelectionGrid[validationInfo.x][validationInfo.y] = false
+    if (state.shotSelectionGrid[0]) {
+      state.shotSelectionGrid[validationInfo.x][validationInfo.y] = false
+    }
   },
 
   [ADD_SELECTED_TASK] (state, validationInfo) {
-    state.shotSelectionGrid[validationInfo.x][validationInfo.y] = true
+    if (state.shotSelectionGrid[0]) {
+      state.shotSelectionGrid[validationInfo.x][validationInfo.y] = true
+    }
   },
 
   [CLEAR_SELECTED_TASKS] (state, validationInfo) {

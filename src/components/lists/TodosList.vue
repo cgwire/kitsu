@@ -33,7 +33,7 @@
   <div class="table-body" v-scroll="onBodyScroll" v-if="entries.length > 0">
     <table class="table">
       <tbody>
-        <tr v-for="entry in entries">
+        <tr v-for="(entry, i) in entries">
           <production-name-cell
             class="production"
             :entry="{
@@ -66,11 +66,15 @@
           >
           </task-type-name>
           <validation-cell
-            class="status"
+            class="status unselectable"
+            :ref="'validation-' + i + '-0'"
             :task-test="entry"
             :is-border="false"
             :is-assignees="false"
             :selectable="!done"
+            :selected="selectionGrid[i][0]"
+            :rowX="i"
+            :columnY="0"
             @select="onTaskSelected"
             @unselect="onTaskUnselected"
             :column="entry.taskStatus"
@@ -128,10 +132,12 @@ export default {
     'entries',
     'isLoading',
     'isError',
-    'done'
+    'done',
+    'selectionGrid'
   ],
   computed: {
     ...mapGetters([
+      'nbSelectedTasks'
     ])
   },
   methods: {
@@ -147,11 +153,47 @@ export default {
     },
 
     onTaskSelected (validationInfo) {
+      if (validationInfo.isShiftKey) {
+        if (this.lastSelection) {
+          let startX = this.lastSelection.x
+          let endX = validationInfo.x
+          if (validationInfo.x < this.lastSelection.x) {
+            startX = validationInfo.x
+            endX = this.lastSelection.x
+          }
+
+          for (let i = startX; i <= endX; i++) {
+            const ref = 'validation-' + i + '-' + 0
+            const validationCell = this.$refs[ref][0]
+            if (!this.selectionGrid[i][0]) {
+              validationCell.select({ctrlKey: true, isUserClick: false})
+            }
+          }
+        }
+      } else if (!validationInfo.isCtrlKey) {
+        this.$store.commit('CLEAR_SELECTED_TASKS')
+      }
       this.$store.commit('ADD_SELECTED_TASK', validationInfo)
+
+      if (!validationInfo.isShiftKey && validationInfo.isUserClick) {
+        this.lastSelection = {
+          x: validationInfo.x,
+          y: 0
+        }
+      }
     },
 
     onTaskUnselected (validationInfo) {
-      this.$store.commit('REMOVE_SELECTED_TASK', validationInfo)
+      if (!validationInfo.isCtrlKey) {
+        if (this.nbSelectedTasks === 1) {
+          this.$store.commit('REMOVE_SELECTED_TASK', validationInfo)
+        } else {
+          this.$store.commit('CLEAR_SELECTED_TASKS')
+          this.$store.commit('ADD_SELECTED_TASK', validationInfo)
+        }
+      } else {
+        this.$store.commit('REMOVE_SELECTED_TASK', validationInfo)
+      }
     }
   }
 }

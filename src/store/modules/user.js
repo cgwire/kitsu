@@ -2,9 +2,14 @@ import peopleApi from '../api/people'
 import peopleStore from './people'
 import taskStatusStore from './taskstatus'
 import auth from '../../lib/auth'
-import { populateTask } from '../../lib/helpers'
 import { sortTasks } from '../../lib/sorting'
 import { indexSearch, buildTaskIndex } from '../../lib/indexing'
+import {
+  populateTask,
+  buildSelectionGrid,
+  clearSelectionGrid
+} from '../../lib/helpers'
+
 import {
   USER_LOGIN,
   USER_LOGOUT,
@@ -32,6 +37,10 @@ import {
 
   SET_TODOS_SEARCH,
 
+  ADD_SELECTED_TASK,
+  REMOVE_SELECTED_TASK,
+  CLEAR_SELECTED_TASKS,
+
   RESET_ALL
 } from '../mutation-types'
 
@@ -51,6 +60,7 @@ const state = {
   displayedDoneTasks: [],
   todosIndex: {},
   todosSearchText: '',
+  todoSelectionGrid: {},
 
   avatarFormData: null,
 
@@ -74,6 +84,7 @@ const getters = {
   displayedTodos: state => state.displayedTodos,
   displayedDoneTasks: state => state.displayedDoneTasks,
   todosSearchText: state => state.todosSearchText,
+  todoSelectionGrid: state => state.todoSelectionGrid,
 
   isSaveProfileLoading: state => state.isSaveProfileLoading,
   isSaveProfileLoadingError: state => state.isSaveProfileLoadingError,
@@ -231,6 +242,7 @@ const mutations = {
       task.taskStatus = taskStatus
     })
 
+    state.todoSelectionGrid = buildSelectionGrid(tasks.length, 1)
     state.todos = sortTasks(tasks)
 
     state.todosIndex = buildTaskIndex(tasks)
@@ -288,6 +300,22 @@ const mutations = {
     state.displayedTodos = searchResult || state.todos
   },
 
+  [ADD_SELECTED_TASK] (state, validationInfo) {
+    if (state.todoSelectionGrid[0]) {
+      state.todoSelectionGrid[validationInfo.x][validationInfo.y] = true
+    }
+  },
+
+  [REMOVE_SELECTED_TASK] (state, validationInfo) {
+    if (state.todoSelectionGrid[0]) {
+      state.todoSelectionGrid[validationInfo.x][validationInfo.y] = false
+    }
+  },
+
+  [CLEAR_SELECTED_TASKS] (state) {
+    state.todoSelectionGrid = clearSelectionGrid(state.todoSelectionGrid)
+  },
+
   [RESET_ALL] (state) {
     state.user = null
     state.isAuthenticated = false
@@ -297,6 +325,7 @@ const mutations = {
     state.isTodosLoading = false
     state.isTodosLoadingError = false
     state.todos = []
+    state.todoSelectionGrid = {}
 
     state.changePassword = {
       isLoading: false,

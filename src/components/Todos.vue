@@ -39,6 +39,7 @@
       :entries="displayedTodos"
       :is-loading="isTodosLoading"
       :is-error="isTodosLoadingError"
+      :selection-grid="todoSelectionGrid"
       v-if="isCurrentActive"
     ></todos-list>
 
@@ -88,7 +89,8 @@ export default {
       'displayedDoneTasks',
       'todosSearchText',
       'isTodosLoading',
-      'isTodosLoadingError'
+      'isTodosLoadingError',
+      'todoSelectionGrid'
     ]),
 
     isCurrentActive () {
