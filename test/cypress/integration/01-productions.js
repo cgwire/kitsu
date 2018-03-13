@@ -1,6 +1,7 @@
-describe('Testing production page', function () {
-  context('Create a new production', function () {
-    before(function () {
+describe('Testing production page', () => {
+
+  context('Create a new production', () => {
+    before(() => {
       Cypress.Cookies.defaults({
         whitelist: ['session_id', 'access_token_cookie', 'refresh_token_cookie']
       })
@@ -17,24 +18,29 @@ describe('Testing production page', function () {
       cy.get('aside').contains('Productions').click()
     })
 
-    it('click to add production', function () {
-      cy.get('div.level-item > .button').contains('Add a production').click().wait(500)
+    it('click to add production', () => {
+      cy.get('div.level-item > .button')
+        .contains('Add a production')
+        .click()
+        .wait(500)
     })
 
     const productionName = `Agent 327-${Math.floor((Math.random() * 1000) + 1)}`
 
-    it('type production form', function () {
+    it('type production form', () => {
       cy.get('.input').type(productionName)
-      cy.get('.is-active > .modal-content > .box > .has-text-right > .is-primary').contains('Confirm').click()
+      cy.get('.is-active > .modal-content > .box > .has-text-right > .is-primary')
+        .contains('Confirm')
+        .click()
     })
 
-    it('Verify the new production', function () {
+    it('Verify the new production', () => {
       cy.wait(500)
       cy.get('.table-body').contains(productionName)
     })
   })
 
-  after(function () {
+  after(() => {
     cy.get('ul > :nth-child(2)').contains('Logout').click({force: true})
   })
 })
