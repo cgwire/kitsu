@@ -34,6 +34,10 @@ export default {
   vertical-align: middle;
 }
 
+th.actions {
+  min-width: 200px;
+}
+
 .avatar {
   border-radius: 50%;
   color: white;
@@ -251,6 +255,10 @@ input.search-input:focus {
 .button:focus,
 .button:active {
   border-color: #666;
+}
+
+.unselectable {
+  user-select: none;
 }
 
 @media screen and (max-width: 1000px) {

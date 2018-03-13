@@ -2,12 +2,12 @@
 <div class="data-list">
   <div style="overflow: hidden">
     <table class="table table-header" ref="headerWrapper">
-      <thead>
+      <thead class="thead">
         <tr>
           <th class="name">{{ $t('custom_actions.fields.name') }}</th>
           <th class="url">{{ $t('custom_actions.fields.url') }}</th>
           <th class="entity-type">{{ $t('custom_actions.fields.entity_type') }}</th>
-          <th class="actions"></th>
+          <th class="actions">&nbsp;</th>
         </tr>
       </thead>
     </table>
@@ -106,5 +106,9 @@ export default {
 .entity-type {
   width: 200px;
   min-width: 200px;
+}
+
+.thead {
+  width: 100%
 }
 </style>

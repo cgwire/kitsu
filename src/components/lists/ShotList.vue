@@ -73,7 +73,7 @@
         <tr
           :key="entry.id"
           :class="{canceled: entry.canceled}"
-          v-for="entry in entries"
+          v-for="(entry, i) in entries"
         >
           <td class="thumbnail">
             <entity-thumbnail :entity="entry"></entity-thumbnail>
@@ -109,11 +109,16 @@
           </td>
           <validation-cell
             :key="column.name + '-' + entry.id"
+            :ref="'validation-' + i + '-' + j"
             :column="column"
             :entity="entry"
+            :selected="shotSelectionGrid[i][j]"
+            :rowX="i"
+            :columnY="j"
+            class="unselectable"
             @select="onTaskSelected"
             @unselect="onTaskUnselected"
-            v-for="column in validationColumns"
+            v-for="(column, j) in validationColumns"
           >
           </validation-cell>
           <row-actions v-if="isCurrentUserManager"
@@ -175,7 +180,8 @@ export default {
   ],
   data () {
     return {
-      busy: false
+      busy: false,
+      lastSelection: null
     }
   },
   components: {
@@ -192,7 +198,9 @@ export default {
       'currentProduction',
       'isCurrentUserManager',
       'displayedShotsLength',
-      'shotSearchText'
+      'nbSelectedTasks',
+      'shotSearchText',
+      'shotSelectionGrid'
     ]),
     isEmptyList () {
       return this.entries &&
@@ -212,12 +220,56 @@ export default {
       this.$refs.tableWrapper.scrollLeft = position.scrollLeft
     },
 
-    onTaskSelected (task) {
-      this.$store.commit('ADD_SELECTED_TASK', task)
+    onTaskSelected (validationInfo) {
+      if (validationInfo.isShiftKey) {
+        if (this.lastSelection) {
+          let startX = this.lastSelection.x
+          let endX = validationInfo.x
+          let startY = this.lastSelection.y
+          let endY = validationInfo.y
+          if (validationInfo.x < this.lastSelection.x) {
+            startX = validationInfo.x
+            endX = this.lastSelection.x
+          }
+          if (validationInfo.y < this.lastSelection.y) {
+            startY = validationInfo.y
+            endY = this.lastSelection.y
+          }
+
+          for (let i = startX; i <= endX; i++) {
+            for (let j = startY; j <= endY; j++) {
+              const ref = 'validation-' + i + '-' + j
+              const validationCell = this.$refs[ref][0]
+              if (!this.shotSelectionGrid[i][j]) {
+                validationCell.select({ctrlKey: true, isUserClick: false})
+              }
+            }
+          }
+        }
+      } else if (!validationInfo.isCtrlKey) {
+        this.$store.commit('CLEAR_SELECTED_TASKS')
+      }
+      this.$store.commit('ADD_SELECTED_TASK', validationInfo)
+
+      if (!validationInfo.isShiftKey && validationInfo.isUserClick) {
+        this.lastSelection = {
+          x: validationInfo.x,
+          y: validationInfo.y
+        }
+      }
     },
 
-    onTaskUnselected (task) {
-      this.$store.commit('REMOVE_SELECTED_TASK', task)
+    onTaskUnselected (validationInfo) {
+      if (!validationInfo.isCtrlKey) {
+        if (this.nbSelectedTasks === 1) {
+          this.$store.commit('REMOVE_SELECTED_TASK', validationInfo)
+        } else {
+          this.$store.commit('CLEAR_SELECTED_TASKS')
+          this.$store.commit('ADD_SELECTED_TASK', validationInfo)
+        }
+      } else {
+        this.$store.commit('REMOVE_SELECTED_TASK', validationInfo)
+      }
     },
 
     onBodyScroll (event, position) {

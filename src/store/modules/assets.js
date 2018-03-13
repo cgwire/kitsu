@@ -6,7 +6,14 @@ import productionsStore from './productions'
 import peopleStore from './people'
 
 import {PAGE_SIZE} from '../../lib/pagination'
-import { sortAssets, sortByName } from '../../lib/sorting'
+import {
+  sortAssets,
+  sortByName
+} from '../../lib/sorting'
+import {
+  buildSelectionGrid,
+  clearSelectionGrid
+} from '../../lib/helpers'
 import {
   buildAssetIndex,
   indexSearch
@@ -57,6 +64,10 @@ import {
 
   SET_ASSET_LIST_SCROLL_POSITION,
 
+  REMOVE_SELECTED_TASK,
+  ADD_SELECTED_TASK,
+  CLEAR_SELECTED_TASKS,
+
   RESET_ALL
 } from '../mutation-types'
 
@@ -96,11 +107,14 @@ const state = {
   assets: [],
   assetMap: {},
   assetTypes: [],
+  nbValidationColumns: 0,
 
   assetIndex: {},
+  filteredAssets: [],
   displayedAssets: [],
   displayedAssetsLength: 0,
   assetSearchText: '',
+  assetSelectionGrid: {},
 
   openProductions: [],
   isAssetsLoading: false,
@@ -132,6 +146,7 @@ const getters = {
   assets: state => state.assets,
   assetMap: state => state.assetMap,
   assetSearchText: state => state.assetSearchText,
+  assetSelectionGrid: state => state.assetSelectionGrid,
 
   isAssetsLoading: state => state.isAssetsLoading,
   isAssetsLoadingError: state => state.isAssetsLoadingError,
@@ -211,7 +226,6 @@ const actions = {
 
   loadAsset ({ commit, state }, { assetId, callback }) {
     assetsApi.getAsset(assetId, (err, asset) => {
-      console.log(err, asset)
       if (!err) {
         commit(LOAD_ASSET_END, asset)
       }
@@ -315,19 +329,29 @@ const mutations = {
   },
 
   [LOAD_ASSETS_END] (state, assets) {
+    const validationColumns = {}
     assets = sortAssets(assets)
     assets.forEach((asset) => {
       state.assetMap[asset.id] = asset
       asset.production_id = helpers.getCurrentProduction().id
 
-      asset.tasks.forEach(helpers.populateTask)
+      asset.tasks.forEach((task) => {
+        helpers.populateTask(task)
+        validationColumns[task.task_type_id] = true
+      })
     })
 
     state.assets = assets
     state.isAssetsLoading = false
     state.isAssetsLoadingError = false
+    state.nbValidationColumns = Object.keys(validationColumns).length
 
     state.assetIndex = buildAssetIndex(assets)
+
+    const maxX = assets.length
+    const maxY = state.nbValidationColumns
+    state.assetSelectionGrid = buildSelectionGrid(maxX, maxY)
+
     state.displayedAssets = state.assets.slice(0, PAGE_SIZE)
     state.displayedAssetsLength = state.assets ? state.assets.length : 0
   },
@@ -515,6 +539,10 @@ const mutations = {
     const taskTypes = extractTaskTypes(state.assets)
     result = applyFilters(taskTypes, result, assetSearch) || []
 
+    const maxX = result.length
+    const maxY = state.nbValidationColumns
+    state.assetSelectionGrid = buildSelectionGrid(maxX, maxY)
+
     state.displayedAssets = result.slice(0, PAGE_SIZE)
     state.displayedAssetsLength = result ? result.length : 0
     state.assetSearchText = assetSearch
@@ -562,6 +590,22 @@ const mutations = {
     state.assetListScrollPosition = scrollPosition
   },
 
+  [REMOVE_SELECTED_TASK] (state, validationInfo) {
+    if (state.assetSelectionGrid[0]) {
+      state.assetSelectionGrid[validationInfo.x][validationInfo.y] = false
+    }
+  },
+
+  [ADD_SELECTED_TASK] (state, validationInfo) {
+    if (state.assetSelectionGrid[0]) {
+      state.assetSelectionGrid[validationInfo.x][validationInfo.y] = true
+    }
+  },
+
+  [CLEAR_SELECTED_TASKS] (state, validationInfo) {
+    state.assetSelectionGrid = clearSelectionGrid(state.assetSelectionGrid)
+  },
+
   [RESET_ALL] (state) {
     state.assets = []
     state.assetMap = {}
@@ -570,6 +614,7 @@ const mutations = {
     state.isAssetsLoadingError = false
     state.assetsCsvFormData = null
     state.assetValidationColumns = {}
+    state.assetSelectionGrid = {}
 
     state.assetIndex = {}
     state.displayedAssets = []

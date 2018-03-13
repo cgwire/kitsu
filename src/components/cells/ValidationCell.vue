@@ -39,9 +39,7 @@ export default {
   name: 'validation-cell',
 
   data () {
-    return {
-      selected: false
-    }
+    return {}
   },
 
   components: {
@@ -73,6 +71,18 @@ export default {
     selectable: {
       default: true,
       type: Boolean
+    },
+    selected: {
+      default: false,
+      type: Boolean
+    },
+    rowX: {
+      default: 0,
+      type: Number
+    },
+    columnY: {
+      default: 0,
+      type: Number
     }
   },
 
@@ -102,34 +112,35 @@ export default {
     ...mapActions([
     ]),
 
-    select () {
+    select (event) {
+      const isUserClick = event.isUserClick !== false
+
       if (this.selectable) {
         if (this.$refs.cell &&
             this.$refs.cell.className.indexOf('selected') < 0) {
-          this.selected = true
           this.$emit('select', {
             entity: this.entity,
             column: this.column,
-            task: this.task
+            task: this.task,
+            x: this.rowX,
+            y: this.columnY,
+            isCtrlKey: event.ctrlKey,
+            isShiftKey: event.shiftKey,
+            isUserClick: isUserClick
           })
         } else {
-          this.selected = false
           this.$emit('unselect', {
             entity: this.entity,
             column: this.column,
-            task: this.task
+            task: this.task,
+            x: this.rowX,
+            y: this.columnY,
+            isCtrlKey: event.ctrlKey,
+            isShiftKey: event.shiftKey,
+            isUserClick: isUserClick
           })
         }
       }
-    }
-  },
-
-  watch: {
-    nbSelectedTasks () {
-      if (this.nbSelectedTasks === 0) this.selected = false
-    },
-    nbSelectedValidations () {
-      if (this.nbSelectedTasks === 0) this.selected = false
     }
   }
 }

@@ -13,7 +13,8 @@ describe('Checking task with superviseur', function () {
         cy.get('.email').type(users[1].email)
         cy.get('.password').type('default')
         cy.get('.main-button').click()
-        cy.get('.nav-right > .nav-item').contains(`${users[1].firstName} ${users[1].lastName}`)
+        cy.get('.nav-right > .nav-item')
+          .contains(`${users[1].firstName} ${users[1].lastName}`)
       })
     })
 
@@ -23,7 +24,12 @@ describe('Checking task with superviseur', function () {
     })
 
     it('checking Agent 327', function () {
-      cy.get('tbody > tr').contains('Agent 327').parent().parent().children().then(($children) => {
+      cy.get('tbody > tr')
+        .contains('Agent 327')
+        .parent()
+        .parent()
+        .children()
+        .then(($children) => {
         cy.wrap($children[4]).contains('wfa')
         cy.wrap($children[4]).contains('CP')
       })
@@ -32,7 +38,12 @@ describe('Checking task with superviseur', function () {
 
   context('edit task in done', function () {
     it('click on WFA button', function () {
-      cy.get('tbody > tr').contains('Agent 327').parent().parent().children().then(($children) => {
+      cy.get('tbody > tr')
+        .contains('Agent 327')
+        .parent()
+        .parent()
+        .children()
+        .then(($children) => {
         cy.wrap($children[4]).contains('wfa').click()
       })
     })

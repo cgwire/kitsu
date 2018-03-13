@@ -264,4 +264,14 @@ a.secondary {
 a.secondary:hover {
   text-decoration: underline
 }
+
+@media screen and (max-width: 768px) {
+  .title {
+    margin-top: 1em;
+  }
+
+  .production-name {
+    font-size: 1.1em;
+  }
+}
 </style>
