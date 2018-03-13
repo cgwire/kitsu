@@ -24,6 +24,7 @@
     "moment": "2.20.1",
     "moment-timezone": "0.5.14",
     "ncu": "0.2.1",
+    "pify": "3.0.0",
     "reconnecting-eventsource": "1.0.1",
     "superagent": "3.8.2",
     "thenby": "1.2.3",
