@@ -1,5 +1,4 @@
 from tests.base import ApiDBTestCase
-from zou.app.models.entity import Entity
 
 
 class SequenceTestCase(ApiDBTestCase):
@@ -9,37 +8,22 @@ class SequenceTestCase(ApiDBTestCase):
         self.generate_fixture_project_status()
         self.generate_fixture_project()
         self.generate_fixture_entity_type()
-        self.generate_fixture_episode()
-        self.generate_fixture_sequence()
         self.generate_fixture_department()
         self.generate_fixture_task_type()
         self.generate_fixture_task_status()
         self.generate_fixture_assigner()
         self.generate_fixture_person()
-        self.generate_data(
-            Entity,
-            3,
-            entities_out=[],
-            entities_in=[],
-            project_id=self.project.id,
-            entity_type_id=self.entity_type.id,
-        )
-        self.generate_data(
-            Entity,
-            2,
-            entities_out=[],
-            entities_in=[],
-            project_id=self.project.id,
-            entity_type_id=self.sequence_type.id
-        )
+
+        self.generate_fixture_episode()
+        self.generate_fixture_sequence()
+        self.serialized_sequence = self.sequence.serialize(obj_type="Sequence")
+        self.generate_fixture_sequence("SE02")
+        self.generate_fixture_sequence("SE03")
 
     def test_get_sequences(self):
         sequences = self.get("data/sequences")
         self.assertEquals(len(sequences), 3)
-        self.assertDictEqual(
-            sequences[0],
-            self.sequence.serialize(obj_type="Sequence")
-        )
+        self.assertDictEqual(sequences[0], self.serialized_sequence)
 
     def test_get_sequence(self):
         sequence = self.get("data/sequences/%s" % self.sequence.id)

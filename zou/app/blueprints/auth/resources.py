@@ -77,6 +77,12 @@ def on_identity_loaded(sender, identity):
 
 
 class AuthenticatedResource(Resource):
+    """
+    Returns information if the user is authenticade else it returns a 401
+    response.
+    It can be used by third party tools, especially browser frontend, to know
+    if current user is still logged in.
+    """
 
     @jwt_required
     def get(self):
@@ -91,6 +97,10 @@ class AuthenticatedResource(Resource):
 
 
 class LogoutResource(Resource):
+    """
+    Log user out by revoking his auth tokens. Once log out, current user
+    cannot access to API anymore.
+    """
 
     @jwt_required
     def get(self):
@@ -120,6 +130,12 @@ class LogoutResource(Resource):
 
 
 class LoginResource(Resource):
+    """
+    Log in user by creating and registering auth tokens. Login is based
+    on email and password. If no user match given email and a destkop ID,
+    it looks in matching the desktop ID with the one stored in database. It is
+    useful for clients that run on desktop tools and that don't know user email.
+    """
 
     def post(self):
         (email, password) = self.get_arguments()
@@ -187,6 +203,10 @@ class LoginResource(Resource):
 
 
 class RefreshTokenResource(Resource):
+    """
+    Tokens are considered as outdated every two weeks. This route allows to
+    make their lifetime long. Before they get outdated.
+    """
 
     @jwt_refresh_token_required
     def get(self):
@@ -203,6 +223,9 @@ class RefreshTokenResource(Resource):
 
 
 class RegistrationResource(Resource):
+    """
+    Allow an user to register himself to the service.
+    """
 
     def post(self):
         (
@@ -279,6 +302,13 @@ class RegistrationResource(Resource):
 
 
 class ChangePasswordResource(Resource):
+    """
+    Allow the user to change his password. Prior to modify the password,
+    it requires to give the current password (to make sure the user changing
+    the password is not someone who stealed the session).
+    The new password requires a confirmation to ensure that the user didn't
+    make mistake by typing his new password.
+    """
 
     @jwt_required
     def post(self):
@@ -345,7 +375,7 @@ class ChangePasswordResource(Resource):
 class PersonListResource(Resource):
     """
     Resource used to list people available in the database without
-    having too much information.
+    having too much information. Just, the bare minimum.
     """
 
     @jwt_required

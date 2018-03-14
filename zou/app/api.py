@@ -15,7 +15,6 @@ from .blueprints.shots import blueprint as shots_blueprint
 from .blueprints.tasks import blueprint as tasks_blueprint
 from .blueprints.thumbnails import blueprint as thumbnails_blueprint
 from .blueprints.user import blueprint as user_blueprint
-from .blueprints.actions import blueprint as actions_blueprint
 
 
 def configure(app):
@@ -47,7 +46,6 @@ def configure_api_routes(app):
     app.register_blueprint(tasks_blueprint)
     app.register_blueprint(thumbnails_blueprint)
     app.register_blueprint(user_blueprint)
-    app.register_blueprint(actions_blueprint)
     return app
 
 

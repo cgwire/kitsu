@@ -23,6 +23,12 @@ from zou.app.utils import query, events, permissions
 
 
 class CommentTaskResource(Resource):
+    """
+    Creates a new comment for given task. It requires a text, a task_status
+    and a person as arguments. This way, comments keep history of status
+    changes. When the comment is created, it updates the task status with
+    given task status.
+    """
 
     @jwt_required
     def post(self, task_id):
@@ -77,6 +83,10 @@ class CommentTaskResource(Resource):
 
 
 class AddPreviewResource(Resource):
+    """
+    Add a preview to given task. Revision is automatically set: it is
+    equal to last revision + 1.
+    """
 
     @jwt_required
     def post(self, task_id, comment_id):
@@ -124,6 +134,9 @@ class AddPreviewResource(Resource):
 
 
 class TaskPreviewsResource(Resource):
+    """
+    Return previews linked to given task.
+    """
 
     @jwt_required
     def get(self, task_id):
@@ -134,6 +147,9 @@ class TaskPreviewsResource(Resource):
 
 
 class TaskCommentsResource(Resource):
+    """
+    Return comments link to given task.
+    """
 
     @jwt_required
     def get(self, task_id):
@@ -143,6 +159,10 @@ class TaskCommentsResource(Resource):
 
 
 class PersonTasksResource(Resource):
+    """
+    Return task assigned to given user of which status has is_done flag sets
+    to false.
+    """
 
     @jwt_required
     def get(self, person_id):
@@ -154,6 +174,10 @@ class PersonTasksResource(Resource):
 
 
 class PersonDoneTasksResource(Resource):
+    """
+    Return task assigned to given user of which status has is_done flag sets
+    to true. It return only tasks related to open projects.
+    """
 
     @jwt_required
     def get(self, person_id):
@@ -165,6 +189,9 @@ class PersonDoneTasksResource(Resource):
 
 
 class CreateShotTasksResource(Resource):
+    """
+    Create a new task for given shot and task type.
+    """
 
     @jwt_required
     def post(self, task_type_id):
@@ -179,6 +206,9 @@ class CreateShotTasksResource(Resource):
 
 
 class CreateAssetTasksResource(Resource):
+    """
+    Create a new task for given asset and task type.
+    """
 
     @jwt_required
     def post(self, task_type_id):
@@ -194,6 +224,10 @@ class CreateAssetTasksResource(Resource):
 
 
 class ToReviewResource(Resource):
+    """
+    Change a task status to "to review". It creates a new preview file entry
+    and set path from the hard disk.
+    """
 
     @jwt_required
     def put(self, task_id):
@@ -269,6 +303,9 @@ class ToReviewResource(Resource):
 
 
 class ClearAssignationResource(Resource):
+    """
+    Remove all assignations set to given task.
+    """
 
     @jwt_required
     def put(self):
@@ -296,6 +333,10 @@ class ClearAssignationResource(Resource):
 
 
 class TasksAssignResource(Resource):
+    """
+    Assign given task lists to given person. If a given task ID is wrong,
+    it ignores it.
+    """
 
     @jwt_required
     def put(self, person_id):
@@ -331,6 +372,9 @@ class TasksAssignResource(Resource):
 
 
 class TaskAssignResource(Resource):
+    """
+    Assign given task to given person.
+    """
 
     @jwt_required
     def put(self, task_id):
@@ -362,6 +406,10 @@ class TaskAssignResource(Resource):
 
 
 class TaskFullResource(Resource):
+    """
+    Return a task with many information: full details for assignees, full
+    details for task type, full details for task status, etc.
+    """
 
     @jwt_required
     def get(self, task_id):
@@ -398,6 +446,9 @@ class TaskFullResource(Resource):
 
 
 class TaskStartResource(Resource):
+    """
+    Set the status of a given task to Work In Progress.
+    """
 
     @jwt_required
     def put(self, task_id):
@@ -408,6 +459,10 @@ class TaskStartResource(Resource):
 
 
 class TaskForEntityResource(Resource):
+    """
+    Return tasks related to given entity asset, episode, sequence, shot or
+    scene.
+    """
 
     @jwt_required
     def get(self, entity_id, task_type_id):
@@ -421,6 +476,9 @@ class TaskForEntityResource(Resource):
 
 
 class SetTimeSpentResource(Resource):
+    """
+    Set time spent by a person on a task for a given day.
+    """
 
     @jwt_required
     def post(self, task_id, date, person_id):
@@ -449,6 +507,9 @@ class SetTimeSpentResource(Resource):
 
 
 class AddTimeSpentResource(Resource):
+    """
+    Add given timeframe to time spent by a person on a task for a given day.
+    """
 
     @jwt_required
     def post(self, task_id, date, person_id):
@@ -479,6 +540,9 @@ class AddTimeSpentResource(Resource):
 
 
 class GetTimeSpentResource(Resource):
+    """
+    Get time spent on a given task by a given person.
+    """
 
     @jwt_required
     def get(self, task_id, date):

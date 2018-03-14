@@ -2,6 +2,7 @@ import pytest
 
 from tests.base import ApiDBTestCase
 
+from zou.app.models.entity import Entity
 from zou.app.services import shots_service
 from zou.app.services.exception import (
     SceneNotFoundException,
@@ -34,6 +35,12 @@ class ShotUtilsTestCase(ApiDBTestCase):
         self.assertEquals(episode["name"], 'E01')
 
     def test_get_sequence_from_shot_no_sequence(self):
+        self.shot_noseq = Entity.create(
+            name="P01NOSEQ",
+            project_id=self.project.id,
+            entity_type_id=self.shot_type.id
+        )
+
         self.assertRaises(
             SequenceNotFoundException,
             shots_service.get_sequence_from_shot,

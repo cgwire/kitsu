@@ -5,6 +5,7 @@ from tests.base import ApiDBTestCase
 from zou.app import app
 from zou.app.utils import fs, thumbnail
 from zou.app.services import assets_service
+from zou.app.models.entity import Entity
 
 from PIL import Image
 
@@ -140,3 +141,6 @@ class RouteThumbnailTestCase(ApiDBTestCase):
             self.entity_id,
             self.entity_id
         ), {}, 404)
+        entity = Entity.get(self.entity_id)
+        entity.preview_file_id = None
+        entity.save()

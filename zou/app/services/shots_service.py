@@ -61,14 +61,14 @@ def get_camera_type():
 def get_episodes(criterions={}):
     episode_type = get_episode_type()
     criterions["entity_type_id"] = episode_type["id"]
-    result = Entity.query.filter_by(**criterions).all()
+    result = Entity.query.filter_by(**criterions).order_by("name").all()
     return Entity.serialize_list(result, obj_type="Episode")
 
 
 def get_sequences(criterions={}):
     sequence_type = get_sequence_type()
     criterions["entity_type_id"] = sequence_type["id"]
-    result = Entity.query.filter_by(**criterions).all()
+    result = Entity.query.filter_by(**criterions).order_by(Entity.name).all()
     return Entity.serialize_list(result, obj_type="Sequence")
 
 
@@ -81,6 +81,7 @@ def get_shots(criterions={}):
     query = query.join(Sequence, Sequence.id == Entity.parent_id)
     query = query.add_columns(Project.name)
     query = query.add_columns(Sequence.name)
+    query = query.order_by(Entity.name)
     data = query.all()
 
     shots = []
@@ -451,11 +452,12 @@ def get_or_create_sequence(project_id, episode_id, name):
 
 
 def get_entities_for_project(project_id, entity_type_id, obj_type="Entity"):
-    projects_service.get_project_raw(project_id)
-    result = Entity.get_all_by(
-        entity_type_id=entity_type_id,
-        project_id=project_id
-    )
+    projects_service.get_project_raw(project_id)  # exception if not exists
+    result = Entity.query \
+        .filter(Entity.entity_type_id == entity_type_id) \
+        .filter(Entity.project_id == project_id) \
+        .order_by(Entity.name) \
+        .all()
     return Entity.serialize_list(result, obj_type=obj_type)
 
 
@@ -493,10 +495,12 @@ def get_scenes_for_project(project_id):
 
 def get_scenes_for_sequence(sequence_id):
     get_sequence(sequence_id)
-    result = Entity.get_all_by(
-        parent_id=sequence_id,
-        entity_type_id=get_scene_type()["id"],
-    )
+    scene_type_id = get_scene_type()["id"]
+    result = Entity.query \
+        .filter(Entity.entity_type_id == scene_type_id) \
+        .filter(Entity.parent_id == sequence_id) \
+        .order_by(Entity.name) \
+        .all()
     return Entity.serialize_list(result, "Scene")
 
 

@@ -71,6 +71,16 @@ class BaseMixin(object):
         return instance
 
     @classmethod
+    def create_no_commit(cls, **kw):
+        """
+        Shorthand to create an entry via the database session without commiting
+        the request.
+        """
+        instance = cls(**kw)
+        db.session.add(instance)
+        return instance
+
+    @classmethod
     def get_id_map(cls, field="shotgun_id"):
         """
         Build a map to easily match a field value with an id. It's useful during
@@ -105,6 +115,14 @@ class BaseMixin(object):
         except:
             db.session.rollback()
             raise
+
+    def delete_no_commit(self):
+        """
+        Shorthand to delete an entry via the database session based on current
+        instance id. The change is not commited.
+        """
+        db.session.delete(self)
+        return True
 
     def update(self, data):
         """

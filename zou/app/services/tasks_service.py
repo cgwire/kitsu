@@ -671,6 +671,7 @@ def get_person_tasks(person_id, projects, is_done=None):
         .filter(Comment.object_id.in_(task_ids)) \
         .order_by(Comment.object_id, Comment.created_at) \
         .all()
+    print(task_ids, comments)
 
     task_id = None
     for comment in comments:
@@ -681,10 +682,12 @@ def get_person_tasks(person_id, projects, is_done=None):
                 "date": fields.serialize_value(comment.created_at),
                 "person_id": fields.serialize_value(comment.person_id)
             }
+    print(task_comment_map)
     for task in tasks:
         if task["id"] in task_comment_map:
             task["last_comment"] = task_comment_map[task["id"]]
         else:
             task["last_comment"] = {}
+    print([task["id"] for task in tasks])
 
     return tasks

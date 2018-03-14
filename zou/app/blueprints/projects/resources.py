@@ -6,6 +6,10 @@ from zou.app.utils import permissions
 
 
 class OpenProjectsResource(Resource):
+    """
+    Return the list of projects currently running. Most of the time, past
+    projects are not needed.
+    """
 
     @jwt_required
     def get(self):
@@ -17,6 +21,10 @@ class OpenProjectsResource(Resource):
 
 
 class AllProjectsResource(Resource):
+    """
+    Return all projects listed in database. Ensure that user has at least
+    the manager level before that.
+    """
 
     @jwt_required
     def get(self):
