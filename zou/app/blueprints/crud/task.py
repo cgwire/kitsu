@@ -22,6 +22,7 @@ class TasksResource(BaseModelsResource):
         try:
             data = request.json
             is_assignees = "assignees" in data
+            assignees = None
 
             if is_assignees:
                 assignees = data['assignees']
@@ -29,7 +30,7 @@ class TasksResource(BaseModelsResource):
                 del data["assignees"]
 
             instance = self.model(**data)
-            if assignees:
+            if assignees is not None:
                 instance.assignees = persons
             instance.save()
 
@@ -37,11 +38,11 @@ class TasksResource(BaseModelsResource):
 
         except TypeError as exception:
             current_app.logger.error(str(exception))
-            return {"message": exception.message}, 400
+            return {"message": str(exception)}, 400
 
         except IntegrityError as exception:
             current_app.logger.error(str(exception))
-            return {"message": exception.message}, 400
+            return {"message": "Task already exists."}, 400
 
 
 class TaskResource(BaseModelResource):
