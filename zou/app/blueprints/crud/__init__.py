@@ -35,6 +35,7 @@ from .comments import CommentsResource, CommentResource
 from .time_spent import TimeSpentsResource, TimeSpentResource
 from .custom_action import CustomActionsResource, CustomActionResource
 from .asset_instance import AssetInstanceResource, AssetInstancesResource
+from .playlist import PlaylistsResource, PlaylistResource
 
 
 routes = [
@@ -75,7 +76,9 @@ routes = [
     ("/data/custom-actions/", CustomActionsResource),
     ("/data/custom-actions/<instance_id>", CustomActionResource),
     ("/data/asset-instances/", AssetInstancesResource),
-    ("/data/asset-instances/<instance_id>", AssetInstanceResource)
+    ("/data/asset-instances/<instance_id>", AssetInstanceResource),
+    ("/data/playlists/", PlaylistsResource),
+    ("/data/playlists/<instance_id>", PlaylistResource)
 ]
 
 blueprint = Blueprint("/data", "data")

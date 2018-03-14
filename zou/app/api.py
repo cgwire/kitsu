@@ -10,6 +10,7 @@ from .blueprints.export import blueprint as export_blueprint
 from .blueprints.source import blueprint as import_blueprint
 from .blueprints.index import blueprint as index_blueprint
 from .blueprints.persons import blueprint as persons_blueprint
+from .blueprints.playlists import blueprint as playlists_blueprint
 from .blueprints.projects import blueprint as projects_blueprint
 from .blueprints.shots import blueprint as shots_blueprint
 from .blueprints.tasks import blueprint as tasks_blueprint
@@ -41,6 +42,7 @@ def configure_api_routes(app):
     app.register_blueprint(import_blueprint)
     app.register_blueprint(index_blueprint)
     app.register_blueprint(persons_blueprint)
+    app.register_blueprint(playlists_blueprint)
     app.register_blueprint(projects_blueprint)
     app.register_blueprint(shots_blueprint)
     app.register_blueprint(tasks_blueprint)
