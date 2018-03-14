@@ -95,6 +95,9 @@ class BaseModelsResource(Resource):
     def check_create_permissions(self, data):
         return permissions.check_manager_permissions()
 
+    def update_data(self, data):
+        return data
+
     @jwt_required
     def get(self):
         """
@@ -130,6 +133,7 @@ class BaseModelsResource(Resource):
         try:
             data = request.json
             self.check_create_permissions(data)
+            data = self.update_data(data)
             instance = self.model(**data)
             instance.save()
             return instance.serialize(), 201
