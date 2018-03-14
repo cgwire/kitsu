@@ -12,6 +12,7 @@ import login from './modules/login'
 import main from './modules/main'
 import people from './modules/people'
 import user from './modules/user'
+import playlists from './modules/playlists'
 import productions from './modules/productions'
 import taskTypes from './modules/tasktypes'
 import taskStatus from './modules/taskstatus'
@@ -27,6 +28,7 @@ let modules = {
   login,
   main,
   people,
+  playlists,
   productions,
   shots,
   tasks,

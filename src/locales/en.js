@@ -304,6 +304,15 @@ export default {
     save_error: 'An error occured while saving breakdown.'
   },
 
+  playlists: {
+    title: 'Playlists',
+    new_playlist: 'Add a playlist',
+    loading_error: 'A server error occured. Playlists cannot be loaded.',
+    no_selection: 'Please select a playlist on the left.',
+    delete_text: 'Are you sure you want to remove {name} from your database?',
+    delete_error: 'An error occured while deleting this playlist.'
+  },
+
   server_down: {
     title: 'Kitsu encountered an error while reaching its data API.',
     text: 'Please contact your vendor support, your system administrator or your IT department to understand what is going wrong.'

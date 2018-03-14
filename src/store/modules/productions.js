@@ -48,12 +48,18 @@ const state = {
 
   assetsPath: {name: 'open-productions'},
   shotsPath: {name: 'open-productions'},
-  breakdownPath: {name: 'open-productions'}
+  breakdownPath: {name: 'open-productions'},
+  playlistsPath: {name: 'open-productions'}
 }
 
 const helpers = {
   getProductionComponentPath (routeName, productionId) {
-    return `/productions/${productionId}/${routeName}`
+    return {
+      name: routeName,
+      params: {
+        production_id: productionId
+      }
+    }
   }
 }
 
@@ -72,6 +78,7 @@ const getters = {
   assetsPath: state => state.assetsPath,
   shotsPath: state => state.shotsPath,
   breakdownPath: state => state.breakdownPath,
+  playlistsPath: state => state.playlistsPath,
   currentProduction: (state) => {
     if (state.currentProduction) {
       return state.currentProduction
@@ -293,6 +300,8 @@ const mutations = {
       'shots', currentProductionId)
     state.breakdownPath = helpers.getProductionComponentPath(
       'breakdown', currentProductionId)
+    state.playlistsPath = helpers.getProductionComponentPath(
+      'playlists', currentProductionId)
   },
 
   [RESET_ALL] (state) {
@@ -311,6 +320,11 @@ const mutations = {
       isLoading: false,
       isError: false
     }
+
+    state.assetsPath = {name: 'open-productions'}
+    state.shotsPath = {name: 'open-productions'}
+    state.breakdownPath = {name: 'open-productions'}
+    state.playlistPath = {name: 'open-productions'}
   }
 }
 

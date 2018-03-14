@@ -298,6 +298,15 @@ export default {
     save_error: 'Une erreur est survenue en sauvegardant le casting.'
   },
 
+  playlists: {
+    title: 'Playlists',
+    new_playlist: 'Ajouter une playlist',
+    loading_error: 'Une erreur serveur est apparue, les playlists ne peuvent pas être chargées.',
+    no_selection: 'Séléctionnez une playlist sur la gauche.',
+    delete_text: 'Êtes vous sûr de vouloir supprimer {name} de la base de données ?',
+    delete_error: 'Une erreur est survenue en supprimant la playlist.'
+  },
+
   server_down: {
     title: 'Kitsu a rencontré une erreur en communiquant avec son API de données.',
     text: 'Contactez votre fournisseur, votre administrateur système ou votre département informatique pour comprendre ce qui ne va pas.'

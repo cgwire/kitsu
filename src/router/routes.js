@@ -17,6 +17,7 @@ import People from '../components/People'
 import Person from '../components/Person'
 import Productions from '../components/Productions'
 import OpenProductions from '../components/OpenProductions'
+import Playlist from '../components/Playlist'
 import Profile from '../components/Profile'
 import Task from '../components/Task'
 import TaskTypes from '../components/TaskTypes'
@@ -315,6 +316,22 @@ export const routes = [
         path: '/profile/change-avatar',
         component: Profile,
         name: 'change-avatar'
+      },
+
+      {
+        name: 'playlists',
+        path: '/productions/:production_id/playlists',
+        component: Playlist
+      },
+      {
+        name: 'playlist',
+        path: '/productions/:production_id/playlists/:playlist_id',
+        component: Playlist
+      },
+      {
+        name: 'delete-playlist',
+        path: '/productions/:production_id/playlists/:playlist_id/delete',
+        component: Playlist
       }
     ]
   },
