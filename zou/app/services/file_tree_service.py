@@ -27,7 +27,7 @@ from zou.app.services.exception import (
     TaskNotFoundException
 )
 
-ALLOWED_FIELDS = ["short_name"]
+ALLOWED_FIELDS = ["short_name", "name", "number"]
 
 
 def get_working_file_path(
@@ -488,7 +488,7 @@ def get_folder_from_datatype(
     elif datatype == "Scene":
         folder = get_folder_from_scene(entity)
     elif datatype == "Instance":
-        folder = get_folder_from_asset_instance(asset_instance)
+        folder = get_folder_from_asset_instance(asset_instance, field)
     elif datatype == "Representation":
         folder = get_folder_from_representation(representation)
     elif datatype in ["Name", "OutputFile", "WorkingFile"]:
@@ -618,11 +618,17 @@ def get_folder_from_scene(scene):
     return folder
 
 
-def get_folder_from_asset_instance(asset_instance):
+def get_folder_from_asset_instance(asset_instance, field):
+    folder = ""
     if asset_instance is not None:
-        return str(asset_instance["number"]).zfill(4)
-    else:
-        return ""
+        number = str(asset_instance.get("number", 0)).zfill(4)
+        if field == "number":
+            folder = number
+        elif field == "name":
+            folder = asset_instance.get("name", "")
+    print(asset_instance)
+    print("instance folder", folder)
+    return folder
 
 
 def get_folder_from_representation(representation):

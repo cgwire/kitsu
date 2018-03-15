@@ -90,7 +90,17 @@ class BreakdownServiceTestCase(ApiDBTestCase):
         self.assertEquals(len(instances[self.entity_character_id]), 1)
         self.assertEquals(instances[self.entity_id][0]["number"], 1)
         self.assertEquals(instances[self.entity_id][1]["number"], 2)
+        self.assertEquals(
+            instances[self.entity_id][1]["name"], "props_tree_0002")
         self.assertEquals(instances[self.entity_character_id][0]["number"], 1)
+
+    def test_build_asset_instance_name(self):
+        name = breakdown_service.build_asset_instance_name(
+            self.entity_id, 3)
+        self.assertEquals(name, "props_tree_0003")
+        name = breakdown_service.build_asset_instance_name(
+            self.entity_character_id, 5)
+        self.assertEquals(name, "character_rabbit_0005")
 
     def test_get_shot_asset_instances_for_asset(self):
         instances = breakdown_service.get_shot_asset_instances_for_asset(
