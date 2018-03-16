@@ -47,8 +47,7 @@ class WorkingFilePathResource(Resource):
 
         try:
             task = tasks_service.get_task(task_id)
-            if not permissions.has_manager_permissions():
-                user_service.check_has_task_related(task["project_id"])
+            user_service.check_project_access(task["project_id"])
 
             software = files_service.get_software(software_id)
             is_revision_set_by_user = revision != 0
@@ -114,8 +113,7 @@ class EntityOutputFilePathResource(Resource, ArgsMixin):
         args = self.get_arguments()
         try:
             entity = entities_service.get_entity(entity_id)
-            if not permissions.has_manager_permissions():
-                user_service.check_has_task_related(entity["project_id"])
+            user_service.check_project_access(entity["project_id"])
             output_type = files_service.get_output_type(args["output_type_id"])
             task_type = tasks_service.get_task_type(args["task_type_id"])
             entity = entities_service.get_entity(entity_id)
@@ -187,8 +185,7 @@ class InstanceOutputFilePathResource(Resource, ArgsMixin):
             asset = assets_service.get_asset(asset_instance["asset_id"])
             output_type = files_service.get_output_type(args["output_type_id"])
             task_type = tasks_service.get_task_type(args["task_type_id"])
-            if not permissions.has_manager_permissions():
-                user_service.check_has_task_related(asset["project_id"])
+            user_service.check_project_access(asset["project_id"])
 
             folder_path = file_tree_service.get_instance_folder_path(
                 asset_instance,
@@ -240,8 +237,7 @@ class LastWorkingFilesResource(Resource):
     def get(self, task_id):
         result = {}
         task = tasks_service.get_task(task_id)
-        if not permissions.has_manager_permissions():
-            user_service.check_has_task_related(task["project_id"])
+        user_service.check_project_access(task["project_id"])
         result = files_service.get_last_working_files_for_task(task["id"])
 
         return result
@@ -256,8 +252,7 @@ class TaskWorkingFilesResource(Resource):
     def get(self, task_id):
         result = {}
         task = tasks_service.get_task(task_id)
-        if not permissions.has_manager_permissions():
-            user_service.check_has_task_related(task["project_id"])
+        user_service.check_project_access(task["project_id"])
         result = files_service.get_working_files_for_task(task["id"])
 
         return result
@@ -286,8 +281,7 @@ class NewWorkingFileResource(Resource):
 
         try:
             task = tasks_service.get_task(task_id)
-            if not permissions.has_manager_permissions():
-                user_service.check_has_task_related(task["project_id"])
+            user_service.check_project_access(task["project_id"])
             software = files_service.get_software(software_id)
             tasks_service.assign_task(
                 task_id,
@@ -367,8 +361,7 @@ class ModifiedFileResource(Resource):
     def put(self, working_file_id):
         working_file = files_service.get_working_file(working_file_id)
         task = tasks_service.get_task(working_file["task_id"])
-        if not permissions.has_manager_permissions():
-            user_service.check_has_task_related(task["project_id"])
+        user_service.check_project_access(task["project_id"])
         working_file = files_service.update_working_file(
             working_file_id,
             {"updated_at": datetime.datetime.utcnow()}
@@ -386,8 +379,7 @@ class CommentWorkingFileResource(Resource):
         comment = self.get_comment_from_args()
         working_file = files_service.get_working_file(working_file_id)
         task = tasks_service.get_task(working_file["task_id"])
-        if not permissions.has_manager_permissions():
-            user_service.check_has_task_related(task["project_id"])
+        user_service.check_project_access(task["project_id"])
         working_file = self.update_comment(working_file_id, comment)
         return working_file
 
@@ -439,8 +431,7 @@ class NewEntityOutputFileResource(Resource, ArgsMixin):
                 pass
 
             entity = entities_service.get_entity(entity_id)
-            if not permissions.has_manager_permissions():
-                user_service.check_has_task_related(entity["project_id"])
+            user_service.check_project_access(entity["project_id"])
             output_type = files_service.get_output_type(args["output_type_id"])
             task_type = tasks_service.get_task_type(args["task_type_id"])
 
@@ -583,8 +574,7 @@ class NewInstanceOutputFileResource(Resource, ArgsMixin):
             )
 
             entity = assets_service.get_asset(asset_instance["asset_id"])
-            if not permissions.has_manager_permissions():
-                user_service.check_has_task_related(entity["project_id"])
+            user_service.check_project_access(entity["project_id"])
 
             output_type = files_service.get_output_type(args["output_type_id"])
             task_type = tasks_service.get_task_type(args["task_type_id"])
@@ -886,8 +876,7 @@ class FileResource(Resource):
             entity = entities_service.get_entity(file_dict["entity_id"])
             project_id = entity["project_id"]
 
-        if not permissions.has_manager_permissions():
-            user_service.check_has_task_related(project_id)
+        user_service.check_project_access(project_id)
         return file_dict
 
 

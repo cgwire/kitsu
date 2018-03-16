@@ -20,8 +20,7 @@ class AssetResource(Resource):
         Retrieve given asset.
         """
         asset = assets_service.get_full_asset(asset_id)
-        if not permissions.has_manager_permissions():
-            user_service.check_has_task_related(asset["project_id"])
+        user_service.check_project_access(asset["project_id"])
         return asset
 
     @jwt_required
@@ -40,8 +39,7 @@ class AllAssetsResource(Resource):
         Adds project name and asset type name.
         """
         criterions = query.get_query_criterions_from_request(request)
-        if not permissions.has_manager_permissions():
-            user_service.check_criterions_has_task_related(criterions)
+        user_service.check_project_access(criterions)
         return assets_service.all_assets(criterions)
 
 
@@ -55,8 +53,7 @@ class AssetsAndTasksResource(Resource):
         """
         criterions = query.get_query_criterions_from_request(request)
         page = query.get_page_from_request(request)
-        if not permissions.has_manager_permissions():
-            user_service.check_criterions_has_task_related(criterions)
+        user_service.check_project_access(criterions)
         return assets_service.all_assets_and_tasks(criterions, page)
 
 
@@ -89,10 +86,8 @@ class ProjectAssetTypesResource(Resource):
         """
         Retrieve all asset types for given project.
         """
-        if not permissions.has_manager_permissions():
-            user_service.check_has_task_related(project_id)
-        asset_types = assets_service.get_asset_types_for_project(project_id)
-        return asset_types
+        user_service.check_project_access(project_id)
+        return assets_service.get_asset_types_for_project(project_id)
 
 
 class ShotAssetTypesResource(Resource):
@@ -103,10 +98,8 @@ class ShotAssetTypesResource(Resource):
         Retrieve all asset shots for given soht.
         """
         shot = shots_service.get_shot(shot_id)
-        if not permissions.has_manager_permissions():
-            user_service.check_has_task_related(shot["project_id"])
-        asset_types = assets_service.get_asset_types_for_shot(shot_id)
-        return asset_types
+        user_service.check_project_access(shot["project_id"])
+        return assets_service.get_asset_types_for_shot(shot_id)
 
 
 class ProjectAssetsResource(Resource):
@@ -116,12 +109,10 @@ class ProjectAssetsResource(Resource):
         """
         Retrieve all assets for given project.
         """
-        if not permissions.has_manager_permissions():
-            user_service.check_has_task_related(project_id)
+        user_service.check_project_access(project_id)
         criterions = query.get_query_criterions_from_request(request)
         criterions["project_id"] = project_id
-        assets = assets_service.get_assets(criterions)
-        return assets
+        return assets_service.get_assets(criterions)
 
 
 class ProjectAssetTypeAssetsResource(Resource):
@@ -131,13 +122,11 @@ class ProjectAssetTypeAssetsResource(Resource):
         """
         Retrieve all assets for given project and entity type.
         """
-        if not permissions.has_manager_permissions():
-            user_service.check_has_task_related(project_id)
+        user_service.check_project_access(project_id)
         criterions = query.get_query_criterions_from_request(request)
         criterions["project_id"] = project_id
         criterions["entity_type_id"] = asset_type_id
-        assets = assets_service.get_assets(criterions)
-        return assets
+        return assets_service.get_assets(criterions)
 
 
 class AssetTasksResource(Resource):
@@ -148,8 +137,7 @@ class AssetTasksResource(Resource):
         Retrieve all tasks related to a given shot.
         """
         asset = assets_service.get_asset(asset_id)
-        if not permissions.has_manager_permissions():
-            user_service.check_has_task_related(asset["project_id"])
+        user_service.check_project_access(asset["project_id"])
         return tasks_service.get_tasks_for_asset(asset_id)
 
 
@@ -161,8 +149,7 @@ class AssetTaskTypesResource(Resource):
         Retrieve all task types related to a given asset.
         """
         asset = assets_service.get_asset(asset_id)
-        if not permissions.has_manager_permissions():
-            user_service.check_has_task_related(asset["project_id"])
+        user_service.check_project_access(asset["project_id"])
         return tasks_service.get_task_types_for_asset(asset_id)
 
 
@@ -211,8 +198,7 @@ class CastInResource(Resource):
         Resource to retrieve the casting of a given asset.
         """
         asset = assets_service.get_asset(asset_id)
-        if not permissions.has_manager_permissions():
-            user_service.check_has_task_related(asset["project_id"])
+        user_service.check_project_access(asset["project_id"])
         return breakdown_service.get_cast_in(asset_id)
 
 
