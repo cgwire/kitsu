@@ -248,6 +248,12 @@ def create_asset(project_id, asset_type_id, name, description, data):
     return asset_dict
 
 
+def update_asset(working_file_id, data):
+    asset = get_asset_raw(working_file_id)
+    asset.update(data)
+    return asset.serialize()
+
+
 def remove_asset(asset_id):
     asset = get_asset_raw(asset_id)
     try:
