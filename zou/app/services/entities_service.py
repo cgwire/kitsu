@@ -13,6 +13,10 @@ from zou.app.services.exception import (
 
 
 def get_model_raw(model, instance_id, exception):
+    """
+    Returns an active record matching *model* and *instance_id*. It raises
+    *exception* if model is not found.
+    """
     try:
         instance = model.get(instance_id)
     except StatementError:
@@ -25,6 +29,9 @@ def get_model_raw(model, instance_id, exception):
 
 
 def get_entity_type(name):
+    """
+    Return entity type maching *name*. If it doesn't exist, it creates it.
+    """
     entity_type = EntityType.get_by(name=name)
     if entity_type is None:
         entity_type = EntityType.create(name=name)
@@ -32,6 +39,10 @@ def get_entity_type(name):
 
 
 def get_entity_type_by_id(entity_type_id):
+    """
+    Return an entity type matching given id, as a dict. Raises an exception
+    if nothing is found.
+    """
     return get_model_raw(
         EntityType,
         entity_type_id,
@@ -40,6 +51,10 @@ def get_entity_type_by_id(entity_type_id):
 
 
 def get_entity_raw(entity_id):
+    """
+    Return an entity type matching given id, as an active record. Raises an
+    exception if nothing is found.
+    """
     return get_model_raw(
         Entity,
         entity_id,
@@ -48,6 +63,10 @@ def get_entity_raw(entity_id):
 
 
 def get_entity(entity_id):
+    """
+    Return an entity type matching given id, as a dict. Raises an exception if
+    nothing is found.
+    """
     return get_model_raw(
         Entity,
         entity_id,
@@ -56,6 +75,10 @@ def get_entity(entity_id):
 
 
 def update_entity_preview(entity_id, preview_file_id):
+    """
+    Update given entity main preview. If entity or preview is not found, it
+    raises an exception.
+    """
     entity = Entity.get(entity_id)
     if entity is None:
         raise EntityNotFoundException
