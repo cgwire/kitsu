@@ -11,14 +11,14 @@ class EntityTestCase(ApiDBTestCase):
         super(EntityTestCase, self).setUp()
         self.generate_fixture_project_status()
         self.generate_fixture_project()
-        self.generate_fixture_entity_type()
+        self.generate_fixture_asset_type()
         self.generate_data(
             Entity,
             3,
             entities_out=[],
             entities_in=[],
             project_id=self.project.id,
-            entity_type_id=self.entity_type.id
+            entity_type_id=self.asset_type.id
         )
 
     def test_get_entities(self):
@@ -36,10 +36,10 @@ class EntityTestCase(ApiDBTestCase):
             "name": "Cosmos Landromat",
             "description": "Video game trailer.",
             "project_id": self.project.id,
-            "entity_type_id": self.entity_type.id
+            "entity_type_id": self.asset_type.id
         }
-        self.entity = self.post("data/entities", data)
-        self.assertIsNotNone(self.entity["id"])
+        self.asset = self.post("data/entities", data)
+        self.assertIsNotNone(self.asset["id"])
 
         entities = self.get("data/entities")
         self.assertEquals(len(entities), 4)

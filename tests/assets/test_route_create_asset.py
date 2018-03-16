@@ -12,7 +12,7 @@ class CreateAssetsTestCase(ApiDBTestCase):
 
         self.generate_fixture_project_status()
         self.generate_fixture_project()
-        self.generate_fixture_entity_type()
+        self.generate_fixture_asset_type()
 
         self.is_event_fired = False
         events.unregister_all()
@@ -25,7 +25,7 @@ class CreateAssetsTestCase(ApiDBTestCase):
         )
         self.assertEqual(
             data["asset_type"]["id"],
-            str(self.entity_type.id)
+            str(self.asset_type.id)
         )
         self.assertEqual(
             data["project"]["id"],
@@ -45,7 +45,7 @@ class CreateAssetsTestCase(ApiDBTestCase):
         }
         path = "data/projects/%s/asset-types/%s/assets/new" % (
             self.project.id,
-            self.entity_type.id
+            self.asset_type.id
         )
         asset = self.post(path, self.asset_data)
         assets = assets_service.get_assets()
@@ -65,21 +65,21 @@ class CreateAssetsTestCase(ApiDBTestCase):
         )
 
     def test_remove_asset(self):
-        self.generate_fixture_entity()
-        path = "data/assets/%s" % self.entity.id
+        self.generate_fixture_asset()
+        path = "data/assets/%s" % self.asset.id
         self.delete(path)
         assets = assets_service.get_assets()
         self.assertEquals(len(assets), 0)
 
     def test_remove_asset_with_tasks(self):
-        self.generate_fixture_entity()
+        self.generate_fixture_asset()
         self.generate_fixture_person()
         self.generate_fixture_assigner()
         self.generate_fixture_department()
         self.generate_fixture_task_type()
         self.generate_fixture_task_status()
         self.generate_fixture_task()
-        path = "data/assets/%s" % self.entity.id
+        path = "data/assets/%s" % self.asset.id
         self.delete(path)
         assets = assets_service.get_assets()
         self.assertEquals(len(assets), 1)

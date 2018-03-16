@@ -9,7 +9,7 @@ class SequenceShotsTestCase(ApiDBTestCase):
 
         self.generate_fixture_project_status()
         self.generate_fixture_project()
-        self.generate_fixture_entity_type()
+        self.generate_fixture_asset_type()
         self.generate_fixture_sequence()
         self.generate_fixture_shot()
 
@@ -23,7 +23,7 @@ class SequenceShotsTestCase(ApiDBTestCase):
             entities_out=[],
             entities_in=[],
             project_id=self.project.id,
-            entity_type_id=self.entity_type.id
+            entity_type_id=self.asset_type.id
         )
         self.generate_data(
             Entity,

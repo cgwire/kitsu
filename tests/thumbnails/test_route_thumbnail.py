@@ -20,8 +20,8 @@ class RouteThumbnailTestCase(ApiDBTestCase):
         self.delete_thumbnail_folders()
         self.generate_fixture_project_status()
         self.generate_fixture_project()
-        self.generate_fixture_entity_type()
-        self.generate_fixture_entity()
+        self.generate_fixture_asset_type()
+        self.generate_fixture_asset()
         self.generate_fixture_sequence()
         self.generate_fixture_shot()
         self.generate_fixture_department()
@@ -34,7 +34,7 @@ class RouteThumbnailTestCase(ApiDBTestCase):
         self.generate_fixture_software()
         self.generate_fixture_working_file()
         self.generate_fixture_preview_file()
-        self.entity_id = self.entity.id
+        self.asset_id = self.asset.id
         self.preview_file_id = self.preview_file.id
 
     def tearDown(self):
@@ -125,11 +125,11 @@ class RouteThumbnailTestCase(ApiDBTestCase):
         self.upload_file(path, file_path_fixture)
 
         self.put("/actions/entities/%s/set-main-preview/%s" % (
-            self.entity_id,
+            self.asset_id,
             self.preview_file_id
         ), {})
 
-        asset = assets_service.get_asset(self.entity_id)
+        asset = assets_service.get_asset(self.asset_id)
         self.assertEquals(asset["preview_file_id"], str(self.preview_file_id))
 
         self.put("/actions/entities/%s/set-main-preview/%s" % (
@@ -138,9 +138,9 @@ class RouteThumbnailTestCase(ApiDBTestCase):
         ), {}, 404)
 
         self.put("/actions/entities/%s/set-main-preview/%s" % (
-            self.entity_id,
-            self.entity_id
+            self.asset_id,
+            self.asset_id
         ), {}, 404)
-        entity = Entity.get(self.entity_id)
+        entity = Entity.get(self.asset_id)
         entity.preview_file_id = None
         entity.save()

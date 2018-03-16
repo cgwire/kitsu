@@ -7,7 +7,7 @@ class EpisodeSequencesTestCase(ApiDBTestCase):
         super(EpisodeSequencesTestCase, self).setUp()
         self.generate_fixture_project_status()
         self.generate_fixture_project()
-        self.generate_fixture_entity_type()
+        self.generate_fixture_asset_type()
         self.generate_fixture_episode()
         self.generate_fixture_sequence("SH01")
         self.serialized_sequence = self.sequence.serialize(obj_type="Sequence")

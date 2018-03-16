@@ -9,7 +9,7 @@ class ProjectShotsTestCase(ApiDBTestCase):
         self.generate_fixture_project_status()
         self.generate_fixture_project()
         self.generate_fixture_project_standard()
-        self.generate_fixture_entity_type()
+        self.generate_fixture_asset_type()
         self.generate_fixture_sequence()
         self.generate_fixture_shot("SH01")
         self.serialized_shot = self.shot.serialize(obj_type="Shot")

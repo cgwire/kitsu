@@ -9,7 +9,7 @@ class ProjectSequencesTestCase(ApiDBTestCase):
         self.generate_fixture_project_status()
         self.generate_fixture_project()
         self.generate_fixture_project_standard()
-        self.generate_fixture_entity_type()
+        self.generate_fixture_asset_type()
         self.generate_fixture_sequence("SE01")
         self.serialized_sequence = self.sequence.serialize(obj_type="Sequence")
         self.generate_fixture_sequence("SE02")

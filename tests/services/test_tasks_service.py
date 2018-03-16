@@ -31,8 +31,8 @@ class TaskServiceTestCase(ApiDBTestCase):
 
         self.generate_fixture_project_status()
         self.generate_fixture_project()
-        self.generate_fixture_entity_type()
-        self.generate_fixture_entity()
+        self.generate_fixture_asset_type()
+        self.generate_fixture_asset()
         self.generate_fixture_sequence()
         self.generate_fixture_shot()
         self.generate_fixture_department()
@@ -167,12 +167,12 @@ class TaskServiceTestCase(ApiDBTestCase):
 
         self.assertEquals(
             data["task_after"]["entity"]["id"],
-            str(self.entity.id)
+            str(self.asset.id)
         )
 
         self.assertEquals(
             data["task_after"]["entity_type"]["id"],
-            str(self.entity_type.id)
+            str(self.asset_type.id)
         )
 
         self.assertEquals(
@@ -237,12 +237,12 @@ class TaskServiceTestCase(ApiDBTestCase):
         self.assertEqual(tasks[0]["id"], str(self.scene_task.id))
 
     def test_get_tasks_for_asset(self):
-        tasks = tasks_service.get_tasks_for_asset(self.entity.id)
+        tasks = tasks_service.get_tasks_for_entity(self.asset.id)
         self.assertEqual(len(tasks), 1)
         self.assertEqual(tasks[0]["id"], str(self.task.id))
 
-    def test_get_tasks_for_entity(self):
-        tasks = tasks_service.get_task_dicts_for_entity(self.entity.id)
+    def test_get_tasks_for_asset(self):
+        tasks = tasks_service.get_task_dicts_for_entity(self.asset.id)
         self.assertEqual(len(tasks), 1)
         self.assertEqual(tasks[0]["id"], str(self.task.id))
         self.assertEqual(tasks[0]["task_type_name"], str("Shaders"))
@@ -267,7 +267,7 @@ class TaskServiceTestCase(ApiDBTestCase):
         self.assertEqual(task_types[0]["id"], str(self.task_type_animation.id))
 
     def test_get_task_types_for_entity(self):
-        task_types = tasks_service.get_task_types_for_asset(self.entity.id)
+        task_types = tasks_service.get_task_types_for_entity(self.asset.id)
         self.assertEqual(len(task_types), 1)
         self.assertEqual(task_types[0]["id"], str(self.task_type.id))
 
@@ -289,7 +289,7 @@ class TaskServiceTestCase(ApiDBTestCase):
             project_id=self.project.id,
             task_type_id=self.task_type.id,
             task_status_id=self.task_status.id,
-            entity_id=self.entity.id,
+            entity_id=self.asset.id,
             assignees=[self.person],
             assigner_id=self.assigner.id,
             duration=50,
@@ -300,7 +300,7 @@ class TaskServiceTestCase(ApiDBTestCase):
         )
         self.task.save()
 
-        tasks = tasks_service.get_task_dicts_for_entity(self.entity.id)
+        tasks = tasks_service.get_task_dicts_for_entity(self.asset.id)
         self.assertEqual(len(tasks), 1)
         self.assertEqual(tasks[0]["name"], u"Première Tâche")
         self.assertEqual(tasks[0]["task_type_name"], u"Modélisation")

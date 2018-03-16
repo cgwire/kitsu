@@ -7,7 +7,7 @@ class EpisodeTestCase(ApiDBTestCase):
         super(EpisodeTestCase, self).setUp()
         self.generate_fixture_project_status()
         self.generate_fixture_project()
-        self.generate_fixture_entity_type()
+        self.generate_fixture_asset_type()
         self.generate_fixture_episode("E02")
         self.generate_fixture_episode("E03")
         self.generate_fixture_episode("E01")

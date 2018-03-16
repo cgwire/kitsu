@@ -13,8 +13,8 @@ class FileTreeTestCase(ApiDBTestCase):
         self.generate_fixture_project_status()
         self.generate_fixture_project()
         self.generate_fixture_project_standard()
-        self.generate_fixture_entity_type()
-        self.generate_fixture_entity()
+        self.generate_fixture_asset_type()
+        self.generate_fixture_asset()
         self.generate_fixture_episode()
         self.generate_fixture_sequence()
         self.generate_fixture_shot()
@@ -30,12 +30,12 @@ class FileTreeTestCase(ApiDBTestCase):
         self.generate_fixture_shot_task()
         self.generate_fixture_shot_task_standard()
         self.generate_fixture_software()
-        self.entity_standard = Entity(
+        self.asset_standard = Entity(
             name='Car',
             project_id=self.project_standard.id,
-            entity_type_id=self.entity_type.id
+            entity_type_id=self.asset_type.id
         )
-        self.entity_standard.save()
+        self.asset_standard.save()
         self.sequence_standard = Entity(
             name='Seq1',
             project_id=self.project.id,
@@ -77,7 +77,7 @@ class FileTreeTestCase(ApiDBTestCase):
         self.assertEqual(path, "/simple/productions/")
 
     def test_get_project(self):
-        project = file_tree_service.get_project(self.entity.serialize())
+        project = file_tree_service.get_project(self.asset.serialize())
         self.assertEqual(project["name"], self.project.name)
 
     def test_get_file_name_template(self):
@@ -91,7 +91,7 @@ class FileTreeTestCase(ApiDBTestCase):
         template = file_tree_service.get_file_name_template(
             tree,
             "working",
-            self.entity.serialize()
+            self.asset.serialize()
         )
         self.assertEqual(template, tree["working"]["file_name"]["asset"])
         template = file_tree_service.get_file_name_template(
@@ -112,7 +112,7 @@ class FileTreeTestCase(ApiDBTestCase):
         template = file_tree_service.get_folder_path_template(
             tree,
             "working",
-            self.entity.serialize()
+            self.asset.serialize()
         )
         self.assertEqual(template, tree["working"]["folder_path"]["asset"])
         template = file_tree_service.get_folder_path_template(
@@ -168,26 +168,26 @@ class FileTreeTestCase(ApiDBTestCase):
         )
         self.assertEquals(path, "E01")
 
-    def test_get_folder_from_datatype_asset(self):
+    def test_get_folder_from_datatype_entity(self):
         path = file_tree_service.get_folder_from_datatype(
             "Asset",
-            self.entity.serialize(),
+            self.asset.serialize(),
             self.task.serialize()
         )
-        self.assertEquals(path, self.entity.name)
+        self.assertEquals(path, self.asset.name)
 
-    def test_get_folder_from_datatype_asset_type(self):
+    def test_get_folder_from_datatype_entity_type(self):
         path = file_tree_service.get_folder_from_datatype(
             "AssetType",
-            self.entity.serialize(),
+            self.asset.serialize(),
             self.task.serialize()
         )
-        self.assertEquals(path, self.entity_type.name)
+        self.assertEquals(path, self.asset_type.name)
 
     def test_get_folder_from_datatype_department(self):
         path = file_tree_service.get_folder_from_datatype(
             "Department",
-            self.entity.serialize(),
+            self.asset.serialize(),
             self.task.serialize()
         )
         self.assertEquals(path, self.department.name)
@@ -195,7 +195,7 @@ class FileTreeTestCase(ApiDBTestCase):
     def test_get_folder_from_datatype_task(self):
         path = file_tree_service.get_folder_from_datatype(
             "Task",
-            self.entity.serialize(),
+            self.asset.serialize(),
             self.task.serialize()
         )
         self.assertEquals(path, self.task.name)
@@ -203,13 +203,13 @@ class FileTreeTestCase(ApiDBTestCase):
     def test_get_folder_from_datatype_task_type(self):
         path = file_tree_service.get_folder_from_datatype(
             "TaskType",
-            self.entity.serialize(),
+            self.asset.serialize(),
             task=self.task.serialize()
         )
         self.assertEquals(path, self.task_type.name)
         path = file_tree_service.get_folder_from_datatype(
             "TaskType",
-            self.entity.serialize(),
+            self.asset.serialize(),
             task_type=self.task_type.serialize()
         )
         self.assertEquals(path, self.task_type.name)
@@ -217,7 +217,7 @@ class FileTreeTestCase(ApiDBTestCase):
     def test_get_folder_from_datatype_software(self):
         path = file_tree_service.get_folder_from_datatype(
             "Software",
-            self.entity.serialize(),
+            self.asset.serialize(),
             self.task.serialize(),
             software=self.software.serialize()
         )
@@ -226,7 +226,7 @@ class FileTreeTestCase(ApiDBTestCase):
     def test_get_folder_from_datatype_output_type(self):
         path = file_tree_service.get_folder_from_datatype(
             "OutputType",
-            self.entity.serialize(),
+            self.asset.serialize(),
             self.task.serialize(),
             output_type=self.output_type_cache
         )
@@ -237,7 +237,7 @@ class FileTreeTestCase(ApiDBTestCase):
             MalformedFileTreeException,
             file_tree_service.get_folder_from_datatype,
             "Unknown",
-            self.entity.serialize(),
+            self.asset.serialize(),
             self.task.serialize()
         )
 
@@ -297,7 +297,7 @@ class FileTreeTestCase(ApiDBTestCase):
 
     def test_get_output_file_name_asset(self):
         file_name = file_tree_service.get_output_file_name(
-            self.entity.serialize(),
+            self.asset.serialize(),
             name="main",
             revision=3
         )
@@ -355,7 +355,7 @@ class FileTreeTestCase(ApiDBTestCase):
 
     def test_get_folder_path_shot_asset_instance(self):
         self.generate_fixture_shot_asset_instance(
-            asset=self.entity,
+            asset=self.asset,
             shot=self.shot
         )
         path = file_tree_service.get_instance_folder_path(
@@ -372,7 +372,7 @@ class FileTreeTestCase(ApiDBTestCase):
 
     def test_get_file_name_shot_asset_instance(self):
         self.generate_fixture_shot_asset_instance(
-            asset=self.entity,
+            asset=self.asset,
             shot=self.shot
         )
         file_name = file_tree_service.get_instance_file_name(
@@ -390,7 +390,7 @@ class FileTreeTestCase(ApiDBTestCase):
 
     def test_get_folder_path_scene_asset_instance(self):
         self.generate_fixture_scene_asset_instance(
-            asset=self.entity,
+            asset=self.asset,
             scene=self.scene
         )
         path = file_tree_service.get_instance_folder_path(
@@ -407,7 +407,7 @@ class FileTreeTestCase(ApiDBTestCase):
 
     def test_get_file_name_scene_asset_instance(self):
         self.generate_fixture_scene_asset_instance(
-            asset=self.entity,
+            asset=self.asset,
             scene=self.scene
         )
         file_name = file_tree_service.get_instance_file_name(
@@ -426,7 +426,7 @@ class FileTreeTestCase(ApiDBTestCase):
 
     def test_get_folder_path_representation(self):
         self.generate_fixture_scene_asset_instance(
-            asset=self.entity,
+            asset=self.asset,
             scene=self.scene
         )
         path = file_tree_service.get_instance_folder_path(
@@ -449,7 +449,7 @@ class FileTreeTestCase(ApiDBTestCase):
     def test_update_variable(self):
         name = file_tree_service.update_variable(
             "<AssetType>_<Asset>",
-            entity=self.entity.serialize(),
+            asset=self.asset.serialize(),
             task=self.task.serialize()
         )
         self.assertEquals(name, "props_tree")
@@ -464,7 +464,7 @@ class FileTreeTestCase(ApiDBTestCase):
     def test_update_variable_short_name(self):
         name = file_tree_service.update_variable(
             "<TaskType.short_name>",
-            entity=self.entity.serialize(),
+            asset=self.asset.serialize(),
             task=self.task.serialize()
         )
         self.assertEquals(name, "shd")
