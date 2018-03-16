@@ -227,8 +227,6 @@ def get_output_folder_path(
 ):
     project = get_project(entity)
     tree = get_tree_from_project(project)
-    import pprint
-    pprint.pprint(tree)
     root_path = get_root_path(tree, mode, sep)
     style = tree[mode]["folder_path"].get("style", "")
 
@@ -626,12 +624,13 @@ def get_folder_from_asset_instance(asset_instance, field):
     folder = ""
     if asset_instance is not None:
         number = str(asset_instance.get("number", 0)).zfill(4)
-        if field == "number":
+        if field == "name":
+            folder = asset_instance.get("name", number)
+            if folder is None:
+                folder = number
+        else:
             folder = number
-        elif field == "name":
-            folder = asset_instance.get("name", "")
-    print(asset_instance)
-    print("instance folder", folder)
+
     return folder
 
 
