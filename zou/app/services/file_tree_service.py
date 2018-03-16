@@ -227,6 +227,8 @@ def get_output_folder_path(
 ):
     project = get_project(entity)
     tree = get_tree_from_project(project)
+    import pprint
+    pprint.pprint(tree)
     root_path = get_root_path(tree, mode, sep)
     style = tree[mode]["folder_path"].get("style", "")
 
@@ -432,10 +434,12 @@ def update_variable(
             revision=revision,
             field=field
         )
-        render = render.replace(
-            "<%s>" % variable,
-            apply_style(slugify(data, separator="_"), style)
-        )
+
+        if data is not None:
+            render = render.replace(
+                "<%s>" % variable,
+                apply_style(slugify(data, separator="_"), style)
+            )
     return render
 
 
