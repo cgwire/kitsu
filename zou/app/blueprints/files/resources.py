@@ -742,15 +742,15 @@ class GetNextInstanceOutputFileRevisionResource(Resource, ArgsMixin):
         args = self.get_arguments()
 
         asset_instance = assets_service.get_asset_instance(asset_instance_id)
-        entity = entities_service.get_entity(asset_instance["asset_id"])
+        asset = entities_service.get_entity(asset_instance["asset_id"])
         output_type = files_service.get_output_type(args["output_type_id"])
         task_type = tasks_service.get_task_type(args["task_type_id"])
         if not permissions.has_manager_permissions():
-            user_service.check_has_task_related(entity["project_id"])
+            user_service.check_has_task_related(asset["project_id"])
 
         next_revision_number = \
             files_service.get_next_output_file_revision(
-                entity["id"],
+                asset["id"],
                 output_type["id"],
                 task_type["id"],
                 args["name"],
@@ -900,7 +900,7 @@ class SetTreeResource(Resource):
 
     @jwt_required
     def post(self, project_id):
-        (tree_name) = self.get_arguments()
+        tree_name = self.get_arguments()
 
         try:
             permissions.check_manager_permissions()
@@ -923,6 +923,4 @@ class SetTreeResource(Resource):
         )
         args = parser.parse_args()
 
-        return (
-            args.get("tree_name", ""),
-        )
+        return args.get("tree_name", "")

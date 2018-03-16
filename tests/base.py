@@ -7,7 +7,7 @@ from mixer.backend.flask import mixer
 
 from zou.app import app
 from zou.app.utils import fields, auth
-from zou.app.services import file_tree_service
+from zou.app.services import file_tree_service, breakdown_service
 
 from zou.app.models.project import Project
 from zou.app.models.person import Person
@@ -402,6 +402,9 @@ class ApiDBTestCase(ApiTestCase):
             entity_id=shot.id,
             entity_type_id=self.shot_type.id,
             number=number,
+            name=breakdown_service.build_asset_instance_name(
+                self.entity.id, number
+            ),
             description="Asset instance description"
         )
         return self.asset_instance
@@ -421,6 +424,9 @@ class ApiDBTestCase(ApiTestCase):
             entity_id=scene.id,
             entity_type_id=self.scene_type.id,
             number=number,
+            name=breakdown_service.build_asset_instance_name(
+                self.entity.id, number
+            ),
             description="Asset instance description"
         )
         return self.asset_instance

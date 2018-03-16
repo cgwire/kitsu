@@ -13,6 +13,8 @@ class AssetInstanceInShotTestCase(ApiDBTestCase):
         self.scene_id = str(self.scene.id)
         self.shot_id = str(self.shot.id)
         self.entity_id = str(self.entity.id)
+        self.entity_name = str(self.entity.name)
+        self.entity_type_name = str(self.entity_type.name)
         self.entity_character_id = str(self.entity_character.id)
 
     def new_instance(self, target_type, target_id, asset_id):
@@ -40,6 +42,10 @@ class AssetInstanceInShotTestCase(ApiDBTestCase):
         self.assertEquals(len(instances[self.entity_character_id]), 1)
         self.assertEquals(instances[self.entity_id][0]["number"], 1)
         self.assertEquals(instances[self.entity_id][1]["number"], 2)
+        self.assertEquals(
+            instances[self.entity_id][1]["name"],
+            "props_tree_0002"
+        )
         self.assertEquals(instances[self.entity_character_id][0]["number"], 1)
 
     def test_get_shot_asset_instances_for_asset(self):
@@ -70,6 +76,10 @@ class AssetInstanceInShotTestCase(ApiDBTestCase):
         self.assertEquals(len(instances[self.entity_character_id]), 1)
         self.assertEquals(instances[self.entity_id][0]["number"], 1)
         self.assertEquals(instances[self.entity_id][1]["number"], 2)
+        self.assertEquals(
+            instances[self.entity_id][1]["name"],
+            "props_tree_0002"
+        )
         self.assertEquals(instances[self.entity_character_id][0]["number"], 1)
 
     def test_get_scene_asset_instances_for_asset(self):
