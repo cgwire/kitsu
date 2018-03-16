@@ -8,6 +8,9 @@ from sqlalchemy.exc import StatementError
 
 
 def open_projects(name=None):
+    """
+    Return all open projects. Allow to filter projects by name.
+    """
     query = Project.query \
         .join(ProjectStatus) \
         .filter(ProjectStatus.name.in_(("Active", "open", "Open"))) \
@@ -20,6 +23,9 @@ def open_projects(name=None):
 
 
 def all_projects(name=None):
+    """
+    Return all projects. Allow to filter projects by name.
+    """
     query = Project.query \
         .join(ProjectStatus) \
         .add_columns(ProjectStatus.name) \
@@ -39,18 +45,30 @@ def all_projects(name=None):
 
 
 def get_or_create_open_status():
+    """
+    Return open status. If it does not exist, it creates it.
+    """
     return get_or_create_status("Open")
 
 
 def get_open_status():
+    """
+    Return open status. If it does not exist, it creates it.
+    """
     get_or_create_status("Open")
 
 
 def get_closed_status():
+    """
+    Return closed status. If it does not exist, it creates it.
+    """
     get_or_create_status("Closed")
 
 
 def get_or_create_status(name):
+    """
+    Return given status. If it does not exist, it creates it.
+    """
     project_status = ProjectStatus.get_by(name=name)
     if project_status is None:
         project_status = ProjectStatus(
@@ -62,6 +80,9 @@ def get_or_create_status(name):
 
 
 def save_project_status(project_statuses):
+    """
+    Save in database all project status given in parameter.
+    """
     result = []
     filtered_satuses = (x for x in project_statuses if x is not None)
 
@@ -72,6 +93,9 @@ def save_project_status(project_statuses):
 
 
 def get_or_create(name):
+    """
+    Get project which match given name. Create it if it does not exist.
+    """
     project = Project.get_by(name=name)
     if project is None:
         open_status = get_or_create_open_status()
@@ -84,6 +108,10 @@ def get_or_create(name):
 
 
 def get_project_by_name(project_name):
+    """
+    Get project matching given name. Raises an exception if project is not
+    found.
+    """
     project = Project.get_by(name=project_name)
 
     if project is None:
@@ -93,6 +121,10 @@ def get_project_by_name(project_name):
 
 
 def get_project_raw(project_id):
+    """
+    Get project matching given id, as active record. Raises an exception if
+    project is not found.
+    """
     try:
         project = Project.get(project_id)
     except StatementError:
@@ -105,10 +137,17 @@ def get_project_raw(project_id):
 
 
 def get_project(project_id):
+    """
+    Get project matching given id, as a dict. Raises an exception if project is
+    not found.
+    """
     return get_project_raw(project_id).serialize()
 
 
 def update_project(project_id, data):
+    """
+    Update project matching given id with data from *data* dict.
+    """
     project = get_project_raw(project_id)
     project.update(data)
     return project.serialize()
