@@ -1,6 +1,8 @@
 from flask_restful import Resource
 from flask_jwt_extended import jwt_required
 
+from flask import request
+
 from zou.app.services import projects_service, user_service
 from zou.app.utils import permissions
 
@@ -13,11 +15,13 @@ class OpenProjectsResource(Resource):
 
     @jwt_required
     def get(self):
+        name = request.args.get("name", None)
         try:
             permissions.check_manager_permissions()
-            return projects_service.open_projects()
+
+            return projects_service.open_projects(name=name)
         except permissions.PermissionDenied:
-            return user_service.get_projects()
+            return user_service.get_open_projects(name=name)
 
 
 class AllProjectsResource(Resource):
@@ -28,8 +32,10 @@ class AllProjectsResource(Resource):
 
     @jwt_required
     def get(self):
+        name = request.args.get("name", None)
         try:
             permissions.check_manager_permissions()
-            return projects_service.all_projects(), 200
+
+            return projects_service.all_projects(name=name)
         except permissions.PermissionDenied:
-            return user_service.get_projects()
+            return user_service.get_projects(name=name)

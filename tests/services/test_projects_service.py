@@ -25,6 +25,10 @@ class ProjectServiceTestCase(ApiDBTestCase):
         self.assertEqual(len(projects), 2)
         self.assertEqual(projects[0]["project_status_name"], "open")
 
+        projects = projects_service.all_projects(name="Cosmos Landromat")
+        self.assertEqual(len(projects), 1)
+        self.assertEqual(projects[0]["name"], "Cosmos Landromat")
+
     def test_get_or_create_status(self):
         project_status = projects_service.get_or_create_status("Frozen")
         statuses = ProjectStatus.query.all()

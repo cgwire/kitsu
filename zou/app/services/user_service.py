@@ -168,11 +168,25 @@ def get_sequence_scenes(sequence_id):
     return Entity.serialize_list(query.all(), obj_type="Scene")
 
 
-def get_projects():
+def get_open_projects(name=None):
     query = Project.query \
         .join(Task, ProjectStatus) \
         .filter(assignee_filter()) \
         .filter(open_project_filter())
+
+    if name is not None:
+        query = query.filter(Project.name == name)
+
+    return fields.serialize_value(query.all())
+
+
+def get_projects(name=None):
+    query = Project.query \
+        .join(Task, ProjectStatus) \
+        .filter(assignee_filter())
+
+    if name is not None:
+        query = query.filter(Project.name == name)
 
     return fields.serialize_value(query.all())
 

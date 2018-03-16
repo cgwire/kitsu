@@ -7,25 +7,29 @@ from zou.app.utils import fields
 from sqlalchemy.exc import StatementError
 
 
-def open_projects():
-    query = ProjectStatus.query
-    query = query.filter(ProjectStatus.name.in_(("Active", "open", "Open")))
-    statuses = query.all()
-    status_ids = [x.id for x in statuses]
+def open_projects(name=None):
+    query = Project.query \
+        .join(ProjectStatus) \
+        .filter(ProjectStatus.name.in_(("Active", "open", "Open"))) \
+        .order_by(Project.name)
 
-    query = Project.query.filter(Project.project_status_id.in_(status_ids))
+    if name is not None:
+        query = query.filter(Project.name == name)
+
     return fields.serialize_value(query.all())
 
 
+def all_projects(name=None):
+    query = Project.query \
+        .join(ProjectStatus) \
+        .add_columns(ProjectStatus.name) \
+        .order_by(Project.name)
 
-def all_projects():
+    if name is not None:
+        query = query.filter(Project.name == name)
+
     result = []
-    query = Project.query.join(ProjectStatus)
-    query = query.add_columns(ProjectStatus.name)
-    query = query.order_by(Project.name)
-    entries = query.all()
-
-    for entry in entries:
+    for entry in query.all():
         (project, project_status_name) = entry
         data = project.serialize()
         data["project_status_name"] = project_status_name
