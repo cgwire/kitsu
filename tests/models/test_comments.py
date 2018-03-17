@@ -13,14 +13,14 @@ class CommentTestCase(ApiDBTestCase):
         self.generate_fixture_project_status()
         self.generate_fixture_project()
         self.generate_fixture_person()
-        self.generate_fixture_entity_type()
+        self.generate_fixture_asset_type()
         self.entities = self.generate_data(
             Entity,
             3,
             entities_out=[],
             entities_in=[],
             project_id=self.project.id,
-            entity_type_id=self.entity_type.id
+            entity_type_id=self.asset_type.id
         )
         self.comments = self.generate_data(
             Comment,

@@ -11,8 +11,8 @@ class TaskTestCase(ApiDBTestCase):
         super(TaskTestCase, self).setUp()
         self.generate_fixture_project_status()
         self.generate_fixture_project()
-        self.generate_fixture_entity_type()
-        self.generate_fixture_entity()
+        self.generate_fixture_asset_type()
+        self.generate_fixture_asset()
         self.generate_fixture_person()
         self.generate_fixture_department()
         self.generate_fixture_task_type()
@@ -26,7 +26,7 @@ class TaskTestCase(ApiDBTestCase):
             project_id=self.project.id,
             task_type_id=self.task_type.id,
             task_status_id=self.task_status.id,
-            entity_id=self.entity.id,
+            entity_id=self.asset.id,
             assignees=[self.person],
             assigner_id=self.assigner.id
         )
@@ -47,7 +47,7 @@ class TaskTestCase(ApiDBTestCase):
             "project_id": self.project.id,
             "task_type_id": self.task_type.id,
             "task_status_id": self.task_status.id,
-            "entity_id": self.entity.id,
+            "entity_id": self.asset.id,
             "assignees": [str(self.person.id)],
             "assigner_id": self.assigner.id
         }

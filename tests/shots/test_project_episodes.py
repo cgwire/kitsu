@@ -9,7 +9,7 @@ class ProjectEpisodesTestCase(ApiDBTestCase):
         self.generate_fixture_project_status()
         self.generate_fixture_project()
         self.generate_fixture_project_standard()
-        self.generate_fixture_entity_type()
+        self.generate_fixture_asset_type()
         self.generate_fixture_episode("E01")
         self.serialized_episode = self.episode.serialize(obj_type="Episode")
         self.generate_fixture_episode("E02")

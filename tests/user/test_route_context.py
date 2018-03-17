@@ -12,8 +12,8 @@ class UserContextRoutesTestCase(ApiDBTestCase):
         self.generate_fixture_project()
         self.generate_fixture_person()
         self.generate_fixture_project_closed()
-        self.generate_fixture_entity_type()
-        self.generate_fixture_entity()
+        self.generate_fixture_asset_type()
+        self.generate_fixture_asset()
         self.generate_fixture_episode()
         self.generate_fixture_sequence()
         self.generate_fixture_shot()
@@ -22,7 +22,7 @@ class UserContextRoutesTestCase(ApiDBTestCase):
         self.generate_fixture_task_status()
         self.generate_fixture_assigner()
         self.generate_fixture_task()
-        self.entity_dict = self.entity.serialize(obj_type="Asset")
+        self.asset_dict = self.asset.serialize(obj_type="Asset")
         self.maxDiff = None
 
         self.task_id = self.task.id
@@ -71,10 +71,10 @@ class UserContextRoutesTestCase(ApiDBTestCase):
         self.generate_fixture_shot_task()
         shot_task_id = self.shot_task.id
         self.generate_fixture_asset_types()
-        self.generate_fixture_entity_character()
-        self.generate_fixture_task("main", self.entity_character.id)
+        self.generate_fixture_asset_character()
+        self.generate_fixture_task("main", self.asset_character.id)
         task2_id = self.task.id
-        self.generate_fixture_task("second", self.entity_character.id)
+        self.generate_fixture_task("second", self.asset_character.id)
         task3_id = self.task.id
 
         asset_types = self.get(
@@ -96,7 +96,7 @@ class UserContextRoutesTestCase(ApiDBTestCase):
         assets = self.get(
             "data/user/projects/%s/asset-types/%s/assets" % (
                 self.project.id,
-                self.entity_type.id
+                self.asset_type.id
             )
         )
         self.assertEquals(len(assets), 0)
@@ -105,13 +105,13 @@ class UserContextRoutesTestCase(ApiDBTestCase):
         assets = self.get(
             "data/user/projects/%s/asset-types/%s/assets" % (
                 self.project.id,
-                self.entity_type.id
+                self.asset_type.id
             )
         )
         self.assertEquals(len(assets), 1)
 
     def test_get_asset_tasks(self):
-        path = "data/user/assets/%s/tasks" % self.entity.id
+        path = "data/user/assets/%s/tasks" % self.asset.id
         task_id = self.task.id
 
         tasks = self.get(path)
@@ -147,7 +147,7 @@ class UserContextRoutesTestCase(ApiDBTestCase):
         self.assertEquals(len(tasks), 1)
 
     def test_get_asset_task_types(self):
-        path = "data/user/assets/%s/task-types" % self.entity.id
+        path = "data/user/assets/%s/task-types" % self.asset.id
         task_id = self.task.id
         task_type_id = self.task_type.id
 

@@ -7,7 +7,7 @@ from mixer.backend.flask import mixer
 
 from zou.app import app
 from zou.app.utils import fields, auth
-from zou.app.services import file_tree_service
+from zou.app.services import file_tree_service, breakdown_service
 
 from zou.app.models.project import Project
 from zou.app.models.person import Person
@@ -268,35 +268,35 @@ class ApiDBTestCase(ApiTestCase):
             "file_tree": file_tree_service.get_tree_from_file("no_preview")
         })
 
-    def generate_fixture_entity(self):
-        self.entity = Entity.create(
+    def generate_fixture_asset(self):
+        self.asset = Entity.create(
             name="Tree",
             description="Description Tree",
             project_id=self.project.id,
-            entity_type_id=self.entity_type.id
+            entity_type_id=self.asset_type.id
         )
 
-    def generate_fixture_entity_character(self):
-        self.entity_character = Entity.create(
+    def generate_fixture_asset_character(self):
+        self.asset_character = Entity.create(
             name="Rabbit",
             description="Main character",
             project_id=self.project.id,
-            entity_type_id=self.entity_type_character.id
+            entity_type_id=self.asset_type_character.id
         )
 
-    def generate_fixture_entity_camera(self):
-        self.entity_camera = Entity.create(
+    def generate_fixture_asset_camera(self):
+        self.asset_camera = Entity.create(
             name="Main camera",
             description="Description Camera",
             project_id=self.project.id,
-            entity_type_id=self.entity_type_camera.id
+            entity_type_id=self.asset_type_camera.id
         )
 
-    def generate_fixture_entity_standard(self):
-        self.entity_standard = Entity.create(
+    def generate_fixture_asset_standard(self):
+        self.asset_standard = Entity.create(
             name="Car",
             project_id=self.project_standard.id,
-            entity_type_id=self.entity_type.id
+            entity_type_id=self.asset_type.id
         )
 
     def generate_fixture_sequence(
@@ -394,7 +394,7 @@ class ApiDBTestCase(ApiTestCase):
         number=1
     ):
         if asset is None:
-            asset = self.entity
+            asset = self.asset
         if shot is None:
             shot = self.shot
         self.asset_instance = AssetInstance.create(
@@ -402,6 +402,9 @@ class ApiDBTestCase(ApiTestCase):
             entity_id=shot.id,
             entity_type_id=self.shot_type.id,
             number=number,
+            name=breakdown_service.build_asset_instance_name(
+                self.asset.id, number
+            ),
             description="Asset instance description"
         )
         return self.asset_instance
@@ -413,7 +416,7 @@ class ApiDBTestCase(ApiTestCase):
         number=1
     ):
         if asset is None:
-            asset = self.entity
+            asset = self.asset
         if scene is None:
             scene = self.scene
         self.asset_instance = AssetInstance.create(
@@ -421,6 +424,9 @@ class ApiDBTestCase(ApiTestCase):
             entity_id=scene.id,
             entity_type_id=self.scene_type.id,
             number=number,
+            name=breakdown_service.build_asset_instance_name(
+                self.asset.id, number
+            ),
             description="Asset instance description"
         )
         return self.asset_instance
@@ -464,17 +470,17 @@ class ApiDBTestCase(ApiTestCase):
             password=auth.encrypt_password("mypassword")
         )
 
-    def generate_fixture_entity_type(self):
-        self.entity_type = EntityType.create(name="Props")
+    def generate_fixture_asset_type(self):
+        self.asset_type = EntityType.create(name="Props")
         self.shot_type = EntityType.create(name="Shot")
         self.sequence_type = EntityType.create(name="Sequence")
         self.episode_type = EntityType.create(name="Episode")
         self.scene_type = EntityType.create(name="Scene")
 
     def generate_fixture_asset_types(self):
-        self.entity_type_character = EntityType.create(name="Character")
-        self.entity_type_environment = EntityType.create(name="Environment")
-        self.entity_type_camera = EntityType.create(name="Camera")
+        self.asset_type_character = EntityType.create(name="Character")
+        self.asset_type_environment = EntityType.create(name="Environment")
+        self.asset_type_camera = EntityType.create(name="Camera")
 
     def generate_fixture_department(self):
         self.department = Department.create(name="Modeling", color="#FFFFFF")
@@ -521,9 +527,9 @@ class ApiDBTestCase(ApiTestCase):
     def generate_fixture_assigner(self):
         self.assigner = Person.create(first_name="Ema", last_name="Peel")
 
-    def generate_fixture_task(self, name="Master", entity_id=None):
-        if entity_id is None:
-            entity_id = self.entity.id
+    def generate_fixture_task(self, name="Master", asset_id=None):
+        if asset_id is None:
+            asset_id = self.asset.id
 
         start_date = fields.get_date_object("2017-02-20")
         due_date = fields.get_date_object("2017-02-28")
@@ -533,7 +539,7 @@ class ApiDBTestCase(ApiTestCase):
             project_id=self.project.id,
             task_type_id=self.task_type.id,
             task_status_id=self.task_status.id,
-            entity_id=entity_id,
+            entity_id=asset_id,
             assignees=[self.person],
             assigner_id=self.assigner.id,
             duration=50,
@@ -552,7 +558,7 @@ class ApiDBTestCase(ApiTestCase):
             project_id=self.project_standard.id,
             task_type_id=self.task_type.id,
             task_status_id=self.task_status.id,
-            entity_id=self.entity_standard.id,
+            entity_id=self.asset_standard.id,
             assignees=[self.person],
             assigner_id=self.assigner.id,
             duration=50,
@@ -619,7 +625,7 @@ class ApiDBTestCase(ApiTestCase):
             comment="",
             revision=revision,
             task_id=self.task.id,
-            entity_id=self.entity.id,
+            entity_id=self.asset.id,
             person_id=self.person.id,
             software_id=self.software.id
         )
@@ -650,10 +656,10 @@ class ApiDBTestCase(ApiTestCase):
 
         if task is None:
             task_type_id = self.task_type.id
-            entity_id = self.entity.id
+            asset_id = self.asset.id
         else:
             task_type_id = task.task_type_id
-            entity_id = task.entity_id
+            asset_id = task.entity_id
 
         if asset_instance is None:
             asset_instance_id = None
@@ -664,7 +670,7 @@ class ApiDBTestCase(ApiTestCase):
             comment="",
             revision=revision,
             task_type_id=task_type_id,
-            entity_id=entity_id,
+            entity_id=asset_id,
             person_id=self.person.id,
             file_status_id=self.file_status.id,
             output_type_id=output_type.id,
@@ -715,7 +721,7 @@ class ApiDBTestCase(ApiTestCase):
         return file_path_fixture
 
     def generate_assigned_task(self):
-        self.generate_fixture_entity()
+        self.generate_fixture_asset()
         self.generate_fixture_department()
         self.generate_fixture_task_type()
         self.generate_fixture_task_status()
@@ -724,7 +730,7 @@ class ApiDBTestCase(ApiTestCase):
         self.generate_fixture_task()
 
     def generate_shot_suite(self):
-        self.generate_fixture_entity_type()
+        self.generate_fixture_asset_type()
         self.generate_fixture_project_status()
         self.generate_fixture_project()
         self.generate_fixture_episode()

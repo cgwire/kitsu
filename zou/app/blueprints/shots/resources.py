@@ -24,8 +24,7 @@ class ShotResource(Resource):
         Retrieve given shot.
         """
         shot = shots_service.get_full_shot(shot_id)
-        if not permissions.has_manager_permissions():
-            user_service.check_has_task_related(shot["project_id"])
+        user_service.check_project_access(shot["project_id"])
         return shot
 
     @jwt_required
@@ -52,9 +51,7 @@ class SceneResource(Resource):
         Retrieve given scene.
         """
         scene = shots_service.get_full_scene(scene_id)
-        if not permissions.has_manager_permissions():
-            user_service.check_has_task_related(scene["project_id"])
-
+        user_service.check_project_access(scene["project_id"])
         return scene
 
     @jwt_required
@@ -64,7 +61,6 @@ class SceneResource(Resource):
         """
         permissions.check_manager_permissions()
         deleted_scene = shots_service.remove_scene(scene_id)
-
         return deleted_scene, 204
 
 
@@ -76,8 +72,7 @@ class ShotsResource(Resource):
         Retrieve all shot entries. Filters can be specified in the query string.
         """
         criterions = query.get_query_criterions_from_request(request)
-        if not permissions.has_manager_permissions():
-            user_service.check_criterions_has_task_related(criterions)
+        user_service.check_project_access(criterions)
         return shots_service.get_shots(criterions)
 
 
@@ -90,8 +85,7 @@ class ScenesResource(Resource):
         string.
         """
         criterions = query.get_query_criterions_from_request(request)
-        if not permissions.has_manager_permissions():
-            user_service.check_criterions_has_task_related(criterions)
+        user_service.check_project_access(criterions)
         return shots_service.get_scenes(criterions)
 
 
@@ -103,8 +97,7 @@ class ShotAssetsResource(Resource):
         Retrieve all assets for a given shot.
         """
         shot = shots_service.get_shot(shot_id)
-        if not permissions.has_manager_permissions():
-            user_service.check_has_task_related(shot["project_id"])
+        user_service.check_project_access(shot["project_id"])
         return shots_service.get_entities_out(shot_id)
 
 
@@ -116,8 +109,7 @@ class ShotTaskTypesResource(Resource):
         Retrieve all task types related to a given shot.
         """
         shot = shots_service.get_shot(shot_id)
-        if not permissions.has_manager_permissions():
-            user_service.check_has_task_related(shot["project_id"])
+        user_service.check_project_access(shot["project_id"])
         return tasks_service.get_task_types_for_shot(shot_id)
 
 
@@ -129,8 +121,7 @@ class ShotTasksResource(Resource):
         Retrieve all tasks related to a given shot.
         """
         shot = shots_service.get_shot(shot_id)
-        if not permissions.has_manager_permissions():
-            user_service.check_has_task_related(shot["project_id"])
+        user_service.check_project_access(shot["project_id"])
         return tasks_service.get_tasks_for_shot(shot_id)
 
 
@@ -142,8 +133,7 @@ class SequenceTasksResource(Resource):
         Retrieve all tasks related to a given shot.
         """
         sequence = shots_service.get_sequence(sequence_id)
-        if not permissions.has_manager_permissions():
-            user_service.check_has_task_related(sequence["project_id"])
+        user_service.check_project_access(sequence["project_id"])
         return tasks_service.get_tasks_for_sequence(sequence_id)
 
 
@@ -155,8 +145,7 @@ class SequenceTaskTypesResource(Resource):
         Retrieve all task types related to a given shot.
         """
         sequence = shots_service.get_sequence(sequence_id)
-        if not permissions.has_manager_permissions():
-            user_service.check_has_task_related(sequence["project_id"])
+        user_service.check_project_access(sequence["project_id"])
         return tasks_service.get_task_types_for_sequence(sequence_id)
 
 
@@ -169,8 +158,7 @@ class ShotsAndTasksResource(Resource):
         related tasks.
         """
         criterions = query.get_query_criterions_from_request(request)
-        if not permissions.has_manager_permissions():
-            user_service.check_criterions_has_task_related(criterions)
+        user_service.check_project_access(criterions)
         return shots_service.get_shots_and_tasks(criterions)
 
 
@@ -182,8 +170,7 @@ class ProjectShotsResource(Resource):
         Retrieve all shots related to a given project.
         """
         projects_service.get_project(project_id)
-        if not permissions.has_manager_permissions():
-            user_service.check_has_task_related(project_id)
+        user_service.check_project_access(project_id)
         return shots_service.get_shots_for_project(project_id)
 
     @jwt_required
@@ -219,8 +206,7 @@ class ProjectSequencesResource(Resource):
         Retrieve all sequences related to a given project.
         """
         projects_service.get_project(project_id)
-        if not permissions.has_manager_permissions():
-            user_service.check_has_task_related(project_id)
+        user_service.check_project_access(project_id)
         return shots_service.get_sequences_for_project(project_id)
 
     @jwt_required
@@ -254,8 +240,7 @@ class ProjectEpisodesResource(Resource):
         Retrieve all episodes related to a given project.
         """
         projects_service.get_project(project_id)
-        if not permissions.has_manager_permissions():
-            user_service.check_has_task_related(project_id)
+        user_service.check_project_access(project_id)
         return shots_service.get_episodes_for_project(project_id)
 
     @jwt_required
@@ -283,8 +268,7 @@ class EpisodeResource(Resource):
         Retrieve given episode.
         """
         episode = shots_service.get_full_episode(episode_id)
-        if not permissions.has_manager_permissions():
-            user_service.check_has_task_related(episode["project_id"])
+        user_service.check_project_access(episode["project_id"])
         return episode
 
 
@@ -297,8 +281,7 @@ class EpisodesResource(Resource):
         string.
         """
         criterions = query.get_query_criterions_from_request(request)
-        if not permissions.has_manager_permissions():
-            user_service.check_criterions_has_task_related(criterions)
+        user_service.check_project_access(criterions)
         return shots_service.get_episodes(criterions)
 
 
@@ -311,9 +294,7 @@ class EpisodeSequencesResource(Resource):
         Filters can be specified in the query string.
         """
         episode = shots_service.get_episode(episode_id)
-        if not permissions.has_manager_permissions():
-            user_service.check_has_task_related(episode["project_id"])
-
+        user_service.check_project_access(episode["project_id"])
         criterions = query.get_query_criterions_from_request(request)
         criterions["parent_id"] = episode_id
         return shots_service.get_sequences(criterions)
@@ -327,8 +308,7 @@ class SequenceResource(Resource):
         Retrieve given sequence.
         """
         sequence = shots_service.get_full_sequence(sequence_id)
-        if not permissions.has_manager_permissions():
-            user_service.check_has_task_related(sequence["project_id"])
+        user_service.check_project_access(sequence["project_id"])
         return sequence
 
 
@@ -341,8 +321,7 @@ class SequencesResource(Resource):
         string.
         """
         criterions = query.get_query_criterions_from_request(request)
-        if not permissions.has_manager_permissions():
-            user_service.check_criterions_has_task_related(criterions)
+        user_service.check_project_access(criterions)
         return shots_service.get_sequences(criterions)
 
 
@@ -355,8 +334,7 @@ class SequenceShotsResource(Resource):
         Filters can be specified in the query string.
         """
         sequence = shots_service.get_sequence(sequence_id)
-        if not permissions.has_manager_permissions():
-            user_service.check_has_task_related(sequence["project_id"])
+        user_service.check_project_access(sequence["project_id"])
         criterions = query.get_query_criterions_from_request(request)
         criterions["parent_id"] = sequence_id
         return shots_service.get_shots(criterions)
@@ -370,8 +348,7 @@ class CastingResource(Resource):
         Resource to retrieve the casting of a given shot.
         """
         shot = shots_service.get_shot(shot_id)
-        if not permissions.has_manager_permissions():
-            user_service.check_has_task_related(shot["project_id"])
+        user_service.check_project_access(shot["project_id"])
         return breakdown_service.get_casting(shot_id)
 
     @jwt_required
@@ -392,8 +369,7 @@ class ProjectScenesResource(Resource):
         Retrieve all shots related to a given project.
         """
         projects_service.get_project(project_id)
-        if not permissions.has_manager_permissions():
-            user_service.check_has_task_related(project_id)
+        user_service.check_project_access(project_id)
         return shots_service.get_scenes_for_project(project_id)
 
     @jwt_required
@@ -427,8 +403,7 @@ class SequenceScenesResource(Resource):
         Retrieve all scenes related to a given sequence.
         """
         sequence = shots_service.get_sequence(sequence_id)
-        if not permissions.has_manager_permissions():
-            user_service.check_has_task_related(sequence["project_id"])
+        user_service.check_project_access(sequence["project_id"])
         return shots_service.get_scenes_for_sequence(sequence_id)
 
 
@@ -440,8 +415,7 @@ class SceneTaskTypesResource(Resource):
         Retrieve all task types related to a given scene.
         """
         scene = shots_service.get_scene(scene_id)
-        if not permissions.has_manager_permissions():
-            user_service.check_has_task_related(scene["project_id"])
+        user_service.check_project_access(scene["project_id"])
         return tasks_service.get_task_types_for_scene(scene_id)
 
 
@@ -453,8 +427,7 @@ class SceneTasksResource(Resource):
         Retrieve all tasks related to a given scene.
         """
         scene = shots_service.get_scene(scene_id)
-        if not permissions.has_manager_permissions():
-            user_service.check_has_task_related(scene["project_id"])
+        user_service.check_project_access(scene["project_id"])
         return tasks_service.get_tasks_for_scene(scene_id)
 
 

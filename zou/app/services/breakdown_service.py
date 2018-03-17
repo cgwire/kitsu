@@ -1,3 +1,4 @@
+from slugify import slugify
 from sqlalchemy import desc
 from sqlalchemy.orm import aliased
 
@@ -135,13 +136,26 @@ def add_asset_instance_to_entity(entity_id, asset_id, description=""):
     if instance is not None:
         number = instance.number + 1
 
+    name = build_asset_instance_name(asset_id, number)
+
     return AssetInstance.create(
         asset_id=asset_id,
         entity_id=entity_id,
         entity_type_id=entity.entity_type_id,
         number=number,
+        name=name,
         description=description
     ).serialize()
+
+
+def build_asset_instance_name(asset_id, number):
+    asset = Entity.get(asset_id)
+    asset_type = EntityType.get(asset.entity_type_id)
+
+    asset_name = slugify(asset.name, separator="_")
+    asset_type_name = slugify(asset_type.name, separator="_")
+
+    return "%s_%s_%s" % (asset_type_name, asset_name, str(number).zfill(4))
 
 
 def get_asset_instances_for_shot(shot_id):

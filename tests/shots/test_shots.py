@@ -9,7 +9,7 @@ class ShotTestCase(ApiDBTestCase):
         super(ShotTestCase, self).setUp()
         self.generate_fixture_project_status()
         self.generate_fixture_project()
-        self.generate_fixture_entity_type()
+        self.generate_fixture_asset_type()
         self.generate_fixture_episode()
         self.generate_fixture_sequence()
         self.generate_fixture_shot("SH01")
@@ -19,7 +19,7 @@ class ShotTestCase(ApiDBTestCase):
 
         self.generate_fixture_shot("SH02")
         self.generate_fixture_shot("SH03")
-        self.generate_fixture_entity()
+        self.generate_fixture_asset()
 
     def test_get_shots(self):
         shots = self.get("data/shots/all")
@@ -27,7 +27,7 @@ class ShotTestCase(ApiDBTestCase):
         self.assertDictEqual(shots[0], self.shot_dict)
 
     def test_remove_shot(self):
-        self.generate_fixture_entity()
+        self.generate_fixture_asset()
         path = "data/shots/%s" % self.shot.id
         shots = shots_service.get_shots()
         self.assertEquals(len(shots), 3)

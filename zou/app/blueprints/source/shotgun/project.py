@@ -26,13 +26,24 @@ class ImportShotgunProjectsResource(BaseImportShotgunResource):
 
     def extract_data(self, sg_project):
         sg_project_status = sg_project["sg_status"]
+        sg_fps = sg_project.get("sg_fps", None)
+        sg_width___height = sg_project.get("sg_width___height", None)
         project_status_id = self.project_status_map.get(sg_project_status, None)
 
-        return {
+        data = {
             "project_status_id": project_status_id,
             "name": sg_project["name"],
-            "shotgun_id": sg_project["id"]
+            "shotgun_id": sg_project["id"],
+            "data": {}
         }
+
+        if sg_fps is not None:
+            data["data"]["fps"] = sg_fps
+
+        if sg_width___height is not None:
+            data["data"]["width_height"] = sg_width___height
+
+        return data
 
     def import_entry(self, data):
         project = Project.get_by(shotgun_id=data["shotgun_id"])

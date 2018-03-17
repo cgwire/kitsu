@@ -7,7 +7,7 @@ class ImportShotgunEpisode(ShotgunTestCase):
 
     def setUp(self):
         super(ImportShotgunEpisode, self).setUp()
-        self.generate_fixture_entity_type()
+        self.generate_fixture_asset_type()
 
     def test_import_episodes(self):
         self.load_fixture('projects')

@@ -12,8 +12,8 @@ class FolderPathTestCase(ApiDBTestCase):
         self.generate_fixture_project()
         self.generate_fixture_person()
         self.generate_fixture_assigner()
-        self.generate_fixture_entity_type()
-        self.generate_fixture_entity()
+        self.generate_fixture_asset_type()
+        self.generate_fixture_asset()
         self.generate_fixture_sequence()
         self.generate_fixture_shot()
         self.generate_fixture_scene()
@@ -110,7 +110,7 @@ class FolderPathTestCase(ApiDBTestCase):
     def test_get_path_shot_asset_instance(self):
         self.output_type = files_service.get_or_create_output_type("Cache")
         self.generate_fixture_shot_asset_instance(
-            asset=self.entity,
+            asset=self.asset,
             shot=self.shot
         )
         data = {
@@ -133,13 +133,13 @@ class FolderPathTestCase(ApiDBTestCase):
         )
         self.assertEquals(
             result["name"],
-            "cosmos_landromat_s01_p01_animation_cache_main_props_tree_instance_0001_v003"
+            "cosmos_landromat_s01_p01_animation_cache_main_props_tree_0001_v003"
         )
 
     def test_get_path_scene_asset_instance(self):
         self.output_type = files_service.get_or_create_output_type("Cache")
         self.generate_fixture_scene_asset_instance(
-            asset=self.entity,
+            asset=self.asset,
             scene=self.scene
         )
         data = {
@@ -162,7 +162,7 @@ class FolderPathTestCase(ApiDBTestCase):
         )
         self.assertEquals(
             result["name"],
-            "cosmos_landromat_s01_sc01_animation_cache_main_props_tree_instance_0001_v003"
+            "cosmos_landromat_s01_sc01_animation_cache_main_props_tree_0001_v003"
         )
 
     def test_get_path_asset_software(self):

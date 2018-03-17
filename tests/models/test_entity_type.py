@@ -26,8 +26,8 @@ class EntityTypeTestCase(ApiDBTestCase):
         data = {
             "name": "shot"
         }
-        self.entity_types = self.post("data/entity-types", data)
-        self.assertIsNotNone(self.entity_types["id"])
+        self.asset_types = self.post("data/entity-types", data)
+        self.assertIsNotNone(self.asset_types["id"])
 
         entity_types = self.get("data/entity-types")
         self.assertEquals(len(entity_types), 4)

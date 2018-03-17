@@ -27,7 +27,7 @@ from zou.app.services.exception import (
     TaskNotFoundException
 )
 
-ALLOWED_FIELDS = ["short_name"]
+ALLOWED_FIELDS = ["short_name", "name", "number"]
 
 
 def get_working_file_path(
@@ -432,10 +432,12 @@ def update_variable(
             revision=revision,
             field=field
         )
-        render = render.replace(
-            "<%s>" % variable,
-            apply_style(slugify(data, separator="_"), style)
-        )
+
+        if data is not None:
+            render = render.replace(
+                "<%s>" % variable,
+                apply_style(slugify(data, separator="_"), style)
+            )
     return render
 
 
@@ -488,7 +490,7 @@ def get_folder_from_datatype(
     elif datatype == "Scene":
         folder = get_folder_from_scene(entity)
     elif datatype == "Instance":
-        folder = get_folder_from_asset_instance(asset_instance)
+        folder = get_folder_from_asset_instance(asset_instance, field)
     elif datatype == "Representation":
         folder = get_folder_from_representation(representation)
     elif datatype in ["Name", "OutputFile", "WorkingFile"]:
@@ -618,11 +620,18 @@ def get_folder_from_scene(scene):
     return folder
 
 
-def get_folder_from_asset_instance(asset_instance):
+def get_folder_from_asset_instance(asset_instance, field):
+    folder = ""
     if asset_instance is not None:
-        return str(asset_instance["number"]).zfill(4)
-    else:
-        return ""
+        number = str(asset_instance.get("number", 0)).zfill(4)
+        if field == "name":
+            folder = asset_instance.get("name", number)
+            if folder is None:
+                folder = number
+        else:
+            folder = number
+
+    return folder
 
 
 def get_folder_from_representation(representation):

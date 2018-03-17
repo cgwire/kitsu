@@ -14,8 +14,8 @@ class RouteTaskChangeTestCase(ApiDBTestCase):
 
         self.generate_fixture_project_status()
         self.generate_fixture_project()
-        self.generate_fixture_entity_type()
-        self.generate_fixture_entity()
+        self.generate_fixture_asset_type()
+        self.generate_fixture_asset()
         self.generate_fixture_sequence()
         self.generate_fixture_shot()
         self.generate_fixture_department()

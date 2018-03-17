@@ -29,8 +29,8 @@ class EntityServiceTestCase(ApiDBTestCase):
 
         self.generate_fixture_project_status()
         self.generate_fixture_project()
-        self.generate_fixture_entity_type()
-        self.generate_fixture_entity()
+        self.generate_fixture_asset_type()
+        self.generate_fixture_asset()
         self.generate_fixture_sequence()
         self.generate_fixture_shot()
         self.generate_fixture_department()
@@ -51,10 +51,10 @@ class EntityServiceTestCase(ApiDBTestCase):
 
     def test_set_main_preview(self):
         entities_service.update_entity_preview(
-            str(self.entity.id),
+            str(self.asset.id),
             str(self.preview_file.id)
         )
-        asset = assets_service.get_asset(self.entity.id)
+        asset = assets_service.get_asset(self.asset.id)
         self.assertEquals(asset["preview_file_id"], str(self.preview_file.id))
 
         with pytest.raises(EntityNotFoundException):
@@ -65,8 +65,8 @@ class EntityServiceTestCase(ApiDBTestCase):
 
         with pytest.raises(PreviewFileNotFoundException):
             entities_service.update_entity_preview(
-                str(self.entity.id),
-                str(self.entity.id)
+                str(self.asset.id),
+                str(self.asset.id)
             )
 
-        self.entity.preview_file_id = None
+        self.asset.preview_file_id = None

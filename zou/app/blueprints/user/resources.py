@@ -1,3 +1,4 @@
+from flask import request
 from flask_restful import Resource
 from flask_jwt_extended import jwt_required
 
@@ -75,8 +76,8 @@ class OpenProjectsResource(Resource):
 
     @jwt_required
     def get(self):
-        projects = user_service.get_projects()
-        return projects
+        name = request.args.get("name", None)
+        return user_service.get_open_projects(name=name)
 
 
 class ProjectSequencesResource(Resource):

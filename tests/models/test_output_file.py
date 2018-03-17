@@ -11,11 +11,11 @@ class OutputFileTestCase(ApiDBTestCase):
         super(OutputFileTestCase, self).setUp()
         self.generate_fixture_project_status()
         self.generate_fixture_project()
-        self.generate_fixture_entity_type()
+        self.generate_fixture_asset_type()
         self.generate_fixture_department()
         self.generate_fixture_task_type()
         self.generate_fixture_task_status()
-        self.generate_fixture_entity()
+        self.generate_fixture_asset()
         self.generate_fixture_sequence()
         self.generate_fixture_shot()
         self.generate_fixture_person()
@@ -26,7 +26,7 @@ class OutputFileTestCase(ApiDBTestCase):
             OutputFile,
             3,
             task_id=self.task.id,
-            entity_id=self.entity.id,
+            entity_id=self.asset.id,
             person_id=self.person.id,
             file_status_id=self.file_status.id
         )

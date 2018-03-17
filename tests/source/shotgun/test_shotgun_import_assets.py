@@ -28,7 +28,7 @@ class ImportShotgunAssetTestCase(ShotgunTestCase):
         self.assertEqual(len(self.entities), 2)
 
     def test_import_asset(self):
-        self.generate_fixture_entity_type()
+        self.generate_fixture_asset_type()
         self.generate_fixture_project_status()
         self.generate_fixture_project()
         self.generate_fixture_sequence()
@@ -121,7 +121,7 @@ class ImportShotgunAssetTestCase(ShotgunTestCase):
         api_path = "/import/shotgun/assets"
         self.assets = self.post(api_path, [sg_asset], 200)
         asset = self.assets[0]
-        self.entity = Entity.get(asset["id"])
+        self.asset = Entity.get(asset["id"])
         self.generate_fixture_project_status()
         self.generate_fixture_file_status()
         self.generate_fixture_person()
