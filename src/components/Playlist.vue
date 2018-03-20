@@ -13,7 +13,7 @@
           {{ $t('playlists.new_playlist') }}
         </button>
 
-        <div class="playlitsts" v-if="!loading.playlists">
+        <div class="playlists" v-if="!loading.playlists">
           <router-link
             :key="playlist.id"
             :to="{
@@ -37,8 +37,8 @@
           text="$t('playlists.loading_error')"
           v-if="errors.playlistLoading">
         </error-text>
-
       </div>
+
       <div class="playlist-column column">
         {{ currentPlaylist.name }}
         <button-link
@@ -53,6 +53,39 @@
           v-if="currentPlaylist.id"
         >
         </button-link>
+      </div>
+
+      <div class="addition-column column">
+        <page-subtitle :text="$t('playlists.add_shots')"></page-subtitle>
+        <spinner v-if="isShotsLoading"></spinner>
+        <div v-else>
+          <combobox
+            :label="$t('shots.fields.episode')"
+            :options="getEpisodeOptions"
+            v-model="episodeId"
+            v-if="episodes.length > 0"
+          ></combobox>
+          <div v-else>
+            There is no shot in this production.
+          </div>
+          <combobox
+            :label="$t('shots.fields.sequence')"
+            :options="sequenceOptions"
+            v-model="sequenceId"
+            v-if="episodeId && sequenceOptions.length > 0"
+          ></combobox>
+          <div v-if="sequenceOptions.length === 0 && episodeId">
+            There is no sequence in this episode.
+          </div>
+
+          <div v-if="sequenceShots.length === 0 && sequenceId">
+            There is no shot in this sequence.
+          </div>
+          <div class="addition-shot" v-for="shot in sequenceShots">
+            {{ shot.name }}
+            <button class="button">add</button>
+          </div>
+        </div>
       </div>
     </div>
 
@@ -79,7 +112,9 @@
 import { mapGetters, mapActions } from 'vuex'
 import moment from 'moment'
 import ButtonLink from './widgets/ButtonLink'
+import Combobox from './widgets/Combobox'
 import ErrorText from './widgets/ErrorText'
+import PageSubtitle from './widgets/PageSubtitle'
 import PageTitle from './widgets/PageTitle'
 import Spinner from './widgets/Spinner'
 import DeleteModal from './widgets/DeleteModal'
@@ -89,14 +124,20 @@ export default {
 
   components: {
     ButtonLink,
+    Combobox,
     DeleteModal,
     ErrorText,
     PageTitle,
+    PageSubtitle,
     Spinner
   },
 
   data () {
     return {
+      episodeId: null,
+      sequenceId: null,
+      sequenceOptions: [],
+      sequenceShots: [],
       currentPlaylist: {
         name: this.$t('playlists.no_selection')
       },
@@ -119,8 +160,13 @@ export default {
   computed: {
     ...mapGetters([
       'currentProduction',
+      'episodes',
+      'getEpisodeOptions',
+      'isShotsLoading',
       'playlistMap',
-      'playlists'
+      'playlists',
+      'sequences',
+      'shots'
     ]),
 
     deleteText () {
@@ -138,6 +184,7 @@ export default {
     ...mapActions([
       'deletePlaylist',
       'loadPlaylists',
+      'loadShots',
       'newPlaylist'
     ]),
 
@@ -207,20 +254,59 @@ export default {
       } else {
         this.modals.isDeleteDisplayed = false
       }
+    },
+
+    setSequences () {
+      const sequences = this.sequences.filter((sequence) => {
+        return sequence.parent_id === this.episodeId
+      })
+      this.sequenceOptions = sequences.map(
+        (sequence) => { return { label: sequence.name, value: sequence.id } }
+      )
+    },
+
+    setShots () {
+      this.sequenceShots = this.shots.filter((shot) => {
+        return shot.sequence_id === this.sequenceId
+      })
+    },
+
+    clearAdditionColumn () {
+      this.sequenceOptions = []
+      this.episodeId = null
+      this.sequenceId = null
     }
   },
 
   created () {
+    if (this.currentProduction.id !== this.$route.params.production_id) {
+      this.$store.commit(
+        'SET_CURRENT_PRODUCTION',
+        this.$route.params.production_id
+      )
+    }
     this.loading.playlists = true
     this.loadPlaylists((err) => {
       if (err) this.errors.loadPlaylists = true
       this.loading.playlists = false
       if (!err) {
         this.handleModalsDisplay()
-        this.setCurrentPlaylist()
         if (!this.currentPlaylist.id) this.goFirstPlaylist()
+        this.setCurrentPlaylist()
       }
     })
+
+    if (this.shots.length === 0) {
+      this.loadShots(() => {
+        if (this.episodes.length > 0) {
+          this.episodeId = this.episodes[0].id
+        }
+      })
+    } else {
+      if (this.episodes.length > 0) {
+        this.episodeId = this.episodes[0].id
+      }
+    }
   },
 
   watch: {
@@ -230,18 +316,26 @@ export default {
     },
 
     currentProduction () {
-      const oldPath = `${this.$route.path}`
       const newPath = {
         name: 'playlists',
         params: {production_id: this.currentProduction.id}
       }
-      this.$router.push(newPath)
-      const path = this.$route.path
-
-      if (oldPath !== path && path.length === 59) {
+      if (this.currentProduction.id !== this.$route.params.production_id) {
+        this.$router.push(newPath)
         this.loadPlaylists()
+        this.loadShots()
       }
+    },
+
+    episodeId () {
+      this.sequenceId = null
+      this.setSequences()
+    },
+
+    sequenceId () {
+      this.setShots()
     }
+
   },
 
   metaInfo () {
@@ -257,11 +351,13 @@ export default {
   display: flex;
   padding-left: 0;
   padding-right: 0;
+  padding-bottom: 0;
 }
 
 .columns {
   display: flex;
   flex: 1;
+  margin-bottom: 0;
 }
 
 .playlist-list-column {
@@ -276,6 +372,7 @@ export default {
 }
 
 .playlist-column {
+  flex: 1;
 }
 
 .playlist-item {
@@ -284,6 +381,11 @@ export default {
   border-radius: 1em;
   padding: 1em;
   margin: 0.2em;
+}
+
+.addition-column {
+  max-width: 200px;
+  background: #F4F5F9;
 }
 
 .playlist-item.selected {

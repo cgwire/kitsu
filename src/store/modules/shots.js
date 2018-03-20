@@ -351,7 +351,7 @@ const mutations = {
     state.shots = []
     state.shotValidationColumns = []
     state.sequences = []
-    state.episoded = []
+    state.episodes = []
     state.isShotsLoading = true
     state.isShotsLoadingError = false
 
