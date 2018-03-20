@@ -4,14 +4,16 @@ import { sync } from 'vuex-router-sync'
 import router from './router'
 import vuescroll from 'vue-scroll'
 import i18n from './lib/i18n'
-import realtime from './lib/realtime'
+// import realtime from './lib/realtime'
 import store from './store'
 import App from './App'
 import VueLazyload from 'vue-lazyload'
 import Meta from 'vue-meta'
 import infiniteScroll from 'vue-infinite-scroll'
+<<<<<<< 66705fc63c678ab55a36f70ee3840c6774a688c4
 import VueChartkick from 'vue-chartkick'
 import Chart from 'chart.js'
+import VueWebsocket from 'vue-websocket'
 
 Vue.config.productionTip = false
 Vue.use(vuescroll)
@@ -19,6 +21,7 @@ Vue.use(VueLazyload)
 Vue.use(Meta)
 Vue.use(infiniteScroll)
 Vue.use(VueChartkick, {adapter: Chart})
+Vue.use(VueWebsocket, '/events')
 
 // Make the current route part of the main state.
 sync(store, router)
@@ -53,8 +56,8 @@ new Vue({
 })
 
 // Realtime update configuration.
-const source = realtime.createNewSource()
-realtime.init(source)
+// const source = realtime.createNewSource()
+// realtime.init(source)
 
 // Catch escape command
 document.addEventListener('keyup', (evt) => {
