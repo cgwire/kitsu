@@ -4,8 +4,6 @@ from flask import abort, request, send_from_directory
 from flask_restful import Resource
 from flask_jwt_extended import jwt_required
 
-from moviepy.editor import VideoFileClip
-
 from zou.app.services import (
     shots_service,
     files_service,
@@ -54,6 +52,7 @@ class CreatePreviewFilePictureResource(Resource):
             return thumbnail_utils.get_preview_url_path(instance_id), 201
 
         elif extension in [".mp4", ".mov"]:
+            from moviepy.editor import VideoFileClip
             file_name = "%s%s" % (instance_id, extension)
             folder = thumbnail_utils.create_folder(folder_path)
             file_path = os.path.join(folder, file_name)
