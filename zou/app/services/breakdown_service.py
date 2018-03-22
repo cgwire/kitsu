@@ -176,7 +176,7 @@ def get_asset_instances_for_scene(scene_id):
 
 
 def get_camera_instances_for_scene(scene_id):
-    camera_entity_type = assets_service.get_or_create_type("Camera")
+    camera_entity_type = assets_service.get_or_create_asset_type("Camera")
     return get_asset_instances_for_entity(scene_id, camera_entity_type["id"])
 
 

@@ -27,7 +27,7 @@ class ImportShotgunAssetsResource(BaseImportShotgunResource):
 
     def prepare_import(self):
         entity_type_names = self.extract_entity_type_names(self.sg_entries)
-        assets_service.save_asset_types(entity_type_names)
+        assets_service.create_asset_types(entity_type_names)
         self.project_ids = Project.get_id_map()
         self.entity_type_ids = EntityType.get_id_map(field="name")
         self.parent_map = {}
