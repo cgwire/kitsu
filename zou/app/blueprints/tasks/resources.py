@@ -268,7 +268,7 @@ class ToReviewResource(Resource):
 
     def get_preview_path(self, task, name, revision, software):
         try:
-            folder_path = file_tree_service.get_folder_path(
+            folder_path = file_tree_service.get_entity_folder_path(
                 task,
                 mode="preview",
                 software=software
