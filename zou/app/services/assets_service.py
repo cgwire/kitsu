@@ -19,6 +19,9 @@ from zou.app.services.exception import (
 
 
 def get_asset_types(criterions={}):
+    """
+    Retriev all asset types available.
+    """
     shot_type = shots_service.get_shot_type()
     sequence_type = shots_service.get_sequence_type()
     episode_type = shots_service.get_episode_type()
@@ -41,9 +44,9 @@ def get_asset_types_for_project(project_id):
     ]
 
     if len(asset_type_ids) > 0:
-        query = EntityType.query
-        query = query.filter(EntityType.id.in_(asset_type_ids))
-        result = query.all()
+        result = EntityType.query \
+            .filter(EntityType.id.in_(asset_type_ids)) \
+            .all()
     else:
         result = []
     return EntityType.serialize_list(result, obj_type="AssetType")

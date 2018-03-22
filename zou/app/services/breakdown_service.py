@@ -150,12 +150,10 @@ def add_asset_instance_to_entity(entity_id, asset_id, description=""):
 
 def build_asset_instance_name(asset_id, number):
     asset = Entity.get(asset_id)
-    asset_type = EntityType.get(asset.entity_type_id)
-
     asset_name = slugify(asset.name, separator="_")
-    asset_type_name = slugify(asset_type.name, separator="_")
+    number = str(number).zfill(4)
 
-    return "%s_%s_%s" % (asset_type_name, asset_name, str(number).zfill(4))
+    return "%s_%s" % (asset_name, number)
 
 
 def get_asset_instances_for_shot(shot_id):
