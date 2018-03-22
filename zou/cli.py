@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 import sys
+import flask_migrate
 
 from zou.app.utils import dbhelpers, auth, commands
 from zou.app.services import (
@@ -42,6 +43,14 @@ def reset_db():
 
     clear_db()
     init_db()
+
+
+@cli.command()
+def upgrade_db():
+    "Upgrade database schema."
+    from zou.app import app
+    with app.app_context():
+        flask_migrate.upgrade()
 
 
 @cli.command()

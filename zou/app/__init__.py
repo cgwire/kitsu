@@ -5,6 +5,7 @@ from flask_restful import current_app
 from flask_jwt_extended import JWTManager
 from flask_principal import Principal, identity_changed, Identity
 from flask_sqlalchemy import SQLAlchemy
+from flask_migrate import Migrate
 
 from . import config
 from .stores import auth_tokens_store
@@ -27,6 +28,7 @@ if not app.config["THUMBNAIL_FOLDER"]:
 
 
 db = SQLAlchemy(app)
+migrate = Migrate(app, db)
 
 app.secret_key = app.config["SECRET_KEY"]
 jwt = JWTManager(app)
