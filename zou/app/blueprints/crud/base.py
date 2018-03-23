@@ -9,6 +9,7 @@ from flask_jwt_extended import jwt_required
 from sqlalchemy.exc import IntegrityError, StatementError
 
 from zou.app.utils import permissions
+from zou.app.services.exception import ArgumentsException
 
 
 class BaseModelsResource(Resource):
@@ -150,6 +151,10 @@ class BaseModelsResource(Resource):
             current_app.logger.error(str(exception))
             return {"message": str(exception)}, 400
 
+        except ArgumentsException as exception:
+            current_app.logger.error(str(exception))
+            return {"message": str(exception)}, 400
+
 
 class BaseModelResource(Resource):
 
@@ -175,6 +180,9 @@ class BaseModelResource(Resource):
     def get_arguments(self):
         return request.json
 
+    def update_data(self, data):
+        return data
+
     @jwt_required
     def get(self, instance_id):
         """
@@ -199,6 +207,7 @@ class BaseModelResource(Resource):
             data = self.get_arguments()
             instance = self.get_model_or_404(instance_id)
             self.check_update_permissions(instance.serialize(), data)
+            data = self.update_data(data)
             instance.update(data)
             return instance.serialize(), 200
 
@@ -215,6 +224,10 @@ class BaseModelResource(Resource):
             return {"message": str(exception)}, 400
 
         except StatementError as exception:
+            current_app.logger.error(str(exception))
+            return {"message": str(exception)}, 400
+
+        except ArgumentsException as exception:
             current_app.logger.error(str(exception))
             return {"message": str(exception)}, 400
 

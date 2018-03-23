@@ -1,4 +1,3 @@
-from flask import request
 from flask_restful import Resource, current_app
 from zou.app.models.department import Department
 from zou.app.models.task_type import TaskType
@@ -23,7 +22,8 @@ class ImportShotgunStepsResource(BaseImportShotgunResource):
             "short_name": sg_step.get("sg_short_name", ""),
             "shotgun_id": sg_step["id"],
             "color": color,
-            "department_name": department_name
+            "department_name": department_name,
+            "for_entity": sg_step.get("entity_type", "Asset")
         }
 
     def extract_color(self, sg_step):
@@ -56,9 +56,6 @@ class ImportShotgunStepsResource(BaseImportShotgunResource):
     def save_task_type(self, department, data):
         task_type = TaskType.get_by(shotgun_id=data["shotgun_id"])
         data["department_id"] = department.id
-
-        if task_type is None:
-            task_type = TaskType.get_by(name=data["name"])
 
         if task_type is None:
             task_type = TaskType(**data)

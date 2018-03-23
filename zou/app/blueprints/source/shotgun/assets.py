@@ -92,10 +92,12 @@ class ImportShotgunAssetsResource(BaseImportShotgunResource):
         # We handle the fact that an asset can have multiple parents by using
         # the entities out field as a children field.
         for key in self.parent_map.keys():
-            asset = assets_service.get_asset_by_shotgun_id(key)
-            if asset is not None:
+            try:
+                asset = assets_service.get_asset_by_shotgun_id(key)
                 data = {"entities_out": self.parent_map[key]}
                 assets_service.update_asset(asset["id"], data)
+            except AssetNotFoundException:
+                pass
 
         return self.parent_map
 

@@ -671,7 +671,6 @@ def get_person_tasks(person_id, projects, is_done=None):
         .filter(Comment.object_id.in_(task_ids)) \
         .order_by(Comment.object_id, Comment.created_at) \
         .all()
-    print(task_ids, comments)
 
     task_id = None
     for comment in comments:
