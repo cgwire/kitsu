@@ -332,6 +332,11 @@ export const routes = [
         name: 'delete-playlist',
         path: '/productions/:production_id/playlists/:playlist_id/delete',
         component: Playlist
+      },
+      {
+        name: 'edit-playlist',
+        path: '/productions/:production_id/playlists/:playlist_id/edit',
+        component: Playlist
       }
     ]
   },
