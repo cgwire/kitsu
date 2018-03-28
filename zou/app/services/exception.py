@@ -123,3 +123,7 @@ class WrongDateFormatException(Exception):
 
 class EntryAlreadyExistsException(Exception):
     pass
+
+
+class PlaylistNotFoundException(Exception):
+    pass
