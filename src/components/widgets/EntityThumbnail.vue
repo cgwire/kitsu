@@ -9,11 +9,17 @@
     v-lazy="thumbnailPath"
   />
 </a>
-<span :class="{
-  'thumbnail-picture': true,
-  'thumbnail-empty': true,
-  square: square
-}" v-else>
+<span
+  :class="{
+    'thumbnail-picture': true,
+    'thumbnail-empty': true,
+    square: square
+  }"
+  :style="{
+    width: emptyWidth + 'px',
+    height: emptyHeight + 'px',
+  }"
+  v-else>
 </span>
 </template>
 
@@ -28,6 +34,18 @@ export default {
     square: {
       default: false,
       type: Boolean
+    },
+    emptyWidth: {
+      default: 50,
+      type: Number
+    },
+    emptyHeight: {
+      default: 30,
+      type: Number
+    },
+    previewFileId: {
+      default: null,
+      type: String
     }
   },
   computed: {
@@ -40,12 +58,14 @@ export default {
              this.entity.preview_file_id.length > 0
     },
     thumbnailPath () {
+      const previewFileId = this.previewFileId || this.entity.preview_file_id
+
       if (this.square) {
         return '/api/pictures/thumbnails-square/preview-files/' +
-               this.entity.preview_file_id + '.png'
+               previewFileId + '.png'
       } else {
         return '/api/pictures/thumbnails/preview-files/' +
-               this.entity.preview_file_id + '.png'
+               previewFileId + '.png'
       }
     }
   }
@@ -54,8 +74,6 @@ export default {
 
 <style scoped>
 span.thumbnail-empty {
-  width: 50px;
-  height: 30px;
   background: #F3F3F3;
   display: block;
 }
