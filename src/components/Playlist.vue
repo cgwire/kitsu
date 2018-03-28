@@ -1,6 +1,7 @@
 <template>
   <div class="productions page fixed-page">
     <div class="columns">
+
       <div class="playlist-list-column column">
         <page-title class="title" :text="$t('playlists.title')"></page-title>
         <button
@@ -10,6 +11,7 @@
           }"
           @click="addPlaylist"
         >
+          <plus-icon class="icon is-small"></plus-icon>
           {{ $t('playlists.new_playlist') }}
         </button>
 
@@ -40,66 +42,155 @@
       </div>
 
       <div class="playlist-column column">
-        {{ currentPlaylist.name }}
-        <button-link
-          :path="{
-            name: 'delete-playlist',
-            params: {
-              production_id: currentProduction.id,
-              playlist_id: currentPlaylist.id
-            }
-          }"
-          icon="delete"
-          v-if="currentPlaylist.id"
-        >
-        </button-link>
+        <div class="playlist-header flexrow">
+          <div class="flexrow-item playlist-name">
+            {{ currentPlaylist.name }}
+          </div>
+          <div class="flexrow-item">
+            <button-link
+              :path="{
+                name: 'edit-playlist',
+                params: {
+                  production_id: currentProduction.id,
+                  playlist_id: currentPlaylist.id
+                }
+              }"
+              class="edit-button"
+              icon="edit"
+              v-if="currentPlaylist.id"
+            >
+            </button-link>
+          </div>
+          <div class="flexrow-item">
+            <button-link
+              :path="{
+                name: 'delete-playlist',
+                params: {
+                  production_id: currentProduction.id,
+                  playlist_id: currentPlaylist.id
+                }
+              }"
+              class="delete-button"
+              icon="delete"
+              v-if="currentPlaylist.id"
+            >
+            </button-link>
+          </div>
+        </div>
+
+        <div class="has-text-centered player">
+          <div
+            :class="{
+              'is-hidden': Object.keys(currentShots).length === 0
+            }"
+          >
+            <video-player
+              class="video-player-box"
+              ref="videoPlayer"
+              :options="playerOptions"
+              :playsinline="true"
+              @playlistitem="onCurrentShotChange"
+              @ready="onPlayerReady"
+            >
+            </video-player>
+            <p v-if="Object.values(currentShots)[currentShot]">
+            {{ Object.values(currentShots)[currentShot].entity_name }}
+            </p>
+          </div>
+          <p
+            :class="{
+              'is-hidden': Object.keys(currentShots).length > 0 || !currentPlaylist.id
+            }"
+          >
+            {{ $t('playlists.select_shot') }}
+          </p>
+        </div>
+        <div class="playlisted-shots flexrow">
+          <div
+            class="flexrow-item has-text-centered"
+            v-for="(shot, index) in playlistedShots"
+          >
+            <playlisted-shot
+              :index="index"
+              :shot="shot"
+              :is-playing="currentShot === index"
+              @play-click="playShot"
+              @remove-click="removeShot"
+              @preview-changed="onPreviewChanged"
+            >
+            </playlisted-shot>
+          </div>
+        </div>
       </div>
 
       <div class="addition-column column">
         <page-subtitle :text="$t('playlists.add_shots')"></page-subtitle>
+
         <spinner v-if="isShotsLoading"></spinner>
         <div v-else>
-          <combobox
-            :label="$t('shots.fields.episode')"
-            :options="getEpisodeOptions"
-            v-model="episodeId"
-            v-if="episodes.length > 0"
-          ></combobox>
-          <div v-else>
-            There is no shot in this production.
-          </div>
-          <combobox
-            :label="$t('shots.fields.sequence')"
-            :options="sequenceOptions"
-            v-model="sequenceId"
-            v-if="episodeId && sequenceOptions.length > 0"
-          ></combobox>
-          <div v-if="sequenceOptions.length === 0 && episodeId">
-            There is no sequence in this episode.
+          <div class="flexrow">
+            <div class="flexrom-item">
+              <combobox
+                :label="$t('shots.fields.episode')"
+                :options="getEpisodeOptions"
+                v-model="episodeId"
+                v-if="episodes.length > 0"
+              ></combobox>
+              <div v-else>
+                {{ $t('playlists.no_shot_for_productioN') }}
+              </div>
+            </div>
+            <div class="flexrow-item">
+              <combobox
+                :label="$t('shots.fields.sequence')"
+                :options="sequenceOptions"
+                v-model="sequenceId"
+                v-if="episodeId && sequenceOptions.length > 0"
+              ></combobox>
+              <div v-if="sequenceOptions.length === 0 && episodeId">
+                {{ $t('playlists.no_sequence_for_episode') }}
+              </div>
+            </div>
           </div>
 
           <div v-if="sequenceShots.length === 0 && sequenceId">
-            There is no shot in this sequence.
+            {{ $t('playlists.no_shot_for_sequence') }}
           </div>
-          <div class="addition-shot" v-for="shot in sequenceShots">
+
+          <div
+            :class="{
+              'addition-shot': true,
+              playlisted: currentShots[shot.id] !== undefined
+            }"
+            @click.prevent="addShot(shot)"
+            v-for="shot in sequenceShots"
+          >
+            <entity-thumbnail
+              :entity="shot"
+              :empty-width="150"
+              :empty-height="100"
+            ></entity-thumbnail>
             {{ shot.name }}
-            <button class="button">add</button>
           </div>
         </div>
       </div>
     </div>
 
+    <edit-playlist-modal
+      :active="modals.isEditDisplayed"
+      :is-loading="loading.editPlaylist"
+      :is-error="errors.editError"
+      :cancel-route="currentPlaylistRoute"
+      :playlist-to-edit="currentPlaylist"
+      @confirm="runEditPlaylist"
+    >
+    </edit-playlist-modal>
+
     <delete-modal
       :active="modals.isDeleteDisplayed"
       :is-loading="loading.deletePlaylist"
       :is-error="errors.deletePlaylist"
-      :cancel-route="{
-        name: 'playlist',
-        params: {
-          production_id: currentProduction.id,
-          playlist_id: currentPlaylist.id
-        }
-      }"
+      :cancel-route="currentPlaylistRoute"
       :text="deleteText"
       :error-text="$t('playlists.delete_error')"
       @confirm="removePlaylist"
@@ -107,17 +198,25 @@
     </delete-modal>
   </div>
 </template>
-
 <script>
 import { mapGetters, mapActions } from 'vuex'
+
+import 'video.js/dist/video-js.css'
+
 import moment from 'moment'
+import { PlusIcon } from 'vue-feather-icons'
+import { videoPlayer } from 'vue-video-player'
+
 import ButtonLink from './widgets/ButtonLink'
 import Combobox from './widgets/Combobox'
+import DeleteModal from './widgets/DeleteModal'
+import EditPlaylistModal from './modals/EditPlaylistModal'
+import EntityThumbnail from './widgets/EntityThumbnail'
 import ErrorText from './widgets/ErrorText'
 import PageSubtitle from './widgets/PageSubtitle'
 import PageTitle from './widgets/PageTitle'
+import PlaylistedShot from './playlists/PlaylistedShot'
 import Spinner from './widgets/Spinner'
-import DeleteModal from './widgets/DeleteModal'
 
 export default {
   name: 'productions',
@@ -126,10 +225,15 @@ export default {
     ButtonLink,
     Combobox,
     DeleteModal,
+    EditPlaylistModal,
+    EntityThumbnail,
     ErrorText,
-    PageTitle,
     PageSubtitle,
-    Spinner
+    PageTitle,
+    PlaylistedShot,
+    PlusIcon,
+    Spinner,
+    videoPlayer
   },
 
   data () {
@@ -138,11 +242,12 @@ export default {
       sequenceId: null,
       sequenceOptions: [],
       sequenceShots: [],
-      currentPlaylist: {
-        name: this.$t('playlists.no_selection')
-      },
+      currentPlaylist: { name: this.$t('playlists.no_selection') },
+      currentShots: {},
+      currentShot: 0,
       modals: {
-        isDeleteDisplayed: false
+        isDeleteDisplayed: false,
+        isEditDisplayed: false
       },
       loading: {
         playlists: false,
@@ -153,6 +258,10 @@ export default {
         playlistLoading: false,
         addPlaylist: false,
         deletePlaylist: false
+      },
+      playerOptions: {
+        muted: true,
+        sources: []
       }
     }
   },
@@ -166,7 +275,9 @@ export default {
       'playlistMap',
       'playlists',
       'sequences',
-      'shots'
+      'shotMap',
+      'shots',
+      'taskTypeMap'
     ]),
 
     deleteText () {
@@ -177,28 +288,103 @@ export default {
       } else {
         return ''
       }
+    },
+
+    playlistedShots () {
+      return Object.values(this.currentShots)
+    },
+
+    player () {
+      return this.$refs.videoPlayer ? this.$refs.videoPlayer.player : null
+    },
+
+    currentPlaylistRoute () {
+      if (this.currentPlaylist.id) {
+        return {
+          name: 'playlist',
+          params: {
+            production_id: this.currentProduction.id,
+            playlist_id: this.currentPlaylist.id
+          }
+        }
+      } else {
+        return {
+          name: 'playlists',
+          params: {
+            production_id: this.currentProduction.id
+          }
+        }
+      }
     }
   },
 
   methods: {
     ...mapActions([
+      'addShotPreviewToPlaylist',
+      'changePlaylistPreview',
       'deletePlaylist',
+      'editPlaylist',
+      'loadPlaylist',
       'loadPlaylists',
+      'loadShotPreviewFiles',
       'loadShots',
-      'newPlaylist'
+      'newPlaylist',
+      'removeShotPreviewFromPlaylist'
     ]),
 
+    clearAdditionColumn () {
+      this.sequenceOptions = []
+      this.episodeId = null
+      this.sequenceId = null
+    },
+
+    clearCurrentPlaylist () {
+      this.currentPlaylist = {}
+      this.currentShots = {}
+    },
+
+    resetPlaylist () {
+      this.handleModalsDisplay()
+      this.clearCurrentPlaylist()
+      this.setCurrentPlaylist()
+      this.configurePlayer()
+    },
+
     addPlaylist () {
+      const newPlaylist = {
+        name: moment().format('YYYY-MM-DD hh:mm'),
+        production_id: this.currentProduction.id
+      }
       this.loading.addPlaylist = true
       this.errors.addPlaylist = false
       this.newPlaylist({
+        data: newPlaylist,
+        callback: (err, playlist) => {
+          if (err) this.errors.addPlaylist = true
+          this.$router.push({
+            name: 'playlist',
+            params: {
+              production_id: this.currentProduction.id,
+              playlist_id: playlist.id
+            }
+          })
+          this.loading.addPlaylist = false
+        }
+      })
+    },
+
+    runEditPlaylist (form) {
+      this.loading.editPlaylist = true
+      this.errors.editPlaylist = false
+      this.editPlaylist({
         data: {
-          name: moment().format('YYYY-MM-DD hh:mm'),
-          production_id: this.currentProduction.id
+          name: form.name,
+          id: this.currentPlaylist.id
         },
         callback: (err) => {
-          if (err) this.errors.addPlaylist = true
-          this.loading.addPlaylist = false
+          if (err) this.errors.editPlaylist = true
+          this.loading.editPlaylist = false
+          this.$router.push(this.currentPlaylistRoute)
         }
       })
     },
@@ -216,15 +402,25 @@ export default {
       })
     },
 
-    setCurrentPlaylist () {
+    setCurrentPlaylist (callback) {
       const playlistId = this.$route.params.playlist_id
       const playlist = this.playlistMap[playlistId]
       if (playlist) {
-        this.currentPlaylist = playlist
+        this.loadPlaylist({
+          playlist,
+          callback: (err, playlist) => {
+            if (err) console.log(err)
+            this.currentPlaylist = playlist
+            this.rebuildCurrentShots()
+            this.configurePlayer()
+            if (callback) callback()
+          }
+        })
       } else {
         this.currentPlaylist = {
           name: this.$t('playlists.no_selection')
         }
+        this.currentShots = {}
       }
     },
 
@@ -249,32 +445,155 @@ export default {
 
     handleModalsDisplay () {
       const path = this.$store.state.route.path
+      this.modals.isDeleteDisplayed = false
+      this.modals.isEditDisplayed = false
       if (path.indexOf('delete') > 0) {
         this.modals.isDeleteDisplayed = true
-      } else {
-        this.modals.isDeleteDisplayed = false
+      } else if (path.indexOf('edit') > 0) {
+        this.modals.isEditDisplayed = true
       }
     },
 
-    setSequences () {
+    setAdditionSequences () {
       const sequences = this.sequences.filter((sequence) => {
         return sequence.parent_id === this.episodeId
       })
       this.sequenceOptions = sequences.map(
         (sequence) => { return { label: sequence.name, value: sequence.id } }
       )
+      if (sequences.length > 0) {
+        this.sequenceId = this.sequences[0].id
+      }
     },
 
-    setShots () {
+    setAdditionShots () {
       this.sequenceShots = this.shots.filter((shot) => {
         return shot.sequence_id === this.sequenceId
       })
     },
 
-    clearAdditionColumn () {
-      this.sequenceOptions = []
-      this.episodeId = null
-      this.sequenceId = null
+    addShot (shot) {
+      if (this.currentPlaylist.id) {
+        this.loadShotPreviewFiles({
+          playlist: this.currentPlaylist,
+          shot,
+          callback: (err, previewFiles) => {
+            if (err) console.log(err)
+            this.addShotPreviewToPlaylist({
+              playlist: this.currentPlaylist,
+              previewFiles: previewFiles,
+              shot,
+              callback: () => {
+                this.rebuildCurrentShots()
+                this.configurePlayer()
+              }
+            })
+          }
+        })
+      }
+    },
+
+    removeShot (shot) {
+      if (shot.preview_file_id) {
+        this.removeShotPreviewFromPlaylist({
+          playlist: this.currentPlaylist,
+          shot
+        })
+        this.rebuildCurrentShots()
+        this.configurePlayer()
+      }
+    },
+
+    onPreviewChanged (shot, previewFileId) {
+      this.changePlaylistPreview({
+        playlist: this.currentPlaylist,
+        shot,
+        previewFileId
+      })
+      this.rebuildCurrentShots()
+      this.configurePlayer()
+    },
+
+    rebuildCurrentShots () {
+      this.currentShots = {}
+      this.currentPlaylist.shots.forEach((shotPreview) => {
+        const shot = this.shotMap[shotPreview.shot_id]
+        this.currentShots[shotPreview.shot_id] = {
+          id: shotPreview.shot_id,
+          name: shot.name,
+          entity_name: shot.tasks[0].entity_name,
+          preview_files: shotPreview.preview_files,
+          preview_file_id: shotPreview.preview_file_id || shot.preview_file_id
+        }
+      })
+    },
+
+    configurePlayer () {
+      if (this.player) {
+        const movies = []
+        Object.values(
+          this.currentShots
+        ).forEach((shot) => {
+          const previewId = shot.preview_file_id
+          const posterPath = `/api/pictures/previews/preview-files/${previewId}.png`
+          const moviePath = `/api/movies/originals/preview-files/${previewId}.mp4`
+          movies.push({
+            sources: [{
+              type: 'video/mp4',
+              src: moviePath
+            }],
+            poster: posterPath
+          })
+        })
+
+        setTimeout(() => {
+          this.player.playlist(movies)
+          this.player.playlist.autoadvance(0)
+          this.player.playlist.repeat(true)
+        }, 100)
+      }
+    },
+
+    onPlayerReady (player) {
+      if (this.player) {
+        this.player.on('playlistitem', () => {
+          this.onCurrentShotChange()
+        })
+      }
+    },
+
+    playShot (shotIndex) {
+      if (this.player) {
+        this.player.playlist.currentItem(shotIndex)
+      }
+    },
+
+    onCurrentShotChange () {
+      this.currentShot = this.player.playlist.currentItem()
+    },
+
+    loadShotsData () {
+      this.loadShots(() => {
+        if (this.episodes.length > 0) {
+          this.episodeId = this.episodes[0].id // Cascade update
+        }
+
+        this.loadPlaylistsData()
+      })
+    },
+
+    loadPlaylistsData () {
+      this.loading.playlists = true
+      this.loadPlaylists((err) => {
+        if (err) this.errors.loadPlaylists = true
+        this.loading.playlists = false
+        if (!err) {
+          this.handleModalsDisplay()
+          this.setCurrentPlaylist(() => {
+            if (!this.currentPlaylist.id) this.goFirstPlaylist()
+          })
+        }
+      })
     }
   },
 
@@ -285,62 +604,47 @@ export default {
         this.$route.params.production_id
       )
     }
-    this.loading.playlists = true
-    this.loadPlaylists((err) => {
-      if (err) this.errors.loadPlaylists = true
-      this.loading.playlists = false
-      if (!err) {
-        this.handleModalsDisplay()
-        if (!this.currentPlaylist.id) this.goFirstPlaylist()
-        this.setCurrentPlaylist()
-      }
-    })
 
     if (this.shots.length === 0) {
-      this.loadShots(() => {
-        if (this.episodes.length > 0) {
-          this.episodeId = this.episodes[0].id
-        }
-      })
+      this.loadShotsData()
     } else {
       if (this.episodes.length > 0) {
-        this.episodeId = this.episodes[0].id
+        this.episodeId = this.episodes[0].id // Then cacscade update
+
+        this.setCurrentPlaylist(this.loadPlaylistsData)
       }
     }
   },
 
   watch: {
     $route () {
-      this.handleModalsDisplay()
-      this.setCurrentPlaylist()
+      this.resetPlaylist()
     },
 
     currentProduction () {
-      const newPath = {
-        name: 'playlists',
-        params: {production_id: this.currentProduction.id}
-      }
       if (this.currentProduction.id !== this.$route.params.production_id) {
-        this.$router.push(newPath)
-        this.loadPlaylists()
-        this.loadShots()
+        this.$router.push({
+          name: 'playlists',
+          params: {production_id: this.currentProduction.id}
+        })
+        this.resetPlaylist()
       }
     },
 
     episodeId () {
       this.sequenceId = null
-      this.setSequences()
+      this.setAdditionSequences()
     },
 
     sequenceId () {
-      this.setShots()
+      this.setAdditionShots()
     }
-
   },
 
   metaInfo () {
     return {
-      title: `${this.$t('playlists.title')} - Kitsu`
+      title: `${this.currentProduction.name} ${this.$t('playlists.title')}` +
+             ` - Kitsu`
     }
   }
 }
@@ -355,40 +659,98 @@ export default {
 }
 
 .columns {
-  display: flex;
-  flex: 1;
   margin-bottom: 0;
+}
+
+.title {
+  border-bottom: 2px solid #DDD;
+  padding-bottom: 7px;
 }
 
 .playlist-list-column {
   max-width: 300px;
-  padding: 2em 1em 1em 2em;
   background: #F4F5F9;
   overflow-y: auto;
-}
-
-.button {
-  width: 100%;
+  padding: 2em 1em 1em 2em;
+  border-right: 1px solid #DDD;
+  box-shadow: 0px 0px 6px #F0F0F0;
 }
 
 .playlist-column {
   flex: 1;
+  overflow-y: auto;
 }
 
 .playlist-item {
   display: block;
   background: white;
-  border-radius: 1em;
   padding: 1em;
   margin: 0.2em;
+  border: 1px solid #EEE;
+  box-shadow: 0px 0px 6px #DDD;
+  color: #666;
+}
+
+.playlist-item.selected {
+  border-right: 3px solid #67BE4B;
 }
 
 .addition-column {
   max-width: 200px;
   background: #F4F5F9;
+  overflow-y: auto;
+  border-left: 1px solid #DDD;
+  box-shadow: 0px 0px 6px #F0F0F0;
 }
 
-.playlist-item.selected {
-  border-right: 2px solid green;
+.addition-shot {
+  cursor: pointer;
+  text-align: center;
+  margin-bottom: 0.5em;
+  opacity: 0.5
+}
+
+.addition-shot:hover {
+  opacity: 0.75
+}
+
+.addition-shot.playlisted {
+  opacity: 1
+}
+
+span.thumbnail-picture {
+  box-shadow: 0px 0px 6px #DDD;
+  margin-bottom: 2px;
+}
+
+.playlist-column {
+  padding: 2em 1.5em 1.5em 1.5em;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.playlist-header {
+  align-items: center;
+  border-bottom: 1px solid #CCC;
+  padding-bottom: 0.5em;
+  margin-bottom: 1em;
+  min-height: 50px;
+}
+
+.playlist-name {
+  flex: 1;
+  font-size: 1.5em;
+}
+
+.player {
+  flex: 1;
+  overflow-y: auto;
+}
+
+.playlisted-shots {
+  min-height: 150px;
+  margin-top: 1em;
+  overflow-x: auto;
 }
 </style>
