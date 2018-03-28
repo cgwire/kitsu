@@ -11,6 +11,11 @@ import VueLazyload from 'vue-lazyload'
 import Meta from 'vue-meta'
 import infiniteScroll from 'vue-infinite-scroll'
 
+/* eslint-disable no-unused-vars */
+import videojs from 'video.js'
+/* eslint-disable no-unused-vars */
+import videojsPlaylist from 'videojs-playlist'
+
 Vue.config.productionTip = false
 Vue.use(vuescroll)
 Vue.use(VueLazyload)
