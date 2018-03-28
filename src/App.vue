@@ -150,6 +150,10 @@ input.input:focus {
   margin-right: 0.5em;
 }
 
+.actions .button .icon.is-small.icon-only:first-child:last-child {
+  margin-right: 0.5em;
+}
+
 .actions .button .icon.is-small:first-child:last-child {
   margin-right: 0em;
 }
@@ -239,6 +243,10 @@ input.search-input:focus {
   margin-right: 1em;
 }
 
+.flexrow-item:last-child {
+  margin-right: 0;
+}
+
 .menu-mask {
   position: fixed;
   background: blue;
@@ -259,6 +267,10 @@ input.search-input:focus {
 
 .unselectable {
   user-select: none;
+}
+
+.playlist-column .video-player-box .video-js {
+  margin: auto;
 }
 
 @media screen and (max-width: 1000px) {
