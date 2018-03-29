@@ -39,7 +39,7 @@ DATABASE = {
     "password": os.getenv("DB_PASSWORD", "mysecretpassword"),
     "database": os.getenv("DB_DATABASE", "zoudb")
 }
-SQLALCHEMY_DATABASE_URI = dbhelpers.get_db_uri()
+SQLALCHEMY_DATABASE_URI = str(dbhelpers.get_db_uri())
 SQLALCHEMY_TRACK_MODIFICATIONS = True
 
 NB_RECORDS_PER_PAGE = 100

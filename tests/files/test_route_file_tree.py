@@ -133,7 +133,7 @@ class FolderPathTestCase(ApiDBTestCase):
         )
         self.assertEquals(
             result["name"],
-            "cosmos_landromat_s01_p01_animation_cache_main_props_tree_0001_v003"
+            "cosmos_landromat_s01_p01_animation_cache_main_tree_0001_v003"
         )
 
     def test_get_path_scene_asset_instance(self):
@@ -162,7 +162,7 @@ class FolderPathTestCase(ApiDBTestCase):
         )
         self.assertEquals(
             result["name"],
-            "cosmos_landromat_s01_sc01_animation_cache_main_props_tree_0001_v003"
+            "cosmos_landromat_s01_sc01_animation_cache_main_tree_0001_v003"
         )
 
     def test_get_path_asset_software(self):
