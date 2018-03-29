@@ -6,10 +6,9 @@ from zou.app.utils import events, fields, cache
 from zou.app.models.entity import Entity
 from zou.app.models.project import Project
 from zou.app.models.task import Task
-from zou.app.models.preview_file import PreviewFile
 from zou.app.models.task import association_table as assignees_table
 
-from zou.app.services import projects_service, entities_service, tasks_service
+from zou.app.services import projects_service, entities_service
 from zou.app.services.exception import (
     EpisodeNotFoundException,
     SequenceNotFoundException,
@@ -617,26 +616,3 @@ def create_scene(project_id, sequence_id, name):
 def get_entities_out(shot_id):
     shot = get_shot_raw(shot_id)
     return Entity.serialize_list(shot.entities_out, obj_type="Asset")
-
-
-def get_preview_files_for_shot(shot_id):
-    tasks = tasks_service.get_tasks_for_shot(shot_id)
-    previews = {}
-
-    for task in tasks:
-        preview_files = PreviewFile.query \
-            .filter_by(task_id=task["id"]) \
-            .order_by(PreviewFile.revision.desc()) \
-            .all()
-        task_type_id = task["task_type_id"]
-
-        if len(preview_files) > 0:
-            previews[task_type_id] = [
-                {
-                    "id": str(preview_file.id),
-                    "revision": preview_file.revision
-                }
-                for preview_file in preview_files
-            ]  # Do not add too much field to avoid building too big responses
-
-    return previews
