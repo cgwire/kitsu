@@ -403,7 +403,7 @@ def create_asset(
 def update_asset(working_file_id, data):
     asset = get_asset_raw(working_file_id)
     asset.update(data)
-    return asset.serialize()
+    return asset.serialize(obj_type="Asset")
 
 
 def remove_asset(asset_id):

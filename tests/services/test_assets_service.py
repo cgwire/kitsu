@@ -157,7 +157,7 @@ class AssetServiceTestCase(ApiDBTestCase):
         self.assertDictEqual(asset, asset_again)
 
     def test_update_asset(self):
-        asset = self.asset.serialize()
+        asset = self.asset.serialize(obj_type="Asset")
         asset = assets_service.update_asset(asset["id"], {"name": "New name"})
         asset_again = assets_service.get_asset(asset["id"])
         self.assertDictEqual(asset, asset_again)

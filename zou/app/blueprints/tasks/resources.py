@@ -434,7 +434,7 @@ class TaskFullResource(Resource):
             if sequence["parent_id"] is not None:
                 episode = shots_service.get_episode(sequence["parent_id"])
                 result["episode"] = episode
-        entity_type = tasks_service.get_entity_type(entity["entity_type_id"])
+        entity_type = entities_service.get_entity_type(entity["entity_type_id"])
         result["entity_type"] = entity_type
         assignees = []
         for assignee_id in task["assignees"]:

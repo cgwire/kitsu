@@ -35,27 +35,27 @@ def get_episode_from_sequence(sequence):
 
 @cache.memoize_function(120)
 def get_episode_type():
-    return entities_service.get_entity_type("Episode")
+    return entities_service.get_entity_type_by_name("Episode")
 
 
 @cache.memoize_function(120)
 def get_sequence_type():
-    return entities_service.get_entity_type("Sequence")
+    return entities_service.get_entity_type_by_name("Sequence")
 
 
 @cache.memoize_function(120)
 def get_shot_type():
-    return entities_service.get_entity_type("Shot")
+    return entities_service.get_entity_type_by_name("Shot")
 
 
 @cache.memoize_function(120)
 def get_scene_type():
-    return entities_service.get_entity_type("Scene")
+    return entities_service.get_entity_type_by_name("Scene")
 
 
 @cache.memoize_function(120)
 def get_camera_type():
-    return entities_service.get_entity_type("Camera")
+    return entities_service.get_entity_type_by_name("Camera")
 
 
 def get_episodes(criterions={}):

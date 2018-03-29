@@ -12,17 +12,7 @@ from zou.app.services.exception import (
 )
 
 
-def get_entity_type(name):
-    """
-    Return entity type maching *name*. If it doesn't exist, it creates it.
-    """
-    entity_type = EntityType.get_by(name=name)
-    if entity_type is None:
-        entity_type = EntityType.create(name=name)
-    return entity_type.serialize()
-
-
-def get_entity_type_by_id(entity_type_id):
+def get_entity_type(entity_type_id):
     """
     Return an entity type matching given id, as a dict. Raises an exception
     if nothing is found.
@@ -32,6 +22,16 @@ def get_entity_type_by_id(entity_type_id):
         entity_type_id,
         EntityTypeNotFoundException
     ).serialize()
+
+
+def get_entity_type_by_name(name):
+    """
+    Return entity type maching *name*. If it doesn't exist, it creates it.
+    """
+    entity_type = EntityType.get_by(name=name)
+    if entity_type is None:
+        entity_type = EntityType.create(name=name)
+    return entity_type.serialize()
 
 
 def get_entity_raw(entity_id):
