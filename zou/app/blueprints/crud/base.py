@@ -93,6 +93,9 @@ class BaseModelsResource(Resource):
     def check_read_permissions(self):
         return permissions.check_manager_permissions()
 
+    def add_project_permission_filter(self, query):
+        return query
+
     def check_create_permissions(self, data):
         return permissions.check_manager_permissions()
 
@@ -113,6 +116,7 @@ class BaseModelsResource(Resource):
             else:
                 options = request.args
                 query = self.apply_filters(options)
+                query = self.add_project_permission_filter(query)
                 page = int(options.get("page", "-1"))
                 is_paginated = page > -1
 
