@@ -111,12 +111,12 @@ class BaseModelsResource(Resource):
         try:
             self.check_read_permissions()
             query = self.model.query
+            query = self.add_project_permission_filter(query)
             if not request.args:
                 return self.all_entries(query)
             else:
                 options = request.args
                 query = self.apply_filters(options)
-                query = self.add_project_permission_filter(query)
                 page = int(options.get("page", "-1"))
                 is_paginated = page > -1
 

@@ -29,6 +29,19 @@ def related_projects():
     return Project.serialize_list(projects)
 
 
+def related_projects_filter():
+    projects = Project.query \
+        .join(Task) \
+        .filter(assignee_filter()) \
+        .filter(open_project_filter()) \
+        .all()
+    project_ids = [project.id for project in projects]
+    if len(project_ids) > 0:
+        return Project.id.in_(project_ids)
+    else:
+        return Project.id.in_(["00000000-0000-0000-0000-000000000000"])
+
+
 def asset_type_filter():
     shot_type = shots_service.get_shot_type()
     sequence_type = shots_service.get_sequence_type()
@@ -224,3 +237,7 @@ def check_criterions_has_task_related(criterions):
 def check_project_access(project_id):
     return permissions.has_manager_permissions() or \
         check_has_task_related(project_id)
+
+
+def is_current_user_manager():
+    return permissions.has_manager_permissions()
