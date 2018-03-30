@@ -1,7 +1,7 @@
 from sqlalchemy.orm import aliased
 from sqlalchemy.exc import IntegrityError, StatementError
 
-from zou.app.utils import events, fields, cache
+from zou.app.utils import events, fields, cache, query as query_utils
 
 from zou.app.models.entity import Entity
 from zou.app.models.project import Project
@@ -61,27 +61,30 @@ def get_camera_type():
 def get_episodes(criterions={}):
     episode_type = get_episode_type()
     criterions["entity_type_id"] = episode_type["id"]
-    result = Entity.query.filter_by(**criterions).order_by("name").all()
-    return Entity.serialize_list(result, obj_type="Episode")
+    query = Entity.query.order_by(Entity.name)
+    query = query_utils.apply_criterions_to_db_query(Entity, query, criterions)
+    return Entity.serialize_list(query.all(), obj_type="Episode")
 
 
 def get_sequences(criterions={}):
     sequence_type = get_sequence_type()
     criterions["entity_type_id"] = sequence_type["id"]
-    result = Entity.query.filter_by(**criterions).order_by(Entity.name).all()
-    return Entity.serialize_list(result, obj_type="Sequence")
+    query = Entity.query.order_by(Entity.name)
+    query = query_utils.apply_criterions_to_db_query(Entity, query, criterions)
+    return Entity.serialize_list(query.all(), obj_type="Sequence")
 
 
 def get_shots(criterions={}):
     shot_type = get_shot_type()
     criterions["entity_type_id"] = shot_type["id"]
     Sequence = aliased(Entity, name='sequence')
-    query = Entity.query.filter_by(**criterions)
-    query = query.join(Project)
-    query = query.join(Sequence, Sequence.id == Entity.parent_id)
-    query = query.add_columns(Project.name)
-    query = query.add_columns(Sequence.name)
-    query = query.order_by(Entity.name)
+    query = Entity.query
+    query = query_utils.apply_criterions_to_db_query(Entity, query, criterions)
+    query = query.join(Project) \
+        .join(Sequence, Sequence.id == Entity.parent_id) \
+        .add_columns(Project.name) \
+        .add_columns(Sequence.name) \
+        .order_by(Entity.name)
     data = query.all()
 
     shots = []
@@ -98,11 +101,13 @@ def get_scenes(criterions={}):
     scene_type = get_scene_type()
     criterions["entity_type_id"] = scene_type["id"]
     Sequence = aliased(Entity, name='sequence')
-    query = Entity.query.filter_by(**criterions)
-    query = query.join(Project)
-    query = query.join(Sequence, Sequence.id == Entity.parent_id)
-    query = query.add_columns(Project.name)
-    query = query.add_columns(Sequence.name)
+
+    query = Entity.query
+    query = query_utils.apply_criterions_to_db_query(Entity, query, criterions)
+    query = query.join(Project) \
+        .join(Sequence, Sequence.id == Entity.parent_id) \
+        .add_columns(Project.name) \
+        .add_columns(Sequence.name)
     data = query.all()
 
     scenes = []

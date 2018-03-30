@@ -34,6 +34,10 @@ class AssetsTestCase(ApiDBTestCase):
         self.assertEquals(asset["asset_type_name"], str(self.asset_type.name))
         self.assertEquals(len(asset["tasks"]), 2)
 
+    def test_get_asset_by_name(self):
+        assets = self.get("data/assets/all?name=%s" % self.asset.name.lower())
+        self.assertEquals(assets[0]["id"], str(self.asset.id))
+
     def test_get_project_assets(self):
         assets = self.get("data/projects/%s/assets" % self.project.id)
         self.assertEquals(len(assets), 1)

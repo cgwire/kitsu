@@ -33,6 +33,11 @@ class SequenceTestCase(ApiDBTestCase):
         self.assertEquals(sequence["episode_id"], str(self.episode.id))
         self.assertEquals(sequence["project_name"], self.project.name)
 
+    def test_get_sequence_by_name(self):
+        sequences = self.get(
+            "data/sequences?name=%s" % self.sequence.name.lower())
+        self.assertEquals(sequences[0]["id"], str(self.sequence.id))
+
     def test_get_sequence_tasks(self):
         self.generate_fixture_sequence_task()
         tasks = self.get("data/sequences/%s/tasks" % self.sequence.id)

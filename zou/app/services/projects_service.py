@@ -32,7 +32,7 @@ def all_projects(name=None):
         .order_by(Project.name)
 
     if name is not None:
-        query = query.filter(Project.name == name)
+        query = query.filter(Project.name.ilike(name))
 
     result = []
     for entry in query.all():

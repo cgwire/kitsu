@@ -49,6 +49,7 @@ class BaseModelsResource(Resource):
     def build_filters(self, options):
         many_join_filter = []
         in_filter = []
+        name_filter = []
         filters = {}
 
         for key, value in options.items():
@@ -61,7 +62,10 @@ class BaseModelsResource(Resource):
                 )
                 value_is_list = len(value) > 0 and value[0] == '['
 
-                if is_many_to_many_field:
+                if key == "name" and field_key is not None:
+                    name_filter.append(value)
+
+                elif is_many_to_many_field:
                     many_join_filter.append((key, value))
 
                 elif value_is_list:
@@ -71,16 +75,20 @@ class BaseModelsResource(Resource):
                 else:
                     filters[key] = value
 
-        return (many_join_filter, in_filter, filters)
+        return (many_join_filter, in_filter, name_filter, filters)
 
     def apply_filters(self, query):
         (
             many_join_filter,
             in_filter,
+            name_filter,
             criterions
         ) = self.build_filters(query)
 
         query = self.model.query.filter_by(**criterions)
+
+        for value in name_filter:
+            query = query.filter(self.model.name.ilike(value))
 
         for id_filter in in_filter:
             query = query.filter(id_filter)

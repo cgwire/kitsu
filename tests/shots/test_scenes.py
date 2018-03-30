@@ -21,7 +21,6 @@ class SceneTestCase(ApiDBTestCase):
 
     def test_get_project_scenes(self):
         scenes = self.get("data/projects/%s/scenes" % self.project.id)
-        print([scene["name"] for scene in scenes])
         self.assertEquals(len(scenes), 4)
         self.assertDictEqual(scenes[0], self.serialized_scene)
         self.get("data/projects/123/scenes", 404)
@@ -47,6 +46,10 @@ class SceneTestCase(ApiDBTestCase):
         self.assertEquals(scene["episode_name"], self.episode.name)
         self.assertEquals(scene["episode_id"], str(self.episode.id))
         self.assertEquals(scene["project_name"], self.project.name)
+
+    def test_get_scene_by_name(self):
+        scenes = self.get("data/scenes/all?name=%s" % self.scene.name)
+        self.assertEquals(scenes[0]["id"], str(self.scene.id))
 
     def test_create_scene(self):
         scene_name = "NSC01"

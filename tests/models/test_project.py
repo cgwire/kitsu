@@ -1,7 +1,5 @@
 from tests.base import ApiDBTestCase
 
-from zou.app.models.project import Project
-
 from zou.app.utils import fields
 
 
@@ -9,7 +7,10 @@ class ProjectTestCase(ApiDBTestCase):
 
     def setUp(self):
         super(ProjectTestCase, self).setUp()
-        self.generate_data(Project, 3)
+        self.generate_fixture_project_status()
+        self.generate_fixture_project()
+        self.generate_fixture_project("Agent 327")
+        self.generate_fixture_project("Big Buck Bunny")
 
     def test_get_projects(self):
         projects = self.get("data/projects")
@@ -23,7 +24,7 @@ class ProjectTestCase(ApiDBTestCase):
 
     def test_create_project(self):
         data = {
-            "name": "Cosmos Landromat",
+            "name": "Cosmos Landromat 2",
             "description": "Video game trailer."
         }
         self.project = self.post("data/projects", data)
@@ -35,7 +36,7 @@ class ProjectTestCase(ApiDBTestCase):
     def test_update_project(self):
         project = self.get_first("data/projects")
         data = {
-            "name": "Cosmos Landromat 2"
+            "name": "Cosmos Landromat 3"
         }
         self.put("data/projects/%s" % project["id"], data)
         project_again = self.get("data/projects/%s" % project["id"])
@@ -53,7 +54,7 @@ class ProjectTestCase(ApiDBTestCase):
 
     def test_project_status(self):
         data = {
-            "name": "open",
+            "name": "stalled",
             "color": "#FFFFFF"
         }
         self.open_status = self.post("data/project-status", data)
@@ -63,7 +64,7 @@ class ProjectTestCase(ApiDBTestCase):
         }
         self.close_status = self.post("data/project-status", data)
         data = {
-            "name": "Cosmos Landromat",
+            "name": "Cosmos Landromat 2",
             "description": "Video game trailer.",
             "project_status_id": self.open_status["id"]
         }
@@ -72,3 +73,9 @@ class ProjectTestCase(ApiDBTestCase):
         project_again = self.get("data/projects/%s" % self.project["id"])
         self.assertEquals(
             project_again['project_status_id'], self.open_status["id"])
+
+    def test_get_project_by_name(self):
+        project_before = self.get("data/projects")[1]
+        project = self.get_first(
+            "data/projects?name=%s" % project_before["name"].lower())
+        self.assertEquals(project["id"], project_before["id"])

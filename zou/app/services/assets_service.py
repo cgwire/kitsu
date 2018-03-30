@@ -1,6 +1,7 @@
 from sqlalchemy.exc import StatementError, IntegrityError
 
 from zou.app.utils import events, fields
+from zou.app.utils import query as query_utils
 
 from zou.app.models.entity import Entity
 from zou.app.models.entity_type import EntityType
@@ -57,8 +58,8 @@ def get_assets(criterions={}):
     Get all assets for given criterions.
     """
     query = Entity.query \
-        .filter_by(**criterions) \
         .filter(build_entity_asset_type_filter())
+    query = query_utils.apply_criterions_to_db_query(Entity, query, criterions)
     result = query.all()
     return EntityType.serialize_list(result, obj_type="Asset")
 
@@ -158,8 +159,8 @@ def get_asset_types(criterions={}):
     Retrieve all asset types available.
     """
     query = EntityType.query \
-        .filter_by(**criterions) \
         .filter(build_entity_type_asset_type_filter())
+    query = query_utils.apply_criterions_to_db_query(Entity, query, criterions)
     return EntityType.serialize_list(query.all(), obj_type="AssetType")
 
 
