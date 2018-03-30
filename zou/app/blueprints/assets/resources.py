@@ -40,7 +40,7 @@ class AllAssetsResource(Resource):
         """
         criterions = query.get_query_criterions_from_request(request)
         user_service.check_project_access(criterions)
-        return assets_service.all_assets(criterions)
+        return assets_service.get_assets(criterions)
 
 
 class AssetsAndTasksResource(Resource):
@@ -54,7 +54,7 @@ class AssetsAndTasksResource(Resource):
         criterions = query.get_query_criterions_from_request(request)
         page = query.get_page_from_request(request)
         user_service.check_project_access(criterions)
-        return assets_service.all_assets_and_tasks(criterions, page)
+        return assets_service.get_assets_and_tasks(criterions, page)
 
 
 class AssetTypeResource(Resource):

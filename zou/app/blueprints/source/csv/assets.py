@@ -18,7 +18,7 @@ class AssetsCsvImportResource(BaseCsvProjectImportResource):
 
         self.add_to_cache_if_absent(
             self.entity_types,
-            assets_service.get_or_create_type,
+            assets_service.get_or_create_asset_type,
             entity_type_name
         )
         entity_type_id = self.get_id_from_cache(

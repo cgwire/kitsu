@@ -1,5 +1,5 @@
 from zou.app.utils import events
-from sqlalchemy.exc import StatementError
+from zou.app.services import base_service
 
 from zou.app.models.entity import Entity
 from zou.app.models.entity_type import EntityType
@@ -12,23 +12,19 @@ from zou.app.services.exception import (
 )
 
 
-def get_model_raw(model, instance_id, exception):
+def get_entity_type(entity_type_id):
     """
-    Returns an active record matching *model* and *instance_id*. It raises
-    *exception* if model is not found.
+    Return an entity type matching given id, as a dict. Raises an exception
+    if nothing is found.
     """
-    try:
-        instance = model.get(instance_id)
-    except StatementError:
-        raise exception
-
-    if instance is None:
-        raise exception
-
-    return instance
+    return base_service.get_instance(
+        EntityType,
+        entity_type_id,
+        EntityTypeNotFoundException
+    ).serialize()
 
 
-def get_entity_type(name):
+def get_entity_type_by_name(name):
     """
     Return entity type maching *name*. If it doesn't exist, it creates it.
     """
@@ -38,24 +34,12 @@ def get_entity_type(name):
     return entity_type.serialize()
 
 
-def get_entity_type_by_id(entity_type_id):
-    """
-    Return an entity type matching given id, as a dict. Raises an exception
-    if nothing is found.
-    """
-    return get_model_raw(
-        EntityType,
-        entity_type_id,
-        EntityTypeNotFoundException
-    ).serialize()
-
-
 def get_entity_raw(entity_id):
     """
     Return an entity type matching given id, as an active record. Raises an
     exception if nothing is found.
     """
-    return get_model_raw(
+    return base_service.get_instance(
         Entity,
         entity_id,
         EntityNotFoundException
@@ -67,7 +51,7 @@ def get_entity(entity_id):
     Return an entity type matching given id, as a dict. Raises an exception if
     nothing is found.
     """
-    return get_model_raw(
+    return base_service.get_instance(
         Entity,
         entity_id,
         EntityNotFoundException
