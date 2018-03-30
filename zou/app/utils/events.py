@@ -60,5 +60,7 @@ def emit(event, data={}):
         "type": event,
         "data": {"data": data}})
     )
+    from zou.app.stores.queue_store import job_queue
     for func in event_handlers.values():
-        func.handle_event(data)
+        job_queue.enqueue(func.handle_event, data)
+
