@@ -1,41 +1,47 @@
 <template>
   <div class="page fixed-page">
-    <h1 class="title">
-       <div class="level">
-         <div class="level-left">
-           <div class="level-item" v-if="currentTask">
-             <span
-               class="tag is-medium"
-               :style="{
-                 'border-left': '4px solid ' + currentTask.task_type_color,
-                 'border-radius': '0',
-                 'font-weight': 'bold',
-                 color: '#666'
-               }">
-               {{ currentTask.task_type_name }}
-             </span>
-           </div>
-           <entity-thumbnail
-             class="entity-thumbnail"
-             :entity="currentTask.entity"
-             v-if="currentTask && currentTask.entity"
-           />
-           </entity-thumbnail>
-           <div class="level-item">
-             {{ currentTask ? title : 'Loading...'}}
-           </div>
+     <div class="back-button">
+       <router-link
+         :to="entityPage"
+       >
+         < {{ $t('main.back_to_list')}}
+       </router-link>
+     </div">
+     {{ entityPage }}
+     <div class="level page-header">
+       <div class="level-left">
+         <div class="level-item" v-if="currentTask">
+           <span
+             class="tag is-medium"
+             :style="{
+               'border-left': '4px solid ' + currentTask.task_type_color,
+               'border-radius': '0',
+               'font-weight': 'bold',
+               color: '#666'
+             }">
+             {{ currentTask.task_type_name }}
+           </span>
          </div>
-         <div class="level-right" v-if="isCurrentUserManager">
-           <button-link
-             class="level-item"
-             text=""
-             icon="delete"
-             :path="currentTask ? `/tasks/${currentTask.id}/delete` : ''"
-           >
-           </button-link>
+         <entity-thumbnail
+           class="entity-thumbnail"
+           :entity="currentTask.entity"
+           v-if="currentTask && currentTask.entity"
+         />
+         </entity-thumbnail>
+         <div class="level-item title">
+           {{ currentTask ? title : 'Loading...'}}
          </div>
        </div>
-    </h1>
+       <div class="level-right" v-if="isCurrentUserManager">
+         <button-link
+           class="level-item"
+           text=""
+           icon="delete"
+           :path="currentTask ? `/tasks/${currentTask.id}/delete` : ''"
+         >
+         </button-link>
+       </div>
+     </div>
 
     <div class="task-columns">
       <div class="task-column">
@@ -250,7 +256,7 @@
 
 <script>
 import { mapGetters, mapActions } from 'vuex'
-import { ImageIcon } from 'vue-feather-icons'
+import { ChevronLeftIcon, ImageIcon } from 'vue-feather-icons'
 
 import PeopleAvatar from './widgets/PeopleAvatar'
 import PeopleName from './widgets/PeopleName'
@@ -270,6 +276,7 @@ export default {
     AddPreviewModal,
     ButtonLink,
     Comment,
+    ChevronLeftIcon,
     DeleteModal,
     EntityThumbnail,
     ImageIcon,
@@ -381,6 +388,28 @@ export default {
       'currentProduction',
       'isCurrentUserManager'
     ]),
+
+    entityPage () {
+      if (this.currentTask) {
+        const type = this.currentTask.entity_type_name
+        console.log(type, this.currentTask.project_id)
+        if (type === 'Shot') {
+          return {
+            name: 'shots',
+            params: {production_id: this.currentTask.project_id}
+          }
+        } else {
+          return {
+            name: 'assets',
+            params: {production_id: this.currentTask.project_id}
+          }
+        }
+      } else {
+        return {
+          name: 'open-productions'
+        }
+      }
+    },
 
     currentPreviewId () {
       let previewId = this.route.params.preview_id
@@ -578,7 +607,6 @@ export default {
     confirmDeleteTask () {
       this.loading.deleteTask = true
       this.errors.deleteTask = false
-      const type = this.currentTask.entity_type_name
 
       this.$store.dispatch('deleteTask', {
         task: this.currentTask,
@@ -587,17 +615,7 @@ export default {
             this.loading.deleteTask = false
             this.errors.deleteTask = true
           } else {
-            if (type === 'Shot') {
-              this.$router.push({
-                name: 'shots',
-                params: {production_id: this.currentProduction.id}
-              })
-            } else {
-              this.$router.push({
-                name: 'assets',
-                params: {production_id: this.currentProduction.id}
-              })
-            }
+            this.$router.push(this.entityPage)
           }
         }
       })
@@ -619,9 +637,18 @@ export default {
 </script>
 
 <style scoped>
-.title {
+.back-button {
   margin-top: 1em;
+  font-size: 0.8em;
   margin-bottom: 0;
+}
+
+.page-header {
+  margin-top: 1em;
+}
+
+.back-button a {
+  color: #999;
 }
 
 .task-information {
@@ -706,7 +733,7 @@ video {
 }
 
 .avatar-wrapper {
-  margin-right: 0.5em;
+  margin-right: 0em;
 }
 
 .entity-thumbnail {

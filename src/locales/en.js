@@ -78,6 +78,7 @@ export default {
     production: 'Production',
     studio: 'Studio',
     admin: 'Admin',
+    back_to_list: 'back to list',
     csv: {
       import_file: 'Import',
       export_file: 'Export',

@@ -306,6 +306,7 @@ const mutations = {
           task_type_priority: taskType.priority,
 
           project_name: asset.project_name,
+          project_id: asset.production_id,
 
           entity_name: `${asset.asset_type_name} / ${asset.name}`,
           entity_type_name: asset.asset_type_name,
@@ -356,6 +357,7 @@ const mutations = {
           task_type_priority: taskType.priority,
 
           project_name: shot.project_name,
+          project_id: shot.production_id,
 
           entity_type_name: 'Shot',
           sequence_name: shot.sequence_name,
