@@ -81,18 +81,18 @@
         <div class="has-text-centered player">
           <div
             :class="{
+              'video-wrapper': true,
               'is-hidden': Object.keys(currentShots).length === 0
             }"
           >
-            <video-player
-              class="video-player-box"
+            <video
+              class="video-player"
               ref="videoPlayer"
-              :options="playerOptions"
-              :playsinline="true"
-              @playlistitem="onCurrentShotChange"
-              @ready="onPlayerReady"
+              src=""
+              @ended="playNext"
+              controls
             >
-            </video-player>
+            </video>
             <p v-if="Object.values(currentShots)[currentShot]">
             {{ Object.values(currentShots)[currentShot].entity_name }}
             </p>
@@ -201,11 +201,8 @@
 <script>
 import { mapGetters, mapActions } from 'vuex'
 
-import 'video.js/dist/video-js.css'
-
 import moment from 'moment'
 import { PlusIcon } from 'vue-feather-icons'
-import { videoPlayer } from 'vue-video-player'
 
 import ButtonLink from './widgets/ButtonLink'
 import Combobox from './widgets/Combobox'
@@ -232,8 +229,7 @@ export default {
     PageTitle,
     PlaylistedShot,
     PlusIcon,
-    Spinner,
-    videoPlayer
+    Spinner
   },
 
   data () {
@@ -261,6 +257,7 @@ export default {
       },
       playerOptions: {
         muted: true,
+        fluid: true,
         sources: []
       }
     }
@@ -295,7 +292,7 @@ export default {
     },
 
     player () {
-      return this.$refs.videoPlayer ? this.$refs.videoPlayer.player : null
+      return this.$refs.videoPlayer
     },
 
     currentPlaylistRoute () {
@@ -315,7 +312,21 @@ export default {
           }
         }
       }
+    },
+
+    currentMovieSrc () {
+      if (this.currentShots.length > 0) {
+        const currentIndex = this.currentShot
+        const currentShot = this.currentShots[currentIndex]
+        const previewId = currentShot.preview_file_id
+        console.log('ok')
+        return `/api/movies/originals/preview-files/${previewId}.mp4`
+      } else {
+        console.log('nok')
+        return 'toto'
+      }
     }
+
   },
 
   methods: {
@@ -473,7 +484,7 @@ export default {
     },
 
     addShot (shot) {
-      if (this.currentPlaylist.id) {
+      if (this.currentPlaylist.id && !this.currentShots[shot.id]) {
         this.loadShotPreviewFiles({
           playlist: this.currentPlaylist,
           shot,
@@ -497,10 +508,14 @@ export default {
       if (shot.preview_file_id) {
         this.removeShotPreviewFromPlaylist({
           playlist: this.currentPlaylist,
-          shot
+          shot,
+          callback: () => {
+            this.currentShots = {}
+            setTimeout(() => {
+              this.rebuildCurrentShots()
+            }, 100)
+          }
         })
-        this.rebuildCurrentShots()
-        this.configurePlayer()
       }
     },
 
@@ -528,30 +543,31 @@ export default {
       })
     },
 
-    configurePlayer () {
-      if (this.player) {
-        const movies = []
-        Object.values(
-          this.currentShots
-        ).forEach((shot) => {
-          const previewId = shot.preview_file_id
-          const posterPath = `/api/pictures/previews/preview-files/${previewId}.png`
-          const moviePath = `/api/movies/originals/preview-files/${previewId}.mp4`
-          movies.push({
-            sources: [{
-              type: 'video/mp4',
-              src: moviePath
-            }],
-            poster: posterPath
-          })
-        })
-
-        setTimeout(() => {
-          this.player.playlist(movies)
-          this.player.playlist.autoadvance(0)
-          this.player.playlist.repeat(true)
-        }, 100)
+    getMoviePath () {
+      const currentIndex = this.currentShot
+      if (this.currentShots && Object.keys(this.currentShots).length > 0) {
+        const currentShotId = Object.keys(this.currentShots)[currentIndex]
+        const currentShot = this.currentShots[currentShotId]
+        const previewId = currentShot.preview_file_id
+        return `/api/movies/originals/preview-files/${previewId}.mp4`
+      } else {
+        return ''
       }
+    },
+
+    playNext () {
+      let currentIndex = this.currentShot + 1
+      if (currentIndex >= Object.keys(this.currentShots).length) {
+        currentIndex = 0
+      }
+      this.currentShot = currentIndex
+      this.player.src = this.getMoviePath()
+      this.player.play()
+    },
+
+    configurePlayer () {
+      const moviePath = this.getMoviePath()
+      this.player.src = moviePath
     },
 
     onPlayerReady (player) {
@@ -564,21 +580,20 @@ export default {
 
     playShot (shotIndex) {
       if (this.player) {
-        this.player.playlist.currentItem(shotIndex)
+        this.currentShot = shotIndex
+        this.player.src = this.getMoviePath()
+        this.player.play()
       }
     },
 
-    onCurrentShotChange () {
-      this.currentShot = this.player.playlist.currentItem()
-    },
-
-    loadShotsData () {
+    loadShotsData (callback) {
       this.loadShots(() => {
         if (this.episodes.length > 0) {
           this.episodeId = this.episodes[0].id // Cascade update
         }
 
         this.loadPlaylistsData()
+        if (callback) callback()
       })
     },
 
@@ -627,7 +642,9 @@ export default {
           name: 'playlists',
           params: {production_id: this.currentProduction.id}
         })
-        this.resetPlaylist()
+        this.loadShotsData(() => {
+          this.resetPlaylist()
+        })
       }
     },
 
@@ -660,6 +677,7 @@ export default {
 
 .columns {
   margin-bottom: 0;
+  flex: 1;
 }
 
 .title {
@@ -674,11 +692,6 @@ export default {
   padding: 2em 1em 1em 2em;
   border-right: 1px solid #DDD;
   box-shadow: 0px 0px 6px #F0F0F0;
-}
-
-.playlist-column {
-  flex: 1;
-  overflow-y: auto;
 }
 
 .playlist-item {
@@ -728,6 +741,11 @@ span.thumbnail-picture {
   display: flex;
   flex-direction: column;
   overflow: hidden;
+  flex: 1;
+}
+
+.playlist-list-column .button {
+  width: 100%;
 }
 
 .playlist-header {
@@ -738,6 +756,16 @@ span.thumbnail-picture {
   min-height: 50px;
 }
 
+.video-wrapper {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+}
+
+.video-wrapper video {
+  max-height: calc(100vh - 450px);
+}
+
 .playlist-name {
   flex: 1;
   font-size: 1.5em;
@@ -745,7 +773,7 @@ span.thumbnail-picture {
 
 .player {
   flex: 1;
-  overflow-y: auto;
+  overflow-y: hidden;
 }
 
 .playlisted-shots {
