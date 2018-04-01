@@ -53,6 +53,7 @@ export const sortPlaylists = (playlists) => {
   return playlists.sort(
     firstBy('created_at', -1)
       .thenBy((a, b) => a.project_name.localeCompare(b.project_name))
+      .thenBy('name')
   )
 }
 

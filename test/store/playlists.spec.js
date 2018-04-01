@@ -61,15 +61,21 @@ describe('playlists', () => {
     playlists = [
       {
         id: 1,
-        name: 'Daily'
+        name: 'Daily',
+        project_name: 'Big Buck Bunny',
+        created_at: '20180401'
       },
       {
         id: 2,
-        name: 'Weekly'
+        name: 'Weekly',
+        project_name: 'Big Buck Bunny',
+        created_at: '20180401'
       },
       {
         id: 3,
-        name: 'Sequence 01'
+        name: 'Sequence 01',
+        project_name: 'Big Buck Bunny',
+        created_at: '20180401'
       }
     ]
   })
