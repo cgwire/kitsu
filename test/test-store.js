@@ -10,6 +10,7 @@ import './store/taskstatus.spec.js'
 import './store/assettypes.spec.js'
 import './store/customactions.spec.js'
 import './store/breakdown.spec.js'
+import './store/playlists.spec.js'
 
 import './store/lib/sorting.spec.js'
 import './store/lib/string.spec.js'

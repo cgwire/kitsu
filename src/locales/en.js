@@ -304,6 +304,26 @@ export default {
     save_error: 'An error occured while saving breakdown.'
   },
 
+  playlists: {
+    title: 'Playlists',
+    new_playlist: 'Add a playlist',
+    edit_title: 'Edit playlist',
+    loading_error: 'A server error occured. Playlists cannot be loaded.',
+    no_playlist: 'There is currently no playlist for this project.',
+    no_selection: 'Please select a playlist on the left.',
+    delete_text: 'Are you sure you want to remove {name} from your database?',
+    delete_error: 'An error occured while deleting this playlist.',
+    add_shots: 'Select shots',
+    select_shot: 'Please select a shot in the right column',
+    select_playlist: 'Please select a playlist in the left column',
+    remove: 'remove',
+    no_shot_for_production: 'There is no shot for this production',
+    no_sequence_for_episode: 'There is no sequence for this episode',
+    fields: {
+      name: 'Name'
+    }
+  },
+
   server_down: {
     title: 'Kitsu encountered an error while reaching its data API.',
     text: 'Please contact your vendor support, your system administrator or your IT department to understand what is going wrong.'

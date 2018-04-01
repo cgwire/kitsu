@@ -44,6 +44,12 @@
            </router-link>
          </p>
 
+         <p @click="toggleSidebar()">
+           <router-link :to="playlistsPath">
+             {{ $t("playlists.title") }}
+           </router-link>
+         </p>
+
          <div v-if="isCurrentUserManager">
            <h2>{{ $t('main.studio')}}</h2>
 
@@ -110,6 +116,7 @@ export default {
       'breakdownPath',
       'assetsPath',
       'shotsPath',
+      'playlistsPath',
       'isCurrentUserManager',
       'isCurrentUserAdmin'
     ])
