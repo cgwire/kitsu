@@ -7,6 +7,7 @@ from zou.app.services import (
     shots_service,
     tasks_service,
     projects_service,
+    playlists_service,
     user_service
 )
 
@@ -136,7 +137,7 @@ class ShotPreviewsResource(Resource):
         """
         shot = shots_service.get_shot(shot_id)
         user_service.check_project_access(shot["project_id"])
-        return shots_service.get_preview_files_for_shot(shot_id)
+        return playlists_service.get_preview_files_for_shot(shot_id)
 
 
 class SequenceTasksResource(Resource):

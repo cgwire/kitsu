@@ -1,15 +1,14 @@
 from sqlalchemy.orm import aliased
 from sqlalchemy.exc import IntegrityError, StatementError
 
-from zou.app.utils import events, fields, cache
+from zou.app.utils import events, fields, cache, query as query_utils
 
 from zou.app.models.entity import Entity
 from zou.app.models.project import Project
 from zou.app.models.task import Task
-from zou.app.models.preview_file import PreviewFile
 from zou.app.models.task import association_table as assignees_table
 
-from zou.app.services import projects_service, entities_service, tasks_service
+from zou.app.services import projects_service, entities_service
 from zou.app.services.exception import (
     EpisodeNotFoundException,
     SequenceNotFoundException,
@@ -36,53 +35,56 @@ def get_episode_from_sequence(sequence):
 
 @cache.memoize_function(120)
 def get_episode_type():
-    return entities_service.get_entity_type("Episode")
+    return entities_service.get_entity_type_by_name("Episode")
 
 
 @cache.memoize_function(120)
 def get_sequence_type():
-    return entities_service.get_entity_type("Sequence")
+    return entities_service.get_entity_type_by_name("Sequence")
 
 
 @cache.memoize_function(120)
 def get_shot_type():
-    return entities_service.get_entity_type("Shot")
+    return entities_service.get_entity_type_by_name("Shot")
 
 
 @cache.memoize_function(120)
 def get_scene_type():
-    return entities_service.get_entity_type("Scene")
+    return entities_service.get_entity_type_by_name("Scene")
 
 
 @cache.memoize_function(120)
 def get_camera_type():
-    return entities_service.get_entity_type("Camera")
+    return entities_service.get_entity_type_by_name("Camera")
 
 
 def get_episodes(criterions={}):
     episode_type = get_episode_type()
     criterions["entity_type_id"] = episode_type["id"]
-    result = Entity.query.filter_by(**criterions).order_by("name").all()
-    return Entity.serialize_list(result, obj_type="Episode")
+    query = Entity.query.order_by(Entity.name)
+    query = query_utils.apply_criterions_to_db_query(Entity, query, criterions)
+    return Entity.serialize_list(query.all(), obj_type="Episode")
 
 
 def get_sequences(criterions={}):
     sequence_type = get_sequence_type()
     criterions["entity_type_id"] = sequence_type["id"]
-    result = Entity.query.filter_by(**criterions).order_by(Entity.name).all()
-    return Entity.serialize_list(result, obj_type="Sequence")
+    query = Entity.query.order_by(Entity.name)
+    query = query_utils.apply_criterions_to_db_query(Entity, query, criterions)
+    return Entity.serialize_list(query.all(), obj_type="Sequence")
 
 
 def get_shots(criterions={}):
     shot_type = get_shot_type()
     criterions["entity_type_id"] = shot_type["id"]
     Sequence = aliased(Entity, name='sequence')
-    query = Entity.query.filter_by(**criterions)
-    query = query.join(Project)
-    query = query.join(Sequence, Sequence.id == Entity.parent_id)
-    query = query.add_columns(Project.name)
-    query = query.add_columns(Sequence.name)
-    query = query.order_by(Entity.name)
+    query = Entity.query
+    query = query_utils.apply_criterions_to_db_query(Entity, query, criterions)
+    query = query.join(Project) \
+        .join(Sequence, Sequence.id == Entity.parent_id) \
+        .add_columns(Project.name) \
+        .add_columns(Sequence.name) \
+        .order_by(Entity.name)
     data = query.all()
 
     shots = []
@@ -99,11 +101,13 @@ def get_scenes(criterions={}):
     scene_type = get_scene_type()
     criterions["entity_type_id"] = scene_type["id"]
     Sequence = aliased(Entity, name='sequence')
-    query = Entity.query.filter_by(**criterions)
-    query = query.join(Project)
-    query = query.join(Sequence, Sequence.id == Entity.parent_id)
-    query = query.add_columns(Project.name)
-    query = query.add_columns(Sequence.name)
+
+    query = Entity.query
+    query = query_utils.apply_criterions_to_db_query(Entity, query, criterions)
+    query = query.join(Project) \
+        .join(Sequence, Sequence.id == Entity.parent_id) \
+        .add_columns(Project.name) \
+        .add_columns(Sequence.name)
     data = query.all()
 
     scenes = []
@@ -617,26 +621,3 @@ def create_scene(project_id, sequence_id, name):
 def get_entities_out(shot_id):
     shot = get_shot_raw(shot_id)
     return Entity.serialize_list(shot.entities_out, obj_type="Asset")
-
-
-def get_preview_files_for_shot(shot_id):
-    tasks = tasks_service.get_tasks_for_shot(shot_id)
-    previews = {}
-
-    for task in tasks:
-        preview_files = PreviewFile.query \
-            .filter_by(task_id=task["id"]) \
-            .order_by(PreviewFile.revision.desc()) \
-            .all()
-        task_type_id = task["task_type_id"]
-
-        if len(preview_files) > 0:
-            previews[task_type_id] = [
-                {
-                    "id": str(preview_file.id),
-                    "revision": preview_file.revision
-                }
-                for preview_file in preview_files
-            ]  # Do not add too much field to avoid building too big responses
-
-    return previews

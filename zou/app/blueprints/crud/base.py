@@ -9,6 +9,7 @@ from flask_jwt_extended import jwt_required
 from sqlalchemy.exc import IntegrityError, StatementError
 
 from zou.app.utils import permissions
+from zou.app.services.exception import ArgumentsException
 
 
 class BaseModelsResource(Resource):
@@ -48,6 +49,7 @@ class BaseModelsResource(Resource):
     def build_filters(self, options):
         many_join_filter = []
         in_filter = []
+        name_filter = []
         filters = {}
 
         for key, value in options.items():
@@ -60,7 +62,10 @@ class BaseModelsResource(Resource):
                 )
                 value_is_list = len(value) > 0 and value[0] == '['
 
-                if is_many_to_many_field:
+                if key == "name" and field_key is not None:
+                    name_filter.append(value)
+
+                elif is_many_to_many_field:
                     many_join_filter.append((key, value))
 
                 elif value_is_list:
@@ -70,16 +75,20 @@ class BaseModelsResource(Resource):
                 else:
                     filters[key] = value
 
-        return (many_join_filter, in_filter, filters)
+        return (many_join_filter, in_filter, name_filter, filters)
 
     def apply_filters(self, query):
         (
             many_join_filter,
             in_filter,
+            name_filter,
             criterions
         ) = self.build_filters(query)
 
         query = self.model.query.filter_by(**criterions)
+
+        for value in name_filter:
+            query = query.filter(self.model.name.ilike(value))
 
         for id_filter in in_filter:
             query = query.filter(id_filter)
@@ -91,6 +100,9 @@ class BaseModelsResource(Resource):
 
     def check_read_permissions(self):
         return permissions.check_manager_permissions()
+
+    def add_project_permission_filter(self, query):
+        return query
 
     def check_create_permissions(self, data):
         return permissions.check_manager_permissions()
@@ -107,6 +119,7 @@ class BaseModelsResource(Resource):
         try:
             self.check_read_permissions()
             query = self.model.query
+            query = self.add_project_permission_filter(query)
             if not request.args:
                 return self.all_entries(query)
             else:
@@ -150,6 +163,10 @@ class BaseModelsResource(Resource):
             current_app.logger.error(str(exception))
             return {"message": str(exception)}, 400
 
+        except ArgumentsException as exception:
+            current_app.logger.error(str(exception))
+            return {"message": str(exception)}, 400
+
 
 class BaseModelResource(Resource):
 
@@ -175,6 +192,9 @@ class BaseModelResource(Resource):
     def get_arguments(self):
         return request.json
 
+    def update_data(self, data):
+        return data
+
     @jwt_required
     def get(self, instance_id):
         """
@@ -199,6 +219,7 @@ class BaseModelResource(Resource):
             data = self.get_arguments()
             instance = self.get_model_or_404(instance_id)
             self.check_update_permissions(instance.serialize(), data)
+            data = self.update_data(data)
             instance.update(data)
             return instance.serialize(), 200
 
@@ -215,6 +236,10 @@ class BaseModelResource(Resource):
             return {"message": str(exception)}, 400
 
         except StatementError as exception:
+            current_app.logger.error(str(exception))
+            return {"message": str(exception)}, 400
+
+        except ArgumentsException as exception:
             current_app.logger.error(str(exception))
             return {"message": str(exception)}, 400
 

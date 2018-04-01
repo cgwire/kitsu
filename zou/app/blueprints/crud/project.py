@@ -21,3 +21,4 @@ class ProjectResource(BaseModelResource):
     def update_data(self, data):
         open_status = projects_service.get_or_create_open_status()
         data["open_status_id"] = open_status["id"]
+        return data

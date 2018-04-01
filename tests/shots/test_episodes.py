@@ -34,6 +34,10 @@ class EpisodeTestCase(ApiDBTestCase):
         self.assertEquals(episode["name"], self.episode.name)
         self.assertEquals(episode["project_name"], self.project.name)
 
+    def test_get_episode_by_name(self):
+        episodes = self.get("data/episodes?name=%s" % self.episode.name.lower())
+        self.assertEquals(episodes[0]["id"], str(self.episode.id))
+
     def test_create_episode(self):
         episode_name = "NE01"
         data = {"name": episode_name}

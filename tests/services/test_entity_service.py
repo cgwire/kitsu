@@ -49,7 +49,24 @@ class EntityServiceTestCase(ApiDBTestCase):
         self.generate_fixture_output_file()
         self.generate_fixture_preview_file()
 
-    def test_set_main_preview(self):
+    def test_get_entity_type(self):
+        entity_type = entities_service.get_entity_type(self.asset_type.id)
+        self.assertEquals(entity_type, self.asset_type.serialize())
+
+    def test_get_entity_type_by_name(self):
+        entity_type = \
+            entities_service.get_entity_type_by_name(self.asset_type.name)
+        self.assertEquals(entity_type, self.asset_type.serialize())
+
+    def test_get_entity_raw(self):
+        entity = entities_service.get_entity_raw(self.asset.id)
+        self.assertEquals(entity.id, self.asset.id)
+
+    def test_get_entity(self):
+        entity = entities_service.get_entity(self.asset.id)
+        self.assertEquals(entity, self.asset.serialize())
+
+    def test_update_entity_preview(self):
         entities_service.update_entity_preview(
             str(self.asset.id),
             str(self.preview_file.id)

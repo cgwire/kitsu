@@ -589,7 +589,7 @@ def get_folder_from_temporal_entity(entity):
 
 def get_folder_from_temporal_entity_type(entity):
     if entity is not None:
-        entity_type = entities_service.get_entity_type_by_id(
+        entity_type = entities_service.get_entity_type(
             entity["entity_type_id"]
         )
         folder = entity_type["name"].lower()

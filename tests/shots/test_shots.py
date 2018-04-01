@@ -53,6 +53,10 @@ class ShotTestCase(ApiDBTestCase):
         self.assertEquals(shot["project_name"], self.project.name)
         self.assertEquals(len(shot["tasks"]), 1)
 
+    def test_get_shot_by_name(self):
+        shots = self.get("data/shots/all?name=%s" % self.shot.name.lower())
+        self.assertEquals(shots[0]["id"], str(self.shot.id))
+
     def test_remove_shot_with_tasks(self):
         self.generate_fixture_person()
         self.generate_fixture_assigner()

@@ -1,8 +1,9 @@
 from zou.app.models.playlist import Playlist
+from zou.app.models.preview_file import PreviewFile
 
 from zou.app.utils import fields
 
-from zou.app.services import shots_service
+from zou.app.services import shots_service, tasks_service
 
 from zou.app.services.exception import PlaylistNotFoundException
 
@@ -27,3 +28,26 @@ def get_playlist_with_preview_file_revisions(playlist_id):
             shot["shot_id"]
         )
     return playlist_dict
+
+
+def get_preview_files_for_shot(shot_id):
+    tasks = tasks_service.get_tasks_for_shot(shot_id)
+    previews = {}
+
+    for task in tasks:
+        preview_files = PreviewFile.query \
+            .filter_by(task_id=task["id"]) \
+            .order_by(PreviewFile.revision.desc()) \
+            .all()
+        task_type_id = task["task_type_id"]
+
+        if len(preview_files) > 0:
+            previews[task_type_id] = [
+                {
+                    "id": str(preview_file.id),
+                    "revision": preview_file.revision
+                }
+                for preview_file in preview_files
+            ]  # Do not add too much field to avoid building too big responses
+
+    return previews

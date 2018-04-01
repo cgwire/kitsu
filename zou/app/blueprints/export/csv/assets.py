@@ -64,7 +64,7 @@ class AssetsCsvExport(Resource):
         return row
 
     def get_assets_data(self, project_id):
-        results = assets_service.all_assets_and_tasks({
+        results = assets_service.get_assets_and_tasks({
             "project_id": project_id
         })
         return sorted(

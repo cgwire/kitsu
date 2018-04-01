@@ -235,9 +235,9 @@ class ApiDBTestCase(ApiTestCase):
     def generate_fixture_project_closed_status(self):
         self.closed_status = ProjectStatus.create(name="closed", color="#FFFFFF")
 
-    def generate_fixture_project(self):
+    def generate_fixture_project(self, name="Cosmos Landromat"):
         self.project = Project.create(
-            name="Cosmos Landromat",
+            name=name,
             project_status_id=self.open_status.id
         )
         self.project.update({

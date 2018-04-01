@@ -162,7 +162,7 @@ def upgrade():
     sa.Column('created_at', sa.DateTime(), nullable=True),
     sa.Column('updated_at', sa.DateTime(), nullable=True),
     sa.Column('id', sqlalchemy_utils.types.uuid.UUIDType(binary=False), nullable=False),
-    sa.Column('name', sa.String(length=16), nullable=False),
+    sa.Column('name', sa.String(length=160), nullable=False),
     sa.Column('description', sa.String(length=600), nullable=True),
     sa.Column('shotgun_id', sa.Integer(), nullable=True),
     sa.Column('canceled', sa.Boolean(), nullable=True),

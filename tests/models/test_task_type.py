@@ -25,12 +25,13 @@ class TaskTypeTestCase(ApiDBTestCase):
 
     def test_create_task_type(self):
         data = {
-            "name": "open",
+            "name": "animation",
             "color": "#000000",
             "department_id": self.department_id
         }
         self.task_type = self.post("data/task-types", data)
         self.assertIsNotNone(self.task_type["id"])
+        self.task_type = self.post("data/task-types", data, 400)
 
         task_types = self.get("data/task-types")
         self.assertEquals(len(task_types), 4)
