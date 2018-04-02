@@ -24,7 +24,7 @@ def get_playlist_with_preview_file_revisions(playlist_id):
         playlist_dict["shots"] = []
 
     for shot in playlist_dict["shots"]:
-        shot["preview_files"] = shots_service.get_preview_files_for_shot(
+        shot["preview_files"] = get_preview_files_for_shot(
             shot["shot_id"]
         )
     return playlist_dict
