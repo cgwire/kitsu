@@ -420,8 +420,11 @@ class TaskFullResource(Resource):
         result = task
         task_type = tasks_service.get_task_type(task["task_type_id"])
         result["task_type"] = task_type
-        assigner = persons_service.get_person(task["assigner_id"])
-        result["assigner"] = assigner
+        try:
+            assigner = persons_service.get_person(task["assigner_id"])
+            result["assigner"] = assigner
+        except PersonNotFoundException:
+            pass
         project = projects_service.get_project(task["project_id"])
         result["project"] = project
         task_status = tasks_service.get_task_status(task["task_status_id"])
