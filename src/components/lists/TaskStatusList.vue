@@ -101,7 +101,7 @@ export default {
       this.$refs.headerWrapper.style.left = `-${position.scrollLeft}px`
     },
     translateBoolean (booleanValue) {
-      return booleanValue ? this.$t('yes') : this.$t('no')
+      return booleanValue ? this.$t('main.yes') : this.$t('main.no')
     }
   }
 }

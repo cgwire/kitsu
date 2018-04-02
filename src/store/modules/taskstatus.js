@@ -106,7 +106,6 @@ const mutations = {
 
     if (taskStatus && taskStatus.id) {
       Object.assign(taskStatus, newTaskStatus)
-      taskStatus.is_reviewable = Boolean(newTaskStatus.is_reviewable)
     } else {
       state.taskStatus.push(newTaskStatus)
       state.taskStatus = sortByName(state.taskStatus)

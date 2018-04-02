@@ -5,7 +5,7 @@
       <thead>
         <tr>
           <th class="thumbnail"></th>
-          <th class="episode" v-if="entries && entries.length > 0 && entries[0].episode_name.length > 0">
+          <th class="episode" v-if="!isSingleEpisode">
             {{ $t('shots.fields.episode') }}
           </th>
           <th class="sequence">{{ $t('shots.fields.sequence') }}</th>
@@ -78,7 +78,7 @@
           <td class="thumbnail">
             <entity-thumbnail :entity="entry"></entity-thumbnail>
           </td>
-          <td :class="{name: !entry.canceled}" v-if="entries[0].episode_name.length > 0">
+          <td :class="{name: !entry.canceled}" v-if="!isSingleEpisode">
             {{ entry.episode_name }}
           </td>
           <td :class="{name: !entry.canceled}">
@@ -197,6 +197,7 @@ export default {
     ...mapGetters([
       'currentProduction',
       'isCurrentUserManager',
+      'isSingleEpisode',
       'displayedShotsLength',
       'nbSelectedTasks',
       'shotSearchText',

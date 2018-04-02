@@ -11,6 +11,7 @@
             :label="$t('shots.fields.episode')"
             :options="getEpisodeOptions"
             v-model="episodeId"
+            v-if="!isSingleEpisode"
           ></combobox>
           <combobox
             :label="$t('shots.fields.sequence')"
@@ -172,6 +173,7 @@ export default {
       'assetsByType',
       'currentProduction',
       'displayedShots',
+      'isSingleEpisode',
 
       'getEpisodeOptions',
       'castingSequenceOptions',

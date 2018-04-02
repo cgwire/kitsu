@@ -200,15 +200,23 @@ const getters = {
 
   getEpisodeOptions: state => state.episodes.map(
     (episode) => { return { label: episode.name, value: episode.id } }
-  )
+  ),
+
+  isSingleEpisode: state => Object.keys(state.episodeMap).length < 2
 }
 
 const actions = {
 
-  loadShots ({ commit, state, rootState }, callback) {
-    const currentProduction = productionsStore.getters.currentProduction(
-      rootState.productions
-    )
+  loadEpisodes ({ commit, state, rootGetters }, callback) {
+    const currentProduction = rootGetters.currentProduction
+    shotsApi.getEpisodes(currentProduction, (err, episodes) => {
+      if (err) console.log(err)
+      commit(LOAD_EPISODES_END, episodes)
+    })
+  },
+
+  loadShots ({ commit, state, rootGetters }, callback) {
+    const currentProduction = rootGetters.currentProduction
     commit(LOAD_SHOTS_START)
     shotsApi.getEpisodes(currentProduction, (err, episodes) => {
       commit(LOAD_EPISODES_END, episodes)

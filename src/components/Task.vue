@@ -7,7 +7,6 @@
          < {{ $t('main.back_to_list')}}
        </router-link>
      </div">
-     {{ entityPage }}
      <div class="level page-header">
        <div class="level-left">
          <div class="level-item" v-if="currentTask">
@@ -326,7 +325,7 @@ export default {
         isLoading: true,
         isError: false
       }
-      this.$store.dispatch('loadTask', {
+      this.loadTask({
         taskId: this.route.params.task_id,
         callback: (err) => {
           if (err) {
@@ -340,8 +339,10 @@ export default {
               isError: false
             }
             task = this.getCurrentTask()
+            this.setProduction(task.project_id)
+            this.loadEpisodes()
             this.currentTask = task
-            this.$store.dispatch('loadTaskComments', {
+            this.loadTaskComments({
               taskId: this.route.params.task_id,
               callback: (err) => {
                 if (err) {
@@ -357,7 +358,7 @@ export default {
       })
     } else {
       this.currentTask = task
-      this.$store.dispatch('loadTaskComments', {
+      this.loadTaskComments({
         taskId: this.route.params.task_id,
         callback: (err) => {
           if (err) {
@@ -378,6 +379,7 @@ export default {
       'commentTexts',
       'route',
       'user',
+      'isSingleEpisode',
       'taskStatusOptions',
       'getTask',
       'getTaskComments',
@@ -392,7 +394,6 @@ export default {
     entityPage () {
       if (this.currentTask) {
         const type = this.currentTask.entity_type_name
-        console.log(type, this.currentTask.project_id)
         if (type === 'Shot') {
           return {
             name: 'shots',
@@ -423,7 +424,14 @@ export default {
     title () {
       if (this.currentTask) {
         const projectName = this.currentTask.project_name
-        const entityName = this.currentTask.entity_name
+        const type = this.currentTask.entity_type_name
+        let entityName = this.currentTask.entity_name
+        if (this.isSingleEpisode && type === 'Shot') {
+          entityName = entityName
+            .split('/')
+            .splice(1)
+            .join('/')
+        }
         return `${projectName} / ${entityName}`
       } else {
         return 'Loading...'
@@ -476,6 +484,10 @@ export default {
 
   methods: {
     ...mapActions([
+      'loadEpisodes',
+      'loadTask',
+      'loadTaskComments',
+      'setProduction'
     ]),
     changeTab (tab) {
       this.selectedTab = tab
