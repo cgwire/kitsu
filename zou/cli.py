@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+import os
 import sys
 import flask_migrate
 
@@ -48,9 +49,14 @@ def reset_db():
 @cli.command()
 def upgrade_db():
     "Upgrade database schema."
+
     from zou.app import app
     with app.app_context():
-        flask_migrate.upgrade()
+        import zou
+        directory = os.path.join(
+            os.path.dirname(zou.__file__), "..", "migrations"
+        )
+        flask_migrate.upgrade(directory=directory)
 
 
 @cli.command()
