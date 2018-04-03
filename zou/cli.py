@@ -54,7 +54,7 @@ def upgrade_db():
     with app.app_context():
         import zou
         directory = os.path.join(
-            os.path.dirname(zou.__file__), "..", "migrations"
+            os.path.dirname(zou.__file__), "migrations"
         )
         flask_migrate.upgrade(directory=directory)
 
