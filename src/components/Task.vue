@@ -1,45 +1,28 @@
 <template>
   <div class="page fixed-page">
      <div class="back-button">
-       <router-link
-         :to="entityPage"
-       >
-         < {{ $t('main.back_to_list')}}
+       <router-link :to="entityPage">
+         &larr; {{ $t('main.back_to_list')}}
        </router-link>
-     </div">
-     <div class="level page-header">
-       <div class="level-left">
-         <div class="level-item" v-if="currentTask">
-           <span
-             class="tag is-medium"
-             :style="{
-               'border-left': '4px solid ' + currentTask.task_type_color,
-               'border-radius': '0',
-               'font-weight': 'bold',
-               color: '#666'
-             }">
-             {{ currentTask.task_type_name }}
-           </span>
-         </div>
-         <entity-thumbnail
-           class="entity-thumbnail"
-           :entity="currentTask.entity"
-           v-if="currentTask && currentTask.entity"
-         />
-         </entity-thumbnail>
-         <div class="level-item title">
-           {{ currentTask ? title : 'Loading...'}}
-         </div>
+     </div>
+
+     <div class="flexrow page-header" v-if="currentTask">
+       <span
+         class="tag is-medium flexrow-item"
+         :style="taskTypeBorder"
+       >
+         {{ currentTask.task_type_name }}
+       </span>
+       <div class="title flexrow-item">
+         {{ currentTask ? title : 'Loading...'}}
        </div>
-       <div class="level-right" v-if="isCurrentUserManager">
-         <button-link
-           class="level-item"
-           text=""
-           icon="delete"
-           :path="currentTask ? `/tasks/${currentTask.id}/delete` : ''"
-         >
-         </button-link>
-       </div>
+       <button-link
+         class="flexrow-item"
+         text=""
+         icon="delete"
+         :path="deleteTaskPath"
+       >
+       </button-link>
      </div>
 
     <div class="task-columns">
@@ -99,45 +82,6 @@
               </em>
             </div>
           </div>
-
-          <table
-            :class="{
-              table: true,
-              hidden: selectedTab !== 'metadatas'
-            }"
-          >
-            <tr>
-              <td><strong>Project</strong></td>
-              <td>{{ currentTask.project_name }}</td>
-            </tr>
-            <tr>
-              <td><strong>Due date</strong></td>
-              <td>{{ currentTask.due_date ? currentTask.due_date.substring(0, 10) : '' }}</td>
-            </tr>
-            <tr>
-              <td><strong>Start date</strong></td>
-              <td>{{ currentTask.start_date ? currentTask.start_date.substring(0, 10) : '' }}</td>
-            </tr>
-
-            <tr>
-              <td><strong>Real start date</strong></td>
-              <td>{{ currentTask.real_start_date ? currentTask.real_start_date.substring(0, 10) : '' }}</td>
-            </tr>
-
-            <tr>
-              <td><strong>End date</strong></td>
-              <td>{{ currentTask.end_date ? currentTask.end_date.substring(0, 10) : '' }}</td>
-            </tr>
-            <tr>
-              <td><strong>Duration</strong></td>
-              <td>{{ currentTask.duration ? (currentTask.duration - 3600) / 3600 : '' }} hours</td>
-            </tr>
-            <tr>
-              <td><strong>Estimation</strong></td>
-              <td>{{ currentTask.duration ? currentTask.duration / 3600 : '' }} hours</td>
-            </tr>
-          </table>
-
         </div>
 
         <div class="has-text-centered" v-else>
@@ -151,7 +95,7 @@
         </h2>
         <div
           class="preview-list"
-          v-if="currentTaskPreviews && currentTaskPreviews.length > 0"
+          v-if="isPreviews"
         >
           <preview-row
             :key="preview.id"
@@ -216,10 +160,10 @@
 
     <add-preview-modal
       ref="add-preview-modal"
-      :active="display.addPreview"
+      :active="modals.addPreview"
       :is-loading="loading.addPreview"
       :is-error="errors.addPreview"
-      :cancel-route="currentTask ? '/tasks/' + currentTask.id : ''"
+      :cancel-route="taskPath"
       :form-data="addPreviewFormData"
       @fileselected="selectFile"
       @confirm="createPreview"
@@ -350,7 +294,7 @@ export default {
   },
 
   created () {
-    this.$store.commit('CLEAR_SELECTED_TASKS')
+    this.clearSelectedTasks()
     let task = this.getCurrentTask()
     if (!task) {
       this.taskLoading = {
@@ -381,7 +325,6 @@ export default {
                 } else {
                   this.currentTaskComments = this.getCurrentTaskComments()
                   this.currentTaskPreviews = this.getCurrentTaskPreviews()
-                  this.currentComment = this.getCurrentComment()
                 }
               }
             })
@@ -397,7 +340,6 @@ export default {
           } else {
             this.currentTaskComments = this.getCurrentTaskComments()
             this.currentTaskPreviews = this.getCurrentTaskPreviews()
-            this.currentComment = this.getCurrentComment()
           }
         }
       })
@@ -579,12 +521,15 @@ export default {
       'loadTaskComments',
       'setProduction'
     ]),
-    changeTab (tab) {
-      this.selectedTab = tab
+
+    isHighlighted (comment) {
+      return comment.preview && comment.preview.id === this.currentPreviewId
     },
+
     getCurrentTask () {
       return this.getTask(this.route.params.task_id)
     },
+
     getCurrentComment () {
       if (this.route.params.comment_id) {
         return this.getTaskComment(
@@ -593,12 +538,15 @@ export default {
         )
       }
     },
+
     getCurrentTaskComments () {
       return this.getTaskComments(this.route.params.task_id)
     },
+
     getCurrentTaskPreviews () {
       return this.getTaskPreviews(this.route.params.task_id)
     },
+
     getCurrentTaskPath () {
       if (this.currentTask) {
         return `/tasks/${this.currentTask.id}`
@@ -606,6 +554,7 @@ export default {
         return ''
       }
     },
+
     getOriginalPath () {
       let previewId = this.route.params.preview_id
       if (!previewId && this.currentTaskPreviews.length > 0) {
@@ -613,6 +562,7 @@ export default {
       }
       return `/api/pictures/originals/preview-files/${previewId}.png`
     },
+
     getPreviewPath () {
       let previewId = this.route.params.preview_id
       if (!previewId && this.currentTaskPreviews.length > 0) {
@@ -620,6 +570,7 @@ export default {
       }
       return `/api/pictures/previews/preview-files/${previewId}.png`
     },
+
     addComment (comment, taskStatusId) {
       this.addCommentLoading = {
         isLoading: true,
@@ -723,30 +674,70 @@ export default {
       this.loading.deleteTask = true
       this.errors.deleteTask = false
 
-      this.$store.dispatch('deleteTask', {
+      this.deleteTask({
         task: this.currentTask,
         callback: (err) => {
+          this.loading.deleteTask = false
           if (err) {
-            this.loading.deleteTask = false
             this.errors.deleteTask = true
           } else {
             this.$router.push(this.entityPage)
           }
         }
       })
+    },
+
+    confirmEditTaskComment (comment) {
+      this.loading.editComment = true
+      this.errors.editComment = false
+      this.editTaskComment({
+        taskId: this.currentTask.id,
+        comment,
+        callback: (err) => {
+          this.loading.editComment = false
+          if (err) {
+            this.errors.editComment = true
+          } else {
+            this.$router.push(this.taskPath)
+          }
+        }
+      })
+    },
+
+    confirmDeleteTaskComment () {
+      this.loading.deleteComment = true
+      this.errors.deleteComment = false
+      const commentId = this.route.params.comment_id
+
+      this.deleteTaskComment({
+        taskId: this.currentTask.id,
+        commentId,
+        callback: (err) => {
+          this.loading.deleteComment = false
+          if (err) {
+            this.errors.deleteComment = true
+          } else {
+            this.$router.push(this.taskPath)
+          }
+        }
+      })
     }
   },
+
   mounted () {
     this.handleModalsDisplay()
   },
+
   watch: {
     $route () { this.handleModalsDisplay() }
   },
 
   metaInfo () {
-    return {
-      title: this.currentTask ? `${this.title} / ${this.currentTask.task_type_name}- Kitsu` : `Loading task... - Kitsu`
+    let title = 'Loading task... - Kitsu'
+    if (this.currentTask) {
+      title = `${this.title} / ${this.currentTask.task_type_name} - Kitsu`
     }
+    return { title }
   }
 }
 </script>
@@ -831,6 +822,12 @@ video {
   flex-wrap: wrap;
 }
 
+.page-header .tag {
+ border-radius: 0;
+ font-weight: bold;
+ color: #666;
+}
+
 .assignees {
   display: flex;
 }
@@ -852,7 +849,12 @@ video {
 }
 
 .entity-thumbnail {
-  width: 70px;
+  width: 50px;
   margin-right: 0.3em;
+}
+
+.title {
+  margin: 0;
+  flex: 1;
 }
 </style>
