@@ -351,6 +351,8 @@ export default {
       'tasks',
       'comments',
       'commentTexts',
+      'displayedShots',
+      'displayedAssets',
       'route',
       'user',
       'isSingleEpisode',
@@ -430,6 +432,64 @@ export default {
             name: 'assets',
             params: {production_id: this.currentTask.project_id}
           }
+        }
+      } else {
+        return {
+          name: 'open-productions'
+        }
+      }
+    },
+
+    previousEntity () {
+      if (this.currentTask) {
+        const type = this.currentTask.entity_type_name
+        const taskTypeId = this.currentTask.task_type_id
+        let entityList = this.displayedAssets
+        if (type === 'Shot') {
+          entityList = this.displayedShots
+        }
+
+        let entityIndex = entityList.findIndex((entity) => {
+          return entity.id === this.currentTask.entity_id
+        })
+        if (entityIndex === 0) entityIndex = entityList.length
+        entityIndex--
+        const task = entityList[entityIndex].tasks.find((task) => {
+          return task.task_type_id === taskTypeId
+        })
+
+        return {
+          name: 'task',
+          params: {task_id: task.id}
+        }
+      } else {
+        return {
+          name: 'open-productions'
+        }
+      }
+    },
+
+    nextEntity () {
+      if (this.currentTask) {
+        const type = this.currentTask.entity_type_name
+        const taskTypeId = this.currentTask.task_type_id
+        let entityList = this.displayedAssets
+        if (type === 'Shot') {
+          entityList = this.displayedShots
+        }
+
+        let entityIndex = entityList.findIndex((entity) => {
+          return entity.id === this.currentTask.entity_id
+        })
+        if (entityIndex === entityList.length) entityIndex = 0
+        entityIndex++
+        const task = entityList[entityIndex].tasks.find((task) => {
+          return task.task_type_id === taskTypeId
+        })
+
+        return {
+          name: 'task',
+          params: {task_id: task.id}
         }
       } else {
         return {
