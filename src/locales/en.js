@@ -158,6 +158,7 @@ export default {
     post_status: 'Post status',
     edit_title: 'Edit comment',
     change_preview: 'Change preview',
+    empty_text: 'This comment is empty',
     fields: {
       text: 'text'
     }

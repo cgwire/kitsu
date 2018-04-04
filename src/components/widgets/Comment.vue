@@ -11,12 +11,8 @@
 >
 
   <figure class="media-left">
-    <div class="level">
-      <div class="level-left">
-        <people-avatar class="level-item" :person="comment.person">
-        </people-avatar>
-      </div>
-    </div>
+    <people-avatar class="level-item" :person="comment.person">
+    </people-avatar>
   </figure>
 
   <div class="media-content">
@@ -29,7 +25,6 @@
           {{ formatDate(comment.created_at) }}
         </span>
         <button-link
-          class="level-item"
           icon="edit"
           :path="{
             name: 'comment-edit',
@@ -42,7 +37,6 @@
         >
         </button-link>
         <button-link
-          class="level-item"
           icon="delete"
           :path="{
             name: 'comment-delete',
@@ -56,48 +50,49 @@
         </button-link>
       </p>
 
-      <div class="level" v-if="comment.task_status.is_reviewable">
-
-        <div class="level-left">
-          <span class="level-item" :style="{'color': comment.task_status.color}">
-            {{ comment.task_status.name }}
-          </span>
-          <router-link
-            :to="previewRoute"
-            class="revision"
-            v-if="comment.preview"
-          >
-            revision {{ comment.preview.revision }}
-          </router-link>
-          <button-link
-            class="level-item"
-            :text="$t('tasks.add_preview')"
-            icon="upload"
-            :path="{
-              name: 'task-add-preview',
-              params: {
-                task_id: comment.object_id,
-                comment_id: comment.id
-              }
-            }"
-            v-if="editable && !comment.preview"
-          >
-          </button-link>
-          <button-link
-            class="level-item"
-            :text="$t('comments.change_preview')"
-            icon="upload"
-            :path="{
-              name: 'task-change-preview',
-              params: {
-                task_id: comment.object_id,
-                comment_id: comment.id
-              }
-            }"
-            v-if="editable && comment.preview"
-          >
-          </button-link>
-        </div>
+      <div class="flexrow" v-if="comment.task_status.is_reviewable">
+        <span
+          class="flexrow-item"
+          :style="{'color': comment.task_status.color}"
+          v-if="editable"
+        >
+          {{ comment.task_status.name }}
+        </span>
+        <router-link
+          :to="previewRoute"
+          class="revision"
+          v-if="comment.preview"
+        >
+          revision {{ comment.preview.revision }}
+        </router-link>
+        <button-link
+          class="flexrow-item"
+          :text="$t('tasks.add_preview')"
+          icon="upload"
+          :path="{
+            name: 'task-add-preview',
+            params: {
+              task_id: comment.object_id,
+              comment_id: comment.id
+            }
+          }"
+          v-if="editable && !comment.preview"
+        >
+        </button-link>
+        <button-link
+          class="flexrow-item"
+          :text="$t('comments.change_preview')"
+          icon="upload"
+          :path="{
+            name: 'task-change-preview',
+            params: {
+              task_id: comment.object_id,
+              comment_id: comment.id
+            }
+          }"
+          v-if="editable && comment.preview"
+        >
+        </button-link>
       </div>
 
       <p v-if="comment.task_status.name === 'Done'">
@@ -106,7 +101,14 @@
         </span>
       </p>
 
-      <p v-html="compileMarkdown(comment.text)" class="comment-text">
+      <p
+        v-html="compileMarkdown(comment.text)"
+        class="comment-text"
+        v-if="comment.text"
+      >
+      </p>
+      <p class="comment-text empty" v-else>
+        {{ $t('comments.empty_text') }}
       </p>
     </div>
   </div>
@@ -175,9 +177,11 @@ export default {
 
 <style scoped>
 .comment {
-  padding-left: 0.6em;
-  padding-right: 0.6em;
+  padding: 0.6em;
   border-left: 3px solid #CCC;
+  box-shadow: 0px 0px 6px #E0E0E0;
+  background: white;
+  border-radius: 0 5px 5px 0;
 }
 
 .comment.highlighted {
@@ -186,6 +190,10 @@ export default {
 
 .comment:first-child {
   padding-top: 1em;
+}
+
+.content .comment-person {
+  margin-bottom: 0.3em;
 }
 
 .comment-date {
@@ -204,5 +212,14 @@ a.revision {
 
 a.revision:hover {
   text-decoration: underline;
+}
+
+.comment-text {
+  margin-top: 1em;
+}
+
+.comment-text.empty {
+  font-style: italic;
+  color: #AAA;
 }
 </style>

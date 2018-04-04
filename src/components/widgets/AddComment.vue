@@ -97,7 +97,10 @@ export default {
 
 <style scoped>
 .add-comment {
-  margin-left: 1em;
+  border-radius: 5px;
+  padding: 1em;
+  box-shadow: 0px 0px 6px #E0E0E0;
+  background: white;
 }
 
 .add-comment textarea {

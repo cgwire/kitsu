@@ -1,59 +1,64 @@
 <template>
   <div class="page fixed-page">
-     <div class="back-button">
-       <router-link :to="entityPage">
-         &larr; {{ $t('main.back_to_list')}}
-       </router-link>
-     </div>
+    <div class="page-header">
+      <div class="back-button">
+        <router-link :to="entityPage">
+          &larr; {{ $t('main.back_to_list')}}
+        </router-link>
+      </div>
 
-     <div class="flexrow page-header" v-if="currentTask">
-       <span
-         class="tag is-medium flexrow-item"
-         :style="taskTypeBorder"
-       >
-         {{ currentTask.task_type_name }}
+      <div class="flexrow" v-if="currentTask">
+        <span
+          class="tag is-medium flexrow-item task-type"
+          :style="taskTypeBorder"
+        >
+          {{ currentTask.task_type_name }}
+        </span>
+        <div class="title flexrow-item">
+          {{ currentTask ? title : 'Loading...'}}
+        </div>
+        <button-link
+          class="flexrow-item"
+          text=""
+          icon="delete"
+          :path="deleteTaskPath"
+        >
+        </button-link>
+      </div>
+      <div
+        class="flexrow task-information"
+        v-if="currentTask"
+      >
+        <span class="flexrow-item">{{ $t('tasks.current_status') }}</span>
+        <validation-tag
+          :task="currentTask"
+          class="is-medium flexrow-item"
+          :is-static="true"
+          v-if="currentTask"
+        ></validation-tag>
+        <span class="flexrow-item">{{ $t('tasks.fields.assignees') }}:</span>
+        <span
+          class="flexrow-item avatar-wrapper"
+          v-if="currentTask.assignees"
+          v-for="personId in currentTask.assignees"
+        >
+          <people-avatar
+            :key="personId"
+            :person="personMap[personId]"
+            class="flexrow-item"
+            :size="30"
+            :font-size="16"
+          >
+          </people-avatar>
        </span>
-       <div class="title flexrow-item">
-         {{ currentTask ? title : 'Loading...'}}
-       </div>
-       <button-link
-         class="flexrow-item"
-         text=""
-         icon="delete"
-         :path="deleteTaskPath"
-       >
-       </button-link>
-     </div>
+       <span
+         v-else>
+       </span>
+      </div>
+    </div>
 
     <div class="task-columns">
-      <div class="task-column">
-        <div
-          class="flexrow task-information"
-          v-if="currentTask"
-        >
-          <span class="flexrow-item">{{ $t('tasks.current_status') }}</span>
-          <validation-tag
-            :task="currentTask"
-            class="is-medium flexrow-item"
-            :is-static="true"
-            v-if="currentTask"
-          ></validation-tag>
-          <span class="flexrow-item">{{ $t('tasks.fields.assignees') }}:</span>
-          <span
-            class="flexrow-item avatar-wrapper"
-            v-for="personId in currentTask.assignees"
-          >
-            <people-avatar
-              :key="personId"
-              :person="personMap[personId]"
-              class="flexrow-item"
-              :size="30"
-              :font-size="16"
-            >
-            </people-avatar>
-         </span>
-        </div>
-
+      <div class="task-column comments-column">
         <div v-if="currentTask">
           <div>
             <add-comment
@@ -87,73 +92,75 @@
         <div class="has-text-centered" v-else>
           <img src="../assets/spinner.svg" />
         </div>
-	  </div>
+      </div>
 
       <div class="task-column preview-column">
-        <h2 class="subtitle">
-          {{ $t('tasks.preview') }}
-        </h2>
-        <div
-          class="preview-list"
-          v-if="isPreviews"
-        >
-          <preview-row
-            :key="preview.id"
-            :preview="preview"
-            :taskId="currentTask ? currentTask.id : ''"
-            :selected="preview.id === currentPreviewId"
-            v-for="preview in currentTaskPreviews"
+        <div class="preview-column-content">
+          <h2 class="subtitle">
+            {{ $t('tasks.preview') }}
+          </h2>
+          <div
+            class="preview-list"
+            v-if="isPreviews"
           >
-          </preview-row>
-        </div>
-        <div v-else>
-          <em>
-            {{ $t('tasks.no_preview')}}
-          </em>
-        </div>
-
-        <div class="preview-picture">
-          <div v-if="currentTaskPreviews && currentTaskPreviews.length > 0 && isMovie">
-            <video
-              :src="moviePath"
-              controls
-              :poster="getPreviewPath()" />
-            </video>
+            <preview-row
+              :key="preview.id"
+              :preview="preview"
+              :taskId="currentTask ? currentTask.id : ''"
+              :selected="preview.id === currentPreviewId"
+              v-for="preview in currentTaskPreviews"
+            >
+            </preview-row>
           </div>
-          <a
-            :href="getOriginalPath()"
-            target="_blank"
-            v-else-if="currentTaskPreviews.length > 0 && !isMovie"
-          >
-            <img :src="getPreviewPath()" />
-          </a>
-        </div>
-        <div
-          class="flexrow"
-           v-if="currentTask && currentTask.entity && currentTask.entity.preview_file_id !== currentPreviewId"
-          >
-          <button
-            :class="{
-              button: true,
-              'flexrow-item': true,
-              'is-loading': loading.setPreview
-            }"
-            @click="setPreview"
-            v-if="currentTaskPreviews.length > 0 && isCurrentUserManager"
-          >
-            <image-icon class="icon"></image-icon>
-            <span class="text">
-              {{ $t('tasks.set_preview') }}
+          <div v-else>
+            <em>
+              {{ $t('tasks.no_preview')}}
+            </em>
+          </div>
+
+          <div class="preview-picture">
+            <div v-if="currentTaskPreviews && currentTaskPreviews.length > 0 && isMovie">
+              <video
+                :src="moviePath"
+                controls
+                :poster="getPreviewPath()" />
+              </video>
+            </div>
+            <a
+              :href="getOriginalPath()"
+              target="_blank"
+              v-else-if="currentTaskPreviews.length > 0 && !isMovie"
+            >
+              <img :src="getPreviewPath()" />
+            </a>
+          </div>
+          <div
+            class="flexrow"
+             v-if="currentTask && currentTask.entity && currentTask.entity.preview_file_id !== currentPreviewId"
+            >
+            <button
+              :class="{
+                button: true,
+                'flexrow-item': true,
+                'is-loading': loading.setPreview
+              }"
+              @click="setPreview"
+              v-if="currentTaskPreviews.length > 0 && isCurrentUserManager"
+            >
+              <image-icon class="icon"></image-icon>
+              <span class="text">
+                {{ $t('tasks.set_preview') }}
+              </span>
+            </button>
+            <span class="error flexrow-item" v-if="errors.setPreview">
+              {{ $t('tasks.set_preview_error') }}
             </span>
-          </button>
-          <span class="error flexrow-item" v-if="errors.setPreview">
-            {{ $t('tasks.set_preview_error') }}
-          </span>
-        </div>
-        <div
-          class="set-main-preview"
-          v-if="currentTask && currentTask.entity && currentTask.entity.preview_file_id === currentPreviewId">
-          <em>{{ $t('tasks.set_preview_done') }}</em>
+          </div>
+          <div
+            class="set-main-preview"
+            v-if="currentTask && currentTask.entity && currentTask.entity.preview_file_id === currentPreviewId">
+            <em>{{ $t('tasks.set_preview_done') }}</em>
+          </div>
         </div>
       </div>
     </div>
@@ -827,14 +834,22 @@ export default {
 </script>
 
 <style scoped>
-.back-button {
-  margin-top: 1em;
-  font-size: 0.8em;
-  margin-bottom: 0;
+.page {
+  background: #F9F9F9;
+  padding: 0;
 }
 
 .page-header {
+  padding: 50px 1em 1em 1em;
   margin-top: 1em;
+  background: white;
+  box-shadow: 0px 0px 6px #E0E0E0;
+}
+
+.back-button {
+  margin-top: 1em;
+  font-size: 0.8em;
+  margin-bottom: 0.5em;
 }
 
 .back-button a {
@@ -842,7 +857,7 @@ export default {
 }
 
 .task-information {
-  margin-bottom: 2em;
+  margin-top: 1em;
 }
 
 .selected {
@@ -879,7 +894,14 @@ video {
 
 .comments,
 .no-comment {
-  margin-top: 2em;
+  margin-top: 1em;
+}
+
+.no-comment {
+  background: white;
+  box-shadow: 0px 0px 6px #E0E0E0;
+  padding: 1em;
+  border-radius: 5px;
 }
 
 .task-columns {
@@ -894,11 +916,14 @@ video {
   overflow-y: auto;
 }
 
-.preview-column {
+.comments-column {
 }
 
-.task-column:first-child {
-  padding-left: 0;
+.preview-column-content {
+  background: white;
+  box-shadow: 0px 0px 6px #E0E0E0;
+  padding: 1em;
+  border-radius: 5px;
 }
 
 .preview-list {
@@ -907,9 +932,9 @@ video {
 }
 
 .page-header .tag {
- border-radius: 0;
- font-weight: bold;
- color: #666;
+  border-radius: 0;
+  font-weight: bold;
+  color: #666;
 }
 
 .assignees {
