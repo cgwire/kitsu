@@ -21,11 +21,39 @@
 
   <div class="media-content">
     <div class="content">
-      <p class="comment-person">
-        <strong>
+      <p class="comment-person flexrow">
+        <strong class="flexrow-item">
           <people-name class="" :person="comment.person"></people-name>
         </strong>
-        <span class="comment-date">{{ formatDate(comment.created_at) }}</span>
+        <span class="comment-date flexrow-item">
+          {{ formatDate(comment.created_at) }}
+        </span>
+        <button-link
+          class="level-item"
+          icon="edit"
+          :path="{
+            name: 'comment-edit',
+            params: {
+              task_id: comment.object_id,
+              comment_id: comment.id
+            }
+          }"
+          v-if="editable"
+        >
+        </button-link>
+        <button-link
+          class="level-item"
+          icon="delete"
+          :path="{
+            name: 'comment-delete',
+            params: {
+              task_id: comment.object_id,
+              comment_id: comment.id
+            }
+          }"
+          v-if="editable"
+        >
+        </button-link>
       </p>
 
       <div class="level" v-if="comment.task_status.is_reviewable">
@@ -45,12 +73,31 @@
             class="level-item"
             :text="$t('tasks.add_preview')"
             icon="upload"
-            :path="'/tasks/' + comment.object_id + '/comments/' + comment.id + '/add-preview'"
-            v-else
+            :path="{
+              name: 'task-add-preview',
+              params: {
+                task_id: comment.object_id,
+                comment_id: comment.id
+              }
+            }"
+            v-if="editable && !comment.preview"
+          >
+          </button-link>
+          <button-link
+            class="level-item"
+            :text="$t('comments.change_preview')"
+            icon="upload"
+            :path="{
+              name: 'task-change-preview',
+              params: {
+                task_id: comment.object_id,
+                comment_id: comment.id
+              }
+            }"
+            v-if="editable && comment.preview"
           >
           </button-link>
         </div>
-        </button-link>
       </div>
 
       <p v-if="comment.task_status.name === 'Done'">
@@ -59,13 +106,7 @@
         </span>
       </p>
 
-      <p class="version" v-if="comment.task_status_name === 'RETAKE'">
-      </p>
-
       <p v-html="compileMarkdown(comment.text)" class="comment-text">
-      </p>
-
-      <p class="comment-date">
       </p>
     </div>
   </div>
@@ -96,8 +137,13 @@ export default {
     highlighted: {
       type: Boolean,
       default: false
+    },
+    editable: {
+      type: Boolean,
+      default: false
     }
   },
+
   computed: {
     previewRoute () {
       if (this.comment.preview) {
@@ -130,6 +176,7 @@ export default {
 <style scoped>
 .comment {
   padding-left: 0.6em;
+  padding-right: 0.6em;
   border-left: 3px solid #CCC;
 }
 
@@ -145,13 +192,14 @@ export default {
   color: #999;
   font-style: italic;
   margin-left: 0.5em;
+  flex: 1;
 }
 
 a.revision {
   color: #999;
   font-size: 0.8em;
   font-style: italic;
-  margin: 0;
+  margin: 0 1em 0 0;
 }
 
 a.revision:hover {
