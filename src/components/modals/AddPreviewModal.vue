@@ -7,7 +7,10 @@
   <div class="modal-content">
 
     <div class="box content">
-      <h1 class="title">
+      <h1 class="title" v-if="isEditing">
+        {{ $t("tasks.change_preview") }}
+      </h1>
+      <h1 class="title" v-else>
         {{ $t("tasks.add_preview") }}
       </h1>
 
@@ -54,32 +57,49 @@ import FileUpload from '../widgets/FileUpload.vue'
 
 export default {
   name: 'add-preview-modal',
-  props: [
-    'active',
-    'cancelRoute',
-    'isLoading',
-    'isError'
-  ],
-  watch: {
-    active () {
-      this.reset()
+
+  components: {
+    FileUpload
+  },
+
+  props: {
+    active: {
+      type: Boolean,
+      default: false
+    },
+    isLoading: {
+      type: Boolean,
+      default: false
+    },
+    isError: {
+      type: Boolean,
+      default: false
+    },
+    isEditing: {
+      type: Boolean,
+      default: false
+    },
+    cancelRoute: {
+      type: Object,
+      default: () => {}
     }
   },
+
   data () {
     return {
       formData: null
     }
   },
-  components: {
-    FileUpload
+
+  mounted () {
+    this.formData = null
   },
+
   computed: {
     ...mapGetters([
     ])
   },
-  mounted () {
-    this.formData = null
-  },
+
   methods: {
     ...mapActions([
     ]),
@@ -96,6 +116,12 @@ export default {
 
     onConfirmClicked () {
       this.$emit('confirm')
+    }
+  },
+
+  watch: {
+    active () {
+      this.reset()
     }
   }
 }
