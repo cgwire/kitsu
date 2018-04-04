@@ -1,9 +1,28 @@
 <template>
   <div class="page fixed-page">
     <div class="page-header">
-      <div class="back-button">
-        <router-link :to="entityPage">
-          &larr; {{ $t('main.back_to_list')}}
+      <div class="back-button flexrow">
+        <router-link
+          :to="previousEntity"
+          class="flexrow-item"
+          :title="$t('tasks.previous')"
+        >
+          &larr;
+        </router-link>
+
+        <router-link
+          :to="entityPage"
+          class="list-link flexrow-item has-text-centered"
+        >
+          {{ $t('tasks.back_to_list')}}
+        </router-link>
+
+        <router-link
+          :to="nextEntity"
+          class="next-link flexrow-item"
+          :title="$t('tasks.next')"
+        >
+          &rarr;
         </router-link>
       </div>
 
@@ -305,55 +324,7 @@ export default {
 
   created () {
     this.clearSelectedTasks()
-    let task = this.getCurrentTask()
-    if (!task) {
-      this.taskLoading = {
-        isLoading: true,
-        isError: false
-      }
-      this.loadTask({
-        taskId: this.route.params.task_id,
-        callback: (err) => {
-          if (err) {
-            this.taskLoading = {
-              isLoading: false,
-              isError: true
-            }
-          } else {
-            this.taskLoading = {
-              isLoading: false,
-              isError: false
-            }
-            task = this.getCurrentTask()
-            this.setProduction(task.project_id)
-            this.loadEpisodes()
-            this.currentTask = task
-            this.loadTaskComments({
-              taskId: this.route.params.task_id,
-              callback: (err) => {
-                if (err) {
-                } else {
-                  this.currentTaskComments = this.getCurrentTaskComments()
-                  this.currentTaskPreviews = this.getCurrentTaskPreviews()
-                }
-              }
-            })
-          }
-        }
-      })
-    } else {
-      this.currentTask = task
-      this.loadTaskComments({
-        taskId: this.route.params.task_id,
-        callback: (err) => {
-          if (err) {
-          } else {
-            this.currentTaskComments = this.getCurrentTaskComments()
-            this.currentTaskPreviews = this.getCurrentTaskPreviews()
-          }
-        }
-      })
-    }
+    this.loadTaskData()
   },
 
   computed: {
@@ -452,7 +423,6 @@ export default {
 
     taskEntityPath () {
       if (this.currentTask) {
-        console.log(this.currentTask)
         const type = this.currentTask.entity_type_name
         if (type === 'Shot') {
           return {
@@ -478,23 +448,36 @@ export default {
       }
     },
 
+    entityList () {
+      const type = this.currentTask.entity_type_name
+      return type === 'Shot' ? this.displayedShots : this.displayedAssets
+    },
+
     previousEntity () {
       if (this.currentTask) {
-        const type = this.currentTask.entity_type_name
         const taskTypeId = this.currentTask.task_type_id
-        let entityList = this.displayedAssets
-        if (type === 'Shot') {
-          entityList = this.displayedShots
-        }
-
-        let entityIndex = entityList.findIndex((entity) => {
+        let entityIndex = this.entityList.findIndex((entity) => {
           return entity.id === this.currentTask.entity_id
         })
-        if (entityIndex === 0) entityIndex = entityList.length
-        entityIndex--
-        const task = entityList[entityIndex].tasks.find((task) => {
-          return task.task_type_id === taskTypeId
-        })
+
+        let previousEntityIndex = entityIndex - 1
+        if (previousEntityIndex < 0) {
+          previousEntityIndex = this.entityList.length - 1
+        }
+
+        let task = null
+        while (!task) {
+          task = this.entityList[previousEntityIndex].tasks.find((task) => {
+            return task.task_type_id === taskTypeId
+          })
+
+          if (!task) {
+            previousEntityIndex--
+            if (previousEntityIndex < 0) {
+              previousEntityIndex = this.entityList.length
+            }
+          }
+        }
 
         return {
           name: 'task',
@@ -509,21 +492,29 @@ export default {
 
     nextEntity () {
       if (this.currentTask) {
-        const type = this.currentTask.entity_type_name
         const taskTypeId = this.currentTask.task_type_id
-        let entityList = this.displayedAssets
-        if (type === 'Shot') {
-          entityList = this.displayedShots
-        }
-
-        let entityIndex = entityList.findIndex((entity) => {
+        let entityIndex = this.entityList.findIndex((entity) => {
           return entity.id === this.currentTask.entity_id
         })
-        if (entityIndex === entityList.length) entityIndex = 0
-        entityIndex++
-        const task = entityList[entityIndex].tasks.find((task) => {
-          return task.task_type_id === taskTypeId
-        })
+
+        let nextEntityIndex = entityIndex + 1
+        if (nextEntityIndex >= this.entityList.length) {
+          nextEntityIndex = 0
+        }
+
+        let task = null
+        while (!task) {
+          task = this.entityList[nextEntityIndex].tasks.find((task) => {
+            return task.task_type_id === taskTypeId
+          })
+
+          if (!task) {
+            nextEntityIndex++
+            if (nextEntityIndex >= this.entityList.length) {
+              nextEntityIndex = 0
+            }
+          }
+        }
 
         return {
           name: 'task',
@@ -616,9 +607,67 @@ export default {
       'deleteTaskComment',
       'loadEpisodes',
       'loadTask',
+      'loadShots',
+      'loadAssets',
       'loadTaskComments',
       'setProduction'
     ]),
+
+    loadTaskData () {
+      let task = this.getCurrentTask()
+      if (!task) {
+        this.taskLoading = {
+          isLoading: true,
+          isError: false
+        }
+
+        this.loadTask({
+          taskId: this.route.params.task_id,
+          callback: (err, task) => {
+            if (err) console.log(err)
+
+            this.setProduction(task.project_id)
+            let loadingFunction = this.loadAssets
+            if (task.entity_type_name === 'Shot') {
+              loadingFunction = this.loadShots
+            }
+            loadingFunction(() => {
+              this.currentTask = task
+              this.loadTaskComments({
+                taskId: task.id,
+                callback: (err) => {
+                  if (err) {
+                    this.taskLoading = {
+                      isLoading: false,
+                      isError: true
+                    }
+                  } else {
+                    this.currentTaskComments = this.getCurrentTaskComments()
+                    this.currentTaskPreviews = this.getCurrentTaskPreviews()
+                    this.taskLoading = {
+                      isLoading: false,
+                      isError: false
+                    }
+                  }
+                }
+              })
+            })
+          }
+        })
+      } else {
+        this.currentTask = task
+        this.loadTaskComments({
+          taskId: this.route.params.task_id,
+          callback: (err) => {
+            if (err) {
+            } else {
+              this.currentTaskComments = this.getCurrentTaskComments()
+              this.currentTaskPreviews = this.getCurrentTaskPreviews()
+            }
+          }
+        })
+      }
+    },
 
     isHighlighted (comment) {
       return comment.preview && comment.preview.id === this.currentPreviewId
@@ -850,7 +899,12 @@ export default {
   },
 
   watch: {
-    $route () { this.handleModalsDisplay() }
+    $route () {
+      this.handleModalsDisplay()
+      if (this.$route.params.task_id !== this.currentTask.id) {
+        this.loadTaskData()
+      }
+    }
   },
 
   metaInfo () {
@@ -864,6 +918,10 @@ export default {
 </script>
 
 <style scoped>
+.list-link {
+  flex: 1;
+}
+
 .page {
   background: #F9F9F9;
   padding: 0;

@@ -78,7 +78,6 @@ export default {
     production: 'Production',
     studio: 'Studio',
     admin: 'Admin',
-    back_to_list: 'back to list',
     csv: {
       import_file: 'Import',
       export_file: 'Export',
@@ -165,6 +164,9 @@ export default {
   },
 
   tasks: {
+    previous: 'previous task',
+    next: 'next task',
+    back_to_list: 'back to list',
     preview: 'Previews',
     assign: 'Assign one task to: | Assign {nbSelectedTasks} tasks to:',
     change_status_to: 'Change task status to:',

@@ -118,12 +118,12 @@ const actions = {
     })
   },
 
-  loadTask ({ commit, state }, payload) {
-    tasksApi.getTask(payload.taskId, (err, task) => {
+  loadTask ({ commit, state }, { taskId, callback }) {
+    tasksApi.getTask(taskId, (err, task) => {
       if (!err) {
         commit(LOAD_TASK_END, task)
       }
-      if (payload.callback) payload.callback(err)
+      if (callback) callback(err, task)
     })
   },
 

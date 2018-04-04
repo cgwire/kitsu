@@ -401,7 +401,6 @@ const mutations = {
       if (shot.data.fps) isFps = true
       if (shot.data.frame_in) isFrameIn = true
       if (shot.data.frame_out) isFrameOut = true
-      console.log(shot.data, isFps, isFrameIn, isFrameOut)
     })
 
     state.isShotsLoading = false
@@ -411,7 +410,6 @@ const mutations = {
     state.isFps = isFps
     state.isFrameIn = isFrameIn
     state.isFrameOut = isFrameOut
-    console.log(state.isFrameIn)
 
     state.shotIndex = buildShotIndex(state.shots)
 
