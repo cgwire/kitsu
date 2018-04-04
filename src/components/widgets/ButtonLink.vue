@@ -10,44 +10,44 @@
     :class="{
       icon: true,
       'is-small': true,
-      'only-icon': onlyIcon
+      'only-icon': !isText
     }" v-if="icon === 'plus'"></plus-icon>
   <download-icon
     :class="{
       icon: true,
       'is-small': true,
-      'only-icon': onlyIcon
+      'only-icon': !isText
     }" v-if="icon === 'download'"></download-icon>
   <upload-icon
     :class="{
       icon: true,
       'is-small': true,
-      'only-icon': onlyIcon
+      'only-icon': !isText
     }" v-if="icon === 'upload'"></upload-icon>
   <edit-icon
     :class="{
       icon: true,
       'is-small': true,
-      'only-icon': onlyIcon
+      'only-icon': !isText
     }" v-if="icon === 'edit'"></edit-icon>
   <trash-icon
     :class="{
       icon: true,
       'is-small': true,
-      'only-icon': onlyIcon
+      'only-icon': !isText
     }" v-if="icon === 'delete'"></trash-icon>
   <rotate-ccw-icon
     :class="{
       icon: true,
       'is-small': true,
-      'only-icon': onlyIcon
+      'only-icon': !isText
     }" v-if="icon === 'restore'"></rotate-ccw-icon>
 
   <span
     :class="{
       text: true,
       'is-hidden-touch': isResponsive
-    }" v-if="text.length > 0">
+    }" v-if="isText">
     {{ text }}
   </span>
 </router-link>
@@ -91,7 +91,9 @@ export default {
     }
   },
   computed: {
-    onlyIcon: () => !this.text || this.text.length === 0
+    isText () {
+      return this.text && this.text.length > 0
+    }
   }
 }
 </script>
