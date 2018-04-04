@@ -19,6 +19,8 @@ import {
 
   CREATE_TASKS_END,
   DELETE_TASK_END,
+  EDIT_COMMENT_END,
+  DELETE_COMMENT_END,
 
   PREVIEW_FILE_SELECTED,
   ADD_PREVIEW_END,
@@ -207,13 +209,30 @@ const actions = {
     })
   },
 
-  deleteTask ({ commit, state }, payload) {
-    const task = payload.task
+  deleteTask ({ commit }, { task, callback }) {
     tasksApi.deleteTask(task, (err) => {
       if (!err) {
         commit(DELETE_TASK_END, task)
       }
-      if (payload.callback) payload.callback(err)
+      if (callback) callback(err)
+    })
+  },
+
+  editTaskComment ({ commit }, { taskId, comment, callback }) {
+    tasksApi.editTaskComment(comment, (err, comment) => {
+      if (!err) {
+        commit(EDIT_COMMENT_END, { taskId, comment })
+      }
+      if (callback) callback(err)
+    })
+  },
+
+  deleteTaskComment ({ commit }, { taskId, commentId, callback }) {
+    tasksApi.deleteTaskComment(commentId, (err) => {
+      if (!err) {
+        commit(DELETE_COMMENT_END, { taskId, commentId })
+      }
+      if (callback) callback(err)
     })
   },
 
@@ -471,6 +490,14 @@ const mutations = {
     state.taskComments[task.id] = undefined
     state.taskPreviews[task.id] = undefined
     state.taskMap[task.id] = undefined
+  },
+
+  [DELETE_COMMENT_END] (state, { taskId, commentId }) {
+    state.taskComments[taskId] = [...state.taskComments[taskId]].splice(1)
+  },
+
+  [EDIT_COMMENT_END] (state, { taskId, comment }) {
+    state.taskComments[taskId][0].text = comment.text
   },
 
   [PREVIEW_FILE_SELECTED] (state, formData) {

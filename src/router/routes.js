@@ -244,6 +244,16 @@ export const routes = [
         path: '/tasks/:task_id/previews/:preview_id',
         component: Task
       },
+      {
+        name: 'comment-edit',
+        path: '/tasks/:task_id/comments/:comment_id/edit',
+        component: Task
+      },
+      {
+        name: 'comment-delete',
+        path: '/tasks/:task_id/comments/:comment_id/delete',
+        component: Task
+      },
 
       { path: '/asset-types', component: AssetTypes },
       { path: '/asset-types/new', component: AssetTypes },

@@ -72,37 +72,24 @@
         </div>
 
         <div v-if="currentTask">
-          <div class="tabs hidden">
-            <ul>
-              <li :class="(this.selectedTab === 'validation') ? 'is-active' : '' ">
-                <a @click="changeTab('validation')">Validation</a> </li>
-              <li :class="(this.selectedTab === 'metadatas') ? 'is-active' : '' ">
-                <a @click="changeTab('metadatas')">Metadatas</a></li>
-              </li>
-            </ul>
-          </div>
-
-          <div
-            :class="{
-              validation: true,
-              hidden: selectedTab !== 'validation'
-            }"
-          >
+          <div>
             <add-comment
               :addComment="addComment"
               :isAddCommentLoading="addCommentLoading.isLoading"
               :user="user"
               :task="currentTask"
               :taskStatusOptions="taskStatusOptions"
-              v-if="isCurrentUserManager || currentTask.assignees.find((personId) => personId === user.id)"
+              v-if="isCommentingAllowed"
             >
             </add-comment>
             <div class="comments" v-if="currentTaskComments.length > 0">
               <comment
                 :comment="comment"
-                :highlighted="comment.preview && comment.preview.id === currentPreviewId"
+                :highlighted="isHighlighted(comment)"
                 :key="comment.id"
-                v-for="comment in currentTaskComments"
+                :current-user="user"
+                :editable="user.id === comment.person.id && index === 0"
+                v-for="(comment, index) in currentTaskComments"
               >
               </comment>
             </div>
@@ -239,14 +226,48 @@
     >
     </add-preview-modal>
 
+    <add-preview-modal
+      ref="change-preview-modal"
+      :active="modals.changePreview"
+      :is-loading="loading.changePreview"
+      :is-error="errors.changePreview"
+      :cancel-route="taskPath"
+      :form-data="changePreviewFormData"
+      :is-editing="true"
+      @fileselected="selectFile"
+      @confirm="changePreview"
+    >
+    </add-preview-modal>
+
+    <edit-comment-modal
+      :active="modals.editComment"
+      :is-loading="loading.editComment"
+      :is-error="errors.editComment"
+      :cancel-route="taskPath"
+      :comment-to-edit="commentToEdit"
+      @confirm="confirmEditTaskComment"
+    >
+    </edit-comment-modal>
+
     <delete-modal
-      :active="display.deleteTask"
+      :active="modals.deleteTask"
       :is-loading="loading.deleteTask"
       :is-error="errors.deleteTask"
-      :cancel-route="currentTask ? `/tasks/${currentTask.id}` : ''"
+      :cancel-route="taskPath"
       :text="deleteText"
       :error-text="$t('tasks.delete_error')"
       @confirm="confirmDeleteTask"
+    >
+    </delete-modal>
+
+    <delete-modal
+      :active="modals.deleteComment"
+      :is-loading="loading.deleteComment"
+      :is-error="errors.deleteComment"
+      :cancel-route="taskPath"
+      :text="$t('tasks.delete_comment')"
+      :error-text="$t('tasks.delete_comment_error')"
+      @confirm="confirmDeleteTaskComment"
     >
     </delete-modal>
 
@@ -265,6 +286,7 @@ import PreviewRow from './widgets/PreviewRow'
 import ValidationTag from './widgets/ValidationTag'
 import AddPreviewModal from './modals/AddPreviewModal'
 import DeleteModal from './widgets/DeleteModal'
+import EditCommentModal from './modals/EditCommentModal'
 import ButtonLink from './widgets/ButtonLink'
 import EntityThumbnail from './widgets/EntityThumbnail'
 
@@ -278,6 +300,7 @@ export default {
     ChevronLeftIcon,
     DeleteModal,
     EntityThumbnail,
+    EditCommentModal,
     ImageIcon,
     PeopleAvatar,
     ValidationTag,
@@ -296,19 +319,28 @@ export default {
         isLoading: false,
         isError: false
       },
-      display: {
+      modals: {
         addPreview: false,
-        deleteTask: false
+        changePreview: false,
+        deleteTask: false,
+        deleteComment: false,
+        editComment: false
       },
       loading: {
         addPreview: false,
+        changePreview: false,
         setPreview: false,
-        deleteTask: false
+        deleteTask: false,
+        deleteComment: false,
+        editComment: false
       },
       errors: {
         addPreview: false,
+        changePreview: false,
         setPreview: false,
-        deleteTask: false
+        deleteTask: false,
+        deleteComment: false,
+        editComment: false
       },
       currentTask: null,
       currentTaskComments: [],
@@ -390,6 +422,58 @@ export default {
       'currentProduction',
       'isCurrentUserManager'
     ]),
+
+    isCommentingAllowed () {
+      return this.isCurrentUserManager || this.currentTask.assignees.find(
+        (personId) => personId === this.user.id
+      )
+    },
+
+    taskTypeBorder () {
+      let border = 'transparent'
+      if (this.currentTask) border = this.currentTask.task_type_color
+      return {
+        'border-left': `4px solid ${border}`
+      }
+    },
+
+    taskPath () {
+      let taskPath = { name: 'open-productions' }
+      if (this.currentTask) {
+        taskPath = {
+          name: 'task',
+          params: {
+            task_id: this.currentTask.id
+          }
+        }
+      }
+      return taskPath
+    },
+
+    deleteTaskPath () {
+      let deleteTaskPath = ''
+      if (this.currentTask) {
+        deleteTaskPath = {
+          name: 'task-delete',
+          params: {
+            task_id: this.currentTask.id
+          }
+        }
+      }
+      return deleteTaskPath
+    },
+
+    commentToEdit () {
+      let commentToEdit = {}
+      if (this.currentTask && this.currentTaskComments.length > 0) {
+        commentToEdit = this.currentTaskComments[0]
+      }
+      return commentToEdit
+    },
+
+    isPreviews () {
+      return this.currentTaskPreviews && this.currentTaskPreviews.length > 0
+    },
 
     entityPage () {
       if (this.currentTask) {
@@ -484,6 +568,12 @@ export default {
 
   methods: {
     ...mapActions([
+      'addCommentPreview',
+      'changeCommentPreview',
+      'clearSelectedTasks',
+      'deleteTask',
+      'editTaskComment',
+      'deleteTaskComment',
       'loadEpisodes',
       'loadTask',
       'loadTaskComments',
@@ -558,20 +648,33 @@ export default {
         }
       })
     },
+
     handleModalsDisplay () {
       const path = this.$store.state.route.path
 
+      this.modals = {
+        addPreview: false,
+        changePreview: false,
+        deleteTask: false,
+        deleteComment: false,
+        editComment: false
+      }
       if (path.indexOf('add-preview') > 0) {
-        this.display.addPreview = true
-        this.display.deleteTask = false
-      } else if (path.indexOf('delete') > 0) {
-        this.display.deleteTask = true
-        this.display.addPreview = false
-        this.currentComment = null
-      } else {
-        this.display.addPreview = false
-        this.display.deleteTask = false
-        this.currentComment = null
+        this.modals.addPreview = true
+      } else if (path.indexOf('change-preview') > 0) {
+        this.modals.changePreview = true
+      } else if (
+        path.indexOf('delete') > 0 && path.indexOf('comments') < 0
+      ) {
+        this.modals.deleteTask = true
+      } else if (
+        path.indexOf('delete') > 0 && path.indexOf('comments') > 0
+      ) {
+        this.modals.deleteComment = true
+      } else if (
+        path.indexOf('edit') > 0 && path.indexOf('comments') > 0
+      ) {
+        this.modals.editComment = true
       }
     },
 

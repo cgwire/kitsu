@@ -33,6 +33,17 @@ export default {
     client.get(`/api/data/comments/${data.id}`, callback)
   },
 
+  editTaskComment (comment, callback) {
+    const commentData = {
+      text: comment.text
+    }
+    client.put(`/api/data/comments/${comment.id}`, commentData, callback)
+  },
+
+  deleteTaskComment (commentId, callback) {
+    client.del(`/api/data/comments/${commentId}`, callback)
+  },
+
   createTasks (data, callback) {
     const taskTypeId = data.task_type_id
     const type = data.type
