@@ -289,7 +289,8 @@ export default {
       currentTask: null,
       currentTaskComments: [],
       currentTaskPreviews: [],
-      addPreviewFormData: null
+      addPreviewFormData: null,
+      changePreviewFormData: null
     }
   },
 
@@ -696,7 +697,7 @@ export default {
     createPreview () {
       this.errors.addPreview = false
       this.loading.addPreview = true
-      this.$store.dispatch('addPreview', {
+      this.addCommentPreview({
         taskId: this.route.params.task_id,
         commentId: this.route.params.comment_id,
         callback: (err, preview) => {
@@ -708,6 +709,29 @@ export default {
           }
           this.$refs['add-preview-modal'].reset()
           this.loading.addPreview = false
+          this.currentTaskPreviews = this.getCurrentTaskPreviews()
+          this.currentTaskComments = this.getCurrentTaskComments()
+        }
+      })
+    },
+
+    changePreview () {
+      const preview = this.currentTaskComments[0].preview
+      this.errors.changePreview = false
+      this.loading.changePreview = true
+      this.changeCommentPreview({
+        preview: preview,
+        taskId: this.currentTask.id,
+        commenttId: this.currentTaskComments[0].id,
+        callback: (err, preview) => {
+          if (err) {
+            this.errors.changePreview = true
+          } else {
+            this.$router.push(`/tasks/${this.route.params.task_id}` +
+                              `/previews/${preview.id}`)
+          }
+          this.$refs['change-preview-modal'].reset()
+          this.loading.changePreview = false
           this.currentTaskPreviews = this.getCurrentTaskPreviews()
           this.currentTaskComments = this.getCurrentTaskComments()
         }

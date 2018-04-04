@@ -236,7 +236,7 @@ const actions = {
     })
   },
 
-  addPreview ({ commit, state }, payload) {
+  addCommentPreview ({ commit, state }, payload) {
     const fileName = state.previewFormData.get('file').name
     const extension = fileName.slice(fileName.length - 4)
     payload.isMovie = ['.mp4', '.mov'].includes(extension)
@@ -258,6 +258,19 @@ const actions = {
           }
         })
       }
+    })
+  },
+
+  changeCommentPreview ({ commit, state }, {
+    preview, taskId, commentId, callback
+  }) {
+    console.log('yeah ')
+    tasksApi.uploadPreview(preview.id, state.previewFormData, (err) => {
+      console.log('yeah 2')
+      if (!err) {
+        commit(ADD_PREVIEW_END, { preview, taskId, commentId })
+      }
+      if (callback) callback(err, preview)
     })
   },
 
@@ -503,10 +516,13 @@ const mutations = {
   [PREVIEW_FILE_SELECTED] (state, formData) {
     state.previewFormData = formData
   },
+
   [ADD_PREVIEW_END] (state, {preview, taskId, commentId}) {
     const getTaskComment = getters.getTaskComment(state, getters)
-    const comment =
-      JSON.parse(JSON.stringify(getTaskComment(taskId, commentId)))
+    const comment = {
+      ...getTaskComment(taskId, commentId)
+    }
+
     if (!comment.preview) {
       const newPreview = {
         id: preview.id,

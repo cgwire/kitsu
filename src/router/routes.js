@@ -240,6 +240,11 @@ export const routes = [
         component: Task
       },
       {
+        name: 'task-change-preview',
+        path: '/tasks/:task_id/comments/:comment_id/change-preview',
+        component: Task
+      },
+      {
         name: 'task-preview',
         path: '/tasks/:task_id/previews/:preview_id',
         component: Task
