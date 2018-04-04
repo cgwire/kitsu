@@ -155,7 +155,12 @@ export default {
     validated: 'Validated!',
     validation_required: 'Validation Required',
     add_comment: 'Add a comment...',
-    post_status: 'Post status'
+    post_status: 'Post status',
+    edit_title: 'Edit comment',
+    change_preview: 'Change preview',
+    fields: {
+      text: 'text'
+    }
   },
 
   tasks: {
@@ -177,6 +182,7 @@ export default {
     current_status: 'Current status :',
     add_preview: 'Add preview',
     add_preview_error: 'An error occured while adding preview.',
+    change_preview: 'Change preview',
     set_preview: 'Set this preview as thumbnail',
     set_preview_error: 'An error occured while setting preview as thumbnail',
     set_preview_done: 'This preview is used as thumbnail for the current entity.',
@@ -188,6 +194,9 @@ export default {
     tasks: 'Tasks',
     current: 'Current',
     done: 'Done',
+    delete_comment: 'Delete comment',
+    edit_comment: 'Edit comment',
+    delete_comment_error: 'An error occured while deleting comment',
     fields: {
       production: 'Prod',
       entity: 'Entity',
