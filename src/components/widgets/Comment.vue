@@ -17,50 +17,16 @@
 
   <div class="media-content">
     <div class="content">
-      <p class="comment-person flexrow">
+      <div class="comment-person flexrow">
         <strong class="flexrow-item">
           <people-name class="" :person="comment.person"></people-name>
         </strong>
         <span class="comment-date flexrow-item">
           {{ formatDate(comment.created_at) }}
         </span>
-        <button-link
-          icon="edit"
-          :path="{
-            name: 'comment-edit',
-            params: {
-              task_id: comment.object_id,
-              comment_id: comment.id
-            }
-          }"
-          v-if="editable"
-        >
-        </button-link>
-        <button-link
-          icon="delete"
-          :path="{
-            name: 'comment-delete',
-            params: {
-              task_id: comment.object_id,
-              comment_id: comment.id
-            }
-          }"
-          v-if="editable"
-        >
-        </button-link>
-      </p>
-
-      <div class="flexrow" v-if="comment.task_status.is_reviewable">
-        <span
-          class="flexrow-item"
-          :style="{'color': comment.task_status.color}"
-          v-if="editable"
-        >
-          {{ comment.task_status.name }}
-        </span>
         <router-link
           :to="previewRoute"
-          class="revision"
+          class="revision flexrow-item"
           v-if="comment.preview"
         >
           revision {{ comment.preview.revision }}
@@ -76,7 +42,7 @@
               comment_id: comment.id
             }
           }"
-          v-if="editable && !comment.preview"
+          v-if="editable && !comment.preview && comment.task_status.is_reviewable"
         >
         </button-link>
         <button-link
@@ -90,9 +56,36 @@
               comment_id: comment.id
             }
           }"
-          v-if="editable && comment.preview"
+          v-if="editable && comment.preview && comment.task_status.is_reviewable"
         >
         </button-link>
+        <button-link
+          icon="edit"
+          class="flexrow-item"
+          :path="{
+            name: 'comment-edit',
+            params: {
+              task_id: comment.object_id,
+              comment_id: comment.id
+            }
+          }"
+          v-if="editable"
+        >
+        </button-link>
+        <button-link
+          icon="delete"
+          class="flexrow-item"
+          :path="{
+            name: 'comment-delete',
+            params: {
+              task_id: comment.object_id,
+              comment_id: comment.id
+            }
+          }"
+          v-if="editable"
+        >
+        </button-link>
+
       </div>
 
       <p v-if="comment.task_status.name === 'Done'">
