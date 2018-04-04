@@ -15,7 +15,9 @@
           {{ currentTask.task_type_name }}
         </span>
         <div class="title flexrow-item">
-          {{ currentTask ? title : 'Loading...'}}
+          <router-link :to="taskEntityPath">
+            {{ currentTask ? title : 'Loading...'}}
+          </router-link>
         </div>
         <button-link
           class="flexrow-item"
@@ -439,6 +441,34 @@ export default {
           return {
             name: 'assets',
             params: {production_id: this.currentTask.project_id}
+          }
+        }
+      } else {
+        return {
+          name: 'open-productions'
+        }
+      }
+    },
+
+    taskEntityPath () {
+      if (this.currentTask) {
+        console.log(this.currentTask)
+        const type = this.currentTask.entity_type_name
+        if (type === 'Shot') {
+          return {
+            name: 'shot',
+            params: {
+              production_id: this.currentTask.project_id,
+              shot_id: this.currentTask.entity.id
+            }
+          }
+        } else {
+          return {
+            name: 'asset',
+            params: {
+              production_id: this.currentTask.project_id,
+              asset_id: this.currentTask.entity.id
+            }
           }
         }
       } else {
@@ -965,5 +995,9 @@ video {
 .title {
   margin: 0;
   flex: 1;
+}
+
+.title a {
+  color: inherit;
 }
 </style>
