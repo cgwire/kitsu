@@ -15,9 +15,8 @@
           ref="textField"
           :label="$t('comments.fields.text')"
           v-model="form.text"
-          @enter="runConfirmation"
-          v-focus
-        >
+          @keyup.ctrl="runConfirmation"
+          v-focus >
         </textarea-field>
       </form>
 
@@ -102,11 +101,13 @@ export default {
   },
 
   methods: {
-    runConfirmation () {
-      this.$emit('confirm', {
-        id: this.commentToEdit.id,
-        ...this.form
-      })
+    runConfirmation (event) {
+      if (event.keyCode === 13) {
+        this.$emit('confirm', {
+          id: this.commentToEdit.id,
+          ...this.form
+        })
+      }
     }
   }
 }

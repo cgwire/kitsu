@@ -980,9 +980,8 @@ video {
   margin-bottom: 0.5em;
 }
 
-.comments,
-.no-comment {
-  margin-top: 1em;
+.add-comment {
+  margin-bottom: 1em;
 }
 
 .no-comment {

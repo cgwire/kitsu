@@ -197,7 +197,7 @@ export default {
     tasks: 'Tasks',
     current: 'Current',
     done: 'Done',
-    delete_comment: 'Delete comment',
+    delete_comment: 'Are you sure you want to delete last comment?',
     edit_comment: 'Edit comment',
     delete_comment_error: 'An error occured while deleting comment',
     fields: {

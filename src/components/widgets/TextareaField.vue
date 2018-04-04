@@ -11,6 +11,7 @@
       :value="value"
       @input="updateValue()"
       @keyup.enter="emitEnter()"
+      @keyup="emitKeyup"
     />
   </p>
 </div>
@@ -56,6 +57,9 @@ export default {
     updateValue () {
       this.$emit('input', this.$refs.input.value)
     },
+    emitKeyup (event) {
+      this.$emit('keyup', event)
+    },
     focus () {
       this.$refs.input.focus()
     }
@@ -66,5 +70,6 @@ export default {
 textarea {
   min-height: 5em;
   max-height: 5em;
+  padding: 0.5em;
 }
 </style>
