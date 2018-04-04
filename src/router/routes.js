@@ -1,5 +1,6 @@
 import auth from '../lib/auth'
 import lang from '../lib/lang'
+import timezone from '../lib/timezone'
 import init from '../lib/init'
 
 import userStore from '../store/modules/user'
@@ -38,6 +39,7 @@ export const routes = [
         if (nextPath) {
           next(nextPath)
         } else {
+          timezone.setTimezone()
           lang.setLocale()
           init((err) => {
             if (err) {
@@ -64,6 +66,7 @@ export const routes = [
         if (nextPath) {
           next(nextPath)
         } else {
+          timezone.setTimezone()
           lang.setLocale()
           if (taskTypeStore.state.taskTypes.length === 0) {
             init(next)

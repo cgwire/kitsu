@@ -74,7 +74,7 @@
 
 <script>
 import marked from 'marked'
-import moment from 'moment'
+import moment from 'moment-timezone'
 
 import PeopleAvatar from './PeopleAvatar.vue'
 import PeopleName from './PeopleName.vue'
@@ -87,6 +87,7 @@ export default {
     PeopleName,
     ButtonLink
   },
+
   props: {
     comment: {
       type: Object,
@@ -112,10 +113,13 @@ export default {
       }
     }
   },
+
   methods: {
     formatDate (date) {
-      return moment(date).fromNow()
+      const utcDate = moment.tz(date, 'UTC')
+      return moment(utcDate.format()).fromNow()
     },
+
     compileMarkdown (input) {
       return marked(input || '')
     }

@@ -201,7 +201,7 @@
 <script>
 import { mapGetters, mapActions } from 'vuex'
 
-import moment from 'moment'
+import moment from 'moment-timezone'
 import { PlusIcon } from 'vue-feather-icons'
 
 import ButtonLink from './widgets/ButtonLink'
@@ -320,10 +320,8 @@ export default {
         const currentIndex = this.currentShot
         const currentShot = this.currentShots[currentIndex]
         const previewId = currentShot.preview_file_id
-        console.log('ok')
         return `/api/movies/originals/preview-files/${previewId}.mp4`
       } else {
-        console.log('nok')
         return 'toto'
       }
     }
@@ -364,7 +362,7 @@ export default {
 
     addPlaylist () {
       const newPlaylist = {
-        name: moment().format('YYYY-MM-DD hh:mm'),
+        name: moment().format('YYYY-MM-DD HH:mm'),
         production_id: this.currentProduction.id
       }
       this.loading.addPlaylist = true
