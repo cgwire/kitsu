@@ -248,7 +248,7 @@ def get_full_shot(shot_id):
     shot["project_name"] = project["name"]
     shot["sequence_id"] = sequence["id"]
     shot["sequence_name"] = sequence["name"]
-    if sequence.parent_id is not None:
+    if sequence["parent_id"] is not None:
         episode = get_episode(sequence["parent_id"])
         shot["episode_id"] = episode["id"]
         shot["episode_name"] = episode["name"]
@@ -305,7 +305,7 @@ def get_full_scene(scene_id):
     scene["project_name"] = project["name"]
     scene["sequence_id"] = sequence["id"]
     scene["sequence_name"] = sequence["name"]
-    if sequence.parent_id is not None:
+    if sequence["parent_id"] is not None:
         episode = get_episode(sequence["parent_id"])
         scene["episode_id"] = episode["id"]
         scene["episode_name"] = episode["name"]
@@ -348,7 +348,7 @@ def get_full_sequence(sequence_id):
     sequence["project_name"] = project["name"]
 
     if sequence["parent_id"] is not None:
-        episode = Entity.get(sequence["parent_id"])
+        episode = get_episode(sequence["parent_id"])
         sequence["episode_id"] = episode["id"]
         sequence["episode_name"] = episode["name"]
 
@@ -738,4 +738,4 @@ def get_entities_out(shot_id):
     Get entities related to shot as external entities.
     """
     shot = get_shot_raw(shot_id)
-    return Entity.serialize_list(shot.entities_out, obj_type="Asset"
+    return Entity.serialize_list(shot.entities_out, obj_type="Asset")
