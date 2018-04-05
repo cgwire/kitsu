@@ -408,9 +408,9 @@ def get_tasks_for_entity_and_task_type(entity_id, task_type_id):
     For a task type, returns all tasks related to given entity.
     """
     tasks = Task.query \
-       .filter_by(entity_id=entity_id, task_type_id=task_type_id) \
-       .order_by(Task.name) \
-       .all()
+        .filter_by(entity_id=entity_id, task_type_id=task_type_id) \
+        .order_by(Task.name) \
+        .all()
     return Task.serialize_list(tasks)
 
 
@@ -780,7 +780,8 @@ def start_task(task_id):
 def task_to_review(task_id, person, comment, preview_path=""):
     """
     Change the task status to "waiting for approval" if it is not already the
-    case. It emits a *task:to-review* event. Change the real start date time to now.
+    case. It emits a *task:to-review* event. Change the real start date time to
+    now.
     """
     task = get_task_raw(task_id)
     to_review_status = get_to_review_status()

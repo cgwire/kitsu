@@ -105,7 +105,7 @@ def get_working_file_name(
     name="",
     revision=1
 ):
-    entity = tasks_service.get_entity(task["entity_id"])
+    entity = entities_service.get_entity(task["entity_id"])
     project = get_project(entity)
     tree = get_tree_from_project(project)
 
@@ -161,8 +161,8 @@ def get_instance_file_name(
     revision=1,
     nb_elements=1
 ):
-    shot = tasks_service.get_entity(asset_instance["entity_id"])
-    asset = tasks_service.get_entity(asset_instance["asset_id"])
+    shot = entities_service.get_entity(asset_instance["entity_id"])
+    asset = entities_service.get_entity(asset_instance["asset_id"])
     project = get_project(shot)
     tree = get_tree_from_project(project)
 
@@ -193,7 +193,7 @@ def get_working_folder_path(
     revision=1,
     sep=os.sep
 ):
-    entity = tasks_service.get_entity(task["entity_id"])
+    entity = entities_service.get_entity(task["entity_id"])
     project = get_project(entity)
     tree = get_tree_from_project(project)
     root_path = get_root_path(tree, mode, sep)
@@ -257,8 +257,8 @@ def get_instance_folder_path(
     revision=1,
     sep=os.sep,
 ):
-    shot = tasks_service.get_entity(asset_instance["entity_id"])
-    asset = tasks_service.get_entity(asset_instance["asset_id"])
+    shot = entities_service.get_entity(asset_instance["entity_id"])
+    asset = entities_service.get_entity(asset_instance["asset_id"])
     project = get_project(shot)
     tree = get_tree_from_project(project)
     root_path = get_root_path(tree, mode, sep)

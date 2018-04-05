@@ -429,7 +429,7 @@ class TaskFullResource(Resource):
         result["project"] = project
         task_status = tasks_service.get_task_status(task["task_status_id"])
         result["task_status"] = task_status
-        entity = tasks_service.get_entity(task["entity_id"])
+        entity = entities_service.get_entity(task["entity_id"])
         result["entity"] = entity
         if entity["parent_id"] is not None:
             sequence = shots_service.get_sequence(entity["parent_id"])

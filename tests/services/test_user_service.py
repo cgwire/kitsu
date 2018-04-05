@@ -6,10 +6,10 @@ from zou.app.services import user_service, persons_service
 from zou.app.utils import permissions
 
 
-class TaskServiceTestCase(ApiDBTestCase):
+class UserServiceTestCase(ApiDBTestCase):
 
     def setUp(self):
-        super(TaskServiceTestCase, self).setUp()
+        super(UserServiceTestCase, self).setUp()
 
         self.generate_fixture_project_status()
         self.generate_fixture_project()
@@ -44,7 +44,7 @@ class TaskServiceTestCase(ApiDBTestCase):
         persons_service.get_current_user_raw = self.get_current_user_raw
 
     def tearDown(self):
-        super(TaskServiceTestCase, self).tearDown()
+        super(UserServiceTestCase, self).tearDown()
         persons_service.get_current_user = self.old_get_current_user
         persons_service.get_current_user_raw = self.old_get_current_user_raw
 

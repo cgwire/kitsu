@@ -103,4 +103,4 @@ class ImportRemoveShotgunTaskResource(ImportRemoveShotgunBaseResource):
         )
 
     def delete_func(self, entity):
-        tasks_service.delete_task(entity.id)
+        tasks_service.remove_task(entity.id)

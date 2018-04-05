@@ -200,7 +200,7 @@ class TaskServiceTestCase(ApiDBTestCase):
         self.assertEqual(str(self.task_id), task["id"])
         self.output_file.delete()
         self.working_file.delete()
-        tasks_service.delete_task(task["id"])
+        tasks_service.remove_task(task["id"])
 
         self.assertRaises(
             TaskNotFoundException,
@@ -236,12 +236,7 @@ class TaskServiceTestCase(ApiDBTestCase):
         self.assertEqual(len(tasks), 1)
         self.assertEqual(tasks[0]["id"], str(self.scene_task.id))
 
-    def test_get_tasks_for_asset(self):
-        tasks = tasks_service.get_tasks_for_entity(self.asset.id)
-        self.assertEqual(len(tasks), 1)
-        self.assertEqual(tasks[0]["id"], str(self.task.id))
-
-    def test_get_tasks_for_asset(self):
+    def test_get_dict_tasks_for_asset(self):
         tasks = tasks_service.get_task_dicts_for_entity(self.asset.id)
         self.assertEqual(len(tasks), 1)
         self.assertEqual(tasks[0]["id"], str(self.task.id))

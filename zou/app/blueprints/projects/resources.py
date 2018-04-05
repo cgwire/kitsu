@@ -36,6 +36,12 @@ class AllProjectsResource(Resource):
         try:
             permissions.check_manager_permissions()
 
-            return projects_service.all_projects(name=name)
+            if name is None:
+                return projects_service.get_projects()
+            else:
+                return [projects_service.get_project_by_name(name)]
         except permissions.PermissionDenied:
-            return user_service.get_projects(name=name)
+            if name is None:
+                return user_service.get_projects()
+            else:
+                return [user_service.get_project_by_name(name)]

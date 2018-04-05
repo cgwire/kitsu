@@ -16,7 +16,7 @@ from zou.app.services import (
 from zou.app.utils import fields, permissions
 
 
-def assignee_filter():
+def build_assignee_filter():
     """
     Query filter for task to retrieve only tasks assigned to current user.
     """
@@ -24,11 +24,28 @@ def assignee_filter():
     return Task.assignees.contains(current_user)
 
 
-def open_project_filter():
+def build_open_project_filter():
     """
     Query filter for project to retrieve only open projects.
     """
     return ProjectStatus.name.in_(("Active", "open", "Open"))
+
+
+def build_related_projects_filter():
+    """
+    Query filter for project to retrieve open projects with at least
+    one task assigned to current user.
+    """
+    projects = Project.query \
+        .join(Task) \
+        .filter(build_assignee_filter()) \
+        .filter(build_open_project_filter()) \
+        .all()
+    project_ids = [project.id for project in projects]
+    if len(project_ids) > 0:
+        return Project.id.in_(project_ids)
+    else:
+        return Project.id.in_(["00000000-0000-0000-0000-000000000000"])
 
 
 def related_projects():
@@ -38,27 +55,10 @@ def related_projects():
     """
     projects = Project.query \
         .join(Task) \
-        .filter(assignee_filter()) \
-        .filter(open_project_filter()) \
+        .filter(build_assignee_filter()) \
+        .filter(build_open_project_filter()) \
         .all()
     return Project.serialize_list(projects)
-
-
-def related_projects_filter():
-    """
-    Query filter for project to retrieve open projects with at least
-    one task assigned to current user.
-    """
-    projects = Project.query \
-        .join(Task) \
-        .filter(assignee_filter()) \
-        .filter(open_project_filter()) \
-        .all()
-    project_ids = [project.id for project in projects]
-    if len(project_ids) > 0:
-        return Project.id.in_(project_ids)
-    else:
-        return Project.id.in_(["00000000-0000-0000-0000-000000000000"])
 
 
 def get_todos():
@@ -86,8 +86,8 @@ def get_tasks_for_entity(entity_id):
     query = Task.query \
         .join(Project, ProjectStatus) \
         .filter(Task.entity_id == entity_id) \
-        .filter(assignee_filter()) \
-        .filter(open_project_filter())
+        .filter(build_assignee_filter()) \
+        .filter(build_open_project_filter())
 
     return fields.serialize_value(query.all())
 
@@ -100,8 +100,8 @@ def get_task_types_for_entity(entity_id):
     query = TaskType.query \
         .join(Task, Project, ProjectStatus) \
         .filter(Task.entity_id == entity_id) \
-        .filter(assignee_filter()) \
-        .filter(open_project_filter())
+        .filter(build_assignee_filter()) \
+        .filter(build_open_project_filter())
 
     return fields.serialize_value(query.all())
 
@@ -118,8 +118,8 @@ def get_assets_for_asset_type(project_id, asset_type_id):
         .join(ProjectStatus) \
         .filter(EntityType.id == asset_type_id) \
         .filter(Project.id == project_id) \
-        .filter(assignee_filter()) \
-        .filter(open_project_filter())
+        .filter(build_assignee_filter()) \
+        .filter(build_open_project_filter())
 
     return Entity.serialize_list(query.all(), obj_type="Asset")
 
@@ -134,8 +134,8 @@ def get_asset_types_for_project(project_id):
         .join(Task, Task.entity_id == Entity.id) \
         .join(Project, ProjectStatus) \
         .filter(Project.id == project_id) \
-        .filter(assignee_filter()) \
-        .filter(open_project_filter()) \
+        .filter(build_assignee_filter()) \
+        .filter(build_open_project_filter()) \
         .filter(assets_service.build_asset_type_filter())
 
     return EntityType.serialize_list(query.all(), obj_type="AssetType")
@@ -159,8 +159,8 @@ def get_sequences_for_project(project_id):
         .filter(Shot.entity_type_id == shot_type["id"]) \
         .filter(Entity.entity_type_id == sequence_type["id"]) \
         .filter(Project.id == project_id) \
-        .filter(assignee_filter()) \
-        .filter(open_project_filter())
+        .filter(build_assignee_filter()) \
+        .filter(build_open_project_filter())
 
     return Entity.serialize_list(query.all(), obj_type="Sequence")
 
@@ -186,8 +186,8 @@ def get_project_episodes(project_id):
         .filter(Sequence.entity_type_id == sequence_type["id"]) \
         .filter(Entity.entity_type_id == episode_type["id"]) \
         .filter(Project.id == project_id) \
-        .filter(assignee_filter()) \
-        .filter(open_project_filter())
+        .filter(build_assignee_filter()) \
+        .filter(build_open_project_filter())
 
     return Entity.serialize_list(query.all(), obj_type="Episode")
 
@@ -201,8 +201,8 @@ def get_shots_for_sequence(sequence_id):
         .join(Task, Project, ProjectStatus, EntityType) \
         .filter(Entity.entity_type_id == shot_type["id"]) \
         .filter(Entity.parent_id == sequence_id) \
-        .filter(assignee_filter()) \
-        .filter(open_project_filter())
+        .filter(build_assignee_filter()) \
+        .filter(build_open_project_filter())
 
     return Entity.serialize_list(query.all(), obj_type="Shot")
 
@@ -217,8 +217,8 @@ def get_scenes_for_sequence(sequence_id):
         .join(Task, Project, ProjectStatus, EntityType) \
         .filter(Entity.entity_type_id == scene_type["id"]) \
         .filter(Entity.parent_id == sequence_id) \
-        .filter(assignee_filter()) \
-        .filter(open_project_filter())
+        .filter(build_assignee_filter()) \
+        .filter(build_open_project_filter())
 
     return Entity.serialize_list(query.all(), obj_type="Scene")
 
@@ -229,8 +229,8 @@ def get_open_projects(name=None):
     """
     query = Project.query \
         .join(Task, ProjectStatus) \
-        .filter(assignee_filter()) \
-        .filter(open_project_filter())
+        .filter(build_assignee_filter()) \
+        .filter(build_open_project_filter())
 
     if name is not None:
         query = query.filter(Project.name == name)
@@ -244,7 +244,7 @@ def get_projects(name=None):
     """
     query = Project.query \
         .join(Task, ProjectStatus) \
-        .filter(assignee_filter())
+        .filter(build_assignee_filter())
 
     if name is not None:
         query = query.filter(Project.name == name)
@@ -257,7 +257,7 @@ def check_assigned(task_id):
     Return true if current user is assiged to task related to given ID.
     """
     query = Task.query \
-        .filter(assignee_filter()) \
+        .filter(build_assignee_filter()) \
         .filter(Task.id == task_id)
 
     if query.first() is None:
@@ -272,7 +272,7 @@ def check_has_task_related(project_id):
     """
     query = Project.query \
         .join(Task) \
-        .filter(assignee_filter()) \
+        .filter(build_assignee_filter()) \
 
     if query.first() is None:
         raise permissions.PermissionDenied

@@ -20,7 +20,7 @@ class ProjectServiceTestCase(ApiDBTestCase):
         self.assertEqual(len(projects), 1)
         self.assertEqual("Cosmos Landromat", projects[0]["name"])
 
-    def test_get_all_projects(self):
+    def test_get_projects(self):
         projects = projects_service.get_projects()
         self.assertEqual(len(projects), 2)
         self.assertEqual(projects[0]["project_status_name"], "open")
@@ -50,7 +50,7 @@ class ProjectServiceTestCase(ApiDBTestCase):
         statuses = ProjectStatus.query.all()
         self.assertEqual(len(statuses), 4)
 
-    def test_get_or_create(self):
+    def test_get_or_create_project(self):
         project = projects_service.get_or_create_project("Agent 327")
         projects = projects_service.get_projects()
         self.assertIsNotNone(project["id"])
@@ -74,3 +74,9 @@ class ProjectServiceTestCase(ApiDBTestCase):
             projects_service.get_project,
             "wrongid"
         )
+
+    def test_update_project(self):
+        new_name = "New name"
+        projects_service.update_project(self.project.id, {"name": new_name})
+        project = projects_service.get_project(self.project.id)
+        self.assertEqual(project["name"], new_name)

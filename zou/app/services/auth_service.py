@@ -55,10 +55,10 @@ def check_credentials(email, password, app=None):
     Password hash comparison is based on BCrypt.
     """
     try:
-        person = persons_service.get_by_email(email)
+        person = persons_service.get_person_by_email(email)
     except PersonNotFoundException:
         try:
-            person = persons_service.get_by_desktop_login(email)
+            person = persons_service.get_person_by_desktop_login(email)
         except PersonNotFoundException:
             if app is not None:
                 app.logger.error("Person not found: %s" % (email))
@@ -85,10 +85,10 @@ def no_password_auth_strategy(email):
     matches an user in the database.
     """
     try:
-        person = persons_service.get_by_email(email)
+        person = persons_service.get_person_by_email(email)
     except PersonNotFoundException:
         try:
-            person = persons_service.get_by_desktop_login(email)
+            person = persons_service.get_person_by_desktop_login(email)
         except PersonNotFoundException:
             return None
     return person

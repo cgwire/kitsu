@@ -446,7 +446,7 @@ def remove_asset_link(asset_in_id, asset_out_id):
 
     if asset_out in asset_in.entities_out:
         asset_in.entities_out = \
-            [x for x in asset_in.entities_out if x.id != asset_out]
+            [x for x in asset_in.entities_out if x.id != asset_out_id]
         asset_in.save()
         events.emit("asset:remove-link", {
             "asset_in": asset_in.serialize(obj_type="Asset"),

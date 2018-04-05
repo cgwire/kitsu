@@ -57,8 +57,8 @@ class ImportShotgunProjectTestCase(ShotgunTestCase):
         self.assertEqual(project["name"], sg_project["name"])
         self.assertEqual(project["shotgun_id"], sg_project["id"])
         self.assertEqual(project["project_status_id"], str(project_status.id))
-        self.assertEqual(project["data"]["fps"], sg_project["sg_fps"])
+        self.assertEqual(project["data"]["sg_fps"], sg_project["sg_fps"])
         self.assertEqual(
-            project["data"]["width_height"],
+            project["data"]["sg_width___height"],
             sg_project["sg_width___height"]
         )
