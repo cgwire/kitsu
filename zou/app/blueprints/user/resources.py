@@ -18,7 +18,7 @@ class AssetTasksResource(Resource):
     @jwt_required
     def get(self, asset_id):
         assets_service.get_asset(asset_id)
-        return user_service.get_entity_tasks(asset_id)
+        return user_service.get_tasks_for_entity(asset_id)
 
 
 class AssetTaskTypesResource(Resource):
@@ -29,7 +29,7 @@ class AssetTaskTypesResource(Resource):
     @jwt_required
     def get(self, asset_id):
         assets_service.get_asset(asset_id)
-        return user_service.get_entity_task_types(asset_id)
+        return user_service.get_task_types_for_entity(asset_id)
 
 
 class ShotTaskTypesResource(Resource):
@@ -40,7 +40,7 @@ class ShotTaskTypesResource(Resource):
     @jwt_required
     def get(self, shot_id):
         shots_service.get_shot(shot_id)
-        return user_service.get_entity_task_types(shot_id)
+        return user_service.get_task_types_for_entity(shot_id)
 
 
 class SceneTaskTypesResource(Resource):
@@ -51,7 +51,7 @@ class SceneTaskTypesResource(Resource):
     @jwt_required
     def get(self, scene_id):
         shots_service.get_scene(scene_id)
-        return user_service.get_entity_task_types(scene_id)
+        return user_service.get_task_types_for_entity(scene_id)
 
 
 class AssetTypeAssetsResource(Resource):
@@ -64,9 +64,7 @@ class AssetTypeAssetsResource(Resource):
     def get(self, project_id, asset_type_id):
         projects_service.get_project(project_id)
         assets_service.get_asset_type(asset_type_id)
-        return user_service.get_asset_type_assets(
-            project_id, asset_type_id
-        )
+        return user_service.get_assets_for_asset_type(project_id, asset_type_id)
 
 
 class OpenProjectsResource(Resource):
@@ -89,7 +87,7 @@ class ProjectSequencesResource(Resource):
     @jwt_required
     def get(self, project_id):
         projects_service.get_project(project_id)
-        return user_service.get_project_sequences(project_id)
+        return user_service.get_sequences_for_project(project_id)
 
 
 class ProjectEpisodesResource(Resource):
@@ -113,7 +111,7 @@ class ProjectAssetTypesResource(Resource):
     @jwt_required
     def get(self, project_id):
         projects_service.get_project(project_id)
-        return user_service.get_project_asset_types(project_id)
+        return user_service.get_asset_types_for_project(project_id)
 
 
 class SequenceShotsResource(Resource):
@@ -125,7 +123,7 @@ class SequenceShotsResource(Resource):
     @jwt_required
     def get(self, sequence_id):
         shots_service.get_sequence(sequence_id)
-        return user_service.get_sequence_shots(sequence_id)
+        return user_service.get_shots_for_sequence(sequence_id)
 
 
 class SequenceScenesResource(Resource):
@@ -137,7 +135,7 @@ class SequenceScenesResource(Resource):
     @jwt_required
     def get(self, sequence_id):
         shots_service.get_sequence(sequence_id)
-        return user_service.get_sequence_scenes(sequence_id)
+        return user_service.get_scenes_for_sequence(sequence_id)
 
 
 class ShotTasksResource(Resource):
@@ -148,7 +146,7 @@ class ShotTasksResource(Resource):
     @jwt_required
     def get(self, shot_id):
         shots_service.get_shot(shot_id)
-        return user_service.get_entity_tasks(shot_id)
+        return user_service.get_tasks_for_entity(shot_id)
 
 
 class SceneTasksResource(Resource):
@@ -159,7 +157,7 @@ class SceneTasksResource(Resource):
     @jwt_required
     def get(self, scene_id):
         shots_service.get_scene(scene_id)
-        return user_service.get_entity_tasks(scene_id)
+        return user_service.get_tasks_for_entity(scene_id)
 
 
 class TodosResource(Resource):

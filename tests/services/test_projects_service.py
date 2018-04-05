@@ -21,13 +21,9 @@ class ProjectServiceTestCase(ApiDBTestCase):
         self.assertEqual("Cosmos Landromat", projects[0]["name"])
 
     def test_get_all_projects(self):
-        projects = projects_service.all_projects()
+        projects = projects_service.get_projects()
         self.assertEqual(len(projects), 2)
         self.assertEqual(projects[0]["project_status_name"], "open")
-
-        projects = projects_service.all_projects(name="Cosmos Landromat")
-        self.assertEqual(len(projects), 1)
-        self.assertEqual(projects[0]["name"], "Cosmos Landromat")
 
     def test_get_or_create_status(self):
         project_status = projects_service.get_or_create_status("Frozen")
@@ -55,8 +51,8 @@ class ProjectServiceTestCase(ApiDBTestCase):
         self.assertEqual(len(statuses), 4)
 
     def test_get_or_create(self):
-        project = projects_service.get_or_create("Agent 327")
-        projects = projects_service.all_projects()
+        project = projects_service.get_or_create_project("Agent 327")
+        projects = projects_service.get_projects()
         self.assertIsNotNone(project["id"])
         self.assertEqual(project["name"], "Agent 327")
         self.assertEqual(len(projects), 3)
