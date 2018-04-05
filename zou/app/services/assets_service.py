@@ -19,7 +19,7 @@ from zou.app.services.exception import (
 )
 
 
-def build_entity_asset_type_filter():
+def build_asset_type_filter():
     """
     Generate a query filter to filter entity that are assets (it means not shot,
     not sequence, not episode and not scene)
@@ -58,7 +58,7 @@ def get_assets(criterions={}):
     Get all assets for given criterions.
     """
     query = Entity.query \
-        .filter(build_entity_asset_type_filter())
+        .filter(build_asset_type_filter())
     query = query_utils.apply_criterions_to_db_query(Entity, query, criterions)
     result = query.all()
     return EntityType.serialize_list(result, obj_type="Asset")
@@ -71,7 +71,7 @@ def get_full_assets(criterions={}):
     """
     query = Entity.query \
         .filter_by(**criterions) \
-        .filter(build_entity_asset_type_filter()) \
+        .filter(build_asset_type_filter()) \
         .join(Project, EntityType) \
         .add_columns(Project.name, EntityType.name) \
         .order_by(Project.name, EntityType.name, Entity.name)
@@ -94,7 +94,7 @@ def get_assets_and_tasks(criterions={}, page=1):
     task_map = {}
 
     query = Entity.query \
-        .filter(build_entity_asset_type_filter()) \
+        .filter(build_asset_type_filter()) \
         .join(EntityType) \
         .outerjoin(Task) \
         .outerjoin(assignees_table) \
