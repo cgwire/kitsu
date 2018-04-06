@@ -185,6 +185,29 @@ class WorkingFilesTestCase(ApiDBTestCase):
         working_file = self.get("data/working-files/%s" % self.working_file.id)
         self.assertEqual(working_file["comment"], comment_data["comment"])
 
+    def test_update_working_file_permission(self):
+        working_file = self.working_file.serialize()
+        task = self.task.serialize()
+        self.generate_fixture_user_cg_artist()
+        user = self.user_cg_artist.serialize()
+        self.log_in_cg_artist()
+        comment_data = {
+            "comment": "test working file comment"
+        }
+
+        self.put(
+            "/actions/working-files/%s/comment" % working_file["id"],
+            comment_data,
+            403
+        )
+        tasks_service.assign_task(task["id"], user["id"])
+        self.put(
+            "/actions/working-files/%s/comment" % working_file["id"],
+            comment_data
+        )
+        working_file = self.get("data/working-files/%s" % working_file["id"])
+        self.assertEqual(working_file["comment"], comment_data["comment"])
+
     def test_comment_working_wrong_data(self):
         comment_data = {
             "comment_wrong": "test working file comment"
