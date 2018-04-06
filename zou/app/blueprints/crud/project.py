@@ -9,6 +9,12 @@ class ProjectsResource(BaseModelsResource):
     def __init__(self):
         BaseModelsResource.__init__(self, Project)
 
+    def add_project_permission_filter(self, query):
+        return query.filter(user_service.build_related_projects_filter())
+
+    def check_read_permissions(self):
+        True
+
 
 class ProjectResource(BaseModelResource):
 
