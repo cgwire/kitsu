@@ -462,6 +462,7 @@ def get_person_tasks(person_id, projects, is_done=None):
         .add_columns(
             Project.name,
             Entity.name,
+            Entity.description,
             Entity.preview_file_id,
             EntityType.name,
             Sequence.name,
@@ -485,6 +486,7 @@ def get_person_tasks(person_id, projects, is_done=None):
         task,
         project_name,
         entity_name,
+        entity_description,
         entity_preview_file_id,
         entity_type_name,
         sequence_name,
@@ -502,6 +504,7 @@ def get_person_tasks(person_id, projects, is_done=None):
         task_dict.update({
             "project_name": project_name,
             "entity_name": entity_name,
+            "entity_description": entity_description,
             "entity_preview_file_id": str(entity_preview_file_id),
             "entity_type_name": entity_type_name,
             "sequence_name": sequence_name,
