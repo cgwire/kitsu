@@ -11,6 +11,9 @@
           <th class="name">
             {{ $t('tasks.fields.entity') }}
           </th>
+          <th class="description">
+            {{ $t('assets.fields.description') }}
+          </th>
           <th class="type">
             {{ $t('tasks.fields.task_type') }}
           </th>
@@ -56,6 +59,9 @@
             <router-link :to="entry.entity_path">
               {{ entry.full_entity_name }}
             </router-link>
+          </td>
+          <td class="description">
+            {{ entry.entity_description }}
           </td>
           <task-type-name
             class="type"
@@ -203,6 +209,11 @@ export default {
 .name {
   width: 230px;
   min-width: 230px;
+}
+
+.description {
+  width: 250px;
+  min-width: 250px;
 }
 
 .name a {
