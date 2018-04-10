@@ -69,6 +69,7 @@ export default {
     or: 'ou',
     yes: 'oui',
     no: 'non',
+    info: 'Information',
     confirmation: 'Confirmer',
     confirmation_and_stay: 'Confirmer et rester',
     clear_selection: 'Effacer la sélection',

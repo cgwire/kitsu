@@ -69,6 +69,7 @@ export default {
     or: 'or',
     yes: 'yes',
     no: 'no',
+    info: 'Information',
     confirmation: 'Confirm',
     confirmation_and_stay: 'Confirm and stay',
     clear_selection: 'Clear current selection',
