@@ -29,14 +29,13 @@
           v-focus
         >
         </text-field>
-        <text-field
+        <textarea-field
           ref="descriptionField"
           :label="$t('assets.fields.description')"
           v-model="form.description"
-          @enter="runConfirmation"
           v-focus
         >
-        </text-field>
+        </textarea-field>
       </form>
 
       <p class="has-text-right">
@@ -81,12 +80,14 @@
 <script>
 import { mapGetters, mapActions } from 'vuex'
 import TextField from '../widgets/TextField'
+import TextareaField from '../widgets/TextareaField'
 import Combobox from '../widgets/Combobox'
 
 export default {
   name: 'edit-asset-modal',
   components: {
     TextField,
+    TextareaField,
     Combobox
   },
 

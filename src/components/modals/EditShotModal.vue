@@ -41,7 +41,6 @@
           :label="$t('shots.fields.frame_in')"
           v-model="form.frameIn"
           type="number"
-          @enter="runConfirmation"
         >
         </text-field>
         <text-field
