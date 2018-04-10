@@ -26,7 +26,10 @@
         </router-link>
       </div>
 
-      <div class="flexrow" v-if="currentTask">
+      <div
+        class="flexrow"
+        v-if="currentTask"
+      >
         <span
           class="tag is-medium flexrow-item task-type"
           :style="taskTypeBorder"
@@ -46,6 +49,7 @@
         >
         </button-link>
       </div>
+
       <div
         class="flexrow task-information"
         v-if="currentTask"
@@ -97,7 +101,7 @@
                 :highlighted="isHighlighted(comment)"
                 :key="comment.id"
                 :current-user="user"
-                :editable="user.id === comment.person.id && index === 0"
+                :editable="comment.person && user.id === comment.person.id && index === 0"
                 v-for="(comment, index) in currentTaskComments"
               >
               </comment>
@@ -143,6 +147,7 @@
             <div v-if="currentTaskPreviews && currentTaskPreviews.length > 0 && isMovie">
               <video
                 :src="moviePath"
+                ref="preview-movie"
                 controls
                 :poster="getPreviewPath()" />
               </video>
@@ -152,7 +157,10 @@
               target="_blank"
               v-else-if="currentTaskPreviews.length > 0 && !isMovie"
             >
-              <img :src="getPreviewPath()" />
+              <img
+                :src="getPreviewPath()"
+                ref="preview-picture"
+              />
             </a>
           </div>
           <div
@@ -805,11 +813,12 @@ export default {
       const preview = this.currentTaskComments[0].preview
       this.errors.changePreview = false
       this.loading.changePreview = true
+
       this.changeCommentPreview({
         preview: preview,
         taskId: this.currentTask.id,
-        commenttId: this.currentTaskComments[0].id,
-        callback: (err, preview) => {
+        comment: this.currentTaskComments[0],
+        callback: (err, isMovie) => {
           if (err) {
             this.errors.changePreview = true
           } else {
@@ -817,6 +826,14 @@ export default {
                               `/previews/${preview.id}`)
           }
           this.$refs['change-preview-modal'].reset()
+
+          if (!isMovie) {
+            this.$refs['preview-picture'].src =
+              this.getPreviewPath() + '?' + new Date().getTime()
+          } else {
+            this.$refs['preview-movie'].src =
+              this.getPreviewPath() + '?' + new Date().getTime()
+          }
           this.loading.changePreview = false
           this.currentTaskPreviews = this.getCurrentTaskPreviews()
           this.currentTaskComments = this.getCurrentTaskComments()
@@ -887,6 +904,7 @@ export default {
           if (err) {
             this.errors.deleteComment = true
           } else {
+            this.currentTaskComments = this.getCurrentTaskComments()
             this.$router.push(this.taskPath)
           }
         }
@@ -928,10 +946,11 @@ export default {
 }
 
 .page-header {
-  padding: 50px 1em 1em 1em;
+  padding: 0 1em 1em 1em;
   margin-top: 1em;
   background: white;
   box-shadow: 0px 0px 6px #E0E0E0;
+  margin: 80px 1em 1em 1em;
 }
 
 .back-button {

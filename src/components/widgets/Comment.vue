@@ -45,7 +45,7 @@
           v-if="editable && !comment.preview && comment.task_status.is_reviewable"
         >
         </button-link>
-        <button-link
+        <!--button-link
           class="flexrow-item"
           :text="$t('comments.change_preview')"
           icon="upload"
@@ -57,7 +57,7 @@
             }
           }"
           v-if="editable && comment.preview && comment.task_status.is_reviewable"
-        >
+        -->
         </button-link>
         <button-link
           icon="edit"
