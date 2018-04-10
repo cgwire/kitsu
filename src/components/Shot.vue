@@ -92,6 +92,7 @@
               :square="true"
               :empty-width="100"
               :empty-height="100"
+              :with-link="false"
             >
             </entity-thumbnail>
             <div>
@@ -254,6 +255,10 @@ export default {
 <style scoped>
 .shot-thumbnail {
   max-width: 100px;
+}
+
+.asset-link .thumbnail-picture {
+  margin-bottom: 0.5em;
 }
 
 .asset-type {
