@@ -7,6 +7,8 @@
           <entity-thumbnail
             class="asset-thumbnail"
             :entity="currentAsset"
+            :empty-width="100"
+            :empty-height="66.6"
             v-if="currentAsset"
           >
           </entity-thumbnail>
@@ -260,5 +262,6 @@ export default {
 
 .field-label {
   font-weight: bold;
+  width: 120px;
 }
 </style>

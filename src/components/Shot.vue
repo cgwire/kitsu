@@ -293,5 +293,6 @@ export default {
 
 .field-label {
   font-weight: bold;
+  width: 140px;
 }
 </style>
