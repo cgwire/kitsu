@@ -2,6 +2,7 @@ from sqlalchemy.orm import aliased
 
 from zou.app.models.entity import Entity
 from zou.app.models.entity_type import EntityType
+from zou.app.models.search_filters import SearchFilter
 from zou.app.models.project import Project
 from zou.app.models.project_status import ProjectStatus
 from zou.app.models.task import Task
@@ -13,6 +14,7 @@ from zou.app.services import (
     tasks_service,
     assets_service
 )
+from zou.app.services.exception import SearchFilterNotFoundException
 from zou.app.utils import fields, permissions
 
 
@@ -306,3 +308,65 @@ def is_current_user_manager():
     Return true is current user is manager or admin.
     """
     return permissions.has_manager_permissions()
+
+
+def get_filters():
+    """
+    Retrieve search filters used by current user. It groups them by
+    list type and project_id. If the filter is not related to a project,
+    the project_id is all.
+    """
+    result = {}
+    current_user = persons_service.get_current_user_raw()
+
+    filters = SearchFilter.query \
+        .join(Project, ProjectStatus) \
+        .filter(SearchFilter.person_id == current_user.id) \
+        .filter(open_project_filter()) \
+        .all()
+
+    for search_filter in filters:
+        if search_filter.list_type not in result:
+            result[search_filter.list_type] = {}
+        subresult = result[search_filter.list_type]
+
+        project_id = str(search_filter.project_id)
+        if project_id is None:
+            project_id = "all"
+
+        if project_id not in subresult:
+            subresult[project_id] = []
+
+        subresult[project_id].append(search_filter.serialize())
+
+    return result
+
+
+def create_filter(list_type, name, query, project_id=None):
+    """
+    Add a new search filter to the database.
+    """
+    current_user = persons_service.get_current_user_raw()
+    search_filter = SearchFilter.create(
+        list_type=list_type,
+        name=name,
+        search_query=query,
+        project_id=project_id,
+        person_id=current_user.id
+    )
+    return search_filter.serialize()
+
+
+def remove_filter(search_filter_id):
+    """
+    Remove given filter from database.
+    """
+    current_user = persons_service.get_current_user_raw()
+    search_filter = SearchFilter.get_by(
+        id=search_filter_id,
+        person_id=current_user.id
+    )
+    if search_filter is None:
+        raise SearchFilterNotFoundException
+    search_filter.delete()
+    return search_filter.serialize()

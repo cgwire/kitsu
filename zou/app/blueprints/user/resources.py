@@ -2,6 +2,8 @@ from flask import request
 from flask_restful import Resource
 from flask_jwt_extended import jwt_required
 
+from zou.app.mixin import ArgsMixin
+
 from zou.app.services import (
     user_service,
     assets_service,
@@ -180,3 +182,43 @@ class DoneResource(Resource):
     @jwt_required
     def get(self):
         return user_service.get_done_tasks()
+
+
+class FiltersResource(Resource, ArgsMixin):
+    """
+    Allow to create and retrieve filters for current user and only for
+    open projects.
+    """
+
+    @jwt_required
+    def get(self):
+        return user_service.get_filters()
+
+    @jwt_required
+    def post(self):
+        arguments = self.get_arguments()
+
+        return user_service.create_filter(
+            arguments["list_type"],
+            arguments["name"],
+            arguments["query"],
+            arguments["project_id"]
+        ), 201
+
+    def get_arguments(self):
+        return self.get_args([
+            ("name", "", True),
+            ("query", "", True),
+            ("list_type", "todo", True),
+            ("project_id", None, False)
+        ])
+
+
+class FilterResource(Resource):
+    """
+    Allow to remove given filter if its owned by current user.
+    """
+
+    @jwt_required
+    def delete(self, filter_id):
+        return user_service.remove_filter(filter_id), 204

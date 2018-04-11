@@ -128,5 +128,10 @@ class EntryAlreadyExistsException(Exception):
 class PlaylistNotFoundException(Exception):
     pass
 
+
+class SearchFilterNotFoundException(Exception):
+    pass
+
+
 class ArgumentsException(Exception):
     pass

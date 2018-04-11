@@ -249,3 +249,61 @@ class UserContextRoutesTestCase(ApiDBTestCase):
         path = "data/user/done-tasks/"
         tasks = self.get(path)
         self.assertEquals(len(tasks), 1)
+
+    def test_get_filters(self):
+        project_id = str(self.project.id)
+        path = "data/user/filters/"
+        filter_1 = {
+            "list_type": "asset",
+            "name": "props",
+            "query": "props",
+            "project_id": project_id
+        }
+        filter_2 = {
+            "list_type": "shot",
+            "name": "se01",
+            "query": "se01",
+            "project_id": project_id
+        }
+        filter_3 = {
+            "list_type": "all",
+            "name": "wfa",
+            "query": "wfa",
+            "project_id": project_id
+        }
+        self.post(path, filter_1)
+        self.post(path, filter_2)
+        self.post(path, filter_3)
+
+        result = self.get(path)
+        self.assertTrue("asset" in result)
+        self.assertTrue("shot" in result)
+        self.assertTrue("all" in result)
+        self.assertEqual(len(result["asset"][project_id]), 1)
+        self.assertEqual(len(result["shot"][project_id]), 1)
+        self.assertEqual(len(result["all"][project_id]), 1)
+        self.assertEqual(
+            result["all"][project_id][0]["search_query"], "wfa")
+        self.assertEqual(
+            result["asset"][project_id][0]["search_query"], "props")
+        self.assertEqual(
+            result["shot"][project_id][0]["search_query"], "se01")
+
+    def test_remove_filter(self):
+        project_id = str(self.project.id)
+        path = "data/user/filters"
+        filter_1 = {
+            "list_type": "asset",
+            "name": "props",
+            "query": "props",
+            "project_id": project_id
+        }
+        search_filter = self.post(path, filter_1)
+        result = self.get(path)
+        self.assertTrue("asset" in result)
+
+        print("%s/%s" % (path, search_filter["id"]))
+        self.delete("%s/%s" % (path, search_filter["id"]))
+
+        result = self.get(path)
+        self.assertFalse("asset" in result)
