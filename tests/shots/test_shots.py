@@ -16,10 +16,14 @@ class ShotTestCase(ApiDBTestCase):
         self.shot_dict = self.shot.serialize(obj_type="Shot")
         self.shot_dict["project_name"] = self.project.name
         self.shot_dict["sequence_name"] = self.sequence.name
+        self.serialized_shot = self.shot.serialize(obj_type="Shot")
+        self.serialized_sequence = self.sequence.serialize(obj_type="Sequence")
 
         self.generate_fixture_shot("SH02")
         self.generate_fixture_shot("SH03")
         self.generate_fixture_asset()
+
+        self.generate_fixture_project_standard()
 
     def test_get_shots(self):
         shots = self.get("data/shots/all")
@@ -91,3 +95,14 @@ class ShotTestCase(ApiDBTestCase):
         self.assertEquals(shot["name"], shot_name)
         self.assertEquals(shot["parent_id"], sequence_id)
         self.assertDictEqual(shot["data"], data["data"])
+
+    def test_get_shots_for_project(self):
+        self.generate_fixture_sequence_standard()
+        self.generate_fixture_shot_standard("SH01")
+        self.generate_fixture_shot_standard("SH02")
+        shots = self.get("data/projects/%s/shots" % self.project.id)
+        self.assertEquals(len(shots), 3)
+        self.assertDictEqual(shots[0], self.serialized_shot)
+
+    def test_get_shots_for_project_404(self):
+        self.get("data/projects/unknown/shots", 404)

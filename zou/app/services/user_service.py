@@ -268,6 +268,20 @@ def check_assigned(task_id):
     return True
 
 
+def check_working_on_entity(entity_id):
+    """
+    Return True if user has task assigned which is related to given entity.
+    """
+    query = Task.query \
+        .filter(build_assignee_filter()) \
+        .filter(Task.entity_id == entity_id)
+
+    if query.first() is None:
+        raise permissions.PermissionDenied
+
+    return True
+
+
 def check_has_task_related(project_id):
     """
     Return true if current user is assigned to a task of the given project.
@@ -322,7 +336,7 @@ def get_filters():
     filters = SearchFilter.query \
         .join(Project, ProjectStatus) \
         .filter(SearchFilter.person_id == current_user.id) \
-        .filter(open_project_filter()) \
+        .filter(build_open_project_filter()) \
         .all()
 
     for search_filter in filters:
