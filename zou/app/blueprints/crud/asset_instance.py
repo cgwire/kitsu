@@ -24,3 +24,11 @@ class AssetInstanceResource(BaseModelResource):
             asset_instance = self.get_model_or_404(instance["id"])
             asset = assets_service.get_asset(asset_instance.asset_id)
             return user_service.check_has_task_related(asset["project_id"])
+
+    def check_update_permissions(self, asset_instance, data):
+        if permissions.has_manager_permissions():
+            return True
+        else:
+            return user_service.check_working_on_entity(
+                asset_instance["entity_id"]
+            )

@@ -41,11 +41,14 @@ class CommentTaskResource(Resource):
         tasks_service.get_task(task_id)
         if not permissions.has_manager_permissions():
             user_service.check_assigned(task_id)
+
         task_status = tasks_service.get_task_status(task_status_id)
+
         if person_id:
             person = persons_service.get_person(person_id)
         else:
             person = persons_service.get_current_user()
+
         comment = tasks_service.create_comment(
             object_id=task_id,
             object_type="Task",
@@ -417,35 +420,39 @@ class TaskFullResource(Resource):
         if not permissions.has_manager_permissions():
             user_service.check_has_task_related(task["project_id"])
 
-        result = task
         task_type = tasks_service.get_task_type(task["task_type_id"])
-        result["task_type"] = task_type
-        try:
-            assigner = persons_service.get_person(task["assigner_id"])
-            result["assigner"] = assigner
-        except PersonNotFoundException:
-            pass
         project = projects_service.get_project(task["project_id"])
-        result["project"] = project
         task_status = tasks_service.get_task_status(task["task_status_id"])
-        result["task_status"] = task_status
         entity = entities_service.get_entity(task["entity_id"])
-        result["entity"] = entity
-        if entity["parent_id"] is not None:
-            sequence = shots_service.get_sequence(entity["parent_id"])
-            result["sequence"] = sequence
-            if sequence["parent_id"] is not None:
-                episode = shots_service.get_episode(sequence["parent_id"])
-                result["episode"] = episode
         entity_type = entities_service.get_entity_type(entity["entity_type_id"])
-        result["entity_type"] = entity_type
         assignees = []
         for assignee_id in task["assignees"]:
             assignees.append(persons_service.get_person(assignee_id))
-        result["persons"] = assignees
-        result["type"] = "Task"
 
-        return result, 200
+        task.update({
+            "entity": entity,
+            "task_type": task_type,
+            "task_status": task_status,
+            "project": project,
+            "entity_type": entity_type,
+            "persons": assignees,
+            "type": "Task"
+        })
+
+        try:
+            assigner = persons_service.get_person(task["assigner_id"])
+            task["assigner"] = assigner
+        except PersonNotFoundException:
+            pass
+
+        if entity["parent_id"] is not None:
+            sequence = shots_service.get_sequence(entity["parent_id"])
+            task["sequence"] = sequence
+            if sequence["parent_id"] is not None:
+                episode = shots_service.get_episode(sequence["parent_id"])
+                task["episode"] = episode
+
+        return task, 200
 
 
 class TaskStartResource(Resource):
