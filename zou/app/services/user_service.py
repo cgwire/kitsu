@@ -52,7 +52,7 @@ def build_related_projects_filter():
 
 def related_projects():
     """
-    Return all projects related to current user: open projects with at least
+    Return all projects related to current user: open projects with at least
     one task assigned to current user.
     """
     projects = Project.query \
