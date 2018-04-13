@@ -73,6 +73,9 @@ class ShotsResource(Resource):
         Retrieve all shot entries. Filters can be specified in the query string.
         """
         criterions = query.get_query_criterions_from_request(request)
+        if "sequence_id" in criterions:
+            sequence = shots_service.get_sequence(criterions["sequence_id"])
+            criterions["project_id"] = sequence["project_id"]
         user_service.check_project_access(criterions)
         return shots_service.get_shots(criterions)
 

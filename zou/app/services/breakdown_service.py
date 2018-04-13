@@ -14,8 +14,20 @@ from zou.app.services import (
     entities_service
 )
 
+"""
+Breakdown can be represented in two ways:
+* Relation entries linking an asset and a shot. A number of number of occurences
+  can be mentioned.
+* Storing an entry for each instance of an asset casted in a shot or a scene.
+
+Warning: These two representations are not linked. Data are not synchronized.
+"""
+
 
 def get_casting(shot_id):
+    """
+    Return all assets and their number of occurences listed in given shot.
+    """
     casting = []
     links = EntityLink.query \
         .filter_by(entity_in_id=shot_id) \
@@ -36,6 +48,10 @@ def get_casting(shot_id):
 
 
 def update_casting(shot_id, casting):
+    """
+    Update casting for given shot. Casting is an array of dictionaries made of
+    two fields: `asset_id` and `nb_occurences`.
+    """
     shot = shots_service.get_shot_raw(shot_id)
     shot.update({"entities_out": []})
     for cast in casting:
@@ -48,6 +64,9 @@ def update_casting(shot_id, casting):
 
 
 def get_cast_in(asset_id):
+    """
+    Get the list of shots where an asset is casted in.
+    """
     cast_in = []
     Sequence = aliased(Entity, name="sequence")
     Episode = aliased(Entity, name="episode")
@@ -88,6 +107,11 @@ def get_cast_in(asset_id):
 
 
 def get_asset_instances_for_entity(entity_id, entity_type_id=None):
+    """
+    Return all asset instances for given entity (shot or scene).
+
+    Asset instances are a different way to represent the casting of a shot.
+    """
     query = AssetInstance.query \
         .filter(AssetInstance.entity_id == entity_id) \
         .order_by(AssetInstance.asset_id, AssetInstance.number) \
@@ -107,7 +131,10 @@ def get_asset_instances_for_entity(entity_id, entity_type_id=None):
     return result
 
 
-def get_entity_asset_instances_for_asset(asset_id, entity_type_id):
+def get_asset_instances_for_asset_and_entity_type(asset_id, entity_type_id):
+    """
+    Return all asset instances for given asset and entity type (shot or scene).
+    """
     instances = AssetInstance.query \
         .filter(AssetInstance.asset_id == asset_id) \
         .filter(AssetInstance.entity_type_id == entity_type_id) \
@@ -124,6 +151,9 @@ def get_entity_asset_instances_for_asset(asset_id, entity_type_id):
 
 
 def add_asset_instance_to_entity(entity_id, asset_id, description=""):
+    """
+    Add an asset instance to given entity (scene or shot).
+    """
     entity = entities_service.get_entity_raw(entity_id)
     instance = AssetInstance.query \
         .filter(AssetInstance.entity_type_id == entity.entity_type_id) \
@@ -149,6 +179,10 @@ def add_asset_instance_to_entity(entity_id, asset_id, description=""):
 
 
 def build_asset_instance_name(asset_id, number):
+    """
+    Helpers to generate normalized asset instance name. It is used to build
+    default instance names.
+    """
     asset = Entity.get(asset_id)
     asset_name = slugify(asset.name, separator="_")
     number = str(number).zfill(4)
@@ -157,35 +191,56 @@ def build_asset_instance_name(asset_id, number):
 
 
 def get_asset_instances_for_shot(shot_id):
+    """
+    Return asset instances for given shot.
+    """
     return get_asset_instances_for_entity(shot_id)
 
 
 def get_shot_asset_instances_for_asset(asset_id):
-    return get_entity_asset_instances_for_asset(
+    """
+    Return asset instances casted in a shot for given asset.
+    """
+    return get_asset_instances_for_asset_and_entity_type(
         asset_id,
         shots_service.get_shot_type()["id"]
     )
 
 
 def add_asset_instance_to_shot(shot_id, asset_id, description=""):
+    """
+    Add asset instance to given shot.
+    """
     return add_asset_instance_to_entity(shot_id, asset_id, description)
 
 
 def get_asset_instances_for_scene(scene_id):
+    """
+    Return asset instance casted in given scene.
+    """
     return get_asset_instances_for_entity(scene_id)
 
 
 def get_camera_instances_for_scene(scene_id):
+    """
+    Return all instances of type Camera for given layout scene.
+    """
     camera_entity_type = assets_service.get_or_create_asset_type("Camera")
     return get_asset_instances_for_entity(scene_id, camera_entity_type["id"])
 
 
 def get_scene_asset_instances_for_asset(asset_id):
-    return get_entity_asset_instances_for_asset(
+    """
+    Return all asset instances of an asset casted in layout scenes.
+    """
+    return get_asset_instances_for_asset_and_entity_type(
         asset_id,
         shots_service.get_scene_type()["id"]
     )
 
 
 def add_asset_instance_to_scene(scene_id, asset_id, description=""):
+    """
+    Create a new asset instance for given asset and scene.
+    """
     return add_asset_instance_to_entity(scene_id, asset_id, description)

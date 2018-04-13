@@ -2,6 +2,8 @@ from flask import request
 from flask_restful import Resource
 from flask_jwt_extended import jwt_required
 
+from zou.app.mixin import ArgsMixin
+
 from zou.app.services import (
     user_service,
     assets_service,
@@ -18,7 +20,7 @@ class AssetTasksResource(Resource):
     @jwt_required
     def get(self, asset_id):
         assets_service.get_asset(asset_id)
-        return user_service.get_entity_tasks(asset_id)
+        return user_service.get_tasks_for_entity(asset_id)
 
 
 class AssetTaskTypesResource(Resource):
@@ -29,7 +31,7 @@ class AssetTaskTypesResource(Resource):
     @jwt_required
     def get(self, asset_id):
         assets_service.get_asset(asset_id)
-        return user_service.get_entity_task_types(asset_id)
+        return user_service.get_task_types_for_entity(asset_id)
 
 
 class ShotTaskTypesResource(Resource):
@@ -40,7 +42,7 @@ class ShotTaskTypesResource(Resource):
     @jwt_required
     def get(self, shot_id):
         shots_service.get_shot(shot_id)
-        return user_service.get_entity_task_types(shot_id)
+        return user_service.get_task_types_for_entity(shot_id)
 
 
 class SceneTaskTypesResource(Resource):
@@ -51,7 +53,7 @@ class SceneTaskTypesResource(Resource):
     @jwt_required
     def get(self, scene_id):
         shots_service.get_scene(scene_id)
-        return user_service.get_entity_task_types(scene_id)
+        return user_service.get_task_types_for_entity(scene_id)
 
 
 class AssetTypeAssetsResource(Resource):
@@ -64,9 +66,7 @@ class AssetTypeAssetsResource(Resource):
     def get(self, project_id, asset_type_id):
         projects_service.get_project(project_id)
         assets_service.get_asset_type(asset_type_id)
-        return user_service.get_asset_type_assets(
-            project_id, asset_type_id
-        )
+        return user_service.get_assets_for_asset_type(project_id, asset_type_id)
 
 
 class OpenProjectsResource(Resource):
@@ -89,7 +89,7 @@ class ProjectSequencesResource(Resource):
     @jwt_required
     def get(self, project_id):
         projects_service.get_project(project_id)
-        return user_service.get_project_sequences(project_id)
+        return user_service.get_sequences_for_project(project_id)
 
 
 class ProjectEpisodesResource(Resource):
@@ -113,7 +113,7 @@ class ProjectAssetTypesResource(Resource):
     @jwt_required
     def get(self, project_id):
         projects_service.get_project(project_id)
-        return user_service.get_project_asset_types(project_id)
+        return user_service.get_asset_types_for_project(project_id)
 
 
 class SequenceShotsResource(Resource):
@@ -125,7 +125,7 @@ class SequenceShotsResource(Resource):
     @jwt_required
     def get(self, sequence_id):
         shots_service.get_sequence(sequence_id)
-        return user_service.get_sequence_shots(sequence_id)
+        return user_service.get_shots_for_sequence(sequence_id)
 
 
 class SequenceScenesResource(Resource):
@@ -137,7 +137,7 @@ class SequenceScenesResource(Resource):
     @jwt_required
     def get(self, sequence_id):
         shots_service.get_sequence(sequence_id)
-        return user_service.get_sequence_scenes(sequence_id)
+        return user_service.get_scenes_for_sequence(sequence_id)
 
 
 class ShotTasksResource(Resource):
@@ -148,7 +148,7 @@ class ShotTasksResource(Resource):
     @jwt_required
     def get(self, shot_id):
         shots_service.get_shot(shot_id)
-        return user_service.get_entity_tasks(shot_id)
+        return user_service.get_tasks_for_entity(shot_id)
 
 
 class SceneTasksResource(Resource):
@@ -159,7 +159,7 @@ class SceneTasksResource(Resource):
     @jwt_required
     def get(self, scene_id):
         shots_service.get_scene(scene_id)
-        return user_service.get_entity_tasks(scene_id)
+        return user_service.get_tasks_for_entity(scene_id)
 
 
 class TodosResource(Resource):
@@ -182,3 +182,43 @@ class DoneResource(Resource):
     @jwt_required
     def get(self):
         return user_service.get_done_tasks()
+
+
+class FiltersResource(Resource, ArgsMixin):
+    """
+    Allow to create and retrieve filters for current user and only for
+    open projects.
+    """
+
+    @jwt_required
+    def get(self):
+        return user_service.get_filters()
+
+    @jwt_required
+    def post(self):
+        arguments = self.get_arguments()
+
+        return user_service.create_filter(
+            arguments["list_type"],
+            arguments["name"],
+            arguments["query"],
+            arguments["project_id"]
+        ), 201
+
+    def get_arguments(self):
+        return self.get_args([
+            ("name", "", True),
+            ("query", "", True),
+            ("list_type", "todo", True),
+            ("project_id", None, False)
+        ])
+
+
+class FilterResource(Resource):
+    """
+    Allow to remove given filter if its owned by current user.
+    """
+
+    @jwt_required
+    def delete(self, filter_id):
+        return user_service.remove_filter(filter_id), 204

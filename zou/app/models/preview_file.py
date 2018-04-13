@@ -13,6 +13,7 @@ class PreviewFile(db.Model, BaseMixin, SerializerMixin):
     name = db.Column(db.String(250))
     revision = db.Column(db.Integer(), default=1)
     description = db.Column(db.Text())
+    path = db.Column(db.String(400))
 
     source = db.Column(db.String(40))
     shotgun_id = db.Column(db.Integer, unique=True)

@@ -76,12 +76,6 @@ class ImportShotgunShotsResource(BaseImportShotgunResource):
                 assets.append(asset)
         return assets
 
-    def extract_custom_data(self, sg_shot):
-        return {
-            k: v for k, v in sg_shot.items()
-            if self.is_custom_field(k) and v is not None
-        }
-
     def is_custom_field(self, name):
         non_custom_fields = [
             "sg_cut_in",

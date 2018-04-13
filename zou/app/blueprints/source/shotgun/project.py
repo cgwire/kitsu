@@ -26,8 +26,7 @@ class ImportShotgunProjectsResource(BaseImportShotgunResource):
 
     def extract_data(self, sg_project):
         sg_project_status = sg_project["sg_status"]
-        sg_fps = sg_project.get("sg_fps", None)
-        sg_width___height = sg_project.get("sg_width___height", None)
+        custom_fields = self.extract_custom_data(sg_project)
         project_status_id = self.project_status_map.get(sg_project_status, None)
 
         data = {
@@ -37,13 +36,14 @@ class ImportShotgunProjectsResource(BaseImportShotgunResource):
             "data": {}
         }
 
-        if sg_fps is not None:
-            data["data"]["fps"] = sg_fps
-
-        if sg_width___height is not None:
-            data["data"]["width_height"] = sg_width___height
-
+        data["data"] = custom_fields
         return data
+
+    def is_custom_field(self, name):
+        non_custom_fields = [
+            "sg_status",
+        ]
+        return name[:3] == "sg_" and name not in non_custom_fields
 
     def import_entry(self, data):
         project = Project.get_by(shotgun_id=data["shotgun_id"])

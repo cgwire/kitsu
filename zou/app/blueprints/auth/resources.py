@@ -87,7 +87,7 @@ class AuthenticatedResource(Resource):
     @jwt_required
     def get(self):
         try:
-            person = persons_service.get_by_email(get_jwt_identity())
+            person = persons_service.get_person_by_email(get_jwt_identity())
             return {
                 "authenticated": True,
                 "user": person
@@ -381,7 +381,7 @@ class PersonListResource(Resource):
     @jwt_required
     def get(self):
         person_names = []
-        for person in persons_service.all():
+        for person in persons_service.get_persons():
             person_names.append({
                 "id": person["id"],
                 "first_name": person["first_name"],

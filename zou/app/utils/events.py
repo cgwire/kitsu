@@ -60,5 +60,11 @@ def emit(event, data={}):
         "type": event,
         "data": {"data": data}})
     )
+    from zou.app import config
     for func in event_handlers.values():
-        func.handle_event(data)
+        if config.ENABLE_JOB_QUEUE:
+            from zou.app.stores.queue_store import job_queue
+            job_queue.enqueue(func.handle_event, data)
+        else:
+            func.handle_event(data)
+

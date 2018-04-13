@@ -19,6 +19,9 @@ def get_page_from_request(request):
 
 
 def apply_criterions_to_db_query(model, db_query, criterions):
+    """
+    Apply criterions given in HTTP request to the sqlachemy db query object.
+    """
     if "name" in criterions and hasattr(model, "name"):
         value = criterions["name"]
         db_query = db_query.filter(model.name.ilike(value))

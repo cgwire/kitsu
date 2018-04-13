@@ -17,22 +17,6 @@ from zou.app.services.exception import (
 )
 
 
-def get_sequence_from_shot(shot):
-    try:
-        sequence = Entity.get(shot["parent_id"])
-    except:
-        raise SequenceNotFoundException('Wrong parent_id for given shot.')
-    return sequence.serialize(obj_type="Sequence")
-
-
-def get_episode_from_sequence(sequence):
-    try:
-        episode = Entity.get(sequence["parent_id"])
-    except:
-        raise EpisodeNotFoundException('Wrong parent_id for given sequence.')
-    return episode.serialize(obj_type="Episode")
-
-
 @cache.memoize_function(120)
 def get_episode_type():
     return entities_service.get_entity_type_by_name("Episode")
@@ -59,6 +43,9 @@ def get_camera_type():
 
 
 def get_episodes(criterions={}):
+    """
+    Get all episodes for given criterions.
+    """
     episode_type = get_episode_type()
     criterions["entity_type_id"] = episode_type["id"]
     query = Entity.query.order_by(Entity.name)
@@ -67,6 +54,9 @@ def get_episodes(criterions={}):
 
 
 def get_sequences(criterions={}):
+    """
+    Get all sequences for given criterions.
+    """
     sequence_type = get_sequence_type()
     criterions["entity_type_id"] = sequence_type["id"]
     query = Entity.query.order_by(Entity.name)
@@ -75,6 +65,9 @@ def get_sequences(criterions={}):
 
 
 def get_shots(criterions={}):
+    """
+    Get all shots for given criterions.
+    """
     shot_type = get_shot_type()
     criterions["entity_type_id"] = shot_type["id"]
     Sequence = aliased(Entity, name='sequence')
@@ -98,6 +91,9 @@ def get_shots(criterions={}):
 
 
 def get_scenes(criterions={}):
+    """
+    Get all scenes for given criterions.
+    """
     scene_type = get_scene_type()
     criterions["entity_type_id"] = scene_type["id"]
     Sequence = aliased(Entity, name='sequence')
@@ -121,6 +117,9 @@ def get_scenes(criterions={}):
 
 
 def get_episode_map(criterions={}):
+    """
+    Returns a dict where keys are episode_id and values are episodes.
+    """
     episodes = get_episodes(criterions)
     episode_map = {}
     for episode in episodes:
@@ -129,6 +128,9 @@ def get_episode_map(criterions={}):
 
 
 def get_shots_and_tasks(criterions={}):
+    """
+    Get all shots for given criterions with related tasks for each shot.
+    """
     shot_type = get_shot_type()
     shot_map = {}
     task_map = {}
@@ -210,6 +212,9 @@ def get_shots_and_tasks(criterions={}):
 
 
 def get_shot_raw(shot_id):
+    """
+    Return given shot as an active record.
+    """
     shot_type = get_shot_type()
     try:
         shot = Entity.get_by(
@@ -226,26 +231,32 @@ def get_shot_raw(shot_id):
 
 
 def get_shot(shot_id):
+    """
+    Return given shot as a dictionary.
+    """
     return get_shot_raw(shot_id).serialize(obj_type="Shot")
 
 
 def get_full_shot(shot_id):
+    """
+    Return given shot as a dictionary with extra data like project and
+    sequence names.
+    """
     shot = get_shot(shot_id)
-    sequence = Entity.get(shot["parent_id"])
-    project = Project.get(shot["project_id"])
-    shot["project_name"] = project.name
-    shot["sequence_id"] = str(sequence.id)
-    shot["sequence_name"] = sequence.name
+    sequence = get_sequence(shot["parent_id"])
+    project = projects_service.get_project(shot["project_id"])
+    shot["project_name"] = project["name"]
+    shot["sequence_id"] = sequence["id"]
+    shot["sequence_name"] = sequence["name"]
+    if sequence["parent_id"] is not None:
+        episode = get_episode(sequence["parent_id"])
+        shot["episode_id"] = episode["id"]
+        shot["episode_name"] = episode["name"]
 
-    if sequence.parent_id is not None:
-        episode = Entity.get(sequence.parent_id)
-        shot["episode_id"] = str(episode.id)
-        shot["episode_name"] = episode.name
-
+    task_dicts = []
     tasks = Task.query \
         .filter_by(entity_id=shot_id) \
         .all()
-    task_dicts = []
     for task in tasks:
         task_dicts.append({
             "id": str(task.id),
@@ -258,6 +269,9 @@ def get_full_shot(shot_id):
 
 
 def get_scene_raw(scene_id):
+    """
+    Return given scene as an active record.
+    """
     scene_type = get_scene_type()
     try:
         scene = Entity.get_by(
@@ -274,26 +288,35 @@ def get_scene_raw(scene_id):
 
 
 def get_scene(scene_id):
+    """
+    Return given scene as a dictionary.
+    """
     return get_scene_raw(scene_id).serialize(obj_type="Scene")
 
 
 def get_full_scene(scene_id):
+    """
+    Return given scene as a dictionary with extra data like project and sequence
+    names.
+    """
     scene = get_scene(scene_id)
-    project = Project.get(scene["project_id"])
-    sequence = Entity.get(scene["parent_id"])
-    scene["project_name"] = project.name
-    scene["sequence_id"] = str(sequence.id)
-    scene["sequence_name"] = sequence.name
-
-    if sequence.parent_id is not None:
-        episode = Entity.get(sequence.parent_id)
-        scene["episode_id"] = str(episode.id)
-        scene["episode_name"] = episode.name
+    project = projects_service.get_project(scene["project_id"])
+    sequence = get_sequence(scene["parent_id"])
+    scene["project_name"] = project["name"]
+    scene["sequence_id"] = sequence["id"]
+    scene["sequence_name"] = sequence["name"]
+    if sequence["parent_id"] is not None:
+        episode = get_episode(sequence["parent_id"])
+        scene["episode_id"] = episode["id"]
+        scene["episode_name"] = episode["name"]
 
     return scene
 
 
 def get_sequence_raw(sequence_id):
+    """
+    Return given sequence as an active record.
+    """
     sequence_type = get_sequence_type()
     try:
         sequence = Entity.get_by(
@@ -310,23 +333,43 @@ def get_sequence_raw(sequence_id):
 
 
 def get_sequence(sequence_id):
+    """
+    Return given sequence as a dictionary.
+    """
     return get_sequence_raw(sequence_id).serialize(obj_type="Sequence")
 
 
 def get_full_sequence(sequence_id):
+    """
+    Return given sequence as a dictionary with extra data like project name.
+    """
     sequence = get_sequence(sequence_id)
-    project = Project.get(sequence["project_id"])
-    sequence["project_name"] = project.name
+    project = projects_service.get_project(sequence["project_id"])
+    sequence["project_name"] = project["name"]
 
     if sequence["parent_id"] is not None:
-        episode = Entity.get(sequence["parent_id"])
-        sequence["episode_id"] = str(episode.id)
-        sequence["episode_name"] = episode.name
+        episode = get_episode(sequence["parent_id"])
+        sequence["episode_id"] = episode["id"]
+        sequence["episode_name"] = episode["name"]
 
     return sequence
 
 
+def get_sequence_from_shot(shot):
+    """
+    Return parent sequence of given shot.
+    """
+    try:
+        sequence = Entity.get(shot["parent_id"])
+    except:
+        raise SequenceNotFoundException('Wrong parent_id for given shot.')
+    return sequence.serialize(obj_type="Sequence")
+
+
 def get_episode_raw(episode_id):
+    """
+    Return given episode as an active record.
+    """
     episode_type = get_episode_type()
     try:
         episode = Entity.get_by(
@@ -342,17 +385,37 @@ def get_episode_raw(episode_id):
 
 
 def get_episode(episode_id):
+    """
+    Return given episode as a dictionary.
+    """
     return get_episode_raw(episode_id).serialize(obj_type="Episode")
 
 
 def get_full_episode(episode_id):
+    """
+    Return given episode as a dictionary with extra data like project name.
+    """
     episode = get_episode(episode_id)
-    project = Project.get(episode["project_id"])
-    episode["project_name"] = project.name
+    project = projects_service.get_project(episode["project_id"])
+    episode["project_name"] = project["name"]
     return episode
 
 
+def get_episode_from_sequence(sequence):
+    """
+    Return parent episode of given sequence.
+    """
+    try:
+        episode = Entity.get(sequence["parent_id"])
+    except:
+        raise EpisodeNotFoundException('Wrong parent_id for given sequence.')
+    return episode.serialize(obj_type="Episode")
+
+
 def get_shot_by_shotgun_id(shotgun_id):
+    """
+    Retrieves a shot identifed by its shotgun ID (stored during import).
+    """
     shot_type = get_shot_type()
     shot = Entity.get_by(
         entity_type_id=shot_type["id"],
@@ -365,6 +428,9 @@ def get_shot_by_shotgun_id(shotgun_id):
 
 
 def get_scene_by_shotgun_id(shotgun_id):
+    """
+    Retrieves a scene identifed by its shotgun ID (stored during import).
+    """
     scene_type = get_scene_type()
     scene = Entity.get_by(
         entity_type_id=scene_type["id"],
@@ -377,6 +443,9 @@ def get_scene_by_shotgun_id(shotgun_id):
 
 
 def get_sequence_by_shotgun_id(shotgun_id):
+    """
+    Retrieves a sequence identifed by its shotgun ID (stored during import).
+    """
     sequence_type = get_sequence_type()
     sequence = Entity.get_by(
         entity_type_id=sequence_type["id"],
@@ -389,6 +458,9 @@ def get_sequence_by_shotgun_id(shotgun_id):
 
 
 def get_episode_by_shotgun_id(shotgun_id):
+    """
+    Retrieves an episode identifed by its shotgun ID (stored during import).
+    """
     episode_type = get_episode_type()
     episode = Entity.get_by(
         entity_type_id=episode_type["id"],
@@ -401,26 +473,41 @@ def get_episode_by_shotgun_id(shotgun_id):
 
 
 def is_shot(entity):
+    """
+    Returns True if given entity has 'Shot' as entity type
+    """
     shot_type = get_shot_type()
     return str(entity["entity_type_id"]) == shot_type["id"]
 
 
 def is_scene(entity):
+    """
+    Returns True if given entity has 'Scene' as entity type
+    """
     scene_type = get_scene_type()
     return str(entity["entity_type_id"]) == scene_type["id"]
 
 
 def is_sequence(entity):
+    """
+    Returns True if given entity has 'Sequence' as entity type
+    """
     sequence_type = get_sequence_type()
     return str(entity["entity_type_id"]) == sequence_type["id"]
 
 
 def is_episode(entity):
+    """
+    Returns True if given entity has 'Episode' as entity type
+    """
     episode_type = get_episode_type()
     return str(entity["entity_type_id"]) == episode_type["id"]
 
 
 def get_or_create_episode(project_id, name):
+    """
+    Retrieve episode matching given project and name or create it.
+    """
     episode_type = get_episode_type()
     episode = Entity.get_by(
         entity_type_id=episode_type["id"],
@@ -438,6 +525,9 @@ def get_or_create_episode(project_id, name):
 
 
 def get_or_create_sequence(project_id, episode_id, name):
+    """
+    Retrieve sequence matching given project, episode and name or create it.
+    """
     sequence_type = get_sequence_type()
     sequence = Entity.get_by(
         entity_type_id=sequence_type["id"],
@@ -456,18 +546,11 @@ def get_or_create_sequence(project_id, episode_id, name):
     return sequence.serialize()
 
 
-def get_entities_for_project(project_id, entity_type_id, obj_type="Entity"):
-    projects_service.get_project_raw(project_id)  # exception if not exists
-    result = Entity.query \
-        .filter(Entity.entity_type_id == entity_type_id) \
-        .filter(Entity.project_id == project_id) \
-        .order_by(Entity.name) \
-        .all()
-    return Entity.serialize_list(result, obj_type=obj_type)
-
-
 def get_episodes_for_project(project_id):
-    return get_entities_for_project(
+    """
+    Retrieve all episodes related to given project.
+    """
+    return entities_service.get_entities_for_project(
         project_id,
         get_episode_type()["id"],
         "Episode"
@@ -475,7 +558,10 @@ def get_episodes_for_project(project_id):
 
 
 def get_sequences_for_project(project_id):
-    return get_entities_for_project(
+    """
+    Retrieve all sequences related to given project.
+    """
+    return entities_service.get_entities_for_project(
         project_id,
         get_sequence_type()["id"],
         "Sequence"
@@ -483,7 +569,10 @@ def get_sequences_for_project(project_id):
 
 
 def get_shots_for_project(project_id):
-    return get_entities_for_project(
+    """
+    Retrieve all shots related to given project.
+    """
+    return entities_service.get_entities_for_project(
         project_id,
         get_shot_type()["id"],
         "Shot"
@@ -491,7 +580,10 @@ def get_shots_for_project(project_id):
 
 
 def get_scenes_for_project(project_id):
-    return get_entities_for_project(
+    """
+    Retrieve all scenes related to given project.
+    """
+    return entities_service.get_entities_for_project(
         project_id,
         get_scene_type()["id"],
         "Scene"
@@ -499,6 +591,9 @@ def get_scenes_for_project(project_id):
 
 
 def get_scenes_for_sequence(sequence_id):
+    """
+    Retrieve all scenes children of given sequence.
+    """
     get_sequence(sequence_id)
     scene_type_id = get_scene_type()["id"]
     result = Entity.query \
@@ -510,6 +605,10 @@ def get_scenes_for_sequence(sequence_id):
 
 
 def remove_shot(shot_id):
+    """
+    Remove given shot from database. If it has tasks linked to it, it marks
+    the shot as canceled.
+    """
     shot = get_shot_raw(shot_id)
     try:
         shot.delete()
@@ -521,6 +620,10 @@ def remove_shot(shot_id):
 
 
 def remove_scene(scene_id):
+    """
+    Remove given scene from database. If it has tasks linked to it, it marks
+    the scene as canceled.
+    """
     scene = get_scene_raw(scene_id)
     try:
         scene.delete()
@@ -532,6 +635,9 @@ def remove_scene(scene_id):
 
 
 def create_episode(project_id, name):
+    """
+    Create episode for given project.
+    """
     episode_type = get_episode_type()
     episode = Entity.get_by(
         entity_type_id=episode_type["id"],
@@ -548,6 +654,9 @@ def create_episode(project_id, name):
 
 
 def create_sequence(project_id, episode_id, name):
+    """
+    Create sequence for given project and episode.
+    """
     sequence_type = get_sequence_type()
 
     if episode_id is not None:
@@ -570,6 +679,9 @@ def create_sequence(project_id, episode_id, name):
 
 
 def create_shot(project_id, sequence_id, name, data={}):
+    """
+    Create shot for given project and sequence.
+    """
     shot_type = get_shot_type()
 
     if sequence_id is not None:
@@ -593,6 +705,9 @@ def create_shot(project_id, sequence_id, name, data={}):
 
 
 def create_scene(project_id, sequence_id, name):
+    """
+    Create scene for given project and sequence.
+    """
     scene_type = get_scene_type()
 
     if sequence_id is not None:
@@ -619,5 +734,8 @@ def create_scene(project_id, sequence_id, name):
 
 
 def get_entities_out(shot_id):
+    """
+    Get entities related to shot as external entities.
+    """
     shot = get_shot_raw(shot_id)
     return Entity.serialize_list(shot.entities_out, obj_type="Asset")

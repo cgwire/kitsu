@@ -11,7 +11,7 @@ class ImportShotgunProjectTestCase(ShotgunTestCase):
         super(ImportShotgunProjectTestCase, self).setUp()
 
     def test_import_projects(self):
-        self.projects = self.load_fixture('projects')
+        self.projects = self.load_fixture("projects")
         self.assertEqual(len(self.projects), 2)
 
         self.projects = self.get("data/projects")
@@ -28,8 +28,8 @@ class ImportShotgunProjectTestCase(ShotgunTestCase):
         self.assertDictEqual(self.projects[0]["file_tree"], tree)
 
     def test_import_projects_twice(self):
-        self.projects = self.load_fixture('projects')
-        self.projects = self.load_fixture('projects')
+        self.projects = self.load_fixture("projects")
+        self.projects = self.load_fixture("projects")
         self.assertEqual(len(self.projects), 2)
 
         self.projects = self.get("data/projects")
@@ -57,8 +57,8 @@ class ImportShotgunProjectTestCase(ShotgunTestCase):
         self.assertEqual(project["name"], sg_project["name"])
         self.assertEqual(project["shotgun_id"], sg_project["id"])
         self.assertEqual(project["project_status_id"], str(project_status.id))
-        self.assertEqual(project["data"]["fps"], sg_project["sg_fps"])
+        self.assertEqual(project["data"]["sg_fps"], sg_project["sg_fps"])
         self.assertEqual(
-            project["data"]["width_height"],
+            project["data"]["sg_width___height"],
             sg_project["sg_width___height"]
         )

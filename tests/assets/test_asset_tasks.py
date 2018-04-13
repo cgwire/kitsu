@@ -19,6 +19,8 @@ class AssetTasksTestCase(ApiDBTestCase):
         self.generate_fixture_shot_task()
         self.generate_fixture_task()
         self.person_id = str(self.person.id)
+        self.asset_id = self.asset.id
+        self.task_type_dict = self.task_type.serialize()
 
     def test_get_tasks_for_asset(self):
         tasks = self.get("data/assets/%s/tasks" % self.asset.id)
@@ -33,3 +35,14 @@ class AssetTasksTestCase(ApiDBTestCase):
         self.assertEqual(
             assets[0]["tasks"][0]["assignees"][0], str(self.person_id)
         )
+
+    def test_get_task_types_for_asset(self):
+        task_types = self.get("data/assets/%s/task-types" % self.asset_id)
+        self.assertEquals(len(task_types), 1)
+        self.assertDictEqual(
+            task_types[0],
+            self.task_type_dict
+        )
+
+    def test_get_task_types_for_asset_not_found(self):
+        self.get("data/assets/no-asset/task-types", 404)

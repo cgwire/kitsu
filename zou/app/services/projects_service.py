@@ -22,7 +22,7 @@ def open_projects(name=None):
     return fields.serialize_value(query.all())
 
 
-def all_projects(name=None):
+def get_projects():
     """
     Return all projects. Allow to filter projects by name.
     """
@@ -30,9 +30,6 @@ def all_projects(name=None):
         .join(ProjectStatus) \
         .add_columns(ProjectStatus.name) \
         .order_by(Project.name)
-
-    if name is not None:
-        query = query.filter(Project.name.ilike(name))
 
     result = []
     for entry in query.all():
@@ -92,7 +89,7 @@ def save_project_status(project_statuses):
     return result
 
 
-def get_or_create(name):
+def get_or_create_project(name):
     """
     Get project which match given name. Create it if it does not exist.
     """
@@ -104,19 +101,6 @@ def get_or_create(name):
             project_status_id=open_status["id"]
         )
         project.save()
-    return project.serialize()
-
-
-def get_project_by_name(project_name):
-    """
-    Get project matching given name. Raises an exception if project is not
-    found.
-    """
-    project = Project.get_by(name=project_name)
-
-    if project is None:
-        raise ProjectNotFoundException()
-
     return project.serialize()
 
 
@@ -142,6 +126,19 @@ def get_project(project_id):
     not found.
     """
     return get_project_raw(project_id).serialize()
+
+
+def get_project_by_name(project_name):
+    """
+    Get project matching given name. Raises an exception if project is not
+    found.
+    """
+    project = Project.query.filter(Project.name.ilike(project_name)).first()
+
+    if project is None:
+        raise ProjectNotFoundException()
+
+    return project.serialize()
 
 
 def update_project(project_id, data):

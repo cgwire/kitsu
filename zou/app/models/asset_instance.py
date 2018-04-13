@@ -35,6 +35,7 @@ class AssetInstance(db.Model, BaseMixin, SerializerMixin):
     name = db.Column(db.String(80))
     number = db.Column(db.Integer())
     description = db.Column(db.String(200))
+    active = db.Column(db.Boolean())
     data = db.Column(JSONB)
 
     __table_args__ = (

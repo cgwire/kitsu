@@ -21,6 +21,14 @@ from zou.app.stores import auth_tokens_store
 
 
 def check_auth(app, email, password):
+    """
+    Depending on configured strategy, it checks if given email and password
+    mach an active user in the database. It raises exceptions adapted to
+    encountered error (no auth strategy configured, wrong email, wrong passwor
+    or unactive user).
+    App is needed as parameter to give access to configuration while avoiding
+    cyclic imports.
+    """
     strategy = app.config["AUTH_STRATEGY"]
     if strategy == "auth_local_classic":
         user = local_auth_strategy(email, password, app)
@@ -42,11 +50,15 @@ def check_auth(app, email, password):
 
 
 def check_credentials(email, password, app=None):
+    """
+    Check if given password and email match an user in database.
+    Password hash comparison is based on BCrypt.
+    """
     try:
-        person = persons_service.get_by_email(email)
+        person = persons_service.get_person_by_email(email)
     except PersonNotFoundException:
         try:
-            person = persons_service.get_by_desktop_login(email)
+            person = persons_service.get_person_by_desktop_login(email)
         except PersonNotFoundException:
             if app is not None:
                 app.logger.error("Person not found: %s" % (email))
@@ -68,21 +80,34 @@ def check_credentials(email, password, app=None):
 
 
 def no_password_auth_strategy(email):
+    """
+    If no password auth strategy is configured, it just checks that given email
+    matches an user in the database.
+    """
     try:
-        person = persons_service.get_by_email(email)
+        person = persons_service.get_person_by_email(email)
     except PersonNotFoundException:
         try:
-            person = persons_service.get_by_desktop_login(email)
+            person = persons_service.get_person_by_desktop_login(email)
         except PersonNotFoundException:
             return None
     return person
 
 
 def local_auth_strategy(email, password, app=None):
+    """
+    Local strategy just checks that email and passwords are correct the
+    traditional way (email is in database and related password hash corresponds
+    to given password).
+    """
     return check_credentials(email, password, app)
 
 
 def active_directory_auth_strategy(email, password, app):
+    """
+    Connect to an active directory server to know if given user can be
+    authenticated.
+    """
     username = email.split("@")[0]
     domain = app.config["AUTH_AD_DOMAIN"]
     user = "%s\\%s" % (domain, username)
@@ -114,6 +139,10 @@ def active_directory_auth_strategy(email, password, app):
 
 
 def register_tokens(app, access_token, refresh_token=None):
+    """
+    Register access and refresh tokens to auth token store. That way they
+    can be used like a session.
+    """
     access_jti = get_jti(encoded_token=access_token)
     auth_tokens_store.add(
         access_jti,
@@ -131,6 +160,9 @@ def register_tokens(app, access_token, refresh_token=None):
 
 
 def revoke_tokens(app, jti):
+    """
+    Remove access and refresh tokens from auth token store.
+    """
     auth_tokens_store.add(
         jti,
         'true',

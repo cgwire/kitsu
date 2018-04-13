@@ -178,7 +178,28 @@ class AssetServiceTestCase(ApiDBTestCase):
         self.assertTrue(asset["canceled"])
 
     def test_add_asset_link(self):
-        pass
+        self.generate_fixture_asset_types()
+        self.generate_fixture_asset_character()
+        assets_service.add_asset_link(
+            self.asset.id,
+            self.asset_character.id
+        )
+        asset = assets_service.get_asset(self.asset.id)
+        self.assertEquals(
+            asset["entities_out"][0],
+            str(self.asset_character.id)
+        )
 
     def test_remove_asset_link(self):
-        pass
+        self.generate_fixture_asset_types()
+        self.generate_fixture_asset_character()
+        assets_service.add_asset_link(
+            self.asset.id,
+            self.asset_character.id
+        )
+        assets_service.remove_asset_link(
+            self.asset.id,
+            self.asset_character.id
+        )
+        asset = assets_service.get_asset(self.asset.id)
+        self.assertEquals(len(asset["entities_out"]), 0)

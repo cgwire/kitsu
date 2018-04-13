@@ -1,8 +1,8 @@
 from tests.base import ApiDBTestCase
 
 from zou.app.services import persons_service
-
 from zou.app.services.exception import PersonNotFoundException
+from zou.app.utils import auth
 
 
 class PersonServiceTestCase(ApiDBTestCase):
@@ -15,10 +15,10 @@ class PersonServiceTestCase(ApiDBTestCase):
         self.person_email = self.person.email
         self.person_desktop_login = self.person.desktop_login
 
-    def test_get_all_active(self):
-        self.assertEqual(len(persons_service.all()), 2)
-        self.person.update({"active": False})
-        self.assertEqual(len(persons_service.all_active()), 1)
+    def test_get_active_persons(self):
+        self.assertEqual(len(persons_service.get_persons()), 2)
+        persons_service.update_person(self.person.id, {"active": False})
+        self.assertEqual(len(persons_service.get_active_persons()), 1)
 
     def test_get_person(self):
         self.assertRaises(
@@ -36,35 +36,37 @@ class PersonServiceTestCase(ApiDBTestCase):
             self.person_id
         )
 
-    def test_get_by_email(self):
+    def test_get_person_by_email(self):
         self.assertRaises(
             PersonNotFoundException,
-            persons_service.get_by_email,
+            persons_service.get_person_by_email,
             "wrong-email"
         )
-        person = persons_service.get_by_email(self.person_email)
+        person = persons_service.get_person_by_email(self.person_email)
         self.assertEqual(self.person_id, person["id"])
         persons_service.delete_person(person["id"])
 
         self.assertRaises(
             PersonNotFoundException,
-            persons_service.get_by_email,
+            persons_service.get_person_by_email,
             self.person_email
         )
 
-    def test_get_by_desktop_login(self):
+    def test_get_person_by_desktop_login(self):
         self.assertRaises(
             PersonNotFoundException,
-            persons_service.get_by_desktop_login,
+            persons_service.get_person_by_desktop_login,
             "wrong-login"
         )
-        person = persons_service.get_by_desktop_login(self.person_desktop_login)
+        person = persons_service.get_person_by_desktop_login(
+            self.person_desktop_login)
+        person = persons_service.get_person_by_email(person["email"])
         self.assertEqual(self.person_id, person["id"])
         persons_service.delete_person(person["id"])
 
         self.assertRaises(
             PersonNotFoundException,
-            persons_service.get_by_desktop_login,
+            persons_service.get_person_by_desktop_login,
             self.person_desktop_login
         )
 
@@ -78,3 +80,13 @@ class PersonServiceTestCase(ApiDBTestCase):
             persons_service.get_person_by_email_username,
             "ema.doe@yahoo.com"
         )
+
+    def test_create_person(self):
+        person = persons_service.create_person(
+            "john.doe2@gmail.com",
+            auth.encrypt_password("passwordhash"),
+            "John",
+            "Doe"
+        )
+        person = persons_service.get_person_by_email(person["email"])
+        self.assertEquals(person["first_name"], "John")

@@ -77,3 +77,16 @@ def update_entity_preview(entity_id, preview_file_id):
         "preview_file_id": preview_file_id
     })
     return entity.serialize()
+
+
+def get_entities_for_project(project_id, entity_type_id, obj_type="Entity"):
+    """
+    Retrieve all entities related to given project of which entity is entity
+    type.
+    """
+    result = Entity.query \
+        .filter(Entity.entity_type_id == entity_type_id) \
+        .filter(Entity.project_id == project_id) \
+        .order_by(Entity.name) \
+        .all()
+    return Entity.serialize_list(result, obj_type=obj_type)

@@ -10,10 +10,17 @@ class PermissionDenied(Forbidden):
 
 
 def has_manager_permissions():
+    """
+    Return True if user is admin or manager.
+    """
     return admin_permission.can() or manager_permission.can()
 
 
 def check_manager_permissions():
+    """
+    Return True if user is admin or manager. It raises a PermissionDenied
+    exception in case of failure.
+    """
     if has_manager_permissions():
         return True
     else:
@@ -21,6 +28,10 @@ def check_manager_permissions():
 
 
 def check_admin_permissions():
+    """
+    Return True if user is admin. It raises a PermissionDenied exception in case
+    of failure.
+    """
     if admin_permission.can():
         return True
     else:

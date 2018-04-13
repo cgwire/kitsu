@@ -1,5 +1,6 @@
 from zou.app.models.project import Project
 from zou.app.services import user_service, projects_service
+from zou.app.utils import permissions
 
 from .base import BaseModelResource, BaseModelsResource
 
@@ -8,6 +9,15 @@ class ProjectsResource(BaseModelsResource):
 
     def __init__(self):
         BaseModelsResource.__init__(self, Project)
+
+    def add_project_permission_filter(self, query):
+        if permissions.has_manager_permissions():
+            return query
+        else:
+            return query.filter(user_service.build_related_projects_filter())
+
+    def check_read_permissions(self):
+        return True
 
 
 class ProjectResource(BaseModelResource):
