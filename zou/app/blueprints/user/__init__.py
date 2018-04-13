@@ -18,6 +18,7 @@ from .resources import (
     TodosResource,
     DoneResource,
     FilterResource,
+    DesktopLoginLogsResource,
     FiltersResource
 )
 
@@ -45,7 +46,9 @@ routes = [
     ("/data/user/done-tasks", DoneResource),
 
     ("/data/user/filters", FiltersResource),
-    ("/data/user/filters/<filter_id>", FilterResource)
+    ("/data/user/filters/<filter_id>", FilterResource),
+
+    ("/data/user/desktop-login-logs", DesktopLoginLogsResource),
 ]
 
 blueprint = Blueprint("user", "user")

@@ -1,3 +1,5 @@
+import datetime
+
 from flask_restful import Resource, reqparse
 from flask_jwt_extended import jwt_required
 
@@ -46,3 +48,41 @@ class NewPersonResource(Resource):
         parser.add_argument("role", default="user")
         args = parser.parse_args()
         return args
+
+
+class DesktopLoginsResource(Resource):
+    """
+    Allow to create and retrieve desktop login logs. Desktop login logs can only
+    be created by current user.
+    """
+
+    @jwt_required
+    def get(self, person_id):
+        current_user = persons_service.get_current_user()
+        if current_user["id"] != person_id and \
+           not permissions.has_manager_permissions():
+            raise permissions.PermissionDenied
+
+        persons_service.get_person(person_id)
+        return persons_service.get_desktop_login_logs(person_id)
+
+    @jwt_required
+    def post(self, person_id):
+        arguments = self.get_arguments()
+
+        current_user = persons_service.get_current_user()
+        if current_user["id"] != person_id and \
+           not permissions.has_admin_permissions():
+            raise permissions.PermissionDenied
+
+        desktop_login_log = persons_service.create_desktop_login_logs(
+            person_id,
+            arguments["date"]
+        )
+
+        return desktop_login_log, 201
+
+    def get_arguments(self):
+        parser = reqparse.RequestParser()
+        parser.add_argument("date", default=datetime.datetime.now())
+        return parser.parse_args()

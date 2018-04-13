@@ -16,6 +16,13 @@ def has_manager_permissions():
     return admin_permission.can() or manager_permission.can()
 
 
+def has_admin_permissions():
+    """
+    Return True if user is admin or manager.
+    """
+    return admin_permission.can()
+
+
 def check_manager_permissions():
     """
     Return True if user is admin or manager. It raises a PermissionDenied

@@ -5,7 +5,10 @@ from sqlalchemy.exc import StatementError
 from flask_jwt_extended import get_jwt_identity
 
 from zou.app.models.person import Person
+from zou.app.models.desktop_login_logs import DesktopLoginLog
+
 from zou.app.utils import fields
+
 from zou.app.services.exception import PersonNotFoundException
 
 
@@ -163,3 +166,25 @@ def delete_person(person_id):
     person_dict = person.serialize()
     person.delete()
     return person_dict
+
+
+def get_desktop_login_logs(person_id):
+    """
+    Get all logs for user desktop logins.
+    """
+    logs = DesktopLoginLog.query \
+        .filter(DesktopLoginLog.person_id == person_id) \
+        .order_by(DesktopLoginLog.date.desc()) \
+        .all()
+    print(fields.serialize_list(logs))
+    return fields.serialize_list(logs)
+
+
+def create_desktop_login_logs(person_id, date):
+    """
+    Add a new log entry for desktop logins.
+    """
+    return DesktopLoginLog.create(
+        person_id=person_id,
+        date=date
+    ).serialize()

@@ -90,3 +90,18 @@ class PersonServiceTestCase(ApiDBTestCase):
         )
         person = persons_service.get_person_by_email(person["email"])
         self.assertEquals(person["first_name"], "John")
+
+    def test_add_destktop_login_logs(self):
+        person = self.person.serialize()
+        date_1 = self.now()
+
+        logs = persons_service.get_desktop_login_logs(person["id"])
+        self.assertEqual(len(logs), 0)
+
+        persons_service.create_desktop_login_logs(person["id"], date_1)
+        date_2 = self.now()
+        persons_service.create_desktop_login_logs(person["id"], date_2)
+        logs = persons_service.get_desktop_login_logs(person["id"])
+        self.assertEqual(len(logs), 2)
+        self.assertEqual(logs[0]["person_id"], self.person["id"])
+        self.assertEqual(logs[0]["date"], date_2)
