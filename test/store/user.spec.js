@@ -19,6 +19,8 @@ import {
   USER_LOAD_TODOS_END,
   USER_LOAD_DONE_TASKS_END,
 
+  LOAD_USER_FILTERS_END,
+
   SET_TODOS_SEARCH
 } from '../../src/store/mutation-types'
 
@@ -29,6 +31,7 @@ const user = {
 }
 let tasks = null
 let doneTasks = []
+let userFilters = {}
 
 peopleApi.updatePerson = (form, callback) => {
   if (form === undefined) {
@@ -52,6 +55,10 @@ peopleApi.loadTodos = (callback) => {
 
 peopleApi.loadDone = (callback) => {
   return callback(null, doneTasks)
+}
+
+peopleApi.getUserSearchFilters = (callback) => {
+  return callback(null, userFilters)
 }
 
 describe('user', () => {
@@ -87,15 +94,25 @@ describe('user', () => {
     ]
 
     doneTasks = [{
-        project_name: 'Agent327',
-        task_type_name: 'Concept',
-        entity_name: 'Tree',
-        entity_type_name: 'Props',
-        entity_id: 'asset-1',
-        task_status_short_name: 'done',
-        last_comment: {},
-        id: 'task-1'
+      project_name: 'Agent327',
+      task_type_name: 'Concept',
+      entity_name: 'Tree',
+      entity_type_name: 'Props',
+      entity_id: 'asset-1',
+      task_status_short_name: 'done',
+      last_comment: {},
+      id: 'task-1'
     }]
+
+    userFilters = {
+      asset: {
+        'prod-1': [{
+          name: 'props',
+          query: 'props',
+          id: 'filter-1'
+        }]
+      }
+    }
   })
 
   describe('actions', () => {
@@ -227,6 +244,13 @@ describe('user', () => {
 
       helpers.runAction('setTodosSearch', '')
     })
+
+    it('loadUserSearchFilters', () => {
+      helpers.runAction('loadUserSearchFilters', () => {
+        const filterId = store._vm.userFilters.asset['prod-1'][0].id
+        expect(filterId).to.equal('filter-1')
+      })
+    })
   })
 
   describe('mutations', () => {
@@ -313,6 +337,11 @@ describe('user', () => {
       expect(store._vm.todosSearchText).to.equal('wip')
       expect(store._vm.displayedTodos[0]).to.deep.equal(tasks[0])
       expect(store._vm.displayedTodos.length).to.equal(1)
+    })
+
+    it('LOAD_USER_FILTERS_END', () => {
+      store.commit(LOAD_USER_FILTERS_END, userFilters)
+      expect(store._vm.userFilters.asset['prod-1'][0].id).to.equal('filter-1')
     })
   })
 })

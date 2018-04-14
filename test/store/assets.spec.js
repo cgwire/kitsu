@@ -29,12 +29,24 @@ import {
 
   NEW_TASK_COMMENT_END,
 
-  LOAD_ASSET_TYPE_STATUS_END
+  SAVE_ASSET_SEARCH_END,
+  REMOVE_ASSET_SEARCH_END,
+
+  LOAD_ASSET_TYPE_STATUS_END,
+  LOAD_TASK_STATUSES_END,
+  LOAD_TASK_TYPES_END
 } from '../../src/store/mutation-types'
 
 
 let assets = []
 let assetTypes = []
+let production = {
+  id: 'production-1',
+  name: 'Big Buck Bunny'
+}
+let userFilters = {}
+let taskStatus = []
+let taskTypes = []
 
 assetsApi.getAssets = (callback) => {
   process.nextTick(() => {
@@ -89,7 +101,10 @@ describe('assets', () => {
             entity_name: 'BBB / Bunny',
             task_type_name: 'Concept',
             task_type_color: '#0000FF',
-            task_type_priority: 1
+            task_type_priority: 1,
+            task_type_id: 'task-type-1',
+            task_status_id: 'task-status-1',
+            assignees: []
           },
           {
             id: 'task-2',
@@ -98,10 +113,14 @@ describe('assets', () => {
             asset_type_name: 'Character',
             task_type_name: 'Modeling',
             task_type_color: '#00FF00',
-            task_type_priority: 2
+            task_type_id: 'task-type-2',
+            task_status_id: 'task-status-1',
+            task_type_priority: 2,
+            assignees: []
           }
         ]
       },
+
       {
         id: 2,
         name: 'Chair',
@@ -112,16 +131,23 @@ describe('assets', () => {
             id: 'task-3',
             task_type_name: 'Concept',
             task_type_color: '#0000FF',
-            task_type_priority: 1
+            task_type_priority: 1,
+            task_type_id: 'task-type-1',
+            task_status_id: 'task-status-1',
+            assignees: []
           },
           {
             id: 'task-4',
             task_type_name: 'Shaders',
             task_type_color: '#FF0000',
-            task_type_priority: 3
+            task_type_priority: 3,
+            task_type_id: 'task-type-3',
+            task_status_id: 'task-status-1',
+            assignees: []
           }
         ]
       },
+
       {
         id: 3,
         project_name: 'BBB',
@@ -145,11 +171,52 @@ describe('assets', () => {
         name: 'FX'
       }
     ]
+
+    taskStatus = [
+      {
+        id: 'task-status-1',
+        name: 'work in progress',
+        short_name: 'wip'
+      }
+    ]
+
+    taskTypes = [
+      {
+        id: 'task-type-1',
+        name: 'Concept',
+        color: '#FF0000',
+        priority: 1
+      },
+      {
+        id: 'task-type-2',
+        name: 'Modeling',
+        color: '#00FF00',
+        priority: 2
+      },
+      {
+        id: 'task-type-3',
+        name: 'Shaders',
+        color: '#0000FF',
+        priority: 3
+      }
+    ]
+
+    userFilters = {
+      asset: {
+        'production-1': [{
+          name: 'props',
+          query: 'props',
+          id: 'filter-1'
+        }]
+      }
+    }
   })
 
   describe('getters', () => {
     it('getAsset', () => {
-      store.commit(LOAD_ASSETS_END, assets)
+      store.commit(LOAD_TASK_TYPES_END, taskTypes)
+      store.commit(LOAD_TASK_STATUSES_END, taskStatus)
+      store.commit(LOAD_ASSETS_END, { assets, production, userFilters })
       const assetType = getters.getAsset(state)(2)
       expect(assetType.id).to.equal(2)
       expect(assetType.name).to.equal('Chair')
@@ -164,8 +231,43 @@ describe('assets', () => {
     })
   })
 
-  /*
   describe('actions', () => {
+    it('saveAssetSearch', () => {
+      store.commit(LOAD_TASK_TYPES_END, taskTypes)
+      store.commit(LOAD_TASK_STATUSES_END, taskStatus)
+      store.commit(LOAD_ASSETS_END, { assets, production, userFilters })
+      const query = {
+        name: 'characters',
+        query: 'characters',
+        id: 'filter-2'
+      }
+      helpers.runAction('saveAssetSearch', query)
+      .then(() => {
+        expect(state.assetSearchQueries.length).to.equal(2)
+      })
+      .catch((err) => {
+      })
+    })
+
+    it('removeAssetSearch', () => {
+      store.commit(LOAD_TASK_TYPES_END, taskTypes)
+      store.commit(LOAD_TASK_STATUSES_END, taskStatus)
+      store.commit(LOAD_ASSETS_END, { assets, production, userFilters })
+      const query = {
+        name: 'props',
+        query: 'props',
+        id: 'filter-1'
+      }
+      helpers.runAction('removeAssetSearch', query)
+      .then(() => {
+        expect(state.assetSearchQueries.length).to.equal(0)
+      })
+      .catch((err) => {
+      })
+    })
+  })
+
+  /*
     it('loadAssets', (done) => {
       helpers.runAction('loadAssetTypes', (err) => {
         expect(err).to.be.null
@@ -251,7 +353,9 @@ describe('assets', () => {
     })
 
     it('LOAD_ASSETS_END', () => {
-      store.commit(LOAD_ASSETS_END, assets)
+      store.commit(LOAD_TASK_TYPES_END, taskTypes)
+      store.commit(LOAD_TASK_STATUSES_END, taskStatus)
+      store.commit(LOAD_ASSETS_END, { assets, production, userFilters })
       expect(state.isAssetsLoading).to.equal(false)
       expect(state.isAssetsLoadingError).to.equal(false)
       expect(state.assets).to.deep.equal(assets)
@@ -265,29 +369,14 @@ describe('assets', () => {
         assets[0].tasks[0]
       )
 
-      expect(state.validationColumns).to.deep.equal({
-        Concept: {
-          name: assets[0].tasks[0].task_type_name,
-          color: assets[0].tasks[0].task_type_color,
-          priority: assets[0].tasks[0].task_type_priority
-        },
-        Modeling: {
-          name: assets[0].tasks[1].task_type_name,
-          color: assets[0].tasks[1].task_type_color,
-          priority: assets[0].tasks[1].task_type_priority
-        },
-        Shaders: {
-          name: assets[2].tasks[1].task_type_name,
-          color: assets[2].tasks[1].task_type_color,
-          priority: assets[2].tasks[1].task_type_priority
-        }
-      })
-
-      expect(state.assetIndex["Bun"][0]).to.deep.equal(assets[0])
+      expect(state.assetSearchQueries).to.deep.equal(
+        userFilters.asset[production.id])
     })
 
     it('EDIT_ASSET_START', () => {
-      store.commit(LOAD_ASSETS_END, assets)
+      store.commit(LOAD_TASK_TYPES_END, taskTypes)
+      store.commit(LOAD_TASK_STATUSES_END, taskStatus)
+      store.commit(LOAD_ASSETS_END, { assets, production, userFilters })
       store.commit(EDIT_ASSET_START)
       expect(state.editAsset).to.deep.equal({
         isCreateError: false,
@@ -297,7 +386,9 @@ describe('assets', () => {
     })
 
     it('EDIT_ASSET_ERROR', () => {
-      store.commit(LOAD_ASSETS_END, assets)
+      store.commit(LOAD_TASK_TYPES_END, taskTypes)
+      store.commit(LOAD_TASK_STATUSES_END, taskStatus)
+      store.commit(LOAD_ASSETS_END, { assets, production, userFilters })
       store.commit(EDIT_ASSET_ERROR)
       expect(state.editAsset).to.deep.equal({
         isCreateError: true,
@@ -307,7 +398,9 @@ describe('assets', () => {
     })
 
     it('EDIT_ASSET_END', () => {
-      store.commit(LOAD_ASSETS_END, assets)
+      store.commit(LOAD_TASK_TYPES_END, taskTypes)
+      store.commit(LOAD_TASK_STATUSES_END, taskStatus)
+      store.commit(LOAD_ASSETS_END, { assets, production, userFilters })
       store.commit(EDIT_ASSET_END, {
         id: 4,
         name: 'New asset',
@@ -315,7 +408,7 @@ describe('assets', () => {
         project_name: 'Agent 327'
       })
       expect(state.assets.length).to.equal(4)
-      expect(state.assets[0].name).to.equal('New asset')
+      expect(state.assets[3].name).to.equal('New asset')
 
       const newName = 'Chair edited'
       store.commit(EDIT_ASSET_END, {
@@ -332,8 +425,37 @@ describe('assets', () => {
       store.commit(DELETE_ASSET_END, assets[2])
     })
 
+    it('SAVE_ASSET_SEARCH_END', () => {
+      store.commit(LOAD_TASK_TYPES_END, taskTypes)
+      store.commit(LOAD_TASK_STATUSES_END, taskStatus)
+      store.commit(LOAD_ASSETS_END, { assets, production, userFilters })
+      store.commit(SAVE_ASSET_SEARCH_END, {
+        searchQuery: {
+          name: 'characters',
+          query: 'characters',
+          id: 'filter-2'
+        }
+      })
+      expect(state.assetSearchQueries.length).to.equal(2)
+    })
+
+    it('REMOVE_ASSET_SEARCH_END', () => {
+      store.commit(LOAD_TASK_TYPES_END, taskTypes)
+      store.commit(LOAD_TASK_STATUSES_END, taskStatus)
+      store.commit(LOAD_ASSETS_END, { assets, production, userFilters })
+      store.commit(REMOVE_ASSET_SEARCH_END, {
+        searchQuery: {
+          name: 'props',
+          query: 'props',
+          id: 'filter-1'
+        }
+      })
+      expect(state.assetSearchQueries.length).to.equal(0)
+    })
+
     /*
     it('DELETE_ASSET_TYPE_START', () => {
+
       store.commit(LOAD_ASSET_TYPES_END, assetTypes)
       store.commit(DELETE_ASSET_TYPE_START)
       expect(state.deleteAssetType).to.deep.equal({

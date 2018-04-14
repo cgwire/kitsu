@@ -323,7 +323,7 @@ const mutations = {
     state.taskMap = {}
   },
 
-  [LOAD_ASSETS_END] (state, assets) {
+  [LOAD_ASSETS_END] (state, { assets }) {
     const validationColumns = {}
     assets.forEach((asset) => {
       asset.validations = {}
@@ -544,7 +544,6 @@ const mutations = {
 
   [CHANGE_PREVIEW_END] (state, { preview, comment, isMovie }) {
     const taskId = comment.object_id
-    console.log(preview)
     preview.is_movie = isMovie
 
     const newPreview = {

@@ -69,5 +69,23 @@ export default {
 
   getPersonDoneTasks (personId, callback) {
     client.get(`/api/data/persons/${personId}/done-tasks`, callback)
+  },
+
+  getUserSearchFilters (callback) {
+    client.get('/api/data/user/filters', callback)
+  },
+
+  createFilter (listType, name, query, productionId, callback) {
+    const data = {
+      list_type: listType,
+      name,
+      query: query,
+      project_id: productionId
+    }
+    client.post('/api/data/user/filters', data, callback)
+  },
+
+  removeFilter (searchQuery, callback) {
+    client.del(`/api/data/user/filters/${searchQuery.id}`, callback)
   }
 }

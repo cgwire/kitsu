@@ -170,7 +170,26 @@ input.search-input:focus {
 }
 
 .filters-area {
+  margin-bottom: 1em;
+}
+
+.query-list {
   margin-bottom: 2em;
+  margin-left: 2.5em;
+}
+
+.query-list .tag {
+  margin-right: 1em;
+  border: 1px solid transparent;
+}
+
+.query-list .tag .delete {
+  margin-left: 0.5em;
+  transform: scale(0.6)
+}
+
+.query-list .tag:hover {
+  transform: scale(1.1)
 }
 
 .fixed-page {

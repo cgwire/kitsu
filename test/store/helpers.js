@@ -11,9 +11,9 @@ const helpers = {
   runAction (action, payload, callback) {
     if (typeof(payload) === 'function') {
       callback = payload
-      store._actions[action][0](callback)
+      return store._actions[action][0](callback)
     } else {
-      store._actions[action][0](payload, callback)
+      return store._actions[action][0](payload, callback)
     }
   }
 }

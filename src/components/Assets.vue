@@ -49,9 +49,19 @@
       <search-field
         ref="asset-search-field"
         @change="onSearchChange"
+        @save="saveSearchQuery"
         placeholder="ex: props, modeling=wip"
       >
       </search-field>
+    </div>
+
+    <div class="query-list">
+      <search-query-list
+        :queries="assetSearchQueries"
+        @changesearch="changeSearch"
+        @removesearch="removeSearchQuery"
+      >
+      </search-query-list>
     </div>
   </div>
 
@@ -143,18 +153,17 @@
 
 <script>
 import { mapGetters, mapActions } from 'vuex'
-import { SearchIcon, FilterIcon } from 'vue-feather-icons'
 
 import AssetList from './lists/AssetList.vue'
-import EditAssetModal from './modals/EditAssetModal'
-import DeleteModal from './widgets/DeleteModal'
-import ImportModal from './modals/ImportModal'
-import SearchField from './widgets/SearchField'
-import Filters from './widgets/Filters'
-import ButtonLink from './widgets/ButtonLink'
 import ButtonHrefLink from './widgets/ButtonHrefLink'
-import PageTitle from './widgets/PageTitle'
+import ButtonLink from './widgets/ButtonLink'
 import CreateTasksModal from './modals/CreateTasksModal'
+import DeleteModal from './widgets/DeleteModal'
+import EditAssetModal from './modals/EditAssetModal'
+import ImportModal from './modals/ImportModal'
+import PageTitle from './widgets/PageTitle'
+import SearchField from './widgets/SearchField'
+import SearchQueryList from './widgets/SearchQueryList'
 import ShowAssignationsButton from './widgets/ShowAssignationsButton'
 
 export default {
@@ -162,17 +171,15 @@ export default {
 
   components: {
     AssetList,
-    CreateTasksModal,
-    DeleteModal,
-    FilterIcon,
-    ImportModal,
-    EditAssetModal,
-    Filters,
     ButtonLink,
     ButtonHrefLink,
+    CreateTasksModal,
+    DeleteModal,
+    EditAssetModal,
+    ImportModal,
     PageTitle,
-    SearchIcon,
     SearchField,
+    SearchQueryList,
     ShowAssignationsButton
   },
 
@@ -221,6 +228,7 @@ export default {
       'assets',
       'assetsCsvFormData',
       'assetSearchText',
+      'assetSearchQueries',
       'assetTypes',
       'displayedAssets',
       'openProductions',
@@ -268,6 +276,8 @@ export default {
   methods: {
     ...mapActions([
       'loadAssets',
+      'removeAssetSearch',
+      'saveAssetSearch',
       'setLastProductionScreen',
       'setAssetSearch'
     ]),
@@ -450,6 +460,29 @@ export default {
     onSearchChange () {
       const searchQuery = this.$refs['asset-search-field'].getValue()
       this.setAssetSearch(searchQuery)
+    },
+
+    changeSearch (searchQuery) {
+      this.$refs['asset-search-field'].setValue(searchQuery.search_query)
+      this.$refs['asset-search-field'].$emit('change', searchQuery.search_query)
+    },
+
+    saveSearchQuery (searchQuery) {
+      this.saveAssetSearch(searchQuery)
+        .then(() => {
+        })
+        .catch((err) => {
+          if (err) console.log('error')
+        })
+    },
+
+    removeSearchQuery (searchQuery) {
+      this.removeAssetSearch(searchQuery)
+        .then(() => {
+        })
+        .catch((err) => {
+          if (err) console.log('error')
+        })
     },
 
     saveScrollPosition (scrollPosition) {
