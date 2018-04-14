@@ -108,4 +108,9 @@ export default {
   min-height: 5em;
   margin-bottom: 0.3em;
 }
+
+.add-comment textarea:focus,
+.add-comment textarea:active {
+  border-color: #00B242;
+}
 </style>
