@@ -25,7 +25,7 @@
     </span>
   </div>
 
-  <div class="flexrow-item save-search">
+  <div class="flexrow-item save-search" v-if="canSave">
     <button class="button" @click="onSaveClicked">
       <save-icon class="icon is-small only-icon"></save-icon>
     </button>
@@ -42,6 +42,10 @@ export default {
     placeholder: {
       type: String,
       default: ''
+    },
+    canSave: {
+      type: Boolean,
+      default: false
     }
   },
   components: {
@@ -57,7 +61,7 @@ export default {
     },
 
     onSaveClicked () {
-      this.$emit('save', this.$refs.input.value)
+      if (this.canSave) this.$emit('save', this.$refs.input.value)
     },
 
     setValue (value) {

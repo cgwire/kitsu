@@ -48,6 +48,7 @@
     <div class="filters-area">
       <search-field
         ref="asset-search-field"
+        :can-save="true"
         @change="onSearchChange"
         @save="saveSearchQuery"
         placeholder="ex: props, modeling=wip"
