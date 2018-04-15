@@ -99,7 +99,7 @@ class AddPreviewResource(Resource):
         if not permissions.has_manager_permissions():
             user_service.check_assigned(task_id)
 
-        comment = tasks_service.get_comment(comment_id)
+        comment = tasks_service.get_comment_raw(comment_id)
         task_status = tasks_service.get_task_status(
             comment.task_status_id
         )
