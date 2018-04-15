@@ -69,6 +69,7 @@ export default {
     or: 'ou',
     yes: 'oui',
     no: 'non',
+    info: 'Information',
     confirmation: 'Confirmer',
     confirmation_and_stay: 'Confirmer et rester',
     clear_selection: 'Effacer la sélection',
@@ -78,6 +79,7 @@ export default {
     production: 'Production',
     studio: 'Studio',
     admin: 'Admin',
+    back_to_list: 'retour à la liste',
     csv: {
       import_file: 'Importer',
       export_file: 'Exporter',

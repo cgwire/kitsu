@@ -18,13 +18,49 @@
     </div>
   </div>
 
-  <div>
+  <div class="columns">
+    <div class="column">
     <page-subtitle :text="$t('shots.tasks')"></page-subtitle>
     <entity-task-list
       :entries="currentShot ? currentShot.tasks : []"
       :is-loading="!currentShot"
       :is-error="false"
     ></entity-task-list>
+    </div>
+    <div class="column">
+      <page-subtitle :text="$t('main.info')"></page-subtitle>
+      <table class="table">
+        <tbody>
+          <tr v-if="currentShot && currentShot.data.fps">
+            <td class="field-label">{{ $t('shots.fields.fps') }}</td>
+            <td>
+              {{ currentShot ? currentShot.data.fps : '' }}
+            </td>
+          </tr>
+
+          <tr v-if="currentShot && currentShot.data.frame_in">
+            <td class="field-label">{{ $t('shots.fields.frame_in') }}</td>
+            <td>
+              {{ currentShot ? currentShot.data.frame_in : '' }}
+            </td>
+          </tr>
+
+          <tr v-if="currentShot && currentShot.data.frame_out">
+            <td class="field-label">{{ $t('shots.fields.frame_out') }}</td>
+            <td>
+              {{ currentShot ? currentShot.data.frame_out : '' }}
+            </td>
+          </tr>
+
+          <tr>
+            <td class="field-label">{{ $t('shots.fields.description') }}</td>
+            <td>
+              {{ currentShot ? currentShot.description : '' }}
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
   </div>
 
   <div>
@@ -54,6 +90,9 @@
             <entity-thumbnail
               :entity="asset"
               :square="true"
+              :empty-width="100"
+              :empty-height="100"
+              :with-link="false"
             >
             </entity-thumbnail>
             <div>
@@ -218,6 +257,10 @@ export default {
   max-width: 100px;
 }
 
+.asset-link .thumbnail-picture {
+  margin-bottom: 0.5em;
+}
+
 .asset-type {
   text-transform: uppercase;
   font-size: 1.2em;
@@ -248,4 +291,8 @@ export default {
   word-wrap: break-word;
 }
 
+.field-label {
+  font-weight: bold;
+  width: 140px;
+}
 </style>

@@ -7,6 +7,8 @@
           <entity-thumbnail
             class="asset-thumbnail"
             :entity="currentAsset"
+            :empty-width="100"
+            :empty-height="66.6"
             v-if="currentAsset"
           >
           </entity-thumbnail>
@@ -18,13 +20,28 @@
     </div>
   </div>
 
-  <div>
-    <page-subtitle :text="$t('assets.tasks')"></page-subtitle>
-    <entity-task-list
-      :entries="currentAsset ? currentAsset.tasks : []"
-      :is-loading="!currentAsset"
-      :is-error="false"
-    ></entity-task-list>
+  <div class="columns">
+    <div class="column">
+      <page-subtitle :text="$t('assets.tasks')"></page-subtitle>
+      <entity-task-list
+        :entries="currentAsset ? currentAsset.tasks : []"
+        :is-loading="!currentAsset"
+        :is-error="false"
+      ></entity-task-list>
+    </div>
+    <div class="column">
+      <page-subtitle :text="$t('main.info')"></page-subtitle>
+      <table class="table">
+        <tbody>
+          <tr>
+            <td class="field-label">{{ $t('assets.fields.description') }}</td>
+            <td>
+              {{ currentAsset ? currentAsset.description : '' }}
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
   </div>
 
   <page-subtitle :text="$t('assets.cast_in')"></page-subtitle>
@@ -53,6 +70,7 @@
           <entity-thumbnail
             :entity="shot"
             :square="true"
+            :with-link="false"
           >
           </entity-thumbnail>
           <div>
@@ -208,6 +226,10 @@ export default {
   max-width: 100px;
 }
 
+.thumbnail-picture {
+  margin-bottom: 0.5em;
+}
+
 .shot-sequence {
   text-transform: uppercase;
   font-size: 1.2em;
@@ -236,5 +258,10 @@ export default {
 
 .shot-link span {
   word-wrap: break-word;
+}
+
+.field-label {
+  font-weight: bold;
+  width: 120px;
 }
 </style>

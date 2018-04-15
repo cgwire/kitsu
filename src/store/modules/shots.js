@@ -119,6 +119,10 @@ const state = {
   episodes: [],
   shotSearchText: '',
 
+  isFps: false,
+  isFrameIn: false,
+  isFrameOut: false,
+
   displayedShots: [],
   displayedShotsLength: 0,
   shotIndex: {},
@@ -155,6 +159,10 @@ const getters = {
   shotMap: state => state.shotMap,
   sequences: state => state.sequences,
   episodes: state => state.episodes,
+
+  isFps: state => state.isFps,
+  isFrameIn: state => state.isFrameIn,
+  isFrameOut: state => state.isFrameOut,
 
   shotSearchText: state => state.shotSearchText,
   shotSelectionGrid: state => state.shotSelectionGrid,
@@ -200,15 +208,23 @@ const getters = {
 
   getEpisodeOptions: state => state.episodes.map(
     (episode) => { return { label: episode.name, value: episode.id } }
-  )
+  ),
+
+  isSingleEpisode: state => Object.keys(state.episodeMap).length < 2
 }
 
 const actions = {
 
-  loadShots ({ commit, state, rootState }, callback) {
-    const currentProduction = productionsStore.getters.currentProduction(
-      rootState.productions
-    )
+  loadEpisodes ({ commit, state, rootGetters }, callback) {
+    const currentProduction = rootGetters.currentProduction
+    shotsApi.getEpisodes(currentProduction, (err, episodes) => {
+      if (err) console.log(err)
+      commit(LOAD_EPISODES_END, episodes)
+    })
+  },
+
+  loadShots ({ commit, state, rootGetters }, callback) {
+    const currentProduction = rootGetters.currentProduction
     commit(LOAD_SHOTS_START)
     shotsApi.getEpisodes(currentProduction, (err, episodes) => {
       commit(LOAD_EPISODES_END, episodes)
@@ -368,6 +384,9 @@ const mutations = {
 
   [LOAD_SHOTS_END] (state, shots) {
     const validationColumns = {}
+    let isFps = false
+    let isFrameIn = false
+    let isFrameOut = false
 
     state.shotMap = {}
     state.shots = sortShots(shots)
@@ -378,11 +397,19 @@ const mutations = {
         helpers.populateTask(task)
         validationColumns[task.task_type_id] = true
       })
+
+      if (shot.data.fps) isFps = true
+      if (shot.data.frame_in) isFrameIn = true
+      if (shot.data.frame_out) isFrameOut = true
     })
 
     state.isShotsLoading = false
     state.isShotsLoadingError = false
     state.nbValidationColumns = Object.keys(validationColumns).length
+
+    state.isFps = isFps
+    state.isFrameIn = isFrameIn
+    state.isFrameOut = isFrameOut
 
     state.shotIndex = buildShotIndex(state.shots)
 
@@ -460,6 +487,10 @@ const mutations = {
     }
     state.shotIndex = buildShotIndex(state.shots)
     state.shotCreated = newShot.name
+
+    if (newShot.data.fps) state.isFps = true
+    if (newShot.data.frame_in) state.isFrameIn = true
+    if (newShot.data.frame_out) state.isFrameOut = true
   },
 
   [DELETE_SHOT_START] (state) {
@@ -577,6 +608,10 @@ const mutations = {
     state.displayedShots = state.shots.slice(0, PAGE_SIZE)
     state.shotMap[shot.id] = shot
     state.shotIndex = buildShotIndex(state.shots)
+
+    if (shot.data.fps) state.isFps = true
+    if (shot.data.frame_in) state.isFrameIn = true
+    if (shot.data.frame_out) state.isFrameOut = true
   },
 
   [NEW_SEQUENCE_START] (state) {},

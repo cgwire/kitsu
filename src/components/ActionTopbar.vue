@@ -52,29 +52,6 @@
 
           <div
             class="level-item"
-            v-if="selectedBar === 'tasks'"
-          >
-            <div class="flexrow">
-              <div class="flexrow-item strong bigger">
-                {{ $t('tasks.create_for_selection') }}
-              </div>
-              <div class="flexrow-item" v-if="!isCreationLoading">
-                <button
-                  class="button is-success confirm-button"
-                  @click="confirmTaskCreation"
-                >
-                  {{ $t('main.confirmation') }}
-                </button>
-
-                <div class="" v-if="isCreationLoading">
-                  <spinner :is-white="true"></spinner>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <div
-            class="level-item"
             v-if="selectedBar === 'change-status'"
           >
             <div class="flexrow">

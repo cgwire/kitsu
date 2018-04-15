@@ -128,17 +128,14 @@
 
         <spinner v-if="isShotsLoading"></spinner>
         <div v-else>
-          <div class="flexrow">
+          <div class="flexrow" v-if="episodes.length > 0">
             <div class="flexrom-item">
               <combobox
                 :label="$t('shots.fields.episode')"
                 :options="getEpisodeOptions"
                 v-model="episodeId"
-                v-if="episodes.length > 0"
+                v-if="!isSingleEpisode"
               ></combobox>
-              <div v-else>
-                {{ $t('playlists.no_shot_for_productioN') }}
-              </div>
             </div>
             <div class="flexrow-item">
               <combobox
@@ -151,6 +148,9 @@
                 {{ $t('playlists.no_sequence_for_episode') }}
               </div>
             </div>
+          </div>
+          <div v-else>
+            {{ $t('playlists.no_shot_for_production') }}
           </div>
 
           <div v-if="sequenceShots.length === 0 && sequenceId">
@@ -201,7 +201,7 @@
 <script>
 import { mapGetters, mapActions } from 'vuex'
 
-import moment from 'moment'
+import moment from 'moment-timezone'
 import { PlusIcon } from 'vue-feather-icons'
 
 import ButtonLink from './widgets/ButtonLink'
@@ -269,6 +269,7 @@ export default {
       'episodes',
       'getEpisodeOptions',
       'isShotsLoading',
+      'isSingleEpisode',
       'playlistMap',
       'playlists',
       'sequences',
@@ -319,10 +320,8 @@ export default {
         const currentIndex = this.currentShot
         const currentShot = this.currentShots[currentIndex]
         const previewId = currentShot.preview_file_id
-        console.log('ok')
         return `/api/movies/originals/preview-files/${previewId}.mp4`
       } else {
-        console.log('nok')
         return 'toto'
       }
     }
@@ -363,7 +362,7 @@ export default {
 
     addPlaylist () {
       const newPlaylist = {
-        name: moment().format('YYYY-MM-DD hh:mm'),
+        name: moment().format('YYYY-MM-DD HH:mm'),
         production_id: this.currentProduction.id
       }
       this.loading.addPlaylist = true
@@ -531,16 +530,18 @@ export default {
 
     rebuildCurrentShots () {
       this.currentShots = {}
-      this.currentPlaylist.shots.forEach((shotPreview) => {
-        const shot = this.shotMap[shotPreview.shot_id]
-        this.currentShots[shotPreview.shot_id] = {
-          id: shotPreview.shot_id,
-          name: shot.name,
-          entity_name: shot.tasks[0].entity_name,
-          preview_files: shotPreview.preview_files,
-          preview_file_id: shotPreview.preview_file_id || shot.preview_file_id
-        }
-      })
+      if (this.currentPlaylist) {
+        this.currentPlaylist.shots.forEach((shotPreview) => {
+          const shot = this.shotMap[shotPreview.shot_id]
+          this.currentShots[shotPreview.shot_id] = {
+            id: shotPreview.shot_id,
+            name: shot.name,
+            entity_name: shot.tasks[0].entity_name,
+            preview_files: shotPreview.preview_files,
+            preview_file_id: shotPreview.preview_file_id || shot.preview_file_id
+          }
+        })
+      }
     },
 
     getMoviePath () {
@@ -605,7 +606,9 @@ export default {
         if (!err) {
           this.handleModalsDisplay()
           this.setCurrentPlaylist(() => {
-            if (!this.currentPlaylist.id) this.goFirstPlaylist()
+            if (!this.currentPlaylist || !this.currentPlaylist.id) {
+              this.goFirstPlaylist()
+            }
           })
         }
       })

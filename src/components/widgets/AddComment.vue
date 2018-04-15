@@ -97,12 +97,20 @@ export default {
 
 <style scoped>
 .add-comment {
-  margin-left: 1em;
+  border-radius: 5px;
+  padding: 1em;
+  box-shadow: 0px 0px 6px #E0E0E0;
+  background: white;
 }
 
 .add-comment textarea {
   max-height: 5em;
   min-height: 5em;
   margin-bottom: 0.3em;
+}
+
+.add-comment textarea:focus,
+.add-comment textarea:active {
+  border-color: #00B242;
 }
 </style>

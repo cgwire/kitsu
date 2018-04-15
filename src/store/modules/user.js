@@ -41,6 +41,9 @@ import {
   REMOVE_SELECTED_TASK,
   CLEAR_SELECTED_TASKS,
 
+  LOAD_USER_FILTERS_END,
+  LOAD_USER_FILTERS_ERROR,
+
   RESET_ALL
 } from '../mutation-types'
 
@@ -68,6 +71,8 @@ const state = {
   isSaveProfileLoading: false,
   isSaveProfileLoadingError: false,
 
+  userFilters: {},
+
   changePassword: {
     isLoading: false,
     isError: false,
@@ -92,7 +97,9 @@ const getters = {
   isTodosLoading: state => state.isTodosLoading,
   isTodosLoadingError: state => state.isTodosLoadingError,
 
-  changePassword: state => state.changePassword
+  changePassword: state => state.changePassword,
+
+  userFilters: state => state.userFilters
 }
 
 const actions = {
@@ -165,6 +172,14 @@ const actions = {
 
   setTodosSearch ({ commit, state }, searchText) {
     commit(SET_TODOS_SEARCH, searchText)
+  },
+
+  loadUserSearchFilters ({ commit }, callback) {
+    peopleApi.getUserSearchFilters((err, searchFilters) => {
+      if (err) commit(LOAD_USER_FILTERS_ERROR)
+      else commit(LOAD_USER_FILTERS_END, searchFilters)
+      callback(err)
+    })
   }
 }
 
@@ -301,19 +316,25 @@ const mutations = {
   },
 
   [ADD_SELECTED_TASK] (state, validationInfo) {
-    if (state.todoSelectionGrid[0]) {
+    if (state.todoSelectionGrid && state.todoSelectionGrid[0]) {
       state.todoSelectionGrid[validationInfo.x][validationInfo.y] = true
     }
   },
 
   [REMOVE_SELECTED_TASK] (state, validationInfo) {
-    if (state.todoSelectionGrid[0]) {
+    if (state.todoSelectionGrid && state.todoSelectionGrid[0]) {
       state.todoSelectionGrid[validationInfo.x][validationInfo.y] = false
     }
   },
 
   [CLEAR_SELECTED_TASKS] (state) {
     state.todoSelectionGrid = clearSelectionGrid(state.todoSelectionGrid)
+  },
+
+  [LOAD_USER_FILTERS_ERROR] (state) {
+  },
+  [LOAD_USER_FILTERS_END] (state, userFilters) {
+    state.userFilters = userFilters
   },
 
   [RESET_ALL] (state) {
@@ -326,6 +347,8 @@ const mutations = {
     state.isTodosLoadingError = false
     state.todos = []
     state.todoSelectionGrid = {}
+
+    state.userFilters = {}
 
     state.changePassword = {
       isLoading: false,

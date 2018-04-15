@@ -1,5 +1,6 @@
 import Vue from 'vue'
 import assetsApi from '../api/assets'
+import peopleApi from '../api/people'
 import tasksStore from './tasks'
 import taskTypesStore from './tasktypes'
 import productionsStore from './productions'
@@ -68,6 +69,9 @@ import {
   ADD_SELECTED_TASK,
   CLEAR_SELECTED_TASKS,
 
+  SAVE_ASSET_SEARCH_END,
+  REMOVE_ASSET_SEARCH_END,
+
   RESET_ALL
 } from '../mutation-types'
 
@@ -115,6 +119,7 @@ const state = {
   displayedAssetsLength: 0,
   assetSearchText: '',
   assetSelectionGrid: {},
+  assetSearchQueries: [],
 
   openProductions: [],
   isAssetsLoading: false,
@@ -146,6 +151,7 @@ const getters = {
   assets: state => state.assets,
   assetMap: state => state.assetMap,
   assetSearchText: state => state.assetSearchText,
+  assetSearchQueries: state => state.assetSearchQueries,
   assetSelectionGrid: state => state.assetSelectionGrid,
 
   isAssetsLoading: state => state.isAssetsLoading,
@@ -206,19 +212,19 @@ const getters = {
 
 const actions = {
 
-  loadAssets ({ commit, state, rootState }, callback) {
-    const currentProduction = productionsStore.getters.currentProduction(
-      rootState.productions
-    )
+  loadAssets ({ commit, state, rootGetters }, callback) {
+    const production = rootGetters.currentProduction
+    const userFilters = rootGetters.userFilters
+
     commit(LOAD_ASSETS_START)
-    assetsApi.getAssets(currentProduction, (err, assets) => {
+    assetsApi.getAssets(production, (err, assets) => {
       if (err) commit(LOAD_ASSETS_ERROR)
       else {
         assets.forEach((asset) => {
-          asset.project_name = currentProduction.name
+          asset.project_name = production.name
           return asset
         })
-        commit(LOAD_ASSETS_END, assets)
+        commit(LOAD_ASSETS_END, { production, assets, userFilters })
       }
       if (callback) callback(err)
     })
@@ -243,27 +249,27 @@ const actions = {
     })
   },
 
-  newAsset ({ commit, state }, payload) {
-    commit(EDIT_ASSET_START, payload.data)
-    assetsApi.newAsset(payload.data, (err, asset) => {
+  newAsset ({ commit, state }, { data, callback }) {
+    commit(EDIT_ASSET_START, data)
+    assetsApi.newAsset(data, (err, asset) => {
       if (err) {
         commit(EDIT_ASSET_ERROR)
       } else {
         commit(EDIT_ASSET_END, asset)
       }
-      if (payload.callback) payload.callback(err)
+      if (callback) callback(err)
     })
   },
 
-  editAsset ({ commit, state }, payload) {
+  editAsset ({ commit, state }, { data, callback }) {
     commit(EDIT_ASSET_START)
-    assetsApi.updateAsset(payload.data, (err, asset) => {
+    assetsApi.updateAsset(data, (err, asset) => {
       if (err) {
         commit(EDIT_ASSET_ERROR)
       } else {
         commit(EDIT_ASSET_END, asset)
       }
-      if (payload.callback) payload.callback(err)
+      if (callback) callback(err)
     })
   },
 
@@ -306,10 +312,48 @@ const actions = {
     commit(SET_ASSET_SEARCH, searchQuery)
   },
 
+  saveAssetSearch ({ commit, rootGetters }, searchQuery) {
+    return new Promise((resolve, reject) => {
+      const query = state.assetSearchQueries.find(
+        (query) => query.name === searchQuery
+      )
+      const production = rootGetters.currentProduction
+
+      if (!query) {
+        peopleApi.createFilter(
+          'asset',
+          searchQuery,
+          searchQuery,
+          production.id,
+          (err, searchQuery) => {
+            commit(SAVE_ASSET_SEARCH_END, { searchQuery, production })
+            if (err) {
+              reject(err)
+            } else {
+              resolve(searchQuery)
+            }
+          }
+        )
+      } else {
+        resolve()
+      }
+    })
+  },
+
+  removeAssetSearch ({ commit, rootGetters }, searchQuery) {
+    return new Promise((resolve, reject) => {
+      const production = rootGetters.currentProduction
+      peopleApi.removeFilter(searchQuery, (err) => {
+        commit(REMOVE_ASSET_SEARCH_END, { searchQuery, production })
+        if (err) reject(err)
+        else resolve()
+      })
+    })
+  },
+
   displayMoreAssets ({commit}) {
     commit(DISPLAY_MORE_ASSETS)
   }
-
 }
 
 const mutations = {
@@ -321,6 +365,7 @@ const mutations = {
     state.assetIndex = {}
     state.displayedAssets = []
     state.displayedAssetsLength = 0
+    state.assetSearchQueries = []
   },
 
   [LOAD_ASSETS_ERROR] (state) {
@@ -328,12 +373,12 @@ const mutations = {
     state.isAssetsLoadingError = true
   },
 
-  [LOAD_ASSETS_END] (state, assets) {
+  [LOAD_ASSETS_END] (state, { production, assets, userFilters }) {
     const validationColumns = {}
     assets = sortAssets(assets)
     assets.forEach((asset) => {
       state.assetMap[asset.id] = asset
-      asset.production_id = helpers.getCurrentProduction().id
+      asset.production_id = production.id
 
       asset.tasks.forEach((task) => {
         helpers.populateTask(task)
@@ -354,6 +399,12 @@ const mutations = {
 
     state.displayedAssets = state.assets.slice(0, PAGE_SIZE)
     state.displayedAssetsLength = state.assets ? state.assets.length : 0
+
+    if (userFilters.asset && userFilters.asset[production.id]) {
+      state.assetSearchQueries = userFilters.asset[production.id]
+    } else {
+      state.assetSearchQueries = []
+    }
   },
 
   [LOAD_ASSET_END] (state, asset) {
@@ -548,6 +599,20 @@ const mutations = {
     state.assetSearchText = assetSearch
   },
 
+  [SAVE_ASSET_SEARCH_END] (state, { searchQuery }) {
+    state.assetSearchQueries.push(searchQuery)
+    state.assetSearchQueries = sortByName(state.assetSearchQueries)
+  },
+
+  [REMOVE_ASSET_SEARCH_END] (state, { searchQuery }) {
+    const queryIndex = state.assetSearchQueries.findIndex(
+      (query) => query.name === searchQuery.name
+    )
+    if (queryIndex >= 0) {
+      state.assetSearchQueries.splice(queryIndex, 1)
+    }
+  },
+
   [CREATE_TASKS_END] (state, tasks) {
     tasks.forEach((task) => {
       if (task) {
@@ -615,6 +680,7 @@ const mutations = {
     state.assetsCsvFormData = null
     state.assetValidationColumns = {}
     state.assetSelectionGrid = {}
+    state.searchQueries = []
 
     state.assetIndex = {}
     state.displayedAssets = []

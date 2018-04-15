@@ -111,12 +111,12 @@ export default {
         is_reviewable: 'true'
       },
       isReviewableOptions: [
-        {label: this.$tc('main.yes'), value: 'true'},
-        {label: this.$tc('main.no'), value: 'false'}
+        {label: this.$t('main.yes'), value: 'true'},
+        {label: this.$t('main.no'), value: 'false'}
       ],
       isDoneOptions: [
-        {label: this.$tc('main.yes'), value: 'true'},
-        {label: this.$tc('main.no'), value: 'false'}
+        {label: this.$t('main.yes'), value: 'true'},
+        {label: this.$t('main.no'), value: 'false'}
       ],
       colors: [
         '#000000',
@@ -169,6 +169,7 @@ export default {
     },
     active () {
       if (this.active) {
+        this.resetForm()
         setTimeout(() => {
           this.$refs.nameField.focus()
         }, 100)

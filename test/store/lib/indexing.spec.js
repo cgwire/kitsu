@@ -8,7 +8,7 @@ import {
   indexSearch
 } from '../../../src/lib/indexing'
 
-describe('lib/string', () => {
+describe('lib/indexing', () => {
 
   it('buildNameIndex', () => {
     const entries = [

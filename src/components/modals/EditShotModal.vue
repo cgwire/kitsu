@@ -29,21 +29,18 @@
           v-focus
         >
         </text-field>
-        <text-field
+        <textarea-field
           ref="descriptionField"
           :label="$t('shots.fields.description')"
           v-model="form.description"
           @enter="runConfirmation"
-          v-focus
         >
-        </text-field>
+        </textarea-field>
         <text-field
           ref="frameInField"
           :label="$t('shots.fields.frame_in')"
           v-model="form.frameIn"
           type="number"
-          @enter="runConfirmation"
-          v-focus
         >
         </text-field>
         <text-field
@@ -52,7 +49,6 @@
           v-model="form.frameOut"
           type="number"
           @enter="runConfirmation"
-          v-focus
         >
         </text-field>
         <text-field
@@ -61,7 +57,6 @@
           v-model="form.fps"
           type="number"
           @enter="runConfirmation"
-          v-focus
         >
         </text-field>
       </form>
@@ -108,12 +103,14 @@
 <script>
 import { mapGetters, mapActions } from 'vuex'
 import TextField from '../widgets/TextField'
+import TextareaField from '../widgets/TextareaField'
 import Combobox from '../widgets/Combobox'
 
 export default {
   name: 'edit-shot-modal',
   components: {
     TextField,
+    TextareaField,
     Combobox
   },
 

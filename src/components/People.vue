@@ -10,7 +10,7 @@
           <button-link v-if="isCurrentUserAdmin"
             class="level-item"
             :text="$t('main.csv.import_file')"
-            is-responsive="true"
+            :is-responsive="true"
             icon="upload"
             path="/people/import"
           >
@@ -25,7 +25,7 @@
           <button-link v-if="isCurrentUserAdmin"
             class="level-item"
             :text="$t('people.new_person')"
-            is-responsive="true"
+            :is-responsive="true"
             icon="plus"
             path="/people/new"
           >

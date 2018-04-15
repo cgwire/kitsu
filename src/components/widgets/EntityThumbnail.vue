@@ -2,13 +2,20 @@
 <a
   :href="originalPath"
   target="_blank"
-  v-if="isPreview"
+  v-if="isPreview && withLink"
 >
   <img
     class="thumbnail-picture"
     v-lazy="thumbnailPath"
   />
 </a>
+
+<img
+  class="thumbnail-picture"
+  v-lazy="thumbnailPath"
+  v-else-if="isPreview && !withLink"
+/>
+
 <span
   :class="{
     'thumbnail-picture': true,
@@ -26,6 +33,7 @@
 <script>
 export default {
   name: 'entity-thumbnail',
+
   props: {
     entity: {
       default: () => {},
@@ -46,17 +54,24 @@ export default {
     previewFileId: {
       default: null,
       type: String
+    },
+    withLink: {
+      default: true,
+      type: Boolean
     }
   },
+
   computed: {
     originalPath () {
       return '/api/pictures/originals/preview-files/' +
              this.entity.preview_file_id + '.png'
     },
+
     isPreview () {
       return this.entity.preview_file_id &&
              this.entity.preview_file_id.length > 0
     },
+
     thumbnailPath () {
       const previewFileId = this.previewFileId || this.entity.preview_file_id
 

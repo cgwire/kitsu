@@ -3,6 +3,7 @@
   <div class="flexrow-item">
     <search-icon></search-icon>
   </div>
+
   <div class="flexrow-item search-field">
     <input
       ref="input"
@@ -10,9 +11,11 @@
       type="text"
       :placeholder="placeholder"
       @input="onSearchChange"
+      @keyup.enter="onSaveClicked"
       v-focus
     />
   </div>
+
   <div class="flexrow-item erase-search">
     <span
       class="tag"
@@ -21,11 +24,17 @@
       x
     </span>
   </div>
+
+  <div class="flexrow-item save-search" v-if="canSave">
+    <button class="button" @click="onSaveClicked">
+      <save-icon class="icon is-small only-icon"></save-icon>
+    </button>
+  </div>
 </div>
 </template>
 
 <script>
-import { SearchIcon, XIcon } from 'vue-feather-icons'
+import { SaveIcon, SearchIcon, XIcon } from 'vue-feather-icons'
 
 export default {
   name: 'search-field',
@@ -33,10 +42,15 @@ export default {
     placeholder: {
       type: String,
       default: ''
+    },
+    canSave: {
+      type: Boolean,
+      default: false
     }
   },
   components: {
     XIcon,
+    SaveIcon,
     SearchIcon
   },
   computed: {
@@ -45,15 +59,23 @@ export default {
     onSearchChange () {
       this.$emit('change', this.$refs.input.value)
     },
+
+    onSaveClicked () {
+      if (this.canSave) this.$emit('save', this.$refs.input.value)
+    },
+
     setValue (value) {
       this.$refs.input.value = value
     },
+
     getValue (value) {
       return this.$refs.input.value
     },
+
     focus () {
       this.$refs.input.focus()
     },
+
     clearSearch () {
       this.setValue('')
       this.onSearchChange()
@@ -74,6 +96,16 @@ export default {
 
 .search-input {
   width: 300px;
+}
+
+.save-search .button {
+  margin-left: 0.5em;
+  border: 0;
+  color: #777;
+}
+
+.save-search .button:hover {
+  color: #333;
 }
 
 @media screen and (max-width: 768px) {
