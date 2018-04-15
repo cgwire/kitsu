@@ -315,7 +315,7 @@ const actions = {
   saveAssetSearch ({ commit, rootGetters }, searchQuery) {
     return new Promise((resolve, reject) => {
       const query = state.assetSearchQueries.find(
-        (query) => query.name === searchQuery.name
+        (query) => query.name === searchQuery
       )
       const production = rootGetters.currentProduction
 
