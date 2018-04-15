@@ -27,6 +27,9 @@ def get_person_raw(person_id):
     """
     Return given person as an active record.
     """
+    if person_id is None:
+        raise PersonNotFoundException()
+
     try:
         person = Person.get(person_id)
     except StatementError:
