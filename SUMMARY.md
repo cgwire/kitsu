@@ -10,6 +10,8 @@
 
 * [User Modules](user-modules/README.md)
 
+* [Admin Modules](admin-modules/README.md)
+
 * [Permissions](permissions/README.md)
 
 * [Development Environment](development-environment/README.md)
