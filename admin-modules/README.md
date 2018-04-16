@@ -4,6 +4,8 @@ Admin Modules enables you to customize your own environment of production by def
 ## Task Type
 Task Types correspond to the different steps of your production pipeline.
 A click on + Add Task Type button, displays this dialog box :
+![Image of AddTaskType](https://kitsu.cg-wire.com/img/CGW_AddTaskType.png)
+
 * Name : input a *string* defining the label of your task type;
 * Priority : input a *number* corresponding to the range of the column displayed in production web pages;
 
