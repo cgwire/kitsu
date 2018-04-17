@@ -1,5 +1,6 @@
 import Vue from 'vue'
 import shotsApi from '../api/shots'
+import peopleApi from '../api/people'
 import tasksStore from './tasks'
 import peopleStore from './people'
 import taskTypesStore from './tasktypes'
@@ -78,6 +79,9 @@ import {
 
   SET_PREVIEW,
 
+  SAVE_SHOT_SEARCH_END,
+  REMOVE_SHOT_SEARCH_END,
+
   RESET_ALL
 } from '../mutation-types'
 
@@ -118,6 +122,7 @@ const state = {
   sequences: [],
   episodes: [],
   shotSearchText: '',
+  shotSearchQueries: [],
 
   isFps: false,
   isFrameIn: false,
@@ -159,6 +164,7 @@ const getters = {
   shotMap: state => state.shotMap,
   sequences: state => state.sequences,
   episodes: state => state.episodes,
+  shotSearchQueries: state => state.shotSearchQueries,
 
   isFps: state => state.isFps,
   isFrameIn: state => state.isFrameIn,
@@ -224,24 +230,26 @@ const actions = {
   },
 
   loadShots ({ commit, state, rootGetters }, callback) {
-    const currentProduction = rootGetters.currentProduction
+    const production = rootGetters.currentProduction
+    const userFilters = rootGetters.userFilters
+
     commit(LOAD_SHOTS_START)
-    shotsApi.getEpisodes(currentProduction, (err, episodes) => {
+    shotsApi.getEpisodes(production, (err, episodes) => {
       commit(LOAD_EPISODES_END, episodes)
       if (err) commit(LOAD_SHOTS_ERROR)
       else {
-        shotsApi.getSequences(currentProduction, (err, sequences) => {
+        shotsApi.getSequences(production, (err, sequences) => {
           if (err) commit(LOAD_SHOTS_ERROR)
           else {
             commit(LOAD_SEQUENCES_END, sequences)
-            shotsApi.getShots(currentProduction, (err, shots) => {
+            shotsApi.getShots(production, (err, shots) => {
               if (err) commit(LOAD_SHOTS_ERROR)
               else {
                 shots.forEach((shot) => {
-                  shot.project_name = currentProduction.name
+                  shot.project_name = production.name
                   return shot
                 })
-                commit(LOAD_SHOTS_END, shots)
+                commit(LOAD_SHOTS_END, { production, shots, userFilters })
               }
               if (callback) callback(err)
             })
@@ -359,6 +367,45 @@ const actions = {
 
   setShotSearch ({commit}, searchQuery) {
     commit(SET_SHOT_SEARCH, searchQuery)
+  },
+
+  saveShotSearch ({ commit, rootGetters }, searchQuery) {
+    return new Promise((resolve, reject) => {
+      const query = state.shotSearchQueries.find(
+        (query) => query.name === searchQuery.name
+      )
+      const production = rootGetters.currentProduction
+
+      if (!query) {
+        peopleApi.createFilter(
+          'shot',
+          searchQuery,
+          searchQuery,
+          production.id,
+          (err, searchQuery) => {
+            commit(SAVE_SHOT_SEARCH_END, { searchQuery, production })
+            if (err) {
+              reject(err)
+            } else {
+              resolve(searchQuery)
+            }
+          }
+        )
+      } else {
+        resolve()
+      }
+    })
+  },
+
+  removeShotSearch ({ commit, rootGetters }, searchQuery) {
+    return new Promise((resolve, reject) => {
+      const production = rootGetters.currentProduction
+      peopleApi.removeFilter(searchQuery, (err) => {
+        commit(REMOVE_SHOT_SEARCH_END, { searchQuery, production })
+        if (err) reject(err)
+        else resolve()
+      })
+    })
   }
 }
 
@@ -375,6 +422,7 @@ const mutations = {
     state.shotMap = {}
     state.displayedShots = []
     state.displayedShotsLength = 0
+    state.shotSearchQueries = []
   },
 
   [LOAD_SHOTS_ERROR] (state) {
@@ -382,7 +430,7 @@ const mutations = {
     state.isShotsLoadingError = true
   },
 
-  [LOAD_SHOTS_END] (state, shots) {
+  [LOAD_SHOTS_END] (state, { production, shots, userFilters }) {
     const validationColumns = {}
     let isFps = false
     let isFrameIn = false
@@ -419,6 +467,26 @@ const mutations = {
 
     state.displayedShots = state.shots.slice(0, PAGE_SIZE)
     state.displayedShotsLength = state.shots.length
+
+    if (userFilters.shot && userFilters.shot[production.id]) {
+      state.shotSearchQueries = userFilters.shot[production.id]
+    } else {
+      state.shotSearchQueries = []
+    }
+  },
+
+  [SAVE_SHOT_SEARCH_END] (state, { searchQuery }) {
+    state.shotSearchQueries.push(searchQuery)
+    state.shotSearchQueries = sortByName(state.shotSearchQueries)
+  },
+
+  [REMOVE_SHOT_SEARCH_END] (state, { searchQuery }) {
+    const queryIndex = state.shotSearchQueries.findIndex(
+      (query) => query.name === searchQuery.name
+    )
+    if (queryIndex >= 0) {
+      state.shotSearchQueries.splice(queryIndex, 1)
+    }
   },
 
   [LOAD_SEQUENCES_END] (state, sequences) {
@@ -709,6 +777,8 @@ const mutations = {
     state.shotMap = {}
     state.displayedShots = []
     state.displayedShotsLength = 0
+
+    state.shotSearchQueries = []
 
     state.editShot = {
       isLoading: false,

@@ -374,7 +374,7 @@ const mutations = {
     state.taskMap = {}
   },
 
-  [LOAD_SHOTS_END] (state, shots) {
+  [LOAD_SHOTS_END] (state, { shots }) {
     const validationColumns = {}
     shots.forEach((shot) => {
       shot.validations = {}
