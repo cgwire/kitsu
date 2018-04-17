@@ -1,7 +1,7 @@
 import peopleApi from '../api/people'
 import colors from '../../lib/colors'
 import { populateTask, clearSelectionGrid } from '../../lib/helpers'
-import { sortTasks } from '../../lib/sorting'
+import { sortTasks, sortPeople } from '../../lib/sorting'
 import { indexSearch, buildTaskIndex } from '../../lib/indexing'
 import taskStatusStore from './taskstatus'
 import {
@@ -144,16 +144,6 @@ const getters = {
       }
     }
   )
-}
-
-const sortPeople = (people) => {
-  return people.sort((a, b) => {
-    if (a.first_name !== a.last_name) {
-      return a.first_name.localeCompare(b.first_name)
-    } else {
-      return a.last_name.localeCompare(b.last_name)
-    }
-  })
 }
 
 const actions = {
