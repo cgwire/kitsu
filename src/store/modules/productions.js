@@ -48,6 +48,7 @@ const state = {
 
   assetsPath: {name: 'open-productions'},
   shotsPath: {name: 'open-productions'},
+  sequencesPath: {name: 'open-productions'},
   breakdownPath: {name: 'open-productions'},
   playlistsPath: {name: 'open-productions'}
 }
@@ -77,6 +78,7 @@ const getters = {
 
   assetsPath: state => state.assetsPath,
   shotsPath: state => state.shotsPath,
+  sequencesPath: state => state.sequencesPath,
   breakdownPath: state => state.breakdownPath,
   playlistsPath: state => state.playlistsPath,
   currentProduction: (state) => {
@@ -298,6 +300,8 @@ const mutations = {
       'assets', currentProductionId)
     state.shotsPath = helpers.getProductionComponentPath(
       'shots', currentProductionId)
+    state.sequencesPath = helpers.getProductionComponentPath(
+      'sequences', currentProductionId)
     state.breakdownPath = helpers.getProductionComponentPath(
       'breakdown', currentProductionId)
     state.playlistsPath = helpers.getProductionComponentPath(
@@ -323,6 +327,7 @@ const mutations = {
 
     state.assetsPath = {name: 'open-productions'}
     state.shotsPath = {name: 'open-productions'}
+    state.sequencesPath = {name: 'open-productions'}
     state.breakdownPath = {name: 'open-productions'}
     state.playlistPath = {name: 'open-productions'}
   }

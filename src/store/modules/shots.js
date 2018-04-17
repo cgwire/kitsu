@@ -17,6 +17,7 @@ import {
 } from '../../lib/helpers'
 import {
   buildShotIndex,
+  buildSequenceIndex,
   indexSearch
 } from '../../lib/indexing'
 import {
@@ -56,9 +57,17 @@ import {
   EDIT_SHOT_ERROR,
   EDIT_SHOT_END,
 
+  EDIT_SEQUENCE_START,
+  EDIT_SEQUENCE_ERROR,
+  EDIT_SEQUENCE_END,
+
   DELETE_SHOT_START,
   DELETE_SHOT_ERROR,
   DELETE_SHOT_END,
+
+  DELETE_SEQUENCE_START,
+  DELETE_SEQUENCE_ERROR,
+  DELETE_SEQUENCE_END,
 
   RESTORE_SHOT_START,
   RESTORE_SHOT_ERROR,
@@ -67,11 +76,15 @@ import {
   NEW_TASK_COMMENT_END,
 
   SET_SHOT_SEARCH,
+  SET_SEQUENCE_SEARCH,
+
   SET_CURRENT_PRODUCTION,
   CREATE_TASKS_END,
   DISPLAY_MORE_SHOTS,
+  DISPLAY_MORE_SEQUENCES,
 
   SET_SHOT_LIST_SCROLL_POSITION,
+  SET_SEQUENCE_LIST_SCROLL_POSITION,
 
   REMOVE_SELECTED_TASK,
   ADD_SELECTED_TASK,
@@ -123,6 +136,7 @@ const state = {
   episodes: [],
   shotSearchText: '',
   shotSearchQueries: [],
+  sequenceSearchText: '',
 
   isFps: false,
   isFrameIn: false,
@@ -130,12 +144,17 @@ const state = {
 
   displayedShots: [],
   displayedShotsLength: 0,
+  displayedSequences: [],
+  displayedSequencesLength: 0,
   shotIndex: {},
+  sequenceIndex: {},
+
   shotMap: {},
   sequenceMap: {},
   episodeMap: {},
   shotCreated: '',
   shotSelectionGrid: {},
+  sequenceSelectionGrid: {},
 
   isShotsLoading: false,
   isShotsLoadingError: false,
@@ -156,13 +175,15 @@ const state = {
     isError: false
   },
 
-  shotListScrollPosition: 0
+  shotListScrollPosition: 0,
+  sequenceListScrollPosition: 0
 }
 
 const getters = {
   shots: state => state.shots,
   shotMap: state => state.shotMap,
   sequences: state => state.sequences,
+  sequenceMap: state => state.sequenceMap,
   episodes: state => state.episodes,
   shotSearchQueries: state => state.shotSearchQueries,
 
@@ -171,10 +192,14 @@ const getters = {
   isFrameOut: state => state.isFrameOut,
 
   shotSearchText: state => state.shotSearchText,
+  sequenceSearchText: state => state.sequenceSearchText,
   shotSelectionGrid: state => state.shotSelectionGrid,
+  sequenceSelectionGrid: state => state.sequenceSelectionGrid,
 
   displayedShots: state => state.displayedShots,
   displayedShotsLength: state => state.displayedShotsLength,
+  displayedSequences: state => state.displayedSequences,
+  displayedSequencesLength: state => state.displayedSequencesLength,
   shotsBySequence: state => {
     const shotsBySequence = []
     let sequenceShots = []
@@ -203,6 +228,7 @@ const getters = {
 
   shotsCsvFormData: state => state.shotsCsvFormData,
   shotListScrollPosition: state => state.shotListScrollPosition,
+  sequenceListScrollPosition: state => state.sequenceListScrollPosition,
 
   getShot: (state, getters) => (id) => {
     return state.shots.find((shot) => shot.id === id)
@@ -326,6 +352,18 @@ const actions = {
     })
   },
 
+  editSequence ({ commit, state }, { data, callback }) {
+    commit(EDIT_SEQUENCE_START)
+    shotsApi.updateSequence(data, (err, shot) => {
+      if (err) {
+        commit(EDIT_SEQUENCE_ERROR)
+      } else {
+        commit(EDIT_SEQUENCE_END, shot)
+      }
+      if (callback) callback(err)
+    })
+  },
+
   deleteShot ({ commit, state }, payload) {
     commit(DELETE_SHOT_START)
     const shot = payload.shot
@@ -336,6 +374,18 @@ const actions = {
         commit(DELETE_SHOT_END, shot)
       }
       if (payload.callback) payload.callback(err)
+    })
+  },
+
+  deleteSequence ({ commit, state }, { sequence, callback }) {
+    commit(DELETE_SEQUENCE_START)
+    shotsApi.deleteSequence(sequence, (err) => {
+      if (err) {
+        commit(DELETE_SEQUENCE_ERROR)
+      } else {
+        commit(DELETE_SEQUENCE_END, sequence)
+      }
+      if (callback) callback(err)
     })
   },
 
@@ -365,10 +415,15 @@ const actions = {
     commit(DISPLAY_MORE_SHOTS)
   },
 
+  displayMoreSequences ({commit}) {
+    commit(DISPLAY_MORE_SEQUENCES)
+  },
+
   setShotSearch ({commit}, searchQuery) {
     commit(SET_SHOT_SEARCH, searchQuery)
   },
 
+<<<<<<< 51df3185735a2da1bda2ab046b0222ce1a6b7168
   saveShotSearch ({ commit, rootGetters }, searchQuery) {
     return new Promise((resolve, reject) => {
       const query = state.shotSearchQueries.find(
@@ -406,6 +461,10 @@ const actions = {
         else resolve()
       })
     })
+  },
+
+  setSequenceSearch ({commit}, searchQuery) {
+    commit(SET_SEQUENCE_SEARCH, searchQuery)
   }
 }
 
@@ -419,10 +478,13 @@ const mutations = {
     state.isShotsLoadingError = false
 
     state.shotIndex = {}
+    state.sequenceIndex = {}
     state.shotMap = {}
     state.displayedShots = []
     state.displayedShotsLength = 0
     state.shotSearchQueries = []
+    state.displayedSequences = []
+    state.displayedSequencesLength = 0
   },
 
   [LOAD_SHOTS_ERROR] (state) {
@@ -493,9 +555,21 @@ const mutations = {
     const sequenceMap = {}
     sequences.forEach((sequence) => {
       sequenceMap[sequence.id] = sequence
+      if (sequence.parent_id) {
+        const episode = state.episodeMap[sequence.parent_id]
+        Object.assign(sequence, {
+          episode_id: episode.id,
+          episode_name: episode.name
+        })
+      }
     })
     state.sequenceMap = sequenceMap
     state.sequences = sortByName(sequences)
+    state.displayedSequences = state.sequences
+
+    state.sequenceIndex = buildSequenceIndex(state.sequences)
+    state.displayedSequences = state.sequences.slice(0, PAGE_SIZE)
+    state.displayedSequencesLength = state.sequences.length
   },
 
   [LOAD_EPISODES_END] (state, episodes) {
@@ -565,6 +639,17 @@ const mutations = {
     if (newShot.data.frame_out) state.isFrameOut = true
   },
 
+  [EDIT_SEQUENCE_START] (state, data) {},
+  [EDIT_SEQUENCE_ERROR] (state) {},
+  [EDIT_SEQUENCE_END] (state, newSequence) {
+    const sequence = state.sequenceMap[newSequence.id]
+    if (sequence) {
+      Object.assign(sequence, newSequence)
+    }
+    state.sequenceIndex = buildSequenceIndex(state.sequences)
+    state.shotCreated = newSequence.name
+  },
+
   [DELETE_SHOT_START] (state) {
     state.deleteShot = {
       isLoading: true,
@@ -599,6 +684,21 @@ const mutations = {
       isError: false
     }
     state.shotIndex = buildShotIndex(state.shots)
+  },
+
+  [DELETE_SEQUENCE_START] (state) {},
+  [DELETE_SEQUENCE_ERROR] (state) {},
+  [DELETE_SEQUENCE_END] (state, sequenceToDelete) {
+    const sequenceToDeleteIndex = state.sequences.findIndex(
+      (sequence) => sequence.id === sequenceToDelete.id
+    )
+    const displayedSequenceToDeleteIndex = state.sequences.findIndex(
+      (sequence) => sequence.id === sequenceToDelete.id
+    )
+    state.sequences.splice(sequenceToDeleteIndex, 1)
+    state.displayedSequences.splice(displayedSequenceToDeleteIndex, 1)
+    state.sequenceMap[sequenceToDelete.id] = undefined
+    state.sequenceIndex = buildSequenceIndex(state.sequences)
   },
 
   [RESTORE_SHOT_START] (state) {
@@ -658,6 +758,15 @@ const mutations = {
     state.displayedShots = result.slice(0, PAGE_SIZE)
     state.displayedShotsLength = result.length
     state.shotSearchText = shotSearch
+  },
+
+  [SET_SEQUENCE_SEARCH] (state, sequenceSearch) {
+    const result =
+      indexSearch(state.sequenceIndex, sequenceSearch) || state.sequences
+
+    state.displayedSequences = result.slice(0, PAGE_SIZE)
+    state.displayedSequencesLength = result.length
+    state.sequenceSearchText = sequenceSearch
   },
 
   [NEW_SHOT_START] (state) {},
@@ -734,8 +843,22 @@ const mutations = {
     )
   },
 
+  [DISPLAY_MORE_SEQUENCES] (state, tasks) {
+    let sequences
+    if (state.sequenceSearchText.length > 0) {
+      sequences = indexSearch(state.shotIndex, state.sequenceSearchText)
+    } else {
+      sequences = state.sequences
+    }
+    state.displayedSequences = sequences.slice(
+      0,
+      state.displayedSequences.length + PAGE_SIZE
+    )
+  },
+
   [SET_CURRENT_PRODUCTION] (state, production) {
     state.shotSearchText = ''
+    state.sequenceSearchText = ''
   },
 
   [SET_PREVIEW] (state, {entityId, taskId, previewId}) {
@@ -746,7 +869,11 @@ const mutations = {
   },
 
   [SET_SHOT_LIST_SCROLL_POSITION] (state, scrollPosition) {
-    state.shotListScrollPosition = scrollPosition
+    state.sequenceListScrollPosition = scrollPosition
+  },
+
+  [SET_SEQUENCE_LIST_SCROLL_POSITION] (state, scrollPosition) {
+    state.sequenceListScrollPosition = scrollPosition
   },
 
   [REMOVE_SELECTED_TASK] (state, validationInfo) {
@@ -777,6 +904,8 @@ const mutations = {
     state.shotMap = {}
     state.displayedShots = []
     state.displayedShotsLength = 0
+    state.displayedSequences = []
+    state.displayedSequencesLength = 0
 
     state.shotSearchQueries = []
 

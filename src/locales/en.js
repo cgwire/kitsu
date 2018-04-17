@@ -312,6 +312,10 @@ export default {
     no_casting: 'The shot casting is empty.'
   },
 
+  sequences: {
+    title: 'Sequences'
+  },
+
   breakdown: {
     title: 'Breakdown',
     select_shot: 'Please select a shot on the left to manage its casting.',

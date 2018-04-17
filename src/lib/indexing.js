@@ -66,6 +66,21 @@ export const buildShotIndex = (shots) => {
 }
 
 /*
+ * Generate an index to find sequence easily. Search will be based on the
+ * episode and sequence names at the same time.
+ * Results are arrays of sequences.
+ */
+export const buildSequenceIndex = (sequences) => {
+  const index = {}
+  const sequenceIndex = {}
+  sequences.forEach((sequence) => {
+    let words = [sequence.name, sequence.episode_name]
+    indexWords(index, sequenceIndex, sequence, words)
+  })
+  return index
+}
+
+/*
  * Run a non case sensitive search on given index. It accepts different search
  * terms separated by spaces. Terms dedicated to task status filtering (like
  * modeling:wip) are ignored. The result is the intersection of queries.
