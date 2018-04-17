@@ -197,11 +197,6 @@ export const routes = [
         name: 'shots'
       },
       {
-        path: '/productions/:production_id/shots/:shot_id',
-        component: Shot,
-        name: 'shot'
-      },
-      {
         path: '/productions/:production_id/shots/manage',
         component: Shots,
         name: 'manage-shots'
@@ -230,6 +225,11 @@ export const routes = [
         path: '/productions/:production_id/shots/restore/:shot_id',
         component: Shots,
         name: 'restore-shots'
+      },
+      {
+        path: '/productions/:production_id/shots/:shot_id',
+        component: Shot,
+        name: 'shot'
       },
 
       {

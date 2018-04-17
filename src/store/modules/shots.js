@@ -480,6 +480,10 @@ const mutations = {
       state.shots.push(newShot)
       state.shots = sortShots(state.shots)
       state.shotMap[newShot.id] = newShot
+
+      const maxX = state.shots.length
+      const maxY = state.nbValidationColumns
+      state.shotSelectionGrid = buildSelectionGrid(maxX, maxY)
     }
     state.editShot = {
       isLoading: false,
@@ -593,6 +597,7 @@ const mutations = {
   [NEW_SHOT_END] (state, shot) {
     const sequence = state.sequenceMap[shot.parent_id]
     const episode = state.episodeMap[sequence.parent_id]
+    shot.production_id = shot.project_id
     shot.sequence_name = sequence.name
     shot.sequence_id = sequence.id
     shot.episode_name = episode.name
@@ -608,6 +613,10 @@ const mutations = {
     state.displayedShots = state.shots.slice(0, PAGE_SIZE)
     state.shotMap[shot.id] = shot
     state.shotIndex = buildShotIndex(state.shots)
+
+    const maxX = state.shots.length
+    const maxY = state.nbValidationColumns
+    state.shotSelectionGrid = buildSelectionGrid(maxX, maxY)
 
     if (shot.data.fps) state.isFps = true
     if (shot.data.frame_in) state.isFrameIn = true
