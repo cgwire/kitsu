@@ -152,9 +152,15 @@ export default {
         this.confirmAndStayClicked()
       }
     },
+
+    focusName () {
+      this.$refs.nameField.focus()
+    },
+
     confirmAndStayClicked () {
       this.$emit('confirmAndStay', this.form)
     },
+
     confirmClicked () {
       this.$emit('confirm', this.form)
     },
@@ -166,7 +172,7 @@ export default {
     resetForm () {
       this.assetSuccessText = ''
       if (!this.isEditing()) {
-        if (this.assetTypes.length > 0) {
+        if (!this.form.entity_type_id && this.assetTypes.length > 0) {
           this.form.entity_type_id = this.assetTypes[0].id
         }
         if (this.openProductions.length > 0) {
@@ -193,6 +199,7 @@ export default {
     assetToEdit () {
       this.resetForm()
     },
+
     assetCreated () {
       if (this.isEditing()) {
         this.assetSuccessText = this.$t('assets.edit_success', {
