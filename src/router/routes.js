@@ -116,17 +116,25 @@ export const routes = [
         name: 'person'
       },
 
-      { path: '/productions', component: Productions },
-      { path: '/productions/new', component: Productions },
       {
-        name: 'edit-production',
-        path: '/productions/edit/:production_id',
-        component: Productions
+        path: '/productions',
+        component: Productions,
+        name: 'productions'
       },
       {
-        name: 'delete-production',
+        path: '/productions/new',
+        component: Productions,
+        name: 'productions-new'
+      },
+      {
+        path: '/productions/edit/:production_id',
+        component: Productions,
+        name: 'edit-production'
+      },
+      {
         path: '/productions/delete/:production_id',
-        component: Productions
+        component: Productions,
+        name: 'delete-production'
       },
 
       {
