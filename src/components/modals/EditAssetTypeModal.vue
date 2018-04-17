@@ -20,6 +20,7 @@
           ref="nameField"
           :label="$t('asset_types.fields.name')"
           v-model="form.name"
+          @enter="runConfirmation"
           v-focus
         >
         </text-field>
@@ -32,7 +33,7 @@
             'is-primary': true,
             'is-loading': isLoading
           }"
-          @click="confirmClicked"
+          @click="runConfirmation"
         >
           {{ $t("main.confirmation") }}
         </a>
@@ -71,14 +72,6 @@ export default {
     'assetTypeToEdit'
   ],
 
-  watch: {
-    assetTypeToEdit () {
-      if (this.assetTypeToEdit) {
-        this.form.name = this.assetTypeToEdit.name
-      }
-    }
-  },
-
   data () {
     return {}
   },
@@ -98,8 +91,25 @@ export default {
   methods: {
     ...mapActions([
     ]),
-    confirmClicked () {
+
+    runConfirmation () {
       this.$emit('confirm', this.form)
+    }
+  },
+
+  watch: {
+    active () {
+      if (this.active) {
+        setTimeout(() => {
+          this.$refs.nameField.focus()
+        }, 100)
+      }
+    },
+
+    assetTypeToEdit () {
+      if (this.assetTypeToEdit) {
+        this.form.name = this.assetTypeToEdit.name
+      }
     }
   }
 }
