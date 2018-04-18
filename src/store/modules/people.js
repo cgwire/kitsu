@@ -1,7 +1,7 @@
 import peopleApi from '../api/people'
 import colors from '../../lib/colors'
 import { populateTask, clearSelectionGrid } from '../../lib/helpers'
-import { sortTasks, sortPeople } from '../../lib/sorting'
+import { sortTasks, sortPeople, sortByName } from '../../lib/sorting'
 import { indexSearch, buildTaskIndex } from '../../lib/indexing'
 import taskStatusStore from './taskstatus'
 import {
@@ -36,6 +36,8 @@ import {
   LOAD_PERSON_DONE_TASKS_END,
 
   SET_PERSON_TASKS_SEARCH,
+  SAVE_PERSON_TASKS_SEARCH_END,
+  REMOVE_PERSON_TASKS_SEARCH_END,
   NEW_TASK_COMMENT_END,
 
   ADD_SELECTED_TASK,
@@ -105,7 +107,8 @@ const state = {
   displayedPersonDoneTasks: [],
   personTasksIndex: {},
   personTasksSearchText: '',
-  personTaskSelectionGrid: {}
+  personTaskSelectionGrid: {},
+  personTaskSearchQueries: []
 }
 
 const getters = {
@@ -133,6 +136,7 @@ const getters = {
   displayedPersonTasks: state => state.displayedPersonTasks,
   displayedPersonDoneTasks: state => state.displayedPersonDoneTasks,
   personTasksSearchText: state => state.personTasksSearchText,
+  personTaskSearchQueries: state => state.personTaskSearchQueries,
   personTaskSelectionGrid: state => state.personTaskSelectionGrid,
 
   getPerson: (state, getters) => (id) => state.personMap[id],
@@ -214,14 +218,17 @@ const actions = {
     })
   },
 
-  loadPersonTasks ({ commit, state }, { personId, forced, callback }) {
-    commit(LOAD_PERSON_TASKS_END, [])
+  loadPersonTasks (
+    { commit, state, rootGetters }, { personId, forced, callback }
+  ) {
+    const userFilters = rootGetters.userFilters
+    commit(LOAD_PERSON_TASKS_END, { tasks: [], userFilters })
     commit(LOAD_PERSON_DONE_TASKS_END, [])
     peopleApi.getPersonTasks(personId, (err, tasks) => {
       if (err) tasks = []
       peopleApi.getPersonDoneTasks(personId, (err, doneTasks) => {
         if (err) doneTasks = []
-        commit(LOAD_PERSON_TASKS_END, tasks)
+        commit(LOAD_PERSON_TASKS_END, { tasks, userFilters })
         commit(LOAD_PERSON_DONE_TASKS_END, doneTasks)
         if (callback) callback(err)
       })
@@ -254,6 +261,43 @@ const actions = {
 
   setPersonTasksSearch ({ commit, state }, searchText) {
     commit(SET_PERSON_TASKS_SEARCH, searchText)
+  },
+
+  savePersonTasksSearch ({ commit, rootGetters }, searchQuery) {
+    return new Promise((resolve, reject) => {
+      const query = state.personTaskSearchQueries.find(
+        (query) => query.name === searchQuery
+      )
+
+      if (!query) {
+        peopleApi.createFilter(
+          'persontasks',
+          searchQuery,
+          searchQuery,
+          null,
+          (err, searchQuery) => {
+            commit(SAVE_PERSON_TASKS_SEARCH_END, { searchQuery })
+            if (err) {
+              reject(err)
+            } else {
+              resolve(searchQuery)
+            }
+          }
+        )
+      } else {
+        resolve()
+      }
+    })
+  },
+
+  removePersonTasksSearch ({ commit, rootGetters }, searchQuery) {
+    return new Promise((resolve, reject) => {
+      peopleApi.removeFilter(searchQuery, (err) => {
+        commit(REMOVE_PERSON_TASKS_SEARCH_END, { searchQuery })
+        if (err) reject(err)
+        else resolve()
+      })
+    })
   }
 }
 
@@ -409,7 +453,7 @@ const mutations = {
       `.png?unique=${randomHash}`
   },
 
-  [LOAD_PERSON_TASKS_END] (state, tasks) {
+  [LOAD_PERSON_TASKS_END] (state, { tasks, userFilters }) {
     tasks.forEach(populateTask)
     const personTaskSelectionGrid = {}
     for (let i = 0; i < tasks.length; i++) {
@@ -424,6 +468,11 @@ const mutations = {
       state.personTasksSearchText
     )
     state.displayedPersonTasks = searchResult || state.personTasks
+    if (userFilters.persontasks && userFilters.persontasks.all) {
+      state.personTaskSearchQueries = userFilters.persontasks.all
+    } else {
+      state.personTaskSearchQueries = []
+    }
   },
 
   [LOAD_PERSON_DONE_TASKS_END] (state, tasks) {
@@ -435,6 +484,20 @@ const mutations = {
     const searchResult = indexSearch(state.personTasksIndex, searchText)
     state.personTasksSearchText = searchText
     state.displayedPersonTasks = searchResult || state.personTasks
+  },
+
+  [SAVE_PERSON_TASKS_SEARCH_END] (state, { searchQuery }) {
+    state.personTaskSearchQueries.push(searchQuery)
+    state.personTaskSearchQueries = sortByName(state.personTaskSearchQueries)
+  },
+
+  [REMOVE_PERSON_TASKS_SEARCH_END] (state, { searchQuery }) {
+    const queryIndex = state.personTaskSearchQueries.findIndex(
+      (query) => query.name === searchQuery.name
+    )
+    if (queryIndex >= 0) {
+      state.personTaskSearchQueries.splice(queryIndex, 1)
+    }
   },
 
   [NEW_TASK_COMMENT_END] (state, {comment, taskId}) {
@@ -480,6 +543,7 @@ const mutations = {
     state.isDeleteLoading = false
     state.isDeleteLoadingError = false
     state.personToDelete = {}
+    state.personTaskSearchQueries = []
 
     state.isEditModalShown = false
     state.isEditLoading = false

@@ -621,7 +621,7 @@ const mutations = {
     state.isShowAssignations = isShowAssignations
   },
 
-  [LOAD_PERSON_TASKS_END] (state, tasks) {
+  [LOAD_PERSON_TASKS_END] (state, { tasks }) {
     tasks.forEach((task) => {
       if (task.last_comment.person_id) {
         const person = helpers.getPerson(task.last_comment.person_id)
@@ -632,7 +632,7 @@ const mutations = {
     })
   },
 
-  [USER_LOAD_TODOS_END] (state, tasks) {
+  [USER_LOAD_TODOS_END] (state, { tasks }) {
     tasks.forEach((task) => {
       if (task.last_comment.person_id) {
         const person = helpers.getPerson(task.last_comment.person_id)

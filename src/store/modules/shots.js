@@ -372,7 +372,7 @@ const actions = {
   saveShotSearch ({ commit, rootGetters }, searchQuery) {
     return new Promise((resolve, reject) => {
       const query = state.shotSearchQueries.find(
-        (query) => query.name === searchQuery.name
+        (query) => query.name === searchQuery
       )
       const production = rootGetters.currentProduction
 

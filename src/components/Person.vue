@@ -43,8 +43,19 @@
       }"
       ref="person-tasks-search-field"
       @change="onSearchChange"
+      @save="saveSearchQuery"
+      :can-save="true"
     >
     </search-field>
+
+    <div class="query-list">
+      <search-query-list
+        :queries="personTaskSearchQueries"
+        @changesearch="changeSearch"
+        @removesearch="removeSearchQuery"
+      >
+      </search-query-list>
+    </div>
 
     <todos-list
       :entries="displayedPersonTasks"
@@ -72,6 +83,7 @@ import PageTitle from './widgets/PageTitle'
 import PageSubtitle from './widgets/PageSubtitle'
 import PeopleAvatar from './widgets/PeopleAvatar'
 import SearchField from './widgets/SearchField'
+import SearchQueryList from './widgets/SearchQueryList'
 import TodosList from './lists/TodosList'
 
 export default {
@@ -81,6 +93,7 @@ export default {
     PageSubtitle,
     PeopleAvatar,
     SearchField,
+    SearchQueryList,
     TodosList
   },
 
@@ -116,6 +129,7 @@ export default {
       'displayedPersonTasks',
       'displayedPersonDoneTasks',
       'personTasksSearchText',
+      'personTaskSearchQueries',
       'personTaskSelectionGrid'
     ]),
 
@@ -131,7 +145,9 @@ export default {
   methods: {
     ...mapActions([
       'loadPersonTasks',
-      'setPersonTasksSearch'
+      'setPersonTasksSearch',
+      'savePersonTasksSearch',
+      'removePersonTasksSearch'
     ]),
 
     onSearchChange (text) {
@@ -160,6 +176,31 @@ export default {
 
     selectDone () {
       this.activeTab = 'done'
+    },
+
+    changeSearch (searchQuery) {
+      this.$refs['person-tasks-search-field'].setValue(searchQuery.search_query)
+      this.$refs['person-tasks-search-field'].$emit(
+        'change', searchQuery.search_query
+      )
+    },
+
+    saveSearchQuery (searchQuery) {
+      this.savePersonTasksSearch(searchQuery)
+        .then(() => {
+        })
+        .catch((err) => {
+          if (err) console.log(err)
+        })
+    },
+
+    removeSearchQuery (searchQuery) {
+      this.removePersonTasksSearch(searchQuery)
+        .then(() => {
+        })
+        .catch((err) => {
+          if (err) console.log(err)
+        })
     }
   },
 
@@ -192,5 +233,9 @@ export default {
 }
 .skills {
   width: 250px;
+}
+
+.query-list {
+  margin-top: 1em;
 }
 </style>
