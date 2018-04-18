@@ -432,12 +432,19 @@ export default {
     taskEntityPath () {
       if (this.currentTask) {
         const type = this.currentTask.entity_type_name
+        let entityId = ''
+        if (this.currentTask.entity) {
+          entityId = this.currentTask.entity.id
+        } else {
+          entityId = this.currentTask.entity_id
+        }
+
         if (type === 'Shot') {
           return {
             name: 'shot',
             params: {
               production_id: this.currentTask.project_id,
-              shot_id: this.currentTask.entity.id
+              shot_id: entityId
             }
           }
         } else {
@@ -445,7 +452,7 @@ export default {
             name: 'asset',
             params: {
               production_id: this.currentTask.project_id,
-              asset_id: this.currentTask.entity.id
+              asset_id: entityId
             }
           }
         }
@@ -475,9 +482,13 @@ export default {
 
         let task = null
         while (!task) {
-          task = this.entityList[previousEntityIndex].tasks.find((task) => {
-            return task.task_type_id === taskTypeId
-          })
+          if (this.entityList[previousEntityIndex]) {
+            task = this.entityList[previousEntityIndex].tasks.find((task) => {
+              return task.task_type_id === taskTypeId
+            })
+          } else {
+            task = this.currentTask
+          }
 
           if (!task) {
             previousEntityIndex--
@@ -512,9 +523,13 @@ export default {
 
         let task = null
         while (!task) {
-          task = this.entityList[nextEntityIndex].tasks.find((task) => {
-            return task.task_type_id === taskTypeId
-          })
+          if (this.entityList[nextEntityIndex]) {
+            task = this.entityList[nextEntityIndex].tasks.find((task) => {
+              return task.task_type_id === taskTypeId
+            })
+          } else {
+            task = this.currentTask
+          }
 
           if (!task) {
             nextEntityIndex++
