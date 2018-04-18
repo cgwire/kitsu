@@ -27,11 +27,16 @@
             class="project"
             :only-avatar="true"
             :entry="entry"
+            :last-production-screen="lastProductionScreen"
           >
           </production-name-cell>
-          <td class="name">
-            {{ entry.name }}
-          </td>
+          <production-name-cell
+            class="name"
+            :with-avatar="false"
+            :entry="entry"
+            :last-production-screen="lastProductionScreen"
+          >
+          </production-name-cell>
           <td class="td-status">
             {{ $t(getStatusLocale(entry.project_status_name)) }}
           </td>
@@ -82,6 +87,7 @@ export default {
   },
   computed: {
     ...mapGetters([
+      'lastProductionScreen'
     ])
   },
   methods: {

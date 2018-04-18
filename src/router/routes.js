@@ -116,17 +116,25 @@ export const routes = [
         name: 'person'
       },
 
-      { path: '/productions', component: Productions },
-      { path: '/productions/new', component: Productions },
       {
-        name: 'edit-production',
-        path: '/productions/edit/:production_id',
-        component: Productions
+        path: '/productions',
+        component: Productions,
+        name: 'productions'
       },
       {
-        name: 'delete-production',
+        path: '/productions/new',
+        component: Productions,
+        name: 'productions-new'
+      },
+      {
+        path: '/productions/edit/:production_id',
+        component: Productions,
+        name: 'edit-production'
+      },
+      {
         path: '/productions/delete/:production_id',
-        component: Productions
+        component: Productions,
+        name: 'delete-production'
       },
 
       {
@@ -189,11 +197,6 @@ export const routes = [
         name: 'shots'
       },
       {
-        path: '/productions/:production_id/shots/:shot_id',
-        component: Shot,
-        name: 'shot'
-      },
-      {
         path: '/productions/:production_id/shots/manage',
         component: Shots,
         name: 'manage-shots'
@@ -222,6 +225,11 @@ export const routes = [
         path: '/productions/:production_id/shots/restore/:shot_id',
         component: Shots,
         name: 'restore-shots'
+      },
+      {
+        path: '/productions/:production_id/shots/:shot_id',
+        component: Shot,
+        name: 'shot'
       },
 
       {

@@ -19,7 +19,8 @@ export default {
       name: 'Name',
       email: 'Email',
       phone: 'Phone',
-      role: 'Role'
+      role: 'Role',
+      active: 'Active'
     },
     fields: {
       first_name: 'First name',
@@ -29,7 +30,8 @@ export default {
       role: 'Role',
       old_password: 'Current password',
       password: 'New password',
-      password_2: 'New password (repeat)'
+      password_2: 'New password (repeat)',
+      active: 'Active'
     },
     role: {
       admin: 'Administrator',

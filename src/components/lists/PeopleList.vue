@@ -16,6 +16,9 @@
           <th class="role">
           {{ $t("people.list.role") }}
           </th>
+          <th class="active">
+          {{ $t("people.list.active") }}
+          </th>
           <th class="actions"></th>
         </tr>
       </thead>
@@ -36,6 +39,7 @@
           <td class="email">{{ entry.email }}</td>
           <td class="phone">{{ entry.phone }}</td>
           <td class="role">{{ $t('people.role.' + entry.role) }}</td>
+          <td class="active">{{ entry.active ? $t('main.yes') : $t('main.no') }}</td>
           <row-actions
             v-if="isCurrentUserAdmin"
             :entry-id="entry.id"
@@ -118,6 +122,7 @@ export default {
   min-width: 140px;
 }
 .role {
+  width: 100px;
   min-width: 100px;
 }
 .actions {

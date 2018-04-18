@@ -458,9 +458,14 @@ const mutations = {
       Object.assign(asset, newAsset)
     } else {
       newAsset.validations = {}
+      newAsset.production_id = newAsset.project_id
       state.assets.push(newAsset)
       state.assets = sortAssets(state.assets)
       state.displayedAssets.unshift(newAsset)
+
+      const maxX = state.assets.length
+      const maxY = state.nbValidationColumns
+      state.assetSelectionGrid = buildSelectionGrid(maxX, maxY)
     }
     state.editAsset = {
       isLoading: false,

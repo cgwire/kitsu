@@ -12,7 +12,8 @@ export default {
       last_name: person.last_name,
       email: person.email,
       phone: person.phone,
-      role: person.role
+      role: person.role,
+      active: person.active
     }
     client.post(`/api/data/persons/new`, data, callback)
   },
@@ -25,7 +26,8 @@ export default {
       phone: person.phone,
       timezone: person.timezone,
       locale: person.locale,
-      role: person.role
+      role: person.role,
+      active: person.active
     }
     client.put(`/api/data/persons/${person.id}`, data, callback)
   },

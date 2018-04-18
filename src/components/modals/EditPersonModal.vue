@@ -38,6 +38,11 @@
           localeKeyPrefix="people.role."
           v-model="form.role">
         </combobox>
+        <combobox
+          :label="$t('people.fields.active')"
+          :options="activeOptions"
+          v-model="form.active">
+        </combobox>
       </form>
 
       <p class="has-text-right">
@@ -79,11 +84,14 @@ export default {
   ],
   watch: {
     personToEdit () {
-      this.form.first_name = this.personToEdit.first_name
-      this.form.last_name = this.personToEdit.last_name
-      this.form.phone = this.personToEdit.phone
-      this.form.email = this.personToEdit.email
-      this.form.role = this.personToEdit.role
+      this.form = {
+        first_name: this.personToEdit.first_name,
+        last_name: this.personToEdit.last_name,
+        phone: this.personToEdit.phone,
+        email: this.personToEdit.email,
+        role: this.personToEdit.role,
+        active: this.personToEdit.active
+      }
     }
   },
   data () {
@@ -93,12 +101,18 @@ export default {
         last_name: '',
         email: '',
         phone: '',
-        role: 'user'
+        role: 'user',
+        active: true
       },
+
       roleOptions: [
         {label: 'user', value: 'user'},
         {label: 'manager', value: 'manager'},
         {label: 'admin', value: 'admin'}
+      ],
+      activeOptions: [
+        {label: this.$t('main.yes'), value: 'true'},
+        {label: this.$t('main.no'), value: 'false'}
       ]
     }
   },
@@ -107,9 +121,11 @@ export default {
     Combobox
   },
   computed: {
+
     ...mapGetters([
       'personToEdit'
     ]),
+
     personName () {
       if (this.personToEdit !== undefined) {
         return this.personToEdit.first_name + ' ' + this.personToEdit.last_name
@@ -120,8 +136,11 @@ export default {
   },
   methods: {
     ...mapActions([
+
     ]),
     confirmClicked () {
+      this.form.active =
+        this.form.active === 'true' || this.form.active === true
       this.$emit('confirm', this.form)
     }
   }

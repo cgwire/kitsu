@@ -47,10 +47,21 @@
       <div class="filters-area">
         <search-field
           ref="shot-search-field"
+          :can-save="true"
           @change="onSearchChange"
           placeholder="ex: e01 s01, anim=wip"
+          @save="saveSearchQuery"
         >
         </search-field>
+      </div>
+
+      <div class="query-list">
+        <search-query-list
+          :queries="shotSearchQueries"
+          @changesearch="changeSearch"
+          @removesearch="removeSearchQuery"
+        >
+        </search-query-list>
       </div>
     </div>
 
@@ -155,36 +166,38 @@
 <script>
 import { mapGetters, mapActions } from 'vuex'
 import { SearchIcon } from 'vue-feather-icons'
-import ShotList from './lists/ShotList.vue'
+import ButtonHrefLink from './widgets/ButtonHrefLink'
+import ButtonLink from './widgets/ButtonLink'
+import CreateTasksModal from './modals/CreateTasksModal'
 import DeleteModal from './widgets/DeleteModal'
 import EditShotModal from './modals/EditShotModal'
+import Filters from './widgets/Filters'
 import ImportModal from './modals/ImportModal'
 import ManageShotsModal from './modals/ManageShotsModal'
-import CreateTasksModal from './modals/CreateTasksModal'
-import Filters from './widgets/Filters'
-import ButtonLink from './widgets/ButtonLink'
-import ButtonHrefLink from './widgets/ButtonHrefLink'
 import PageTitle from './widgets/PageTitle'
 import SearchField from './widgets/SearchField'
+import SearchQueryList from './widgets/SearchQueryList'
 import ShowAssignationsButton from './widgets/ShowAssignationsButton'
+import ShotList from './lists/ShotList.vue'
 
 export default {
   name: 'shots',
 
   components: {
-    ShotList,
-    ManageShotsModal,
-    EditShotModal,
-    DeleteModal,
-    ImportModal,
-    CreateTasksModal,
-    Filters,
     ButtonLink,
     ButtonHrefLink,
+    CreateTasksModal,
+    DeleteModal,
+    EditShotModal,
+    Filters,
+    ImportModal,
+    ManageShotsModal,
     PageTitle,
     SearchField,
+    SearchIcon,
+    SearchQueryList,
     ShowAssignationsButton,
-    SearchIcon
+    ShotList
   },
 
   data () {
@@ -234,6 +247,7 @@ export default {
     ...mapGetters([
       'shots',
       'shotsCsvFormData',
+      'shotSearchQueries',
       'displayedShots',
       'sequences',
       'openProductions',
@@ -283,6 +297,8 @@ export default {
   methods: {
     ...mapActions([
       'loadShots',
+      'removeShotSearch',
+      'saveShotSearch',
       'setLastProductionScreen',
       'setShotSearch',
       'showAssignations',
@@ -484,6 +500,29 @@ export default {
         'SET_SHOT_LIST_SCROLL_POSITION',
         scrollPosition
       )
+    },
+
+    changeSearch (searchQuery) {
+      this.$refs['shot-search-field'].setValue(searchQuery.search_query)
+      this.$refs['shot-search-field'].$emit('change', searchQuery.search_query)
+    },
+
+    saveSearchQuery (searchQuery) {
+      this.saveShotSearch(searchQuery)
+        .then(() => {
+        })
+        .catch((err) => {
+          if (err) console.log('error')
+        })
+    },
+
+    removeSearchQuery (searchQuery) {
+      this.removeShotSearch(searchQuery)
+        .then(() => {
+        })
+        .catch((err) => {
+          if (err) console.log('error')
+        })
     }
   },
 

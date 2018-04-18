@@ -19,7 +19,8 @@ export default {
       name: 'Nom',
       email: 'Adresse Mail',
       phone: 'Téléphone',
-      role: 'Rôle'
+      role: 'Rôle',
+      active: 'Actif'
     },
     fields: {
       first_name: 'Prénom',
@@ -27,6 +28,7 @@ export default {
       email: 'Adresse email',
       phone: 'Téléphone',
       role: 'Rôle',
+      active: 'Actif',
       old_password: 'Mot de passe actuel',
       password: 'Nouveau mot de passe',
       password_2: 'Répétez le nouveau mot de passe'

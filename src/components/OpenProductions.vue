@@ -59,6 +59,13 @@
           </router-link>
         </div>
       </div>
+      <div class="has-text-centered new-production-link">
+        <router-link
+          :to="{name: 'open-productions-new'}"
+        >
+          {{ $t('productions.home.create_new') }}
+        </router-link>
+      </div>
     </div>
 
     <div class="has-text-centered welcome" v-else>
@@ -263,6 +270,14 @@ a.secondary {
 
 a.secondary:hover {
   text-decoration: underline
+}
+
+.new-production-link {
+  margin-top: 4em;
+}
+
+.new-production-link a {
+  color: #BBB;
 }
 
 @media screen and (max-width: 768px) {

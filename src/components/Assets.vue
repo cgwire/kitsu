@@ -76,6 +76,7 @@
   ></asset-list>
 
   <edit-asset-modal
+    ref="edit-asset-modal"
     :active="modals.isNewDisplayed"
     :is-loading="loading.edit"
     :is-loading-stay="loading.stay"
@@ -294,7 +295,8 @@ export default {
         callback: (err) => {
           this.loading.stay = false
           if (!err) {
-            this.resetEditModal()
+            this.resetLightEditModal()
+            this.$refs['edit-asset-modal'].focusName()
             this.editAsset.isSuccess = true
           } else {
             this.loading.edit = false
@@ -371,14 +373,21 @@ export default {
       })
     },
 
+    resetLightEditModal () {
+      const form = {
+        name: '',
+        entity_type_id: this.assetToEdit.entity_type_id,
+        production_id: this.currentProduction.id
+      }
+      this.assetToEdit = form
+    },
+
     resetEditModal () {
       const form = { name: '' }
       if (this.assetTypes.length > 0) {
         form.asset_type_id = this.assetTypes[0].id
       }
-      if (this.openProductions.length > 0) {
-        form.production_id = this.openProductions[0].id
-      }
+      form.production_id = this.currentProduction.id
       this.assetToEdit = form
     },
 
