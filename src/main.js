@@ -4,7 +4,7 @@ import { sync } from 'vuex-router-sync'
 import router from './router'
 import vuescroll from 'vue-scroll'
 import i18n from './lib/i18n'
-// import realtime from './lib/realtime'
+import realtime from './lib/realtime'
 import store from './store'
 import App from './App'
 import VueLazyload from 'vue-lazyload'
@@ -50,10 +50,8 @@ new Vue({
 })
 
 // Realtime update configuration.
-/*
 const source = realtime.createNewSource()
 realtime.init(source)
-*/
 
 // Catch escape command
 document.addEventListener('keyup', (evt) => {
