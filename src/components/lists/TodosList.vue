@@ -78,7 +78,7 @@
             :is-border="false"
             :is-assignees="false"
             :selectable="!done"
-            :selected="selectionGrid[i][0]"
+            :selected="selectionGrid && selectionGrid[i] ? selectionGrid[i][0] : false"
             :rowX="i"
             :columnY="0"
             @select="onTaskSelected"
