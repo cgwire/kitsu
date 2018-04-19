@@ -103,5 +103,5 @@ class PersonServiceTestCase(ApiDBTestCase):
         persons_service.create_desktop_login_logs(person["id"], date_2)
         logs = persons_service.get_desktop_login_logs(person["id"])
         self.assertEqual(len(logs), 2)
-        self.assertEqual(logs[0]["person_id"], self.person["id"])
+        self.assertEqual(logs[0]["person_id"], person["id"])
         self.assertEqual(logs[0]["date"], date_2)
