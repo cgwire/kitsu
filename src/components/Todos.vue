@@ -31,9 +31,20 @@
       }"
       ref="todos-search-field"
       @change="onSearchChange"
+      @save="saveSearchQuery"
+      :can-save="true"
       v-if="isCurrentActive"
     >
     </search-field>
+
+    <div class="query-list">
+      <search-query-list
+        :queries="todoSearchQueries"
+        @changesearch="changeSearch"
+        @removesearch="removeSearchQuery"
+      >
+      </search-query-list>
+    </div>
 
     <todos-list
       :entries="displayedTodos"
@@ -58,13 +69,15 @@ import { mapGetters, mapActions } from 'vuex'
 import TodosList from './lists/TodosList'
 import PageTitle from './widgets/PageTitle'
 import SearchField from './widgets/SearchField'
+import SearchQueryList from './widgets/SearchQueryList'
 
 export default {
   name: 'todos',
   components: {
     TodosList,
     PageTitle,
-    SearchField
+    SearchField,
+    SearchQueryList
   },
 
   data () {
@@ -90,7 +103,8 @@ export default {
       'todosSearchText',
       'isTodosLoading',
       'isTodosLoadingError',
-      'todoSelectionGrid'
+      'todoSelectionGrid',
+      'todoSearchQueries'
     ]),
 
     isCurrentActive () {
@@ -105,7 +119,9 @@ export default {
   methods: {
     ...mapActions([
       'loadTodos',
-      'setTodosSearch'
+      'setTodosSearch',
+      'removeTodoSearch',
+      'saveTodoSearch'
     ]),
 
     onSearchChange (text) {
@@ -121,6 +137,29 @@ export default {
 
     selectDone () {
       this.activeTab = 'done'
+    },
+
+    changeSearch (searchQuery) {
+      this.$refs['todos-search-field'].setValue(searchQuery.search_query)
+      this.$refs['todos-search-field'].$emit('change', searchQuery.search_query)
+    },
+
+    saveSearchQuery (searchQuery) {
+      this.saveTodoSearch(searchQuery)
+        .then(() => {
+        })
+        .catch((err) => {
+          if (err) console.log('error')
+        })
+    },
+
+    removeSearchQuery (searchQuery) {
+      this.removeTodoSearch(searchQuery)
+        .then(() => {
+        })
+        .catch((err) => {
+          if (err) console.log('error')
+        })
     }
   },
 

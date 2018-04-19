@@ -2,7 +2,7 @@ import peopleApi from '../api/people'
 import peopleStore from './people'
 import taskStatusStore from './taskstatus'
 import auth from '../../lib/auth'
-import { sortTasks } from '../../lib/sorting'
+import { sortTasks, sortByName } from '../../lib/sorting'
 import { indexSearch, buildTaskIndex } from '../../lib/indexing'
 import {
   populateTask,
@@ -44,6 +44,9 @@ import {
   LOAD_USER_FILTERS_END,
   LOAD_USER_FILTERS_ERROR,
 
+  SAVE_TODO_SEARCH_END,
+  REMOVE_TODO_SEARCH_END,
+
   RESET_ALL
 } from '../mutation-types'
 
@@ -64,6 +67,7 @@ const state = {
   todosIndex: {},
   todosSearchText: '',
   todoSelectionGrid: {},
+  todoSearchQueries: [],
 
   avatarFormData: null,
 
@@ -90,6 +94,7 @@ const getters = {
   displayedDoneTasks: state => state.displayedDoneTasks,
   todosSearchText: state => state.todosSearchText,
   todoSelectionGrid: state => state.todoSelectionGrid,
+  todoSearchQueries: state => state.todoSearchQueries,
 
   isSaveProfileLoading: state => state.isSaveProfileLoading,
   isSaveProfileLoadingError: state => state.isSaveProfileLoadingError,
@@ -139,7 +144,9 @@ const actions = {
     })
   },
 
-  loadTodos ({ commit, state }, { callback, forced }) {
+  loadTodos ({ commit, state, rootGetters }, { callback, forced }) {
+    const userFilters = rootGetters.userFilters
+
     if (state.todos.length === 0 || forced) {
       commit(USER_LOAD_TODOS_START)
       peopleApi.loadTodos((err, tasks) => {
@@ -151,7 +158,7 @@ const actions = {
             if (err) {
               commit(USER_LOAD_TODOS_ERROR)
             } else {
-              commit(USER_LOAD_TODOS_END, tasks)
+              commit(USER_LOAD_TODOS_END, { tasks, userFilters })
               commit(USER_LOAD_DONE_TASKS_END, doneTasks)
             }
             if (callback) callback(err)
@@ -179,6 +186,43 @@ const actions = {
       if (err) commit(LOAD_USER_FILTERS_ERROR)
       else commit(LOAD_USER_FILTERS_END, searchFilters)
       callback(err)
+    })
+  },
+
+  saveTodoSearch ({ commit, rootGetters }, searchQuery) {
+    return new Promise((resolve, reject) => {
+      const query = state.todoSearchQueries.find(
+        (query) => query.name === searchQuery
+      )
+
+      if (!query) {
+        peopleApi.createFilter(
+          'todos',
+          searchQuery,
+          searchQuery,
+          null,
+          (err, searchQuery) => {
+            commit(SAVE_TODO_SEARCH_END, { searchQuery })
+            if (err) {
+              reject(err)
+            } else {
+              resolve(searchQuery)
+            }
+          }
+        )
+      } else {
+        resolve()
+      }
+    })
+  },
+
+  removeTodoSearch ({ commit, rootGetters }, searchQuery) {
+    return new Promise((resolve, reject) => {
+      peopleApi.removeFilter(searchQuery, (err) => {
+        commit(REMOVE_TODO_SEARCH_END, { searchQuery })
+        if (err) reject(err)
+        else resolve()
+      })
     })
   }
 }
@@ -249,7 +293,7 @@ const mutations = {
     state.isTodosLoading = true
   },
 
-  [USER_LOAD_TODOS_END] (state, tasks) {
+  [USER_LOAD_TODOS_END] (state, { tasks, userFilters }) {
     state.isTodosLoading = false
     tasks.forEach(populateTask)
     tasks.forEach((task) => {
@@ -263,6 +307,11 @@ const mutations = {
     state.todosIndex = buildTaskIndex(tasks)
     const searchResult = indexSearch(state.todosIndex, state.todosSearchText)
     state.displayedTodos = searchResult || state.todos
+    if (userFilters.todos && userFilters.todos.all) {
+      state.todoSearchQueries = userFilters.todos.all
+    } else {
+      state.todoSearchQueries = []
+    }
   },
 
   [USER_LOAD_DONE_TASKS_END] (state, tasks) {
@@ -315,6 +364,20 @@ const mutations = {
     state.displayedTodos = searchResult || state.todos
   },
 
+  [SAVE_TODO_SEARCH_END] (state, { searchQuery }) {
+    state.todoSearchQueries.push(searchQuery)
+    state.todoSearchQueries = sortByName(state.todoSearchQueries)
+  },
+
+  [REMOVE_TODO_SEARCH_END] (state, { searchQuery }) {
+    const queryIndex = state.todoSearchQueries.findIndex(
+      (query) => query.name === searchQuery.name
+    )
+    if (queryIndex >= 0) {
+      state.todoSearchQueries.splice(queryIndex, 1)
+    }
+  },
+
   [ADD_SELECTED_TASK] (state, validationInfo) {
     if (state.todoSelectionGrid && state.todoSelectionGrid[0]) {
       state.todoSelectionGrid[validationInfo.x][validationInfo.y] = true
@@ -347,6 +410,7 @@ const mutations = {
     state.isTodosLoadingError = false
     state.todos = []
     state.todoSelectionGrid = {}
+    state.todoSearchQueries = []
 
     state.userFilters = {}
 

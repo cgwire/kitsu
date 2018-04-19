@@ -41,7 +41,7 @@
             class="production"
             :entry="{
               name: entry.project_name,
-              id: entry.production_id
+              id: entry.project_id
             }"
             :only-avatar="true"
           >
