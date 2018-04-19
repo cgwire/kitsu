@@ -339,14 +339,20 @@ def get_filters():
         .filter(build_open_project_filter()) \
         .all()
 
+    filters = filters + SearchFilter.query \
+        .filter(SearchFilter.person_id == current_user.id) \
+        .filter(SearchFilter.project_id == None) \
+        .all()
+
     for search_filter in filters:
         if search_filter.list_type not in result:
             result[search_filter.list_type] = {}
         subresult = result[search_filter.list_type]
 
-        project_id = str(search_filter.project_id)
-        if project_id is None:
+        if search_filter.project_id is None:
             project_id = "all"
+        else:
+            project_id = str(search_filter.project_id)
 
         if project_id not in subresult:
             subresult[project_id] = []
@@ -368,6 +374,7 @@ def create_filter(list_type, name, query, project_id=None):
         project_id=project_id,
         person_id=current_user.id
     )
+    search_filter.serialize()
     return search_filter.serialize()
 
 
