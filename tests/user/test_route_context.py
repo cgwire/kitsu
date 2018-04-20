@@ -302,8 +302,25 @@ class UserContextRoutesTestCase(ApiDBTestCase):
         result = self.get(path)
         self.assertTrue("asset" in result)
 
-        print("%s/%s" % (path, search_filter["id"]))
         self.delete("%s/%s" % (path, search_filter["id"]))
 
         result = self.get(path)
         self.assertFalse("asset" in result)
+
+    def test_add_logs(self):
+        path = "/data/user/desktop-login-logs"
+
+        date_1 = self.now()
+        data = {"date": date_1}
+        logs = self.get(path)
+        self.assertEqual(len(logs), 0)
+
+        self.post(path, data)
+        date_2 = self.now()
+        data = {"date": date_2}
+        self.post(path, data)
+
+        logs = self.get(path)
+        self.assertEqual(len(logs), 2)
+        self.assertEqual(logs[0]["person_id"], str(self.user.id))
+        self.assertEqual(logs[0]["date"], date_2)

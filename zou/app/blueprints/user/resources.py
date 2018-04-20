@@ -239,7 +239,7 @@ class DesktopLoginLogsResource(Resource):
         return persons_service.get_desktop_login_logs(current_user["id"])
 
     @jwt_required
-    def post(self, person_id):
+    def post(self):
         arguments = self.get_arguments()
         current_user = persons_service.get_current_user()
         desktop_login_log = persons_service.create_desktop_login_logs(
