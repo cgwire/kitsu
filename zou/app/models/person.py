@@ -70,6 +70,11 @@ class Person(db.Model, BaseMixin, SerializerMixin):
                 self.last_name
             )
 
+    def serialize(self, obj_type="Person"):
+        data = SerializerMixin.serialize(self, "Person")
+        data["full_name"] = self.full_name()
+        return data
+
     def serialize_safe(self):
         data = SerializerMixin.serialize(self, "Person")
         del data["password"]

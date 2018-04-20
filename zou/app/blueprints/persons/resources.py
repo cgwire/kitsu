@@ -4,7 +4,7 @@ from flask_restful import Resource, reqparse
 from flask_jwt_extended import jwt_required
 
 from zou.app.services import persons_service
-from zou.app.utils import auth, permissions
+from zou.app.utils import auth, permissions, csv_utils
 
 
 class NewPersonResource(Resource):
@@ -86,3 +86,15 @@ class DesktopLoginsResource(Resource):
         parser = reqparse.RequestParser()
         parser.add_argument("date", default=datetime.datetime.now())
         return parser.parse_args()
+
+
+class PresenceLogsResource(Resource):
+    """
+    """
+
+    @jwt_required
+    def get(self, month_date):
+        permissions.check_admin_permissions()
+        date = datetime.datetime.strptime(month_date, "%Y-%m")
+        presence_logs = persons_service.get_presence_logs(date.year, date.month)
+        return csv_utils.build_csv_response(presence_logs)

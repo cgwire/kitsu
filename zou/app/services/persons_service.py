@@ -1,4 +1,8 @@
 import slugify
+import datetime
+
+from calendar import monthrange
+from dateutil import relativedelta
 
 from sqlalchemy.exc import StatementError
 
@@ -23,7 +27,12 @@ def get_active_persons():
     """
     Return all person with flag active set to True.
     """
-    return fields.serialize_models(Person.query.filter_by(active=True).all())
+    persons = Person.query \
+        .filter_by(active=True) \
+        .order_by(Person.first_name) \
+        .order_by(Person.last_name) \
+        .all()
+    return fields.serialize_models(persons)
 
 
 def get_person_raw(person_id):
@@ -176,7 +185,6 @@ def get_desktop_login_logs(person_id):
         .filter(DesktopLoginLog.person_id == person_id) \
         .order_by(DesktopLoginLog.date.desc()) \
         .all()
-    print(fields.serialize_list(logs))
     return fields.serialize_list(logs)
 
 
@@ -188,3 +196,35 @@ def create_desktop_login_logs(person_id, date):
         person_id=person_id,
         date=date
     ).serialize()
+
+
+def get_presence_logs(year, month):
+    """
+    Return arrays of presence for a given month, adapted for a CSV rendering.
+    Rows are users and columns represent the days of given month.
+    """
+    persons = get_active_persons()
+    headers = [str(year)]
+    csv_content = []
+
+    (_, limit) = monthrange(year, month)
+    headers += [str(i) for i in range(1, limit + 1)]
+    start_date = datetime.datetime(year, month, 1, 0, 0, 0)
+    end_date = datetime.date.today() + relativedelta.relativedelta(months=1)
+
+    csv_content.append(headers)
+    for person in persons:
+        row = [person["full_name"]]
+        row += ["" for i in range(1, limit + 1)]
+        logs = DesktopLoginLog.query \
+            .filter(DesktopLoginLog.person_id == person["id"]) \
+            .filter(DesktopLoginLog.date >= start_date) \
+            .filter(DesktopLoginLog.date < end_date) \
+            .order_by(DesktopLoginLog.date) \
+            .all()
+
+        for log in logs:
+            day = log.date.day
+            row[day] = "X"
+        csv_content.append(row)
+    return csv_content
