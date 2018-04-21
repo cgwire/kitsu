@@ -249,11 +249,17 @@ export default {
 
   watch: {
     $route () { this.handleModalsDisplay() },
+
     currentProduction () {
       const productionId = this.$route.params.production_id
+      const newPath = {
+        name: 'sequences',
+        params: {production_id: this.currentProduction.id}
+      }
       if (this.currentProduction.id !== productionId) {
         this.$refs['sequence-search-field'].setValue('')
         this.$store.commit('SET_SHOT_LIST_SCROLL_POSITION', 0)
+        this.$router.push(newPath)
         this.loadShots()
       }
     }

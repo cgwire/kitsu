@@ -313,7 +313,17 @@ export default {
   },
 
   sequences: {
-    title: 'Sequences'
+    title: 'Sequences',
+    number: 'sequence | sequences',
+    new_sequence: 'New sequence',
+    edit_title: 'Edit sequence',
+    empty_list: 'There is no sequence in the production. What about creating some?',
+    delete_text: 'Are you sure you want to remove {name} from your database?',
+    delete_error: 'An error occured while deleting this sequence. There are probably data linked to it. Are you sure this sequence has no shot linked to it?',
+    fields: {
+      name: 'name',
+      description: 'description'
+    }
   },
 
   breakdown: {

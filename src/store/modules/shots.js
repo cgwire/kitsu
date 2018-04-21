@@ -423,7 +423,6 @@ const actions = {
     commit(SET_SHOT_SEARCH, searchQuery)
   },
 
-<<<<<<< 51df3185735a2da1bda2ab046b0222ce1a6b7168
   saveShotSearch ({ commit, rootGetters }, searchQuery) {
     return new Promise((resolve, reject) => {
       const query = state.shotSearchQueries.find(
