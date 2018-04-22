@@ -120,6 +120,7 @@ export default {
     logout () {
       this.$store.dispatch('logout', (err, success) => {
         if (err) console.log(err)
+        this.toggleUserMenu()
         if (success) this.$router.push('/login')
       })
     },
