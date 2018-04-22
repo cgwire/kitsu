@@ -7,8 +7,14 @@
           <th class="episode" v-if="!isSingleEpisode">
             {{ $t('shots.fields.episode') }}
           </th>
-          <th class="sequence">{{ $t('shots.fields.sequence') }}</th>
+          <th class="name">{{ $t('shots.fields.sequence') }}</th>
           <th class="description">{{ $t('shots.fields.description') }}</th>
+          <th
+            class="validation"
+            :style="validationStyle(column.color)"
+            v-for="column in validationColumns">
+            {{ column.name }}
+          </th>
           <th class="actions">
           </th>
         </tr>
@@ -45,18 +51,36 @@
       <tbody>
         <tr
           :key="entry.id"
-          :class="{canceled: entry.canceled}"
           v-for="(entry, i) in entries"
         >
-          <td :class="{name: !entry.canceled}" v-if="!isSingleEpisode">
+
+          <td class="name" v-if="!isSingleEpisode">
             {{ entry.episode_name }}
           </td>
-          <td :class="{'shot-name': true, 'name': !entry.canceled}">
+
+          <td class="name">
             {{ entry.name }}
           </td>
+
           <td class="description">
             {{ entry.description }}
           </td>
+
+          <td
+            class="validation"
+            :style="validationStyle(column.color)"
+            v-for="column in validationColumns">
+            <pie-chart
+              width="70px"
+              height="50px"
+              :legend="false"
+              :colors="chartColors(entry, column)"
+              :data="chartData(entry, column)"
+              v-if="isStats(entry, column)"
+            >
+            </pie-chart>
+          </td>
+
           <row-actions v-if="isCurrentUserManager"
             :entry="entry"
             :edit-route="{
@@ -75,6 +99,7 @@
             }"
           >
           </row-actions>
+
           <td class="actions" v-else>
           </td>
         </tr>
@@ -83,9 +108,9 @@
   </div>
 
   <p class="has-text-centered nb-sequences" v-if="!isEmptyList">
-    {{ displayedSequencesLength }} {{ $tc('sequences.number', displayedSequencesLength) }}
+    {{ displayedSequencesLength }}
+    {{ $tc('sequences.number', displayedSequencesLength) }}
   </p>
-
 </div>
 </template>
 
@@ -94,17 +119,16 @@ import { mapGetters, mapActions } from 'vuex'
 import ValidationCell from '../cells/ValidationCell'
 import RowActions from '../widgets/RowActions'
 import ButtonLink from '../widgets/ButtonLink'
-import ButtonHrefLink from '../widgets/ButtonHrefLink'
 import PageTitle from '../widgets/PageTitle'
 import TableInfo from '../widgets/TableInfo'
-import EntityThumbnail from '../widgets/EntityThumbnail'
 
 export default {
-  name: 'shot-list',
+  name: 'sequence-list',
   props: [
     'entries',
     'isLoading',
     'isError',
+    'sequenceStats',
     'validationColumns'
   ],
   data () {
@@ -115,8 +139,6 @@ export default {
   },
   components: {
     ButtonLink,
-    ButtonHrefLink,
-    EntityThumbnail,
     PageTitle,
     RowActions,
     TableInfo,
@@ -128,8 +150,7 @@ export default {
       'isCurrentUserManager',
       'isSingleEpisode',
       'displayedSequencesLength',
-      'sequenceSearchText',
-      'sequenceSelectionGrid'
+      'sequenceSearchText'
     ]),
     isEmptyList () {
       return this.entries &&
@@ -146,60 +167,36 @@ export default {
       'loadMoreSequences'
     ]),
 
+    validationStyle (color) {
+      return {
+        'border-left': `2px solid ${color}`
+      }
+    },
+
+    chartColors (entry, column) {
+      const stats = this.sequenceStats[entry.id][column.id]
+      const taskStatusIds = Object.keys(stats)
+      return taskStatusIds.map((key) => {
+        return this.sequenceStats[entry.id][column.id][key].color
+      })
+    },
+
+    chartData (entry, column) {
+      return Object.keys(this.sequenceStats[entry.id][column.id]).map((key) => {
+        return [
+          this.sequenceStats[entry.id][column.id][key].name,
+          this.sequenceStats[entry.id][column.id][key].value
+        ]
+      })
+    },
+
+    isStats (entry, column) {
+      return this.sequenceStats[entry.id] &&
+             this.sequenceStats[entry.id][column.id]
+    },
+
     onHeaderScroll (event, position) {
       this.$refs.tableWrapper.scrollLeft = position.scrollLeft
-    },
-
-    onTaskSelected (validationInfo) {
-      if (validationInfo.isShiftKey) {
-        if (this.lastSelection) {
-          let startX = this.lastSelection.x
-          let endX = validationInfo.x
-          let startY = this.lastSelection.y
-          let endY = validationInfo.y
-          if (validationInfo.x < this.lastSelection.x) {
-            startX = validationInfo.x
-            endX = this.lastSelection.x
-          }
-          if (validationInfo.y < this.lastSelection.y) {
-            startY = validationInfo.y
-            endY = this.lastSelection.y
-          }
-
-          for (let i = startX; i <= endX; i++) {
-            for (let j = startY; j <= endY; j++) {
-              const ref = 'validation-' + i + '-' + j
-              const validationCell = this.$refs[ref][0]
-              if (!this.shotSelectionGrid[i][j]) {
-                validationCell.select({ctrlKey: true, isUserClick: false})
-              }
-            }
-          }
-        }
-      } else if (!validationInfo.isCtrlKey) {
-        this.$store.commit('CLEAR_SELECTED_TASKS')
-      }
-      this.$store.commit('ADD_SELECTED_TASK', validationInfo)
-
-      if (!validationInfo.isShiftKey && validationInfo.isUserClick) {
-        this.lastSelection = {
-          x: validationInfo.x,
-          y: validationInfo.y
-        }
-      }
-    },
-
-    onTaskUnselected (validationInfo) {
-      if (!validationInfo.isCtrlKey) {
-        if (this.nbSelectedTasks === 1) {
-          this.$store.commit('REMOVE_SELECTED_TASK', validationInfo)
-        } else {
-          this.$store.commit('CLEAR_SELECTED_TASKS')
-          this.$store.commit('ADD_SELECTED_TASK', validationInfo)
-        }
-      } else {
-        this.$store.commit('REMOVE_SELECTED_TASK', validationInfo)
-      }
     },
 
     onBodyScroll (event, position) {
@@ -219,19 +216,12 @@ export default {
 </script>
 
 <style scoped>
-.project {
-  min-width: 60px;
-  max-width: 60px;
-  width: 60px;
-}
-
-.actions {
+.episode {
   min-width: 100px;
+  max-width: 100px;
+  width: 100px;
 }
 
-th.actions {
-  padding: 0.4em;
-}
 
 .name {
   min-width: 100px;
@@ -243,22 +233,8 @@ th.actions {
   color: inherit;
 }
 
-.name.shot-name {
-  min-width: 110px;
-  width: 110px;
-}
-
-.episode {
-  min-width: 100px;
-  max-width: 100px;
-  width: 100px;
-}
-
-.sequence {
-  min-width: 100px;
-  max-width: 100px;
-  width: 100px;
-  font-weight: bold;
+td.name {
+  font-size: 1.2em;
 }
 
 .description {
@@ -267,33 +243,17 @@ th.actions {
   width: 200px;
 }
 
-td.name {
-  font-size: 1.2em;
+.validation {
+  min-width: 100px;
+  max-width: 100px;
+  width: 100px;
 }
 
-.canceled {
-  text-decoration: line-through;
+.actions {
+  min-width: 100px;
 }
 
-.thumbnail {
-  min-width: 50px;
-  max-width: 50px;
-  width: 50px;
-  padding: 0;
-}
-
-.thumbnail img {
-  margin-top: 5px;
-}
-
-span.thumbnail-empty {
-  display: block;
-  width: 50px;
-  height: 30px;
-  background: #F3F3F3;
-}
-
-.info {
-  margin-top: 2em;
+th.actions {
+  padding: 0.4em;
 }
 </style>

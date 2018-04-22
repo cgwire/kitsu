@@ -95,6 +95,8 @@ import {
   SAVE_SHOT_SEARCH_END,
   REMOVE_SHOT_SEARCH_END,
 
+  COMPUTE_SEQUENCE_STATS,
+
   RESET_ALL
 } from '../mutation-types'
 
@@ -137,6 +139,7 @@ const state = {
   shotSearchText: '',
   shotSearchQueries: [],
   sequenceSearchText: '',
+  sequenceStats: {},
 
   isFps: false,
   isFrameIn: false,
@@ -184,6 +187,7 @@ const getters = {
   shotMap: state => state.shotMap,
   sequences: state => state.sequences,
   sequenceMap: state => state.sequenceMap,
+  sequenceStats: state => state.sequenceStats,
   episodes: state => state.episodes,
   shotSearchQueries: state => state.shotSearchQueries,
 
@@ -462,8 +466,38 @@ const actions = {
     })
   },
 
+  initSequences ({ commit, dispatch, state, rootState, rootGetters }) {
+    return new Promise((resolve, reject) => {
+      const productionId = rootState.route.params.production_id
+      dispatch('setLastProductionScreen', 'sequences')
+      if (rootGetters.currentProduction.id !== productionId) {
+        dispatch('setProduction', productionId)
+      }
+
+      if (state.sequences.length === 0 ||
+          state.sequences[0].production_id !== productionId) {
+        dispatch('loadShots', (err) => {
+          if (err) {
+            reject(err)
+          } else {
+            commit(COMPUTE_SEQUENCE_STATS, 0)
+            resolve()
+          }
+        })
+      }
+    })
+  },
+
   setSequenceSearch ({commit}, searchQuery) {
     commit(SET_SEQUENCE_SEARCH, searchQuery)
+  },
+
+  setSequenceListScrollPosition ({ commit }, scrollPosition) {
+    commit(SET_SEQUENCE_LIST_SCROLL_POSITION, scrollPosition)
+  },
+
+  computeSequenceStats ({ commit }) {
+    commit(COMPUTE_SEQUENCE_STATS)
   }
 }
 
@@ -868,7 +902,7 @@ const mutations = {
   },
 
   [SET_SHOT_LIST_SCROLL_POSITION] (state, scrollPosition) {
-    state.sequenceListScrollPosition = scrollPosition
+    state.shotListScrollPosition = scrollPosition
   },
 
   [SET_SEQUENCE_LIST_SCROLL_POSITION] (state, scrollPosition) {
@@ -891,13 +925,43 @@ const mutations = {
     state.shotSelectionGrid = clearSelectionGrid(state.shotSelectionGrid)
   },
 
+  [COMPUTE_SEQUENCE_STATS] (state, validationInfo) {
+    const results = {}
+    state.shots.forEach((shot) => {
+      const sequenceId = shot.sequence_id
+      if (!results[sequenceId]) results[sequenceId] = {}
+
+      shot.tasks.forEach((task) => {
+        const taskTypeId = task.task_type_id
+        const taskStatusId = task.task_status_color
+        if (!results[sequenceId][taskTypeId]) {
+          results[sequenceId][taskTypeId] = {}
+        }
+
+        if (!results[sequenceId][taskTypeId][taskStatusId]) {
+          results[sequenceId][taskTypeId][taskStatusId] = {
+            name: task.task_status_short_name,
+            color: task.task_status_color,
+            value: 0
+          }
+        }
+
+        results[sequenceId][taskTypeId][taskStatusId].value++
+      })
+    })
+
+    state.sequenceStats = results
+  },
+
   [RESET_ALL] (state) {
     state.shots = []
     state.sequences = []
+    state.sequenceStats = []
     state.episodes = []
     state.isShotsLoading = false
     state.isShotsLoadingError = false
     state.shotsCsvFormData = null
+    state.sequenceStats = {}
 
     state.shotIndex = {}
     state.shotMap = {}

@@ -22,6 +22,8 @@
       :entries="displayedSequences"
       :is-loading="isShotsLoading"
       :is-error="isShotsLoadingError"
+      :validation-columns="shotValidationColumns"
+      :sequence-stats="sequenceStats"
       @scroll="saveScrollPosition"
     ></sequence-list>
 
@@ -61,7 +63,6 @@ import { SearchIcon } from 'vue-feather-icons'
 import SequenceList from './lists/SequenceList.vue'
 import DeleteModal from './widgets/DeleteModal'
 import EditSequenceModal from './modals/EditSequenceModal'
-import ButtonLink from './widgets/ButtonLink'
 import PageTitle from './widgets/PageTitle'
 import SearchField from './widgets/SearchField'
 
@@ -72,7 +73,6 @@ export default {
     SequenceList,
     EditSequenceModal,
     DeleteModal,
-    ButtonLink,
     PageTitle,
     SearchField,
     SearchIcon
@@ -93,46 +93,29 @@ export default {
         del: false
       },
       sequenceToDelete: null,
-      sequenceToEdit: null,
-      columns: [
-        'Episode',
-        'Name',
-        'Description'
-      ]
+      sequenceToEdit: null
     }
   },
 
   computed: {
     ...mapGetters([
-      'sequences',
-      'sequenceMap',
+      'currentProduction',
       'displayedSequences',
+      'isCurrentUserManager',
       'isShotsLoading',
       'isShotsLoadingError',
-      'currentProduction',
-      'isCurrentUserManager',
+      'sequences',
+      'sequenceMap',
+      'sequenceStats',
       'sequenceSearchText',
-      'sequenceListScrollPosition'
+      'sequenceListScrollPosition',
+      'shotValidationColumns'
     ])
   },
 
   created () {
-    this.setLastProductionScreen('sequences')
-
-    const productionId = this.$store.state.route.params.production_id
-    if (this.currentProduction.id !== productionId) {
-      this.$store.commit(
-        'SET_CURRENT_PRODUCTION',
-        productionId
-      )
-    }
-
-    if (this.sequences.length === 0 ||
-        this.sequences[0].production_id !== this.currentProduction.id) {
-      this.loadShots((err) => {
-        if (!err) this.handleModalsDisplay()
-      })
-    }
+    this.initSequences()
+      .then(this.handleModalsDisplay)
   },
 
   mounted () {
@@ -146,13 +129,17 @@ export default {
 
   methods: {
     ...mapActions([
-      'loadShots',
-      'editSequence',
+      'computeSequenceStats',
       'deleteSequence',
+      'editSequence',
+      'hideAssignations',
+      'initSequences',
+      'loadShots',
       'setLastProductionScreen',
+      'setProduction',
       'setSequenceSearch',
-      'showAssignations',
-      'hideAssignations'
+      'setSequenceListScrollPosition',
+      'showAssignations'
     ]),
 
     confirmEditSequence (form) {
@@ -214,15 +201,14 @@ export default {
     handleModalsDisplay () {
       const path = this.$store.state.route.path
       const sequenceId = this.$store.state.route.params.sequence_id
-      this.errors.edit = false
+      this.errors = {
+        edit: false,
+        delete: false
+      }
 
       this.modals = {
         isNewDisplayed: false,
-        isRestoreDisplayed: false,
-        isDeleteDisplayed: false,
-        isImportDisplayed: false,
-        isCreateTasksDisplayed: false,
-        isManagedDisplayed: false
+        isDeleteDisplayed: false
       }
 
       if (path.indexOf('edit') > 0) {
@@ -240,10 +226,7 @@ export default {
     },
 
     saveScrollPosition (scrollPosition) {
-      this.$store.commit(
-        'SET_SEQUENCE_LIST_SCROLL_POSITION',
-        scrollPosition
-      )
+      this.setSequenceListScrollPosition(scrollPosition)
     }
   },
 
@@ -258,9 +241,11 @@ export default {
       }
       if (this.currentProduction.id !== productionId) {
         this.$refs['sequence-search-field'].setValue('')
-        this.$store.commit('SET_SHOT_LIST_SCROLL_POSITION', 0)
+        this.$store.commit('SET_SEQUENCE_LIST_SCROLL_POSITION', 0)
         this.$router.push(newPath)
-        this.loadShots()
+        this.loadShots(() => {
+          this.computeSequenceStats()
+        })
       }
     }
   },

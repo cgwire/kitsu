@@ -10,12 +10,15 @@ import App from './App'
 import VueLazyload from 'vue-lazyload'
 import Meta from 'vue-meta'
 import infiniteScroll from 'vue-infinite-scroll'
+import VueChartkick from 'vue-chartkick'
+import Chart from 'chart.js'
 
 Vue.config.productionTip = false
 Vue.use(vuescroll)
 Vue.use(VueLazyload)
 Vue.use(Meta)
 Vue.use(infiniteScroll)
+Vue.use(VueChartkick, {adapter: Chart})
 
 // Make the current route part of the main state.
 sync(store, router)
