@@ -2,3 +2,4 @@ Episode,Sequence,Name,Description,FPS,Frame In,Frame Out
 E01,SE01,S01,Description 01,25,0,100
 E01,SE01,S02,Description 02,25,100,200
 E01,SE02,S01,Description 03,25,200,300
+E02,SE01,S01,Description 01,25,300,400

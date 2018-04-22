@@ -25,7 +25,7 @@ class ShotsCsvImportResource(BaseCsvProjectImportResource):
             self.episodes[episode_key] = \
                 shots_service.get_or_create_episode(project_id, episode_name)
 
-        sequence_key = "%s-%s" % (project_id, sequence_name)
+        sequence_key = "%s-%s-%s" % (project_id, episode_name, sequence_name)
         if sequence_key not in self.sequences:
             episode = self.episodes[episode_key]
             self.sequences[sequence_key] = \
