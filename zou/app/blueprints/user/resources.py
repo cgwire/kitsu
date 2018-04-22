@@ -1,11 +1,14 @@
+import datetime
+
 from flask import request
-from flask_restful import Resource
+from flask_restful import Resource, reqparse
 from flask_jwt_extended import jwt_required
 
 from zou.app.mixin import ArgsMixin
 
 from zou.app.services import (
     user_service,
+    persons_service,
     assets_service,
     projects_service,
     shots_service
@@ -222,3 +225,30 @@ class FilterResource(Resource):
     @jwt_required
     def delete(self, filter_id):
         return user_service.remove_filter(filter_id), 204
+
+
+class DesktopLoginLogsResource(Resource):
+    """
+    Allow to create and retrieve desktop login logs. Desktop login logs can only
+    be created by current user.
+    """
+
+    @jwt_required
+    def get(self):
+        current_user = persons_service.get_current_user()
+        return persons_service.get_desktop_login_logs(current_user["id"])
+
+    @jwt_required
+    def post(self):
+        arguments = self.get_arguments()
+        current_user = persons_service.get_current_user()
+        desktop_login_log = persons_service.create_desktop_login_logs(
+            current_user["id"],
+            arguments["date"]
+        )
+        return desktop_login_log, 201
+
+    def get_arguments(self):
+        parser = reqparse.RequestParser()
+        parser.add_argument("date", default=datetime.datetime.now())
+        return parser.parse_args()
