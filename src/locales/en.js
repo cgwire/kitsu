@@ -312,6 +312,34 @@ export default {
     no_casting: 'The shot casting is empty.'
   },
 
+  sequences: {
+    title: 'Sequences',
+    number: 'sequence | sequences',
+    new_sequence: 'New sequence',
+    edit_title: 'Edit sequence',
+    empty_list: 'There is no sequence in the production. What about creating some?',
+    delete_text: 'Are you sure you want to remove {name} from your database?',
+    delete_error: 'An error occured while deleting this sequence. There are probably data linked to it. Are you sure this sequence has no shot linked to it?',
+    fields: {
+      name: 'name',
+      description: 'description'
+    }
+  },
+
+  episodes: {
+    title: 'Episodes',
+    number: 'episode | episodes',
+    new_episode: 'New episode',
+    edit_title: 'Edit episode',
+    empty_list: 'There is no episode in the production. What about creating some?',
+    delete_text: 'Are you sure you want to remove {name} from your database?',
+    delete_error: 'An error occured while deleting this episode. There are probably data linked to it. Are you sure this episode has no sequence linked to it?',
+    fields: {
+      name: 'name',
+      description: 'description'
+    }
+  },
+
   breakdown: {
     title: 'Breakdown',
     select_shot: 'Please select a shot on the left to manage its casting.',

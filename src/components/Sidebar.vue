@@ -14,8 +14,8 @@
             <h2 class="subtitle sidebar-title">Kitsu</h2>
           </p>
         </router-link>
-        <section>
 
+        <section>
          <h2>{{ $t('main.user')}}</h2>
 
          <p @click="toggleSidebar()">
@@ -35,6 +35,18 @@
          <p @click="toggleSidebar()">
            <router-link :to="shotsPath">
              {{ $t("shots.title") }}
+           </router-link>
+         </p>
+
+         <p @click="toggleSidebar()">
+           <router-link :to="sequencesPath">
+             {{ $t("sequences.title") }}
+           </router-link>
+         </p>
+
+         <p @click="toggleSidebar()" v-if="!isSingleEpisode">
+           <router-link :to="episodesPath">
+             {{ $t("episodes.title") }}
            </router-link>
          </p>
 
@@ -111,11 +123,14 @@ export default {
   computed: {
     ...mapGetters([
       'isSidebarHidden',
+      'isSingleEpisode',
       'rawCurrentProduction',
       'currentProduction',
       'breakdownPath',
       'assetsPath',
       'shotsPath',
+      'sequencesPath',
+      'episodesPath',
       'playlistsPath',
       'isCurrentUserManager',
       'isCurrentUserAdmin'

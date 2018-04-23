@@ -292,6 +292,11 @@ input.search-input:focus {
   margin: auto;
 }
 
+.tabs li.is-active a {
+  border-color: #00B242;
+  color: #00B242;
+}
+
 @media screen and (max-width: 1000px) {
   .button .icon.is-small {
     margin-right: 0;

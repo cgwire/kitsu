@@ -56,6 +56,7 @@ const actions = {
         commit(LOGOUT_FAILURE)
         callback(null, false)
       } else {
+        commit(RESET_ALL)
         commit(LOGOUT_SUCCESS)
         commit(TOGGLE_USER_MENU)
         callback(null, true)

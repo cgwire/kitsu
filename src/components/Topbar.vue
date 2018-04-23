@@ -120,6 +120,7 @@ export default {
     logout () {
       this.$store.dispatch('logout', (err, success) => {
         if (err) console.log(err)
+        this.toggleUserMenu()
         if (success) this.$router.push('/login')
       })
     },
@@ -127,6 +128,8 @@ export default {
       const path = this.$store.state.route.path
       return path.indexOf('assets') > 0 ||
         path.indexOf('shots') > 0 ||
+        path.indexOf('sequences') > 0 ||
+        path.indexOf('episodes') > 0 ||
         path.indexOf('playlists') > 0 ||
         path.indexOf('breakdown') > 0
     }

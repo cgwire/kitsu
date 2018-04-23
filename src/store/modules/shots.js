@@ -17,6 +17,8 @@ import {
 } from '../../lib/helpers'
 import {
   buildShotIndex,
+  buildSequenceIndex,
+  buildEpisodeIndex,
   indexSearch
 } from '../../lib/indexing'
 import {
@@ -56,9 +58,25 @@ import {
   EDIT_SHOT_ERROR,
   EDIT_SHOT_END,
 
+  EDIT_SEQUENCE_START,
+  EDIT_SEQUENCE_ERROR,
+  EDIT_SEQUENCE_END,
+
+  EDIT_EPISODE_START,
+  EDIT_EPISODE_ERROR,
+  EDIT_EPISODE_END,
+
   DELETE_SHOT_START,
   DELETE_SHOT_ERROR,
   DELETE_SHOT_END,
+
+  DELETE_SEQUENCE_START,
+  DELETE_SEQUENCE_ERROR,
+  DELETE_SEQUENCE_END,
+
+  DELETE_EPISODE_START,
+  DELETE_EPISODE_ERROR,
+  DELETE_EPISODE_END,
 
   RESTORE_SHOT_START,
   RESTORE_SHOT_ERROR,
@@ -67,11 +85,18 @@ import {
   NEW_TASK_COMMENT_END,
 
   SET_SHOT_SEARCH,
+  SET_SEQUENCE_SEARCH,
+  SET_EPISODE_SEARCH,
+
   SET_CURRENT_PRODUCTION,
   CREATE_TASKS_END,
   DISPLAY_MORE_SHOTS,
+  DISPLAY_MORE_SEQUENCES,
+  DISPLAY_MORE_EPISODES,
 
   SET_SHOT_LIST_SCROLL_POSITION,
+  SET_SEQUENCE_LIST_SCROLL_POSITION,
+  SET_EPISODE_LIST_SCROLL_POSITION,
 
   REMOVE_SELECTED_TASK,
   ADD_SELECTED_TASK,
@@ -81,6 +106,9 @@ import {
 
   SAVE_SHOT_SEARCH_END,
   REMOVE_SHOT_SEARCH_END,
+
+  COMPUTE_SEQUENCE_STATS,
+  COMPUTE_EPISODE_STATS,
 
   RESET_ALL
 } from '../mutation-types'
@@ -123,6 +151,10 @@ const state = {
   episodes: [],
   shotSearchText: '',
   shotSearchQueries: [],
+  sequenceSearchText: '',
+  sequenceStats: {},
+  episodeSearchText: '',
+  episodeStats: {},
 
   isFps: false,
   isFrameIn: false,
@@ -130,12 +162,19 @@ const state = {
 
   displayedShots: [],
   displayedShotsLength: 0,
+  displayedSequences: [],
+  displayedSequencesLength: 0,
+  displayedEpisodes: [],
+  displayedEpisodesLength: 0,
   shotIndex: {},
+  sequenceIndex: {},
+
   shotMap: {},
   sequenceMap: {},
   episodeMap: {},
   shotCreated: '',
   shotSelectionGrid: {},
+  sequenceSelectionGrid: {},
 
   isShotsLoading: false,
   isShotsLoadingError: false,
@@ -156,14 +195,20 @@ const state = {
     isError: false
   },
 
-  shotListScrollPosition: 0
+  shotListScrollPosition: 0,
+  sequenceListScrollPosition: 0,
+  episodeListScrollPosition: 0
 }
 
 const getters = {
   shots: state => state.shots,
   shotMap: state => state.shotMap,
   sequences: state => state.sequences,
+  sequenceMap: state => state.sequenceMap,
+  sequenceStats: state => state.sequenceStats,
+  episodeStats: state => state.episodeStats,
   episodes: state => state.episodes,
+  episodeMap: state => state.episodeMap,
   shotSearchQueries: state => state.shotSearchQueries,
 
   isFps: state => state.isFps,
@@ -171,11 +216,18 @@ const getters = {
   isFrameOut: state => state.isFrameOut,
 
   shotSearchText: state => state.shotSearchText,
+  sequenceSearchText: state => state.sequenceSearchText,
+  episodeSearchText: state => state.episodeSearchText,
   shotSelectionGrid: state => state.shotSelectionGrid,
+  sequenceSelectionGrid: state => state.sequenceSelectionGrid,
 
   displayedShots: state => state.displayedShots,
   displayedShotsLength: state => state.displayedShotsLength,
-  shotsBySequence: state => {
+  displayedSequences: state => state.displayedSequences,
+  displayedSequencesLength: state => state.displayedSequencesLength,
+  displayedEpisodes: state => state.displayedEpisodes,
+  displayedEpisodesLength: state => state.displayedEpisodesLength,
+  shotsByEpisode: state => {
     const shotsBySequence = []
     let sequenceShots = []
     let previousShot = null
@@ -203,6 +255,8 @@ const getters = {
 
   shotsCsvFormData: state => state.shotsCsvFormData,
   shotListScrollPosition: state => state.shotListScrollPosition,
+  sequenceListScrollPosition: state => state.sequenceListScrollPosition,
+  episodeListScrollPosition: state => state.episodeListScrollPosition,
 
   getShot: (state, getters) => (id) => {
     return state.shots.find((shot) => shot.id === id)
@@ -326,6 +380,30 @@ const actions = {
     })
   },
 
+  editSequence ({ commit, state }, { data, callback }) {
+    commit(EDIT_SEQUENCE_START)
+    shotsApi.updateSequence(data, (err, sequence) => {
+      if (err) {
+        commit(EDIT_SEQUENCE_ERROR)
+      } else {
+        commit(EDIT_SEQUENCE_END, sequence)
+      }
+      if (callback) callback(err)
+    })
+  },
+
+  editEpisode ({ commit, state }, { data, callback }) {
+    commit(EDIT_EPISODE_START)
+    shotsApi.updateEpisode(data, (err, episode) => {
+      if (err) {
+        commit(EDIT_EPISODE_ERROR)
+      } else {
+        commit(EDIT_EPISODE_END, episode)
+      }
+      if (callback) callback(err)
+    })
+  },
+
   deleteShot ({ commit, state }, payload) {
     commit(DELETE_SHOT_START)
     const shot = payload.shot
@@ -336,6 +414,30 @@ const actions = {
         commit(DELETE_SHOT_END, shot)
       }
       if (payload.callback) payload.callback(err)
+    })
+  },
+
+  deleteSequence ({ commit, state }, { sequence, callback }) {
+    commit(DELETE_SEQUENCE_START)
+    shotsApi.deleteSequence(sequence, (err) => {
+      if (err) {
+        commit(DELETE_SEQUENCE_ERROR)
+      } else {
+        commit(DELETE_SEQUENCE_END, sequence)
+      }
+      if (callback) callback(err)
+    })
+  },
+
+  deleteEpisode ({ commit, state }, { episode, callback }) {
+    commit(DELETE_EPISODE_START)
+    shotsApi.deleteEpisode(episode, (err) => {
+      if (err) {
+        commit(DELETE_EPISODE_ERROR)
+      } else {
+        commit(DELETE_EPISODE_END, episode)
+      }
+      if (callback) callback(err)
     })
   },
 
@@ -363,6 +465,14 @@ const actions = {
 
   displayMoreShots ({commit}) {
     commit(DISPLAY_MORE_SHOTS)
+  },
+
+  displayMoreSequences ({commit}) {
+    commit(DISPLAY_MORE_SEQUENCES)
+  },
+
+  displayMoreEpisodes ({commit}) {
+    commit(DISPLAY_MORE_EPISODES)
   },
 
   setShotSearch ({commit}, searchQuery) {
@@ -406,6 +516,74 @@ const actions = {
         else resolve()
       })
     })
+  },
+
+  initSequences ({ commit, dispatch, state, rootState, rootGetters }) {
+    return new Promise((resolve, reject) => {
+      const productionId = rootState.route.params.production_id
+      dispatch('setLastProductionScreen', 'sequences')
+      if (rootGetters.currentProduction.id !== productionId) {
+        dispatch('setProduction', productionId)
+      }
+
+      if (state.sequences.length === 0 ||
+          state.sequences[0].production_id !== productionId) {
+        dispatch('loadShots', (err) => {
+          if (err) {
+            reject(err)
+          } else {
+            dispatch('computeSequenceStats')
+            resolve()
+          }
+        })
+      }
+    })
+  },
+
+  setSequenceSearch ({commit}, searchQuery) {
+    commit(SET_SEQUENCE_SEARCH, searchQuery)
+  },
+
+  setSequenceListScrollPosition ({ commit }, scrollPosition) {
+    commit(SET_SEQUENCE_LIST_SCROLL_POSITION, scrollPosition)
+  },
+
+  computeSequenceStats ({ commit }) {
+    commit(COMPUTE_SEQUENCE_STATS)
+  },
+
+  initEpisodes ({ commit, dispatch, state, rootState, rootGetters }) {
+    return new Promise((resolve, reject) => {
+      const productionId = rootState.route.params.production_id
+      dispatch('setLastProductionScreen', 'episodes')
+      if (rootGetters.currentProduction.id !== productionId) {
+        dispatch('setProduction', productionId)
+      }
+
+      if (state.episodes.length === 0 ||
+          state.episodes[0].production_id !== productionId) {
+        dispatch('loadShots', (err) => {
+          if (err) {
+            reject(err)
+          } else {
+            dispatch('computeEpisodeStats')
+            resolve()
+          }
+        })
+      }
+    })
+  },
+
+  setEpisodeSearch ({commit}, searchQuery) {
+    commit(SET_EPISODE_SEARCH, searchQuery)
+  },
+
+  setEpisodeListScrollPosition ({ commit }, scrollPosition) {
+    commit(SET_EPISODE_LIST_SCROLL_POSITION, scrollPosition)
+  },
+
+  computeEpisodeStats ({ commit }) {
+    commit(COMPUTE_EPISODE_STATS)
   }
 }
 
@@ -419,10 +597,15 @@ const mutations = {
     state.isShotsLoadingError = false
 
     state.shotIndex = {}
+    state.sequenceIndex = {}
     state.shotMap = {}
     state.displayedShots = []
     state.displayedShotsLength = 0
     state.shotSearchQueries = []
+    state.displayedSequences = []
+    state.displayedSequencesLength = 0
+    state.displayedEpisodes = []
+    state.displayedEpisodesLength = 0
   },
 
   [LOAD_SHOTS_ERROR] (state) {
@@ -493,9 +676,20 @@ const mutations = {
     const sequenceMap = {}
     sequences.forEach((sequence) => {
       sequenceMap[sequence.id] = sequence
+      if (sequence.parent_id) {
+        const episode = state.episodeMap[sequence.parent_id]
+        Object.assign(sequence, {
+          episode_id: episode.id,
+          episode_name: episode.name
+        })
+      }
     })
     state.sequenceMap = sequenceMap
     state.sequences = sortByName(sequences)
+
+    state.sequenceIndex = buildSequenceIndex(state.sequences)
+    state.displayedSequences = state.sequences.slice(0, PAGE_SIZE)
+    state.displayedSequencesLength = state.sequences.length
   },
 
   [LOAD_EPISODES_END] (state, episodes) {
@@ -505,6 +699,10 @@ const mutations = {
     })
     state.episodeMap = episodeMap
     state.episodes = sortByName(episodes)
+
+    state.episodeIndex = buildEpisodeIndex(state.episodes)
+    state.displayedEpisodes = state.episodes.slice(0, PAGE_SIZE)
+    state.displayedEpisodesLength = state.episodes.length
   },
 
   [LOAD_SHOT_END] (state, shot) {
@@ -565,6 +763,26 @@ const mutations = {
     if (newShot.data.frame_out) state.isFrameOut = true
   },
 
+  [EDIT_SEQUENCE_START] (state, data) {},
+  [EDIT_SEQUENCE_ERROR] (state) {},
+  [EDIT_SEQUENCE_END] (state, newSequence) {
+    const sequence = state.sequenceMap[newSequence.id]
+    if (sequence) {
+      Object.assign(sequence, newSequence)
+    }
+    state.sequenceIndex = buildSequenceIndex(state.sequences)
+  },
+
+  [EDIT_EPISODE_START] (state, data) {},
+  [EDIT_EPISODE_ERROR] (state) {},
+  [EDIT_EPISODE_END] (state, newEpisode) {
+    const episode = state.episodeMap[newEpisode.id]
+    if (episode) {
+      Object.assign(episode, newEpisode)
+    }
+    state.episodeIndex = buildEpisodeIndex(state.episodes)
+  },
+
   [DELETE_SHOT_START] (state) {
     state.deleteShot = {
       isLoading: true,
@@ -599,6 +817,36 @@ const mutations = {
       isError: false
     }
     state.shotIndex = buildShotIndex(state.shots)
+  },
+
+  [DELETE_SEQUENCE_START] (state) {},
+  [DELETE_SEQUENCE_ERROR] (state) {},
+  [DELETE_SEQUENCE_END] (state, sequenceToDelete) {
+    const sequenceToDeleteIndex = state.sequences.findIndex(
+      (sequence) => sequence.id === sequenceToDelete.id
+    )
+    const displayedSequenceToDeleteIndex = state.sequences.findIndex(
+      (sequence) => sequence.id === sequenceToDelete.id
+    )
+    state.sequences.splice(sequenceToDeleteIndex, 1)
+    state.displayedSequences.splice(displayedSequenceToDeleteIndex, 1)
+    state.sequenceMap[sequenceToDelete.id] = undefined
+    state.sequenceIndex = buildSequenceIndex(state.sequences)
+  },
+
+  [DELETE_EPISODE_START] (state) {},
+  [DELETE_EPISODE_ERROR] (state) {},
+  [DELETE_EPISODE_END] (state, episodeToDelete) {
+    const episodeToDeleteIndex = state.sequences.findIndex(
+      (episode) => episode.id === episodeToDelete.id
+    )
+    const displayedEpisodeToDeleteIndex = state.episodes.findIndex(
+      (episode) => episode.id === episodeToDelete.id
+    )
+    state.episodes.splice(episodeToDeleteIndex, 1)
+    state.displayedEpisodes.splice(displayedEpisodeToDeleteIndex, 1)
+    state.episodeMap[episodeToDelete.id] = undefined
+    state.episodeIndex = buildEpisodeIndex(state.episodes)
   },
 
   [RESTORE_SHOT_START] (state) {
@@ -658,6 +906,24 @@ const mutations = {
     state.displayedShots = result.slice(0, PAGE_SIZE)
     state.displayedShotsLength = result.length
     state.shotSearchText = shotSearch
+  },
+
+  [SET_SEQUENCE_SEARCH] (state, sequenceSearch) {
+    const result =
+      indexSearch(state.sequenceIndex, sequenceSearch) || state.sequences
+
+    state.displayedSequences = result.slice(0, PAGE_SIZE)
+    state.displayedSequencesLength = result.length
+    state.sequenceSearchText = sequenceSearch
+  },
+
+  [SET_EPISODE_SEARCH] (state, episodeSearch) {
+    const result =
+      indexSearch(state.episodeIndex, episodeSearch) || state.episodes
+
+    state.displayedEpisodes = result.slice(0, PAGE_SIZE)
+    state.displayedEpisodesLength = result.length
+    state.episodeSearchText = episodeSearch
   },
 
   [NEW_SHOT_START] (state) {},
@@ -722,11 +988,9 @@ const mutations = {
   },
 
   [DISPLAY_MORE_SHOTS] (state, tasks) {
-    let shots
+    let shots = state.shots
     if (state.shotSearchText.length > 0) {
       shots = indexSearch(state.shotIndex, state.shotSearchText)
-    } else {
-      shots = state.shots
     }
     state.displayedShots = shots.slice(
       0,
@@ -734,8 +998,31 @@ const mutations = {
     )
   },
 
+  [DISPLAY_MORE_SEQUENCES] (state, tasks) {
+    let sequences = state.sequences
+    if (state.sequenceSearchText.length > 0) {
+      sequences = indexSearch(state.sequenceIndex, state.sequenceSearchText)
+    }
+    state.displayedSequences = sequences.slice(
+      0,
+      state.displayedSequences.length + PAGE_SIZE
+    )
+  },
+
+  [DISPLAY_MORE_EPISODES] (state, tasks) {
+    let episodes = state.episodes
+    if (state.episodeSearchText.length > 0) {
+      episodes = indexSearch(state.shotIndex, state.episodeSearchText)
+    }
+    state.displayedEpisodes = episodes.slice(
+      0,
+      state.displayedEpisodes.length + PAGE_SIZE
+    )
+  },
+
   [SET_CURRENT_PRODUCTION] (state, production) {
     state.shotSearchText = ''
+    state.sequenceSearchText = ''
   },
 
   [SET_PREVIEW] (state, {entityId, taskId, previewId}) {
@@ -747,6 +1034,14 @@ const mutations = {
 
   [SET_SHOT_LIST_SCROLL_POSITION] (state, scrollPosition) {
     state.shotListScrollPosition = scrollPosition
+  },
+
+  [SET_SEQUENCE_LIST_SCROLL_POSITION] (state, scrollPosition) {
+    state.sequenceListScrollPosition = scrollPosition
+  },
+
+  [SET_EPISODE_LIST_SCROLL_POSITION] (state, scrollPosition) {
+    state.episodeListScrollPosition = scrollPosition
   },
 
   [REMOVE_SELECTED_TASK] (state, validationInfo) {
@@ -765,18 +1060,78 @@ const mutations = {
     state.shotSelectionGrid = clearSelectionGrid(state.shotSelectionGrid)
   },
 
+  [COMPUTE_SEQUENCE_STATS] (state, validationInfo) {
+    const results = {}
+    state.shots.forEach((shot) => {
+      const sequenceId = shot.sequence_id
+      if (!results[sequenceId]) results[sequenceId] = {}
+
+      shot.tasks.forEach((task) => {
+        const taskTypeId = task.task_type_id
+        const taskStatusId = task.task_status_color
+        if (!results[sequenceId][taskTypeId]) {
+          results[sequenceId][taskTypeId] = {}
+        }
+
+        if (!results[sequenceId][taskTypeId][taskStatusId]) {
+          results[sequenceId][taskTypeId][taskStatusId] = {
+            name: task.task_status_short_name,
+            color: task.task_status_color,
+            value: 0
+          }
+        }
+
+        results[sequenceId][taskTypeId][taskStatusId].value++
+      })
+    })
+
+    state.sequenceStats = results
+  },
+
+  [COMPUTE_EPISODE_STATS] (state, validationInfo) {
+    const results = {}
+    state.shots.forEach((shot) => {
+      const episodeId = shot.episode_id
+      if (!results[episodeId]) results[episodeId] = {}
+
+      shot.tasks.forEach((task) => {
+        const taskTypeId = task.task_type_id
+        const taskStatusId = task.task_status_color
+        if (!results[episodeId][taskTypeId]) {
+          results[episodeId][taskTypeId] = {}
+        }
+
+        if (!results[episodeId][taskTypeId][taskStatusId]) {
+          results[episodeId][taskTypeId][taskStatusId] = {
+            name: task.task_status_short_name,
+            color: task.task_status_color,
+            value: 0
+          }
+        }
+
+        results[episodeId][taskTypeId][taskStatusId].value++
+      })
+    })
+
+    state.episodeStats = results
+  },
+
   [RESET_ALL] (state) {
     state.shots = []
     state.sequences = []
+    state.sequenceStats = []
     state.episodes = []
     state.isShotsLoading = false
     state.isShotsLoadingError = false
     state.shotsCsvFormData = null
+    state.sequenceStats = {}
 
     state.shotIndex = {}
     state.shotMap = {}
     state.displayedShots = []
     state.displayedShotsLength = 0
+    state.displayedSequences = []
+    state.displayedSequencesLength = 0
 
     state.shotSearchQueries = []
 
