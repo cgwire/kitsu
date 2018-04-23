@@ -325,7 +325,6 @@ export default {
         return 'toto'
       }
     }
-
   },
 
   methods: {
@@ -471,8 +470,12 @@ export default {
       this.sequenceOptions = sequences.map(
         (sequence) => { return { label: sequence.name, value: sequence.id } }
       )
+
+      this.sequences = sequences
       if (sequences.length > 0) {
-        this.sequenceId = this.sequences[0].id
+        this.sequenceId = sequences[0].id
+      } else {
+        this.sequenceId = null
       }
     },
 
