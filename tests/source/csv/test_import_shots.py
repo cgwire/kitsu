@@ -23,9 +23,9 @@ class ImportCsvShotsTestCase(ApiDBTestCase):
         self.upload_file(path, file_path_fixture)
 
         sequences = shots_service.get_sequences()
-        self.assertEqual(len(sequences), 2)
+        self.assertEqual(len(sequences), 3)
         shots = shots_service.get_shots()
-        self.assertEqual(len(shots), 3)
+        self.assertEqual(len(shots), 4)
 
         entity_types = EntityType.query.all()
         self.assertEqual(len(entity_types), 3)
