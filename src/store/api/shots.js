@@ -81,12 +81,24 @@ export default {
     client.put(`/api/data/entities/${sequence.id}`, data, callback)
   },
 
+  updateEpisode (episode, callback) {
+    const data = {
+      name: episode.name,
+      description: episode.description
+    }
+    client.put(`/api/data/entities/${episode.id}`, data, callback)
+  },
+
   deleteShot (shot, callback) {
     client.del(`/api/data/shots/${shot.id}`, callback)
   },
 
   deleteSequence (sequence, callback) {
     client.del(`/api/data/entities/${sequence.id}`, callback)
+  },
+
+  deleteEpisode (episode, callback) {
+    client.del(`/api/data/entities/${episode.id}`, callback)
   },
 
   restoreShot (shot, callback) {

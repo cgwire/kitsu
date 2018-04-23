@@ -4,10 +4,7 @@
     <table class="table table-header" ref="headerWrapper">
       <thead>
         <tr>
-          <th class="episode" v-if="!isSingleEpisode">
-            {{ $t('shots.fields.episode') }}
-          </th>
-          <th class="name">{{ $t('shots.fields.sequence') }}</th>
+          <th class="name">{{ $t('shots.fields.episode') }}</th>
           <th class="description">{{ $t('shots.fields.description') }}</th>
           <th
             class="validation"
@@ -29,7 +26,7 @@
   </table-info>
 
   <div class="has-text-centered" v-if="isEmptyList">
-    <p class="info">{{ $t('sequences.empty_list') }}</p>
+    <p class="info">{{ $t('episodes.empty_list') }}</p>
     <button-link
       class="level-item big-button"
       :text="$t('shots.new_shots')"
@@ -44,7 +41,7 @@
   <div
     ref="body"
     class="table-body"
-    v-infinite-scroll="loadMoreSequences"
+    v-infinite-scroll="loadMoreEpisodes"
     v-scroll="onBodyScroll"
   >
     <table class="table">
@@ -53,10 +50,6 @@
           :key="entry.id"
           v-for="(entry, i) in entries"
         >
-
-          <td class="name" v-if="!isSingleEpisode">
-            {{ entry.episode_name }}
-          </td>
 
           <td class="name">
             {{ entry.name }}
@@ -84,16 +77,16 @@
           <row-actions v-if="isCurrentUserManager"
             :entry="entry"
             :edit-route="{
-              name: 'edit-sequence',
+              name: 'edit-episode',
               params: {
-                sequence_id: entry.id,
+                episode_id: entry.id,
                 production_id: currentProduction.id
               }
             }"
             :delete-route="{
-              name: 'delete-sequence',
+              name: 'delete-episode',
               params: {
-                sequence_id: entry.id,
+                episode_id: entry.id,
                 production_id: currentProduction.id
               }
             }"
@@ -107,9 +100,9 @@
     </table>
   </div>
 
-  <p class="has-text-centered nb-sequences" v-if="!isEmptyList">
-    {{ displayedSequencesLength }}
-    {{ $tc('sequences.number', displayedSequencesLength) }}
+  <p class="has-text-centered nb-episodes" v-if="!isEmptyList">
+    {{ displayedEpisodesLength }}
+    {{ $tc('episodes.number', displayedEpisodesLength) }}
   </p>
 </div>
 </template>
@@ -122,47 +115,51 @@ import PageTitle from '../widgets/PageTitle'
 import TableInfo from '../widgets/TableInfo'
 
 export default {
-  name: 'sequence-list',
+  name: 'episode-list',
   props: [
     'entries',
     'isLoading',
     'isError',
-    'sequenceStats',
+    'episodeStats',
     'validationColumns'
   ],
+
   data () {
     return {
       busy: false,
       lastSelection: null
     }
   },
+
   components: {
     ButtonLink,
     PageTitle,
     RowActions,
     TableInfo
   },
+
   computed: {
     ...mapGetters([
       'currentProduction',
       'isCurrentUserManager',
       'isSingleEpisode',
-      'displayedSequencesLength',
-      'sequenceSearchText'
+      'displayedEpisodesLength',
+      'episodeSearchText'
     ]),
+
     isEmptyList () {
       return this.entries &&
              this.entries.length === 0 &&
              !this.isLoading &&
              !this.isError &&
-             (!this.sequenceSearchText || this.sequenceSearchText.length === 0)
+             (!this.episodeSearchText || this.episodeSearchText.length === 0)
     }
   },
 
   methods: {
     ...mapActions([
-      'displayMoreSequences',
-      'loadMoreSequences'
+      'displayMoreEpisodes',
+      'loadMoreEpisodes'
     ]),
 
     validationStyle (color) {
@@ -172,25 +169,25 @@ export default {
     },
 
     chartColors (entry, column) {
-      const stats = this.sequenceStats[entry.id][column.id]
+      const stats = this.episodeStats[entry.id][column.id]
       const taskStatusIds = Object.keys(stats)
       return taskStatusIds.map((key) => {
-        return this.sequenceStats[entry.id][column.id][key].color
+        return this.episodeStats[entry.id][column.id][key].color
       })
     },
 
     chartData (entry, column) {
-      return Object.keys(this.sequenceStats[entry.id][column.id]).map((key) => {
+      return Object.keys(this.episodeStats[entry.id][column.id]).map((key) => {
         return [
-          this.sequenceStats[entry.id][column.id][key].name,
-          this.sequenceStats[entry.id][column.id][key].value
+          this.episodeStats[entry.id][column.id][key].name,
+          this.episodeStats[entry.id][column.id][key].value
         ]
       })
     },
 
     isStats (entry, column) {
-      return this.sequenceStats[entry.id] &&
-             this.sequenceStats[entry.id][column.id]
+      return this.episodeStats[entry.id] &&
+             this.episodeStats[entry.id][column.id]
     },
 
     onHeaderScroll (event, position) {
@@ -202,8 +199,8 @@ export default {
       this.$emit('scroll', position.scrollTop)
     },
 
-    loadMoreSequences () {
-      this.displayMoreSequences()
+    loadMoreEpisodes () {
+      this.displayMoreEpisodes()
     },
 
     setScrollPosition (scrollPosition) {
@@ -214,13 +211,6 @@ export default {
 </script>
 
 <style scoped>
-.episode {
-  min-width: 100px;
-  max-width: 100px;
-  width: 100px;
-}
-
-
 .name {
   min-width: 100px;
   width: 100px;

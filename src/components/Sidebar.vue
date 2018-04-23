@@ -44,6 +44,11 @@
            </router-link>
          </p>
 
+         <p @click="toggleSidebar()" v-if="!isSingleEpisode">
+           <router-link :to="episodesPath">
+             {{ $t("episodes.title") }}
+           </router-link>
+         </p>
 
          <p @click="toggleSidebar()">
            <router-link :to="breakdownPath">
@@ -118,12 +123,14 @@ export default {
   computed: {
     ...mapGetters([
       'isSidebarHidden',
+      'isSingleEpisode',
       'rawCurrentProduction',
       'currentProduction',
       'breakdownPath',
       'assetsPath',
       'shotsPath',
       'sequencesPath',
+      'episodesPath',
       'playlistsPath',
       'isCurrentUserManager',
       'isCurrentUserAdmin'

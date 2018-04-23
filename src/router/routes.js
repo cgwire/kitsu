@@ -26,6 +26,7 @@ import TaskStatus from '../components/TaskStatus'
 import Todos from '../components/Todos'
 import ServerDown from '../components/ServerDown'
 import Sequences from '../components/Sequences'
+import Episodes from '../components/Episodes'
 import Shot from '../components/Shot'
 import Shots from '../components/Shots'
 
@@ -247,6 +248,22 @@ export const routes = [
         path: '/productions/:production_id/sequences/delete/:sequence_id',
         component: Sequences,
         name: 'delete-sequence'
+      },
+
+      {
+        path: '/productions/:production_id/episodes',
+        component: Episodes,
+        name: 'episodes'
+      },
+      {
+        path: '/productions/:production_id/episodes/edit/:episode_id',
+        component: Episodes,
+        name: 'edit-episode'
+      },
+      {
+        path: '/productions/:production_id/episodes/delete/:episode_id',
+        component: Episodes,
+        name: 'delete-episode'
       },
 
       {

@@ -81,6 +81,21 @@ export const buildSequenceIndex = (sequences) => {
 }
 
 /*
+ * Generate an index to find episode easily. Search will be based on the
+ * episode name.
+ * Results are arrays of episodes.
+ */
+export const buildEpisodeIndex = (episodes) => {
+  const index = {}
+  const episodeIndex = {}
+  episodes.forEach((episode) => {
+    let words = [episode.name]
+    indexWords(index, episodeIndex, episode, words)
+  })
+  return index
+}
+
+/*
  * Run a non case sensitive search on given index. It accepts different search
  * terms separated by spaces. Terms dedicated to task status filtering (like
  * modeling:wip) are ignored. The result is the intersection of queries.
