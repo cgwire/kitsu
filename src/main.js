@@ -10,7 +10,6 @@ import App from './App'
 import VueLazyload from 'vue-lazyload'
 import Meta from 'vue-meta'
 import infiniteScroll from 'vue-infinite-scroll'
-<<<<<<< 66705fc63c678ab55a36f70ee3840c6774a688c4
 import VueChartkick from 'vue-chartkick'
 import Chart from 'chart.js'
 import VueWebsocket from 'vue-websocket'

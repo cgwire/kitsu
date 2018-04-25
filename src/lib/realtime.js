@@ -1,18 +1,8 @@
-import store from '../store'
-import ReconnectingEventSource from 'reconnecting-eventsource'
-
 const realtime = {
 
+  handleEvent (msg) {
+  }
   /*
-   * Create a new event stream source (listener).
-   */
-  createNewSource: () => {
-    return new ReconnectingEventSource('/events')
-  },
-
-  /*
-   * Configure realtime events to listen to.
-   */
   init: (source) => {
     realtime.subscribe(source, 'comment:new', (eventData) => {
       const commentId = eventData.id
@@ -41,19 +31,9 @@ const realtime = {
     })
 
     return source
-  },
-
-  /*
-   * Set on a event stream source, a listener by linking a function
-   * to an event name.
-   */
-  subscribe: (source, eventName, listener) => {
-    source.addEventListener(eventName, (event) => {
-      const data = JSON.parse(event.data)
-      listener(data.data)
-    }, false)
-    return source
   }
+  */
+
 }
 
 export default realtime

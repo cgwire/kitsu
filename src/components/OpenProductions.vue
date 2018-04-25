@@ -202,20 +202,6 @@ export default {
     return {
       title: `${this.$t('productions.home.title')} - Kitsu`
     }
-  },
-
-  socket: {
-    events: {
-      // Similar as this.$socket.on('changed', (msg) => { ... });
-      // If you set `prefix` to `/counter/`, the event name will be `/counter/changed`
-      //
-      message (msg) {
-        console.log('Something changed: ' + msg)
-      },
-      events (msg) {
-        console.log('Something changed events: ' + msg)
-      }
-    }
   }
 }
 </script>
