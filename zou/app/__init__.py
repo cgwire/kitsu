@@ -28,12 +28,16 @@ if not app.config["THUMBNAIL_FOLDER"]:
 
 
 db = SQLAlchemy(app)
-migrate = Migrate(app, db)
+migrate = Migrate(app, db)  # DB schema migration features
 
 app.secret_key = app.config["SECRET_KEY"]
-jwt = JWTManager(app)
-Principal(app)
-cache.cache.init_app(app)
+jwt = JWTManager(app)  # JWT auth tokens
+Principal(app)  # Permissions
+cache.cache.init_app(app)  # Function caching
+
+if config.DEBUG:
+    from flask_socketio import SocketIO
+    SocketIO(app)
 
 
 def configure_auth():

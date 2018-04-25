@@ -1,11 +1,9 @@
 from collections import OrderedDict
 from zou.app.stores import publisher_store
 
-import json
-
 handlers = {}
 
-publisher = publisher_store.new()
+publisher_store.init()
 
 
 def register(event, name, handler):
@@ -56,10 +54,8 @@ def emit(event, data={}):
     (like the realtime event daemon).
     """
     event_handlers = handlers.get(event, {})
-    publisher.publish('sse', json.dumps({
-        "type": event,
-        "data": {"data": data}})
-    )
+    publisher_store.publish(event, data)
+
     from zou.app import config
     for func in event_handlers.values():
         if config.ENABLE_JOB_QUEUE:
@@ -67,4 +63,3 @@ def emit(event, data={}):
             job_queue.enqueue(func.handle_event, data)
         else:
             func.handle_event(data)
-

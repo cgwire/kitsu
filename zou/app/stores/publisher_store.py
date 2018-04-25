@@ -1,29 +1,35 @@
-import redis
-import sys
+from flask_socketio import SocketIO
+from flask import current_app
 
 from zou.app import config
 
+host = config.KEY_VALUE_STORE["host"]
+port = config.KEY_VALUE_STORE["port"]
+redis_db = config.KV_EVENTS_DB_INDEX
+redis_url = "redis://%s:%s/%s" % (host, port, redis_db)
 
-def new():
+socketio = None
+
+
+def publish(event, data):
+    data = {
+        "type": event,
+        "data": data
+    }
+    if socketio is not None:
+        socketio.emit("event", data, namespace="/events")
+    else:
+        current_app.logger.error(
+            "Publisher store not initialized, run init() befor emitting events"
+        )
+
+
+def init():
     """
     Initialize key value store that will be used for the event publishing.
     That way the main API takes advantage of Redis pub/sub capabilities to push
     events to the event stream API.
     """
-    try:
-        publisher = redis.StrictRedis(
-            host=config.KEY_VALUE_STORE["host"],
-            port=config.KEY_VALUE_STORE["port"],
-            db=config.KV_EVENTS_DB_INDEX,
-            decode_responses=True
-        )
-        publisher.get(None)
-    except redis.ConnectionError:
-        try:
-            import fakeredis
-            publisher = fakeredis.FakeStrictRedis()
-        except:
-            print("Cannot access to the required Redis instance")
-            sys.exit(1)
-
-    return publisher
+    global socketio
+    socketio = SocketIO(message_queue=redis_url)
+    return socketio
