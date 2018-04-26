@@ -73,6 +73,7 @@ def run_migrations_online():
     context.configure(connection=connection,
                       target_metadata=target_metadata,
                       process_revision_directives=process_revision_directives,
+                      render_item=render_item,
                       **current_app.extensions['migrate'].configure_args)
 
     try:
@@ -80,6 +81,18 @@ def run_migrations_online():
             context.run_migrations()
     finally:
         connection.close()
+
+
+def render_itemtype_, obj, autogen_context):
+    """Apply custom rendering for selected items."""
+
+    if type_ == 'type' and isinstance(obj, sqlalchemy_utils.types.uuid.UUIDType):
+        autogen_context.imports.add("import sqlalchemy_utils")
+        autogen_context.imports.add("import uuid")
+        return "sqlalchemy_utils.types.uuid.UUIDType(), default=uuid.uuid4"
+
+    return False
+
 
 if context.is_offline_mode():
     run_migrations_offline()
