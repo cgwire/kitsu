@@ -279,7 +279,7 @@ def get_scene_raw(scene_id):
             id=scene_id
         )
     except StatementError:
-        raise SequenceNotFoundException
+        raise SceneNotFoundException
 
     if scene is None:
         raise SceneNotFoundException
@@ -731,6 +731,15 @@ def create_scene(project_id, sequence_id, name):
             data={}
         )
     return scene.serialize(obj_type="Scene")
+
+
+def update_shot(shot_id, data_dict):
+    """
+    Update shot fields matching given id with data from dict given in parameter.
+    """
+    shot = get_shot_raw(shot_id)
+    shot.update(data_dict)
+    return shot.serialize()
 
 
 def get_entities_out(shot_id):
