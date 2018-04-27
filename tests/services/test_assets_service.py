@@ -99,7 +99,12 @@ class AssetServiceTestCase(ApiDBTestCase):
         )
 
     def test_get_asset_instance(self):
-        self.generate_fixture_shot_asset_instance()
+        self.generate_fixture_scene()
+        self.generate_fixture_scene_asset_instance()
+        self.generate_fixture_shot_asset_instance(
+            self.shot,
+            self.asset_instance
+        )
         asset_instance = assets_service.get_asset_instance(
             self.asset_instance.id
         )

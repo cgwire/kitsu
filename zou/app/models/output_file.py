@@ -26,6 +26,7 @@ class OutputFile(db.Model, BaseMixin, SerializerMixin):
     representation = db.Column(db.String(20), index=True)
     nb_elements = db.Column(db.Integer(), default=1)
     canceled = db.Column(db.Boolean(), default=False, nullable=False)
+    for_entity = db.Column(db.String(20), index=True)
 
     uploaded_movie_url = db.Column(db.String(600))
     uploaded_movie_name = db.Column(db.String(150))

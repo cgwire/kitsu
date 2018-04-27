@@ -22,6 +22,7 @@ class BaseModelsResource(Resource):
         if query is None:
             query = self.model.query
 
+        print(query.all())
         return self.model.serialize_list(query.all())
 
     def paginated_entries(self, query, page):

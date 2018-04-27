@@ -274,13 +274,18 @@ class ApiDBTestCase(ApiTestCase):
             "file_tree": file_tree_service.get_tree_from_file("no_preview")
         })
 
-    def generate_fixture_asset(self):
+    def generate_fixture_asset(
+        self,
+        name="Tree",
+        description="Description Tree"
+    ):
         self.asset = Entity.create(
-            name="Tree",
-            description="Description Tree",
+            name=name,
+            description=description,
             project_id=self.project.id,
             entity_type_id=self.asset_type.id
         )
+        return self.asset
 
     def generate_fixture_asset_character(self):
         self.asset_character = Entity.create(
@@ -395,25 +400,13 @@ class ApiDBTestCase(ApiTestCase):
 
     def generate_fixture_shot_asset_instance(
         self,
-        asset=None,
-        shot=None,
+        shot,
+        asset_instance,
         number=1
     ):
-        if asset is None:
-            asset = self.asset
-        if shot is None:
-            shot = self.shot
-        self.asset_instance = AssetInstance.create(
-            asset_id=asset.id,
-            entity_id=shot.id,
-            entity_type_id=self.shot_type.id,
-            number=number,
-            name=breakdown_service.build_asset_instance_name(
-                self.asset.id, number
-            ),
-            description="Asset instance description"
-        )
-        return self.asset_instance
+        self.shot.instance_casting.append(asset_instance)
+        self.shot.save()
+        return self.shot
 
     def generate_fixture_scene_asset_instance(
         self,
@@ -427,8 +420,7 @@ class ApiDBTestCase(ApiTestCase):
             scene = self.scene
         self.asset_instance = AssetInstance.create(
             asset_id=asset.id,
-            entity_id=scene.id,
-            entity_type_id=self.scene_type.id,
+            scene_id=scene.id,
             number=number,
             name=breakdown_service.build_asset_instance_name(
                 self.asset.id, number
