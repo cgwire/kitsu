@@ -22,7 +22,7 @@ from zou.app.services.exception import (
     TaskNotFoundException
 )
 
-from sqlalchemy.exc import IntegrityError
+from sqlalchemy.exc import IntegrityError, DataError
 
 
 class BaseImportShotgunResource(Resource):
@@ -53,6 +53,11 @@ class BaseImportShotgunResource(Resource):
             except IntegrityError:
                 current_app.logger.error(
                     "Data information are duplicated or wrong: %s" %
+                    sg_entry
+                )
+            except DataError:
+                current_app.logger.error(
+                    "Data cannot be stored (schema error)" %
                     sg_entry
                 )
 
