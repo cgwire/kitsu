@@ -14,7 +14,7 @@ from zou.app.services import (
     user_service,
     entities_service
 )
-from zou.app.utils import thumbnail as thumbnail_utils, permissions
+from zou.app.utils import thumbnail as thumbnail_utils, permissions, events
 
 
 class CreatePreviewFilePictureResource(Resource):
@@ -48,6 +48,7 @@ class CreatePreviewFilePictureResource(Resource):
                 )
 
             thumbnail_utils.generate_preview_variants(instance_id)
+            self.emit_app_preview_event(instance_id)
 
             return thumbnail_utils.get_preview_url_path(instance_id), 201
 
@@ -66,11 +67,23 @@ class CreatePreviewFilePictureResource(Resource):
 
             file_name = "%s%s" % (instance_id, extension)
             clip.write_videofile(os.path.join(folder, instance_id + ".mp4"))
+            self.emit_app_preview_event(instance_id)
 
             return {}, 201
 
         else:
             abort(400, "Wrong file format")
+
+    def emit_app_preview_event(self, preview_file_id):
+        preview_file = files_service.get_preview_file(preview_file_id)
+        comment = tasks_service.get_comment_by_preview_file_id(
+            preview_file_id
+        )
+        events.emit("preview:add", {
+            "comment_id": comment["id"],
+            "task_id": preview_file["task_id"],
+            "preview": preview_file
+        })
 
     def is_allowed(self, preview_file_id):
         if permissions.has_manager_permissions():

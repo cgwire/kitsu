@@ -382,6 +382,17 @@ def get_comment_raw(comment_id):
     return comment
 
 
+def get_comment_by_preview_file_id(preview_file_id):
+    """
+    Return comment related to given preview file as a dict.
+    """
+    comment = Comment.get_by(preview_file_id=preview_file_id)
+    if comment is not None:
+        return comment.serialize()
+    else:
+        return None
+
+
 def create_comment(
     object_id,
     task_status_id,
