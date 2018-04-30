@@ -246,6 +246,7 @@ export default {
   computed: {
     ...mapGetters([
       'shots',
+      'shotMap',
       'shotsCsvFormData',
       'shotSearchQueries',
       'displayedShots',
@@ -277,8 +278,8 @@ export default {
       )
     }
 
-    if (this.shots.length === 0 ||
-        this.shots[0].production_id !== this.currentProduction.id) {
+    if (Object.keys(this.shotMap).length === 0 ||
+        this.shotMap[Object.keys(this.shotMap)[0]].production_id !== this.currentProduction.id) {
       this.loadShots((err) => {
         if (!err) this.handleModalsDisplay()
       })
