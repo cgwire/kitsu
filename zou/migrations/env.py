@@ -2,6 +2,8 @@ from __future__ import with_statement
 from alembic import context
 from sqlalchemy import engine_from_config, pool
 from logging.config import fileConfig
+from flask import current_app
+
 import logging
 
 # this is the Alembic Config object, which provides
@@ -17,7 +19,6 @@ logger = logging.getLogger('alembic.env')
 # for 'autogenerate' support
 # from myapp import mymodel
 # target_metadata = mymodel.Base.metadata
-from flask import current_app
 config.set_main_option('sqlalchemy.url',
                        current_app.config.get('SQLALCHEMY_DATABASE_URI'))
 target_metadata = current_app.extensions['migrate'].db.metadata
@@ -73,6 +74,7 @@ def run_migrations_online():
     context.configure(connection=connection,
                       target_metadata=target_metadata,
                       process_revision_directives=process_revision_directives,
+                      render_item=render_item,
                       **current_app.extensions['migrate'].configure_args)
 
     try:
@@ -80,6 +82,19 @@ def run_migrations_online():
             context.run_migrations()
     finally:
         connection.close()
+
+
+def render_item(type_, obj, autogen_context):
+    """Apply custom rendering for selected items."""
+
+    if type_ == 'type' and \
+       isinstance(obj, sqlalchemy_utils.types.uuid.UUIDType):
+        autogen_context.imports.add("import sqlalchemy_utils")
+        autogen_context.imports.add("import uuid")
+        return "sqlalchemy_utils.types.uuid.UUIDType(binary=False), default=uuid.uuid4"
+
+    return False
+
 
 if context.is_offline_mode():
     run_migrations_offline()

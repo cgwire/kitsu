@@ -1,15 +1,19 @@
 from tests.base import ApiDBTestCase
 
+from zou.app.services import scenes_service
+
 
 class SceneTestCase(ApiDBTestCase):
 
     def setUp(self):
         super(SceneTestCase, self).setUp()
         self.generate_shot_suite()
+        self.serialized_shot = self.shot.serialize(obj_type="Shot")
         self.serialized_scene = self.scene.serialize(obj_type="Scene")
         self.serialized_sequence = self.sequence.serialize(obj_type="Sequence")
         self.sequence_id = self.sequence.id
         self.generate_fixture_shot("S02")
+        self.serialized_shot_02 = self.shot.serialize(obj_type="Shot")
         self.generate_fixture_scene("SC02")
         self.generate_fixture_scene("SC03")
         self.generate_fixture_scene("SC04")
@@ -78,3 +82,34 @@ class SceneTestCase(ApiDBTestCase):
         task_types = self.get("data/scenes/%s/task-types" % self.scene.id)
         self.assertEquals(len(task_types), 1)
         self.assertEqual(task_types[0]["id"], task_type_id)
+
+    def test_get_scene_shots(self):
+        scenes_service.add_shot_to_scene(
+            self.serialized_scene, self.serialized_shot)
+        scenes_service.add_shot_to_scene(
+            self.serialized_scene, self.serialized_shot_02)
+        shots = self.get("data/scenes/%s/shots" % self.serialized_scene["id"])
+        self.assertEqual(len(shots), 2)
+        self.assertEqual(shots[0]["id"], self.serialized_shot["id"])
+        self.assertEqual(shots[1]["id"], self.serialized_shot_02["id"])
+
+    def test_add_shot_to_scene(self):
+        path = "data/scenes/%s/shots" % self.serialized_scene["id"]
+        self.post(path, {"shot_id": self.serialized_shot["id"]})
+        self.post(path, {"shot_id": self.serialized_shot_02["id"]})
+        shots = self.get(path)
+        self.assertEqual(len(shots), 2)
+        self.assertEqual(shots[0]["id"], self.serialized_shot["id"])
+        self.assertEqual(shots[1]["id"], self.serialized_shot_02["id"])
+
+    def test_remove_shot_from_scene(self):
+        scenes_service.add_shot_to_scene(
+            self.serialized_scene, self.serialized_shot)
+        scenes_service.add_shot_to_scene(
+            self.serialized_scene, self.serialized_shot_02)
+        self.delete("data/scenes/%s/shots/%s" % (
+            self.serialized_scene["id"], self.serialized_shot["id"])
+        )
+        shots = self.get("data/scenes/%s/shots" % self.serialized_scene["id"])
+        self.assertEqual(len(shots), 1)
+        self.assertEqual(shots[0]["id"], self.serialized_shot_02["id"])

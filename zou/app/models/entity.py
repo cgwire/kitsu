@@ -52,11 +52,20 @@ class Entity(db.Model, BaseMixin, SerializerMixin):
         nullable=False,
         index=True
     )
+
     parent_id = db.Column(
         UUIDType(binary=False),
         db.ForeignKey('entity.id'),
         index=True
-    )
+    )  # sequence or episode
+
+    source_id = db.Column(
+        UUIDType(binary=False),
+        db.ForeignKey('entity.id'),
+        index=True,
+        nullable=True
+    )  # if the entity is generated from another one (like shots from scene).
+
     preview_file_id = db.Column(
         UUIDType(binary=False),
         db.ForeignKey('preview_file.id', name="fk_main_preview")

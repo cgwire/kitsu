@@ -1,4 +1,5 @@
 from flask_restful import Resource, current_app
+
 from zou.app.models.department import Department
 from zou.app.models.task_type import TaskType
 from zou.app.utils import colors
@@ -37,8 +38,7 @@ class ImportShotgunStepsResource(BaseImportShotgunResource):
 
     def import_entry(self, data):
         department = self.save_department(data)
-        task_type = self.save_task_type(department, data)
-        return task_type
+        return self.save_task_type(department, data)
 
     def save_department(self, data):
         department = Department.get_by(name=data["department_name"])
@@ -64,7 +64,6 @@ class ImportShotgunStepsResource(BaseImportShotgunResource):
         else:
             task_type.update(data)
             current_app.logger.info("Task Type updated: %s" % task_type)
-
         return task_type
 
 

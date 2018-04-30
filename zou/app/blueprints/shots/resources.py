@@ -4,10 +4,11 @@ from flask_jwt_extended import jwt_required
 
 from zou.app.services import (
     breakdown_service,
-    shots_service,
-    tasks_service,
     projects_service,
     playlists_service,
+    scenes_service,
+    shots_service,
+    tasks_service,
     user_service
 )
 
@@ -519,3 +520,38 @@ class SceneCameraInstancesResource(Resource):
         scene = shots_service.get_scene(scene_id)
         user_service.check_project_access(scene["project_id"])
         return breakdown_service.get_camera_instances_for_scene(scene_id)
+
+
+class SceneShotsResource(Resource, ArgsMixin):
+
+    @jwt_required
+    def get(self, scene_id):
+        """
+        Retrieve all shots that comes from given scene.
+        """
+        scene = shots_service.get_scene(scene_id)
+        user_service.check_project_access(scene["project_id"])
+        return scenes_service.get_shots_by_scene(scene_id)
+
+    @jwt_required
+    def post(self, scene_id):
+        """
+        Mark given scene as source of given shot.
+        """
+        args = self.get_args([
+            ("shot_id", None, True)
+        ])
+        permissions.check_manager_permissions()
+        scene = shots_service.get_scene(scene_id)
+        shot = shots_service.get_shot(args["shot_id"])
+        return scenes_service.add_shot_to_scene(scene, shot), 201
+
+
+class RemoveShotFromSceneResource(Resource):
+
+    @jwt_required
+    def delete(self, scene_id, shot_id):
+        permissions.check_manager_permissions()
+        scene = shots_service.get_scene(scene_id)
+        shot = shots_service.get_shot(shot_id)
+        return scenes_service.remove_shot_from_scene(scene, shot), 204
