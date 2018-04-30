@@ -647,13 +647,13 @@ const mutations = {
 
     state.shotIndex = buildShotIndex(shots)
 
-    const maxX = shots.length
-    const maxY = state.nbValidationColumns
-    state.shotSelectionGrid = buildSelectionGrid(maxX, maxY)
-
     state.displayedShots = shots.slice(0, PAGE_SIZE)
     state.displayedShotsLength = shots.length
     cache.shots = shots
+
+    const maxX = state.displayedShots.length
+    const maxY = state.nbValidationColumns
+    state.shotSelectionGrid = buildSelectionGrid(maxX, maxY)
 
     if (userFilters.shot && userFilters.shot[production.id]) {
       state.shotSearchQueries = userFilters.shot[production.id]
@@ -751,7 +751,7 @@ const mutations = {
       cache.shots = sortShots(state.shots)
       state.shotMap[newShot.id] = newShot
 
-      const maxX = state.shots.length
+      const maxX = state.displayedShots.length
       const maxY = state.nbValidationColumns
       state.shotSelectionGrid = buildSelectionGrid(maxX, maxY)
     }
@@ -903,13 +903,13 @@ const mutations = {
     let result = indexSearch(state.shotIndex, shotSearch) || state.shots
     result = applyFilters(taskTypes, result, shotSearch) || []
 
-    const maxX = result.length
-    const maxY = state.nbValidationColumns
-    state.shotSelectionGrid = buildSelectionGrid(maxX, maxY)
-
     state.displayedShots = result.slice(0, PAGE_SIZE)
     state.displayedShotsLength = result.length
     state.shotSearchText = shotSearch
+
+    const maxX = state.displayedShots.length
+    const maxY = state.nbValidationColumns
+    state.shotSelectionGrid = buildSelectionGrid(maxX, maxY)
   },
 
   [SET_SEQUENCE_SEARCH] (state, sequenceSearch) {
@@ -1000,6 +1000,10 @@ const mutations = {
       0,
       state.displayedShots.length + PAGE_SIZE
     )
+
+    const maxX = state.displayedShots.length
+    const maxY = state.nbValidationColumns
+    state.shotSelectionGrid = buildSelectionGrid(maxX, maxY)
   },
 
   [DISPLAY_MORE_SEQUENCES] (state, tasks) {
