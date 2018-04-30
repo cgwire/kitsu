@@ -12,12 +12,8 @@ socketio = None
 
 
 def publish(event, data):
-    data = {
-        "type": event,
-        "data": data
-    }
     if socketio is not None:
-        socketio.emit("event", data, namespace="/events")
+        socketio.emit(event, data, namespace="/events")
     else:
         current_app.logger.error(
             "Publisher store not initialized, run init() befor emitting events"
