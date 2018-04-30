@@ -22,11 +22,6 @@ def create_app(redis_url):
     def connected():
         app.logger.info("New websocket client connected")
 
-    @socketio.on("event", namespace="/events")
-    def on_event(data):
-        if data is not None and "type" in data:
-            app.logger.info(data["type"])
-
     @socketio.on_error('/events')
     def on_error(error):
         app.logger.error(error)
