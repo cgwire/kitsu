@@ -18,6 +18,7 @@
       <form v-on:submit.prevent>
         <text-field
           :label="$t('people.fields.first_name')"
+          ref="name-field"
           v-model="form.first_name">
         </text-field>
         <text-field
@@ -82,18 +83,7 @@ export default {
     'isError',
     'errorText'
   ],
-  watch: {
-    personToEdit () {
-      this.form = {
-        first_name: this.personToEdit.first_name,
-        last_name: this.personToEdit.last_name,
-        phone: this.personToEdit.phone,
-        email: this.personToEdit.email,
-        role: this.personToEdit.role,
-        active: this.personToEdit.active
-      }
-    }
-  },
+
   data () {
     return {
       form: {
@@ -102,7 +92,7 @@ export default {
         email: '',
         phone: '',
         role: 'user',
-        active: true
+        active: 'true'
       },
 
       roleOptions: [
@@ -138,10 +128,39 @@ export default {
     ...mapActions([
 
     ]),
+
     confirmClicked () {
       this.form.active =
         this.form.active === 'true' || this.form.active === true
       this.$emit('confirm', this.form)
+    },
+
+    resetForm () {
+      if (this.personToEdit) {
+        this.form = {
+          first_name: this.personToEdit.first_name,
+          last_name: this.personToEdit.last_name,
+          phone: this.personToEdit.phone,
+          email: this.personToEdit.email,
+          role: this.personToEdit.role,
+          active: this.personToEdit.active ? 'true' : 'false'
+        }
+      }
+    }
+  },
+
+  watch: {
+    personToEdit () {
+      this.resetForm()
+    },
+
+    active () {
+      if (this.active) {
+        this.resetForm()
+        setTimeout(() => {
+          this.$refs.nameField.focus()
+        }, 100)
+      }
     }
   }
 }

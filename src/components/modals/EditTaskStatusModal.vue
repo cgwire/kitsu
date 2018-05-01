@@ -146,10 +146,13 @@ export default {
   methods: {
     ...mapActions([
     ]),
+
     confirmClicked () {
       this.$emit('confirm', this.form)
     },
+
     isEditing: () => this.taskStatusToEdit && this.taskStatusToEdit.id,
+
     resetForm () {
       if (this.taskStatusToEdit) {
         this.form = {
