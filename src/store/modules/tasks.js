@@ -237,26 +237,34 @@ const actions = {
     })
   },
 
-  addCommentPreview ({ commit, state }, payload) {
+  addCommentPreview (
+    { commit, getters, state },
+    { taskId, commentId, callback }
+  ) {
     const fileName = state.previewFormData.get('file').name
     const extension = fileName.slice(fileName.length - 4)
-    payload.isMovie = ['.mp4', '.mov'].includes(extension)
+    const previewData = {
+      taskId,
+      commentId,
+      isMovie: ['.mp4', '.mov'].includes(extension)
+    }
 
-    tasksApi.addPreview(payload, (err, preview) => {
-      if (err && payload.callback) {
-        payload.callback(err)
+    tasksApi.addPreview(previewData, (err, preview) => {
+      if (err && callback) {
+        callback(err)
       } else {
         tasksApi.uploadPreview(preview.id, state.previewFormData, (err) => {
           if (!err) {
+            const comment = getters.getTaskComment(taskId, commentId)
+
             commit(ADD_PREVIEW_END, {
               preview,
-              taskId: payload.taskId,
-              commentId: payload.commentId
+              taskId,
+              commentId,
+              comment
             })
           }
-          if (payload.callback) {
-            payload.callback(err, preview)
-          }
+          if (callback) callback(err, preview)
         })
       }
     })
@@ -520,12 +528,7 @@ const mutations = {
     state.previewFormData = formData
   },
 
-  [ADD_PREVIEW_END] (state, { preview, taskId, commentId }) {
-    const getTaskComment = getters.getTaskComment(state, getters)
-    const comment = {
-      ...getTaskComment(taskId, commentId)
-    }
-
+  [ADD_PREVIEW_END] (state, { preview, taskId, commentId, comment }) {
     if (!comment.preview) {
       const newPreview = {
         id: preview.id,
@@ -535,10 +538,8 @@ const mutations = {
       }
       state.taskPreviews[taskId] =
         [newPreview].concat(state.taskPreviews[taskId])
+
       comment.preview = newPreview
-      state.taskComments[taskId].shift()
-      state.taskComments[taskId] =
-        [comment].concat(state.taskComments[taskId])
     }
   },
 

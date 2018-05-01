@@ -810,16 +810,13 @@ export default {
         taskId: this.route.params.task_id,
         commentId: this.route.params.comment_id,
         callback: (err, preview) => {
+          this.loading.addPreview = false
           if (err) {
             this.errors.addPreview = true
           } else {
-            this.$router.push(`/tasks/${this.route.params.task_id}` +
-                              `/previews/${preview.id}`)
+            this.$refs['add-preview-modal'].reset()
+            this.resetPreview(preview.is_movie, preview)
           }
-          this.$refs['add-preview-modal'].reset()
-          this.loading.addPreview = false
-          this.currentTaskPreviews = this.getCurrentTaskPreviews()
-          this.currentTaskComments = this.getCurrentTaskComments()
         }
       })
     },
@@ -834,26 +831,29 @@ export default {
         taskId: this.currentTask.id,
         comment: this.currentTaskComments[0],
         callback: (err, isMovie) => {
+          this.loading.changePreview = false
           if (err) {
             this.errors.changePreview = true
           } else {
-            this.$router.push(`/tasks/${this.route.params.task_id}` +
-                              `/previews/${preview.id}`)
+            this.$refs['change-preview-modal'].reset()
+            if (!isMovie) {
+              this.$refs['preview-picture'].src =
+                this.getPreviewPath() + '?' + new Date().getTime()
+            } else {
+              this.$refs['preview-movie'].src =
+                this.getPreviewPath() + '?' + new Date().getTime()
+            }
+            this.resetPreview(isMovie, preview)
           }
-          this.$refs['change-preview-modal'].reset()
-
-          if (!isMovie) {
-            this.$refs['preview-picture'].src =
-              this.getPreviewPath() + '?' + new Date().getTime()
-          } else {
-            this.$refs['preview-movie'].src =
-              this.getPreviewPath() + '?' + new Date().getTime()
-          }
-          this.loading.changePreview = false
-          this.currentTaskPreviews = this.getCurrentTaskPreviews()
-          this.currentTaskComments = this.getCurrentTaskComments()
         }
       })
+    },
+
+    resetPreview (isMovie, preview) {
+      this.$router.push(`/tasks/${this.route.params.task_id}` +
+                        `/previews/${preview.id}`)
+      this.currentTaskPreviews = this.getCurrentTaskPreviews()
+      this.currentTaskComments = this.getCurrentTaskComments()
     },
 
     setPreview () {
@@ -924,6 +924,28 @@ export default {
           }
         }
       })
+    },
+
+    onComment (eventData) {
+      const commentId = eventData.id
+      this.$store.dispatch('loadComment', {id: commentId})
+    },
+
+    onPreviewAdded (eventData) {
+      const taskId = eventData.task_id
+      const commentId = eventData.comment_id
+      const preview = eventData.preview
+      const comment = this.$store.getters.getTaskComment(taskId, commentId)
+
+      if (!comment.preview || comment.preview.id !== eventData.preview.id) {
+        this.$store.commit('ADD_PREVIEW_END', {
+          preview,
+          taskId,
+          commentId,
+          comment
+        })
+        this.resetPreview(preview.is_movie, preview)
+      }
     }
   },
 
@@ -936,6 +958,18 @@ export default {
       this.handleModalsDisplay()
       if (this.$route.params.task_id !== this.currentTask.id) {
         this.loadTaskData()
+      }
+    }
+  },
+
+  socket: {
+    events: {
+      'comment:new' (eventData) {
+        this.onComment(eventData)
+      },
+
+      'preview:add' (eventData) {
+        this.onPreviewAdded(eventData)
       }
     }
   },

@@ -12,6 +12,33 @@ export default {
         href: '/static/favicon.ico'
       }
     ]
+  },
+
+  methods: {
+    onAssignation (eventData) {
+      const store = this.$store
+      if (store.getters.user.id === eventData.person.id) {
+        store.dispatch('loadTodos', {forced: true})
+      }
+      if (store.getters.route.path.indexOf(eventData.person.id) > 0) {
+        store.dispatch('loadPersonTasks', {
+          personId: eventData.person.id,
+          forced: true
+        })
+      }
+    }
+  },
+
+  socket: {
+    events: {
+      'task:assign' (eventData) {
+        this.onAssignation(eventData)
+      },
+
+      'task:unassign' (eventData) {
+        this.onAssignation(eventData)
+      }
+    }
   }
 }
 </script>
