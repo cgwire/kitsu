@@ -278,6 +278,7 @@ export default {
   methods: {
     ...mapActions([
       'loadAssets',
+      'loadComment',
       'removeAssetSearch',
       'saveAssetSearch',
       'setLastProductionScreen',
@@ -516,6 +517,15 @@ export default {
         this.$refs['asset-search-field'].value = ''
         this.$store.commit('SET_ASSET_LIST_SCROLL_POSITION', 0)
         this.$store.dispatch('loadAssets')
+      }
+    }
+  },
+
+  socket: {
+    events: {
+      'comment:new' (eventData) {
+        const commentId = eventData.id
+        this.loadComment({id: commentId})
       }
     }
   },

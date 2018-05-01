@@ -297,6 +297,7 @@ export default {
   methods: {
     ...mapActions([
       'loadShots',
+      'loadComment',
       'removeShotSearch',
       'saveShotSearch',
       'setLastProductionScreen',
@@ -540,6 +541,15 @@ export default {
         this.$refs['shot-search-field'].setValue('')
         this.$store.commit('SET_SHOT_LIST_SCROLL_POSITION', 0)
         this.$store.dispatch('loadShots')
+      }
+    }
+  },
+
+  socket: {
+    events: {
+      'comment:new' (eventData) {
+        const commentId = eventData.id
+        this.loadComment({id: commentId})
       }
     }
   },
