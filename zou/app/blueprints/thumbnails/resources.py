@@ -79,8 +79,12 @@ class CreatePreviewFilePictureResource(Resource):
         comment = tasks_service.get_comment_by_preview_file_id(
             preview_file_id
         )
+        comment_id = None
+        if comment is not None:
+            comment_id = comment["id"]
+
         events.emit("preview:add", {
-            "comment_id": comment["id"],
+            "comment_id": comment_id,
             "task_id": preview_file["task_id"],
             "preview": preview_file
         })
