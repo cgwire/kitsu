@@ -143,7 +143,7 @@ export default {
           phone: this.personToEdit.phone,
           email: this.personToEdit.email,
           role: this.personToEdit.role,
-          active: this.personToEdit.active ? 'true' : 'false'
+          active: !this.personToEdit.id || this.personToEdit.active ? 'true' : 'false'
         }
       }
     }
