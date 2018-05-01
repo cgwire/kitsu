@@ -7,3 +7,6 @@ env:
 script:
     - npm install
     - npm run test:store
+branches:
+    only:
+        - master
