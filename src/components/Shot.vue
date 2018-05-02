@@ -29,23 +29,23 @@
     </div>
     <div class="column">
       <page-subtitle :text="$t('main.info')"></page-subtitle>
-      <table class="table">
+      <table class="table" v-if="currentShot">
         <tbody>
-          <tr v-if="currentShot && currentShot.data.fps">
+          <tr v-if="currentShot.data.fps">
             <td class="field-label">{{ $t('shots.fields.fps') }}</td>
             <td>
               {{ currentShot ? currentShot.data.fps : '' }}
             </td>
           </tr>
 
-          <tr v-if="currentShot && currentShot.data.frame_in">
+          <tr v-if="currentShot.data.frame_in">
             <td class="field-label">{{ $t('shots.fields.frame_in') }}</td>
             <td>
               {{ currentShot ? currentShot.data.frame_in : '' }}
             </td>
           </tr>
 
-          <tr v-if="currentShot && currentShot.data.frame_out">
+          <tr v-if="currentShot.data.frame_out">
             <td class="field-label">{{ $t('shots.fields.frame_out') }}</td>
             <td>
               {{ currentShot ? currentShot.data.frame_out : '' }}
@@ -54,9 +54,10 @@
 
           <tr>
             <td class="field-label">{{ $t('shots.fields.description') }}</td>
-            <td>
-              {{ currentShot ? currentShot.description : '' }}
-            </td>
+            <description-cell
+              :entry="currentShot"
+            >
+            </description-cell>
           </tr>
         </tbody>
       </table>
@@ -121,6 +122,7 @@
 <script>
 import { mapGetters, mapActions } from 'vuex'
 
+import DescriptionCell from './cells/DescriptionCell'
 import PageTitle from './widgets/PageTitle'
 import PageSubtitle from './widgets/PageSubtitle'
 import EntityThumbnail from './widgets/EntityThumbnail'
@@ -130,6 +132,7 @@ import TableInfo from './widgets/TableInfo'
 export default {
   name: 'shot',
   components: {
+    DescriptionCell,
     EntityThumbnail,
     EntityTaskList,
     PageSubtitle,

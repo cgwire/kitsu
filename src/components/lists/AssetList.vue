@@ -92,9 +92,8 @@
             {{ entry.name }}
             </router-link>
           </td>
-          <td class="description">
-            {{ entry.description }}
-          </td>
+          <description-cell class="description" :entry="entry">
+          </description-cell>
           <validation-cell
             :key="column.name + '-' + entry.id"
             :ref="'validation-' + i + '-' + j"
@@ -150,6 +149,7 @@
 
 <script>
 import { mapGetters, mapActions } from 'vuex'
+import DescriptionCell from '../cells/DescriptionCell'
 import RowActions from '../widgets/RowActions'
 import ButtonLink from '../widgets/ButtonLink'
 import ButtonHrefLink from '../widgets/ButtonHrefLink'
@@ -177,6 +177,7 @@ export default {
   components: {
     ButtonLink,
     ButtonHrefLink,
+    DescriptionCell,
     EntityThumbnail,
     PageTitle,
     RowActions,

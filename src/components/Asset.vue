@@ -31,13 +31,14 @@
     </div>
     <div class="column">
       <page-subtitle :text="$t('main.info')"></page-subtitle>
-      <table class="table">
+      <table class="table" v-if="currentAsset">
         <tbody>
           <tr>
             <td class="field-label">{{ $t('assets.fields.description') }}</td>
-            <td>
-              {{ currentAsset ? currentAsset.description : '' }}
-            </td>
+            <description-cell
+              :entry="currentAsset"
+            >
+            </description-cell>
           </tr>
         </tbody>
       </table>
@@ -98,6 +99,7 @@
 <script>
 import { mapGetters, mapActions } from 'vuex'
 
+import DescriptionCell from './cells/DescriptionCell'
 import PageTitle from './widgets/PageTitle'
 import PageSubtitle from './widgets/PageSubtitle'
 import EntityThumbnail from './widgets/EntityThumbnail'
@@ -107,6 +109,7 @@ import EntityTaskList from './lists/EntityTaskList'
 export default {
   name: 'asset',
   components: {
+    DescriptionCell,
     EntityThumbnail,
     EntityTaskList,
     PageSubtitle,
