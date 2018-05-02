@@ -42,5 +42,6 @@ export default {
   color: #666;
   border-radius: 0;
   font-weight: bold;
+  cursor: default;
 }
 </style>
