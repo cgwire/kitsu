@@ -6,6 +6,9 @@
           <th class="production">
             {{ $t('tasks.fields.production') }}
           </th>
+          <th class="type">
+            {{ $t('tasks.fields.task_type') }}
+          </th>
           <th class="thumbnail">
           </th>
           <th class="name">
@@ -13,9 +16,6 @@
           </th>
           <th class="description">
             {{ $t('assets.fields.description') }}
-          </th>
-          <th class="type">
-            {{ $t('tasks.fields.task_type') }}
           </th>
           <th class="status">
             {{ $t('tasks.fields.task_status') }}
@@ -46,23 +46,6 @@
             :only-avatar="true"
           >
           </production-name-cell>
-          <td class="thumbnail">
-            <img
-              class="thumbnail-picture"
-              :src="'/api/pictures/thumbnails/preview-files/' + entry.entity_preview_file_id + '.png'"
-              v-if="entry.entity_preview_file_id.length > 0"
-            />
-            <span class="thumbnail-picture thumbnail-empty" v-else>
-            </span>
-          </td>
-          <td class="name">
-            <router-link :to="entry.entity_path">
-              {{ entry.full_entity_name }}
-            </router-link>
-          </td>
-          <td class="description">
-            {{ entry.entity_description }}
-          </td>
           <task-type-name
             class="type"
             :entry="{
@@ -71,6 +54,25 @@
             }"
           >
           </task-type-name>
+          <td class="thumbnail">
+            <entity-thumbnail
+              :empty-width="60"
+              :empty-height="40"
+              :entity="{preview_file_id: entry.entity_preview_file_id}"
+            >
+            </entity-thumbnail>
+          </td>
+
+          <td class="name">
+            <router-link :to="entry.entity_path">
+              {{ entry.full_entity_name }}
+            </router-link>
+          </td>
+          <description-cell
+            class="description"
+            :entry="{description: entry.entity_description}"
+          >
+          </description-cell>
           <validation-cell
             class="status unselectable"
             :ref="'validation-' + i + '-0'"
@@ -117,16 +119,20 @@
 import { mapGetters, mapActions } from 'vuex'
 import moment from 'moment-timezone'
 
+import DescriptionCell from '../cells/DescriptionCell'
 import ProductionNameCell from '../cells/ProductionNameCell'
 import LastCommentCell from '../cells/LastCommentCell'
 import TaskTypeName from '../cells/TaskTypeName'
 import ValidationCell from '../cells/ValidationCell'
 import TableInfo from '../widgets/TableInfo'
 import ValidationTag from '../widgets/ValidationTag'
+import EntityThumbnail from '../widgets/EntityThumbnail'
 
 export default {
   name: 'todos-list',
   components: {
+    DescriptionCell,
+    EntityThumbnail,
     LastCommentCell,
     ProductionNameCell,
     TableInfo,
@@ -216,6 +222,11 @@ export default {
   min-width: 250px;
 }
 
+.description li {
+  list-style-type: disc;
+  margin-left: 2em;
+}
+
 .name a {
   color: inherit;
 }
@@ -250,17 +261,6 @@ export default {
   min-width: 60px;
   max-width: 60px;
   width: 60px;
-  padding: 0 0 0 0;
-}
-
-.thumbnail img {
-  margin-top: 5px;
-}
-
-span.thumbnail-empty {
-  display: block;
-  width: 60px;
-  height: 40px;
-  background: #F3F3F3;
+  padding: 0;
 }
 </style>
