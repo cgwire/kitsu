@@ -107,8 +107,11 @@ const helpers = {
   }
 }
 
+const cache = {
+  assets: []
+}
+
 const state = {
-  assets: [],
   assetMap: {},
   assetTypes: [],
   nbValidationColumns: 0,
@@ -148,7 +151,6 @@ const state = {
 }
 
 const getters = {
-  assets: state => state.assets,
   assetMap: state => state.assetMap,
   assetSearchText: state => state.assetSearchText,
   assetSearchQueries: state => state.assetSearchQueries,
@@ -169,7 +171,7 @@ const getters = {
     let assets = []
 
     if (state.assetSearchText.length === 0) {
-      assets = state.assets.slice(0, 100)
+      assets = cache.assets.slice(0, 100)
     } else {
       assets = state.displayedAssets.slice(0, 100)
     }
@@ -198,7 +200,7 @@ const getters = {
   assetsCsvFormData: state => state.assetsCsvFormData,
 
   getAsset: (state, getters) => (id) => {
-    return state.assets.find((asset) => asset.id === id)
+    return cache.assets.find((asset) => asset.id === id)
   },
 
   getOpenProduction: (state, getters) => (id) => {
@@ -358,7 +360,7 @@ const actions = {
 
 const mutations = {
   [LOAD_ASSETS_START] (state) {
-    state.assets = []
+    cache.assets = []
     state.isAssetsLoading = true
     state.isAssetsLoadingError = false
 
@@ -386,7 +388,7 @@ const mutations = {
       })
     })
 
-    state.assets = assets
+    cache.assets = assets
     state.isAssetsLoading = false
     state.isAssetsLoadingError = false
     state.nbValidationColumns = Object.keys(validationColumns).length
@@ -397,8 +399,8 @@ const mutations = {
     const maxY = state.nbValidationColumns
     state.assetSelectionGrid = buildSelectionGrid(maxX, maxY)
 
-    state.displayedAssets = state.assets.slice(0, PAGE_SIZE)
-    state.displayedAssetsLength = state.assets ? state.assets.length : 0
+    state.displayedAssets = cache.assets.slice(0, PAGE_SIZE)
+    state.displayedAssetsLength = cache.assets ? cache.assets.length : 0
 
     if (userFilters.asset && userFilters.asset[production.id]) {
       state.assetSearchQueries = userFilters.asset[production.id]
@@ -459,11 +461,11 @@ const mutations = {
     } else {
       newAsset.validations = {}
       newAsset.production_id = newAsset.project_id
-      state.assets.push(newAsset)
-      state.assets = sortAssets(state.assets)
+      cache.assets.push(newAsset)
+      cache.assets = sortAssets(cache.assets)
       state.displayedAssets.unshift(newAsset)
 
-      const maxX = state.assets.length
+      const maxX = cache.assets.length
       const maxY = state.nbValidationColumns
       state.assetSelectionGrid = buildSelectionGrid(maxX, maxY)
     }
@@ -471,7 +473,7 @@ const mutations = {
       isLoading: false,
       isError: false
     }
-    state.assetIndex = buildAssetIndex(state.assets)
+    state.assetIndex = buildAssetIndex(cache.assets)
     state.assetMap[newAsset.id] = asset
   },
 
@@ -493,13 +495,13 @@ const mutations = {
     if (asset.tasks.length > 0) {
       asset.canceled = true
     } else {
-      const assetToDeleteIndex = state.assets.findIndex(
+      const assetToDeleteIndex = cache.assets.findIndex(
         (asset) => asset.id === assetToDelete.id
       )
-      const displayAssetToDeleteIndex = state.assets.findIndex(
+      const displayAssetToDeleteIndex = cache.assets.findIndex(
         (asset) => asset.id === assetToDelete.id
       )
-      state.assets.splice(assetToDeleteIndex, 1)
+      cache.assets.splice(assetToDeleteIndex, 1)
       state.displayedAssets.splice(displayAssetToDeleteIndex, 1)
       state.assetMap[assetToDelete.id] = undefined
     }
@@ -508,7 +510,7 @@ const mutations = {
       isLoading: false,
       isError: false
     }
-    state.assetIndex = buildAssetIndex(state.assets)
+    state.assetIndex = buildAssetIndex(cache.assets)
   },
 
   [RESTORE_ASSET_START] (state) {
@@ -530,7 +532,7 @@ const mutations = {
       isLoading: false,
       isError: false
     }
-    state.assetIndex = buildAssetIndex(state.assets)
+    state.assetIndex = buildAssetIndex(cache.assets)
   },
 
   [RESTORE_ASSET_START] (state) {
@@ -552,11 +554,11 @@ const mutations = {
       isLoading: false,
       isError: false
     }
-    state.assetIndex = buildAssetIndex(state.assets)
+    state.assetIndex = buildAssetIndex(cache.assets)
   },
 
   [DELETE_TASK_END] (state, task) {
-    const asset = state.assets.find(
+    const asset = cache.assets.find(
       (asset) => asset.id === task.entity_id
     )
     if (asset) {
@@ -591,8 +593,8 @@ const mutations = {
   },
 
   [SET_ASSET_SEARCH] (state, assetSearch) {
-    let result = indexSearch(state.assetIndex, assetSearch) || state.assets
-    const taskTypes = extractTaskTypes(state.assets)
+    let result = indexSearch(state.assetIndex, assetSearch) || cache.assets
+    const taskTypes = extractTaskTypes(cache.assets)
     result = applyFilters(taskTypes, result, assetSearch) || []
 
     const maxX = result.length
@@ -637,7 +639,7 @@ const mutations = {
     if (state.assetSearchText.length > 0) {
       assets = indexSearch(state.assetIndex, state.assetSearchText)
     } else {
-      assets = state.assets
+      assets = cache.assets
     }
     state.displayedAssets = assets.slice(
       0,
@@ -677,7 +679,7 @@ const mutations = {
   },
 
   [RESET_ALL] (state) {
-    state.assets = []
+    cache.assets = []
     state.assetMap = {}
     state.assetTypes = []
     state.isAssetsLoading = false
