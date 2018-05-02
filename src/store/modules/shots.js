@@ -114,7 +114,8 @@ import {
 } from '../mutation-types'
 
 const cache = {
-  shots: []
+  shots: [],
+  shotIndex: []
 }
 
 const helpers = {
@@ -150,7 +151,7 @@ const helpers = {
 }
 
 const state = {
-  shots: [],
+  shotMap: {},
   sequences: [],
   episodes: [],
   shotSearchText: '',
@@ -170,10 +171,8 @@ const state = {
   displayedSequencesLength: 0,
   displayedEpisodes: [],
   displayedEpisodesLength: 0,
-  shotIndex: {},
   sequenceIndex: {},
 
-  shotMap: {},
   sequenceMap: {},
   episodeMap: {},
   shotCreated: '',
@@ -205,7 +204,6 @@ const state = {
 }
 
 const getters = {
-  shotMap: state => state.shotMap,
   sequences: state => state.sequences,
   sequenceMap: state => state.sequenceMap,
   sequenceStats: state => state.sequenceStats,
@@ -213,6 +211,7 @@ const getters = {
   episodes: state => state.episodes,
   episodeMap: state => state.episodeMap,
   shotSearchQueries: state => state.shotSearchQueries,
+  shotMap: state => state.shotMap,
 
   isFps: state => state.isFps,
   isFrameIn: state => state.isFrameIn,
@@ -260,10 +259,6 @@ const getters = {
   shotListScrollPosition: state => state.shotListScrollPosition,
   sequenceListScrollPosition: state => state.sequenceListScrollPosition,
   episodeListScrollPosition: state => state.episodeListScrollPosition,
-
-  getShot: (state, getters) => (id) => {
-    return state.shotMap[id]
-  },
 
   getSequenceOptions: state => state.sequences.map(
     (sequence) => { return { label: sequence.name, value: sequence.id } }
@@ -593,15 +588,16 @@ const actions = {
 const mutations = {
   [LOAD_SHOTS_START] (state) {
     cache.shots = []
+    cache.shotIndex = {}
+    state.shotMap = {}
+
     state.shotValidationColumns = []
     state.sequences = []
     state.episodes = []
     state.isShotsLoading = true
     state.isShotsLoadingError = false
 
-    state.shotIndex = {}
     state.sequenceIndex = {}
-    state.shotMap = {}
     state.displayedShots = []
     state.displayedShotsLength = 0
     state.shotSearchQueries = []
@@ -625,7 +621,6 @@ const mutations = {
 
     state.shotMap = {}
     shots.forEach((shot) => {
-      state.shotMap[shot.id] = shot
       shot.production_id = helpers.getCurrentProduction().id
       shot.tasks.forEach((task) => {
         helpers.populateTask(task)
@@ -635,6 +630,7 @@ const mutations = {
       if (shot.data.fps) isFps = true
       if (shot.data.frame_in) isFrameIn = true
       if (shot.data.frame_out) isFrameOut = true
+      state.shotMap[shot.id] = shot
     })
 
     state.isShotsLoading = false
@@ -645,7 +641,7 @@ const mutations = {
     state.isFrameIn = isFrameIn
     state.isFrameOut = isFrameOut
 
-    state.shotIndex = buildShotIndex(shots)
+    cache.shotIndex = buildShotIndex(shots)
 
     state.displayedShots = shots.slice(0, PAGE_SIZE)
     state.displayedShotsLength = shots.length
@@ -748,7 +744,7 @@ const mutations = {
       Object.assign(shot, newShot)
     } else {
       cache.shots.push(newShot)
-      cache.shots = sortShots(state.shots)
+      cache.shots = sortShots(cache.shots)
       state.shotMap[newShot.id] = newShot
 
       const maxX = state.displayedShots.length
@@ -759,7 +755,7 @@ const mutations = {
       isLoading: false,
       isError: false
     }
-    state.shotIndex = buildShotIndex(cache.shots)
+    cache.shotIndex = buildShotIndex(cache.shots)
     state.shotCreated = newShot.name
 
     if (newShot.data.fps) state.isFps = true
@@ -820,7 +816,7 @@ const mutations = {
       isLoading: false,
       isError: false
     }
-    state.shotIndex = buildShotIndex(cache.shots)
+    cache.shotIndex = buildShotIndex(cache.shots)
   },
 
   [DELETE_SEQUENCE_START] (state) {},
@@ -872,7 +868,7 @@ const mutations = {
       isLoading: false,
       isError: false
     }
-    state.shotIndex = buildShotIndex(state.shots)
+    cache.shotIndex = buildShotIndex(cache.shots)
   },
 
   [NEW_TASK_COMMENT_END] (state, {comment, taskId}) {
@@ -899,8 +895,8 @@ const mutations = {
   },
 
   [SET_SHOT_SEARCH] (state, shotSearch) {
-    const taskTypes = extractTaskTypes(state.shots)
-    let result = indexSearch(state.shotIndex, shotSearch) || state.shots
+    const taskTypes = extractTaskTypes(cache.shots)
+    let result = indexSearch(cache.shotIndex, shotSearch) || cache.shots
     result = applyFilters(taskTypes, result, shotSearch) || []
 
     state.displayedShots = result.slice(0, PAGE_SIZE)
@@ -946,13 +942,13 @@ const mutations = {
     shot.validations = []
     shot.data = {}
 
-    state.shots.push(shot)
-    state.shots = sortShots(state.shots)
-    state.displayedShots = state.shots.slice(0, PAGE_SIZE)
+    cache.shots.push(shot)
+    cache.shots = sortShots(cache.shots)
+    state.displayedShots = cache.shots.slice(0, PAGE_SIZE)
     state.shotMap[shot.id] = shot
-    state.shotIndex = buildShotIndex(state.shots)
+    cache.shotIndex = buildShotIndex(cache.shots)
 
-    const maxX = state.shots.length
+    const maxX = state.displayedShots.length
     const maxY = state.nbValidationColumns
     state.shotSelectionGrid = buildSelectionGrid(maxX, maxY)
 
@@ -994,7 +990,7 @@ const mutations = {
   [DISPLAY_MORE_SHOTS] (state, tasks) {
     let shots = cache.shots
     if (state.shotSearchText.length > 0) {
-      shots = indexSearch(state.shotIndex, state.shotSearchText)
+      shots = indexSearch(cache.shotIndex, state.shotSearchText)
     }
     state.displayedShots = shots.slice(
       0,
@@ -1020,7 +1016,7 @@ const mutations = {
   [DISPLAY_MORE_EPISODES] (state, tasks) {
     let episodes = state.episodes
     if (state.episodeSearchText.length > 0) {
-      episodes = indexSearch(state.shotIndex, state.episodeSearchText)
+      episodes = indexSearch(cache.shotIndex, state.episodeSearchText)
     }
     state.displayedEpisodes = episodes.slice(
       0,
@@ -1125,7 +1121,9 @@ const mutations = {
   },
 
   [RESET_ALL] (state) {
-    state.shots = []
+    cache.shots = []
+    cache.shotIndex = {}
+
     state.sequences = []
     state.sequenceStats = []
     state.episodes = []
@@ -1134,7 +1132,6 @@ const mutations = {
     state.shotsCsvFormData = null
     state.sequenceStats = {}
 
-    state.shotIndex = {}
     state.shotMap = {}
     state.displayedShots = []
     state.displayedShotsLength = 0

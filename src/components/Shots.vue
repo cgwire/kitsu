@@ -278,8 +278,9 @@ export default {
       )
     }
 
-    if (Object.keys(this.shotMap).length === 0 ||
-        this.shotMap[Object.keys(this.shotMap)[0]].production_id !== this.currentProduction.id) {
+    const shotIds = Object.keys(this.shotMap)
+    if (shotIds.length === 0 ||
+        this.shotMap[shotIds[0]].production_id !== this.currentProduction.id) {
       this.loadShots((err) => {
         if (!err) this.handleModalsDisplay()
       })
