@@ -108,6 +108,7 @@ const helpers = {
 }
 
 const cache = {
+  assetIndex: {},
   assets: []
 }
 
@@ -116,7 +117,6 @@ const state = {
   assetTypes: [],
   nbValidationColumns: 0,
 
-  assetIndex: {},
   filteredAssets: [],
   displayedAssets: [],
   displayedAssetsLength: 0,
@@ -200,7 +200,7 @@ const getters = {
   assetsCsvFormData: state => state.assetsCsvFormData,
 
   getAsset: (state, getters) => (id) => {
-    return cache.assets.find((asset) => asset.id === id)
+    return state.assetMap[id]
   },
 
   getOpenProduction: (state, getters) => (id) => {
@@ -364,7 +364,7 @@ const mutations = {
     state.isAssetsLoading = true
     state.isAssetsLoadingError = false
 
-    state.assetIndex = {}
+    cache.assetIndex = {}
     state.displayedAssets = []
     state.displayedAssetsLength = 0
     state.assetSearchQueries = []
@@ -393,14 +393,13 @@ const mutations = {
     state.isAssetsLoadingError = false
     state.nbValidationColumns = Object.keys(validationColumns).length
 
-    state.assetIndex = buildAssetIndex(assets)
-
-    const maxX = assets.length
-    const maxY = state.nbValidationColumns
-    state.assetSelectionGrid = buildSelectionGrid(maxX, maxY)
-
+    cache.assetIndex = buildAssetIndex(assets)
     state.displayedAssets = cache.assets.slice(0, PAGE_SIZE)
     state.displayedAssetsLength = cache.assets ? cache.assets.length : 0
+
+    const maxX = state.displayedAssets.length
+    const maxY = state.nbValidationColumns
+    state.assetSelectionGrid = buildSelectionGrid(maxX, maxY)
 
     if (userFilters.asset && userFilters.asset[production.id]) {
       state.assetSearchQueries = userFilters.asset[production.id]
@@ -465,7 +464,7 @@ const mutations = {
       cache.assets = sortAssets(cache.assets)
       state.displayedAssets.unshift(newAsset)
 
-      const maxX = cache.assets.length
+      const maxX = state.displayedAssets.assets.length
       const maxY = state.nbValidationColumns
       state.assetSelectionGrid = buildSelectionGrid(maxX, maxY)
     }
@@ -473,7 +472,7 @@ const mutations = {
       isLoading: false,
       isError: false
     }
-    state.assetIndex = buildAssetIndex(cache.assets)
+    cache.assetIndex = buildAssetIndex(cache.assets)
     state.assetMap[newAsset.id] = asset
   },
 
@@ -510,7 +509,7 @@ const mutations = {
       isLoading: false,
       isError: false
     }
-    state.assetIndex = buildAssetIndex(cache.assets)
+    cache.assetIndex = buildAssetIndex(cache.assets)
   },
 
   [RESTORE_ASSET_START] (state) {
@@ -532,7 +531,7 @@ const mutations = {
       isLoading: false,
       isError: false
     }
-    state.assetIndex = buildAssetIndex(cache.assets)
+    cache.assetIndex = buildAssetIndex(cache.assets)
   },
 
   [RESTORE_ASSET_START] (state) {
@@ -554,7 +553,7 @@ const mutations = {
       isLoading: false,
       isError: false
     }
-    state.assetIndex = buildAssetIndex(cache.assets)
+    cache.assetIndex = buildAssetIndex(cache.assets)
   },
 
   [DELETE_TASK_END] (state, task) {
@@ -593,17 +592,17 @@ const mutations = {
   },
 
   [SET_ASSET_SEARCH] (state, assetSearch) {
-    let result = indexSearch(state.assetIndex, assetSearch) || cache.assets
+    let result = indexSearch(cache.assetIndex, assetSearch) || cache.assets
     const taskTypes = extractTaskTypes(cache.assets)
     result = applyFilters(taskTypes, result, assetSearch) || []
-
-    const maxX = result.length
-    const maxY = state.nbValidationColumns
-    state.assetSelectionGrid = buildSelectionGrid(maxX, maxY)
 
     state.displayedAssets = result.slice(0, PAGE_SIZE)
     state.displayedAssetsLength = result ? result.length : 0
     state.assetSearchText = assetSearch
+
+    const maxX = state.displayedAssets.length
+    const maxY = state.nbValidationColumns
+    state.assetSelectionGrid = buildSelectionGrid(maxX, maxY)
   },
 
   [SAVE_ASSET_SEARCH_END] (state, { searchQuery }) {
@@ -637,7 +636,7 @@ const mutations = {
   [DISPLAY_MORE_ASSETS] (state, tasks) {
     let assets
     if (state.assetSearchText.length > 0) {
-      assets = indexSearch(state.assetIndex, state.assetSearchText)
+      assets = indexSearch(cache.assetIndex, state.assetSearchText)
     } else {
       assets = cache.assets
     }
@@ -689,7 +688,7 @@ const mutations = {
     state.assetSelectionGrid = {}
     state.searchQueries = []
 
-    state.assetIndex = {}
+    cache.assetIndex = {}
     state.displayedAssets = []
 
     state.editAsset = {
