@@ -56,19 +56,16 @@ class Person(db.Model, BaseMixin, SerializerMixin):
     )
 
     def __repr__(self):
-        return "<Person %s>" % self.full_name()
+        if sys.version_info[0] < 3:
+            return "<Person %s>" % self.full_name().encode("utf-8")
+        else:
+            return "<Person %s>" % self.full_name()
 
     def full_name(self):
-        if sys.version_info[0] < 3:
-            return "%s %s" % (
-                self.first_name.encode("utf-8"),
-                self.last_name.encode("utf-8")
-            )
-        else:
-            return "%s %s" % (
-                self.first_name,
-                self.last_name
-            )
+        return "%s %s" % (
+            self.first_name,
+            self.last_name
+        )
 
     def serialize(self, obj_type="Person"):
         data = SerializerMixin.serialize(self, "Person")
