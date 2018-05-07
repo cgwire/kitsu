@@ -16,7 +16,7 @@ class OpenProjectRouteTestCase(ApiDBTestCase):
 
         self.assertEqual(len(projects), 2)
         self.assertEqual(projects[0]["name"], self.project.name)
-        self.assertEqual(projects[0]["project_status_name"], "open")
+        self.assertEqual(projects[0]["project_status_name"], "Open")
         self.assertEqual(projects[1]["project_status_name"], "closed")
 
     def test_get_project_by_name(self):
