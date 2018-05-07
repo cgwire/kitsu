@@ -70,10 +70,9 @@ class WorkingFilePathResource(Resource):
                 software=software,
                 name=name
             )
-        except MalformedFileTreeException:
+        except MalformedFileTreeException as exception:
             return {
-                "error":
-                    "Tree is not properly written, check modes and variables",
+                "message": str(exception),
                 "received_data": request.json,
             }, 400
 
@@ -145,10 +144,9 @@ class EntityOutputFilePathResource(Resource, ArgsMixin):
                 task_type=task_type,
                 name=args["name"]
             )
-        except MalformedFileTreeException:
+        except MalformedFileTreeException as exception:
             return {
-                "error":
-                    "Tree is not properly written, check modes and variables",
+                "message": str(exception),
                 "received_data": request.json,
             }, 400
 
@@ -205,11 +203,9 @@ class InstanceOutputFilePathResource(Resource, ArgsMixin):
                 name=args["name"],
                 revision=args["revision"]
             )
-        except MalformedFileTreeException as e:
-            current_app.logger.error(e)
+        except MalformedFileTreeException as exception:
             return {
-                "error":
-                    "Tree is not properly written, check modes and variables",
+                "message": str(exception),
                 "received_data": request.json,
             }, 400
 
