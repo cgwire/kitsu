@@ -2,7 +2,7 @@ import datetime
 import uuid
 import sqlalchemy.orm as orm
 
-from pytz import timezone
+from pytz import tzinfo
 from babel import Locale
 
 
@@ -29,7 +29,7 @@ def serialize_value(value):
         return value
     elif isinstance(value, Locale):
         return str(value)
-    elif isinstance(value, type(timezone("Europe/Paris"))):
+    elif isinstance(value, tzinfo.DstTzInfo):
         return str(value)
     elif isinstance(value, list):
         return serialize_list(value)

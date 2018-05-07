@@ -22,7 +22,6 @@ class ProjectsResource(BaseModelsResource):
     def update_data(self, data):
         open_status = projects_service.get_or_create_open_status()
         if "project_status_id" not in data:
-            print(open_status["id"])
             data["project_status_id"] = open_status["id"]
         return data
 
