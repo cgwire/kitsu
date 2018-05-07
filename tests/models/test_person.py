@@ -1,6 +1,5 @@
 # -*- coding: UTF-8 -*-
 from tests.base import ApiDBTestCase
-from zou.app.models.person import Person
 
 from zou.app.utils import fields
 
@@ -9,10 +8,21 @@ class PersonTestCase(ApiDBTestCase):
 
     def setUp(self):
         super(PersonTestCase, self).setUp()
-        self.generate_data(Person, 3, skills=[])
+        self.generate_fixture_person(
+            first_name="Ema",
+            last_name="Doe",
+            desktop_login="ema.doe",
+            email="ema.doe@gmail.com"
+        )
+        self.generate_fixture_person(
+            first_name="Jérémy",
+            last_name="Utêfœuit",
+            desktop_login="jeremy.utf8",
+            email="jeremy.utf8@gmail.com"
+        )
+        self.generate_fixture_person()
 
     def test_repr(self):
-        self.generate_fixture_person()
         self.assertEqual(str(self.person), "<Person John Doe>")
         self.person.first_name = u"Léon"
         self.assertEqual(str(self.person), "<Person Léon Doe>")
@@ -30,9 +40,9 @@ class PersonTestCase(ApiDBTestCase):
 
     def test_create_person(self):
         data = {
-            "first_name": "John",
+            "first_name": "John2",
             "last_name": "Doe",
-            "email": "john.doe@gmail.com"
+            "email": "john2.doe@gmail.com"
         }
         self.person = self.post("data/persons/new", data)
         self.assertIsNotNone(self.person["id"])
