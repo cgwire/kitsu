@@ -380,6 +380,16 @@ def change_folder_path_separators(folder_path, sep):
 
 
 def get_root_path(tree, mode, sep):
+    if tree is None:
+        raise MalformedFileTreeException(
+            "No tree can be found for given project."
+        )
+
+    if mode not in tree:
+        raise MalformedFileTreeException(
+            "Mode %s cannot be found on given tree." % mode
+        )
+
     try:
         mountpoint = tree[mode]["mountpoint"]
         root = tree[mode]["root"]

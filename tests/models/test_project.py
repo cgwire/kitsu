@@ -11,6 +11,7 @@ class ProjectTestCase(ApiDBTestCase):
         self.generate_fixture_project()
         self.generate_fixture_project("Agent 327")
         self.generate_fixture_project("Big Buck Bunny")
+        self.open_status_id = str(self.open_status.id)
 
     def test_get_projects(self):
         projects = self.get("data/projects")
@@ -29,6 +30,10 @@ class ProjectTestCase(ApiDBTestCase):
         }
         self.project = self.post("data/projects", data)
         self.assertIsNotNone(self.project["id"])
+        self.assertEquals(
+            self.project["project_status_id"],
+            str(self.open_status_id)
+        )
 
         projects = self.get("data/projects")
         self.assertEquals(len(projects), 4)

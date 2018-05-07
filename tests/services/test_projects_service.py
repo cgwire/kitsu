@@ -23,7 +23,7 @@ class ProjectServiceTestCase(ApiDBTestCase):
     def test_get_projects(self):
         projects = projects_service.get_projects()
         self.assertEqual(len(projects), 2)
-        self.assertEqual(projects[0]["project_status_name"], "open")
+        self.assertEqual(projects[0]["project_status_name"], "Open")
 
     def test_get_or_create_status(self):
         project_status = projects_service.get_or_create_status("Frozen")

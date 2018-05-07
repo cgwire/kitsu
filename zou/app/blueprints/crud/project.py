@@ -19,6 +19,12 @@ class ProjectsResource(BaseModelsResource):
     def check_read_permissions(self):
         return True
 
+    def update_data(self, data):
+        open_status = projects_service.get_or_create_open_status()
+        if "project_status_id" not in data:
+            data["project_status_id"] = open_status["id"]
+        return data
+
 
 class ProjectResource(BaseModelResource):
 
@@ -27,8 +33,3 @@ class ProjectResource(BaseModelResource):
 
     def check_read_permissions(self, project):
         user_service.check_project_access(project["id"])
-
-    def update_data(self, data):
-        open_status = projects_service.get_or_create_open_status()
-        data["open_status_id"] = open_status["id"]
-        return data

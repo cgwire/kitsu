@@ -231,7 +231,7 @@ class ApiDBTestCase(ApiTestCase):
         )
 
     def generate_fixture_project_status(self):
-        self.open_status = ProjectStatus.create(name="open", color="#FFFFFF")
+        self.open_status = ProjectStatus.create(name="Open", color="#FFFFFF")
 
     def generate_fixture_project_closed_status(self):
         self.closed_status = ProjectStatus.create(
