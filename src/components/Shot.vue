@@ -1,5 +1,6 @@
 <template>
 <div class="page">
+
   <div class="page-header">
     <div class="level">
       <div class="level-left">
@@ -31,21 +32,21 @@
       <page-subtitle :text="$t('main.info')"></page-subtitle>
       <table class="table" v-if="currentShot">
         <tbody>
-          <tr v-if="currentShot.data.fps">
+          <tr v-if="currentShot.data && currentShot.data.fps">
             <td class="field-label">{{ $t('shots.fields.fps') }}</td>
             <td>
               {{ currentShot ? currentShot.data.fps : '' }}
             </td>
           </tr>
 
-          <tr v-if="currentShot.data.frame_in">
+          <tr v-if="currentShot.data && currentShot.data.frame_in">
             <td class="field-label">{{ $t('shots.fields.frame_in') }}</td>
             <td>
               {{ currentShot ? currentShot.data.frame_in : '' }}
             </td>
           </tr>
 
-          <tr v-if="currentShot.data.frame_out">
+          <tr v-if="currentShot.data && currentShot.data.frame_out">
             <td class="field-label">{{ $t('shots.fields.frame_out') }}</td>
             <td>
               {{ currentShot ? currentShot.data.frame_out : '' }}
@@ -64,7 +65,7 @@
     </div>
   </div>
 
-  <div>
+  <div class="shot-casting">
     <page-subtitle :text="$t('shots.casting')"></page-subtitle>
     <div v-if="currentShot">
       <div
@@ -256,6 +257,51 @@ export default {
 </script>
 
 <style scoped>
+h2.subtitle {
+  margin-top: 0;
+  margin-bottom: 0.5em;
+  font-weight: 300;
+  font-size: 1.5em;
+}
+
+.page {
+  background: #F9F9F9;
+  padding: 0em;
+}
+
+.page-header {
+  padding: 1em 1em 1em 1em;
+  background: white;
+  box-shadow: 0px 0px 6px #E0E0E0;
+  margin-top: calc(50px + 2em);
+  margin-bottom: 2em;
+  margin-left: 1em;
+  margin-right: 1em;
+}
+
+.columns {
+  margin-left: 1em;
+  margin-right: 1em;
+}
+
+.column {
+  background: white;
+  padding: 1em;
+  box-shadow: 0px 0px 6px #E0E0E0;
+}
+
+.column:first-child {
+  margin-right: 1em;
+}
+
+.shot-casting {
+  margin-left: 1em;
+  margin-right: 1em;
+  background: white;
+  padding: 1em;
+  box-shadow: 0px 0px 6px #E0E0E0;
+}
+
 .shot-thumbnail {
   max-width: 100px;
 }

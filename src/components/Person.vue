@@ -48,7 +48,10 @@
     >
     </search-field>
 
-    <div class="query-list">
+    <div
+      class="query-list"
+      v-if="isCurrentActive"
+    >
       <search-query-list
         :queries="personTaskSearchQueries"
         @changesearch="changeSearch"
