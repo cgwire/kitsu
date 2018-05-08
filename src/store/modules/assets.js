@@ -170,11 +170,7 @@ const getters = {
     let previousAsset = null
     let assets = []
 
-    if (state.assetSearchText.length === 0) {
-      assets = cache.assets.slice(0, 100)
-    } else {
-      assets = state.displayedAssets.slice(0, 100)
-    }
+    assets = state.displayedAssets.slice(0, 100)
 
     for (let asset of assets) {
       if (

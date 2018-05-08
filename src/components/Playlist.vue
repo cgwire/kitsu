@@ -274,7 +274,6 @@ export default {
       'playlists',
       'sequences',
       'shotMap',
-      'shots',
       'taskTypeMap'
     ]),
 
@@ -471,7 +470,6 @@ export default {
         (sequence) => { return { label: sequence.name, value: sequence.id } }
       )
 
-      this.sequences = sequences
       if (sequences.length > 0) {
         this.sequenceId = sequences[0].id
       } else {
@@ -480,7 +478,7 @@ export default {
     },
 
     setAdditionShots () {
-      this.sequenceShots = this.shots.filter((shot) => {
+      this.sequenceShots = Object.values(this.shotMap).filter((shot) => {
         return shot.sequence_id === this.sequenceId
       })
     },
@@ -626,7 +624,7 @@ export default {
       )
     }
 
-    if (this.shots.length === 0) {
+    if (Object.keys(this.shotMap).length === 0) {
       this.loadShotsData()
     } else {
       if (this.episodes.length > 0) {

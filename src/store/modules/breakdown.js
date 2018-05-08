@@ -141,7 +141,8 @@ const actions = {
       }
     }
 
-    const castingSequenceShots = rootState.shots.shots.filter((shot) => {
+    const shots = Object.values(rootState.shots.shotMap)
+    const castingSequenceShots = shots.filter((shot) => {
       return shot.sequence_id === sequenceId
     })
     commit(CASTING_SET_SEQUENCE, sequenceId)
