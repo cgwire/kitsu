@@ -450,7 +450,6 @@ const mutations = {
     if (assetType) newAsset.asset_type_name = assetType.name
 
     newAsset.tasks = []
-
     if (asset) {
       Object.assign(asset, newAsset)
     } else {
@@ -460,7 +459,7 @@ const mutations = {
       cache.assets = sortAssets(cache.assets)
       state.displayedAssets.unshift(newAsset)
 
-      const maxX = state.displayedAssets.assets.length
+      const maxX = state.displayedAssets.length
       const maxY = state.nbValidationColumns
       state.assetSelectionGrid = buildSelectionGrid(maxX, maxY)
     }
