@@ -292,11 +292,13 @@ export default {
     },
 
     isCurrentViewAsset () {
-      return this.$route.path.indexOf('asset') > 0
+      return this.$route.path.indexOf('asset') > 0 &&
+             !this.$route.params.asset_id
     },
 
     isCurrentViewShot () {
-      return this.$route.path.indexOf('shot') > 0
+      return this.$route.path.indexOf('shot') > 0 &&
+             !this.$route.params.shot_id
     },
 
     isCurrentViewTodos () {
