@@ -106,12 +106,13 @@ export default {
       ]
     }
   },
+
   components: {
     TextField,
     Combobox
   },
-  computed: {
 
+  computed: {
     ...mapGetters([
       'personToEdit'
     ]),
@@ -158,7 +159,7 @@ export default {
       if (this.active) {
         this.resetForm()
         setTimeout(() => {
-          this.$refs.nameField.focus()
+          this.$refs['name-field'].focus()
         }, 100)
       }
     }
