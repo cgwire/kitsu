@@ -734,7 +734,7 @@ const mutations = {
   },
 
   [EDIT_SHOT_END] (state, newShot) {
-    const shot = getters.getShot(state)(newShot.id)
+    const shot = state.shotMap[newShot.id]
     const sequence = state.sequences.find(
       (sequence) => sequence.id === newShot.parent_id
     )
@@ -804,7 +804,7 @@ const mutations = {
       const shotToDeleteIndex = cache.shots.findIndex(
         (shot) => shot.id === shotToDelete.id
       )
-      const displayedShotToDeleteIndex = cache.displayedShots.findIndex(
+      const displayedShotToDeleteIndex = state.displayedShots.findIndex(
         (shot) => shot.id === shotToDelete.id
       )
       cache.shots.splice(shotToDeleteIndex, 1)

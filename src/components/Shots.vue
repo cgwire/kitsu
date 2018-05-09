@@ -257,7 +257,6 @@ export default {
       'editShot',
       'deleteShot',
       'restoreShot',
-      'getShot',
       'shotValidationColumns',
       'currentProduction',
       'isCurrentUserManager',
@@ -456,13 +455,13 @@ export default {
         this.resetEditModal()
         this.modals.isNewDisplayed = true
       } else if (path.indexOf('edit') > 0) {
-        this.shotToEdit = this.getShot(shotId)
+        this.shotToEdit = this.shotMap[shotId]
         this.modals.isNewDisplayed = true
       } else if (path.indexOf('delete') > 0) {
-        this.shotToDelete = this.getShot(shotId)
+        this.shotToDelete = this.shotMap[shotId]
         this.modals.isDeleteDisplayed = true
       } else if (path.indexOf('restore') > 0) {
-        this.shotToRestore = this.getShot(shotId)
+        this.shotToRestore = this.shotMap[shotId]
         this.modals.isRestoreDisplayed = true
       } else if (path.indexOf('import') > 0) {
         this.modals.isImportDisplayed = true
