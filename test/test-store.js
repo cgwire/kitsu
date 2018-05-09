@@ -1,7 +1,5 @@
 import expect from 'chai'
 
-/*
-import './store/login.spec'
 import './store/main.spec'
 import './store/people.spec'
 import './store/user.spec'
@@ -17,6 +15,4 @@ import './store/lib/sorting.spec.js'
 import './store/lib/string.spec.js'
 import './store/lib/indexing.spec.js'
 import './store/lib/helpers.spec.js'
-*/
-
 import './store/assets.spec.js'

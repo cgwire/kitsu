@@ -168,7 +168,6 @@ export default {
 
   computed: {
     ...mapGetters([
-      'assets',
       'assetMap',
       'assetsByType',
       'currentProduction',

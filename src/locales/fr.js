@@ -82,6 +82,7 @@ export default {
     studio: 'Studio',
     admin: 'Admin',
     back_to_list: 'retour à la liste',
+    empty_comment: 'Commentaire vide',
     csv: {
       import_file: 'Importer',
       export_file: 'Exporter',

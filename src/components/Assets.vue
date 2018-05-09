@@ -226,8 +226,8 @@ export default {
 
   computed: {
     ...mapGetters([
+      'assetMap',
       'assetListScrollPosition',
-      'assets',
       'assetsCsvFormData',
       'assetSearchText',
       'assetSearchQueries',
@@ -258,8 +258,9 @@ export default {
       )
     }
 
-    if (this.assets.length === 0 ||
-        this.assets[0].production_id !== this.currentProduction.id) {
+    const assetKeys = Object.keys(this.assetMap)
+    if (assetKeys.length === 0 ||
+        this.assetMap[assetKeys[0]].production_id !== this.currentProduction.id) {
       this.loadAssets((err) => {
         if (!err) this.handleModalsDisplay()
       })

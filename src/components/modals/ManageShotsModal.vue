@@ -194,7 +194,7 @@ export default {
     ...mapGetters([
       'episodes',
       'sequences',
-      'shots',
+      'shotMap',
       'currentProduction'
     ]),
 
@@ -211,7 +211,7 @@ export default {
       const isExist = this.displayedSequences.find((sequence) => {
         return this.names.sequence === sequence.name
       })
-      return !isEmpty && !isExist
+      return !isEmpty && !isExist && this.selectedEpisodeId
     },
 
     isAddShotAllowed () {
@@ -219,7 +219,7 @@ export default {
       const isExist = this.displayedShots.find((shot) => {
         return this.names.shot === shot.name
       })
-      return !isEmpty && !isExist
+      return !isEmpty && !isExist && this.selectedSequenceId
     }
   },
 
@@ -248,7 +248,7 @@ export default {
 
     selectSequence (sequenceId) {
       this.selectedSequenceId = sequenceId
-      this.displayedShots = this.shots.filter((shot) => {
+      this.displayedShots = Object.values(this.shotMap).filter((shot) => {
         return shot.sequence_id === sequenceId
       })
     },

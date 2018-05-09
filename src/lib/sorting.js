@@ -37,7 +37,7 @@ export const sortTasks = (tasks) => {
   return tasks.sort(
     firstBy((a, b) => a.project_name.localeCompare(b.project_name))
       .thenBy((a, b) => a.task_type_name.localeCompare(b.task_type_name))
-      .thenBy((a, b) => a.entity_name.localeCompare(b.entity_name))
+      .thenBy((a, b) => a.full_entity_name.localeCompare(b.full_entity_name))
   )
 }
 

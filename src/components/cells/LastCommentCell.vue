@@ -9,16 +9,28 @@
       v-if="task.last_comment.person"
     >
     </people-avatar>
+    <span class="no-avatar" v-else>
+      &nbsp;
+    </span>
+
     <span
       class="flexrow-item last-comment"
+      v-if="commentText && commentText.length > 0"
+      v-html="compileMarkdown(commentText)"
     >
-      {{ commentText }}
+    </span>
+    <span
+      class="flexrow-item last-comment no-comment"
+      v-else-if="task.last_comment.person"
+    >
+      {{ $t('main.empty_comment') }}
     </span>
   </div>
 </td>
 </template>
 
 <script>
+import marked from 'marked'
 import { mapGetters, mapActions } from 'vuex'
 import PeopleAvatar from './../widgets/PeopleAvatar'
 
@@ -45,15 +57,28 @@ export default {
       return result
     }
   },
+
   methods: {
     ...mapActions([
-    ])
+    ]),
+
+    compileMarkdown (input) {
+      return marked(input || '')
+    }
   }
 }
 </script>
 
 <style scoped>
+.no-avatar {
+  width: 30px;
+}
+
 .last-comment {
   margin-left: 0.6em;
+}
+
+.no-comment {
+  font-style: italic;
 }
 </style>

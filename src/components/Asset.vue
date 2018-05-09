@@ -31,73 +31,79 @@
     </div>
     <div class="column">
       <page-subtitle :text="$t('main.info')"></page-subtitle>
-      <table class="table">
+      <table class="table" v-if="currentAsset">
         <tbody>
           <tr>
             <td class="field-label">{{ $t('assets.fields.description') }}</td>
-            <td>
-              {{ currentAsset ? currentAsset.description : '' }}
-            </td>
+            <description-cell
+              :entry="currentAsset"
+            >
+            </description-cell>
           </tr>
         </tbody>
       </table>
     </div>
   </div>
 
-  <page-subtitle :text="$t('assets.cast_in')"></page-subtitle>
-  <div v-if="currentAsset">
-    <div
-      class="sequence-shots"
-        v-for="sequenceShots in currentAsset.castInShotsBySequence"
-        v-if="currentAsset.castInShotsBySequence[0].length > 0"
-    >
-      <div class="shot-sequence">
-        {{ sequenceShots[0] ? sequenceShots[0].sequence_name : '' }}
-      </div>
-      <div class="shot-list">
-        <router-link
-          class="shot-link"
-          :key="shot.shot_id"
-          :to="{
-            name: 'shot',
-            params: {
-              production_id: currentProduction.id,
-              shot_id: shot.shot_id
-            }
-          }"
-          v-for="shot in sequenceShots"
-        >
-          <entity-thumbnail
-            :entity="shot"
-            :square="true"
-            :with-link="false"
+  <div class="asset-casted-in">
+    <page-subtitle :text="$t('assets.cast_in')"></page-subtitle>
+    <div v-if="currentAsset">
+      <div
+        class="sequence-shots"
+          v-for="sequenceShots in currentAsset.castInShotsBySequence"
+          v-if="currentAsset.castInShotsBySequence[0].length > 0"
+      >
+        <div class="shot-sequence">
+          {{ sequenceShots[0] ? sequenceShots[0].sequence_name : '' }}
+        </div>
+        <div class="shot-list">
+          <router-link
+            class="shot-link"
+            :key="shot.shot_id"
+            :to="{
+              name: 'shot',
+              params: {
+                production_id: currentProduction.id,
+                shot_id: shot.shot_id
+              }
+            }"
+            v-for="shot in sequenceShots"
           >
-          </entity-thumbnail>
-          <div>
-            <span>{{ shot.name }}</span>
-            <span v-if="shot.nb_occurences > 1">
-              ({{ shot.nb_occurences }})
-            </span>
-          </div>
-        </router-link>
+            <entity-thumbnail
+              :entity="shot"
+              :square="true"
+              :empty-width="100"
+              :empty-height="100"
+              :with-link="false"
+            >
+            </entity-thumbnail>
+            <div>
+              <span>{{ shot.name }}</span>
+              <span v-if="shot.nb_occurences > 1">
+                ({{ shot.nb_occurences }})
+              </span>
+            </div>
+          </router-link>
+        </div>
+      </div>
+      <div v-else>
+        {{ $t('assets.no_cast_in') }}
       </div>
     </div>
-    <div v-else>
-      {{ $t('assets.no_cast_in') }}
-    </div>
+    <table-info
+      :is-loading="castIn.isLoadin"
+      :is-error="castIn.isError"
+      v-else
+    >
+    </table-info>
   </div>
-  <table-info
-    :is-loading="castIn.isLoadin"
-    :is-error="castIn.isError"
-    v-else
-  >
-  </table-info>
 </div>
 </template>
 
 <script>
 import { mapGetters, mapActions } from 'vuex'
 
+import DescriptionCell from './cells/DescriptionCell'
 import PageTitle from './widgets/PageTitle'
 import PageSubtitle from './widgets/PageSubtitle'
 import EntityThumbnail from './widgets/EntityThumbnail'
@@ -107,6 +113,7 @@ import EntityTaskList from './lists/EntityTaskList'
 export default {
   name: 'asset',
   components: {
+    DescriptionCell,
     EntityThumbnail,
     EntityTaskList,
     PageSubtitle,
@@ -222,6 +229,52 @@ export default {
 </script>
 
 <style scoped>
+h2.subtitle {
+  margin-top: 0;
+  margin-bottom: 0.5em;
+  font-weight: 300;
+  font-size: 1.5em;
+}
+
+.page {
+  background: #F9F9F9;
+  padding: 0em;
+}
+
+.page-header {
+  padding: 1em 1em 1em 1em;
+  background: white;
+  box-shadow: 0px 0px 6px #E0E0E0;
+  margin-top: calc(50px + 2em);
+  margin-bottom: 2em;
+  margin-left: 1em;
+  margin-right: 1em;
+}
+
+.columns {
+  margin-left: 1em;
+  margin-right: 1em;
+}
+
+.column {
+  background: white;
+  padding: 1em;
+  box-shadow: 0px 0px 6px #E0E0E0;
+}
+
+.column:first-child {
+  margin-right: 1em;
+}
+
+.asset-casted-in {
+  margin-left: 1em;
+  margin-right: 1em;
+  background: white;
+  padding: 1em;
+  box-shadow: 0px 0px 6px #E0E0E0;
+}
+
+
 .asset-thumbnail {
   max-width: 100px;
 }

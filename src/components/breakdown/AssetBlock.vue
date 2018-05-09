@@ -82,7 +82,7 @@ export default {
   width: 60px;
   height: 60px;
   margin-right: 1em;
-  margin-bottom: 1em;
+  margin-bottom: 4em;
   font-size: 0.8em;
   cursor: default;
   background: #EEE;

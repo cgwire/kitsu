@@ -233,25 +233,29 @@ describe('lib/sorting', () => {
       {
         project_name: 'Big Buck Bunny',
         task_type_name: 'Modeling',
-        entity_name: 'Props / Tree',
+        entity_name: 'Tree',
+        full_entity_name: 'Props / Tree',
         id: 4
       },
       {
         project_name: 'Agent 327',
         task_type_name: 'Modeling',
-        entity_name: 'Characters / Agent327',
+        entity_name: 'Agent327',
+        full_entity_name: 'Characters / Agent327',
         id: 1
       },
       {
         project_name: 'Agent 327',
         task_type_name: 'Setup',
-        entity_name: 'Characters / Agent327',
+        entity_name: 'Agent327',
+        full_entity_name: 'Characters / Agent327',
         id: 3
       },
       {
         project_name: 'Agent 327',
         task_type_name: 'Modeling',
-        entity_name: 'Characters / SuperVilain',
+        entity_name: 'SuperVilain',
+        full_entity_name: 'Characters / SuperVilain',
         id: 2
       }
     ]

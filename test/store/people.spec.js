@@ -37,6 +37,9 @@ import {
 let people = []
 let tasks = []
 let doneTasks = []
+let personTasksFilters = {}
+let userFilters = {}
+let person = {}
 
 peopleApi.getPeople = (callback) => {
   process.nextTick(() => {
@@ -146,6 +149,8 @@ describe('people', () => {
         last_comment: {},
         id: 'task-1'
     }]
+    userFilters = {
+    }
   })
 
   describe('actions', () => {
@@ -291,7 +296,7 @@ describe('people', () => {
     })
 
     it('setPersonTasksSearch', () => {
-      store.commit(LOAD_PERSON_TASKS_END, tasks)
+      store.commit(LOAD_PERSON_TASKS_END, { tasks, userFilters })
       helpers.runAction('setPersonTasksSearch', 'wip')
 
       expect(store._vm.personTasksSearchText).to.equal('wip')
@@ -485,7 +490,7 @@ describe('people', () => {
     })
 
     it('LOAD_PERSON_TASKS_END', () => {
-      store.commit(LOAD_PERSON_TASKS_END, tasks)
+      store.commit(LOAD_PERSON_TASKS_END, { tasks, userFilters })
       expect(store._vm.displayedPersonTasks).to.deep.equal(tasks)
       expect(
         store._vm.displayedPersonTasks[0].full_entity_name
@@ -498,13 +503,12 @@ describe('people', () => {
     })
 
     it('SET_PERSON_TASK_SEARCH', () => {
-      store.commit(LOAD_PERSON_TASKS_END, tasks)
+      store.commit(LOAD_PERSON_TASKS_END, { tasks, person, userFilters })
       store.commit(SET_PERSON_TASKS_SEARCH, 'wip')
 
       expect(store._vm.personTasksSearchText).to.equal('wip')
       expect(store._vm.displayedPersonTasks[0]).to.deep.equal(tasks[0])
       expect(store._vm.displayedPersonTasks.length).to.equal(1)
     })
-
   })
 })

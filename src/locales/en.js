@@ -81,6 +81,7 @@ export default {
     production: 'Production',
     studio: 'Studio',
     admin: 'Admin',
+    empty_comment: 'Empty comment',
     csv: {
       import_file: 'Import',
       export_file: 'Export',

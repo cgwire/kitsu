@@ -108,9 +108,8 @@
           <td class="fps" v-if="isFps">
             {{ entry.data && entry.data.fps ? entry.data.fps : ''}}
           </td>
-          <td class="description">
-            {{ entry.description }}
-          </td>
+          <description-cell class="description" :entry="entry">
+          </description-cell>
           <validation-cell
             :key="column.name + '-' + entry.id"
             :ref="'validation-' + i + '-' + j"
@@ -166,6 +165,7 @@
 
 <script>
 import { mapGetters, mapActions } from 'vuex'
+import DescriptionCell from '../cells/DescriptionCell'
 import ValidationCell from '../cells/ValidationCell'
 import RowActions from '../widgets/RowActions'
 import ButtonLink from '../widgets/ButtonLink'
@@ -191,6 +191,7 @@ export default {
   components: {
     ButtonLink,
     ButtonHrefLink,
+    DescriptionCell,
     EntityThumbnail,
     PageTitle,
     RowActions,

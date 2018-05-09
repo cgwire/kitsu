@@ -563,7 +563,8 @@ export default {
       if (this.currentTask) {
         const projectName = this.currentTask.project_name
         const type = this.currentTask.entity_type_name
-        let entityName = this.currentTask.entity_name
+        let entityName =
+          this.currentTask.full_entity_name || this.currentTask.entity_name
         if (this.isSingleEpisode && type === 'Shot') {
           entityName = entityName
             .split('/')
