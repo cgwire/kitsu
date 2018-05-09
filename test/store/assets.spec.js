@@ -349,7 +349,7 @@ describe('assets', () => {
       store.commit(LOAD_ASSETS_ERROR)
       expect(state.isAssetsLoading).to.equal(false)
       expect(state.isAssetsLoadingError).to.equal(true)
-      expect(state.assets).to.deep.equal([])
+      expect(state.displayedAssets).to.deep.equal([])
     })
 
     it('LOAD_ASSETS_END', () => {
@@ -358,14 +358,14 @@ describe('assets', () => {
       store.commit(LOAD_ASSETS_END, { assets, production, userFilters })
       expect(state.isAssetsLoading).to.equal(false)
       expect(state.isAssetsLoadingError).to.equal(false)
-      expect(state.assets).to.deep.equal(assets)
-      expect(state.assets[0].name).to.equal('Bunny')
-      expect(state.assets[1].name).to.equal('Forest')
+      expect(state.displayedAssets).to.deep.equal(assets)
+      expect(state.displayedAssets[0].name).to.equal('Bunny')
+      expect(state.displayedAssets[1].name).to.equal('Forest')
 
-      expect(state.assets[0].validations.Modeling).to.deep.equal(
+      expect(state.displayedAssets[0].validations.Modeling).to.deep.equal(
         assets[0].tasks[1]
       )
-      expect(state.assets[0].validations.Concept).to.deep.equal(
+      expect(state.displayedAssets[0].validations.Concept).to.deep.equal(
         assets[0].tasks[0]
       )
 
@@ -407,15 +407,15 @@ describe('assets', () => {
         asset_type_name: 'Props',
         project_name: 'Agent 327'
       })
-      expect(state.assets.length).to.equal(4)
-      expect(state.assets[3].name).to.equal('New asset')
+      expect(state.displayedAssets.length).to.equal(4)
+      expect(state.displayedAssets[0].name).to.equal('New asset')
 
       const newName = 'Chair edited'
       store.commit(EDIT_ASSET_END, {
         id: 2,
         name: newName
       })
-      expect(state.assets.length).to.equal(4)
+      expect(state.displayedAssets.length).to.equal(4)
       const assetName = getters.getAsset(state)(2).name
       expect(assetName).to.equal(newName)
       expect(state.editAsset).to.deep.equal({

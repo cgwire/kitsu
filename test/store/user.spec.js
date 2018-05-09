@@ -235,7 +235,7 @@ describe('user', () => {
     })
 
     it('setTodosSearch', () => {
-      store.commit(USER_LOAD_TODOS_END, tasks)
+      store.commit(USER_LOAD_TODOS_END, { tasks, userFilters })
       helpers.runAction('setTodosSearch', 'wip')
 
       expect(store._vm.todosSearchText).to.equal('wip')
@@ -318,7 +318,10 @@ describe('user', () => {
     })
 
     it('USER_LOAD_TODOS_END', () => {
-      store.commit(USER_LOAD_TODOS_END, tasks)
+      store.commit(USER_LOAD_TODOS_END, {
+        tasks,
+        userFilters
+      })
       expect(store._vm.displayedTodos).to.deep.equal(tasks)
       expect(
         store._vm.displayedTodos[0].full_entity_name
@@ -331,7 +334,7 @@ describe('user', () => {
     })
 
     it('SET_TODOS_SEARCH', () => {
-      store.commit(USER_LOAD_TODOS_END, tasks)
+      store.commit(USER_LOAD_TODOS_END, { tasks, userFilters })
       store.commit(SET_TODOS_SEARCH, 'wip')
 
       expect(store._vm.todosSearchText).to.equal('wip')
