@@ -135,7 +135,11 @@ export default {
     taskTypeId () {
       const previewFiles = this.shot.preview_files[this.taskTypeId]
       if (previewFiles && previewFiles.length > 0) {
-        this.previewFileId = this.shot.preview_file_id || previewFiles[0].id
+        if (!this.previewFileId) {
+          this.previewFileId = this.shot.preview_file_id || previewFiles[0].id
+        } else {
+          this.previewFileId = previewFiles[0].id
+        }
       }
     },
 
