@@ -43,6 +43,11 @@ if config.DEBUG:
     SocketIO(app, async_mode="threading")
 
 
+@app.teardown_appcontext
+def shutdown_session(exception=None):
+    db.session.remove()
+
+
 def configure_auth():
     from zou.app.services import persons_service
 
