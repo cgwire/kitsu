@@ -183,8 +183,15 @@ class LoginResource(Resource):
         except UnactiveUserException:
             return {
                 "error": True,
+                "login": False,
                 "message": "User is unactive, he cannot log in."
             }, 400
+        except Exception as exception:
+            return {
+                "error": True,
+                "login": False,
+                "message": exception.message
+            }, 500
 
     def get_arguments(self):
         parser = reqparse.RequestParser()
