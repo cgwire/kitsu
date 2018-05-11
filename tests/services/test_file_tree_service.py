@@ -354,12 +354,14 @@ class FileTreeTestCase(ApiDBTestCase):
         )
 
     def test_get_folder_path_shot_asset_instance(self):
+        self.generate_fixture_scene_asset_instance()
         self.generate_fixture_shot_asset_instance(
-            asset=self.asset,
-            shot=self.shot
+            self.shot,
+            self.asset_instance
         )
         path = file_tree_service.get_instance_folder_path(
             self.asset_instance.serialize(),
+            self.shot.serialize(),
             output_type=self.output_type_cache,
             task_type=self.task_type_animation.serialize(),
             representation="abc"
@@ -371,12 +373,14 @@ class FileTreeTestCase(ApiDBTestCase):
         )
 
     def test_get_file_name_shot_asset_instance(self):
+        self.generate_fixture_scene_asset_instance()
         self.generate_fixture_shot_asset_instance(
-            asset=self.asset,
-            shot=self.shot
+            self.shot,
+            self.asset_instance
         )
         file_name = file_tree_service.get_instance_file_name(
             self.asset_instance.serialize(),
+            self.shot.serialize(),
             output_type=self.output_type_cache,
             task_type=self.task_type_animation.serialize(),
             name="main",
@@ -389,12 +393,10 @@ class FileTreeTestCase(ApiDBTestCase):
         )
 
     def test_get_folder_path_scene_asset_instance(self):
-        self.generate_fixture_scene_asset_instance(
-            asset=self.asset,
-            scene=self.scene
-        )
+        self.generate_fixture_scene_asset_instance()
         path = file_tree_service.get_instance_folder_path(
             self.asset_instance.serialize(),
+            self.scene.serialize(),
             task_type=self.task_type_animation.serialize(),
             output_type=self.output_type_cache,
             representation="abc"
@@ -406,12 +408,10 @@ class FileTreeTestCase(ApiDBTestCase):
         )
 
     def test_get_file_name_scene_asset_instance(self):
-        self.generate_fixture_scene_asset_instance(
-            asset=self.asset,
-            scene=self.scene
-        )
+        self.generate_fixture_scene_asset_instance()
         file_name = file_tree_service.get_instance_file_name(
             self.asset_instance.serialize(),
+            self.scene.serialize(),
             output_type=self.output_type_cache,
             task_type=self.task_type_animation.serialize(),
             name="main",
@@ -425,12 +425,10 @@ class FileTreeTestCase(ApiDBTestCase):
         )
 
     def test_get_folder_path_representation(self):
-        self.generate_fixture_scene_asset_instance(
-            asset=self.asset,
-            scene=self.scene
-        )
+        self.generate_fixture_scene_asset_instance()
         path = file_tree_service.get_instance_folder_path(
             self.asset_instance.serialize(),
+            self.scene.serialize(),
             task_type=self.task_type_animation.serialize(),
             output_type=self.output_type_cache,
             representation="abc"

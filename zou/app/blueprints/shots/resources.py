@@ -467,8 +467,7 @@ class ShotAssetInstancesResource(Resource, ArgsMixin):
         Add an asset instance to given shot.
         """
         args = self.get_args([
-            ("asset_instance_id", None, True),
-            ("description", None, False)
+            ("asset_instance_id", None, True)
         ])
         shot = shots_service.get_shot(shot_id)
         user_service.check_project_access(shot["project_id"])

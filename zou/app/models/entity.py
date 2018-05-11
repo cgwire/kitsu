@@ -8,21 +8,18 @@ from zou.app.utils import fields
 from sqlalchemy.dialects.postgresql import JSONB
 
 
-instance_casting_table = db.Table(
-    "asset_instance_casting",
-    db.Column(
-        "asset_instance",
-        UUIDType(binary=False),
-        db.ForeignKey("asset_instance.id"),
-        primary_key=True
-    ),
-    db.Column(
-        "entity",
+class AssetInstanceLink(db.Model):
+    __tablename__ = "asset_instance_link"
+    entity_id = db.Column(
         UUIDType(binary=False),
         db.ForeignKey("entity.id"),
         primary_key=True
     )
-)
+    asset_instance_id = db.Column(
+        UUIDType(binary=False),
+        db.ForeignKey("asset_instance.id"),
+        primary_key=True
+    )
 
 
 class EntityLink(db.Model, BaseMixin):
@@ -99,7 +96,7 @@ class Entity(db.Model, BaseMixin, SerializerMixin):
 
     instance_casting = db.relationship(
         "AssetInstance",
-        secondary=instance_casting_table,
+        secondary="asset_instance_link",
         backref="shots"
     )
 

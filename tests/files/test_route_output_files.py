@@ -364,7 +364,12 @@ class RouteOutputFilesTestCase(ApiDBTestCase):
         self.assertEqual(result["next_revision"], 1)
 
     def test_new_instance_output(self):
-        self.generate_fixture_shot_asset_instance()
+        self.generate_fixture_scene()
+        self.generate_fixture_scene_asset_instance()
+        self.generate_fixture_shot_asset_instance(
+            self.shot,
+            self.asset_instance
+        )
         data = {
             "person_id": self.person_id,
             "comment": "test working file publish",
@@ -374,7 +379,10 @@ class RouteOutputFilesTestCase(ApiDBTestCase):
             "representation": "abc"
         }
         result = self.post(
-            "data/asset-instances/%s/output-files/new" % self.asset_instance.id,
+            "data/asset-instances/%s/entities/%s/output-files/new" % (
+                self.asset_instance.id,
+                self.shot.id
+            ),
             data
         )
 
@@ -403,66 +411,15 @@ class RouteOutputFilesTestCase(ApiDBTestCase):
         self.assertEqual(output_file["source_file_id"], self.working_file_id)
 
     def test_get_next_instance_revision(self):
-        self.generate_fixture_shot_asset_instance()
+        self.generate_fixture_scene()
+        self.generate_fixture_scene_asset_instance()
+        self.generate_fixture_shot_asset_instance(
+            self.shot,
+            self.asset_instance
+        )
         self.task_type_animation_id = self.task_type_animation.id
-        self.asset_instance_id = self.asset_instance.id
-
-        data = {
-            "person_id": self.person_id,
-            "comment": "test working file publish",
-            "output_type_id": self.cache_type_id,
-            "task_type_id": self.task_type_animation.id,
-            "working_file_id": self.working_file_id
-        }
-        result = self.post(
-            "data/asset-instances/%s/output-files/new" % self.asset_instance.id,
-            data
-        )
-
-        data = {
-            "output_type_id": self.cache_type_id,
-            "task_type_id": self.task_type_animation_id,
-            "name": "main"
-        }
-        result = self.post(
-            "data/asset-instances/%s/output-files/next-revision" %
-            self.asset_instance_id,
-            data,
-            200
-        )
-        self.assertEquals(result["next_revision"], 2)
-
-    def test_get_last_instance_outputs(self):
-        self.generate_fixture_shot_asset_instance()
-        self.task_type_animation_id = str(self.task_type_animation.id)
-        self.asset_instance_id = str(self.asset_instance.id)
-
-        data = {
-            "person_id": self.person_id,
-            "comment": "test working file publish",
-            "output_type_id": self.cache_type_id,
-            "task_type_id": self.task_type_animation.id,
-            "working_file_id": self.working_file_id
-        }
-        output_file = self.post(
-            "data/asset-instances/%s/output-files/new" % self.asset_instance.id,
-            data
-        )
-
-        result = self.get(
-            "data/asset-instances/%s/output-files/last-revisions" %
-            self.asset_instance_id,
-            200
-        )
-        self.assertEquals(
-            result[self.cache_type_id]["main"]["id"],
-            output_file["id"]
-        )
-
-    def test_get_output_types(self):
-        self.generate_fixture_shot_asset_instance()
-        self.task_type_animation_id = str(self.task_type_animation.id)
-        self.asset_instance_id = str(self.asset_instance.id)
+        asset_instance_id = self.asset_instance.id
+        shot_id = self.shot.id
 
         data = {
             "person_id": self.person_id,
@@ -472,14 +429,94 @@ class RouteOutputFilesTestCase(ApiDBTestCase):
             "working_file_id": self.working_file_id
         }
         self.post(
-            "data/asset-instances/%s/output-files/new" % self.asset_instance.id,
-            data
+            "data/asset-instances/%s/entities/%s/output-files/new" % (
+                asset_instance_id,
+                shot_id
+            ), data
+        )
+
+        data = {
+            "output_type_id": self.cache_type_id,
+            "task_type_id": self.task_type_animation_id,
+            "name": "main"
+        }
+        result = self.post(
+            "data/asset-instances/%s/entities/%s/output-files/next-revision" % (
+                asset_instance_id,
+                shot_id
+            ),
+            data,
+            200
+        )
+        self.assertEquals(result["next_revision"], 2)
+
+    def test_get_last_instance_outputs(self):
+        self.generate_fixture_scene()
+        self.generate_fixture_scene_asset_instance()
+        self.generate_fixture_shot_asset_instance(
+            self.shot,
+            self.asset_instance
+        )
+        self.task_type_animation_id = str(self.task_type_animation.id)
+        asset_instance_id = str(self.asset_instance.id)
+        shot_id = str(self.shot.id)
+
+        data = {
+            "person_id": self.person_id,
+            "comment": "test working file publish",
+            "output_type_id": self.cache_type_id,
+            "task_type_id": self.task_type_animation.id,
+            "working_file_id": self.working_file_id
+        }
+        output_file = self.post(
+            "data/asset-instances/%s/entities/%s/output-files/new" % (
+                asset_instance_id,
+                shot_id
+            ), data
         )
 
         result = self.get(
-            "data/asset-instances/%s/output-types" %
-            self.asset_instance_id,
-            200
+            "data/asset-instances/%s/entities/%s/output-files/last-revisions" % (
+                asset_instance_id,
+                shot_id
+            )
+        )
+        self.assertEquals(
+            result[self.cache_type_id]["main"]["id"],
+            output_file["id"]
+        )
+
+    def test_get_output_types(self):
+        self.generate_fixture_scene()
+        self.generate_fixture_scene_asset_instance()
+        self.generate_fixture_shot_asset_instance(
+            self.shot,
+            self.asset_instance
+        )
+        self.task_type_animation_id = str(self.task_type_animation.id)
+        asset_instance_id = str(self.asset_instance.id)
+        shot_id = str(self.shot.id)
+
+        data = {
+            "person_id": self.person_id,
+            "temporal_entity_id": self.shot.id,
+            "comment": "test working file publish",
+            "output_type_id": self.cache_type_id,
+            "task_type_id": self.task_type_animation.id,
+            "working_file_id": self.working_file_id
+        }
+        self.post(
+            "data/asset-instances/%s/entities/%s/output-files/new" % (
+                asset_instance_id,
+                shot_id
+            ), data
+        )
+
+        result = self.get(
+            "data/asset-instances/%s/entities/%s/output-types" % (
+                asset_instance_id,
+                shot_id
+            )
         )
         self.assertEquals(
             result[0]["id"],
@@ -519,9 +556,11 @@ class RouteOutputFilesTestCase(ApiDBTestCase):
         self.assertEquals(len(output_files), 3)
 
     def test_get_output_files_for_output_type_and_asset_instance(self):
+        self.generate_fixture_scene()
+        self.generate_fixture_scene_asset_instance()
         self.generate_fixture_shot_asset_instance(
-            asset=self.asset,
-            shot=self.shot
+            self.shot,
+            self.asset_instance
         )
         self.generate_fixture_output_type()
         geometry = self.output_type
@@ -549,21 +588,22 @@ class RouteOutputFilesTestCase(ApiDBTestCase):
             asset_instance=self.asset_instance)
 
         output_files = self.get(
-            "data/asset-instances/%s/output-types/%s/output-files" % (
-                self.asset_instance.id, geometry.id
+            "data/asset-instances/%s/entities/%s/"
+            "output-types/%s/output-files" % (
+                self.asset_instance.id, self.scene.id, geometry.id
             ))
         self.assertEquals(len(output_files), 7)
 
         output_files = self.get(
-            "data/asset-instances/%s/output-types/%s/"
+            "data/asset-instances/%s/entities/%s/output-types/%s/"
             "output-files?representation=obj" % (
-                self.asset_instance.id, geometry.id
+                self.asset_instance.id, self.scene.id, geometry.id
             ))
         self.assertEquals(len(output_files), 4)
 
         output_files = self.get(
-            "data/asset-instances/%s/output-types/%s/"
+            "data/asset-instances/%s/entities/%s/output-types/%s/"
             "output-files?representation=max" % (
-                self.asset_instance.id, geometry.id
+                self.asset_instance.id, self.scene.id, geometry.id
             ))
         self.assertEquals(len(output_files), 3)

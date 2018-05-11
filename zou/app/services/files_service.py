@@ -205,13 +205,14 @@ def create_new_output_revision(
     output_type_id,
     person_id,
     task_type_id,
-    asset_instance_id=None,
     revision=0,
     representation="",
     name="main",
     comment="",
     extension="",
-    nb_elements=1
+    nb_elements=1,
+    asset_instance_id=None,
+    temporal_entity_id=None
 ):
     """
     Create a new ouput file for given entity. Output type, task type, author
@@ -222,7 +223,12 @@ def create_new_output_revision(
 
     An asset instance can be given too. In that case, the output file is
     linked to the asset instance.
+
+    The `temporal_entity_id` concerns only asset instance output files. It is
+    here to describe if the output is generated in the context of a shot or in
+    the context of a scene.
     """
+
     if revision < 1:
         try:
             output_file = get_last_output_revision(
@@ -230,7 +236,8 @@ def create_new_output_revision(
                 output_type_id,
                 task_type_id,
                 name=name,
-                asset_instance_id=asset_instance_id
+                asset_instance_id=asset_instance_id,
+                temporal_entity_id=temporal_entity_id
             )
 
             revision = output_file["revision"] + 1
@@ -240,22 +247,37 @@ def create_new_output_revision(
     file_status_id = get_default_status()["id"]
 
     try:
-        output_file = OutputFile.create(
+        output_file = OutputFile.get_by(
             name=name,
-            comment=comment,
-            extension=extension,
-            representation=representation,
-            revision=revision,
             entity_id=entity_id,
             asset_instance_id=asset_instance_id,
-            person_id=person_id,
-            source_file_id=working_file_id,
             output_type_id=output_type_id,
-            file_status_id=file_status_id,
             task_type_id=task_type_id,
-            nb_elements=nb_elements
+            temporal_entity_id=temporal_entity_id,
+            representation=representation,
+            revision=revision
         )
-        output_file.save()
+
+        if output_file is None:
+            output_file = OutputFile.create(
+                name=name,
+                comment=comment,
+                extension=extension,
+                representation=representation,
+                revision=revision,
+                entity_id=entity_id,
+                asset_instance_id=asset_instance_id,
+                person_id=person_id,
+                source_file_id=working_file_id,
+                output_type_id=output_type_id,
+                file_status_id=file_status_id,
+                task_type_id=task_type_id,
+                nb_elements=nb_elements,
+                temporal_entity_id=temporal_entity_id
+            )
+        else:
+            raise EntryAlreadyExistsException
+
     except IntegrityError:
         raise EntryAlreadyExistsException
 
@@ -295,7 +317,8 @@ def get_next_output_file_revision(
     output_type_id,
     task_type_id,
     name="main",
-    asset_instance_id=None
+    asset_instance_id=None,
+    temporal_entity_id=None
 ):
     """
     Get next output file revision available for given entity, output type, task
@@ -309,7 +332,8 @@ def get_next_output_file_revision(
             task_type_id=task_type_id,
             entity_id=entity_id,
             name=name,
-            asset_instance_id=asset_instance_id
+            asset_instance_id=asset_instance_id,
+            temporal_entity_id=temporal_entity_id
         )
         return last_output["revision"] + 1
     except NoOutputFileException:
@@ -321,7 +345,8 @@ def get_last_output_revision(
     output_type_id,
     task_type_id,
     name="main",
-    asset_instance_id=None
+    asset_instance_id=None,
+    temporal_entity_id=None
 ):
     """
     Get output with highest revision created for given entity, output type, task
@@ -342,7 +367,10 @@ def get_last_output_revision(
     if asset_instance_id is None:
         query = query.filter(OutputFile.entity_id == entity_id)
     else:
-        query = query.filter(OutputFile.asset_instance_id == asset_instance_id)
+        query = query.filter(
+            OutputFile.asset_instance_id == asset_instance_id,
+            OutputFile.temporal_entity_id == temporal_entity_id
+        )
 
     output_files = query.all()
 
@@ -366,12 +394,13 @@ def get_output_files_for_entity(entity_id):
     return fields.serialize_models(output_files)
 
 
-def get_output_files_for_instance(asset_instance_id):
+def get_output_files_for_instance(asset_instance_id, temporal_entity_id):
     """
     Return output files for given instance ordered by revision.
     """
     output_files = OutputFile.query.filter_by(
-        asset_instance_id=asset_instance_id
+        asset_instance_id=asset_instance_id,
+        temporal_entity_id=temporal_entity_id
     ).filter(
         OutputFile.revision >= 0
     ).order_by(
@@ -401,12 +430,19 @@ def get_last_output_files_for_entity(entity_id):
     return result
 
 
-def get_last_output_files_for_instance(asset_instance_id):
+def get_last_output_files_for_instance(
+    asset_instance_id,
+    temporal_entity_id
+):
     """
     Get last output files for given instance grouped by output type and name.
     """
     result = {}
-    output_files = get_output_files_for_instance(asset_instance_id)
+
+    output_files = get_output_files_for_instance(
+        asset_instance_id,
+        temporal_entity_id
+    )
 
     # We assume here that output files are returned in the right order.
     for output_file in output_files:
@@ -491,13 +527,19 @@ def get_output_types_for_entity(entity_id):
     return OutputType.serialize_list(output_types)
 
 
-def get_output_types_for_instance(asset_instance_id):
+def get_output_types_for_instance(
+    asset_instance_id,
+    temporal_entity_id=None
+):
     """
     Get output types from all output files created for given instance.
     """
     output_types = OutputType.query \
         .join(OutputFile) \
-        .filter(OutputFile.asset_instance_id == asset_instance_id) \
+        .filter(
+            OutputFile.asset_instance_id == asset_instance_id,
+            OutputFile.temporal_entity_id == temporal_entity_id
+        ) \
         .order_by(OutputType.name) \
         .all()
     return OutputType.serialize_list(output_types)
@@ -525,6 +567,7 @@ def get_output_files_for_output_type_and_entity(
 
 def get_output_files_for_output_type_and_asset_instance(
     asset_instance_id,
+    temporal_entity_id,
     output_type_id,
     representation=None
 ):
@@ -532,8 +575,11 @@ def get_output_files_for_output_type_and_asset_instance(
     Get output files created for given asset instance and output type.
     """
     query = OutputFile.query \
-        .filter(OutputFile.asset_instance_id == asset_instance_id) \
-        .filter(OutputFile.output_type_id == output_type_id) \
+        .filter(
+            OutputFile.asset_instance_id == asset_instance_id,
+            OutputFile.output_type_id == output_type_id,
+            OutputFile.temporal_entity_id == temporal_entity_id
+        ) \
         .order_by(desc(OutputFile.revision))
 
     if representation is not None:

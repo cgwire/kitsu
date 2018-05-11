@@ -287,10 +287,14 @@ class ApiDBTestCase(ApiTestCase):
         )
         return self.asset
 
-    def generate_fixture_asset_character(self):
+    def generate_fixture_asset_character(
+        self,
+        name="Rabbit",
+        description="Main char"
+    ):
         self.asset_character = Entity.create(
-            name="Rabbit",
-            description="Main character",
+            name=name,
+            description=description,
             project_id=self.project.id,
             entity_type_id=self.asset_type_character.id
         )
@@ -664,6 +668,7 @@ class ApiDBTestCase(ApiTestCase):
         name="main",
         representation="",
         asset_instance=None,
+        temporal_entity_id=None,
         task=None
     ):
         if output_type is None:
@@ -680,6 +685,8 @@ class ApiDBTestCase(ApiTestCase):
             asset_instance_id = None
         else:
             asset_instance_id = asset_instance.id
+            if temporal_entity_id is None:
+                temporal_entity_id = self.scene.id
 
         self.output_file = OutputFile.create(
             comment="",
@@ -691,6 +698,7 @@ class ApiDBTestCase(ApiTestCase):
             output_type_id=output_type.id,
             asset_instance_id=asset_instance_id,
             representation=representation,
+            temporal_entity_id=temporal_entity_id,
             name=name
         )
         return self.output_file
