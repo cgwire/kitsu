@@ -74,6 +74,9 @@ def on_identity_loaded(sender, identity):
             return identity
         except PersonNotFoundException:
             return None
+        except Exception as exception:
+            current_app.logger.error(exception.message)
+            return None
 
 
 class AuthenticatedResource(Resource):
