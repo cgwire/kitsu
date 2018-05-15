@@ -6,7 +6,7 @@ from zou.app.utils import dbhelpers
 APP_NAME = "Zou"
 APP_SYSTEM_ERROR_SUBJECT_LINE = "%s system error" % APP_NAME
 
-DEBUG = os.getenv("DEBUG", True)
+DEBUG = os.getenv("DEBUG", False)
 SECRET_KEY = os.getenv("SECRET_KEY", "mysecretkey")
 
 AUTH_STRATEGY = os.getenv("AUTH_STRATEGY", "auth_local_classic")
