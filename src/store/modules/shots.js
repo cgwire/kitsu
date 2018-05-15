@@ -4,7 +4,6 @@ import peopleApi from '../api/people'
 import tasksStore from './tasks'
 import peopleStore from './people'
 import taskTypesStore from './tasktypes'
-import productionsStore from './productions'
 
 import {PAGE_SIZE} from '../../lib/pagination'
 import {
@@ -119,9 +118,6 @@ const cache = {
 }
 
 const helpers = {
-  getCurrentProduction () {
-    return productionsStore.getters.currentProduction(productionsStore.state)
-  },
   getTask (taskId) {
     return tasksStore.state.taskMap[taskId]
   },
@@ -342,18 +338,6 @@ const actions = {
     })
   },
 
-  newSequence ({ commit, state }, payload) {
-    commit(NEW_SEQUENCE_START)
-    shotsApi.newSequence(payload.sequence, (err, sequence) => {
-      if (err) {
-        commit(NEW_SEQUENCE_ERROR)
-      } else {
-        commit(NEW_SEQUENCE_END, sequence)
-      }
-      if (payload.callback) payload.callback(err, sequence)
-    })
-  },
-
   newEpisode ({ commit, state }, payload) {
     commit(NEW_EPISODE_START)
     shotsApi.newEpisode(payload.episode, (err, episode) => {
@@ -378,64 +362,46 @@ const actions = {
     })
   },
 
-  editSequence ({ commit, state }, { data, callback }) {
-    commit(EDIT_SEQUENCE_START)
-    shotsApi.updateSequence(data, (err, sequence) => {
-      if (err) {
-        commit(EDIT_SEQUENCE_ERROR)
-      } else {
-        commit(EDIT_SEQUENCE_END, sequence)
-      }
-      if (callback) callback(err)
+  editEpisode ({ commit, state }, episode) {
+    return new Promise((resolve, reject) => {
+      commit(EDIT_EPISODE_START)
+      shotsApi.updateEpisode(episode, (err, episode) => {
+        if (err) {
+          commit(EDIT_EPISODE_ERROR)
+          reject(err)
+        } else {
+          commit(EDIT_EPISODE_END, episode)
+          resolve(episode)
+        }
+      })
     })
   },
 
-  editEpisode ({ commit, state }, { data, callback }) {
-    commit(EDIT_EPISODE_START)
-    shotsApi.updateEpisode(data, (err, episode) => {
-      if (err) {
-        commit(EDIT_EPISODE_ERROR)
-      } else {
-        commit(EDIT_EPISODE_END, episode)
-      }
-      if (callback) callback(err)
-    })
-  },
-
-  deleteShot ({ commit, state }, payload) {
+  deleteShot ({ commit, state }, { shot, callback }) {
     commit(DELETE_SHOT_START)
-    const shot = payload.shot
     shotsApi.deleteShot(shot, (err) => {
       if (err) {
         commit(DELETE_SHOT_ERROR)
       } else {
         commit(DELETE_SHOT_END, shot)
       }
-      if (payload.callback) payload.callback(err)
-    })
-  },
-
-  deleteSequence ({ commit, state }, { sequence, callback }) {
-    commit(DELETE_SEQUENCE_START)
-    shotsApi.deleteSequence(sequence, (err) => {
-      if (err) {
-        commit(DELETE_SEQUENCE_ERROR)
-      } else {
-        commit(DELETE_SEQUENCE_END, sequence)
-      }
       if (callback) callback(err)
     })
   },
 
-  deleteEpisode ({ commit, state }, { episode, callback }) {
-    commit(DELETE_EPISODE_START)
-    shotsApi.deleteEpisode(episode, (err) => {
-      if (err) {
-        commit(DELETE_EPISODE_ERROR)
-      } else {
-        commit(DELETE_EPISODE_END, episode)
-      }
-      if (callback) callback(err)
+  deleteEpisode ({ commit, state }, episode) {
+    return new Promise((resolve, reject) => {
+      console.log(episode)
+      commit(DELETE_EPISODE_START)
+      shotsApi.deleteEpisode(episode, (err) => {
+        if (err) {
+          commit(DELETE_EPISODE_ERROR)
+          reject(err)
+        } else {
+          commit(DELETE_EPISODE_END, episode)
+          resolve(episode)
+        }
+      })
     })
   },
 
@@ -452,9 +418,9 @@ const actions = {
     })
   },
 
-  uploadShotFile ({ commit, state }, callback) {
+  uploadShotFile ({ commit, state, rootGetters }, callback) {
     commit(IMPORT_SHOTS_START)
-    const currentProduction = helpers.getCurrentProduction()
+    const currentProduction = rootGetters.currentProduction
     shotsApi.postCsv(currentProduction, state.shotsCsvFormData, (err) => {
       commit(IMPORT_SHOTS_END)
       if (callback) callback(err)
@@ -538,6 +504,48 @@ const actions = {
     })
   },
 
+  newSequence ({ commit, state }, { sequence, callback }) {
+    commit(NEW_SEQUENCE_START)
+    shotsApi.newSequence(sequence, (err, sequence) => {
+      if (err) {
+        commit(NEW_SEQUENCE_ERROR)
+      } else {
+        commit(NEW_SEQUENCE_END, sequence)
+      }
+      if (callback) callback(err, sequence)
+    })
+  },
+
+  editSequence ({ commit, state }, data) {
+    return new Promise((resolve, reject) => {
+      commit(EDIT_SEQUENCE_START)
+      shotsApi.updateSequence(data, (err, sequence) => {
+        if (err) {
+          commit(EDIT_SEQUENCE_ERROR)
+          reject(err)
+        } else {
+          commit(EDIT_SEQUENCE_END, sequence)
+          resolve(sequence)
+        }
+      })
+    })
+  },
+
+  deleteSequence ({ commit, state }, sequence) {
+    return new Promise((resolve, reject) => {
+      commit(DELETE_SEQUENCE_START)
+      shotsApi.deleteSequence(sequence, (err) => {
+        if (err) {
+          commit(DELETE_SEQUENCE_ERROR)
+        } else {
+          commit(DELETE_SEQUENCE_END, sequence)
+        }
+        if (err) reject(err)
+        else resolve(sequence)
+      })
+    })
+  },
+
   setSequenceSearch ({commit}, searchQuery) {
     commit(SET_SEQUENCE_SEARCH, searchQuery)
   },
@@ -612,7 +620,10 @@ const mutations = {
     state.isShotsLoadingError = true
   },
 
-  [LOAD_SHOTS_END] (state, { production, shots, userFilters }) {
+  [LOAD_SHOTS_END] (
+    state,
+    { production, shots, userFilters }
+  ) {
     const validationColumns = {}
     let isFps = false
     let isFrameIn = false
@@ -621,7 +632,7 @@ const mutations = {
 
     state.shotMap = {}
     shots.forEach((shot) => {
-      shot.production_id = helpers.getCurrentProduction().id
+      shot.production_id = production.id
       shot.tasks.forEach((task) => {
         helpers.populateTask(task)
         validationColumns[task.task_type_id] = true
@@ -837,7 +848,7 @@ const mutations = {
   [DELETE_EPISODE_START] (state) {},
   [DELETE_EPISODE_ERROR] (state) {},
   [DELETE_EPISODE_END] (state, episodeToDelete) {
-    const episodeToDeleteIndex = state.sequences.findIndex(
+    const episodeToDeleteIndex = state.episodes.findIndex(
       (episode) => episode.id === episodeToDelete.id
     )
     const displayedEpisodeToDeleteIndex = state.episodes.findIndex(
@@ -960,9 +971,15 @@ const mutations = {
   [NEW_SEQUENCE_START] (state) {},
   [NEW_SEQUENCE_ERROR] (state) {},
   [NEW_SEQUENCE_END] (state, sequence) {
+    if (sequence.parent_id) {
+      const episode = state.episodeMap[sequence.parent_id]
+      sequence.episode_id = episode.id
+      sequence.episode_name = episode.name
+    }
     state.sequences.push(sequence)
     state.sequences = sortByName(state.sequences)
     state.sequenceMap[sequence.id] = sequence
+    state.sequenceIndex = buildSequenceIndex(state.sequences)
   },
 
   [NEW_EPISODE_START] (state) {},
@@ -970,6 +987,7 @@ const mutations = {
   [NEW_EPISODE_END] (state, episode) {
     state.episodes.push(episode)
     state.episodes = sortByName(state.episodes)
+    state.displayedEpisodes = state.episodes
     state.episodeMap[episode.id] = episode
   },
 
@@ -1064,7 +1082,7 @@ const mutations = {
     state.shotSelectionGrid = clearSelectionGrid(state.shotSelectionGrid)
   },
 
-  [COMPUTE_SEQUENCE_STATS] (state, validationInfo) {
+  [COMPUTE_SEQUENCE_STATS] (state) {
     const results = {}
     cache.shots.forEach((shot) => {
       const sequenceId = shot.sequence_id
@@ -1092,7 +1110,7 @@ const mutations = {
     state.sequenceStats = results
   },
 
-  [COMPUTE_EPISODE_STATS] (state, validationInfo) {
+  [COMPUTE_EPISODE_STATS] (state) {
     const results = {}
     cache.shots.forEach((shot) => {
       const episodeId = shot.episode_id
@@ -1133,12 +1151,19 @@ const mutations = {
     state.sequenceStats = {}
 
     state.shotMap = {}
+    state.sequenceMap = {}
+    state.episodeMap = {}
     state.displayedShots = []
     state.displayedShotsLength = 0
     state.displayedSequences = []
     state.displayedSequencesLength = 0
+    state.displayedEpisodes = []
+    state.displayedEpisodesLength = 0
 
     state.shotSearchQueries = []
+    state.shotSearchText = ''
+    state.sequenceSearchText = ''
+    state.episodeSearchText = ''
 
     state.editShot = {
       isLoading: false,
