@@ -177,5 +177,18 @@ def patch_set_done_flag_on_task_status():
         })
 
 
+@cli.command()
+def patch_scene_asset_instance():
+    """
+    Patch to run after upgrade from 0.6.1 or lower to 0.6.2 or superior.
+    It concerns only casting based on instances.
+    """
+    from zou.app.models.asset_instance import AssetInstance
+    for asset_instance in AssetInstance.query.all():
+        asset_instance.update({
+            "scene_id": asset_instance["entity_id"]
+        })
+
+
 if __name__ == '__main__':
     cli()
