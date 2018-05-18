@@ -401,8 +401,8 @@ def create_asset(
     return asset_dict
 
 
-def update_asset(working_file_id, data):
-    asset = get_asset_raw(working_file_id)
+def update_asset(asset_id, data):
+    asset = get_asset_raw(asset_id)
     asset.update(data)
     return asset.serialize(obj_type="Asset")
 
