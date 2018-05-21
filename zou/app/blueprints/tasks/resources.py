@@ -17,7 +17,8 @@ from zou.app.services import (
     files_service,
     file_tree_service,
     user_service,
-    entities_service
+    entities_service,
+    notifications_service
 )
 from zou.app.utils import query, events, permissions
 
@@ -38,7 +39,7 @@ class CommentTaskResource(Resource):
             person_id
         ) = self.get_arguments()
 
-        tasks_service.get_task(task_id)
+        task = tasks_service.get_task(task_id)
         if not permissions.has_manager_permissions():
             user_service.check_assigned(task_id)
 
@@ -57,9 +58,15 @@ class CommentTaskResource(Resource):
             text=comment
         )
 
+        status_changed = task_status_id != task["task_status_id"]
+
         tasks_service.update_task(
             task_id,
             {"task_status_id": task_status_id}
+        )
+
+        notifications_service.create_notifications_for_task_and_comment(
+            task, comment, change=status_changed
         )
 
         comment["task_status"] = task_status
