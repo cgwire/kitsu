@@ -58,7 +58,9 @@ class NotificationsServiceTestCase(ApiDBTestCase):
     def test_create_notifications_for_task_and_comment(self):
         self.generate_fixture_comment()
         notifications_service.create_notifications_for_task_and_comment(
-            self.task_dict, self.comment)
+            self.task_dict,
+            self.comment
+        )
         notifications = Notification.get_all()
-        self.assertEqual(len(notifications), 2)
+        self.assertEqual(len(notifications), 1)
         self.assertEqual(notifications[0].author_id, self.user.id)
