@@ -369,6 +369,13 @@ export default {
     }
   },
 
+  notifications: {
+    title: 'Notifications',
+    commented_on: 'commented on',
+    and_change_status: 'and changed status to',
+    with_preview: 'with a preview'
+  },
+
   server_down: {
     title: 'Kitsu encountered an error while reaching its data API.',
     text: 'Please contact your vendor support, your system administrator or your IT department to understand what is going wrong.'

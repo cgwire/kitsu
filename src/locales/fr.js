@@ -340,6 +340,13 @@ export default {
     delete_error: 'Une erreur est survenue en supprimant la playlist.'
   },
 
+  notifications: {
+    title: 'Notifications',
+    commented_on: 'a commenté',
+    and_change_status: 'et changé le statut à',
+    with_preview: 'avec une version'
+  },
+
   server_down: {
     title: 'Kitsu a rencontré une erreur en communiquant avec son API de données.',
     text: 'Contactez votre fournisseur, votre administrateur système ou votre département informatique pour comprendre ce qui ne va pas.'

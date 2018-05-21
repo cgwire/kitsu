@@ -14,6 +14,7 @@ import CustomActions from '../components/CustomActions'
 import Login from '../components/Login'
 import Main from '../components/Main'
 import NotFound from '../components/NotFound'
+import Notifications from '../components/Notifications'
 import People from '../components/People'
 import Person from '../components/Person'
 import Productions from '../components/Productions'
@@ -397,6 +398,12 @@ export const routes = [
         name: 'edit-playlist',
         path: '/productions/:production_id/playlists/:playlist_id/edit',
         component: Playlist
+      },
+
+      {
+        name: 'notifications',
+        path: '/notifications',
+        component: Notifications
       }
     ]
   },

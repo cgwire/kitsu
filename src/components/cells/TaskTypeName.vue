@@ -13,7 +13,7 @@
 import { mapGetters, mapActions } from 'vuex'
 
 export default {
-  name: 'task-type-name',
+  name: 'task-type-cell',
   components: {
   },
   props: [
