@@ -1,18 +1,22 @@
 from sqlalchemy.orm import aliased
+from flask import current_app
 
 from zou.app.models.entity import Entity
 from zou.app.models.entity_type import EntityType
-from zou.app.models.search_filters import SearchFilter
 from zou.app.models.project import Project
 from zou.app.models.project_status import ProjectStatus
+from zou.app.models.search_filters import SearchFilter
+from zou.app.models.notifications import Notification
 from zou.app.models.task import Task
 from zou.app.models.task_type import TaskType
+from zou.app.models.comment import Comment
 
 from zou.app.services import (
+    assets_service,
+    notifications_service,
     persons_service,
     shots_service,
-    tasks_service,
-    assets_service
+    tasks_service
 )
 from zou.app.services.exception import SearchFilterNotFoundException
 from zou.app.utils import fields, permissions
@@ -391,3 +395,76 @@ def remove_filter(search_filter_id):
         raise SearchFilterNotFoundException
     search_filter.delete()
     return search_filter.serialize()
+
+
+def get_last_notifications():
+    """
+    Return last 100 user notifications.
+    """
+    current_user = persons_service.get_current_user_raw()
+    result = []
+    notifications = Notification.query \
+        .filter_by(person_id=current_user.id) \
+        .order_by(Notification.created_at) \
+        .join(Task, Project, Comment) \
+        .add_columns(
+            Project.id,
+            Project.name,
+            Task.task_type_id,
+            Comment.preview_file_id,
+            Comment.task_status_id,
+            Comment.text,
+            Task.entity_id
+        ) \
+        .limit(100) \
+        .all()
+
+    for (
+        notification,
+        project_id,
+        project_name,
+        task_type_id,
+        preview_file_id,
+        task_status_id,
+        comment_text,
+        task_entity_id
+    ) in notifications:
+        current_app.logger.info(task_entity_id)
+        full_entity_name = notifications_service.get_full_entity_name(
+            task_entity_id
+        )
+        result.append(fields.serialize_dict({
+            "id": notification.id,
+            "author_id": notification.author_id,
+            "task_id": notification.task_id,
+            "task_type_id": task_type_id,
+            "task_status_id": task_status_id,
+            "preview_file_id": preview_file_id,
+            "project_id": project_id,
+            "project_name": project_name,
+            "comment_text": comment_text,
+            "created_at": notification.created_at,
+            "read": notification.read,
+            "change": notification.change,
+            "full_entity_name": full_entity_name
+        }))
+
+    return result
+
+
+def mark_notifications_as_read():
+    """
+    Mark all recent notifications for current_user as read. It is useful
+    to mark a list of notifications as read after an user retrieved them.
+    """
+    current_user = persons_service.get_current_user_raw()
+    notifications = Notification.query \
+        .filter_by(person_id=current_user.id, read=False) \
+        .order_by(Notification.created_at) \
+        .limit(100) \
+        .all()
+
+    for notification in notifications:
+        notification.update({"read": True})
+
+    return fields.serialize_list(notifications)

@@ -557,6 +557,7 @@ class ApiDBTestCase(ApiTestCase):
             due_date=due_date,
             real_start_date=real_start_date
         )
+        return self.task
 
     def generate_fixture_task_standard(self):
         start_date = fields.get_date_object("2017-02-20")

@@ -252,3 +252,15 @@ class DesktopLoginLogsResource(Resource):
         parser = reqparse.RequestParser()
         parser.add_argument("date", default=datetime.datetime.now())
         return parser.parse_args()
+
+
+class NotificationsResource(Resource):
+    """
+    Return last 100 user notifications.
+    """
+
+    @jwt_required
+    def get(self):
+        notifications = user_service.get_last_notifications()
+        user_service.mark_notifications_as_read()
+        return notifications
