@@ -19,7 +19,8 @@ from .resources import (
     DoneResource,
     FilterResource,
     DesktopLoginLogsResource,
-    FiltersResource
+    FiltersResource,
+    NotificationsResource
 )
 
 routes = [
@@ -49,6 +50,8 @@ routes = [
     ("/data/user/filters/<filter_id>", FilterResource),
 
     ("/data/user/desktop-login-logs", DesktopLoginLogsResource),
+
+    ("/data/user/notifications", NotificationsResource)
 ]
 
 blueprint = Blueprint("user", "user")
