@@ -1,12 +1,12 @@
 import expect from 'chai'
 
-
 import './store/assets.spec.js'
 import './store/assettypes.spec.js'
 import './store/breakdown.spec.js'
 import './store/customactions.spec.js'
 import './store/episodes.spec.js'
 import './store/main.spec'
+import './store/notifications.spec.js'
 import './store/people.spec'
 import './store/playlists.spec.js'
 import './store/productions.spec.js'
