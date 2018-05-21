@@ -50,6 +50,13 @@ class BaseMixin(object):
         return cls.query.filter_by(**kw).first()
 
     @classmethod
+    def get_all(cls):
+        """
+        Shorthand to retrieve all data for a model.
+        """
+        return cls.query.all()
+
+    @classmethod
     def get_all_by(cls, **kw):
         """
         Shorthand to retrieve data by using filters.
