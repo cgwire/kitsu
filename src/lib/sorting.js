@@ -69,6 +69,10 @@ export const sortByName = (entries) => {
   return entries.sort((a, b) => a.name.localeCompare(b.name))
 }
 
+export const sortByDate = (entries) => {
+  return entries.sort(firstBy('created_at', -1))
+}
+
 export const sortValidationColumns = (columns) => {
   return columns.sort((a, b) => {
     if (a.priority !== b.priority) {

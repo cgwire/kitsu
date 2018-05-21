@@ -119,12 +119,8 @@ export default {
   },
 
   mounted () {
-    if (this.episodeSearchText.length > 0) {
-      this.$refs['episode-search-field'].setValue(this.episodeSearchText)
-    }
-    this.$refs['episode-list'].setScrollPosition(
-      this.episodeListScrollPosition
-    )
+    this.setDefaultSearchText()
+    this.setDefaultListScrollPosition()
   },
 
   methods: {
@@ -142,40 +138,53 @@ export default {
       'showAssignations'
     ]),
 
+    setDefaultSearchText () {
+      if (this.episodeSearchText.length > 0) {
+        this.$refs['episode-search-field'].setValue(this.episodeSearchText)
+      }
+    },
+
+    setDefaultListScrollPosition () {
+      this.$refs['episode-list'].setScrollPosition(
+        this.episodeListScrollPosition
+      )
+    },
+
+    navigateToList () {
+      this.$router.push({
+        name: 'episodes',
+        params: {production_id: this.currentProduction.id}
+      })
+    },
+
     confirmEditEpisode (form) {
       this.loading.edit = true
       this.errors.edit = false
 
-      this.editEpisode({
-        data: form,
-        callback: (err) => {
-          if (!err) {
-            this.loading.edit = false
-            this.modals.isNewDisplayed = false
-            this.$router.push({
-              name: 'episodes',
-              params: {production_id: this.currentProduction.id}
-            })
-          } else {
-            this.loading.edit = false
-            this.errors.edit = true
-          }
-        }
-      })
+      this.editEpisode(form)
+        .then(() => {
+          this.loading.edit = false
+          this.modals.isNewDisplayed = false
+          this.navigateToList()
+        })
+        .catch(() => {
+          this.loading.edit = false
+          this.errors.edit = true
+        })
     },
 
     confirmDeleteEpisode () {
-      this.deleteEpisode({
-        episode: this.episodeToDelete,
-        callback: (err) => {
-          if (!err) {
-            this.$router.push({
-              name: 'episodes',
-              params: {production_id: this.currentProduction.id}
-            })
-          }
-        }
-      })
+      this.loading.delete = true
+      this.errors.edit = false
+
+      this.deleteEpisode(this.episodeToDelete)
+        .then(() => {
+          this.loading.delete = false
+          this.navigateToList()
+        }).catch(() => {
+          this.loading.delete = false
+          this.errors.delete = true
+        })
     },
 
     resetEditModal () {
@@ -235,11 +244,11 @@ export default {
 
     currentProduction () {
       const productionId = this.$route.params.production_id
-      const newPath = {
-        name: 'episodes',
-        params: {production_id: this.currentProduction.id}
-      }
       if (this.currentProduction.id !== productionId) {
+        const newPath = {
+          name: 'episodes',
+          params: {production_id: this.currentProduction.id}
+        }
         this.$refs['episode-search-field'].setValue('')
         this.$store.commit('SET_SEQUENCE_LIST_SCROLL_POSITION', 0)
         this.$router.push(newPath)
@@ -255,7 +264,6 @@ export default {
       title: `${this.currentProduction.name} ${this.$t('episodes.title')} - Kitsu`
     }
   }
-
 }
 </script>
 

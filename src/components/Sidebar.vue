@@ -44,7 +44,7 @@
            </router-link>
          </p>
 
-         <p @click="toggleSidebar()" v-if="!isSingleEpisode">
+         <p @click="toggleSidebar()">
            <router-link :to="episodesPath">
              {{ $t("episodes.title") }}
            </router-link>
@@ -123,7 +123,6 @@ export default {
   computed: {
     ...mapGetters([
       'isSidebarHidden',
-      'isSingleEpisode',
       'rawCurrentProduction',
       'currentProduction',
       'breakdownPath',

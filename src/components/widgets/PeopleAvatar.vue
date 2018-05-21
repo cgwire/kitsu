@@ -9,7 +9,15 @@
     }"
     v-if="isLink"
   >
-    <router-link :to="'/people/' + person.id" class="avatar-link">
+    <router-link
+      :to="{
+        name: 'person',
+        params: {
+          person_id: person.id
+        }
+      }"
+      class="avatar-link"
+    >
     <img
       v-lazy="person.avatarPath"
       v-if="person.has_avatar"

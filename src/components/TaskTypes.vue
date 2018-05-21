@@ -80,12 +80,12 @@ export default {
 
   computed: {
     ...mapGetters([
-      'taskTypes',
-      'isTaskTypesLoading',
-      'isTaskTypesLoadingError',
       'editTaskType',
       'deleteTaskType',
-      'getTaskType'
+      'getTaskType',
+      'isTaskTypesLoading',
+      'isTaskTypesLoadingError',
+      'taskTypes'
     ])
   },
 
@@ -165,7 +165,6 @@ export default {
       title: `${this.$t('task_types.title')} - Kitsu`
     }
   }
-
 }
 </script>
 

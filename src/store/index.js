@@ -7,13 +7,14 @@ import assetTypes from './modules/assettypes'
 import assets from './modules/assets'
 import breakdown from './modules/breakdown'
 import customActions from './modules/customactions'
-import shots from './modules/shots'
 import login from './modules/login'
 import main from './modules/main'
+import notifications from './modules/notifications'
 import people from './modules/people'
 import user from './modules/user'
 import playlists from './modules/playlists'
 import productions from './modules/productions'
+import shots from './modules/shots'
 import taskTypes from './modules/tasktypes'
 import taskStatus from './modules/taskstatus'
 import tasks from './modules/tasks'
@@ -30,6 +31,7 @@ let modules = {
   people,
   playlists,
   productions,
+  notifications,
   shots,
   tasks,
   taskTypes,

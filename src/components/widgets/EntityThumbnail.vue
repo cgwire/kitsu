@@ -6,12 +6,14 @@
 >
   <img
     class="thumbnail-picture"
+    :style="imgStyle"
     v-lazy="thumbnailPath"
   />
 </a>
 
 <img
   class="thumbnail-picture"
+  style="imgStyle"
   v-lazy="thumbnailPath"
   v-else-if="isPreview && !withLink"
 />
@@ -42,6 +44,14 @@ export default {
     square: {
       default: false,
       type: Boolean
+    },
+    width: {
+      default: null,
+      type: Number
+    },
+    height: {
+      default: null,
+      type: Number
     },
     emptyWidth: {
       default: 50,
@@ -82,6 +92,18 @@ export default {
         return '/api/pictures/thumbnails/preview-files/' +
                previewFileId + '.png'
       }
+    },
+
+    imgStyle () {
+      const style = {}
+      if (this.width) {
+        style.width = this.width + 'px'
+      }
+
+      if (this.height) {
+        style.height = this.height + 'px'
+      }
+      return style
     }
   }
 }

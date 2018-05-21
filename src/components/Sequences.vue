@@ -119,12 +119,8 @@ export default {
   },
 
   mounted () {
-    if (this.sequenceSearchText.length > 0) {
-      this.$refs['sequence-search-field'].setValue(this.sequenceSearchText)
-    }
-    this.$refs['sequence-list'].setScrollPosition(
-      this.sequenceListScrollPosition
-    )
+    this.setDefaultSearchText()
+    this.setDefaultListScrollPosition()
   },
 
   methods: {
@@ -142,44 +138,55 @@ export default {
       'showAssignations'
     ]),
 
+    setDefaultSearchText () {
+      if (this.sequenceSearchText.length > 0) {
+        this.$refs['sequence-search-field'].setValue(this.sequenceSearchText)
+      }
+    },
+
+    setDefaultListScrollPosition () {
+      this.$refs['sequence-list'].setScrollPosition(
+        this.sequenceListScrollPosition
+      )
+    },
+
+    navigateToList () {
+      this.$router.push({
+        name: 'sequences',
+        params: {production_id: this.currentProduction.id}
+      })
+    },
+
     confirmEditSequence (form) {
       this.loading.edit = true
       this.errors.edit = false
 
-      this.editSequence({
-        data: form,
-        callback: (err) => {
-          if (!err) {
-            this.loading.edit = false
-            this.modals.isNewDisplayed = false
-            this.$router.push({
-              name: 'sequences',
-              params: {production_id: this.currentProduction.id}
-            })
-          } else {
-            this.loading.edit = false
-            this.errors.edit = true
-          }
-        }
-      })
+      this.editSequence(form)
+        .then(() => {
+          this.loading.edit = false
+          this.navigateToList()
+        }).catch(() => {
+          this.loading.edit = false
+          this.errors.edit = true
+        })
     },
 
     confirmDeleteSequence () {
-      this.deleteSequence({
-        sequence: this.sequenceToDelete,
-        callback: (err) => {
-          if (!err) {
-            this.$router.push({
-              name: 'sequences',
-              params: {production_id: this.currentProduction.id}
-            })
-          }
-        }
-      })
+      this.loading.del = true
+      this.deleteSequence(this.sequenceToDelete)
+        .then(() => {
+          this.loading.del = false
+          this.navigateToList()
+        }).catch(() => {
+          this.loading.del = false
+          this.errors.del = true
+        })
     },
 
     resetEditModal () {
-      const form = { name: '' }
+      const form = {
+        name: ''
+      }
       if (this.sequences.length > 0) {
         form.sequence_id = this.sequences[0].id
       }
@@ -235,13 +242,15 @@ export default {
 
     currentProduction () {
       const productionId = this.$route.params.production_id
-      const newPath = {
-        name: 'sequences',
-        params: {production_id: this.currentProduction.id}
-      }
       if (this.currentProduction.id !== productionId) {
+        const newPath = {
+          name: 'sequences',
+          params: {production_id: this.currentProduction.id}
+        }
+
         this.$refs['sequence-search-field'].setValue('')
         this.$store.commit('SET_SEQUENCE_LIST_SCROLL_POSITION', 0)
+
         this.$router.push(newPath)
         this.loadShots(() => {
           this.computeSequenceStats()

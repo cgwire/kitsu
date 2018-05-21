@@ -38,6 +38,16 @@
 
       <div class="nav-right">
         <div
+          class="nav-item"
+        >
+          <router-link :to="{name: 'notifications'}">
+            <bell-icon
+              class="has-no-notifications"
+            ></bell-icon>
+          </router-link>
+        </div>
+
+        <div
           :class="{
             'nav-item': true,
             'user-nav': true,
@@ -73,13 +83,16 @@
 
 <script>
 import { mapGetters, mapActions } from 'vuex'
+import { BellIcon } from 'vue-feather-icons'
+
+import Combobox from './widgets/Combobox'
 import PeopleAvatar from './widgets/PeopleAvatar'
 import PeopleName from './widgets/PeopleName'
-import Combobox from './widgets/Combobox'
 
 export default {
   name: 'topbar',
   components: {
+    BellIcon,
     Combobox,
     PeopleName,
     PeopleAvatar
@@ -272,5 +285,10 @@ export default {
 
 .production-selector {
   margin-top: 1.9em;
+}
+
+.has-no-notifications {
+  margin-top: 5px;
+  color: #CCC;
 }
 </style>
