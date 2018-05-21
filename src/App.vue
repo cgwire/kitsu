@@ -117,6 +117,14 @@ tr:hover .actions a {
   opacity: 1
 }
 
+a {
+  color: #999;
+}
+
+a:hover {
+  color: #999;
+}
+
 .canceled td:not(.actions) {
   text-decoration: line-through;
 }
