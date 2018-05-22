@@ -264,3 +264,14 @@ class NotificationsResource(Resource):
         notifications = user_service.get_last_notifications()
         user_service.mark_notifications_as_read()
         return notifications
+
+
+class NotificationResource(Resource):
+    """
+    Return notification matching given id, only if it's a notification that
+    belongs to current user.
+    """
+
+    @jwt_required
+    def get(self, notification_id):
+        return user_service.get_notification(notification_id)

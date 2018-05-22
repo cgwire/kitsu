@@ -8,7 +8,11 @@ from mixer.backend.flask import mixer
 
 from zou.app import app
 from zou.app.utils import fields, auth
-from zou.app.services import file_tree_service, breakdown_service
+from zou.app.services import (
+    breakdown_service,
+    file_tree_service,
+    tasks_service
+)
 
 from zou.app.models.project import Project
 from zou.app.models.person import Person
@@ -622,6 +626,15 @@ class ApiDBTestCase(ApiTestCase):
             assignees=[self.person],
             assigner_id=self.assigner.id
         )
+
+    def generate_fixture_comment(self):
+        self.comment = tasks_service.create_comment(
+            self.task.id,
+            self.task_status.id,
+            self.person.id,
+            "first comment"
+        )
+        return self.comment
 
     def generate_fixture_file_status(self):
         self.file_status = FileStatus.create(
