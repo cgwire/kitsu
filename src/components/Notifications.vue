@@ -16,6 +16,7 @@
         <people-avatar
           class="flexrow-item"
           :person="personMap[notification.author_id]"
+          v-if="personMap[notification.author_id]"
         >
         </people-avatar>
       </div>

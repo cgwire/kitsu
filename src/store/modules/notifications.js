@@ -30,18 +30,30 @@ const getters = {
 }
 
 const actions = {
-  loadNotifications ({ commit, state }) {
-    return new Promise((resolve, reject) => {
+  loadNotifications ({ commit, state }, callback) {
+    if (callback) {
       commit(LOAD_NOTIFICATIONS_END, [])
       notificationsApi.getNotifications((err, notifications) => {
         if (err) {
-          reject(err)
+          callback(err)
         } else {
           commit(LOAD_NOTIFICATIONS_END, notifications)
-          resolve()
+          callback()
         }
       })
-    })
+    } else {
+      return new Promise((resolve, reject) => {
+        commit(LOAD_NOTIFICATIONS_END, [])
+        notificationsApi.getNotifications((err, notifications) => {
+          if (err) {
+            reject(err)
+          } else {
+            commit(LOAD_NOTIFICATIONS_END, notifications)
+            resolve()
+          }
+        })
+      })
+    }
   },
 
   loadNotification ({ commit, state }, notificationId) {
