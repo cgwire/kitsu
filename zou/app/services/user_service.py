@@ -1,5 +1,4 @@
 from sqlalchemy.orm import aliased
-from flask import current_app
 
 from zou.app.models.entity import Entity
 from zou.app.models.entity_type import EntityType
@@ -18,7 +17,10 @@ from zou.app.services import (
     shots_service,
     tasks_service
 )
-from zou.app.services.exception import SearchFilterNotFoundException
+from zou.app.services.exception import (
+    SearchFilterNotFoundException,
+    NotificationNotFoundException
+)
 from zou.app.utils import fields, permissions
 
 
@@ -397,13 +399,25 @@ def remove_filter(search_filter_id):
     return search_filter.serialize()
 
 
-def get_last_notifications():
+def get_notification(notification_id):
+    """
+    Return notification matching given ID as a dictionnary.
+    """
+    notifications = get_last_notifications(notification_id)
+
+    if len(notifications) == 0:
+        raise NotificationNotFoundException
+
+    return notifications[0]
+
+
+def get_last_notifications(notification_id=None):
     """
     Return last 100 user notifications.
     """
     current_user = persons_service.get_current_user_raw()
     result = []
-    notifications = Notification.query \
+    query = Notification.query \
         .filter_by(person_id=current_user.id) \
         .order_by(Notification.created_at) \
         .join(Task, Project, Comment) \
@@ -415,9 +429,12 @@ def get_last_notifications():
             Comment.task_status_id,
             Comment.text,
             Task.entity_id
-        ) \
-        .limit(100) \
-        .all()
+        )
+
+    if notification_id is not None:
+        query = query.filter(Notification.id == notification_id)
+
+    notifications = query.limit(100).all()
 
     for (
         notification,
@@ -429,13 +446,13 @@ def get_last_notifications():
         comment_text,
         task_entity_id
     ) in notifications:
-        current_app.logger.info(task_entity_id)
         full_entity_name = notifications_service.get_full_entity_name(
             task_entity_id
         )
         result.append(fields.serialize_dict({
             "id": notification.id,
             "author_id": notification.author_id,
+            "comment_id": notification.comment_id,
             "task_id": notification.task_id,
             "task_type_id": task_type_id,
             "task_status_id": task_status_id,

@@ -1,6 +1,6 @@
 from tests.base import ApiDBTestCase
 
-from zou.app.services import tasks_service
+from zou.app.services import tasks_service, notifications_service
 
 
 class UserContextRoutesTestCase(ApiDBTestCase):
@@ -21,7 +21,7 @@ class UserContextRoutesTestCase(ApiDBTestCase):
         self.generate_fixture_task_type()
         self.generate_fixture_task_status()
         self.generate_fixture_assigner()
-        self.generate_fixture_task()
+        self.task_dict = self.generate_fixture_task().serialize()
         self.asset_dict = self.asset.serialize(obj_type="Asset")
         self.maxDiff = None
 
@@ -324,3 +324,31 @@ class UserContextRoutesTestCase(ApiDBTestCase):
         self.assertEqual(len(logs), 2)
         self.assertEqual(logs[0]["person_id"], str(self.user.id))
         self.assertEqual(logs[0]["date"], date_2)
+
+    def test_get_notifications(self):
+        person_id = str(self.person.id)
+        tasks_service.assign_task(self.task.id, self.user.id)
+        self.generate_fixture_comment()
+        notifications_service.create_notifications_for_task_and_comment(
+            self.task_dict,
+            self.comment
+        )
+        path = "/data/user/notifications"
+        notifications = self.get(path)
+        self.assertEqual(len(notifications), 1)
+        self.assertEqual(notifications[0]["author_id"], person_id)
+
+    def test_get_notification(self):
+        tasks_service.assign_task(self.task.id, self.user.id)
+        self.generate_fixture_comment()
+        notifications_service.create_notifications_for_task_and_comment(
+            self.task_dict,
+            self.comment
+        )
+        path = "/data/user/notifications"
+        notifications = self.get(path)
+        notification = notifications[0]
+        path = "/data/user/notifications/%s" % notification["id"]
+        notification_again = self.get(path)
+        self.assertEqual(notification_again["id"], notification["id"])
+        self.assertEqual(notification_again["full_entity_name"], "Props / Tree")

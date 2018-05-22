@@ -3,7 +3,15 @@ from zou.app.models.entity import Entity
 from zou.app.models.entity_type import EntityType
 from zou.app.models.notifications import Notification
 
-from zou.app.services import tasks_service, persons_service, shots_service
+from zou.app.services import (
+    tasks_service,
+    persons_service,
+    shots_service
+)
+from zou.app.services.exception import (
+    PersonNotFoundException
+)
+from zou.app.utils import events
 
 
 def get_full_entity_name(entity_id):
@@ -73,8 +81,15 @@ def create_notifications_for_task_and_comment(task, comment, change=False):
     recipient_ids.remove(comment["person_id"])
 
     for recipient_id in recipient_ids:
-        person = persons_service.get_person(recipient_id)
-        create_notification(
-            person, comment, read=False, change=change
-        )
+        try:
+            person = persons_service.get_person(recipient_id)
+            notification = create_notification(
+                person, comment, read=False, change=change
+            )
+            events.emit("notifications:new", {
+                "id": notification["id"],
+                "person_id": recipient_id
+            })
+        except PersonNotFoundException:
+            pass
     return recipient_ids

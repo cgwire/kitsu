@@ -93,6 +93,10 @@ class SearchFilterNotFoundException(NotFound):
     pass
 
 
+class NotificationNotFoundException(NotFound):
+    pass
+
+
 class MalformedFileTreeException(Exception):
     pass
 
