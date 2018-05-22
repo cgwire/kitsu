@@ -1,9 +1,29 @@
 <template>
-<span
-  class="tag task-type-name"
+<router-link
+  :to="{
+    name: 'task-type',
+    params: {
+      production_id: productionId,
+      task_type_id: taskType.id
+    }
+  }"
+  v-if="productionId"
+>
+  <span
+    class="tag task-type-name"
+    :style="{ 'border-left': '4px solid ' + color }"
+  >
+    {{ taskType.name }}
+  </span>
+</router-link>
+<div
+  class="tag task-type-name no-link"
   :style="{ 'border-left': '4px solid ' + color }"
+  v-else
 >
   {{ taskType.name }}
+</div>
+
 </span>
 </template>
 
@@ -15,7 +35,8 @@ export default {
   components: {
   },
   props: [
-    'taskType'
+    'taskType',
+    'productionId'
   ],
   computed: {
     ...mapGetters([
@@ -41,5 +62,9 @@ export default {
   color: #666;
   border-radius: 0;
   font-weight: bold;
+}
+
+.no-link {
+  cursor: default
 }
 </style>

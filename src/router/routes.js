@@ -27,6 +27,7 @@ import TaskStatus from '../components/TaskStatus'
 import Todos from '../components/Todos'
 import ServerDown from '../components/ServerDown'
 import Sequences from '../components/Sequences'
+import TaskType from '../components/TaskType'
 import Episodes from '../components/Episodes'
 import Shot from '../components/Shot'
 import Shots from '../components/Shots'
@@ -268,6 +269,12 @@ export const routes = [
       },
 
       {
+        path: '/productions/:production_id/task-types/:task_type_id',
+        component: TaskType,
+        name: 'task-type'
+      },
+
+      {
         name: 'task',
         path: '/tasks/:task_id',
         component: Task
@@ -348,6 +355,11 @@ export const routes = [
         name: 'delete-task-status',
         path: '/task-status/delete/:task_status_id',
         component: TaskStatus
+      },
+      {
+        name: 'task-types',
+        path: '/task-types',
+        component: TaskTypes
       },
 
       {
