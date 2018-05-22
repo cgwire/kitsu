@@ -13,61 +13,61 @@
     >
 
       <div class="flexrow-item">
-          <people-avatar
-            class="flexrow-item"
-            :person="personMap[notification.author_id]"
-          >
-          </people-avatar>
+        <people-avatar
+          class="flexrow-item"
+          :person="personMap[notification.author_id]"
+        >
+        </people-avatar>
       </div>
 
       <div class="flexrow-item comment-content">
         <div class="notification-info">
-            <span class="date">
-              {{ formatDate(notification.created_at) }}
-            </span>
-            <router-link
-              :to="{
-                name: 'person',
-                params: {person_id: notification.author_id}
-              }"
+          <span class="date">
+            {{ formatDate(notification.created_at) }}
+          </span>
+          <router-link
+            :to="{
+              name: 'person',
+              params: {person_id: notification.author_id}
+            }"
+          >
+            {{ personName(notification) }}
+          </router-link>
+          <span>
+            {{ $t('notifications.commented_on') }}
+          </span>
+          <router-link
+            class=""
+            :to="{name: 'task', params: {task_id: notification.task_id}}"
+          >
+            {{ notification.project_name }} / {{ notification.full_entity_name }}
+            &nbsp;
+          </router-link>
+          <router-link
+            class=""
+            :to="{name: 'task', params: {task_id: notification.task_id}}"
+          >
+            <task-type-name
+              :task-type="taskTypeMap[notification.task_type_id]"
             >
-              {{ personName(notification) }}
-            </router-link>
-            <span>
-              {{ $t('notifications.commented_on') }}
-            </span>
-            <router-link
-              class=""
-              :to="{name: 'task', params: {task_id: notification.task_id}}"
-            >
-              {{ notification.project_name }} / {{ notification.full_entity_name }}
-              &nbsp;
-            </router-link>
-            <router-link
-              class=""
-              :to="{name: 'task', params: {task_id: notification.task_id}}"
-            >
-              <task-type-name
-                :task-type="taskTypeMap[notification.task_type_id]"
-              >
-              </task-type-name>
-            </router-link>
-            <span
-              v-if="notification.change"
-            >
-              {{ $t('notifications.and_change_status') }}
-            </span>
-            <validation-tag
-              class="validation-tag"
-              :task="{
-                id: notification.task_id,
-                task_status_short_name: taskStatusMap[notification.task_status_id].short_name,
-                task_status_color: taskStatusMap[notification.task_status_id].color
+            </task-type-name>
+          </router-link>
+          <span
+            v-if="notification.change"
+          >
+            {{ $t('notifications.and_change_status') }}
+          </span>
+          <validation-tag
+            class="validation-tag"
+            :task="{
+              id: notification.task_id,
+              task_status_short_name: taskStatusMap[notification.task_status_id].short_name,
+              task_status_color: taskStatusMap[notification.task_status_id].color
 
-              }"
-              v-if="notification.change"
-            >
-            </validation-tag>
+            }"
+            v-if="notification.change"
+          >
+          </validation-tag>
           <span
             v-if="notification.preview_file_id"
           >
@@ -77,10 +77,9 @@
             class="thumbnail-picture-wrapper"
             v-if="notification.preview_file_id"
           >
-            {{ notification.preview_file_id }}
             <entity-thumbnail
               :entity="{preview_file_id: notification.preview_file_id}"
-              :height="30"
+              :height="40"
             >
             </entity-thumbnail>
           </span>
@@ -138,7 +137,8 @@ export default {
 
   methods: {
     ...mapActions([
-      'loadNotifications'
+      'loadNotifications',
+      'markAllNotificationsAsRead'
     ]),
 
     formatDate (date) {
@@ -168,6 +168,23 @@ export default {
         console.error(err)
         this.errors.notifications = true
       })
+  },
+
+  socket: {
+    events: {
+      'preview:add' (eventData) {
+        const commentId = eventData.comment_id
+        const previewId = eventData.preview.id
+        this.$store.commit('NOTIFICATION_ADD_PREVIEW', {
+          previewId,
+          commentId
+        })
+      }
+    }
+  },
+
+  beforeDestroy () {
+    this.markAllNotificationsAsRead()
   },
 
   metaInfo () {
@@ -203,8 +220,6 @@ a {
 }
 
 img.thumbnail-picture {
-  width: 50px;
-  max-width: 50px;
 }
 
 .comment-text {
@@ -230,5 +245,9 @@ img.thumbnail-picture {
 
 .date {
   margin-right: 0.1em;
+}
+
+.thumbnail-picture-wrapper {
+  margin-left: 0.5em;
 }
 </style>

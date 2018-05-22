@@ -56,8 +56,8 @@
       >
         <span class="flexrow-item">{{ $t('tasks.current_status') }}</span>
         <validation-tag
-          :task="currentTask"
           class="is-medium flexrow-item"
+          :task="currentTask"
           :is-static="true"
           v-if="currentTask"
         ></validation-tag>
@@ -68,9 +68,9 @@
           v-for="personId in currentTask.assignees"
         >
           <people-avatar
+            class="flexrow-item"
             :key="personId"
             :person="personMap[personId]"
-            class="flexrow-item"
             :size="30"
             :font-size="16"
           >
