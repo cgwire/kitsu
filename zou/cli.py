@@ -193,9 +193,12 @@ def patch_scene_asset_instance():
     """
     from zou.app.models.asset_instance import AssetInstance
     for asset_instance in AssetInstance.query.all():
-        asset_instance.update({
-            "scene_id": asset_instance["entity_id"]
-        })
+        try:
+            asset_instance.update({
+                "scene_id": asset_instance.entity_id
+            })
+        except:
+            print(asset_instance.serialize())
 
 
 if __name__ == '__main__':
