@@ -17,7 +17,7 @@ import {
   RESET_ALL
 } from '../mutation-types'
 
-const state = {
+const initialState = {
   taskTypes: [],
   taskTypeMap: {},
   isTaskTypesLoading: false,
@@ -34,6 +34,10 @@ const state = {
   }
 }
 
+const state = {
+  ...initialState
+}
+
 const getters = {
   taskTypes: state => state.taskTypes,
   taskTypeMap: state => state.taskTypeMap,
@@ -44,20 +48,24 @@ const getters = {
   editTaskType: state => state.editTaskType,
   deleteTaskType: state => state.deleteTaskType,
 
+  currentTaskType: (state, getters, rootState) => {
+    return state.taskTypeMap[rootState.route.params.task_type_id] || {}
+  },
+
   getTaskType: (state, getters) => (id) => {
-    return state.taskTypes.find(
-      (taskType) => taskType.id === id
-    )
+    return state.taskTypeMap[id]
   },
 
   getTaskTypeOptions: state => state.taskTypes.map(
     (type) => { return { label: type.name, value: type.id } }
   ),
+
   getAssetTaskTypeOptions: state => state.taskTypes
     .filter((taskType) => !taskType.for_shots)
     .map(
       (type) => { return { label: type.name, value: type.id } }
     ),
+
   getShotTaskTypeOptions: state => state.taskTypes
     .filter((taskType) => taskType.for_shots)
     .map(
@@ -111,6 +119,31 @@ const actions = {
       }
       if (payload.callback) payload.callback(err)
     })
+  },
+
+  initTaskType ({ commit, dispatch, state, rootState, rootGetters }, force) {
+    return new Promise((resolve, reject) => {
+      const productionId = rootState.route.params.production_id
+      if (rootGetters.currentProduction.id !== productionId) {
+        dispatch('setProduction', productionId)
+      }
+
+      if (rootGetters.currentTaskType.for_shots) {
+        if (Object.keys(rootGetters.shotMap).length < 2 || force) {
+          dispatch('loadShots', (err) => {
+            if (err) reject(err)
+            else resolve()
+          })
+        }
+      } else {
+        if (Object.keys(rootGetters.assetMap).length < 2 || force) {
+          dispatch('loadAssets', (err) => {
+            if (err) reject(err)
+            else resolve()
+          })
+        }
+      }
+    })
   }
 }
 
@@ -123,6 +156,8 @@ const mutations = {
   [LOAD_TASK_TYPES_ERROR] (state) {
     state.isTaskTypesLoading = false
     state.isTaskTypesLoadingError = true
+    state.taskTypes = []
+    state.taskTypeMap = {}
   },
 
   [LOAD_TASK_TYPES_END] (state, taskTypes) {
@@ -188,19 +223,8 @@ const mutations = {
   },
 
   [RESET_ALL] (state) {
-    state.taskTypes = []
-    state.taskTypeMap = {}
-    state.isTaskTypesLoading = false
-    state.isTaskTypesLoadingError = false
-
-    state.editTaskType = {
-      isLoading: false,
-      isError: false
-    }
-
-    state.deleteTaskType = {
-      isLoading: false,
-      isError: false
+    state = {
+      ...initialState
     }
   }
 }

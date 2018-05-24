@@ -14,7 +14,17 @@
               'border-left': '2px solid ' + column.color
             }"
             v-for="column in validationColumns">
-            {{ column.name }}
+            <router-link
+              :to="{
+                name: 'task-type',
+                params: {
+                  production_id: currentProduction.id,
+                  task_type_id: column.id
+                }
+              }"
+            >
+              {{ column.name }}
+            </router-link>
           </th>
 
           <th class="actions">
@@ -166,6 +176,7 @@ export default {
     'isError',
     'validationColumns'
   ],
+
   data () {
     return {
       busy: false,
@@ -174,6 +185,7 @@ export default {
       selectionGrid: null
     }
   },
+
   components: {
     ButtonLink,
     ButtonHrefLink,
@@ -184,6 +196,7 @@ export default {
     TableInfo,
     ValidationCell
   },
+
   computed: {
     ...mapGetters([
       'currentProduction',
@@ -202,6 +215,7 @@ export default {
              (!this.assetSearchText || this.assetSearchText.length === 0)
     }
   },
+
   methods: {
     ...mapActions([
       'displayMoreAssets'

@@ -230,7 +230,7 @@ const getters = {
     let sequenceShots = []
     let previousShot = null
 
-    for (let shot of cache.shots) {
+    for (let shot of Object.values(state.shotMap)) {
       if (previousShot && shot.sequence_name !== previousShot.sequence_name) {
         shotsBySequence.push(sequenceShots.slice(0))
         sequenceShots = []

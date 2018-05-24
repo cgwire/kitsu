@@ -1,23 +1,26 @@
 <template>
 <td class="name">
-  <div
-    class="tag task-type-name"
-    :style="{ 'border-left': '4px solid ' + color }"
+  <task-type-name
+    :task-type="entry"
+    :production-id="productionId"
   >
-    {{ entry.name }}
-  </div>
+  </task-type-name>
 </td>
 </template>
 
 <script>
 import { mapGetters, mapActions } from 'vuex'
 
+import TaskTypeName from '../widgets/TaskTypeName'
+
 export default {
   name: 'task-type-cell',
   components: {
+    TaskTypeName
   },
   props: [
-    'entry'
+    'entry',
+    'productionId'
   ],
   computed: {
     ...mapGetters([
@@ -42,6 +45,5 @@ export default {
   color: #666;
   border-radius: 0;
   font-weight: bold;
-  cursor: default;
 }
 </style>

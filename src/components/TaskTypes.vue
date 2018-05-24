@@ -73,8 +73,7 @@ export default {
         isDeleteDisplayed: false
       },
       taskTypeToDelete: null,
-      taskTypeToEdit: null,
-      choices: []
+      taskTypeToEdit: null
     }
   },
 

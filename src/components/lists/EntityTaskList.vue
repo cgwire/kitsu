@@ -32,9 +32,11 @@
           <task-type-name
             class="type"
             :entry="{
+              id: entry.taskType.id,
               name: entry.taskType.name,
               color: entry.taskType.color
             }"
+            :production-id="currentProduction.id"
           >
           </task-type-name>
           <td class="status">
@@ -87,6 +89,7 @@ export default {
   ],
   computed: {
     ...mapGetters([
+      'currentProduction'
     ])
   },
   methods: {

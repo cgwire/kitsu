@@ -113,6 +113,7 @@ export default {
 span.thumbnail-empty {
   background: #F3F3F3;
   display: block;
+  margin-bottom: 0.3em;
 }
 
 span.square {

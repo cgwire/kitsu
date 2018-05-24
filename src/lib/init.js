@@ -15,7 +15,8 @@ const init = (callback) => {
     'loadPeople',
     'loadOpenProductions',
     'loadCustomActions',
-    'loadUserSearchFilters'
+    'loadUserSearchFilters',
+    'loadNotifications'
   ]
 
   async.mapSeries(storeActions, store.dispatch, (err) => {

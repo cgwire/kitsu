@@ -48,7 +48,9 @@
           </production-name-cell>
           <task-type-name
             class="type"
+            :production-id="entry.project_id"
             :entry="{
+              id: entry.task_type_id,
               name: entry.task_type_name,
               color: entry.task_type_color
             }"

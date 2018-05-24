@@ -42,7 +42,7 @@
         >
           <router-link :to="{name: 'notifications'}">
             <bell-icon
-              class="has-no-notifications"
+              :class="notificationBellClass"
             ></bell-icon>
           </router-link>
         </div>
@@ -66,7 +66,11 @@
       </div>
     </nav>
 
-    <nav class="user-menu" ref="user-menu" v-show="!isUserMenuHidden">
+    <nav
+      class="user-menu"
+      ref="user-menu"
+      v-show="!isUserMenuHidden"
+    >
       <ul>
         <li>
           <router-link to="/profile" @click.native="toggleUserMenu()">
@@ -118,18 +122,30 @@ export default {
     ...mapGetters([
       'isSidebarHidden',
       'isUserMenuHidden',
+      'isNewNotification',
       'user',
       'openProductions',
       'getOpenProductionOptions',
       'currentProduction'
-    ])
+    ]),
+
+    notificationBellClass () {
+      if (this.isNewNotification) {
+        return 'has-notifications'
+      } else {
+        return 'has-no-notifications'
+      }
+    }
   },
   methods: {
     ...mapActions([
+      'loadNotification',
+      'setProduction',
       'toggleSidebar',
       'toggleUserMenu',
       'logout'
     ]),
+
     logout () {
       this.$store.dispatch('logout', (err, success) => {
         if (err) console.log(err)
@@ -137,6 +153,7 @@ export default {
         if (success) this.$router.push('/login')
       })
     },
+
     isProductionContext () {
       const path = this.$store.state.route.path
       return path.indexOf('assets') > 0 ||
@@ -144,20 +161,31 @@ export default {
         path.indexOf('sequences') > 0 ||
         path.indexOf('episodes') > 0 ||
         path.indexOf('playlists') > 0 ||
+        (path.indexOf('task-types') > 0 && path.indexOf('productions') > 0) ||
         path.indexOf('breakdown') > 0
     }
   },
+
   watch: {
     currentProductionId () {
-      this.$store.commit(
-        'SET_CURRENT_PRODUCTION',
-        `${this.currentProductionId}`
-      )
+      this.setProduction(`${this.currentProductionId}`)
     },
+
     currentProduction () {
       if (this.currentProduction &&
           this.currentProductionId !== this.currentProduction.id) {
         this.currentProductionId = this.currentProduction.id
+      }
+    }
+  },
+
+  socket: {
+    events: {
+      'notifications:new' (eventData) {
+        if (this.user.id === eventData.person_id) {
+          const notificationId = eventData.id
+          this.loadNotification(notificationId)
+        }
       }
     }
   }
@@ -290,5 +318,10 @@ export default {
 .has-no-notifications {
   margin-top: 5px;
   color: #CCC;
+}
+
+.has-notifications {
+  margin-top: 5px;
+  color: #00B242;
 }
 </style>
