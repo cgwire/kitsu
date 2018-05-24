@@ -1,10 +1,21 @@
 <template>
   <div class="page">
-    <h1 class="subtitle">
-      {{ currentProduction.name }}
-      <task-type-name :task-type="currentTaskType">
+    <h1 class="subtitle flexrow">
+      <span class="production-name flexrow-item">
+        {{ currentProduction.name }}
+      </span>
+      <task-type-name
+        class="flexrow-item"
+        :task-type="currentTaskType"
+      >
       </task-type-name>
     </h1>
+
+    <table-info
+      :is-loading="loading.entities"
+      :is-error="errors.entities"
+    >
+    </table-info>
 
     <div
       v-if="!this.currentTaskType.for_shots"
@@ -23,6 +34,7 @@
             v-for="asset in typeAssets"
           >
             <router-link
+              class="asset-block"
               :to="{
                 name: 'asset',
                 params: {
@@ -37,7 +49,7 @@
                 :empty-height="80"
               >
               </entity-thumbnail>
-              <span>
+              <span class="asset-name">
                 {{ asset.name }}
               </span>
             </router-link>
@@ -70,6 +82,7 @@
             v-for="shot in sequenceShots"
           >
             <router-link
+              class="shot-block"
               :to="{
                 name: 'shot',
                 params: {
@@ -84,7 +97,9 @@
                 :empty-height="80"
               >
               </entity-thumbnail>
-              {{ shot.name }}
+              <span class="shot-name">
+                {{ shot.name }}
+              </span>
             </router-link>
             <validation-tag
               :task="shot.validations[currentTaskType.name]"
@@ -103,6 +118,7 @@ import { mapGetters, mapActions } from 'vuex'
 
 import EntityThumbnail from './widgets/EntityThumbnail'
 import PageTitle from './widgets/PageTitle'
+import TableInfo from './widgets/TableInfo'
 import TaskTypeName from './widgets/TaskTypeName'
 import ValidationTag from './widgets/ValidationTag'
 
@@ -111,6 +127,7 @@ export default {
   components: {
     EntityThumbnail,
     PageTitle,
+    TableInfo,
     TaskTypeName,
     ValidationTag
   },
@@ -118,10 +135,10 @@ export default {
   data () {
     return {
       loading: {
-        notifications: false
+        entities: false
       },
       errors: {
-        notifications: false
+        entities: false
       }
     }
   },
@@ -130,16 +147,13 @@ export default {
     ...mapGetters([
       'assetMap',
       'assetsByType',
+      'currentTaskType',
       'currentProduction',
       'displayedAssets',
       'shotsByEpisode',
       'shotMap',
       'taskTypeMap'
     ]),
-
-    currentTaskType () {
-      return this.taskTypeMap[this.$route.params.task_type_id] || {}
-    },
 
     title () {
       return `${this.currentProduction.name} / ${this.currentTaskType.name}`
@@ -148,25 +162,42 @@ export default {
 
   methods: {
     ...mapActions([
+      'initTaskType',
       'loadShots',
       'loadAssets',
       'setProduction'
-    ])
+    ]),
+
+    initData (force) {
+      this.loading.entities = true
+      this.errors.entities = false
+      this.initTaskType(force)
+        .then(() => {
+          this.loading.entities = false
+        })
+        .catch((err) => {
+          console.error(err)
+          this.loading.entities = false
+          this.errors.entities = true
+        })
+    }
   },
 
   mounted () {
-    const productionId = this.$store.state.route.params.production_id
-    if (this.currentProduction.id !== productionId) {
-      this.setProduction(productionId)
-    }
+    this.initData(false)
+  },
 
-    if (this.currentTaskType.for_shots) {
-      if (Object.keys(this.shotMap).length === 0) {
-        this.loadShots()
-      }
-    } else {
-      if (Object.keys(this.assetMap).length === 0) {
-        this.loadAssets()
+  watch: {
+    $route () {
+      this.initData(true)
+    },
+
+    currentProduction () {
+      if (this.currentProduction.id !== this.$route.params.production_id) {
+        this.$router.push({
+          name: 'task-type',
+          params: {production_id: this.currentProduction.id}
+        })
       }
     }
   },
@@ -182,6 +213,10 @@ export default {
 <style scoped>
 .page {
   margin-top: 1em;
+}
+
+.production-name {
+  font-size: 1.5em;
 }
 
 .supervisor-asset-type,
@@ -211,5 +246,10 @@ export default {
   font-size: 0.8em;
   margin-bottom: 2em;
   word-wrap: break-word;
+}
+
+.shot-block,
+.asset-block {
+  flex: 1;
 }
 </style>
