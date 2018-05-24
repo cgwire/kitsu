@@ -156,6 +156,8 @@ const mutations = {
   [LOAD_TASK_TYPES_ERROR] (state) {
     state.isTaskTypesLoading = false
     state.isTaskTypesLoadingError = true
+    state.taskTypes = []
+    state.taskTypeMap = {}
   },
 
   [LOAD_TASK_TYPES_END] (state, taskTypes) {
