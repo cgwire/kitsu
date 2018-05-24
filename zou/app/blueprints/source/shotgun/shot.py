@@ -72,8 +72,9 @@ class ImportShotgunShotsResource(BaseImportShotgunResource):
         if "assets" in sg_shot and len(sg_shot["assets"]) > 0:
             for sg_asset in sg_shot["assets"]:
                 entity_id = self.get_asset_id(sg_asset["id"])
-                asset = Entity.get(entity_id)
-                assets.append(asset)
+                if entity_id is not None:
+                    asset = Entity.get(entity_id)
+                    assets.append(asset)
         return assets
 
     def is_custom_field(self, name):
