@@ -232,6 +232,8 @@ export default {
       'assetSearchText',
       'assetSearchQueries',
       'assetTypes',
+      'assetValidationColumns',
+      'currentProduction',
       'displayedAssets',
       'openProductions',
       'isAssetsLoading',
@@ -240,9 +242,6 @@ export default {
       'deleteAsset',
       'restoreAsset',
       'getAsset',
-      'assetValidationColumns',
-      'currentProduction',
-      'currentProduction',
       'isCurrentUserManager'
     ])
   },

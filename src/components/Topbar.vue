@@ -140,6 +140,7 @@ export default {
   methods: {
     ...mapActions([
       'loadNotification',
+      'setProduction',
       'toggleSidebar',
       'toggleUserMenu',
       'logout'
@@ -160,16 +161,14 @@ export default {
         path.indexOf('sequences') > 0 ||
         path.indexOf('episodes') > 0 ||
         path.indexOf('playlists') > 0 ||
+        (path.indexOf('task-types') > 0 && path.indexOf('productions') > 0) ||
         path.indexOf('breakdown') > 0
     }
   },
 
   watch: {
     currentProductionId () {
-      this.$store.commit(
-        'SET_CURRENT_PRODUCTION',
-        `${this.currentProductionId}`
-      )
+      this.setProduction(`${this.currentProductionId}`)
     },
 
     currentProduction () {

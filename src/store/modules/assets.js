@@ -112,7 +112,7 @@ const cache = {
   assets: []
 }
 
-const state = {
+const initialState = {
   assetMap: {},
   assetTypes: [],
   nbValidationColumns: 0,
@@ -150,6 +150,10 @@ const state = {
   assetListScrollPosition: 0
 }
 
+const state = {
+  ...initialState
+}
+
 const getters = {
   assetMap: state => state.assetMap,
   assetSearchText: state => state.assetSearchText,
@@ -168,9 +172,7 @@ const getters = {
     const assetsByType = []
     let assetTypeAssets = []
     let previousAsset = null
-    let assets = []
-
-    assets = state.displayedAssets.slice(0, 100)
+    let assets = Object.values(state.assetMap)
 
     for (let asset of assets) {
       if (
@@ -357,6 +359,7 @@ const actions = {
 const mutations = {
   [LOAD_ASSETS_START] (state) {
     cache.assets = []
+    state.assetMap = {}
     state.isAssetsLoading = true
     state.isAssetsLoadingError = false
 
@@ -374,6 +377,7 @@ const mutations = {
   [LOAD_ASSETS_END] (state, { production, assets, userFilters }) {
     const validationColumns = {}
     assets = sortAssets(assets)
+    state.assetMap = {}
     assets.forEach((asset) => {
       state.assetMap[asset.id] = asset
       asset.production_id = production.id
@@ -673,33 +677,8 @@ const mutations = {
   },
 
   [RESET_ALL] (state) {
-    cache.assets = []
-    state.assetMap = {}
-    state.assetTypes = []
-    state.isAssetsLoading = false
-    state.isAssetsLoadingError = false
-    state.assetsCsvFormData = null
-    state.assetValidationColumns = {}
-    state.assetSelectionGrid = {}
-    state.searchQueries = []
-
-    cache.assetIndex = {}
-    state.displayedAssets = []
-
-    state.editAsset = {
-      isCreateError: false,
-      isLoading: false,
-      isError: false
-    }
-
-    state.deleteAsset = {
-      isLoading: false,
-      isError: false
-    }
-
-    state.restoreAsset = {
-      isLoading: false,
-      isError: false
+    state = {
+      ...initialState
     }
   }
 }

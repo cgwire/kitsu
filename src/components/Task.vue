@@ -30,12 +30,16 @@
         class="flexrow"
         v-if="currentTask"
       >
-        <span
-          class="tag is-medium flexrow-item task-type"
-          :style="taskTypeBorder"
+        <task-type-name
+          class="flexrow-item task-type"
+          :task-type="{
+            id: currentTask.task_type_id,
+            name: currentTask.task_type_name,
+            color: currentTask.task_type_color
+          }"
+          :production-id="currentProduction.id"
         >
-          {{ currentTask.task_type_name }}
-        </span>
+        </task-type-name>
         <div class="title flexrow-item">
           <router-link :to="taskEntityPath">
             {{ currentTask ? title : 'Loading...'}}
@@ -269,6 +273,7 @@ import DeleteModal from './widgets/DeleteModal'
 import EditCommentModal from './modals/EditCommentModal'
 import ButtonLink from './widgets/ButtonLink'
 import EntityThumbnail from './widgets/EntityThumbnail'
+import TaskTypeName from './widgets/TaskTypeName'
 
 export default {
   name: 'task',
@@ -285,7 +290,8 @@ export default {
     PeopleAvatar,
     ValidationTag,
     PeopleName,
-    PreviewRow
+    PreviewRow,
+    TaskTypeName
   },
 
   data () {
@@ -606,7 +612,7 @@ export default {
             return preview.id === previewId
           })
         }
-        return currentPreview.is_movie
+        return currentPreview ? currentPreview.is_movie : false
       } else {
         return false
       }

@@ -13,7 +13,17 @@
             class="validation"
             :style="validationStyle(column.color)"
             v-for="column in validationColumns">
-            {{ column.name }}
+            <router-link
+              :to="{
+                name: 'task-type',
+                params: {
+                  production_id: currentProduction.id,
+                  task_type_id: column.id
+                }
+              }"
+            >
+              {{ column.name }}
+            </router-link>
           </th>
           <th class="actions">
           </th>
