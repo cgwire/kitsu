@@ -105,6 +105,7 @@ class BaseMixin(object):
         instance fields.
         """
         try:
+            self.updated_at = datetime.datetime.now()
             db.session.add(self)
             db.session.commit()
         except:
@@ -137,6 +138,7 @@ class BaseMixin(object):
         instance fields.
         """
         try:
+            self.updated_at = datetime.datetime.now()
             for key, value in data.items():
                 setattr(self, key, value)
             db.session.commit()
