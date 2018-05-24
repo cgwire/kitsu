@@ -202,6 +202,9 @@ class BaseModelResource(Resource):
     def update_data(self, data):
         return data
 
+    def serialize_instance(self, data):
+        return data.serialize()
+
     @jwt_required
     def get(self, instance_id):
         """
@@ -210,10 +213,11 @@ class BaseModelResource(Resource):
         """
         try:
             instance = self.get_model_or_404(instance_id)
-            self.check_read_permissions(instance.serialize())
+            result = self.serialize_instance(instance)
+            self.check_read_permissions(result)
         except StatementError:
             return {"message": "Wrong id format"}, 400
-        return instance.serialize(), 200
+        return result, 200
 
     @jwt_required
     def put(self, instance_id):

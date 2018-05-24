@@ -55,3 +55,11 @@ class PersonResource(BaseModelResource):
             return True
         else:
             raise permissions.PermissionDenied
+
+    def update_data(self, data):
+        if "password" in data:
+            del data["password"]
+        return data
+
+    def serialize_instance(self, instance):
+        return instance.serialize_safe()
