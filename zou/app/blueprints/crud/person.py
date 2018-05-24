@@ -78,3 +78,8 @@ class PersonResource(BaseModelResource):
     def post_delete(self, instance_dict):
         persons_service.clear_person_cache()
         return instance_dict
+
+    def update_data(self, data, instance_id):
+        if "password" in data:
+            del data["password"]
+        return data

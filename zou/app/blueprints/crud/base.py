@@ -219,6 +219,9 @@ class BaseModelResource(Resource):
     def serialize_instance(self, data):
         return data.serialize()
 
+    def clean_get_result(self, data):
+        return data
+
     @jwt_required
     def get(self, instance_id):
         """
