@@ -179,6 +179,11 @@ class BaseModelResource(Resource):
 
     def __init__(self, model):
         Resource.__init__(self)
+        self.protected_fields = [
+            "id",
+            "created_at",
+            "updated_ad"
+        ]
         self.model = model
 
     def get_model_or_404(self, instance_id):
@@ -200,6 +205,8 @@ class BaseModelResource(Resource):
         return request.json
 
     def update_data(self, data):
+        for field in self.protected_fields:
+            data.pop(field, None)
         return data
 
     def serialize_instance(self, data):
