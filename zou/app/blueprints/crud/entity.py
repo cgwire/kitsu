@@ -21,6 +21,13 @@ class EntityResource(BaseModelResource):
 
     def __init__(self):
         BaseModelResource.__init__(self, Entity)
+        self.protected_fields += [
+            "entity_type_id",
+            "instance_casting",
+            "project_id",
+            "entities_in",
+            "entities_out"
+        ]
 
     def check_read_permissions(self, entity):
         user_service.check_project_access(entity["project_id"])
@@ -42,6 +49,7 @@ class EntityResource(BaseModelResource):
                 data["data"] = {}
             extra_data.update(data["data"])
             data["data"] = extra_data
+            data = self.update_data(data)
 
             entity.update(data)
             return entity.serialize(), 200

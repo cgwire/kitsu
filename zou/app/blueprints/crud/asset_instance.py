@@ -16,7 +16,7 @@ class AssetInstanceResource(BaseModelResource):
 
     def __init__(self):
         BaseModelResource.__init__(self, AssetInstance)
-        self.protected_fields.append(["number"])
+        self.protected_fields.append("number")
 
     def check_read_permissions(self, instance):
         if permissions.has_manager_permissions():

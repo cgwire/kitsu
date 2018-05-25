@@ -182,7 +182,7 @@ class BaseModelResource(Resource):
         self.protected_fields = [
             "id",
             "created_at",
-            "updated_ad"
+            "updated_at"
         ]
         self.model = model
 
