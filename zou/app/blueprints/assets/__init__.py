@@ -2,21 +2,21 @@ from flask import Blueprint
 from zou.app.utils.api import configure_api_from_blueprint
 
 from .resources import (
+    AssetsAndTasksResource,
+    AssetResource,
+    AssetShotAssetInstancesResource,
+    AssetSceneAssetInstancesResource,
     AssetTypeResource,
     AssetTypesResource,
-    AssetResource,
+    AssetTasksResource,
+    AssetTaskTypesResource,
     AllAssetsResource,
-    AssetsAndTasksResource,
     CastInResource,
-    ProjectAssetTypesResource,
-    ShotAssetTypesResource,
     NewAssetResource,
     ProjectAssetsResource,
     ProjectAssetTypeAssetsResource,
-    AssetTasksResource,
-    AssetTaskTypesResource,
-    AssetShotAssetInstancesResource,
-    AssetSceneAssetInstancesResource
+    ProjectAssetTypesResource,
+    ShotAssetTypesResource
 )
 
 
