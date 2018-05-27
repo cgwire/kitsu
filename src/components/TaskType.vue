@@ -45,8 +45,8 @@
               <entity-thumbnail
                 :entity="asset"
                 :square="true"
-                :empty-width="80"
-                :empty-height="80"
+                :empty-width="60"
+                :empty-height="60"
               >
               </entity-thumbnail>
               <span class="asset-name">
@@ -93,8 +93,8 @@
               <entity-thumbnail
                 :entity="shot"
                 :square="true"
-                :empty-width="80"
-                :empty-height="80"
+                :empty-width="60"
+                :empty-height="60"
               >
               </entity-thumbnail>
               <span class="shot-name">
@@ -240,8 +240,8 @@ export default {
   text-align: center;
   display: flex;
   flex-direction: column;
-  max-width: 80px;
-  min-width: 80px;
+  max-width: 60px;
+  min-width: 60px;
   margin-right: 2em;
   font-size: 0.8em;
   margin-bottom: 2em;

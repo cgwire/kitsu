@@ -134,6 +134,8 @@ const actions = {
             if (err) reject(err)
             else resolve()
           })
+        } else {
+          resolve()
         }
       } else {
         if (Object.keys(rootGetters.assetMap).length < 2 || force) {
@@ -141,6 +143,8 @@ const actions = {
             if (err) reject(err)
             else resolve()
           })
+        } else {
+          resolve()
         }
       }
     })
