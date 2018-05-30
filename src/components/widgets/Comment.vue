@@ -32,9 +32,10 @@
           revision {{ comment.preview.revision }}
         </router-link>
         <button-link
+          icon="upload"
           class="flexrow-item"
           :text="$t('tasks.add_preview')"
-          icon="upload"
+          :is-responsive="true"
           :path="{
             name: 'task-add-preview',
             params: {
@@ -44,20 +45,6 @@
           }"
           v-if="editable && !comment.preview && comment.task_status.is_reviewable"
         >
-        </button-link>
-        <!--button-link
-          class="flexrow-item"
-          :text="$t('comments.change_preview')"
-          icon="upload"
-          :path="{
-            name: 'task-change-preview',
-            params: {
-              task_id: comment.object_id,
-              comment_id: comment.id
-            }
-          }"
-          v-if="editable && comment.preview && comment.task_status.is_reviewable"
-        -->
         </button-link>
         <button-link
           icon="edit"
