@@ -228,10 +228,19 @@ const actions = {
     })
   },
 
-  deleteTaskComment ({ commit }, { taskId, commentId, callback }) {
+  deleteTaskComment ({ commit, rootState }, { taskId, commentId, callback }) {
+    const todoStatus = rootState.taskStatus.taskStatus.find((taskStatus) => {
+      console.log(taskStatus.short_name)
+      return taskStatus.short_name === 'todo'
+    })
     tasksApi.deleteTaskComment(commentId, (err) => {
       if (!err) {
-        commit(DELETE_COMMENT_END, { taskId, commentId })
+        commit(DELETE_COMMENT_END, {
+          commentId,
+          taskId,
+          taskStatusMap: rootState.taskStatus.taskStatusMap,
+          todoStatus
+        })
       }
       if (callback) callback(err)
     })
@@ -516,8 +525,29 @@ const mutations = {
     state.taskMap[task.id] = undefined
   },
 
-  [DELETE_COMMENT_END] (state, { taskId, commentId }) {
+  [DELETE_COMMENT_END] (state, {
+    taskId,
+    commentId,
+    taskStatusMap,
+    todoStatus
+  }) {
+    const task = state.taskMap[taskId]
+    let newStatus = todoStatus
     state.taskComments[taskId] = [...state.taskComments[taskId]].splice(1)
+
+    if (state.taskComments[taskId].length > 0) {
+      const newStatusId = state.taskComments[taskId][0].task_status_id
+      console.log(newStatusId)
+      newStatus = taskStatusMap[newStatusId]
+    }
+
+    Object.assign(task, {
+      task_status_id: newStatus.id,
+      task_status_color: newStatus.color,
+      task_status_name: newStatus.name,
+      task_status_short_name: newStatus.short_name,
+      task_status_priority: newStatus.priority
+    })
   },
 
   [EDIT_COMMENT_END] (state, { taskId, comment }) {
