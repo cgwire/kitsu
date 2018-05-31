@@ -28,7 +28,7 @@ import {
   RESET_ALL
 } from '../mutation-types'
 
-const state = {
+const initialState = {
   productions: [],
   productionMap: {},
   openProductions: [],
@@ -57,6 +57,8 @@ const state = {
   breakdownPath: {name: 'open-productions'},
   playlistsPath: {name: 'open-productions'}
 }
+
+let state = {...initialState}
 
 const helpers = {
   getProductionComponentPath (routeName, productionId) {
@@ -193,7 +195,6 @@ const actions = {
   },
 
   storeProductionPicture ({ commit }, formData) {
-    console.log('ok')
     commit(PRODUCTION_PICTURE_FILE_SELECTED, formData)
   },
 
@@ -214,11 +215,13 @@ const actions = {
 
 const mutations = {
   [LOAD_PRODUCTIONS_START] (state) {
+    state.productions = []
     state.isProductionsLoading = true
     state.isProductionsLoadingError = false
   },
 
   [LOAD_PRODUCTIONS_ERROR] (state) {
+    state.productions = []
     state.isProductionsLoading = false
     state.isProductionsLoadingError = true
   },
@@ -334,7 +337,6 @@ const mutations = {
 
   [PRODUCTION_PICTURE_FILE_SELECTED] (state, formData) {
     state.productionAvatarFormData = formData
-    console.log(state.productionAvatarFormData)
   },
 
   [PRODUCTION_AVATAR_UPLOADED] (state, productionId) {
@@ -362,28 +364,7 @@ const mutations = {
   },
 
   [RESET_ALL] (state) {
-    state.productions = []
-    state.productionStatus = []
-    state.isProductionsLoading = false
-    state.isProductionsLoadingError = false
-    state.currentProduction = null
-
-    state.editProduction = {
-      isLoading: false,
-      isError: false
-    }
-
-    state.deleteProduction = {
-      isLoading: false,
-      isError: false
-    }
-
-    state.assetsPath = {name: 'open-productions'}
-    state.shotsPath = {name: 'open-productions'}
-    state.sequencesPath = {name: 'open-productions'}
-    state.episodesPath = {name: 'open-productions'}
-    state.breakdownPath = {name: 'open-productions'}
-    state.playlistPath = {name: 'open-productions'}
+    state = {...initialState}
   }
 }
 

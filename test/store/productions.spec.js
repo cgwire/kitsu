@@ -17,6 +17,8 @@ import {
   DELETE_PRODUCTION_ERROR,
   DELETE_PRODUCTION_END,
 
+  PRODUCTION_PICTURE_FILE_SELECTED,
+  PRODUCTION_AVATAR_UPLOADED,
   LOAD_PRODUCTION_STATUS_END
 } from '../../src/store/mutation-types'
 
@@ -55,7 +57,13 @@ productionsApi.updateProduction = (production, callback) => {
 
 productionsApi.deleteProduction = (production, callback) => {
   process.nextTick(() => {
-    callback(null, productions)
+    callback(null, production)
+  })
+}
+
+productionsApi.postAvatar = (productionId, formData, callback) => {
+  process.nextTick(() => {
+    callback(null, productionId)
   })
 }
 
@@ -71,17 +79,17 @@ describe('productions', () => {
   beforeEach(() => {
     productions = [
       {
-        id: 1,
+        id: 'production-1',
         name: 'Caminandes',
         project_status_name: 'Open'
       },
       {
-        id: 2,
+        id: 'production-2',
         name: 'Big Buck Bunny',
         project_status_name: 'Closed'
       },
       {
-        id: 3,
+        id: 'production-3',
         name: 'Agent 327',
         project_status_name: 'Open'
       }
@@ -91,8 +99,8 @@ describe('productions', () => {
   describe('getters', () => {
     it('getProduction', () => {
       store.commit(LOAD_PRODUCTIONS_END, productions)
-      const production = getters.getProduction(state)(2)
-      expect(production.id).to.equal(2)
+      const production = getters.getProduction(state)('production-2')
+      expect(production.id).to.equal('production-2')
       expect(production.name).to.equal('Big Buck Bunny')
     })
 
@@ -152,7 +160,7 @@ describe('productions', () => {
       store.commit(LOAD_PRODUCTION_STATUS_END, productionStatuses)
       helpers.runAction('editProduction', {
         data: {
-          id: 2,
+          id: 'production-2',
           name: 'Big Buck Bunny 2',
           project_status_name: 'Open',
           project_status_id: 1
@@ -169,6 +177,7 @@ describe('productions', () => {
       expect(state.editProduction.isLoading).to.equal(true)
       expect(state.editProduction.isError).to.equal(false)
     })
+
     it('deleteProduction', (done) => {
       store.commit(LOAD_PRODUCTIONS_END, productions)
       helpers.runAction('deleteProduction', {
@@ -184,32 +193,50 @@ describe('productions', () => {
       expect(state.deleteProduction.isLoading).to.equal(true)
       expect(state.deleteProduction.isError).to.equal(false)
     })
+
+    it('storeProductionPicture', () => {
+      const formData = { form: true }
+      store.dispatch('storeProductionPicture', formData)
+      expect(state.productionAvatarFormData).to.deep.equal(formData)
+    })
+
+    it('uploadProductionAvatar', () => {
+      const formData = { form: true }
+      store.dispatch('storeProductionPicture', formData)
+      return helpers.runAction('uploadProductionAvatar', 'production-2')
+        .then(
+          () => {
+            expect(state.productionMap['production-2'].has_avatar)
+              .to.equal(true)
+        })
+    })
   })
 
   describe('mutations', () => {
-    it('LOAD_PRODUCTIONS_START', () => {
+    it(LOAD_PRODUCTIONS_START, () => {
       store.commit(LOAD_PRODUCTIONS_START)
       expect(state.isProductionsLoading).to.equal(true)
       expect(state.isProductionsLoadingError).to.equal(false)
     })
 
-    it('LOAD_PRODUCTIONS_ERROR', () => {
+    it(LOAD_PRODUCTIONS_ERROR, () => {
       store.commit(LOAD_PRODUCTIONS_ERROR)
       expect(state.isProductionsLoading).to.equal(false)
       expect(state.isProductionsLoadingError).to.equal(true)
       expect(state.productions).to.deep.equal([])
     })
 
-    it('LOAD_PRODUCTIONS_END', () => {
+    it(LOAD_PRODUCTIONS_END, () => {
       store.commit(LOAD_PRODUCTIONS_END, productions)
       expect(state.isProductionsLoading).to.equal(false)
       expect(state.isProductionsLoadingError).to.equal(false)
       expect(state.productions).to.deep.equal(productions)
       expect(state.productions[0].name).to.equal('Agent 327')
       expect(state.productions[1].name).to.equal('Caminandes')
+      expect(state.productionMap['production-1'].name).to.equal('Caminandes')
     })
 
-    it('EDIT_PRODUCTION_START', () => {
+    it(EDIT_PRODUCTION_START, () => {
       store.commit(LOAD_PRODUCTIONS_END, productions)
       store.commit(EDIT_PRODUCTION_START)
       expect(state.editProduction).to.deep.equal({
@@ -217,7 +244,8 @@ describe('productions', () => {
         isError: false
       })
     })
-    it('EDIT_PRODUCTION_ERROR', () => {
+
+    it(EDIT_PRODUCTION_ERROR, () => {
       store.commit(LOAD_PRODUCTIONS_END, productions)
       store.commit(EDIT_PRODUCTION_ERROR)
       expect(state.editProduction).to.deep.equal({
@@ -225,18 +253,19 @@ describe('productions', () => {
         isError: true
       })
     })
-    it('EDIT_PRODUCTION_END', () => {
+
+    it(EDIT_PRODUCTION_END, () => {
       store.commit(LOAD_PRODUCTIONS_END, productions)
       store.commit(LOAD_PRODUCTION_STATUS_END, productionStatuses)
       store.commit(EDIT_PRODUCTION_END, {
-        id: 4,
+        id: 'production-4',
         name: 'New production',
         project_status_name: 'Open',
         project_status_id: 1
       })
       expect(state.productions.length).to.equal(4)
       store.commit(EDIT_PRODUCTION_END, {
-        id: 2,
+        id: 'production-2',
         name: 'Big Buck Bunny 2',
         project_status_name: 'Open',
         project_status_id: 1
@@ -251,7 +280,7 @@ describe('productions', () => {
       store.commit(DELETE_PRODUCTION_END, productions[2])
     })
 
-    it('DELETE_PRODUCTION_START', () => {
+    it(DELETE_PRODUCTION_START, () => {
       store.commit(LOAD_PRODUCTIONS_END, productions)
       store.commit(DELETE_PRODUCTION_START)
       expect(state.deleteProduction).to.deep.equal({
@@ -259,7 +288,7 @@ describe('productions', () => {
         isError: false
       })
     })
-    it('DELETE_PRODUCTION_ERROR', () => {
+    it(DELETE_PRODUCTION_ERROR, () => {
       store.commit(LOAD_PRODUCTIONS_END, productions)
       store.commit(DELETE_PRODUCTION_ERROR)
       expect(state.deleteProduction).to.deep.equal({
@@ -267,7 +296,7 @@ describe('productions', () => {
         isError: true
       })
     })
-    it('DELETE_PRODUCTION_END', () => {
+    it(DELETE_PRODUCTION_END, () => {
       store.commit(LOAD_PRODUCTIONS_END, productions)
       expect(state.productions.length).to.equal(3)
       store.commit(DELETE_PRODUCTION_END, productions[1])
@@ -278,9 +307,21 @@ describe('productions', () => {
       })
     })
 
-    it('LOAD_PRODUCTION_STATUS_END', () => {
+    it(LOAD_PRODUCTION_STATUS_END, () => {
       store.commit(LOAD_PRODUCTION_STATUS_END, productionStatuses)
       expect(state.productionStatus.length).to.equal(2)
+    })
+
+    it(PRODUCTION_PICTURE_FILE_SELECTED, () => {
+      const formData = { form: true }
+      store.commit(PRODUCTION_PICTURE_FILE_SELECTED, formData)
+      expect(state.productionAvatarFormData).to.deep.equal(formData)
+    })
+
+    it(PRODUCTION_AVATAR_UPLOADED, () => {
+      store.commit(LOAD_PRODUCTIONS_END, productions)
+      store.commit(PRODUCTION_AVATAR_UPLOADED, 'production-2')
+      expect(state.productionMap['production-2'].has_avatar).to.equal(true)
     })
   })
 })
