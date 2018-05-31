@@ -1,5 +1,5 @@
-<template> <div class="data-list">
   <div style="overflow: hidden">
+    <template> <div class="data-list">
     <table class="table table-header" ref="headerWrapper">
       <thead>
         <tr>
@@ -39,10 +39,7 @@
         <tr v-for="(entry, i) in entries">
           <production-name-cell
             class="production"
-            :entry="{
-              name: entry.project_name,
-              id: entry.project_id
-            }"
+            :entry="productionMap[entry.project_id]"
             :only-avatar="true"
           >
           </production-name-cell>
@@ -151,7 +148,8 @@ export default {
   ],
   computed: {
     ...mapGetters([
-      'nbSelectedTasks'
+      'nbSelectedTasks',
+      'productionMap'
     ])
   },
   methods: {

@@ -22,7 +22,12 @@
                 background: getAvatarColor(production)
               }"
             >
-              {{ generateAvatar(production) }}
+              <span v-if="!production.has_avatar">
+                {{ generateAvatar(production) }}
+              </span>
+              <span v-else>
+                <img :src="getThumbnailPath(production)" />
+              </span>
             </div>
             <div class="production-name">
               {{ production.name }}
@@ -167,6 +172,10 @@ export default {
       }
     },
 
+    getThumbnailPath (production) {
+      return `/api/pictures/thumbnails/projects/${production.id}.png`
+    },
+
     confirmEditProduction (form) {
       this.newProduction({
         data: form,
@@ -237,6 +246,12 @@ h1 {
   font-size: 64px;
   font-weight: bold;
   border-radius: 0;
+}
+
+.avatar img {
+  border-radius: 0;
+  width: 100%;
+  height: 100%;
 }
 
 .open-production:hover .avatar {

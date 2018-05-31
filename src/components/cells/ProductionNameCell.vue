@@ -3,7 +3,7 @@
   <div class="level">
     <div class="level-left">
       <router-link :to="productionRoute">
-        <span
+        <div
            class="level-item avatar has-text-centered"
            v-if="withAvatar"
            v-bind:style="{
@@ -11,8 +11,13 @@
            width: size + 'px',
            height: size + 'px'
         }">
-          {{ generateAvatar(entry) }}
-        </span>
+	        <span v-if="!entry.has_avatar">
+	          {{ generateAvatar(entry) }}
+	        </span>
+	        <span v-else>
+	          <img :src="getThumbnailPath(entry)" />
+	        </span>
+	      </div>
         <span class="level-item" v-if="!onlyAvatar">
           {{ entry.name }}
         </span>
@@ -26,8 +31,7 @@
 import colors from '../../lib/colors.js'
 import { mapGetters, mapActions } from 'vuex'
 
-export default {
-  name: 'production-name-cell',
+export default {uname: 'production-name-cell',
 
   props: {
     entry: {
@@ -69,12 +73,18 @@ export default {
   methods: {
     ...mapActions([
     ]),
+
     generateAvatar (entry) {
       const firstLetter = entry.name.length > 0 ? entry.name[0] : 'P'
       return firstLetter.toUpperCase()
     },
+
     getAvatarColor (entry) {
       return colors.fromString(entry.name)
+    },
+
+    getThumbnailPath (production) {
+      return `/api/pictures/thumbnails/projects/${production.id}.png`
     }
   }
 }

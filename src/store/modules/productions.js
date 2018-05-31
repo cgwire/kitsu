@@ -22,15 +22,19 @@ import {
   DELETE_PRODUCTION_END,
 
   SET_CURRENT_PRODUCTION,
+  PRODUCTION_PICTURE_FILE_SELECTED,
+  PRODUCTION_AVATAR_UPLOADED,
 
   RESET_ALL
 } from '../mutation-types'
 
 const state = {
   productions: [],
+  productionMap: {},
   openProductions: [],
   productionStatus: [],
   currentProduction: null,
+  productionAvatarFormData: null,
 
   isProductionsLoading: false,
   isProductionsLoadingError: false,
@@ -67,8 +71,11 @@ const helpers = {
 
 const getters = {
   productions: state => state.productions,
+  productionMap: state => state.productionMap,
   openProductions: state => state.openProductions,
   productionStatus: state => state.productionStatus,
+
+  productionAvatarFormData: state => state.productionAvatarFormData,
 
   isProductionsLoading: state => state.isProductionsLoading,
   isProductionsLoadingError: state => state.isProductionsLoadingError,
@@ -183,6 +190,25 @@ const actions = {
 
   setProduction ({commit}, productionId) {
     commit(SET_CURRENT_PRODUCTION, productionId)
+  },
+
+  storeProductionPicture ({ commit }, formData) {
+    console.log('ok')
+    commit(PRODUCTION_PICTURE_FILE_SELECTED, formData)
+  },
+
+  uploadProductionAvatar ({ commit, state }, productionId) {
+    return new Promise((resolve, reject) => {
+      productionsApi.postAvatar(
+        productionId,
+        state.productionAvatarFormData,
+        (err) => {
+          commit(PRODUCTION_AVATAR_UPLOADED, productionId)
+          if (err) reject(err)
+          else resolve()
+        }
+      )
+    })
   }
 }
 
@@ -201,6 +227,12 @@ const mutations = {
     state.isProductionsLoading = false
     state.isProductionsLoadingError = false
     state.productions = sortProductions(productions)
+
+    const productionMap = {}
+    state.productions.forEach((production) => {
+      productionMap[production.id] = production
+    })
+    state.productionMap = productionMap
   },
 
   [LOAD_OPEN_PRODUCTIONS_START] (state) {
@@ -213,6 +245,12 @@ const mutations = {
   [LOAD_OPEN_PRODUCTIONS_END] (state, productions) {
     state.isOpenProductionsLoading = false
     state.openProductions = sortByName(productions)
+
+    const productionMap = {}
+    productions.forEach((production) => {
+      productionMap[production.id] = production
+    })
+    state.productionMap = productionMap
   },
 
   [LOAD_PRODUCTION_STATUS_START] (state) {
@@ -259,6 +297,7 @@ const mutations = {
       Object.assign(production, newProduction)
     } else {
       state.productions.push(newProduction)
+      state.productionMap[newProduction.id] = newProduction
       state.openProductions.push(newProduction)
       state.productions = sortProductions(state.productions)
       state.openProductions = sortByName(state.openProductions)
@@ -291,6 +330,16 @@ const mutations = {
       isLoading: false,
       isError: false
     }
+  },
+
+  [PRODUCTION_PICTURE_FILE_SELECTED] (state, formData) {
+    state.productionAvatarFormData = formData
+    console.log(state.productionAvatarFormData)
+  },
+
+  [PRODUCTION_AVATAR_UPLOADED] (state, productionId) {
+    const production = state.productionMap[productionId]
+    if (production) production.has_avatar = true
   },
 
   [SET_CURRENT_PRODUCTION] (state, currentProductionId) {

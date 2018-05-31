@@ -20,16 +20,23 @@
           v-model="form.name"
           @enter="runConfirmation"
           v-focus
-        >
-        </text-field>
+        />
         <combobox
           :label="$t('productions.fields.status')"
           :options="getProductionStatusOptions"
           localeKeyPrefix="productions.status."
           @enter="runConfirmation"
           v-model="form.project_status_id"
-        >
-        </combobox>
+        />
+
+        <div v-if="productionToEdit && productionToEdit.id">
+          <span class="label">{{ $t("productions.picture") }}</span>
+          <file-upload
+            ref="fileField"
+            accept=".png"
+            @fileselected="onFileSelected"
+          />
+        </div>
       </form>
 
       <p class="has-text-right">
@@ -59,12 +66,14 @@
 <script>
 import { mapGetters, mapActions } from 'vuex'
 import TextField from '../widgets/TextField'
+import FileUpload from '../widgets/FileUpload'
 import Combobox from '../widgets/Combobox'
 
 export default {
   name: 'edit-production-modal',
   components: {
     TextField,
+    FileUpload,
     Combobox
   },
 
@@ -96,6 +105,8 @@ export default {
       if (this.active) {
         setTimeout(() => {
           this.$refs.nameField.focus()
+          this.formData = null
+          if (this.$refs.fileField) this.$refs.fileField.reset()
         }, 100)
       }
     }
@@ -107,14 +118,16 @@ export default {
         form: {
           name: this.productionToEdit.name,
           project_status_id: this.productionToEdit.project_status_id
-        }
+        },
+        formData: null
       }
     } else {
       return {
         form: {
           name: '',
           project_status_id: ''
-        }
+        },
+        formData: null
       }
     }
   },
@@ -130,8 +143,14 @@ export default {
   methods: {
     ...mapActions([
     ]),
+
     runConfirmation () {
       this.$emit('confirm', this.form)
+    },
+
+    onFileSelected (formData) {
+      this.formData = formData
+      this.$emit('fileselected', formData)
     }
   },
 

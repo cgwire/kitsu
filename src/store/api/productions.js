@@ -29,6 +29,14 @@ export default {
     client.put(`/api/data/projects/${production.id}`, data, callback)
   },
 
+  postAvatar (productionId, formData, callback) {
+    client.post(
+      `/api/pictures/thumbnails/projects/${productionId}`,
+      formData,
+      callback
+    )
+  },
+
   deleteProduction (production, callback) {
     client.del(`/api/data/projects/${production.id}`, callback)
   }

@@ -2,6 +2,7 @@ export default {
 
   people: {
     title: 'Employés',
+    picture: 'Changer l\'image',
     edit_title: 'Modifier les informations de',
     new_person: 'Ajouter un employé',
     delete_text: 'Êtes vous sûr de vouloir retirer {personName} de la base de données?',

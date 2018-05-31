@@ -130,6 +130,7 @@ export default {
 
   productions: {
     title: 'Productions',
+    picture: 'Change picture',
     home: {
       title: 'Running Productions',
       welcome: 'Welcome to Kitsu',

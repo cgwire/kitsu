@@ -2,7 +2,7 @@
   <div class="productions page fixed-page">
     <div class="level page-header">
       <div class="level-left">
-        <page-title :text="$t('productions.title')"></page-title>
+        <page-title :text="$t('productions.title')" />
       </div>
       <div class="level-right">
         <div class="level-item">
@@ -11,8 +11,7 @@
             :text="$t('productions.new_production')"
             icon="plus"
             path="/productions/new"
-          >
-          </button-link>
+          />
         </div>
       </div>
     </div>
@@ -21,7 +20,7 @@
       :entries="productions"
       :is-loading="isProductionsLoading"
       :is-error="isProductionsLoadingError"
-    ></production-list>
+    />
 
     <edit-production-modal
       :active="modals.isNewDisplayed"
@@ -29,9 +28,9 @@
       :is-error="editProduction.isError"
       :cancel-route="'/productions'"
       :production-to-edit="productionToEdit"
+      @fileselected="onProductionPictureSelected"
       @confirm="confirmEditProduction"
-    >
-    </edit-production-modal>
+    />
 
     <delete-modal
       :active="modals.isDeleteDisplayed"
@@ -41,8 +40,7 @@
       :text="deleteText()"
       :error-text="$t('productions.delete_error')"
       @confirm="confirmDeleteProduction"
-    >
-    </delete-modal>
+    />
 
   </div>
 </template>
@@ -91,12 +89,13 @@ export default {
 
   computed: {
     ...mapGetters([
-      'productions',
+      'deleteProduction',
+      'editProduction',
+      'getProduction',
       'isProductionsLoading',
       'isProductionsLoadingError',
-      'editProduction',
-      'deleteProduction',
-      'getProduction'
+      'productionAvatarFormData',
+      'productions'
     ])
   },
 
@@ -108,11 +107,14 @@ export default {
 
   methods: {
     ...mapActions([
-      'loadProductions'
+      'loadProductions',
+      'storeProductionPicture',
+      'uploadProductionAvatar'
     ]),
 
     confirmEditProduction (form) {
       let action = 'newProduction'
+      const isEditing = this.productionToEdit && this.productionToEdit.id
       if (this.productionToEdit && this.productionToEdit.id) {
         action = 'editProduction'
         form.id = this.productionToEdit.id
@@ -122,8 +124,16 @@ export default {
         data: form,
         callback: (err) => {
           if (!err) {
-            this.modals.isNewDisplayed = false
-            this.$router.push('/productions')
+            if (isEditing && this.productionAvatarFormData) {
+              this.uploadProductionAvatar(form.id)
+                .then(() => {
+                  this.modals.isNewDisplayed = false
+                  this.$router.push('/productions')
+                })
+            } else {
+              this.modals.isNewDisplayed = false
+              this.$router.push('/productions')
+            }
           }
         }
       })
@@ -164,6 +174,10 @@ export default {
         this.modals.isNewDisplayed = false
         this.modals.isDeleteDisplayed = false
       }
+    },
+
+    onProductionPictureSelected (formData) {
+      this.storeProductionPicture(formData)
     }
   },
 

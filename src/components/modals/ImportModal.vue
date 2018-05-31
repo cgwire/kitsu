@@ -1,4 +1,4 @@
-<template>
+>
 <div :class="{
   'modal': true,
   'is-active': active
