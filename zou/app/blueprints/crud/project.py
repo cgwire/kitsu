@@ -25,15 +25,6 @@ class ProjectsResource(BaseModelsResource):
             data["project_status_id"] = open_status["id"]
         return data
 
-    def all_entries(self, query=None):
-        if query is None:
-            query = self.model.query
-
-        results = self.model.serialize_list(query.all())
-        for result in results:
-            result.pop("file_tree", None)
-        return results
-
 
 class ProjectResource(BaseModelResource):
 
