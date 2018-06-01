@@ -6,6 +6,9 @@ def get_instance(model, instance_id, exception):
     Get instance of any model from its ID and raise given exception if not
     found.
     """
+    if instance_id is None:
+        raise exception()
+
     try:
         instance = model.get(instance_id)
     except StatementError:

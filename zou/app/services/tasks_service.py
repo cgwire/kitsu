@@ -30,9 +30,10 @@ from zou.app.services.exception import (
 )
 
 from zou.app.services import (
-    shots_service,
     assets_service,
-    persons_service
+    base_service,
+    persons_service,
+    shots_service
 )
 
 
@@ -64,14 +65,11 @@ def get_task_status_raw(task_status_id):
     """
     Get task status matching given id as an active record.
     """
-    try:
-        task_status = TaskStatus.get(task_status_id)
-    except StatementError:
-        raise TaskStatusNotFoundException()
-
-    if task_status is None:
-        raise TaskStatusNotFoundException()
-    return task_status
+    return base_service.get_instance(
+        TaskStatus,
+        task_status_id,
+        TaskStatusNotFoundException
+    )
 
 
 def get_task_status(task_status_id):

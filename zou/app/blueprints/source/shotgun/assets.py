@@ -83,9 +83,12 @@ class ImportShotgunAssetsResource(BaseImportShotgunResource):
             entity.update(data)
             current_app.logger.info("Entity updated: %s" % entity)
         except AssetNotFoundException:
-            entity = Entity(**data)
-            entity.save()
-            current_app.logger.info("Entity created: %s" % entity)
+            if data.get("entity_type_id", None) is not None:
+                entity = Entity(**data)
+                entity.save()
+                current_app.logger.info("Entity created: %s" % entity)
+            else:
+                current_app.logger.info("Entity ignored: %s" % entity)
         return entity
 
     def post_processing(self):

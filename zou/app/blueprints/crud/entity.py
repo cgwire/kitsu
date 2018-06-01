@@ -8,6 +8,8 @@ from sqlalchemy.exc import IntegrityError, StatementError
 from zou.app.models.entity import Entity
 from zou.app.services import user_service
 
+from werkzeug.exceptions import NotFound
+
 from .base import BaseModelResource, BaseModelsResource
 
 
@@ -67,6 +69,8 @@ class EntityResource(BaseModelResource):
         except StatementError as exception:
             current_app.logger.error(str(exception))
             return {"error": True, "message": str(exception)}, 400
+        except NotFound as exception:
+            return {"error": True, "message": str(exception)}, 404
         except Exception as exception:
             current_app.logger.error(str(exception))
             return {"error": True, "message": str(exception)}, 400
