@@ -32,17 +32,6 @@ class AssetInstance(db.Model, BaseMixin, SerializerMixin):
         index=True
     )
 
-    # Do not use these column. They are deprecated and will be dropped in
-    # upcoming version
-    entity_id = db.Column(
-        UUIDType(binary=False),
-        db.ForeignKey('entity.id'),
-    )
-    entity_type_id = db.Column(
-        UUIDType(binary=False),
-        db.ForeignKey('entity_type.id')
-    )
-
     __table_args__ = (
         db.UniqueConstraint(
             'asset_id',
@@ -55,6 +44,17 @@ class AssetInstance(db.Model, BaseMixin, SerializerMixin):
             'name',
             name='asset_instance_name_uc'
         )
+    )
+
+    # Do not use these column. They are deprecated and will be dropped in
+    # upcoming version
+    entity_id = db.Column(
+        UUIDType(binary=False),
+        db.ForeignKey('entity.id'),
+    )
+    entity_type_id = db.Column(
+        UUIDType(binary=False),
+        db.ForeignKey('entity_type.id')
     )
 
     def __repr__(self):
