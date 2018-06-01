@@ -377,17 +377,14 @@ class TaskServiceTestCase(ApiDBTestCase):
             self.person.id,
             "first comment"
         )
-        comment = tasks_service.create_comment(
+        tasks_service.create_comment(
             self.task.id,
             self.task_status.id,
             self.person.id,
             "last comment"
         )
-        print(self.task.id)
-        print(comment)
         tasks = tasks_service.get_person_tasks(self.person.id, projects)
         self.assertEqual(len(tasks), 2)
-        print(tasks[0]["last_comment"])
         self.assertEqual(tasks[1]["last_comment"]["text"], "last comment")
         self.assertEqual(
             tasks[1]["last_comment"]["person_id"],

@@ -194,7 +194,6 @@ class ImportShotgunTaskTestCase(ShotgunTestCase):
 
     def test_import_scene_task(self):
         self.load_scene_task()
-        print(shots_service.get_scenes())
         scenes = shots_service.get_scenes({"shotgun_id": 1})
         self.tasks = self.get("data/tasks?entity_id=%s" % scenes[0]["id"])
         self.assertEqual(len(self.tasks), 1)
