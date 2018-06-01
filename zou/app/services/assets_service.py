@@ -1,4 +1,4 @@
-from sqlalchemy.exc import StatementError, IntegrityError
+from sqlalchemy.exc import StatementError
 
 from zou.app.utils import events, fields
 from zou.app.utils import query as query_utils
@@ -409,10 +409,12 @@ def update_asset(asset_id, data):
 
 def remove_asset(asset_id):
     asset = get_asset_raw(asset_id)
-    try:
-        asset.delete()
-    except IntegrityError:
+    is_tasks_related = Task.query.filter_by(entity_id=asset_id).count() > 0
+
+    if is_tasks_related:
         asset.update({"canceled": True})
+    else:
+        asset.delete()
     deleted_asset = asset.serialize(obj_type="Asset")
     events.emit("asset:deletion", {
         "deleted_asset": deleted_asset

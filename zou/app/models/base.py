@@ -74,6 +74,7 @@ class BaseMixin(object):
             db.session.commit()
         except:
             db.session.rollback()
+            db.session.remove()
             raise
         return instance
 
@@ -110,6 +111,7 @@ class BaseMixin(object):
             db.session.commit()
         except:
             db.session.rollback()
+            db.session.remove()
             raise
 
     def delete(self):
@@ -122,6 +124,7 @@ class BaseMixin(object):
             db.session.commit()
         except:
             db.session.rollback()
+            db.session.remove()
             raise
 
     def delete_no_commit(self):
@@ -144,4 +147,5 @@ class BaseMixin(object):
             db.session.commit()
         except:
             db.session.rollback()
+            db.session.remove()
             raise
