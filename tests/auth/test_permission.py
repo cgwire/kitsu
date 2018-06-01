@@ -1,6 +1,6 @@
 from tests.base import ApiDBTestCase
 
-from zou.app.services import tasks_service
+from zou.app.services import tasks_service, projects_service
 
 
 class PermissionTestCase(ApiDBTestCase):
@@ -124,4 +124,20 @@ class PermissionTestCase(ApiDBTestCase):
 
         self.task = tasks_service.get_task(task_id)
         tasks_service.assign_task(self.task["id"], self.user_cg_artist.id)
+        self.get("data/assets/%s" % self.asset.id, 200)
+
+    def test_has_task_related_team(self):
+        self.log_in_cg_artist()
+        self.generate_fixture_asset_type()
+        self.generate_fixture_asset()
+        self.generate_assigned_task()
+        task_id = self.task.id
+        project_id = self.project.id
+        self.get("data/assets/%s" % self.asset.id, 403)
+
+        self.task = tasks_service.get_task(task_id)
+        projects_service.update_project(project_id, {
+            "team": [self.user_cg_artist]
+        })
+        self.project.save()
         self.get("data/assets/%s" % self.asset.id, 200)

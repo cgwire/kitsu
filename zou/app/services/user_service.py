@@ -14,6 +14,7 @@ from zou.app.services import (
     assets_service,
     notifications_service,
     persons_service,
+    projects_service,
     shots_service,
     tasks_service
 )
@@ -290,8 +291,14 @@ def check_working_on_entity(entity_id):
 
 def check_has_task_related(project_id):
     """
-    Return true if current user is assigned to a task of the given project.
+    Return true if current user is assigned to a task of the given project or
+    if current_user is part of the project team.
     """
+    project = projects_service.get_project(project_id)
+    current_user = persons_service.get_current_user()
+    if current_user["id"] in project["team"]:
+        return True
+
     query = Project.query \
         .join(Task) \
         .filter(build_assignee_filter()) \
