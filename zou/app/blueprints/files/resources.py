@@ -427,7 +427,7 @@ class NewEntityOutputFileResource(Resource, ArgsMixin):
                 )
                 working_file_id = working_file["id"]
             except WorkingFileNotFoundException:
-                pass
+                working_file_id = None
 
             entity = entities_service.get_entity(entity_id)
             user_service.check_project_access(entity["project_id"])
@@ -481,7 +481,7 @@ class NewEntityOutputFileResource(Resource, ArgsMixin):
             ("output_type_id", None, True),
             ("task_type_id", None, True),
             ("person_id", None, False),
-            ("working_file_id", "", True),
+            ("working_file_id", None, False),
             ("comment", "", True),
             ("revision", 0, False),
             ("extension", "", False),
@@ -567,7 +567,8 @@ class NewInstanceOutputFileResource(Resource, ArgsMixin):
                 )
                 working_file_id = working_file["id"]
             except WorkingFileNotFoundException:
-                pass
+                working_file_id = None
+
             asset_instance = assets_service.get_asset_instance(
                 asset_instance_id
             )
@@ -628,7 +629,7 @@ class NewInstanceOutputFileResource(Resource, ArgsMixin):
             ("output_type_id", None, True),
             ("task_type_id", None, True),
             ("person_id", None, False),
-            ("working_file_id", "", True),
+            ("working_file_id", None, False),
             ("comment", "", True),
             ("revision", 0, False),
             ("extension", "", False),
