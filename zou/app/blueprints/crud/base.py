@@ -52,8 +52,9 @@ class BaseModelsResource(Resource):
         name_filter = []
         filters = {}
 
+        column_names = [column.name for column in self.model.__table__.columns]
         for key, value in options.items():
-            if key != "page":
+            if key != "page" and key in column_names:
                 field_key = getattr(self.model, key)
                 expr = field_key.property
 
@@ -77,13 +78,13 @@ class BaseModelsResource(Resource):
 
         return (many_join_filter, in_filter, name_filter, filters)
 
-    def apply_filters(self, query):
+    def apply_filters(self, options):
         (
             many_join_filter,
             in_filter,
             name_filter,
             criterions
-        ) = self.build_filters(query)
+        ) = self.build_filters(options)
 
         query = self.model.query.filter_by(**criterions)
 
@@ -132,6 +133,12 @@ class BaseModelsResource(Resource):
                     return self.paginated_entries(query, page)
                 else:
                     return self.all_entries(query)
+        except StatementError as exception:
+            return {
+                "error": True,
+                "message": "One of the value of the filter has not the "
+                           "proper format: %s" % exception.message
+            }, 400
         except permissions.PermissionDenied:
             abort(403)
 
@@ -172,6 +179,11 @@ class BaseModelResource(Resource):
 
     def __init__(self, model):
         Resource.__init__(self)
+        self.protected_fields = [
+            "id",
+            "created_at",
+            "updated_at"
+        ]
         self.model = model
 
     def get_model_or_404(self, instance_id):
@@ -193,7 +205,12 @@ class BaseModelResource(Resource):
         return request.json
 
     def update_data(self, data):
+        for field in self.protected_fields:
+            data.pop(field, None)
         return data
+
+    def serialize_instance(self, data):
+        return data.serialize()
 
     @jwt_required
     def get(self, instance_id):
@@ -203,10 +220,11 @@ class BaseModelResource(Resource):
         """
         try:
             instance = self.get_model_or_404(instance_id)
-            self.check_read_permissions(instance.serialize())
+            result = self.serialize_instance(instance)
+            self.check_read_permissions(result)
         except StatementError:
             return {"message": "Wrong id format"}, 400
-        return instance.serialize(), 200
+        return result, 200
 
     @jwt_required
     def put(self, instance_id):

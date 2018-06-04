@@ -464,20 +464,34 @@ class ShotAssetInstancesResource(Resource, ArgsMixin):
     @jwt_required
     def post(self, shot_id):
         """
-        Create an asset instance on given shot.
+        Add an asset instance to given shot.
         """
         args = self.get_args([
-            ("asset_id", None, True),
-            ("description", None, False)
+            ("asset_instance_id", None, True)
         ])
         shot = shots_service.get_shot(shot_id)
         user_service.check_project_access(shot["project_id"])
         shot = breakdown_service.add_asset_instance_to_shot(
             shot_id,
-            args["asset_id"],
-            args["description"]
+            args["asset_instance_id"]
         )
         return shot, 201
+
+
+class RemoveShotAssetInstanceResource(Resource, ArgsMixin):
+
+    @jwt_required
+    def delete(self, shot_id, asset_instance_id):
+        """
+        Remove an asset instance from given shot.
+        """
+        shot = shots_service.get_shot(shot_id)
+        user_service.check_project_access(shot["project_id"])
+        shot = breakdown_service.remove_asset_instance_for_shot(
+            shot_id,
+            asset_instance_id
+        )
+        return shot, 204
 
 
 class SceneAssetInstancesResource(Resource, ArgsMixin):
@@ -502,12 +516,12 @@ class SceneAssetInstancesResource(Resource, ArgsMixin):
         ])
         scene = shots_service.get_scene(scene_id)
         user_service.check_project_access(scene["project_id"])
-        scene = breakdown_service.add_asset_instance_to_scene(
+        asset_instance = breakdown_service.add_asset_instance_to_scene(
             scene_id,
             args["asset_id"],
             args["description"]
         )
-        return scene, 201
+        return asset_instance, 201
 
 
 class SceneCameraInstancesResource(Resource):

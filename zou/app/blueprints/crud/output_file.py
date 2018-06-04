@@ -20,7 +20,8 @@ class OutputFilesResource(BaseModelsResource):
             return query
         else:
             query = query \
-                .join(Entity, Project) \
+                .join(Entity, OutputFile.entity_id == Entity.id) \
+                .join(Project) \
                 .filter(user_service.build_related_projects_filter())
             return query
 

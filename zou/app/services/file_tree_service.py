@@ -154,6 +154,7 @@ def get_output_file_name(
 
 def get_instance_file_name(
     asset_instance,
+    temporal_entity,
     output_type=None,
     task_type=None,
     mode="output",
@@ -161,15 +162,14 @@ def get_instance_file_name(
     revision=1,
     nb_elements=1
 ):
-    shot = entities_service.get_entity(asset_instance["entity_id"])
     asset = entities_service.get_entity(asset_instance["asset_id"])
-    project = get_project(shot)
+    project = get_project(temporal_entity)
     tree = get_tree_from_project(project)
 
     file_name = get_file_name_root(
         tree,
         mode,
-        entity=shot,
+        entity=temporal_entity,
         output_type=output_type,
         task_type=task_type,
         name=name,
@@ -249,6 +249,7 @@ def get_output_folder_path(
 
 def get_instance_folder_path(
     asset_instance,
+    temporal_entity,
     output_type=None,
     task_type=None,
     name="name",
@@ -257,9 +258,8 @@ def get_instance_folder_path(
     revision=1,
     sep=os.sep,
 ):
-    shot = entities_service.get_entity(asset_instance["entity_id"])
     asset = entities_service.get_entity(asset_instance["asset_id"])
-    project = get_project(shot)
+    project = get_project(temporal_entity)
     tree = get_tree_from_project(project)
     root_path = get_root_path(tree, mode, sep)
     style = tree[mode]["folder_path"].get("style", "")
@@ -272,7 +272,7 @@ def get_instance_folder_path(
 
     folder_path = update_variable(
         folder_template,
-        entity=shot,
+        entity=temporal_entity,
         software=None,
         output_type=output_type,
         name=name,

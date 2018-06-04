@@ -1,6 +1,6 @@
 import datetime
 
-from flask import request, abort, current_app
+from flask import request, abort
 from flask_restful import Resource, reqparse
 from flask_jwt_extended import jwt_required
 
@@ -174,12 +174,13 @@ class InstanceOutputFilePathResource(Resource, ArgsMixin):
     """
 
     @jwt_required
-    def post(self, asset_instance_id):
+    def post(self, asset_instance_id, temporal_entity_id):
         args = self.get_arguments()
 
         try:
             asset_instance = assets_service.get_asset_instance(
                 asset_instance_id)
+            entity = entities_service.get_entity(temporal_entity_id)
             asset = assets_service.get_asset(asset_instance["asset_id"])
             output_type = files_service.get_output_type(args["output_type_id"])
             task_type = tasks_service.get_task_type(args["task_type_id"])
@@ -187,6 +188,7 @@ class InstanceOutputFilePathResource(Resource, ArgsMixin):
 
             folder_path = file_tree_service.get_instance_folder_path(
                 asset_instance,
+                entity,
                 output_type=output_type,
                 task_type=task_type,
                 mode=args["mode"],
@@ -197,6 +199,7 @@ class InstanceOutputFilePathResource(Resource, ArgsMixin):
             )
             file_name = file_tree_service.get_instance_file_name(
                 asset_instance,
+                entity,
                 output_type=output_type,
                 task_type=task_type,
                 mode=args["mode"],
@@ -209,7 +212,7 @@ class InstanceOutputFilePathResource(Resource, ArgsMixin):
                 "received_data": request.json,
             }, 400
 
-        return {"path": folder_path, "name": file_name}, 200
+        return {"folder_path": folder_path, "file_name": file_name}, 200
 
     def get_arguments(self):
         return self.get_args([
@@ -424,7 +427,7 @@ class NewEntityOutputFileResource(Resource, ArgsMixin):
                 )
                 working_file_id = working_file["id"]
             except WorkingFileNotFoundException:
-                pass
+                working_file_id = None
 
             entity = entities_service.get_entity(entity_id)
             user_service.check_project_access(entity["project_id"])
@@ -478,7 +481,7 @@ class NewEntityOutputFileResource(Resource, ArgsMixin):
             ("output_type_id", None, True),
             ("task_type_id", None, True),
             ("person_id", None, False),
-            ("working_file_id", "", True),
+            ("working_file_id", None, False),
             ("comment", "", True),
             ("revision", 0, False),
             ("extension", "", False),
@@ -553,7 +556,7 @@ class NewInstanceOutputFileResource(Resource, ArgsMixin):
     """
 
     @jwt_required
-    def post(self, asset_instance_id):
+    def post(self, asset_instance_id, temporal_entity_id):
         args = self.get_arguments()
 
         try:
@@ -564,10 +567,12 @@ class NewInstanceOutputFileResource(Resource, ArgsMixin):
                 )
                 working_file_id = working_file["id"]
             except WorkingFileNotFoundException:
-                pass
+                working_file_id = None
+
             asset_instance = assets_service.get_asset_instance(
                 asset_instance_id
             )
+            temporal_entity = entities_service.get_entity(temporal_entity_id)
 
             entity = assets_service.get_asset(asset_instance["asset_id"])
             user_service.check_project_access(entity["project_id"])
@@ -586,18 +591,20 @@ class NewInstanceOutputFileResource(Resource, ArgsMixin):
                 person["id"],
                 task_type["id"],
                 asset_instance_id=asset_instance["id"],
+                temporal_entity_id=temporal_entity_id,
                 revision=revision,
                 name=args["name"],
                 representation=args["representation"],
                 comment=args["comment"],
                 nb_elements=int(args["nb_elements"]),
-                extension=args["extension"]
+                extension=args["extension"],
             )
 
             output_file_dict = self.add_path_info(
                 output_file,
                 "output",
                 asset_instance,
+                temporal_entity,
                 output_type,
                 task_type=task_type,
                 name=args["name"],
@@ -622,7 +629,7 @@ class NewInstanceOutputFileResource(Resource, ArgsMixin):
             ("output_type_id", None, True),
             ("task_type_id", None, True),
             ("person_id", None, False),
-            ("working_file_id", "", True),
+            ("working_file_id", None, False),
             ("comment", "", True),
             ("revision", 0, False),
             ("extension", "", False),
@@ -637,6 +644,7 @@ class NewInstanceOutputFileResource(Resource, ArgsMixin):
         output_file,
         mode,
         asset_instance,
+        temporal_entity,
         output_type,
         task_type=None,
         name="main",
@@ -647,6 +655,7 @@ class NewInstanceOutputFileResource(Resource, ArgsMixin):
     ):
         folder_path = file_tree_service.get_instance_folder_path(
             asset_instance,
+            temporal_entity,
             mode=mode,
             output_type=output_type,
             revision=output_file["revision"],
@@ -657,6 +666,7 @@ class NewInstanceOutputFileResource(Resource, ArgsMixin):
         )
         file_name = file_tree_service.get_instance_file_name(
             asset_instance,
+            temporal_entity,
             mode=mode,
             revision=output_file["revision"],
             output_type=output_type,
@@ -724,7 +734,7 @@ class GetNextInstanceOutputFileRevisionResource(Resource, ArgsMixin):
     """
 
     @jwt_required
-    def post(self, asset_instance_id):
+    def post(self, asset_instance_id, temporal_entity_id):
         args = self.get_arguments()
 
         asset_instance = assets_service.get_asset_instance(asset_instance_id)
@@ -740,7 +750,8 @@ class GetNextInstanceOutputFileRevisionResource(Resource, ArgsMixin):
                 output_type["id"],
                 task_type["id"],
                 args["name"],
-                asset_instance_id=asset_instance["id"]
+                asset_instance_id=asset_instance["id"],
+                temporal_entity_id=temporal_entity_id
             )
 
         return {
@@ -776,13 +787,14 @@ class LastInstanceOutputFilesResource(Resource):
     """
 
     @jwt_required
-    def get(self, asset_instance_id):
+    def get(self, asset_instance_id, temporal_entity_id):
         asset_instance = assets_service.get_asset_instance(asset_instance_id)
         entity = entities_service.get_entity(asset_instance["asset_id"])
         if not permissions.has_manager_permissions():
             user_service.check_has_task_related(entity["project_id"])
         return files_service.get_last_output_files_for_instance(
-            asset_instance["id"]
+            asset_instance["id"],
+            temporal_entity_id,
         )
 
 
@@ -804,11 +816,14 @@ class InstanceOutputTypesResource(Resource):
     """
 
     @jwt_required
-    def get(self, asset_instance_id):
+    def get(self, asset_instance_id, temporal_entity_id):
         asset_instance = assets_service.get_asset_instance(asset_instance_id)
         entity = entities_service.get_entity(asset_instance["asset_id"])
         user_service.check_project_access(entity["project_id"])
-        return files_service.get_output_types_for_instance(asset_instance_id)
+        return files_service.get_output_types_for_instance(
+            asset_instance_id,
+            temporal_entity_id
+        )
 
 
 class EntityOutputTypeOutputFilesResource(Resource):
@@ -839,7 +854,7 @@ class InstanceOutputTypeOutputFilesResource(Resource):
     """
 
     @jwt_required
-    def get(self, asset_instance_id, output_type_id):
+    def get(self, asset_instance_id, temporal_entity_id, output_type_id):
         representation = request.args.get("representation", None)
 
         asset_instance = assets_service.get_asset_instance(asset_instance_id)
@@ -850,6 +865,7 @@ class InstanceOutputTypeOutputFilesResource(Resource):
         return \
             files_service.get_output_files_for_output_type_and_asset_instance(
                 asset_instance_id,
+                temporal_entity_id,
                 output_type_id,
                 representation=representation
             )

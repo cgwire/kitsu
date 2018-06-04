@@ -80,7 +80,8 @@ class FolderPathTestCase(ApiDBTestCase):
         data = {
             "name": "hotfix"
         }
-        result = self.post("/data/tasks/%s/working-file-path" % task_id, data, 200)
+        result = self.post(
+            "/data/tasks/%s/working-file-path" % task_id, data, 200)
         self.assertEquals(
             result["name"],
             "cosmos_landromat_props_tree_shaders_hotfix_v005"
@@ -90,7 +91,8 @@ class FolderPathTestCase(ApiDBTestCase):
             "name": "hotfix",
             "revision": 3
         }
-        result = self.post("/data/tasks/%s/working-file-path" % task_id, data, 200)
+        result = self.post(
+            "/data/tasks/%s/working-file-path" % task_id, data, 200)
         self.assertEquals(
             result["name"],
             "cosmos_landromat_props_tree_shaders_hotfix_v003"
@@ -109,59 +111,63 @@ class FolderPathTestCase(ApiDBTestCase):
 
     def test_get_path_shot_asset_instance(self):
         self.output_type = files_service.get_or_create_output_type("Cache")
+        self.generate_fixture_scene_asset_instance()
         self.generate_fixture_shot_asset_instance(
-            asset=self.asset,
-            shot=self.shot
+            self.shot,
+            self.asset_instance
         )
         data = {
             "name": "main",
+            "temporal_entity_id": self.shot.id,
             "output_type_id": self.output_type["id"],
             "task_type_id": self.task_type_animation.id,
             "representation": "abc",
             "revision": 3
         }
         result = self.post(
-            "/data/asset-instances/%s/output-file-path" %
-            self.asset_instance.id,
+            "/data/asset-instances/%s/entities/%s/output-file-path" % (
+                self.asset_instance.id,
+                self.shot.id
+            ),
             data,
             200
         )
         self.assertEquals(
-            result["path"],
+            result["folder_path"],
             "/simple/productions/export/cosmos_landromat/shot/s01/p01/"
             "animation/cache/props/tree/instance_0001/abc"
         )
         self.assertEquals(
-            result["name"],
+            result["file_name"],
             "cosmos_landromat_s01_p01_animation_cache_main_tree_0001_v003"
         )
 
     def test_get_path_scene_asset_instance(self):
         self.output_type = files_service.get_or_create_output_type("Cache")
-        self.generate_fixture_scene_asset_instance(
-            asset=self.asset,
-            scene=self.scene
-        )
+        self.generate_fixture_scene_asset_instance()
         data = {
             "name": "main",
+            "temporal_entity_id": self.scene.id,
             "output_type_id": self.output_type["id"],
             "task_type_id": self.task_type_animation.id,
             "representation": "abc",
             "revision": 3
         }
         result = self.post(
-            "/data/asset-instances/%s/output-file-path" %
-            self.asset_instance.id,
+            "/data/asset-instances/%s/entities/%s/output-file-path" % (
+                self.asset_instance.id,
+                self.scene.id,
+            ),
             data,
             200
         )
         self.assertEquals(
-            result["path"],
+            result["folder_path"],
             "/simple/productions/export/cosmos_landromat/scene/s01/sc01/"
             "animation/cache/props/tree/instance_0001/abc"
         )
         self.assertEquals(
-            result["name"],
+            result["file_name"],
             "cosmos_landromat_s01_sc01_animation_cache_main_tree_0001_v003"
         )
 
@@ -181,7 +187,8 @@ class FolderPathTestCase(ApiDBTestCase):
         data = {
             "revision": 3
         }
-        result = self.post("/data/tasks/%s/working-file-path" % self.task.id, data, 200)
+        result = self.post(
+            "/data/tasks/%s/working-file-path" % self.task.id, data, 200)
         self.assertEquals(
             result["path"],
             "/simple/productions/cosmos_landromat/assets/props/tree/shaders/"
@@ -211,7 +218,8 @@ class FolderPathTestCase(ApiDBTestCase):
         data = {
             "sep": "\\"
         }
-        result = self.post("data/tasks/%s/working-file-path" % self.task.id, data, 200)
+        result = self.post(
+            "data/tasks/%s/working-file-path" % self.task.id, data, 200)
         self.assertEquals(
             result["path"],
             "/simple\\productions\\cosmos_landromat\\assets\\props\\tree\\"
@@ -220,7 +228,8 @@ class FolderPathTestCase(ApiDBTestCase):
 
     def test_get_path_wrong_task_id(self):
         data = {}
-        self.post("/data/tasks/%s/working-file-path" % self.task_type.id, data, 404)
+        self.post(
+            "/data/tasks/%s/working-file-path" % self.task_type.id, data, 404)
 
     def test_get_name_wrong_task_id(self):
         data = {

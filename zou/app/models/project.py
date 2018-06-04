@@ -6,6 +6,21 @@ from zou.app.models.serializer import SerializerMixin
 from zou.app.models.base import BaseMixin
 
 
+class ProjectPersonLink(db.Model):
+    __tablename__ = "project_person_link"
+    project_id = db.Column(
+        UUIDType(binary=False),
+        db.ForeignKey("project.id"),
+        primary_key=True
+    )
+    person_id = db.Column(
+        UUIDType(binary=False),
+        db.ForeignKey("person.id"),
+        primary_key=True
+    )
+    shotgun_id = db.Column(db.Integer)
+
+
 class Project(db.Model, BaseMixin, SerializerMixin):
     """
     Describes a CG production the studio works on.
@@ -20,4 +35,9 @@ class Project(db.Model, BaseMixin, SerializerMixin):
         UUIDType(binary=False),
         db.ForeignKey('project_status.id'),
         index=True
+    )
+
+    team = db.relationship(
+        "Person",
+        secondary="project_person_link"
     )

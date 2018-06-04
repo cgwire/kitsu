@@ -74,6 +74,7 @@ class BaseMixin(object):
             db.session.commit()
         except:
             db.session.rollback()
+            db.session.remove()
             raise
         return instance
 
@@ -105,10 +106,12 @@ class BaseMixin(object):
         instance fields.
         """
         try:
+            self.updated_at = datetime.datetime.now()
             db.session.add(self)
             db.session.commit()
         except:
             db.session.rollback()
+            db.session.remove()
             raise
 
     def delete(self):
@@ -121,6 +124,7 @@ class BaseMixin(object):
             db.session.commit()
         except:
             db.session.rollback()
+            db.session.remove()
             raise
 
     def delete_no_commit(self):
@@ -137,9 +141,11 @@ class BaseMixin(object):
         instance fields.
         """
         try:
+            self.updated_at = datetime.datetime.now()
             for key, value in data.items():
                 setattr(self, key, value)
             db.session.commit()
         except:
             db.session.rollback()
+            db.session.remove()
             raise

@@ -610,10 +610,12 @@ def remove_shot(shot_id):
     the shot as canceled.
     """
     shot = get_shot_raw(shot_id)
-    try:
-        shot.delete()
-    except IntegrityError:
+    is_tasks_related = Task.query.filter_by(entity_id=shot_id).count() > 0
+
+    if is_tasks_related:
         shot.update({"canceled": True})
+    else:
+        shot.delete()
     deleted_shot = shot.serialize(obj_type="Shot")
     events.emit("shot:deletion", {"deleted_shot": deleted_shot})
     return deleted_shot

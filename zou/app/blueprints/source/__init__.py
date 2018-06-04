@@ -57,6 +57,10 @@ from .shotgun.notes import (
     ImportShotgunNotesResource,
     ImportRemoveShotgunNoteResource
 )
+from .shotgun.team import (
+    ImportShotgunProjectConnectionsResource,
+    ImportRemoveShotgunProjectConnectionResource
+)
 
 from .csv.projects import ProjectsCsvImportResource
 from .csv.persons import PersonsCsvImportResource
@@ -77,6 +81,8 @@ routes = [
     ("/import/shotgun/versions", ImportShotgunVersionsResource),
     ("/import/shotgun/notes", ImportShotgunNotesResource),
     ("/import/shotgun/errors", ShotgunImportErrorsResource),
+    ("/import/shotgun/project-connections",
+     ImportShotgunProjectConnectionsResource),
     ("/import/shotgun/errors/<error_id>", ShotgunImportErrorResource),
     ("/import/shotgun/remove/project", ImportRemoveShotgunProjectResource),
     ("/import/shotgun/remove/person", ImportRemoveShotgunPersonResource),
@@ -85,6 +91,8 @@ routes = [
     ("/import/shotgun/remove/episode", ImportRemoveShotgunEpisodeResource),
     ("/import/shotgun/remove/sequence", ImportRemoveShotgunSequenceResource),
     ("/import/shotgun/remove/asset", ImportRemoveShotgunAssetResource),
+    ("/import/shotgun/remove/project-connection",
+     ImportRemoveShotgunProjectConnectionResource),
     ("/import/shotgun/remove/step", ImportRemoveShotgunStepResource),
     ("/import/shotgun/remove/status", ImportRemoveShotgunStatusResource),
     ("/import/shotgun/remove/task", ImportRemoveShotgunTaskResource),

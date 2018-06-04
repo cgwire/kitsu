@@ -94,6 +94,12 @@ def clean_auth_tokens():
     commands.clean_auth_tokens()
 
 
+@cli.command('clear_all_auth_tokens')
+def clear_all_auth_tokens():
+    "Remove all authentication tokens."
+    commands.clean_auth_tokens()
+
+
 @cli.command('init_data')
 def init_data():
     projects_service.get_open_status()
@@ -123,14 +129,16 @@ def init_data():
     tasks_service.get_or_create_task_type(modeling, "Texture", "#64B5F6", 2)
     tasks_service.get_or_create_task_type(modeling, "Modeling", "#78909C", 3)
     tasks_service.get_or_create_task_type(animation, "Setup", "#9CCC65", 4)
-    tasks_service.get_or_create_task_type(concept, "Storyboard", "#43A047", 1, True)
+    tasks_service.get_or_create_task_type(
+        concept, "Storyboard", "#43A047", 1, True)
     tasks_service.get_or_create_task_type(layout, "Layout", "#7CB342", 2, True)
     tasks_service.get_or_create_task_type(
         animation, "Animation", "#009688", 3, True)
     tasks_service.get_or_create_task_type(
         compositing, "Lighting", "#F9A825", 4, True)
     tasks_service.get_or_create_task_type(fx, "FX", "#26C6DA", 5, True)
-    tasks_service.get_or_create_task_type(compositing, "Render", "#F06292", 6, True)
+    tasks_service.get_or_create_task_type(
+        compositing, "Render", "#F06292", 6, True)
     tasks_service.get_or_create_task_type(
         compositing, "Compositing", "#ff5252", 7, True)
     print("Task types initialized.")
@@ -175,6 +183,22 @@ def patch_set_done_flag_on_task_status():
         tasks_service.update_task_status(task_status["id"], {
             "is_done": task_status["short_name"] == "done"
         })
+
+
+@cli.command()
+def patch_scene_asset_instance():
+    """
+    Patch to run after upgrade from 0.6.1 or lower to 0.6.2 or superior.
+    It concerns only casting based on instances.
+    """
+    from zou.app.models.asset_instance import AssetInstance
+    for asset_instance in AssetInstance.query.all():
+        try:
+            asset_instance.update({
+                "scene_id": asset_instance.entity_id
+            })
+        except:
+            print(asset_instance.serialize())
 
 
 if __name__ == '__main__':

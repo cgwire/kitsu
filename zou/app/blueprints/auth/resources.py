@@ -74,6 +74,9 @@ def on_identity_loaded(sender, identity):
             return identity
         except PersonNotFoundException:
             return None
+        except Exception as exception:
+            current_app.logger.error(exception.message)
+            return None
 
 
 class AuthenticatedResource(Resource):
@@ -183,8 +186,15 @@ class LoginResource(Resource):
         except UnactiveUserException:
             return {
                 "error": True,
+                "login": False,
                 "message": "User is unactive, he cannot log in."
             }, 400
+        except Exception as exception:
+            return {
+                "error": True,
+                "login": False,
+                "message": exception.message
+            }, 500
 
     def get_arguments(self):
         parser = reqparse.RequestParser()

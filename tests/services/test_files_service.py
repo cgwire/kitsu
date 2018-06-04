@@ -169,7 +169,6 @@ class FileServiceTestCase(ApiDBTestCase):
             self.task_type.id
         )
         self.assertEqual(output_file["revision"], 2)
-
         output_file = files_service.get_last_output_revision(
             self.asset.id,
             self.output_type.id,
@@ -248,31 +247,46 @@ class FileServiceTestCase(ApiDBTestCase):
             )
         self.assertEquals(len(output_files), 3)
 
-    def test_get_output_files_for_output_type_and_asset_instance(self):
-        asset_instance = self.generate_fixture_shot_asset_instance(
-            asset=self.asset,
-            shot=self.shot
-        )
+    def test_get_output_files_for_output_type_and_scene_asset_instance(self):
+        self.generate_fixture_asset()
+        self.generate_fixture_scene()
+        scene_id = str(self.scene.id)
+        asset_instance = self.generate_fixture_scene_asset_instance()
         geometry = self.output_type
         self.generate_fixture_output_file(
-            geometry, 1, representation="obj", asset_instance=asset_instance)
+            geometry, 1, representation="obj", asset_instance=asset_instance,
+            temporal_entity_id=scene_id
+        )
         self.generate_fixture_output_file(
-            geometry, 2, representation="obj", asset_instance=asset_instance)
+            geometry, 2, representation="obj", asset_instance=asset_instance,
+            temporal_entity_id=scene_id
+        )
         self.generate_fixture_output_file(
-            geometry, 3, representation="obj", asset_instance=asset_instance)
+            geometry, 3, representation="obj", asset_instance=asset_instance,
+            temporal_entity_id=scene_id
+        )
         self.generate_fixture_output_file(
-            geometry, 4, representation="obj", asset_instance=asset_instance)
+            geometry, 4, representation="obj", asset_instance=asset_instance,
+            temporal_entity_id=scene_id
+        )
 
         self.generate_fixture_output_file(
-            geometry, 1, representation="max", asset_instance=asset_instance)
+            geometry, 1, representation="max", asset_instance=asset_instance,
+            temporal_entity_id=scene_id
+        )
         self.generate_fixture_output_file(
-            geometry, 2, representation="max", asset_instance=asset_instance)
+            geometry, 2, representation="max", asset_instance=asset_instance,
+            temporal_entity_id=scene_id
+        )
         self.generate_fixture_output_file(
-            geometry, 3, representation="max", asset_instance=asset_instance)
+            geometry, 3, representation="max", asset_instance=asset_instance,
+            temporal_entity_id=scene_id
+        )
 
         output_files = \
             files_service.get_output_files_for_output_type_and_asset_instance(
                 asset_instance.id,
+                scene_id,
                 geometry.id
             )
         self.assertEquals(len(output_files), 7)
@@ -280,6 +294,7 @@ class FileServiceTestCase(ApiDBTestCase):
         output_files = \
             files_service.get_output_files_for_output_type_and_asset_instance(
                 asset_instance.id,
+                scene_id,
                 geometry.id,
                 representation="obj"
             )
@@ -288,6 +303,75 @@ class FileServiceTestCase(ApiDBTestCase):
         output_files = \
             files_service.get_output_files_for_output_type_and_asset_instance(
                 asset_instance.id,
+                scene_id,
+                geometry.id,
+                representation="max"
+            )
+        self.assertEquals(len(output_files), 3)
+
+    def test_get_output_files_for_output_type_and_shot_asset_instance(self):
+        self.generate_fixture_asset()
+        self.generate_fixture_scene()
+
+        scene_id = str(self.scene.id)
+        shot_id = str(self.shot.id)
+        asset_instance = self.generate_fixture_scene_asset_instance()
+        self.generate_fixture_shot_asset_instance(
+            self.shot,
+            self.asset_instance
+        )
+        geometry = self.output_type
+        self.generate_fixture_output_file(
+            geometry, 1, representation="obj", asset_instance=asset_instance,
+            temporal_entity_id=shot_id
+        )
+        self.generate_fixture_output_file(
+            geometry, 2, representation="obj", asset_instance=asset_instance,
+            temporal_entity_id=shot_id
+        )
+        self.generate_fixture_output_file(
+            geometry, 3, representation="obj", asset_instance=asset_instance,
+            temporal_entity_id=shot_id
+        )
+        self.generate_fixture_output_file(
+            geometry, 4, representation="obj", asset_instance=asset_instance,
+            temporal_entity_id=shot_id
+        )
+
+        self.generate_fixture_output_file(
+            geometry, 1, representation="max", asset_instance=asset_instance,
+            temporal_entity_id=shot_id
+        )
+        self.generate_fixture_output_file(
+            geometry, 2, representation="max", asset_instance=asset_instance,
+            temporal_entity_id=shot_id
+        )
+        self.generate_fixture_output_file(
+            geometry, 3, representation="max", asset_instance=asset_instance,
+            temporal_entity_id=shot_id
+        )
+
+        output_files = \
+            files_service.get_output_files_for_output_type_and_asset_instance(
+                asset_instance.id,
+                shot_id,
+                geometry.id
+            )
+        self.assertEquals(len(output_files), 7)
+
+        output_files = \
+            files_service.get_output_files_for_output_type_and_asset_instance(
+                asset_instance.id,
+                shot_id,
+                geometry.id,
+                representation="obj"
+            )
+        self.assertEquals(len(output_files), 4)
+
+        output_files = \
+            files_service.get_output_files_for_output_type_and_asset_instance(
+                asset_instance.id,
+                shot_id,
                 geometry.id,
                 representation="max"
             )

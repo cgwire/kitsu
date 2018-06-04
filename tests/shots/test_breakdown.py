@@ -72,6 +72,7 @@ class BreakdownTestCase(ApiDBTestCase):
             Entity, 3,
             entities_out=[],
             entities_in=[],
+            instance_casting=[],
             project_id=self.project.id,
             entity_type_id=self.asset_type.id
         )

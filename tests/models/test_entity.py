@@ -1,7 +1,5 @@
 from tests.base import ApiDBTestCase
 
-from zou.app.models.entity import Entity
-
 from zou.app.utils import fields
 
 
@@ -12,14 +10,9 @@ class EntityTestCase(ApiDBTestCase):
         self.generate_fixture_project_status()
         self.generate_fixture_project()
         self.generate_fixture_asset_type()
-        self.generate_data(
-            Entity,
-            3,
-            entities_out=[],
-            entities_in=[],
-            project_id=self.project.id,
-            entity_type_id=self.asset_type.id
-        )
+        self.generate_fixture_asset("Asset 1")
+        self.generate_fixture_asset("Asset 2")
+        self.generate_fixture_asset("Asset 3")
 
     def test_get_entities(self):
         entities = self.get("data/entities")

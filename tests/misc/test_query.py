@@ -1,8 +1,6 @@
 from tests.base import ApiDBTestCase
 
-from zou.app.models.entity import Entity
 from zou.app.models.project import Project
-from zou.app.models.entity_type import EntityType
 
 
 class QueryTestCase(ApiDBTestCase):
@@ -13,25 +11,19 @@ class QueryTestCase(ApiDBTestCase):
         self.generate_fixture_project()
 
         self.project_id = self.project.id
-        project = Project(name='Kitchen',
-                          project_status_id=self.open_status.id)
-        project.save()
-
+        project = Project.create(
+            name='Kitchen',
+            project_status_id=self.open_status.id
+        )
         self.project2_id = project.id
 
-        self.asset_type = EntityType(name='Shot Cosmos Landromat')
-        self.asset_type.save()
-
-        self.generate_data(Entity, 3,
-                           entities_out=[],
-                           entities_in=[],
-                           project_id=self.project_id,
-                           entity_type_id=self.asset_type.id)
-        self.generate_data(Entity, 2,
-                           entities_out=[],
-                           entities_in=[],
-                           project_id=self.project2_id,
-                           entity_type_id=self.asset_type.id)
+        self.generate_fixture_asset_type()
+        self.generate_fixture_asset_types()
+        self.generate_fixture_asset("Asset 1")
+        self.generate_fixture_asset("Asset 2")
+        self.generate_fixture_asset("Asset 3")
+        self.generate_fixture_asset_character("Asset char 1")
+        self.generate_fixture_asset_character("Asset char 2")
 
     def test_get_by_name(self):
         entities = self.get("data/entities")
@@ -39,8 +31,12 @@ class QueryTestCase(ApiDBTestCase):
         entities = self.get("data/entities?name=%s" % entities[0]['name'])
         self.assertEquals(len(entities), 1)
         entities = self.get("data/entities?name=%s&project_id=%s" % (
-            entities[0]['name'], self.project_id))
+            entities[0]['name'],
+            self.project_id)
+        )
         self.assertEquals(len(entities), 1)
         entities = self.get("data/entities?name=%s&project_id=%s" % (
-            entities[0]['name'], self.project2_id))
+            entities[0]['name'],
+            self.project2_id)
+        )
         self.assertEquals(len(entities), 0)

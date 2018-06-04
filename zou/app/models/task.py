@@ -3,6 +3,7 @@ from zou.app import db
 from zou.app.models.serializer import SerializerMixin
 from zou.app.models.base import BaseMixin
 
+
 association_table = db.Table(
     'assignations',
     db.Column(

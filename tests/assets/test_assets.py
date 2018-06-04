@@ -131,7 +131,7 @@ class AssetsTestCase(ApiDBTestCase):
         self.get(path, 404)
 
     def test_remove_asset_with_tasks(self):
-        path = "data/assets/%s" % self.asset.id
+        path = "data/assets/%s" % self.asset_dict["id"]
         self.delete(path)
         assets = assets_service.get_assets()
         self.assertEquals(len(assets), 1)

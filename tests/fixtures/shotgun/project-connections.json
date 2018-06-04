@@ -1,0 +1,44 @@
+[ 
+  {
+    "id": 1,
+    "project": {
+      "type": "Project",
+      "id": 1,
+      "name": "Agent327"
+    },
+    "user": {
+      "type": "HumanUser",
+      "id": 1,
+      "name": "Jhon Doe"
+    },
+    "type": "ProjectUserConnection"
+  },
+  {
+    "id": 1,
+    "project": {
+      "type": "Project",
+      "id": 1,
+      "name": "Agent327"
+    },
+    "user": {
+      "type": "HumanUser",
+      "id": 2,
+      "name": "Jane Doe"
+    },
+    "type": "ProjectUserConnection"
+  },
+  {
+    "id": 2,
+    "project": {
+      "type": "Project",
+      "id": 2,
+      "name": "Big Buck Bunny"
+    },
+    "user": {
+      "type": "HumanUser",
+      "id": 1,
+      "name": "Jhon Doe"
+    },
+    "type": "ProjectUserConnection"
+  }
+]
