@@ -1,5 +1,6 @@
+<template>
+<div class="data-list">
   <div style="overflow: hidden">
-    <template> <div class="data-list">
     <table class="table table-header" ref="headerWrapper">
       <thead>
         <tr>
@@ -33,7 +34,11 @@
     </table>
   </div>
 
-  <div class="table-body" v-scroll="onBodyScroll" v-if="entries.length > 0">
+  <div
+    class="table-body"
+    v-scroll="onBodyScroll"
+    v-if="entries.length > 0"
+  >
     <table class="table">
       <tbody>
         <tr v-for="(entry, i) in entries">
