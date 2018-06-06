@@ -9,6 +9,18 @@ export default {
     client.get(`/api/data/task-status`, callback)
   },
 
+  getTaskSubscribed (taskId, callback) {
+    client.get(`/api/data/user/tasks/${taskId}/subscribed`, callback)
+  },
+
+  subscribeToTask (taskId, callback) {
+    client.post(`/api/actions/user/tasks/${taskId}/subscribe`, {}, callback)
+  },
+
+  unsubscribeFromTask (taskId, callback) {
+    client.del(`/api/actions/user/tasks/${taskId}/unsubscribe`, callback)
+  },
+
   getTaskComments (taskId, callback) {
     client.get(`/api/data/tasks/${taskId}/comments`, callback)
   },

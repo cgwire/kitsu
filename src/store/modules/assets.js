@@ -643,6 +643,9 @@ const mutations = {
       0,
       state.displayedAssets.length + PAGE_SIZE
     )
+    const maxX = state.displayedAssets.length
+    const maxY = state.nbValidationColumns
+    state.assetSelectionGrid = buildSelectionGrid(maxX, maxY)
   },
 
   [SET_CURRENT_PRODUCTION] (state, production) {

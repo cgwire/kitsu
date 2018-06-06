@@ -14,6 +14,7 @@ import {
   LOAD_TASK_END,
   LOAD_TASK_STATUSES_END,
   LOAD_TASK_COMMENTS_END,
+  LOAD_TASK_SUBSCRIBE_END,
 
   NEW_TASK_COMMENT_END,
 
@@ -41,7 +42,7 @@ import {
   RESET_ALL
 } from '../mutation-types'
 
-const state = {
+const initialState = {
   taskMap: {},
   taskStatusMap: {},
   assetValidationColumns: [],
@@ -60,6 +61,10 @@ const state = {
   previewFormData: null
 }
 
+const state = {
+  ...initialState
+}
+
 const helpers = {
   getPerson (personId) {
     return personStore.getters.getPerson(
@@ -73,7 +78,7 @@ const helpers = {
 }
 
 const getters = {
-  getTask: (state, getters) => (id) => state.taskMap[id],
+  taskMap: (state) => state.taskMap,
   getTaskComments: (state, getters) => (id) => state.taskComments[id],
   getTaskPreviews: (state, getters) => (id) => state.taskPreviews[id],
 
@@ -125,6 +130,41 @@ const actions = {
         commit(LOAD_TASK_END, task)
       }
       if (callback) callback(err, task)
+    })
+  },
+
+  loadTaskSubscribed ({ commit, state }, { taskId, callback }) {
+    tasksApi.getTaskSubscribed(taskId, (err, subscribed) => {
+      if (!err) {
+        commit(LOAD_TASK_SUBSCRIBE_END, { taskId, subscribed })
+      }
+      if (callback) callback(err, subscribed)
+    })
+  },
+
+  subscribeToTask ({ commit, state }, taskId) {
+    return new Promise((resolve, reject) => {
+      tasksApi.subscribeToTask(taskId, (err) => {
+        if (err) {
+          reject(err)
+        } else {
+          commit(LOAD_TASK_SUBSCRIBE_END, { taskId, subscribed: true })
+          resolve()
+        }
+      })
+    })
+  },
+
+  unsubscribeFromTask ({ commit, state }, taskId) {
+    return new Promise((resolve, reject) => {
+      tasksApi.unsubscribeFromTask(taskId, (err) => {
+        if (err) {
+          reject(err)
+        } else {
+          commit(LOAD_TASK_SUBSCRIBE_END, { taskId, subscribed: false })
+          resolve()
+        }
+      })
     })
   },
 
@@ -230,7 +270,6 @@ const actions = {
 
   deleteTaskComment ({ commit, rootState }, { taskId, commentId, callback }) {
     const todoStatus = rootState.taskStatus.taskStatus.find((taskStatus) => {
-      console.log(taskStatus.short_name)
       return taskStatus.short_name === 'todo'
     })
     tasksApi.deleteTaskComment(commentId, (err) => {
@@ -487,6 +526,8 @@ const mutations = {
     })
   },
 
+  [LOAD_TASK_SUBSCRIBE_END] (state, { taskId, subscribed }) {},
+
   [NEW_TASK_COMMENT_END] (state, {comment, taskId}) {
     const task = state.taskMap[taskId]
     if (comment.task_status === undefined) {
@@ -675,18 +716,9 @@ const mutations = {
   },
 
   [RESET_ALL] (state, shots) {
-    state.taskMap = {}
-    state.taskStatusMap = {}
-
-    state.taskStatuses = []
-    state.taskComments = {}
-
-    state.taskPreviews = {}
-    state.selectedTasks = {}
-    state.selectedValidations = {}
-    state.nbSelectedTasks = 0
-    state.nbSelectedValidations = 0
-    state.previewFormData = null
+    state = {
+      ...initialState
+    }
   }
 }
 
