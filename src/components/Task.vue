@@ -45,13 +45,17 @@
             {{ currentTask ? title : 'Loading...'}}
           </router-link>
         </div>
+        <subscribe-button
+          class="flexrow-item"
+          :subscribed="isAssigned || isSubscribed"
+          @click="toggleSubscribe"
+        />
         <button-link
           class="flexrow-item"
           text=""
           icon="delete"
           :path="deleteTaskPath"
-        >
-        </button-link>
+        />
       </div>
 
       <div
@@ -262,18 +266,19 @@
 import { mapGetters, mapActions } from 'vuex'
 import { ChevronLeftIcon, ImageIcon } from 'vue-feather-icons'
 
-import PeopleAvatar from './widgets/PeopleAvatar'
-import PeopleName from './widgets/PeopleName'
 import AddComment from './widgets/AddComment'
-import Comment from './widgets/Comment'
-import PreviewRow from './widgets/PreviewRow'
-import ValidationTag from './widgets/ValidationTag'
 import AddPreviewModal from './modals/AddPreviewModal'
+import ButtonLink from './widgets/ButtonLink'
+import Comment from './widgets/Comment'
 import DeleteModal from './widgets/DeleteModal'
 import EditCommentModal from './modals/EditCommentModal'
-import ButtonLink from './widgets/ButtonLink'
 import EntityThumbnail from './widgets/EntityThumbnail'
+import PeopleAvatar from './widgets/PeopleAvatar'
+import PeopleName from './widgets/PeopleName'
+import PreviewRow from './widgets/PreviewRow'
+import SubscribeButton from './widgets/SubscribeButton'
 import TaskTypeName from './widgets/TaskTypeName'
+import ValidationTag from './widgets/ValidationTag'
 
 export default {
   name: 'task',
@@ -291,6 +296,7 @@ export default {
     ValidationTag,
     PeopleName,
     PreviewRow,
+    SubscribeButton,
     TaskTypeName
   },
 
@@ -332,7 +338,8 @@ export default {
       currentTaskComments: [],
       currentTaskPreviews: [],
       addPreviewFormData: null,
-      changePreviewFormData: null
+      changePreviewFormData: null,
+      isSubscribed: false
     }
   },
 
@@ -352,7 +359,7 @@ export default {
       'user',
       'isSingleEpisode',
       'taskStatusOptions',
-      'getTask',
+      'taskMap',
       'getTaskComments',
       'getTaskPreviews',
       'getTaskComment',
@@ -624,6 +631,16 @@ export default {
         previewId = this.currentTaskPreviews[0].id
       }
       return `/api/movies/originals/preview-files/${previewId}.mp4`
+    },
+
+    isAssigned () {
+      if (this.currentTask) {
+        return this.currentTask.assignees.some((assigneeId) => {
+          return assigneeId === this.user.id
+        })
+      } else {
+        return false
+      }
     }
   },
 
@@ -640,7 +657,10 @@ export default {
       'loadShots',
       'loadAssets',
       'loadTaskComments',
-      'setProduction'
+      'loadTaskSubscribed',
+      'subscribeToTask',
+      'setProduction',
+      'unsubscribeFromTask'
     ]),
 
     loadTaskData () {
@@ -678,6 +698,13 @@ export default {
                       isLoading: false,
                       isError: false
                     }
+                    this.loadTaskSubscribed({
+                      taskId: this.route.params.task_id,
+                      callback: (err, subscribed) => {
+                        if (err) console.log(err)
+                        this.isSubscribed = subscribed
+                      }
+                    })
                   }
                 }
               })
@@ -693,6 +720,13 @@ export default {
             } else {
               this.currentTaskComments = this.getCurrentTaskComments()
               this.currentTaskPreviews = this.getCurrentTaskPreviews()
+              this.loadTaskSubscribed({
+                taskId: this.route.params.task_id,
+                callback: (err, subscribed) => {
+                  if (err) console.log(err)
+                  this.isSubscribed = subscribed
+                }
+              })
             }
           }
         })
@@ -704,7 +738,7 @@ export default {
     },
 
     getCurrentTask () {
-      return this.getTask(this.route.params.task_id)
+      return this.taskMap[this.route.params.task_id]
     },
 
     getCurrentComment () {
@@ -952,6 +986,18 @@ export default {
           comment
         })
         this.resetPreview(preview.is_movie, preview)
+      }
+    },
+
+    toggleSubscribe () {
+      if (this.currentTask && !this.isAssigned) {
+        if (this.isSubscribed) {
+          this.unsubscribeFromTask(this.currentTask.id)
+          this.isSubscribed = false
+        } else {
+          this.subscribeToTask(this.currentTask.id)
+          this.isSubscribed = true
+        }
       }
     }
   },
