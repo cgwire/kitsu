@@ -492,3 +492,34 @@ def mark_notifications_as_read():
         notification.update({"read": True})
 
     return fields.serialize_list(notifications)
+
+
+def has_task_subscription(task_id):
+    """
+    Returns true if a subscription entry exists for current user and given
+    task.
+    """
+    current_user = persons_service.get_current_user()
+    return notifications_service.has_task_subscription(
+        current_user["id"],
+        task_id
+    )
+
+
+def subscribe_to_task(task_id):
+    """
+    Create a subscription entry for current user and given task
+    """
+    current_user = persons_service.get_current_user()
+    return notifications_service.subscribe_to_task(current_user["id"], task_id)
+
+
+def unsubscribe_from_task(task_id):
+    """
+    Remove subscription entry for current user and given task
+    """
+    current_user = persons_service.get_current_user()
+    return notifications_service.unsubscribe_from_task(
+        current_user["id"],
+        task_id
+    )

@@ -275,3 +275,36 @@ class NotificationResource(Resource):
     @jwt_required
     def get(self, notification_id):
         return user_service.get_notification(notification_id)
+
+
+class HasTaskSubscribedResource(Resource):
+    """
+    Return true if current user has subscribed to given task.
+    """
+
+    @jwt_required
+    def get(self, task_id):
+        return user_service.has_task_subscription(task_id)
+
+
+class TaskSubscribeResource(Resource):
+    """
+    Create a subscription entry for given task and current user. When an user
+    subscribe to a notification.
+    """
+
+    @jwt_required
+    def post(self, task_id):
+        return user_service.subscribe_to_task(task_id), 201
+
+
+class TaskUnsubscribeResource(Resource):
+    """
+    Create a subscription entry for given task and current user. When an user
+    subscribe to a notification.
+    """
+
+    @jwt_required
+    def delete(self, task_id):
+        user_service.unsubscribe_from_task(task_id)
+        return '', 204

@@ -9,19 +9,22 @@ from .resources import (
     ProjectEpisodesResource,
     ProjectSequencesResource,
     ProjectAssetTypesResource,
+    SceneTasksResource,
+    SceneTaskTypesResource,
     SequenceShotsResource,
     SequenceScenesResource,
     ShotTasksResource,
     ShotTaskTypesResource,
-    SceneTasksResource,
-    SceneTaskTypesResource,
     TodosResource,
     DoneResource,
     FilterResource,
     DesktopLoginLogsResource,
     FiltersResource,
     NotificationsResource,
-    NotificationResource
+    NotificationResource,
+    HasTaskSubscribedResource,
+    TaskSubscribeResource,
+    TaskUnsubscribeResource
 )
 
 routes = [
@@ -53,7 +56,11 @@ routes = [
     ("/data/user/desktop-login-logs", DesktopLoginLogsResource),
 
     ("/data/user/notifications", NotificationsResource),
-    ("/data/user/notifications/<notification_id>", NotificationResource)
+    ("/data/user/notifications/<notification_id>", NotificationResource),
+
+    ("/data/user/tasks/<task_id>/subscribed", HasTaskSubscribedResource),
+    ("/actions/user/tasks/<task_id>/subscribe", TaskSubscribeResource),
+    ("/actions/user/tasks/<task_id>/unsubscribe", TaskUnsubscribeResource)
 ]
 
 blueprint = Blueprint("user", "user")

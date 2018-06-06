@@ -60,7 +60,6 @@ class TaskRoutesTestCase(ApiDBTestCase):
         }
         self.put("/actions/tasks/%s/assign" % self.task.id, data, 200)
         task = self.get("data/tasks/%s" % self.task.id)
-
         self.assertEqual(task["assignees"][0], person_id)
 
     def test_task_assign_404(self):

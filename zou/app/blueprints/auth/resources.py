@@ -9,12 +9,14 @@ from flask_principal import (
     identity_loaded
 )
 
+from sqlalchemy.exc import OperationalError
+
 from zou.app.utils import auth
-from zou.app.services.exception import PersonNotFoundException
 from zou.app.services import persons_service, auth_service
 from zou.app import app
 from zou.app.services.exception import (
     NoAuthStrategyConfigured,
+    PersonNotFoundException,
     WrongPasswordException,
     WrongUserException,
     UnactiveUserException
@@ -189,6 +191,13 @@ class LoginResource(Resource):
                 "login": False,
                 "message": "User is unactive, he cannot log in."
             }, 400
+        except OperationalError as exception:
+            current_app.logger.error(exception)
+            return {
+                "error": True,
+                "login": False,
+                "message": "Database doesn't seem reachable."
+            }, 500
         except Exception as exception:
             return {
                 "error": True,
