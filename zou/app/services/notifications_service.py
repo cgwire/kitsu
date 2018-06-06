@@ -1,7 +1,10 @@
+from sqlalchemy.exc import StatementError
+
 from zou.app.models.comment import Comment
 from zou.app.models.entity import Entity
 from zou.app.models.entity_type import EntityType
 from zou.app.models.notifications import Notification
+from zou.app.models.subscription import Subscription
 
 from zou.app.services import (
     tasks_service,
@@ -9,7 +12,8 @@ from zou.app.services import (
     shots_service
 )
 from zou.app.services.exception import (
-    PersonNotFoundException
+    PersonNotFoundException,
+    SubscriptionNotFoundException
 )
 from zou.app.utils import events
 
@@ -61,12 +65,16 @@ def get_notification_recipients(task):
     """
     recipients = set()
     comments = Comment.get_all_by(object_id=task["id"])
+    subscriptions = Subscription.get_all_by(task_id=task["id"])
 
     for assignee_id in task["assignees"]:
         recipients.add(assignee_id)
 
     for comment in comments:
         recipients.add(str(comment.person_id))
+
+    for subscription in subscriptions:
+        recipients.add(str(subscription.person_id))
 
     return recipients
 
@@ -93,3 +101,49 @@ def create_notifications_for_task_and_comment(task, comment, change=False):
         except PersonNotFoundException:
             pass
     return recipient_ids
+
+def get_task_subscription(person_id, task_id):
+    """
+    Return subscription matching given person and task.
+    """
+    try:
+        subscription = Subscription.get_by(
+            person_id=person_id,
+            task_id=task_id
+        )
+        return subscription
+    except StatementError:
+        return None
+
+
+def has_task_subscription(person_id, task_id):
+    """
+    Return true if a subscription exists for this person and this task.
+    """
+    subscription = get_task_subscription(person_id, task_id)
+    return subscription is not None
+
+
+def subscribe_to_task(person_id, task_id):
+    """
+    Add a subscription entry for given person and task.
+    """
+    subscription = get_task_subscription(person_id, task_id)
+    if subscription is None:
+        subscription = Subscription.create(
+            person_id=person_id,
+            task_id=task_id
+        )
+    return subscription.serialize()
+
+
+def unsubscribe_from_task(person_id, task_id):
+    """
+    Remove subscription entry for given person and task.
+    """
+    subscription = get_task_subscription(person_id, task_id)
+    if subscription is not None:
+        subscription.delete()
+        return subscription.serialize()
+    else:
+        return {}

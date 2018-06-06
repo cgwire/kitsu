@@ -97,6 +97,10 @@ class NotificationNotFoundException(NotFound):
     pass
 
 
+class SubscriptionNotFoundException(NotFound):
+    pass
+
+
 class MalformedFileTreeException(Exception):
     pass
 

@@ -27,6 +27,7 @@ class UserContextRoutesTestCase(ApiDBTestCase):
 
         self.task_id = self.task.id
         self.project_closed_id = self.project_closed.id
+        self.user_id = str(self.user.id)
 
     def assign_user(self, task_id):
         tasks_service.assign_task(task_id, self.user.id)
@@ -352,3 +353,23 @@ class UserContextRoutesTestCase(ApiDBTestCase):
         notification_again = self.get(path)
         self.assertEqual(notification_again["id"], notification["id"])
         self.assertEqual(notification_again["full_entity_name"], "Props / Tree")
+
+    def test_subscribe_task(self):
+        recipients = notifications_service.get_notification_recipients(
+            self.task_dict
+        )
+        self.assertFalse(self.user_id in recipients)
+
+        self.post("/actions/user/tasks/%s/subscribe" % self.task_dict["id"], {})
+        recipients = notifications_service.get_notification_recipients(
+            self.task_dict
+        )
+        self.assertTrue(self.user_id in recipients)
+
+    def test_unsubscribe_task(self):
+        self.post("/actions/user/tasks/%s/subscribe" % self.task_dict["id"], {})
+        self.delete("/actions/user/tasks/%s/unsubscribe" % self.task_dict["id"])
+        recipients = notifications_service.get_notification_recipients(
+            self.task_dict
+        )
+        self.assertFalse(self.user_id in recipients)
