@@ -40,7 +40,6 @@ def upgrade():
     op.create_index(op.f('ix_subscription_person_id'), 'subscription', ['person_id'], unique=False)
     op.create_index(op.f('ix_subscription_task_id'), 'subscription', ['task_id'], unique=False)
     op.create_index(op.f('ix_subscription_task_type_id'), 'subscription', ['task_type_id'], unique=False)
-    op.drop_index('fki_search_filter_project_id_fkey', table_name='search_filter')
     # ### end Alembic commands ###
 
 
