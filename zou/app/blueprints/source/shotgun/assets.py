@@ -76,6 +76,7 @@ class ImportShotgunAssetsResource(BaseImportShotgunResource):
         return entity
 
     def save_entity(self, data):
+        entity = None
         try:
             entity = assets_service.get_raw_asset_by_shotgun_id(
                 data["shotgun_id"]
@@ -88,7 +89,7 @@ class ImportShotgunAssetsResource(BaseImportShotgunResource):
                 entity.save()
                 current_app.logger.info("Entity created: %s" % entity)
             else:
-                current_app.logger.info("Entity ignored: %s" % entity)
+                current_app.logger.info("Entity ignored: %s" % data["name"])
         return entity
 
     def post_processing(self):

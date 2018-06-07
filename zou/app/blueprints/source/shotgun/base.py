@@ -50,16 +50,20 @@ class BaseImportShotgunResource(Resource):
                 current_app.logger.error(
                     "Your data is not properly formatted: %s" % sg_entry
                 )
-            except IntegrityError:
+            except IntegrityError as exception:
+                current_app.logger.error(exception)
                 current_app.logger.error(
                     "Data information are duplicated or wrong: %s" %
                     sg_entry
                 )
-            except DataError:
+                raise
+            except DataError as exception:
+                current_app.logger.error(exception)
                 current_app.logger.error(
                     "Data cannot be stored (schema error)" %
                     sg_entry
                 )
+                raise
 
             self.post_processing()
 

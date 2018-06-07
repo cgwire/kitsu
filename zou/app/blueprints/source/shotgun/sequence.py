@@ -58,8 +58,24 @@ class ImportShotgunSequencesResource(BaseImportShotgunResource):
             current_app.logger.info("Sequence created: %s" % sequence)
 
         else:
-            sequence.update(data)
-            sequence.save()
+            # Little hack to avoid integrity errors due to
+            # duplicated data.
+            similar_sequence = Entity.get_by(
+                name=data["name"],
+                parent_id=data["parent_id"],
+                project_id=data["project_id"],
+                entity_type_id=self.sequence_type["id"]
+            )
+
+            if similar_sequence is None:
+                sequence.update(data)
+                sequence.save()
+            else:
+                sequence.update({
+                    "description": data["description"],
+                    "shotgun_id": data["shotgun_id"]
+                })
+                sequence.save()
             current_app.logger.info("Sequence updated: %s" % sequence)
 
         return sequence
