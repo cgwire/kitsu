@@ -273,16 +273,28 @@ class ToReviewResource(Resource):
 
     def get_preview_path(self, task, name, revision, software):
         try:
-            folder_path = file_tree_service.get_entity_folder_path(
-                task,
-                mode="preview",
-                software=software
+            entity = entities_service.get_entity(task["entity_id"])
+            task_type = tasks_service.get_task_type(task["entity_id"])
+            output_type = files_service.get_or_create_output_type(
+                "Preview",
+                short_name="prev"
             )
-            file_name = file_tree_service.get_file_name(
-                task,
+            folder_path = file_tree_service.get_output_file_name(
+                entity,
                 name=name,
                 mode="preview",
                 software=software,
+                output_type=output_type,
+                task_type=task_type,
+                revision=revision
+            )
+            file_name = file_tree_service.get_file_name(
+                entity,
+                name=name,
+                mode="preview",
+                software=software,
+                output_type=output_type,
+                task_type=task_type,
                 version=revision
             )
         except MalformedFileTreeException:  # No template for preview files.
