@@ -295,7 +295,7 @@ class ToReviewResource(Resource):
                 software=software,
                 output_type=output_type,
                 task_type=task_type,
-                version=revision
+                revision=revision
             )
         except MalformedFileTreeException:  # No template for preview files.
             return {"folder_path": "", "file_name": ""}
