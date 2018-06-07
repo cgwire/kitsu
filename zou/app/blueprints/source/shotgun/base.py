@@ -65,7 +65,7 @@ class BaseImportShotgunResource(Resource):
                 )
                 raise
 
-            self.post_processing()
+        self.post_processing()
 
         return fields.serialize_models(results), 200
 
