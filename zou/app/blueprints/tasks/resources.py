@@ -236,29 +236,28 @@ class ToReviewResource(Resource):
 
     @jwt_required
     def put(self, task_id):
-        (person_id, comment, working_file_id) = self.get_arguments()
+        (
+            person_id,
+            comment,
+            name,
+            revision
+        ) = self.get_arguments()
 
         try:
             task = tasks_service.get_task(task_id)
             if not permissions.has_manager_permissions():
                 user_service.check_assigned(task_id)
 
-            person = persons_service.get_person(person_id)
+            if person_id is not None:
+                person = persons_service.get_person(person_id)
+            else:
+                person = persons_service.get_current_user()
 
-            preview_path = ""
-            if working_file_id is not None:
-                working_file = files_service.get_working_file(working_file_id)
-                software = files_service.get_software(
-                    working_file["software_id"]
-                )
-                revision = working_file["revision"]
-
-                preview_path = self.get_preview_path(
-                    task,
-                    working_file["name"],
-                    revision,
-                    software
-                )
+            preview_path = self.get_preview_path(
+                task,
+                name,
+                revision
+            )
 
             task = tasks_service.task_to_review(
                 task["id"],
@@ -267,34 +266,22 @@ class ToReviewResource(Resource):
                 preview_path
             )
         except PersonNotFoundException:
-            return {"error": "Cannot find given person."}, 400
+            return {"error": True, "message": "Cannot find given person."}, 400
 
         return task
 
-    def get_preview_path(self, task, name, revision, software):
+    def get_preview_path(self, task, name, revision):
         try:
-            entity = entities_service.get_entity(task["entity_id"])
-            task_type = tasks_service.get_task_type(task["entity_id"])
-            output_type = files_service.get_or_create_output_type(
-                "Preview",
-                short_name="prev"
-            )
-            folder_path = file_tree_service.get_output_file_name(
-                entity,
+            folder_path = file_tree_service.get_working_folder_path(
+                task,
                 name=name,
                 mode="preview",
-                software=software,
-                output_type=output_type,
-                task_type=task_type,
                 revision=revision
             )
-            file_name = file_tree_service.get_file_name(
-                entity,
+            file_name = file_tree_service.get_working_file_name(
+                task,
                 name=name,
                 mode="preview",
-                software=software,
-                output_type=output_type,
-                task_type=task_type,
                 revision=revision
             )
         except MalformedFileTreeException:  # No template for preview files.
@@ -307,15 +294,17 @@ class ToReviewResource(Resource):
 
     def get_arguments(self):
         parser = reqparse.RequestParser()
-        parser.add_argument("person_id", default="")
+        parser.add_argument("person_id", default=None)
         parser.add_argument("comment", default="")
-        parser.add_argument("working_file_id", default=None)
+        parser.add_argument("name", default="main")
+        parser.add_argument("revision", default=1, type=int)
         args = parser.parse_args()
 
         return (
             args["person_id"],
             args["comment"],
-            args["working_file_id"]
+            args["name"],
+            args["revision"]
         )
 
 
