@@ -81,7 +81,6 @@ def load_plugin(app, plugin):
         if len(route_path) > 0 and route_path[0] == '/'
     ]
     plugin.routes = routes
-    app.logger.info(plugin.routes)
     plugin.blueprint = Blueprint(plugin.name, plugin.name)
     plugin.api = api_utils.configure_api_from_blueprint(
         plugin.blueprint,

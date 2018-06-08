@@ -207,7 +207,7 @@ class AssetShotAssetInstancesResource(Resource):
     @jwt_required
     def get(self, asset_id):
         """
-        Retrieve all asset instances linked to asset.
+        Retrieve all shot asset instances linked to asset.
         """
         asset = assets_service.get_asset(asset_id)
         user_service.check_project_access(asset["project_id"])
@@ -219,7 +219,7 @@ class AssetSceneAssetInstancesResource(Resource):
     @jwt_required
     def get(self, asset_id):
         """
-        Retrieve all asset instances linked to asset.
+        Retrieve all scene asset instances linked to asset.
         """
         asset = assets_service.get_asset(asset_id)
         user_service.check_project_access(asset["project_id"])
