@@ -667,9 +667,12 @@ def get_or_create_department(name):
 def get_or_create_task_type(
     department,
     name,
+    short_name="",
     color="#888888",
     priority=1,
-    for_shots=False
+    for_shots=False,
+    for_entity="Asset",
+    shotgun_id=None
 ):
     """
     Create a new task type if it doesn't exist. If it exists, it returns the
@@ -679,10 +682,12 @@ def get_or_create_task_type(
     if task_type is None:
         task_type = TaskType(
             name=name,
+            short_name=short_name,
             department_id=department["id"],
             color=color,
             priority=priority,
-            for_shots=for_shots
+            for_shots=for_shots,
+            shotgun_id=shotgun_id
         )
         task_type.save()
     return task_type.serialize()

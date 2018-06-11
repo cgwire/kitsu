@@ -4,8 +4,6 @@ from zou.app.models.project import Project
 from zou.app.models.project import ProjectPersonLink
 from zou.app.models.person import Person
 
-from zou.app.services import projects_service
-
 from zou.app.blueprints.source.shotgun.base import (
     BaseImportShotgunResource,
     ImportRemoveShotgunBaseResource
@@ -39,12 +37,9 @@ class ImportShotgunProjectConnectionsResource(BaseImportShotgunResource):
         if project_person_link is None:
             project = Project.get_by(shotgun_id=data["project_shotgun_id"])
             person = Person.get_by(shotgun_id=data["person_shotgun_id"])
-            print(project)
-            print(person)
 
             if project is not None and person is not None:
                 project.team.append(person)
-                print(project.team)
                 project.save()
                 current_app.logger.info(
                     "Project Person Link created: %s" % project

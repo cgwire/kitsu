@@ -83,6 +83,14 @@ class ImportShotgunTasksResource(BaseImportShotgunResource):
         task = Task.get_by(shotgun_id=data["shotgun_id"])
 
         if task is None:
+            task = Task.get_by(
+                name=data["name"],
+                project_id=data["project_id"],
+                task_type_id=data["task_type_id"],
+                entity_id=data["entity_id"]
+            )
+
+        if task is None:
             task = Task(**data)
             task.save()
             current_app.logger.info("Task created: %s" % task)

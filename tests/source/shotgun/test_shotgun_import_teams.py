@@ -9,7 +9,7 @@ class ImportShotgunProjectConnectionsTestCase(ShotgunTestCase):
     def test_import_project_connections(self):
         self.load_fixture("persons")
         self.load_fixture("projects")
-        self.load_fixture("project-connections")
+        self.load_fixture("projectconnections")
         projects = self.get("data/projects")
         self.assertEqual(len(projects[0]["team"]), 2)
         self.assertEqual(len(projects[1]["team"]), 1)
@@ -17,8 +17,8 @@ class ImportShotgunProjectConnectionsTestCase(ShotgunTestCase):
     def test_import_projects_twice(self):
         self.load_fixture("persons")
         self.load_fixture("projects")
-        self.load_fixture("project-connections")
-        self.load_fixture("project-connections")
+        self.load_fixture("projectconnections")
+        self.load_fixture("projectconnections")
         projects = self.get("data/projects")
         self.assertEqual(len(projects[0]["team"]), 2)
 
@@ -40,7 +40,7 @@ class ImportShotgunProjectConnectionsTestCase(ShotgunTestCase):
             "type": "ProjectUserConnection"
         }
 
-        api_path = "/import/shotgun/project-connections"
+        api_path = "/import/shotgun/projectconnections"
         self.projects = self.post(api_path, [sg_project_persons], 200)
         self.assertEqual(len(self.projects), 1)
 
