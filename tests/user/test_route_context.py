@@ -21,11 +21,18 @@ class UserContextRoutesTestCase(ApiDBTestCase):
         self.generate_fixture_task_type()
         self.generate_fixture_task_status()
         self.generate_fixture_assigner()
+
         self.task_dict = self.generate_fixture_task().serialize()
+        self.task_id = self.task.id
+        self.sequence_dict = self.sequence.serialize()
+
+        self.shot_task_dict = self.generate_fixture_shot_task().serialize()
+        self.task_type_dict = self.task_type_animation.serialize()
+        self.shot_task_id = self.task.id
+
         self.asset_dict = self.asset.serialize(obj_type="Asset")
         self.maxDiff = None
 
-        self.task_id = self.task.id
         self.project_closed_id = self.project_closed.id
         self.user_id = str(self.user.id)
 
@@ -33,7 +40,6 @@ class UserContextRoutesTestCase(ApiDBTestCase):
         tasks_service.assign_task(task_id, self.user.id)
 
     def test_get_project_sequences(self):
-        self.generate_fixture_shot_task()
         self.assign_user(self.shot_task.id)
         sequences = self.get(
             "data/user/projects/%s/sequences" % self.project.id
@@ -41,7 +47,6 @@ class UserContextRoutesTestCase(ApiDBTestCase):
         self.assertEquals(len(sequences), 1)
 
     def test_get_project_episodes(self):
-        self.generate_fixture_shot_task()
         self.assign_user(self.shot_task.id)
         episodes = self.get(
             "data/user/projects/%s/episodes" % self.project.id
@@ -51,7 +56,6 @@ class UserContextRoutesTestCase(ApiDBTestCase):
         self.assertEquals(episodes[0]["type"], "Episode")
 
     def test_get_sequence_shots(self):
-        self.generate_fixture_shot_task()
         self.assign_user(self.shot_task.id)
         shots = self.get("data/user/sequences/%s/shots" % self.sequence.id)
         self.assertEquals(len(shots), 1)
@@ -69,7 +73,6 @@ class UserContextRoutesTestCase(ApiDBTestCase):
 
     def test_get_project_asset_types(self):
         task_id = self.task.id
-        self.generate_fixture_shot_task()
         shot_task_id = self.shot_task.id
         self.generate_fixture_asset_types()
         self.generate_fixture_asset_character()
@@ -124,7 +127,6 @@ class UserContextRoutesTestCase(ApiDBTestCase):
 
     def test_get_shot_tasks(self):
         path = "data/user/shots/%s/tasks" % self.shot.id
-        self.generate_fixture_shot_task()
         shot_task_id = self.shot_task.id
 
         tasks = self.get(path)
@@ -161,7 +163,6 @@ class UserContextRoutesTestCase(ApiDBTestCase):
         self.assertEquals(task_types[0]["id"], str(task_type_id))
 
     def test_get_shot_task_types(self):
-        self.generate_fixture_shot_task()
         path = "data/user/shots/%s/task-types" % self.shot.id
         shot_task_id = self.shot_task.id
 
@@ -203,7 +204,6 @@ class UserContextRoutesTestCase(ApiDBTestCase):
         self.assertEquals(len(projects), 0)
 
     def test_get_todos(self):
-        self.generate_fixture_shot_task()
         task_id = self.task.id
         shot_task_id = self.shot_task.id
 
@@ -371,5 +371,35 @@ class UserContextRoutesTestCase(ApiDBTestCase):
         self.delete("/actions/user/tasks/%s/unsubscribe" % self.task_dict["id"])
         recipients = notifications_service.get_notification_recipients(
             self.task_dict
+        )
+        self.assertFalse(self.user_id in recipients)
+
+    def test_subscribe_sequence(self):
+        recipients = notifications_service.get_notification_recipients(
+            self.shot_task_dict
+        )
+        self.assertFalse(self.user_id in recipients)
+
+        path = "/actions/user/sequences/%s/task-types/%s/subscribe" % (
+            self.sequence_dict["id"],
+            self.task_type_dict["id"]
+        )
+        print(path)
+        self.post(path, {})
+
+        recipients = notifications_service.get_notification_recipients(
+            self.shot_task_dict
+        )
+        self.assertTrue(self.user_id in recipients)
+
+    def test_unsubscribe_sequence(self):
+        path = "/actions/user/sequences/%s/task-types/%s/" % (
+            self.sequence_dict["id"],
+            self.task_type_dict["id"]
+        )
+        self.post(path + "subscribe", {})
+        self.delete(path + "unsubscribe")
+        recipients = notifications_service.get_notification_recipients(
+            self.shot_task_dict
         )
         self.assertFalse(self.user_id in recipients)

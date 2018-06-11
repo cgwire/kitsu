@@ -290,7 +290,7 @@ class HasTaskSubscribedResource(Resource):
 class TaskSubscribeResource(Resource):
     """
     Create a subscription entry for given task and current user. When an user
-    subscribe to a notification.
+    subscribe it gets notification everytime a comment is posted on the task.
     """
 
     @jwt_required
@@ -300,11 +300,51 @@ class TaskSubscribeResource(Resource):
 
 class TaskUnsubscribeResource(Resource):
     """
-    Create a subscription entry for given task and current user. When an user
-    subscribe to a notification.
+    Remove the subscription entry matching given task and current user.
+    The user will no longer receive notifications for this task.
     """
 
     @jwt_required
     def delete(self, task_id):
         user_service.unsubscribe_from_task(task_id)
+        return '', 204
+
+
+class HasSequenceSubscribedResource(Resource):
+    """
+    Return true if current user has subscribed to given sequence and task type.
+    """
+
+    @jwt_required
+    def get(self, sequence_id, task_type_id):
+        return user_service.has_sequence_subscription(sequence_id, task_type_id)
+
+
+class SequenceSubscribeResource(Resource):
+    """
+    Create a subscription entry for given sequence and current user. When an
+    subscribe it gets notification everytime a comment is posted on tasks
+    related to the sequence.
+    """
+
+    @jwt_required
+    def post(self, sequence_id, task_type_id):
+        subscription = user_service.subscribe_to_sequence(
+            sequence_id,
+            task_type_id
+        )
+        return subscription, 201
+
+
+class SequenceUnsubscribeResource(Resource):
+    """
+    Create a subscription entry for given sequence, task type and current user.
+    """
+
+    @jwt_required
+    def delete(self, sequence_id, task_type_id):
+        user_service.unsubscribe_from_sequence(
+            sequence_id,
+            task_type_id
+        )
         return '', 204

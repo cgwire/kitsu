@@ -16,14 +16,17 @@ class NotificationsServiceTestCase(ApiDBTestCase):
         self.generate_fixture_episode()
         self.generate_fixture_sequence()
         self.generate_fixture_shot()
+        self.sequence_dict = self.sequence.serialize()
 
     def generate_fixture_comment(self):
         self.generate_fixture_person()
         self.generate_fixture_assigner()
         self.generate_fixture_department()
         self.generate_fixture_task_type()
+        self.task_type_dict = self.task_type_animation.serialize()
         self.generate_fixture_task_status()
-        self.task_dict = self.generate_fixture_task().serialize()
+        self.task = self.generate_fixture_shot_task()
+        self.task_dict = self.task.serialize()
         self.person_dict = self.generate_fixture_person(
             first_name="Jane",
             email="jane.doe@gmail.com"
@@ -80,6 +83,11 @@ class NotificationsServiceTestCase(ApiDBTestCase):
             self.person_dict["id"],
             self.task_dict["id"]
         )
+        subscription = notifications_service.get_task_subscription_raw(
+            self.person_dict["id"],
+            self.task_dict["id"]
+        )
+        self.assertIsNotNone(subscription)
         recipients = notifications_service.get_notification_recipients(
             self.task_dict
         )
@@ -94,6 +102,45 @@ class NotificationsServiceTestCase(ApiDBTestCase):
         notifications_service.unsubscribe_from_task(
             self.person_dict["id"],
             self.task_dict["id"]
+        )
+        subscription = notifications_service.get_task_subscription_raw(
+            self.person_dict["id"],
+            self.task_dict["id"]
+        )
+        self.assertIsNone(subscription)
+        recipients = notifications_service.get_notification_recipients(
+            self.task_dict
+        )
+        self.assertFalse(self.person_dict["id"] in recipients)
+
+    def test_subscribe_sequence(self):
+        self.generate_fixture_comment()
+        recipients = notifications_service.get_notification_recipients(
+            self.task_dict
+        )
+        self.assertFalse(self.person_dict["id"] in recipients)
+
+        notifications_service.subscribe_to_sequence(
+            self.person_dict["id"],
+            self.sequence_dict["id"],
+            self.task_type_dict["id"]
+        )
+        recipients = notifications_service.get_notification_recipients(
+            self.task_dict
+        )
+        self.assertTrue(self.person_dict["id"] in recipients)
+
+    def test_unsubscribe_sequence(self):
+        self.generate_fixture_comment()
+        notifications_service.subscribe_to_sequence(
+            self.person_dict["id"],
+            self.sequence_dict["id"],
+            self.task_type_dict["id"]
+        )
+        notifications_service.unsubscribe_from_sequence(
+            self.person_dict["id"],
+            self.sequence_dict["id"],
+            self.task_type_dict["id"]
         )
         recipients = notifications_service.get_notification_recipients(
             self.task_dict

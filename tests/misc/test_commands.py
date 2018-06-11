@@ -35,8 +35,6 @@ class CommandsTestCase(ApiTestCase):
             "revoked": True
         }).encode("utf-8"))
         self.assertEquals(len(self.store.keys()), 2)
-        for key in self.store.keys():
-            print(self.store.get(key))
         commands.clean_auth_tokens()
         self.assertEquals(len(self.store.keys()), 1)
         self.assertEquals(self.store.keys()[0], "testkey")
