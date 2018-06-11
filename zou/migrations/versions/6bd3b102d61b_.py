@@ -1,13 +1,12 @@
 """empty message
 
 Revision ID: 6bd3b102d61b
-Revises: 0c90834fadd2
+Revises: 3d5c93bafb9d
 Create Date: 2018-06-06 14:49:11.420104
 
 """
 from alembic import op
 import sqlalchemy as sa
-import sqlalchemy_utils
 import sqlalchemy_utils
 import uuid
 
