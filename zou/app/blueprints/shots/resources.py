@@ -177,7 +177,7 @@ class ShotsAndTasksResource(Resource):
         related tasks.
         """
         criterions = query.get_query_criterions_from_request(request)
-        user_service.check_project_access(criterions)
+        user_service.check_project_access(criterions.get("project_id", None))
         return shots_service.get_shots_and_tasks(criterions)
 
 

@@ -53,7 +53,7 @@ class AssetsAndTasksResource(Resource):
         """
         criterions = query.get_query_criterions_from_request(request)
         page = query.get_page_from_request(request)
-        user_service.check_project_access(criterions)
+        user_service.check_project_access(criterions.get("project_id", None))
         return assets_service.get_assets_and_tasks(criterions, page)
 
 
