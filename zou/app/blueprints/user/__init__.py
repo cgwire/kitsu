@@ -24,7 +24,10 @@ from .resources import (
     NotificationResource,
     HasTaskSubscribedResource,
     TaskSubscribeResource,
-    TaskUnsubscribeResource
+    TaskUnsubscribeResource,
+    HasSequenceSubscribedResource,
+    SequenceSubscribeResource,
+    SequenceUnsubscribeResource
 )
 
 routes = [
@@ -60,7 +63,20 @@ routes = [
 
     ("/data/user/tasks/<task_id>/subscribed", HasTaskSubscribedResource),
     ("/actions/user/tasks/<task_id>/subscribe", TaskSubscribeResource),
-    ("/actions/user/tasks/<task_id>/unsubscribe", TaskUnsubscribeResource)
+    ("/actions/user/tasks/<task_id>/unsubscribe", TaskUnsubscribeResource),
+
+    (
+        "/data/user/entities/<entity_id>/task-types/<task_type_id>/subscribed",
+        HasSequenceSubscribedResource
+    ),
+    (
+        "/actions/user/sequences/<sequence_id>/task-types/<task_type_id>/subscribe",
+        SequenceSubscribeResource
+    ),
+    (
+        "/actions/user/sequences/<sequence_id>/task-types/<task_type_id>/unsubscribe",
+        SequenceUnsubscribeResource
+    )
 ]
 
 blueprint = Blueprint("user", "user")

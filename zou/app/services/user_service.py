@@ -523,3 +523,40 @@ def unsubscribe_from_task(task_id):
         current_user["id"],
         task_id
     )
+
+
+def has_sequence_subscription(sequence_id, task_type_id):
+    """
+    Returns true if a subscription entry exists for current user and given
+    sequence.
+    """
+    current_user = persons_service.get_current_user()
+    return notifications_service.has_sequence_subscription(
+        current_user["id"],
+        sequence_id,
+        task_type_id
+    )
+
+
+def subscribe_to_sequence(sequence_id, task_type_id):
+    """
+    Create a subscription entry for current user and given sequence
+    """
+    current_user = persons_service.get_current_user()
+    return notifications_service.subscribe_to_sequence(
+        current_user["id"],
+        sequence_id,
+        task_type_id
+    )
+
+
+def unsubscribe_from_sequence(sequence_id, task_type_id):
+    """
+    Remove subscription entry for current user and given sequence
+    """
+    current_user = persons_service.get_current_user()
+    return notifications_service.unsubscribe_from_sequence(
+        current_user["id"],
+        sequence_id,
+        task_type_id
+    )

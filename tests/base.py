@@ -588,6 +588,7 @@ class ApiDBTestCase(ApiTestCase):
             assignees=[self.person],
             assigner_id=self.assigner.id,
         )
+        return self.shot_task
 
     def generate_fixture_scene_task(self, name="Master"):
         self.scene_task = Task.create(
