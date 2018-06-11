@@ -125,22 +125,36 @@ def init_data():
     concept = tasks_service.get_or_create_department("Concept")
     layout = tasks_service.get_or_create_department("Layout")
 
-    tasks_service.get_or_create_task_type(concept, "Concept", "#8D6E63", 1)
-    tasks_service.get_or_create_task_type(modeling, "Texture", "#64B5F6", 2)
-    tasks_service.get_or_create_task_type(modeling, "Modeling", "#78909C", 3)
-    tasks_service.get_or_create_task_type(animation, "Setup", "#9CCC65", 4)
     tasks_service.get_or_create_task_type(
-        concept, "Storyboard", "#43A047", 1, True)
-    tasks_service.get_or_create_task_type(layout, "Layout", "#7CB342", 2, True)
+        concept, "Concept", "#8D6E63", 1)
     tasks_service.get_or_create_task_type(
-        animation, "Animation", "#009688", 3, True)
+        modeling, "Texture", "#64B5F6", 2)
     tasks_service.get_or_create_task_type(
-        compositing, "Lighting", "#F9A825", 4, True)
-    tasks_service.get_or_create_task_type(fx, "FX", "#26C6DA", 5, True)
+        modeling, "Modeling", "#78909C", 3)
     tasks_service.get_or_create_task_type(
-        compositing, "Render", "#F06292", 6, True)
+        animation, "Setup", "#9CCC65", 4)
+
     tasks_service.get_or_create_task_type(
-        compositing, "Compositing", "#ff5252", 7, True)
+        concept, "Storyboard", "#43A047",
+        priority=1, for_shots=True, for_entity="Shot")
+    tasks_service.get_or_create_task_type(
+        layout, "Layout", "#7CB342",
+        priority=2, for_shots=True, for_entity="Shot")
+    tasks_service.get_or_create_task_type(
+        animation, "Animation", "#009688",
+        priority=3, for_shots=True, for_entity="Shot")
+    tasks_service.get_or_create_task_type(
+        compositing, "Lighting", "#F9A825",
+        priority=4, for_shots=True, for_entity="Shot")
+    tasks_service.get_or_create_task_type(
+        fx, "FX", "#26C6DA",
+        priority=5, for_shots=True, for_entity="Shot")
+    tasks_service.get_or_create_task_type(
+        compositing, "Render", "#F06292",
+        priority=6, for_shots=True, for_entity="Shot")
+    tasks_service.get_or_create_task_type(
+        compositing, "Compositing", "#ff5252",
+        priority=7, for_shots=True, for_entity="Shot")
     print("Task types initialized.")
 
     tasks_service.get_or_create_status(

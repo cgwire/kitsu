@@ -667,17 +667,20 @@ def get_or_create_department(name):
 def get_or_create_task_type(
     department,
     name,
-    short_name="",
     color="#888888",
     priority=1,
     for_shots=False,
     for_entity="Asset",
+    short_name="",
     shotgun_id=None
 ):
     """
     Create a new task type if it doesn't exist. If it exists, it returns the
     type from database.
     """
+
+    print("whoooo")
+    print(priority, for_shots)
     task_type = TaskType.get_by(name=name)
     if task_type is None:
         task_type = TaskType(

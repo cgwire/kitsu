@@ -59,7 +59,6 @@ class ImportShotgunStepsResource(BaseImportShotgunResource):
         current_app.logger.error("hey")
         current_app.logger.error(task_type)
         if task_type is None:
-            current_app.logger.error("None !!!")
             task_type = TaskType.get_by(
                 name=data["name"],
                 for_entity=data["for_entity"]
