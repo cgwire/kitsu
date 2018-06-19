@@ -978,7 +978,10 @@ export default {
       const preview = eventData.preview
       const comment = this.$store.getters.getTaskComment(taskId, commentId)
 
-      if (!comment.preview || comment.preview.id !== eventData.preview.id) {
+      if (
+        (!comment.preview || comment.preview.id !== eventData.preview.id) &&
+        taskId === this.currentTask.id
+      ) {
         this.$store.commit('ADD_PREVIEW_END', {
           preview,
           taskId,
