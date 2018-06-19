@@ -380,6 +380,14 @@ def get_comment_raw(comment_id):
     return comment
 
 
+def get_comment(comment_id):
+    """
+    Return comment matching give id as an active record.
+    """
+    comment = get_comment_raw()
+    return comment.serialize()
+
+
 def get_comment_by_preview_file_id(preview_file_id):
     """
     Return comment related to given preview file as a dict.
@@ -409,6 +417,12 @@ def create_comment(
         person_id=person_id,
         text=text
     )
+    return comment.serialize()
+
+
+def delete_comment(comment_id):
+    comment = get_comment_raw(comment_id)
+    comment.remove()
     return comment.serialize()
 
 
@@ -470,6 +484,7 @@ def get_person_tasks(person_id, projects, is_done=None):
         .filter(Project.id.in_(project_ids)) \
         .add_columns(
             Project.name,
+            Project.has_avatar,
             Entity.name,
             Entity.description,
             Entity.preview_file_id,
@@ -494,6 +509,7 @@ def get_person_tasks(person_id, projects, is_done=None):
     for (
         task,
         project_name,
+        project_has_avatar,
         entity_name,
         entity_description,
         entity_preview_file_id,
@@ -512,6 +528,8 @@ def get_person_tasks(person_id, projects, is_done=None):
         task_dict = task.serialize()
         task_dict.update({
             "project_name": project_name,
+            "project_id": str(task.project_id),
+            "project_has_avatar": project_has_avatar,
             "entity_name": entity_name,
             "entity_description": entity_description,
             "entity_preview_file_id": str(entity_preview_file_id),
@@ -599,7 +617,7 @@ def update_task(task_id, data):
     """
     Update task with given data.
     """
-    task = Task.get(task_id)
+    task = get_task_raw(task_id)
 
     if is_finished(task, data):
         data["end_date"] = datetime.datetime.now()
@@ -729,11 +747,12 @@ def is_finished(task, data):
     """
     Return True if task status is set to done.
     """
-    done_status = get_done_status()
-    return \
-        str(task.task_status_id) != done_status["id"] and \
-        "task_status_id" in data and \
-        data["task_status_id"] == done_status["id"]
+    if "task_status_id" in data:
+        task_status = get_task_status_raw(task.task_status_id)
+        new_task_status = get_task_status_raw(data["task_status_id"])
+        return new_task_status.id != task_status.id and new_task_status.is_done
+    else:
+        return False
 
 
 def clear_assignation(task_id):

@@ -321,6 +321,12 @@ class CreateProjectThumbnailResource(BaseCreatePictureResource):
     def is_exist(self, project_id):
         return projects_service.get_project(project_id) is not None
 
+    def prepare_creation(self, instance_id):
+        return projects_service.update_project(
+            instance_id,
+            {"has_avatar": True}
+        )
+
 
 class ProjectThumbnailResource(BasePictureResource):
 

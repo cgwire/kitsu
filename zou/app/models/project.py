@@ -30,6 +30,7 @@ class Project(db.Model, BaseMixin, SerializerMixin):
     shotgun_id = db.Column(db.Integer)
     file_tree = db.Column(JSONB)
     data = db.Column(JSONB)
+    has_avatar = db.Column(db.Boolean(), default=False)
 
     project_status_id = db.Column(
         UUIDType(binary=False),
