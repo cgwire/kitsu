@@ -27,8 +27,6 @@
           <th class="end-date" v-else>
             {{ $t('tasks.fields.end_date') }}
           </th>
-          <th class="actions">
-          </th>
         </tr>
       </thead>
     </table>
@@ -101,7 +99,6 @@
           <td class="end-date" v-else>
             {{ formatDate(entry.end_date) }}
           </td>
-          <td class="actions"></td>
        </tr>
       </tbody>
     </table>
@@ -239,6 +236,7 @@ export default {
 .production {
   width: 70px;
   min-width: 70px;
+  max-width: 70px;
 }
 
 .type {
@@ -251,13 +249,17 @@ export default {
   min-width: 80px;
 }
 
-.last-comment {
-  width: 500px;
-  min-width: 500px;
+th.last-comment {
+ max-width: 100%;
+ width: 100%;
+}
+
+td.last-comment {
+  min-width: 250px;
 }
 
 .end-date {
-  width: 150px;
+  width: 100%;
   min-width: 150px;
   color: #999;
 }

@@ -5,6 +5,8 @@
       background: person.color,
       width: size +'px',
       height: size + 'px',
+      'min-width': size +'px',
+      'min-height': size + 'px',
       'font-size': person.has_avatar ? 0 : fontSize + 'px'
     }"
     v-if="isLink"
