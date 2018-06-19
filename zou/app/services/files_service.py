@@ -458,9 +458,9 @@ def get_last_output_files_for_instance(
     return result
 
 
-def get_preview_file(preview_file_id):
+def get_preview_file_raw(preview_file_id):
     """
-    Get preview file as dict.
+    Get preview file as active record.
     """
     try:
         preview_file = PreviewFile.get(preview_file_id)
@@ -470,6 +470,14 @@ def get_preview_file(preview_file_id):
     if preview_file is None:
         raise PreviewFileNotFoundException()
 
+    return preview_file
+
+
+def get_preview_file(preview_file_id):
+    """
+    Get preview file as dict.
+    """
+    preview_file = get_preview_file_raw(preview_file_id)
     return preview_file.serialize()
 
 
@@ -587,3 +595,9 @@ def get_output_files_for_output_type_and_asset_instance(
 
     output_files = query.all()
     return OutputFile.serialize_list(output_files)
+
+
+def remove_preview_file(preview_file_id):
+    preview_file = get_preview_file_raw(preview_file_id)
+    preview_file.remove()
+    return preview_file.serialize()

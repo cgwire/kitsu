@@ -14,7 +14,7 @@ from zou.app.services import (
 from zou.app.services.exception import (
     PersonNotFoundException
 )
-from zou.app.utils import events
+from zou.app.utils import events, fields
 
 
 def get_full_entity_name(entity_id):
@@ -235,3 +235,10 @@ def unsubscribe_from_sequence(person_id, sequence_id, task_type_id):
         return subscription.serialize()
     else:
         return {}
+
+
+def delete_notifications_for_comment(comment_id):
+    notifications = Notification.get_all_by(comment_id=comment_id)
+    for notification in notifications:
+        notification.remove()
+    return fields.serialize_list(notifications)
