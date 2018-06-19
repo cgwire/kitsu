@@ -283,13 +283,11 @@ const actions = {
 
     commit(LOAD_SHOTS_START)
     shotsApi.getEpisodes(production, (err, episodes) => {
-      commit(LOAD_EPISODES_END, episodes)
       if (err) commit(LOAD_SHOTS_ERROR)
       else {
         shotsApi.getSequences(production, (err, sequences) => {
           if (err) commit(LOAD_SHOTS_ERROR)
           else {
-            commit(LOAD_SEQUENCES_END, sequences)
             shotsApi.getShots(production, (err, shots) => {
               if (err) commit(LOAD_SHOTS_ERROR)
               else {
@@ -297,6 +295,8 @@ const actions = {
                   shot.project_name = production.name
                   return shot
                 })
+                commit(LOAD_EPISODES_END, episodes)
+                commit(LOAD_SEQUENCES_END, sequences)
                 commit(LOAD_SHOTS_END, { production, shots, userFilters })
               }
               if (callback) callback(err)
