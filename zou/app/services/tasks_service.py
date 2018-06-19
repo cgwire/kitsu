@@ -696,9 +696,6 @@ def get_or_create_task_type(
     Create a new task type if it doesn't exist. If it exists, it returns the
     type from database.
     """
-
-    print("whoooo")
-    print(priority, for_shots)
     task_type = TaskType.get_by(name=name)
     if task_type is None:
         task_type = TaskType(
