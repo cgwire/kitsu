@@ -384,7 +384,7 @@ def get_comment(comment_id):
     """
     Return comment matching give id as an active record.
     """
-    comment = get_comment_raw()
+    comment = get_comment_raw(comment_id)
     return comment.serialize()
 
 
@@ -422,7 +422,7 @@ def create_comment(
 
 def delete_comment(comment_id):
     comment = get_comment_raw(comment_id)
-    comment.remove()
+    comment.delete()
     return comment.serialize()
 
 

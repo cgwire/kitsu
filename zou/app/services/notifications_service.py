@@ -240,5 +240,5 @@ def unsubscribe_from_sequence(person_id, sequence_id, task_type_id):
 def delete_notifications_for_comment(comment_id):
     notifications = Notification.get_all_by(comment_id=comment_id)
     for notification in notifications:
-        notification.remove()
+        notification.delete()
     return fields.serialize_list(notifications)
