@@ -272,7 +272,7 @@ const actions = {
     const todoStatus = rootState.taskStatus.taskStatus.find((taskStatus) => {
       return taskStatus.short_name === 'todo'
     })
-    tasksApi.deleteTaskComment(commentId, (err) => {
+    tasksApi.deleteTaskComment(taskId, commentId, (err) => {
       if (!err) {
         commit(DELETE_COMMENT_END, {
           commentId,
