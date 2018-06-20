@@ -1,4 +1,4 @@
-from flask import abort, request
+from flask import abort, request, current_app
 from flask_restful import Resource, reqparse
 from flask_jwt_extended import jwt_required
 
@@ -181,8 +181,9 @@ class TaskCommentResource(Resource):
         comment = tasks_service.get_comment(comment_id)
         if comment["preview_file_id"] is not None:
             files_service.delete_preview_file(comment["preview_file_id"])
+        notifs = notifications_service.delete_notifications_for_comment(comment["id"])
+        current_app.logger.info(notifs)
         tasks_service.delete_comment(comment["id"])
-        notifications_service.delete_notifications_for_comment(comment["id"])
 
     def update_task_status(self, task_id):
         tasks_service.get_task(task_id)
