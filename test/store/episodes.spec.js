@@ -305,7 +305,7 @@ describe('episodes', () => {
       store.commit(LOAD_EPISODES_END, episodes)
       expect(state.episodes.length).to.equal(103)
       expect(state.displayedEpisodes.length).to.equal(60)
-      store.commit(DISPLAY_MORE_EPISODES)
+      store.dispatch('displayMoreEpisodes')
       expect(state.displayedEpisodes.length).to.equal(103)
     })
 
@@ -452,6 +452,7 @@ describe('episodes', () => {
       expect(state.displayedEpisodesLength).to.equal(1)
       expect(state.displayedEpisodes[0].id).to.equal('episode-2')
       expect(state.episodeSearchText).to.equal(searchText)
+      store.commit(SET_EPISODE_SEARCH, '')
     })
 
     it(DISPLAY_MORE_EPISODES, () => {
@@ -463,7 +464,6 @@ describe('episodes', () => {
         })
       }
       store.commit(LOAD_EPISODES_END, episodes)
-      store.commit(LOAD_SEQUENCES_END, sequences)
       expect(state.episodes.length).to.equal(103)
       expect(state.displayedEpisodes.length).to.equal(60)
       store.commit(DISPLAY_MORE_EPISODES)

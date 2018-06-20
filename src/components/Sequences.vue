@@ -131,6 +131,7 @@ export default {
       'hideAssignations',
       'initSequences',
       'loadShots',
+      'loadComment',
       'setLastProductionScreen',
       'setProduction',
       'setSequenceSearch',
@@ -254,6 +255,20 @@ export default {
         this.$router.push(newPath)
         this.loadShots(() => {
           this.computeSequenceStats()
+        })
+      }
+    }
+  },
+
+  socket: {
+    events: {
+      'comment:new' (eventData) {
+        const commentId = eventData.id
+        this.loadComment({
+          commentId,
+          callback: () => {
+            this.computeSequenceStats()
+          }
         })
       }
     }

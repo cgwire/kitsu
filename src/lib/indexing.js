@@ -27,7 +27,8 @@ export const buildTaskIndex = (tasks) => {
       task.full_entity_name.replace(/_/g, ' ').replace(/-/g, ' ')
     let words = stringToIndex.split(' ').concat([
       task.task_type_name,
-      task.task_status_short_name
+      task.task_status_short_name,
+      task.project_name
     ])
     indexWords(index, taskIndex, task, words)
   })

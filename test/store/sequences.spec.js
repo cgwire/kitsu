@@ -505,6 +505,7 @@ describe('sequences', () => {
       expect(state.displayedSequencesLength).to.equal(1)
       expect(state.displayedSequences[0].id).to.equal('sequence-2')
       expect(state.sequenceSearchText).to.equal(searchText)
+      store.commit(SET_SEQUENCE_SEARCH, '')
     })
 
     it(DISPLAY_MORE_SEQUENCES, () => {

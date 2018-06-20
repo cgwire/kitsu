@@ -37,6 +37,11 @@ export default {
 
       'task:unassign' (eventData) {
         this.onAssignation(eventData)
+      },
+
+      'comment:new' (eventData) {
+        const commentId = eventData.id
+        this.$store.dispatch('loadComment', {commentId})
       }
     }
   }

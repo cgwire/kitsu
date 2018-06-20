@@ -546,15 +546,6 @@ export default {
     }
   },
 
-  socket: {
-    events: {
-      'comment:new' (eventData) {
-        const commentId = eventData.id
-        this.loadComment({id: commentId})
-      }
-    }
-  },
-
   metaInfo () {
     return {
       title: `${this.currentProduction.name} ${this.$t('shots.title')} - Kitsu`

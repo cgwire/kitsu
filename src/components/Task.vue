@@ -967,18 +967,16 @@ export default {
       })
     },
 
-    onComment (eventData) {
-      const commentId = eventData.id
-      this.$store.dispatch('loadComment', {id: commentId})
-    },
-
     onPreviewAdded (eventData) {
       const taskId = eventData.task_id
       const commentId = eventData.comment_id
       const preview = eventData.preview
       const comment = this.$store.getters.getTaskComment(taskId, commentId)
 
-      if (!comment.preview || comment.preview.id !== eventData.preview.id) {
+      if (
+        (!comment.preview || comment.preview.id !== eventData.preview.id) &&
+        taskId === this.currentTask.id
+      ) {
         this.$store.commit('ADD_PREVIEW_END', {
           preview,
           taskId,
@@ -1017,10 +1015,6 @@ export default {
 
   socket: {
     events: {
-      'comment:new' (eventData) {
-        this.onComment(eventData)
-      },
-
       'preview:add' (eventData) {
         this.onPreviewAdded(eventData)
       }

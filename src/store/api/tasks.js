@@ -52,8 +52,8 @@ export default {
     client.put(`/api/data/comments/${comment.id}`, commentData, callback)
   },
 
-  deleteTaskComment (commentId, callback) {
-    client.del(`/api/data/comments/${commentId}`, callback)
+  deleteTaskComment (taskId, commentId, callback) {
+    client.del(`/api/data/tasks/${taskId}/comments/${commentId}`, callback)
   },
 
   createTasks (data, callback) {

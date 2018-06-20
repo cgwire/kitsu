@@ -25,9 +25,7 @@
               <span v-if="!production.has_avatar">
                 {{ generateAvatar(production) }}
               </span>
-              <span v-else>
-                <img :src="getThumbnailPath(production)" />
-              </span>
+              <img :src="getThumbnailPath(production)" v-else />
             </div>
             <div class="production-name">
               {{ production.name }}
