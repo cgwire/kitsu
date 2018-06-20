@@ -186,12 +186,12 @@ const actions = {
     })
   },
 
-  loadComment ({ commit, state }, payload) {
-    tasksApi.getTaskComment(payload, (err, comment) => {
+  loadComment ({ commit, state }, {commentId, callback}) {
+    tasksApi.getTaskComment({id: commentId}, (err, comment) => {
       if (!err) {
         commit(NEW_TASK_COMMENT_END, {comment, taskId: comment.object_id})
       }
-      if (payload.callback) payload.callback(err, comment)
+      if (callback) callback(err, comment)
     })
   },
 

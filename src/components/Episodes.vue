@@ -130,6 +130,7 @@ export default {
       'editEpisode',
       'hideAssignations',
       'initEpisodes',
+      'loadComment',
       'loadShots',
       'setLastProductionScreen',
       'setProduction',
@@ -254,6 +255,20 @@ export default {
         this.$router.push(newPath)
         this.loadShots(() => {
           this.computeEpisodeStats()
+        })
+      }
+    }
+  },
+
+  socket: {
+    events: {
+      'comment:new' (eventData) {
+        const commentId = eventData.id
+        this.loadComment({
+          commentId,
+          callback: () => {
+            this.computeEpisodeStats()
+          }
         })
       }
     }

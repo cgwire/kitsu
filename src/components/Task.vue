@@ -967,11 +967,6 @@ export default {
       })
     },
 
-    onComment (eventData) {
-      const commentId = eventData.id
-      this.$store.dispatch('loadComment', {id: commentId})
-    },
-
     onPreviewAdded (eventData) {
       const taskId = eventData.task_id
       const commentId = eventData.comment_id
@@ -1020,10 +1015,6 @@ export default {
 
   socket: {
     events: {
-      'comment:new' (eventData) {
-        this.onComment(eventData)
-      },
-
       'preview:add' (eventData) {
         this.onPreviewAdded(eventData)
       }
