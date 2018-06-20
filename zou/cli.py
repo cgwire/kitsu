@@ -67,6 +67,10 @@ def create_admin(email):
 
     try:
         auth.validate_email(email)
+    except auth.EmailNotValidException:
+        print("WARNING: Email is not valid.")
+
+    try:
         password = auth.encrypt_password("default")
         persons_service.create_person(
             email,
@@ -82,9 +86,6 @@ def create_admin(email):
         sys.exit(1)
     except auth.PasswordTooShortException:
         print("Password is too short.")
-        sys.exit(1)
-    except auth.EmailNotValidException:
-        print("Email is not valid.")
         sys.exit(1)
 
 
