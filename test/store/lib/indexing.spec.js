@@ -63,36 +63,42 @@ describe('lib/indexing', () => {
         full_entity_name: 'E01 / SQ01 / SH01',
         task_status_short_name: 'wfa',
         task_type_name: 'Animation',
+        project_name: 'Caminandes',
         id: 1
       },
       {
         full_entity_name: 'E01 / SQ01 / SH02',
         task_status_short_name: 'wip',
         task_type_name: 'Animation',
+        project_name: 'Caminandes',
         id: 2
       },
       {
         full_entity_name: 'Characters / Agent327',
         task_status_short_name: 'wip',
         task_type_name: 'Modeling',
+        project_name: 'Agent327',
         id: 3
       },
       {
         full_entity_name: 'Characters / SuperEvil',
         task_status_short_name: 'todo',
         task_type_name: 'Modeling',
+        project_name: 'Caminandes',
         id: 4
       },
       {
         full_entity_name: 'Props / Tree',
         task_status_short_name: 'wip',
         task_type_name: 'Modeling',
+        project_name: 'Caminandes',
         id: 5
       }
     ]
     const index = buildTaskIndex(entries)
     expect(index['e01'].length).to.equal(2)
     expect(index['wip'].length).to.equal(3)
+    expect(index['caminandes'].length).to.equal(4)
     expect(index['agent327'].length).to.equal(1)
   })
 

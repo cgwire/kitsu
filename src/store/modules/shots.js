@@ -424,7 +424,6 @@ const actions = {
 
   deleteEpisode ({ commit, state }, episode) {
     return new Promise((resolve, reject) => {
-      console.log(episode)
       commit(DELETE_EPISODE_START)
       shotsApi.deleteEpisode(episode, (err) => {
         if (err) {
@@ -1040,7 +1039,7 @@ const mutations = {
   [DISPLAY_MORE_EPISODES] (state, tasks) {
     let episodes = state.episodes
     if (state.episodeSearchText.length > 0) {
-      episodes = indexSearch(cache.shotIndex, state.episodeSearchText)
+      episodes = indexSearch(state.episodeIndex, state.episodeSearchText)
     }
     state.displayedEpisodes = episodes.slice(
       0,
