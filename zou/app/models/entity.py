@@ -43,12 +43,6 @@ class Entity(db.Model, BaseMixin, SerializerMixin):
     They have different meaning but they share the same behaviour toward
     tasks and files.
     """
-    id = db.Column(
-        UUIDType(binary=False),
-        primary_key=True,
-        default=fields.gen_uuid
-    )
-
     name = db.Column(db.String(160), nullable=False)
     description = db.Column(db.String(600))
     shotgun_id = db.Column(db.Integer)
