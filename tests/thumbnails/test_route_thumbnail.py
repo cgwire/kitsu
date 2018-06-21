@@ -65,7 +65,7 @@ class RouteThumbnailTestCase(ApiDBTestCase):
         self.download_file(path, result_file_path)
         result_image = Image.open(result_file_path)
 
-        self.assertEqual(result_image.size, thumbnail.RECTANGLE_SIZE)
+        self.assertEqual(result_image.size, thumbnail.SQUARE_SIZE)
 
         project = Project.get(project_id)
         self.assertTrue(project.has_avatar)
@@ -135,7 +135,10 @@ class RouteThumbnailTestCase(ApiDBTestCase):
         ), {})
 
         asset = assets_service.get_asset(self.asset_id)
-        self.assertEquals(asset["preview_file_id"], str(self.preview_file_id))
+        self.assertEquals(
+            asset["preview_file_id"],
+            str(self.preview_file_id)
+        )
 
         self.put("/actions/entities/%s/set-main-preview/%s" % (
             self.preview_file_id,
