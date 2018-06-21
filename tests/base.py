@@ -249,6 +249,7 @@ class ApiDBTestCase(ApiTestCase):
         self.project.update({
             "file_tree": file_tree_service.get_tree_from_file("simple")
         })
+        return self.project
 
     def generate_fixture_project_closed(self):
         self.project_closed = Project.create(
