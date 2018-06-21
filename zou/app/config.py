@@ -65,3 +65,5 @@ EVENT_HANDLERS_FOLDER = os.getenv(
     os.path.join(os.getcwd(), "event_handlers")
 )
 TMP_DIR = os.getenv("TMP_DIR", os.path.join(os.sep, "tmp"))
+
+EVENT_STREAM_PORT = os.getenv("EVENT_STREAM_PORT", 5001)
