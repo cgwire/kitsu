@@ -99,7 +99,7 @@ def load_plugin_modules(plugin_folder):
 
 def load_plugin(app, plugin):
     """
-    Load a given plugin as an API plugin: add configured routes to the API. It
+    Load a given plugin as an API plugin: add configured routes to the API. It
     assumes that the plugin is already loaded in memory has a blueprint
     structure.
     """
