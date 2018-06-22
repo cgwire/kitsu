@@ -417,12 +417,18 @@ def create_comment(
         person_id=person_id,
         text=text
     )
+    events.emit("comment:new", {
+        "comment_id": comment.id,
+    })
     return comment.serialize()
 
 
 def delete_comment(comment_id):
     comment = get_comment_raw(comment_id)
     comment.delete()
+    events.emit("comment:deletion", {
+        "comment_id": comment_id,
+    })
     return comment.serialize()
 
 
@@ -607,6 +613,9 @@ def create_task(task_type, entity, name="main"):
             "task_type_color": task_type["color"],
             "task_type_priority": task_type["priority"]
         })
+        events.emit("task:new", {
+            "task_id": task.id
+        })
         return task_dict
 
     except IntegrityError:
@@ -623,12 +632,18 @@ def update_task(task_id, data):
         data["end_date"] = datetime.datetime.now()
 
     task.update(data)
+    events.emit("task:update", {
+        "task_id": task_id
+    })
     return task.serialize()
 
 
 def remove_task(task_id):
     task = Task.get(task_id)
     task.delete()
+    events.emit("task:deletion", {
+        "task_id": task_id
+    })
     return task.serialize()
 
 
@@ -643,19 +658,22 @@ def get_or_create_status(
     Create a new task status if it doesn't exist. If it exists, it returns the
     status from database.
     """
-    status = TaskStatus.get_by(name=name)
-    if status is None and len(short_name) > 0:
-        status = TaskStatus.get_by(short_name=short_name)
+    task_status = TaskStatus.get_by(name=name)
+    if task_status is None and len(short_name) > 0:
+        task_status = TaskStatus.get_by(short_name=short_name)
 
-    if status is None:
-        status = TaskStatus.create(
+    if task_status is None:
+        task_status = TaskStatus.create(
             name=name,
             short_name=short_name or name.lower(),
             color=color,
             is_reviewable=is_reviewable,
             is_done=is_done
         )
-    return status.serialize()
+        events.emit("task_status:new", {
+            "task_status_id": task_status.id
+        })
+    return task_status.serialize()
 
 
 def update_task_status(task_status_id, data):
@@ -664,6 +682,9 @@ def update_task_status(task_status_id, data):
     """
     task_status = get_task_status_raw(task_status_id)
     task_status.update(data)
+    events.emit("task_status:update", {
+        "task_status_id": task_status_id
+    })
     return task_status.serialize()
 
 
@@ -674,12 +695,15 @@ def get_or_create_department(name):
     """
     departmemt = Department.get_by(name=name)
     if departmemt is None:
-        departmemt = Department(
+        department = Department(
             name=name,
             color="#000000"
         )
-        departmemt.save()
-    return departmemt.serialize()
+        department.save()
+        events.emit("department:new", {
+            "department_id": department.id
+        })
+    return department.serialize()
 
 
 def get_or_create_task_type(
@@ -698,7 +722,7 @@ def get_or_create_task_type(
     """
     task_type = TaskType.get_by(name=name)
     if task_type is None:
-        task_type = TaskType(
+        task_type = TaskType.create(
             name=name,
             short_name=short_name,
             department_id=department["id"],
@@ -707,7 +731,9 @@ def get_or_create_task_type(
             for_shots=for_shots,
             shotgun_id=shotgun_id
         )
-        task_type.save()
+        events.emit("task_type:new", {
+            "task_type_id": task_type.id
+        })
     return task_type.serialize()
 
 
@@ -762,8 +788,8 @@ def clear_assignation(task_id):
     task_dict = task.serialize()
     for assignee in assignees:
         events.emit("task:unassign", {
-            "person": assignee,
-            "task": task_dict
+            "person_ids": assignee["id"],
+            "task_id": task_id
         })
     return task_dict
 
@@ -778,8 +804,8 @@ def assign_task(task_id, person_id):
     task.save()
     task_dict = task.serialize()
     events.emit("task:assign", {
-        "task": task_dict,
-        "person": person.serialize()
+        "task_id": task.id,
+        "person_id": person.id
     })
     return task_dict
 
@@ -803,21 +829,20 @@ def start_task(task_id):
             new_data["real_start_date"] = datetime.datetime.now()
 
         task.update(new_data)
-
-        task_dict_after = task.serialize()
         events.emit("task:start", {
-            "task_before": task_dict_before,
-            "task_after": task_dict_after
+            "task_id": task_id,
+            "previous_task_status_id": task_dict_before["task_status_id"],
+            "real_start_date": task.real_start_date,
+            "shotgun_id": task_dict_before["shotgun_id"]
         })
 
     return task.serialize()
 
 
-def task_to_review(task_id, person, comment, preview_path=""):
+def task_to_review(task_id, person, comment, preview_path={}):
     """
     Change the task status to "waiting for approval" if it is not already the
-    case. It emits a *task:to-review* event. Change the real start date time to
-    now.
+    case. It emits a *task:to-review* event.
     """
     task = get_task_raw(task_id)
     to_review_status = get_to_review_status()
@@ -839,8 +864,15 @@ def task_to_review(task_id, person, comment, preview_path=""):
     task_dict_after["preview_path"] = preview_path
 
     events.emit("task:to-review", {
-        "task_before": task_dict_before,
-        "task_after": task_dict_after
+        "task_id": task_id,
+        "task_shotgun_id": task_dict_before["shotgun_id"],
+        "entity_type_name": entity_type.name,
+        "previous_task_status_id": task_dict_before["task_status_id"],
+        "entity_shotgun_id": entity.shotgun_id,
+        "project_shotgun_id": project.shotgun_id,
+        "person_shotgun_id": person["shotgun_id"],
+        "comment": comment,
+        "preview_path": preview_path
     })
 
     return task_dict_after

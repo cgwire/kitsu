@@ -2,7 +2,7 @@ from zou.app.models.project import Project
 from zou.app.models.project_status import ProjectStatus
 from zou.app.services.exception import ProjectNotFoundException
 
-from zou.app.utils import fields
+from zou.app.utils import fields, events
 
 from sqlalchemy.exc import StatementError
 
@@ -147,4 +147,7 @@ def update_project(project_id, data):
     """
     project = get_project_raw(project_id)
     project.update(data)
+    events.emit("project:update", {
+        "project_id": project_id
+    })
     return project.serialize()

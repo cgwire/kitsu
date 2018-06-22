@@ -61,12 +61,8 @@ class TaskServiceTestCase(ApiDBTestCase):
     def handle_event(self, data):
         self.is_event_fired = True
         self.assertEqual(
-            data["task_before"]["task_status_id"],
+            data["previous_task_status_id"],
             str(self.open_status_id)
-        )
-        self.assertEqual(
-            data["task_after"]["task_status_id"],
-            str(self.wip_status_id)
         )
 
     def assert_event_is_fired(self):
@@ -151,36 +147,11 @@ class TaskServiceTestCase(ApiDBTestCase):
         self.assert_event_is_fired()
 
         self.assertEquals(
-            data["task_before"]["task_status_id"],
+            data["previous_task_status_id"],
             str(self.open_status_id)
         )
 
-        self.assertEquals(
-            data["task_after"]["task_status_id"],
-            str(self.to_review_status_id)
-        )
-
-        self.assertEquals(
-            data["task_after"]["project"]["id"],
-            str(self.project.id)
-        )
-
-        self.assertEquals(
-            data["task_after"]["entity"]["id"],
-            str(self.asset.id)
-        )
-
-        self.assertEquals(
-            data["task_after"]["entity_type"]["id"],
-            str(self.asset_type.id)
-        )
-
-        self.assertEquals(
-            data["task_after"]["person"]["id"],
-            str(self.person.id)
-        )
-
-        self.assertEquals(data["task_after"]["comment"], "my comment")
+        self.assertEquals(data["comment"], "my comment")
 
     def test_assign_task(self):
         tasks_service.assign_task(self.task.id, self.assigner.id)

@@ -31,18 +31,6 @@ class AssetsTestCase(ApiDBTestCase):
 
     def handle_event(self, data):
         self.is_event_fired = True
-        self.assertEqual(
-            data["asset"]["name"],
-            self.asset_data["name"]
-        )
-        self.assertEqual(
-            data["asset_type"]["id"],
-            str(self.asset_type.id)
-        )
-        self.assertEqual(
-            data["project"]["id"],
-            str(self.project.id)
-        )
 
     def test_get_assets(self):
         assets = self.get("data/assets/all")

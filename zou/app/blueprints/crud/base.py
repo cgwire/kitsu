@@ -8,7 +8,7 @@ from flask_jwt_extended import jwt_required
 
 from sqlalchemy.exc import IntegrityError, StatementError
 
-from zou.app.utils import permissions
+from zou.app.utils import permissions, events
 from zou.app.services.exception import ArgumentsException
 
 
@@ -149,13 +149,16 @@ class BaseModelsResource(Resource):
         expected. The model performs the validation automatically when
         instantiated.
         """
-
         try:
             data = request.json
             self.check_create_permissions(data)
             data = self.update_data(data)
             instance = self.model(**data)
             instance.save()
+            events.emit(
+                "%s:new" % self.model.__tablename__,
+                {"%s_id" % self.model.__tablename__: instance.id}
+            )
             return instance.serialize(), 201
 
         except TypeError as exception:
@@ -239,6 +242,10 @@ class BaseModelResource(Resource):
             self.check_update_permissions(instance.serialize(), data)
             data = self.update_data(data)
             instance.update(data)
+            events.emit(
+                "%s:update" % self.model.__tablename__,
+                {"%s_id" % self.model.__tablename__: instance.id}
+            )
             return instance.serialize(), 200
 
         except StatementError as exception:
@@ -272,6 +279,10 @@ class BaseModelResource(Resource):
         try:
             self.check_delete_permissions(instance.serialize())
             instance.delete()
+            events.emit(
+                "%s:deletion" % self.model.__tablename__,
+                {"%s_id" % self.model.__tablename__: instance.id}
+            )
 
         except IntegrityError as exception:
             current_app.logger.error(str(exception))

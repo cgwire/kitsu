@@ -7,20 +7,15 @@ from zou.app.models.base import BaseMixin
 from sqlalchemy.dialects.postgresql import JSONB
 
 
-class Event(db.Model, BaseMixin, SerializerMixin):
+class ApiEvent(db.Model, BaseMixin, SerializerMixin):
     """
-    Represent notable events occuring on database.
+    Represent notable events occuring on database (asset creation,
+    task assignation, etc.).
     """
-    project_id = db.Column(
-        UUIDType(binary=False),
-        db.ForeignKey("project.id"),
-        nullable=False,
-        index=True
-    )
-    person_id = db.Column(
+    name = db.Column(db.String(80), nullable=False, index=True)
+    user_id = db.Column(
         UUIDType(binary=False),
         db.ForeignKey("person.id"),
-        nullable=False,
         index=True
     )
-    even_data = db.Column(JSONB)
+    data = db.Column(JSONB)

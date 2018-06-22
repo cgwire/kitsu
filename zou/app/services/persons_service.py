@@ -11,7 +11,7 @@ from flask_jwt_extended import get_jwt_identity
 from zou.app.models.person import Person
 from zou.app.models.desktop_login_logs import DesktopLoginLog
 
-from zou.app.utils import fields
+from zou.app.utils import fields, events
 
 from zou.app.services.exception import PersonNotFoundException
 
@@ -146,6 +146,9 @@ def create_person(
         phone=phone,
         role=role
     )
+    events.emit("person:new", {
+        "person_id": person.id
+    })
     return person.serialize()
 
 
@@ -164,6 +167,9 @@ def update_person(person_id, data):
     """
     person = Person.get(person_id)
     person.update(data)
+    events.emit("person:update", {
+        "person_id": person_id
+    })
     return person.serialize()
 
 
@@ -174,6 +180,9 @@ def delete_person(person_id):
     person = Person.get(person_id)
     person_dict = person.serialize()
     person.delete()
+    events.emit("person:deletetion", {
+        "person_id": person_id
+    })
     return person_dict
 
 

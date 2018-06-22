@@ -79,9 +79,9 @@ routes = [
     ("/data/asset-instances/", AssetInstancesResource),
     ("/data/asset-instances/<instance_id>", AssetInstanceResource),
     ("/data/playlists/", PlaylistsResource),
-    ("/data/playlists/<instance_id>", PlaylistResource)
-    ("/data/event/", PlaylistsResource),
-    ("/data/events/<instance_id>", EventResourc)
+    ("/data/playlists/<instance_id>", PlaylistResource),
+    ("/data/events/", EventsResource),
+    ("/data/events/<instance_id>", EventResource)
 ]
 
 blueprint = Blueprint("/data", "data")

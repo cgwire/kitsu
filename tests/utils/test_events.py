@@ -1,9 +1,10 @@
 import unittest
 
 from zou.app.utils import events
+from tests.base import ApiDBTestCase
 
 
-class EventsTestCase(unittest.TestCase):
+class EventsTestCase(ApiDBTestCase):
 
     __name__ = "test_handler"
 

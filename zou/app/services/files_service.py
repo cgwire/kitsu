@@ -23,7 +23,7 @@ from zou.app.services.exception import (
     EntryAlreadyExistsException
 )
 
-from zou.app.utils import fields
+from zou.app.utils import fields, events
 
 from sqlalchemy import desc
 from sqlalchemy.exc import StatementError, IntegrityError
@@ -193,6 +193,9 @@ def create_new_working_revision(
             entity_id=task.entity_id,
             person_id=person_id
         )
+        events.emit("working_file:new", {
+            "working_file_id": working_file.id
+        })
     except IntegrityError:
         raise EntryAlreadyExistsException
 
@@ -275,6 +278,9 @@ def create_new_output_revision(
                 nb_elements=nb_elements,
                 temporal_entity_id=temporal_entity_id
             )
+            events.emit("output_file:new", {
+                "output_file_id": output_file.id
+            })
         else:
             raise EntryAlreadyExistsException
 
@@ -600,4 +606,7 @@ def get_output_files_for_output_type_and_asset_instance(
 def remove_preview_file(preview_file_id):
     preview_file = get_preview_file_raw(preview_file_id)
     preview_file.remove()
+    events.emit("preview_file:deletion", {
+        "preview_file_id": preview_file_id
+    })
     return preview_file.serialize()
