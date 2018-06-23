@@ -153,15 +153,15 @@ const actions = {
     })
   },
 
-  newProduction ({ commit, state }, payload) {
-    commit(EDIT_PRODUCTION_START, payload.data)
-    productionsApi.newProduction(payload.data, (err, production) => {
+  newProduction ({ commit, state }, { data, callback }) {
+    commit(EDIT_PRODUCTION_START, data)
+    productionsApi.newProduction(data, (err, production) => {
       if (err) {
         commit(EDIT_PRODUCTION_ERROR)
       } else {
         commit(EDIT_PRODUCTION_END, production)
       }
-      if (payload.callback) payload.callback(err)
+      if (callback) callback(err, production)
     })
   },
 
