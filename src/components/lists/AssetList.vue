@@ -29,7 +29,10 @@
 
           <th class="actions">
             <button-link
-              class="is-small"
+              :class="{
+                'is-small': true,
+                highlighted: isEmptyTask
+              }"
               icon="plus"
               :text="$t('tasks.create_tasks')"
               :path="{
@@ -208,11 +211,18 @@ export default {
       'assetSelectionGrid',
       'assets'
     ]),
+
     isEmptyList () {
       return this.entries.length === 0 &&
              !this.isLoading &&
              !this.isError &&
              (!this.assetSearchText || this.assetSearchText.length === 0)
+    },
+
+    isEmptyTask () {
+      return !this.emptyList &&
+      this.validationColumns &&
+      this.validationColumns.length === 0
     }
   },
 
@@ -351,5 +361,10 @@ td.type {
 
 .asset-link {
   color: inherit
+}
+
+.highlighted {
+  background: #00B242;
+  color: white;
 }
 </style>
