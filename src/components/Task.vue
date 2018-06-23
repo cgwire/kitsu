@@ -366,7 +366,8 @@ export default {
       'personMap',
       'user',
       'currentProduction',
-      'isCurrentUserManager'
+      'isCurrentUserManager',
+      'productionMap'
     ]),
 
     isCommentingAllowed () {
@@ -574,7 +575,8 @@ export default {
 
     title () {
       if (this.currentTask) {
-        const projectName = this.currentTask.project_name
+        const production = this.productionMap[this.currentTask.project_id]
+        const projectName = production.name
         const type = this.currentTask.entity_type_name
         let entityName =
           this.currentTask.full_entity_name || this.currentTask.entity_name

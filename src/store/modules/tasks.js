@@ -17,6 +17,7 @@ import {
   LOAD_TASK_SUBSCRIBE_END,
 
   NEW_TASK_COMMENT_END,
+  NEW_TASK_END,
 
   CREATE_TASKS_END,
   DELETE_TASK_END,
@@ -195,7 +196,10 @@ const actions = {
     })
   },
 
-  createTasks ({ commit, state }, payload) {
+  createTasks (
+    { commit, state },
+    payload
+  ) {
     const data = {
       task_type_id: payload.task_type_id,
       type: payload.type,
@@ -226,6 +230,25 @@ const actions = {
         next(err, tasks[0])
       })
     }, callback)
+  },
+
+  createTask ({ commit, state }, {entityId, projectId, taskTypeId, type}) {
+    return new Promise((resolve, reject) => {
+      const data = {
+        entity_id: entityId,
+        task_type_id: taskTypeId,
+        type: type,
+        project_id: projectId
+      }
+      tasksApi.createTask(data, (err, tasks) => {
+        if (err) {
+          reject(err)
+        } else {
+          commit(NEW_TASK_END, tasks[0])
+          resolve()
+        }
+      })
+    })
   },
 
   changeSelectedTaskStatus ({ commit, state }, {taskStatusId, callback}) {
@@ -384,31 +407,6 @@ const mutations = {
     assets.forEach((asset) => {
       asset.validations = {}
       asset.tasks.forEach((task) => {
-        const taskStatus = state.taskStatusMap[task.task_status_id]
-        const taskType = helpers.getTaskType(task.task_type_id)
-
-        Object.assign(task, {
-          task_status_name: taskStatus.name,
-          task_status_short_name: taskStatus.short_name,
-          task_status_color: taskStatus.color,
-
-          task_type_name: taskType.name,
-          task_type_color: taskType.color,
-          task_type_priority: taskType.priority,
-
-          project_name: asset.project_name,
-          project_id: asset.production_id,
-
-          entity_name: `${asset.asset_type_name} / ${asset.name}`,
-          entity_type_name: asset.asset_type_name,
-          entity: {
-            id: asset.id,
-            preview_file_id: asset.preview_file_id
-          },
-
-          assigneesInfo: task.assignees.map(helpers.getPerson)
-        })
-
         if (!validationColumns[task.task_type_name]) {
           validationColumns[task.task_type_name] = {
             id: task.task_type_id,
@@ -435,31 +433,6 @@ const mutations = {
     shots.forEach((shot) => {
       shot.validations = {}
       shot.tasks.forEach((task) => {
-        const taskStatus = state.taskStatusMap[task.task_status_id]
-        const taskType = helpers.getTaskType(task.task_type_id)
-
-        Object.assign(task, {
-          task_status_name: taskStatus.name,
-          task_status_short_name: taskStatus.short_name,
-          task_status_color: taskStatus.color,
-
-          task_type_name: taskType.name,
-          task_type_color: taskType.color,
-          task_type_priority: taskType.priority,
-
-          project_name: shot.project_name,
-          project_id: shot.production_id,
-
-          entity_type_name: 'Shot',
-          sequence_name: shot.sequence_name,
-          entity: {
-            id: shot.id,
-            preview_file_id: shot.preview_file_id
-          },
-
-          assigneesInfo: task.assignees.map(helpers.getPerson)
-        })
-
         if (shot.episode_name) {
           task.entity_name = `${shot.episode_name} / ${shot.sequence_name} / ${shot.name}`
         } else {
@@ -578,7 +551,6 @@ const mutations = {
 
     if (state.taskComments[taskId].length > 0) {
       const newStatusId = state.taskComments[taskId][0].task_status_id
-      console.log(newStatusId)
       newStatus = taskStatusMap[newStatusId]
     }
 
@@ -638,7 +610,8 @@ const mutations = {
       const entityId = validationInfo.entity.id
       const validationKey = `${entityId}-${taskTypeId}`
       state.selectedValidations[validationKey] = validationInfo
-      state.nbSelectedValidations = Object.keys(state.selectedValidations).length
+      state.nbSelectedValidations =
+        Object.keys(state.selectedValidations).length
     }
   },
 
@@ -666,6 +639,10 @@ const mutations = {
     tasks.forEach((task) => {
       state.taskMap[task.id] = task
     })
+  },
+
+  [NEW_TASK_END] (state, task) {
+    state.taskMap[task.id] = task
   },
 
   [ASSIGN_TASKS] (state, { selectedTaskIds, personId }) {
