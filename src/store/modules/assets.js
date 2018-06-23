@@ -447,7 +447,7 @@ const mutations = {
     state.editAsset.isSuccess = true
     state.assetCreated = newAsset.name
 
-    const asset = getters.getAsset(state)(newAsset.id)
+    const asset = state.assetMap[newAsset.id]
     const assetType = state.assetTypes.find(
       (assetType) => assetType.id === newAsset.entity_type_id
     )
@@ -466,13 +466,13 @@ const mutations = {
       const maxX = state.displayedAssets.length
       const maxY = state.nbValidationColumns
       state.assetSelectionGrid = buildSelectionGrid(maxX, maxY)
+      state.assetMap[newAsset.id] = newAsset
     }
     state.editAsset = {
       isLoading: false,
       isError: false
     }
     cache.assetIndex = buildAssetIndex(cache.assets)
-    state.assetMap[newAsset.id] = asset
   },
 
   [DELETE_ASSET_START] (state) {

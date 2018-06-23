@@ -146,10 +146,12 @@ export default {
     ]),
 
     runConfirmation () {
-      if (this.isEditing()) {
-        this.confirmClicked()
-      } else {
-        this.confirmAndStayClicked()
+      if (this.form.name.length > 0) {
+        if (this.isEditing()) {
+          this.confirmClicked()
+        } else {
+          this.confirmAndStayClicked()
+        }
       }
     },
 

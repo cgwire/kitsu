@@ -177,10 +177,15 @@ export default {
     confirmEditProduction (form) {
       this.newProduction({
         data: form,
-        callback: (err) => {
+        callback: (err, production) => {
           if (!err) {
             this.modals.isNewDisplayed = false
-            this.$router.push({name: 'open-productions'})
+            this.$router.push({
+              name: 'assets',
+              params: {
+                production_id: production.id
+              }
+            })
           }
         }
       })
