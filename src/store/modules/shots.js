@@ -82,6 +82,7 @@ import {
   RESTORE_SHOT_END,
 
   NEW_TASK_COMMENT_END,
+  NEW_TASK_END,
 
   SET_SHOT_SEARCH,
   SET_SEQUENCE_SEARCH,
@@ -130,7 +131,7 @@ const helpers = {
   getPerson (personId) {
     return peopleStore.state.personMap[personId]
   },
-  populateTask (task) {
+  populateTask (task, shot) {
     task.persons = []
 
     task.taskType = helpers.getTaskType(task.task_type_id)
@@ -143,6 +144,35 @@ const helpers = {
     task.task_status_short_name = task.taskStatus.short_name
     task.task_status_color = task.taskStatus.color
     task.name = task.taskType.priority.toString()
+
+    let entityName = `${shot.sequence_name} / ${shot.name}`
+    if (shot.episode_name) {
+      entityName = `${shot.episode_name} / ${entityName}`
+    }
+
+    Object.assign(task, {
+      task_status_name: task.taskStatus.name,
+      task_status_short_name: task.taskStatus.short_name,
+      task_status_color: task.taskStatus.color,
+
+      task_type_name: task.taskType.name,
+      task_type_color: task.taskType.color,
+      task_type_priority: task.taskType.priority,
+
+      project_id: shot.production_id,
+
+      entity_type_name: 'Shot',
+      entity_name: entityName,
+      sequence_name: shot.sequence_name,
+      entity: {
+        id: shot.id,
+        preview_file_id: shot.preview_file_id
+      },
+
+      assigneesInfo: task.assignees.map(helpers.getPerson)
+    })
+
+    return task
   }
 }
 
@@ -332,15 +362,30 @@ const actions = {
     })
   },
 
-  newShot ({ commit, state }, payload) {
+  newShot ({ commit, dispatch, state, rootState }, {shot, callback}) {
     commit(NEW_SHOT_START)
-    shotsApi.newShot(payload.shot, (err, shot) => {
+    shotsApi.newShot(shot, (err, shot) => {
       if (err) {
         commit(NEW_SHOT_ERROR)
+        if (callback) callback(err)
       } else {
         commit(NEW_SHOT_END, shot)
+        const taskTypes = Object.values(rootState.tasks.shotValidationColumns)
+        const createTaskPromises = taskTypes.map(
+          (validationColumn) => dispatch('createTask', {
+            entityId: shot.id,
+            projectId: shot.project_id,
+            taskTypeId: validationColumn.id,
+            type: 'shots'
+          })
+        )
+
+        Promise.all(createTaskPromises).then(() => {
+          if (callback) callback(null, shot)
+        }).catch((err) => {
+          console.log(err)
+        })
       }
-      if (payload.callback) payload.callback(err, shot)
     })
   },
 
@@ -639,7 +684,7 @@ const mutations = {
     shots.forEach((shot) => {
       shot.production_id = production.id
       shot.tasks.forEach((task) => {
-        helpers.populateTask(task)
+        helpers.populateTask(task, shot)
         validationColumns[task.task_type_id] = true
       })
 
@@ -722,7 +767,9 @@ const mutations = {
   },
 
   [LOAD_SHOT_END] (state, shot) {
-    shot.tasks.forEach(helpers.populateTask)
+    shot.tasks.forEach((task) => {
+      helpers.populateTask(task, shot)
+    })
     shot.tasks = sortByName(shot.tasks)
     state.shotMap[shot.id] = shot
   },
@@ -1141,6 +1188,16 @@ const mutations = {
     })
 
     state.episodeStats = results
+  },
+
+  [NEW_TASK_END] (state, task) {
+    const shot = state.shotMap[task.entity_id]
+    if (shot && task) {
+      task = helpers.populateTask(task, shot)
+
+      shot.tasks.push(task)
+      Vue.set(shot.validations, task.task_type_name, task)
+    }
   },
 
   [RESET_ALL] (state) {

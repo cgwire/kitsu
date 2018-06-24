@@ -54,6 +54,7 @@ import {
   LOAD_OPEN_PRODUCTIONS_END,
   DELETE_TASK_END,
   NEW_TASK_COMMENT_END,
+  NEW_TASK_END,
 
   SET_ASSET_SEARCH,
   CREATE_TASKS_END,
@@ -91,7 +92,7 @@ const helpers = {
   getPerson (personId) {
     return peopleStore.state.personMap[personId]
   },
-  populateTask (task) {
+  populateTask (task, asset, production) {
     task.persons = []
 
     task.taskType = helpers.getTaskType(task.task_type_id)
@@ -99,11 +100,32 @@ const helpers = {
     task.assignees.forEach((personId) => {
       task.persons.push(helpers.getPerson(personId))
     })
-
-    // Hacks for proper render
     task.task_status_short_name = task.taskStatus.short_name
     task.task_status_color = task.taskStatus.color
     task.name = task.taskType.priority.toString()
+
+    Object.assign(task, {
+      task_status_name: task.taskStatus.name,
+      task_status_short_name: task.taskStatus.short_name,
+      task_status_color: task.taskStatus.color,
+
+      task_type_name: task.taskType.name,
+      task_type_color: task.taskType.color,
+      task_type_priority: task.taskType.priority,
+
+      project_id: asset.production_id,
+
+      entity_name: `${asset.asset_type_name} / ${asset.name}`,
+      entity_type_name: asset.asset_type_name,
+      entity: {
+        id: asset.id,
+        preview_file_id: asset.preview_file_id
+      },
+
+      assigneesInfo: task.assignees.map(helpers.getPerson)
+    })
+
+    return task
   }
 }
 
@@ -249,15 +271,31 @@ const actions = {
     })
   },
 
-  newAsset ({ commit, state }, { data, callback }) {
+  newAsset ({ commit, dispatch, state, rootState }, { data, callback }) {
     commit(EDIT_ASSET_START, data)
+
     assetsApi.newAsset(data, (err, asset) => {
       if (err) {
         commit(EDIT_ASSET_ERROR)
+        if (callback) callback(err)
       } else {
         commit(EDIT_ASSET_END, asset)
+        const taskTypes = Object.values(rootState.tasks.assetValidationColumns)
+        const createTaskPromises = taskTypes.map(
+          (validationColumn) => dispatch('createTask', {
+            entityId: asset.id,
+            projectId: asset.project_id,
+            taskTypeId: validationColumn.id,
+            type: 'assets'
+          })
+        )
+
+        Promise.all(createTaskPromises).then(() => {
+          if (callback) callback()
+        }).catch((err) => {
+          console.log(err)
+        })
       }
-      if (callback) callback(err)
     })
   },
 
@@ -383,7 +421,7 @@ const mutations = {
       asset.production_id = production.id
 
       asset.tasks.forEach((task) => {
-        helpers.populateTask(task)
+        helpers.populateTask(task, asset)
         validationColumns[task.task_type_id] = true
       })
     })
@@ -409,7 +447,9 @@ const mutations = {
   },
 
   [LOAD_ASSET_END] (state, asset) {
-    asset.tasks.forEach(helpers.populateTask)
+    asset.tasks.forEach((task) => {
+      helpers.populateTask(task, asset)
+    })
     asset.tasks = sortByName(asset.tasks)
     state.assetMap[asset.id] = asset
   },
@@ -677,6 +717,16 @@ const mutations = {
 
   [CLEAR_SELECTED_TASKS] (state, validationInfo) {
     state.assetSelectionGrid = clearSelectionGrid(state.assetSelectionGrid)
+  },
+
+  [NEW_TASK_END] (state, task) {
+    const asset = state.assetMap[task.entity_id]
+    if (asset && task) {
+      task = helpers.populateTask(task, asset)
+
+      asset.tasks.push(task)
+      Vue.set(asset.validations, task.task_type_name, task)
+    }
   },
 
   [RESET_ALL] (state) {

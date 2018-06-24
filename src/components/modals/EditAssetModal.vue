@@ -172,7 +172,6 @@ export default {
     },
 
     resetForm () {
-      this.assetSuccessText = ''
       if (!this.isEditing()) {
         if (!this.form.entity_type_id && this.assetTypes.length > 0) {
           this.form.entity_type_id = this.assetTypes[0].id
@@ -195,6 +194,7 @@ export default {
 
   mounted () {
     this.resetForm()
+    this.assetSuccessText = ''
   },
 
   watch: {
@@ -215,6 +215,7 @@ export default {
     },
 
     active () {
+      this.assetSuccessText = ''
       if (this.active) {
         setTimeout(() => {
           this.$refs.nameField.focus()
