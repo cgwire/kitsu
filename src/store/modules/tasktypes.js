@@ -1,5 +1,5 @@
 import taskTypesApi from '../api/tasktypes'
-import { sortByName, sortTaskTypes } from '../../lib/sorting'
+import { sortTaskTypes } from '../../lib/sorting'
 
 import {
   LOAD_TASK_TYPES_START,
@@ -192,7 +192,7 @@ const mutations = {
       Object.assign(taskType, newTaskType)
     } else {
       state.taskTypes.push(newTaskType)
-      state.taskTypes = sortByName(state.taskTypes)
+      state.taskTypes = sortTaskTypes(state.taskTypes)
     }
     state.taskTypeMap[newTaskType.id] = newTaskType
     state.editTaskType = {

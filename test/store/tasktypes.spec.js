@@ -61,15 +61,21 @@ describe('taskTypes', () => {
     taskTypes = [
       {
         id: 1,
-        name: 'Modeling'
+        name: 'Modeling',
+        priority: 1,
+        for_shots: true
       },
       {
         id: 2,
-        name: 'Animation'
+        name: 'Animation',
+        priority: 1,
+        for_shots: true
       },
       {
         id: 3,
-        name: 'FX'
+        name: 'FX',
+        priority: 4,
+        for_shots: true
       }
     ]
   })
@@ -172,7 +178,7 @@ describe('taskTypes', () => {
       expect(state.isTaskTypesLoadingError).to.equal(false)
       expect(state.taskTypes).to.deep.equal(taskTypes)
       expect(state.taskTypes[0].name).to.equal('Animation')
-      expect(state.taskTypes[1].name).to.equal('FX')
+      expect(state.taskTypes[1].name).to.equal('Modeling')
     })
 
     it('EDIT_TASK_TYPE_START', () => {
@@ -195,22 +201,27 @@ describe('taskTypes', () => {
       store.commit(LOAD_TASK_TYPES_END, taskTypes)
       store.commit(EDIT_TASK_TYPE_END, {
         id: 4,
-        name: 'New task type'
+        name: 'New task type',
+        priority: 2,
+        for_shots: true
       })
       expect(state.taskTypes.length).to.equal(4)
+      let taskTypeName = state.taskTypes[2].name
+      expect(taskTypeName).to.equal('New task type')
+
       store.commit(EDIT_TASK_TYPE_END, {
         id: 2,
         name: 'Modeling edited'
       })
       expect(state.taskTypes.length).to.equal(4)
-      const taskTypeName = getters.getTaskType(state)(2).name
+      taskTypeName = getters.getTaskType(state)(2).name
       expect(taskTypeName).to.equal('Modeling edited')
 
       expect(state.editTaskType).to.deep.equal({
         isLoading: false,
         isError: false
       })
-      store.commit(DELETE_TASK_TYPE_END, taskTypes[2])
+      store.commit(DELETE_TASK_TYPE_END, taskTypes[1])
     })
 
     it('DELETE_TASK_TYPE_START', () => {
