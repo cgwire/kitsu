@@ -24,7 +24,6 @@ class EntityResource(BaseModelResource):
     def __init__(self):
         BaseModelResource.__init__(self, Entity)
         self.protected_fields += [
-            "entity_type_id",
             "instance_casting",
             "project_id",
             "entities_in",
@@ -53,7 +52,7 @@ class EntityResource(BaseModelResource):
                 data["data"] = {}
             extra_data.update(data["data"])
             data["data"] = extra_data
-            data = self.update_data(data)
+            data = self.update_data(data, instance_id)
             entity.update(data)
             return entity.serialize(), 200
 

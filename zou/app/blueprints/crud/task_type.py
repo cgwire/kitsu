@@ -16,7 +16,9 @@ class TaskTypesResource(BaseModelsResource):
         name = data.get("name", None)
         task_type = TaskType.get_by(name=name)
         if task_type is not None:
-            raise ArgumentsException("A task with similar name already exists")
+            raise ArgumentsException(
+                "A task type with similar name already exists"
+            )
         return data
 
 
@@ -28,12 +30,12 @@ class TaskTypeResource(BaseModelResource):
     def check_read_permissions(self, instance):
         return True
 
-    def update_data(self, data):
+    def update_data(self, data, instance_id):
         name = data.get("name", None)
         if name is not None:
             task_type = TaskType.get_by(name=name)
-            if task_type is not None:
+            if task_type is not None and instance_id != str(task_type.id):
                 raise ArgumentsException(
-                    "A task with similar name already exists"
+                    "A task type with similar name already exists"
                 )
         return data
