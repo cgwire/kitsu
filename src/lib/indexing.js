@@ -44,8 +44,9 @@ export const buildAssetIndex = (entries) => {
   const index = {}
   const assetIndex = {}
   entries.forEach((asset) => {
-    let stringToIndex = asset.name.replace(/_/g, ' ').replace(/-/g, ' ')
-    let words = stringToIndex.split(' ').concat([asset.asset_type_name])
+    const stringToIndex = asset.name.replace(/_/g, ' ').replace(/-/g, ' ')
+    const assetTypeWords = asset.asset_type_name.split(' ')
+    const words = stringToIndex.split(' ').concat(assetTypeWords)
     indexWords(index, assetIndex, asset, words)
   })
   return index
