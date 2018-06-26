@@ -204,7 +204,7 @@ class BaseModelResource(Resource):
     def get_arguments(self):
         return request.json
 
-    def update_data(self, data):
+    def update_data(self, data, instance_id):
         for field in self.protected_fields:
             data.pop(field, None)
         return data
@@ -237,7 +237,7 @@ class BaseModelResource(Resource):
             data = self.get_arguments()
             instance = self.get_model_or_404(instance_id)
             self.check_update_permissions(instance.serialize(), data)
-            data = self.update_data(data)
+            data = self.update_data(data, instance_id)
             instance.update(data)
             return instance.serialize(), 200
 
