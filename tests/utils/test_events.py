@@ -1,6 +1,6 @@
-import unittest
-
 from zou.app.utils import events
+from zou.app.services import events_service
+
 from tests.base import ApiDBTestCase
 
 
@@ -45,3 +45,7 @@ class EventsTestCase(ApiDBTestCase):
         self.assertEqual(self.counter, 3)
         events.emit("task:new")
         self.assertEqual(self.counter, 4)
+
+        event_models = events_service.get_last_events()
+        self.assertEqual(len(event_models), 4)
+        self.assertEqual(event_models[0]["name"], "task:new")
