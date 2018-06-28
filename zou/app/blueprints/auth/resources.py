@@ -189,6 +189,11 @@ class LoginResource(Resource):
                 "Authentication strategy is not properly configured."
             )
             return {"login": False}, 400
+        except TimeoutError:
+            current_app.logger.info(
+                "Timeout occurs while logging in."
+            )
+            return {"login": False}, 400
         except UnactiveUserException:
             return {
                 "error": True,
@@ -203,10 +208,14 @@ class LoginResource(Resource):
                 "message": "Database doesn't seem reachable."
             }, 500
         except Exception as exception:
+            if hasattr(exception, "message"):
+                message = exception.message
+            else:
+                message = str(exception)
             return {
                 "error": True,
                 "login": False,
-                "message": exception.message
+                "message": message
             }, 500
 
     def get_arguments(self):
