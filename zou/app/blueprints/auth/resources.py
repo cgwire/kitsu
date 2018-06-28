@@ -9,7 +9,7 @@ from flask_principal import (
     identity_loaded
 )
 
-from sqlalchemy.exc import OperationalError
+from sqlalchemy.exc import OperationalError, TimeoutError
 
 from zou.app.utils import auth
 from zou.app.services import persons_service, auth_service
@@ -76,7 +76,11 @@ def on_identity_loaded(sender, identity):
             return identity
         except PersonNotFoundException:
             return None
+        except TimeoutError:
+            current_app.logger.error("Identity loading timed out")
+            return None
         except Exception as exception:
+            current_app.logger.error(exception)
             current_app.logger.error(exception.message)
             return None
 
