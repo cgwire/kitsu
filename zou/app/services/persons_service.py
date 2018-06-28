@@ -11,7 +11,7 @@ from flask_jwt_extended import get_jwt_identity
 from zou.app.models.person import Person
 from zou.app.models.desktop_login_logs import DesktopLoginLog
 
-from zou.app.utils import fields, events
+from zou.app.utils import fields, events, cache
 
 from zou.app.services.exception import PersonNotFoundException
 
@@ -52,6 +52,7 @@ def get_person_raw(person_id):
     return person
 
 
+@cache.memoize_function(120)
 def get_person(person_id):
     """
     Return given person as a dictionary.
@@ -60,6 +61,7 @@ def get_person(person_id):
     return person.serialize()
 
 
+@cache.memoize_function(120)
 def get_person_by_email_username(email):
     """
     Return person that matches given email as a dictionary.
@@ -87,6 +89,7 @@ def get_person_by_email_raw(email):
     return person
 
 
+@cache.memoize_function(120)
 def get_person_by_email(email):
     """
     Return person that matches given email as a dictionary.
@@ -95,6 +98,7 @@ def get_person_by_email(email):
     return person.serialize()
 
 
+@cache.memoize_function(120)
 def get_person_by_desktop_login(desktop_login):
     """
     Return person that matches given desktop login as a dictionary. It is useful
