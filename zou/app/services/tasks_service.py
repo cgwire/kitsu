@@ -839,7 +839,13 @@ def start_task(task_id):
     return task.serialize()
 
 
-def task_to_review(task_id, person, comment, preview_path={}):
+def task_to_review(
+    task_id,
+    person,
+    comment,
+    preview_path={},
+    change_status=True
+):
     """
     Change the task status to "waiting for approval" if it is not already the
     case. It emits a *task:to-review* event.
@@ -848,8 +854,9 @@ def task_to_review(task_id, person, comment, preview_path={}):
     to_review_status = get_to_review_status()
     task_dict_before = task.serialize()
 
-    task.update({"task_status_id": to_review_status["id"]})
-    task.save()
+    if change_status:
+        task.update({"task_status_id": to_review_status["id"]})
+        task.save()
 
     project = Project.get(task.project_id)
     entity = Entity.get(task.entity_id)
@@ -872,7 +879,8 @@ def task_to_review(task_id, person, comment, preview_path={}):
         "project_shotgun_id": project.shotgun_id,
         "person_shotgun_id": person["shotgun_id"],
         "comment": comment,
-        "preview_path": preview_path
+        "preview_path": preview_path,
+        "change_status": change_status
     })
 
     return task_dict_after
