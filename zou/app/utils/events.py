@@ -19,6 +19,7 @@ def register(event, name, handler):
     if event not in handlers:
         handlers[event] = OrderedDict()
 
+    print("Handler [%s -> %s registered]" % (event, name))
     handlers[event][name] = handler
 
 
