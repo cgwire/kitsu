@@ -21,6 +21,23 @@ export default {
     client.del(`/api/actions/user/tasks/${taskId}/unsubscribe`, callback)
   },
 
+  subscribeToSequence (sequenceId, taskTypeId, callback) {
+    client.post(
+      `/api/actions/user/sequences/${sequenceId}/task-types/` +
+      `${taskTypeId}/subscribe`,
+      {},
+      callback
+    )
+  },
+
+  unsubscribeFromSequence (sequenceId, taskTypeId, callback) {
+    client.del(
+      `/api/actions/user/sequences/${sequenceId}/task-types/` +
+      `${taskTypeId}/unsubscribe`,
+      callback
+    )
+  },
+
   getTaskComments (taskId, callback) {
     client.get(`/api/data/tasks/${taskId}/comments`, callback)
   },

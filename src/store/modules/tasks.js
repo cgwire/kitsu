@@ -15,6 +15,7 @@ import {
   LOAD_TASK_STATUSES_END,
   LOAD_TASK_COMMENTS_END,
   LOAD_TASK_SUBSCRIBE_END,
+  LOAD_SEQUENCE_SUBSCRIBE_END,
 
   NEW_TASK_COMMENT_END,
   NEW_TASK_END,
@@ -156,6 +157,23 @@ const actions = {
     })
   },
 
+  subscribeToSequence ({ commit, state }, { sequenceId, taskTypeId }) {
+    return new Promise((resolve, reject) => {
+      tasksApi.subscribeToSequence(sequenceId, taskTypeId, (err) => {
+        if (err) {
+          reject(err)
+        } else {
+          commit(LOAD_SEQUENCE_SUBSCRIBE_END, {
+            sequenceId,
+            taskTypeId,
+            subscribed: true
+          })
+          resolve()
+        }
+      })
+    })
+  },
+
   unsubscribeFromTask ({ commit, state }, taskId) {
     return new Promise((resolve, reject) => {
       tasksApi.unsubscribeFromTask(taskId, (err) => {
@@ -163,6 +181,23 @@ const actions = {
           reject(err)
         } else {
           commit(LOAD_TASK_SUBSCRIBE_END, { taskId, subscribed: false })
+          resolve()
+        }
+      })
+    })
+  },
+
+  unsubscribeFromSequence ({ commit, state }, { sequenceId, taskTypeId }) {
+    return new Promise((resolve, reject) => {
+      tasksApi.unsubscribeFromSequence(sequenceId, taskTypeId, (err) => {
+        if (err) {
+          reject(err)
+        } else {
+          commit(LOAD_SEQUENCE_SUBSCRIBE_END, {
+            sequenceId,
+            taskTypeId,
+            subscribed: false
+          })
           resolve()
         }
       })

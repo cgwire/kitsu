@@ -1,3 +1,4 @@
+import Vue from 'vue'
 import taskTypesApi from '../api/tasktypes'
 import { sortTaskTypes } from '../../lib/sorting'
 
@@ -14,6 +15,9 @@ import {
   DELETE_TASK_TYPE_ERROR,
   DELETE_TASK_TYPE_END,
 
+  LOAD_SEQUENCE_SUBSCRIBE_END,
+  LOAD_SEQUENCE_SUBSCRIPTION_END,
+
   RESET_ALL
 } from '../mutation-types'
 
@@ -22,6 +26,7 @@ const initialState = {
   taskTypeMap: {},
   isTaskTypesLoading: false,
   isTaskTypesLoadingError: false,
+  sequenceSubscriptions: {},
 
   editTaskType: {
     isLoading: false,
@@ -41,6 +46,7 @@ const state = {
 const getters = {
   taskTypes: state => state.taskTypes,
   taskTypeMap: state => state.taskTypeMap,
+  sequenceSubscriptions: state => state.sequenceSubscriptions,
 
   isTaskTypesLoading: state => state.isTaskTypesLoading,
   isTaskTypesLoadingError: state => state.isTaskTypesLoadingError,
@@ -129,14 +135,24 @@ const actions = {
       }
 
       if (rootGetters.currentTaskType.for_shots) {
-        if (Object.keys(rootGetters.shotMap).length < 2 || force) {
-          dispatch('loadShots', (err) => {
+        taskTypesApi.getSequenceSubscriptions(
+          rootGetters.currentProduction.id,
+          rootGetters.currentTaskType.id,
+          (err, sequenceIds) => {
             if (err) reject(err)
-            else resolve()
-          })
-        } else {
-          resolve()
-        }
+            else {
+              commit(LOAD_SEQUENCE_SUBSCRIPTION_END, sequenceIds)
+              if (Object.keys(rootGetters.shotMap).length < 2 || force) {
+                dispatch('loadShots', (err) => {
+                  if (err) reject(err)
+                  else resolve()
+                })
+              } else {
+                resolve()
+              }
+            }
+          }
+        )
       } else {
         if (Object.keys(rootGetters.assetMap).length < 2 || force) {
           dispatch('loadAssets', (err) => {
@@ -224,6 +240,17 @@ const mutations = {
       isLoading: false,
       isError: false
     }
+  },
+
+  [LOAD_SEQUENCE_SUBSCRIBE_END] (state, { sequenceId, subscribed }) {
+    Vue.set(state.sequenceSubscriptions, sequenceId, subscribed)
+  },
+
+  [LOAD_SEQUENCE_SUBSCRIPTION_END] (state, sequenceIds) {
+    state.sequenceSubscriptions = {}
+    sequenceIds.forEach((sequenceId) => {
+      state.sequenceSubscriptions[sequenceId] = true
+    })
   },
 
   [RESET_ALL] (state) {

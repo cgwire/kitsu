@@ -71,10 +71,17 @@
         v-if="Object.keys(shotMap).length > 0"
         v-for="sequenceShots in shotsByEpisode"
       >
-        <div class="supervisor-sequence"
-        >
-          {{ sequenceShots[0] ? sequenceShots[0].episode_name + ' / ': '' }}
-          {{ sequenceShots[0] ? sequenceShots[0].sequence_name : '' }}
+        <div class="supervisor-sequence flexrow">
+          <span class="flexrow-item">
+            {{ sequenceShots.length > 0 ? sequenceShots[0].episode_name + ' / ': '' }}
+            {{ sequenceShots.length > 0 ? sequenceShots[0].sequence_name : '' }}
+          </span>
+          <subscribe-button
+            class="flexrow-item"
+            :subscribed="isSubscribed(sequenceShots[0].sequence_id)"
+            @click="toggleSubscribe(sequenceShots[0].sequence_id)"
+            v-if="sequenceShots.length > 0"
+          />
         </div>
         <div class="supervisor-shot-list">
           <div
@@ -118,6 +125,7 @@ import { mapGetters, mapActions } from 'vuex'
 
 import EntityThumbnail from './widgets/EntityThumbnail'
 import PageTitle from './widgets/PageTitle'
+import SubscribeButton from './widgets/SubscribeButton'
 import TableInfo from './widgets/TableInfo'
 import TaskTypeName from './widgets/TaskTypeName'
 import ValidationTag from './widgets/ValidationTag'
@@ -127,6 +135,7 @@ export default {
   components: {
     EntityThumbnail,
     PageTitle,
+    SubscribeButton,
     TableInfo,
     TaskTypeName,
     ValidationTag
@@ -150,6 +159,7 @@ export default {
       'currentTaskType',
       'currentProduction',
       'displayedAssets',
+      'sequenceSubscriptions',
       'shotsByEpisode',
       'shotMap',
       'taskTypeMap'
@@ -165,7 +175,9 @@ export default {
       'initTaskType',
       'loadShots',
       'loadAssets',
-      'setProduction'
+      'setProduction',
+      'subscribeToSequence',
+      'unsubscribeFromSequence'
     ]),
 
     initData (force) {
@@ -180,6 +192,19 @@ export default {
           this.loading.entities = false
           this.errors.entities = true
         })
+    },
+
+    isSubscribed (sequenceId) {
+      return this.sequenceSubscriptions[sequenceId]
+    },
+
+    toggleSubscribe (sequenceId) {
+      let taskTypeId = this.currentTaskType.id
+      if (!this.isSubscribed(sequenceId)) {
+        this.subscribeToSequence({sequenceId, taskTypeId})
+      } else {
+        this.unsubscribeFromSequence({sequenceId, taskTypeId})
+      }
     }
   },
 
@@ -226,6 +251,7 @@ export default {
   border-bottom: 1px solid #CCC;
   font-size: 1.2em;
   margin-bottom: 1em;
+  padding-bottom: 0.5em;
 }
 
 .supervisor-asset-list,
