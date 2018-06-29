@@ -348,3 +348,17 @@ class SequenceUnsubscribeResource(Resource):
             task_type_id
         )
         return '', 204
+
+
+class SequenceSubscriptionsResource(Resource):
+    """
+    Return list of sequence ids to which the current user has subscribed
+    for given task type
+    """
+
+    @jwt_required
+    def get(self, project_id, task_type_id):
+        return user_service.get_sequence_subscriptions(project_id, task_type_id)
+
+
+
