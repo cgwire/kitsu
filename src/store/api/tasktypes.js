@@ -27,5 +27,13 @@ export default {
 
   deleteTaskType (taskType, callback) {
     client.del(`/api/data/task-types/${taskType.id}`, callback)
+  },
+
+  getSequenceSubscriptions (projectId, taskTypeId, callback) {
+    client.get(
+      `/api/data/user/projects/${projectId}/task-types/${taskTypeId}/` +
+      `sequence-subscriptions`,
+      callback
+    )
   }
 }
