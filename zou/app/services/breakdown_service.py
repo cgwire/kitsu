@@ -6,7 +6,7 @@ from zou.app.models.asset_instance import AssetInstance
 from zou.app.models.entity import Entity, EntityLink
 from zou.app.models.entity_type import EntityType
 
-from zou.app.utils import fields
+from zou.app.utils import fields, events
 
 from zou.app.services import (
     assets_service,
@@ -54,12 +54,17 @@ def update_casting(shot_id, casting):
     """
     shot = shots_service.get_shot_raw(shot_id)
     shot.update({"entities_out": []})
+    casting_ids = []
     for cast in casting:
         EntityLink.create(
             entity_in_id=shot.id,
             entity_out_id=cast["asset_id"],
             nb_occurences=cast["nb_occurences"]
         )
+    events.emit("casting:update", {
+        "shot": shot_id,
+        "casting": casting_ids
+    })
     return casting
 
 
@@ -223,13 +228,20 @@ def add_asset_instance_to_scene(scene_id, asset_id, description=""):
         number = instance.number + 1
     name = build_asset_instance_name(asset_id, number)
 
-    return AssetInstance.create(
+    asset_instance = AssetInstance.create(
         asset_id=asset_id,
         scene_id=scene_id,
         number=number,
         name=name,
         description=description
     ).serialize()
+
+    events.emit("asset_instance:new", {
+        "scene_id": scene_id,
+        "asset_id": asset_id,
+        "asset_instance_id": asset_instance["id"]
+    })
+    return asset_instance
 
 
 def add_asset_instance_to_shot(shot_id, asset_instance_id):
@@ -240,6 +252,11 @@ def add_asset_instance_to_shot(shot_id, asset_instance_id):
     asset_instance = assets_service.get_asset_instance_raw(asset_instance_id)
     shot.instance_casting.append(asset_instance)
     shot.save()
+
+    events.emit("asset_instance:add-to-shot", {
+        "shot_id": shot_id,
+        "asset_instance_id": asset_instance_id
+    })
     return shot.serialize()
 
 
@@ -251,6 +268,10 @@ def remove_asset_instance_for_shot(shot_id, asset_instance_id):
     asset_instance = assets_service.get_asset_instance_raw(asset_instance_id)
     shot.instance_casting.remove(asset_instance)
     shot.save()
+    events.emit("asset_instance:remove-from-shot", {
+        "shot_id": shot_id,
+        "asset_instance_id": asset_instance_id
+    })
     return shot.serialize()
 
 

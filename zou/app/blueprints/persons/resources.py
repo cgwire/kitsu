@@ -55,7 +55,6 @@ class DesktopLoginsResource(Resource):
     Allow to create and retrieve desktop login logs. Desktop login logs can only
     be created by current user.
     """
-
     @jwt_required
     def get(self, person_id):
         current_user = persons_service.get_current_user()
@@ -90,6 +89,7 @@ class DesktopLoginsResource(Resource):
 
 class PresenceLogsResource(Resource):
     """
+    Return a csv file containing the presence logs based on a daily basis.
     """
 
     @jwt_required

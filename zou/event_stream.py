@@ -1,4 +1,4 @@
-from flask import Flask
+from flask import Flask, jsonify
 from flask_socketio import SocketIO
 from zou.app import config
 
@@ -18,6 +18,10 @@ def create_app(redis_url):
     app = Flask(__name__)
     app.config["SECRET_KEY"] = config.SECRET_KEY
 
+    @app.route('/')
+    def index():
+        return jsonify({"name": "%s Event stream" % config.APP_NAME})
+
     @socketio.on("connect", namespace="/events")
     def connected():
         app.logger.info("New websocket client connected")
@@ -34,4 +38,4 @@ redis_url = get_redis_url()
 (app, socketio) = create_app(redis_url)
 
 if __name__ == "main":
-    socketio.run(app, debug=False, port=5001)
+    socketio.run(app, debug=False, port=config["EVENT_STREAM_PORT"])

@@ -617,7 +617,9 @@ def remove_shot(shot_id):
     else:
         shot.delete()
     deleted_shot = shot.serialize(obj_type="Shot")
-    events.emit("shot:deletion", {"deleted_shot": deleted_shot})
+    events.emit("shot:deletion", {
+        "shot_id": shot_id
+    })
     return deleted_shot
 
 
@@ -632,7 +634,9 @@ def remove_scene(scene_id):
     except IntegrityError:
         scene.update({"canceled": True})
     deleted_scene = scene.serialize(obj_type="Scene")
-    events.emit("scene:deletion", {"deleted_scene": deleted_scene})
+    events.emit("scene:deletion", {
+        "scene_id": scene_id
+    })
     return deleted_scene
 
 
@@ -652,6 +656,9 @@ def create_episode(project_id, name):
             project_id=project_id,
             name=name
         )
+    events.emit("episode:new", {
+        "episode_id": episode.id
+    })
     return episode.serialize(obj_type="Episode")
 
 
@@ -677,6 +684,9 @@ def create_sequence(project_id, episode_id, name):
             parent_id=episode_id,
             name=name
         )
+    events.emit("sequence:new", {
+        "sequence_id": sequence.id
+    })
     return sequence.serialize(obj_type="Sequence")
 
 
@@ -703,6 +713,9 @@ def create_shot(project_id, sequence_id, name, data={}):
             name=name,
             data=data
         )
+    events.emit("shot:new", {
+        "shot_id": shot.id
+    })
     return shot.serialize(obj_type="Shot")
 
 
@@ -732,6 +745,9 @@ def create_scene(project_id, sequence_id, name):
             name=name,
             data={}
         )
+    events.emit("scene:new", {
+        "scene_id": scene.id
+    })
     return scene.serialize(obj_type="Scene")
 
 
@@ -741,6 +757,9 @@ def update_shot(shot_id, data_dict):
     """
     shot = get_shot_raw(shot_id)
     shot.update(data_dict)
+    events.emit("shot:update", {
+        "shot_id": shot_id
+    })
     return shot.serialize()
 
 

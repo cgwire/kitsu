@@ -1,10 +1,12 @@
 import json
 import datetime
 
-from tests.base import ApiTestCase
+from tests.base import ApiDBTestCase
 
 from zou.app.utils import commands
 from zou.app.stores import auth_tokens_store
+from zou.app.models.entity_type import EntityType
+from zou.app.models.task_type import TaskType
 
 
 def totimestamp(dt, epoch=datetime.datetime(1970, 1, 1)):
@@ -12,7 +14,7 @@ def totimestamp(dt, epoch=datetime.datetime(1970, 1, 1)):
     return (td.microseconds + (td.seconds + td.days * 86400) * 10**6) / 10**6
 
 
-class CommandsTestCase(ApiTestCase):
+class CommandsTestCase(ApiDBTestCase):
 
     def setUp(self):
         super(CommandsTestCase, self).setUp()
@@ -58,3 +60,10 @@ class CommandsTestCase(ApiTestCase):
         commands.clean_auth_tokens()
         self.assertEquals(len(self.store.keys()), 1)
         self.assertEquals(self.store.keys()[0], "testkey2")
+
+    def test_init_data(self):
+        commands.init_data()
+        task_types = TaskType.get_all()
+        asset_types = EntityType.get_all()
+        self.assertEqual(len(task_types), 11)
+        self.assertEqual(len(asset_types), 8)

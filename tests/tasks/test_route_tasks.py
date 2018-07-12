@@ -55,11 +55,12 @@ class TaskRoutesTestCase(ApiDBTestCase):
     def test_task_assign(self):
         self.generate_fixture_task()
         person_id = str(self.person.id)
+        task_id = str(self.task.id)
         data = {
             "person_id": person_id
         }
-        self.put("/actions/tasks/%s/assign" % self.task.id, data, 200)
-        task = self.get("data/tasks/%s" % self.task.id)
+        self.put("/actions/tasks/%s/assign" % task_id, data, 200)
+        task = self.get("data/tasks/%s" % task_id)
         self.assertEqual(task["assignees"][0], person_id)
 
     def test_task_assign_404(self):

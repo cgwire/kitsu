@@ -35,12 +35,8 @@ class RouteTaskChangeTestCase(ApiDBTestCase):
     def handle_event(self, data):
         self.is_event_fired = True
         self.assertEqual(
-            data["task_before"]["task_status_id"],
+            data["previous_task_status_id"],
             self.open_status_id
-        )
-        self.assertEqual(
-            data["task_after"]["task_status_id"],
-            self.wip_status_id
         )
 
     def assert_event_is_fired(self):
@@ -64,8 +60,9 @@ class RouteTaskChangeTestCase(ApiDBTestCase):
 
     def test_status_to_wip_again(self):
         self.task.real_start_date = None
-        self.put("/actions/tasks/%s/start" % self.task.id, {})
-        real_start_date = Task.get(self.task.id).real_start_date
-        self.put("/actions/tasks/%s/start" % self.task.id, {})
-        task = self.get("data/tasks/%s" % self.task.id)
+        task_id = str(self.task.id)
+        self.put("/actions/tasks/%s/start" % task_id, {})
+        real_start_date = Task.get(task_id).real_start_date
+        self.put("/actions/tasks/%s/start" % task_id, {})
+        task = self.get("data/tasks/%s" % task_id)
         self.assertEquals(real_start_date.isoformat(), task["real_start_date"])

@@ -1,5 +1,9 @@
 from collections import OrderedDict
+
 from zou.app.stores import publisher_store
+from zou.app.models.event import ApiEvent
+from zou.app.utils import fields
+from zou.app.services import persons_service
 
 handlers = {}
 
@@ -15,6 +19,7 @@ def register(event, name, handler):
     if event not in handlers:
         handlers[event] = OrderedDict()
 
+    print("Handler [%s -> %s registered]" % (event, name))
     handlers[event][name] = handler
 
 
@@ -54,7 +59,9 @@ def emit(event, data={}):
     (like the realtime event daemon).
     """
     event_handlers = handlers.get(event, {})
+    data = fields.serialize_dict(data)
     publisher_store.publish(event, data)
+    save_event(event, data)
 
     from zou.app import config
     for func in event_handlers.values():
@@ -63,3 +70,20 @@ def emit(event, data={}):
             job_queue.enqueue(func.handle_event, data)
         else:
             func.handle_event(data)
+
+
+def save_event(event, data):
+    """
+    Store event information in the database.
+    """
+    try:
+        person = persons_service.get_current_user_raw()
+        person_id = person.id
+    except:
+        person_id = None
+
+    return ApiEvent.create(
+        name=event,
+        data=data,
+        user_id=person_id
+    )

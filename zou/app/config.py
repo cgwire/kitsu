@@ -56,8 +56,14 @@ DEFAULT_FILE_TREE = os.getenv("DEFAULT_FILE_TREE", "default")
 FILE_TREE_FOLDER = os.getenv("FILE_TREE_FOLDER")
 THUMBNAIL_FOLDER = os.getenv("THUMBNAIL_FOLDER")
 
+PLUGIN_FOLDER = os.getenv(
+    "PLUGIN_FOLDER",
+    os.path.join(os.getcwd(), "plugins")
+)
 EVENT_HANDLERS_FOLDER = os.getenv(
     "EVENT_HANDLERS_FOLDER",
     os.path.join(os.getcwd(), "event_handlers")
 )
 TMP_DIR = os.getenv("TMP_DIR", os.path.join(os.sep, "tmp"))
+
+EVENT_STREAM_PORT = os.getenv("EVENT_STREAM_PORT", 5001)

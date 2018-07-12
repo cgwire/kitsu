@@ -6,6 +6,7 @@ from zou.app import app
 from zou.app.utils import fs, thumbnail
 from zou.app.services import assets_service
 from zou.app.models.entity import Entity
+from zou.app.models.project import Project
 
 from PIL import Image
 
@@ -47,13 +48,14 @@ class RouteThumbnailTestCase(ApiDBTestCase):
         fs.rm_rf(app.config["THUMBNAIL_FOLDER"])
 
     def test_add_thumbnail(self):
-        path = "/pictures/thumbnails/shots/%s" % self.shot.id
+        project_id = str(self.project.id)
+        path = "/pictures/thumbnails/projects/%s" % project_id
 
         file_path_fixture = self.get_fixture_file_path(
                 os.path.join("thumbnails", "th01.png"))
         self.upload_file(path, file_path_fixture)
 
-        path = "/pictures/thumbnails/shots/%s.png" % self.shot.id
+        path = "/pictures/thumbnails/projects/%s.png" % project_id
         current_path = os.path.dirname(__file__)
         result_file_path = os.path.join(TEST_FOLDER, "th01.png")
         result_file_path = os.path.join(
@@ -63,7 +65,10 @@ class RouteThumbnailTestCase(ApiDBTestCase):
         self.download_file(path, result_file_path)
         result_image = Image.open(result_file_path)
 
-        self.assertEqual(result_image.size, thumbnail.RECTANGLE_SIZE)
+        self.assertEqual(result_image.size, thumbnail.SQUARE_SIZE)
+
+        project = Project.get(project_id)
+        self.assertTrue(project.has_avatar)
 
     def test_add_thumbnail_working_file(self):
         path = "/pictures/thumbnails/working-files/%s" % self.working_file.id
@@ -130,7 +135,10 @@ class RouteThumbnailTestCase(ApiDBTestCase):
         ), {})
 
         asset = assets_service.get_asset(self.asset_id)
-        self.assertEquals(asset["preview_file_id"], str(self.preview_file_id))
+        self.assertEquals(
+            asset["preview_file_id"],
+            str(self.preview_file_id)
+        )
 
         self.put("/actions/entities/%s/set-main-preview/%s" % (
             self.preview_file_id,

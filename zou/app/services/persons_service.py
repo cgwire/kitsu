@@ -11,9 +11,16 @@ from flask_jwt_extended import get_jwt_identity
 from zou.app.models.person import Person
 from zou.app.models.desktop_login_logs import DesktopLoginLog
 
-from zou.app.utils import fields
+from zou.app.utils import fields, events, cache
 
 from zou.app.services.exception import PersonNotFoundException
+
+
+def clear_person_cache():
+    cache.cache.delete_memoized(get_person)
+    cache.cache.delete_memoized(get_person_by_email)
+    cache.cache.delete_memoized(get_person_by_email_username)
+    cache.cache.delete_memoized(get_person_by_desktop_login)
 
 
 def get_persons():
@@ -52,6 +59,7 @@ def get_person_raw(person_id):
     return person
 
 
+@cache.memoize_function(120)
 def get_person(person_id):
     """
     Return given person as a dictionary.
@@ -60,6 +68,7 @@ def get_person(person_id):
     return person.serialize()
 
 
+@cache.memoize_function(120)
 def get_person_by_email_username(email):
     """
     Return person that matches given email as a dictionary.
@@ -87,6 +96,7 @@ def get_person_by_email_raw(email):
     return person
 
 
+@cache.memoize_function(120)
 def get_person_by_email(email):
     """
     Return person that matches given email as a dictionary.
@@ -95,6 +105,7 @@ def get_person_by_email(email):
     return person.serialize()
 
 
+@cache.memoize_function(120)
 def get_person_by_desktop_login(desktop_login):
     """
     Return person that matches given desktop login as a dictionary. It is useful
@@ -146,6 +157,10 @@ def create_person(
         phone=phone,
         role=role
     )
+    events.emit("person:new", {
+        "person_id": person.id
+    })
+    clear_person_cache()
     return person.serialize()
 
 
@@ -155,6 +170,7 @@ def update_password(email, password):
     """
     person = get_person_by_email_raw(email)
     person.update({"password": password})
+    clear_person_cache()
     return person.serialize()
 
 
@@ -164,6 +180,10 @@ def update_person(person_id, data):
     """
     person = Person.get(person_id)
     person.update(data)
+    events.emit("person:update", {
+        "person_id": person_id
+    })
+    clear_person_cache()
     return person.serialize()
 
 
@@ -174,6 +194,10 @@ def delete_person(person_id):
     person = Person.get(person_id)
     person_dict = person.serialize()
     person.delete()
+    events.emit("person:deletetion", {
+        "person_id": person_id
+    })
+    clear_person_cache()
     return person_dict
 
 

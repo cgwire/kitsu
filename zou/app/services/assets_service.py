@@ -369,6 +369,11 @@ def create_asset_types(asset_type_names):
     for asset_type_name in asset_type_names:
         asset_type = get_or_create_asset_type(asset_type_name)
         asset_types.append(asset_type)
+
+        events.emit("asset-type:new", {
+            "name": asset_type_name,
+            "id": asset_type["id"]
+        })
     return asset_types
 
 
@@ -394,9 +399,9 @@ def create_asset(
     )
     asset_dict = asset.serialize(obj_type="Asset")
     events.emit("asset:new", {
-        "asset": asset_dict,
-        "asset_type": asset_type.serialize(obj_type="AssetType"),
-        "project": project.serialize()
+        "asset": asset.id,
+        "asset_type": asset_type.id,
+        "project_id": project.id
     })
     return asset_dict
 
@@ -404,6 +409,10 @@ def create_asset(
 def update_asset(asset_id, data):
     asset = get_asset_raw(asset_id)
     asset.update(data)
+    events.emit("asset:update", {
+        "asset_id": asset_id,
+        "data": data
+    })
     return asset.serialize(obj_type="Asset")
 
 
@@ -416,8 +425,8 @@ def remove_asset(asset_id):
     else:
         asset.delete()
     deleted_asset = asset.serialize(obj_type="Asset")
-    events.emit("asset:deletion", {
-        "deleted_asset": deleted_asset
+    events.emit("asset:delete", {
+        "asset_id": asset_id
     })
     return deleted_asset
 
@@ -433,8 +442,8 @@ def add_asset_link(asset_in_id, asset_out_id):
         asset_in.entities_out.append(asset_out)
         asset_in.save()
         events.emit("asset:new-link", {
-            "asset_in": asset_in.serialize(obj_type="Asset"),
-            "asset_out": asset_out.serialize(obj_type="Asset")
+            "asset_in": asset_in.id,
+            "asset_out": asset_out.id
         })
     return asset_in.serialize(obj_type="Asset")
 
@@ -451,8 +460,8 @@ def remove_asset_link(asset_in_id, asset_out_id):
             [x for x in asset_in.entities_out if x.id != asset_out_id]
         asset_in.save()
         events.emit("asset:remove-link", {
-            "asset_in": asset_in.serialize(obj_type="Asset"),
-            "asset_out": asset_out.serialize(obj_type="Asset")
+            "asset_in": asset_in.id,
+            "asset_out": asset_out.id
         })
     return asset_in.serialize(obj_type="Asset")
 
@@ -465,6 +474,6 @@ def cancel_asset(asset_id):
     asset.update({"canceled": True})
     asset_dict = asset.serialize(obj_type="Asset")
     events.emit("asset:deletion", {
-        "deleted_asset": asset_dict
+        "asset_id": asset_id
     })
     return asset_dict
