@@ -16,6 +16,13 @@ from zou.app.utils import fields, events, cache
 from zou.app.services.exception import PersonNotFoundException
 
 
+def clear_person_cache():
+    cache.cache.delete_memoized(get_person)
+    cache.cache.delete_memoized(get_person_by_email)
+    cache.cache.delete_memoized(get_person_by_email_username)
+    cache.cache.delete_memoized(get_person_by_desktop_login)
+
+
 def get_persons():
     """
     Return all person stored in database.
@@ -153,6 +160,7 @@ def create_person(
     events.emit("person:new", {
         "person_id": person.id
     })
+    clear_person_cache()
     return person.serialize()
 
 
@@ -162,6 +170,7 @@ def update_password(email, password):
     """
     person = get_person_by_email_raw(email)
     person.update({"password": password})
+    clear_person_cache()
     return person.serialize()
 
 
@@ -174,6 +183,7 @@ def update_person(person_id, data):
     events.emit("person:update", {
         "person_id": person_id
     })
+    clear_person_cache()
     return person.serialize()
 
 
@@ -187,6 +197,7 @@ def delete_person(person_id):
     events.emit("person:deletetion", {
         "person_id": person_id
     })
+    clear_person_cache()
     return person_dict
 
 
