@@ -130,6 +130,11 @@ a:hover {
   color: #999;
 }
 
+.info {
+  margin-top: 2em;
+  font-size: 1.4em;
+}
+
 .canceled td:not(.actions) {
   text-decoration: line-through;
 }
@@ -156,7 +161,8 @@ input.input:focus {
 }
 
 .big-button {
-  border-radius: 2px;
+  border-radius: 2em;
+  font-weight: bold;
   background: #00B242;
   border-color: #00B242;
   color: white;

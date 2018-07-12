@@ -57,6 +57,9 @@
   </table-info>
 
   <div class="has-text-centered" v-if="isEmptyList">
+    <p class="info">
+      <img src="../../assets/illustrations/empty_asset.png" />
+    </p>
     <p class="info">{{ $t('assets.empty_list') }}</p>
     <button-link
       class="level-item big-button"
@@ -353,10 +356,6 @@ td.type {
 
 .thumbnail img {
   margin-top: 5px;
-}
-
-.info {
-  margin-top: 2em;
 }
 
 .asset-link {

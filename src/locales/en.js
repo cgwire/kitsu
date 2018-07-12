@@ -290,6 +290,8 @@ export default {
     number: 'shot | shots',
     new_shot: 'Add a shot',
     new_shots: 'Add shots',
+    new_sequences: 'Add sequences',
+    new_episodes: 'Add episodes',
     manage: 'Manage shots',
     edit_fail: 'Creation or edition failed, an error occured.',
     new_success: 'Shot {name} successfully created.',

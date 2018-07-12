@@ -39,10 +39,13 @@
   </table-info>
 
   <div class="has-text-centered" v-if="isEmptyList">
+    <p class="info">
+      <img src="../../assets/illustrations/empty_shot.png" />
+    </p>
     <p class="info">{{ $t('sequences.empty_list') }}</p>
     <button-link
       class="level-item big-button"
-      :text="$t('shots.new_shots')"
+      :text="$t('shots.new_sequences')"
       :path="{
         name: 'manage-shots',
         params: {production_id: currentProduction.id}

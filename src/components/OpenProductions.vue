@@ -72,14 +72,14 @@
     </div>
 
     <div class="has-text-centered welcome" v-else>
-      <p class="kitsu-logo">
-        <img src="../assets/kitsu.png" />
+      <p class="kitsu-logo info">
+        <img src="../assets/illustrations/studio_collaboration.png" />
       </p>
       <h1 class="title has-text-centered">
         {{ $t('productions.home.welcome') }}
       </h1>
       <div v-if="isCurrentUserManager">
-        <p class="has-text-centered">
+        <p class="has-text-centered info">
           {{ $t('productions.home.empty') }}
         </p>
         <p class="has-text-centered">
