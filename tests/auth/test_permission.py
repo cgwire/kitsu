@@ -139,5 +139,4 @@ class PermissionTestCase(ApiDBTestCase):
         projects_service.update_project(project_id, {
             "team": [self.user_cg_artist]
         })
-        self.project.save()
         self.get("data/assets/%s" % self.asset.id, 200)
