@@ -12,8 +12,10 @@
            v-bind:class="{'selected': !isSidebarHidden}">
           ≡
         </a>
-        <router-link class="nav-item home-button"
-           to="/">
+        <router-link
+          class="nav-item home-button"
+          to="/"
+        >
           <img src="../assets/logo.png" />
         </router-link>
         <div :class="{
@@ -32,6 +34,36 @@
               >
               </combobox>
             </div>
+            <router-link
+              class="level-item icon-link"
+              :title="$t('assets.title')"
+              :to="{
+                name: 'assets',
+                params: {production_id: currentProductionId}
+              }"
+            >
+            <img src="../assets/icons/assets.png" />
+            </router-link>
+            <router-link
+              class="level-item icon-link"
+              :title="$t('shots.title')"
+              :to="{
+                name: 'shots',
+                params: {production_id: currentProductionId}
+              }"
+            >
+            <img src="../assets/icons/shots.png" />
+            </router-link>
+            <router-link
+              class="level-item icon-link"
+              :title="$t('sequences.title')"
+              :to="{
+                name: 'sequences',
+                params: {production_id: currentProductionId}
+              }"
+            >
+            <img src="../assets/icons/sequences.png" />
+            </router-link>
           </div>
         </div>
       </div>
@@ -313,6 +345,7 @@ export default {
 
 .production-selector {
   margin-top: 1.9em;
+  margin-right: 1em;
 }
 
 .has-no-notifications {
@@ -323,5 +356,9 @@ export default {
 .has-notifications {
   margin-top: 5px;
   color: #00B242;
+}
+
+.icon-link {
+  margin: 0 0.5em;
 }
 </style>
