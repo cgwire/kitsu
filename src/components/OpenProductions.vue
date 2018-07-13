@@ -8,7 +8,12 @@
         <activity-icon></activity-icon>
         {{ $t('productions.home.title') }}
       </h1>
-      <div class="open-productions-list">
+      <div
+        :class="{
+          'open-productions-list': true,
+          'is-grid': openProductions && openProductions.length > 4
+        }"
+    >
         <div
           class="open-production has-text-centered"
           v-for="production in openProductions">
@@ -54,11 +59,11 @@
           <router-link
             class="secondary"
             :to="{
-              name: 'breakdown',
+              name: 'sequences',
               params: {production_id: production.id}
             }"
           >
-            {{ $t('breakdown.title') }}
+            {{ $t('sequences.title') }}
           </router-link>
         </div>
       </div>
@@ -232,34 +237,41 @@ h1 {
 .open-productions-list {
   max-width: 1000px;
   margin: auto;
+  margin-top: 4em;
   display: flex;
   flex-direction: row;
   flex-wrap: wrap;
 }
 
+.is-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill,minmax(200px, 1fr));
+}
+
 .open-production {
   width: 200px;
-  flex: 1;
   padding: 10px;
   cursor: pointer;
+  padding: 1em;
+  flex: 1;
 }
 
 .avatar {
   margin: auto;
   font-size: 64px;
   font-weight: bold;
-  border-radius: 0;
+  border-radius: 1em;
 }
 
 .avatar img {
-  border-radius: 0;
+  border-radius: 1em;
   width: 100%;
   height: 100%;
 }
 
-.open-production:hover .avatar {
-  outline: 5px solid #CCC;
-  transition: outline .2s ease-in-out;
+.open-production:hover .avatar{
+  transform: scale(1.1);
+  transition: transform .2s ease-in-out;
 }
 
 .production-name {
