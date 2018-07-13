@@ -241,6 +241,7 @@ h1 {
   display: flex;
   flex-direction: row;
   flex-wrap: wrap;
+  text-align: center;
 }
 
 .is-grid {
@@ -254,6 +255,10 @@ h1 {
   cursor: pointer;
   padding: 1em;
   flex: 1;
+}
+
+.is-grid .open-production {
+  margin: auto;
 }
 
 .avatar {

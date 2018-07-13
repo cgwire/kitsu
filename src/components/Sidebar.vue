@@ -153,7 +153,7 @@ aside {
   background-color: white;
   padding: 20px 1em 1em 1em;
   overflow-y: auto;
-  z-index: 200;
+  z-index: 205;
   box-shadow: 1px 0px 6px rgba(0,0,0,0.2);
   transition-property: all;
   transition-duration: .5s;

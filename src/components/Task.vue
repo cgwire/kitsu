@@ -27,7 +27,7 @@
       </div>
 
       <div
-        class="flexrow"
+        class="flexrow header-title"
         v-if="currentTask"
       >
         <task-type-name
@@ -46,12 +46,12 @@
           </router-link>
         </div>
         <subscribe-button
-          class="flexrow-item"
+          class="flexrow-item action-button"
           :subscribed="isAssigned || isSubscribed"
           @click="toggleSubscribe"
         />
         <button-link
-          class="flexrow-item"
+          class="flexrow-item action-button"
           text=""
           icon="delete"
           :path="deleteTaskPath"
@@ -90,7 +90,7 @@
       </div>
     </div>
 
-    <div class="task-columns">
+    <div class="task-columns" ref="task-columns">
       <div class="task-column comments-column">
         <div v-if="currentTask">
           <div>
@@ -1004,6 +1004,11 @@ export default {
 
   mounted () {
     this.handleModalsDisplay()
+    setTimeout(() => {
+      console.log(this.$refs['task-columns'].scrollTop)
+      this.$refs['task-columns'].scrollTop = 100
+      window.scrollTo(0, 0)
+    })
   },
 
   watch: {
@@ -1173,5 +1178,34 @@ video {
 
 .title a {
   color: inherit;
+}
+
+@media screen and (max-width: 768px) {
+  .action-button {
+    display: none;
+  }
+
+  .title {
+    font-size: 1.3em;
+    line-height: 1.5em;
+  }
+
+  .header-title {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .header-title .flexrow-item {
+    margin-bottom: 0.5em;
+  }
+
+  .task-columns {
+    flex-direction: column-reverse;
+  }
+
+  .task-column {
+    width: 100%;
+    overflow-y: initial;
+  }
 }
 </style>

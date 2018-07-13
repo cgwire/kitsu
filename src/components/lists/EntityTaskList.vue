@@ -113,13 +113,13 @@ export default {
 }
 
 .status {
-  max-width: 150px;
-  min-width: 150px;
+  max-width: 100px;
+  min-width: 100px;
 }
 
 .assignees {
-  max-width: 200px;
-  min-width: 200px;
+  max-width: 150px;
+  min-width: 150px;
 }
 
 .flexrow-item {

@@ -60,6 +60,7 @@ export default {
   padding: 0.5em 2em;
   padding-top: 70px;
   background: white;
+  height: 100vh;
 }
 
 .table td {
@@ -80,6 +81,9 @@ th.actions {
   width: 40px;
   height: 40px;
   margin-right: 0px;
+}
+
+html {
 }
 
 body {
@@ -341,6 +345,10 @@ input.search-input:focus {
 .tabs li.is-active a {
   border-color: #00B242;
   color: #00B242;
+}
+
+.page .columns:last-child {
+  margin-bottom: 1em;
 }
 
 @media screen and (max-width: 1000px) {

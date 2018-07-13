@@ -2,25 +2,25 @@
 <div class="page">
 
   <div class="page-header">
-    <div class="level">
-      <div class="level-left">
-        <div class="level-item">
-          <entity-thumbnail
-            class="shot-thumbnail"
-            :entity="currentShot"
-            v-if="currentShot"
-          >
-          </entity-thumbnail>
-        </div>
-        <div class="level-item">
-          <page-title :text="title"></page-title>
-        </div>
+    <div class="flexrow">
+      <div class="flexrow-item">
+        <entity-thumbnail
+          class="shot-thumbnail"
+          :entity="currentShot"
+          :empty-width="100"
+          :empty-height="66.66"
+          v-if="currentShot"
+        >
+        </entity-thumbnail>
       </div>
+      <div class="flexrow-item">
+        <page-title class="entity-title" :text="title"></page-title>
+     </div>
     </div>
   </div>
 
   <div class="columns">
-    <div class="column">
+    <div class="column task-column">
     <page-subtitle :text="$t('shots.tasks')"></page-subtitle>
     <entity-task-list
       :entries="currentShot ? currentShot.tasks : []"
@@ -343,5 +343,20 @@ h2.subtitle {
 .field-label {
   font-weight: bold;
   width: 140px;
+}
+
+@media screen and (max-width: 768px) {
+  .task-column {
+    margin-bottom: 1em;
+  }
+
+  .column:first-child {
+    margin-right: 0;
+  }
+
+  .entity-title {
+    font-size: 1.3em;
+    line-height: 1.5em;
+  }
 }
 </style>

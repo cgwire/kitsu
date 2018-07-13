@@ -20,8 +20,7 @@
         </router-link>
         <div :class="{
           'nav-item': true,
-          hidden: !isProductionContext()
-        }">
+        }" v-if="isProductionContext()">
           <div class="level">
             <div class="level-item production-selector-label">
               {{ $t('productions.current') }}:
@@ -133,11 +132,13 @@ export default {
     PeopleName,
     PeopleAvatar
   },
+
   data () {
     return {
       currentProductionId: null
     }
   },
+
   mounted () {
     const userMenu = this.$refs['user-menu']
     const userName = this.$refs['user-name']
@@ -150,6 +151,7 @@ export default {
       }
     }
   },
+
   computed: {
     ...mapGetters([
       'isSidebarHidden',
@@ -169,6 +171,7 @@ export default {
       }
     }
   },
+
   methods: {
     ...mapActions([
       'loadNotification',
@@ -229,7 +232,7 @@ export default {
   box-shadow: 0px 0px 6px rgba(0,0,0,0.2);
   max-height: 60px;
   min-height: 60px;
-  z-index: 199;
+  z-index: 204;
   position: fixed;
   left: 0;
   right: 0;
@@ -248,8 +251,6 @@ export default {
 }
 
 .user-nav.active {
-  background: #5e60ba;
-  color: white
 }
 
 .user-menu {
@@ -258,14 +259,14 @@ export default {
   width: 200px;
   right: 0;
   background-color: white;
-  background: #5e60ba;
-  color: white;
   padding: 1em 1em 1em 1em;
   z-index: 203;
   box-shadow: 2px 3px 3px rgba(0,0,0,0.2);
   transition-property: all;
   transition-duration: .5s;
   transition-timing-function: cubic-bezier(0, 1, 0.5, 1);
+  border-left: 1px solid #EEE;
+  border-bottom: 1px solid #EEE;
 }
 
 .user-menu li {
@@ -275,7 +276,7 @@ export default {
 }
 
 .user-menu li a {
-  color: white;
+  color: #333;
 }
 
 #c-mask-user-menu {
@@ -325,9 +326,11 @@ export default {
     right: -160;
   }
 
+  .icon-link,
   .production-selector-label {
     display: none;
   }
+
 
   .field.production-selector {
     padding: 0;

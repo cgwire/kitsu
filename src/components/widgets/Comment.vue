@@ -18,61 +18,65 @@
   <div class="media-content">
     <div class="content">
       <div class="comment-person flexrow">
-        <strong class="flexrow-item">
-          <people-name class="" :person="comment.person"></people-name>
-        </strong>
-        <span class="comment-date flexrow-item">
-          {{ formatDate(comment.created_at) }}
-        </span>
-        <router-link
-          :to="previewRoute"
-          class="revision flexrow-item"
-          v-if="comment.preview"
-        >
-          revision {{ comment.preview.revision }}
-        </router-link>
-        <button-link
-          icon="upload"
-          class="flexrow-item"
-          :text="$t('tasks.add_preview')"
-          :is-responsive="true"
-          :path="{
-            name: 'task-add-preview',
-            params: {
-              task_id: comment.object_id,
-              comment_id: comment.id
-            }
-          }"
-          v-if="editable && !comment.preview && comment.task_status.is_reviewable"
-        >
-        </button-link>
-        <button-link
-          icon="edit"
-          class="flexrow-item"
-          :path="{
-            name: 'comment-edit',
-            params: {
-              task_id: comment.object_id,
-              comment_id: comment.id
-            }
-          }"
-          v-if="editable"
-        >
-        </button-link>
-        <button-link
-          icon="delete"
-          class="flexrow-item"
-          :path="{
-            name: 'comment-delete',
-            params: {
-              task_id: comment.object_id,
-              comment_id: comment.id
-            }
-          }"
-          v-if="editable"
-        >
-        </button-link>
+        <div class="flexrow-item">
+          <strong class="">
+            <people-name class="" :person="comment.person"></people-name>
+          </strong>
+          <span class="comment-date">
+            {{ formatDate(comment.created_at) }}
+          </span>
+          <router-link
+            :to="previewRoute"
+            class="revision"
+            v-if="comment.preview"
+          >
+            revision {{ comment.preview.revision }}
+          </router-link>
 
+        </div>
+        <div class="flexrow-item">
+          <button-link
+            icon="upload"
+            class=""
+            :text="$t('tasks.add_preview')"
+            :is-responsive="true"
+            :path="{
+              name: 'task-add-preview',
+              params: {
+                task_id: comment.object_id,
+                comment_id: comment.id
+              }
+            }"
+            v-if="editable && !comment.preview && comment.task_status.is_reviewable"
+          >
+          </button-link>
+          <button-link
+            icon="edit"
+            class=""
+            :path="{
+              name: 'comment-edit',
+              params: {
+                task_id: comment.object_id,
+                comment_id: comment.id
+              }
+            }"
+            v-if="editable"
+          >
+          </button-link>
+          <button-link
+            icon="delete"
+            class=""
+            :path="{
+              name: 'comment-delete',
+              params: {
+                task_id: comment.object_id,
+                comment_id: comment.id
+              }
+            }"
+            v-if="editable"
+          >
+          </button-link>
+        </div>
       </div>
 
       <p v-if="comment.task_status.name === 'Done'">
@@ -202,4 +206,12 @@ a.revision:hover {
   font-style: italic;
   color: #AAA;
 }
+
+@media screen and (max-width: 768px) {
+  .flexrow {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+}
+
 </style>

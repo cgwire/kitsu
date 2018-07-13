@@ -1,27 +1,25 @@
 <template>
 <div class="page">
   <div class="page-header">
-    <div class="level">
-      <div class="level-left">
-        <div class="level-item">
-          <entity-thumbnail
-            class="asset-thumbnail"
-            :entity="currentAsset"
-            :empty-width="100"
-            :empty-height="66.6"
-            v-if="currentAsset"
-          >
-          </entity-thumbnail>
-        </div>
-        <div class="level-item">
-          <page-title :text="title"></page-title>
-        </div>
+    <div class="flexrow">
+      <div class="flexrow-item">
+        <entity-thumbnail
+          class="asset-thumbnail"
+          :entity="currentAsset"
+          :empty-width="100"
+          :empty-height="66.6"
+          v-if="currentAsset"
+        >
+        </entity-thumbnail>
+      </div>
+      <div class="flexrow-item">
+        <page-title :text="title" class="entity-title"></page-title>
       </div>
     </div>
   </div>
 
   <div class="columns">
-    <div class="column">
+    <div class="column task-column">
       <page-subtitle :text="$t('assets.tasks')"></page-subtitle>
       <entity-task-list
         :entries="currentAsset ? currentAsset.tasks : []"
@@ -316,5 +314,20 @@ h2.subtitle {
 .field-label {
   font-weight: bold;
   width: 120px;
+}
+
+@media screen and (max-width: 768px) {
+  .task-column {
+    margin-bottom: 1em;
+  }
+
+  .column:first-child {
+    margin-right: 0;
+  }
+
+  .entity-title {
+    font-size: 1.3em;
+    line-height: 1.5em;
+  }
 }
 </style>

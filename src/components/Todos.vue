@@ -134,7 +134,9 @@ export default {
     selectCurrent () {
       this.activeTab = 'current'
       setTimeout(() => {
-        this.$refs['person-tasks-search-field'].focus()
+        if (this.$refs['person-tasks-search-field']) {
+          this.$refs['person-tasks-search-field'].focus()
+        }
       }, 100)
     },
 

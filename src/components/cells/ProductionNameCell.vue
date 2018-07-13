@@ -1,28 +1,28 @@
 <template>
 <td class="production-name">
-  <div class="level">
-    <div class="level-left">
-      <router-link :to="productionRoute">
-        <div
-           class="level-item avatar has-text-centered"
-           v-if="withAvatar"
-           v-bind:style="{
-           background: getAvatarColor(entry),
-           width: size + 'px',
-           height: size + 'px'
-        }">
-	        <span v-if="!entry.has_avatar">
-	          {{ generateAvatar(entry) }}
-	        </span>
-	        <span v-else>
-	          <img :src="getThumbnailPath(entry)" />
-	        </span>
-	      </div>
-        <span class="level-item" v-if="!onlyAvatar">
-          {{ entry.name }}
+  <div class="flexrow">
+    <router-link :to="productionRoute">
+      <div
+         class="flexrow-item avatar has-text-centered"
+         v-if="withAvatar"
+         v-bind:style="{
+         background: getAvatarColor(entry),
+         width: size + 'px',
+         height: size + 'px',
+         'font-size': (size - 15) + 'px',
+         'line-height': size + 'px'
+      }">
+        <span v-if="!entry.has_avatar">
+          {{ generateAvatar(entry) }}
         </span>
-      </router-link>
-    </div>
+        <span v-else>
+          <img :src="getThumbnailPath(entry)" />
+        </span>
+      </div>
+      <span class="flexrow-item" v-if="!onlyAvatar">
+        {{ entry.name }}
+      </span>
+    </router-link>
   </div>
 </td>
 </template>
