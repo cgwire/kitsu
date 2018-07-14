@@ -4,7 +4,6 @@ import { sync } from 'vuex-router-sync'
 import router from './router'
 import vuescroll from 'vue-scroll'
 import i18n from './lib/i18n'
-// import realtime from './lib/realtime'
 import store from './store'
 import App from './App'
 import VueLazyload from 'vue-lazyload'
@@ -13,6 +12,7 @@ import infiniteScroll from 'vue-infinite-scroll'
 import VueChartkick from 'vue-chartkick'
 import Chart from 'chart.js'
 import VueWebsocket from 'vue-websocket'
+import VTooltip from 'v-tooltip'
 
 Vue.config.productionTip = false
 Vue.use(vuescroll)
@@ -21,6 +21,7 @@ Vue.use(Meta)
 Vue.use(infiniteScroll)
 Vue.use(VueChartkick, {adapter: Chart})
 Vue.use(VueWebsocket, '/events')
+Vue.use(VTooltip)
 
 // Make the current route part of the main state.
 sync(store, router)

@@ -1,8 +1,13 @@
 <template>
 <td>
   <span
+    class="description"
     v-if="entry.description && entry.description.length > 0"
-    v-html="compileMarkdown(entry.description)"
+    v-html="compileMarkdown(shortenText(entry.description, 20))"
+    v-tooltip="{
+      content: compileMarkdown(entry.description),
+      trigger: 'click'
+    }"
   >
   </span>
 </td>
@@ -11,6 +16,7 @@
 <script>
 import marked from 'marked'
 import { mapGetters, mapActions } from 'vuex'
+import stringHelpers from '../../lib/string'
 
 export default {
   name: 'description-cell',
@@ -30,7 +36,9 @@ export default {
 
     compileMarkdown (input) {
       return marked(input || '')
-    }
+    },
+
+    shortenText: stringHelpers.shortenText
   }
 }
 </script>
@@ -46,5 +54,9 @@ export default {
 
 .no-comment {
   font-style: italic;
+}
+
+.description {
+  cursor: pointer;
 }
 </style>
