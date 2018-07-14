@@ -14,5 +14,14 @@ export default {
     } else {
       return ''
     }
+  },
+
+  shortenText (text, maxLength) {
+    let result = text || ''
+    if (text !== undefined && text.length > maxLength) {
+      result = text.slice(0, maxLength) + '...'
+    }
+
+    return result
   }
 }
