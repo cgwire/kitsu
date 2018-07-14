@@ -40,6 +40,7 @@
                 name: 'assets',
                 params: {production_id: currentProductionId}
               }"
+              v-if="currentProductionId"
             >
             <img src="../assets/icons/assets.png" />
             </router-link>
@@ -50,6 +51,7 @@
                 name: 'shots',
                 params: {production_id: currentProductionId}
               }"
+              v-if="currentProductionId"
             >
             <img src="../assets/icons/shots.png" />
             </router-link>
@@ -60,6 +62,7 @@
                 name: 'sequences',
                 params: {production_id: currentProductionId}
               }"
+              v-if="currentProductionId"
             >
             <img src="../assets/icons/sequences.png" />
             </router-link>
