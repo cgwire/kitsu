@@ -258,7 +258,7 @@ h1 {
 }
 
 .is-grid .open-production {
-  margin: auto;
+  margin: 1em auto 0 auto;
 }
 
 .avatar {
