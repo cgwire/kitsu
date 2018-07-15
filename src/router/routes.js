@@ -5,6 +5,7 @@ import init from '../lib/init'
 
 import userStore from '../store/modules/user'
 import taskTypeStore from '../store/modules/tasktypes'
+import store from '../store/'
 
 import Asset from '../components/Asset'
 import Assets from '../components/Assets'
@@ -45,17 +46,25 @@ export const routes = [
         } else {
           timezone.setTimezone()
           lang.setLocale()
-          init((err) => {
-            if (err) {
-              next({name: 'server-down'})
-            } else {
-              if (userStore.getters.isCurrentUserManager(userStore.state)) {
-                next({name: 'open-productions'})
+          if (store.state.productions.openProductions.length === 0) {
+            init((err) => {
+              if (err) {
+                next({name: 'server-down'})
               } else {
-                next({name: 'todos'})
+                if (userStore.getters.isCurrentUserManager(userStore.state)) {
+                  next({name: 'open-productions'})
+                } else {
+                  next({name: 'todos'})
+                }
               }
+            })
+          } else {
+            if (userStore.getters.isCurrentUserManager(userStore.state)) {
+              next({name: 'open-productions'})
+            } else {
+              next({name: 'todos'})
             }
-          })
+          }
         }
       })
     }
