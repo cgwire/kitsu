@@ -221,7 +221,7 @@ export default {
     events: {
       'notifications:new' (eventData) {
         if (this.user.id === eventData.person_id) {
-          const notificationId = eventData.id
+          const notificationId = eventData.notification_id
           this.loadNotification(notificationId)
         }
       }

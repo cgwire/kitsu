@@ -263,7 +263,7 @@ export default {
   socket: {
     events: {
       'comment:new' (eventData) {
-        const commentId = eventData.id
+        const commentId = eventData.comment_id
         this.loadComment({
           commentId,
           callback: () => {
