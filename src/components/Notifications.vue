@@ -175,7 +175,7 @@ export default {
     events: {
       'preview:add' (eventData) {
         const commentId = eventData.comment_id
-        const previewId = eventData.preview.id
+        const previewId = eventData.preview_file_id
         this.$store.commit('NOTIFICATION_ADD_PREVIEW', {
           previewId,
           commentId

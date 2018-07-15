@@ -972,20 +972,26 @@ export default {
     onPreviewAdded (eventData) {
       const taskId = eventData.task_id
       const commentId = eventData.comment_id
-      const preview = eventData.preview
+      const previewId = eventData.preview_file_id
+      const isMovie = eventData.is_movie
+      const revision = eventData.revision
       const comment = this.$store.getters.getTaskComment(taskId, commentId)
 
       if (
-        (!comment.preview || comment.preview.id !== eventData.preview.id) &&
+        (!comment.preview || comment.preview.id !== previewId) &&
         taskId === this.currentTask.id
       ) {
         this.$store.commit('ADD_PREVIEW_END', {
-          preview,
+          preview: {
+            id: previewId,
+            revision,
+            is_movie: isMovie
+          },
           taskId,
           commentId,
           comment
         })
-        this.resetPreview(preview.is_movie, preview)
+        this.resetPreview(isMovie, {id: previewId})
       }
     },
 

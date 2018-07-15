@@ -17,12 +17,12 @@ export default {
   methods: {
     onAssignation (eventData) {
       const store = this.$store
-      if (store.getters.user.id === eventData.person.id) {
+      if (store.getters.user.id === eventData.person_id) {
         store.dispatch('loadTodos', {forced: true})
       }
-      if (store.getters.route.path.indexOf(eventData.person.id) > 0) {
+      if (store.getters.route.path.indexOf(eventData.person_id) > 0) {
         store.dispatch('loadPersonTasks', {
-          personId: eventData.person.id,
+          personId: eventData.person_id,
           forced: true
         })
       }
@@ -40,7 +40,7 @@ export default {
       },
 
       'comment:new' (eventData) {
-        const commentId = eventData.id
+        const commentId = eventData.comment_id
         this.$store.dispatch('loadComment', {commentId})
       }
     }
