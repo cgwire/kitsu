@@ -4,154 +4,155 @@
       'action-topbar': true,
       'hidden': isHidden
     }">
-      <div class="level">
-        <div class="level-left">
-          <div class="level-item more-menu-icon" @click="toggleMenu">
-            <more-vertical-icon></more-vertical-icon>
-          </div>
+      <div class="flexrow action-bar">
 
-          <div class="level-item" v-if="selectedBar === 'assignation'">
-            <div class="flexrow" v-if="isCurrentUserManager">
-              <div class="assignation flexrow-item">
-                {{ $tc('tasks.assign', nbSelectedTasks, {nbSelectedTasks}) }}
-              </div>
-              <div class="flexrow-item combobox-item">
-                <combobox
-                  :options="getPersonOptions"
-                  v-model="personId"
-                >
-                </combobox>
-              </div>
-              <div class="" v-if="isAssignationLoading">
-                <spinner :is-white="true"></spinner>
-              </div>
-              <div class="flexrow-item" v-if="!isAssignationLoading">
-                <button
-                  class="button is-success confirm-button"
-                  @click="confirmAssign"
-                >
-                {{ $t('main.confirmation') }}
-                </button>
-              </div>
-              <div class="flexrow-item" v-if="!isAssignationLoading">
-                {{ $t('main.or') }}
-              </div>
-              <div class="flexrow-item" v-if="!isAssignationLoading">
-                <button
-                  class="button is-link clear-assignation-button"
-                  @click="clearAssignation"
-                >
-                  {{ $t('tasks.clear_assignations') }}
-                </button>
-              </div>
-            </div>
-            <div style="padding-left: 1em;" v-else>
-              {{ $t('tasks.no_assignation_right') }}
-            </div>
-          </div>
-
-          <div
-            class="level-item"
-            v-if="selectedBar === 'change-status'"
-          >
-            <div class="flexrow">
-              <div class="flexrow-item strong bigger">
-                {{ $t('tasks.change_status_to') }}
-              </div>
-              <div class="flexrow-item combobox-item">
-                <combobox
-                  :options="taskStatusOptions"
-                  v-model="taskStatusId"
-                >
-                </combobox>
-              </div>
-              <div class="flexrow-item" v-if="!isChangeStatusLoading">
-                <button
-                  class="button is-success confirm-button"
-                  @click="confirmTaskStatusChange"
-                >
-                  {{ $t('main.confirmation') }}
-                </button>
-
-                <div class="" v-if="isChangeStatusLoading">
-                  <spinner :is-white="true"></spinner>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <div
-            class="level-item"
-            v-if="selectedBar === 'tasks'"
-          >
-            <div class="flexrow">
-              <div class="flexrow-item strong bigger">
-                {{ $t('tasks.create_for_selection') }}
-              </div>
-              <div class="flexrow-item" v-if="!isCreationLoading">
-                <button
-                  class="button is-success confirm-button"
-                  @click="confirmTaskCreation"
-                >
-                  {{ $t('main.confirmation') }}
-                </button>
-
-                <div class="" v-if="isCreationLoading">
-                  <spinner :is-white="true"></spinner>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <div
-            class="level-item"
-            v-if="selectedBar === 'custom-actions'"
-          >
-            <div class="flexrow">
-              <div class="flexrow-item strong bigger">
-                {{ $t('custom_actions.run_for_selection') }}
-              </div>
-              <div class="flexrow-item combobox-item">
-                <combobox
-                  :options="customActionOptions"
-                  v-model="customActionUrl"
-                >
-                </combobox>
-              </div>
-              <div class="flexrow-item">
-                <form
-                  target="_blank"
-                  method="POST"
-                  :action="customActionUrl"
-                >
-                  <input type="hidden" id="personid" name="personid" :value="user.id">
-                  <input type="hidden" id="personemail" name="personemail" :value="user.email">
-                  <input type="hidden" id="projectid" name="projectid" :value="currentProduction.id">
-                  <input type="hidden" id="currentpath" name="currentpath" :value="currentUrl">
-                  <input type="hidden" id="currentserver" name="currentserver" :value="currentHost">
-                  <input type="hidden" id="selection" name="selection" :value="selectedTaskIds">
-                  <input type="hidden" id="entity_type" name="entity_type" :value="currentEntityType">
-                <button
-                  class="button is-success"
-                  type="submit"
-                >
-                  {{ $t('main.confirmation') }}
-                </button>
-                </form>
-              </div>
-            </div>
-          </div>
-
+        <div class="flexrow-item more-menu-icon" @click="toggleMenu">
+          <more-vertical-icon></more-vertical-icon>
         </div>
 
-        <div class="level-right">
+        <div class="flexrow-item" v-if="selectedBar === 'assignation'">
+          <div class="flexrow" v-if="isCurrentUserManager">
+            <div class="assignation flexrow-item hide-small-screen">
+              {{ $tc('tasks.assign', nbSelectedTasks, {nbSelectedTasks}) }}
+            </div>
+            <div class="flexrow-item combobox-item">
+              <combobox
+                :options="getPersonOptions"
+                v-model="personId"
+              >
+              </combobox>
+            </div>
+            <div class="" v-if="isAssignationLoading">
+              <spinner :is-white="true"></spinner>
+            </div>
+            <div class="flexrow-item" v-if="!isAssignationLoading">
+              <button
+                class="button is-success confirm-button"
+                @click="confirmAssign"
+              >
+              {{ $t('main.confirmation') }}
+              </button>
+            </div>
+            <div class="flexrow-item hide-small-screen" v-if="!isAssignationLoading">
+              {{ $t('main.or') }}
+            </div>
+            <div class="flexrow-item hide-small-screen" v-if="!isAssignationLoading">
+              <button
+                class="button is-link clear-assignation-button hide-small-screen"
+                @click="clearAssignation"
+              >
+                {{ $t('tasks.clear_assignations') }}
+              </button>
+            </div>
+          </div>
+          <div style="padding-left: 1em;" v-else>
+            {{ $t('tasks.no_assignation_right') }}
+          </div>
+        </div>
+
+        <div
+          class="flexrow-item"
+          v-if="selectedBar === 'change-status'"
+        >
+          <div class="flexrow">
+            <div class="flexrow-item strong bigger hide-small-screen">
+              {{ $t('tasks.change_status_to') }}
+            </div>
+            <div class="flexrow-item combobox-item">
+              <combobox
+                :options="taskStatusOptions"
+                v-model="taskStatusId"
+              >
+              </combobox>
+            </div>
+            <div class="flexrow-item" v-if="!isChangeStatusLoading">
+              <button
+                class="button is-success confirm-button"
+                @click="confirmTaskStatusChange"
+              >
+                {{ $t('main.confirmation') }}
+              </button>
+
+              <div class="" v-if="isChangeStatusLoading">
+                <spinner :is-white="true"></spinner>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div
+          class="flexrow-item"
+          v-if="selectedBar === 'tasks'"
+        >
+          <div class="flexrow">
+            <div class="flexrow-item strong bigger hide-small-screen">
+              {{ $t('tasks.create_for_selection') }}
+            </div>
+            <div class="flexrow-item" v-if="!isCreationLoading">
+              <button
+                class="button is-success confirm-button"
+                @click="confirmTaskCreation"
+              >
+                {{ $t('main.confirmation') }}
+              </button>
+
+              <div class="" v-if="isCreationLoading">
+                <spinner :is-white="true"></spinner>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div
+          class="flexrow-item"
+          v-if="selectedBar === 'custom-actions'"
+        >
+          <div class="flexrow">
+            <div class="flexrow-item strong bigger hide-small-screen">
+              {{ $t('custom_actions.run_for_selection') }}
+            </div>
+            <div class="flexrow-item combobox-item">
+              <combobox
+                :options="customActionOptions"
+                v-model="customActionUrl"
+              >
+              </combobox>
+            </div>
+            <div class="flexrow-item">
+              <form
+                target="_blank"
+                method="POST"
+                :action="customActionUrl"
+              >
+                <input type="hidden" id="personid" name="personid" :value="user.id">
+                <input type="hidden" id="personemail" name="personemail" :value="user.email">
+                <input type="hidden" id="projectid" name="projectid" :value="currentProduction.id">
+                <input type="hidden" id="currentpath" name="currentpath" :value="currentUrl">
+                <input type="hidden" id="currentserver" name="currentserver" :value="currentHost">
+                <input type="hidden" id="selection" name="selection" :value="selectedTaskIds">
+                <input type="hidden" id="entity_type" name="entity_type" :value="currentEntityType">
+              <button
+                class="button is-success"
+                type="submit"
+              >
+                {{ $t('main.confirmation') }}
+              </button>
+              </form>
+            </div>
+          </div>
+        </div>
+
+
+        <div class="flexrow-item clear-selection-container">
           <div
-            class="level-item clear-selection"
+            class="clear-selection flexrow"
             @click="clearSelectedTasks"
           >
-            <x-icon>
+            <x-icon class="flexrow-item">
             </x-icon>
-            {{ $t('main.clear_selection') }}
+            <span class="flexrow-item hide-small-screen">
+              {{ $t('main.clear_selection') }}
+            </span>
           </div>
         </div>
       </div>
@@ -435,16 +436,10 @@ export default {
   box-shadow: 0px 0px 6px rgba(0,0,0,0.2);
   max-height: 60px;
   min-height: 60px;
-  z-index: 200;
+  z-index: 210;
   position: fixed;
   left: 0;
   right: 0;
-}
-
-.level {
-  width: 100%;
-  height: 60px;
-  align-items: center;
 }
 
 div.assignation {
@@ -455,10 +450,6 @@ div.assignation {
 
 div.combobox-item {
   padding-top: 3px;
-}
-
-.level-item {
-  padding: 0.5em;
 }
 
 .hidden {
@@ -489,9 +480,9 @@ div.combobox-item {
   color: white;
 }
 
-.level .more-menu-icon {
+.more-menu-icon {
   cursor: pointer;
-  margin-right: 0;
+  padding-top: 3px;
 }
 
 .more-menu {
@@ -515,9 +506,28 @@ div.combobox-item {
   background: #9f7fdf;
 }
 
-.flexrow-item {
+.action-bar {
+  padding: 0.7em;
+}
+
+.clear-selection-container {
+  flex: 1;
+}
+
+.clear-selection {
+}
+
+.clear-selection .flexrow-item:first-child {
+  margin-left: auto;
 }
 
 @media screen and (max-width: 768px) {
+  .level-item {
+    width: auto;
+  }
+
+  .hide-small-screen {
+    display: none;
+  }
 }
 </style>
