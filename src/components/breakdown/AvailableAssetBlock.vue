@@ -40,10 +40,10 @@ export default {
   name: 'available-asset-block',
   props: {
     asset: {
-      default: {
+      default: () => ({
         id: '',
         name: ''
-      },
+      }),
       type: Object
     },
     casted: {
@@ -103,7 +103,6 @@ export default {
   opacity: 0;
   z-index: 3;
 }
-
 
 .asset.active:hover .asset-add,
 .asset.active:hover .asset-add-10 {

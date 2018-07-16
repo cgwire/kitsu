@@ -334,7 +334,6 @@ export default {
     display: none;
   }
 
-
   .field.production-selector {
     padding: 0;
     margin-top: 2em;

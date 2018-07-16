@@ -22,15 +22,17 @@
     >
       <div
         class="supervisor-type-assets"
+        :key="typeAssets.length > 0 ? typeAssets[0].asset_type_name : ''"
         v-if="Object.keys(assetMap).length > 0"
         v-for="typeAssets in assetsByType"
       >
         <div class="supervisor-asset-type">
-          {{ typeAssets[0] ? typeAssets[0].asset_type_name : '' }}
+          {{ typeAssets.length > 0 ? typeAssets[0].asset_type_name : '' }}
         </div>
         <div class="supervisor-asset-list">
           <div
             class="supervisor-asset"
+            :key="asset.id"
             v-for="asset in typeAssets"
           >
             <router-link
@@ -68,8 +70,9 @@
     >
       <div
         class="supervisor-sequences"
-        v-if="Object.keys(shotMap).length > 0"
+        :key="sequenceShots.length > 0 ? sequenceShots[0].id : ''"
         v-for="sequenceShots in shotsByEpisode"
+        v-if="Object.keys(shotMap).length > 0"
       >
         <div class="supervisor-sequence flexrow">
           <span class="flexrow-item">
@@ -86,6 +89,7 @@
         <div class="supervisor-shot-list">
           <div
             class="supervisor-shot"
+            :key="shot.id"
             v-for="shot in sequenceShots"
           >
             <router-link

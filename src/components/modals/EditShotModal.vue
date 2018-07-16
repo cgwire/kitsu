@@ -61,7 +61,7 @@
         </text-field>
       </form>
 
-      <p class="has-text-right">
+      <div class="has-text-right">
         <a
           :class="{
             button: true,
@@ -94,7 +94,7 @@
         <p class="success has-text-right info-message">
           {{ shotSuccessText }}
         </p>
-      </p>
+      </div>
     </div>
   </div>
 </div>

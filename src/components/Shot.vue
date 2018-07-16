@@ -70,11 +70,12 @@
     <div v-if="currentShot">
       <div
         class="type-assets"
+        :key="typeAssets.length > 0 ? typeAssets[0].asset_type_name : ''"
         v-for="typeAssets in currentShot.castingAssetsByType"
         v-if="currentShot.castingAssetsByType[0].length > 0"
       >
         <div class="asset-type">
-          {{ typeAssets[0] ? typeAssets[0].asset_type_name : '' }}
+          {{ typeAssets.length > 0 ? typeAssets[0].asset_type_name : '' }}
         </div>
         <div class="asset-list">
           <router-link
@@ -106,7 +107,7 @@
           </router-link>
         </div>
       </div>
-      <div v-else>
+      <div v-else>
         {{ $t('shots.no_casting') }}
       </div>
     </div>

@@ -22,7 +22,7 @@
   <div class="table-body" v-scroll="onBodyScroll">
     <table class="table">
       <tbody>
-        <tr v-for="customAction in entries">
+        <tr v-for="customAction in entries" :key="customAction.id">
           <td class="name">{{ customAction.name }}</td>
           <td class="url">{{ customAction.url }}</td>
           <td class="entity-type">{{ customAction.entity_type }}</td>

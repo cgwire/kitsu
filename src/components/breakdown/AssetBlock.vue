@@ -47,10 +47,10 @@ export default {
   name: 'asset-block',
   props: {
     asset: {
-      default: {
+      default: () => ({
         id: '',
         name: ''
-      },
+      }),
       type: Object
     },
     nbOccurences: {
@@ -146,7 +146,6 @@ export default {
   opacity: 1;
 }
 
-
 .asset-picture {
   position: relative;
   top: -80px;
@@ -166,7 +165,6 @@ export default {
   word-break: break-all;
   top: -75px;
 }
-
 
 .nb-occurences {
   margin-left: 0.4em;

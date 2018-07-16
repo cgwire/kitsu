@@ -12,6 +12,7 @@
           <th
             class="validation"
             :style="validationStyle(column.color)"
+            :key="column.id"
             v-for="column in validationColumns">
             <router-link
               :to="{
@@ -64,7 +65,7 @@
       <tbody>
         <tr
           :key="entry.id"
-          v-for="(entry, i) in entries"
+          v-for="entry in entries"
         >
 
           <td class="name" v-if="!isSingleEpisode">
@@ -82,6 +83,7 @@
           <td
             class="validation"
             :style="validationStyle(column.color)"
+            :key="column.id"
             v-for="column in validationColumns">
             <pie-chart
               width="70px"
@@ -232,7 +234,6 @@ export default {
   max-width: 100px;
   width: 100px;
 }
-
 
 .name {
   min-width: 100px;

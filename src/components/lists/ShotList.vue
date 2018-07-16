@@ -20,6 +20,7 @@
           <th class="description">{{ $t('shots.fields.description') }}</th>
           <th
             class="validation"
+            :key="column.id"
             :style="{
               'border-left': '2px solid ' + column.color
             }"

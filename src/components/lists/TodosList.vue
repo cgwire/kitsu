@@ -39,7 +39,7 @@
   >
     <table class="table">
       <tbody>
-        <tr v-for="(entry, i) in entries">
+        <tr v-for="(entry, i) in entries" :key="entry + '-' + i">
           <production-name-cell
             class="production"
             :entry="productionMap[entry.project_id]"

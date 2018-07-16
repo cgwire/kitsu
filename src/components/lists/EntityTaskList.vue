@@ -24,11 +24,10 @@
   >
   </table-info>
 
-
   <div class="table-body" v-scroll="onBodyScroll" v-if="entries.length > 0">
     <table class="table">
       <tbody>
-        <tr v-for="entry in entries">
+        <tr v-for="entry in entries" :key="entry.taskType.id">
           <task-type-name
             class="type"
             :entry="{
@@ -47,7 +46,11 @@
           </td>
           <td class="assignees">
             <div class="flexrow">
-              <div class="avatar-wrapper" v-for="person in entry.persons">
+              <div
+                class="avatar-wrapper"
+                :key="person.id"
+                v-for="person in entry.persons"
+              >
                 <people-avatar
                   class="person-avatar flexrow-item"
                   :key="entry.id + '-' + person.id"

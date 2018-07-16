@@ -20,7 +20,7 @@
         </combobox>
       </form>
 
-      <p class="has-text-right">
+      <div class="has-text-right">
         <a
           :class="{
             button: true,
@@ -40,7 +40,7 @@
         <p class="error has-text-right info-message" v-if="isError">
           {{ errorText }}
         </p>
-      </p>
+      </div>
 
     </div>
   </div>

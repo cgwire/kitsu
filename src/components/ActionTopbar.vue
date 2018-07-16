@@ -142,7 +142,6 @@
           </div>
         </div>
 
-
         <div class="flexrow-item clear-selection-container">
           <div
             class="clear-selection flexrow"

@@ -8,6 +8,7 @@
         selected: value === color
       }"
       :ref="'color-' + index"
+      :key="'color-' + index"
       v-for="(color, index) in colors"
       @click="colorChanged(color)"
     >

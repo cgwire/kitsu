@@ -20,7 +20,7 @@ export default {
       type: String
     },
     selected: {
-      default: '',
+      default: () => {},
       type: Boolean
     },
     name: {

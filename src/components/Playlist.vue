@@ -108,6 +108,7 @@
         <div class="playlisted-shots flexrow">
           <div
             class="flexrow-item has-text-centered"
+            :key="shot.id"
             v-for="(shot, index) in playlistedShots"
           >
             <playlisted-shot
@@ -162,6 +163,7 @@
               'addition-shot': true,
               playlisted: currentShots[shot.id] !== undefined
             }"
+            :key="shot.id"
             @click.prevent="addShot(shot)"
             v-for="shot in sequenceShots"
           >
@@ -762,7 +764,7 @@ span.thumbnail-picture {
 
 .video-wrapper {
   display: flex;
-  flex: 1;
+  flex: 1;
   flex-direction: column;
 }
 

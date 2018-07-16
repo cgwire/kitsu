@@ -22,7 +22,7 @@
   <div class="table-body" v-scroll="onBodyScroll">
     <table class="table">
       <tbody>
-        <tr v-for="entry in entries">
+        <tr v-for="entry in entries" :key="entry.id">
           <production-name-cell
             class="project"
             :only-avatar="true"

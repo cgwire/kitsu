@@ -35,7 +35,7 @@ export default {uname: 'production-name-cell',
 
   props: {
     entry: {
-      default: '',
+      default: () => {},
       type: Object
     },
     size: {

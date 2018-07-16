@@ -20,7 +20,7 @@
   <div class="table-body" v-scroll="onBodyScroll" v-if="entries.length > 0">
     <table class="table">
       <tbody>
-        <tr v-for="entry in entries">
+        <tr v-for="entry in entries" :key="entry.id">
           <td class="name">
              {{ entry.name }}
           </td>

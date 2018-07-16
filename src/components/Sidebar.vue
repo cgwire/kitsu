@@ -5,14 +5,14 @@
         <router-link
            class="home-link"
            to="/"
+           @click="toggleSidebar()"
         >
-          <p
+          <div
             class="company-logo has-text-centered"
-            @click="toggleSidebar()"
           >
             <img src="../assets/kitsu.png" />
             <h2 class="subtitle sidebar-title">Kitsu</h2>
-          </p>
+          </div>
         </router-link>
 
         <section>
@@ -208,7 +208,7 @@ h2 {
 @media screen and (max-width: 768px) {
   .company-logo img {
     width: 40px;
-    margin: 0;
+    margin: 0;
     flex: 1;
   }
 

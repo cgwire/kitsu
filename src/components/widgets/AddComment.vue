@@ -26,6 +26,7 @@
           >
             <option
               v-for="option in taskStatusOptions"
+              :key="option.label"
               :value="option.value"
               :selected="option.value === task_status_id"
             >
@@ -64,7 +65,7 @@ export default {
   props: {
     user: {
       type: Object,
-      default: {}
+      default: () => {}
     },
     addComment: {
       type: Function,
@@ -76,11 +77,11 @@ export default {
     },
     taskStatusOptions: {
       type: Array,
-      default: []
+      default: () => []
     },
     task: {
       type: Object,
-      default: []
+      default: () => []
     }
   },
   methods: {

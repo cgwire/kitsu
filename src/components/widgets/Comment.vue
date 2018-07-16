@@ -182,7 +182,7 @@ export default {
 
 .comment-date {
   color: #999;
-  font-style: italic;
+  font-style: italic;
   margin-left: 0.5em;
   flex: 1;
 }
