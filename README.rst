@@ -78,7 +78,7 @@ Visit `cg-wire.com <https://cg-wire.com>`__ for more information.
    :target: https://gitter.im/cgwire/Lobby
 .. |CGWire Logo| image:: https://zou.cg-wire.com/cgwire.png
    :target: https://cgwire.com
-.. |Unit Image Logo| image:: https://www.unit-image.fr
-   :target: https://cgwire.com
-.. |Les Fées Spéciales Logo| image:: https://www.les-fees-speciales.coop
-   :target: https://cgwire.com
+.. |Unit Image Logo| image:: https://www.cg-wire.com/images/logo-unit-image.png
+   :target: https://www.unit-image.fr
+.. |Les Fées Spéciales Logo| image:: https://www.cg-wire.com/images/logo-les-fees-speciales.png
+   :target: https://www.les-fees-speciales.coop
