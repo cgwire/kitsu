@@ -3,7 +3,6 @@ from collections import OrderedDict
 from zou.app.stores import publisher_store
 from zou.app.models.event import ApiEvent
 from zou.app.utils import fields
-from zou.app.services import persons_service
 
 handlers = {}
 
@@ -63,11 +62,11 @@ def emit(event, data={}):
     publisher_store.publish(event, data)
     save_event(event, data)
 
-    from zou.app import config
+    from zou.app.config import ENABLE_JOB_QUEUE
     for func in event_handlers.values():
-        if config.ENABLE_JOB_QUEUE:
-            from zou.app.stores.queue_store import job_queue
-            job_queue.enqueue(func.handle_event, data)
+        if ENABLE_JOB_QUEUE:
+            from zou.app.stores.queue_store.job_queue import enqueue
+            enqueue(func.handle_event, data)
         else:
             func.handle_event(data)
 
@@ -77,7 +76,8 @@ def save_event(event, data):
     Store event information in the database.
     """
     try:
-        person = persons_service.get_current_user_raw()
+        from zou.app.services.persons_service import get_current_user_raw
+        person = get_current_user_raw()
         person_id = person.id
     except:
         person_id = None
