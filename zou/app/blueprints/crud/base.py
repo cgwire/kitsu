@@ -229,6 +229,12 @@ class BaseModelResource(Resource):
             return {"message": "Wrong id format"}, 400
         return result, 200
 
+    def post_update(self, instance_dict):
+        pass
+
+    def post_delete(self, instance_dict):
+        pass
+
     @jwt_required
     def put(self, instance_id):
         """
