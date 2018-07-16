@@ -61,3 +61,11 @@ class PersonResource(BaseModelResource):
 
     def serialize_instance(self, instance):
         return instance.serialize_safe()
+
+    def post_update(self, instance_dict):
+        persons_service.clear_person_cache()
+        return instance_dict
+
+    def post_delete(self, instance_dict):
+        persons_service.clear_person_cache()
+        return instance_dict

@@ -246,7 +246,10 @@ class BaseModelResource(Resource):
                 "%s:update" % self.model.__tablename__,
                 {"%s_id" % self.model.__tablename__: instance.id}
             )
-            return instance.serialize(), 200
+
+            instance_dict = instance.serialize()
+            self.post_update(instance_dict)
+            return instance_dict, 200
 
         except StatementError as exception:
             current_app.logger.error(str(exception))
@@ -277,12 +280,14 @@ class BaseModelResource(Resource):
         instance = self.get_model_or_404(instance_id)
 
         try:
-            self.check_delete_permissions(instance.serialize())
+            instance_dict = instance.serialize()
+            self.check_delete_permissions(instance_dict)
             instance.delete()
             events.emit(
                 "%s:deletion" % self.model.__tablename__,
                 {"%s_id" % self.model.__tablename__: instance.id}
             )
+            self.post_delete(instance_dict)
 
         except IntegrityError as exception:
             current_app.logger.error(str(exception))
