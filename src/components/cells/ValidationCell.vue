@@ -157,7 +157,7 @@ export default {
 }
 
 td.validation:hover {
-  background: #ecfaec;
+  background: #CCFFCC;
 }
 
 td.selected,

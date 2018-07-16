@@ -63,10 +63,6 @@ export default {
   height: 100vh;
 }
 
-.table td {
-  vertical-align: middle;
-}
-
 th.actions {
   min-width: 200px;
 }
@@ -269,6 +265,10 @@ input.search-input:focus {
   margin-top: 2em;
 }
 
+.table td {
+  vertical-align: middle;
+}
+
 .table-header-wrapper {
   overflow: hidden;
 }
@@ -301,6 +301,14 @@ input.search-input:focus {
 
 .table-info {
   margin-top: 1em;
+}
+
+.table-body .table tr:nth-child(even) {
+  background: #F6F6F6;
+}
+
+.table-body .table tr:hover {
+  background: #F0FFF0;
 }
 
 .flexrow {
@@ -357,11 +365,12 @@ input.search-input:focus {
 }
 
 .tooltip .tooltip-inner {
-  background: black;
-  color: white;
+  background: white;
+  color: #333;
   border-radius: 16px;
   padding: 1em;
   max-width: 250px;
+  box-shadow: 0px 2px 3px 2px rgba(0, 0, 0, 0.1)
 }
 
 .tooltip .tooltip-arrow {
@@ -370,7 +379,7 @@ input.search-input:focus {
   border-style: solid;
   position: absolute;
   margin: 5px;
-  border-color: black;
+  border-color: white;
   z-index: 1;
 }
 
