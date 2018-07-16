@@ -780,7 +780,7 @@ def is_finished(task, data):
 
 def clear_assignation(task_id):
     """
-    Clear task assignation and emit a *task:assign* event.
+    Clear task assignation and emit a *task:unassign* event.
     """
     task = get_task_raw(task_id)
     assignees = [person.serialize() for person in task.assignees]
@@ -788,7 +788,7 @@ def clear_assignation(task_id):
     task_dict = task.serialize()
     for assignee in assignees:
         events.emit("task:unassign", {
-            "person_ids": assignee["id"],
+            "person_id": assignee["id"],
             "task_id": task_id
         })
     return task_dict

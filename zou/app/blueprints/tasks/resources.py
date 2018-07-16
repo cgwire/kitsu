@@ -20,7 +20,7 @@ from zou.app.services import (
     entities_service,
     notifications_service
 )
-from zou.app.utils import query, events, permissions
+from zou.app.utils import query, permissions
 
 
 class CommentTaskResource(Resource):
@@ -71,7 +71,6 @@ class CommentTaskResource(Resource):
 
         comment["task_status"] = task_status
         comment["person"] = person
-        events.emit("comment:new", {"id": comment["id"]})
         return comment, 201
 
     def get_arguments(self):

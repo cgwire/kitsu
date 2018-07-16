@@ -122,7 +122,7 @@ def create_notifications_for_task_and_comment(task, comment, change=False):
                 person, comment, read=False, change=change
             )
             events.emit("notifications:new", {
-                "id": notification["id"],
+                "notification_id": notification["id"],
                 "person_id": recipient_id
             })
         except PersonNotFoundException:

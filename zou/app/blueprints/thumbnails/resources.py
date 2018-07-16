@@ -86,7 +86,9 @@ class CreatePreviewFilePictureResource(Resource):
         events.emit("preview:add", {
             "comment_id": comment_id,
             "task_id": preview_file["task_id"],
-            "preview": preview_file
+            "preview_file_id": preview_file["id"],
+            "is_movie": preview_file["is_movie"],
+            "revision": preview_file["revision"]
         })
 
     def is_allowed(self, preview_file_id):
