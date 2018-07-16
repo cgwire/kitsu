@@ -29,6 +29,11 @@ the [Vuex](https://vuex.vuejs.org) plugin.
 To install the development environment, follow [the dedicated guide](https://kitsu.cg-wire.com/chapter-2/).
 
 
+## Sponsors
+
+[![Les Fées Spéciales](https://www.cg-wire.com/images/logo-les-fees-speciales.png)](http://les-fees-speciales.coop/)
+[![TNZPV](https://www.cg-wire.com/images/logo-tnzpv.png)](https://nousvoir.com/en/home/)
+
 ## About authors
 
 Kitsu is written by CG Wire, a company based in France. We help small to
