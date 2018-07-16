@@ -28,7 +28,7 @@
             >
               {{ episode.name }}
             </div>
-          </div">
+          </div>
           <div class="field">
             <input
               class="input"
@@ -39,8 +39,7 @@
               @keyup.enter="addEpisode"
               v-model="names.episode"
               v-focus
-            >
-            </input>
+            />
             <button
               :class="{
                 button: true,
@@ -52,7 +51,7 @@
             >
               {{ $t('main.add')}}
             </button>
-          </div">
+          </div>
         </div>
 
         <div class="shot-column">
@@ -68,8 +67,8 @@
               @click="selectSequence(sequence.id)"
               v-for="sequence in displayedSequences">
               {{ sequence.name }}
-            </div">
-          </div">
+            </div>
+          </div>
           <div class="field">
             <input
               class="input"
@@ -78,8 +77,7 @@
               type="text"
               @keyup.enter="addSequence"
               v-model="names.sequence"
-            >
-            </input>
+            />
             <button
               :class="{
                 button: true,
@@ -91,7 +89,7 @@
             >
               {{ $t('main.add')}}
             </button>
-          </div">
+          </div>
         </div>
 
         <div class="shot-column">
@@ -103,8 +101,8 @@
               v-for="shot in displayedShots"
             >
               {{ shot.name }}
-            </div">
-          </div">
+            </div>
+          </div>
           <div class="field">
             <input
               class="input"
@@ -113,7 +111,7 @@
               type="text"
               @keyup.enter="addShot"
               v-model="names.shot"
-            > </input>
+            />
             <button
               :class="{
                 button: true,
@@ -125,7 +123,7 @@
             >
               {{ $t('main.add')}}
             </button>
-          </div">
+          </div>
         </div>
       </div>
 
