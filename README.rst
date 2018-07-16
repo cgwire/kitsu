@@ -49,6 +49,13 @@ framework.
 Instruction for setting up a development environment are available in
 `the documentation <https://zou.cg-wire.com/development/>`__
 
+
+Sponsors
+~~~~~~~~
+
+|Unit Image Logo|
+|Les Fées Spéciales Logo|
+
 About authors
 ~~~~~~~~~~~~~
 
@@ -70,4 +77,8 @@ Visit `cg-wire.com <https://cg-wire.com>`__ for more information.
 .. |Gitter badge| image:: https://badges.gitter.im/cgwire/Lobby.png
    :target: https://gitter.im/cgwire/Lobby
 .. |CGWire Logo| image:: https://zou.cg-wire.com/cgwire.png
+   :target: https://cgwire.com
+.. |Unit Image Logo| image:: https://www.unit-image.fr
+   :target: https://cgwire.com
+.. |Les Fées Spéciales Logo| image:: https://www.les-fees-speciales.coop
    :target: https://cgwire.com
