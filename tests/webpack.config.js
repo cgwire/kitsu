@@ -1,6 +1,6 @@
 module.exports = {
-  entry: './test-store.js',
   mode: 'development',
+  entry: './test-store.js',
   output: {
     path: __dirname,
     filename: 'test-bundle.js'
@@ -9,8 +9,13 @@ module.exports = {
     rules: [
       {
         test: /\.js$/,
-        use: 'babel-loader',
-        exclude: /node_modules/
+        exclude: /node_modules/,
+				use: {
+					loader: 'babel-loader',
+					options: {
+						presets: ['@babel/preset-env']
+					}
+				}
       }
     ]
   }

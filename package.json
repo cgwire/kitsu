@@ -9,7 +9,7 @@
     "lint": "vue-cli-service lint",
     "test:unit": "vue-cli-service test:unit",
     "test:e2e": "vue-cli-service test:e2e",
-    "test:store": "cd tests && webpack && mocha --reporter spec test-bundle.js"
+    "test:store": "cd tests && ../node_modules/.bin/webpack && ../node_modules/.bin/mocha --reporter spec test-bundle.js"
   },
   "dependencies": {
     "async": "2.6.1",
@@ -17,9 +17,6 @@
     "chart.js": "2.7.2",
     "color-hash": "1.0.3",
     "email-validator": "2.0.4",
-    "eslint-plugin-html": "4.0.5",
-    "eslint-plugin-import": "2.13.0",
-    "eslint-plugin-node": "6.0.1",
     "marked": "0.4.0",
     "moment": "2.22.2",
     "moment-timezone": "0.5.21",
@@ -51,7 +48,12 @@
     "@vue/cli-service": "3.0.0-rc.5",
     "@vue/eslint-config-standard": "3.0.0-rc.5",
     "@vue/test-utils": "1.0.0-beta.20",
+    "@babel/core": "7.0.0-beta.53",
+    "@babel/preset-env": "7.0.0-beta.53",
+    "babel-loader": "8.0.0-beta.4",
     "chai": "4.1.2",
-    "vue-template-compiler": "2.5.16"
+    "vue-template-compiler": "2.5.16",
+    "webpack-cli": "3.0.8",
+    "webpack": "4.16.1"
   }
 }
