@@ -4,10 +4,8 @@
     class="description"
     v-if="entry.description && entry.description.length > 0"
     v-html="compileMarkdown(shortenText(entry.description, 20))"
-    v-tooltip="{
-      content: compileMarkdown(entry.description),
-      trigger: 'click'
-    }"
+    v-tooltip="tooltipOptions"
+    @click="onClick"
   >
   </span>
 </td>
@@ -20,6 +18,12 @@ import stringHelpers from '../../lib/string'
 
 export default {
   name: 'description-cell',
+  data () {
+    return {
+      isOpen: false,
+      timeout: null
+    }
+  },
   components: {
   },
   props: [
@@ -27,7 +31,18 @@ export default {
   ],
   computed: {
     ...mapGetters([
-    ])
+    ]),
+
+    tooltipOptions () {
+      return {
+        content: this.compileMarkdown(this.entry.description),
+        show: this.isOpen,
+        trigger: 'manual',
+        delay: {
+          hide: 1000
+        }
+      }
+    }
   },
 
   methods: {
@@ -38,7 +53,18 @@ export default {
       return marked(input || '')
     },
 
-    shortenText: stringHelpers.shortenText
+    shortenText: stringHelpers.shortenText,
+
+    onClick () {
+      this.isOpen = !this.isOpen
+      if (this.isOpen) {
+        this.timeout = setTimeout(() => {
+          this.isOpen = false
+        }, 3000)
+      } else {
+        clearTimeout(this.timeout)
+      }
+    }
   }
 }
 </script>

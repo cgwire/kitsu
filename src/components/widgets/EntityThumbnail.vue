@@ -2,6 +2,10 @@
 <a
   :href="originalPath"
   target="_blank"
+  :style="{
+    width: emptyWidth + 'px',
+    height: emptyHeight + 'px',
+  }"
   v-if="isPreview && withLink"
 >
   <img
@@ -110,10 +114,17 @@ export default {
 </script>
 
 <style scoped>
+.thumbnail-picture {
+  margin-left: 0.3em;
+  margin-top: 7px;
+  border: 1px solid #CCC;
+}
+
 span.thumbnail-empty {
   background: #F3F3F3;
   display: block;
   margin-bottom: 0.3em;
+  margin-top: 0.3em;
 }
 
 span.square {
