@@ -59,7 +59,7 @@ Sponsors
 About authors
 ~~~~~~~~~~~~~
 
-Gazu is written by CG Wire, a company based in France. We help small to
+Zou is written by CG Wire, a company based in France. We help small to
 midsize CG studios to manage their production and build pipeline
 efficiently.
 
