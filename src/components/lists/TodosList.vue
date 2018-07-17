@@ -220,8 +220,8 @@ export default {
 }
 
 .description {
-  width: 250px;
-  min-width: 250px;
+  width: 200px;
+  min-width: 200px;
 }
 
 .description li {
@@ -240,8 +240,8 @@ export default {
 }
 
 .type {
-  width: 150px;
-  min-width: 150px;
+  width: 250px;
+  min-width: 250px;
 }
 
 .status {

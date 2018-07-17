@@ -79,25 +79,30 @@ import PeopleAvatar from '../widgets/PeopleAvatar'
 
 export default {
   name: 'todos-list',
+
   components: {
     TableInfo,
     TaskTypeName,
     PeopleAvatar,
     ValidationTag
   },
+
   props: [
     'entries',
     'isLoading',
     'isError'
   ],
+
   computed: {
     ...mapGetters([
       'currentProduction'
     ])
   },
+
   methods: {
     ...mapActions([
     ]),
+
     onBodyScroll (event, position) {
       this.$refs.headerWrapper.style.left = `-${position.scrollLeft}px`
     }
@@ -111,8 +116,8 @@ export default {
 }
 
 .type {
-  max-width: 150px;
-  min-width: 150px;
+  max-width: 250px;
+  min-width: 250px;
 }
 
 .status {

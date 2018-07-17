@@ -39,7 +39,7 @@ export default {
         show: this.isOpen,
         trigger: 'manual',
         delay: {
-          hide: 1000
+          hide: 5000
         }
       }
     }
