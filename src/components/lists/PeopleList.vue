@@ -34,8 +34,8 @@
   <div class="table-body" v-scroll="onBodyScroll">
     <table class="table">
       <tbody>
-        <tr v-for="entry in entries">
-          <people-name-cell class="name" v-bind:entry="entry"></people-name-cell>
+        <tr v-for="entry in entries" :key="entry.id">
+          <people-name-cell class="name" :entry="entry"></people-name-cell>
           <td class="email">{{ entry.email }}</td>
           <td class="phone">{{ entry.phone }}</td>
           <td class="role">{{ $t('people.role.' + entry.role) }}</td>

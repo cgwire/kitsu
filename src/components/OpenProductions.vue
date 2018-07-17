@@ -13,9 +13,10 @@
           'open-productions-list': true,
           'is-grid': openProductions && openProductions.length > 4
         }"
-    >
+      >
         <div
           class="open-production has-text-centered"
+          :key="production.id"
           v-for="production in openProductions">
 
           <router-link
@@ -103,7 +104,6 @@
         </p>
       </div>
     </div>
-
 
     <edit-production-modal
       :active="modals.isNewDisplayed"

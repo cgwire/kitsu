@@ -7,7 +7,11 @@
           <span class="subtitle">Filters: </span>
         </div>
 
-        <div class="level-item tag filter" v-for="filter in filters">
+        <div
+          class="level-item tag filter"
+          :key="filter.id"
+          v-for="filter in filters"
+        >
           <span>
             {{ filter.type }}
             =
@@ -22,8 +26,11 @@
         <div class="level-item" v-if="isAddWidgetVisible">
         <div class="level">
           <span class="select level-item">
-            <select v-model="filterType" @change="onFilterTypeChange">
-              <option v-for="type in filterTypes">
+            <select
+              v-model="filterType"
+              @change="onFilterTypeChange"
+            >
+              <option v-for="type in filterTypes" :key="type">
                 {{ type }}
               </option>
             </select>
@@ -34,10 +41,11 @@
           <span class="select level-item">
             <select v-model="filterValue">
               <option
-                v-for="(choice, index) in choices"
+                v-for="choice in choices"
+                :key="choice ? choice.name : ''"
                 :value="choice"
               >
-                {{ choice ? choice.name : '' }}
+                {{ choice ? choice.name : '' }}
               </option>
             </select>
           </span>

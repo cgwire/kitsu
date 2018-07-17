@@ -39,7 +39,7 @@
   >
     <table class="table">
       <tbody>
-        <tr v-for="(entry, i) in entries">
+        <tr v-for="(entry, i) in entries" :key="entry + '-' + i">
           <production-name-cell
             class="production"
             :entry="productionMap[entry.project_id]"
@@ -220,8 +220,8 @@ export default {
 }
 
 .description {
-  width: 250px;
-  min-width: 250px;
+  width: 200px;
+  min-width: 200px;
 }
 
 .description li {
@@ -240,8 +240,8 @@ export default {
 }
 
 .type {
-  width: 150px;
-  min-width: 150px;
+  width: 250px;
+  min-width: 250px;
 }
 
 .status {

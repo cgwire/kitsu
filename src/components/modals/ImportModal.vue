@@ -14,7 +14,7 @@
       <p class="description" v-on:submit.prevent>
         {{ $t("main.csv.required_fields") }}
         <ul>
-          <li v-for="column in columns">
+          <li v-for="column in columns" :key="column">
             {{ column }}
           </li>
         </ul>

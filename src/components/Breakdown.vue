@@ -69,11 +69,12 @@
         <spinner v-if="isLoading"></spinner>
         <div
           class="type-assets"
+          :key="typeAssets.length > 0 ? typeAssets[0].asset_type_name : ''"
           v-for="typeAssets in castingAssetsByType"
           v-else
         >
           <div class="asset-type">
-            {{ typeAssets[0] ? typeAssets[0].asset_type_name : '' }}
+            {{ typeAssets.length > 0 ? typeAssets[0].asset_type_name : '' }}
           </div>
           <div class="asset-list">
             <asset-block
@@ -104,16 +105,21 @@
         </div>
 
         <spinner v-if="isAssetsLoading"></spinner>
-        <div class="type-assets" v-for="typeAssets in assetsByType" v-else>
+        <div
+          class="type-assets"
+          :key="typeAssets.length > 0 ? typeAssets[0].asset_type_name : ''"
+          v-for="typeAssets in assetsByType"
+          v-else
+        >
           <div class="asset-type">
-            {{ typeAssets[0] ? typeAssets[0].asset_type_name : '' }}
+            {{ typeAssets.length > 0 ? typeAssets[0].asset_type_name : '' }}
           </div>
           <div class="asset-list">
             <available-asset-block
               :key="asset.id"
               :asset="asset"
               :casted="casting[asset.id] !== undefined"
-              :active="castingCurrentShot ? true :  false"
+              :active="castingCurrentShot ? true : false"
               @add-one="addOneAsset"
               @add-ten="addTenAssets"
               v-for="asset in typeAssets"

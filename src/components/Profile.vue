@@ -44,11 +44,10 @@
         <div class="field">
           <label class="label">
             {{ $t('profile.timezone') }}
-          </h1>
           </label>
           <span class="select is-medium">
             <select v-model="form.timezone">
-              <option v-for="timezone in timezones">
+              <option :key="timezone" v-for="timezone in timezones">
                 {{ timezone }}
               </option>
             </select>
@@ -307,7 +306,7 @@ export default {
   margin: auto;
   margin-top: 6em;
   margin-bottom: 2em;
-	box-shadow: rgba(0,0,0,0.15) 0px 1px 4px 2px;
+  box-shadow: rgba(0,0,0,0.15) 0px 1px 4px 2px;
 }
 
 .profile-body {

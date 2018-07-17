@@ -10,6 +10,7 @@
           <th class="description">{{ $t('assets.fields.description') }}</th>
           <th
             class="validation"
+            :key="column.id"
             :style="{
               'border-left': '2px solid ' + column.color
             }"
@@ -93,7 +94,6 @@
           </td>
           <td :class="{type: !entry.canceled}">
             {{ entry.asset_type_name }}
-            </router-link>
           </td>
           <td :class="{name: !entry.canceled}">
             <router-link

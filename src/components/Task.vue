@@ -72,6 +72,7 @@
         <span class="flexrow-item">{{ $t('tasks.fields.assignees') }}:</span>
         <span
           class="flexrow-item avatar-wrapper"
+          :key="personId"
           v-if="currentTask.assignees"
           v-for="personId in currentTask.assignees"
         >
@@ -158,7 +159,6 @@
                 ref="preview-movie"
                 controls
                 :poster="getPreviewPath()" />
-              </video>
             </div>
             <a
               :href="getOriginalPath()"

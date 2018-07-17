@@ -144,7 +144,9 @@ export default {
     confirmClicked () {
       this.$emit('confirm', this.form)
     },
-    isEditing: () => this.taskTypeToEdit && this.taskTypeToEdit.id
+    isEditing () {
+      return this.taskTypeToEdit && this.taskTypeToEdit.id
+    }
   }
 }
 </script>

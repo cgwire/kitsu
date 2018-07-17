@@ -48,11 +48,12 @@
     <div v-if="currentAsset">
       <div
         class="sequence-shots"
-          v-for="sequenceShots in currentAsset.castInShotsBySequence"
-          v-if="currentAsset.castInShotsBySequence[0].length > 0"
+        :key="sequenceShots.length > 0 ? sequenceShots[0].sequence_name : ''"
+        v-for="sequenceShots in currentAsset.castInShotsBySequence"
+        v-if="currentAsset.castInShotsBySequence[0].length > 0"
       >
         <div class="shot-sequence">
-          {{ sequenceShots[0] ? sequenceShots[0].sequence_name : '' }}
+          {{ sequenceShots.length > 0 ? sequenceShots[0].sequence_name : '' }}
         </div>
         <div class="shot-list">
           <router-link
@@ -271,7 +272,6 @@ h2.subtitle {
   padding: 1em;
   box-shadow: 0px 0px 6px #E0E0E0;
 }
-
 
 .asset-thumbnail {
   max-width: 100px;

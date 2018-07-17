@@ -23,8 +23,6 @@
 >
   {{ taskType.name }}
 </div>
-
-</span>
 </template>
 
 <script>

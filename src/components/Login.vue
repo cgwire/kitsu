@@ -106,9 +106,9 @@ export default {
 
 .box {
   margin-top: 30%;
-	padding: 3em 2em 2em 2em;
+  padding: 3em 2em 2em 2em;
   border-radius: 2px;
-	box-shadow: rgba(0,0,0,0.14902) 0px 1px 1px 0px,rgba(0,0,0,0.09804) 0px 1px 2px 0px;
+  box-shadow: rgba(0,0,0,0.14902) 0px 1px 1px 0px,rgba(0,0,0,0.09804) 0px 1px 2px 0px;
 }
 
 .box h1.title {
@@ -125,7 +125,7 @@ export default {
 .main-button {
   background: #5e60ba;
   border-radius: 2px;
-	min-height: 2.8em;
+  min-height: 2.8em;
   color: white;
   border-color: #5e60ba;
 }

@@ -20,6 +20,7 @@ export default {
     let result = text || ''
     if (text !== undefined && text.length > maxLength) {
       result = text.slice(0, maxLength) + '...'
+      result = result.replace(/\n/g, ' ')
     }
 
     return result

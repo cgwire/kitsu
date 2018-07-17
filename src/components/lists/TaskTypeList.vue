@@ -22,7 +22,7 @@
   <div class="table-body" v-scroll="onBodyScroll">
     <table class="table">
       <tbody>
-        <tr v-for="entry in entries">
+        <tr v-for="entry in entries" :key="entry.id">
           <td class="dedicated">{{ renderForShots(entry) }}</td>
           <td class="priority">{{ entry.priority }}</td>
           <task-type-name class="name" :entry="entry"></task-type-name>

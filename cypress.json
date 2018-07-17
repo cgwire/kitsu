@@ -1,8 +1,8 @@
 {
-  "integrationFolder": "./test/cypress/integration",
-  "fixturesFolder": "./test/cypress/fixtures",
-  "pluginsFile": "./test/cypress/plugins/index.js",
-  "supportFile": "./test/cypress/support/index.js",
+  "integrationFolder": "./test/e2e/integration",
+  "fixturesFolder": "./test/e2e/fixtures",
+  "pluginsFile": "./test/e2e/plugins/index.js",
+  "supportFile": "./test/e2e/support/index.js",
   "watchForFileChanges" : false,
   "viewportWidth": 1200,
   "viewportHeight": 800

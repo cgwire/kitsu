@@ -5,13 +5,13 @@
     playing: isPlaying
   }"
 >
-	<div @click.prevent="onPlayClick">
-		<entity-thumbnail
-			class="shot-thumbnail"
-			:entity="shot"
-			:preview-file-id="previewFileId"
-		>
-		</entity-thumbnail>
+  <div @click.prevent="onPlayClick">
+    <entity-thumbnail
+      class="shot-thumbnail"
+      :entity="shot"
+      :preview-file-id="previewFileId"
+    >
+    </entity-thumbnail>
   </div>
 
   <div class="shot-title">{{ shot.entity_name }}</div>

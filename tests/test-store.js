@@ -1,5 +1,6 @@
 import expect from 'chai'
 
+
 import './store/assets.spec.js'
 import './store/assettypes.spec.js'
 import './store/breakdown.spec.js'
@@ -15,6 +16,7 @@ import './store/taskstatus.spec.js'
 import './store/tasktypes.spec.js'
 import './store/user.spec'
 
+import './store/lib/filtering.spec.js'
 import './store/lib/helpers.spec.js'
 import './store/lib/indexing.spec.js'
 import './store/lib/sorting.spec.js'
