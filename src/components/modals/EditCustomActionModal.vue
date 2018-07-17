@@ -128,7 +128,9 @@ export default {
     confirmClicked () {
       this.$emit('confirm', this.form)
     },
-    isEditing: () => this.customActionToEdit && this.customActionToEdit.id
+    isEditing () {
+      return this.customActionToEdit && this.customActionToEdit.id
+    }
   },
 
   watch: {

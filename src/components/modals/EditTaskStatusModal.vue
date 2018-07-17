@@ -151,7 +151,9 @@ export default {
       this.$emit('confirm', this.form)
     },
 
-    isEditing: () => this.taskStatusToEdit && this.taskStatusToEdit.id,
+    isEditing () {
+      return this.taskStatusToEdit && this.taskStatusToEdit.id
+    },
 
     resetForm () {
       if (this.taskStatusToEdit) {
