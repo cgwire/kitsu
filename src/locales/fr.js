@@ -219,6 +219,7 @@ export default {
   custom_actions: {
     title: 'Actions',
     new_custom_action: 'Ajouter une action personnalisée',
+    edit_title: 'Modifier une action personnalisée',
     number: 'action pesonnalisée | actions personnalisées',
     run_for_selection: 'Lancer une action personnalisée pour les tâche sélectionnées :',
     delete_text: 'Êtes-vous sûr de supprimer l\'action personnalisée {name} de la base de données?',

@@ -112,6 +112,7 @@ export default {
   custom_actions: {
     title: 'Custom Actions',
     new_custom_action: 'Add a custom action',
+    edit_title: 'Edit a custom action',
     number: 'custom action | custom actions',
     delete_text: 'Are you sure you want to remove custom action {name} from your database?',
     delete_error: 'An error occured while deleting this custom custom action.',
