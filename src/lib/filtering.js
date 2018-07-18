@@ -7,12 +7,13 @@ export const applyFilters = (taskTypes, result, query) => {
   const filter = findFilter(taskTypeIndex, query)
 
   if (filter.taskType) {
-    result = result.filter((entry) => {
+    return result.filter((entry) => {
       const task = entry.validations[filter.taskType]
       return task && task.task_status_short_name === filter.taskStatus
     })
+  } else {
+    return result
   }
-  return result
 }
 
 /*
