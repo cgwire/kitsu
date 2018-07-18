@@ -13,6 +13,7 @@ import VueChartkick from 'vue-chartkick'
 import Chart from 'chart.js'
 import VueWebsocket from 'vue-websocket'
 import VTooltip from 'v-tooltip'
+import VueCookie from 'vue-cookie'
 
 Vue.config.productionTip = false
 Vue.use(vuescroll)
@@ -20,6 +21,7 @@ Vue.use(VueLazyload)
 Vue.use(Meta)
 Vue.use(infiniteScroll)
 Vue.use(VueChartkick, {adapter: Chart})
+Vue.use(VueCookie)
 Vue.use(VueWebsocket, '/events')
 Vue.use(VTooltip)
 
