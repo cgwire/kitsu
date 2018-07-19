@@ -100,12 +100,15 @@ export const buildEpisodeIndex = (episodes) => {
 /*
  * Run a non case sensitive search on given index. It accepts different search
  * terms separated by spaces. Terms dedicated to task status filtering (like
- * modeling:wip) are ignored. The result is the intersection of queries.
+ * modeling=wip) are ignored. The result is the intersection of queries.
  */
 export const indexSearch = (index, queryText) => {
   if (queryText.length === 0) {
     return null
   } else {
+    const regex = /([^ ]*)=([^ ]*)|\[(.*)\]=([^ ]*)/
+    queryText = queryText.replace(regex, '')
+
     const queries = queryText.split(' ')
     const results = queries
       .map((query) => indexSearchWord(index, query))

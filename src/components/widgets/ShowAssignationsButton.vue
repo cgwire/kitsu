@@ -30,18 +30,39 @@ export default {
     EyeIcon,
     EyeOffIcon
   },
+
   props: {
   },
+
   computed: {
     ...mapGetters([
       'isShowAssignations'
     ])
   },
+
   methods: {
     ...mapActions([
       'showAssignations',
       'hideAssignations'
     ])
+  },
+
+  mounted () {
+    if (this.$cookie.get('show-assignations') === 'true') {
+      this.showAssignations()
+    } else {
+      this.hideAssignations()
+    }
+  },
+
+  watch: {
+    isShowAssignations () {
+      this.$cookie.set(
+        'show-assignations',
+        this.isShowAssignations,
+        {expires: '1M'}
+      )
+    }
   }
 
 }

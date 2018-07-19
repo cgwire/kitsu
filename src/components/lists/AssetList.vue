@@ -14,7 +14,8 @@
             :style="{
               'border-left': '2px solid ' + column.color
             }"
-            v-for="column in validationColumns">
+            v-for="column in validationColumns"
+          >
             <router-link
               :to="{
                 name: 'task-type',

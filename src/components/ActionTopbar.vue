@@ -308,6 +308,10 @@ export default {
 
     isCurrentViewPersonTasks () {
       return this.$route.path.indexOf('todos') > 0
+    },
+
+    isList () {
+      return this.isCurrentViewAsset || this.isCurrentViewShot
     }
   },
 
@@ -371,6 +375,12 @@ export default {
     },
 
     selectBar (barName) {
+      const prefix = this.isList ? 'entities-' : 'todos-'
+      this.$cookie.set(
+        `${prefix}-selected-bar`,
+        barName,
+        { expires: '1M' }
+      )
       this.selectedBar = barName
       this.toggleMenu()
     },
@@ -387,10 +397,17 @@ export default {
   watch: {
     isHidden () {
       if (!this.isHidden) {
-        if (this.isCurrentViewAsset || this.isCurrentViewShot) {
-          this.selectedBar = 'assignation'
+        const prefix = this.isList ? 'entities-' : 'todos-'
+        const lastSelection = this.$cookie.get(`${prefix}-selected-bar`)
+
+        if (lastSelection) {
+          this.selectedBar = lastSelection
         } else {
-          this.selectedBar = 'change-status'
+          if (this.isCurrentViewAsset || this.isCurrentViewShot) {
+            this.selectedBar = 'assignation'
+          } else {
+            this.selectedBar = 'change-status'
+          }
         }
       }
     },
