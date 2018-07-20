@@ -49,3 +49,5 @@ test/test-bundle.js
 TODO
 .package-lock.json
 .idea/
+release.sh
+tests/test-bundle.js
