@@ -12,7 +12,8 @@ import {
 } from '../../lib/sorting'
 import {
   buildSelectionGrid,
-  clearSelectionGrid
+  clearSelectionGrid,
+  computeStats
 } from '../../lib/helpers'
 import {
   buildShotIndex,
@@ -1136,59 +1137,11 @@ const mutations = {
   },
 
   [COMPUTE_SEQUENCE_STATS] (state) {
-    const results = {}
-    cache.shots.forEach((shot) => {
-      const sequenceId = shot.sequence_id
-      if (!results[sequenceId]) results[sequenceId] = {}
-
-      shot.tasks.forEach((task) => {
-        const taskTypeId = task.task_type_id
-        const taskStatusId = task.task_status_color
-        if (!results[sequenceId][taskTypeId]) {
-          results[sequenceId][taskTypeId] = {}
-        }
-
-        if (!results[sequenceId][taskTypeId][taskStatusId]) {
-          results[sequenceId][taskTypeId][taskStatusId] = {
-            name: task.task_status_short_name,
-            color: task.task_status_color,
-            value: 0
-          }
-        }
-
-        results[sequenceId][taskTypeId][taskStatusId].value++
-      })
-    })
-
-    state.sequenceStats = results
+    state.sequenceStats = computeStats(cache.shots, 'sequence_id')
   },
 
   [COMPUTE_EPISODE_STATS] (state) {
-    const results = {}
-    cache.shots.forEach((shot) => {
-      const episodeId = shot.episode_id
-      if (!results[episodeId]) results[episodeId] = {}
-
-      shot.tasks.forEach((task) => {
-        const taskTypeId = task.task_type_id
-        const taskStatusId = task.task_status_color
-        if (!results[episodeId][taskTypeId]) {
-          results[episodeId][taskTypeId] = {}
-        }
-
-        if (!results[episodeId][taskTypeId][taskStatusId]) {
-          results[episodeId][taskTypeId][taskStatusId] = {
-            name: task.task_status_short_name,
-            color: task.task_status_color,
-            value: 0
-          }
-        }
-
-        results[episodeId][taskTypeId][taskStatusId].value++
-      })
-    })
-
-    state.episodeStats = results
+    state.episodeStats = computeStats(cache.shots, 'episode_id')
   },
 
   [NEW_TASK_END] (state, task) {

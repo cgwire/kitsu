@@ -3,13 +3,10 @@
  */
 export const buildNameIndex = (entries) => {
   const index = {}
+  const entryIndex = {}
   entries.forEach((entry) => {
-    let currentString = ''
-    for (let character of entry.name) {
-      currentString += character.toLowerCase()
-      if (index[currentString] === undefined) index[currentString] = []
-      index[currentString].push(entry)
-    }
+    const words = entry.name.split(' ')
+    indexWords(index, entryIndex, entry, words)
   })
   return index
 }

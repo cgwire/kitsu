@@ -342,6 +342,10 @@ input.search-input:focus {
   border-color: #666;
 }
 
+.modal-content .button {
+  margin-left: 0.5em;
+}
+
 .unselectable {
   user-select: none;
 }

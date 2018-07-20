@@ -38,9 +38,9 @@
               :title="$t('assets.title')"
               :to="{
                 name: 'assets',
-                params: {production_id: currentProductionId}
+                params: {production_id: currentProduction.id}
               }"
-              v-if="currentProductionId"
+              v-if="currentProduction"
             >
             <img src="../assets/icons/assets.png" />
             </router-link>
@@ -49,9 +49,9 @@
               :title="$t('shots.title')"
               :to="{
                 name: 'shots',
-                params: {production_id: currentProductionId}
+                params: {production_id: currentProduction.id}
               }"
-              v-if="currentProductionId"
+              v-if="currentProduction"
             >
             <img src="../assets/icons/shots.png" />
             </router-link>
@@ -60,9 +60,9 @@
               :title="$t('sequences.title')"
               :to="{
                 name: 'sequences',
-                params: {production_id: currentProductionId}
+                params: {production_id: currentProduction.id}
               }"
-              v-if="currentProductionId"
+              v-if="currentProduction"
             >
             <img src="../assets/icons/sequences.png" />
             </router-link>
@@ -200,6 +200,7 @@ export default {
         path.indexOf('episodes') > 0 ||
         path.indexOf('playlists') > 0 ||
         (path.indexOf('task-types') > 0 && path.indexOf('productions') > 0) ||
+        (path.indexOf('asset-types') > 0 && path.indexOf('productions') > 0) ||
         path.indexOf('breakdown') > 0
     }
   },

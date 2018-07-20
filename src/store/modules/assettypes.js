@@ -23,6 +23,7 @@ const sortAssetTypes = (assetTypes) => {
 
 const state = {
   assetTypes: [],
+  assetTypeMap: {},
   isAssetTypesLoading: false,
   isAssetTypesLoadingError: false,
 
@@ -39,6 +40,7 @@ const state = {
 
 const getters = {
   assetTypes: state => state.assetTypes,
+  assetTypeMap: state => state.assetTypeMap,
 
   isAssetTypesLoading: state => state.isAssetTypesLoading,
   isAssetTypesLoadingError: state => state.isAssetTypesLoadingError,
@@ -50,7 +52,11 @@ const getters = {
     return state.assetTypes.find(
       (assetType) => assetType.id === id
     )
-  }
+  },
+
+  getAssetTypeOptions: state => state.assetTypes.map(
+    (type) => { return { label: type.name, value: type.id } }
+  )
 }
 
 const actions = {
@@ -118,6 +124,10 @@ const mutations = {
     state.isAssetTypesLoadingError = false
     state.assetTypes = assetTypes
     state.assetTypes = sortAssetTypes(state.assetTypes)
+    state.assetTypeMap = {}
+    state.assetTypes.forEach((assetType) => {
+      state.assetTypeMap[assetType.id] = assetType
+    })
   },
 
   [EDIT_ASSET_TYPE_START] (state, data) {
