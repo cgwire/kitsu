@@ -13,10 +13,12 @@ import {
 } from '../../lib/sorting'
 import {
   buildSelectionGrid,
-  clearSelectionGrid
+  clearSelectionGrid,
+  computeStats
 } from '../../lib/helpers'
 import {
   buildAssetIndex,
+  buildNameIndex,
   indexSearch
 } from '../../lib/indexing'
 import {
@@ -43,15 +45,10 @@ import {
   RESTORE_ASSET_ERROR,
   RESTORE_ASSET_END,
 
-  LOAD_ASSET_TYPES_START,
-  LOAD_ASSET_TYPES_ERROR,
-  LOAD_ASSET_TYPES_END,
-
   ASSET_CSV_FILE_SELECTED,
   IMPORT_ASSETS_START,
   IMPORT_ASSETS_END,
 
-  LOAD_OPEN_PRODUCTIONS_END,
   DELETE_TASK_END,
   NEW_TASK_COMMENT_END,
   NEW_TASK_END,
@@ -65,6 +62,7 @@ import {
   SET_PREVIEW,
 
   SET_ASSET_LIST_SCROLL_POSITION,
+  SET_PRODUCTION_ASSET_TYPE_LIST_SCROLL_POSITION,
 
   REMOVE_SELECTED_TASK,
   ADD_SELECTED_TASK,
@@ -72,6 +70,9 @@ import {
 
   SAVE_ASSET_SEARCH_END,
   REMOVE_ASSET_SEARCH_END,
+
+  SET_ASSET_TYPE_SEARCH,
+  COMPUTE_ASSET_TYPE_STATS,
 
   RESET_ALL
 } from '../mutation-types'
@@ -131,12 +132,12 @@ const helpers = {
 
 const cache = {
   assetIndex: {},
+  assetTypeIndex: {},
   assets: []
 }
 
 const initialState = {
   assetMap: {},
-  assetTypes: [],
   nbValidationColumns: 0,
 
   filteredAssets: [],
@@ -146,7 +147,11 @@ const initialState = {
   assetSelectionGrid: {},
   assetSearchQueries: [],
 
-  openProductions: [],
+  displayedAssetTypes: [],
+  displayedAssetTypesLength: 0,
+  assetTypeSearchText: '',
+  assetTypeStats: {},
+
   isAssetsLoading: false,
   isAssetsLoadingError: false,
   assetsCsvFormData: null,
@@ -188,6 +193,12 @@ const getters = {
   displayedAssets: state => state.displayedAssets,
   displayedAssetsLength: state => state.displayedAssetsLength,
 
+  displayedAssetTypes: state => state.displayedAssetTypes,
+  displayedAssetTypesLength: state => state.displayedAssetTypesLength,
+  assetTypeSearchText: state => state.assetTypeSearchText,
+  assetTypeStats: state => state.assetTypeStats,
+  assetTypeListScrollPosition: state => state.assetTypeListScrollPosition,
+
   assetListScrollPosition: state => state.assetListScrollPosition,
 
   assetsByType: state => {
@@ -221,15 +232,7 @@ const getters = {
 
   getAsset: (state, getters) => (id) => {
     return state.assetMap[id]
-  },
-
-  getOpenProduction: (state, getters) => (id) => {
-    return state.openProductions.find((project) => project.id === id)
-  },
-
-  getAssetTypeOptions: state => state.assetTypes.map(
-    (type) => { return { label: type.name, value: type.id } }
-  )
+  }
 }
 
 const actions = {
@@ -279,7 +282,8 @@ const actions = {
         commit(EDIT_ASSET_ERROR)
         if (callback) callback(err)
       } else {
-        commit(EDIT_ASSET_END, asset)
+        const assetTypeMap = rootState.assetTypes.assetTypeMap
+        commit(EDIT_ASSET_END, { newAsset: asset, assetTypeMap })
         const taskTypes = Object.values(rootState.tasks.assetValidationColumns)
         const createTaskPromises = taskTypes.map(
           (validationColumn) => dispatch('createTask', {
@@ -299,13 +303,14 @@ const actions = {
     })
   },
 
-  editAsset ({ commit, state }, { data, callback }) {
+  editAsset ({ commit, state, rootState }, { data, callback }) {
     commit(EDIT_ASSET_START)
+    const assetTypeMap = rootState.assetTypes.assetTypeMap
     assetsApi.updateAsset(data, (err, asset) => {
       if (err) {
         commit(EDIT_ASSET_ERROR)
       } else {
-        commit(EDIT_ASSET_END, asset)
+        commit(EDIT_ASSET_END, { newAsset: asset, assetTypeMap })
       }
       if (callback) callback(err)
     })
@@ -391,6 +396,43 @@ const actions = {
 
   displayMoreAssets ({commit}) {
     commit(DISPLAY_MORE_ASSETS)
+  },
+
+  initAssetTypes ({ commit, dispatch, state, rootState, rootGetters }) {
+    return new Promise((resolve, reject) => {
+      const productionId = rootState.route.params.production_id
+      dispatch('setLastProductionScreen', 'production-asset-types')
+      if (rootGetters.currentProduction.id !== productionId) {
+        dispatch('setProduction', productionId)
+      }
+
+      if (cache.assets.length === 0 ||
+          cache.assets[0].production_id !== productionId) {
+        dispatch('loadAssets', (err) => {
+          if (err) {
+            reject(err)
+          } else {
+            dispatch('computeAssetTypeStats')
+            resolve()
+          }
+        })
+      } else {
+        dispatch('computeAssetTypeStats')
+        resolve()
+      }
+    })
+  },
+
+  setAssetTypeListScrollPosition ({ commit }) {
+    commit(SET_PRODUCTION_ASSET_TYPE_LIST_SCROLL_POSITION)
+  },
+
+  computeAssetTypeStats ({ commit }) {
+    commit(COMPUTE_ASSET_TYPE_STATS)
+  },
+
+  setAssetTypeSearch ({commit}, searchQuery) {
+    commit(SET_ASSET_TYPE_SEARCH, searchQuery)
   }
 }
 
@@ -414,10 +456,17 @@ const mutations = {
 
   [LOAD_ASSETS_END] (state, { production, assets, userFilters }) {
     const validationColumns = {}
+    const assetTypeMap = {}
     assets = sortAssets(assets)
     state.assetMap = {}
     assets.forEach((asset) => {
       state.assetMap[asset.id] = asset
+      if (!assetTypeMap[asset.asset_type]) {
+        assetTypeMap[asset.asset_type_id] = {
+          id: asset.asset_type_id,
+          name: asset.asset_type_name
+        }
+      }
       asset.production_id = production.id
 
       asset.tasks.forEach((task) => {
@@ -434,6 +483,11 @@ const mutations = {
     cache.assetIndex = buildAssetIndex(assets)
     state.displayedAssets = cache.assets.slice(0, PAGE_SIZE)
     state.displayedAssetsLength = cache.assets ? cache.assets.length : 0
+
+    state.assetTypes = Object.values(assetTypeMap)
+    state.displayedAssetTypes = state.assetTypes
+    state.displayedAssetTypesLength = state.assetTypes.length
+    cache.assetTypeIndex = buildNameIndex(state.assetTypes)
 
     const maxX = state.displayedAssets.length
     const maxY = state.nbValidationColumns
@@ -462,15 +516,6 @@ const mutations = {
     state.assetsCsvFormData = null
   },
 
-  [LOAD_ASSET_TYPES_START] (state) {},
-  [LOAD_ASSET_TYPES_ERROR] (state) {},
-  [LOAD_ASSET_TYPES_END] (state, assetTypes) {
-    state.assetTypes = assetTypes
-  },
-  [LOAD_OPEN_PRODUCTIONS_END] (state, projects) {
-    state.openProductions = projects
-  },
-
   [EDIT_ASSET_START] (state, data) {
     state.editAsset.isLoading = true
     state.editAsset.isError = false
@@ -482,16 +527,17 @@ const mutations = {
     state.editAsset.isCreateError = true
   },
 
-  [EDIT_ASSET_END] (state, newAsset) {
+  [EDIT_ASSET_END] (state, { newAsset, assetTypeMap }) {
     state.editAsset.isCreateError = false
     state.editAsset.isSuccess = true
     state.assetCreated = newAsset.name
 
     const asset = state.assetMap[newAsset.id]
-    const assetType = state.assetTypes.find(
-      (assetType) => assetType.id === newAsset.entity_type_id
-    )
-    if (assetType) newAsset.asset_type_name = assetType.name
+    const assetType = assetTypeMap[newAsset.entity_type_id]
+    if (assetType) {
+      newAsset.asset_type_name = assetType.name
+      newAsset.asset_type_id = assetType.id
+    }
 
     newAsset.tasks = []
     if (asset) {
@@ -703,6 +749,10 @@ const mutations = {
     state.assetListScrollPosition = scrollPosition
   },
 
+  [SET_PRODUCTION_ASSET_TYPE_LIST_SCROLL_POSITION] (state, scrollPosition) {
+    state.assetTypeListScrollPosition = scrollPosition
+  },
+
   [REMOVE_SELECTED_TASK] (state, validationInfo) {
     if (state.assetSelectionGrid[0]) {
       state.assetSelectionGrid[validationInfo.x][validationInfo.y] = false
@@ -727,6 +777,21 @@ const mutations = {
       asset.tasks.push(task)
       Vue.set(asset.validations, task.task_type_name, task)
     }
+  },
+
+  [SET_ASSET_TYPE_SEARCH] (state, searchQuery) {
+    let result = indexSearch(
+      cache.assetTypeIndex,
+      searchQuery
+    ) || state.assetTypes
+
+    state.displayedAssetTypes = result
+    state.displayedAssetTypesLength = result ? result.length : 0
+    state.assetTypeSearchText = searchQuery
+  },
+
+  [COMPUTE_ASSET_TYPE_STATS] (state) {
+    state.assetTypeStats = computeStats(cache.assets, 'asset_type_id')
   },
 
   [RESET_ALL] (state) {

@@ -81,6 +81,14 @@ describe('assetTypes', () => {
       expect(assetType.id).to.equal(2)
       expect(assetType.name).to.equal('Animation')
     })
+
+    it('getAssetTypeOptions', () => {
+      store.commit(LOAD_ASSET_TYPES_END, assetTypes)
+      const options = getters.getAssetTypeOptions(state)
+      expect(options.length).to.equal(3)
+      expect(options[0].label).to.equal('Animation')
+      expect(options[0].value).to.equal(assetTypes[0].id)
+    })
   })
 
   describe('actions', () => {

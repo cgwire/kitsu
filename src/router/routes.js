@@ -12,26 +12,27 @@ import Assets from '../components/Assets'
 import AssetTypes from '../components/AssetTypes'
 import Breakdown from '../components/Breakdown'
 import CustomActions from '../components/CustomActions'
+import Episodes from '../components/Episodes'
 import Login from '../components/Login'
 import Main from '../components/Main'
 import NotFound from '../components/NotFound'
 import Notifications from '../components/Notifications'
+import OpenProductions from '../components/OpenProductions'
 import People from '../components/People'
 import Person from '../components/Person'
 import Productions from '../components/Productions'
-import OpenProductions from '../components/OpenProductions'
+import ProductionAssetTypes from '../components/ProductionAssetTypes'
 import Playlist from '../components/Playlist'
 import Profile from '../components/Profile'
+import ServerDown from '../components/ServerDown'
+import Sequences from '../components/Sequences'
+import Shot from '../components/Shot'
+import Shots from '../components/Shots'
+import TaskType from '../components/TaskType'
 import Task from '../components/Task'
 import TaskTypes from '../components/TaskTypes'
 import TaskStatus from '../components/TaskStatus'
 import Todos from '../components/Todos'
-import ServerDown from '../components/ServerDown'
-import Sequences from '../components/Sequences'
-import TaskType from '../components/TaskType'
-import Episodes from '../components/Episodes'
-import Shot from '../components/Shot'
-import Shots from '../components/Shots'
 
 export const routes = [
 
@@ -202,6 +203,12 @@ export const routes = [
         path: '/productions/:production_id/assets/create-tasks',
         component: Assets,
         name: 'create-asset-tasks'
+      },
+
+      {
+        path: '/productions/:production_id/asset-types',
+        component: ProductionAssetTypes,
+        name: 'production-asset-types'
       },
 
       {

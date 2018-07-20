@@ -51,6 +51,7 @@ const initialState = {
   },
 
   assetsPath: {name: 'open-productions'},
+  assetTypesPath: {name: 'open-productions'},
   shotsPath: {name: 'open-productions'},
   sequencesPath: {name: 'open-productions'},
   episodesPath: {name: 'open-productions'},
@@ -87,6 +88,7 @@ const getters = {
   deleteProduction: state => state.deleteProduction,
 
   assetsPath: state => state.assetsPath,
+  assetTypesPath: state => state.assetTypesPath,
   shotsPath: state => state.shotsPath,
   sequencesPath: state => state.sequencesPath,
   episodesPath: state => state.episodesPath,
@@ -351,6 +353,8 @@ const mutations = {
     state.currentProduction = production
     state.assetsPath = helpers.getProductionComponentPath(
       'assets', currentProductionId)
+    state.assetTypesPath = helpers.getProductionComponentPath(
+      'production-asset-types', currentProductionId)
     state.shotsPath = helpers.getProductionComponentPath(
       'shots', currentProductionId)
     state.sequencesPath = helpers.getProductionComponentPath(

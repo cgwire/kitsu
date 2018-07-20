@@ -33,6 +33,12 @@
          </p>
 
          <p @click="toggleSidebar()">
+           <router-link :to="assetTypesPath">
+             {{ $t("asset_types.title") }}
+           </router-link>
+         </p>
+
+         <p @click="toggleSidebar()">
            <router-link :to="shotsPath">
              {{ $t("shots.title") }}
            </router-link>
@@ -127,6 +133,7 @@ export default {
       'currentProduction',
       'breakdownPath',
       'assetsPath',
+      'assetTypesPath',
       'shotsPath',
       'sequencesPath',
       'episodesPath',
