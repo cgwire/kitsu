@@ -21,7 +21,13 @@ def init_db():
     "Creates datababase table (database must be created through PG client)."
 
     print("Creating database and tables...")
-    dbhelpers.create_all()
+    from zou.app import app
+    with app.app_context():
+        import zou
+        directory = os.path.join(
+            os.path.dirname(zou.__file__), "migrations"
+        )
+        flask_migrate.upgrade(directory=directory)
     print("Database and tables created.")
 
 
