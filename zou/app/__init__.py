@@ -6,12 +6,14 @@ from flask_jwt_extended import JWTManager
 from flask_principal import Principal, identity_changed, Identity
 from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import Migrate
+from flask_mail import Mail
 
 from . import config
 from .stores import auth_tokens_store
 from .services.exception import PersonNotFoundException
 
 from zou.app.utils import cache
+
 
 
 app = Flask(__name__)
@@ -34,7 +36,8 @@ app.secret_key = app.config["SECRET_KEY"]
 jwt = JWTManager(app)  # JWT auth tokens
 Principal(app)  # Permissions
 cache.cache.init_app(app)  # Function caching
-
+mail = Mail()
+mail.init_app(app) # To send emails
 
 # Hack required during development, because Flask SocketIO changes the default
 # Flask CLI.
