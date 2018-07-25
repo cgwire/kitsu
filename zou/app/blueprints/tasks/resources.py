@@ -1,3 +1,5 @@
+import datetime
+
 from flask import abort, request, current_app
 from flask_restful import Resource, reqparse
 from flask_jwt_extended import jwt_required
@@ -541,10 +543,10 @@ class SetTimeSpentResource(Resource):
             time_spent = tasks_service.create_or_update_time_spent(
                 task_id,
                 person_id,
-                date,
+                datetime.datetime.strptime(date, '%Y-%m-%d'),
                 args["duration"]
             )
-            return time_spent, 200
+            return time_spent, 201
         except WrongDateFormatException:
             abort(404)
 

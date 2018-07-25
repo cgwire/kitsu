@@ -1,10 +1,12 @@
 import datetime
 
+from flask import abort
 from flask_restful import Resource, reqparse
 from flask_jwt_extended import jwt_required
 
 from zou.app.services import persons_service
 from zou.app.utils import auth, permissions, csv_utils
+from zou.app.services.exception import WrongDateFormatException
 
 
 class NewPersonResource(Resource):
@@ -98,3 +100,16 @@ class PresenceLogsResource(Resource):
         date = datetime.datetime.strptime(month_date, "%Y-%m")
         presence_logs = persons_service.get_presence_logs(date.year, date.month)
         return csv_utils.build_csv_response(presence_logs)
+
+
+class TimeSpentsResource(Resource):
+    """
+    Get time spents given person and date.
+    """
+
+    @jwt_required
+    def get(self, person_id, date):
+        try:
+            return persons_service.get_time_spents(person_id, date)
+        except WrongDateFormatException:
+            abort(404)
