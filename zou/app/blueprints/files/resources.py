@@ -270,6 +270,7 @@ class NewWorkingFileResource(Resource):
     def post(self, task_id):
         (
             name,
+            mode,
             description,
             comment,
             person_id,
@@ -293,7 +294,7 @@ class NewWorkingFileResource(Resource):
                     name
                 )
 
-            path = self.build_path(task, name, revision, software, sep)
+            path = self.build_path(task, name, revision, software, sep, mode)
 
             working_file = files_service.create_new_working_revision(
                 task_id,
@@ -309,17 +310,19 @@ class NewWorkingFileResource(Resource):
 
         return working_file, 201
 
-    def build_path(self, task, name, revision, software, sep):
+    def build_path(self, task, name, revision, software, sep, mode):
         folder_path = file_tree_service.get_working_folder_path(
             task,
             name=name,
-            software=software
+            software=software,
+            mode=mode
         )
         file_name = file_tree_service.get_working_file_name(
             task,
             name=name,
             software=software,
-            revision=revision
+            revision=revision,
+            mode=mode
         )
         return "%s%s%s" % (folder_path, sep, file_name)
 
@@ -334,6 +337,7 @@ class NewWorkingFileResource(Resource):
             required=True
         )
         parser.add_argument("description", default="")
+        parser.add_argument("mode", default="working")
         parser.add_argument("comment", default="")
         parser.add_argument("person_id", default=person["id"])
         parser.add_argument("software_id", default=maxsoft["id"])
@@ -342,6 +346,7 @@ class NewWorkingFileResource(Resource):
         args = parser.parse_args()
         return (
             args["name"],
+            args["mode"],
             args["description"],
             args["comment"],
             args["person_id"],
