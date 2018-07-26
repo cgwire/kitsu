@@ -5,7 +5,6 @@
       <datepicker
         wrapper-class="datepicker"
         input-class="date-field"
-        calendar-class="calendar"
         :language="locale"
         :disabled-dates="disabledDates"
         :monday-first="true"
@@ -13,8 +12,8 @@
         v-model="selectedDate"
       />
     </div>
-    -
     <div class="flexrow time-spent-total">
+    -&nbsp;&nbsp;
     {{ timeSpentTotal }} {{ $t('timesheets.hours') }}
     </div>
   </div>
@@ -269,19 +268,14 @@ td.name {
   margin-top: 0.5em;
   margin-bottom: 0.5em;
   padding-left: 0.5em;
-  font-size: 1.6em;
-}
-
-.datepicker input.date-field,
-.date-field {
-  font-size: 1.6em;
 }
 
 .calendar {
-  font-size: 1em;
+  font-size: 0.6em;
 }
 
 .time-spent-total {
-  padding-left: 1em;
+  font-size: 1.6em;
+  line-height: 1.7em;
 }
 </style>
