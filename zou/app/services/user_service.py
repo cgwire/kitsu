@@ -47,6 +47,7 @@ def build_related_projects_filter():
     """
     projects = Project.query \
         .join(Task) \
+        .join(ProjectStatus) \
         .filter(build_assignee_filter()) \
         .filter(build_open_project_filter()) \
         .all()
@@ -64,6 +65,7 @@ def related_projects():
     """
     projects = Project.query \
         .join(Task) \
+        .join(ProjectStatus) \
         .filter(build_assignee_filter()) \
         .filter(build_open_project_filter()) \
         .all()
