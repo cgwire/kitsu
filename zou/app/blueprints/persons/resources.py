@@ -4,7 +4,7 @@ from flask import abort
 from flask_restful import Resource, reqparse
 from flask_jwt_extended import jwt_required
 
-from zou.app.services import persons_service
+from zou.app.services import persons_service, time_spents_service
 from zou.app.utils import auth, permissions, csv_utils
 from zou.app.services.exception import WrongDateFormatException
 
@@ -113,3 +113,26 @@ class TimeSpentsResource(Resource):
             return persons_service.get_time_spents(person_id, date)
         except WrongDateFormatException:
             abort(404)
+
+
+class TimeSpentMonthResource(Resource):
+    """
+    Return a table giving time spent by user and by month for given year.
+    """
+
+    @jwt_required
+    def get(self, year, month):
+        permissions.check_manager_permissions()
+        return time_spents_service.get_day_table(year, month)
+
+
+class TimeSpentYearResource(Resource):
+    """
+    Return a table giving time spent by user and by day for given year and
+    month.
+    """
+
+    @jwt_required
+    def get(self, year):
+        permissions.check_manager_permissions()
+        return time_spents_service.get_month_table(year)
