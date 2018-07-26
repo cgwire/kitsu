@@ -1,3 +1,4 @@
+import moment from 'moment-timezone'
 
 export const populateTask = (task) => {
   if (task.entity_type_name === 'Shot') {
@@ -73,4 +74,14 @@ export const computeStats = (entities, idField) => {
   })
 
   return results
+}
+
+export const range = (start, end) => {
+  return [...Array(end - start + 1).keys()]
+    .map(i => i + start)
+}
+
+export const monthToString = (month) => {
+  const currentYear = moment().year()
+  return moment(`${currentYear}-${month + 1}`, 'YYYY-M').format('MMM')
 }

@@ -72,13 +72,20 @@
            <h2>{{ $t('main.studio')}}</h2>
 
            <p @click="toggleSidebar()">
-             <router-link to="/productions">
+             <router-link :to="{name: 'productions'}">
              {{ $t("productions.title") }}
              </router-link>
            </p>
+
            <p @click="toggleSidebar()">
-             <router-link to="/people">
+             <router-link :to="{name: 'people'}">
              {{ $t("people.title") }}
+             </router-link>
+           </p>
+
+           <p @click="toggleSidebar()">
+             <router-link :to="{name: 'timesheets'}">
+             {{ $t("timesheets.title") }}
              </router-link>
            </p>
          </div>

@@ -26,6 +26,7 @@
 <script>
 export default {
   name: 'combobox',
+
   props: {
     label: {
       default: '',
@@ -44,12 +45,15 @@ export default {
       type: String
     }
   },
+
   computed: {
   },
+
   methods: {
     updateValue () {
       this.$emit('input', this.$refs.select.value)
     },
+
     getOptionLabel (option) {
       if (this.localeKeyPrefix.length > 0) {
         return this.$t(this.localeKeyPrefix + option.label.toLowerCase())

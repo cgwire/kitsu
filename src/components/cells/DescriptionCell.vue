@@ -24,11 +24,17 @@ export default {
       timeout: null
     }
   },
+
   components: {
   },
-  props: [
-    'entry'
-  ],
+
+  props: {
+    entry: {
+      type: Object,
+      default: () => {}
+    }
+  },
+
   computed: {
     ...mapGetters([
     ]),

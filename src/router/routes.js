@@ -32,6 +32,7 @@ import TaskType from '../components/TaskType'
 import Task from '../components/Task'
 import TaskTypes from '../components/TaskTypes'
 import TaskStatus from '../components/TaskStatus'
+import Timesheets from '../components/Timesheets'
 import Todos from '../components/Todos'
 
 export const routes = [
@@ -107,8 +108,8 @@ export const routes = [
         name: 'open-productions-new'
       },
 
-      { path: '/people', component: People },
-      { path: '/people/new', component: People },
+      { path: '/people', component: People, name: 'people' },
+      { path: '/people/new', component: People, name: 'new-people' },
       {
         path: '/people/edit/:person_id',
         component: People,
@@ -122,12 +123,17 @@ export const routes = [
       {
         path: '/people/import',
         component: People,
-        name: 'people'
+        name: 'import-people'
       },
       {
         path: '/people/:person_id',
         component: Person,
         name: 'person'
+      },
+      {
+        path: '/timesheets',
+        component: Timesheets,
+        name: 'timesheets'
       },
 
       {

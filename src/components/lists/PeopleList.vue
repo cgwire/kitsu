@@ -55,7 +55,7 @@
           </row-actions>
           <td class="actions" v-else>
           </td>
-         </tr>
+        </tr>
       </tbody>
     </table>
   </div>
@@ -73,12 +73,13 @@ import RowActions from '../widgets/RowActions'
 import TableInfo from '../widgets/TableInfo'
 
 export default {
-  name: 'list',
+  name: 'people-list',
   components: {
     PeopleNameCell,
     RowActions,
     TableInfo
   },
+
   props: [
     'entries',
     'isLoading',
@@ -86,14 +87,17 @@ export default {
     'onEditClicked',
     'onDeleteClicked'
   ],
+
   computed: {
     ...mapGetters([
       'isCurrentUserAdmin'
     ])
   },
+
   methods: {
     ...mapActions([
     ]),
+
     taskColor (nbTasks) {
       if (nbTasks < 1 || nbTasks > 4) {
         return 'red'
@@ -101,6 +105,7 @@ export default {
         return ''
       }
     },
+
     onBodyScroll (event, position) {
       this.$refs.headerWrapper.style.left = `-${position.scrollLeft}px`
     }

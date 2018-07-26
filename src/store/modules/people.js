@@ -111,7 +111,9 @@ const state = {
   personTasksIndex: {},
   personTasksSearchText: '',
   personTaskSelectionGrid: {},
-  personTaskSearchQueries: []
+  personTaskSearchQueries: [],
+
+  timesheet: {}
 }
 
 const getters = {
@@ -150,7 +152,9 @@ const getters = {
         value: person.id
       }
     }
-  )
+  ),
+
+  timesheet: state => state.timesheet
 }
 
 const actions = {
@@ -320,6 +324,25 @@ const actions = {
     })
   },
 
+  loadTimesheets ({ commit }, {
+    detailLevel,
+    year,
+    month
+  }) {
+    return new Promise((resolve, reject) => {
+      const monthString =
+        month.length === 1 ? `0${parseInt(month) + 1}` : `${month}`
+      let mainFunc = peopleApi.getMonthTable
+      if (detailLevel === 'day') {
+        mainFunc = peopleApi.getDayTable
+      }
+      mainFunc(year, monthString)
+        .then((table) => {
+          commit(PEOPLE_TIMESHEET_LOADED, table)
+          resolve()
+        })
+        .catch(reject)
+    })
   }
 }
 
@@ -555,6 +578,10 @@ const mutations = {
     state.personTaskSelectionGrid = clearSelectionGrid(
       state.personTaskSelectionGrid
     )
+  },
+
+  [PEOPLE_TIMESHEET_LOADED] (state, timesheet) {
+    state.timesheet = timesheet
   },
 
   [RESET_ALL] (state, people) {
