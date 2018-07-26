@@ -201,7 +201,7 @@ export default {
     my_tasks: 'My tasks',
     create_for_selection: 'Create task for each empty cell:',
     tasks: 'Tasks',
-    current: 'Current',
+    current: 'Task to do',
     done: 'Done',
     delete_comment: 'Are you sure you want to delete last comment?',
     edit_comment: 'Edit comment',
@@ -215,6 +215,16 @@ export default {
       assignees: 'Assignees',
       end_date: 'End date'
     }
+  },
+
+  timesheets: {
+    title: 'Timesheets',
+    time_spent: 'Time Spent (hours)',
+    hours: 'hours',
+    done_tasks: 'Done tasks',
+    detail_level: 'Detail level',
+    year: 'Year',
+    month: 'Month'
   },
 
   task_types: {

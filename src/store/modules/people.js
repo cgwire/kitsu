@@ -44,6 +44,9 @@ import {
   REMOVE_SELECTED_TASK,
   CLEAR_SELECTED_TASKS,
 
+  SET_TIME_SPENT,
+  PEOPLE_TIMESHEET_LOADED,
+
   RESET_ALL
 } from '../mutation-types'
 
@@ -298,6 +301,25 @@ const actions = {
         else resolve()
       })
     })
+  },
+
+  setTimeSpent ({ commit }, {personId, taskId, date, duration}) {
+    return new Promise((resolve, reject) => {
+      peopleApi.setTimeSpent(
+        taskId,
+        personId,
+        date,
+        duration,
+        (err, timeSpent) => {
+          if (err) reject(err)
+          else {
+            commit(SET_TIME_SPENT, timeSpent)
+            resolve()
+          }
+        })
+    })
+  },
+
   }
 }
 

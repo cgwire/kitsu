@@ -65,6 +65,10 @@ export default {
     client.get('/api/data/user/done-tasks', callback)
   },
 
+  loadTimeSpents (date, callback) {
+    client.get(`/api/data/user/time-spents/${date}`, callback)
+  },
+
   getPersonTasks (personId, callback) {
     client.get(`/api/data/persons/${personId}/tasks`, callback)
   },
@@ -89,5 +93,46 @@ export default {
 
   removeFilter (searchQuery, callback) {
     client.del(`/api/data/user/filters/${searchQuery.id}`, callback)
+  },
+
+  getTimeSpents (personId, date, callback) {
+    // Date is a string with following format: YYYYY-MM-DD.
+    client.get(`/api/data/personId/${personId}/time-spents/${date}`, callback)
+  },
+
+  setTimeSpent (taskId, personId, date, hours, callback) {
+    // Date is a string with following format: YYYYY-MM-DD.
+    const data = {
+      duration: hours * 60
+    }
+    client.post(
+      `/api/actions/tasks/${taskId}/time-spents/${date}/persons/${personId}`,
+      data,
+      callback
+    )
+  },
+
+  getDayTable (year, month) {
+    return new Promise((resolve, reject) => {
+      client.get(
+        `/api/data/persons/time-spents/day-table/${year}/${month}`,
+        (err, table) => {
+          if (err) reject(err)
+          else resolve(table)
+        }
+      )
+    })
+  },
+
+  getMonthTable (year) {
+    return new Promise((resolve, reject) => {
+      client.get(
+        `/api/data/persons/time-spents/month-table/${year}`,
+        (err, table) => {
+          if (err) reject(err)
+          else resolve(table)
+        }
+      )
+    })
   }
 }

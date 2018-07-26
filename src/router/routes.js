@@ -400,6 +400,8 @@ export const routes = [
       },
 
       { path: '/todos', component: Todos, name: 'todos' },
+      { path: '/todos/:tab', component: Todos, name: 'todos-tab' },
+
       { path: '/profile', component: Profile, name: 'profile' },
       {
         path: '/profile/change-avatar',

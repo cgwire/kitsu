@@ -1,3 +1,5 @@
+import moment from 'moment-timezone'
+
 import peopleApi from '../api/people'
 import peopleStore from './people'
 import taskStatusStore from './taskstatus'
@@ -28,6 +30,9 @@ import {
   USER_LOAD_TODOS_END,
   USER_LOAD_TODOS_ERROR,
   USER_LOAD_DONE_TASKS_END,
+  USER_LOAD_TIME_SPENTS_END,
+
+  SET_TIME_SPENT,
 
   UPLOAD_AVATAR_END,
 
@@ -56,7 +61,7 @@ const helpers = {
   }
 }
 
-const state = {
+const initialState = {
   user: null,
 
   isTodosLoading: false,
@@ -76,6 +81,8 @@ const state = {
   isSaveProfileLoadingError: false,
 
   userFilters: {},
+  timeSpentMap: {},
+  timeSpentTotal: 0,
 
   changePassword: {
     isLoading: false,
@@ -83,6 +90,10 @@ const state = {
     isSuccess: false,
     isValid: true
   }
+}
+
+const state = {
+  ...initialState
 }
 
 const getters = {
@@ -104,7 +115,9 @@ const getters = {
 
   changePassword: state => state.changePassword,
 
-  userFilters: state => state.userFilters
+  userFilters: state => state.userFilters,
+  timeSpentMap: state => state.timeSpentMap,
+  timeSpentTotal: state => state.timeSpentTotal
 }
 
 const actions = {
@@ -158,10 +171,19 @@ const actions = {
             if (err) {
               commit(USER_LOAD_TODOS_ERROR)
             } else {
-              commit(USER_LOAD_TODOS_END, { tasks, userFilters })
               commit(USER_LOAD_DONE_TASKS_END, doneTasks)
             }
-            if (callback) callback(err)
+
+            const date = moment().format('YYYY-MM-DD')
+            peopleApi.loadTimeSpents(date, (err, timeSpents) => {
+              if (err) {
+                commit(USER_LOAD_TODOS_ERROR)
+              } else {
+                commit(USER_LOAD_TIME_SPENTS_END, timeSpents)
+                commit(USER_LOAD_TODOS_END, { tasks, userFilters })
+              }
+              if (callback) callback(err)
+            })
           })
         }
       })
@@ -291,6 +313,8 @@ const mutations = {
   [USER_LOAD_TODOS_START] (state) {
     state.isTodosLoadingError = false
     state.isTodosLoading = true
+    state.timeSpents = {}
+    state.timeSpentTotal = 0
   },
 
   [USER_LOAD_TODOS_END] (state, { tasks, userFilters }) {
@@ -400,25 +424,32 @@ const mutations = {
     state.userFilters = userFilters
   },
 
+  [SET_TIME_SPENT] (state, timeSpent) {
+    if (state.user.id === timeSpent.person_id) {
+      state.timeSpentMap[timeSpent.task_id] = timeSpent
+    }
+    state.timeSpentTotal = Object
+      .values(state.timeSpentMap)
+      .reduce((acc, timeSpent) => timeSpent.duration + acc, 0) / 60
+
+    console.log(state.timeSpentTotal)
+  },
+
+  [USER_LOAD_TIME_SPENTS_END] (state, timeSpents) {
+    const timeSpentMap = {}
+    timeSpents.forEach((timeSpent) => {
+      timeSpentMap[timeSpent.task_id] = timeSpent
+    })
+    state.timeSpentMap = timeSpentMap
+
+    state.timeSpentTotal = Object
+      .values(state.timeSpentMap)
+      .reduce((acc, timeSpent) => timeSpent.duration + acc, 0) / 60
+  },
+
   [RESET_ALL] (state) {
-    state.user = null
-    state.isAuthenticated = false
-    state.isSaveProfileLoading = false
-    state.isSaveProfileLoadingError = false
-
-    state.isTodosLoading = false
-    state.isTodosLoadingError = false
-    state.todos = []
-    state.todoSelectionGrid = {}
-    state.todoSearchQueries = []
-
-    state.userFilters = {}
-
-    state.changePassword = {
-      isLoading: false,
-      isError: false,
-      isSuccess: false,
-      isValid: false
+    state = {
+      ...initialState
     }
   }
 }
