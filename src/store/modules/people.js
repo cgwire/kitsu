@@ -1,3 +1,5 @@
+import moment from 'moment-timezone'
+
 import peopleApi from '../api/people'
 import colors from '../../lib/colors'
 import { populateTask, clearSelectionGrid } from '../../lib/helpers'
@@ -46,6 +48,7 @@ import {
 
   SET_TIME_SPENT,
   PEOPLE_TIMESHEET_LOADED,
+  PERSON_LOAD_TIME_SPENTS_END,
 
   RESET_ALL
 } from '../mutation-types'
@@ -81,7 +84,7 @@ const helpers = {
   }
 }
 
-const state = {
+const initialState = {
   people: [],
   personMap: {},
   isPeopleLoading: false,
@@ -105,6 +108,7 @@ const state = {
 
   personCsvFormData: undefined,
 
+  person: {},
   personTasks: [],
   displayedPersonTasks: [],
   displayedPersonDoneTasks: [],
@@ -113,7 +117,13 @@ const state = {
   personTaskSelectionGrid: {},
   personTaskSearchQueries: [],
 
-  timesheet: {}
+  timesheet: {},
+  personTimeSpentMap: {},
+  personTimeSpentTotal: 0
+}
+
+const state = {
+  ...initialState
 }
 
 const getters = {
@@ -154,7 +164,9 @@ const getters = {
     }
   ),
 
-  timesheet: state => state.timesheet
+  timesheet: state => state.timesheet,
+  personTimeSpentMap: state => state.personTimeSpentMap,
+  personTimeSpentTotal: state => state.personTimeSpentTotal
 }
 
 const actions = {
@@ -229,15 +241,22 @@ const actions = {
     { commit, state, rootGetters }, { personId, forced, callback }
   ) {
     const userFilters = rootGetters.userFilters
-    commit(LOAD_PERSON_TASKS_END, { tasks: [], userFilters })
+    commit(LOAD_PERSON_TASKS_END, { personId, tasks: [], userFilters })
     commit(LOAD_PERSON_DONE_TASKS_END, [])
     peopleApi.getPersonTasks(personId, (err, tasks) => {
       if (err) tasks = []
       peopleApi.getPersonDoneTasks(personId, (err, doneTasks) => {
         if (err) doneTasks = []
-        commit(LOAD_PERSON_TASKS_END, { tasks, userFilters })
         commit(LOAD_PERSON_DONE_TASKS_END, doneTasks)
         if (callback) callback(err)
+
+        const date = moment().format('YYYY-MM-DD')
+        peopleApi.getTimeSpents(personId, date, (err, timeSpents) => {
+          if (err) timeSpents = []
+          commit(PERSON_LOAD_TIME_SPENTS_END, timeSpents)
+          commit(LOAD_PERSON_TASKS_END, { personId, tasks, userFilters })
+          if (callback) callback(err)
+        })
       })
     })
   },
@@ -498,7 +517,9 @@ const mutations = {
       `.png?unique=${randomHash}`
   },
 
-  [LOAD_PERSON_TASKS_END] (state, { tasks, userFilters }) {
+  [LOAD_PERSON_TASKS_END] (state, { personId, tasks, userFilters }) {
+    state.person = state.personMap[personId]
+
     tasks.forEach(populateTask)
     const personTaskSelectionGrid = {}
     for (let i = 0; i < tasks.length; i++) {
@@ -584,28 +605,31 @@ const mutations = {
     state.timesheet = timesheet
   },
 
+  [SET_TIME_SPENT] (state, timeSpent) {
+    if (state.person.id === timeSpent.person_id) {
+      state.personTimeSpentMap[timeSpent.task_id] = timeSpent
+    }
+    state.personTimeSpentTotal = Object
+      .values(state.personTimeSpentMap)
+      .reduce((acc, timeSpent) => timeSpent.duration + acc, 0) / 60
+  },
+
+  [PERSON_LOAD_TIME_SPENTS_END] (state, timeSpents) {
+    const timeSpentMap = {}
+    timeSpents.forEach((timeSpent) => {
+      timeSpentMap[timeSpent.task_id] = timeSpent
+    })
+    state.personTimeSpentMap = timeSpentMap
+
+    state.personTimeSpentTotal = Object
+      .values(state.personTimeSpentMap)
+      .reduce((acc, timeSpent) => timeSpent.duration + acc, 0) / 60
+  },
+
   [RESET_ALL] (state, people) {
-    state.isPeopleLoading = false
-    state.isPeopleLoadingError = false
-
-    state.isDeleteModalShown = false
-    state.isDeleteLoading = false
-    state.isDeleteLoadingError = false
-    state.personToDelete = {}
-    state.personTaskSearchQueries = []
-
-    state.isEditModalShown = false
-    state.isEditLoading = false
-    state.isEditLoadingError = false
-    state.personToEdit = {}
-
-    state.isImportModalShown = false
-    state.isImportPeopleLoading = false
-    state.isImportPeopleLoadingError = false
-    state.personCsvFormData = null
-
-    state.people = []
-    state.personMap = {}
+    Object.assign(state, {
+      ...initialState
+    })
   }
 }
 

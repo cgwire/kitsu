@@ -97,7 +97,7 @@ export default {
 
   getTimeSpents (personId, date, callback) {
     // Date is a string with following format: YYYYY-MM-DD.
-    client.get(`/api/data/personId/${personId}/time-spents/${date}`, callback)
+    client.get(`/api/data/persons/${personId}/time-spents/${date}`, callback)
   },
 
   setTimeSpent (taskId, personId, date, hours, callback) {

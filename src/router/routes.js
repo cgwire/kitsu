@@ -131,6 +131,11 @@ export const routes = [
         name: 'person'
       },
       {
+        path: '/people/:person_id/:tab',
+        component: Person,
+        name: 'person-tab'
+      },
+      {
         path: '/timesheets',
         component: Timesheets,
         name: 'timesheets'

@@ -14,24 +14,48 @@
       </div>
     </div>
 
-    <page-subtitle :text="$t('people.running_tasks')"></page-subtitle>
     <div class="task-tabs tabs">
       <ul>
         <li
-          :class="{'is-active': isCurrentActive}"
-          @click="selectCurrent"
+          :class="{'is-active': isActive('todos')}"
         >
-          <a>
+          <router-link :to="{
+            name: 'person',
+            params: {
+              person_id: person.id
+            }
+          }">
             {{ $t('tasks.current')}}
-          </a>
+          </router-link>
         </li>
         <li
-          :class="{'is-active': isDoneActive}"
-          @click="selectDone"
+          :class="{'is-active': isActive('done')}"
+          @click="select('done')"
         >
-          <a>
+          <router-link :to="{
+            name: 'person-tab',
+            params: {
+              tab: 'done',
+              person_id: person.id
+            }
+          }">
             {{ $t('tasks.done') }} ({{ displayedPersonDoneTasks.length }})
-          </a>
+          </router-link>
+        </li>
+        <li
+          :class="{'is-active': isActive('timesheets')}"
+          @click="select('timesheet')"
+          v-if="isCurrentUserManager"
+        >
+          <router-link :to="{
+            name: 'person-tab',
+            params: {
+              tab: 'timesheets',
+              person_id: person.id
+            }
+          }">
+            {{ $t('timesheets.title') }}
+          </router-link>
         </li>
       </ul>
     </div>
@@ -39,7 +63,7 @@
     <search-field
       :class="{
         'search-field': true,
-        'is-hidden': !isCurrentActive
+        'is-hidden': !isActive('todos')
       }"
       ref="person-tasks-search-field"
       @change="onSearchChange"
@@ -50,7 +74,7 @@
 
     <div
       class="query-list"
-      v-if="isCurrentActive"
+      v-if="isActive('todos')"
     >
       <search-query-list
         :queries="personTaskSearchQueries"
@@ -65,7 +89,7 @@
       :is-loading="isTasksLoading"
       :is-error="isTasksLoadingError"
       :selection-grid="personTaskSelectionGrid"
-      v-if="isCurrentActive"
+      v-if="isActive('todos')"
     ></todos-list>
 
     <todos-list
@@ -74,12 +98,24 @@
       :is-error="isTasksLoadingError"
       :done="true"
       :selectionGrid="personTaskSelectionGrid"
-      v-if="isDoneActive"
+      v-if="isActive('done')"
     ></todos-list>
+
+    <timesheet-list
+      :tasks="displayedPersonTasks"
+      :done-tasks="displayedPersonDoneTasks"
+      :is-loading="isTasksLoading"
+      :is-error="isTasksLoadingError"
+      :time-spent-map="personTimeSpentMap"
+      :time-spent-total="personTimeSpentTotal"
+      @time-spent-change="onTimeSpentChange"
+      v-if="isActive('timesheets')"
+    ></timesheet-list>
   </div>
 </template>
 
 <script>
+import moment from 'moment-timezone'
 import { mapGetters, mapActions } from 'vuex'
 
 import PageTitle from './widgets/PageTitle'
@@ -87,6 +123,7 @@ import PageSubtitle from './widgets/PageSubtitle'
 import PeopleAvatar from './widgets/PeopleAvatar'
 import SearchField from './widgets/SearchField'
 import SearchQueryList from './widgets/SearchQueryList'
+import TimesheetList from './lists/TimesheetList'
 import TodosList from './lists/TodosList'
 
 export default {
@@ -97,7 +134,8 @@ export default {
     PeopleAvatar,
     SearchField,
     SearchQueryList,
-    TodosList
+    TodosList,
+    TimesheetList
   },
 
   data () {
@@ -105,7 +143,7 @@ export default {
       isTasksLoading: false,
       isTasksLoadingError: false,
       person: {},
-      activeTab: 'current'
+      activeTab: 'todos'
     }
   },
 
@@ -114,6 +152,7 @@ export default {
   },
 
   mounted () {
+    this.updateActiveTab()
     if (this.personTasksSearchText.length > 0) {
       this.$refs['person-tasks-search-field'].setValue(
         this.personTasksSearchText
@@ -131,18 +170,13 @@ export default {
       'personMap',
       'displayedPersonTasks',
       'displayedPersonDoneTasks',
+      'isCurrentUserManager',
       'personTasksSearchText',
       'personTaskSearchQueries',
-      'personTaskSelectionGrid'
-    ]),
-
-    isCurrentActive () {
-      return this.activeTab === 'current'
-    },
-
-    isDoneActive () {
-      return this.activeTab === 'done'
-    }
+      'personTaskSelectionGrid',
+      'personTimeSpentMap',
+      'personTimeSpentTotal'
+    ])
   },
 
   methods: {
@@ -150,8 +184,24 @@ export default {
       'loadPersonTasks',
       'setPersonTasksSearch',
       'savePersonTasksSearch',
-      'removePersonTasksSearch'
+      'removePersonTasksSearch',
+      'setTimeSpent'
     ]),
+
+    isActive (tab) {
+      return this.activeTab === tab
+    },
+
+    select (tab) {
+      this.activeTab = tab
+      if (this.isActive('todos')) {
+        setTimeout(() => {
+          if (this.$refs['person-tasks-search-field']) {
+            this.$refs['person-tasks-search-field'].focus()
+          }
+        }, 100)
+      }
+    },
 
     onSearchChange (text) {
       this.setPersonTasksSearch(text)
@@ -204,6 +254,20 @@ export default {
         .catch((err) => {
           if (err) console.log(err)
         })
+    },
+
+    updateActiveTab () {
+      if (['done', 'timesheets'].includes(this.$route.params.tab)) {
+        this.activeTab = this.$route.params.tab
+      } else {
+        this.activeTab = 'todos'
+      }
+    },
+
+    onTimeSpentChange (timeSpentInfo) {
+      timeSpentInfo.personId = this.person.id
+      timeSpentInfo.date = moment().format('YYYY-MM-DD')
+      this.setTimeSpent(timeSpentInfo)
     }
   },
 
@@ -215,7 +279,10 @@ export default {
 
   watch: {
     $route () {
-      this.loadPerson(this.$route.params.person_id)
+      const personId = this.$route.params.person_id
+
+      this.updateActiveTab()
+      if (this.person.id !== personId) this.loadPerson()
     }
   }
 }
@@ -240,5 +307,13 @@ export default {
 
 .query-list {
   margin-top: 1em;
+}
+
+.task-tabs {
+  margin-top: 2em;
+}
+
+.data-list {
+  margin-top: 0;
 }
 </style>

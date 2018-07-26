@@ -82,6 +82,8 @@
       :done-tasks="displayedDoneTasks"
       :is-loading="isTodosLoading"
       :is-error="isTodosLoadingError"
+      :time-spent-map="timeSpentMap"
+      :time-spent-total="timeSpentTotal"
       @time-spent-change="onTimeSpentChange"
       v-if="isActive('timesheets')"
     ></timesheet-list>
@@ -133,6 +135,8 @@ export default {
       'todosSearchText',
       'isTodosLoading',
       'isTodosLoadingError',
+      'timeSpentMap',
+      'timeSpentTotal',
       'todoSelectionGrid',
       'todoSearchQueries'
     ])

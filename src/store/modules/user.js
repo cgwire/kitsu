@@ -431,8 +431,6 @@ const mutations = {
     state.timeSpentTotal = Object
       .values(state.timeSpentMap)
       .reduce((acc, timeSpent) => timeSpent.duration + acc, 0) / 60
-
-    console.log(state.timeSpentTotal)
   },
 
   [USER_LOAD_TIME_SPENTS_END] (state, timeSpents) {
