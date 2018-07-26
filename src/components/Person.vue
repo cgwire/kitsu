@@ -108,6 +108,7 @@
       :is-error="isTasksLoadingError"
       :time-spent-map="personTimeSpentMap"
       :time-spent-total="personTimeSpentTotal"
+      @date-changed="onDateChanged"
       @time-spent-change="onTimeSpentChange"
       v-if="isActive('timesheets')"
     ></timesheet-list>
@@ -140,10 +141,11 @@ export default {
 
   data () {
     return {
+      activeTab: 'todos',
       isTasksLoading: false,
       isTasksLoadingError: false,
       person: {},
-      activeTab: 'todos'
+      selectedDate: moment().format('YYYY-MM-DD')
     }
   },
 
@@ -212,6 +214,7 @@ export default {
       this.isTasksLoading = true
       this.loadPersonTasks({
         personId: this.person.id,
+        date: this.selectedDate,
         callback: (err) => {
           if (err) console.log(err)
           this.isTasksLoading = false
@@ -266,8 +269,13 @@ export default {
 
     onTimeSpentChange (timeSpentInfo) {
       timeSpentInfo.personId = this.person.id
-      timeSpentInfo.date = moment().format('YYYY-MM-DD')
+      timeSpentInfo.date = this.selectedDate
       this.setTimeSpent(timeSpentInfo)
+    },
+
+    onDateChanged (date) {
+      this.selectedDate = moment(date).format('YYYY-MM-DD')
+      this.loadPerson(this.person.id)
     }
   },
 

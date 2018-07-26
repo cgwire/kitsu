@@ -1,5 +1,3 @@
-import moment from 'moment-timezone'
-
 import peopleApi from '../api/people'
 import colors from '../../lib/colors'
 import { populateTask, clearSelectionGrid } from '../../lib/helpers'
@@ -238,7 +236,7 @@ const actions = {
   },
 
   loadPersonTasks (
-    { commit, state, rootGetters }, { personId, forced, callback }
+    { commit, state, rootGetters }, { personId, forced, date, callback }
   ) {
     const userFilters = rootGetters.userFilters
     commit(LOAD_PERSON_TASKS_END, { personId, tasks: [], userFilters })
@@ -250,7 +248,6 @@ const actions = {
         commit(LOAD_PERSON_DONE_TASKS_END, doneTasks)
         if (callback) callback(err)
 
-        const date = moment().format('YYYY-MM-DD')
         peopleApi.getTimeSpents(personId, date, (err, timeSpents) => {
           if (err) timeSpents = []
           commit(PERSON_LOAD_TIME_SPENTS_END, timeSpents)

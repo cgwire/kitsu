@@ -2,7 +2,16 @@
 <div class="user-timesheet data-list">
   <div class="flexrow timesheet-header">
     <div class="flexrow-item current-date">
-    {{ currentDate() }}
+      <datepicker
+        wrapper-class="datepicker"
+        input-class="date-field"
+        calendar-class="calendar"
+        :language="locale"
+        :disabled-dates="disabledDates"
+        :monday-first="true"
+        format="d MMMM yyyy"
+        v-model="selectedDate"
+      />
     </div>
     -
     <div class="flexrow time-spent-total">
@@ -34,7 +43,7 @@
   <div
     class="table-body"
     v-scroll="onBodyScroll"
-    v-if="tasks.length > 0"
+    v-if="tasks.length > 0 && !isLoading"
   >
     <table class="table">
       <tbody>
@@ -71,7 +80,7 @@
 
     <page-subtitle :text="$t('timesheets.done_tasks')" />
 
-    <table class="table">
+    <table class="table" v-if="!isLoading">
       <tbody>
        <tr v-for="(task, i) in doneTasks" :key="task + '-' + i">
          <production-name-cell
@@ -122,6 +131,8 @@
 <script>
 import { mapGetters, mapActions } from 'vuex'
 import moment from 'moment-timezone'
+import Datepicker from 'vuejs-datepicker'
+import {en, fr} from 'vuejs-datepicker/dist/locale'
 
 import EntityThumbnail from '../widgets/EntityThumbnail'
 import PageSubtitle from '../widgets/PageSubtitle'
@@ -134,6 +145,7 @@ export default {
   name: 'timesheet-list',
 
   components: {
+    Datepicker,
     EntityThumbnail,
     ProductionNameCell,
     PageSubtitle,
@@ -144,6 +156,10 @@ export default {
 
   data () {
     return {
+      selectedDate: moment().toDate(),
+      disabledDates: {
+        from: moment().toDate()
+      }
     }
   },
 
@@ -160,8 +176,17 @@ export default {
   computed: {
     ...mapGetters([
       'nbSelectedTasks',
-      'productionMap'
-    ])
+      'productionMap',
+      'user'
+    ]),
+
+    locale () {
+      if (this.user.locale === 'fr_FR') {
+        return fr
+      } else {
+        return en
+      }
+    }
   },
 
   methods: {
@@ -178,6 +203,12 @@ export default {
 
     onSliderChange (valueInfo) {
       this.$emit('time-spent-change', valueInfo)
+    }
+  },
+
+  watch: {
+    selectedDate () {
+      this.$emit('date-changed', this.selectedDate)
     }
   }
 }
@@ -239,6 +270,15 @@ td.name {
   margin-bottom: 0.5em;
   padding-left: 0.5em;
   font-size: 1.6em;
+}
+
+.datepicker input.date-field,
+.date-field {
+  font-size: 1.6em;
+}
+
+.calendar {
+  font-size: 1em;
 }
 
 .time-spent-total {

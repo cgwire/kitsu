@@ -1,5 +1,3 @@
-import moment from 'moment-timezone'
-
 import peopleApi from '../api/people'
 import peopleStore from './people'
 import taskStatusStore from './taskstatus'
@@ -157,7 +155,7 @@ const actions = {
     })
   },
 
-  loadTodos ({ commit, state, rootGetters }, { callback, forced }) {
+  loadTodos ({ commit, state, rootGetters }, { callback, forced, date }) {
     const userFilters = rootGetters.userFilters
 
     if (state.todos.length === 0 || forced) {
@@ -174,7 +172,6 @@ const actions = {
               commit(USER_LOAD_DONE_TASKS_END, doneTasks)
             }
 
-            const date = moment().format('YYYY-MM-DD')
             peopleApi.loadTimeSpents(date, (err, timeSpents) => {
               if (err) {
                 commit(USER_LOAD_TODOS_ERROR)

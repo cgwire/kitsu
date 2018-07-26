@@ -84,6 +84,7 @@
       :is-error="isTodosLoadingError"
       :time-spent-map="timeSpentMap"
       :time-spent-total="timeSpentTotal"
+      @date-changed="onDateChanged"
       @time-spent-change="onTimeSpentChange"
       v-if="isActive('timesheets')"
     ></timesheet-list>
@@ -112,12 +113,15 @@ export default {
 
   data () {
     return {
-      activeTab: 'todos'
+      activeTab: 'todos',
+      selectedDate: moment().format('YYYY-MM-DD')
     }
   },
 
   created () {
-    this.loadTodos({})
+    this.loadTodos({
+      date: this.selectedDate
+    })
   },
 
   mounted () {
@@ -201,9 +205,17 @@ export default {
       }
     },
 
+    onDateChanged (date) {
+      this.selectedDate = moment(date).format('YYYY-MM-DD')
+      this.loadTodos({
+        date: this.selectedDate,
+        forced: true
+      })
+    },
+
     onTimeSpentChange (timeSpentInfo) {
       timeSpentInfo.personId = this.user.id
-      timeSpentInfo.date = moment().format('YYYY-MM-DD')
+      timeSpentInfo.date = this.selectedDate
       this.setTimeSpent(timeSpentInfo)
     }
   },
