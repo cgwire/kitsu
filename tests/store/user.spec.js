@@ -61,6 +61,12 @@ peopleApi.getUserSearchFilters = (callback) => {
   return callback(null, userFilters)
 }
 
+peopleApi.loadTimeSpents = (data, callback) => {
+  process.nextTick(() => {
+    callback(null, [])
+  })
+}
+
 describe('user', () => {
 
   beforeEach(helpers.reset)

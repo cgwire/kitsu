@@ -246,8 +246,6 @@ const actions = {
       peopleApi.getPersonDoneTasks(personId, (err, doneTasks) => {
         if (err) doneTasks = []
         commit(LOAD_PERSON_DONE_TASKS_END, doneTasks)
-        if (callback) callback(err)
-
         peopleApi.getTimeSpents(personId, date, (err, timeSpents) => {
           if (err) timeSpents = []
           commit(PERSON_LOAD_TIME_SPENTS_END, timeSpents)
