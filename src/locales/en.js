@@ -219,7 +219,7 @@ export default {
 
   timesheets: {
     title: 'Timesheets',
-    time_spent: 'Time Spent (hours)',
+    time_spents: 'Time Spent (hours)',
     hours: 'hours',
     done_tasks: 'Done tasks',
     detail_level: 'Detail level',
