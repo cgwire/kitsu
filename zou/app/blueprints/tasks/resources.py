@@ -547,6 +547,8 @@ class SetTimeSpentResource(Resource):
                 args["duration"]
             )
             return time_spent, 201
+        except ValueError:
+            abort(404)
         except WrongDateFormatException:
             abort(404)
 
@@ -579,7 +581,9 @@ class AddTimeSpentResource(Resource):
                 args["duration"],
                 add=True
             )
-            return time_spent, 200
+            return time_spent, 201
+        except ValueError:
+            abort(404)
         except WrongDateFormatException:
             abort(404)
 
