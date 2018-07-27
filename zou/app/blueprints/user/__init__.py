@@ -25,6 +25,7 @@ from .resources import (
     HasTaskSubscribedResource,
     TaskSubscribeResource,
     TaskUnsubscribeResource,
+    TimeSpentsResource,
     HasSequenceSubscribedResource,
     SequenceSubscriptionsResource,
     SequenceSubscribeResource,
@@ -58,6 +59,7 @@ routes = [
     ("/data/user/filters/<filter_id>", FilterResource),
 
     ("/data/user/desktop-login-logs", DesktopLoginLogsResource),
+    ("/data/user/time-spents/<date>", TimeSpentsResource),
 
     ("/data/user/notifications", NotificationsResource),
     ("/data/user/notifications/<notification_id>", NotificationResource),

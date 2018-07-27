@@ -4,16 +4,20 @@ import datetime
 from calendar import monthrange
 from dateutil import relativedelta
 
-from sqlalchemy.exc import StatementError
+from sqlalchemy.exc import StatementError, DataError
 
 from flask_jwt_extended import get_jwt_identity
 
 from zou.app.models.person import Person
 from zou.app.models.desktop_login_logs import DesktopLoginLog
+from zou.app.models.time_spent import TimeSpent
 
 from zou.app.utils import fields, events, cache
 
-from zou.app.services.exception import PersonNotFoundException
+from zou.app.services.exception import (
+    PersonNotFoundException,
+    WrongDateFormatException
+)
 
 
 def clear_person_cache():
@@ -252,3 +256,16 @@ def get_presence_logs(year, month):
             row[day] = "X"
         csv_content.append(row)
     return csv_content
+
+
+def get_time_spents(person_id, date):
+    """
+    Return time spents for given person and date.
+    """
+    try:
+        time_spents = TimeSpent.query \
+            .filter_by(person_id=person_id, date=date) \
+            .all()
+    except DataError:
+        raise WrongDateFormatException
+    return fields.serialize_list(time_spents)

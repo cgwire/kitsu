@@ -422,3 +422,17 @@ class PersonListResource(Resource):
                 "active": person["active"]
             })
         return person_names
+
+
+class ResetPasswordResource(Resource):
+    """
+    Ressource to allow a user to change his password.
+    """
+
+    @jwt_required
+    def get(self):
+        pass
+
+    @jwt_required
+    def post(self):
+        pass

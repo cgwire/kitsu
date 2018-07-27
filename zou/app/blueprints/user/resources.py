@@ -1,6 +1,6 @@
 import datetime
 
-from flask import request
+from flask import request, abort
 from flask_restful import Resource, reqparse
 from flask_jwt_extended import jwt_required
 
@@ -13,6 +13,8 @@ from zou.app.services import (
     projects_service,
     shots_service
 )
+
+from zou.app.services.exception import WrongDateFormatException
 
 
 class AssetTasksResource(Resource):
@@ -361,4 +363,15 @@ class SequenceSubscriptionsResource(Resource):
         return user_service.get_sequence_subscriptions(project_id, task_type_id)
 
 
+class TimeSpentsResource(Resource):
+    """
+    Get time spents on for current user and given date.
+    """
 
+    @jwt_required
+    def get(self, date):
+        try:
+            current_user = persons_service.get_current_user()
+            return persons_service.get_time_spents(current_user["id"], date)
+        except WrongDateFormatException:
+            abort(404)

@@ -29,8 +29,7 @@ class RouteTimeSpentTestCase(ApiDBTestCase):
                 self.task.id,
                 self.person.id
             ),
-            data,
-            200
+            data
         )
         time_spents = self.get("data/time-spents")
         self.assertEquals(time_spents[0]["date"], "2017-09-23")
@@ -59,14 +58,14 @@ class RouteTimeSpentTestCase(ApiDBTestCase):
             task_id,
             person_id
         )
-        self.post(path, data, 200)
+        self.post(path, data)
 
         data = {"duration": 7200}
         path = "/actions/tasks/%s/time-spents/2017-09-27/persons/%s" % (
             task_id,
             user_id
         )
-        self.post(path, data, 200)
+        self.post(path, data)
 
         time_spents = self.get(
             "/actions/tasks/%s/time-spents/2017-09-23/" % task_id
@@ -85,8 +84,7 @@ class RouteTimeSpentTestCase(ApiDBTestCase):
                 task_id,
                 person_id
             ),
-            data,
-            200
+            data
         )
 
         data = {"duration": 10800}
@@ -95,8 +93,7 @@ class RouteTimeSpentTestCase(ApiDBTestCase):
                 task_id,
                 person_id
             ),
-            data,
-            200
+            data
         )
         time_spents = self.get("data/time-spents")
         self.assertEquals(time_spents[0]["duration"], 14400)

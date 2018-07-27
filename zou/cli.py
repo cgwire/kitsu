@@ -21,7 +21,13 @@ def init_db():
     "Creates datababase table (database must be created through PG client)."
 
     print("Creating database and tables...")
-    dbhelpers.create_all()
+    from zou.app import app
+    with app.app_context():
+        import zou
+        directory = os.path.join(
+            os.path.dirname(zou.__file__), "migrations"
+        )
+        flask_migrate.upgrade(directory=directory)
     print("Database and tables created.")
 
 
@@ -39,7 +45,7 @@ def reset_db():
     "Drop all tables then recreates them."
 
     clear_db()
-    init_db()
+    dbhelpers.create_all()
 
 
 @cli.command()
@@ -53,6 +59,19 @@ def upgrade_db():
             os.path.dirname(zou.__file__), "migrations"
         )
         flask_migrate.upgrade(directory=directory)
+
+
+@cli.command()
+def stamp_db():
+    "Upgrade database schema."
+
+    from zou.app import app
+    with app.app_context():
+        import zou
+        directory = os.path.join(
+            os.path.dirname(zou.__file__), "migrations"
+        )
+        flask_migrate.stamp(directory=directory)
 
 
 @cli.command()

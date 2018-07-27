@@ -6,7 +6,7 @@ from zou.app.utils import dbhelpers
 APP_NAME = "Zou"
 APP_SYSTEM_ERROR_SUBJECT_LINE = "%s system error" % APP_NAME
 
-DEBUG = os.getenv("DEBUG", False)
+DEBUG = os.getenv("DEBUG", 0)
 SECRET_KEY = os.getenv("SECRET_KEY", "mysecretkey")
 
 AUTH_STRATEGY = os.getenv("AUTH_STRATEGY", "auth_local_classic")
@@ -55,6 +55,11 @@ DEFAULT_FILE_STATUS = "To review"
 DEFAULT_FILE_TREE = os.getenv("DEFAULT_FILE_TREE", "default")
 FILE_TREE_FOLDER = os.getenv("FILE_TREE_FOLDER")
 THUMBNAIL_FOLDER = os.getenv("THUMBNAIL_FOLDER")
+
+MAIL_SERVER = os.getenv("MAIL_SERVER", "localhost")
+MAIL_PORT = os.getenv("MAIL_PORT", 25)
+MAIL_USERNAME = os.getenv("MAIL_USERNAME", "user")
+MAIL_PASSWORD = os.getenv("MAIL_PASSWORD", "pwd")
 
 PLUGIN_FOLDER = os.getenv(
     "PLUGIN_FOLDER",

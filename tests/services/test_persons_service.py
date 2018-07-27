@@ -1,6 +1,6 @@
 from tests.base import ApiDBTestCase
 
-from zou.app.services import persons_service
+from zou.app.services import persons_service, tasks_service
 from zou.app.services.exception import PersonNotFoundException
 from zou.app.utils import auth
 
@@ -105,3 +105,40 @@ class PersonServiceTestCase(ApiDBTestCase):
         self.assertEqual(len(logs), 2)
         self.assertEqual(logs[0]["person_id"], person["id"])
         self.assertEqual(logs[0]["date"], date_2)
+
+    def test_get_time_spents(self):
+        self.generate_fixture_project_status()
+        self.generate_fixture_project()
+        self.generate_fixture_asset_type()
+        self.generate_fixture_asset()
+        self.generate_fixture_department()
+        self.generate_fixture_task_type()
+        self.generate_fixture_task_status()
+        self.generate_fixture_assigner()
+
+        self.generate_fixture_task()
+        task_id = str(self.task.id)
+
+        self.generate_fixture_sequence()
+        self.generate_fixture_shot()
+        self.generate_fixture_shot_task()
+        shot_task_id = str(self.shot_task.id)
+
+        person_id = str(self.person.id)
+        tasks_service.create_or_update_time_spent(
+            task_id, person_id, "2018-06-04", 500
+        )
+        tasks_service.create_or_update_time_spent(
+            shot_task_id, person_id, "2018-06-04", 300
+        )
+        tasks_service.create_or_update_time_spent(
+            task_id, person_id, "2018-06-03", 600
+        )
+
+        time_spents = persons_service.get_time_spents(person_id, "2018-06-04")
+        duration = 0
+        for time_spent in time_spents:
+            duration += time_spent["duration"]
+
+        self.assertEqual(len(time_spents), 2)
+        self.assertEqual(duration, 800)

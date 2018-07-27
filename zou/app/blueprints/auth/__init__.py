@@ -8,6 +8,7 @@ from .resources import (
     ChangePasswordResource,
     RegistrationResource,
     RefreshTokenResource,
+    ResetPasswordResource,
     PersonListResource
 )
 
@@ -17,6 +18,7 @@ routes = [
     ("/auth/authenticated", AuthenticatedResource),
     ("/auth/register", RegistrationResource),
     ("/auth/change-password", ChangePasswordResource),
+    ("/auth/reset-password", ResetPasswordResource),
     ("/auth/refresh-token", RefreshTokenResource),
     ("/auth/person-list", PersonListResource)
 ]
