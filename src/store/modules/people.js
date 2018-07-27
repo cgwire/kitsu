@@ -44,6 +44,10 @@ import {
   REMOVE_SELECTED_TASK,
   CLEAR_SELECTED_TASKS,
 
+  SET_TIME_SPENT,
+  PEOPLE_TIMESHEET_LOADED,
+  PERSON_LOAD_TIME_SPENTS_END,
+
   RESET_ALL
 } from '../mutation-types'
 
@@ -78,7 +82,7 @@ const helpers = {
   }
 }
 
-const state = {
+const initialState = {
   people: [],
   personMap: {},
   isPeopleLoading: false,
@@ -102,13 +106,22 @@ const state = {
 
   personCsvFormData: undefined,
 
+  person: {},
   personTasks: [],
   displayedPersonTasks: [],
   displayedPersonDoneTasks: [],
   personTasksIndex: {},
   personTasksSearchText: '',
   personTaskSelectionGrid: {},
-  personTaskSearchQueries: []
+  personTaskSearchQueries: [],
+
+  timesheet: {},
+  personTimeSpentMap: {},
+  personTimeSpentTotal: 0
+}
+
+const state = {
+  ...initialState
 }
 
 const getters = {
@@ -147,7 +160,11 @@ const getters = {
         value: person.id
       }
     }
-  )
+  ),
+
+  timesheet: state => state.timesheet,
+  personTimeSpentMap: state => state.personTimeSpentMap,
+  personTimeSpentTotal: state => state.personTimeSpentTotal
 }
 
 const actions = {
@@ -219,18 +236,22 @@ const actions = {
   },
 
   loadPersonTasks (
-    { commit, state, rootGetters }, { personId, forced, callback }
+    { commit, state, rootGetters }, { personId, forced, date, callback }
   ) {
     const userFilters = rootGetters.userFilters
-    commit(LOAD_PERSON_TASKS_END, { tasks: [], userFilters })
+    commit(LOAD_PERSON_TASKS_END, { personId, tasks: [], userFilters })
     commit(LOAD_PERSON_DONE_TASKS_END, [])
     peopleApi.getPersonTasks(personId, (err, tasks) => {
       if (err) tasks = []
       peopleApi.getPersonDoneTasks(personId, (err, doneTasks) => {
         if (err) doneTasks = []
-        commit(LOAD_PERSON_TASKS_END, { tasks, userFilters })
         commit(LOAD_PERSON_DONE_TASKS_END, doneTasks)
-        if (callback) callback(err)
+        peopleApi.getTimeSpents(personId, date, (err, timeSpents) => {
+          if (err) timeSpents = []
+          commit(PERSON_LOAD_TIME_SPENTS_END, timeSpents)
+          commit(LOAD_PERSON_TASKS_END, { personId, tasks, userFilters })
+          if (callback) callback(err)
+        })
       })
     })
   },
@@ -297,6 +318,44 @@ const actions = {
         if (err) reject(err)
         else resolve()
       })
+    })
+  },
+
+  setTimeSpent ({ commit }, {personId, taskId, date, duration}) {
+    return new Promise((resolve, reject) => {
+      peopleApi.setTimeSpent(
+        taskId,
+        personId,
+        date,
+        duration,
+        (err, timeSpent) => {
+          if (err) reject(err)
+          else {
+            commit(SET_TIME_SPENT, timeSpent)
+            resolve()
+          }
+        })
+    })
+  },
+
+  loadTimesheets ({ commit }, {
+    detailLevel,
+    year,
+    month
+  }) {
+    return new Promise((resolve, reject) => {
+      const monthString =
+        month.length === 1 ? `0${parseInt(month) + 1}` : `${month}`
+      let mainFunc = peopleApi.getMonthTable
+      if (detailLevel === 'day') {
+        mainFunc = peopleApi.getDayTable
+      }
+      mainFunc(year, monthString)
+        .then((table) => {
+          commit(PEOPLE_TIMESHEET_LOADED, table)
+          resolve()
+        })
+        .catch(reject)
     })
   }
 }
@@ -453,7 +512,9 @@ const mutations = {
       `.png?unique=${randomHash}`
   },
 
-  [LOAD_PERSON_TASKS_END] (state, { tasks, userFilters }) {
+  [LOAD_PERSON_TASKS_END] (state, { personId, tasks, userFilters }) {
+    state.person = state.personMap[personId]
+
     tasks.forEach(populateTask)
     const personTaskSelectionGrid = {}
     for (let i = 0; i < tasks.length; i++) {
@@ -535,28 +596,35 @@ const mutations = {
     )
   },
 
+  [PEOPLE_TIMESHEET_LOADED] (state, timesheet) {
+    state.timesheet = timesheet
+  },
+
+  [SET_TIME_SPENT] (state, timeSpent) {
+    if (state.person.id === timeSpent.person_id) {
+      state.personTimeSpentMap[timeSpent.task_id] = timeSpent
+    }
+    state.personTimeSpentTotal = Object
+      .values(state.personTimeSpentMap)
+      .reduce((acc, timeSpent) => timeSpent.duration + acc, 0) / 60
+  },
+
+  [PERSON_LOAD_TIME_SPENTS_END] (state, timeSpents) {
+    const timeSpentMap = {}
+    timeSpents.forEach((timeSpent) => {
+      timeSpentMap[timeSpent.task_id] = timeSpent
+    })
+    state.personTimeSpentMap = timeSpentMap
+
+    state.personTimeSpentTotal = Object
+      .values(state.personTimeSpentMap)
+      .reduce((acc, timeSpent) => timeSpent.duration + acc, 0) / 60
+  },
+
   [RESET_ALL] (state, people) {
-    state.isPeopleLoading = false
-    state.isPeopleLoadingError = false
-
-    state.isDeleteModalShown = false
-    state.isDeleteLoading = false
-    state.isDeleteLoadingError = false
-    state.personToDelete = {}
-    state.personTaskSearchQueries = []
-
-    state.isEditModalShown = false
-    state.isEditLoading = false
-    state.isEditLoadingError = false
-    state.personToEdit = {}
-
-    state.isImportModalShown = false
-    state.isImportPeopleLoading = false
-    state.isImportPeopleLoadingError = false
-    state.personCsvFormData = null
-
-    state.people = []
-    state.personMap = {}
+    Object.assign(state, {
+      ...initialState
+    })
   }
 }
 

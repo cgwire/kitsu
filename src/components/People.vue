@@ -13,23 +13,20 @@
             :is-responsive="true"
             icon="upload"
             path="/people/import"
-          >
-          </button-link>
+          />
           <button-href-link
             class="level-item"
             :text="$t('main.csv.export_file')"
             icon="download"
             path="/api/export/csv/persons.csv"
-          >
-          </button-href-link>
+          />
           <button-link v-if="isCurrentUserAdmin"
             class="level-item"
             :text="$t('people.new_person')"
             :is-responsive="true"
             icon="plus"
             path="/people/new"
-          >
-          </button-link>
+          />
         </div>
       </div>
     </div>
@@ -122,7 +119,7 @@ export default {
   },
 
   created () {
-    this.$store.dispatch('loadPeople', () => {
+    this.loadPeople(() => {
       this.handleModalsDisplay()
     })
   },
@@ -175,6 +172,7 @@ export default {
 
   methods: {
     ...mapActions([
+      'loadPeople'
     ]),
 
     uploadImportFile () {

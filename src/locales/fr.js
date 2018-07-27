@@ -171,7 +171,7 @@ export default {
     feedback: 'retours',
     my_tasks: 'Mes tâches',
     tasks: 'Tâches',
-    current: 'En cours',
+    current: 'Tâches à faire',
     done: 'Terminées',
     create_for_selection: 'Créer une tâche pour chaque cellule vide :',
     fields: {
@@ -183,6 +183,16 @@ export default {
       assignees: 'Assignation',
       end_date: 'Date de fin'
     }
+  },
+
+  timesheets: {
+    title: 'Feuille de temps',
+    time_spents: 'Temps passé (heures)',
+    hours: 'heures',
+    done_tasks: 'Tâches terminées',
+    detail_level: 'Niveau de détail',
+    year: 'Année',
+    month: 'Mois'
   },
 
   task_types: {

@@ -471,6 +471,11 @@ input.search-input:focus {
   transition: opacity .15s;
 }
 
+.datepicker .date-field {
+  font-size: 1.6em;
+  width: 190px;
+}
+
 @media screen and (max-width: 1000px) {
   .button .icon.is-small {
     margin-right: 0;

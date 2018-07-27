@@ -1,4 +1,6 @@
 import { expect } from 'chai'
+import moment from 'moment-timezone'
+
 import helpers from './helpers'
 import store from '../../src/store'
 import peopleApi from '../../src/store/api/people'
@@ -84,6 +86,18 @@ peopleApi.getPersonTasks = (data, callback) => {
 peopleApi.getPersonDoneTasks = (data, callback) => {
   process.nextTick(() => {
     callback(null, doneTasks)
+  })
+}
+
+peopleApi.loadTimeSpents = (data, callback) => {
+  process.nextTick(() => {
+    callback(null, [])
+  })
+}
+
+peopleApi.getTimeSpents = (personId, date, callback) => {
+  process.nextTick(() => {
+    callback(null, [])
   })
 }
 
@@ -283,13 +297,14 @@ describe('people', () => {
     it('loadPersonTasks', (done) => {
       helpers.runAction('loadPersonTasks', {
         personId: 'person-1',
+        date: moment().format('YYYY-MM-DD'),
         callback: (err) => {
           expect(err).to.be.null
           expect(store._vm.displayedPersonTasks).to.deep.equal(tasks)
           expect(
             store._vm.displayedPersonTasks[0].full_entity_name
           ).to.equal('Props / Tree')
-            expect(store._vm.displayedPersonDoneTasks).to.deep.equal(doneTasks)
+          expect(store._vm.displayedPersonDoneTasks).to.deep.equal(doneTasks)
           done()
         }
       })

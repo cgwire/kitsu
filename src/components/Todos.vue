@@ -1,25 +1,37 @@
 <template>
   <div class="todos page fixed-page">
-    <page-title :text="$t('tasks.my_tasks')" class="page-header">
-    </page-title>
-
     <div class="task-tabs tabs">
       <ul>
         <li
-          :class="{'is-active': isCurrentActive}"
-          @click="selectCurrent"
+          :class="{'is-active': isActive('todos')}"
         >
-          <a>
+          <router-link :to="{
+            name: 'todos',
+          }">
             {{ $t('tasks.current')}}
-          </a>
+          </router-link>
         </li>
         <li
-          :class="{'is-active': isDoneActive}"
-          @click="selectDone"
+          :class="{'is-active': isActive('done')}"
+          @click="select('done')"
         >
-          <a>
+          <router-link :to="{
+            name: 'todos-tab',
+            params: {tab: 'done'}
+          }">
             {{ $t('tasks.done') }} ({{ displayedDoneTasks.length }})
-          </a>
+          </router-link>
+        </li>
+        <li
+          :class="{'is-active': isActive('timesheets')}"
+          @click="select('timesheet')"
+        >
+          <router-link :to="{
+            name: 'todos-tab',
+            params: {tab: 'timesheets'}
+          }">
+            {{ $t('timesheets.title') }}
+          </router-link>
         </li>
       </ul>
     </div>
@@ -27,19 +39,19 @@
     <search-field
       :class="{
         'search-field': true,
-        'is-hidden': !isCurrentActive
+        'is-hidden': !isActive('todos')
       }"
       ref="todos-search-field"
       @change="onSearchChange"
       @save="saveSearchQuery"
       :can-save="true"
-      v-if="isCurrentActive"
+      v-if="isActive('todos')"
     >
     </search-field>
 
     <div
       class="query-list"
-      v-if="isCurrentActive"
+      v-if="isActive('todos')"
     >
       <search-query-list
         :queries="todoSearchQueries"
@@ -54,7 +66,7 @@
       :is-loading="isTodosLoading"
       :is-error="isTodosLoadingError"
       :selection-grid="todoSelectionGrid"
-      v-if="isCurrentActive"
+      v-if="isActive('todos')"
     ></todos-list>
 
     <todos-list
@@ -62,13 +74,28 @@
       :is-loading="isTodosLoading"
       :is-error="isTodosLoadingError"
       :done="true"
-      v-if="isDoneActive"
+      v-if="isActive('done')"
     ></todos-list>
+
+    <timesheet-list
+      :tasks="displayedTodos"
+      :done-tasks="displayedDoneTasks"
+      :is-loading="isTodosLoading"
+      :is-error="isTodosLoadingError"
+      :time-spent-map="timeSpentMap"
+      :time-spent-total="timeSpentTotal"
+      @date-changed="onDateChanged"
+      @time-spent-change="onTimeSpentChange"
+      v-if="isActive('timesheets')"
+    ></timesheet-list>
   </div>
 </template>
 
 <script>
 import { mapGetters, mapActions } from 'vuex'
+import moment from 'moment-timezone'
+
+import TimesheetList from './lists/TimesheetList'
 import TodosList from './lists/TodosList'
 import PageTitle from './widgets/PageTitle'
 import SearchField from './widgets/SearchField'
@@ -77,6 +104,7 @@ import SearchQueryList from './widgets/SearchQueryList'
 export default {
   name: 'todos',
   components: {
+    TimesheetList,
     TodosList,
     PageTitle,
     SearchField,
@@ -85,15 +113,19 @@ export default {
 
   data () {
     return {
-      activeTab: 'current'
+      activeTab: 'todos',
+      selectedDate: moment().format('YYYY-MM-DD')
     }
   },
 
   created () {
-    this.loadTodos({})
+    this.loadTodos({
+      date: this.selectedDate
+    })
   },
 
   mounted () {
+    this.updateActiveTab()
     if (this.todosSearchText.length > 0) {
       this.$refs['todos-search-field'].setValue(this.todosSearchText)
     }
@@ -101,47 +133,45 @@ export default {
 
   computed: {
     ...mapGetters([
+      'user',
       'displayedTodos',
       'displayedDoneTasks',
       'todosSearchText',
       'isTodosLoading',
       'isTodosLoadingError',
+      'timeSpentMap',
+      'timeSpentTotal',
       'todoSelectionGrid',
       'todoSearchQueries'
-    ]),
-
-    isCurrentActive () {
-      return this.activeTab === 'current'
-    },
-
-    isDoneActive () {
-      return this.activeTab === 'done'
-    }
+    ])
   },
 
   methods: {
     ...mapActions([
       'loadTodos',
-      'setTodosSearch',
       'removeTodoSearch',
-      'saveTodoSearch'
+      'saveTodoSearch',
+      'setTodosSearch',
+      'setTimeSpent'
     ]),
+
+    isActive (tab) {
+      return this.activeTab === tab
+    },
+
+    select (tab) {
+      this.activeTab = tab
+      if (this.isActive('todos')) {
+        setTimeout(() => {
+          if (this.$refs['person-tasks-search-field']) {
+            this.$refs['person-tasks-search-field'].focus()
+          }
+        }, 100)
+      }
+    },
 
     onSearchChange (text) {
       this.setTodosSearch(text)
-    },
-
-    selectCurrent () {
-      this.activeTab = 'current'
-      setTimeout(() => {
-        if (this.$refs['person-tasks-search-field']) {
-          this.$refs['person-tasks-search-field'].focus()
-        }
-      }, 100)
-    },
-
-    selectDone () {
-      this.activeTab = 'done'
     },
 
     changeSearch (searchQuery) {
@@ -165,6 +195,34 @@ export default {
         .catch((err) => {
           if (err) console.log('error')
         })
+    },
+
+    updateActiveTab () {
+      if (['done', 'timesheets'].includes(this.$route.params.tab)) {
+        this.activeTab = this.$route.params.tab
+      } else {
+        this.activeTab = 'todos'
+      }
+    },
+
+    onDateChanged (date) {
+      this.selectedDate = moment(date).format('YYYY-MM-DD')
+      this.loadTodos({
+        date: this.selectedDate,
+        forced: true
+      })
+    },
+
+    onTimeSpentChange (timeSpentInfo) {
+      timeSpentInfo.personId = this.user.id
+      timeSpentInfo.date = this.selectedDate
+      this.setTimeSpent(timeSpentInfo)
+    }
+  },
+
+  watch: {
+    $route () {
+      this.updateActiveTab()
     }
   },
 
@@ -182,8 +240,9 @@ export default {
 }
 
 .task-tabs {
-  margin-top: 0em;
+  margin-top: 1em;
   margin-bottom: 1em;
+  font-size: 1.1em;
 }
 
 .data-list {
