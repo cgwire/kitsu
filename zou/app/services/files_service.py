@@ -529,9 +529,16 @@ def update_output_file(output_file_id, data):
     return output_file.serialize()
 
 
+def update_preview_file(preview_file_id, data):
+    preview_file = get_preview_file_raw(preview_file_id)
+    preview_file.update(data)
+    return preview_file.serialize()
+
+
 def get_output_types_for_entity(entity_id):
     """
     Get output types from all output files created for given entity.
+
     """
     output_types = OutputType.query \
         .join(OutputFile) \

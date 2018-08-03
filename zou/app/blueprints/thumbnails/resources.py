@@ -49,6 +49,7 @@ class CreatePreviewFilePictureResource(Resource):
 
             thumbnail_utils.generate_preview_variants(instance_id)
             self.emit_app_preview_event(instance_id)
+            files_service.update_preview_file(instance_id, {"extension": "png"})
 
             return thumbnail_utils.get_preview_url_path(instance_id), 201
 
@@ -67,8 +68,20 @@ class CreatePreviewFilePictureResource(Resource):
 
             file_name = "%s%s" % (instance_id, extension)
             clip.write_videofile(os.path.join(folder, instance_id + ".mp4"))
+            files_service.update_preview_file(instance_id, {"extension": "mp4"})
             self.emit_app_preview_event(instance_id)
 
+            return {}, 201
+
+        elif extension in [".obj", ".pdf"]:
+            from moviepy.editor import VideoFileClip
+            file_name = "%s%s" % (instance_id, extension)
+            folder = thumbnail_utils.create_folder(folder_path)
+            file_path = os.path.join(folder, file_name)
+            uploaded_file.save(file_path)
+            files_service.update_preview_file(instance_id, {
+                "extension": extension[1:]
+            })
             return {}, 201
 
         else:
@@ -88,7 +101,8 @@ class CreatePreviewFilePictureResource(Resource):
             "task_id": preview_file["task_id"],
             "preview_file_id": preview_file["id"],
             "is_movie": preview_file["is_movie"],
-            "revision": preview_file["revision"]
+            "revision": preview_file["revision"],
+            "extension": preview_file["extension"]
         })
 
     def is_allowed(self, preview_file_id):
@@ -135,6 +149,46 @@ class PreviewFileMovieResource(Resource):
             instance_id
         )
         file_name = "%s.mp4" % instance_id
+
+        return send_from_directory(
+            directory=folder_path,
+            filename=file_name
+        )
+
+
+class PreviewFileResource(Resource):
+
+    def __init__(self):
+        Resource.__init__(self)
+
+    def is_exist(self, preview_file_id):
+        return files_service.get_preview_file(preview_file_id) is not None
+
+    def is_allowed(self, preview_file_id):
+        if permissions.has_manager_permissions():
+            return True
+        else:
+            preview_file = files_service.get_preview_file(preview_file_id)
+            task = tasks_service.get_task(preview_file["task_id"])
+            try:
+                user_service.check_has_task_related(task["project_id"])
+                return True
+            except permissions.PermissionDenied:
+                return False
+
+    @jwt_required
+    def get(self, instance_id, extension):
+        if not self.is_exist(instance_id):
+            abort(404)
+
+        if not self.is_allowed(instance_id):
+            abort(403)
+
+        folder_path = thumbnail_utils.get_preview_folder_name(
+            "originals",
+            instance_id
+        )
+        file_name = "%s.%s" % (instance_id, extension)
 
         return send_from_directory(
             directory=folder_path,
