@@ -20,7 +20,7 @@
 
       <file-upload
         ref="preview-field"
-        accept=".png,.jpg,.mp4,.mov"
+        accept=".png,.jpg,.mp4,.mov,.obj,.pdf"
         @fileselected="onFileSelected"
       ></file-upload>
 

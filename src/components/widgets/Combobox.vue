@@ -10,8 +10,8 @@
         @change="updateValue"
       >
         <option
-          v-for="option in options"
-          :key="option.label + '-' + option.value"
+          v-for="(option, i) in options"
+          :key="i + '-' + option.label + '-' + option.value"
           :value="option.value || option.label"
           :selected="value === option.value"
         >

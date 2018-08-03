@@ -206,6 +206,8 @@ export default {
     delete_comment: 'Are you sure you want to delete last comment?',
     edit_comment: 'Edit comment',
     delete_comment_error: 'An error occured while deleting comment',
+    download_pdf_file: 'Download PDF file',
+    full_screen: 'Display in full screen',
     fields: {
       production: 'Prod',
       entity: 'Entity',
