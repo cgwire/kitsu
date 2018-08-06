@@ -153,6 +153,7 @@
           </div>
 
           <div class="preview-picture">
+
             <div v-if="currentTaskPreviews && currentTaskPreviews.length > 0 && isMovie">
               <video
                 :src="moviePath"
@@ -160,6 +161,23 @@
                 controls
                 :poster="getPreviewPath()" />
             </div>
+
+            <a
+              class="button"
+              :href="getOriginalPath()"
+              v-else-if="currentTaskPreviews.length > 0 && extension === 'pdf'"
+            >
+              <download-icon class="icon"></download-icon>
+              <span class="text">
+                {{ $t('tasks.download_pdf_file') }}
+              </span>
+            </a>
+
+            <model-viewer
+              :preview-url="getOriginalPath()"
+              v-else-if="currentTaskPreviews.length > 0 && extension === 'obj'"
+            />
+
             <a
               :href="getOriginalPath()"
               target="_blank"
@@ -171,10 +189,11 @@
               />
             </a>
           </div>
+
           <div
             class="flexrow"
-             v-if="currentTask && currentTask.entity && currentTask.entity.preview_file_id !== currentPreviewId"
-            >
+            v-if="isPreviewButtonVisible"
+          >
             <button
               :class="{
                 button: true,
@@ -264,7 +283,11 @@
 
 <script>
 import { mapGetters, mapActions } from 'vuex'
-import { ChevronLeftIcon, ImageIcon } from 'vue-feather-icons'
+import {
+  ChevronLeftIcon,
+  DownloadIcon,
+  ImageIcon
+} from 'vue-feather-icons'
 
 import AddComment from './widgets/AddComment'
 import AddPreviewModal from './modals/AddPreviewModal'
@@ -273,6 +296,7 @@ import Comment from './widgets/Comment'
 import DeleteModal from './widgets/DeleteModal'
 import EditCommentModal from './modals/EditCommentModal'
 import EntityThumbnail from './widgets/EntityThumbnail'
+import ModelViewer from './widgets/ModelViewer'
 import PeopleAvatar from './widgets/PeopleAvatar'
 import PeopleName from './widgets/PeopleName'
 import PreviewRow from './widgets/PreviewRow'
@@ -289,9 +313,11 @@ export default {
     Comment,
     ChevronLeftIcon,
     DeleteModal,
+    DownloadIcon,
     EntityThumbnail,
     EditCommentModal,
     ImageIcon,
+    ModelViewer,
     PeopleAvatar,
     ValidationTag,
     PeopleName,
@@ -627,6 +653,21 @@ export default {
       }
     },
 
+    extension () {
+      if (this.currentTaskPreviews.length > 0) {
+        let previewId = this.route.params.preview_id
+        let currentPreview = this.currentTaskPreviews[0]
+        if (previewId) {
+          currentPreview = this.currentTaskPreviews.find((preview) => {
+            return preview.id === previewId
+          })
+        }
+        return currentPreview ? currentPreview.extension : ''
+      } else {
+        return ''
+      }
+    },
+
     moviePath () {
       let previewId = this.route.params.preview_id
       if (!previewId && this.currentTaskPreviews.length > 0) {
@@ -643,6 +684,15 @@ export default {
       } else {
         return false
       }
+    },
+
+    isPreviewButtonVisible () {
+      return (
+        this.currentTask &&
+        this.currentTask.entity &&
+        this.currentTask.entity.preview_file_id !== this.currentPreviewId &&
+        !['pdf', 'obj'].includes(this.extension)
+      )
     }
   },
 
@@ -773,7 +823,8 @@ export default {
       if (!previewId && this.currentTaskPreviews.length > 0) {
         previewId = this.currentTaskPreviews[0].id
       }
-      return `/api/pictures/originals/preview-files/${previewId}.png`
+      const extension = this.extension ? this.extension : 'png'
+      return `/api/pictures/originals/preview-files/${previewId}.${extension}`
     },
 
     getPreviewPath () {

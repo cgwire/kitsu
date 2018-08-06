@@ -25,8 +25,8 @@
             @change="updateValue"
           >
             <option
-              v-for="option in taskStatusOptions"
-              :key="option.label"
+              v-for="(option, i) in taskStatusOptions"
+              :key="i + '-' + option.label"
               :value="option.value"
               :selected="option.value === task_status_id"
             >

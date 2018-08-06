@@ -174,6 +174,8 @@ export default {
     current: 'Tâches à faire',
     done: 'Terminées',
     create_for_selection: 'Créer une tâche pour chaque cellule vide :',
+    download_pdf_file: 'Télécharger le fichier PDF',
+    full_screen: 'Afficher en plein écran',
     fields: {
       task_type: 'Type',
       production: 'Prod',
