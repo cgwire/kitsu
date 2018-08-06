@@ -3,7 +3,7 @@
     <div class="task-tabs tabs">
       <ul>
         <li
-          :class="{'is-active': isActive('todos')}"
+          :class="{'is-active': isTabActive('todos')}"
         >
           <router-link :to="{
             name: 'todos',
@@ -12,8 +12,8 @@
           </router-link>
         </li>
         <li
-          :class="{'is-active': isActive('done')}"
-          @click="select('done')"
+          :class="{'is-active': isTabActive('done')}"
+          @click="selectTab('done')"
         >
           <router-link :to="{
             name: 'todos-tab',
@@ -23,8 +23,8 @@
           </router-link>
         </li>
         <li
-          :class="{'is-active': isActive('timesheets')}"
-          @click="select('timesheet')"
+          :class="{'is-active': isTabActive('timesheets')}"
+          @click="selectTab('timesheet')"
         >
           <router-link :to="{
             name: 'todos-tab',
@@ -39,19 +39,19 @@
     <search-field
       :class="{
         'search-field': true,
-        'is-hidden': !isActive('todos')
+        'is-hidden': !isTabActive('todos')
       }"
       ref="todos-search-field"
       @change="onSearchChange"
       @save="saveSearchQuery"
       :can-save="true"
-      v-if="isActive('todos')"
+      v-if="isTabActive('todos')"
     >
     </search-field>
 
     <div
       class="query-list"
-      v-if="isActive('todos')"
+      v-if="isTabActive('todos')"
     >
       <search-query-list
         :queries="todoSearchQueries"
@@ -62,22 +62,26 @@
     </div>
 
     <todos-list
+      ref="todo-list"
       :entries="displayedTodos"
       :is-loading="isTodosLoading"
       :is-error="isTodosLoadingError"
       :selection-grid="todoSelectionGrid"
-      v-if="isActive('todos')"
+      v-if="isTabActive('todos')"
+      @scroll="setTodoListScrollPosition"
     ></todos-list>
 
     <todos-list
+      ref="done-list"
       :entries="displayedDoneTasks"
       :is-loading="isTodosLoading"
       :is-error="isTodosLoadingError"
       :done="true"
-      v-if="isActive('done')"
+      v-if="isTabActive('done')"
     ></todos-list>
 
     <timesheet-list
+      ref="timesheet-list"
       :tasks="displayedTodos"
       :done-tasks="displayedDoneTasks"
       :is-loading="isTodosLoading"
@@ -86,7 +90,7 @@
       :time-spent-total="timeSpentTotal"
       @date-changed="onDateChanged"
       @time-spent-change="onTimeSpentChange"
-      v-if="isActive('timesheets')"
+      v-if="isTabActive('timesheets')"
     ></timesheet-list>
   </div>
 </template>
@@ -118,17 +122,19 @@ export default {
     }
   },
 
-  created () {
-    this.loadTodos({
-      date: this.selectedDate
-    })
-  },
-
   mounted () {
     this.updateActiveTab()
     if (this.todosSearchText.length > 0) {
       this.$refs['todos-search-field'].setValue(this.todosSearchText)
     }
+    this.loadTodos({
+      date: this.selectedDate,
+      callback: () => {
+        this.$refs['todo-list'].setScrollPosition(
+          this.todoListScrollPosition
+        )
+      }
+    })
   },
 
   computed: {
@@ -141,6 +147,7 @@ export default {
       'isTodosLoadingError',
       'timeSpentMap',
       'timeSpentTotal',
+      'todoListScrollPosition',
       'todoSelectionGrid',
       'todoSearchQueries'
     ])
@@ -151,22 +158,31 @@ export default {
       'loadTodos',
       'removeTodoSearch',
       'saveTodoSearch',
+      'setTodoListScrollPosition',
       'setTodosSearch',
       'setTimeSpent'
     ]),
 
-    isActive (tab) {
+    isTabActive (tab) {
       return this.activeTab === tab
     },
 
-    select (tab) {
+    selectTab (tab) {
       this.activeTab = tab
-      if (this.isActive('todos')) {
+      if (this.isTabActive('todos')) {
         setTimeout(() => {
           if (this.$refs['person-tasks-search-field']) {
             this.$refs['person-tasks-search-field'].focus()
           }
         }, 100)
+      }
+    },
+
+    updateActiveTab () {
+      if (['done', 'timesheets'].includes(this.$route.params.tab)) {
+        this.activeTab = this.$route.params.tab
+      } else {
+        this.activeTab = 'todos'
       }
     },
 
@@ -184,7 +200,7 @@ export default {
         .then(() => {
         })
         .catch((err) => {
-          if (err) console.log('error')
+          if (err) console.log('error', err)
         })
     },
 
@@ -193,16 +209,8 @@ export default {
         .then(() => {
         })
         .catch((err) => {
-          if (err) console.log('error')
+          if (err) console.log('error', err)
         })
-    },
-
-    updateActiveTab () {
-      if (['done', 'timesheets'].includes(this.$route.params.tab)) {
-        this.activeTab = this.$route.params.tab
-      } else {
-        this.activeTab = 'todos'
-      }
     },
 
     onDateChanged (date) {
@@ -235,10 +243,6 @@ export default {
 </script>
 
 <style scoped>
-.title {
-  margin-top: 1em;
-}
-
 .task-tabs {
   margin-top: 1em;
   margin-bottom: 1em;

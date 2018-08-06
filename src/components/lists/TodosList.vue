@@ -1,5 +1,6 @@
 <template>
 <div class="data-list">
+
   <div style="overflow: hidden">
     <table class="table table-header" ref="headerWrapper">
       <thead>
@@ -33,6 +34,7 @@
   </div>
 
   <div
+    ref="body"
     class="table-body"
     v-scroll="onBodyScroll"
     v-if="entries.length > 0"
@@ -120,20 +122,21 @@
 import { mapGetters, mapActions } from 'vuex'
 import moment from 'moment-timezone'
 
-import DescriptionCell from '../cells/DescriptionCell'
-import ProductionNameCell from '../cells/ProductionNameCell'
-import LastCommentCell from '../cells/LastCommentCell'
+import EntityThumbnail from '../widgets/EntityThumbnail'
 import TaskTypeName from '../cells/TaskTypeName'
-import ValidationCell from '../cells/ValidationCell'
 import TableInfo from '../widgets/TableInfo'
 import ValidationTag from '../widgets/ValidationTag'
-import EntityThumbnail from '../widgets/EntityThumbnail'
+
+import DescriptionCell from '../cells/DescriptionCell'
+import LastCommentCell from '../cells/LastCommentCell'
+import ProductionNameCell from '../cells/ProductionNameCell'
+import ValidationCell from '../cells/ValidationCell'
 
 export default {
   name: 'todos-list',
   components: {
-    DescriptionCell,
     EntityThumbnail,
+    DescriptionCell,
     LastCommentCell,
     ProductionNameCell,
     TableInfo,
@@ -141,6 +144,7 @@ export default {
     ValidationCell,
     ValidationTag
   },
+
   props: [
     'entries',
     'isLoading',
@@ -148,22 +152,31 @@ export default {
     'done',
     'selectionGrid'
   ],
+
   computed: {
     ...mapGetters([
       'nbSelectedTasks',
       'productionMap'
     ])
   },
+
   methods: {
     ...mapActions([
     ]),
 
-    onBodyScroll (event, position) {
-      this.$refs.headerWrapper.style.left = `-${position.scrollLeft}px`
+    setScrollPosition (scrollPosition) {
+      if (this.$refs.body) {
+        this.$refs.body.scrollTop = scrollPosition
+      }
     },
 
     formatDate (date) {
       return date ? moment(date).fromNow() : ''
+    },
+
+    onBodyScroll (event, position) {
+      this.$refs.headerWrapper.style.left = `-${position.scrollLeft}px`
+      this.$emit('scroll', position.scrollTop)
     },
 
     onTaskSelected (validationInfo) {

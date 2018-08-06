@@ -48,6 +48,8 @@ import {
   PEOPLE_TIMESHEET_LOADED,
   PERSON_LOAD_TIME_SPENTS_END,
 
+  SET_PERSON_TASKS_SCROLL_POSITION,
+
   RESET_ALL
 } from '../mutation-types'
 
@@ -114,6 +116,7 @@ const initialState = {
   personTasksSearchText: '',
   personTaskSelectionGrid: {},
   personTaskSearchQueries: [],
+  personTasksScrollPosition: 0,
 
   timesheet: {},
   personTimeSpentMap: {},
@@ -151,6 +154,7 @@ const getters = {
   personTasksSearchText: state => state.personTasksSearchText,
   personTaskSearchQueries: state => state.personTaskSearchQueries,
   personTaskSelectionGrid: state => state.personTaskSelectionGrid,
+  personTasksScrollPosition: state => state.personTasksScrollPosition,
 
   getPerson: (state, getters) => (id) => state.personMap[id],
   getPersonOptions: state => state.people.map(
@@ -336,6 +340,10 @@ const actions = {
           }
         })
     })
+  },
+
+  setPersonTasksScrollPosition ({ commit }, scrollPosition) {
+    commit(SET_PERSON_TASKS_SCROLL_POSITION, scrollPosition)
   },
 
   loadTimesheets ({ commit }, {
@@ -619,6 +627,10 @@ const mutations = {
     state.personTimeSpentTotal = Object
       .values(state.personTimeSpentMap)
       .reduce((acc, timeSpent) => timeSpent.duration + acc, 0) / 60
+  },
+
+  [SET_PERSON_TASKS_SCROLL_POSITION] (state, scrollPosition) {
+    state.personTasksScrollPosition = scrollPosition
   },
 
   [RESET_ALL] (state, people) {

@@ -38,6 +38,7 @@ import { SaveIcon, SearchIcon, XIcon } from 'vue-feather-icons'
 
 export default {
   name: 'search-field',
+
   props: {
     placeholder: {
       type: String,
@@ -48,13 +49,16 @@ export default {
       default: false
     }
   },
+
   components: {
-    XIcon,
     SaveIcon,
-    SearchIcon
+    SearchIcon,
+    XIcon
   },
+
   computed: {
   },
+
   methods: {
     onSearchChange () {
       this.$emit('change', this.$refs.input.value)
@@ -67,12 +71,12 @@ export default {
       }
     },
 
-    setValue (value) {
-      this.$refs.input.value = value
-    },
-
     getValue (value) {
       return this.$refs.input.value
+    },
+
+    setValue (value) {
+      this.$refs.input.value = value
     },
 
     focus () {
@@ -101,6 +105,10 @@ export default {
   width: 300px;
 }
 
+.search-input::placeholder {
+  color: #CCC;
+}
+
 .save-search .button {
   margin-left: 0.5em;
   border: 0;
@@ -115,9 +123,5 @@ export default {
   .search-input {
     width: 200px;
   }
-}
-
-.search-input::placeholder {
-  color: #CCC;
 }
 </style>

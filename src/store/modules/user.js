@@ -30,25 +30,24 @@ import {
   USER_LOAD_DONE_TASKS_END,
   USER_LOAD_TIME_SPENTS_END,
 
-  SET_TIME_SPENT,
-
-  UPLOAD_AVATAR_END,
-
-  CHANGE_AVATAR_FILE,
-
-  NEW_TASK_COMMENT_END,
-
   SET_TODOS_SEARCH,
+  LOAD_USER_FILTERS_END,
+  LOAD_USER_FILTERS_ERROR,
+  SAVE_TODO_SEARCH_END,
+  REMOVE_TODO_SEARCH_END,
 
   ADD_SELECTED_TASK,
   REMOVE_SELECTED_TASK,
   CLEAR_SELECTED_TASKS,
 
-  LOAD_USER_FILTERS_END,
-  LOAD_USER_FILTERS_ERROR,
+  SET_TIME_SPENT,
 
-  SAVE_TODO_SEARCH_END,
-  REMOVE_TODO_SEARCH_END,
+  UPLOAD_AVATAR_END,
+  CHANGE_AVATAR_FILE,
+
+  NEW_TASK_COMMENT_END,
+
+  SET_TODO_LIST_SCROLL_POSITION,
 
   RESET_ALL
 } from '../mutation-types'
@@ -61,6 +60,18 @@ const helpers = {
 
 const initialState = {
   user: null,
+  isAuthenticated: false,
+
+  avatarFormData: null,
+  isSaveProfileLoading: false,
+  isSaveProfileLoadingError: false,
+
+  changePassword: {
+    isLoading: false,
+    isError: false,
+    isSuccess: false,
+    isValid: true
+  },
 
   isTodosLoading: false,
   isTodosLoadingError: false,
@@ -71,23 +82,11 @@ const initialState = {
   todosSearchText: '',
   todoSelectionGrid: {},
   todoSearchQueries: [],
-
-  avatarFormData: null,
-
-  isAuthenticated: false,
-  isSaveProfileLoading: false,
-  isSaveProfileLoadingError: false,
-
   userFilters: {},
-  timeSpentMap: {},
-  timeSpentTotal: 0,
+  todoListScrollPosition: 0,
 
-  changePassword: {
-    isLoading: false,
-    isError: false,
-    isSuccess: false,
-    isValid: true
-  }
+  timeSpentMap: {},
+  timeSpentTotal: 0
 }
 
 const state = {
@@ -99,21 +98,20 @@ const getters = {
   isAuthenticated: state => state.isAuthenticated,
   isCurrentUserManager: state => state.user && state.user.role !== 'user',
   isCurrentUserAdmin: state => state.user && state.user.role === 'admin',
+  isSaveProfileLoading: state => state.isSaveProfileLoading,
+  isSaveProfileLoadingError: state => state.isSaveProfileLoadingError,
+  changePassword: state => state.changePassword,
+
   displayedTodos: state => state.displayedTodos,
   displayedDoneTasks: state => state.displayedDoneTasks,
   todosSearchText: state => state.todosSearchText,
   todoSelectionGrid: state => state.todoSelectionGrid,
   todoSearchQueries: state => state.todoSearchQueries,
-
-  isSaveProfileLoading: state => state.isSaveProfileLoading,
-  isSaveProfileLoadingError: state => state.isSaveProfileLoadingError,
-
+  userFilters: state => state.userFilters,
   isTodosLoading: state => state.isTodosLoading,
   isTodosLoadingError: state => state.isTodosLoadingError,
+  todoListScrollPosition: state => state.todoListScrollPosition,
 
-  changePassword: state => state.changePassword,
-
-  userFilters: state => state.userFilters,
   timeSpentMap: state => state.timeSpentMap,
   timeSpentTotal: state => state.timeSpentTotal
 }
@@ -243,6 +241,10 @@ const actions = {
         else resolve()
       })
     })
+  },
+
+  setTodoListScrollPosition ({ commit, rootGetters }, scrollPosition) {
+    commit(SET_TODO_LIST_SCROLL_POSITION, scrollPosition)
   }
 }
 
@@ -413,6 +415,10 @@ const mutations = {
 
   [CLEAR_SELECTED_TASKS] (state) {
     state.todoSelectionGrid = clearSelectionGrid(state.todoSelectionGrid)
+  },
+
+  [SET_TODO_LIST_SCROLL_POSITION] (state, scrollPosition) {
+    state.todoListScrollPosition = scrollPosition
   },
 
   [LOAD_USER_FILTERS_ERROR] (state) {

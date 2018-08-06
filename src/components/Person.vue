@@ -7,7 +7,7 @@
           :size="80"
           :font-size="30"
           :is-link="false"
-        ></people-avatar>
+        />
       </div>
       <div class="flexrow-item">
         <page-title :text="person ? person.name : ''"></page-title>
@@ -69,8 +69,7 @@
       @change="onSearchChange"
       @save="saveSearchQuery"
       :can-save="true"
-    >
-    </search-field>
+    />
 
     <div
       class="query-list"
@@ -80,17 +79,18 @@
         :queries="personTaskSearchQueries"
         @changesearch="changeSearch"
         @removesearch="removeSearchQuery"
-      >
-      </search-query-list>
+      />
     </div>
 
     <todos-list
+      ref="task-list"
       :entries="displayedPersonTasks"
       :is-loading="isTasksLoading"
       :is-error="isTasksLoadingError"
       :selection-grid="personTaskSelectionGrid"
+      @scroll="setPersonTasksScrollPosition"
       v-if="isActive('todos')"
-    ></todos-list>
+    />
 
     <todos-list
       :entries="displayedPersonDoneTasks"
@@ -99,7 +99,7 @@
       :done="true"
       :selectionGrid="personTaskSelectionGrid"
       v-if="isActive('done')"
-    ></todos-list>
+    />
 
     <timesheet-list
       :tasks="displayedPersonTasks"
@@ -111,7 +111,7 @@
       @date-changed="onDateChanged"
       @time-spent-change="onTimeSpentChange"
       v-if="isActive('timesheets')"
-    ></timesheet-list>
+    />
   </div>
 </template>
 
@@ -149,10 +149,6 @@ export default {
     }
   },
 
-  created () {
-    this.loadPerson(this.$route.params.person_id)
-  },
-
   mounted () {
     this.updateActiveTab()
     if (this.personTasksSearchText.length > 0) {
@@ -165,14 +161,16 @@ export default {
         this.$refs['person-tasks-search-field'].focus()
       }
     }, 100)
+    this.loadPerson(this.$route.params.person_id)
   },
 
   computed: {
     ...mapGetters([
-      'personMap',
       'displayedPersonTasks',
       'displayedPersonDoneTasks',
       'isCurrentUserManager',
+      'personMap',
+      'personTasksScrollPosition',
       'personTasksSearchText',
       'personTaskSearchQueries',
       'personTaskSelectionGrid',
@@ -187,6 +185,7 @@ export default {
       'setPersonTasksSearch',
       'savePersonTasksSearch',
       'removePersonTasksSearch',
+      'setPersonTasksScrollPosition',
       'setTimeSpent'
     ]),
 
@@ -219,6 +218,11 @@ export default {
           if (err) console.log(err)
           this.isTasksLoading = false
           this.isTasksLoadingError = false
+          setTimeout(() => {
+            this.$refs['task-list'].setScrollPosition(
+              this.personTasksScrollPosition
+            )
+          }, 0)
         }
       })
     },

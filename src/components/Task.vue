@@ -1062,7 +1062,6 @@ export default {
   mounted () {
     this.handleModalsDisplay()
     setTimeout(() => {
-      console.log(this.$refs['task-columns'].scrollTop)
       this.$refs['task-columns'].scrollTop = 100
       window.scrollTo(0, 0)
     })
