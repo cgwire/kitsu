@@ -5,6 +5,7 @@ from .resources import (
     CreatePreviewFilePictureResource,
     PreviewFileMovieResource,
     PreviewFileThumbnailResource,
+    PreviewFileResource,
     PreviewFileThumbnailSquareResource,
     PreviewFilePreviewResource,
     PreviewFileOriginalResource,
@@ -43,9 +44,14 @@ routes = [
         PreviewFileOriginalResource
     ),
     (
+        "/pictures/originals/preview-files/<instance_id>.<extension>",
+        PreviewFileResource
+    ),
+    (
         "/pictures/previews/preview-files/<instance_id>.png",
         PreviewFilePreviewResource
     ),
+
 
     (
         "/pictures/thumbnails/shots/<instance_id>",
@@ -83,7 +89,6 @@ routes = [
         "/actions/entities/<entity_id>/set-main-preview/<preview_file_id>",
         SetMainPreviewResource
     )
-
 ]
 blueprint = Blueprint("thumbnails", "thumbnails")
 api = configure_api_from_blueprint(blueprint, routes)

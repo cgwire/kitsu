@@ -360,7 +360,8 @@ def get_comments(task_id):
             comment_dict["preview"] = {
                 "id": str(preview.id),
                 "revision": preview.revision,
-                "is_movie": preview.is_movie
+                "is_movie": preview.is_movie,
+                "extension": preview.extension
             }
         comments.append(comment_dict)
     return comments

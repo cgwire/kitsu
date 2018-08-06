@@ -16,6 +16,7 @@ class PreviewFile(db.Model, BaseMixin, SerializerMixin):
     path = db.Column(db.String(400))
 
     source = db.Column(db.String(40))
+    extension = db.Column(db.String(6))
     shotgun_id = db.Column(db.Integer, unique=True)
 
     is_movie = db.Column(db.Boolean, default=False)
