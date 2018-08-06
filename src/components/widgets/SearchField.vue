@@ -61,7 +61,10 @@ export default {
     },
 
     onSaveClicked () {
-      if (this.canSave) this.$emit('save', this.$refs.input.value)
+      const value = this.$refs.input.value.trim()
+      if (value.length > 0) {
+        if (this.canSave) this.$emit('save', value)
+      }
     },
 
     setValue (value) {
