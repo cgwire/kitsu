@@ -1220,7 +1220,7 @@ video {
 }
 
 .avatar-wrapper {
-  margin-right: 0em;
+  margin-right: 0.5em;
 }
 
 .entity-thumbnail {
