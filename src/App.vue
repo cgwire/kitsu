@@ -193,11 +193,11 @@ input.input:focus {
 }
 
 .button .icon.is-small:first-child:last-child {
-  margin-right: 0.5em;
+  margin-right: 0em;
 }
 
 .actions .button .icon.is-small.icon-only:first-child:last-child {
-  margin-right: 0.5em;
+  margin-right: 0em;
 }
 
 .actions .button .icon.is-small:first-child:last-child {
