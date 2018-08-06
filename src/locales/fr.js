@@ -141,7 +141,12 @@ export default {
     validated: 'Validé !',
     validation_required: 'Validation requise',
     add_comment: 'Ajouter un commentaire...',
-    post_status: 'Envoyer l\'état'
+    post_status: 'Envoyer l\'état',
+    empty_text: 'Ce commentaire est vide',
+    edit_title: 'Modifier le commentaire',
+    fields: {
+      text: 'Texte'
+    }
   },
 
   tasks: {
@@ -176,6 +181,12 @@ export default {
     create_for_selection: 'Créer une tâche pour chaque cellule vide :',
     download_pdf_file: 'Télécharger le fichier PDF',
     full_screen: 'Afficher en plein écran',
+    delete_comment: 'Êtes vous sûr de vouloir supprimer ce commentaire ?',
+    delete_comment_error: 'Une erreur est survenue en supprimant le commentaire.',
+    previous: 'Précédente',
+    next: 'Suivante',
+    back_to_list: 'Retour à la liste',
+    change_preview: 'Modifier preview',
     fields: {
       task_type: 'Type',
       production: 'Prod',
