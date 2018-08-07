@@ -77,8 +77,8 @@ export default {
       detailLevel: 'day',
       year: `${moment().year()}`,
       month: `${moment().month()}`,
-      currentMonth: moment().month(),
       currentYear: moment().year(),
+      currentMonth: moment().month(),
 
       isLoading: false,
       isLoadingError: false

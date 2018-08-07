@@ -5,7 +5,7 @@
       <thead>
         <tr>
           <th class="name">
-          {{ $t("people.list.name") }}
+            {{ $t("people.list.name") }}
           </th>
 
           <th
@@ -43,8 +43,7 @@
   <table-info
     :is-loading="isLoading"
     :is-error="isError"
-  >
-  </table-info>
+  />
 
   <div class="table-body" v-scroll="onBodyScroll">
     <table class="table">
@@ -53,9 +52,9 @@
           <people-name-cell class="name" :entry="person" />
           <td
             class="time"
+            :key="'month-' + month + '-' + person.id"
             v-for="month in monthRange"
             v-if="detailLevel === 'month'"
-            :key="'month-' + month"
           >
             {{ monthDuration(month, person.id) }}
           </td>
@@ -71,15 +70,14 @@
 
           <td
             class="daytime"
-            :key="'day-' + day"
+            :key="'day-' + day + '-' + person.id"
             v-for="day in dayRange"
             v-if="detailLevel === 'day'"
           >
             {{ dayDuration(day, person.id) }}
           </td>
 
-          <td class="actions">
-          </td>
+          <td class="actions"></td>
          </tr>
       </tbody>
     </table>
@@ -95,7 +93,12 @@
 import moment from 'moment-timezone'
 import { mapGetters, mapActions } from 'vuex'
 
-import { range, monthToString } from '../../lib/helpers'
+import {
+  monthToString,
+  getMonthRange,
+  getWeekRange,
+  getDayRange
+} from '../../lib/helpers'
 import PeopleNameCell from '../cells/PeopleNameCell'
 import TableInfo from '../widgets/TableInfo'
 
@@ -168,31 +171,20 @@ export default {
     ]),
 
     monthRange () {
-      if (`${this.currentYear}` === this.year) {
-        return range(0, this.currentMonth)
-      } else {
-        return range(0, 11)
-      }
+      return getMonthRange(this.year, this.currentYear, this.currentMonth)
     },
 
     dayRange () {
-      if (`${this.currentYear}` === this.year &&
-          `${this.currentMonth}` === this.month) {
-        return range(1, moment().date())
-      } else {
-        const currentDate = moment(
-          `${this.year}-${Number(this.month) + 1}`, 'YYYY-M'
-        )
-        return range(1, currentDate.endOf('month').date())
-      }
+      return getDayRange(
+        this.year,
+        this.month,
+        this.currentYear,
+        this.currentMonth
+      )
     },
 
     weekRange () {
-      if (`${this.currentYear}` === this.year) {
-        return range(1, this.currentWeek)
-      } else {
-        return range(1, 52)
-      }
+      return getWeekRange(this.year, this.currentYear, this.currentWeek)
     }
   },
 
@@ -208,30 +200,22 @@ export default {
 
     monthDuration (month, personId) {
       const monthString = `${month + 1}`
-      if (this.timesheet &&
-          this.timesheet[monthString] &&
-          this.timesheet[monthString][personId]) {
-        return this.timesheet[monthString][personId] / 60
-      } else {
-        return '-'
-      }
+      return this.getDuration(monthString, personId)
     },
 
     weekDuration (week, personId) {
-      if (this.timesheet &&
-          this.timesheet[week] &&
-          this.timesheet[week][personId]) {
-        return this.timesheet[week][personId] / 60
-      } else {
-        return '-'
-      }
+      return this.getDuration(week, personId)
     },
 
     dayDuration (day, personId) {
+      return this.getDuration(day, personId)
+    },
+
+    getDuration (index, personId) {
       if (this.timesheet &&
-          this.timesheet[day] &&
-          this.timesheet[day][personId]) {
-        return this.timesheet[day][personId] / 60
+          this.timesheet[index] &&
+          this.timesheet[index][personId]) {
+        return this.timesheet[index][personId] / 60
       } else {
         return '-'
       }
