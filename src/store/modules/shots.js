@@ -8,6 +8,8 @@ import taskTypesStore from './tasktypes'
 import {PAGE_SIZE} from '../../lib/pagination'
 import {
   sortShots,
+  sortSequences,
+  sortTasks,
   sortByName
 } from '../../lib/sorting'
 import {
@@ -689,6 +691,7 @@ const mutations = {
         helpers.populateTask(task, shot)
         validationColumns[task.task_type_id] = true
       })
+      shot.tasks = sortTasks(shot.tasks)
 
       if (!isFps && shot.data.fps) isFps = true
       if (!isFrameIn && shot.data.frame_in) isFrameIn = true
@@ -748,7 +751,7 @@ const mutations = {
       }
     })
     state.sequenceMap = sequenceMap
-    state.sequences = sortByName(sequences)
+    state.sequences = sortSequences(sequences)
 
     state.sequenceIndex = buildSequenceIndex(state.sequences)
     state.displayedSequences = state.sequences.slice(0, PAGE_SIZE)
@@ -772,7 +775,7 @@ const mutations = {
     shot.tasks.forEach((task) => {
       helpers.populateTask(task, shot)
     })
-    shot.tasks = sortByName(shot.tasks)
+    shot.tasks = sortTasks(shot.tasks)
     state.shotMap[shot.id] = shot
   },
 
@@ -1031,7 +1034,7 @@ const mutations = {
       sequence.episode_name = episode.name
     }
     state.sequences.push(sequence)
-    state.sequences = sortByName(state.sequences)
+    state.sequences = sortSequences(state.sequences)
     state.sequenceMap[sequence.id] = sequence
     state.sequenceIndex = buildSequenceIndex(state.sequences)
   },

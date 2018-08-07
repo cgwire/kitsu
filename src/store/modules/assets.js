@@ -9,6 +9,7 @@ import peopleStore from './people'
 import {PAGE_SIZE} from '../../lib/pagination'
 import {
   sortAssets,
+  sortTasks,
   sortByName
 } from '../../lib/sorting'
 import {
@@ -504,7 +505,7 @@ const mutations = {
     asset.tasks.forEach((task) => {
       helpers.populateTask(task, asset)
     })
-    asset.tasks = sortByName(asset.tasks)
+    asset.tasks = sortTasks(asset.tasks)
     state.assetMap[asset.id] = asset
   },
 
