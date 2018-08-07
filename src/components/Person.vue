@@ -17,7 +17,7 @@
     <div class="task-tabs tabs">
       <ul>
         <li
-          :class="{'is-active': isActive('todos')}"
+          :class="{'is-active': isActiveTab('todos')}"
         >
           <router-link :to="{
             name: 'person',
@@ -29,8 +29,8 @@
           </router-link>
         </li>
         <li
-          :class="{'is-active': isActive('done')}"
-          @click="select('done')"
+          :class="{'is-active': isActiveTab('done')}"
+          @click="selectTab('done')"
         >
           <router-link :to="{
             name: 'person-tab',
@@ -43,8 +43,8 @@
           </router-link>
         </li>
         <li
-          :class="{'is-active': isActive('timesheets')}"
-          @click="select('timesheet')"
+          :class="{'is-active': isActiveTab('timesheets')}"
+          @click="selectTab('timesheet')"
           v-if="isCurrentUserManager"
         >
           <router-link :to="{
@@ -62,18 +62,18 @@
 
     <search-field
       :class="{
-        'search-field': true,
-        'is-hidden': !isActive('todos')
+        'search-field': true
       }"
       ref="person-tasks-search-field"
       @change="onSearchChange"
       @save="saveSearchQuery"
       :can-save="true"
+      v-if="!isActiveTab('done')"
     />
 
     <div
       class="query-list"
-      v-if="isActive('todos')"
+      v-if="isActiveTab('todos')"
     >
       <search-query-list
         :queries="personTaskSearchQueries"
@@ -89,7 +89,7 @@
       :is-error="isTasksLoadingError"
       :selection-grid="personTaskSelectionGrid"
       @scroll="setPersonTasksScrollPosition"
-      v-if="isActive('todos')"
+      v-if="isActiveTab('todos')"
     />
 
     <todos-list
@@ -98,7 +98,7 @@
       :is-error="isTasksLoadingError"
       :done="true"
       :selectionGrid="personTaskSelectionGrid"
-      v-if="isActive('done')"
+      v-if="isActiveTab('done')"
     />
 
     <timesheet-list
@@ -108,9 +108,10 @@
       :is-error="isTasksLoadingError"
       :time-spent-map="personTimeSpentMap"
       :time-spent-total="personTimeSpentTotal"
+      :hide-done="personTasksSearchText.length > 0"
       @date-changed="onDateChanged"
       @time-spent-change="onTimeSpentChange"
-      v-if="isActive('timesheets')"
+      v-if="isActiveTab('timesheets')"
     />
   </div>
 </template>
@@ -189,13 +190,13 @@ export default {
       'setTimeSpent'
     ]),
 
-    isActive (tab) {
+    isActiveTab (tab) {
       return this.activeTab === tab
     },
 
-    select (tab) {
+    selectTab (tab) {
       this.activeTab = tab
-      if (this.isActive('todos')) {
+      if (this.isActiveTab('todos')) {
         setTimeout(() => {
           if (this.$refs['person-tasks-search-field']) {
             this.$refs['person-tasks-search-field'].focus()

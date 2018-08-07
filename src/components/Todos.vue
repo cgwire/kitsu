@@ -38,16 +38,14 @@
 
     <search-field
       :class="{
-        'search-field': true,
-        'is-hidden': !isTabActive('todos')
+        'search-field': true
       }"
       ref="todos-search-field"
       @change="onSearchChange"
       @save="saveSearchQuery"
       :can-save="true"
-      v-if="isTabActive('todos')"
-    >
-    </search-field>
+      v-if="!isTabActive('done')"
+    />
 
     <div
       class="query-list"
@@ -57,8 +55,7 @@
         :queries="todoSearchQueries"
         @changesearch="changeSearch"
         @removesearch="removeSearchQuery"
-      >
-      </search-query-list>
+      />
     </div>
 
     <todos-list
@@ -69,7 +66,7 @@
       :selection-grid="todoSelectionGrid"
       v-if="isTabActive('todos')"
       @scroll="setTodoListScrollPosition"
-    ></todos-list>
+    />
 
     <todos-list
       ref="done-list"
@@ -78,7 +75,7 @@
       :is-error="isTodosLoadingError"
       :done="true"
       v-if="isTabActive('done')"
-    ></todos-list>
+    />
 
     <timesheet-list
       ref="timesheet-list"
@@ -88,10 +85,11 @@
       :is-error="isTodosLoadingError"
       :time-spent-map="timeSpentMap"
       :time-spent-total="timeSpentTotal"
+      :hide-done="todosSearchText.length > 0"
       @date-changed="onDateChanged"
       @time-spent-change="onTimeSpentChange"
       v-if="isTabActive('timesheets')"
-    ></timesheet-list>
+    />
   </div>
 </template>
 
@@ -130,9 +128,11 @@ export default {
     this.loadTodos({
       date: this.selectedDate,
       callback: () => {
-        this.$refs['todo-list'].setScrollPosition(
-          this.todoListScrollPosition
-        )
+        if (this.$refs['todo-list']) {
+          this.$refs['todo-list'].setScrollPosition(
+            this.todoListScrollPosition
+          )
+        }
       }
     })
   },

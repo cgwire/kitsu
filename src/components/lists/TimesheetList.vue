@@ -77,9 +77,12 @@
       </tbody>
     </table>
 
-    <page-subtitle :text="$t('timesheets.done_tasks')" />
+    <page-subtitle
+      :text="$t('timesheets.done_tasks')"
+      v-if="!hideDone"
+    />
 
-    <table class="table" v-if="!isLoading">
+    <table class="table" v-if="!isLoading && !hideDone">
       <tbody>
        <tr v-for="(task, i) in doneTasks" :key="task + '-' + i">
          <production-name-cell
@@ -155,22 +158,47 @@ export default {
 
   data () {
     return {
-      selectedDate: moment().toDate(),
+      selectedDate: moment().toDate(), // By default current day.
       disabledDates: {
-        from: moment().toDate()
+        from: moment().toDate() // Disable dates after today.
       }
     }
   },
 
-  props: [
-    'tasks',
-    'doneTasks',
-    'isLoading',
-    'isError',
-    'done',
-    'timeSpentMap',
-    'timeSpentTotal'
-  ],
+  props: {
+    tasks: {
+      default: () => [],
+      type: Array
+    },
+    doneTasks: {
+      default: () => [],
+      type: Array
+    },
+    isLoading: {
+      default: false,
+      type: Boolean
+    },
+    isError: {
+      default: false,
+      type: Boolean
+    },
+    done: {
+      default: false,
+      type: Boolean
+    },
+    timeSpentMap: {
+      default: () => {},
+      type: Object
+    },
+    timeSpentTotal: {
+      default: 0,
+      type: Number
+    },
+    hideDone: {
+      default: false,
+      type: Boolean
+    }
+  },
 
   computed: {
     ...mapGetters([
