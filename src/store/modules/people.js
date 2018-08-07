@@ -358,6 +358,9 @@ const actions = {
       if (detailLevel === 'day') {
         mainFunc = peopleApi.getDayTable
       }
+      if (detailLevel === 'week') {
+        mainFunc = peopleApi.getWeekTable
+      }
       mainFunc(year, monthString)
         .then((table) => {
           commit(PEOPLE_TIMESHEET_LOADED, table)

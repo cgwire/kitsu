@@ -65,6 +65,10 @@ export default {
           value: 'day'
         },
         {
+          label: 'Week',
+          value: 'week'
+        },
+        {
           label: 'Month',
           value: 'month'
         }

@@ -140,6 +140,11 @@ export const routes = [
         component: Timesheets,
         name: 'timesheets'
       },
+      {
+        path: '/timesheets/:tab',
+        component: Timesheets,
+        name: 'timesheets'
+      },
 
       {
         path: '/productions',

@@ -124,6 +124,18 @@ export default {
     })
   },
 
+  getWeekTable (year) {
+    return new Promise((resolve, reject) => {
+      client.get(
+        `/api/data/persons/time-spents/week-table/${year}`,
+        (err, table) => {
+          if (err) reject(err)
+          else resolve(table)
+        }
+      )
+    })
+  },
+
   getMonthTable (year) {
     return new Promise((resolve, reject) => {
       client.get(

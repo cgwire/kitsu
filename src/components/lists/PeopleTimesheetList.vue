@@ -7,6 +7,7 @@
           <th class="name">
           {{ $t("people.list.name") }}
           </th>
+
           <th
             class="time"
             :key="'month-' + month"
@@ -15,6 +16,16 @@
           >
             {{ monthToString(month) }}
           </th>
+
+          <th
+            class="daytime"
+            :key="'week-' + week"
+            v-for="week in weekRange"
+            v-if="detailLevel === 'week'"
+          >
+            {{ week }}
+          </th>
+
           <th
             class="daytime"
             :key="'day-' + day"
@@ -48,6 +59,16 @@
           >
             {{ monthDuration(month, person.id) }}
           </td>
+
+          <td
+            class="daytime"
+            :key="'week-' + week + '-' + person.id"
+            v-for="week in weekRange"
+            v-if="detailLevel === 'week'"
+          >
+            {{ weekDuration(week, person.id) }}
+          </td>
+
           <td
             class="daytime"
             :key="'day-' + day"
@@ -56,6 +77,7 @@
           >
             {{ dayDuration(day, person.id) }}
           </td>
+
           <td class="actions">
           </td>
          </tr>
@@ -98,7 +120,8 @@ export default {
         }
       ],
       currentMonth: moment().month(),
-      currentYear: moment().year()
+      currentYear: moment().year(),
+      currentWeek: moment().week()
     }
   },
 
@@ -160,7 +183,15 @@ export default {
         const currentDate = moment(
           `${this.year}-${Number(this.month) + 1}`, 'YYYY-M'
         )
-        return range(0, currentDate.endOf('month').date())
+        return range(1, currentDate.endOf('month').date())
+      }
+    },
+
+    weekRange () {
+      if (`${this.currentYear}` === this.year) {
+        return range(1, this.currentWeek)
+      } else {
+        return range(1, 52)
       }
     }
   },
@@ -181,6 +212,16 @@ export default {
           this.timesheet[monthString] &&
           this.timesheet[monthString][personId]) {
         return this.timesheet[monthString][personId] / 60
+      } else {
+        return '-'
+      }
+    },
+
+    weekDuration (week, personId) {
+      if (this.timesheet &&
+          this.timesheet[week] &&
+          this.timesheet[week][personId]) {
+        return this.timesheet[week][personId] / 60
       } else {
         return '-'
       }
