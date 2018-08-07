@@ -10,7 +10,7 @@
         />
       </div>
       <div class="flexrow-item">
-        <page-title :text="person ? person.name : ''"></page-title>
+        <page-title :text="person ? person.name : ''" />
       </div>
     </div>
 
@@ -102,8 +102,8 @@
     />
 
     <timesheet-list
-      :tasks="displayedPersonTasks"
-      :done-tasks="displayedPersonDoneTasks"
+      :tasks="loggablePersonTasks"
+      :done-tasks="loggableDoneTasks"
       :is-loading="isTasksLoading"
       :is-error="isTasksLoadingError"
       :time-spent-map="personTimeSpentMap"
@@ -176,8 +176,25 @@ export default {
       'personTaskSearchQueries',
       'personTaskSelectionGrid',
       'personTimeSpentMap',
-      'personTimeSpentTotal'
-    ])
+      'personTimeSpentTotal',
+      'taskTypeMap'
+    ]),
+
+    loggablePersonTasks () {
+      return this.displayedPersonTasks
+        .filter((task) => {
+          console.log(this.taskTypeMap[task.task_type_id].allow_timelog)
+          return this.taskTypeMap[task.task_type_id].allow_timelog
+        })
+    },
+
+    loggableDoneTasks () {
+      return this.displayedPersonDoneTasks
+        .filter((task) => {
+          console.log(this.taskTypeMap[task.task_type_id].allow_timelog)
+          return this.taskTypeMap[task.task_type_id].allow_timelog
+        })
+    }
   },
 
   methods: {
@@ -220,9 +237,11 @@ export default {
           this.isTasksLoading = false
           this.isTasksLoadingError = false
           setTimeout(() => {
-            this.$refs['task-list'].setScrollPosition(
-              this.personTasksScrollPosition
-            )
+            if (this.$refs['task-list']) {
+              this.$refs['task-list'].setScrollPosition(
+                this.personTasksScrollPosition
+              )
+            }
           }, 0)
         }
       })
