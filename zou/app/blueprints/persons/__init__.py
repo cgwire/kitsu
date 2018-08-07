@@ -7,6 +7,7 @@ from .resources import (
     PresenceLogsResource,
     TimeSpentsResource,
     TimeSpentMonthResource,
+    TimeSpentWeekResource,
     TimeSpentYearResource
 )
 
@@ -16,6 +17,7 @@ routes = [
     ("/data/persons/presence-logs/<month_date>", PresenceLogsResource),
     ("/data/persons/<person_id>/time-spents/<date>", TimeSpentsResource),
     ("/data/persons/time-spents/month-table/<year>", TimeSpentYearResource),
+    ("/data/persons/time-spents/week-table/<year>", TimeSpentWeekResource),
     ("/data/persons/time-spents/day-table/<year>/<month>", TimeSpentMonthResource)
 ]
 

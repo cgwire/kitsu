@@ -117,7 +117,8 @@ class TimeSpentsResource(Resource):
 
 class TimeSpentMonthResource(Resource):
     """
-    Return a table giving time spent by user and by month for given year.
+    Return a table giving time spent by user and by day for given year and
+    month.
     """
 
     @jwt_required
@@ -128,11 +129,22 @@ class TimeSpentMonthResource(Resource):
 
 class TimeSpentYearResource(Resource):
     """
-    Return a table giving time spent by user and by day for given year and
-    month.
+    Return a table giving time spent by user and by month for given year.
     """
 
     @jwt_required
     def get(self, year):
         permissions.check_manager_permissions()
         return time_spents_service.get_month_table(year)
+
+
+
+class TimeSpentWeekResource(Resource):
+    """
+    Return a table giving time spent by user and by week for given year.
+    """
+
+    @jwt_required
+    def get(self, year):
+        permissions.check_manager_permissions()
+        return time_spents_service.get_week_table(year)

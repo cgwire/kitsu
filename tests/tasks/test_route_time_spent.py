@@ -1,5 +1,7 @@
 from tests.base import ApiDBTestCase
 
+from zou.app.services import tasks_service
+
 
 class RouteTimeSpentTestCase(ApiDBTestCase):
 
@@ -19,6 +21,35 @@ class RouteTimeSpentTestCase(ApiDBTestCase):
         self.generate_fixture_person()
         self.generate_fixture_assigner()
         self.generate_fixture_task()
+
+    def create_time_spents(self):
+        self.person_id = str(self.person.id)
+        self.user_id = str(self.user.id)
+
+        task_id = str(self.task.id)
+        self.generate_fixture_sequence()
+        self.generate_fixture_shot()
+        self.generate_fixture_shot_task()
+        shot_task_id = str(self.shot_task.id)
+
+        tasks_service.create_or_update_time_spent(
+            task_id, self.person_id, "2018-06-04", 500
+        )
+        tasks_service.create_or_update_time_spent(
+            shot_task_id, self.person_id, "2018-06-04", 300
+        )
+        tasks_service.create_or_update_time_spent(
+            task_id, self.person_id, "2018-06-03", 600
+        )
+        tasks_service.create_or_update_time_spent(
+            task_id, self.person_id, "2018-05-03", 600
+        )
+        tasks_service.create_or_update_time_spent(
+            task_id, self.person_id, "2018-05-03", 600
+        )
+        tasks_service.create_or_update_time_spent(
+            task_id, self.user_id, "2018-06-03", 600
+        )
 
     def test_set_time_spent(self):
         data = {
@@ -99,3 +130,27 @@ class RouteTimeSpentTestCase(ApiDBTestCase):
         self.assertEquals(time_spents[0]["duration"], 14400)
         self.assertEquals(time_spents[0]["date"], "2017-09-23")
         self.assertEquals(len(time_spents), 1)
+
+    def test_get_month_table(self):
+        self.create_time_spents()
+        month_table = self.get("/data/persons/time-spents/month-table/2018")
+        self.assertEqual(month_table["6"][self.person_id], 1400)
+        self.assertEqual(month_table["6"][self.user_id], 600)
+        self.assertTrue("1" not in month_table)
+
+    def test_get_day_table(self):
+        self.create_time_spents()
+        day_table = self.get("/data/persons/time-spents/day-table/2018/06")
+        self.assertEqual(day_table["3"][self.person_id], 600)
+        self.assertEqual(day_table["4"][self.person_id], 800)
+        self.assertEqual(day_table["3"][self.user_id], 600)
+        self.assertTrue("1" not in day_table)
+
+    def test_get_week_table(self):
+        self.create_time_spents()
+        week_table = self.get("/data/persons/time-spents/week-table/2018")
+        self.assertEqual(week_table["18"][self.person_id], 600)
+        self.assertEqual(week_table["22"][self.person_id], 600)
+        self.assertEqual(week_table["22"][self.user_id], 600)
+        self.assertEqual(week_table["23"][self.person_id], 800)
+        self.assertTrue("1" not in week_table)
