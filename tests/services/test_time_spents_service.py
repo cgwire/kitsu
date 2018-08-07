@@ -60,3 +60,11 @@ class TimeSpentsServiceTestCase(ApiDBTestCase):
         self.assertEqual(day_table["4"][self.person_id], 800)
         self.assertEqual(day_table["3"][self.user_id], 600)
         self.assertTrue("1" not in day_table)
+
+    def test_get_week_table(self):
+        week_table = time_spents_service.get_week_table("2018")
+        self.assertEqual(week_table["18"][self.person_id], 600)
+        self.assertEqual(week_table["22"][self.person_id], 600)
+        self.assertEqual(week_table["22"][self.user_id], 600)
+        self.assertEqual(week_table["23"][self.person_id], 800)
+        self.assertTrue("1" not in week_table)
