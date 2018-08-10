@@ -146,5 +146,31 @@ export default {
         }
       )
     })
+  },
+
+  getAggregatedPersonTimeSpents (
+    personId,
+    detailLevel,
+    year,
+    month,
+    week,
+    day
+  ) {
+    return new Promise((resolve, reject) => {
+      let path = `/api/data/persons/${personId}/time-spents/`
+
+      if (detailLevel === 'month') {
+        path += `month/${year}/${month}`
+      } else if (detailLevel === 'week') {
+        path += `week/${year}/${week}`
+      } else {
+        path += `day/${year}/${month}/${day}`
+      }
+
+      client.get(path, (err, tasks) => {
+        if (err) reject(err)
+        else resolve(tasks)
+      })
+    })
   }
 }
