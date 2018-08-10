@@ -21,8 +21,12 @@
       class="avatar-link"
     >
     <img
+      :src="avatarPath"
+      v-if="person.has_avatar && noCache"
+    />
+    <img
       v-lazy="person.avatarPath"
-      v-if="person.has_avatar"
+      v-else-if="person.has_avatar"
     />
     <span
       v-if="!person.has_avatar"
@@ -43,8 +47,12 @@
    v-else
 >
   <img
+    :src="avatarPath"
+    v-if="person.has_avatar && noCache"
+  />
+  <img
     v-lazy="person.avatarPath"
-    v-if="person.has_avatar"
+    v-else-if="person.has_avatar"
   />
   <span v-else>
     {{ person.initials }}
@@ -55,11 +63,26 @@
 <script>
 export default {
   name: 'person-avatar',
+
+  data () {
+    return {
+      avatarPath: this.person.avatarPath + '&stamp=' + new Date().toISOString()
+    }
+  },
+
   props: {
     person: { type: Object, default: () => { return { color: '#FFF' } } },
     size: { type: Number, default: 40 },
     'font-size': { type: Number, default: 18 },
-    'is-link': { type: Boolean, default: true }
+    'is-link': { type: Boolean, default: true },
+    'no-cache': { type: Boolean, default: false }
+  },
+
+  watch: {
+    person () {
+      this.avatarPath = this.person.avatarPath + '&stamp=' + new Date().toISOString()
+      console.log(this.avatarPath)
+    }
   }
 }
 </script>
