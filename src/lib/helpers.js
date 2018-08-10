@@ -83,32 +83,32 @@ export const range = (start, end) => {
 
 export const monthToString = (month) => {
   const currentYear = moment().year()
-  return moment(`${currentYear}-${month + 1}`, 'YYYY-M').format('MMM')
+  return moment(`${currentYear}-${month}`, 'YYYY-M').format('MMM')
 }
 
 export const getMonthRange = (year, currentYear, currentMonth) => {
   if (currentYear === year) {
-    return range(0, currentMonth)
+    return range(1, currentMonth + 1)
   } else {
-    return range(0, 11)
+    return range(1, 12)
   }
 }
 
 export const getDayRange = (year, month, currentYear, currentMonth) => {
-  if (`${currentYear}` === year &&
-      `${currentMonth}` === month) {
+  if (currentYear === year &&
+      currentMonth === month) {
     return range(1, moment().date())
   } else {
     const currentDate = moment(
-      `${year}-${Number(month) + 1}`, 'YYYY-M'
+      `${year}-${Number(month)}`, 'YYYY-M'
     )
     return range(1, currentDate.endOf('month').date())
   }
 }
 
-export const getWeekRange = (year, currentYear, currentWeek) => {
-  if (`${currentYear}` === year) {
-    return range(1, currentWeek)
+export const getWeekRange = (year, currentYear) => {
+  if (currentYear === year) {
+    return range(1, moment().week())
   } else {
     return range(1, 52)
   }
