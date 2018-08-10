@@ -21,26 +21,27 @@
           :label="$t('task_types.fields.name')"
           v-model="form.name"
           v-focus
-        >
-        </text-field>
+        />
         <combobox
           :label="$t('task_types.fields.priority')"
           :options="priorityOptions"
           v-model="form.priority"
-        >
-        </combobox>
+        />
         <combobox
           :label="$t('task_types.fields.dedicated_to')"
           :options="dedicatedToOptions"
           v-model="form.for_shots"
-        >
-        </combobox>
+        />
+        <combobox
+          :label="$t('task_types.fields.allow_timelog')"
+          :options="allowTimelogOptions"
+          v-model="form.allow_timelog"
+        />
         <color-field
           ref="colorField"
           :label="$t('task_types.fields.color')"
           v-model="form.color"
-        >
-        </color-field>
+        />
       </form>
 
       <p class="has-text-right">
@@ -56,7 +57,8 @@
         </a>
         <router-link
           :to="cancelRoute"
-          class="button is-link">
+          class="button is-link"
+        >
           {{ $t("main.cancel") }}
         </router-link>
       </p>
@@ -98,7 +100,8 @@ export default {
           name: this.taskTypeToEdit.name,
           color: this.taskTypeToEdit.color,
           priority: String(this.taskTypeToEdit.priority),
-          for_shots: String(this.taskTypeToEdit.for_shots)
+          for_shots: String(this.taskTypeToEdit.for_shots),
+          allow_timelog: String(this.taskTypeToEdit.allow_timelog || 'false')
         }
       }
     }
@@ -110,7 +113,8 @@ export default {
         name: '',
         color: '#999999',
         priority: '',
-        for_shots: 'false'
+        for_shots: 'false',
+        allow_timelog: 'false'
       },
       priorityOptions: [
         {label: '1', value: '1'},
@@ -125,8 +129,12 @@ export default {
         {label: '10', value: '10'}
       ],
       dedicatedToOptions: [
-        {label: this.$tc('assets.title'), value: 'false'},
-        {label: this.$tc('shots.title'), value: 'true'}
+        {label: this.$t('assets.title'), value: 'false'},
+        {label: this.$t('shots.title'), value: 'true'}
+      ],
+      allowTimelogOptions: [
+        {label: this.$t('main.yes'), value: 'true'},
+        {label: this.$t('main.no'), value: 'false'}
       ]
     }
   },

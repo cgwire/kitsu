@@ -55,11 +55,7 @@
           <task-type-name
             class="type"
             :production-id="task.project_id"
-            :entry="{
-              id: task.task_type_id,
-              name: task.task_type_name,
-              color: task.task_type_color
-            }"
+            :entry="taskTypeMap[task.task_type_id]"
           />
 
           <td class="name">
@@ -202,6 +198,7 @@ export default {
 
   computed: {
     ...mapGetters([
+      'taskTypeMap',
       'nbSelectedTasks',
       'productionMap',
       'user'

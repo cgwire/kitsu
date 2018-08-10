@@ -1,6 +1,6 @@
 <template>
 <div class="data-list">
-  <div style="overflow: hidden">
+  <div class="table-header-wrapper">
     <table class="table table-header" ref="headerWrapper">
       <thead>
         <tr>
@@ -45,7 +45,7 @@
     :is-error="isError"
   />
 
-  <div class="table-body" v-scroll="onBodyScroll">
+  <div class="table-body" v-scroll="onBodyScroll" v-if="!isLoading">
     <table class="table">
       <tbody>
         <tr v-for="person in people" :key="person.id">
@@ -56,7 +56,22 @@
             v-for="month in monthRange"
             v-if="detailLevel === 'month'"
           >
-            {{ monthDuration(month, person.id) }}
+            <router-link
+              :to="{
+                name: 'timesheets-month-person',
+                params: {
+                  person_id: person.id,
+                  year: year,
+                  month: month
+                }
+              }"
+              v-if="monthDuration(month, person.id) > 0"
+            >
+              {{ monthDuration(month, person.id) }}
+            </router-link>
+            <span v-else>
+            -
+            </span>
           </td>
 
           <td
@@ -65,7 +80,22 @@
             v-for="week in weekRange"
             v-if="detailLevel === 'week'"
           >
-            {{ weekDuration(week, person.id) }}
+            <router-link
+              :to="{
+                name: 'timesheets-week-person',
+                params: {
+                  person_id: person.id,
+                  year: year,
+                  week: week
+                }
+              }"
+              v-if="weekDuration(week, person.id) > 0"
+            >
+              {{ weekDuration(week, person.id) }}
+            </router-link>
+            <span v-else>
+            -
+            </span>
           </td>
 
           <td
@@ -74,7 +104,23 @@
             v-for="day in dayRange"
             v-if="detailLevel === 'day'"
           >
-            {{ dayDuration(day, person.id) }}
+            <router-link
+              :to="{
+                name: 'timesheets-day-person',
+                params: {
+                  person_id: person.id,
+                  year: year,
+                  month: month,
+                  day: day
+                }
+              }"
+              v-if="dayDuration(day, person.id) > 0"
+            >
+              {{ dayDuration(day, person.id) }}
+            </router-link>
+            <span v-else>
+            -
+            </span>
           </td>
 
           <td class="actions"></td>
@@ -122,7 +168,7 @@ export default {
           value: 'month'
         }
       ],
-      currentMonth: moment().month(),
+      currentMonth: moment().month() + 1,
       currentYear: moment().year(),
       currentWeek: moment().week()
     }
@@ -145,13 +191,13 @@ export default {
     },
 
     year: {
-      type: String,
-      default: ''
+      type: Number,
+      default: 0
     },
 
     month: {
-      type: String,
-      default: ''
+      type: Number,
+      default: 0
     },
 
     isLoading: {
@@ -199,7 +245,7 @@ export default {
     monthToString,
 
     monthDuration (month, personId) {
-      const monthString = `${month + 1}`
+      const monthString = `${month}`
       return this.getDuration(monthString, personId)
     },
 
@@ -236,13 +282,28 @@ export default {
 }
 
 .daytime {
-  width: 40px;
-  min-width: 40px;
+  width: 50px;
+  min-width: 50px;
 }
 
 .time,
 .daytime {
   text-align: center;
   vertical-align: middle;
+}
+
+th.actions {
+  padding: 0;
+}
+
+th.actions,
+.table td.actions {
+  width: 100%;
+  min-width: auto;
+}
+
+a,
+a:hover{
+  color: inherit;
 }
 </style>

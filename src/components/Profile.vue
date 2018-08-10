@@ -65,6 +65,7 @@
             >
               <option value="en_US">English</option>
               <option value="fr_FR">French</option>
+              <option value="zh_Hans_CN">Chinese</option>
             </select>
           </span>
         </div>
@@ -170,6 +171,7 @@
 <script>
 import moment from 'moment-timezone'
 import { mapGetters, mapActions } from 'vuex'
+
 import ChangeAvatarModal from './modals/ChangeAvatarModal'
 import PeopleAvatar from './widgets/PeopleAvatar'
 import TextField from './widgets/TextField'
@@ -239,6 +241,11 @@ export default {
 
     localeChanged () {
       this.$i18n.locale = this.form.locale.substring(0, 2)
+      if (this.form.locale === 'zh_Hans_CN') {
+        moment.locale('zh_CN')
+      } else {
+        moment.locale(this.form.locale.substring(0, 2))
+      }
     },
 
     passwordChangeRequested () {

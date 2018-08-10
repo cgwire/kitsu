@@ -135,15 +135,41 @@ export const routes = [
         component: Person,
         name: 'person-tab'
       },
+
       {
         path: '/timesheets',
         component: Timesheets,
         name: 'timesheets'
       },
       {
-        path: '/timesheets/:tab',
+        path: '/timesheets/month/:year',
         component: Timesheets,
-        name: 'timesheets'
+        name: 'timesheets-month'
+      },
+      {
+        path: '/timesheets/month/:year/:month/persons/:person_id',
+        component: Timesheets,
+        name: 'timesheets-month-person'
+      },
+      {
+        path: '/timesheets/week/:year',
+        component: Timesheets,
+        name: 'timesheets-week'
+      },
+      {
+        path: '/timesheets/week/:year/:week/persons/:person_id',
+        component: Timesheets,
+        name: 'timesheets-week-person'
+      },
+      {
+        path: '/timesheets/day/:year/:month',
+        component: Timesheets,
+        name: 'timesheets-day'
+      },
+      {
+        path: '/timesheets/day/:year/:month/:day/persons/:person_id',
+        component: Timesheets,
+        name: 'timesheets-day-person'
       },
 
       {

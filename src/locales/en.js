@@ -285,10 +285,11 @@ export default {
     number: 'task type | task types',
     title: 'Task Types',
     fields: {
-      name: 'Name',
+      dedicated_to: 'For',
       color: 'Color',
-      priority: 'Priority',
-      dedicated_to: 'For'
+      name: 'Name',
+      allow_timelog: 'Timelog',
+      priority: 'Priority'
     }
   },
 

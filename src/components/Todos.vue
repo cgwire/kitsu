@@ -79,8 +79,8 @@
 
     <timesheet-list
       ref="timesheet-list"
-      :tasks="displayedTodos"
-      :done-tasks="displayedDoneTasks"
+      :tasks="loggableTodos"
+      :done-tasks="loggableDoneTasks"
       :is-loading="isTodosLoading"
       :is-error="isTodosLoadingError"
       :time-spent-map="timeSpentMap"
@@ -145,12 +145,29 @@ export default {
       'todosSearchText',
       'isTodosLoading',
       'isTodosLoadingError',
+      'taskTypeMap',
       'timeSpentMap',
       'timeSpentTotal',
       'todoListScrollPosition',
       'todoSelectionGrid',
       'todoSearchQueries'
-    ])
+    ]),
+
+    loggableTodos () {
+      return this.displayedTodos
+        .filter((task) => {
+          console.log(this.taskTypeMap[task.task_type_id].allow_timelog)
+          return this.taskTypeMap[task.task_type_id].allow_timelog
+        })
+    },
+
+    loggableDoneTasks () {
+      return this.displayedDoneTasks
+        .filter((task) => {
+          console.log(this.taskTypeMap[task.task_type_id].allow_timelog)
+          return this.taskTypeMap[task.task_type_id].allow_timelog
+        })
+    }
   },
 
   methods: {

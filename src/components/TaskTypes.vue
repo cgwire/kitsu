@@ -21,7 +21,7 @@
       :entries="taskTypes"
       :is-loading="isTaskTypesLoading"
       :is-error="isTaskTypesLoadingError"
-    ></task-type-list>
+    />
 
     <edit-task-type-modal
       :active="modals.isNewDisplayed"
@@ -30,8 +30,7 @@
       :cancel-route="'/task-types'"
       :task-type-to-edit="taskTypeToEdit"
       @confirm="confirmEditTaskType"
-    >
-    </edit-task-type-modal>
+    />
 
     <delete-modal
       :active="modals.isDeleteDisplayed"
@@ -41,8 +40,7 @@
       :text="deleteText()"
       :error-text="$t('task_types.delete_error')"
       @confirm="confirmDeleteTaskType"
-    >
-    </delete-modal>
+    />
 
   </div>
 </template>

@@ -23,6 +23,20 @@ export const sortShots = (shots) => {
   )
 }
 
+export const sortSequences = (sequences) => {
+  return sequences.sort(
+    firstBy('canceled')
+      .thenBy((a, b) => {
+        if (a.episode_name) {
+          return a.episode_name.localeCompare(b.episode_name)
+        } else {
+          return 0
+        }
+      })
+      .thenBy((a, b) => a.name.localeCompare(b.name))
+  )
+}
+
 export const sortProductions = (productions) => {
   return productions.sort((a, b) => {
     if (a.project_status_name === b.project_status_name) {
@@ -35,9 +49,21 @@ export const sortProductions = (productions) => {
 
 export const sortTasks = (tasks) => {
   return tasks.sort(
-    firstBy((a, b) => a.project_name.localeCompare(b.project_name))
+    firstBy((a, b) => {
+      if (a.project_name) {
+        return a.project_name.localeCompare(b.project_name)
+      } else {
+        return 0
+      }
+    })
       .thenBy((a, b) => a.task_type_name.localeCompare(b.task_type_name))
-      .thenBy((a, b) => a.full_entity_name.localeCompare(b.full_entity_name))
+      .thenBy((a, b) => {
+        if (a.full_entity_name) {
+          return a.full_entity_name.localeCompare(b.full_entity_name)
+        } else {
+          return a.entity_name.localeCompare(b.entity_name)
+        }
+      })
   )
 }
 

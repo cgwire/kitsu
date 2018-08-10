@@ -10,7 +10,8 @@ export default {
       name: taskType.name,
       color: taskType.color,
       priority: Number(taskType.priority),
-      for_shots: Boolean(taskType.for_shots === 'true')
+      for_shots: Boolean(taskType.for_shots === 'true'),
+      allow_timelog: Boolean(taskType.allow_timelog === 'true')
     }
     client.post('/api/data/task-types/', data, callback)
   },
@@ -20,7 +21,8 @@ export default {
       name: taskType.name,
       color: taskType.color,
       priority: Number(taskType.priority),
-      for_shots: Boolean(taskType.for_shots === 'true')
+      for_shots: Boolean(taskType.for_shots === 'true'),
+      allow_timelog: Boolean(taskType.allow_timelog === 'true')
     }
     client.put(`/api/data/task-types/${taskType.id}`, data, callback)
   },
