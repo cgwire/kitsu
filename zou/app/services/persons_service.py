@@ -256,16 +256,3 @@ def get_presence_logs(year, month):
             row[day] = "X"
         csv_content.append(row)
     return csv_content
-
-
-def get_time_spents(person_id, date):
-    """
-    Return time spents for given person and date.
-    """
-    try:
-        time_spents = TimeSpent.query \
-            .filter_by(person_id=person_id, date=date) \
-            .all()
-    except DataError:
-        raise WrongDateFormatException
-    return fields.serialize_list(time_spents)

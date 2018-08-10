@@ -7,11 +7,12 @@ from flask_jwt_extended import jwt_required
 from zou.app.mixin import ArgsMixin
 
 from zou.app.services import (
-    user_service,
-    persons_service,
     assets_service,
+    persons_service,
     projects_service,
-    shots_service
+    shots_service,
+    time_spents_service,
+    user_service
 )
 
 from zou.app.services.exception import WrongDateFormatException
@@ -372,6 +373,6 @@ class TimeSpentsResource(Resource):
     def get(self, date):
         try:
             current_user = persons_service.get_current_user()
-            return persons_service.get_time_spents(current_user["id"], date)
+            return time_spents_service.get_time_spents(current_user["id"], date)
         except WrongDateFormatException:
             abort(404)

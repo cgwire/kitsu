@@ -104,13 +104,65 @@ class PresenceLogsResource(Resource):
 
 class TimeSpentsResource(Resource):
     """
-    Get time spents given person and date.
+    Get time spents for given person and date.
     """
 
     @jwt_required
     def get(self, person_id, date):
         try:
-            return persons_service.get_time_spents(person_id, date)
+            return time_spents_service.get_time_spents(person_id, date)
+        except WrongDateFormatException:
+            abort(404)
+
+
+class PersonMonthTimeSpentsResource(Resource):
+    """
+    Get aggregated time spents for given person and month.
+    """
+
+    @jwt_required
+    def get(self, person_id, year, month):
+        try:
+            return time_spents_service.get_month_time_spents(
+                person_id,
+                year,
+                month
+            )
+        except WrongDateFormatException:
+            abort(404)
+
+
+class PersonWeekTimeSpentsResource(Resource):
+    """
+    Get aggregated time spents for given person and week.
+    """
+
+    @jwt_required
+    def get(self, person_id, year, week):
+        try:
+            return time_spents_service.get_week_time_spents(
+                person_id,
+                year,
+                week
+            )
+        except WrongDateFormatException:
+            abort(404)
+
+
+class PersonDayTimeSpentsResource(Resource):
+    """
+    Get aggregated time spents for given person and day.
+    """
+
+    @jwt_required
+    def get(self, person_id, year, month, day):
+        try:
+            return time_spents_service.get_day_time_spents(
+                person_id,
+                year,
+                month,
+                day
+            )
         except WrongDateFormatException:
             abort(404)
 
@@ -136,7 +188,6 @@ class TimeSpentYearResource(Resource):
     def get(self, year):
         permissions.check_manager_permissions()
         return time_spents_service.get_month_table(year)
-
 
 
 class TimeSpentWeekResource(Resource):
