@@ -57,10 +57,6 @@ new Vue({
   store
 })
 
-// Realtime update configuration.
-// const source = realtime.createNewSource()
-// realtime.init(source)
-
 // Catch escape command
 document.addEventListener('keyup', (evt) => {
   if (evt.keyCode === 27) {
