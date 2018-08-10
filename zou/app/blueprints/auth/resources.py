@@ -81,7 +81,8 @@ def on_identity_loaded(sender, identity):
             return None
         except Exception as exception:
             current_app.logger.error(exception)
-            current_app.logger.error(exception.message)
+            if hasattr(exception, 'message'):
+                current_app.logger.error(exception.message)
             return None
 
 
