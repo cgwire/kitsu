@@ -1,10 +1,10 @@
 <template>
   <div class="page fixed-page">
     <div class="page-header">
-      <div class="back-button flexrow">
+      <div class="flexrow navigation-buttons">
         <router-link
           :to="previousEntity"
-          class="flexrow-item"
+          class="flexrow-item arrow"
           :title="$t('tasks.previous')"
         >
           &larr;
@@ -12,14 +12,14 @@
 
         <router-link
           :to="entityPage"
-          class="list-link flexrow-item has-text-centered"
+          class="flexrow-item has-text-centered"
         >
           {{ $t('tasks.back_to_list')}}
         </router-link>
 
         <router-link
           :to="nextEntity"
-          class="next-link flexrow-item"
+          class="next-link flexrow-item arrow"
           :title="$t('tasks.next')"
         >
           &rarr;
@@ -1095,10 +1095,6 @@ export default {
 </script>
 
 <style scoped>
-.list-link {
-  flex: 1;
-}
-
 .page {
   background: #F9F9F9;
   padding: 0;
@@ -1112,13 +1108,18 @@ export default {
   margin: 80px 1em 1em 1em;
 }
 
-.back-button {
-  margin-top: 1em;
-  font-size: 0.8em;
+.navigation-buttons {
+  font-size: 1em;
+  margin-top: 0.5em;
   margin-bottom: 0.5em;
 }
 
-.back-button a {
+.navigation-buttons .arrow {
+  font-size: 1.2em;
+  font-weight: bold;
+}
+
+.navigation-buttons a {
   color: #999;
 }
 
@@ -1139,19 +1140,11 @@ video {
   width: 100%;
 }
 
-.hidden {
-  display: none;
-}
-
 .validation-buttons button {
   width: 100%;
   margin-bottom: 0.3em;
   border-width: 2px;
   font-weight: bold;
-}
-
-.page {
-  overflow: hidden;
 }
 
 .preview-row {
