@@ -68,3 +68,46 @@ class TimeSpentsServiceTestCase(ApiDBTestCase):
         self.assertEqual(week_table["22"][self.user_id], 600)
         self.assertEqual(week_table["23"][self.person_id], 800)
         self.assertTrue("1" not in week_table)
+
+    def test_get_month_time_spents(self):
+        tasks = time_spents_service.get_month_time_spents(
+            self.person_id,
+            "2018",
+            "5"
+        )
+        self.assertEqual(len(tasks), 1)
+        self.assertEqual(tasks[0]["entity_name"], "Tree")
+        self.assertEqual(tasks[0]["duration"], 600)
+
+    def test_get_week_time_spents(self):
+        tasks = time_spents_service.get_week_time_spents(
+            self.person_id,
+            "2018",
+            "18"
+        )
+        self.assertEqual(len(tasks), 1)
+        self.assertEqual(tasks[0]["entity_name"], "Tree")
+        self.assertEqual(tasks[0]["duration"], 600)
+
+    def test_get_day_time_spents(self):
+        tasks = time_spents_service.get_day_time_spents(
+            self.person_id,
+            "2018",
+            "5",
+            "3"
+        )
+        self.assertEqual(len(tasks), 1)
+        self.assertEqual(tasks[0]["entity_name"], "Tree")
+        self.assertEqual(tasks[0]["duration"], 600)
+
+    def test_get_time_spents(self):
+        time_spents = time_spents_service.get_time_spents(
+            self.person_id,
+            "2018-06-04"
+        )
+        duration = 0
+        for time_spent in time_spents:
+            duration += time_spent["duration"]
+
+        self.assertEqual(len(time_spents), 2)
+        self.assertEqual(duration, 800)

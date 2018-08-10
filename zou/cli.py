@@ -32,6 +32,19 @@ def init_db():
 
 
 @cli.command()
+def migrate_db():
+    "Upgrade database schema."
+
+    from zou.app import app
+    with app.app_context():
+        import zou
+        directory = os.path.join(
+            os.path.dirname(zou.__file__), "migrations"
+        )
+        flask_migrate.migrate(directory=directory)
+
+
+@cli.command()
 def clear_db():
     "Drop all tables from database"
 
@@ -147,6 +160,21 @@ def patch_scene_asset_instance():
             })
         except:
             print(asset_instance.serialize())
+
+
+@cli.command()
+def patch_task_type_allow_timelog():
+    """
+    Patch to run after upgrade from 0.7.3 or lower to 0.7.4 or superior.
+    """
+    from zou.app.models.task_type import TaskType
+    for task_type in TaskType.query.all():
+        try:
+            task_type.update({
+                "allow_timelog": True
+            })
+        except:
+            print(task_type.serialize())
 
 
 if __name__ == '__main__':
