@@ -260,6 +260,29 @@ const actions = {
     })
   },
 
+  loadAggregatedPersonTimeSpents (
+    { commit, state, rootGetters }, {
+      personId,
+      detailLevel,
+      year,
+      month,
+      week,
+      day
+    }) {
+    return new Promise((resolve, reject) => {
+      peopleApi.getAggregatedPersonTimeSpents(
+        personId,
+        detailLevel,
+        year,
+        month,
+        week,
+        day
+      ).then((tasks) => {
+        resolve(tasks)
+      }).catch((err) => reject(err))
+    })
+  },
+
   showPersonImportModal ({ commit, state }, personId) {
     commit(SHOW_IMPORT_PEOPLE_MODAL)
   },
