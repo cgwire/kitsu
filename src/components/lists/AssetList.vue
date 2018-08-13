@@ -5,7 +5,6 @@
       <thead>
         <tr>
           <th class="thumbnail"></th>
-          <th class="type">{{ $t('assets.fields.type') }}</th>
           <th class="name">{{ $t('assets.fields.name') }}</th>
           <th class="description">{{ $t('assets.fields.description') }}</th>
           <th
@@ -43,7 +42,7 @@
                   production_id: currentProduction.id
                 }
               }"
-              v-if="isCurrentUserManager && entries.length > 0"
+              v-if="isCurrentUserManager && displayedAssets.length > 0"
             >
             </button-link>
           </th>
@@ -81,71 +80,75 @@
     v-infinite-scroll="loadMoreAssets"
     infinite-scroll-disabled="busy"
     infinite-scroll-distance="120"
+    v-if="!isLoading"
   >
 
     <table class="table">
-      <tbody>
+      <tbody
+        class="tbody"
+        :key="group[0] ? group[0].asset_type_id : ''"
+        v-for="(group, k) in displayedAssets"
+      >
+        <tr class="type-header">
+          <td colspan="30">
+            {{ group[0] ? group[0].asset_type_name : ''}}
+          </td>
+        </tr>
         <tr
-          :key="entry.id"
-          :class="{canceled: entry.canceled}"
-          v-for="(entry, i) in entries"
+          :key="asset.id"
+          :class="{canceled: asset.canceled}"
+          v-for="(asset, i) in group"
         >
           <td class="thumbnail">
-            <entity-thumbnail :entity="entry"></entity-thumbnail>
+            <entity-thumbnail :entity="asset"></entity-thumbnail>
           </td>
-          <td :class="{type: !entry.canceled}">
-            {{ entry.asset_type_name }}
-          </td>
-          <td :class="{name: !entry.canceled}">
+          <td :class="{name: !asset.canceled}">
             <router-link
               class="asset-link"
               :to="{
                 name: 'asset',
                 params: {
-                  production_id: entry.production_id,
-                  asset_id: entry.id
+                  production_id: asset.production_id,
+                  asset_id: asset.id
                 }
               }">
-            {{ entry.name }}
+            {{ asset.name }}
             </router-link>
           </td>
-          <description-cell class="description" :entry="entry">
-          </description-cell>
+          <description-cell class="description" :entry="asset" />
           <validation-cell
-            :key="column.name + '-' + entry.id"
-            :ref="'validation-' + i + '-' + j"
+            :key="column.name + '-' + asset.id"
+            :ref="'validation-' + getIndex(i, k) + '-' + j"
             :column="column"
-            :entity="entry"
-            :selected="assetSelectionGrid[i][j]"
-            :rowX="i"
+            :entity="asset"
+            :selected="assetSelectionGrid[getIndex(i, k)][j]"
+            :rowX="getIndex(i, k)"
             :columnY="j"
-            class="unselectable toto"
             @select="onTaskSelected"
             @unselect="onTaskUnselected"
             v-for="(column, j) in validationColumns"
-          >
-          </validation-cell>
+          />
           <row-actions v-if="isCurrentUserManager"
-            :entry="entry"
+            :asset="asset"
             :edit-route="{
               name: 'edit-asset',
               params: {
                 production_id: currentProduction.id,
-                asset_id: entry.id
+                asset_id: asset.id
               }
             }"
             :delete-route="{
               name: 'delete-asset',
               params: {
                 production_id: currentProduction.id,
-                asset_id: entry.id
+                asset_id: asset.id
               }
             }"
             :restore-route="{
               name: 'restore-asset',
               params: {
                 production_id: currentProduction.id,
-                asset_id: entry.id
+                asset_id: asset.id
               }
             }"
           >
@@ -153,6 +156,7 @@
           <td class="actions" v-else>
           </td>
         </tr>
+        <tr class="empty-line"></tr>
       </tbody>
     </table>
   </div>
@@ -177,12 +181,24 @@ import ValidationCell from '../cells/ValidationCell'
 
 export default {
   name: 'asset-list',
-  props: [
-    'entries',
-    'isLoading',
-    'isError',
-    'validationColumns'
-  ],
+  props: {
+    displayedAssets: {
+      type: Array,
+      default: () => []
+    },
+    isLoading: {
+      type: Boolean,
+      default: true
+    },
+    isError: {
+      type: Boolean,
+      default: true
+    },
+    validationColumns: {
+      type: Array,
+      default: () => []
+    }
+  },
 
   data () {
     return {
@@ -217,7 +233,7 @@ export default {
     ]),
 
     isEmptyList () {
-      return this.entries.length === 0 &&
+      return this.displayedAssets.length === 0 &&
              !this.isLoading &&
              !this.isError &&
              (!this.assetSearchText || this.assetSearchText.length === 0)
@@ -297,7 +313,19 @@ export default {
     },
 
     setScrollPosition (scrollPosition) {
-      this.$refs.body.scrollTop = scrollPosition
+      if (this.$refs.body) {
+        this.$refs.body.scrollTop = scrollPosition
+      }
+    },
+
+    getIndex (i, k) {
+      let j = 0
+      let index = 0
+      while (j < k) {
+        index += this.displayedAssets[j].length
+        j++
+      }
+      return i + index
     }
   }
 }
@@ -366,5 +394,48 @@ td.type {
 .highlighted {
   background: #00B242;
   color: white;
+}
+
+tr {
+  border-right: 1px solid #CCC;
+  border-left: 1px solid #CCC;
+}
+
+thead tr {
+  border-right: 1px solid transparent;
+  border-left: 1px solid transparent;
+}
+
+.empty-line {
+  border-right: 0;
+  border-left: 0;
+  border-bottom: 1px solid #CCC;
+  height: 1em;
+  box-shadow: inner 2px 2px 2px #EEE;
+}
+
+tbody:first-child tr:first-child {
+  border-top: 1px solid #CCC;
+}
+
+tbody:last-child .empty-line:last-child {
+  border: 0;
+}
+
+tbody {
+  user-select: none;
+}
+
+.table-header {
+  margin-bottom: 1em;
+}
+
+.table tr.type-header {
+  border-top: 1px solid #CCC;
+  font-size: 1.1em;
+}
+
+.table tr.type-header:hover {
+  background: transparent;
 }
 </style>
