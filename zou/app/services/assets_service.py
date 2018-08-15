@@ -103,6 +103,7 @@ def get_assets_and_tasks(criterions={}, page=1):
             Task.id,
             Task.task_type_id,
             Task.task_status_id,
+            Task.priority,
             assignees_table.columns.person
         ) \
         .order_by(
@@ -119,6 +120,7 @@ def get_assets_and_tasks(criterions={}, page=1):
         task_id,
         task_type_id,
         task_status_id,
+        task_priority,
         person_id
     ) in query.all():
 
@@ -142,6 +144,7 @@ def get_assets_and_tasks(criterions={}, page=1):
                     "entity_id": str(asset.id),
                     "task_status_id": str(task_status_id),
                     "task_type_id": str(task_type_id),
+                    "priority": task_priority or 0,
                     "assignees": []
                 }
                 task_map[task_id] = task_dict
