@@ -24,7 +24,8 @@
             class="validation-cell"
             :key="column.id"
             :style="{
-              'border-left': '2px solid ' + column.color
+              'border-left': '1px solid ' + column.color,
+              'background': getBackground(column.color)
             }"
             v-for="column in validationColumns">
             <router-link
@@ -187,6 +188,8 @@
 
 <script>
 import { mapGetters, mapActions } from 'vuex'
+import colors from '../../lib/colors'
+
 import DescriptionCell from '../cells/DescriptionCell'
 import ValidationCell from '../cells/ValidationCell'
 import RowActions from '../widgets/RowActions'
@@ -315,6 +318,10 @@ export default {
 
     setScrollPosition (scrollPosition) {
       this.$refs.body.scrollTop = scrollPosition
+    },
+
+    getBackground (color) {
+      return colors.hexToRGBa(color, 0.08)
     }
   }
 }

@@ -6,8 +6,11 @@
     selected: selectable & selected
   }"
   :style="{
-    'border-left': isBorder ? '2px solid ' + column.color : 'none',
+    'border-left': isBorder ? '1px solid ' + column.color : 'none',
+    'background': isBorder ? getBackground(column.color) : 'transparent'
   }"
+  @mouseover="onMouseOver"
+  @mouseout="onMouseOut"
   @click="select"
 >
   <div class="wrapper">
@@ -33,6 +36,8 @@
 
 <script>
 import { mapGetters, mapActions } from 'vuex'
+import colors from '../../lib/colors'
+
 import ValidationTag from '../widgets/ValidationTag'
 import PeopleAvatar from '../widgets/PeopleAvatar'
 
@@ -115,9 +120,36 @@ export default {
     ...mapActions([
     ]),
 
+    getBackground (color) {
+      if (this.isBorder) {
+        return colors.hexToRGBa(color, 0.08)
+      } else {
+        return 'transparent'
+      }
+    },
+
+    onMouseOver (event) {
+      if (this.selectable && !this.selected) {
+        this.changeStyle('#CCFFCC')
+      }
+    },
+
+    onMouseOut (event) {
+      if (this.selectable && !this.selected) {
+        const background = this.getBackground(this.column.color)
+        this.changeStyle(background)
+      }
+    },
+
+    changeStyle (background) {
+      const border =
+        this.isBorder ? '1px solid ' + this.column.color : 'none'
+      this.$refs['cell'].style =
+        `border-left: ${border}; background: ${background};`
+    },
+
     select (event) {
       const isUserClick = event.isUserClick !== false
-
       if (this.selectable && !this.isCurrentUserClient) {
         if (this.$refs.cell &&
             this.$refs.cell.className.indexOf('selected') < 0) {
@@ -143,6 +175,18 @@ export default {
             isUserClick: isUserClick
           })
         }
+      }
+    }
+  },
+
+  watch: {
+    selected () {
+      if (this.selected) {
+        const background = '#D1C4E9'
+        this.changeStyle(background)
+      } else {
+        const background = this.getBackground(this.column.color)
+        this.changeStyle(background)
       }
     }
   }

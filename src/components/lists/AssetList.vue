@@ -13,7 +13,8 @@
             class="validation-cell"
             :key="column.id"
             :style="{
-              'border-left': '2px solid ' + column.color
+              'border-left': '1px solid ' + column.color,
+              'background': getBackground(column.color)
             }"
             v-for="column in validationColumns"
           >
@@ -29,7 +30,6 @@
               {{ column.name }}
             </router-link>
           </th>
-
           <th class="actions">
             <button-link
               :class="{
@@ -45,8 +45,7 @@
                 }
               }"
               v-if="isCurrentUserManager && displayedAssets.length > 0"
-            >
-            </button-link>
+            />
           </th>
         </tr>
       </thead>
@@ -90,7 +89,6 @@
     infinite-scroll-distance="120"
     v-if="!isLoading"
   >
-
     <table class="table">
       <tbody
         class="tbody"
@@ -183,6 +181,8 @@
 
 <script>
 import { mapGetters, mapActions } from 'vuex'
+import colors from '../../lib/colors'
+
 import DescriptionCell from '../cells/DescriptionCell'
 import RowActions from '../widgets/RowActions'
 import ButtonLink from '../widgets/ButtonLink'
@@ -264,6 +264,10 @@ export default {
     ...mapActions([
       'displayMoreAssets'
     ]),
+
+    getBackground (color) {
+      return colors.hexToRGBa(color, 0.08)
+    },
 
     onTaskSelected (validationInfo) {
       if (validationInfo.isShiftKey) {
@@ -420,6 +424,10 @@ thead tr {
   border-left: 1px solid transparent;
 }
 
+thead tr a {
+  color: #7A7A7A;
+}
+
 .empty-line {
   border-right: 0;
   border-left: 0;
@@ -451,5 +459,10 @@ tbody {
 
 .table-body {
   padding-top: 1em;
+}
+
+.table tr.type-header td {
+  font-weight: bold;
+  padding-left: 0.3em;
 }
 </style>
