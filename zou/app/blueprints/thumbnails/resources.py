@@ -1,6 +1,6 @@
 import os
 
-from flask import abort, request, send_from_directory
+from flask import abort, request, send_from_directory, current_app
 from flask_restful import Resource
 from flask_jwt_extended import jwt_required
 
@@ -33,7 +33,7 @@ class CreatePreviewFilePictureResource(Resource):
             "originals",
             instance_id
         )
-        extension = uploaded_file.filename[-4:]
+        extension = "." + uploaded_file.filename.split(".")[-1].lower()
         if extension in [".png", ".jpg"]:
             thumbnail_utils.save_file(
                 folder_path,
@@ -73,7 +73,7 @@ class CreatePreviewFilePictureResource(Resource):
 
             return {}, 201
 
-        elif extension in [".obj", ".pdf"]:
+        elif extension in [".obj", ".pdf", ".ma", ".mb"]:
             from moviepy.editor import VideoFileClip
             file_name = "%s%s" % (instance_id, extension)
             folder = thumbnail_utils.create_folder(folder_path)
@@ -85,7 +85,8 @@ class CreatePreviewFilePictureResource(Resource):
             return {}, 201
 
         else:
-            abort(400, "Wrong file format")
+            current_app.logger.info("Wrong file format, extension: %s", extension)
+            abort(400, "Wrong file format, extension: %s" % extension)
 
     def emit_app_preview_event(self, preview_file_id):
         preview_file = files_service.get_preview_file(preview_file_id)
