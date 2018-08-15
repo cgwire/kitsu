@@ -151,6 +151,7 @@ def get_shots_and_tasks(criterions={}):
             Task.id,
             Task.task_type_id,
             Task.task_status_id,
+            Task.priority,
             assignees_table.columns.person
         ) \
         .filter(Entity.entity_type_id == shot_type["id"]) \
@@ -167,6 +168,7 @@ def get_shots_and_tasks(criterions={}):
         task_id,
         task_type_id,
         task_status_id,
+        task_priority,
         person_id
     ) in query.all():
         shot_id = str(shot.id)
@@ -199,6 +201,7 @@ def get_shots_and_tasks(criterions={}):
                     "entity_id": shot_id,
                     "task_status_id": str(task_status_id),
                     "task_type_id": str(task_type_id),
+                    "priority": task_priority or 0,
                     "assignees": []
                 }
                 task_map[task_id] = task_dict
