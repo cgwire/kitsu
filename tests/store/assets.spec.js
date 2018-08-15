@@ -441,7 +441,7 @@ describe('assets', () => {
         }
       })
       expect(state.displayedAssets.length).to.equal(4)
-      expect(state.displayedAssets[0].name).to.equal('New asset')
+      expect(state.displayedAssets[3].name).to.equal('New asset')
 
       const newName = 'Chair edited'
       store.commit(EDIT_ASSET_END, {
