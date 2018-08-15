@@ -49,13 +49,14 @@ export const sortProductions = (productions) => {
 
 export const sortTasks = (tasks) => {
   return tasks.sort(
-    firstBy((a, b) => {
-      if (a.project_name) {
-        return a.project_name.localeCompare(b.project_name)
-      } else {
-        return 0
-      }
-    })
+    firstBy('priority', -1)
+      .thenBy((a, b) => {
+        if (a.project_name) {
+          return a.project_name.localeCompare(b.project_name)
+        } else {
+          return 0
+        }
+      })
       .thenBy((a, b) => a.task_type_name.localeCompare(b.task_type_name))
       .thenBy((a, b) => {
         if (a.full_entity_name) {

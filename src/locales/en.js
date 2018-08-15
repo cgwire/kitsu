@@ -120,8 +120,8 @@ export default {
     logout: 'Logout',
     profile: 'Profile',
     production: 'Production',
-    studio: 'Studio',
     save: 'Save',
+    studio: 'Studio',
     user: 'User',
     yes: 'yes',
     csv: {
@@ -136,6 +136,7 @@ export default {
 
   menu: {
     assign_tasks: 'Assign tasks',
+    change_priority: 'Change priority',
     change_status: 'Change status',
     create_tasks: 'Create tasks',
     run_custom_action: 'Run custom action'
@@ -154,8 +155,8 @@ export default {
   },
 
   people: {
-    delete_text: 'Are you sure you want to remove {personName} from your database?',
     delete_error: 'An error occured while deleting this person. There are probably data linked to it. Are you sure this person has no assignation or wrote no comment?',
+    delete_text: 'Are you sure you want to remove {personName} from your database?',
     edit_title: 'Edit person',
     new_person: 'Add a new employee',
     persons: 'person | persons',
@@ -351,6 +352,7 @@ export default {
     back_to_list: 'back to list',
     change_status_to: 'Change task status to:',
     change_preview: 'Change preview',
+    change_priority: 'Change priority to:',
     clear_assignations: 'clear assignations',
     create_for_selection: 'Create task for each empty cell:',
     create_tasks: 'Add tasks',
@@ -391,6 +393,12 @@ export default {
       production: 'Prod',
       task_status: 'Status',
       task_type: 'Type'
+    },
+    priority: {
+      emergency: 'Emergency',
+      normal: 'Normal',
+      high: 'High',
+      very_high: 'Very High'
     }
   },
 

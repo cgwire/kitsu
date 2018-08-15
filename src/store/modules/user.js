@@ -323,10 +323,8 @@ const mutations = {
       const taskStatus = helpers.getTaskStatus(task.task_status_id)
       task.taskStatus = taskStatus
     })
-
     state.todoSelectionGrid = buildSelectionGrid(tasks.length, 1)
     state.todos = sortTasks(tasks)
-
     state.todosIndex = buildTaskIndex(tasks)
     const searchResult = indexSearch(state.todosIndex, state.todosSearchText)
     state.displayedTodos = searchResult || state.todos

@@ -68,7 +68,7 @@
 
   <asset-list
     ref="asset-list"
-    :entries="displayedAssets"
+    :displayed-assets="displayedAssetsByType"
     :is-loading="isAssetsLoading"
     :is-error="isAssetsLoadingError"
     :validation-columns="assetValidationColumns"
@@ -234,7 +234,7 @@ export default {
       'assetTypes',
       'assetValidationColumns',
       'currentProduction',
-      'displayedAssets',
+      'displayedAssetsByType',
       'openProductions',
       'isAssetsLoading',
       'isAssetsLoadingError',

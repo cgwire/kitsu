@@ -42,6 +42,10 @@ export default {
       'comment:new' (eventData) {
         const commentId = eventData.comment_id
         this.$store.dispatch('loadComment', {commentId})
+      },
+
+      'task:update' (eventData) {
+        this.$store.dispatch('getTask', { taskId: eventData.task_id })
       }
     }
   }

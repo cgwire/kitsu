@@ -258,8 +258,8 @@ export default {
 }
 
 .status {
-  width: 80px;
-  min-width: 80px;
+  width: 90px;
+  min-width: 90px;
 }
 
 th.last-comment {

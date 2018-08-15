@@ -53,6 +53,7 @@ import {
   DELETE_TASK_END,
   NEW_TASK_COMMENT_END,
   NEW_TASK_END,
+  EDIT_TASK_END,
 
   SET_ASSET_SEARCH,
   CREATE_TASKS_END,
@@ -94,6 +95,7 @@ const helpers = {
   getPerson (personId) {
     return peopleStore.state.personMap[personId]
   },
+
   populateTask (task, asset, production) {
     task.persons = []
 
@@ -128,6 +130,27 @@ const helpers = {
     })
 
     return task
+  },
+
+  groupAssetsByType: (assets) => {
+    const assetsByType = []
+    let assetTypeAssets = []
+    let previousAsset = null
+
+    for (let asset of assets) {
+      if (
+        previousAsset &&
+        asset.asset_type_name !== previousAsset.asset_type_name
+      ) {
+        assetsByType.push(assetTypeAssets.slice(0))
+        assetTypeAssets = []
+      }
+      assetTypeAssets.push(asset)
+      previousAsset = asset
+    }
+    assetsByType.push(assetTypeAssets)
+
+    return assetsByType
   }
 }
 
@@ -202,26 +225,12 @@ const getters = {
 
   assetListScrollPosition: state => state.assetListScrollPosition,
 
+  displayedAssetsByType: state => {
+    return helpers.groupAssetsByType(state.displayedAssets)
+  },
+
   assetsByType: state => {
-    const assetsByType = []
-    let assetTypeAssets = []
-    let previousAsset = null
-    let assets = Object.values(state.assetMap)
-
-    for (let asset of assets) {
-      if (
-        previousAsset &&
-        asset.asset_type_name !== previousAsset.asset_type_name
-      ) {
-        assetsByType.push(assetTypeAssets.slice(0))
-        assetTypeAssets = []
-      }
-      assetTypeAssets.push(asset)
-      previousAsset = asset
-    }
-    assetsByType.push(assetTypeAssets)
-
-    return assetsByType
+    return helpers.groupAssetsByType(Object.values(state.assetMap))
   },
 
   editAsset: state => state.editAsset,
@@ -543,12 +552,14 @@ const mutations = {
     newAsset.tasks = []
     if (asset) {
       Object.assign(asset, newAsset)
+      state.displayedAssets = sortAssets(state.displayedAssets)
     } else {
       newAsset.validations = {}
       newAsset.production_id = newAsset.project_id
       cache.assets.push(newAsset)
       cache.assets = sortAssets(cache.assets)
-      state.displayedAssets.unshift(newAsset)
+      state.displayedAssets.push(newAsset)
+      state.displayedAssets = sortAssets(state.displayedAssets)
 
       const maxX = state.displayedAssets.length
       const maxY = state.nbValidationColumns
@@ -777,6 +788,14 @@ const mutations = {
 
       asset.tasks.push(task)
       Vue.set(asset.validations, task.task_type_name, task)
+    }
+  },
+
+  [EDIT_TASK_END] (state, { task, taskType }) {
+    const asset = state.assetMap[task.entity_id]
+    if (asset && task) {
+      const assetTask = asset.tasks.find((ctask) => ctask.id === task.id)
+      assetTask.priority = task.priority
     }
   },
 

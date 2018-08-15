@@ -86,6 +86,7 @@ import {
 
   NEW_TASK_COMMENT_END,
   NEW_TASK_END,
+  EDIT_TASK_END,
 
   SET_SHOT_SEARCH,
   SET_SEQUENCE_SEARCH,
@@ -1154,6 +1155,14 @@ const mutations = {
 
       shot.tasks.push(task)
       Vue.set(shot.validations, task.task_type_name, task)
+    }
+  },
+
+  [EDIT_TASK_END] (state, { task, taskType }) {
+    const shot = state.shotMap[task.entity_id]
+    if (shot && task) {
+      const shotTask = shot.tasks.find((ctask) => ctask.id === task.id)
+      shotTask.priority = task.priority
     }
   },
 
