@@ -96,8 +96,12 @@ const state = {
 const getters = {
   user: state => state.user,
   isAuthenticated: state => state.isAuthenticated,
-  isCurrentUserManager: state => state.user && state.user.role !== 'user',
+  isCurrentUserManager: state => {
+    return state.user && ['admin', 'manager'].includes(state.user.role)
+  },
   isCurrentUserAdmin: state => state.user && state.user.role === 'admin',
+  isCurrentUserCGArtist: state => state.user && state.user.role === 'user',
+  isCurrentUserClient: state => state.user && state.user.role === 'client',
   isSaveProfileLoading: state => state.isSaveProfileLoading,
   isSaveProfileLoadingError: state => state.isSaveProfileLoadingError,
   changePassword: state => state.changePassword,

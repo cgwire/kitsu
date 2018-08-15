@@ -6,9 +6,11 @@
         <tr>
           <th class="thumbnail"></th>
           <th class="name">{{ $t('assets.fields.name') }}</th>
-          <th class="description">{{ $t('assets.fields.description') }}</th>
+          <th class="description" v-if="!isCurrentUserClient">
+            {{ $t('assets.fields.description') }}
+          </th>
           <th
-            class="validation"
+            class="validation-cell"
             :key="column.id"
             :style="{
               'border-left': '2px solid ' + column.color
@@ -57,7 +59,7 @@
   >
   </table-info>
 
-  <div class="has-text-centered" v-if="isEmptyList">
+  <div class="has-text-centered" v-if="isEmptyList && !isCurrentUserClient">
     <p class="info">
       <img src="../../assets/illustrations/empty_asset.png" />
     </p>
@@ -71,6 +73,12 @@
       }"
     >
     </button-link>
+  </div>
+  <div class="has-text-centered" v-if="isEmptyList && isCurrentUserClient">
+    <p class="info">
+      <img src="../../assets/illustrations/empty_asset.png" />
+    </p>
+    <p class="info">{{ $t('assets.empty_list_client') }}</p>
   </div>
 
   <div
@@ -115,8 +123,13 @@
             {{ asset.name }}
             </router-link>
           </td>
-          <description-cell class="description" :entry="asset" />
+          <description-cell
+            class="description"
+            v-if="!isCurrentUserClient"
+            :entry="asset"
+          />
           <validation-cell
+            class="validation-cell"
             :key="column.name + '-' + asset.id"
             :ref="'validation-' + getIndex(i, k) + '-' + j"
             :column="column"
@@ -226,6 +239,7 @@ export default {
       'assetSearchText',
       'selectedTasks',
       'nbSelectedTasks',
+      'isCurrentUserClient',
       'isCurrentUserManager',
       'displayedAssetsLength',
       'assetSelectionGrid',
@@ -361,7 +375,7 @@ export default {
   width: 200px;
 }
 
-.validation {
+.validation-cell {
   min-width: 120px;
   max-width: 120px;
   width: 120px;
@@ -426,10 +440,6 @@ tbody {
   user-select: none;
 }
 
-.table-header {
-  margin-bottom: 1em;
-}
-
 .table tr.type-header {
   border-top: 1px solid #CCC;
   font-size: 1.1em;
@@ -437,5 +447,9 @@ tbody {
 
 .table tr.type-header:hover {
   background: transparent;
+}
+
+.table-body {
+  padding-top: 1em;
 }
 </style>

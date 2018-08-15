@@ -36,7 +36,7 @@
   >
   </table-info>
 
-  <div class="has-text-centered" v-if="isEmptyList">
+  <div class="has-text-centered" v-if="isEmptyList && !isCurrentUserClient">
     <p class="info">
       <img src="../../assets/illustrations/empty_shot.png" />
     </p>
@@ -50,6 +50,12 @@
       }"
     >
     </button-link>
+  </div>
+  <div class="has-text-centered" v-if="isEmptyList && isCurrentUserClient">
+    <p class="info">
+      <img src="../../assets/illustrations/empty_shot.png" />
+    </p>
+    <p class="info">{{ $t('episodes.empty_list_client') }}</p>
   </div>
 
   <div
@@ -156,6 +162,7 @@ export default {
   computed: {
     ...mapGetters([
       'currentProduction',
+      'isCurrentUserClient',
       'isCurrentUserManager',
       'isSingleEpisode',
       'displayedEpisodesLength',

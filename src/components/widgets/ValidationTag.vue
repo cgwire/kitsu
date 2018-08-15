@@ -2,17 +2,26 @@
 <span>
   <router-link
     :to="'/tasks/' + task.id"
-    :class="{
-      tag: true,
-      dynamic: !isStatic
-    }"
+    class="tag dynamic"
+    v-if="!isStatic && !isCurrentUserClient"
     :style="{
       background: this.backgroundColor,
       color: this.color,
   }">
     {{ task.task_status_short_name }}
   </router-link>
-  <span class="priority" v-if="priority">
+
+  <span
+    class="tag"
+    v-else
+    :style="{
+      background: this.backgroundColor,
+      color: this.color,
+  }">
+    {{ task.task_status_short_name }}
+  </span>
+
+  <span class="priority" v-if="isPriority && !isCurrentUserClient">
     {{ priority }}
   </span>
 </span>
@@ -39,7 +48,8 @@ export default {
 
   computed: {
     ...mapGetters([
-      'taskStatusMap'
+      'taskStatusMap',
+      'isCurrentUserClient'
     ]),
 
     backgroundColor () {

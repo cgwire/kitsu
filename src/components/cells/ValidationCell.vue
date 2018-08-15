@@ -2,7 +2,7 @@
 <td
   ref="cell"
   :class="{
-    validation: selectable,
+    validation: selectable && !isCurrentUserClient,
     selected: selectable & selected
   }"
   :style="{
@@ -23,7 +23,7 @@
       :person="personMap[personId]"
       :size="20"
       :font-size="10"
-      v-if="isAssignees && isShowAssignations"
+      v-if="isAssignees && isShowAssignations && !isCurrentUserClient"
       v-for="personId in assignees"
     >
     </people-avatar>
@@ -92,6 +92,7 @@ export default {
       'selectedTasks',
       'selectedValidations',
       'nbSelectedTasks',
+      'isCurrentUserClient',
       'isShowAssignations',
       'personMap',
       'taskStatusMap'
@@ -117,7 +118,7 @@ export default {
     select (event) {
       const isUserClick = event.isUserClick !== false
 
-      if (this.selectable) {
+      if (this.selectable && !this.isCurrentUserClient) {
         if (this.$refs.cell &&
             this.$refs.cell.className.indexOf('selected') < 0) {
           this.$emit('select', {
