@@ -12,6 +12,7 @@
 >
   <div class="wrapper">
     <validation-tag
+      class="validation-tag"
       :task="task"
       v-if="task"
     >
@@ -92,7 +93,8 @@ export default {
       'selectedValidations',
       'nbSelectedTasks',
       'isShowAssignations',
-      'personMap'
+      'personMap',
+      'taskStatusMap'
     ]),
 
     task () {
@@ -149,6 +151,7 @@ export default {
 <style scoped>
 .validation {
   cursor: pointer;
+  margin-bottom: 3px;
 }
 
 .wrapper {
@@ -165,7 +168,15 @@ td.selected.validation:hover {
   background: #D1C4E9;
 }
 
-.person-avatar {
+span.person-avatar:nth-child(2) {
   margin-left: 3px;
+}
+
+.validation-tag {
+  margin-bottom: 3px;
+}
+
+.person-avatar {
+  margin-right: 3px;
 }
 </style>

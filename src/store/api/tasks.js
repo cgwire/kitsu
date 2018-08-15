@@ -5,6 +5,10 @@ export default {
     client.get(`/api/data/tasks/${taskId}/full`, callback)
   },
 
+  updateTask (taskId, data, callback) {
+    client.put(`/api/data/tasks/${taskId}`, data, callback)
+  },
+
   getTaskStatuses (callback) {
     client.get(`/api/data/task-status`, callback)
   },

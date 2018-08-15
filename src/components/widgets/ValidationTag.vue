@@ -1,19 +1,25 @@
 <template>
-<router-link
-  :to="'/tasks/' + task.id"
-  :class="{
-    tag: true,
-    dynamic: !isStatic
-  }"
-  :style="{
-    background: this.backgroundColor,
-    color: this.color,
-}">
-  {{ task.task_status_short_name }}
-</router-link>
+<span>
+  <router-link
+    :to="'/tasks/' + task.id"
+    :class="{
+      tag: true,
+      dynamic: !isStatic
+    }"
+    :style="{
+      background: this.backgroundColor,
+      color: this.color,
+  }">
+    {{ task.task_status_short_name }}
+  </router-link>
+  <span class="priority" v-if="priority">
+    {{ priority }}
+  </span>
+</span>
 </template>
 
 <script>
+import { mapGetters } from 'vuex'
 export default {
   name: 'validation-tag',
   props: {
@@ -24,9 +30,18 @@ export default {
     isStatic: {
       default: false,
       type: Boolean
+    },
+    isPriority: {
+      default: true,
+      type: Boolean
     }
   },
+
   computed: {
+    ...mapGetters([
+      'taskStatusMap'
+    ]),
+
     backgroundColor () {
       if (this.task.task_status_short_name === 'wtg') {
         return '#f5f5f5'
@@ -45,12 +60,30 @@ export default {
       }
       return this.task.task_status_color
     },
+
     color () {
       if (this.task.task_status_short_name !== 'todo' &&
           this.task.task_status_short_name !== 'wtg') {
         return 'white'
       } else {
         return '#333'
+      }
+    },
+
+    priority () {
+      if (
+        this.task.priority &&
+        !this.taskStatusMap[this.task.task_status_id].is_done
+      ) {
+        if (this.task.priority === 3) {
+          return '!!!'
+        } else if (this.task.priority === 2) {
+          return '!!'
+        } else if (this.task.priority === 1) {
+          return '!'
+        }
+      } else {
+        return ''
       }
     }
   }
@@ -67,5 +100,9 @@ export default {
   cursor: pointer;
   transform: scale(1.15);
   transition: all 0.1s ease-in-out
+}
+
+.priority {
+  color: red;
 }
 </style>

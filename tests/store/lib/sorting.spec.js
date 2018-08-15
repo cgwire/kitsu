@@ -233,6 +233,14 @@ describe('lib/sorting', () => {
       {
         project_name: 'Big Buck Bunny',
         task_type_name: 'Modeling',
+        entity_name: 'Chair',
+        full_entity_name: 'Props / Tree',
+        priority: 3,
+        id: 5
+      },
+      {
+        project_name: 'Big Buck Bunny',
+        task_type_name: 'Modeling',
         entity_name: 'Tree',
         full_entity_name: 'Props / Tree',
         id: 4
@@ -260,11 +268,12 @@ describe('lib/sorting', () => {
       }
     ]
     let results = sortTasks(entries)
-    expect(results.length).to.equal(4)
-    expect(results[0].id).to.equal(1)
-    expect(results[1].id).to.equal(2)
-    expect(results[2].id).to.equal(3)
-    expect(results[3].id).to.equal(4)
+    expect(results.length).to.equal(5)
+    expect(results[0].id).to.equal(5)
+    expect(results[1].id).to.equal(1)
+    expect(results[2].id).to.equal(2)
+    expect(results[3].id).to.equal(3)
+    expect(results[4].id).to.equal(4)
 
     results = sortProductions([])
     expect(results.length).to.equal(0)

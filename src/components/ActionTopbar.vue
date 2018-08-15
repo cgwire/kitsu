@@ -82,6 +82,36 @@
 
         <div
           class="flexrow-item"
+          v-if="selectedBar === 'priorities'"
+        >
+          <div class="flexrow">
+            <div class="flexrow-item strong bigger hide-small-screen">
+              {{ $t('tasks.change_priority') }}
+            </div>
+            <div class="flexrow-item combobox-item">
+              <combobox
+                :options="priorityOptions"
+                v-model="priority"
+              >
+              </combobox>
+            </div>
+            <div class="flexrow-item" v-if="!isChangePriorityLoading">
+              <button
+                class="button is-success confirm-button"
+                @click="confirmPriorityChange"
+              >
+                {{ $t('main.confirmation') }}
+              </button>
+
+              <div class="" v-if="isChangePriorityLoading">
+                <spinner :is-white="true"></spinner>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div
+          class="flexrow-item"
           v-if="selectedBar === 'tasks'"
         >
           <div class="flexrow">
@@ -181,6 +211,14 @@
         <div
           class="more-menu-item"
           v-if="isCurrentViewAsset || isCurrentViewShot"
+          @click="selectBar('priorities')"
+        >
+          {{ $t('menu.change_priority') }}
+        </div>
+
+        <div
+          class="more-menu-item"
+          v-if="isCurrentViewAsset || isCurrentViewShot"
           @click="selectBar('tasks')"
         >
           {{ $t('menu.create_tasks') }}
@@ -192,7 +230,6 @@
         >
           {{ $t('menu.run_custom_action') }}
         </div>
-
       </div>
     </div>
 
@@ -219,6 +256,7 @@ import { ChevronRightIcon, XIcon, MoreVerticalIcon } from 'vue-feather-icons'
 
 export default {
   name: 'topbar',
+
   components: {
     ChevronRightIcon,
     Combobox,
@@ -229,20 +267,42 @@ export default {
     ButtonHrefLink,
     XIcon
   },
+
   data () {
     return {
       isMoreMenuDisplayed: true,
       isAssignationLoading: false,
-      isCreationLoading: false,
       isChangeStatusLoading: false,
+      isChangePriorityLoading: false,
+      isCreationLoading: false,
       selectedBar: 'assignation',
       personId: '',
       taskStatusId: '',
       customActionUrl: '',
       selectedTaskIds: [],
-      customActionOptions: []
+      customActionOptions: [],
+      priority: '0',
+      priorityOptions: [
+        {
+          label: this.$t('tasks.priority.normal'),
+          value: '0'
+        },
+        {
+          label: this.$t('tasks.priority.high'),
+          value: '1'
+        },
+        {
+          label: this.$t('tasks.priority.very_high'),
+          value: '2'
+        },
+        {
+          label: this.$t('tasks.priority.emergency'),
+          value: '3'
+        }
+      ]
     }
   },
+
   computed: {
     ...mapGetters([
       'assetMap',
@@ -321,6 +381,7 @@ export default {
       'createSelectedTasks',
       'unassignSelectedTasks',
       'changeSelectedTaskStatus',
+      'changeSelectedPriorities',
       'clearSelectedTasks'
     ]),
 
@@ -353,14 +414,24 @@ export default {
       })
     },
 
+    confirmPriorityChange () {
+      this.isChangePriorityLoading = true
+      this.changeSelectedPriorities({
+        priority: Number(this.priority),
+        callback: () => {
+          this.isChangePriorityLoading = false
+        }
+      })
+    },
+
     confirmTaskCreation () {
       const type = this.$route.path.indexOf('shots') > 0 ? 'shots' : 'assets'
-      this.isCreationLoading = true
+      this.isPriorityLoading = true
       this.createSelectedTasks({
         type: type,
         projectId: this.currentProduction.id,
         callback: () => {
-          this.isCreationLoading = false
+          this.isPriorityLoading = false
         }
       })
     },

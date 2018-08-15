@@ -19,6 +19,7 @@ import {
 
   NEW_TASK_COMMENT_END,
   NEW_TASK_END,
+  EDIT_TASK_END,
 
   CREATE_TASKS_END,
   DELETE_TASK_END,
@@ -305,6 +306,36 @@ const actions = {
     }, (err) => {
       commit(CLEAR_SELECTED_TASKS)
       callback(err)
+    })
+  },
+
+  changeSelectedPriorities ({ commit, state, rootGetters }, { priority, callback }) {
+    async.eachSeries(Object.keys(state.selectedTasks), (taskId, next) => {
+      const task = state.taskMap[taskId]
+      const taskType = rootGetters.taskTypeMap[task.task_type_id]
+
+      if (task && task.priority !== priority) {
+        tasksApi.updateTask(taskId, { priority }, (err, task) => {
+          if (!err) {
+            commit(EDIT_TASK_END, { task, taskType })
+          }
+          next(err)
+        })
+      } else {
+        next()
+      }
+    }, (err) => {
+      callback(err)
+    })
+  },
+
+  getTask ({ commit, rootGetters }, { taskId, callback }) {
+    tasksApi.getTask(taskId, (err, task) => {
+      if (!err) {
+        const taskType = rootGetters.taskTypeMap[task.task_type_id]
+        commit(EDIT_TASK_END, { task, taskType })
+      }
+      if (callback) callback(err)
     })
   },
 
@@ -678,6 +709,10 @@ const mutations = {
 
   [NEW_TASK_END] (state, task) {
     state.taskMap[task.id] = task
+  },
+
+  [EDIT_TASK_END] (state, { task }) {
+    state.taskMap[task.id].priority = task.priority
   },
 
   [ASSIGN_TASKS] (state, { selectedTaskIds, personId }) {

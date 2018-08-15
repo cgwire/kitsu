@@ -53,6 +53,7 @@ import {
   DELETE_TASK_END,
   NEW_TASK_COMMENT_END,
   NEW_TASK_END,
+  EDIT_TASK_END,
 
   SET_ASSET_SEARCH,
   CREATE_TASKS_END,
@@ -787,6 +788,14 @@ const mutations = {
 
       asset.tasks.push(task)
       Vue.set(asset.validations, task.task_type_name, task)
+    }
+  },
+
+  [EDIT_TASK_END] (state, { task, taskType }) {
+    const asset = state.assetMap[task.entity_id]
+    if (asset && task) {
+      const assetTask = asset.tasks.find((ctask) => ctask.id === task.id)
+      assetTask.priority = task.priority
     }
   },
 
