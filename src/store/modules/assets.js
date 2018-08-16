@@ -53,7 +53,6 @@ import {
   DELETE_TASK_END,
   NEW_TASK_COMMENT_END,
   NEW_TASK_END,
-  EDIT_TASK_END,
 
   SET_ASSET_SEARCH,
   CREATE_TASKS_END,
@@ -97,26 +96,9 @@ const helpers = {
   },
 
   populateTask (task, asset, production) {
-    task.persons = []
-
-    task.taskType = helpers.getTaskType(task.task_type_id)
-    task.taskStatus = helpers.getTaskStatus(task.task_status_id)
-    task.assignees.forEach((personId) => {
-      task.persons.push(helpers.getPerson(personId))
-    })
-    task.task_status_short_name = task.taskStatus.short_name
-    task.task_status_color = task.taskStatus.color
-    task.name = task.taskType.priority.toString()
+    task.name = helpers.getTaskType(task.task_type_id).priority.toString()
 
     Object.assign(task, {
-      task_status_name: task.taskStatus.name,
-      task_status_short_name: task.taskStatus.short_name,
-      task_status_color: task.taskStatus.color,
-
-      task_type_name: task.taskType.name,
-      task_type_color: task.taskType.color,
-      task_type_priority: task.taskType.priority,
-
       project_id: asset.production_id,
 
       entity_name: `${asset.asset_type_name} / ${asset.name}`,
@@ -124,9 +106,7 @@ const helpers = {
       entity: {
         id: asset.id,
         preview_file_id: asset.preview_file_id
-      },
-
-      assigneesInfo: task.assignees.map(helpers.getPerson)
+      }
     })
 
     return task
@@ -238,11 +218,7 @@ const getters = {
   restoreAsset: state => state.restoreAsset,
   assetCreated: state => state.assetCreated,
 
-  assetsCsvFormData: state => state.assetsCsvFormData,
-
-  getAsset: (state, getters) => (id) => {
-    return state.assetMap[id]
-  }
+  assetsCsvFormData: state => state.assetsCsvFormData
 }
 
 const actions = {
@@ -265,10 +241,11 @@ const actions = {
     })
   },
 
-  loadAsset ({ commit, state }, { assetId, callback }) {
+  loadAsset ({ commit, state, rootGetters }, { assetId, callback }) {
+    const taskTypeMap = rootGetters.taskTypeMap
     assetsApi.getAsset(assetId, (err, asset) => {
       if (!err) {
-        commit(LOAD_ASSET_END, asset)
+        commit(LOAD_ASSET_END, { asset, taskTypeMap })
       }
       if (callback) callback(err)
     })
@@ -361,8 +338,10 @@ const actions = {
     })
   },
 
-  setAssetSearch ({commit}, searchQuery) {
-    commit(SET_ASSET_SEARCH, searchQuery)
+  setAssetSearch ({ commit, rootGetters }, assetSearch) {
+    const taskStatusMap = rootGetters.taskStatusMap
+    const taskMap = rootGetters.taskMap
+    commit(SET_ASSET_SEARCH, { assetSearch, taskMap, taskStatusMap })
   },
 
   saveAssetSearch ({ commit, rootGetters }, searchQuery) {
@@ -437,8 +416,10 @@ const actions = {
     commit(SET_PRODUCTION_ASSET_TYPE_LIST_SCROLL_POSITION)
   },
 
-  computeAssetTypeStats ({ commit }) {
-    commit(COMPUTE_ASSET_TYPE_STATS)
+  computeAssetTypeStats ({ commit, rootGetters }) {
+    const taskStatusMap = rootGetters.taskStatusMap
+    const taskMap = rootGetters.taskMap
+    commit(COMPUTE_ASSET_TYPE_STATS, { taskStatusMap, taskMap })
   },
 
   setAssetTypeSearch ({commit}, searchQuery) {
@@ -468,9 +449,9 @@ const mutations = {
     const validationColumns = {}
     const assetTypeMap = {}
     assets = sortAssets(assets)
+
     state.assetMap = {}
     assets.forEach((asset) => {
-      state.assetMap[asset.id] = asset
       if (!assetTypeMap[asset.asset_type]) {
         assetTypeMap[asset.asset_type_id] = {
           id: asset.asset_type_id,
@@ -483,6 +464,8 @@ const mutations = {
         helpers.populateTask(task, asset)
         validationColumns[task.task_type_id] = true
       })
+
+      state.assetMap[asset.id] = asset
     })
 
     cache.assets = assets
@@ -510,11 +493,11 @@ const mutations = {
     }
   },
 
-  [LOAD_ASSET_END] (state, asset) {
+  [LOAD_ASSET_END] (state, { asset, taskTypeMap }) {
     asset.tasks.forEach((task) => {
       helpers.populateTask(task, asset)
     })
-    asset.tasks = sortTasks(asset.tasks)
+    asset.tasks = sortTasks(asset.tasks, taskTypeMap)
     state.assetMap[asset.id] = asset
   },
 
@@ -560,6 +543,7 @@ const mutations = {
       cache.assets = sortAssets(cache.assets)
       state.displayedAssets.push(newAsset)
       state.displayedAssets = sortAssets(state.displayedAssets)
+      state.displayedAssetsLength = state.displayedAssets.length
 
       const maxX = state.displayedAssets.length
       const maxY = state.nbValidationColumns
@@ -688,10 +672,12 @@ const mutations = {
     }
   },
 
-  [SET_ASSET_SEARCH] (state, assetSearch) {
+  [SET_ASSET_SEARCH] (state, { assetSearch, taskStatusMap, taskMap }) {
     let result = indexSearch(cache.assetIndex, assetSearch) || cache.assets
     const taskTypes = extractTaskTypes(cache.assets)
-    result = applyFilters(taskTypes, result, assetSearch) || []
+    result = applyFilters(
+      taskTypes, result, assetSearch, taskStatusMap, taskMap
+    ) || []
 
     state.displayedAssets = result.slice(0, PAGE_SIZE)
     state.displayedAssetsLength = result ? result.length : 0
@@ -791,14 +777,6 @@ const mutations = {
     }
   },
 
-  [EDIT_TASK_END] (state, { task, taskType }) {
-    const asset = state.assetMap[task.entity_id]
-    if (asset && task) {
-      const assetTask = asset.tasks.find((ctask) => ctask.id === task.id)
-      assetTask.priority = task.priority
-    }
-  },
-
   [SET_ASSET_TYPE_SEARCH] (state, searchQuery) {
     let result = indexSearch(
       cache.assetTypeIndex,
@@ -810,8 +788,10 @@ const mutations = {
     state.assetTypeSearchText = searchQuery
   },
 
-  [COMPUTE_ASSET_TYPE_STATS] (state) {
-    state.assetTypeStats = computeStats(cache.assets, 'asset_type_id')
+  [COMPUTE_ASSET_TYPE_STATS] (state, { taskStatusMap, taskMap }) {
+    state.assetTypeStats = computeStats(
+      cache.assets, 'asset_type_id', taskStatusMap, taskMap
+    )
   },
 
   [RESET_ALL] (state) {

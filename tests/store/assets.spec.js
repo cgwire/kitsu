@@ -53,6 +53,9 @@ let userFilters = {}
 let taskStatuses = []
 let taskTypes = []
 
+let taskMap = {}
+let taskStatusMap = {}
+
 assetsApi.getAssets = (callback) => {
   process.nextTick(() => {
     callback(null, assets)
@@ -94,6 +97,39 @@ describe('assets', () => {
   afterEach(helpers.reset)
 
   beforeEach(() => {
+    taskMap = {
+      'task-1': {
+        id: 'task-1',
+        entity_name: 'BBB / Bunny',
+        task_type_id: 'task-type-1',
+        task_status_id: 'task-status-3',
+        assignees: []
+      },
+      'task-2': {
+        id: 'task-2',
+        entity_name: 'BBB / Bunny',
+        project_name: 'BBB',
+        task_type_id: 'task-type-2',
+        task_status_id: 'task-status-3',
+        assignees: []
+      },
+      'task-3': {
+        id: 'task-3',
+        entity_name: 'BBB / Bunny',
+        task_type_id: 'task-type-1',
+        task_status_id: 'task-status-3',
+        assignees: []
+      },
+      'task-4': {
+        id: 'task-4',
+        entity_name: 'BBB / Bunny',
+        project_name: 'BBB',
+        task_type_id: 'task-type-2',
+        task_status_id: 'task-status-3',
+        assignees: []
+      }
+    }
+
     assets = [
       {
         id: 1,
@@ -101,30 +137,7 @@ describe('assets', () => {
         project_name: 'BBB',
         asset_type_id: 'asset-type-1',
         asset_type_name: 'Character',
-        tasks: [
-          {
-            id: 'task-1',
-            entity_name: 'BBB / Bunny',
-            task_type_name: 'Concept',
-            task_type_color: '#0000FF',
-            task_type_priority: 1,
-            task_type_id: 'task-type-1',
-            task_status_id: 'task-status-1',
-            assignees: []
-          },
-          {
-            id: 'task-2',
-            entity_name: 'BBB / Bunny',
-            project_name: 'BBB',
-            asset_type_name: 'Character',
-            task_type_name: 'Modeling',
-            task_type_color: '#00FF00',
-            task_type_id: 'task-type-2',
-            task_status_id: 'task-status-1',
-            task_type_priority: 2,
-            assignees: []
-          }
-        ]
+        tasks: [taskMap['task-1'], taskMap['task-2']]
       },
 
       {
@@ -133,26 +146,7 @@ describe('assets', () => {
         project_name: 'BBB',
         asset_type_id: 'asset-type-2',
         asset_type_name: 'Props',
-        tasks: [
-          {
-            id: 'task-3',
-            task_type_name: 'Concept',
-            task_type_color: '#0000FF',
-            task_type_priority: 1,
-            task_type_id: 'task-type-1',
-            task_status_id: 'task-status-1',
-            assignees: []
-          },
-          {
-            id: 'task-4',
-            task_type_name: 'Shaders',
-            task_type_color: '#FF0000',
-            task_type_priority: 3,
-            task_type_id: 'task-type-3',
-            task_status_id: 'task-status-1',
-            assignees: []
-          }
-        ]
+        tasks: [taskMap['task-3'], taskMap['task-4']]
       },
 
       {
@@ -203,6 +197,12 @@ describe('assets', () => {
       }
     ]
 
+    taskStatusMap = {
+      'task-status-1': taskStatuses[0],
+      'task-status-2': taskStatuses[1],
+      'task-status-3': taskStatuses[2]
+    }
+
     taskTypes = [
       {
         id: 'task-type-1',
@@ -236,14 +236,6 @@ describe('assets', () => {
   })
 
   describe('getters', () => {
-    it('getAsset', () => {
-      store.commit(LOAD_TASK_TYPES_END, taskTypes)
-      store.commit(LOAD_TASK_STATUSES_END, taskStatuses)
-      store.commit(LOAD_ASSETS_END, { assets, production, userFilters })
-      const assetType = getters.getAsset(state)(2)
-      expect(assetType.id).to.equal(2)
-      expect(assetType.name).to.equal('Chair')
-    })
   })
 
   describe('actions', () => {
@@ -285,76 +277,6 @@ describe('assets', () => {
       done()
     })
   })
-
-  /*
-    it('loadAssets', (done) => {
-      helpers.runAction('loadAssetTypes', (err) => {
-        expect(err).to.be.null
-        expect(state.isAssetTypesLoading).to.equal(false)
-        expect(state.isAssetTypesLoadingError).to.equal(false)
-        expect(state.assetTypes).to.deep.equal(assetTypes)
-        done()
-      })
-      expect(state.isAssetTypesLoading).to.equal(true)
-      expect(state.isAssetTypesLoadingError).to.equal(false)
-    })
-
-    it('newAssetType', (done) => {
-      store.commit(LOAD_ASSET_TYPES_END, assetTypes)
-      helpers.runAction('newAssetType', {
-        data: {
-          name: 'New assetType'
-        },
-        callback: (err) => {
-          expect(err).to.be.null
-          expect(state.editAssetType.isLoading).to.equal(false)
-          expect(state.editAssetType.isError).to.equal(false)
-          expect(state.assetTypes.length).to.equal(4)
-          done()
-        }
-      })
-      expect(state.editAssetType.isLoading).to.equal(true)
-      expect(state.editAssetType.isError).to.equal(false)
-    })
-
-    it('editAssetType', (done) => {
-      store.commit(LOAD_ASSET_TYPES_END, assetTypes)
-      helpers.runAction('editAssetType', {
-        data: {
-          id: 2,
-          name: 'Modeling edited',
-          color: '#FFFFFF'
-        },
-        callback: (err) => {
-          expect(err).to.be.null
-          expect(state.editAssetType.isLoading).to.equal(false)
-          expect(state.editAssetType.isError).to.equal(false)
-          expect(state.assetTypes.length).to.equal(3)
-          const assetTypeName = getters.getAssetType(state)(2).name
-          expect(assetTypeName).to.equal('Modeling edited')
-          done()
-        }
-      })
-      expect(state.editAssetType.isLoading).to.equal(true)
-      expect(state.editAssetType.isError).to.equal(false)
-    })
-    it('deleteAssetType', (done) => {
-      store.commit(LOAD_ASSET_TYPES_END, assetTypes)
-      helpers.runAction('deleteAssetType', {
-        assetType: assetTypes[1],
-        callback: (err) => {
-          expect(err).to.be.null
-          expect(state.deleteAssetType.isLoading).to.equal(false)
-          expect(state.deleteAssetType.isError).to.equal(false)
-          expect(state.assetTypes.length).to.equal(2)
-          done()
-        }
-      })
-      expect(state.deleteAssetType.isLoading).to.equal(true)
-      expect(state.deleteAssetType.isError).to.equal(false)
-    })
-  })
-  */
 
   describe('mutations', () => {
 
@@ -516,7 +438,7 @@ describe('assets', () => {
       store.commit(LOAD_TASK_TYPES_END, taskTypes)
       store.commit(SET_CURRENT_PRODUCTION, production)
       store.commit(LOAD_ASSETS_END, { production, assets, userFilters })
-      store.commit(COMPUTE_ASSET_TYPE_STATS)
+      store.commit(COMPUTE_ASSET_TYPE_STATS, { taskMap, taskStatusMap })
       expect(
         state.assetTypeStats['asset-type-1']['task-type-1']['#333333'].value
       ).to.equal(1)

@@ -1,7 +1,7 @@
 <template>
   <div class="people page fixed-page">
     <div class="flexrow page-header">
-      <div class="flexrow-item">
+      <div class="flexrow-item" v-if="person">
         <people-avatar
           :person="person"
           :size="80"
@@ -15,7 +15,7 @@
     </div>
 
     <div class="task-tabs tabs">
-      <ul>
+      <ul v-if="person">
         <li
           :class="{'is-active': isActiveTab('todos')}"
         >
@@ -145,7 +145,7 @@ export default {
       activeTab: 'todos',
       isTasksLoading: false,
       isTasksLoadingError: false,
-      person: {},
+      person: null,
       selectedDate: moment().format('YYYY-MM-DD')
     }
   },

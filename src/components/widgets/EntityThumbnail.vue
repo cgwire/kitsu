@@ -124,7 +124,7 @@ span.thumbnail-empty {
   background: #F3F3F3;
   display: block;
   margin-bottom: 0.3em;
-  margin-top: 0.3em;
+  margin-top: 7px;
 }
 
 span.square {

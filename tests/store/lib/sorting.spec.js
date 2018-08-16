@@ -2,6 +2,9 @@ import { expect } from 'chai'
 import {
   sortAssets,
   sortByName,
+  sortByDate,
+  sortPeople,
+  sortPlaylists,
   sortProductions,
   sortShots,
   sortTaskTypes,
@@ -9,6 +12,12 @@ import {
   sortValidationColumns
 } from '../../../src/lib/sorting'
 
+
+const taskTypeMap = {
+  'task-type-1': {id: 'task-type-1', priority: 1, name: 'Modeling'},
+  'task-type-2': {id: 'task-type-2', priority: 1, name: 'Setup'},
+  'task-type-3': {id: 'task-type-3', priority: 2, name: 'Texture'}
+}
 
 describe('lib/sorting', () => {
 
@@ -232,7 +241,7 @@ describe('lib/sorting', () => {
     const entries = [
       {
         project_name: 'Big Buck Bunny',
-        task_type_name: 'Modeling',
+        task_type_id: 'task-type-1',
         entity_name: 'Chair',
         full_entity_name: 'Props / Tree',
         priority: 3,
@@ -240,34 +249,34 @@ describe('lib/sorting', () => {
       },
       {
         project_name: 'Big Buck Bunny',
-        task_type_name: 'Modeling',
+        task_type_id: 'task-type-1',
         entity_name: 'Tree',
         full_entity_name: 'Props / Tree',
         id: 4
       },
       {
         project_name: 'Agent 327',
-        task_type_name: 'Modeling',
+        task_type_id: 'task-type-1',
         entity_name: 'Agent327',
         full_entity_name: 'Characters / Agent327',
         id: 1
       },
       {
         project_name: 'Agent 327',
-        task_type_name: 'Setup',
+        task_type_id: 'task-type-2',
         entity_name: 'Agent327',
         full_entity_name: 'Characters / Agent327',
         id: 3
       },
       {
         project_name: 'Agent 327',
-        task_type_name: 'Modeling',
+        task_type_id: 'task-type-1',
         entity_name: 'SuperVilain',
         full_entity_name: 'Characters / SuperVilain',
         id: 2
       }
     ]
-    let results = sortTasks(entries)
+    let results = sortTasks(entries, taskTypeMap)
     expect(results.length).to.equal(5)
     expect(results[0].id).to.equal(5)
     expect(results[1].id).to.equal(1)
@@ -300,18 +309,54 @@ describe('lib/sorting', () => {
   })
 
   it('sortValidationColumns', () => {
-    const entries = [
-      {priority: 2, name: 'Big Buck Bunny', id: 3},
-      {priority: 1, name: 'Cosmos Landromat', id: 2},
-      {priority: 1, name: 'Agent 327', id: 1},
-    ]
-    let results = sortValidationColumns(entries)
+    const entries = ['task-type-3', 'task-type-2', 'task-type-1']
+    let results = sortValidationColumns(entries, taskTypeMap)
     expect(results.length).to.equal(3)
-    expect(results[0].id).to.equal(1)
-    expect(results[1].id).to.equal(2)
-    expect(results[2].id).to.equal(3)
+    expect(results[0]).to.equal('task-type-1')
+    expect(results[1]).to.equal('task-type-2')
+    expect(results[2]).to.equal('task-type-3')
 
     results = sortValidationColumns([])
     expect(results.length).to.equal(0)
+  })
+
+  it('sortPlaylist', () => {
+    const entries = [
+      { id: 1, created_at: '2018-09-12-12:18:30', name: 'Playlist1'},
+      { id: 2, created_at: '2018-09-18-16:22:00', name: 'Playlist2'},
+      { id: 3, created_at: '2018-09-18-18:19:00', name: 'Playlist3'},
+    ]
+    let results = sortByDate(entries)
+    expect(results.length).to.equal(3)
+    expect(results[0].id).to.equal(3)
+    expect(results[1].id).to.equal(2)
+    expect(results[2].id).to.equal(1)
+  })
+
+  it('sortPeople', () => {
+    const people = [
+      { id: 1, first_name: 'Allen', last_name: 'Beard'},
+      { id: 2, first_name: 'John', last_name: 'Doe'},
+      { id: 3, first_name: 'Emma', last_name: 'Doe'}
+    ]
+
+    let results = sortPeople(people)
+    expect(results.length).to.equal(3)
+    expect(results[0].id).to.equal(1)
+    expect(results[1].id).to.equal(3)
+    expect(results[2].id).to.equal(2)
+  })
+
+  it('sortByDate', () => {
+    const entries = [
+      { id: 1, created_at: '2018-09-12-12:18:30'},
+      { id: 2, created_at: '2018-09-18-16:22:00'},
+      { id: 3, created_at: '2018-09-18-18:19:00'}
+    ]
+    let results = sortByDate(entries)
+    expect(results.length).to.equal(3)
+    expect(results[0].id).to.equal(3)
+    expect(results[1].id).to.equal(2)
+    expect(results[2].id).to.equal(1)
   })
 })

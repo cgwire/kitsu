@@ -56,10 +56,9 @@
               </span>
             </router-link>
             <validation-tag
-              :task="asset.validations[currentTaskType.name]"
+              :task="taskMap[asset.validations[currentTaskType.name]]"
               v-if="asset.validations[currentTaskType.name]"
-            >
-            </validation-tag>
+            />
           </div>
         </div>
       </div>
@@ -113,7 +112,7 @@
               </span>
             </router-link>
             <validation-tag
-              :task="shot.validations[currentTaskType.name]"
+              :task="taskMap[shot.validations[currentTaskType.name]]"
               v-if="shot.validations[currentTaskType.name]"
             >
             </validation-tag>
@@ -166,7 +165,8 @@ export default {
       'sequenceSubscriptions',
       'shotsByEpisode',
       'shotMap',
-      'taskTypeMap'
+      'taskTypeMap',
+      'taskMap'
     ]),
 
     title () {

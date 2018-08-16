@@ -133,15 +133,15 @@ const actions = {
     })
   },
 
-  checkNewPasswordValidityAndSave ({ commit, state }, payload) {
+  checkNewPasswordValidityAndSave ({ commit, state }, { form, callback }) {
     if (auth.isPasswordValid(
-      payload.form.password,
-      payload.form.password2
+      form.password,
+      form.password2
     )) {
-      actions.changeUserPassword({ commit, state }, payload)
+      actions.changeUserPassword({ commit, state }, { form, callback })
     } else {
       commit(USER_CHANGE_PASSWORD_UNVALID)
-      if (payload.callback) payload.callback()
+      if (callback) callback()
     }
   },
 
@@ -159,6 +159,7 @@ const actions = {
 
   loadTodos ({ commit, state, rootGetters }, { callback, forced, date }) {
     const userFilters = rootGetters.userFilters
+    const taskTypeMap = rootGetters.taskTypeMap
 
     if (state.todos.length === 0 || forced) {
       commit(USER_LOAD_TODOS_START)
@@ -179,7 +180,10 @@ const actions = {
                 commit(USER_LOAD_TODOS_ERROR)
               } else {
                 commit(USER_LOAD_TIME_SPENTS_END, timeSpents)
-                commit(USER_LOAD_TODOS_END, { tasks, userFilters })
+                commit(
+                  USER_LOAD_TODOS_END,
+                  { tasks, userFilters, taskTypeMap }
+                )
               }
               if (callback) callback(err)
             })
@@ -320,7 +324,7 @@ const mutations = {
     state.timeSpentTotal = 0
   },
 
-  [USER_LOAD_TODOS_END] (state, { tasks, userFilters }) {
+  [USER_LOAD_TODOS_END] (state, { tasks, userFilters, taskTypeMap }) {
     state.isTodosLoading = false
     tasks.forEach(populateTask)
     tasks.forEach((task) => {
@@ -328,7 +332,7 @@ const mutations = {
       task.taskStatus = taskStatus
     })
     state.todoSelectionGrid = buildSelectionGrid(tasks.length, 1)
-    state.todos = sortTasks(tasks)
+    state.todos = sortTasks(tasks, taskTypeMap)
     state.todosIndex = buildTaskIndex(tasks)
     const searchResult = indexSearch(state.todosIndex, state.todosSearchText)
     state.displayedTodos = searchResult || state.todos

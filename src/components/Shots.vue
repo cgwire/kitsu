@@ -8,8 +8,7 @@
 
         <div class="level-right" v-if="isCurrentUserManager">
           <div class="level-item">
-            <show-assignations-button>
-            </show-assignations-button>
+            <show-assignations-button />
             <button-link
               class="level-item"
               :text="$t('main.csv.import_file')"
@@ -19,16 +18,14 @@
                 name: 'import-shots',
                 params: {production_id: currentProduction.id}
               }"
-            >
-            </button-link>
+            />
             <button-href-link
               class="level-item"
               :text="$t('main.csv.export_file')"
               icon="download"
               :is-responsive="true"
               :path="'/api/export/csv/projects/' + currentProduction.id + '/shots.csv'"
-            >
-            </button-href-link>
+            />
             <button-link
               class="level-item"
               :text="$t('shots.manage')"
@@ -38,8 +35,7 @@
                 name: 'manage-shots',
                 params: {production_id: currentProduction.id}
               }"
-            >
-            </button-link>
+            />
           </div>
         </div>
       </div>
@@ -237,24 +233,24 @@ export default {
 
   computed: {
     ...mapGetters([
+      'currentProduction',
+      'deleteShot',
+      'displayedShots',
+      'editShot',
+      'isCurrentUserManager',
+      'isShotsLoading',
+      'isShotsLoadingError',
+      'isShowAssignations',
+      'openProductions',
+      'restoreShot',
+      'sequences',
       'shots',
       'shotMap',
       'shotsCsvFormData',
       'shotSearchQueries',
-      'displayedShots',
-      'sequences',
-      'openProductions',
-      'isShotsLoading',
-      'isShotsLoadingError',
-      'editShot',
-      'deleteShot',
-      'restoreShot',
       'shotValidationColumns',
-      'currentProduction',
-      'isCurrentUserManager',
       'shotSearchText',
-      'shotListScrollPosition',
-      'isShowAssignations'
+      'shotListScrollPosition'
     ])
   },
 
@@ -263,19 +259,14 @@ export default {
 
     const productionId = this.$store.state.route.params.production_id
     if (this.currentProduction.id !== productionId) {
-      this.$store.commit(
-        'SET_CURRENT_PRODUCTION',
-        productionId
-      )
+      this.setProduction(productionId)
     }
 
     const shotIds = Object.keys(this.shotMap)
     if (shotIds.length === 0 ||
         this.shotMap[shotIds[0]].production_id !== this.currentProduction.id) {
       this.loadShots((err) => {
-        setTimeout(() => {
-          this.$refs['shot-list'].resizeHeaders()
-        }, 0)
+        this.resizeHeaders()
         if (!err) this.handleModalsDisplay()
       })
     }
@@ -288,6 +279,7 @@ export default {
     this.$refs['shot-list'].setScrollPosition(
       this.shotListScrollPosition
     )
+    this.resizeHeaders()
   },
 
   methods: {
@@ -297,6 +289,7 @@ export default {
       'removeShotSearch',
       'saveShotSearch',
       'setLastProductionScreen',
+      'setProduction',
       'setShotSearch',
       'showAssignations',
       'hideAssignations'
@@ -396,7 +389,7 @@ export default {
               name: 'shots',
               params: {production_id: this.currentProduction.id}
             })
-            this.$store.dispatch('loadShots')
+            this.loadShots()
           }
         }
       })
@@ -479,7 +472,7 @@ export default {
         if (!err) {
           this.loading.importing = false
           this.modals.isImportDisplayed = false
-          this.$store.dispatch('loadShots')
+          this.loadShots()
         } else {
           this.loading.importing = false
           this.errors.importing = true
@@ -520,6 +513,12 @@ export default {
         .catch((err) => {
           if (err) console.log('error')
         })
+    },
+
+    resizeHeaders () {
+      setTimeout(() => {
+        this.$refs['shot-list'].resizeHeaders()
+      }, 0)
     }
   },
 
@@ -536,11 +535,7 @@ export default {
       if (oldPath !== path) {
         this.$refs['shot-search-field'].setValue('')
         this.$store.commit('SET_SHOT_LIST_SCROLL_POSITION', 0)
-        this.$store.dispatch('loadShots', {
-          callback: () => {
-            this.$refs['shot-list'].resizeHeaders()
-          }
-        })
+        this.loadShots(this.resizeHeaders)
       }
     }
   },

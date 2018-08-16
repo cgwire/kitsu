@@ -86,7 +86,6 @@ import {
 
   NEW_TASK_COMMENT_END,
   NEW_TASK_END,
-  EDIT_TASK_END,
 
   SET_SHOT_SEARCH,
   SET_SEQUENCE_SEARCH,
@@ -135,19 +134,9 @@ const helpers = {
   getPerson (personId) {
     return peopleStore.state.personMap[personId]
   },
-  populateTask (task, shot) {
-    task.persons = []
 
-    task.taskType = helpers.getTaskType(task.task_type_id)
-    task.taskStatus = helpers.getTaskStatus(task.task_status_id)
-    task.assignees.forEach((personId) => {
-      task.persons.push(helpers.getPerson(personId))
-    })
-
-    // Hacks for proper render
-    task.task_status_short_name = task.taskStatus.short_name
-    task.task_status_color = task.taskStatus.color
-    task.name = task.taskType.priority.toString()
+  populateTask (task, shot, production) {
+    task.name = helpers.getTaskType(task.task_type_id).priority.toString()
 
     let entityName = `${shot.sequence_name} / ${shot.name}`
     if (shot.episode_name) {
@@ -155,25 +144,15 @@ const helpers = {
     }
 
     Object.assign(task, {
-      task_status_name: task.taskStatus.name,
-      task_status_short_name: task.taskStatus.short_name,
-      task_status_color: task.taskStatus.color,
-
-      task_type_name: task.taskType.name,
-      task_type_color: task.taskType.color,
-      task_type_priority: task.taskType.priority,
-
       project_id: shot.production_id,
 
-      entity_type_name: 'Shot',
       entity_name: entityName,
+      entity_type_name: shot.shot_type_name,
       sequence_name: shot.sequence_name,
       entity: {
         id: shot.id,
         preview_file_id: shot.preview_file_id
-      },
-
-      assigneesInfo: task.assignees.map(helpers.getPerson)
+      }
     })
 
     return task
@@ -320,6 +299,7 @@ const actions = {
   loadShots ({ commit, state, rootGetters }, callback) {
     const production = rootGetters.currentProduction
     const userFilters = rootGetters.userFilters
+    const taskTypeMap = rootGetters.taskTypeMap
 
     commit(LOAD_SHOTS_START)
     shotsApi.getEpisodes(production, (err, episodes) => {
@@ -337,7 +317,10 @@ const actions = {
                 })
                 commit(LOAD_EPISODES_END, episodes)
                 commit(LOAD_SEQUENCES_END, sequences)
-                commit(LOAD_SHOTS_END, { production, shots, userFilters })
+                commit(
+                  LOAD_SHOTS_END,
+                  { production, shots, userFilters, taskTypeMap }
+                )
               }
               if (callback) callback(err)
             })
@@ -347,10 +330,11 @@ const actions = {
     })
   },
 
-  loadShot ({ commit, state }, { shotId, callback }) {
+  loadShot ({ commit, state, rootGetters }, { shotId, callback }) {
+    const taskTypeMap = rootGetters.taskTypeMap
     shotsApi.getShot(shotId, (err, shot) => {
       if (!err) {
-        commit(LOAD_SHOT_END, shot)
+        commit(LOAD_SHOT_END, { shot, taskTypeMap })
       }
       if (callback) callback(err)
     })
@@ -535,8 +519,10 @@ const actions = {
     commit(DISPLAY_MORE_EPISODES)
   },
 
-  setShotSearch ({commit}, searchQuery) {
-    commit(SET_SHOT_SEARCH, searchQuery)
+  setShotSearch ({commit, rootGetters}, shotSearch) {
+    const taskStatusMap = rootGetters.taskStatusMap
+    const taskMap = rootGetters.taskMap
+    commit(SET_SHOT_SEARCH, { shotSearch, taskStatusMap, taskMap })
   },
 
   saveShotSearch ({ commit, rootGetters }, searchQuery) {
@@ -608,8 +594,10 @@ const actions = {
     commit(SET_SEQUENCE_LIST_SCROLL_POSITION, scrollPosition)
   },
 
-  computeSequenceStats ({ commit }) {
-    commit(COMPUTE_SEQUENCE_STATS)
+  computeSequenceStats ({ commit, rootGetters }) {
+    const taskStatusMap = rootGetters.taskStatusMap
+    const taskMap = rootGetters.taskMap
+    commit(COMPUTE_SEQUENCE_STATS, { taskStatusMap, taskMap })
   },
 
   initEpisodes ({ commit, dispatch, state, rootState, rootGetters }) {
@@ -642,8 +630,10 @@ const actions = {
     commit(SET_EPISODE_LIST_SCROLL_POSITION, scrollPosition)
   },
 
-  computeEpisodeStats ({ commit }) {
-    commit(COMPUTE_EPISODE_STATS)
+  computeEpisodeStats ({ commit, rootGetters }) {
+    const taskStatusMap = rootGetters.taskStatusMap
+    const taskMap = rootGetters.taskMap
+    commit(COMPUTE_EPISODE_STATS, { taskStatusMap, taskMap })
   }
 }
 
@@ -676,7 +666,7 @@ const mutations = {
 
   [LOAD_SHOTS_END] (
     state,
-    { production, shots, userFilters }
+    { production, shots, userFilters, taskTypeMap }
   ) {
     const validationColumns = {}
     let isFps = false
@@ -688,14 +678,14 @@ const mutations = {
     shots.forEach((shot) => {
       shot.production_id = production.id
       shot.tasks.forEach((task) => {
-        helpers.populateTask(task, shot)
+        helpers.populateTask(task, shot, production)
         validationColumns[task.task_type_id] = true
       })
-      shot.tasks = sortTasks(shot.tasks)
 
       if (!isFps && shot.data.fps) isFps = true
       if (!isFrameIn && shot.data.frame_in) isFrameIn = true
       if (!isFrameOut && shot.data.frame_out) isFrameOut = true
+
       state.shotMap[shot.id] = shot
     })
 
@@ -771,11 +761,11 @@ const mutations = {
     state.displayedEpisodesLength = state.episodes.length
   },
 
-  [LOAD_SHOT_END] (state, shot) {
+  [LOAD_SHOT_END] (state, { shot, taskTypeMap }) {
     shot.tasks.forEach((task) => {
       helpers.populateTask(task, shot)
     })
-    shot.tasks = sortTasks(shot.tasks)
+    shot.tasks = sortTasks(shot.tasks, taskTypeMap)
     state.shotMap[shot.id] = shot
   },
 
@@ -962,10 +952,12 @@ const mutations = {
     }
   },
 
-  [SET_SHOT_SEARCH] (state, shotSearch) {
+  [SET_SHOT_SEARCH] (state, { shotSearch, taskStatusMap, taskMap }) {
     const taskTypes = extractTaskTypes(cache.shots)
     let result = indexSearch(cache.shotIndex, shotSearch) || cache.shots
-    result = applyFilters(taskTypes, result, shotSearch) || []
+    result = applyFilters(
+      taskTypes, result, shotSearch, taskStatusMap, taskMap
+    ) || []
 
     state.displayedShots = result.slice(0, PAGE_SIZE)
     state.displayedShotsLength = result.length
@@ -1139,12 +1131,22 @@ const mutations = {
     state.shotSelectionGrid = clearSelectionGrid(state.shotSelectionGrid)
   },
 
-  [COMPUTE_SEQUENCE_STATS] (state) {
-    state.sequenceStats = computeStats(cache.shots, 'sequence_id')
+  [COMPUTE_SEQUENCE_STATS] (state, { taskMap, taskStatusMap }) {
+    state.sequenceStats = computeStats(
+      cache.shots,
+      'sequence_id',
+      taskStatusMap,
+      taskMap
+    )
   },
 
-  [COMPUTE_EPISODE_STATS] (state) {
-    state.episodeStats = computeStats(cache.shots, 'episode_id')
+  [COMPUTE_EPISODE_STATS] (state, { taskMap, taskStatusMap }) {
+    state.episodeStats = computeStats(
+      cache.shots,
+      'episode_id',
+      taskStatusMap,
+      taskMap
+    )
   },
 
   [NEW_TASK_END] (state, task) {
@@ -1154,14 +1156,6 @@ const mutations = {
 
       shot.tasks.push(task)
       Vue.set(shot.validations, task.task_type_name, task)
-    }
-  },
-
-  [EDIT_TASK_END] (state, { task, taskType }) {
-    const shot = state.shotMap[task.entity_id]
-    if (shot && task) {
-      const shotTask = shot.tasks.find((ctask) => ctask.id === task.id)
-      shotTask.priority = task.priority
     }
   },
 

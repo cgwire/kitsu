@@ -11,23 +11,20 @@
           </th>
           <th
             class="validation-cell"
-            :key="column.id"
-            :style="{
-              'border-left': '1px solid ' + column.color,
-              'background': getBackground(column.color)
-            }"
-            v-for="column in validationColumns"
+            :key="columnId"
+            :style="getValidationStyle(columnId)"
+            v-for="columnId in validationColumns"
           >
             <router-link
               :to="{
                 name: 'task-type',
                 params: {
                   production_id: currentProduction.id,
-                  task_type_id: column.id
+                  task_type_id: columnId
                 }
               }"
             >
-              {{ column.name }}
+              {{ taskTypeMap[columnId].name }}
             </router-link>
           </th>
           <th class="actions">
@@ -87,9 +84,11 @@
     v-infinite-scroll="loadMoreAssets"
     infinite-scroll-disabled="busy"
     infinite-scroll-distance="120"
-    v-if="!isLoading && !isEmptyList"
   >
-    <table class="table">
+    <table
+      class="table"
+      v-if="isListVisible"
+    >
       <tbody
         class="tbody"
         :key="group[0] ? group[0].asset_type_id : ''"
@@ -128,16 +127,16 @@
           />
           <validation-cell
             class="validation-cell"
-            :key="column.name + '-' + asset.id"
+            :key="columnId + '-' + asset.id"
             :ref="'validation-' + getIndex(i, k) + '-' + j"
-            :column="column"
+            :column="taskTypeMap[columnId]"
             :entity="asset"
             :selected="assetSelectionGrid[getIndex(i, k)][j]"
             :rowX="getIndex(i, k)"
             :columnY="j"
             @select="onTaskSelected"
             @unselect="onTaskUnselected"
-            v-for="(column, j) in validationColumns"
+            v-for="(columnId, j) in validationColumns"
           />
           <row-actions v-if="isCurrentUserManager"
             :asset="asset"
@@ -243,7 +242,8 @@ export default {
       'isCurrentUserManager',
       'displayedAssetsLength',
       'assetSelectionGrid',
-      'assets'
+      'assets',
+      'taskTypeMap'
     ]),
 
     isEmptyList () {
@@ -258,6 +258,16 @@ export default {
       !this.isLoading &&
       this.validationColumns &&
       this.validationColumns.length === 0
+    },
+
+    isListVisible () {
+      return (
+        !this.isLoading &&
+        !this.isError &&
+        (
+          this.displayedAssetsLength > 0
+        )
+      )
     }
   },
 
@@ -346,6 +356,14 @@ export default {
         j++
       }
       return i + index
+    },
+
+    getValidationStyle (columnId) {
+      const taskType = this.taskTypeMap[columnId]
+      return {
+        'border-left': '1px solid ' + taskType.color,
+        'background': this.getBackground(taskType.color)
+      }
     }
   }
 }
@@ -368,13 +386,6 @@ export default {
   font-weight: bold;
 }
 
-.type {
-  min-width: 160px;
-  max-width: 160px;
-  width: 160px;
-  font-weight: bold;
-}
-
 .description {
   min-width: 200px;
   max-width: 200px;
@@ -389,10 +400,6 @@ export default {
 }
 
 td.name {
-  font-size: 1.2em;
-}
-
-td.type {
   font-size: 1.2em;
 }
 
@@ -430,12 +437,8 @@ thead tr a {
   color: #7A7A7A;
 }
 
-.empty-line {
-  border-right: 0;
-  border-left: 0;
-  border-bottom: 1px solid #CCC;
-  height: 1em;
-  box-shadow: inner 2px 2px 2px #EEE;
+.table-body {
+  padding-top: 1em;
 }
 
 tbody:first-child tr:first-child {
@@ -459,12 +462,16 @@ tbody {
   background: transparent;
 }
 
-.table-body {
-  padding-top: 1em;
-}
-
 .table tr.type-header td {
   font-weight: bold;
   padding-left: 0.3em;
+}
+
+.empty-line {
+  border-right: 0;
+  border-left: 0;
+  border-bottom: 1px solid #CCC;
+  height: 1em;
+  box-shadow: inner 2px 2px 2px #EEE;
 }
 </style>

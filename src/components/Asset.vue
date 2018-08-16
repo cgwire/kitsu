@@ -35,6 +35,7 @@
             <td class="field-label">{{ $t('assets.fields.description') }}</td>
             <description-cell
               :entry="currentAsset"
+              :full="true"
             >
             </description-cell>
           </tr>
