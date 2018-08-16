@@ -35,7 +35,7 @@
   >
   </table-info>
 
-  <div class="has-text-centered" v-if="isEmptyList">
+  <div class="has-text-centered" v-if="isEmptyList && !isCurrentUserClient">
     <p class="info">
       <img src="../../assets/illustrations/empty_asset.png" />
     </p>
@@ -47,8 +47,13 @@
         name: 'new-asset',
         params: {production_id: currentProduction.id}
       }"
-    >
-    </button-link>
+    />
+  </div>
+  <div class="has-text-centered" v-if="isEmptyList && isCurrentUserClient">
+    <p class="info">
+      <img src="../../assets/illustrations/empty_asset.png" />
+    </p>
+    <p class="info">{{ $t('assets.empty_list_client') }}</p>
   </div>
 
   <div
@@ -131,9 +136,10 @@ export default {
 
   computed: {
     ...mapGetters([
+      'assetTypeSearchText',
       'currentProduction',
       'displayedAssetTypesLength',
-      'assetTypeSearchText'
+      'isCurrentUserClient'
     ]),
     isEmptyList () {
       return this.entries &&

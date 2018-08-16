@@ -98,6 +98,11 @@
           </button-link>
         </p>
       </div>
+      <div v-else-if="isCurrentUserClient">
+        <p class="has-text-centered">
+          {{ $t('productions.home.no_prod_for_client') }}
+        </p>
+      </div>
       <div v-else>
         <p class="has-text-centered">
           {{ $t('productions.home.no_task') }}
@@ -146,11 +151,12 @@ export default {
 
   computed: {
     ...mapGetters([
-      'openProductions',
-      'isCurrentUserManager',
       'editProduction',
+      'isCurrentUserManager',
+      'isCurrentUserClient',
+      'isOpenProductionsLoading',
       'lastProductionScreen',
-      'isOpenProductionsLoading'
+      'openProductions'
     ])
   },
 

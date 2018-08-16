@@ -50,27 +50,29 @@ export const clearSelectionGrid = (selectionGrid) => {
 
 export const computeStats = (entities, idField) => {
   const results = {}
-  entities.forEach((shot) => {
-    const sequenceId = shot[idField]
-    if (!results[sequenceId]) results[sequenceId] = {}
+  entities.forEach((entity) => {
+    if (!entity.canceled) {
+      const sequenceId = entity[idField]
+      if (!results[sequenceId]) results[sequenceId] = {}
 
-    shot.tasks.forEach((task) => {
-      const taskTypeId = task.task_type_id
-      const taskStatusId = task.task_status_color
-      if (!results[sequenceId][taskTypeId]) {
-        results[sequenceId][taskTypeId] = {}
-      }
-
-      if (!results[sequenceId][taskTypeId][taskStatusId]) {
-        results[sequenceId][taskTypeId][taskStatusId] = {
-          name: task.task_status_short_name,
-          color: task.task_status_color,
-          value: 0
+      entity.tasks.forEach((task) => {
+        const taskTypeId = task.task_type_id
+        const taskStatusId = task.task_status_color
+        if (!results[sequenceId][taskTypeId]) {
+          results[sequenceId][taskTypeId] = {}
         }
-      }
 
-      results[sequenceId][taskTypeId][taskStatusId].value++
-    })
+        if (!results[sequenceId][taskTypeId][taskStatusId]) {
+          results[sequenceId][taskTypeId][taskStatusId] = {
+            name: task.task_status_short_name,
+            color: task.task_status_color,
+            value: 0
+          }
+        }
+
+        results[sequenceId][taskTypeId][taskStatusId].value++
+      })
+    }
   })
 
   return results

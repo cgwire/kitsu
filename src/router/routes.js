@@ -53,7 +53,7 @@ export const routes = [
               if (err) {
                 next({name: 'server-down'})
               } else {
-                if (userStore.getters.isCurrentUserManager(userStore.state)) {
+                if (!userStore.getters.isCurrentUserCGArtist(userStore.state)) {
                   next({name: 'open-productions'})
                 } else {
                   next({name: 'todos'})
@@ -61,7 +61,7 @@ export const routes = [
               }
             })
           } else {
-            if (userStore.getters.isCurrentUserManager(userStore.state)) {
+            if (!userStore.getters.isCurrentUserCGArtist(userStore.state)) {
               next({name: 'open-productions'})
             } else {
               next({name: 'todos'})

@@ -51,8 +51,7 @@
           @change="onSearchChange"
           placeholder="ex: e01 s01, anim=wip"
           @save="saveSearchQuery"
-        >
-        </search-field>
+        />
       </div>
 
       <div class="query-list">
@@ -60,8 +59,7 @@
           :queries="shotSearchQueries"
           @changesearch="changeSearch"
           @removesearch="removeSearchQuery"
-        >
-        </search-query-list>
+        />
       </div>
     </div>
 
@@ -72,7 +70,7 @@
       :is-error="isShotsLoadingError"
       :validation-columns="shotValidationColumns"
       @scroll="saveScrollPosition"
-    ></shot-list>
+    />
 
     <manage-shots-modal
       :active="modals.isManageDisplayed"
@@ -83,8 +81,7 @@
         name: 'shots',
         params: {production_id: currentProduction.id}
       }"
-    >
-    </manage-shots-modal>
+    />
 
     <edit-shot-modal
       :active="modals.isNewDisplayed"
@@ -99,8 +96,7 @@
       :shot-to-edit="shotToEdit"
       @confirm="confirmEditShot"
       @confirmAndStay="confirmNewShotStay"
-    >
-    </edit-shot-modal>
+    />
 
     <delete-modal
       :active="modals.isDeleteDisplayed"
@@ -113,8 +109,7 @@
       :text="deleteText()"
       :error-text="$t('shots.delete_error')"
       @confirm="confirmDeleteShot"
-    >
-    </delete-modal>
+    />
 
     <delete-modal
       :active="modals.isRestoreDisplayed"
@@ -127,8 +122,7 @@
       :text="restoreText()"
       :error-text="$t('shots.restore_error')"
       @confirm="confirmRestoreShot"
-    >
-    </delete-modal>
+    />
 
     <import-modal
       :active="modals.isImportDisplayed"
@@ -142,8 +136,7 @@
       :columns="columns"
       @fileselected="selectFile"
       @confirm="uploadImportFile"
-    >
-    </import-modal>
+    />
 
     <create-tasks-modal
       :active="modals.isCreateTasksDisplayed"
@@ -157,8 +150,7 @@
       :text="$t('tasks.create_tasks_shot_explaination')"
       :error-text="$t('tasks.create_tasks_shot_failed')"
       @confirm="confirmCreateTasks"
-    >
-    </create-tasks-modal>
+    />
 
   </div>
 </template>

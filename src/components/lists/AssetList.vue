@@ -6,12 +6,15 @@
         <tr>
           <th class="thumbnail"></th>
           <th class="name">{{ $t('assets.fields.name') }}</th>
-          <th class="description">{{ $t('assets.fields.description') }}</th>
+          <th class="description" v-if="!isCurrentUserClient">
+            {{ $t('assets.fields.description') }}
+          </th>
           <th
-            class="validation"
+            class="validation-cell"
             :key="column.id"
             :style="{
-              'border-left': '2px solid ' + column.color
+              'border-left': '1px solid ' + column.color,
+              'background': getBackground(column.color)
             }"
             v-for="column in validationColumns"
           >
@@ -27,7 +30,6 @@
               {{ column.name }}
             </router-link>
           </th>
-
           <th class="actions">
             <button-link
               :class="{
@@ -43,8 +45,7 @@
                 }
               }"
               v-if="isCurrentUserManager && displayedAssets.length > 0"
-            >
-            </button-link>
+            />
           </th>
         </tr>
       </thead>
@@ -57,7 +58,7 @@
   >
   </table-info>
 
-  <div class="has-text-centered" v-if="isEmptyList">
+  <div class="has-text-centered" v-if="isEmptyList && !isCurrentUserClient">
     <p class="info">
       <img src="../../assets/illustrations/empty_asset.png" />
     </p>
@@ -72,6 +73,12 @@
     >
     </button-link>
   </div>
+  <div class="has-text-centered" v-if="isEmptyList && isCurrentUserClient">
+    <p class="info">
+      <img src="../../assets/illustrations/empty_asset.png" />
+    </p>
+    <p class="info">{{ $t('assets.empty_list_client') }}</p>
+  </div>
 
   <div
     ref="body"
@@ -82,7 +89,6 @@
     infinite-scroll-distance="120"
     v-if="!isLoading"
   >
-
     <table class="table">
       <tbody
         class="tbody"
@@ -115,8 +121,13 @@
             {{ asset.name }}
             </router-link>
           </td>
-          <description-cell class="description" :entry="asset" />
+          <description-cell
+            class="description"
+            v-if="!isCurrentUserClient"
+            :entry="asset"
+          />
           <validation-cell
+            class="validation-cell"
             :key="column.name + '-' + asset.id"
             :ref="'validation-' + getIndex(i, k) + '-' + j"
             :column="column"
@@ -170,6 +181,8 @@
 
 <script>
 import { mapGetters, mapActions } from 'vuex'
+import colors from '../../lib/colors'
+
 import DescriptionCell from '../cells/DescriptionCell'
 import RowActions from '../widgets/RowActions'
 import ButtonLink from '../widgets/ButtonLink'
@@ -226,6 +239,7 @@ export default {
       'assetSearchText',
       'selectedTasks',
       'nbSelectedTasks',
+      'isCurrentUserClient',
       'isCurrentUserManager',
       'displayedAssetsLength',
       'assetSelectionGrid',
@@ -233,14 +247,15 @@ export default {
     ]),
 
     isEmptyList () {
-      return this.displayedAssets.length === 0 &&
+      return this.displayedAssetsLength === 0 &&
              !this.isLoading &&
              !this.isError &&
              (!this.assetSearchText || this.assetSearchText.length === 0)
     },
 
     isEmptyTask () {
-      return !this.emptyList &&
+      return !this.isEmptyList &&
+      !this.isLoading &&
       this.validationColumns &&
       this.validationColumns.length === 0
     }
@@ -250,6 +265,10 @@ export default {
     ...mapActions([
       'displayMoreAssets'
     ]),
+
+    getBackground (color) {
+      return colors.hexToRGBa(color, 0.08)
+    },
 
     onTaskSelected (validationInfo) {
       if (validationInfo.isShiftKey) {
@@ -309,6 +328,7 @@ export default {
     },
 
     loadMoreAssets () {
+      console.log('load more assets')
       this.displayMoreAssets()
     },
 
@@ -361,7 +381,7 @@ export default {
   width: 200px;
 }
 
-.validation {
+.validation-cell {
   min-width: 120px;
   max-width: 120px;
   width: 120px;
@@ -406,6 +426,10 @@ thead tr {
   border-left: 1px solid transparent;
 }
 
+thead tr a {
+  color: #7A7A7A;
+}
+
 .empty-line {
   border-right: 0;
   border-left: 0;
@@ -426,10 +450,6 @@ tbody {
   user-select: none;
 }
 
-.table-header {
-  margin-bottom: 1em;
-}
-
 .table tr.type-header {
   border-top: 1px solid #CCC;
   font-size: 1.1em;
@@ -437,5 +457,14 @@ tbody {
 
 .table tr.type-header:hover {
   background: transparent;
+}
+
+.table-body {
+  padding-top: 1em;
+}
+
+.table tr.type-header td {
+  font-weight: bold;
+  padding-left: 0.3em;
 }
 </style>

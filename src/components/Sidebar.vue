@@ -16,13 +16,15 @@
         </router-link>
 
         <section>
-         <h2>{{ $t('main.user')}}</h2>
+         <div v-if="!isCurrentUserClient">
+           <h2>{{ $t('main.user')}}</h2>
 
-         <p @click="toggleSidebar()">
-           <router-link :to="{name: 'todos'}">
-             {{ $t("tasks.my_tasks") }}
-           </router-link>
-         </p>
+           <p @click="toggleSidebar()">
+             <router-link :to="{name: 'todos'}">
+               {{ $t("tasks.my_tasks") }}
+             </router-link>
+           </p>
+         </div>
 
          <h2>{{ $t('main.production')}}</h2>
 
@@ -56,17 +58,19 @@
            </router-link>
          </p>
 
-         <p @click="toggleSidebar()">
-           <router-link :to="breakdownPath">
-             {{ $t("breakdown.title") }}
-           </router-link>
-         </p>
+         <div v-if="!isCurrentUserClient">
+           <p @click="toggleSidebar()">
+             <router-link :to="breakdownPath">
+               {{ $t("breakdown.title") }}
+             </router-link>
+           </p>
 
-         <p @click="toggleSidebar()">
-           <router-link :to="playlistsPath">
-             {{ $t("playlists.title") }}
-           </router-link>
-         </p>
+           <p @click="toggleSidebar()">
+             <router-link :to="playlistsPath">
+               {{ $t("playlists.title") }}
+             </router-link>
+           </p>
+         </div>
 
          <div v-if="isCurrentUserManager">
            <h2>{{ $t('main.studio')}}</h2>
@@ -145,6 +149,8 @@ export default {
       'sequencesPath',
       'episodesPath',
       'playlistsPath',
+      'isCurrentUserClient',
+      'isCurrentUserCGArtist',
       'isCurrentUserManager',
       'isCurrentUserAdmin'
     ])

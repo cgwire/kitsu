@@ -17,12 +17,15 @@
             {{ $t('shots.fields.frame_out') }}
           </th>
           <th class="fps" v-if="isFps">{{ $t('shots.fields.fps') }}</th>
-          <th class="description">{{ $t('shots.fields.description') }}</th>
+          <th class="description" v-if="!isCurrentUserClient">
+            {{ $t('shots.fields.description') }}
+          </th>
           <th
-            class="validation"
+            class="validation-cell"
             :key="column.id"
             :style="{
-              'border-left': '2px solid ' + column.color
+              'border-left': '1px solid ' + column.color,
+              'background': getBackground(column.color)
             }"
             v-for="column in validationColumns">
             <router-link
@@ -64,7 +67,7 @@
   >
   </table-info>
 
-  <div class="has-text-centered" v-if="isEmptyList">
+  <div class="has-text-centered" v-if="isEmptyList && !isCurrentUserClient">
     <p class="info">
       <img src="../../assets/illustrations/empty_shot.png" />
     </p>
@@ -76,8 +79,13 @@
         name: 'manage-shots',
         params: {production_id: currentProduction.id}
       }"
-    >
-    </button-link>
+    />
+  </div>
+  <div class="has-text-centered" v-if="isEmptyList && isCurrentUserClient">
+    <p class="info">
+      <img src="../../assets/illustrations/empty_shot.png" />
+    </p>
+    <p class="info">{{ $t('shots.empty_list_client') }}</p>
   </div>
 
   <div
@@ -94,7 +102,7 @@
           v-for="(entry, i) in entries"
         >
           <td class="thumbnail">
-            <entity-thumbnail :entity="entry"></entity-thumbnail>
+            <entity-thumbnail :entity="entry" />
           </td>
           <td :class="{name: !entry.canceled}" v-if="!isSingleEpisode">
             {{ entry.episode_name }}
@@ -122,9 +130,13 @@
           <td class="fps" v-if="isFps">
             {{ entry.data && entry.data.fps ? entry.data.fps : ''}}
           </td>
-          <description-cell class="description" :entry="entry">
-          </description-cell>
+          <description-cell
+            class="description"
+            :entry="entry"
+            v-if="!isCurrentUserClient"
+          />
           <validation-cell
+            class="unselectable validation-cell"
             :key="column.name + '-' + entry.id"
             :ref="'validation-' + i + '-' + j"
             :column="column"
@@ -132,12 +144,10 @@
             :selected="shotSelectionGrid[i][j]"
             :rowX="i"
             :columnY="j"
-            class="unselectable"
             @select="onTaskSelected"
             @unselect="onTaskUnselected"
             v-for="(column, j) in validationColumns"
-          >
-          </validation-cell>
+          />
           <row-actions v-if="isCurrentUserManager"
             :entry="entry"
             :edit-route="{
@@ -161,8 +171,7 @@
                 production_id: currentProduction.id
               }
             }"
-          >
-          </row-actions>
+          />
           <td class="actions" v-else>
           </td>
         </tr>
@@ -179,6 +188,8 @@
 
 <script>
 import { mapGetters, mapActions } from 'vuex'
+import colors from '../../lib/colors'
+
 import DescriptionCell from '../cells/DescriptionCell'
 import ValidationCell from '../cells/ValidationCell'
 import RowActions from '../widgets/RowActions'
@@ -216,6 +227,7 @@ export default {
     ...mapGetters([
       'currentProduction',
       'isCurrentUserManager',
+      'isCurrentUserClient',
       'isFps',
       'isFrameIn',
       'isFrameOut',
@@ -306,6 +318,10 @@ export default {
 
     setScrollPosition (scrollPosition) {
       this.$refs.body.scrollTop = scrollPosition
+    },
+
+    getBackground (color) {
+      return colors.hexToRGBa(color, 0.08)
     }
   }
 }
@@ -378,11 +394,10 @@ th.actions {
   width: 200px;
 }
 
-.validation {
+.validation-cell {
   min-width: 150px;
   max-width: 150px;
   width: 150px;
-  margin-right: 1em;
 }
 
 td.name {

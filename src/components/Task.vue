@@ -165,7 +165,7 @@
             <a
               class="button"
               :href="getOriginalPath()"
-              v-else-if="currentTaskPreviews.length > 0 && extension === 'pdf'"
+              v-else-if="isDlPreviewFile"
             >
               <download-icon class="icon"></download-icon>
               <span class="text">
@@ -691,8 +691,13 @@ export default {
         this.currentTask &&
         this.currentTask.entity &&
         this.currentTask.entity.preview_file_id !== this.currentPreviewId &&
-        !['pdf', 'obj'].includes(this.extension)
+        !['pdf', 'obj', 'ma', 'mb'].includes(this.extension)
       )
+    },
+
+    isDlPreviewFile () {
+      return this.currentTaskPreviews.length > 0 &&
+        ['pdf', 'ma', 'mb'].includes(this.extension)
     }
   },
 

@@ -98,7 +98,8 @@ export default {
       roleOptions: [
         {label: 'user', value: 'user'},
         {label: 'manager', value: 'manager'},
-        {label: 'admin', value: 'admin'}
+        {label: 'admin', value: 'admin'},
+        {label: 'client', value: 'client'}
       ],
       activeOptions: [
         {label: this.$t('main.yes'), value: 'true'},
