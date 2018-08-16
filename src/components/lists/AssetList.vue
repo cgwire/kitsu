@@ -247,14 +247,15 @@ export default {
     ]),
 
     isEmptyList () {
-      return this.displayedAssets.length === 0 &&
+      return this.displayedAssetsLength === 0 &&
              !this.isLoading &&
              !this.isError &&
              (!this.assetSearchText || this.assetSearchText.length === 0)
     },
 
     isEmptyTask () {
-      return !this.emptyList &&
+      return !this.isEmptyList &&
+      !this.isLoading &&
       this.validationColumns &&
       this.validationColumns.length === 0
     }
@@ -327,6 +328,7 @@ export default {
     },
 
     loadMoreAssets () {
+      console.log('load more assets')
       this.displayMoreAssets()
     },
 
