@@ -14,7 +14,7 @@ BIG_SQUARE_SIZE = 400, 400
 
 
 def save_file(subfolder, instance_id, file_to_save, size=None):
-    extension = file_to_save.filename[-4:]
+    extension = "." + file_to_save.filename.split(".")[-1].lower()
     file_name = instance_id + extension
     thumbnail_folder = create_folder(subfolder)
 
