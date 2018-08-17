@@ -17,10 +17,12 @@ import {
   RESET_ALL
 } from '../mutation-types'
 
-const state = {
+const initialState = {
   taskStatus: [],
   taskStatusMap: {}
 }
+
+const state = initialState
 
 const getters = {
   taskStatus: state => state.taskStatus,
@@ -126,8 +128,7 @@ const mutations = {
   },
 
   [RESET_ALL] (state) {
-    state.taskStatus = []
-    state.taskStatusMap = {}
+    Object.assign(state, {...initialState})
   }
 }
 

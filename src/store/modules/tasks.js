@@ -763,9 +763,7 @@ const mutations = {
   },
 
   [RESET_ALL] (state, shots) {
-    state = {
-      ...initialState
-    }
+    Object.assign(state, {...initialState})
   }
 }
 

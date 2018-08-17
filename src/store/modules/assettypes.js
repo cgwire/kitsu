@@ -21,7 +21,7 @@ const sortAssetTypes = (assetTypes) => {
   })
 }
 
-const state = {
+const initialState = {
   assetTypes: [],
   assetTypeMap: {},
   isAssetTypesLoading: false,
@@ -37,6 +37,8 @@ const state = {
     isError: false
   }
 }
+
+const state = {...initialState}
 
 const getters = {
   assetTypes: state => state.assetTypes,
@@ -180,19 +182,7 @@ const mutations = {
   },
 
   [RESET_ALL] (state) {
-    state.assetTypes = []
-    state.isAssetTypesLoading = false
-    state.isAssetTypesLoadingError = false
-
-    state.editAssetType = {
-      isLoading: false,
-      isError: false
-    }
-
-    state.deleteAssetType = {
-      isLoading: false,
-      isError: false
-    }
+    Object.assign(state, {...initialState})
   }
 }
 

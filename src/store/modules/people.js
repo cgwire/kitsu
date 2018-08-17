@@ -660,9 +660,7 @@ const mutations = {
   },
 
   [RESET_ALL] (state, people) {
-    Object.assign(state, {
-      ...initialState
-    })
+    Object.assign(state, {...initialState})
   }
 }
 

@@ -68,7 +68,7 @@ const helpers = {
   }
 }
 
-const state = {
+const initialState = {
   castingSequenceId: '',
   castingShotId: 0,
   castingSequenceShots: [],
@@ -80,6 +80,8 @@ const state = {
   castingAssetsByType: [],
   isCastingDirty: false
 }
+
+const state = {...initialState}
 
 const getters = {
   castingSequenceId: state => state.castingSequenceId,
@@ -298,17 +300,7 @@ const mutations = {
   },
 
   [RESET_ALL] (state) {
-    state.castingSequenceId = ''
-    state.castingShotId = ''
-    state.castingSequenceShots = []
-    state.castingEpisodeSequences = []
-    state.castingEpisodeOptions = []
-    state.castingSequenceOptions = []
-
-    state.castingCurrentShot = null
-    state.casting = {}
-    state.castingAssetsByType = []
-    state.isCastingDirty = false
+    Object.assign(state, {...initialState})
   }
 }
 

@@ -1167,12 +1167,10 @@ const mutations = {
   },
 
   [RESET_ALL] (state) {
+    Object.assign(state, {...initialState})
+
     cache.shots = []
     cache.shotIndex = {}
-
-    state = {
-      ...initialState
-    }
   }
 }
 
