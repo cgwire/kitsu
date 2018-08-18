@@ -135,6 +135,16 @@ def init_data():
     commands.init_data()
 
 
+@cli.command('set_default_password')
+@click.argument("email")
+def set_default_password(email):
+    "Set the password of given user as default"
+    from zou.app.services import persons_service
+    from zou.app.utils import auth
+    password = auth.encrypt_password("default")
+    persons_service.update_password(email, password)
+
+
 @cli.command()
 def patch_set_done_flag_on_task_status():
     """
