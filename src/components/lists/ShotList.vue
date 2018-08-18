@@ -5,11 +5,15 @@
       <thead>
         <tr>
           <th class="thumbnail"></th>
-          <th class="episode" v-if="!isSingleEpisode">
+          <th class="episode" ref="th-episode" v-if="!isSingleEpisode">
             {{ $t('shots.fields.episode') }}
           </th>
-          <th class="sequence">{{ $t('shots.fields.sequence') }}</th>
-          <th class="name shot-name">{{ $t('shots.fields.name') }}</th>
+          <th class="sequence" ref="th-sequence" >
+            {{ $t('shots.fields.sequence') }}
+          </th>
+          <th class="name shot-name" ref="th-shot" >
+            {{ $t('shots.fields.name') }}
+          </th>
           <th class="framein" v-if="isFrameIn">
             {{ $t('shots.fields.frame_in') }}
           </th>
@@ -95,7 +99,7 @@
     v-scroll="onBodyScroll"
   >
     <table class="table">
-      <tbody>
+      <tbody ref="body-tbody">
         <tr
           :key="entry.id"
           :class="{canceled: entry.canceled}"
@@ -322,6 +326,29 @@ export default {
 
     getBackground (color) {
       return colors.hexToRGBa(color, 0.08)
+    },
+
+    resizeHeaders () {
+      if (this.$refs['body-tbody'].children.length > 0) {
+        let sequenceWidth, shotWidth
+        if (this.isSingleEpisode) {
+          sequenceWidth =
+            this.$refs['body-tbody'].children[0].children[1].offsetWidth
+          shotWidth =
+            this.$refs['body-tbody'].children[0].children[2].offsetWidth
+        } else {
+          sequenceWidth =
+            this.$refs['body-tbody'].children[0].children[2].offsetWidth
+          shotWidth =
+            this.$refs['body-tbody'].children[0].children[3].offsetWidth
+          const episodeWidth =
+            this.$refs['body-tbody'].children[0].children[1].offsetWidth
+          this.$refs['th-episode'].style = `min-width: ${episodeWidth}px`
+        }
+
+        this.$refs['th-sequence'].style = `min-width: ${sequenceWidth}px`
+        this.$refs['th-shot'].style = `min-width: ${shotWidth}px`
+      }
     }
   }
 }
@@ -330,7 +357,6 @@ export default {
 <style scoped>
 .project {
   min-width: 60px;
-  max-width: 60px;
   width: 60px;
 }
 
@@ -359,26 +385,22 @@ th.actions {
 
 .episode {
   min-width: 100px;
-  max-width: 100px;
   width: 100px;
 }
 
 .sequence {
   min-width: 100px;
-  max-width: 100px;
   width: 100px;
   font-weight: bold;
 }
 
 .framein {
   min-width: 50px;
-  max-width: 50px;
   width: 50px;
 }
 
 .frameout {
   min-width: 50px;
-  max-width: 50px;
   width: 50px;
 }
 

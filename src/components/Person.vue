@@ -73,7 +73,7 @@
 
     <div
       class="query-list"
-      v-if="isActiveTab('todos')"
+      v-if="isTabActive('todos') || isTabActive('timesheets')"
     >
       <search-query-list
         :queries="personTaskSearchQueries"

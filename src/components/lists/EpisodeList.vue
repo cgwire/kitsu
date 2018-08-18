@@ -4,8 +4,12 @@
     <table class="table table-header" ref="headerWrapper">
       <thead>
         <tr>
-          <th class="name">{{ $t('shots.fields.episode') }}</th>
-          <th class="description">{{ $t('shots.fields.description') }}</th>
+          <th class="name" ref="th-episode">
+            {{ $t('shots.fields.episode') }}
+          </th>
+          <th class="description">
+            {{ $t('shots.fields.description') }}
+          </th>
           <th
             class="validation"
             :style="validationStyle(column.color)"
@@ -33,8 +37,7 @@
   <table-info
     :is-loading="isLoading"
     :is-error="isError"
-  >
-  </table-info>
+  />
 
   <div class="has-text-centered" v-if="isEmptyList && !isCurrentUserClient">
     <p class="info">
@@ -48,8 +51,7 @@
         name: 'manage-shots',
         params: {production_id: currentProduction.id}
       }"
-    >
-    </button-link>
+    />
   </div>
   <div class="has-text-centered" v-if="isEmptyList && isCurrentUserClient">
     <p class="info">
@@ -65,7 +67,7 @@
     v-scroll="onBodyScroll"
   >
     <table class="table">
-      <tbody>
+      <tbody ref="body-tbody">
         <tr
           :key="entry.id"
           v-for="entry in entries"
@@ -91,8 +93,7 @@
               :colors="chartColors(entry, column)"
               :data="chartData(entry, column)"
               v-if="isStats(entry, column)"
-            >
-            </pie-chart>
+            />
           </td>
 
           <row-actions v-if="isCurrentUserManager"
@@ -111,8 +112,7 @@
                 production_id: currentProduction.id
               }
             }"
-          >
-          </row-actions>
+          />
 
           <td class="actions" v-else>
           </td>
@@ -227,6 +227,14 @@ export default {
 
     setScrollPosition (scrollPosition) {
       this.$refs.body.scrollTop = scrollPosition
+    },
+
+    resizeHeaders () {
+      if (this.$refs['body-tbody'].children.length > 0) {
+        const episodeWidth =
+          this.$refs['body-tbody'].children[0].children[0].offsetWidth
+        this.$refs['th-episode'].style = `min-width: ${episodeWidth}px`
+      }
     }
   }
 }

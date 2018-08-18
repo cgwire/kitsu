@@ -116,6 +116,7 @@ export default {
   created () {
     this.initEpisodes()
       .then(this.handleModalsDisplay)
+      .then(this.resizeHeaders)
   },
 
   mounted () {
@@ -237,6 +238,12 @@ export default {
 
     saveScrollPosition (scrollPosition) {
       this.setEpisodeListScrollPosition(scrollPosition)
+    },
+
+    resizeHeaders () {
+      setTimeout(() => {
+        this.$refs['episode-list'].resizeHeaders()
+      }, 0)
     }
   },
 
@@ -255,6 +262,7 @@ export default {
         this.$router.push(newPath)
         this.loadShots(() => {
           this.computeEpisodeStats()
+          this.resizeHeaders()
         })
       }
     }

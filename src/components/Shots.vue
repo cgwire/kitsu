@@ -273,6 +273,9 @@ export default {
     if (shotIds.length === 0 ||
         this.shotMap[shotIds[0]].production_id !== this.currentProduction.id) {
       this.loadShots((err) => {
+        setTimeout(() => {
+          this.$refs['shot-list'].resizeHeaders()
+        }, 0)
         if (!err) this.handleModalsDisplay()
       })
     }
@@ -533,7 +536,11 @@ export default {
       if (oldPath !== path) {
         this.$refs['shot-search-field'].setValue('')
         this.$store.commit('SET_SHOT_LIST_SCROLL_POSITION', 0)
-        this.$store.dispatch('loadShots')
+        this.$store.dispatch('loadShots', {
+          callback: () => {
+            this.$refs['shot-list'].resizeHeaders()
+          }
+        })
       }
     }
   },

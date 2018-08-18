@@ -4,10 +4,12 @@
     <table class="table table-header" ref="headerWrapper">
       <thead>
         <tr>
-          <th class="episode" v-if="!isSingleEpisode">
+          <th class="episode" ref="th-episode" v-if="!isSingleEpisode">
             {{ $t('shots.fields.episode') }}
           </th>
-          <th class="name">{{ $t('shots.fields.sequence') }}</th>
+          <th class="name" ref="th-sequence">
+            {{ $t('shots.fields.sequence') }}
+          </th>
           <th class="description">{{ $t('shots.fields.description') }}</th>
           <th
             class="validation"
@@ -68,7 +70,7 @@
     v-scroll="onBodyScroll"
   >
     <table class="table">
-      <tbody>
+      <tbody ref="body-tbody">
         <tr
           :key="entry.id"
           v-for="entry in entries"
@@ -98,8 +100,7 @@
               :colors="chartColors(entry, column)"
               :data="chartData(entry, column)"
               v-if="isStats(entry, column)"
-            >
-            </pie-chart>
+            />
           </td>
 
           <row-actions v-if="isCurrentUserManager"
@@ -230,6 +231,24 @@ export default {
 
     setScrollPosition (scrollPosition) {
       this.$refs.body.scrollTop = scrollPosition
+    },
+
+    resizeHeaders () {
+      if (this.$refs['body-tbody'].children.length > 0) {
+        let sequenceWidth
+        if (this.isSingleEpisode) {
+          sequenceWidth =
+            this.$refs['body-tbody'].children[0].children[0].offsetWidth
+        } else {
+          sequenceWidth =
+            this.$refs['body-tbody'].children[0].children[1].offsetWidth
+          const episodeWidth =
+            this.$refs['body-tbody'].children[0].children[0].offsetWidth
+          this.$refs['th-episode'].style = `min-width: ${episodeWidth}px`
+        }
+
+        this.$refs['th-sequence'].style = `min-width: ${sequenceWidth}px`
+      }
     }
   }
 }
@@ -238,7 +257,6 @@ export default {
 <style scoped>
 .episode {
   min-width: 100px;
-  max-width: 100px;
   width: 100px;
 }
 
@@ -258,13 +276,11 @@ td.name {
 
 .description {
   min-width: 200px;
-  max-width: 200px;
   width: 200px;
 }
 
 .validation {
   min-width: 100px;
-  max-width: 100px;
   width: 100px;
 }
 

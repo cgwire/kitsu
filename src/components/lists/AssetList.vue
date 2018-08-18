@@ -87,7 +87,7 @@
     v-infinite-scroll="loadMoreAssets"
     infinite-scroll-disabled="busy"
     infinite-scroll-distance="120"
-    v-if="!isLoading"
+    v-if="!isLoading && !isEmptyList"
   >
     <table class="table">
       <tbody
