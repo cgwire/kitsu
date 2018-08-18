@@ -192,6 +192,7 @@ export default {
     },
     role: {
       admin: 'Administrator',
+      client: 'Client',
       manager: 'Supervisor',
       user: 'CG Artist'
     }
@@ -377,6 +378,7 @@ export default {
     download_pdf_file: 'Download PDF file',
     feedback: 'feedback',
     full_screen: 'Display in full screen',
+    hide_assignations: 'Hide assignations',
     my_tasks: 'My tasks',
     next: 'next task',
     no_assignation_right: 'you are no allowed to manage assignations',
@@ -388,6 +390,7 @@ export default {
     set_preview_error: 'An error occured while setting preview as thumbnail',
     set_preview_done: 'This preview is used as thumbnail for the current entity.',
     select_preview_file: 'Please select a picture from your hard drive to be used as a preview for the current task:',
+    show_assignations: 'Show assignations',
     validation: 'Validation',
     tasks: 'Tasks',
     fields: {
