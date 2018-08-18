@@ -201,6 +201,7 @@ describe('productions', () => {
     })
 
     it('uploadProductionAvatar', () => {
+      store.commit(LOAD_PRODUCTIONS_END, productions)
       const formData = { form: true }
       store.dispatch('storeProductionPicture', formData)
       return helpers.runAction('uploadProductionAvatar', 'production-2')
