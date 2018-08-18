@@ -289,7 +289,6 @@ const getters = {
         sequenceShots = []
       }
       sequenceShots.push(shot)
-      console.log(shot)
       previousShot = shot
     }
     shotsBySequence.push(sequenceShots)
