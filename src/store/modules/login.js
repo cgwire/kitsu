@@ -30,9 +30,11 @@ const actions = {
   changeEmail ({ commit, state }, email) {
     commit(CHANGE_EMAIL, email)
   },
+
   changePassword ({ commit, state }, password) {
     commit(CHANGE_PASSWORD, password)
   },
+
   logIn ({ commit, state }, callback) {
     commit(LOGIN_RUN)
     auth.logIn(
@@ -50,6 +52,7 @@ const actions = {
       }
     )
   },
+
   logout ({ commit, state }, callback) {
     auth.logout((err) => {
       if (err) {

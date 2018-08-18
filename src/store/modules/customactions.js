@@ -17,7 +17,7 @@ import {
   RESET_ALL
 } from '../mutation-types'
 
-const state = {
+const initialState = {
   customActions: [],
   isCustomActionsLoading: false,
   isCustomActionsLoadingError: false,
@@ -32,6 +32,8 @@ const state = {
     isError: false
   }
 }
+
+const state = {...initialState}
 
 const helpers = {
   getOptions (customAction) {
@@ -196,19 +198,7 @@ const mutations = {
   },
 
   [RESET_ALL] (state) {
-    state.customActions = []
-    state.isCustomActionsLoading = false
-    state.isCustomActionsLoadingError = false
-
-    state.editCustomAction = {
-      isLoading: false,
-      isError: false
-    }
-
-    state.deleteCustomAction = {
-      isLoading: false,
-      isError: false
-    }
+    Object.assign(state, {...initialState})
   }
 }
 

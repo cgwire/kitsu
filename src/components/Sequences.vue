@@ -116,6 +116,7 @@ export default {
   created () {
     this.initSequences()
       .then(this.handleModalsDisplay)
+      .then(this.resizeHeaders)
   },
 
   mounted () {
@@ -235,6 +236,12 @@ export default {
 
     saveScrollPosition (scrollPosition) {
       this.setSequenceListScrollPosition(scrollPosition)
+    },
+
+    resizeHeaders () {
+      setTimeout(() => {
+        this.$refs['sequence-list'].resizeHeaders()
+      }, 0)
     }
   },
 
@@ -254,6 +261,7 @@ export default {
 
         this.$router.push(newPath)
         this.loadShots(() => {
+          this.resizeHeaders()
           this.computeSequenceStats()
         })
       }

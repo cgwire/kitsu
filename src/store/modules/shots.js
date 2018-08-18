@@ -289,7 +289,6 @@ const getters = {
         sequenceShots = []
       }
       sequenceShots.push(shot)
-      console.log(shot)
       previousShot = shot
     }
     shotsBySequence.push(sequenceShots)
@@ -1167,12 +1166,10 @@ const mutations = {
   },
 
   [RESET_ALL] (state) {
+    Object.assign(state, {...initialState})
+
     cache.shots = []
     cache.shotIndex = {}
-
-    state = {
-      ...initialState
-    }
   }
 }
 

@@ -73,7 +73,7 @@
 
     <div
       class="query-list"
-      v-if="isActiveTab('todos')"
+      v-if="isTabActive('todos') || isTabActive('timesheets')"
     >
       <search-query-list
         :queries="personTaskSearchQueries"
@@ -183,7 +183,6 @@ export default {
     loggablePersonTasks () {
       return this.displayedPersonTasks
         .filter((task) => {
-          console.log(this.taskTypeMap[task.task_type_id].allow_timelog)
           return this.taskTypeMap[task.task_type_id].allow_timelog
         })
     },
@@ -191,7 +190,6 @@ export default {
     loggableDoneTasks () {
       return this.displayedPersonDoneTasks
         .filter((task) => {
-          console.log(this.taskTypeMap[task.task_type_id].allow_timelog)
           return this.taskTypeMap[task.task_type_id].allow_timelog
         })
     }

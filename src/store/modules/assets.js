@@ -815,9 +815,10 @@ const mutations = {
   },
 
   [RESET_ALL] (state) {
-    state = {
-      ...initialState
-    }
+    cache.assets = []
+    cache.assetIndex = {}
+
+    Object.assign(state, {...initialState})
   }
 }
 

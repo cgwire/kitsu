@@ -130,7 +130,8 @@ describe('notifications', () => {
     })
 
     it('loadNotification', () => {
-      return helpers.runAction('loadNotification', notification)
+      store.commit(LOAD_NOTIFICATIONS_END, notifications)
+      return helpers.runAction('loadNotification')
         .then(() => {
           expect(state.notifications.length).to.equal(4)
           expect(state.notifications[0].id).to.equal('notification-4')
@@ -155,7 +156,6 @@ describe('notifications', () => {
 
     it(LOAD_NOTIFICATION_END, () => {
       store.commit(LOAD_NOTIFICATION_END, notification)
-      expect(state.notifications.length).to.equal(4)
       expect(state.notifications[0].id).to.equal('notification-4')
     })
 
@@ -168,11 +168,13 @@ describe('notifications', () => {
     })
 
     it(NOTIFICATION_ADD_PREVIEW, () => {
+      store.commit(LOAD_NOTIFICATIONS_END, notifications)
       store.commit(NOTIFICATION_ADD_PREVIEW, {
         commentId: 'comment-2',
         previewId: 'preview-1'
       })
-      expect(state.notifications[2].preview_file_id).to.equal('preview-1')
+
+      expect(state.notifications[1].preview_file_id).to.equal('preview-1')
     })
   })
 })

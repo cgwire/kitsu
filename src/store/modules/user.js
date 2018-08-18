@@ -451,9 +451,7 @@ const mutations = {
   },
 
   [RESET_ALL] (state) {
-    state = {
-      ...initialState
-    }
+    Object.assign(state, {...initialState})
   }
 }
 

@@ -26,10 +26,12 @@ import {
   RESET_ALL
 } from '../mutation-types'
 
-const state = {
+const initialState = {
   playlists: [],
   playlistMap: {}
 }
+
+const state = {...initialState}
 
 const getters = {
   playlists: state => state.playlists,
@@ -205,8 +207,7 @@ const mutations = {
   },
 
   [RESET_ALL] (state) {
-    state.playlists = []
-    state.playlistMap = {}
+    Object.assign(state, {...initialState})
   }
 }
 

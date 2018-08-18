@@ -81,7 +81,6 @@ export default {
   watch: {
     person () {
       this.avatarPath = this.person.avatarPath + '&stamp=' + new Date().toISOString()
-      console.log(this.avatarPath)
     }
   }
 }

@@ -7,11 +7,13 @@ import {
   RESET_ALL
 } from '../mutation-types'
 
-let state = {
+const initialState = {
   isSidebarHidden: true,
   isUserMenuHidden: true,
   lastProductionScreen: 'assets'
 }
+
+const state = {...initialState}
 
 const getters = {
   isSidebarHidden: state => state.isSidebarHidden,
@@ -43,8 +45,7 @@ const mutations = {
   },
 
   [RESET_ALL] (state) {
-    state.isSidebarHidden = true
-    state.isUserMenuHidden = true
+    Object.assign(state, {...initialState})
   }
 }
 

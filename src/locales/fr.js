@@ -37,7 +37,8 @@ export default {
     role: {
       admin: 'Administrateur',
       manager: 'Superviseur',
-      user: 'Graphiste'
+      user: 'Graphiste',
+      client: 'Client'
     }
   },
 
@@ -118,6 +119,7 @@ export default {
     new_production: 'Ajouter une production',
     number: 'production | productions',
     current: 'Production sélectionnée ',
+    picture: 'Changer l\'image',
     home: {
       title: 'Productions en cours',
       welcome: 'Bienvenue sur Kitsu',
@@ -173,6 +175,8 @@ export default {
     set_preview: 'Utilisez cette previz comme vignette',
     set_preview_error: 'Une erreur est survenue en utilisant cette vignette.',
     set_preview_done: 'Cette previz sert de vignette à l\'entité courante.',
+    show_assignations: 'Voir assignations',
+    hide_assignations: 'Cacher assignations',
     select_preview_file: 'Choisissez une preview sur votre disque dur:',
     delete_error: 'Une erreur est survenue en supprimant la tâche.',
     feedback: 'retours',
@@ -222,6 +226,7 @@ export default {
     number: 'type de tâche | types de tâches',
     new_task_type: 'Ajouter un type de tâche',
     fields: {
+      allow_timelog: 'Temps passé',
       name: 'Nom',
       color: 'Couleur',
       priority: 'Priorité',
@@ -259,6 +264,11 @@ export default {
       name: 'Nom',
       url: 'URL',
       entity_type: 'Type d\'entité'
+    },
+    entity_types: {
+      all: 'Tous',
+      shot: 'Plan',
+      asset: 'Asset'
     }
   },
 
@@ -367,12 +377,23 @@ export default {
   },
 
   playlists: {
+    add_shots: 'Selectonner les plans',
     title: 'Playlists',
     new_playlist: 'Ajouter une playlist',
     loading_error: 'Une erreur serveur est apparue, les playlists ne peuvent pas être chargées.',
     no_selection: 'Séléctionnez une playlist sur la gauche.',
     delete_text: 'Êtes vous sûr de vouloir supprimer {name} de la base de données ?',
-    delete_error: 'Une erreur est survenue en supprimant la playlist.'
+    delete_error: 'Une erreur est survenue en supprimant la playlist.',
+    edit_title: 'Modifier la playlist',
+    no_playlist: 'Il n\'y a pas de playlist pour ce projet.',
+    no_sequence_for_episode: 'Il n\'y a pas de séquence pour cette épisode',
+    no_shot_for_production: 'Il n\'y pas de shot pour cette production',
+    select_shot: 'Sélectionnez un plan dans la colonne de droite',
+    select_playlist: 'Sélectionnez une playlist dans la colonne de gauche',
+    remove: 'enlever',
+    fields: {
+      name: 'Nom'
+    }
   },
 
   notifications: {
