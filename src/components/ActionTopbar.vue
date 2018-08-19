@@ -7,7 +7,7 @@
       <div class="flexrow action-bar">
 
         <div class="flexrow-item more-menu-icon" @click="toggleMenu">
-          <more-vertical-icon></more-vertical-icon>
+          <more-vertical-icon />
         </div>
 
         <div class="flexrow-item" v-if="selectedBar === 'assignation'">
@@ -16,21 +16,17 @@
               {{ $tc('tasks.assign', nbSelectedTasks, {nbSelectedTasks}) }}
             </div>
             <div class="flexrow-item combobox-item">
-              <combobox
-                :options="getPersonOptions"
-                v-model="personId"
-              >
-              </combobox>
+              <people-field v-model="person" />
             </div>
             <div class="" v-if="isAssignationLoading">
-              <spinner :is-white="true"></spinner>
+              <spinner :is-white="true" :size="25" />
             </div>
             <div class="flexrow-item" v-if="!isAssignationLoading">
               <button
                 class="button is-success confirm-button"
                 @click="confirmAssign"
               >
-              {{ $t('main.confirmation') }}
+                {{ $t('main.confirmation') }}
               </button>
             </div>
             <div class="flexrow-item hide-small-screen" v-if="!isAssignationLoading">
@@ -247,10 +243,9 @@
 
 <script>
 import { mapGetters, mapActions } from 'vuex'
-import PeopleAvatar from './widgets/PeopleAvatar'
-import PeopleName from './widgets/PeopleName'
-import Combobox from './widgets/Combobox'
 import ButtonHrefLink from './widgets/ButtonHrefLink'
+import Combobox from './widgets/Combobox'
+import PeopleField from './widgets/PeopleField'
 import Spinner from './widgets/Spinner'
 import { ChevronRightIcon, XIcon, MoreVerticalIcon } from 'vue-feather-icons'
 
@@ -261,8 +256,7 @@ export default {
     ChevronRightIcon,
     Combobox,
     MoreVerticalIcon,
-    PeopleName,
-    PeopleAvatar,
+    PeopleField,
     Spinner,
     ButtonHrefLink,
     XIcon
@@ -276,7 +270,7 @@ export default {
       isChangePriorityLoading: false,
       isCreationLoading: false,
       selectedBar: 'assignation',
-      personId: '',
+      person: null,
       taskStatusId: '',
       customActionUrl: '',
       selectedTaskIds: [],
@@ -316,7 +310,8 @@ export default {
       'allCustomActionOptions',
       'assetCustomActionOptions',
       'shotCustomActionOptions',
-      'user'
+      'user',
+      'people'
     ]),
 
     isHidden () {
@@ -372,6 +367,10 @@ export default {
 
     isList () {
       return this.isCurrentViewAsset || this.isCurrentViewShot
+    },
+
+    selectedPersonId () {
+      return this.person ? this.person.id : null
     }
   },
 
@@ -385,23 +384,17 @@ export default {
       'clearSelectedTasks'
     ]),
 
-    getSelectedPersonId () {
-      if (this.getPersonOptions.length > 0) {
-        const defaultChoice = this.getPersonOptions[0].value
-        return this.personId || defaultChoice
-      } else {
-        return null
-      }
-    },
-
     confirmAssign () {
-      this.isAssignationLoading = true
-      this.assignSelectedTasks({
-        personId: this.getSelectedPersonId(),
-        callback: () => {
-          this.isAssignationLoading = false
-        }
-      })
+      if (this.selectedPersonId) {
+        this.isAssignationLoading = true
+        this.assignSelectedTasks({
+          personId: this.selectedPersonId,
+          callback: () => {
+            this.isAssignationLoading = false
+            this.person = null
+          }
+        })
+      }
     },
 
     confirmTaskStatusChange () {
@@ -511,6 +504,10 @@ export default {
 
     $route () {
       this.clearSelectedTasks()
+    },
+
+    person () {
+      console.log('top', this.person)
     }
   }
 }

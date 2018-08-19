@@ -2,7 +2,11 @@ import peopleApi from '../api/people'
 import colors from '../../lib/colors'
 import { populateTask, clearSelectionGrid } from '../../lib/helpers'
 import { sortTasks, sortPeople, sortByName } from '../../lib/sorting'
-import { indexSearch, buildTaskIndex } from '../../lib/indexing'
+import {
+  indexSearch,
+  buildTaskIndex,
+  buildNameIndex
+} from '../../lib/indexing'
 import taskStatusStore from './taskstatus'
 import {
   LOAD_PEOPLE_START,
@@ -86,6 +90,7 @@ const helpers = {
 
 const initialState = {
   people: [],
+  peopleIndex: {},
   personMap: {},
   isPeopleLoading: false,
   isPeopleLoadingError: true,
@@ -129,6 +134,7 @@ const state = {
 
 const getters = {
   people: state => state.people,
+  peopleIndex: state => state.peopleIndex,
   personMap: state => state.personMap,
   isPeopleLoading: state => state.isPeopleLoading,
   isPeopleLoadingError: state => state.isPeopleLoadingError,
@@ -414,6 +420,7 @@ const mutations = {
       person = helpers.addAdditionalInformation(person)
       state.personMap[person.id] = person
     })
+    state.peopleIndex = buildNameIndex(state.people)
   },
 
   [DELETE_PEOPLE_START] (state) {

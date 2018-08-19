@@ -25,6 +25,7 @@
     "pify": "3.0.0",
     "superagent": "3.8.3",
     "thenby": "1.2.6",
+    "v-autocomplete": "1.8.2",
     "v-tooltip": "2.0.0-rc.33",
     "vue": "2.5.16",
     "vue-chartkick": "0.4.0",

@@ -2,10 +2,11 @@ import Vue from 'vue'
 import { sync } from 'vuex-router-sync'
 
 import router from './router'
-import vuescroll from 'vue-scroll'
 import i18n from './lib/i18n'
 import store from './store'
 import App from './App'
+
+import vuescroll from 'vue-scroll'
 import VueLazyload from 'vue-lazyload'
 import Meta from 'vue-meta'
 import infiniteScroll from 'vue-infinite-scroll'
@@ -14,6 +15,9 @@ import Chart from 'chart.js'
 import VueWebsocket from 'vue-websocket'
 import VTooltip from 'v-tooltip'
 import VueCookie from 'vue-cookie'
+import Autocomplete from 'v-autocomplete'
+
+import 'v-autocomplete/dist/v-autocomplete.css'
 
 Vue.config.productionTip = false
 Vue.use(vuescroll)
@@ -24,6 +28,7 @@ Vue.use(VueChartkick, {adapter: Chart})
 Vue.use(VueCookie)
 Vue.use(VueWebsocket, '/events')
 Vue.use(VTooltip)
+Vue.use(Autocomplete)
 
 // Make the current route part of the main state.
 sync(store, router)
