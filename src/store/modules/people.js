@@ -54,6 +54,8 @@ import {
 
   SET_PERSON_TASKS_SCROLL_POSITION,
 
+  PEOPLE_SEARCH_CHANGE,
+
   RESET_ALL
 } from '../mutation-types'
 
@@ -90,6 +92,7 @@ const helpers = {
 
 const initialState = {
   people: [],
+  displayedPeople: [],
   peopleIndex: {},
   personMap: {},
   isPeopleLoading: false,
@@ -134,6 +137,7 @@ const state = {
 
 const getters = {
   people: state => state.people,
+  displayedPeople: state => state.displayedPeople,
   peopleIndex: state => state.peopleIndex,
   personMap: state => state.personMap,
   isPeopleLoading: state => state.isPeopleLoading,
@@ -397,6 +401,10 @@ const actions = {
         })
         .catch(reject)
     })
+  },
+
+  peopleSearchChange ({ commit }, text) {
+    commit(PEOPLE_SEARCH_CHANGE, text)
   }
 }
 
@@ -416,6 +424,7 @@ const mutations = {
     state.isPeopleLoading = false
     state.isPeopleLoadingError = false
     state.people = sortPeople(people)
+    state.displayedPeople = state.people
     state.people.forEach((person) => {
       person = helpers.addAdditionalInformation(person)
       state.personMap[person.id] = person
@@ -664,6 +673,14 @@ const mutations = {
 
   [SET_PERSON_TASKS_SCROLL_POSITION] (state, scrollPosition) {
     state.personTasksScrollPosition = scrollPosition
+  },
+
+  [PEOPLE_SEARCH_CHANGE] (state, text) {
+    if (text) {
+      state.displayedPeople = indexSearch(state.peopleIndex, text)
+    } else {
+      state.displayedPeople = state.people
+    }
   },
 
   [RESET_ALL] (state, people) {

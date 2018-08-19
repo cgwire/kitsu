@@ -52,8 +52,7 @@
         @change="onSearchChange"
         @save="saveSearchQuery"
         placeholder="ex: props, modeling=wip"
-      >
-      </search-field>
+      />
     </div>
 
     <div class="query-list">
