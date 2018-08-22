@@ -42,6 +42,8 @@ import {
   LOAD_PERSON_TASKS_END,
   USER_LOAD_TODOS_END,
 
+  SET_PRODUCTION,
+
   RESET_ALL
 } from '../mutation-types'
 
@@ -110,12 +112,16 @@ const getters = {
   nbSelectedValidations: state => state.nbSelectedValidations,
   isShowAssignations: state => state.isShowAssignations,
 
-  assetValidationColumns: (state) => {
-    return sortValidationColumns(Object.values(state.assetValidationColumns))
+  assetValidationColumns: (state, getters) => {
+    return sortValidationColumns(
+      Object.values(state.assetValidationColumns), getters.taskTypeMap
+    )
   },
 
-  shotValidationColumns: (state) => {
-    return sortValidationColumns(Object.values(state.shotValidationColumns))
+  shotValidationColumns: (state, getters) => {
+    return sortValidationColumns(
+      Object.values(state.shotValidationColumns), getters.taskTypeMap
+    )
   }
 }
 
@@ -290,7 +296,6 @@ const actions = {
   changeSelectedTaskStatus ({ commit, state }, {taskStatusId, callback}) {
     async.eachSeries(Object.keys(state.selectedTasks), (taskId, next) => {
       const task = state.taskMap[taskId]
-
       if (task && task.task_status_id !== taskStatusId) {
         actions.commentTask({ commit, state }, {
           taskId: taskId,
@@ -309,7 +314,10 @@ const actions = {
     })
   },
 
-  changeSelectedPriorities ({ commit, state, rootGetters }, { priority, callback }) {
+  changeSelectedPriorities (
+    { commit, state, rootGetters },
+    { priority, callback }
+  ) {
     async.eachSeries(Object.keys(state.selectedTasks), (taskId, next) => {
       const task = state.taskMap[taskId]
       const taskType = rootGetters.taskTypeMap[task.task_type_id]
@@ -465,7 +473,6 @@ const actions = {
 const mutations = {
   [LOAD_ASSETS_START] (state, assets) {
     state.assetValidationColumns = []
-    state.taskMap = {}
   },
 
   [LOAD_ASSETS_END] (state, { assets }) {
@@ -473,17 +480,16 @@ const mutations = {
     assets.forEach((asset) => {
       asset.validations = {}
       asset.tasks.forEach((task) => {
-        if (!validationColumns[task.task_type_name]) {
-          validationColumns[task.task_type_name] = {
-            id: task.task_type_id,
-            name: task.task_type_name,
-            color: task.task_type_color,
-            priority: task.task_type_priority
-          }
+        const taskType = helpers.getTaskType(task.task_type_id)
+        if (!validationColumns[taskType.name]) {
+          validationColumns[taskType.name] = task.task_type_id
         }
 
-        asset.validations[task.task_type_name] = task
+        asset.validations[taskType.name] = task.id
         state.taskMap[task.id] = task
+      })
+      asset.tasks = asset.tasks.map((task) => {
+        return task.id
       })
     })
     state.assetValidationColumns = validationColumns
@@ -491,7 +497,6 @@ const mutations = {
 
   [LOAD_SHOTS_START] (state, assets) {
     state.shotValidationColumns = {}
-    state.taskMap = {}
   },
 
   [LOAD_SHOTS_END] (state, { shots }) {
@@ -499,23 +504,16 @@ const mutations = {
     shots.forEach((shot) => {
       shot.validations = {}
       shot.tasks.forEach((task) => {
-        if (shot.episode_name) {
-          task.entity_name = `${shot.episode_name} / ${shot.sequence_name} / ${shot.name}`
-        } else {
-          task.entity_name = `${shot.sequence_name} / ${shot.name}`
+        const taskType = helpers.getTaskType(task.task_type_id)
+        if (!validationColumns[taskType.name]) {
+          validationColumns[taskType.name] = task.task_type_id
         }
 
-        if (!validationColumns[task.task_type_name]) {
-          validationColumns[task.task_type_name] = {
-            id: task.task_type_id,
-            name: task.task_type_name,
-            color: task.task_type_color,
-            priority: task.task_type_priority
-          }
-        }
-
-        shot.validations[task.task_type_name] = task
+        shot.validations[taskType.name] = task.id
         state.taskMap[task.id] = task
+      })
+      shot.tasks = shot.tasks.map((task) => {
+        return task.id
       })
     })
     state.shotValidationColumns = validationColumns
@@ -724,6 +722,7 @@ const mutations = {
       }
     })
   },
+
   [UNASSIGN_TASKS] (state, selectedTaskIds) {
     selectedTaskIds.forEach((taskId) => {
       const task = state.taskMap[taskId]
@@ -760,6 +759,10 @@ const mutations = {
 
       state.taskMap[task.id] = task
     })
+  },
+
+  [SET_PRODUCTION] (state) {
+    state.taskMap = {}
   },
 
   [RESET_ALL] (state, shots) {

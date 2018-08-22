@@ -319,6 +319,7 @@ export default {
     manage: 'Gérer les plans',
     edit_fail: 'La création ou l\'édition a échoué, une erreur est survenue.',
     new_success: 'Plan {name} créé avec succès.',
+    edit_success: 'Plan {name} édité avec succès.',
     description: 'Description',
     empty_list: 'Il n\'y a pas de shots dans la production. Voulez vous en créer ?',
     fields: {
@@ -337,7 +338,7 @@ export default {
     restore_error: 'Une erreur est survenue en restorant le plan.',
     tasks: 'Tâches de fabrication',
     casting: 'Casting',
-    no_cast_in: 'Le casting du plan est vide.'
+    no_casting: 'Le casting du plan est vide.'
   },
 
   sequences: {

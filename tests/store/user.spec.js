@@ -21,6 +21,8 @@ import {
 
   LOAD_USER_FILTERS_END,
 
+  LOAD_TASK_TYPES_END,
+
   SET_TODOS_SEARCH
 } from '../../src/store/mutation-types'
 
@@ -33,32 +35,38 @@ let tasks = null
 let doneTasks = []
 let userFilters = {}
 
+const taskTypeMap = {
+  'task-type-1': {id: 'task-type-1', priority: 1, name: 'Modeling'},
+  'task-type-2': {id: 'task-type-2', priority: 1, name: 'Setup'},
+  'task-type-3': {id: 'task-type-3', priority: 2, name: 'Texture'}
+}
+
 peopleApi.updatePerson = (form, callback) => {
   if (form === undefined) {
-    return callback(new Error('Server error'))
+    return process.nextTick(() => callback(new Error('Server error')))
   } else {
-    return callback()
+    return process.nextTick(callback)
   }
 }
 
 peopleApi.changePassword = (form, callback) => {
   if (form.old_password === 'wrongPassword') {
-    return callback(new Error('Wrong password'))
+    return process.nextTick(() => callback(new Error('Wrong password')))
   } else {
-    return callback()
+    return process.nextTick(callback)
   }
 }
 
 peopleApi.loadTodos = (callback) => {
-  return callback(null, tasks)
+  return process.nextTick(() => callback(null, tasks))
 }
 
 peopleApi.loadDone = (callback) => {
-  return callback(null, doneTasks)
+  return process.nextTick(() => callback(null, doneTasks))
 }
 
 peopleApi.getUserSearchFilters = (callback) => {
-  return callback(null, userFilters)
+  return process.nextTick(() => callback(null, userFilters))
 }
 
 peopleApi.loadTimeSpents = (data, callback) => {
@@ -81,6 +89,7 @@ describe('user', () => {
         entity_type_name: 'Props',
         entity_id: 'asset-1',
         task_status_short_name: 'wip',
+        task_type_id: 'task-type-1',
         last_comment: {},
         id: 'task-1'
       },
@@ -91,6 +100,7 @@ describe('user', () => {
         entity_type_name: 'Props',
         entity_id: 'asset-1',
         task_status_short_name: 'todo',
+        task_type_id: 'task-type-1',
         last_comment: {
           text: "last comment",
           person_id: "person-1"
@@ -106,6 +116,7 @@ describe('user', () => {
       entity_type_name: 'Props',
       entity_id: 'asset-1',
       task_status_short_name: 'done',
+      task_type_id: 'task-type-1',
       last_comment: {},
       id: 'task-1'
     }]
@@ -153,25 +164,25 @@ describe('user', () => {
     })
 
 
-    it('changePasswordValidityAndSave (password unvalid)', (done) => {
-      helpers.runAction('changeUserPassword', {
+    it('checkPasswordValidityAndSave (password unvalid)', (done) => {
+      helpers.runAction('checkNewPasswordValidityAndSave', {
         form: {
           old_password: 'oldPassword',
           password: 'newPassword',
-          password_2: 'newPassword'
+          password2: 'newPasswordd'
         },
         callback: done
       })
-          expect(store._vm.isSaveProfileLoading).to.not.be.ok
+      expect(store._vm.changePassword.isLoading).to.not.be.ok
       expect(store._vm.changePassword.isValid).to.not.be.ok
     })
 
-    it('changePasswordValidityAndSave (password valid)', (done) => {
-      helpers.runAction('changeUserPassword', {
+    it('checkPasswordValidityAndSave (password valid)', (done) => {
+      helpers.runAction('checkNewPasswordValidityAndSave', {
         form: {
           old_password: 'oldPassword',
           password: 'newPassword',
-          password_2: 'newPassword'
+          password2: 'newPassword'
         },
         callback: () => {
           expect(store._vm.changePassword.isLoading).to.not.be.ok
@@ -227,6 +238,7 @@ describe('user', () => {
     })
 
     it('loadTodos', (done) => {
+      store.commit(LOAD_TASK_TYPES_END, Object.values(taskTypeMap))
       helpers.runAction('loadTodos', {
         personId: 'person-1',
         callback: (err) => {
@@ -241,7 +253,7 @@ describe('user', () => {
     })
 
     it('setTodosSearch', () => {
-      store.commit(USER_LOAD_TODOS_END, { tasks, userFilters })
+      store.commit(USER_LOAD_TODOS_END, { tasks, userFilters, taskTypeMap })
       helpers.runAction('setTodosSearch', 'wip')
 
       expect(store._vm.todosSearchText).to.equal('wip')
@@ -326,7 +338,8 @@ describe('user', () => {
     it('USER_LOAD_TODOS_END', () => {
       store.commit(USER_LOAD_TODOS_END, {
         tasks,
-        userFilters
+        userFilters,
+        taskTypeMap
       })
       expect(store._vm.displayedTodos).to.deep.equal(tasks)
       expect(
@@ -340,7 +353,7 @@ describe('user', () => {
     })
 
     it('SET_TODOS_SEARCH', () => {
-      store.commit(USER_LOAD_TODOS_END, { tasks, userFilters })
+      store.commit(USER_LOAD_TODOS_END, { tasks, userFilters, taskTypeMap })
       store.commit(SET_TODOS_SEARCH, 'wip')
 
       expect(store._vm.todosSearchText).to.equal('wip')

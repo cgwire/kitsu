@@ -2,14 +2,20 @@
  * Look in the search query for task type filter like anim=wip.
  * Then apply filters found on result list.
  */
-export const applyFilters = (taskTypes, result, query) => {
+export const applyFilters = (
+  taskTypes, result, query, taskStatusMap, taskMap
+) => {
   const taskTypeIndex = buildIndex(taskTypes)
   const filter = findFilter(taskTypeIndex, query)
 
   if (filter.taskType) {
     return result.filter((entry) => {
-      const task = entry.validations[filter.taskType]
-      return task && task.task_status_short_name === filter.taskStatus
+      let task = null
+      if (entry.validations[filter.taskType]) {
+        task = taskMap[entry.validations[filter.taskType]]
+      }
+      return task &&
+        taskStatusMap[task.task_status_id].short_name === filter.taskStatus
     })
   } else {
     return result

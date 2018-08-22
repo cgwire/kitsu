@@ -50,6 +50,9 @@ export default {
     }
   },
 
+  /*
+   * Turn hexadecimal color (#FFFFFF) to a RGBa one (rgba(255, 255, 255, 0.3))
+   */
   hexToRGBa (hex, alpha) {
     const r = parseInt(hex.slice(1, 3), 16)
     const g = parseInt(hex.slice(3, 5), 16)

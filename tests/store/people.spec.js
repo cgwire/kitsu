@@ -33,6 +33,8 @@ import {
   LOAD_PERSON_DONE_TASKS_END,
   SET_PERSON_TASKS_SEARCH,
 
+  LOAD_TASK_TYPES_END,
+
   NEW_PEOPLE_END
 } from '../../src/store/mutation-types'
 
@@ -42,6 +44,12 @@ let doneTasks = []
 let personTasksFilters = {}
 let userFilters = {}
 let person = {}
+
+const taskTypeMap = {
+  'task-type-1': {id: 'task-type-1', priority: 1, name: 'Modeling'},
+  'task-type-2': {id: 'task-type-2', priority: 1, name: 'Setup'},
+  'task-type-3': {id: 'task-type-3', priority: 2, name: 'Texture'}
+}
 
 peopleApi.getPeople = (callback) => {
   process.nextTick(() => {
@@ -136,6 +144,7 @@ describe('people', () => {
         entity_type_name: 'Props',
         entity_id: 'asset-1',
         task_status_short_name: 'wip',
+        task_type_id: 'task-type-1',
         last_comment: {},
         id: 'task-1'
       },
@@ -146,6 +155,7 @@ describe('people', () => {
         entity_type_name: 'Props',
         entity_id: 'asset-1',
         task_status_short_name: 'todo',
+        task_type_id: 'task-type-1',
         last_comment: {
           text: "last comment",
           person_id: "person-1"
@@ -295,6 +305,7 @@ describe('people', () => {
     })
 
     it('loadPersonTasks', (done) => {
+      store.commit(LOAD_TASK_TYPES_END, Object.values(taskTypeMap))
       helpers.runAction('loadPersonTasks', {
         personId: 'person-1',
         date: moment().format('YYYY-MM-DD'),
@@ -311,7 +322,7 @@ describe('people', () => {
     })
 
     it('setPersonTasksSearch', () => {
-      store.commit(LOAD_PERSON_TASKS_END, { tasks, userFilters })
+      store.commit(LOAD_PERSON_TASKS_END, { tasks, userFilters, taskTypeMap })
       helpers.runAction('setPersonTasksSearch', 'wip')
 
       expect(store._vm.personTasksSearchText).to.equal('wip')
@@ -505,7 +516,7 @@ describe('people', () => {
     })
 
     it('LOAD_PERSON_TASKS_END', () => {
-      store.commit(LOAD_PERSON_TASKS_END, { tasks, userFilters })
+      store.commit(LOAD_PERSON_TASKS_END, { tasks, userFilters, taskTypeMap })
       expect(store._vm.displayedPersonTasks).to.deep.equal(tasks)
       expect(
         store._vm.displayedPersonTasks[0].full_entity_name
@@ -518,7 +529,9 @@ describe('people', () => {
     })
 
     it('SET_PERSON_TASK_SEARCH', () => {
-      store.commit(LOAD_PERSON_TASKS_END, { tasks, person, userFilters })
+      store.commit(
+        LOAD_PERSON_TASKS_END, { tasks, person, userFilters, taskTypeMap }
+      )
       store.commit(SET_PERSON_TASKS_SEARCH, 'wip')
 
       expect(store._vm.personTasksSearchText).to.equal('wip')

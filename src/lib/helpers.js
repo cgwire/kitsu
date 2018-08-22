@@ -48,24 +48,26 @@ export const clearSelectionGrid = (selectionGrid) => {
   return selectionGrid
 }
 
-export const computeStats = (entities, idField) => {
+export const computeStats = (entities, idField, taskStatusMap, taskMap) => {
   const results = {}
   entities.forEach((entity) => {
     if (!entity.canceled) {
       const sequenceId = entity[idField]
       if (!results[sequenceId]) results[sequenceId] = {}
 
-      entity.tasks.forEach((task) => {
+      entity.tasks.forEach((taskId) => {
+        const task = taskMap[taskId]
         const taskTypeId = task.task_type_id
-        const taskStatusId = task.task_status_color
+        const taskStatus = taskStatusMap[task.task_status_id]
+        const taskStatusId = taskStatus.color
         if (!results[sequenceId][taskTypeId]) {
           results[sequenceId][taskTypeId] = {}
         }
 
         if (!results[sequenceId][taskTypeId][taskStatusId]) {
           results[sequenceId][taskTypeId][taskStatusId] = {
-            name: task.task_status_short_name,
-            color: task.task_status_color,
+            name: taskStatus.short_name,
+            color: taskStatus.color,
             value: 0
           }
         }

@@ -253,7 +253,11 @@ const actions = {
     { commit, state, rootGetters }, { personId, forced, date, callback }
   ) {
     const userFilters = rootGetters.userFilters
-    commit(LOAD_PERSON_TASKS_END, { personId, tasks: [], userFilters })
+    const taskTypeMap = rootGetters.taskTypeMap
+    commit(
+      LOAD_PERSON_TASKS_END,
+      { personId, tasks: [], userFilters, taskTypeMap }
+    )
     commit(LOAD_PERSON_DONE_TASKS_END, [])
     peopleApi.getPersonTasks(personId, (err, tasks) => {
       if (err) tasks = []
@@ -263,7 +267,10 @@ const actions = {
         peopleApi.getTimeSpents(personId, date, (err, timeSpents) => {
           if (err) timeSpents = []
           commit(PERSON_LOAD_TIME_SPENTS_END, timeSpents)
-          commit(LOAD_PERSON_TASKS_END, { personId, tasks, userFilters })
+          commit(
+            LOAD_PERSON_TASKS_END,
+            { personId, tasks, userFilters, taskTypeMap }
+          )
           if (callback) callback(err)
         })
       })
@@ -562,7 +569,10 @@ const mutations = {
       `.png?unique=${randomHash}`
   },
 
-  [LOAD_PERSON_TASKS_END] (state, { personId, tasks, userFilters }) {
+  [LOAD_PERSON_TASKS_END] (
+    state,
+    { personId, tasks, userFilters, taskTypeMap }
+  ) {
     state.person = state.personMap[personId]
 
     tasks.forEach(populateTask)
@@ -571,7 +581,7 @@ const mutations = {
       personTaskSelectionGrid[i] = { 0: false }
     }
     state.personTaskSelectionGrid = personTaskSelectionGrid
-    state.personTasks = sortTasks(tasks)
+    state.personTasks = sortTasks(tasks, taskTypeMap)
 
     state.personTasksIndex = buildTaskIndex(tasks)
     const searchResult = indexSearch(

@@ -26,22 +26,22 @@
           </th>
           <th
             class="validation-cell"
-            :key="column.id"
+            :key="columnId"
             :style="{
-              'border-left': '1px solid ' + column.color,
-              'background': getBackground(column.color)
+              'border-left': '1px solid ' + taskTypeMap[columnId].color,
+              'background': getBackground(taskTypeMap[columnId].color)
             }"
-            v-for="column in validationColumns">
+            v-for="columnId in validationColumns">
             <router-link
               :to="{
                 name: 'task-type',
                 params: {
                   production_id: currentProduction.id,
-                  task_type_id: column.id
+                  task_type_id: columnId
                 }
               }"
             >
-              {{ column.name }}
+              {{ taskTypeMap[columnId].name }}
             </router-link>
           </th>
 
@@ -101,83 +101,82 @@
     <table class="table">
       <tbody ref="body-tbody">
         <tr
-          :key="entry.id"
-          :class="{canceled: entry.canceled}"
-          v-for="(entry, i) in entries"
+          :key="shot.id"
+          :class="{canceled: shot.canceled}"
+          v-for="(shot, i) in entries"
         >
           <td class="thumbnail">
-            <entity-thumbnail :entity="entry" />
+            <entity-thumbnail :entity="shot" />
           </td>
-          <td :class="{name: !entry.canceled}" v-if="!isSingleEpisode">
-            {{ entry.episode_name }}
+          <td :class="{name: !shot.canceled}" v-if="!isSingleEpisode">
+            {{ shot.episode_name }}
           </td>
-          <td :class="{name: !entry.canceled}">
-            {{ entry.sequence_name }}
+          <td :class="{name: !shot.canceled}">
+            {{ shot.sequence_name }}
           </td>
-          <td :class="{'shot-name': true, 'name': !entry.canceled}">
+          <td :class="{'shot-name': true, 'name': !shot.canceled}">
             <router-link :to="{
               name: 'shot',
               params: {
-                production_id: entry.production_id,
-                shot_id: entry.id
+                production_id: shot.production_id,
+                shot_id: shot.id
               }
             }">
-              {{ entry.name }}
+              {{ shot.name }}
             </router-link>
           </td>
           <td class="framein" v-if="isFrameIn">
-            {{ entry.data && entry.data.frame_in ? entry.data.frame_in : ''}}
+            {{ shot.data && shot.data.frame_in ? shot.data.frame_in : ''}}
           </td>
           <td class="frameout" v-if="isFrameOut">
-            {{ entry.data && entry.data.frame_out ? entry.data.frame_out : ''}}
+            {{ shot.data && shot.data.frame_out ? shot.data.frame_out : ''}}
           </td>
           <td class="fps" v-if="isFps">
-            {{ entry.data && entry.data.fps ? entry.data.fps : ''}}
+            {{ shot.data && shot.data.fps ? shot.data.fps : ''}}
           </td>
           <description-cell
             class="description"
-            :entry="entry"
+            :entry="shot"
             v-if="!isCurrentUserClient"
           />
           <validation-cell
             class="unselectable validation-cell"
-            :key="column.name + '-' + entry.id"
+            :key="columnId + '-' + shot.id"
             :ref="'validation-' + i + '-' + j"
-            :column="column"
-            :entity="entry"
+            :column="taskTypeMap[columnId]"
+            :entity="shot"
             :selected="shotSelectionGrid[i][j]"
             :rowX="i"
             :columnY="j"
             @select="onTaskSelected"
             @unselect="onTaskUnselected"
-            v-for="(column, j) in validationColumns"
+            v-for="(columnId, j) in validationColumns"
           />
           <row-actions v-if="isCurrentUserManager"
-            :entry="entry"
+            :entry="shot"
             :edit-route="{
               name: 'edit-shots',
               params: {
-                shot_id: entry.id,
+                shot_id: shot.id,
                 production_id: currentProduction.id
               }
             }"
             :restore-route="{
               name: 'restore-shots',
               params: {
-                shot_id: entry.id,
+                shot_id: shot.id,
                 production_id: currentProduction.id
               }
             }"
             :delete-route="{
               name: 'delete-shots',
               params: {
-                shot_id: entry.id,
+                shot_id: shot.id,
                 production_id: currentProduction.id
               }
             }"
           />
-          <td class="actions" v-else>
-          </td>
+          <td class="actions" v-else></td>
         </tr>
       </tbody>
     </table>
@@ -205,18 +204,21 @@ import EntityThumbnail from '../widgets/EntityThumbnail'
 
 export default {
   name: 'shot-list',
+
   props: [
     'entries',
     'isLoading',
     'isError',
     'validationColumns'
   ],
+
   data () {
     return {
       busy: false,
       lastSelection: null
     }
   },
+
   components: {
     ButtonLink,
     ButtonHrefLink,
@@ -227,19 +229,21 @@ export default {
     TableInfo,
     ValidationCell
   },
+
   computed: {
     ...mapGetters([
       'currentProduction',
+      'displayedShotsLength',
       'isCurrentUserManager',
       'isCurrentUserClient',
       'isFps',
       'isFrameIn',
       'isFrameOut',
       'isSingleEpisode',
-      'displayedShotsLength',
       'nbSelectedTasks',
       'shotSearchText',
-      'shotSelectionGrid'
+      'shotSelectionGrid',
+      'taskTypeMap'
     ]),
     isEmptyList () {
       return this.entries &&
@@ -395,13 +399,13 @@ th.actions {
 }
 
 .framein {
-  min-width: 50px;
-  width: 50px;
+  min-width: 60px;
+  width: 60px;
 }
 
 .frameout {
-  min-width: 50px;
-  width: 50px;
+  min-width: 60px;
+  width: 60px;
 }
 
 .fps {

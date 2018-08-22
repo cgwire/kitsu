@@ -47,7 +47,7 @@ export const sortProductions = (productions) => {
   })
 }
 
-export const sortTasks = (tasks) => {
+export const sortTasks = (tasks, taskTypeMap) => {
   return tasks.sort(
     firstBy('priority', -1)
       .thenBy((a, b) => {
@@ -57,7 +57,11 @@ export const sortTasks = (tasks) => {
           return 0
         }
       })
-      .thenBy((a, b) => a.task_type_name.localeCompare(b.task_type_name))
+      .thenBy((a, b) => {
+        const taskTypeA = taskTypeMap[a.task_type_id]
+        const taskTypeB = taskTypeMap[b.task_type_id]
+        return taskTypeA.name.localeCompare(taskTypeB.name)
+      })
       .thenBy((a, b) => {
         if (a.full_entity_name) {
           return a.full_entity_name.localeCompare(b.full_entity_name)
@@ -79,8 +83,7 @@ export const sortTaskTypes = (taskTypes) => {
 export const sortPlaylists = (playlists) => {
   return playlists.sort(
     firstBy('created_at', -1)
-      .thenBy((a, b) => a.project_name.localeCompare(b.project_name))
-      .thenBy('name')
+      .thenBy((a, b) => a.name.localeCompare(b.name))
   )
 }
 
@@ -100,12 +103,14 @@ export const sortByDate = (entries) => {
   return entries.sort(firstBy('created_at', -1))
 }
 
-export const sortValidationColumns = (columns) => {
+export const sortValidationColumns = (columns, taskTypeMap) => {
   return columns.sort((a, b) => {
-    if (a.priority !== b.priority) {
-      return a.priority > b.priority
+    const taskTypeA = taskTypeMap[a]
+    const taskTypeB = taskTypeMap[b]
+    if (taskTypeA.priority !== taskTypeB.priority) {
+      return taskTypeA.priority > taskTypeB.priority
     } else {
-      return a.name.localeCompare(b.name)
+      return taskTypeA.name.localeCompare(taskTypeB.name)
     }
   })
 }

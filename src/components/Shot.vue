@@ -57,6 +57,7 @@
             <td class="field-label">{{ $t('shots.fields.description') }}</td>
             <description-cell
               :entry="currentShot"
+              :full="true"
             >
             </description-cell>
           </tr>
