@@ -8,7 +8,7 @@
       background: this.backgroundColor,
       color: this.color,
   }">
-    {{ task.task_status_short_name }}
+    {{ taskStatus.short_name }}
   </router-link>
 
   <span
@@ -18,7 +18,7 @@
       background: this.backgroundColor,
       color: this.color,
   }">
-    {{ task.task_status_short_name }}
+    {{ taskStatus.short_name }}
   </span>
 
   <span class="priority" v-if="isPriority && !isCurrentUserClient">
@@ -52,28 +52,32 @@ export default {
       'isCurrentUserClient'
     ]),
 
+    taskStatus () {
+      return this.taskStatusMap[this.task.task_status_id]
+    },
+
     backgroundColor () {
-      if (this.task.task_status_short_name === 'wtg') {
+      if (this.taskStatus.short_name === 'wtg') {
         return '#f5f5f5'
-      } else if (this.task.task_status_short_name === 'ip') {
+      } else if (this.taskStatus.short_name === 'ip') {
         return '#3273dc'
-      } else if (this.task.task_status_short_name === 'pndng') {
+      } else if (this.taskStatus.short_name === 'pndng') {
         return '#ab26ff'
-      } else if (this.task.task_status_short_name === 'fin') {
+      } else if (this.taskStatus.short_name === 'fin') {
         return '#22d160'
-      } else if (this.task.task_status_short_name === 'rtk') {
+      } else if (this.taskStatus.short_name === 'rtk') {
         return '#ff3860'
-      } else if (this.task.task_status_short_name === 'cfrm') {
+      } else if (this.taskStatus.short_name === 'cfrm') {
         return '#f1c40f'
-      } else if (this.task.task_status_short_name === 'recd') {
+      } else if (this.taskStatus.short_name === 'recd') {
         return '#1abc9c'
       }
-      return this.task.task_status_color
+      return this.taskStatus.color
     },
 
     color () {
-      if (this.task.task_status_short_name !== 'todo' &&
-          this.task.task_status_short_name !== 'wtg') {
+      if (this.taskStatus.short_name !== 'todo' &&
+          this.taskStatus.short_name !== 'wtg') {
         return 'white'
       } else {
         return '#333'
@@ -83,7 +87,7 @@ export default {
     priority () {
       if (
         this.task.priority &&
-        !this.taskStatusMap[this.task.task_status_id].is_done
+        !this.taskStatus.is_done
       ) {
         if (this.task.priority === 3) {
           return '!!!'

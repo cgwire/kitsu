@@ -2,7 +2,7 @@
   <div class="people page fixed-page">
     <div class="level page-header">
       <div class="level-left">
-        <page-title :text="$t('people.title')"></page-title>
+        <page-title class="flexrow-item" :text="$t('people.title')"></page-title>
       </div>
 
       <div class="level-right">
@@ -31,8 +31,16 @@
       </div>
     </div>
 
+    <search-field
+      class="search"
+      ref="people-search-field"
+      :can-save="false"
+      @change="onSearchChange"
+      placeholder="ex: John Doe"
+    />
+
     <people-list
-      :entries="people"
+      :entries="displayedPeople"
       :is-loading="isPeopleLoading"
       :is-error="isPeopleLoadingError"
     ></people-list>
@@ -82,6 +90,7 @@ import Filters from './widgets/Filters'
 import ButtonLink from './widgets/ButtonLink'
 import ButtonHrefLink from './widgets/ButtonHrefLink'
 import PageTitle from './widgets/PageTitle'
+import SearchField from './widgets/SearchField'
 
 export default {
   name: 'people',
@@ -93,22 +102,12 @@ export default {
     ButtonLink,
     ButtonHrefLink,
     PageTitle,
+    SearchField,
     Filters
   },
 
   data () {
     return {
-      choices: [],
-      personFilters: [{
-        type: 'Situation',
-        value: {
-          name: 'active'
-        }
-      }],
-      personFilterTypes: [
-        'Situation',
-        'Skill'
-      ],
       csvColumns: [
         'First Name',
         'Last Name',
@@ -132,7 +131,7 @@ export default {
 
   computed: {
     ...mapGetters([
-      'people',
+      'displayedPeople',
       'isPeopleLoading',
       'isPeopleLoadingError',
 
@@ -172,7 +171,8 @@ export default {
 
   methods: {
     ...mapActions([
-      'loadPeople'
+      'loadPeople',
+      'peopleSearchChange'
     ]),
 
     uploadImportFile () {
@@ -217,17 +217,6 @@ export default {
       this.$store.commit('PERSON_CSV_FILE_SELECTED', formData)
     },
 
-    changeFilterType (type) {
-      if (type === 'Assignee') {
-      } else if (type === 'Production') {
-        this.choices = this.people
-        this.choices = this.productions
-      } else {
-        this.choices = []
-      }
-      return this.choices
-    },
-
     showImportModalIfNeeded (path) {
       if (path.indexOf('import') > 0) {
         this.$store.dispatch('showPersonImportModal')
@@ -260,6 +249,10 @@ export default {
       this.showDeleteModalIfNeeded(path, personId)
       this.showEditModalIfNeeded(path, personId)
       this.showImportModalIfNeeded(path, personId)
+    },
+
+    onSearchChange () {
+      this.peopleSearchChange(this.$refs['people-search-field'].getValue())
     }
   },
 
@@ -272,4 +265,7 @@ export default {
 </script>
 
 <style scoped>
+.search {
+  margin-top: 2em;
+}
 </style>

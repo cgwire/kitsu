@@ -4,13 +4,12 @@
   <div class="asset-list-header page-header">
     <div class="level header-title">
       <div class="level-left">
-        <page-title :text="$t('assets.title')"></page-title>
+        <page-title :text="$t('assets.title')" />
       </div>
 
       <div class="level-right" v-if="isCurrentUserManager">
         <div class="level-item">
-          <show-assignations-button>
-          </show-assignations-button>
+          <show-assignations-button />
           <button-link
             class="level-item"
             :text="$t('main.csv.import_file')"
@@ -20,16 +19,14 @@
               name: 'import-assets',
               params: {production_id: currentProduction.id}
             }"
-          >
-          </button-link>
+          />
           <button-href-link
             class="level-item"
             :text="$t('main.csv.export_file')"
             icon="download"
             :is-responsive="true"
             :path="'/api/export/csv/projects/' + currentProduction.id + '/assets.csv'"
-          >
-          </button-href-link>
+          />
           <button-link
             class="level-item"
             :text="$t('assets.new_asset')"
@@ -39,8 +36,7 @@
               name: 'new-asset',
               params: {production_id: currentProduction.id}
             }"
-          >
-          </button-link>
+          />
         </div>
       </div>
     </div>
@@ -52,8 +48,7 @@
         @change="onSearchChange"
         @save="saveSearchQuery"
         placeholder="ex: props, modeling=wip"
-      >
-      </search-field>
+      />
     </div>
 
     <div class="query-list">
@@ -61,8 +56,7 @@
         :queries="assetSearchQueries"
         @changesearch="changeSearch"
         @removesearch="removeSearchQuery"
-      >
-      </search-query-list>
+      />
     </div>
   </div>
 
@@ -73,7 +67,7 @@
     :is-error="isAssetsLoadingError"
     :validation-columns="assetValidationColumns"
     @scroll="saveScrollPosition"
-  ></asset-list>
+  />
 
   <edit-asset-modal
     ref="edit-asset-modal"
@@ -89,8 +83,7 @@
     :asset-to-edit="assetToEdit"
     @confirm="confirmEditAsset"
     @confirmAndStay="confirmNewAssetStay"
-  >
-  </edit-asset-modal>
+  />
 
   <delete-modal
     :active="modals.isDeleteDisplayed"
@@ -103,8 +96,7 @@
     :text="deleteText()"
     :error-text="$t('assets.delete_error')"
     @confirm="confirmDeleteAsset"
-  >
-  </delete-modal>
+  />
 
   <delete-modal
     :active="modals.isRestoreDisplayed"
@@ -117,8 +109,7 @@
     :text="restoreText()"
     :error-text="$t('assets.restore_error')"
     @confirm="confirmRestoreAsset"
-  >
-  </delete-modal>
+  />
 
   <import-modal
     :active="modals.isImportDisplayed"
@@ -132,8 +123,7 @@
     :columns="columns"
     @fileselected="selectFile"
     @confirm="uploadImportFile"
-  >
-  </import-modal>
+  />
 
   <create-tasks-modal
     :active="modals.isCreateTasksDisplayed"
@@ -147,8 +137,7 @@
     :text="$t('tasks.create_tasks_asset_explaination')"
     :error-text="$t('tasks.create_tasks_asset_failed')"
     @confirm="confirmCreateTasks"
-  >
-  </create-tasks-modal>
+  />
 
 </div>
 </template>
@@ -241,7 +230,6 @@ export default {
       'editAsset',
       'deleteAsset',
       'restoreAsset',
-      'getAsset',
       'isCurrentUserManager'
     ])
   },
@@ -422,13 +410,13 @@ export default {
         this.modals.isNewDisplayed = true
       } else if (path.indexOf('edit') > 0) {
         this.editAsset.isSuccess = false
-        this.assetToEdit = this.getAsset(assetId)
+        this.assetToEdit = this.assetMap[assetId]
         this.modals.isNewDisplayed = true
       } else if (path.indexOf('delete') > 0) {
-        this.assetToDelete = this.getAsset(assetId)
+        this.assetToDelete = this.assetMap[assetId]
         this.modals.isDeleteDisplayed = true
       } else if (path.indexOf('restore') > 0) {
-        this.assetToRestore = this.getAsset(assetId)
+        this.assetToRestore = this.assetMap[assetId]
         this.modals.isRestoreDisplayed = true
       } else if (path.indexOf('import') > 0) {
         this.modals.isImportDisplayed = true

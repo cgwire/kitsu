@@ -6,6 +6,7 @@
           :to="previousEntity"
           class="flexrow-item arrow"
           :title="$t('tasks.previous')"
+          v-if="previousEntity"
         >
           &larr;
         </router-link>
@@ -21,6 +22,7 @@
           :to="nextEntity"
           class="next-link flexrow-item arrow"
           :title="$t('tasks.next')"
+          v-if="nextEntity"
         >
           &rarr;
         </router-link>
@@ -32,12 +34,9 @@
       >
         <task-type-name
           class="flexrow-item task-type"
-          :task-type="{
-            id: currentTask.task_type_id,
-            name: currentTask.task_type_name,
-            color: currentTask.task_type_color
-          }"
+          :task-type="currentTaskType"
           :production-id="currentProduction.id"
+          v-if="currentTaskType"
         >
         </task-type-name>
         <div class="title flexrow-item">
@@ -386,6 +385,7 @@ export default {
       'isSingleEpisode',
       'taskStatusOptions',
       'taskMap',
+      'taskTypeMap',
       'getTaskComments',
       'getTaskPreviews',
       'getTaskComment',
@@ -450,8 +450,7 @@ export default {
 
     entityPage () {
       if (this.currentTask) {
-        const type = this.currentTask.entity_type_name
-        if (type === 'Shot') {
+        if (this.entityList === this.displayedShots) {
           return {
             name: 'shots',
             params: {production_id: this.currentTask.project_id}
@@ -504,8 +503,14 @@ export default {
     },
 
     entityList () {
-      const type = this.currentTask.entity_type_name
-      return type === 'Shot' ? this.displayedShots : this.displayedAssets
+      let entity = this.displayedShots.find((entity) => {
+        return entity.id === this.currentTask.entity_id
+      })
+      if (entity) {
+        return this.displayedShots
+      } else {
+        return this.displayedAssets
+      }
     },
 
     previousEntity () {
@@ -514,33 +519,44 @@ export default {
         let entityIndex = this.entityList.findIndex((entity) => {
           return entity.id === this.currentTask.entity_id
         })
+        let firstTraversal = false
 
         let previousEntityIndex = entityIndex - 1
         if (previousEntityIndex < 0) {
           previousEntityIndex = this.entityList.length - 1
         }
 
-        let task = null
-        while (!task) {
+        let taskId = null
+        while (!taskId) {
           if (this.entityList[previousEntityIndex]) {
-            task = this.entityList[previousEntityIndex].tasks.find((task) => {
-              return task.task_type_id === taskTypeId
+            const entity = this.entityList[previousEntityIndex]
+            taskId = entity.tasks.find((ctaskId) => {
+              const task = this.taskMap[ctaskId]
+              if (task) {
+                return task.task_type_id === taskTypeId
+              } else {
+                return false
+              }
             })
           } else {
-            task = this.currentTask
+            taskId = this.currentTask.id
           }
 
-          if (!task) {
+          if (!taskId) {
             previousEntityIndex--
             if (previousEntityIndex < 0) {
               previousEntityIndex = this.entityList.length
+              if (firstTraversal) {
+                return null
+              }
+              firstTraversal = true
             }
           }
         }
 
         return {
           name: 'task',
-          params: {task_id: task.id}
+          params: {task_id: taskId}
         }
       } else {
         return {
@@ -552,6 +568,7 @@ export default {
     nextEntity () {
       if (this.currentTask) {
         const taskTypeId = this.currentTask.task_type_id
+        let firstTraversal = false
         let entityIndex = this.entityList.findIndex((entity) => {
           return entity.id === this.currentTask.entity_id
         })
@@ -561,27 +578,38 @@ export default {
           nextEntityIndex = 0
         }
 
-        let task = null
-        while (!task) {
+        let taskId = null
+        while (!taskId) {
           if (this.entityList[nextEntityIndex]) {
-            task = this.entityList[nextEntityIndex].tasks.find((task) => {
-              return task.task_type_id === taskTypeId
+            const entity = this.entityList[nextEntityIndex]
+            taskId = entity.tasks.find((ctaskId) => {
+              const task = this.taskMap[ctaskId]
+              if (task) {
+                return task.task_type_id === taskTypeId
+              } else {
+                return false
+              }
             })
           } else {
-            task = this.currentTask
+            taskId = this.currentTask.id
           }
 
-          if (!task) {
+          if (!taskId) {
             nextEntityIndex++
             if (nextEntityIndex >= this.entityList.length) {
               nextEntityIndex = 0
+
+              if (firstTraversal) {
+                return null
+              }
+              firstTraversal = true
             }
           }
         }
 
         return {
           name: 'task',
-          params: {task_id: task.id}
+          params: {task_id: taskId}
         }
       } else {
         return {
@@ -698,6 +726,14 @@ export default {
     isDlPreviewFile () {
       return this.currentTaskPreviews.length > 0 &&
         ['pdf', 'ma', 'mb'].includes(this.extension)
+    },
+
+    currentTaskType () {
+      if (this.currentTask) {
+        return this.taskTypeMap[this.currentTask.task_type_id]
+      } else {
+        return null
+      }
     }
   },
 
@@ -1067,8 +1103,10 @@ export default {
   mounted () {
     this.handleModalsDisplay()
     setTimeout(() => {
-      this.$refs['task-columns'].scrollTop = 100
-      window.scrollTo(0, 0)
+      if (this.$refs['task-columns']) {
+        this.$refs['task-columns'].scrollTop = 100
+        window.scrollTo(0, 0)
+      }
     })
   },
 

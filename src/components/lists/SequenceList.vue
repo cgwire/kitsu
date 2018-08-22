@@ -13,19 +13,20 @@
           <th class="description">{{ $t('shots.fields.description') }}</th>
           <th
             class="validation"
-            :style="validationStyle(column.color)"
-            :key="column.id"
-            v-for="column in validationColumns">
+            :style="validationStyle(taskTypeMap[columnId].color)"
+            :key="columnId"
+            v-for="columnId in validationColumns"
+          >
             <router-link
               :to="{
                 name: 'task-type',
                 params: {
                   production_id: currentProduction.id,
-                  task_type_id: column.id
+                  task_type_id: columnId
                 }
               }"
             >
-              {{ column.name }}
+              {{ taskTypeMap[columnId].name }}
             </router-link>
           </th>
           <th class="actions">
@@ -90,16 +91,16 @@
 
           <td
             class="validation"
-            :style="validationStyle(column.color)"
+            :style="validationStyle(taskTypeMap[column].color)"
             :key="column.id"
             v-for="column in validationColumns">
             <pie-chart
               width="70px"
               height="50px"
               :legend="false"
-              :colors="chartColors(entry, column)"
-              :data="chartData(entry, column)"
-              v-if="isStats(entry, column)"
+              :colors="chartColors(entry, taskTypeMap[column])"
+              :data="chartData(entry, taskTypeMap[column])"
+              v-if="isStats(entry, taskTypeMap[column])"
             />
           </td>
 
@@ -145,6 +146,7 @@ import TableInfo from '../widgets/TableInfo'
 
 export default {
   name: 'sequence-list',
+
   props: [
     'entries',
     'isLoading',
@@ -152,27 +154,32 @@ export default {
     'sequenceStats',
     'validationColumns'
   ],
+
   data () {
     return {
       busy: false,
       lastSelection: null
     }
   },
+
   components: {
     ButtonLink,
     PageTitle,
     RowActions,
     TableInfo
   },
+
   computed: {
     ...mapGetters([
       'currentProduction',
+      'displayedSequencesLength',
       'isCurrentUserClient',
       'isCurrentUserManager',
       'isSingleEpisode',
-      'displayedSequencesLength',
-      'sequenceSearchText'
+      'sequenceSearchText',
+      'taskTypeMap'
     ]),
+
     isEmptyList () {
       return this.entries &&
              this.entries.length === 0 &&

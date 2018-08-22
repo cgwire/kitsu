@@ -2,7 +2,11 @@ import peopleApi from '../api/people'
 import colors from '../../lib/colors'
 import { populateTask, clearSelectionGrid } from '../../lib/helpers'
 import { sortTasks, sortPeople, sortByName } from '../../lib/sorting'
-import { indexSearch, buildTaskIndex } from '../../lib/indexing'
+import {
+  indexSearch,
+  buildTaskIndex,
+  buildNameIndex
+} from '../../lib/indexing'
 import taskStatusStore from './taskstatus'
 import {
   LOAD_PEOPLE_START,
@@ -50,6 +54,8 @@ import {
 
   SET_PERSON_TASKS_SCROLL_POSITION,
 
+  PEOPLE_SEARCH_CHANGE,
+
   RESET_ALL
 } from '../mutation-types'
 
@@ -86,6 +92,8 @@ const helpers = {
 
 const initialState = {
   people: [],
+  displayedPeople: [],
+  peopleIndex: {},
   personMap: {},
   isPeopleLoading: false,
   isPeopleLoadingError: true,
@@ -129,6 +137,8 @@ const state = {
 
 const getters = {
   people: state => state.people,
+  displayedPeople: state => state.displayedPeople,
+  peopleIndex: state => state.peopleIndex,
   personMap: state => state.personMap,
   isPeopleLoading: state => state.isPeopleLoading,
   isPeopleLoadingError: state => state.isPeopleLoadingError,
@@ -243,7 +253,11 @@ const actions = {
     { commit, state, rootGetters }, { personId, forced, date, callback }
   ) {
     const userFilters = rootGetters.userFilters
-    commit(LOAD_PERSON_TASKS_END, { personId, tasks: [], userFilters })
+    const taskTypeMap = rootGetters.taskTypeMap
+    commit(
+      LOAD_PERSON_TASKS_END,
+      { personId, tasks: [], userFilters, taskTypeMap }
+    )
     commit(LOAD_PERSON_DONE_TASKS_END, [])
     peopleApi.getPersonTasks(personId, (err, tasks) => {
       if (err) tasks = []
@@ -253,7 +267,10 @@ const actions = {
         peopleApi.getTimeSpents(personId, date, (err, timeSpents) => {
           if (err) timeSpents = []
           commit(PERSON_LOAD_TIME_SPENTS_END, timeSpents)
-          commit(LOAD_PERSON_TASKS_END, { personId, tasks, userFilters })
+          commit(
+            LOAD_PERSON_TASKS_END,
+            { personId, tasks, userFilters, taskTypeMap }
+          )
           if (callback) callback(err)
         })
       })
@@ -391,6 +408,10 @@ const actions = {
         })
         .catch(reject)
     })
+  },
+
+  peopleSearchChange ({ commit }, text) {
+    commit(PEOPLE_SEARCH_CHANGE, text)
   }
 }
 
@@ -410,10 +431,12 @@ const mutations = {
     state.isPeopleLoading = false
     state.isPeopleLoadingError = false
     state.people = sortPeople(people)
+    state.displayedPeople = state.people
     state.people.forEach((person) => {
       person = helpers.addAdditionalInformation(person)
       state.personMap[person.id] = person
     })
+    state.peopleIndex = buildNameIndex(state.people)
   },
 
   [DELETE_PEOPLE_START] (state) {
@@ -546,7 +569,10 @@ const mutations = {
       `.png?unique=${randomHash}`
   },
 
-  [LOAD_PERSON_TASKS_END] (state, { personId, tasks, userFilters }) {
+  [LOAD_PERSON_TASKS_END] (
+    state,
+    { personId, tasks, userFilters, taskTypeMap }
+  ) {
     state.person = state.personMap[personId]
 
     tasks.forEach(populateTask)
@@ -555,7 +581,7 @@ const mutations = {
       personTaskSelectionGrid[i] = { 0: false }
     }
     state.personTaskSelectionGrid = personTaskSelectionGrid
-    state.personTasks = sortTasks(tasks)
+    state.personTasks = sortTasks(tasks, taskTypeMap)
 
     state.personTasksIndex = buildTaskIndex(tasks)
     const searchResult = indexSearch(
@@ -657,6 +683,14 @@ const mutations = {
 
   [SET_PERSON_TASKS_SCROLL_POSITION] (state, scrollPosition) {
     state.personTasksScrollPosition = scrollPosition
+  },
+
+  [PEOPLE_SEARCH_CHANGE] (state, text) {
+    if (text) {
+      state.displayedPeople = indexSearch(state.peopleIndex, text)
+    } else {
+      state.displayedPeople = state.people
+    }
   },
 
   [RESET_ALL] (state, people) {

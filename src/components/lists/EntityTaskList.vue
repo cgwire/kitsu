@@ -1,5 +1,6 @@
 <template>
 <div class="data-list">
+
   <div style="overflow: hidden">
     <table class="table table-header" ref="headerWrapper">
       <thead>
@@ -21,44 +22,39 @@
   <table-info
     :is-loading="isLoading"
     :is-error="isError"
-  >
-  </table-info>
+  />
 
   <div class="table-body" v-scroll="onBodyScroll" v-if="entries.length > 0">
     <table class="table">
       <tbody>
-        <tr v-for="entry in entries" :key="entry.taskType.id">
+        <tr v-for="task in entries" :key="task.task_type_id">
           <task-type-name
             class="type"
-            :entry="{
-              id: entry.taskType.id,
-              name: entry.taskType.name,
-              color: entry.taskType.color
-            }"
+            :entry="getTaskType(task)"
             :production-id="currentProduction.id"
+            v-if="getTaskType(task)"
           >
           </task-type-name>
           <td class="status">
             <validation-tag
-              :task="entry"
-            >
-            </validation-tag>
+              :task="getTask(task)"
+              v-if="getTask(task)"
+            />
           </td>
           <td class="assignees">
             <div class="flexrow">
               <div
                 class="avatar-wrapper"
-                :key="person.id"
-                v-for="person in entry.persons"
+                :key="personId"
+                v-for="personId in getAssignees(task)"
               >
                 <people-avatar
                   class="person-avatar flexrow-item"
-                  :key="entry.id + '-' + person.id"
-                  :person="person"
+                  :key="task.id + '-' + personId"
+                  :person="personMap[personId]"
                   :size="30"
                   :font-size="15"
-                >
-                </people-avatar>
+                />
               </div>
             </div>
           </td>
@@ -66,6 +62,7 @@
       </tbody>
     </table>
   </div>
+
 </div>
 </template>
 
@@ -87,15 +84,27 @@ export default {
     ValidationTag
   },
 
-  props: [
-    'entries',
-    'isLoading',
-    'isError'
-  ],
+  props: {
+    entries: {
+      type: Array,
+      default: () => []
+    },
+    isLoading: {
+      type: Boolean,
+      default: false
+    },
+    isError: {
+      type: Boolean,
+      default: false
+    }
+  },
 
   computed: {
     ...mapGetters([
-      'currentProduction'
+      'currentProduction',
+      'personMap',
+      'taskMap',
+      'taskTypeMap'
     ])
   },
 
@@ -105,6 +114,24 @@ export default {
 
     onBodyScroll (event, position) {
       this.$refs.headerWrapper.style.left = `-${position.scrollLeft}px`
+    },
+
+    getTask (task) {
+      if (typeof (task) === 'string') {
+        return this.taskMap[task]
+      } else {
+        return task
+      }
+    },
+
+    getTaskType (entry) {
+      const task = this.getTask(entry)
+      return task ? this.taskTypeMap[task.task_type_id] : null
+    },
+
+    getAssignees (entry) {
+      const task = this.getTask(entry)
+      return task ? task.assignees : []
     }
   }
 }

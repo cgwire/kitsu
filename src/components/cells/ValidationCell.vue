@@ -7,7 +7,7 @@
   }"
   :style="{
     'border-left': isBorder ? '1px solid ' + column.color : 'none',
-    'background': isBorder ? getBackground(column.color) : 'transparent'
+    'background': isBorder ? getBackground() : 'transparent'
   }"
   @mouseover="onMouseOver"
   @mouseout="onMouseOut"
@@ -18,8 +18,7 @@
       class="validation-tag"
       :task="task"
       v-if="task"
-    >
-    </validation-tag>
+    />
     <people-avatar
       class="person-avatar"
       :key="task.id + '-' + personId"
@@ -28,8 +27,7 @@
       :font-size="10"
       v-if="isAssignees && isShowAssignations && !isCurrentUserClient"
       v-for="personId in assignees"
-    >
-    </people-avatar>
+    />
   </div>
 </td>
 </template>
@@ -100,11 +98,13 @@ export default {
       'isCurrentUserClient',
       'isShowAssignations',
       'personMap',
+      'taskMap',
       'taskStatusMap'
     ]),
 
     task () {
-      return this.taskTest || this.entity.validations[this.column.name]
+      return this.taskTest ||
+        this.taskMap[this.entity.validations[this.column.name]]
     },
 
     assignees () {
@@ -120,9 +120,9 @@ export default {
     ...mapActions([
     ]),
 
-    getBackground (color) {
+    getBackground () {
       if (this.isBorder) {
-        return colors.hexToRGBa(color, 0.08)
+        return colors.hexToRGBa(this.column.color, 0.08)
       } else {
         return 'transparent'
       }
@@ -136,7 +136,7 @@ export default {
 
     onMouseOut (event) {
       if (this.selectable && !this.selected) {
-        const background = this.getBackground(this.column.color)
+        const background = this.getBackground()
         this.changeStyle(background)
       }
     },

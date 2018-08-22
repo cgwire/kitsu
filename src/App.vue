@@ -56,33 +56,6 @@ export default {
 :focus {outline:none;}
 ::-moz-focus-inner {border:0;}
 
-#app .router-link-active {
-  color: #00d1b2;
-}
-
-.page {
-  padding: 0.5em 2em;
-  padding-top: 70px;
-  background: white;
-  height: 100vh;
-}
-
-th.actions {
-  min-width: 200px;
-}
-
-.avatar {
-  border-radius: 50%;
-  color: white;
-}
-
-.avatar img {
-  border-radius: 50%;
-  width: 40px;
-  height: 40px;
-  margin-right: 0px;
-}
-
 html {
 }
 
@@ -98,6 +71,33 @@ body {
   margin: 0;
   padding: 0;
   border: 0;
+}
+
+#app .router-link-active {
+  color: #00d1b2;
+}
+
+.page {
+  padding: 0.5em 2em;
+  padding-top: 70px;
+  background: white;
+  height: 100vh;
+}
+
+th.actions {
+  min-width: 100px;
+}
+
+.avatar {
+  border-radius: 50%;
+  color: white;
+}
+
+.avatar img {
+  border-radius: 50%;
+  width: 40px;
+  height: 40px;
+  margin-right: 0px;
 }
 
 .th-project {
@@ -297,10 +297,6 @@ input.search-input:focus {
 
 .table {
   margin-bottom: 0;
-}
-
-.table td.actions {
-  min-width: 145px;
 }
 
 .table-info {

@@ -1,27 +1,32 @@
 import Vue from 'vue'
 import { sync } from 'vuex-router-sync'
 
-import router from './router'
-import vuescroll from 'vue-scroll'
-import i18n from './lib/i18n'
-import store from './store'
 import App from './App'
-import VueLazyload from 'vue-lazyload'
-import Meta from 'vue-meta'
-import infiniteScroll from 'vue-infinite-scroll'
-import VueChartkick from 'vue-chartkick'
+import i18n from './lib/i18n'
+import router from './router'
+import store from './store'
+
+import Autocomplete from 'v-autocomplete'
 import Chart from 'chart.js'
+import infiniteScroll from 'vue-infinite-scroll'
+import Meta from 'vue-meta'
+import VueChartkick from 'vue-chartkick'
+import VueCookie from 'vue-cookie'
+import VueLazyload from 'vue-lazyload'
+import vuescroll from 'vue-scroll'
 import VueWebsocket from 'vue-websocket'
 import VTooltip from 'v-tooltip'
-import VueCookie from 'vue-cookie'
+
+import 'v-autocomplete/dist/v-autocomplete.css'
 
 Vue.config.productionTip = false
-Vue.use(vuescroll)
-Vue.use(VueLazyload)
+Vue.use(Autocomplete)
 Vue.use(Meta)
 Vue.use(infiniteScroll)
 Vue.use(VueChartkick, {adapter: Chart})
 Vue.use(VueCookie)
+Vue.use(VueLazyload)
+Vue.use(vuescroll)
 Vue.use(VueWebsocket, '/events')
 Vue.use(VTooltip)
 
@@ -31,7 +36,7 @@ sync(store, router)
 // Global custom directive to enable automatic focus on field after page
 // loading.
 Vue.directive('focus', {
-  inserted: function (el) {
+  inserted (el) {
     el.focus()
   }
 })

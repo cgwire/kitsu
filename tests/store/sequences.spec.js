@@ -41,6 +41,8 @@ let taskStatuses = []
 let taskTypes = []
 let userFilters = []
 
+let taskMap = {}
+let taskStatusMap = {}
 
 sequencesApi.getSequences = (callback) => {
   process.nextTick(() => {
@@ -101,49 +103,53 @@ describe('sequences', () => {
       }
     ]
 
-    shots = [
-      {
-        id: 1,
-        name: 'S01',
-        parent_id: 'sequence-1',
-        sequence_id: 'sequence-1',
-        sequence_name: 'SE01',
-        episode_name: 'E01',
-        canceled: false,
-        data: {},
-        tasks: [
-          {
-            id: 'task-1',
-            entity_name: 'BBB / Bunny',
-            task_type_name: 'Animation',
-            task_type_color: '#0000FF',
-            task_type_priority: 1,
-            task_type_id: 'task-type-1',
-            task_status_id: 'task-status-3',
-            taskStatus: {
-              name: 'Waiting For Approval',
-              short_name: 'wfa'
-            },
-            assignees: []
-          },
-          {
-            id: 'task-2',
-            entity_name: 'BBB / Bunny',
-            project_name: 'BBB',
-            task_type_name: 'Compositing',
-            task_type_color: '#00FF00',
-            task_type_id: 'task-type-2',
-            task_status_id: 'task-status-3',
-            task_type_priority: 2,
-            taskStatus: {
-              name: 'Waiting For Approval',
-              short_name: 'wfa'
-            },
-            assignees: []
-          }
-        ]
+    taskMap = {
+      'task-1': {
+        id: 'task-1',
+        entity_name: 'BBB / Bunny',
+        task_type_id: 'task-type-1',
+        task_status_id: 'task-status-3',
+        assignees: []
+      },
+      'task-2': {
+        id: 'task-2',
+        entity_name: 'BBB / Bunny',
+        project_name: 'BBB',
+        task_type_id: 'task-type-2',
+        task_status_id: 'task-status-3',
+        assignees: []
+      },
+      'task-3': {
+        id: 'task-3',
+        entity_name: 'BBB / Bunny',
+        task_type_id: 'task-type-1',
+        task_status_id: 'task-status-3',
+        assignees: []
+      },
+      'task-4': {
+        id: 'task-4',
+        entity_name: 'BBB / Bunny',
+        project_name: 'BBB',
+        task_type_id: 'task-type-2',
+        task_status_id: 'task-status-3',
+        assignees: []
+      },
+      'task-5': {
+        id: 'task-5',
+        entity_name: 'BBB / Bunny',
+        task_type_id: 'task-type-1',
+        task_status_id: 'task-status-3',
+        assignees: []
+      },
+      'task-6': {
+        id: 'task-6',
+        entity_name: 'BBB / Bunny',
+        project_name: 'BBB',
+        task_type_id: 'task-type-2',
+        task_status_id: 'task-status-3',
+        assignees: []
       }
-    ]
+    }
 
     shots = [
       {
@@ -155,37 +161,7 @@ describe('sequences', () => {
         episode_name: 'E01',
         canceled: false,
         data: {},
-        tasks: [
-          {
-            id: 'task-1',
-            entity_name: 'BBB / Bunny',
-            task_type_name: 'Animation',
-            task_type_color: '#0000FF',
-            task_type_priority: 1,
-            task_type_id: 'task-type-1',
-            task_status_id: 'task-status-3',
-            taskStatus: {
-              name: 'Waiting For Approval',
-              short_name: 'wfa'
-            },
-            assignees: []
-          },
-          {
-            id: 'task-2',
-            entity_name: 'BBB / Bunny',
-            project_name: 'BBB',
-            task_type_name: 'Compositing',
-            task_type_color: '#00FF00',
-            task_type_id: 'task-type-2',
-            task_status_id: 'task-status-3',
-            task_type_priority: 2,
-            taskStatus: {
-              name: 'Waiting For Approval',
-              short_name: 'wfa'
-            },
-            assignees: []
-          }
-        ]
+        tasks: [taskMap['task-1'], taskMap['task-2']]
       },
       {
         id: 'shot-2',
@@ -196,37 +172,7 @@ describe('sequences', () => {
         episode_name: 'E01',
         canceled: false,
         data: {},
-        tasks: [
-          {
-            id: 'task-1',
-            entity_name: 'BBB / Bunny',
-            task_type_name: 'Animation',
-            task_type_color: '#0000FF',
-            task_type_priority: 1,
-            task_type_id: 'task-type-1',
-            task_status_id: 'task-status-3',
-            taskStatus: {
-              name: 'Waiting For Approval',
-              short_name: 'wfa'
-            },
-            assignees: []
-          },
-          {
-            id: 'task-2',
-            entity_name: 'BBB / Bunny',
-            project_name: 'BBB',
-            task_type_name: 'Compositing',
-            task_type_color: '#00FF00',
-            task_type_id: 'task-type-2',
-            task_status_id: 'task-status-3',
-            task_type_priority: 2,
-            taskStatus: {
-              name: 'Waiting For Approval',
-              short_name: 'wfa'
-            },
-            assignees: []
-          }
-        ]
+        tasks: [taskMap['task-3'], taskMap['task-4']]
       },
       {
         id: 'shot-3',
@@ -237,39 +183,8 @@ describe('sequences', () => {
         episode_name: 'E01',
         canceled: false,
         data: {},
-        tasks: [
-          {
-            id: 'task-1',
-            entity_name: 'BBB / Bunny',
-            task_type_name: 'Animation',
-            task_type_color: '#0000FF',
-            task_type_priority: 1,
-            task_type_id: 'task-type-1',
-            task_status_id: 'task-status-3',
-            taskStatus: {
-              name: 'Waiting For Approval',
-              short_name: 'wfa'
-            },
-            assignees: []
-          },
-          {
-            id: 'task-2',
-            entity_name: 'BBB / Bunny',
-            project_name: 'BBB',
-            task_type_name: 'Compositing',
-            task_type_color: '#00FF00',
-            task_type_id: 'task-type-2',
-            task_status_id: 'task-status-3',
-            task_type_priority: 2,
-            taskStatus: {
-              name: 'Waiting For Approval',
-              short_name: 'wfa'
-            },
-            assignees: []
-          }
-        ]
+        tasks: [taskMap['task-5'], taskMap['task-6']]
       }
-
     ]
 
     production = {
@@ -300,6 +215,12 @@ describe('sequences', () => {
         is_reviewable: false
       }
     ]
+
+    taskStatusMap = {
+      'task-status-1': taskStatuses[0],
+      'task-status-2': taskStatuses[1],
+      'task-status-3': taskStatuses[2]
+    }
 
     taskTypes = [
       {
@@ -537,7 +458,7 @@ describe('sequences', () => {
       store.commit(LOAD_EPISODES_END, episodes)
       store.commit(LOAD_SEQUENCES_END, sequences)
       store.commit(LOAD_SHOTS_END, { production, shots, userFilters })
-      store.commit(COMPUTE_SEQUENCE_STATS)
+      store.commit(COMPUTE_SEQUENCE_STATS, { taskMap, taskStatusMap })
       expect(
         state.sequenceStats['sequence-1']['task-type-1']['#333333'].value
       ).to.equal(2)
