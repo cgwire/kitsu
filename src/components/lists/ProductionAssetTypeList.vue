@@ -7,19 +7,19 @@
           <th class="name">{{ $t('asset_types.fields.name') }}</th>
           <th
             class="validation"
-            :style="validationStyle(column.color)"
-            :key="column.id"
-            v-for="column in validationColumns">
+            :style="validationStyle(taskTypeMap[columnId].color)"
+            :key="columnId"
+            v-for="columnId in validationColumns">
             <router-link
               :to="{
                 name: 'task-type',
                 params: {
                   production_id: currentProduction.id,
-                  task_type_id: column.id
+                  task_type_id: columnId
                 }
               }"
             >
-              {{ column.name }}
+              {{ taskTypeMap[columnId].name }}
             </router-link>
           </th>
           <th class="actions">
@@ -74,18 +74,17 @@
 
           <td
             class="validation"
-            :style="validationStyle(column.color)"
-            :key="column.id"
-            v-for="column in validationColumns">
+            :style="validationStyle(taskTypeMap[columnId].color)"
+            :key="columnId"
+            v-for="columnId in validationColumns">
             <pie-chart
               width="70px"
               height="50px"
               :legend="false"
-              :colors="chartColors(entry, column)"
-              :data="chartData(entry, column)"
-              v-if="isStats(entry, column)"
-            >
-            </pie-chart>
+              :colors="chartColors(entry, taskTypeMap[columnId])"
+              :data="chartData(entry, taskTypeMap[columnId])"
+              v-if="isStats(entry, taskTypeMap[columnId])"
+            />
           </td>
 
           <td class="actions">
@@ -139,7 +138,8 @@ export default {
       'assetTypeSearchText',
       'currentProduction',
       'displayedAssetTypesLength',
-      'isCurrentUserClient'
+      'isCurrentUserClient',
+      'taskTypeMap'
     ]),
     isEmptyList () {
       return this.entries &&
