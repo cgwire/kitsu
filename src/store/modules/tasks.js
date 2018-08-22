@@ -42,7 +42,7 @@ import {
   LOAD_PERSON_TASKS_END,
   USER_LOAD_TODOS_END,
 
-  SET_PRODUCTION,
+  SET_CURRENT_PRODUCTION,
 
   RESET_ALL
 } from '../mutation-types'
@@ -761,7 +761,7 @@ const mutations = {
     })
   },
 
-  [SET_PRODUCTION] (state) {
+  [SET_CURRENT_PRODUCTION] (state) {
     state.taskMap = {}
   },
 
