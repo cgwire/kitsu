@@ -2,10 +2,15 @@
 <td>
   <span
     class="description"
-    v-if="entry.description && entry.description.length > 0"
+    v-if="entry.description && entry.description.length > 0 && !full"
     v-html="compileMarkdown(shortenText(entry.description, 20))"
     v-tooltip="tooltipOptions"
     @click="onClick"
+  >
+  </span>
+  <span
+    v-html="compileMarkdown(entry.description)"
+    v-else
   >
   </span>
 </td>
@@ -32,6 +37,10 @@ export default {
     entry: {
       type: Object,
       default: () => {}
+    },
+    full: {
+      type: Boolean,
+      default: false
     }
   },
 
