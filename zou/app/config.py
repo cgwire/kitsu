@@ -60,6 +60,7 @@ MAIL_SERVER = os.getenv("MAIL_SERVER", "localhost")
 MAIL_PORT = os.getenv("MAIL_PORT", 25)
 MAIL_USERNAME = os.getenv("MAIL_USERNAME", "user")
 MAIL_PASSWORD = os.getenv("MAIL_PASSWORD", "pwd")
+MAIL_DEBUG = os.getenv("MAIL_DEBUG", 0)
 
 PLUGIN_FOLDER = os.getenv(
     "PLUGIN_FOLDER",
