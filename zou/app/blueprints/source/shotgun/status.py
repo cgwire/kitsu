@@ -37,7 +37,7 @@ class ImportShotgunStatusResource(BaseImportShotgunResource):
     def get_existing_status(self, data):
         task_status = TaskStatus.get_by(shotgun_id=data["shotgun_id"])
         if task_status is None:
-            task_status = TaskStatus.get_by(name=data["short_name"])
+            task_status = TaskStatus.get_by(short_name=data["short_name"])
         return task_status
 
 

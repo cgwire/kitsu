@@ -95,5 +95,7 @@ class ImportShotgunStepTestCase(ShotgunTestCase):
 
         api_path = "/import/shotgun/steps"
         task_types = self.post(api_path, sg_steps, 200)
+        self.assertEqual(len(task_types), 2)
+        self.assertEqual(len(task_types), 2)
         task_types = self.post(api_path, sg_steps, 200)
         self.assertEqual(len(task_types), 2)
