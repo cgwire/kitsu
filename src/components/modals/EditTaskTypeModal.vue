@@ -101,7 +101,7 @@ export default {
           color: this.taskTypeToEdit.color,
           priority: String(this.taskTypeToEdit.priority),
           for_shots: String(this.taskTypeToEdit.for_shots),
-          allow_timelog: String(this.taskTypeToEdit.allow_timelog || 'false')
+          allow_timelog: String(this.taskTypeToEdit.allow_timelog || 'true')
         }
       }
     }

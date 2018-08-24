@@ -21,7 +21,7 @@
       :entries="taskStatus"
       :is-loading="taskStatusList.isLoading"
       :is-error="taskStatusList.isError"
-    ></task-status-list>
+    />
 
     <edit-task-status-modal
       :active="modals.isNewDisplayed"
@@ -30,8 +30,7 @@
       :cancel-route="'/task-status'"
       :task-status-to-edit="taskStatusToEdit"
       @confirm="confirmEditTaskStatus"
-    >
-    </edit-task-status-modal>
+    />
 
     <delete-modal
       :active="modals.isDeleteDisplayed"
@@ -41,8 +40,7 @@
       :text="deleteText()"
       :error-text="$t('task_status.delete_error')"
       @confirm="confirmDeleteTaskStatus"
-    >
-    </delete-modal>
+    />
 
   </div>
 </template>
