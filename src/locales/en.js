@@ -240,8 +240,10 @@ export default {
       status: 'Status'
     },
     status: {
-      closed: 'Close',
-      open: 'Open'
+      closed: 'Closed',
+      open: 'Open',
+      active: 'Open',
+      archived: 'Closed'
     }
   },
 
