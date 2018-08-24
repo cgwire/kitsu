@@ -288,7 +288,9 @@ td.name {
 
 .validation {
   min-width: 100px;
+  max-width: 100px;
   width: 100px;
+  word-wrap: break-word;
 }
 
 .actions {

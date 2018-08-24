@@ -266,6 +266,7 @@ td.name {
   min-width: 100px;
   max-width: 100px;
   width: 100px;
+  word-wrap: break-word;
 }
 
 .actions {
