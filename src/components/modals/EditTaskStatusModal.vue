@@ -108,7 +108,8 @@ export default {
         name: '',
         short_name: '',
         color: '#999999',
-        is_reviewable: 'true'
+        is_reviewable: 'true',
+        is_done: 'false'
       },
       isReviewableOptions: [
         {label: this.$t('main.yes'), value: 'true'},
@@ -172,6 +173,7 @@ export default {
     taskStatusToEdit () {
       this.resetForm()
     },
+
     active () {
       if (this.active) {
         this.resetForm()
@@ -188,6 +190,7 @@ export default {
 .modal-content .box p.text {
   margin-bottom: 1em;
 }
+
 .title {
   border-bottom: 2px solid #DDD;
   padding-bottom: 0.5em;

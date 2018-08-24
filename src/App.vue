@@ -88,6 +88,10 @@ th.actions {
   min-width: 100px;
 }
 
+td.actions {
+    min-width: 100px;
+}
+
 .avatar {
   border-radius: 50%;
   color: white;
