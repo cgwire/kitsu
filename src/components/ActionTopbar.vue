@@ -391,7 +391,6 @@ export default {
           personId: this.selectedPersonId,
           callback: () => {
             this.isAssignationLoading = false
-            this.person = null
           }
         })
       }
