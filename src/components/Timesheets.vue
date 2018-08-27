@@ -256,7 +256,7 @@ export default {
         day: this.$route.params.day
       }).then((tasks) => {
         this.isInfoLoading = false
-        this.tasks = tasks
+        this.tasks = tasks.filter((task) => task.duration > 0)
       }).catch((err) => {
         console.error(err)
         this.isInfoLoadingError = true
