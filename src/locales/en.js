@@ -377,7 +377,7 @@ export default {
     delete_comment_error: 'An error occured while deleting comment',
     edit_comment: 'Edit comment',
     done: 'Done',
-    download_pdf_file: 'Download PDF file',
+    download_pdf_file: 'Download file',
     feedback: 'feedback',
     full_screen: 'Display in full screen',
     hide_assignations: 'Hide assignations',

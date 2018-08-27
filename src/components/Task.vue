@@ -163,6 +163,7 @@
 
             <a
               class="button"
+              ref="preview-file"
               :href="getOriginalPath()"
               v-else-if="isDlPreviewFile"
             >
@@ -180,7 +181,7 @@
             <a
               :href="getOriginalPath()"
               target="_blank"
-              v-else-if="currentTaskPreviews.length > 0 && !isMovie"
+              v-else-if="currentTaskPreviews.length > 0 && extension === 'png'"
             >
               <img
                 :src="getPreviewPath()"
@@ -624,6 +625,7 @@ export default {
       if (!previewId && this.currentTaskPreviews.length > 0) {
         previewId = this.currentTaskPreviews[0].id
       }
+
       return previewId
     },
 
@@ -950,7 +952,7 @@ export default {
             this.errors.addPreview = true
           } else {
             this.$refs['add-preview-modal'].reset()
-            this.resetPreview(preview.is_movie, preview)
+            this.resetPreview(preview)
           }
         }
       })
@@ -965,30 +967,23 @@ export default {
         preview: preview,
         taskId: this.currentTask.id,
         comment: this.currentTaskComments[0],
-        callback: (err, isMovie) => {
+        callback: (err, isMovie, extension) => {
           this.loading.changePreview = false
           if (err) {
             this.errors.changePreview = true
           } else {
             this.$refs['change-preview-modal'].reset()
-            if (!isMovie) {
-              this.$refs['preview-picture'].src =
-                this.getPreviewPath() + '?' + new Date().getTime()
-            } else {
-              this.$refs['preview-movie'].src =
-                this.getPreviewPath() + '?' + new Date().getTime()
-            }
-            this.resetPreview(isMovie, preview)
+            this.resetPreview(preview)
           }
         }
       })
     },
 
-    resetPreview (isMovie, preview) {
-      this.$router.push(`/tasks/${this.route.params.task_id}` +
-                        `/previews/${preview.id}`)
+    resetPreview (preview) {
       this.currentTaskPreviews = this.getCurrentTaskPreviews()
       this.currentTaskComments = this.getCurrentTaskComments()
+      this.$router.push(`/tasks/${this.route.params.task_id}` +
+                        `/previews/${preview.id}`)
     },
 
     setPreview () {
@@ -1083,7 +1078,7 @@ export default {
           commentId,
           comment
         })
-        this.resetPreview(isMovie, {id: previewId})
+        this.resetPreview({id: previewId})
       }
     },
 
@@ -1111,6 +1106,10 @@ export default {
   },
 
   watch: {
+    currentPreviewId () {
+
+    },
+
     $route () {
       this.handleModalsDisplay()
       if (this.$route.params.task_id !== this.currentTask.id) {

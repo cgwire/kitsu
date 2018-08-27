@@ -20,9 +20,10 @@ import {
   Maximize2Icon
 } from 'vue-feather-icons'
 import {
-  prepareScene,
+  clearScene,
   goFullScreen,
-  loadObject
+  loadObject,
+  prepareScene
 } from 'js-3d-model-viewer'
 
 export default {
@@ -56,6 +57,13 @@ export default {
       this.scene = prepareScene(this.element)
       loadObject(this.scene, this.previewUrl)
     }, 100)
+  },
+
+  watch: {
+    previewUrl () {
+      clearScene(this.scene)
+      loadObject(this.scene, this.previewUrl)
+    }
   }
 }
 </script>
