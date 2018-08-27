@@ -150,6 +150,7 @@ const mutations = {
     } else {
       state.assetTypes.push(newAssetType)
       state.assetTypes = sortAssetTypes(state.assetTypes)
+      state.assetTypeMap[newAssetType.id] = newAssetType
     }
     state.editAssetType = {
       isLoading: false,
@@ -174,6 +175,7 @@ const mutations = {
       (assetType) => assetType.id === assetTypeToDelete.id
     )
     state.assetTypes.splice(assetTypeToDeleteIndex, 1)
+    delete state.assetTypeMap[assetTypeToDelete.id]
 
     state.deleteAssetType = {
       isLoading: false,

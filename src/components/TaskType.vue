@@ -56,8 +56,8 @@
               </span>
             </router-link>
             <validation-tag
-              :task="taskMap[asset.validations[currentTaskType.name]]"
-              v-if="asset.validations[currentTaskType.name]"
+              :task="taskMap[asset.validations[currentTaskType.id]]"
+              v-if="asset.validations[currentTaskType.id]"
             />
           </div>
         </div>
@@ -112,8 +112,8 @@
               </span>
             </router-link>
             <validation-tag
-              :task="taskMap[shot.validations[currentTaskType.name]]"
-              v-if="shot.validations[currentTaskType.name]"
+              :task="taskMap[shot.validations[currentTaskType.id]]"
+              v-if="shot.validations[currentTaskType.id]"
             >
             </validation-tag>
           </div>

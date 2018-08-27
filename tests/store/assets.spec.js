@@ -303,10 +303,10 @@ describe('assets', () => {
       expect(state.displayedAssets[0].name).to.equal('Bunny')
       expect(state.displayedAssets[1].name).to.equal('Forest')
 
-      expect(state.displayedAssets[0].validations.Modeling).to.deep.equal(
+      expect(state.displayedAssets[0].validations['task-type-2']).to.deep.equal(
         assets[0].tasks[1]
       )
-      expect(state.displayedAssets[0].validations.Concept).to.deep.equal(
+      expect(state.displayedAssets[0].validations['task-type-1']).to.deep.equal(
         assets[0].tasks[0]
       )
 
