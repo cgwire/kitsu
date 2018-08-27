@@ -240,6 +240,27 @@ export default {
       timeSpentInfo.personId = this.user.id
       timeSpentInfo.date = this.selectedDate
       this.setTimeSpent(timeSpentInfo)
+    },
+
+    onAssignation (eventData) {
+      if (this.user.id === eventData.person_id) {
+        this.$store.dispatch('loadTodos', {
+          forced: true,
+          date: this.selectedDate
+        })
+      }
+    }
+  },
+
+  socket: {
+    events: {
+      'task:assign' (eventData) {
+        this.onAssignation(eventData)
+      },
+
+      'task:unassign' (eventData) {
+        this.onAssignation(eventData)
+      }
     }
   },
 

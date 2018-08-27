@@ -17,9 +17,6 @@ export default {
   methods: {
     onAssignation (eventData) {
       const store = this.$store
-      if (store.getters.user.id === eventData.person_id) {
-        store.dispatch('loadTodos', {forced: true})
-      }
       if (store.getters.route.path.indexOf(eventData.person_id) > 0) {
         store.dispatch('loadPersonTasks', {
           personId: eventData.person_id,
