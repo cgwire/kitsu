@@ -340,8 +340,8 @@ const actions = {
     })
   },
 
-  loadShotCasting ({ commit, state, rootState }, { shot, callback }) {
-    const assetMap = rootState.assets.assetMap
+  loadShotCasting ({ commit, rootGetters }, { shot, callback }) {
+    const assetMap = rootGetters.assetMap
     shotsApi.getCasting(shot, (err, casting) => {
       if (!err) {
         commit(LOAD_SHOT_CASTING_END, { shot, casting, assetMap })
@@ -350,7 +350,7 @@ const actions = {
     })
   },
 
-  newShot ({ commit, dispatch, state, rootState }, {shot, callback}) {
+  newShot ({ commit, dispatch, rootGetters }, {shot, callback}) {
     commit(NEW_SHOT_START)
     shotsApi.newShot(shot, (err, shot) => {
       if (err) {
@@ -358,12 +358,12 @@ const actions = {
         if (callback) callback(err)
       } else {
         commit(NEW_SHOT_END, shot)
-        const taskTypes = Object.values(rootState.tasks.shotValidationColumns)
-        const createTaskPromises = taskTypes.map(
-          (validationColumn) => dispatch('createTask', {
+        const taskTypeIds = Object.values(rootGetters.shotValidationColumns)
+        const createTaskPromises = taskTypeIds.map(
+          (taskTypeId) => dispatch('createTask', {
             entityId: shot.id,
             projectId: shot.project_id,
-            taskTypeId: validationColumn.id,
+            taskTypeId: taskTypeId,
             type: 'shots'
           })
         )

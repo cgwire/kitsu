@@ -261,7 +261,7 @@ const actions = {
     })
   },
 
-  newAsset ({ commit, dispatch, state, rootState }, { data, callback }) {
+  newAsset ({ commit, dispatch, state, rootGetters }, { data, callback }) {
     commit(EDIT_ASSET_START, data)
 
     assetsApi.newAsset(data, (err, asset) => {
@@ -269,14 +269,14 @@ const actions = {
         commit(EDIT_ASSET_ERROR)
         if (callback) callback(err)
       } else {
-        const assetTypeMap = rootState.assetTypes.assetTypeMap
+        const assetTypeMap = rootGetters.assetTypeMap
         commit(EDIT_ASSET_END, { newAsset: asset, assetTypeMap })
-        const taskTypes = Object.values(rootState.tasks.assetValidationColumns)
-        const createTaskPromises = taskTypes.map(
-          (validationColumn) => dispatch('createTask', {
+        const taskTypeIds = Object.values(rootGetters.assetValidationColumns)
+        const createTaskPromises = taskTypeIds.map(
+          (taskTypeId) => dispatch('createTask', {
             entityId: asset.id,
             projectId: asset.project_id,
-            taskTypeId: validationColumn.id,
+            taskTypeId: taskTypeId,
             type: 'assets'
           })
         )
