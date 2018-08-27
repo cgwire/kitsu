@@ -399,6 +399,10 @@ export default {
 
     confirmTaskStatusChange () {
       this.isChangeStatusLoading = true
+      if (!this.taskStatusId) {
+        this.taskStatusId = this.taskStatusOptions[0].value
+      }
+
       this.changeSelectedTaskStatus({
         taskStatusId: this.taskStatusId,
         callback: () => {
@@ -504,10 +508,6 @@ export default {
 
     $route () {
       this.clearSelectedTasks()
-    },
-
-    person () {
-      console.log('top', this.person)
     }
   }
 }
