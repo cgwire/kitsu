@@ -937,17 +937,8 @@ const mutations = {
       const taskStatus = helpers.getTaskStatus(comment.task_status_id)
 
       if (shot) {
-        const validations = {...shot.validations}
-
-        delete validations[task.task_type_name]
         Vue.set(task, 'task_status_id', taskStatus.id)
-        Vue.set(task, 'task_status_color', taskStatus.color)
-        Vue.set(task, 'task_status_name', taskStatus.name)
-        Vue.set(task, 'task_status_short_name', taskStatus.short_name)
-        Vue.set(validations, task.task_type_name, {...task})
-
-        delete shot.validations
-        Vue.set(shot, 'validations', validations)
+        Vue.set(shot.validations, task.task_type_name, {...task})
       }
     }
   },
@@ -1116,13 +1107,15 @@ const mutations = {
   },
 
   [REMOVE_SELECTED_TASK] (state, validationInfo) {
-    if (state.shotSelectionGrid[0]) {
+    if (state.shotSelectionGrid[0] &&
+        state.shotSelectionGrid[validationInfo.x]) {
       state.shotSelectionGrid[validationInfo.x][validationInfo.y] = false
     }
   },
 
   [ADD_SELECTED_TASK] (state, validationInfo) {
-    if (state.shotSelectionGrid[0]) {
+    if (state.shotSelectionGrid[0] &&
+        state.shotSelectionGrid[validationInfo.x]) {
       state.shotSelectionGrid[validationInfo.x][validationInfo.y] = true
     }
   },
