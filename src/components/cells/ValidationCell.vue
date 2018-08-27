@@ -104,7 +104,7 @@ export default {
 
     task () {
       return this.taskTest ||
-        this.taskMap[this.entity.validations[this.column.name]]
+        this.taskMap[this.entity.validations[this.column.id]]
     },
 
     assignees () {

@@ -252,7 +252,10 @@ const actions = {
     })
   },
 
-  createSelectedTasks ({ commit, state }, {type, projectId, callback}) {
+  createSelectedTasks (
+    { commit, state },
+    { type, projectId, callback }
+  ) {
     async.eachSeries(Object.keys(state.selectedValidations), (key, next) => {
       const validationInfo = state.selectedValidations[key]
       const data = {
@@ -274,7 +277,10 @@ const actions = {
     }, callback)
   },
 
-  createTask ({ commit, state }, {entityId, projectId, taskTypeId, type}) {
+  createTask (
+    { commit, state, rootGetters },
+    { entityId, projectId, taskTypeId, type }
+  ) {
     return new Promise((resolve, reject) => {
       const data = {
         entity_id: entityId,
@@ -485,7 +491,7 @@ const mutations = {
           validationColumns[taskType.name] = task.task_type_id
         }
 
-        asset.validations[taskType.name] = task.id
+        asset.validations[task.task_type_id] = task.id
         state.taskMap[task.id] = task
       })
       asset.tasks = asset.tasks.map((task) => {
@@ -509,7 +515,7 @@ const mutations = {
           validationColumns[taskType.name] = task.task_type_id
         }
 
-        shot.validations[taskType.name] = task.id
+        shot.validations[task.task_type_id] = task.id
         state.taskMap[task.id] = task
       })
       shot.tasks = shot.tasks.map((task) => {
@@ -522,11 +528,6 @@ const mutations = {
   [LOAD_TASK_END] (state, task) {
     Object.assign(task, {
       project_name: task.project.name,
-      task_status_name: task.task_status.name,
-      task_status_short_name: task.task_status.short_name,
-      task_type_name: task.task_type.name,
-      task_status_color: task.task_status.color,
-      task_type_color: task.task_type.color,
       entity_type_name: task.entity_type.name
     })
     if (task.entity_type.name === 'Shot') {
@@ -590,9 +591,6 @@ const mutations = {
 
     Object.assign(task, {
       task_status_id: comment.task_status_id,
-      task_status_name: comment.task_status.name,
-      task_status_short_name: comment.task_status.short_name,
-      task_status_color: comment.task_status.color,
       last_comment: comment
     })
   },
@@ -620,9 +618,6 @@ const mutations = {
 
     Object.assign(task, {
       task_status_id: newStatus.id,
-      task_status_color: newStatus.color,
-      task_status_name: newStatus.name,
-      task_status_short_name: newStatus.short_name,
       task_status_priority: newStatus.priority
     })
   },

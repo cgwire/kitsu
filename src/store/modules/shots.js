@@ -999,7 +999,7 @@ const mutations = {
     shot.preview_file_id = ''
 
     shot.tasks = []
-    shot.validations = []
+    shot.validations = {}
     shot.data = {}
 
     cache.shots.push(shot)
@@ -1046,7 +1046,7 @@ const mutations = {
         const shot = state.shotMap[task.entity_id]
         if (shot) {
           const validations = {...shot.validations}
-          Vue.set(validations, task.task_type_name, task)
+          Vue.set(validations, task.task_type_id, task.id)
           delete shot.validations
           Vue.set(shot, 'validations', validations)
         }
@@ -1155,7 +1155,7 @@ const mutations = {
       task = helpers.populateTask(task, shot)
 
       shot.tasks.push(task)
-      Vue.set(shot.validations, task.task_type_name, task)
+      Vue.set(shot.validations, task.task_type_id, task.id)
     }
   },
 

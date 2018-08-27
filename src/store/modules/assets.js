@@ -642,7 +642,7 @@ const mutations = {
       (asset) => asset.id === task.entity_id
     )
     if (asset) {
-      asset.validations[task.task_type_name] = null
+      asset.validations[task.task_type_id] = null
       const taskIndex = asset.tasks.findIndex(
         (assetTask) => assetTask.id === task.entity_id
       )
@@ -659,12 +659,9 @@ const mutations = {
       if (asset) {
         const validations = {...asset.validations}
 
-        delete validations[task.task_type_name]
+        delete validations[task.task_type_id]
         Vue.set(task, 'task_status_id', taskStatus.id)
-        Vue.set(task, 'task_status_color', taskStatus.color)
-        Vue.set(task, 'task_status_name', taskStatus.name)
-        Vue.set(task, 'task_status_short_name', taskStatus.short_name)
-        Vue.set(validations, task.task_type_name, {...task})
+        Vue.set(validations, task.task_type_id, {...task})
 
         delete asset.validations
         Vue.set(asset, 'validations', validations)
@@ -708,7 +705,7 @@ const mutations = {
         const asset = state.assetMap[task.entity_id]
         if (asset) {
           const validations = {...asset.validations}
-          Vue.set(validations, task.task_type_name, task)
+          Vue.set(validations, task.task_type_id, task.id)
           delete asset.validations
           Vue.set(asset, 'validations', validations)
         }
@@ -773,7 +770,7 @@ const mutations = {
       task = helpers.populateTask(task, asset)
 
       asset.tasks.push(task)
-      Vue.set(asset.validations, task.task_type_name, task)
+      Vue.set(asset.validations, task.task_type_id, task.id)
     }
   },
 
