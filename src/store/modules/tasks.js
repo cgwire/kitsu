@@ -408,6 +408,7 @@ const actions = {
           if (!err) {
             const comment = getters.getTaskComment(taskId, commentId)
 
+            preview.extension = extension.substring(1)
             commit(ADD_PREVIEW_END, {
               preview,
               taskId,
@@ -432,7 +433,7 @@ const actions = {
       if (!err) {
         commit(CHANGE_PREVIEW_END, { comment, isMovie, preview })
       }
-      if (callback) callback(err, isMovie)
+      if (callback) callback(err, isMovie, extension)
     })
   },
 
@@ -589,10 +590,12 @@ const mutations = {
       state.taskComments[taskId].unshift(comment)
     }
 
-    Object.assign(task, {
-      task_status_id: comment.task_status_id,
-      last_comment: comment
-    })
+    if (task) {
+      Object.assign(task, {
+        task_status_id: comment.task_status_id,
+        last_comment: comment
+      })
+    }
   },
 
   [DELETE_TASK_END] (state, task) {
@@ -636,7 +639,8 @@ const mutations = {
         id: preview.id,
         feedback: false,
         revision: preview.revision,
-        is_movie: preview.is_movie
+        is_movie: preview.is_movie,
+        extension: preview.extension
       }
       state.taskPreviews[taskId] =
         [newPreview].concat(state.taskPreviews[taskId])
@@ -705,7 +709,10 @@ const mutations = {
   },
 
   [EDIT_TASK_END] (state, { task }) {
-    state.taskMap[task.id].priority = task.priority
+    const currentTask = state.taskMap[task.id]
+    if (currentTask) {
+      state.taskMap[task.id].priority = task.priority
+    }
   },
 
   [ASSIGN_TASKS] (state, { selectedTaskIds, personId }) {
