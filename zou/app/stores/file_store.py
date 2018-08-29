@@ -96,3 +96,29 @@ def exists_movie(prefix, id):
 def remove_movie(prefix, id):
     key = make_key(prefix, id)
     movies.delete(key)
+
+
+def add_file(prefix, id, path):
+    key = make_key(prefix, id)
+    with open(path, 'rb') as fd:
+        return files.write(key, fd)
+
+
+def get_file(prefix, id):
+    key = make_key(prefix, id)
+    return files.read(key)
+
+
+def open_file(prefix, id):
+    key = make_key(prefix, id)
+    return make_read_generator(files, key)
+
+
+def exists_file(prefix, id):
+    key = make_key(prefix, id)
+    return files.exists(key)
+
+
+def remove_file(prefix, id):
+    key = make_key(prefix, id)
+    files.delete(key)

@@ -2,7 +2,6 @@ import os
 import shutil
 import math
 
-from zou.app import app
 from zou.app.utils import fs
 
 from PIL import Image
@@ -14,6 +13,10 @@ BIG_SQUARE_SIZE = 400, 400
 
 
 def save_file(tmp_folder, instance_id, file_to_save):
+    """
+    Save file in given folder. The file must only be temporary saved via
+    this function.
+    """
     extension = "." + file_to_save.filename.split(".")[-1].lower()
     file_name = instance_id + extension.lower()
     file_path = os.path.join(tmp_folder, file_name)
@@ -22,6 +25,9 @@ def save_file(tmp_folder, instance_id, file_to_save):
 
 
 def convert_jpg_to_png(file_source_path):
+    """
+    Convert .jpg file located at given path into a .png file with same name.
+    """
     folder_path = os.path.dirname(file_source_path)
     file_source_name = os.path.basename(file_source_path)
     file_target_name = "%s.png" % file_source_name[:-4]
@@ -34,54 +40,16 @@ def convert_jpg_to_png(file_source_path):
 
 
 def get_file_name(instance_id):
+    """
+    Build thumbnail file name for given id.
+    """
     return "%s.png" % instance_id
 
 
-def get_file_path(subfolder, instance_id):
-    return os.path.join(get_folder_name(subfolder), get_file_name(instance_id))
-
-
-def get_folder_name(subfolder):
-    thumbnail_folder = app.config["TMP_DIR"]
-    print(thumbnail_folder, subfolder)
-    return os.path.join(thumbnail_folder, subfolder)
-
-
-def get_preview_folder_name(subfolder, instance_id):
-    thumbnail_folder = app.config["THUMBNAIL_FOLDER"]
-    subfolder = os.path.join(
-        "preview-files",
-        subfolder,
-        instance_id.split("-")[0][:3]
-    )
-
-    return os.path.join(thumbnail_folder, subfolder)
-
-
-def get_preview_file_path(subfolder, instance_id):
-    return os.path.join(
-        get_preview_folder_name("originals", instance_id),
-        get_file_name(instance_id)
-    )
-
-
-def create_folder(subfolder):
-    thumbnail_folder = get_folder_name(subfolder)
-    print(thumbnail_folder)
-    fs.mkdir_p(thumbnail_folder)
-    return thumbnail_folder
-
-
-def flat(*nums):
-    return tuple(int(round(n)) for n in nums)
-
-
-def get_image_size(file_path):
-    im = Image.open(file_path)
-    return im.size
-
-
 def get_full_size_from_width(im, width):
+    """
+    From given width/g
+    """
     im_width, im_height = im.size
     ratio = float(im_height) / float(im_width)
     height = int(math.ceil(width * ratio))
@@ -89,6 +57,9 @@ def get_full_size_from_width(im, width):
 
 
 def turn_into_thumbnail(file_path, size=None):
+    """
+    Turn given picture into a smaller version.
+    """
     im = Image.open(file_path)
 
     if size is not None:
@@ -103,6 +74,7 @@ def turn_into_thumbnail(file_path, size=None):
 
     im = im.resize(size)
     im.save(file_path)
+    return file_path
 
 
 def prepare_image_for_thumbnail(im, size):
@@ -142,11 +114,21 @@ def prepare_image_for_thumbnail(im, size):
 
 
 def url_path(data_type, instance_id):
+    """
+    Build thumbnail download path for given data type and instance ID.
+    """
     data_type = data_type.replace("_", "-")
     return "pictures/thumbnails/%s/%s.png" % (data_type, instance_id)
 
 
 def generate_preview_variants(original_path, instance_id):
+    """
+    Generate three thumbnails for given picture path.
+
+    1. Rectangle thumbnail
+    2. Square thumbnail
+    3. Big rectangle thumbnail
+    """
     file_name = get_file_name(instance_id)
     variants = [
         ("thumbnails", RECTANGLE_SIZE),
@@ -168,12 +150,8 @@ def generate_preview_variants(original_path, instance_id):
     return result
 
 
-def get_preview_url_path(instance_id):
-    file_name = get_file_name(instance_id)
-    return {
-        "original": "/api/pictures/originals/preview-files/%s" % file_name,
-        "thumbnail": "/api/pictures/thumbnails/preview-files/%s" % file_name,
-        "thumbnail_square":
-            "/api/pictures/thumbnails-square/preview-files/%s" % file_name,
-        "previews": "/api/pictures/previews/preview-files/%s" % file_name
-    }
+def flat(*nums):
+    """
+    Turn into an int tuple an a enumerable of numbers.
+    """
+    return tuple(int(round(n)) for n in nums)

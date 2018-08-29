@@ -23,6 +23,7 @@ from zou.app.utils import (
 
 ALLOWED_PICTURE_EXTENSION = [".png", ".jpg", ".PNG", ".JPG"]
 ALLOWED_MOVIE_EXTENSION = [".mp4", ".mov", ".MP4", ".MOV"]
+ALLOWED_FILE_EXTENSION = [".obj", ".pdf", ".ma", ".mb"]
 
 
 class CreatePreviewFilePictureResource(Resource):
@@ -38,29 +39,33 @@ class CreatePreviewFilePictureResource(Resource):
         uploaded_file = request.files["file"]
 
         extension = "." + uploaded_file.filename.split(".")[-1].lower()
-        extension = uploaded_file.filename[-4:]
 
         if extension in ALLOWED_PICTURE_EXTENSION:
             self.save_picture_preview(instance_id, uploaded_file)
-            files_service.update_preview_file(instance_id, {"extension": "png"})
+            preview_file = files_service.update_preview_file(
+                instance_id,
+                {"extension": "png"}
+            )
             self.emit_app_preview_event(instance_id)
+            return preview_file, 201
 
         elif extension in ALLOWED_MOVIE_EXTENSION:
             self.save_movie_preview(instance_id, uploaded_file)
-            files_service.update_preview_file(instance_id, {"extension": "mp4"})
+            preview_file = files_service.update_preview_file(
+                instance_id,
+                {"extension": "mp4"}
+            )
             self.emit_app_preview_event(instance_id)
+            return preview_file, 201
 
-        elif extension in [".obj", ".pdf", ".ma", ".mb"]:
-            folder_path = ""
-            file_name = "%s%s" % (instance_id, extension)
-            folder = thumbnail_utils.create_folder(folder_path)
-            file_path = os.path.join(folder, file_name)
-            uploaded_file.save(file_path)
-            files_service.update_preview_file(instance_id, {
-                "extension": extension[1:]
-            })
+        elif extension in ALLOWED_FILE_EXTENSION:
+            self.save_file_preview(instance_id, uploaded_file, extension)
+            preview_file = files_service.update_preview_file(
+                instance_id,
+                {"extension": extension[1:]}
+            )
             self.emit_app_preview_event(instance_id)
-            return {}, 201
+            return preview_file, 201
 
         else:
             current_app.logger.info(
@@ -74,40 +79,45 @@ class CreatePreviewFilePictureResource(Resource):
             instance_id,
             uploaded_file
         )
-        variants = thumbnail_utils.generate_preview_variants(
-            original_tmp_path,
-            instance_id
-        )
-        variants.append(("original", original_tmp_path))
-
-        for (name, path) in variants:
-            file_store.add_picture(name, instance_id, path)
-            os.remove(path)
-
-        return {}, 201
+        return self.save_variants(original_tmp_path, instance_id)
 
     def save_movie_preview(self, instance_id, uploaded_file):
         tmp_folder = current_app.config["TMP_DIR"]
-
         uploaded_movie_path = movie_utils.save_file(
             tmp_folder,
             instance_id,
             uploaded_file
         )
         normalized_movie_path = movie_utils.normalize_movie(uploaded_movie_path)
+        file_store.add_movie("previews", instance_id, normalized_movie_path)
         original_tmp_path = movie_utils.generate_thumbnail(
             normalized_movie_path
         )
 
-        file_store.add_movie("previews", instance_id, normalized_movie_path)
         os.remove(uploaded_movie_path)
         os.remove(normalized_movie_path)
+        return self.save_variants(original_tmp_path, instance_id)
 
+    def save_file_preview(self, instance_id, uploaded_file, extension):
+        tmp_folder = current_app.config["TMP_DIR"]
+        file_name = instance_id + extension
+        file_path = os.path.join(tmp_folder, file_name)
+        uploaded_file.save(file_path)
+        file_store.add_file("previews", instance_id, file_path)
+        os.remove(file_path)
+        return file_path
+
+    def save_variants(self, original_tmp_path, instance_id):
         variants = thumbnail_utils.generate_preview_variants(
             original_tmp_path,
             instance_id
         )
         variants.append(("original", original_tmp_path))
+        for (name, path) in variants:
+            file_store.add_picture(name, instance_id, path)
+            os.remove(path)
+
+        return variants
 
     def emit_app_preview_event(self, preview_file_id):
         preview_file = files_service.get_preview_file(preview_file_id)
@@ -200,16 +210,21 @@ class PreviewFileResource(Resource):
         if not self.is_allowed(instance_id):
             abort(403)
 
-        folder_path = thumbnail_utils.get_preview_folder_name(
-            "originals",
-            instance_id
-        )
-        file_name = "%s.%s" % (instance_id, extension)
+        try:
+            if extension == "png":
+                mimetype = "image/png"
+                stream = file_store.open_picture("previews", instance_id)
+            elif extension == "pdf":
+                mimetype = "application/pdf"
+                stream = file_store.open_file("previews", instance_id)
+            else:
+                mimetype = "application/octet-stream"
+                stream = file_store.open_file("previews", instance_id)
 
-        return send_from_directory(
-            directory=folder_path,
-            filename=file_name
-        )
+            return send_file(stream, mimetype=mimetype)
+        except FileNotFound:
+            current_app.logger.error("File was not found for: %s" % instance_id)
+            abort(404)
 
 
 class BasePreviewPictureResource(Resource):
@@ -297,10 +312,15 @@ class BaseCreatePictureResource(Resource):
 
         self.check_permissions(instance_id)
         self.prepare_creation(instance_id)
+        tmp_folder = current_app.config["TMP_DIR"]
         uploaded_file = request.files["file"]
-        thumbnail_path = thumbnail_utils.generate_thumbnail(
+        thumbnail_path = thumbnail_utils.save_file(
+            tmp_folder,
             instance_id,
-            uploaded_file,
+            uploaded_file
+        )
+        thumbnail_path = thumbnail_utils.turn_into_thumbnail(
+            thumbnail_path,
             size=self.size
         )
         file_store.add_picture("thumbnails", instance_id, thumbnail_path)
@@ -332,10 +352,18 @@ class BasePictureResource(Resource):
         if not self.is_allowed(instance_id):
             abort(403)
 
-        return send_file(
-            file_store.open_picture("thumbnails", instance_id),
-            mimetype="image/png"
-        )
+        try:
+            return send_file(
+                file_store.open_picture(
+                    "thumbnails",
+                    instance_id
+                ),
+                mimetype="image/png"
+            )
+
+        except FileNotFound:
+            current_app.logger.error("File was not found for: %s" % instance_id)
+            abort(404)
 
 
 class CreatePersonThumbnailResource(BaseCreatePictureResource):
