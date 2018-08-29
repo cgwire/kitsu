@@ -17,11 +17,13 @@ def path(self, filename):
     folder_one = filename.split("-")[0]
     file_name = "-".join(filename.split("-")[1:])
     folder_two = file_name[:3]
+    folder_three = file_name[3:6]
 
     path = os.path.join(
         self.root,
         folder_one,
         folder_two,
+        folder_three,
         file_name
     )
     return path
