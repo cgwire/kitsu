@@ -1,8 +1,9 @@
 import os
 
-from flask import abort, request, send_file, current_app
+from flask import abort, request, current_app, stream_with_context, Response
 from flask_restful import Resource
 from flask_jwt_extended import jwt_required
+from flask_fs.errors import FileNotFound
 
 from zou.app.stores import file_store
 from zou.app.services import (
@@ -24,6 +25,10 @@ from zou.app.utils import (
 ALLOWED_PICTURE_EXTENSION = [".png", ".jpg", ".PNG", ".JPG"]
 ALLOWED_MOVIE_EXTENSION = [".mp4", ".mov", ".MP4", ".MOV"]
 ALLOWED_FILE_EXTENSION = [".obj", ".pdf", ".ma", ".mb"]
+
+
+def send_file(generator, mimetype="application/octet-stream"):
+    return Response(stream_with_context(generator), mimetype=mimetype)
 
 
 class CreatePreviewFilePictureResource(Resource):
@@ -176,10 +181,14 @@ class PreviewFileMovieResource(Resource):
         if not self.is_allowed(instance_id):
             abort(403)
 
-        return send_file(
-            file_store.open_movie("previews", instance_id),
-            mimetype="video/mp4"
-        )
+        try:
+            return send_file(
+                file_store.open_movie("previews", instance_id),
+                mimetype="video/mp4"
+            )
+        except FileNotFound:
+            current_app.logger.error("File was not found for: %s" % instance_id)
+            abort(404)
 
 
 class PreviewFileResource(Resource):
@@ -256,13 +265,14 @@ class BasePreviewPictureResource(Resource):
         if not self.is_allowed(instance_id):
             abort(403)
 
-        return send_file(
-            file_store.open_picture(
-                self.picture_type,
-                instance_id
-            ),
-            mimetype="image/png"
-        )
+        try:
+            return send_file(
+                file_store.open_picture(self.picture_type, instance_id),
+                mimetype="image/png"
+            )
+        except FileNotFound:
+            current_app.logger.error("File was not found for: %s" % instance_id)
+            abort(404)
 
 
 class PreviewFileThumbnailResource(BasePreviewPictureResource):
@@ -354,13 +364,9 @@ class BasePictureResource(Resource):
 
         try:
             return send_file(
-                file_store.open_picture(
-                    "thumbnails",
-                    instance_id
-                ),
+                file_store.open_picture("thumbnails", instance_id),
                 mimetype="image/png"
             )
-
         except FileNotFound:
             current_app.logger.error("File was not found for: %s" % instance_id)
             abort(404)

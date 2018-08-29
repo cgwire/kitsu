@@ -1,49 +1,84 @@
 import os
+import io
 import flask_fs as fs
 
 from flask_fs.backends.local import LocalBackend
+from flask_fs.backends.swift import SwiftBackend
 
 from zou.app import app
 
 
-
 def read(self, filename):
-    print("read", filename)
     with self.open(filename, 'rb') as f:
         return f.read()
 
+
 def path(self, filename):
-    print("pathhhh", filename)
     folder_one = filename.split("-")[0]
     file_name = "-".join(filename.split("-")[1:])
     folder_two = file_name[:3]
 
     path = os.path.join(
         self.root,
-        "preview-files",
         folder_one,
         folder_two,
         file_name
     )
-    if os.path.exists(path + ".mp4"):
-        path += ".mp4"
-    else:
-        path += ".png"
-    print("pathhhh computed", path)
     return path
+
+
+def init_swift(self, name, config):
+    """
+    Hack needed because Flask FS backend supports only swift 1.0 authentication.
+    """
+    import swiftclient
+    super(SwiftBackend, self).__init__(name, config)
+
+    self.conn = swiftclient.Connection(
+        user=config.user,
+        key=config.key,
+        authurl=config.authurl,
+        auth_version="2.0",
+        os_options={
+            "tenant_name": config.tenant_name,
+            "region_name": config.region_name
+        }
+    )
+    self.conn.put_container(self.name)
 
 LocalBackend.read = read
 LocalBackend.path = path
-
-pictures = fs.Storage("pictures", overwrite=True)
-movies = fs.Storage("movies", overwrite=True)
-
-pictures.configure(app)
-movies.configure(app)
+SwiftBackend.__init__ = init_swift
 
 
 def make_key(prefix, id):
     return "%s-%s" % (prefix, id)
+
+
+def make_read_generator(bucket, key):
+    read_stream = bucket.read(key)
+
+    def read_generator(read_stream):
+        for chunk in io.BytesIO(read_stream):
+            yield chunk
+
+    return read_generator(read_stream)
+
+
+def make_storage(bucket):
+    return fs.Storage(
+        "%s%s" % (app.config.get("FS_BUCKET_PREFIX", ""), bucket),
+        overwrite=True
+    )
+
+
+pictures = make_storage("pictures")
+movies = make_storage("movies")
+files = make_storage("files")
+
+pictures.configure(app)
+movies.configure(app)
+files.configure(app)
 
 
 def add_picture(prefix, id, path):
@@ -59,7 +94,7 @@ def get_picture(prefix, id):
 
 def open_picture(prefix, id):
     key = make_key(prefix, id)
-    return pictures.open(key, 'rb')
+    return make_read_generator(pictures, key)
 
 
 def exists_picture(prefix, id):
@@ -85,7 +120,7 @@ def get_movie(prefix, id):
 
 def open_movie(prefix, id):
     key = make_key(prefix, id)
-    return movies.open(key, 'rb')
+    return make_read_generator(movies, key)
 
 
 def exists_movie(prefix, id):
