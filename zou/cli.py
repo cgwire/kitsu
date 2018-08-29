@@ -173,6 +173,93 @@ def patch_scene_asset_instance():
 
 
 @cli.command()
+def patch_file_storage():
+    """
+    Patch to run after upgrade from 0.7.6 or lower to 0.8.0 or superior.
+    It concerns only files stored on the hard drive.
+    """
+    from zou import app
+    from zou.app import config
+    from zou.app.stores import file_store
+    from zou.app.services import files_service
+
+    with app.app.app_context():
+        if hasattr(config, "THUMBNAIL_FOLDER"):
+            preview_folder = config.THUMBNAIL_FOLDER
+        else:
+            preview_folder = config.PREVIEW_FOLDER
+
+        originals_folder = os.path.join(
+            preview_folder,
+            "preview-files",
+            "originals"
+        )
+
+        if os.path.exists(originals_folder):
+            for folder in os.listdir(originals_folder):
+                subfolder = os.path.join(".", originals_folder, folder)
+
+                for filename in os.listdir(subfolder):
+                    file_path = os.path.join(subfolder, filename)
+                    instance_id = filename.split(".")[0]
+                    extension = filename.split(".")[1]
+
+                    if extension == "png":
+                        file_store.add_picture(
+                            "originals",
+                            instance_id,
+                            file_path
+                        )
+                    elif extension == "mp4":
+                        file_store.add_movie("previews", instance_id, file_path)
+                    else:
+                        file_store.add_file("previews", instance_id, file_path)
+
+                    print("Original file stored: %s" % instance_id)
+                    try:
+                        files_service.update_preview_file(
+                            instance_id, {"exstension": extension}
+                        )
+                    except:
+                        print(
+                            "Warning: preview file entry "
+                            "not found: %s." % instance_id
+                        )
+
+        for prefix in ["thumbnails", "thumbnails-square", "previews"]:
+            folder = os.path.join(preview_folder, "preview-files", prefix)
+
+            if os.path.exists(folder):
+                for subfoldername in os.listdir(folder):
+                    subfolder = os.path.join(".", folder, subfoldername)
+
+                    for filename in os.listdir(subfolder):
+                        file_path = os.path.join(subfolder, filename)
+                        instance_id = filename.split(".")[0]
+
+                        file_store.add_picture(
+                            "prefix",
+                            instance_id,
+                            file_path
+                        )
+                        print("%s file stored: %s" % (prefix, instance_id))
+
+        for prefix in ["persons", "projects"]:
+            folder = os.path.join(
+                preview_folder,
+                "preview-files",
+                prefix
+            )
+
+            if os.path.exists(folder):
+                for filename in os.listdir(folder):
+                    file_path = os.path.joins(folder, filename)
+                    instance_id = filename.split(".")[0]
+                    file_store.add_picture("thumbnails", instance_id, file_path)
+                    print("%s file stored: %s" % (prefix, instance_id))
+
+
+@cli.command()
 def patch_task_type_allow_timelog():
     """
     Patch to run after upgrade from 0.7.3 or lower to 0.7.4 or superior.
