@@ -28,10 +28,18 @@ ALLOWED_FILE_EXTENSION = [".obj", ".pdf", ".ma", ".mb"]
 
 
 def send_file(generator, mimetype="application/octet-stream"):
+    """
+    Helpers to return file response.
+    """
     return Response(stream_with_context(generator), mimetype=mimetype)
 
 
 class CreatePreviewFilePictureResource(Resource):
+    """
+    Main resource to add a preview. It stores the preview file and generates
+    three picture files matching preview when it's possible: a square thumbnail,
+    a rectangle thumbnail and a midsize file.
+    """
 
     @jwt_required
     def post(self, instance_id):
@@ -78,6 +86,10 @@ class CreatePreviewFilePictureResource(Resource):
             abort(400, "Wrong file format, extension: %s" % extension)
 
     def save_picture_preview(self, instance_id, uploaded_file):
+        """
+        Get uploaded picture, build thumbnails then save everything in the file
+        storage.
+        """
         tmp_folder = current_app.config["TMP_DIR"]
         original_tmp_path = thumbnail_utils.save_file(
             tmp_folder,
@@ -87,6 +99,10 @@ class CreatePreviewFilePictureResource(Resource):
         return self.save_variants(original_tmp_path, instance_id)
 
     def save_movie_preview(self, instance_id, uploaded_file):
+        """
+        Get uploaded movie, normalize it (720p) then build thumbnails then save
+        everything in the file storage.
+        """
         tmp_folder = current_app.config["TMP_DIR"]
         uploaded_movie_path = movie_utils.save_file(
             tmp_folder,
@@ -104,6 +120,9 @@ class CreatePreviewFilePictureResource(Resource):
         return self.save_variants(original_tmp_path, instance_id)
 
     def save_file_preview(self, instance_id, uploaded_file, extension):
+        """
+        Get uploaded file then save it in the file storage.
+        """
         tmp_folder = current_app.config["TMP_DIR"]
         file_name = instance_id + extension
         file_path = os.path.join(tmp_folder, file_name)
@@ -113,6 +132,9 @@ class CreatePreviewFilePictureResource(Resource):
         return file_path
 
     def save_variants(self, original_tmp_path, instance_id):
+        """
+        Build variants of a picture file and save them in the main storage.
+        """
         variants = thumbnail_utils.generate_preview_variants(
             original_tmp_path,
             instance_id
@@ -125,6 +147,9 @@ class CreatePreviewFilePictureResource(Resource):
         return variants
 
     def emit_app_preview_event(self, preview_file_id):
+        """
+        Emit an event, each time a preview is added.
+        """
         preview_file = files_service.get_preview_file(preview_file_id)
         comment = tasks_service.get_comment_by_preview_file_id(
             preview_file_id
@@ -143,6 +168,9 @@ class CreatePreviewFilePictureResource(Resource):
         })
 
     def is_allowed(self, preview_file_id):
+        """
+        Return true if user is allowed to add a preview.
+        """
         if permissions.has_manager_permissions():
             return True
         else:
@@ -150,10 +178,16 @@ class CreatePreviewFilePictureResource(Resource):
             return user_service.check_assigned(preview_file["task_id"])
 
     def is_exist(self, preview_file_id):
+        """
+        Return true if preview file entry matching given id exists in database.
+        """
         return files_service.get_preview_file(preview_file_id) is not None
 
 
 class PreviewFileMovieResource(Resource):
+    """
+    Allow to download a movie preview.
+    """
 
     def __init__(self):
         Resource.__init__(self)
@@ -192,6 +226,9 @@ class PreviewFileMovieResource(Resource):
 
 
 class PreviewFileResource(Resource):
+    """
+    Allow to download a generic file preview.
+    """
 
     def __init__(self):
         Resource.__init__(self)
@@ -237,6 +274,9 @@ class PreviewFileResource(Resource):
 
 
 class BasePreviewPictureResource(Resource):
+    """
+    Base class to download a thumbnail.
+    """
 
     def __init__(self, picture_type):
         Resource.__init__(self)
@@ -282,6 +322,9 @@ class PreviewFileThumbnailResource(BasePreviewPictureResource):
 
 
 class PreviewFilePreviewResource(BasePreviewPictureResource):
+    """
+    Smaller version of uploaded image.
+    """
 
     def __init__(self):
         BasePreviewPictureResource.__init__(self, "previews")
@@ -303,6 +346,9 @@ class PreviewFileOriginalResource(BasePreviewPictureResource):
 
 
 class BaseCreatePictureResource(Resource):
+    """
+    Base class to create a thumbnail.
+    """
 
     def __init__(self, data_type, size=thumbnail_utils.RECTANGLE_SIZE):
         Resource.__init__(self)
@@ -322,6 +368,7 @@ class BaseCreatePictureResource(Resource):
 
         self.check_permissions(instance_id)
         self.prepare_creation(instance_id)
+
         tmp_folder = current_app.config["TMP_DIR"]
         uploaded_file = request.files["file"]
         thumbnail_path = thumbnail_utils.save_file(
@@ -346,6 +393,9 @@ class BaseCreatePictureResource(Resource):
 
 
 class BasePictureResource(Resource):
+    """
+    Base resource to download a thumbnail.
+    """
 
     def __init__(self, subfolder):
         Resource.__init__(self)
