@@ -1,4 +1,5 @@
 from flask import Blueprint
+
 from zou.app.utils.api import configure_api_from_blueprint
 
 from .person import PersonResource, PersonsResource
@@ -37,6 +38,8 @@ from .custom_action import CustomActionsResource, CustomActionResource
 from .asset_instance import AssetInstanceResource, AssetInstancesResource
 from .playlist import PlaylistsResource, PlaylistResource
 from .event import EventsResource, EventResource
+from .notifications import NotificationsResource, NotificationResource
+from .search_filters import SearchFiltersResource, SearchFilterResource
 
 
 routes = [
@@ -81,7 +84,11 @@ routes = [
     ("/data/playlists/", PlaylistsResource),
     ("/data/playlists/<instance_id>", PlaylistResource),
     ("/data/events/", EventsResource),
-    ("/data/events/<instance_id>", EventResource)
+    ("/data/events/<instance_id>", EventResource),
+    ("/data/notifications/", NotificationsResource),
+    ("/data/notifications/<instance_id>", NotificationResource),
+    ("/data/search-filters/", SearchFilterResource),
+    ("/data/search-filters/<instance_id>", SearchFiltersResource)
 ]
 
 blueprint = Blueprint("/data", "data")

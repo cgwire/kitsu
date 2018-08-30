@@ -1,7 +1,7 @@
 import os
 import flask_fs
 
-from flask import Flask
+from flask import Flask, jsonify
 from flask_restful import current_app
 from flask_jwt_extended import JWTManager
 from flask_principal import Principal, identity_changed, Identity
@@ -51,6 +51,9 @@ if config.DEBUG:
 def shutdown_session(exception=None):
     db.session.remove()
 
+@app.errorhandler(404)
+def page_not_found(error):
+    return jsonify(error=404, text=str(error)), 404
 
 def configure_auth():
     from zou.app.services import persons_service
