@@ -3,10 +3,10 @@ from tests.base import ApiTestCase
 from zou.app.stores import auth_tokens_store
 
 
-class CommandsTestCase(ApiTestCase):
+class AuthTokensTestCase(ApiTestCase):
 
     def setUp(self):
-        super(CommandsTestCase, self).setUp()
+        super(AuthTokensTestCase, self).setUp()
         self.store = auth_tokens_store
         self.store.clear()
 

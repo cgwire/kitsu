@@ -23,8 +23,8 @@ def save_file(tmp_folder, instance_id, file_to_save):
     file_to_save.save(file_path)
     return file_path
 
-
 def convert_jpg_to_png(file_source_path):
+
     """
     Convert .jpg file located at given path into a .png file with same name.
     """
@@ -113,14 +113,6 @@ def prepare_image_for_thumbnail(im, size):
     return im
 
 
-def url_path(data_type, instance_id):
-    """
-    Build thumbnail download path for given data type and instance ID.
-    """
-    data_type = data_type.replace("_", "-")
-    return "pictures/thumbnails/%s/%s.png" % (data_type, instance_id)
-
-
 def generate_preview_variants(original_path, instance_id):
     """
     Generate three thumbnails for given picture path.
@@ -148,6 +140,14 @@ def generate_preview_variants(original_path, instance_id):
         turn_into_thumbnail(picture_path, size)
         result.append((picture_type, picture_path))
     return result
+
+
+def url_path(data_type, instance_id):
+    """
+    Build thumbnail download path for given data type and instance ID.
+    """
+    data_type = data_type.replace("_", "-")
+    return "pictures/thumbnails/%s/%s.png" % (data_type, instance_id)
 
 
 def flat(*nums):

@@ -48,6 +48,12 @@ def init_swift(self, name, config):
     )
     self.conn.put_container(self.name)
 
+
+def clear_bucket(bucket):
+    for filename in bucket.list_files():
+        os.remove(os.path.join(bucket.root, filename))
+
+
 LocalBackend.read = read
 LocalBackend.path = path
 SwiftBackend.__init__ = init_swift
@@ -81,6 +87,12 @@ files = make_storage("files")
 pictures.configure(app)
 movies.configure(app)
 files.configure(app)
+
+
+def clear():
+    clear_bucket(pictures)
+    clear_bucket(movies)
+    clear_bucket(files)
 
 
 def add_picture(prefix, id, path):

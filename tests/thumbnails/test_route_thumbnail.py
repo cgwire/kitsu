@@ -62,7 +62,7 @@ class RouteThumbnailTestCase(ApiDBTestCase):
         self.download_file(path, result_file_path)
         result_image = Image.open(result_file_path)
 
-        self.assertEqual(result_image.size, thumbnail.RECTANGLE_SIZE)
+        self.assertEqual(result_image.size, thumbnail.BIG_SQUARE_SIZE)
 
     def test_add_preview(self):
         path = "/pictures/preview-files/%s" % self.preview_file_id
