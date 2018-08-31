@@ -361,7 +361,7 @@ class RouteOutputFilesTestCase(ApiDBTestCase):
     def test_get_next_revision_wrong_data(self):
         self.generate_fixture_output_type()
         self.post(
-            "/data/tasks/unknown/output-files/next-revision",
+            "/data/entities/unknown/output-files/next-revision",
             {
                 "name": "main",
                 "output_type_id": self.output_type.id,

@@ -3,6 +3,7 @@ from sqlalchemy.exc import IntegrityError
 
 from zou.app.models.task import Task
 from zou.app.models.person import Person
+
 from zou.app.services import user_service
 
 from .base import BaseModelsResource, BaseModelResource

@@ -4,7 +4,6 @@ import os
 
 from zou.app import app
 from zou.app.stores import file_store
-from zou.app.utils import fs
 
 
 class FileStoreTestCase(unittest.TestCase):
@@ -12,6 +11,7 @@ class FileStoreTestCase(unittest.TestCase):
     def setUp(self):
         super(FileStoreTestCase, self).setUp()
         with app.app_context():
+            self.preview_path = app.config["PREVIEW_FOLDER"]
             self.store = file_store
             self.store.clear()
 
@@ -32,8 +32,11 @@ class FileStoreTestCase(unittest.TestCase):
         file_name = "thumbnails-63e453f1-9655-49ad-acba-ff7f27c49e9d"
         self.assertEquals(
             file_store.path(file_store.pictures, file_name),
-            "./tmp/pictures/thumbnails/63e/453/"
-            "63e453f1-9655-49ad-acba-ff7f27c49e9d"
+            os.path.join(
+                self.preview_path,
+                "pictures/thumbnails/63e/453/"
+                "63e453f1-9655-49ad-acba-ff7f27c49e9d"
+            )
         )
 
     def test_add_and_open_picture(self):
