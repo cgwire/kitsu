@@ -152,7 +152,6 @@
           </div>
 
           <div class="preview-picture">
-
             <div v-if="currentTaskPreviews && currentTaskPreviews.length > 0 && isMovie">
               <video
                 :src="moviePath"
@@ -677,7 +676,7 @@ export default {
             return preview.id === previewId
           })
         }
-        return currentPreview ? currentPreview.is_movie : false
+        return currentPreview && currentPreview.extension === 'mp4'
       } else {
         return false
       }
@@ -967,7 +966,7 @@ export default {
         preview: preview,
         taskId: this.currentTask.id,
         comment: this.currentTaskComments[0],
-        callback: (err, isMovie, extension) => {
+        callback: (err, extension) => {
           this.loading.changePreview = false
           if (err) {
             this.errors.changePreview = true
@@ -1060,8 +1059,8 @@ export default {
       const taskId = eventData.task_id
       const commentId = eventData.comment_id
       const previewId = eventData.preview_file_id
-      const isMovie = eventData.is_movie
       const revision = eventData.revision
+      const extension = eventData.extension
       const comment = this.$store.getters.getTaskComment(taskId, commentId)
 
       if (
@@ -1072,7 +1071,7 @@ export default {
           preview: {
             id: previewId,
             revision,
-            is_movie: isMovie
+            extension: extension
           },
           taskId,
           commentId,

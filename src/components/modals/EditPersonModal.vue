@@ -19,29 +19,35 @@
         <text-field
           :label="$t('people.fields.first_name')"
           ref="name-field"
+          @enter="confirmClicked()"
           v-model="form.first_name">
         </text-field>
         <text-field
           :label="$t('people.fields.last_name')"
+          @enter="confirmClicked()"
           v-model="form.last_name">
         </text-field>
         <text-field
           :label="$t('people.fields.email')"
+          @enter="confirmClicked()"
           v-model="form.email">
         </text-field>
         <text-field
           :label="$t('people.fields.phone')"
+          @enter="confirmClicked()"
           v-model="form.phone">
         </text-field>
         <combobox
           :label="$t('people.fields.role')"
           :options="roleOptions"
           localeKeyPrefix="people.role."
+          @enter="confirmClicked()"
           v-model="form.role">
         </combobox>
         <combobox
           :label="$t('people.fields.active')"
           :options="activeOptions"
+          @enter="confirmClicked()"
           v-model="form.active">
         </combobox>
       </form>
@@ -134,7 +140,9 @@ export default {
     confirmClicked () {
       this.form.active =
         this.form.active === 'true' || this.form.active === true
-      this.$emit('confirm', this.form)
+      if (this.email) {
+        this.$emit('confirm', this.form)
+      }
     },
 
     resetForm () {

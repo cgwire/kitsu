@@ -7,6 +7,7 @@
     <span class="select">
       <select
         ref="select"
+        @keyup.enter="emitEnter()"
         @change="updateValue"
       >
         <option
@@ -52,6 +53,9 @@ export default {
   methods: {
     updateValue () {
       this.$emit('input', this.$refs.select.value)
+    },
+    emitEnter () {
+      this.$emit('enter', this.$refs.select.value)
     },
 
     getOptionLabel (option) {
