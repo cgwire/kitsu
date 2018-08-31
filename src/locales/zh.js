@@ -8,6 +8,7 @@ export default {
     edit_success: '已成功编辑资源{name}.',
     edit_title: '编辑资源',
     empty_list: '制作中没有资源. 要创建一些吗?',
+    empty_list_client: '此制作中没有资源.',
     new_asset: '添加资源',
     new_assets: '添加多个资源',
     new_success: '已成功创建资源{name}.',
@@ -84,6 +85,7 @@ export default {
     delete_text: '您确定要从您的数据库移除{name}吗?',
     edit_title: '编辑片段',
     empty_list: '制作中没有片段. 要创建一些吗?',
+    empty_list_client: '此制作中没有片段.',
     new_episode: '新建片段',
     number: '片段 | 片段(多个)',
     title: '片段(多个)',
@@ -120,8 +122,9 @@ export default {
     logout: '退出',
     profile: '简介',
     production: '制作',
-    studio: '工作室',
     save: '保存',
+
+    studio: '工作室',
     user: '用户',
     yes: '是',
     csv: {
@@ -136,6 +139,7 @@ export default {
 
   menu: {
     assign_tasks: '分配多个任务',
+    change_priority: '更改优先级',
     change_status: '更改状态',
     create_tasks: '创建多个任务',
     run_custom_action: '执行自定义操作'
@@ -154,8 +158,8 @@ export default {
   },
 
   people: {
-    delete_text: '您确定要从您的数据库移除{personName}吗?',
     delete_error: '删除此人员时出现错误. 很可能存在有链接至此的数据. 您确定此人员没有分配任务或是没写注释吗?',
+    delete_text: '您确定要从您的数据库移除{personName}吗?',
     edit_title: '编辑人员',
     new_person: '添加新员工',
     persons: '人员 | 人员(多名)',
@@ -189,6 +193,7 @@ export default {
     },
     role: {
       admin: '管理员',
+      client: '客户',
       manager: '监制',
       user: 'CG艺术家'
     }
@@ -227,6 +232,7 @@ export default {
       create_new: '创建新制作',
       empty: '您什么制作也没开启. 要创建一个新的吗?',
       no_task: '还没有任务分配给您. 您可以到监制那儿了解一下自己能做些什么!',
+      no_prod_for_client: '您无权访问任何制作. 请联系您的承包商获取访问权限.',
       title: '执行多个制作',
       welcome: '欢迎使用Kitsu'
     },
@@ -285,10 +291,11 @@ export default {
     number: '任务类型 | 任务类型(多种)',
     title: '任务类型(多种)',
     fields: {
-      name: '名称',
+      dedicated_to: '专用于',
       color: '颜色',
-      priority: '优先级',
-      dedicated_to: '专用于'
+      name: '名称',
+      allow_timelog: '时间日志',
+      priority: '优先级'
     }
   },
 
@@ -297,6 +304,7 @@ export default {
     delete_error: '删除此序列时出现错误. 很可能存在有链接至此的数据. 您确定没有镜头链接至此序列吗?',
     edit_title: '编辑序列',
     empty_list: '制作中没有序列. 要创建一些吗?',
+    empty_list_client: '此制作中没有序列.',
     new_sequence: '新建序列',
     number: '序列 | 序列(多个)',
     title: '序列(多个)',
@@ -314,6 +322,7 @@ export default {
     edit_fail: '创建或编辑失败, 有错误出现.',
     edit_title: '编辑镜头',
     empty_list: '制作中没有镜头. 要创建一些吗?',
+    empty_list_client: '此制作中没有镜头.',
     new_shot: '添加镜头',
     new_shots: '添加多个镜头',
     new_sequences: '添加多个序列',
@@ -350,6 +359,7 @@ export default {
     back_to_list: '返回列表',
     change_status_to: '将任务状态改为:',
     change_preview: '更换预览',
+    change_priority: '将优先级改为:',
     clear_assignations: '清除多个任务分配',
     create_for_selection: '为每个空单元格都创建任务:',
     create_tasks: '添加多个任务',
@@ -369,6 +379,7 @@ export default {
     download_pdf_file: '下载PDF文件',
     feedback: '反馈',
     full_screen: '全屏显示',
+    hide_assignations: '隐藏多个任务分配',
     my_tasks: '我的任务(多个)',
     next: '下一个任务',
     no_assignation_right: '不允许您管理多个任务分配',
@@ -380,6 +391,7 @@ export default {
     set_preview_error: '将预览设置为缩略图时出现错误',
     set_preview_done: '此预览被用作当前实体的缩略图.',
     select_preview_file: '请从您的硬盘选择一张要被用作当前任务的预览的图片:',
+    show_assignations: '显示多个任务分配',
     validation: '确认',
     tasks: '任务(多个)',
     fields: {
@@ -390,6 +402,12 @@ export default {
       production: '制作',
       task_status: '状态',
       task_type: '类型'
+    },
+    priority: {
+      emergency: '紧急',
+      normal: '正常',
+      high: '高',
+      very_high: '非常高'
     }
   },
 
