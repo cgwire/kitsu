@@ -35,6 +35,7 @@ import {
   HIDE_DELETE_PEOPLE_MODAL,
 
   UPLOAD_AVATAR_END,
+  USER_SAVE_PROFILE_SUCCESS,
 
   LOAD_PERSON_TASKS_END,
   LOAD_PERSON_DONE_TASKS_END,
@@ -218,7 +219,7 @@ const actions = {
       if (err) {
         commit(EDIT_PEOPLE_ERROR)
       } else {
-        commit(EDIT_PEOPLE_END)
+        commit(EDIT_PEOPLE_END, state.personToEdit)
         commit(HIDE_EDIT_PEOPLE_MODAL)
       }
       if (payload.callback) payload.callback(err)
@@ -690,6 +691,14 @@ const mutations = {
       state.displayedPeople = indexSearch(state.peopleIndex, text)
     } else {
       state.displayedPeople = state.people
+    }
+  },
+
+  [USER_SAVE_PROFILE_SUCCESS] (state, form) {
+    const person = state.personMap[form.id]
+    if (person) {
+      Object.assign(person, form)
+      helpers.addAdditionalInformation(person)
     }
   },
 

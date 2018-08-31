@@ -44,6 +44,7 @@ import {
 
   UPLOAD_AVATAR_END,
   CHANGE_AVATAR_FILE,
+  EDIT_PEOPLE_END,
 
   NEW_TASK_COMMENT_END,
 
@@ -127,6 +128,7 @@ const actions = {
       if (err) {
         commit(USER_SAVE_PROFILE_ERROR)
       } else {
+        payload.form.id = state.user.id
         commit(USER_SAVE_PROFILE_SUCCESS, payload.form)
       }
       if (payload.callback) payload.callback()
@@ -278,10 +280,25 @@ const mutations = {
     state.isSaveProfileLoading = false
     state.isSaveProfileLoadingError = true
   },
+
   [USER_SAVE_PROFILE_SUCCESS] (state, form) {
     Object.assign(state.user, form)
+    Object.assign(
+      state.user,
+      peopleStore.helpers.addAdditionalInformation(state.user)
+    )
     state.isSaveProfileLoading = false
     state.isSaveProfileLoadingError = false
+  },
+
+  [EDIT_PEOPLE_END] (state, form) {
+    if (state.user.id === form.id) {
+      Object.assign(state.user, form)
+      Object.assign(
+        state.user,
+        peopleStore.helpers.addAdditionalInformation(state.user)
+      )
+    }
   },
 
   [USER_CHANGE_PASSWORD_LOADING] (state) {

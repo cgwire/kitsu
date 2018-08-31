@@ -48,10 +48,10 @@ export default {
   },
 
   mounted () {
-    if (this.$cookie.get('show-assignations') === 'true') {
-      this.showAssignations()
-    } else {
+    if (this.$cookie.get('show-assignations') === 'false') {
       this.hideAssignations()
+    } else {
+      this.showAssignations()
     }
   },
 

@@ -140,7 +140,7 @@ export default {
     confirmClicked () {
       this.form.active =
         this.form.active === 'true' || this.form.active === true
-      if (this.email) {
+      if (this.form.email) {
         this.$emit('confirm', this.form)
       }
     },
