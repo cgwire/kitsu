@@ -393,11 +393,9 @@ const actions = {
     { taskId, commentId, callback }
   ) {
     const fileName = state.previewFormData.get('file').name
-    const extension = fileName.slice(fileName.length - 4)
     const previewData = {
       taskId,
-      commentId,
-      isMovie: ['.mp4', '.mov'].includes(extension)
+      commentId
     }
 
     tasksApi.addPreview(previewData, (err, preview) => {
@@ -407,7 +405,7 @@ const actions = {
         tasksApi.uploadPreview(preview.id, state.previewFormData, (err) => {
           if (!err) {
             const comment = getters.getTaskComment(taskId, commentId)
-
+            const extension = fileName.slice(fileName.length - 3)
             preview.extension = extension.substring(1)
             commit(ADD_PREVIEW_END, {
               preview,
@@ -427,13 +425,13 @@ const actions = {
   }) {
     const fileName = state.previewFormData.get('file').name
     const extension = fileName.slice(fileName.length - 4)
-    const isMovie = ['.mp4', '.mov'].includes(extension)
+    preview.extension = extension
 
     tasksApi.uploadPreview(preview.id, state.previewFormData, (err) => {
       if (!err) {
-        commit(CHANGE_PREVIEW_END, { comment, isMovie, preview })
+        commit(CHANGE_PREVIEW_END, { comment, preview })
       }
-      if (callback) callback(err, isMovie, extension)
+      if (callback) callback(err, extension)
     })
   },
 
@@ -649,15 +647,14 @@ const mutations = {
     }
   },
 
-  [CHANGE_PREVIEW_END] (state, { preview, comment, isMovie }) {
+  [CHANGE_PREVIEW_END] (state, { preview, comment }) {
     const taskId = comment.object_id
-    preview.is_movie = isMovie
 
     const newPreview = {
       id: preview.id,
       feedback: false,
       revision: preview.revision,
-      is_movie: preview.is_movie
+      extension: preview.extension
     }
     state.taskPreviews[taskId].shift()
     state.taskPreviews[taskId] =
