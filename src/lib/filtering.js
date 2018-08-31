@@ -51,9 +51,11 @@ export const findFilter = (taskTypeNameIndex, query) => {
  * Extract available task types from given result of an entity and task
  * list.
  */
-export const extractTaskTypes = (result) => {
+export const extractTaskTypes = (result, taskTypeMap) => {
   if (result.length > 0) {
-    return Object.keys(result[0].validations)
+    return Object.keys(result[0].validations).map((taskTypeId) => {
+      return taskTypeMap[taskTypeId]
+    })
   } else {
     return []
   }
@@ -63,14 +65,14 @@ export const extractTaskTypes = (result) => {
  * For given list of names, build an index that return names as result
  * of a query that matches the beginning of this string.
  */
-export const buildIndex = (names) => {
+export const buildIndex = (taskTypes) => {
   const index = {}
-  names.forEach((name) => {
+  taskTypes.forEach((taskType) => {
     let currentString = ''
-    for (let character of name) {
+    for (let character of taskType.name) {
       currentString += character.toLowerCase()
       if (index[currentString] === undefined) index[currentString] = []
-      index[currentString].push(name)
+      index[currentString].push(taskType.id)
     }
   })
   return index

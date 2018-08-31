@@ -521,8 +521,12 @@ const actions = {
 
   setShotSearch ({commit, rootGetters}, shotSearch) {
     const taskStatusMap = rootGetters.taskStatusMap
+    const taskTypeMap = rootGetters.taskTypeMap
     const taskMap = rootGetters.taskMap
-    commit(SET_SHOT_SEARCH, { shotSearch, taskStatusMap, taskMap })
+    commit(
+      SET_SHOT_SEARCH,
+      { shotSearch, taskStatusMap, taskMap, taskTypeMap }
+    )
   },
 
   saveShotSearch ({ commit, rootGetters }, searchQuery) {
@@ -943,8 +947,11 @@ const mutations = {
     }
   },
 
-  [SET_SHOT_SEARCH] (state, { shotSearch, taskStatusMap, taskMap }) {
-    const taskTypes = extractTaskTypes(cache.shots)
+  [SET_SHOT_SEARCH] (
+    state,
+    { shotSearch, taskStatusMap, taskMap, taskTypeMap }
+  ) {
+    const taskTypes = extractTaskTypes(cache.shots, taskTypeMap)
     let result = indexSearch(cache.shotIndex, shotSearch) || cache.shots
     result = applyFilters(
       taskTypes, result, shotSearch, taskStatusMap, taskMap

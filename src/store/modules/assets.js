@@ -340,8 +340,12 @@ const actions = {
 
   setAssetSearch ({ commit, rootGetters }, assetSearch) {
     const taskStatusMap = rootGetters.taskStatusMap
+    const taskTypeMap = rootGetters.taskTypeMap
     const taskMap = rootGetters.taskMap
-    commit(SET_ASSET_SEARCH, { assetSearch, taskMap, taskStatusMap })
+    commit(
+      SET_ASSET_SEARCH,
+      { assetSearch, taskMap, taskStatusMap, taskTypeMap }
+    )
   },
 
   saveAssetSearch ({ commit, rootGetters }, searchQuery) {
@@ -663,9 +667,11 @@ const mutations = {
     }
   },
 
-  [SET_ASSET_SEARCH] (state, { assetSearch, taskStatusMap, taskMap }) {
+  [SET_ASSET_SEARCH] (
+    state, { assetSearch, taskStatusMap, taskTypeMap, taskMap }
+  ) {
     let result = indexSearch(cache.assetIndex, assetSearch) || cache.assets
-    const taskTypes = extractTaskTypes(cache.assets)
+    const taskTypes = extractTaskTypes(cache.assets, taskTypeMap)
     result = applyFilters(
       taskTypes, result, assetSearch, taskStatusMap, taskMap
     ) || []
