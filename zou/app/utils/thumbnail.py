@@ -2,7 +2,6 @@ import os
 import shutil
 import math
 
-from zou.app import app
 from zou.app.utils import fs
 
 from PIL import Image
@@ -13,26 +12,26 @@ PREVIEW_SIZE = 1200, 0
 BIG_SQUARE_SIZE = 400, 400
 
 
-def save_file(subfolder, instance_id, file_to_save, size=None):
+def save_file(tmp_folder, instance_id, file_to_save):
+    """
+    Save file in given folder. The file must only be temporary saved via
+    this function.
+    """
     extension = "." + file_to_save.filename.split(".")[-1].lower()
-    file_name = instance_id + extension
-    thumbnail_folder = create_folder(subfolder)
-
-    file_path = os.path.join(thumbnail_folder, file_name)
+    file_name = instance_id + extension.lower()
+    file_path = os.path.join(tmp_folder, file_name)
     file_to_save.save(file_path)
-
-    if size is not None:
-        turn_into_thumbnail(file_path, size=size)
-
     return file_path
 
+def convert_jpg_to_png(file_source_path):
 
-def convert_jpg_to_png(subfolder, instance_id):
-    file_source_name = "%s.jpg" % instance_id
-    file_target_name = "%s.png" % instance_id
-    thumbnail_folder = create_folder(subfolder)
-    file_source_path = os.path.join(thumbnail_folder, file_source_name)
-    file_target_path = os.path.join(thumbnail_folder, file_target_name)
+    """
+    Convert .jpg file located at given path into a .png file with same name.
+    """
+    folder_path = os.path.dirname(file_source_path)
+    file_source_name = os.path.basename(file_source_path)
+    file_target_name = "%s.png" % file_source_name[:-4]
+    file_target_path = os.path.join(folder_path, file_target_name)
 
     im = Image.open(file_source_path)
     im.save(file_target_path)
@@ -41,52 +40,16 @@ def convert_jpg_to_png(subfolder, instance_id):
 
 
 def get_file_name(instance_id):
+    """
+    Build thumbnail file name for given id.
+    """
     return "%s.png" % instance_id
 
 
-def get_file_path(subfolder, instance_id):
-    return os.path.join(get_folder_name(subfolder), get_file_name(instance_id))
-
-
-def get_folder_name(subfolder):
-    thumbnail_folder = app.config["THUMBNAIL_FOLDER"]
-    return os.path.join(thumbnail_folder, subfolder)
-
-
-def get_preview_folder_name(subfolder, instance_id):
-    thumbnail_folder = app.config["THUMBNAIL_FOLDER"]
-    subfolder = os.path.join(
-        "preview-files",
-        subfolder,
-        instance_id.split("-")[0][:3]
-    )
-
-    return os.path.join(thumbnail_folder, subfolder)
-
-
-def get_preview_file_path(subfolder, instance_id):
-    return os.path.join(
-        get_preview_folder_name("originals", instance_id),
-        get_file_name(instance_id)
-    )
-
-
-def create_folder(subfolder):
-    thumbnail_folder = get_folder_name(subfolder)
-    fs.mkdir_p(thumbnail_folder)
-    return thumbnail_folder
-
-
-def flat(*nums):
-    return tuple(int(round(n)) for n in nums)
-
-
-def get_image_size(file_path):
-    im = Image.open(file_path)
-    return im.size
-
-
 def get_full_size_from_width(im, width):
+    """
+    From given width/g
+    """
     im_width, im_height = im.size
     ratio = float(im_height) / float(im_width)
     height = int(math.ceil(width * ratio))
@@ -94,6 +57,9 @@ def get_full_size_from_width(im, width):
 
 
 def turn_into_thumbnail(file_path, size=None):
+    """
+    Turn given picture into a smaller version.
+    """
     im = Image.open(file_path)
 
     if size is not None:
@@ -108,6 +74,7 @@ def turn_into_thumbnail(file_path, size=None):
 
     im = im.resize(size)
     im.save(file_path)
+    return file_path
 
 
 def prepare_image_for_thumbnail(im, size):
@@ -146,35 +113,45 @@ def prepare_image_for_thumbnail(im, size):
     return im
 
 
-def url_path(data_type, instance_id):
-    data_type = data_type.replace("_", "-")
-    return "pictures/thumbnails/%s/%s.png" % (data_type, instance_id)
+def generate_preview_variants(original_path, instance_id):
+    """
+    Generate three thumbnails for given picture path.
 
-
-def generate_preview_variants(instance_id):
+    1. Rectangle thumbnail
+    2. Square thumbnail
+    3. Big rectangle thumbnail
+    """
     file_name = get_file_name(instance_id)
-    original_path = get_preview_file_path("originals", instance_id)
     variants = [
         ("thumbnails", RECTANGLE_SIZE),
         ("thumbnails-square", SQUARE_SIZE),
         ("previews", PREVIEW_SIZE)
     ]
 
+    result = []
     for picture_data in variants:
         (picture_type, size) = picture_data
-        folder_path = get_preview_folder_name(picture_type, instance_id)
-        full_folder_path = create_folder(folder_path)
-        picture_path = os.path.join(full_folder_path, file_name)
+        folder_path = os.path.dirname(original_path)
+        picture_path = os.path.join(
+            folder_path,
+            "%s-%s" % (picture_type, file_name)
+        )
         shutil.copyfile(original_path, picture_path)
         turn_into_thumbnail(picture_path, size)
+        result.append((picture_type, picture_path))
+    return result
 
 
-def get_preview_url_path(instance_id):
-    file_name = get_file_name(instance_id)
-    return {
-        "original": "/api/pictures/originals/preview-files/%s" % file_name,
-        "thumbnail": "/api/pictures/thumbnails/preview-files/%s" % file_name,
-        "thumbnail_square":
-            "/api/pictures/thumbnails-square/preview-files/%s" % file_name,
-        "previews": "/api/pictures/previews/preview-files/%s" % file_name
-    }
+def url_path(data_type, instance_id):
+    """
+    Build thumbnail download path for given data type and instance ID.
+    """
+    data_type = data_type.replace("_", "-")
+    return "pictures/thumbnails/%s/%s.png" % (data_type, instance_id)
+
+
+def flat(*nums):
+    """
+    Turn into an int tuple an a enumerable of numbers.
+    """
+    return tuple(int(round(n)) for n in nums)

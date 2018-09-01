@@ -1,3 +1,5 @@
+import redis
+
 from flask_socketio import SocketIO
 from flask import current_app
 
@@ -14,10 +16,6 @@ socketio = None
 def publish(event, data):
     if socketio is not None:
         socketio.emit(event, data, namespace="/events")
-    else:
-        current_app.logger.error(
-            "Publisher store not initialized, run init() befor emitting events"
-        )
 
 
 def init():
@@ -27,5 +25,17 @@ def init():
     events to the event stream API.
     """
     global socketio
-    socketio = SocketIO(message_queue=redis_url)
+
+    try:
+        publisher_store = redis.StrictRedis(
+            host=host,
+            port=port,
+            db=redis_db,
+            decode_responses=True
+        )
+        publisher_store.get(None)
+        socketio = SocketIO(message_queue=redis_url)
+    except redis.ConnectionError:
+        pass
+
     return socketio

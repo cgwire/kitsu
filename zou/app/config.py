@@ -54,7 +54,7 @@ DEFAULT_FILE_STATUS = "To review"
 
 DEFAULT_FILE_TREE = os.getenv("DEFAULT_FILE_TREE", "default")
 FILE_TREE_FOLDER = os.getenv("FILE_TREE_FOLDER")
-THUMBNAIL_FOLDER = os.getenv("THUMBNAIL_FOLDER")
+PREVIEW_FOLDER = os.getenv("PREVIEW_FOLDER", "previews")
 
 MAIL_SERVER = os.getenv("MAIL_SERVER", "localhost")
 MAIL_PORT = os.getenv("MAIL_PORT", 25)
@@ -70,6 +70,15 @@ EVENT_HANDLERS_FOLDER = os.getenv(
     "EVENT_HANDLERS_FOLDER",
     os.path.join(os.getcwd(), "event_handlers")
 )
-TMP_DIR = os.getenv("TMP_DIR", os.path.join(os.sep, "tmp"))
+TMP_DIR = os.getenv("TMP_DIR", os.path.join(os.sep, "tmp", "zou"))
 
 EVENT_STREAM_PORT = os.getenv("EVENT_STREAM_PORT", 5001)
+
+FS_BACKEND = os.getenv("FS_BACKEND", "local")
+FS_ROOT = PREVIEW_FOLDER
+FS_BUCKET_PREFIX = os.getenv("FS_BUCKET_PREFIX", "")
+FS_SWIFT_AUTHURL = os.getenv("FS_SWIFT_AUTHURL")
+FS_SWIFT_USER = os.getenv("FS_SWIFT_USER")
+FS_SWIFT_TENANT_NAME = os.getenv("FS_SWIFT_TENANT_NAME")
+FS_SWIFT_KEY = os.getenv("FS_SWIFT_KEY")
+FS_SWIFT_REGION_NAME = os.getenv("FS_SWIFT_REGION_NAME")

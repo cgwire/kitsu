@@ -1,23 +1,45 @@
 import os
 
-from flask import abort, request, send_from_directory, current_app
+from flask import abort, request, current_app, stream_with_context, Response
 from flask_restful import Resource
 from flask_jwt_extended import jwt_required
+from flask_fs.errors import FileNotFound
 
+from zou.app.stores import file_store
 from zou.app.services import (
-    shots_service,
     files_service,
     persons_service,
-    assets_service,
     projects_service,
     tasks_service,
     user_service,
     entities_service
 )
-from zou.app.utils import thumbnail as thumbnail_utils, permissions, events
+from zou.app.utils import (
+    events,
+    movie_utils,
+    permissions,
+    thumbnail as thumbnail_utils
+)
+
+
+ALLOWED_PICTURE_EXTENSION = [".png", ".jpg", ".PNG", ".JPG"]
+ALLOWED_MOVIE_EXTENSION = [".mp4", ".mov", ".MP4", ".MOV"]
+ALLOWED_FILE_EXTENSION = [".obj", ".pdf", ".ma", ".mb"]
+
+
+def send_file(generator, mimetype="application/octet-stream"):
+    """
+    Helpers to return file response.
+    """
+    return Response(stream_with_context(generator), mimetype=mimetype)
 
 
 class CreatePreviewFilePictureResource(Resource):
+    """
+    Main resource to add a preview. It stores the preview file and generates
+    three picture files matching preview when it's possible: a square thumbnail,
+    a rectangle thumbnail and a midsize file.
+    """
 
     @jwt_required
     def post(self, instance_id):
@@ -29,66 +51,105 @@ class CreatePreviewFilePictureResource(Resource):
 
         uploaded_file = request.files["file"]
 
-        folder_path = thumbnail_utils.get_preview_folder_name(
-            "originals",
-            instance_id
-        )
         extension = "." + uploaded_file.filename.split(".")[-1].lower()
-        if extension in [".png", ".jpg"]:
-            thumbnail_utils.save_file(
-                folder_path,
+
+        if extension in ALLOWED_PICTURE_EXTENSION:
+            self.save_picture_preview(instance_id, uploaded_file)
+            preview_file = files_service.update_preview_file(
                 instance_id,
-                uploaded_file,
-                size=None
+                {"extension": "png"}
             )
-            if extension == ".jpg":
-                thumbnail_utils.convert_jpg_to_png(
-                    folder_path,
-                    instance_id
-                )
-
-            thumbnail_utils.generate_preview_variants(instance_id)
             self.emit_app_preview_event(instance_id)
-            files_service.update_preview_file(instance_id, {"extension": "png"})
+            return preview_file, 201
 
-            return thumbnail_utils.get_preview_url_path(instance_id), 201
-
-        elif extension in [".mp4", ".mov"]:
-            from moviepy.editor import VideoFileClip
-            file_name = "%s%s" % (instance_id, extension)
-            folder = thumbnail_utils.create_folder(folder_path)
-            file_path = os.path.join(folder, file_name)
-            picture_path = os.path.join(folder, "%s.png" % instance_id)
-            uploaded_file.save(file_path + '.tmp')
-            clip = VideoFileClip(file_path + '.tmp')
-
-            clip = clip.resize(height=720)
-            clip.save_frame(picture_path, round(clip.duration / 2))
-            thumbnail_utils.generate_preview_variants(instance_id)
-
-            file_name = "%s%s" % (instance_id, extension)
-            clip.write_videofile(os.path.join(folder, instance_id + ".mp4"))
-            files_service.update_preview_file(instance_id, {"extension": "mp4"})
+        elif extension in ALLOWED_MOVIE_EXTENSION:
+            self.save_movie_preview(instance_id, uploaded_file)
+            preview_file = files_service.update_preview_file(
+                instance_id,
+                {"extension": "mp4"}
+            )
             self.emit_app_preview_event(instance_id)
+            return preview_file, 201
 
-            return {}, 201
-
-        elif extension in [".obj", ".pdf", ".ma", ".mb"]:
-            from moviepy.editor import VideoFileClip
-            file_name = "%s%s" % (instance_id, extension)
-            folder = thumbnail_utils.create_folder(folder_path)
-            file_path = os.path.join(folder, file_name)
-            uploaded_file.save(file_path)
-            files_service.update_preview_file(instance_id, {
-                "extension": extension[1:]
-            })
-            return {}, 201
+        elif extension in ALLOWED_FILE_EXTENSION:
+            self.save_file_preview(instance_id, uploaded_file, extension)
+            preview_file = files_service.update_preview_file(
+                instance_id,
+                {"extension": extension[1:]}
+            )
+            self.emit_app_preview_event(instance_id)
+            return preview_file, 201
 
         else:
-            current_app.logger.info("Wrong file format, extension: %s", extension)
+            current_app.logger.info(
+                "Wrong file format, extension: %s", extension)
             abort(400, "Wrong file format, extension: %s" % extension)
 
+    def save_picture_preview(self, instance_id, uploaded_file):
+        """
+        Get uploaded picture, build thumbnails then save everything in the file
+        storage.
+        """
+        tmp_folder = current_app.config["TMP_DIR"]
+        original_tmp_path = thumbnail_utils.save_file(
+            tmp_folder,
+            instance_id,
+            uploaded_file
+        )
+        return self.save_variants(original_tmp_path, instance_id)
+
+    def save_movie_preview(self, instance_id, uploaded_file):
+        """
+        Get uploaded movie, normalize it (720p) then build thumbnails then save
+        everything in the file storage.
+        """
+        tmp_folder = current_app.config["TMP_DIR"]
+        uploaded_movie_path = movie_utils.save_file(
+            tmp_folder,
+            instance_id,
+            uploaded_file
+        )
+        normalized_movie_path = movie_utils.normalize_movie(uploaded_movie_path)
+        file_store.add_movie("previews", instance_id, normalized_movie_path)
+        original_tmp_path = movie_utils.generate_thumbnail(
+            normalized_movie_path
+        )
+
+        os.remove(uploaded_movie_path)
+        os.remove(normalized_movie_path)
+        return self.save_variants(original_tmp_path, instance_id)
+
+    def save_file_preview(self, instance_id, uploaded_file, extension):
+        """
+        Get uploaded file then save it in the file storage.
+        """
+        tmp_folder = current_app.config["TMP_DIR"]
+        file_name = instance_id + extension
+        file_path = os.path.join(tmp_folder, file_name)
+        uploaded_file.save(file_path)
+        file_store.add_file("previews", instance_id, file_path)
+        os.remove(file_path)
+        return file_path
+
+    def save_variants(self, original_tmp_path, instance_id):
+        """
+        Build variants of a picture file and save them in the main storage.
+        """
+        variants = thumbnail_utils.generate_preview_variants(
+            original_tmp_path,
+            instance_id
+        )
+        variants.append(("original", original_tmp_path))
+        for (name, path) in variants:
+            file_store.add_picture(name, instance_id, path)
+            os.remove(path)
+
+        return variants
+
     def emit_app_preview_event(self, preview_file_id):
+        """
+        Emit an event, each time a preview is added.
+        """
         preview_file = files_service.get_preview_file(preview_file_id)
         comment = tasks_service.get_comment_by_preview_file_id(
             preview_file_id
@@ -107,6 +168,9 @@ class CreatePreviewFilePictureResource(Resource):
         })
 
     def is_allowed(self, preview_file_id):
+        """
+        Return true if user is allowed to add a preview.
+        """
         if permissions.has_manager_permissions():
             return True
         else:
@@ -114,10 +178,16 @@ class CreatePreviewFilePictureResource(Resource):
             return user_service.check_assigned(preview_file["task_id"])
 
     def is_exist(self, preview_file_id):
+        """
+        Return true if preview file entry matching given id exists in database.
+        """
         return files_service.get_preview_file(preview_file_id) is not None
 
 
 class PreviewFileMovieResource(Resource):
+    """
+    Allow to download a movie preview.
+    """
 
     def __init__(self):
         Resource.__init__(self)
@@ -145,19 +215,20 @@ class PreviewFileMovieResource(Resource):
         if not self.is_allowed(instance_id):
             abort(403)
 
-        folder_path = thumbnail_utils.get_preview_folder_name(
-            "originals",
-            instance_id
-        )
-        file_name = "%s.mp4" % instance_id
-
-        return send_from_directory(
-            directory=folder_path,
-            filename=file_name
-        )
+        try:
+            return send_file(
+                file_store.open_movie("previews", instance_id),
+                mimetype="video/mp4"
+            )
+        except FileNotFound:
+            current_app.logger.error("File was not found for: %s" % instance_id)
+            abort(404)
 
 
 class PreviewFileResource(Resource):
+    """
+    Allow to download a generic file preview.
+    """
 
     def __init__(self):
         Resource.__init__(self)
@@ -185,23 +256,31 @@ class PreviewFileResource(Resource):
         if not self.is_allowed(instance_id):
             abort(403)
 
-        folder_path = thumbnail_utils.get_preview_folder_name(
-            "originals",
-            instance_id
-        )
-        file_name = "%s.%s" % (instance_id, extension)
+        try:
+            if extension == "png":
+                mimetype = "image/png"
+                stream = file_store.open_picture("previews", instance_id)
+            elif extension == "pdf":
+                mimetype = "application/pdf"
+                stream = file_store.open_file("previews", instance_id)
+            else:
+                mimetype = "application/octet-stream"
+                stream = file_store.open_file("previews", instance_id)
 
-        return send_from_directory(
-            directory=folder_path,
-            filename=file_name
-        )
+            return send_file(stream, mimetype=mimetype)
+        except FileNotFound:
+            current_app.logger.error("File was not found for: %s" % instance_id)
+            abort(404)
 
 
 class BasePreviewPictureResource(Resource):
+    """
+    Base class to download a thumbnail.
+    """
 
-    def __init__(self, subfolder):
+    def __init__(self, picture_type):
         Resource.__init__(self)
-        self.subfolder = subfolder
+        self.picture_type = picture_type
 
     def is_exist(self, preview_file_id):
         return files_service.get_preview_file(preview_file_id) is not None
@@ -226,20 +305,14 @@ class BasePreviewPictureResource(Resource):
         if not self.is_allowed(instance_id):
             abort(403)
 
-        folder_path = thumbnail_utils.get_preview_folder_name(
-            self.subfolder,
-            instance_id
-        )
-        file_name = thumbnail_utils.get_file_name(instance_id)
-
-        # Use legacy folder name if the file cannot be found.
-        if not os.path.exists(os.path.join(folder_path, file_name)):
-            folder_path = thumbnail_utils.get_folder_name("preview-files")
-
-        return send_from_directory(
-            directory=folder_path,
-            filename=file_name
-        )
+        try:
+            return send_file(
+                file_store.open_picture(self.picture_type, instance_id),
+                mimetype="image/png"
+            )
+        except FileNotFound:
+            current_app.logger.error("File was not found for: %s" % instance_id)
+            abort(404)
 
 
 class PreviewFileThumbnailResource(BasePreviewPictureResource):
@@ -249,6 +322,9 @@ class PreviewFileThumbnailResource(BasePreviewPictureResource):
 
 
 class PreviewFilePreviewResource(BasePreviewPictureResource):
+    """
+    Smaller version of uploaded image.
+    """
 
     def __init__(self):
         BasePreviewPictureResource.__init__(self, "previews")
@@ -270,6 +346,9 @@ class PreviewFileOriginalResource(BasePreviewPictureResource):
 
 
 class BaseCreatePictureResource(Resource):
+    """
+    Base class to create a thumbnail.
+    """
 
     def __init__(self, data_type, size=thumbnail_utils.RECTANGLE_SIZE):
         Resource.__init__(self)
@@ -289,13 +368,20 @@ class BaseCreatePictureResource(Resource):
 
         self.check_permissions(instance_id)
         self.prepare_creation(instance_id)
+
+        tmp_folder = current_app.config["TMP_DIR"]
         uploaded_file = request.files["file"]
-        thumbnail_utils.save_file(
-            self.data_type,
+        thumbnail_path = thumbnail_utils.save_file(
+            tmp_folder,
             instance_id,
-            uploaded_file,
+            uploaded_file
+        )
+        thumbnail_path = thumbnail_utils.turn_into_thumbnail(
+            thumbnail_path,
             size=self.size
         )
+        file_store.add_picture("thumbnails", instance_id, thumbnail_path)
+        os.remove(thumbnail_path)
 
         thumbnail_url_path = \
             thumbnail_utils.url_path(
@@ -307,6 +393,9 @@ class BaseCreatePictureResource(Resource):
 
 
 class BasePictureResource(Resource):
+    """
+    Base resource to download a thumbnail.
+    """
 
     def __init__(self, subfolder):
         Resource.__init__(self)
@@ -323,10 +412,14 @@ class BasePictureResource(Resource):
         if not self.is_allowed(instance_id):
             abort(403)
 
-        return send_from_directory(
-            directory=thumbnail_utils.get_folder_name(self.subfolder),
-            filename=thumbnail_utils.get_file_name(instance_id)
-        )
+        try:
+            return send_file(
+                file_store.open_picture("thumbnails", instance_id),
+                mimetype="image/png"
+            )
+        except FileNotFound:
+            current_app.logger.error("File was not found for: %s" % instance_id)
+            abort(404)
 
 
 class CreatePersonThumbnailResource(BaseCreatePictureResource):
@@ -397,88 +490,6 @@ class ProjectThumbnailResource(BasePictureResource):
         try:
             if not permissions.has_manager_permissions():
                 user_service.check_has_task_related(project_id)
-            return True
-        except permissions.PermissionDenied:
-            return False
-
-
-class CreateShotThumbnailResource(BaseCreatePictureResource):
-
-    def __init__(self):
-        BaseCreatePictureResource.__init__(self, "shots")
-
-    def is_exist(self, shot_id):
-        return shots_service.get_shot(shot_id) is not None
-
-
-class ShotThumbnailResource(BasePictureResource):
-
-    def __init__(self):
-        BasePictureResource.__init__(self, "shots")
-
-    def is_exist(self, shot_id):
-        return shots_service.get_shot(shot_id) is not None
-
-    def is_allowed(self, shot_id):
-        shot = shots_service.get_shot(shot_id)
-        try:
-            if not permissions.has_manager_permissions():
-                user_service.check_has_task_related(shot.project_id)
-            return True
-        except permissions.PermissionDenied:
-            return False
-
-
-class CreateAssetThumbnailResource(BaseCreatePictureResource):
-
-    def __init__(self):
-        BaseCreatePictureResource.__init__(self, "assets")
-
-    def is_exist(self, asset_id):
-        return assets_service.get_asset(asset_id) is not None
-
-
-class AssetThumbnailResource(BasePictureResource):
-
-    def __init__(self):
-        BasePictureResource.__init__(self, "assets")
-
-    def is_exist(self, asset_id):
-        return assets_service.get_asset(asset_id) is not None
-
-    def is_allowed(self, asset_id):
-        asset = assets_service.get_asset(asset_id)
-        try:
-            if not permissions.has_manager_permissions():
-                user_service.check_has_task_related(asset.project_id)
-            return True
-        except permissions.PermissionDenied:
-            return False
-
-
-class CreateWorkingFileThumbnailResource(BaseCreatePictureResource):
-
-    def __init__(self):
-        BaseCreatePictureResource.__init__(self, "working_files")
-
-    def is_exist(self, working_file_id):
-        return files_service.get_working_file(working_file_id) is not None
-
-
-class WorkingFileThumbnailResource(BasePictureResource):
-
-    def __init__(self):
-        BasePictureResource.__init__(self, "working_files")
-
-    def is_exist(self, working_file_id):
-        return files_service.get_working_file(working_file_id) is not None
-
-    def is_allowed(self, working_file_id):
-        working_file = files_service.get_working_file(working_file_id)
-        task = tasks_service.get_task(working_file["task_id"])
-        try:
-            if not permissions.has_manager_permissions():
-                user_service.check_has_task_related(task.project_id)
             return True
         except permissions.PermissionDenied:
             return False

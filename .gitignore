@@ -91,4 +91,3 @@ ENV/
 # Vagrant files
 Vagrantfile
 .vagrant
-thumbnails

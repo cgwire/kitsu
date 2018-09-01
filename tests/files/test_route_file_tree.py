@@ -231,12 +231,6 @@ class FolderPathTestCase(ApiDBTestCase):
         self.post(
             "/data/tasks/%s/working-file-path" % self.task_type.id, data, 404)
 
-    def test_get_name_wrong_task_id(self):
-        data = {
-            "task_id": self.task_type.id
-        }
-        self.post("/data/tasks/%s/file-path" % self.task_type.id, data, 404)
-
     def test_get_path_wrong_mode(self):
         data = {
             "mode": "unknown"

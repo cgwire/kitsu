@@ -1,6 +1,7 @@
 import os
+import flask_fs
 
-from flask import Flask
+from flask import Flask, jsonify
 from flask_restful import current_app
 from flask_jwt_extended import JWTManager
 from flask_principal import Principal, identity_changed, Identity
@@ -11,22 +12,21 @@ from flask_mail import Mail
 from . import config
 from .stores import auth_tokens_store
 from .services.exception import PersonNotFoundException
+from .utils import fs
 
 from zou.app.utils import cache
-
 
 
 app = Flask(__name__)
 app.config.from_object(config)
 
 if not app.config["FILE_TREE_FOLDER"]:
-    # file_trees are included in Python package: use root_path
+    # Default file_trees are included in Python package: use root_path
     app.config["FILE_TREE_FOLDER"] = os.path.join(app.root_path,
                                                   'file_trees')
 
-if not app.config["THUMBNAIL_FOLDER"]:
-    app.config["THUMBNAIL_FOLDER"] = os.path.join(app.instance_path,
-                                                  'thumbnails')
+if not app.config["PREVIEW_FOLDER"]:
+    app.config["PREVIEW_FOLDER"] = os.path.join(app.instance_path, 'previews')
 
 
 db = SQLAlchemy(app)
@@ -36,8 +36,9 @@ app.secret_key = app.config["SECRET_KEY"]
 jwt = JWTManager(app)  # JWT auth tokens
 Principal(app)  # Permissions
 cache.cache.init_app(app)  # Function caching
+flask_fs.init_app(app)  # To save files in object storage
 mail = Mail()
-mail.init_app(app) # To send emails
+mail.init_app(app)  # To send emails
 
 # Hack required during development, because Flask SocketIO changes the default
 # Flask CLI.
@@ -50,6 +51,9 @@ if config.DEBUG:
 def shutdown_session(exception=None):
     db.session.remove()
 
+@app.errorhandler(404)
+def page_not_found(error):
+    return jsonify(error=404, text=str(error)), 404
 
 def configure_auth():
     from zou.app.services import persons_service
@@ -74,6 +78,7 @@ def configure_auth():
 def load_api():
     from . import api
     api.configure(app)
+    fs.mkdir_p(app.config["TMP_DIR"])
     configure_auth()
 
 load_api()
