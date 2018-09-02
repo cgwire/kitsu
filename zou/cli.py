@@ -244,7 +244,7 @@ def patch_file_storage():
                         instance_id = filename.split(".")[0]
 
                         file_store.add_picture(
-                            "prefix",
+                            prefix,
                             instance_id,
                             file_path
                         )
@@ -253,13 +253,12 @@ def patch_file_storage():
         for prefix in ["persons", "projects"]:
             folder = os.path.join(
                 preview_folder,
-                "preview-files",
                 prefix
             )
 
             if os.path.exists(folder):
                 for filename in os.listdir(folder):
-                    file_path = os.path.joins(folder, filename)
+                    file_path = os.path.join(folder, filename)
                     instance_id = filename.split(".")[0]
                     file_store.add_picture("thumbnails", instance_id, file_path)
                     print("%s file stored: %s" % (prefix, instance_id))
