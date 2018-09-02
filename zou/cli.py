@@ -184,11 +184,12 @@ def patch_file_storage():
     from zou.app.services import files_service
 
     with app.app.app_context():
-        if hasattr(config, "THUMBNAIL_FOLDER"):
+        if hasattr(config, "THUMBNAIL_FOLDER",):
             preview_folder = config.THUMBNAIL_FOLDER
         else:
             preview_folder = config.PREVIEW_FOLDER
 
+        print("Looking for existing file in %s" % preview_folder)
         originals_folder = os.path.join(
             preview_folder,
             "preview-files",
@@ -198,9 +199,11 @@ def patch_file_storage():
         if os.path.exists(originals_folder):
             for folder in os.listdir(originals_folder):
                 subfolder = os.path.join(".", originals_folder, folder)
+                print("Looking into folder: %s" % subfolder)
 
                 for filename in os.listdir(subfolder):
                     file_path = os.path.join(subfolder, filename)
+                    print("Loading file: %s" % file_path)
                     instance_id = filename.split(".")[0]
                     extension = filename.split(".")[1]
 
@@ -215,7 +218,10 @@ def patch_file_storage():
                     else:
                         file_store.add_file("previews", instance_id, file_path)
 
-                    print("Original file stored: %s" % instance_id)
+                    print("Original file stored: (%s, %s)" % (
+                        instance_id,
+                        extension
+                    ))
                     try:
                         files_service.update_preview_file(
                             instance_id, {"exstension": extension}
