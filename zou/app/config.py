@@ -54,7 +54,10 @@ DEFAULT_FILE_STATUS = "To review"
 
 DEFAULT_FILE_TREE = os.getenv("DEFAULT_FILE_TREE", "default")
 FILE_TREE_FOLDER = os.getenv("FILE_TREE_FOLDER")
-PREVIEW_FOLDER = os.getenv("PREVIEW_FOLDER", "previews")
+PREVIEW_FOLDER = os.getenv(
+    "PREVIEW_FOLDER",
+    os.getenv("THUMBNAIL_FOLDER", "previews")
+)
 
 MAIL_SERVER = os.getenv("MAIL_SERVER", "localhost")
 MAIL_PORT = os.getenv("MAIL_PORT", 25)
