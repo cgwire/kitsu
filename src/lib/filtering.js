@@ -7,7 +7,6 @@ export const applyFilters = (
 ) => {
   const taskTypeIndex = buildIndex(taskTypes)
   const filter = findFilter(taskTypeIndex, query)
-
   if (filter.taskType) {
     return result.filter((entry) => {
       let task = null
@@ -27,8 +26,8 @@ export const applyFilters = (
  * query.
  */
 export const findFilter = (taskTypeNameIndex, query) => {
-  let result = {}
   const regex = /([^ ]*)=([^ ]*)|\[(.*)\]=([^ ]*)/
+  let result = {}
   let rgxMatch = query.match(regex)
 
   if (rgxMatch && rgxMatch[0]) {
@@ -43,7 +42,6 @@ export const findFilter = (taskTypeNameIndex, query) => {
       }
     }
   }
-
   return result
 }
 
