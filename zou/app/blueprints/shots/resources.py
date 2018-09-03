@@ -35,8 +35,15 @@ class ShotResource(Resource):
         Delete given shot.
         """
         try:
+            parser = reqparse.RequestParser()
+            parser.add_argument("force", default=False, type=bool)
+            args = parser.parse_args()
+            force = args["force"]
+
             permissions.check_manager_permissions()
-            deleted_shot = shots_service.remove_shot(shot_id)
+            if force:
+                permissions.check_admin_permissions()
+            deleted_shot = shots_service.remove_shot(shot_id, force=force)
         except ShotNotFoundException:
             abort(404)
         except permissions.PermissionDenied:

@@ -179,16 +179,6 @@ class TaskServiceTestCase(ApiDBTestCase):
             self.task_id
         )
 
-    def test_remove_task(self):
-        self.working_file.delete()
-        self.output_file.delete()
-        tasks_service.remove_task(self.task_id)
-        self.assertRaises(
-            TaskNotFoundException,
-            tasks_service.get_task,
-            self.task_id
-        )
-
     def test_get_tasks_for_sequence(self):
         self.generate_fixture_sequence_task()
         tasks = tasks_service.get_tasks_for_sequence(self.sequence.id)
@@ -388,3 +378,27 @@ class TaskServiceTestCase(ApiDBTestCase):
         self.assertEquals(str(self.task.task_status_id), done_status["id"])
         self.assertIsNotNone(self.task.end_date)
         self.assertLess(self.task.end_date, datetime.datetime.now())
+
+    def test_remove_task(self):
+        self.working_file.delete()
+        self.output_file.delete()
+        tasks_service.remove_task(self.task_id)
+        self.assertRaises(
+            TaskNotFoundException,
+            tasks_service.get_task,
+            self.task_id
+        )
+
+    def test_remove_task_force(self):
+        tasks_service.create_comment(
+            self.task.id,
+            self.task_status.id,
+            self.person.id,
+            "first comment"
+        )
+        tasks_service.remove_task(self.task_id, force=True)
+        self.assertRaises(
+            TaskNotFoundException,
+            tasks_service.get_task,
+            self.task_id
+        )

@@ -5,10 +5,15 @@ from zou.app.utils import events, fields, cache, query as query_utils
 
 from zou.app.models.entity import Entity
 from zou.app.models.project import Project
+from zou.app.models.subscription import Subscription
 from zou.app.models.task import Task
 from zou.app.models.task import association_table as assignees_table
 
-from zou.app.services import projects_service, entities_service
+from zou.app.services import (
+    deletion_service,
+    entities_service,
+    projects_service
+)
 from zou.app.services.exception import (
     EpisodeNotFoundException,
     SequenceNotFoundException,
@@ -607,10 +612,10 @@ def get_scenes_for_sequence(sequence_id):
     return Entity.serialize_list(result, "Scene")
 
 
-def remove_shot(shot_id):
+def remove_shot(shot_id, force=False):
     """
     Remove given shot from database. If it has tasks linked to it, it marks
-    the shot as canceled.
+    the shot as canceled. Deletion can be forced.
     """
     shot = get_shot_raw(shot_id)
     is_tasks_related = Task.query.filter_by(entity_id=shot_id).count() > 0
@@ -618,7 +623,16 @@ def remove_shot(shot_id):
     if is_tasks_related:
         shot.update({"canceled": True})
     else:
+        tasks = Task.query.filter_by(entity_id=shot_id).all()
+        for task in tasks:
+            deletion_service.remove_task(task.id, force=True)
+
+        subscriptions = Subscription.query.filter_by(entity_id=shot_id).all()
+        for subscription in subscriptions:
+            subscription.delete()
+
         shot.delete()
+
     deleted_shot = shot.serialize(obj_type="Shot")
     events.emit("shot:deletion", {
         "shot_id": shot_id

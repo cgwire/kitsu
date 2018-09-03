@@ -1,10 +1,14 @@
 from flask import request, current_app
+from flask_restful import reqparse
+from flask_jwt_extended import jwt_required
+
 from sqlalchemy.exc import IntegrityError
 
 from zou.app.models.task import Task
 from zou.app.models.person import Person
 
-from zou.app.services import user_service
+from zou.app.services import user_service, tasks_service, deletion_service
+from zou.app.utils import permissions, events
 
 from .base import BaseModelsResource, BaseModelResource
 
@@ -53,3 +57,34 @@ class TaskResource(BaseModelResource):
 
     def check_read_permissions(self, task):
         user_service.check_project_access(task["project_id"])
+
+    def check_delete_permissions(self, task):
+        permissions.check_admin_permissions()
+
+    @jwt_required
+    def delete(self, instance_id):
+        """
+        Delete a model corresponding at given ID and return it as a JSON
+        object.
+        """
+        parser = reqparse.RequestParser()
+        parser.add_argument("force", default=False, type=bool)
+        args = parser.parse_args()
+
+        instance = self.get_model_or_404(instance_id)
+
+        try:
+            instance_dict = instance.serialize()
+            self.check_delete_permissions(instance_dict)
+            deletion_service.remove_task(instance_id, force=args["force"])
+            events.emit(
+                "%s:deletion" % self.model.__tablename__,
+                {"%s_id" % self.model.__tablename__: instance.id}
+            )
+            self.post_delete(instance_dict)
+
+        except IntegrityError as exception:
+            current_app.logger.error(str(exception))
+            return {"message": str(exception)}, 400
+
+        return {"deletion_success": True}, 204
