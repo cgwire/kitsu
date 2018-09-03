@@ -26,7 +26,14 @@ class AssetResource(Resource):
     @jwt_required
     def delete(self, asset_id):
         permissions.check_manager_permissions()
-        deleted_asset = assets_service.remove_asset(asset_id)
+
+        parser = reqparse.RequestParser()
+        parser.add_argument("force", default=False, type=bool)
+        args = parser.parse_args()
+        force = args["force"]
+        if force:
+            permissions.check_admin_permissions()
+        deleted_asset = assets_service.remove_asset(asset_id, force=force)
         return deleted_asset, 204
 
 

@@ -180,10 +180,10 @@ class TaskCommentResource(Resource):
 
     def remove_comment_and_related(self, comment_id):
         comment = tasks_service.get_comment(comment_id)
-        if comment["preview_file_id"] is not None:
-            files_service.remove_preview_file(comment["preview_file_id"])
         notifications_service.delete_notifications_for_comment(comment["id"])
         tasks_service.delete_comment(comment["id"])
+        if comment["preview_file_id"] is not None:
+            files_service.remove_preview_file(comment["preview_file_id"])
 
     def update_task_status(self, task_id):
         tasks_service.get_task(task_id)

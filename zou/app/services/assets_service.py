@@ -10,7 +10,12 @@ from zou.app.models.task import Task
 from zou.app.models.asset_instance import AssetInstance
 from zou.app.models.task import association_table as assignees_table
 
-from zou.app.services import shots_service, projects_service, base_service
+from zou.app.services import (
+    base_service,
+    deletion_service,
+    projects_service,
+    shots_service
+)
 
 from zou.app.services.exception import (
     AssetNotFoundException,
@@ -419,13 +424,16 @@ def update_asset(asset_id, data):
     return asset.serialize(obj_type="Asset")
 
 
-def remove_asset(asset_id):
+def remove_asset(asset_id, force=True):
     asset = get_asset_raw(asset_id)
     is_tasks_related = Task.query.filter_by(entity_id=asset_id).count() > 0
 
-    if is_tasks_related:
+    if is_tasks_related and not force:
         asset.update({"canceled": True})
     else:
+        tasks = Task.query.filter_by(entity_id=asset_id).all()
+        for task in tasks:
+            deletion_service.remove_task(task.id, force=True)
         asset.delete()
     deleted_asset = asset.serialize(obj_type="Asset")
     events.emit("asset:delete", {
@@ -469,11 +477,12 @@ def remove_asset_link(asset_in_id, asset_out_id):
     return asset_in.serialize(obj_type="Asset")
 
 
-def cancel_asset(asset_id):
+def cancel_asset(asset_id, force=True):
     """
     Set cancel flag on asset to true. Send an event to event queue.
     """
     asset = get_asset_raw(asset_id)
+
     asset.update({"canceled": True})
     asset_dict = asset.serialize(obj_type="Asset")
     events.emit("asset:deletion", {

@@ -7,16 +7,19 @@ from zou.app import app
 from zou.app.utils import events
 
 from zou.app.models.comment import Comment
+from zou.app.models.department import Department
+from zou.app.models.entity import Entity
 from zou.app.models.person import Person
 from zou.app.models.task import Task
 from zou.app.models.task_type import TaskType
-from zou.app.models.department import Department
-from zou.app.models.entity import Entity
 from zou.app.models.task_status import TaskStatus
 from zou.app.models.time_spent import TimeSpent
 from zou.app.models.project import Project
 from zou.app.models.entity_type import EntityType
 from zou.app.models.preview_file import PreviewFile
+from zou.app.models.working_file import WorkingFile
+from zou.app.models.output_file import OutputFile
+from zou.app.models.notifications import Notification
 
 from zou.app.utils import fields
 
@@ -639,8 +642,32 @@ def update_task(task_id, data):
     return task.serialize()
 
 
-def remove_task(task_id):
+def remove_task(task_id, force=False):
     task = Task.get(task_id)
+
+    if force:
+        working_files = WorkingFile.query.filter_by(task_id=task_id)
+        for working_file in working_files:
+            output_files = OutputFile.query.filter_by(
+                source_file_id=working_file.id
+            )
+            for output_file in output_files:
+                output_file.delete()
+
+            working_file.delete()
+
+        comments = Comment.query.filter_by(object_id=task_id)
+        for comment in comments:
+            notifications = Notification.query.filter_by(comment_id=comment.id)
+            for notification in notifications:
+                notification.delete()
+
+            comment.delete()
+
+        preview_files = PreviewFile.query.filter_by(task_id=task_id)
+        for preview_file in preview_files:
+            preview_file.delete()
+
     task.delete()
     events.emit("task:deletion", {
         "task_id": task_id
