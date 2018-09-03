@@ -39,7 +39,11 @@ export default {
   },
 
   deleteAsset (asset, callback) {
-    client.del(`/api/data/assets/${asset.id}`, callback)
+    if (asset.canceled) {
+      client.del(`/api/data/assets/${asset.id}?force=true`, callback)
+    } else {
+      client.del(`/api/data/assets/${asset.id}`, callback)
+    }
   },
 
   restoreAsset (asset, callback) {

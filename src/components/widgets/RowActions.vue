@@ -19,6 +19,14 @@
   <router-link
     class="button"
     :to="props.deleteRoute"
+    v-if="props.entry.canceled && isCurrentUserAdmin"
+  >
+    <img src="../../assets/icons/trash.svg" class="icon is-small" />
+  </router-link>
+
+  <router-link
+    class="button"
+    :to="props.deleteRoute"
     v-else
   >
     <img src="../../assets/icons/trash.svg" class="icon is-small" />
@@ -61,6 +69,7 @@ export default {
   },
   computed: {
     ...mapGetters([
+      'isCurrentUserAdmin'
     ])
   },
   methods: {

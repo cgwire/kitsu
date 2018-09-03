@@ -101,7 +101,7 @@ export default {
   },
 
   deleteTask (task, callback) {
-    client.del(`/api/data/tasks/${task.id}`, callback)
+    client.del(`/api/data/tasks/${task.id}?force=true`, callback)
   },
 
   addPreview (data, callback) {
