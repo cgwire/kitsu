@@ -484,7 +484,7 @@ const mutations = {
     state.personToEdit.id = personId
   },
 
-  [EDIT_PEOPLE_END] (state) {
+  [EDIT_PEOPLE_END] (state, form) {
     state.isEditLoading = false
     state.isEditLoadingError = false
     const personToEditIndex = state.people.findIndex(

@@ -139,7 +139,7 @@
             v-for="(columnId, j) in validationColumns"
           />
           <row-actions v-if="isCurrentUserManager"
-            :asset="asset"
+            :entry="asset"
             :edit-route="{
               name: 'edit-asset',
               params: {

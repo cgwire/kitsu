@@ -157,8 +157,8 @@ describe('people', () => {
         task_status_short_name: 'todo',
         task_type_id: 'task-type-1',
         last_comment: {
-          text: "last comment",
-          person_id: "person-1"
+          text: 'last comment',
+          person_id: 'person-1'
         },
         id: 'task-2'
       }
@@ -401,35 +401,35 @@ describe('people', () => {
     })
 
     it('EDIT_PEOPLE_START', () => {
-      store.commit(EDIT_PEOPLE_START, {last_name: "New"})
+      store.commit(EDIT_PEOPLE_START, {last_name: 'New'})
       expect(store._vm.isEditLoading).to.equal(true)
       expect(store._vm.isEditLoadingError).to.equal(false)
-      expect(store._vm.personToEdit.last_name).to.equal("New")
+      expect(store._vm.personToEdit.last_name).to.equal('New')
     })
 
     it('EDIT_PEOPLE_END', () => {
       store.commit(LOAD_PEOPLE_END, people)
       store.commit(SHOW_EDIT_PEOPLE_MODAL, 'person-3')
-      store.commit(EDIT_PEOPLE_START, {last_name: "Edited"})
+      store.commit(EDIT_PEOPLE_START, {last_name: 'Edited'})
       store.commit(EDIT_PEOPLE_END)
       expect(store._vm.isEditLoading).to.equal(false)
       expect(store._vm.isEditLoadingError).to.equal(false)
       expect(
         store._vm.people.find((person) => person.id === 'person-3')
-      .last_name).to.equal("Edited")
+      .last_name).to.equal('Edited')
     })
 
     it('EDIT_PEOPLE_END creation', () => {
       store.commit(LOAD_PEOPLE_END, people)
       store.commit(SHOW_EDIT_PEOPLE_MODAL)
-      store.commit(EDIT_PEOPLE_START, {first_name: 'New', last_name: "Person"})
+      store.commit(EDIT_PEOPLE_START, {first_name: 'New', last_name: 'Person'})
       store.commit(NEW_PEOPLE_END, 'new-person')
       store.commit(EDIT_PEOPLE_END)
       expect(store._vm.isEditLoading).to.equal(false)
       expect(store._vm.isEditLoadingError).to.equal(false)
       expect(
         store._vm.people.find((person) => person.id === 'new-person')
-      .last_name).to.equal("Person")
+      .last_name).to.equal('Person')
     })
 
     it('EDIT_PEOPLE_ERROR', () => {

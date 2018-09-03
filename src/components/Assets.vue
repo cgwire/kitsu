@@ -88,7 +88,7 @@
   <delete-modal
     :active="modals.isDeleteDisplayed"
     :is-loading="deleteAsset.isLoading"
-    :is-error="deleteAsset.isDeleteError"
+    :is-error="deleteAsset.isError"
     :cancel-route="{
       name: 'assets',
       params: {production_id: currentProduction.id}
@@ -101,7 +101,7 @@
   <delete-modal
     :active="modals.isRestoreDisplayed"
     :is-loading="restoreAsset.isLoading"
-    :is-error="restoreAsset.isRestoreError"
+    :is-error="restoreAsset.isDeleteError"
     :cancel-route="{
       name: 'assets',
       params: {production_id: currentProduction.id}
@@ -325,7 +325,9 @@ export default {
       this.$store.dispatch('deleteAsset', {
         asset: this.assetToDelete,
         callback: (err) => {
-          if (!err) this.modals.isDeleteDisplayed = false
+          if (!err) {
+            this.modals.isDeleteDisplayed = false
+          }
         }
       })
     },

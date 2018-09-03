@@ -292,7 +292,7 @@ const mutations = {
   },
 
   [EDIT_PEOPLE_END] (state, form) {
-    if (state.user.id === form.id) {
+    if (state.user && form && state.user.id === form.id) {
       Object.assign(state.user, form)
       Object.assign(
         state.user,

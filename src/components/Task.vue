@@ -1049,6 +1049,7 @@ export default {
             this.errors.deleteComment = true
           } else {
             this.currentTaskComments = this.getCurrentTaskComments()
+            this.currentTaskPreviews = this.getCurrentTaskPreviews()
             this.$router.push(this.taskPath)
           }
         }
