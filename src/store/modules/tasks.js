@@ -549,9 +549,7 @@ const mutations = {
     })
     state.taskComments[taskId] = comments
     state.taskPreviews[taskId] = comments.reduce((previews, comment) => {
-      if (comment.preview) {
-        previews.push(comment.preview)
-      }
+      if (comment.preview) previews.push(comment.preview)
       return previews
     }, [])
   },
@@ -611,6 +609,7 @@ const mutations = {
     const task = state.taskMap[taskId]
     let newStatus = todoStatus
     state.taskComments[taskId] = [...state.taskComments[taskId]].splice(1)
+    state.taskPreviews[taskId] = [...state.taskPreviews[taskId]].splice(1)
 
     if (state.taskComments[taskId].length > 0) {
       const newStatusId = state.taskComments[taskId][0].task_status_id

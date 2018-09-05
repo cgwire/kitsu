@@ -37,8 +37,7 @@
           :task-type="currentTaskType"
           :production-id="currentProduction.id"
           v-if="currentTaskType"
-        >
-        </task-type-name>
+        />
         <div class="title flexrow-item">
           <router-link :to="taskEntityPath">
             {{ currentTask ? title : 'Loading...'}}
@@ -163,7 +162,7 @@
             <a
               class="button"
               ref="preview-file"
-              :href="getOriginalPath()"
+              :href="currentPreviewPath"
               v-else-if="isDlPreviewFile"
             >
               <download-icon class="icon"></download-icon>
@@ -173,12 +172,12 @@
             </a>
 
             <model-viewer
-              :preview-url="getOriginalPath()"
+              :preview-url="currentPreviewPath"
               v-else-if="currentTaskPreviews.length > 0 && extension === 'obj'"
             />
 
             <a
-              :href="getOriginalPath()"
+              :href="currentPreviewPath"
               target="_blank"
               v-else-if="currentTaskPreviews.length > 0 && extension === 'png'"
             >
@@ -229,8 +228,7 @@
       :form-data="addPreviewFormData"
       @fileselected="selectFile"
       @confirm="createPreview"
-    >
-    </add-preview-modal>
+    />
 
     <add-preview-modal
       ref="change-preview-modal"
@@ -242,8 +240,7 @@
       :is-editing="true"
       @fileselected="selectFile"
       @confirm="changePreview"
-    >
-    </add-preview-modal>
+    />
 
     <edit-comment-modal
       :active="modals.editComment"
@@ -252,8 +249,7 @@
       :cancel-route="taskPath"
       :comment-to-edit="commentToEdit"
       @confirm="confirmEditTaskComment"
-    >
-    </edit-comment-modal>
+    />
 
     <delete-modal
       :active="modals.deleteTask"
@@ -263,8 +259,7 @@
       :text="deleteText"
       :error-text="$t('tasks.delete_error')"
       @confirm="confirmDeleteTask"
-    >
-    </delete-modal>
+    />
 
     <delete-modal
       :active="modals.deleteComment"
@@ -274,8 +269,7 @@
       :text="$t('tasks.delete_comment')"
       :error-text="$t('tasks.delete_comment_error')"
       @confirm="confirmDeleteTaskComment"
-    >
-    </delete-modal>
+    />
 
   </div>
 </template>
@@ -364,7 +358,8 @@ export default {
       currentTaskPreviews: [],
       addPreviewFormData: null,
       changePreviewFormData: null,
-      isSubscribed: false
+      isSubscribed: false,
+      currentPreviewPath: ''
     }
   },
 
@@ -788,6 +783,7 @@ export default {
                   } else {
                     this.currentTaskComments = this.getCurrentTaskComments()
                     this.currentTaskPreviews = this.getCurrentTaskPreviews()
+                    this.currentPreviewPath = this.getOriginalPath()
                     this.taskLoading = {
                       isLoading: false,
                       isError: false
@@ -814,6 +810,7 @@ export default {
             } else {
               this.currentTaskComments = this.getCurrentTaskComments()
               this.currentTaskPreviews = this.getCurrentTaskPreviews()
+              this.currentPreviewPath = this.getOriginalPath()
               this.loadTaskSubscribed({
                 taskId: this.route.params.task_id,
                 callback: (err, subscribed) => {
@@ -898,8 +895,9 @@ export default {
               isLoading: false,
               isError: false
             }
-            this.currentTaskPreviews = this.getCurrentTaskPreviews()
             this.currentTaskComments = this.getCurrentTaskComments()
+            this.currentTaskPreviews = this.getCurrentTaskPreviews()
+            this.currentPreviewPath = this.getOriginalPath()
             this.currentTask = this.getCurrentTask()
           }
         }
@@ -979,8 +977,9 @@ export default {
     },
 
     resetPreview (preview) {
-      this.currentTaskPreviews = this.getCurrentTaskPreviews()
       this.currentTaskComments = this.getCurrentTaskComments()
+      this.currentTaskPreviews = this.getCurrentTaskPreviews()
+      this.currentPreviewPath = this.getOriginalPath()
       this.$router.push(`/tasks/${this.route.params.task_id}` +
                         `/previews/${preview.id}`)
     },
@@ -1050,6 +1049,7 @@ export default {
           } else {
             this.currentTaskComments = this.getCurrentTaskComments()
             this.currentTaskPreviews = this.getCurrentTaskPreviews()
+            this.currentPreviewPath = this.getOriginalPath()
             this.$router.push(this.taskPath)
           }
         }
