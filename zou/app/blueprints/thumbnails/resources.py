@@ -342,7 +342,7 @@ class PreviewFileThumbnailSquareResource(BasePreviewPictureResource):
 class PreviewFileOriginalResource(BasePreviewPictureResource):
 
     def __init__(self):
-        BasePreviewPictureResource.__init__(self, "originals")
+        BasePreviewPictureResource.__init__(self, "original")
 
 
 class BaseCreatePictureResource(Resource):

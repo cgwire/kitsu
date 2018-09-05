@@ -61,9 +61,13 @@ PREVIEW_FOLDER = os.getenv(
 
 MAIL_SERVER = os.getenv("MAIL_SERVER", "localhost")
 MAIL_PORT = os.getenv("MAIL_PORT", 25)
-MAIL_USERNAME = os.getenv("MAIL_USERNAME", "user")
-MAIL_PASSWORD = os.getenv("MAIL_PASSWORD", "pwd")
+MAIL_USERNAME = os.getenv("MAIL_USERNAME", "")
+MAIL_PASSWORD = os.getenv("MAIL_PASSWORD", "")
 MAIL_DEBUG = os.getenv("MAIL_DEBUG", 0)
+MAIL_USE_TLS = os.getenv("MAIL_USE_TLS", False)
+MAIL_USE_SSL = os.getenv("MAIL_USE_SSL", False)
+MAIL_DEFAULT_SENDER = os.getenv("MAIL_DEFAULT_SENDER", "no-reply@cg-wire.com")
+DOMAIN_NAME = os.getenv("DOMAIN_NAME", "localhost:8080")
 
 PLUGIN_FOLDER = os.getenv(
     "PLUGIN_FOLDER",

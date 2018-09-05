@@ -3,6 +3,7 @@ import json
 from tests.base import ApiDBTestCase
 
 from zou.app.utils import auth, fields
+from zou.app.stores import auth_tokens_store
 
 
 class AuthTestCase(ApiDBTestCase):
@@ -222,3 +223,26 @@ class AuthTestCase(ApiDBTestCase):
         response = self.app.get("data/persons")
         self.assertEquals(response.status_code, 200)
         response = self.app.get("auth/logout", headers=headers)
+
+    def test_reset_password(self):
+        self.assertIsNotAuthenticated({}, code=422)
+        data = {"email": "fake_email@test.com"}
+        self.post("auth/reset-password", data, 400)
+        data = {"email": self.user.email}
+        response = self.post("auth/reset-password", data, 200)
+        self.assertTrue(response["success"])
+
+        token = "token-test"
+        new_password = "newpassword"
+        auth_tokens_store.add("reset-%s" % token, self.user.email)
+        data = {
+            "token": token,
+            "password": new_password,
+            "password2": new_password
+        }
+        response = self.put("auth/reset-password", data, 200)
+        self.assertTrue(response["success"])
+        self.post("auth/login", {
+            "email": self.user.email,
+            "password": new_password
+        }, 200)

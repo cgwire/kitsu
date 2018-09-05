@@ -16,4 +16,6 @@ install:
   - "pip install -r requirements.txt"
 before_script:
   - psql -c 'create database zoudb;' -U postgres
+env:
+  - MAIL_DEBUG=1
 script: py.test
