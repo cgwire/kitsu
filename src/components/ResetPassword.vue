@@ -111,22 +111,4 @@ export default {
 </script>
 
 <style scoped>
-.box h1.title {
-  color: #6a6a6a;
-  font-weight: 500;
-  font-size: 1.4em;
-  line-height: 1.6em;
-}
-
-.field {
-  margin-bottom: 1em;
-}
-
-.input {
-  height: 2.4em;
-}
-
-.input:focus {
-  border: 1px solid #00B242;
-}
 </style>

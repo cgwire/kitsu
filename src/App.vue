@@ -248,6 +248,25 @@ input.input:focus {
   box-shadow: rgba(0,0,0,0.14902) 0px 1px 1px 0px,rgba(0,0,0,0.09804) 0px 1px 2px 0px;
 }
 
+.box h1.title {
+  color: #6a6a6a;
+  font-weight: 500;
+  font-size: 1.4em;
+  line-height: 1.6em;
+}
+
+.box .field {
+  margin-bottom: 1em;
+}
+
+.box .input {
+  height: 2.4em;
+}
+
+.box .input:focus {
+  border: 1px solid #00B242;
+}
+
 .button .icon.is-small:first-child:last-child {
   margin-right: 0em;
 }
