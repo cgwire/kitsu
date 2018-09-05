@@ -400,11 +400,13 @@ export default {
     no_preview: 'There is currently no preview for this task.',
     preview: 'Previews',
     previous: 'previous task',
+    unsubscribe_notifications: 'Unsubscribe from notifications',
     set_preview: 'Set this preview as thumbnail',
     set_preview_error: 'An error occured while setting preview as thumbnail',
     set_preview_done: 'This preview is used as thumbnail for the current entity.',
     select_preview_file: 'Please select a picture from your hard drive to be used as a preview for the current task:',
     show_assignations: 'Show assignations',
+    subscribe_notifications: 'Subscribe to notifications',
     validation: 'Validation',
     tasks: 'Tasks',
     fields: {
