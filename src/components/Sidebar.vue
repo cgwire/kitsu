@@ -70,6 +70,12 @@
                {{ $t("playlists.title") }}
              </router-link>
            </p>
+
+           <p @click="toggleSidebar()">
+             <router-link :to="teamPath">
+               {{ $t("people.team") }}
+             </router-link>
+           </p>
          </div>
 
          <div v-if="isCurrentUserManager">
@@ -149,6 +155,7 @@ export default {
       'sequencesPath',
       'episodesPath',
       'playlistsPath',
+      'teamPath',
       'isCurrentUserClient',
       'isCurrentUserCGArtist',
       'isCurrentUserManager',

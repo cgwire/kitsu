@@ -30,6 +30,7 @@ import ServerDown from '../components/ServerDown'
 import Sequences from '../components/Sequences'
 import Shot from '../components/Shot'
 import Shots from '../components/Shots'
+import Team from '../components/Team'
 import TaskType from '../components/TaskType'
 import Task from '../components/Task'
 import TaskTypes from '../components/TaskTypes'
@@ -210,6 +211,12 @@ export const routes = [
         path: '/productions/:production_id/breakdown/shots/:shot_id',
         component: Breakdown,
         name: 'breakdown-shot'
+      },
+
+      {
+        path: '/productions/:production_id/team',
+        component: Team,
+        name: 'team'
       },
 
       {

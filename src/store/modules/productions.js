@@ -56,7 +56,8 @@ const initialState = {
   sequencesPath: {name: 'open-productions'},
   episodesPath: {name: 'open-productions'},
   breakdownPath: {name: 'open-productions'},
-  playlistsPath: {name: 'open-productions'}
+  playlistsPath: {name: 'open-productions'},
+  teamPath: {name: 'open-productions'}
 }
 
 let state = {...initialState}
@@ -94,6 +95,8 @@ const getters = {
   episodesPath: state => state.episodesPath,
   breakdownPath: state => state.breakdownPath,
   playlistsPath: state => state.playlistsPath,
+  teamPath: state => state.teamPath,
+
   currentProduction: (state) => {
     if (state.currentProduction) {
       return state.currentProduction
@@ -365,6 +368,8 @@ const mutations = {
       'breakdown', currentProductionId)
     state.playlistsPath = helpers.getProductionComponentPath(
       'playlists', currentProductionId)
+    state.teamPath = helpers.getProductionComponentPath(
+      'team', currentProductionId)
   },
 
   [RESET_ALL] (state) {
