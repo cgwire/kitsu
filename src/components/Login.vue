@@ -8,7 +8,7 @@
             {{ $t("login.title") }}
           </h1>
         </div>
-        <div class="field">
+        <div class="field mt2">
           <p class="control has-icon">
             <input
               class="input is-medium email"
@@ -18,7 +18,7 @@
               @keyup.enter="logIn"
               v-focus >
             <span class="icon">
-              <i class="fa fa-envelope"></i>
+              <mail-icon width=20 height=20 />
             </span>
           </p>
         </div>
@@ -31,13 +31,12 @@
               @input="updatePassword"
               @keyup.enter="logIn">
             <span class="icon">
-              <i class="fa fa-lock"></i>
+              <lock-icon width=20 height=20 />
             </span>
           </p>
         </div>
         <p class="control">
           <a v-bind:class="{
-            button: true,
             'main-button': true,
             'is-fullwidth': true,
             'is-loading': isLoginLoading
@@ -49,6 +48,15 @@
         <p class="control error" v-show="isLoginError">
           {{ $t("login.login_failed") }}
         </p>
+        <p
+          class="has-text-centered"
+        >
+          <router-link
+            :to="{name: 'reset-password'}"
+          >
+            {{ $t("login.forgot_password")}}
+          </router-link>
+        </p>
       </div>
     </div>
   </div>
@@ -56,15 +64,23 @@
 
 <script>
 import { mapGetters, mapActions } from 'vuex'
+import { MailIcon, LockIcon } from 'vue-feather-icons'
 
 export default {
   name: 'login',
+
+  components: {
+    MailIcon,
+    LockIcon
+  },
+
   computed: {
     ...mapGetters([
       'isLoginLoading',
       'isLoginError'
     ])
   },
+
   methods: {
     ...mapActions([
     ]),
@@ -91,26 +107,6 @@ export default {
 </script>
 
 <style scoped>
-.login {
-  background-color: #CFCFCF;
-}
-
-.login-header {
-  margin-bottom: 2em;
-}
-
-.container {
-  max-width: 400px;
-  color: #4a4a4a;
-}
-
-.box {
-  margin-top: 30%;
-  padding: 3em 2em 2em 2em;
-  border-radius: 2px;
-  box-shadow: rgba(0,0,0,0.14902) 0px 1px 1px 0px,rgba(0,0,0,0.09804) 0px 1px 2px 0px;
-}
-
 .box h1.title {
   color: #6a6a6a;
   font-weight: 500;
@@ -120,18 +116,6 @@ export default {
 .box h2.subtitle {
   color: #4a4a4a;
   margin-bottom: 1em;
-}
-
-.main-button {
-  background: #5e60ba;
-  border-radius: 2px;
-  min-height: 2.8em;
-  color: white;
-  border-color: #5e60ba;
-}
-
-.main-button:hover {
-  background: #67BE4B;
 }
 
 .field {
@@ -145,20 +129,6 @@ export default {
 .input:focus {
   border: 1px solid #00B242;
 }
-
-.button {
-  padding: 24px 24px 24px 12px;
-  margin: .3em 0 0em 0;
-  font-size: 16px;
-  font-weight: 500;
-  letter-spacing: 1px;
-  background: #00B242;
-  color: #fff;
-  border: 0;
-  border-bottom: 3px solid #008732;
-  transition: all 0.15s ease;
-}
-.button:focus { outline: 0; }
 
 img {
   margin-bottom: 2em;

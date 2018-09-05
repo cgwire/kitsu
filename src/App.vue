@@ -1,5 +1,5 @@
 <template>
-  <router-view></router-view>
+  <router-view />
 </template>
 
 <script>
@@ -86,7 +86,11 @@ th.actions {
 }
 
 td.actions {
-    min-width: 100px;
+  min-width: 100px;
+}
+
+.hero {
+  background-color: #CFCFCF;
 }
 
 .avatar {
@@ -104,6 +108,10 @@ td.actions {
 .th-project {
   width: 30px;
   border-radius: 50%;
+}
+
+.grey-background {
+  background-color: #CFCFCF;
 }
 
 td strong {
@@ -146,6 +154,10 @@ a:hover {
 
 .field {
   margin-bottom: 2em;
+}
+
+.mt2 {
+  margin-top: 2em;
 }
 
 input.input:focus {
@@ -195,6 +207,45 @@ input.input:focus {
 
 .footer-info {
   font-style: italic;
+}
+
+.container {
+  max-width: 400px;
+  color: #4a4a4a;
+}
+
+.main-button {
+  border-radius: 2px;
+  min-height: 2.8em;
+  color: white;
+  border-color: #5e60ba;
+  padding: 12px 12px 12px 12px;
+  margin: .3em 0 0em 0;
+  font-size: 16px;
+  font-weight: 500;
+  letter-spacing: 1px;
+  background: #00B242;
+  color: #fff;
+  border: 0;
+  border-bottom: 3px solid #008732;
+  transition: all 0.15s ease;
+  width: 100%;
+  display: block;
+  text-align: center;
+}
+
+.main-button:hover {
+  background: #67BE4B;
+  color: #fff;
+}
+
+.main-button:focus { outline: 0; }
+
+.box {
+  margin-top: 30%;
+  padding: 3em 2em 2em 2em;
+  border-radius: 2px;
+  box-shadow: rgba(0,0,0,0.14902) 0px 1px 1px 0px,rgba(0,0,0,0.09804) 0px 1px 2px 0px;
 }
 
 .button .icon.is-small:first-child:last-child {
@@ -491,6 +542,33 @@ input.search-input:focus {
 
   .level-item:not(:last-child) {
      margin-bottom: 0;
+  }
+}
+
+@media (min-width: 500px) {
+  .container {
+    margin: 0 auto;
+  }
+}
+
+@media (max-width: 500px) {
+  .container {
+    flex: 1;
+    width: 100%;
+    max-width: 100%;
+    display: flex;
+  }
+
+  .box {
+    margin: 0;
+    width: 100%;
+    min-width: 100%;
+    flex: 1;
+  }
+
+  .hero {
+    display: flex;
+    flex-direction: column;
   }
 }
 </style>
