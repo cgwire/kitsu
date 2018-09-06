@@ -1,10 +1,31 @@
 <template>
-  <router-view />
+  <div
+    class="has-text-centered mt2 loading-info"
+    v-if="isLoginLoading"
+  >
+    <span>Loading data...</span>
+    <spinner class="mt2" />
+  </div>
+  <router-view v-else />
 </template>
 
 <script>
+import { mapGetters } from 'vuex'
+import Spinner from './components/widgets/Spinner.vue'
+
 export default {
   name: 'app',
+
+  components: {
+    Spinner
+  },
+
+  computed: {
+    ...mapGetters([
+      'isLoginLoading'
+    ])
+  },
+
   metaInfo: {
     link: [
       {
@@ -72,6 +93,10 @@ body {
 
 #app .router-link-active {
   color: #00d1b2;
+}
+
+.loading-info {
+  background: white;
 }
 
 .page {

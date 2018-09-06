@@ -3,7 +3,8 @@ import store from '../store'
 import {
   USER_LOGIN,
   USER_LOGOUT,
-  USER_LOGIN_FAIL
+  USER_LOGIN_FAIL,
+  LOGIN_RUN
 } from '../store/mutation-types.js'
 
 const auth = {
@@ -93,6 +94,7 @@ const auth = {
           query: { redirect: to.fullPath }
         })
       } else {
+        store.commit(LOGIN_RUN)
         next()
       }
     }
