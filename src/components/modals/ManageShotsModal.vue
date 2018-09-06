@@ -353,6 +353,10 @@ export default {
   flex-direction: column;
 }
 
+.shot-column .button {
+  margin-left: 0;
+}
+
 .shot-column .button,
 .shot-column .input {
   border-radius: 0;

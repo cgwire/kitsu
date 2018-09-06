@@ -266,7 +266,7 @@ input.input:focus {
 
 .main-button:focus { outline: 0; }
 
-.box {
+.hero .box {
   margin-top: 30%;
   padding: 3em 2em 2em 2em;
   border-radius: 2px;
@@ -280,15 +280,15 @@ input.input:focus {
   line-height: 1.6em;
 }
 
-.box .field {
+.hero .box .field {
   margin-bottom: 1em;
 }
 
-.box .input {
+.hero .box .input {
   height: 2.4em;
 }
 
-.box .input:focus {
+.hero .box .input:focus {
   border: 1px solid #00B242;
 }
 
