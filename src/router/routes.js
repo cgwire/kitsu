@@ -64,6 +64,7 @@ export const routes = [
             })
           } else {
             if (!userStore.getters.isCurrentUserCGArtist(userStore.state)) {
+              store.commit('LOGIN_SUCCESS')
               next({name: 'open-productions'})
             } else {
               next({name: 'todos'})
