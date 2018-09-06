@@ -3,7 +3,7 @@
     class="has-text-centered mt2 loading-info"
     v-if="isLoginLoading"
   >
-    <span>Loading data...</span>
+      <span>{{ $t('main.loading_data') }}...</span>
     <spinner class="mt2" />
   </div>
   <router-view v-else />

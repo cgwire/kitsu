@@ -5,7 +5,7 @@
     :component-item="assignationItem"
     :min-len="1"
     :input-attrs="{
-      placeholder: this.$t('Select a person...')
+      placeholder: this.$t('people.select_person')
     }"
     @update-items="update"
     @input="onChange"

@@ -130,6 +130,7 @@ export default {
     info: 'Information',
     or: 'or',
     no: 'no',
+    loading_data: 'Loading data',
     loading_error: 'An error occured while loading data.',
     logout: 'Logout',
     profile: 'Profile',
@@ -175,6 +176,7 @@ export default {
     new_person: 'Add a new employee',
     persons: 'person | persons',
     running_tasks: 'Running tasks',
+    select_person: 'Select a person...',
     title: 'People',
     csv: {
       import_file: 'Import a .csv file',
