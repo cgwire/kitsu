@@ -1,7 +1,7 @@
 <template>
 <div class="flexrow">
   <div class="flexrow-item">
-    <search-icon></search-icon>
+    <search-icon />
   </div>
 
   <div class="flexrow-item search-field">
@@ -27,7 +27,7 @@
 
   <div class="flexrow-item save-search" v-if="canSave">
     <button class="button" @click="onSaveClicked">
-      <save-icon class="icon is-small only-icon"></save-icon>
+      <save-icon class="icon is-small only-icon" />
     </button>
   </div>
 </div>

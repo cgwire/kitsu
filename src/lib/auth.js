@@ -3,7 +3,8 @@ import store from '../store'
 import {
   USER_LOGIN,
   USER_LOGOUT,
-  USER_LOGIN_FAIL
+  USER_LOGIN_FAIL,
+  LOGIN_RUN
 } from '../store/mutation-types.js'
 
 const auth = {
@@ -37,6 +38,31 @@ const auth = {
       })
   },
 
+  resetPassword (email) {
+    return new Promise((resolve, reject) => {
+      superagent
+        .post('/api/auth/reset-password')
+        .send({ email })
+        .end((err, res) => {
+          if (err) reject(err)
+          else resolve()
+        })
+    })
+  },
+
+  resetChangePassword (token, password, password2) {
+    return new Promise((resolve, reject) => {
+      console.log({ token, password, password2 })
+      superagent
+        .put('/api/auth/reset-password')
+        .send({ token, password, password2 })
+        .end((err, res) => {
+          if (err) reject(err)
+          else resolve()
+        })
+    })
+  },
+
   isServerLoggedIn (callback) {
     superagent
       .get('/api/auth/authenticated')
@@ -68,6 +94,7 @@ const auth = {
           query: { redirect: to.fullPath }
         })
       } else {
+        store.commit(LOGIN_RUN)
         next()
       }
     }
@@ -91,6 +118,5 @@ const auth = {
   isPasswordValid (password, password2) {
     return password.length > 6 && password === password2
   }
-
 }
 export default auth

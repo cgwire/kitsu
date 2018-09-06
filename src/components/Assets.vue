@@ -145,7 +145,7 @@
 <script>
 import { mapGetters, mapActions } from 'vuex'
 
-import AssetList from './lists/AssetList.vue'
+import AssetList from './lists/AssetList'
 import ButtonHrefLink from './widgets/ButtonHrefLink'
 import ButtonLink from './widgets/ButtonLink'
 import CreateTasksModal from './modals/CreateTasksModal'

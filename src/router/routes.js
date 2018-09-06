@@ -24,6 +24,8 @@ import Productions from '../components/Productions'
 import ProductionAssetTypes from '../components/ProductionAssetTypes'
 import Playlist from '../components/Playlist'
 import Profile from '../components/Profile'
+import ResetPassword from '../components/ResetPassword'
+import ResetChangePassword from '../components/ResetChangePassword'
 import ServerDown from '../components/ServerDown'
 import Sequences from '../components/Sequences'
 import Shot from '../components/Shot'
@@ -483,6 +485,16 @@ export const routes = [
     path: '/login',
     component: Login,
     name: 'login'
+  },
+  {
+    path: '/reset-password',
+    component: ResetPassword,
+    name: 'reset-password'
+  },
+  {
+    path: '/reset-change-password/:token',
+    component: ResetChangePassword,
+    name: 'reset-change-password'
   },
   {
     path: '/server-down',

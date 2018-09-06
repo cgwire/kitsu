@@ -27,6 +27,7 @@
             {{ formatDate(notification.created_at) }}
           </span>
           <router-link
+            class="person-name"
             :to="{
               name: 'person',
               params: {person_id: notification.author_id}
@@ -34,7 +35,7 @@
           >
             {{ personName(notification) }}
           </router-link>
-          <span>
+          <span class="comment-explaination">
             {{ $t('notifications.commented_on') }}
           </span>
           <router-link
@@ -62,8 +63,7 @@
             class="validation-tag"
             :task="{
               id: notification.task_id,
-              task_status_short_name: taskStatusMap[notification.task_status_id].short_name,
-              task_status_color: taskStatusMap[notification.task_status_id].color
+              task_status_id: notification.task_status_id
 
             }"
             v-if="notification.change"
@@ -221,6 +221,15 @@ a {
 }
 
 img.thumbnail-picture {
+}
+
+.person-name {
+  margin-left: 0.5em;
+}
+
+.comment-explaination {
+  margin-left: 0.5em;
+  margin-right: 0.5em;
 }
 
 .comment-text {

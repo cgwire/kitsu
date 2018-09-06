@@ -65,6 +65,22 @@ const actions = {
         callback(null, true)
       }
     })
+  },
+
+  resetPassword ({ commit }, email) {
+    return new Promise((resolve, reject) => {
+      auth.resetPassword(email)
+        .then(resolve)
+        .catch(reject)
+    })
+  },
+
+  resetChangePassword ({ commit }, { token, password, password2 }) {
+    return new Promise((resolve, reject) => {
+      auth.resetChangePassword(token, password, password2)
+        .then(resolve)
+        .catch(reject)
+    })
   }
 }
 

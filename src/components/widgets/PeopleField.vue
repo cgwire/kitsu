@@ -4,6 +4,9 @@
     :get-label="getAssignationLabel"
     :component-item="assignationItem"
     :min-len="1"
+    :input-attrs="{
+      placeholder: this.$t('Select a person...')
+    }"
     @update-items="update"
     @input="onChange"
     v-model="item"

@@ -96,12 +96,24 @@ export default {
   },
 
   login: {
+    forgot_password: 'Forgot password?',
     login: 'Log in',
     login_failed: 'Log in failed, please verify your credentials',
+    login_page: 'Cancel',
+    reset_change_password: 'Change password',
+    reset_change_password_form_failed: 'There is a problem with the password you gave. Please, verify that it is more than 6 chars long and that both passwords match.',
+    reset_change_password_failed: 'Changing password failed. Please, restart the whole procedure again.',
+    reset_change_password_succeed: 'Your password was changed successfully. Please, go back to the login page to use it.',
+    reset_change_password_title: 'Enter a new password',
+    reset_password: 'Reset Password',
+    reset_password_failed: 'Reset Password failed. Please verify your email.',
+    reset_password_succeed: 'Reset Password succeeded. Please check your inbox.',
+    reset_password_title: 'Enter your email to reset your password',
     title: 'Log in to Kitsu',
     fields: {
       email: 'Email',
-      password: 'Password'
+      password: 'Password',
+      password2: 'Password again'
     }
   },
 
@@ -388,11 +400,13 @@ export default {
     no_preview: 'There is currently no preview for this task.',
     preview: 'Previews',
     previous: 'previous task',
+    unsubscribe_notifications: 'Unsubscribe from notifications',
     set_preview: 'Set this preview as thumbnail',
     set_preview_error: 'An error occured while setting preview as thumbnail',
     set_preview_done: 'This preview is used as thumbnail for the current entity.',
     select_preview_file: 'Please select a picture from your hard drive to be used as a preview for the current task:',
     show_assignations: 'Show assignations',
+    subscribe_notifications: 'Subscribe to notifications',
     validation: 'Validation',
     tasks: 'Tasks',
     fields: {

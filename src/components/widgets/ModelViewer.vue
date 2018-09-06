@@ -24,7 +24,7 @@ import {
   goFullScreen,
   loadObject,
   prepareScene
-} from 'js-3d-model-viewer'
+} from '../../../node_modules/js-3d-model-viewer/src/index'
 
 export default {
   name: 'model-viewer',

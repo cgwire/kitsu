@@ -1,6 +1,7 @@
 <template>
 <button
   class="button"
+  :title="buttonTitle"
   @click="$emit('click')"
 >
   <eye-icon
@@ -32,7 +33,16 @@ export default {
       type: Boolean
     }
   },
-  computed: {}
+
+  computed: {
+    buttonTitle () {
+      if (!this.subscribed) {
+        return this.$t('tasks.subscribe_notifications')
+      } else {
+        return this.$t('tasks.unsubscribe_notifications')
+      }
+    }
+  }
 }
 </script>
 
