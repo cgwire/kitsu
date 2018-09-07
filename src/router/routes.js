@@ -67,6 +67,7 @@ export const routes = [
               store.commit('LOGIN_SUCCESS')
               next({name: 'open-productions'})
             } else {
+              store.commit('LOGIN_SUCCESS')
               next({name: 'todos'})
             }
           }
