@@ -87,8 +87,12 @@ export const routes = [
           timezone.setTimezone()
           lang.setLocale()
           if (taskTypeStore.state.taskTypes.length === 0) {
-            init(next)
+            init(() => {
+              store.commit('LOGIN_SUCCESS')
+              next()
+            })
           } else {
+            store.commit('LOGIN_SUCCESS')
             next()
           }
         }
