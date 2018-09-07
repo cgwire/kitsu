@@ -4,6 +4,8 @@
 
 * [Installation](installation/README.md)
 
+* [Getting started](getting-started/README.md)
+
 * [Production Modules](production-modules/README.md)
 
 * [Studio Modules](studio-modules/README.md)
