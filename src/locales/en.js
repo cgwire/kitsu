@@ -170,6 +170,7 @@ export default {
   },
 
   people: {
+    add_member_to_team: 'Add a member to the team: ',
     delete_error: 'An error occured while deleting this person. There are probably data linked to it. Are you sure this person has no assignation or wrote no comment?',
     delete_text: 'Are you sure you want to remove {personName} from your database?',
     edit_title: 'Edit person',
@@ -177,6 +178,7 @@ export default {
     persons: 'person | persons',
     running_tasks: 'Running tasks',
     select_person: 'Select a person...',
+    team: 'Production Team',
     title: 'People',
     csv: {
       import_file: 'Import a .csv file',

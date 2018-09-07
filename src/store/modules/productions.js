@@ -25,6 +25,8 @@ import {
   PRODUCTION_PICTURE_FILE_SELECTED,
   PRODUCTION_AVATAR_UPLOADED,
 
+  TEAM_ADD_PERSON,
+
   RESET_ALL
 } from '../mutation-types'
 
@@ -215,6 +217,16 @@ const actions = {
         }
       )
     })
+  },
+
+  addPersonToTeam ({ commit, state }, person) {
+    return new Promise((resolve, reject) => {
+      commit(TEAM_ADD_PERSON, person.id)
+      return productionsApi.addPersonToTeam(
+        state.currentProduction.id,
+        person.id
+      )
+    })
   }
 }
 
@@ -370,6 +382,12 @@ const mutations = {
       'playlists', currentProductionId)
     state.teamPath = helpers.getProductionComponentPath(
       'team', currentProductionId)
+  },
+
+  [TEAM_ADD_PERSON] (state, personId) {
+    if (!state.currentProduction.team.find((p) => p.id === personId)) {
+      state.currentProduction.team.push(personId)
+    }
   },
 
   [RESET_ALL] (state) {

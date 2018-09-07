@@ -39,5 +39,21 @@ export default {
 
   deleteProduction (production, callback) {
     client.del(`/api/data/projects/${production.id}`, callback)
+  },
+
+  addPersonToTeam (productionId, personId) {
+    return new Promise((resolve, reject) => {
+      const data = {
+        person_id: personId
+      }
+      client.post(
+        `/api/data/projects/${productionId}/team`,
+        data,
+        (err, production) => {
+          if (err) reject(err)
+          else resolve(production)
+        }
+      )
+    })
   }
 }

@@ -24,7 +24,8 @@ export default {
   data () {
     return {
       assignationItem: AssignationItem,
-      items: []
+      items: [],
+      item: null
     }
   },
 
@@ -88,6 +89,7 @@ export default {
   max-height: 300px;
   overflow-y: auto;
   box-shadow: 2px 2px 2px 0px #DDD;
+  z-index: 100;
 }
 
 .v-autocomplete .v-autocomplete-list-item {
@@ -102,5 +104,6 @@ export default {
   width: 300px;
   padding: 0.5em;
   margin-bottom: 3px;
+  border: 1px solid #CCC;
 }
 </style>

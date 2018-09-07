@@ -9,18 +9,24 @@
       </div>
     </div>
 
-    <div class="flexrow">
-      <span class="flexrow-item">
-        $t('people.add_member_to_team')
+    <div class="flexrow mt2 add-people">
+      <span class="flexrow-item people-field-label">
+        {{ $t('people.add_member_to_team') }}
       </span>
       <people-field
         class="flexrow-item"
         v-model="person"
       />
+      <button
+        class="button flexrow-item"
+        @click="addPerson"
+      >
+        {{ $t('main.add') }}
+      </button>
     </div>
 
     <people-list
-      :entries="[]"
+      :entries="teamPersons"
       :is-loading="isTeamLoading"
       :is-error="isTeamLoadingError"
     />
@@ -29,6 +35,9 @@
 
 <script>
 import { mapGetters, mapActions } from 'vuex'
+
+import { sortPeople } from '../lib/sorting'
+
 import PeopleList from './lists/PeopleList'
 import PageTitle from './widgets/PageTitle'
 import PeopleField from './widgets/PeopleField'
@@ -49,34 +58,37 @@ export default {
     }
   },
 
-  created () {
-    /*
-    this.loadTeam(() => {
-    })
-    */
-  },
-
-  watch: {
-  },
-
   computed: {
     ...mapGetters([
+      'currentProduction',
+      'productionMap',
+      'openProductions',
+      'personMap'
     ]),
 
-    deleteText () {
-      const person = this.personToDelete
-      if (person !== undefined) {
-        const personName = `${person.first_name} ${person.last_name}`
-        return this.$t('people.delete_text', {personName: personName})
-      } else {
-        return ''
-      }
+    teamPersons () {
+      return sortPeople(this.currentProduction.team
+        .map((personId) => this.personMap[personId]))
     }
   },
 
   methods: {
     ...mapActions([
-    ])
+      'addPersonToTeam',
+      'setProduction'
+    ]),
+
+    addPerson () {
+      this.addPersonToTeam(this.person)
+    }
+  },
+
+  mounted () {
+    const currentProductionId = this.$route.params.production_id
+    this.setProduction(currentProductionId)
+  },
+
+  watch: {
   },
 
   metaInfo () {
@@ -88,7 +100,11 @@ export default {
 </script>
 
 <style scoped>
-.search {
-  margin-top: 2em;
+.add-people {
+  font-size: 1.3em;
+}
+
+.people-field-label {
+  padding-bottom: 7px;
 }
 </style>

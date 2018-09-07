@@ -1,39 +1,41 @@
 export default {
 
   people: {
-    title: 'Employés',
-    picture: 'Changer l\'image',
-    edit_title: 'Modifier les informations de',
-    new_person: 'Ajouter un employé',
+    add_member_to_team: 'Ajouter un membre à l\'équipe: ',
     delete_text: 'Êtes vous sûr de vouloir retirer {personName} de la base de données?',
     delete_error: 'Une erreur est survenue lors de la suppression. Il y a probablement des données liées à elle. Etes vous sur que cette personne n\'a aucune tâche assignée et n\'a fait aucun commentaire ?',
+    edit_title: 'Modifier les informations de',
+    new_person: 'Ajouter un employé',
     persons: 'Personnes',
-    select_person: 'Sélectionner une personne...',
+    picture: 'Changer l\'image',
     running_tasks: 'Tâches en cours',
+    select_person: 'Sélectionner une personne...',
+    team: 'Equipe de la production',
+    title: 'Employés',
     csv: {
-      import_file: 'Importer',
       export_file: 'Télécharger',
+      import_file: 'Importer',
       import_title: 'Import employees from a CSV file',
       required_fields: 'Le fichier CSV à importer doit comporter les colonnes suivantes :',
       select_file: 'Sélectionnez un fichier de votre disque dur :'
     },
     list: {
-      name: 'Nom',
+      active: 'Actif',
       email: 'Adresse Mail',
+      name: 'Nom',
       phone: 'Téléphone',
-      role: 'Rôle',
-      active: 'Actif'
+      role: 'Rôle'
     },
     fields: {
+      active: 'Actif',
+      email: 'Adresse email',
       first_name: 'Prénom',
       last_name: 'Nom',
-      email: 'Adresse email',
-      phone: 'Téléphone',
-      role: 'Rôle',
-      active: 'Actif',
       old_password: 'Mot de passe actuel',
       password: 'Nouveau mot de passe',
-      password_2: 'Répétez le nouveau mot de passe'
+      password_2: 'Répétez le nouveau mot de passe',
+      phone: 'Téléphone',
+      role: 'Rôle'
     },
     role: {
       admin: 'Administrateur',
