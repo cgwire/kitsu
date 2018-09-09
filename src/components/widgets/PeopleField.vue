@@ -4,9 +4,11 @@
     :get-label="getAssignationLabel"
     :component-item="assignationItem"
     :min-len="1"
+    :auto-select-one-item="false"
     :input-attrs="{
       placeholder: this.$t('people.select_person')
     }"
+    ref="autocomplete"
     @update-items="update"
     @input="onChange"
     v-model="item"
@@ -14,9 +16,9 @@
 </template>
 
 <script>
-import { mapGetters } from 'vuex'
-import { indexSearch } from '../../lib/indexing'
 import AssignationItem from './AssignationItem'
+import { mapGetters } from 'vuex'
+import { buildNameIndex, indexSearch } from '../../lib/indexing'
 
 export default {
   name: 'people-field',
@@ -25,25 +27,38 @@ export default {
     return {
       assignationItem: AssignationItem,
       items: [],
-      item: null
+      item: {}
     }
   },
 
   created () {
     this.items = this.people
     this.item = this.value
+    this.index = buildNameIndex(this.people)
+  },
+
+  mounted () {
+    this.$refs.autocomplete.$el.children[0].children[0].addEventListener(
+      'keyup', (event) => {
+        if (event.keyCode === 13 && this.item) {
+          this.$emit('enter')
+        }
+      })
   },
 
   props: {
     value: {
       type: Object,
-      default: null
+      default: () => {}
+    },
+    people: {
+      type: Array,
+      default: () => []
     }
   },
 
   computed: {
     ...mapGetters([
-      'people',
       'peopleIndex'
     ])
   },
@@ -53,13 +68,14 @@ export default {
       if (item) {
         return item.name
       } else {
-        return null
+        return ''
       }
     },
 
     update (searchText) {
       if (searchText) {
-        this.items = indexSearch(this.peopleIndex, searchText)
+        const result = indexSearch(this.index, searchText)
+        this.items = result
       } else {
         this.items = this.people
       }
@@ -70,6 +86,10 @@ export default {
       if (!this.item) {
         this.items = this.people
       }
+    },
+
+    clear () {
+      this.item = null
     }
   },
 
@@ -78,6 +98,10 @@ export default {
       if (!this.item) {
         this.items = this.people
       }
+    },
+
+    people () {
+      this.index = buildNameIndex(this.people)
     }
   }
 }

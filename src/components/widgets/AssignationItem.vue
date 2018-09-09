@@ -1,11 +1,13 @@
 <template>
   <div class="flexrow">
-    <people-avatar :person="item" class="flexrow-item" :size="30"/>
-    <strong>
-      {{ searchText }}
-    </strong>
+    <people-avatar
+      :no-cache="true"
+      :person="item"
+      :size="30"
+      class="flexrow-item"
+    />
     <span class="flexrow-item">
-      {{ item.name.substring(searchText.length) }}
+      {{ item.name }}
     </span>
   </div>
 </template>
@@ -23,6 +25,16 @@ export default {
   props: {
     item: { required: true },
     searchText: { required: true }
+  },
+
+  computed: {
+    nonHighilightedText () {
+      if (this.searchText === this.item.first_name) {
+        return '&nbsp;' + this.item.name.substring(this.searchText.length)
+      } else {
+        return this.item.name.substring(this.searchText.length)
+      }
+    }
   }
 }
 </script>

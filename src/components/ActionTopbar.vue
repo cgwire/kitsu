@@ -16,7 +16,7 @@
               {{ $tc('tasks.assign', nbSelectedTasks, {nbSelectedTasks}) }}
             </div>
             <div class="flexrow-item combobox-item">
-              <people-field v-model="person" />
+              <people-field :people="people" v-model="person" />
             </div>
             <div class="" v-if="isAssignationLoading">
               <spinner :is-white="true" :size="25" />
