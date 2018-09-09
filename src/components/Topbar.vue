@@ -194,14 +194,7 @@ export default {
 
     isProductionContext () {
       const path = this.$store.state.route.path
-      return path.indexOf('assets') > 0 ||
-        path.indexOf('shots') > 0 ||
-        path.indexOf('sequences') > 0 ||
-        path.indexOf('episodes') > 0 ||
-        path.indexOf('playlists') > 0 ||
-        (path.indexOf('task-types') > 0 && path.indexOf('productions') > 0) ||
-        (path.indexOf('asset-types') > 0 && path.indexOf('productions') > 0) ||
-        path.indexOf('breakdown') > 0
+      return this.$route.params.production_id !== undefined
     }
   },
 

@@ -25,7 +25,7 @@
       :validation-columns="shotValidationColumns"
       :sequence-stats="sequenceStats"
       @scroll="saveScrollPosition"
-    ></sequence-list>
+    />
 
     <edit-sequence-modal
       :active="modals.isNewDisplayed"
@@ -37,8 +37,7 @@
       }"
       :sequence-to-edit="sequenceToEdit"
       @confirm="confirmEditSequence"
-    >
-    </edit-sequence-modal>
+    />
 
     <delete-modal
       :active="modals.isDeleteDisplayed"
@@ -51,8 +50,7 @@
         params: {production_id: currentProduction.id}
       }"
       @confirm="confirmDeleteSequence"
-    >
-    </delete-modal>
+    />
 
   </div>
 </template>
@@ -147,9 +145,11 @@ export default {
     },
 
     setDefaultListScrollPosition () {
-      this.$refs['sequence-list'].setScrollPosition(
-        this.sequenceListScrollPosition
-      )
+      if (this.$refs['sequence-list']) {
+        this.$refs['sequence-list'].setScrollPosition(
+          this.sequenceListScrollPosition
+        )
+      }
     },
 
     navigateToList () {
@@ -240,7 +240,9 @@ export default {
 
     resizeHeaders () {
       setTimeout(() => {
-        this.$refs['sequence-list'].resizeHeaders()
+        if (this.$refs['sequence-list']) {
+          this.$refs['sequence-list'].resizeHeaders()
+        }
       }, 0)
     }
   },

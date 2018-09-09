@@ -55,5 +55,17 @@ export default {
         }
       )
     })
+  },
+
+  removePersonFromTeam (productionId, personId) {
+    return new Promise((resolve, reject) => {
+      client.del(
+        `/api/data/projects/${productionId}/team/${personId}`,
+        (err, production) => {
+          if (err) reject(err)
+          else resolve(production)
+        }
+      )
+    })
   }
 }

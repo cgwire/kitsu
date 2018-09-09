@@ -135,6 +135,7 @@ export default {
     logout: 'Logout',
     profile: 'Profile',
     production: 'Production',
+    remove: 'Remove',
     save: 'Save',
     studio: 'Studio',
     user: 'User',

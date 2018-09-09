@@ -14,7 +14,10 @@
         {{ $t('people.add_member_to_team') }}
       </span>
       <people-field
+        ref="people-field"
         class="flexrow-item"
+        :people="unlistedPeople"
+        @enter="addPerson"
         v-model="person"
       />
       <button
@@ -25,10 +28,11 @@
       </button>
     </div>
 
-    <people-list
+    <production-team-list
       :entries="teamPersons"
       :is-loading="isTeamLoading"
       :is-error="isTeamLoadingError"
+      @remove="removePerson"
     />
   </div>
 </template>
@@ -38,16 +42,16 @@ import { mapGetters, mapActions } from 'vuex'
 
 import { sortPeople } from '../lib/sorting'
 
-import PeopleList from './lists/PeopleList'
+import ProductionTeamList from './lists/ProductionTeamList'
 import PageTitle from './widgets/PageTitle'
 import PeopleField from './widgets/PeopleField'
 
 export default {
   name: 'people',
   components: {
-    PeopleList,
+    PageTitle,
     PeopleField,
-    PageTitle
+    ProductionTeamList
   },
 
   data () {
@@ -63,12 +67,19 @@ export default {
       'currentProduction',
       'productionMap',
       'openProductions',
-      'personMap'
+      'personMap',
+      'people'
     ]),
 
     teamPersons () {
       return sortPeople(this.currentProduction.team
         .map((personId) => this.personMap[personId]))
+    },
+
+    unlistedPeople () {
+      return this.people.filter((person) => {
+        return !this.currentProduction.team.includes(person.id)
+      })
     }
   },
 
@@ -80,7 +91,15 @@ export default {
 
     addPerson () {
       this.addPersonToTeam(this.person)
+      setTimeout(() => {
+        this.$refs['people-field'].clear()
+      }, 1)
+    },
+
+    removePerson (person) {
+      this.removePersonFromTeam(person)
     }
+
   },
 
   mounted () {

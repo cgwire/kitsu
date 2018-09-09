@@ -26,6 +26,7 @@ import {
   PRODUCTION_AVATAR_UPLOADED,
 
   TEAM_ADD_PERSON,
+  TEAM_REMOVE_PERSON,
 
   RESET_ALL
 } from '../mutation-types'
@@ -227,6 +228,16 @@ const actions = {
         person.id
       )
     })
+  },
+
+  removePersonFromTeam ({ commit, state }, person) {
+    return new Promise((resolve, reject) => {
+      commit(TEAM_REMOVE_PERSON, person.id)
+      return productionsApi.removePersonFromTeam(
+        state.currentProduction.id,
+        person.id
+      )
+    })
   }
 }
 
@@ -385,8 +396,17 @@ const mutations = {
   },
 
   [TEAM_ADD_PERSON] (state, personId) {
-    if (!state.currentProduction.team.find((p) => p.id === personId)) {
+    if (!state.currentProduction.team.find((pId) => pId === personId)) {
       state.currentProduction.team.push(personId)
+    }
+  },
+
+  [TEAM_REMOVE_PERSON] (state, personId) {
+    const personIndex = state.currentProduction.team.find(
+      (pId) => pId === personId
+    )
+    if (personIndex) {
+      state.currentProduction.team.splice(personIndex, 1)
     }
   },
 
