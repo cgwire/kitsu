@@ -5,14 +5,17 @@
 ### Create a production
 
 First step is to create add a production on Kitsu. Click on the **Create a new production** button.
-![create a production](img/getting-started/create_production.png)
+![Create a production](img/getting-started/create_production.png)
 
 
 Enter the name, keep the status as **open** if you want to work immediately on it.
 Then validate by clicking on **Confirm**.
+![Add a production](img/getting-started/add_production.png)
 
-The main navigation will be with the 3 lines on the top of the screen.
-Choose below **Studio** the Productions page. There you can see all the production you have created, and their status. (open for an active production, or closed if not active). When you go on top of a production you can see 2 news icones on the right part of the line : **Edit** and **Delete**.
+The main navigation will be with the 3 lines on the top of the screen. ![Main button](img/getting-started/main_button.png)
+Choose below **Studio** section the **Productions** page. ![Main menu](img/getting-started/main_menu_production.png)
+There you can see all the production you have created, and their status. (open for an active production, or closed if not active). When you go on top of a production you can see 2 news icones on the right part of the line : **Edit** and **Delete**.
+![Edit a production](img/getting-started/production_edit.png)
 
 Go into the edit menu for you newly created production. You can change the picture of you production, instead of the first letter. 
 
