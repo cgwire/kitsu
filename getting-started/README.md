@@ -13,21 +13,21 @@ Then validate by clicking on **Confirm**.
 ![Add a production](../img/getting-started/add_production.png)
 
 The main navigation will be with the 3 lines on the top of the screen. ![Main button](../img/getting-started/main_button.png)
-Choose below **Studio** section the **Productions** page. ![Main menu](../img/getting-started/main_menu_production.png)
-There you can see all the production you have created, and their status. (open for an active production, or closed if not active). When you go on top of a production you can see 2 news icones on the right part of the line : **Edit** and **Delete**.
+Choose below **Studio** section the **Productions** page. 
+![Main menu](../img/getting-started/main_menu_production.png)
+
+There you can see all the production you have created, and their status. (open for an active production, or closed if not active). When you go on top of a production you can see 2 news icones on the right part of the line : **Edit** ![Edit button](../img/getting-started/edit_button.png)and **Delete** ![Delete button](../img/getting-started/delete_button.png).
 ![Edit a production](../img/getting-started/production_edit.png)
 
 Go into the edit menu for you newly created production. You can change the picture of you production, instead of the first letter. 
-
-### Create an episode with a script
-
-So now you should have the first script of your production. It's time for the breakdown and the creation of the assets.
-It will help you to find the assets you could reuse from past episode, and help to dispatch the work to the artists.
-
+![Edit the detail of a production](../img/getting-started/production_edit_popup.png)
 
 ### Create some assets (perso / props / bg / fx)
 
-Lets begin with the asset page, you can access it by multiple ways, the fastest and easiest is with the asset icone on top of the page.
+So now you should have the first script of your production. It's time to for the breakdown and the creation of the assets.
+It will help you to find the assets you could reuse from past episode, and help to dispatch the work to the artists.
+
+Lets begin with the asset page, you can access it by multiple ways, the fastest and easiest is with the asset icone on top of the page. ![Asset button](../img/getting-started/asset_button.png)
 
 On the asset page click on **Add an asset**.
 Then you can choose the type : Camera, Characters, Environment, FX, Props.
