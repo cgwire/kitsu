@@ -80,12 +80,15 @@ Then click on the **Add a new employee** button. ![Add a new employee](../img/ge
 On the new window you can enter the first (1) and last name (2), the email (which is mandatory to create the account) (3), the phone number (4) and define the role of the employee : **CG artist**, **Supervisor**, **Administrator** or **Client** (5). 
 If the artist is working right now keep him as active, otherwise select no.
 Validate by clicking **Confirm** button.
+
 ![Create a new employee](../img/getting-started/create_employee.png)
 
 
 We can now get back to the **Assets** page. You can use the main menu ![Main menu](../img/getting-started/main_button.png) under the **Production** section.
 
 ![Main menu assets page](../img/getting-started/main_menu_assets.png)
+
+### Assign an artist
 
 Now is time to assigned the artist! 
 
@@ -114,7 +117,7 @@ If you want you can hide this information with the **Hide assignations** button 
 Now everybody know what to do, and who is doing what!
 
 
-### Create sequences and shots with a storyboard 
+### Create sequences and shots
 
 Now is the time when you have to do the breakdown of the storyboard. Meaning you can now create the sequences and the shots of the episode.
 
@@ -154,7 +157,9 @@ A new pop-up will open and let you choose what task do you want to add to the sh
 
 Now we can do the breakdown of the storyboard, meaning associate the assets to each shots. 
 
-On the main menu ![Main menu](../img/getting-started/main_menu.png), under **Production** section, choose breakdown.
+### Create a Breakdown list
+
+On the main menu ![Main menu](../img/getting-started/main_button.png), under **Production** section, choose breakdown.
 
 ![Menu breakdown](../img/getting-started/menu_breakdown.png)
 
@@ -182,7 +187,7 @@ We can now assign people on the shots tasks. If the animation and so are doing e
 
 Everything is filled, if you want to see a detail of a shot, click on his name, a new page will open with the list of the taks, the assignation, and the list of assets that will appear on this shot.
  
-### Add the Framerange with the animatic
+### Add the Frameranges
 
 At this stage of the production the animatic should be done. Meaning you have the lengh (framerange In and framerange Out) of each shot. You can add this information on the spreadsheet.
 This way you will be sure that all the frame will be calculated and none will me missing, or over compute.
