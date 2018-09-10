@@ -118,20 +118,36 @@ Now everybody know what to do, and who is doing what!
 
 Now is the time when you have to do the breakdown of the storyboard. Meaning you can now create the sequences and the shots of the episode.
 
-You need to go to the **Shots** page : you can either use the shot icone on top of the page, or use the main menu and under the **Production** section, click on the Shots.
+You need to go to the **Shots** page : you can either use the shot icone on top of the page ![Shot button](../img/getting-started/shot_button.png), or use the main menu and under the **Production** section, click on the Shots.
 
-You want to click on the **Manage shots** button. A new pop up will open, as for the creation of the assets.
+![Main menu shots](../img/getting-started/main_menu_shots.png)
+
+You want to click on the **Add shots** button. A new pop up will open, as for the creation of the assets.
 
 You can create now the episodes, sequences and shots.
 
-Enter the first episode using your own code name, for example e001, then click on the **Add** button.
-Do the same for the sequence, for example, sq01, then **Add**, and now the shots : sh001, then again **Add**. You can now see that the episode, sequence and shot are on the line, they are linked, you have created the first shot of the first sequence of the first episode. So everything is on track.
-Now to add more shots: as you can see the box is already fill with your name code but incremented, so you just have to continue to click on **Add**, to create more shots.
-You jsut have to do the same with the sequence.
+Enter the first episode using your own code name, for example type e01, then click on the **Add** button.
+Do the same for the sequence, for example, sq01, then **Add**, and now the shots : sh001, then again **Add**.
 
-If you have miss a shot on a previous sequence, you just have to edit the shot you need, and change the sequence. If at some point you need to delete a shot, just click on the garbage icone on the right of the line. If you need to re import this shot click on the reload button.
+![Manage shots](../img/getting-started/manage_shot.png)
 
-We can now associate tasks to the shots. Same way than for the assets, click on the **+Add tasks** button on the topp of the spreadsheet. All the shots will be linked to the tasks.
+You can now see that the episode, sequence and shot are on a line, they are linked, you have created the first shot of the first sequence of the first episode. So everything is on track.
+
+Now to add more shots: as you can see the box is already fill with your name code but incremented, so you just have to continue to click on **Add** because the field is already completed, to create more shots.
+
+![Add shots](../img/getting-started/add_shots.png)
+
+You just have to do the same with the sequence.
+
+If you have miss a shot on a previous sequence, you just have to edit the shot you need ![Edit button](../img/getting-started/edit_button.png), and change the sequence. 
+
+![Change sequence](../img/getting-started/change_seq.png)
+
+If at some point you need to delete a shot, just click on the delete icone on the right of the line ![Delete button](../img/getting-started/delete_button.png). If you need to re import this shot click on the restore button ![Restore button](../img/getting-started/restore_button.png).
+
+We can now associate tasks to the shots. Same way than for the assets, click on the **+Add tasks** button ![Add task button](../img/getting-started/add_task_button.png) on the top of the spreadsheet. 
+
+A new pop-up will open and let you choose what task do you want to add to the shot. All the shots will be linked to these tasks.
 
 Now we can do the breakdown of the storyboard, meaning associate the assets to each shots. 
 
