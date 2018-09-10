@@ -21,10 +21,10 @@ There, you can see all the productions you have created, and their status (open 
 
 ![Edit a production](../img/getting-started/production_edit.png)
 
-Go into the edit menu for you newly created production. You can change the picture of you production, instead of the first letter. 
+Go into the edit menu for you newly created production. You can change the picture of you production, instead of showing the first letter. 
 ![Edit the detail of a production](../img/getting-started/production_edit_popup.png)
 
-### Create some assets (perso / props / bg / fx)
+### Create some assets (character / props / background / fx)
 
 So now you should have the first script of your production. It's time to do the breakdown and the creation of the assets.
 It will help you to find the assets you could reuse from past episode, and help to dispatch the work to the artists.
@@ -63,36 +63,49 @@ If some assets don't match the task (as environment and setup) just change the s
 
 So, to change a status : click directly on the status you want to change (1).
 
-A new page is opened, and here you can add a comment to explain the changing of status (1), and change the status of the task (2). Validate with **Post status** (3).
+A new page is opened, and here you can add a comment to explain the change of status (1), and choose a new status for the task (2). Validate with **Post status** (3).
 ![Changing status](../img/getting-started/changing_status.png)
 
-Now that we have created all the assets we need, and link them to tasks, we can now add the artist and assigne them.
+Now that we have created all the assets we need, and link them to tasks, we can now add the artist and assign them.
 
 ### Add an artist
 
 We need to create a account for each artist.
-Go to the main menu (3 lignes on top left of the screen), and under the Studio section, choose **People** page.
+Go to the main menu ![Main menu](../img/getting-started/main_button.png), and under the Studio section, choose **People** page.
+![People Menu](../img/getting-started/main_menu_people.png)
 
-Then click on the **Add a new employee** button.
-On the new window you can enter the first and last name, the email (which is mandatory to create the account), the phone number and define the role of the employee : **CG artist**, **Supervisor**, **Administrator** or **Client**. 
+Then click on the **Add a new employee** button. ![Add a new employee](../img/getting-started/add_employee.png)
+On the new window you can enter the first (1) and last name (2), the email (which is mandatory to create the account) (3), the phone number (4) and define the role of the employee : **CG artist**, **Supervisor**, **Administrator** or **Client** (5). 
 If the artist is working right now keep him as active, otherwise select no.
 Validate by clicking **Confirm** button.
+![Create a new employee](../img/getting-started/create_employee.png)
 
-We can now get back to the **Asset** page. You can use the main menu under the **Production** section.
+
+We can now get back to the **Assets** page. You can use the main menu ![Main menu](../img/getting-started/main_button.png) under the **Production** section.
+![Main menu assets page](../img/getting-started/main_menu_assets.png)
 
 Now is time to assigned the artist! 
 
 On the assets page, click on the empty space on the right of a status on the asset you want to assign.
+![Assigned a task](../img/getting-started/task_assigned.png)
 
-A new blue line on top of the screen appears. You can add the assignation. As soon as you click on the box you will see the list of the people. Just click on the name to assign him.
+A new blue line on top of the screen appears. 
+![Blue menu](../img/getting-started/blue_menu.png)
 
-You can assign several task at the time to the same person. One you have the blue line top screen, just keep **Ctrl** on your keyboard pressed and select multiple tasks. You can even use the **Shift** touch to select a range of tasks. When you have selected everything you need, apply with the **Confim** button.
+You can add the assignation. As soon as you click on the box you will see the list of the people. Just click on the name to assign him.
+![Assigned people](../img/getting-started/assigned_people.png)
+
+You can assign several task at the time to the same person (1). One you have the blue line top screen, just keep **Ctrl** on your keyboard pressed and select multiple tasks. You can even use the **Shift** touch to select a range of tasks (2). When you have selected everything you need, apply with the **Confim** button.
+![Assigned multiple people](../img/getting-started/assigned_multiple.png)
 
 On the same way you can **Clear assignations** if needed.
 
-When you're done with all the assignation quit this mode using the **Clear current selection** button.
+When you're done with all the assignation quit this mode using the **Clear current selection** button ![Clear current selection](../img/getting-started/clear_current_selection.png).
 
-From now you can see next to each statut the initial of the artist. If you want you can hide this information with the **Hide assignations** button on the top of the spreadsheet.
+From now you can see next to each statut the initial of the artist. 
+![Assigned people](../img/getting-started/assignation.png)
+
+If you want you can hide this information with the **Hide assignations** button on the top of the spreadsheet ![Hide assignations](../img/getting-started/hide_assignation.png).
 
 Now everybody knows what to do, and who is doing what!
 
