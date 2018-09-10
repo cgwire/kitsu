@@ -5,7 +5,7 @@
 ### Create a production
 
 First step is to create add a production on Kitsu. Click on the **Create a new production** button.
-![create a production](https://kitsu.cg-wire.com/img/getting-started/create_production.png)
+![create a production](img/getting-started/create_production.png)
 
 
 Enter the name, keep the status as **open** if you want to work immediately on it.
