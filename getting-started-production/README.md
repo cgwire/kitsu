@@ -187,7 +187,7 @@ We can now assign people on the shots tasks. If the animation and so are doing e
 
 Everything is filled, if you want to see a detail of a shot, click on his name, a new page will open with the list of the taks, the assignation, and the list of assets that will appear on this shot.
  
-### [Add the Frameranges](#add-the-framerange)
+### [Add the Frameranges](#add-the-frameranges)
 
 At this stage of the production the animatic should be done. Meaning you have the lengh (framerange In and framerange Out) of each shot. You can add this information on the spreadsheet.
 This way you will be sure that all the frame will be calculated and none will me missing, or over compute.

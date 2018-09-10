@@ -11,7 +11,7 @@
 	* [Assign an artist](getting-started-production/README.md#assign-an-artist)
 	* [Create sequences and shots](getting-started-production/README.md#create-sequences-and-shots)
 	* [Create a Breakdown list](getting-started-production/README.md#create-a-breakdown-list)
-	* [Add the Frameranges](getting-started-production/README.md#add-the-framerange)
+	* [Add the Frameranges](getting-started-production/README.md#add-the-frameranges)
 	* [Validation per batch](getting-started-production/README.md#validation-per-batch)
 	* [Change the priority](getting-started-production/README.md#change-the-priority)
 	
