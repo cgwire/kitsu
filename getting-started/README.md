@@ -45,12 +45,12 @@ You will see the newly created asset appearing on the background everytime your 
 
 For now the assets aren't associate to episode, this association will be down during the **Breakdown** of the storyboard, with sequences and shots.
 
-You can edit assets any time you want by going to the asset page, hovering the asset you want to modify, and then click on the **Edit button** ![Edit button](../img/getting-started/edit_button.png) on the right side of the line.
+You can edit assets any time you want by going to the asset page, hovering the asset you want to modify, and then click on the **Edit button** (1) ![Edit button](../img/getting-started/edit_button.png) on the right side of the line.
 ![Edit an asset](../img/getting-started/asset_edit.png)
 
-On the main asset page, to read the full description, just click on the first words, and a pop up will open with the full description.
+On the main asset page, to read the full description, just click on the first words (2), and a pop up will open with the full description.
 
-Then we can associate tasks to the assets, like **Concep**, **Modeling**, **Texture**, **Setup**, and other if needed.
+Then we can associate tasks to the assets (3), like **Concep**, **Modeling**, **Texture**, **Setup**, and other if needed.
 
 You just have to click on the **Add tasks** on top of the spreadsheet, a new window open, and on the list under **Type** you can choose the task you need to add, validate it by **Confirm** button.
 
