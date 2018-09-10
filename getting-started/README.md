@@ -126,14 +126,14 @@ You want to click on the **Add shots** button. A new pop up will open, as for th
 
 You can create now the episodes, sequences and shots.
 
-Enter the first episode using your own code name, for example type e01, then click on the **Add** button.
-Do the same for the sequence, for example, sq01, then **Add**, and now the shots : sh001, then again **Add**.
+Enter the first episode using your own code name, for example type e01, then click on the **Add** button (1).
+Do the same for the sequence, for example, sq01, then **Add** (2), and now the shots : sh001, then again **Add** (3).
 
 ![Manage shots](../img/getting-started/manage_shot.png)
 
 You can now see that the episode, sequence and shot are on a line, they are linked, you have created the first shot of the first sequence of the first episode. So everything is on track.
 
-Now to add more shots: as you can see the box is already fill with your name code but incremented, so you just have to continue to click on **Add** because the field is already completed, to create more shots.
+Now to add more shots: as you can see the box is already fill with your name code but incremented, so you just have to continue to click on **Add** to create more shots.
 
 ![Add shots](../img/getting-started/add_shots.png)
 
@@ -143,7 +143,8 @@ If you have miss a shot on a previous sequence, you just have to edit the shot y
 
 ![Change sequence](../img/getting-started/change_seq.png)
 
-If at some point you need to delete a shot, just click on the delete icone on the right of the line ![Delete button](../img/getting-started/delete_button.png). If you need to re import this shot click on the restore button ![Restore button](../img/getting-started/restore_button.png).
+If at some point you need to delete a shot, just click on the delete icone on the right of the line ![Delete button](../img/getting-started/delete_button.png). If you need to re import this shot, click on the restore button ![Restore button](../img/getting-started/restore_button.png).
+
 
 We can now associate tasks to the shots. Same way than for the assets, click on the **+Add tasks** button ![Add task button](../img/getting-started/add_task_button.png) on the top of the spreadsheet. 
 
