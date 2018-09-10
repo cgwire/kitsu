@@ -24,7 +24,7 @@ For example when you start a new task you can say that you have well understood 
 
 To change the status, from todo to wip for example, click on the status box, choose the one you want and validate your comment and the new status by clicking on **Post status**.
 
-### [Show your work and ask for validation](#show-your-work-and-ask-for-validation)
+### [Ask for validation](#ask-for-validation)
 
 You can ask for a validation (waiting for approval) to share your progress by posting a preview of your work. Change the status of your task and post a comment. Then click on the **Add preview** button on your new post. 
 On the new window you can either drag and drop you pic or video on the **Choose a file** button, or navigate through your system and pick your file, validate with the **Confirm** button.
