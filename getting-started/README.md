@@ -14,6 +14,7 @@ Then validate by clicking on **Confirm**.
 
 The main navigation will be with the 3 lines on the top of the screen. ![Main button](../img/getting-started/main_button.png)
 Choose below **Studio** section the **Productions** page. 
+
 ![Main menu](../img/getting-started/main_menu_production.png)
 
 There you can see all the production you have created, and their status. (open for an active production, or closed if not active). When you go on top of a production you can see 2 news icones on the right part of the line : **Edit** ![Edit button](../img/getting-started/edit_button.png)and **Delete** ![Delete button](../img/getting-started/delete_button.png).
