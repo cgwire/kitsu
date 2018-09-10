@@ -24,7 +24,7 @@ There, you can see all the productions you have created, and their status (open 
 Go into the edit menu for you newly created production. You can change the picture of you production, instead of showing the first letter. 
 ![Edit the detail of a production](../img/getting-started/production_edit_popup.png)
 
-### [Create some assets](#asset)
+### [Create some assets](#create-some-assets)
 
 So now you should have the first script of your production. It's time to do the breakdown and the creation of the assets.
 It will help you to find the assets you could reuse from past episode, and help to dispatch the work to the artists.
