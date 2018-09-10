@@ -16,7 +16,11 @@
 	* [Change the priority](getting-started-production/README.md#change-the-priority)
 	
 * [Getting Started as Artist](getting-started-artist/README.md)
-
+	* [See what you have to do](getting-started-artist/README.md#see-what-you-have-to-do)
+	* [Communicate and change status](getting-started-artist/README.md#communicate-and-change-status)
+	* [Show your work and ask for validation](getting-started-artist/README.md#show-your-work-and-ask-for-validation)
+	* [Fill the timesheet](getting-started-artist/README.md#fill-the-timesheet)
+	
 * [Production Modules](production-modules/README.md)
 
 * [Studio Modules](studio-modules/README.md)

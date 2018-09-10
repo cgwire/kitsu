@@ -183,16 +183,16 @@ When you are done for this shot click on the **Save** button, and go on with the
 If a new asset is created during the storyboard just get back to the asset page (using the button on the top of the screen or via the main menu) ![Asset button](../img/getting-started/asset_button.png)
 , create the assets you need. The tasks previously created will be applied immediately to this new asset. You will have to do the assignation on it, and you're good to continue with the breakdown.
 
-We can now assign people on the shots tasks. If the animation and so are doing elsewhere you can create a account for this studio and assign them the tasks. They will be able to feed by themself the spreadsheet.
+We can now assign people on the shots tasks. If the animation and so are done elsewhere, you can create a account for this studio and assign it tasks. They will be able to feed by themself the spreadsheet.
 
-Everything is filled, if you want to see a detail of a shot, click on his name, a new page will open with the list of the taks, the assignation, and the list of assets that will appear on this shot.
+Everything is now filled, if you want to see a detail of a shot, click on his name, a new page will open with the list of the taks, the assignation, and the list of assets that will appear on this shot.
  
 ### [Add the Frameranges](#add-the-frameranges)
 
-At this stage of the production the animatic should be done. Meaning you have the lengh (framerange In and framerange Out) of each shot. You can add this information on the spreadsheet.
-This way you will be sure that all the frame will be calculated and none will me missing, or over compute.
+At this stage of the production the animatic should be done. Meaning you have the lengh (**framerange In** and **framerange Out**) for each shot. You can add this information on the spreadsheet.
+This way you will be sure that all the frames will be calculated and none will be missing, or over compute.
 
-You may also be able to add camera assets!
+You may also be able to add camera as assets!
 
 You need to edit the shots to fill the framerange information. Click on the edit button on the right side of the shot line.
 
