@@ -17,6 +17,7 @@ Choose below **Studio** section the **Productions** page.
 ![Main menu](../img/getting-started/main_menu_production.png)
 
 There you can see all the production you have created, and their status. (open for an active production, or closed if not active). When you go on top of a production you can see 2 news icones on the right part of the line : **Edit** ![Edit button](../img/getting-started/edit_button.png)and **Delete** ![Delete button](../img/getting-started/delete_button.png).
+
 ![Edit a production](../img/getting-started/production_edit.png)
 
 Go into the edit menu for you newly created production. You can change the picture of you production, instead of the first letter. 
@@ -29,16 +30,22 @@ It will help you to find the assets you could reuse from past episode, and help 
 
 Lets begin with the asset page, you can access it by multiple ways, the fastest and easiest is with the asset icone on top of the page. ![Asset button](../img/getting-started/asset_button.png)
 
-On the asset page click on **Add an asset**.
-Then you can choose the type : Camera, Characters, Environment, FX, Props.
-Lets start with an environment, we will give it the name **Street 01**, and enter a description that will help the designer to know what to do, and later to indentify easily the asset.
+On the asset page click on **Add asset**.
+![Asset page first time](../img/getting-started/add_assets_first.png)
 
-If you have multiple asset to create, click on **Confirm and stay**, you can change whenever you want the asset type, and keep adding assets.
+A pop up window open : 
+
+Then you can choose the **Type** (1) : Camera, Characters, Environment, FX, Props.
+Lets start with an environment, we will give it a name under **Asset** (2), and enter a description that will help the designer to know what to do, and later to indentify easily the asset.
+If you have multiple asset to create, click on **Confirm and stay** (3), you can change whenever you want the asset type, and keep adding assets.
+![Create an asset](../img/getting-started/add_asset_popup.png)
+
 You will see the newly created asset appearing on the background everytime your click on confirm and stay. When you have added you last asset, just click on **Confirm**, it will save the asset and close the window. If you don't have more asset to add, click on **Close** it will cancel the window.
 
 For now the assets aren't associate to episode, this association will be down during the **Breakdown** of the storyboard, with sequences and shots.
 
-You can edit assets any time you want by going to the asset page, hovering the asset you want to modify, and then click on the edit button on the right side of the line.
+You can edit assets any time you want by going to the asset page, hovering the asset you want to modify, and then click on the edit button ![Edit button](../img/getting-started/edit_button.png) on the right side of the line.
+![Edit an asset](../img/getting-started/asset_edit.png)
 
 On the main asset page, to read the full description, just click on the first words, and a pop up will open with the full description.
 
