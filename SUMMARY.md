@@ -4,7 +4,9 @@
 
 * [Installation](installation/README.md)
 
-* [Getting Started](getting-started/README.md)
+* [Getting Started as Production](getting-started-production/README.md)
+
+* [Getting Started as Artist](getting-started-artist/README.md)
 
 * [Production Modules](production-modules/README.md)
 
