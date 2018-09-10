@@ -6,7 +6,7 @@
 
 * [Getting Started as Production](getting-started-production/README.md)
 	* [Create a production](getting-started-production/README.md#Create a production)
-	* [Create an asset](getting-started-production/README.md#create-some-assets)
+	* [Create some assets](getting-started-production/README.md#create)
 	* [Add an artist](getting-started-production/README.md#Add an artist)
 	* [Assign an artist](getting-started-production/README.md#Assign an artist)
 	* [Create sequences and shots](getting-started-production/README.md#Create sequences and shots)
