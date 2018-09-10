@@ -4,7 +4,11 @@
 
 ### Create a production
 
-First step is to create add a production on Kitsu, enter the name, keep the status as **open** if you want to work immediately on it.
+First step is to create add a production on Kitsu. Click on the **Create a new production** button.
+![create a production](https://kitsu.cg-wire.com/img/getting-started/create_production.png)
+
+
+Enter the name, keep the status as **open** if you want to work immediately on it.
 Then validate by clicking on **Confirm**.
 
 The main navigation will be with the 3 lines on the top of the screen.
@@ -143,6 +147,8 @@ For this we will use the same technique than for the assignation or the changing
 There is 4 levels of prioriy : **Normal**, that is the basic level of all the task, **High**, **Very High**, or **Emergency**. Save the changes with the **Confirm** button.
 
 You can now see next to the status of the task some **Exclamation mark**. The more there is, the more urgent is the task.
+
+-----------------------------------
 
 ## As an artist
  
