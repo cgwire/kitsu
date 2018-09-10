@@ -211,7 +211,7 @@ The blue line on the top of the screen will appear.
 You can change it purpose by clicking on the 3 vertical dots on the left part of the screen and choose **Change status**.
 You can now do you selection, with **Crtl** of **Chift** and choose the new status for your selected tasks. Validated the new status with the **Confirm** button.
 
-### [Change the priority](#priority)
+### [Change the priority](#prio)
 
 At some point on the production you may want to prioritized some tasks, and pinpoint these urgent tasks to your team.
 

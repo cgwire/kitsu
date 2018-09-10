@@ -13,7 +13,7 @@
 	* [Create a Breakdown list](getting-started-production/README.md#breakdown)
 	* [Add the Frameranges](getting-started-production/README.md#framerange)
 	* [Validation per batch](getting-started-production/README.md#batch)
-	* [Change the priority](getting-started-production/README.md#priority)
+	* [Change the priority](getting-started-production/README.md#prio)
 	
 * [Getting Started as Artist](getting-started-artist/README.md)
 
