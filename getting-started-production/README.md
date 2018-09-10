@@ -150,24 +150,39 @@ We can now associate tasks to the shots. Same way than for the assets, click on 
 
 A new pop-up will open and let you choose what task do you want to add to the shot. All the shots will be linked to these tasks.
 
+![List of tasks for the shots](../img/getting-started/task_shots.png)
+
 Now we can do the breakdown of the storyboard, meaning associate the assets to each shots. 
 
-On the main menu, under **Production** section, choose breakdown.
+On the main menu ![Main menu](../img/getting-started/main_menu.png), under **Production** section, choose breakdown.
 
-On the left part of the breakdown page there is the sequence menu, you can choose between the episode and the sequence you have created. And on the right part of the screen all the assets available that you have created for this production.
+![Menu breakdown](../img/getting-started/menu_breakdown.png)
+
+On the left part of the breakdown page there is the sequence menu (1), you can choose between the episode and the sequence you have created. And on the right part of the screen all the assets available that you have created for this production (3). And on the middle part it will be your selection for the shot (2).
+
+![Breakdown page](../img/getting-started/breakdown_general.png)
 
 So now you have to select the shot you wan to cast, let's say the first one. So click on the shot sh001, then click on the assets you want to assign, some characters, backgrounds,etc. 
-When you pass over the asset you can see a +1 or +10. It's the number of time you want to add this asset. You can click the number of time you need the asset. 
+When you pass over the asset you can see a +1 or +10. It's the number of time you want to add this asset. 
+
+![Breakdown add asset](../img/getting-started/breakdown_add_asset.png)
+
+You can click the number of time you need the asset. You can now see the asset appearing on the middle part of the screen. Next to the name of the asset is the number of this asset you have add.
+
 If you add twice an asset by mistake, you just have to go on the middle part of the screen, on your selection of assets for this shot, and selection -1.
 When you are done for this shot click on the **Save** button, and go on with the other shots.
 
-If a new asset is created during the storyboard just get back to the asset page (using the button on the top of the screen or via the main menu), create the assets you need. The tasks previously created wil be applied immediately to this new asset. you will just have to do the assignation on it, and you're good to continue with the breakdown.
+![Breakdown remove asset](../img/getting-started/breakdown_remove_asset.png)
+
+
+If a new asset is created during the storyboard just get back to the asset page (using the button on the top of the screen or via the main menu) ![Asset button](../img/getting-started/asset_button.png)
+, create the assets you need. The tasks previously created will be applied immediately to this new asset. You will have to do the assignation on it, and you're good to continue with the breakdown.
 
 We can now assign people on the shots tasks. If the animation and so are doing elsewhere you can create a account for this studio and assign them the tasks. They will be able to feed by themself the spreadsheet.
 
 Everything is filled, if you want to see a detail of a shot, click on his name, a new page will open with the list of the taks, the assignation, and the list of assets that will appear on this shot.
  
-### Add the Framerange with the animatix
+### Add the Framerange with the animatic
 
 At this stage of the production the animatic should be done. Meaning you have the lengh (framerange In and framerange Out) of each shot. You can add this information on the spreadsheet.
 This way you will be sure that all the frame will be calculated and none will me missing, or over compute.
