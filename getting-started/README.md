@@ -84,6 +84,7 @@ Validate by clicking **Confirm** button.
 
 
 We can now get back to the **Assets** page. You can use the main menu ![Main menu](../img/getting-started/main_button.png) under the **Production** section.
+
 ![Main menu assets page](../img/getting-started/main_menu_assets.png)
 
 Now is time to assigned the artist! 
@@ -95,6 +96,7 @@ A new blue line on top of the screen appears.
 ![Blue menu](../img/getting-started/blue_menu.png)
 
 You can add the assignation. As soon as you click on the box you will see the list of the people. Just click on the name to assign him.
+
 ![Selected people](../img/getting-started/select_people.png)
 
 You can assign several task at the time to the same person (1). Once you have the blue menu visible, just keep **Ctrl** on your keyboard pressed and select multiple tasks. You can even use the **Shift** touch to select a range of tasks (2). When you have selected everything you need, apply with the **Confim** button.
