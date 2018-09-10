@@ -4,20 +4,20 @@
 
 ### Create a production
 
-First step is to create add a production on Kitsu. Click on the **Create a new production** button.
+The first step on Kitsu is to create a production. Click on the **Create a new production** button.
 ![Create a production](../img/getting-started/create_production.png)
 
 
-Enter the name, keep the status as **open** if you want to work immediately on it.
+Enter the name of your production, keep the status as **Open** if you want to work immediately on it.
 Then validate by clicking on **Confirm**.
 ![Add a production](../img/getting-started/add_production.png)
 
-The main navigation will be with the 3 lines on the top of the screen. ![Main button](../img/getting-started/main_button.png)
-Choose below **Studio** section the **Productions** page. 
+The main navigation will be with the 3 lines on the top of the screen ![Main button](../img/getting-started/main_button.png).
+It will open a menu on the left part of the screen. Choose below **Studio** section the **Productions** page. 
 
 ![Main menu](../img/getting-started/main_menu_production.png)
 
-There you can see all the production you have created, and their status. (open for an active production, or closed if not active). When you go on top of a production you can see 2 news icones on the right part of the line : **Edit** ![Edit button](../img/getting-started/edit_button.png)and **Delete** ![Delete button](../img/getting-started/delete_button.png).
+There, you can see all the productions you have created, and their status (open for an active production, or closed if not active). When you go on top of a production you can see 2 news icones on the right part of the line : **Edit** ![Edit button](../img/getting-started/edit_button.png)and **Delete** ![Delete button](../img/getting-started/delete_button.png).
 
 ![Edit a production](../img/getting-started/production_edit.png)
 
@@ -26,24 +26,25 @@ Go into the edit menu for you newly created production. You can change the pictu
 
 ### Create some assets (perso / props / bg / fx)
 
-So now you should have the first script of your production. It's time to for the breakdown and the creation of the assets.
+So now you should have the first script of your production. It's time to do the breakdown and the creation of the assets.
 It will help you to find the assets you could reuse from past episode, and help to dispatch the work to the artists.
 
 Lets begin with the asset page, you can access it by multiple ways, the fastest and easiest is with the asset icone on top of the page ![Asset button](../img/getting-started/asset_button.png).
 
-On the asset page click on **Add asset**.
+On the asset page click on **Add assets**.
 ![Asset page first time](../img/getting-started/add_assets_first.png)
 
-A pop up window open : 
-
-Then you can choose the **Type** (1) : Camera, Characters, Environment, FX, Props.
-Lets start with an environment, we will give it a name under **Asset** (2), and enter a description that will help the designer to know what to do, and later to indentify easily the asset.
-If you have multiple asset to create, click on **Confirm and stay** (3), you can change whenever you want the asset type, and keep adding assets.
+A pop up window open :
+ 
+You can choose the **Type** (1) : Camera, Characters, Environment, FX, Props.
+Lets start with an environment. We will give it a name under **Asset** (2), and enter a description that will help the designer to know what to do, and later to indentify easily the asset.
+If you have multiple assets to create, click on **Confirm and stay** (3), you can change whenever you want the asset type, and keep adding assets.
 ![Create an asset](../img/getting-started/add_asset_popup.png)
 
-You will see the newly created asset appearing on the background everytime your click on confirm and stay. When you have added you last asset, just click on **Confirm**, it will save the asset and close the window. If you don't have more asset to add, click on **Close** it will cancel the window.
+You will see the newly created asset appearing on the background everytime your click on **Confirm and stay**. When you have added you last asset, just click on **Confirm**, it will save the asset and close the window. If you don't have more asset to add, click on **Close** it will cancel the window.
 
-For now the assets aren't associate to episode, this association will be down during the **Breakdown** of the storyboard, with sequences and shots.
+For now the assets aren't associate to episode, this association will be done during the **Breakdown** of the storyboard, with sequences and shots creation.
+
 
 You can edit assets any time you want by going to the asset page, hovering the asset you want to modify, and then click on the **Edit button** (1) ![Edit button](../img/getting-started/edit_button.png) on the right side of the line.
 ![Edit an asset](../img/getting-started/asset_edit.png)
@@ -52,11 +53,18 @@ On the main asset page, to read the full description, just click on the first wo
 
 Then we can associate tasks to the assets (3), like **Concep**, **Modeling**, **Texture**, **Setup**, and other if needed.
 
-You just have to click on the **Add tasks** on top of the spreadsheet, a new window open, and on the list under **Type** you can choose the task you need to add, validate it by **Confirm** button.
+You just have to click on the **Add tasks** (3) on top of the spreadsheet, a new window open, and on the list under **Type** you can choose the task you need to add, validate it by **Confirm** button.
+![Add task to an asset](../img/getting-started/add_task.png)
 
-This tasks will be added to all the assets, if some assets don't match the task (as environment and setup) just change the status of this task on **N/A**.
+This tasks will be added to all the assets.
+![Task on asset](../img/getting-started/asset_task_added.png)
 
-So, to change a status : click directly on the status you want to change, a new page is opened, and here you can add a comment to explain the changing of status, and change the status of the task. Validate with **Post status**.
+If some assets don't match the task (as environment and setup) just change the status of this task on **N/A**, or delete it.
+
+So, to change a status : click directly on the status you want to change (1).
+
+A new page is opened, and here you can add a comment to explain the changing of status (1), and change the status of the task (2). Validate with **Post status** (3).
+![Changing status](../img/getting-started/changing_status.png)
 
 Now that we have created all the assets we need, and link them to tasks, we can now add the artist and assigne them.
 
