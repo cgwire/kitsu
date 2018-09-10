@@ -29,7 +29,7 @@ Go into the edit menu for you newly created production. You can change the pictu
 So now you should have the first script of your production. It's time to for the breakdown and the creation of the assets.
 It will help you to find the assets you could reuse from past episode, and help to dispatch the work to the artists.
 
-Lets begin with the asset page, you can access it by multiple ways, the fastest and easiest is with the asset icone on top of the page. ![Asset button](../img/getting-started/asset_button.png)
+Lets begin with the asset page, you can access it by multiple ways, the fastest and easiest is with the asset icone on top of the page ![Asset button](../img/getting-started/asset_button.png).
 
 On the asset page click on **Add asset**.
 ![Asset page first time](../img/getting-started/add_assets_first.png)
@@ -45,7 +45,7 @@ You will see the newly created asset appearing on the background everytime your 
 
 For now the assets aren't associate to episode, this association will be down during the **Breakdown** of the storyboard, with sequences and shots.
 
-You can edit assets any time you want by going to the asset page, hovering the asset you want to modify, and then click on the edit button ![Edit button](../img/getting-started/edit_button.png) on the right side of the line.
+You can edit assets any time you want by going to the asset page, hovering the asset you want to modify, and then click on the **Edit button** ![Edit button](../img/getting-started/edit_button.png) on the right side of the line.
 ![Edit an asset](../img/getting-started/asset_edit.png)
 
 On the main asset page, to read the full description, just click on the first words, and a pop up will open with the full description.
