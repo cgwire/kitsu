@@ -1,6 +1,8 @@
-# How to get started with Kitsu as a production manager
+# How to get started with Kitsu
 
-	## Create a production
+## As a production manager
+
+### Create a production
 
 First step is to create add a production on Kitsu, enter the name, keep the status as **open** if you want to work immediately on it.
 Then validate by clicking on **Confirm**.
@@ -10,13 +12,13 @@ Choose below **Studio** the Productions page. There you can see all the producti
 
 Go into the edit menu for you newly created production. You can change the picture of you production, instead of the first letter. 
 
-	## Create an episode with a script
+### Create an episode with a script
 
 So now you should have the first script of your production. It's time for the breakdown and the creation of the assets.
 It will help you to find the assets you could reuse from past episode, and help to dispatch the work to the artists.
 
 
-	## Create some assets (perso / props / bg / fx)
+### Create some assets (perso / props / bg / fx)
 
 Lets begin with the asset page, you can access it by multiple ways, the fastest and easiest is with the asset icone on top of the page.
 
@@ -43,7 +45,7 @@ So, to change a status : click directly on the status you want to change, a new 
 
 Now that we have created all the assets we need, and link them to tasks, we can now add the artist and assigne them.
 
-## Add an artist
+### Add an artist
 
 We need to create a account for each artist.
 Go to the main menu (3 lignes on top left of the screen), and under the Studio section, choose **People** page.
@@ -72,7 +74,7 @@ From now you can see next to each statut the initial of the artist. If you want 
 Now everybody knows what to do, and who is doing what!
 
 
-## Create sequences and shots with a storyboard 
+### Create sequences and shots with a storyboard 
 
 Now is the time when you have to do the breakdown of the storyboard. Meaning you can now create the sequences and the shots of the episode.
 
@@ -108,7 +110,7 @@ We can now assign people on the shots tasks. If the animation and so are doing e
 
 Everything is filled, if you want to see a detail of a shot, click on his name, a new page will open with the list of the taks, the assignation, and the list of assets that will appear on this shot.
  
-## Add the Framerange with the animatix
+### Add the Framerange with the animatix
 
 At this stage of the production the animatic should be done. Meaning you have the lengh (framerange In and framerange Out) of each shot. You can add this information on the spreadsheet.
 This way you will be sure that all the frame will be calculated and none will me missing, or over compute.
@@ -120,7 +122,7 @@ You need to edit the shots to fill the framerange information. Click on the edit
 On the new window you can enter the **In** and **Out** of the shot, you can enter it by hand or use the **+** and **-** buttons.
 Save with the **Confirm** button. Now the framerange appears on the general spreadsheet of the shot page.
 
-## Validation per batch
+### Validation per batch
 
 To do a validation (changing the status of a task) you can do it by click on the status of the task on the spreadsheet. It will open a new page, and here you can post a comment and change the status.
 
@@ -132,7 +134,7 @@ The blue line on the top of the screen will appear.
 You can change it purpose by clicking on the 3 vertical dots on the left part of the screen and choose **Change status**.
 You can now do you selection, with **Crtl** of **Chift** and choose the new status for your selected tasks. Validated the new status with the **Confirm** button.
 
-## Change the priority
+### Change the priority
 
 At some point on the production you may want to prioritized some tasks, and pinpoint these urgent tasks to your team.
 
@@ -142,7 +144,7 @@ There is 4 levels of prioriy : **Normal**, that is the basic level of all the ta
 
 You can now see next to the status of the task some **Exclamation mark**. The more there is, the more urgent is the task.
 
-# How to get started with Kitsu as an artist
+## As an artist
  
  When your account is created on Kitsu, you can fill in detail your profil.
  Click on your name on the top right of the screen.
@@ -151,13 +153,13 @@ You can now see next to the status of the task some **Exclamation mark**. The mo
  You can also change your password if you want.
  
  
-## See what you have to do
+### See what you have to do
  
 The main part for you on kitsu will be the **My tasks** page. You can find it on the main menu (top icon), under the **User** section.
 
 You can see per production what you are assigned to, the status of the tasks and their priority. 
  
-## Communicate/Change the status
+### Communicate/Change the status
 
 When you start a new task you are assigned to, click on the status (**TODO**). It will open a new page where you can communicate about your work. Let your teamate know what you are doing and when you are starting! 
 For each status change you can add a comment.
@@ -166,7 +168,7 @@ For example when you start a new task you can say that you have well understood 
 
 To change the status, from todo to wip for example, click on the status box, choose the one you want and validate your comment and the new status by clicking on **Post status**.
 
-## Show your work / ask for a validation
+### Show your work / ask for a validation
 
 You can ask for a validation (waiting for approval) to share your progress by posting a preview of your work. Change the status of your task and post a comment. Then click on the **Add preview** button on your new post. 
 On the new window you can either drag and drop you pic or video on the **Choose a file** button, or navigate through your system and pick your file, validate with the **Confirm** button.
@@ -180,7 +182,7 @@ This detail page of the task will be your way to communicate with other, they wi
 When you will get back to your todo page, you will see all the last comment posted on each task you are assigned to. 
 You can also see the tasks validated on the **Done** tab.
 
-## Fill the timesheet
+### Fill the timesheet
 
 Everyday you can declare what time you have spend on each task. Go to the **Timesheets** tab, and move the cursor next to each task accordingly to the number of hours spend. You can also go quicker and click on the **1**, **4**, or **8** hours buttons.
 
