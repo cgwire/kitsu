@@ -5,15 +5,15 @@
 * [Installation](installation/README.md)
 
 * [Getting Started as Production](getting-started-production/README.md)
-	* [Create a production](getting-started-production/README.md#production)
+	* [Create a production](getting-started-production/README.md#create-a-production)
 	* [Create some assets](getting-started-production/README.md#create-some-assets)
-	* [Add an artist](getting-started-production/README.md#artist)
-	* [Assign an artist](getting-started-production/README.md#assign)
-	* [Create sequences and shots](getting-started-production/README.md#shot)
-	* [Create a Breakdown list](getting-started-production/README.md#breakdown)
-	* [Add the Frameranges](getting-started-production/README.md#framerange)
-	* [Validation per batch](getting-started-production/README.md#batch)
-	* [Change the priority](getting-started-production/README.md#prio)
+	* [Add an artist](getting-started-production/README.md#add-an-artist)
+	* [Assign an artist](getting-started-production/README.md#assign-an-artist)
+	* [Create sequences and shots](getting-started-production/README.md#create-sequences-and-shots)
+	* [Create a Breakdown list](getting-started-production/README.md#create-a-breakdown-list)
+	* [Add the Frameranges](getting-started-production/README.md#add-the-framerange)
+	* [Validation per batch](getting-started-production/README.md#validation-per-batch)
+	* [Change the priority](getting-started-production/README.md#change-the-priority)
 	
 * [Getting Started as Artist](getting-started-artist/README.md)
 

@@ -2,7 +2,7 @@
 
 ## As a production manager
 
-### [Create a production](#production)
+### [Create a production](#create-a-production)
 
 The first step on Kitsu is to create a production. Click on the **Create a new production** button.
 ![Create a production](../img/getting-started/create_production.png)
@@ -69,7 +69,7 @@ A new page is opened, and here you can add a comment to explain the change of st
 
 Now that we have created all the assets we need, and have linked them to tasks, we can now add the artists and assign them.
 
-### [Add an artist](#artist)
+### [Add an artist](#add-an-artist)
 
 We need to create a account for each artist.
 Go to the main menu ![Main menu](../img/getting-started/main_button.png), and under the Studio section, choose **People** page.
@@ -88,7 +88,7 @@ We can now get back to the **Assets** page. You can use the main menu ![Main men
 
 ![Main menu assets page](../img/getting-started/main_menu_assets.png)
 
-### [Assign an artist](#assign)
+### [Assign an artist](#assign-an-artist)
 
 Now is time to assigned the artist! 
 
@@ -117,7 +117,7 @@ If you want you can hide this information with the **Hide assignations** button 
 Now everybody know what to do, and who is doing what!
 
 
-### [Create sequences and shots](#shot)
+### [Create sequences and shots](#create-sequences-and-shots)
 
 Now is the time when you have to do the breakdown of the storyboard. Meaning you can now create the sequences and the shots of the episode.
 
@@ -157,7 +157,7 @@ A new pop-up will open and let you choose what task do you want to add to the sh
 
 Now we can do the breakdown of the storyboard, meaning associate the assets to each shots. 
 
-### [Create a Breakdown list](#breakdown)
+### [Create a Breakdown list](#create-a-breakdown-list)
 
 On the main menu ![Main menu](../img/getting-started/main_button.png), under **Production** section, choose breakdown.
 
@@ -187,7 +187,7 @@ We can now assign people on the shots tasks. If the animation and so are doing e
 
 Everything is filled, if you want to see a detail of a shot, click on his name, a new page will open with the list of the taks, the assignation, and the list of assets that will appear on this shot.
  
-### [Add the Frameranges](#framerange)
+### [Add the Frameranges](#add-the-framerange)
 
 At this stage of the production the animatic should be done. Meaning you have the lengh (framerange In and framerange Out) of each shot. You can add this information on the spreadsheet.
 This way you will be sure that all the frame will be calculated and none will me missing, or over compute.
@@ -199,7 +199,7 @@ You need to edit the shots to fill the framerange information. Click on the edit
 On the new window you can enter the **In** and **Out** of the shot, you can enter it by hand or use the **+** and **-** buttons.
 Save with the **Confirm** button. Now the framerange appears on the general spreadsheet of the shot page.
 
-### [Validation per batch](#batch)
+### [Validation per batch](#validation-per-batch)
 
 To do a validation (changing the status of a task) you can do it by click on the status of the task on the spreadsheet. It will open a new page, and here you can post a comment and change the status.
 
@@ -211,7 +211,7 @@ The blue line on the top of the screen will appear.
 You can change it purpose by clicking on the 3 vertical dots on the left part of the screen and choose **Change status**.
 You can now do you selection, with **Crtl** of **Chift** and choose the new status for your selected tasks. Validated the new status with the **Confirm** button.
 
-### [Change the priority](#prio)
+### [Change the priority](#change-the-priority)
 
 At some point on the production you may want to prioritized some tasks, and pinpoint these urgent tasks to your team.
 
