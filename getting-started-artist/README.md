@@ -7,7 +7,7 @@
  
 ![User profil](../img/getting-started/user_profil.png)
  
-On this new page you can check your name (1) (2), your email (3) fill you phone number (4), change the timezone (5) and the language of the website (6), and post of pic of yourself as your avatar (7). It will help to recognize who is doing what and you can also identify more easily your coworker! Kitsu can now be used as a who's who!
+On this new page you can check your name (1) (2), your email (3) fill you phone number (4), change the timezone (5) and the language of the website (6), and post a pic of yourself as your avatar (7). It will help to recognize who is doing what and you can also identify more easily your coworkers! Kitsu can now be used as a who's who!
  
 ![User detail](../img/getting-started/user_detail.png)
  
@@ -32,10 +32,10 @@ When you start a new task you are assigned to, click on the status (**TODO**) (1
 
 ![Shot status](../img/getting-started/shot_status.png)
 
-It will open a new page where you can communicate about your work. Let your teammate know what you are doing and when you are starting! 
-For each status change you need to add a comment.
+It will open a new page where you can communicate about your work. Let your teammates know what you are doing and when you are starting! 
+For each status changed, you need to add a comment.
 
-For example when you start a **new task** you can say that **you have well understood everything and you are starting it**, or you can **ask all the question you have**, if you miss information for example.
+For example when you start a **new task** you can say that **you have well understood everything and you are starting it**, or you can **ask all the question you have**, if you miss informations for example.
 
 To change the status, from **todo** to **wip** for example, fill your comment (1), click on the status box and choose the one you want (2) and validate your comment and the new status by clicking on **Post status** (3) .
 
@@ -88,7 +88,7 @@ You can also see the tasks validated or N/A on the **Done** tab.
 
 ### [Fill the timesheet](#fill-the-timesheet)
 
-Everyday you can declare what time you have spend on each task. On your **My Taks** page, go to the **Timesheets** tab.
+Everyday you can declare what time you have spend on each task. On your **My Tasks** page, go to the **Timesheets** tab.
 
 ![Timesheets](../img/getting-started/timesheets.png)
 
