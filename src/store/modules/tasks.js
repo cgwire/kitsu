@@ -480,7 +480,7 @@ const mutations = {
     state.assetValidationColumns = []
   },
 
-  [LOAD_ASSETS_END] (state, { assets }) {
+  [LOAD_ASSETS_END] (state, { assets, personMap }) {
     const validationColumns = {}
     assets.forEach((asset) => {
       asset.validations = {}
@@ -488,6 +488,12 @@ const mutations = {
         const taskType = helpers.getTaskType(task.task_type_id)
         if (!validationColumns[taskType.name]) {
           validationColumns[taskType.name] = task.task_type_id
+        }
+
+        if (task.assignees.length > 1) {
+          task.assignees = task.assignees.sort((a, b) => {
+            return personMap[a].name.localeCompare(personMap[b])
+          })
         }
 
         asset.validations[task.task_type_id] = task.id
@@ -504,7 +510,7 @@ const mutations = {
     state.shotValidationColumns = {}
   },
 
-  [LOAD_SHOTS_END] (state, { shots }) {
+  [LOAD_SHOTS_END] (state, { shots, personMap }) {
     const validationColumns = {}
     shots.forEach((shot) => {
       shot.validations = {}
@@ -512,6 +518,12 @@ const mutations = {
         const taskType = helpers.getTaskType(task.task_type_id)
         if (!validationColumns[taskType.name]) {
           validationColumns[taskType.name] = task.task_type_id
+        }
+
+        if (task.assignees.length > 1) {
+          task.assignees = task.assignees.sort((a, b) => {
+            return personMap[a].name.localeCompare(personMap[b])
+          })
         }
 
         shot.validations[task.task_type_id] = task.id
