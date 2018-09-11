@@ -185,7 +185,7 @@ If a new asset is created during the storyboard just get back to the asset page 
 
 Now your **Breakdown page** should look like this.
 
-![Breakdown page fill](../img/getting-started/breakdown full.png)
+![Breakdown page fill](../img/getting-started/breakdown_full.png)
 
 We can now assign people on the shots tasks. If the animation and so are done elsewhere, you can create a account for this studio and assign it tasks. They will be able to feed by themself the spreadsheet.
 
@@ -204,7 +204,7 @@ This way you will be sure that all the frames will be calculated and none will b
 
 You may also be able to add camera as assets!
 
-You need to edit the shots to fill the framerange information. Click on the edit button ![Edit button](../img/getting-started/edit_button.png)on the right side of the shot line.
+You need to edit the shots to fill the framerange information. Click on the edit button ![Edit button](../img/getting-started/edit_button.png) on the right side of the shot line.
 
 On the new window you can enter the **In** and **Out** of the shot (1), you can enter it by hand or use the **+** and **-** buttons (2).
 Save with the **Confirm** button. Now the framerange appears on the general spreadsheet of the shot page.
@@ -213,7 +213,7 @@ Save with the **Confirm** button. Now the framerange appears on the general spre
 
 ### [Validation per batch](#validation-per-batch)
 
-To do a validation (or changing the status of a task) you can do it by clicking on the status of the task on the spreadsheet (1). 
+To do a validation (or changing the status of a task) you can do it by clicking on the status of the task (1). 
 
 ![Shot status](../img/getting-started/shot_status.png)
 
@@ -236,7 +236,7 @@ You can change it purpose by clicking on the 3 vertical dots on the left part of
 
 ![Blue menu status](../img/getting-started/blue_menu_status.png)
 
-You can now do you selection, with **Crtl** of **Chift** (1) and choose the new status for your selected tasks (2) . Validated the new status with the **Confirm** button (3).
+You can now do you selection, with **Crtl** of **Shift** (1) and choose the new status for your selected tasks (2) . Validated the new status with the **Confirm** button (3).
 
 ![Change status per batch](../img/getting-started/change_status_batch.png)
 
