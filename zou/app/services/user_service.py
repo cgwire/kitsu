@@ -304,8 +304,11 @@ def check_project_access(project_id):
     Return true if current user is manager or has a task assigned for this
     project.
     """
-    return permissions.has_admin_permissions() or \
+    is_allowed = permissions.has_admin_permissions() or \
         check_belong_to_project(project_id)
+    if not is_allowed:
+        raise permissions.PermissionDenied
+    return is_allowed
 
 
 def check_manager_project_access(project_id):
@@ -313,11 +316,14 @@ def check_manager_project_access(project_id):
     Return true if current user is manager or has a task assigned for this
     project.
     """
-    return permissions.has_admin_permissions() or \
+    is_allowed = permissions.has_admin_permissions() or \
         (
             permissions.has_manager_permissions() and
             check_belong_to_project(project_id)
         )
+    if not is_allowed:
+        raise permissions.PermissionDenied
+    return is_allowed
 
 
 def get_filters():

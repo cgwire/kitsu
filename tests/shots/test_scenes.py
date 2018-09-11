@@ -29,11 +29,6 @@ class SceneTestCase(ApiDBTestCase):
         self.assertDictEqual(scenes[0], self.serialized_scene)
         self.get("data/projects/123/scenes", 404)
 
-        self.generate_fixture_user_cg_artist()
-        self.log_in_cg_artist()
-        self.get("data/projects/%s/scenes" % self.project.id, 403)
-        self.log_in_admin()
-
     def test_get_sequence_scenes(self):
         scenes = self.get("data/sequences/%s/scenes" % self.sequence_id)
         self.assertEquals(len(scenes), 4)
