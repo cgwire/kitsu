@@ -300,6 +300,7 @@ const actions = {
     const production = rootGetters.currentProduction
     const userFilters = rootGetters.userFilters
     const taskTypeMap = rootGetters.taskTypeMap
+    const personMap = rootGetters.personMap
 
     commit(LOAD_SHOTS_START)
     shotsApi.getEpisodes(production, (err, episodes) => {
@@ -319,7 +320,7 @@ const actions = {
                 commit(LOAD_SEQUENCES_END, sequences)
                 commit(
                   LOAD_SHOTS_END,
-                  { production, shots, userFilters, taskTypeMap }
+                  { production, shots, userFilters, taskTypeMap, personMap }
                 )
               }
               if (callback) callback(err)

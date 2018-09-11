@@ -111,6 +111,11 @@
             {{ $t("main.profile") }}
           </router-link>
         </li>
+        <li>
+          <a href="https://kitsu.cg-wire.com" target="_blank">
+            {{ $t("main.documentation ")}}
+          </a>
+        </li>
         <li @click="logout">
           {{ $t("main.logout") }}
         </li>
@@ -193,15 +198,7 @@ export default {
     },
 
     isProductionContext () {
-      const path = this.$store.state.route.path
-      return path.indexOf('assets') > 0 ||
-        path.indexOf('shots') > 0 ||
-        path.indexOf('sequences') > 0 ||
-        path.indexOf('episodes') > 0 ||
-        path.indexOf('playlists') > 0 ||
-        (path.indexOf('task-types') > 0 && path.indexOf('productions') > 0) ||
-        (path.indexOf('asset-types') > 0 && path.indexOf('productions') > 0) ||
-        path.indexOf('breakdown') > 0
+      return this.$route.params.production_id !== undefined
     }
   },
 

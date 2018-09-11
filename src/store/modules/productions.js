@@ -25,6 +25,9 @@ import {
   PRODUCTION_PICTURE_FILE_SELECTED,
   PRODUCTION_AVATAR_UPLOADED,
 
+  TEAM_ADD_PERSON,
+  TEAM_REMOVE_PERSON,
+
   RESET_ALL
 } from '../mutation-types'
 
@@ -56,7 +59,8 @@ const initialState = {
   sequencesPath: {name: 'open-productions'},
   episodesPath: {name: 'open-productions'},
   breakdownPath: {name: 'open-productions'},
-  playlistsPath: {name: 'open-productions'}
+  playlistsPath: {name: 'open-productions'},
+  teamPath: {name: 'open-productions'}
 }
 
 let state = {...initialState}
@@ -94,6 +98,8 @@ const getters = {
   episodesPath: state => state.episodesPath,
   breakdownPath: state => state.breakdownPath,
   playlistsPath: state => state.playlistsPath,
+  teamPath: state => state.teamPath,
+
   currentProduction: (state) => {
     if (state.currentProduction) {
       return state.currentProduction
@@ -210,6 +216,26 @@ const actions = {
           if (err) reject(err)
           else resolve()
         }
+      )
+    })
+  },
+
+  addPersonToTeam ({ commit, state }, person) {
+    return new Promise((resolve, reject) => {
+      commit(TEAM_ADD_PERSON, person.id)
+      return productionsApi.addPersonToTeam(
+        state.currentProduction.id,
+        person.id
+      )
+    })
+  },
+
+  removePersonFromTeam ({ commit, state }, person) {
+    return new Promise((resolve, reject) => {
+      commit(TEAM_REMOVE_PERSON, person.id)
+      return productionsApi.removePersonFromTeam(
+        state.currentProduction.id,
+        person.id
       )
     })
   }
@@ -365,6 +391,23 @@ const mutations = {
       'breakdown', currentProductionId)
     state.playlistsPath = helpers.getProductionComponentPath(
       'playlists', currentProductionId)
+    state.teamPath = helpers.getProductionComponentPath(
+      'team', currentProductionId)
+  },
+
+  [TEAM_ADD_PERSON] (state, personId) {
+    if (!state.currentProduction.team.find((pId) => pId === personId)) {
+      state.currentProduction.team.push(personId)
+    }
+  },
+
+  [TEAM_REMOVE_PERSON] (state, personId) {
+    const personIndex = state.currentProduction.team.find(
+      (pId) => pId === personId
+    )
+    if (personIndex) {
+      state.currentProduction.team.splice(personIndex, 1)
+    }
   },
 
   [RESET_ALL] (state) {
