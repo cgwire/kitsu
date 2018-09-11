@@ -100,13 +100,13 @@ class BaseModelsResource(Resource):
         return query
 
     def check_read_permissions(self):
-        return permissions.check_manager_permissions()
+        return permissions.check_admin_permissions()
 
     def add_project_permission_filter(self, query):
         return query
 
     def check_create_permissions(self, data):
-        return permissions.check_manager_permissions()
+        return permissions.check_admin_permissions()
 
     def update_data(self, data):
         return data
@@ -196,13 +196,13 @@ class BaseModelResource(Resource):
         return instance
 
     def check_read_permissions(self, instance):
-        return permissions.check_manager_permissions()
+        return permissions.check_admin_permissions()
 
     def check_update_permissions(self, instance, data):
-        return permissions.check_manager_permissions()
+        return permissions.check_admin_permissions()
 
     def check_delete_permissions(self, instance):
-        return permissions.check_manager_permissions()
+        return permissions.check_admin_permissions()
 
     def get_arguments(self):
         return request.json

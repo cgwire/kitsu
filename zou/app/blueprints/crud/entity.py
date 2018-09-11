@@ -18,6 +18,9 @@ class EntitiesResource(BaseModelsResource):
     def __init__(self):
         BaseModelsResource.__init__(self, Entity)
 
+    def check_create_permissions(self, entity):
+        user_service.check_manager_project_access(entity["project_id"])
+
 
 class EntityResource(BaseModelResource):
 

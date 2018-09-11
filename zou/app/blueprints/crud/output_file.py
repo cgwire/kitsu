@@ -16,7 +16,7 @@ class OutputFilesResource(BaseModelsResource):
         return True
 
     def add_project_permission_filter(self, query):
-        if user_service.is_current_user_manager():
+        if permissions.has_admin_permissions():
             return query
         else:
             query = query \

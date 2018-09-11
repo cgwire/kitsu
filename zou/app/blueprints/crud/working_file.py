@@ -6,7 +6,6 @@ from zou.app.services import (
     tasks_service,
     files_service
 )
-from zou.app.utils import permissions
 
 
 class WorkingFilesResource(BaseModelsResource):
@@ -27,5 +26,5 @@ class WorkingFileResource(BaseModelResource):
 
     def check_update_permissions(self, instance, data):
         working_file = files_service.get_working_file(instance["id"])
-        return permissions.has_manager_permissions or \
-            user_service.check_assigned(working_file["task_id"])
+        task = tasks_service.get_task(working_file["task_id"])
+        user_service.check_project_access(task["project_id"])

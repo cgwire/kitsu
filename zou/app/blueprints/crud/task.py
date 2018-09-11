@@ -58,9 +58,6 @@ class TaskResource(BaseModelResource):
     def check_read_permissions(self, task):
         user_service.check_project_access(task["project_id"])
 
-    def check_delete_permissions(self, task):
-        permissions.check_admin_permissions()
-
     @jwt_required
     def delete(self, instance_id):
         """

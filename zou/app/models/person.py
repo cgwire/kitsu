@@ -77,3 +77,9 @@ class Person(db.Model, BaseMixin, SerializerMixin):
         data["full_name"] = self.full_name()
         del data["password"]
         return data
+
+    def serialize_without_info(self):
+        data = self.serialize_safe()
+        del data["phone"]
+        del data["email"]
+        return data

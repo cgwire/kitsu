@@ -80,3 +80,16 @@ class ProjectServiceTestCase(ApiDBTestCase):
         projects_service.update_project(self.project.id, {"name": new_name})
         project = projects_service.get_project(self.project.id)
         self.assertEqual(project["name"], new_name)
+
+    def test_add_team_member(self):
+        self.generate_fixture_person()
+        projects_service.add_team_member(self.project.id, self.person.id)
+        project = projects_service.get_project(self.project.id)
+        self.assertEqual(project["team"], [str(self.person.id)])
+
+    def test_remove_team_member(self):
+        self.generate_fixture_person()
+        projects_service.add_team_member(self.project.id, self.person.id)
+        projects_service.remove_team_member(self.project.id, self.person.id)
+        project = projects_service.get_project(self.project.id)
+        self.assertEqual(project["team"], [])

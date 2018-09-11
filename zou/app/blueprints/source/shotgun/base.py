@@ -73,7 +73,7 @@ class BaseImportShotgunResource(Resource):
         return self.sg_entries
 
     def check_permissions(self):
-        return permissions.check_manager_permissions()
+        return permissions.check_admin_permissions()
 
     def prepare_import(self):
         pass

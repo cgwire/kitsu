@@ -4,7 +4,7 @@ from tests.base import ApiDBTestCase
 from zou.app.utils import fields
 
 from zou.app.models.task import Task
-from zou.app.services import tasks_service
+from zou.app.services import projects_service
 
 
 class WorkingFilesTestCase(ApiDBTestCase):
@@ -163,16 +163,15 @@ class WorkingFilesTestCase(ApiDBTestCase):
         self.assertEquals(remote_file["id"], output_file_id)
         self.assertEquals(remote_file["type"], "OutputFile")
 
-        path = "/data/files/%s" % self.task.id
+        path = "/data/files/%s" % self.task_id
         self.get(path, 404)
 
         self.generate_fixture_user_cg_artist()
         self.log_in_cg_artist()
         path = "/data/files/%s" % output_file_id
         self.get(path, 403)
-
-        tasks_service.assign_task(self.task.id, self.user_cg_artist.id)
-        remote_file = self.get(path)
+        projects_service.add_team_member(self.project_id, self.user_cg_artist.id)
+        self.get(path)
 
     def test_comment_working_file(self):
         comment_data = {
@@ -187,7 +186,6 @@ class WorkingFilesTestCase(ApiDBTestCase):
 
     def test_update_working_file_permission(self):
         working_file = self.working_file.serialize()
-        task = self.task.serialize()
         self.generate_fixture_user_cg_artist()
         user = self.user_cg_artist.serialize()
         self.log_in_cg_artist()
@@ -200,7 +198,7 @@ class WorkingFilesTestCase(ApiDBTestCase):
             comment_data,
             403
         )
-        tasks_service.assign_task(task["id"], user["id"])
+        projects_service.add_team_member(self.project_id, user["id"])
         self.put(
             "/actions/working-files/%s/comment" % working_file["id"],
             comment_data

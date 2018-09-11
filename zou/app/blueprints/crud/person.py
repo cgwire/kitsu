@@ -19,7 +19,10 @@ class PersonsResource(BaseModelsResource):
         if query is None:
             query = self.model.query
 
-        return [person.serialize_safe() for person in query.all()]
+        if permissions.has_manager_permissions():
+            return [person.serialize_safe() for person in query.all()]
+        else:
+            return [person.serialize_without_info() for person in query.all()]
 
     def post(self):
         abort(405)
@@ -35,6 +38,9 @@ class PersonResource(BaseModelResource):
         self.protected_fields += [
             "password"
         ]
+
+    def check_read_permissions(self, instance):
+        return True
 
     def check_update_permissions(self, instance, data):
         if instance["id"] != persons_service.get_current_user()["id"]:
@@ -60,7 +66,10 @@ class PersonResource(BaseModelResource):
             raise permissions.PermissionDenied
 
     def serialize_instance(self, instance):
-        return instance.serialize_safe()
+        if permissions.has_manager_permissions():
+            return instance.serialize_safe()
+        else:
+            return instance.serialize_without_info()
 
     def post_update(self, instance_dict):
         persons_service.clear_person_cache()

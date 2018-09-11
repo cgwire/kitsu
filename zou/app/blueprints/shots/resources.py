@@ -40,9 +40,12 @@ class ShotResource(Resource):
             args = parser.parse_args()
             force = args["force"]
 
-            permissions.check_manager_permissions()
             if force:
                 permissions.check_admin_permissions()
+            else:
+                shot = shots_service.get_shot(shot_id)
+                user_service.check_manager_project_access(shot["project_id"])
+
             deleted_shot = shots_service.remove_shot(shot_id, force=force)
         except ShotNotFoundException:
             abort(404)
@@ -68,7 +71,8 @@ class SceneResource(Resource):
         """
         Delete given scene.
         """
-        permissions.check_manager_permissions()
+        scene = shots_service.get_scene(scene_id)
+        user_service.check_manager_project_access(scene["project_id"])
         deleted_scene = shots_service.remove_scene(scene_id)
         return deleted_scene, 204
 
@@ -206,7 +210,8 @@ class ProjectShotsResource(Resource):
         """
         (sequence_id, name, data) = self.get_arguments()
         projects_service.get_project(project_id)
-        permissions.check_manager_permissions()
+        user_service.check_manager_project_access(project_id)
+
         shot = shots_service.create_shot(
             project_id,
             sequence_id,
@@ -219,6 +224,7 @@ class ProjectShotsResource(Resource):
         parser = reqparse.RequestParser()
         parser.add_argument("name", required=True)
         parser.add_argument("sequence_id", default=None)
+
         parser.add_argument("data", type=dict)
         args = parser.parse_args()
         return (args["sequence_id"], args["name"], args["data"])
@@ -242,7 +248,7 @@ class ProjectSequencesResource(Resource):
         """
         (episode_id, name) = self.get_arguments()
         projects_service.get_project(project_id)
-        permissions.check_manager_permissions()
+        user_service.check_manager_project_access(project_id)
         sequence = shots_service.create_sequence(
             project_id,
             episode_id,
@@ -276,7 +282,7 @@ class ProjectEpisodesResource(Resource):
         """
         name = self.get_arguments()
         projects_service.get_project(project_id)
-        permissions.check_manager_permissions()
+        user_service.check_manager_project_access(project_id)
         return shots_service.create_episode(project_id, name), 201
 
     def get_arguments(self):
@@ -383,7 +389,8 @@ class CastingResource(Resource):
         Resource to allow the modification of assets linked to a shot.
         """
         casting = request.json
-        permissions.check_manager_permissions()
+        shot = shots_service.get_shot(shot_id)
+        user_service.check_project_access(shot["project_id"])
         return breakdown_service.update_casting(shot_id, casting)
 
 
@@ -405,7 +412,7 @@ class ProjectScenesResource(Resource):
         """
         (sequence_id, name) = self.get_arguments()
         projects_service.get_project(project_id)
-        permissions.check_manager_permissions()
+        user_service.check_manager_project_access(project_id)
         scene = shots_service.create_scene(
             project_id,
             sequence_id,
@@ -562,8 +569,8 @@ class SceneShotsResource(Resource, ArgsMixin):
         args = self.get_args([
             ("shot_id", None, True)
         ])
-        permissions.check_manager_permissions()
         scene = shots_service.get_scene(scene_id)
+        user_service.check_project_access(scene["project_id"])
         shot = shots_service.get_shot(args["shot_id"])
         return scenes_service.add_shot_to_scene(scene, shot), 201
 
@@ -572,7 +579,7 @@ class RemoveShotFromSceneResource(Resource):
 
     @jwt_required
     def delete(self, scene_id, shot_id):
-        permissions.check_manager_permissions()
         scene = shots_service.get_scene(scene_id)
+        user_service.check_project_access(scene["project_id"])
         shot = shots_service.get_shot(shot_id)
         return scenes_service.remove_shot_from_scene(scene, shot), 204
