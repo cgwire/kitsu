@@ -163,16 +163,16 @@ On the main menu ![Main menu](../img/getting-started/main_button.png), under **P
 
 ![Menu breakdown](../img/getting-started/menu_breakdown.png)
 
-On the left part of the breakdown page there is the sequence menu (1), you can choose between the episode and the sequence you have created. And on the right part of the screen all the assets available that you have created for this production (3). And on the middle part it will be your selection for the shot (2).
+On the left part of the breakdown page there is the sequence menu (1), you can choose between the episodes and the sequences you have created. And on the right part of the screen are all the assets available that you have created for this production (3). And on the middle part it will be your selection for the shot (2).
 
 ![Breakdown page](../img/getting-started/breakdown_general.png)
 
 So now you have to select the shot you wan to cast, let's say the first one. So click on the shot sh001, then click on the assets you want to assign, some characters, backgrounds,etc. 
-When you pass over the asset you can see a +1 or +10. It's the number of time you want to add this asset. 
+When you pass over the asset you can see a +1 or +10. It's the number of time you can add this asset. 
 
 ![Breakdown add asset](../img/getting-started/breakdown_add_asset.png)
 
-You can click the number of time you need the asset. You can now see the asset appearing on the middle part of the screen. Next to the name of the asset is the number of this asset you have add.
+You can click the number of time you need the asset. You can now see the asset appearing on the middle part of the screen. Next to the name of the asset is the number of  time this asset have been added. On this example we have added 2 times the character asset Paul.
 
 If you add twice an asset by mistake, you just have to go on the middle part of the screen, on your selection of assets for this shot, and selection -1.
 When you are done for this shot click on the **Save** button, and go on with the other shots.
@@ -180,50 +180,51 @@ When you are done for this shot click on the **Save** button, and go on with the
 ![Breakdown remove asset](../img/getting-started/breakdown_remove_asset.png)
 
 
-If a new asset is created during the storyboard just get back to the asset page (using the button on the top of the screen or via the main menu) ![Asset button](../img/getting-started/asset_button.png)
-, create the assets you need. The tasks previously created will be applied immediately to this new asset. You will have to do the assignation on it, and you're good to continue with the breakdown.
+If a new asset is created during the storyboard, just get back to the asset page (using the button on the top of the screen ![Asset button](../img/getting-started/asset_button.png) or via the main menu), create the assets you need. The tasks previously created will be applied immediately to this new asset. You will have to do the assignation on it, and then you're good to continue with the breakdown.
 
 Now your **Breakdown page** should look like this.
 
 ![Breakdown page fill](../img/getting-started/breakdown_full.png)
 
-We can now assign people on the shots tasks. If the animation and so are done elsewhere, you can create a account for this studio and assign it tasks. They will be able to feed by themself the spreadsheet.
+We can now assign people on the shots tasks. If the animation and so are done elsewhere, you can create a account for this studio and assign it to tasks. They will be able to feed by themselves the spreadsheet.
 
 Everything is now filled, if you want to see a detail of a shot, click on his name. 
 
 ![Shot detail](../img/getting-started/shot_detail.png)
 
-A new page will open with the list of the taks, the assignation, and the list of assets that will appear on this shot.
+A new page will open with the list of the taks, the assignation, and the list of assets that will appear on this shot (**Shot casting**).
  
 ![Shot detail page](../img/getting-started/shot_detail_page.png)
  
 ### [Add the Frameranges](#add-the-frameranges)
 
-At this stage of the production the animatic should be done. Meaning you have the lengh (**framerange In** and **framerange Out**) for each shot. You can add this information on the spreadsheet.
+At this stage of the production the animatic should be done. Meaning you have the length (**framerange In** and **framerange Out**) for each shot. You can add this information on the spreadsheet.
 This way you will be sure that all the frames will be calculated and none will be missing, or over compute.
 
 You may also be able to add camera as assets!
 
 You need to edit the shots to fill the framerange information. Click on the edit button ![Edit button](../img/getting-started/edit_button.png) on the right side of the shot line.
 
-On the new window you can enter the **In** and **Out** of the shot (1), you can enter it by hand or use the **+** and **-** buttons (2).
-Save with the **Confirm** button. Now the framerange appears on the general spreadsheet of the shot page.
+On the new window you can enter the **In** and **Out** of the shot (1), you can do it by hand or with the **+** and **-** buttons (2).
+Save with the **Confirm** button. Now the frameranges appear on the general spreadsheet of the shot page.
 
 ![Shot edit page](../img/getting-started/shot_edit.png)
 
 ### [Validation per batch](#validation-per-batch)
 
-To do a validation (or changing the status of a task) you can do it by clicking on the status of the task (1). 
+To do a validation (or changing the status of a task) you can click on the status of the task (1). 
 
 ![Shot status](../img/getting-started/shot_status.png)
 
-It will open a new page, and here you can post a comment and change the status.
+It will open a new page, and here you can post a comment (1) and change the status (2), and validate the post and the new status with "Post status" button (3).
 
 ![Changing status](../img/getting-started/changing_status.png)
 
 
 Or you can do it per batch. 
 We will use the same technique as for the assignation.
+
+
 Click on the empty space on the right of the status/assignation on a task (1).
 
 ![Task assigned](../img/getting-started/task_assigned.png)
@@ -236,7 +237,7 @@ You can change it purpose by clicking on the 3 vertical dots on the left part of
 
 ![Blue menu status](../img/getting-started/blue_menu_status.png)
 
-You can now do you selection, with **Crtl** of **Shift** (1) and choose the new status for your selected tasks (2) . Validated the new status with the **Confirm** button (3).
+You can now do your selection, by pressing the **Crtl** or **Shift** keys (1) and then choose the new status for your selected tasks (2). Validated the new status with the **Confirm** button (3).
 
 ![Change status per batch](../img/getting-started/change_status_batch.png)
 
