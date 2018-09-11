@@ -245,8 +245,28 @@ You can now do your selection, by pressing the **Crtl** or **Shift** keys (1) an
 
 At some point on the production you may want to prioritized some tasks, and pinpoint these urgent tasks to your team.
 
-For this we will use the same technique than for the assignation or the changing status. Click on the empty space near a task. The blue menu will appear on the top of the screen. click on the 3 dots menu button, and choose **Change priority**.
+For this we will use the same technique than for the assignation or the changing status. Click on the empty space near a task (1). 
+
+![Task assigned](../img/getting-started/task_assigned.png)
+
+The blue menu will appear on the top of the screen. 
+
+![Blue menu](../img/getting-started/blue_menu.png)
+
+Click on the 3 dots menu button ![Blue menu dot](../img/getting-started/blue_menu_dot.png), and choose **Change priority**.
+
+![Change priority](../img/getting-started/change_priority.png)
 
 There is 4 levels of prioriy : **Normal**, that is the basic level of all the task, **High**, **Very High**, or **Emergency**. Save the changes with the **Confirm** button.
 
-You can now see next to the status of the task some **Exclamation mark**. The more there is, the more urgent is the task.
+As we have done for the assignation or the status, select the shot (1), select the level of priority (2), and apply with **Confirm** (3).
+
+![Priority selection](../img/getting-started/priority.png)
+
+You can now see next to the status of the task some **Exclamation mark**. The more there is, the more urgent is the task. 
+	* (1) is **Normal**, 
+	* (2) is **High**,
+	* (3) is **Very High**
+	* (4) is for **Emergency**.
+	
+![Priority level](../img/getting-started/priority_level.png)
