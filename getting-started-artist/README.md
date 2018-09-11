@@ -92,7 +92,7 @@ Everyday you can declare what time you have spend on each task. On your **My Tak
 
 ![Timesheets](../img/getting-started/timesheets.png)
 
-You need to move the cursor (1) next to each task accordingly to the number of hours spend. You can also go quicker and click on the **1**, **4**, or **8** hours buttons (2) .
+You need to move the cursor (1) next to each task accordingly to the number of hours spent. You can also go quicker and click on the **1**, **4**, or **8** hours buttons (2) .
 
 If one day you miss your declaration, you can click on the today date (3) , and go back in time and select the day you have missed.
 
@@ -100,7 +100,7 @@ If one day you miss your declaration, you can click on the today date (3) , and 
 
 You can do the same with the **Done taks** work below!
 
-![Timesheets done tasks](../img/getting-started/timesheets_done_task.png)
+![Timesheets done tasks](../img/getting-started/timesheet_done_task.png)
 
  
 	
