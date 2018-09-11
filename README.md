@@ -33,6 +33,7 @@ To install the development environment, follow [the dedicated guide](https://kit
 
 [![Les Fées Spéciales](https://www.cg-wire.com/images/logo-les-fees-speciales.png)](http://les-fees-speciales.coop/)
 [![TNZPV](https://www.cg-wire.com/images/logo-tnzpv.png)](https://nousvoir.com/en/home/)
+[![Karlab](https://www.cg-wire.com/images/logo-karlab.png)](https://www.karlab.fr)
 
 ## About authors
 
