@@ -223,20 +223,24 @@ const actions = {
   addPersonToTeam ({ commit, state }, person) {
     return new Promise((resolve, reject) => {
       commit(TEAM_ADD_PERSON, person.id)
-      return productionsApi.addPersonToTeam(
+      productionsApi.addPersonToTeam(
         state.currentProduction.id,
         person.id
       )
+        .then(resolve)
+        .catch(reject)
     })
   },
 
   removePersonFromTeam ({ commit, state }, person) {
     return new Promise((resolve, reject) => {
       commit(TEAM_REMOVE_PERSON, person.id)
-      return productionsApi.removePersonFromTeam(
+      productionsApi.removePersonFromTeam(
         state.currentProduction.id,
         person.id
       )
+        .then(resolve)
+        .catch(reject)
     })
   }
 }
