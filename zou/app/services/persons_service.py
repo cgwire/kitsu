@@ -4,19 +4,17 @@ import datetime
 from calendar import monthrange
 from dateutil import relativedelta
 
-from sqlalchemy.exc import StatementError, DataError
+from sqlalchemy.exc import StatementError
 
 from flask_jwt_extended import get_jwt_identity
 
 from zou.app.models.person import Person
 from zou.app.models.desktop_login_logs import DesktopLoginLog
-from zou.app.models.time_spent import TimeSpent
 
 from zou.app.utils import fields, events, cache
 
 from zou.app.services.exception import (
-    PersonNotFoundException,
-    WrongDateFormatException
+    PersonNotFoundException
 )
 
 

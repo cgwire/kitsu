@@ -1,4 +1,5 @@
 from zou.app.models.project import Project
+from zou.app.models.person import Person
 from zou.app.models.project_status import ProjectStatus
 from zou.app.services.exception import ProjectNotFoundException
 
@@ -150,4 +151,26 @@ def update_project(project_id, data):
     events.emit("project:update", {
         "project_id": project_id
     })
+    return project.serialize()
+
+
+def add_team_member(project_id, person_id):
+    """
+    Add a a person listed in database to the the project team.
+    """
+    project = get_project_raw(project_id)
+    person = Person.get(person_id)
+    project.team.append(person)
+    project.save()
+    return project.serialize()
+
+
+def remove_team_member(project_id, person_id):
+    """
+    Remove a a person listed in database from the the project team.
+    """
+    project = get_project_raw(project_id)
+    person = Person.get(person_id)
+    project.team.remove(person)
+    project.save()
     return project.serialize()

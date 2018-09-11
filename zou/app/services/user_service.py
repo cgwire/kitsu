@@ -33,6 +33,15 @@ def build_assignee_filter():
     return Task.assignees.contains(current_user)
 
 
+def build_team_filter():
+    """
+    Query filter for task to retrieve only models from project for which the
+    user is part of the team.
+    """
+    current_user = persons_service.get_current_user_raw()
+    return Project.team.contains(current_user)
+
+
 def build_open_project_filter():
     """
     Query filter for project to retrieve only open projects.
@@ -42,13 +51,12 @@ def build_open_project_filter():
 
 def build_related_projects_filter():
     """
-    Query filter for project to retrieve open projects with at least
-    one task assigned to current user.
+    Query filter for project to retrieve open projects of which the user
+    is part of the team.
     """
     projects = Project.query \
-        .join(Task) \
         .join(ProjectStatus) \
-        .filter(build_assignee_filter()) \
+        .filter(build_team_filter()) \
         .filter(build_open_project_filter()) \
         .all()
     project_ids = [project.id for project in projects]
@@ -60,13 +68,13 @@ def build_related_projects_filter():
 
 def related_projects():
     """
-    Return all projects related to current user: open projects with at least
-    one task assigned to current user.
+    Return all projects related to current user: open projects of which the user
+    is part of the team.
     """
     projects = Project.query \
         .join(Task) \
         .join(ProjectStatus) \
-        .filter(build_assignee_filter()) \
+        .filter(build_team_filter()) \
         .filter(build_open_project_filter()) \
         .all()
     return Project.serialize_list(projects)
@@ -239,8 +247,8 @@ def get_open_projects(name=None):
     Get all open projects for which current user has a task assigned.
     """
     query = Project.query \
-        .join(Task, ProjectStatus) \
-        .filter(build_assignee_filter()) \
+        .join(ProjectStatus) \
+        .filter(build_team_filter()) \
         .filter(build_open_project_filter())
 
     if name is not None:
@@ -254,8 +262,8 @@ def get_projects(name=None):
     Get all projects for which current user has a task assigned.
     """
     query = Project.query \
-        .join(Task, ProjectStatus) \
-        .filter(build_assignee_filter())
+        .join(ProjectStatus) \
+        .filter(build_team_filter())
 
     if name is not None:
         query = query.filter(Project.name == name)
@@ -263,26 +271,13 @@ def get_projects(name=None):
     return fields.serialize_value(query.all())
 
 
-def check_assigned(task_id):
-    """
-    Return true if current user is assiged to task related to given ID.
-    """
-    query = Task.query \
-        .filter(build_assignee_filter()) \
-        .filter(Task.id == task_id)
-
-    if query.first() is None:
-        raise permissions.PermissionDenied
-
-    return True
-
-
 def check_working_on_entity(entity_id):
     """
     Return True if user has task assigned which is related to given entity.
     """
+    current_user = persons_service.get_current_service()
     query = Task.query \
-        .filter(build_assignee_filter()) \
+        .filter(Task.id == current_user["id"]) \
         .filter(Task.entity_id == entity_id)
 
     if query.first() is None:
@@ -291,7 +286,7 @@ def check_working_on_entity(entity_id):
     return True
 
 
-def check_has_task_related(project_id):
+def check_belong_to_project(project_id):
     """
     Return true if current user is assigned to a task of the given project or
     if current_user is part of the project team.
@@ -300,27 +295,8 @@ def check_has_task_related(project_id):
     current_user = persons_service.get_current_user()
     if current_user["id"] in project["team"]:
         return True
-
-    query = Project.query \
-        .join(Task) \
-        .filter(build_assignee_filter()) \
-
-    if query.first() is None:
-        raise permissions.PermissionDenied
-
-    return True
-
-
-def check_criterions_has_task_related(criterions):
-    """
-    Extract project id from criterions and return true if the current user
-    has a task assigned for this project.
-    """
-    if "project_id" in criterions:
-        check_has_task_related(criterions["project_id"])
-        return True
     else:
-        raise permissions.PermissionDenied
+        return False
 
 
 def check_project_access(project_id):
@@ -328,15 +304,20 @@ def check_project_access(project_id):
     Return true if current user is manager or has a task assigned for this
     project.
     """
-    return permissions.has_manager_permissions() or \
-        check_has_task_related(project_id)
+    return permissions.has_admin_permissions() or \
+        check_belong_to_project(project_id)
 
 
-def is_current_user_manager():
+def check_manager_project_access(project_id):
     """
-    Return true is current user is manager or admin.
+    Return true if current user is manager or has a task assigned for this
+    project.
     """
-    return permissions.has_manager_permissions()
+    return permissions.has_admin_permissions() or \
+        (
+            permissions.has_manager_permissions() and
+            check_belong_to_project(project_id)
+        )
 
 
 def get_filters():
