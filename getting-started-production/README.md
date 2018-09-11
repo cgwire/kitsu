@@ -183,9 +183,19 @@ When you are done for this shot click on the **Save** button, and go on with the
 If a new asset is created during the storyboard just get back to the asset page (using the button on the top of the screen or via the main menu) ![Asset button](../img/getting-started/asset_button.png)
 , create the assets you need. The tasks previously created will be applied immediately to this new asset. You will have to do the assignation on it, and you're good to continue with the breakdown.
 
+Now your **Breakdown page** should look like this.
+
+![Breakdown page fill](../img/getting-started/breakdown full.png)
+
 We can now assign people on the shots tasks. If the animation and so are done elsewhere, you can create a account for this studio and assign it tasks. They will be able to feed by themself the spreadsheet.
 
-Everything is now filled, if you want to see a detail of a shot, click on his name, a new page will open with the list of the taks, the assignation, and the list of assets that will appear on this shot.
+Everything is now filled, if you want to see a detail of a shot, click on his name. 
+
+![Shot detail](../img/getting-started/shot_detail.png)
+
+A new page will open with the list of the taks, the assignation, and the list of assets that will appear on this shot.
+ 
+![Shot detail page](../img/getting-started/shot_detail_page.png)
  
 ### [Add the Frameranges](#add-the-frameranges)
 
@@ -194,22 +204,41 @@ This way you will be sure that all the frames will be calculated and none will b
 
 You may also be able to add camera as assets!
 
-You need to edit the shots to fill the framerange information. Click on the edit button on the right side of the shot line.
+You need to edit the shots to fill the framerange information. Click on the edit button ![Edit button](../img/getting-started/edit_button.png)on the right side of the shot line.
 
-On the new window you can enter the **In** and **Out** of the shot, you can enter it by hand or use the **+** and **-** buttons.
+On the new window you can enter the **In** and **Out** of the shot (1), you can enter it by hand or use the **+** and **-** buttons (2).
 Save with the **Confirm** button. Now the framerange appears on the general spreadsheet of the shot page.
+
+![Shot edit page](../img/getting-started/shot_edit.png)
 
 ### [Validation per batch](#validation-per-batch)
 
-To do a validation (changing the status of a task) you can do it by click on the status of the task on the spreadsheet. It will open a new page, and here you can post a comment and change the status.
+To do a validation (or changing the status of a task) you can do it by clicking on the status of the task on the spreadsheet (1). 
+
+![Shot status](../img/getting-started/shot_status.png)
+
+It will open a new page, and here you can post a comment and change the status.
+
+![Changing status](../img/getting-started/changing_status.png)
+
 
 Or you can do it per batch. 
 We will use the same technique as for the assignation.
-Click on the empty space on the right of the status/assignation on a task.
-The blue line on the top of the screen will appear. 
+Click on the empty space on the right of the status/assignation on a task (1).
 
-You can change it purpose by clicking on the 3 vertical dots on the left part of the screen and choose **Change status**.
-You can now do you selection, with **Crtl** of **Chift** and choose the new status for your selected tasks. Validated the new status with the **Confirm** button.
+![Task assigned](../img/getting-started/task_assigned.png)
+
+The blue menu on the top of the screen will appear. 
+
+![Blue menu](../img/getting-started/blue_menu.png)
+
+You can change it purpose by clicking on the 3 vertical dots on the left part of the screen ![Blue menu dot](../img/getting-started/blue_menu_dot.png), a new menu will appear and you can choose **Change status**.
+
+![Blue menu status](../img/getting-started/blue_menu_status.png)
+
+You can now do you selection, with **Crtl** of **Chift** (1) and choose the new status for your selected tasks (2) . Validated the new status with the **Confirm** button (3).
+
+![Change status per batch](../img/getting-started/change_status_batch.png)
 
 ### [Change the priority](#change-the-priority)
 
