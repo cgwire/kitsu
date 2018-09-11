@@ -14,22 +14,22 @@ from zou.app.services import (
     tasks_service
 )
 
-from zou.app.models.project import Project
-from zou.app.models.person import Person
+from zou.app.models.asset_instance import AssetInstance
 from zou.app.models.department import Department
-from zou.app.models.working_file import WorkingFile
-from zou.app.models.output_file import OutputFile
-from zou.app.models.preview_file import PreviewFile
-from zou.app.models.output_type import OutputType
-from zou.app.models.software import Software
-from zou.app.models.project_status import ProjectStatus
 from zou.app.models.entity import Entity
 from zou.app.models.entity_type import EntityType
-from zou.app.models.task import Task
-from zou.app.models.task_type import TaskType
-from zou.app.models.task_status import TaskStatus
 from zou.app.models.file_status import FileStatus
-from zou.app.models.asset_instance import AssetInstance
+from zou.app.models.output_file import OutputFile
+from zou.app.models.output_type import OutputType
+from zou.app.models.project import Project
+from zou.app.models.project_status import ProjectStatus
+from zou.app.models.person import Person
+from zou.app.models.preview_file import PreviewFile
+from zou.app.models.task import Task
+from zou.app.models.task_status import TaskStatus
+from zou.app.models.task_type import TaskType
+from zou.app.models.software import Software
+from zou.app.models.working_file import WorkingFile
 
 
 class ApiTestCase(unittest.TestCase):
@@ -246,6 +246,7 @@ class ApiDBTestCase(ApiTestCase):
             name=name,
             project_status_id=self.open_status.id
         )
+        self.project_id = self.project.id
         self.project.update({
             "file_tree": file_tree_service.get_tree_from_file("simple")
         })
@@ -558,6 +559,9 @@ class ApiDBTestCase(ApiTestCase):
             due_date=due_date,
             real_start_date=real_start_date
         )
+        self.task_id = self.task.id
+        self.project.team.append(self.person)
+        self.project.save()
         return self.task
 
     def generate_fixture_task_standard(self):
@@ -578,6 +582,9 @@ class ApiDBTestCase(ApiTestCase):
             due_date=due_date,
             real_start_date=real_start_date
         )
+        self.project.team.append(self.person)
+        self.project.save()
+        return self.task_standard
 
     def generate_fixture_shot_task(self, name="Master"):
         self.shot_task = Task.create(
@@ -589,6 +596,8 @@ class ApiDBTestCase(ApiTestCase):
             assignees=[self.person],
             assigner_id=self.assigner.id,
         )
+        self.project.team.append(self.person)
+        self.project.save()
         return self.shot_task
 
     def generate_fixture_scene_task(self, name="Master"):
@@ -601,6 +610,8 @@ class ApiDBTestCase(ApiTestCase):
             assignees=[self.person],
             assigner_id=self.assigner.id,
         )
+        self.project.team.append(self.person)
+        self.project.save()
         return self.scene_task
 
     def generate_fixture_sequence_task(self, name="Master"):
@@ -613,6 +624,9 @@ class ApiDBTestCase(ApiTestCase):
             assignees=[self.person],
             assigner_id=self.assigner.id,
         )
+        self.project.team.append(self.person)
+        self.project.save()
+        return self.sequence_task
 
     def generate_fixture_shot_task_standard(self):
         self.shot_task_standard = Task.create(
@@ -624,6 +638,9 @@ class ApiDBTestCase(ApiTestCase):
             assignees=[self.person],
             assigner_id=self.assigner.id
         )
+        self.project.team.append(self.person)
+        self.project.save()
+        return self.shot_task_standard
 
     def generate_fixture_comment(self):
         self.comment = tasks_service.create_comment(

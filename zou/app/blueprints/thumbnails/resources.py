@@ -171,11 +171,13 @@ class CreatePreviewFilePictureResource(Resource):
         """
         Return true if user is allowed to add a preview.
         """
-        if permissions.has_manager_permissions():
+        preview_file = files_service.get_preview_file(preview_file_id)
+        task = tasks_service.get_task(preview_file["task_id"])
+        try:
+            user_service.check_project_access(task["project_id"])
             return True
-        else:
-            preview_file = files_service.get_preview_file(preview_file_id)
-            return user_service.check_assigned(preview_file["task_id"])
+        except permissions.PermissionDenied:
+            return False
 
     def is_exist(self, preview_file_id):
         """
@@ -196,16 +198,13 @@ class PreviewFileMovieResource(Resource):
         return files_service.get_preview_file(preview_file_id) is not None
 
     def is_allowed(self, preview_file_id):
-        if permissions.has_manager_permissions():
+        preview_file = files_service.get_preview_file(preview_file_id)
+        task = tasks_service.get_task(preview_file["task_id"])
+        try:
+            user_service.check_project_access(task["project_id"])
             return True
-        else:
-            preview_file = files_service.get_preview_file(preview_file_id)
-            task = tasks_service.get_task(preview_file["task_id"])
-            try:
-                user_service.check_has_task_related(task["project_id"])
-                return True
-            except permissions.PermissionDenied:
-                return False
+        except permissions.PermissionDenied:
+            return False
 
     @jwt_required
     def get(self, instance_id):
@@ -243,7 +242,7 @@ class PreviewFileResource(Resource):
             preview_file = files_service.get_preview_file(preview_file_id)
             task = tasks_service.get_task(preview_file["task_id"])
             try:
-                user_service.check_has_task_related(task["project_id"])
+                user_service.check_project_access(task["project_id"])
                 return True
             except permissions.PermissionDenied:
                 return False
@@ -292,7 +291,7 @@ class BasePreviewPictureResource(Resource):
             preview_file = files_service.get_preview_file(preview_file_id)
             task = tasks_service.get_task(preview_file["task_id"])
             try:
-                user_service.check_has_task_related(task["project_id"])
+                user_service.check_project_access(task["project_id"])
                 return True
             except permissions.PermissionDenied:
                 return False
@@ -488,8 +487,7 @@ class ProjectThumbnailResource(BasePictureResource):
 
     def is_allowed(self, project_id):
         try:
-            if not permissions.has_manager_permissions():
-                user_service.check_has_task_related(project_id)
+            user_service.check_project_access(project_id)
             return True
         except permissions.PermissionDenied:
             return False
@@ -499,7 +497,9 @@ class SetMainPreviewResource(Resource):
 
     @jwt_required
     def put(self, entity_id, preview_file_id):
-        permissions.check_manager_permissions()
+        preview_file = files_service.get_preview_file(preview_file_id)
+        task = tasks_service.get_task(preview_file["task_id"])
+        user_service.check_project_access(task["project_id"])
         return entities_service.update_entity_preview(
             entity_id,
             preview_file_id

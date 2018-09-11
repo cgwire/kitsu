@@ -8,6 +8,7 @@ from flask_jwt_extended import jwt_required
 
 from zou.app import app
 from zou.app.utils import fields, permissions
+from zou.app.services import user_service
 
 
 class BaseCsvImportResource(Resource):
@@ -69,7 +70,7 @@ class BaseCsvProjectImportResource(BaseCsvImportResource):
         result = []
 
         try:
-            self.check_permissions()
+            self.check_project_permissions(project_id)
             self.prepare_import()
             with open(file_path) as csvfile:
                 reader = csv.DictReader(csvfile)
@@ -80,6 +81,9 @@ class BaseCsvProjectImportResource(BaseCsvImportResource):
         except KeyError as e:
             print(e)
             return {"error": "A column is missing: %s" % e}, 400
+
+    def check_project_permissions(self, project_id):
+        return user_service.check_manager_project_access(project_id)
 
     def import_row(self, project_id):
         pass

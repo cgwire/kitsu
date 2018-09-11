@@ -54,41 +54,25 @@ class UserServiceTestCase(ApiDBTestCase):
     def get_current_user_raw(self):
         return self.user
 
-    def test_check_assigned(self):
-        with self.assertRaises(permissions.PermissionDenied):
-            user_service.check_assigned(self.task_id)
-        self.task.assignees.append(self.user)
-        self.task.save()
-        self.assertTrue(user_service.check_assigned(self.task_id))
+    def test_check_project_access(self):
+        from zou.app import app
+        with app.app_context():
+            self.generate_fixture_user_cg_artist()
+            self.log_in_cg_artist()
+            with self.assertRaises(permissions.PermissionDenied):
+                user_service.check_project_access(self.project_id)
 
-    def test_check_has_task_related(self):
-        with self.assertRaises(permissions.PermissionDenied):
-            user_service.check_has_task_related(self.project_id)
-        self.task.assignees.append(self.user)
-        self.task.save()
-        self.assertTrue(user_service.check_has_task_related(self.project_id))
-
-    def test_check_criterions_has_task_related(self):
-        with self.assertRaises(permissions.PermissionDenied):
-            user_service.check_criterions_has_task_related({})
-
-        with self.assertRaises(permissions.PermissionDenied):
-            user_service.check_criterions_has_task_related({
-                "project_id": self.project_id
-            })
-
-        self.task.assignees.append(self.user)
-        self.task.save()
-        self.assertTrue(user_service.check_criterions_has_task_related({
-            "project_id": self.project_id
-        }))
+            self.project.team.append(self.user)
+            self.project.save()
+            self.assertTrue(
+                user_service.check_project_access(self.project_id))
 
     def test_related_projects(self):
         projects = user_service.related_projects()
         self.assertEqual(len(projects), 0)
 
-        self.task.assignees.append(self.user)
-        self.task.save()
+        self.project.team.append(self.user)
+        self.project.save()
         projects = user_service.related_projects()
         self.assertEqual(len(projects), 1)
         self.assertEqual(projects[0]["id"], str(self.project_id))

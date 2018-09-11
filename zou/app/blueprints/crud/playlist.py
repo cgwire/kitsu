@@ -12,6 +12,9 @@ class PlaylistsResource(BaseModelsResource):
     def check_read_permissions(self):
         return True
 
+    def check_create_permissions(self, playlist):
+        user_service.check_manager_project_access(playlist["project_id"])
+
 
 class PlaylistResource(BaseModelResource):
 
@@ -19,4 +22,7 @@ class PlaylistResource(BaseModelResource):
         BaseModelResource.__init__(self, Playlist)
 
     def check_read_permissions(self, playlist):
+        user_service.check_project_access(playlist["project_id"])
+
+    def check_update_permissions(self, playlist, data):
         user_service.check_project_access(playlist["project_id"])

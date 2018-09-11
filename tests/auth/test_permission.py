@@ -1,6 +1,6 @@
 from tests.base import ApiDBTestCase
 
-from zou.app.services import tasks_service, projects_service
+from zou.app.services import projects_service
 
 
 class PermissionTestCase(ApiDBTestCase):
@@ -100,13 +100,12 @@ class PermissionTestCase(ApiDBTestCase):
         self.generate_fixture_project_closed()
         self.generate_fixture_asset_type()
         self.generate_fixture_asset()
-        self.generate_assigned_task()
-        task_id = str(self.task.id)
         self.log_in_cg_artist()
         user_id = str(self.user_cg_artist.id)
         projects = self.get("data/projects")
         self.assertEquals(len(projects), 0)
-        tasks_service.assign_task(task_id, user_id)
+
+        projects_service.add_team_member(self.project_id, user_id)
         projects = self.get("data/projects")
         self.assertEquals(len(projects), 1)
         projects = self.get("data/projects/all")
@@ -114,29 +113,13 @@ class PermissionTestCase(ApiDBTestCase):
         projects = self.get("data/projects/open")
         self.assertEquals(len(projects), 1)
 
-    def test_has_task_related(self):
+    def test_is_in_team(self):
         self.log_in_cg_artist()
         self.generate_fixture_asset_type()
         self.generate_fixture_asset()
-        self.generate_assigned_task()
-        task_id = self.task.id
         self.get("data/assets/%s" % self.asset.id, 403)
-
-        self.task = tasks_service.get_task(task_id)
-        tasks_service.assign_task(self.task["id"], self.user_cg_artist.id)
-        self.get("data/assets/%s" % self.asset.id, 200)
-
-    def test_has_task_related_team(self):
-        self.log_in_cg_artist()
-        self.generate_fixture_asset_type()
-        self.generate_fixture_asset()
-        self.generate_assigned_task()
-        task_id = self.task.id
-        project_id = self.project.id
-        self.get("data/assets/%s" % self.asset.id, 403)
-
-        self.task = tasks_service.get_task(task_id)
-        projects_service.update_project(project_id, {
-            "team": [self.user_cg_artist]
-        })
+        projects_service.add_team_member(
+            self.project_id,
+            self.user_cg_artist.id
+        )
         self.get("data/assets/%s" % self.asset.id, 200)

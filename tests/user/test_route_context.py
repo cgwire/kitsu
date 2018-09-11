@@ -2,6 +2,8 @@ from tests.base import ApiDBTestCase
 
 from zou.app.services import tasks_service, notifications_service
 
+from zou.app.models.project import Project
+
 
 class UserContextRoutesTestCase(ApiDBTestCase):
 
@@ -22,6 +24,8 @@ class UserContextRoutesTestCase(ApiDBTestCase):
         self.generate_fixture_task_status()
         self.generate_fixture_assigner()
 
+        self.project_id = self.project.id
+
         self.task_dict = self.generate_fixture_task().serialize()
         self.task_id = self.task.id
         self.sequence_dict = self.sequence.serialize()
@@ -38,6 +42,9 @@ class UserContextRoutesTestCase(ApiDBTestCase):
 
     def assign_user(self, task_id):
         tasks_service.assign_task(task_id, self.user.id)
+        project = Project.get(self.project_id)
+        project.team.append(self.user)
+        project.save()
 
     def test_get_project_sequences(self):
         self.assign_user(self.shot_task.id)
@@ -190,16 +197,17 @@ class UserContextRoutesTestCase(ApiDBTestCase):
         projects = self.get("data/user/projects/open")
         self.assertEquals(len(projects), 0)
 
-        tasks_service.update_task(self.task_id, {
-            "assignees": [self.user]
-        })
+        project = Project.get(self.project_id)
+        project.team.append(self.user)
+        project.save()
 
         projects = self.get("data/user/projects/open")
         self.assertEquals(len(projects), 1)
 
-        tasks_service.update_task(self.task_id, {
-            "project_id": self.project_closed_id
-        })
+        project = Project.get(self.project_id)
+        project.team[:] = []
+        project.save()
+
         projects = self.get("data/user/projects/open")
         self.assertEquals(len(projects), 0)
 
@@ -221,9 +229,6 @@ class UserContextRoutesTestCase(ApiDBTestCase):
         tasks_service.update_task(shot_task_id, {
             "task_status_id": tasks_service.get_done_status()["id"]
         })
-
-        self.assign_user(task_id)
-        self.assign_user(shot_task_id)
 
         path = "data/user/tasks/"
         tasks = self.get(path)

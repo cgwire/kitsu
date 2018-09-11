@@ -1,6 +1,6 @@
 import datetime
 
-from flask import abort, request, current_app
+from flask import abort, request
 from flask_restful import Resource, reqparse
 from flask_jwt_extended import jwt_required
 
@@ -42,8 +42,7 @@ class CommentTaskResource(Resource):
         ) = self.get_arguments()
 
         task = tasks_service.get_task(task_id)
-        if not permissions.has_manager_permissions():
-            user_service.check_assigned(task_id)
+        user_service.check_project_access(task["project_id"])
 
         task_status = tasks_service.get_task_status(task_status_id)
 
@@ -104,8 +103,7 @@ class AddPreviewResource(Resource):
         is_movie = self.get_arguments()
 
         task = tasks_service.get_task(task_id)
-        if not permissions.has_manager_permissions():
-            user_service.check_assigned(task_id)
+        user_service.check_project_access(task["project_id"])
 
         comment = tasks_service.get_comment_raw(comment_id)
         task_status = tasks_service.get_task_status(
@@ -147,8 +145,7 @@ class TaskPreviewsResource(Resource):
     @jwt_required
     def get(self, task_id):
         task = tasks_service.get_task(task_id)
-        if not permissions.has_manager_permissions():
-            user_service.check_has_task_related(task["project_id"])
+        user_service.check_project_access(task["project_id"])
         return files_service.get_preview_files_for_task(task_id)
 
 
@@ -160,8 +157,7 @@ class TaskCommentsResource(Resource):
     @jwt_required
     def get(self, task_id):
         task = tasks_service.get_task(task_id)
-        if not permissions.has_manager_permissions():
-            user_service.check_has_task_related(task["project_id"])
+        user_service.check_project_access(task["project_id"])
         return tasks_service.get_comments(task_id)
 
 
@@ -172,8 +168,8 @@ class TaskCommentResource(Resource):
 
     @jwt_required
     def delete(self, task_id, comment_id):
-        if not permissions.has_manager_permissions():
-            user_service.check_assigned(task_id)
+        task = tasks_service.get(task_id)
+        user_service.check_project_access(task["project_id"])
         comment = self.remove_comment_and_related(comment_id)
         self.update_task_status(task_id)
         return comment
@@ -204,7 +200,7 @@ class PersonTasksResource(Resource):
 
     @jwt_required
     def get(self, person_id):
-        if not permissions.has_manager_permissions():
+        if not permissions.has_admin_permissions():
             projects = user_service.related_projects()
         else:
             projects = projects_service.open_projects()
@@ -219,7 +215,7 @@ class PersonDoneTasksResource(Resource):
 
     @jwt_required
     def get(self, person_id):
-        if not permissions.has_manager_permissions():
+        if not permissions.has_admin_permissions():
             projects = user_service.related_projects()
         else:
             projects = projects_service.open_projects()
@@ -233,8 +229,11 @@ class CreateShotTasksResource(Resource):
 
     @jwt_required
     def post(self, task_type_id):
-        permissions.check_manager_permissions()
         criterions = query.get_query_criterions_from_request(request)
+        if "project_id" not in criterions:
+            return {"error": True, "message": "Project ID is missing"}, 400
+
+        user_service.check_manager_project_access(criterions["project_id"])
         shots = shots_service.get_shots(criterions)
         task_type = tasks_service.get_task_type(task_type_id)
         tasks = [
@@ -250,8 +249,11 @@ class CreateAssetTasksResource(Resource):
 
     @jwt_required
     def post(self, task_type_id):
-        permissions.check_manager_permissions()
         criterions = query.get_query_criterions_from_request(request)
+        if "project_id" not in criterions:
+            return {"error": True, "message": "Project ID is missing"}, 400
+
+        user_service.check_manager_project_access(criterions["project_id"])
         assets = assets_service.get_assets(criterions)
         task_type = tasks_service.get_task_type(task_type_id)
         tasks = [
@@ -279,8 +281,7 @@ class ToReviewResource(Resource):
 
         try:
             task = tasks_service.get_task(task_id)
-            if not permissions.has_manager_permissions():
-                user_service.check_assigned(task_id)
+            user_service.check_project_access(task["project_id"])
 
             if person_id is not None:
                 person = persons_service.get_person(person_id)
@@ -354,6 +355,10 @@ class ClearAssignationResource(Resource):
     def put(self):
         (task_ids) = self.get_arguments()
 
+        if len(task_ids) > 0:
+            task = tasks_service.get_task(task_ids[0])
+            user_service.check_manager_project_access(task["project_id"])
+
         for task_id in task_ids:
             try:
                 tasks_service.clear_assignation(task_id)
@@ -385,6 +390,10 @@ class TasksAssignResource(Resource):
     def put(self, person_id):
         (task_ids) = self.get_arguments()
 
+        if len(task_ids) > 0:
+            task = tasks_service.get_task(task_ids[0])
+            user_service.check_manager_project_access(task["project_id"])
+
         tasks = []
         for task_id in task_ids:
             try:
@@ -394,6 +403,12 @@ class TasksAssignResource(Resource):
                 pass
             except PersonNotFoundException:
                 return {"error": "Assignee doesn't exist in database."}, 400
+
+        if len(tasks) > 0:
+            projects_service.add_team_member(
+                tasks[0]["project_id"],
+                person_id
+            )
 
         return tasks
 
@@ -424,8 +439,14 @@ class TaskAssignResource(Resource):
         (person_id) = self.get_arguments()
 
         try:
-            permissions.check_manager_permissions()
-            task = self.assign_task(task_id, person_id)
+            task = tasks_service.get_task(task_id)
+            user_service.check_manager_project_access(task["project_id"])
+
+            self.assign_task(task_id, person_id)
+            projects_service.add_team_member(
+                task["project_id"],
+                person_id
+            )
         except PersonNotFoundException:
             return {"error": "Assignee doesn't exist in database."}, 400
 
@@ -457,8 +478,7 @@ class TaskFullResource(Resource):
     @jwt_required
     def get(self, task_id):
         task = tasks_service.get_task(task_id)
-        if not permissions.has_manager_permissions():
-            user_service.check_has_task_related(task["project_id"])
+        user_service.check_project_access(task["project_id"])
 
         task_type = tasks_service.get_task_type(task["task_type_id"])
         project = projects_service.get_project(task["project_id"])
@@ -503,8 +523,7 @@ class TaskStartResource(Resource):
     @jwt_required
     def put(self, task_id):
         task = tasks_service.get_task(task_id)
-        if not permissions.has_manager_permissions():
-            user_service.check_assigned(task_id)
+        user_service.check_project_access(task["project_id"])
         return tasks_service.start_task(task["id"])
 
 
@@ -517,8 +536,7 @@ class TaskForEntityResource(Resource):
     @jwt_required
     def get(self, entity_id, task_type_id):
         entity = entities_service.get_entity(entity_id)
-        if not permissions.has_manager_permissions():
-            user_service.check_has_task_related(entity["project_id"])
+        user_service.check_project_access(entity["project_id"])
         return tasks_service.get_tasks_for_entity_and_task_type(
             entity_id,
             task_type_id
@@ -535,9 +553,8 @@ class SetTimeSpentResource(Resource):
         args = self.get_arguments()
 
         try:
-            if not permissions.has_manager_permissions():
-                user_service.check_assigned(task_id)
-            tasks_service.get_task(task_id)
+            task = tasks_service.get_task(task_id)
+            user_service.check_project_access(task["project_id"])
             persons_service.get_person(person_id)
             time_spent = tasks_service.create_or_update_time_spent(
                 task_id,
@@ -568,9 +585,8 @@ class AddTimeSpentResource(Resource):
         args = self.get_arguments()
 
         try:
-            tasks_service.get_task(task_id)
-            if not permissions.has_manager_permissions():
-                user_service.check_assigned(task_id)
+            task = tasks_service.get_task(task_id)
+            user_service.check_project_access(task["project_id"])
 
             persons_service.get_person(person_id)
             time_spent = tasks_service.create_or_update_time_spent(
@@ -602,8 +618,7 @@ class GetTimeSpentResource(Resource):
     def get(self, task_id, date):
         try:
             task = tasks_service.get_task(task_id)
-            if not permissions.has_manager_permissions():
-                user_service.check_has_task_related(task.project_id)
+            user_service.check_project_access(task["project_id"])
             return tasks_service.get_time_spents(task_id)
         except WrongDateFormatException:
             abort(404)

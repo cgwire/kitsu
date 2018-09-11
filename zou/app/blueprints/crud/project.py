@@ -11,7 +11,7 @@ class ProjectsResource(BaseModelsResource):
         BaseModelsResource.__init__(self, Project)
 
     def add_project_permission_filter(self, query):
-        if permissions.has_manager_permissions():
+        if permissions.has_admin_permissions():
             return query
         else:
             return query.filter(user_service.build_related_projects_filter())

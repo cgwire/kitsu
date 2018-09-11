@@ -30,6 +30,7 @@ class TaskRoutesTestCase(ApiDBTestCase):
 
     def test_create_asset_tasks(self):
         path = "/actions/task-types/%s/assets/create-tasks" % self.task_type_id
+        path += "?project_id=%s" % self.project.id
         tasks = self.post(path, {})
         self.assertEqual(len(tasks), 1)
 
@@ -42,6 +43,7 @@ class TaskRoutesTestCase(ApiDBTestCase):
 
     def test_create_shot_tasks(self):
         path = "/actions/task-types/%s/shots/create-tasks" % self.task_type_id
+        path += "?project_id=%s" % self.project.id
         tasks = self.post(path, {})
         self.assertEqual(len(tasks), 1)
 

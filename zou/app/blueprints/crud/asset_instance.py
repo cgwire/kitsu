@@ -19,16 +19,16 @@ class AssetInstanceResource(BaseModelResource):
         self.protected_fields.append("number")
 
     def check_read_permissions(self, instance):
-        if permissions.has_manager_permissions():
+        if permissions.has_admin_permissions():
             return True
         else:
             asset_instance = self.get_model_or_404(instance["id"])
             asset = assets_service.get_asset(asset_instance.asset_id)
-            return user_service.check_has_task_related(asset["project_id"])
+            return user_service.check_project_access(asset["project_id"])
 
     def check_update_permissions(self, asset_instance, data):
-        if permissions.has_manager_permissions():
+        if permissions.has_admin_permissions():
             return True
         else:
             asset = assets_service.get_asset(asset_instance["asset_id"])
-            return user_service.check_has_task_related(asset["project_id"])
+            return user_service.check_project_access(asset["project_id"])

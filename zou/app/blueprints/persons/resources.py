@@ -4,7 +4,10 @@ from flask import abort
 from flask_restful import Resource, reqparse
 from flask_jwt_extended import jwt_required
 
-from zou.app.services import persons_service, time_spents_service
+from zou.app.services import (
+    persons_service,
+    time_spents_service
+)
 from zou.app.utils import auth, permissions, csv_utils
 from zou.app.services.exception import WrongDateFormatException
 
@@ -109,6 +112,7 @@ class TimeSpentsResource(Resource):
 
     @jwt_required
     def get(self, person_id, date):
+        permissions.check_admin_permissions()
         try:
             return time_spents_service.get_time_spents(person_id, date)
         except WrongDateFormatException:
@@ -122,6 +126,7 @@ class PersonMonthTimeSpentsResource(Resource):
 
     @jwt_required
     def get(self, person_id, year, month):
+        permissions.check_admin_permissions()
         try:
             return time_spents_service.get_month_time_spents(
                 person_id,
@@ -139,6 +144,7 @@ class PersonWeekTimeSpentsResource(Resource):
 
     @jwt_required
     def get(self, person_id, year, week):
+        permissions.check_admin_permissions()
         try:
             return time_spents_service.get_week_time_spents(
                 person_id,
@@ -156,6 +162,7 @@ class PersonDayTimeSpentsResource(Resource):
 
     @jwt_required
     def get(self, person_id, year, month, day):
+        permissions.check_admin_permissions()
         try:
             return time_spents_service.get_day_time_spents(
                 person_id,
@@ -175,7 +182,7 @@ class TimeSpentMonthResource(Resource):
 
     @jwt_required
     def get(self, year, month):
-        permissions.check_manager_permissions()
+        permissions.check_admin_permissions()
         return time_spents_service.get_day_table(year, month)
 
 
@@ -186,7 +193,7 @@ class TimeSpentYearResource(Resource):
 
     @jwt_required
     def get(self, year):
-        permissions.check_manager_permissions()
+        permissions.check_admin_permissions()
         return time_spents_service.get_month_table(year)
 
 
@@ -197,5 +204,5 @@ class TimeSpentWeekResource(Resource):
 
     @jwt_required
     def get(self, year):
-        permissions.check_manager_permissions()
+        permissions.check_admin_permissions()
         return time_spents_service.get_week_table(year)

@@ -4,20 +4,22 @@ from zou.app.utils.api import configure_api_from_blueprint
 from .resources import (
     DesktopLoginsResource,
     NewPersonResource,
+    PersonMonthTimeSpentsResource,
+    PersonWeekTimeSpentsResource,
+    PersonDayTimeSpentsResource,
     PresenceLogsResource,
     TimeSpentsResource,
     TimeSpentMonthResource,
     TimeSpentWeekResource,
-    TimeSpentYearResource,
-    PersonMonthTimeSpentsResource,
-    PersonWeekTimeSpentsResource,
-    PersonDayTimeSpentsResource
+    TimeSpentYearResource
 )
 
 routes = [
     ("/data/persons/new", NewPersonResource),
+
     ("/data/persons/<person_id>/desktop-login-logs", DesktopLoginsResource),
     ("/data/persons/presence-logs/<month_date>", PresenceLogsResource),
+
     ("/data/persons/<person_id>/time-spents/<date>", TimeSpentsResource),
     ("/data/persons/<person_id>/time-spents/month/<year>/<month>", PersonMonthTimeSpentsResource),
     ("/data/persons/<person_id>/time-spents/week/<year>/<week>", PersonWeekTimeSpentsResource),

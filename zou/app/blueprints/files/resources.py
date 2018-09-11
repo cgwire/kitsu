@@ -710,8 +710,7 @@ class GetNextEntityOutputFileRevisionResource(Resource, ArgsMixin):
         entity = entities_service.get_entity(entity_id)
         output_type = files_service.get_output_type(args["output_type_id"])
         task_type = tasks_service.get_task_type(args["task_type_id"])
-        if not permissions.has_manager_permissions():
-            user_service.check_has_task_related(entity["project_id"])
+        user_service.check_project_access(entity["project_id"])
 
         next_revision_number = \
             files_service.get_next_output_file_revision(
@@ -746,8 +745,7 @@ class GetNextInstanceOutputFileRevisionResource(Resource, ArgsMixin):
         asset = entities_service.get_entity(asset_instance["asset_id"])
         output_type = files_service.get_output_type(args["output_type_id"])
         task_type = tasks_service.get_task_type(args["task_type_id"])
-        if not permissions.has_manager_permissions():
-            user_service.check_has_task_related(asset["project_id"])
+        user_service.check_project_access(asset["project_id"])
 
         next_revision_number = \
             files_service.get_next_output_file_revision(
@@ -780,8 +778,7 @@ class LastEntityOutputFilesResource(Resource):
     @jwt_required
     def get(self, entity_id):
         entity = entities_service.get_entity(entity_id)
-        if not permissions.has_manager_permissions():
-            user_service.check_has_task_related(entity["project_id"])
+        user_service.check_project_access(entity["project_id"])
         return files_service.get_last_output_files_for_entity(entity["id"])
 
 
@@ -795,8 +792,7 @@ class LastInstanceOutputFilesResource(Resource):
     def get(self, asset_instance_id, temporal_entity_id):
         asset_instance = assets_service.get_asset_instance(asset_instance_id)
         entity = entities_service.get_entity(asset_instance["asset_id"])
-        if not permissions.has_manager_permissions():
-            user_service.check_has_task_related(entity["project_id"])
+        user_service.check_project_access(entity["project_id"])
         return files_service.get_last_output_files_for_instance(
             asset_instance["id"],
             temporal_entity_id,
@@ -909,7 +905,7 @@ class SetTreeResource(Resource):
         tree_name = self.get_arguments()
 
         try:
-            permissions.check_manager_permissions()
+            user_service.check_project_access(project_id)
             tree = file_tree_service.get_tree_from_file(tree_name)
             project = projects_service.update_project(
                 project_id,

@@ -18,9 +18,9 @@ class CommentResource(BaseModelResource):
         BaseModelResource.__init__(self, Comment)
 
     def check_read_permissions(self, instance):
-        if permissions.has_manager_permissions():
+        if permissions.has_admin_permissions():
             return True
         else:
             comment = self.get_model_or_404(instance["id"])
             task = tasks_service.get_task(comment.object_id)
-            return user_service.check_has_task_related(task["project_id"])
+            return user_service.check_project_access(task["project_id"])
