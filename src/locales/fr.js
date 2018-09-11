@@ -10,7 +10,7 @@ export default {
     picture: 'Changer l\'image',
     running_tasks: 'Tâches en cours',
     select_person: 'Sélectionner une personne...',
-    team: 'Equipe de la production',
+    team: 'Équipe',
     title: 'Employés',
     csv: {
       export_file: 'Télécharger',
@@ -75,6 +75,7 @@ export default {
     confirmation_and_stay: 'Confirmer et rester',
     clear_selection: 'Effacer la sélection',
     close: 'Fermer',
+    documentation: 'Documentation',
     delete_text: 'Etes vous sûr de vouloir supprimer {name} de la base de données ?',
     empty_comment: 'Commentaire vide',
     info: 'Information',

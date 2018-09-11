@@ -123,6 +123,7 @@ export default {
     cancel: 'Cancel',
     clear_selection: 'Clear current selection',
     delete_text: 'Are you sure you want to remove {name} from your database?',
+    documentation: 'Documentation',
     close: 'Close',
     confirmation: 'Confirm',
     confirmation_and_stay: 'Confirm and stay',
@@ -179,7 +180,7 @@ export default {
     persons: 'person | persons',
     running_tasks: 'Running tasks',
     select_person: 'Select a person...',
-    team: 'Production Team',
+    team: 'Team',
     title: 'People',
     csv: {
       import_file: 'Import a .csv file',

@@ -111,6 +111,11 @@
             {{ $t("main.profile") }}
           </router-link>
         </li>
+        <li>
+          <a href="https://kitsu.cg-wire.com" target="_blank">
+            {{ $t("main.documentation ")}}
+          </a>
+        </li>
         <li @click="logout">
           {{ $t("main.logout") }}
         </li>
@@ -193,7 +198,6 @@ export default {
     },
 
     isProductionContext () {
-      const path = this.$store.state.route.path
       return this.$route.params.production_id !== undefined
     }
   },
