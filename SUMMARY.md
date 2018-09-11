@@ -15,7 +15,7 @@
 	* [Validation per batch](getting-started-production/README.md#validation-per-batch)
 	* [Change the priority](getting-started-production/README.md#change-the-priority)
 	
-* [Getting Started as Artist](getting-started-artist/README.md)
+* [Getting Started as Artist](getting-started-artist/README.md#as-an-artist)
 	* [See what you have to do](getting-started-artist/README.md#see-what-you-have-to-do)
 	* [Communicate and change status](getting-started-artist/README.md#communicate-and-change-status)
 	* [Ask for validation](getting-started-artist/README.md#ask-for-validation)
