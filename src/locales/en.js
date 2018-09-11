@@ -209,7 +209,7 @@ export default {
       active: 'Active'
     },
     role: {
-      admin: 'Administrator',
+      admin: 'Studio Manager',
       client: 'Client',
       manager: 'Supervisor',
       user: 'CG Artist'

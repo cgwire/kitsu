@@ -38,7 +38,7 @@ export default {
       role: 'Rôle'
     },
     role: {
-      admin: 'Administrateur',
+      admin: 'Studio Manager',
       manager: 'Superviseur',
       user: 'Graphiste',
       client: 'Client'
