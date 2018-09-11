@@ -20,19 +20,19 @@
       }"
       class="avatar-link"
     >
-    <img
-      :src="avatarPath"
-      v-if="person.has_avatar && noCache"
-    />
-    <img
-      v-lazy="person.avatarPath"
-      v-else-if="person.has_avatar"
-    />
-    <span
-      v-if="!person.has_avatar"
-    >
-     {{ person.initials }}
-    </span>
+      <img
+        :src="avatarPath"
+        v-if="person.has_avatar && noCache"
+      />
+      <img
+        v-lazy="avatarPath"
+        v-else-if="person.has_avatar"
+      />
+      <span
+        v-if="!person.has_avatar"
+      >
+       {{ person.initials }}
+      </span>
     </router-link>
   </span>
 
@@ -52,7 +52,7 @@
   />
   <img
     v-lazy="person.avatarPath"
-    v-else-if="person.has_avatar"
+    v-else-if="person.has_avatar && noCache"
   />
   <span v-else>
     {{ person.initials }}
@@ -66,7 +66,7 @@ export default {
 
   data () {
     return {
-      avatarPath: this.person.avatarPath + '&stamp=' + new Date().toISOString()
+      avatarPath: `${this.person.avatarPath}`
     }
   },
 

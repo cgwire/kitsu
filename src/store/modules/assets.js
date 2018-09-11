@@ -226,6 +226,7 @@ const actions = {
   loadAssets ({ commit, state, rootGetters }, callback) {
     const production = rootGetters.currentProduction
     const userFilters = rootGetters.userFilters
+    const personMap = rootGetters.personMap
 
     commit(LOAD_ASSETS_START)
     assetsApi.getAssets(production, (err, assets) => {
@@ -235,7 +236,10 @@ const actions = {
           asset.project_name = production.name
           return asset
         })
-        commit(LOAD_ASSETS_END, { production, assets, userFilters })
+        commit(
+          LOAD_ASSETS_END,
+          { production, assets, userFilters, personMap }
+        )
       }
       if (callback) callback(err)
     })

@@ -8,6 +8,7 @@ import {
   LOAD_PRODUCTIONS_START,
   LOAD_PRODUCTIONS_ERROR,
   LOAD_PRODUCTIONS_END,
+  LOAD_OPEN_PRODUCTIONS_END,
 
   EDIT_PRODUCTION_START,
   EDIT_PRODUCTION_ERROR,
@@ -19,7 +20,11 @@ import {
 
   PRODUCTION_PICTURE_FILE_SELECTED,
   PRODUCTION_AVATAR_UPLOADED,
-  LOAD_PRODUCTION_STATUS_END
+  LOAD_PRODUCTION_STATUS_END,
+
+  SET_CURRENT_PRODUCTION,
+  TEAM_ADD_PERSON,
+  TEAM_REMOVE_PERSON,
 } from '../../src/store/mutation-types'
 
 
@@ -67,6 +72,17 @@ productionsApi.postAvatar = (productionId, formData, callback) => {
   })
 }
 
+productionsApi.addPersonToTeam = (projectId, personId) => {
+  return new Promise ((resolve, reject) => {
+    resolve()
+  })
+}
+
+productionsApi.removePersonFromTeam = (projectId, personId) => {
+  return new Promise ((resolve, reject) => {
+    resolve()
+  })
+}
 
 const getters = productionStore.getters
 const state = store.state.productions
@@ -81,17 +97,20 @@ describe('productions', () => {
       {
         id: 'production-1',
         name: 'Caminandes',
-        project_status_name: 'Open'
+        project_status_name: 'Open',
+        team: []
       },
       {
         id: 'production-2',
         name: 'Big Buck Bunny',
-        project_status_name: 'Closed'
+        project_status_name: 'Closed',
+        team: []
       },
       {
         id: 'production-3',
         name: 'Agent 327',
-        project_status_name: 'Open'
+        project_status_name: 'Open',
+        team: []
       }
     ]
   })
@@ -211,6 +230,28 @@ describe('productions', () => {
               .to.equal(true)
         })
     })
+
+    it('addPersonToTeam', () => {
+      const personId = 'person-1'
+      store.commit(LOAD_OPEN_PRODUCTIONS_END, productions)
+      store.commit(SET_CURRENT_PRODUCTION, productions[0].id)
+      return store.dispatch('addPersonToTeam', personId)
+        .then(() => {
+          expect(state.currentProduction.team.includes(personId)).to.be.ok
+        })
+    })
+
+    it('removePersonFromTeam', () => {
+      const personId = 'person-1'
+      store.commit(LOAD_OPEN_PRODUCTIONS_END, productions)
+      store.commit(SET_CURRENT_PRODUCTION, productions[0].id)
+      store.commit(TEAM_ADD_PERSON, personId)
+      return store.dispatch('removePersonFromTeam', personId)
+        .then(() => {
+          expect(state.currentProduction.team.includes(personId)).to.not.be.ok
+        })
+    })
+
   })
 
   describe('mutations', () => {
@@ -323,6 +364,23 @@ describe('productions', () => {
       store.commit(LOAD_PRODUCTIONS_END, productions)
       store.commit(PRODUCTION_AVATAR_UPLOADED, 'production-2')
       expect(state.productionMap['production-2'].has_avatar).to.equal(true)
+    })
+
+    it(TEAM_ADD_PERSON, () => {
+      const personId = 'person-1'
+      store.commit(LOAD_OPEN_PRODUCTIONS_END, productions)
+      store.commit(SET_CURRENT_PRODUCTION, productions[0].id)
+      store.commit(TEAM_ADD_PERSON, personId)
+      expect(state.currentProduction.team.includes(personId)).to.be.ok
+    })
+
+    it(TEAM_REMOVE_PERSON, () => {
+      const personId = 'person-1'
+      store.commit(LOAD_OPEN_PRODUCTIONS_END, productions)
+      store.commit(SET_CURRENT_PRODUCTION, productions[0].id)
+      store.commit(TEAM_ADD_PERSON, personId)
+      store.commit(TEAM_REMOVE_PERSON, personId)
+      expect(state.currentProduction.team.includes(personId)).to.not.be.ok
     })
   })
 })
