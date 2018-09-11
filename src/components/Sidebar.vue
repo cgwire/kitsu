@@ -78,7 +78,7 @@
            </p>
          </div>
 
-         <div v-if="isCurrentUserManager">
+         <div v-if="isCurrentUserAdmin">
            <h2>{{ $t('main.studio')}}</h2>
 
            <p @click="toggleSidebar()">
