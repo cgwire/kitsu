@@ -152,16 +152,16 @@ If a shot is misplaced on a sequence, you just have to edit the shot you want ![
 
 ![Change sequence](../img/getting-started/change_seq.png)
 
-If at some point you need to delete a shot, just click on the delete icon on the right of the line ![Delete button](../img/getting-started/delete_button.png). If you need to re import this shot, click on the restore button ![Restore button](../img/getting-started/restore_button.png).
+If at some point you need to delete a shot, just click on the **trash can** icon on the right of the line ![Delete button](../img/getting-started/delete_button.png). If you need to import back this shot, click on the restore button ![Restore button](../img/getting-started/restore_button.png).
 
 
 We can now associate tasks to the shots. Same way than for the assets, click on the **+Add tasks** button ![Add task button](../img/getting-started/add_task_button.png) on the top of the spreadsheet. 
 
-A new pop-up will open and let you choose what task do you want to add to the shots. All the shots will be linked to the tasks.
+A new pop-up will open and let you choose what task you want to add. All the shots will be linked to the tasks.
 
 ![List of tasks for the shots](../img/getting-started/task_shots.png)
 
-Now we can do the breakdown of the storyboard, meaning associate the assets to each shots. 
+Now we can do the breakdown of the storyboard, meaning associate the assets to each shot. 
 
 ### [Create a Breakdown list](#create-a-breakdown-list)
 
@@ -169,11 +169,11 @@ On the main menu ![Main menu](../img/getting-started/main_button.png), under **P
 
 ![Menu breakdown](../img/getting-started/menu_breakdown.png)
 
-On the left part of the breakdown page is the episode/sequence/shot menu (1), you can choose between the ones you have created. On the right part of the screen are all the assets available created for this production (3). And on the middle part it will be your selection for the shot (2).
+On the left part of the breakdown page is the episode/sequence/shot menu (1), you can choose between the ones you have created. They are, the right part of the screen, all the assets available created for this production (3). And on the middle part it will be your selection for the shot (2).
 
 ![Breakdown page](../img/getting-started/breakdown_general.png)
 
-So now you have to select the shot you wan to cast, let's say the first one. So click on the shot sh001 on the left part (1), then click on the assets you want to assign, some characters, backgrounds,etc on the right part (3). 
+So now you have to select the shot you wan to cast, let's say the first one. So click on the shot sh001 on the left part (1), then click on the assets you want to assign: some characters, backgrounds, etc. on the right part (3). 
 
 When you pass over the asset you can see a +1 or +10. It's the number of time you will add this asset. You can click as many times as you need on it.
 
@@ -193,9 +193,9 @@ Now your **Breakdown page** should look like this.
 
 ![Breakdown page fill](../img/getting-started/breakdown_full.png)
 
-We can now assign people on the shots tasks. If the animation and so are done elsewhere, you can create a account for this studio and assign it to tasks. They will be able to feed by themselves the spreadsheet.
+We can now assign people on the shots tasks. If the animation and so are done elsewhere, you can create an account for this studio and assign it to tasks. They will be able to feed by themselves the spreadsheet.
 
-Everything is now filled, if you want to see a detail of a shot, click on his name. 
+Everything is now filled, if you want to see a detail of a shot, click on its name. 
 
 ![Shot detail](../img/getting-started/shot_detail.png)
 
@@ -206,7 +206,7 @@ A new page will open with the list of the tasks, the assignation, and the list o
 ### [Add the Frameranges](#add-the-frameranges)
 
 At this stage of the production, the animatic should be done. Meaning you have the length (**framerange In** and **framerange Out**) for each shot. You can add this information on the spreadsheet.
-This way you will be sure that all the frames will be calculated and none will be missing, or over compute.
+This way you will be sure that all the frames will be calculated and none will be missing, or over computed.
 
 You may also be able to add camera as assets!
 
@@ -257,7 +257,7 @@ You can now do your shots or assets selection, by pressing the **Crtl** or **Shi
 
 At some point on the production you may want to prioritized some tasks, and pinpoint these urgent tasks to your team.
 
-For this, we will use the same technique than for the assignation or the change of status. Click on the empty space near a task (1). 
+For this, we will use the same technique as before. Click on the empty space near a status task (1). 
 
 ![Task assigned](../img/getting-started/task_assigned.png)
 
