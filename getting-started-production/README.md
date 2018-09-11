@@ -17,11 +17,11 @@ It will open a menu on the left part of the screen. Choose below **Studio** sect
 
 ![Main menu](../img/getting-started/main_menu_production.png)
 
-There, you can see all the productions you have created, and their status (open for an active production, or closed if not active). When you go on top of a production you can see 2 news icones on the right part of the line : **Edit** ![Edit button](../img/getting-started/edit_button.png)and **Delete** ![Delete button](../img/getting-started/delete_button.png).
+There, you can see all the productions you have created, and their status (open for an active production, or closed if not active). When you go on top of a production you can see 2 news icones on the right part of the line : **Edit** ![Edit button](../img/getting-started/edit_button.png) and **Delete** ![Delete button](../img/getting-started/delete_button.png).
 
 ![Edit a production](../img/getting-started/production_edit.png)
 
-Go into the edit menu for your newly created production. You can change the picture, instead of showing the first letters lets show a nice image. 
+Go into the **Edit production** page for your newly created production. You can change the picture, instead of showing the first letters, lets show a nice image. 
 
 ![Edit the detail of a production](../img/getting-started/production_edit_popup.png)
 
@@ -47,7 +47,7 @@ You will see the newly created asset appearing on the background everytime your 
 For now the assets aren't associate to episode, this association will be done during the **Breakdown** of the storyboard, with sequences and shots creation.
 
 
-You can edit assets any time you want by going to the asset page, hovering the asset you want to modify, and then click on the **Edit button** (1) ![Edit button](../img/getting-started/edit_button.png) on the right side of the line.
+You can edit assets any time you want by going to the asset page, hovering the asset you want to modify, and then click on the **Edit button** ![Edit button](../img/getting-started/edit_button.png) (1) on the right side of the line.
 ![Edit an asset](../img/getting-started/asset_edit.png)
 
 On the main asset page, to read the description, just click on the first words (2), and a pop up will open with the full description.
@@ -75,7 +75,7 @@ Now that we have created all the assets we need, and have linked them to tasks, 
 ### [Add an artist](#add-an-artist)
 
 We need to create a account for each artist.
-Go to the main menu ![Main menu](../img/getting-started/main_button.png), and under the Studio section, choose **People** page.
+Go to the main menu ![Main menu](../img/getting-started/main_button.png), and under the **Studio** section, choose **People** page.
 
 ![People Menu](../img/getting-started/main_menu_people.png)
 
@@ -124,7 +124,7 @@ Now everybody know what to do, and who is doing what!
 
 Now is time to do the breakdown of the storyboard. Meaning you can now create the sequences and the shots of the episode and associate assets to them.
 
-You need to go to the **Shots** page : you can either use the shot icone on top of the page ![Shot button](../img/getting-started/shot_button.png), or use the main menu ![Main menu button](../img/getting-started/main_button.png) and under the **Production** section, click on the Shots.
+You need to go to the **Shots** page : you can either use the shot icone on top of the page ![Shot button](../img/getting-started/shot_button.png), or use the main menu ![Main menu button](../img/getting-started/main_button.png) and under the **Production** section, click on the **Shots**.
 
 ![Main menu shots](../img/getting-started/main_menu_shots.png)
 
@@ -165,7 +165,7 @@ Now we can do the breakdown of the storyboard, meaning associate the assets to e
 
 ### [Create a Breakdown list](#create-a-breakdown-list)
 
-On the main menu ![Main menu](../img/getting-started/main_button.png), under **Production** section, choose breakdown.
+On the main menu ![Main menu](../img/getting-started/main_button.png), under **Production** section, choose **Breakdown**.
 
 ![Menu breakdown](../img/getting-started/menu_breakdown.png)
 
