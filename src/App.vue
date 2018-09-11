@@ -1,7 +1,7 @@
 <template>
   <div
     class="has-text-centered mt2 loading-info"
-    v-if="isLoginLoading"
+    v-if="isLoginLoading && user"
   >
       <span>{{ $t('main.loading_data') }}...</span>
     <spinner class="mt2" />
@@ -22,7 +22,8 @@ export default {
 
   computed: {
     ...mapGetters([
-      'isLoginLoading'
+      'isLoginLoading',
+      'user'
     ])
   },
 
