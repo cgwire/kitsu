@@ -279,5 +279,21 @@ def patch_task_type_allow_timelog():
             print(task_type.serialize())
 
 
+@cli.command()
+def patch_team():
+    """
+    Patch to run after upgrade from 0.7.10 or lower to 0.8.0 or superior.
+    """
+    from zou.app.models.project import Project
+    from zou.app.models.person import Person
+    from zou.app.models.task import Task
+    for project in Project.query.all():
+        for person in Person.query.all():
+            task = Task.get_by(project_id=project.id, assignee_id=person.id)
+            if task is not None:
+                project.team.append(person)
+                project.save()
+
+
 if __name__ == '__main__':
     cli()
