@@ -1,6 +1,6 @@
 # How to get started with Kitsu
 
-## As a production manager
+## [As a production manager](#as-a-production-manager)
 
 ### [Create a production](#create-a-production)
 

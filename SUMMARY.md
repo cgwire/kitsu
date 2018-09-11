@@ -4,7 +4,7 @@
 
 * [Installation](installation/README.md)
 
-* [Getting Started as Production](getting-started-production/README.md)
+* [Getting Started as Production](getting-started-production/README.md#as-a-production-manager)
 	* [Create a production](getting-started-production/README.md#create-a-production)
 	* [Create some assets](getting-started-production/README.md#create-some-assets)
 	* [Add an artist](getting-started-production/README.md#add-an-artist)
