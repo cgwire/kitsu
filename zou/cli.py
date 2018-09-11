@@ -289,7 +289,10 @@ def patch_team():
     from zou.app.models.task import Task
     for project in Project.query.all():
         for person in Person.query.all():
-            task = Task.get_by(project_id=project.id, assignee_id=person.id)
+            task = Task.query \
+              .filter(Project.id == project.id) \
+              .filter(Task.assignees.contains(person)) \
+              .first()
             if task is not None:
                 project.team.append(person)
                 project.save()
