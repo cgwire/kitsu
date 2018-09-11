@@ -9,6 +9,8 @@
  
 On this new page you can check your name (1) (2), your email (3) fill you phone number (4), change the timezone (5) and the language of the website (6), and post of pic of yourself as your avatar (7). It will help to recognize who is doing what and you can also identify more easily your coworker! Kitsu can now be used as a who's who!
  
+![User detail](../img/getting-started/user_detail.png)
+ 
 If you keep scrolling you can also change your password if you want.
 
 ![User password](../img/getting-started/user_password.png)
@@ -16,26 +18,26 @@ If you keep scrolling you can also change your password if you want.
  
 ### [See what you have to do](#see-what-you-have-to-do)
  
-The main part for you on kitsu will be the **My tasks** page. You can find it on the main menu ![Main menu](../img/getting-started/main_button.png), under the **User** section **My tasks**.
+The main part for you, on **Kitsu**, will be the **My tasks** page. You can find it on the main menu ![Main menu](../img/getting-started/main_button.png), under the **User** section **My tasks**.
 
 ![My tasks](../img/getting-started/my_tasks.png)
 
-You can see per production what you are assigned to, the status of the tasks and their priority. 
+You can see per **Production** (1) the **Entity** (2) you are assigned to, the **Status** (3) of the tasks and the **Priority** (4). 
  
 ![My tasks page](../img/getting-started/my_task_page.png)
  
 ### [Communicate and change status](#communicate-and-change-status)
 
-When you start a new task you are assigned to, click on the status (**TODO**) (1).
+When you start a new task you are assigned to, click on the status (**TODO**) (1) on the shots or assets page.
 
 ![Shot status](../img/getting-started/shot_status.png)
 
-It will open a new page where you can communicate about your work. Let your teamate know what you are doing and when you are starting! 
-For each status change you can add a comment.
+It will open a new page where you can communicate about your work. Let your teammate know what you are doing and when you are starting! 
+For each status change you need to add a comment.
 
-For example when you start a new task you can say that you have well understood everything and you are starting it, or you can ask all the question you have, if you miss information for example.
+For example when you start a **new task** you can say that **you have well understood everything and you are starting it**, or you can **ask all the question you have**, if you miss information for example.
 
-To change the status, from todo to wip for example, fill your comment (1), click on the status box and choose the one you want (2) and validate your comment and the new status by clicking on **Post status** (3) .
+To change the status, from **todo** to **wip** for example, fill your comment (1), click on the status box and choose the one you want (2) and validate your comment and the new status by clicking on **Post status** (3) .
 
 ![Changing status](../img/getting-started/changing_status.png)
 
@@ -61,16 +63,16 @@ Your work will appear on the right part of the screen as a V1.
 
 ![Preview v1](../img/getting-started/previewv1.png)
 
-If you need to post more version, you always keep track of your previous work, the older version aren't hiden.
+If you need to post more versions, you will always keep track of your previous work, the older versions aren't hidden.
 
 ![Preview v2](../img/getting-started/previewv2.png)
 
 You can also use this pics as a thumbnail on the asset or shot spreadsheet. It will help to recognize the assets/shots on the main pages.
-Below your preview click on the **Set this preview as thumbnail**. You can do this at each version of your work if needed.
+Below your preview, click on the **Set this preview as thumbnail**. You can do this at each version of your work if needed.
 
 ![Preview as a thumbnail](../img/getting-started/preview_thumbnail.png)
 
-Once you have clicked on the button a message apprears instead to confirm the modification.
+Once you have clicked on the button a message appears instead to confirm the modification.
 
 ![Preview confirmed](../img/getting-started/preview_confirmed.png)
 
