@@ -95,6 +95,13 @@ The result of the filter will be display, but not the button anymore. Just cance
 
 ### [How notifications work](#how-notifications-work)
 
+The notification symbol is the **Bell** button next to your name, top right of the screen.
+It's **gray** when you don't have a new notification, ![Notification off](../img/faq/notification_icon_off.png) and **green** when you have a new one ![Notification on](../img/faq/notification_icon_on.png).
+
+As an artist you will receive a notification as soon as someone change the status of one of your task, or post a comment.
+
+
+
 ### [How to get notified](#how-to-get-notified)
 
 ### [How not to be notified](#how-not-to-be-notified)
