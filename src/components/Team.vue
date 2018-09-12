@@ -104,7 +104,9 @@ export default {
 
   mounted () {
     const currentProductionId = this.$route.params.production_id
-    this.setProduction(currentProductionId)
+    if (this.currentProduction.id !== currentProductionId) {
+      this.setProduction(currentProductionId)
+    }
   },
 
   watch: {
