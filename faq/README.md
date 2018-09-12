@@ -6,7 +6,7 @@
 	* [How to add Filters](#how-to-add-filters)
 	* [What Filters can I create](#what-filters-can-i-create)
 	* [How to delete Filters](#how-to-delete-filters)
-* ## [Notifications](#notification)
+* ## [Notifications](#notifications)
 	* [How notifications work](#how-notifications-work)
 	* [How to get notified](#how-to-get-notified)
 	* [How not to be notified](#how-not-to-be-notified)
