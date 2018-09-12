@@ -43,7 +43,7 @@ For example, lets search all the **FX** assets.
 
 Another example is to search a specifique **Sequence** on the **Shots page**. You want to see only the shots of the sequence 1 of the first episode.
 
-If you only type "s001" the result will display all the shots of all the episodes which contain sequence 1.
+If you only type `s001` the result will display all the shots of all the episodes which contain sequence 1.
 
 ![Search bar sequence episode](../img/faq/filter_ep_seq.png)
 
