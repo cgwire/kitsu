@@ -21,6 +21,8 @@
 	* [Ask for validation](getting-started-artist/README.md#ask-for-validation)
 	* [Fill the timesheet](getting-started-artist/README.md#fill-the-timesheet)	
 
+* [FAQ](faq/README.md)
+
 * [Permissions](permissions/README.md)
 
 * [Development Environment](development-environment/README.md)
