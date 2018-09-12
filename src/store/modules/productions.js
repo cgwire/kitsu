@@ -406,7 +406,7 @@ const mutations = {
   },
 
   [TEAM_REMOVE_PERSON] (state, personId) {
-    const personIndex = state.currentProduction.team.find(
+    const personIndex = state.currentProduction.team.findIndex(
       (pId) => pId === personId
     )
     if (personIndex) {
