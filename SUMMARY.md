@@ -19,15 +19,7 @@
 	* [See what you have to do](getting-started-artist/README.md#see-what-you-have-to-do)
 	* [Communicate and change status](getting-started-artist/README.md#communicate-and-change-status)
 	* [Ask for validation](getting-started-artist/README.md#ask-for-validation)
-	* [Fill the timesheet](getting-started-artist/README.md#fill-the-timesheet)
-	
-* [Production Modules](production-modules/README.md)
-
-* [Studio Modules](studio-modules/README.md)
-
-* [User Modules](user-modules/README.md)
-
-* [Admin Modules](admin-modules/README.md)
+	* [Fill the timesheet](getting-started-artist/README.md#fill-the-timesheet)	
 
 * [Permissions](permissions/README.md)
 
