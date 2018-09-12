@@ -63,7 +63,7 @@ Your work will appear on the right part of the screen as a V1.
 
 ![Preview v1](../img/getting-started/previewv1.png)
 
-If you need to post more versions, you will always keep track of your previous work, the older versions aren't hidden.
+If you need to post more versions, you will always keep track of your previous work, the older versions aren't hidden. You can also post a preview with the "Retake" status.
 
 ![Preview v2](../img/getting-started/previewv2.png)
 
