@@ -1,7 +1,13 @@
 # FAQ for Kitsu
 
 * ## Filters
+	* [Introduction](#introduction)
+	* [How Search Bar works](#how-search-bar-work)
+	* [How to use the Filters](#how-to-use-the-filters)
  
+ 
+### [Introduction](#introduction)
+
 In Kitsu the filters are linked to the **Search bar**. It gives you the opportunity to **save** your search and in a click, get back to it.
  
 ![Search bar](../img/faq/filter_search_bar.png)
@@ -13,7 +19,7 @@ You can find the **Search bar** and the **save** option on different pages :
 
 You can find the **Search bar** on a lot of other pages but the main difference will be the lack of the **Save** button next to it ![Search bar](../img/faq/filter_save_button.png).
 
-### How Search Bar works ?
+### [How Search Bar works](#how-search-bar-work)
 
 The search bar uses the autocompletion, so you don't need to type everything to get a result.
 
@@ -49,7 +55,7 @@ You can continue and be even more specific, you only want to see the first episo
 
 ![Search layout wfa seq2](../img/faq/filter_lay_wfa_s002.png)
 
-### How to use the Filters
+### [How to use the Filters](#how-to-use-the-filters)
 
 Kitsu allows you to save your research. You can save them buy pressing tne **Enter** key at the enter of your research, or click on the **Save** button ![Save button](../img/faq/filter_save_button.png).
 
