@@ -10,6 +10,8 @@
 	* [How notifications work](#how-notifications-work)
 	* [How to get notified](#how-to-get-notified)
 	* [How not to be notified](#how-not-to-be-notified)
+
+-----------------------------------------	
  
 ## [Filters](#filters) 
 ### [Introduction to filters](#introduction-to-filters)
@@ -90,6 +92,7 @@ If you have created a **Filter button** by mistake, click on the cross next to i
 
 The result of the filter will be display, but not the button anymore. Just cancel your research by deleting the text or use the cross next to the search bar ![Search delete](../img/faq/filter_cross_delete.png)
 
+-----------------------------------------
 
 ## [Notifications](#notification)
 
