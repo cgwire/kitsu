@@ -94,7 +94,7 @@ The result of the filter will be display, but not the button anymore. Just cance
 
 -----------------------------------------
 
-## [Notifications](#notification)
+## [Notifications](#notifications)
 
 ### [How notifications work](#how-notifications-work)
 
