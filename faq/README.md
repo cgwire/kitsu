@@ -3,7 +3,9 @@
 * ## Filters
 	* [Introduction](#introduction)
 	* [How Search Bar works](#how-search-bar-work)
-	* [How to use the Filters](#how-to-use-the-filters)
+	* [What Filter can I create](#what-filter-can-i-create)
+	* [How to add Filters](#how-to-add-filters)
+	* [How to delete Filters](#how-to-delete-filters)
  
  
 ### [Introduction](#introduction)
@@ -47,15 +49,27 @@ As you can see the result is more accurate.
 
 On the same way, you can search specific status links to task. Type the **name of the task** (or the **first letters**), then add the sign **equal** (**=**) and the status you are looking for.
 
-For example, search all the shots which are **Waiting for approval** (**WFA**) at the **Layout** stage. So on the search bar you will type : **lay=wfa**.
+For example, search all the shots which are **Waiting for approval** (**WFA**) at the **Layout** stage. So on the search bar you will type : **layout=wfa** or **lay=wfa** .
 
 ![Search layout wfa](../img/faq/filter_lay_wfa.png)
 
-You can continue and be even more specific, you only want to see the first episode. On the search bar add a **space** and type e001. You can be even more specific and just want to see the sequence 2. The research will be **lay=wfa e001 s002**.
+You can continue and be even more specific, lets focus on the first episode. On the search bar add a **space** and type e001. You can be even more specific and just want to see the sequence 2. The research will be **lay=wfa e001 s002**.
 
 ![Search layout wfa seq2](../img/faq/filter_lay_wfa_s002.png)
 
-### [How to use the Filters](#how-to-use-the-filters)
+### [What Filter can I create](#what-filter-can-i-create)
+
+You can create filters about entities :
+* **Episodes** : `e001`, `e002` etc.  
+* **Sequences** : `e001 s001`, `s001 s001` etc.
+* **Asset Type** : `characters`, `environment`, `fx` etc.
+
+You can also create filters about tasks status: always use **task=status**, you don't have to type all the letter of the task, Kitsu will understand only the first. But the status has to be fully typed.
+* Layout is Work in progress (wip) : `layout=wip` or `lay=wip`
+* Concept is waiting for approval (wfa) only for the fx : `concept=wfa fx` or `con=wfa fx`
+* On episode 2 Layout is wip : `e002 lay=wip` or `layout=wip e002`
+
+### [How to add Filters](#how-to-add-filters)
 
 Kitsu allows you to save your research. You can save them buy pressing tne **Enter** key at the enter of your research, or click on the **Save** button ![Save button](../img/faq/filter_save_button.png).
 
@@ -65,5 +79,8 @@ Now under the **Search bar** you can see your previous search as buttons.
 
 Everytime you get back to this page the buttons will be here. It will help you to find the information you need easier and faster.
 
+### [How to delete Filters](#how-to-delete-filters)
 
+If you have created a filter button by mistake click on the cross next to it ![Filter delete](../img/faq/filter_delete.png).
 
+The result of the filter will be display, but not the button anymore. Just cancel your research by deleting the text or use the cross enxt to the search bar ![Search delete](../img/faq/filter_cross_delete.png)
