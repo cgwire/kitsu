@@ -1,12 +1,12 @@
 # FAQ for Kitsu
 
-* ## [Filters](#filters)
+* [Filters](#filters)
 	* [Introduction to filters](#introduction-to-filters)
 	* [How Search Bar works](#how-search-bar-work)
 	* [How to add Filters](#how-to-add-filters)
 	* [What Filters can I create](#what-filters-can-i-create)
 	* [How to delete Filters](#how-to-delete-filters)
-* ## [Notifications](#notifications)
+* [Notifications](#notifications)
 	* [How notifications work](#how-notifications-work)
 	* [How to get notified](#how-to-get-notified)
 	* [How not to be notified](#how-not-to-be-notified)
