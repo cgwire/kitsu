@@ -117,7 +117,9 @@ Now you can see next to each statut the initial of the artist, or his pic if he 
 
 If you want, you can hide this information with the **Hide assignations** button on the top of the spreadsheet ![Hide assignations](../img/getting-started/hide_assignation.png).
 
-Now everybody know what to do, and who is doing what!
+Now that you have assigned someone, he will be added to the production team. Depending of his position (artist, supervisor) he will only see the production where he is assigned. 
+
+Everybody know what to do, and who is doing what!
 
 
 ### [Create sequences and shots](#create-sequences-and-shots)
