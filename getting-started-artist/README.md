@@ -3,7 +3,7 @@
 ## [As an artist](#as-an-artist)
  
  When your account is created on Kitsu, you can fill in detail your profil.
- Click on your name on the top right of the screen (1) then on **Profile** (2).
+ Click on your name on the top right of the screen (1) then on **Profile** (2). Note that you have an easy access to the documentation (3).
  
 ![User profil](../img/getting-started/user_profil.png)
  

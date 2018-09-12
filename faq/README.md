@@ -3,8 +3,8 @@
 * ## Filters
 	* [Introduction](#introduction)
 	* [How Search Bar works](#how-search-bar-work)
-	* [What Filters can I create](#what-filters-can-i-create)
 	* [How to add Filters](#how-to-add-filters)
+	* [What Filters can I create](#what-filters-can-i-create)
 	* [How to delete Filters](#how-to-delete-filters)
  
  
@@ -57,6 +57,16 @@ You can be even more specific, lets focus on the first episode : on the search b
 
 ![Search layout wfa seq2](../img/faq/filter_lay_wfa_s002.png)
 
+### [How to add Filters](#how-to-add-filters)
+
+Kitsu allows you to save your research. You can save them by pressing tne **Enter** key at the end of your typing, or click on the **Save** button ![Save button](../img/faq/filter_save_button.png).
+
+Now under the **Search bar** you can see your previous searches as buttons. 
+
+![Search saved](../img/faq/filter_saved.png)
+
+Everytime you get back to this page, the buttons will be there. It will help you to find the informations you need easier and faster.
+
 ### [What Filters can I create](#what-filters-can-i-create)
 
 You can create **filters** about **entities** :
@@ -69,15 +79,6 @@ You can also create **filters** about **task status**: always use **task=status*
 * Concept is waiting for approval (wfa) only for the fx : `concept=wfa fx` or `fx con=wfa`
 * On episode 2 Layout is wip : `e002 lay=wip` or `layout=wip e002`
 
-### [How to add Filters](#how-to-add-filters)
-
-Kitsu allows you to save your research. You can save them by pressing tne **Enter** key at the end of your typing, or click on the **Save** button ![Save button](../img/faq/filter_save_button.png).
-
-Now under the **Search bar** you can see your previous searches as buttons. 
-
-![Search saved](../img/faq/filter_saved.png)
-
-Everytime you get back to this page, the buttons will be there. It will help you to find the informations you need easier and faster.
 
 ### [How to delete Filters](#how-to-delete-filters)
 
