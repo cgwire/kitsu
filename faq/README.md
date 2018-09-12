@@ -103,7 +103,7 @@ It's **gray** ![Notification off](../img/faq/notification_icon_off.png) when you
 
 When you click on the **Bell** button, it will open the **Notifications** page.
 
-There you can see all the changes made on the **Tasks** you are following. 
+Ther,e you can see all the changes made on the **Tasks** you are following or assigned. 
 
 ![Notification page](../img/faq/notification_page.png)
 
@@ -118,7 +118,7 @@ and (6) the comment.
 
 Each part is a **link** you can use to jump on the information you need. If you click on the **status**, you will jump to the status page of the entity and you can answer right away.
 
-For example, let's assign Jacques to a new task and ask him to work on the asset.
+For example, lets assign Jacques to a new task and ask him to work on the asset.
 
 ![Notification example 01](../img/faq/notification_example01.png)
 
@@ -130,6 +130,6 @@ Jacques receives immediately a notification, the **Bell** button change color ![
 
 ### [How to get notified](#how-to-get-notified)
 
-As an artist you will receive a notification as soon as someone change the status of one of your task, or post a comment.
+As an artist you will receive a notification ![Notification on](../img/faq/notification_icon_on.png) as soon as someone change the status of one of your task, or post a comment.
 
 ### [How not to be notified](#how-not-to-be-notified)
