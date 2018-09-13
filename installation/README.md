@@ -1,5 +1,13 @@
 # Installation
 
+## Cloud Hosting
+
+If your version of Kitsu is hosted and maintained by CGWire, you don't have
+anything to install. Simply, connect to the URL that was given to you to start
+using Kitsu!
+
+## Self-Hosting
+
 To run properly, Kitsu requires Zou, the database API. Information related to
 both modules installation are located in the Zou installation documentation.
 
