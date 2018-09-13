@@ -9,7 +9,7 @@
 * [Notifications](#notifications)
 	* [How notifications work](#how-notifications-work)
 	* [How to get notified](#how-to-get-notified)
-	* [How not to be notified](#how-not-to-be-notified)
+	* [How not to be notified anymore](#how-not-to-be-notified-anymore)
 
 -----------------------------------------	
  
@@ -142,6 +142,6 @@ By default you are following all the tasks you are assigned to, on the task page
 
 If you want to follow another task, just click on the **crossed eye** button ![Notification off](../img/faq/notification_off.png), it will change, not crossed anymore ![Notification on](../img/faq/notification_on.png) meaning you are now following this task, and will receive notification about it. 
 
-### [How not to be notified](#how-not-to-be-notified)
+### [How not to be notified anymore](#how-not-to-be-notified-anymore)
 
-If you don't want to follow a task anymore, just click on the **eye** button ![Notification on](../img/faq/notification_on.png) on the task page. He now will be crossed ![Notification off](../img/faq/notification_off.png), meaning you won't receive notification anymore.
+If you don't want to follow a task anymore, just click on the **eye** button ![Notification on](../img/faq/notification_on.png) on the task page. He now will be crossed ![Notification off](../img/faq/notification_off.png), meaning you won't receive notifications anymore.
