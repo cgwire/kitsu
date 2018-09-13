@@ -157,12 +157,12 @@ If you don't want to follow a task anymore, just click on the **eye** button ![N
 
 ## [Playlist](#playlist)
 ### [How to create a playlist](#how-to-create-a-playlist)
-You can find the **Playlist** page on the **main menu** ![Main menu](../img/faq/main_button.png) under the **Production** section. 
+You can find the **Playlisst** page on the **main menu** ![Main menu](../img/faq/main_button.png) under the **Production** section. 
 
 ![Playlist main menu](../img/faq/playlist_main_menu.png)
 
-The **Playlist** page is separated in 3 parts : 
-* (1) : you can **create** a playlist, or choose between them
+The **Playlists** page is separated in 3 parts : 
+* (1) : you can **create** a playlist, or choose one
 * (3) : Select the **Shots** you want to show.
 * (2) : the shots you have selected will appear here.
 
@@ -170,18 +170,20 @@ The **Playlist** page is separated in 3 parts :
 
 Start by creating a **Playlist** ![Playlist add button](../img/faq/playlist_add_button.png), You default name will be the date and the hour. You can change the name of the playlist with the **Edit** button ![Edit button](../img/faq/edit_button.png). For example add the name of your department.
 
+![Playlist add page](../img/faq/playlist_add_page.png)
+
 Then on the right part, choose wich shots you want to add on your playlist. Start with selecting the **Episode** and the **Sequence** you want. Then click on the shots you want to add.
 
 The shots will appear on the middle part of the screen. As soon as you add them, they will be saved on the playlist, and everybody can see them.
 
 ### [How to switch from tasks and versions](#how-to-switch-from-tasks-and-versions)
 
-For each shot selected on a playlist you can choose the **task** you want to see and the **version**.
+For each shot selected on a playlist you can choose the **task** and the **version** you want to see.
 
 ![Playlist task selection](../img/faq/playlist_task_selection.png)
 ![Playlist version selection](../img/faq/playlist_version_selection.png)
 
-Just select the task or version you want to see it playing on the playlist.
+Just select the task or version you want for each shot. The new selection will be on the playlist.
 
 ### [How to delete a playlist](#how-to-delete-a-playlist)
 
