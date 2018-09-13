@@ -1,7 +1,7 @@
 # Permissions
 
-Kitsu proposes a simple permission scheme to manage your productions. They can
-be set via the People studio module.
+Kitsu proposes a simple permission scheme to manage your productions. To set
+permissions for a user, go to the employee page and grant him with one of the following role:
 
 ## Studio Manager
 
@@ -9,9 +9,12 @@ Admin have read and write access on everything.
 
 ## Supervisor
 
-Managers have read and write access on everything production they work on. 
-They are not allowed to managed the studio team, the main timesheets and the
-production list.
+Managers have read and write access on everything production they work on:
+assets, shots, tasks, assignations, statistics, breakdown and playlists.
+
+They are not allowed to access the studio team, the main timesheets and the
+production list. They can't define task types, task statuses and asset types
+neither.
 
 ## CG artist
 
