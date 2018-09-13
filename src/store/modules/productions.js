@@ -410,7 +410,7 @@ const mutations = {
     const personIndex = state.currentProduction.team.findIndex(
       (pId) => pId === personId
     )
-    if (personIndex) {
+    if (personIndex !== null) {
       state.currentProduction.team.splice(personIndex, 1)
     }
   },
