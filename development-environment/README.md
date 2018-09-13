@@ -10,9 +10,10 @@ the following elements installed:
 * A [Zou Events development instance](https://zou.cg-wire.com/development/) up and running on port 5001 (optional)
 
 Eventually you can use our [Docker image]() but it will require you to give two
-environment variables: `KITSU_API_TARGET` and `KITSU_EVENT_TARGET`. Each of
-them are the urls of where the API can be reached and where the event stream
-can be reached.
+environment variables: 
+
+* `KITSU_API_TARGET` (default: http://localohst:5000): The URL where the API can be reached.
+* `KITSU_EVENT_TARGET` (default: http://localohst:5001): The URL where the event stream can be reached.
 
 ## Develop
 
