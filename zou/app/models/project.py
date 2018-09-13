@@ -31,6 +31,9 @@ class Project(db.Model, BaseMixin, SerializerMixin):
     file_tree = db.Column(JSONB)
     data = db.Column(JSONB)
     has_avatar = db.Column(db.Boolean(), default=False)
+    fps = db.Column(db.String(10))
+    ratio = db.Column(db.String(10))
+    resolution = db.Column(db.String(12))
 
     project_status_id = db.Column(
         UUIDType(binary=False),
