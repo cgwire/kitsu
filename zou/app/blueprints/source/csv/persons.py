@@ -19,14 +19,23 @@ class PersonsCsvImportResource(BaseCsvImportResource):
 
         try:
             password = auth.encrypt_password("default")
-            person = Person.create(
-                email=email,
-                password=password,
-                first_name=first_name,
-                last_name=last_name,
-                phone=phone
-            )
+            person = Person.get_by(email=email)
+
+            if person is None:
+                person = Person.create(
+                    email=email,
+                    password=password,
+                    first_name=first_name,
+                    last_name=last_name,
+                    phone=phone
+                )
+            else:
+                person.update({
+                    "first_name": first_name,
+                    "last_name": last_name,
+                    "phone": phone
+                })
         except IntegrityError:
             person = Person.get_by(email=email)
 
-        return person
+        return person.serialize_safe()

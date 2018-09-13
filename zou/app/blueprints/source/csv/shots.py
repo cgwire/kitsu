@@ -57,4 +57,4 @@ class ShotsCsvImportResource(BaseCsvProjectImportResource):
                 entity_type_id=shot_type["id"]
             )
 
-        return entity
+        return entity.serialize()

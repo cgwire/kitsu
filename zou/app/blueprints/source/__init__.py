@@ -62,7 +62,6 @@ from .shotgun.team import (
     ImportRemoveShotgunProjectConnectionResource
 )
 
-from .csv.projects import ProjectsCsvImportResource
 from .csv.persons import PersonsCsvImportResource
 from .csv.assets import AssetsCsvImportResource
 from .csv.shots import ShotsCsvImportResource
@@ -99,7 +98,6 @@ routes = [
     ("/import/shotgun/remove/note", ImportRemoveShotgunNoteResource),
     ("/import/shotgun/remove/version", ImportRemoveShotgunVersionResource),
 
-    ("/import/csv/projects", ProjectsCsvImportResource),
     ("/import/csv/persons", PersonsCsvImportResource),
     ("/import/csv/projects/<project_id>/assets", AssetsCsvImportResource),
     ("/import/csv/projects/<project_id>/shots", ShotsCsvImportResource)

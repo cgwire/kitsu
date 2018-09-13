@@ -31,9 +31,10 @@ class BaseCsvImportResource(Resource):
             with open(file_path) as csvfile:
                 reader = csv.DictReader(csvfile)
                 for row in reader:
-                    result.append(self.import_row(row))
+                    row = self.import_row(row)
+                    result.append(row)
 
-            return fields.serialize_models(result), 201
+            return result, 201
         except KeyError as e:
             return {"error": "A column is missing: %s" % e}, 400
 
@@ -75,9 +76,10 @@ class BaseCsvProjectImportResource(BaseCsvImportResource):
             with open(file_path) as csvfile:
                 reader = csv.DictReader(csvfile)
                 for row in reader:
-                    result.append(self.import_row(row, project_id))
+                    row = self.import_row(row, project_id)
+                    result.append(row)
 
-            return fields.serialize_models(result), 201
+            return result, 201
         except KeyError as e:
             print(e)
             return {"error": "A column is missing: %s" % e}, 400

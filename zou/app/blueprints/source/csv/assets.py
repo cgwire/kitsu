@@ -42,4 +42,4 @@ class AssetsCsvImportResource(BaseCsvProjectImportResource):
         except IntegrityError:
             pass
 
-        return entity
+        return entity.serialize()
