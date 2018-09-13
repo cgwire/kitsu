@@ -5,10 +5,14 @@
 Prior to setting up the Kitsu development environment make sure you have
 the following elements installed:
 
-* Node.js 6.x or superior
+* Node.js 8.x or superior
 * A [Zou development instance](https://zou.cg-wire.com/development/) up and running on port 5000
 * A [Zou Events development instance](https://zou.cg-wire.com/development/) up and running on port 5001 (optional)
 
+Eventually you can use our [Docker image]() but it will require you to give two
+environment variables: `KITSU_API_TARGET` and `KITSU_EVENT_TARGET`. Each of
+them are the urls of where the API can be reached and where the event stream
+can be reached.
 
 ## Develop
 
@@ -38,15 +42,8 @@ Every changes will automatically update the page.
 If you want to build your code, simply run this command:
 
 ```bash
-npm run build
+npm run serve
 ```
-
-If you need more details about the build:
-
-```bash
-npm run build --report
-```
-
 
 ## Tests
 
