@@ -7,6 +7,9 @@
           <th class="project">&nbsp;</th>
           <th class="name">{{ $t('productions.fields.name') }}</th>
           <th class="status">{{ $t('productions.fields.status') }}</th>
+          <th class="fps">{{ $t('productions.fields.fps') }}</th>
+          <th class="ratio">{{ $t('productions.fields.ratio') }}</th>
+          <th class="resolution">{{ $t('productions.fields.resolution') }}</th>
           <th class="actions"></th>
         </tr>
       </thead>
@@ -37,8 +40,17 @@
             :last-production-screen="lastProductionScreen"
           >
           </production-name-cell>
-          <td class="td-status">
+          <td class="status">
             {{ $t(getStatusLocale(entry.project_status_name)) }}
+          </td>
+          <td class="fps">
+            {{ entry.fps }}
+          </td>
+          <td class="ratio">
+            {{ entry.ratio }}
+          </td>
+          <td class="resolution">
+            {{ entry.resolution }}
           </td>
           <row-actions
             :entry-id="entry.id"
@@ -128,4 +140,12 @@ export default {
 .actions {
   min-width: 100px;
 }
+
+.fps,
+.ratio,
+.resolution {
+  width: 100px;
+  min-width: 100px;
+}
+
 </style>

@@ -115,6 +115,11 @@ td.actions {
   min-width: 100px;
 }
 
+ul {
+  list-style-type: disc;
+  margin-left: 1em;
+}
+
 .hero {
   background-color: #CFCFCF;
 }

@@ -14,9 +14,11 @@
     </span>
 
     <span
-      class="flexrow-item last-comment"
+      class="flexrow-item last-comment pointer"
       v-if="commentText && commentText.length > 0"
+      v-tooltip="tooltipOptions"
       v-html="compileMarkdown(commentText)"
+      @click="onClick"
     >
     </span>
     <span
@@ -39,9 +41,18 @@ export default {
   components: {
     PeopleAvatar
   },
+
+  data () {
+    return {
+      isOpen: false,
+      timeout: null
+    }
+  },
+
   props: [
     'task'
   ],
+
   computed: {
     ...mapGetters([
     ]),
@@ -55,6 +66,17 @@ export default {
       }
 
       return result
+    },
+
+    tooltipOptions () {
+      return {
+        content: this.compileMarkdown(this.task.last_comment.text),
+        show: this.isOpen,
+        trigger: 'manual',
+        delay: {
+          hide: 5000
+        }
+      }
     }
   },
 
@@ -64,6 +86,17 @@ export default {
 
     compileMarkdown (input) {
       return marked(input || '')
+    },
+
+    onClick () {
+      this.isOpen = !this.isOpen
+      if (this.isOpen) {
+        this.timeout = setTimeout(() => {
+          this.isOpen = false
+        }, 3000)
+      } else {
+        clearTimeout(this.timeout)
+      }
     }
   }
 }
@@ -78,7 +111,15 @@ export default {
   margin-left: 0.6em;
 }
 
+.pointer {
+  cursor: pointer;
+}
+
 .no-comment {
   font-style: italic;
+}
+
+.tooltip {
+  width: 500px;
 }
 </style>

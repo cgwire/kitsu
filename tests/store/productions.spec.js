@@ -132,7 +132,7 @@ describe('productions', () => {
 
     it('productionStatusOptions', () => {
       store.commit(LOAD_PRODUCTION_STATUS_END, productionStatuses)
-      const options = getters.getProductionStatusOptions(state)
+      const options = getters.productionStatusOptions(state)
       expect(options[0].label).to.equal('Open')
       expect(options[0].value).to.equal(1)
       expect(options[1].label).to.equal('Closed')

@@ -23,10 +23,31 @@
         />
         <combobox
           :label="$t('productions.fields.status')"
-          :options="getProductionStatusOptions"
+          :options="productionStatusOptions"
           localeKeyPrefix="productions.status."
           @enter="runConfirmation"
           v-model="form.project_status_id"
+        />
+        <text-field
+          ref="fpsField"
+          :label="$t('productions.fields.fps')"
+          v-model="form.fps"
+          @enter="runConfirmation"
+          v-focus
+        />
+        <text-field
+          ref="ratioField"
+          :label="$t('productions.fields.ratio')"
+          v-model="form.ratio"
+          @enter="runConfirmation"
+          v-focus
+        />
+        <text-field
+          ref="resolutionField"
+          :label="$t('productions.fields.resolution')"
+          v-model="form.resolution"
+          @enter="runConfirmation"
+          v-focus
         />
 
         <div v-if="productionToEdit && productionToEdit.id">
@@ -65,20 +86,19 @@
 
 <script>
 import { mapGetters, mapActions } from 'vuex'
-import TextField from '../widgets/TextField'
-import FileUpload from '../widgets/FileUpload'
 import Combobox from '../widgets/Combobox'
+import FileUpload from '../widgets/FileUpload'
+import TextField from '../widgets/TextField'
 
 export default {
   name: 'edit-production-modal',
   components: {
-    TextField,
+    Combobox,
     FileUpload,
-    Combobox
+    TextField
   },
 
   props: [
-    'onConfirmClicked',
     'text',
     'active',
     'cancelRoute',
@@ -88,36 +108,15 @@ export default {
     'productionToEdit'
   ],
 
-  watch: {
-    productionToEdit () {
-      if (this.productionToEdit && this.productionToEdit.id) {
-        this.form.name = this.productionToEdit.name
-        this.form.project_status_id = this.productionToEdit.project_status_id
-      } else {
-        this.form = {
-          name: '',
-          project_status_id: this.getProductionStatusOptions[0].value
-        }
-      }
-    },
-
-    active () {
-      if (this.active) {
-        setTimeout(() => {
-          this.$refs.nameField.focus()
-          this.formData = null
-          if (this.$refs.fileField) this.$refs.fileField.reset()
-        }, 100)
-      }
-    }
-  },
-
   data () {
     if (this.productionToEdit && this.productionToEdit.id) {
       return {
         form: {
           name: this.productionToEdit.name,
-          project_status_id: this.productionToEdit.project_status_id
+          project_status_id: this.productionToEdit.project_status_id,
+          fps: this.productionToEdit.fps,
+          ratio: this.productionToEdit.ratio,
+          resolution: this.productionToEdit.resolution
         },
         formData: null
       }
@@ -125,18 +124,27 @@ export default {
       return {
         form: {
           name: '',
-          project_status_id: ''
+          project_status_id: '',
+          fps: '',
+          ratio: '',
+          resolution: ''
         },
         formData: null
       }
     }
   },
 
+  mounted () {
+    if (this.productionStatus.length > 0) {
+      this.form.project_status_id = this.productionStatus[0].id
+    }
+  },
+
   computed: {
     ...mapGetters([
+      'productionStatusOptions',
       'productions',
-      'productionStatus',
-      'getProductionStatusOptions'
+      'productionStatus'
     ])
   },
 
@@ -154,22 +162,41 @@ export default {
     }
   },
 
-  mounted () {
-    if (this.productionStatus.length > 0) {
-      this.form.project_status_id = this.productionStatus[0].id
+  watch: {
+    productionToEdit () {
+      if (this.productionToEdit && this.productionToEdit.id) {
+        this.form = {
+          name: this.productionToEdit.name,
+          project_status_id: this.productionToEdit.project_status_id,
+          fps: this.productionToEdit.fps,
+          ratio: this.productionToEdit.ratio,
+          resolution: this.productionToEdit.resolution
+        }
+      } else {
+        this.form = {
+          name: '',
+          project_status_id: this.productionStatusOptions[0].value,
+          fps: '',
+          ratio: '',
+          resolution: ''
+        }
+      }
+    },
+
+    active () {
+      if (this.active) {
+        setTimeout(() => {
+          this.$refs.nameField.focus()
+          this.formData = null
+          if (this.$refs.fileField) this.$refs.fileField.reset()
+        }, 100)
+      }
     }
   }
 }
 </script>
 
 <style scoped>
-.modal-content .box p.text {
-  margin-bottom: 1em;
-}
-.is-danger {
-  color: #ff3860;
-  font-style: italic;
-}
 .title {
   border-bottom: 2px solid #DDD;
   padding-bottom: 0.5em;

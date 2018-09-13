@@ -1,7 +1,12 @@
 <template>
 <td class="production-name">
-  <div class="flexrow">
-    <router-link :to="productionRoute">
+  <div
+    class="flexrow"
+    v-tooltip="tooltipOptions"
+  >
+    <router-link
+      :to="productionRoute"
+    >
       <div
          class="flexrow-item avatar has-text-centered"
          v-if="withAvatar"
@@ -53,6 +58,10 @@ export default {uname: 'production-name-cell',
     lastProductionScreen: {
       default: 'assets',
       type: String
+    },
+    isTooltip: {
+      default: false,
+      type: Boolean
     }
   },
 
@@ -65,6 +74,32 @@ export default {uname: 'production-name-cell',
         name: this.lastProductionScreen,
         params: {
           production_id: this.entry.id
+        }
+      }
+    },
+
+    productionInfo () {
+      const fps = this.entry.fps
+      const ratio = this.entry.ratio
+      const resolution = this.entry.resolution
+      const infos = []
+      if (fps) infos.push(`${this.$t('productions.fields.fps')}: ${fps}`)
+      if (ratio) infos.push(`${this.$t('productions.fields.ratio')}: ${ratio}`)
+      if (resolution) {
+        infos.push(`${this.$t('productions.fields.resolution')}: ${resolution}`)
+      }
+      if (infos.length > 0 && this.isTooltip) {
+        return infos.join('<br>')
+      } else {
+        return ''
+      }
+    },
+
+    tooltipOptions () {
+      return {
+        content: this.productionInfo,
+        delay: {
+          hide: 5000
         }
       }
     }

@@ -120,29 +120,32 @@ export default {
   },
 
   productions: {
-    title: 'Productions',
+    current: 'Production sélectionnée ',
+    delete_text: 'Êtes vous sûr de vouloir retirer {name} de la base de données?',
+    delete_error: 'Une erreur est survenue lors de la suppression. Il y a probablement des données liées à cette production. Etes vous sur que cette production n\'a aucune tâche, shot ou asset lié ?',
     edit_title: 'Modifier la production',
     new_production: 'Ajouter une production',
     number: 'production | productions',
-    current: 'Production sélectionnée ',
     picture: 'Changer l\'image',
+    title: 'Productions',
     home: {
-      title: 'Productions en cours',
-      welcome: 'Bienvenue sur Kitsu',
-      empty: 'Vous n\'avez pas de production ouverte, voulez vous en créer une nouvelle ?',
       create_new: 'Créer une nouvelle production',
-      no_task: 'Vous n\'avez pas de tâches assignées. Demandez à votre superviseur ce que vous pouvez faire !'
+      empty: 'Vous n\'avez pas de production ouverte, voulez vous en créer une nouvelle ?',
+      no_task: 'Vous n\'avez pas de tâches assignées. Demandez à votre superviseur ce que vous pouvez faire !',
+      title: 'Productions en cours',
+      welcome: 'Bienvenue sur Kitsu'
     },
     fields: {
-      name: 'Nom',
-      status: 'État'
+      fps: 'FPS',
+      name: 'Name',
+      ratio: 'Ratio',
+      resolution: 'Resolution',
+      status: 'Status'
     },
     status: {
       open: 'Ouvert',
       closed: 'Fermé'
-    },
-    delete_text: 'Êtes vous sûr de vouloir retirer {name} de la base de données?',
-    delete_error: 'Une erreur est survenue lors de la suppression. Il y a probablement des données liées à cette production. Etes vous sur que cette production n\'a aucune tâche, shot ou asset lié ?'
+    }
   },
 
   comments: {
