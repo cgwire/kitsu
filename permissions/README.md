@@ -3,17 +3,18 @@
 Kitsu proposes a simple permission scheme to manage your productions. They can
 be set via the People studio module.
 
-## Admin
+## Studio Manager
 
 Admin have read and write access on everything.
 
-## Manager
+## Supervisor
 
-Managers have read and write access on everything about studio and production modules except on people. They are not
-allowed to managed the studio team (no write access on the people page).
+Managers have read and write access on everything production they work on. 
+They are not allowed to managed the studio team, the main timesheets and the
+production list.
 
-## User
+## CG artist
 
-User don't have access to studio modules. They can only display data related to
-production for which they have tasks assigned. They can only comment and change
-status of task for which they have an assignation.
+CG artists can only display production of which they are part of.
+They can only comment tasks and change their status when they are assigned to 
+it.
