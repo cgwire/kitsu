@@ -108,11 +108,11 @@ It's **gray** ![Notification off](../img/faq/notification_icon_off.png) when you
 
 When you click on the **Bell** button, it will open the **Notifications** page.
 
-Ther,e you can see all the changes made on the **Tasks** you are following or assigned. 
+There, you can see all the changes made on the **Tasks** you are following or assigned. 
 
 ![Notification page](../img/faq/notification_page.png)
 
-There is a lot of informations an a notification : 
+There is a lot of informations on a notification : 
 * (1) the name of the **author**
 * (2) the related **entity**
 * (3) the related **task**
@@ -156,8 +156,11 @@ If you don't want to follow a task anymore, just click on the **eye** button ![N
 
 
 ## [Playlist](#playlist)
+
+![Playlist page](../img/faq/playlist_example.png)
+
 ### [How to create a playlist](#how-to-create-a-playlist)
-You can find the **Playlisst** page on the **main menu** ![Main menu](../img/faq/main_button.png) under the **Production** section. 
+You can find the **Playlists** page on the **main menu** ![Main menu](../img/faq/main_button.png) under the **Production** section. 
 
 ![Playlist main menu](../img/faq/playlist_main_menu.png)
 
