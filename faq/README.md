@@ -132,4 +132,14 @@ Jacques receives immediately a notification, the **Bell** button change color ![
 
 As an artist you will receive a notification ![Notification on](../img/faq/notification_icon_on.png) as soon as someone change the status of one of your task, or post a comment.
 
+You can also choose to follow specifics tasks. Go into the task page you want to follow : on the **assets** or **shots** pages click onto the status icon.
+
+On the top right side of the page you can see an **Eye** button, next to the **Delete task** button.
+
+![Follow button](../img/faq/notification_other_task.png)
+
+By default you are following all the tasks you are assigned to, on the task page the icon will be **open** ![Notification on](../img/faq/notification_on.png). 
+
+If you want to follow another task, just click on the **crossed eye** button ![Notification off](../img/faq/notification_off.png), it will change, not crossed anymore ![Notification on](../img/faq/notification_on.png) meannig you are now following this task, and will receive notification about it. 
+
 ### [How not to be notified](#how-not-to-be-notified)
