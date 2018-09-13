@@ -140,6 +140,8 @@ On the top right side of the page you can see an **Eye** button, next to the **D
 
 By default you are following all the tasks you are assigned to, on the task page the icon will be **open** ![Notification on](../img/faq/notification_on.png). 
 
-If you want to follow another task, just click on the **crossed eye** button ![Notification off](../img/faq/notification_off.png), it will change, not crossed anymore ![Notification on](../img/faq/notification_on.png) meannig you are now following this task, and will receive notification about it. 
+If you want to follow another task, just click on the **crossed eye** button ![Notification off](../img/faq/notification_off.png), it will change, not crossed anymore ![Notification on](../img/faq/notification_on.png) meaning you are now following this task, and will receive notification about it. 
 
 ### [How not to be notified](#how-not-to-be-notified)
+
+If you don't want to follow a task anymore, just click on the **eye** button ![Notification on](../img/faq/notification_on.png) on the task page. He now will be crossed ![Notification off](../img/faq/notification_off.png), meaning you won't receive notification anymore.
