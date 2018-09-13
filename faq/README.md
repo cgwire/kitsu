@@ -11,6 +11,11 @@
 	* [How to get notified](#how-to-get-notified)
 	* [How not to be notified anymore](#how-not-to-be-notified-anymore)
 
+* [Playlist](#playlist)
+	* [How to create a playlist](#how-to-create-a-playlist)
+	* [How to switch from tasks and versions](#how-to-switch-from-tasks-and-versions)
+	* [How to delete a playlist](#how-to-delete-a-playlist)
+
 -----------------------------------------	
  
 ## [Filters](#filters) 
@@ -145,3 +150,21 @@ If you want to follow another task, just click on the **crossed eye** button ![N
 ### [How not to be notified anymore](#how-not-to-be-notified-anymore)
 
 If you don't want to follow a task anymore, just click on the **eye** button ![Notification on](../img/faq/notification_on.png) on the task page. He now will be crossed ![Notification off](../img/faq/notification_off.png), meaning you won't receive notifications anymore.
+
+
+------------------------------------
+
+
+## [Playlist](#playlist)
+### [How to create a playlist](#how-to-create-a-playlist)
+You can find the **Playlist** page on the **main menu** ![Main menu](../img/faq/main_button.png) under the **Production** section. 
+
+![Playlist main menu](../img/faq/playlist_main_menu.png)
+
+
+
+
+### [How to switch from tasks and versions](#how-to-switch-from-tasks-and-versions)
+
+
+### [How to delete a playlist](#how-to-delete-a-playlist)
