@@ -52,7 +52,7 @@
   />
   <img
     v-lazy="person.avatarPath"
-    v-else-if="person.has_avatar && noCache"
+    v-else-if="person.has_avatar"
   />
   <span v-else>
     {{ person.initials }}
