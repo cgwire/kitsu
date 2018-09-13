@@ -172,12 +172,21 @@ Start by creating a **Playlist** ![Playlist add button](../img/faq/playlist_add_
 
 Then on the right part, choose wich shots you want to add on your playlist. Start with selecting the **Episode** and the **Sequence** you want. Then click on the shots you want to add.
 
-The shot will appear on the middle part of the screen. For each shot you can choose the **task** you want to see and the **version**.
+The shots will appear on the middle part of the screen. As soon as you add them, they will be saved on the playlist, and everybody can see them.
+
+### [How to switch from tasks and versions](#how-to-switch-from-tasks-and-versions)
+
+For each shot selected on a playlist you can choose the **task** you want to see and the **version**.
 
 ![Playlist task selection](../img/faq/playlist_task_selection.png)
 ![Playlist version selection](../img/faq/playlist_version_selection.png)
 
-### [How to switch from tasks and versions](#how-to-switch-from-tasks-and-versions)
-
+Just select the task or version you want to see it playing on the playlist.
 
 ### [How to delete a playlist](#how-to-delete-a-playlist)
+
+To delete a playlist, click on its name on the left part, then once loaded, click on the **delete** button (middle part) ![Delete button](../img/faq/delete_button.png).
+
+A confirmation pop-up will appear. Validate with the **Confirm** button.
+
+![Playlist Delete popup](../img/faq/playlist_delete.png)
