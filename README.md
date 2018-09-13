@@ -1,62 +1,28 @@
 ![Kitsu Logo](img/kitsu.png)
 
-# Kitsu, CG Production Manager
+# Kitsu, CG Production Manager Documentation
 
-Kitsu is a web application for validation tracking in CG productions. By
+Kitsu is a validation tracking app for CG productions. By
 offering a clean UI and a shared database, it allows you to communicate
-efficiently with all the shareholders of the production: CG artists,
-production managers, TDs, supervisors and clients.
+efficiently with all the shareholders of the production: CG Artists,
+Production managers, TDs, Supervisors and Clients.
 
-To be kept up to date of incoming releases follow our
-[forum](https://forum.cg-wire.com).
+## Getting Started
 
-![Shot module mockup](img/shots.png)
+Depending of your role in the studio we propose you two tutorials:
 
-## Main modules
+* [Getting Started as a Production Manager](getting-started-production/README.md#as-a-production-manager): you will learn how to set up a full
+  production and dispatch tasks to your team.
+* [Getting Started as a CG artist](getting-started-artist/README.md#as-an-artist): you will find all the information required to access
+  to your task list, share your progress and upload your results.
 
-To start with Kitsu we recommend you to understand what every modules does.
-There are four kinds of modules:
+## Frequently Asked Questions
 
-* Production modules related to current production (assets and shots).
-* Studio modules related to all productions (people and running productions).
-* Admin modules related to configuration (task types, task status, ...).
-* Your profile, the module to set your own preferences.
+It's the place to find common questions and their answers. Tutorials don't
+cover everything this FAQ is here to add the missing part
 
-## Studio modules
+[Frequently Asked Questions](faq/README.md)
 
-Studio modules allow managers to deal with common data that is shared by all
-productions.
-
-* People: This is the list of the people involved in the studio.
-* Productions: create, open and close productions.
-
-## Production modules
-
-Production modules are used in the context of given production.
-
-* Shot tasks: see the status of every tasks related to shots.
-* Asset tasks: see the status of every tasks related to assets.
-* Casting: link assets and shots together.
-* Task validation: comment and change task status, add preview to comments.
-
-## Admin modules
-
-Admin modules are here to deal with overall configuration. It allows to adapt
-the software to your studio.
-
-* Task types: manage your task types, your fabrication steps. 
-* Task status: manage your task status, to adapt the review workflow to your
-  needs. 
-* Asset types: manage your asset types, for a better organization of your
-  assets. 
-* Custom actions: manage custom actions, urls to send information to your
-  in-house tools
-
-## Profile
-
-* Set your name
-* Chose your locale
-* Change password
 
 ## About authors
 
