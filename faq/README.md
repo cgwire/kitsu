@@ -161,8 +161,19 @@ You can find the **Playlist** page on the **main menu** ![Main menu](../img/faq/
 
 ![Playlist main menu](../img/faq/playlist_main_menu.png)
 
+The **Playlist** page is separated in 3 parts : 
+* (1) : you can **create** a playlist, or choose between them
+* (3) : Select the **Shots** you want to show.
+* (2) : the shots you have selected will appear here.
 
+Start by creating a **Playlist** ![Playlist add button](../img/faq/playlist_add_button.png), You default name will be the date and the hour. You can change the name of the playlist with the **Edit** button ![Edit button](../img/faq/edit_button.png). For example add the name of your department.
 
+Then on the right part, choose wich shots you want to add on your playlist. Start with selecting the **Episode** and the **Sequence** you want. Then click on the shots you want to add.
+
+The shot will appear on the middle part of the screen. For each shot you can choose the **task** you want to see and the **version**.
+
+![Playlist task selection](../img/faq/playlist_task_selection.png)
+![Playlist version selection](../img/faq/playlist_version_selection.png)
 
 ### [How to switch from tasks and versions](#how-to-switch-from-tasks-and-versions)
 
