@@ -28,7 +28,7 @@
             <div class="level-item">
               <combobox
                 class="production-selector"
-                :options="getOpenProductionOptions"
+                :options="openProductionOptions"
                 v-model="currentProductionId"
               >
               </combobox>
@@ -94,8 +94,8 @@
             class="avatar"
             :person="user"
             :is-link="false"
-          ></people-avatar>
-          <people-name class="user-name" :person="user"></people-name>
+          />
+          <people-name class="user-name" :person="user" />
         </div>
       </div>
     </nav>
@@ -167,7 +167,7 @@ export default {
       'isNewNotification',
       'user',
       'openProductions',
-      'getOpenProductionOptions',
+      'openProductionOptions',
       'currentProduction'
     ]),
 

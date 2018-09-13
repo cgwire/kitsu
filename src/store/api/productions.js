@@ -24,7 +24,10 @@ export default {
   updateProduction (production, callback) {
     const data = {
       name: production.name,
-      project_status_id: production.project_status_id
+      project_status_id: production.project_status_id,
+      fps: production.fps,
+      ratio: production.ratio,
+      resolution: production.resolution
     }
     client.put(`/api/data/projects/${production.id}`, data, callback)
   },

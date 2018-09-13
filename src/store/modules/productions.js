@@ -109,6 +109,13 @@ const getters = {
       return null
     }
   },
+  productionStatusOptions: state => state.productionStatus.map(
+    (status) => { return { label: status.name, value: status.id } }
+  ),
+  openProductionOptions: state => state.openProductions.map(
+    (production) => { return { label: production.name, value: production.id } }
+  ),
+
   getProduction: (state, getters) => (id) => {
     return state.productions.find(
       (production) => production.id === id
@@ -118,13 +125,7 @@ const getters = {
     return state.productionStatus.find(
       (productionStatus) => productionStatus.id === id
     )
-  },
-  getProductionStatusOptions: state => state.productionStatus.map(
-    (status) => { return { label: status.name, value: status.id } }
-  ),
-  getOpenProductionOptions: state => state.openProductions.map(
-    (production) => { return { label: production.name, value: production.id } }
-  )
+  }
 }
 
 const actions = {

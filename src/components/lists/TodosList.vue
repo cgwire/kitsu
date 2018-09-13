@@ -44,6 +44,7 @@
         <tr v-for="(entry, i) in entries" :key="entry + '-' + i">
           <production-name-cell
             class="production"
+            :is-tooltip="true"
             :entry="productionMap[entry.project_id]"
             :only-avatar="true"
           >

@@ -1,6 +1,10 @@
 <template>
   <div class="production-name">
-    <router-link class="flexrow" :to="productionRoute">
+    <router-link
+      class="flexrow"
+      :title="productionInfos"
+      :to="productionRoute"
+    >
       <div
          class="flexrow-item avatar has-text-centered"
          v-if="withAvatar"
@@ -66,6 +70,13 @@ export default {
           production_id: this.project.id
         }
       }
+    },
+
+    productionInfo () {
+      const fps = this.production.fps
+      const ratio = this.production.ratio
+      const resolution = this.production.resolution
+      return `fps: ${fps}\nratio: ${ratio}\nresolution: ${resolution}`
     }
   },
 

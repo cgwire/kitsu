@@ -254,7 +254,10 @@ export default {
       welcome: 'Welcome to Kitsu'
     },
     fields: {
+      fps: 'FPS',
       name: 'Name',
+      ratio: 'Ratio',
+      resolution: 'Resolution',
       status: 'Status'
     },
     status: {
