@@ -18,8 +18,9 @@ Depending of your role in the studio we propose you two tutorials:
 
 ## Frequently Asked Questions
 
-It's the place to find common questions and their answers. Tutorials don't
-cover everything this FAQ is here to add the missing part
+It's the place to find common questions asked by the studios and their answers.
+Tutorials don't cover everything... Fortunately, this FAQ is here to add the
+missing part!
 
 [Frequently Asked Questions](faq/README.md)
 
