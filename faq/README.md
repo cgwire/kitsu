@@ -1,24 +1,24 @@
 # FAQ for Kitsu
 
-* [Filters](#filters)
+* [How to create Filters?](#how-to-create-filters)
 	* [Introduction to filters](#introduction-to-filters)
 	* [How Search Bar works](#how-search-bar-work)
 	* [How to add Filters](#how-to-add-filters)
 	* [What Filters can I create](#what-filters-can-i-create)
 	* [How to delete Filters](#how-to-delete-filters)
-* [Notifications](#notifications)
+* [Where can a find the Notifications](#where-can-i-find-the-notifications)
 	* [How notifications work](#how-notifications-work)
 	* [How to get notified](#how-to-get-notified)
 	* [How not to be notified anymore](#how-not-to-be-notified-anymore)
 
-* [Playlist](#playlist)
+* [How to do a Playlist](#how-to-do-a-playlist)
 	* [How to create a playlist](#how-to-create-a-playlist)
 	* [How to switch from tasks and versions](#how-to-switch-from-tasks-and-versions)
 	* [How to delete a playlist](#how-to-delete-a-playlist)
 
 -----------------------------------------	
  
-## [Filters](#filters) 
+## [How to create Filters?](#how-to-create-filters)
 ### [Introduction to filters](#introduction-to-filters)
 
 In **Kitsu**, the filters are linked to the **Search bar**. It gives you the opportunity to **save** your search and in a click, get back to it.
@@ -99,7 +99,7 @@ The result of the filter will be display, but not the button anymore. Just cance
 
 -----------------------------------------
 
-## [Notifications](#notifications)
+## [Where can a find the Notifications](#where-can-i-find-the-notifications)
 
 ### [How notifications work](#how-notifications-work)
 
