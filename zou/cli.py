@@ -290,7 +290,7 @@ def patch_team():
     for project in Project.query.all():
         for person in Person.query.all():
             task = Task.query \
-              .filter(Project.id == project.id) \
+              .filter(Task.project_id == project.id) \
               .filter(Task.assignees.contains(person)) \
               .first()
             if task is not None:
