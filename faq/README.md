@@ -2,19 +2,19 @@
 
 * [How to create Filters?](#how-to-create-filters)
 	* [Introduction to filters](#introduction-to-filters)
-	* [How Search Bar works](#how-search-bar-work)
-	* [How to add Filters](#how-to-add-filters)
-	* [What Filters can I create](#what-filters-can-i-create)
-	* [How to delete Filters](#how-to-delete-filters)
-* [Where can a find the Notifications](#where-can-i-find-the-notifications)
-	* [How notifications work](#how-notifications-work)
-	* [How to get notified](#how-to-get-notified)
+	* [How Search Bar works?](#how-search-bar-work)
+	* [How to add Filters?](#how-to-add-filters)
+	* [What Filters can I create?](#what-filters-can-i-create)
+	* [How to delete Filters?](#how-to-delete-filters)
+* [Where can a find the Notifications?](#where-can-i-find-the-notifications)
+	* [How notifications work?](#how-notifications-work)
+	* [How to get notified?](#how-to-get-notified)
 	* [How not to be notified anymore](#how-not-to-be-notified-anymore)
 
-* [How to do a Playlist](#how-to-do-a-playlist)
-	* [How to create a playlist](#how-to-create-a-playlist)
-	* [How to switch from tasks and versions](#how-to-switch-from-tasks-and-versions)
-	* [How to delete a playlist](#how-to-delete-a-playlist)
+* [How to do a Playlist?](#how-to-do-a-playlist)
+	* [How to create a playlist?](#how-to-create-a-playlist)
+	* [How to switch from tasks and versions?](#how-to-switch-from-tasks-and-versions)
+	* [How to delete a playlist?](#how-to-delete-a-playlist)
 
 -----------------------------------------	
  
@@ -32,7 +32,7 @@ You can find the **Search bar** and the **save** option on different pages :
 
 You can find the **Search bar** on a lot of other pages but the main difference will be the lack of the **Save** button next to it ![Search bar](../img/faq/filter_save_button.png).
 
-### [How Search Bar works](#how-search-bar-work)
+### [How Search Bar works?](#how-search-bar-work)
 
 The **Search bar** uses the autocompletion, so you don't need to type everything to get a prompt result.
 
@@ -68,7 +68,7 @@ You can be even more specific, lets focus on the first episode : on the search b
 
 ![Search layout wfa seq2](../img/faq/filter_lay_wfa_s002.png)
 
-### [How to add Filters](#how-to-add-filters)
+### [How to add Filters?](#how-to-add-filters)
 
 Kitsu allows you to save your research. You can save them by pressing tne **Enter** key at the end of your typing, or click on the **Save** button ![Save button](../img/faq/filter_save_button.png).
 
@@ -78,7 +78,7 @@ Now under the **Search bar** you can see your previous searches as buttons.
 
 Everytime you get back to this page, the buttons will be there. It will help you to find the informations you need easier and faster.
 
-### [What Filters can I create](#what-filters-can-i-create)
+### [What Filters can I create?](#what-filters-can-i-create)
 
 You can create **filters** about **entities** :
 * **Episodes** : `e001`, `e002` etc.  
@@ -91,7 +91,7 @@ You can also create **filters** about **task status**: always use **task=status*
 * On episode 2 Layout is wip : `e002 lay=wip` or `layout=wip e002`
 
 
-### [How to delete Filters](#how-to-delete-filters)
+### [How to delete Filters?](#how-to-delete-filters)
 
 If you have created a **Filter button** by mistake, click on the cross next to it ![Filter delete](../img/faq/filter_delete.png).
 
@@ -99,9 +99,9 @@ The result of the filter will be display, but not the button anymore. Just cance
 
 -----------------------------------------
 
-## [Where can a find the Notifications](#where-can-i-find-the-notifications)
+## [Where can I find the Notifications?](#where-can-i-find-the-notifications)
 
-### [How notifications work](#how-notifications-work)
+### [How notifications work?](#how-notifications-work)
 
 The notification symbol is the **Bell** button next to your name, top right of the screen.
 It's **gray** ![Notification off](../img/faq/notification_icon_off.png) when you don't have a new notification, and **green** ![Notification on](../img/faq/notification_icon_on.png) when you have a new one.
@@ -133,7 +133,7 @@ Jacques receives immediately a notification, the **Bell** button change color ![
 
 ![Notification example 02](../img/faq/notification_example02.png)
 
-### [How to get notified](#how-to-get-notified)
+### [How to get notified?](#how-to-get-notified)
 
 As an artist you will receive a notification ![Notification on](../img/faq/notification_icon_on.png) as soon as someone change the status of one of your task, or post a comment.
 
@@ -147,7 +147,7 @@ By default you are following all the tasks you are assigned to, on the task page
 
 If you want to follow another task, just click on the **crossed eye** button ![Notification off](../img/faq/notification_off.png), it will change, not crossed anymore ![Notification on](../img/faq/notification_on.png) meaning you are now following this task, and will receive notification about it. 
 
-### [How not to be notified anymore](#how-not-to-be-notified-anymore)
+### [How not to be notified anymore?](#how-not-to-be-notified-anymore)
 
 If you don't want to follow a task anymore, just click on the **eye** button ![Notification on](../img/faq/notification_on.png) on the task page. He now will be crossed ![Notification off](../img/faq/notification_off.png), meaning you won't receive notifications anymore.
 
@@ -155,11 +155,11 @@ If you don't want to follow a task anymore, just click on the **eye** button ![N
 ------------------------------------
 
 
-## [Playlist](#playlist)
+## [How to do a Playlist?](#how-to-do-a-playlist)
 
 ![Playlist page](../img/faq/playlist_example.png)
 
-### [How to create a playlist](#how-to-create-a-playlist)
+### [How to create a playlist?](#how-to-create-a-playlist)
 You can find the **Playlists** page on the **main menu** ![Main menu](../img/faq/main_button.png) under the **Production** section. 
 
 ![Playlist main menu](../img/faq/playlist_main_menu.png)
@@ -179,7 +179,7 @@ Then on the right part, choose wich shots you want to add on your playlist. Star
 
 The shots will appear on the middle part of the screen. As soon as you add them, they will be saved on the playlist, and everybody can see them.
 
-### [How to switch from tasks and versions](#how-to-switch-from-tasks-and-versions)
+### [How to switch from tasks and versions?](#how-to-switch-from-tasks-and-versions)
 
 For each shot selected on a playlist you can choose the **task** and the **version** you want to see.
 
@@ -188,7 +188,7 @@ For each shot selected on a playlist you can choose the **task** and the **versi
 
 Just select the task or version you want for each shot. The new selection will be on the playlist.
 
-### [How to delete a playlist](#how-to-delete-a-playlist)
+### [How to delete a playlist?](#how-to-delete-a-playlist)
 
 To delete a playlist, click on its name on the left part, then once loaded, click on the **delete** button (middle part) ![Delete button](../img/faq/delete_button.png).
 
