@@ -15,11 +15,11 @@
 	* [Do batch validations](getting-started-production/README.md#validation-per-batch)
 	* [Change priorities](getting-started-production/README.md#change-the-priority)
 	
-* [Getting Started as a CG Artist](getting-started-artist/README.md#as-an-artist)
-	* [See your assigations](getting-started-artist/README.md#see-what-you-have-to-do)
-	* [Share your progress](getting-started-artist/README.md#communicate-and-change-status)
-	* [Ask for a review](getting-started-artist/README.md#ask-for-validation)
-	* [Fill your timesheet](getting-started-artist/README.md#fill-the-timesheet)	
+* [Getting Started as a CG Artist](getting-started-artist/README.md#first-connection)
+	* [See your assigments](getting-started-artist/README.md#see-your-assignments)
+	* [Share your progress](getting-started-artist/README.md#share-your-progress)
+	* [Ask for a review](getting-started-artist/README.md#ask-for-a-review)
+	* [Fill your timesheet](getting-started-artist/README.md#fill-your-timesheet)	
 
 * [FAQ](faq/README.md)
 
