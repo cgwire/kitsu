@@ -1,118 +1,159 @@
 # FAQ for Kitsu
 
-* [How to create Filters?](#how-to-create-filters)
+* [How to create filters?](#how-to-create-filters)
 	* [Introduction to filters](#introduction-to-filters)
-	* [How Search Bar works?](#how-search-bar-work)
-	* [How to add Filters?](#how-to-add-filters)
-	* [What Filters can I create?](#what-filters-can-i-create)
-	* [How to delete Filters?](#how-to-delete-filters)
-* [Where can a find the Notifications?](#where-can-i-find-the-notifications)
+	* [How to use the search bar?](#how-to-use-the-search-bar)
+	* [How to save filter queries?](#how-to-save-filter-queries)
+	* [What filters can I create?](#what-filters-can-i-create)
+	* [How to delete filters?](#how-to-delete-filters)
+
+
+ * [Where I can see my notifications?](#where-can-i-see-my-notifications)
 	* [How notifications work?](#how-notifications-work)
 	* [How to get notified?](#how-to-get-notified)
-	* [How not to be notified anymore](#how-not-to-be-notified-anymore)
+	* [How to not be notified anymore](#how-to-not-be-notified-anymore)
 
-* [How to do a Playlist?](#how-to-do-a-playlist)
+
+* [How to build a playlist?](#how-to-build-a-playlist)
 	* [How to create a playlist?](#how-to-create-a-playlist)
-	* [How to switch from tasks and versions?](#how-to-switch-from-tasks-and-versions)
+	* [How to switch between tasks and revisions?](#how-to-switch-between-tasks-and-revisions)
 	* [How to delete a playlist?](#how-to-delete-a-playlist)
 
 -----------------------------------------	
  
 ## [How to create Filters?](#how-to-create-filters)
+
 ### [Introduction to filters](#introduction-to-filters)
 
-In **Kitsu**, the filters are linked to the **Search bar**. It gives you the opportunity to **save** your search and in a click, get back to it.
+In **Kitsu**, the filters are done through the **Search bar**. It allows you to
+**save** your search query. Once done you can run your query again with a
+simple click.
  
 ![Search bar](../img/faq/filter_search_bar.png)
 
-You can find the **Search bar** and the **save** option on different pages : 
-* Assets page
-* Shots page
-* Sequence page
+You can find the **search bar** and the **save** option in the following pages: 
 
-You can find the **Search bar** on a lot of other pages but the main difference will be the lack of the **Save** button next to it ![Search bar](../img/faq/filter_save_button.png).
+* Assets
+* Shots
+* Sequences
+* Todo-lists
 
-### [How Search Bar works?](#how-search-bar-work)
+![Search bar](../img/faq/filter_save_button.png).
 
-The **Search bar** uses the autocompletion, so you don't need to type everything to get a prompt result.
+NB: The **Search bar** is available too in people episodes list.
 
-For example type the letter `V` and you already get the result of all the assets starting with a V.
 
-![Search bar autocompletion](../img/faq/filter_autocompletion.png)
+### [How to use the search bar?](#how-to-use-the-search-bar)
 
-You can also search some specific **type of asset** : `Props`, `Character`, `Environment`, `Fx` ... The result will display all the assets under this type.
+The **search bar** query is applied everytime a new character is typed. You
+don't need to type everything to get a prompt result.
+
+For example, in the assets page, type the letter `V` and you wil get the
+result of all the assets starting with a `V`.  
+
+![Search bar result](../img/faq/filter_autocompletion.png)
+
+You can also search some specific **type of asset** : `Props`, `Character`,
+`Environment`, `Fx` ... The result will display all the assets from this type.
 
 For example, lets search all the **FX** assets. 
 	
 ![Search asset type](../img/faq/filter_asset_type.png)
 
-Another example is to search a specifique **Sequence** on the **Shots page**. You want to see only the shots of the sequence 1 of the first episode.
+Another example get **shots page** of a specific **sequence**.
+Ex: see only the shots of the first sequence of the first episode.
 
-If you only type `s001` the result will display all the shots of all the episodes which contain sequence 1.
+If you type `s001` the result will get all the shots of all the episodes
+from sequence 1.
 
 ![Search bar sequence episode](../img/faq/filter_ep_seq.png)
 
-To be more specific you need to detail your research : try `e001 s001`.
+To be more specific you have to add information to your search. Let's type
+`e001 s001`.
 
 ![Search bar sequence 1 episode 1](../img/faq/filter_ep_seq1.png)
 
-As you can see the result is more accurate.
+Then you get all shots for sequence 1 of episode 1.
 
-On the same way, you can search **specific status** link to task. Type the **name of the task** (or the **first letters**), then add the sign **equal** (**=**) and the status you are looking for.
+In the same way, you can search **specific status** link to task. Type the
+**name of the task** (or the **first letters**), then add the sign **equal**
+(`=`) and the status you are looking for.
 
-For example, search all the shots which are **Waiting for approval** (**WFA**) at the **Layout** stage. So on the search bar you will type : `layout=wfa` or `lay=wfa`.
+For example, search all the shots which are **Waiting for approval** (**WFA**)
+at the **Layout** stage. So on the search bar you will type : `layout=wfa` or
+`lay=wfa`.
 
 ![Search layout wfa](../img/faq/filter_lay_wfa.png)
 
-You can be even more specific, lets focus on the first episode : on the search bar add a **space** after the previous search and type `e001`. You can be even more precise and ask to see only the sequence 2. The research will be `lay=wfa e001 s002` or `s002 e001 layout=wfa`.
+You can be even more specific, lets focus on the first episode : on the search
+bar add a **space** after the previous search and type `e001`. You can be even
+more precise and ask to see only the sequence 2. The research will be `lay=wfa
+e001 s002` or `s002 e001 layout=wfa`.
 
 ![Search layout wfa seq2](../img/faq/filter_lay_wfa_s002.png)
 
-### [How to add Filters?](#how-to-add-filters)
 
-Kitsu allows you to save your research. You can save them by pressing tne **Enter** key at the end of your typing, or click on the **Save** button ![Save button](../img/faq/filter_save_button.png).
+### [How to save filter queries?](#how-to-save-filter-queries)
 
-Now under the **Search bar** you can see your previous searches as buttons. 
+Kitsu allows you to save your research. You can save them by pressing tne
+**Enter**, or click on the **Save** button 
+![Save button](../img/faq/filter_save_button.png).
+
+Now under the **search bar** you can see your saved queries as buttons. 
 
 ![Search saved](../img/faq/filter_saved.png)
 
-Everytime you get back to this page, the buttons will be there. It will help you to find the informations you need easier and faster.
+Everytime you get back to this page, the buttons will be there. It will help
+you to run commont queries faster.
 
-### [What Filters can I create?](#what-filters-can-i-create)
+### [What filters can I create?](#what-filters-can-i-create)
 
 You can create **filters** about **entities** :
+
 * **Episodes** : `e001`, `e002` etc.  
 * **Sequences** : `e001 s001`, `s001 s001` etc.
 * **Asset Type** : `characters`, `environment`, `fx` etc.
 
-You can also create **filters** about **task status**: always use **task=status**, you don't have to type all the letter of the task, Kitsu will understand only the first. But the status has to be fully typed.
+You can also create **filters** about **task status**: always use
+**task=status**, you don't have to type all the letter of the task, Kitsu will
+understand only the first. But the status has to be fully typed.
+
 * Layout is Work in progress (wip) : `layout=wip` or `lay=wip`
 * Concept is waiting for approval (wfa) only for the fx : `concept=wfa fx` or `fx con=wfa`
 * On episode 2 Layout is wip : `e002 lay=wip` or `layout=wip e002`
 
 
-### [How to delete Filters?](#how-to-delete-filters)
+### [How to delete filters?](#how-to-delete-filters)
 
-If you have created a **Filter button** by mistake, click on the cross next to it ![Filter delete](../img/faq/filter_delete.png).
+If you have created a **Filter button** by mistake, click on the cross next to
+it ![Filter delete](../img/faq/filter_delete.png).
 
-The result of the filter will be display, but not the button anymore. Just cancel your research by deleting the text or use the cross next to the search bar ![Search delete](../img/faq/filter_cross_delete.png)
+The result of the filter will be display, but not the button anymore. Just
+cancel your research by deleting the text or use the cross next to the search
+bar ![Search delete](../img/faq/filter_cross_delete.png)
 
 -----------------------------------------
 
-## [Where can I find the Notifications?](#where-can-i-find-the-notifications)
+## [Where can I see my notifications?](#where-can-i-see-notifications)
 
 ### [How notifications work?](#how-notifications-work)
 
-The notification symbol is the **Bell** button next to your name, top right of the screen.
-It's **gray** ![Notification off](../img/faq/notification_icon_off.png) when you don't have a new notification, and **green** ![Notification on](../img/faq/notification_icon_on.png) when you have a new one.
+The notification symbol is the **Bell** button next to your name, top right of
+the screen.  Its color is **grey** 
+![Notification off](../img/faq/notification_icon_off.png) when you don't have
+any notification, and **green** 
+![Notification on](../img/faq/notification_icon_on.png) when you have a new
+one.
 
-When you click on the **Bell** button, it will open the **Notifications** page.
+When you click on the **bell** button, it will open the **notifications** page.
 
-There, you can see all the changes made on the **Tasks** you are following or assigned. 
+There, you can see all the changes made to the **tasks** you are following or
+assigned to you.
 
 ![Notification page](../img/faq/notification_page.png)
 
 There is a lot of informations on a notification : 
+
 * (1) the name of the **author**
 * (2) the related **entity**
 * (3) the related **task**
@@ -121,77 +162,108 @@ There is a lot of informations on a notification :
 
 and (6) the comment.
 
-Each part is a **link** you can use to jump on the information you need. If you click on the **status**, you will jump to the status page of the entity and you can answer right away.
+Each part is a **link** you can use to jump on the information you need. If you
+click on the **status**, you will jump to the status page of the entity. So you
+can react quickly to this new change.
 
-For example, lets assign Jacques to a new task and ask him to work on the asset.
+For example, let's assign Jacques to a new task and ask him to work on it.
 
 ![Notification example 01](../img/faq/notification_example01.png)
 
-Jacques receives immediately a notification, the **Bell** button change color ![Notification on](../img/faq/notification_icon_on.png) , and he can read the new comment.
+Jacques receives immediately a notification, the **bell** button change color
+![Notification on](../img/faq/notification_icon_on.png) , and he can read the
+new comment.
 
-**All the notifications and comments appear in real time**. No need to refresh to stay up to date.
+**All the notifications and comments appear in real time**. No need to refresh
+to stay up to date.
 
 ![Notification example 02](../img/faq/notification_example02.png)
 
 ### [How to get notified?](#how-to-get-notified)
 
-As an artist you will receive a notification ![Notification on](../img/faq/notification_icon_on.png) as soon as someone change the status of one of your task, or post a comment.
+As an artist you will receive a notification 
+![Notification](../img/faq/notification_icon_on.png) as soon as someone change
+the status of one of your task, or post a comment.
 
-You can also choose to follow specifics tasks. Go into the task page you want to follow : on the **assets** or **shots** pages click onto the status icon.
+You can also choose to follow specifics tasks. Go into the task page you want
+to follow: on the **assets** or **shots** pages click onto the status icon.
 
-On the top right side of the page you can see an **Eye** button, next to the **Delete task** button.
+On the top right side of the page you can see an **eye** button, next to the
+**delete task** button.
 
 ![Follow button](../img/faq/notification_other_task.png)
 
-By default you are following all the tasks you are assigned to, on the task page the icon will be **open** ![Notification on](../img/faq/notification_on.png). 
+By default you are following all the tasks you are assigned to, on the task
+page the icon will be **open** ![Notification on](../img/faq/notification_on.png). 
 
-If you want to follow another task, just click on the **crossed eye** button ![Notification off](../img/faq/notification_off.png), it will change, not crossed anymore ![Notification on](../img/faq/notification_on.png) meaning you are now following this task, and will receive notification about it. 
+If you want to follow another task, just click on the **crossed eye** button
+![Notification off](../img/faq/notification_off.png), it will change, not
+crossed anymore ![Notification on](../img/faq/notification_on.png) meaning you
+are now following this task, and will receive notification about it. 
 
-### [How not to be notified anymore?](#how-not-to-be-notified-anymore)
+### [How to not be notified anymore?](#how-to-not-be-notified-anymore)
 
-If you don't want to follow a task anymore, just click on the **eye** button ![Notification on](../img/faq/notification_on.png) on the task page. He now will be crossed ![Notification off](../img/faq/notification_off.png), meaning you won't receive notifications anymore.
+If you don't want to follow a task anymore, just click on the **eye** button
+![Notification on](../img/faq/notification_on.png) on the task page. It 
+will be crossed ![Notification off](../img/faq/notification_off.png), meaning
+you won't receive notifications anymore.
 
 
 ------------------------------------
 
 
-## [How to do a Playlist?](#how-to-do-a-playlist)
+## [How to build a Playlist?](#how-to-build-a-playlist)
 
-![Playlist page](../img/faq/playlist_example.png)
 
 ### [How to create a playlist?](#how-to-create-a-playlist)
-You can find the **Playlists** page on the **main menu** ![Main menu](../img/faq/main_button.png) under the **Production** section. 
+
+You can find the **Playlists** page on the **main menu** 
+![Main menu](../img/faq/main_button.png) under the **Production** section. 
 
 ![Playlist main menu](../img/faq/playlist_main_menu.png)
 
-The **Playlists** page is separated in 3 parts : 
-* (1) : you can **create** a playlist, or choose one
-* (3) : Select the **Shots** you want to show.
-* (2) : the shots you have selected will appear here.
+The **playlists** page is separated in 3 parts: 
+
+* (1): The playlist list where you can **create** a playlist, or load an existing one.
+* (2): The shots of the current playlist. 
+* (3): The **shots** you want to show.
 
 ![Playlist page](../img/faq/playlist_page.png)
 
-Start by creating a **Playlist** ![Playlist add button](../img/faq/playlist_add_button.png), You default name will be the date and the hour. You can change the name of the playlist with the **Edit** button ![Edit button](../img/faq/edit_button.png). For example add the name of your department.
+Start by creating a **Playlist** 
+![Playlist add button](../img/faq/playlist_add_button.png), You default name
+will be the date and the hour. You can change it later via the
+**Edit** button ![Edit button](../img/faq/edit_button.png). 
 
 ![Playlist add page](../img/faq/playlist_add_page.png)
 
-Then on the right part, choose wich shots you want to add on your playlist. Start with selecting the **Episode** and the **Sequence** you want. Then click on the shots you want to add.
+Once the playlist created, via the right pane, you can select wich shots to add
+to your playlist.  Start by selecting the **episode** and the **sequence**.
+The sequences shots are now listed. Click on the shots you want to add to the
+playlist to see them playlisted.
 
-The shots will appear on the middle part of the screen. As soon as you add them, they will be saved on the playlist, and everybody can see them.
+The shots will appear on the middle part of the screen. Every changes are 
+automatically saved.
 
-### [How to switch from tasks and versions?](#how-to-switch-from-tasks-and-versions)
+![Playlist page](../img/faq/playlist_example.png)
 
-For each shot selected on a playlist you can choose the **task** and the **version** you want to see.
+### [How to switch between tasks and revisions?](#how-to-switch-between-tasks-and-revisions)
+
+For each playlisted shot you can choose the **task** and the
+**version** you want to see.
 
 ![Playlist task selection](../img/faq/playlist_task_selection.png)
 ![Playlist version selection](../img/faq/playlist_version_selection.png)
 
-Just select the task or version you want for each shot. The new selection will be on the playlist.
 
 ### [How to delete a playlist?](#how-to-delete-a-playlist)
 
-To delete a playlist, click on its name on the left part, then once loaded, click on the **delete** button (middle part) ![Delete button](../img/faq/delete_button.png).
+To delete a playlist, load it by clicking on its name. Then,
+click on the **delete** button ![delete button](../img/faq/delete_button.png). 
+The button is located in the top right of the middle pane.
 
-A confirmation pop-up will appear. Validate with the **Confirm** button.
+A confirmation pop-up will appear. Validate it by clicking the **Confirm**
+button.
 
-![Playlist Delete popup](../img/faq/playlist_delete.png)
+![Playlist delete popup](../img/faq/playlist_delete.png)
+
