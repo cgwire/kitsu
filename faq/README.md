@@ -29,28 +29,45 @@
 
 ## [How to share a preview?](#how-to-share-a-preview)
 
-When you start a new task you are assigned to, click on the status ![Todo](../img/getting-started/todo_icon.png)
-(1) on the shots or assets page.
+You can ask for a review by switching the status of a task to 
+(**Waiting for Approval** ![wfa](../img/getting-started/wfa_icon.png)). This status allows you to share your progress by
+posting a preview of your work. The first step is to change the status of your
+task and post a comment. 
 
-![Shot status](../img/getting-started/shot_status.png)
+![Waiting for approval](../img/getting-started/wfa_status.png)
 
-It will open a new page where you can communicate about your work. Let your
-teammates know what you are doing. For instance show them you start working
-on something. Each time you change the status of a task, you can attach a
-text comment to it.
+Then click on the **Add preview** button on your new post 
+![Add preview](../img/getting-started/add_preview_button.png). 
 
-For example when you start a **new task** you can say that everything is ok.
-If some information is missing, you can either ask all the questions you want.
+A new window is displayed.
 
-To change the status, let's say from ![Todo](../img/getting-started/todo_icon.png) to ![Wip](../img/getting-started/wip_icon.png) as example, start
-by filling the comment box (1). Then, click on the status box and choose the
-one you want (2) and validate your comment and the new status by clicking on
-**Post status** (3) button.
+![Add preview file](../img/getting-started/add_preview.png)
 
-![Changing status](../img/getting-started/changing_status.png)
+You can either drag and drop you pic or video on the **Choose a file** button,
+or navigate through your system and pick your file, validate with the
+**Confirm** button.
 
-You can edit your last comment by using the **edit** button 
-![Edit button](../img/getting-started/edit_button.png).
+Your work will appear on the right part of the screen as a V1. 
+
+![Preview v1](../img/getting-started/previewv1.png)
+
+If you post more revisiions, you will always keep track of your previous work.
+Each time you add a new revision, the previous versions are still available. 
+
+![Preview v2](../img/getting-started/previewv2.png)
+
+This detailed page of the task will be your way to communicate with others.
+They will also use this page to answer your question, give you feedback, and 
+asking for a retake. The history of the conversation is always available.
+
+For a quicker access to the information, when you will get back to your todo
+page, the last comment posted on each task will be available too.
+
+![My tasks page](../img/getting-started/my_task_page2.png)
+
+You can also see the tasks validated as ![NA](../img/getting-started/na_icon.png) on the **Done** tab.
+
+![My done tasks page](../img/getting-started/done_page.png)
 
  -----------------------------------------	
 
