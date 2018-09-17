@@ -25,7 +25,7 @@ So thoose below **Studio** section, the **Productions** page.
 There, you can see all the productions you have created, and their status (open
 for an active production, or closed if not active). When you cursor is above a
 production line you can see 2 news icons on the right part of the line :
-**Edit** ![Edit button](../img/getting-started/edit_button.png) and **Delete**
+**edit** ![Edit button](../img/getting-started/edit_button.png) and **delete**
 ![Delete button](../img/getting-started/delete_button.png).
 
 ![Edit a production](../img/getting-started/production_edit.png)
@@ -155,9 +155,9 @@ You can now do the assignation. As soon as you click on the box you will see the
 ![Selected people](../img/getting-started/select_people.png)
 
 You can assign several tasks to the same person in one step (1). Once you have
-the blue menu visible, just keep **Ctrl** on your keyboard pressed and select
-multiple tasks. You can even use the **Shift** key to select a range of tasks
-(2). When you have selected everything you need, apply with the **Confim**
+the blue menu visible, just keep **ctrl** on your keyboard pressed and select
+multiple tasks. You can even use the **shift** key to select a range of tasks
+(2). When you have selected everything you need, apply with the **Confirm**
 button.  
 
 ![Assigned multiple people](../img/getting-started/assigned_multiple.png)
@@ -313,7 +313,7 @@ You can change its purpose by clicking on the 3 vertical dots on the left part o
 
 ![Blue menu status](../img/getting-started/blue_menu_status.png)
 
-You can now do your shots or assets selection, by pressing the **Crtl** or **Shift** key (1) and then choose the new status for your selected tasks (2). Validated the new status with the **Confirm** button (3).
+You can now do your shots or assets selection, by pressing the **crtl** or **shift** key (1) and then choose the new status for your selected tasks (2). Validated the new status with the **Confirm** button (3).
 
 ![Change status per batch](../img/getting-started/change_status_batch.png)
 
@@ -339,7 +339,7 @@ As we have done for the assignation or the status, select the shots (1), select 
 
 ![Priority selection](../img/getting-started/priority.png)
 
-You can now see next to the status of the task some **Exclamation mark**. The more there is, the more urgent is the task. 
+You can now see next to the status of the task some **exclamation mark**. The more there is, the more urgent is the task. 
 * (1) is **Normal**, 
 * (2) is **High**,
 * (3) is **Very High**
@@ -349,17 +349,18 @@ You can now see next to the status of the task some **Exclamation mark**. The mo
 
 ### [Perform a review](#perform-a-review)
 
-When a CG arstist asks for a review you can go to the task page to see the result.
+When a CG arstist asks for a review ![wfa](../img/getting-started/wfa_icon.png) 
+you can go to the task page to see the result.
 The CG artist may have send you a picture, a movie or an `.obj` file. All can 
 be reviewed from the browser.
 
-From there you can change the status to `retake` if you want that the CG artist
+From there you can change the status to ![Retake](../img/getting-started/retake_icon.png) if you want that the CG artist
 performs some changes. Or you can change it to done, to notifiy the CG artist
 that his work is validated.
 
 You can also use the preview as a thumbnail on the asset or shot spreadsheet. It
 will help to recognize the assets/shots on the main pages.  Below your preview,
-click on the **Set this preview as thumbnail**. You can do this at each version
+click on the **Set this preview as thumbnail**. You can do this at each version 
 of your work if needed.
 
 ![Preview as a thumbnail](../img/getting-started/preview_thumbnail.png)
