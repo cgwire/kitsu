@@ -355,7 +355,7 @@ The CG artist may have send you a picture, a movie or an `.obj` file. All can
 be reviewed from the browser.
 
 From there you can change the status to ![Retake](../img/getting-started/retake_icon.png) if you want that the CG artist
-performs some changes. Or you can change it to done, to notifiy the CG artist
+performs some changes. Or you can change it to ![Done](../img/getting-started/done_icon.png), to notifiy the CG artist
 that his work is validated.
 
 You can also use the preview as a thumbnail on the asset or shot spreadsheet. It
