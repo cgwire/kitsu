@@ -25,22 +25,22 @@
 
 ### [Introduction to filters](#introduction-to-filters)
 
-In **Kitsu**, the filters are done through the **Search bar**. It allows you to
+In **Kitsu**, the filters are done through the **search bar**. It allows you to
 **save** your search query. Once done you can run your query again with a
 simple click.
  
 ![Search bar](../img/faq/filter_search_bar.png)
 
-You can find the **search bar** and the **save** option in the following pages: 
+You can find the **search bar** and the **save** option ![Search bar](../img/faq/filter_save_button.png). in the following pages: 
 
 * Assets
 * Shots
 * Sequences
 * Todo-lists
 
-![Search bar](../img/faq/filter_save_button.png).
 
-NB: The **Search bar** is available too in people episodes list.
+
+NB: The **search bar** is available too in people episodes list.
 
 
 ### [How to use the search bar?](#how-to-use-the-search-bar)
@@ -79,8 +79,8 @@ In the same way, you can search **specific status** link to task. Type the
 **name of the task** (or the **first letters**), then add the sign **equal**
 (`=`) and the status you are looking for.
 
-For example, search all the shots which are **Waiting for approval** (**WFA**)
-at the **Layout** stage. So on the search bar you will type : `layout=wfa` or
+For example, search all the shots which are **Waiting for approval** ![WFA](../img/faq/wfa_icon.png)
+at the **layout** stage. So on the search bar you will type : `layout=wfa` or
 `lay=wfa`.
 
 ![Search layout wfa](../img/faq/filter_lay_wfa.png)
@@ -125,7 +125,7 @@ understand only the first. But the status has to be fully typed.
 
 ### [How to delete filters?](#how-to-delete-filters)
 
-If you have created a **Filter button** by mistake, click on the cross next to
+If you have created a **filter button** by mistake, click on the cross next to
 it ![Filter delete](../img/faq/filter_delete.png).
 
 The result of the filter will be display, but not the button anymore. Just
@@ -188,7 +188,8 @@ the status of one of your task, or post a comment.
 You can also choose to follow specifics tasks. Go into the task page you want
 to follow: on the **assets** or **shots** pages click onto the status icon.
 
-On the top right side of the page you can see an **eye** button, next to the
+On the top right side of the page you can see an **eye** button 
+![Notification off](../img/faq/notification_off.png), next to the
 **delete task** button.
 
 ![Follow button](../img/faq/notification_other_task.png)
@@ -233,7 +234,7 @@ The **playlists** page is separated in 3 parts:
 Start by creating a **Playlist** 
 ![Playlist add button](../img/faq/playlist_add_button.png), You default name
 will be the date and the hour. You can change it later via the
-**Edit** button ![Edit button](../img/faq/edit_button.png). 
+**edit** button ![Edit button](../img/faq/edit_button.png). 
 
 ![Playlist add page](../img/faq/playlist_add_page.png)
 

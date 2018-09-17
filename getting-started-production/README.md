@@ -18,7 +18,7 @@ To navigate through Kitsu sections you need to use the sidebar. It can be
 accessed through the 3 lines button on top of the screen 
 ![Main button](../img/getting-started/main_button.png).  It will open a menu on
 the left part of the screen. We want show you the production list. 
-So thoose below **Studio** section, the **Productions** page. 
+So thoose below **Studio** section, the **PRODUCTIONS** page. 
 
 ![Main menu](../img/getting-started/main_menu_production.png)
 
@@ -73,7 +73,7 @@ during the **breakdown** of the storyboard, with sequences and shots creation.
 
 
 You can edit assets any time you want by going to the asset page, hovering the
-asset you want to modify, and then click on the **Edit button** 
+asset you want to modify, and then click on the **edit** button 
 ![Edit button](../img/getting-started/edit_button.png) (1) on the right side of
 the line.  
 
@@ -94,7 +94,7 @@ validate it by **Confirm** button.
 These tasks will be added to all the assets.
 
 If some assets don't match the task (as environment and setup) just change the
-status of this task on **N/A**, or delete it.
+status of this task on ![N/A](../img/getting-started/na_icon.png), or delete it.
 
 To change a status click directly on the status you want to change (1).
 
@@ -106,8 +106,9 @@ click on the **Post status** button (3).
 
 ![Changing status](../img/getting-started/changing_status.png)
 
-If you want to delete a task, click on the **delete** button on the right top
-of the page ![Delete button](../img/getting-started/delete_button.png).
+If you want to delete a task, click on the **delete** button 
+![Delete button](../img/getting-started/delete_button.png) on the right top
+of the page .
 
 Now that we have created all the assets and related tasks,
 we can now add the artists to the team and assign task to them.
@@ -117,7 +118,7 @@ we can now add the artists to the team and assign task to them.
 
 An account is required for each artist. Go to the main menu ![Main
 menu](../img/getting-started/main_button.png), and under the **Studio**
-section, choose **People** page.
+section, choose **PEOPLE** page.
 
 ![People Menu](../img/getting-started/main_menu_people.png)
 
@@ -136,13 +137,13 @@ him as active, otherwise select no. Validate by clicking **Confirm** button.
 
 ### [Assign tasks to a CG artist](#assign-tasks-to-a-cg-artist)
 
-We can now get back to the **Assets** page. You can use the main menu 
+We can now get back to the **ASSETS** page. You can use the main menu 
 ![Main menu](../img/getting-started/main_button.png) under the **Production**
 section.
 
 ![Main menu assets page](../img/getting-started/main_menu_assets.png)
 
-Now its time to do our first assignment! 
+Now its time to do your first assignment! 
 
 Click on the empty space on the right of the status (1) you want to assign.
 ![Assigned a task](../img/getting-started/task_assigned.png)
@@ -186,7 +187,7 @@ the sequences and the shots of the episode and associate assets to them.
 You need to go to the **Shots** page : you can either use the shot icon on top
 of the page ![Shot button](../img/getting-started/shot_button.png), or use the
 main menu ![Main menu button](../img/getting-started/main_button.png) and under
-the **Production** section, click on the **Shots**.
+the **Production** section, click on the **SHOTS**.
 
 ![Main menu shots](../img/getting-started/main_menu_shots.png)
 
@@ -210,11 +211,14 @@ Now to add more shots: as you can see the box is already filled with your name c
 
 You just have to do the same with the sequences and episodes.
 
-If a shot is misplaced on a sequence, you just have to edit the shot you want ![Edit button](../img/getting-started/edit_button.png), and change the sequence. 
+If a shot is misplaced on a sequence, you just have to edit 
+![Edit button](../img/getting-started/edit_button.png) the shot you want, 
+and change the sequence. 
 
 ![Change sequence](../img/getting-started/change_seq.png)
 
-If at some point you need to delete a shot, just click on the **trash can** icon on the right of the line ![Delete button](../img/getting-started/delete_button.png). If you need to import back this shot, click on the restore button ![Restore button](../img/getting-started/restore_button.png).
+If at some point you need to delete a shot, just click on the **trash can** icon ![Delete button](../img/getting-started/delete_button.png) on the right of the line. 
+If you need to import back this shot, click on the restore button ![Restore button](../img/getting-started/restore_button.png).
 
 
 We can now associate tasks to the shots. Same way than for the assets, click on the **+Add tasks** button ![Add task button](../img/getting-started/add_task_button.png) on the top of the spreadsheet. 
@@ -227,7 +231,7 @@ Now we can do the breakdown of the storyboard, meaning associate the assets to e
 
 ### [Create a breakdown list](#create-a-breakdown-list)
 
-On the main menu ![Main menu](../img/getting-started/main_button.png), under **Production** section, choose **Breakdown**.
+On the main menu ![Main menu](../img/getting-started/main_button.png), under **Production** section, choose **BREAKDOWN**.
 
 ![Menu breakdown](../img/getting-started/menu_breakdown.png)
 
@@ -237,7 +241,7 @@ On the left part of the breakdown page is the episode/sequence/shot menu (1), yo
 
 So now you have to select the shot you wan to cast, let's say the first one. So click on the shot sh001 on the left part (1), then click on the assets you want to assign: some characters, backgrounds, etc. on the right part (3). 
 
-When you pass over the asset you can see a +1 or +10. It's the number of time you will add this asset. You can click as many times as you need on it.
+When you pass over the asset you can see a **+1** or **+10**. It's the number of time you will add this asset. You can click as many times as you need on it.
 
 ![Breakdown add asset](../img/getting-started/breakdown_add_asset.png)
 
@@ -251,7 +255,7 @@ When you are done for this shot click on the **Save** button, and go on with the
 
 If a new asset is created during the storyboard, just get back to the asset page (using the button on the top of the screen ![Asset button](../img/getting-started/asset_button.png) or via the main menu ![Main menu button](../img/getting-started/main_button.png)), create the assets you need. The tasks previously created will be applied immediately to these new assets. But you will have to do the assignation, then you will be good to continue with the breakdown.
 
-Now your **Breakdown page** should look like this.
+Now your **Breakdown** page should look like this.
 
 ![Breakdown page fill](../img/getting-started/breakdown_full.png)
 
@@ -358,7 +362,7 @@ From there you can change the status to ![Retake](../img/getting-started/retake_
 performs some changes. Or you can change it to ![Done](../img/getting-started/done_icon.png), to notifiy the CG artist
 that his work is validated.
 
-You can also use the preview as a thumbnail on the asset or shot spreadsheet. It
+You can also use the preview as a **thumbnail** on the asset or shot spreadsheet. It
 will help to recognize the assets/shots on the main pages.  Below your preview,
 click on the **Set this preview as thumbnail**. You can do this at each version 
 of your work if needed.
