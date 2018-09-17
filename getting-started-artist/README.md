@@ -88,7 +88,7 @@ Your work will appear on the right part of the screen as a V1.
 
 ![Preview v1](../img/getting-started/previewv1.png)
 
-If you post more revisiions, you will always keep track of your previous work.
+If you post more revisions, you will always keep track of your previous work.
 Each time you add a new revision, the previous versions are still available. 
 
 ![Preview v2](../img/getting-started/previewv2.png)
