@@ -1,99 +1,148 @@
-# How to get started with Kitsu
+# Getting started as a Production Manager
 
-## [As a production manager](#as-a-production-manager)
+## [First steps](#first-steps)
 
-### [Create a production](#create-a-production)
+### [Create your first production](#create-your-first-production)
 
-The first step on Kitsu is to create a production. Click on the **Create a new production** button.
+The first step on Kitsu is to create a production. Click on the **Create a new
+production** button.  
+
 ![Create a production](../img/getting-started/create_production.png)
 
+Enter the name of your production, leave the status as **Open** if you want to
+work immediately on it. Then validate by clicking on **Confirm**.
 
-Enter the name of your production, leave the status as **Open** if you want to work immediately on it.
-Then validate by clicking on **Confirm**.
 ![Add a production](../img/getting-started/add_production.png)
 
-The main navigation will be opened with the 3 lines button on the top of the screen ![Main button](../img/getting-started/main_button.png).
-It will open a menu on the left part of the screen. Choose below **Studio** section, the **Productions** page. 
+To navigate through Kitsu sections you need to use the sidebar. It can be 
+accessed through the 3 lines button on top of the screen 
+![Main button](../img/getting-started/main_button.png).  It will open a menu on
+the left part of the screen. We want show you the production list. 
+So thoose below **Studio** section, the **Productions** page. 
 
 ![Main menu](../img/getting-started/main_menu_production.png)
 
-There, you can see all the productions you have created, and their status (open for an active production, or closed if not active). When you go on top of a production you can see 2 news icons on the right part of the line : **Edit** ![Edit button](../img/getting-started/edit_button.png) and **Delete** ![Delete button](../img/getting-started/delete_button.png).
+There, you can see all the productions you have created, and their status (open
+for an active production, or closed if not active). When you cursor is above a
+production line you can see 2 news icons on the right part of the line :
+**Edit** ![Edit button](../img/getting-started/edit_button.png) and **Delete**
+![Delete button](../img/getting-started/delete_button.png).
 
 ![Edit a production](../img/getting-started/production_edit.png)
 
-Go into the **Edit production** page for your newly created production. You can change the picture instead of showing the first letters. Lets show a nice image. 
+Go into the **Edit production** page for your newly created production. The 
+default avatar for a production is the first letter displayed on a colored 
+background. But you can change it with a picture.
 
-![Edit the detail of a production](../img/getting-started/production_edit_popup.png)
+![Edit the details of a production](../img/getting-started/production_edit_popup.png)
 
 ### [Create some assets](#create-some-assets)
 
-So now you should have the first script of your production. It's time to do the breakdown and the creation of the assets.
-It will help you to find the assets you could reuse from past episode, and help to dispatch the work to the artists.
+So, now you have the first script for your production. It's time to do the
+breakdown and the creation of the assets. It will allow you to list your assets, 
+dispatch the work to the CG artists, and follow the progress of each related
+tasks.
 
-Lets begin with the asset page, you can access it by multiple ways, the fastest and easiest is with the asset icon on top of the page ![Asset button](../img/getting-started/asset_button.png).
+Lets begin with the asset page, you can access it via multiple ways, the fastest
+and easiest is with the asset icon on top of the page 
+![Asset button](../img/getting-started/asset_button.png).
 
 On the asset page click on **Add assets**.
+
 ![Asset page first time](../img/getting-started/add_assets_first.png)
 
-A pop up window opens :
+A pop-up window opens:
  
-You can choose the **Type** (1) : Camera, Characters, Environment, FX, Props.
-Lets start with an environment. We will give it a name under **Asset** (2), and enter a description that will help the designer to know what to do, and later to indentify easily the asset.
-If you have multiple assets to create, click on **Confirm and stay** (3), you can change whenever you want the asset type, and keep adding assets.
+It asks you to choose the asset **Type** (1): Camera, Characters, Environment,
+FX, Props, etc.  
+Let's start with an environment. We will give it a name (2), and enter a
+description that will help the designer to know what to do, and later to
+indentify easily the asset.
+If you have multiple assets to create, click on **Confirm and stay** (3). You
+can change whenever you want the asset type, and keep adding assets. 
+
 ![Create an asset](../img/getting-started/add_asset_popup.png)
 
-You will see the newly created asset appearing on the background everytime your click on **Confirm and stay**. When you have added your last asset, just click on **Confirm**, it will save the asset and close the window. If you don't have more asset to add, click on **Close**, it will cancel the window.
+You will see the newly created asset appearing on the background everytime your
+click on **Confirm and stay**. When you have added your last asset, just click
+on **Confirm**, it will save the asset and close the window. If you don't have
+more asset to add, click on **Close**, it will cancel the window.
 
-For now the assets aren't associate to episode, this association will be done during the **Breakdown** of the storyboard, with sequences and shots creation.
+For now the assets aren't associated with episode, this association will be done
+during the **breakdown** of the storyboard, with sequences and shots creation.
 
 
-You can edit assets any time you want by going to the asset page, hovering the asset you want to modify, and then click on the **Edit button** ![Edit button](../img/getting-started/edit_button.png) (1) on the right side of the line.
+You can edit assets any time you want by going to the asset page, hovering the
+asset you want to modify, and then click on the **Edit button** 
+![Edit button](../img/getting-started/edit_button.png) (1) on the right side of
+the line.  
+
 ![Edit an asset](../img/getting-started/asset_edit.png)
 
-On the main asset page, to read the description, just click on the first words (2), and a pop up will open with the full description.
+On the main asset page, to extend the description, click on the first words
+(2), and a pop-up will open with the full description.
 
-Then we can associate tasks to the assets (3), like **Concep**, **Modeling**, **Texture**, **Setup**, and other if needed.
+And now we can create tasks for the assets (3), like **Concept**, **Modeling**,
+**Texture**, **Setup**, and other if needed.
 
-Click on the **+ Add tasks** (3) on top of the spreadsheet, a new window will open and on the list under **Type** you can choose the task you need to add, validate it by **Confirm** button.
+Click on the **+ Add tasks** (3) on top of the spreadsheet, a new window will
+open and on the list under **Type** you can choose the task you need to add,
+validate it by **Confirm** button.
+
 ![Add task to an asset](../img/getting-started/add_task.png)
 
-This tasks will be added to all the assets.
+These tasks will be added to all the assets.
 
+If some assets don't match the task (as environment and setup) just change the
+status of this task on **N/A**, or delete it.
 
-If some assets don't match the task (as environment and setup) just change the status of this task on **N/A**, or delete it.
+To change a status click directly on the status you want to change (1).
 
-So, to change a status : click directly on the status you want to change (1).
 ![Task on asset](../img/getting-started/asset_task_added.png)
 
-A new page is opened, and here you can add a comment to explain the change of status (1), and choose a new status for the task (2). Validate with **Post status** (3).
+A new page is opened, and here you can change a status and add a comment to
+explain the status change (1). Choose a new status for the task (2). Then 
+click on the **Post status** button (3).  
+
 ![Changing status](../img/getting-started/changing_status.png)
 
-If you want to delete a task, click on the **delete** button on the right top of the page ![Delete button](../img/getting-started/delete_button.png).
+If you want to delete a task, click on the **delete** button on the right top
+of the page ![Delete button](../img/getting-started/delete_button.png).
 
-Now that we have created all the assets we need and have linked them to tasks, we can now add the artists and assign them.
+Now that we have created all the assets and related tasks,
+we can now add the artists to the team and assign task to them.
 
-### [Add an artist](#add-an-artist)
 
-We need to create a account for each artist.
-Go to the main menu ![Main menu](../img/getting-started/main_button.png), and under the **Studio** section, choose **People** page.
+### [Add a CG Artist to the team](#add-a-cg-artist-to-the-team)
+
+An account is required for each artist. Go to the main menu ![Main
+menu](../img/getting-started/main_button.png), and under the **Studio**
+section, choose **People** page.
 
 ![People Menu](../img/getting-started/main_menu_people.png)
 
-Then click on the **+ Add a new employee** button. ![Add a new employee](../img/getting-started/add_employee.png). 
-On the new window you can enter the first (1) and last name (2), the email (which is **mandatory** to create the account) (3), the phone number (4) and define the role of the employee : **CG artist**, **Supervisor**, **Administrator** or **Client** (5). 
-If the artist is working right now keep him as active, otherwise select no.
-Validate by clicking **Confirm** button.
+Then click on the **+ Add a new employee** button. 
+
+![Add a new employee](../img/getting-started/add_employee.png). 
+
+A creation window opens. You can enter the first (1) and last name (2), the email
+(which is **mandatory** to create the account) (3), the phone number (4) and
+define the role of the employee : **CG artist**, **Supervisor**,
+**Administrator** or **Client** (5).  If the artist is working right now keep
+him as active, otherwise select no. Validate by clicking **Confirm** button.
 
 ![Create a new employee](../img/getting-started/create_employee.png)
 
 
-### [Assign an artist](#assign-an-artist)
+### [Assign tasks to a CG artist](#assign-tasks-to-a-cg-artist)
 
-We can now get back to the **Assets** page. You can use the main menu ![Main menu](../img/getting-started/main_button.png) under the **Production** section.
+We can now get back to the **Assets** page. You can use the main menu 
+![Main menu](../img/getting-started/main_button.png) under the **Production**
+section.
 
 ![Main menu assets page](../img/getting-started/main_menu_assets.png)
 
-Now its time to assigned the artist! 
+Now its time to do our first assignment! 
 
 Click on the empty space on the right of the status (1) you want to assign.
 ![Assigned a task](../img/getting-started/task_assigned.png)
@@ -105,14 +154,21 @@ You can now do the assignation. As soon as you click on the box you will see the
 
 ![Selected people](../img/getting-started/select_people.png)
 
-You can assign several tasks to the same person in one step (1). Once you have the blue menu visible, just keep **Ctrl** on your keyboard pressed and select multiple tasks. You can even use the **Shift** key to select a range of tasks (2). When you have selected everything you need, apply with the **Confim** button.
+You can assign several tasks to the same person in one step (1). Once you have
+the blue menu visible, just keep **Ctrl** on your keyboard pressed and select
+multiple tasks. You can even use the **Shift** key to select a range of tasks
+(2). When you have selected everything you need, apply with the **Confim**
+button.  
+
 ![Assigned multiple people](../img/getting-started/assigned_multiple.png)
 
 On the same way you can **Clear assignations** if needed.
 
-When you're done with all the assignation quit this mode using the **Clear current selection** button ![Clear current selection](../img/getting-started/clear_current_selection.png).
+When you're done with all the assignations quit this mode using the **Clear
+current selection** button ![Clear current selection](../img/getting-started/clear_current_selection.png).
 
 Now you can see next to each statut the initial of the artist, or his pic if he has added one. 
+
 ![Assigned people](../img/getting-started/assignation.png)
 
 If you want, you can hide this information with the **Hide assignations** button on the top of the spreadsheet ![Hide assignations](../img/getting-started/hide_assignation.png).
@@ -124,9 +180,13 @@ Everybody know what to do, and who is doing what!
 
 ### [Create sequences and shots](#create-sequences-and-shots)
 
-Now is time to do the breakdown of the storyboard. Meaning you can now create the sequences and the shots of the episode and associate assets to them.
+Now is time to do the breakdown of the storyboard. Meaning you can now create
+the sequences and the shots of the episode and associate assets to them.
 
-You need to go to the **Shots** page : you can either use the shot icon on top of the page ![Shot button](../img/getting-started/shot_button.png), or use the main menu ![Main menu button](../img/getting-started/main_button.png) and under the **Production** section, click on the **Shots**.
+You need to go to the **Shots** page : you can either use the shot icon on top
+of the page ![Shot button](../img/getting-started/shot_button.png), or use the
+main menu ![Main menu button](../img/getting-started/main_button.png) and under
+the **Production** section, click on the **Shots**.
 
 ![Main menu shots](../img/getting-started/main_menu_shots.png)
 
@@ -165,7 +225,7 @@ A new pop-up will open and let you choose what task you want to add. All the sho
 
 Now we can do the breakdown of the storyboard, meaning associate the assets to each shot. 
 
-### [Create a Breakdown list](#create-a-breakdown-list)
+### [Create a breakdown list](#create-a-breakdown-list)
 
 On the main menu ![Main menu](../img/getting-started/main_button.png), under **Production** section, choose **Breakdown**.
 
@@ -205,6 +265,7 @@ A new page will open with the list of the tasks, the assignation, and the list o
  
 ![Shot detail page](../img/getting-started/shot_detail_page.png)
  
+
 ### [Add the Frameranges](#add-the-frameranges)
 
 At this stage of the production, the animatic should be done. Meaning you have the length (**framerange In** and **framerange Out**) for each shot. You can add this information on the spreadsheet.
@@ -222,6 +283,7 @@ Save with the **Confirm** button.
 Now the frameranges appear on the general spreadsheet of the shot page.
 
 ![Shot framerange detail](../img/getting-started/shot_framerange_detail.png)
+
 
 ### [Validation per batch](#validation-per-batch)
 
@@ -255,7 +317,7 @@ You can now do your shots or assets selection, by pressing the **Crtl** or **Shi
 
 ![Change status per batch](../img/getting-started/change_status_batch.png)
 
-### [Change the priority](#change-the-priority)
+### [Change priorities](#change-priorities)
 
 At some point on the production you may want to prioritized some tasks, and pinpoint these urgent tasks to your team.
 
@@ -284,3 +346,25 @@ You can now see next to the status of the task some **Exclamation mark**. The mo
 * (4) is for **Emergency**.
 	
 ![Priority level](../img/getting-started/priority_level.png)
+
+### [Perform a review](#perform-a-review)
+
+When a CG arstist asks for a review you can go to the task page to see the result.
+The CG artist may have send you a picture, a movie or an `.obj` file. All can 
+be reviewed from the browser.
+
+From there you can change the status to `retake` if you want that the CG artist
+performs some changes. Or you can change it to done, to notifiy the CG artist
+that his work is validated.
+
+You can also use the preview as a thumbnail on the asset or shot spreadsheet. It
+will help to recognize the assets/shots on the main pages.  Below your preview,
+click on the **Set this preview as thumbnail**. You can do this at each version
+of your work if needed.
+
+![Preview as a thumbnail](../img/getting-started/preview_thumbnail.png)
+
+Once you have clicked on the button a message appears instead to confirm the
+modification.
+
+![Preview confirmed](../img/getting-started/preview_confirmed.png)
