@@ -1,5 +1,11 @@
 # FAQ for Kitsu
 
+* [How to share a preview?](#how-to-share-a-preview)
+
+
+* [How to change your password?](#how-to-change-your-password)
+
+
 * [How to create filters?](#how-to-create-filters)
 	* [Introduction to filters](#introduction-to-filters)
 	* [How to use the search bar?](#how-to-use-the-search-bar)
@@ -20,6 +26,48 @@
 	* [How to delete a playlist?](#how-to-delete-a-playlist)
 
 -----------------------------------------	
+
+## [How to share a preview?](#how-to-share-a-preview)
+
+When you start a new task you are assigned to, click on the status ![Todo](../img/getting-started/todo_icon.png)
+(1) on the shots or assets page.
+
+![Shot status](../img/getting-started/shot_status.png)
+
+It will open a new page where you can communicate about your work. Let your
+teammates know what you are doing. For instance show them you start working
+on something. Each time you change the status of a task, you can attach a
+text comment to it.
+
+For example when you start a **new task** you can say that everything is ok.
+If some information is missing, you can either ask all the questions you want.
+
+To change the status, let's say from ![Todo](../img/getting-started/todo_icon.png) to ![Wip](../img/getting-started/wip_icon.png) as example, start
+by filling the comment box (1). Then, click on the status box and choose the
+one you want (2) and validate your comment and the new status by clicking on
+**Post status** (3) button.
+
+![Changing status](../img/getting-started/changing_status.png)
+
+You can edit your last comment by using the **edit** button 
+![Edit button](../img/getting-started/edit_button.png).
+
+ -----------------------------------------	
+
+## [How to change your password?](#how-to-change-your-password)
+
+Click on your name on the top right of the screen (1) then on **Profile** (2).
+
+NB: A link to this documentation is available in this menu too (3).
+ 
+![User profile](../img/getting-started/user_profil.png)
+
+If you keep scrolling you can also change your password if you want. We
+encourage you to change the default password with one of your own.
+
+![User password](../img/getting-started/user_password.png)
+
+ -----------------------------------------	
  
 ## [How to create Filters?](#how-to-create-filters)
 
