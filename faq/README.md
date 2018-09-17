@@ -56,19 +56,6 @@ Each time you add a new revision, the previous versions are still available.
 
 ![Preview v2](../img/getting-started/previewv2.png)
 
-This detailed page of the task will be your way to communicate with others.
-They will also use this page to answer your question, give you feedback, and 
-asking for a retake. The history of the conversation is always available.
-
-For a quicker access to the information, when you will get back to your todo
-page, the last comment posted on each task will be available too.
-
-![My tasks page](../img/getting-started/my_task_page2.png)
-
-You can also see the tasks validated as ![NA](../img/getting-started/na_icon.png) on the **Done** tab.
-
-![My done tasks page](../img/getting-started/done_page.png)
-
  -----------------------------------------	
 
 ## [How to change your password?](#how-to-change-your-password)
