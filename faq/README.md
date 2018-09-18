@@ -89,7 +89,7 @@ One way to have a global view is by clicking on the **task** name.
 It will open a new page, where you can see the state of all the **status** 
 on this **specific task** per type or per shot.
 
-![Global asset task](../img/faq/global_view_task.png) ![Global shot task](../img/faq/global_view_task01.png)
+![Global asset task](../img/faq/global_view_task.png) ![Global shot task](../img/faq/global_view_task02.png)
 
 
 ### [Sequence global page](#sequence-global-page)	
