@@ -16,7 +16,8 @@ export default {
   newProduction (production, callback) {
     const data = {
       name: production.name,
-      project_status_id: production.project_status_id
+      project_status_id: production.project_status_id,
+      production_type: production.production_type
     }
     client.post(`/api/data/projects/`, data, callback)
   },
@@ -25,6 +26,7 @@ export default {
     const data = {
       name: production.name,
       project_status_id: production.project_status_id,
+      production_type: production.production_type,
       fps: production.fps,
       ratio: production.ratio,
       resolution: production.resolution

@@ -4,6 +4,9 @@
       <div class="level header-title">
         <div class="level-left">
           <page-title :text="$t('shots.title')"></page-title>
+          <combobox
+            :options="[]"
+          />
         </div>
 
         <div class="level-right" v-if="isCurrentUserManager">
@@ -156,6 +159,7 @@ import { mapGetters, mapActions } from 'vuex'
 import { SearchIcon } from 'vue-feather-icons'
 import ButtonHrefLink from './widgets/ButtonHrefLink'
 import ButtonLink from './widgets/ButtonLink'
+import ComboBox from './widgets/Combobox'
 import CreateTasksModal from './modals/CreateTasksModal'
 import DeleteModal from './widgets/DeleteModal'
 import EditShotModal from './modals/EditShotModal'
@@ -174,6 +178,7 @@ export default {
   components: {
     ButtonLink,
     ButtonHrefLink,
+    ComboBox,
     CreateTasksModal,
     DeleteModal,
     EditShotModal,

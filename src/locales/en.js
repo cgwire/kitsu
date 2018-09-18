@@ -258,13 +258,19 @@ export default {
       name: 'Name',
       ratio: 'Ratio',
       resolution: 'Resolution',
-      status: 'Status'
+      status: 'Status',
+      type: 'Type'
     },
     status: {
       closed: 'Closed',
       open: 'Open',
       active: 'Open',
       archived: 'Closed'
+    },
+    type: {
+      short: 'Short',
+      featurefilm: 'Feature Film',
+      tvshow: 'TV Show'
     }
   },
 

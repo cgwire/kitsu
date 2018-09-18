@@ -140,11 +140,17 @@ export default {
       name: 'Name',
       ratio: 'Ratio',
       resolution: 'Resolution',
-      status: 'Status'
+      status: 'Status',
+      type: 'Type'
     },
     status: {
       open: 'Ouvert',
       closed: 'Fermé'
+    },
+    type: {
+      short: 'Format court',
+      featurefilm: 'Long Métrage',
+      tvshow: 'Série télé'
     }
   },
 
