@@ -9,6 +9,8 @@ class TaskTypesCsvExport(BaseCsvExport):
     def __init__(self):
         BaseCsvExport.__init__(self, TaskType)
 
+        self.name = "task_types_export"
+
     def build_headers(self):
         return ["Department", "Name"]
 

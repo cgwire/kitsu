@@ -15,6 +15,8 @@ class TasksCsvExport(BaseCsvExport):
     def __init__(self):
         BaseCsvExport.__init__(self, Task)
 
+        self.file_name = "tasks_export"
+
     def build_headers(self):
         return [
             "Project",
