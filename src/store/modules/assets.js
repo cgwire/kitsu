@@ -13,6 +13,7 @@ import {
   sortByName
 } from '../../lib/sorting'
 import {
+  appendSelectionGrid,
   buildSelectionGrid,
   clearSelectionGrid,
   computeStats
@@ -727,9 +728,14 @@ const mutations = {
       0,
       state.displayedAssets.length + PAGE_SIZE
     )
+    const previousX = state.displayedAssets.length - PAGE_SIZE
     const maxX = state.displayedAssets.length
     const maxY = state.nbValidationColumns
-    state.assetSelectionGrid = buildSelectionGrid(maxX, maxY)
+    if (previousX > 0) {
+      state.assetSelectionGrid = appendSelectionGrid(
+        state.assetSelectionGrid, previousX, maxX, maxY
+      )
+    }
   },
 
   [SET_CURRENT_PRODUCTION] (state, production) {
