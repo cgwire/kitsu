@@ -170,6 +170,33 @@ class TaskRoutesTestCase(ApiDBTestCase):
         path = "/actions/tasks/unknown/comments/"
         comments = self.get(path, 404)
 
+    def test_delete_task_comment(self):
+        self.generate_fixture_project_standard()
+        self.generate_fixture_asset_standard()
+        self.generate_fixture_task_standard()
+        self.generate_fixture_task()
+
+        self.task_id = str(self.task.id)
+
+        path = "/actions/tasks/%s/comment/" % self.task_id
+        data = {
+            "task_status_id": self.wip_status_id,
+            "comment": "comment test"
+        }
+        self.post(path, data)
+        comment = {
+            "task_status_id": self.wip_status_id,
+            "comment": "comment test 2"
+        }
+        comment = self.post(path, comment)
+
+        path = "/data/tasks/%s/comments/%s" % (self.task_id, comment["id"])
+        comments = self.delete(path)
+        self.delete(path, 404)
+        path = "/data/tasks/%s/comments/" % self.task_id
+        comments = self.get(path)
+        self.assertEqual(len(comments), 1)
+
     def test_get_tasks_for_task_type_and_entity(self):
         self.generate_fixture_task()
         task_type_id = self.task_type.id
