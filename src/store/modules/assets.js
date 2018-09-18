@@ -307,16 +307,15 @@ const actions = {
     })
   },
 
-  deleteAsset ({ commit, state }, payload) {
+  deleteAsset ({ commit, state }, { asset, callback }) {
     commit(DELETE_ASSET_START)
-    const asset = payload.asset
     assetsApi.deleteAsset(asset, (err) => {
       if (err) {
         commit(DELETE_ASSET_ERROR)
       } else {
         commit(DELETE_ASSET_END, asset)
       }
-      if (payload.callback) payload.callback(err)
+      if (callback) callback(err)
     })
   },
 
@@ -580,7 +579,7 @@ const mutations = {
   [DELETE_ASSET_END] (state, assetToDelete) {
     const asset = state.assetMap[assetToDelete.id]
 
-    if (asset.tasks.length > 0) {
+    if (asset.tasks.length > 0 && !assetToDelete.canceled) {
       asset.canceled = true
     } else {
       const assetToDeleteIndex = cache.assets.findIndex(

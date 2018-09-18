@@ -326,7 +326,12 @@ export default {
         asset: this.assetToDelete,
         callback: (err) => {
           if (!err) {
-            this.modals.isDeleteDisplayed = false
+            this.$router.push({
+              name: 'assets',
+              params: {
+                production_id: this.currentProduction.id
+              }
+            })
           }
         }
       })

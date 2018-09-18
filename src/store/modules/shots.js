@@ -861,7 +861,7 @@ const mutations = {
   [DELETE_SHOT_END] (state, shotToDelete) {
     const shot = state.shotMap[shotToDelete.id]
 
-    if (shot.tasks.length > 0) {
+    if (shot.tasks.length > 0 && !shot.canceled) {
       shot.canceled = true
     } else {
       const shotToDeleteIndex = cache.shots.findIndex(
