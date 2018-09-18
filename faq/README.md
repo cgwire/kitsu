@@ -97,7 +97,7 @@ on this **specific task** per type or per shot.
 The other way is to go to the **Sequences** page. You can go there with the **sequence** 
 button ![Sequence button](../img/faq/sequence_button.png) on top of a page.
 
-Or you can access it using the main menu ![mMin button](../img/faq/main_button.png), and then 
+Or you can access it using the main menu ![Main button](../img/faq/main_button.png), and then 
 click on the **SEQUENCES** page under the **Production** section.
 
 ![Main menu sequence](../img/faq/global_sequence_mainmenu.png)
