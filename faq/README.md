@@ -6,6 +6,11 @@
 * [How to change your password?](#how-to-change-your-password)
 
 
+* [How to have a global view of the production?](#how-to-have-a-global-view-of-the-production)
+	* [Task global page](#task-global-page)
+	* [Sequence global page](#sequence-global-page)	
+
+
 * [How to create filters?](#how-to-create-filters)
 	* [Introduction to filters](#introduction-to-filters)
 	* [How to use the search bar?](#how-to-use-the-search-bar)
@@ -70,6 +75,40 @@ If you keep scrolling you can also change your password if you want. We
 encourage you to change the default password with one of your own.
 
 ![User password](../img/getting-started/user_password.png)
+
+ -----------------------------------------	
+
+## [How to have a global view of the production?](#how-to-have-a-global-view-of-the-production)
+
+### [Task global page](#task-global-page)
+
+One way to have a global view is by clicking on the task name.
+
+![Global asset page](../img/faq/global_view_asset_task.png)
+
+It will open a new page, where you can see the stage of all the assets status on this specific task.
+
+![Global asset task](../img/faq/global_view_task.png)
+
+
+### [Sequence global page](#sequence-global-page)	
+
+The other way is to go to the **Sequences** page. You can go there with the **sequence** 
+button ![Sequence button](../img/faq/sequence_button.png) on top of a page.
+
+Or you can access it using the main menu ![mMin button](../img/faq/main_button.png), and then 
+click on the **SEQUENCES** page under the **Production** section.
+
+![Global sequence task](../img/faq/global_view_sequence.png)
+
+With this view you can see all the status distribution per tasks on each sequences.
+
+You can fly over the pie chart to have more detailed information about the distribution.
+
+![Global sequence detail](../img/faq/global_view_sequence_detail.png)
+
+You can also click on the **tasks name** to have the detailed shots about this task.
+
 
  -----------------------------------------	
  
