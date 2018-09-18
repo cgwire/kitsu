@@ -19,23 +19,20 @@
           :label="$t('assets.fields.type')"
           :options="getAssetTypeOptions"
           v-model="form.entity_type_id"
-        >
-        </combobox>
+        />
         <text-field
           ref="nameField"
           :label="$t('assets.fields.name')"
           v-model="form.name"
           @enter="runConfirmation"
           v-focus
-        >
-        </text-field>
+        />
         <textarea-field
           ref="descriptionField"
           :label="$t('assets.fields.description')"
           v-model="form.description"
           v-focus
-        >
-        </textarea-field>
+        />
       </form>
 
       <div class="has-text-right">

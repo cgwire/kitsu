@@ -13,6 +13,7 @@ import {
   sortByName
 } from '../../lib/sorting'
 import {
+  appendSelectionGrid,
   buildSelectionGrid,
   clearSelectionGrid,
   computeStats
@@ -307,16 +308,15 @@ const actions = {
     })
   },
 
-  deleteAsset ({ commit, state }, payload) {
+  deleteAsset ({ commit, state }, { asset, callback }) {
     commit(DELETE_ASSET_START)
-    const asset = payload.asset
     assetsApi.deleteAsset(asset, (err) => {
       if (err) {
         commit(DELETE_ASSET_ERROR)
       } else {
         commit(DELETE_ASSET_END, asset)
       }
-      if (payload.callback) payload.callback(err)
+      if (callback) callback(err)
     })
   },
 
@@ -580,7 +580,7 @@ const mutations = {
   [DELETE_ASSET_END] (state, assetToDelete) {
     const asset = state.assetMap[assetToDelete.id]
 
-    if (asset.tasks.length > 0) {
+    if (asset.tasks.length > 0 && !assetToDelete.canceled) {
       asset.canceled = true
     } else {
       const assetToDeleteIndex = cache.assets.findIndex(
@@ -728,9 +728,14 @@ const mutations = {
       0,
       state.displayedAssets.length + PAGE_SIZE
     )
+    const previousX = state.displayedAssets.length - PAGE_SIZE
     const maxX = state.displayedAssets.length
     const maxY = state.nbValidationColumns
-    state.assetSelectionGrid = buildSelectionGrid(maxX, maxY)
+    if (previousX > 0) {
+      state.assetSelectionGrid = appendSelectionGrid(
+        state.assetSelectionGrid, previousX, maxX, maxY
+      )
+    }
   },
 
   [SET_CURRENT_PRODUCTION] (state, production) {

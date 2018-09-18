@@ -13,6 +13,7 @@ import {
   sortByName
 } from '../../lib/sorting'
 import {
+  appendSelectionGrid,
   buildSelectionGrid,
   clearSelectionGrid,
   computeStats
@@ -861,7 +862,7 @@ const mutations = {
   [DELETE_SHOT_END] (state, shotToDelete) {
     const shot = state.shotMap[shotToDelete.id]
 
-    if (shot.tasks.length > 0) {
+    if (shot.tasks.length > 0 && !shot.canceled) {
       shot.canceled = true
     } else {
       const shotToDeleteIndex = cache.shots.findIndex(
@@ -1063,9 +1064,14 @@ const mutations = {
       state.displayedShots.length + PAGE_SIZE
     )
 
+    const previousX = state.displayedShots.length - PAGE_SIZE
     const maxX = state.displayedShots.length
     const maxY = state.nbValidationColumns
-    state.shotSelectionGrid = buildSelectionGrid(maxX, maxY)
+    if (previousX > 0) {
+      state.shotSelectionGrid = appendSelectionGrid(
+        state.shotSelectionGrid, previousX, maxX, maxY
+      )
+    }
   },
 
   [DISPLAY_MORE_SEQUENCES] (state, tasks) {
