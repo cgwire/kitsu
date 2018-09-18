@@ -22,7 +22,7 @@
     * [Ask for a review](getting-started-artist/README.md#ask-for-a-review)
     * [Fill your timesheet](getting-started-artist/README.md#fill-your-timesheet)    
 
-* [FAQ](faq/README.md)
+* [FAQ](faq/README.md#faq-for-kitsu)
 
 * [Permissions](permissions/README.md)
 
