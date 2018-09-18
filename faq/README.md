@@ -1,4 +1,4 @@
-# FAQ for Kitsu
+# [FAQ for Kitsu](#faq-for-kitsu)
 
 * [How to share a preview?](#how-to-share-a-preview)
 
@@ -82,11 +82,12 @@ encourage you to change the default password with one of your own.
 
 ### [Task global page](#task-global-page)
 
-One way to have a global view is by clicking on the task name.
+One way to have a global view is by clicking on the **task** name.
 
 ![Global asset page](../img/faq/global_view_asset_task.png)
 
-It will open a new page, where you can see the stage of all the assets status on this specific task.
+It will open a new page, where you can see the stage of all the **assets status** 
+on this **specific task** per type.
 
 ![Global asset task](../img/faq/global_view_task.png)
 
@@ -99,9 +100,12 @@ button ![Sequence button](../img/faq/sequence_button.png) on top of a page.
 Or you can access it using the main menu ![mMin button](../img/faq/main_button.png), and then 
 click on the **SEQUENCES** page under the **Production** section.
 
-![Global sequence task](../img/faq/global_view_sequence.png)
+![Main menu sequence](../img/faq/global_sequence_mainmenu.png)
 
 With this view you can see all the status distribution per tasks on each sequences.
+
+![Global sequence task](../img/faq/global_view_sequence.png)
+
 
 You can fly over the pie chart to have more detailed information about the distribution.
 
