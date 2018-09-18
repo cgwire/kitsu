@@ -86,11 +86,11 @@ One way to have a global view is by clicking on the **task** name.
 
 ![Global asset page](../img/faq/global_view_asset_task.png)
 
-It will open a new page, where you can see the stage of all the **assets status** 
-on this **specific task** per type.
+It will open a new page, where you can see the state of all the **status** 
+on this **specific task** per type or per shot.
 
 ![Global asset task](../img/faq/global_view_task.png)
-
+![Global shot task](../img/faq/global_view_task01.png)
 
 ### [Sequence global page](#sequence-global-page)	
 
