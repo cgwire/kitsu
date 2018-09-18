@@ -304,7 +304,7 @@ export default {
     new_success: 'Asset {name} créé avec succès.',
     empty_list: 'Il n\'y a pas d\'assets dans la production. Voulez vous en créer ?',
     fields: {
-      name: 'Asset',
+      name: 'Nom',
       type: 'Type',
       production: 'Prod',
       description: 'Description'

@@ -20,7 +20,7 @@ export default {
     title: 'Assets',
     fields: {
       description: 'Description',
-      name: 'Asset',
+      name: 'Name',
       production: 'Prod',
       type: 'Type'
     }
