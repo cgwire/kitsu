@@ -27,7 +27,8 @@ export default {
     return {
       assignationItem: AssignationItem,
       items: [],
-      item: {}
+      item: {},
+      searchText: ''
     }
   },
 
@@ -42,6 +43,12 @@ export default {
       'keyup', (event) => {
         if (event.keyCode === 13 && this.item) {
           this.$emit('enter')
+        }
+
+        this.searchText =
+          this.$refs.autocomplete.$el.children[0].children[0].value
+        if (!this.item && this.searchText.length === 0) {
+          this.items = this.people
         }
       })
   },
@@ -83,9 +90,6 @@ export default {
 
     onChange () {
       this.$emit('input', this.item)
-      if (!this.item) {
-        this.items = this.people
-      }
     },
 
     clear () {
