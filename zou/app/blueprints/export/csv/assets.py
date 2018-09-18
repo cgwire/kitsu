@@ -1,5 +1,6 @@
 from flask_restful import Resource
 from flask_jwt_extended import jwt_required
+from slugify import slugify
 
 from zou.app.services import (
     assets_service,
@@ -30,7 +31,7 @@ class AssetsCsvExport(Resource):
             csv_content.append(self.build_row(result, validation_columns))
 
         file_name = "%s assets" % project["name"]
-        return csv_utils.build_csv_response(csv_content, file_name)
+        return csv_utils.build_csv_response(csv_content, slugify(file_name))
 
     def check_permissions(self, project_id):
         user_service.check_project_access(project_id)

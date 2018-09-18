@@ -168,11 +168,11 @@ class TaskCommentResource(Resource):
 
     @jwt_required
     def delete(self, task_id, comment_id):
-        task = tasks_service.get(task_id)
+        task = tasks_service.get_task(task_id)
         user_service.check_project_access(task["project_id"])
         comment = self.remove_comment_and_related(comment_id)
         self.update_task_status(task_id)
-        return comment
+        return comment, 204
 
     def remove_comment_and_related(self, comment_id):
         comment = tasks_service.get_comment(comment_id)

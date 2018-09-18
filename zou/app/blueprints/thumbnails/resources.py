@@ -22,9 +22,9 @@ from zou.app.utils import (
 )
 
 
-ALLOWED_PICTURE_EXTENSION = [".png", ".jpg", ".PNG", ".JPG"]
+ALLOWED_PICTURE_EXTENSION = [".png", ".jpg", ".jpeg", ".PNG", ".JPG", ".JPEG"]
 ALLOWED_MOVIE_EXTENSION = [".mp4", ".mov", ".MP4", ".MOV"]
-ALLOWED_FILE_EXTENSION = [".obj", ".pdf", ".ma", ".mb"]
+ALLOWED_FILE_EXTENSION = [".obj", ".pdf", ".ma", ".mb", ".rar", ".zip"]
 
 
 def send_file(generator, mimetype="application/octet-stream"):

@@ -91,3 +91,7 @@ ENV/
 # Vagrant files
 Vagrantfile
 .vagrant
+
+previews
+thumbnails
+release.sh

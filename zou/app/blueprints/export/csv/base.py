@@ -9,6 +9,7 @@ class BaseCsvExport(BaseModelResource):
 
     def __init__(self, model):
         BaseModelResource.__init__(self, model)
+        self.file_name = "export"
 
     def check_permissions(self):
         pass
@@ -25,4 +26,7 @@ class BaseCsvExport(BaseModelResource):
         except permissions.PermissionDenied:
             abort(403)
 
-        return csv_utils.build_csv_response(csv_content)
+        return csv_utils.build_csv_response(
+            csv_content,
+            file_name=self.file_name
+        )

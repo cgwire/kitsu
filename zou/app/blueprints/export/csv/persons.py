@@ -7,6 +7,7 @@ class PersonsCsvExport(BaseCsvExport):
 
     def __init__(self):
         BaseCsvExport.__init__(self, Person)
+        self.file_name = "people_export"
 
     def build_headers(self):
         return ["Last Name", "First Name", "Email", "Phone", "Role"]

@@ -7,7 +7,7 @@ from flask_restful import Resource
 from flask_jwt_extended import jwt_required
 
 from zou.app import app
-from zou.app.utils import fields, permissions
+from zou.app.utils import permissions
 from zou.app.services import user_service
 
 
