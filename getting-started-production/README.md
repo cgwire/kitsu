@@ -134,13 +134,13 @@ him as active, otherwise select no. Validate by clicking **Confirm** button.
 
 ![Create a new employee](../img/getting-started/create_employee.png)
 
-* **CG artist**: only see the productions if they are on ther team. 
-They can navigate through all the production, but **can't add a comment 
+* **CG artist**: only see the productions if they are on the team. 
+They can navigate through the production, but **can't add a comment 
 on a task if they are not assigned to it**.
-* **Supervisor**: only see the productions if they are on their team. 
-They can navigate through all the production and **are allow to add 
+* **Supervisor**: only see the productions if they are on the team. 
+They can navigate through the production and **are allow to add 
 comments to all the tasks**, even if they are not assigned.
-* **Client**: only see the productions if they are on their team. 
+* **Client**: only see the productions if they are on the team. 
 They can navigate through all the production. **They can't have access 
 to the status tasks page**.
 * **Administrator**: They can navigate through all the production (even the closed), 
