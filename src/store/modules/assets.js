@@ -399,9 +399,6 @@ const actions = {
     return new Promise((resolve, reject) => {
       const productionId = rootState.route.params.production_id
       dispatch('setLastProductionScreen', 'production-asset-types')
-      if (rootGetters.currentProduction.id !== productionId) {
-        dispatch('setProduction', productionId)
-      }
 
       if (cache.assets.length === 0 ||
           cache.assets[0].production_id !== productionId) {

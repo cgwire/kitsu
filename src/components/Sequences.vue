@@ -104,6 +104,7 @@ export default {
       'isShotsLoadingError',
       'sequences',
       'sequenceMap',
+      'sequencesPath',
       'sequenceStats',
       'sequenceSearchText',
       'sequenceListScrollPosition',
@@ -132,7 +133,6 @@ export default {
       'loadShots',
       'loadComment',
       'setLastProductionScreen',
-      'setProduction',
       'setSequenceSearch',
       'setSequenceListScrollPosition',
       'showAssignations'
@@ -153,10 +153,7 @@ export default {
     },
 
     navigateToList () {
-      this.$router.push({
-        name: 'sequences',
-        params: {production_id: this.currentProduction.id}
-      })
+      this.$router.push(this.sequencesPath)
     },
 
     confirmEditSequence (form) {

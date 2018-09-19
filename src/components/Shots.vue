@@ -4,9 +4,6 @@
       <div class="level header-title">
         <div class="level-left">
           <page-title :text="$t('shots.title')"></page-title>
-          <combobox
-            :options="[]"
-          />
         </div>
 
         <div class="level-right" v-if="isCurrentUserManager">
@@ -159,7 +156,7 @@ import { mapGetters, mapActions } from 'vuex'
 import { SearchIcon } from 'vue-feather-icons'
 import ButtonHrefLink from './widgets/ButtonHrefLink'
 import ButtonLink from './widgets/ButtonLink'
-import ComboBox from './widgets/Combobox'
+import Combobox from './widgets/Combobox'
 import CreateTasksModal from './modals/CreateTasksModal'
 import DeleteModal from './widgets/DeleteModal'
 import EditShotModal from './modals/EditShotModal'
@@ -178,7 +175,7 @@ export default {
   components: {
     ButtonLink,
     ButtonHrefLink,
-    ComboBox,
+    Combobox,
     CreateTasksModal,
     DeleteModal,
     EditShotModal,
@@ -214,13 +211,6 @@ export default {
       },
       shotToDelete: null,
       shotToEdit: null,
-      choices: [],
-      shotFilters: [{
-        type: 'Type',
-        value: {
-          name: 'open'
-        }
-      }],
       columns: [
         'Episode',
         'Sequence',
@@ -229,9 +219,6 @@ export default {
         'FPS',
         'Frame In',
         'Frame Out'
-      ],
-      shotFilterTypes: [
-        'Type'
       ]
     }
   },
@@ -242,10 +229,13 @@ export default {
       'deleteShot',
       'displayedShots',
       'editShot',
+      'episodeMap',
+      'episodes',
       'isCurrentUserManager',
       'isShotsLoading',
       'isShotsLoadingError',
       'isShowAssignations',
+      'isTVShow',
       'openProductions',
       'restoreShot',
       'sequences',
@@ -261,18 +251,14 @@ export default {
 
   created () {
     this.setLastProductionScreen('shots')
-
-    const productionId = this.$store.state.route.params.production_id
-    if (this.currentProduction.id !== productionId) {
-      this.setProduction(productionId)
-    }
-
     const shotIds = Object.keys(this.shotMap)
     if (shotIds.length === 0 ||
         this.shotMap[shotIds[0]].production_id !== this.currentProduction.id) {
       this.loadShots((err) => {
         this.resizeHeaders()
-        if (!err) this.handleModalsDisplay()
+        if (!err) {
+          this.handleModalsDisplay()
+        }
       })
     }
   },
@@ -294,7 +280,6 @@ export default {
       'removeShotSearch',
       'saveShotSearch',
       'setLastProductionScreen',
-      'setProduction',
       'setShotSearch',
       'showAssignations',
       'hideAssignations'
@@ -430,8 +415,8 @@ export default {
     },
 
     handleModalsDisplay () {
-      const path = this.$store.state.route.path
-      const shotId = this.$store.state.route.params.shot_id
+      const path = this.$route.path
+      const shotId = this.$route.params.shot_id
       this.editShot.isSuccess = false
       this.editShot.isError = false
 
@@ -528,7 +513,10 @@ export default {
   },
 
   watch: {
-    $route () { this.handleModalsDisplay() },
+    $route () {
+      this.handleModalsDisplay()
+    },
+
     currentProduction () {
       const oldPath = `${this.$route.path}`
       const newPath = {
@@ -542,6 +530,9 @@ export default {
         this.$store.commit('SET_SHOT_LIST_SCROLL_POSITION', 0)
         this.loadShots(this.resizeHeaders)
       }
+    },
+
+    currentEpisode () {
     }
   },
 

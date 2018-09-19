@@ -213,7 +213,6 @@ export default {
       'loadAssets',
       'saveCasting',
       'setAssetSearch',
-      'setProduction',
       'setCastingEpisode',
       'setCastingSequence',
       'setCastingShot',
@@ -223,10 +222,8 @@ export default {
     ]),
 
     reset () {
-      const productionId = this.$store.state.route.params.production_id
       this.shotId = this.$route.params.shot_id
 
-      this.setProduction(productionId)
       this.loadShots(() => {
         this.loadAssets(() => {
           this.isLoading = true
@@ -324,12 +321,7 @@ export default {
     },
 
     currentProduction () {
-      const newPath = {
-        name: 'breakdown',
-        params: {production_id: this.currentProduction.id}
-      }
       if (this.currentProduction.id !== this.$route.params.production_id) {
-        this.$router.push(newPath)
         this.reset()
       }
     }

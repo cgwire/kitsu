@@ -22,50 +22,24 @@
           'nav-item': true,
         }" v-if="isProductionContext()">
           <div class="level">
-            <div class="level-item production-selector-label">
-              {{ $t('productions.current') }}:
-            </div>
             <div class="level-item">
               <combobox
                 class="production-selector"
                 :options="openProductionOptions"
                 v-model="currentProductionId"
-              >
-              </combobox>
+              />
+              <combobox
+                class="production-selector"
+                :options="navigationOptions"
+                v-model="currentProjectSection"
+              />
+              <combobox
+                class="production-selector"
+                :options="episodeOptions"
+                v-model="currentEpisodeId"
+                v-if="isTVShow && isShotPage"
+              />
             </div>
-            <router-link
-              class="level-item icon-link"
-              :title="$t('assets.title')"
-              :to="{
-                name: 'assets',
-                params: {production_id: currentProduction.id}
-              }"
-              v-if="currentProduction"
-            >
-            <img src="../assets/icons/assets.png" />
-            </router-link>
-            <router-link
-              class="level-item icon-link"
-              :title="$t('shots.title')"
-              :to="{
-                name: 'shots',
-                params: {production_id: currentProduction.id}
-              }"
-              v-if="currentProduction"
-            >
-            <img src="../assets/icons/shots.png" />
-            </router-link>
-            <router-link
-              class="level-item icon-link"
-              :title="$t('sequences.title')"
-              :to="{
-                name: 'sequences',
-                params: {production_id: currentProduction.id}
-              }"
-              v-if="currentProduction"
-            >
-            <img src="../assets/icons/sequences.png" />
-            </router-link>
           </div>
         </div>
       </div>
@@ -143,7 +117,19 @@ export default {
 
   data () {
     return {
-      currentProductionId: null
+      currentProductionId: null,
+      currentEpisodeId: null,
+      currentProjectSection: 'assets',
+      navigationOptions: [
+        {label: this.$t('assets.title'), value: 'assets'},
+        {label: this.$t('shots.title'), value: 'shots'},
+        {label: this.$t('sequences.title'), value: 'sequences'},
+        {label: this.$t('episodes.title'), value: 'episodes'},
+        {label: this.$t('asset_types.title'), value: 'assetTypes'},
+        {label: this.$t('breakdown.title'), value: 'breakdown'},
+        {label: this.$t('playlists.title'), value: 'playlists'},
+        {label: this.$t('team.title'), value: 'team'}
+      ]
     }
   },
 
@@ -158,17 +144,39 @@ export default {
         userName.style.width = `${userNameWidth}px`
       }
     }
+
+    this.currentProductionId =
+      this.$route.params.production_id ||
+      (this.currentProduction ? this.currentProduction.id : null)
+
+    this.currentEpisodeId =
+      this.$route.params.episode_id ||
+      (this.currentEpisode ? this.currentEpisode.id : null)
+
+    this.currentProjectSection = this.getCurrentSection()
   },
 
   computed: {
     ...mapGetters([
+      'breakdownPath',
+      'assetsPath',
+      'assetTypesPath',
+      'shotsPath',
+      'sequencesPath',
+      'episodesPath',
+      'playlistsPath',
+      'teamPath',
+      'episodes',
+      'episodeOptions',
+      'currentEpisode',
+      'currentProduction',
       'isSidebarHidden',
       'isUserMenuHidden',
+      'isTVShow',
       'isNewNotification',
-      'user',
       'openProductions',
       'openProductionOptions',
-      'currentProduction'
+      'user'
     ]),
 
     notificationBellClass () {
@@ -177,13 +185,22 @@ export default {
       } else {
         return 'has-no-notifications'
       }
+    },
+
+    isShotPage () {
+      return (
+        this.$route.path.indexOf('shots') > 0 ||
+        this.$route.path.indexOf('sequences') > 0
+      )
     }
   },
 
   methods: {
     ...mapActions([
+      'loadEpisodes',
       'loadNotification',
       'setProduction',
+      'setCurrentEpisode',
       'toggleSidebar',
       'toggleUserMenu',
       'logout'
@@ -199,19 +216,60 @@ export default {
 
     isProductionContext () {
       return this.$route.params.production_id !== undefined
+    },
+
+    getCurrentSection () {
+      let name = ''
+      const segments = this.$route.path.split('/')
+      if (this.isTVShow) {
+        name = segments[5]
+      }
+      if (!name) {
+        name = segments[3]
+
+        if (name === 'episodes' && segments.length === 6) {
+          name = segments[5]
+        }
+      }
+      return name
+    },
+
+    updateRoute () {
+      this.$router.push(this[this.currentProjectSection + 'Path'])
     }
   },
 
   watch: {
     currentProductionId () {
-      this.setProduction(`${this.currentProductionId}`)
+      this.setProduction({
+        productionId: `${this.currentProductionId}`
+      })
+
+      this.$store.commit('CLEAR_EPISODES')
+      if (this.isTVShow) {
+        this.loadEpisodes(() => {
+          this.setProduction({
+            productionId: `${this.currentProduction.id}`,
+            episodeId: `${this.currentEpisode.id}`
+          })
+          this.updateRoute()
+        })
+      } else {
+        this.updateRoute()
+      }
     },
 
-    currentProduction () {
-      if (this.currentProduction &&
-          this.currentProductionId !== this.currentProduction.id) {
-        this.currentProductionId = this.currentProduction.id
-      }
+    currentEpisodeId () {
+      this.setCurrentEpisode(`${this.currentEpisodeId}`)
+      this.setProduction({
+        productionId: `${this.currentProductionId}`,
+        episodeId: `${this.currentEpisodeId}`
+      })
+      this.updateRoute()
+    },
+
+    currentProjectSection () {
+      this.updateRoute()
     }
   },
 

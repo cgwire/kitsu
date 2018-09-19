@@ -93,10 +93,12 @@ import {
   SET_EPISODE_SEARCH,
 
   SET_CURRENT_PRODUCTION,
+  SET_CURRENT_EPISODE,
   CREATE_TASKS_END,
   DISPLAY_MORE_SHOTS,
   DISPLAY_MORE_SEQUENCES,
   DISPLAY_MORE_EPISODES,
+  CLEAR_EPISODES,
 
   SET_SHOT_LIST_SCROLL_POSITION,
   SET_SEQUENCE_LIST_SCROLL_POSITION,
@@ -170,6 +172,8 @@ const initialState = {
   sequenceStats: {},
   episodeSearchText: '',
   episodeStats: {},
+
+  currentEpisode: null,
 
   isFps: false,
   isFrameIn: false,
@@ -284,7 +288,21 @@ const getters = {
     (episode) => { return { label: episode.name, value: episode.id } }
   ),
 
-  isSingleEpisode: state => state.episodes.length < 2
+  isSingleEpisode: state => state.episodes.length < 2,
+
+  currentEpisode: (state) => {
+    if (state.currentEpisode) {
+      return state.currentEpisode
+    } else if (state.episodes.length > 0) {
+      return state.episodes[0]
+    } else {
+      return null
+    }
+  },
+
+  episodeOptions: state => state.episodes.map(
+    (episode) => { return { label: episode.name, value: episode.id } }
+  )
 }
 
 const actions = {
@@ -294,6 +312,7 @@ const actions = {
     shotsApi.getEpisodes(currentProduction, (err, episodes) => {
       if (err) console.log(err)
       commit(LOAD_EPISODES_END, episodes)
+      if (callback) callback()
     })
   },
 
@@ -574,9 +593,6 @@ const actions = {
     return new Promise((resolve, reject) => {
       const productionId = rootState.route.params.production_id
       dispatch('setLastProductionScreen', 'sequences')
-      if (rootGetters.currentProduction.id !== productionId) {
-        dispatch('setProduction', productionId)
-      }
 
       if (state.sequences.length === 0 ||
           state.sequences[0].production_id !== productionId) {
@@ -606,13 +622,14 @@ const actions = {
     commit(COMPUTE_SEQUENCE_STATS, { taskStatusMap, taskMap })
   },
 
+  setCurrentEpisode ({ commit }, episodeId) {
+    commit(SET_CURRENT_EPISODE, episodeId)
+  },
+
   initEpisodes ({ commit, dispatch, state, rootState, rootGetters }) {
     return new Promise((resolve, reject) => {
       const productionId = rootState.route.params.production_id
       dispatch('setLastProductionScreen', 'episodes')
-      if (rootGetters.currentProduction.id !== productionId) {
-        dispatch('setProduction', productionId)
-      }
 
       if (state.episodes.length === 0 ||
           state.episodes[0].production_id !== productionId) {
@@ -1101,6 +1118,10 @@ const mutations = {
     state.sequenceSearchText = ''
   },
 
+  [CLEAR_EPISODES] (state) {
+    state.episodes = []
+  },
+
   [SET_PREVIEW] (state, {entityId, taskId, previewId}) {
     const shot = state.shotMap[entityId]
     if (shot) {
@@ -1164,6 +1185,10 @@ const mutations = {
       shot.tasks.push(task)
       Vue.set(shot.validations, task.task_type_id, task.id)
     }
+  },
+
+  [SET_CURRENT_EPISODE] (state, episodeId) {
+    state.currentEpisode = state.episodeMap[episodeId]
   },
 
   [RESET_ALL] (state) {

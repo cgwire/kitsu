@@ -237,14 +237,6 @@ export default {
   created () {
     this.setLastProductionScreen('assets')
 
-    const productionId = this.$store.state.route.params.production_id
-    if (this.currentProduction.id !== productionId) {
-      this.$store.commit(
-        'SET_CURRENT_PRODUCTION',
-        productionId
-      )
-    }
-
     const assetKeys = Object.keys(this.assetMap)
     if (assetKeys.length === 0 ||
         this.assetMap[assetKeys[0]].production_id !== this.currentProduction.id) {

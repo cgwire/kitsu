@@ -106,6 +106,7 @@ export default {
       'isShotsLoadingError',
       'episodes',
       'episodeMap',
+      'episodePath',
       'episodeStats',
       'episodeSearchText',
       'episodeListScrollPosition',
@@ -134,7 +135,6 @@ export default {
       'loadComment',
       'loadShots',
       'setLastProductionScreen',
-      'setProduction',
       'setEpisodeSearch',
       'setEpisodeListScrollPosition',
       'showAssignations'
@@ -153,10 +153,7 @@ export default {
     },
 
     navigateToList () {
-      this.$router.push({
-        name: 'episodes',
-        params: {production_id: this.currentProduction.id}
-      })
+      this.$router.push(this.episodesPath)
     },
 
     confirmEditEpisode (form) {

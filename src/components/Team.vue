@@ -85,8 +85,7 @@ export default {
 
   methods: {
     ...mapActions([
-      'addPersonToTeam',
-      'setProduction'
+      'addPersonToTeam'
     ]),
 
     addPerson () {
@@ -103,10 +102,6 @@ export default {
   },
 
   mounted () {
-    const currentProductionId = this.$route.params.production_id
-    if (this.currentProduction.id !== currentProductionId) {
-      this.setProduction(currentProductionId)
-    }
   },
 
   watch: {

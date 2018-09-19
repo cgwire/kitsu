@@ -49,6 +49,7 @@ export default {
 
   computed: {
     ...mapGetters([
+      'assetTypePath',
       'assetTypeStats',
       'assetTypeSearchText',
       'assetTypeListScrollPosition',
@@ -78,8 +79,7 @@ export default {
       'loadComment',
       'setAssetTypeSearch',
       'setAssetTypeListScrollPosition',
-      'setLastProductionScreen',
-      'setProduction'
+      'setLastProductionScreen'
     ]),
 
     setDefaultSearchText () {
@@ -97,10 +97,7 @@ export default {
     },
 
     navigateToList () {
-      this.$router.push({
-        name: 'production-asset-types',
-        params: {production_id: this.currentProduction.id}
-      })
+      this.$router.push(this.assetTypesPath)
     },
 
     onSearchChange (event) {
@@ -117,15 +114,9 @@ export default {
     currentProduction () {
       const productionId = this.$route.params.production_id
       if (this.currentProduction.id !== productionId) {
-        const newPath = {
-          name: 'production-asset-types',
-          params: {production_id: this.currentProduction.id}
-        }
-
         this.$refs['asset-type-search-field'].setValue('')
         this.setAssetTypeListScrollPosition(0)
 
-        this.$router.push(newPath)
         this.loadAssets(() => {
           this.computeAssetTypeStats()
         })

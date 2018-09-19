@@ -179,7 +179,6 @@ export default {
       'initTaskType',
       'loadShots',
       'loadAssets',
-      'setProduction',
       'subscribeToSequence',
       'unsubscribeFromSequence'
     ]),

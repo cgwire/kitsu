@@ -129,11 +129,6 @@ const actions = {
 
   initTaskType ({ commit, dispatch, state, rootState, rootGetters }, force) {
     return new Promise((resolve, reject) => {
-      const productionId = rootState.route.params.production_id
-      if (rootGetters.currentProduction.id !== productionId) {
-        dispatch('setProduction', productionId)
-      }
-
       if (rootGetters.currentTaskType.for_shots) {
         taskTypesApi.getSequenceSubscriptions(
           rootGetters.currentProduction.id,

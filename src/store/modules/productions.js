@@ -66,12 +66,24 @@ const initialState = {
 let state = {...initialState}
 
 const helpers = {
-  getProductionComponentPath (routeName, productionId) {
-    return {
-      name: routeName,
-      params: {
-        production_id: productionId
+  getProductionComponentPath (routeName, productionId, episodeId) {
+    if (episodeId) {
+      return {
+        name: 'episode-' + routeName,
+        params: {
+          episode_id: episodeId,
+          production_id: productionId
+        }
       }
+    } else if (productionId) {
+      return {
+        name: routeName,
+        params: {
+          production_id: productionId
+        }
+      }
+    } else {
+      return {name: 'open-productions'}
     }
   }
 }
@@ -109,6 +121,12 @@ const getters = {
       return null
     }
   },
+
+  isTVShow: (state) => {
+    const currentProduction = getters.currentProduction(state)
+    return currentProduction.production_type === 'tvshow'
+  },
+
   productionStatusOptions: state => state.productionStatus.map(
     (status) => { return { label: status.name, value: status.id } }
   ),
@@ -146,7 +164,7 @@ const actions = {
       else {
         commit(LOAD_OPEN_PRODUCTIONS_END, productions)
         if (!state.currentProduction && productions.length > 0) {
-          commit(SET_CURRENT_PRODUCTION, productions[0].id)
+          commit(SET_CURRENT_PRODUCTION, { productionId: productions[0].id })
         }
       }
       if (callback) callback(err)
@@ -199,8 +217,8 @@ const actions = {
     })
   },
 
-  setProduction ({commit}, productionId) {
-    commit(SET_CURRENT_PRODUCTION, productionId)
+  setProduction ({ commit }, { productionId, episodeId }) {
+    commit(SET_CURRENT_PRODUCTION, { productionId, episodeId })
   },
 
   storeProductionPicture ({ commit }, formData) {
@@ -379,27 +397,27 @@ const mutations = {
     if (production) production.has_avatar = true
   },
 
-  [SET_CURRENT_PRODUCTION] (state, currentProductionId) {
+  [SET_CURRENT_PRODUCTION] (state, { productionId, episodeId }) {
     const production = state.openProductions.find(
-      (production) => production.id === currentProductionId
+      (production) => production.id === productionId
     )
     state.currentProduction = production
     state.assetsPath = helpers.getProductionComponentPath(
-      'assets', currentProductionId)
+      'assets', productionId)
     state.assetTypesPath = helpers.getProductionComponentPath(
-      'production-asset-types', currentProductionId)
+      'production-asset-types', productionId)
     state.shotsPath = helpers.getProductionComponentPath(
-      'shots', currentProductionId)
+      'shots', productionId, episodeId)
     state.sequencesPath = helpers.getProductionComponentPath(
-      'sequences', currentProductionId)
+      'sequences', productionId, episodeId)
     state.episodesPath = helpers.getProductionComponentPath(
-      'episodes', currentProductionId)
+      'episodes', productionId)
     state.breakdownPath = helpers.getProductionComponentPath(
-      'breakdown', currentProductionId)
+      'breakdown', productionId)
     state.playlistsPath = helpers.getProductionComponentPath(
-      'playlists', currentProductionId)
+      'playlists', productionId)
     state.teamPath = helpers.getProductionComponentPath(
-      'team', currentProductionId)
+      'team', productionId)
   },
 
   [TEAM_ADD_PERSON] (state, personId) {

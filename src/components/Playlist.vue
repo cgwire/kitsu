@@ -619,13 +619,6 @@ export default {
   },
 
   created () {
-    if (this.currentProduction.id !== this.$route.params.production_id) {
-      this.$store.commit(
-        'SET_CURRENT_PRODUCTION',
-        this.$route.params.production_id
-      )
-    }
-
     if (Object.keys(this.shotMap).length === 0) {
       this.loadShotsData()
     } else {

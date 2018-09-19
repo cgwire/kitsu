@@ -146,8 +146,6 @@ export default {
   computed: {
     ...mapGetters([
       'isSidebarHidden',
-      'rawCurrentProduction',
-      'currentProduction',
       'breakdownPath',
       'assetsPath',
       'assetTypesPath',
