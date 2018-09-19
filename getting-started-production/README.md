@@ -139,7 +139,8 @@ They can navigate through the production, but **can't add a comment
 on a task if they are not assigned to it**.
 * **Supervisor**: only see the productions if they are on the team. 
 They can navigate through the production and **are allow to add 
-comments to all the tasks**, even if they are not assigned.
+comments to all the tasks**, even if they are not assigned. 
+**They can also assigned CG artist to tasks, change priority etc.**
 * **Client**: only see the productions if they are on the team. 
 They can navigate through all the production. **They can't have access 
 to the status tasks page**.
