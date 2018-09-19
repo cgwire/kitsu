@@ -134,6 +134,39 @@ him as active, otherwise select no. Validate by clicking **Confirm** button.
 
 ![Create a new employee](../img/getting-started/create_employee.png)
 
+* **CG artist**: only see the productions if they are on ther team. 
+They can navigate through all the production, but **can't add a comment 
+on a task if they are not assigned to it**.
+* **Supervisor**: only see the productions if they are on their team. 
+They can navigate through all the production and **are allow to add 
+comments to all the tasks**, even if they are not assigned.
+* **Client**: only see the productions if they are on their team. 
+They can navigate through all the production. **They can't have access 
+to the status tasks page**.
+* **Administrator**: They can navigate through all the production (even the closed), 
+and **have a full access to Kitsu**.
+
+CG artists, supervisors and clients will only see the productions they are assigned to.
+
+All the people are now part of your studio. They will be added to a specific production 
+when you will assign them to a task on a production. Otherwise they won't have access to anything.
+
+You can also add someone to a production without assign him a task.
+
+On the main menu ![Main menu](../img/getting-started/main_button.png) under the 
+**Production** section select the **TEAM** page.
+
+![Team menu](../img/getting-started/add_team_menu.png)
+
+On the **Team** page you can see all the assignations for a specific project. If you want to check 
+another project team you will need to switch the project on the top of the page.
+
+![Team page](../img/getting-started/team_page.png)
+
+You can also add someone to a production without assign him to a task, you can select his name on the search 
+box (or type his name), and validate with **add**.
+
+
 
 ### [Assign tasks to a CG artist](#assign-tasks-to-a-cg-artist)
 
