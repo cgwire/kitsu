@@ -164,7 +164,7 @@ export default {
       this.$route.params.episode_id ||
       (this.currentEpisode ? this.currentEpisode.id : null)
 
-    this.currentProjectSection = this.getCurrentSection()
+    this.currentProjectSection = this.getCurrentSectionFromRoute()
   },
 
   computed: {
@@ -203,11 +203,16 @@ export default {
         this.$route.path.indexOf('shots') > 0 ||
         this.$route.path.indexOf('sequences') > 0
       )
+    },
+
+    isProductionContext () {
+      return this.$route.params.production_id !== undefined
     }
   },
 
   methods: {
     ...mapActions([
+      'clearEpisodes',
       'loadEpisodes',
       'loadNotification',
       'setProduction',
@@ -225,11 +230,7 @@ export default {
       })
     },
 
-    isProductionContext () {
-      return this.$route.params.production_id !== undefined
-    },
-
-    getCurrentSection () {
+    getCurrentSectionFromRoute () {
       let name = ''
       const segments = this.$route.path.split('/')
       if (this.isTVShow) {
@@ -246,18 +247,25 @@ export default {
     },
 
     updateRoute () {
-      this.$router.push(this[this.currentProjectSection + 'Path'])
+      this.$router.push(this[`${this.currentProjectSection}Path`])
     }
   },
 
   watch: {
+    $route () {
+      const productionId = this.$route.params.production_id
+      if (this.currentProductionId !== productionId) {
+        this.currentProductionId = productionId
+      }
+    },
+
     currentProductionId () {
       this.setProduction({
         productionId: `${this.currentProductionId}`
       })
-
-      this.$store.commit('CLEAR_EPISODES')
       if (this.isTVShow) {
+        console.log('loadEpisodes')
+        this.clearEpisodes()
         this.loadEpisodes(() => {
           this.setProduction({
             productionId: `${this.currentProduction.id}`,

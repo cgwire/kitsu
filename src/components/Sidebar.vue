@@ -26,58 +26,6 @@
            </p>
          </div>
 
-         <h2>{{ $t('main.production')}}</h2>
-
-         <p @click="toggleSidebar()">
-           <router-link :to="assetsPath">
-             {{ $t("assets.title") }}
-           </router-link>
-         </p>
-
-         <p @click="toggleSidebar()">
-           <router-link :to="assetTypesPath">
-             {{ $t("asset_types.title") }}
-           </router-link>
-         </p>
-
-         <p @click="toggleSidebar()">
-           <router-link :to="shotsPath">
-             {{ $t("shots.title") }}
-           </router-link>
-         </p>
-
-         <p @click="toggleSidebar()">
-           <router-link :to="sequencesPath">
-             {{ $t("sequences.title") }}
-           </router-link>
-         </p>
-
-         <p @click="toggleSidebar()">
-           <router-link :to="episodesPath">
-             {{ $t("episodes.title") }}
-           </router-link>
-         </p>
-
-         <div v-if="!isCurrentUserClient">
-           <p @click="toggleSidebar()">
-             <router-link :to="breakdownPath">
-               {{ $t("breakdown.title") }}
-             </router-link>
-           </p>
-
-           <p @click="toggleSidebar()">
-             <router-link :to="playlistsPath">
-               {{ $t("playlists.title") }}
-             </router-link>
-           </p>
-
-           <p @click="toggleSidebar()">
-             <router-link :to="teamPath">
-               {{ $t("people.team") }}
-             </router-link>
-           </p>
-         </div>
-
          <div v-if="isCurrentUserAdmin">
            <h2>{{ $t('main.studio')}}</h2>
 
@@ -146,14 +94,6 @@ export default {
   computed: {
     ...mapGetters([
       'isSidebarHidden',
-      'breakdownPath',
-      'assetsPath',
-      'assetTypesPath',
-      'shotsPath',
-      'sequencesPath',
-      'episodesPath',
-      'playlistsPath',
-      'teamPath',
       'isCurrentUserClient',
       'isCurrentUserCGArtist',
       'isCurrentUserManager',
