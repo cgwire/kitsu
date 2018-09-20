@@ -20,22 +20,33 @@
         </router-link>
         <div :class="{
           'nav-item': true,
-        }" v-if="isProductionContext()">
+        }" v-if="isProductionContext">
           <div class="level">
             <div class="level-item">
               <combobox
                 class="production-selector"
                 :options="openProductionOptions"
+                :is-top="true"
                 v-model="currentProductionId"
               />
+              <strong>
+              >
+              </strong>
               <combobox
                 class="production-selector"
                 :options="navigationOptions"
+                :is-top="true"
                 v-model="currentProjectSection"
               />
+              <strong
+                v-if="isTVShow && isShotPage"
+              >
+              >
+              </strong>
               <combobox
                 class="production-selector"
                 :options="episodeOptions"
+                :is-top="true"
                 v-model="currentEpisodeId"
                 v-if="isTVShow && isShotPage"
               />
@@ -51,7 +62,7 @@
           <router-link :to="{name: 'notifications'}">
             <bell-icon
               :class="notificationBellClass"
-            ></bell-icon>
+            />
           </router-link>
         </div>
 
@@ -128,7 +139,7 @@ export default {
         {label: this.$t('asset_types.title'), value: 'assetTypes'},
         {label: this.$t('breakdown.title'), value: 'breakdown'},
         {label: this.$t('playlists.title'), value: 'playlists'},
-        {label: this.$t('team.title'), value: 'team'}
+        {label: this.$t('people.team'), value: 'team'}
       ]
     }
   },
@@ -359,6 +370,33 @@ export default {
   padding-right: 0;
 }
 
+.production-selector-label {
+  margin-right: 1em;
+}
+
+.production-selector {
+  margin-top: 23px;
+  margin-right: 1em;
+}
+
+.has-no-notifications {
+  margin-top: 5px;
+  color: #CCC;
+}
+
+.has-notifications {
+  margin-top: 5px;
+  color: #00B242;
+}
+
+.icon-link {
+  margin: 0 0.5em;
+}
+
+strong {
+  margin-right: 1em;
+}
+
 @media screen and (max-width: 768px) {
   .home-button {
     display: none;
@@ -394,32 +432,5 @@ export default {
     padding: 0;
     margin-top: 2em;
   }
-}
-
-.hidden {
-  display: none;
-}
-
-.production-selector-label {
-  margin-right: 1em;
-}
-
-.production-selector {
-  margin-top: 1.9em;
-  margin-right: 1em;
-}
-
-.has-no-notifications {
-  margin-top: 5px;
-  color: #CCC;
-}
-
-.has-notifications {
-  margin-top: 5px;
-  color: #00B242;
-}
-
-.icon-link {
-  margin: 0 0.5em;
 }
 </style>
