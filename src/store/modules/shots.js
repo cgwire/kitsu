@@ -229,6 +229,8 @@ const getters = {
   episodeMap: state => state.episodeMap,
   episodeStats: state => state.episodeStats,
 
+  currentEpisode: state => state.currentEpisode,
+
   shotSearchQueries: state => state.shotSearchQueries,
   shotMap: state => state.shotMap,
 
@@ -290,22 +292,16 @@ const getters = {
 
   isSingleEpisode: state => state.episodes.length < 2,
 
-  currentEpisode: (state) => {
-    if (state.currentEpisode) {
-      return state.currentEpisode
-    } else if (state.episodes.length > 0) {
-      return state.episodes[0]
-    } else {
-      return null
-    }
-  },
-
   episodeOptions: state => state.episodes.map(
     (episode) => { return { label: episode.name, value: episode.id } }
   )
 }
 
 const actions = {
+
+  clearEpisodes ({ commit }) {
+    commit(CLEAR_EPISODES)
+  },
 
   loadEpisodes ({ commit, state, rootGetters }, callback) {
     const currentProduction = rootGetters.currentProduction
@@ -321,31 +317,26 @@ const actions = {
     const userFilters = rootGetters.userFilters
     const taskTypeMap = rootGetters.taskTypeMap
     const personMap = rootGetters.personMap
+    const episode = rootGetters.currentEpisode
 
     commit(LOAD_SHOTS_START)
-    shotsApi.getEpisodes(production, (err, episodes) => {
+    shotsApi.getSequences(production, episode, (err, sequences) => {
       if (err) commit(LOAD_SHOTS_ERROR)
       else {
-        shotsApi.getSequences(production, (err, sequences) => {
+        shotsApi.getShots(production, episode, (err, shots) => {
           if (err) commit(LOAD_SHOTS_ERROR)
           else {
-            shotsApi.getShots(production, (err, shots) => {
-              if (err) commit(LOAD_SHOTS_ERROR)
-              else {
-                shots.forEach((shot) => {
-                  shot.project_name = production.name
-                  return shot
-                })
-                commit(LOAD_EPISODES_END, episodes)
-                commit(LOAD_SEQUENCES_END, sequences)
-                commit(
-                  LOAD_SHOTS_END,
-                  { production, shots, userFilters, taskTypeMap, personMap }
-                )
-              }
-              if (callback) callback(err)
+            shots.forEach((shot) => {
+              shot.project_name = production.name
+              return shot
             })
+            commit(LOAD_SEQUENCES_END, sequences)
+            commit(
+              LOAD_SHOTS_END,
+              { production, shots, userFilters, taskTypeMap, personMap }
+            )
           }
+          if (callback) callback(err)
         })
       }
     })
@@ -668,7 +659,6 @@ const mutations = {
 
     state.shotValidationColumns = []
     state.sequences = []
-    state.episodes = []
     state.isShotsLoading = true
     state.isShotsLoadingError = false
 
@@ -757,10 +747,12 @@ const mutations = {
       sequenceMap[sequence.id] = sequence
       if (sequence.parent_id) {
         const episode = state.episodeMap[sequence.parent_id]
-        Object.assign(sequence, {
-          episode_id: episode.id,
-          episode_name: episode.name
-        })
+        if (episode) {
+          Object.assign(sequence, {
+            episode_id: episode.id,
+            episode_name: episode.name
+          })
+        }
       }
     })
     state.sequenceMap = sequenceMap
@@ -782,6 +774,10 @@ const mutations = {
     state.episodeIndex = buildEpisodeIndex(state.episodes)
     state.displayedEpisodes = state.episodes.slice(0, PAGE_SIZE)
     state.displayedEpisodesLength = state.episodes.length
+
+    if (state.episodes.length > 0) {
+      state.currentEpisode = state.episodes[0]
+    }
   },
 
   [LOAD_SHOT_END] (state, { shot, taskTypeMap }) {
@@ -1120,6 +1116,7 @@ const mutations = {
 
   [CLEAR_EPISODES] (state) {
     state.episodes = []
+    state.currentEpisode = null
   },
 
   [SET_PREVIEW] (state, {entityId, taskId, previewId}) {
@@ -1188,6 +1185,7 @@ const mutations = {
   },
 
   [SET_CURRENT_EPISODE] (state, episodeId) {
+    console.log('set current episode', episodeId)
     state.currentEpisode = state.episodeMap[episodeId]
   },
 

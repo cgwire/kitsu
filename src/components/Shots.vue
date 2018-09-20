@@ -3,7 +3,23 @@
     <div class="shot-list-header page-header">
       <div class="level header-title">
         <div class="level-left">
-          <page-title :text="$t('shots.title')"></page-title>
+          <div class="filters-area">
+            <search-field
+              ref="shot-search-field"
+              :can-save="true"
+              @change="onSearchChange"
+              placeholder="ex: e01 s01, anim=wip"
+              @save="saveSearchQuery"
+            />
+          </div>
+
+          <div class="query-list">
+            <search-query-list
+              :queries="shotSearchQueries"
+              @changesearch="changeSearch"
+              @removesearch="removeSearchQuery"
+            />
+          </div>
         </div>
 
         <div class="level-right" v-if="isCurrentUserManager">
@@ -38,24 +54,6 @@
             />
           </div>
         </div>
-      </div>
-
-      <div class="filters-area">
-        <search-field
-          ref="shot-search-field"
-          :can-save="true"
-          @change="onSearchChange"
-          placeholder="ex: e01 s01, anim=wip"
-          @save="saveSearchQuery"
-        />
-      </div>
-
-      <div class="query-list">
-        <search-query-list
-          :queries="shotSearchQueries"
-          @changesearch="changeSearch"
-          @removesearch="removeSearchQuery"
-        />
       </div>
     </div>
 
@@ -154,6 +152,7 @@
 <script>
 import { mapGetters, mapActions } from 'vuex'
 import { SearchIcon } from 'vue-feather-icons'
+
 import ButtonHrefLink from './widgets/ButtonHrefLink'
 import ButtonLink from './widgets/ButtonLink'
 import Combobox from './widgets/Combobox'
@@ -225,6 +224,7 @@ export default {
 
   computed: {
     ...mapGetters([
+      'currentEpisode',
       'currentProduction',
       'deleteShot',
       'displayedShots',
@@ -251,16 +251,6 @@ export default {
 
   created () {
     this.setLastProductionScreen('shots')
-    const shotIds = Object.keys(this.shotMap)
-    if (shotIds.length === 0 ||
-        this.shotMap[shotIds[0]].production_id !== this.currentProduction.id) {
-      this.loadShots((err) => {
-        this.resizeHeaders()
-        if (!err) {
-          this.handleModalsDisplay()
-        }
-      })
-    }
   },
 
   mounted () {
@@ -270,11 +260,11 @@ export default {
     this.$refs['shot-list'].setScrollPosition(
       this.shotListScrollPosition
     )
-    this.resizeHeaders()
   },
 
   methods: {
     ...mapActions([
+      'clearEpisodes',
       'loadShots',
       'loadComment',
       'removeShotSearch',
@@ -518,21 +508,32 @@ export default {
     },
 
     currentProduction () {
-      const oldPath = `${this.$route.path}`
-      const newPath = {
-        name: 'shots',
-        params: {production_id: this.currentProduction.id}
-      }
-      if (this.$route.path.length === 55) this.$router.push(newPath)
-      const path = this.$route.path
-      if (oldPath !== path) {
-        this.$refs['shot-search-field'].setValue('')
-        this.$store.commit('SET_SHOT_LIST_SCROLL_POSITION', 0)
-        this.loadShots(this.resizeHeaders)
+      this.$refs['shot-search-field'].setValue('')
+      this.$store.commit('SET_SHOT_LIST_SCROLL_POSITION', 0)
+
+      console.log('cool')
+      if (!this.isTVShow) {
+        this.clearEpisodes()
+        this.loadShots((err) => {
+          this.resizeHeaders()
+          if (!err) {
+            this.handleModalsDisplay()
+            this.resizeHeaders()
+          }
+        })
       }
     },
 
     currentEpisode () {
+      if (this.isTVShow && this.currentEpisode) {
+        this.loadShots((err) => {
+          this.resizeHeaders()
+          if (!err) {
+            this.handleModalsDisplay()
+            this.resizeHeaders()
+          }
+        })
+      }
     }
   },
 
@@ -548,5 +549,9 @@ export default {
 <style scoped>
 .data-list {
   margin-top: 0;
+}
+
+.page-header {
+  margin-bottom: 1em;
 }
 </style>

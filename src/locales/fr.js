@@ -358,10 +358,10 @@ export default {
   },
 
   sequences: {
-    title: 'Sequences',
-    number: 'sequence | sequences',
-    new_sequence: 'Nouvelle sequence',
-    edit_title: 'Éditer sequence',
+    title: 'Séquences',
+    number: 'séquence | séquences',
+    new_sequence: 'Nouvelle séquence',
+    edit_title: 'Éditer séquence',
     delete_text: 'Etes vous sûr de vouloir retirer {name} de la base de données ?',
     delete_error: 'Une erreur est survenue en créant le plan, êtes vous sûr que la séquence n\'a plus aucun lien ?',
     empty_list: 'Il n\'y a pas de séquence dans la description. Pourquoi pas en créer quelques uns?',

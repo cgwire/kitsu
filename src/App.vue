@@ -322,7 +322,7 @@ input.search-input:focus {
 }
 
 .filters-area {
-  margin-bottom: 1em;
+  margin-bottom: 2em;
 }
 
 .query-list {

@@ -2,18 +2,13 @@
   <div class="sequences page fixed-page">
     <div class="sequence-list-header page-header">
       <div class="level header-title">
-        <div class="level-left">
-          <page-title :text="$t('sequences.title')"></page-title>
+        <div class="level-left filters-area">
+          <search-field
+            ref="sequence-search-field"
+            @change="onSearchChange"
+            placeholder="ex: e01 s01, anim=wip"
+          />
         </div>
-      </div>
-
-      <div class="filters-area">
-        <search-field
-          ref="sequence-search-field"
-          @change="onSearchChange"
-          placeholder="ex: e01 s01, anim=wip"
-        >
-        </search-field>
       </div>
     </div>
 
@@ -97,11 +92,13 @@ export default {
 
   computed: {
     ...mapGetters([
+      'currentEpisode',
       'currentProduction',
       'displayedSequences',
       'isCurrentUserManager',
       'isShotsLoading',
       'isShotsLoadingError',
+      'isTVShow',
       'sequences',
       'sequenceMap',
       'sequencesPath',
@@ -113,12 +110,11 @@ export default {
   },
 
   created () {
-    this.initSequences()
-      .then(this.handleModalsDisplay)
-      .then(this.resizeHeaders)
   },
 
   mounted () {
+    this.computeSequenceStats()
+
     this.setDefaultSearchText()
     this.setDefaultListScrollPosition()
   },
@@ -248,21 +244,24 @@ export default {
     $route () { this.handleModalsDisplay() },
 
     currentProduction () {
-      const productionId = this.$route.params.production_id
-      if (this.currentProduction.id !== productionId) {
-        const newPath = {
-          name: 'sequences',
-          params: {production_id: this.currentProduction.id}
-        }
+      this.$refs['sequence-search-field'].setValue('')
+      this.$store.commit('SET_SEQUENCE_LIST_SCROLL_POSITION', 0)
 
-        this.$refs['sequence-search-field'].setValue('')
-        this.$store.commit('SET_SEQUENCE_LIST_SCROLL_POSITION', 0)
+      if (!this.isTVShow) {
+        console.log('not tv show')
+        this.initSequences()
+          .then(this.handleModalsDisplay)
+          .then(this.resizeHeaders)
+      }
+    },
 
-        this.$router.push(newPath)
-        this.loadShots(() => {
-          this.resizeHeaders()
-          this.computeSequenceStats()
-        })
+    currentEpisode () {
+      console.log('episodes', 'change currentEpisode')
+      console.log(this.isTVShow, this.currentEpisode)
+      if (this.isTVShow && this.currentEpisode) {
+        this.initSequences()
+          .then(this.handleModalsDisplay)
+          .then(this.resizeHeaders)
       }
     }
   },
