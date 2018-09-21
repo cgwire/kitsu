@@ -265,6 +265,8 @@ Now we can do the breakdown of the storyboard, meaning associate the assets to e
 
 ### [Create a breakdown list](#create-a-breakdown-list)
 
+Fill the breakdown will help you for the assembly of the shots. With the breakdown you have all the details of the assets you need to add to create your shot. We will be sure to omit nothing.
+
 On the main menu ![Main menu](../img/getting-started/main_button.png), under **Production** section, choose **BREAKDOWN**.
 
 ![Menu breakdown](../img/getting-started/menu_breakdown.png)
