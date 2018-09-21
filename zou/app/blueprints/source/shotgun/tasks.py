@@ -6,7 +6,7 @@ from zou.app.models.project import Project
 from zou.app.models.person import Person
 from zou.app.models.task import Task
 
-from zou.app.services import tasks_service
+from zou.app.services import deletion_service
 
 from zou.app.blueprints.source.shotgun.base import (
     BaseImportShotgunResource,
@@ -124,4 +124,4 @@ class ImportRemoveShotgunTaskResource(ImportRemoveShotgunBaseResource):
         )
 
     def delete_func(self, entity):
-        tasks_service.remove_task(entity.id)
+        deletion_service.remove_task(entity.id)

@@ -642,39 +642,6 @@ def update_task(task_id, data):
     return task.serialize()
 
 
-def remove_task(task_id, force=False):
-    task = Task.get(task_id)
-
-    if force:
-        working_files = WorkingFile.query.filter_by(task_id=task_id)
-        for working_file in working_files:
-            output_files = OutputFile.query.filter_by(
-                source_file_id=working_file.id
-            )
-            for output_file in output_files:
-                output_file.delete()
-
-            working_file.delete()
-
-        comments = Comment.query.filter_by(object_id=task_id)
-        for comment in comments:
-            notifications = Notification.query.filter_by(comment_id=comment.id)
-            for notification in notifications:
-                notification.delete()
-
-            comment.delete()
-
-        preview_files = PreviewFile.query.filter_by(task_id=task_id)
-        for preview_file in preview_files:
-            preview_file.delete()
-
-    task.delete()
-    events.emit("task:deletion", {
-        "task_id": task_id
-    })
-    return task.serialize()
-
-
 def get_or_create_status(
     name,
     short_name="",

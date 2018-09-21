@@ -6,7 +6,7 @@ from tests.base import ApiDBTestCase
 from zou.app.models.task import Task
 from zou.app.models.task_type import TaskType
 from zou.app.models.time_spent import TimeSpent
-from zou.app.services import tasks_service
+from zou.app.services import tasks_service, deletion_service
 from zou.app.utils import events, fields
 
 from zou.app.services.exception import TaskNotFoundException
@@ -171,7 +171,7 @@ class TaskServiceTestCase(ApiDBTestCase):
         self.assertEqual(str(self.task_id), task["id"])
         self.output_file.delete()
         self.working_file.delete()
-        tasks_service.remove_task(task["id"])
+        deletion_service.remove_task(task["id"])
 
         self.assertRaises(
             TaskNotFoundException,
@@ -382,7 +382,7 @@ class TaskServiceTestCase(ApiDBTestCase):
     def test_remove_task(self):
         self.working_file.delete()
         self.output_file.delete()
-        tasks_service.remove_task(self.task_id)
+        deletion_service.remove_task(self.task_id)
         self.assertRaises(
             TaskNotFoundException,
             tasks_service.get_task,
@@ -396,7 +396,13 @@ class TaskServiceTestCase(ApiDBTestCase):
             self.person.id,
             "first comment"
         )
-        tasks_service.remove_task(self.task_id, force=True)
+        TimeSpent.create(
+            person_id=self.person.id,
+            task_id=self.task.id,
+            date=datetime.date(2017, 9, 23),
+            duration=3600
+        )
+        deletion_service.remove_task(self.task_id, force=True)
         self.assertRaises(
             TaskNotFoundException,
             tasks_service.get_task,

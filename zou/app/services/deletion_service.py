@@ -5,6 +5,7 @@ from zou.app.models.notifications import Notification
 from zou.app.models.output_file import OutputFile
 from zou.app.models.preview_file import PreviewFile
 from zou.app.models.task import Task
+from zou.app.models.time_spent import TimeSpent
 from zou.app.models.working_file import WorkingFile
 
 from zou.app.utils import events
@@ -45,6 +46,10 @@ def remove_task(task_id, force=False):
             if entity.preview_file_id == preview_file.id:
                 entity.update({"preview_file_id": None})
             remove_preview_file(preview_file)
+
+        time_spents = TimeSpent.query.filter_by(task_id=task_id)
+        for time_spent in time_spents:
+            time_spent.delete()
 
     task.delete()
     events.emit("task:deletion", {

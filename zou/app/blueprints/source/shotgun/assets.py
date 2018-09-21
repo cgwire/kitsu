@@ -13,6 +13,7 @@ from zou.app.blueprints.source.shotgun.base import (
 
 from zou.app.services import (
     assets_service,
+    deletion_service,
     tasks_service,
     files_service
 )
@@ -119,7 +120,7 @@ class ImportRemoveShotgunAssetResource(ImportRemoveShotgunBaseResource):
                 assets_service.cancel_asset(asset["id"])
             else:
                 for task in tasks:
-                    tasks_service.remove_task(task["id"])
+                    deletion_service.remove_task(task["id"])
                 assets_service.remove_asset(asset["id"])
             return asset
         except AssetNotFoundException:
