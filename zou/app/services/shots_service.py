@@ -162,7 +162,10 @@ def get_shots_and_tasks(criterions={}):
         .filter(Entity.entity_type_id == shot_type["id"]) \
 
     if "project_id" in criterions:
-        query = query.filter(Entity.project_id == criterions["project_id"]) \
+        query = query.filter(Entity.project_id == criterions["project_id"])
+
+    if "episode_id" in criterions:
+        query = query.filter(Sequence.parent_id == criterions["episode_id"])
 
     for (
         shot,
