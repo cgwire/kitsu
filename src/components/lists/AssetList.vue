@@ -107,7 +107,7 @@
           <td class="thumbnail">
             <entity-thumbnail :entity="asset"></entity-thumbnail>
           </td>
-          <td :class="{name: !asset.canceled}">
+          <td :class="{name: true, bold: !asset.canceled}">
             <router-link
               class="asset-link"
               :to="{
@@ -383,6 +383,9 @@ export default {
   min-width: 200px;
   max-width: 200px;
   width: 200px;
+}
+
+.bold {
   font-weight: bold;
 }
 

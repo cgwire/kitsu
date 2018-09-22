@@ -108,13 +108,15 @@
           <td class="thumbnail">
             <entity-thumbnail :entity="shot" />
           </td>
-          <td :class="{name: !shot.canceled}" v-if="!isSingleEpisode">
+          <td :class="{name: true, bold: !shot.canceled}"
+            v-if="!isSingleEpisode"
+          >
             {{ shot.episode_name }}
           </td>
-          <td :class="{name: !shot.canceled}">
+          <td :class="{name: true, bold: !shot.canceled}">
             {{ shot.sequence_name }}
           </td>
-          <td :class="{'shot-name': true, 'name': !shot.canceled}">
+          <td :class="{'shot-name': true, name: true, bold: !shot.canceled}">
             <router-link :to="{
               name: 'shot',
               params: {
@@ -375,6 +377,9 @@ th.actions {
 .name {
   min-width: 100px;
   width: 100px;
+}
+
+.bold {
   font-weight: bold;
 }
 
