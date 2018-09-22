@@ -2,8 +2,8 @@
   <div class="shots page fixed-page">
     <div class="shot-list-header page-header">
       <div class="level header-title">
-        <div class="level-left">
-          <div class="filters-area">
+        <div class="level-left flexcolumn">
+          <div class="filters-area flexcolumn-item">
             <search-field
               ref="shot-search-field"
               :can-save="true"
@@ -13,7 +13,7 @@
             />
           </div>
 
-          <div class="query-list">
+          <div class="query-list flexcolumn-item">
             <search-query-list
               :queries="shotSearchQueries"
               @changesearch="changeSearch"
@@ -260,6 +260,16 @@ export default {
     this.$refs['shot-list'].setScrollPosition(
       this.shotListScrollPosition
     )
+    if (!this.isTVShow) {
+      this.clearEpisodes()
+      this.loadShots((err) => {
+        this.resizeHeaders()
+        if (!err) {
+          this.handleModalsDisplay()
+          this.resizeHeaders()
+        }
+      })
+    }
   },
 
   methods: {
@@ -511,7 +521,6 @@ export default {
       this.$refs['shot-search-field'].setValue('')
       this.$store.commit('SET_SHOT_LIST_SCROLL_POSITION', 0)
 
-      console.log('cool')
       if (!this.isTVShow) {
         this.clearEpisodes()
         this.loadShots((err) => {
@@ -538,8 +547,14 @@ export default {
   },
 
   metaInfo () {
-    return {
-      title: `${this.currentProduction.name} ${this.$t('shots.title')} - Kitsu`
+    if (this.isTVShow) {
+      return {
+        title: `${this.currentProduction.name} - ${this.currentEpisode.name} | ${this.$t('shots.title')} - Kitsu`
+      }
+    } else {
+      return {
+        title: `${this.currentProduction.name} ${this.$t('shots.title')} - Kitsu`
+      }
     }
   }
 

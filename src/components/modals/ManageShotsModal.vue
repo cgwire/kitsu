@@ -8,14 +8,12 @@
 
     <div class="box">
 
-      <page-title :text="$t('shots.manage')">
-      </page-title>
+      <page-title :text="$t('shots.manage')" />
 
       <div class="shot-columns">
-
-        <div class="shot-column">
-
+        <div class="shot-column" v-if="isTVShow">
           <h2 class="subtitle">Episodes</h2>
+
           <div class="list">
             <div
               :class="{
@@ -193,6 +191,7 @@ export default {
       'episodes',
       'sequences',
       'shotMap',
+      'isTVShow',
       'currentProduction'
     ]),
 
@@ -209,7 +208,7 @@ export default {
       const isExist = this.displayedSequences.find((sequence) => {
         return this.names.sequence === sequence.name
       })
-      return !isEmpty && !isExist && this.selectedEpisodeId
+      return !isEmpty && !isExist && (this.selectedEpisodeId || !this.isTVShow)
     },
 
     isAddShotAllowed () {

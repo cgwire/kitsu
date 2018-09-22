@@ -291,4 +291,8 @@ export default {
 .data-list {
   margin-top: 0;
 }
+
+.filters-area {
+  margin-bottom: 2em;
+}
 </style>

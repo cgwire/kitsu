@@ -322,12 +322,12 @@ input.search-input:focus {
 }
 
 .filters-area {
-  margin-bottom: 2em;
 }
 
 .query-list {
+  margin-top: 1em;
   margin-bottom: 2em;
-  margin-left: 2.5em;
+  margin-left: 4.5em;
 }
 
 .query-list .tag {
@@ -420,6 +420,15 @@ input.search-input:focus {
 
 .flexrow-item {
   margin-right: 1em;
+}
+
+.flexcolumn {
+  display: flex;
+  flex-direction: column;
+}
+
+.flexcolumn-item {
+  width: 100%
 }
 
 .flexrow-item:last-child {

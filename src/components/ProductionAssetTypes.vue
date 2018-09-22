@@ -1,8 +1,6 @@
 <template>
   <div class="asset-types page fixed-page">
     <div class="asset-type-list-header page-header">
-      <page-title :text="$t('asset_types.title')"></page-title>
-
       <div class="filters-area">
         <search-field
           ref="asset-type-search-field"
@@ -62,13 +60,13 @@ export default {
   },
 
   created () {
-    this.initAssetTypes()
-      .then(this.handleModalsDisplay)
   },
 
   mounted () {
     this.setDefaultSearchText()
     this.setDefaultListScrollPosition()
+    this.initAssetTypes()
+      .then(this.handleModalsDisplay)
   },
 
   methods: {
@@ -112,15 +110,12 @@ export default {
 
   watch: {
     currentProduction () {
-      const productionId = this.$route.params.production_id
-      if (this.currentProduction.id !== productionId) {
-        this.$refs['asset-type-search-field'].setValue('')
-        this.setAssetTypeListScrollPosition(0)
+      this.$refs['asset-type-search-field'].setValue('')
+      this.setAssetTypeListScrollPosition(0)
 
-        this.loadAssets(() => {
-          this.computeAssetTypeStats()
-        })
-      }
+      this.loadAssets(() => {
+        this.computeAssetTypeStats()
+      })
     }
   },
 
@@ -140,7 +135,7 @@ export default {
 
   metaInfo () {
     return {
-      title: `${this.currentProduction.name} ${this.$t('asset_types.title')} - Kitsu`
+      title: `${this.currentProduction.name} | ${this.$t('asset_types.title')} - Kitsu`
     }
   }
 }
@@ -149,5 +144,9 @@ export default {
 <style scoped>
 .data-list {
   margin-top: 0;
+}
+
+.filters-area {
+  margin-bottom: 2em;
 }
 </style>

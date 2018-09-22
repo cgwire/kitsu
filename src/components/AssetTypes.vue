@@ -18,6 +18,7 @@
     </div>
 
     <asset-type-list
+      class="mt2"
       :entries="assetTypes"
       :is-loading="isAssetTypesLoading"
       :is-error="isAssetTypesLoadingError"

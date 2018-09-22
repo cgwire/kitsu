@@ -1,9 +1,9 @@
 <template>
   <div class="main">
-    <topbar></topbar>
-    <action-topbar></action-topbar>
-    <sidebar></sidebar>
-    <router-view></router-view>
+    <topbar />
+    <action-topbar />
+    <sidebar />
+    <router-view />
   </div>
 </template>
 

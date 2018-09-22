@@ -113,8 +113,9 @@ export default {
   },
 
   mounted () {
-    this.computeSequenceStats()
-
+    this.initSequences()
+      .then(this.handleModalsDisplay)
+      .then(this.resizeHeaders)
     this.setDefaultSearchText()
     this.setDefaultListScrollPosition()
   },
@@ -281,8 +282,14 @@ export default {
   },
 
   metaInfo () {
-    return {
-      title: `${this.currentProduction.name} ${this.$t('sequences.title')} - Kitsu`
+    if (this.isTVShow) {
+      return {
+        title: `${this.currentProduction.name} - ${this.currentEpisode.name} | ${this.$t('sequences.title')} - Kitsu`
+      }
+    } else {
+      return {
+        title: `${this.currentProduction.name} ${this.$t('sequences.title')} - Kitsu`
+      }
     }
   }
 
@@ -292,5 +299,9 @@ export default {
 <style scoped>
 .data-list {
   margin-top: 0;
+}
+
+.filters-area {
+  margin-bottom: 2em;
 }
 </style>

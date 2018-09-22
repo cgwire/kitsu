@@ -330,6 +330,7 @@ const actions = {
               shot.project_name = production.name
               return shot
             })
+            console.log(shots)
             commit(LOAD_SEQUENCES_END, sequences)
             commit(
               LOAD_SHOTS_END,

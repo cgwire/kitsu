@@ -3,8 +3,24 @@
 
   <div class="asset-list-header page-header">
     <div class="level header-title">
-      <div class="level-left">
-        <page-title :text="$t('assets.title')" />
+      <div class="level-left flexcolumn">
+        <div class="filters-area flexcolumn-item">
+          <search-field
+            ref="asset-search-field"
+            :can-save="true"
+            @change="onSearchChange"
+            @save="saveSearchQuery"
+            placeholder="ex: props, modeling=wip"
+          />
+        </div>
+
+        <div class="query-list flexcolumn-item">
+          <search-query-list
+            :queries="assetSearchQueries"
+            @changesearch="changeSearch"
+            @removesearch="removeSearchQuery"
+          />
+        </div>
       </div>
 
       <div class="level-right" v-if="isCurrentUserManager">
@@ -39,24 +55,6 @@
           />
         </div>
       </div>
-    </div>
-
-    <div class="filters-area">
-      <search-field
-        ref="asset-search-field"
-        :can-save="true"
-        @change="onSearchChange"
-        @save="saveSearchQuery"
-        placeholder="ex: props, modeling=wip"
-      />
-    </div>
-
-    <div class="query-list">
-      <search-query-list
-        :queries="assetSearchQueries"
-        @changesearch="changeSearch"
-        @removesearch="removeSearchQuery"
-      />
     </div>
   </div>
 
@@ -236,14 +234,6 @@ export default {
 
   created () {
     this.setLastProductionScreen('assets')
-
-    const assetKeys = Object.keys(this.assetMap)
-    if (assetKeys.length === 0 ||
-        this.assetMap[assetKeys[0]].production_id !== this.currentProduction.id) {
-      this.loadAssets((err) => {
-        if (!err) this.handleModalsDisplay()
-      })
-    }
   },
 
   mounted () {
@@ -253,6 +243,9 @@ export default {
     this.$refs['asset-list'].setScrollPosition(
       this.assetListScrollPosition
     )
+    this.loadAssets((err) => {
+      if (!err) this.handleModalsDisplay()
+    })
   },
 
   methods: {
@@ -492,25 +485,17 @@ export default {
     $route () { this.handleModalsDisplay() },
 
     currentProduction () {
-      const oldPath = `${this.$route.path}`
-      const newPath = {
-        name: 'assets',
-        params: {production_id: this.currentProduction.id}
-      }
-      if (this.$route.path.length === 56) this.$router.push(newPath)
-      const path = this.$route.path
-
-      if (oldPath !== path) {
-        this.$refs['asset-search-field'].value = ''
-        this.$store.commit('SET_ASSET_LIST_SCROLL_POSITION', 0)
-        this.$store.dispatch('loadAssets')
-      }
+      this.$refs['asset-search-field'].value = ''
+      this.$store.commit('SET_ASSET_LIST_SCROLL_POSITION', 0)
+      this.loadAssets((err) => {
+        if (!err) this.handleModalsDisplay()
+      })
     }
   },
 
   metaInfo () {
     return {
-      title: `${this.currentProduction.name} ${this.$t('assets.title')} - Kitsu`
+      title: `${this.currentProduction.name} | ${this.$t('assets.title')} - Kitsu`
     }
   }
 

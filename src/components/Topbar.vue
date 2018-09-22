@@ -130,17 +130,7 @@ export default {
     return {
       currentProductionId: null,
       currentEpisodeId: null,
-      currentProjectSection: 'assets',
-      navigationOptions: [
-        {label: this.$t('assets.title'), value: 'assets'},
-        {label: this.$t('shots.title'), value: 'shots'},
-        {label: this.$t('sequences.title'), value: 'sequences'},
-        {label: this.$t('episodes.title'), value: 'episodes'},
-        {label: this.$t('asset_types.title'), value: 'assetTypes'},
-        {label: this.$t('breakdown.title'), value: 'breakdown'},
-        {label: this.$t('playlists.title'), value: 'playlists'},
-        {label: this.$t('people.team'), value: 'team'}
-      ]
+      currentProjectSection: 'assets'
     }
   },
 
@@ -207,7 +197,25 @@ export default {
 
     isProductionContext () {
       return this.$route.params.production_id !== undefined
+    },
+
+    navigationOptions () {
+      const options = [
+        {label: this.$t('assets.title'), value: 'assets'},
+        {label: this.$t('shots.title'), value: 'shots'},
+        {label: this.$t('sequences.title'), value: 'sequences'},
+        {label: this.$t('episodes.title'), value: 'episodes'},
+        {label: this.$t('asset_types.title'), value: 'assetTypes'},
+        {label: this.$t('breakdown.title'), value: 'breakdown'},
+        {label: this.$t('playlists.title'), value: 'playlists'},
+        {label: this.$t('people.team'), value: 'team'}
+      ]
+      if (!this.isTVShow) {
+        options.splice(3, 1)
+      }
+      return options
     }
+
   },
 
   methods: {
@@ -247,14 +255,18 @@ export default {
     },
 
     updateRoute () {
-      this.$router.push(this[`${this.currentProjectSection}Path`])
+      let section = this.currentProjectSection
+      if (section === 'asset-types') {
+        section = 'assetTypes'
+      }
+      this.$router.push(this[`${section}Path`])
     }
   },
 
   watch: {
     $route () {
       const productionId = this.$route.params.production_id
-      if (this.currentProductionId !== productionId) {
+      if (productionId && this.currentProductionId !== productionId) {
         this.currentProductionId = productionId
       }
     },
