@@ -11,7 +11,7 @@ NB: A link to this documentation is available in this menu too (3).
  
 ![User profile](../img/getting-started/user_profil.png)
  
-On this new page you can check your name (1) (2), your email (3) fill you phone
+On this new page you can check your name (1) (2), your email (3), fill you phone
 number (4), change the timezone (5), the language of the website (6), and
 post a pic of yourself as your avatar (7). It will help to recognize who is
 doing what! 
@@ -28,19 +28,19 @@ encourage you to change the default password with one of your own.
  
 The main part for you, on **Kitsu**, will be the **My tasks** page. You can
 find it on the main menu ![Main menu](../img/getting-started/main_button.png),
-under the **User** section of **My tasks**. The CGWire logo is a shortcut too,
+under the **User** section of **MY TASKS**. The CGWire logo is a shortcut too,
 to your task list.
 
 ![My tasks](../img/getting-started/my_tasks.png)
 
-You can see per **Production** (1) the **entity** (2) you are assigned to, the
-**status** (3) of the tasks you are working on and their **priority** (4). 
+You can see per **Production** (1) the **Entity** (2) you are assigned to, the
+**Status** (3) of the tasks you are working on and their **priority** (4). 
  
 ![My tasks page](../img/getting-started/my_task_page.png)
  
 ### [Share your progress](#share-your-progress)
 
-When you start a new task you are assigned to, click on the status (**TODO**)
+When you start a new task you are assigned to, click on the status ![Todo](../img/getting-started/todo_icon.png)
 (1) on the shots or assets page.
 
 ![Shot status](../img/getting-started/shot_status.png)
@@ -50,24 +50,24 @@ teammates know what you are doing. For instance show them you start working
 on something. Each time you change the status of a task, you can attach a
 text comment to it.
 
-For example when you start a **new task** you can say that **everything is ok**
-If some information is missing, you can **ask all the questions you want**.
+For example when you start a **new task** you can say that everything is ok.
+If some information is missing, you can either ask all the questions you want.
 
-To change the status, let's say from **todo** to **wip** as example, start
+To change the status, let's say from ![Todo](../img/getting-started/todo_icon.png) to ![Wip](../img/getting-started/wip_icon.png) as example, start
 by filling the comment box (1). Then, click on the status box and choose the
 one you want (2) and validate your comment and the new status by clicking on
 **Post status** (3) button.
 
 ![Changing status](../img/getting-started/changing_status.png)
 
-You can edit your last comment by using the **Edit button** 
-![Edit button](../img/getting-started/edit_button.png)
+You can edit your last comment by using the **edit** button 
+![Edit button](../img/getting-started/edit_button.png).
 
 
 ### [Ask for a review](#ask-for-a-review)
 
 You can ask for a review by switching the status of a task to 
-(**Waiting for approval**). This status allows you to share your progress by
+(**Waiting for Approval** ![wfa](../img/getting-started/wfa_icon.png)). This status allows you to share your progress by
 posting a preview of your work. The first step is to change the status of your
 task and post a comment. 
 
@@ -88,7 +88,7 @@ Your work will appear on the right part of the screen as a V1.
 
 ![Preview v1](../img/getting-started/previewv1.png)
 
-If you post more revisiions, you will always keep track of your previous work.
+If you post more revisions, you will always keep track of your previous work.
 Each time you add a new revision, the previous versions are still available. 
 
 ![Preview v2](../img/getting-started/previewv2.png)
@@ -102,7 +102,7 @@ page, the last comment posted on each task will be available too.
 
 ![My tasks page](../img/getting-started/my_task_page2.png)
 
-You can also see the tasks validated as `N/A` on the **done** tab.
+You can also see the tasks validated as ![NA](../img/getting-started/na_icon.png) on the **Done** tab.
 
 ![My done tasks page](../img/getting-started/done_page.png)
 

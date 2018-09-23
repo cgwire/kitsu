@@ -18,14 +18,14 @@ To navigate through Kitsu sections you need to use the sidebar. It can be
 accessed through the 3 lines button on top of the screen 
 ![Main button](../img/getting-started/main_button.png).  It will open a menu on
 the left part of the screen. We want show you the production list. 
-So thoose below **Studio** section, the **Productions** page. 
+So thoose below **Studio** section, the **PRODUCTIONS** page. 
 
 ![Main menu](../img/getting-started/main_menu_production.png)
 
 There, you can see all the productions you have created, and their status (open
 for an active production, or closed if not active). When you cursor is above a
 production line you can see 2 news icons on the right part of the line :
-**Edit** ![Edit button](../img/getting-started/edit_button.png) and **Delete**
+**edit** ![Edit button](../img/getting-started/edit_button.png) and **delete**
 ![Delete button](../img/getting-started/delete_button.png).
 
 ![Edit a production](../img/getting-started/production_edit.png)
@@ -73,7 +73,7 @@ during the **breakdown** of the storyboard, with sequences and shots creation.
 
 
 You can edit assets any time you want by going to the asset page, hovering the
-asset you want to modify, and then click on the **Edit button** 
+asset you want to modify, and then click on the **edit** button 
 ![Edit button](../img/getting-started/edit_button.png) (1) on the right side of
 the line.  
 
@@ -94,7 +94,7 @@ validate it by **Confirm** button.
 These tasks will be added to all the assets.
 
 If some assets don't match the task (as environment and setup) just change the
-status of this task on **N/A**, or delete it.
+status of this task on ![N/A](../img/getting-started/na_icon.png), or delete it.
 
 To change a status click directly on the status you want to change (1).
 
@@ -106,8 +106,9 @@ click on the **Post status** button (3).
 
 ![Changing status](../img/getting-started/changing_status.png)
 
-If you want to delete a task, click on the **delete** button on the right top
-of the page ![Delete button](../img/getting-started/delete_button.png).
+If you want to delete a task, click on the **delete** button 
+![Delete button](../img/getting-started/delete_button.png) on the right top
+of the page .
 
 Now that we have created all the assets and related tasks,
 we can now add the artists to the team and assign task to them.
@@ -117,7 +118,7 @@ we can now add the artists to the team and assign task to them.
 
 An account is required for each artist. Go to the main menu ![Main
 menu](../img/getting-started/main_button.png), and under the **Studio**
-section, choose **People** page.
+section, choose **PEOPLE** page.
 
 ![People Menu](../img/getting-started/main_menu_people.png)
 
@@ -133,16 +134,50 @@ him as active, otherwise select no. Validate by clicking **Confirm** button.
 
 ![Create a new employee](../img/getting-started/create_employee.png)
 
+* **CG artist**: only see the productions if they are on the team. 
+They can navigate through the production, but **can't add a comment 
+on a task if they are not assigned to it**.
+* **Supervisor**: only see the productions if they are on the team. 
+They can navigate through the production and **are allow to add 
+comments to all the tasks**, even if they are not assigned. 
+**They can also assigned CG artist to tasks, change priority etc.**
+* **Client**: only see the productions if they are on the team. 
+They can navigate through all the production. **They can't have access 
+to the status tasks page**.
+* **Administrator**: They can navigate through all the production (even the closed), 
+and **have a full access to Kitsu**.
+
+CG artists, supervisors and clients will only see the productions they are assigned to.
+
+All the people are now part of your studio. They will be added to a specific production 
+when you will assign them to a task on a production. Otherwise they won't have access to anything.
+
+You can also add someone to a production without assign him a task.
+
+On the main menu ![Main menu](../img/getting-started/main_button.png) under the 
+**Production** section select the **TEAM** page.
+
+![Team menu](../img/getting-started/add_team_menu.png)
+
+On the **Team** page you can see all the assignations for a specific project. If you want to check 
+another project team you will need to switch the project on the top of the page.
+
+![Team page](../img/getting-started/team_page.png)
+
+You can also add someone to a production without assign him to a task, you can select his name on the search 
+box (or type his name), and validate with **add**.
+
+
 
 ### [Assign tasks to a CG artist](#assign-tasks-to-a-cg-artist)
 
-We can now get back to the **Assets** page. You can use the main menu 
+We can now get back to the **ASSETS** page. You can use the main menu 
 ![Main menu](../img/getting-started/main_button.png) under the **Production**
 section.
 
 ![Main menu assets page](../img/getting-started/main_menu_assets.png)
 
-Now its time to do our first assignment! 
+Now its time to do your first assignment! 
 
 Click on the empty space on the right of the status (1) you want to assign.
 ![Assigned a task](../img/getting-started/task_assigned.png)
@@ -155,9 +190,9 @@ You can now do the assignation. As soon as you click on the box you will see the
 ![Selected people](../img/getting-started/select_people.png)
 
 You can assign several tasks to the same person in one step (1). Once you have
-the blue menu visible, just keep **Ctrl** on your keyboard pressed and select
-multiple tasks. You can even use the **Shift** key to select a range of tasks
-(2). When you have selected everything you need, apply with the **Confim**
+the blue menu visible, just keep **ctrl** on your keyboard pressed and select
+multiple tasks. You can even use the **shift** key to select a range of tasks
+(2). When you have selected everything you need, apply with the **Confirm**
 button.  
 
 ![Assigned multiple people](../img/getting-started/assigned_multiple.png)
@@ -186,7 +221,7 @@ the sequences and the shots of the episode and associate assets to them.
 You need to go to the **Shots** page: you can either use the shot icon on top
 of the page ![Shot button](../img/getting-started/shot_button.png), or use the
 main menu ![Main menu button](../img/getting-started/main_button.png) and under
-the **Production** section, click on the **Shots**.
+the **Production** section, click on the **SHOTS**.
 
 ![Main menu shots](../img/getting-started/main_menu_shots.png)
 
@@ -226,7 +261,6 @@ icon on the right of the line ![Delete button](../img/getting-started/delete_but
 If you need to import back this shot, click on the restore button 
 ![Restore button](../img/getting-started/restore_button.png).
 
-
 We can now associate tasks to the shots. Same way than for the assets, click on
 the **+Add tasks** button ![Add task button](../img/getting-started/add_task_button.png)
 on the top of the spreadsheet. 
@@ -241,8 +275,9 @@ each shot.
 
 ### [Create a breakdown list](#create-a-breakdown-list)
 
-On the main menu ![Main menu](../img/getting-started/main_button.png), under
-**Production** section, choose **Breakdown**.
+Fill the breakdown will help you for the assembly of the shots. With the breakdown you have all the details of the assets you need to add to create your shot. We will be sure to omit nothing.
+
+On the main menu ![Main menu](../img/getting-started/main_button.png), under **Production** section, choose **BREAKDOWN**.
 
 ![Menu breakdown](../img/getting-started/menu_breakdown.png)
 
@@ -257,8 +292,7 @@ So now you have to select the shot you wan to cast, let's say the first one. So
 click on the shot sh001 on the left part (1), then click on the assets you want
 to assign: some characters, backgrounds, etc. on the right part (3). 
 
-When you pass over the asset you can see a +1 or +10. It's the number of time
-you will add this asset. You can click as many times as you need on it.
+When you pass over the asset you can see a **+1** or **+10**. It's the number of time you will add this asset. You can click as many times as you need on it.
 
 ![Breakdown add asset](../img/getting-started/breakdown_add_asset.png)
 
@@ -282,7 +316,7 @@ need. The tasks previously created will be applied immediately to these new
 assets. But you will have to do the assignation, then you will be good to
 continue with the breakdown.
 
-Now your **Breakdown page** should look like this.
+Now your **Breakdown** page should look like this.
 
 ![Breakdown page fill](../img/getting-started/breakdown_full.png)
 
@@ -357,9 +391,7 @@ new menu will appear and there you can choose **Change status**.
 
 ![Blue menu status](../img/getting-started/blue_menu_status.png)
 
-You can now do your shots or assets selection, by pressing the **Crtl** or
-**Shift** key (1) and then choose the new status for your selected tasks (2).
-Validated the new status with the **Confirm** button (3).
+You can now do your shots or assets selection, by pressing the **crtl** or **shift** key (1) and then choose the new status for your selected tasks (2). Validated the new status with the **Confirm** button (3).
 
 ![Change status per batch](../img/getting-started/change_status_batch.png)
 
@@ -387,7 +419,7 @@ As we have done for the assignation or the status, select the shots (1), select 
 
 ![Priority selection](../img/getting-started/priority.png)
 
-You can now see next to the status of the task some **Exclamation mark**. The more there is, the more urgent is the task. 
+You can now see next to the status of the task some **exclamation mark**. The more there is, the more urgent is the task. 
 * (1) is **Normal**, 
 * (2) is **High**,
 * (3) is **Very High**
@@ -397,17 +429,18 @@ You can now see next to the status of the task some **Exclamation mark**. The mo
 
 ### [Perform a review](#perform-a-review)
 
-When a CG arstist asks for a review you can go to the task page to see the result.
+When a CG arstist asks for a review ![wfa](../img/getting-started/wfa_icon.png) 
+you can go to the task page to see the result.
 The CG artist may have send you a picture, a movie or an `.obj` file. All can 
 be reviewed from the browser.
 
-From there you can change the status to `retake` if you want that the CG artist
-performs some changes. Or you can change it to done, to notifiy the CG artist
+From there you can change the status to ![Retake](../img/getting-started/retake_icon.png) if you want that the CG artist
+performs some changes. Or you can change it to ![Done](../img/getting-started/done_icon.png), to notifiy the CG artist
 that his work is validated.
 
-You can also use the preview as a thumbnail on the asset or shot spreadsheet. It
+You can also use the preview as a **thumbnail** on the asset or shot spreadsheet. It
 will help to recognize the assets/shots on the main pages.  Below your preview,
-click on the **Set this preview as thumbnail**. You can do this at each version
+click on the **Set this preview as thumbnail**. You can do this at each version 
 of your work if needed.
 
 ![Preview as a thumbnail](../img/getting-started/preview_thumbnail.png)

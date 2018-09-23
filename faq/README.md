@@ -1,4 +1,15 @@
-# FAQ for Kitsu
+# [FAQ for Kitsu](#faq-for-kitsu)
+
+* [How to share a preview?](#how-to-share-a-preview)
+
+
+* [How to change your password?](#how-to-change-your-password)
+
+
+* [How to have a global view of the production?](#how-to-have-a-global-view-of-the-production)
+	* [Task global page](#task-global-page)
+	* [Sequence global page](#sequence-global-page)	
+
 
 * [How to create filters?](#how-to-create-filters)
 	* [Introduction to filters](#introduction-to-filters)
@@ -20,27 +31,111 @@
 	* [How to delete a playlist?](#how-to-delete-a-playlist)
 
 -----------------------------------------	
+
+## [How to share a preview?](#how-to-share-a-preview)
+
+You can ask for a review by switching the status of a task to 
+(**Waiting for Approval** ![wfa](../img/getting-started/wfa_icon.png)). This status allows you to share your progress by
+posting a preview of your work. The first step is to change the status of your
+task and post a comment. 
+
+![Waiting for approval](../img/getting-started/wfa_status.png)
+
+Then click on the **Add preview** button on your new post 
+![Add preview](../img/getting-started/add_preview_button.png). 
+
+A new window is displayed.
+
+![Add preview file](../img/getting-started/add_preview.png)
+
+You can either drag and drop you pic or video on the **Choose a file** button,
+or navigate through your system and pick your file, validate with the
+**Confirm** button.
+
+Your work will appear on the right part of the screen as a V1. 
+
+![Preview v1](../img/getting-started/previewv1.png)
+
+If you post more revisions, you will always keep track of your previous work.
+Each time you add a new revision, the previous versions are still available. 
+
+![Preview v2](../img/getting-started/previewv2.png)
+
+ -----------------------------------------	
+
+## [How to change your password?](#how-to-change-your-password)
+
+Click on your name on the top right of the screen (1) then on **Profile** (2).
+
+NB: A link to this documentation is available in this menu too (3).
+ 
+![User profile](../img/getting-started/user_profil.png)
+
+If you keep scrolling you can also change your password if you want. We
+encourage you to change the default password with one of your own.
+
+![User password](../img/getting-started/user_password.png)
+
+ -----------------------------------------	
+
+## [How to have a global view of the production?](#how-to-have-a-global-view-of-the-production)
+
+### [Task global page](#task-global-page)
+
+One way to have a global view is by clicking on the **task** name.
+
+![Global asset page](../img/faq/global_view_asset_task.png)
+
+It will open a new page, where you can see the state of all the **status** 
+on this **specific task** per type or per shot.
+
+![Global asset task](../img/faq/global_view_task.png) ![Global shot task](../img/faq/global_view_task01.png)
+
+
+### [Sequence global page](#sequence-global-page)	
+
+The other way is to go to the **Sequences** page. You can go there with the **sequence** 
+button ![Sequence button](../img/faq/sequence_button.png) on top of a page.
+
+Or you can access it using the main menu ![Main button](../img/faq/main_button.png), and then 
+click on the **SEQUENCES** page under the **Production** section.
+
+![Main menu sequence](../img/faq/global_sequence_mainmenu.png)
+
+With this view you can see all the status distribution per tasks on each sequences.
+
+![Global sequence task](../img/faq/global_view_sequence.png)
+
+
+You can fly over the pie chart to have more detailed information about the distribution.
+
+![Global sequence detail](../img/faq/global_view_sequence_detail.png)
+
+You can also click on the **tasks name** to have the detailed shots about this task.
+
+
+ -----------------------------------------	
  
 ## [How to create Filters?](#how-to-create-filters)
 
 ### [Introduction to filters](#introduction-to-filters)
 
-In **Kitsu**, the filters are done through the **Search bar**. It allows you to
+In **Kitsu**, the filters are done through the **search bar**. It allows you to
 **save** your search query. Once done you can run your query again with a
 simple click.
  
 ![Search bar](../img/faq/filter_search_bar.png)
 
-You can find the **search bar** and the **save** option in the following pages: 
+You can find the **search bar** and the **save** option ![Search bar](../img/faq/filter_save_button.png). in the following pages: 
 
 * Assets
 * Shots
 * Sequences
 * Todo-lists
 
-![Search bar](../img/faq/filter_save_button.png).
 
-NB: The **Search bar** is available too in people episodes list.
+
+NB: The **search bar** is available too in people episodes list.
 
 
 ### [How to use the search bar?](#how-to-use-the-search-bar)
@@ -79,8 +174,8 @@ In the same way, you can search **specific status** link to task. Type the
 **name of the task** (or the **first letters**), then add the sign **equal**
 (`=`) and the status you are looking for.
 
-For example, search all the shots which are **Waiting for approval** (**WFA**)
-at the **Layout** stage. So on the search bar you will type : `layout=wfa` or
+For example, search all the shots which are **Waiting for approval** ![WFA](../img/faq/wfa_icon.png)
+at the **layout** stage. So on the search bar you will type : `layout=wfa` or
 `lay=wfa`.
 
 ![Search layout wfa](../img/faq/filter_lay_wfa.png)
@@ -125,7 +220,7 @@ understand only the first. But the status has to be fully typed.
 
 ### [How to delete filters?](#how-to-delete-filters)
 
-If you have created a **Filter button** by mistake, click on the cross next to
+If you have created a **filter button** by mistake, click on the cross next to
 it ![Filter delete](../img/faq/filter_delete.png).
 
 The result of the filter will be display, but not the button anymore. Just
@@ -188,7 +283,8 @@ the status of one of your task, or post a comment.
 You can also choose to follow specifics tasks. Go into the task page you want
 to follow: on the **assets** or **shots** pages click onto the status icon.
 
-On the top right side of the page you can see an **eye** button, next to the
+On the top right side of the page you can see an **eye** button 
+![Notification off](../img/faq/notification_off.png), next to the
 **delete task** button.
 
 ![Follow button](../img/faq/notification_other_task.png)
@@ -233,7 +329,7 @@ The **playlists** page is separated in 3 parts:
 Start by creating a **Playlist** 
 ![Playlist add button](../img/faq/playlist_add_button.png), You default name
 will be the date and the hour. You can change it later via the
-**Edit** button ![Edit button](../img/faq/edit_button.png). 
+**edit** button ![Edit button](../img/faq/edit_button.png). 
 
 ![Playlist add page](../img/faq/playlist_add_page.png)
 
