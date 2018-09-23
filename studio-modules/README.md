@@ -1,5 +1,0 @@
-# Studio Modules
-
-## Productions
-
-## People
