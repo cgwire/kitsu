@@ -6,9 +6,9 @@
 * [How to change your password?](#how-to-change-your-password)
 
 
-* [How to have a global view of the production?](#how-to-have-a-global-view-of-the-production)
-	* [Task global page](#task-global-page)
-	* [Sequence global page](#sequence-global-page)	
+* [How to have an overview of the production?](#how-to-have-an-overview-of-the-production)
+	* [Task type overview page](#task-type-overview-page)
+	* [Sequence overview page](#sequence-overview-page)	
 
 
 * [How to create filters?](#how-to-create-filters)
@@ -35,9 +35,9 @@
 ## [How to share a preview?](#how-to-share-a-preview)
 
 You can ask for a review by switching the status of a task to 
-(**Waiting for Approval** ![wfa](../img/getting-started/wfa_icon.png)). This status allows you to share your progress by
-posting a preview of your work. The first step is to change the status of your
-task and post a comment. 
+(**Waiting for Approval** ![wfa](../img/getting-started/wfa_icon.png)). This
+status allows you to share your progress by posting a preview of your work. The
+first step is to change the status of your task and post a comment. 
 
 ![Waiting for approval](../img/getting-started/wfa_status.png)
 
@@ -78,43 +78,47 @@ encourage you to change the default password with one of your own.
 
  -----------------------------------------	
 
-## [How to have a global view of the production?](#how-to-have-a-global-view-of-the-production)
+## [How to have an overview of the production?](#how-to-have-an-overview-of-the-production)
 
-### [Task global page](#task-global-page)
+### [Task type overview page](#task-type-overview-page)
 
-One way to have a global view is by clicking on the **task** name.
+To access to the task type overview, you can click click on the **task type** name.
 
-![Global asset page](../img/faq/global_view_asset_task.png)
+![Overview asset page](../img/faq/global_view_asset_task.png)
 
-It will open a new page, where you can see the state of all the **status** 
-on this **specific task** per type or per shot.
+It will go to a page where you can see the state of all the **status** 
+for this **specific task type** per asset or per shot.
 
-![Global asset task](../img/faq/global_view_task.png) ![Global shot task](../img/faq/global_view_task01.png)
+![Overview asset task](../img/faq/global_view_task.png) ![Overview shot task](../img/faq/global_view_task01.png)
 
 
-### [Sequence global page](#sequence-global-page)	
+### [Sequence overview page](#sequence-overview-page)	
 
-The other way is to go to the **Sequences** page. You can go there with the **sequence** 
-button ![Sequence button](../img/faq/sequence_button.png) on top of a page.
+The other way is to go to the **Sequences** page. You can go there with the
+**sequence** button ![Sequence button](../img/faq/sequence_button.png) on top
+of a page.
 
-Or you can access it using the main menu ![Main button](../img/faq/main_button.png), and then 
-click on the **SEQUENCES** page under the **Production** section.
+Or you can access it using the main menu ![Main
+button](../img/faq/main_button.png), and then click on the **SEQUENCES** page
+under the **Production** section.
 
 ![Main menu sequence](../img/faq/global_sequence_mainmenu.png)
 
-With this view you can see all the status distribution per tasks on each sequences.
+With this view you can see all the status distribution per tasks on each
+sequences.
 
-![Global sequence task](../img/faq/global_view_sequence.png)
+![Overview sequence task](../img/faq/global_view_sequence.png)
+
+You can fly over the pie chart to have more detailed information about the
+distribution.
+
+![Overview sequence detail](../img/faq/global_view_sequence_detail.png)
+
+You can also click on the **tasks name** to have the detailed shots about this
+task.
 
 
-You can fly over the pie chart to have more detailed information about the distribution.
-
-![Global sequence detail](../img/faq/global_view_sequence_detail.png)
-
-You can also click on the **tasks name** to have the detailed shots about this task.
-
-
- -----------------------------------------	
+-----------------------------------------	
  
 ## [How to create Filters?](#how-to-create-filters)
 
@@ -126,14 +130,13 @@ simple click.
  
 ![Search bar](../img/faq/filter_search_bar.png)
 
-You can find the **search bar** and the **save** option ![Search bar](../img/faq/filter_save_button.png). in the following pages: 
+You can find the **search bar** and the **save** option ![Search
+bar](../img/faq/filter_save_button.png). in the following pages: 
 
 * Assets
 * Shots
 * Sequences
 * Todo-lists
-
-
 
 NB: The **search bar** is available too in people episodes list.
 
