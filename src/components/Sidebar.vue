@@ -24,6 +24,11 @@
                {{ $t("tasks.my_tasks") }}
              </router-link>
            </p>
+           <p @click="toggleSidebar()">
+             <router-link :to="{name: 'open-productions'}">
+               {{ $t("productions.open_productions") }}
+             </router-link>
+           </p>
          </div>
 
          <div v-if="isCurrentUserAdmin">

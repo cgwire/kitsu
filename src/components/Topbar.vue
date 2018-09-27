@@ -12,19 +12,21 @@
            v-bind:class="{'selected': !isSidebarHidden}">
           ≡
         </a>
+
         <router-link
           class="nav-item home-button"
           to="/"
         >
           <img src="../assets/logo.png" />
         </router-link>
+
         <div :class="{
           'nav-item': true,
         }" v-if="isProductionContext">
           <div class="level">
             <div class="level-item">
               <combobox
-                class="production-selector"
+                class="context-selector"
                 :options="openProductionOptions"
                 :is-top="true"
                 v-model="currentProductionId"
@@ -33,22 +35,22 @@
               >
               </strong>
               <combobox
-                class="production-selector"
+                class="context-selector"
                 :options="navigationOptions"
                 :is-top="true"
                 v-model="currentProjectSection"
               />
               <strong
-                v-if="isTVShow && isShotPage"
+                v-if="isEpisodeContext"
               >
               >
               </strong>
               <combobox
-                class="production-selector"
+                class="context-selector"
                 :options="episodeOptions"
                 :is-top="true"
                 v-model="currentEpisodeId"
-                v-if="isTVShow && isShotPage"
+                v-if="isEpisodeContext"
               />
             </div>
           </div>
@@ -80,7 +82,10 @@
             :person="user"
             :is-link="false"
           />
-          <people-name class="user-name" :person="user" />
+          <people-name
+            class="user-name"
+            :person="user"
+          />
         </div>
       </div>
     </nav>
@@ -149,28 +154,23 @@ export default {
     this.currentProductionId =
       this.$route.params.production_id ||
       (this.currentProduction ? this.currentProduction.id : null)
-
-    this.currentEpisodeId =
-      this.$route.params.episode_id ||
-      (this.currentEpisode ? this.currentEpisode.id : null)
-
-    this.currentProjectSection = this.getCurrentSectionFromRoute()
   },
 
   computed: {
     ...mapGetters([
-      'breakdownPath',
       'assetsPath',
       'assetTypesPath',
-      'shotsPath',
-      'sequencesPath',
       'episodesPath',
+      'breakdownPath',
       'playlistsPath',
+      'sequencesPath',
+      'shotsPath',
       'teamPath',
-      'episodes',
-      'episodeOptions',
+
       'currentEpisode',
       'currentProduction',
+      'episodes',
+      'episodeOptions',
       'isSidebarHidden',
       'isUserMenuHidden',
       'isTVShow',
@@ -189,14 +189,16 @@ export default {
     },
 
     isShotPage () {
-      return (
-        this.$route.path.indexOf('shots') > 0 ||
-        this.$route.path.indexOf('sequences') > 0
-      )
+      return this.$route.params.episode_id
     },
 
     isProductionContext () {
-      return this.$route.params.production_id !== undefined
+      return this.$route.params.production_id !== undefined ||
+        this.$route.path.indexOf('tasks') > 0
+    },
+
+    isEpisodeContext () {
+      return this.isTVShow && this.isShotPage && this.episodes.length > 0
     },
 
     navigationOptions () {
@@ -215,7 +217,6 @@ export default {
       }
       return options
     }
-
   },
 
   methods: {
@@ -259,15 +260,69 @@ export default {
       if (section === 'asset-types') {
         section = 'assetTypes'
       }
-      this.$router.push(this[`${section}Path`])
+
+      if (section === 'task-types') {
+        if (this.isTVShow) {
+          this.$router.push({
+            name: 'episode-task-type',
+            params: {
+              production_id: this.currentProduction.id,
+              episode_id: this.currentEpisode.id
+            }
+          })
+        } else {
+          this.$router.push({
+            name: 'task-type',
+            params: {
+              production_id: this.currentProduction.id
+            }
+          })
+        }
+
+      // Exception for manage shots modal
+      } else if (this.$route.path.indexOf('manage') > 0) {
+        if (this.isTVShow) {
+          this.$router.push({
+            name: 'episode-manage-shots',
+            params: {
+              production_id: this.currentProduction.id,
+              episode_id: this.currentEpisode.id
+            }
+          })
+        } else {
+          this.$router.push({
+            name: 'manage-shots',
+            params: {
+              production_id: this.currentProduction.id
+            }
+          })
+        }
+      } else {
+        if (
+          this.currentProduction &&
+          !this.$route.params.asset_id &&
+          !this.$route.params.shot_id
+        ) {
+          if ((this.isTVShow && this.currentEpisode) || !this.isTVShow) {
+            if (section) this.$router.push(this[`${section}Path`])
+          }
+        }
+      }
     }
   },
 
   watch: {
     $route () {
       const productionId = this.$route.params.production_id
+      const episodeId = this.$route.params.episode_id
+
+      // Url changes because current production changes.
       if (productionId && this.currentProductionId !== productionId) {
         this.currentProductionId = productionId
+
+      // Url changes because current episode changes.
+      } else if (episodeId && this.currentEpisodeId !== episodeId) {
+        this.currentEpisodeId = episodeId
       }
     },
 
@@ -275,28 +330,45 @@ export default {
       this.setProduction({
         productionId: `${this.currentProductionId}`
       })
+
       if (this.isTVShow) {
-        console.log('loadEpisodes')
         this.clearEpisodes()
         this.loadEpisodes(() => {
-          this.setProduction({
-            productionId: `${this.currentProduction.id}`,
-            episodeId: `${this.currentEpisode.id}`
-          })
-          this.updateRoute()
+          if (!this.currentEpisode) { // When production is empty
+            this.currentProjectSection = this.getCurrentSectionFromRoute()
+            this.updateRoute()
+          } else {
+            this.currentEpisodeId =
+              this.$route.params.episode_id ||
+              (this.currentEpisode ? this.currentEpisode.id : null)
+            this.currentProjectSection = this.getCurrentSectionFromRoute()
+            this.updateRoute()
+          }
         })
       } else {
+        this.currentProjectSection = this.getCurrentSectionFromRoute()
         this.updateRoute()
       }
     },
 
     currentEpisodeId () {
-      this.setCurrentEpisode(`${this.currentEpisodeId}`)
-      this.setProduction({
-        productionId: `${this.currentProductionId}`,
-        episodeId: `${this.currentEpisodeId}`
-      })
-      this.updateRoute()
+      if (this.currentEpisode) {
+        this.setCurrentEpisode(`${this.currentEpisodeId}`)
+        this.setProduction({
+          productionId: `${this.currentProductionId}`,
+          episodeId: `${this.currentEpisodeId}`
+        })
+        this.updateRoute()
+      }
+    },
+
+    currentEpisode () {
+      if (
+        this.currentEpisode &&
+        this.currentEpisode.id !== this.currentEpisodeId
+      ) {
+        this.currentEpisodeId = this.currentEpisode.id
+      }
     },
 
     currentProjectSection () {
@@ -359,10 +431,15 @@ export default {
   border-bottom: 1px solid #EEE;
 }
 
+.user-menu ul {
+  margin-left: 0;
+}
+
 .user-menu li {
   cursor: pointer;
   padding: 0.2em;
   font-size: 1.1em;
+  list-style-type: none;
 }
 
 .user-menu li a {
@@ -390,11 +467,11 @@ export default {
   padding-right: 0;
 }
 
-.production-selector-label {
+.context-selector-label {
   margin-right: 1em;
 }
 
-.production-selector {
+.context-selector {
   margin-top: 23px;
   margin-right: 1em;
 }
@@ -444,11 +521,11 @@ strong {
   }
 
   .icon-link,
-  .production-selector-label {
+  .context-selector-label {
     display: none;
   }
 
-  .field.production-selector {
+  .field.context-selector {
     padding: 0;
     margin-top: 2em;
   }
