@@ -1,10 +1,13 @@
 import client from './client'
 
 export default {
-  getAssets (currentProduction, callback) {
+  getAssets (production, episode, callback) {
     let path = '/api/data/assets/with-tasks'
-    if (currentProduction) {
-      path += `?project_id=${currentProduction.id}`
+    if (production) {
+      path += `?project_id=${production.id}`
+    }
+    if (episode) {
+      path += `&episode_id=${episode.id}`
     }
     client.get(path, callback)
   },
@@ -23,7 +26,8 @@ export default {
       name: asset.name,
       description: asset.description,
       entity_type_id: asset.entity_type_id,
-      project_id: asset.project_id
+      project_id: asset.project_id,
+      source_id: asset.source_id
     }
     client.post(`/api/data/entities/`, data, callback)
   },

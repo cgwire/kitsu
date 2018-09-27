@@ -122,5 +122,17 @@ export default {
       formData,
       callback
     )
+  },
+
+  getEpisodeStats (productionId) {
+    return new Promise((resolve, reject) => {
+      client.get(
+        `/api/data/projects/${productionId}/episodes/stats`,
+        (err, episodeStats) => {
+          if (err) reject(err)
+          else resolve(episodeStats)
+        }
+      )
+    })
   }
 }
