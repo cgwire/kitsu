@@ -4,6 +4,9 @@
     <table class="table table-header" ref="headerWrapper">
       <thead>
         <tr>
+          <th class="episode" v-if="isTVShow">
+            {{ $t('assets.fields.episode') }}
+          </th>
           <th class="thumbnail"></th>
           <th class="name">{{ $t('assets.fields.name') }}</th>
           <th class="description" v-if="!isCurrentUserClient">
@@ -104,6 +107,9 @@
           :class="{canceled: asset.canceled}"
           v-for="(asset, i) in group"
         >
+          <td class="episode" v-if="isTVShow">
+            {{ episodeMap[asset.source_id] ? episodeMap[asset.source_id].name : $t('main.all') }}
+          </td>
           <td class="thumbnail">
             <entity-thumbnail :entity="asset"></entity-thumbnail>
           </td>
