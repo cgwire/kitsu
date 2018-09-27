@@ -20,6 +20,7 @@ export default {
     title: 'Assets',
     fields: {
       description: 'Description',
+      episode: 'Ep.',
       name: 'Name',
       production: 'Prod',
       type: 'Type'
@@ -119,6 +120,7 @@ export default {
 
   main: {
     add: 'add',
+    all: 'All',
     admin: 'Admin',
     cancel: 'Cancel',
     clear_selection: 'Clear current selection',
@@ -227,6 +229,7 @@ export default {
     no_selection: 'Please select a playlist on the left.',
     no_sequence_for_episode: 'There is no sequence for this episode',
     no_shot_for_production: 'There is no shot for this production',
+    no_shot_for_sequence: 'There is no shot for this sequence',
     select_shot: 'Please select a shot in the right column',
     select_playlist: 'Please select a playlist in the left column',
     title: 'Playlists',
@@ -243,6 +246,7 @@ export default {
     edit_title: 'Edit production',
     new_production: 'Add a production',
     number: 'production | productions',
+    open_productions: 'My productions',
     picture: 'Change picture',
     title: 'Productions',
     home: {
