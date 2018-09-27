@@ -38,7 +38,6 @@ export const buildSelectionGrid = (maxX, maxY) => {
 }
 
 export const appendSelectionGrid = (grid, previousX, maxX, maxY) => {
-  console.log(grid, previousX, maxX, maxY)
   const result = {...grid}
   for (let i = previousX; i < maxX; i++) {
     if (!result[i]) result[i] = {}
@@ -71,20 +70,21 @@ export const computeStats = (entities, idField, taskStatusMap, taskMap) => {
         const task = taskMap[taskId]
         const taskTypeId = task.task_type_id
         const taskStatus = taskStatusMap[task.task_status_id]
-        const taskStatusId = taskStatus.color
-        if (!results[sequenceId][taskTypeId]) {
-          results[sequenceId][taskTypeId] = {}
-        }
 
-        if (!results[sequenceId][taskTypeId][taskStatusId]) {
-          results[sequenceId][taskTypeId][taskStatusId] = {
-            name: taskStatus.short_name,
-            color: taskStatus.color,
-            value: 0
+        if (taskStatus) {
+          const taskStatusId = taskStatus.color
+          if (!results[sequenceId][taskTypeId]) {
+            results[sequenceId][taskTypeId] = {}
           }
+          if (!results[sequenceId][taskTypeId][taskStatusId]) {
+            results[sequenceId][taskTypeId][taskStatusId] = {
+              name: taskStatus.short_name,
+              color: taskStatus.color,
+              value: 0
+            }
+          }
+          results[sequenceId][taskTypeId][taskStatusId].value++
         }
-
-        results[sequenceId][taskTypeId][taskStatusId].value++
       })
     }
   })
