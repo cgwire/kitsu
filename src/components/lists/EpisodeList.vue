@@ -16,13 +16,7 @@
             :key="taskTypeMap[columnId].id"
             v-for="columnId in validationColumns">
             <router-link
-              :to="{
-                name: 'task-type',
-                params: {
-                  production_id: currentProduction.id,
-                  task_type_id: columnId
-                }
-              }"
+              :to="taskTypePath(columnId)"
             >
               {{ taskTypeMap[columnId].name }}
             </router-link>
@@ -236,6 +230,44 @@ export default {
           this.$refs['body-tbody'].children[0].children[0].offsetWidth
         this.$refs['th-episode'].style = `min-width: ${episodeWidth}px`
       }
+    },
+
+    editPath (episodeId) {
+      return this.getPath('edit-episode', episodeId)
+    },
+
+    deletePath (episodeId) {
+      return this.getPath('delete-episode', episodeId)
+    },
+
+    taskTypePath (taskTypeId) {
+      let route = {
+        name: 'task-type',
+        params: {
+          production_id: this.currentProduction.id,
+          task_type_id: taskTypeId,
+          type: 'shots'
+        }
+      }
+
+      if (this.isTVShow) {
+        route.name = `episode-task-type`
+        route.params.episode_id = this.currentEpisode.id
+      }
+
+      return route
+    },
+
+    getPath (section, episodeId) {
+      let route = {
+        name: section,
+        params: {
+          production_id: this.currentProduction.id,
+          episode_id: episodeId
+        }
+      }
+
+      return route
     }
   }
 }
@@ -263,9 +295,9 @@ td.name {
 }
 
 .validation {
-  min-width: 100px;
-  max-width: 100px;
-  width: 100px;
+  min-width: 110px;
+  max-width: 110px;
+  width: 110px;
   word-wrap: break-word;
 }
 

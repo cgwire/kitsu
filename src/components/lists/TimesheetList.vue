@@ -59,7 +59,7 @@
           />
 
           <td class="name">
-            <router-link :to="task.entity_path">
+            <router-link :to="entityPath(task)">
               {{ task.full_entity_name }}
             </router-link>
           </td>
@@ -227,6 +227,29 @@ export default {
 
     onSliderChange (valueInfo) {
       this.$emit('time-spent-change', valueInfo)
+    },
+
+    entityPath (entity) {
+      const entityType = entity.sequence_name ? 'shot' : 'asset'
+      const route = {
+        name: entityType,
+        params: {
+          production_id: entity.project_id
+        }
+      }
+
+      if (entityType === 'asset') {
+        route.params.asset_id = entity.entity_id
+      } else {
+        route.params.shot_id = entity.entity_id
+      }
+
+      if (entity.episode_id) {
+        route.name = `episode-${entityType}`
+        route.params.episode_id = entity.episode_id
+      }
+
+      return route
     }
   },
 

@@ -4,7 +4,7 @@
     <table class="table table-header" ref="headerWrapper">
       <thead>
         <tr>
-          <th class="episode" ref="th-episode" v-if="!isSingleEpisode">
+          <th class="episode" ref="th-episode" v-if="isTVShow">
             {{ $t('shots.fields.episode') }}
           </th>
           <th class="name" ref="th-sequence">
@@ -18,13 +18,7 @@
             v-for="columnId in validationColumns"
           >
             <router-link
-              :to="{
-                name: 'task-type',
-                params: {
-                  production_id: currentProduction.id,
-                  task_type_id: columnId
-                }
-              }"
+              :to="taskTypePath(columnId)"
             >
               {{ taskTypeMap[columnId].name }}
             </router-link>
@@ -39,8 +33,7 @@
   <table-info
     :is-loading="isLoading"
     :is-error="isError"
-  >
-  </table-info>
+  />
 
   <div class="has-text-centered" v-if="isEmptyList && !isCurrentUserClient">
     <p class="info">
@@ -50,10 +43,7 @@
     <button-link
       class="level-item big-button"
       :text="$t('shots.new_sequences')"
-      :path="{
-        name: 'manage-shots',
-        params: {production_id: currentProduction.id}
-      }"
+      :path="manageShotPath"
     >
     </button-link>
   </div>
@@ -77,7 +67,7 @@
           v-for="entry in entries"
         >
 
-          <td class="name" v-if="!isSingleEpisode">
+          <td class="name" v-if="isTVShow">
             {{ entry.episode_name }}
           </td>
 
@@ -106,22 +96,9 @@
 
           <row-actions v-if="isCurrentUserManager"
             :entry="entry"
-            :edit-route="{
-              name: 'edit-sequence',
-              params: {
-                sequence_id: entry.id,
-                production_id: currentProduction.id
-              }
-            }"
-            :delete-route="{
-              name: 'delete-sequence',
-              params: {
-                sequence_id: entry.id,
-                production_id: currentProduction.id
-              }
-            }"
-          >
-          </row-actions>
+            :edit-route="editPath(entry.id)"
+            :delete-route="deletePath(entry.id)"
+          />
 
           <td class="actions" v-else>
           </td>
@@ -172,10 +149,11 @@ export default {
   computed: {
     ...mapGetters([
       'currentProduction',
+      'currentEpisode',
       'displayedSequencesLength',
       'isCurrentUserClient',
       'isCurrentUserManager',
-      'isSingleEpisode',
+      'isTVShow',
       'sequenceSearchText',
       'taskTypeMap'
     ]),
@@ -186,6 +164,10 @@ export default {
              !this.isLoading &&
              !this.isError &&
              (!this.sequenceSearchText || this.sequenceSearchText.length === 0)
+    },
+
+    manageShotPath () {
+      return this.getPath('manage-shots')
     }
   },
 
@@ -243,7 +225,7 @@ export default {
     resizeHeaders () {
       if (this.$refs['body-tbody'].children.length > 0) {
         let sequenceWidth
-        if (this.isSingleEpisode) {
+        if (!this.isTVShow) {
           sequenceWidth =
             this.$refs['body-tbody'].children[0].children[0].offsetWidth
         } else {
@@ -256,6 +238,51 @@ export default {
 
         this.$refs['th-sequence'].style = `min-width: ${sequenceWidth}px`
       }
+    },
+
+    editPath (sequenceId) {
+      return this.getPath('edit-sequence', sequenceId)
+    },
+
+    deletePath (sequenceId) {
+      return this.getPath('delete-sequence', sequenceId)
+    },
+
+    taskTypePath (taskTypeId) {
+      let route = {
+        name: 'task-type',
+        params: {
+          production_id: this.currentProduction.id,
+          task_type_id: taskTypeId,
+          type: 'shots'
+        }
+      }
+
+      if (this.isTVShow) {
+        route.name = `episode-task-type`
+        route.params.episode_id = this.currentEpisode.id
+      }
+
+      return route
+    },
+
+    getPath (section, sequenceId) {
+      let route = {
+        name: section,
+        params: {
+          production_id: this.currentProduction.id
+        }
+      }
+
+      if (this.isTVShow && this.currentEpisode) {
+        route.name = `episode-${section}`
+        route.params.episode_id = this.currentEpisode.id
+      }
+
+      if (sequenceId) {
+        route.params.sequence_id = sequenceId
+      }
+      return route
     }
   }
 }
@@ -287,9 +314,9 @@ td.name {
 }
 
 .validation {
-  min-width: 100px;
-  max-width: 100px;
-  width: 100px;
+  min-width: 110px;
+  max-width: 110px;
+  width: 110px;
   word-wrap: break-word;
 }
 

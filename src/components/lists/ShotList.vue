@@ -5,9 +5,6 @@
       <thead>
         <tr>
           <th class="thumbnail"></th>
-          <th class="episode" ref="th-episode" v-if="!isSingleEpisode">
-            {{ $t('shots.fields.episode') }}
-          </th>
           <th class="sequence" ref="th-sequence" >
             {{ $t('shots.fields.sequence') }}
           </th>
@@ -33,13 +30,7 @@
             }"
             v-for="columnId in validationColumns">
             <router-link
-              :to="{
-                name: 'task-type',
-                params: {
-                  production_id: currentProduction.id,
-                  task_type_id: columnId
-                }
-              }"
+              :to="taskTypePath(columnId)"
             >
               {{ taskTypeMap[columnId].name }}
             </router-link>
@@ -50,12 +41,7 @@
               class="is-small"
               icon="plus"
               :text="$t('tasks.create_tasks')"
-              :path="{
-                name: 'create-shot-tasks',
-                params: {
-                  production_id: currentProduction.id
-                }
-              }"
+              :path="createTasksPath"
               v-if="isCurrentUserManager"
             >
             </button-link>
@@ -79,10 +65,7 @@
     <button-link
       class="level-item big-button"
       :text="$t('shots.new_shots')"
-      :path="{
-        name: 'manage-shots',
-        params: {production_id: currentProduction.id}
-      }"
+      :path="manageShotsPath"
     />
   </div>
   <div class="has-text-centered" v-if="isEmptyList && isCurrentUserClient">
@@ -108,22 +91,11 @@
           <td class="thumbnail">
             <entity-thumbnail :entity="shot" />
           </td>
-          <td :class="{name: true, bold: !shot.canceled}"
-            v-if="!isSingleEpisode"
-          >
-            {{ shot.episode_name }}
-          </td>
           <td :class="{name: true, bold: !shot.canceled}">
             {{ shot.sequence_name }}
           </td>
           <td :class="{'shot-name': true, name: true, bold: !shot.canceled}">
-            <router-link :to="{
-              name: 'shot',
-              params: {
-                production_id: shot.production_id,
-                shot_id: shot.id
-              }
-            }">
+            <router-link :to="shotPath(shot.id)">
               {{ shot.name }}
             </router-link>
           </td>
@@ -156,27 +128,9 @@
           />
           <row-actions v-if="isCurrentUserManager"
             :entry="shot"
-            :edit-route="{
-              name: 'edit-shots',
-              params: {
-                shot_id: shot.id,
-                production_id: currentProduction.id
-              }
-            }"
-            :restore-route="{
-              name: 'restore-shots',
-              params: {
-                shot_id: shot.id,
-                production_id: currentProduction.id
-              }
-            }"
-            :delete-route="{
-              name: 'delete-shots',
-              params: {
-                shot_id: shot.id,
-                production_id: currentProduction.id
-              }
-            }"
+            :edit-route="editPath(shot.id)"
+            :restore-route="restorePath(shot.id)"
+            :delete-route="deletePath(shot.id)"
           />
           <td class="actions" v-else></td>
         </tr>
@@ -235,6 +189,7 @@ export default {
   computed: {
     ...mapGetters([
       'currentProduction',
+      'currentEpisode',
       'displayedShotsLength',
       'isCurrentUserManager',
       'isCurrentUserClient',
@@ -242,17 +197,39 @@ export default {
       'isFrameIn',
       'isFrameOut',
       'isSingleEpisode',
+      'isTVShow',
       'nbSelectedTasks',
       'shotSearchText',
       'shotSelectionGrid',
       'taskTypeMap'
     ]),
+
     isEmptyList () {
       return this.entries &&
              this.entries.length === 0 &&
              !this.isLoading &&
              !this.isError &&
              (!this.shotSearchText || this.shotSearchText.length === 0)
+    },
+
+    createTasksPath () {
+      return this.getPath('create-shot-tasks')
+    },
+
+    manageShotsPath () {
+      let route = {
+        name: 'manage-shots',
+        params: {
+          production_id: this.currentProduction.id
+        }
+      }
+
+      if (this.isTVShow && this.currentEpisode) {
+        route.name = 'episode-manage-shots'
+        route.params.episode_id = this.currentEpisode.id
+      }
+
+      return route
     }
   },
 
@@ -337,24 +314,73 @@ export default {
     resizeHeaders () {
       if (this.$refs['body-tbody'].children.length > 0) {
         let sequenceWidth, shotWidth
-        if (this.isSingleEpisode) {
-          sequenceWidth =
-            this.$refs['body-tbody'].children[0].children[1].offsetWidth
-          shotWidth =
-            this.$refs['body-tbody'].children[0].children[2].offsetWidth
-        } else {
-          sequenceWidth =
-            this.$refs['body-tbody'].children[0].children[2].offsetWidth
-          shotWidth =
-            this.$refs['body-tbody'].children[0].children[3].offsetWidth
-          const episodeWidth =
-            this.$refs['body-tbody'].children[0].children[1].offsetWidth
-          this.$refs['th-episode'].style = `min-width: ${episodeWidth}px`
-        }
+        sequenceWidth =
+          this.$refs['body-tbody'].children[0].children[1].offsetWidth
+        shotWidth =
+          this.$refs['body-tbody'].children[0].children[2].offsetWidth
 
         this.$refs['th-sequence'].style = `min-width: ${sequenceWidth}px`
         this.$refs['th-shot'].style = `min-width: ${shotWidth}px`
       }
+    },
+
+    taskTypePath (taskTypeId) {
+      if (this.isTVShow && this.currentEpisode) {
+        return {
+          name: 'episode-task-type',
+          params: {
+            production_id: this.currentProduction.id,
+            episode_id: this.currentEpisode.id,
+            task_type_id: taskTypeId,
+            type: 'shots'
+          }
+        }
+      } else {
+        return {
+          name: 'task-type',
+          params: {
+            production_id: this.currentProduction.id,
+            task_type_id: taskTypeId,
+            type: 'shots'
+          }
+        }
+      }
+    },
+
+    shotPath (shotId) {
+      return this.getPath('shot', shotId)
+    },
+
+    editPath (shotId) {
+      return this.getPath('edit-shot', shotId)
+    },
+
+    deletePath (shotId) {
+      return this.getPath('delete-shot', shotId)
+    },
+
+    restorePath (shotId) {
+      return this.getPath('restore-shot', shotId)
+    },
+
+    getPath (section, shotId) {
+      let route = {
+        name: section,
+        params: {
+          production_id: this.currentProduction.id
+        }
+      }
+
+      if (this.isTVShow && this.currentEpisode) {
+        route.name = `episode-${section}`
+        route.params.episode_id = this.currentEpisode.id
+      }
+
+      if (shotId) {
+        route.params.shot_id = shotId
+      }
+
+      return route
     }
   }
 }

@@ -26,10 +26,7 @@
       :active="modals.isNewDisplayed"
       :is-loading="loading.edit"
       :is-error="errors.edit"
-      :cancel-route="{
-        name: 'sequences',
-        params: {production_id: currentProduction.id}
-      }"
+      :cancel-route="sequencesPath"
       :sequence-to-edit="sequenceToEdit"
       @confirm="confirmEditSequence"
     />
@@ -40,10 +37,7 @@
       :is-error="errors.del"
       :text="deleteText()"
       :error-text="$t('sequences.delete_error')"
-      :cancel-route="{
-        name: 'sequences',
-        params: {production_id: currentProduction.id}
-      }"
+      :cancel-route="sequencesPath"
       @confirm="confirmDeleteSequence"
     />
 
@@ -113,11 +107,13 @@ export default {
   },
 
   mounted () {
-    this.initSequences()
-      .then(this.handleModalsDisplay)
-      .then(this.resizeHeaders)
-    this.setDefaultSearchText()
-    this.setDefaultListScrollPosition()
+    setTimeout(() => {
+      this.initSequences()
+        .then(this.handleModalsDisplay)
+        .then(this.resizeHeaders)
+      this.setDefaultSearchText()
+      this.setDefaultListScrollPosition()
+    }, 0)
   },
 
   methods: {
@@ -249,7 +245,6 @@ export default {
       this.$store.commit('SET_SEQUENCE_LIST_SCROLL_POSITION', 0)
 
       if (!this.isTVShow) {
-        console.log('not tv show')
         this.initSequences()
           .then(this.handleModalsDisplay)
           .then(this.resizeHeaders)
@@ -257,8 +252,6 @@ export default {
     },
 
     currentEpisode () {
-      console.log('episodes', 'change currentEpisode')
-      console.log(this.isTVShow, this.currentEpisode)
       if (this.isTVShow && this.currentEpisode) {
         this.initSequences()
           .then(this.handleModalsDisplay)
@@ -284,11 +277,14 @@ export default {
   metaInfo () {
     if (this.isTVShow) {
       return {
-        title: `${this.currentProduction.name} - ${this.currentEpisode.name} | ${this.$t('sequences.title')} - Kitsu`
+        title: `${this.currentProduction ? this.currentProduction.name : ''}` +
+               ` - ${this.currentEpisode ? this.currentEpisode.name : ''}` +
+               ` | ${this.$t('sequences.title')} - Kitsu`
       }
     } else {
       return {
-        title: `${this.currentProduction.name} ${this.$t('sequences.title')} - Kitsu`
+        title: `${this.currentProduction ? this.currentProduction.name : ''}` +
+               ` ${this.$t('sequences.title')} - Kitsu`
       }
     }
   }

@@ -1,23 +1,15 @@
 <template>
   <div class="breakdown page">
-    <page-title :text="$t('breakdown.title')" class="page-header">
-    </page-title>
-    <div class="breakdown-columns">
+    <div class="breakdown-columns mt2">
 
       <div class="breakdown-column shot-column">
-        <spinner v-if="isShotsLoading"></spinner>
+        <spinner v-if="isShotsLoading" />
         <div v-else>
-          <combobox
-            :label="$t('shots.fields.episode')"
-            :options="getEpisodeOptions"
-            v-model="episodeId"
-            v-if="!isSingleEpisode"
-          ></combobox>
           <combobox
             :label="$t('shots.fields.sequence')"
             :options="castingSequenceOptions"
             v-model="sequenceId"
-          ></combobox>
+          />
           <p class="shots-title">{{ $t('shots.title')}}</p>
           <shot-line
             :key="shot.id"
@@ -25,8 +17,8 @@
             :selected="castingCurrentShot && castingCurrentShot.id === shot.id"
             :name="shot.name"
             @click="selectShot"
-            v-for="shot in castingSequenceShots">
-          </shot-line>
+            v-for="shot in castingSequenceShots"
+          />
         </div>
       </div>
 
@@ -66,7 +58,7 @@
           :text="$t('breakdown.save_error')"
         >
         </error-text>
-        <spinner v-if="isLoading"></spinner>
+        <spinner v-if="isLoading" />
         <div
           class="type-assets"
           :key="typeAssets.length > 0 ? typeAssets[0].asset_type_name : ''"
@@ -104,7 +96,7 @@
           </div>
         </div>
 
-        <spinner v-if="isAssetsLoading"></spinner>
+        <spinner v-if="isAssetsLoading" />
         <div
           class="type-assets"
           :key="typeAssets.length > 0 ? typeAssets[0].asset_type_name : ''"
@@ -123,8 +115,7 @@
               @add-one="addOneAsset"
               @add-ten="addTenAssets"
               v-for="asset in typeAssets"
-            >
-            </available-asset-block>
+            />
           </div>
         </div>
       </div>
@@ -176,9 +167,10 @@ export default {
     ...mapGetters([
       'assetMap',
       'assetsByType',
+      'currentEpisode',
       'currentProduction',
       'displayedShots',
-      'isSingleEpisode',
+      'isTVShow',
 
       'getEpisodeOptions',
       'castingSequenceOptions',
@@ -203,6 +195,7 @@ export default {
   },
 
   created () {
+    console.log('breakdow created', 'loadShots')
     this.reset()
     this.setLastProductionScreen('breakdown')
   },
@@ -224,23 +217,36 @@ export default {
     reset () {
       this.shotId = this.$route.params.shot_id
 
+      // Episode change
+      if (
+        this.currentEpisode &&
+        this.episodeId !== this.$route.params.episode_id
+      ) {
+        this.reloadShots()
+      // Data are already there, update breakdown
+      } else if (this.currentEpisode) {
+        this.episodeId = this.currentEpisode.id
+        this.setCastingEpisode(this.episodeId)
+      }
+    },
+
+    reloadShots () {
+      this.shotId = this.$route.params.shot_id
+
       this.loadShots(() => {
-        this.loadAssets(() => {
-          this.isLoading = true
-          this.setCastingShot({
-            shotId: this.shotId,
-            callback: () => {
-              this.isLoading = false
-              if (this.getEpisodeOptions.length > 0) {
-                const shot = this.shotMap[this.shotId]
-                if (this.shotId && shot) {
-                  this.episodeId = shot.episode_id
-                } else {
-                  this.episodeId = this.getEpisodeOptions[0].value
-                }
-              }
+        this.isLoading = true
+        this.setCastingShot({
+          shotId: this.shotId,
+          callback: () => {
+            this.isLoading = false
+            this.episodeId = this.currentEpisode.id
+            if (this.isTVShow) {
+              this.setCastingEpisode(this.episodeId)
             }
-          })
+            if (Object.keys(this.assetMap).length === 0) {
+              this.loadAssets()
+            }
+          }
         })
       })
     },
@@ -250,13 +256,19 @@ export default {
     },
 
     selectShot (shotId) {
-      this.$router.push({
+      let route = {
         name: 'breakdown-shot',
         params: {
           production_id: this.currentProduction.id,
           shot_id: shotId
         }
-      })
+      }
+
+      if (this.currentEpisode) {
+        route.name = 'episode-breakdown-shot'
+        route.params.episode_id = this.currentEpisode.id
+      }
+      this.$router.push(route)
     },
 
     onSaveClicked () {
@@ -288,19 +300,28 @@ export default {
   watch: {
     $route () {
       const shotId = this.$route.params.shot_id
-      if (shotId) {
+      if (shotId && this.shotId !== shotId) {
+        this.shotId = shotId
+      }
+    },
+
+    episodeId () {
+      if (this.episodeId !== this.$route.params.episode_id) {
+        console.log('breakdown episodeId', 'loadShots')
+        this.reloadShots()
+      }
+    },
+
+    shotId () {
+      if (this.shotId) {
         this.isLoading = true
         this.setCastingShot({
-          shotId,
+          shotId: this.shotId,
           callback: () => {
             this.isLoading = false
           }
         })
       }
-    },
-
-    episodeId () {
-      this.setCastingEpisode(this.episodeId)
     },
 
     sequenceId () {
@@ -321,7 +342,12 @@ export default {
     },
 
     currentProduction () {
-      if (this.currentProduction.id !== this.$route.params.production_id) {
+      console.log('breakdown current production', 'loadShots')
+      this.reset()
+    },
+
+    currentEpisode () {
+      if (this.currentEpisode && this.episodeId !== this.currentEpisode.id) {
         this.reset()
       }
     }

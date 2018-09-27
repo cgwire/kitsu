@@ -47,37 +47,29 @@
             :is-tooltip="true"
             :entry="productionMap[entry.project_id]"
             :only-avatar="true"
-          >
-          </production-name-cell>
+          />
           <task-type-name
             class="type"
             :production-id="entry.project_id"
-            :entry="{
-              id: entry.task_type_id,
-              name: entry.task_type_name,
-              color: entry.task_type_color
-            }"
-          >
-          </task-type-name>
+            :entry="getTaskType(entry)"
+          />
           <td class="thumbnail">
             <entity-thumbnail
               :empty-width="60"
               :empty-height="40"
               :entity="{preview_file_id: entry.entity_preview_file_id}"
-            >
-            </entity-thumbnail>
+            />
           </td>
 
           <td class="name">
-            <router-link :to="entry.entity_path">
+            <router-link :to="entityPath(entry)">
               {{ entry.full_entity_name }}
             </router-link>
           </td>
           <description-cell
             class="description"
             :entry="{description: entry.entity_description}"
-          >
-          </description-cell>
+          />
           <validation-cell
             class="status unselectable"
             :ref="'validation-' + i + '-0'"
@@ -91,14 +83,12 @@
             @select="onTaskSelected"
             @unselect="onTaskUnselected"
             :column="entry.taskStatus"
-          >
-          </validation-cell>
+          />
           <last-comment-cell
             class="last-comment"
             :task="entry"
             v-if="!done"
-          >
-          </last-comment-cell>
+          />
           <td class="end-date" v-else>
             {{ formatDate(entry.end_date) }}
           </td>
@@ -110,8 +100,7 @@
   <table-info
     :is-loading="isLoading"
     :is-error="isError"
-  >
-  </table-info>
+  />
 
   <p class="has-text-centered footer-info" v-if="!isLoading">
     {{ entries.length }} {{ $tc('tasks.tasks', entries.length) }}
@@ -147,16 +136,17 @@ export default {
   },
 
   props: [
+    'done',
     'entries',
     'isLoading',
     'isError',
-    'done',
     'selectionGrid'
   ],
 
   computed: {
     ...mapGetters([
       'nbSelectedTasks',
+      'taskTypeMap',
       'productionMap'
     ])
   },
@@ -222,6 +212,35 @@ export default {
       } else {
         this.$store.commit('REMOVE_SELECTED_TASK', validationInfo)
       }
+    },
+
+    getTaskType (entry) {
+      const taskType = this.taskTypeMap[entry.task_type_id]
+      taskType.episode_id = entry.episode_id
+      return taskType
+    },
+
+    entityPath (entity) {
+      const entityType = entity.sequence_name ? 'shot' : 'asset'
+      const route = {
+        name: entityType,
+        params: {
+          production_id: entity.project_id
+        }
+      }
+
+      if (entityType === 'asset') {
+        route.params.asset_id = entity.entity_id
+      } else {
+        route.params.shot_id = entity.entity_id
+      }
+
+      if (entity.episode_id) {
+        route.name = `episode-${entityType}`
+        route.params.episode_id = entity.episode_id
+      }
+
+      return route
     }
   }
 }

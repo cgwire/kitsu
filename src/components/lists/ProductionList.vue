@@ -58,11 +58,11 @@
             :entry-id="entry.id"
             :edit-route="{
               name: 'edit-production',
-              params: {production_id: entry.id}
+              params: {production_edit_id: entry.id}
             }"
             :delete-route="{
               name: 'delete-production',
-              params: {production_id: entry.id}
+              params: {production_delete_id: entry.id}
             }"
           />
         </tr>

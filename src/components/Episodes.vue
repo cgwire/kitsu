@@ -1,12 +1,6 @@
 <template>
   <div class="episodes page fixed-page">
     <div class="episode-list-header page-header">
-      <div class="level header-title">
-        <div class="level-left">
-          <page-title :text="$t('episodes.title')"></page-title>
-        </div>
-      </div>
-
       <div class="filters-area">
         <search-field
           ref="episode-search-field"
@@ -22,23 +16,19 @@
       :entries="displayedEpisodes"
       :is-loading="isShotsLoading"
       :is-error="isShotsLoadingError"
-      :validation-columns="shotValidationColumns"
+      :validation-columns="episodeValidationColumns"
       :episode-stats="episodeStats"
       @scroll="saveScrollPosition"
-    ></episode-list>
+    />
 
     <edit-episode-modal
       :active="modals.isNewDisplayed"
       :is-loading="loading.edit"
       :is-error="errors.edit"
-      :cancel-route="{
-        name: 'episodes',
-        params: {production_id: currentProduction.id}
-      }"
+      :cancel-route="episodesPath"
       :episode-to-edit="episodeToEdit"
       @confirm="confirmEditEpisode"
-    >
-    </edit-episode-modal>
+    />
 
     <delete-modal
       :active="modals.isDeleteDisplayed"
@@ -46,14 +36,9 @@
       :is-error="errors.del"
       :text="deleteText()"
       :error-text="$t('episodes.delete_error')"
-      :cancel-route="{
-        name: 'episodes',
-        params: {production_id: currentProduction.id}
-      }"
+      :cancel-route="episodesPath"
       @confirm="confirmDeleteEpisode"
-    >
-    </delete-modal>
-
+    />
   </div>
 </template>
 
@@ -101,6 +86,7 @@ export default {
     ...mapGetters([
       'currentProduction',
       'displayedEpisodes',
+      'episodesPath',
       'isCurrentUserManager',
       'isShotsLoading',
       'isShotsLoadingError',
@@ -110,7 +96,7 @@ export default {
       'episodeStats',
       'episodeSearchText',
       'episodeListScrollPosition',
-      'shotValidationColumns'
+      'episodeValidationColumns'
     ])
   },
 
@@ -239,7 +225,9 @@ export default {
 
     resizeHeaders () {
       setTimeout(() => {
-        this.$refs['episode-list'].resizeHeaders()
+        if (this.$refs['episode-list']) {
+          this.$refs['episode-list'].resizeHeaders()
+        }
       }, 0)
     }
   },
@@ -258,8 +246,12 @@ export default {
         this.$store.commit('SET_SEQUENCE_LIST_SCROLL_POSITION', 0)
         this.$router.push(newPath)
         this.loadShots(() => {
-          this.computeEpisodeStats()
           this.resizeHeaders()
+          if (this.isTVShow) {
+            this.loadEpisodeStats()
+          } else {
+            this.computeEpisodeStats()
+          }
         })
       }
     }
@@ -272,7 +264,11 @@ export default {
         this.loadComment({
           commentId,
           callback: () => {
-            this.computeEpisodeStats()
+            if (this.isTVShow) {
+              this.loadEpisodeStats()
+            } else {
+              this.computeEpisodeStats()
+            }
           }
         })
       }

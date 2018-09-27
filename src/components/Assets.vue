@@ -31,10 +31,7 @@
             :text="$t('main.csv.import_file')"
             icon="upload"
             :is-responsive="true"
-            :path="{
-              name: 'import-assets',
-              params: {production_id: currentProduction.id}
-            }"
+            :path="importPath"
           />
           <button-href-link
             class="level-item"
@@ -48,10 +45,7 @@
             :text="$t('assets.new_asset')"
             icon="plus"
             :is-responsive="true"
-            :path="{
-              name: 'new-asset',
-              params: {production_id: currentProduction.id}
-            }"
+            :path="newAssetPath"
           />
         </div>
       </div>
@@ -74,10 +68,7 @@
     :is-loading-stay="loading.stay"
     :is-error="editAsset.isCreateError"
     :is-success="editAsset.isSuccess"
-    :cancel-route="{
-      name: 'assets',
-      params: {production_id: currentProduction.id}
-    }"
+    :cancel-route="assetsPath"
     :asset-to-edit="assetToEdit"
     @confirm="confirmEditAsset"
     @confirmAndStay="confirmNewAssetStay"
@@ -87,10 +78,7 @@
     :active="modals.isDeleteDisplayed"
     :is-loading="deleteAsset.isLoading"
     :is-error="deleteAsset.isError"
-    :cancel-route="{
-      name: 'assets',
-      params: {production_id: currentProduction.id}
-    }"
+    :cancel-route="assetsPath"
     :text="deleteText()"
     :error-text="$t('assets.delete_error')"
     @confirm="confirmDeleteAsset"
@@ -100,10 +88,7 @@
     :active="modals.isRestoreDisplayed"
     :is-loading="restoreAsset.isLoading"
     :is-error="restoreAsset.isDeleteError"
-    :cancel-route="{
-      name: 'assets',
-      params: {production_id: currentProduction.id}
-    }"
+    :cancel-route="assetsPath"
     :text="restoreText()"
     :error-text="$t('assets.restore_error')"
     @confirm="confirmRestoreAsset"
@@ -113,10 +98,7 @@
     :active="modals.isImportDisplayed"
     :is-loading="loading.importing"
     :is-error="errors.importing"
-    :cancel-route="{
-      name: 'assets',
-      params: {production_id: currentProduction.id}
-    }"
+    :cancel-route="assetsPath"
     :form-data="assetsCsvFormData"
     :columns="columns"
     @fileselected="selectFile"
@@ -127,16 +109,12 @@
     :active="modals.isCreateTasksDisplayed"
     :is-loading="loading.creatingTasks"
     :is-error="errors.creatingTasks"
-    :cancel-route="{
-      name: 'assets',
-      params: {production_id: currentProduction.id}
-    }"
+    :cancel-route="assetsPath"
     :title="$t('tasks.create_tasks_asset')"
     :text="$t('tasks.create_tasks_asset_explaination')"
     :error-text="$t('tasks.create_tasks_asset_failed')"
     @confirm="confirmCreateTasks"
   />
-
 </div>
 </template>
 
@@ -214,22 +192,63 @@ export default {
   computed: {
     ...mapGetters([
       'assetMap',
+      'assetsPath',
       'assetListScrollPosition',
       'assetsCsvFormData',
       'assetSearchText',
       'assetSearchQueries',
       'assetTypes',
       'assetValidationColumns',
+      'currentEpisode',
       'currentProduction',
       'displayedAssetsByType',
       'openProductions',
       'isAssetsLoading',
       'isAssetsLoadingError',
+      'isTVShow',
       'editAsset',
       'deleteAsset',
       'restoreAsset',
       'isCurrentUserManager'
-    ])
+    ]),
+
+    newAssetPath () {
+      if (this.isTVShow && this.currentEpisode) {
+        return {
+          name: 'episode-new-asset',
+          params: {
+            production_id: this.currentProduction.id,
+            episode_id: this.currentEpisode.id
+          }
+        }
+      } else {
+        return {
+          name: 'new-asset',
+          params: {
+            production_id: this.currentProduction.id
+          }
+        }
+      }
+    },
+
+    importPath () {
+      if (this.isTVShow && this.currentEpisode) {
+        return {
+          name: 'episode-import-assets',
+          params: {
+            production_id: this.currentProduction.id,
+            episode_id: this.currentEpisode.id
+          }
+        }
+      } else {
+        return {
+          name: 'import-assets',
+          params: {
+            production_id: this.currentProduction.id
+          }
+        }
+      }
+    }
   },
 
   created () {
@@ -485,11 +504,27 @@ export default {
     $route () { this.handleModalsDisplay() },
 
     currentProduction () {
-      this.$refs['asset-search-field'].value = ''
+      this.$refs['asset-search-field'].setValue('')
       this.$store.commit('SET_ASSET_LIST_SCROLL_POSITION', 0)
-      this.loadAssets((err) => {
-        if (!err) this.handleModalsDisplay()
-      })
+
+      if (!this.isTVShow) {
+        this.clearEpisodes()
+        this.loadAssets((err) => {
+          if (!err) {
+            this.handleModalsDisplay()
+          }
+        })
+      }
+    },
+
+    currentEpisode () {
+      if (this.isTVShow && this.currentEpisode) {
+        this.loadAssets((err) => {
+          if (!err) {
+            this.handleModalsDisplay()
+          }
+        })
+      }
     }
   },
 

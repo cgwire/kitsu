@@ -6,8 +6,7 @@
           ref="asset-type-search-field"
           @change="onSearchChange"
           placeholder="ex: chars, agent327"
-        >
-        </search-field>
+        />
       </div>
     </div>
 
@@ -19,7 +18,7 @@
       :validation-columns="assetValidationColumns"
       :asset-type-stats="assetTypeStats"
       @scroll="saveScrollPosition"
-    ></production-asset-type-list>
+    />
   </div>
 </template>
 
@@ -52,6 +51,7 @@ export default {
       'assetTypeSearchText',
       'assetTypeListScrollPosition',
       'assetValidationColumns',
+      'currentEpisode',
       'currentProduction',
       'displayedAssetTypes',
       'isAssetsLoading',
@@ -73,6 +73,7 @@ export default {
     ...mapActions([
       'computeAssetTypeStats',
       'initAssetTypes',
+      'isTVShow',
       'loadAssets',
       'loadComment',
       'setAssetTypeSearch',
@@ -116,6 +117,17 @@ export default {
       this.loadAssets(() => {
         this.computeAssetTypeStats()
       })
+    },
+
+    currentEpisode () {
+      if (this.isTVShow) {
+        this.$refs['asset-type-search-field'].setValue('')
+        this.setAssetTypeListScrollPosition(0)
+
+        this.loadAssets(() => {
+          this.computeAssetTypeStats()
+        })
+      }
     }
   },
 

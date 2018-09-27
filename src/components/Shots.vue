@@ -30,10 +30,7 @@
               :text="$t('main.csv.import_file')"
               icon="upload"
               :is-responsive="true"
-              :path="{
-                name: 'import-shots',
-                params: {production_id: currentProduction.id}
-              }"
+              :path="importPath"
             />
             <button-href-link
               class="level-item"
@@ -47,10 +44,7 @@
               :text="$t('shots.manage')"
               icon="plus"
               :is-responsive="true"
-              :path="{
-                name: 'manage-shots',
-                params: {production_id: currentProduction.id}
-              }"
+              :path="manageShotsPath"
             />
           </div>
         </div>
@@ -71,10 +65,7 @@
       :is-loading="loading.manage"
       :is-error="false"
       :is-success="false"
-      :cancel-route="{
-        name: 'shots',
-        params: {production_id: currentProduction.id}
-      }"
+      :cancel-route="shotsPath"
     />
 
     <edit-shot-modal
@@ -83,10 +74,7 @@
       :is-loading-stay="loading.stay"
       :is-error="editShot.isCreateError"
       :is-success="editShot.isSuccess"
-      :cancel-route="{
-        name: 'shots',
-        params: {production_id: currentProduction.id}
-      }"
+      :cancel-route="shotsPath"
       :shot-to-edit="shotToEdit"
       @confirm="confirmEditShot"
       @confirmAndStay="confirmNewShotStay"
@@ -96,10 +84,7 @@
       :active="modals.isDeleteDisplayed"
       :is-loading="deleteShot.isLoading"
       :is-error="deleteShot.isError"
-      :cancel-route="{
-        name: 'shots',
-        params: {production_id: currentProduction.id}
-      }"
+      :cancel-route="shotsPath"
       :text="deleteText()"
       :error-text="$t('shots.delete_error')"
       @confirm="confirmDeleteShot"
@@ -109,10 +94,7 @@
       :active="modals.isRestoreDisplayed"
       :is-loading="restoreShot.isLoading"
       :is-error="restoreShot.isError"
-      :cancel-route="{
-        name: 'shots',
-        params: {production_id: currentProduction.id}
-      }"
+      :cancel-route="shotsPath"
       :text="restoreText()"
       :error-text="$t('shots.restore_error')"
       @confirm="confirmRestoreShot"
@@ -122,10 +104,7 @@
       :active="modals.isImportDisplayed"
       :is-loading="loading.importing"
       :is-error="errors.importing"
-      :cancel-route="{
-        name: 'shots',
-        params: {production_id: currentProduction.id}
-      }"
+      :cancel-route="shotsPath"
       :form-data="shotsCsvFormData"
       :columns="columns"
       @fileselected="selectFile"
@@ -239,14 +218,46 @@ export default {
       'openProductions',
       'restoreShot',
       'sequences',
-      'shots',
       'shotMap',
       'shotsCsvFormData',
       'shotSearchQueries',
-      'shotValidationColumns',
       'shotSearchText',
+      'shotsPath',
+      'shotValidationColumns',
       'shotListScrollPosition'
-    ])
+    ]),
+
+    importPath () {
+      let route = {
+        name: 'import-shots',
+        params: {
+          production_id: this.currentProduction.id
+        }
+      }
+
+      if (this.isTVShow && this.currentEpisode) {
+        route.name = 'episode-import-shots'
+        route.params.episode_id = this.currentEpisode.id
+      }
+
+      return route
+    },
+
+    manageShotsPath () {
+      let route = {
+        name: 'manage-shots',
+        params: {
+          production_id: this.currentProduction.id
+        }
+      }
+
+      if (this.isTVShow && this.currentEpisode) {
+        route.name = 'episode-manage-shots'
+        route.params.episode_id = this.currentEpisode.id
+      }
+
+      return route
+    }
   },
 
   created () {
@@ -260,8 +271,17 @@ export default {
     this.$refs['shot-list'].setScrollPosition(
       this.shotListScrollPosition
     )
+
     if (!this.isTVShow) {
       this.clearEpisodes()
+      this.loadShots((err) => {
+        this.resizeHeaders()
+        if (!err) {
+          this.handleModalsDisplay()
+          this.resizeHeaders()
+        }
+      })
+    } else if (this.displayedShots.length === 0) {
       this.loadShots((err) => {
         this.resizeHeaders()
         if (!err) {
@@ -507,7 +527,9 @@ export default {
 
     resizeHeaders () {
       setTimeout(() => {
-        this.$refs['shot-list'].resizeHeaders()
+        if (this.$refs['shot-list']) {
+          this.$refs['shot-list'].resizeHeaders()
+        }
       }, 0)
     }
   },
@@ -549,7 +571,9 @@ export default {
   metaInfo () {
     if (this.isTVShow) {
       return {
-        title: `${this.currentProduction.name} - ${this.currentEpisode.name} | ${this.$t('shots.title')} - Kitsu`
+        title: `${this.currentProduction ? this.currentProduction.name : ''}` +
+               ` - ${this.currentEpisode ? this.currentEpisode.name : ''}` +
+               ` | ${this.$t('shots.title')} - Kitsu`
       }
     } else {
       return {
