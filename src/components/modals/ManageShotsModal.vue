@@ -188,6 +188,7 @@ export default {
 
   computed: {
     ...mapGetters([
+      'currentProduction',
       'episodes',
       'sequences',
       'shotMap',
@@ -222,9 +223,11 @@ export default {
 
   methods: {
     ...mapActions([
+      'loadShots',
       'newEpisode',
       'newSequence',
-      'newShot'
+      'newShot',
+      'setCurrentEpisode'
     ]),
 
     focusAddSequence () {
@@ -236,11 +239,28 @@ export default {
     },
 
     selectEpisode (episodeId) {
-      this.selectedEpisodeId = episodeId
-      this.displayedSequences = this.sequences.filter((sequence) => {
-        return sequence.parent_id === episodeId
-      })
-      this.displayedShots = []
+      if (!this.isTVShow) {
+        this.selectedEpisodeId = episodeId
+        this.displayedSequences = this.sequences.filter((sequence) => {
+          return sequence.parent_id === episodeId
+        })
+        this.displayedShots = []
+      } else {
+        this.selectedEpisodeId = episodeId
+        this.$router.push({
+          name: 'episode-manage-shots',
+          params: {
+            production_id: this.currentProduction.id,
+            episode_id: episodeId
+          }
+        })
+
+        setTimeout(() => {
+          console.log('cool', this.sequences)
+          this.displayedSequences = this.sequences
+          this.displayedShots = []
+        }, 1000)
+      }
     },
 
     selectSequence (sequenceId) {
