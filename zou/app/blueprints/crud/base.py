@@ -111,6 +111,9 @@ class BaseModelsResource(Resource):
     def update_data(self, data):
         return data
 
+    def post_creation(self, instance):
+        return instance
+
     @jwt_required
     def get(self):
         """
@@ -155,6 +158,7 @@ class BaseModelsResource(Resource):
             data = self.update_data(data)
             instance = self.model(**data)
             instance.save()
+            self.post_creation(instance)
             events.emit(
                 "%s:new" % self.model.__tablename__,
                 {"%s_id" % self.model.__tablename__: instance.id}

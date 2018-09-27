@@ -1,5 +1,5 @@
 from zou.app.models.project import Project
-from zou.app.services import user_service, projects_service
+from zou.app.services import user_service, projects_service, shots_service
 from zou.app.utils import permissions
 
 from .base import BaseModelResource, BaseModelsResource
@@ -23,7 +23,13 @@ class ProjectsResource(BaseModelsResource):
         open_status = projects_service.get_or_create_open_status()
         if "project_status_id" not in data:
             data["project_status_id"] = open_status["id"]
+
         return data
+
+    def post_creation(self, instance):
+        if instance.production_type == "tvshow":
+            shots_service.create_episode(instance.id, "E01")
+        return instance
 
 
 class ProjectResource(BaseModelResource):
