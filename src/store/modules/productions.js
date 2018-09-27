@@ -403,9 +403,9 @@ const mutations = {
     )
     state.currentProduction = production
     state.assetsPath = helpers.getProductionComponentPath(
-      'assets', productionId)
+      'assets', productionId, episodeId)
     state.assetTypesPath = helpers.getProductionComponentPath(
-      'production-asset-types', productionId)
+      'production-asset-types', productionId, episodeId)
     state.shotsPath = helpers.getProductionComponentPath(
       'shots', productionId, episodeId)
     state.sequencesPath = helpers.getProductionComponentPath(
@@ -413,9 +413,9 @@ const mutations = {
     state.episodesPath = helpers.getProductionComponentPath(
       'episodes', productionId)
     state.breakdownPath = helpers.getProductionComponentPath(
-      'breakdown', productionId)
+      'breakdown', productionId, episodeId)
     state.playlistsPath = helpers.getProductionComponentPath(
-      'playlists', productionId)
+      'playlists', productionId, episodeId)
     state.teamPath = helpers.getProductionComponentPath(
       'team', productionId)
   },

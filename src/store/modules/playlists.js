@@ -41,9 +41,10 @@ const getters = {
 const actions = {
 
   loadPlaylists ({ commit, rootGetters }, callback) {
-    const currentProduction = rootGetters.currentProduction
+    const production = rootGetters.currentProduction
+    const episode = rootGetters.currentEpisode
     commit(LOAD_PLAYLISTS_START)
-    playlistsApi.getPlaylists(currentProduction, (err, playlists) => {
+    playlistsApi.getPlaylists(production, episode, (err, playlists) => {
       if (err) commit(LOAD_PLAYLISTS_ERROR)
       else commit(LOAD_PLAYLISTS_END, playlists)
       if (callback) callback(err)

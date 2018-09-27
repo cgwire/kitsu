@@ -115,6 +115,7 @@ import {
 
   COMPUTE_SEQUENCE_STATS,
   COMPUTE_EPISODE_STATS,
+  SET_EPISODE_STATS,
 
   RESET_ALL
 } from '../mutation-types'
@@ -174,6 +175,7 @@ const initialState = {
   episodeStats: {},
 
   currentEpisode: null,
+  episodeValidationColumns: [],
 
   isFps: false,
   isFrameIn: false,
@@ -264,6 +266,8 @@ const getters = {
   sequenceListScrollPosition: state => state.sequenceListScrollPosition,
   episodeListScrollPosition: state => state.episodeListScrollPosition,
 
+  episodeValidationColumns: state => state.episodeValidationColumns,
+
   shotsByEpisode: state => {
     const shotsBySequence = []
     let sequenceShots = []
@@ -312,12 +316,23 @@ const actions = {
     })
   },
 
-  loadShots ({ commit, state, rootGetters }, callback) {
+  loadShots ({ commit, dispatch, state, rootGetters }, callback) {
     const production = rootGetters.currentProduction
     const userFilters = rootGetters.userFilters
     const taskTypeMap = rootGetters.taskTypeMap
     const personMap = rootGetters.personMap
-    const episode = rootGetters.currentEpisode
+    const isTVShow = rootGetters.isTVShow
+    const episodeId = rootGetters.route.params.episode_id
+    let episode = null
+
+    if (episodeId) {
+      dispatch('setCurrentEpisode', episodeId)
+      episode = rootGetters.currentEpisode
+    }
+
+    if (isTVShow && !episode) {
+      return callback()
+    }
 
     commit(LOAD_SHOTS_START)
     shotsApi.getSequences(production, episode, (err, sequences) => {
@@ -330,7 +345,6 @@ const actions = {
               shot.project_name = production.name
               return shot
             })
-            console.log(shots)
             commit(LOAD_SEQUENCES_END, sequences)
             commit(
               LOAD_SHOTS_END,
@@ -621,19 +635,31 @@ const actions = {
   initEpisodes ({ commit, dispatch, state, rootState, rootGetters }) {
     return new Promise((resolve, reject) => {
       const productionId = rootState.route.params.production_id
+      const isTVShow = rootGetters.isTVShow
       dispatch('setLastProductionScreen', 'episodes')
 
       if (state.episodes.length === 0 ||
           state.episodes[0].production_id !== productionId) {
-        dispatch('loadShots', (err) => {
-          if (err) {
-            reject(err)
-          } else {
-            dispatch('computeEpisodeStats')
-            resolve()
-          }
-        })
+        if (isTVShow) {
+          return dispatch('loadEpisodeStats', productionId)
+        } else {
+          dispatch('computEpisodeStats')
+          resolve()
+        }
       }
+    })
+  },
+
+  loadEpisodeStats ({ commit }, productionId) {
+    return new Promise((resolve, reject) => {
+      commit(SET_EPISODE_STATS, {})
+      shotsApi.getEpisodeStats(productionId)
+        .then((episodeStats) => {
+          console.log(episodeStats)
+          commit(SET_EPISODE_STATS, episodeStats)
+          resolve()
+        })
+        .catch(reject)
     })
   },
 
@@ -645,10 +671,15 @@ const actions = {
     commit(SET_EPISODE_LIST_SCROLL_POSITION, scrollPosition)
   },
 
-  computeEpisodeStats ({ commit, rootGetters }) {
+  computeEpisodeStats ({ commit, dispatch, rootGetters }) {
     const taskStatusMap = rootGetters.taskStatusMap
     const taskMap = rootGetters.taskMap
-    commit(COMPUTE_EPISODE_STATS, { taskStatusMap, taskMap })
+    const isTVShow = rootGetters.isTVShow
+    if (!isTVShow) {
+      commit(COMPUTE_EPISODE_STATS, { taskStatusMap, taskMap })
+    } else {
+      dispatch('loadEpisodeStats', rootGetters.currentProduction.id)
+    }
   }
 }
 
@@ -658,7 +689,6 @@ const mutations = {
     cache.shotIndex = {}
     state.shotMap = {}
 
-    state.shotValidationColumns = []
     state.sequences = []
     state.isShotsLoading = true
     state.isShotsLoadingError = false
@@ -1186,8 +1216,20 @@ const mutations = {
   },
 
   [SET_CURRENT_EPISODE] (state, episodeId) {
-    console.log('set current episode', episodeId)
     state.currentEpisode = state.episodeMap[episodeId]
+  },
+
+  [SET_EPISODE_STATS] (state, episodeStats) {
+    const validationColumnsMap = {}
+    Object.keys(episodeStats).forEach((episodeId) => {
+      Object.keys(episodeStats[episodeId]).forEach((taskTypeId) => {
+        validationColumnsMap[taskTypeId] = true
+      })
+    })
+
+    state.episodeStats = episodeStats
+    state.episodeValidationColumns = Object.keys(validationColumnsMap)
+    console.log(state.episodeValidationColumns)
   },
 
   [RESET_ALL] (state) {

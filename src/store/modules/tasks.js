@@ -497,6 +497,7 @@ const mutations = {
         }
 
         asset.validations[task.task_type_id] = task.id
+        task.episode_id = asset.source_id
         state.taskMap[task.id] = task
       })
       asset.tasks = asset.tasks.map((task) => {
@@ -527,6 +528,7 @@ const mutations = {
         }
 
         shot.validations[task.task_type_id] = task.id
+        task.episode_id = shot.episode_id
         state.taskMap[task.id] = task
       })
       shot.tasks = shot.tasks.map((task) => {

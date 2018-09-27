@@ -101,7 +101,6 @@ const helpers = {
 
     Object.assign(task, {
       project_id: asset.production_id,
-
       entity_name: `${asset.asset_type_name} / ${asset.name}`,
       entity_type_name: asset.asset_type_name,
       entity: {
@@ -228,9 +227,15 @@ const actions = {
     const production = rootGetters.currentProduction
     const userFilters = rootGetters.userFilters
     const personMap = rootGetters.personMap
+    const episode = rootGetters.currentEpisode
+    const isTVShow = rootGetters.isTVShow
+
+    if (isTVShow && !episode) {
+      return callback()
+    }
 
     commit(LOAD_ASSETS_START)
-    assetsApi.getAssets(production, (err, assets) => {
+    assetsApi.getAssets(production, episode, (err, assets) => {
       if (err) commit(LOAD_ASSETS_ERROR)
       else {
         assets.forEach((asset) => {

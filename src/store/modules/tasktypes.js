@@ -138,9 +138,14 @@ const actions = {
             else {
               commit(LOAD_SEQUENCE_SUBSCRIPTION_END, sequenceIds)
               if (Object.keys(rootGetters.shotMap).length < 2 || force) {
-                dispatch('loadShots', (err) => {
+                dispatch('loadEpisodes', (err) => {
                   if (err) reject(err)
-                  else resolve()
+                  else {
+                    dispatch('loadShots', (err) => {
+                      if (err) reject(err)
+                      else resolve()
+                    })
+                  }
                 })
               } else {
                 resolve()
