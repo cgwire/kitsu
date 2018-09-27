@@ -21,6 +21,7 @@ from .resources import (
     ProjectScenesResource,
     ProjectSequencesResource,
     ProjectEpisodesResource,
+    ProjectEpisodeStatsResource,
 
     EpisodeResource,
     EpisodesResource,
@@ -73,6 +74,10 @@ routes = [
     ("/data/projects/<project_id>/scenes", ProjectScenesResource),
     ("/data/projects/<project_id>/sequences", ProjectSequencesResource),
     ("/data/projects/<project_id>/episodes", ProjectEpisodesResource),
+    (
+        "/data/projects/<project_id>/episodes/stats",
+        ProjectEpisodeStatsResource
+    ),
 
     ("/data/shots/<shot_id>/casting", CastingResource),
 

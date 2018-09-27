@@ -1,3 +1,4 @@
+from sqlalchemy import func
 from sqlalchemy.orm import aliased
 from sqlalchemy.exc import IntegrityError, StatementError
 
@@ -8,6 +9,7 @@ from zou.app.models.project import Project
 from zou.app.models.subscription import Subscription
 from zou.app.models.task import Task
 from zou.app.models.task import association_table as assignees_table
+from zou.app.models.task_status import TaskStatus
 
 from zou.app.services import (
     deletion_service,
@@ -789,3 +791,62 @@ def get_entities_out(shot_id):
     """
     shot = get_shot_raw(shot_id)
     return Entity.serialize_list(shot.entities_out, obj_type="Asset")
+
+
+def get_episode_stats_for_project(project_id):
+    """
+    Retrieve number of tasks by status, task_types and episodes
+    for given project.
+    """
+    Sequence = aliased(Entity, name='sequence')
+    Episode = aliased(Entity, name='episode')
+    query = Task.query \
+        .with_entities(
+            Task.project_id,
+            Episode.id,
+            Task.task_type_id,
+            Task.task_status_id,
+            TaskStatus.short_name,
+            TaskStatus.color
+        ) \
+        .filter(Task.project_id == project_id) \
+        .join(Project, Project.id == Task.project_id) \
+        .join(TaskStatus, TaskStatus.id == Task.task_status_id) \
+        .join(Entity, Entity.id == Task.entity_id) \
+        .join(Sequence, Sequence.id == Entity.parent_id) \
+        .join(Episode, Episode.id == Sequence.parent_id) \
+        .group_by(
+            Task.project_id,
+            Episode.id,
+            Task.task_type_id,
+            Task.task_status_id,
+            TaskStatus.short_name,
+            TaskStatus.color
+        ) \
+        .add_columns(
+            func.count(Task.id)
+        )
+
+    results = {}
+    for (
+        project_id,
+        episode_id,
+        task_type_id,
+        task_status_id,
+        task_status_short_name,
+        task_status_color,
+        task_count
+    ) in query.all():
+        episode_id = str(episode_id)
+        task_type_id = str(task_type_id)
+        task_status_id = str(task_status_id)
+        results.setdefault(episode_id, {})
+        results[episode_id].setdefault(task_type_id, {})
+        results[episode_id][task_type_id].setdefault(task_status_id, {})
+        results[episode_id][task_type_id][task_status_id] = {
+            "name": task_status_short_name,
+            "value": task_count,
+            "color": task_status_color
+        }
+
+    return results
