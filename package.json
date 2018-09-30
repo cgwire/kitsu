@@ -1,25 +1,28 @@
 {
   "name": "kitsu-docs",
   "version": "1.0.0",
-  "description": "Documetation for Kitsu, CG production manager",
+  "description": "Documentation for Kitsu, CG production manager",
   "main": "index.js",
-  "scripts": {},
+  "scripts": {
+    "docs:dev": "vuepress dev docs",
+    "docs:build": "vuepress build docs"
+  },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/cgwire/kitsu.git"
+    "url": "git+https://github.com/cgwire/kitsu.git@docs"
   },
   "keywords": [
     "documentation",
     "cg",
-    "production"
+    "production tracking"
   ],
-  "author": "Frank Rousseau <gelnior@free.fr> (https://blog.addictedtointer.net/)",
+  "author": "CGWire <contact@cg-wire.com> (https://cg-wire.com)",
   "license": "AGPL-3.0",
   "bugs": {
     "url": "https://github.com/cgwire/kitsu/issues"
   },
   "homepage": "https://github.com/cgwire/kitsu#readme",
   "devDependencies": {
-    "gitbook-cli": "2.3.0"
+    "vuepress": "0.14.4"
   }
 }
