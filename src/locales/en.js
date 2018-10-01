@@ -361,7 +361,7 @@ export default {
     new_episodes: 'Add episodes',
     no_casting: 'The shot casting is empty.',
     number: 'shot | shots',
-    manage: 'Manage shots',
+    manage: 'Create shots',
     new_success: 'Shot {name} successfully created.',
     restore_text: 'Are you sure you want to restore {name} into your database?',
     restore_error: 'An error occured while restoring this shot.',

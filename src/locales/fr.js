@@ -333,7 +333,7 @@ export default {
     new_shots: 'Ajouter des plans',
     new_sequences: 'Ajouter des séquences',
     new_episodes: 'Ajouter des épisodes',
-    manage: 'Gérer les plans',
+    manage: 'Créer des plans',
     edit_fail: 'La création ou l\'édition a échoué, une erreur est survenue.',
     new_success: 'Plan {name} créé avec succès.',
     edit_success: 'Plan {name} édité avec succès.',
