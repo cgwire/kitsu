@@ -92,6 +92,7 @@ import {
   SET_SEQUENCE_SEARCH,
   SET_EPISODE_SEARCH,
 
+  RESET_PRODUCTION_PATH,
   SET_CURRENT_PRODUCTION,
   SET_CURRENT_EPISODE,
   CREATE_TASKS_END,
@@ -322,15 +323,13 @@ const actions = {
     const taskTypeMap = rootGetters.taskTypeMap
     const personMap = rootGetters.personMap
     const isTVShow = rootGetters.isTVShow
-    const episodeId = rootGetters.route.params.episode_id
-    let episode = null
-
-    if (episodeId) {
-      dispatch('setCurrentEpisode', episodeId)
-      episode = rootGetters.currentEpisode
-    }
+    const episode = rootGetters.currentEpisode
 
     if (isTVShow && !episode) {
+      return callback()
+    }
+
+    if (state.isShotsLoading) {
       return callback()
     }
 
@@ -628,8 +627,11 @@ const actions = {
     commit(COMPUTE_SEQUENCE_STATS, { taskStatusMap, taskMap })
   },
 
-  setCurrentEpisode ({ commit }, episodeId) {
+  setCurrentEpisode ({ commit, rootGetters }, episodeId) {
     commit(SET_CURRENT_EPISODE, episodeId)
+
+    const productionId = rootGetters.currentProduction.id
+    commit(RESET_PRODUCTION_PATH, { productionId, episodeId })
   },
 
   initEpisodes ({ commit, dispatch, state, rootState, rootGetters }) {
@@ -655,7 +657,6 @@ const actions = {
       commit(SET_EPISODE_STATS, {})
       shotsApi.getEpisodeStats(productionId)
         .then((episodeStats) => {
-          console.log(episodeStats)
           commit(SET_EPISODE_STATS, episodeStats)
           resolve()
         })
@@ -1229,7 +1230,6 @@ const mutations = {
 
     state.episodeStats = episodeStats
     state.episodeValidationColumns = Object.keys(validationColumnsMap)
-    console.log(state.episodeValidationColumns)
   },
 
   [RESET_ALL] (state) {

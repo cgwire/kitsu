@@ -231,6 +231,11 @@ const actions = {
     const isTVShow = rootGetters.isTVShow
 
     if (isTVShow && !episode) {
+      if (callback) return callback()
+      else return null
+    }
+
+    if (state.isAssetsLoading) {
       return callback()
     }
 
