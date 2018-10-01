@@ -12,7 +12,7 @@
               class="button is-link"
               :to="{name: 'change-avatar'}"
             >
-            change avatar
+            {{ $t('profile.change_avatar') }}
             </router-link>
           </p>
           <h1>
@@ -228,7 +228,9 @@ export default {
       return [{name: 'Animation'}, {name: 'Modeling'}]
     },
     timezones () {
-      return moment.tz.names()
+      return moment.tz.names().filter((timezone) => {
+        return timezone.indexOf('/') > 0 && timezone.indexOf('Etc') < 0
+      })
     }
   },
 
@@ -305,6 +307,7 @@ export default {
   background: #EEEEEE;
   width: 100%;
   flex: 1 1 auto;
+  height: 100%;
 }
 
 .profile-content {
