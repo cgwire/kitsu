@@ -37,20 +37,6 @@
               {{ $t('breakdown.select_shot') }}
             </em>
           </div>
-          <div class="level-right" v-if="isCurrentUserManager">
-            <button
-              :class="{
-                button: true,
-                'save-button': true,
-                'is-success': true,
-                'is-loading': isSaving
-              }"
-              :disabled="!isCastingDirty"
-              @click="onSaveClicked"
-            >
-              {{ $t('main.save') }}
-            </button>
-          </div>
         </div>
         <error-text
           :align-right="true"
@@ -282,18 +268,22 @@ export default {
 
     addOneAsset (assetId) {
       this.addAssetToCasting({assetId, nbOccurences: 1})
+      this.saveCasting()
     },
 
     addTenAssets (assetId) {
       this.addAssetToCasting({assetId, nbOccurences: 10})
+      this.saveCasting()
     },
 
     removeOneAsset (assetId) {
       this.removeAssetFromCasting({assetId, nbOccurences: 1})
+      this.saveCasting()
     },
 
     removeTenAssets (assetId) {
       this.removeAssetFromCasting({assetId, nbOccurences: 10})
+      this.saveCasting()
     }
   },
 
