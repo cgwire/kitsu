@@ -17,9 +17,6 @@ from zou.app.models.time_spent import TimeSpent
 from zou.app.models.project import Project
 from zou.app.models.entity_type import EntityType
 from zou.app.models.preview_file import PreviewFile
-from zou.app.models.working_file import WorkingFile
-from zou.app.models.output_file import OutputFile
-from zou.app.models.notifications import Notification
 
 from zou.app.utils import fields
 
@@ -495,11 +492,14 @@ def get_person_tasks(person_id, projects, is_done=None):
         .add_columns(
             Project.name,
             Project.has_avatar,
+            Entity.id,
             Entity.name,
             Entity.description,
             Entity.preview_file_id,
+            Entity.source_id,
             EntityType.name,
             Sequence.name,
+            Episode.id,
             Episode.name,
             TaskType.name,
             TaskStatus.name,
@@ -520,11 +520,14 @@ def get_person_tasks(person_id, projects, is_done=None):
         task,
         project_name,
         project_has_avatar,
+        entity_id,
         entity_name,
         entity_description,
         entity_preview_file_id,
+        entity_source_id,
         entity_type_name,
         sequence_name,
+        episode_id,
         episode_name,
         task_type_name,
         task_status_name,
@@ -535,16 +538,25 @@ def get_person_tasks(person_id, projects, is_done=None):
         if entity_preview_file_id is None:
             entity_preview_file_id = ""
 
+        if entity_source_id is None:
+            entity_source_id = ""
+
+        if episode_id is None:
+            episode_id = entity_source_id
+
         task_dict = task.serialize()
         task_dict.update({
             "project_name": project_name,
             "project_id": str(task.project_id),
             "project_has_avatar": project_has_avatar,
+            "entity_id": str(entity_id),
             "entity_name": entity_name,
             "entity_description": entity_description,
             "entity_preview_file_id": str(entity_preview_file_id),
+            "entity_source_id": str(entity_source_id),
             "entity_type_name": entity_type_name,
             "sequence_name": sequence_name,
+            "episode_id": str(episode_id),
             "episode_name": episode_name,
             "task_type_name": task_type_name,
             "task_status_name": task_status_name,

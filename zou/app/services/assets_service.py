@@ -132,6 +132,11 @@ def get_assets_and_tasks(criterions={}, page=1):
         person_id
     ) in query.all():
 
+        if asset.source_id is None:
+            source_id = ""
+        else:
+            source_id = str(asset.source_id)
+
         if asset.id not in asset_map:
             asset_map[asset.id] = {
                 "id": str(asset.id),
@@ -141,7 +146,7 @@ def get_assets_and_tasks(criterions={}, page=1):
                 "asset_type_name": entity_type_name,
                 "asset_type_id": str(asset.entity_type_id),
                 "canceled": asset.canceled,
-                "source_id": str(asset.source_id),
+                "episode_id": source_id,
                 "data": fields.serialize_value(asset.data),
                 "tasks": []
             }
