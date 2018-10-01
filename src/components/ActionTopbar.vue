@@ -16,7 +16,7 @@
               {{ $tc('tasks.assign', nbSelectedTasks, {nbSelectedTasks}) }}
             </div>
             <div class="flexrow-item combobox-item">
-              <people-field :people="people" v-model="person" />
+              <people-field :people="currentTeam" v-model="person" />
             </div>
             <div class="" v-if="isAssignationLoading">
               <spinner :is-white="true" :size="25" />
@@ -300,6 +300,7 @@ export default {
   computed: {
     ...mapGetters([
       'assetMap',
+      'personMap',
       'getPersonOptions',
       'taskStatusOptions',
       'selectedTasks',
@@ -310,8 +311,8 @@ export default {
       'allCustomActionOptions',
       'assetCustomActionOptions',
       'shotCustomActionOptions',
-      'user',
-      'people'
+      'people',
+      'user'
     ]),
 
     isHidden () {
@@ -371,6 +372,16 @@ export default {
 
     selectedPersonId () {
       return this.person ? this.person.id : null
+    },
+
+    currentTeam () {
+      if (this.people.length > 10) {
+        return this.currentProduction.team.map((personId) => {
+          return this.personMap[personId]
+        })
+      } else {
+        return this.people
+      }
     }
   },
 
