@@ -21,6 +21,7 @@ import {
   DELETE_PRODUCTION_ERROR,
   DELETE_PRODUCTION_END,
 
+  RESET_PRODUCTION_PATH,
   SET_CURRENT_PRODUCTION,
   PRODUCTION_PICTURE_FILE_SELECTED,
   PRODUCTION_AVATAR_UPLOADED,
@@ -217,8 +218,15 @@ const actions = {
     })
   },
 
-  setProduction ({ commit }, { productionId, episodeId }) {
-    commit(SET_CURRENT_PRODUCTION, { productionId, episodeId })
+  setProduction ({ commit, rootGetters }, productionId) {
+    commit(SET_CURRENT_PRODUCTION, productionId)
+    if (rootGetters.isTVShow) {
+      const episode = rootGetters.currentEpisode
+      const episodeId = episode ? episode.id : null
+      commit(RESET_PRODUCTION_PATH, { productionId, episodeId })
+    } else {
+      commit(RESET_PRODUCTION_PATH, { productionId })
+    }
   },
 
   storeProductionPicture ({ commit }, formData) {
@@ -397,11 +405,16 @@ const mutations = {
     if (production) production.has_avatar = true
   },
 
-  [SET_CURRENT_PRODUCTION] (state, { productionId, episodeId }) {
+  [SET_CURRENT_PRODUCTION] (state, productionId) {
     const production = state.openProductions.find(
       (production) => production.id === productionId
     )
     state.currentProduction = production
+  },
+
+  [RESET_PRODUCTION_PATH] (state, { productionId, episodeId }) {
+    console.log('RESET_PRODUCTION_PATH', productionId, episodeId)
+
     state.assetsPath = helpers.getProductionComponentPath(
       'assets', productionId, episodeId)
     state.assetTypesPath = helpers.getProductionComponentPath(
