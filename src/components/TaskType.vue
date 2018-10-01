@@ -1,5 +1,20 @@
 <template>
   <div class="page">
+    <div
+      v-if="this.currentTaskType.for_shots"
+    >
+      <router-link :to="shotsPath">
+        {{ $t('tasks.back_to_list') }}
+      </router-link>
+    </div>
+    <div
+      v-else
+    >
+      <router-link :to="assetsPath">
+        {{ $t('tasks.back_to_list') }}
+      </router-link>
+    </div>
+
     <h1 class="subtitle flexrow">
       <task-type-name
         class="flexrow-item"
@@ -141,6 +156,7 @@ export default {
     ...mapGetters([
       'assetMap',
       'assetsByType',
+      'assetsPath',
       'currentEpisode',
       'currentProduction',
       'currentTaskType',
@@ -149,6 +165,7 @@ export default {
       'sequenceSubscriptions',
       'shotsByEpisode',
       'shotMap',
+      'shotsPath',
       'taskTypeMap',
       'taskMap'
     ]),
@@ -223,6 +240,7 @@ export default {
 
   watch: {
     $route () {
+      this.initData(true)
     },
 
     currentProduction () {

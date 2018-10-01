@@ -213,41 +213,11 @@ export default {
     ]),
 
     newAssetPath () {
-      if (this.isTVShow && this.currentEpisode) {
-        return {
-          name: 'episode-new-asset',
-          params: {
-            production_id: this.currentProduction.id,
-            episode_id: this.currentEpisode.id
-          }
-        }
-      } else {
-        return {
-          name: 'new-asset',
-          params: {
-            production_id: this.currentProduction.id
-          }
-        }
-      }
+      return this.getPath('new-asset')
     },
 
     importPath () {
-      if (this.isTVShow && this.currentEpisode) {
-        return {
-          name: 'episode-import-assets',
-          params: {
-            production_id: this.currentProduction.id,
-            episode_id: this.currentEpisode.id
-          }
-        }
-      } else {
-        return {
-          name: 'import-assets',
-          params: {
-            production_id: this.currentProduction.id
-          }
-        }
-      }
+      return this.getPath('import-assets')
     }
   },
 
@@ -262,9 +232,11 @@ export default {
     this.$refs['asset-list'].setScrollPosition(
       this.assetListScrollPosition
     )
-    this.loadAssets((err) => {
-      if (!err) this.handleModalsDisplay()
-    })
+    if (Object.keys(this.assetMap).length < 2) {
+      this.loadAssets((err) => {
+        if (!err) this.handleModalsDisplay()
+      })
+    }
   },
 
   methods: {
@@ -497,27 +469,43 @@ export default {
 
     saveScrollPosition (scrollPosition) {
       this.$store.commit('SET_ASSET_LIST_SCROLL_POSITION', scrollPosition)
+    },
+
+    getPath (section) {
+      let route = {
+        name: section,
+        params: {
+          production_id: this.currentProduction.id
+        }
+      }
+      if (this.isTVShow && this.currentEpisode) {
+        route.name = `episode-${section}`
+        route.episode_id = this.currentEpisode.id
+      }
+      return route
     }
   },
 
   watch: {
-    $route () { this.handleModalsDisplay() },
+    $route () {
+      this.handleModalsDisplay()
+    },
 
     currentProduction () {
       this.$refs['asset-search-field'].setValue('')
       this.$store.commit('SET_ASSET_LIST_SCROLL_POSITION', 0)
 
-      if (!this.isTVShow) {
-        this.clearEpisodes()
-        this.loadAssets((err) => {
-          if (!err) {
-            this.handleModalsDisplay()
-          }
-        })
-      }
+      this.loadAssets((err) => {
+        if (!err) {
+          this.handleModalsDisplay()
+        }
+      })
     },
 
     currentEpisode () {
+      this.$refs['asset-search-field'].setValue('')
+      this.$store.commit('SET_ASSET_LIST_SCROLL_POSITION', 0)
+
       if (this.isTVShow && this.currentEpisode) {
         this.loadAssets((err) => {
           if (!err) {
@@ -529,11 +517,18 @@ export default {
   },
 
   metaInfo () {
-    return {
-      title: `${this.currentProduction.name} | ${this.$t('assets.title')} - Kitsu`
+    if (this.isTVShow) {
+      return {
+        title: `${this.currentProduction ? this.currentProduction.name : ''}` +
+               ` - ${this.currentEpisode ? this.currentEpisode.name : ''}` +
+               ` | ${this.$t('assets.title')} - Kitsu`
+      }
+    } else {
+      return {
+        title: `${this.currentProduction.name} ${this.$t('assets.title')} - Kitsu`
+      }
     }
   }
-
 }
 </script>
 

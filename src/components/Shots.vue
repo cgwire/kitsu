@@ -272,21 +272,11 @@ export default {
       this.shotListScrollPosition
     )
 
-    if (!this.isTVShow) {
-      this.clearEpisodes()
+    if (Object.keys(this.shotMap).length < 2) {
       this.loadShots((err) => {
         this.resizeHeaders()
         if (!err) {
           this.handleModalsDisplay()
-          this.resizeHeaders()
-        }
-      })
-    } else if (this.displayedShots.length === 0) {
-      this.loadShots((err) => {
-        this.resizeHeaders()
-        if (!err) {
-          this.handleModalsDisplay()
-          this.resizeHeaders()
         }
       })
     }
@@ -294,7 +284,6 @@ export default {
 
   methods: {
     ...mapActions([
-      'clearEpisodes',
       'loadShots',
       'loadComment',
       'removeShotSearch',
@@ -543,16 +532,13 @@ export default {
       this.$refs['shot-search-field'].setValue('')
       this.$store.commit('SET_SHOT_LIST_SCROLL_POSITION', 0)
 
-      if (!this.isTVShow) {
-        this.clearEpisodes()
-        this.loadShots((err) => {
+      this.loadShots((err) => {
+        this.resizeHeaders()
+        if (!err) {
+          this.handleModalsDisplay()
           this.resizeHeaders()
-          if (!err) {
-            this.handleModalsDisplay()
-            this.resizeHeaders()
-          }
-        })
-      }
+        }
+      })
     },
 
     currentEpisode () {

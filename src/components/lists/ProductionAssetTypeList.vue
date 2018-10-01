@@ -11,13 +11,7 @@
             :key="columnId"
             v-for="columnId in validationColumns">
             <router-link
-              :to="{
-                name: 'task-type',
-                params: {
-                  production_id: currentProduction.id,
-                  task_type_id: columnId
-                }
-              }"
+              :to="taskTypePath(columnId)"
             >
               {{ taskTypeMap[columnId].name }}
             </router-link>
@@ -136,11 +130,14 @@ export default {
   computed: {
     ...mapGetters([
       'assetTypeSearchText',
+      'currentEpisode',
       'currentProduction',
       'displayedAssetTypesLength',
       'isCurrentUserClient',
+      'isTVShow',
       'taskTypeMap'
     ]),
+
     isEmptyList () {
       return this.entries &&
              this.entries.length === 0 &&
@@ -195,6 +192,24 @@ export default {
 
     setScrollPosition (scrollPosition) {
       this.$refs.body.scrollTop = scrollPosition
+    },
+
+    taskTypePath (taskTypeId) {
+      let route = {
+        name: 'task-type',
+        params: {
+          production_id: this.currentProduction.id,
+          task_type_id: taskTypeId,
+          type: 'assets'
+        }
+      }
+
+      if (this.isTVShow && this.currentEpisode) {
+        route.name = 'episode-task-type'
+        route.params.episode_id = this.currentEpisode.id
+      }
+
+      return route
     }
   }
 }

@@ -49,6 +49,7 @@ export default {
   computed: {
     ...mapGetters([
       'currentEpisode',
+      'currentProduction',
       'isTVShow',
       'taskMap',
       'taskStatusMap',
@@ -111,7 +112,7 @@ export default {
       let route = {
         name: 'task',
         params: {
-          production_id: task.project_id,
+          production_id: this.currentProduction.id,
           task_id: task.id
         }
       }

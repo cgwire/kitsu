@@ -39,30 +39,21 @@
           </router-link>
           <router-link
             class="secondary"
-            :to="{
-              name: 'assets',
-              params: {production_id: production.id}
-            }"
+            :to="assetsPath(production)"
           >
             {{ $t('assets.title') }}
           </router-link>
           -
           <router-link
             class="secondary"
-            :to="{
-              name: 'shots',
-              params: {production_id: production.id}
-            }"
+            :to="shotsPath(production)"
           >
             {{ $t('shots.title') }}
           </router-link>
           -
           <router-link
             class="secondary"
-            :to="{
-              name: 'sequences',
-              params: {production_id: production.id}
-            }"
+            :to="sequencesPath(production)"
           >
             {{ $t('sequences.title') }}
           </router-link>
@@ -175,10 +166,33 @@ export default {
     },
 
     getPath (production) {
-      return {
-        name: this.lastProductionScreen,
-        params: {production_id: production.id}
+      return this.sectionPath(production, this.lastProductionScreen)
+    },
+
+    assetsPath (production) {
+      return this.sectionPath(production, 'assets')
+    },
+
+    shotsPath (production) {
+      return this.sectionPath(production, 'shots')
+    },
+
+    sequencesPath (production) {
+      return this.sectionPath(production, 'sequences')
+    },
+
+    sectionPath (production, section) {
+      let route = {
+        name: section,
+        params: {
+          production_id: production.id
+        }
       }
+      if (production.production_type === 'tvshow') {
+        route.name = `episode-${section}`
+        route.params.episode_id = production.first_episode_id
+      }
+      return route
     },
 
     getThumbnailPath (production) {

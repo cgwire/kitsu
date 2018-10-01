@@ -698,7 +698,6 @@ export default {
       'loadTaskComments',
       'loadTaskSubscribed',
       'subscribeToTask',
-      'setProduction',
       'setCurrentEpisode',
       'unsubscribeFromTask'
     ]),
@@ -746,7 +745,6 @@ export default {
           callback: (err, task) => {
             if (err) console.log(err)
 
-            this.setProduction(task.project_id)
             let loadingFunction = this.loadAssets
 
             if (task.entity_type_name === 'Shot') {
@@ -853,7 +851,7 @@ export default {
       if (!previewId &&
           this.currentTaskPreviews.length > 0 &&
           this.currentTaskPreviews
-         ) {
+      ) {
         previewId = this.currentTaskPreviews[0].id
       }
       const extension = this.extension ? this.extension : 'png'

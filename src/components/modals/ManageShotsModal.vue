@@ -180,9 +180,18 @@ export default {
     active () {
       if (this.active) {
         setTimeout(() => {
-          this.$refs.addEpisodeInput.focus()
+          if (this.isTVShow) {
+            this.$refs.addEpisodeInput.focus()
+          } else {
+            this.$refs.addSequenceInput.focus()
+          }
         }, 100)
       }
+    },
+
+    sequences () {
+      this.displayedSequences = this.sequences
+      this.displayedShots = []
     }
   },
 
@@ -192,6 +201,7 @@ export default {
       'episodes',
       'sequences',
       'shotMap',
+      'sequences',
       'isTVShow',
       'currentProduction'
     ]),
@@ -254,12 +264,6 @@ export default {
             episode_id: episodeId
           }
         })
-
-        setTimeout(() => {
-          console.log('cool', this.sequences)
-          this.displayedSequences = this.sequences
-          this.displayedShots = []
-        }, 1000)
       }
     },
 
@@ -295,7 +299,11 @@ export default {
     addSequence () {
       if (this.isAddSequenceAllowed) {
         const sequenceName = this.names.sequence
-        if (sequenceName.length > 0 && this.selectedEpisodeId) {
+        console.log(sequenceName)
+        if (
+          sequenceName.length > 0 &&
+          (this.selectedEpisodeId || !this.isTVShow)
+        ) {
           this.loading.addSequence = true
           const sequence = {
             name: this.names.sequence,

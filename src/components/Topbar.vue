@@ -198,7 +198,10 @@ export default {
     },
 
     isEpisodeContext () {
-      return this.isTVShow && this.isShotPage && this.episodes.length > 0
+      return this.isTVShow &&
+             this.isShotPage &&
+             // Do not display combobox if there is no episode
+             this.episodes.length > 0
     },
 
     navigationOptions () {
@@ -212,7 +215,7 @@ export default {
         {label: this.$t('playlists.title'), value: 'playlists'},
         {label: this.$t('people.team'), value: 'team'}
       ]
-      if (!this.isTVShow) {
+      if (!this.isTVShow) { // Remove episode Section from the list.
         options.splice(3, 1)
       }
       return options
@@ -252,29 +255,31 @@ export default {
           name = segments[5]
         }
       }
+
       return name
     },
 
     updateRoute () {
       let section = this.currentProjectSection
-      if (section === 'asset-types') {
-        section = 'assetTypes'
-      }
+      if (section === 'asset-types') section = 'assetTypes'
 
-      if (section === 'task-types') {
+      // Exception for task-type pages
+      if (this.$route.params.task_type_id) {
         if (this.isTVShow) {
           this.$router.push({
             name: 'episode-task-type',
             params: {
               production_id: this.currentProduction.id,
-              episode_id: this.currentEpisode.id
+              episode_id: this.currentEpisode.id,
+              task_type_id: this.$route.params.task_type_id
             }
           })
         } else {
           this.$router.push({
             name: 'task-type',
             params: {
-              production_id: this.currentProduction.id
+              production_id: this.currentProduction.id,
+              task_type_id: this.$route.params.task_type_id
             }
           })
         }
@@ -297,16 +302,27 @@ export default {
             }
           })
         }
+
+      // General case
+      } else if (
+        this.currentProduction &&
+        ((this.isTVShow && this.currentEpisode) || !this.isTVShow) &&
+        section &&
+        !this.$route.params.shot_id &&
+        !this.$route.params.asset_id &&
+        !this.$route.params.task_id
+      ) {
+        this.$router.push(this[`${section}Path`])
+      } else if (
+        (
+          this.$route.params.shot_id ||
+          this.$route.params.asset_id ||
+          this.$route.params.task_id
+        ) &&
+        section !== this.getCurrentSectionFromRoute()
+      ) {
+        this.$router.push(this[`${section}Path`])
       } else {
-        if (
-          this.currentProduction &&
-          !this.$route.params.asset_id &&
-          !this.$route.params.shot_id
-        ) {
-          if ((this.isTVShow && this.currentEpisode) || !this.isTVShow) {
-            if (section) this.$router.push(this[`${section}Path`])
-          }
-        }
       }
     }
   },
@@ -327,38 +343,31 @@ export default {
     },
 
     currentProductionId () {
-      this.setProduction({
-        productionId: `${this.currentProductionId}`
-      })
-
+      this.setProduction(`${this.currentProductionId}`)
+      this.clearEpisodes()
       if (this.isTVShow) {
-        this.clearEpisodes()
         this.loadEpisodes(() => {
           if (!this.currentEpisode) { // When production is empty
             this.currentProjectSection = this.getCurrentSectionFromRoute()
-            this.updateRoute()
           } else {
             this.currentEpisodeId =
-              this.$route.params.episode_id ||
-              (this.currentEpisode ? this.currentEpisode.id : null)
+              this.$route.params.episode_id || this.currentEpisode.id
             this.currentProjectSection = this.getCurrentSectionFromRoute()
-            this.updateRoute()
           }
         })
       } else {
         this.currentProjectSection = this.getCurrentSectionFromRoute()
+        this.currentEpisodeId = null
         this.updateRoute()
       }
     },
 
     currentEpisodeId () {
-      if (this.currentEpisode) {
+      if (this.isTVShow) {
         this.setCurrentEpisode(`${this.currentEpisodeId}`)
-        this.setProduction({
-          productionId: `${this.currentProductionId}`,
-          episodeId: `${this.currentEpisodeId}`
-        })
         this.updateRoute()
+      } else {
+        this.clearEpisodes()
       }
     },
 

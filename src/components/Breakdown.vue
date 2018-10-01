@@ -201,38 +201,28 @@ export default {
     ]),
 
     reset () {
-      this.shotId = this.$route.params.shot_id
-
-      // Episode change
-      if (
-        this.currentEpisode &&
-        this.episodeId !== this.$route.params.episode_id
-      ) {
-        this.reloadShots()
-      // Data are already there, update breakdown
-      } else if (this.currentEpisode) {
-        this.episodeId = this.currentEpisode.id
-        this.setCastingEpisode(this.episodeId)
-      }
+      this.reloadShots()
     },
 
     reloadShots () {
-      this.shotId = this.$route.params.shot_id
-
       this.loadShots(() => {
-        this.isLoading = true
-        this.setCastingShot({
-          shotId: this.shotId,
-          callback: () => {
-            this.isLoading = false
+        if (this.isTVShow) {
+          if (this.currentEpisode) {
             this.episodeId = this.currentEpisode.id
-            if (this.isTVShow) {
-              this.setCastingEpisode(this.episodeId)
-            }
-            if (Object.keys(this.assetMap).length === 0) {
-              this.loadAssets()
-            }
           }
+
+          this.setCastingEpisode(this.episodeId)
+        }
+
+        this.loadAssets(() => {
+          this.isLoading = true
+          this.shotId = this.$route.params.shot_id
+          this.setCastingShot({
+            shotId: this.shotId,
+            callback: () => {
+              this.isLoading = false
+            }
+          })
         })
       })
     },
@@ -295,13 +285,6 @@ export default {
       }
     },
 
-    episodeId () {
-      if (this.episodeId !== this.$route.params.episode_id) {
-        console.log('breakdown episodeId', 'loadShots')
-        this.reloadShots()
-      }
-    },
-
     shotId () {
       if (this.shotId) {
         this.isLoading = true
@@ -318,6 +301,12 @@ export default {
       this.setCastingSequence(this.sequenceId)
     },
 
+    episodeId () {
+      if (this.episodeId !== this.$route.params.episode_id) {
+        // this.reloadShots()
+      }
+    },
+
     castingSequenceOptions () {
       if (this.castingSequenceOptions.length > 0) {
         const shot = this.shotMap[this.shotId]
@@ -332,7 +321,6 @@ export default {
     },
 
     currentProduction () {
-      console.log('breakdown current production', 'loadShots')
       this.reset()
     },
 

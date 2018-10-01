@@ -600,22 +600,15 @@ export default {
     }
   },
 
-  created () {
-    if (Object.keys(this.shotMap).length === 0) {
-      this.loadShotsData()
-    } else {
-      if (this.episodes.length > 0) {
-        this.setAdditionSequences()
-        this.setCurrentPlaylist(this.loadPlaylistsData)
-      }
-    }
+  mounted () {
+    this.setAdditionSequences()
+    this.loadShotsData(() => {
+      this.resetPlaylist()
+    })
   },
 
   watch: {
     $route () {
-      this.loadShotsData(() => {
-        this.resetPlaylist()
-      })
     },
 
     sequenceId () {
@@ -624,6 +617,9 @@ export default {
 
     currentEpisode () {
       this.setAdditionSequences()
+      this.loadShotsData(() => {
+        this.resetPlaylist()
+      })
     }
   },
 

@@ -95,7 +95,7 @@
           v-for="(asset, i) in group"
         >
           <td class="episode" v-if="isTVShow">
-            {{ episodeMap[asset.source_id] ? episodeMap[asset.source_id].name : $t('main.all') }}
+            {{ episodeMap[asset.episode_id] ? episodeMap[asset.episode_id].name : $t('main.all') }}
           </td>
           <td class="thumbnail">
             <entity-thumbnail :entity="asset" />
@@ -314,7 +314,7 @@ export default {
     },
 
     loadMoreAssets () {
-      console.log('load more assets')
+      // console.log('load more assets')
       this.displayMoreAssets()
     },
 
@@ -368,7 +368,7 @@ export default {
         }
       }
 
-      if (this.isTVShow) {
+      if (this.isTVShow && this.currentEpisode) {
         route.name = `episode-task-type`
         route.params.episode_id = this.currentEpisode.id
       }
