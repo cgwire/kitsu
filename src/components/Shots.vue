@@ -331,10 +331,7 @@ export default {
           if (!err) {
             this.loading.edit = false
             this.modals.isNewDisplayed = false
-            this.$router.push({
-              name: 'shots',
-              params: {production_id: this.currentProduction.id}
-            })
+            this.$router.push(this.shotsPath)
           } else {
             this.loading.edit = false
             this.editShot.isCreateError = true
@@ -348,10 +345,7 @@ export default {
         shot: this.shotToDelete,
         callback: (err) => {
           if (!err) {
-            this.$router.push({
-              name: 'shots',
-              params: {production_id: this.currentProduction.id}
-            })
+            this.$router.push(this.shotsPath)
           }
         }
       })
@@ -362,10 +356,7 @@ export default {
         shot: this.shotToRestore,
         callback: (err) => {
           if (!err) {
-            this.$router.push({
-              name: 'shots',
-              params: {production_id: this.currentProduction.id}
-            })
+            this.$router.push(this.shotsPath)
           }
         }
       })
@@ -384,10 +375,7 @@ export default {
             this.errors.creatingTasks = true
           } else {
             this.modals.isCreateTasks = false
-            this.$router.push({
-              name: 'shots',
-              params: {production_id: this.currentProduction.id}
-            })
+            this.$router.push(this.shotsPath)
             this.loadShots()
           }
         }

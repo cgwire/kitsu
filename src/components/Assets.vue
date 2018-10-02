@@ -285,10 +285,7 @@ export default {
           if (!err) {
             this.loading.edit = false
             this.modals.isNewDisplayed = false
-            this.$router.push({
-              name: 'assets',
-              params: {production_id: this.currentProduction.id}
-            })
+            this.$router.push(this.assetsPath)
           } else {
             this.loading.edit = false
             this.editAsset.isCreateError = true
@@ -302,12 +299,7 @@ export default {
         asset: this.assetToDelete,
         callback: (err) => {
           if (!err) {
-            this.$router.push({
-              name: 'assets',
-              params: {
-                production_id: this.currentProduction.id
-              }
-            })
+            this.$router.push(this.assetsPath)
           }
         }
       })
@@ -335,10 +327,7 @@ export default {
             this.errors.creatingTasks = true
           } else {
             this.modals.isCreateTasks = false
-            this.$router.push({
-              name: 'assets',
-              params: {production_id: this.currentProduction.id}
-            })
+            this.$router.push(this.assetsPath)
             this.loadAssets()
           }
         }
@@ -428,10 +417,7 @@ export default {
         if (!err) {
           this.loading.importing = false
           this.$store.dispatch('loadAssets')
-          this.$router.push({
-            name: 'assets',
-            params: {production_id: this.currentProduction.id}
-          })
+          this.$router.push(this.assetsPath)
         } else {
           this.loading.importing = false
           this.errors.importing = true
