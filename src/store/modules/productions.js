@@ -124,8 +124,8 @@ const getters = {
   },
 
   isTVShow: (state) => {
-    const currentProduction = getters.currentProduction(state)
-    return currentProduction.production_type === 'tvshow'
+    const production = getters.currentProduction(state)
+    return production && production.production_type === 'tvshow'
   },
 
   productionStatusOptions: state => state.productionStatus.map(
