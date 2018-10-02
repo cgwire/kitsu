@@ -400,7 +400,7 @@ def create_asset(
     name,
     description,
     data,
-    source_id
+    source_id=None
 ):
     """
     Create a new asset from given parameters.
