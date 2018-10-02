@@ -1,4 +1,6 @@
 from zou.app.models.project import Project
+from zou.app.models.entity import Entity
+from zou.app.models.entity_type import EntityType
 from zou.app.models.person import Person
 from zou.app.models.project_status import ProjectStatus
 from zou.app.services.exception import ProjectNotFoundException
@@ -20,7 +22,23 @@ def open_projects(name=None):
     if name is not None:
         query = query.filter(Project.name == name)
 
-    return fields.serialize_value(query.all())
+    projects = []
+    for project in query.all():
+        project_dict = project.serialize()
+        if project.production_type == "tvshow":
+            first_episode = Entity.query \
+                .join(EntityType) \
+                .filter(EntityType.name == 'Episode') \
+                .filter(Entity.project_id == project.id) \
+                .order_by(Entity.name) \
+                .first()
+            if first_episode is not None:
+                project_dict["first_episode_id"] = \
+                    fields.serialize_value(first_episode.id)
+
+        projects.append(project_dict)
+
+    return projects
 
 
 def get_projects():

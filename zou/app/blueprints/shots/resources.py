@@ -292,6 +292,19 @@ class ProjectEpisodesResource(Resource):
         return args["name"]
 
 
+class ProjectEpisodeStatsResource(Resource):
+
+    @jwt_required
+    def get(self, project_id):
+        """
+        Retrieve number of tasks by status, task_types and episodes
+        for given project.
+        """
+        projects_service.get_project(project_id)
+        user_service.check_project_access(project_id)
+        return shots_service.get_episode_stats_for_project(project_id)
+
+
 class EpisodeResource(Resource):
 
     @jwt_required

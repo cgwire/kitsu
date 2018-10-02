@@ -58,11 +58,18 @@ class AssetsAndTasksResource(Resource):
         """
         Retrieve all entities that are not shot or sequence.
         Adds project name and asset type name and all related tasks.
+        If episode_id is given as parameter, it returns assets not linked
+        to an episode and assets linked to given episode.
         """
         criterions = query.get_query_criterions_from_request(request)
         page = query.get_page_from_request(request)
         user_service.check_project_access(criterions.get("project_id", None))
-        return assets_service.get_assets_and_tasks(criterions, page)
+        assets = assets_service.get_assets_and_tasks(criterions, page)
+        if "episode_id" in criterions:
+            criterions["episode_id"] = None
+            assets += assets_service.get_assets_and_tasks(criterions, page)
+
+        return assets
 
 
 class AssetTypeResource(Resource):
@@ -168,7 +175,8 @@ class NewAssetResource(Resource):
         (
             name,
             description,
-            data
+            data,
+            source_id
         ) = self.get_arguments()
 
         user_service.check_manager_project_access(project_id)
@@ -177,7 +185,8 @@ class NewAssetResource(Resource):
             asset_type_id,
             name,
             description,
-            data
+            data,
+            source_id
         )
         return asset, 201
 
@@ -190,11 +199,13 @@ class NewAssetResource(Resource):
         )
         parser.add_argument("description")
         parser.add_argument("data", type=dict, default={})
+        parser.add_argument("source_id", default=None)
         args = parser.parse_args()
         return (
             args["name"],
             args.get("description", ""),
-            args["data"]
+            args["data"],
+            args["source_id"]
         )
 
 

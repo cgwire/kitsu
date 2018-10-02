@@ -119,6 +119,9 @@ def get_assets_and_tasks(criterions={}, page=1):
     if "project_id" in criterions:
         query = query.filter(Entity.project_id == criterions["project_id"])
 
+    if "episode_id" in criterions:
+        query = query.filter(Entity.source_id == criterions["episode_id"])
+
     for (
         asset,
         entity_type_name,
@@ -129,6 +132,11 @@ def get_assets_and_tasks(criterions={}, page=1):
         person_id
     ) in query.all():
 
+        if asset.source_id is None:
+            source_id = ""
+        else:
+            source_id = str(asset.source_id)
+
         if asset.id not in asset_map:
             asset_map[asset.id] = {
                 "id": str(asset.id),
@@ -138,6 +146,7 @@ def get_assets_and_tasks(criterions={}, page=1):
                 "asset_type_name": entity_type_name,
                 "asset_type_id": str(asset.entity_type_id),
                 "canceled": asset.canceled,
+                "episode_id": source_id,
                 "data": fields.serialize_value(asset.data),
                 "tasks": []
             }
@@ -390,14 +399,14 @@ def create_asset(
     asset_type_id,
     name,
     description,
-    data
+    data,
+    source_id=None
 ):
     """
     Create a new asset from given parameters.
     """
     project = projects_service.get_project_raw(project_id)
     asset_type = get_asset_type_raw(asset_type_id)
-
     asset = Entity.create(
         project_id=project_id,
         entity_type_id=asset_type_id,

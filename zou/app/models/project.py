@@ -34,6 +34,7 @@ class Project(db.Model, BaseMixin, SerializerMixin):
     fps = db.Column(db.String(10))
     ratio = db.Column(db.String(10))
     resolution = db.Column(db.String(12))
+    production_type = db.Column(db.String(20), default="short")
 
     project_status_id = db.Column(
         UUIDType(binary=False),

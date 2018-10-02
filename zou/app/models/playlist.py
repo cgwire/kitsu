@@ -15,11 +15,13 @@ class Playlist(db.Model, BaseMixin, SerializerMixin):
     shots = db.Column(JSONB)
 
     project_id = db.Column(UUIDType(binary=False), db.ForeignKey('project.id'))
+    episode_id = db.Column(UUIDType(binary=False), db.ForeignKey('entity.id'))
 
     __table_args__ = (
         db.UniqueConstraint(
             'name',
             'project_id',
+            'episode_id',
             name='playlist_uc'
         ),
     )
