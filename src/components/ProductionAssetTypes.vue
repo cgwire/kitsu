@@ -1,15 +1,12 @@
 <template>
   <div class="asset-types page fixed-page">
     <div class="asset-type-list-header page-header">
-      <page-title :text="$t('asset_types.title')"></page-title>
-
       <div class="filters-area">
         <search-field
           ref="asset-type-search-field"
           @change="onSearchChange"
           placeholder="ex: chars, agent327"
-        >
-        </search-field>
+        />
       </div>
     </div>
 
@@ -21,7 +18,7 @@
       :validation-columns="assetValidationColumns"
       :asset-type-stats="assetTypeStats"
       @scroll="saveScrollPosition"
-    ></production-asset-type-list>
+    />
   </div>
 </template>
 
@@ -49,10 +46,12 @@ export default {
 
   computed: {
     ...mapGetters([
+      'assetTypePath',
       'assetTypeStats',
       'assetTypeSearchText',
       'assetTypeListScrollPosition',
       'assetValidationColumns',
+      'currentEpisode',
       'currentProduction',
       'displayedAssetTypes',
       'isAssetsLoading',
@@ -61,25 +60,25 @@ export default {
   },
 
   created () {
-    this.initAssetTypes()
-      .then(this.handleModalsDisplay)
   },
 
   mounted () {
     this.setDefaultSearchText()
     this.setDefaultListScrollPosition()
+    this.initAssetTypes()
+      .then(this.handleModalsDisplay)
   },
 
   methods: {
     ...mapActions([
       'computeAssetTypeStats',
       'initAssetTypes',
+      'isTVShow',
       'loadAssets',
       'loadComment',
       'setAssetTypeSearch',
       'setAssetTypeListScrollPosition',
-      'setLastProductionScreen',
-      'setProduction'
+      'setLastProductionScreen'
     ]),
 
     setDefaultSearchText () {
@@ -97,10 +96,7 @@ export default {
     },
 
     navigateToList () {
-      this.$router.push({
-        name: 'production-asset-types',
-        params: {production_id: this.currentProduction.id}
-      })
+      this.$router.push(this.assetTypesPath)
     },
 
     onSearchChange (event) {
@@ -115,17 +111,19 @@ export default {
 
   watch: {
     currentProduction () {
-      const productionId = this.$route.params.production_id
-      if (this.currentProduction.id !== productionId) {
-        const newPath = {
-          name: 'production-asset-types',
-          params: {production_id: this.currentProduction.id}
-        }
+      this.$refs['asset-type-search-field'].setValue('')
+      this.setAssetTypeListScrollPosition(0)
 
+      this.loadAssets(() => {
+        this.computeAssetTypeStats()
+      })
+    },
+
+    currentEpisode () {
+      if (this.isTVShow) {
         this.$refs['asset-type-search-field'].setValue('')
         this.setAssetTypeListScrollPosition(0)
 
-        this.$router.push(newPath)
         this.loadAssets(() => {
           this.computeAssetTypeStats()
         })
@@ -149,7 +147,7 @@ export default {
 
   metaInfo () {
     return {
-      title: `${this.currentProduction.name} ${this.$t('asset_types.title')} - Kitsu`
+      title: `${this.currentProduction.name} | ${this.$t('asset_types.title')} - Kitsu`
     }
   }
 }
@@ -158,5 +156,9 @@ export default {
 <style scoped>
 .data-list {
   margin-top: 0;
+}
+
+.filters-area {
+  margin-bottom: 2em;
 }
 </style>

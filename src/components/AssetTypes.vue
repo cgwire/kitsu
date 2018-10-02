@@ -1,27 +1,14 @@
 <template>
   <div class="asset-types page fixed-page">
     <div class="level page-header">
-      <div class="level-left">
-        <page-title :text="$t('asset_types.title')"></page-title>
-      </div>
-      <div class="level-right">
-        <div class="level-item">
-          <button-link
-            class="level-item"
-            icon="plus"
-            :text="$t('asset_types.new_asset_type')"
-            path="/asset-types/new"
-          >
-          </button-link>
-        </div>
-      </div>
     </div>
 
     <asset-type-list
+      class="mt2"
       :entries="assetTypes"
       :is-loading="isAssetTypesLoading"
       :is-error="isAssetTypesLoadingError"
-    ></asset-type-list>
+    />
 
     <edit-asset-type-modal
       :active="modals.isNewDisplayed"
@@ -30,8 +17,7 @@
       :cancel-route="'/asset-types'"
       :asset-type-to-edit="assetTypeToEdit"
       @confirm="confirmEditAssetType"
-    >
-    </edit-asset-type-modal>
+    />
 
     <delete-modal
       :active="modals.isDeleteDisplayed"
@@ -41,9 +27,7 @@
       :text="deleteText()"
       :error-text="$t('asset_types.delete_error')"
       @confirm="confirmDeleteAssetType"
-    >
-    </delete-modal>
-
+    />
   </div>
 </template>
 

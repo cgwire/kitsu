@@ -22,7 +22,7 @@
     </table>
   </div>
 
-  <div class="table-body" v-scroll="onBodyScroll">
+  <div class="table-body" v-scroll="onBodyScroll" v-if="!isEmpty">
     <table class="table">
       <tbody>
         <tr v-for="entry in entries" :key="entry.id">
@@ -45,6 +45,12 @@
         </tr>
       </tbody>
     </table>
+  </div>
+
+  <div class="table-body" v-if="isEmpty">
+    <p class="has-text-centered mt2" v-if="isEmpty">
+      {{ $t('people.empty_team') }}
+    </p>
   </div>
 
   <p class="has-text-centered footer-info">
@@ -74,7 +80,11 @@ export default {
   computed: {
     ...mapGetters([
       'isCurrentUserAdmin'
-    ])
+    ]),
+
+    isEmpty () {
+      return !this.entries || this.entries.length === 0
+    }
   },
 
   methods: {

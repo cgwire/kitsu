@@ -21,6 +21,7 @@ import {
   DELETE_PRODUCTION_ERROR,
   DELETE_PRODUCTION_END,
 
+  RESET_PRODUCTION_PATH,
   SET_CURRENT_PRODUCTION,
   PRODUCTION_PICTURE_FILE_SELECTED,
   PRODUCTION_AVATAR_UPLOADED,
@@ -66,12 +67,24 @@ const initialState = {
 let state = {...initialState}
 
 const helpers = {
-  getProductionComponentPath (routeName, productionId) {
-    return {
-      name: routeName,
-      params: {
-        production_id: productionId
+  getProductionComponentPath (routeName, productionId, episodeId) {
+    if (episodeId) {
+      return {
+        name: 'episode-' + routeName,
+        params: {
+          episode_id: episodeId,
+          production_id: productionId
+        }
       }
+    } else if (productionId) {
+      return {
+        name: routeName,
+        params: {
+          production_id: productionId
+        }
+      }
+    } else {
+      return {name: 'open-productions'}
     }
   }
 }
@@ -109,6 +122,12 @@ const getters = {
       return null
     }
   },
+
+  isTVShow: (state) => {
+    const production = getters.currentProduction(state)
+    return production && production.production_type === 'tvshow'
+  },
+
   productionStatusOptions: state => state.productionStatus.map(
     (status) => { return { label: status.name, value: status.id } }
   ),
@@ -146,7 +165,7 @@ const actions = {
       else {
         commit(LOAD_OPEN_PRODUCTIONS_END, productions)
         if (!state.currentProduction && productions.length > 0) {
-          commit(SET_CURRENT_PRODUCTION, productions[0].id)
+          commit(SET_CURRENT_PRODUCTION, { productionId: productions[0].id })
         }
       }
       if (callback) callback(err)
@@ -199,8 +218,15 @@ const actions = {
     })
   },
 
-  setProduction ({commit}, productionId) {
+  setProduction ({ commit, rootGetters }, productionId) {
     commit(SET_CURRENT_PRODUCTION, productionId)
+    if (rootGetters.isTVShow) {
+      const episode = rootGetters.currentEpisode
+      const episodeId = episode ? episode.id : null
+      commit(RESET_PRODUCTION_PATH, { productionId, episodeId })
+    } else {
+      commit(RESET_PRODUCTION_PATH, { productionId })
+    }
   },
 
   storeProductionPicture ({ commit }, formData) {
@@ -379,27 +405,32 @@ const mutations = {
     if (production) production.has_avatar = true
   },
 
-  [SET_CURRENT_PRODUCTION] (state, currentProductionId) {
+  [SET_CURRENT_PRODUCTION] (state, productionId) {
     const production = state.openProductions.find(
-      (production) => production.id === currentProductionId
+      (production) => production.id === productionId
     )
     state.currentProduction = production
+  },
+
+  [RESET_PRODUCTION_PATH] (state, { productionId, episodeId }) {
+    console.log('RESET_PRODUCTION_PATH', productionId, episodeId)
+
     state.assetsPath = helpers.getProductionComponentPath(
-      'assets', currentProductionId)
+      'assets', productionId, episodeId)
     state.assetTypesPath = helpers.getProductionComponentPath(
-      'production-asset-types', currentProductionId)
+      'production-asset-types', productionId, episodeId)
     state.shotsPath = helpers.getProductionComponentPath(
-      'shots', currentProductionId)
+      'shots', productionId, episodeId)
     state.sequencesPath = helpers.getProductionComponentPath(
-      'sequences', currentProductionId)
+      'sequences', productionId, episodeId)
     state.episodesPath = helpers.getProductionComponentPath(
-      'episodes', currentProductionId)
+      'episodes', productionId)
     state.breakdownPath = helpers.getProductionComponentPath(
-      'breakdown', currentProductionId)
+      'breakdown', productionId, episodeId)
     state.playlistsPath = helpers.getProductionComponentPath(
-      'playlists', currentProductionId)
+      'playlists', productionId, episodeId)
     state.teamPath = helpers.getProductionComponentPath(
-      'team', currentProductionId)
+      'team', productionId)
   },
 
   [TEAM_ADD_PERSON] (state, personId) {

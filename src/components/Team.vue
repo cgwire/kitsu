@@ -1,14 +1,5 @@
 <template>
   <div class="people page fixed-page">
-    <div class="level page-header">
-      <div class="level-left">
-        <page-title
-          class="flexrow-item"
-          :text="$t('people.team')"
-        />
-      </div>
-    </div>
-
     <div class="flexrow mt2 add-people">
       <span class="flexrow-item people-field-label">
         {{ $t('people.add_member_to_team') }}
@@ -85,8 +76,7 @@ export default {
 
   methods: {
     ...mapActions([
-      'addPersonToTeam',
-      'setProduction'
+      'addPersonToTeam'
     ]),
 
     addPerson () {
@@ -103,10 +93,6 @@ export default {
   },
 
   mounted () {
-    const currentProductionId = this.$route.params.production_id
-    if (this.currentProduction.id !== currentProductionId) {
-      this.setProduction(currentProductionId)
-    }
   },
 
   watch: {
@@ -114,7 +100,7 @@ export default {
 
   metaInfo () {
     return {
-      title: `${this.$t('people.team')} - Kitsu`
+      title: `${this.currentProduction.name} | ${this.$t('people.team')} - Kitsu`
     }
   }
 }

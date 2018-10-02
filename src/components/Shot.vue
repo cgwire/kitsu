@@ -2,6 +2,13 @@
 <div class="page">
 
   <div class="page-header">
+    <router-link
+      :to="shotsPath"
+      class="flexrow-item has-text-centered"
+    >
+      {{ $t('tasks.back_to_list')}}
+    </router-link>
+
     <div class="flexrow">
       <div class="flexrow-item">
         <entity-thumbnail
@@ -10,26 +17,25 @@
           :empty-width="100"
           :empty-height="66.66"
           v-if="currentShot"
-        >
-        </entity-thumbnail>
+        />
       </div>
       <div class="flexrow-item">
-        <page-title class="entity-title" :text="title"></page-title>
+        <page-title class="entity-title" :text="title" />
      </div>
     </div>
   </div>
 
   <div class="columns">
     <div class="column task-column">
-    <page-subtitle :text="$t('shots.tasks')"></page-subtitle>
+    <page-subtitle :text="$t('shots.tasks')" />
     <entity-task-list
       :entries="currentShot ? currentShot.tasks : []"
       :is-loading="!currentShot"
       :is-error="false"
-    ></entity-task-list>
+    />
     </div>
     <div class="column">
-      <page-subtitle :text="$t('main.info')"></page-subtitle>
+      <page-subtitle :text="$t('main.info')" />
       <table class="table" v-if="currentShot">
         <tbody>
           <tr v-if="currentShot.data && currentShot.data.fps">
@@ -58,8 +64,7 @@
             <description-cell
               :entry="currentShot"
               :full="true"
-            >
-            </description-cell>
+            />
           </tr>
         </tbody>
       </table>
@@ -67,7 +72,7 @@
   </div>
 
   <div class="shot-casting">
-    <page-subtitle :text="$t('shots.casting')"></page-subtitle>
+    <page-subtitle :text="$t('shots.casting')" />
     <div v-if="currentShot">
       <div
         class="type-assets"
@@ -97,8 +102,7 @@
               :empty-width="100"
               :empty-height="100"
               :with-link="false"
-            >
-            </entity-thumbnail>
+            />
             <div>
               <span>{{ asset.name }}</span>
               <span v-if="asset.nb_occurences > 1">
@@ -200,19 +204,18 @@ export default {
     ...mapGetters([
       'currentProduction',
       'route',
-      'shotMap'
+      'shotMap',
+      'shotsPath'
     ]),
 
     title () {
       if (this.currentShot) {
         if (this.currentShot.episode_name) {
-          return `${this.currentShot.project_name} / ` +
-                 `${this.currentShot.episode_name} / ` +
+          return `${this.currentShot.episode_name} / ` +
                  `${this.currentShot.sequence_name} / ` +
                  `${this.currentShot.name}`
         } else {
-          return `${this.currentShot.project_name} / ` +
-                 `${this.currentShot.sequence_name} / ` +
+          return `${this.currentShot.sequence_name} / ` +
                  `${this.currentShot.name}`
         }
       } else {

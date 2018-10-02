@@ -5,6 +5,7 @@ export default {
     delete_text: 'Êtes vous sûr de vouloir retirer {personName} de la base de données?',
     delete_error: 'Une erreur est survenue lors de la suppression. Il y a probablement des données liées à elle. Etes vous sur que cette personne n\'a aucune tâche assignée et n\'a fait aucun commentaire ?',
     edit_title: 'Modifier les informations de',
+    empty_team: 'Personne n\'a été affecté à cette production',
     new_person: 'Ajouter un employé',
     persons: 'Personnes',
     picture: 'Changer l\'image',
@@ -140,11 +141,17 @@ export default {
       name: 'Name',
       ratio: 'Ratio',
       resolution: 'Resolution',
-      status: 'Status'
+      status: 'Status',
+      type: 'Type'
     },
     status: {
       open: 'Ouvert',
       closed: 'Fermé'
+    },
+    type: {
+      short: 'Format court',
+      featurefilm: 'Long Métrage',
+      tvshow: 'Série télé'
     }
   },
 
@@ -326,12 +333,12 @@ export default {
     new_shots: 'Ajouter des plans',
     new_sequences: 'Ajouter des séquences',
     new_episodes: 'Ajouter des épisodes',
-    manage: 'Gérer les plans',
+    manage: 'Créer des plans',
     edit_fail: 'La création ou l\'édition a échoué, une erreur est survenue.',
     new_success: 'Plan {name} créé avec succès.',
     edit_success: 'Plan {name} édité avec succès.',
     description: 'Description',
-    empty_list: 'Il n\'y a pas de shots dans la production. Voulez vous en créer ?',
+    empty_list: 'Il n\'y a pas de plans dans la production. Voulez vous en créer ?',
     fields: {
       name: 'Plan',
       episode: 'Épisode',
@@ -352,13 +359,13 @@ export default {
   },
 
   sequences: {
-    title: 'Sequences',
-    number: 'sequence | sequences',
-    new_sequence: 'Nouvelle sequence',
-    edit_title: 'Éditer sequence',
+    title: 'Séquences',
+    number: 'séquence | séquences',
+    new_sequence: 'Nouvelle séquence',
+    edit_title: 'Éditer séquence',
     delete_text: 'Etes vous sûr de vouloir retirer {name} de la base de données ?',
     delete_error: 'Une erreur est survenue en créant le plan, êtes vous sûr que la séquence n\'a plus aucun lien ?',
-    empty_list: 'Il n\'y a pas de séquence dans la description. Pourquoi pas en créer quelques uns?',
+    empty_list: 'Il n\'y a pas de séquence dans la production. Voulez vous en créer ?',
     fields: {
       name: 'Nom',
       description: 'Description'
@@ -372,7 +379,7 @@ export default {
     edit_title: 'Éditer episode',
     delete_text: 'Etes vous sûr de vouloir retirer {name} de la base de données ?',
     delete_error: 'Une erreur est survenue en créant le plan, êtes vous sûr que la séquence n\'a plus aucun lien ?',
-    empty_list: 'Il n\'y a pas de séquence dans la description. Pourquoi pas en créer quelques uns?',
+    empty_list: 'Il n\'y a pas d\'épisodes dans la production. Voulez vous en créer ?',
     fields: {
       name: 'Nom',
       description: 'Description'
@@ -398,7 +405,7 @@ export default {
     edit_title: 'Modifier la playlist',
     no_playlist: 'Il n\'y a pas de playlist pour ce projet.',
     no_sequence_for_episode: 'Il n\'y a pas de séquence pour cette épisode',
-    no_shot_for_production: 'Il n\'y pas de shot pour cette production',
+    no_shot_for_production: 'Il n\'y pas de plan pour cette production',
     select_shot: 'Sélectionnez un plan dans la colonne de droite',
     select_playlist: 'Sélectionnez une playlist dans la colonne de gauche',
     remove: 'enlever',

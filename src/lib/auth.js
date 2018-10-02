@@ -52,7 +52,6 @@ const auth = {
 
   resetChangePassword (token, password, password2) {
     return new Promise((resolve, reject) => {
-      console.log({ token, password, password2 })
       superagent
         .put('/api/auth/reset-password')
         .send({ token, password, password2 })

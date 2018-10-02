@@ -20,6 +20,12 @@
           :options="getAssetTypeOptions"
           v-model="form.entity_type_id"
         />
+        <combobox
+          :label="$t('assets.fields.episode')"
+          :options="episodeOptions"
+          v-model="form.source_id"
+          v-if="isTVShow"
+        />
         <text-field
           ref="nameField"
           :label="$t('assets.fields.name')"
@@ -108,7 +114,8 @@ export default {
           name: this.assetToEdit.name,
           description: this.assetToEdit.description,
           entity_type_id: this.assetToEdit.entity_type_id,
-          production_id: this.currentProduction.id
+          production_id: this.currentProduction.id,
+          source_id: this.assetToEdit.source_id
         },
         assetSuccessText: ''
       }
@@ -118,7 +125,8 @@ export default {
           name: '',
           description: '',
           entity_type_id: '',
-          project_id: ''
+          project_id: '',
+          source_id: this.currentEpisode ? this.currentEpisode.id : null
         },
         assetSuccessText: ''
       }
@@ -129,13 +137,34 @@ export default {
     ...mapGetters([
       'assets',
       'assetCreated',
-
       'assetTypes',
-      'openProductions',
+      'currentProduction',
+      'currentEpisode',
+      'episodes',
       'getAssetTypeOptions',
       'getOpenProductionOptions',
-      'currentProduction'
-    ])
+      'isTVShow',
+      'openProductions'
+    ]),
+
+    episodeOptions () {
+      let options = this.episodes.map((episode) => {
+        return {
+          label: episode.name,
+          value: episode.id
+        }
+      })
+      options.unshift({
+        label: this.$t('main.all'),
+        value: 'null'
+      })
+      return options
+    }
+  },
+
+  mounted () {
+    this.resetForm()
+    this.assetSuccessText = ''
   },
 
   methods: {
@@ -178,20 +207,18 @@ export default {
         }
         this.form.name = ''
         this.form.description = ''
+        this.form.source_id =
+          this.currentEpisode ? this.currentEpisode.id : null
       } else {
         this.form = {
           entity_type_id: this.assetToEdit.asset_type_id,
           project_id: this.assetToEdit.project_id,
           name: this.assetToEdit.name,
-          description: this.assetToEdit.description
+          description: this.assetToEdit.description,
+          source_id: this.assetToEdit.source_id
         }
       }
     }
-  },
-
-  mounted () {
-    this.resetForm()
-    this.assetSuccessText = ''
   },
 
   watch: {

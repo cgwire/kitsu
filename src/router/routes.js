@@ -192,12 +192,12 @@ export const routes = [
         name: 'productions-new'
       },
       {
-        path: '/productions/edit/:production_id',
+        path: '/productions/edit/:production_edit_id',
         component: Productions,
         name: 'edit-production'
       },
       {
-        path: '/productions/delete/:production_id',
+        path: '/productions/delete/:production_delete_id',
         component: Productions,
         name: 'delete-production'
       },
@@ -208,9 +208,19 @@ export const routes = [
         name: 'breakdown'
       },
       {
-        path: '/productions/:production_id/breakdown/shots/:shot_id',
+        path: '/productions/:production_id/breakdown/:shot_id',
         component: Breakdown,
         name: 'breakdown-shot'
+      },
+      {
+        path: '/productions/:production_id/episodes/:episode_id/breakdown',
+        component: Breakdown,
+        name: 'episode-breakdown'
+      },
+      {
+        path: '/productions/:production_id/episodes/:episode_id/breakdown/:shot_id',
+        component: Breakdown,
+        name: 'episode-breakdown-shot'
       },
 
       {
@@ -263,9 +273,57 @@ export const routes = [
       },
 
       {
+        path: '/productions/:production_id/episodes/:episode_id/assets',
+        component: Assets,
+        name: 'episode-assets'
+      },
+      {
+        path: '/productions/:production_id/episodes/:episode_id/assets/new',
+        component: Assets,
+        name: 'episode-new-asset'
+      },
+      {
+        path:
+        '/productions/:production_id/episodes/:episode_id/assets/:asset_id',
+        component: Asset,
+        name: 'episode-asset'
+      },
+      {
+        path:
+        '/productions/:production_id/episodes/:episode_id/assets/edit/:asset_id',
+        component: Assets,
+        name: 'episode-edit-asset'
+      },
+      {
+        path: '/productions/:production_id/episodes/:episode_id/assets/delete/:asset_id',
+        component: Assets,
+        name: 'episode-delete-asset'
+      },
+      {
+        path: '/productions/:production_id/episodes/:episode_id/assets/restore/:asset_id',
+        component: Assets,
+        name: 'episode-restore-asset'
+      },
+      {
+        path: '/productions/:production_id/episodes/:episode_id/assets/import',
+        component: Assets,
+        name: 'episode-import-assets'
+      },
+      {
+        path: '/productions/:production_id/episodes/:episode_id/assets/create-tasks',
+        component: Assets,
+        name: 'episode-create-asset-tasks'
+      },
+
+      {
         path: '/productions/:production_id/asset-types',
         component: ProductionAssetTypes,
         name: 'production-asset-types'
+      },
+      {
+        path: '/productions/:production_id/episodes/:episode_id/asset-types',
+        component: ProductionAssetTypes,
+        name: 'episode-production-asset-types'
       },
 
       {
@@ -291,22 +349,63 @@ export const routes = [
       {
         path: '/productions/:production_id/shots/edit/:shot_id',
         component: Shots,
-        name: 'edit-shots'
+        name: 'edit-shot'
       },
       {
         path: '/productions/:production_id/shots/delete/:shot_id',
         component: Shots,
-        name: 'delete-shots'
+        name: 'delete-shot'
       },
       {
         path: '/productions/:production_id/shots/restore/:shot_id',
         component: Shots,
-        name: 'restore-shots'
+        name: 'restore-shot'
       },
       {
         path: '/productions/:production_id/shots/:shot_id',
         component: Shot,
         name: 'shot'
+      },
+
+      {
+        path: '/productions/:production_id/episodes/:episode_id/shots',
+        component: Shots,
+        name: 'episode-shots'
+      },
+      {
+        path: '/productions/:production_id/episodes/:episode_id/shots/manage',
+        component: Shots,
+        name: 'episode-manage-shots'
+      },
+      {
+        path: '/productions/:production_id/episodes/:episode_id/shots/import',
+        component: Shots,
+        name: 'episode-import-shots'
+      },
+      {
+        path: '/productions/:production_id/episodes/:episode_id/shots/create-tasks',
+        component: Shots,
+        name: 'episode-create-shot-tasks'
+      },
+      {
+        path: '/productions/:production_id/episodes/:episode_id/shots/edit/:shot_id',
+        component: Shots,
+        name: 'episode-edit-shot'
+      },
+      {
+        path: '/productions/:production_id/episodes/:episode_id/shots/delete/:shot_id',
+        component: Shots,
+        name: 'episode-delete-shot'
+      },
+      {
+        path: '/productions/:production_id/episodes/:episode_id/shots/restore/:shot_id',
+        component: Shots,
+        name: 'episode-restore-shot'
+      },
+      {
+        path: '/productions/:production_id/episodes/:episode_id/shots/:shot_id',
+        component: Shot,
+        name: 'episode-shot'
       },
 
       {
@@ -323,6 +422,21 @@ export const routes = [
         path: '/productions/:production_id/sequences/delete/:sequence_id',
         component: Sequences,
         name: 'delete-sequence'
+      },
+      {
+        path: '/productions/:production_id/episodes/:episode_id/sequences',
+        component: Sequences,
+        name: 'episode-sequences'
+      },
+      {
+        path: '/productions/:production_id/episodes/:episode_id/sequences/edit/:sequence_id',
+        component: Sequences,
+        name: 'episode-edit-sequence'
+      },
+      {
+        path: '/productions/:production_id/episodes/:episode_id/sequences/delete/:sequence_id',
+        component: Sequences,
+        name: 'episode-delete-sequence'
       },
 
       {
@@ -342,44 +456,85 @@ export const routes = [
       },
 
       {
-        path: '/productions/:production_id/task-types/:task_type_id',
+        path: '/productions/:production_id/:type/task-types/:task_type_id',
         component: TaskType,
         name: 'task-type'
+      },
+      {
+        path: '/productions/:production_id/episodes/:episode_id/:type/task-types/:task_type_id',
+        component: TaskType,
+        name: 'episode-task-type'
       },
 
       {
         name: 'task',
-        path: '/tasks/:task_id',
+        path: '/productions/:production_id/:type/tasks/:task_id',
         component: Task
       },
       {
         name: 'task-delete',
-        path: '/tasks/:task_id/delete',
+        path: '/productions/:production_id/:type/tasks/:task_id/delete',
         component: Task
       },
       {
         name: 'task-add-preview',
-        path: '/tasks/:task_id/comments/:comment_id/add-preview',
+        path: '/productions/:production_id/:type/tasks/:task_id/comments/:comment_id/add-preview',
         component: Task
       },
       {
         name: 'task-change-preview',
-        path: '/tasks/:task_id/comments/:comment_id/change-preview',
+        path: '/productions/:production_id/:type/tasks/:task_id/comments/:comment_id/change-preview',
         component: Task
       },
       {
         name: 'task-preview',
-        path: '/tasks/:task_id/previews/:preview_id',
+        path: '/productions/:production_id/:type/tasks/:task_id/previews/:preview_id',
         component: Task
       },
       {
         name: 'comment-edit',
-        path: '/tasks/:task_id/comments/:comment_id/edit',
+        path: '/productions/:production_id/:type/tasks/:task_id/comments/:comment_id/edit',
         component: Task
       },
       {
         name: 'comment-delete',
-        path: '/tasks/:task_id/comments/:comment_id/delete',
+        path: '/productions/:production_id/:type/tasks/:task_id/comments/:comment_id/delete',
+        component: Task
+      },
+
+      {
+        name: 'episode-task',
+        path: '/productions/:production_id/episodes/:episode_id/:type/tasks/:task_id',
+        component: Task
+      },
+      {
+        name: 'episode-task-delete',
+        path: '/productions/:production_id/episodes/:episode_id/:type/tasks/:task_id/delete',
+        component: Task
+      },
+      {
+        name: 'episode-task-add-preview',
+        path: '/productions/:production_id/episodes/:episode_id/:type/tasks/:task_id/comments/:comment_id/add-preview',
+        component: Task
+      },
+      {
+        name: 'episode-task-change-preview',
+        path: '/productions/:production_id/episodes/:episode_id/:type/tasks/:task_id/comments/:comment_id/change-preview',
+        component: Task
+      },
+      {
+        name: 'episode-task-preview',
+        path: '/productions/:production_id/episodes/:episode_id/:type/tasks/:task_id/previews/:preview_id',
+        component: Task
+      },
+      {
+        name: 'episode-comment-edit',
+        path: '/productions/:production_id/episodes/:episode_id/:type/tasks/:task_id/comments/:comment_id/edit',
+        component: Task
+      },
+      {
+        name: 'episode-comment-delete',
+        path: '/productions/:production_id/episodes/:episode_id/:type/tasks/:task_id/comments/:comment_id/delete',
         component: Task
       },
 
@@ -483,6 +638,26 @@ export const routes = [
       },
       {
         name: 'edit-playlist',
+        path: '/productions/:production_id/playlists/:playlist_id/edit',
+        component: Playlist
+      },
+      {
+        name: 'episode-playlists',
+        path: '/productions/:production_id/episodes/:episode_id/playlists',
+        component: Playlist
+      },
+      {
+        name: 'episode-playlist',
+        path: '/productions/:production_id/episodes/:episode_id/playlists/:playlist_id',
+        component: Playlist
+      },
+      {
+        name: 'episode-delete-playlist',
+        path: '/productions/:production_id/playlists/:playlist_id/delete',
+        component: Playlist
+      },
+      {
+        name: 'episode-edit-playlist',
         path: '/productions/:production_id/playlists/:playlist_id/edit',
         component: Playlist
       },

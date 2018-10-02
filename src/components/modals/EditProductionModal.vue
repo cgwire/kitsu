@@ -21,28 +21,35 @@
           @enter="runConfirmation"
           v-focus
         />
-        <combobox
+        <combobox v-if="productionToEdit && productionToEdit.id"
           :label="$t('productions.fields.status')"
           :options="productionStatusOptions"
           localeKeyPrefix="productions.status."
           @enter="runConfirmation"
           v-model="form.project_status_id"
         />
-        <text-field
+        <combobox
+          :label="$t('productions.fields.type')"
+          :options="productionTypeOptions"
+          localeKeyPrefix="productions.type."
+          @enter="runConfirmation"
+          v-model="form.production_type"
+        />
+        <text-field v-if="productionToEdit && productionToEdit.id"
           ref="fpsField"
           :label="$t('productions.fields.fps')"
           v-model="form.fps"
           @enter="runConfirmation"
           v-focus
         />
-        <text-field
+        <text-field v-if="productionToEdit && productionToEdit.id"
           ref="ratioField"
           :label="$t('productions.fields.ratio')"
           v-model="form.ratio"
           @enter="runConfirmation"
           v-focus
         />
-        <text-field
+        <text-field v-if="productionToEdit && productionToEdit.id"
           ref="resolutionField"
           :label="$t('productions.fields.resolution')"
           v-model="form.resolution"
@@ -109,29 +116,43 @@ export default {
   ],
 
   data () {
-    if (this.productionToEdit && this.productionToEdit.id) {
-      return {
-        form: {
-          name: this.productionToEdit.name,
-          project_status_id: this.productionToEdit.project_status_id,
-          fps: this.productionToEdit.fps,
-          ratio: this.productionToEdit.ratio,
-          resolution: this.productionToEdit.resolution
+    const data = {
+      formData: null,
+      productionTypeOptions: [
+        {
+          label: 'short',
+          value: 'short'
         },
-        formData: null
+        {
+          label: 'featurefilm',
+          value: 'featurefilm'
+        },
+        {
+          label: 'tvshow',
+          value: 'tvshow'
+        }
+      ]
+    }
+    if (this.productionToEdit && this.productionToEdit.id) {
+      data.form = {
+        name: this.productionToEdit.name,
+        project_status_id: this.productionToEdit.project_status_id,
+        fps: this.productionToEdit.fps,
+        ratio: this.productionToEdit.ratio,
+        resolution: this.productionToEdit.resolution,
+        production_type: this.productionToEdit.production_type
       }
     } else {
-      return {
-        form: {
-          name: '',
-          project_status_id: '',
-          fps: '',
-          ratio: '',
-          resolution: ''
-        },
-        formData: null
+      data.form = {
+        name: '',
+        project_status_id: '',
+        fps: '',
+        ratio: '',
+        resolution: '',
+        production_type: ''
       }
     }
+    return data
   },
 
   mounted () {

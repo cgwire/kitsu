@@ -1,12 +1,6 @@
 <template>
 <router-link
-  :to="{
-    name: 'task-type',
-    params: {
-      production_id: productionId,
-      task_type_id: taskType.id
-    }
-  }"
+  :to="taskTypePath"
   v-if="productionId"
 >
   <span
@@ -39,11 +33,31 @@ export default {
   computed: {
     ...mapGetters([
     ]),
+
     color () {
       if (this.taskType.color.toUpperCase() === '#000000') return '#666'
       else return this.taskType.color
+    },
+
+    taskTypePath () {
+      let route = {
+        name: 'task-type',
+        params: {
+          production_id: this.productionId,
+          task_type_id: this.taskType.id,
+          type: this.taskType.for_shots ? 'shots' : 'assets'
+        }
+      }
+
+      if (this.taskType.episode_id) {
+        route.name = 'episode-task-type'
+        route.params.episode_id = this.taskType.episode_id
+      }
+      return route
     }
+
   },
+
   methods: {
     ...mapActions([
     ])

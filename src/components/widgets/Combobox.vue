@@ -6,6 +6,9 @@
   <p class="control">
     <span class="select">
       <select
+        :class="{
+          'is-top': this.isTop
+        }"
         ref="select"
         @keyup.enter="emitEnter()"
         @change="updateValue"
@@ -44,6 +47,10 @@ export default {
     localeKeyPrefix: {
       default: '',
       type: String
+    },
+    isTop: {
+      default: false,
+      type: Boolean
     }
   },
 
@@ -68,3 +75,23 @@ export default {
   }
 }
 </script>
+
+<style scoped>
+.is-top {
+  font-size: 1.2em;
+  border: 0;
+  border-bottom: 1px solid #CCC;
+  border-radius: 0;
+}
+
+.is-top:focus {
+  border-color: #00B242;
+}
+
+.select:after {
+  margin-top: -3px;
+  border: 2px solid #00B242;
+  border-right: 0;
+  border-top: 0;
+}
+</style>

@@ -1,21 +1,31 @@
 <template>
   <div class="page">
+    <div
+      v-if="this.currentTaskType.for_shots"
+    >
+      <router-link :to="shotsPath">
+        {{ $t('tasks.back_to_list') }}
+      </router-link>
+    </div>
+    <div
+      v-else
+    >
+      <router-link :to="assetsPath">
+        {{ $t('tasks.back_to_list') }}
+      </router-link>
+    </div>
+
     <h1 class="subtitle flexrow">
-      <span class="production-name flexrow-item">
-        {{ currentProduction.name }}
-      </span>
       <task-type-name
         class="flexrow-item"
         :task-type="currentTaskType"
-      >
-      </task-type-name>
+      />
     </h1>
 
     <table-info
       :is-loading="loading.entities"
       :is-error="errors.entities"
-    >
-    </table-info>
+    />
 
     <div
       v-if="!this.currentTaskType.for_shots"
@@ -37,20 +47,14 @@
           >
             <router-link
               class="asset-block"
-              :to="{
-                name: 'asset',
-                params: {
-                  asset_id: asset.id
-                }
-              }"
+              :to="getPath(asset.id, 'asset')"
             >
               <entity-thumbnail
                 :entity="asset"
                 :square="true"
                 :empty-width="60"
                 :empty-height="60"
-              >
-              </entity-thumbnail>
+              />
               <span class="asset-name">
                 {{ asset.name }}
               </span>
@@ -93,20 +97,14 @@
           >
             <router-link
               class="shot-block"
-              :to="{
-                name: 'shot',
-                params: {
-                  shot_id: shot.id
-                }
-              }"
+              :to="getPath(shot.id, 'shot')"
             >
               <entity-thumbnail
                 :entity="shot"
                 :square="true"
                 :empty-width="60"
                 :empty-height="60"
-              >
-              </entity-thumbnail>
+              />
               <span class="shot-name">
                 {{ shot.name }}
               </span>
@@ -114,8 +112,7 @@
             <validation-tag
               :task="taskMap[shot.validations[currentTaskType.id]]"
               v-if="shot.validations[currentTaskType.id]"
-            >
-            </validation-tag>
+            />
           </div>
         </div>
       </div>
@@ -159,12 +156,16 @@ export default {
     ...mapGetters([
       'assetMap',
       'assetsByType',
-      'currentTaskType',
+      'assetsPath',
+      'currentEpisode',
       'currentProduction',
+      'currentTaskType',
       'displayedAssets',
+      'isTVShow',
       'sequenceSubscriptions',
       'shotsByEpisode',
       'shotMap',
+      'shotsPath',
       'taskTypeMap',
       'taskMap'
     ]),
@@ -179,7 +180,6 @@ export default {
       'initTaskType',
       'loadShots',
       'loadAssets',
-      'setProduction',
       'subscribeToSequence',
       'unsubscribeFromSequence'
     ]),
@@ -209,6 +209,28 @@ export default {
       } else {
         this.unsubscribeFromSequence({sequenceId, taskTypeId})
       }
+    },
+
+    getPath (entityId, section) {
+      let route = {
+        name: section,
+        params: {
+          production_id: this.currentProduction.id
+        }
+      }
+
+      if (this.isTVShow && this.currentEpisode) {
+        route.name = `episode-${section}`
+        route.params.episode_id = this.currentEpisode.id
+      }
+
+      if (section === 'shot') {
+        route.params.shot_id = entityId
+      } else if (section === 'asset') {
+        route.params.asset_id = entityId
+      }
+
+      return route
     }
   },
 
@@ -222,12 +244,7 @@ export default {
     },
 
     currentProduction () {
-      if (this.currentProduction.id !== this.$route.params.production_id) {
-        this.$router.push({
-          name: 'task-type',
-          params: {production_id: this.currentProduction.id}
-        })
-      }
+      this.initData(true)
     }
   },
 

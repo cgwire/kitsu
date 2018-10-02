@@ -6,7 +6,7 @@
 }">
   <button-link
     :text="label"
-    :path="'/tasks/' + taskId + '/previews/' + preview.id"
+    :path="previewPath"
   >
   </button-link>
 </div>
@@ -32,6 +32,11 @@ export default {
     taskId: {
       type: String,
       default: ''
+    },
+
+    previewPath: {
+      type: Object,
+      default: () => {}
     }
   },
   computed: {

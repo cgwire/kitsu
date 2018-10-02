@@ -8,14 +8,12 @@
 
     <div class="box">
 
-      <page-title :text="$t('shots.manage')">
-      </page-title>
+      <page-title :text="$t('shots.manage')" />
 
       <div class="shot-columns">
-
-        <div class="shot-column">
-
+        <div class="shot-column" v-if="isTVShow">
           <h2 class="subtitle">Episodes</h2>
+
           <div class="list">
             <div
               :class="{
@@ -182,17 +180,29 @@ export default {
     active () {
       if (this.active) {
         setTimeout(() => {
-          this.$refs.addEpisodeInput.focus()
+          if (this.isTVShow) {
+            this.$refs.addEpisodeInput.focus()
+          } else {
+            this.$refs.addSequenceInput.focus()
+          }
         }, 100)
       }
+    },
+
+    sequences () {
+      this.displayedSequences = this.sequences
+      this.displayedShots = []
     }
   },
 
   computed: {
     ...mapGetters([
+      'currentProduction',
       'episodes',
       'sequences',
       'shotMap',
+      'sequences',
+      'isTVShow',
       'currentProduction'
     ]),
 
@@ -209,7 +219,7 @@ export default {
       const isExist = this.displayedSequences.find((sequence) => {
         return this.names.sequence === sequence.name
       })
-      return !isEmpty && !isExist && this.selectedEpisodeId
+      return !isEmpty && !isExist && (this.selectedEpisodeId || !this.isTVShow)
     },
 
     isAddShotAllowed () {
@@ -223,9 +233,11 @@ export default {
 
   methods: {
     ...mapActions([
+      'loadShots',
       'newEpisode',
       'newSequence',
-      'newShot'
+      'newShot',
+      'setCurrentEpisode'
     ]),
 
     focusAddSequence () {
@@ -237,11 +249,22 @@ export default {
     },
 
     selectEpisode (episodeId) {
-      this.selectedEpisodeId = episodeId
-      this.displayedSequences = this.sequences.filter((sequence) => {
-        return sequence.parent_id === episodeId
-      })
-      this.displayedShots = []
+      if (!this.isTVShow) {
+        this.selectedEpisodeId = episodeId
+        this.displayedSequences = this.sequences.filter((sequence) => {
+          return sequence.parent_id === episodeId
+        })
+        this.displayedShots = []
+      } else {
+        this.selectedEpisodeId = episodeId
+        this.$router.push({
+          name: 'episode-manage-shots',
+          params: {
+            production_id: this.currentProduction.id,
+            episode_id: episodeId
+          }
+        })
+      }
     },
 
     selectSequence (sequenceId) {
@@ -276,7 +299,11 @@ export default {
     addSequence () {
       if (this.isAddSequenceAllowed) {
         const sequenceName = this.names.sequence
-        if (sequenceName.length > 0 && this.selectedEpisodeId) {
+        console.log(sequenceName)
+        if (
+          sequenceName.length > 0 &&
+          (this.selectedEpisodeId || !this.isTVShow)
+        ) {
           this.loading.addSequence = true
           const sequence = {
             name: this.names.sequence,

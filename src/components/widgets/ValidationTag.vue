@@ -1,7 +1,7 @@
 <template>
 <span>
   <router-link
-    :to="'/tasks/' + task.id"
+    :to="taskPath(task)"
     class="tag dynamic"
     v-if="!isStatic && !isCurrentUserClient"
     :style="{
@@ -48,7 +48,12 @@ export default {
 
   computed: {
     ...mapGetters([
+      'currentEpisode',
+      'currentProduction',
+      'isTVShow',
+      'taskMap',
       'taskStatusMap',
+      'taskTypeMap',
       'isCurrentUserClient'
     ]),
 
@@ -100,6 +105,28 @@ export default {
         return ''
       }
     }
+  },
+
+  methods: {
+    taskPath (task) {
+      let route = {
+        name: 'task',
+        params: {
+          production_id: this.currentProduction.id,
+          task_id: task.id
+        }
+      }
+
+      if (this.isTVShow && this.currentEpisode) {
+        route.name = 'episode-task'
+        route.params.episode_id = task.episode_id || this.currentEpisode.id
+      }
+
+      const taskType = this.taskTypeMap[task.task_type_id]
+      route.params.type = taskType.for_shots ? 'shots' : 'assets'
+
+      return route
+    }
   }
 }
 </script>
@@ -113,7 +140,7 @@ export default {
 .tag.dynamic:hover {
   cursor: pointer;
   transform: scale(1.15);
-  transition: all 0.1s ease-in-out
+  transition: all 0.1s ease-in-out;
 }
 
 .priority {

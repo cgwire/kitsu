@@ -1,8 +1,15 @@
 import client from './client'
 
 export default {
-  getPlaylists (production, callback) {
-    client.get(`/api/data/projects/${production.id}/playlists`, callback)
+  getPlaylists (production, episode, callback) {
+    let path = `/api/data/projects/${production.id}`
+    if (episode) {
+      path += `/episodes/${episode.id}/playlists`
+    } else {
+      path += `/playlists`
+    }
+
+    client.get(path, callback)
   },
 
   getPlaylist (production, playlist, callback) {
@@ -18,8 +25,10 @@ export default {
   newPlaylist (playlist, callback) {
     const data = {
       name: playlist.name,
-      project_id: playlist.production_id
+      project_id: playlist.production_id,
+      episode_id: playlist.episode_id
     }
+
     client.post('/api/data/playlists/', data, callback)
   },
 

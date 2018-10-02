@@ -159,15 +159,16 @@ export default {
 
     handleModalsDisplay () {
       const path = this.$store.state.route.path
-      const productionId = this.$store.state.route.params.production_id
 
       if (path.indexOf('new') > 0) {
         this.productionToEdit = {}
         this.modals.isNewDisplayed = true
       } else if (path.indexOf('edit') > 0) {
+        const productionId = this.$store.state.route.params.production_edit_id
         this.productionToEdit = this.getProduction(productionId)
         this.modals.isNewDisplayed = true
       } else if (path.indexOf('delete') > 0) {
+        const productionId = this.$store.state.route.params.production_delete_id
         this.productionToDelete = this.getProduction(productionId)
         this.modals.isDeleteDisplayed = true
       } else {

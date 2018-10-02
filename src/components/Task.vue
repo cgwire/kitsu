@@ -66,7 +66,7 @@
           :task="currentTask"
           :is-static="true"
           v-if="currentTask"
-        ></validation-tag>
+        />
         <span class="flexrow-item">{{ $t('tasks.fields.assignees') }}:</span>
         <span
           class="flexrow-item avatar-wrapper"
@@ -80,11 +80,11 @@
             :person="personMap[personId]"
             :size="30"
             :font-size="16"
-          >
-          </people-avatar>
+          />
        </span>
        <span
-         v-else>
+         v-else
+       >
        </span>
       </div>
     </div>
@@ -100,8 +100,7 @@
               :task="currentTask"
               :taskStatusOptions="taskStatusOptions"
               v-if="isCommentingAllowed"
-            >
-            </add-comment>
+            />
             <div class="comments" v-if="currentTaskComments.length > 0">
               <comment
                 :comment="comment"
@@ -110,8 +109,7 @@
                 :current-user="user"
                 :editable="comment.person && user.id === comment.person.id && index === 0"
                 v-for="(comment, index) in currentTaskComments"
-              >
-              </comment>
+              />
             </div>
             <div class="no-comment" v-else>
               <em>
@@ -138,11 +136,11 @@
             <preview-row
               :key="preview.id"
               :preview="preview"
+              :preview-path="previewPath(preview.id)"
               :taskId="currentTask ? currentTask.id : ''"
               :selected="preview.id === currentPreviewId"
               v-for="preview in currentTaskPreviews"
-            >
-            </preview-row>
+            />
           </div>
           <div v-else>
             <em>
@@ -156,7 +154,8 @@
                 :src="moviePath"
                 ref="preview-movie"
                 controls
-                :poster="getPreviewPath()" />
+                :poster="getPreviewPath()"
+              />
             </div>
 
             <a
@@ -201,7 +200,7 @@
               @click="setPreview"
               v-if="currentTaskPreviews.length > 0 && isCurrentUserManager"
             >
-              <image-icon class="icon"></image-icon>
+              <image-icon class="icon" />
               <span class="text">
                 {{ $t('tasks.set_preview') }}
               </span>
@@ -224,7 +223,7 @@
       :active="modals.addPreview"
       :is-loading="loading.addPreview"
       :is-error="errors.addPreview"
-      :cancel-route="taskPath"
+      :cancel-route="taskPath()"
       :form-data="addPreviewFormData"
       @fileselected="selectFile"
       @confirm="createPreview"
@@ -235,7 +234,7 @@
       :active="modals.changePreview"
       :is-loading="loading.changePreview"
       :is-error="errors.changePreview"
-      :cancel-route="taskPath"
+      :cancel-route="taskPath()"
       :form-data="changePreviewFormData"
       :is-editing="true"
       @fileselected="selectFile"
@@ -246,7 +245,7 @@
       :active="modals.editComment"
       :is-loading="loading.editComment"
       :is-error="errors.editComment"
-      :cancel-route="taskPath"
+      :cancel-route="taskPath()"
       :comment-to-edit="commentToEdit"
       @confirm="confirmEditTaskComment"
     />
@@ -255,7 +254,7 @@
       :active="modals.deleteTask"
       :is-loading="loading.deleteTask"
       :is-error="errors.deleteTask"
-      :cancel-route="taskPath"
+      :cancel-route="taskPath()"
       :text="deleteText"
       :error-text="$t('tasks.delete_error')"
       @confirm="confirmDeleteTask"
@@ -265,12 +264,11 @@
       :active="modals.deleteComment"
       :is-loading="loading.deleteComment"
       :is-error="errors.deleteComment"
-      :cancel-route="taskPath"
+      :cancel-route="taskPath()"
       :text="$t('tasks.delete_comment')"
       :error-text="$t('tasks.delete_comment_error')"
       @confirm="confirmDeleteTaskComment"
     />
-
   </div>
 </template>
 
@@ -321,6 +319,7 @@ export default {
 
   data () {
     return {
+      entityPage: this.getEntityPage(),
       selectedTab: 'validation',
       taskLoading: {
         isLoading: true,
@@ -370,25 +369,26 @@ export default {
 
   computed: {
     ...mapGetters([
-      'tasks',
       'comments',
       'commentTexts',
+      'currentEpisode',
+      'currentProduction',
       'displayedShots',
       'displayedAssets',
-      'route',
-      'user',
-      'isSingleEpisode',
-      'taskStatusOptions',
-      'taskMap',
-      'taskTypeMap',
       'getTaskComments',
       'getTaskPreviews',
       'getTaskComment',
-      'personMap',
-      'user',
-      'currentProduction',
       'isCurrentUserManager',
-      'productionMap'
+      'isSingleEpisode',
+      'isTVShow',
+      'personMap',
+      'productionMap',
+      'route',
+      'tasks',
+      'taskStatusOptions',
+      'taskMap',
+      'taskTypeMap',
+      'user'
     ]),
 
     isCommentingAllowed () {
@@ -405,30 +405,8 @@ export default {
       }
     },
 
-    taskPath () {
-      let taskPath = { name: 'open-productions' }
-      if (this.currentTask) {
-        taskPath = {
-          name: 'task',
-          params: {
-            task_id: this.currentTask.id
-          }
-        }
-      }
-      return taskPath
-    },
-
     deleteTaskPath () {
-      let deleteTaskPath = ''
-      if (this.currentTask) {
-        deleteTaskPath = {
-          name: 'task-delete',
-          params: {
-            task_id: this.currentTask.id
-          }
-        }
-      }
-      return deleteTaskPath
+      return this.taskPath(this.currentTask, 'task-delete')
     },
 
     commentToEdit () {
@@ -441,26 +419,6 @@ export default {
 
     isPreviews () {
       return this.currentTaskPreviews && this.currentTaskPreviews.length > 0
-    },
-
-    entityPage () {
-      if (this.currentTask) {
-        if (this.entityList === this.displayedShots) {
-          return {
-            name: 'shots',
-            params: {production_id: this.currentTask.project_id}
-          }
-        } else {
-          return {
-            name: 'assets',
-            params: {production_id: this.currentTask.project_id}
-          }
-        }
-      } else {
-        return {
-          name: 'open-productions'
-        }
-      }
     },
 
     taskEntityPath () {
@@ -549,10 +507,7 @@ export default {
           }
         }
 
-        return {
-          name: 'task',
-          params: {task_id: taskId}
-        }
+        return this.taskPath({id: taskId})
       } else {
         return {
           name: 'open-productions'
@@ -602,10 +557,7 @@ export default {
           }
         }
 
-        return {
-          name: 'task',
-          params: {task_id: taskId}
-        }
+        return this.taskPath({id: taskId})
       } else {
         return {
           name: 'open-productions'
@@ -625,8 +577,6 @@ export default {
 
     title () {
       if (this.currentTask) {
-        const production = this.productionMap[this.currentTask.project_id]
-        const projectName = production.name
         const type = this.currentTask.entity_type_name
         let entityName =
           this.currentTask.full_entity_name || this.currentTask.entity_name
@@ -636,7 +586,7 @@ export default {
             .splice(1)
             .join('/')
         }
-        return `${projectName} / ${entityName}`
+        return `${entityName}`
       } else {
         return 'Loading...'
       }
@@ -748,9 +698,39 @@ export default {
       'loadTaskComments',
       'loadTaskSubscribed',
       'subscribeToTask',
-      'setProduction',
+      'setCurrentEpisode',
       'unsubscribeFromTask'
     ]),
+
+    getEntityPage () {
+      if (this.currentTask) {
+        if (this.entityList === this.displayedShots) {
+          if (this.isTVShow) {
+            return {
+              name: 'episode-shots',
+              params: {
+                episode_id: this.currentEpisode ? this.currentEpisode.id : '',
+                production_id: this.currentTask.project_id
+              }
+            }
+          } else {
+            return {
+              name: 'shots',
+              params: {production_id: this.currentTask.project_id}
+            }
+          }
+        } else {
+          return {
+            name: 'assets',
+            params: {production_id: this.currentTask.project_id}
+          }
+        }
+      } else {
+        return {
+          name: 'open-productions'
+        }
+      }
+    },
 
     loadTaskData () {
       let task = this.getCurrentTask()
@@ -765,10 +745,17 @@ export default {
           callback: (err, task) => {
             if (err) console.log(err)
 
-            this.setProduction(task.project_id)
             let loadingFunction = this.loadAssets
+
             if (task.entity_type_name === 'Shot') {
-              loadingFunction = this.loadShots
+              loadingFunction = (callback) => {
+                this.loadEpisodes(() => {
+                  if (this.isTVShow) {
+                    this.setCurrentEpisode(task.episode.id)
+                  }
+                  this.loadShots(callback)
+                })
+              }
             }
             loadingFunction(() => {
               this.currentTask = task
@@ -784,6 +771,7 @@ export default {
                     this.currentTaskComments = this.getCurrentTaskComments()
                     this.currentTaskPreviews = this.getCurrentTaskPreviews()
                     this.currentPreviewPath = this.getOriginalPath()
+                    this.entityPage = this.getEntityPage()
                     this.taskLoading = {
                       isLoading: false,
                       isError: false
@@ -811,6 +799,7 @@ export default {
               this.currentTaskComments = this.getCurrentTaskComments()
               this.currentTaskPreviews = this.getCurrentTaskPreviews()
               this.currentPreviewPath = this.getOriginalPath()
+              this.entityPage = this.getEntityPage()
               this.loadTaskSubscribed({
                 taskId: this.route.params.task_id,
                 callback: (err, subscribed) => {
@@ -859,7 +848,10 @@ export default {
 
     getOriginalPath () {
       let previewId = this.route.params.preview_id
-      if (!previewId && this.currentTaskPreviews.length > 0) {
+      if (!previewId &&
+          this.currentTaskPreviews.length > 0 &&
+          this.currentTaskPreviews
+      ) {
         previewId = this.currentTaskPreviews[0].id
       }
       const extension = this.extension ? this.extension : 'png'
@@ -980,8 +972,7 @@ export default {
       this.currentTaskComments = this.getCurrentTaskComments()
       this.currentTaskPreviews = this.getCurrentTaskPreviews()
       this.currentPreviewPath = this.getOriginalPath()
-      this.$router.push(`/tasks/${this.route.params.task_id}` +
-                        `/previews/${preview.id}`)
+      this.$router.push(this.previewPath(preview.id))
     },
 
     setPreview () {
@@ -1092,6 +1083,41 @@ export default {
           this.isSubscribed = true
         }
       }
+    },
+
+    taskPath (task, section = 'task') {
+      if (!task) {
+        task = this.currentTask
+      } else {
+        task.project_id = this.currentTask.project_id
+        task.episode_id = this.currentTask.episode_id
+      }
+
+      let route = { name: 'open-productions' }
+      if (task) {
+        route = {
+          name: section,
+          params: {
+            production_id: task.project_id,
+            task_id: task.id
+          }
+        }
+
+        if (this.isTVShow && this.currentEpisode) {
+          route.name = `episode-${section}`
+          route.params.episode_id = task.episode_id || this.currentEpisode.id
+        }
+      }
+      return route
+    },
+
+    previewPath (previewId) {
+      const route = this.taskPath(this.currentTask, 'task-preview')
+
+      if (route.params) {
+        route.params.preview_id = previewId
+      }
+      return route
     }
   },
 
@@ -1107,7 +1133,6 @@ export default {
 
   watch: {
     currentPreviewId () {
-
     },
 
     $route () {

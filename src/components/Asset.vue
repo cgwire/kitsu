@@ -1,6 +1,15 @@
 <template>
 <div class="page">
   <div class="page-header">
+    <div class="flexrow navigation-buttons">
+      <router-link
+        :to="assetsPath"
+        class="flexrow-item has-text-centered"
+      >
+        {{ $t('tasks.back_to_list')}}
+      </router-link>
+    </div>
+
     <div class="flexrow">
       <div class="flexrow-item">
         <entity-thumbnail
@@ -176,14 +185,14 @@ export default {
   computed: {
     ...mapGetters([
       'assetMap',
+      'assetsPath',
       'currentProduction',
       'route'
     ]),
 
     title () {
       if (this.currentAsset) {
-        return `${this.currentAsset.project_name} / ` +
-               `${this.currentAsset.asset_type_name} / ` +
+        return `${this.currentAsset.asset_type_name} / ` +
                `${this.currentAsset.name}`
       } else {
         return 'Loading...'
@@ -208,9 +217,11 @@ export default {
       'loadAssetCastIn',
       'clearSelectedTasks'
     ]),
+
     changeTab (tab) {
       this.selectedTab = tab
     },
+
     getCurrentAsset () {
       return this.assetMap[this.route.params.asset_id] || null
     }

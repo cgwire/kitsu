@@ -4,6 +4,9 @@
     <table class="table table-header" ref="headerWrapper">
       <thead>
         <tr>
+          <th class="episode" v-if="isTVShow">
+            {{ $t('assets.fields.episode') }}
+          </th>
           <th class="thumbnail"></th>
           <th class="name">{{ $t('assets.fields.name') }}</th>
           <th class="description" v-if="!isCurrentUserClient">
@@ -16,13 +19,7 @@
             v-for="columnId in validationColumns"
           >
             <router-link
-              :to="{
-                name: 'task-type',
-                params: {
-                  production_id: currentProduction.id,
-                  task_type_id: columnId
-                }
-              }"
+              :to="taskTypePath(columnId)"
             >
               {{ taskTypeMap[columnId].name }}
             </router-link>
@@ -35,12 +32,7 @@
               }"
               icon="plus"
               :text="$t('tasks.create_tasks')"
-              :path="{
-                name: 'create-asset-tasks',
-                params: {
-                  production_id: currentProduction.id
-                }
-              }"
+              :path="createTasksPath"
               v-if="isCurrentUserManager && displayedAssets.length > 0"
             />
           </th>
@@ -52,8 +44,7 @@
   <table-info
     :is-loading="isLoading"
     :is-error="isError"
-  >
-  </table-info>
+  />
 
   <div class="has-text-centered" v-if="isEmptyList && !isCurrentUserClient">
     <p class="info">
@@ -67,8 +58,7 @@
         name: 'new-asset',
         params: {production_id: currentProduction.id}
       }"
-    >
-    </button-link>
+    />
   </div>
   <div class="has-text-centered" v-if="isEmptyList && isCurrentUserClient">
     <p class="info">
@@ -96,7 +86,7 @@
       >
         <tr class="type-header">
           <td colspan="30">
-            {{ group[0] ? group[0].asset_type_name : ''}}
+            {{ group[0] ? group[0].asset_type_name : '' }}
           </td>
         </tr>
         <tr
@@ -104,20 +94,18 @@
           :class="{canceled: asset.canceled}"
           v-for="(asset, i) in group"
         >
+          <td class="episode" v-if="isTVShow">
+            {{ episodeMap[asset.episode_id] ? episodeMap[asset.episode_id].name : $t('main.all') }}
+          </td>
           <td class="thumbnail">
-            <entity-thumbnail :entity="asset"></entity-thumbnail>
+            <entity-thumbnail :entity="asset" />
           </td>
           <td :class="{name: true, bold: !asset.canceled}">
             <router-link
               class="asset-link"
-              :to="{
-                name: 'asset',
-                params: {
-                  production_id: asset.production_id,
-                  asset_id: asset.id
-                }
-              }">
-            {{ asset.name }}
+              :to="assetPath(asset.id)"
+            >
+              {{ asset.name }}
             </router-link>
           </td>
           <description-cell
@@ -140,29 +128,10 @@
           />
           <row-actions v-if="isCurrentUserManager"
             :entry="asset"
-            :edit-route="{
-              name: 'edit-asset',
-              params: {
-                production_id: currentProduction.id,
-                asset_id: asset.id
-              }
-            }"
-            :delete-route="{
-              name: 'delete-asset',
-              params: {
-                production_id: currentProduction.id,
-                asset_id: asset.id
-              }
-            }"
-            :restore-route="{
-              name: 'restore-asset',
-              params: {
-                production_id: currentProduction.id,
-                asset_id: asset.id
-              }
-            }"
-          >
-          </row-actions>
+            :edit-route="editPath(asset.id)"
+            :delete-route="deletePath(asset.id)"
+            :restore-route="restorePath(asset.id)"
+          />
           <td class="actions" v-else>
           </td>
         </tr>
@@ -234,17 +203,24 @@ export default {
 
   computed: {
     ...mapGetters([
-      'currentProduction',
+      'assets',
       'assetSearchText',
-      'selectedTasks',
+      'assetSelectionGrid',
+      'episodeMap',
+      'currentEpisode',
+      'currentProduction',
+      'displayedAssetsLength',
       'nbSelectedTasks',
       'isCurrentUserClient',
       'isCurrentUserManager',
-      'displayedAssetsLength',
-      'assetSelectionGrid',
-      'assets',
+      'isTVShow',
+      'selectedTasks',
       'taskTypeMap'
     ]),
+
+    createTasksPath () {
+      return this.getPath('create-asset-tasks')
+    },
 
     isEmptyList () {
       return this.displayedAssetsLength === 0 &&
@@ -338,7 +314,7 @@ export default {
     },
 
     loadMoreAssets () {
-      console.log('load more assets')
+      // console.log('load more assets')
       this.displayMoreAssets()
     },
 
@@ -361,9 +337,63 @@ export default {
     getValidationStyle (columnId) {
       const taskType = this.taskTypeMap[columnId]
       return {
-        'border-left': '1px solid ' + taskType.color,
+        'border-left': `1px solid ${taskType.color}`,
         'background': this.getBackground(taskType.color)
       }
+    },
+
+    assetPath (assetId) {
+      return this.getPath('asset', assetId)
+    },
+
+    editPath (assetId) {
+      return this.getPath('edit-asset', assetId)
+    },
+
+    deletePath (assetId) {
+      return this.getPath('delete-asset', assetId)
+    },
+
+    restorePath (assetId) {
+      return this.getPath('restore-asset', assetId)
+    },
+
+    taskTypePath (taskTypeId) {
+      let route = {
+        name: 'task-type',
+        params: {
+          production_id: this.currentProduction.id,
+          task_type_id: taskTypeId,
+          type: 'assets'
+        }
+      }
+
+      if (this.isTVShow && this.currentEpisode) {
+        route.name = `episode-task-type`
+        route.params.episode_id = this.currentEpisode.id
+      }
+
+      return route
+    },
+
+    getPath (section, assetId) {
+      let route = {
+        name: section,
+        params: {
+          production_id: this.currentProduction.id
+        }
+      }
+
+      if (this.isTVShow && this.currentEpisode) {
+        route.name = `episode-${section}`
+        route.params.episode_id = this.currentEpisode.id
+      }
+
+      if (assetId) {
+        route.params.asset_id = assetId
+      }
+
+      return route
     }
   }
 }
@@ -383,6 +413,12 @@ export default {
   min-width: 200px;
   max-width: 200px;
   width: 200px;
+}
+
+.episode {
+  min-width: 50px;
+  max-width: 50px;
+  width: 50px;
 }
 
 .bold {

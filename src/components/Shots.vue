@@ -2,8 +2,24 @@
   <div class="shots page fixed-page">
     <div class="shot-list-header page-header">
       <div class="level header-title">
-        <div class="level-left">
-          <page-title :text="$t('shots.title')"></page-title>
+        <div class="level-left flexcolumn">
+          <div class="filters-area flexcolumn-item">
+            <search-field
+              ref="shot-search-field"
+              :can-save="true"
+              @change="onSearchChange"
+              placeholder="ex: e01 s01, anim=wip"
+              @save="saveSearchQuery"
+            />
+          </div>
+
+          <div class="query-list flexcolumn-item">
+            <search-query-list
+              :queries="shotSearchQueries"
+              @changesearch="changeSearch"
+              @removesearch="removeSearchQuery"
+            />
+          </div>
         </div>
 
         <div class="level-right" v-if="isCurrentUserManager">
@@ -14,10 +30,7 @@
               :text="$t('main.csv.import_file')"
               icon="upload"
               :is-responsive="true"
-              :path="{
-                name: 'import-shots',
-                params: {production_id: currentProduction.id}
-              }"
+              :path="importPath"
             />
             <button-href-link
               class="level-item"
@@ -31,31 +44,10 @@
               :text="$t('shots.manage')"
               icon="plus"
               :is-responsive="true"
-              :path="{
-                name: 'manage-shots',
-                params: {production_id: currentProduction.id}
-              }"
+              :path="manageShotsPath"
             />
           </div>
         </div>
-      </div>
-
-      <div class="filters-area">
-        <search-field
-          ref="shot-search-field"
-          :can-save="true"
-          @change="onSearchChange"
-          placeholder="ex: e01 s01, anim=wip"
-          @save="saveSearchQuery"
-        />
-      </div>
-
-      <div class="query-list">
-        <search-query-list
-          :queries="shotSearchQueries"
-          @changesearch="changeSearch"
-          @removesearch="removeSearchQuery"
-        />
       </div>
     </div>
 
@@ -73,10 +65,7 @@
       :is-loading="loading.manage"
       :is-error="false"
       :is-success="false"
-      :cancel-route="{
-        name: 'shots',
-        params: {production_id: currentProduction.id}
-      }"
+      :cancel-route="shotsPath"
     />
 
     <edit-shot-modal
@@ -85,10 +74,7 @@
       :is-loading-stay="loading.stay"
       :is-error="editShot.isCreateError"
       :is-success="editShot.isSuccess"
-      :cancel-route="{
-        name: 'shots',
-        params: {production_id: currentProduction.id}
-      }"
+      :cancel-route="shotsPath"
       :shot-to-edit="shotToEdit"
       @confirm="confirmEditShot"
       @confirmAndStay="confirmNewShotStay"
@@ -98,10 +84,7 @@
       :active="modals.isDeleteDisplayed"
       :is-loading="deleteShot.isLoading"
       :is-error="deleteShot.isError"
-      :cancel-route="{
-        name: 'shots',
-        params: {production_id: currentProduction.id}
-      }"
+      :cancel-route="shotsPath"
       :text="deleteText()"
       :error-text="$t('shots.delete_error')"
       @confirm="confirmDeleteShot"
@@ -111,10 +94,7 @@
       :active="modals.isRestoreDisplayed"
       :is-loading="restoreShot.isLoading"
       :is-error="restoreShot.isError"
-      :cancel-route="{
-        name: 'shots',
-        params: {production_id: currentProduction.id}
-      }"
+      :cancel-route="shotsPath"
       :text="restoreText()"
       :error-text="$t('shots.restore_error')"
       @confirm="confirmRestoreShot"
@@ -124,10 +104,7 @@
       :active="modals.isImportDisplayed"
       :is-loading="loading.importing"
       :is-error="errors.importing"
-      :cancel-route="{
-        name: 'shots',
-        params: {production_id: currentProduction.id}
-      }"
+      :cancel-route="shotsPath"
       :form-data="shotsCsvFormData"
       :columns="columns"
       @fileselected="selectFile"
@@ -154,8 +131,10 @@
 <script>
 import { mapGetters, mapActions } from 'vuex'
 import { SearchIcon } from 'vue-feather-icons'
+
 import ButtonHrefLink from './widgets/ButtonHrefLink'
 import ButtonLink from './widgets/ButtonLink'
+import Combobox from './widgets/Combobox'
 import CreateTasksModal from './modals/CreateTasksModal'
 import DeleteModal from './widgets/DeleteModal'
 import EditShotModal from './modals/EditShotModal'
@@ -174,6 +153,7 @@ export default {
   components: {
     ButtonLink,
     ButtonHrefLink,
+    Combobox,
     CreateTasksModal,
     DeleteModal,
     EditShotModal,
@@ -209,13 +189,6 @@ export default {
       },
       shotToDelete: null,
       shotToEdit: null,
-      choices: [],
-      shotFilters: [{
-        type: 'Type',
-        value: {
-          name: 'open'
-        }
-      }],
       columns: [
         'Episode',
         'Sequence',
@@ -224,52 +197,71 @@ export default {
         'FPS',
         'Frame In',
         'Frame Out'
-      ],
-      shotFilterTypes: [
-        'Type'
       ]
     }
   },
 
   computed: {
     ...mapGetters([
+      'currentEpisode',
       'currentProduction',
       'deleteShot',
       'displayedShots',
       'editShot',
+      'episodeMap',
+      'episodes',
       'isCurrentUserManager',
       'isShotsLoading',
       'isShotsLoadingError',
       'isShowAssignations',
+      'isTVShow',
       'openProductions',
       'restoreShot',
       'sequences',
-      'shots',
       'shotMap',
       'shotsCsvFormData',
       'shotSearchQueries',
-      'shotValidationColumns',
       'shotSearchText',
+      'shotsPath',
+      'shotValidationColumns',
       'shotListScrollPosition'
-    ])
+    ]),
+
+    importPath () {
+      let route = {
+        name: 'import-shots',
+        params: {
+          production_id: this.currentProduction.id
+        }
+      }
+
+      if (this.isTVShow && this.currentEpisode) {
+        route.name = 'episode-import-shots'
+        route.params.episode_id = this.currentEpisode.id
+      }
+
+      return route
+    },
+
+    manageShotsPath () {
+      let route = {
+        name: 'manage-shots',
+        params: {
+          production_id: this.currentProduction.id
+        }
+      }
+
+      if (this.isTVShow && this.currentEpisode) {
+        route.name = 'episode-manage-shots'
+        route.params.episode_id = this.currentEpisode.id
+      }
+
+      return route
+    }
   },
 
   created () {
     this.setLastProductionScreen('shots')
-
-    const productionId = this.$store.state.route.params.production_id
-    if (this.currentProduction.id !== productionId) {
-      this.setProduction(productionId)
-    }
-
-    const shotIds = Object.keys(this.shotMap)
-    if (shotIds.length === 0 ||
-        this.shotMap[shotIds[0]].production_id !== this.currentProduction.id) {
-      this.loadShots((err) => {
-        this.resizeHeaders()
-        if (!err) this.handleModalsDisplay()
-      })
-    }
   },
 
   mounted () {
@@ -279,7 +271,15 @@ export default {
     this.$refs['shot-list'].setScrollPosition(
       this.shotListScrollPosition
     )
-    this.resizeHeaders()
+
+    if (Object.keys(this.shotMap).length < 2) {
+      this.loadShots((err) => {
+        this.resizeHeaders()
+        if (!err) {
+          this.handleModalsDisplay()
+        }
+      })
+    }
   },
 
   methods: {
@@ -289,7 +289,6 @@ export default {
       'removeShotSearch',
       'saveShotSearch',
       'setLastProductionScreen',
-      'setProduction',
       'setShotSearch',
       'showAssignations',
       'hideAssignations'
@@ -332,10 +331,7 @@ export default {
           if (!err) {
             this.loading.edit = false
             this.modals.isNewDisplayed = false
-            this.$router.push({
-              name: 'shots',
-              params: {production_id: this.currentProduction.id}
-            })
+            this.$router.push(this.shotsPath)
           } else {
             this.loading.edit = false
             this.editShot.isCreateError = true
@@ -349,10 +345,7 @@ export default {
         shot: this.shotToDelete,
         callback: (err) => {
           if (!err) {
-            this.$router.push({
-              name: 'shots',
-              params: {production_id: this.currentProduction.id}
-            })
+            this.$router.push(this.shotsPath)
           }
         }
       })
@@ -363,10 +356,7 @@ export default {
         shot: this.shotToRestore,
         callback: (err) => {
           if (!err) {
-            this.$router.push({
-              name: 'shots',
-              params: {production_id: this.currentProduction.id}
-            })
+            this.$router.push(this.shotsPath)
           }
         }
       })
@@ -385,10 +375,7 @@ export default {
             this.errors.creatingTasks = true
           } else {
             this.modals.isCreateTasks = false
-            this.$router.push({
-              name: 'shots',
-              params: {production_id: this.currentProduction.id}
-            })
+            this.$router.push(this.shotsPath)
             this.loadShots()
           }
         }
@@ -425,8 +412,8 @@ export default {
     },
 
     handleModalsDisplay () {
-      const path = this.$store.state.route.path
-      const shotId = this.$store.state.route.params.shot_id
+      const path = this.$route.path
+      const shotId = this.$route.params.shot_id
       this.editShot.isSuccess = false
       this.editShot.isError = false
 
@@ -517,32 +504,55 @@ export default {
 
     resizeHeaders () {
       setTimeout(() => {
-        this.$refs['shot-list'].resizeHeaders()
+        if (this.$refs['shot-list']) {
+          this.$refs['shot-list'].resizeHeaders()
+        }
       }, 0)
     }
   },
 
   watch: {
-    $route () { this.handleModalsDisplay() },
+    $route () {
+      this.handleModalsDisplay()
+    },
+
     currentProduction () {
-      const oldPath = `${this.$route.path}`
-      const newPath = {
-        name: 'shots',
-        params: {production_id: this.currentProduction.id}
-      }
-      if (this.$route.path.length === 55) this.$router.push(newPath)
-      const path = this.$route.path
-      if (oldPath !== path) {
-        this.$refs['shot-search-field'].setValue('')
-        this.$store.commit('SET_SHOT_LIST_SCROLL_POSITION', 0)
-        this.loadShots(this.resizeHeaders)
+      this.$refs['shot-search-field'].setValue('')
+      this.$store.commit('SET_SHOT_LIST_SCROLL_POSITION', 0)
+
+      this.loadShots((err) => {
+        this.resizeHeaders()
+        if (!err) {
+          this.handleModalsDisplay()
+          this.resizeHeaders()
+        }
+      })
+    },
+
+    currentEpisode () {
+      if (this.isTVShow && this.currentEpisode) {
+        this.loadShots((err) => {
+          this.resizeHeaders()
+          if (!err) {
+            this.handleModalsDisplay()
+            this.resizeHeaders()
+          }
+        })
       }
     }
   },
 
   metaInfo () {
-    return {
-      title: `${this.currentProduction.name} ${this.$t('shots.title')} - Kitsu`
+    if (this.isTVShow) {
+      return {
+        title: `${this.currentProduction ? this.currentProduction.name : ''}` +
+               ` - ${this.currentEpisode ? this.currentEpisode.name : ''}` +
+               ` | ${this.$t('shots.title')} - Kitsu`
+      }
+    } else {
+      return {
+        title: `${this.currentProduction.name} ${this.$t('shots.title')} - Kitsu`
+      }
     }
   }
 
@@ -552,5 +562,9 @@ export default {
 <style scoped>
 .data-list {
   margin-top: 0;
+}
+
+.page-header {
+  margin-bottom: 1em;
 }
 </style>

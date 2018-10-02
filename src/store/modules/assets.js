@@ -101,7 +101,6 @@ const helpers = {
 
     Object.assign(task, {
       project_id: asset.production_id,
-
       entity_name: `${asset.asset_type_name} / ${asset.name}`,
       entity_type_name: asset.asset_type_name,
       entity: {
@@ -228,9 +227,20 @@ const actions = {
     const production = rootGetters.currentProduction
     const userFilters = rootGetters.userFilters
     const personMap = rootGetters.personMap
+    const episode = rootGetters.currentEpisode
+    const isTVShow = rootGetters.isTVShow
+
+    if (isTVShow && !episode) {
+      if (callback) return callback()
+      else return null
+    }
+
+    if (state.isAssetsLoading) {
+      return callback()
+    }
 
     commit(LOAD_ASSETS_START)
-    assetsApi.getAssets(production, (err, assets) => {
+    assetsApi.getAssets(production, episode, (err, assets) => {
       if (err) commit(LOAD_ASSETS_ERROR)
       else {
         assets.forEach((asset) => {
@@ -399,9 +409,6 @@ const actions = {
     return new Promise((resolve, reject) => {
       const productionId = rootState.route.params.production_id
       dispatch('setLastProductionScreen', 'production-asset-types')
-      if (rootGetters.currentProduction.id !== productionId) {
-        dispatch('setProduction', productionId)
-      }
 
       if (cache.assets.length === 0 ||
           cache.assets[0].production_id !== productionId) {
@@ -543,10 +550,12 @@ const mutations = {
     newAsset.tasks = []
     if (asset) {
       Object.assign(asset, newAsset)
+      asset.episode_id = newAsset.source_id
       state.displayedAssets = sortAssets(state.displayedAssets)
     } else {
       newAsset.validations = {}
       newAsset.production_id = newAsset.project_id
+      newAsset.episode_id = newAsset.source_id
       cache.assets.push(newAsset)
       cache.assets = sortAssets(cache.assets)
       state.displayedAssets.push(newAsset)

@@ -23,7 +23,7 @@ import {
 
 let playlists = []
 
-playlistsApi.getPlaylists = (production, callback) => {
+playlistsApi.getPlaylists = (production, episode, callback) => {
   process.nextTick(() => {
     callback(null, playlists)
   })

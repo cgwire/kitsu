@@ -10,7 +10,8 @@ import {
 const initialState = {
   isSidebarHidden: true,
   isUserMenuHidden: true,
-  lastProductionScreen: 'assets'
+  lastProductionScreen: 'assets',
+  currentProductionScreen: 'assets'
 }
 
 const state = {...initialState}
@@ -18,16 +19,19 @@ const state = {...initialState}
 const getters = {
   isSidebarHidden: state => state.isSidebarHidden,
   isUserMenuHidden: state => state.isUserMenuHidden,
-  lastProductionScreen: state => state.lastProductionScreen
+  lastProductionScreen: state => state.lastProductionScreen,
+  currentProductionScreen: state => state.currentProductionScreen
 }
 
 const actions = {
   toggleSidebar ({ commit, state }) {
     commit(TOGGLE_SIDEBAR)
   },
+
   toggleUserMenu ({ commit, state }) {
     commit(TOGGLE_USER_MENU)
   },
+
   setLastProductionScreen ({ commit, state }, lastProductionScreen) {
     commit(SET_LAST_PRODUCTION_SCREEN, lastProductionScreen)
   }

@@ -3,7 +3,6 @@
     <div class="columns">
 
       <div class="playlist-list-column column">
-        <page-title class="title" :text="$t('playlists.title')"></page-title>
         <button
           :class="{
             button: true,
@@ -18,13 +17,7 @@
         <div class="playlists" v-if="!loading.playlists">
           <router-link
             :key="playlist.id"
-            :to="{
-              name: 'playlist',
-              params: {
-                playlist_id: playlist.id,
-                production_id: currentProduction.id
-              }
-            }"
+            :to="getPlaylistPath(playlist.id)"
             :class="{
               'playlist-item': true,
               selected: playlist.id === currentPlaylist.id
@@ -37,8 +30,8 @@
         <spinner v-else></spinner>
         <error-text
           text="$t('playlists.loading_error')"
-          v-if="errors.playlistLoading">
-        </error-text>
+          v-if="errors.playlistLoading"
+        />
       </div>
 
       <div class="playlist-column column">
@@ -48,33 +41,19 @@
           </div>
           <div class="flexrow-item">
             <button-link
-              :path="{
-                name: 'edit-playlist',
-                params: {
-                  production_id: currentProduction.id,
-                  playlist_id: currentPlaylist.id
-                }
-              }"
+              :path="editPath"
               class="edit-button"
               icon="edit"
               v-if="currentPlaylist.id"
-            >
-            </button-link>
+            />
           </div>
           <div class="flexrow-item">
             <button-link
-              :path="{
-                name: 'delete-playlist',
-                params: {
-                  production_id: currentProduction.id,
-                  playlist_id: currentPlaylist.id
-                }
-              }"
+              :path="deletePath"
               class="delete-button"
               icon="delete"
               v-if="currentPlaylist.id"
-            >
-            </button-link>
+            />
           </div>
         </div>
 
@@ -118,34 +97,25 @@
               @play-click="playShot"
               @remove-click="removeShot"
               @preview-changed="onPreviewChanged"
-            >
-            </playlisted-shot>
+            />
           </div>
         </div>
       </div>
 
       <div class="addition-column column">
-        <page-subtitle :text="$t('playlists.add_shots')"></page-subtitle>
+        <page-subtitle :text="$t('playlists.add_shots')" />
 
-        <spinner v-if="isShotsLoading"></spinner>
+        <spinner v-if="isShotsLoading" />
         <div v-else>
           <div class="flexrow" v-if="episodes.length > 0">
-            <div class="flexrom-item">
-              <combobox
-                :label="$t('shots.fields.episode')"
-                :options="getEpisodeOptions"
-                v-model="episodeId"
-                v-if="!isSingleEpisode"
-              ></combobox>
-            </div>
             <div class="flexrow-item">
               <combobox
                 :label="$t('shots.fields.sequence')"
                 :options="sequenceOptions"
                 v-model="sequenceId"
-                v-if="episodeId && sequenceOptions.length > 0"
-              ></combobox>
-              <div v-if="sequenceOptions.length === 0 && episodeId">
+                v-if="sequenceOptions.length > 0"
+              />
+              <div v-if="sequenceOptions.length === 0">
                 {{ $t('playlists.no_sequence_for_episode') }}
               </div>
             </div>
@@ -171,7 +141,7 @@
               :entity="shot"
               :empty-width="150"
               :empty-height="100"
-            ></entity-thumbnail>
+            />
             {{ shot.name }}
           </div>
         </div>
@@ -185,8 +155,7 @@
       :cancel-route="currentPlaylistRoute"
       :playlist-to-edit="currentPlaylist"
       @confirm="runEditPlaylist"
-    >
-    </edit-playlist-modal>
+    />
 
     <delete-modal
       :active="modals.isDeleteDisplayed"
@@ -196,8 +165,7 @@
       :text="deleteText"
       :error-text="$t('playlists.delete_error')"
       @confirm="removePlaylist"
-    >
-    </delete-modal>
+    />
   </div>
 </template>
 <script>
@@ -236,7 +204,6 @@ export default {
 
   data () {
     return {
-      episodeId: null,
       sequenceId: null,
       sequenceOptions: [],
       sequenceShots: [],
@@ -267,13 +234,15 @@ export default {
 
   computed: {
     ...mapGetters([
+      'currentEpisode',
       'currentProduction',
       'episodes',
       'getEpisodeOptions',
       'isShotsLoading',
-      'isSingleEpisode',
+      'isTVShow',
       'playlistMap',
       'playlists',
+      'playlistsPath',
       'sequences',
       'shotMap',
       'taskTypeMap'
@@ -299,20 +268,9 @@ export default {
 
     currentPlaylistRoute () {
       if (this.currentPlaylist.id) {
-        return {
-          name: 'playlist',
-          params: {
-            production_id: this.currentProduction.id,
-            playlist_id: this.currentPlaylist.id
-          }
-        }
+        return this.getPlaylistPath(this.currentPlaylist.id)
       } else {
-        return {
-          name: 'playlists',
-          params: {
-            production_id: this.currentProduction.id
-          }
-        }
+        return this.playlistsPath
       }
     },
 
@@ -323,8 +281,16 @@ export default {
         const previewId = currentShot.preview_file_id
         return `/api/movies/originals/preview-files/${previewId}.mp4`
       } else {
-        return 'toto'
+        return ''
       }
+    },
+
+    editPath () {
+      return this.getPlaylistPath(this.currentPlaylist.id, 'edit')
+    },
+
+    deletePath () {
+      return this.getPlaylistPath(this.currentPlaylist.id, 'delete')
     }
   },
 
@@ -344,7 +310,6 @@ export default {
 
     clearAdditionColumn () {
       this.sequenceOptions = []
-      this.episodeId = null
       this.sequenceId = null
     },
 
@@ -365,19 +330,18 @@ export default {
         name: moment().format('YYYY-MM-DD HH:mm'),
         production_id: this.currentProduction.id
       }
+
+      if (this.isTVShow && this.currentEpisode) {
+        newPlaylist.episode_id = this.currentEpisode.id
+      }
+
       this.loading.addPlaylist = true
       this.errors.addPlaylist = false
       this.newPlaylist({
         data: newPlaylist,
         callback: (err, playlist) => {
           if (err) this.errors.addPlaylist = true
-          this.$router.push({
-            name: 'playlist',
-            params: {
-              production_id: this.currentProduction.id,
-              playlist_id: playlist.id
-            }
-          })
+          this.$router.push(this.getPlaylistPath(playlist.id))
           this.loading.addPlaylist = false
         }
       })
@@ -444,12 +408,7 @@ export default {
           }
         })
       } else {
-        this.$router.push({
-          name: 'playlists',
-          params: {
-            production_id: this.currentProduction.id
-          }
-        })
+        this.$router.push(this.playlistsPath)
       }
     },
 
@@ -465,9 +424,15 @@ export default {
     },
 
     setAdditionSequences () {
-      const sequences = this.sequences.filter((sequence) => {
-        return sequence.parent_id === this.episodeId
-      })
+      let sequences = []
+      if (this.isTVShow && this.currentEpisode) {
+        sequences = this.sequences.filter((sequence) => {
+          return sequence.parent_id === this.currentEpisode.id
+        })
+      } else {
+        sequences = this.sequences
+      }
+
       this.sequenceOptions = sequences.map(
         (sequence) => { return { label: sequence.name, value: sequence.id } }
       )
@@ -593,7 +558,7 @@ export default {
     loadShotsData (callback) {
       this.loadShots(() => {
         if (this.episodes.length > 0) {
-          this.episodeId = this.episodes[0].id // Cascade update
+          this.setAdditionSequences()
         }
 
         this.loadPlaylistsData()
@@ -615,59 +580,60 @@ export default {
           })
         }
       })
+    },
+
+    getPlaylistPath (playlistId, section) {
+      let route = {
+        name: section ? `${section}-playlist` : 'playlist',
+        params: {
+          production_id: this.currentProduction.id,
+          playlist_id: playlistId
+        }
+      }
+
+      if (this.isTVShow && this.currentEpisode) {
+        route.name = `episode-${route.name}`
+        route.params.episode_id = this.currentEpisode.id
+      }
+
+      return route
     }
   },
 
-  created () {
-    if (this.currentProduction.id !== this.$route.params.production_id) {
-      this.$store.commit(
-        'SET_CURRENT_PRODUCTION',
-        this.$route.params.production_id
-      )
-    }
-
-    if (Object.keys(this.shotMap).length === 0) {
-      this.loadShotsData()
-    } else {
-      if (this.episodes.length > 0) {
-        this.episodeId = this.episodes[0].id // Then cacscade update
-
-        this.setCurrentPlaylist(this.loadPlaylistsData)
-      }
-    }
+  mounted () {
+    this.setAdditionSequences()
+    this.loadShotsData(() => {
+      this.resetPlaylist()
+    })
   },
 
   watch: {
     $route () {
-      this.resetPlaylist()
-    },
-
-    currentProduction () {
-      if (this.currentProduction.id !== this.$route.params.production_id) {
-        this.$router.push({
-          name: 'playlists',
-          params: {production_id: this.currentProduction.id}
-        })
-        this.loadShotsData(() => {
-          this.resetPlaylist()
-        })
-      }
-    },
-
-    episodeId () {
-      this.sequenceId = null
-      this.setAdditionSequences()
     },
 
     sequenceId () {
       this.setAdditionShots()
+    },
+
+    currentEpisode () {
+      this.setAdditionSequences()
+      this.loadShotsData(() => {
+        this.resetPlaylist()
+      })
     }
   },
 
   metaInfo () {
-    return {
-      title: `${this.currentProduction.name} ${this.$t('playlists.title')}` +
-             ` - Kitsu`
+    if (this.isTVShow) {
+      return {
+        title: `${this.currentProduction.name} - ${this.currentEpisode.id} |` +
+               ` ${this.$t('playlists.title')} - Kitsu`
+      }
+    } else {
+      return {
+        title: `${this.currentProduction.name} ${this.$t('playlists.title')}` +
+               ` - Kitsu`
+      }
     }
   }
 }

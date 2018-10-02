@@ -6,6 +6,7 @@
         <tr>
           <th class="project">&nbsp;</th>
           <th class="name">{{ $t('productions.fields.name') }}</th>
+          <th class="type">{{ $t('productions.fields.type') }}</th>
           <th class="status">{{ $t('productions.fields.status') }}</th>
           <th class="fps">{{ $t('productions.fields.fps') }}</th>
           <th class="ratio">{{ $t('productions.fields.ratio') }}</th>
@@ -31,15 +32,16 @@
             :only-avatar="true"
             :entry="entry"
             :last-production-screen="lastProductionScreen"
-          >
-          </production-name-cell>
+          />
           <production-name-cell
             class="name"
             :with-avatar="false"
             :entry="entry"
             :last-production-screen="lastProductionScreen"
-          >
-          </production-name-cell>
+          />
+          <td class="type">
+            {{ $t('productions.type.' + (entry.production_type || 'short')) }}
+          </td>
           <td class="status">
             {{ $t(getStatusLocale(entry.project_status_name)) }}
           </td>
@@ -56,14 +58,13 @@
             :entry-id="entry.id"
             :edit-route="{
               name: 'edit-production',
-              params: {production_id: entry.id}
+              params: {production_edit_id: entry.id}
             }"
             :delete-route="{
               name: 'delete-production',
-              params: {production_id: entry.id}
+              params: {production_delete_id: entry.id}
             }"
-          >
-          </row-actions>
+          />
         </tr>
       </tbody>
     </table>
@@ -130,6 +131,11 @@ export default {
 .name {
   min-width: 250px;
   width: 250px;
+}
+
+.type {
+  min-width: 120px;
+  width: 120px;
 }
 
 .status {

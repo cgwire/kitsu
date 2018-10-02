@@ -2,18 +2,13 @@
   <div class="sequences page fixed-page">
     <div class="sequence-list-header page-header">
       <div class="level header-title">
-        <div class="level-left">
-          <page-title :text="$t('sequences.title')"></page-title>
+        <div class="level-left filters-area">
+          <search-field
+            ref="sequence-search-field"
+            @change="onSearchChange"
+            placeholder="ex: e01 s01, anim=wip"
+          />
         </div>
-      </div>
-
-      <div class="filters-area">
-        <search-field
-          ref="sequence-search-field"
-          @change="onSearchChange"
-          placeholder="ex: e01 s01, anim=wip"
-        >
-        </search-field>
       </div>
     </div>
 
@@ -31,10 +26,7 @@
       :active="modals.isNewDisplayed"
       :is-loading="loading.edit"
       :is-error="errors.edit"
-      :cancel-route="{
-        name: 'sequences',
-        params: {production_id: currentProduction.id}
-      }"
+      :cancel-route="sequencesPath"
       :sequence-to-edit="sequenceToEdit"
       @confirm="confirmEditSequence"
     />
@@ -45,10 +37,7 @@
       :is-error="errors.del"
       :text="deleteText()"
       :error-text="$t('sequences.delete_error')"
-      :cancel-route="{
-        name: 'sequences',
-        params: {production_id: currentProduction.id}
-      }"
+      :cancel-route="sequencesPath"
       @confirm="confirmDeleteSequence"
     />
 
@@ -97,13 +86,16 @@ export default {
 
   computed: {
     ...mapGetters([
+      'currentEpisode',
       'currentProduction',
       'displayedSequences',
       'isCurrentUserManager',
       'isShotsLoading',
       'isShotsLoadingError',
+      'isTVShow',
       'sequences',
       'sequenceMap',
+      'sequencesPath',
       'sequenceStats',
       'sequenceSearchText',
       'sequenceListScrollPosition',
@@ -112,14 +104,16 @@ export default {
   },
 
   created () {
-    this.initSequences()
-      .then(this.handleModalsDisplay)
-      .then(this.resizeHeaders)
   },
 
   mounted () {
-    this.setDefaultSearchText()
-    this.setDefaultListScrollPosition()
+    setTimeout(() => {
+      this.initSequences()
+        .then(this.handleModalsDisplay)
+        .then(this.resizeHeaders)
+      this.setDefaultSearchText()
+      this.setDefaultListScrollPosition()
+    }, 0)
   },
 
   methods: {
@@ -132,7 +126,6 @@ export default {
       'loadShots',
       'loadComment',
       'setLastProductionScreen',
-      'setProduction',
       'setSequenceSearch',
       'setSequenceListScrollPosition',
       'showAssignations'
@@ -153,10 +146,7 @@ export default {
     },
 
     navigateToList () {
-      this.$router.push({
-        name: 'sequences',
-        params: {production_id: this.currentProduction.id}
-      })
+      this.$router.push(this.sequencesPath)
     },
 
     confirmEditSequence (form) {
@@ -251,21 +241,21 @@ export default {
     $route () { this.handleModalsDisplay() },
 
     currentProduction () {
-      const productionId = this.$route.params.production_id
-      if (this.currentProduction.id !== productionId) {
-        const newPath = {
-          name: 'sequences',
-          params: {production_id: this.currentProduction.id}
-        }
+      this.$refs['sequence-search-field'].setValue('')
+      this.$store.commit('SET_SEQUENCE_LIST_SCROLL_POSITION', 0)
 
-        this.$refs['sequence-search-field'].setValue('')
-        this.$store.commit('SET_SEQUENCE_LIST_SCROLL_POSITION', 0)
+      if (!this.isTVShow) {
+        this.initSequences()
+          .then(this.handleModalsDisplay)
+          .then(this.resizeHeaders)
+      }
+    },
 
-        this.$router.push(newPath)
-        this.loadShots(() => {
-          this.resizeHeaders()
-          this.computeSequenceStats()
-        })
+    currentEpisode () {
+      if (this.isTVShow && this.currentEpisode) {
+        this.initSequences()
+          .then(this.handleModalsDisplay)
+          .then(this.resizeHeaders)
       }
     }
   },
@@ -285,8 +275,17 @@ export default {
   },
 
   metaInfo () {
-    return {
-      title: `${this.currentProduction.name} ${this.$t('sequences.title')} - Kitsu`
+    if (this.isTVShow) {
+      return {
+        title: `${this.currentProduction ? this.currentProduction.name : ''}` +
+               ` - ${this.currentEpisode ? this.currentEpisode.name : ''}` +
+               ` | ${this.$t('sequences.title')} - Kitsu`
+      }
+    } else {
+      return {
+        title: `${this.currentProduction ? this.currentProduction.name : ''}` +
+               ` ${this.$t('sequences.title')} - Kitsu`
+      }
     }
   }
 
@@ -296,5 +295,9 @@ export default {
 <style scoped>
 .data-list {
   margin-top: 0;
+}
+
+.filters-area {
+  margin-bottom: 2em;
 }
 </style>

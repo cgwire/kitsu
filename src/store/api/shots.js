@@ -6,19 +6,21 @@ export default {
     client.get(path, callback)
   },
 
-  getShots (currentProduction, callback) {
+  getShots (production, episode, callback) {
     let path = '/api/data/shots/with-tasks'
-    if (currentProduction) path += `?project_id=${currentProduction.id}`
+    if (production) path += `?project_id=${production.id}`
+    if (episode) path += `&episode_id=${episode.id}`
     client.get(path, callback)
   },
 
-  getSequences (currentProduction, callback) {
-    let path = `/api/data/projects/${currentProduction.id}/sequences`
+  getSequences (production, episode, callback) {
+    let path = `/api/data/projects/${production.id}/sequences`
+    if (episode) path = `/api/data/episodes/${episode.id}/sequences`
     client.get(path, callback)
   },
 
-  getEpisodes (currentProduction, callback) {
-    let path = `/api/data/projects/${currentProduction.id}/episodes`
+  getEpisodes (production, callback) {
+    let path = `/api/data/projects/${production.id}/episodes`
     client.get(path, callback)
   },
 
@@ -120,5 +122,17 @@ export default {
       formData,
       callback
     )
+  },
+
+  getEpisodeStats (productionId) {
+    return new Promise((resolve, reject) => {
+      client.get(
+        `/api/data/projects/${productionId}/episodes/stats`,
+        (err, episodeStats) => {
+          if (err) reject(err)
+          else resolve(episodeStats)
+        }
+      )
+    })
   }
 }
