@@ -550,10 +550,12 @@ const mutations = {
     newAsset.tasks = []
     if (asset) {
       Object.assign(asset, newAsset)
+      asset.episode_id = newAsset.source_id
       state.displayedAssets = sortAssets(state.displayedAssets)
     } else {
       newAsset.validations = {}
       newAsset.production_id = newAsset.project_id
+      newAsset.episode_id = newAsset.source_id
       cache.assets.push(newAsset)
       cache.assets = sortAssets(cache.assets)
       state.displayedAssets.push(newAsset)
