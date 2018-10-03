@@ -65,10 +65,10 @@ export const routes = [
             })
           } else {
             if (!userStore.getters.isCurrentUserCGArtist(userStore.state)) {
-              store.commit('LOGIN_SUCCESS')
+              store.commit('DATA_LOADING_END')
               next({name: 'open-productions'})
             } else {
-              store.commit('LOGIN_SUCCESS')
+              store.commit('DATA_LOADING_END')
               next({name: 'todos'})
             }
           }
@@ -90,11 +90,11 @@ export const routes = [
           lang.setLocale()
           if (taskTypeStore.state.taskTypes.length === 0) {
             init(() => {
-              store.commit('LOGIN_SUCCESS')
+              store.commit('DATA_LOADING_END')
               next()
             })
           } else {
-            store.commit('LOGIN_SUCCESS')
+            store.commit('DATA_LOADING_END')
             next()
           }
         }

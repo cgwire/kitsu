@@ -4,7 +4,7 @@ import {
   USER_LOGIN,
   USER_LOGOUT,
   USER_LOGIN_FAIL,
-  LOGIN_RUN
+  DATA_LOADING_START
 } from '../store/mutation-types.js'
 
 const auth = {
@@ -18,7 +18,7 @@ const auth = {
         else {
           if (res.body.login) {
             const user = res.body.user
-            store.commit(USER_LOGIN, user)
+            store.commit(DATA_LOADING_START, user)
             callback(null, user)
           } else {
             store.commit(USER_LOGIN_FAIL)
@@ -93,7 +93,7 @@ const auth = {
           query: { redirect: to.fullPath }
         })
       } else {
-        store.commit(LOGIN_RUN)
+        store.commit(DATA_LOADING_START)
         next()
       }
     }

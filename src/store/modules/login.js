@@ -7,6 +7,9 @@ import {
   LOGOUT_SUCCESS,
   LOGOUT_FAILURE,
 
+  DATA_LOADING_START,
+  DATA_LOADING_END,
+
   TOGGLE_USER_MENU,
   RESET_ALL
 } from '../mutation-types'
@@ -16,14 +19,16 @@ const state = {
   email: '',
   password: '',
   isLoginLoading: false,
-  isLoginError: false
+  isLoginError: false,
+  isDataLoading: false
 }
 
 const getters = {
   email: state => state.email,
   password: state => state.password,
   isLoginLoading: state => state.isLoginLoading,
-  isLoginError: state => state.isLoginError
+  isLoginError: state => state.isLoginError,
+  isDataLoading: state => state.isDataLoading
 }
 
 const actions = {
@@ -45,8 +50,7 @@ const actions = {
           commit(LOGIN_FAILURE)
           callback(null, false)
         } else {
-          // Login end is commited at the end of the init phase, initiated
-          // after login through this callback.
+          commit(LOGIN_SUCCESS)
           callback(null, true)
         }
       }
@@ -88,24 +92,38 @@ const mutations = {
   [CHANGE_EMAIL] (state, email) {
     state.email = email
   },
+
   [CHANGE_PASSWORD] (state, password) {
     state.password = password
   },
+
   [LOGIN_RUN] (state) {
     state.isLoginLoading = true
     state.isLoginError = false
   },
+
   [LOGIN_SUCCESS] (state, email) {
     state.isLoginLoading = false
   },
+
   [LOGIN_FAILURE] (state, email) {
     state.isLoginLoading = false
     state.isLoginError = true
   },
+
   [LOGOUT_SUCCESS] (state, email) {
     state.isLoginLoading = false
     state.isLoginError = false
   },
+
+  [DATA_LOADING_START] (state) {
+    state.isDataLoading = true
+  },
+
+  [DATA_LOADING_END] (state) {
+    state.isDataLoading = false
+  },
+
   [RESET_ALL] (state, email) {
     state.email = ''
     state.password = ''

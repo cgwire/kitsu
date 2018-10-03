@@ -1,12 +1,16 @@
 import async from 'async'
 import store from '../store'
 
-import { LOGIN_SUCCESS } from '../store/mutation-types'
+import {
+  DATA_LOADING_START,
+  DATA_LOADING_END
+} from '../store/mutation-types'
 
 /**
  * Load base data required to display properly all information.
  */
 const init = (callback) => {
+  store.commit(DATA_LOADING_START)
   const storeActions = [
     'loadProductionStatus',
     'loadTaskStatuses',
@@ -27,7 +31,7 @@ const init = (callback) => {
     // We run login success mutation when done because init
     // happens either after successful login or at first connexion
     // when the user have an active session.
-    store.commit(LOGIN_SUCCESS)
+    store.commit(DATA_LOADING_END)
     callback()
   })
 }

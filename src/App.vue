@@ -1,7 +1,7 @@
 <template>
   <div
     class="has-text-centered mt2 loading-info"
-    v-if="isLoginLoading && user"
+    v-if="user && isDataLoading"
   >
       <span>{{ $t('main.loading_data') }}...</span>
     <spinner class="mt2" />
@@ -10,7 +10,7 @@
 </template>
 
 <script>
-import { mapGetters } from 'vuex'
+import { mapGetters, mapActions } from 'vuex'
 import Spinner from './components/widgets/Spinner.vue'
 
 export default {
@@ -23,6 +23,8 @@ export default {
   computed: {
     ...mapGetters([
       'isLoginLoading',
+      'isDataLoading',
+      'route',
       'user'
     ])
   },
@@ -37,10 +39,13 @@ export default {
   },
 
   methods: {
+    ...mapActions([
+      'loadPersonTasks'
+    ]),
+
     onAssignation (eventData) {
-      const store = this.$store
-      if (store.getters.route.path.indexOf(eventData.person_id) > 0) {
-        store.dispatch('loadPersonTasks', {
+      if (this.route.path.indexOf(eventData.person_id) > 0) {
+        this.loadPersonTasks({
           personId: eventData.person_id,
           forced: true
         })
@@ -268,6 +273,7 @@ input.input:focus {
 .main-button:hover {
   background: #67BE4B;
   color: #fff;
+  border-bottom: 3px solid #119843;
 }
 
 .main-button:focus { outline: 0; }

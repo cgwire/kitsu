@@ -15,7 +15,7 @@
               type="text"
               :placeholder="$t('login.fields.email')"
               @input="updateEmail"
-              @keyup.enter="logIn"
+              @keyup.enter="confirmLogIn"
               v-focus >
             <span class="icon">
               <mail-icon width=20 height=20 />
@@ -29,7 +29,7 @@
               type="password"
               :placeholder="$t('login.fields.password')"
               @input="updatePassword"
-              @keyup.enter="logIn">
+              @keyup.enter="confirmLogIn">
             <span class="icon">
               <lock-icon width=20 height=20 />
             </span>
@@ -37,12 +37,13 @@
         </div>
         <p class="control">
           <a v-bind:class="{
+            button: true,
             'main-button': true,
             'is-fullwidth': true,
             'is-loading': isLoginLoading
           }"
-            @click="logIn">
-              {{ $t("login.login") }}
+            @click="confirmLogIn">
+            {{ $t("login.login") }}
           </a>
         </p>
         <p class="control error" v-show="isLoginError">
@@ -83,15 +84,19 @@ export default {
 
   methods: {
     ...mapActions([
+      'logIn'
     ]),
+
     updateEmail (e) {
       this.$store.dispatch('changeEmail', e.target.value)
     },
+
     updatePassword (e) {
       this.$store.dispatch('changePassword', e.target.value)
     },
-    logIn () {
-      this.$store.dispatch('logIn', (err, success) => {
+
+    confirmLogIn () {
+      this.logIn((err, success) => {
         if (err) console.log(err)
         if (success) this.$router.push('/')
       })

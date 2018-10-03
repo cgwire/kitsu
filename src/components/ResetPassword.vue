@@ -26,6 +26,7 @@
 
         <p class="control">
           <a v-bind:class="{
+            'button': true,
             'main-button': true,
             'is-fullwidth': true,
             'is-loading': isLoading
