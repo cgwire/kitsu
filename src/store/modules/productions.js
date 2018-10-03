@@ -413,8 +413,6 @@ const mutations = {
   },
 
   [RESET_PRODUCTION_PATH] (state, { productionId, episodeId }) {
-    console.log('RESET_PRODUCTION_PATH', productionId, episodeId)
-
     state.assetsPath = helpers.getProductionComponentPath(
       'assets', productionId, episodeId)
     state.assetTypesPath = helpers.getProductionComponentPath(
