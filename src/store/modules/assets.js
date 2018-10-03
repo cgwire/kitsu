@@ -277,8 +277,11 @@ const actions = {
   },
 
   newAsset ({ commit, dispatch, state, rootGetters }, { data, callback }) {
-    commit(EDIT_ASSET_START, data)
+    if (cache.assets.find((asset) => asset.name === data.name)) {
+      return callback()
+    }
 
+    commit(EDIT_ASSET_START, data)
     assetsApi.newAsset(data, (err, asset) => {
       if (err) {
         commit(EDIT_ASSET_ERROR)
@@ -306,6 +309,10 @@ const actions = {
   },
 
   editAsset ({ commit, state, rootState }, { data, callback }) {
+    if (data.name && cache.assets.find((asset) => asset.name === data.name)) {
+      data.name = undefined
+    }
+
     commit(EDIT_ASSET_START)
     const assetTypeMap = rootState.assetTypes.assetTypeMap
     assetsApi.updateAsset(data, (err, asset) => {
