@@ -114,18 +114,21 @@ const actions = {
 
       commit(CASTING_SET_CASTING, [])
       commit(CASTING_SET_SHOT, shot)
-      shotsApi.getCasting(state.castingCurrentShot, (err, casting) => {
-        if (!err) {
-          const castingMap = {}
-          casting.forEach((cast) => {
-            castingMap[cast.asset_id] = assetMap[cast.asset_id]
-            castingMap[cast.asset_id].nb_occurences = cast.nb_occurences
-          })
-          commit(CASTING_SET_CASTING, castingMap)
-        }
-
-        if (callback) callback(err)
-      })
+      if (state.castingCurrentShot) {
+        shotsApi.getCasting(state.castingCurrentShot, (err, casting) => {
+          if (!err) {
+            const castingMap = {}
+            casting.forEach((cast) => {
+              castingMap[cast.asset_id] = assetMap[cast.asset_id]
+              castingMap[cast.asset_id].nb_occurences = cast.nb_occurences
+            })
+            commit(CASTING_SET_CASTING, castingMap)
+          }
+          if (callback) callback(err)
+        })
+      } else {
+        if (callback) callback()
+      }
     } else {
       commit(CASTING_SET_CASTING, [])
       commit(CASTING_SET_SHOT, null)
@@ -161,9 +164,12 @@ const actions = {
       }
     }
 
-    const castingSequenceShots = rootState.shots.sequences.filter((sequence) => {
-      return sequence.parent_id === episodeId
-    })
+    let castingSequenceShots = rootState.shots.sequences
+    if (episodeId) {
+      castingSequenceShots = rootState.shots.sequences.filter((sequence) => {
+        return sequence.parent_id === episodeId
+      })
+    }
 
     commit(CASTING_SET_SEQUENCES, castingSequenceShots)
     commit(CASTING_SET_EPISODE, episodeId)

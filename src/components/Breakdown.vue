@@ -180,8 +180,7 @@ export default {
     ])
   },
 
-  created () {
-    console.log('breakdow created', 'loadShots')
+  mounted () {
     this.reset()
     this.setLastProductionScreen('breakdown')
   },
@@ -212,6 +211,8 @@ export default {
           }
 
           this.setCastingEpisode(this.episodeId)
+        } else {
+          this.setCastingEpisode(null)
         }
 
         this.loadAssets(() => {
