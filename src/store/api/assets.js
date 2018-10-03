@@ -40,7 +40,8 @@ export default {
       name: asset.name,
       description: asset.description,
       entity_type_id: asset.entity_type_id,
-      project_id: asset.project_id
+      project_id: asset.project_id,
+      source_id: asset.source_id === 'null' ? null : asset.source_id
     }
     client.put(`/api/data/entities/${asset.id}`, data, callback)
   },

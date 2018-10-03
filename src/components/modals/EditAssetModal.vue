@@ -115,7 +115,7 @@ export default {
           description: this.assetToEdit.description,
           entity_type_id: this.assetToEdit.entity_type_id,
           production_id: this.currentProduction.id,
-          source_id: this.assetToEdit.source_id
+          source_id: this.assetToEdit.source_id || this.assetToEdit.episode_id
         },
         assetSuccessText: ''
       }
@@ -203,7 +203,8 @@ export default {
           this.form.entity_type_id = this.assetTypes[0].id
         }
         if (this.openProductions.length > 0) {
-          this.form.project_id = this.currentProduction.id
+          this.form.project_id =
+            this.currentProduction.id ? this.currentProduction.id : ''
         }
         this.form.name = ''
         this.form.description = ''
@@ -215,7 +216,7 @@ export default {
           project_id: this.assetToEdit.project_id,
           name: this.assetToEdit.name,
           description: this.assetToEdit.description,
-          source_id: this.assetToEdit.source_id
+          source_id: this.assetToEdit.source_id || this.assetToEdit.episode_id
         }
       }
     }

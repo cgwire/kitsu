@@ -81,7 +81,7 @@
     >
       <tbody
         class="tbody"
-        :key="group[0] ? group[0].asset_type_id : ''"
+        :key="group[0] ? group[0].asset_type_id + group[0].canceled : ''"
         v-for="(group, k) in displayedAssets"
       >
         <tr class="type-header">

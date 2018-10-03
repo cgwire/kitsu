@@ -309,8 +309,12 @@ const actions = {
   },
 
   editAsset ({ commit, state, rootState }, { data, callback }) {
-    if (data.name && cache.assets.find((asset) => asset.name === data.name)) {
-      data.name = undefined
+    if (
+      data.name && cache.assets.find((asset) => {
+        return asset.name === data.name && data.id !== asset.id
+      })
+    ) {
+      return callback()
     }
 
     commit(EDIT_ASSET_START)
@@ -556,8 +560,8 @@ const mutations = {
 
     newAsset.tasks = []
     if (asset) {
+      newAsset.episode_id = newAsset.source_id
       Object.assign(asset, newAsset)
-      asset.episode_id = newAsset.source_id
       state.displayedAssets = sortAssets(state.displayedAssets)
     } else {
       newAsset.validations = {}
