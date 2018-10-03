@@ -242,7 +242,7 @@ export default {
   productions: {
     current: 'Selected production',
     delete_text: 'Are you sure you want to remove {name} from your database?',
-    delete_error: 'An error occured while deleting this production. There are probably data linked to it. Are you sure this production has no task, shot or asset linked to it?',
+    delete_error: 'An error occured while deleting this production. There are probably data linked to it. Are you sure this production has no task, shot or asset linked to it? Kitsu doesn\'t allow production deletion. If you don\'t want to see the production anymore, you can close it instead.',
     edit_title: 'Edit production',
     new_production: 'Add a production',
     number: 'production | productions',
@@ -284,6 +284,7 @@ export default {
     password_title: 'Change password',
     timezone: 'Timezone',
     title: 'Your Profile',
+    change_avatar: 'Change avatar',
     avatar: {
       title: 'Change avatar'
     },

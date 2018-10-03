@@ -52,6 +52,7 @@ export default {
     password_title: 'Changement de mot de passe',
     timezone: 'Fuseau horaire',
     language: 'Langue',
+    change_avatar: 'Changer Avatar',
     save: {
       button: 'Sauvegardez vos changements',
       error: 'Une erreur est survenue pendant la sauvegarde de vos changememts.'
@@ -123,7 +124,7 @@ export default {
   productions: {
     current: 'Production sélectionnée ',
     delete_text: 'Êtes vous sûr de vouloir retirer {name} de la base de données?',
-    delete_error: 'Une erreur est survenue lors de la suppression. Il y a probablement des données liées à cette production. Etes vous sur que cette production n\'a aucune tâche, shot ou asset lié ?',
+    delete_error: 'Une erreur est survenue lors de la suppression. Il y a probablement des données liées à cette production. Etes vous sur que cette production n\'a aucune tâche, shot ou asset lié ? Kitsu n\'autorise pas la suppression de production. Si vous ne souhaitez plus la voir apparaitre, vous pouvez fermer la production.',
     edit_title: 'Modifier la production',
     new_production: 'Ajouter une production',
     number: 'production | productions',
