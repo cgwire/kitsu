@@ -362,6 +362,7 @@ export default {
       } else {
         this.currentProjectSection = this.getCurrentSectionFromRoute()
         this.currentEpisodeId = null
+        this.setProduction(`${this.currentProduction.id}`)
         this.updateRoute()
       }
     },

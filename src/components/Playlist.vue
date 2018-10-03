@@ -107,7 +107,7 @@
 
         <spinner v-if="isShotsLoading" />
         <div v-else>
-          <div class="flexrow" v-if="episodes.length > 0">
+          <div class="flexrow" v-if="episodes.length > 0 || !isTVShow">
             <div class="flexrow-item">
               <combobox
                 :label="$t('shots.fields.sequence')"
@@ -557,7 +557,7 @@ export default {
 
     loadShotsData (callback) {
       this.loadShots(() => {
-        if (this.episodes.length > 0) {
+        if (this.episodes.length > 0 || !this.isTVShow) {
           this.setAdditionSequences()
         }
 
@@ -602,9 +602,11 @@ export default {
 
   mounted () {
     this.setAdditionSequences()
-    this.loadShotsData(() => {
-      this.resetPlaylist()
-    })
+    setTimeout(() => { // Needed to ensure playlist is loaded after topbar
+      this.loadShotsData(() => {
+        this.resetPlaylist()
+      })
+    }, 0)
   },
 
   watch: {

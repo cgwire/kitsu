@@ -279,6 +279,8 @@ export default {
           this.handleModalsDisplay()
         }
       })
+    } else {
+      this.resizeHeaders()
     }
   },
 
@@ -376,7 +378,9 @@ export default {
           } else {
             this.modals.isCreateTasks = false
             this.$router.push(this.shotsPath)
-            this.loadShots()
+            this.loadShots(() => {
+              this.resizeHeaders()
+            })
           }
         }
       })
@@ -459,7 +463,9 @@ export default {
         if (!err) {
           this.loading.importing = false
           this.modals.isImportDisplayed = false
-          this.loadShots()
+          this.loadShots(() => {
+            this.resizeHeaders()
+          })
         } else {
           this.loading.importing = false
           this.errors.importing = true
@@ -524,7 +530,6 @@ export default {
         this.resizeHeaders()
         if (!err) {
           this.handleModalsDisplay()
-          this.resizeHeaders()
         }
       })
     },
@@ -535,7 +540,6 @@ export default {
           this.resizeHeaders()
           if (!err) {
             this.handleModalsDisplay()
-            this.resizeHeaders()
           }
         })
       }

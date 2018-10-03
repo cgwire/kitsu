@@ -164,9 +164,6 @@ const actions = {
       if (err) commit(LOAD_OPEN_PRODUCTIONS_ERROR)
       else {
         commit(LOAD_OPEN_PRODUCTIONS_END, productions)
-        if (!state.currentProduction && productions.length > 0) {
-          commit(SET_CURRENT_PRODUCTION, { productionId: productions[0].id })
-        }
       }
       if (callback) callback(err)
     })
@@ -406,9 +403,7 @@ const mutations = {
   },
 
   [SET_CURRENT_PRODUCTION] (state, productionId) {
-    const production = state.openProductions.find(
-      (production) => production.id === productionId
-    )
+    const production = state.productionMap[productionId]
     state.currentProduction = production
   },
 

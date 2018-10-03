@@ -43,6 +43,13 @@ const actions = {
   loadPlaylists ({ commit, rootGetters }, callback) {
     const production = rootGetters.currentProduction
     const episode = rootGetters.currentEpisode
+    const isTVShow = rootGetters.isTVShow
+
+    if (isTVShow && !episode) {
+      if (callback) return callback()
+      else return null
+    }
+
     commit(LOAD_PLAYLISTS_START)
     playlistsApi.getPlaylists(production, episode, (err, playlists) => {
       if (err) commit(LOAD_PLAYLISTS_ERROR)

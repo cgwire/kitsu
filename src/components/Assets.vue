@@ -416,7 +416,7 @@ export default {
       this.$store.dispatch('uploadAssetFile', (err) => {
         if (!err) {
           this.loading.importing = false
-          this.$store.dispatch('loadAssets')
+          this.loadAssets()
           this.$router.push(this.assetsPath)
         } else {
           this.loading.importing = false
