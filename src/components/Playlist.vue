@@ -609,6 +609,7 @@ export default {
 
   watch: {
     $route () {
+      this.setCurrentPlaylist()
     },
 
     sequenceId () {
@@ -626,12 +627,14 @@ export default {
   metaInfo () {
     if (this.isTVShow) {
       return {
-        title: `${this.currentProduction.name} - ${this.currentEpisode.id} |` +
+        title: `${this.currentProduction ? this.currentProduction.name : ''} ` +
+               `- ${this.currentEpisode ? this.currentEpisode.name : ''} |` +
                ` ${this.$t('playlists.title')} - Kitsu`
       }
     } else {
       return {
-        title: `${this.currentProduction.name} ${this.$t('playlists.title')}` +
+        title: `${this.currentProduction ? this.currentProduction.name : ''}` +
+               ` ${this.$t('playlists.title')}` +
                ` - Kitsu`
       }
     }

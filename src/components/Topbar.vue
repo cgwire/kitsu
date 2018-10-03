@@ -312,13 +312,15 @@ export default {
         section &&
         !this.$route.params.shot_id &&
         !this.$route.params.asset_id &&
-        !this.$route.params.task_id
+        !this.$route.params.task_id &&
+        !this.$route.params.playlist_id
       ) {
         this.$router.push(this[`${section}Path`])
       } else if (
         (
           this.$route.params.shot_id ||
           this.$route.params.asset_id ||
+          this.$route.params.playlist_id ||
           this.$route.params.task_id
         ) &&
         section !== this.getCurrentSectionFromRoute()
