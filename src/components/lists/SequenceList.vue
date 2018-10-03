@@ -4,9 +4,6 @@
     <table class="table table-header" ref="headerWrapper">
       <thead>
         <tr>
-          <th class="episode" ref="th-episode" v-if="isTVShow">
-            {{ $t('shots.fields.episode') }}
-          </th>
           <th class="name" ref="th-sequence">
             {{ $t('shots.fields.sequence') }}
           </th>
@@ -66,10 +63,6 @@
           :key="entry.id"
           v-for="entry in entries"
         >
-
-          <td class="name" v-if="isTVShow">
-            {{ entry.episode_name }}
-          </td>
 
           <td class="name">
             {{ entry.name }}
@@ -224,18 +217,8 @@ export default {
 
     resizeHeaders () {
       if (this.$refs['body-tbody'].children.length > 0) {
-        let sequenceWidth
-        if (!this.isTVShow) {
-          sequenceWidth =
-            this.$refs['body-tbody'].children[0].children[0].offsetWidth
-        } else {
-          sequenceWidth =
-            this.$refs['body-tbody'].children[0].children[1].offsetWidth
-          const episodeWidth =
-            this.$refs['body-tbody'].children[0].children[0].offsetWidth
-          this.$refs['th-episode'].style = `min-width: ${episodeWidth}px`
-        }
-
+        const sequenceWidth =
+          this.$refs['body-tbody'].children[0].children[0].offsetWidth
         this.$refs['th-sequence'].style = `min-width: ${sequenceWidth}px`
       }
     },
@@ -258,7 +241,7 @@ export default {
         }
       }
 
-      if (this.isTVShow) {
+      if (this.isTVShow && this.currentEpisode) {
         route.name = `episode-task-type`
         route.params.episode_id = this.currentEpisode.id
       }
