@@ -1217,7 +1217,9 @@ const mutations = {
   },
 
   [SET_CURRENT_EPISODE] (state, episodeId) {
-    state.currentEpisode = state.episodeMap[episodeId]
+    if (episodeId) {
+      state.currentEpisode = state.episodeMap[episodeId]
+    }
   },
 
   [SET_EPISODE_STATS] (state, episodeStats) {

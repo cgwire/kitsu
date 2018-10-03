@@ -263,6 +263,8 @@ export default {
       let section = this.currentProjectSection
       if (section === 'asset-types') section = 'assetTypes'
 
+      if (!this.$route.params.production_id) return
+
       // Exception for task-type pages
       if (this.$route.params.task_type_id) {
         if (this.isTVShow) {
@@ -364,7 +366,11 @@ export default {
 
     currentEpisodeId () {
       if (this.isTVShow) {
-        this.setCurrentEpisode(`${this.currentEpisodeId}`)
+        if (this.currentEpisode) {
+          this.setCurrentEpisode(`${this.currentEpisodeId}`)
+        } else {
+          this.setCurrentEpisode(null)
+        }
         this.updateRoute()
       } else {
         this.clearEpisodes()
