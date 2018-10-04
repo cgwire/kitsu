@@ -20,7 +20,7 @@ So in below **Studio** section, click on the **PRODUCTIONS** button.
 
 ![Main menu](../img/getting-started/main_menu_production.png)
 
-There, you can see all the productions you have created, and their status (open
+There, you can see all the productions you have created, their type and their status (open
 for an active production, or closed if not active). When you cursor is above a
 production line you can see 2 news icons on the right part of the line :
 **edit** ![Edit button](../img/getting-started/edit_button.png) and **delete**
@@ -29,6 +29,9 @@ production line you can see 2 news icons on the right part of the line :
 ![Edit a production](../img/getting-started/production_edit.png)
 
 To modify a production go into the **Edit production** page. 
+
+You can add some specific information as the **FPS** (Frames per second), 
+the **Ratio** and the **Resolution** of the picture.
 
 NB: The  default avatar for a production is the first letter displayed on a
 colored background. You can change with a picture if you want.
@@ -42,9 +45,8 @@ breakdown and the creation of the assets. It will allow you to list your assets,
 dispatch the work to the CG artists, and follow the progress of each related
 tasks.
 
-Let's begin with the asset page, you can access it via multiple ways, the fastest
-and easiest is with the asset icon on top of the page 
-![Asset button](../img/getting-started/asset_button.png).
+Let's begin with the asset page, you can access it via the drop down menu on top of the page 
+![Asset button](../img/getting-started/drop_down_menu.png).
 
 On the asset page click on **Add assets**.
 
