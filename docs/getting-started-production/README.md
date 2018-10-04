@@ -116,7 +116,7 @@ artists to the team and assign tasks to them.
 
 ## Add a CG Artist to the team
 
-An account is required for each artist. Go to the main menu ![Main
+An account is required for each artist. Go to drop down menu ![Main
 menu](../img/getting-started/main_button.png), and under the **Studio**
 section, choose **PEOPLE** page.
 
@@ -146,7 +146,7 @@ You can also add someone to a production without assign him a task.
 
 On the drop down menu on the top of the page select the **TEAM** page.
 
-![Main menu](../img/getting-started/main_menu_people.png) 
+![Main menu](../img/getting-started/drop_down_menu_team.png) 
 
 On the **Team** page you can see all the assignations for a specific project.
 If you want to check another project team you will need to switch the project
