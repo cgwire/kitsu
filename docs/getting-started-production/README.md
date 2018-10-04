@@ -161,9 +161,8 @@ can select his name on the search box (or type his name), and validate with
 ## Assign tasks to a CG artist
 
 We can now get back to the **ASSETS** page via drop down menu
-![Main menu](../img/getting-started/drop_down_menu_asset.png).
 
-![Main menu assets page](../img/getting-started/main_menu_assets.png)
+![Main menu](../img/getting-started/drop_down_menu_asset.png).
 
 Now its time to do your first assignment! 
 
