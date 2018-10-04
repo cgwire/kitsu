@@ -70,12 +70,17 @@ export default {uname: 'production-name-cell',
     ]),
 
     productionRoute () {
-      return {
+      let route = {
         name: this.lastProductionScreen,
         params: {
           production_id: this.entry.id
         }
       }
+      if (this.entry.first_episode_id) {
+        route.name = `episode-${this.lastProductionScreen}`
+        route.params.episode_id = this.entry.first_episode_id
+      }
+      return route
     },
 
     productionInfo () {

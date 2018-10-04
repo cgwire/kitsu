@@ -64,12 +64,17 @@ export default {
     ]),
 
     productionRoute () {
-      return {
+      let route = {
         name: this.lastProductionScreen,
         params: {
           production_id: this.project.id
         }
       }
+      if (this.project.first_episode_id) {
+        route.name = `episode-${this.lastProductionScreen}`
+        route.params.episode_id = this.project.first_episode_id
+      }
+      return route
     },
 
     productionInfo () {
