@@ -250,7 +250,7 @@ import Spinner from './widgets/Spinner'
 import { ChevronRightIcon, XIcon, MoreVerticalIcon } from 'vue-feather-icons'
 
 export default {
-  name: 'topbar',
+  name: 'action-topbar',
 
   components: {
     ChevronRightIcon,
