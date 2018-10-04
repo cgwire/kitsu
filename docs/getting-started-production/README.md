@@ -8,8 +8,7 @@ production** button.
 ![Create a production](../img/getting-started/create_production.png)
 
 Enter the name of your production, choose **TV Show** if you need more than one episode.
-or 
- Then validate by clicking on **Confirm**.
+Then validate by clicking on **Confirm**.
 
 ![Add a production](../img/getting-started/add_production.png)
 
