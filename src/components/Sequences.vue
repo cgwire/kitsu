@@ -123,7 +123,6 @@ export default {
       'editSequence',
       'hideAssignations',
       'initSequences',
-      'loadShots',
       'loadComment',
       'setLastProductionScreen',
       'setSequenceSearch',

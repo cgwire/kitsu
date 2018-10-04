@@ -58,7 +58,8 @@ export default {
     ]),
 
     taskStatus () {
-      return this.taskStatusMap[this.task.task_status_id]
+      const taskStatusId = this.task.task_status_id
+      return this.taskStatusMap ? this.taskStatusMap[taskStatusId] : {}
     },
 
     backgroundColor () {

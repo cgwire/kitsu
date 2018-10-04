@@ -151,9 +151,7 @@ export default {
       }
     }
 
-    this.currentProductionId =
-      this.$route.params.production_id ||
-      (this.currentProduction ? this.currentProduction.id : null)
+    this.currentProductionId = this.$route.params.production_id
   },
 
   computed: {
@@ -313,6 +311,7 @@ export default {
         !this.$route.params.shot_id &&
         !this.$route.params.asset_id &&
         !this.$route.params.task_id &&
+        !this.$route.params.sequence_id &&
         !this.$route.params.playlist_id
       ) {
         this.$router.push(this[`${section}Path`])
@@ -320,6 +319,7 @@ export default {
         (
           this.$route.params.shot_id ||
           this.$route.params.asset_id ||
+          this.$route.params.sequence_id ||
           this.$route.params.playlist_id ||
           this.$route.params.task_id
         ) &&
@@ -343,6 +343,14 @@ export default {
       // Url changes because current episode changes.
       } else if (episodeId && this.currentEpisodeId !== episodeId) {
         this.currentEpisodeId = episodeId
+      }
+
+      if (!productionId) {
+        this.currentProductionId = null
+        this.currentEpisodeId = null
+        this.currentProjectSection = null
+        this.setCurrentEpisode(null)
+        this.setProduction(null)
       }
     },
 
