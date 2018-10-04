@@ -232,7 +232,13 @@ export default {
     this.$refs['asset-list'].setScrollPosition(
       this.assetListScrollPosition
     )
-    if (Object.keys(this.assetMap).length < 2) {
+    if (
+      Object.keys(this.assetMap).length < 2 ||
+      (
+        this.assetValidationColumns.length > 0 &&
+        !Object.keys(this.assetMap)[0].validations
+      )
+    ) {
       this.loadAssets((err) => {
         if (!err) this.handleModalsDisplay()
       })

@@ -272,7 +272,13 @@ export default {
       this.shotListScrollPosition
     )
 
-    if (Object.keys(this.shotMap).length < 2) {
+    if (
+      Object.keys(this.shotMap).length < 2 ||
+      (
+        this.shotValidationColumns.length > 0 &&
+        !Object.keys(this.shotMap)[0].validations
+      )
+    ) {
       this.loadShots((err) => {
         this.resizeHeaders()
         if (!err) {
