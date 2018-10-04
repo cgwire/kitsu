@@ -56,10 +56,11 @@ A pop-up window opens:
  
 It asks you to choose the asset **Type** (1): Camera, Characters, Environment,
 FX, Props, etc.  
-Let's start with an environment. We will give it a name (2), and enter a
+Let's start with an environment. You will then select the **Episode** (2), or the main pack (**All**).
+We will give it a **Name** (3), and enter a
 description that will help the designer to know what to do, and later to
 indentify easily the asset.
-If you have multiple assets to create, click on **Confirm and stay** (3). You
+If you have multiple assets to create, click on **Confirm and stay**. You
 can change the asset type, and keep adding assets. 
 
 ![Create an asset](../img/getting-started/add_asset_popup.png)
@@ -69,8 +70,7 @@ click on **Confirm and stay**. After you added your last asset, click
 on **Confirm**, it will save the asset and close the window. If you don't have
 more asset to add, click on **Close**, it will cancel the window.
 
-For now the assets aren't linked with episode, this association will be done
-during the **breakdown** of the storyboard, with sequences and shots creation.
+For now the assets are linked with the first episode, or with the main pack.
 
 You can edit assets by going to the asset page, hovering the
 asset you want to modify, and then click on the **edit** button 
