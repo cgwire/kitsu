@@ -33,6 +33,7 @@ def get_casting(shot_id):
         .filter_by(entity_in_id=shot_id) \
         .join(Entity, EntityLink.entity_out_id == Entity.id) \
         .join(EntityType, Entity.entity_type_id == EntityType.id) \
+        .filter(Entity.canceled != True) \
         .add_columns(Entity.name, EntityType.name, Entity.preview_file_id) \
         .order_by(EntityType.name, Entity.name)
 
@@ -77,6 +78,7 @@ def get_cast_in(asset_id):
     Episode = aliased(Entity, name="episode")
     links = EntityLink.query \
         .filter_by(entity_out_id=asset_id) \
+        .filter(Entity.canceled != True) \
         .join(Entity, EntityLink.entity_in_id == Entity.id) \
         .join(Sequence, Entity.parent_id == Sequence.id) \
         .outerjoin(Episode, Sequence.parent_id == Episode.id) \
