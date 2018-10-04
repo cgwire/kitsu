@@ -144,8 +144,8 @@ won't have access to anything.
 
 You can also add someone to a production without assign him a task.
 
-On the main menu ![Main menu](../img/getting-started/main_button.png) under the 
-**Production** section select the **TEAM** page.
+On the drop down menu on the top of the page ![Main menu](../img/getting-started/main_button.png) 
+select the **TEAM** page.
 
 ![Team menu](../img/getting-started/add_team_menu.png)
 
@@ -161,9 +161,8 @@ can select his name on the search box (or type his name), and validate with
 
 ## Assign tasks to a CG artist
 
-We can now get back to the **ASSETS** page via the sidebar menu
-![Main menu](../img/getting-started/main_button.png) in the **Production**
-section.
+We can now get back to the **ASSETS** page via drop down menu
+![Main menu](../img/getting-started/drop_down_menu_asset.png).
 
 ![Main menu assets page](../img/getting-started/main_menu_assets.png)
 
@@ -214,12 +213,10 @@ Now, everybody know what to do, and who is doing what!
 It's time to do the breakdown of the storyboard. Meaning you can create
 the sequences and the shots of the episode and associate assets to them.
 
-You need to go to the **Shots** page: you can either use the shot icon on top
-of the page ![Shot button](../img/getting-started/shot_button.png), or use the
-main menu ![Main menu button](../img/getting-started/main_button.png) and under
-the **Production** section, click on the **SHOTS**.
+You need to go to the **Shots** page: you can use the
+drop down menu and click on the **SHOTS**.
 
-![Main menu shots](../img/getting-started/main_menu_shots.png)
+![Main menu button](../img/getting-started/drop_down_menu_shot.png) 
 
 To start with the shot creation click on the **Add shots** button.
 
