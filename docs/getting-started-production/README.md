@@ -144,10 +144,9 @@ won't have access to anything.
 
 You can also add someone to a production without assign him a task.
 
-On the drop down menu on the top of the page ![Main menu](../img/getting-started/main_button.png) 
-select the **TEAM** page.
+On the drop down menu on the top of the page select the **TEAM** page.
 
-![Team menu](../img/getting-started/add_team_menu.png)
+![Main menu](../img/getting-started/main_menu_people.png) 
 
 On the **Team** page you can see all the assignations for a specific project.
 If you want to check another project team you will need to switch the project
