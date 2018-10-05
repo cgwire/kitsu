@@ -146,7 +146,7 @@ You can also add someone to a production without assign him a task.
 
 On the drop down menu on the top of the page select the **TEAM** page.
 
-![Main menu](../img/getting-started/drop_down_menu_team.png) 
+![Drop down menu team](../img/getting-started/drop_down_menu_team.png) 
 
 On the **Team** page you can see all the assignations for a specific project.
 If you want to check another project team you will need to switch the project
@@ -162,7 +162,7 @@ can select his name on the search box (or type his name), and validate with
 
 We can now get back to the **ASSETS** page via drop down menu
 
-![Main menu](../img/getting-started/drop_down_menu_asset.png).
+![Drop down menu asset](../img/getting-started/drop_down_menu_asset.png).
 
 Now its time to do your first assignment! 
 
@@ -214,7 +214,7 @@ the sequences and the shots of the episode and associate assets to them.
 You need to go to the **Shots** page: you can use the
 drop down menu and click on the **SHOTS**.
 
-![Main menu button](../img/getting-started/drop_down_menu_shot.png) 
+![Drop down menu shot](../img/getting-started/drop_down_menu_shot.png) 
 
 To start with the shot creation click on the **Add shots** button.
 
@@ -296,16 +296,13 @@ example we have added 2 times the character asset Paul.
 
 If you add twice an asset by mistake, you just have to go on the middle part of
 the screen, on your selection of assets for this shot (2). From there click on
-**-1**.  When you are done for this shot click on the **Save** button, and go
-on with the other shots.
+**-1**.  When you are done for this shot go on with the other shots. 
+Your selection is automatically saved
 
 ![Breakdown remove asset](../img/getting-started/breakdown_remove_asset.png)
 
-
 If a new asset is created during the storyboard, just get back to the asset
-page (using the button on the top of the screen 
-![Asset button](../img/getting-started/asset_button.png) or via the main menu 
-![Main menu button](../img/getting-started/main_button.png)), create the assets you
+page (using the drop down menu), create the assets you
 need. The tasks previously created will be applied immediately to these new
 assets. But you will have to do the assignation, then you will be good to
 continue with the breakdown.
