@@ -577,4 +577,8 @@ export default {
 .page-header {
   margin-bottom: 1em;
 }
+
+.level {
+  align-items: flex-start;
+}
 </style>

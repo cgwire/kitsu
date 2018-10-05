@@ -23,31 +23,29 @@
         </div>
       </div>
 
-      <div class="level-right" v-if="isCurrentUserManager">
-        <div class="level-item">
-          <show-assignations-button />
-          <button-link
-            class="level-item"
-            :text="$t('main.csv.import_file')"
-            icon="upload"
-            :is-responsive="true"
-            :path="importPath"
-          />
-          <button-href-link
-            class="level-item"
-            :text="$t('main.csv.export_file')"
-            icon="download"
-            :is-responsive="true"
-            :path="'/api/export/csv/projects/' + currentProduction.id + '/assets.csv'"
-          />
-          <button-link
-            class="level-item"
-            :text="$t('assets.new_asset')"
-            icon="plus"
-            :is-responsive="true"
-            :path="newAssetPath"
-          />
-        </div>
+      <div class="level-right flexrow" v-if="isCurrentUserManager">
+        <show-assignations-button class="flexrow-item" />
+        <button-link
+          class="flexrow-item"
+          :text="$t('main.csv.import_file')"
+          icon="upload"
+          :is-responsive="true"
+          :path="importPath"
+        />
+        <button-href-link
+          class="flexrow-item"
+          :text="$t('main.csv.export_file')"
+          icon="download"
+          :is-responsive="true"
+          :path="'/api/export/csv/projects/' + currentProduction.id + '/assets.csv'"
+        />
+        <button-link
+          class="flexrow-item"
+          :text="$t('assets.new_asset')"
+          icon="plus"
+          :is-responsive="true"
+          :path="newAssetPath"
+        />
       </div>
     </div>
   </div>
@@ -527,5 +525,9 @@ export default {
 <style scoped>
 .data-list {
   margin-top: 0;
+}
+
+.level {
+  align-items: flex-start
 }
 </style>
