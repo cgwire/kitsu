@@ -237,9 +237,11 @@ export default {
         !Object.keys(this.assetMap)[0].validations
       )
     ) {
-      this.loadAssets((err) => {
-        if (!err) this.handleModalsDisplay()
-      })
+      setTimeout(() => {
+        this.loadAssets((err) => {
+          if (!err) this.handleModalsDisplay()
+        })
+      }, 0)
     }
   },
 

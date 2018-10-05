@@ -254,10 +254,12 @@ export default {
         }
       }
 
+      if (name === 'asset-types') name = 'assetTypes'
       return name
     },
 
     updateRoute () {
+      const currentSection = this.getCurrentSectionFromRoute()
       let section = this.currentProjectSection
       if (section === 'asset-types') section = 'assetTypes'
 
@@ -323,7 +325,7 @@ export default {
           this.$route.params.playlist_id ||
           this.$route.params.task_id
         ) &&
-        section !== this.getCurrentSectionFromRoute()
+        section !== currentSection
       ) {
         this.$router.push(this[`${section}Path`])
       } else {
@@ -351,6 +353,11 @@ export default {
         this.currentProjectSection = null
         this.setCurrentEpisode(null)
         this.setProduction(null)
+      } else {
+        let section = this.getCurrentSectionFromRoute()
+        if (this.currentProjectSection !== section) {
+          this.currentProjectSection = section
+        }
       }
     },
 
