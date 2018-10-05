@@ -58,32 +58,20 @@ export default {
     ]),
 
     taskStatus () {
-      const taskStatusId = this.task.task_status_id
-      return this.taskStatusMap ? this.taskStatusMap[taskStatusId] : {}
+      if (this.task) {
+        const taskStatusId = this.task.task_status_id
+        return this.taskStatusMap ? this.taskStatusMap[taskStatusId] : {}
+      } else {
+        return {}
+      }
     },
 
     backgroundColor () {
-      if (this.taskStatus.short_name === 'wtg') {
-        return '#f5f5f5'
-      } else if (this.taskStatus.short_name === 'ip') {
-        return '#3273dc'
-      } else if (this.taskStatus.short_name === 'pndng') {
-        return '#ab26ff'
-      } else if (this.taskStatus.short_name === 'fin') {
-        return '#22d160'
-      } else if (this.taskStatus.short_name === 'rtk') {
-        return '#ff3860'
-      } else if (this.taskStatus.short_name === 'cfrm') {
-        return '#f1c40f'
-      } else if (this.taskStatus.short_name === 'recd') {
-        return '#1abc9c'
-      }
       return this.taskStatus.color
     },
 
     color () {
-      if (this.taskStatus.short_name !== 'todo' &&
-          this.taskStatus.short_name !== 'wtg') {
+      if (this.taskStatus.short_name !== 'todo') {
         return 'white'
       } else {
         return '#333'
