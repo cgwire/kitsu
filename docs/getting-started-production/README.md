@@ -270,8 +270,7 @@ Fill the breakdown will help you for the assembly of the shots. With the
 breakdown you have all the details of the assets you need to add to create your
 shot. We will be sure to omit nothing.
 
-On the main menu ![Main menu](../img/getting-started/main_button.png), under
-**Production** section, choose **BREAKDOWN**.
+On the drop down menu choose **BREAKDOWN**.
 
 ![Menu breakdown](../img/getting-started/menu_breakdown.png)
 
