@@ -46,7 +46,8 @@ dispatch the work to the CG artists, and follow the progress of each related
 tasks.
 
 Let's begin with the asset page, you can access it via the drop down menu on top of the page 
-![Asset button](../img/getting-started/drop_down_menu.png).
+
+![Drop down menu asset](../img/getting-started/drop_down_menu.png).
 
 On the asset page click on **Add assets**.
 
@@ -124,7 +125,7 @@ section, choose **PEOPLE** page.
 
 Then, click on the **+ Add a new employee** button. 
 
-![Add a new employee](../img/getting-started/add_employee.png). 
+![Add a new employee](../img/getting-started/add_employee.png)
 
 A creation window opens. You can enter the first (1) and last name (2), the email
 (which is **mandatory** to create the account) (3), the phone number (4) and
@@ -167,9 +168,11 @@ We can now get back to the **ASSETS** page via drop down menu
 Now its time to do your first assignment! 
 
 Click on the empty space on the right of the status (1) you want to assign.
+
 ![Assigned a task](../img/getting-started/task_assigned.png)
 
 A new blue line on top of the screen appears. 
+
 ![Blue menu](../img/getting-started/blue_menu.png)
 
 You can now do the assignation. Click on the text input and you will see
@@ -272,7 +275,7 @@ shot. We will be sure to omit nothing.
 
 On the drop down menu choose **BREAKDOWN**.
 
-![Menu breakdown](../img/getting-started/menu_breakdown.png)
+![drop down Menu breakdown](../img/getting-started/drop_down_menu_breakdown.png)
 
 On the left part of the breakdown page is the episode/sequence/shot menu (1),
 you can choose between the ones you have created. They are, the right part of
