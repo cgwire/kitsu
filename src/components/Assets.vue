@@ -233,7 +233,7 @@ export default {
       this.assetListScrollPosition
     )
     if (
-      Object.keys(this.assetMap).length < 2 ||
+      Object.keys(this.displayedAssets).length < 2 ||
       (
         this.assetValidationColumns.length > 0 &&
         !Object.keys(this.assetMap)[0].validations
@@ -487,11 +487,13 @@ export default {
       this.$refs['asset-search-field'].setValue('')
       this.$store.commit('SET_ASSET_LIST_SCROLL_POSITION', 0)
 
-      this.loadAssets((err) => {
-        if (!err) {
-          this.handleModalsDisplay()
-        }
-      })
+      if (!this.isTVShow) {
+        this.loadAssets((err) => {
+          if (!err) {
+            this.handleModalsDisplay()
+          }
+        })
+      }
     },
 
     currentEpisode () {
