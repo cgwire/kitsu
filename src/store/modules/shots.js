@@ -1039,8 +1039,8 @@ const mutations = {
     shot.production_id = shot.project_id
     shot.sequence_name = sequence.name
     shot.sequence_id = sequence.id
-    shot.episode_name = episode.name
-    shot.episode_id = episode.id
+    shot.episode_name = episode ? episode.name : null
+    shot.episode_id = episode ? episode.id : null
     shot.preview_file_id = ''
 
     shot.tasks = []
