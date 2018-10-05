@@ -625,7 +625,7 @@ def remove_shot(shot_id, force=False):
     shot = get_shot_raw(shot_id)
     is_tasks_related = Task.query.filter_by(entity_id=shot_id).count() > 0
 
-    if is_tasks_related:
+    if is_tasks_related and not force:
         shot.update({"canceled": True})
     else:
         tasks = Task.query.filter_by(entity_id=shot_id).all()

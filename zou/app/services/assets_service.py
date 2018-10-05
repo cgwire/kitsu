@@ -433,7 +433,7 @@ def update_asset(asset_id, data):
     return asset.serialize(obj_type="Asset")
 
 
-def remove_asset(asset_id, force=True):
+def remove_asset(asset_id, force=False):
     asset = get_asset_raw(asset_id)
     is_tasks_related = Task.query.filter_by(entity_id=asset_id).count() > 0
 

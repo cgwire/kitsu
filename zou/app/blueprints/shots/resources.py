@@ -40,11 +40,8 @@ class ShotResource(Resource):
             args = parser.parse_args()
             force = args["force"]
 
-            if force:
-                permissions.check_admin_permissions()
-            else:
-                shot = shots_service.get_shot(shot_id)
-                user_service.check_manager_project_access(shot["project_id"])
+            shot = shots_service.get_shot(shot_id)
+            user_service.check_manager_project_access(shot["project_id"])
 
             deleted_shot = shots_service.remove_shot(shot_id, force=force)
         except ShotNotFoundException:

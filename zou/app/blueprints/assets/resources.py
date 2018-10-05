@@ -32,8 +32,7 @@ class AssetResource(Resource):
 
         asset = assets_service.get_full_asset(asset_id)
         user_service.check_manager_project_access(asset["project_id"])
-        if force:
-            permissions.check_admin_permissions()
+
         deleted_asset = assets_service.remove_asset(asset_id, force=force)
         return deleted_asset, 204
 
