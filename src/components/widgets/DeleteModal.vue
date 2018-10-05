@@ -13,6 +13,7 @@
           <a
             :class="{
               button: true,
+              'is-danger': true,
               'is-loading': isLoading
             }"
             @click="$emit('confirm')">
@@ -20,7 +21,7 @@
           </a>
           <router-link
             :to="cancelRoute"
-            class="button is-primary">
+            class="button is-link">
             {{ $t("main.cancel") }}
           </router-link>
         </p>
@@ -58,7 +59,7 @@ export default {
   margin-bottom: 1em;
 }
 
-.is-danger {
+p.is-danger {
   color: #ff3860;
   font-style: italic;
   margin-bottom: 2em;
