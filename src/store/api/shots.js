@@ -92,7 +92,11 @@ export default {
   },
 
   deleteShot (shot, callback) {
-    client.del(`/api/data/shots/${shot.id}`, callback)
+    if (shot.canceled) {
+      client.del(`/api/data/shots/${shot.id}?force=true`, callback)
+    } else {
+      client.del(`/api/data/shots/${shot.id}`, callback)
+    }
   },
 
   deleteSequence (sequence, callback) {
