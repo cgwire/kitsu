@@ -86,7 +86,7 @@
         <div
           class="type-assets"
           :key="typeAssets.length > 0 ? typeAssets[0].asset_type_name : ''"
-          v-for="typeAssets in assetsByType"
+          v-for="typeAssets in availableAssetsByType"
           v-else
         >
           <div class="asset-type">
@@ -177,7 +177,16 @@ export default {
       'isCastingSaveActive',
 
       'isCurrentUserManager'
-    ])
+    ]),
+
+    availableAssetsByType () {
+      const result = []
+      this.assetsByType.forEach((typeGroup) => {
+        const newGroup = typeGroup.filter((asset) => !asset.canceled)
+        if (newGroup.length > 0) result.push(newGroup)
+      })
+      return result
+    }
   },
 
   mounted () {
