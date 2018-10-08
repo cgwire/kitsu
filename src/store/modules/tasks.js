@@ -492,7 +492,7 @@ const mutations = {
 
         if (task.assignees.length > 1) {
           task.assignees = task.assignees.sort((a, b) => {
-            return personMap[a].name.localeCompare(personMap[b])
+            return personMap[a].name.localeCompare(personMap[b].name)
           })
         }
 
