@@ -41,6 +41,9 @@ class EntityResource(BaseModelResource):
     def check_update_permissions(self, entity, data):
         return user_service.check_manager_project_access(entity["project_id"])
 
+    def check_delete_permissions(self, entity):
+        return user_service.check_manager_project_access(entity["project_id"])
+
     @jwt_required
     def put(self, instance_id):
         """
