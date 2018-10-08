@@ -22,6 +22,13 @@ def open_projects(name=None):
     if name is not None:
         query = query.filter(Project.name == name)
 
+    return get_projects_with_first_episode(query)
+
+
+def get_projects_with_first_episode(query):
+    """
+    Helpers function to attach first episode name to curent project.
+    """
     projects = []
     for project in query.all():
         project_dict = project.serialize()
@@ -35,8 +42,8 @@ def open_projects(name=None):
             if first_episode is not None:
                 project_dict["first_episode_id"] = \
                     fields.serialize_value(first_episode.id)
-
         projects.append(project_dict)
+
 
     return projects
 

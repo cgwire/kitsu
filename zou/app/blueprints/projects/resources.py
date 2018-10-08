@@ -19,7 +19,6 @@ class OpenProjectsResource(Resource):
         name = request.args.get("name", None)
         try:
             permissions.check_admin_permissions()
-
             return projects_service.open_projects(name=name)
         except permissions.PermissionDenied:
             return user_service.get_open_projects(name=name)

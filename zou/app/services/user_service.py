@@ -254,7 +254,7 @@ def get_open_projects(name=None):
     if name is not None:
         query = query.filter(Project.name == name)
 
-    return fields.serialize_value(query.all())
+    return projects_service.get_projects_with_first_episode(query)
 
 
 def get_projects(name=None):
