@@ -61,7 +61,9 @@ To access to the task type overview, you can click click on the **task type** na
 It will go to a page where you can see the state of all the **status** 
 for this **specific task type** per asset or per shot.
 
-![Overview asset task](../img/faq/global_view_task.png) ![Overview shot task](../img/faq/global_view_task01.png)
+![Overview asset task](../img/faq/global_view_task.png)
+
+![Overview shot task](../img/faq/global_view_task01.png)
 
 
 ### Sequence overview page
@@ -124,7 +126,7 @@ result of all the assets starting with a `V`.
 You can also search some specific **type of asset** : `Props`, `Character`,
 `Environment`, `Fx` ... The result will display all the assets from this type.
 
-For example, lets search all the **FX** assets. 
+For example, let's search all the **FX** assets. 
 	
 ![Search asset type](../img/faq/filter_asset_type.png)
 
@@ -138,7 +140,7 @@ Select the first episode on the drop down menu, then search `s001`, the result
 
 In the same way, you can search **specific status** link to task. Type the
 **name of the task** (or the **first letters**), then add the sign **equal**
-(`=`) and the status you are looking for.
+(`=`) and the **status** you are looking for.
 
 For example, search all the shots which are **Waiting for approval** ![WFA](../img/faq/wfa_icon.png)
 at the **layout** stage. So on the search bar you will type : `layout=wfa` or
@@ -146,7 +148,7 @@ at the **layout** stage. So on the search bar you will type : `layout=wfa` or
 
 ![Search layout wfa](../img/faq/filter_lay_wfa.png)
 
-You can be even more specific, lets focus on the first episode : on the search
+You can be even more specific, lets focus on the first sequence : on the search
 bar add a **space** after the previous search and type `s001`. 
 The research will be `lay=wfa s001` or `s001 layout=wfa`.
 
