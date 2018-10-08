@@ -314,8 +314,9 @@ export default {
     },
 
     loadMoreAssets () {
-      // console.log('load more assets')
-      this.displayMoreAssets()
+      setTimeout(() => {
+        this.displayMoreAssets()
+      }, 1)
     },
 
     setScrollPosition (scrollPosition) {
