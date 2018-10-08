@@ -68,22 +68,24 @@ export const computeStats = (entities, idField, taskStatusMap, taskMap) => {
 
       entity.tasks.forEach((taskId) => {
         const task = taskMap[taskId]
-        const taskTypeId = task.task_type_id
-        const taskStatus = taskStatusMap[task.task_status_id]
+        if (task) {
+          const taskTypeId = task.task_type_id
+          const taskStatus = taskStatusMap[task.task_status_id]
 
-        if (taskStatus) {
-          const taskStatusId = taskStatus.color
-          if (!results[sequenceId][taskTypeId]) {
-            results[sequenceId][taskTypeId] = {}
-          }
-          if (!results[sequenceId][taskTypeId][taskStatusId]) {
-            results[sequenceId][taskTypeId][taskStatusId] = {
-              name: taskStatus.short_name,
-              color: taskStatus.color,
-              value: 0
+          if (taskStatus) {
+            const taskStatusId = taskStatus.color
+            if (!results[sequenceId][taskTypeId]) {
+              results[sequenceId][taskTypeId] = {}
             }
+            if (!results[sequenceId][taskTypeId][taskStatusId]) {
+              results[sequenceId][taskTypeId][taskStatusId] = {
+                name: taskStatus.short_name,
+                color: taskStatus.color,
+                value: 0
+              }
+            }
+            results[sequenceId][taskTypeId][taskStatusId].value++
           }
-          results[sequenceId][taskTypeId][taskStatusId].value++
         }
       })
     }
