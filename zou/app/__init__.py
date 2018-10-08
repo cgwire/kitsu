@@ -1,7 +1,7 @@
 import os
 import flask_fs
 
-from flask import Flask, jsonify
+from flask import Flask
 from flask_restful import current_app
 from flask_jwt_extended import JWTManager
 from flask_principal import Principal, identity_changed, Identity
