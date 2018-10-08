@@ -9,15 +9,16 @@
             class="validation"
             :style="validationStyle(taskTypeMap[columnId].color)"
             :key="columnId"
-            v-for="columnId in validationColumns">
+            v-for="columnId in validationColumns"
+            v-if="!isLoading"
+          >
             <router-link
               :to="taskTypePath(columnId)"
             >
               {{ taskTypeMap[columnId].name }}
             </router-link>
           </th>
-          <th class="actions">
-          </th>
+          <th class="actions"></th>
         </tr>
       </thead>
     </table>
@@ -26,10 +27,12 @@
   <table-info
     :is-loading="isLoading"
     :is-error="isError"
-  >
-  </table-info>
+  />
 
-  <div class="has-text-centered" v-if="isEmptyList && !isCurrentUserClient">
+  <div
+    class="has-text-centered"
+    v-if="isEmptyList && !isCurrentUserClient && !isLoading"
+  >
     <p class="info">
       <img src="../../assets/illustrations/empty_asset.png" />
     </p>
@@ -37,13 +40,13 @@
     <button-link
       class="level-item big-button"
       :text="$t('assets.new_asset')"
-      :path="{
-        name: 'new-asset',
-        params: {production_id: currentProduction.id}
-      }"
+      :path="newAssetPath"
     />
   </div>
-  <div class="has-text-centered" v-if="isEmptyList && isCurrentUserClient">
+  <div
+    class="has-text-centered"
+    v-if="isEmptyList && isCurrentUserClient && !isLoading"
+  >
     <p class="info">
       <img src="../../assets/illustrations/empty_asset.png" />
     </p>
@@ -54,6 +57,7 @@
     ref="body"
     class="table-body"
     v-scroll="onBodyScroll"
+    v-if="!isLoading"
   >
     <table class="table">
       <tbody>
@@ -70,7 +74,8 @@
             class="validation"
             :style="validationStyle(taskTypeMap[columnId].color)"
             :key="columnId"
-            v-for="columnId in validationColumns">
+            v-for="columnId in validationColumns"
+          >
             <pie-chart
               width="70px"
               height="50px"
@@ -81,14 +86,16 @@
             />
           </td>
 
-          <td class="actions">
-          </td>
+          <td class="actions"></td>
         </tr>
       </tbody>
     </table>
   </div>
 
-  <p class="has-text-centered nb-asset-types" v-if="!isEmptyList">
+  <p
+    class="has-text-centered nb-asset-types"
+    v-if="!isEmptyList && !isLoading"
+  >
     {{ displayedAssetTypesLength }}
     {{ $tc('asset_types.number', displayedAssetTypesLength) }}
   </p>
@@ -206,6 +213,22 @@ export default {
 
       if (this.isTVShow && this.currentEpisode) {
         route.name = 'episode-task-type'
+        route.params.episode_id = this.currentEpisode.id
+      }
+
+      return route
+    },
+
+    newAssetPath () {
+      let route = {
+        name: 'new-asset-type',
+        params: {
+          production_id: this.currentProduction.id
+        }
+      }
+
+      if (this.isTVShow && this.currentEpisode) {
+        route.name = 'episode-asset-type'
         route.params.episode_id = this.currentEpisode.id
       }
 

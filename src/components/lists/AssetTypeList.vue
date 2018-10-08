@@ -34,8 +34,7 @@
               name: 'delete-asset-type',
               params: {asset_type_id: entry.id}
             }"
-          >
-          </row-actions>
+          />
         </tr>
       </tbody>
     </table>

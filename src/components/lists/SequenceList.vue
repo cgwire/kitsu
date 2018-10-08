@@ -13,6 +13,7 @@
             :style="validationStyle(taskTypeMap[columnId].color)"
             :key="columnId"
             v-for="columnId in validationColumns"
+            v-if="!isLoading"
           >
             <router-link
               :to="taskTypePath(columnId)"
@@ -32,7 +33,10 @@
     :is-error="isError"
   />
 
-  <div class="has-text-centered" v-if="isEmptyList && !isCurrentUserClient">
+  <div
+    class="has-text-centered"
+    v-if="isEmptyList && !isCurrentUserClient && !isLoading"
+  >
     <p class="info">
       <img src="../../assets/illustrations/empty_shot.png" />
     </p>
@@ -44,7 +48,10 @@
     >
     </button-link>
   </div>
-  <div class="has-text-centered" v-if="isEmptyList && isCurrentUserClient">
+  <div
+    class="has-text-centered"
+    v-if="isEmptyList && isCurrentUserClient && !isLoading"
+  >
     <p class="info">
       <img src="../../assets/illustrations/empty_shot.png" />
     </p>
@@ -56,6 +63,7 @@
     class="table-body"
     v-infinite-scroll="loadMoreSequences"
     v-scroll="onBodyScroll"
+    v-if="!isLoading"
   >
     <table class="table">
       <tbody ref="body-tbody">
@@ -100,7 +108,10 @@
     </table>
   </div>
 
-  <p class="has-text-centered nb-sequences" v-if="!isEmptyList">
+  <p
+    class="has-text-centered nb-sequences"
+    v-if="!isEmptyList && !isLoading"
+  >
     {{ displayedSequencesLength }}
     {{ $tc('sequences.number', displayedSequencesLength) }}
   </p>
@@ -212,11 +223,14 @@ export default {
     },
 
     setScrollPosition (scrollPosition) {
-      this.$refs.body.scrollTop = scrollPosition
+      if (this.$refs.body) {
+        this.$refs.body.scrollTop = scrollPosition
+      }
     },
 
     resizeHeaders () {
-      if (this.$refs['body-tbody'].children.length > 0) {
+      if (this.$refs['body-tbody'] &&
+          this.$refs['body-tbody'].children.length > 0) {
         const sequenceWidth =
           this.$refs['body-tbody'].children[0].children[0].offsetWidth
         this.$refs['th-sequence'].style = `min-width: ${sequenceWidth}px`

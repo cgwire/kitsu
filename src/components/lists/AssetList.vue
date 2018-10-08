@@ -17,6 +17,7 @@
             :key="columnId"
             :style="getValidationStyle(columnId)"
             v-for="columnId in validationColumns"
+            v-if="!isLoading"
           >
             <router-link
               :to="taskTypePath(columnId)"
@@ -33,7 +34,7 @@
               icon="plus"
               :text="$t('tasks.create_tasks')"
               :path="createTasksPath"
-              v-if="isCurrentUserManager && displayedAssets.length > 0"
+              v-if="isCurrentUserManager && displayedAssets.length > 0 && !isLoading"
             />
           </th>
         </tr>
@@ -46,7 +47,10 @@
     :is-error="isError"
   />
 
-  <div class="has-text-centered" v-if="isEmptyList && !isCurrentUserClient">
+  <div
+    class="has-text-centered"
+    v-if="isEmptyList && !isCurrentUserClient && !isLoading"
+  >
     <p class="info">
       <img src="../../assets/illustrations/empty_asset.png" />
     </p>
@@ -60,7 +64,10 @@
       }"
     />
   </div>
-  <div class="has-text-centered" v-if="isEmptyList && isCurrentUserClient">
+  <div
+    class="has-text-centered"
+    v-if="isEmptyList && isCurrentUserClient && !isLoading"
+  >
     <p class="info">
       <img src="../../assets/illustrations/empty_asset.png" />
     </p>
@@ -74,6 +81,7 @@
     v-infinite-scroll="loadMoreAssets"
     infinite-scroll-disabled="busy"
     infinite-scroll-distance="120"
+    v-if="!isLoading"
   >
     <table
       class="table"
@@ -140,7 +148,10 @@
     </table>
   </div>
 
-  <p class="has-text-centered nb-assets" v-if="!isEmptyList">
+  <p
+    class="has-text-centered nb-assets"
+    v-if="!isEmptyList && !isLoading"
+  >
     {{ displayedAssetsLength }} {{ $tc('assets.number', displayedAssetsLength) }}
   </p>
 

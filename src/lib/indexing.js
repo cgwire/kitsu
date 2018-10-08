@@ -5,8 +5,10 @@ export const buildNameIndex = (entries) => {
   const index = {}
   const entryIndex = {}
   entries.forEach((entry) => {
-    const words = entry.name.split(' ')
-    indexWords(index, entryIndex, entry, words)
+    if (entry) {
+      const words = entry.name.split(' ')
+      indexWords(index, entryIndex, entry, words)
+    }
   })
   return index
 }

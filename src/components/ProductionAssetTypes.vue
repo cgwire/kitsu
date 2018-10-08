@@ -13,7 +13,7 @@
     <production-asset-type-list
       ref="asset-type-list"
       :entries="displayedAssetTypes"
-      :is-loading="isAssetsLoading"
+      :is-loading="isAssetsLoading || initialLoading"
       :is-error="isAssetsLoadingError"
       :validation-columns="assetValidationColumns"
       :asset-type-stats="assetTypeStats"
@@ -41,6 +41,7 @@ export default {
 
   data () {
     return {
+      initialLoading: true
     }
   },
 
@@ -65,8 +66,13 @@ export default {
   mounted () {
     this.setDefaultSearchText()
     this.setDefaultListScrollPosition()
-    this.initAssetTypes()
-      .then(this.handleModalsDisplay)
+    setTimeout(() => {
+      this.initAssetTypes()
+        .then(this.handleModalsDisplay)
+        .then(() => {
+          this.initialLoading = false
+        })
+    }, 100)
   },
 
   methods: {
@@ -112,20 +118,26 @@ export default {
   watch: {
     currentProduction () {
       this.$refs['asset-type-search-field'].setValue('')
-      this.setAssetTypeListScrollPosition(0)
 
-      this.loadAssets(() => {
-        this.computeAssetTypeStats()
-      })
+      if (!this.isTVShow) {
+        this.initialLoading = true
+        this.loadAssets(() => {
+          this.computeAssetTypeStats()
+          this.setAssetTypeListScrollPosition(0)
+          this.initialLoading = false
+        })
+      }
     },
 
     currentEpisode () {
       if (this.isTVShow) {
+        this.initialLoading = true
         this.$refs['asset-type-search-field'].setValue('')
         this.setAssetTypeListScrollPosition(0)
 
         this.loadAssets(() => {
           this.computeAssetTypeStats()
+          this.initialLoading = false
         })
       }
     }

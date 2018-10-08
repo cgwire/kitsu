@@ -15,7 +15,7 @@
     <sequence-list
       ref="sequence-list"
       :entries="displayedSequences"
-      :is-loading="isShotsLoading"
+      :is-loading="isShotsLoading || initialLoading"
       :is-error="isShotsLoadingError"
       :validation-columns="shotValidationColumns"
       :sequence-stats="sequenceStats"
@@ -67,6 +67,7 @@ export default {
 
   data () {
     return {
+      initialLoading: true,
       modals: {
         isNewDisplayed: false,
         isDeleteDisplayed: false
@@ -103,17 +104,17 @@ export default {
     ])
   },
 
-  created () {
-  },
-
   mounted () {
     setTimeout(() => {
       this.initSequences()
         .then(this.handleModalsDisplay)
         .then(this.resizeHeaders)
+        .then(() => {
+          this.initialLoading = false
+        })
       this.setDefaultSearchText()
       this.setDefaultListScrollPosition()
-    }, 0)
+    }, 100)
   },
 
   methods: {
@@ -255,6 +256,9 @@ export default {
         this.initSequences()
           .then(this.handleModalsDisplay)
           .then(this.resizeHeaders)
+          .then(() => {
+            this.initialLoading = false
+          })
       }
     }
   },

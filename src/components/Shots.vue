@@ -18,6 +18,7 @@
               :queries="shotSearchQueries"
               @changesearch="changeSearch"
               @removesearch="removeSearchQuery"
+              v-if="!isShotsLoading && !initialLoading"
             />
           </div>
         </div>
@@ -54,7 +55,7 @@
     <shot-list
       ref="shot-list"
       :entries="displayedShots"
-      :is-loading="isShotsLoading"
+      :is-loading="isShotsLoading || initialLoading"
       :is-error="isShotsLoadingError"
       :validation-columns="shotValidationColumns"
       @scroll="saveScrollPosition"
@@ -170,6 +171,7 @@ export default {
 
   data () {
     return {
+      initialLoading: true,
       modals: {
         isNewDisplayed: false,
         isDeleteDisplayed: false,
@@ -279,12 +281,15 @@ export default {
         !Object.keys(this.shotMap)[0].validations
       )
     ) {
-      this.loadShots((err) => {
-        this.resizeHeaders()
-        if (!err) {
-          this.handleModalsDisplay()
-        }
-      })
+      setTimeout(() => {
+        this.loadShots((err) => {
+          this.initialLoading = false
+          this.resizeHeaders()
+          if (!err) {
+            this.handleModalsDisplay()
+          }
+        })
+      }, 100)
     } else {
       this.resizeHeaders()
     }
@@ -532,17 +537,23 @@ export default {
       this.$refs['shot-search-field'].setValue('')
       this.$store.commit('SET_SHOT_LIST_SCROLL_POSITION', 0)
 
-      this.loadShots((err) => {
-        this.resizeHeaders()
-        if (!err) {
-          this.handleModalsDisplay()
-        }
-      })
+      this.initialLoading = true
+      if (!this.isTVShow) {
+        this.loadShots((err) => {
+          this.initialLoading = false
+          this.resizeHeaders()
+          if (!err) {
+            this.handleModalsDisplay()
+          }
+        })
+      }
     },
 
     currentEpisode () {
       if (this.isTVShow && this.currentEpisode) {
+        this.initialLoading = true
         this.loadShots((err) => {
+          this.initialLoading = false
           this.resizeHeaders()
           if (!err) {
             this.handleModalsDisplay()

@@ -19,6 +19,7 @@
             :queries="assetSearchQueries"
             @changesearch="changeSearch"
             @removesearch="removeSearchQuery"
+            v-if="!isAssetsLoading && !initialLoading"
           />
         </div>
       </div>
@@ -53,7 +54,7 @@
   <asset-list
     ref="asset-list"
     :displayed-assets="displayedAssetsByType"
-    :is-loading="isAssetsLoading"
+    :is-loading="isAssetsLoading || initialLoading"
     :is-error="isAssetsLoadingError"
     :validation-columns="assetValidationColumns"
     @scroll="saveScrollPosition"
@@ -150,6 +151,7 @@ export default {
 
   data () {
     return {
+      initialLoading: true,
       modals: {
         isCreateTasksDisplayed: false,
         isImportDisplayed: false,
@@ -239,9 +241,10 @@ export default {
     ) {
       setTimeout(() => {
         this.loadAssets((err) => {
+          this.initialLoading = false
           if (!err) this.handleModalsDisplay()
         })
-      }, 0)
+      }, 100)
     }
   },
 
@@ -472,7 +475,7 @@ export default {
       }
       if (this.isTVShow && this.currentEpisode) {
         route.name = `episode-${section}`
-        route.episode_id = this.currentEpisode.id
+        route.params.episode_id = this.currentEpisode.id
       }
       return route
     }

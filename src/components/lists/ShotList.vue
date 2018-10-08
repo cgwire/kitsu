@@ -28,7 +28,9 @@
               'border-left': '1px solid ' + taskTypeMap[columnId].color,
               'background': getBackground(taskTypeMap[columnId].color)
             }"
-            v-for="columnId in validationColumns">
+            v-for="columnId in validationColumns"
+            v-if="!isLoading"
+          >
             <router-link
               :to="taskTypePath(columnId)"
             >
@@ -57,7 +59,10 @@
   >
   </table-info>
 
-  <div class="has-text-centered" v-if="isEmptyList && !isCurrentUserClient">
+  <div
+    class="has-text-centered"
+    v-if="isEmptyList && !isCurrentUserClient && !isLoading"
+  >
     <p class="info">
       <img src="../../assets/illustrations/empty_shot.png" />
     </p>
@@ -68,7 +73,10 @@
       :path="manageShotsPath"
     />
   </div>
-  <div class="has-text-centered" v-if="isEmptyList && isCurrentUserClient">
+  <div
+    class="has-text-centered"
+    v-if="isEmptyList && isCurrentUserClient && !isLoading"
+  >
     <p class="info">
       <img src="../../assets/illustrations/empty_shot.png" />
     </p>
@@ -80,6 +88,7 @@
     class="table-body"
     v-infinite-scroll="loadMoreShots"
     v-scroll="onBodyScroll"
+    v-if="!isLoading"
   >
     <table class="table">
       <tbody ref="body-tbody">
@@ -138,7 +147,10 @@
     </table>
   </div>
 
-  <p class="has-text-centered nb-shots" v-if="!isEmptyList">
+  <p
+    class="has-text-centered nb-shots"
+    v-if="!isEmptyList && !isLoading"
+  >
     {{ displayedShotsLength }} {{ $tc('shots.number', displayedShotsLength) }}
   </p>
 
@@ -170,7 +182,6 @@ export default {
 
   data () {
     return {
-      busy: false,
       lastSelection: null
     }
   },
@@ -304,7 +315,9 @@ export default {
     },
 
     setScrollPosition (scrollPosition) {
-      this.$refs.body.scrollTop = scrollPosition
+      if (this.$refs.body) {
+        this.$refs.body.scrollTop = scrollPosition
+      }
     },
 
     getBackground (color) {
@@ -312,7 +325,10 @@ export default {
     },
 
     resizeHeaders () {
-      if (this.$refs['body-tbody'].children.length > 0) {
+      if (
+        this.$refs['body-tbody'] &&
+        this.$refs['body-tbody'].children.length > 0
+      ) {
         let sequenceWidth, shotWidth
         sequenceWidth =
           this.$refs['body-tbody'].children[0].children[1].offsetWidth
