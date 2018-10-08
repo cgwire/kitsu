@@ -67,14 +67,12 @@ for this **specific task type** per asset or per shot.
 ### Sequence overview page
 
 The other way is to go to the **Sequences** page. You can go there with the
-**sequence** button ![Sequence button](../img/faq/sequence_button.png) on top
-of a page.
+drop down menu on top of a page.
 
-Or you can access it using the main menu ![Main
-button](../img/faq/main_button.png), and then click on the **SEQUENCES** page
-under the **Production** section.
 
-![Main menu sequence](../img/faq/global_sequence_mainmenu.png)
+![Drop down menu](../img/faq/drop_down_menu.png)
+
+![Drop down menu sequence](../img/faq/drop_down_menu_breakdown.png)
 
 With this view you can see all the status distribution per tasks on each
 sequences.
@@ -133,17 +131,10 @@ For example, lets search all the **FX** assets.
 Another example get **shots page** of a specific **sequence**.
 Ex: see only the shots of the first sequence of the first episode.
 
-If you type `s001` the result will get all the shots of all the episodes
-from sequence 1.
+Select the first episode on the drop down menu, then search `s001`, the result
+ will get all the shots of all the episodes from sequence 1.
 
 ![Search bar sequence episode](../img/faq/filter_ep_seq.png)
-
-To be more specific you have to add information to your search. Let's type
-`e001 s001`.
-
-![Search bar sequence 1 episode 1](../img/faq/filter_ep_seq1.png)
-
-Then you get all shots for sequence 1 of episode 1.
 
 In the same way, you can search **specific status** link to task. Type the
 **name of the task** (or the **first letters**), then add the sign **equal**
@@ -156,9 +147,8 @@ at the **layout** stage. So on the search bar you will type : `layout=wfa` or
 ![Search layout wfa](../img/faq/filter_lay_wfa.png)
 
 You can be even more specific, lets focus on the first episode : on the search
-bar add a **space** after the previous search and type `e001`. You can be even
-more precise and ask to see only the sequence 2. The research will be `lay=wfa
-e001 s002` or `s002 e001 layout=wfa`.
+bar add a **space** after the previous search and type `s001`. 
+The research will be `lay=wfa s001` or `s001 layout=wfa`.
 
 ![Search layout wfa seq2](../img/faq/filter_lay_wfa_s002.png)
 
@@ -179,9 +169,8 @@ you to run commont queries faster.
 ### What filters can I create?
 
 You can create **filters** about **entities** :
-
-* **Episodes** : `e001`, `e002` etc.  
-* **Sequences** : `e001 s001`, `s001 s001` etc.
+ 
+* **Sequences** : `s001`, `s002` etc.
 * **Asset Type** : `characters`, `environment`, `fx` etc.
 
 You can also create **filters** about **task status**: always use
@@ -190,7 +179,7 @@ understand only the first. But the status has to be fully typed.
 
 * Layout is Work in progress (wip) : `layout=wip` or `lay=wip`
 * Concept is waiting for approval (wfa) only for the fx : `concept=wfa fx` or `fx con=wfa`
-* On episode 2 Layout is wip : `e002 lay=wip` or `layout=wip e002`
+* On sequence 2 Layout is wip : `s002 lay=wip` or `layout=wip s002`
 
 
 ### How to delete filters?
@@ -288,10 +277,9 @@ you won't receive notifications anymore.
 
 ### How to create a playlist?
 
-You can find the **Playlists** page on the **main menu** 
-![Main menu](../img/faq/main_button.png) under the **Production** section. 
+You can find the **Playlists** page on the drop down menu. 
 
-![Playlist main menu](../img/faq/playlist_main_menu.png)
+![Playlist main menu](../img/faq/drop_down_menu_playlist.png)
 
 The **playlists** page is separated in 3 parts: 
 
