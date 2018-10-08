@@ -39,6 +39,7 @@ export default {
   },
 
   mounted () {
+    this.items = this.people
     this.$refs.autocomplete.$el.children[0].children[0].addEventListener(
       'keyup', (event) => {
         if (event.keyCode === 13 && this.item) {
@@ -105,6 +106,8 @@ export default {
     },
 
     people () {
+      this.items = null
+      this.items = this.people
       this.index = buildNameIndex(this.people)
     }
   }

@@ -248,6 +248,7 @@ import Combobox from './widgets/Combobox'
 import PeopleField from './widgets/PeopleField'
 import Spinner from './widgets/Spinner'
 import { ChevronRightIcon, XIcon, MoreVerticalIcon } from 'vue-feather-icons'
+import { sortPeople } from '../lib/sorting'
 
 export default {
   name: 'action-topbar',
@@ -276,6 +277,7 @@ export default {
       selectedTaskIds: [],
       customActionOptions: [],
       priority: '0',
+      currentTeam: [],
       priorityOptions: [
         {
           label: this.$t('tasks.priority.normal'),
@@ -372,16 +374,6 @@ export default {
 
     selectedPersonId () {
       return this.person ? this.person.id : null
-    },
-
-    currentTeam () {
-      if (this.people.length > 10) {
-        return this.currentProduction.team.map((personId) => {
-          return this.personMap[personId]
-        })
-      } else {
-        return this.people
-      }
     }
   },
 
@@ -465,6 +457,19 @@ export default {
 
     toggleMenu () {
       this.isMoreMenuDisplayed = !this.isMoreMenuDisplayed
+    },
+
+    setCurrentTeam () {
+      if (this.people.length > 10) {
+        this.currentTeam = sortPeople(
+          this.currentProduction.team.map((personId) => {
+            return this.personMap[personId]
+          })
+        )
+      } else {
+        this.currentTeam = this.people
+      }
+      return this.currentTeam
     }
   },
 
@@ -514,6 +519,10 @@ export default {
           this.customActionOptions = this.assetCustomActionOptions
         }
       }
+    },
+
+    currentProduction () {
+      this.setCurrentTeam()
     },
 
     $route () {
