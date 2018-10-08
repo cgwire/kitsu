@@ -263,73 +263,33 @@ export default {
       let section = this.currentProjectSection
       if (section === 'asset-types') section = 'assetTypes'
 
-      if (!this.$route.params.production_id) return
+      // Edge case: manage shots modal
 
-      // Exception for task-type pages
-      if (this.$route.params.task_type_id) {
-        if (this.isTVShow) {
-          this.$router.push({
-            name: 'episode-task-type',
-            params: {
-              production_id: this.currentProduction.id,
-              episode_id: this.currentEpisode.id,
-              task_type_id: this.$route.params.task_type_id
-            }
-          })
-        } else {
-          this.$router.push({
-            name: 'task-type',
-            params: {
-              production_id: this.currentProduction.id,
-              task_type_id: this.$route.params.task_type_id
-            }
-          })
-        }
+      const isListPage =
+        (this.$route.params.episode_id && this.$route.params.length === 2) ||
+        (!this.$route.params.episode_id && this.$route.params.length === 1)
 
-      // Exception for manage shots modal
-      } else if (this.$route.path.indexOf('manage') > 0) {
-        if (this.isTVShow) {
-          this.$router.push({
-            name: 'episode-manage-shots',
-            params: {
-              production_id: this.currentProduction.id,
-              episode_id: this.currentEpisode.id
-            }
-          })
-        } else {
-          this.$router.push({
-            name: 'manage-shots',
-            params: {
-              production_id: this.currentProduction.id
-            }
-          })
-        }
+      const isContextChanged =
+        section !== currentSection ||
+        this.$route.params.episode_id !== this.currentEpisodeId ||
+        this.$route.params.production_id !== this.currentProductionId
 
-      // General case
-      } else if (
+      const isProperContext =
+        this.$route.params.production_id &&
         this.currentProduction &&
         ((this.isTVShow && this.currentEpisode) || !this.isTVShow) &&
         section &&
-        !this.$route.params.shot_id &&
-        !this.$route.params.asset_id &&
-        !this.$route.params.task_id &&
-        !this.$route.params.sequence_id &&
-        !this.$route.params.playlist_id
-      ) {
-        this.$router.push(this[`${section}Path`])
-      } else if (
-        (
-          this.$route.params.shot_id ||
-          this.$route.params.asset_id ||
-          this.$route.params.sequence_id ||
-          this.$route.params.playlist_id ||
-          this.$route.params.task_id
-        ) &&
-        section !== currentSection
-      ) {
-        this.$router.push(this[`${section}Path`])
-      } else {
+        this.$route.path.indexOf('manage') < 0
+
+      if (isProperContext) {
+        if (!isListPage && isContextChanged) {
+          this.$router.push(this[`${section}Path`])
+        } else if (isListPage) {
+          this.$router.push(this[`${section}Path`])
+        }
       }
+
+      return this.$route.path
     }
   },
 

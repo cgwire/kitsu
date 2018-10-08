@@ -235,7 +235,9 @@ export default {
   },
 
   mounted () {
-    this.initData(false)
+    setTimeout(() => {
+      this.initData(false)
+    }, 100)
   },
 
   watch: {

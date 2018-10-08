@@ -198,7 +198,9 @@ export default {
     },
 
     setScrollPosition (scrollPosition) {
-      this.$refs.body.scrollTop = scrollPosition
+      if (this.$refs.body) {
+        this.$refs.body.scrollTop = scrollPosition
+      }
     },
 
     taskTypePath (taskTypeId) {

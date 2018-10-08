@@ -47,6 +47,7 @@
           class="flexrow-item action-button"
           :subscribed="isAssigned || isSubscribed"
           @click="toggleSubscribe"
+          v-if="!isAssigned"
         />
         <button-link
           class="flexrow-item action-button"
@@ -431,23 +432,25 @@ export default {
           entityId = this.currentTask.entity_id
         }
 
-        if (type === 'Shot') {
-          return {
-            name: 'shot',
-            params: {
-              production_id: this.currentTask.project_id,
-              shot_id: entityId
-            }
-          }
-        } else {
-          return {
-            name: 'asset',
-            params: {
-              production_id: this.currentTask.project_id,
-              asset_id: entityId
-            }
+        let route = {
+          name: type === 'Shot' ? 'shot' : 'asset',
+          params: {
+            production_id: this.currentTask.project_id
           }
         }
+
+        if (type === 'Shot') {
+          route.params.shot_id = entityId
+        } else {
+          route.params.asset_id = entityId
+        }
+
+        if (this.$route.params.episode_id) {
+          route.name = `episode-${route.name}`
+          route.params.episode_id = this.$route.params.episode_id
+        }
+
+        return route
       } else {
         return {
           name: 'open-productions'
@@ -704,27 +707,16 @@ export default {
 
     getEntityPage () {
       if (this.currentTask) {
-        if (this.entityList === this.displayedShots) {
-          if (this.isTVShow) {
-            return {
-              name: 'episode-shots',
-              params: {
-                episode_id: this.currentEpisode ? this.currentEpisode.id : '',
-                production_id: this.currentTask.project_id
-              }
-            }
-          } else {
-            return {
-              name: 'shots',
-              params: {production_id: this.currentTask.project_id}
-            }
-          }
-        } else {
-          return {
-            name: 'assets',
-            params: {production_id: this.currentTask.project_id}
-          }
+        let route = {
+          name: this.$route.params.type,
+          params: {production_id: this.currentTask.project_id}
         }
+        if (this.isTVShow) {
+          route.name = `episode-${route.name}`
+          route.params.episode_id =
+            this.currentEpisode ? this.currentEpisode.id : ''
+        }
+        return route
       } else {
         return {
           name: 'open-productions'

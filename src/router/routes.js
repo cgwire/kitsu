@@ -492,12 +492,12 @@ export const routes = [
         component: Task
       },
       {
-        name: 'comment-edit',
+        name: 'task-edit-comment',
         path: '/productions/:production_id/:type/tasks/:task_id/comments/:comment_id/edit',
         component: Task
       },
       {
-        name: 'comment-delete',
+        name: 'task-delete-comment',
         path: '/productions/:production_id/:type/tasks/:task_id/comments/:comment_id/delete',
         component: Task
       },
@@ -528,12 +528,12 @@ export const routes = [
         component: Task
       },
       {
-        name: 'episode-comment-edit',
+        name: 'episode-task-edit-comment',
         path: '/productions/:production_id/episodes/:episode_id/:type/tasks/:task_id/comments/:comment_id/edit',
         component: Task
       },
       {
-        name: 'episode-comment-delete',
+        name: 'episode-task-delete-comment',
         path: '/productions/:production_id/episodes/:episode_id/:type/tasks/:task_id/comments/:comment_id/delete',
         component: Task
       },

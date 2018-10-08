@@ -49,9 +49,10 @@ export default {
         }
       }
 
-      if (this.taskType.episode_id) {
+      if (this.taskType.episode_id || this.$route.params.episode_id) {
         route.name = 'episode-task-type'
-        route.params.episode_id = this.taskType.episode_id
+        route.params.episode_id =
+          this.taskType.episode_id || this.$route.params.episode_id
       }
       return route
     }

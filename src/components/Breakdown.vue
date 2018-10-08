@@ -209,7 +209,9 @@ export default {
     ]),
 
     reset () {
-      this.reloadShots()
+      setTimeout(() => {
+        this.reloadShots()
+      }, 100)
     },
 
     reloadShots () {

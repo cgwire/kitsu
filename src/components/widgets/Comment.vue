@@ -40,39 +40,21 @@
             class=""
             :text="$t('tasks.add_preview')"
             :is-responsive="true"
-            :path="{
-              name: 'task-add-preview',
-              params: {
-                task_id: comment.object_id,
-                comment_id: comment.id
-              }
-            }"
+            :path="addPreviewPath"
             v-if="editable && !comment.preview && comment.task_status.is_reviewable"
           >
           </button-link>
           <button-link
             icon="edit"
             class=""
-            :path="{
-              name: 'comment-edit',
-              params: {
-                task_id: comment.object_id,
-                comment_id: comment.id
-              }
-            }"
+            :path="editCommentPath"
             v-if="editable"
           >
           </button-link>
           <button-link
             icon="delete"
             class=""
-            :path="{
-              name: 'comment-delete',
-              params: {
-                task_id: comment.object_id,
-                comment_id: comment.id
-              }
-            }"
+            :path="deleteCommentPath"
             v-if="editable"
           >
           </button-link>
@@ -132,17 +114,36 @@ export default {
 
   computed: {
     previewRoute () {
+      let route = {
+        name: 'task',
+        params: {task_id: this.comment.object_id}
+      }
       if (this.comment.preview) {
-        return {
+        route = {
           name: 'task-preview',
           params: {
             task_id: this.comment.object_id,
             preview_id: this.comment.preview.id
           }
         }
-      } else {
-        return {name: 'task', params: {task_id: this.comment.object_id}}
       }
+      if (this.$route.params.episode_id) {
+        route.name = `episode-${route.name}`
+        route.params.episode_id = this.$route.params.episode_id
+      }
+      return route
+    },
+
+    deleteCommentPath () {
+      return this.getPath('task-delete-comment')
+    },
+
+    editCommentPath () {
+      return this.getPath('task-edit-comment')
+    },
+
+    addPreviewPath () {
+      return this.getPath('task-add-preview')
     }
   },
 
@@ -154,6 +155,21 @@ export default {
 
     compileMarkdown (input) {
       return marked(input || '')
+    },
+
+    getPath (name) {
+      let route = {
+        name: name,
+        params: {
+          task_id: this.comment.object_id,
+          comment_id: this.comment.id
+        }
+      }
+      if (this.$route.params.episode_id) {
+        route.name = `episode-${route.name}`
+        route.params.episode_id = this.$route.params.episode_id
+      }
+      return route
     }
   }
 }
