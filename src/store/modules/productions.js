@@ -289,7 +289,9 @@ const mutations = {
 
     const productionMap = {}
     state.productions.forEach((production) => {
-      productionMap[production.id] = production
+      if (!productionMap[production.id]) {
+        productionMap[production.id] = production
+      }
     })
     state.productionMap = productionMap
   },

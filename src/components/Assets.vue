@@ -489,6 +489,7 @@ export default {
     currentProduction () {
       this.$refs['asset-search-field'].setValue('')
       this.$store.commit('SET_ASSET_LIST_SCROLL_POSITION', 0)
+      console.log('cool')
 
       this.loadAssets((err) => {
         if (!err) {

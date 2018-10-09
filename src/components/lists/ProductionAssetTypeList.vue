@@ -151,6 +151,22 @@ export default {
              !this.isLoading &&
              !this.isError &&
              (!this.assetTypeSearchText || this.assetTypeSearchText.length === 0)
+    },
+
+    newAssetPath () {
+      let route = {
+        name: 'new-asset',
+        params: {
+          production_id: this.currentProduction.id
+        }
+      }
+
+      if (this.isTVShow && this.currentEpisode) {
+        route.name = 'episode-new-asset'
+        route.params.episode_id = this.currentEpisode.id
+      }
+
+      return route
     }
   },
 
@@ -215,22 +231,6 @@ export default {
 
       if (this.isTVShow && this.currentEpisode) {
         route.name = 'episode-task-type'
-        route.params.episode_id = this.currentEpisode.id
-      }
-
-      return route
-    },
-
-    newAssetPath () {
-      let route = {
-        name: 'new-asset-type',
-        params: {
-          production_id: this.currentProduction.id
-        }
-      }
-
-      if (this.isTVShow && this.currentEpisode) {
-        route.name = 'episode-asset-type'
         route.params.episode_id = this.currentEpisode.id
       }
 

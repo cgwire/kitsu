@@ -133,9 +133,10 @@ export default {
 
   data () {
     return {
-      currentProductionId: null,
-      currentEpisodeId: null,
-      currentProjectSection: 'assets'
+      currentProductionId: this.$route.params.production_id,
+      currentEpisodeId: this.$route.params.episode_id,
+      currentProjectSection: 'assets',
+      silent: false
     }
   },
 
@@ -150,8 +151,6 @@ export default {
         userName.style.width = `${userNameWidth}px`
       }
     }
-
-    this.currentProductionId = this.$route.params.production_id
   },
 
   computed: {
@@ -175,6 +174,7 @@ export default {
       'isNewNotification',
       'openProductions',
       'openProductionOptions',
+      'productionMap',
       'user'
     ]),
 
@@ -263,109 +263,97 @@ export default {
       let section = this.currentProjectSection
       if (section === 'asset-types') section = 'assetTypes'
 
-      // Edge case: manage shots modal
-
+      /*
       const isListPage =
         (this.$route.params.episode_id && this.$route.params.length === 2) ||
         (!this.$route.params.episode_id && this.$route.params.length === 1)
-
-      const isContextChanged =
-        section !== currentSection ||
-        this.$route.params.episode_id !== this.currentEpisodeId ||
-        this.$route.params.production_id !== this.currentProductionId
-
-      const isProperContext =
-        this.$route.params.production_id &&
-        this.currentProduction &&
-        ((this.isTVShow && this.currentEpisode) || !this.isTVShow) &&
-        section &&
-        this.$route.path.indexOf('manage') < 0
-
-      if (isProperContext) {
-        if (!isListPage && isContextChanged) {
-          this.$router.push(this[`${section}Path`])
-        } else if (isListPage) {
-          this.$router.push(this[`${section}Path`])
-        }
-      }
-
+      */
+      /*
+      console.log(section, currentSection)
+      console.log(
+        this.$route.params.episode_id,
+        this.currentEpisodeId
+      )
+      console.log(
+        this.$route.params.production_id,
+        this.currentProductionId
+      )
+      */
       return this.$route.path
+    },
+
+    clearContext () {
+      this.silent = true
+      this.currentProductionId = null
+      this.currentEpisodeId = null
+      this.currentProjectSection = null
+      this.setCurrentEpisode(null)
+      this.setProduction(null)
+      this.silent = false
+    },
+
+    setEpisodeFromRoute () {
+      if (this.isTVShow) {
+        this.silent = true
+        this.setCurrentEpisode(this.$route.params.episode_id)
+        this.silent = false
+      } else {
+        this.silent = true
+        this.clearEpisodes()
+        this.currentEpisodeId = null
+        this.silent = false
+      }
+    },
+
+    setProductionFromRoute () {
+      this.setProduction(this.$route.params.production_id)
+      if (this.isTVShow) {
+        this.loadEpisodes(() => {
+          this.silent = true
+          this.currentEpisodeId = this.currentProduction.first_episode_id
+          this.setCurrentEpisode(`${this.currentEpisodeId}`)
+          this.silent = false
+
+          if (this.currentEpisodeId !== this.$route.params.episode_id) {
+            // this.updateRoute()
+          }
+        })
+      }
     }
   },
 
   watch: {
     $route () {
       const productionId = this.$route.params.production_id
-      const episodeId = this.$route.params.episode_id
-
-      // Url changes because current production changes.
-      if (productionId && this.currentProductionId !== productionId) {
-        this.currentProductionId = productionId
-
-      // Url changes because current episode changes.
-      } else if (episodeId && this.currentEpisodeId !== episodeId) {
-        this.currentEpisodeId = episodeId
-      }
 
       if (!productionId) {
-        this.currentProductionId = null
-        this.currentEpisodeId = null
-        this.currentProjectSection = null
-        this.setCurrentEpisode(null)
-        this.setProduction(null)
+        this.clearContext()
       } else {
-        let section = this.getCurrentSectionFromRoute()
-        if (this.currentProjectSection !== section) {
-          this.currentProjectSection = section
+        if (isChanged === 'production') {
+          this.setProductionFromRoute()
+        } else if (isChanged === 'episode') {
+          this.setEpisodeFromRoute()
         }
       }
     },
 
     currentProductionId () {
-      this.setProduction(`${this.currentProductionId}`)
-      this.clearEpisodes()
-      if (this.isTVShow) {
-        this.loadEpisodes(() => {
-          if (!this.currentEpisode) { // When production is empty
-            this.currentProjectSection = this.getCurrentSectionFromRoute()
-          } else {
-            this.currentEpisodeId =
-              this.$route.params.episode_id || this.currentEpisode.id
-            this.currentProjectSection = this.getCurrentSectionFromRoute()
-          }
-        })
-      } else {
-        this.currentProjectSection = this.getCurrentSectionFromRoute()
-        this.currentEpisodeId = null
-        this.setProduction(`${this.currentProduction.id}`)
-        this.updateRoute()
-      }
+      if (!this.silent) this.updateRoute()
     },
 
     currentEpisodeId () {
-      if (this.isTVShow) {
-        if (this.currentEpisode) {
-          this.setCurrentEpisode(`${this.currentEpisodeId}`)
-        } else {
-          this.setCurrentEpisode(null)
-        }
-        this.updateRoute()
-      } else {
-        this.clearEpisodes()
-      }
-    },
-
-    currentEpisode () {
-      if (
-        this.currentEpisode &&
-        this.currentEpisode.id !== this.currentEpisodeId
-      ) {
-        this.currentEpisodeId = this.currentEpisode.id
-      }
+      if (!this.silent) this.updateRoute()
     },
 
     currentProjectSection () {
-      this.updateRoute()
+      if (!this.silent) this.updateRoute()
+    },
+
+    currentEpisode () {
+      this.silent = true
+      this.currentEpisodeId =
+        this.currentEpisode ? this.currentEpisode.id : null
+      this.silent = false
     }
   },
 
