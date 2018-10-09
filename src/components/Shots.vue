@@ -116,10 +116,7 @@
       :active="modals.isCreateTasksDisplayed"
       :is-loading="loading.creatingTasks"
       :is-error="errors.creatingTasks"
-      :cancel-route="{
-        name: 'shots',
-        params: {production_id: currentProduction.id}
-      }"
+      :cancel-route="shotsPath"
       :title="$t('tasks.create_tasks_shot')"
       :text="$t('tasks.create_tasks_shot_explaination')"
       :error-text="$t('tasks.create_tasks_shot_failed')"
