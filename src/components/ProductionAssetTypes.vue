@@ -56,7 +56,8 @@ export default {
       'currentProduction',
       'displayedAssetTypes',
       'isAssetsLoading',
-      'isAssetsLoadingError'
+      'isAssetsLoadingError',
+      'isTVShow'
     ])
   },
 
@@ -79,7 +80,6 @@ export default {
     ...mapActions([
       'computeAssetTypeStats',
       'initAssetTypes',
-      'isTVShow',
       'loadAssets',
       'loadComment',
       'setAssetTypeSearch',
@@ -118,8 +118,10 @@ export default {
   watch: {
     currentProduction () {
       this.$refs['asset-type-search-field'].setValue('')
+      console.log('ou yea', `${this.currentProduction.production_type}`)
 
       if (!this.isTVShow) {
+        console.log('ou yea')
         this.initialLoading = true
         this.loadAssets(() => {
           this.computeAssetTypeStats()

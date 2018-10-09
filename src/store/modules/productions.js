@@ -220,9 +220,13 @@ const actions = {
     if (rootGetters.isTVShow) {
       const episode = rootGetters.currentEpisode
       const episodeId = episode ? episode.id : null
-      commit(RESET_PRODUCTION_PATH, { productionId, episodeId })
+      if (productionId && episodeId) {
+        commit(RESET_PRODUCTION_PATH, { productionId, episodeId })
+      }
     } else {
-      commit(RESET_PRODUCTION_PATH, { productionId })
+      if (productionId) {
+        commit(RESET_PRODUCTION_PATH, { productionId })
+      }
     }
   },
 

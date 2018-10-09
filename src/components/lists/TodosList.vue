@@ -216,7 +216,11 @@ export default {
 
     getTaskType (entry) {
       const taskType = this.taskTypeMap[entry.task_type_id]
+      const production = this.productionMap[entry.project_id]
       taskType.episode_id = entry.episode_id
+      if (production.production_type === 'tvshow' && !entry.episode_id) {
+        taskType.episode_id = production.first_episode_id
+      }
       return taskType
     },
 
@@ -233,6 +237,11 @@ export default {
         route.params.asset_id = entity.entity_id
       } else {
         route.params.shot_id = entity.entity_id
+      }
+
+      const production = this.productionMap[entity.project_id]
+      if (production.production_type === 'tvshow' && !entity.episode_id) {
+        entity.episode_id = production.first_episode_id
       }
 
       if (entity.episode_id) {
