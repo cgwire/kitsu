@@ -40,7 +40,8 @@ export default {
 
   methods: {
     ...mapActions([
-      'loadPersonTasks'
+      'loadPersonTasks',
+      'refreshPreview'
     ]),
 
     onAssignation (eventData) {

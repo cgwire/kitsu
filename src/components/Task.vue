@@ -127,11 +127,41 @@
 
       <div class="task-column preview-column">
         <div class="preview-column-content">
-          <h2 class="subtitle">
-            {{ $t('tasks.preview') }}
-          </h2>
+          <div class="flexrow preview-header">
+            <h2 class="subtitle flexrow-item">
+              {{ $t('tasks.preview') }}
+            </h2>
+            <div
+              class="set-main-preview flexrow-item flexrow pull-right"
+              v-if="isPreviewButtonVisible"
+            >
+              <button
+                :class="{
+                  button: true,
+                  'flexrow-item': true,
+                  'is-loading': loading.setPreview
+                }"
+                @click="setPreview"
+                v-if="currentTaskPreviews.length > 0 && isCurrentUserManager"
+              >
+                <image-icon class="icon" />
+                <span class="text">
+                  {{ $t('tasks.set_preview') }}
+                </span>
+              </button>
+              <span class="error flexrow-item" v-if="errors.setPreview">
+                {{ $t('tasks.set_preview_error') }}
+              </span>
+            </div>
+            <div
+              class="set-main-preview flexrow-item pull-right"
+              v-if="currentTask && currentTask.entity && currentTask.entity.preview_file_id === currentPreviewId">
+              <em>{{ $t('tasks.set_preview_done') }}</em>
+            </div>
+          </div>
+
           <div
-            class="preview-list"
+            class="preview-list mt2"
             v-if="isPreviews"
           >
             <preview-row
@@ -150,12 +180,13 @@
           </div>
 
           <div class="preview-picture">
-            <div v-if="currentTaskPreviews && currentTaskPreviews.length > 0 && isMovie">
-              <video
-                :src="moviePath"
+            <div
+              v-if="currentTaskPreviews && currentTaskPreviews.length > 0 && isMovie"
+            >
+              <video-player
+                :preview="currentPreview"
+                @annotationchanged="onAnnotationChanged"
                 ref="preview-movie"
-                controls
-                :poster="getPreviewPath()"
               />
             </div>
 
@@ -186,34 +217,6 @@
                 ref="preview-picture"
               />
             </a>
-          </div>
-
-          <div
-            class="flexrow"
-            v-if="isPreviewButtonVisible"
-          >
-            <button
-              :class="{
-                button: true,
-                'flexrow-item': true,
-                'is-loading': loading.setPreview
-              }"
-              @click="setPreview"
-              v-if="currentTaskPreviews.length > 0 && isCurrentUserManager"
-            >
-              <image-icon class="icon" />
-              <span class="text">
-                {{ $t('tasks.set_preview') }}
-              </span>
-            </button>
-            <span class="error flexrow-item" v-if="errors.setPreview">
-              {{ $t('tasks.set_preview_error') }}
-            </span>
-          </div>
-          <div
-            class="set-main-preview"
-            v-if="currentTask && currentTask.entity && currentTask.entity.preview_file_id === currentPreviewId">
-            <em>{{ $t('tasks.set_preview_done') }}</em>
           </div>
         </div>
       </div>
@@ -295,6 +298,7 @@ import PreviewRow from './widgets/PreviewRow'
 import SubscribeButton from './widgets/SubscribeButton'
 import TaskTypeName from './widgets/TaskTypeName'
 import ValidationTag from './widgets/ValidationTag'
+import VideoPlayer from './previews/VideoPlayer'
 
 export default {
   name: 'task',
@@ -315,7 +319,8 @@ export default {
     PeopleName,
     PreviewRow,
     SubscribeButton,
-    TaskTypeName
+    TaskTypeName,
+    VideoPlayer
   },
 
   data () {
@@ -683,6 +688,17 @@ export default {
       } else {
         return null
       }
+    },
+
+    currentPreview () {
+      let currentPreview = this.currentTaskPreviews[0]
+      let previewId = this.route.params.preview_id
+      if (previewId) {
+        currentPreview = this.currentTaskPreviews.find((preview) => {
+          return preview.id === previewId
+        })
+      }
+      return currentPreview
     }
   },
 
@@ -700,9 +716,11 @@ export default {
       'loadAssets',
       'loadTaskComments',
       'loadTaskSubscribed',
+      'refreshPreview',
       'subscribeToTask',
       'setCurrentEpisode',
-      'unsubscribeFromTask'
+      'unsubscribeFromTask',
+      'updatePreviewAnnotation'
     ]),
 
     getEntityPage () {
@@ -841,8 +859,8 @@ export default {
     getOriginalPath () {
       let previewId = this.route.params.preview_id
       if (!previewId &&
-          this.currentTaskPreviews.length > 0 &&
-          this.currentTaskPreviews
+          this.currentTaskPreviews &&
+          this.currentTaskPreviews.length > 0
       ) {
         previewId = this.currentTaskPreviews[0].id
       }
@@ -1110,6 +1128,10 @@ export default {
         route.params.preview_id = previewId
       }
       return route
+    },
+
+    onAnnotationChanged ({ preview, annotations }) {
+      this.updatePreviewAnnotation({ preview, annotations })
     }
   },
 
@@ -1139,6 +1161,18 @@ export default {
     events: {
       'preview:add' (eventData) {
         this.onPreviewAdded(eventData)
+      },
+
+      'preview_file:update' (eventData) {
+        this.refreshPreview({
+          taskId: this.currentTask.id,
+          previewId: eventData.preview_file_id
+        }).then(() => {
+          if (this.$refs['preview-movie']) {
+            console.log(this.$refs['preview-movie'])
+            this.$refs['preview-movie'].reloadAnnotations()
+          }
+        })
       }
     }
   },
@@ -1154,6 +1188,11 @@ export default {
 </script>
 
 <style scoped>
+h2.subtitle {
+  margin: 0;
+  padding: 0;
+}
+
 .page {
   background: #F9F9F9;
   padding: 0;
@@ -1284,8 +1323,16 @@ video {
   flex: 1;
 }
 
+.pull-right {
+  margin-left: auto;
+}
+
 .title a {
   color: inherit;
+}
+
+.set-main-preview {
+  height: 30px;
 }
 
 @media screen and (max-width: 768px) {

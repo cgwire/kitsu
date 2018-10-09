@@ -17,6 +17,7 @@
     "chart.js": "2.7.2",
     "color-hash": "1.0.3",
     "email-validator": "2.0.4",
+    "fabric": "2.4.1",
     "js-3d-model-viewer": "0.1.4",
     "marked": "0.4.0",
     "moment": "2.22.2",
