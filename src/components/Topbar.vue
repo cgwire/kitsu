@@ -331,7 +331,6 @@ export default {
           this.currentProductionId !== routeProductionId ||
           this.currentProduction.id !== routeProductionId
       ) {
-        console.log('est production', routeProductionId)
         this.setProduction(routeProductionId)
         if (this.isTVShow) {
           this.loadEpisodes(() => {

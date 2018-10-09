@@ -241,10 +241,12 @@ export default {
     ) {
       setTimeout(() => {
         this.loadAssets((err) => {
-          this.initialLoading = false
+          setTimeout(() => {
+            this.initialLoading = false
+          }, 200)
           if (!err) this.handleModalsDisplay()
         })
-      }, 100)
+      }, 0)
     }
   },
 
@@ -490,13 +492,15 @@ export default {
       this.$refs['asset-search-field'].setValue('')
       this.$store.commit('SET_ASSET_LIST_SCROLL_POSITION', 0)
 
-      setTimeout(() => {
+      if (!this.isTVShow) {
+        this.initialLoading = true
         this.loadAssets((err) => {
+          this.initialLoading = false
           if (!err) {
             this.handleModalsDisplay()
           }
         })
-      }, 100)
+      }
     },
 
     currentEpisode () {
@@ -504,9 +508,11 @@ export default {
       this.$store.commit('SET_ASSET_LIST_SCROLL_POSITION', 0)
 
       if (this.isTVShow && this.currentEpisode) {
+        this.initialLoading = true
         this.loadAssets((err) => {
           if (!err) {
             this.handleModalsDisplay()
+            this.initialLoading = false
           }
         })
       }
