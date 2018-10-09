@@ -331,12 +331,15 @@ export default {
           this.currentProductionId !== routeProductionId ||
           this.currentProduction.id !== routeProductionId
       ) {
+        console.log('est production', routeProductionId)
         this.setProduction(routeProductionId)
         if (this.isTVShow) {
           this.loadEpisodes(() => {
             this.setEpisodeFromRoute()
             this.updateComboFromRoute()
           })
+        } else {
+          this.updateComboFromRoute()
         }
       } else if (this.episodes.length < 2) {
         // This loading is required when the production is the first production
@@ -455,7 +458,7 @@ export default {
   top: 60px;
   width: 200px;
   right: 0;
-  background-color: white;
+background-color: white;
   padding: 1em 1em 1em 1em;
   z-index: 203;
   box-shadow: 2px 3px 3px rgba(0,0,0,0.2);
