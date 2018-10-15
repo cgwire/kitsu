@@ -247,6 +247,8 @@ export default {
           if (!err) this.handleModalsDisplay()
         })
       }, 0)
+    } else {
+      if (!this.isAssetsLoading) this.initialLoading = false
     }
   },
 

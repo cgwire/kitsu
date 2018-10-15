@@ -299,7 +299,6 @@ export default {
     addSequence () {
       if (this.isAddSequenceAllowed) {
         const sequenceName = this.names.sequence
-        console.log(sequenceName)
         if (
           sequenceName.length > 0 &&
           (this.selectedEpisodeId || !this.isTVShow)

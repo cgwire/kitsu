@@ -280,7 +280,9 @@ export default {
     ) {
       setTimeout(() => {
         this.loadShots((err) => {
-          this.initialLoading = false
+          setTimeout(() => {
+            this.initialLoading = false
+          }, 200)
           this.resizeHeaders()
           if (!err) {
             this.handleModalsDisplay()
@@ -288,6 +290,7 @@ export default {
         })
       }, 100)
     } else {
+      if (!this.isShotsLoading) this.initialLoading = false
       this.resizeHeaders()
     }
   },
