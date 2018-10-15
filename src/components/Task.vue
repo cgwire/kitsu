@@ -674,7 +674,7 @@ export default {
 
     isDlPreviewFile () {
       return this.currentTaskPreviews.length > 0 &&
-        ['pdf', 'ma', 'mb'].includes(this.extension)
+        ['pdf', 'ma', 'mb', 'rar', 'zip'].includes(this.extension)
     },
 
     currentTaskType () {
