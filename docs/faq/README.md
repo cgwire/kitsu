@@ -419,3 +419,51 @@ On the new pop up you can define your personalized task :
 ![Add Status](../img/faq/add_status.png)
 
 Click on **Confirm** to save your changes.
+
+---------------------
+
+## How to delete an asset
+
+Go on the main page of the assets.
+
+![Delete asset](../img/faq/delete_asset_global.png)
+
+On the right part of the asset line, click on the ![Delete button](../img/faq/delete_button.png) button.
+
+A confirmation pop up will appear, validate with **Confirm**.
+
+![Delete asset popup](../img/faq/validation_popup_delete_asset.png)
+
+Once deleted, the asset will appear as crossed, it can be still restored 
+with ![Restore asset](../img/faq/restore_button.png) .
+
+![Delete asset](../img/faq/delete_asset1.png)
+
+To definitively delete an asset, you have to click on ![Delete button](../img/faq/delete_button.png) button a second time.
+
+The asset will be remove from the database and won't appear anymore on Kitsu.
+
+---------------------
+
+## How to delete a shot
+
+Go on the main page of the shots.
+
+![Delete shot](../img/faq/delete_shot_global.png)
+
+On the right part of the shot line, click on the ![Delete button](../img/faq/delete_button.png) button.
+
+A confirmation pop up will appear, validate with **Confirm**.
+
+![Delete shot popup](../img/faq/validation_popup_delete_shot.png)
+
+Once deleted, the shot will appear as crossed, it can be still restored 
+with ![Restore asset](../img/faq/restore_button.png) .
+
+![Delete shot](../img/faq/delete_shot1.png)
+
+To definitively delete an shot, you have to click on ![Delete button](../img/faq/delete_button.png) button a second time.
+
+The shot will be remove from the database and won't appear anymore on Kitsu.
+
+
