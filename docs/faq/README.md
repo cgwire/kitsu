@@ -329,6 +329,8 @@ button.
 
 ![Playlist delete popup](../img/faq/playlist_delete.png)
 
+------------------------------------
+
 ## How to customize the worklfow?
 
 ### How to edit an existing task?
@@ -360,7 +362,7 @@ page under the **Admin** section.
 
 ![Task Type](../img/faq/menu_tasktype.png)
 
-On the main page, click on the ![Add Task Type](../img/faq/add_task_type.png) button.
+On the main page, click on the ![Add Task Type](../img/faq/add_tasktype.png) button.
 
 On the new pop up you can define your personalized task : 
 
