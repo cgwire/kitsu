@@ -466,4 +466,22 @@ To definitively delete an shot, you have to click on ![Delete button](../img/faq
 
 The shot will be remove from the database and won't appear anymore on Kitsu.
 
+-----------------------
+
+## How to delete a sequence
+
+To delete a sequence, you must first delete all the shots on this sequence. It's a safe guard.
+
+If you don't delete all the shots of a sequence before deleting it, you will see an error message after confirming the deletion.
+
+![Delete sequence error](../img/faq/delete_sequence_error.png)
+
+Once you have deleted all the shots of the sequence, use the drop down menu to go to the sequence
+ page.
+ 
+![Drop down menu sequence](../img/faq/drop_down_menu_breakdown.png)
+ 
+Then you can delete the sequence, with the ![Delete button](../img/faq/delete_button.png) button.
+
+![Delete sequence](../img/faq/delete_sequence.png)
 
