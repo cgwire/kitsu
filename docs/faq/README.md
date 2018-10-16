@@ -335,7 +335,7 @@ button.
 
 ### How to edit an existing task?
 
-On the main menu ![Main menu](../img/faq/main_button.png) select the **TASK TYPE** 
+On the main menu ![Main menu](../img/faq/main_button.png) select the **TASK TYPES** 
 page under the **Admin** section.
 
 ![Task Type](../img/faq/menu_tasktype.png)
@@ -348,7 +348,7 @@ You can change :
 - (1) The name of the task
 - (2) The priority, meaning the order of the tasks
 - (3) For wich entity it will be used
-- (4) If the artists need to timelog they work on this task
+- (4) If the artists need to timelog their work on this task
 - (5) The color 
 
 ![Edit task](../img/faq/edit_task.png)
@@ -357,7 +357,7 @@ Click on **Confirm** to save your changes.
 
 ### How to create a new task?
 
-On the main menu ![Main menu](../img/faq/main_button.png) select the **TASK TYPE** 
+On the main menu ![Main menu](../img/faq/main_button.png) select the **TASK TYPES** 
 page under the **Admin** section.
 
 ![Task Type](../img/faq/menu_tasktype.png)
@@ -369,7 +369,7 @@ On the new pop up you can define your personalized task :
 - (1) The name of the task
 - (2) The priority, meaning the order of the tasks
 - (3) For wich entity it will be used
-- (4) If the artists need to timelog they work on this task
+- (4) If the artists need to timelog their work on this task
 - (5) The color 
 
 ![Add task](../img/faq/add_task.png)
@@ -384,7 +384,7 @@ page under the **Admin** section.
 ![Task Status](../img/faq/menu_status_type.png)
 
 On the main page, you will be able to edit some status already created ![edit button](../img/faq/edit_button.png). Except ![Done Status](../img/faq/done_icon.png)
- and ![Todo Status](../img/faq/todo_icon.png), which are part of the core system.
+ and ![Todo Status](../img/faq/todo_icon.png), which are parts of the core system.
 
 ![Task Status global page](../img/faq/task_status_global.png)
  
