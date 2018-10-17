@@ -172,14 +172,14 @@ export default {
 
   data () {
     return {
-      annotations: [...this.preview.annotations] || [],
+      annotations:
+        this.preview.annotations ? [...this.preview.annotations] : [],
       currentTime: '00:00.00',
       fabricCanvas: null,
       isDrawing: false,
       isPlaying: false,
       isRepeating: false,
       maxDuration: '00:00.00',
-      previewAnnotations: this.preview.annotations,
       videoDuration: 0
     }
   },
@@ -681,9 +681,13 @@ export default {
     },
 
     reloadAnnotations () {
-      this.annotations = [...this.preview.annotations].sort((a, b) => {
-        return a.time < b.time
-      }) || []
+      if (this.preview.annotations) {
+        this.annotations = [...this.preview.annotations].sort((a, b) => {
+          return a.time < b.time
+        }) || []
+      } else {
+        return []
+      }
     }
   },
 

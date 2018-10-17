@@ -498,9 +498,13 @@ export default {
     },
 
     reloadAnnotations () {
-      this.annotations = [...this.preview.annotations].sort((a, b) => {
-        return a.time < b.time
-      }) || []
+      if (this.preview.annotations) {
+        this.annotations = [...this.preview.annotations].sort((a, b) => {
+          return a.time < b.time
+        }) || []
+      } else {
+        return []
+      }
     }
   },
 
