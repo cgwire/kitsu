@@ -361,7 +361,8 @@ def get_comments(task_id):
                 "id": str(preview.id),
                 "revision": preview.revision,
                 "is_movie": preview.is_movie,
-                "extension": preview.extension
+                "extension": preview.extension,
+                "annotations": preview.annotations
             }
         comments.append(comment_dict)
     return comments

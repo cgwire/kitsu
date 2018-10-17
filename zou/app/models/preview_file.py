@@ -4,6 +4,8 @@ from zou.app import db
 from zou.app.models.serializer import SerializerMixin
 from zou.app.models.base import BaseMixin
 
+from sqlalchemy.dialects.postgresql import JSONB
+
 
 class PreviewFile(db.Model, BaseMixin, SerializerMixin):
     """
@@ -24,6 +26,8 @@ class PreviewFile(db.Model, BaseMixin, SerializerMixin):
     url = db.Column(db.String(600))
     uploaded_movie_url = db.Column(db.String(600))
     uploaded_movie_name = db.Column(db.String(150))
+
+    annotations = db.Column(JSONB)
 
     task_id = db.Column(
         UUIDType(binary=False),
