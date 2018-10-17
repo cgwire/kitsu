@@ -130,6 +130,31 @@ export default {
     )
   },
 
+  updatePreviewAnnotation (preview, annotations) {
+    return new Promise((resolve, reject) => {
+      client.put(
+        `/api/data/preview-files/${preview.id}`,
+        { annotations },
+        (err, preview) => {
+          if (err) reject(err)
+          else resolve(preview)
+        }
+      )
+    })
+  },
+
+  getPreviewFile (previewId) {
+    return new Promise((resolve, reject) => {
+      client.get(
+        `/api/data/preview-files/${previewId}`,
+        (err, preview) => {
+          if (err) reject(err)
+          else resolve(preview)
+        }
+      )
+    })
+  },
+
   assignTasks (personId, selectedTaskIds, callback) {
     client.put(
       `/api/actions/persons/${personId}/assign`,

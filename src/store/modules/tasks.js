@@ -29,6 +29,7 @@ import {
   PREVIEW_FILE_SELECTED,
   ADD_PREVIEW_END,
   CHANGE_PREVIEW_END,
+  UPDATE_PREVIEW_ANNOTATION,
 
   ADD_SELECTED_TASK,
   REMOVE_SELECTED_TASK,
@@ -446,6 +447,23 @@ const actions = {
     })
   },
 
+  updatePreviewAnnotation ({ commit, state }, { preview, annotations }) {
+    return new Promise((resolve, reject) => {
+      return tasksApi.updatePreviewAnnotation(preview, annotations)
+    })
+  },
+
+  refreshPreview ({ commit, state }, { taskId, previewId }) {
+    return new Promise((resolve, reject) => {
+      tasksApi.getPreviewFile(previewId)
+        .then((preview) => {
+          commit(UPDATE_PREVIEW_ANNOTATION, { taskId, preview })
+          resolve()
+        })
+        .catch(reject)
+    })
+  },
+
   assignSelectedTasks ({ commit, state }, { personId, callback }) {
     const selectedTaskIds = Object.keys(state.selectedTasks)
     tasksApi.assignTasks(personId, selectedTaskIds, (err) => {
@@ -658,6 +676,13 @@ const mutations = {
 
       comment.preview = newPreview
     }
+  },
+
+  [UPDATE_PREVIEW_ANNOTATION] (state, { taskId, preview }) {
+    const oldPreview = state.taskPreviews[taskId].find(
+      (p) => p.id === preview.id
+    )
+    oldPreview.annotations = preview.annotations
   },
 
   [CHANGE_PREVIEW_END] (state, { preview, comment }) {
