@@ -207,16 +207,12 @@
               v-else-if="currentTaskPreviews.length > 0 && extension === 'obj'"
             />
 
-            <a
-              :href="currentPreviewPath"
-              target="_blank"
+            <picture-viewer
+              :preview="currentPreview"
+              @annotationchanged="onAnnotationChanged"
+              ref="preview-picture"
               v-else-if="currentTaskPreviews.length > 0 && extension === 'png'"
-            >
-              <img
-                :src="getPreviewPath()"
-                ref="preview-picture"
-              />
-            </a>
+            />
           </div>
         </div>
       </div>
@@ -294,6 +290,7 @@ import EntityThumbnail from './widgets/EntityThumbnail'
 import ModelViewer from './widgets/ModelViewer'
 import PeopleAvatar from './widgets/PeopleAvatar'
 import PeopleName from './widgets/PeopleName'
+import PictureViewer from './previews/PictureViewer'
 import PreviewRow from './widgets/PreviewRow'
 import SubscribeButton from './widgets/SubscribeButton'
 import TaskTypeName from './widgets/TaskTypeName'
@@ -315,11 +312,12 @@ export default {
     ImageIcon,
     ModelViewer,
     PeopleAvatar,
-    ValidationTag,
     PeopleName,
     PreviewRow,
+    PictureViewer,
     SubscribeButton,
     TaskTypeName,
+    ValidationTag,
     VideoPlayer
   },
 
@@ -1169,8 +1167,9 @@ export default {
           previewId: eventData.preview_file_id
         }).then(() => {
           if (this.$refs['preview-movie']) {
-            console.log(this.$refs['preview-movie'])
             this.$refs['preview-movie'].reloadAnnotations()
+          } else if (this.$refs['preview-picture']) {
+            this.$refs['preview-picture'].reloadAnnotations()
           }
         })
       }
