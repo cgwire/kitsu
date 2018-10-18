@@ -394,15 +394,10 @@ export default {
         fabric.util.requestAnimFrame(render)
       })
 
-      fabricCanvas.on('object:scaling', (e) => {
-        var o = e.target
-        if (!o.strokeWidthUnscaled && o.strokeWidth) {
-          o.strokeWidthUnscaled = o.strokeWidth
-        }
-        if (o.strokeWidthUnscaled) {
-          o.strokeWidth = o.strokeWidthUnscaled / o.scaleX
-        }
-      })
+      fabricCanvas.off('object:scaling', this.onScaled)
+      fabricCanvas.on('object:scaling', this.onScaled)
+      fabricCanvas.off('object:scaled', this.onScaled)
+      fabricCanvas.on('object:scaled', this.onScaled)
       return fabricCanvas
     },
 
@@ -471,6 +466,11 @@ export default {
       setTimeout(() => {
         this.emitResizeEvent()
       }, 100)
+    },
+
+    onScaled (event) {
+      const obj = event.target
+      if (obj) obj.set({ strokeWidth: 8 / (obj.scaleX + obj.scaleY) })
     },
 
     exitFullScreen () {

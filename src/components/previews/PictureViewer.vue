@@ -173,13 +173,11 @@ export default {
       this.isResizing = true
       this.clearCanvas(() => {
         setTimeout(() => {
-          if (this.container) {
-            this.setupFabricPicture((fabricCanvas) => {
-              this.fabricCanvas = fabricCanvas
-              this.loadAnnotation(0)
-              this.isResizing = false
-            })
-          }
+          this.setupFabricPicture((fabricCanvas) => {
+            this.fabricCanvas = fabricCanvas
+            this.loadAnnotation(0)
+            this.isResizing = false
+          })
         }, 0)
       })
     },
@@ -451,45 +449,47 @@ export default {
       this.clearAnnotations()
 
       let scaleMultiplier = 1
-      if (annotation.width) {
-        scaleMultiplier = this.fabricCanvas.width / annotation.width
-      }
+      if (annotation) {
+        if (annotation.width) {
+          scaleMultiplier = this.fabricCanvas.width / annotation.width
+        }
 
-      annotation.drawing.objects.forEach((obj) => {
-        const base = {
-          left: obj.left * scaleMultiplier,
-          top: obj.top * scaleMultiplier,
-          fill: 'transparent',
-          stroke: '#ff3860',
-          strokeWidth: 4,
-          radius: obj.radius,
-          width: obj.width,
-          height: obj.height,
-          scaleX: obj.scaleX * scaleMultiplier,
-          scaleY: obj.scaleY * scaleMultiplier
-        }
-        if (obj.type === 'rect') {
-          const rect = new fabric.Rect({
-            ...base
-          })
-          this.fabricCanvas.add(rect)
-          rect.set({strokeWidth: 4})
-        } else if (obj.type === 'circle') {
-          const circle = new fabric.Circle({
-            ...base
-          })
-          this.fabricCanvas.add(circle)
-          circle.set({strokeWidth: 2})
-        } else if (obj.type === 'path') {
-          const path = new fabric.Path(
-            obj.path,
-            {
+        annotation.drawing.objects.forEach((obj) => {
+          const base = {
+            left: obj.left * scaleMultiplier,
+            top: obj.top * scaleMultiplier,
+            fill: 'transparent',
+            stroke: '#ff3860',
+            strokeWidth: 4,
+            radius: obj.radius,
+            width: obj.width,
+            height: obj.height,
+            scaleX: obj.scaleX * scaleMultiplier,
+            scaleY: obj.scaleY * scaleMultiplier
+          }
+          if (obj.type === 'rect') {
+            const rect = new fabric.Rect({
               ...base
-            }
-          )
-          this.fabricCanvas.add(path)
-        }
-      })
+            })
+            this.fabricCanvas.add(rect)
+            rect.set({strokeWidth: 4})
+          } else if (obj.type === 'circle') {
+            const circle = new fabric.Circle({
+              ...base
+            })
+            this.fabricCanvas.add(circle)
+            circle.set({strokeWidth: 2})
+          } else if (obj.type === 'path') {
+            const path = new fabric.Path(
+              obj.path,
+              {
+                ...base
+              }
+            )
+            this.fabricCanvas.add(path)
+          }
+        })
+      }
     },
 
     deleteSelection () {
@@ -510,6 +510,8 @@ export default {
 
   watch: {
     preview () {
+      this.clearAnnotations()
+      this.annotations = []
       this.reloadAnnotations()
       this.mountPicture()
     }
