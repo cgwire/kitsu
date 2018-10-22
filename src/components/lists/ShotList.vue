@@ -86,7 +86,6 @@
   <div
     ref="body"
     class="table-body"
-    v-infinite-scroll="loadMoreShots"
     v-scroll="onBodyScroll"
     v-if="!isLoading"
   >
@@ -308,6 +307,11 @@ export default {
     onBodyScroll (event, position) {
       this.$refs.headerWrapper.style.left = `-${position.scrollLeft}px`
       this.$emit('scroll', position.scrollTop)
+      const maxHeight =
+        this.$refs.body.scrollHeight - this.$refs.body.offsetHeight
+      if (maxHeight < (position.scrollTop + 100)) {
+        this.loadMoreShots()
+      }
     },
 
     loadMoreShots () {
