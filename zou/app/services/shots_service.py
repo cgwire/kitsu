@@ -537,6 +537,20 @@ def get_or_create_episode(project_id, name):
     return episode.serialize()
 
 
+def get_or_create_first_episode(project_id):
+    """
+    Get the first episode of the production.
+    """
+    episode = Entity.query \
+        .filter_by(project_id=project_id) \
+        .order_by(Entity.name) \
+        .first()
+    if episode is not None:
+        return episode.serialize()
+    else:
+        return get_or_create_episode(project_id, "E01")
+
+
 def get_or_create_sequence(project_id, episode_id, name):
     """
     Retrieve sequence matching given project, episode and name or create it.
