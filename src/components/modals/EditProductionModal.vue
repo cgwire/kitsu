@@ -149,7 +149,7 @@ export default {
         fps: '',
         ratio: '',
         resolution: '',
-        production_type: ''
+        production_type: 'short'
       }
     }
     return data
@@ -191,7 +191,8 @@ export default {
           project_status_id: this.productionToEdit.project_status_id,
           fps: this.productionToEdit.fps,
           ratio: this.productionToEdit.ratio,
-          resolution: this.productionToEdit.resolution
+          resolution: this.productionToEdit.resolution,
+          production_type: this.productionToEdit.production_type
         }
       } else {
         this.form = {
@@ -199,7 +200,8 @@ export default {
           project_status_id: this.productionStatusOptions[0].value,
           fps: '',
           ratio: '',
-          resolution: ''
+          resolution: '',
+          production_type: 'short'
         }
       }
     },
