@@ -26,7 +26,7 @@ def generate_thumbnail(movie_path):
     file_target_path = os.path.join(folder_path, file_target_name)
 
     movie_clip = VideoFileClip(movie_path)
-    movie_clip.save_frame(file_target_path, round(movie_clip.duration / 2))
+    movie_clip.save_frame(file_target_path, 0)
     return file_target_path
 
 
