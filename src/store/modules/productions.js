@@ -341,6 +341,9 @@ const mutations = {
     const productionStatus = getters.getProductionStatus(state)(
       newProduction.project_status_id
     )
+    const openProduction = state.openProductions.find(
+      (openProduction) => openProduction.id === newProduction.id
+    )
     newProduction.project_status_name = productionStatus.name
 
     if (production) {
@@ -361,7 +364,17 @@ const mutations = {
         }
       }
 
+      if (
+        newProduction.production_type &&
+        newProduction.production_type !== production.production_type &&
+        newProduction.production_type === 'short'
+      ) {
+        production.first_episode_id = undefined
+        openProduction.first_episode_id = undefined
+      }
+
       Object.assign(production, newProduction)
+      Object.assign(openProduction, newProduction)
     } else {
       state.productions.push(newProduction)
       state.productionMap[newProduction.id] = newProduction

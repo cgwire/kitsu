@@ -1,6 +1,19 @@
 <template>
   <div class="asset-types page fixed-page">
     <div class="level page-header">
+      <div class="level-left">
+        <page-title :text="$t('asset_types.title')" />
+      </div>
+      <div class="level-right">
+        <div class="level-item">
+          <button-link
+            class="level-item"
+            icon="plus"
+            :text="$t('asset_types.new_asset_type')"
+            path="/asset-types/new"
+          />
+        </div>
+      </div>
     </div>
 
     <asset-type-list

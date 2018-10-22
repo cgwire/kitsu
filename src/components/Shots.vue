@@ -267,9 +267,6 @@ export default {
     if (this.shotSearchText.length > 0) {
       this.$refs['shot-search-field'].setValue(this.shotSearchText)
     }
-    this.$refs['shot-list'].setScrollPosition(
-      this.shotListScrollPosition
-    )
 
     if (
       Object.keys(this.shotMap).length < 2 ||
@@ -286,12 +283,20 @@ export default {
           this.resizeHeaders()
           if (!err) {
             this.handleModalsDisplay()
+            setTimeout(() => {
+              this.$refs['shot-list'].setScrollPosition(
+                this.shotListScrollPosition
+              )
+            }, 500)
           }
         })
       }, 100)
     } else {
       if (!this.isShotsLoading) this.initialLoading = false
       this.resizeHeaders()
+      this.$refs['shot-list'].setScrollPosition(
+        this.shotListScrollPosition
+      )
     }
   },
 

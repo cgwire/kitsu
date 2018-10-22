@@ -141,8 +141,7 @@
               <combobox
                 :options="customActionOptions"
                 v-model="customActionUrl"
-              >
-              </combobox>
+              />
             </div>
             <div class="flexrow-item">
               <form
@@ -517,6 +516,17 @@ export default {
           this.customActionOptions = this.shotCustomActionOptions
         } else {
           this.customActionOptions = this.assetCustomActionOptions
+        }
+
+        if (this.customActionOptions.length > 0) {
+          const isUrlSelected =
+            this.customActionOptions.findIndex((action) => {
+              return action.url === this.customActionUrl
+            }) >= 0
+
+          if (!isUrlSelected) {
+            this.customActionUrl = this.customActionOptions[0].value
+          }
         }
       }
     },

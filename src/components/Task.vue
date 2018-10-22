@@ -1027,7 +1027,7 @@ export default {
           if (err) {
             this.errors.editComment = true
           } else {
-            this.$router.push(this.taskPath)
+            this.$router.push(this.taskPath())
           }
         }
       })
@@ -1049,7 +1049,7 @@ export default {
             this.currentTaskComments = this.getCurrentTaskComments()
             this.currentTaskPreviews = this.getCurrentTaskPreviews()
             this.currentPreviewPath = this.getOriginalPath()
-            this.$router.push(this.taskPath)
+            this.$router.push(this.taskPath())
           }
         }
       })
