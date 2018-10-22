@@ -112,7 +112,7 @@ class BaseModelsResource(Resource):
         return data
 
     def post_creation(self, instance):
-        return instance
+        return instance.serialize()
 
     @jwt_required
     def get(self):
@@ -158,12 +158,12 @@ class BaseModelsResource(Resource):
             data = self.update_data(data)
             instance = self.model(**data)
             instance.save()
-            self.post_creation(instance)
+            instance_dict = self.post_creation(instance)
             events.emit(
                 "%s:new" % self.model.__tablename__,
                 {"%s_id" % self.model.__tablename__: instance.id}
             )
-            return instance.serialize(), 201
+            return instance_dict, 201
 
         except TypeError as exception:
             current_app.logger.error(str(exception))

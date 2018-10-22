@@ -1,6 +1,6 @@
 from zou.app.models.project import Project
 from zou.app.services import user_service, projects_service, shots_service
-from zou.app.utils import permissions
+from zou.app.utils import permissions, fields
 
 from .base import BaseModelResource, BaseModelsResource
 
@@ -26,10 +26,13 @@ class ProjectsResource(BaseModelsResource):
 
         return data
 
-    def post_creation(self, instance):
-        if instance.production_type == "tvshow":
-            shots_service.create_episode(instance.id, "E01")
-        return instance
+    def post_creation(self, project):
+        project_dict = project.serialize()
+        if project.production_type == "tvshow":
+            episode = shots_service.create_episode(project.id, "E01")
+            project_dict["first_episode_id"] = \
+                fields.serialize_value(episode["id"])
+        return project_dict
 
 
 class ProjectResource(BaseModelResource):
@@ -39,3 +42,12 @@ class ProjectResource(BaseModelResource):
 
     def check_read_permissions(self, project):
         user_service.check_project_access(project["id"])
+
+    def post_update(self, project_dict):
+        if project_dict["production_type"] == "tvshow":
+            episode = shots_service.get_or_create_first_episode(
+                project_dict["id"]
+            )
+            project_dict["first_episode_id"] = \
+                fields.serialize_value(episode["id"])
+        return project_dict
