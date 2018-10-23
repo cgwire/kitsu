@@ -5,6 +5,8 @@ from zou.app import db
 from zou.app.models.serializer import SerializerMixin
 from zou.app.models.base import BaseMixin
 
+from sqlalchemy.dialects.postgresql import JSONB
+
 
 class WorkingFile(db.Model, BaseMixin, SerializerMixin):
     """
@@ -20,6 +22,7 @@ class WorkingFile(db.Model, BaseMixin, SerializerMixin):
     size = db.Column(db.Integer())
     checksum = db.Column(db.Integer())
     path = db.Column(db.String(400))
+    data = db.Column(JSONB)
 
     task_id = db.Column(
         UUIDType(binary=False),
