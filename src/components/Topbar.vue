@@ -106,7 +106,7 @@
             {{ $t("main.documentation ")}}
           </a>
         </li>
-        <li @click="logout">
+        <li @click="onLogoutClicked">
           {{ $t("main.logout") }}
         </li>
       </ul>
@@ -222,11 +222,10 @@ export default {
       'setProduction',
       'setCurrentEpisode',
       'toggleSidebar',
-      'toggleUserMenu',
-      'logout'
+      'toggleUserMenu'
     ]),
 
-    logout () {
+    onLogoutClicked () {
       this.logout((err, success) => {
         if (err) console.log(err)
         this.toggleUserMenu()
