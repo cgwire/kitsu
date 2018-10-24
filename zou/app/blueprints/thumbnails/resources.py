@@ -1,11 +1,13 @@
 import os
 
-from flask import abort, request, current_app, stream_with_context, Response
+from flask import abort, request, current_app
+from flask import send_file as flask_send_file
 from flask_restful import Resource
 from flask_jwt_extended import jwt_required
 from flask_fs.errors import FileNotFound
 
 from zou.app.stores import file_store
+from zou.app import config
 from zou.app.services import (
     files_service,
     persons_service,
@@ -27,11 +29,71 @@ ALLOWED_MOVIE_EXTENSION = [".mp4", ".mov", ".MP4", ".MOV"]
 ALLOWED_FILE_EXTENSION = [".obj", ".pdf", ".ma", ".mb", ".rar", ".zip"]
 
 
-def send_file(generator, mimetype="application/octet-stream"):
+def send_standard_file(
+    preview_file_id,
+    extension,
+    mimetype="application/octet-stream"
+):
+    return send_storage_file(
+        file_store.get_local_file_path,
+        file_store.open_file,
+        "previews",
+        preview_file_id,
+        extension,
+        mimetype=mimetype
+    )
+
+
+def send_movie_file(preview_file_id):
+    return send_storage_file(
+        file_store.get_local_movie_path,
+        file_store.open_movie,
+        "previews",
+        preview_file_id,
+        "mp4",
+        mimetype="video/mp4"
+    )
+
+
+def send_picture_file(prefix, preview_file_id):
+    return send_storage_file(
+        file_store.get_local_picture_path,
+        file_store.open_picture,
+        prefix,
+        preview_file_id,
+        "png",
+        mimetype="image/png"
+    )
+
+
+def send_storage_file(
+    get_path,
+    open_file,
+    prefix,
+    preview_file_id,
+    extension,
+    mimetype="application/octet-stream"
+):
     """
-    Helpers to return file response.
+    Send file from storage. If it's not a local storage, cache the file in
+    a temporary folder before sending it. It accepts conditional headers.
     """
-    return Response(stream_with_context(generator), mimetype=mimetype)
+    if config.FS_BACKEND == "local":
+        file_path = get_path(prefix, preview_file_id)
+    else:
+        file_path = os.path.join(
+            config.TMP_DIR,
+            "cache-%s.%s" % (preview_file_id, extension)
+        )
+        if not os.path.exists(file_path):
+            with open(file_path, 'wb') as tmp_file:
+                for chunk in open_file(prefix, preview_file_id):
+                    tmp_file.write(chunk)
+    return flask_send_file(
+        file_path,
+        conditional=True,
+        mimetype=mimetype
+    )
 
 
 class CreatePreviewFilePictureResource(Resource):
@@ -216,10 +278,7 @@ class PreviewFileMovieResource(Resource):
             abort(403)
 
         try:
-            return send_file(
-                file_store.open_movie("previews", instance_id),
-                mimetype="video/mp4"
-            )
+            return send_movie_file(instance_id)
         except FileNotFound:
             current_app.logger.error("File was not found for: %s" % instance_id)
             abort(404)
@@ -258,16 +317,13 @@ class PreviewFileResource(Resource):
 
         try:
             if extension == "png":
-                mimetype = "image/png"
-                stream = file_store.open_picture("previews", instance_id)
+                return send_picture_file(instance_id)
             elif extension == "pdf":
                 mimetype = "application/pdf"
-                stream = file_store.open_file("previews", instance_id)
+                return send_standard_file(instance_id, extension, mimetype)
             else:
-                mimetype = "application/octet-stream"
-                stream = file_store.open_file("previews", instance_id)
+                return send_standard_file(instance_id, extension)
 
-            return send_file(stream, mimetype=mimetype)
         except FileNotFound:
             current_app.logger.error("File was not found for: %s" % instance_id)
             abort(404)
@@ -306,10 +362,7 @@ class BasePreviewPictureResource(Resource):
             abort(403)
 
         try:
-            return send_file(
-                file_store.open_picture(self.picture_type, instance_id),
-                mimetype="image/png"
-            )
+            return send_picture_file(self.picture_type, instance_id)
         except FileNotFound:
             current_app.logger.error("File was not found for: %s" % instance_id)
             abort(404)
@@ -413,10 +466,7 @@ class BasePictureResource(Resource):
             abort(403)
 
         try:
-            return send_file(
-                file_store.open_picture("thumbnails", instance_id),
-                mimetype="image/png"
-            )
+            return send_picture_file("thumbnails", instance_id)
         except FileNotFound:
             current_app.logger.error("File was not found for: %s" % instance_id)
             abort(404)

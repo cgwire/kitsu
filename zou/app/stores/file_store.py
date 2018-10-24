@@ -111,6 +111,11 @@ def open_picture(prefix, id):
     return make_read_generator(pictures, key)
 
 
+def read_picture(prefix, id):
+    key = make_key(prefix, id)
+    return pictures.read(key)
+
+
 def exists_picture(prefix, id):
     key = make_key(prefix, id)
     return pictures.exists(key)
@@ -119,6 +124,10 @@ def exists_picture(prefix, id):
 def remove_picture(prefix, id):
     key = make_key(prefix, id)
     pictures.delete(key)
+
+
+def get_local_picture_path(prefix, id):
+    return path(pictures, make_key(prefix, id))
 
 
 def add_movie(prefix, id, path):
@@ -137,6 +146,11 @@ def open_movie(prefix, id):
     return make_read_generator(movies, key)
 
 
+def read_movie(prefix, id):
+    key = make_key(prefix, id)
+    return movies.read(key)
+
+
 def exists_movie(prefix, id):
     key = make_key(prefix, id)
     return movies.exists(key)
@@ -145,6 +159,10 @@ def exists_movie(prefix, id):
 def remove_movie(prefix, id):
     key = make_key(prefix, id)
     movies.delete(key)
+
+
+def get_local_movie_path(prefix, id):
+    return path(movies, make_key(prefix, id))
 
 
 def add_file(prefix, id, path):
@@ -163,6 +181,11 @@ def open_file(prefix, id):
     return make_read_generator(files, key)
 
 
+def read_file(prefix, id):
+    key = make_key(prefix, id)
+    return files.read(key)
+
+
 def exists_file(prefix, id):
     key = make_key(prefix, id)
     return files.exists(key)
@@ -171,3 +194,7 @@ def exists_file(prefix, id):
 def remove_file(prefix, id):
     key = make_key(prefix, id)
     files.delete(key)
+
+
+def get_local_file_path(prefix, id):
+    return path(files, make_key(prefix, id))
