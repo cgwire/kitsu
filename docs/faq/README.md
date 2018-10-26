@@ -96,7 +96,7 @@ task.
 
 ### Introduction to filters
 
-In **Kitsu**, the filters are done through the **search bar**. It allows you to
+In **Kitsu**, the filters are set through the **search bar**. It allows you to
 **save** your search query. Once done you can run your query again with a
 simple click.
  
@@ -166,18 +166,21 @@ Now under the **search bar** you can see your saved queries as buttons.
 ![Search saved](../img/faq/filter_saved.png)
 
 Everytime you get back to this page, the buttons will be there. It will help
-you to run commont queries faster.
+you to run common queries faster.
 
 ### What filters can I create?
 
-You can create **filters** about **entities** :
- 
-* **Sequences** : `s001`, `s002` etc.
+You can create **filters** about **entities**:
+
+* **Episodes** : `e001`, `e002` etc.  
+* **Sequences** : `e001 s001`, `s001 s001` etc.
 * **Asset Type** : `characters`, `environment`, `fx` etc.
 
-You can also create **filters** about **task status**: always use
-**task=status**, you don't have to type all the letter of the task, Kitsu will
-understand only the first. But the status has to be fully typed.
+You can also create **filters** about **task status** by following this syntax:
+**task=status**. You don't have to type all the letter of the task, Kitsu will
+understand the first letters. The status name has to be fully typed.
+
+Expemples:
 
 * Layout is Work in progress (wip) : `layout=wip` or `lay=wip`
 * Concept is waiting for approval (wfa) only for the fx : `concept=wfa fx` or `fx con=wfa`
@@ -213,7 +216,7 @@ assigned to you.
 
 ![Notification page](../img/faq/notification_page.png)
 
-There is a lot of informations on a notification : 
+Notifications include the following information: 
 
 * (1) the name of the **author**
 * (2) the related **entity**
@@ -223,20 +226,21 @@ There is a lot of informations on a notification :
 
 and (6) the comment.
 
-Each part is a **link** you can use to jump on the information you need. If you
-click on the **status**, you will jump to the status page of the entity. So you
-can react quickly to this new change.
+Each part is a **link** you can use it to jump on the information you need. If
+you click on the **status**, you will jump to the status page of the entity. So
+you can react quickly to this new change.
 
 For example, let's assign Jacques to a new task and ask him to work on it.
 
 ![Notification example 01](../img/faq/notification_example01.png)
 
 Jacques receives immediately a notification, the **bell** button change color
-![Notification on](../img/faq/notification_icon_on.png) , and he can read the
+![Notification on](../img/faq/notification_icon_on.png), and he can read the
 new comment.
 
 **All the notifications and comments appear in real time**. No need to refresh
 to stay up to date.
+
 
 ![Notification example 02](../img/faq/notification_example02.png)
 
@@ -256,12 +260,13 @@ On the top right side of the page you can see an **eye** button
 ![Follow button](../img/faq/notification_other_task.png)
 
 By default you are following all the tasks you are assigned to, on the task
-page the icon will be **open** ![Notification on](../img/faq/notification_on.png). 
+page the icon will be on (eye open) ![Notification on](../img/faq/notification_on.png). 
 
-If you want to follow another task, just click on the **crossed eye** button
-![Notification off](../img/faq/notification_off.png), it will change, not
-crossed anymore ![Notification on](../img/faq/notification_on.png) meaning you
-are now following this task, and will receive notification about it. 
+If you want to follow another task, click on the **crossed eye** button
+![Notification off](../img/faq/notification_off.png). Its aspect will change,
+it is not crossed anymore ![Notification on](../img/faq/notification_on.png)
+meaning you are now following this task, and will receive notification about
+it. 
 
 ### How to not be notified anymore?
 
@@ -322,7 +327,7 @@ For each playlisted shot you can choose the **task** and the
 
 To delete a playlist, load it by clicking on its name. Then,
 click on the **delete** button ![delete button](../img/faq/delete_button.png). 
-The button is located in the top right of the middle pane.
+The button is located in the top right of the middle panel.
 
 A confirmation pop-up will appear. Validate it by clicking the **Confirm**
 button.
@@ -333,43 +338,45 @@ button.
 
 ## How to customize the worklfow?
 
-### How to edit an existing task?
+### How to edit an existing task type?
 
-On the main menu ![Main menu](../img/faq/main_button.png) select the **TASK TYPES** 
-page under the **Admin** section.
+On the main menu ![Main menu](../img/faq/main_button.png) select the 
+**TASK TYPES** page under the **Admin** section.
 
 ![Task Type](../img/faq/menu_tasktype.png)
 
-On the main page, you will be able to edit all the tasks already created ![edit button](../img/faq/edit_button.png).
+On the main page, you will be able to edit all the tasks already created 
+![edit button](../img/faq/edit_button.png).
 
 ![Task Type global page](../img/faq/task_type_global.png)
 
 You can change : 
-- (1) The name of the task
-- (2) The priority, meaning the order of the tasks
+- (1) The name of the task type
+- (2) The priority, meaning the order of the task types
 - (3) For wich entity it will be used
-- (4) If the artists need to timelog their work on this task
+- (4) If the artists need to timelog their work on this task type
 - (5) The color 
 
 ![Edit task](../img/faq/edit_task.png)
 
 Click on **Confirm** to save your changes.
 
-### How to create a new task?
+### How to create a new task type?
 
-On the main menu ![Main menu](../img/faq/main_button.png) select the **TASK TYPES** 
-page under the **Admin** section.
+On the main menu ![Main menu](../img/faq/main_button.png) select 
+the **TASK TYPES** page under the **Admin** section.
 
 ![Task Type](../img/faq/menu_tasktype.png)
 
-On the main page, click on the ![Add Task Type](../img/faq/add_tasktype.png) button.
+On the main page, click on the ![Add Task Type](../img/faq/add_tasktype.png)
+button.
 
-On the new pop up you can define your personalized task : 
+On the new pop up you can define your personalized task:
 
-- (1) The name of the task
-- (2) The priority, meaning the order of the tasks
+- (1) The name of the task type
+- (2) The priority, meaning the order of the task type columns
 - (3) For wich entity it will be used
-- (4) If the artists need to timelog their work on this task
+- (4) If the artists need to timelog their work for tasks with this task type
 - (5) The color 
 
 ![Add task](../img/faq/add_task.png)
@@ -378,13 +385,16 @@ Click on **Confirm** to save your changes.
 
 ### How to edit an existing status?
 
-On the main menu ![Main menu](../img/faq/main_button.png) select the **TASK STATUS** 
-page under the **Admin** section.
+On the main menu ![Main menu](../img/faq/main_button.png) select the 
+**TASK STATUS** page under the **Admin** section.
 
 ![Task Status](../img/faq/menu_status_type.png)
 
-On the main page, you will be able to edit some status already created ![edit button](../img/faq/edit_button.png). Except ![Done Status](../img/faq/done_icon.png)
- and ![Todo Status](../img/faq/todo_icon.png), which are parts of the core system.
+On the main page, you will be able to edit some status already created 
+![edit button](../img/faq/edit_button.png). Except 
+![Done Status](../img/faq/done_icon.png)
+and ![Todo Status](../img/faq/todo_icon.png), which are parts of the core
+system.
 
 ![Task Status global page](../img/faq/task_status_global.png)
  
@@ -401,8 +411,8 @@ Click on **Confirm** to save your changes.
 
 ### How to create a new status?
 
-On the main menu ![Main menu](../img/faq/main_button.png) select the **TASK STATUS** 
-page under the **Admin** section.
+On the main menu ![Main menu](../img/faq/main_button.png) select the 
+**TASK STATUS** page under the **Admin** section.
 
 ![Task Status](../img/faq/menu_status_type.png)
 
@@ -428,7 +438,8 @@ Go on the main page of the assets.
 
 ![Delete asset](../img/faq/delete_asset_global.png)
 
-On the right part of the asset line, click on the ![Delete button](../img/faq/delete_button.png) button.
+On the right part of the asset line, click on the 
+![Delete button](../img/faq/delete_button.png) button.
 
 A confirmation pop up will appear, validate with **Confirm**.
 
@@ -439,7 +450,8 @@ with ![Restore asset](../img/faq/restore_button.png) .
 
 ![Delete asset](../img/faq/delete_asset1.png)
 
-To definitively delete an asset, you have to click on ![Delete button](../img/faq/delete_button.png) button a second time.
+To definitively delete an asset, you have to click on 
+![Delete button](../img/faq/delete_button.png) button a second time.
 
 The asset will be remove from the database and won't appear anymore on Kitsu.
 
@@ -451,7 +463,8 @@ Go on the main page of the shots.
 
 ![Delete shot](../img/faq/delete_shot_global.png)
 
-On the right part of the shot line, click on the ![Delete button](../img/faq/delete_button.png) button.
+On the right part of the shot line, click on the 
+![Delete button](../img/faq/delete_button.png) button.
 
 A confirmation pop up will appear, validate with **Confirm**.
 
@@ -462,26 +475,30 @@ with ![Restore asset](../img/faq/restore_button.png) .
 
 ![Delete shot](../img/faq/delete_shot1.png)
 
-To definitively delete an shot, you have to click on ![Delete button](../img/faq/delete_button.png) button a second time.
+To definitively delete a shot, you have to click on 
+![Delete button](../img/faq/delete_button.png) button a second time.
 
-The shot will be remove from the database and won't appear anymore on Kitsu.
+The shot will be removed from the database and won't appear anymore on Kitsu.
 
 -----------------------
 
 ## How to delete a sequence
 
-To delete a sequence, you must first delete all the shots on this sequence. It's a safe guard.
+To delete a sequence, you must first delete all the shots on this sequence.
+It's a safe guard.
 
-If you don't delete all the shots of a sequence before deleting it, you will see an error message after confirming the deletion.
+If you don't delete all the shots of a sequence before deleting it, you will
+see an error message after confirming the deletion.
 
 ![Delete sequence error](../img/faq/delete_sequence_error.png)
 
-Once you have deleted all the shots of the sequence, use the drop down menu to go to the sequence
- page.
+Once you have deleted all the shots of the sequence, use the drop down menu to
+go to the sequence page.
  
 ![Drop down menu sequence](../img/faq/drop_down_menu_breakdown.png)
  
-Then you can delete the sequence, with the ![Delete button](../img/faq/delete_button.png) button.
+Then you can delete the sequence, with the 
+![Delete button](../img/faq/delete_button.png) button.
 
 ![Delete sequence](../img/faq/delete_sequence.png)
 
