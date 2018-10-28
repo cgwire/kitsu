@@ -482,6 +482,12 @@ export const routes = [
         component: Task
       },
       {
+        name: 'task-add-extra-preview',
+        path: '/productions/:production_id/:type/tasks/:task_id/comments/:comment_id/add-extra-preview',
+        component: Task
+      },
+
+      {
         name: 'task-change-preview',
         path: '/productions/:production_id/:type/tasks/:task_id/comments/:comment_id/change-preview',
         component: Task
@@ -517,6 +523,12 @@ export const routes = [
         path: '/productions/:production_id/episodes/:episode_id/:type/tasks/:task_id/comments/:comment_id/add-preview',
         component: Task
       },
+      {
+        name: 'episode-task-add-extra-preview',
+        path: '/productions/:production_id/episodes/:episode_id/:type/tasks/:task_id/comments/:comment_id/add-extra-preview',
+        component: Task
+      },
+
       {
         name: 'episode-task-change-preview',
         path: '/productions/:production_id/episodes/:episode_id/:type/tasks/:task_id/comments/:comment_id/change-preview',
