@@ -447,9 +447,16 @@ const actions = {
     })
   },
 
-  updatePreviewAnnotation ({ commit, state }, { preview, annotations }) {
+  updatePreviewAnnotation ({ commit, state }, {
+    taskId, preview, annotations
+  }) {
     return new Promise((resolve, reject) => {
-      return tasksApi.updatePreviewAnnotation(preview, annotations)
+      tasksApi.updatePreviewAnnotation(preview, annotations)
+        .then((preview) => {
+          commit(UPDATE_PREVIEW_ANNOTATION, { taskId, preview, annotations })
+          resolve()
+        })
+        .catch(reject)
     })
   },
 
@@ -457,7 +464,11 @@ const actions = {
     return new Promise((resolve, reject) => {
       tasksApi.getPreviewFile(previewId)
         .then((preview) => {
-          commit(UPDATE_PREVIEW_ANNOTATION, { taskId, preview })
+          commit(UPDATE_PREVIEW_ANNOTATION, {
+            taskId,
+            preview,
+            annotations: preview.annotations
+          })
           resolve()
         })
         .catch(reject)
@@ -581,8 +592,14 @@ const mutations = {
     })
     state.taskComments[taskId] = comments
     state.taskPreviews[taskId] = comments.reduce((previews, comment) => {
-      if (comment.preview) previews.push(comment.preview)
-      return previews
+      if (comment.previews && comment.previews.length > 0) {
+        const preview = comment.previews[0]
+        preview.previews = [...comment.previews]
+        previews.push(preview)
+        return previews
+      } else {
+        return previews
+      }
     }, [])
   },
 
@@ -668,21 +685,43 @@ const mutations = {
         id: preview.id,
         feedback: false,
         revision: preview.revision,
-        is_movie: preview.is_movie,
         extension: preview.extension
       }
-      state.taskPreviews[taskId] =
-        [newPreview].concat(state.taskPreviews[taskId])
 
-      comment.preview = newPreview
+      const existingPreview = state.taskPreviews[taskId].find(
+        (p) => p.revision === preview.revision
+      )
+
+      if (existingPreview) {
+        const existingSubPreview =
+          existingPreview.previews.find((p) => p.id === newPreview.id)
+        if (!existingSubPreview) {
+          existingPreview.previews.push(newPreview)
+        }
+      } else {
+        newPreview.previews = [{...newPreview}]
+        state.taskPreviews[taskId] =
+          [newPreview].concat(state.taskPreviews[taskId])
+
+        comment.preview = newPreview
+        comment.previews = [newPreview]
+      }
     }
   },
 
-  [UPDATE_PREVIEW_ANNOTATION] (state, { taskId, preview }) {
-    const oldPreview = state.taskPreviews[taskId].find(
-      (p) => p.id === preview.id
-    )
-    oldPreview.annotations = preview.annotations
+  [UPDATE_PREVIEW_ANNOTATION] (state, { taskId, preview, annotations }) {
+    let oldPreview = null
+    state.taskPreviews[taskId].forEach((p) => {
+      p.previews.forEach((subPreview) => {
+        if (subPreview.id === preview.id) {
+          oldPreview = subPreview
+        }
+      })
+    })
+
+    if (oldPreview) {
+      oldPreview.annotations = annotations
+    }
   },
 
   [CHANGE_PREVIEW_END] (state, { preview, comment }) {
