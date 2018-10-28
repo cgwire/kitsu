@@ -16,7 +16,7 @@
             class="validation-cell"
             :key="columnId"
             :style="getValidationStyle(columnId)"
-            v-for="columnId in validationColumns"
+            v-for="columnId in sortedValidationColumns"
             v-if="!isLoading"
           >
             <router-link
@@ -132,7 +132,7 @@
             :columnY="j"
             @select="onTaskSelected"
             @unselect="onTaskUnselected"
-            v-for="(columnId, j) in validationColumns"
+            v-for="(columnId, j) in sortedValidationColumns"
           />
           <row-actions v-if="isCurrentUserManager"
             :entry="asset"
@@ -255,6 +255,12 @@ export default {
           this.displayedAssetsLength > 0
         )
       )
+    },
+
+    sortedValidationColumns () {
+      return [...this.validationColumns].sort((a, b) => {
+        return this.taskTypeMap[a].priority < this.taskTypeMap[b].priority
+      })
     }
   },
 
