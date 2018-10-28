@@ -20,7 +20,7 @@
 
       <file-upload
         ref="preview-field"
-        accept=".png,.jpg,.mp4,.mov,.obj,.pdf,.ma,.mb,.zip,.rar,.jpeg"
+        :accept="extensions"
         @fileselected="onFileSelected"
       ></file-upload>
 
@@ -82,6 +82,10 @@ export default {
     cancelRoute: {
       type: Object,
       default: () => {}
+    },
+    extensions: {
+      type: String,
+      default: '.png,.jpg,.mp4,.mov,.obj,.pdf,.ma,.mb,.zip,.rar,.jpeg'
     }
   },
 
