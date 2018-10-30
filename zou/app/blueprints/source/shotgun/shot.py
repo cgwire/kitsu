@@ -28,6 +28,7 @@ class ImportShotgunShotsResource(BaseImportShotgunResource):
         custom_fields = self.extract_custom_data(sg_shot)
         project_id = self.get_project(sg_shot, self.project_map)
         sequence_id = self.get_sequence(sg_shot)
+        scene_id = self.get_scene(sg_shot)
         assets = self.extract_assets(sg_shot)
 
         shot_type = shots_service.get_shot_type()
@@ -38,6 +39,7 @@ class ImportShotgunShotsResource(BaseImportShotgunResource):
             "project_id": project_id,
             "entity_type_id": shot_type["id"],
             "parent_id": sequence_id,
+            "source_id": scene_id,
             "entities_out": assets
         }
         data_field_content = {
@@ -53,6 +55,12 @@ class ImportShotgunShotsResource(BaseImportShotgunResource):
         if sg_shot["project"] is not None:
             project_id = project_map.get(sg_shot["project"]["name"], None)
         return project_id
+
+    def get_scene(self, sg_shot):
+        scene_id = None
+        if "sg_scene" in sg_shot and sg_shot["sg_scene"] is not None:
+            scene_id = self.get_scene_id(sg_shot["sg_scene"]["id"])
+        return scene_id
 
     def get_sequence(self, sg_shot):
         sequence_id = None

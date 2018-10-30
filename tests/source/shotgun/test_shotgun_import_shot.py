@@ -31,6 +31,11 @@ class ImportShotgunShotTestCase(ShotgunTestCase):
                     "name": "Sheep"
                 }
             ],
+            "sg_scene": {
+                "type": "Scene",
+                "id": 1,
+                "name": "SC01"
+            },
             "sg_cut_duration": 122,
             "sg_custom_field": "test",
             "type": "Shot",
@@ -41,6 +46,7 @@ class ImportShotgunShotTestCase(ShotgunTestCase):
         self.load_fixture('projects')
         self.load_fixture('sequences')
         self.load_fixture('assets')
+        self.load_fixture('scenes')
 
         api_path = "/import/shotgun/shots"
         self.shots = self.post(api_path, [self.sg_shot], 200)
@@ -56,6 +62,7 @@ class ImportShotgunShotTestCase(ShotgunTestCase):
         )
         entity = Entity.get_by(name=self.sg_shot["assets"][0]["name"])
         project = Project.get_by(name=self.sg_shot["project"]["name"])
+        scene = Entity.get_by(name=self.sg_shot["sg_scene"]["name"])
         self.assertEqual(shot["name"], self.sg_shot["code"])
         self.assertEqual(shot["data"]["frame_in"], 0)
         self.assertEqual(shot["data"]["frame_out"], 122)
@@ -63,6 +70,7 @@ class ImportShotgunShotTestCase(ShotgunTestCase):
         self.assertEqual(shot["parent_id"], str(sequence.id))
         self.assertEqual(shot["entities_out"][0], str(entity.id))
         self.assertEqual(shot["project_id"], str(project.id))
+        self.assertEqual(shot["source_id"], str(scene.id))
 
     def test_import_shot_twice(self):
         self.load_fixture('projects')

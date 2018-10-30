@@ -2,6 +2,7 @@
   {
     "sg_cut_in": null, 
     "code": "SC01",
+    "name": "SC01",
     "project": {
       "type": "Project", 
       "id": 1, 
