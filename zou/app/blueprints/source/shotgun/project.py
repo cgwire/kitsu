@@ -10,6 +10,8 @@ from zou.app.blueprints.source.shotgun.base import (
     ImportRemoveShotgunBaseResource
 )
 
+from zou.app.services.exception import WrongFileTreeFileException
+
 
 class ImportShotgunProjectsResource(BaseImportShotgunResource):
 
@@ -52,7 +54,16 @@ class ImportShotgunProjectsResource(BaseImportShotgunResource):
             project = Project(**data)
 
             tree_name = current_app.config["DEFAULT_FILE_TREE"]
-            project.file_tree = file_tree_service.get_tree_from_file(tree_name)
+            try:
+                project.file_tree = file_tree_service.get_tree_from_file(
+                    tree_name
+                )
+            except WrongFileTreeFileException:
+                current_app.logger.error(
+                    "Can't find default file to set project file tree. Set "
+                    "an empty file tree instead."
+                )
+                project.file_tree = {}
 
             project.save()
             current_app.logger.info("Project created: %s" % project)
