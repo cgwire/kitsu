@@ -96,6 +96,30 @@ class ImportShotgunStepTestCase(ShotgunTestCase):
         api_path = "/import/shotgun/steps"
         task_types = self.post(api_path, sg_steps, 200)
         self.assertEqual(len(task_types), 2)
+        task_types = self.get("/data/task-types")
         self.assertEqual(len(task_types), 2)
         task_types = self.post(api_path, sg_steps, 200)
         self.assertEqual(len(task_types), 2)
+        task_types = self.get("/data/task-types")
+        self.assertEqual(len(task_types), 2)
+
+    def test_import_step_rename(self):
+        sg_step_animation = {
+            "code": "Animation",
+            "color": "50,149,253",
+            "id": 14,
+            "type": "Step"
+        }
+        sg_step_modeling = {
+            "code": "Modeling",
+            "color": "50,149,253",
+            "id": 14,
+            "type": "Step"
+        }
+        sg_steps = [sg_step_animation, sg_step_modeling]
+
+        api_path = "/import/shotgun/steps"
+        task_types = self.post(api_path, sg_steps, 200)
+        self.assertEqual(len(task_types), 2)
+        task_types = self.get("/data/task-types")
+        self.assertEqual(len(task_types), 1)

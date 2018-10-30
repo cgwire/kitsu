@@ -56,8 +56,6 @@ class ImportShotgunStepsResource(BaseImportShotgunResource):
     def save_task_type(self, department, data):
         task_type = TaskType.get_by(shotgun_id=data["shotgun_id"])
         data["department_id"] = department.id
-        current_app.logger.error("hey")
-        current_app.logger.error(task_type)
         if task_type is None:
             task_type = TaskType.get_by(
                 name=data["name"],
