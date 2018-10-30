@@ -40,6 +40,8 @@ class ImportShotgunPersonsResource(BaseImportShotgunResource):
     def import_entry(self, data):
         if data["email"] != "changeme@email.com":
             person = Person.get_by(shotgun_id=data["shotgun_id"])
+            if person is None:
+                person = Person.get_by(email=data["email"])
 
             if person is None:
                 data["password"] = auth.encrypt_password("default")

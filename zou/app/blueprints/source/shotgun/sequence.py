@@ -29,7 +29,6 @@ class ImportShotgunSequencesResource(BaseImportShotgunResource):
         episode_id = self.get_episode(sg_sequence)
         if project_id is None:
             raise ShotgunEntryImportFailed
-
         return {
             "name": sg_sequence["code"],
             "shotgun_id": sg_sequence["id"],
@@ -52,21 +51,19 @@ class ImportShotgunSequencesResource(BaseImportShotgunResource):
             entity_type_id=self.sequence_type["id"]
         )
 
-        if sequence is None:
+        similar_sequence = Entity.get_by(
+            name=data["name"],
+            parent_id=data["parent_id"],
+            project_id=data["project_id"],
+            entity_type_id=self.sequence_type["id"]
+        )
+
+        if sequence is None and similar_sequence is None:
             sequence = Entity(**data)
             sequence.save()
             current_app.logger.info("Sequence created: %s" % sequence)
 
-        else:
-            # Little hack to avoid integrity errors due to
-            # duplicated data.
-            similar_sequence = Entity.get_by(
-                name=data["name"],
-                parent_id=data["parent_id"],
-                project_id=data["project_id"],
-                entity_type_id=self.sequence_type["id"]
-            )
-
+        elif sequence is not None:
             if similar_sequence is None:
                 sequence.update(data)
                 sequence.save()
