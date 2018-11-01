@@ -8,7 +8,7 @@ from zou.app.models.entity import Entity
 from zou.app.models.project import Project
 from zou.app.models.subscription import Subscription
 from zou.app.models.task import Task
-from zou.app.models.task import association_table as assignees_table
+from zou.app.models.task import assignees_table
 from zou.app.models.task_status import TaskStatus
 
 from zou.app.services import (

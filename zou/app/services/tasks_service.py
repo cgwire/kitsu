@@ -1,4 +1,5 @@
 import datetime
+import uuid
 
 from sqlalchemy.exc import StatementError, IntegrityError, DataError
 from sqlalchemy.orm import aliased
@@ -32,6 +33,7 @@ from zou.app.services.exception import (
 from zou.app.services import (
     assets_service,
     base_service,
+    files_service,
     persons_service,
     shots_service
 )
@@ -357,13 +359,27 @@ def get_comments(task_id):
 
         if comment.preview_file_id is not None:
             preview = PreviewFile.get(comment.preview_file_id)
-            comment_dict["preview"] = {
+            comment_dict["previews"] = [{
                 "id": str(preview.id),
                 "revision": preview.revision,
                 "is_movie": preview.is_movie,
                 "extension": preview.extension,
                 "annotations": preview.annotations
-            }
+            }]
+        else:
+            comment_dict["previews"] = []
+            previews = sorted(
+                comment.previews,
+                key=lambda x: x.created_at
+            )
+            for preview in previews:
+                comment_dict["previews"].append({
+                    "id": str(preview.id),
+                    "revision": preview.revision,
+                    "is_movie": preview.is_movie,
+                    "extension": preview.extension,
+                    "annotations": preview.annotations
+                })
         comments.append(comment_dict)
     return comments
 
@@ -394,7 +410,10 @@ def get_comment_by_preview_file_id(preview_file_id):
     """
     Return comment related to given preview file as a dict.
     """
-    comment = Comment.get_by(preview_file_id=preview_file_id)
+    preview_file = files_service.get_preview_file_raw(preview_file_id)
+    comment = Comment.query \
+         .filter(Comment.previews.contains(preview_file)) \
+         .first()
     if comment is not None:
         return comment.serialize()
     else:
@@ -892,3 +911,25 @@ def task_to_review(
     })
 
     return task_dict_after
+
+
+def add_preview_file_to_comment(comment_id, person_id, task_id, revision=0):
+    """
+    Add a preview to comment preview list. Auto set the revision field
+    (add 1 if it's a new preview, keep the preview revision in other cases).
+    """
+    comment = get_comment_raw(comment_id)
+    if revision == 0 and len(comment.previews) == 0:
+        revision = get_next_preview_revision(task_id)
+    elif revision == 0:
+        revision = comment.previews[0].revision
+
+    preview_file = files_service.create_preview_file_raw(
+        str(uuid.uuid4())[:13],
+        revision,
+        task_id,
+        person_id
+    )
+    comment.previews.append(preview_file)
+    comment.save()
+    return preview_file.serialize()

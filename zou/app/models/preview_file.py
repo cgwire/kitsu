@@ -21,11 +21,11 @@ class PreviewFile(db.Model, BaseMixin, SerializerMixin):
     extension = db.Column(db.String(6))
     shotgun_id = db.Column(db.Integer, unique=True)
 
-    is_movie = db.Column(db.Boolean, default=False)
+    is_movie = db.Column(db.Boolean, default=False) # deprecated
 
-    url = db.Column(db.String(600))
-    uploaded_movie_url = db.Column(db.String(600))
-    uploaded_movie_name = db.Column(db.String(150))
+    url = db.Column(db.String(600)) # deprecated
+    uploaded_movie_url = db.Column(db.String(600)) # deprecated
+    uploaded_movie_name = db.Column(db.String(150)) # deprecated
 
     annotations = db.Column(JSONB)
 
@@ -34,7 +34,10 @@ class PreviewFile(db.Model, BaseMixin, SerializerMixin):
         db.ForeignKey("task.id"),
         index=True
     )
-    person_id = db.Column(UUIDType(binary=False), db.ForeignKey("person.id"))
+    person_id = db.Column(
+        UUIDType(binary=False),
+        db.ForeignKey("person.id")
+    )
 
     source_file_id = db.Column(
         UUIDType(binary=False),

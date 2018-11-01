@@ -4,7 +4,7 @@ from zou.app.models.serializer import SerializerMixin
 from zou.app.models.base import BaseMixin
 
 
-association_table = db.Table(
+assignees_table = db.Table(
     'assignations',
     db.Column(
         'task',
@@ -66,7 +66,7 @@ class Task(db.Model, BaseMixin, SerializerMixin):
 
     assignees = db.relationship(
         'Person',
-        secondary=association_table
+        secondary=assignees_table
     )
 
     __table_args__ = (

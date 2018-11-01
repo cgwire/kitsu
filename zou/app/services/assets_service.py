@@ -8,7 +8,7 @@ from zou.app.models.entity_type import EntityType
 from zou.app.models.project import Project
 from zou.app.models.task import Task
 from zou.app.models.asset_instance import AssetInstance
-from zou.app.models.task import association_table as assignees_table
+from zou.app.models.task import assignees_table
 
 from zou.app.services import (
     base_service,

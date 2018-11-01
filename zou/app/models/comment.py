@@ -6,6 +6,23 @@ from zou.app.models.serializer import SerializerMixin
 from zou.app.models.base import BaseMixin
 
 
+preview_link_table = db.Table(
+    "comment_preview_link",
+    db.Column(
+        "comment",
+        UUIDType(binary=False),
+        db.ForeignKey("comment.id"),
+        primary_key=True
+    ),
+    db.Column(
+        "preview_file",
+        UUIDType(binary=False),
+        db.ForeignKey("preview_file.id"),
+        primary_key=True
+    )
+)
+
+
 class Comment(db.Model, BaseMixin, SerializerMixin):
     """
     Comment can occurs on any object but they are mainly used on tasks.
@@ -33,6 +50,11 @@ class Comment(db.Model, BaseMixin, SerializerMixin):
     preview_file_id = db.Column(
         UUIDType(binary=False),
         db.ForeignKey("preview_file.id")
+    )
+    previews = db.relationship(
+        "PreviewFile",
+        secondary=preview_link_table,
+        backref="comments"
     )
 
     def __repr__(self):

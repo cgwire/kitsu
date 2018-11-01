@@ -499,12 +499,11 @@ def get_preview_files_for_task(task_id):
     return fields.serialize_models(previews)
 
 
-def create_preview_file(
+def create_preview_file_raw(
     name,
     revision,
     task_id,
     person_id,
-    is_movie,
     source="webgui"
 ):
     return PreviewFile.create(
@@ -513,7 +512,22 @@ def create_preview_file(
         source=source,
         task_id=task_id,
         person_id=person_id,
-        is_movie=is_movie
+    )
+
+
+def create_preview_file(
+    name,
+    revision,
+    task_id,
+    person_id,
+    source="webgui"
+):
+    return create_preview_file_raw(
+        name,
+        revision,
+        task_id,
+        person_id,
+        source
     ).serialize()
 
 

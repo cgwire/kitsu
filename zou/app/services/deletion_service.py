@@ -12,6 +12,25 @@ from zou.app.utils import events
 from zou.app.stores import file_store
 
 
+def remove_comment(comment_id):
+    comment = Comment.get(comment_id)
+    notifications = Notification.query.filter_by(comment_id=comment.id)
+    for notification in notifications:
+        notification.delete()
+
+    if comment.preview_file_id is not None:
+        preview_file = PreviewFile.get(comment.preview_file_id)
+        remove_preview_file(preview_file)
+
+    previews = [preview for preview in comment.previews]
+    comment.delete()
+
+    for preview in previews:
+        remove_preview_file(preview)
+
+    return comment.serialize()
+
+
 def remove_task(task_id, force=False):
     """
     Remove given task. Force deletion if the task has some comments and files
@@ -58,6 +77,11 @@ def remove_task(task_id, force=False):
     return task.serialize()
 
 
+def remove_preview_file_by_id(preview_file_id):
+    preview_file = PreviewFile.get(preview_file_id)
+    return remove_preview_file(preview_file)
+
+
 def remove_preview_file(preview_file):
     """
     Remove all files related to given preview file, then remove the preview file
@@ -70,7 +94,10 @@ def remove_preview_file(preview_file):
     else:
         clear_generic_files(preview_file.id)
 
+    preview_file.comments = []
+    preview_file.save()
     preview_file.delete()
+    return preview_file.serialize()
 
 
 def clear_picture_files(preview_file_id):

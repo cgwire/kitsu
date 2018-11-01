@@ -11,6 +11,7 @@ from zou.app.services.exception import (
     WrongDateFormatException
 )
 from zou.app.services import (
+    deletion_service,
     tasks_service,
     shots_service,
     assets_service,
@@ -100,41 +101,53 @@ class AddPreviewResource(Resource):
 
     @jwt_required
     def post(self, task_id, comment_id):
-        is_movie = self.get_arguments()
-
         task = tasks_service.get_task(task_id)
         user_service.check_project_access(task["project_id"])
 
-        comment = tasks_service.get_comment_raw(comment_id)
+        comment = tasks_service.get_comment(comment_id)
         task_status = tasks_service.get_task_status(
-            comment.task_status_id
+            comment["task_status_id"]
         )
         person = persons_service.get_current_user()
-
         if not task_status["is_reviewable"]:
             return {
                 "error": "Comment status is not reviewable, you cannot link a "
                          "preview to it."
             }, 400
 
-        revision = tasks_service.get_next_preview_revision(task_id)
-        preview = files_service.create_preview_file(
-            task["name"],
-            revision,
-            task["id"],
-            person["id"],
-            is_movie
+        preview_file = tasks_service.add_preview_file_to_comment(
+            comment_id, person["id"], task_id
         )
-        comment.update({"preview_file_id": preview["id"]})
+        return preview_file, 201
 
-        return preview, 201
 
-    def get_arguments(self):
-        parser = reqparse.RequestParser()
-        parser.add_argument("is_movie", type=bool, default=False)
-        args = parser.parse_args()
+class AddExtraPreviewResource(Resource):
+    """
+    Add a preview to given comment.
+    """
 
-        return args["is_movie"]
+    @jwt_required
+    def post(self, task_id, comment_id, preview_file_id):
+        task = tasks_service.get_task(task_id)
+        user_service.check_project_access(task["project_id"])
+        tasks_service.get_comment(comment_id)
+
+        person = persons_service.get_current_user()
+        related_preview_file = files_service.get_preview_file(preview_file_id)
+
+        preview_file = tasks_service.add_preview_file_to_comment(
+            comment_id, person["id"], task_id, related_preview_file["revision"]
+        )
+        return preview_file, 201
+
+    @jwt_required
+    def delete(self, task_id, comment_id, preview_file_id):
+        task = tasks_service.get_task(task_id)
+        user_service.check_project_access(task["project_id"])
+        preview_file = deletion_service.remove_preview_file_by_id(
+            preview_file_id
+        )
+        return preview_file, 204
 
 
 class TaskPreviewsResource(Resource):
@@ -175,11 +188,7 @@ class TaskCommentResource(Resource):
         return comment, 204
 
     def remove_comment_and_related(self, comment_id):
-        comment = tasks_service.get_comment(comment_id)
-        notifications_service.delete_notifications_for_comment(comment["id"])
-        tasks_service.delete_comment(comment["id"])
-        if comment["preview_file_id"] is not None:
-            files_service.remove_preview_file(comment["preview_file_id"])
+        deletion_service.remove_comment(comment_id)
 
     def update_task_status(self, task_id):
         tasks_service.get_task(task_id)
