@@ -49,6 +49,8 @@ class FileTreeTestCase(ApiDBTestCase):
             parent_id=self.sequence_standard.id
         )
         self.shot_standard.save()
+        self.output_type_materials = files_service.get_or_create_output_type(
+            "Materials")
         self.output_type_cache = files_service.get_or_create_output_type(
             "Cache")
         self.output_type_image = files_service.get_or_create_output_type(
@@ -422,6 +424,42 @@ class FileTreeTestCase(ApiDBTestCase):
             file_name,
             "cosmos_landromat_s01_sc01_animation_cache_main_"
             "tree_0001_v003"
+        )
+
+    def test_get_folder_path_asset_asset_instance(self):
+        self.generate_fixture_asset_types()
+        self.generate_fixture_asset_character()
+        self.generate_fixture_asset_asset_instance()
+        path = file_tree_service.get_instance_folder_path(
+            self.asset_instance.serialize(),
+            self.asset.serialize(),
+            task_type=self.task_type.serialize(),
+            output_type=self.output_type_materials,
+            representation="ml"
+        )
+        self.assertEquals(
+            path,
+            "/simple/productions/export/cosmos_landromat/assets/props/tree/"
+            "shaders/materials/character/rabbit/instance_0001/ml"
+        )
+
+    def test_get_file_name_asset_asset_instance(self):
+        self.generate_fixture_asset_types()
+        self.generate_fixture_asset_character()
+        self.generate_fixture_asset_asset_instance()
+        file_name = file_tree_service.get_instance_file_name(
+            self.asset_instance.serialize(),
+            self.asset.serialize(),
+            output_type=self.output_type_materials,
+            task_type=self.task_type.serialize(),
+            name="main",
+            revision=3
+        )
+
+        self.assertEquals(
+            file_name,
+            "cosmos_landromat_props_tree_shaders_materials_main_"
+            "rabbit_0001_v003"
         )
 
     def test_get_folder_path_representation(self):

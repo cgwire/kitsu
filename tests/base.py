@@ -435,6 +435,27 @@ class ApiDBTestCase(ApiTestCase):
         )
         return self.asset_instance
 
+    def generate_fixture_asset_asset_instance(
+        self,
+        asset=None,
+        target_asset=None,
+        number=1
+    ):
+        if asset is None:
+            asset = self.asset_character
+        if target_asset is None:
+            target_asset = self.asset
+        self.asset_instance = AssetInstance.create(
+            asset_id=asset.id,
+            target_asset_id=target_asset.id,
+            number=number,
+            name=breakdown_service.build_asset_instance_name(
+                asset.id, number
+            ),
+            description="Asset instance description"
+        )
+        return self.asset_instance
+
     def generate_fixture_user(self):
         self.user = Person.create(
             first_name="John",

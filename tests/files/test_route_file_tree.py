@@ -171,6 +171,38 @@ class FolderPathTestCase(ApiDBTestCase):
             "cosmos_landromat_s01_sc01_animation_cache_main_tree_0001_v003"
         )
 
+    def test_get_path_asset_asset_instance(self):
+        self.output_type = files_service.get_or_create_output_type("Materials")
+        self.generate_fixture_asset_types()
+        self.generate_fixture_asset_character()
+        self.generate_fixture_asset_asset_instance()
+        data = {
+            "name": "main",
+            "temporal_entity_id": self.asset.id,
+            "output_type_id": self.output_type["id"],
+            "task_type_id": self.task_type.id,
+            "representation": "abc",
+            "revision": 3
+        }
+        result = self.post(
+            "/data/asset-instances/%s/entities/%s/output-file-path" % (
+                self.asset_instance.id,
+                self.asset.id,
+            ),
+            data,
+            200
+        )
+        self.assertEquals(
+            result["folder_path"],
+            "/simple/productions/export/cosmos_landromat/assets/props/"
+            "tree/shaders/materials/character/rabbit/instance_0001/abc"
+        )
+        self.assertEquals(
+            result["file_name"],
+            "cosmos_landromat_props_tree_shaders_materials_main_rabbit"
+            "_0001_v003"
+        )
+
     def test_get_path_asset_software(self):
         data = {
             "software_id": self.software.id

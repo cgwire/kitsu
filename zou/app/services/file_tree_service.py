@@ -311,7 +311,10 @@ def get_tree_from_file(tree_name):
 def get_folder_path_template(tree, mode, entity):
     try:
         if entity["type"] == "AssetInstance":
-            return tree[mode]["folder_path"]["instance"]
+            if entity.get("target_asset_id", None) is not None:
+                return tree[mode]["folder_path"]["instance_asset"]
+            else:
+                return tree[mode]["folder_path"]["instance"]
         elif shots_service.is_shot(entity):
             return tree[mode]["folder_path"]["shot"]
         elif shots_service.is_sequence(entity):
@@ -327,7 +330,10 @@ def get_folder_path_template(tree, mode, entity):
 def get_file_name_template(tree, mode, entity):
     try:
         if entity["type"] == "AssetInstance":
-            return tree[mode]["file_name"]["instance"]
+            if entity.get("target_asset_id", None) is not None:
+                return tree[mode]["file_name"]["instance_asset"]
+            else:
+                return tree[mode]["file_name"]["instance"]
         elif shots_service.is_shot(entity):
             return tree[mode]["file_name"]["shot"]
         elif shots_service.is_sequence(entity):
@@ -590,8 +596,8 @@ def get_folder_from_episode(entity):
 
 def get_folder_from_temporal_entity(entity):
     if entity is not None:
-        entity_type = entities_service.get_entity(entity["id"])
-        folder = entity_type["name"]
+        entity = entities_service.get_entity(entity["id"])
+        folder = entity["name"]
     else:
         raise MalformedFileTreeException("Given temporal entity is null.")
     return folder

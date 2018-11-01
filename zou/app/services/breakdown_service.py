@@ -286,3 +286,68 @@ def build_asset_instance_name(asset_id, number):
     asset_name = slugify(asset.name, separator="_")
     number = str(number).zfill(4)
     return "%s_%s" % (asset_name, number)
+
+
+def get_asset_instances_for_asset(asset_id, asset_type_id=None):
+    """
+    Return all asset instances inside given asset.
+
+    Asset instances for asset are used for environment (instantiation of props)
+    or for props (instantiation of sub props).
+    """
+    query = AssetInstance.query \
+        .filter(AssetInstance.target_asset_id == asset_id) \
+        .order_by(
+            AssetInstance.asset_id,
+            AssetInstance.number
+        )
+
+    if asset_type_id is not None:
+        query = query \
+            .join(Entity, AssetInstance.asset_id == Entity.id) \
+            .filter(Entity.entity_type_id == asset_type_id)
+
+    asset_instances = query.all()
+
+    result = {}
+    for asset_instance in asset_instances:
+        asset_id = str(asset_instance.asset_id)
+        if asset_id not in result:
+            result[asset_id] = []
+        result[asset_id].append(asset_instance.serialize())
+    return result
+
+
+def add_asset_instance_to_asset(
+    asset_id,
+    asset_to_instantiate_id,
+    description=""
+):
+    """
+    Create a new asset instance for given asset and scene.
+    """
+    instance = AssetInstance.query \
+        .filter(AssetInstance.target_asset_id == asset_id) \
+        .filter(AssetInstance.asset_id == asset_to_instantiate_id) \
+        .order_by(desc(AssetInstance.number)) \
+        .first()
+
+    number = 1
+    if instance is not None:
+        number = instance.number + 1
+    name = build_asset_instance_name(asset_to_instantiate_id, number)
+
+    asset_instance = AssetInstance.create(
+        asset_id=asset_to_instantiate_id,
+        target_asset_id=asset_id,
+        number=number,
+        name=name,
+        description=description
+    ).serialize()
+
+    events.emit("asset_instance:new", {
+        "asset_id": asset_id,
+        "asset_instantiated": asset_to_instantiate_id,
+        "asset_instance_id": asset_instance["id"]
+    })
+    return asset_instance

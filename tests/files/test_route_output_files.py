@@ -506,6 +506,125 @@ class RouteOutputFilesTestCase(ApiDBTestCase):
             output_file["id"]
         )
 
+    def test_new_asset_asset_instance_output(self):
+        self.generate_fixture_asset_types()
+        self.generate_fixture_asset_character()
+        self.generate_fixture_asset_asset_instance()
+        data = {
+            "person_id": self.person_id,
+            "comment": "test working file publish",
+            "output_type_id": self.tx_type_id,
+            "task_type_id": self.task_type.id,
+            "working_file_id": self.working_file_id,
+            "representation": ".tx"
+        }
+        result = self.post(
+            "data/asset-instances/%s/entities/%s/output-files/new" % (
+                self.asset_instance.id,
+                self.asset.id
+            ),
+            data
+        )
+
+        self.assertEqual(
+            result["folder_path"],
+            "/simple/productions/export/cosmos_landromat/assets/props/tree/"
+            "shaders/texture/character/rabbit/instance_0001/tx"
+        )
+        self.assertEqual(
+            result["file_name"],
+            "cosmos_landromat_props_tree_shaders_texture_main_rabbit_"
+            "0001_v001"
+        )
+        self.assertEqual(
+            result["path"],
+            "/simple/productions/export/cosmos_landromat/assets/props/tree/"
+            "shaders/texture/character/rabbit/instance_0001/tx/"
+            "cosmos_landromat_props_tree_shaders_texture_main_rabbit_"
+            "0001_v001"
+        )
+
+        output_file_id = result["id"]
+        output_file = self.get("/data/output-files/%s" % output_file_id)
+
+        self.assertEqual(output_file["comment"], data["comment"])
+        self.assertEqual(output_file["revision"], 1)
+        self.assertEqual(output_file["source_file_id"], self.working_file_id)
+
+    def test_get_next_asset_asset_instance_revision(self):
+        self.generate_fixture_asset_types()
+        self.generate_fixture_asset_character()
+        self.generate_fixture_asset_asset_instance()
+
+        self.task_type_id = self.task_type.id
+        asset_instance_id = self.asset_instance.id
+        asset_id = self.asset.id
+
+        data = {
+            "person_id": self.person_id,
+            "comment": "test working file publish",
+            "output_type_id": self.tx_type_id,
+            "task_type_id": self.task_type.id,
+            "working_file_id": self.working_file_id
+        }
+        self.post(
+            "data/asset-instances/%s/entities/%s/output-files/new" % (
+                asset_instance_id,
+                asset_id
+            ), data
+        )
+
+        data = {
+            "output_type_id": self.tx_type_id,
+            "task_type_id": self.task_type_id,
+            "name": "main"
+        }
+        result = self.post(
+            "data/asset-instances/%s/entities/%s/output-files/next-revision" % (
+                asset_instance_id,
+                asset_id
+            ),
+            data,
+            200
+        )
+        self.assertEquals(result["next_revision"], 2)
+
+    def test_get_last_asset_asset_instance_outputs(self):
+        self.generate_fixture_asset_types()
+        self.generate_fixture_asset_character()
+        self.generate_fixture_asset_asset_instance()
+
+        self.task_type_id = self.task_type.id
+        asset_instance_id = self.asset_instance.id
+        asset_id = self.asset.id
+
+        data = {
+            "person_id": self.person_id,
+            "comment": "test working file publish",
+            "output_type_id": self.tx_type_id,
+            "task_type_id": self.task_type_id,
+            "working_file_id": self.working_file_id
+        }
+        output_file = self.post(
+            "data/asset-instances/%s/entities/%s/output-files/new" % (
+                asset_instance_id,
+                asset_id
+            ), data
+        )
+
+        result = self.get(
+            "data/asset-instances/%s/entities/%s/output-files/"
+            "last-revisions" % (
+                asset_instance_id,
+                asset_id
+            )
+        )
+        self.assertEquals(
+            result[self.tx_type_id]["main"]["id"],
+            output_file["id"]
+        )
+
+
     def test_get_output_types(self):
         self.generate_fixture_scene()
         self.generate_fixture_scene_asset_instance()

@@ -3,6 +3,7 @@ from zou.app.utils.api import configure_api_from_blueprint
 
 from .resources import (
     AssetsAndTasksResource,
+    AssetAssetInstancesResource,
     AssetResource,
     AssetShotAssetInstancesResource,
     AssetSceneAssetInstancesResource,
@@ -29,7 +30,6 @@ routes = [
     ("/data/assets/<asset_id>/tasks", AssetTasksResource),
     ("/data/assets/<asset_id>/task-types", AssetTaskTypesResource),
     ("/data/assets/<asset_id>/cast-in", CastInResource),
-
     (
         "/data/assets/<asset_id>/shot-asset-instances",
         AssetShotAssetInstancesResource
@@ -37,6 +37,10 @@ routes = [
     (
         "/data/assets/<asset_id>/scene-asset-instances",
         AssetSceneAssetInstancesResource
+    ),
+    (
+        "/data/assets/<asset_id>/asset-asset-instances",
+        AssetAssetInstancesResource
     ),
     (
         "/data/projects/<project_id>/asset-types/<asset_type_id>/assets",

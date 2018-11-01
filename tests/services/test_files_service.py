@@ -376,3 +376,66 @@ class FileServiceTestCase(ApiDBTestCase):
                 representation="max"
             )
         self.assertEquals(len(output_files), 3)
+
+    def test_get_output_files_for_output_type_and_asset_asset_instance(self):
+        self.generate_fixture_asset_types()
+        self.generate_fixture_asset()
+        self.generate_fixture_asset_character()
+        asset_character_id = str(self.asset_character.id)
+        asset_instance = self.generate_fixture_asset_asset_instance()
+        geometry = self.output_type
+        self.generate_fixture_output_file(
+            geometry, 1, representation="obj", asset_instance=asset_instance,
+            temporal_entity_id=asset_character_id
+        )
+        self.generate_fixture_output_file(
+            geometry, 2, representation="obj", asset_instance=asset_instance,
+            temporal_entity_id=asset_character_id
+        )
+        self.generate_fixture_output_file(
+            geometry, 3, representation="obj", asset_instance=asset_instance,
+            temporal_entity_id=asset_character_id
+        )
+        self.generate_fixture_output_file(
+            geometry, 4, representation="obj", asset_instance=asset_instance,
+            temporal_entity_id=asset_character_id
+        )
+
+        self.generate_fixture_output_file(
+            geometry, 1, representation="max", asset_instance=asset_instance,
+            temporal_entity_id=asset_character_id
+        )
+        self.generate_fixture_output_file(
+            geometry, 2, representation="max", asset_instance=asset_instance,
+            temporal_entity_id=asset_character_id
+        )
+        self.generate_fixture_output_file(
+            geometry, 3, representation="max", asset_instance=asset_instance,
+            temporal_entity_id=asset_character_id
+        )
+
+        output_files = \
+            files_service.get_output_files_for_output_type_and_asset_instance(
+                asset_instance.id,
+                asset_character_id,
+                geometry.id
+            )
+        self.assertEquals(len(output_files), 7)
+
+        output_files = \
+            files_service.get_output_files_for_output_type_and_asset_instance(
+                asset_instance.id,
+                asset_character_id,
+                geometry.id,
+                representation="obj"
+            )
+        self.assertEquals(len(output_files), 4)
+
+        output_files = \
+            files_service.get_output_files_for_output_type_and_asset_instance(
+                asset_instance.id,
+                asset_character_id,
+                geometry.id,
+                representation="max"
+            )
+        self.assertEquals(len(output_files), 3)
