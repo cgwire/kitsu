@@ -206,6 +206,8 @@ export default {
     full_screen: 'Afficher en plein écran',
     delete_comment: 'Êtes vous sûr de vouloir supprimer ce commentaire ?',
     delete_comment_error: 'Une erreur est survenue en supprimant le commentaire.',
+    delete_preview: 'Êtes vous sûr de vouloir supprimer ce commentaire ?',
+    delete_preview_error: 'Une erreur est survenue en supprimant la preview.',
     previous: 'Précédente',
     next: 'Suivante',
     back_to_list: 'Retour à la liste',

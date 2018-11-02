@@ -39,6 +39,7 @@ import {
 
   SET_PREVIEW,
   SET_IS_SHOW_ASSIGNATIONS,
+  DELETE_PREVIEW_END,
 
   LOAD_PERSON_TASKS_END,
   USER_LOAD_TODOS_END,
@@ -421,6 +422,44 @@ const actions = {
     })
   },
 
+  addCommentExtraPreview (
+    { commit, getters, state },
+    { taskId, commentId, previewId, callback }
+  ) {
+    const fileName = state.previewFormData.get('file').name
+
+    tasksApi.addExtraPreview(previewId, taskId, commentId, (err, preview) => {
+      if (err && callback) {
+        callback(err)
+      } else {
+        tasksApi.uploadPreview(preview.id, state.previewFormData, (err) => {
+          if (!err) {
+            const comment = getters.getTaskComment(taskId, commentId)
+            preview.extension = 'png'
+            commit(ADD_PREVIEW_END, {
+              preview,
+              taskId,
+              commentId,
+              comment
+            })
+          }
+          if (callback) callback(err, preview)
+        })
+      }
+    })
+  },
+
+  deleteTaskPreview ({ commit, state }, { taskId, commentId, previewId }) {
+    return new Promise((resolve, reject) => {
+      tasksApi.deletePreview(taskId, commentId, previewId)
+        .then(() => {
+          commit(DELETE_PREVIEW_END, { taskId, previewId })
+          resolve()
+        })
+        .catch(reject)
+    })
+  },
+
   changeCommentPreview ({ commit, state }, {
     comment, preview, taskId, callback
   }) {
@@ -707,6 +746,16 @@ const mutations = {
         comment.previews = [newPreview]
       }
     }
+  },
+
+  [DELETE_PREVIEW_END] (state, { taskId, previewId }) {
+    state.taskPreviews[taskId].forEach((p) => {
+      const index =
+        p.previews.findIndex((subPreview) => subPreview.id === previewId)
+      if (index >= 0) {
+        p.previews.splice(index, 1)
+      }
+    })
   },
 
   [UPDATE_PREVIEW_ANNOTATION] (state, { taskId, preview, annotations }) {

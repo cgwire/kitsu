@@ -1,7 +1,13 @@
 <template>
 <div ref="container" class="picture-player">
   <div ref="picture-wrapper" class="picture-wrapper">
+    <div class="loading-background" v-if="isLoading" >
+      <spinner class="spinner" />
+    </div>
     <canvas
+      :style="{
+        display: 'block'
+      }"
       id="annotation-canvas"
       ref="annotation-canvas"
       class="canvas"
@@ -9,8 +15,42 @@
     </canvas>
   </div>
 
-  <div class="buttons flexrow pull-bottom">
+  <div class="buttons flexrow pull-bottom" ref="button-bar">
     <div class="left flexrow">
+      <button
+        @click="onPreviousClicked"
+        class="button flexrow-item"
+      >
+        <chevron-left-icon class="icon" />
+      </button>
+
+      <span
+        class="flexrow-item bar-element"
+      >
+        {{ currentIndex }} / {{ preview.previews.length }}
+      </span>
+
+      <button
+        class="button flexrow-item"
+        @click="onNextClicked"
+      >
+        <chevron-right-icon class="icon" />
+      </button>
+
+      <button
+        class="button flexrow-item"
+        @click="onAddPreviewClicked"
+      >
+        <plus-icon class="icon" />
+      </button>
+
+      <button
+        class="button flexrow-item"
+        @click="onRemovePreviewClicked"
+        v-if="currentIndex > 1"
+      >
+        <trash-icon class="icon" />
+      </button>
     </div>
 
     <div class="right flexrow">
@@ -24,7 +64,7 @@
 
       <button
         class="button flexrow-item"
-        @click="onAnnotateClicked"
+        @click="onRectAnnotateClicked"
         v-if="isFullScreenEnabled"
       >
         <square-icon class="icon" />
@@ -73,23 +113,33 @@
 <script>
 import { fabric } from 'fabric'
 import {
+  ChevronLeftIcon,
+  ChevronRightIcon,
   CircleIcon,
   DownloadIcon,
   Edit2Icon,
   MaximizeIcon,
+  PlusIcon,
+  TrashIcon,
   SquareIcon,
   XIcon
 } from 'vue-feather-icons'
+import Spinner from '../widgets/Spinner'
 
 export default {
   name: 'picture-viewer',
 
   components: {
+    ChevronLeftIcon,
+    ChevronRightIcon,
     CircleIcon,
     DownloadIcon,
     Edit2Icon,
     MaximizeIcon,
+    PlusIcon,
     SquareIcon,
+    Spinner,
+    TrashIcon,
     XIcon
   },
 
@@ -102,6 +152,8 @@ export default {
 
   data () {
     return {
+      currentIndex: 1,
+      isLoading: true,
       isDrawing: false,
       annotations:
         this.preview.annotations ? [...this.preview.annotations] : [],
@@ -110,6 +162,7 @@ export default {
   },
 
   mounted () {
+    this.container.style.height = this.getDefaultHeight() + 'px'
     setTimeout(() => {
       this.mountPicture()
 
@@ -139,17 +192,8 @@ export default {
     },
 
     picturePath () {
-      return `/api/pictures/originals/preview-files/${this.preview.id}.png`
-    },
-
-    isFullScreen () {
-      return !!(
-        document.fullScreen ||
-        document.webkitIsFullScreen ||
-        document.mozFullScreen ||
-        document.msFullscreenElement ||
-        document.fullscreenElement
-      )
+      const previewId = this.preview.previews[this.currentIndex - 1].id
+      return `/api/pictures/originals/preview-files/${previewId}.png`
     },
 
     isFullScreenEnabled () {
@@ -161,6 +205,10 @@ export default {
         document.webkitFullscreenEnabled ||
         document.createElement('picture').webkitRequestFullScreen
       )
+    },
+
+    currentPreview () {
+      return this.preview.previews[this.currentIndex - 1]
     }
   },
 
@@ -169,16 +217,28 @@ export default {
   },
 
   methods: {
+    isFullScreen () {
+      return !!(
+        document.fullScreen ||
+        document.webkitIsFullScreen ||
+        document.mozFullScreen ||
+        document.msFullscreenElement ||
+        document.fullscreenElement
+      )
+    },
+
     mountPicture () {
       this.isResizing = true
+      this.isLoading = true
       this.clearCanvas(() => {
         setTimeout(() => {
           this.setupFabricPicture((fabricCanvas) => {
+            this.isLoading = false
             this.fabricCanvas = fabricCanvas
             this.loadAnnotation(0)
             this.isResizing = false
           })
-        }, 0)
+        }, 100)
       })
     },
 
@@ -194,46 +254,41 @@ export default {
         this.$refs['annotation-canvas'].html = ''
       }
       setTimeout(() => {
-        try {
-          if (this.fabricCanvas) {
-            this.fabricCanvas.dispose()
+        if (this.fabricCanvas) {
+          try {
+            this.fabricCanvas.clear()
+          } catch (err) {
+            console.log(err)
           }
-        } catch (err) {
-          console.log(err)
+
+          try {
+            this.fabricCanvas.dispose()
+          } catch (err) {
+            console.log(err)
+          }
         }
         this.fabricCanvas = null
         if (callback) callback()
       }, 10)
     },
 
+    getDefaultHeight () {
+      if (this.isFullScreen()) {
+        return screen.height
+      } else {
+        return screen.width > 1300 ? 500 : 300
+      }
+    },
+
     getDimensions (picture) {
       const ratio = picture.height / picture.width
       let width = this.container.offsetWidth - 1
-      let height = width * ratio
-
-      const maxHeight = screen.width > 1300 ? 500 : 300
-      if (height > maxHeight) {
-        height = maxHeight
-        width = Math.round(height / ratio)
+      let height = Math.floor(width * ratio)
+      if (height > this.getDefaultHeight()) {
+        height = this.getDefaultHeight()
       }
-
-      const isFullScreen = !!(
-        document.fullScreen ||
-        document.webkitIsFullScreen ||
-        document.mozFullScreen ||
-        document.msFullscreenElement ||
-        document.fullscreenElement
-      )
-
-      if (isFullScreen) {
-        width = screen.width - 1
-        height = width * ratio
-
-        if (height + 50 > screen.height) {
-          height = screen.height - 50
-          width = height / ratio
-        }
-      }
+      height = height - 32
+      width = Math.floor(height / ratio)
 
       return { width, height }
     },
@@ -245,6 +300,7 @@ export default {
         const height = dimensions.height
         const fabricCanvas = new fabric.Canvas('annotation-canvas')
 
+        this.container.style.height = this.getDefaultHeight() + 'px'
         fabricCanvas.setDimensions({
           width: width,
           height: height
@@ -263,7 +319,6 @@ export default {
 
         fabricCanvas.add(fabricPicture)
         fabricPicture.sendToBack()
-
         fabricCanvas.freeDrawingBrush.color = '#ff3860'
         fabricCanvas.freeDrawingBrush.width = 4
 
@@ -279,27 +334,32 @@ export default {
         fabricCanvas.off('mouse:up', this.onMouseUp)
         fabricCanvas.on('mouse:up', this.onMouseUp)
 
+        fabricCanvas.renderAll()
+        fabricCanvas.calcOffset()
         callback(fabricCanvas)
       })
     },
 
-    onFullscreenClicked () {
-      const isFullScreen = !!(
-        document.fullScreen ||
-        document.webkitIsFullScreen ||
-        document.mozFullScreen ||
-        document.msFullscreenElement ||
-        document.fullscreenElement
-      )
+    onAddPreviewClicked () {
+      this.$emit('add-preview')
+    },
 
-      if (isFullScreen) {
+    onRemovePreviewClicked () {
+      this.$emit('remove-extra-preview', this.currentPreview)
+    },
+
+    onFullscreenClicked () {
+      if (this.isFullScreen()) {
         this.exitFullScreen()
+        setTimeout(() => {
+          this.onWindowResize()
+        }, 100)
       } else {
         this.setFullScreen()
+        setTimeout(() => {
+          this.onWindowResize()
+        }, 100)
       }
-      setTimeout(() => {
-        this.emitResizeEvent()
-      }, 1)
     },
 
     exitFullScreen () {
@@ -313,6 +373,10 @@ export default {
         document.msExitFullscreen()
       }
       this.container.setAttribute('data-fullscreen', !!false)
+
+      setTimeout(() => {
+        this.container.style.height = this.getDefaultHeight() + 'px'
+      }, 100)
     },
 
     setFullScreen () {
@@ -326,25 +390,23 @@ export default {
         this.container.msRequestFullscreen()
       }
       this.container.setAttribute('data-fullscreen', !!true)
-    },
 
-    emitResizeEvent () {
-      const evt = window.document.createEvent('UIEvents')
-      evt.initUIEvent('resize', true, false, window, 0)
-      window.dispatchEvent(evt)
+      setTimeout(() => {
+        this.container.style.height = this.getDefaultHeight() + 'px'
+      }, 100)
     },
 
     onDeleteClicked () {
       this.deleteSelection()
     },
 
-    onAnnotateClicked () {
+    onRectAnnotateClicked () {
       this.fabricCanvas.isDrawingMode = false
       this.isDrawing = false
 
       const rect = new fabric.Rect({
-        left: this.fabricCanvas.width / 2 - 25,
-        top: this.fabricCanvas.height / 2 - 25,
+        left: Math.floor(this.fabricCanvas.width / 2) - 25,
+        top: Math.floor(this.fabricCanvas.height / 2) - 25,
         fill: 'transparent',
         strokeWidth: 4,
         stroke: '#ff3860',
@@ -355,6 +417,7 @@ export default {
       this.fabricCanvas.add(rect)
       this.fabricCanvas.setActiveObject(rect)
       this.saveAnnotations()
+      this.fabricCanvas.calcOffset()
     },
 
     onCircleAnnotateClicked () {
@@ -374,6 +437,7 @@ export default {
 
       this.fabricCanvas.add(circle)
       this.fabricCanvas.setActiveObject(circle)
+      circle.bringToFront()
       this.saveAnnotations()
     },
 
@@ -389,10 +453,9 @@ export default {
 
     onWindowResize () {
       setTimeout(() => {
-        if (!this.isResizing) {
-          this.mountPicture()
-          this.reloadAnnotations()
-        }
+        console.log(this.container.style.height, this.getDefaultHeight())
+        this.mountPicture()
+        this.reloadAnnotations()
       }, 100)
     },
 
@@ -420,14 +483,16 @@ export default {
           this.annotations.splice(0, 1)
         }
       } else {
+        this.annotations = []
         this.annotations.push({
           time: 0,
           width: this.fabricCanvas.width,
           drawing: this.fabricCanvas.toJSON()
         })
       }
-      this.$emit('annotationchanged', {
-        preview: this.preview,
+
+      this.$emit('annotation-changed', {
+        preview: this.currentPreview,
         annotations: [...this.annotations]
       })
     },
@@ -437,11 +502,13 @@ export default {
     },
 
     clearAnnotations () {
-      this.fabricCanvas.getObjects().forEach((obj) => {
-        if (['rect', 'circle', 'path'].includes(obj.type)) {
-          this.fabricCanvas.remove(obj)
-        }
-      })
+      if (this.fabricCanvas) {
+        this.fabricCanvas.getObjects().forEach((obj) => {
+          if (['rect', 'circle', 'path'].includes(obj.type)) {
+            this.fabricCanvas.remove(obj)
+          }
+        })
+      }
     },
 
     loadAnnotation (time) {
@@ -498,28 +565,76 @@ export default {
     },
 
     reloadAnnotations () {
-      if (this.preview.annotations) {
-        this.annotations = [...this.preview.annotations].sort((a, b) => {
-          return a.time < b.time
-        }) || []
+      if (this.currentPreview.annotations) {
+        this.annotations = this.currentPreview.annotations
       } else {
         return []
       }
+    },
+
+    onPreviousClicked () {
+      if (this.currentIndex > 1) {
+        this.currentIndex--
+      } else {
+        this.currentIndex = this.preview.previews.length
+      }
+    },
+
+    onNextClicked () {
+      if (this.currentIndex < this.preview.previews.length) {
+        this.currentIndex++
+      } else {
+        this.currentIndex = 1
+      }
+    },
+
+    displayFirst () {
+      if (this.currentIndex > 1) {
+        this.currentIndex = 1
+      } else {
+        this.reset()
+      }
+    },
+
+    displayLast () {
+      this.currentIndex = this.preview.previews.length
+    },
+
+    reset () {
+      this.clearAnnotations()
+      this.annotations = []
+      this.reloadAnnotations()
+      this.mountPicture()
     }
   },
 
   watch: {
     preview () {
-      this.clearAnnotations()
-      this.annotations = []
-      this.reloadAnnotations()
-      this.mountPicture()
+      if (this.currentIndex > 1) {
+        this.currentIndex = 1
+      } else {
+        this.reset()
+      }
+    },
+
+    currentIndex () {
+      this.reset()
     }
   }
 }
 </script>
 
 <style scoped>
+.loading-background {
+  width: 100%;
+  height: 100%;
+  background: black;
+  display: flex;
+  background: black;
+  align-items: center;
+  justify-content: center;
+}
+
 .icon {
   margin-top: -4px;
   height: 20px;
@@ -540,10 +655,19 @@ export default {
   height: 100%;
 }
 
+.spinner {
+  margin-top: 1em;
+  margin-bottom: 1em;
+}
+
 .picture-wrapper {
   flex: 1;
   display: flex;
   background: black;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  width: 100%;
 }
 
 .annotation-picture {
@@ -553,14 +677,14 @@ export default {
 .pull-bottom {
 }
 
-.time-indicator {
+.bar-element {
   color: #CCC;
-  padding-left: 0.8em;
+  padding-left: 1em;
 }
 
 #annotation-canvas {
-  width: 100%;
   display: block;
+  width: 0;
 }
 
 #annotation-picture {
@@ -578,63 +702,12 @@ export default {
   margin: auto;
 }
 
-.progress {
-  padding: 0;
-  margin: 0;
-  height: 8px;
-}
-
-.picture-progress {
-  cursor: pointer;
-  width: 100%;
-  margin: 0;
-  padding: 0;
-  border: 0;
-  background: #999;
-  height: 8px;
-}
-
-progress::-moz-progress-bar {
-  background-color: #43B581;
-}
-
-progress::-webkit-progress-value {
-  background-color: #43B581;
-}
-
-progress {
-  width: 100%;
-  border-radius: 0;
-  margin: 0;
-  padding: 0;
-  border: 0;
-  background: #999;
-  height: 8px;
-  display: block;
-}
-
-.progress progress#progress span#progress-bar {
-  border-radius: 0;
-  margin: 0;
-  padding: 0;
-  background-color: #43B581;
-}
-
 .picture-annotation {
   background: #26292F;
   height: 12px;
   text-align: left;
   margin-top: 0px;
   padding: 0;
-}
-
-.annotation-mark {
-  display: flex;
-  background: #ff3860;
-  width: 8px;
-  height: 8px;
-  display: inline-block;
-  top: -6px;
 }
 
 .buttons .button {

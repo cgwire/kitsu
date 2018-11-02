@@ -483,7 +483,12 @@ export const routes = [
       },
       {
         name: 'task-add-extra-preview',
-        path: '/productions/:production_id/:type/tasks/:task_id/comments/:comment_id/add-extra-preview',
+        path: '/productions/:production_id/:type/tasks/:task_id/comments/:comment_id/preview-files/:preview_id/add-extra-preview',
+        component: Task
+      },
+      {
+        name: 'task-remove-extra-preview',
+        path: '/productions/:production_id/:type/tasks/:task_id/comments/:comment_id/preview-files/:preview_id/remove-extra-preview/:extra_preview_id',
         component: Task
       },
 
@@ -525,7 +530,12 @@ export const routes = [
       },
       {
         name: 'episode-task-add-extra-preview',
-        path: '/productions/:production_id/episodes/:episode_id/:type/tasks/:task_id/comments/:comment_id/add-extra-preview',
+        path: '/productions/:production_id/episodes/:episode_id/:type/tasks/:task_id/comments/:comment_id/preview-files/:preview_id/add-extra-preview',
+        component: Task
+      },
+      {
+        name: 'episode-task-remove-extra-preview',
+        path: '/productions/:production_id/episodes/:episode_id/:type/tasks/:task_id/comments/:comment_id/preview-files/:preview_id/remove-extra-preview/:extra_preview_id',
         component: Task
       },
 

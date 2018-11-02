@@ -109,9 +109,31 @@ export default {
     const commentId = data.commentId
     client.post(
       `/api/actions/tasks/${taskId}/comments/${commentId}/add-preview`,
-      {is_movie: data.isMovie},
+      {},
       callback
     )
+  },
+
+  addExtraPreview (previewId, taskId, commentId, callback) {
+    client.post(
+      `/api/actions/tasks/${taskId}/comments/${commentId}/preview-files/` +
+      `${previewId}`,
+      {},
+      callback
+    )
+  },
+
+  deletePreview (taskId, commentId, previewId, callback) {
+    return new Promise((resolve, reject) => {
+      client.del(
+        `/api/actions/tasks/${taskId}/comments/${commentId}/preview-files/` +
+        `${previewId}`,
+        (err, preview) => {
+          if (err) reject(err)
+          else resolve(preview)
+        }
+      )
+    })
   },
 
   setPreview (entityId, previewId, callback) {

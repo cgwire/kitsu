@@ -11,8 +11,7 @@
 >
 
   <figure class="media-left">
-    <people-avatar class="level-item" :person="comment.person">
-    </people-avatar>
+    <people-avatar class="level-item" :person="comment.person" />
   </figure>
 
   <div class="media-content">
@@ -20,7 +19,7 @@
       <div class="comment-person flexrow">
         <div class="flexrow-item">
           <strong class="">
-            <people-name class="" :person="comment.person"></people-name>
+            <people-name class="" :person="comment.person" />
           </strong>
           <span class="comment-date">
             {{ formatDate(comment.created_at) }}
@@ -28,9 +27,9 @@
           <router-link
             :to="previewRoute"
             class="revision"
-            v-if="comment.preview"
+            v-if="comment.previews.length > 0"
           >
-            revision {{ comment.preview.revision }}
+            revision {{ comment.previews[0].revision }}
           </router-link>
 
         </div>
@@ -41,7 +40,7 @@
             :text="$t('tasks.add_preview')"
             :is-responsive="true"
             :path="addPreviewPath"
-            v-if="editable && !comment.preview && comment.task_status.is_reviewable"
+            v-if="editable && comment.previews.length === 0 && comment.task_status.is_reviewable"
           >
           </button-link>
           <button-link
@@ -118,12 +117,12 @@ export default {
         name: 'task',
         params: {task_id: this.comment.object_id}
       }
-      if (this.comment.preview) {
+      if (this.comment.previews.length > 0) {
         route = {
           name: 'task-preview',
           params: {
             task_id: this.comment.object_id,
-            preview_id: this.comment.preview.id
+            preview_id: this.comment.previews[0].id
           }
         }
       }
