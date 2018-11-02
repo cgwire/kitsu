@@ -231,14 +231,14 @@ export default {
       this.isResizing = true
       this.isLoading = true
       this.clearCanvas(() => {
-        setTimeout(() => {
-          this.setupFabricPicture((fabricCanvas) => {
-            this.isLoading = false
-            this.fabricCanvas = fabricCanvas
-            this.loadAnnotation(0)
-            this.isResizing = false
-          })
-        }, 100)
+        this.setupFabricPicture((fabricCanvas) => {
+          this.isLoading = false
+          this.fabricCanvas = fabricCanvas
+          this.loadAnnotation(0)
+          this.isResizing = false
+          this.fixCanvasSize()
+          if (this.fabricCanvas) this.fabricCanvas.calcOffset()
+        })
       })
     },
 
@@ -253,6 +253,7 @@ export default {
         this.$refs['annotation-canvas'].innerText = ''
         this.$refs['annotation-canvas'].html = ''
       }
+
       setTimeout(() => {
         if (this.fabricCanvas) {
           try {
@@ -269,7 +270,7 @@ export default {
         }
         this.fabricCanvas = null
         if (callback) callback()
-      }, 10)
+      }, 0)
     },
 
     getDefaultHeight () {
@@ -314,11 +315,13 @@ export default {
           objectCaching: false,
           selectable: false
         })
-        fabricPicture.scaleToWidth(width)
-        fabricPicture.scaleToHeight(height)
 
         fabricCanvas.add(fabricPicture)
         fabricPicture.sendToBack()
+        this.fabricPicture = fabricPicture
+        this.fabricPicture.scaleToWidth(width)
+        this.fabricPicture.scaleToHeight(height)
+
         fabricCanvas.freeDrawingBrush.color = '#ff3860'
         fabricCanvas.freeDrawingBrush.width = 4
 
@@ -333,9 +336,6 @@ export default {
         fabricCanvas.on('object:scaled', this.saveAnnotations)
         fabricCanvas.off('mouse:up', this.onMouseUp)
         fabricCanvas.on('mouse:up', this.onMouseUp)
-
-        fabricCanvas.renderAll()
-        fabricCanvas.calcOffset()
         callback(fabricCanvas)
       })
     },
@@ -373,10 +373,6 @@ export default {
         document.msExitFullscreen()
       }
       this.container.setAttribute('data-fullscreen', !!false)
-
-      setTimeout(() => {
-        this.container.style.height = this.getDefaultHeight() + 'px'
-      }, 100)
     },
 
     setFullScreen () {
@@ -390,10 +386,6 @@ export default {
         this.container.msRequestFullscreen()
       }
       this.container.setAttribute('data-fullscreen', !!true)
-
-      setTimeout(() => {
-        this.container.style.height = this.getDefaultHeight() + 'px'
-      }, 100)
     },
 
     onDeleteClicked () {
@@ -417,7 +409,6 @@ export default {
       this.fabricCanvas.add(rect)
       this.fabricCanvas.setActiveObject(rect)
       this.saveAnnotations()
-      this.fabricCanvas.calcOffset()
     },
 
     onCircleAnnotateClicked () {
@@ -453,7 +444,6 @@ export default {
 
     onWindowResize () {
       setTimeout(() => {
-        console.log(this.container.style.height, this.getDefaultHeight())
         this.mountPicture()
         this.reloadAnnotations()
       }, 100)
@@ -605,6 +595,31 @@ export default {
       this.annotations = []
       this.reloadAnnotations()
       this.mountPicture()
+    },
+
+    fixCanvasSize () {
+      if (this.fabricPicture) {
+        const dimensions = this.getDimensions(this.fabricPicture)
+        const width = dimensions.width
+        const height = dimensions.height
+        let elements = document.getElementsByClassName('canvas-container')
+        for (let i = 0; i < elements.length; i++) {
+          const element = elements[i]
+          element.style.width = width + 'px'
+          element.style.height = height + 'px'
+        }
+        elements = document.getElementsByClassName('upper-canvas')
+        for (let i = 0; i < elements.length; i++) {
+          const element = elements[i]
+          element.style.width = width + 'px'
+          element.style.height = height + 'px'
+          element.setAttribute('width', width)
+          element.setAttribute('height', height)
+        }
+        setTimeout(() => {
+          this.fabricCanvas.calcOffset()
+        }, 10)
+      }
     }
   },
 

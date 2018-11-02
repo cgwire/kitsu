@@ -202,7 +202,7 @@ export default {
             this.clearCanvas()
             setTimeout(() => {
               this.mountVideo()
-            }, 100)
+            }, 0)
           }
           this.video.addEventListener('timeupdate', this.updateProgressBar)
           this.video.onended = this.onVideoEnd
@@ -299,35 +299,34 @@ export default {
       this.isResizing = true
       this.clearCanvas()
 
-      setTimeout(() => {
-        this.video.mute = true
-        this.videoDuration = this.video.duration
-        this.progress.setAttribute('max', this.videoDuration)
-        this.maxDuration = this.formatTime(this.videoDuration)
-        this.isLoading = false
-        this.isPlaying = false
-        this.isRepeating = false
+      this.video.mute = true
+      this.videoDuration = this.video.duration
+      this.progress.setAttribute('max', this.videoDuration)
+      this.maxDuration = this.formatTime(this.videoDuration)
+      this.isLoading = false
+      this.isPlaying = false
+      this.isRepeating = false
 
-        if (this.container) {
-          const dimensions = this.getDimensions()
-          const width = dimensions.width
-          const height = dimensions.height
+      if (this.container) {
+        const dimensions = this.getDimensions()
+        const width = dimensions.width
+        const height = dimensions.height
 
-          this.container.style.height = this.getDefaultHeight() + 'px'
-          this.video.style.width = width + 'px'
-          this.video.style.height = height + 'px'
-          this.videoWrapper.style.width = width + 'px'
-          this.videoWrapper.style.height = height + 'px'
+        this.container.style.height = this.getDefaultHeight() + 'px'
+        this.video.style.width = width + 'px'
+        this.video.style.height = height + 'px'
+        this.videoWrapper.style.width = width + 'px'
+        this.videoWrapper.style.height = height + 'px'
 
-          this.fabricCanvas = this.setupFabricVideo(width, height)
-          this.fabricCanvas.on('object:moved', this.saveAnnotations)
-          this.fabricCanvas.on('object:scaled', this.saveAnnotations)
-          this.fabricCanvas.on('mouse:up', () => {
-            if (this.isDrawing) this.saveAnnotations()
-          })
-          this.isResizing = false
-        }
-      }, 100)
+        this.fabricCanvas = this.setupFabricVideo(width, height)
+        this.fabricCanvas.on('object:moved', this.saveAnnotations)
+        this.fabricCanvas.on('object:scaled', this.saveAnnotations)
+        this.fabricCanvas.on('mouse:up', () => {
+          if (this.isDrawing) this.saveAnnotations()
+        })
+        this.fixCanvasSize()
+        this.isResizing = false
+      }
     },
 
     clearCanvas () {
@@ -554,7 +553,7 @@ export default {
       setTimeout(() => {
         if (!this.isResizing) this.mountVideo()
         this.reloadAnnotations()
-      }, 1)
+      }, 100)
     },
 
     saveAnnotations () {
@@ -675,6 +674,31 @@ export default {
         return position
       } else {
         return 0
+      }
+    },
+
+    fixCanvasSize () {
+      if (this.fabricPicture) {
+        const dimensions = this.getDimensions()
+        const width = dimensions.width
+        const height = dimensions.height
+        let elements = document.getElementsByClassName('canvas-container')
+        for (let i = 0; i < elements.length; i++) {
+          const element = elements[i]
+          element.style.width = width + 'px'
+          element.style.height = height + 'px'
+        }
+        elements = document.getElementsByClassName('upper-canvas')
+        for (let i = 0; i < elements.length; i++) {
+          const element = elements[i]
+          element.style.width = width + 'px'
+          element.style.height = height + 'px'
+          element.setAttribute('width', width)
+          element.setAttribute('height', height)
+        }
+        setTimeout(() => {
+          this.fabricCanvas.calcOffset()
+        }, 10)
       }
     },
 
