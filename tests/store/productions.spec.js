@@ -176,13 +176,15 @@ describe('productions', () => {
 
     it('editProduction', (done) => {
       store.commit(LOAD_PRODUCTIONS_END, productions)
+      store.commit(LOAD_OPEN_PRODUCTIONS_END, [...productions])
       store.commit(LOAD_PRODUCTION_STATUS_END, productionStatuses)
       helpers.runAction('editProduction', {
         data: {
           id: 'production-2',
           name: 'Big Buck Bunny 2',
           project_status_name: 'Open',
-          project_status_id: 1
+          project_status_id: 1,
+          production_type: 'short'
         },
         callback: (err) => {
           expect(err).to.be.null
@@ -280,8 +282,16 @@ describe('productions', () => {
     })
 
     it(EDIT_PRODUCTION_START, () => {
+      const production = {
+        id: 'production-2',
+        name: 'Big Buck Bunny 2',
+        project_status_name: 'Open',
+        project_status_id: 1,
+        production_type: 'short'
+      }
       store.commit(LOAD_PRODUCTIONS_END, productions)
-      store.commit(EDIT_PRODUCTION_START)
+      store.commit(LOAD_OPEN_PRODUCTIONS_END, [...productions])
+      store.commit(EDIT_PRODUCTION_START, production)
       expect(state.editProduction).to.deep.equal({
         isLoading: true,
         isError: false
@@ -299,6 +309,7 @@ describe('productions', () => {
 
     it(EDIT_PRODUCTION_END, () => {
       store.commit(LOAD_PRODUCTIONS_END, productions)
+      store.commit(LOAD_OPEN_PRODUCTIONS_END, [...productions])
       store.commit(LOAD_PRODUCTION_STATUS_END, productionStatuses)
       store.commit(EDIT_PRODUCTION_END, {
         id: 'production-4',
