@@ -426,8 +426,6 @@ const actions = {
     { commit, getters, state },
     { taskId, commentId, previewId, callback }
   ) {
-    const fileName = state.previewFormData.get('file').name
-
     tasksApi.addExtraPreview(previewId, taskId, commentId, (err, preview) => {
       if (err && callback) {
         callback(err)
