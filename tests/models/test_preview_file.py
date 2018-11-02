@@ -1,7 +1,5 @@
 from tests.base import ApiDBTestCase
 
-from zou.app.models.preview_file import PreviewFile
-
 from zou.app.utils import fields
 
 
@@ -24,13 +22,9 @@ class PreviewFileTestCase(ApiDBTestCase):
         self.generate_fixture_file_status()
         self.generate_fixture_output_type()
         self.generate_fixture_output_file()
-        self.generate_data(
-            PreviewFile,
-            3,
-            task_id=self.task.id,
-            person_id=self.person.id,
-            source_file_id=self.output_file.id
-        )
+        self.generate_fixture_preview_file()
+        self.generate_fixture_preview_file(2)
+        self.generate_fixture_preview_file(3)
 
     def test_get_preview_files(self):
         preview_files = self.get("data/preview-files")

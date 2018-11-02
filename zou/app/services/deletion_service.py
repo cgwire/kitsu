@@ -11,24 +11,29 @@ from zou.app.models.working_file import WorkingFile
 from zou.app.utils import events
 from zou.app.stores import file_store
 
+from zou.app.services.exception import CommentNotFoundException
+
 
 def remove_comment(comment_id):
     comment = Comment.get(comment_id)
-    notifications = Notification.query.filter_by(comment_id=comment.id)
-    for notification in notifications:
-        notification.delete()
+    if comment is not None:
+        notifications = Notification.query.filter_by(comment_id=comment.id)
+        for notification in notifications:
+            notification.delete()
 
-    if comment.preview_file_id is not None:
-        preview_file = PreviewFile.get(comment.preview_file_id)
-        remove_preview_file(preview_file)
+        if comment.preview_file_id is not None:
+            preview_file = PreviewFile.get(comment.preview_file_id)
+            remove_preview_file(preview_file)
 
-    previews = [preview for preview in comment.previews]
-    comment.delete()
+        previews = [preview for preview in comment.previews]
+        comment.delete()
 
-    for preview in previews:
-        remove_preview_file(preview)
+        for preview in previews:
+            remove_preview_file(preview)
 
-    return comment.serialize()
+        return comment.serialize()
+    else:
+        raise CommentNotFoundException
 
 
 def remove_task(task_id, force=False):

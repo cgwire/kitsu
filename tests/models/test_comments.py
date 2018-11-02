@@ -11,25 +11,17 @@ class CommentTestCase(ApiDBTestCase):
         super(CommentTestCase, self).setUp()
         self.generate_fixture_project_status()
         self.generate_fixture_project()
-        self.generate_fixture_person()
         self.generate_fixture_asset_type()
-        self.entities = [
-            self.generate_fixture_asset("Asset 1"),
-            self.generate_fixture_asset("Asset 2"),
-            self.generate_fixture_asset("Asset 3")
-        ]
-        self.comments = self.generate_data(
-            Comment,
-            3,
-            text="test comment",
-            object_id=self.entities[0].id,
-            person_id=self.person.id
-        )
+        self.generate_assigned_task()
+        self.comments = []
+        self.comments.append(self.generate_fixture_comment())
+        self.comments.append(self.generate_fixture_comment())
+        self.comments.append(self.generate_fixture_comment())
 
     def test_repr(self):
         self.assertEqual(
-            str(self.comments[0]),
-            "<Comment of %s>" % self.comments[0].object_id
+            str(Comment.get(self.comments[0]["id"])),
+            "<Comment of %s>" % self.comments[0]["object_id"]
         )
 
     def test_get_comments(self):
@@ -45,7 +37,7 @@ class CommentTestCase(ApiDBTestCase):
     def test_create_comment(self):
         data = {
             "object_type": "shot",
-            "object_id": self.entities[0].id,
+            "object_id": self.task.id,
             "person_id": self.person.id,
             "text": "New comment"
         }

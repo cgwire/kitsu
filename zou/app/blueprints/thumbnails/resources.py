@@ -60,6 +60,7 @@ class CreatePreviewFilePictureResource(Resource):
                 {"extension": "png"}
             )
             self.emit_app_preview_event(instance_id)
+            print(preview_file)
             return preview_file, 201
 
         elif extension in ALLOWED_MOVIE_EXTENSION:
