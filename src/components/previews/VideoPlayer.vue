@@ -1,6 +1,9 @@
 <template>
 <div ref="container" class="video-player">
   <div ref="video-wrapper" class="video-wrapper">
+    <div class="loading-background" v-if="isLoading" >
+      <spinner class="spinner" />
+    </div>
     <video
       id="annotation-movie"
       ref="movie"
@@ -18,117 +21,118 @@
     </canvas>
   </div>
 
-  <div class="video-progress pull-bottom">
-    <progress
-      ref="progress"
-      value="0"
-      min="0"
-      @click="onProgressClicked"
+  <div class="button-bar" ref="button-bar">
+    <div class="video-progress pull-bottom">
+      <progress
+        ref="progress"
+        value="0"
+        min="0"
+        @click="onProgressClicked"
+      >
+        <span
+          id="progress-bar"
+          ref="progress-bar"
+        ></span>
+      </progress>
+    </div>
+    <div
+      class="video-annotation pull-bottom"
+      ref="annotation-bar"
     >
       <span
-        id="progress-bar"
-        ref="progress-bar"
-      ></span>
-    </progress>
-  </div>
-
-  <div
-    class="video-annotation pull-bottom"
-    ref="annotation-bar"
-  >
-    <span
-      class="annotation-mark"
-      :key="`annotation-${annotation.time}`"
-      :style="{
-        cursor: 'pointer',
-        position: 'relative',
-        display: 'inline-block',
-        'left': getTimelinePosition(annotation.time, index) + 'px'
-      }"
-      @click="loadAnnotation(annotation.time)"
-      v-for="(annotation, index) in annotations"
-    >
-    </span>
-  </div>
-
-  <div class="buttons flexrow pull-bottom">
-    <div class="left flexrow">
-      <button
-        class="button flexrow-item"
-        @click="onPlayPauseClicked"
-      >
-        <pause-icon class="icon" v-if="isPlaying" />
-        <play-icon class="icon" v-else />
-      </button>
-
-      <button
-        :class="{
-          button: true,
-          'flexrow-item': true,
-          active: isRepeating
+        class="annotation-mark"
+        :key="`annotation-${annotation.time}`"
+        :style="{
+          cursor: 'pointer',
+          position: 'relative',
+          display: 'inline-block',
+          'left': getTimelinePosition(annotation.time, index) + 'px'
         }"
-        @click="onRepeatClicked"
+        @click="loadAnnotation(annotation.time)"
+        v-for="(annotation, index) in annotations"
       >
-        <repeat-icon class="icon smaller" />
-      </button>
-
-      <span class="flexrow-item time-indicator">
-        {{ currentTime }} / {{ maxDuration }}
       </span>
     </div>
 
-    <div class="right flexrow">
-      <button
-        class="button flexrow-item"
-        @click="onDeleteClicked"
-        v-if="isFullScreenEnabled"
-      >
-        <x-icon class="icon" />
-      </button>
+    <div class="buttons flexrow pull-bottom">
+      <div class="left flexrow">
+        <button
+          class="button flexrow-item"
+          @click="onPlayPauseClicked"
+        >
+          <pause-icon class="icon" v-if="isPlaying" />
+          <play-icon class="icon" v-else />
+        </button>
 
-      <button
-        class="button flexrow-item"
-        @click="onAnnotateClicked"
-        v-if="isFullScreenEnabled"
-      >
-        <square-icon class="icon" />
-      </button>
+        <button
+          :class="{
+            button: true,
+            'flexrow-item': true,
+            active: isRepeating
+          }"
+          @click="onRepeatClicked"
+        >
+          <repeat-icon class="icon smaller" />
+        </button>
 
-      <button
-        class="button flexrow-item"
-        @click="onCircleAnnotateClicked"
-        v-if="isFullScreenEnabled"
-      >
-        <circle-icon class="icon" />
-      </button>
+        <span class="flexrow-item time-indicator">
+          {{ currentTime }} / {{ maxDuration }}
+        </span>
+      </div>
 
-      <button
-        :class="{
-          button: true,
-          'flexrow-item': true,
-          active: isDrawing
-        }"
-        @click="onPencilAnnotateClicked"
-        v-if="isFullScreenEnabled"
-      >
-        <edit-2-icon class="icon" />
-      </button>
+      <div class="right flexrow">
+        <button
+          class="button flexrow-item"
+          @click="onDeleteClicked"
+          v-if="isFullScreenEnabled"
+        >
+          <x-icon class="icon" />
+        </button>
 
-      <button
-        class="button flexrow-item"
-        @click="onFullscreenClicked"
-        v-if="isFullScreenEnabled"
-      >
-        <maximize-icon class="icon" />
-      </button>
+        <button
+          class="button flexrow-item"
+          @click="onAnnotateClicked"
+          v-if="isFullScreenEnabled"
+        >
+          <square-icon class="icon" />
+        </button>
 
-      <a
-        target="_blank"
-        class="button flexrow-item"
-        :href="moviePath"
-      >
-        <download-icon class="icon" />
-      </a>
+        <button
+          class="button flexrow-item"
+          @click="onCircleAnnotateClicked"
+          v-if="isFullScreenEnabled"
+        >
+          <circle-icon class="icon" />
+        </button>
+
+        <button
+          :class="{
+            button: true,
+            'flexrow-item': true,
+            active: isDrawing
+          }"
+          @click="onPencilAnnotateClicked"
+          v-if="isFullScreenEnabled"
+        >
+          <edit-2-icon class="icon" />
+        </button>
+
+        <button
+          class="button flexrow-item"
+          @click="onFullscreenClicked"
+          v-if="isFullScreenEnabled"
+        >
+          <maximize-icon class="icon" />
+        </button>
+
+        <a
+          target="_blank"
+          class="button flexrow-item"
+          :href="moviePath"
+        >
+          <download-icon class="icon" />
+        </a>
+      </div>
     </div>
   </div>
 </div>
@@ -147,6 +151,7 @@ import {
   SquareIcon,
   XIcon
 } from 'vue-feather-icons'
+import Spinner from '../widgets/Spinner'
 
 export default {
   name: 'video-player',
@@ -159,6 +164,7 @@ export default {
     PauseIcon,
     PlayIcon,
     RepeatIcon,
+    Spinner,
     SquareIcon,
     XIcon
   },
@@ -177,6 +183,7 @@ export default {
       currentTime: '00:00.00',
       fabricCanvas: null,
       isDrawing: false,
+      isLoading: false,
       isPlaying: false,
       isRepeating: false,
       maxDuration: '00:00.00',
@@ -185,6 +192,8 @@ export default {
   },
 
   mounted () {
+    this.container.style.height = this.getDefaultHeight() + 'px'
+    this.isLoading = true
     setTimeout(() => {
       if (this.video) {
         this.video.addEventListener('loadedmetadata', () => {
@@ -248,16 +257,6 @@ export default {
       return this.$refs.movie && this.videoDuration && this.videoDuration > 0
     },
 
-    isFullScreen () {
-      return !!(
-        document.fullScreen ||
-        document.webkitIsFullScreen ||
-        document.mozFullScreen ||
-        document.msFullscreenElement ||
-        document.fullscreenElement
-      )
-    },
-
     isFullScreenEnabled () {
       return !!(
         document.fullscreenEnabled ||
@@ -275,6 +274,16 @@ export default {
   },
 
   methods: {
+    isFullScreen () {
+      return !!(
+        document.fullScreen ||
+        document.webkitIsFullScreen ||
+        document.mozFullScreen ||
+        document.msFullscreenElement ||
+        document.fullscreenElement
+      )
+    },
+
     updateProgressBar () {
       if (!this.progress.getAttribute('max')) {
         this.progress.setAttribute('max', this.video.duration)
@@ -295,6 +304,7 @@ export default {
         this.videoDuration = this.video.duration
         this.progress.setAttribute('max', this.videoDuration)
         this.maxDuration = this.formatTime(this.videoDuration)
+        this.isLoading = false
         this.isPlaying = false
         this.isRepeating = false
 
@@ -303,6 +313,7 @@ export default {
           const width = dimensions.width
           const height = dimensions.height
 
+          this.container.style.height = this.getDefaultHeight() + 'px'
           this.video.style.width = width + 'px'
           this.video.style.height = height + 'px'
           this.videoWrapper.style.width = width + 'px'
@@ -330,35 +341,23 @@ export default {
       }
     },
 
-    getDimensions () {
+    getDefaultHeight () {
+      if (this.isFullScreen()) {
+        return screen.height
+      } else {
+        return screen.width > 1300 ? 500 : 300
+      }
+    },
+
+    getDimensions (picture) {
       const ratio = this.video.videoHeight / this.video.videoWidth
       let width = this.container.offsetWidth - 1
-      let height = width * ratio
-
-      const maxHeight = screen.width > 1300 ? 500 : 300
-      if (height > maxHeight) {
-        height = maxHeight
-        width = Math.round(height / ratio)
+      let height = Math.floor(width * ratio)
+      if (height > this.getDefaultHeight()) {
+        height = this.getDefaultHeight()
       }
-
-      const isFullScreen = !!(
-        document.fullScreen ||
-        document.webkitIsFullScreen ||
-        document.mozFullScreen ||
-        document.msFullscreenElement ||
-        document.fullscreenElement
-      )
-
-      if (isFullScreen) {
-        width = screen.width - 1
-        height = width * ratio
-
-        if (height + 50 > screen.height) {
-          height = screen.height - 50
-          width = height / ratio
-        }
-      }
-
+      height = height - 52
+      width = Math.floor(height / ratio)
       return { width, height }
     },
 
@@ -446,19 +445,12 @@ export default {
         (currentTime / this.video.duration) * 100
       ) + '%'
 
+      this.clearAnnotations()
       this.video.currentTime = currentTime
     },
 
     onFullscreenClicked () {
-      const isFullScreen = !!(
-        document.fullScreen ||
-        document.webkitIsFullScreen ||
-        document.mozFullScreen ||
-        document.msFullscreenElement ||
-        document.fullscreenElement
-      )
-
-      if (isFullScreen) {
+      if (this.isFullScreen()) {
         this.exitFullScreen()
       } else {
         this.setFullScreen()
@@ -597,11 +589,13 @@ export default {
     },
 
     clearAnnotations () {
-      this.fabricCanvas.getObjects().forEach((obj) => {
-        if (['rect', 'circle', 'path'].includes(obj.type)) {
-          this.fabricCanvas.remove(obj)
-        }
-      })
+      if (this.fabricCanvas) {
+        this.fabricCanvas.getObjects().forEach((obj) => {
+          if (['rect', 'circle', 'path'].includes(obj.type)) {
+            this.fabricCanvas.remove(obj)
+          }
+        })
+      }
     },
 
     loadAnnotation (time) {
@@ -674,6 +668,10 @@ export default {
         )
         position = position - index * 10 - 5
         if (position < 0) position = 0
+        if (position + 10 > this.progress.offsetWidth) {
+          position = position - 5
+        }
+
         return position
       } else {
         return 0
@@ -694,6 +692,7 @@ export default {
   watch: {
     preview () {
       this.maxDuration = '00:00.00'
+      this.isLoading = true
       this.reloadAnnotations()
     }
   }
@@ -701,6 +700,16 @@ export default {
 </script>
 
 <style scoped>
+.loading-background {
+  width: 100%;
+  height: 100%;
+  background: black;
+  display: flex;
+  background: black;
+  align-items: center;
+  justify-content: center;
+}
+
 .icon {
   margin-top: -4px;
   height: 20px;
@@ -725,6 +734,11 @@ export default {
   flex: 1;
   display: flex;
   background: black;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  margin: auto;
+  width: 100%;
 }
 
 .annotation-movie {
@@ -740,8 +754,8 @@ export default {
 }
 
 #annotation-canvas {
-  width: 100%;
   display: block;
+  width: 0;
 }
 
 #annotation-movie {
@@ -752,11 +766,6 @@ export default {
   width: 100%;
   text-align: center;
   background: #36393F;
-}
-
-.video-wrapper {
-  text-align: center;
-  margin: auto;
 }
 
 .progress {
