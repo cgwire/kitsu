@@ -1157,7 +1157,10 @@ export default {
 
       if (
         comment &&
-        (!comment.preview || comment.preview.id !== previewId) &&
+        (
+          comment.previews.length === 0 ||
+          comment.previews[0].id !== previewId
+        ) &&
         taskId === this.currentTask.id
       ) {
         this.$store.commit('ADD_PREVIEW_END', {
@@ -1170,7 +1173,11 @@ export default {
           commentId,
           comment
         })
-        this.resetPreview({id: previewId})
+        if (this.currentPreviewId) {
+          this.resetPreview({id: this.currentPreviewId})
+        } else {
+          this.resetPreview({id: previewId})
+        }
       }
     },
 

@@ -717,32 +717,30 @@ const mutations = {
   },
 
   [ADD_PREVIEW_END] (state, { preview, taskId, commentId, comment }) {
-    if (!comment.preview) {
-      const newPreview = {
-        id: preview.id,
-        feedback: false,
-        revision: preview.revision,
-        extension: preview.extension
+    const newPreview = {
+      id: preview.id,
+      feedback: false,
+      revision: preview.revision,
+      extension: preview.extension
+    }
+
+    const existingPreview = state.taskPreviews[taskId].find(
+      (p) => p.revision === preview.revision
+    )
+
+    if (existingPreview) {
+      const existingSubPreview =
+        existingPreview.previews.find((p) => p.id === newPreview.id)
+      if (!existingSubPreview) {
+        existingPreview.previews.push(newPreview)
       }
+    } else {
+      newPreview.previews = [{...newPreview}]
+      state.taskPreviews[taskId] =
+        [newPreview].concat(state.taskPreviews[taskId])
 
-      const existingPreview = state.taskPreviews[taskId].find(
-        (p) => p.revision === preview.revision
-      )
-
-      if (existingPreview) {
-        const existingSubPreview =
-          existingPreview.previews.find((p) => p.id === newPreview.id)
-        if (!existingSubPreview) {
-          existingPreview.previews.push(newPreview)
-        }
-      } else {
-        newPreview.previews = [{...newPreview}]
-        state.taskPreviews[taskId] =
-          [newPreview].concat(state.taskPreviews[taskId])
-
-        comment.preview = newPreview
-        comment.previews = [newPreview]
-      }
+      comment.preview = newPreview
+      comment.previews = [newPreview]
     }
   },
 
