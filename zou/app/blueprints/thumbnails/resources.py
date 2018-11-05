@@ -83,7 +83,7 @@ def send_storage_file(
     else:
         file_path = os.path.join(
             config.TMP_DIR,
-            "cache-%s.%s" % (preview_file_id, extension)
+            "cache-%s-%s.%s" % (prefix, preview_file_id, extension)
         )
         if not os.path.exists(file_path):
             with open(file_path, 'wb') as tmp_file:
