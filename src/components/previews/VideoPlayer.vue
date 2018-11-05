@@ -208,13 +208,7 @@ export default {
           this.video.onended = this.onVideoEnd
         })
 
-        window.addEventListener('keydown', (event) => {
-          if (event.keyCode === 46 && this.fabricCanvas) {
-            this.deleteSelection()
-          }
-        }, false)
-
-        window.removeEventListener('resize', this.onWindowResize)
+        window.addEventListener('keydown', this.onKeyDown, false)
         window.addEventListener('resize', this.onWindowResize)
       }
     }, 0)
@@ -271,6 +265,8 @@ export default {
 
   beforeDestroy () {
     this.clearCanvas()
+    window.removeEventListener('keydown', this.onKeyDown)
+    window.removeEventListener('resize', this.onWindowResize)
   },
 
   methods: {
@@ -296,7 +292,6 @@ export default {
     },
 
     mountVideo () {
-      this.isResizing = true
       this.clearCanvas()
 
       this.video.mute = true
@@ -312,24 +307,33 @@ export default {
         const width = dimensions.width
         const height = dimensions.height
 
-        this.container.style.height = this.getDefaultHeight() + 'px'
-        this.video.style.width = width + 'px'
-        this.video.style.height = height + 'px'
-        this.videoWrapper.style.width = width + 'px'
-        this.videoWrapper.style.height = height + 'px'
+        if (height > 0) {
+          this.container.style.height = this.getDefaultHeight() + 'px'
+          this.video.style.width = width + 'px'
+          this.video.style.height = height + 'px'
+          this.videoWrapper.style.width = width + 'px'
+          this.videoWrapper.style.height = height + 'px'
 
-        this.fabricCanvas = this.setupFabricVideo(width, height)
-        this.fabricCanvas.on('object:moved', this.saveAnnotations)
-        this.fabricCanvas.on('object:scaled', this.saveAnnotations)
-        this.fabricCanvas.on('mouse:up', () => {
-          if (this.isDrawing) this.saveAnnotations()
-        })
-        this.fixCanvasSize()
-        this.isResizing = false
+          this.fabricCanvas = this.setupFabricVideo(width, height)
+          this.fabricCanvas.on('object:moved', this.saveAnnotations)
+          this.fabricCanvas.on('object:scaled', this.saveAnnotations)
+          this.fabricCanvas.on('mouse:up', () => {
+            if (this.isDrawing) this.saveAnnotations()
+          })
+          this.fixCanvasSize()
+        }
       }
     },
 
     clearCanvas () {
+      if (this.fabricCanvas) {
+        this.fabricCanvas.getObjects().forEach((obj) => {
+          this.fabricCanvas.remove(obj)
+        })
+      }
+      try {
+        if (this.fabricCanvas) this.fabricCanvas.clear()
+      } catch (err) { }
       try {
         if (this.fabricCanvas) this.fabricCanvas.dispose()
       } catch (err) { }
@@ -348,7 +352,7 @@ export default {
       }
     },
 
-    getDimensions (picture) {
+    getDimensions () {
       const ratio = this.video.videoHeight / this.video.videoWidth
       let width = this.container.offsetWidth - 1
       let height = Math.floor(width * ratio)
@@ -381,6 +385,7 @@ export default {
       fabricVideo.scaleToHeight(height)
       fabricCanvas.add(fabricVideo)
       fabricVideo.sendToBack()
+      this.fabricVideo = fabricVideo
 
       fabricCanvas.freeDrawingBrush.color = '#ff3860'
       fabricCanvas.freeDrawingBrush.width = 4
@@ -454,9 +459,6 @@ export default {
       } else {
         this.setFullScreen()
       }
-      setTimeout(() => {
-        this.emitResizeEvent()
-      }, 100)
     },
 
     onScaled (event) {
@@ -488,12 +490,6 @@ export default {
         this.container.msRequestFullscreen()
       }
       this.container.setAttribute('data-fullscreen', !!true)
-    },
-
-    emitResizeEvent () {
-      const evt = window.document.createEvent('UIEvents')
-      evt.initUIEvent('resize', true, false, window, 0)
-      window.dispatchEvent(evt)
     },
 
     onDeleteClicked () {
@@ -550,10 +546,22 @@ export default {
     },
 
     onWindowResize () {
-      setTimeout(() => {
-        if (!this.isResizing) this.mountVideo()
-        this.reloadAnnotations()
-      }, 100)
+      const now = (new Date().getTime())
+      this.lastCall = this.lastCall || 0
+      if (now - this.lastCall > 600) {
+        this.lastCall = now
+        setTimeout(() => {
+          this.mountVideo()
+          this.reloadAnnotations()
+          this.loadAnnotation(this.video.currentTime)
+        }, 0)
+      }
+    },
+
+    onKeyDown (event) {
+      if (event.keyCode === 46 && this.fabricCanvas) {
+        this.deleteSelection()
+      }
     },
 
     saveAnnotations () {
@@ -599,6 +607,7 @@ export default {
 
     loadAnnotation (time) {
       const annotation = this.getAnnotation(time)
+      if (!annotation) return
 
       this.video.pause()
       this.video.currentTime = time
@@ -678,27 +687,32 @@ export default {
     },
 
     fixCanvasSize () {
-      if (this.fabricPicture) {
+      if (this.fabricVideo) {
         const dimensions = this.getDimensions()
         const width = dimensions.width
         const height = dimensions.height
-        let elements = document.getElementsByClassName('canvas-container')
-        for (let i = 0; i < elements.length; i++) {
-          const element = elements[i]
-          element.style.width = width + 'px'
-          element.style.height = height + 'px'
+        if (height > 0) {
+          let elements = document.getElementsByClassName('canvas-container')
+          for (let i = 0; i < elements.length; i++) {
+            const element = elements[i]
+            element.style.width = width + 'px'
+            element.style.height = height + 'px'
+          }
+          elements = document.getElementsByClassName('upper-canvas')
+          for (let i = 0; i < elements.length; i++) {
+            const element = elements[i]
+            element.style.width = width + 'px'
+            element.style.height = height + 'px'
+            element.setAttribute('width', width)
+            element.setAttribute('height', height)
+          }
+
+          setTimeout(() => {
+            this.fabricCanvas.calcOffset()
+            this.fabricVideo.scaleToWidth(width)
+            this.fabricVideo.scaleToHeight(height)
+          }, 10)
         }
-        elements = document.getElementsByClassName('upper-canvas')
-        for (let i = 0; i < elements.length; i++) {
-          const element = elements[i]
-          element.style.width = width + 'px'
-          element.style.height = height + 'px'
-          element.setAttribute('width', width)
-          element.setAttribute('height', height)
-        }
-        setTimeout(() => {
-          this.fabricCanvas.calcOffset()
-        }, 10)
       }
     },
 

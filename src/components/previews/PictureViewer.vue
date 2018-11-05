@@ -166,10 +166,7 @@ export default {
     setTimeout(() => {
       this.mountPicture()
 
-      window.removeEventListener('keydown', this.onKeyDown)
       window.addEventListener('keydown', this.onKeyDown)
-
-      window.removeEventListener('resize', this.onWindowResize)
       window.addEventListener('resize', this.onWindowResize)
     }, 0)
   },
@@ -214,9 +211,12 @@ export default {
 
   beforeDestroy () {
     this.clearCanvas()
+    window.removeEventListener('keydown', this.onKeyDown)
+    window.removeEventListener('resize', this.onWindowResize)
   },
 
   methods: {
+
     isFullScreen () {
       return !!(
         document.fullScreen ||
@@ -351,14 +351,8 @@ export default {
     onFullscreenClicked () {
       if (this.isFullScreen()) {
         this.exitFullScreen()
-        setTimeout(() => {
-          this.onWindowResize()
-        }, 100)
       } else {
         this.setFullScreen()
-        setTimeout(() => {
-          this.onWindowResize()
-        }, 100)
       }
     },
 
@@ -443,10 +437,15 @@ export default {
     },
 
     onWindowResize () {
-      setTimeout(() => {
-        this.mountPicture()
-        this.reloadAnnotations()
-      }, 100)
+      const now = (new Date().getTime())
+      this.lastCall = this.lastCall || 0
+      if (now - this.lastCall > 600) {
+        this.lastCall = now
+        setTimeout(() => {
+          this.mountPicture()
+          this.reloadAnnotations()
+        }, 0)
+      }
     },
 
     onKeyDown (event) {
@@ -517,7 +516,7 @@ export default {
             top: obj.top * scaleMultiplier,
             fill: 'transparent',
             stroke: '#ff3860',
-            strokeWidth: 4,
+            strokeWidth: 4 / scaleMultiplier,
             radius: obj.radius,
             width: obj.width,
             height: obj.height,
@@ -529,13 +528,13 @@ export default {
               ...base
             })
             this.fabricCanvas.add(rect)
-            rect.set({strokeWidth: 4})
+            rect.set({ strokeWidth: 8 / (obj.scaleX + obj.scaleY) })
           } else if (obj.type === 'circle') {
             const circle = new fabric.Circle({
               ...base
             })
             this.fabricCanvas.add(circle)
-            circle.set({strokeWidth: 2})
+            circle.set({ strokeWidth: 8 / (obj.scaleX + obj.scaleY) })
           } else if (obj.type === 'path') {
             const path = new fabric.Path(
               obj.path,
@@ -617,7 +616,7 @@ export default {
           element.setAttribute('height', height)
         }
         setTimeout(() => {
-          this.fabricCanvas.calcOffset()
+          if (this.fabricCanvas) this.fabricCanvas.calcOffset()
         }, 10)
       }
     }

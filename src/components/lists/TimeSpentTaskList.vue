@@ -3,8 +3,7 @@
   <table-info
     :is-loading="isLoading"
     :is-error="isLoadingError"
-  >
-  </table-info>
+  />
 
   <div class="aggregated-time-spents">
     <div

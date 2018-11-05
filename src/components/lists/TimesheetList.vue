@@ -101,7 +101,6 @@
          <td class="name">
            <router-link :to="task.entity_path">
              {{ task.full_entity_name }}
-             {{ timeSpentMap[task.id] ? timeSpentMap[task.id].duration / 60 : 0 }}
            </router-link>
          </td>
          <time-slider-cell
