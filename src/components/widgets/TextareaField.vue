@@ -68,8 +68,7 @@ export default {
 </script>
 <style scoped>
 textarea {
-  min-height: 5em;
-  max-height: 5em;
+  min-height: 8em;
   padding: 0.5em;
 }
 </style>
