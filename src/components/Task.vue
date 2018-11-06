@@ -1404,6 +1404,7 @@ video {
   box-shadow: 0px 0px 6px #E0E0E0;
   padding: 1em;
   border-radius: 5px;
+  overflow-x: hidden;
 }
 
 .preview-list {
