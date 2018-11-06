@@ -1,7 +1,6 @@
 <template>
   <div class="page">
-    <page-title :text="$t('notifications.title')"></page-title>
-
+    <page-title :text="$t('notifications.title')" />
     <div
       :class="{
         flexrow: true,
@@ -17,8 +16,7 @@
           class="flexrow-item"
           :person="personMap[notification.author_id]"
           v-if="personMap[notification.author_id]"
-        >
-        </people-avatar>
+        />
       </div>
 
       <div class="flexrow-item comment-content">
@@ -40,20 +38,15 @@
           </span>
           <router-link
             class=""
-            :to="{name: 'task', params: {task_id: notification.task_id}}"
+            :to="entityPath(notification)"
           >
             {{ notification.project_name }} / {{ notification.full_entity_name }}
             &nbsp;
           </router-link>
-          <router-link
-            class=""
-            :to="{name: 'task', params: {task_id: notification.task_id}}"
-          >
-            <task-type-name
-              :task-type="taskTypeMap[notification.task_type_id]"
-            >
-            </task-type-name>
-          </router-link>
+          <task-type-name
+            :task-type="buildTaskTypeFromNotification(notification)"
+            :production-id="notification.project_id"
+          />
           <span
             v-if="notification.change"
           >
@@ -61,14 +54,9 @@
           </span>
           <validation-tag
             class="validation-tag"
-            :task="{
-              id: notification.task_id,
-              task_status_id: notification.task_status_id
-
-            }"
+            :task="buildTaskFromNotification(notification)"
             v-if="notification.change"
-          >
-          </validation-tag>
+          />
           <span
             v-if="notification.preview_file_id"
           >
@@ -81,8 +69,7 @@
             <entity-thumbnail
               :entity="{preview_file_id: notification.preview_file_id}"
               :height="40"
-            >
-            </entity-thumbnail>
+            />
           </span>
         </div>
         <div
@@ -142,6 +129,30 @@ export default {
       'markAllNotificationsAsRead'
     ]),
 
+    entityPath (notification) {
+      const type =
+        this.getTaskType(notification).for_shots ? 'shot' : 'asset'
+
+      const route = {
+        name: 'task',
+        params: {
+          production_id: notification.project_id,
+          task_id: notification.task_id,
+          type: type
+        }
+      }
+
+      if (notification.episode_id) {
+        route.name = 'episode-task'
+        route.params.episode_id = notification.episode_id
+      }
+      return route
+    },
+
+    getTaskType (notification) {
+      return this.taskTypeMap[notification.task_type_id]
+    },
+
     formatDate (date) {
       const utcDate = moment.tz(date, 'UTC')
       date = moment(utcDate.format()).fromNow()
@@ -155,6 +166,22 @@ export default {
     personName (notification) {
       const person = this.personMap[notification.author_id]
       return person ? person.full_name : ''
+    },
+
+    buildTaskFromNotification (notification) {
+      return {
+        id: notification.task_id,
+        task_status_id: notification.task_status_id,
+        task_type_id: notification.task_type_id,
+        episode_id: notification.episode_id
+      }
+    },
+
+    buildTaskTypeFromNotification (notification) {
+      return {
+        ...this.taskTypeMap[notification.task_type_id],
+        episode_id: notification.episode_id
+      }
     }
   },
 

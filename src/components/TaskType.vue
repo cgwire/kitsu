@@ -61,7 +61,7 @@
             </router-link>
             <validation-tag
               :task="taskMap[asset.validations[currentTaskType.id]]"
-              v-if="asset.validations[currentTaskType.id]"
+              v-if="asset.validations[currentTaskType.id] && taskMap[asset.validations[currentTaskType.id]]"
             />
           </div>
         </div>
