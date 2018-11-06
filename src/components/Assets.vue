@@ -241,14 +241,26 @@ export default {
     ) {
       setTimeout(() => {
         this.loadAssets((err) => {
+          if (!err) {
+            this.handleModalsDisplay()
+            this.onSearchChange()
+            setTimeout(() => {
+              this.$refs['asset-list'].setScrollPosition(
+                this.assetListScrollPosition
+              )
+            }, 500)
+          }
           setTimeout(() => {
             this.initialLoading = false
           }, 200)
-          if (!err) this.handleModalsDisplay()
         })
       }, 0)
     } else {
       if (!this.isAssetsLoading) this.initialLoading = false
+      this.onSearchChange()
+      this.$refs['asset-list'].setScrollPosition(
+        this.assetListScrollPosition
+      )
     }
   },
 
