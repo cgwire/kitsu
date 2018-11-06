@@ -519,7 +519,7 @@ background-color: white;
 
 .has-notifications {
   margin-top: 5px;
-  color: #00B242;
+  color: #f57f17;
 }
 
 .icon-link {
