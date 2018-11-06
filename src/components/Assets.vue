@@ -252,6 +252,7 @@ export default {
           }
           setTimeout(() => {
             this.initialLoading = false
+            this.resizeHeaders()
           }, 200)
         })
       }, 0)
@@ -353,7 +354,9 @@ export default {
           } else {
             this.modals.isCreateTasks = false
             this.$router.push(this.assetsPath)
-            this.loadAssets()
+            this.loadAssets(() => {
+              this.resizeHeaders()
+            })
           }
         }
       })
@@ -441,7 +444,9 @@ export default {
       this.$store.dispatch('uploadAssetFile', (err) => {
         if (!err) {
           this.loading.importing = false
-          this.loadAssets()
+          this.loadAssets(() => {
+            this.resizeHeaders()
+          })
           this.$router.push(this.assetsPath)
         } else {
           this.loading.importing = false
@@ -494,6 +499,15 @@ export default {
         route.params.episode_id = this.currentEpisode.id
       }
       return route
+    },
+
+    resizeHeaders () {
+      setTimeout(() => {
+        if (this.$refs['asset-list']) {
+          console.log('resize yeah!')
+          this.$refs['asset-list'].resizeHeaders()
+        }
+      }, 0)
     }
   },
 
@@ -510,6 +524,7 @@ export default {
         this.initialLoading = true
         this.loadAssets((err) => {
           this.initialLoading = false
+          this.resizeHeaders()
           if (!err) {
             this.handleModalsDisplay()
           }
@@ -527,6 +542,7 @@ export default {
           if (!err) {
             this.handleModalsDisplay()
             this.initialLoading = false
+            this.resizeHeaders()
           }
         })
       }
