@@ -722,8 +722,9 @@ export default {
           return a.time < b.time
         }) || []
       } else {
-        return []
+        this.annotations = []
       }
+      return this.annotations
     }
   },
 
