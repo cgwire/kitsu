@@ -289,7 +289,7 @@ export default {
 
       if (
         this.productionMap[this.currentProductionId] &&
-        this.$route.params.production_id !== this.currentProductionId
+        !episodeId
       ) {
         episodeId =
           this.productionMap[this.currentProductionId].first_episode_id
