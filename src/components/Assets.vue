@@ -504,7 +504,6 @@ export default {
     resizeHeaders () {
       setTimeout(() => {
         if (this.$refs['asset-list']) {
-          console.log('resize yeah!')
           this.$refs['asset-list'].resizeHeaders()
         }
       }, 0)
