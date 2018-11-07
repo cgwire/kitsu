@@ -26,21 +26,24 @@ def get_full_entity_name(entity_id):
     asset the result is "Asset type name / Asset name".
     """
     entity = Entity.get(entity_id)
+    episode_id = None
     if shots_service.is_shot(entity.serialize()):
         sequence = Entity.get(entity.parent_id)
         if sequence.parent_id is None:
-            return "%s / %s" % (sequence.name, entity.name)
+            name = "%s / %s" % (sequence.name, entity.name)
         else:
             episode = Entity.get(sequence.parent_id)
-            return "%s / %s / %s" % (
+            episode_id = str(episode.id)
+            name = "%s / %s / %s" % (
                 episode.name,
                 sequence.name,
                 entity.name
             )
     else:
         asset_type = EntityType.get(entity.entity_type_id)
+        episode_id = entity.source_id
         name = "%s / %s" % (asset_type.name, entity.name)
-    return name
+    return (name, episode_id)
 
 
 def create_notification(person, comment, read=False, change=False):
