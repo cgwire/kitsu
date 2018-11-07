@@ -8,7 +8,7 @@
       id="annotation-movie"
       ref="movie"
       class="annotation-movie"
-      style="display: none;"
+      preload="auto"
       :src="moviePath"
       :poster="posterPath"
     >
@@ -16,6 +16,7 @@
     <canvas
       id="annotation-canvas"
       ref="annotation-canvas"
+      style="display: none;"
       class="canvas"
     >
     </canvas>
@@ -91,7 +92,7 @@
 
         <button
           class="button flexrow-item"
-          @click="onAnnotateClicked"
+          @click="onRectAnnotateClicked"
           v-if="isFullScreenEnabled"
         >
           <square-icon class="icon" />
@@ -206,6 +207,7 @@ export default {
           }
           this.video.addEventListener('timeupdate', this.updateProgressBar)
           this.video.onended = this.onVideoEnd
+          this.showVideo()
         })
 
         window.addEventListener('keydown', this.onKeyDown, false)
@@ -220,7 +222,7 @@ export default {
     },
 
     canvas () {
-      return this.$refs.canvas
+      return this.$refs['annotation-canvas']
     },
 
     video () {
@@ -278,6 +280,26 @@ export default {
         document.msFullscreenElement ||
         document.fullscreenElement
       )
+    },
+
+    showCanvas (callback) {
+      if (this.isVideoShown) {
+        this.canvas.style.display = 'block'
+        this.video.style.display = 'none'
+        this.mountVideo()
+        this.isVideoShown = false
+        this.loadAnnotation(this.video.currentTime)
+      } else if (callback) {
+        callback()
+      }
+    },
+
+    showVideo () {
+      if (!this.isVideoShown) {
+        this.canvas.style.display = 'none'
+        this.video.style.display = 'block'
+      }
+      this.isVideoShown = true
     },
 
     updateProgressBar () {
@@ -407,6 +429,9 @@ export default {
     play () {
       this.clearAnnotations()
       this.isPlaying = true
+      this.showVideo()
+      this.fabricCanvas.isDrawingMode = false
+      this.isDrawing = false
       this.video.play()
     },
 
@@ -444,6 +469,10 @@ export default {
       var pos =
         (e.pageX - this.progress.offsetLeft) / this.progress.offsetWidth
       const currentTime = pos * this.video.duration
+      this.setCurrentTime(currentTime)
+    },
+
+    setCurrentTime (currentTime) {
       this.progress.value = currentTime
       this.progressBar.style.width = Math.floor(
         (currentTime / this.video.duration) * 100
@@ -451,6 +480,7 @@ export default {
 
       this.clearAnnotations()
       this.video.currentTime = currentTime
+      this.showVideo()
     },
 
     onFullscreenClicked () {
@@ -496,56 +526,62 @@ export default {
       this.deleteSelection()
     },
 
-    onAnnotateClicked () {
-      this.fabricCanvas.isDrawingMode = false
-      this.isDrawing = false
+    onRectAnnotateClicked () {
+      this.showCanvas(() => {
+        this.fabricCanvas.isDrawingMode = false
+        this.isDrawing = false
 
-      const rect = new fabric.Rect({
-        left: this.fabricCanvas.width / 2 - 25,
-        top: this.fabricCanvas.height / 2 - 25,
-        fill: 'transparent',
-        strokeWidth: 4,
-        stroke: '#ff3860',
-        width: 50,
-        height: 50
+        const rect = new fabric.Rect({
+          left: this.fabricCanvas.width / 2 - 25,
+          top: this.fabricCanvas.height / 2 - 25,
+          fill: 'transparent',
+          strokeWidth: 4,
+          stroke: '#ff3860',
+          width: 50,
+          height: 50
+        })
+
+        this.fabricCanvas.add(rect)
+        this.fabricCanvas.setActiveObject(rect)
+        this.saveAnnotations()
       })
-
-      this.fabricCanvas.add(rect)
-      this.fabricCanvas.setActiveObject(rect)
-      this.saveAnnotations()
     },
 
     onCircleAnnotateClicked () {
-      this.fabricCanvas.isDrawingMode = false
-      this.isDrawing = false
+      this.showCanvas(() => {
+        this.fabricCanvas.isDrawingMode = false
+        this.isDrawing = false
 
-      const circle = new fabric.Circle({
-        left: this.fabricCanvas.width / 2 - 25,
-        top: this.fabricCanvas.height / 2 - 25,
-        radius: 20,
-        fill: 'transparent',
-        strokeWidth: 4,
-        stroke: '#ff3860',
-        width: 50,
-        height: 50
+        const circle = new fabric.Circle({
+          left: this.fabricCanvas.width / 2 - 25,
+          top: this.fabricCanvas.height / 2 - 25,
+          radius: 20,
+          fill: 'transparent',
+          strokeWidth: 4,
+          stroke: '#ff3860',
+          width: 50,
+          height: 50
+        })
+
+        this.fabricCanvas.add(circle)
+        this.fabricCanvas.setActiveObject(circle)
+        this.saveAnnotations()
       })
-
-      this.fabricCanvas.add(circle)
-      this.fabricCanvas.setActiveObject(circle)
-      this.saveAnnotations()
     },
 
     onPencilAnnotateClicked () {
-      if (this.fabricCanvas.isDrawingMode) {
-        this.fabricCanvas.isDrawingMode = false
-        this.isDrawing = false
-      } else {
-        this.fabricCanvas.isDrawingMode = true
-        this.isDrawing = true
-      }
+      this.showCanvas(() => {
+        if (this.fabricCanvas.isDrawingMode) {
+          this.fabricCanvas.isDrawingMode = false
+          this.isDrawing = false
+        } else {
+          this.fabricCanvas.isDrawingMode = true
+          this.isDrawing = true
+        }
+      })
     },
 
-    onWindowResize () {
+    onWindowResize (callback) {
       const now = (new Date().getTime())
       this.lastCall = this.lastCall || 0
       if (now - this.lastCall > 600) {
@@ -554,13 +590,42 @@ export default {
           this.mountVideo()
           this.reloadAnnotations()
           this.loadAnnotation(this.video.currentTime)
+
+          if (this.isVideoShown) {
+            this.canvas.style.display = 'none'
+            let elements = document.getElementsByClassName('canvas-container')
+            for (let i = 0; i < elements.length; i++) {
+              const element = elements[i]
+              element.style.display = 'none'
+            }
+          }
+          if (callback && typeof callback === 'function') callback()
         }, 0)
       }
     },
 
     onKeyDown (event) {
-      if (event.keyCode === 46 && this.fabricCanvas) {
-        this.deleteSelection()
+      if (!['INPUT', 'TEXTAREA'].includes(event.target.tagName)) {
+        if (event.keyCode === 46 && this.fabricCanvas) {
+          this.deleteSelection()
+        } else if (event.keyCode === 37) {
+          let newTime = this.video.currentTime - 1 / 25
+          if (newTime < 0) {
+            this.setCurrentTime(0)
+          } else {
+            this.setCurrentTime(newTime)
+          }
+        } else if (event.keyCode === 39) {
+          let newTime = this.video.currentTime + 1 / 25
+          if (newTime > this.maxDuration) {
+            this.setCurrentTime(this.maxDuration)
+          } else {
+            this.setCurrentTime(newTime)
+          }
+        } else if (event.keyCode === 32) {
+          if (this.isPlaying) this.pause()
+          else this.play()
+        }
       }
     },
 
@@ -596,7 +661,7 @@ export default {
     },
 
     clearAnnotations () {
-      if (this.fabricCanvas) {
+      if (this.fabricCanvas && this.fabricCanvas.getObjects().length > 0) {
         this.fabricCanvas.getObjects().forEach((obj) => {
           if (['rect', 'circle', 'path'].includes(obj.type)) {
             this.fabricCanvas.remove(obj)
@@ -611,6 +676,8 @@ export default {
 
       this.video.pause()
       this.video.currentTime = time
+      this.fabricCanvas.isDrawingMode = false
+      this.isDrawing = false
 
       this.clearAnnotations()
 
@@ -654,6 +721,8 @@ export default {
           this.fabricCanvas.add(path)
         }
       })
+
+      if (this.isVideoShown) this.showCanvas()
     },
 
     deleteSelection () {
