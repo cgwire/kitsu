@@ -7,9 +7,9 @@
           <th class="episode" ref="th-episode" v-if="isTVShow">
             {{ $t('assets.fields.episode') }}
           </th>
-          <th class="thumbnail"></th>
+          <th class="thumbnail" ref="th-thumbnail"></th>
           <th class="name" ref="th-name">{{ $t('assets.fields.name') }}</th>
-          <th class="description" v-if="!isCurrentUserClient">
+          <th class="description" ref="th-description" v-if="!isCurrentUserClient">
             {{ $t('assets.fields.description') }}
           </th>
           <th
@@ -213,6 +213,10 @@ export default {
     ValidationCell
   },
 
+  mounted () {
+    this.resizeHeaders()
+  },
+
   computed: {
     ...mapGetters([
       'assets',
@@ -259,8 +263,17 @@ export default {
     },
 
     sortedValidationColumns () {
-      return [...this.validationColumns].sort((a, b) => {
-        return this.taskTypeMap[a].priority < this.taskTypeMap[b].priority
+      const columns = [...this.validationColumns]
+      return columns.sort((a, b) => {
+        const taskTypeA = this.taskTypeMap[a]
+        const taskTypeB = this.taskTypeMap[b]
+        if (taskTypeA.priority === taskTypeB.priority) {
+          return taskTypeA.name.localeCompare(taskTypeB)
+        } else if (taskTypeA.priority > taskTypeB.priority) {
+          return 1
+        } else {
+          return -1
+        }
       })
     }
   },
@@ -416,26 +429,30 @@ export default {
     },
 
     resizeHeaders () {
+      console.log('resize')
       if (
         this.$refs['body-tbody'] &&
         this.$refs['body-tbody'][0].children.length > 0
       ) {
-        let episodeWidth, nameWidth
-
         if (this.$refs['th-episode']) {
-          console.log('test')
-          console.log(
-            this.$refs['body-tbody'][0].children[1]
-          )
-          episodeWidth =
+          const episodeWidth =
             this.$refs['body-tbody'][0].children[1].children[0].offsetWidth
-          console.log(this.$refs['body-tbody'][0].children[1].children[0])
-          this.$refs['th-episode'].style = `min-width: ${episodeWidth}px`
+          this.$refs['th-episode'].style['min-width'] = `${episodeWidth}px`
+          const nameWidth =
+            this.$refs['body-tbody'][0].children[1].children[2].offsetWidth
+          this.$refs['th-name'].style['min-width'] = `${nameWidth}px`
+        } else {
+          const thumbnailWidth =
+            this.$refs['body-tbody'][0].children[1].children[0].offsetWidth
+          this.$refs['th-thumbnail'].style['min-width'] = `${thumbnailWidth}px`
+          const nameWidth =
+            this.$refs['body-tbody'][0].children[1].children[1].offsetWidth
+          this.$refs['th-name'].style['min-width'] = `${nameWidth}px`
+          const descriptionWidth =
+            this.$refs['body-tbody'][0].children[1].children[2].offsetWidth
+          this.$refs['th-description'].style['min-width'] =
+            `${descriptionWidth}px`
         }
-
-        nameWidth =
-          this.$refs['body-tbody'][0].children[1].children[2].offsetWidth
-        this.$refs['th-name'].style = `min-width: ${nameWidth}px`
       }
     }
   }

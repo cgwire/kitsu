@@ -243,8 +243,17 @@ export default {
     },
 
     sortedValidationColumns () {
-      return [...this.validationColumns].sort((a, b) => {
-        return this.taskTypeMap[a].priority < this.taskTypeMap[b].priority
+      const columns = [...this.validationColumns]
+      return columns.sort((a, b) => {
+        const taskTypeA = this.taskTypeMap[a]
+        const taskTypeB = this.taskTypeMap[b]
+        if (taskTypeA.priority === taskTypeB.priority) {
+          return taskTypeA.name.localeCompare(taskTypeB)
+        } else if (taskTypeA.priority > taskTypeB.priority) {
+          return 1
+        } else {
+          return -1
+        }
       })
     }
   },
