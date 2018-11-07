@@ -429,7 +429,6 @@ export default {
     },
 
     resizeHeaders () {
-      console.log('resize')
       if (
         this.$refs['body-tbody'] &&
         this.$refs['body-tbody'][0].children.length > 0

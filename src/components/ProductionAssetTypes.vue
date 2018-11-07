@@ -118,10 +118,8 @@ export default {
   watch: {
     currentProduction () {
       this.$refs['asset-type-search-field'].setValue('')
-      console.log('ou yea', `${this.currentProduction.production_type}`)
 
       if (!this.isTVShow) {
-        console.log('ou yea')
         this.initialLoading = true
         this.loadAssets(() => {
           this.computeAssetTypeStats()

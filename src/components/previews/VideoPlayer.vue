@@ -289,6 +289,7 @@ export default {
         this.mountVideo()
         this.isVideoShown = false
         this.loadAnnotation(this.video.currentTime)
+        if (callback) callback()
       } else if (callback) {
         callback()
       }
