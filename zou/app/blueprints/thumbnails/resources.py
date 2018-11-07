@@ -80,6 +80,14 @@ def send_storage_file(
     """
     if config.FS_BACKEND == "local":
         file_path = get_path(prefix, preview_file_id)
+        if not os.path.exists(file_path):
+            return {
+                "error": True,
+                "message": "File not found for: %s %s" % (
+                    prefix,
+                    preview_file_id
+                )
+            }, 404
     else:
         file_path = os.path.join(
             config.TMP_DIR,
