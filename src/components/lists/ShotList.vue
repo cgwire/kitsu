@@ -244,7 +244,7 @@ export default {
 
     sortedValidationColumns () {
       return [...this.validationColumns].sort((a, b) => {
-        return this.taskTypeMap[a].priority > this.taskTypeMap[b].priority
+        return this.taskTypeMap[a].priority < this.taskTypeMap[b].priority
       })
     }
   },

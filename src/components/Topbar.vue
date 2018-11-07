@@ -289,7 +289,10 @@ export default {
 
       if (
         this.productionMap[this.currentProductionId] &&
-        this.$route.params.production_id !== this.currentProductionId
+        (
+          this.$route.params.production_id !== this.currentProductionId ||
+          !episodeId
+        )
       ) {
         episodeId =
           this.productionMap[this.currentProductionId].first_episode_id
@@ -519,7 +522,7 @@ background-color: white;
 
 .has-notifications {
   margin-top: 5px;
-  color: #00B242;
+  color: #f57f17;
 }
 
 .icon-link {

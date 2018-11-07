@@ -557,8 +557,9 @@ export default {
       if (this.currentPreview.annotations) {
         this.annotations = this.currentPreview.annotations
       } else {
-        return []
+        this.annotations = []
       }
+      return this.annotations
     },
 
     onPreviousClicked () {

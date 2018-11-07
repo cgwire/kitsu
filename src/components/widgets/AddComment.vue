@@ -105,8 +105,7 @@ export default {
 }
 
 .add-comment textarea {
-  max-height: 5em;
-  min-height: 5em;
+  min-height: 7em;
   margin-bottom: 0.3em;
 }
 

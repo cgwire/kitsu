@@ -757,10 +757,17 @@ export default {
           name: this.$route.params.type,
           params: {production_id: this.currentTask.project_id}
         }
+
+        if (route.name === 'asset') {
+          route.params.asset_id = this.currentTask.entity_id
+        } else {
+          route.params.shot_id = this.currentTask.entity_id
+        }
+
         if (this.isTVShow) {
           route.name = `episode-${route.name}`
           route.params.episode_id =
-            this.currentEpisode ? this.currentEpisode.id : ''
+            this.currentEpisode ? this.currentEpisode.id : this.$route.params.episode_id
         }
         return route
       } else {
@@ -1397,6 +1404,7 @@ video {
   box-shadow: 0px 0px 6px #E0E0E0;
   padding: 1em;
   border-radius: 5px;
+  overflow-x: hidden;
 }
 
 .preview-list {

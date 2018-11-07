@@ -282,6 +282,7 @@ export default {
           }, 200)
           this.resizeHeaders()
           if (!err) {
+            this.onSearchChange()
             this.handleModalsDisplay()
             setTimeout(() => {
               this.$refs['shot-list'].setScrollPosition(
@@ -294,6 +295,7 @@ export default {
     } else {
       if (!this.isShotsLoading) this.initialLoading = false
       this.resizeHeaders()
+      this.onSearchChange()
       this.$refs['shot-list'].setScrollPosition(
         this.shotListScrollPosition
       )

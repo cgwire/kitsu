@@ -4,11 +4,11 @@
     <table class="table table-header" ref="headerWrapper">
       <thead>
         <tr>
-          <th class="episode" v-if="isTVShow">
+          <th class="episode" ref="th-episode" v-if="isTVShow">
             {{ $t('assets.fields.episode') }}
           </th>
           <th class="thumbnail"></th>
-          <th class="name">{{ $t('assets.fields.name') }}</th>
+          <th class="name" ref="th-name">{{ $t('assets.fields.name') }}</th>
           <th class="description" v-if="!isCurrentUserClient">
             {{ $t('assets.fields.description') }}
           </th>
@@ -89,6 +89,7 @@
     >
       <tbody
         class="tbody"
+        ref="body-tbody"
         :key="group[0] ? group[0].asset_type_id + group[0].canceled : ''"
         v-for="(group, k) in displayedAssets"
       >
@@ -259,7 +260,7 @@ export default {
 
     sortedValidationColumns () {
       return [...this.validationColumns].sort((a, b) => {
-        return this.taskTypeMap[a].priority > this.taskTypeMap[b].priority
+        return this.taskTypeMap[a].priority < this.taskTypeMap[b].priority
       })
     }
   },
@@ -412,6 +413,30 @@ export default {
       }
 
       return route
+    },
+
+    resizeHeaders () {
+      if (
+        this.$refs['body-tbody'] &&
+        this.$refs['body-tbody'][0].children.length > 0
+      ) {
+        let episodeWidth, nameWidth
+
+        if (this.$refs['th-episode']) {
+          console.log('test')
+          console.log(
+            this.$refs['body-tbody'][0].children[1]
+          )
+          episodeWidth =
+            this.$refs['body-tbody'][0].children[1].children[0].offsetWidth
+          console.log(this.$refs['body-tbody'][0].children[1].children[0])
+          this.$refs['th-episode'].style = `min-width: ${episodeWidth}px`
+        }
+
+        nameWidth =
+          this.$refs['body-tbody'][0].children[1].children[2].offsetWidth
+        this.$refs['th-name'].style = `min-width: ${nameWidth}px`
+      }
     }
   }
 }
@@ -429,13 +454,11 @@ export default {
 
 .name {
   min-width: 200px;
-  max-width: 200px;
   width: 200px;
 }
 
 .episode {
   min-width: 50px;
-  max-width: 50px;
   width: 50px;
 }
 
