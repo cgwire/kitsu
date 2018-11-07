@@ -40,8 +40,10 @@ class NotificationsServiceTestCase(ApiDBTestCase):
         )
 
     def test_get_full_entity_name(self):
-        asset_name = notifications_service.get_full_entity_name(self.asset.id)
-        shot_name = notifications_service.get_full_entity_name(self.shot.id)
+        (asset_name, episode_id) = \
+            notifications_service.get_full_entity_name(self.asset.id)
+        (shot_name, episode_id) = \
+            notifications_service.get_full_entity_name(self.shot.id)
         self.assertEquals(asset_name, "Props / Tree")
         self.assertEquals(shot_name, "E01 / S01 / P01")
 

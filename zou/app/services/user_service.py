@@ -442,9 +442,8 @@ def get_last_notifications(notification_id=None):
         comment_text,
         task_entity_id
     ) in notifications:
-        full_entity_name = notifications_service.get_full_entity_name(
-            task_entity_id
-        )
+        (full_entity_name, episode_id) = \
+            notifications_service.get_full_entity_name(task_entity_id)
         result.append(fields.serialize_dict({
             "id": notification.id,
             "author_id": notification.author_id,
@@ -459,7 +458,8 @@ def get_last_notifications(notification_id=None):
             "created_at": notification.created_at,
             "read": notification.read,
             "change": notification.change,
-            "full_entity_name": full_entity_name
+            "full_entity_name": full_entity_name,
+            "episode_id": episode_id
         }))
 
     return result
