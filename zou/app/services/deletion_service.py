@@ -23,6 +23,8 @@ def remove_comment(comment_id):
 
         if comment.preview_file_id is not None:
             preview_file = PreviewFile.get(comment.preview_file_id)
+            comment.preview_file_id = None
+            comment.save()
             remove_preview_file(preview_file)
 
         previews = [preview for preview in comment.previews]
