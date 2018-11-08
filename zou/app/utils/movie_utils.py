@@ -30,9 +30,9 @@ def generate_thumbnail(movie_path):
     return file_target_path
 
 
-def normalize_movie(movie_path, height=1080, qscale='2'):
+def normalize_movie(movie_path, height=1080, bitrate="28M"):
     """
-    Turn movie in a 720p movie file.
+    Turn movie in a 1080p movie file.
     """
     folder_path = os.path.dirname(movie_path)
     file_source_name = os.path.basename(movie_path)
@@ -43,6 +43,6 @@ def normalize_movie(movie_path, height=1080, qscale='2'):
     movie_clip = movie_clip.resize(height=height)
     movie_clip.write_videofile(
         file_target_path,
-        ffmpeg_params=['-qscale:v', qscale]
+        bitrate=bitrate
     )
     return file_target_path
