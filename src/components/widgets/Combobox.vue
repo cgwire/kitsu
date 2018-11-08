@@ -4,11 +4,15 @@
     {{ label }}
   </label>
   <p class="control">
-    <span class="select">
+    <span
+      :class="{
+        select: true,
+        'is-top': this.isTop,
+        'is-dark': this.isDark
+      }"
+    >
       <select
-        :class="{
-          'is-top': this.isTop
-        }"
+        class="select-input"
         ref="select"
         @keyup.enter="emitEnter()"
         @change="updateValue"
@@ -51,6 +55,10 @@ export default {
     isTop: {
       default: false,
       type: Boolean
+    },
+    isDark: {
+      default: false,
+      type: Boolean
     }
   },
 
@@ -77,21 +85,51 @@ export default {
 </script>
 
 <style scoped>
-.is-top {
+.is-top select {
   font-size: 1.2em;
   border: 0;
   border-bottom: 1px solid #CCC;
   border-radius: 0;
 }
 
-.is-top:focus {
-  border-color: #00B242;
+.is-dark select {
+  color: #CCC;
+  background: #26292F;
+  border: 0;
+  border-radius: 0;
+  margin: 0;
 }
 
-.select:after {
-  margin-top: -3px;
+.is-dark select:focus {
+  border-color: #26292F;
+  outline: 0;
+}
+
+.is-top select:focus {
+  border-color: #00B242;
+  outline: 0;
+}
+
+.is-top:after {
+  margin-top: -8px;
   border: 2px solid #00B242;
   border-right: 0;
   border-top: 0;
+}
+
+.is-dark:after {
+  margin-top: -8px;
+  border-right: 0;
+  border-top: 0;
+}
+
+.is-dark:hover:after {
+  border: 1px solid #00B242;
+  border-right: 0;
+  border-top: 0;
+}
+
+.select-input {
+  height: 31px;
 }
 </style>
