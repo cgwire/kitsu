@@ -13,6 +13,16 @@
       :poster="posterPath"
     >
     </video>
+    <video
+      id="comparison-movie"
+      ref="comparison-movie"
+      class="annotation-movie"
+      preload="auto"
+      :src="comparisonMoviePath"
+      :poster="comparisonPosterPath"
+      v-if="isComparing"
+    >
+    </video>
     <canvas
       id="annotation-canvas"
       ref="annotation-canvas"
@@ -43,12 +53,7 @@
       <span
         class="annotation-mark"
         :key="`annotation-${annotation.time}`"
-        :style="{
-          cursor: 'pointer',
-          position: 'relative',
-          display: 'inline-block',
-          'left': getTimelinePosition(annotation.time, index) + 'px'
-        }"
+        :style="getAnnotationStyles(annotation, index)"
         @click="loadAnnotation(annotation.time)"
         v-for="(annotation, index) in annotations"
       >
@@ -79,6 +84,26 @@
         <span class="flexrow-item time-indicator">
           {{ currentTime }} / {{ maxDuration }}
         </span>
+
+        <button
+          :class="{
+            button: true,
+            'flexrow-item': true,
+            active: isComparing
+          }"
+          @click="onCompareClicked"
+        >
+          <copy-icon class="icon smaller" />
+        </button>
+
+        <combobox
+          class="comparison-combobox"
+          :options="comparisonOptions"
+          :is-dark="true"
+          v-model="previewToCompareId"
+          v-if="isComparing"
+        >
+        </combobox>
       </div>
 
       <div class="right flexrow">
@@ -143,6 +168,7 @@
 import { fabric } from 'fabric'
 import {
   CircleIcon,
+  CopyIcon,
   DownloadIcon,
   Edit2Icon,
   MaximizeIcon,
@@ -152,6 +178,7 @@ import {
   SquareIcon,
   XIcon
 } from 'vue-feather-icons'
+import Combobox from '../widgets/Combobox'
 import Spinner from '../widgets/Spinner'
 
 export default {
@@ -159,6 +186,8 @@ export default {
 
   components: {
     CircleIcon,
+    CopyIcon,
+    Combobox,
     DownloadIcon,
     Edit2Icon,
     MaximizeIcon,
@@ -174,6 +203,10 @@ export default {
     preview: {
       type: Object,
       default: () => {}
+    },
+    otherPreviews: {
+      type: Array,
+      default: () => []
     }
   },
 
@@ -183,12 +216,20 @@ export default {
         this.preview.annotations ? [...this.preview.annotations] : [],
       currentTime: '00:00.00',
       fabricCanvas: null,
+      isComparing: false,
       isDrawing: false,
       isLoading: false,
       isPlaying: false,
       isRepeating: false,
       maxDuration: '00:00.00',
-      videoDuration: 0
+      previewToCompareId: this.otherPreviews ? this.otherPreviews[0].id : null,
+      videoDuration: 0,
+      comparisonOptions: this.otherPreviews.map((preview) => {
+        return {
+          label: 'v' + preview.revision,
+          value: preview.id
+        }
+      })
     }
   },
 
@@ -198,16 +239,8 @@ export default {
     setTimeout(() => {
       if (this.video) {
         this.video.addEventListener('loadedmetadata', () => {
-          this.reloadAnnotations()
-          if (this.video.currentTime === 0) {
-            this.clearCanvas()
-            setTimeout(() => {
-              this.mountVideo()
-            }, 0)
-          }
-          this.video.addEventListener('timeupdate', this.updateProgressBar)
-          this.video.onended = this.onVideoEnd
-          this.showVideo()
+          this.configureVideo()
+          this.isLoading = false
         })
 
         window.addEventListener('keydown', this.onKeyDown, false)
@@ -216,41 +249,19 @@ export default {
     }, 0)
   },
 
-  computed: {
-    container () {
-      return this.$refs.container
-    },
+  beforeDestroy () {
+    this.clearCanvas()
+    window.removeEventListener('keydown', this.onKeyDown)
+    window.removeEventListener('resize', this.onWindowResize)
+  },
 
+  computed: {
     canvas () {
       return this.$refs['annotation-canvas']
     },
 
-    video () {
-      return this.$refs.movie
-    },
-
-    videoWrapper () {
-      return this.$refs['video-wrapper']
-    },
-
-    progress () {
-      return this.$refs.progress
-    },
-
-    progressBar () {
-      return this.$refs['progress-bar']
-    },
-
-    moviePath () {
-      return `/api/movies/originals/preview-files/${this.preview.id}.mp4`
-    },
-
-    posterPath () {
-      return `/api/pictures/previews/preview-files/${this.preview.id}.png`
-    },
-
-    isVideo () {
-      return this.$refs.movie && this.videoDuration && this.videoDuration > 0
+    container () {
+      return this.$refs.container
     },
 
     isFullScreenEnabled () {
@@ -262,13 +273,47 @@ export default {
         document.webkitFullscreenEnabled ||
         document.createElement('video').webkitRequestFullScreen
       )
-    }
-  },
+    },
 
-  beforeDestroy () {
-    this.clearCanvas()
-    window.removeEventListener('keydown', this.onKeyDown)
-    window.removeEventListener('resize', this.onWindowResize)
+    isVideo () {
+      return this.$refs.movie && this.videoDuration && this.videoDuration > 0
+    },
+
+    moviePath () {
+      return `/api/movies/originals/preview-files/${this.preview.id}.mp4`
+    },
+
+    posterPath () {
+      return `/api/pictures/previews/preview-files/${this.preview.id}.png`
+    },
+
+    comparisonMoviePath () {
+      return `/api/movies/originals/preview-files/${this.previewToCompareId}.mp4`
+    },
+
+    comparisonPosterPath () {
+      return `/api/pictures/originals/preview-files/${this.previewToCompareId}.png`
+    },
+
+    progress () {
+      return this.$refs.progress
+    },
+
+    progressBar () {
+      return this.$refs['progress-bar']
+    },
+
+    video () {
+      return this.$refs.movie
+    },
+
+    comparisonVideo () {
+      return this.$refs['comparison-movie']
+    },
+
+    videoWrapper () {
+      return this.$refs['video-wrapper']
+    }
   },
 
   methods: {
@@ -282,8 +327,70 @@ export default {
       )
     },
 
+    getDefaultHeight () {
+      if (this.isFullScreen()) {
+        return screen.height
+      } else {
+        return screen.width > 1300 ? 500 : 300
+      }
+    },
+
+    getDimensions () {
+      const ratio = this.video.videoHeight / this.video.videoWidth
+      let width = this.container.offsetWidth - 1
+      let height = Math.floor(width * ratio)
+      height = Math.min(height, this.getDefaultHeight()) - 55
+      width = Math.floor(height / ratio)
+      return { width, height }
+    },
+
+    getTimelinePosition (time, index) {
+      if (this.$refs.movie) {
+        let position = Math.round(
+          (time / this.$refs.movie.duration) * this.progress.offsetWidth
+        )
+        position = position - index * 10 - 5
+        if (position < 0) position = 0
+        if (position + 10 > this.progress.offsetWidth) {
+          position = position - 5
+        }
+        return position
+      } else {
+        return 0
+      }
+    },
+
+    setCurrentTime (currentTime) {
+      this.progress.value = currentTime
+      this.progressBar.style.width = Math.floor(
+        (currentTime / this.video.duration) * 100
+      ) + '%'
+      this.clearAnnotations()
+      this.video.currentTime = currentTime
+      if (this.isComparing) {
+        const comparisonVideo = document.getElementById('comparison-movie')
+        comparisonVideo.currentTime = currentTime
+      }
+      this.showVideo()
+    },
+
+    configureVideo () {
+      this.reloadAnnotations()
+      this.video.addEventListener('timeupdate', this.updateProgressBar)
+      this.video.onended = this.onVideoEnd
+      this.showVideo()
+      if (this.video.currentTime === 0) {
+        this.clearCanvas()
+        this.$nextTick(() => {
+          this.mountVideo()
+          this.isLoading = false
+        })
+      }
+    },
+
     showCanvas (callback) {
       if (this.isVideoShown) {
+        this.isComparing = false
         this.canvas.style.display = 'block'
         this.video.style.display = 'none'
         this.mountVideo()
@@ -299,19 +406,13 @@ export default {
       if (!this.isVideoShown) {
         this.canvas.style.display = 'none'
         this.video.style.display = 'block'
+        let elements = document.getElementsByClassName('canvas-container')
+        for (let i = 0; i < elements.length; i++) {
+          const element = elements[i]
+          element.style.display = 'none'
+        }
       }
       this.isVideoShown = true
-    },
-
-    updateProgressBar () {
-      if (!this.progress.getAttribute('max')) {
-        this.progress.setAttribute('max', this.video.duration)
-      }
-      this.progress.value = this.video.currentTime * 1
-      this.progressBar.style.width = Math.floor(
-        (this.video.currentTime / this.video.duration) * 100
-      ) + '%'
-      this.currentTime = this.formatTime(this.video.currentTime)
     },
 
     mountVideo () {
@@ -331,19 +432,30 @@ export default {
         const height = dimensions.height
 
         if (height > 0) {
-          this.container.style.height = this.getDefaultHeight() + 'px'
-          this.video.style.width = width + 'px'
-          this.video.style.height = height + 'px'
-          this.videoWrapper.style.width = width + 'px'
-          this.videoWrapper.style.height = height + 'px'
+          if (!this.isComparing) {
+            this.container.style.height = this.getDefaultHeight() + 'px'
+            this.video.style.width = width + 'px'
+            this.video.style.height = height + 'px'
+            this.videoWrapper.style.width = width + 'px'
+            this.videoWrapper.style.height = height + 'px'
 
-          this.fabricCanvas = this.setupFabricVideo(width, height)
-          this.fabricCanvas.on('object:moved', this.saveAnnotations)
-          this.fabricCanvas.on('object:scaled', this.saveAnnotations)
-          this.fabricCanvas.on('mouse:up', () => {
-            if (this.isDrawing) this.saveAnnotations()
-          })
-          this.fixCanvasSize()
+            this.fabricCanvas = this.setupFabricVideo(width, height)
+            this.fabricCanvas.on('object:moved', this.saveAnnotations)
+            this.fabricCanvas.on('object:scaled', this.saveAnnotations)
+            this.fabricCanvas.on('mouse:up', () => {
+              if (this.isDrawing) this.saveAnnotations()
+            })
+            this.fixCanvasSize()
+          } else {
+            this.container.style.height = this.getDefaultHeight() + 'px'
+            this.video.style.width = (width / 2) + 'px'
+            this.video.style.height = (height / 2) + 'px'
+            const comparisonVideo = document.getElementById('comparison-movie')
+            comparisonVideo.style.width = (width / 2) + 'px'
+            comparisonVideo.style.height = (height / 2) + 'px'
+            this.videoWrapper.style.width = width + 'px'
+            this.videoWrapper.style.height = height + 'px'
+          }
         }
       }
     },
@@ -360,31 +472,6 @@ export default {
       try {
         if (this.fabricCanvas) this.fabricCanvas.dispose()
       } catch (err) { }
-      if (this.$refs['annotation-canvas']) {
-        this.$refs['annotation-canvas'].innerHTML = ''
-        this.$refs['annotation-canvas'].innerText = ''
-        this.$refs['annotation-canvas'].html = ''
-      }
-    },
-
-    getDefaultHeight () {
-      if (this.isFullScreen()) {
-        return screen.height
-      } else {
-        return screen.width > 1300 ? 500 : 300
-      }
-    },
-
-    getDimensions () {
-      const ratio = this.video.videoHeight / this.video.videoWidth
-      let width = this.container.offsetWidth - 1
-      let height = Math.floor(width * ratio)
-      if (height > this.getDefaultHeight()) {
-        height = this.getDefaultHeight()
-      }
-      height = height - 52
-      width = Math.floor(height / ratio)
-      return { width, height }
     },
 
     setupFabricVideo (width, height, update = false) {
@@ -413,6 +500,11 @@ export default {
       fabricCanvas.freeDrawingBrush.color = '#ff3860'
       fabricCanvas.freeDrawingBrush.width = 4
 
+      fabricCanvas.off('object:scaling', this.onScaled)
+      fabricCanvas.on('object:scaling', this.onScaled)
+      fabricCanvas.off('object:scaled', this.onScaled)
+      fabricCanvas.on('object:scaled', this.onScaled)
+
       fabric.util.requestAnimFrame(function render () {
         try {
           fabricCanvas.renderAll()
@@ -420,10 +512,6 @@ export default {
         fabric.util.requestAnimFrame(render)
       })
 
-      fabricCanvas.off('object:scaling', this.onScaled)
-      fabricCanvas.on('object:scaling', this.onScaled)
-      fabricCanvas.off('object:scaled', this.onScaled)
-      fabricCanvas.on('object:scaled', this.onScaled)
       return fabricCanvas
     },
 
@@ -434,67 +522,50 @@ export default {
       this.fabricCanvas.isDrawingMode = false
       this.isDrawing = false
       this.video.play()
+      if (this.isComparing) {
+        const comparisonVideo = document.getElementById('comparison-movie')
+        comparisonVideo.play()
+      }
     },
 
     pause () {
       this.isPlaying = false
       this.video.pause()
-    },
-
-    onVideoEnd () {
-      this.isPlaying = false
-      if (this.isRepeating) {
-        this.video.currentTime = 0
-        this.progress.value = 0
-        this.play()
+      if (this.isComparing) {
+        const comparisonVideo = document.getElementById('comparison-movie')
+        comparisonVideo.pause()
       }
     },
 
-    onPlayPauseClicked () {
-      if (this.video.paused || this.video.ended) {
-        this.play()
+    goPreviousFrame () {
+      let newTime = this.video.currentTime - 1 / 25
+      if (newTime < 0) {
+        this.setCurrentTime(0)
       } else {
-        this.pause()
+        this.setCurrentTime(newTime)
       }
     },
 
-    onRepeatClicked () {
-      if (this.isRepeating) {
-        this.isRepeating = false
+    goNextFrame () {
+      let newTime = this.video.currentTime + 1 / 25
+      if (newTime > this.video.duration) {
+        this.setCurrentTime(this.video.duration)
       } else {
-        this.isRepeating = true
+        this.setCurrentTime(newTime)
       }
     },
 
-    onProgressClicked (e) {
-      var pos =
-        (e.pageX - this.progress.offsetLeft) / this.progress.offsetWidth
-      const currentTime = pos * this.video.duration
-      this.setCurrentTime(currentTime)
-    },
-
-    setCurrentTime (currentTime) {
-      this.progress.value = currentTime
-      this.progressBar.style.width = Math.floor(
-        (currentTime / this.video.duration) * 100
-      ) + '%'
-
-      this.clearAnnotations()
-      this.video.currentTime = currentTime
-      this.showVideo()
-    },
-
-    onFullscreenClicked () {
-      if (this.isFullScreen()) {
-        this.exitFullScreen()
-      } else {
-        this.setFullScreen()
+    formatTime (seconds) {
+      let milliseconds = `.${Math.round((seconds % 1) * 100)}`
+      if (milliseconds.length === 2) milliseconds += '0'
+      try {
+        return new Date(1000 * seconds)
+          .toISOString()
+          .substr(14, 5) + milliseconds
+      } catch (err) {
+        console.log(err)
+        return '00:00.00'
       }
-    },
-
-    onScaled (event) {
-      const obj = event.target
-      if (obj) obj.set({ strokeWidth: 8 / (obj.scaleX + obj.scaleY) })
     },
 
     exitFullScreen () {
@@ -527,11 +598,86 @@ export default {
       this.deleteSelection()
     },
 
+    onVideoEnd () {
+      this.isPlaying = false
+      if (this.isRepeating) {
+        this.video.currentTime = 0
+        if (this.isComparing) {
+          const comparisonVideo = document.getElementById('comparison-movie')
+          comparisonVideo.currentTime = 0
+        }
+        this.progress.value = 0
+        this.play()
+      }
+    },
+
+    onPlayPauseClicked () {
+      if (this.video.paused || this.video.ended) {
+        this.play()
+      } else {
+        this.pause()
+      }
+    },
+
+    onRepeatClicked () {
+      if (this.isRepeating) {
+        this.isRepeating = false
+      } else {
+        this.isRepeating = true
+      }
+    },
+
+    onCompareClicked () {
+      if (this.isComparing) {
+        this.isComparing = false
+        this.mountVideo()
+      } else {
+        this.isComparing = true
+        if (this.fabricCanvas) this.fabricCanvas.isDrawingMode = false
+        this.isDrawing = false
+        this.$nextTick(() => {
+          if (!this.isVideoShown) this.showVideo()
+          this.mountVideo()
+        })
+      }
+    },
+
+    onProgressClicked (e) {
+      var pos =
+        (e.pageX - this.progress.offsetLeft) / this.progress.offsetWidth
+      const currentTime = pos * this.video.duration
+      this.setCurrentTime(currentTime)
+    },
+
+    updateProgressBar () {
+      if (!this.progress.getAttribute('max')) {
+        this.progress.setAttribute('max', this.video.duration)
+      }
+      this.progress.value = this.video.currentTime * 1
+      const width = Math.floor(
+        (this.video.currentTime / this.video.duration) * 100
+      )
+      this.progressBar.style.width = width + '%'
+      this.currentTime = this.formatTime(this.video.currentTime)
+    },
+
+    onFullscreenClicked () {
+      if (this.isFullScreen()) {
+        this.exitFullScreen()
+      } else {
+        this.setFullScreen()
+      }
+    },
+
+    onScaled (event) {
+      const obj = event.target
+      if (obj) obj.set({ strokeWidth: 8 / (obj.scaleX + obj.scaleY) })
+    },
+
     onRectAnnotateClicked () {
       this.showCanvas(() => {
         this.fabricCanvas.isDrawingMode = false
         this.isDrawing = false
-
         const rect = new fabric.Rect({
           left: this.fabricCanvas.width / 2 - 25,
           top: this.fabricCanvas.height / 2 - 25,
@@ -541,7 +687,6 @@ export default {
           width: 50,
           height: 50
         })
-
         this.fabricCanvas.add(rect)
         this.fabricCanvas.setActiveObject(rect)
         this.saveAnnotations()
@@ -552,7 +697,6 @@ export default {
       this.showCanvas(() => {
         this.fabricCanvas.isDrawingMode = false
         this.isDrawing = false
-
         const circle = new fabric.Circle({
           left: this.fabricCanvas.width / 2 - 25,
           top: this.fabricCanvas.height / 2 - 25,
@@ -563,7 +707,6 @@ export default {
           width: 50,
           height: 50
         })
-
         this.fabricCanvas.add(circle)
         this.fabricCanvas.setActiveObject(circle)
         this.saveAnnotations()
@@ -587,11 +730,10 @@ export default {
       this.lastCall = this.lastCall || 0
       if (now - this.lastCall > 600) {
         this.lastCall = now
-        setTimeout(() => {
+        this.$nextTick(() => {
           this.mountVideo()
           this.reloadAnnotations()
           this.loadAnnotation(this.video.currentTime)
-
           if (this.isVideoShown) {
             this.canvas.style.display = 'none'
             let elements = document.getElementsByClassName('canvas-container')
@@ -601,7 +743,7 @@ export default {
             }
           }
           if (callback && typeof callback === 'function') callback()
-        }, 0)
+        })
       }
     },
 
@@ -610,23 +752,28 @@ export default {
         if (event.keyCode === 46 && this.fabricCanvas) {
           this.deleteSelection()
         } else if (event.keyCode === 37) {
-          let newTime = this.video.currentTime - 1 / 25
-          if (newTime < 0) {
-            this.setCurrentTime(0)
-          } else {
-            this.setCurrentTime(newTime)
-          }
+          this.goPreviousFrame()
         } else if (event.keyCode === 39) {
-          let newTime = this.video.currentTime + 1 / 25
-          if (newTime > this.maxDuration) {
-            this.setCurrentTime(this.maxDuration)
-          } else {
-            this.setCurrentTime(newTime)
-          }
+          this.goNextFrame()
         } else if (event.keyCode === 32) {
-          if (this.isPlaying) this.pause()
-          else this.play()
+          this.onPlayPauseClicked()
         }
+      }
+    },
+
+    getAnnotation (time) {
+      return [...this.annotations].find(
+        (annotation) => annotation.time === time
+      )
+    },
+
+    clearAnnotations () {
+      if (this.fabricCanvas && this.fabricCanvas.getObjects().length > 0) {
+        this.fabricCanvas.getObjects().forEach((obj) => {
+          if (['rect', 'circle', 'path'].includes(obj.type)) {
+            this.fabricCanvas.remove(obj)
+          }
+        })
       }
     },
 
@@ -653,22 +800,6 @@ export default {
         preview: this.preview,
         annotations: [...this.annotations]
       })
-    },
-
-    getAnnotation (time) {
-      return [...this.annotations].find(
-        (annotation) => annotation.time === time
-      )
-    },
-
-    clearAnnotations () {
-      if (this.fabricCanvas && this.fabricCanvas.getObjects().length > 0) {
-        this.fabricCanvas.getObjects().forEach((obj) => {
-          if (['rect', 'circle', 'path'].includes(obj.type)) {
-            this.fabricCanvas.remove(obj)
-          }
-        })
-      }
     },
 
     loadAnnotation (time) {
@@ -726,34 +857,29 @@ export default {
       if (this.isVideoShown) this.showCanvas()
     },
 
+    reloadAnnotations () {
+      if (this.preview.annotations) {
+        this.annotations = [...this.preview.annotations].sort((a, b) => {
+          return a.time < b.time
+        }) || []
+      } else {
+        this.annotations = []
+      }
+      return this.annotations
+    },
+
+    getAnnotationStyles (annotation, index) {
+      return {
+        cursor: 'pointer',
+        position: 'relative',
+        display: 'inline-block',
+        'left': this.getTimelinePosition(annotation.time, index) + 'px'
+      }
+    },
+
     deleteSelection () {
       this.fabricCanvas.remove(this.fabricCanvas.getActiveObject())
       this.saveAnnotations()
-    },
-
-    formatTime (seconds) {
-      let milliseconds = `.${Math.round((seconds % 1) * 100)}`
-      if (milliseconds.length === 2) milliseconds += '0'
-      return new Date(1000 * seconds)
-        .toISOString()
-        .substr(14, 5) + milliseconds
-    },
-
-    getTimelinePosition (time, index) {
-      if (this.$refs.movie) {
-        let position = Math.round(
-          (time / this.$refs.movie.duration) * this.progress.offsetWidth
-        )
-        position = position - index * 10 - 5
-        if (position < 0) position = 0
-        if (position + 10 > this.progress.offsetWidth) {
-          position = position - 5
-        }
-
-        return position
-      } else {
-        return 0
-      }
     },
 
     fixCanvasSize () {
@@ -784,17 +910,6 @@ export default {
           }, 10)
         }
       }
-    },
-
-    reloadAnnotations () {
-      if (this.preview.annotations) {
-        this.annotations = [...this.preview.annotations].sort((a, b) => {
-          return a.time < b.time
-        }) || []
-      } else {
-        this.annotations = []
-      }
-      return this.annotations
     }
   },
 
@@ -803,6 +918,33 @@ export default {
       this.maxDuration = '00:00.00'
       this.isLoading = true
       this.reloadAnnotations()
+      if (this.isComparing) {
+        this.isComparing = false
+        this.mountVideo()
+      }
+
+      this.comparisonOptions = this.otherPreviews.map((preview) => {
+        return {
+          label: 'v' + preview.revision,
+          value: preview.id
+        }
+      })
+      if (this.otherPreviews && this.otherPreviews[0]) {
+        this.previewToCompareId = this.otherPreviews[0].id
+      } else {
+        this.previewToCompareId = null
+      }
+    },
+
+    previewToCompareId () {
+      if (this.isComparing) {
+        this.pause()
+        const currentTime = this.video.currentTime
+        const comparisonVideo = document.getElementById('comparison-movie')
+        this.$nextTick(() => {
+          comparisonVideo.currentTime = currentTime
+        })
+      }
     }
   }
 }
@@ -936,6 +1078,10 @@ progress {
   top: -6px;
 }
 
+.buttons {
+  height: 32px;
+}
+
 .buttons .button {
   background: #26292F;
   border-radius: 0;
@@ -947,5 +1093,9 @@ progress {
 .buttons .button.active,
 .buttons .button:hover {
   color: #43B581;
+}
+
+.comparison-combobox {
+  margin-bottom: 0;
 }
 </style>

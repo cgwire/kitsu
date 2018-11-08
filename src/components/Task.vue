@@ -185,6 +185,7 @@
             >
               <video-player
                 :preview="currentPreview"
+                :other-previews="otherPreviews"
                 @annotationchanged="onAnnotationChanged"
                 ref="preview-movie"
               />
@@ -386,6 +387,7 @@ export default {
       currentTask: null,
       currentTaskComments: [],
       currentTaskPreviews: [],
+      otherPreviews: [],
       addPreviewFormData: null,
       addExtraPreviewFormData: null,
       changePreviewFormData: null,
@@ -815,6 +817,7 @@ export default {
                   } else {
                     this.currentTaskComments = this.getCurrentTaskComments()
                     this.currentTaskPreviews = this.getCurrentTaskPreviews()
+                    this.setOtherPreviews()
                     this.currentPreviewPath = this.getOriginalPath()
                     this.entityPage = this.getEntityPage()
                     this.taskLoading = {
@@ -843,8 +846,10 @@ export default {
             } else {
               this.currentTaskComments = this.getCurrentTaskComments()
               this.currentTaskPreviews = this.getCurrentTaskPreviews()
+              this.setOtherPreviews()
               this.currentPreviewPath = this.getOriginalPath()
               this.entityPage = this.getEntityPage()
+              this.setOtherPreviews()
               this.loadTaskSubscribed({
                 taskId: this.route.params.task_id,
                 callback: (err, subscribed) => {
@@ -934,6 +939,7 @@ export default {
             }
             this.currentTaskComments = this.getCurrentTaskComments()
             this.currentTaskPreviews = this.getCurrentTaskPreviews()
+            this.setOtherPreviews()
             this.currentPreviewPath = this.getOriginalPath()
             this.currentTask = this.getCurrentTask()
           }
@@ -1053,6 +1059,7 @@ export default {
     resetPreview (preview) {
       this.currentTaskComments = this.getCurrentTaskComments()
       this.currentTaskPreviews = this.getCurrentTaskPreviews()
+      this.setOtherPreviews()
       this.currentPreviewPath = this.getOriginalPath()
       this.$router.push(this.previewPath(preview.id))
     },
@@ -1071,6 +1078,16 @@ export default {
           this.loading.setPreview = false
         }
       })
+    },
+
+    setOtherPreviews () {
+      this.otherPreviews = this.currentTaskPreviews.filter((p) => {
+        return (
+          p.id !== this.currentPreviewId &&
+          p.extension === 'mp4'
+        )
+      })
+      return this.otherPreviews
     },
 
     confirmDeleteTask () {
@@ -1122,6 +1139,7 @@ export default {
           } else {
             this.currentTaskComments = this.getCurrentTaskComments()
             this.currentTaskPreviews = this.getCurrentTaskPreviews()
+            this.setOtherPreviews()
             this.currentPreviewPath = this.getOriginalPath()
             if (this.currentTaskPreviews.length > 0) {
               this.resetPreview(this.currentTaskPreviews[0])
@@ -1259,7 +1277,7 @@ export default {
 
   mounted () {
     this.handleModalsDisplay()
-    setTimeout(() => {
+    this.$nextTick(() => {
       if (this.$refs['task-columns']) {
         this.$refs['task-columns'].scrollTop = 100
         window.scrollTo(0, 0)
@@ -1269,6 +1287,7 @@ export default {
 
   watch: {
     currentPreviewId () {
+      this.setOtherPreviews()
     },
 
     $route () {
