@@ -20,7 +20,7 @@
       preload="auto"
       :src="comparisonMoviePath"
       :poster="comparisonPosterPath"
-      v-if="isComparing"
+      v-if="isComparing && previewToCompareId"
     >
     </video>
     <canvas
@@ -92,18 +92,25 @@
             active: isComparing
           }"
           @click="onCompareClicked"
+          v-if="taskTypeOptions.length > 0"
         >
           <copy-icon class="icon smaller" />
         </button>
 
         <combobox
           class="comparison-combobox"
-          :options="comparisonOptions"
+          :options="taskTypeOptions"
+          :is-dark="true"
+          v-model="taskTypeId"
+          v-if="isComparing"
+        />
+        <combobox
+          class="comparison-combobox"
+          :options="previewFileOptions"
           :is-dark="true"
           v-model="previewToCompareId"
           v-if="isComparing"
-        >
-        </combobox>
+        />
       </div>
 
       <div class="right flexrow">
@@ -204,9 +211,13 @@ export default {
       type: Object,
       default: () => {}
     },
-    otherPreviews: {
-      type: Array,
-      default: () => []
+    entityPreviewFiles: {
+      type: Object,
+      default: () => {}
+    },
+    taskTypeMap: {
+      type: Object,
+      default: () => {}
     }
   },
 
@@ -222,14 +233,10 @@ export default {
       isPlaying: false,
       isRepeating: false,
       maxDuration: '00:00.00',
-      previewToCompareId: this.otherPreviews ? this.otherPreviews[0].id : null,
-      videoDuration: 0,
-      comparisonOptions: this.otherPreviews.map((preview) => {
-        return {
-          label: 'v' + preview.revision,
-          value: preview.id
-        }
-      })
+      previewToCompareId: null,
+      taskTypeId:
+        this.entityPreviewFIles ? Object.keys(this.entityPreviewFiles)[0] : null,
+      videoDuration: 0
     }
   },
 
@@ -241,6 +248,7 @@ export default {
         this.video.addEventListener('loadedmetadata', () => {
           this.configureVideo()
           this.isLoading = false
+          this.setDefaultComparisonTaskType()
         })
 
         window.addEventListener('keydown', this.onKeyDown, false)
@@ -313,6 +321,48 @@ export default {
 
     videoWrapper () {
       return this.$refs['video-wrapper']
+    },
+
+    taskTypeOptions () {
+      const taskTypeIds = Object.keys(this.entityPreviewFiles)
+      return taskTypeIds
+        .filter((taskTypeId) => {
+          if (this.entityPreviewFiles[taskTypeId].length > 1) {
+            return true
+          } else if (this.entityPreviewFiles[taskTypeId].length === 1) {
+            return (
+              this.entityPreviewFiles[taskTypeId][0].id !== this.preview.id
+            )
+          } else {
+            return false
+          }
+        })
+        .map((taskTypeId) => {
+          const taskType = this.taskTypeMap[taskTypeId]
+          return {
+            label: taskType.name,
+            value: taskType.id
+          }
+        })
+    },
+
+    previewFileOptions () {
+      let previewFiles = this.entityPreviewFiles[this.taskTypeId]
+      if (previewFiles) {
+        previewFiles = previewFiles.filter(p => p.id !== this.preview.id)
+        if (previewFiles && previewFiles.length > 0) {
+          return previewFiles.map((previewFile) => {
+            return {
+              label: `v${previewFile.revision}`,
+              value: previewFile.id
+            }
+          })
+        } else {
+          return []
+        }
+      } else {
+        return []
+      }
     }
   },
 
@@ -369,7 +419,7 @@ export default {
       this.video.currentTime = currentTime
       if (this.isComparing) {
         const comparisonVideo = document.getElementById('comparison-movie')
-        comparisonVideo.currentTime = currentTime
+        if (comparisonVideo) comparisonVideo.currentTime = currentTime
       }
       this.showVideo()
     },
@@ -451,8 +501,10 @@ export default {
             this.video.style.width = (width / 2) + 'px'
             this.video.style.height = (height / 2) + 'px'
             const comparisonVideo = document.getElementById('comparison-movie')
-            comparisonVideo.style.width = (width / 2) + 'px'
-            comparisonVideo.style.height = (height / 2) + 'px'
+            if (comparisonVideo) {
+              comparisonVideo.style.width = (width / 2) + 'px'
+              comparisonVideo.style.height = (height / 2) + 'px'
+            }
             this.videoWrapper.style.width = width + 'px'
             this.videoWrapper.style.height = height + 'px'
           }
@@ -524,7 +576,7 @@ export default {
       this.video.play()
       if (this.isComparing) {
         const comparisonVideo = document.getElementById('comparison-movie')
-        comparisonVideo.play()
+        if (comparisonVideo) comparisonVideo.play()
       }
     },
 
@@ -533,7 +585,7 @@ export default {
       this.video.pause()
       if (this.isComparing) {
         const comparisonVideo = document.getElementById('comparison-movie')
-        comparisonVideo.pause()
+        if (comparisonVideo) comparisonVideo.pause()
       }
     },
 
@@ -604,7 +656,7 @@ export default {
         this.video.currentTime = 0
         if (this.isComparing) {
           const comparisonVideo = document.getElementById('comparison-movie')
-          comparisonVideo.currentTime = 0
+          if (comparisonVideo) comparisonVideo.currentTime = 0
         }
         this.progress.value = 0
         this.play()
@@ -910,6 +962,39 @@ export default {
           }, 10)
         }
       }
+    },
+
+    setDefaultComparisonTaskType () {
+      const taskTypeIds = Object.keys(this.entityPreviewFiles)
+      if (taskTypeIds && taskTypeIds.length > 0) {
+        const taskTypeOption = this.taskTypeOptions.find((option) => {
+          return this.entityPreviewFiles[option.value].findIndex(
+            p => p.id === this.preview.id
+          ) >= 0
+        })
+        if (taskTypeOption) {
+          this.taskTypeId = taskTypeOption.value
+        } else {
+          this.taskTypeId = this.taskTypeOptions[0].value
+        }
+        this.setDefaultComparisonPreview()
+      } else {
+        this.previewToCompareId = null
+      }
+    },
+
+    setDefaultComparisonPreview () {
+      let previewFiles = this.entityPreviewFiles[this.taskTypeId]
+      if (previewFiles) {
+        previewFiles = previewFiles.filter(p => p.id !== this.preview.id)
+        if (previewFiles.length > 0) {
+          this.previewToCompareId = previewFiles[0].id
+        } else {
+          this.previewToCompareId = null
+        }
+      } else {
+        this.previewToCompareId = null
+      }
     }
   },
 
@@ -922,29 +1007,22 @@ export default {
         this.isComparing = false
         this.mountVideo()
       }
-
-      this.comparisonOptions = this.otherPreviews.map((preview) => {
-        return {
-          label: 'v' + preview.revision,
-          value: preview.id
-        }
-      })
-      if (this.otherPreviews && this.otherPreviews[0]) {
-        this.previewToCompareId = this.otherPreviews[0].id
-      } else {
-        this.previewToCompareId = null
-      }
+      this.setDefaultComparisonTaskType()
     },
 
     previewToCompareId () {
       if (this.isComparing) {
         this.pause()
         const currentTime = this.video.currentTime
-        const comparisonVideo = document.getElementById('comparison-movie')
         this.$nextTick(() => {
-          comparisonVideo.currentTime = currentTime
+          const comparisonVideo = document.getElementById('comparison-movie')
+          if (comparisonVideo) comparisonVideo.currentTime = currentTime
         })
       }
+    },
+
+    taskTypeId () {
+      this.setDefaultComparisonPreview()
     }
   }
 }

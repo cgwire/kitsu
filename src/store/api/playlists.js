@@ -8,7 +8,6 @@ export default {
     } else {
       path += `/playlists`
     }
-
     client.get(path, callback)
   },
 
@@ -22,13 +21,17 @@ export default {
     client.get(path, callback)
   },
 
+  getEntityPreviewFiles (entity, callback) {
+    const path = `/api/data/playlists/entities/${entity.id}/preview-files`
+    client.get(path, callback)
+  },
+
   newPlaylist (playlist, callback) {
     const data = {
       name: playlist.name,
       project_id: playlist.production_id,
       episode_id: playlist.episode_id
     }
-
     client.post('/api/data/playlists/', data, callback)
   },
 
@@ -39,7 +42,6 @@ export default {
     if (playlist.shots) {
       data.shots = playlist.shots
     }
-
     client.put(`/api/data/playlists/${playlist.id}`, data, callback)
   },
 

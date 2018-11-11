@@ -9,7 +9,7 @@
             class="validation"
             :style="validationStyle(taskTypeMap[columnId].color)"
             :key="columnId"
-            v-for="columnId in validationColumns"
+            v-for="columnId in sortedValidationColumns"
             v-if="!isLoading"
           >
             <router-link
@@ -74,7 +74,7 @@
             class="validation"
             :style="validationStyle(taskTypeMap[columnId].color)"
             :key="columnId"
-            v-for="columnId in validationColumns"
+            v-for="columnId in sortedValidationColumns"
           >
             <pie-chart
               width="70px"
@@ -167,6 +167,21 @@ export default {
       }
 
       return route
+    },
+
+    sortedValidationColumns () {
+      const columns = [...this.validationColumns]
+      return columns.sort((a, b) => {
+        const taskTypeA = this.taskTypeMap[a]
+        const taskTypeB = this.taskTypeMap[b]
+        if (taskTypeA.priority === taskTypeB.priority) {
+          return taskTypeA.name.localeCompare(taskTypeB)
+        } else if (taskTypeA.priority > taskTypeB.priority) {
+          return 1
+        } else {
+          return -1
+        }
+      })
     }
   },
 

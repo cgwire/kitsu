@@ -185,7 +185,8 @@
             >
               <video-player
                 :preview="currentPreview"
-                :other-previews="otherPreviews"
+                :task-type-map="taskTypeMap"
+                :entity-preview-files="taskEntityPreviews"
                 @annotationchanged="onAnnotationChanged"
                 ref="preview-movie"
               />
@@ -403,8 +404,6 @@ export default {
 
   computed: {
     ...mapGetters([
-      'comments',
-      'commentTexts',
       'currentEpisode',
       'currentProduction',
       'displayedShots',
@@ -418,7 +417,7 @@ export default {
       'personMap',
       'productionMap',
       'route',
-      'tasks',
+      'taskEntityPreviews',
       'taskStatusOptions',
       'taskMap',
       'taskTypeMap',
@@ -808,6 +807,7 @@ export default {
               this.currentTask = task
               this.loadTaskComments({
                 taskId: task.id,
+                entityId: task.entity_id,
                 callback: (err) => {
                   if (err) {
                     this.taskLoading = {
@@ -841,6 +841,7 @@ export default {
         this.currentTask = task
         this.loadTaskComments({
           taskId: this.route.params.task_id,
+          entityId: task.entity_id,
           callback: (err) => {
             if (err) {
             } else {
@@ -1203,6 +1204,11 @@ export default {
         } else {
           this.resetPreview({id: previewId})
         }
+        /*
+        this.loadTaskEntityPreviewFiles({
+          entityId: this.currentTask.entity_id
+        })
+        */
       }
     },
 

@@ -90,6 +90,7 @@ export default {
   border: 0;
   border-bottom: 1px solid #CCC;
   border-radius: 0;
+  height: 38px;
 }
 
 .is-dark select {
@@ -111,7 +112,6 @@ export default {
 }
 
 .is-top:after {
-  margin-top: -8px;
   border: 2px solid #00B242;
   border-right: 0;
   border-top: 0;

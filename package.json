@@ -28,7 +28,7 @@
     "thenby": "1.2.6",
     "v-autocomplete": "1.8.2",
     "v-tooltip": "2.0.0-rc.33",
-    "vue": "2.5.16",
+    "vue": "2.5.17",
     "vue-chartkick": "0.4.0",
     "vue-color": "2.4.6",
     "vue-cookie": "1.1.4",
@@ -58,7 +58,7 @@
     "@babel/preset-env": "7.0.0-beta.53",
     "babel-loader": "8.0.0-beta.4",
     "chai": "4.1.2",
-    "vue-template-compiler": "2.5.16",
+    "vue-template-compiler": "2.5.17",
     "webpack-cli": "3.0.8",
     "webpack": "4.16.1"
   }
