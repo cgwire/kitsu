@@ -128,6 +128,7 @@ export default {
     edit_title: 'Modifier la production',
     new_production: 'Ajouter une production',
     number: 'production | productions',
+    open_productions: 'Mes productions',
     picture: 'Changer l\'image',
     title: 'Productions',
     home: {

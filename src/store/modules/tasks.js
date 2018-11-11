@@ -1,6 +1,7 @@
 import async from 'async'
 
 import tasksApi from '../api/tasks'
+import playlistsApi from '../api/playlists'
 import { sortByName, sortValidationColumns } from '../../lib/sorting'
 import personStore from './people'
 import taskTypeStore from './tasktypes'
@@ -14,6 +15,7 @@ import {
   LOAD_TASK_END,
   LOAD_TASK_STATUSES_END,
   LOAD_TASK_COMMENTS_END,
+  LOAD_TASK_ENTITY_PREVIEW_FILES_END,
   LOAD_TASK_SUBSCRIBE_END,
   LOAD_SEQUENCE_SUBSCRIBE_END,
 
@@ -58,6 +60,7 @@ const initialState = {
   taskStatuses: [],
   taskComments: {},
   taskPreviews: {},
+  taskEntityPreviews: {},
   selectedTasks: {},
   selectedValidations: {},
 
@@ -113,6 +116,7 @@ const getters = {
   nbSelectedTasks: state => state.nbSelectedTasks,
   nbSelectedValidations: state => state.nbSelectedValidations,
   isShowAssignations: state => state.isShowAssignations,
+  taskEntityPreviews: state => state.taskEntityPreviews,
 
   assetValidationColumns: (state, getters) => {
     return sortValidationColumns(
@@ -213,12 +217,25 @@ const actions = {
     })
   },
 
-  loadTaskComments ({ commit, state }, payload) {
-    tasksApi.getTaskComments(payload.taskId, (err, comments) => {
-      if (!err) {
-        commit(LOAD_TASK_COMMENTS_END, {comments, taskId: payload.taskId})
+  loadTaskComments (
+    { commit, state, dispatch },
+    { taskId, entityId, callback }
+  ) {
+    tasksApi.getTaskComments(taskId, (err, comments) => {
+      if (err) {
+        callback(err)
+      } else {
+        commit(LOAD_TASK_COMMENTS_END, {comments, taskId})
+        dispatch('loadTaskEntityPreviewFiles', { callback, entityId })
       }
-      if (payload.callback) payload.callback(err)
+    })
+  },
+
+  loadTaskEntityPreviewFiles ({ commit, state }, { callback, entityId }) {
+    const entity = {id: entityId}
+    playlistsApi.getEntityPreviewFiles(entity, (err, previewFiles) => {
+      commit(LOAD_TASK_ENTITY_PREVIEW_FILES_END, previewFiles)
+      if (callback) callback(err)
     })
   },
 
@@ -621,6 +638,10 @@ const mutations = {
     state.taskMap[task.id] = task
   },
 
+  [LOAD_TASK_ENTITY_PREVIEW_FILES_END] (state, previewFiles) {
+    state.taskEntityPreviews = previewFiles
+  },
+
   [LOAD_TASK_COMMENTS_END] (state, {taskId, comments}) {
     comments.forEach((comment) => {
       comment.person = personStore.helpers.addAdditionalInformation(
@@ -631,7 +652,13 @@ const mutations = {
     state.taskPreviews[taskId] = comments.reduce((previews, comment) => {
       if (comment.previews && comment.previews.length > 0) {
         const preview = comment.previews[0]
-        preview.previews = [...comment.previews]
+        preview.previews = comment.previews.map((p) => {
+          return {
+            id: p.id,
+            annotations: p.annotations
+          }
+        })
+
         previews.push(preview)
         return previews
       } else {

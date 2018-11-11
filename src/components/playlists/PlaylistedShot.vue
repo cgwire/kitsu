@@ -10,8 +10,7 @@
       class="shot-thumbnail"
       :entity="shot"
       :preview-file-id="previewFileId"
-    >
-    </entity-thumbnail>
+    />
   </div>
 
   <div class="shot-title">{{ shot.entity_name }}</div>
@@ -20,11 +19,11 @@
     <combobox
       :options="taskTypeOptions"
       v-model="taskTypeId"
-    ></combobox>
+    />
     <combobox
       :options="previewFileOptions"
       v-model="previewFileId"
-    ></combobox>
+    />
   </div>
 
   <a class="remove-button" @click.prevent="onRemoveClick">
