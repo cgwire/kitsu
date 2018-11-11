@@ -80,14 +80,6 @@ def send_storage_file(
     """
     if config.FS_BACKEND == "local":
         file_path = get_path(prefix, preview_file_id)
-        if not os.path.exists(file_path):
-            return {
-                "error": True,
-                "message": "File not found for: %s %s" % (
-                    prefix,
-                    preview_file_id
-                )
-            }, 404
     else:
         file_path = os.path.join(
             config.TMP_DIR,
@@ -97,11 +89,21 @@ def send_storage_file(
             with open(file_path, 'wb') as tmp_file:
                 for chunk in open_file(prefix, preview_file_id):
                     tmp_file.write(chunk)
-    return flask_send_file(
-        file_path,
-        conditional=True,
-        mimetype=mimetype
-    )
+
+    try:
+        return flask_send_file(
+            file_path,
+            conditional=True,
+            mimetype=mimetype
+        )
+    except FileNotFoundError:
+        return {
+            "error": True,
+            "message": "File not found for: %s %s" % (
+                prefix,
+                preview_file_id
+            )
+        }, 404
 
 
 class CreatePreviewFilePictureResource(Resource):

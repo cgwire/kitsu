@@ -68,3 +68,30 @@ def get_preview_files_for_shot(shot_id):
             ]  # Do not add too much field to avoid building too big responses
 
     return previews
+
+
+def get_preview_files_for_entity(entity_id):
+    """
+    Get all preview files available for given entity.
+    """
+    tasks = tasks_service.get_task_dicts_for_entity(entity_id)
+    previews = {}
+
+    for task in tasks:
+        preview_files = PreviewFile.query \
+            .filter_by(task_id=task["id"]) \
+            .filter_by(extension="mp4") \
+            .order_by(PreviewFile.revision.desc()) \
+            .all()
+        task_type_id = task["task_type_id"]
+
+        if len(preview_files) > 0:
+            previews[task_type_id] = [
+                {
+                    "id": str(preview_file.id),
+                    "revision": preview_file.revision
+                }
+                for preview_file in preview_files
+            ]  # Do not add too much field to avoid building too big responses
+
+    return previews
