@@ -223,8 +223,7 @@ export default {
 
   data () {
     return {
-      annotations:
-        this.preview.annotations ? [...this.preview.annotations] : [],
+      annotations: [],
       currentTime: '00:00.00',
       fabricCanvas: null,
       isComparing: false,
@@ -241,6 +240,7 @@ export default {
   },
 
   mounted () {
+    this.reloadAnnotations()
     this.container.style.height = this.getDefaultHeight() + 'px'
     this.isLoading = true
     setTimeout(() => {
@@ -814,7 +814,7 @@ export default {
     },
 
     getAnnotation (time) {
-      return [...this.annotations].find(
+      return this.annotations.find(
         (annotation) => annotation.time === time
       )
     },
@@ -847,10 +847,15 @@ export default {
           width: this.fabricCanvas.width,
           drawing: this.fabricCanvas.toJSON()
         })
+        this.annotations = this.annotations.sort((a, b) => {
+          return a.time < b.time
+        }) || []
       }
+      const annotations = []
+      this.annotations.forEach(a => annotations.push({...a}))
       this.$emit('annotationchanged', {
         preview: this.preview,
-        annotations: [...this.annotations]
+        annotations: annotations
       })
     },
 
@@ -911,7 +916,9 @@ export default {
 
     reloadAnnotations () {
       if (this.preview.annotations) {
-        this.annotations = [...this.preview.annotations].sort((a, b) => {
+        const annotations = []
+        this.preview.annotations.forEach(a => annotations.push({...a}))
+        this.annotations = annotations.sort((a, b) => {
           return a.time < b.time
         }) || []
       } else {
@@ -974,10 +981,11 @@ export default {
         })
         if (taskTypeOption) {
           this.taskTypeId = taskTypeOption.value
-        } else {
+        } else if (this.taskTypeOptions.length > 0) {
           this.taskTypeId = this.taskTypeOptions[0].value
         }
-        this.setDefaultComparisonPreview()
+
+        if (this.taskTypeId) this.setDefaultComparisonPreview()
       } else {
         this.previewToCompareId = null
       }

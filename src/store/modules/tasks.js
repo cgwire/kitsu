@@ -506,11 +506,18 @@ const actions = {
   }) {
     return new Promise((resolve, reject) => {
       tasksApi.updatePreviewAnnotation(preview, annotations)
-        .then((preview) => {
-          commit(UPDATE_PREVIEW_ANNOTATION, { taskId, preview, annotations })
+        .then((updatedPreview) => {
+          commit(UPDATE_PREVIEW_ANNOTATION, {
+            taskId,
+            preview,
+            annotations
+          })
           resolve()
         })
-        .catch(reject)
+        .catch((err) => {
+          console.log(err)
+          reject(err)
+        })
     })
   },
 
@@ -789,6 +796,10 @@ const mutations = {
           oldPreview = subPreview
         }
       })
+
+      if (p.id === preview.id) {
+        preview.annotations = annotations
+      }
     })
 
     if (oldPreview) {
