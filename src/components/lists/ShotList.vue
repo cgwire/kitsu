@@ -331,6 +331,7 @@ export default {
 
     loadMoreShots () {
       this.displayMoreShots()
+      this.$nextTick(this.resizeHeaders)
     },
 
     setScrollPosition (scrollPosition) {

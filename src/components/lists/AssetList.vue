@@ -78,7 +78,6 @@
     ref="body"
     class="table-body"
     v-scroll="onBodyScroll"
-    v-infinite-scroll="loadMoreAssets"
     infinite-scroll-disabled="busy"
     infinite-scroll-distance="120"
     v-if="!isLoading"
@@ -342,12 +341,17 @@ export default {
     onBodyScroll (event, position) {
       this.$refs.headerWrapper.style.left = `-${position.scrollLeft}px`
       this.$emit('scroll', position.scrollTop)
+
+      const maxHeight =
+        this.$refs.body.scrollHeight - this.$refs.body.offsetHeight
+      if (maxHeight < (position.scrollTop + 100)) {
+        this.loadMoreAssets()
+      }
     },
 
     loadMoreAssets () {
-      setTimeout(() => {
-        this.displayMoreAssets()
-      }, 1)
+      this.displayMoreAssets()
+      this.$nextTick(this.resizeHeaders)
     },
 
     setScrollPosition (scrollPosition) {
