@@ -22,7 +22,7 @@
         ref="preview-field"
         :accept="extensions"
         @fileselected="onFileSelected"
-      ></file-upload>
+      />
 
       <p class="error" v-if="isError">
         {{ $t("tasks.add_preview_error") }}
@@ -85,7 +85,7 @@ export default {
     },
     extensions: {
       type: String,
-      default: '.png,.jpg,.mp4,.mov,.obj,.pdf,.ma,.mb,.zip,.rar,.jpeg'
+      default: '.png,.jpg,.mp4,.mov,.obj,.pdf,.ma,.mb,.zip,.rar,.jpeg,.blend'
     }
   },
 
