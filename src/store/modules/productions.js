@@ -316,6 +316,10 @@ const mutations = {
       productionMap[production.id] = production
     })
     state.productionMap = productionMap
+
+    if (!state.currentProduction && state.openProductions.length > 0) {
+      state.currentProduction = state.openProductions[0]
+    }
   },
 
   [LOAD_PRODUCTION_STATUS_START] (state) {
@@ -374,7 +378,7 @@ const mutations = {
       }
 
       Object.assign(production, newProduction)
-      Object.assign(openProduction, newProduction)
+      if (openProduction) Object.assign(openProduction, newProduction)
     } else {
       state.productions.push(newProduction)
       state.productionMap[newProduction.id] = newProduction
