@@ -474,6 +474,7 @@ export default {
 
   mounted () {
     this.customActionUrl = this.defaultCustomActionUrl
+    this.setCurrentTeam()
   },
 
   watch: {
