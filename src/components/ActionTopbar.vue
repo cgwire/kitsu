@@ -459,7 +459,7 @@ export default {
     },
 
     setCurrentTeam () {
-      if (this.people.length > 10) {
+      if (this.people.length > 10 && this.currentProduction) {
         this.currentTeam = sortPeople(
           this.currentProduction.team.map((personId) => {
             return this.personMap[personId]
