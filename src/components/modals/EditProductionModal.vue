@@ -133,6 +133,7 @@ export default {
         }
       ]
     }
+
     if (this.productionToEdit && this.productionToEdit.id) {
       data.form = {
         name: this.productionToEdit.name,
@@ -140,19 +141,39 @@ export default {
         fps: this.productionToEdit.fps,
         ratio: this.productionToEdit.ratio,
         resolution: this.productionToEdit.resolution,
-        production_type: this.productionToEdit.production_type
+        production_type: this.productionToEdit.production_type || 'short'
       }
     } else {
       data.form = {
         name: '',
-        project_status_id: '',
+        project_status_id: this.productionStatus ? this.productionStatus[0].id : null,
         fps: '',
         ratio: '',
         resolution: '',
         production_type: 'short'
       }
     }
+
     return data
+  },
+
+  created () {
+    this.resetForm()
+
+    this.productionTypeOptions = [
+      {
+        label: 'short',
+        value: 'short'
+      },
+      {
+        label: 'featurefilm',
+        value: 'featurefilm'
+      },
+      {
+        label: 'tvshow',
+        value: 'tvshow'
+      }
+    ]
   },
 
   mounted () {
@@ -163,9 +184,9 @@ export default {
 
   computed: {
     ...mapGetters([
-      'productionStatusOptions',
       'productions',
-      'productionStatus'
+      'productionStatus',
+      'productionStatusOptions'
     ])
   },
 
@@ -180,11 +201,9 @@ export default {
     onFileSelected (formData) {
       this.formData = formData
       this.$emit('fileselected', formData)
-    }
-  },
+    },
 
-  watch: {
-    productionToEdit () {
+    resetForm () {
       if (this.productionToEdit && this.productionToEdit.id) {
         this.form = {
           name: this.productionToEdit.name,
@@ -192,7 +211,7 @@ export default {
           fps: this.productionToEdit.fps,
           ratio: this.productionToEdit.ratio,
           resolution: this.productionToEdit.resolution,
-          production_type: this.productionToEdit.production_type
+          production_type: this.productionToEdit.production_type || 'short'
         }
       } else {
         this.form = {
@@ -204,6 +223,12 @@ export default {
           production_type: 'short'
         }
       }
+    }
+  },
+
+  watch: {
+    productionToEdit () {
+      this.resetForm()
     },
 
     active () {

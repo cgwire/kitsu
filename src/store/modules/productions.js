@@ -378,7 +378,7 @@ const mutations = {
       }
 
       Object.assign(production, newProduction)
-      Object.assign(openProduction, newProduction)
+      if (openProduction) Object.assign(openProduction, newProduction)
     } else {
       state.productions.push(newProduction)
       state.productionMap[newProduction.id] = newProduction
