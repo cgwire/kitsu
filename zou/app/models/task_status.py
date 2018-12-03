@@ -12,6 +12,9 @@ class TaskStatus(db.Model, BaseMixin, SerializerMixin):
     short_name = \
         db.Column(db.String(10), unique=True, nullable=False, index=True)
     color = db.Column(db.String(7), nullable=False)
+
     is_reviewable = db.Column(db.Boolean(), default=False)
     is_done = db.Column(db.Boolean(), default=False, index=True)
+    is_artist_allowed = db.Column(db.Boolean(), default=True)
+
     shotgun_id = db.Column(db.Integer)
