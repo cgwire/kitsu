@@ -127,7 +127,7 @@ def clean_auth_tokens():
 @cli.command('clear_all_auth_tokens')
 def clear_all_auth_tokens():
     "Remove all authentication tokens."
-    commands.clean_auth_tokens()
+    commands.clear_all_auth_tokens()
 
 
 @cli.command('init_data')
