@@ -99,7 +99,7 @@
               :isAddCommentLoading="addCommentLoading.isLoading"
               :user="user"
               :task="currentTask"
-              :taskStatusOptions="taskStatusOptions"
+              :taskStatusOptions="taskStatusOptionsForCurrentUser"
               v-if="isCommentingAllowed"
             />
             <div class="comments" v-if="currentTaskComments.length > 0">
@@ -726,6 +726,14 @@ export default {
         })
       }
       return currentPreview
+    },
+
+    taskStatusOptionsForCurrentUser () {
+      if (this.isCurrentUserManager) {
+        return this.taskStatusOptions
+      } else {
+        return this.taskStatusOptions.filter(status => status.isArtistAllowed)
+      }
     }
   },
 

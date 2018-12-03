@@ -309,8 +309,9 @@ export default {
     title: 'Task Status',
     fields: {
       color: 'Color',
-      is_reviewable: 'Is reviewable',
       is_done: 'Is done',
+      is_reviewable: 'Is reviewable',
+      is_artist_allowed: 'Is artist allowed',
       name: 'Name',
       short_name: 'Short name'
     }

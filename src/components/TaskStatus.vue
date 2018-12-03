@@ -121,7 +121,7 @@ export default {
           if (err) {
             this.editStatus.isError = true
           } else {
-            this.$router.push('/task-status') // Close modal
+            this.$router.push({name: 'task-status'}) // Close modal
           }
         }
       })
@@ -137,7 +137,7 @@ export default {
           if (err) {
             this.deleteStatus.isError = true
           } else {
-            this.$router.push('/task-status') // Close modal
+            this.$router.push({name: 'task-status'}) // Close modal
           }
         }
       })

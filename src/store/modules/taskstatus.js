@@ -95,6 +95,9 @@ const mutations = {
     state.taskStatus = sortByName(taskStatus)
     state.taskStatusMap = {}
     taskStatus.forEach((taskStatus) => {
+      if (taskStatus.is_artist_allowed === null) {
+        taskStatus.is_artist_allowed = true
+      }
       state.taskStatusMap[taskStatus.id] = taskStatus
     })
   },

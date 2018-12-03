@@ -11,7 +11,7 @@
   <router-link
     class="button"
     :to="props.restoreRoute"
-    v-if="!props.entry.canceled"
+    v-if="props.entry.canceled"
   >
     <img src="../../assets/icons/rotate-ccw.svg" class="icon is-small" />
   </router-link>
@@ -19,7 +19,7 @@
   <router-link
     class="button"
     :to="props.deleteRoute"
-    v-if="!props.hideDelete && props.entry.canceled && isCurrentUserAdmin"
+    v-if="!props.hideDelete && !props.entry.canceled && isCurrentUserAdmin"
   >
     <img src="../../assets/icons/trash.svg" class="icon is-small" />
   </router-link>

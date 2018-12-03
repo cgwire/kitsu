@@ -22,35 +22,36 @@
           :label="$t('task_status.fields.name')"
           v-model="form.name"
           v-focus
-        >
-        </text-field>
+        />
         <text-field
           ref="shortNameField"
           input-class="task-status-short-name"
           :label="$t('task_status.fields.short_name')"
           v-model="form.short_name"
           v-focus
-        >
-        </text-field>
-        <combobox
-          :label="$t('task_status.fields.is_reviewable')"
-          :options="isReviewableOptions"
-          v-model="form.is_reviewable"
-        >
-        </combobox>
+        />
         <combobox
           :label="$t('task_status.fields.is_done')"
           :options="isDoneOptions"
           v-model="form.is_done"
-        >
-        </combobox>
+        />
+        <combobox
+          :label="$t('task_status.fields.is_reviewable')"
+          :options="isReviewableOptions"
+          v-model="form.is_reviewable"
+        />
+        <combobox
+          :label="$t('task_status.fields.is_artist_allowed')"
+          :options="isArtistAllowedOptions"
+          v-model="form.is_artist_allowed"
+        />
+
         <color-field
           ref="colorField"
           :label="$t('task_status.fields.color')"
           :colors="colors"
           v-model="form.color"
-        >
-        </color-field>
+        />
       </form>
 
       <p class="has-text-right">
@@ -119,6 +120,10 @@ export default {
         {label: this.$t('main.yes'), value: 'true'},
         {label: this.$t('main.no'), value: 'false'}
       ],
+      isArtistAllowedOptions: [
+        {label: this.$t('main.yes'), value: 'true'},
+        {label: this.$t('main.no'), value: 'false'}
+      ],
       colors: [
         '#000000',
         '#E81123',
@@ -163,7 +168,8 @@ export default {
           short_name: this.taskStatusToEdit.short_name,
           color: this.taskStatusToEdit.color,
           is_reviewable: String(this.taskStatusToEdit.is_reviewable),
-          is_done: String(this.taskStatusToEdit.is_done)
+          is_done: String(this.taskStatusToEdit.is_done),
+          is_artist_allowed: String(this.taskStatusToEdit.is_artist_allowed)
         }
       }
     }

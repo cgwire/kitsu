@@ -797,6 +797,7 @@ const mutations = {
 
   [LOAD_EPISODES_END] (state, episodes) {
     const episodeMap = {}
+    if (!episodes) episodes = []
     episodes.forEach((episode) => {
       episodeMap[episode.id] = episode
     })
