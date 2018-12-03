@@ -53,6 +53,7 @@
               name: 'delete-task-status',
               params: {task_status_id: entry.id}
             }"
+            :hide-delete="entry.short_name === 'todo'"
           />
         </tr>
       </tbody>
