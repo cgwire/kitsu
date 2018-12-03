@@ -107,12 +107,14 @@
   <create-tasks-modal
     :active="modals.isCreateTasksDisplayed"
     :is-loading="loading.creatingTasks"
+    :is-loading-stay="loading.taskStay"
     :is-error="errors.creatingTasks"
     :cancel-route="assetsPath"
     :title="$t('tasks.create_tasks_asset')"
     :text="$t('tasks.create_tasks_asset_explaination')"
     :error-text="$t('tasks.create_tasks_asset_failed')"
     @confirm="confirmCreateTasks"
+    @confirm-and-stay="confirmCreateTasksAndStay"
   />
 </div>
 </template>
@@ -162,7 +164,8 @@ export default {
         creatingTasks: false,
         importing: false,
         edit: false,
-        stay: false
+        stay: false,
+        taskStay: false
       },
       errors: {
         creatingTasks: false,
@@ -342,22 +345,35 @@ export default {
 
     confirmCreateTasks (form) {
       this.loading.creatingTasks = true
+      this.runTasksCreation(form, (err) => {
+        if (!err) this.$router.push(this.assetsPath)
+        this.loading.creatingTasks = false
+      })
+    },
+
+    confirmCreateTasksAndStay (form) {
+      this.loading.taskStay = true
+      this.runTasksCreation(form, () => {
+        this.loading.taskStay = false
+      })
+    },
+
+    runTasksCreation (form, callback) {
       this.errors.creatingTasks = false
       this.$store.dispatch('createTasks', {
         task_type_id: form.task_type_id,
         type: 'assets',
         project_id: this.currentProduction.id,
         callback: (err) => {
-          this.loading.creatingTasks = false
           if (err) {
             this.errors.creatingTasks = true
           } else {
             this.modals.isCreateTasks = false
-            this.$router.push(this.assetsPath)
             this.loadAssets(() => {
               this.resizeHeaders()
             })
           }
+          callback(err)
         }
       })
     },
