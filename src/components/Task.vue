@@ -638,9 +638,9 @@ export default {
 
     deleteText () {
       if (this.currentTask) {
+        const taskType = this.taskTypeMap[this.currentTask.task_type_id]
         return this.$t('main.delete_text', {
-          name: `${this.currentTask.entity_name}` +
-                ` / ${this.currentTask.task_type_name}`
+          name: `${this.currentTask.entity_name} / ${taskType.name}`
         })
       } else {
         return ''
