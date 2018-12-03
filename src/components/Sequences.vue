@@ -156,6 +156,7 @@ export default {
       this.editSequence(form)
         .then(() => {
           this.loading.edit = false
+          this.resizeHeaders()
           this.navigateToList()
         }).catch(() => {
           this.loading.edit = false
@@ -168,6 +169,7 @@ export default {
       this.deleteSequence(this.sequenceToDelete)
         .then(() => {
           this.loading.del = false
+          this.resizeHeaders()
           this.navigateToList()
         }).catch(() => {
           this.loading.del = false

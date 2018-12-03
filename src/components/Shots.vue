@@ -285,6 +285,7 @@ export default {
             this.onSearchChange()
             this.handleModalsDisplay()
             setTimeout(() => {
+              this.resizeHeaders()
               this.$refs['shot-list'].setScrollPosition(
                 this.shotListScrollPosition
               )
@@ -506,6 +507,7 @@ export default {
     changeSearch (searchQuery) {
       this.$refs['shot-search-field'].setValue(searchQuery.search_query)
       this.$refs['shot-search-field'].$emit('change', searchQuery.search_query)
+      this.resizeHeaders()
     },
 
     saveSearchQuery (searchQuery) {
@@ -567,6 +569,10 @@ export default {
           }
         })
       }
+    },
+
+    displayedShots () {
+      this.resizeHeaders()
     }
   },
 
