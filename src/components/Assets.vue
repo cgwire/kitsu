@@ -10,7 +10,7 @@
             :can-save="true"
             @change="onSearchChange"
             @save="saveSearchQuery"
-            placeholder="ex: props, modeling=wip"
+            placeholder="ex: props modeling=wip"
           />
         </div>
 
