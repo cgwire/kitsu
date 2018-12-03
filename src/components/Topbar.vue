@@ -351,6 +351,7 @@ export default {
           this.updateComboFromRoute()
         })
       } else {
+        this.setProduction(routeProductionId)
         this.setEpisodeFromRoute()
         this.updateComboFromRoute()
       }
