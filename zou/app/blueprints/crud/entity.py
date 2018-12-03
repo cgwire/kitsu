@@ -61,7 +61,10 @@ class EntityResource(BaseModelResource):
                 data["data"] = {}
             extra_data.update(data["data"])
             data["data"] = extra_data
+
             data = self.update_data(data, instance_id)
+            if data.get("source_id", None) == "null":
+                data["source_id"] = None
             entity.update(data)
             return entity.serialize(), 200
 
