@@ -26,7 +26,9 @@ from zou.app.utils import (
 
 ALLOWED_PICTURE_EXTENSION = [".png", ".jpg", ".jpeg", ".PNG", ".JPG", ".JPEG"]
 ALLOWED_MOVIE_EXTENSION = [".mp4", ".mov", ".MP4", ".MOV"]
-ALLOWED_FILE_EXTENSION = [".obj", ".pdf", ".ma", ".mb", ".rar", ".zip"]
+ALLOWED_FILE_EXTENSION = [
+    ".obj", ".pdf", ".ma", ".mb", ".rar", ".zip", ".blend"
+]
 
 
 def send_standard_file(
@@ -96,7 +98,7 @@ def send_storage_file(
             conditional=True,
             mimetype=mimetype
         )
-    except FileNotFoundError:
+    except FileNotFound:
         return {
             "error": True,
             "message": "File not found for: %s %s" % (
@@ -478,6 +480,9 @@ class BasePictureResource(Resource):
         try:
             return send_picture_file("thumbnails", instance_id)
         except FileNotFound:
+            current_app.logger.error("File was not found for: %s" % instance_id)
+            abort(404)
+        except IOError:
             current_app.logger.error("File was not found for: %s" % instance_id)
             abort(404)
 
