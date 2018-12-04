@@ -108,7 +108,8 @@ const getters = {
     return {
       label: status.name,
       value: status.id,
-      color: status.color
+      color: status.color,
+      isArtistAllowed: status.is_artist_allowed
     }
   }),
 

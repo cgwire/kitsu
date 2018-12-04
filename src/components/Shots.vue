@@ -8,7 +8,7 @@
               ref="shot-search-field"
               :can-save="true"
               @change="onSearchChange"
-              placeholder="ex: e01 s01, anim=wip"
+              placeholder="ex: e01 s01 anim=wip"
               @save="saveSearchQuery"
             />
           </div>
@@ -115,12 +115,14 @@
     <create-tasks-modal
       :active="modals.isCreateTasksDisplayed"
       :is-loading="loading.creatingTasks"
+      :is-loading-stay="loading.creatingTasksStay"
       :is-error="errors.creatingTasks"
       :cancel-route="shotsPath"
       :title="$t('tasks.create_tasks_shot')"
       :text="$t('tasks.create_tasks_shot_explaination')"
       :error-text="$t('tasks.create_tasks_shot_failed')"
       @confirm="confirmCreateTasks"
+      @confirm-and-stay="confirmCreateTasksAndStay"
     />
 
   </div>
@@ -180,7 +182,8 @@ export default {
         creatingTasks: false,
         edit: false,
         importing: false,
-        stay: false
+        stay: false,
+        creatingTasksStay: false
       },
       errors: {
         creatingTasks: false,
@@ -285,6 +288,7 @@ export default {
             this.onSearchChange()
             this.handleModalsDisplay()
             setTimeout(() => {
+              this.resizeHeaders()
               this.$refs['shot-list'].setScrollPosition(
                 this.shotListScrollPosition
               )
@@ -384,22 +388,35 @@ export default {
 
     confirmCreateTasks (form) {
       this.loading.creatingTasks = true
+      this.runTasksCreation(form, (err) => {
+        if (!err) this.$router.push(this.shotsPath)
+        this.loading.creatingTasks = false
+      })
+    },
+
+    confirmCreateTasksAndStay (form) {
+      this.loading.creatingTasksStay = true
+      this.runTasksCreation(form, () => {
+        this.loading.creatingTasksStay = false
+      })
+    },
+
+    runTasksCreation (form, callback) {
       this.errors.creatingTasks = false
       this.$store.dispatch('createTasks', {
         task_type_id: form.task_type_id,
         project_id: this.currentProduction.id,
         type: 'shots',
         callback: (err) => {
-          this.loading.creatingTasks = false
           if (err) {
             this.errors.creatingTasks = true
           } else {
             this.modals.isCreateTasks = false
-            this.$router.push(this.shotsPath)
             this.loadShots(() => {
               this.resizeHeaders()
             })
           }
+          callback(err)
         }
       })
     },
@@ -494,6 +511,7 @@ export default {
     onSearchChange (event) {
       const searchQuery = this.$refs['shot-search-field'].getValue()
       this.setShotSearch(searchQuery)
+      this.resizeHeaders()
     },
 
     saveScrollPosition (scrollPosition) {
@@ -506,6 +524,7 @@ export default {
     changeSearch (searchQuery) {
       this.$refs['shot-search-field'].setValue(searchQuery.search_query)
       this.$refs['shot-search-field'].$emit('change', searchQuery.search_query)
+      this.resizeHeaders()
     },
 
     saveSearchQuery (searchQuery) {
@@ -567,6 +586,10 @@ export default {
           }
         })
       }
+    },
+
+    displayedShots () {
+      this.resizeHeaders()
     }
   },
 

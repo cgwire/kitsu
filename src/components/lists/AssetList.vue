@@ -435,6 +435,7 @@ export default {
     resizeHeaders () {
       if (
         this.$refs['body-tbody'] &&
+        this.$refs['body-tbody'][0] &&
         this.$refs['body-tbody'][0].children.length > 0
       ) {
         if (this.$refs['th-episode']) {

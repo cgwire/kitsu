@@ -25,6 +25,16 @@
           :class="{
             button: true,
             'is-primary': true,
+            'is-loading': isLoadingStay
+          }"
+          @click="confirmAndStayClicked"
+        >
+          {{ $t("main.confirmation_and_stay") }}
+        </a>
+        <a
+          :class="{
+            button: true,
+            'is-primary': true,
             'is-loading': isLoading
           }"
           @click="confirmClicked"
@@ -60,15 +70,16 @@ export default {
   },
 
   props: [
-    'onConfirmClicked',
-    'text',
-    'title',
     'active',
     'cancelRoute',
+    'errorText',
     'isError',
     'isLoading',
+    'isLoadingStay',
     'isSuccess',
-    'errorText'
+    'onConfirmClicked',
+    'text',
+    'title'
   ],
 
   data () {
@@ -93,10 +104,14 @@ export default {
   methods: {
     ...mapActions([
     ]),
+
     confirmClicked () {
       this.$emit('confirm', this.form)
-    }
+    },
 
+    confirmAndStayClicked () {
+      this.$emit('confirm-and-stay', this.form)
+    }
   },
 
   mounted () {

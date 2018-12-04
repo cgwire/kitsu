@@ -16,6 +16,9 @@
           <th class="is-done">
             {{ $t('task_status.fields.is_done') }}
           </th>
+          <th class="is-artist-allowed">
+            {{ $t('task_status.fields.is_artist_allowed') }}
+          </th>
           <th class="actions"></th>
         </tr>
       </thead>
@@ -35,13 +38,15 @@
           <td class="name">
             {{ entry.name }}
           </td>
-          <task-status-name class="short-name" :entry="entry">
-          </task-status-name>
+          <task-status-name class="short-name" :entry="entry" />
           <td class="is-reviewable">
             {{ translateBoolean(entry.is_reviewable) }}
           </td>
           <td class="is-done">
             {{ translateBoolean(entry.is_done) }}
+          </td>
+          <td class="is-artist-allowed">
+            {{ translateBoolean(entry.is_artist_allowed) }}
           </td>
           <row-actions
             :entry-id="entry.id"
@@ -53,6 +58,7 @@
               name: 'delete-task-status',
               params: {task_status_id: entry.id}
             }"
+            :hide-delete="entry.short_name === 'todo'"
           />
         </tr>
       </tbody>
@@ -94,9 +100,11 @@ export default {
   methods: {
     ...mapActions([
     ]),
+
     onBodyScroll (event, position) {
       this.$refs.headerWrapper.style.left = `-${position.scrollLeft}px`
     },
+
     translateBoolean (booleanValue) {
       return booleanValue ? this.$t('main.yes') : this.$t('main.no')
     }
@@ -115,13 +123,10 @@ export default {
   min-width: 150px;
 }
 
-.is-reviewable {
-  width: 120px;
-  min-width: 120px;
-}
-
-.is-done {
-  width: 120px;
-  min-width: 120px;
+.is-reviewable,
+.is-done,
+.is-artist-allowed {
+  width: 140px;
+  min-width: 140px;
 }
 </style>

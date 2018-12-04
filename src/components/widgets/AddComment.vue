@@ -3,8 +3,7 @@
     <figure class="media-left">
       <div class="level">
         <div class="level-left">
-          <people-avatar class="level-item" :person="user">
-          </people-avatar>
+          <people-avatar class="level-item" :person="user" />
         </div>
       </div>
     </figure>

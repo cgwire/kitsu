@@ -99,7 +99,7 @@
               :isAddCommentLoading="addCommentLoading.isLoading"
               :user="user"
               :task="currentTask"
-              :taskStatusOptions="taskStatusOptions"
+              :taskStatusOptions="taskStatusOptionsForCurrentUser"
               v-if="isCommentingAllowed"
             />
             <div class="comments" v-if="currentTaskComments.length > 0">
@@ -638,9 +638,9 @@ export default {
 
     deleteText () {
       if (this.currentTask) {
+        const taskType = this.taskTypeMap[this.currentTask.task_type_id]
         return this.$t('main.delete_text', {
-          name: `${this.currentTask.entity_name}` +
-                ` / ${this.currentTask.task_type_name}`
+          name: `${this.currentTask.entity_name} / ${taskType.name}`
         })
       } else {
         return ''
@@ -726,6 +726,14 @@ export default {
         })
       }
       return currentPreview
+    },
+
+    taskStatusOptionsForCurrentUser () {
+      if (this.isCurrentUserManager) {
+        return this.taskStatusOptions
+      } else {
+        return this.taskStatusOptions.filter(status => status.isArtistAllowed)
+      }
     }
   },
 

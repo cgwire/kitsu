@@ -50,6 +50,10 @@ import {
 
   SET_TODO_LIST_SCROLL_POSITION,
 
+  SAVE_ASSET_SEARCH_END,
+  SAVE_SHOT_SEARCH_END,
+  REMOVE_ASSET_SEARCH_END,
+
   RESET_ALL
 } from '../mutation-types'
 
@@ -469,6 +473,31 @@ const mutations = {
     state.timeSpentTotal = Object
       .values(state.timeSpentMap)
       .reduce((acc, timeSpent) => timeSpent.duration + acc, 0) / 60
+  },
+
+  [SAVE_ASSET_SEARCH_END] (state, { searchQuery, production }) {
+    if (!state.userFilters.asset[production.id]) {
+      state.userFilters.asset[production.id] = []
+    }
+    if (!state.userFilters.asset[production.id].includes(searchQuery)) {
+      state.userFilters.asset[production.id].push(searchQuery)
+      state.userFilters.asset[production.id] =
+        sortByName(state.userFilters.asset[production.id])
+    }
+  },
+
+  [SAVE_SHOT_SEARCH_END] (state, { searchQuery, production }) {
+    if (!state.userFilters.shot[production.id]) {
+      state.userFilters.shot[production.id] = []
+    }
+    if (!state.userFilters.shot[production.id].includes(searchQuery)) {
+      state.userFilters.shot[production.id].push(searchQuery)
+      state.userFilters.shot[production.id] =
+        sortByName(state.userFilters.shot[production.id])
+    }
+  },
+
+  [REMOVE_ASSET_SEARCH_END] (state) {
   },
 
   [RESET_ALL] (state) {
