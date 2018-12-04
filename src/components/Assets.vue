@@ -248,9 +248,11 @@ export default {
             this.handleModalsDisplay()
             this.onSearchChange()
             setTimeout(() => {
-              this.$refs['asset-list'].setScrollPosition(
-                this.assetListScrollPosition
-              )
+              if (this.$refs['asset-list']) {
+                this.$refs['asset-list'].setScrollPosition(
+                  this.assetListScrollPosition
+                )
+              }
             }, 500)
           }
           setTimeout(() => {
@@ -474,11 +476,13 @@ export default {
     onSearchChange () {
       const searchQuery = this.$refs['asset-search-field'].getValue()
       this.setAssetSearch(searchQuery)
+      this.resizeHeaders()
     },
 
     changeSearch (searchQuery) {
       this.$refs['asset-search-field'].setValue(searchQuery.search_query)
       this.$refs['asset-search-field'].$emit('change', searchQuery.search_query)
+      this.resizeHeaders()
     },
 
     saveSearchQuery (searchQuery) {
@@ -561,6 +565,10 @@ export default {
           }
         })
       }
+    },
+
+    displayedAssets () {
+      this.resizeHeaders()
     }
   },
 

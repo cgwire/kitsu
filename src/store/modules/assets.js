@@ -309,11 +309,10 @@ const actions = {
   },
 
   editAsset ({ commit, state, rootState }, { data, callback }) {
-    if (
-      data.name && cache.assets.find((asset) => {
-        return asset.name === data.name && data.id !== asset.id
-      })
-    ) {
+    const existingAsset = data.name && cache.assets.find((asset) => {
+      return asset.name === data.name && data.id !== asset.id
+    })
+    if (existingAsset) {
       return callback()
     }
 
@@ -710,8 +709,10 @@ const mutations = {
   },
 
   [SAVE_ASSET_SEARCH_END] (state, { searchQuery }) {
-    state.assetSearchQueries.push(searchQuery)
-    state.assetSearchQueries = sortByName(state.assetSearchQueries)
+    if (!state.assetSearchQueries.includes(searchQuery)) {
+      state.assetSearchQueries.push(searchQuery)
+      state.assetSearchQueries = sortByName(state.assetSearchQueries)
+    }
   },
 
   [REMOVE_ASSET_SEARCH_END] (state, { searchQuery }) {

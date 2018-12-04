@@ -157,6 +157,7 @@ export default {
 
   computed: {
     ...mapGetters([
+      'assetsPath',
       'currentEpisode',
       'currentProduction',
       'episodes',
@@ -351,7 +352,9 @@ export default {
           this.updateComboFromRoute()
         })
       } else {
-        this.setProduction(routeProductionId)
+        if (this.assetsPath.name === 'open-productions' && routeProductionId) {
+          this.setProduction(routeProductionId)
+        }
         this.setEpisodeFromRoute()
         this.updateComboFromRoute()
       }

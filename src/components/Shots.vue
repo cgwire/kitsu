@@ -511,6 +511,7 @@ export default {
     onSearchChange (event) {
       const searchQuery = this.$refs['shot-search-field'].getValue()
       this.setShotSearch(searchQuery)
+      this.resizeHeaders()
     },
 
     saveScrollPosition (scrollPosition) {
