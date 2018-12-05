@@ -16,6 +16,7 @@ install:
   - "pip install -r requirements.txt"
 before_script:
   - psql -c 'create database zoudb;' -U postgres
+  - mkdir /home/travis/build/cgwire/zou/previews
 env:
   - MAIL_DEBUG=1
   - PREVIEW_FOLDER=/home/travis/build/cgwire/zou/previews
