@@ -476,13 +476,16 @@ const mutations = {
   },
 
   [SAVE_ASSET_SEARCH_END] (state, { searchQuery, production }) {
-    if (!state.userFilters.asset[production.id]) {
-      state.userFilters.asset[production.id] = []
-    }
-    if (!state.userFilters.asset[production.id].includes(searchQuery)) {
-      state.userFilters.asset[production.id].push(searchQuery)
-      state.userFilters.asset[production.id] =
-        sortByName(state.userFilters.asset[production.id])
+    if (production) {
+      if (!state.userFilters.asset) state.userFilters.asset = {}
+      if (!state.userFilters.asset[production.id]) {
+        state.userFilters.asset[production.id] = []
+      }
+      if (!state.userFilters.asset[production.id].includes(searchQuery)) {
+        state.userFilters.asset[production.id].push(searchQuery)
+        state.userFilters.asset[production.id] =
+          sortByName(state.userFilters.asset[production.id])
+      }
     }
   },
 

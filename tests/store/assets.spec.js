@@ -405,7 +405,8 @@ describe('assets', () => {
           name: 'characters',
           query: 'characters',
           id: 'filter-2'
-        }
+        },
+        production: {id: 'production-1'}
       })
       expect(state.assetSearchQueries.length).to.equal(2)
     })
