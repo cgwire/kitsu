@@ -669,7 +669,11 @@ const mutations = {
       (asset) => asset.id === task.entity_id
     )
     if (asset) {
-      asset.validations[task.task_type_id] = null
+      const validations = {...asset.validations}
+      Vue.set(validations, task.task_type_id, null)
+      delete asset.validations
+      Vue.set(asset, 'validations', validations)
+
       const taskIndex = asset.tasks.findIndex(
         (assetTask) => assetTask.id === task.entity_id
       )

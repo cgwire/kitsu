@@ -297,6 +297,24 @@ const actions = {
     }, callback)
   },
 
+  deleteSelectedTasks ({ commit, state }) {
+    return new Promise((resolve, reject) => {
+      const selectedTaskIds = Object.keys(state.selectedTasks)
+      async.eachSeries(selectedTaskIds, (taskId, next) => {
+        const task = state.taskMap[taskId]
+        tasksApi.deleteTask(task, (err) => {
+          if (!err) commit(DELETE_TASK_END, task)
+          next(err)
+        })
+      }, (err) => {
+        if (err) reject(err)
+        else {
+          resolve()
+        }
+      })
+    })
+  },
+
   createTask (
     { commit, state, rootGetters },
     { entityId, projectId, taskTypeId, type }

@@ -158,6 +158,7 @@ export default {
     change_priority: 'Change priority',
     change_status: 'Change status',
     create_tasks: 'Create tasks',
+    delete_tasks: 'Delete tasks',
     run_custom_action: 'Run custom action'
   },
 
@@ -408,6 +409,7 @@ export default {
     delete_error: 'An error occured while deleting task.',
     delete_comment: 'Are you sure you want to delete last comment?',
     delete_comment_error: 'An error occured while deleting comment.',
+    delete_for_selection: 'Delete selected tasks:',
     delete_preview: 'Are you sure you want to delete this preview?',
     delete_preview_error: 'An error occured while deleting preview.',
     edit_comment: 'Edit comment',
