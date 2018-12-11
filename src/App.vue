@@ -106,6 +106,10 @@ body {
   background: white;
 }
 
+.hidden {
+  display: none;
+}
+
 .page {
   padding: 0.5em 2em;
   padding-top: 70px;
@@ -398,6 +402,16 @@ input.search-input:focus {
   width: 100%;
 }
 
+.table-header .header-icon {
+  width: 15px;
+  cursor: pointer;
+  opacity: 0;
+}
+
+.table-header th:hover .header-icon {
+  opacity: 100;
+}
+
 .table-body {
   flex: 1;
   overflow: auto;
@@ -462,6 +476,16 @@ input.search-input:focus {
 
 .modal-content .button {
   margin-left: 0.5em;
+}
+
+.modal-content .box p.text {
+  margin-bottom: 1em;
+}
+
+.modal-content p.is-danger {
+  color: #ff3860;
+  font-style: italic;
+  margin-bottom: 2em;
 }
 
 .unselectable {
