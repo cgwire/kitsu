@@ -131,3 +131,7 @@ export const getWeekRange = (year, currentYear) => {
     return range(1, 52)
   }
 }
+
+export const remove = (items, valueToRemove) => {
+  return items.filter(item => item !== valueToRemove)
+}
