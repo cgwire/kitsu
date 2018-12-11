@@ -66,7 +66,7 @@ const auth = {
     superagent
       .get('/api/auth/authenticated')
       .end((err, res) => {
-        if (err && res.statusCode === 401) {
+        if (err && [401, 422].includes(res.statusCode)) {
           store.commit(USER_LOGIN_FAIL)
           callback(null)
         } else if (err) {
