@@ -43,7 +43,9 @@ export default {
   name: 'validation-cell',
 
   data () {
-    return {}
+    return {
+      task: null
+    }
   },
 
   components: {
@@ -90,6 +92,14 @@ export default {
     }
   },
 
+  mounted () {
+    if (this.taskTest) {
+      this.task = this.taskTest
+    } else {
+      this.task = this.taskMap[this.entity.validations[this.column.id]]
+    }
+  },
+
   computed: {
     ...mapGetters([
       'selectedTasks',
@@ -101,11 +111,6 @@ export default {
       'taskMap',
       'taskStatusMap'
     ]),
-
-    task () {
-      return this.taskTest ||
-        this.taskMap[this.entity.validations[this.column.id]]
-    },
 
     assignees () {
       if (this.task) {

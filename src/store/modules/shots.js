@@ -981,19 +981,7 @@ const mutations = {
     cache.shotIndex = buildShotIndex(cache.shots)
   },
 
-  [NEW_TASK_COMMENT_END] (state, {comment, taskId}) {
-    const task = helpers.getTask(taskId)
-
-    if (task) {
-      const shot = state.shotMap[task.entity_id]
-      const taskStatus = helpers.getTaskStatus(comment.task_status_id)
-
-      if (shot) {
-        Vue.set(task, 'task_status_id', taskStatus.id)
-        Vue.set(shot.validations, task.task_type_name, {...task})
-      }
-    }
-  },
+  [NEW_TASK_COMMENT_END] (state, {comment, taskId}) {},
 
   [SET_SHOT_SEARCH] (
     state,
@@ -1113,11 +1101,9 @@ const mutations = {
     const previousX = state.displayedShots.length - PAGE_SIZE
     const maxX = state.displayedShots.length
     const maxY = state.nbValidationColumns
-    if (previousX > 0) {
-      state.shotSelectionGrid = appendSelectionGrid(
-        state.shotSelectionGrid, previousX, maxX, maxY
-      )
-    }
+    state.shotSelectionGrid = appendSelectionGrid(
+      state.shotSelectionGrid, previousX, maxX, maxY
+    )
   },
 
   [DISPLAY_MORE_SEQUENCES] (state, tasks) {
