@@ -59,6 +59,7 @@
       :is-error="isShotsLoadingError"
       :validation-columns="shotValidationColumns"
       @scroll="saveScrollPosition"
+      @delete-all-tasks="onDeleteAllTasksClicked"
     />
 
     <manage-shots-modal
@@ -88,7 +89,7 @@
       :cancel-route="shotsPath"
       :text="deleteText()"
       :error-text="$t('shots.delete_error')"
-      @confirm="confirmDeleteShot"
+      @confirm="confirmDeleteAllTasks"
     />
 
     <delete-modal
@@ -99,6 +100,17 @@
       :text="restoreText()"
       :error-text="$t('shots.restore_error')"
       @confirm="confirmRestoreShot"
+    />
+
+    <hard-delete-modal
+      :active="modals.isDeleteAllTasksDisplayed"
+      :is-loading="loading.deleteAllTasks"
+      :is-error="errors.deleteAllTasks"
+      :cancel-route="shotsPath"
+      :text="deleteAllTasksText()"
+      :error-text="$t('tasks.delete_all_error')"
+      :lock-text="deleteAllTasksLockText"
+      @confirm="confirmDeleteAllTasks"
     />
 
     <import-modal
@@ -140,6 +152,7 @@ import DeleteModal from './widgets/DeleteModal'
 import EditShotModal from './modals/EditShotModal'
 import Filters from './widgets/Filters'
 import ImportModal from './modals/ImportModal'
+import HardDeleteModal from './modals/HardDeleteModal'
 import ManageShotsModal from './modals/ManageShotsModal'
 import PageTitle from './widgets/PageTitle'
 import SearchField from './widgets/SearchField'
@@ -159,6 +172,7 @@ export default {
     EditShotModal,
     Filters,
     ImportModal,
+    HardDeleteModal,
     ManageShotsModal,
     PageTitle,
     SearchField,
@@ -172,21 +186,24 @@ export default {
     return {
       initialLoading: true,
       modals: {
-        isNewDisplayed: false,
+        isCreateTasksDisplayed: false,
         isDeleteDisplayed: false,
-        isRestoreDisplayed: false,
+        isDeleteAllTasksDisplayed: false,
         isImportDisplayed: false,
-        isCreateTasksDisplayed: false
+        isNewDisplayed: false,
+        isRestoreDisplayed: false
       },
       loading: {
         creatingTasks: false,
+        creatingTasksStay: false,
+        deleteAllTasks: false,
         edit: false,
         importing: false,
-        stay: false,
-        creatingTasksStay: false
+        stay: false
       },
       errors: {
         creatingTasks: false,
+        deleteAllTasks: false,
         importing: false
       },
       shotToDelete: null,
@@ -199,7 +216,8 @@ export default {
         'FPS',
         'Frame In',
         'Frame Out'
-      ]
+      ],
+      deleteAllTasksLockText: null
     }
   },
 
@@ -226,39 +244,16 @@ export default {
       'shotSearchText',
       'shotsPath',
       'shotValidationColumns',
-      'shotListScrollPosition'
+      'shotListScrollPosition',
+      'taskTypeMap'
     ]),
 
     importPath () {
-      let route = {
-        name: 'import-shots',
-        params: {
-          production_id: this.currentProduction.id
-        }
-      }
-
-      if (this.isTVShow && this.currentEpisode) {
-        route.name = 'episode-import-shots'
-        route.params.episode_id = this.currentEpisode.id
-      }
-
-      return route
+      return this.getPath('import-shots')
     },
 
     manageShotsPath () {
-      let route = {
-        name: 'manage-shots',
-        params: {
-          production_id: this.currentProduction.id
-        }
-      }
-
-      if (this.isTVShow && this.currentEpisode) {
-        route.name = 'episode-manage-shots'
-        route.params.episode_id = this.currentEpisode.id
-      }
-
-      return route
+      return this.getPath('manage-shots')
     }
   },
 
@@ -308,6 +303,7 @@ export default {
 
   methods: {
     ...mapActions([
+      'deleteAllTasks',
       'loadShots',
       'loadComment',
       'removeShotSearch',
@@ -362,6 +358,25 @@ export default {
           }
         }
       })
+    },
+
+    confirmDeleteAllTasks () {
+      const taskTypeId = this.$route.params.task_type_id
+      const projectId = this.currentProduction.id
+      this.errors.deleteAllTasks = false
+      this.loading.deleteAllTasks = true
+      this.deleteAllTasks({ projectId, taskTypeId })
+        .then(() => {
+          this.loading.deleteAllTasks = false
+          this.loadShots(() => {
+            this.resizeHeaders()
+          })
+          this.$router.push(this.shotsPath)
+        }).catch((err) => {
+          console.error(err)
+          this.loading.deleteAllTasks = false
+          this.errors.deleteAllTasks = true
+        })
     },
 
     confirmDeleteShot () {
@@ -441,6 +456,15 @@ export default {
       }
     },
 
+    deleteAllTasksText () {
+      const taskType = this.taskTypeMap[this.$route.params.task_type_id]
+      if (taskType) {
+        return this.$t('tasks.delete_all_text', {name: taskType.name})
+      } else {
+        return ''
+      }
+    },
+
     restoreText () {
       const shot = this.shotToRestore
       if (shot) {
@@ -457,12 +481,13 @@ export default {
       this.editShot.isError = false
 
       this.modals = {
-        isNewDisplayed: false,
-        isRestoreDisplayed: false,
-        isDeleteDisplayed: false,
-        isImportDisplayed: false,
         isCreateTasksDisplayed: false,
-        isManagedDisplayed: false
+        isDeleteDisplayed: false,
+        isDeleteAllTasksDisplayed: false,
+        isImportDisplayed: false,
+        isManagedDisplayed: false,
+        isNewDisplayed: false,
+        isRestoreDisplayed: false
       }
 
       if (path.indexOf('new') > 0) {
@@ -471,6 +496,8 @@ export default {
       } else if (path.indexOf('edit') > 0) {
         this.shotToEdit = this.shotMap[shotId]
         this.modals.isNewDisplayed = true
+      } else if (path.indexOf('delete-all-tasks') > 0) {
+        this.modals.isDeleteAllTasksDisplayed = true
       } else if (path.indexOf('delete') > 0) {
         this.shotToDelete = this.shotMap[shotId]
         this.modals.isDeleteDisplayed = true
@@ -506,6 +533,15 @@ export default {
           this.errors.importing = true
         }
       })
+    },
+
+    onDeleteAllTasksClicked (taskTypeId) {
+      const route = this.getPath('delete-all-shot-tasks')
+      console.log(taskTypeId, this.taskTypeMap)
+      const taskType = this.taskTypeMap[taskTypeId]
+      route.params.task_type_id = taskTypeId
+      this.deleteAllTasksLockText = taskType.name
+      this.$router.push(route)
     },
 
     onSearchChange (event) {
@@ -551,6 +587,20 @@ export default {
           this.$refs['shot-list'].resizeHeaders()
         }
       }, 0)
+    },
+
+    getPath (section) {
+      let route = {
+        name: section,
+        params: {
+          production_id: this.currentProduction.id
+        }
+      }
+      if (this.isTVShow && this.currentEpisode) {
+        route.name = `episode-${section}`
+        route.params.episode_id = this.currentEpisode.id
+      }
+      return route
     }
   },
 

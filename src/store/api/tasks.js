@@ -104,6 +104,13 @@ export default {
     client.del(`/api/data/tasks/${task.id}?force=true`, callback)
   },
 
+  deleteAllTasks (projectId, taskTypeId, callback) {
+    client.del(
+      `/api/data/projects/${projectId}/task-types/${taskTypeId}/tasks`,
+      callback
+    )
+  },
+
   addPreview (data, callback) {
     const taskId = data.taskId
     const commentId = data.commentId

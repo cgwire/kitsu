@@ -13,7 +13,10 @@
   @mouseout="onMouseOut"
   @click="select"
 >
-  <div class="wrapper">
+  <div
+    class="wrapper"
+    v-if="!minimized"
+  >
     <validation-tag
       class="validation-tag"
       :task="task"
@@ -27,6 +30,17 @@
       :font-size="10"
       v-if="isAssignees && isShowAssignations && !isCurrentUserClient"
       v-for="personId in assignees"
+    />
+  </div>
+  <div
+    class="wrapper"
+    v-else
+  >
+    <validation-tag
+      class="validation-tag"
+      :task="task"
+      :minimized="minimized"
+      v-if="task"
     />
   </div>
 </td>
@@ -72,6 +86,10 @@ export default {
     },
     isAssignees: {
       default: true,
+      type: Boolean
+    },
+    minimized: {
+      default: false,
       type: Boolean
     },
     selectable: {

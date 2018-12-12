@@ -315,6 +315,15 @@ const actions = {
     })
   },
 
+  deleteAllTasks ({ commit, state }, { projectId, taskTypeId }) {
+    return new Promise((resolve, reject) => {
+      tasksApi.deleteAllTasks(projectId, taskTypeId, (err) => {
+        if (err) reject(err)
+        else resolve()
+      })
+    })
+  },
+
   createTask (
     { commit, state, rootGetters },
     { entityId, projectId, taskTypeId, type }
@@ -925,7 +934,6 @@ const mutations = {
         const person = helpers.getPerson(task.last_comment.person_id)
         task.last_comment.person = person
       }
-
       state.taskMap[task.id] = task
     })
   },
