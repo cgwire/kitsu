@@ -1,5 +1,6 @@
 <template>
 <span>
+<span v-if="!minimized">
   <router-link
     :to="taskPath(task)"
     class="tag dynamic"
@@ -13,17 +14,42 @@
 
   <span
     class="tag"
-    v-else
     :style="{
       background: this.backgroundColor,
       color: this.color,
-  }">
+    }"
+    v-else
+  >
     {{ taskStatus.short_name }}
   </span>
 
   <span class="priority" v-if="isPriority && !isCurrentUserClient">
     {{ priority }}
   </span>
+</span>
+<span v-else>
+  <router-link
+    :to="taskPath(task)"
+    class="tag dynamic"
+    v-if="!isStatic && !isCurrentUserClient"
+    :style="{
+      background: this.backgroundColor,
+      color: this.color,
+  }">
+     &nbsp;
+  </router-link>
+
+  <span
+    class="tag"
+    :style="{
+      background: this.backgroundColor,
+      color: this.color,
+    }"
+    v-else
+  >
+    &nbsp;
+  </span>
+</span>
 </span>
 </template>
 
@@ -42,6 +68,10 @@ export default {
     },
     isPriority: {
       default: true,
+      type: Boolean
+    },
+    minimized: {
+      default: false,
       type: Boolean
     }
   },

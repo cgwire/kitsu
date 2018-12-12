@@ -13,7 +13,10 @@
   @mouseout="onMouseOut"
   @click="select"
 >
-  <div class="wrapper">
+  <div
+    class="wrapper"
+    v-if="!minimized"
+  >
     <validation-tag
       class="validation-tag"
       :task="task"
@@ -27,6 +30,17 @@
       :font-size="10"
       v-if="isAssignees && isShowAssignations && !isCurrentUserClient"
       v-for="personId in assignees"
+    />
+  </div>
+  <div
+    class="wrapper"
+    v-else
+  >
+    <validation-tag
+      class="validation-tag"
+      :task="task"
+      :minimized="minimized"
+      v-if="task"
     />
   </div>
 </td>
@@ -43,7 +57,9 @@ export default {
   name: 'validation-cell',
 
   data () {
-    return {}
+    return {
+      task: null
+    }
   },
 
   components: {
@@ -72,6 +88,10 @@ export default {
       default: true,
       type: Boolean
     },
+    minimized: {
+      default: false,
+      type: Boolean
+    },
     selectable: {
       default: true,
       type: Boolean
@@ -90,6 +110,14 @@ export default {
     }
   },
 
+  mounted () {
+    if (this.taskTest) {
+      this.task = this.taskTest
+    } else {
+      this.task = this.taskMap[this.entity.validations[this.column.id]]
+    }
+  },
+
   computed: {
     ...mapGetters([
       'selectedTasks',
@@ -101,11 +129,6 @@ export default {
       'taskMap',
       'taskStatusMap'
     ]),
-
-    task () {
-      return this.taskTest ||
-        this.taskMap[this.entity.validations[this.column.id]]
-    },
 
     assignees () {
       if (this.task) {

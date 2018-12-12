@@ -271,6 +271,11 @@ export const routes = [
         component: Assets,
         name: 'create-asset-tasks'
       },
+      {
+        path: '/productions/:production_id/assets/delete-all-tasks/:task_type_id',
+        component: Assets,
+        name: 'delete-all-asset-tasks'
+      },
 
       {
         path: '/productions/:production_id/episodes/:episode_id/assets',
@@ -314,6 +319,11 @@ export const routes = [
         component: Assets,
         name: 'episode-create-asset-tasks'
       },
+      {
+        path: '/productions/:production_id/episodes/:episode_id/assets/delete-all-tasks/:task_type_id',
+        component: Assets,
+        name: 'episode-delete-all-asset-tasks'
+      },
 
       {
         path: '/productions/:production_id/asset-types',
@@ -346,6 +356,12 @@ export const routes = [
         component: Shots,
         name: 'create-shot-tasks'
       },
+      {
+        path: '/productions/:production_id/shots/delete-all-tasks/:task_type_id',
+        component: Shots,
+        name: 'delete-all-shot-tasks'
+      },
+
       {
         path: '/productions/:production_id/shots/edit/:shot_id',
         component: Shots,
@@ -386,6 +402,11 @@ export const routes = [
         path: '/productions/:production_id/episodes/:episode_id/shots/create-tasks',
         component: Shots,
         name: 'episode-create-shot-tasks'
+      },
+      {
+        path: '/productions/:production_id/episodes/:episode_id/shots/delete-all-tasks/:task_type_id',
+        component: Shots,
+        name: 'episode-delete-all-shot-tasks'
       },
       {
         path: '/productions/:production_id/episodes/:episode_id/shots/edit/:shot_id',

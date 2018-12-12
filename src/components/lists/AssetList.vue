@@ -1,5 +1,14 @@
 <template>
 <div class="data-list">
+
+  <table-header-menu
+    ref="headerMenu"
+    :is-minimized="hiddenColumns[lastHeaderMenuDisplayed]"
+    :is-current-user-admin="isCurrentUserAdmin"
+    @minimize-clicked="onMinimizeColumnToggled()"
+    @delete-all-clicked="onDeleteAllTasksClicked()"
+  />
+
   <div class="table-header-wrapper">
     <table class="table table-header" ref="headerWrapper">
       <thead>
@@ -9,21 +18,36 @@
           </th>
           <th class="thumbnail" ref="th-thumbnail"></th>
           <th class="name" ref="th-name">{{ $t('assets.fields.name') }}</th>
-          <th class="description" ref="th-description" v-if="!isCurrentUserClient">
+          <th
+            class="description"
+            ref="th-description"
+            v-if="!isCurrentUserClient"
+          >
             {{ $t('assets.fields.description') }}
           </th>
           <th
-            class="validation-cell"
+            :class="{
+              'validation-cell': !hiddenColumns[columnId],
+              'hidden-validation-cell': hiddenColumns[columnId]
+            }"
             :key="columnId"
             :style="getValidationStyle(columnId)"
             v-for="columnId in sortedValidationColumns"
             v-if="!isLoading"
           >
-            <router-link
-              :to="taskTypePath(columnId)"
-            >
-              {{ taskTypeMap[columnId].name }}
-            </router-link>
+            <div class="flexrow">
+              <router-link
+                class="flexrow-item"
+                style="margin-right: 0;"
+                :to="taskTypePath(columnId)"
+              >
+                {{ !hiddenColumns[columnId] ? taskTypeMap[columnId].name : '' }}
+              </router-link>
+              <chevron-down-icon
+                @click="showHeaderMenu(columnId, $event)"
+                class="header-icon flexrow-item"
+              />
+            </div>
           </th>
           <th class="actions">
             <button-link
@@ -122,7 +146,10 @@
             :entry="asset"
           />
           <validation-cell
-            class="validation-cell"
+            :class="{
+              'validation-cell': !hiddenColumns[columnId],
+              'hidden-validation-cell': hiddenColumns[columnId]
+            }"
             :key="columnId + '-' + asset.id"
             :ref="'validation-' + getIndex(i, k) + '-' + j"
             :column="taskTypeMap[columnId]"
@@ -130,6 +157,7 @@
             :selected="assetSelectionGrid[getIndex(i, k)][j]"
             :rowX="getIndex(i, k)"
             :columnY="j"
+            :minimized="hiddenColumns[columnId]"
             @select="onTaskSelected"
             @unselect="onTaskUnselected"
             v-for="(columnId, j) in sortedValidationColumns"
@@ -140,8 +168,7 @@
             :delete-route="deletePath(asset.id)"
             :restore-route="restorePath(asset.id)"
           />
-          <td class="actions" v-else>
-          </td>
+          <td class="actions" v-else></td>
         </tr>
         <tr class="empty-line"></tr>
       </tbody>
@@ -160,7 +187,12 @@
 
 <script>
 import { mapGetters, mapActions } from 'vuex'
-import colors from '../../lib/colors'
+import {
+  ChevronDownIcon
+} from 'vue-feather-icons'
+import {
+  entityListMixin
+} from './base'
 
 import DescriptionCell from '../cells/DescriptionCell'
 import RowActions from '../widgets/RowActions'
@@ -168,11 +200,14 @@ import ButtonLink from '../widgets/ButtonLink'
 import ButtonHrefLink from '../widgets/ButtonHrefLink'
 import EntityThumbnail from '../widgets/EntityThumbnail'
 import PageTitle from '../widgets/PageTitle'
+import TableHeaderMenu from '../widgets/TableHeaderMenu'
 import TableInfo from '../widgets/TableInfo'
 import ValidationCell from '../cells/ValidationCell'
 
 export default {
   name: 'asset-list',
+  mixins: [entityListMixin],
+
   props: {
     displayedAssets: {
       type: Array,
@@ -194,10 +229,9 @@ export default {
 
   data () {
     return {
-      busy: false,
-      scrollPosition: 0,
       lastSelection: null,
-      selectionGrid: null
+      hiddenColumns: {},
+      lastHeaderMenuDisplayed: null
     }
   },
 
@@ -206,10 +240,16 @@ export default {
     ButtonHrefLink,
     DescriptionCell,
     EntityThumbnail,
+    ChevronDownIcon,
     PageTitle,
     RowActions,
     TableInfo,
+    TableHeaderMenu,
     ValidationCell
+  },
+
+  created () {
+    this.initHiddenColumns(this.validationColumns, this.hiddenColumns)
   },
 
   mounted () {
@@ -226,6 +266,7 @@ export default {
       'currentProduction',
       'displayedAssetsLength',
       'nbSelectedTasks',
+      'isCurrentUserAdmin',
       'isCurrentUserClient',
       'isCurrentUserManager',
       'isTVShow',
@@ -259,21 +300,6 @@ export default {
           this.displayedAssetsLength > 0
         )
       )
-    },
-
-    sortedValidationColumns () {
-      const columns = [...this.validationColumns]
-      return columns.sort((a, b) => {
-        const taskTypeA = this.taskTypeMap[a]
-        const taskTypeB = this.taskTypeMap[b]
-        if (taskTypeA.priority === taskTypeB.priority) {
-          return taskTypeA.name.localeCompare(taskTypeB)
-        } else if (taskTypeA.priority > taskTypeB.priority) {
-          return 1
-        } else {
-          return -1
-        }
-      })
     }
   },
 
@@ -282,8 +308,32 @@ export default {
       'displayMoreAssets'
     ]),
 
-    getBackground (color) {
-      return colors.hexToRGBa(color, 0.08)
+    showHeaderMenu (columnId, event) {
+      const headerMenuEl = this.$refs.headerMenu.$el
+      if (headerMenuEl.className === 'header-menu') {
+        headerMenuEl.className = 'header-menu hidden'
+      } else {
+        headerMenuEl.className = 'header-menu'
+        let headerElement = event.srcElement.parentNode.parentNode
+        if (headerElement.tagName !== 'TH') {
+          headerElement = headerElement.parentNode
+        }
+        const left = headerElement.getBoundingClientRect().left + 1
+        const top = headerElement.getBoundingClientRect().bottom
+        headerMenuEl.style.left = left + 'px'
+        headerMenuEl.style.top = top + 'px'
+      }
+      this.lastHeaderMenuDisplayed = columnId
+    },
+
+    onMinimizeColumnToggled () {
+      this.hideColumn(this.lastHeaderMenuDisplayed)
+      this.showHeaderMenu()
+    },
+
+    onDeleteAllTasksClicked () {
+      this.$emit('delete-all-tasks', this.lastHeaderMenuDisplayed)
+      this.showHeaderMenu()
     },
 
     onTaskSelected (validationInfo) {
@@ -354,12 +404,6 @@ export default {
       this.$nextTick(this.resizeHeaders)
     },
 
-    setScrollPosition (scrollPosition) {
-      if (this.$refs.body) {
-        this.$refs.body.scrollTop = scrollPosition
-      }
-    },
-
     getIndex (i, k) {
       let j = 0
       let index = 0
@@ -368,14 +412,6 @@ export default {
         j++
       }
       return i + index
-    },
-
-    getValidationStyle (columnId) {
-      const taskType = this.taskTypeMap[columnId]
-      return {
-        'border-left': `1px solid ${taskType.color}`,
-        'background': this.getBackground(taskType.color)
-      }
     },
 
     assetPath (assetId) {
@@ -459,6 +495,12 @@ export default {
         }
       }
     }
+  },
+
+  watch: {
+    validationColumns () {
+      this.initHiddenColumns(this.validationColumns, this.hiddenColumns)
+    }
   }
 }
 </script>
@@ -498,6 +540,13 @@ export default {
   max-width: 120px;
   width: 120px;
   margin-right: 1em;
+}
+
+.hidden-validation-cell {
+  min-width: 30px;
+  max-width: 30px;
+  width: 30px;
+  padding: 4px;
 }
 
 td.name {
@@ -540,6 +589,8 @@ thead tr a {
 
 .table-body {
   padding-top: 1em;
+  position: relative;
+  z-index: 1;
 }
 
 tbody:first-child tr:first-child {
@@ -574,5 +625,9 @@ tbody {
   border-bottom: 1px solid #CCC;
   height: 1em;
   box-shadow: inner 2px 2px 2px #EEE;
+}
+
+.table-header-wrapper {
+  position: relative;
 }
 </style>

@@ -58,6 +58,7 @@
     :is-error="isAssetsLoadingError"
     :validation-columns="assetValidationColumns"
     @scroll="saveScrollPosition"
+    @delete-all-tasks="onDeleteAllTasksClicked"
   />
 
   <edit-asset-modal
@@ -91,6 +92,17 @@
     :text="restoreText()"
     :error-text="$t('assets.restore_error')"
     @confirm="confirmRestoreAsset"
+  />
+
+  <hard-delete-modal
+    :active="modals.isDeleteAllTasksDisplayed"
+    :is-loading="loading.deleteAllTasks"
+    :is-error="errors.deleteAllTasks"
+    :cancel-route="assetsPath"
+    :text="deleteAllTasksText()"
+    :error-text="$t('tasks.delete_all_error')"
+    :lock-text="deleteAllTasksLockText"
+    @confirm="confirmDeleteAllTasks"
   />
 
   <import-modal
@@ -129,6 +141,7 @@ import CreateTasksModal from './modals/CreateTasksModal'
 import DeleteModal from './widgets/DeleteModal'
 import EditAssetModal from './modals/EditAssetModal'
 import ImportModal from './modals/ImportModal'
+import HardDeleteModal from './modals/HardDeleteModal'
 import PageTitle from './widgets/PageTitle'
 import SearchField from './widgets/SearchField'
 import SearchQueryList from './widgets/SearchQueryList'
@@ -144,6 +157,7 @@ export default {
     CreateTasksModal,
     DeleteModal,
     EditAssetModal,
+    HardDeleteModal,
     ImportModal,
     PageTitle,
     SearchField,
@@ -156,14 +170,16 @@ export default {
       initialLoading: true,
       modals: {
         isCreateTasksDisplayed: false,
+        isDeleteDisplayed: false,
+        isDeleteAllTasksDisplayed: false,
         isImportDisplayed: false,
-        isNewDisplayed: false,
-        isDeleteDisplayed: false
+        isNewDisplayed: false
       },
       loading: {
         creatingTasks: false,
-        importing: false,
+        deleteAllTasks: false,
         edit: false,
+        importing: false,
         stay: false,
         taskStay: false
       },
@@ -174,21 +190,22 @@ export default {
       assetToDelete: null,
       assetToRestore: null,
       assetToEdit: null,
-      choices: [],
       assetFilters: [{
         type: 'Type',
         value: {
           name: 'open'
         }
       }],
+      assetFilterTypes: [
+        'Type'
+      ],
+      choices: [],
       columns: [
         'Type',
         'Name',
         'Description'
       ],
-      assetFilterTypes: [
-        'Type'
-      ]
+      deleteAllTasksLockText: null
     }
   },
 
@@ -204,15 +221,16 @@ export default {
       'assetValidationColumns',
       'currentEpisode',
       'currentProduction',
+      'editAsset',
+      'deleteAsset',
       'displayedAssetsByType',
       'openProductions',
       'isAssetsLoading',
       'isAssetsLoadingError',
+      'isCurrentUserManager',
       'isTVShow',
-      'editAsset',
-      'deleteAsset',
       'restoreAsset',
-      'isCurrentUserManager'
+      'taskTypeMap'
     ]),
 
     newAssetPath () {
@@ -272,6 +290,7 @@ export default {
 
   methods: {
     ...mapActions([
+      'deleteAllTasks',
       'loadAssets',
       'loadComment',
       'removeAssetSearch',
@@ -380,6 +399,25 @@ export default {
       })
     },
 
+    confirmDeleteAllTasks () {
+      const taskTypeId = this.$route.params.task_type_id
+      const projectId = this.currentProduction.id
+      this.errors.deleteAllTasks = false
+      this.loading.deleteAllTasks = true
+      this.deleteAllTasks({ projectId, taskTypeId })
+        .then(() => {
+          this.loading.deleteAllTasks = false
+          this.loadAssets(() => {
+            this.resizeHeaders()
+          })
+          this.$router.push(this.assetsPath)
+        }).catch((err) => {
+          console.error(err)
+          this.loading.deleteAllTasks = false
+          this.errors.deleteAllTasks = true
+        })
+    },
+
     resetLightEditModal () {
       const form = {
         name: '',
@@ -402,6 +440,15 @@ export default {
       const asset = this.assetToDelete
       if (asset) {
         return this.$t('assets.delete_text', {name: asset.name})
+      } else {
+        return ''
+      }
+    },
+
+    deleteAllTasksText () {
+      const taskType = this.taskTypeMap[this.$route.params.task_type_id]
+      if (taskType) {
+        return this.$t('tasks.delete_all_text', {name: taskType.name})
       } else {
         return ''
       }
@@ -430,6 +477,10 @@ export default {
         this.editAsset.isSuccess = false
         this.assetToEdit = this.assetMap[assetId]
         this.modals.isNewDisplayed = true
+      } else if (path.indexOf('delete-all-tasks') > 0) {
+        const taskType = this.taskTypeMap[this.$route.params.task_type_id]
+        this.deleteAllTasksLockText = taskType.name
+        this.modals.isDeleteAllTasksDisplayed = true
       } else if (path.indexOf('delete') > 0) {
         this.assetToDelete = this.assetMap[assetId]
         this.modals.isDeleteDisplayed = true
@@ -444,6 +495,7 @@ export default {
         this.modals = {
           isNewDisplayed: false,
           isDeleteDisplayed: false,
+          isDeleteAllTasksDisplayed: false,
           isRestoreDisplayed: false,
           isImportDisplayed: false,
           isCreateTasksDisplayed: false
@@ -527,6 +579,14 @@ export default {
           this.$refs['asset-list'].resizeHeaders()
         }
       }, 0)
+    },
+
+    onDeleteAllTasksClicked (taskTypeId) {
+      const route = this.getPath('delete-all-asset-tasks')
+      const taskType = this.taskTypeMap[taskTypeId]
+      route.params.task_type_id = taskTypeId
+      this.deleteAllTasksLockText = taskType.name
+      this.$router.push(route)
     }
   },
 

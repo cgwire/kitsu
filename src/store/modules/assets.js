@@ -669,7 +669,11 @@ const mutations = {
       (asset) => asset.id === task.entity_id
     )
     if (asset) {
-      asset.validations[task.task_type_id] = null
+      const validations = {...asset.validations}
+      Vue.set(validations, task.task_type_id, null)
+      delete asset.validations
+      Vue.set(asset, 'validations', validations)
+
       const taskIndex = asset.tasks.findIndex(
         (assetTask) => assetTask.id === task.entity_id
       )
@@ -678,16 +682,6 @@ const mutations = {
   },
 
   [NEW_TASK_COMMENT_END] (state, {comment, taskId}) {
-    const task = helpers.getTask(taskId)
-    if (task) {
-      const asset = state.assetMap[task.entity_id]
-      const taskStatus = helpers.getTaskStatus(comment.task_status_id)
-
-      if (asset) {
-        Vue.set(task, 'task_status_id', taskStatus.id)
-        Vue.set(asset.validations, task.task_type_id, taskId)
-      }
-    }
   },
 
   [SET_ASSET_SEARCH] (
@@ -752,11 +746,9 @@ const mutations = {
     const previousX = state.displayedAssets.length - PAGE_SIZE
     const maxX = state.displayedAssets.length
     const maxY = state.nbValidationColumns
-    if (previousX > 0) {
-      state.assetSelectionGrid = appendSelectionGrid(
-        state.assetSelectionGrid, previousX, maxX, maxY
-      )
-    }
+    state.assetSelectionGrid = appendSelectionGrid(
+      state.assetSelectionGrid, previousX, maxX, maxY
+    )
   },
 
   [SET_CURRENT_PRODUCTION] (state, production) {

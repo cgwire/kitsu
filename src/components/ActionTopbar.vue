@@ -131,6 +131,28 @@
 
         <div
           class="flexrow-item"
+          v-if="selectedBar === 'delete-tasks'"
+        >
+          <div class="flexrow">
+            <div class="flexrow-item strong bigger hide-small-screen">
+              {{ $t('tasks.delete_for_selection') }}
+            </div>
+            <div class="flexrow-item" v-if="!isDeletionLoading">
+              <button
+                class="button is-danger confirm-button"
+                @click="confirmTaskDeletion"
+              >
+                {{ $t('main.confirmation') }}
+              </button>
+            </div>
+            <div class="flexrow-item" v-else>
+              <spinner :is-white="true" :size="20"/>
+            </div>
+          </div>
+        </div>
+
+        <div
+          class="flexrow-item"
           v-if="selectedBar === 'custom-actions'"
         >
           <div class="flexrow">
@@ -221,6 +243,14 @@
 
         <div
           class="more-menu-item"
+          v-if="isCurrentViewAsset || isCurrentViewShot"
+          @click="selectBar('delete-tasks')"
+        >
+          {{ $t('menu.delete_tasks') }}
+        </div>
+
+        <div
+          class="more-menu-item"
           @click="selectBar('custom-actions')"
         >
           {{ $t('menu.run_custom_action') }}
@@ -269,6 +299,7 @@ export default {
       isChangeStatusLoading: false,
       isChangePriorityLoading: false,
       isCreationLoading: false,
+      isDeletionLoading: false,
       selectedBar: 'assignation',
       person: null,
       taskStatusId: '',
@@ -380,6 +411,7 @@ export default {
     ...mapActions([
       'assignSelectedTasks',
       'createSelectedTasks',
+      'deleteSelectedTasks',
       'unassignSelectedTasks',
       'changeSelectedTaskStatus',
       'changeSelectedPriorities',
@@ -424,14 +456,25 @@ export default {
 
     confirmTaskCreation () {
       const type = this.$route.path.indexOf('shots') > 0 ? 'shots' : 'assets'
-      this.isPriorityLoading = true
+      this.isCreationLoading = true
       this.createSelectedTasks({
         type: type,
         projectId: this.currentProduction.id,
         callback: () => {
-          this.isPriorityLoading = false
+          this.isCreationLoading = false
         }
       })
+    },
+
+    confirmTaskDeletion () {
+      this.isDeletionLoading = true
+      this.deleteSelectedTasks()
+        .then(() => {
+          this.isDeletionLoading = false
+        })
+        .catch((err) => {
+          console.error(err)
+        })
     },
 
     clearAssignation () {

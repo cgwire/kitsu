@@ -149,7 +149,11 @@ export default {
   methods: {
     formatDate (date) {
       const utcDate = moment.tz(date, 'UTC')
-      return moment(utcDate.format()).fromNow()
+      if (moment().diff(utcDate, 'days') > 1) {
+        return utcDate.format('YYYY-MM-DD HH:mm')
+      } else {
+        return moment(utcDate.format()).fromNow()
+      }
     },
 
     compileMarkdown (input) {
@@ -197,7 +201,6 @@ export default {
 
 .comment-date {
   color: #999;
-  font-style: italic;
   margin-left: 0.5em;
   flex: 1;
 }

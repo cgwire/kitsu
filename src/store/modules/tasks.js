@@ -297,6 +297,33 @@ const actions = {
     }, callback)
   },
 
+  deleteSelectedTasks ({ commit, state }) {
+    return new Promise((resolve, reject) => {
+      const selectedTaskIds = Object.keys(state.selectedTasks)
+      async.eachSeries(selectedTaskIds, (taskId, next) => {
+        const task = state.taskMap[taskId]
+        tasksApi.deleteTask(task, (err) => {
+          if (!err) commit(DELETE_TASK_END, task)
+          next(err)
+        })
+      }, (err) => {
+        if (err) reject(err)
+        else {
+          resolve()
+        }
+      })
+    })
+  },
+
+  deleteAllTasks ({ commit, state }, { projectId, taskTypeId }) {
+    return new Promise((resolve, reject) => {
+      tasksApi.deleteAllTasks(projectId, taskTypeId, (err) => {
+        if (err) reject(err)
+        else resolve()
+      })
+    })
+  },
+
   createTask (
     { commit, state, rootGetters },
     { entityId, projectId, taskTypeId, type }
@@ -907,7 +934,6 @@ const mutations = {
         const person = helpers.getPerson(task.last_comment.person_id)
         task.last_comment.person = person
       }
-
       state.taskMap[task.id] = task
     })
   },

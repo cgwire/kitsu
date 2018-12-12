@@ -1,5 +1,14 @@
 <template>
 <div class="data-list">
+
+  <table-header-menu
+    ref="headerMenu"
+    :is-minimized="hiddenColumns[lastHeaderMenuDisplayed]"
+    :is-current-user-admin="isCurrentUserAdmin"
+    @minimize-clicked="onMinimizeColumnToggled()"
+    @delete-all-clicked="onDeleteAllTasksClicked()"
+  />
+
   <div class="table-header-wrapper">
     <table class="table table-header" ref="headerWrapper">
       <thead>
@@ -22,22 +31,29 @@
             {{ $t('shots.fields.description') }}
           </th>
           <th
-            class="validation-cell"
-            :key="columnId"
-            :style="{
-              'border-left': '1px solid ' + taskTypeMap[columnId].color,
-              'background': getBackground(taskTypeMap[columnId].color)
+            :class="{
+              'validation-cell': !hiddenColumns[columnId],
+              'hidden-validation-cell': hiddenColumns[columnId]
             }"
+            :key="columnId"
+            :style="getValidationStyle(columnId)"
             v-for="columnId in sortedValidationColumns"
             v-if="!isLoading"
           >
-            <router-link
-              :to="taskTypePath(columnId)"
-            >
-              {{ taskTypeMap[columnId].name }}
-            </router-link>
+            <div class="flexrow">
+              <router-link
+                class="flexrow-item"
+                style="margin-right: 0;"
+                :to="taskTypePath(columnId)"
+              >
+                {{ !hiddenColumns[columnId] ? taskTypeMap[columnId].name : '' }}
+              </router-link>
+              <chevron-down-icon
+                @click="showHeaderMenu(columnId, $event)"
+                class="header-icon flexrow-item"
+              />
+            </div>
           </th>
-
           <th class="actions">
             <button-link
               class="is-small"
@@ -122,11 +138,15 @@
             v-if="!isCurrentUserClient"
           />
           <validation-cell
-            class="unselectable validation-cell"
+            :class="{
+              'validation-cell': !hiddenColumns[columnId],
+              'hidden-validation-cell': hiddenColumns[columnId]
+            }"
             :key="columnId + '-' + shot.id"
             :ref="'validation-' + i + '-' + j"
             :column="taskTypeMap[columnId]"
             :entity="shot"
+            :minimized="hiddenColumns[columnId]"
             :selected="shotSelectionGrid[i][j]"
             :rowX="i"
             :columnY="j"
@@ -158,7 +178,12 @@
 
 <script>
 import { mapGetters, mapActions } from 'vuex'
-import colors from '../../lib/colors'
+import {
+  ChevronDownIcon
+} from 'vue-feather-icons'
+import {
+  entityListMixin
+} from './base'
 
 import DescriptionCell from '../cells/DescriptionCell'
 import ValidationCell from '../cells/ValidationCell'
@@ -166,11 +191,13 @@ import RowActions from '../widgets/RowActions'
 import ButtonLink from '../widgets/ButtonLink'
 import ButtonHrefLink from '../widgets/ButtonHrefLink'
 import PageTitle from '../widgets/PageTitle'
+import TableHeaderMenu from '../widgets/TableHeaderMenu'
 import TableInfo from '../widgets/TableInfo'
 import EntityThumbnail from '../widgets/EntityThumbnail'
 
 export default {
   name: 'shot-list',
+  mixins: [entityListMixin],
 
   props: [
     'entries',
@@ -181,19 +208,31 @@ export default {
 
   data () {
     return {
-      lastSelection: null
+      lastSelection: null,
+      hiddenColumns: {},
+      lastHeaderMenuDisplayed: null
     }
   },
 
   components: {
     ButtonLink,
     ButtonHrefLink,
+    ChevronDownIcon,
     DescriptionCell,
     EntityThumbnail,
     PageTitle,
     RowActions,
+    TableHeaderMenu,
     TableInfo,
     ValidationCell
+  },
+
+  created () {
+    this.initHiddenColumns(this.validationColumns, this.hiddenColumns)
+  },
+
+  mounted () {
+    this.resizeHeaders()
   },
 
   computed: {
@@ -201,6 +240,7 @@ export default {
       'currentProduction',
       'currentEpisode',
       'displayedShotsLength',
+      'isCurrentUserAdmin',
       'isCurrentUserManager',
       'isCurrentUserClient',
       'isFps',
@@ -240,21 +280,6 @@ export default {
       }
 
       return route
-    },
-
-    sortedValidationColumns () {
-      const columns = [...this.validationColumns]
-      return columns.sort((a, b) => {
-        const taskTypeA = this.taskTypeMap[a]
-        const taskTypeB = this.taskTypeMap[b]
-        if (taskTypeA.priority === taskTypeB.priority) {
-          return taskTypeA.name.localeCompare(taskTypeB)
-        } else if (taskTypeA.priority > taskTypeB.priority) {
-          return 1
-        } else {
-          return -1
-        }
-      })
     }
   },
 
@@ -340,10 +365,6 @@ export default {
       }
     },
 
-    getBackground (color) {
-      return colors.hexToRGBa(color, 0.08)
-    },
-
     resizeHeaders () {
       if (
         this.$refs['body-tbody'] &&
@@ -417,6 +438,34 @@ export default {
       }
 
       return route
+    },
+
+    showHeaderMenu (columnId, event) {
+      const headerMenuEl = this.$refs.headerMenu.$el
+      if (headerMenuEl.className === 'header-menu') {
+        headerMenuEl.className = 'header-menu hidden'
+      } else {
+        headerMenuEl.className = 'header-menu'
+        let headerElement = event.srcElement.parentNode.parentNode
+        if (headerElement.tagName !== 'TH') {
+          headerElement = headerElement.parentNode
+        }
+        const left = headerElement.getBoundingClientRect().left + 1
+        const top = headerElement.getBoundingClientRect().bottom
+        headerMenuEl.style.left = left + 'px'
+        headerMenuEl.style.top = top + 'px'
+      }
+      this.lastHeaderMenuDisplayed = columnId
+    },
+
+    onMinimizeColumnToggled () {
+      this.hideColumn(this.lastHeaderMenuDisplayed)
+      this.showHeaderMenu()
+    },
+
+    onDeleteAllTasksClicked () {
+      this.$emit('delete-all-tasks', this.lastHeaderMenuDisplayed)
+      this.showHeaderMenu()
     }
   }
 }
@@ -525,5 +574,12 @@ span.thumbnail-empty {
 
 .info {
   margin-top: 2em;
+}
+
+.hidden-validation-cell {
+  min-width: 30px;
+  max-width: 30px;
+  width: 30px;
+  padding: 4px;
 }
 </style>
