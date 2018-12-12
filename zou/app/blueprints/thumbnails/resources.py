@@ -98,6 +98,14 @@ def send_storage_file(
             conditional=True,
             mimetype=mimetype
         )
+    except IOError:
+        return {
+            "error": True,
+            "message": "File not found for: %s %s" % (
+                prefix,
+                preview_file_id
+            )
+        }, 404
     except FileNotFound:
         return {
             "error": True,
