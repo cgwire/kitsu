@@ -4,6 +4,7 @@ from zou.app.utils.api import configure_api_from_blueprint
 from .resources import (
     TaskFullResource,
     TaskForEntityResource,
+    DeletAllTasksForTaskTypeResource,
 
     TaskAssignResource,
     TasksAssignResource,
@@ -41,6 +42,10 @@ routes = [
         "/data/entities/<entity_id>/task-types/<task_type_id>/tasks",
         TaskForEntityResource
     ),
+    (
+        "/data/projects/<project_id>/task-types/<task_type_id>/tasks/",
+        DeletAllTasksForTaskTypeResource
+    ),
 
     ("/actions/tasks/<task_id>/comment", CommentTaskResource),
     ("/actions/tasks/<task_id>/assign", TaskAssignResource),
@@ -61,7 +66,8 @@ routes = [
         AddPreviewResource
     ),
     (
-        "/actions/tasks/<task_id>/comments/<comment_id>/preview-files/<preview_file_id>",
+        "/actions/tasks/<task_id>/comments/<comment_id>/preview-files/"
+        "<preview_file_id>",
         AddExtraPreviewResource
     ),
     (

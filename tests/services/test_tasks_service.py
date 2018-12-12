@@ -408,3 +408,19 @@ class TaskServiceTestCase(ApiDBTestCase):
             tasks_service.get_task,
             self.task_id
         )
+
+    def test_delete_all_task_types(self):
+        self.generate_fixture_project_standard()
+        self.generate_fixture_asset_standard()
+        task_1_id = str(self.task.id)
+        task_2_id = str(self.generate_fixture_task(name="second task").id)
+        task_3_id = str(self.shot_task.id)
+        task_4_id = str(self.generate_fixture_task_standard().id)
+        deletion_service.remove_tasks_for_project_and_task_type(
+            self.project.id,
+            self.task_type.id
+        )
+        self.assertIsNone(Task.get(task_1_id))
+        self.assertIsNone(Task.get(task_2_id))
+        self.assertIsNotNone(Task.get(task_3_id))
+        self.assertIsNotNone(Task.get(task_4_id))

@@ -256,3 +256,21 @@ class TaskRoutesTestCase(ApiDBTestCase):
 
         tasks = self.get("/data/persons/%s/done-tasks" % self.person.id)
         self.assertEquals(len(tasks), 1)
+
+    def test_delete_all_task_types(self):
+        self.generate_fixture_project_standard()
+        self.generate_fixture_asset_standard()
+        task_1_id = str(self.generate_fixture_task().id)
+        task_2_id = str(self.generate_fixture_task(name="second task").id)
+        task_3_id = str(self.generate_fixture_shot_task().id)
+        task_4_id = str(self.generate_fixture_task_standard().id)
+        self.delete(
+            "/data/projects/%s/task-types/%s/tasks" % (
+                self.project.id,
+                self.task_type.id
+            )
+        )
+        self.get("/data/tasks/%s" % task_1_id, 404)
+        self.get("/data/tasks/%s" % task_2_id, 404)
+        self.get("/data/tasks/%s" % task_3_id)
+        self.get("/data/tasks/%s" % task_4_id)

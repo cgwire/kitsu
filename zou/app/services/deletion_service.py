@@ -153,3 +153,14 @@ def clear_generic_files(preview_file_id):
         file_store.remove_file("previews", preview_file_id)
     except:
         pass
+
+
+def remove_tasks_for_project_and_task_type(project_id, task_type_id):
+    """
+    Remove fully all tasks and related for given project and task type.
+    """
+    tasks = Task.query.filter_by(
+        project_id=project_id, task_type_id=task_type_id
+    )
+    for task in tasks:
+        remove_task(task.id, force=True)
