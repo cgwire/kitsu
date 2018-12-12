@@ -631,3 +631,22 @@ class GetTimeSpentResource(Resource):
             return tasks_service.get_time_spents(task_id)
         except WrongDateFormatException:
             abort(404)
+
+
+class DeletAllTasksForTaskTypeResource(Resource):
+    """
+    Delete all tasks for a given task type and project. It's mainly used
+    when tasks are created by mistake at the beginning of the project.
+    """
+
+    @jwt_required
+    def delete(self, project_id, task_type_id):
+        if permissions.has_admin_permissions():
+            projects_service.get_project(project_id)
+            deletion_service.remove_tasks_for_project_and_task_type(
+                project_id,
+                task_type_id
+            )
+            return None, 204
+        else:
+            return 403
