@@ -635,7 +635,7 @@ class GetTimeSpentResource(Resource):
 
 class DeletAllTasksForTaskTypeResource(Resource):
     """
-    Delete all tasks for a given task type and project. It's mainly used
+    Delete all tasks for a given task type and project. It's mainly used
     when tasks are created by mistake at the beginning of the project.
     """
 
