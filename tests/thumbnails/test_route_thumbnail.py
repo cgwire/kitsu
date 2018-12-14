@@ -45,7 +45,6 @@ class RouteThumbnailTestCase(ApiDBTestCase):
     def delete_thumbnail_folders(self):
         fs.rm_rf(TEST_FOLDER)
 
-    """
     def test_add_thumbnail(self):
         path = "/pictures/thumbnails/persons/%s" % self.person.id
 
@@ -126,4 +125,3 @@ class RouteThumbnailTestCase(ApiDBTestCase):
         entity = Entity.get(self.asset_id)
         entity.preview_file_id = None
         entity.save()
-    """
