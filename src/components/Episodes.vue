@@ -6,8 +6,7 @@
           ref="episode-search-field"
           @change="onSearchChange"
           placeholder="ex: e01 s01, anim=wip"
-        >
-        </search-field>
+        />
       </div>
     </div>
 
@@ -109,6 +108,7 @@ export default {
   mounted () {
     this.setDefaultSearchText()
     this.setDefaultListScrollPosition()
+    this.resizeHeaders()
   },
 
   methods: {
@@ -217,6 +217,7 @@ export default {
     onSearchChange (event) {
       const searchQuery = this.$refs['episode-search-field'].getValue()
       this.setEpisodeSearch(searchQuery)
+      this.resizeHeaders()
     },
 
     saveScrollPosition (scrollPosition) {
