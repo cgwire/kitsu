@@ -26,7 +26,8 @@ import {
 } from '../../lib/indexing'
 import {
   applyFilters,
-  extractTaskTypes
+  getFilters,
+  getKeyWords
 } from '../../lib/filtering'
 
 import {
@@ -533,8 +534,12 @@ const actions = {
     })
   },
 
-  displayMoreShots ({commit}) {
-    commit(DISPLAY_MORE_SHOTS)
+  displayMoreShots ({ commit, rootGetters }) {
+    commit(DISPLAY_MORE_SHOTS, {
+      taskTypeMap: rootGetters.taskTypeMap,
+      taskStatusMap: rootGetters.taskStatusMap,
+      taskMap: rootGetters.taskMap
+    })
   },
 
   displayMoreSequences ({commit}) {
@@ -987,11 +992,19 @@ const mutations = {
     state,
     { shotSearch, taskStatusMap, taskMap, taskTypeMap }
   ) {
-    const taskTypes = extractTaskTypes(cache.shots, taskTypeMap)
-    let result = indexSearch(cache.shotIndex, shotSearch) || cache.shots
-    result = applyFilters(
-      taskTypes, result, shotSearch, taskStatusMap, taskMap
-    ) || []
+    const taskTypes = Object.values(taskTypeMap)
+    const taskStatuses = Object.values(taskStatusMap)
+
+    const query = shotSearch
+    const keywords = getKeyWords(query) || []
+    const filters = getFilters(
+      cache.shotIndex,
+      taskTypes,
+      taskStatuses,
+      query
+    )
+    let result = indexSearch(cache.shotIndex, keywords) || cache.shots
+    result = applyFilters(result, filters, taskMap)
 
     state.displayedShots = result.slice(0, PAGE_SIZE)
     state.displayedShotsLength = result.length
@@ -1003,8 +1016,9 @@ const mutations = {
   },
 
   [SET_SEQUENCE_SEARCH] (state, sequenceSearch) {
+    const keywords = getKeyWords(sequenceSearch)
     const result =
-      indexSearch(state.sequenceIndex, sequenceSearch) || state.sequences
+      indexSearch(state.sequenceIndex, keywords) || state.sequences
 
     state.displayedSequences = result.slice(0, PAGE_SIZE)
     state.displayedSequencesLength = result.length
@@ -1012,8 +1026,9 @@ const mutations = {
   },
 
   [SET_EPISODE_SEARCH] (state, episodeSearch) {
+    const keywords = getKeyWords(episodeSearch)
     const result =
-      indexSearch(state.episodeIndex, episodeSearch) || state.episodes
+      indexSearch(state.episodeIndex, keywords) || state.episodes
 
     state.displayedEpisodes = result.slice(0, PAGE_SIZE)
     state.displayedEpisodesLength = result.length
@@ -1088,10 +1103,25 @@ const mutations = {
     })
   },
 
-  [DISPLAY_MORE_SHOTS] (state, tasks) {
+  [DISPLAY_MORE_SHOTS] (state, {
+    taskTypeMap,
+    taskStatusMap,
+    taskMap
+  }) {
     let shots = cache.shots
     if (state.shotSearchText.length > 0) {
-      shots = indexSearch(cache.shotIndex, state.shotSearchText)
+      const taskTypes = Object.values(taskTypeMap)
+      const taskStatuses = Object.values(taskStatusMap)
+      const query = state.shotSearchText
+      const keywords = getKeyWords(query) || []
+      const filters = getFilters(
+        cache.shotIndex,
+        taskTypes,
+        taskStatuses,
+        query
+      )
+      shots = indexSearch(cache.shotIndex, keywords) || cache.shots
+      shots = applyFilters(shots, filters, taskMap)
     }
     state.displayedShots = shots.slice(
       0,
@@ -1101,15 +1131,18 @@ const mutations = {
     const previousX = state.displayedShots.length - PAGE_SIZE
     const maxX = state.displayedShots.length
     const maxY = state.nbValidationColumns
-    state.shotSelectionGrid = appendSelectionGrid(
-      state.shotSelectionGrid, previousX, maxX, maxY
-    )
+    if (previousX >= 0) {
+      state.shotSelectionGrid = appendSelectionGrid(
+        state.shotSelectionGrid, previousX, maxX, maxY
+      )
+    }
   },
 
   [DISPLAY_MORE_SEQUENCES] (state, tasks) {
     let sequences = state.sequences
     if (state.sequenceSearchText.length > 0) {
-      sequences = indexSearch(state.sequenceIndex, state.sequenceSearchText)
+      const keywords = getKeyWords(state.sequenceSearchText)
+      sequences = indexSearch(state.sequenceIndex, keywords)
     }
     state.displayedSequences = sequences.slice(
       0,
@@ -1120,7 +1153,8 @@ const mutations = {
   [DISPLAY_MORE_EPISODES] (state, tasks) {
     let episodes = state.episodes
     if (state.episodeSearchText.length > 0) {
-      episodes = indexSearch(state.episodeIndex, state.episodeSearchText)
+      const keywords = getKeyWords(state.episodeSearchText)
+      episodes = indexSearch(state.episodeIndex, keywords)
     }
     state.displayedEpisodes = episodes.slice(
       0,

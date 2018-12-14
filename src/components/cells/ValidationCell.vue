@@ -211,6 +211,14 @@ export default {
         const background = this.getBackground(this.column.color)
         this.changeStyle(background)
       }
+    },
+
+    taskTest () {
+      if (this.taskTest) {
+        this.task = this.taskTest
+      } else {
+        this.task = this.taskMap[this.entity.validations[this.column.id]]
+      }
     }
   }
 }

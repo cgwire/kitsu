@@ -7,6 +7,10 @@ import {
   buildTaskIndex,
   buildNameIndex
 } from '../../lib/indexing'
+import {
+  getKeyWords
+} from '../../lib/filtering'
+
 import taskStatusStore from './taskstatus'
 import {
   LOAD_PEOPLE_START,
@@ -585,10 +589,9 @@ const mutations = {
     state.personTasks = sortTasks(tasks, taskTypeMap)
 
     state.personTasksIndex = buildTaskIndex(tasks)
-    const searchResult = indexSearch(
-      state.personTasksIndex,
-      state.personTasksSearchText
-    )
+    const keywords = getKeyWords(state.personTasksSearchText)
+    const searchResult = indexSearch(state.personTasksIndex, keywords)
+
     state.displayedPersonTasks = searchResult || state.personTasks
     if (userFilters.persontasks && userFilters.persontasks.all) {
       state.personTaskSearchQueries = userFilters.persontasks.all
@@ -603,7 +606,9 @@ const mutations = {
   },
 
   [SET_PERSON_TASKS_SEARCH] (state, searchText) {
-    const searchResult = indexSearch(state.personTasksIndex, searchText)
+    state.displayedPersonTasks = []
+    const keywords = getKeyWords(searchText)
+    const searchResult = indexSearch(state.personTasksIndex, keywords)
     state.personTasksSearchText = searchText
     state.displayedPersonTasks = searchResult || state.personTasks
   },
@@ -688,7 +693,8 @@ const mutations = {
 
   [PEOPLE_SEARCH_CHANGE] (state, text) {
     if (text) {
-      state.displayedPeople = indexSearch(state.peopleIndex, text)
+      const keywords = getKeyWords(text)
+      state.displayedPeople = indexSearch(state.peopleIndex, keywords)
     } else {
       state.displayedPeople = state.people
     }
