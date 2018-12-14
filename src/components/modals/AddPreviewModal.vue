@@ -85,7 +85,8 @@ export default {
     },
     extensions: {
       type: String,
-      default: '.png,.jpg,.mp4,.mov,.obj,.pdf,.ma,.mb,.zip,.rar,.jpeg,.blend'
+      default:
+        '.png,.jpg,.mp4,.mov,.obj,.pdf,.ma,.mb,.zip,.rar,.jpeg,.blend,.wmv'
     }
   },
 
