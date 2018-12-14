@@ -25,7 +25,7 @@ from zou.app.utils import (
 
 
 ALLOWED_PICTURE_EXTENSION = [".png", ".jpg", ".jpeg", ".PNG", ".JPG", ".JPEG"]
-ALLOWED_MOVIE_EXTENSION = [".mp4", ".mov", ".MP4", ".MOV"]
+ALLOWED_MOVIE_EXTENSION = [".mp4", ".mov", ".wmv", ".MP4", ".MOV", ".WMV"]
 ALLOWED_FILE_EXTENSION = [
     ".obj", ".pdf", ".ma", ".mb", ".rar", ".zip", ".blend"
 ]
