@@ -12,7 +12,7 @@
           </th>
           <th
             class="validation"
-            :style="validationStyle(taskTypeMap[columnId].color)"
+            :style="getValidationStyle(columnId)"
             :key="taskTypeMap[columnId].id"
             v-for="columnId in sortedValidationColumns">
             <router-link
@@ -77,7 +77,7 @@
 
           <td
             class="validation"
-            :style="validationStyle(taskTypeMap[columnId].color)"
+            :style="getValidationStyle(columnId)"
             :key="columnId"
             v-for="columnId in sortedValidationColumns">
             <pie-chart
@@ -124,6 +124,7 @@
 
 <script>
 import { mapGetters, mapActions } from 'vuex'
+import { entityListMixin } from './base'
 import RowActions from '../widgets/RowActions'
 import ButtonLink from '../widgets/ButtonLink'
 import PageTitle from '../widgets/PageTitle'
@@ -131,6 +132,8 @@ import TableInfo from '../widgets/TableInfo'
 
 export default {
   name: 'episode-list',
+  mixins: [entityListMixin],
+
   props: [
     'entries',
     'isLoading',
@@ -170,21 +173,6 @@ export default {
              !this.isLoading &&
              !this.isError &&
              (!this.episodeSearchText || this.episodeSearchText.length === 0)
-    },
-
-    sortedValidationColumns () {
-      const columns = [...this.validationColumns]
-      return columns.sort((a, b) => {
-        const taskTypeA = this.taskTypeMap[a]
-        const taskTypeB = this.taskTypeMap[b]
-        if (taskTypeA.priority === taskTypeB.priority) {
-          return taskTypeA.name.localeCompare(taskTypeB)
-        } else if (taskTypeA.priority > taskTypeB.priority) {
-          return 1
-        } else {
-          return -1
-        }
-      })
     }
   },
 
@@ -193,12 +181,6 @@ export default {
       'displayMoreEpisodes',
       'loadMoreEpisodes'
     ]),
-
-    validationStyle (color) {
-      return {
-        'border-left': `2px solid ${color}`
-      }
-    },
 
     chartColors (entry, column) {
       const stats = this.episodeStats[entry.id][column.id]

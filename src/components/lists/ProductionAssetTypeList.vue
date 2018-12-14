@@ -7,7 +7,7 @@
           <th class="name">{{ $t('asset_types.fields.name') }}</th>
           <th
             class="validation"
-            :style="validationStyle(taskTypeMap[columnId].color)"
+            :style="getValidationStyle(columnId)"
             :key="columnId"
             v-for="columnId in sortedValidationColumns"
             v-if="!isLoading"
@@ -72,7 +72,7 @@
 
           <td
             class="validation"
-            :style="validationStyle(taskTypeMap[columnId].color)"
+            :style="getValidationStyle(columnId)"
             :key="columnId"
             v-for="columnId in sortedValidationColumns"
           >
@@ -104,6 +104,8 @@
 
 <script>
 import { mapGetters, mapActions } from 'vuex'
+
+import { entityListMixin } from './base'
 import RowActions from '../widgets/RowActions'
 import ButtonLink from '../widgets/ButtonLink'
 import PageTitle from '../widgets/PageTitle'
@@ -111,6 +113,7 @@ import TableInfo from '../widgets/TableInfo'
 
 export default {
   name: 'production-asset-type-list',
+  mixins: [entityListMixin],
 
   props: [
     'entries',
@@ -167,33 +170,12 @@ export default {
       }
 
       return route
-    },
-
-    sortedValidationColumns () {
-      const columns = [...this.validationColumns]
-      return columns.sort((a, b) => {
-        const taskTypeA = this.taskTypeMap[a]
-        const taskTypeB = this.taskTypeMap[b]
-        if (taskTypeA.priority === taskTypeB.priority) {
-          return taskTypeA.name.localeCompare(taskTypeB)
-        } else if (taskTypeA.priority > taskTypeB.priority) {
-          return 1
-        } else {
-          return -1
-        }
-      })
     }
   },
 
   methods: {
     ...mapActions([
     ]),
-
-    validationStyle (color) {
-      return {
-        'border-left': `2px solid ${color}`
-      }
-    },
 
     chartColors (entry, column) {
       const stats = this.assetTypeStats[entry.id][column.id]

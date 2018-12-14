@@ -102,7 +102,6 @@ export default {
   created () {
     this.initEpisodes()
       .then(this.handleModalsDisplay)
-      .then(this.resizeHeaders)
   },
 
   mounted () {
@@ -235,6 +234,10 @@ export default {
 
   watch: {
     $route () { this.handleModalsDisplay() },
+
+    displayedEpisodes () {
+      this.resizeHeaders()
+    },
 
     currentProduction () {
       const productionId = this.$route.params.production_id
