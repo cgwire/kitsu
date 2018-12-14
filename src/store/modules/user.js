@@ -4,6 +4,7 @@ import taskStatusStore from './taskstatus'
 import auth from '../../lib/auth'
 import { sortTasks, sortByName } from '../../lib/sorting'
 import { indexSearch, buildTaskIndex } from '../../lib/indexing'
+import { getKeyWords } from '../../lib/filtering'
 import {
   populateTask,
   buildSelectionGrid,
@@ -355,7 +356,8 @@ const mutations = {
     state.todoSelectionGrid = buildSelectionGrid(tasks.length, 1)
     state.todos = sortTasks(tasks, taskTypeMap)
     state.todosIndex = buildTaskIndex(tasks)
-    const searchResult = indexSearch(state.todosIndex, state.todosSearchText)
+    const keywords = getKeyWords(state.todosSearchText)
+    const searchResult = indexSearch(state.todosIndex, keywords)
     state.displayedTodos = searchResult || state.todos
     if (userFilters.todos && userFilters.todos.all) {
       state.todoSearchQueries = userFilters.todos.all
@@ -409,7 +411,8 @@ const mutations = {
   },
 
   [SET_TODOS_SEARCH] (state, searchText) {
-    const searchResult = indexSearch(state.todosIndex, searchText)
+    const keywords = getKeyWords(searchText)
+    const searchResult = indexSearch(state.todosIndex, keywords)
     state.todosSearchText = searchText
     state.displayedTodos = searchResult || state.todos
   },

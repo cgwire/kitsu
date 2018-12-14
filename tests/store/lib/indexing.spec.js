@@ -110,10 +110,10 @@ describe('lib/indexing', () => {
       {name: 'Test', id: 4}
     ]
     const index = buildNameIndex(entries)
-    expect(indexSearch(index, 'A').length).to.equal(2)
-    expect(indexSearch(index, 'Ca').length).to.equal(0)
-    expect(indexSearch(index, 'a').length).to.equal(2)
-    expect(indexSearch(index, 'bunny').length).to.equal(1)
-    expect(indexSearch(index, 'bunny')[0].id).to.equal(3)
+    expect(indexSearch(index, ['A']).length).to.equal(2)
+    expect(indexSearch(index, ['Ca']).length).to.equal(0)
+    expect(indexSearch(index, ['a']).length).to.equal(2)
+    expect(indexSearch(index, ['bunny']).length).to.equal(1)
+    expect(indexSearch(index, ['bunny'])[0].id).to.equal(3)
   })
 })

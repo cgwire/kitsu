@@ -190,9 +190,7 @@ import { mapGetters, mapActions } from 'vuex'
 import {
   ChevronDownIcon
 } from 'vue-feather-icons'
-import {
-  entityListMixin
-} from './base'
+import { entityListMixin } from './base'
 
 import DescriptionCell from '../cells/DescriptionCell'
 import RowActions from '../widgets/RowActions'

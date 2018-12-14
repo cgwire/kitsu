@@ -1,12 +1,17 @@
 /*
  * Build a simple index based on entry names.
  */
-export const buildNameIndex = (entries) => {
+export const buildNameIndex = (entries, split = true) => {
   const index = {}
   const entryIndex = {}
   entries.forEach((entry) => {
     if (entry) {
-      const words = entry.name.split(' ')
+      let words
+      if (split) {
+        words = entry.name.split(' ')
+      } else {
+        words = [entry.name]
+      }
       indexWords(index, entryIndex, entry, words)
     }
   })
@@ -101,23 +106,16 @@ export const buildEpisodeIndex = (episodes) => {
  * terms separated by spaces. Terms dedicated to task status filtering (like
  * modeling=wip) are ignored. The result is the intersection of queries.
  */
-export const indexSearch = (index, queryText) => {
-  if (queryText.length === 0) {
-    return null
+export const indexSearch = (index, keywords) => {
+  if (!keywords) keywords = []
+  const results = keywords
+    .map((query) => indexSearchWord(index, query))
+    .filter((result) => result !== null)
+
+  if (results.length > 0) {
+    return results.reduce(resultIntersection, [...results[0]])
   } else {
-    const regex = /([^ ]*)=([^ ]*)|\[(.*)\]=([^ ]*)/
-    queryText = queryText.replace(regex, '')
-
-    const queries = queryText.split(' ')
-    const results = queries
-      .map((query) => indexSearchWord(index, query))
-      .filter((result) => result !== null)
-
-    if (results.length > 0) {
-      return results.reduce(resultIntersection, [...results[0]])
-    } else {
-      return null
-    }
+    return null
   }
 }
 

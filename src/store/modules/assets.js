@@ -25,7 +25,8 @@ import {
 } from '../../lib/indexing'
 import {
   applyFilters,
-  extractTaskTypes
+  getKeyWords,
+  getFilters
 } from '../../lib/filtering'
 
 import {
@@ -411,8 +412,12 @@ const actions = {
     })
   },
 
-  displayMoreAssets ({commit}) {
-    commit(DISPLAY_MORE_ASSETS)
+  displayMoreAssets ({ commit, rootGetters }) {
+    commit(DISPLAY_MORE_ASSETS, {
+      taskTypeMap: rootGetters.taskTypeMap,
+      taskStatusMap: rootGetters.taskStatusMap,
+      taskMap: rootGetters.taskMap
+    })
   },
 
   initAssetTypes ({ commit, dispatch, state, rootState, rootGetters }) {
@@ -687,15 +692,25 @@ const mutations = {
   [SET_ASSET_SEARCH] (
     state, { assetSearch, taskStatusMap, taskTypeMap, taskMap }
   ) {
-    let result = indexSearch(cache.assetIndex, assetSearch) || cache.assets
-    const taskTypes = extractTaskTypes(cache.assets, taskTypeMap)
-    result = applyFilters(
-      taskTypes, result, assetSearch, taskStatusMap, taskMap
-    ) || []
+    const taskTypes = Object.values(taskTypeMap)
+    const taskStatuses = Object.keys(taskStatusMap).map((id) => {
+      return taskStatusMap[id]
+    })
+
+    const query = assetSearch
+    const keywords = getKeyWords(query) || []
+    const filters = getFilters(
+      cache.assetIndex,
+      taskTypes,
+      taskStatuses,
+      query
+    )
+    let result = indexSearch(cache.assetIndex, keywords) || cache.assets
+    result = applyFilters(result, filters, taskMap)
 
     state.displayedAssets = result.slice(0, PAGE_SIZE)
     state.displayedAssetsLength = result ? result.length : 0
-    state.assetSearchText = assetSearch
+    state.assetSearchText = query
 
     const maxX = state.displayedAssets.length
     const maxY = state.nbValidationColumns
@@ -732,13 +747,29 @@ const mutations = {
     })
   },
 
-  [DISPLAY_MORE_ASSETS] (state, tasks) {
+  [DISPLAY_MORE_ASSETS] (state, {
+    taskTypeMap,
+    taskStatusMap,
+    taskMap
+  }) {
     let assets
     if (state.assetSearchText.length > 0) {
-      assets = indexSearch(cache.assetIndex, state.assetSearchText)
+      const taskTypes = Object.values(taskTypeMap)
+      const taskStatuses = Object.values(taskStatusMap)
+      const query = state.assetSearchText
+      const keywords = getKeyWords(query) || []
+      const filters = getFilters(
+        cache.assetIndex,
+        taskTypes,
+        taskStatuses,
+        query
+      )
+      assets = indexSearch(cache.assetIndex, keywords) || cache.assets
+      assets = applyFilters(assets, filters, taskMap)
     } else {
       assets = cache.assets
     }
+
     state.displayedAssets = assets.slice(
       0,
       state.displayedAssets.length + PAGE_SIZE
@@ -746,9 +777,11 @@ const mutations = {
     const previousX = state.displayedAssets.length - PAGE_SIZE
     const maxX = state.displayedAssets.length
     const maxY = state.nbValidationColumns
-    state.assetSelectionGrid = appendSelectionGrid(
-      state.assetSelectionGrid, previousX, maxX, maxY
-    )
+    if (previousX >= 0) {
+      state.assetSelectionGrid = appendSelectionGrid(
+        state.assetSelectionGrid, previousX, maxX, maxY
+      )
+    }
   },
 
   [SET_CURRENT_PRODUCTION] (state, production) {

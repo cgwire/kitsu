@@ -240,13 +240,14 @@ export default {
       }
 
       const production = this.productionMap[entity.project_id]
-      if (production.production_type === 'tvshow' && !entity.episode_id) {
-        entity.episode_id = production.first_episode_id
+      let episodeId = entity.episode_id
+      if (production.production_type === 'tvshow' && !episodeId) {
+        episodeId = production.first_episode_id
       }
 
-      if (entity.episode_id) {
+      if (episodeId) {
         route.name = `episode-${entityType}`
-        route.params.episode_id = entity.episode_id
+        route.params.episode_id = episodeId
       }
 
       return route

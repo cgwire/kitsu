@@ -6,8 +6,7 @@
           ref="episode-search-field"
           @change="onSearchChange"
           placeholder="ex: e01 s01, anim=wip"
-        >
-        </search-field>
+        />
       </div>
     </div>
 
@@ -103,12 +102,12 @@ export default {
   created () {
     this.initEpisodes()
       .then(this.handleModalsDisplay)
-      .then(this.resizeHeaders)
   },
 
   mounted () {
     this.setDefaultSearchText()
     this.setDefaultListScrollPosition()
+    this.resizeHeaders()
   },
 
   methods: {
@@ -217,6 +216,7 @@ export default {
     onSearchChange (event) {
       const searchQuery = this.$refs['episode-search-field'].getValue()
       this.setEpisodeSearch(searchQuery)
+      this.resizeHeaders()
     },
 
     saveScrollPosition (scrollPosition) {
@@ -234,6 +234,10 @@ export default {
 
   watch: {
     $route () { this.handleModalsDisplay() },
+
+    displayedEpisodes () {
+      this.resizeHeaders()
+    },
 
     currentProduction () {
       const productionId = this.$route.params.production_id
