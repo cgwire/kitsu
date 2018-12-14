@@ -16,7 +16,7 @@ class NotificationsResource(BaseModelsResource):
 class NotificationResource(BaseModelResource):
 
     def __init__(self):
-        BaseModelResource.__init__(self, NotificationResource)
+        BaseModelResource.__init__(self, Notification)
 
     def check_read_permissions(self, instance):
         return permissions.check_admin_permissions()
