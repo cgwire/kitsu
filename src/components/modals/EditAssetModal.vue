@@ -48,6 +48,7 @@
             'is-primary': true,
             'is-loading': isLoadingStay
           }"
+          :disabled="this.form.name && this.form.name.length === 0"
           @click="confirmAndStayClicked"
           v-if="!assetToEdit || !assetToEdit.id"
         >
@@ -59,6 +60,7 @@
             'is-primary': true,
             'is-loading': isLoading
           }"
+          :disabled="this.form.name && this.form.name.length === 0"
           @click="confirmClicked"
         >
           {{ $t("main.confirmation") }}
