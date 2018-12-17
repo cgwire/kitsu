@@ -404,6 +404,10 @@ export default {
 
     selectedPersonId () {
       return this.person ? this.person.id : null
+    },
+
+    currentProductionTeam () {
+      return this.currentProduction.team
     }
   },
 
@@ -576,6 +580,10 @@ export default {
     },
 
     currentProduction () {
+      this.setCurrentTeam()
+    },
+
+    currentProductionTeam () {
       this.setCurrentTeam()
     },
 
