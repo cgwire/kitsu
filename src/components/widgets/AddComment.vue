@@ -1,6 +1,6 @@
 <template>
   <article class="add-comment media">
-    <figure class="media-left">
+    <figure class="media-left" v-if="!light">
       <div class="level">
         <div class="level-left">
           <people-avatar class="level-item" :person="user" />
@@ -74,6 +74,10 @@ export default {
       type: Boolean,
       default: null
     },
+    light: {
+      type: Boolean,
+      default: false
+    },
     taskStatusOptions: {
       type: Array,
       default: () => []
@@ -98,8 +102,6 @@ export default {
 <style scoped>
 .add-comment {
   border-radius: 5px;
-  padding: 1em;
-  box-shadow: 0px 0px 6px #E0E0E0;
   background: white;
 }
 

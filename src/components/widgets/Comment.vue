@@ -6,7 +6,7 @@
     highlighted: highlighted
   }"
   :style="{
-    'border-left': '3px solid ' + comment.task_status.color
+    'border-left': '6px solid ' + comment.task_status.color
   }"
 >
 
@@ -27,7 +27,7 @@
           <router-link
             :to="previewRoute"
             class="revision"
-            v-if="comment.previews.length > 0"
+            v-if="!light && comment.previews.length > 0"
           >
             revision {{ comment.previews[0].revision }}
           </router-link>
@@ -108,6 +108,10 @@ export default {
     editable: {
       type: Boolean,
       default: false
+    },
+    light: {
+      type: Boolean,
+      default: true
     }
   },
 
@@ -181,8 +185,7 @@ export default {
 <style scoped>
 .comment {
   padding: 0.6em;
-  border-left: 3px solid #CCC;
-  box-shadow: 0px 0px 6px #E0E0E0;
+  border-left: 6px solid #CCC;
   background: white;
   border-radius: 0 5px 5px 0;
 }

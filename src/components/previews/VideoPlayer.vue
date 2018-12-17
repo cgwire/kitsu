@@ -77,12 +77,16 @@
             active: isRepeating
           }"
           @click="onRepeatClicked"
+          v-if="!light"
         >
           <repeat-icon class="icon smaller" />
         </button>
 
         <span class="flexrow-item time-indicator">
-          {{ currentTime }} / {{ maxDuration }}
+          {{ currentTime }}
+        </span>
+        <span class="flexrow-item time-indicator" v-if="!light">
+          / {{ maxDuration }}
         </span>
 
         <button
@@ -123,22 +127,6 @@
         </button>
 
         <button
-          class="button flexrow-item"
-          @click="onRectAnnotateClicked"
-          v-if="isFullScreenEnabled"
-        >
-          <square-icon class="icon" />
-        </button>
-
-        <button
-          class="button flexrow-item"
-          @click="onCircleAnnotateClicked"
-          v-if="isFullScreenEnabled"
-        >
-          <circle-icon class="icon" />
-        </button>
-
-        <button
           :class="{
             button: true,
             'flexrow-item': true,
@@ -162,6 +150,7 @@
           target="_blank"
           class="button flexrow-item"
           :href="moviePath"
+          v-if="!light"
         >
           <download-icon class="icon" />
         </a>
@@ -218,6 +207,10 @@ export default {
     taskTypeMap: {
       type: Object,
       default: () => {}
+    },
+    light: {
+      type: Boolean,
+      default: false
     }
   },
 
@@ -381,7 +374,7 @@ export default {
       if (this.isFullScreen()) {
         return screen.height
       } else {
-        return screen.width > 1300 ? 500 : 300
+        return screen.width > 1300 && !this.light ? 500 : 200
       }
     },
 
