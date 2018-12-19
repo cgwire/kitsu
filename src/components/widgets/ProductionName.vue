@@ -2,7 +2,7 @@
   <div class="production-name">
     <router-link
       class="flexrow"
-      :title="productionInfos"
+      :title="productionInfo"
       :to="productionRoute"
     >
       <div
@@ -78,10 +78,14 @@ export default {
     },
 
     productionInfo () {
-      const fps = this.production.fps
-      const ratio = this.production.ratio
-      const resolution = this.production.resolution
-      return `fps: ${fps}\nratio: ${ratio}\nresolution: ${resolution}`
+      const fps = this.project.fps
+      const ratio = this.project.ratio
+      const resolution = this.project.resolution
+      if (fps || ratio || resolution) {
+        return `fps: ${fps}\nratio: ${ratio}\nresolution: ${resolution}`
+      } else {
+        return ''
+      }
     }
   },
 
