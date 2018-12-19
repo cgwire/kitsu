@@ -213,6 +213,10 @@ export default {
           resolution: this.productionToEdit.resolution,
           production_type: this.productionToEdit.production_type || 'short'
         }
+        this.form.project_status_id = null
+        this.$nextTick(() => {
+          this.form.project_status_id = this.productionToEdit.project_status_id
+        })
       } else {
         this.form = {
           name: '',
