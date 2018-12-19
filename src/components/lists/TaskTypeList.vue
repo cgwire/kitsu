@@ -5,9 +5,10 @@
       <thead>
         <tr>
           <th class="name">{{ $t('task_types.fields.name') }}</th>
-          <th class="dedicated">{{ $t('task_types.fields.dedicated_to') }}</th>
           <th class="priority">{{ $t('task_types.fields.priority') }}</th>
-          <th class="allow-timelog">{{ $t('task_types.fields.allow_timelog') }}</th>
+          <th class="allow-timelog">
+            {{ $t('task_types.fields.allow_timelog') }}
+          </th>
           <th class="actions"></th>
         </tr>
       </thead>
@@ -17,33 +18,64 @@
   <table-info
     :is-loading="isLoading"
     :is-error="isError"
-  >
-  </table-info>
+  />
 
   <div class="table-body" v-scroll="onBodyScroll">
-    <table class="table">
+    <table class="table splitted-table">
       <tbody>
-        <tr v-for="entry in entries" :key="entry.id">
-          <task-type-name class="name" :entry="entry"></task-type-name>
-          <td class="dedicated">{{ renderForShots(entry) }}</td>
-          <td class="priority">{{ entry.priority }}</td>
+        <tr class="type-header">
+          <td colspan="30">
+            {{ $t('assets.title') }}
+          </td>
+        </tr>
+        <tr v-for="taskType in assetTaskTypes" :key="taskType.id">
+          <task-type-name class="name" :entry="taskType" />
+          <td class="priority">{{ taskType.priority }}</td>
           <td class="allow-timelog">
-            {{ entry.allow_timelog ? $t('main.yes') : $t('main.no')}}
+            {{ taskType.allow_timelog ? $t('main.yes') : $t('main.no')}}
           </td>
           <row-actions
-            :entry-id="entry.id"
+            :taskType-id="taskType.id"
             :edit-route="{
               name: 'edit-task-type',
-              params: {task_type_id: entry.id}
+              params: {task_type_id: taskType.id}
             }"
             :delete-route="{
               name: 'delete-task-type',
-              params: {task_type_id: entry.id}
+              params: {task_type_id: taskType.id}
             }"
-          >
-          </row-actions>
+          />
         </tr>
       </tbody>
+    </table>
+
+    <table class="table splitted-table">
+      <tbody>
+        <tr class="type-header">
+          <td colspan="30">
+            {{ $t('shots.title') }}
+          </td>
+        </tr>
+        <tr v-for="taskType in shotTaskTypes" :key="taskType.id">
+          <task-type-name class="name" :entry="taskType" />
+          <td class="priority">{{ taskType.priority }}</td>
+          <td class="allow-timelog">
+            {{ taskType.allow_timelog ? $t('main.yes') : $t('main.no')}}
+          </td>
+          <row-actions
+            :taskType-id="taskType.id"
+            :edit-route="{
+              name: 'edit-task-type',
+              params: {task_type_id: taskType.id}
+            }"
+            :delete-route="{
+              name: 'delete-task-type',
+              params: {task_type_id: taskType.id}
+            }"
+          />
+        </tr>
+      </tbody>
+
     </table>
   </div>
 
@@ -75,26 +107,26 @@ export default {
 
   components: {
     RowActions,
-    TaskTypeName,
-    TableInfo
+    TableInfo,
+    TaskTypeName
   },
 
   computed: {
     ...mapGetters([
-    ])
+    ]),
+
+    assetTaskTypes () {
+      return this.entries.filter(taskType => !taskType.for_shots)
+    },
+
+    shotTaskTypes () {
+      return this.entries.filter(taskType => taskType.for_shots)
+    }
   },
 
   methods: {
     ...mapActions([
     ]),
-
-    renderForShots (entry) {
-      if (entry.for_shots) {
-        return this.$t('shots.title')
-      } else {
-        return this.$t('assets.title')
-      }
-    },
 
     onBodyScroll (event, position) {
       this.$refs.headerWrapper.style.left = `-${position.scrollLeft}px`
