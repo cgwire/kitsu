@@ -654,6 +654,7 @@ export default {
 
 .columns {
   margin-bottom: 0;
+  overflow-y: auto;
   flex: 1;
 }
 
