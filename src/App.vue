@@ -434,6 +434,57 @@ input.search-input:focus {
   background: #F0FFF0;
 }
 
+.table tr.type-header {
+  border-top: 1px solid #CCC;
+  font-size: 1.1em;
+}
+
+.table tr.type-header:hover {
+  background: transparent;
+}
+
+.table tr.type-header td {
+  font-weight: bold;
+  padding-left: 0.3em;
+}
+
+.splitted-table tr {
+  border-right: 1px solid #CCC;
+  border-left: 1px solid #CCC;
+}
+
+.splitted-table thead tr {
+  border-right: 1px solid transparent;
+  border-left: 1px solid transparent;
+}
+
+.splitted-table thead tr a {
+  color: #7A7A7A;
+}
+
+.splitted-table .table-body {
+  padding-top: 1em;
+  position: relative;
+  z-index: 1;
+}
+
+.splitted-table tbody:first-child tr:first-child {
+  border-top: 1px solid #CCC;
+}
+
+.splitted-table tbody:last-child .empty-line:last-child {
+  border: 0;
+}
+
+.splitted-table tbody {
+  user-select: none;
+  border-bottom: 1px solid #CCC;
+}
+
+.splitted-table {
+  margin-top: 1em;
+}
+
 .flexrow {
   display: flex;
   align-items: center;
