@@ -3,8 +3,7 @@
 
   <div class="asset-list-header page-header">
     <div class="level header-title">
-      <div class="level-left flexcolumn">
-        <div class="filters-area flexcolumn-item">
+      <div class="level-left">
           <search-field
             ref="asset-search-field"
             :can-save="true"
@@ -12,16 +11,6 @@
             @save="saveSearchQuery"
             placeholder="ex: props modeling=wip"
           />
-        </div>
-
-        <div class="query-list flexcolumn-item">
-          <search-query-list
-            :queries="assetSearchQueries"
-            @changesearch="changeSearch"
-            @removesearch="removeSearchQuery"
-            v-if="!isAssetsLoading && !initialLoading"
-          />
-        </div>
       </div>
 
       <div class="level-right flexrow" v-if="isCurrentUserManager">
@@ -49,6 +38,15 @@
         />
       </div>
     </div>
+    <div class="query-list">
+      <search-query-list
+        :queries="assetSearchQueries"
+        @changesearch="changeSearch"
+        @removesearch="removeSearchQuery"
+        v-if="!isAssetsLoading && !initialLoading"
+      />
+    </div>
+
   </div>
 
   <asset-list

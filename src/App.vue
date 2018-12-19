@@ -338,11 +338,12 @@ input.search-input:focus {
 .query-list {
   margin-top: 1em;
   margin-bottom: 2em;
-  margin-left: 4.5em;
+  margin-left: 2.5em;
 }
 
 .query-list .tag {
   margin-right: 1em;
+  margin-bottom: 0.2em;
   border: 1px solid transparent;
 }
 
