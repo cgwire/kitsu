@@ -603,20 +603,6 @@ tbody {
   user-select: none;
 }
 
-.table tr.type-header {
-  border-top: 1px solid #CCC;
-  font-size: 1.1em;
-}
-
-.table tr.type-header:hover {
-  background: transparent;
-}
-
-.table tr.type-header td {
-  font-weight: bold;
-  padding-left: 0.3em;
-}
-
 .empty-line {
   border-right: 0;
   border-left: 0;
