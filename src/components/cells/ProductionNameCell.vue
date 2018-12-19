@@ -6,6 +6,7 @@
   >
     <router-link
       :to="productionRoute"
+      v-if="!noLink"
     >
       <div
          class="flexrow-item avatar has-text-centered"
@@ -28,6 +29,28 @@
         {{ entry.name }}
       </span>
     </router-link>
+    <div v-else>
+      <div
+         class="flexrow-item avatar has-text-centered"
+         v-if="withAvatar"
+         v-bind:style="{
+         background: getAvatarColor(entry),
+         width: size + 'px',
+         height: size + 'px',
+         'font-size': (size - 15) + 'px',
+         'line-height': size + 'px'
+      }">
+        <span v-if="!entry.has_avatar">
+          {{ generateAvatar(entry) }}
+        </span>
+        <span v-else>
+          <img :src="getThumbnailPath(entry)" />
+        </span>
+      </div>
+      <span class="flexrow-item" v-if="!onlyAvatar">
+        {{ entry.name }}
+      </span>
+    </div>
   </div>
 </td>
 </template>
@@ -60,6 +83,10 @@ export default {uname: 'production-name-cell',
       type: String
     },
     isTooltip: {
+      default: false,
+      type: Boolean
+    },
+    noLink: {
       default: false,
       type: Boolean
     }
