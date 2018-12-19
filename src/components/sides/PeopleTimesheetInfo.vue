@@ -21,7 +21,7 @@
     class="info-date"
     v-else-if="isWeekInfo"
   >
-    week {{ week }}, {{ year }}
+    week {{ week }}, {{ startDay }} - {{ endDay }} {{ weekMonth }} {{ year }}
   </div>
 
   <div
@@ -41,6 +41,8 @@
 </template>
 
 <script>
+import moment from 'moment-timezone'
+
 import { mapGetters, mapActions } from 'vuex'
 import { XIcon } from 'vue-feather-icons'
 import PageTitle from '../widgets/PageTitle'
@@ -98,6 +100,31 @@ export default {
   computed: {
     ...mapGetters([
     ]),
+
+    startDay () {
+      return moment()
+        .day('Monday')
+        .year(this.year)
+        .week(this.week)
+        .date()
+    },
+
+    endDay () {
+      return moment()
+        .day('Monday')
+        .year(this.year)
+        .week(this.week)
+        .add('days', 6)
+        .date()
+    },
+
+    weekMonth () {
+      return moment()
+        .day('Monday')
+        .year(this.year)
+        .week(this.week)
+        .format('MMM')
+    },
 
     monthString () {
       return monthToString(this.month)

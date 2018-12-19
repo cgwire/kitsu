@@ -32,7 +32,7 @@
 
         <people-timesheet-list
           class="data-list"
-          :people="people"
+          :people="filteredPeople"
           :timesheet="timesheet"
           :detail-level="detailLevel"
           :month="currentMonth"
@@ -137,6 +137,22 @@ export default {
       'personMap',
       'timesheet'
     ]),
+
+    filteredPeople () {
+      return this.people.filter((person) => {
+        const keys = Object.keys(this.timesheet)
+        let isThere = false
+        let i = 0
+        do {
+          if (this.timesheet[keys[i]]) {
+            isThere = this.timesheet[keys[i]][person.id] !== undefined
+          }
+          i++
+        } while (!isThere && i < keys.length)
+
+        return person.active && isThere
+      })
+    },
 
     yearOptions () {
       const year = 2018
