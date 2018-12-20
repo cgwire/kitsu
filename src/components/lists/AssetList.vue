@@ -253,6 +253,11 @@ export default {
 
   mounted () {
     this.resizeHeaders()
+    window.addEventListener('keydown', this.onKeyDown, false)
+  },
+
+  beforeDestroy () {
+    window.removeEventListener('keydown', this.onKeyDown)
   },
 
   computed: {
@@ -507,6 +512,28 @@ export default {
             `${descriptionWidth}px`
         }
       }
+    },
+
+    onKeyDown (event) {
+      const i = this.lastSelection.x
+      const j = this.lastSelection.y
+      if (event.ctrlKey) {
+        if (event.keyCode === 37) {
+          this.select(i, j - 1)
+        } else if (event.keyCode === 38) {
+          this.select(i - 1, j)
+        } else if (event.keyCode === 39) {
+          this.select(i, j + 1)
+        } else if (event.keyCode === 40) {
+          this.select(i + 1, j)
+        }
+      }
+    },
+
+    select (i, j) {
+      const ref = 'validation-' + i + '-' + j
+      const validationCell = this.$refs[ref]
+      if (validationCell) validationCell[0].$el.click()
     }
   },
 
