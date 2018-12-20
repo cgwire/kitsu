@@ -34,6 +34,7 @@ import {
   UPDATE_PREVIEW_ANNOTATION,
 
   ADD_SELECTED_TASK,
+  ADD_SELECTED_TASKS,
   REMOVE_SELECTED_TASK,
   CLEAR_SELECTED_TASKS,
   ASSIGN_TASKS,
@@ -858,6 +859,32 @@ const mutations = {
       const entityId = validationInfo.entity.id
       const validationKey = `${entityId}-${taskTypeId}`
       state.selectedValidations[validationKey] = validationInfo
+      state.nbSelectedValidations =
+        Object.keys(state.selectedValidations).length
+    }
+  },
+
+  [ADD_SELECTED_TASKS] (state, selection) {
+    const tmpSelectedTasks = JSON.parse(JSON.stringify(state.selectedTasks))
+    const tmpSelectedValidations =
+      JSON.parse(JSON.stringify(state.selectedValidations))
+    let isValidationChanged = false
+    selection.forEach((validationInfo) => {
+      if (validationInfo.task) {
+        tmpSelectedTasks[validationInfo.task.id] = validationInfo.task
+      } else {
+        const taskTypeId = validationInfo.column.id
+        const entityId = validationInfo.entity.id
+        const validationKey = `${entityId}-${taskTypeId}`
+        tmpSelectedValidations[validationKey] = validationInfo
+        isValidationChanged = true
+      }
+    })
+    state.selectedTasks = tmpSelectedTasks
+    state.nbSelectedTasks = Object.keys(state.selectedTasks).length
+    console.log(JSON.stringify(state.selectedTasks, null, 2))
+    if (isValidationChanged) {
+      state.selectedValidations = tmpSelectedValidations
       state.nbSelectedValidations =
         Object.keys(state.selectedValidations).length
     }

@@ -113,7 +113,7 @@ export default {
   mounted () {
     if (this.taskTest) {
       this.task = this.taskTest
-    } else {
+    } else if (this.entity) {
       this.task = this.taskMap[this.entity.validations[this.column.id]]
     }
   },
@@ -216,7 +216,7 @@ export default {
     taskTest () {
       if (this.taskTest) {
         this.task = this.taskTest
-      } else {
+      } else if (this.entity) {
         this.task = this.taskMap[this.entity.validations[this.column.id]]
       }
     }

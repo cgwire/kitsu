@@ -402,6 +402,16 @@ export default {
     this.loadTaskData()
   },
 
+  mounted () {
+    this.handleModalsDisplay()
+    this.$nextTick(() => {
+      if (this.$refs['task-columns']) {
+        this.$refs['task-columns'].scrollTop = 100
+        window.scrollTo(0, 0)
+      }
+    })
+  },
+
   computed: {
     ...mapGetters([
       'currentEpisode',
@@ -1212,11 +1222,6 @@ export default {
         } else {
           this.resetPreview({id: previewId})
         }
-        /*
-        this.loadTaskEntityPreviewFiles({
-          entityId: this.currentTask.entity_id
-        })
-        */
       }
     },
 
@@ -1287,16 +1292,6 @@ export default {
       route.params.comment_id = this.currentTaskComments[0].id
       this.$router.push(route)
     }
-  },
-
-  mounted () {
-    this.handleModalsDisplay()
-    this.$nextTick(() => {
-      if (this.$refs['task-columns']) {
-        this.$refs['task-columns'].scrollTop = 100
-        window.scrollTo(0, 0)
-      }
-    })
   },
 
   watch: {
