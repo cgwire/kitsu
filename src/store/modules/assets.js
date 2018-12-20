@@ -57,7 +57,6 @@ import {
   NEW_TASK_END,
 
   SET_ASSET_SEARCH,
-  CREATE_TASKS_END,
   SET_CURRENT_PRODUCTION,
 
   DISPLAY_MORE_ASSETS,
@@ -69,7 +68,9 @@ import {
 
   REMOVE_SELECTED_TASK,
   ADD_SELECTED_TASK,
+  ADD_SELECTED_TASKS,
   CLEAR_SELECTED_TASKS,
+  CREATE_TASKS_END,
 
   SAVE_ASSET_SEARCH_END,
   REMOVE_ASSET_SEARCH_END,
@@ -670,17 +671,17 @@ const mutations = {
   },
 
   [DELETE_TASK_END] (state, task) {
-    const asset = cache.assets.find(
+    const asset = state.displayedAssets.find(
       (asset) => asset.id === task.entity_id
     )
     if (asset) {
-      const validations = {...asset.validations}
-      Vue.set(validations, task.task_type_id, null)
+      const validations = JSON.parse(JSON.stringify(asset.validations))
+      delete validations[task.task_type_id]
       delete asset.validations
       Vue.set(asset, 'validations', validations)
 
       const taskIndex = asset.tasks.findIndex(
-        (assetTask) => assetTask.id === task.entity_id
+        (assetTaskId) => assetTaskId === task.id
       )
       asset.tasks.splice(taskIndex, 1)
     }
@@ -731,20 +732,6 @@ const mutations = {
     if (queryIndex >= 0) {
       state.assetSearchQueries.splice(queryIndex, 1)
     }
-  },
-
-  [CREATE_TASKS_END] (state, tasks) {
-    tasks.forEach((task) => {
-      if (task) {
-        const asset = state.assetMap[task.entity_id]
-        if (asset) {
-          const validations = {...asset.validations}
-          Vue.set(validations, task.task_type_id, task.id)
-          delete asset.validations
-          Vue.set(asset, 'validations', validations)
-        }
-      }
-    })
   },
 
   [DISPLAY_MORE_ASSETS] (state, {
@@ -817,8 +804,19 @@ const mutations = {
     }
   },
 
+  [ADD_SELECTED_TASKS] (state, selection) {
+    const tmpGrid = JSON.parse(JSON.stringify(state.assetSelectionGrid))
+    selection.forEach((validationInfo) => {
+      if (tmpGrid[0] && tmpGrid[validationInfo.x]) {
+        tmpGrid[validationInfo.x][validationInfo.y] = true
+      }
+    })
+    state.assetSelectionGrid = tmpGrid
+  },
+
   [CLEAR_SELECTED_TASKS] (state, validationInfo) {
-    state.assetSelectionGrid = clearSelectionGrid(state.assetSelectionGrid)
+    const tmpGrid = JSON.parse(JSON.stringify(state.assetSelectionGrid))
+    state.assetSelectionGrid = clearSelectionGrid(tmpGrid)
   },
 
   [NEW_TASK_END] (state, task) {
@@ -829,6 +827,20 @@ const mutations = {
       asset.tasks.push(task)
       Vue.set(asset.validations, task.task_type_id, task.id)
     }
+  },
+
+  [CREATE_TASKS_END] (state, tasks) {
+    tasks.forEach((task) => {
+      if (task) {
+        const asset = state.assetMap[task.entity_id]
+        if (asset) {
+          const validations = {...asset.validations}
+          Vue.set(validations, task.task_type_id, task.id)
+          delete asset.validations
+          Vue.set(asset, 'validations', validations)
+        }
+      }
+    })
   },
 
   [SET_ASSET_TYPE_SEARCH] (state, searchQuery) {

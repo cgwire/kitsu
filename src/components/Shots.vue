@@ -12,44 +12,43 @@
               @save="saveSearchQuery"
             />
           </div>
-
-          <div class="query-list flexcolumn-item">
-            <search-query-list
-              :queries="shotSearchQueries"
-              @changesearch="changeSearch"
-              @removesearch="removeSearchQuery"
-              v-if="!isShotsLoading && !initialLoading"
-            />
-          </div>
         </div>
 
         <div class="level-right" v-if="isCurrentUserManager">
-          <div class="level-item">
-            <show-assignations-button />
-            <button-link
-              class="level-item"
-              :text="$t('main.csv.import_file')"
-              icon="upload"
-              :is-responsive="true"
-              :path="importPath"
-            />
-            <button-href-link
-              class="level-item"
-              :text="$t('main.csv.export_file')"
-              icon="download"
-              :is-responsive="true"
-              :path="'/api/export/csv/projects/' + currentProduction.id + '/shots.csv'"
-            />
-            <button-link
-              class="level-item"
-              :text="$t('shots.manage')"
-              icon="plus"
-              :is-responsive="true"
-              :path="manageShotsPath"
-            />
-          </div>
+          <show-assignations-button class="level-item"/>
+          <button-link
+            class="level-item"
+            :text="$t('main.csv.import_file')"
+            icon="upload"
+            :is-responsive="true"
+            :path="importPath"
+          />
+          <button-href-link
+            class="level-item"
+            :text="$t('main.csv.export_file')"
+            icon="download"
+            :is-responsive="true"
+            :path="'/api/export/csv/projects/' + currentProduction.id + '/shots.csv'"
+          />
+          <button-link
+            class="level-item"
+            :text="$t('shots.manage')"
+            icon="plus"
+            :is-responsive="true"
+            :path="manageShotsPath"
+          />
         </div>
       </div>
+
+      <div class="query-list flexcolumn-item">
+        <search-query-list
+          :queries="shotSearchQueries"
+          @changesearch="changeSearch"
+          @removesearch="removeSearchQuery"
+          v-if="!isShotsLoading && !initialLoading"
+        />
+      </div>
+
     </div>
 
     <shot-list
@@ -670,6 +669,10 @@ export default {
 }
 
 .level {
+  align-items: flex-start;
+}
+
+.flexcolumn {
   align-items: flex-start;
 }
 </style>

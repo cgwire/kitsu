@@ -7,7 +7,6 @@
           <th class="project">&nbsp;</th>
           <th class="name">{{ $t('productions.fields.name') }}</th>
           <th class="type">{{ $t('productions.fields.type') }}</th>
-          <th class="status">{{ $t('productions.fields.status') }}</th>
           <th class="fps">{{ $t('productions.fields.fps') }}</th>
           <th class="ratio">{{ $t('productions.fields.ratio') }}</th>
           <th class="resolution">{{ $t('productions.fields.resolution') }}</th>
@@ -24,9 +23,14 @@
   </table-info>
 
   <div class="table-body" v-scroll="onBodyScroll">
-    <table class="table">
+    <table class="table splitted-table">
       <tbody>
-        <tr v-for="entry in entries" :key="entry.id">
+        <tr class="type-header">
+          <td colspan="30">
+            {{ $t('productions.status.open') }}
+          </td>
+        </tr>
+        <tr v-for="entry in openProductions" :key="entry.id">
           <production-name-cell
             class="project"
             :only-avatar="true"
@@ -42,8 +46,52 @@
           <td class="type">
             {{ $t('productions.type.' + (entry.production_type || 'short')) }}
           </td>
-          <td class="status">
-            {{ $t(getStatusLocale(entry.project_status_name)) }}
+          <td class="fps">
+            {{ entry.fps }}
+          </td>
+          <td class="ratio">
+            {{ entry.ratio }}
+          </td>
+          <td class="resolution">
+            {{ entry.resolution }}
+          </td>
+          <row-actions
+            :entry-id="entry.id"
+            :edit-route="{
+              name: 'edit-production',
+              params: {production_edit_id: entry.id}
+            }"
+            :delete-route="{
+              name: 'delete-production',
+              params: {production_delete_id: entry.id}
+            }"
+          />
+        </tr>
+      </tbody>
+    </table>
+    <table class="table splitted-table">
+      <tbody>
+        <tr class="type-header">
+          <td colspan="30">
+            {{ $t('productions.status.closed') }}
+          </td>
+        </tr>
+        <tr v-for="entry in closedProductions" :key="entry.id">
+          <production-name-cell
+            class="project"
+            :only-avatar="true"
+            :entry="entry"
+            :no-link="true"
+            :last-production-screen="lastProductionScreen"
+          />
+          <production-name-cell
+            class="name"
+            :with-avatar="false"
+            :entry="entry"
+            :last-production-screen="lastProductionScreen"
+          />
+          <td class="type">
+            {{ $t('productions.type.' + (entry.production_type || 'short')) }}
           </td>
           <td class="fps">
             {{ entry.fps }}
@@ -90,22 +138,32 @@ export default {
     'isLoading',
     'isError'
   ],
+
   data () {
     return {}
   },
+
   components: {
     ProductionNameCell,
     RowActions,
     TableInfo
   },
+
   computed: {
     ...mapGetters([
+      'openProductions',
       'lastProductionScreen'
-    ])
+    ]),
+
+    closedProductions () {
+      return this.entries.filter(p => p.project_status_name === 'Closed')
+    }
   },
+
   methods: {
     ...mapActions([
     ]),
+
     // Convert a database status to a locale key.
     getStatusLocale (originalStatus) {
       const statusMap = {

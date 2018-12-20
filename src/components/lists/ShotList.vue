@@ -146,6 +146,7 @@
             :ref="'validation-' + i + '-' + j"
             :column="taskTypeMap[columnId]"
             :entity="shot"
+            :task-test="taskMap[shot.validations[columnId]]"
             :minimized="hiddenColumns[columnId]"
             :selected="shotSelectionGrid[i][j]"
             :rowX="i"
@@ -249,8 +250,10 @@ export default {
       'isSingleEpisode',
       'isTVShow',
       'nbSelectedTasks',
+      'shotMap',
       'shotSearchText',
       'shotSelectionGrid',
+      'taskMap',
       'taskTypeMap'
     ]),
 
@@ -581,5 +584,9 @@ span.thumbnail-empty {
   max-width: 30px;
   width: 30px;
   padding: 4px;
+}
+
+tbody {
+  user-select: none;
 }
 </style>

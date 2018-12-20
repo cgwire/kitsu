@@ -45,18 +45,22 @@
     :is-error="isError"
   />
 
-  <div class="table-body" v-scroll="onBodyScroll" v-if="!isLoading">
+  <div class="table-body" v-scroll="onBodyScroll" v-if="!isLoading" ref="body">
     <table class="table">
       <tbody>
         <tr v-for="person in people" :key="person.id">
           <people-name-cell class="name" :entry="person" />
           <td
-            class="time"
+            :class="{
+              time: true,
+              selected: isMonthSelected(person.id, year, month)
+            }"
             :key="'month-' + month + '-' + person.id"
             v-for="month in monthRange"
             v-if="detailLevel === 'month'"
           >
             <router-link
+              class="duration"
               :to="{
                 name: 'timesheets-month-person',
                 params: {
@@ -75,12 +79,19 @@
           </td>
 
           <td
-            class="daytime"
+            :class="{
+              daytime: true,
+              selected: isWeekSelected(person.id, year, week)
+            }"
             :key="'week-' + week + '-' + person.id"
             v-for="week in weekRange"
             v-if="detailLevel === 'week'"
           >
             <router-link
+              :class="{
+                duration: true,
+                'warning': weekDuration(week, person.id) > 35
+              }"
               :to="{
                 name: 'timesheets-week-person',
                 params: {
@@ -100,11 +111,17 @@
 
           <td
             class="daytime"
+            :class="{
+              daytime: true,
+              weekend: isWeekend(year, month, day),
+              selected: isDaySelected(person.id, year, month, day)
+            }"
             :key="'day-' + day + '-' + person.id"
             v-for="day in dayRange"
             v-if="detailLevel === 'day'"
           >
             <router-link
+              class="duration"
               :to="{
                 name: 'timesheets-day-person',
                 params: {
@@ -213,7 +230,8 @@ export default {
 
   computed: {
     ...mapGetters([
-      'isCurrentUserManager'
+      'isCurrentUserManager',
+      'route'
     ]),
 
     monthRange () {
@@ -265,6 +283,53 @@ export default {
       } else {
         return '-'
       }
+    },
+
+    isWeekend (year, month, day) {
+      let date = moment(`${year}-${month}-${day}`)
+      if (day < 10) date = moment(`${year}-${month}-0${day}`)
+      return [0, 6].includes(date.day())
+    },
+
+    isDaySelected (personId, year, month, day) {
+      return (
+        this.$route.params.person_id &&
+        this.$route.params.person_id === personId &&
+        this.$route.params.year === year &&
+        this.$route.params.month === month &&
+        this.$route.params.day === day
+      )
+    },
+
+    isWeekSelected (personId, year, week) {
+      return (
+        this.$route.params.person_id &&
+        this.$route.params.person_id === personId &&
+        this.$route.params.year === year &&
+        this.$route.params.week === week
+      )
+    },
+
+    isMonthSelected (personId, year, month) {
+      return (
+        this.$route.params.person_id &&
+        this.$route.params.person_id === personId &&
+        this.$route.params.year === year &&
+        this.$route.params.month === month
+      )
+    }
+  },
+
+  watch: {
+    detailLevel () {
+      this.$refs.headerWrapper.style.left = 0
+    },
+
+    route () {
+      const els = document.getElementsByClassName('selected')
+      if (els.length === 0) { // selected element is not visible
+        this.$refs.body.scrollLeft += 350
+      }
     }
   }
 }
@@ -303,7 +368,37 @@ th.actions,
 }
 
 a,
-a:hover{
+a:hover {
   color: inherit;
+}
+
+.warning {
+  color: #ff3860;
+}
+
+.warning:hover {
+  color: red;
+}
+
+.weekend {
+  background-color: #EEE;
+}
+
+.selected .duration {
+  background: #D1C4E9;
+}
+
+.duration {
+  border-radius: 50%;
+  padding: 0.5em;
+}
+
+.selected .duration.warning {
+  background: #ff9890;
+  color: black;
+}
+
+.duration:hover {
+  background: #BBEEBB;
 }
 </style>

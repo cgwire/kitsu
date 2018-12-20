@@ -153,7 +153,7 @@
             :key="columnId + '-' + asset.id"
             :ref="'validation-' + getIndex(i, k) + '-' + j"
             :column="taskTypeMap[columnId]"
-            :entity="asset"
+            :task-test="taskMap[asset.validations[columnId]]"
             :selected="assetSelectionGrid[getIndex(i, k)][j]"
             :rowX="getIndex(i, k)"
             :columnY="j"
@@ -269,6 +269,7 @@ export default {
       'isCurrentUserManager',
       'isTVShow',
       'selectedTasks',
+      'taskMap',
       'taskTypeMap'
     ]),
 
@@ -335,6 +336,7 @@ export default {
     },
 
     onTaskSelected (validationInfo) {
+      const selection = []
       if (validationInfo.isShiftKey) {
         if (this.lastSelection) {
           let startX = this.lastSelection.x
@@ -355,15 +357,26 @@ export default {
               const ref = 'validation-' + i + '-' + j
               const validationCell = this.$refs[ref][0]
               if (!this.assetSelectionGrid[i][j]) {
-                validationCell.select({ctrlKey: true, isUserClick: false})
+                selection.push({
+                  entity: validationCell.entity,
+                  column: validationCell.column,
+                  task: validationCell.task,
+                  x: validationCell.rowX,
+                  y: validationCell.columnY
+                })
               }
             }
           }
+          this.$store.commit('ADD_SELECTED_TASK', validationInfo)
         }
       } else if (!validationInfo.isCtrlKey) {
         this.$store.commit('CLEAR_SELECTED_TASKS')
       }
-      this.$store.commit('ADD_SELECTED_TASK', validationInfo)
+      if (selection.length === 0) {
+        this.$store.commit('ADD_SELECTED_TASK', validationInfo)
+      } else {
+        this.$store.commit('ADD_SELECTED_TASKS', selection)
+      }
 
       if (!validationInfo.isShiftKey && validationInfo.isUserClick) {
         this.lastSelection = {
@@ -601,20 +614,6 @@ tbody:last-child .empty-line:last-child {
 
 tbody {
   user-select: none;
-}
-
-.table tr.type-header {
-  border-top: 1px solid #CCC;
-  font-size: 1.1em;
-}
-
-.table tr.type-header:hover {
-  background: transparent;
-}
-
-.table tr.type-header td {
-  font-weight: bold;
-  padding-left: 0.3em;
 }
 
 .empty-line {

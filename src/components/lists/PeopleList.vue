@@ -5,19 +5,16 @@
       <thead>
         <tr>
           <th class="name">
-          {{ $t("people.list.name") }}
+            {{ $t("people.list.name") }}
           </th>
           <th class="email">
-          {{ $t("people.list.email") }}
+            {{ $t("people.list.email") }}
           </th>
           <th class="phone">
-          {{ $t("people.list.phone") }}
+            {{ $t("people.list.phone") }}
           </th>
           <th class="role">
-          {{ $t("people.list.role") }}
-          </th>
-          <th class="active">
-          {{ $t("people.list.active") }}
+            {{ $t("people.list.role") }}
           </th>
           <th class="actions"></th>
         </tr>
@@ -28,14 +25,50 @@
   <table-info
     :is-loading="isLoading"
     :is-error="isError"
-  >
-  </table-info>
+  />
 
   <div class="table-body" v-scroll="onBodyScroll">
-    <table class="table">
+
+    <table class="table splitted-table" v-if="activePeople.length > 0">
+      <tr class="type-header">
+        <td colspan="30">
+          {{ $t('people.active') }}
+        </td>
+      </tr>
       <tbody>
-        <tr v-for="entry in entries" :key="entry.id">
-          <people-name-cell class="name" :entry="entry"></people-name-cell>
+        <tr v-for="entry in activePeople" :key="entry.id">
+          <people-name-cell class="name" :entry="entry" />
+          <td class="email">{{ entry.email }}</td>
+          <td class="phone">{{ entry.phone }}</td>
+          <td class="role">{{ $t('people.role.' + entry.role) }}</td>
+          <row-actions
+            v-if="isCurrentUserAdmin"
+            :entry-id="entry.id"
+            :edit-route="{
+              name: 'edit-person',
+              params: {person_id: entry.id}
+            }"
+            :delete-route="{
+              name: 'delete-person',
+              params: {person_id: entry.id}
+            }"
+          >
+          </row-actions>
+          <td class="actions" v-else>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+
+    <table class="table splitted-table" v-if="unactivePeople.length > 0">
+      <tr class="type-header">
+        <td colspan="30">
+          {{ $t('people.unactive') }}
+        </td>
+      </tr>
+      <tbody>
+        <tr v-for="entry in unactivePeople" :key="entry.id">
+          <people-name-cell class="name" :entry="entry" />
           <td class="email">{{ entry.email }}</td>
           <td class="phone">{{ entry.phone }}</td>
           <td class="role">{{ $t('people.role.' + entry.role) }}</td>
@@ -91,7 +124,15 @@ export default {
   computed: {
     ...mapGetters([
       'isCurrentUserAdmin'
-    ])
+    ]),
+
+    activePeople () {
+      return this.entries.filter(person => person.active)
+    },
+
+    unactivePeople () {
+      return this.entries.filter(person => !person.active)
+    }
   },
 
   methods: {

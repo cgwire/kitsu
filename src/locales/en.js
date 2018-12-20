@@ -178,6 +178,7 @@ export default {
   },
 
   people: {
+    active: 'Active',
     add_member_to_team: 'Add a member to the team: ',
     delete_error: 'An error occured while deleting this person. There are probably data linked to it. Are you sure this person has no assignation or wrote no comment?',
     delete_text: 'Are you sure you want to remove {personName} from your database?',
@@ -188,6 +189,7 @@ export default {
     select_person: 'Select a person...',
     team: 'Team',
     title: 'People',
+    unactive: 'Unactive',
     csv: {
       import_file: 'Import a .csv file',
       export_file: 'Download as a .csv file',

@@ -88,6 +88,7 @@ import {
 
   NEW_TASK_COMMENT_END,
   NEW_TASK_END,
+  CREATE_TASKS_END,
 
   SET_SHOT_SEARCH,
   SET_SEQUENCE_SEARCH,
@@ -96,7 +97,6 @@ import {
   RESET_PRODUCTION_PATH,
   SET_CURRENT_PRODUCTION,
   SET_CURRENT_EPISODE,
-  CREATE_TASKS_END,
   DISPLAY_MORE_SHOTS,
   DISPLAY_MORE_SEQUENCES,
   DISPLAY_MORE_EPISODES,
@@ -108,6 +108,8 @@ import {
 
   REMOVE_SELECTED_TASK,
   ADD_SELECTED_TASK,
+  ADD_SELECTED_TASKS,
+  DELETE_TASK_END,
   CLEAR_SELECTED_TASKS,
 
   SET_PREVIEW,
@@ -1204,7 +1206,8 @@ const mutations = {
   },
 
   [CLEAR_SELECTED_TASKS] (state, validationInfo) {
-    state.shotSelectionGrid = clearSelectionGrid(state.shotSelectionGrid)
+    const tmpGrid = JSON.parse(JSON.stringify(state.shotSelectionGrid))
+    state.shotSelectionGrid = clearSelectionGrid(tmpGrid)
   },
 
   [COMPUTE_SEQUENCE_STATS] (state, { taskMap, taskStatusMap }) {
@@ -1233,6 +1236,47 @@ const mutations = {
       shot.tasks.push(task)
       Vue.set(shot.validations, task.task_type_id, task.id)
     }
+  },
+
+  [DELETE_TASK_END] (state, task) {
+    const shot = state.displayedShots.find(
+      (shot) => shot.id === task.entity_id
+    )
+    if (shot) {
+      const validations = JSON.parse(JSON.stringify(shot.validations))
+      delete validations[task.task_type_id]
+      delete shot.validations
+      Vue.set(shot, 'validations', validations)
+
+      const taskIndex = shot.tasks.findIndex(
+        (shotTaskId) => shotTaskId === task.id
+      )
+      shot.tasks.splice(taskIndex, 1)
+    }
+  },
+
+  [CREATE_TASKS_END] (state, tasks) {
+    tasks.forEach((task) => {
+      if (task) {
+        const shot = state.shotMap[task.entity_id]
+        if (shot) {
+          const validations = {...shot.validations}
+          Vue.set(validations, task.task_type_id, task.id)
+          delete shot.validations
+          Vue.set(shot, 'validations', validations)
+        }
+      }
+    })
+  },
+
+  [ADD_SELECTED_TASKS] (state, selection) {
+    const tmpGrid = JSON.parse(JSON.stringify(state.shotSelectionGrid))
+    selection.forEach((validationInfo) => {
+      if (tmpGrid[0] && tmpGrid[validationInfo.x]) {
+        tmpGrid[validationInfo.x][validationInfo.y] = true
+      }
+    })
+    state.shotSelectionGrid = tmpGrid
   },
 
   [SET_CURRENT_EPISODE] (state, episodeId) {

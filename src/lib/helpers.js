@@ -106,7 +106,7 @@ export const monthToString = (month) => {
 
 export const getMonthRange = (year, currentYear, currentMonth) => {
   if (currentYear === year) {
-    return range(1, currentMonth + 1)
+    return range(1, currentMonth)
   } else {
     return range(1, 12)
   }
@@ -115,7 +115,7 @@ export const getMonthRange = (year, currentYear, currentMonth) => {
 export const getDayRange = (year, month, currentYear, currentMonth) => {
   if (currentYear === year &&
       currentMonth === month) {
-    return range(1, moment().date())
+    return range(1, moment().date() + 1)
   } else {
     const currentDate = moment(
       `${year}-${Number(month)}`, 'YYYY-M'
