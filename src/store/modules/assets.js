@@ -676,14 +676,15 @@ const mutations = {
     )
     if (asset) {
       const validations = JSON.parse(JSON.stringify(asset.validations))
-      delete validations[task.task_type_id]
       delete asset.validations
       Vue.set(asset, 'validations', validations)
 
-      const taskIndex = asset.tasks.findIndex(
+      const tasks = JSON.parse(JSON.stringify(asset.tasks))
+      const taskIndex = tasks.findIndex(
         (assetTaskId) => assetTaskId === task.id
       )
-      asset.tasks.splice(taskIndex, 1)
+      tasks.splice(taskIndex, 1)
+      Vue.set(asset, 'tasks', tasks)
     }
   },
 
