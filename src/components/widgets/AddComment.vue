@@ -34,7 +34,7 @@
           </select>
         </span>
         <button
-          v-bind:class="{
+          :class="{
             'button': true,
             'is-loading': isAddCommentLoading
           }"
@@ -58,9 +58,11 @@ export default {
       task_status_id: this.task.task_status_id
     }
   },
+
   components: {
     PeopleAvatar
   },
+
   props: {
     user: {
       type: Object,
@@ -87,11 +89,13 @@ export default {
       default: () => []
     }
   },
+
   methods: {
     runAddComment (text, taskStatusId) {
       this.addComment(text, taskStatusId)
       this.text = ''
     },
+
     updateValue (value) {
       this.task_status_id = this.$refs.statusSelect.value
     }

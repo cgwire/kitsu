@@ -454,7 +454,11 @@ const actions = {
           if (!err) {
             const comment = getters.getTaskComment(taskId, commentId)
             const extension = fileName.slice(fileName.length - 3)
-            preview.extension = extension.substring(1)
+            if (extension.startsWith('.')) {
+              preview.extension = extension.substring(1)
+            } else {
+              preview.extension = extension
+            }
             commit(ADD_PREVIEW_END, {
               preview,
               taskId,

@@ -48,17 +48,20 @@
               />
             </div>
 
-            <a
-              class="button mt2"
-              ref="preview-file"
-              :href="currentPreviewPath"
+            <div
               v-else-if="isDlPreviewFile"
             >
-              <download-icon class="icon" />
-              <span class="text">
-                {{ $t('tasks.download_pdf_file') }}
-              </span>
-            </a>
+              <a
+                class="button mt2"
+                ref="preview-file"
+                :href="currentPreviewPath"
+              >
+                <download-icon class="icon" />
+                <span class="text">
+                  {{ $t('tasks.download_pdf_file') }}
+                </span>
+              </a>
+            </div>
 
             <model-viewer
               :preview-url="currentPreviewPath"
@@ -75,7 +78,21 @@
               ref="preview-picture"
               v-else-if="currentTaskPreviews.length > 0 && extension === 'png'"
             />
+            <div
+              v-if="currentTaskPreviews.length === 0"
+            >
+              <em>There is currently no preview</em>
+            </div>
+            <div>
+              <button
+                class="button add-preview-button"
+                @click="onAddPreviewClicked"
+              >
+              Add Preview
+              </button>
+            </div>
           </div>
+
         </div>
       </div>
 
@@ -83,6 +100,7 @@
         <div v-if="currentTask">
           <div>
             <add-comment
+              ref="add-comment"
               :addComment="addComment"
               :isAddCommentLoading="addCommentLoading.isLoading"
               :user="user"
@@ -97,9 +115,10 @@
                 :highlighted="isHighlighted(comment)"
                 :key="comment.id"
                 :current-user="user"
-                :editable="false"
+                :editable="index === 0"
                 :light="true"
-                v-for="comment in currentTaskComments"
+                :add-preview="onAddPreviewClicked"
+                v-for="(comment, index) in currentTaskComments"
               />
             </div>
             <div class="no-comment" v-else>
@@ -140,18 +159,6 @@
       extensions=".png,.jpg"
       @fileselected="selectFile"
       @confirm="createExtraPreview"
-    />
-
-    <add-preview-modal
-      ref="change-preview-modal"
-      :active="modals.changePreview"
-      :is-loading="loading.changePreview"
-      :is-error="errors.changePreview"
-      :cancel-route="taskPath()"
-      :form-data="changePreviewFormData"
-      :is-editing="true"
-      @fileselected="selectFile"
-      @confirm="changePreview"
     />
 
   </div>
@@ -490,6 +497,7 @@ export default {
       'addCommentExtraPreview',
       'changeCommentPreview',
       'clearSelectedTasks',
+      'commentTask',
       'deleteTaskPreview',
       'deleteTaskComment',
       'editTaskComment',
@@ -623,7 +631,7 @@ export default {
         isLoading: true,
         isError: false
       }
-      this.$store.dispatch('commentTask', {
+      this.commentTask({
         taskId: this.task.id,
         taskStatusId: taskStatusId,
         comment: comment,
@@ -687,22 +695,51 @@ export default {
       this.$store.commit('PREVIEW_FILE_SELECTED', formData)
     },
 
-    createPreview () {
-      this.errors.addPreview = false
-      this.loading.addPreview = true
-      this.addCommentPreview({
+    createComment (text, taskStatusId, callback) {
+      this.commentTask({
         taskId: this.task.id,
-        commentId: this.route.params.comment_id,
-        callback: (err, preview) => {
-          this.loading.addPreview = false
+        taskStatusId: taskStatusId,
+        comment: text,
+        callback: (err) => {
           if (err) {
-            this.errors.addPreview = true
+            console.log(err)
+            callback(err)
           } else {
-            this.$refs['add-preview-modal'].reset()
-            this.resetPreview(preview)
+            callback()
           }
         }
       })
+    },
+
+    createPreview () {
+      this.errors.addPreview = false
+      this.loading.addPreview = true
+      const addNewPreview = () => {
+        this.addCommentPreview({
+          taskId: this.task.id,
+          commentId: this.currentTaskComments[0].id,
+          callback: (err, preview) => {
+            this.loading.addPreview = false
+            if (err) {
+              this.errors.addPreview = true
+            } else {
+              this.$refs['add-preview-modal'].reset()
+              this.resetPreview(preview)
+              this.modals.addPreview = false
+            }
+          }
+        })
+      }
+      const taskStatusId = this.$refs['add-comment'].task_status_id
+      let revision = 1
+      if (this.currentTaskPreviews.length > 0) {
+        revision = this.currentTaskPreviews[0].revision + 1
+      }
+      this.createComment(
+        `New Preview v${revision}`,
+        taskStatusId,
+        addNewPreview
+      )
     },
 
     createExtraPreview () {
@@ -763,7 +800,6 @@ export default {
       this.currentTaskPreviews = this.getCurrentTaskPreviews()
       this.setOtherPreviews()
       this.currentPreviewPath = this.getOriginalPath()
-      this.$router.push(this.previewPath(preview.id))
     },
 
     setPreview () {
@@ -905,11 +941,6 @@ export default {
         } else {
           this.resetPreview({id: previewId})
         }
-        /*
-        this.loadTaskEntityPreviewFiles({
-          entityId: this.currentTask.entity_id
-        })
-        */
       }
     },
 
@@ -951,18 +982,13 @@ export default {
       return route
     },
 
-    previewPath (previewId) {
-      const route = this.taskPath(this.currentTask, 'task-preview')
-
-      if (route.params) {
-        route.params.preview_id = previewId
-      }
-      return route
-    },
-
     onAnnotationChanged ({ preview, annotations }) {
       const taskId = this.currentTask.id
       this.updatePreviewAnnotation({ taskId, preview, annotations })
+    },
+
+    onAddPreviewClicked (comment) {
+      this.modals.addPreview = true
     },
 
     onAddExtraPreview () {
@@ -997,6 +1023,22 @@ export default {
 
   socket: {
     events: {
+      'preview:add' (eventData) {
+        this.onPreviewAdded(eventData)
+      },
+
+      'preview_file:update' (eventData) {
+        this.refreshPreview({
+          taskId: this.currentTask.id,
+          previewId: eventData.preview_file_id
+        }).then(() => {
+          if (this.$refs['preview-movie']) {
+            this.$refs['preview-movie'].reloadAnnotations()
+          } else if (this.$refs['preview-picture']) {
+            this.$refs['preview-picture'].reloadAnnotations()
+          }
+        })
+      }
     }
   }
 }
@@ -1155,5 +1197,10 @@ video {
   border-top: 1px solid #EEE;
   border-bottom: 1px solid #EEE;
   border-right: 1px solid #EEE;
+}
+
+.add-preview-button {
+  margin-top: 0.5em;
+  width: 100%;
 }
 </style>

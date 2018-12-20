@@ -33,7 +33,7 @@
           </router-link>
 
         </div>
-        <div class="flexrow-item">
+        <div class="flexrow-item" v-if="!light">
           <button-link
             icon="upload"
             class=""
@@ -41,22 +41,19 @@
             :is-responsive="true"
             :path="addPreviewPath"
             v-if="editable && comment.previews.length === 0 && comment.task_status.is_reviewable"
-          >
-          </button-link>
+          />
           <button-link
             icon="edit"
             class=""
             :path="editCommentPath"
             v-if="editable"
-          >
-          </button-link>
+          />
           <button-link
             icon="delete"
             class=""
             :path="deleteCommentPath"
             v-if="editable"
-          >
-          </button-link>
+          />
         </div>
       </div>
 
@@ -111,7 +108,7 @@ export default {
     },
     light: {
       type: Boolean,
-      default: true
+      default: false
     }
   },
 
