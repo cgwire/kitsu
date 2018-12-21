@@ -1,6 +1,9 @@
 import { expect } from 'chai'
 import test from '../../../src/lib/string'
-import { populateTask } from '../../../src/lib/helpers'
+import {
+  getFilledColumns,
+  populateTask
+} from '../../../src/lib/helpers'
 
 describe('lib/helpers', () => {
 
@@ -28,5 +31,33 @@ describe('lib/helpers', () => {
     }
     populateTask(task)
     expect(task.full_entity_name).to.equal('SQ01 / SH01')
+  })
+
+  it('getFilledColumns', () => {
+    const assets = [
+      {
+        id: 'asset-1',
+        validations: {
+          'task-type-1': 'task-1'
+        }
+      },
+      {
+        id: 'asset-2',
+        validations: {
+          'task-type-2': 'task-2'
+        }
+      },
+      {
+        id: 'asset-3',
+        tasks: [{
+          id: 'task-3',
+          task_type_id: 'task-type-3'
+        }]
+      }
+    ]
+    const filledColumns = getFilledColumns(assets)
+    expect(filledColumns['task-type-1']).to.be.ok
+    expect(filledColumns['task-type-2']).to.be.ok
+    expect(filledColumns['task-type-3']).to.be.ok
   })
 })

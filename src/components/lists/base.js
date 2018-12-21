@@ -4,8 +4,8 @@ import Vue from 'vue'
 export const entityListMixin = {
   computed: {
     sortedValidationColumns () {
-      const columns = [...this.validationColumns]
-      return columns.sort((a, b) => {
+      let columns = [...this.validationColumns]
+      columns = columns.sort((a, b) => {
         const taskTypeA = this.taskTypeMap[a]
         const taskTypeB = this.taskTypeMap[b]
         if (taskTypeA.priority === taskTypeB.priority) {
@@ -16,6 +16,13 @@ export const entityListMixin = {
           return -1
         }
       })
+      if (this.assetFilledColumns) {
+        return columns.filter(c => this.assetFilledColumns[c])
+      } else if (this.shotFilledColumns) {
+        return columns.filter(c => this.shotFilledColumns[c])
+      } else {
+        return columns
+      }
     }
   },
 

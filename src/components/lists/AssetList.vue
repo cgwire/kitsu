@@ -258,6 +258,7 @@ export default {
   computed: {
     ...mapGetters([
       'assets',
+      'assetFilledColumns',
       'assetSearchText',
       'assetSelectionGrid',
       'episodeMap',

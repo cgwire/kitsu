@@ -135,3 +135,20 @@ export const getWeekRange = (year, currentYear) => {
 export const remove = (items, valueToRemove) => {
   return items.filter(item => item !== valueToRemove)
 }
+
+export const getFilledColumns = (entries) => {
+  const filledColumns = {}
+  entries.forEach((entry) => {
+    if (entry.validations) {
+      Object.assign(
+        filledColumns,
+        entry.validations
+      )
+    } else {
+      entry.tasks.forEach((task) => {
+        filledColumns[task.task_type_id] = task.id
+      })
+    }
+  })
+  return filledColumns
+}
