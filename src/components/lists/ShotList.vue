@@ -250,6 +250,7 @@ export default {
       'isSingleEpisode',
       'isTVShow',
       'nbSelectedTasks',
+      'shotFilledColumns',
       'shotMap',
       'shotSearchText',
       'shotSelectionGrid',

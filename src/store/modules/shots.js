@@ -16,7 +16,8 @@ import {
   appendSelectionGrid,
   buildSelectionGrid,
   clearSelectionGrid,
-  computeStats
+  computeStats,
+  getFilledColumns
 } from '../../lib/helpers'
 import {
   buildShotIndex,
@@ -192,6 +193,7 @@ const initialState = {
   displayedEpisodes: [],
   displayedEpisodesLength: 0,
   sequenceIndex: {},
+  shotFilledColumns: {},
 
   sequenceMap: {},
   episodeMap: {},
@@ -256,6 +258,7 @@ const getters = {
   displayedSequencesLength: state => state.displayedSequencesLength,
   displayedEpisodes: state => state.displayedEpisodes,
   displayedEpisodesLength: state => state.displayedEpisodesLength,
+  shotFilledColumns: state => state.shotFilledColumns,
 
   isShotsLoading: state => state.isShotsLoading,
   isShotsLoadingError: state => state.isShotsLoadingError,
@@ -753,6 +756,7 @@ const mutations = {
 
     state.displayedShots = shots.slice(0, PAGE_SIZE)
     state.displayedShotsLength = shots.length
+    state.shotFilledColumns = getFilledColumns(state.displayedShots)
     cache.shots = shots
 
     const maxX = state.displayedShots.length
@@ -1010,6 +1014,7 @@ const mutations = {
 
     state.displayedShots = result.slice(0, PAGE_SIZE)
     state.displayedShotsLength = result.length
+    state.shotFilledColumns = getFilledColumns(state.displayedShots)
     state.shotSearchText = shotSearch
 
     const maxX = state.displayedShots.length
@@ -1056,6 +1061,7 @@ const mutations = {
     cache.shots.push(shot)
     cache.shots = sortShots(cache.shots)
     state.displayedShots = cache.shots.slice(0, PAGE_SIZE)
+    state.shotFilledColumns = getFilledColumns(state.displayedShots)
     state.shotMap[shot.id] = shot
     cache.shotIndex = buildShotIndex(cache.shots)
 
@@ -1129,6 +1135,7 @@ const mutations = {
       0,
       state.displayedShots.length + PAGE_SIZE
     )
+    state.shotFilledColumns = getFilledColumns(state.displayedShots)
 
     const previousX = state.displayedShots.length - PAGE_SIZE
     const maxX = state.displayedShots.length

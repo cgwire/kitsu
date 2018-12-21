@@ -1,4 +1,5 @@
 import Vue from 'vue'
+
 import assetsApi from '../api/assets'
 import peopleApi from '../api/people'
 import tasksStore from './tasks'
@@ -16,6 +17,7 @@ import {
   appendSelectionGrid,
   buildSelectionGrid,
   clearSelectionGrid,
+  getFilledColumns,
   computeStats
 } from '../../lib/helpers'
 import {
@@ -149,6 +151,7 @@ const initialState = {
   filteredAssets: [],
   displayedAssets: [],
   displayedAssetsLength: 0,
+  assetFilledColumns: {},
   assetSearchText: '',
   assetSelectionGrid: {},
   assetSearchQueries: [],
@@ -198,6 +201,7 @@ const getters = {
 
   displayedAssets: state => state.displayedAssets,
   displayedAssetsLength: state => state.displayedAssetsLength,
+  assetFilledColumns: state => state.assetFilledColumns,
 
   displayedAssetTypes: state => state.displayedAssetTypes,
   displayedAssetTypesLength: state => state.displayedAssetTypesLength,
@@ -467,6 +471,7 @@ const mutations = {
 
     cache.assetIndex = {}
     state.displayedAssets = []
+    state.assetFilledColumns = {}
     state.displayedAssetsLength = 0
     state.assetSearchQueries = []
   },
@@ -505,6 +510,8 @@ const mutations = {
     state.nbValidationColumns = Object.keys(validationColumns).length
 
     cache.assetIndex = buildAssetIndex(assets)
+    state.assetFilledColumns =
+      getFilledColumns(cache.assets.slice(0, PAGE_SIZE))
     state.displayedAssets = cache.assets.slice(0, PAGE_SIZE)
     state.displayedAssetsLength = cache.assets ? cache.assets.length : 0
 
@@ -576,6 +583,7 @@ const mutations = {
       cache.assets = sortAssets(cache.assets)
       state.displayedAssets.push(newAsset)
       state.displayedAssets = sortAssets(state.displayedAssets)
+      state.assetFilledColumns = getFilledColumns(state.displayedAssets)
       state.displayedAssetsLength = state.displayedAssets.length
 
       const maxX = state.displayedAssets.length
@@ -616,6 +624,7 @@ const mutations = {
       )
       cache.assets.splice(assetToDeleteIndex, 1)
       state.displayedAssets.splice(displayAssetToDeleteIndex, 1)
+      state.assetFilledColumns = getFilledColumns(state.displayedAssets)
       state.assetMap[assetToDelete.id] = undefined
     }
 
@@ -711,6 +720,7 @@ const mutations = {
     result = applyFilters(result, filters, taskMap)
 
     state.displayedAssets = result.slice(0, PAGE_SIZE)
+    state.assetFilledColumns = getFilledColumns(state.displayedAssets)
     state.displayedAssetsLength = result ? result.length : 0
     state.assetSearchText = query
 
@@ -762,6 +772,7 @@ const mutations = {
       0,
       state.displayedAssets.length + PAGE_SIZE
     )
+    state.assetFilledColumns = getFilledColumns(state.displayedAssets)
     const previousX = state.displayedAssets.length - PAGE_SIZE
     const maxX = state.displayedAssets.length
     const maxY = state.nbValidationColumns
