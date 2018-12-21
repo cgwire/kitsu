@@ -40,6 +40,8 @@ export default {
 
   methods: {
     ...mapActions([
+      'getTask',
+      'loadComment',
       'loadPersonTasks',
       'refreshPreview'
     ]),
@@ -66,11 +68,11 @@ export default {
 
       'comment:new' (eventData) {
         const commentId = eventData.comment_id
-        this.$store.dispatch('loadComment', {commentId})
+        this.loadComment({ commentId })
       },
 
       'task:update' (eventData) {
-        this.$store.dispatch('getTask', { taskId: eventData.task_id })
+        this.getTask({ taskId: eventData.task_id })
       }
     }
   }
@@ -81,8 +83,7 @@ export default {
 :focus {outline:none;}
 ::-moz-focus-inner {border:0;}
 
-html {
-}
+html {}
 
 body {
   height: 100%;
