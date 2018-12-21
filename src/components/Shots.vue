@@ -88,7 +88,7 @@
       :cancel-route="shotsPath"
       :text="deleteText()"
       :error-text="$t('shots.delete_error')"
-      @confirm="confirmDeleteAllTasks"
+      @confirm="confirmDeleteShot"
     />
 
     <delete-modal
