@@ -20,6 +20,7 @@
     <validation-tag
       class="validation-tag"
       :task="task"
+      :is-static="true"
       v-if="task"
     />
     <people-avatar
@@ -82,6 +83,10 @@ export default {
     },
     isBorder: {
       default: true,
+      type: Boolean
+    },
+    isStatic: {
+      default: false,
       type: Boolean
     },
     isAssignees: {

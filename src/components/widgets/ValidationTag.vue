@@ -7,7 +7,7 @@
     v-if="!isStatic && !isCurrentUserClient"
     :style="{
       background: this.backgroundColor,
-      color: this.color,
+      color: this.color
   }">
     {{ taskStatus.short_name }}
   </router-link>
@@ -22,7 +22,6 @@
   >
     {{ taskStatus.short_name }}
   </span>
-
   <span class="priority" v-if="isPriority && !isCurrentUserClient">
     {{ priority }}
   </span>

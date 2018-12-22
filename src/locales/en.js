@@ -132,6 +132,7 @@ export default {
     confirmation_and_stay: 'Confirm and stay',
     dark_theme: 'Dark Theme',
     empty_comment: 'Empty comment',
+    history: 'history',
     info: 'Information',
     or: 'or',
     no: 'no',

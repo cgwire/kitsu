@@ -17,7 +17,6 @@
           v-if="currentTaskType"
         />
       </div>
-
       <div
         class="flexrow task-information"
         v-if="currentTask"
@@ -28,6 +27,18 @@
           :task="currentTask"
           :is-static="true"
         />
+        <router-link
+          :to="{
+            name: 'task',
+            params: {
+              task_id: currentTask && currentTask.id,
+              production_id: currentProduction.id,
+              type: 'assets'
+            }
+          }"
+        >
+          {{ $t('main.history') }}
+        </router-link>
       </div>
     </div>
 
@@ -143,8 +154,8 @@
       :active="modals.addPreview"
       :is-loading="loading.addPreview"
       :is-error="errors.addPreview"
-      :cancel-route="taskPath()"
       :form-data="addPreviewFormData"
+      @cancel="onClosePreview"
       @fileselected="selectFile"
       @confirm="createPreview"
     />
@@ -154,9 +165,9 @@
       :active="modals.addExtraPreview"
       :is-loading="loading.addExtraPreview"
       :is-error="errors.addExtraPreview"
-      :cancel-route="taskPath()"
       :form-data="addExtraPreviewFormData"
       extensions=".png,.jpg"
+      @cancel="onCloseExtraPreview"
       @fileselected="selectFile"
       @confirm="createExtraPreview"
     />
@@ -746,13 +757,10 @@ export default {
       this.errors.addExtraPreview = false
       this.loading.addExtraPreview = true
       const previewId = this.currentPreviewId
-      const comment = this.getCurrentTaskComments().find((comment) => {
-        return comment.previews.findIndex((p) => p.id === previewId) >= 0
-      })
       this.addCommentExtraPreview({
         taskId: this.task.id,
-        previewId: this.$route.params.preview_id,
-        commentId: comment.id,
+        commentId: this.currentTaskComments[0].id,
+        previewId: this.currentTaskPreviews[0].id,
         callback: (err, preview) => {
           this.loading.addExtraPreview = false
           if (err) {
@@ -769,6 +777,7 @@ export default {
             setTimeout(() => {
               this.$refs['preview-picture'].displayLast()
             }, 0)
+            this.modals.addExtraPreview = false
           }
         }
       })
@@ -992,19 +1001,26 @@ export default {
     },
 
     onAddExtraPreview () {
-      const route = this.taskPath(this.currentTask, 'task-add-extra-preview')
-      route.params.preview_id = this.currentPreviewId ||
-        this.currentPreview.id
-      route.params.comment_id = this.currentTaskComments[0].id
-      this.$router.push(route)
+      this.modals.addExtraPreview = true
     },
 
     onRemoveExtraPreview (preview) {
-      const route = this.taskPath(this.currentTask, 'task-remove-extra-preview')
+      const route = this.taskPath(
+        this.currentTask,
+        'task-remove-extra-preview'
+      )
       route.params.preview_id = this.currentPreviewId
       route.params.extra_preview_id = preview.id
       route.params.comment_id = this.currentTaskComments[0].id
       this.$router.push(route)
+    },
+
+    onClosePreview () {
+      this.modals.addPreview = false
+    },
+
+    onCloseExtraPreview () {
+      this.modals.addExtraPreview = false
     }
   },
 

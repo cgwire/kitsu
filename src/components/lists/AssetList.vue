@@ -159,6 +159,7 @@
             :rowX="getIndex(i, k)"
             :columnY="j"
             :minimized="hiddenColumns[columnId]"
+            :is-static="true"
             @select="onTaskSelected"
             @unselect="onTaskUnselected"
             v-for="(columnId, j) in sortedValidationColumns"
