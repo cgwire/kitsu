@@ -77,6 +77,11 @@ export default {
   font-weight: bold;
 }
 
+.dark .tag {
+  color: #EEEEEE;
+  background: #5E6169;
+}
+
 .no-link {
   cursor: default
 }

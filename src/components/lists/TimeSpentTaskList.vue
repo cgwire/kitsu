@@ -149,6 +149,10 @@ export default {
 </script>
 
 <style scoped>
+.dark .table {
+  border-color: #25282E;
+}
+
 .name {
   width: 300px;
 }

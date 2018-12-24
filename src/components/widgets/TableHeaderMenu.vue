@@ -53,6 +53,10 @@ export default {
 </script>
 
 <style scoped>
+.dark .header-menu {
+  background-color: #36393F;
+  box-shadow: 0px 2px 6px #333;
+}
 .header-menu {
   position: absolute;
   background: white;

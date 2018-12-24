@@ -4,8 +4,7 @@
 
       <div class="has-text-centered profile-header">
         <div class="profile-header-content has-text-centered">
-          <people-avatar :person="this.user" :size="150" :font-size="60">
-          </people-avatar>
+          <people-avatar :person="this.user" :size="150" :font-size="60" />
 
           <p>
             <router-link
@@ -27,20 +26,20 @@
         </h2>
         <text-field
           :label="$t('people.fields.first_name')"
-          v-model="form.first_name">
-        </text-field>
+          v-model="form.first_name"
+        />
         <text-field
           :label="$t('people.fields.last_name')"
-          v-model="form.last_name">
-        </text-field>
+          v-model="form.last_name"
+        />
         <text-field
           :label="$t('people.fields.email')"
-          v-model="form.email">
-        </text-field>
+          v-model="form.email"
+        />
         <text-field
           :label="$t('people.fields.phone')"
-          v-model="form.phone">
-        </text-field>
+          v-model="form.phone"
+        />
         <div class="field">
           <label class="label">
             {{ $t('profile.timezone') }}
@@ -96,18 +95,18 @@
         <text-field
           :label="$t('people.fields.old_password')"
           type="password"
-          v-model="passwordForm.oldPassword">
-        </text-field>
+          v-model="passwordForm.oldPassword"
+        />
         <text-field
           :label="$t('people.fields.password')"
           type="password"
-          v-model="passwordForm.password">
-        </text-field>
+          v-model="passwordForm.password"
+        />
         <text-field
           :label="$t('people.fields.password_2')"
           type="password"
-          v-model="passwordForm.password2">
-        </text-field>
+          v-model="passwordForm.password2"
+        />
 
         <button
           :class="{
@@ -303,7 +302,17 @@ export default {
 </script>
 
 <style scoped>
-.profile.page {
+.dark .profile {
+  background: #36393F;
+  color: #EEEEEE;
+}
+
+.dark .profile-content {
+  background: #4E5159;
+  color: #EEEEEE;
+}
+
+.profile {
   background: #EEEEEE;
   width: 100%;
   flex: 1 1 auto;
@@ -374,7 +383,7 @@ h2:first-child {
 }
 
 .save-button {
-  border-radius: 2px;
+  border-radius: 5px;
   width: 100%;
   background: #00B242;
   border-color: #00B242;

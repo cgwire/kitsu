@@ -93,19 +93,6 @@ export default {
   height: 38px;
 }
 
-.is-dark select {
-  color: #CCC;
-  background: #26292F;
-  border: 0;
-  border-radius: 0;
-  margin: 0;
-}
-
-.is-dark select:focus {
-  border-color: #26292F;
-  outline: 0;
-}
-
 .is-top select:focus {
   border-color: #00B242;
   outline: 0;
@@ -113,18 +100,6 @@ export default {
 
 .is-top:after {
   border: 2px solid #00B242;
-  border-right: 0;
-  border-top: 0;
-}
-
-.is-dark:after {
-  margin-top: -8px;
-  border-right: 0;
-  border-top: 0;
-}
-
-.is-dark:hover:after {
-  border: 1px solid #00B242;
   border-right: 0;
   border-top: 0;
 }

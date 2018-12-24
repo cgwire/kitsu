@@ -84,8 +84,7 @@
               name: 'delete-person',
               params: {person_id: entry.id}
             }"
-          >
-          </row-actions>
+          />
           <td class="actions" v-else>
           </td>
         </tr>

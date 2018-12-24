@@ -40,6 +40,16 @@ export default {
 </script>
 
 <style scoped>
+.dark div {
+  background-color: #36393F;
+  border-color: #25282E;
+  color: #EEE;
+}
+
+.dark div:hover {
+  background-color: #5E6169;
+}
+
 div {
   color: black;
   width: 100%;

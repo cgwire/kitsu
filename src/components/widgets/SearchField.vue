@@ -26,7 +26,7 @@
   </div>
 
   <div class="flexrow-item save-search" v-if="canSave">
-    <button class="button" @click="onSaveClicked">
+    <button class="button save-button" @click="onSaveClicked">
       <save-icon class="icon is-small only-icon" />
     </button>
   </div>
@@ -91,6 +91,10 @@ export default {
 }
 </script>
 <style>
+.dark .button.save-button:hover {
+  color: #EEE;
+}
+
 .erase-search {
   cursor: pointer;
   margin: 0;
@@ -117,6 +121,10 @@ export default {
 
 .save-search .button:hover {
   color: #333;
+}
+
+.button.save-button {
+  background: transparent;
 }
 
 @media screen and (max-width: 768px) {

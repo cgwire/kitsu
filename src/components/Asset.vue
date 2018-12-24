@@ -18,8 +18,7 @@
           :empty-width="100"
           :empty-height="66.6"
           v-if="currentAsset"
-        >
-        </entity-thumbnail>
+        />
       </div>
       <div class="flexrow-item">
         <page-title :text="title" class="entity-title"></page-title>
@@ -34,22 +33,23 @@
         :entries="currentAsset ? currentAsset.tasks : []"
         :is-loading="!currentAsset"
         :is-error="false"
-      ></entity-task-list>
+      />
     </div>
     <div class="column">
       <page-subtitle :text="$t('main.info')"></page-subtitle>
-      <table class="table" v-if="currentAsset">
-        <tbody>
-          <tr>
-            <td class="field-label">{{ $t('assets.fields.description') }}</td>
-            <description-cell
-              :entry="currentAsset"
-              :full="true"
-            >
-            </description-cell>
-          </tr>
-        </tbody>
-      </table>
+      <div class="table-body">
+        <table class="table" v-if="currentAsset">
+          <tbody>
+            <tr>
+              <td class="field-label">{{ $t('assets.fields.description') }}</td>
+              <description-cell
+                :entry="currentAsset"
+                :full="true"
+              />
+            </tr>
+          </tbody>
+        </table>
+      </div>
     </div>
   </div>
 
@@ -84,8 +84,7 @@
               :empty-width="100"
               :empty-height="100"
               :with-link="false"
-            >
-            </entity-thumbnail>
+            />
             <div>
               <span>{{ shot.name }}</span>
               <span v-if="shot.nb_occurences > 1">
@@ -103,8 +102,7 @@
       :is-loading="castIn.isLoadin"
       :is-error="castIn.isError"
       v-else
-    >
-    </table-info>
+    />
   </div>
 </div>
 </template>
@@ -240,6 +238,19 @@ export default {
 </script>
 
 <style scoped>
+.dark .page {
+  background: #3D4048;
+  padding-bottom: 1em;
+}
+
+.dark .page-header,
+.dark .asset-casted-in,
+.dark .column {
+  background: #46494F;
+  border-color: #25282E;
+  box-shadow: 0px 0px 6px #333;
+}
+
 h2.subtitle {
   margin-top: 0;
   margin-bottom: 0.5em;

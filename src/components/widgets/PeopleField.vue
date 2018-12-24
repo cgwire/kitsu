@@ -82,7 +82,7 @@ export default {
 
     update (searchText) {
       if (searchText) {
-        const result = indexSearch(this.index, searchText)
+        const result = indexSearch(this.index, [searchText])
         this.items = result
       } else {
         this.items = this.people
@@ -115,6 +115,21 @@ export default {
 </script>
 
 <style>
+.dark .v-autocomplete .v-autocomplete-input-group .v-autocomplete-input {
+  background-color: #36393F;
+  border-color: #25282E;
+  color: #EEE;
+}
+
+.dark .v-autocomplete .v-autocomplete-input-group .v-autocomplete-input:focus {
+  border-color: #00B242;
+}
+
+.dark .v-autocomplete .v-autocomplete-list {
+  box-shadow: 2px 2px 2px 0px #333;
+  border-color: #25282E;
+}
+
 .v-autocomplete .v-autocomplete-list {
   width: 100%;
   max-height: 300px;

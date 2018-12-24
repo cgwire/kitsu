@@ -261,6 +261,7 @@ export default {
 <style scoped>
 .page {
   margin-top: 1em;
+  height: 100%;
 }
 
 .production-name {

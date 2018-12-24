@@ -100,7 +100,7 @@
               </button>
 
               <div class="" v-if="isChangePriorityLoading">
-                <spinner :is-white="true"></spinner>
+                <spinner :is-white="true" />
               </div>
             </div>
           </div>
@@ -123,7 +123,7 @@
               </button>
 
               <div class="" v-if="isCreationLoading">
-                <spinner :is-white="true"></spinner>
+                <spinner :is-white="true" />
               </div>
             </div>
           </div>
@@ -146,7 +146,7 @@
               </button>
             </div>
             <div class="flexrow-item" v-else>
-              <spinner :is-white="true" :size="20"/>
+              <spinner :is-white="true" />
             </div>
           </div>
         </div>

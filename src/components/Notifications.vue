@@ -44,6 +44,7 @@
             &nbsp;
           </router-link>
           <task-type-name
+            class="task-type-name"
             :task-type="buildTaskTypeFromNotification(notification)"
             :production-id="notification.project_id"
           />
@@ -224,6 +225,15 @@ export default {
 </script>
 
 <style scoped>
+.dark .notification {
+  background: #3D4048;
+  color: #EEEEEE;
+}
+
+.dark a {
+  color: #DDDDDD;
+}
+
 a {
   font-weight: bold;
   color: #666;
@@ -286,5 +296,9 @@ img.thumbnail-picture {
 
 .thumbnail-picture-wrapper {
   margin-left: 0.5em;
+}
+
+.task-type-name {
+  margin-right: 0.5em;
 }
 </style>

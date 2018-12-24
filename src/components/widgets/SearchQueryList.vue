@@ -8,7 +8,7 @@
   >
     {{ searchQuery.name }}
     <button
-      class="delete is-small"
+      class="delete"
       @click.prevent="removeSearch(searchQuery)"
     >
     </button>

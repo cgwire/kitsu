@@ -4,7 +4,7 @@
     <div class="flexrow-item current-date">
       <datepicker
         wrapper-class="datepicker"
-        input-class="date-field"
+        input-class="date-field input"
         :language="locale"
         :disabled-dates="disabledDates"
         :monday-first="true"

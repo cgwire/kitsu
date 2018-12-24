@@ -1,7 +1,7 @@
 <template>
-    <div class="columns fixed-page">
-      <div class="column main-column">
-        <div class="timesheets page" v-if="isCurrentUserManager">
+  <div class="columns fixed-page">
+    <div class="column main-column">
+      <div class="timesheets page" v-if="isCurrentUserManager">
         <div class="page-header flexrow">
           <page-title class="flexrow-item" :text="$t('timesheets.title')"/>
           <combobox
@@ -365,6 +365,10 @@ export default {
 </script>
 
 <style scoped>
+.dark .main-column {
+  border-color: #5E6169;
+}
+
 .columns {
   display: flex;
   flex-direction: row;
@@ -378,13 +382,18 @@ export default {
 
 .main-column {
   border-right: 3px solid #CCC;
+  margin: 0;
+}
+
+.timesheets {
+  height: 100%;
+  padding-bottom: 1em;
 }
 
 .side-column {
   width: 400px;
   max-width: 400px;
   margin-top: 70px;
-  background: white;
   margin-right: 10px;
   margin-bottom: 10px;
 }

@@ -24,4 +24,7 @@ export default {
 </script>
 
 <style scoped>
+.dark .person-name {
+  color: #EEE;
+}
 </style>
