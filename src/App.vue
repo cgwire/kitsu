@@ -152,7 +152,7 @@ body {
 }
 
 .dark .is-top select {
-  background: inherit;
+  background-color: #222427;
 }
 
 .dark .title,
