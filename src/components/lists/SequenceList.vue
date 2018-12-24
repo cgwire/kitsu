@@ -214,10 +214,16 @@ export default {
     onBodyScroll (event, position) {
       this.$refs.headerWrapper.style.left = `-${position.scrollLeft}px`
       this.$emit('scroll', position.scrollTop)
+      const maxHeight =
+        this.$refs.body.scrollHeight - this.$refs.body.offsetHeight
+      if (maxHeight < (position.scrollTop + 100)) {
+        this.loadMoreSequences()
+      }
     },
 
     loadMoreSequences () {
       this.displayMoreSequences()
+      this.$nextTick(this.resizeHeaders)
     },
 
     setScrollPosition (scrollPosition) {
