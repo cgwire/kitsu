@@ -882,7 +882,6 @@ const mutations = {
     })
     state.selectedTasks = tmpSelectedTasks
     state.nbSelectedTasks = Object.keys(state.selectedTasks).length
-    console.log(JSON.stringify(state.selectedTasks, null, 2))
     if (isValidationChanged) {
       state.selectedValidations = tmpSelectedValidations
       state.nbSelectedValidations =

@@ -720,7 +720,6 @@ const mutations = {
 
     state.displayedAssets = result.slice(0, PAGE_SIZE)
     state.assetFilledColumns = getFilledColumns(state.displayedAssets)
-    console.log(state.displayedAssets, state.assetFilledColumns)
     state.displayedAssetsLength = result ? result.length : 0
     state.assetSearchText = query
 
