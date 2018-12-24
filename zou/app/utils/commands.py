@@ -64,11 +64,11 @@ def init_data():
     tasks_service.get_or_create_task_type(
         concept, "Concept", "#8D6E63", 1)
     tasks_service.get_or_create_task_type(
-        modeling, "Texture", "#64B5F6", 2)
+        modeling, "Modeling", "#78909C", 2)
     tasks_service.get_or_create_task_type(
-        modeling, "Modeling", "#78909C", 3)
+        modeling, "Shading", "#64B5F6", 3)
     tasks_service.get_or_create_task_type(
-        animation, "Setup", "#9CCC65", 4)
+        animation, "Rigging", "#9CCC65", 4)
 
     tasks_service.get_or_create_task_type(
         concept, "Storyboard", "#43A047",
@@ -86,7 +86,7 @@ def init_data():
         fx, "FX", "#26C6DA",
         priority=5, for_shots=True, for_entity="Shot")
     tasks_service.get_or_create_task_type(
-        compositing, "Render", "#F06292",
+        compositing, "Rendering", "#F06292",
         priority=6, for_shots=True, for_entity="Shot")
     tasks_service.get_or_create_task_type(
         compositing, "Compositing", "#ff5252",
