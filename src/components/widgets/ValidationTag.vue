@@ -80,6 +80,7 @@ export default {
     ...mapGetters([
       'currentEpisode',
       'currentProduction',
+      'isDarkTheme',
       'isTVShow',
       'taskMap',
       'taskStatusMap',
@@ -97,11 +98,15 @@ export default {
     },
 
     backgroundColor () {
-      return this.taskStatus.color
+      if (this.taskStatus.short_name === 'todo' && this.isDarkTheme) {
+        return '#5F626A'
+      } else {
+        return this.taskStatus.color
+      }
     },
 
     color () {
-      if (this.taskStatus.short_name !== 'todo') {
+      if (this.taskStatus.short_name !== 'todo' || this.isDarkTheme) {
         return 'white'
       } else {
         return '#333'

@@ -1,12 +1,14 @@
 <template>
-  <div
-    class="has-text-centered mt2 loading-info"
-    v-if="user && isDataLoading"
-  >
-      <span>{{ $t('main.loading_data') }}...</span>
-    <spinner class="mt2" />
+  <div :class="{ theme: true, dark: isDarkTheme }">
+    <div
+      class="has-text-centered mt2 loading-info"
+      v-if="user && isDataLoading"
+    >
+        <span>{{ $t('main.loading_data') }}...</span>
+      <spinner class="mt2" />
+    </div>
+    <router-view v-else />
   </div>
-  <router-view v-else />
 </template>
 
 <script>
@@ -24,9 +26,21 @@ export default {
     ...mapGetters([
       'isLoginLoading',
       'isDataLoading',
+      'isDarkTheme',
       'route',
       'user'
     ])
+  },
+
+  mounted () {
+    if (localStorage.getItem('dark-theme') === 'true' && !this.isDarkTheme) {
+      this.$store.commit('TOGGLE_DARK_THEME')
+      document.documentElement.style.background = '#36393F'
+      document.body.style.background = '#36393F'
+    } else {
+      document.documentElement.style.background = '#FFF'
+      document.body.style.background = '#FFF'
+    }
   },
 
   metaInfo: {
@@ -52,6 +66,18 @@ export default {
           personId: eventData.person_id,
           forced: true
         })
+      }
+    }
+  },
+
+  watch: {
+    isDarkTheme () {
+      if (this.isDarkTheme) {
+        document.documentElement.style.background = '#36393F'
+        document.body.style.background = '#36393F'
+      } else {
+        document.documentElement.style.background = '#FFF'
+        document.body.style.background = '#FFF'
       }
     }
   },
@@ -83,7 +109,9 @@ export default {
 :focus {outline:none;}
 ::-moz-focus-inner {border:0;}
 
-html {}
+html {
+  height: 100%;
+}
 
 body {
   height: 100%;
@@ -97,6 +125,220 @@ body {
   margin: 0;
   padding: 0;
   border: 0;
+}
+
+.dark .hero {
+  background-color: #25282E;
+}
+
+.dark .input,
+.dark select,
+.dark textarea,
+.dark .page,
+.dark .loading-info,
+.dark .side-column {
+  background: #36393F;
+  color: #EEEEEE;
+}
+
+.dark select,
+.dark textarea,
+.dark .input {
+  border-color: #25282E;
+}
+
+.dark .select::after {
+  border-color: #00B242;
+}
+
+.dark .is-top select {
+  background: inherit;
+}
+
+.dark .title,
+.dark .subtitle {
+  color: #EEEEEE;
+}
+
+.dark label.label {
+  color: #EEEEEE;
+}
+
+.dark .box .title,
+.dark .box {
+  background: #3D4048;
+  color: #EEEEEE;
+}
+
+.dark .button.is-link {
+  background: transparent;
+  border-color: transparent;
+  color: #DDDDDD;
+}
+
+.dark .is-link:hover {
+  color: #DDDDDD;
+  background: #5E6169;
+}
+
+.dark .button {
+  background: #4E5159;
+  border-color: #25282E;
+  color: #EEEEEE;
+}
+
+.dark .button.is-danger {
+  background: #FF2B56;
+}
+
+.dark .main-button {
+  background: #00B242;
+  border-bottom: 3px solid #008732;
+}
+
+.dark .hero .box h1.title {
+  color: #DDD;
+}
+
+.dark .table-body .table tr:nth-child(odd) {
+  color: #EEEEEE;
+  background: #46494F;
+}
+
+.dark .table-header,
+.dark .table-header tr:hover,
+.dark .table-body .table tr:nth-child(even) {
+  color: #EEEEEE;
+  background: #36393F;
+}
+
+.dark .table-header th {
+  color: #EEEEEE;
+  border-color: #666666;
+}
+
+.dark .table-body td {
+  border-color: #25282E;
+}
+
+.dark .table-body .table tr:hover {
+  color: #EEEEEE;
+  background: #5E6169;
+}
+
+.dark .table tr.type-header {
+  border-top: 1px solid #25282E;
+  font-size: 1.1em;
+}
+
+.dark .table tr.type-header:hover {
+  background: #46494F;
+}
+
+.dark .table tr.type-header td {
+  font-weight: bold;
+  padding-left: 0.3em;
+}
+
+.dark .splitted-table {
+  border-left: 1px solid #36393F;
+}
+
+.dark .splitted-table tr {
+  border-right: 1px solid #25282E;
+  border-left: 1px solid #25282E;
+}
+
+.dark .splitted-table thead tr {
+  border-right: 1px solid transparent;
+  border-left: 1px solid transparent;
+}
+
+.dark .splitted-table thead tr a {
+  color: #7A7A7A;
+}
+
+.dark .splitted-table .table-body {
+  padding-top: 1em;
+  position: relative;
+  z-index: 1;
+}
+
+.dark .splitted-table tbody:first-child tr:first-child {
+  border-top: 1px solid #25282E;
+}
+
+.dark .splitted-table .empty-line {
+  border: 0;
+}
+
+.dark .splitted-table .empty-line td {
+  border-color: #36393F;
+  background: #36393F;
+  border: 0;
+}
+
+.dark .splitted-table tbody {
+  user-select: none;
+  border-bottom: 1px solid #25282E;
+}
+
+.dark .search-input {
+  border-color: #888;
+}
+
+.dark .erase-search .tag {
+  background-color: #999;
+  color: #333
+}
+
+.dark .erase-search .tag:hover {
+  background-color: #CCC;
+}
+
+.dark .tabs a {
+  color: #EEEEEE;
+}
+
+.dark .tabs a:hover {
+  border-color: #EEEEEE;
+}
+
+.dark .tabs li.is-active a:hover {
+  border-color: #00C252;
+  color: #00C252;
+}
+
+.dark .tabs li.is-active a:hover {
+  border-color: #00C252;
+  color: #00C252;
+}
+
+.dark .search-queries .tag {
+  color: #EEE;
+  background-color: #5E6169;
+}
+
+.dark .current-date .datepicker .vdp-datepicker__calendar {
+  background-color: #36393F;
+  border-color: #25282E;
+}
+.dark .current-date .datepicker .vdp-datepicker__calendar header span:hover {
+  background: #36393F;
+}
+.dark .current-date .datepicker .vdp-datepicker__calendar header .prev::after {
+  border-right-color: #EEE;
+}
+.dark .current-date .datepicker .vdp-datepicker__calendar header .next::after {
+  border-left-color: #EEE;
+}
+
+.dark .current-date .datepicker .vdp-datepicker__calendar header .next.disabled::after {
+  border-left-color: #666;
+}
+
+.dark .hero .control .icon {
+  color: #555;
 }
 
 #app .router-link-active {
@@ -202,8 +444,12 @@ a:hover {
   margin-top: 2em;
 }
 
+.select select:hover,
+.select select:active,
+.select select:focus,
 input.input:focus {
   border-color: #00B242;
+  outline: none;
 }
 
 .button:focus {
@@ -668,7 +914,7 @@ input.search-input:focus {
 
 .datepicker .date-field {
   font-size: 1.6em;
-  width: 190px;
+  width: 250px;
 }
 
 @media screen and (max-width: 1000px) {

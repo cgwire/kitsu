@@ -181,7 +181,9 @@ export default {
       const stats = this.assetTypeStats[entry.id][column.id]
       const taskStatusIds = Object.keys(stats)
       return taskStatusIds.map((key) => {
-        return this.assetTypeStats[entry.id][column.id][key].color
+        const data = this.assetTypeStats[entry.id][column.id][key]
+        let color = data.name === 'todo' ? '#5F626A' : data.color
+        return color
       })
     },
 

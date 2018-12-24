@@ -36,38 +36,40 @@
     </div>
     <div class="column">
       <page-subtitle :text="$t('main.info')" />
-      <table class="table" v-if="currentShot">
-        <tbody>
-          <tr v-if="currentShot.data && currentShot.data.fps">
-            <td class="field-label">{{ $t('shots.fields.fps') }}</td>
-            <td>
-              {{ currentShot ? currentShot.data.fps : '' }}
-            </td>
-          </tr>
+      <div class="table-body">
+        <table class="table" v-if="currentShot">
+          <tbody>
+            <tr v-if="currentShot.data && currentShot.data.fps">
+              <td class="field-label">{{ $t('shots.fields.fps') }}</td>
+              <td>
+                {{ currentShot ? currentShot.data.fps : '' }}
+              </td>
+            </tr>
 
-          <tr v-if="currentShot.data && currentShot.data.frame_in">
-            <td class="field-label">{{ $t('shots.fields.frame_in') }}</td>
-            <td>
-              {{ currentShot ? currentShot.data.frame_in : '' }}
-            </td>
-          </tr>
+            <tr v-if="currentShot.data && currentShot.data.frame_in">
+              <td class="field-label">{{ $t('shots.fields.frame_in') }}</td>
+              <td>
+                {{ currentShot ? currentShot.data.frame_in : '' }}
+              </td>
+            </tr>
 
-          <tr v-if="currentShot.data && currentShot.data.frame_out">
-            <td class="field-label">{{ $t('shots.fields.frame_out') }}</td>
-            <td>
-              {{ currentShot ? currentShot.data.frame_out : '' }}
-            </td>
-          </tr>
+            <tr v-if="currentShot.data && currentShot.data.frame_out">
+              <td class="field-label">{{ $t('shots.fields.frame_out') }}</td>
+              <td>
+                {{ currentShot ? currentShot.data.frame_out : '' }}
+              </td>
+            </tr>
 
-          <tr>
-            <td class="field-label">{{ $t('shots.fields.description') }}</td>
-            <description-cell
-              :entry="currentShot"
-              :full="true"
-            />
-          </tr>
-        </tbody>
-      </table>
+            <tr>
+              <td class="field-label">{{ $t('shots.fields.description') }}</td>
+              <description-cell
+                :entry="currentShot"
+                :full="true"
+              />
+            </tr>
+          </tbody>
+        </table>
+      </div>
     </div>
   </div>
 
@@ -262,6 +264,20 @@ export default {
 </script>
 
 <style scoped>
+.dark .page {
+  background: #3D4048;
+  height: 100%;
+  padding-bottom: 1em;
+}
+
+.dark .page-header,
+.dark .shot-casting,
+.dark .column {
+  background: #46494F;
+  border-color: #25282E;
+  box-shadow: 0px 0px 6px #333;
+}
+
 h2.subtitle {
   margin-top: 0;
   margin-bottom: 0.5em;

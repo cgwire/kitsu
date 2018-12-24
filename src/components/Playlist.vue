@@ -645,6 +645,29 @@ export default {
 </script>
 
 <style scoped>
+.dark .playlist-item {
+  background: #46494F;
+  box-shadow: 0px 0px 6px #333;
+  border-color: #25282E;
+  color: #EEE;
+}
+
+.dark .playlist-list-column {
+  background: #3D4048;
+  border-color: #25282E;
+  box-shadow: 0px 0px 6px #333;
+}
+
+.dark .addition-column {
+  background: #3D4048;
+  border-left: 1px solid #25282E;
+  box-shadow: 0px 0px 6px #333;
+}
+
+.dark span.thumbnail-picture {
+  box-shadow: 0px 0px 6px #333;
+}
+
 .page {
   display: flex;
   padding-left: 0;

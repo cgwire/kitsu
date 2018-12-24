@@ -120,12 +120,13 @@ export default {
 
   computed: {
     ...mapGetters([
-      'selectedTasks',
-      'selectedValidations',
-      'nbSelectedTasks',
+      'isDarkTheme',
       'isCurrentUserClient',
       'isShowAssignations',
+      'nbSelectedTasks',
       'personMap',
+      'selectedTasks',
+      'selectedValidations',
       'taskMap',
       'taskStatusMap'
     ]),
@@ -145,7 +146,8 @@ export default {
 
     getBackground () {
       if (this.isBorder) {
-        return colors.hexToRGBa(this.column.color, 0.08)
+        const opacity = this.isDarkTheme ? 0.15 : 0.08
+        return colors.hexToRGBa(this.column.color, opacity)
       } else {
         return 'transparent'
       }
@@ -153,7 +155,8 @@ export default {
 
     onMouseOver (event) {
       if (this.selectable && !this.selected) {
-        this.changeStyle('#CCFFCC')
+        const background = this.isDarkTheme ? '#878B97' : '#CCFFCC'
+        this.changeStyle(background)
       }
     },
 
@@ -205,7 +208,7 @@ export default {
   watch: {
     selected () {
       if (this.selected) {
-        const background = '#D1C4E9'
+        const background = this.isDarkTheme ? '#5E60BA' : '#D1C4E9'
         this.changeStyle(background)
       } else {
         const background = this.getBackground(this.column.color)
@@ -225,6 +228,11 @@ export default {
 </script>
 
 <style scoped>
+.dark td.selected,
+.dark td.selected.validation:hover {
+  background-color: #8F91EB;
+}
+
 .validation {
   cursor: pointer;
   margin-bottom: 3px;
@@ -233,15 +241,6 @@ export default {
 .wrapper {
   display: flex;
   flex-wrap: wrap;
-}
-
-td.validation:hover {
-  background: #CCFFCC;
-}
-
-td.selected,
-td.selected.validation:hover {
-  background: #D1C4E9;
 }
 
 span.person-avatar:nth-child(2) {

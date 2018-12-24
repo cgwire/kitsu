@@ -130,6 +130,7 @@ export default {
     close: 'Close',
     confirmation: 'Confirm',
     confirmation_and_stay: 'Confirm and stay',
+    dark_theme: 'Dark Theme',
     empty_comment: 'Empty comment',
     info: 'Information',
     or: 'or',
@@ -145,6 +146,7 @@ export default {
     save: 'Save',
     studio: 'Studio',
     user: 'User',
+    white_theme: 'White Theme',
     yes: 'yes',
     csv: {
       export_file: 'Export',

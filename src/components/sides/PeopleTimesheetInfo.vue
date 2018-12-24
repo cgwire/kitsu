@@ -36,7 +36,7 @@
     :tasks="tasks"
     :is-loading="isLoading"
     :is-error="isLoadingError"
-  ></time-spent-task-list>
+  />
 </div>
 </template>
 
@@ -183,6 +183,10 @@ export default {
 </script>
 
 <style scoped>
+.dark .close-button:hover {
+  background: #5E6169;
+}
+
 .people-timesheet-info {
   padding: 1em;
 }

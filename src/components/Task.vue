@@ -1340,6 +1340,21 @@ export default {
 </script>
 
 <style scoped>
+.dark .page {
+  background: #3D4048;
+  padding-bottom: 1em;
+}
+
+.dark .page-header,
+.dark .add-comment,
+.dark .comment,
+.dark .preview-column-content,
+.dark .column {
+  background: #46494F;
+  border-color: #25282E;
+  box-shadow: 0px 0px 6px #333;
+}
+
 h2.subtitle {
   margin: 0;
   padding: 0;

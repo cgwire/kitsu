@@ -336,6 +336,18 @@ export default {
 </script>
 
 <style scoped>
+.dark .weekend {
+  background-color: #25282E;
+}
+
+.dark .duration:hover {
+  color: #333;
+}
+
+.selected .duration {
+  color: #333;
+}
+
 .name {
   width: 230px;
   min-width: 230px;
