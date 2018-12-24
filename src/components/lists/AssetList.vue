@@ -107,7 +107,7 @@
     v-if="!isLoading"
   >
     <table
-      class="table"
+      class="table splitted-table"
       v-if="isListVisible"
     >
       <tbody
@@ -171,7 +171,7 @@
           />
           <td class="actions" v-else></td>
         </tr>
-        <tr class="empty-line"></tr>
+        <tr class="empty-line"><td colspan="30"></td></tr>
       </tbody>
     </table>
   </div>
@@ -519,6 +519,10 @@ export default {
 </script>
 
 <style scoped>
+.dark thead tr a {
+  color: #CCC;
+}
+
 .table {
   min-width: 1000px;
 }
@@ -586,11 +590,6 @@ td.name {
   color: white;
 }
 
-tr {
-  border-right: 1px solid #CCC;
-  border-left: 1px solid #CCC;
-}
-
 thead tr {
   border-right: 1px solid transparent;
   border-left: 1px solid transparent;
@@ -607,23 +606,17 @@ thead tr a {
 }
 
 tbody:first-child tr:first-child {
-  border-top: 1px solid #CCC;
 }
 
 tbody:last-child .empty-line:last-child {
   border: 0;
 }
 
-tbody {
-  user-select: none;
-}
-
 .empty-line {
   border-right: 0;
   border-left: 0;
-  border-bottom: 1px solid #CCC;
   height: 1em;
-  box-shadow: inner 2px 2px 2px #EEE;
+  color: red;
 }
 
 .table-header-wrapper {

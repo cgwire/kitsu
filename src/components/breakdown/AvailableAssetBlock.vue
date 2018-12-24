@@ -71,6 +71,16 @@ export default {
 </script>
 
 <style scoped>
+.dark .asset {
+  background-color: #5E6169;
+}
+
+.dark .asset.casted,
+.dark .asset .asset-add,
+.dark .asset .asset-add-10 {
+  background-color: #8F91EB;
+}
+
 .asset-add {
   position: relative;
   top: 0;

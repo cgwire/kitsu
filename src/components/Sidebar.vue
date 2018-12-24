@@ -114,6 +114,11 @@ export default {
 </script>
 
 <style scoped>
+.dark aside {
+  background-color: #2F3136;
+  color: #EEE;
+}
+
 aside {
   position: fixed;
   top: 0;

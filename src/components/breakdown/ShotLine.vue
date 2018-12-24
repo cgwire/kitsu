@@ -36,6 +36,14 @@ export default {
 }
 </script>
 <style scoped>
+.dark .shot:hover {
+  background-color: #56595F;
+}
+
+.dark .shot.selected {
+  background-color: #8F91EB;
+}
+
 .shot {
   font-size: 1.1em;
   padding: 0.5em 0 0.2em 0.2em;

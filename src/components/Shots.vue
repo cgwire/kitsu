@@ -149,7 +149,6 @@ import Combobox from './widgets/Combobox'
 import CreateTasksModal from './modals/CreateTasksModal'
 import DeleteModal from './widgets/DeleteModal'
 import EditShotModal from './modals/EditShotModal'
-import Filters from './widgets/Filters'
 import ImportModal from './modals/ImportModal'
 import HardDeleteModal from './modals/HardDeleteModal'
 import ManageShotsModal from './modals/ManageShotsModal'
@@ -169,7 +168,6 @@ export default {
     CreateTasksModal,
     DeleteModal,
     EditShotModal,
-    Filters,
     ImportModal,
     HardDeleteModal,
     ManageShotsModal,

@@ -11,37 +11,37 @@
       icon: true,
       'is-small': true,
       'only-icon': !isText
-    }" v-if="icon === 'plus'"></plus-icon>
+    }" v-if="icon === 'plus'" />
   <download-icon
     :class="{
       icon: true,
       'is-small': true,
       'only-icon': !isText
-    }" v-if="icon === 'download'"></download-icon>
+    }" v-if="icon === 'download'" />
   <upload-icon
     :class="{
       icon: true,
       'is-small': true,
       'only-icon': !isText
-    }" v-if="icon === 'upload'"></upload-icon>
+    }" v-if="icon === 'upload'" />
   <edit-icon
     :class="{
       icon: true,
       'is-small': true,
       'only-icon': !isText
-    }" v-if="icon === 'edit'"></edit-icon>
+    }" v-if="icon === 'edit'" />
   <trash-icon
     :class="{
       icon: true,
       'is-small': true,
       'only-icon': !isText
-    }" v-if="icon === 'delete'"></trash-icon>
+    }" v-if="icon === 'delete'" />
   <rotate-ccw-icon
     :class="{
       icon: true,
       'is-small': true,
       'only-icon': !isText
-    }" v-if="icon === 'restore'"></rotate-ccw-icon>
+    }" v-if="icon === 'restore'" />
 
   <span
     :class="{

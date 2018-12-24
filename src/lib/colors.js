@@ -6,6 +6,9 @@ export default {
    */
   fromString (str) {
     let colorHash = new ColorHash({lightness: 0.7, saturation: 0.8})
+    if (localStorage && localStorage.getItem('dark-theme') === 'true') {
+      colorHash = new ColorHash({lightness: 0.6, saturation: 0.8})
+    }
     return colorHash.hex(str)
   },
 

@@ -1,4 +1,5 @@
 import {
+  TOGGLE_DARK_THEME,
   TOGGLE_SIDEBAR,
   TOGGLE_USER_MENU,
 
@@ -8,6 +9,7 @@ import {
 } from '../mutation-types'
 
 const initialState = {
+  isDarkTheme: false,
   isSidebarHidden: true,
   isUserMenuHidden: true,
   lastProductionScreen: 'assets',
@@ -17,6 +19,7 @@ const initialState = {
 const state = {...initialState}
 
 const getters = {
+  isDarkTheme: state => state.isDarkTheme,
   isSidebarHidden: state => state.isSidebarHidden,
   isUserMenuHidden: state => state.isUserMenuHidden,
   lastProductionScreen: state => state.lastProductionScreen,
@@ -24,6 +27,13 @@ const getters = {
 }
 
 const actions = {
+  toggleDarkTheme ({ commit, state }) {
+    commit(TOGGLE_DARK_THEME)
+    if (localStorage) {
+      localStorage.setItem('dark-theme', state.isDarkTheme)
+    }
+  },
+
   toggleSidebar ({ commit, state }) {
     commit(TOGGLE_SIDEBAR)
   },
@@ -38,18 +48,26 @@ const actions = {
 }
 
 const mutations = {
+  [TOGGLE_DARK_THEME] (state) {
+    state.isDarkTheme = !state.isDarkTheme
+  },
+
   [TOGGLE_SIDEBAR] (state) {
     state.isSidebarHidden = !state.isSidebarHidden
   },
+
   [TOGGLE_USER_MENU] (state) {
     state.isUserMenuHidden = !state.isUserMenuHidden
   },
+
   [SET_LAST_PRODUCTION_SCREEN] (state, lastProductionScreen) {
     state.lastProductionScreen = lastProductionScreen
   },
 
   [RESET_ALL] (state) {
+    const isDarkTheme = state.isDarkTheme
     Object.assign(state, {...initialState})
+    state.isDarkTheme = isDarkTheme
   }
 }
 

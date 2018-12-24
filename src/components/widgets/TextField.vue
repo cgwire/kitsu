@@ -3,12 +3,12 @@
   <label class="label">{{ label }}</label>
   <p class="control">
     <input
-      class="input"
       :class="'input ' + inputClass"
       ref="input"
       :placeholder="placeholder"
       :type="type"
       :value="value"
+      min="0"
       @input="updateValue()"
       @keyup.enter="emitEnter()"
     />
@@ -62,3 +62,8 @@ export default {
   }
 }
 </script>
+<style scoped>
+input.input {
+  font-size: 1.2em;
+}
+</style>

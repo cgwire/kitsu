@@ -23,12 +23,20 @@ export default {
     'entry'
   ],
   computed: {
-    ...mapGetters([]),
+    ...mapGetters([
+      'isDarkTheme'
+    ]),
+
     color () {
-      return this.entry.color
+      if (this.entry.short_name === 'todo' && this.isDarkTheme) {
+        return '#5F626A'
+      } else {
+        return this.entry.color
+      }
     },
+
     textColor () {
-      if (this.entry.short_name === 'todo') {
+      if (this.entry.short_name === 'todo' && !this.isDarkTheme) {
         return '#333'
       } else {
         return 'white'
@@ -45,7 +53,7 @@ export default {
 .tag {
   margin: 0.7em;
   padding: 1em;
-  font-size: 1em;
+  font-size: 0.8em;
   color: white;
   text-transform: uppercase;
 }

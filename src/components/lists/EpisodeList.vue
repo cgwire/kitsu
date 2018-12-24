@@ -57,7 +57,6 @@
   <div
     ref="body"
     class="table-body"
-    v-infinite-scroll="loadMoreEpisodes"
     v-scroll="onBodyScroll"
   >
     <table class="table">
@@ -186,7 +185,9 @@ export default {
       const stats = this.episodeStats[entry.id][column.id]
       const taskStatusIds = Object.keys(stats)
       return taskStatusIds.map((key) => {
-        return this.episodeStats[entry.id][column.id][key].color
+        const data = this.episodeStats[entry.id][column.id][key]
+        let color = data.name === 'todo' ? '#5F626A' : data.color
+        return color
       })
     },
 
@@ -211,10 +212,16 @@ export default {
     onBodyScroll (event, position) {
       this.$refs.headerWrapper.style.left = `-${position.scrollLeft}px`
       this.$emit('scroll', position.scrollTop)
+      const maxHeight =
+        this.$refs.body.scrollHeight - this.$refs.body.offsetHeight
+      if (maxHeight < (position.scrollTop + 100)) {
+        this.loadMoreEpisodes()
+      }
     },
 
     loadMoreEpisodes () {
       this.displayMoreEpisodes()
+      this.$nextTick(this.resizeHeaders)
     },
 
     setScrollPosition (scrollPosition) {

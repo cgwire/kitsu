@@ -77,6 +77,7 @@ export default {
     confirmation_and_stay: 'Confirmer et rester',
     clear_selection: 'Effacer la sélection',
     close: 'Fermer',
+    dark_theme: 'Thème sombre',
     documentation: 'Documentation',
     delete_text: 'Etes vous sûr de vouloir supprimer {name} de la base de données ?',
     empty_comment: 'Commentaire vide',
@@ -92,6 +93,7 @@ export default {
     studio: 'Studio',
     user: 'Utilisateur',
     save: 'Enregistrer',
+    white_theme: 'Thème blanc',
     yes: 'oui',
     csv: {
       import_file: 'Importer',

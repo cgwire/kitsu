@@ -114,6 +114,11 @@ export default {
 </script>
 
 <style scoped>
+.dark .thumbnail-picture {
+  background-color: #4E5159;
+  border-color: #36393F;
+}
+
 .thumbnail-picture {
   margin-left: 0.3em;
   margin-top: 7px;

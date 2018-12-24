@@ -1,44 +1,55 @@
-<template functional>
+<template>
 <td class="actions has-text-right">
   <router-link
     class="button"
-    :to="props.editRoute"
-    v-if="!props.hideEdit && !props.entry.canceled"
+    :to="editRoute"
+    v-if="!hideEdit && !entry.canceled"
   >
-    <img src="../../assets/icons/edit.svg" class="icon is-small" />
+    <edit-icon class="icon is-small only-icon" />
   </router-link>
 
   <router-link
     class="button"
-    :to="props.restoreRoute"
-    v-if="props.entry.canceled"
+    :to="restoreRoute"
+    v-if="entry.canceled"
   >
-    <img src="../../assets/icons/rotate-ccw.svg" class="icon is-small" />
+    <rotate-ccw-icon class="icon is-small only-icon" />
   </router-link>
 
   <router-link
     class="button"
-    :to="props.deleteRoute"
-    v-if="!props.hideDelete && !props.entry.canceled && isCurrentUserAdmin"
+    :to="deleteRoute"
+    v-if="!hideDelete && !entry.canceled && isCurrentUserAdmin"
   >
-    <img src="../../assets/icons/trash.svg" class="icon is-small" />
+    <trash-icon class="icon is-small only-icon" />
   </router-link>
 
   <router-link
     class="button"
-    :to="props.deleteRoute"
-    v-else-if="!props.hideDelete"
+    :to="deleteRoute"
+    v-else-if="!hideDelete"
   >
-    <img src="../../assets/icons/trash.svg" class="icon is-small" />
+    <trash-icon class="icon is-small only-icon" />
   </router-link>
 </td>
 </template>
 
 <script>
 import { mapGetters, mapActions } from 'vuex'
+import {
+  EditIcon,
+  RotateCcwIcon,
+  TrashIcon
+} from 'vue-feather-icons'
 
 export default {
   name: 'row-actions',
+  components: {
+    EditIcon,
+    RotateCcwIcon,
+    TrashIcon
+  },
+
   props: {
     entry: {
       type: Object,

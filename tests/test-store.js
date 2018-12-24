@@ -1,5 +1,7 @@
 import expect from 'chai'
 
+global.localStorage = require('localStorage')
+
 import './store/assets.spec.js'
 import './store/assettypes.spec.js'
 import './store/breakdown.spec.js'

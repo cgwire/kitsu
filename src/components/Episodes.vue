@@ -99,15 +99,12 @@ export default {
     ])
   },
 
-  created () {
-    this.initEpisodes()
-      .then(this.handleModalsDisplay)
-  },
-
   mounted () {
     this.setDefaultSearchText()
     this.setDefaultListScrollPosition()
     this.resizeHeaders()
+    this.initEpisodes()
+      .then(this.handleModalsDisplay)
   },
 
   methods: {

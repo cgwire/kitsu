@@ -17,7 +17,8 @@
           class="nav-item home-button"
           to="/"
         >
-          <img src="../assets/logo.png" />
+          <img src="../assets/logo.png" v-if="!isDarkTheme" />
+          <img src="../assets/logo-dark.svg" v-else />
         </router-link>
 
         <div :class="{
@@ -101,6 +102,14 @@
             {{ $t("main.profile") }}
           </router-link>
         </li>
+        <li @click="toggleDarkTheme">
+          <span v-if="!isDarkTheme">
+            {{ $t("main.dark_theme ")}}
+          </span>
+          <span v-else>
+            {{ $t("main.white_theme ")}}
+          </span>
+        </li>
         <li>
           <a href="https://kitsu.cg-wire.com" target="_blank">
             {{ $t("main.documentation ")}}
@@ -162,6 +171,7 @@ export default {
       'currentProduction',
       'episodes',
       'episodeOptions',
+      'isDarkTheme',
       'isSidebarHidden',
       'isUserMenuHidden',
       'isTVShow',
@@ -222,6 +232,7 @@ export default {
       'logout',
       'setProduction',
       'setCurrentEpisode',
+      'toggleDarkTheme',
       'toggleSidebar',
       'toggleUserMenu'
     ]),
@@ -309,6 +320,8 @@ export default {
       if (isEpisodeContext) {
         route.name = `episode-${section}`
         route.params.episode_id = episodeId
+      } else if (section === 'episodes' && !isTVShow) {
+        route.name = 'assets'
       }
 
       if (
@@ -330,6 +343,7 @@ export default {
 
     setProductionFromRoute () {
       const routeProductionId = this.$route.params.production_id
+      const routeEpisodeId = this.$route.params.episode_id
       if (!this.currentProduction ||
           this.currentProductionId !== routeProductionId ||
           this.currentProduction.id !== routeProductionId
@@ -343,7 +357,11 @@ export default {
         } else {
           this.updateComboFromRoute()
         }
-      } else if (this.episodes.length < 2) {
+      } else if (
+        this.episodes.length < 2 &&
+        this.isTVShow &&
+        this.currentEpisode.id !== routeEpisodeId
+      ) {
         // This loading is required when the production is the first production
         // it is already set as current production but episodes are not
         // loaded.
@@ -397,7 +415,6 @@ export default {
       this.currentProjectSection = section
       this.silent = false
     }
-
   },
 
   watch: {
@@ -433,6 +450,22 @@ export default {
 </script>
 
 <style scoped>
+.dark .topbar .nav,
+.dark .user-menu {
+  background-color: #222427;
+  color: #EEE;
+  border-left: 1px solid #2F3136;
+  border-bottom: 1px solid #2F3136;
+}
+
+.dark .user-menu a {
+  color: #EEE;
+}
+
+.dark #toggle-menu-button:hover {
+  color: #EEE;
+}
+
 .nav {
   box-shadow: 0px 0px 6px rgba(0,0,0,0.2);
   max-height: 60px;
@@ -463,7 +496,7 @@ export default {
   top: 60px;
   width: 200px;
   right: 0;
-background-color: white;
+  background-color: white;
   padding: 1em 1em 1em 1em;
   z-index: 203;
   box-shadow: 2px 3px 3px rgba(0,0,0,0.2);

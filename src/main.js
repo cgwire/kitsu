@@ -8,7 +8,6 @@ import store from './store'
 
 import Autocomplete from 'v-autocomplete'
 import Chart from 'chart.js'
-import infiniteScroll from 'vue-infinite-scroll'
 import Meta from 'vue-meta'
 import VueChartkick from 'vue-chartkick'
 import VueCookie from 'vue-cookie'
@@ -22,7 +21,6 @@ import 'v-autocomplete/dist/v-autocomplete.css'
 Vue.config.productionTip = false
 Vue.use(Autocomplete)
 Vue.use(Meta)
-Vue.use(infiniteScroll)
 Vue.use(VueChartkick, {adapter: Chart})
 Vue.use(VueCookie)
 Vue.use(VueLazyload)

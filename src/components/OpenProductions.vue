@@ -1,11 +1,11 @@
 <template>
   <div class="open-productions page">
     <div class="has-text-centered" v-if="isOpenProductionsLoading">
-      <spinner></spinner>
+      <spinner />
     </div>
     <div v-else-if="openProductions.length > 0">
       <h1 class="title has-text-centered">
-        <activity-icon></activity-icon>
+        <activity-icon />
         {{ $t('productions.home.title') }}
       </h1>
       <div

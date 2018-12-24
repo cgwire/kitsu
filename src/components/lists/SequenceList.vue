@@ -61,7 +61,6 @@
   <div
     ref="body"
     class="table-body"
-    v-infinite-scroll="loadMoreSequences"
     v-scroll="onBodyScroll"
     v-if="!isLoading"
   >
@@ -157,6 +156,7 @@ export default {
       'currentProduction',
       'currentEpisode',
       'displayedSequencesLength',
+      'isDarkTheme',
       'isCurrentUserClient',
       'isCurrentUserManager',
       'isTVShow',
@@ -187,7 +187,9 @@ export default {
       const stats = this.sequenceStats[entry.id][column.id]
       const taskStatusIds = Object.keys(stats)
       return taskStatusIds.map((key) => {
-        return this.sequenceStats[entry.id][column.id][key].color
+        const data = this.sequenceStats[entry.id][column.id][key]
+        let color = data.name === 'todo' ? '#5F626A' : data.color
+        return color
       })
     },
 
@@ -212,10 +214,16 @@ export default {
     onBodyScroll (event, position) {
       this.$refs.headerWrapper.style.left = `-${position.scrollLeft}px`
       this.$emit('scroll', position.scrollTop)
+      const maxHeight =
+        this.$refs.body.scrollHeight - this.$refs.body.offsetHeight
+      if (maxHeight < (position.scrollTop + 100)) {
+        this.loadMoreSequences()
+      }
     },
 
     loadMoreSequences () {
       this.displayMoreSequences()
+      this.$nextTick(this.resizeHeaders)
     },
 
     setScrollPosition (scrollPosition) {

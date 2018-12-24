@@ -402,6 +402,7 @@ export default {
 }
 
 .modal-footer {
+  padding: 1em 1em 0 1em;
 }
 
 input::placeholder {

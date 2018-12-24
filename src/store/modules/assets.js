@@ -510,10 +510,9 @@ const mutations = {
     state.nbValidationColumns = Object.keys(validationColumns).length
 
     cache.assetIndex = buildAssetIndex(assets)
-    state.assetFilledColumns =
-      getFilledColumns(cache.assets.slice(0, PAGE_SIZE))
     state.displayedAssets = cache.assets.slice(0, PAGE_SIZE)
     state.displayedAssetsLength = cache.assets ? cache.assets.length : 0
+    state.assetFilledColumns = getFilledColumns(state.displayedAssets)
 
     state.assetTypes = Object.values(assetTypeMap)
     state.displayedAssetTypes = state.assetTypes
