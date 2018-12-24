@@ -47,6 +47,8 @@
     "vuex-router-sync": "5.0.0"
   },
   "devDependencies": {
+    "@babel/core": "7.0.0-beta.53",
+    "@babel/preset-env": "7.0.0-beta.53",
     "@vue/cli-plugin-babel": "3.0.0-rc.5",
     "@vue/cli-plugin-e2e-cypress": "3.0.0-rc.5",
     "@vue/cli-plugin-eslint": "3.0.0-rc.5",
@@ -54,12 +56,11 @@
     "@vue/cli-service": "3.0.0-rc.5",
     "@vue/eslint-config-standard": "3.0.0-rc.5",
     "@vue/test-utils": "1.0.0-beta.20",
-    "@babel/core": "7.0.0-beta.53",
-    "@babel/preset-env": "7.0.0-beta.53",
     "babel-loader": "8.0.0-beta.4",
     "chai": "4.1.2",
+    "localStorage": "1.0.4",
     "vue-template-compiler": "2.5.17",
-    "webpack-cli": "3.0.8",
-    "webpack": "4.16.1"
+    "webpack": "4.16.1",
+    "webpack-cli": "3.0.8"
   }
 }
