@@ -343,6 +343,7 @@ export default {
 
     setProductionFromRoute () {
       const routeProductionId = this.$route.params.production_id
+      const routeEpisodeId = this.$route.params.episode_id
       if (!this.currentProduction ||
           this.currentProductionId !== routeProductionId ||
           this.currentProduction.id !== routeProductionId
@@ -356,7 +357,11 @@ export default {
         } else {
           this.updateComboFromRoute()
         }
-      } else if (this.episodes.length < 2) {
+      } else if (
+        this.episodes.length < 2 &&
+        this.isTVShow &&
+        this.currentEpisode.id !== routeEpisodeId
+      ) {
         // This loading is required when the production is the first production
         // it is already set as current production but episodes are not
         // loaded.
