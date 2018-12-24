@@ -320,6 +320,8 @@ export default {
       if (isEpisodeContext) {
         route.name = `episode-${section}`
         route.params.episode_id = episodeId
+      } else if (section === 'episodes' && !isTVShow) {
+        route.name = 'assets'
       }
 
       if (

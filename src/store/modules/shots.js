@@ -653,7 +653,9 @@ const actions = {
       if (state.episodes.length === 0 ||
           state.episodes[0].production_id !== productionId) {
         if (isTVShow) {
-          return dispatch('loadEpisodeStats', productionId)
+          dispatch('loadEpisodes', () => {
+            return dispatch('loadEpisodeStats', productionId)
+          })
         } else {
           dispatch('computEpisodeStats')
           resolve()
