@@ -611,7 +611,9 @@ export default {
 
   watch: {
     $route () {
-      this.setCurrentPlaylist()
+      this.setCurrentPlaylist(() => {
+        this.handleModalsDisplay()
+      })
     },
 
     sequenceId () {
