@@ -1348,6 +1348,7 @@ export default {
 .dark .page-header,
 .dark .add-comment,
 .dark .comment,
+.dark .no-comment,
 .dark .preview-column-content,
 .dark .column {
   background: #46494F;
