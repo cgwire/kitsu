@@ -29,6 +29,7 @@
     :to="deleteRoute"
     v-else-if="!hideDelete"
   >
+    <trash-icon class="icon is-small only-icon" />
   </router-link>
 </td>
 </template>
