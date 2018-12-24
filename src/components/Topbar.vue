@@ -360,7 +360,10 @@ export default {
       } else if (
         this.episodes.length < 2 &&
         this.isTVShow &&
-        this.currentEpisode.id !== routeEpisodeId
+        (
+          !this.currentEpisode ||
+          this.currentEpisode.id !== routeEpisodeId
+        )
       ) {
         // This loading is required when the production is the first production
         // it is already set as current production but episodes are not
