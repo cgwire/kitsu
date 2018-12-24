@@ -50,7 +50,6 @@ import { mapGetters, mapActions } from 'vuex'
 import ProductionList from './lists/ProductionList'
 import EditProductionModal from './modals/EditProductionModal'
 import DeleteModal from './widgets/DeleteModal'
-import Filters from './widgets/Filters'
 import ButtonLink from './widgets/ButtonLink'
 import PageTitle from './widgets/PageTitle'
 
@@ -61,7 +60,6 @@ export default {
     ButtonLink,
     DeleteModal,
     EditProductionModal,
-    Filters,
     PageTitle,
     ProductionList
   },
@@ -74,16 +72,7 @@ export default {
       },
       productionToDelete: null,
       productionToEdit: null,
-      choices: [],
-      productionFilters: [{
-        type: 'Status',
-        value: {
-          name: 'open'
-        }
-      }],
-      productionFilterTypes: [
-        'Status'
-      ]
+      choices: []
     }
   },
 

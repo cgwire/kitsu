@@ -86,7 +86,6 @@ import PeopleList from './lists/PeopleList'
 import DeleteModal from './widgets/DeleteModal'
 import EditPersonModal from './modals/EditPersonModal'
 import ImportModal from './modals/ImportModal'
-import Filters from './widgets/Filters'
 import ButtonLink from './widgets/ButtonLink'
 import ButtonHrefLink from './widgets/ButtonHrefLink'
 import PageTitle from './widgets/PageTitle'
@@ -102,8 +101,7 @@ export default {
     ButtonLink,
     ButtonHrefLink,
     PageTitle,
-    SearchField,
-    Filters
+    SearchField
   },
 
   data () {
