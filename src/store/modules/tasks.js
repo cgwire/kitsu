@@ -608,6 +608,7 @@ const mutations = {
 
   [LOAD_ASSETS_END] (state, { assets, personMap }) {
     const validationColumns = {}
+    state.taskMap = {}
     assets.forEach((asset) => {
       asset.validations = {}
       asset.tasks.forEach((task) => {
@@ -639,6 +640,7 @@ const mutations = {
 
   [LOAD_SHOTS_END] (state, { shots, personMap }) {
     const validationColumns = {}
+    state.taskMap = {}
     shots.forEach((shot) => {
       shot.validations = {}
       shot.tasks.forEach((task) => {
