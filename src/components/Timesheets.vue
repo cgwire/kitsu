@@ -9,16 +9,14 @@
             :label="$t('timesheets.detail_level')"
             :options="detailOptions"
             v-model="detailLevelString"
-          >
-          </combobox>
+          />
 
           <combobox
             class="flexrow-item"
             :label="$t('timesheets.year')"
             :options="yearOptions"
             v-model="yearString"
-          >
-          </combobox>
+          />
 
           <combobox
             class="flexrow-item"
@@ -26,8 +24,7 @@
             :options="monthOptions"
             v-model="monthString"
             v-if="detailLevelString === 'day'"
-          >
-          </combobox>
+          />
         </div>
 
         <people-timesheet-list
