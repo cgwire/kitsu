@@ -141,6 +141,12 @@ body {
   color: #EEEEEE;
 }
 
+.dark textarea[disabled] {
+  background: #36393F;
+  color: #BBB;
+  border-color: #25282E;
+}
+
 .dark select,
 .dark textarea,
 .dark .input {
