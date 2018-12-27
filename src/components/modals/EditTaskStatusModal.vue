@@ -36,11 +36,6 @@
           v-model="form.is_done"
         />
         <combobox
-          :label="$t('task_status.fields.is_reviewable')"
-          :options="isReviewableOptions"
-          v-model="form.is_reviewable"
-        />
-        <combobox
           :label="$t('task_status.fields.is_artist_allowed')"
           :options="isArtistAllowedOptions"
           v-model="form.is_artist_allowed"
@@ -112,10 +107,6 @@ export default {
         is_reviewable: 'true',
         is_done: 'false'
       },
-      isReviewableOptions: [
-        {label: this.$t('main.yes'), value: 'true'},
-        {label: this.$t('main.no'), value: 'false'}
-      ],
       isDoneOptions: [
         {label: this.$t('main.yes'), value: 'true'},
         {label: this.$t('main.no'), value: 'false'}
