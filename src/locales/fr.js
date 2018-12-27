@@ -6,6 +6,7 @@ export default {
     delete_error: 'Une erreur est survenue lors de la suppression. Il y a probablement des données liées à elle. Etes vous sur que cette personne n\'a aucune tâche assignée et n\'a fait aucun commentaire ?',
     edit_title: 'Modifier les informations de',
     empty_team: 'Personne n\'a été affecté à cette production',
+    no_task_assigned: 'Il n\'y a aucune tâche assignée.',
     new_person: 'Ajouter un employé',
     persons: 'Personnes',
     picture: 'Changer l\'image',
@@ -222,7 +223,9 @@ export default {
     set_preview: 'Utilisez cette previz comme vignette',
     set_preview_error: 'Une erreur est survenue en utilisant cette vignette.',
     set_preview_done: 'Cette previz sert de vignette à l\'entité courante.',
+    subscribe_notifications: 'S\'abonner aux notifications',
     show_assignations: 'Voir assignations',
+    unsubscribe_notifications: 'Se désabonner des notifications',
     tasks: 'Tâches',
     validation: 'Validation',
     fields: {

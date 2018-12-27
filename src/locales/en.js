@@ -435,6 +435,7 @@ export default {
     no_assignation_right: 'you are no allowed to manage assignations',
     no_comment: 'There is currently no comment for this task.',
     no_preview: 'There is currently no preview for this task.',
+    no_task_assigned: 'No task assigned.',
     preview: 'Previews',
     previous: 'previous task',
     unsubscribe_notifications: 'Unsubscribe from notifications',

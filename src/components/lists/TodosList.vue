@@ -102,7 +102,11 @@
     :is-error="isError"
   />
 
-  <p class="has-text-centered footer-info" v-if="!isLoading">
+  <p class="has-text-centered empty-list" v-if="entries.length === 0">
+    {{ $t('people.no_task_assigned') }}
+  </p>
+
+  <p class="has-text-centered footer-info" v-if="!isLoading && entries.length">
     {{ entries.length }} {{ $tc('tasks.tasks', entries.length) }}
   </p>
 </div>
@@ -312,5 +316,10 @@ td.last-comment {
   max-width: 60px;
   width: 60px;
   padding: 0;
+}
+
+.empty-list {
+  margin-top: 2em;
+  font-size: 1.5em;
 }
 </style>
