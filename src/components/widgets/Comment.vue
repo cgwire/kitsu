@@ -180,19 +180,23 @@ export default {
 </script>
 
 <style scoped>
-.comment {
-  padding: 0.6em;
-  border-left: 6px solid #CCC;
-  background: white;
-  border-radius: 0 5px 5px 0;
+.dark .comment-text {
+  color: #EEE;
 }
 
-.comment.highlighted {
-  background: #F1EEFF;
+.comment {
+  background: white;
+  border-left: 6px solid #CCC;
+  border-radius: 0 5px 5px 0;
+  padding: 0.6em;
 }
 
 .comment:first-child {
   padding-top: 1em;
+}
+
+.comment.highlighted {
+  background: #F1EEFF;
 }
 
 .content .comment-person {

@@ -150,7 +150,6 @@
           target="_blank"
           class="button flexrow-item"
           :href="moviePath"
-          v-if="!light"
         >
           <download-icon class="icon" />
         </a>

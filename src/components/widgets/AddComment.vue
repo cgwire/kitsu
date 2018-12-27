@@ -10,12 +10,12 @@
     <div class="media-content">
       <p class="control">
         <textarea
+          ref="commentTextarea"
           class="textarea"
           :placeholder="$t('comments.add_comment')"
-          @keyup.enter.ctrl="runAddComment(text, task_status_id)"
-          :disabled="isAddCommentLoading"
+          :disabled="isLoading"
           v-model="text"
-          ref="commentTextarea"
+          @keyup.enter.ctrl="runAddComment(text, task_status_id)"
           v-focus>
         </textarea>
         <span class="select">
@@ -36,11 +36,17 @@
         <button
           :class="{
             'button': true,
-            'is-loading': isAddCommentLoading
+            'is-loading': isLoading
           }"
           @click="runAddComment(text, task_status_id)"
         >
           {{ $t('comments.post_status') }}
+        </button>
+        <button
+          class="button"
+          @click="$emit('add-preview')"
+        >
+          {{ $t('comments.add_preview') }}
         </button>
       </p>
     </div>
@@ -64,15 +70,11 @@ export default {
   },
 
   props: {
-    user: {
-      type: Object,
-      default: () => {}
-    },
     addComment: {
       type: Function,
       default: null
     },
-    isAddCommentLoading: {
+    isLoading: {
       type: Boolean,
       default: null
     },
@@ -80,19 +82,23 @@ export default {
       type: Boolean,
       default: false
     },
+    task: {
+      type: Object,
+      default: () => []
+    },
     taskStatusOptions: {
       type: Array,
       default: () => []
     },
-    task: {
+    user: {
       type: Object,
-      default: () => []
+      default: () => {}
     }
   },
 
   methods: {
     runAddComment (text, taskStatusId) {
-      this.addComment(text, taskStatusId)
+      this.$emit('add-comment', text, taskStatusId)
       this.text = ''
     },
 

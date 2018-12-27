@@ -664,6 +664,10 @@ export default {
 </script>
 
 <style scoped>
+.dark .main-column {
+  border-right: 3px solid #666;
+}
+
 .data-list {
   margin-top: 0;
 }
