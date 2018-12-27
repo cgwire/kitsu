@@ -8,7 +8,7 @@
       </div>
     </figure>
     <div class="media-content">
-      <p class="control">
+      <div>
         <textarea
           ref="commentTextarea"
           class="textarea"
@@ -18,21 +18,11 @@
           @keyup.enter.ctrl="runAddComment(text, task_status_id)"
           v-focus>
         </textarea>
-        <span class="select">
-          <select
-            ref="statusSelect"
-            @change="updateValue"
-          >
-            <option
-              v-for="(option, i) in taskStatusOptions"
-              :key="i + '-' + option.label"
-              :value="option.value"
-              :selected="option.value === task_status_id"
-            >
-              {{ option.label }}
-            </option>
-          </select>
-        </span>
+        <combobox
+          :options="taskStatusOptions"
+          :is-simple="true"
+          v-model="task_status_id"
+        />
         <button
           :class="{
             'button': true,
@@ -42,18 +32,35 @@
         >
           {{ $t('comments.post_status') }}
         </button>
+      </div>
+      <div class="flexrow">
         <button
-          class="button"
+          class="button flexrow-item"
           @click="$emit('add-preview')"
         >
           {{ $t('comments.add_preview') }}
         </button>
-      </p>
+        <span
+          class="attachment-file flexrow-item"
+        >
+          <em
+            v-if="!isFileAttached"
+          >
+            {{ $t('comments.no_file_attached') }}
+          </em>
+          <em
+            v-if="isFileAttached"
+          >
+            {{ attachedFileName }}
+          </em>
+        </span>
+      </div>
     </div>
   </article>
 </template>
 
 <script>
+import Combobox from './Combobox.vue'
 import PeopleAvatar from './PeopleAvatar.vue'
 
 export default {
@@ -66,6 +73,7 @@ export default {
   },
 
   components: {
+    Combobox,
     PeopleAvatar
   },
 
@@ -93,6 +101,19 @@ export default {
     user: {
       type: Object,
       default: () => {}
+    },
+    attachedFileName: {
+      type: String,
+      default: ''
+    }
+  },
+
+  computed: {
+    isFileAttached () {
+      return (
+        this.attachedFileName !== undefined &&
+        this.attachedFileName.length > 0
+      )
     }
   },
 
@@ -104,6 +125,12 @@ export default {
 
     updateValue (value) {
       this.task_status_id = this.$refs.statusSelect.value
+    }
+  },
+
+  watch: {
+    task () {
+      this.task_status_id = this.task.task_status_id
     }
   }
 }
@@ -123,5 +150,9 @@ export default {
 .add-comment textarea:focus,
 .add-comment textarea:active {
   border-color: #00B242;
+}
+
+.control {
+  margin-bottom: 0.1em;
 }
 </style>
