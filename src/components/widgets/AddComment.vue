@@ -125,6 +125,10 @@ export default {
 
     updateValue (value) {
       this.task_status_id = this.$refs.statusSelect.value
+    },
+
+    focus () {
+      this.$refs.commentTextarea.focus()
     }
   },
 
