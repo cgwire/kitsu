@@ -391,6 +391,9 @@ export default {
       this.taskPreviews = this.getTaskPreviews(this.task.id)
       this.setOtherPreviews()
       this.currentPreviewPath = this.getOriginalPath()
+      this.$nextTick(() => {
+        this.$refs['add-comment'].focus()
+      })
     },
 
     getOriginalPath () {
