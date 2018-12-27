@@ -387,10 +387,14 @@ export default {
       }
 
       if (!validationInfo.isShiftKey && validationInfo.isUserClick) {
-        this.lastSelection = {
-          x: validationInfo.x,
-          y: validationInfo.y
-        }
+        const x = validationInfo.x
+        const y = validationInfo.y
+        this.lastSelection = { x, y }
+        const ref = 'validation-' + x + '-' + y
+        const validationCell = this.$refs[ref][0]
+        this.$nextTick(() => {
+          this.scrollToValidationCell(validationCell)
+        })
       }
     },
 
@@ -516,18 +520,22 @@ export default {
     },
 
     onKeyDown (event) {
-      const i = this.lastSelection.x
-      const j = this.lastSelection.y
+      const lastSelection =
+        this.lastSelection ? this.lastSelection : { x: 0, y: 0 }
+      const i = lastSelection.x
+      const j = lastSelection.y
+      let validationCell = null
       if (event.ctrlKey) {
         if (event.keyCode === 37) {
-          this.select(i, j - 1)
+          validationCell = this.select(i, j - 1)
         } else if (event.keyCode === 38) {
-          this.select(i - 1, j)
+          validationCell = this.select(i - 1, j)
         } else if (event.keyCode === 39) {
-          this.select(i, j + 1)
+          validationCell = this.select(i, j + 1)
         } else if (event.keyCode === 40) {
-          this.select(i + 1, j)
+          validationCell = this.select(i + 1, j)
         }
+        this.scrollToValidationCell(validationCell)
       }
     },
 
@@ -535,6 +543,7 @@ export default {
       const ref = 'validation-' + i + '-' + j
       const validationCell = this.$refs[ref]
       if (validationCell) validationCell[0].$el.click()
+      return validationCell ? validationCell[0] : 0
     }
   },
 

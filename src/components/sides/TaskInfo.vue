@@ -83,7 +83,7 @@
             />
             <div
               class="no-preview"
-              v-if="taskPreviews.length === 0"
+              v-if="!taskPreviews || taskPreviews.length === 0"
             >
               <em>{{ $t('tasks.no_preview') }}</em>
             </div>
@@ -282,19 +282,22 @@ export default {
     },
 
     currentPreview () {
-      return this.taskPreviews.length > 0 ? this.taskPreviews[0] : null
+      return this.taskPreviews &&
+        this.taskPreviews.length > 0 ? this.taskPreviews[0] : null
     },
 
     currentPreviewId () {
-      return this.taskPreviews.length > 0 ? this.taskPreviews[0].id : null
+      return this.taskPreviews &&
+        this.taskPreviews.length > 0 ? this.taskPreviews[0].id : null
     },
 
     extension () {
-      return this.taskPreviews.length > 0 ? this.taskPreviews[0].extension : ''
+      return this.taskPreviews &&
+        this.taskPreviews.length > 0 ? this.taskPreviews[0].extension : ''
     },
 
     isStandardPreview () {
-      return this.taskPreviews.length > 0 &&
+      return this.taskPreviews && this.taskPreviews.length > 0 &&
         ['pdf', 'ma', 'mb', 'rar', 'zip', 'blend'].includes(this.extension)
     },
 
@@ -308,16 +311,18 @@ export default {
     },
 
     isPicturePreview () {
-      return this.taskPreviews.length > 0 && this.extension === 'png'
+      return this.taskPreviews &&
+       this.taskPreviews.length > 0 && this.extension === 'png'
     },
 
     is3DModelPreview () {
-      return this.taskPreviews.length > 0 && this.extension === 'obj'
+      return this.taskPreviews &&
+       this.taskPreviews.length > 0 && this.extension === 'obj'
     },
 
     moviePath () {
       let previewId = null
-      if (!previewId && this.taskPreviews.length > 0) {
+      if (!previewId && this.taskPreviews && this.taskPreviews.length > 0) {
         previewId = this.taskPreviews[0].id
       }
       return `/api/movies/originals/preview-files/${previewId}.mp4`

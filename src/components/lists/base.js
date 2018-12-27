@@ -63,6 +63,48 @@ export const entityListMixin = {
       }
     },
 
+    setScrollLeftPosition (scrollPosition) {
+      if (this.$refs.body) {
+        this.$refs.body.scrollLeft = scrollPosition
+      }
+    },
+
+    scrollToValidationCell (validationCell) {
+      if (validationCell) {
+        const margin = 20
+        const rect = validationCell.$el.getBoundingClientRect()
+        const listRect = this.$refs.body.getBoundingClientRect()
+        const isBelow = rect.bottom > listRect.bottom - margin
+        const isAbove = rect.top < listRect.top + margin
+        const isRight = rect.right > listRect.right - margin
+        const isLeft = rect.left < listRect.left + margin
+
+        if (isBelow) {
+          const scrollingRequired = rect.bottom - listRect.bottom + margin
+          this.setScrollPosition(
+            this.$refs.body.scrollTop + scrollingRequired
+          )
+        } else if (isAbove) {
+          const scrollingRequired = listRect.top - rect.top + margin
+          this.setScrollPosition(
+            this.$refs.body.scrollTop - scrollingRequired
+          )
+        }
+
+        if (isRight) {
+          const scrollingRequired = rect.right - listRect.right + margin
+          this.setScrollLeftPosition(
+            this.$refs.body.scrollLeft + scrollingRequired
+          )
+        } else if (isLeft) {
+          const scrollingRequired = listRect.left - rect.left + margin
+          this.setScrollLeftPosition(
+            this.$refs.body.scrollLeft - scrollingRequired
+          )
+        }
+      }
+    },
+
     getValidationStyle (columnId) {
       const taskType = this.taskTypeMap[columnId]
       return {
