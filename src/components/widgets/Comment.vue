@@ -35,14 +35,6 @@
         </div>
         <div class="flexrow-item" v-if="!light">
           <button-link
-            icon="upload"
-            class=""
-            :text="$t('tasks.add_preview')"
-            :is-responsive="true"
-            :path="addPreviewPath"
-            v-if="editable && comment.previews.length === 0 && comment.task_status.is_reviewable"
-          />
-          <button-link
             icon="edit"
             class=""
             :path="editCommentPath"
