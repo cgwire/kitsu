@@ -6,8 +6,8 @@
     class="tag dynamic"
     v-if="!isStatic && !isCurrentUserClient"
     :style="{
-      background: this.backgroundColor,
-      color: this.color
+      background: backgroundColor,
+      color: color
   }">
     {{ taskStatus.short_name }}
   </router-link>
@@ -15,8 +15,9 @@
   <span
     class="tag"
     :style="{
-      background: this.backgroundColor,
-      color: this.color,
+      background: backgroundColor,
+      color: color,
+      cursor: cursor
     }"
     v-else
   >
@@ -32,8 +33,8 @@
     class="tag dynamic"
     v-if="!isStatic && !isCurrentUserClient"
     :style="{
-      background: this.backgroundColor,
-      color: this.color,
+      background: backgroundColor,
+      color: color
   }">
      &nbsp;
   </router-link>
@@ -41,8 +42,9 @@
   <span
     class="tag"
     :style="{
-      background: this.backgroundColor,
-      color: this.color,
+      background: backgroundColor,
+      color: color,
+      cursor: cursor
     }"
     v-else
   >
@@ -72,6 +74,10 @@ export default {
     minimized: {
       default: false,
       type: Boolean
+    },
+    pointer: {
+      default: false,
+      type: Boolean
     }
   },
 
@@ -86,6 +92,10 @@ export default {
       'taskTypeMap',
       'isCurrentUserClient'
     ]),
+
+    cursor () {
+      return this.pointer ? 'pointer' : 'default'
+    },
 
     taskStatus () {
       if (this.task) {
@@ -159,7 +169,6 @@ export default {
 <style scoped>
 .tag {
   text-transform: uppercase;
-  cursor: default;
 }
 
 .tag.dynamic:hover {
