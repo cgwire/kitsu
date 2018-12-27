@@ -47,8 +47,6 @@ import {
   LOAD_PERSON_TASKS_END,
   USER_LOAD_TODOS_END,
 
-  SET_CURRENT_PRODUCTION,
-
   RESET_ALL
 } from '../mutation-types'
 
@@ -774,10 +772,12 @@ const mutations = {
       newStatus = taskStatusMap[newStatusId]
     }
 
-    Object.assign(task, {
-      task_status_id: newStatus.id,
-      task_status_priority: newStatus.priority
-    })
+    if (task) {
+      Object.assign(task, {
+        task_status_id: newStatus.id,
+        task_status_priority: newStatus.priority
+      })
+    }
   },
 
   [EDIT_COMMENT_END] (state, { taskId, comment }) {
@@ -982,10 +982,6 @@ const mutations = {
 
       state.taskMap[task.id] = task
     })
-  },
-
-  [SET_CURRENT_PRODUCTION] (state) {
-    state.taskMap = {}
   },
 
   [RESET_ALL] (state, shots) {
