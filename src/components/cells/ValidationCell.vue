@@ -21,6 +21,7 @@
       class="validation-tag"
       :task="task"
       :is-static="true"
+      :pointer="true"
       v-if="task"
     />
     <people-avatar
