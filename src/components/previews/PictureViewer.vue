@@ -47,7 +47,7 @@
       <button
         class="button flexrow-item"
         @click="onRemovePreviewClicked"
-        v-if="currentIndex > 1"
+        v-if="currentIndex > 1 && !light"
       >
         <trash-icon class="icon" />
       </button>

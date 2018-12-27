@@ -70,6 +70,7 @@ export default {
 
   main: {
     add: 'Ajouter',
+    all: 'Tous',
     admin: 'Admin',
     back_to_list: 'retour à la liste',
     cancel: 'Annuler',
@@ -78,13 +79,17 @@ export default {
     clear_selection: 'Effacer la sélection',
     close: 'Fermer',
     dark_theme: 'Thème sombre',
+    delete_all: 'Supprimer tout',
     documentation: 'Documentation',
     delete_text: 'Etes vous sûr de vouloir supprimer {name} de la base de données ?',
     empty_comment: 'Commentaire vide',
+    history: 'Historique',
     info: 'Information',
     loading_data: 'Chargement des données',
     loading_error: 'Une erreur est survenue en chargeant les données.',
     logout: 'Se déconnecter',
+    maximize: 'Maximiser',
+    minimize: 'Minimiser',
     no: 'non',
     or: 'ou',
     production: 'Production',
@@ -161,13 +166,15 @@ export default {
   },
 
   comments: {
-    retake: 'Reprise',
+    add_comment: 'Ajouter un commentaire...',
+    add_preview: 'Attacher un fichier',
+    edit_title: 'Modifier le commentaire',
+    empty_text: 'Ce commentaire est vide',
+    no_file_attached: 'Aucun fichier attaché',
+    post_status: 'Publier le commentaire',
     validated: 'Validé !',
     validation_required: 'Validation requise',
-    add_comment: 'Ajouter un commentaire...',
-    post_status: 'Envoyer l\'état',
-    empty_text: 'Ce commentaire est vide',
-    edit_title: 'Modifier le commentaire',
+    retake: 'Reprise',
     fields: {
       text: 'Texte'
     }
@@ -192,6 +199,7 @@ export default {
     create_for_selection: 'Créer une tâche pour chaque cellule vide :',
     current: 'Tâches à faire',
     current_status: 'Statut actuel :',
+    delete_all_error: 'Supprimer toutes les tâches pour ce type de tâche a échoué',
     delete_comment: 'Êtes vous sûr de vouloir supprimer ce commentaire ?',
     delete_comment_error: 'Une erreur est survenue en supprimant le commentaire.',
     delete_error: 'Une erreur est survenue en supprimant la tâche.',
@@ -204,7 +212,7 @@ export default {
     full_screen: 'Afficher en plein écran',
     hide_assignations: 'Cacher assignations',
     my_tasks: 'Mes tâches',
-    no_preview: 'Il n\'y a pas de previz pour cette tâche..',
+    no_preview: 'Il n\'y a pas de préviz pour cette tâche.',
     no_comment: 'Il n\'y a pas de commentaires pour cette tâche.',
     no_assignation_right: 'vous n\'êtes pas autorisé à gérer les assigations.',
     next: 'Suivante',
@@ -320,10 +328,11 @@ export default {
     new_success: 'Asset {name} créé avec succès.',
     empty_list: 'Il n\'y a pas d\'assets dans la production. Voulez vous en créer ?',
     fields: {
+      description: 'Description',
+      episode: 'Ep.',
       name: 'Nom',
-      type: 'Type',
       production: 'Prod',
-      description: 'Description'
+      type: 'Type'
     },
     delete_text: 'Etes vous sûr de vouloir retirer {name} de la base de données ?',
     delete_error: 'Une erreur est survenue en créant l\'asset, êtes vous sûr de vouloir que l\'asset n\'ait plus aucun lien ?',

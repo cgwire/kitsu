@@ -49,10 +49,12 @@ export default {
 
   comments: {
     add_comment: 'Add a comment...',
+    add_preview: 'Attach file',
     change_preview: 'Change preview',
     empty_text: 'This comment is empty',
     edit_title: 'Edit comment',
-    post_status: 'Post status',
+    no_file_attached: 'No file attached',
+    post_status: 'Post comment',
     retake: 'Retake',
     validated: 'Validated!',
     validation_required: 'Validation Required',

@@ -196,6 +196,10 @@ body {
   border-bottom: 3px solid #008732;
 }
 
+.dark .add-comment .select select {
+  background: #4E5159;
+}
+
 .dark .hero .box h1.title {
   color: #DDD;
 }

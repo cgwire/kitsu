@@ -78,14 +78,14 @@
               :light="true"
               @annotation-changed="onAnnotationChanged"
               @add-preview="onAddExtraPreview"
-              @remove-extra-preview="onRemoveExtraPreview"
               ref="preview-picture"
               v-else-if="isPicturePreview"
             />
             <div
+              class="no-preview"
               v-if="taskPreviews.length === 0"
             >
-              <em>There is currently no preview</em>
+              <em>{{ $t('tasks.no_preview') }}</em>
             </div>
           </div>
 
@@ -102,6 +102,7 @@
               :task-status-options="taskStatusOptionsForCurrentUser"
               :light="true"
               :is-loading="loading.addComment"
+              :attached-file-name="attachedFileName"
               @add-comment="addComment"
               @add-preview="onAddPreviewClicked"
               v-if="isCommentingAllowed"
@@ -135,10 +136,9 @@
       :active="modals.addPreview"
       :is-loading="loading.addPreview"
       :is-error="errors.addPreview"
-      :form-data="addPreviewFormData"
       @cancel="onClosePreview"
       @fileselected="selectFile"
-      @confirm="createPreview"
+      @confirm="onClosePreview"
     />
 
     <add-preview-modal
@@ -208,7 +208,7 @@ export default {
   data () {
     return {
       addExtraPreviewFormData: null,
-      addPreviewFormData: null,
+      attachedFileName: '',
       currentPreviewPath: '',
       taskComments: [],
       taskPreviews: [],
@@ -247,6 +247,7 @@ export default {
       'isSingleEpisode',
       'isTVShow',
       'personMap',
+      'previewFormData',
       'taskEntityPreviews',
       'taskStatusOptions',
       'taskTypeMap',
@@ -355,6 +356,7 @@ export default {
       'addCommentPreview',
       'addCommentExtraPreview',
       'commentTask',
+      'loadPreviewFileFormData',
       'loadTask',
       'loadTaskComments',
       'refreshPreview',
@@ -402,6 +404,11 @@ export default {
       return this.otherPreviews
     },
 
+    selectFile (formData) {
+      this.loadPreviewFileFormData(formData)
+      this.attachedFileName = formData.get('file').name
+    },
+
     addComment (comment, taskStatusId) {
       this.loading.addComment = true
       this.errors.addComment = false
@@ -410,67 +417,33 @@ export default {
         taskStatusId: taskStatusId,
         comment: comment,
         callback: (err) => {
-          this.loading.addComment = false
           if (err) {
             console.log(err)
             this.errors.addComment = true
           } else {
             this.errors.addComment = false
-            this.reset()
-          }
-        }
-      })
-    },
-
-    selectFile (formData) {
-      this.$store.commit('PREVIEW_FILE_SELECTED', formData)
-    },
-
-    createComment (text, taskStatusId, callback) {
-      this.commentTask({
-        taskId: this.task.id,
-        taskStatusId: taskStatusId,
-        comment: text,
-        callback: (err) => {
-          if (err) {
-            console.log(err)
-            callback(err)
-          } else {
-            callback()
-          }
-        }
-      })
-    },
-
-    createPreview () {
-      this.errors.addPreview = false
-      this.loading.addPreview = true
-      const addNewPreview = () => {
-        this.addCommentPreview({
-          taskId: this.task.id,
-          commentId: this.taskComments[0].id,
-          callback: (err, preview) => {
-            this.loading.addPreview = false
-            if (err) {
-              this.errors.addPreview = true
+            if (this.attachedFileName) {
+              this.addCommentPreview({
+                taskId: this.task.id,
+                commentId: this.taskComments[0].id,
+                callback: (err, preview) => {
+                  if (err) {
+                    this.errors.addComment = true
+                  } else {
+                    this.$refs['add-preview-modal'].reset()
+                    this.reset()
+                    this.loading.addComment = false
+                    this.attachedFileName = ''
+                  }
+                }
+              })
             } else {
-              this.$refs['add-preview-modal'].reset()
-              this.resetPreview(preview)
-              this.modals.addPreview = false
+              this.loading.addComment = false
+              this.reset()
             }
           }
-        })
-      }
-      const taskStatusId = this.$refs['add-comment'].task_status_id
-      let revision = 1
-      if (this.taskPreviews.length > 0) {
-        revision = this.taskPreviews[0].revision + 1
-      }
-      this.createComment(
-        `New Preview v${revision}`,
-        taskStatusId,
-        addNewPreview
-      )
+        }
+      })
     },
 
     createExtraPreview () {
@@ -494,17 +467,6 @@ export default {
           }
         }
       })
-    },
-
-    onRemoveExtraPreview (preview) {
-      const route = this.taskPath(
-        this.task,
-        'task-remove-extra-preview'
-      )
-      route.params.preview_id = this.currentPreviewId
-      route.params.extra_preview_id = preview.id
-      route.params.comment_id = this.taskComments[0].id
-      this.$router.push(route)
     },
 
     onPreviewAdded (eventData) {
@@ -561,6 +523,7 @@ export default {
 
   watch: {
     task () {
+      this.attachedFileName = ''
       this.loadTaskData()
     }
   },
@@ -591,6 +554,7 @@ export default {
 <style scoped>
 .dark .add-comment,
 .dark .comment,
+.dark .preview-column-content,
 .dark .no-comment {
   background: #46494F;
   border-color: #25282E;
@@ -598,8 +562,12 @@ export default {
 }
 
 .dark .add-comment {
-  padding: 0.5em 0.5em 0.3em 0.5em;
+  padding: 0.5em;
   margin-bottom: 0.5em;
+}
+
+.dark .no-preview {
+  padding: 0.5em;
 }
 
 .dark .preview-picture {

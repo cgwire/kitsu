@@ -119,6 +119,7 @@ const getters = {
   nbSelectedValidations: state => state.nbSelectedValidations,
   isShowAssignations: state => state.isShowAssignations,
   taskEntityPreviews: state => state.taskEntityPreviews,
+  previewFormData: state => state.previewFormData,
 
   assetValidationColumns: (state, getters) => {
     return sortValidationColumns(
@@ -595,6 +596,10 @@ const actions = {
 
   clearSelectedTasks ({ commit, state }) {
     commit(CLEAR_SELECTED_TASKS)
+  },
+
+  loadPreviewFileFormData ({ commit }, previewFormData) {
+    commit('PREVIEW_FILE_SELECTED', previewFormData)
   }
 }
 
