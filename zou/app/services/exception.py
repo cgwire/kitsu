@@ -143,3 +143,7 @@ class EntryAlreadyExistsException(Exception):
 
 class ArgumentsException(Exception):
     pass
+
+
+class WrongIdFormatException(Exception):
+    pass
