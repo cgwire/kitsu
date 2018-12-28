@@ -1,5 +1,6 @@
 import os
 import flask_fs
+import traceback
 
 from flask import Flask, jsonify
 from flask_restful import current_app
@@ -11,7 +12,7 @@ from flask_mail import Mail
 
 from . import config
 from .stores import auth_tokens_store
-from .services.exception import PersonNotFoundException
+from .services.exception import PersonNotFoundException, WrongIdFormatException
 from .utils import fs
 
 from zou.app.utils import cache
@@ -51,9 +52,29 @@ if config.DEBUG:
 def shutdown_session(exception=None):
     db.session.remove()
 
+
 @app.errorhandler(404)
 def page_not_found(error):
     return jsonify(error=404, text=str(error)), 404
+
+
+@app.errorhandler(WrongIdFormatException)
+def id_parameter_format_error(error):
+    return jsonify(
+        error=True,
+        message="One of the ID sent in parameter is not properly formatted."
+    ), 400
+
+
+if not config.DEBUG:
+    @app.errorhandler(Exception)
+    def server_error(error):
+        return jsonify(
+            error=500,
+            message=str(error),
+            stacktrace=traceback.format_exc()
+        ), 500
+
 
 def configure_auth():
     from zou.app.services import persons_service

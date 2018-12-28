@@ -232,8 +232,10 @@ class BaseModelResource(Resource):
             instance = self.get_model_or_404(instance_id)
             result = self.serialize_instance(instance)
             self.check_read_permissions(result)
-        except StatementError:
-            return {"message": "Wrong id format"}, 400
+
+        except StatementError as exception:
+            current_app.logger.error(str(exception))
+            return {"message": str(exception)}, 400
         return result, 200
 
     def post_update(self, instance_dict):
@@ -263,10 +265,6 @@ class BaseModelResource(Resource):
             instance_dict = instance.serialize()
             self.post_update(instance_dict)
             return instance_dict, 200
-
-        except StatementError as exception:
-            current_app.logger.error(str(exception))
-            return {"message": "Wrong id format"}, 400
 
         except TypeError as exception:
             current_app.logger.error(str(exception))
@@ -303,6 +301,10 @@ class BaseModelResource(Resource):
             self.post_delete(instance_dict)
 
         except IntegrityError as exception:
+            current_app.logger.error(str(exception))
+            return {"message": str(exception)}, 400
+
+        except StatementError as exception:
             current_app.logger.error(str(exception))
             return {"message": str(exception)}, 400
 

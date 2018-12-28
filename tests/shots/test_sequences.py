@@ -17,7 +17,9 @@ class SequenceTestCase(ApiDBTestCase):
         self.generate_fixture_episode()
         self.generate_fixture_sequence()
         self.serialized_sequence = self.sequence.serialize(obj_type="Sequence")
-        self.generate_fixture_sequence("SE02")
+        self.sequence_id = str(self.serialized_sequence["id"])
+        sequence_02 = self.generate_fixture_sequence("SE02")
+        self.sequence_02_id = str(sequence_02.id)
         self.generate_fixture_sequence("SE03")
 
     def test_get_sequences(self):
@@ -75,3 +77,16 @@ class SequenceTestCase(ApiDBTestCase):
         shots = self.get("data/sequences/%s/shots" % self.sequence.id)
         self.assertEquals(len(shots), 1)
         self.assertEqual(shots[0]["id"], shot["id"])
+
+    def test_get_sequences_by_project_and_name(self):
+        self.get("data/sequences?project_id=undefined&name=S01", 400)
+        sequences = self.get(
+            "data/sequences?project_id=%s&name=SE02" % self.project_id
+        )
+        self.assertEquals(sequences[0]["id"], str(self.sequence_02_id))
+
+        self.generate_fixture_user_cg_artist()
+        self.log_in_cg_artist()
+        sequences = self.get(
+            "data/sequences?project_id=%s&name=SE01" % self.project_id, 403
+        )

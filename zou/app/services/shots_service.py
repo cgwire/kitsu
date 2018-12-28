@@ -20,7 +20,8 @@ from zou.app.services.exception import (
     EpisodeNotFoundException,
     SequenceNotFoundException,
     SceneNotFoundException,
-    ShotNotFoundException
+    ShotNotFoundException,
+    WrongIdFormatException
 )
 
 
@@ -57,7 +58,11 @@ def get_episodes(criterions={}):
     criterions["entity_type_id"] = episode_type["id"]
     query = Entity.query.order_by(Entity.name)
     query = query_utils.apply_criterions_to_db_query(Entity, query, criterions)
-    return Entity.serialize_list(query.all(), obj_type="Episode")
+    try:
+        episodes = query.all()
+    except StatementError:  # Occurs when an id is not properly formatted
+        raise WrongIdFormatException
+    return Entity.serialize_list(episodes, obj_type="Episode")
 
 
 def get_sequences(criterions={}):
@@ -68,7 +73,11 @@ def get_sequences(criterions={}):
     criterions["entity_type_id"] = sequence_type["id"]
     query = Entity.query.order_by(Entity.name)
     query = query_utils.apply_criterions_to_db_query(Entity, query, criterions)
-    return Entity.serialize_list(query.all(), obj_type="Sequence")
+    try:
+        sequences = query.all()
+    except StatementError:  # Occurs when an id is not properly formatted
+        raise WrongIdFormatException
+    return Entity.serialize_list(sequences, obj_type="Sequence")
 
 
 def get_shots(criterions={}):
@@ -85,7 +94,10 @@ def get_shots(criterions={}):
         .add_columns(Project.name) \
         .add_columns(Sequence.name) \
         .order_by(Entity.name)
-    data = query.all()
+    try:
+        data = query.all()
+    except StatementError:  # Occurs when an id is not properly formatted
+        raise WrongIdFormatException
 
     shots = []
     for (shot_model, project_name, sequence_name) in data:
@@ -111,7 +123,10 @@ def get_scenes(criterions={}):
         .join(Sequence, Sequence.id == Entity.parent_id) \
         .add_columns(Project.name) \
         .add_columns(Sequence.name)
-    data = query.all()
+    try:
+        data = query.all()
+    except StatementError:  # Occurs when an id is not properly formatted
+        raise WrongIdFormatException
 
     scenes = []
     for (scene_model, project_name, sequence_name) in data:

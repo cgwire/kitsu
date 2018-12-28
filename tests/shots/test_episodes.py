@@ -9,6 +9,7 @@ class EpisodeTestCase(ApiDBTestCase):
         self.generate_fixture_project()
         self.generate_fixture_asset_type()
         self.generate_fixture_episode("E01")
+        self.project_id = str(self.project.id)
         self.serialized_episode = self.episode.serialize(obj_type="Episode")
         self.episode_id = str(self.episode.id)
 
@@ -24,6 +25,7 @@ class EpisodeTestCase(ApiDBTestCase):
         self.generate_fixture_sequence("SE04")
 
         episode_02 = self.generate_fixture_episode("E02")
+        self.episode_02_id = str(episode_02.id)
         self.generate_fixture_sequence("SE01", episode_id=episode_02.id)
         self.generate_fixture_episode("E03")
 
@@ -64,3 +66,16 @@ class EpisodeTestCase(ApiDBTestCase):
 
     def test_get_episodes_for_project_404(self):
         self.get("data/projects/unknown/episodes", 404)
+
+    def test_get_episodes_by_project_and_name(self):
+        self.get("data/episodes?project_id=undefined&name=E01", 400)
+        episodes = self.get(
+            "data/episodes?project_id=%s&name=E02" % self.project_id
+        )
+        self.assertEquals(episodes[0]["id"], str(self.episode_02_id))
+
+        self.generate_fixture_user_cg_artist()
+        self.log_in_cg_artist()
+        episodes = self.get(
+            "data/episodes?project_id=%s&name=E01" % self.project_id, 403
+        )
