@@ -1,5 +1,6 @@
 import os
 import flask_fs
+import traceback
 
 from flask import Flask, jsonify
 from flask_restful import current_app
@@ -51,9 +52,20 @@ if config.DEBUG:
 def shutdown_session(exception=None):
     db.session.remove()
 
+
 @app.errorhandler(404)
 def page_not_found(error):
     return jsonify(error=404, text=str(error)), 404
+
+
+@app.errorhandler(Exception)
+def server_error(error):
+    return jsonify(
+        error=500,
+        message=str(error),
+        stacktrace=traceback.format_exc()
+    ), 500
+
 
 def configure_auth():
     from zou.app.services import persons_service
