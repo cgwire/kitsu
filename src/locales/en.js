@@ -446,6 +446,7 @@ export default {
     show_assignations: 'Show assignations',
     subscribe_notifications: 'Subscribe to notifications',
     validation: 'Validation',
+    with_status: 'with status',
     tasks: 'Tasks',
     fields: {
       assignees: 'Assignees',

@@ -105,7 +105,7 @@ const getters = {
 
   taskStatusOptions: state => state.taskStatuses.map((status) => {
     return {
-      label: status.name,
+      label: status.short_name,
       value: status.id,
       color: status.color,
       isArtistAllowed: status.is_artist_allowed

@@ -8,23 +8,19 @@
       </div>
     </figure>
     <div class="media-content">
-      <div>
-        <textarea
-          ref="commentTextarea"
-          class="textarea"
-          :placeholder="$t('comments.add_comment')"
-          :disabled="isLoading"
-          v-model="text"
-          @keyup.enter.ctrl="runAddComment(text, task_status_id)"
-          v-focus>
-        </textarea>
-        <combobox
-          :options="taskStatusOptions"
-          :is-simple="true"
-          v-model="task_status_id"
-        />
+      <textarea
+        ref="commentTextarea"
+        class="textarea flexrow-item"
+        :placeholder="$t('comments.add_comment')"
+        :disabled="isLoading"
+        v-model="text"
+        @keyup.enter.ctrl="runAddComment(text, task_status_id)"
+        v-focus>
+      </textarea>
+      <div class="flexrow">
         <button
           :class="{
+            'flexrow-item': true,
             'button': true,
             'is-loading': isLoading
           }"
@@ -32,6 +28,14 @@
         >
           {{ $t('comments.post_status') }}
         </button>
+        <span class="flexrow-item">
+          {{ $t('comments.with_status') }}
+        </span>
+        <combobox
+          :options="taskStatusOptions"
+          :is-simple="true"
+          v-model="task_status_id"
+        />
       </div>
       <div class="flexrow">
         <button

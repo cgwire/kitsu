@@ -1,6 +1,7 @@
 export default {
 
   people: {
+    active: 'Présents',
     add_member_to_team: 'Ajouter un membre à l\'équipe: ',
     delete_text: 'Êtes vous sûr de vouloir retirer {personName} de la base de données?',
     delete_error: 'Une erreur est survenue lors de la suppression. Il y a probablement des données liées à elle. Etes vous sur que cette personne n\'a aucune tâche assignée et n\'a fait aucun commentaire ?',
@@ -14,6 +15,7 @@ export default {
     select_person: 'Sélectionner une personne...',
     team: 'Équipe',
     title: 'Employés',
+    unactive: 'Absents',
     csv: {
       export_file: 'Télécharger',
       import_file: 'Importer',
@@ -172,10 +174,11 @@ export default {
     edit_title: 'Modifier le commentaire',
     empty_text: 'Ce commentaire est vide',
     no_file_attached: 'Aucun fichier attaché',
-    post_status: 'Publier le commentaire',
+    post_status: 'Publier',
+    retake: 'Reprise',
     validated: 'Validé !',
     validation_required: 'Validation requise',
-    retake: 'Reprise',
+    with_status: 'avec le statut',
     fields: {
       text: 'Texte'
     }
@@ -332,7 +335,7 @@ export default {
     empty_list: 'Il n\'y a pas d\'assets dans la production. Voulez vous en créer ?',
     fields: {
       description: 'Description',
-      episode: 'Ep.',
+      episode: 'Ép.',
       name: 'Nom',
       production: 'Prod',
       type: 'Type'
@@ -394,10 +397,10 @@ export default {
   },
 
   episodes: {
-    title: 'Episodes',
-    number: 'episode | episodes',
-    new_episode: 'Nouvelle episode',
-    edit_title: 'Éditer episode',
+    title: 'Épisodes',
+    number: 'épisode | épisodes',
+    new_episode: 'Nouvel épisode',
+    edit_title: 'Éditer épisode',
     delete_text: 'Etes vous sûr de vouloir retirer {name} de la base de données ?',
     delete_error: 'Une erreur est survenue en créant le plan, êtes vous sûr que la séquence n\'a plus aucun lien ?',
     empty_list: 'Il n\'y a pas d\'épisodes dans la production. Voulez vous en créer ?',

@@ -31,7 +31,6 @@
           >
             revision {{ comment.previews[0].revision }}
           </router-link>
-
         </div>
         <div class="flexrow-item" v-if="!light">
           <button-link
@@ -47,6 +46,15 @@
             v-if="editable"
           />
         </div>
+      </div>
+      <div>
+        <router-link
+          :to="previewRoute"
+          class="revision"
+          v-if="light && comment.previews.length > 0"
+        >
+          revision {{ comment.previews[0].revision }}
+        </router-link>
       </div>
 
       <p v-if="comment.task_status.name === 'Done'">
@@ -72,6 +80,7 @@
 <script>
 import marked from 'marked'
 import moment from 'moment-timezone'
+import { mapGetters } from 'vuex'
 
 import PeopleAvatar from './PeopleAvatar.vue'
 import PeopleName from './PeopleName.vue'
@@ -105,6 +114,11 @@ export default {
   },
 
   computed: {
+    ...mapGetters([
+      'taskMap',
+      'taskTypeMap'
+    ]),
+
     previewRoute () {
       let route = {
         name: 'task',
@@ -123,6 +137,9 @@ export default {
         route.name = `episode-${route.name}`
         route.params.episode_id = this.$route.params.episode_id
       }
+      const task = this.taskMap[this.comment.object_id]
+      const taskType = this.taskTypeMap[task.task_type_id]
+      route.params.type = taskType.for_shots ? 'shots' : 'assets'
       return route
     },
 

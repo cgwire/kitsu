@@ -569,17 +569,27 @@ export default {
   box-shadow: 0px 0px 6px #333;
 }
 
-.dark .add-comment {
-  padding: 0.5em;
-  margin-bottom: 0.5em;
-}
-
 .dark .no-preview {
   padding: 0.5em;
 }
 
 .dark .preview-picture {
   border: 1px solid #25282E;
+}
+
+.dark .side {
+  background: #36393F;
+}
+
+.side {
+  background: #F8F8F8;
+  height: 100%;
+}
+
+.add-comment {
+  padding: 0.5em;
+  margin-bottom: 0.5em;
+  box-shadow: 0px 0px 6px #E0E0E0;
 }
 
 .page-header {
@@ -604,6 +614,7 @@ export default {
   background: white;
   padding: 1em;
   border-radius: 5px;
+  box-shadow: 0px 0px 6px #E0E0E0;
 }
 
 .task-columns {
@@ -625,10 +636,24 @@ export default {
   border-bottom: 1px solid #EEE;
   border-right: 1px solid #EEE;
   margin-top: 0.1em;
+  box-shadow: 0px 0px 6px #E0E0E0;
 }
 
 .add-preview-button {
   margin-top: 0.5em;
   width: 100%;
+}
+
+.no-comment {
+  background: white;
+  box-shadow: 0px 0px 6px #E0E0E0;
+}
+
+.comments {
+  padding-bottom: 1em;
+}
+
+.preview-colum-content {
+  box-shadow: 0px 0px 6px #E0E0E0;
 }
 </style>
