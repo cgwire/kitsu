@@ -334,6 +334,7 @@ class ApiDBTestCase(ApiTestCase):
             entity_type_id=self.sequence_type.id,
             parent_id=episode_id
         )
+        return self.sequence
 
     def generate_fixture_sequence_standard(self):
         self.sequence_standard = Entity.create(
@@ -341,6 +342,7 @@ class ApiDBTestCase(ApiTestCase):
             project_id=self.project_standard.id,
             entity_type_id=self.sequence_type.id
         )
+        return self.sequence_standard
 
     def generate_fixture_episode(self, name="E01", project_id=None):
         if project_id is None:

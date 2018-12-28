@@ -8,13 +8,16 @@ class SceneTestCase(ApiDBTestCase):
     def setUp(self):
         super(SceneTestCase, self).setUp()
         self.generate_shot_suite()
+        self.project_id = str(self.project.id)
         self.serialized_shot = self.shot.serialize(obj_type="Shot")
         self.serialized_scene = self.scene.serialize(obj_type="Scene")
+        self.scene_id = str(self.scene.id)
         self.serialized_sequence = self.sequence.serialize(obj_type="Sequence")
-        self.sequence_id = self.sequence.id
+        self.sequence_id = str(self.sequence.id)
         self.generate_fixture_shot("S02")
         self.serialized_shot_02 = self.shot.serialize(obj_type="Shot")
-        self.generate_fixture_scene("SC02")
+        scene_02 = self.generate_fixture_scene("SC02")
+        self.scene_02_id = str(scene_02.id)
         self.generate_fixture_scene("SC03")
         self.generate_fixture_scene("SC04")
         self.generate_assigned_task()
@@ -108,3 +111,16 @@ class SceneTestCase(ApiDBTestCase):
         shots = self.get("data/scenes/%s/shots" % self.serialized_scene["id"])
         self.assertEqual(len(shots), 1)
         self.assertEqual(shots[0]["id"], self.serialized_shot_02["id"])
+
+    def test_get_scenes_by_project_and_name(self):
+        self.get("data/scenes/all?project_id=undefined&name=SC01", 400)
+        scenes = self.get(
+            "data/scenes/all?project_id=%s&name=SC02" % self.project_id
+        )
+        self.assertEquals(scenes[0]["id"], str(self.scene_02_id))
+
+        self.generate_fixture_user_cg_artist()
+        self.log_in_cg_artist()
+        scenes = self.get(
+            "data/scenes/all?project_id=%s&name=SC01" % self.project_id, 403
+        )

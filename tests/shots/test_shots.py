@@ -9,6 +9,7 @@ class ShotTestCase(ApiDBTestCase):
         super(ShotTestCase, self).setUp()
         self.generate_fixture_project_status()
         self.generate_fixture_project()
+        self.project_id = str(self.project.id)
         self.generate_fixture_asset_type()
         self.generate_fixture_episode()
         self.generate_fixture_sequence()
@@ -17,9 +18,11 @@ class ShotTestCase(ApiDBTestCase):
         self.shot_dict["project_name"] = self.project.name
         self.shot_dict["sequence_name"] = self.sequence.name
         self.serialized_shot = self.shot.serialize(obj_type="Shot")
+        self.shot_id = str(self.shot.id)
         self.serialized_sequence = self.sequence.serialize(obj_type="Sequence")
 
-        self.generate_fixture_shot("SH02")
+        shot_02 = self.generate_fixture_shot("SH02")
+        self.shot_02_id = str(shot_02.id)
         self.generate_fixture_shot("SH03")
         self.generate_fixture_asset()
 
@@ -106,3 +109,16 @@ class ShotTestCase(ApiDBTestCase):
 
     def test_get_shots_for_project_404(self):
         self.get("data/projects/unknown/shots", 404)
+
+    def test_get_shots_by_project_and_name(self):
+        self.get("data/shots/all?project_id=undefined&name=SH01", 400)
+        shots = self.get(
+            "data/shots/all?project_id=%s&name=SH02" % self.project_id
+        )
+        self.assertEquals(shots[0]["id"], str(self.shot_02_id))
+
+        self.generate_fixture_user_cg_artist()
+        self.log_in_cg_artist()
+        shots = self.get(
+            "data/shots/all?project_id=%s&name=SH01" % self.project_id, 403
+        )

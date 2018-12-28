@@ -15,7 +15,10 @@ from zou.app.services import (
 from zou.app.mixin import ArgsMixin
 from zou.app.utils import query, permissions
 
-from zou.app.services.exception import ShotNotFoundException
+from zou.app.services.exception import (
+    ShotNotFoundException,
+    WrongIdFormatException
+)
 
 
 class ShotResource(Resource):
@@ -85,7 +88,7 @@ class ShotsResource(Resource):
         if "sequence_id" in criterions:
             sequence = shots_service.get_sequence(criterions["sequence_id"])
             criterions["project_id"] = sequence["project_id"]
-        user_service.check_project_access(criterions)
+        user_service.check_project_access(criterions.get("project_id", None))
         return shots_service.get_shots(criterions)
 
 
@@ -98,7 +101,7 @@ class ScenesResource(Resource):
         string.
         """
         criterions = query.get_query_criterions_from_request(request)
-        user_service.check_project_access(criterions)
+        user_service.check_project_access(criterions.get("project_id", None))
         return shots_service.get_scenes(criterions)
 
 
@@ -323,7 +326,7 @@ class EpisodesResource(Resource):
         string.
         """
         criterions = query.get_query_criterions_from_request(request)
-        user_service.check_project_access(criterions)
+        user_service.check_project_access(criterions.get("project_id", None))
         return shots_service.get_episodes(criterions)
 
 
@@ -363,7 +366,7 @@ class SequencesResource(Resource):
         string.
         """
         criterions = query.get_query_criterions_from_request(request)
-        user_service.check_project_access(criterions)
+        user_service.check_project_access(criterions.get("project_id", None))
         return shots_service.get_sequences(criterions)
 
 
