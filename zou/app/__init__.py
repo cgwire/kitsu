@@ -69,10 +69,12 @@ def id_parameter_format_error(error):
 if not config.DEBUG:
     @app.errorhandler(Exception)
     def server_error(error):
+        stacktrace = traceback.format_exc()
+        current_app.logger.error(stacktrace)
         return jsonify(
             error=500,
             message=str(error),
-            stacktrace=traceback.format_exc()
+            stacktrace=stacktrace
         ), 500
 
 
