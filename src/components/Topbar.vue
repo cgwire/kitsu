@@ -13,13 +13,13 @@
           ≡
         </a>
 
-        <router-link
+        <!--router-link
           class="nav-item home-button"
           to="/"
         >
           <img src="../assets/logo.png" v-if="!isDarkTheme" />
           <img src="../assets/logo-dark.svg" v-else />
-        </router-link>
+        </router-link-->
 
         <div :class="{
           'nav-item': true,

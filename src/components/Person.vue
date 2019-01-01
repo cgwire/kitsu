@@ -1,119 +1,132 @@
 <template>
-  <div class="people page fixed-page">
-    <div class="flexrow page-header">
-      <div class="flexrow-item" v-if="person">
-        <people-avatar
-          :person="person"
-          :size="80"
-          :font-size="30"
-          :is-link="false"
+<div class="columns fixed-page">
+  <div class="column main-column">
+    <div class="people page">
+      <div class="flexrow page-header">
+        <div class="flexrow-item" v-if="person">
+          <people-avatar
+            :person="person"
+            :size="80"
+            :font-size="30"
+            :is-link="false"
+          />
+        </div>
+        <div class="flexrow-item">
+          <page-title :text="person ? person.name : ''" />
+        </div>
+      </div>
+
+      <div class="task-tabs tabs">
+        <ul v-if="person">
+          <li
+            :class="{'is-active': isActiveTab('todos')}"
+          >
+            <router-link :to="{
+              name: 'person',
+              params: {
+                person_id: person.id
+              }
+            }">
+              {{ $t('tasks.current')}}
+            </router-link>
+          </li>
+          <li
+            :class="{'is-active': isActiveTab('done')}"
+            @click="selectTab('done')"
+          >
+            <router-link :to="{
+              name: 'person-tab',
+              params: {
+                tab: 'done',
+                person_id: person.id
+              }
+            }">
+              {{ $t('tasks.done') }} ({{ displayedPersonDoneTasks.length }})
+            </router-link>
+          </li>
+          <li
+            :class="{'is-active': isActiveTab('timesheets')}"
+            @click="selectTab('timesheet')"
+            v-if="isCurrentUserManager"
+          >
+            <router-link :to="{
+              name: 'person-tab',
+              params: {
+                tab: 'timesheets',
+                person_id: person.id
+              }
+            }">
+              {{ $t('timesheets.title') }}
+            </router-link>
+          </li>
+        </ul>
+      </div>
+
+      <search-field
+        :class="{
+          'search-field': true
+        }"
+        ref="person-tasks-search-field"
+        @change="onSearchChange"
+        @save="saveSearchQuery"
+        :can-save="true"
+        v-if="!isActiveTab('done')"
+      />
+
+      <div
+        class="query-list"
+        v-if="isActiveTab('todos') || isActiveTab('timesheets')"
+      >
+        <search-query-list
+          :queries="personTaskSearchQueries"
+          @changesearch="changeSearch"
+          @removesearch="removeSearchQuery"
         />
       </div>
-      <div class="flexrow-item">
-        <page-title :text="person ? person.name : ''" />
-      </div>
-    </div>
 
-    <div class="task-tabs tabs">
-      <ul v-if="person">
-        <li
-          :class="{'is-active': isActiveTab('todos')}"
-        >
-          <router-link :to="{
-            name: 'person',
-            params: {
-              person_id: person.id
-            }
-          }">
-            {{ $t('tasks.current')}}
-          </router-link>
-        </li>
-        <li
-          :class="{'is-active': isActiveTab('done')}"
-          @click="selectTab('done')"
-        >
-          <router-link :to="{
-            name: 'person-tab',
-            params: {
-              tab: 'done',
-              person_id: person.id
-            }
-          }">
-            {{ $t('tasks.done') }} ({{ displayedPersonDoneTasks.length }})
-          </router-link>
-        </li>
-        <li
-          :class="{'is-active': isActiveTab('timesheets')}"
-          @click="selectTab('timesheet')"
-          v-if="isCurrentUserManager"
-        >
-          <router-link :to="{
-            name: 'person-tab',
-            params: {
-              tab: 'timesheets',
-              person_id: person.id
-            }
-          }">
-            {{ $t('timesheets.title') }}
-          </router-link>
-        </li>
-      </ul>
-    </div>
+      <todos-list
+        ref="task-list"
+        :entries="displayedPersonTasks"
+        :is-loading="isTasksLoading"
+        :is-error="isTasksLoadingError"
+        :selection-grid="personTaskSelectionGrid"
+        @scroll="setPersonTasksScrollPosition"
+        v-if="isActiveTab('todos')"
+      />
 
-    <search-field
-      :class="{
-        'search-field': true
-      }"
-      ref="person-tasks-search-field"
-      @change="onSearchChange"
-      @save="saveSearchQuery"
-      :can-save="true"
-      v-if="!isActiveTab('done')"
-    />
+      <todos-list
+        ref="done-list"
+        :entries="displayedPersonDoneTasks"
+        :is-loading="isTasksLoading"
+        :is-error="isTasksLoadingError"
+        :done="true"
+        :selectionGrid="personTaskSelectionGrid"
+        v-if="isActiveTab('done')"
+      />
 
-    <div
-      class="query-list"
-      v-if="isActiveTab('todos') || isActiveTab('timesheets')"
-    >
-      <search-query-list
-        :queries="personTaskSearchQueries"
-        @changesearch="changeSearch"
-        @removesearch="removeSearchQuery"
+      <timesheet-list
+        :tasks="loggablePersonTasks"
+        :done-tasks="loggableDoneTasks"
+        :is-loading="isTasksLoading"
+        :is-error="isTasksLoadingError"
+        :time-spent-map="personTimeSpentMap"
+        :time-spent-total="personTimeSpentTotal"
+        :hide-done="personTasksSearchText.length > 0"
+        @date-changed="onDateChanged"
+        @time-spent-change="onTimeSpentChange"
+        v-if="isActiveTab('timesheets')"
       />
     </div>
-
-    <todos-list
-      ref="task-list"
-      :entries="displayedPersonTasks"
-      :is-loading="isTasksLoading"
-      :is-error="isTasksLoadingError"
-      :selection-grid="personTaskSelectionGrid"
-      @scroll="setPersonTasksScrollPosition"
-      v-if="isActiveTab('todos')"
-    />
-
-    <todos-list
-      :entries="displayedPersonDoneTasks"
-      :is-loading="isTasksLoading"
-      :is-error="isTasksLoadingError"
-      :done="true"
-      :selectionGrid="personTaskSelectionGrid"
-      v-if="isActiveTab('done')"
-    />
-
-    <timesheet-list
-      :tasks="loggablePersonTasks"
-      :done-tasks="loggableDoneTasks"
-      :is-loading="isTasksLoading"
-      :is-error="isTasksLoadingError"
-      :time-spent-map="personTimeSpentMap"
-      :time-spent-total="personTimeSpentTotal"
-      :hide-done="personTasksSearchText.length > 0"
-      @date-changed="onDateChanged"
-      @time-spent-change="onTimeSpentChange"
-      v-if="isActiveTab('timesheets')"
+  </div>
+  <div
+    class="column side-column"
+    v-if="nbSelectedTasks === 1"
+  >
+    <task-info
+      :task="Object.values(selectedTasks)[0]"
     />
   </div>
+</div>
 </template>
 
 <script>
@@ -127,6 +140,7 @@ import SearchField from './widgets/SearchField'
 import SearchQueryList from './widgets/SearchQueryList'
 import TimesheetList from './lists/TimesheetList'
 import TodosList from './lists/TodosList'
+import TaskInfo from './sides/TaskInfo'
 
 export default {
   name: 'person',
@@ -136,6 +150,7 @@ export default {
     PeopleAvatar,
     SearchField,
     SearchQueryList,
+    TaskInfo,
     TodosList,
     TimesheetList
   },
@@ -153,14 +168,10 @@ export default {
   mounted () {
     this.updateActiveTab()
     if (this.personTasksSearchText.length > 0) {
-      this.$refs['person-tasks-search-field'].setValue(
-        this.personTasksSearchText
-      )
+      this.searchField.setValue(this.personTasksSearchText)
     }
     setTimeout(() => {
-      if (this.$refs['person-tasks-search-field']) {
-        this.$refs['person-tasks-search-field'].focus()
-      }
+      if (this.searchField) this.searchField.focus()
     }, 100)
     this.loadPerson(this.$route.params.person_id)
   },
@@ -170,6 +181,7 @@ export default {
       'displayedPersonTasks',
       'displayedPersonDoneTasks',
       'isCurrentUserManager',
+      'nbSelectedTasks',
       'personMap',
       'personTasksScrollPosition',
       'personTasksSearchText',
@@ -177,6 +189,7 @@ export default {
       'personTaskSelectionGrid',
       'personTimeSpentMap',
       'personTimeSpentTotal',
+      'selectedTasks',
       'taskTypeMap'
     ]),
 
@@ -192,6 +205,18 @@ export default {
         .filter((task) => {
           return this.taskTypeMap[task.task_type_id].allow_timelog
         })
+    },
+
+    searchField () {
+      return this.$refs['person-tasks-search-field']
+    },
+
+    taskList () {
+      return this.$refs['task-list']
+    },
+
+    haveDoneList () {
+      return this.$refs['done-list']
     }
   },
 
@@ -213,9 +238,7 @@ export default {
       this.activeTab = tab
       if (this.isActiveTab('todos')) {
         setTimeout(() => {
-          if (this.$refs['person-tasks-search-field']) {
-            this.$refs['person-tasks-search-field'].focus()
-          }
+          if (this.searchField) this.searchField.focus()
         }, 100)
       }
     },
@@ -235,13 +258,23 @@ export default {
           this.isTasksLoading = false
           this.isTasksLoadingError = false
           setTimeout(() => {
-            if (this.$refs['task-list']) {
-              this.$refs['task-list'].setScrollPosition(
-                this.personTasksScrollPosition
-              )
+            if (this.taskList) {
+              this.$nextTick(() => {
+                this.taskList.setScrollPosition(
+                  this.personTasksScrollPosition
+                )
+              })
             }
+            this.resizeHeaders()
           }, 0)
         }
+      })
+    },
+
+    resizeHeaders () {
+      this.$nextTick(() => {
+        if (this.taskList) this.taskList.resizeHeaders()
+        if (this.haveDoneList) this.haveDoneList.resizeHeaders()
       })
     },
 
@@ -345,5 +378,29 @@ export default {
 
 .data-list {
   margin-top: 0;
+}
+
+.dark .main-column {
+  border-right: 3px solid #666;
+}
+
+.todos {
+  display: flex;
+  flex-direction: column;
+}
+
+.columns {
+  display: flex;
+  flex-direction: row;
+  padding: 0;
+}
+
+.column {
+  overflow-y: auto;
+  padding: 0;
+}
+
+.main-column {
+  border-right: 3px solid #CCC;
 }
 </style>

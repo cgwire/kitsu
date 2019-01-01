@@ -581,6 +581,10 @@ const mutations = {
     state.person = state.personMap[personId]
 
     tasks.forEach(populateTask)
+    tasks.forEach((task) => {
+      const taskStatus = helpers.getTaskStatus(task.task_status_id)
+      task.taskStatus = taskStatus
+    })
     const personTaskSelectionGrid = {}
     for (let i = 0; i < tasks.length; i++) {
       personTaskSelectionGrid[i] = { 0: false }
