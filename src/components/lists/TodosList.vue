@@ -1,6 +1,5 @@
 <template>
 <div class="data-list">
-
   <div style="overflow: hidden">
     <table class="table table-header" ref="headerWrapper">
       <thead>
@@ -8,7 +7,7 @@
           <th class="production">
             {{ $t('tasks.fields.production') }}
           </th>
-          <th class="type">
+          <th class="type" ref="th-type">
             {{ $t('tasks.fields.task_type') }}
           </th>
           <th class="thumbnail">
@@ -40,7 +39,7 @@
     v-if="entries.length > 0"
   >
     <table class="table">
-      <tbody>
+      <tbody ref="body-tbody">
         <tr v-for="(entry, i) in entries" :key="entry + '-' + i">
           <production-name-cell
             class="production"
@@ -102,11 +101,17 @@
     :is-error="isError"
   />
 
-  <p class="has-text-centered empty-list" v-if="entries.length === 0">
+  <p
+    class="has-text-centered empty-list"
+    v-if="entries.length === 0 && !isLoading"
+  >
     {{ $t('people.no_task_assigned') }}
   </p>
 
-  <p class="has-text-centered footer-info" v-if="!isLoading && entries.length">
+  <p
+    class="has-text-centered footer-info"
+    v-if="entries.length && !isLoading"
+  >
     {{ entries.length }} {{ $tc('tasks.tasks', entries.length) }}
   </p>
 </div>
@@ -125,9 +130,12 @@ import DescriptionCell from '../cells/DescriptionCell'
 import LastCommentCell from '../cells/LastCommentCell'
 import ProductionNameCell from '../cells/ProductionNameCell'
 import ValidationCell from '../cells/ValidationCell'
+import { selectionListMixin } from './selection'
 
 export default {
   name: 'todos-list',
+  mixins: [selectionListMixin],
+
   components: {
     EntityThumbnail,
     DescriptionCell,
@@ -146,6 +154,15 @@ export default {
     'isError',
     'selectionGrid'
   ],
+
+  mounted () {
+    this.resizeHeaders()
+    window.addEventListener('keydown', this.onKeyDown, false)
+  },
+
+  beforeDestroy () {
+    window.removeEventListener('keydown', this.onKeyDown)
+  },
 
   computed: {
     ...mapGetters([
@@ -198,10 +215,14 @@ export default {
       this.$store.commit('ADD_SELECTED_TASK', validationInfo)
 
       if (!validationInfo.isShiftKey && validationInfo.isUserClick) {
-        this.lastSelection = {
-          x: validationInfo.x,
-          y: 0
-        }
+        const x = validationInfo.x
+        const y = 0
+        this.lastSelection = { x, y }
+        const ref = 'validation-' + x + '-' + y
+        const validationCell = this.$refs[ref][0]
+        this.$nextTick(() => {
+          this.scrollToValidationCell(validationCell)
+        })
       }
     },
 
@@ -255,6 +276,78 @@ export default {
       }
 
       return route
+    },
+
+    onKeyDown (event) {
+      const lastSelection =
+        this.lastSelection ? this.lastSelection : { x: 0, y: 0 }
+      const i = lastSelection.x
+      const j = lastSelection.y
+      let validationCell = null
+      if (event.ctrlKey) {
+        if (event.keyCode === 37) {
+          validationCell = this.select(i, j - 1)
+        } else if (event.keyCode === 38) {
+          validationCell = this.select(i - 1, j)
+        } else if (event.keyCode === 39) {
+          validationCell = this.select(i, j + 1)
+        } else if (event.keyCode === 40) {
+          validationCell = this.select(i + 1, j)
+        }
+        this.scrollToValidationCell(validationCell)
+      }
+    },
+
+    scrollToValidationCell (validationCell) {
+      if (validationCell) {
+        const margin = 20
+        const rect = validationCell.$el.getBoundingClientRect()
+        const listRect = this.$refs.body.getBoundingClientRect()
+        const isBelow = rect.bottom > listRect.bottom - margin
+        const isAbove = rect.top < listRect.top + margin
+        const isRight = rect.right > listRect.right - margin
+        const isLeft = rect.left < listRect.left + margin
+
+        if (isBelow) {
+          const scrollingRequired = rect.bottom - listRect.bottom + margin
+          this.setScrollPosition(
+            this.$refs.body.scrollTop + scrollingRequired
+          )
+        } else if (isAbove) {
+          const scrollingRequired = listRect.top - rect.top + margin
+          this.setScrollPosition(
+            this.$refs.body.scrollTop - scrollingRequired
+          )
+        }
+
+        if (isRight) {
+          const scrollingRequired = rect.right - listRect.right + margin
+          this.setScrollLeftPosition(
+            this.$refs.body.scrollLeft + scrollingRequired
+          )
+        } else if (isLeft) {
+          const scrollingRequired = listRect.left - rect.left + margin
+          this.setScrollLeftPosition(
+            this.$refs.body.scrollLeft - scrollingRequired
+          )
+        }
+      }
+    },
+
+    select (i, j) {
+      const ref = 'validation-' + i + '-' + j
+      const validationCell = this.$refs[ref]
+      if (validationCell) validationCell[0].$el.click()
+      return validationCell ? validationCell[0] : 0
+    },
+
+    resizeHeaders () {
+      const tableBody = this.$refs['body-tbody']
+      const isTableBodyContainLines = tableBody && tableBody.children
+      if (isTableBodyContainLines) {
+        const typeColumnWidth = tableBody.children[0].children[1].offsetWidth
+        this.$refs['th-type'].style['min-width'] = `${typeColumnWidth}px`
+      }
     }
   }
 }
@@ -287,8 +380,8 @@ export default {
 }
 
 .type {
-  width: 250px;
-  min-width: 250px;
+  width: 130px;
+  min-width: 130px;
 }
 
 .status {
