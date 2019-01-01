@@ -115,6 +115,7 @@ export default {
 
   computed: {
     ...mapGetters([
+      'currentProduction',
       'taskMap',
       'taskTypeMap'
     ]),
@@ -122,14 +123,18 @@ export default {
     previewRoute () {
       let route = {
         name: 'task',
-        params: {task_id: this.comment.object_id}
+        params: {
+          task_id: this.comment.object_id,
+          production_id: this.currentProduction.id
+        }
       }
       if (this.comment.previews.length > 0) {
         route = {
           name: 'task-preview',
           params: {
             task_id: this.comment.object_id,
-            preview_id: this.comment.previews[0].id
+            preview_id: this.comment.previews[0].id,
+            production_id: this.currentProduction.id
           }
         }
       }
