@@ -49,7 +49,7 @@ export default {
 
   comments: {
     add_comment: 'Add a comment...',
-    add_preview: 'Attach file',
+    add_preview: 'Attach preview',
     change_preview: 'Change preview',
     empty_text: 'This comment is empty',
     edit_title: 'Edit comment',
@@ -58,6 +58,7 @@ export default {
     retake: 'Retake',
     validated: 'Validated!',
     validation_required: 'Validation Required',
+    with_status: 'with status',
     fields: {
       text: 'text'
     }
@@ -189,6 +190,7 @@ export default {
     delete_text: 'Are you sure you want to remove {personName} from your database?',
     edit_title: 'Edit person',
     new_person: 'Add a new employee',
+    no_task_assigned: 'There is no running tasks assigned to you.',
     persons: 'person | persons',
     running_tasks: 'Running tasks',
     select_person: 'Select a person...',
@@ -435,7 +437,6 @@ export default {
     no_assignation_right: 'you are no allowed to manage assignations',
     no_comment: 'There is currently no comment for this task.',
     no_preview: 'There is currently no preview for this task.',
-    no_task_assigned: 'No task assigned.',
     preview: 'Previews',
     previous: 'previous task',
     unsubscribe_notifications: 'Unsubscribe from notifications',
@@ -446,7 +447,6 @@ export default {
     show_assignations: 'Show assignations',
     subscribe_notifications: 'Subscribe to notifications',
     validation: 'Validation',
-    with_status: 'with status',
     tasks: 'Tasks',
     fields: {
       assignees: 'Assignees',

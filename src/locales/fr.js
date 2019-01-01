@@ -185,7 +185,7 @@ export default {
   },
 
   tasks: {
-    add_preview: 'Ajouter une previz',
+    add_preview: 'Attacher une préviz',
     add_preview_error: 'Une erreur est survenue en ajoutant la preview.',
     assign: 'Assigner une tâche à : | Assigner {nbSelectedTasks} tâches à :',
     back_to_list: 'Retour à la liste',
