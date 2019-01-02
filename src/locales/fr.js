@@ -1,11 +1,13 @@
 export default {
 
   people: {
+    active: 'Présents',
     add_member_to_team: 'Ajouter un membre à l\'équipe: ',
     delete_text: 'Êtes vous sûr de vouloir retirer {personName} de la base de données?',
     delete_error: 'Une erreur est survenue lors de la suppression. Il y a probablement des données liées à elle. Etes vous sur que cette personne n\'a aucune tâche assignée et n\'a fait aucun commentaire ?',
     edit_title: 'Modifier les informations de',
     empty_team: 'Personne n\'a été affecté à cette production',
+    no_task_assigned: 'Il n\'y a aucune tâche assignée.',
     new_person: 'Ajouter un employé',
     persons: 'Personnes',
     picture: 'Changer l\'image',
@@ -13,6 +15,7 @@ export default {
     select_person: 'Sélectionner une personne...',
     team: 'Équipe',
     title: 'Employés',
+    unactive: 'Absents',
     csv: {
       export_file: 'Télécharger',
       import_file: 'Importer',
@@ -70,6 +73,7 @@ export default {
 
   main: {
     add: 'Ajouter',
+    all: 'Tous',
     admin: 'Admin',
     back_to_list: 'retour à la liste',
     cancel: 'Annuler',
@@ -78,13 +82,17 @@ export default {
     clear_selection: 'Effacer la sélection',
     close: 'Fermer',
     dark_theme: 'Thème sombre',
+    delete_all: 'Supprimer tout',
     documentation: 'Documentation',
     delete_text: 'Etes vous sûr de vouloir supprimer {name} de la base de données ?',
     empty_comment: 'Commentaire vide',
+    history: 'Historique',
     info: 'Information',
     loading_data: 'Chargement des données',
     loading_error: 'Une erreur est survenue en chargeant les données.',
     logout: 'Se déconnecter',
+    maximize: 'Maximiser',
+    minimize: 'Minimiser',
     no: 'non',
     or: 'ou',
     production: 'Production',
@@ -161,20 +169,23 @@ export default {
   },
 
   comments: {
+    add_comment: 'Ajouter un commentaire...',
+    add_preview: 'Attacher un fichier',
+    edit_title: 'Modifier le commentaire',
+    empty_text: 'Ce commentaire est vide',
+    no_file_attached: 'Aucun fichier attaché',
+    post_status: 'Publier',
     retake: 'Reprise',
     validated: 'Validé !',
     validation_required: 'Validation requise',
-    add_comment: 'Ajouter un commentaire...',
-    post_status: 'Envoyer l\'état',
-    empty_text: 'Ce commentaire est vide',
-    edit_title: 'Modifier le commentaire',
+    with_status: 'avec le statut',
     fields: {
       text: 'Texte'
     }
   },
 
   tasks: {
-    add_preview: 'Ajouter une previz',
+    add_preview: 'Attacher une préviz',
     add_preview_error: 'Une erreur est survenue en ajoutant la preview.',
     assign: 'Assigner une tâche à : | Assigner {nbSelectedTasks} tâches à :',
     back_to_list: 'Retour à la liste',
@@ -192,6 +203,7 @@ export default {
     create_for_selection: 'Créer une tâche pour chaque cellule vide :',
     current: 'Tâches à faire',
     current_status: 'Statut actuel :',
+    delete_all_error: 'Supprimer toutes les tâches pour ce type de tâche a échoué',
     delete_comment: 'Êtes vous sûr de vouloir supprimer ce commentaire ?',
     delete_comment_error: 'Une erreur est survenue en supprimant le commentaire.',
     delete_error: 'Une erreur est survenue en supprimant la tâche.',
@@ -204,7 +216,7 @@ export default {
     full_screen: 'Afficher en plein écran',
     hide_assignations: 'Cacher assignations',
     my_tasks: 'Mes tâches',
-    no_preview: 'Il n\'y a pas de previz pour cette tâche..',
+    no_preview: 'Il n\'y a pas de préviz pour cette tâche.',
     no_comment: 'Il n\'y a pas de commentaires pour cette tâche.',
     no_assignation_right: 'vous n\'êtes pas autorisé à gérer les assigations.',
     next: 'Suivante',
@@ -214,7 +226,9 @@ export default {
     set_preview: 'Utilisez cette previz comme vignette',
     set_preview_error: 'Une erreur est survenue en utilisant cette vignette.',
     set_preview_done: 'Cette previz sert de vignette à l\'entité courante.',
+    subscribe_notifications: 'S\'abonner aux notifications',
     show_assignations: 'Voir assignations',
+    unsubscribe_notifications: 'Se désabonner des notifications',
     tasks: 'Tâches',
     validation: 'Validation',
     fields: {
@@ -320,10 +334,11 @@ export default {
     new_success: 'Asset {name} créé avec succès.',
     empty_list: 'Il n\'y a pas d\'assets dans la production. Voulez vous en créer ?',
     fields: {
+      description: 'Description',
+      episode: 'Ép.',
       name: 'Nom',
-      type: 'Type',
       production: 'Prod',
-      description: 'Description'
+      type: 'Type'
     },
     delete_text: 'Etes vous sûr de vouloir retirer {name} de la base de données ?',
     delete_error: 'Une erreur est survenue en créant l\'asset, êtes vous sûr de vouloir que l\'asset n\'ait plus aucun lien ?',
@@ -382,10 +397,10 @@ export default {
   },
 
   episodes: {
-    title: 'Episodes',
-    number: 'episode | episodes',
-    new_episode: 'Nouvelle episode',
-    edit_title: 'Éditer episode',
+    title: 'Épisodes',
+    number: 'épisode | épisodes',
+    new_episode: 'Nouvel épisode',
+    edit_title: 'Éditer épisode',
     delete_text: 'Etes vous sûr de vouloir retirer {name} de la base de données ?',
     delete_error: 'Une erreur est survenue en créant le plan, êtes vous sûr que la séquence n\'a plus aucun lien ?',
     empty_list: 'Il n\'y a pas d\'épisodes dans la production. Voulez vous en créer ?',

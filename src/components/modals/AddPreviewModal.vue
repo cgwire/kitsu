@@ -4,8 +4,8 @@
   'is-active': active
 }">
   <div class="modal-background"></div>
-  <div class="modal-content">
 
+  <div class="modal-content">
     <div class="box content">
       <h1 class="title" v-if="isEditing">
         {{ $t("tasks.change_preview") }}
@@ -36,16 +36,15 @@
             'is-loading': isLoading,
             'is-disabled': formData == undefined
           }"
-          @click="onConfirmClicked">
+          @click="$emit('confirm')">
           {{ $t("main.confirmation") }}
         </a>
-        <router-link
-          :to="cancelRoute"
+        <button
+          @click="$emit('cancel')"
           class="button is-link">
           {{ $t("main.cancel") }}
-        </router-link>
+        </button>
       </p>
-
     </div>
   </div>
 </div>
@@ -78,10 +77,6 @@ export default {
     isEditing: {
       type: Boolean,
       default: false
-    },
-    cancelRoute: {
-      type: Object,
-      default: () => {}
     },
     extensions: {
       type: String,
@@ -117,10 +112,6 @@ export default {
     reset () {
       this.$refs['preview-field'].reset()
       this.formData = null
-    },
-
-    onConfirmClicked () {
-      this.$emit('confirm')
     }
   },
 

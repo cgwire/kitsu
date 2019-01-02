@@ -21,7 +21,7 @@
         />
       </div>
       <div class="flexrow-item">
-        <page-title :text="title" class="entity-title"></page-title>
+        <page-title :text="title" class="entity-title" />
       </div>
     </div>
   </div>

@@ -159,6 +159,7 @@
             :rowX="getIndex(i, k)"
             :columnY="j"
             :minimized="hiddenColumns[columnId]"
+            :is-static="true"
             @select="onTaskSelected"
             @unselect="onTaskUnselected"
             v-for="(columnId, j) in sortedValidationColumns"
@@ -247,14 +248,6 @@ export default {
     ValidationCell
   },
 
-  created () {
-    this.initHiddenColumns(this.validationColumns, this.hiddenColumns)
-  },
-
-  mounted () {
-    this.resizeHeaders()
-  },
-
   computed: {
     ...mapGetters([
       'assets',
@@ -308,98 +301,6 @@ export default {
     ...mapActions([
       'displayMoreAssets'
     ]),
-
-    showHeaderMenu (columnId, event) {
-      const headerMenuEl = this.$refs.headerMenu.$el
-      if (headerMenuEl.className === 'header-menu') {
-        headerMenuEl.className = 'header-menu hidden'
-      } else {
-        headerMenuEl.className = 'header-menu'
-        let headerElement = event.srcElement.parentNode.parentNode
-        if (headerElement.tagName !== 'TH') {
-          headerElement = headerElement.parentNode
-        }
-        const left = headerElement.getBoundingClientRect().left + 1
-        const top = headerElement.getBoundingClientRect().bottom
-        headerMenuEl.style.left = left + 'px'
-        headerMenuEl.style.top = top + 'px'
-      }
-      this.lastHeaderMenuDisplayed = columnId
-    },
-
-    onMinimizeColumnToggled () {
-      this.hideColumn(this.lastHeaderMenuDisplayed)
-      this.showHeaderMenu()
-    },
-
-    onDeleteAllTasksClicked () {
-      this.$emit('delete-all-tasks', this.lastHeaderMenuDisplayed)
-      this.showHeaderMenu()
-    },
-
-    onTaskSelected (validationInfo) {
-      const selection = []
-      if (validationInfo.isShiftKey) {
-        if (this.lastSelection) {
-          let startX = this.lastSelection.x
-          let endX = validationInfo.x
-          let startY = this.lastSelection.y
-          let endY = validationInfo.y
-          if (validationInfo.x < this.lastSelection.x) {
-            startX = validationInfo.x
-            endX = this.lastSelection.x
-          }
-          if (validationInfo.y < this.lastSelection.y) {
-            startY = validationInfo.y
-            endY = this.lastSelection.y
-          }
-
-          for (let i = startX; i <= endX; i++) {
-            for (let j = startY; j <= endY; j++) {
-              const ref = 'validation-' + i + '-' + j
-              const validationCell = this.$refs[ref][0]
-              if (!this.assetSelectionGrid[i][j]) {
-                selection.push({
-                  entity: validationCell.entity,
-                  column: validationCell.column,
-                  task: validationCell.task,
-                  x: validationCell.rowX,
-                  y: validationCell.columnY
-                })
-              }
-            }
-          }
-          this.$store.commit('ADD_SELECTED_TASK', validationInfo)
-        }
-      } else if (!validationInfo.isCtrlKey) {
-        this.$store.commit('CLEAR_SELECTED_TASKS')
-      }
-      if (selection.length === 0) {
-        this.$store.commit('ADD_SELECTED_TASK', validationInfo)
-      } else {
-        this.$store.commit('ADD_SELECTED_TASKS', selection)
-      }
-
-      if (!validationInfo.isShiftKey && validationInfo.isUserClick) {
-        this.lastSelection = {
-          x: validationInfo.x,
-          y: validationInfo.y
-        }
-      }
-    },
-
-    onTaskUnselected (validationInfo) {
-      if (!validationInfo.isCtrlKey) {
-        if (this.nbSelectedTasks === 1) {
-          this.$store.commit('REMOVE_SELECTED_TASK', validationInfo)
-        } else {
-          this.$store.commit('CLEAR_SELECTED_TASKS')
-          this.$store.commit('ADD_SELECTED_TASK', validationInfo)
-        }
-      } else {
-        this.$store.commit('REMOVE_SELECTED_TASK', validationInfo)
-      }
-    },
 
     onBodyScroll (event, position) {
       this.$refs.headerWrapper.style.left = `-${position.scrollLeft}px`
@@ -612,6 +513,10 @@ tbody:last-child .empty-line:last-child {
   border: 0;
 }
 
+.table-body .table .empty-line {
+  background: inherit;
+}
+
 .empty-line {
   border-right: 0;
   border-left: 0;
@@ -621,5 +526,9 @@ tbody:last-child .empty-line:last-child {
 
 .table-header-wrapper {
   position: relative;
+}
+
+.splitted-table tbody {
+  border: 0;
 }
 </style>

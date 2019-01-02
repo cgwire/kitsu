@@ -1,63 +1,76 @@
 <template>
-<div class="assets page fixed-page">
+<div class="columns fixed-page">
+  <div class="column main-column">
+    <div class="assets page">
+      <div class="asset-list-header page-header">
+        <div class="level header-title">
+          <div class="level-left flexcolumn">
+            <div class="filters-area flexcolumn-item">
+              <search-field
+                ref="asset-search-field"
+                :can-save="true"
+                @change="onSearchChange"
+                @save="saveSearchQuery"
+                placeholder="ex: props modeling=wip"
+              />
+            </div>
+          </div>
 
-  <div class="asset-list-header page-header">
-    <div class="level header-title">
-      <div class="level-left">
-          <search-field
-            ref="asset-search-field"
-            :can-save="true"
-            @change="onSearchChange"
-            @save="saveSearchQuery"
-            placeholder="ex: props modeling=wip"
+          <div class="level-right flexrow" v-if="isCurrentUserManager">
+            <show-assignations-button class="flexrow-item" />
+            <button-link
+              class="flexrow-item"
+              :text="$t('main.csv.import_file')"
+              icon="upload"
+              :is-responsive="true"
+              :path="importPath"
+            />
+            <button-href-link
+              class="flexrow-item"
+              :text="$t('main.csv.export_file')"
+              icon="download"
+              :is-responsive="true"
+              :path="'/api/export/csv/projects/' + currentProduction.id + '/assets.csv'"
+            />
+            <button-link
+              class="flexrow-item"
+              :text="$t('assets.new_asset')"
+              icon="plus"
+              :is-responsive="true"
+              :path="newAssetPath"
+            />
+          </div>
+        </div>
+        <div class="query-list">
+          <search-query-list
+            :queries="assetSearchQueries"
+            @changesearch="changeSearch"
+            @removesearch="removeSearchQuery"
+            v-if="!isAssetsLoading && !initialLoading"
           />
+        </div>
       </div>
 
-      <div class="level-right flexrow" v-if="isCurrentUserManager">
-        <show-assignations-button class="flexrow-item" />
-        <button-link
-          class="flexrow-item"
-          :text="$t('main.csv.import_file')"
-          icon="upload"
-          :is-responsive="true"
-          :path="importPath"
-        />
-        <button-href-link
-          class="flexrow-item"
-          :text="$t('main.csv.export_file')"
-          icon="download"
-          :is-responsive="true"
-          :path="'/api/export/csv/projects/' + currentProduction.id + '/assets.csv'"
-        />
-        <button-link
-          class="flexrow-item"
-          :text="$t('assets.new_asset')"
-          icon="plus"
-          :is-responsive="true"
-          :path="newAssetPath"
-        />
-      </div>
-    </div>
-    <div class="query-list">
-      <search-query-list
-        :queries="assetSearchQueries"
-        @changesearch="changeSearch"
-        @removesearch="removeSearchQuery"
-        v-if="!isAssetsLoading && !initialLoading"
+      <asset-list
+        ref="asset-list"
+        :displayed-assets="displayedAssetsByType"
+        :is-loading="isAssetsLoading || initialLoading"
+        :is-error="isAssetsLoadingError"
+        :validation-columns="assetValidationColumns"
+        @scroll="saveScrollPosition"
+        @delete-all-tasks="onDeleteAllTasksClicked"
       />
     </div>
-
   </div>
 
-  <asset-list
-    ref="asset-list"
-    :displayed-assets="displayedAssetsByType"
-    :is-loading="isAssetsLoading || initialLoading"
-    :is-error="isAssetsLoadingError"
-    :validation-columns="assetValidationColumns"
-    @scroll="saveScrollPosition"
-    @delete-all-tasks="onDeleteAllTasksClicked"
-  />
+  <div
+    class="column side-column"
+    v-if="nbSelectedTasks === 1"
+  >
+    <task-info
+      :task="Object.values(selectedTasks)[0]"
+    />
+  </div>
 
   <edit-asset-modal
     ref="edit-asset-modal"
@@ -144,6 +157,7 @@ import PageTitle from './widgets/PageTitle'
 import SearchField from './widgets/SearchField'
 import SearchQueryList from './widgets/SearchQueryList'
 import ShowAssignationsButton from './widgets/ShowAssignationsButton'
+import TaskInfo from './sides/TaskInfo.vue'
 
 export default {
   name: 'assets',
@@ -160,7 +174,8 @@ export default {
     PageTitle,
     SearchField,
     SearchQueryList,
-    ShowAssignationsButton
+    ShowAssignationsButton,
+    TaskInfo
   },
 
   data () {
@@ -227,7 +242,9 @@ export default {
       'isAssetsLoadingError',
       'isCurrentUserManager',
       'isTVShow',
+      'nbSelectedTasks',
       'restoreAsset',
+      'selectedTasks',
       'taskTypeMap'
     ]),
 
@@ -647,11 +664,35 @@ export default {
 </script>
 
 <style scoped>
+.dark .main-column {
+  border-right: 3px solid #666;
+}
+
 .data-list {
   margin-top: 0;
 }
 
 .level {
   align-items: flex-start
+}
+
+.assets {
+  display: flex;
+  flex-direction: column;
+}
+
+.columns {
+  display: flex;
+  flex-direction: row;
+  padding: 0;
+}
+
+.column {
+  overflow-y: auto;
+  padding: 0;
+}
+
+.main-column {
+  border-right: 3px solid #CCC;
 }
 </style>

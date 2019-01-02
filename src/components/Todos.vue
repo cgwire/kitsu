@@ -1,96 +1,109 @@
 <template>
-  <div class="todos page fixed-page">
-    <div class="task-tabs tabs">
-      <ul>
-        <li
-          :class="{'is-active': isTabActive('todos')}"
-        >
-          <router-link :to="{
-            name: 'todos',
-          }">
-            {{ $t('tasks.current')}}
-          </router-link>
-        </li>
-        <li
-          :class="{'is-active': isTabActive('done')}"
-          @click="selectTab('done')"
-        >
-          <router-link :to="{
-            name: 'todos-tab',
-            params: {tab: 'done'}
-          }">
-            {{ $t('tasks.done') }} ({{ displayedDoneTasks.length }})
-          </router-link>
-        </li>
-        <li
-          :class="{'is-active': isTabActive('timesheets')}"
-          @click="selectTab('timesheet')"
-        >
-          <router-link :to="{
-            name: 'todos-tab',
-            params: {tab: 'timesheets'}
-          }">
-            {{ $t('timesheets.title') }}
-          </router-link>
-        </li>
-      </ul>
-    </div>
+<div class="columns fixed-page">
+  <div class="column main-column">
+    <div class="todos page">
+      <div class="task-tabs tabs">
+        <ul>
+          <li
+            :class="{'is-active': isTabActive('todos')}"
+          >
+            <router-link :to="{
+              name: 'todos',
+            }">
+              {{ $t('tasks.current')}}
+            </router-link>
+          </li>
+          <li
+            :class="{'is-active': isTabActive('done')}"
+            @click="selectTab('done')"
+          >
+            <router-link :to="{
+              name: 'todos-tab',
+              params: {tab: 'done'}
+            }">
+              {{ $t('tasks.done') }} ({{ displayedDoneTasks.length }})
+            </router-link>
+          </li>
+          <li
+            :class="{'is-active': isTabActive('timesheets')}"
+            @click="selectTab('timesheet')"
+          >
+            <router-link :to="{
+              name: 'todos-tab',
+              params: {tab: 'timesheets'}
+            }">
+              {{ $t('timesheets.title') }}
+            </router-link>
+          </li>
+        </ul>
+      </div>
 
-    <search-field
-      :class="{
-        'search-field': true
-      }"
-      ref="todos-search-field"
-      @change="onSearchChange"
-      @save="saveSearchQuery"
-      :can-save="true"
-      v-if="!isTabActive('done')"
-    />
+      <search-field
+        :class="{
+          'search-field': true
+        }"
+        ref="todos-search-field"
+        @change="onSearchChange"
+        @save="saveSearchQuery"
+        :can-save="true"
+        v-if="!isTabActive('done')"
+      />
 
-    <div
-      class="query-list"
-      v-if="isTabActive('todos') || isTabActive('timesheets')"
-    >
-      <search-query-list
-        :queries="todoSearchQueries"
-        @changesearch="changeSearch"
-        @removesearch="removeSearchQuery"
+      <div
+        class="query-list"
+        v-if="isTabActive('todos') || isTabActive('timesheets')"
+      >
+        <search-query-list
+          :queries="todoSearchQueries"
+          @changesearch="changeSearch"
+          @removesearch="removeSearchQuery"
+        />
+      </div>
+
+      <todos-list
+        ref="todo-list"
+        :entries="displayedTodos"
+        :is-loading="isTodosLoading"
+        :is-error="isTodosLoadingError"
+        :selection-grid="todoSelectionGrid"
+        v-if="isTabActive('todos')"
+        @scroll="setTodoListScrollPosition"
+      />
+
+      <todos-list
+        ref="done-list"
+        :entries="displayedDoneTasks"
+        :is-loading="isTodosLoading"
+        :is-error="isTodosLoadingError"
+        :done="true"
+        v-if="isTabActive('done')"
+      />
+
+      <timesheet-list
+        ref="timesheet-list"
+        :tasks="loggableTodos"
+        :done-tasks="loggableDoneTasks"
+        :is-loading="isTodosLoading"
+        :is-error="isTodosLoadingError"
+        :time-spent-map="timeSpentMap"
+        :time-spent-total="timeSpentTotal"
+        :hide-done="todosSearchText.length > 0"
+        @date-changed="onDateChanged"
+        @time-spent-change="onTimeSpentChange"
+        v-if="isTabActive('timesheets')"
       />
     </div>
+  </div>
 
-    <todos-list
-      ref="todo-list"
-      :entries="displayedTodos"
-      :is-loading="isTodosLoading"
-      :is-error="isTodosLoadingError"
-      :selection-grid="todoSelectionGrid"
-      v-if="isTabActive('todos')"
-      @scroll="setTodoListScrollPosition"
-    />
-
-    <todos-list
-      ref="done-list"
-      :entries="displayedDoneTasks"
-      :is-loading="isTodosLoading"
-      :is-error="isTodosLoadingError"
-      :done="true"
-      v-if="isTabActive('done')"
-    />
-
-    <timesheet-list
-      ref="timesheet-list"
-      :tasks="loggableTodos"
-      :done-tasks="loggableDoneTasks"
-      :is-loading="isTodosLoading"
-      :is-error="isTodosLoadingError"
-      :time-spent-map="timeSpentMap"
-      :time-spent-total="timeSpentTotal"
-      :hide-done="todosSearchText.length > 0"
-      @date-changed="onDateChanged"
-      @time-spent-change="onTimeSpentChange"
-      v-if="isTabActive('timesheets')"
+  <div
+    class="column side-column"
+    v-if="nbSelectedTasks === 1"
+  >
+    <task-info
+      :task="Object.values(selectedTasks)[0]"
     />
   </div>
+</div>
 </template>
 
 <script>
@@ -102,15 +115,18 @@ import TodosList from './lists/TodosList'
 import PageTitle from './widgets/PageTitle'
 import SearchField from './widgets/SearchField'
 import SearchQueryList from './widgets/SearchQueryList'
+import TaskInfo from './sides/TaskInfo'
 
 export default {
   name: 'todos',
+
   components: {
     TimesheetList,
     TodosList,
     PageTitle,
     SearchField,
-    SearchQueryList
+    SearchQueryList,
+    TaskInfo
   },
 
   data () {
@@ -128,11 +144,14 @@ export default {
     this.loadTodos({
       date: this.selectedDate,
       callback: () => {
-        if (this.$refs['todo-list']) {
-          this.$refs['todo-list'].setScrollPosition(
-            this.todoListScrollPosition
-          )
+        if (this.todoList) {
+          this.$nextTick(() => {
+            this.todoList.setScrollPosition(
+              this.todoListScrollPosition
+            )
+          })
         }
+        this.resizeHeaders()
       }
     })
   },
@@ -145,6 +164,8 @@ export default {
       'todosSearchText',
       'isTodosLoading',
       'isTodosLoadingError',
+      'nbSelectedTasks',
+      'selectedTasks',
       'taskTypeMap',
       'timeSpentMap',
       'timeSpentTotal',
@@ -165,6 +186,14 @@ export default {
         .filter((task) => {
           return this.taskTypeMap[task.task_type_id].allow_timelog
         })
+    },
+
+    todoList () {
+      return this.$refs['todo-list']
+    },
+
+    haveDoneList () {
+      return this.$refs['done-list']
     }
   },
 
@@ -182,15 +211,21 @@ export default {
       return this.activeTab === tab
     },
 
+    resizeHeaders () {
+      this.$nextTick(() => {
+        if (this.todoList) this.todoList.resizeHeaders()
+        if (this.haveDoneList) this.haveDoneList.resizeHeaders()
+      })
+    },
+
     selectTab (tab) {
       this.activeTab = tab
-      if (this.isTabActive('todos')) {
-        setTimeout(() => {
-          if (this.$refs['person-tasks-search-field']) {
-            this.$refs['person-tasks-search-field'].focus()
-          }
-        }, 100)
-      }
+      this.resizeHeaders()
+      setTimeout(() => {
+        if (this.$refs['todos-search-field']) {
+          this.$refs['todos-search-field'].focus()
+        }
+      }, 300)
     },
 
     updateActiveTab () {
@@ -244,9 +279,17 @@ export default {
 
     onAssignation (eventData) {
       if (this.user.id === eventData.person_id) {
-        this.$store.dispatch('loadTodos', {
+        this.loadTodos({
           forced: true,
-          date: this.selectedDate
+          date: this.selectedDate,
+          callback: () => {
+            if (this.todoList) {
+              this.$nextTick(() => {
+                this.todoList.setScrollPosition(this.todoListScrollPosition)
+              })
+            }
+            this.resizeHeaders()
+          }
         })
       }
     }
@@ -298,5 +341,37 @@ export default {
   margin-left: 2.5em;
   margin-bottom: 2em;
   margin-top: 0.2em;
+}
+
+.dark .main-column {
+  border-right: 3px solid #666;
+}
+
+.data-list {
+  margin-top: 0;
+}
+
+.level {
+  align-items: flex-start
+}
+
+.todos {
+  display: flex;
+  flex-direction: column;
+}
+
+.columns {
+  display: flex;
+  flex-direction: row;
+  padding: 0;
+}
+
+.column {
+  overflow-y: auto;
+  padding: 0;
+}
+
+.main-column {
+  border-right: 3px solid #CCC;
 }
 </style>

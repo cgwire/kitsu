@@ -152,3 +152,66 @@ export const getFilledColumns = (entries) => {
   })
   return filledColumns
 }
+
+export const getTaskTypeStyle = (task) => {
+  let border = 'transparent'
+  if (task) border = task.task_type_color
+  return {
+    'border-left': `4px solid ${border}`
+  }
+}
+
+export const getTaskPath = (
+  task,
+  production,
+  isTVShow,
+  episode,
+  taskTypeMap
+) => {
+  const productionId =
+    task.project_id ? task.project_id : production.id
+  let route = {
+    name: 'task',
+    params: {
+      production_id: productionId,
+      task_id: task.id
+    }
+  }
+  if (isTVShow && episode) {
+    route.name = 'episode-task'
+    route.params.episode_id = task.episode_id || episode.id
+  }
+  const taskType = taskTypeMap[task.task_type_id]
+  route.params.type = taskType.for_shots ? 'shots' : 'assets'
+  return route
+}
+
+export const getTaskEntityPath = (task, episodeId) => {
+  if (task) {
+    const type = task.entity_type_name
+    const entityId = task.entity ? task.entity.id : task.entity_id
+    const route = {
+      name: type === 'Shot' ? 'shot' : 'asset',
+      params: {
+        production_id: task.project_id
+      }
+    }
+
+    if (type === 'Shot') {
+      route.params.shot_id = entityId
+    } else {
+      route.params.asset_id = entityId
+    }
+
+    if (episodeId) {
+      route.name = `episode-${route.name}`
+      route.params.episode_id = episodeId
+    }
+
+    return route
+  } else {
+    return {
+      name: 'open-productions'
+    }
+  }
+}

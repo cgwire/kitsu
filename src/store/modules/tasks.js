@@ -47,8 +47,6 @@ import {
   LOAD_PERSON_TASKS_END,
   USER_LOAD_TODOS_END,
 
-  SET_CURRENT_PRODUCTION,
-
   RESET_ALL
 } from '../mutation-types'
 
@@ -107,7 +105,7 @@ const getters = {
 
   taskStatusOptions: state => state.taskStatuses.map((status) => {
     return {
-      label: status.name,
+      label: status.short_name,
       value: status.id,
       color: status.color,
       isArtistAllowed: status.is_artist_allowed
@@ -119,6 +117,7 @@ const getters = {
   nbSelectedValidations: state => state.nbSelectedValidations,
   isShowAssignations: state => state.isShowAssignations,
   taskEntityPreviews: state => state.taskEntityPreviews,
+  previewFormData: state => state.previewFormData,
 
   assetValidationColumns: (state, getters) => {
     return sortValidationColumns(
@@ -454,7 +453,11 @@ const actions = {
           if (!err) {
             const comment = getters.getTaskComment(taskId, commentId)
             const extension = fileName.slice(fileName.length - 3)
-            preview.extension = extension.substring(1)
+            if (extension.startsWith('.')) {
+              preview.extension = extension.substring(1)
+            } else {
+              preview.extension = extension
+            }
             commit(ADD_PREVIEW_END, {
               preview,
               taskId,
@@ -591,6 +594,10 @@ const actions = {
 
   clearSelectedTasks ({ commit, state }) {
     commit(CLEAR_SELECTED_TASKS)
+  },
+
+  loadPreviewFileFormData ({ commit }, previewFormData) {
+    commit('PREVIEW_FILE_SELECTED', previewFormData)
   }
 }
 
@@ -601,6 +608,7 @@ const mutations = {
 
   [LOAD_ASSETS_END] (state, { assets, personMap }) {
     const validationColumns = {}
+    state.taskMap = {}
     assets.forEach((asset) => {
       asset.validations = {}
       asset.tasks.forEach((task) => {
@@ -632,6 +640,7 @@ const mutations = {
 
   [LOAD_SHOTS_END] (state, { shots, personMap }) {
     const validationColumns = {}
+    state.taskMap = {}
     shots.forEach((shot) => {
       shot.validations = {}
       shot.tasks.forEach((task) => {
@@ -765,10 +774,12 @@ const mutations = {
       newStatus = taskStatusMap[newStatusId]
     }
 
-    Object.assign(task, {
-      task_status_id: newStatus.id,
-      task_status_priority: newStatus.priority
-    })
+    if (task) {
+      Object.assign(task, {
+        task_status_id: newStatus.id,
+        task_status_priority: newStatus.priority
+      })
+    }
   },
 
   [EDIT_COMMENT_END] (state, { taskId, comment }) {
@@ -827,7 +838,7 @@ const mutations = {
       })
 
       if (p.id === preview.id) {
-        preview.annotations = annotations
+        p.annotations = annotations
       }
     })
 
@@ -973,10 +984,6 @@ const mutations = {
 
       state.taskMap[task.id] = task
     })
-  },
-
-  [SET_CURRENT_PRODUCTION] (state) {
-    state.taskMap = {}
   },
 
   [RESET_ALL] (state, shots) {

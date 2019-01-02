@@ -7,7 +7,10 @@
       <div class="flexrow action-bar">
 
         <div class="flexrow-item more-menu-icon" @click="toggleMenu">
-          <more-vertical-icon />
+          <div class="flexrow">
+            <span class="flexrow-item hide-small-screen">{{ currentMenuLabel }}</span>
+            <chevron-down-icon class="flexrow-item" />
+          </div>
         </div>
 
         <div class="flexrow-item" v-if="selectedBar === 'assignation'">
@@ -276,14 +279,14 @@ import ButtonHrefLink from './widgets/ButtonHrefLink'
 import Combobox from './widgets/Combobox'
 import PeopleField from './widgets/PeopleField'
 import Spinner from './widgets/Spinner'
-import { ChevronRightIcon, XIcon, MoreVerticalIcon } from 'vue-feather-icons'
+import { ChevronDownIcon, XIcon, MoreVerticalIcon } from 'vue-feather-icons'
 import { sortPeople } from '../lib/sorting'
 
 export default {
   name: 'action-topbar',
 
   components: {
-    ChevronRightIcon,
+    ChevronDownIcon,
     Combobox,
     MoreVerticalIcon,
     PeopleField,
@@ -408,6 +411,18 @@ export default {
 
     currentProductionTeam () {
       return this.currentProduction.team
+    },
+
+    currentMenuLabel () {
+      const labels = {
+        'assignation': 'menu.assign_tasks',
+        'change-status': 'menu.change_status',
+        'priorities': 'menu.change_priority',
+        'tasks': 'menu.create_tasks',
+        'delete-tasks': 'menu.delete_tasks',
+        'custom-actions': 'menu.run_custom_action'
+      }
+      return this.$t(labels[this.selectedBar])
     }
   },
 
@@ -623,6 +638,7 @@ div.combobox-item {
 
 .clear-selection {
   cursor: pointer;
+  padding-right: 0.5em;
 }
 
 .field {
@@ -647,7 +663,16 @@ div.combobox-item {
 
 .more-menu-icon {
   cursor: pointer;
-  padding-top: 3px;
+  font-weight: bold;
+  font-size: 1.2em;
+  background: #4e50aa;
+  height: 60px;
+  padding: 0 0.5em 0 0.5em;
+  align-items: middle;
+}
+
+.more-menu-icon .flexrow {
+  height: 100%;
 }
 
 .more-menu {
@@ -672,7 +697,8 @@ div.combobox-item {
 }
 
 .action-bar {
-  padding: 0.7em;
+  padding: 0;
+  margin: 0;
 }
 
 .clear-selection-container {

@@ -141,6 +141,12 @@ body {
   color: #EEEEEE;
 }
 
+.dark textarea[disabled] {
+  background: #36393F;
+  color: #BBB;
+  border-color: #25282E;
+}
+
 .dark select,
 .dark textarea,
 .dark .input {
@@ -194,6 +200,10 @@ body {
 .dark .main-button {
   background: #00B242;
   border-bottom: 3px solid #008732;
+}
+
+.dark .add-comment .select select {
+  background: #4E5159;
 }
 
 .dark .hero .box h1.title {
@@ -755,6 +765,10 @@ input.search-input:focus {
   margin-right: 0;
 }
 
+.side {
+  padding: 1em;
+}
+
 .menu-mask {
   position: fixed;
   background: blue;
@@ -802,6 +816,15 @@ input.search-input:focus {
 
 .page .columns:last-child {
   margin-bottom: 1em;
+}
+
+.side-column {
+  width: 400px;
+  max-width: 400px;
+  margin-top: 70px;
+  background: white;
+  margin-right: 10px;
+  margin-bottom: 10px;
 }
 
 .tooltip {
