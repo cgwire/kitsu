@@ -1,4 +1,7 @@
 import ColorHash from 'color-hash'
+import Color from 'color'
+
+const darkenColorIndex = {}
 
 export default {
   /*
@@ -66,5 +69,17 @@ export default {
     } else {
       return 'rgb(' + r + ', ' + g + ', ' + b + ')'
     }
+  },
+
+  /*
+   * Turn hexadecimal color (#FFFFFF) to a darker and more saturated version.
+   * Uses a cache for to not recompute the target color each time this function
+   * is called.
+   */
+  darkenColor (colorHash) {
+    if (!darkenColorIndex[colorHash]) {
+      darkenColorIndex[colorHash] = Color(colorHash).darken(0.3).saturate(0.6)
+    }
+    return darkenColorIndex[colorHash]
   }
 }
