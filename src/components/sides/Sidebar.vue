@@ -10,7 +10,7 @@
           <div
             class="company-logo has-text-centered"
           >
-            <img src="../assets/kitsu.png" />
+            <img src="../../assets/kitsu.png" />
             <h2 class="subtitle sidebar-title">Kitsu</h2>
           </div>
         </router-link>

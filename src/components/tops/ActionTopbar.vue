@@ -8,7 +8,9 @@
 
         <div class="flexrow-item more-menu-icon" @click="toggleMenu">
           <div class="flexrow">
-            <span class="flexrow-item hide-small-screen">{{ currentMenuLabel }}</span>
+            <span class="flexrow-item hide-small-screen">
+              {{ currentMenuLabel }}
+            </span>
             <chevron-down-icon class="flexrow-item" />
           </div>
         </div>
@@ -275,12 +277,13 @@
 
 <script>
 import { mapGetters, mapActions } from 'vuex'
-import ButtonHrefLink from './widgets/ButtonHrefLink'
-import Combobox from './widgets/Combobox'
-import PeopleField from './widgets/PeopleField'
-import Spinner from './widgets/Spinner'
+import { sortPeople } from '../../lib/sorting'
+
 import { ChevronDownIcon, XIcon, MoreVerticalIcon } from 'vue-feather-icons'
-import { sortPeople } from '../lib/sorting'
+import ButtonHrefLink from '../widgets/ButtonHrefLink'
+import Combobox from '../widgets/Combobox'
+import PeopleField from '../widgets/PeopleField'
+import Spinner from '../widgets/Spinner'
 
 export default {
   name: 'action-topbar',
