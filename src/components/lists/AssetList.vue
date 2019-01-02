@@ -513,6 +513,10 @@ tbody:last-child .empty-line:last-child {
   border: 0;
 }
 
+.table-body .table .empty-line {
+  background: inherit;
+}
+
 .empty-line {
   border-right: 0;
   border-left: 0;
@@ -522,5 +526,9 @@ tbody:last-child .empty-line:last-child {
 
 .table-header-wrapper {
   position: relative;
+}
+
+.splitted-table tbody {
+  border: 0;
 }
 </style>
