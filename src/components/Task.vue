@@ -1327,16 +1327,25 @@ export default {
       },
 
       'preview_file:update' (eventData) {
-        this.refreshPreview({
-          taskId: this.currentTask.id,
-          previewId: eventData.preview_file_id
-        }).then(() => {
-          if (this.$refs['preview-movie']) {
-            this.$refs['preview-movie'].reloadAnnotations()
-          } else if (this.$refs['preview-picture']) {
-            this.$refs['preview-picture'].reloadAnnotations()
-          }
+        const preview = this.currentTaskPreviews.filter((preview) => {
+          return preview.id === eventData.preview_file_id
         })
+        if (preview) {
+          this.refreshPreview({
+            taskId: this.currentTask.id,
+            previewId: eventData.preview_file_id
+          }).then(() => {
+            if (this.$refs['preview-movie']) {
+              if (!this.$refs['preview-movie'].isDrawing) {
+                this.$refs['preview-movie'].reloadAnnotations()
+              }
+            } else if (this.$refs['preview-picture']) {
+              if (!this.$refs['preview-picture'].isDrawing) {
+                this.$refs['preview-picture'].reset()
+              }
+            }
+          })
+        }
       }
     }
   },

@@ -838,7 +838,7 @@ const mutations = {
       })
 
       if (p.id === preview.id) {
-        preview.annotations = annotations
+        p.annotations = annotations
       }
     })
 

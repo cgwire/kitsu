@@ -942,6 +942,7 @@ export default {
     },
 
     reloadAnnotations () {
+      this.annotations = []
       if (this.preview.annotations) {
         const annotations = []
         this.preview.annotations.forEach(a => annotations.push({...a}))
