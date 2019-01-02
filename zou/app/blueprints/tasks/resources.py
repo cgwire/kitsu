@@ -109,12 +109,6 @@ class AddPreviewResource(Resource):
             comment["task_status_id"]
         )
         person = persons_service.get_current_user()
-        if not task_status["is_reviewable"]:
-            return {
-                "error": "Comment status is not reviewable, you cannot link a "
-                         "preview to it."
-            }, 400
-
         preview_file = tasks_service.add_preview_file_to_comment(
             comment_id, person["id"], task_id
         )

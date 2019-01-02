@@ -106,14 +106,12 @@ def init_data():
     tasks_service.get_or_create_status(
         "Waiting For Approval",
         "wfa",
-        "#ab26ff",
-        is_reviewable=True
+        "#ab26ff"
     )
     tasks_service.get_or_create_status(
         "Retake",
         "retake",
-        "#ff3860",
-        is_reviewable=True
+        "#ff3860"
     )
     tasks_service.get_or_create_status(
         "Done",
