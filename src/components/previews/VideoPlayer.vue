@@ -824,8 +824,26 @@ export default {
     saveAnnotations () {
       const currentTime = this.video.currentTime
       const annotation = this.getAnnotation(currentTime)
+
+      this.fabricCanvas.getObjects().forEach((obj) => {
+        if (obj.type === 'path') {
+          if (!obj.canvasWidth) obj.canvasWidth = this.fabricCanvas.width
+          obj.setControlsVisibility({
+            mt: false,
+            mb: false,
+            ml: false,
+            mr: false,
+            bl: false,
+            br: false,
+            tl: false,
+            tr: false,
+            mtr: false
+          })
+        }
+      })
+
       if (annotation) {
-        annotation.drawing = this.fabricCanvas.toJSON()
+        annotation.drawing = this.fabricCanvas.toJSON(['canvasWidth'])
         annotation.width = this.fabricCanvas.width
         if (annotation.drawing && annotation.drawing.objects.length === 1) {
           const index = this.annotations.findIndex(
@@ -837,7 +855,7 @@ export default {
         this.annotations.push({
           time: currentTime,
           width: this.fabricCanvas.width,
-          drawing: this.fabricCanvas.toJSON()
+          drawing: this.fabricCanvas.toJSON(['canvasWidth'])
         })
         this.annotations = this.annotations.sort((a, b) => {
           return a.time < b.time
@@ -893,12 +911,29 @@ export default {
           this.fabricCanvas.add(circle)
           circle.set({strokeWidth: 2})
         } else if (obj.type === 'path') {
+          let strokeMultiplier = 1
+          if (obj.canvasWidth) {
+            strokeMultiplier = obj.canvasWidth / this.fabricCanvas.width
+          }
           const path = new fabric.Path(
             obj.path,
             {
-              ...base
+              ...base,
+              strokeWidth: 3 * strokeMultiplier,
+              canvasWidth: obj.canvasWidth
             }
           )
+          path.setControlsVisibility({
+            mt: false,
+            mb: false,
+            ml: false,
+            mr: false,
+            bl: false,
+            br: false,
+            tl: false,
+            tr: false,
+            mtr: false
+          })
           this.fabricCanvas.add(path)
         }
       })
