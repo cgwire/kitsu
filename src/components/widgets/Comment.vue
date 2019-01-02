@@ -6,7 +6,7 @@
     highlighted: highlighted
   }"
   :style="{
-    'border-left': '3px solid ' + comment.task_status.color
+    'border-left': '6px solid ' + comment.task_status.color
   }"
 >
 
@@ -27,37 +27,34 @@
           <router-link
             :to="previewRoute"
             class="revision"
-            v-if="comment.previews.length > 0"
+            v-if="!light && comment.previews.length > 0"
           >
             revision {{ comment.previews[0].revision }}
           </router-link>
-
         </div>
-        <div class="flexrow-item">
-          <button-link
-            icon="upload"
-            class=""
-            :text="$t('tasks.add_preview')"
-            :is-responsive="true"
-            :path="addPreviewPath"
-            v-if="editable && comment.previews.length === 0 && comment.task_status.is_reviewable"
-          >
-          </button-link>
+        <div class="flexrow-item" v-if="!light">
           <button-link
             icon="edit"
             class=""
             :path="editCommentPath"
             v-if="editable"
-          >
-          </button-link>
+          />
           <button-link
             icon="delete"
             class=""
             :path="deleteCommentPath"
             v-if="editable"
-          >
-          </button-link>
+          />
         </div>
+      </div>
+      <div>
+        <router-link
+          :to="previewRoute"
+          class="revision"
+          v-if="light && comment.previews.length > 0"
+        >
+          revision {{ comment.previews[0].revision }}
+        </router-link>
       </div>
 
       <p v-if="comment.task_status.name === 'Done'">
@@ -83,6 +80,7 @@
 <script>
 import marked from 'marked'
 import moment from 'moment-timezone'
+import { mapGetters } from 'vuex'
 
 import PeopleAvatar from './PeopleAvatar.vue'
 import PeopleName from './PeopleName.vue'
@@ -108,21 +106,35 @@ export default {
     editable: {
       type: Boolean,
       default: false
+    },
+    light: {
+      type: Boolean,
+      default: false
     }
   },
 
   computed: {
+    ...mapGetters([
+      'currentProduction',
+      'taskMap',
+      'taskTypeMap'
+    ]),
+
     previewRoute () {
       let route = {
         name: 'task',
-        params: {task_id: this.comment.object_id}
+        params: {
+          task_id: this.comment.object_id,
+          production_id: this.currentProduction.id
+        }
       }
       if (this.comment.previews.length > 0) {
         route = {
           name: 'task-preview',
           params: {
             task_id: this.comment.object_id,
-            preview_id: this.comment.previews[0].id
+            preview_id: this.comment.previews[0].id,
+            production_id: this.currentProduction.id
           }
         }
       }
@@ -130,6 +142,9 @@ export default {
         route.name = `episode-${route.name}`
         route.params.episode_id = this.$route.params.episode_id
       }
+      const task = this.taskMap[this.comment.object_id]
+      const taskType = this.taskTypeMap[task.task_type_id]
+      route.params.type = taskType.for_shots ? 'shots' : 'assets'
       return route
     },
 
@@ -179,20 +194,23 @@ export default {
 </script>
 
 <style scoped>
-.comment {
-  padding: 0.6em;
-  border-left: 3px solid #CCC;
-  box-shadow: 0px 0px 6px #E0E0E0;
-  background: white;
-  border-radius: 0 5px 5px 0;
+.dark .comment-text {
+  color: #EEE;
 }
 
-.comment.highlighted {
-  background: #F1EEFF;
+.comment {
+  background: white;
+  border-left: 6px solid #CCC;
+  border-radius: 0 5px 5px 0;
+  padding: 0.6em;
 }
 
 .comment:first-child {
   padding-top: 1em;
+}
+
+.comment.highlighted {
+  background: #F1EEFF;
 }
 
 .content .comment-person {

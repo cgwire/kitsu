@@ -1,5 +1,5 @@
 <template>
-<div class="field">
+<div class="field" v-if="!isSimple">
   <label class="label" v-if="label.length > 0">
     {{ label }}
   </label>
@@ -7,8 +7,7 @@
     <span
       :class="{
         select: true,
-        'is-top': this.isTop,
-        'is-dark': this.isDark
+        'is-top': this.isTop
       }"
     >
       <select
@@ -29,6 +28,27 @@
     </span>
   </p>
 </div>
+<span
+  class="select"
+  v-else
+>
+  <select
+    class="select-input"
+    ref="select"
+    @keyup.enter="emitEnter()"
+    @change="updateValue"
+  >
+    <option
+      v-for="(option, i) in options"
+      :key="i + '-' + option.label + '-' + option.value"
+      :value="option.value || option.label"
+      :selected="value === option.value"
+    >
+      {{ getOptionLabel(option) }}
+    </option>
+  </select>
+</span>
+
 </template>
 
 <script>
@@ -56,7 +76,7 @@ export default {
       default: false,
       type: Boolean
     },
-    isDark: {
+    isSimple: {
       default: false,
       type: Boolean
     }

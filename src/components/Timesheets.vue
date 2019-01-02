@@ -9,16 +9,14 @@
             :label="$t('timesheets.detail_level')"
             :options="detailOptions"
             v-model="detailLevelString"
-          >
-          </combobox>
+          />
 
           <combobox
             class="flexrow-item"
             :label="$t('timesheets.year')"
             :options="yearOptions"
             v-model="yearString"
-          >
-          </combobox>
+          />
 
           <combobox
             class="flexrow-item"
@@ -26,8 +24,7 @@
             :options="monthOptions"
             v-model="monthString"
             v-if="detailLevelString === 'day'"
-          >
-          </combobox>
+          />
         </div>
 
         <people-timesheet-list
@@ -369,6 +366,17 @@ export default {
   border-color: #5E6169;
 }
 
+.data-list {
+  margin-top: 0;
+}
+
+.timesheets {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  padding-bottom: 1em;
+}
+
 .columns {
   display: flex;
   flex-direction: row;
@@ -383,27 +391,5 @@ export default {
 .main-column {
   border-right: 3px solid #CCC;
   margin: 0;
-}
-
-.timesheets {
-  height: 100%;
-  padding-bottom: 1em;
-}
-
-.side-column {
-  width: 400px;
-  max-width: 400px;
-  margin-top: 70px;
-  margin-right: 10px;
-  margin-bottom: 10px;
-}
-
-.data-list {
-  margin-top: 0;
-}
-
-.timesheets {
-  display: flex;
-  flex-direction: column;
 }
 </style>

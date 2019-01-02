@@ -47,7 +47,7 @@
       <button
         class="button flexrow-item"
         @click="onRemovePreviewClicked"
-        v-if="currentIndex > 1"
+        v-if="currentIndex > 1 && !light"
       >
         <trash-icon class="icon" />
       </button>
@@ -60,22 +60,6 @@
         v-if="isFullScreenEnabled"
       >
         <x-icon class="icon" />
-      </button>
-
-      <button
-        class="button flexrow-item"
-        @click="onRectAnnotateClicked"
-        v-if="isFullScreenEnabled"
-      >
-        <square-icon class="icon" />
-      </button>
-
-      <button
-        class="button flexrow-item"
-        @click="onCircleAnnotateClicked"
-        v-if="isFullScreenEnabled"
-      >
-        <circle-icon class="icon" />
       </button>
 
       <button
@@ -147,6 +131,10 @@ export default {
     preview: {
       type: Object,
       default: () => {}
+    },
+    light: {
+      type: Boolean,
+      default: false
     }
   },
 
@@ -277,7 +265,7 @@ export default {
       if (this.isFullScreen()) {
         return screen.height
       } else {
-        return screen.width > 1300 ? 500 : 300
+        return screen.width > 1300 && !this.light ? 500 : 200
       }
     },
 
@@ -464,20 +452,41 @@ export default {
     },
 
     saveAnnotations () {
+      // Annotation are aimed to be used mainly by videos. That's why
+      // annotations are stored in a list.
       const annotation = this.getAnnotation(0)
+
+      this.fabricCanvas.getObjects().forEach((obj) => {
+        if (obj.type === 'path') {
+          if (!obj.canvasWidth) obj.canvasWidth = this.fabricCanvas.width
+          obj.setControlsVisibility({
+            mt: false,
+            mb: false,
+            ml: false,
+            mr: false,
+            bl: false,
+            br: false,
+            tl: false,
+            tr: false,
+            mtr: false
+          })
+        }
+      })
+
       if (annotation) {
-        annotation.drawing = this.fabricCanvas.toJSON()
+        annotation.drawing = this.fabricCanvas.toJSON(['canvasWidth'])
         annotation.width = this.fabricCanvas.width
         if (annotation.drawing && annotation.drawing.objects.length === 1) {
           this.annotations.splice(0, 1)
         }
       } else {
         this.annotations = []
-        this.annotations.push({
+        const annotation = {
           time: 0,
           width: this.fabricCanvas.width,
-          drawing: this.fabricCanvas.toJSON()
-        })
+          drawing: this.fabricCanvas.toJSON(['canvasWidth'])
+        }
+        this.annotations.push(annotation)
       }
 
       this.$emit('annotation-changed', {
@@ -516,8 +525,7 @@ export default {
             top: obj.top * scaleMultiplier,
             fill: 'transparent',
             stroke: '#ff3860',
-            strokeWidth: 4 / scaleMultiplier,
-            radius: obj.radius,
+            radius: obj.radius * scaleMultiplier,
             width: obj.width,
             height: obj.height,
             scaleX: obj.scaleX * scaleMultiplier,
@@ -536,12 +544,29 @@ export default {
             this.fabricCanvas.add(circle)
             circle.set({ strokeWidth: 8 / (obj.scaleX + obj.scaleY) })
           } else if (obj.type === 'path') {
+            let strokeMultiplier = 1
+            if (obj.canvasWidth) {
+              strokeMultiplier = obj.canvasWidth / this.fabricCanvas.width
+            }
             const path = new fabric.Path(
               obj.path,
               {
-                ...base
+                ...base,
+                strokeWidth: 3 * strokeMultiplier,
+                canvasWidth: obj.canvasWidth
               }
             )
+            path.setControlsVisibility({
+              mt: false,
+              mb: false,
+              ml: false,
+              mr: false,
+              bl: false,
+              br: false,
+              tl: false,
+              tr: false,
+              mtr: false
+            })
             this.fabricCanvas.add(path)
           }
         })

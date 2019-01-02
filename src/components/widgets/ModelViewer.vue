@@ -1,12 +1,18 @@
 <template>
 <div>
-  <div ref="model-viewer" id="model-viewer">
+  <div
+    ref="model-viewer"
+    id="model-viewer"
+    :class="{
+      light: light
+    }"
+  >
   </div>
   <div class="viewer-actions">
     <button
       class="button"
       @click="goFullScreen">
-      <maximize-2-icon class="icon"></maximize-2-icon>
+      <maximize-2-icon class="icon" />
       <span class="text">
         {{ $t('tasks.full_screen') }}
       </span>
@@ -37,6 +43,10 @@ export default {
     previewUrl: {
       default: '',
       type: String
+    },
+    light: {
+      default: false,
+      type: Boolean
     }
   },
 
@@ -71,6 +81,10 @@ export default {
 <style scoped>
 #model-viewer {
   height: 500px;
+}
+
+#model-viewer.light {
+  height: 200px;
 }
 
 .viewer-actions {

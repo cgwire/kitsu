@@ -228,14 +228,6 @@ export default {
     ValidationCell
   },
 
-  created () {
-    this.initHiddenColumns(this.validationColumns, this.hiddenColumns)
-  },
-
-  mounted () {
-    this.resizeHeaders()
-  },
-
   computed: {
     ...mapGetters([
       'currentProduction',
@@ -296,58 +288,6 @@ export default {
       this.$refs.tableWrapper.scrollLeft = position.scrollLeft
     },
 
-    onTaskSelected (validationInfo) {
-      if (validationInfo.isShiftKey) {
-        if (this.lastSelection) {
-          let startX = this.lastSelection.x
-          let endX = validationInfo.x
-          let startY = this.lastSelection.y
-          let endY = validationInfo.y
-          if (validationInfo.x < this.lastSelection.x) {
-            startX = validationInfo.x
-            endX = this.lastSelection.x
-          }
-          if (validationInfo.y < this.lastSelection.y) {
-            startY = validationInfo.y
-            endY = this.lastSelection.y
-          }
-
-          for (let i = startX; i <= endX; i++) {
-            for (let j = startY; j <= endY; j++) {
-              const ref = 'validation-' + i + '-' + j
-              const validationCell = this.$refs[ref][0]
-              if (!this.shotSelectionGrid[i][j]) {
-                validationCell.select({ctrlKey: true, isUserClick: false})
-              }
-            }
-          }
-        }
-      } else if (!validationInfo.isCtrlKey) {
-        this.$store.commit('CLEAR_SELECTED_TASKS')
-      }
-      this.$store.commit('ADD_SELECTED_TASK', validationInfo)
-
-      if (!validationInfo.isShiftKey && validationInfo.isUserClick) {
-        this.lastSelection = {
-          x: validationInfo.x,
-          y: validationInfo.y
-        }
-      }
-    },
-
-    onTaskUnselected (validationInfo) {
-      if (!validationInfo.isCtrlKey) {
-        if (this.nbSelectedTasks === 1) {
-          this.$store.commit('REMOVE_SELECTED_TASK', validationInfo)
-        } else {
-          this.$store.commit('CLEAR_SELECTED_TASKS')
-          this.$store.commit('ADD_SELECTED_TASK', validationInfo)
-        }
-      } else {
-        this.$store.commit('REMOVE_SELECTED_TASK', validationInfo)
-      }
-    },
-
     onBodyScroll (event, position) {
       this.$refs.headerWrapper.style.left = `-${position.scrollLeft}px`
       this.$emit('scroll', position.scrollTop)
@@ -361,12 +301,6 @@ export default {
     loadMoreShots () {
       this.displayMoreShots()
       this.$nextTick(this.resizeHeaders)
-    },
-
-    setScrollPosition (scrollPosition) {
-      if (this.$refs.body) {
-        this.$refs.body.scrollTop = scrollPosition
-      }
     },
 
     resizeHeaders () {
@@ -442,34 +376,6 @@ export default {
       }
 
       return route
-    },
-
-    showHeaderMenu (columnId, event) {
-      const headerMenuEl = this.$refs.headerMenu.$el
-      if (headerMenuEl.className === 'header-menu') {
-        headerMenuEl.className = 'header-menu hidden'
-      } else {
-        headerMenuEl.className = 'header-menu'
-        let headerElement = event.srcElement.parentNode.parentNode
-        if (headerElement.tagName !== 'TH') {
-          headerElement = headerElement.parentNode
-        }
-        const left = headerElement.getBoundingClientRect().left + 1
-        const top = headerElement.getBoundingClientRect().bottom
-        headerMenuEl.style.left = left + 'px'
-        headerMenuEl.style.top = top + 'px'
-      }
-      this.lastHeaderMenuDisplayed = columnId
-    },
-
-    onMinimizeColumnToggled () {
-      this.hideColumn(this.lastHeaderMenuDisplayed)
-      this.showHeaderMenu()
-    },
-
-    onDeleteAllTasksClicked () {
-      this.$emit('delete-all-tasks', this.lastHeaderMenuDisplayed)
-      this.showHeaderMenu()
     }
   }
 }

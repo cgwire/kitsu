@@ -49,12 +49,6 @@
           @click="toggleSubscribe"
           v-if="!isAssigned"
         />
-        <button-link
-          class="flexrow-item action-button"
-          text=""
-          icon="delete"
-          :path="deleteTaskPath"
-        />
       </div>
 
       <div
@@ -95,11 +89,13 @@
         <div v-if="currentTask">
           <div>
             <add-comment
-              :addComment="addComment"
-              :isAddCommentLoading="addCommentLoading.isLoading"
+              :isAddCommentLoading="loading.addComment"
               :user="user"
               :task="currentTask"
               :taskStatusOptions="taskStatusOptionsForCurrentUser"
+              :attached-file-name="attachedFileName"
+              @add-comment="addComment"
+              @add-preview="onAddPreviewClicked"
               v-if="isCommentingAllowed"
             />
             <div class="comments" v-if="currentTaskComments.length > 0">
@@ -230,7 +226,7 @@
       :cancel-route="taskPath()"
       :form-data="addPreviewFormData"
       @fileselected="selectFile"
-      @confirm="createPreview"
+      @confirm="closeAddPreviewModal"
     />
 
     <add-preview-modal
@@ -264,16 +260,6 @@
       :cancel-route="taskPath()"
       :comment-to-edit="commentToEdit"
       @confirm="confirmEditTaskComment"
-    />
-
-    <delete-modal
-      :active="modals.deleteTask"
-      :is-loading="loading.deleteTask"
-      :is-error="errors.deleteTask"
-      :cancel-route="taskPath()"
-      :text="deleteText"
-      :error-text="$t('tasks.delete_error')"
-      @confirm="confirmDeleteTask"
     />
 
     <delete-modal
@@ -349,14 +335,11 @@ export default {
 
   data () {
     return {
+      attachedFileName: '',
       entityPage: this.getEntityPage(),
       selectedTab: 'validation',
       taskLoading: {
         isLoading: true,
-        isError: false
-      },
-      addCommentLoading: {
-        isLoading: false,
         isError: false
       },
       modals: {
@@ -368,6 +351,7 @@ export default {
         editComment: false
       },
       loading: {
+        addComment: false,
         addPreview: false,
         addExtraPreview: false,
         changePreview: false,
@@ -377,6 +361,7 @@ export default {
         editComment: false
       },
       errors: {
+        addComment: false,
         addPreview: false,
         addExtraPreview: false,
         changePreview: false,
@@ -751,6 +736,7 @@ export default {
     ...mapActions([
       'addCommentPreview',
       'addCommentExtraPreview',
+      'commentTask',
       'changeCommentPreview',
       'clearSelectedTasks',
       'deleteTask',
@@ -761,6 +747,7 @@ export default {
       'loadTask',
       'loadShots',
       'loadAssets',
+      'loadPreviewFileFormData',
       'loadTaskComments',
       'loadTaskSubscribed',
       'refreshPreview',
@@ -936,34 +923,51 @@ export default {
     },
 
     addComment (comment, taskStatusId) {
-      this.addCommentLoading = {
-        isLoading: true,
-        isError: false
-      }
-      this.$store.dispatch('commentTask', {
+      this.loading.addComment = true
+      this.errors.addComment = false
+      this.commentTask({
         taskId: this.route.params.task_id,
         taskStatusId: taskStatusId,
         comment: comment,
         callback: (err) => {
           if (err) {
             console.log(err)
-            this.addCommentLoading = {
-              isLoading: false,
-              isError: true
-            }
+            this.errors.addComment = true
           } else {
-            this.addCommentLoading = {
-              isLoading: false,
-              isError: false
+            this.errors.addComment = false
+            this.reset()
+            if (this.attachedFileName) {
+              this.addCommentPreview({
+                taskId: this.route.params.task_id,
+                commentId: this.currentTaskComments[0].id,
+                callback: (err, preview) => {
+                  if (err) {
+                    this.errors.addComment = true
+                  } else {
+                    this.$refs['add-preview-modal'].reset()
+                    this.loading.addComment = false
+                    this.attachedFileName = ''
+                    this.resetPreview({
+                      id: preview.id
+                    })
+                  }
+                }
+              })
+            } else {
+              this.loading.addComment = false
+              this.reset()
             }
-            this.currentTaskComments = this.getCurrentTaskComments()
-            this.currentTaskPreviews = this.getCurrentTaskPreviews()
-            this.setOtherPreviews()
-            this.currentPreviewPath = this.getOriginalPath()
-            this.currentTask = this.getCurrentTask()
           }
         }
       })
+    },
+
+    reset () {
+      this.currentTaskComments = this.getCurrentTaskComments()
+      this.currentTaskPreviews = this.getCurrentTaskPreviews()
+      this.setOtherPreviews()
+      this.currentPreviewPath = this.getOriginalPath()
+      this.currentTask = this.getCurrentTask()
     },
 
     handleModalsDisplay () {
@@ -1001,7 +1005,8 @@ export default {
     },
 
     selectFile (formData) {
-      this.$store.commit('PREVIEW_FILE_SELECTED', formData)
+      this.loadPreviewFileFormData(formData)
+      this.attachedFileName = formData.get('file').name
     },
 
     createPreview () {
@@ -1291,6 +1296,14 @@ export default {
       route.params.extra_preview_id = preview.id
       route.params.comment_id = this.currentTaskComments[0].id
       this.$router.push(route)
+    },
+
+    onAddPreviewClicked () {
+      this.modals.addPreview = true
+    },
+
+    closeAddPreviewModal () {
+      this.modals.addPreview = false
     }
   },
 
@@ -1314,16 +1327,25 @@ export default {
       },
 
       'preview_file:update' (eventData) {
-        this.refreshPreview({
-          taskId: this.currentTask.id,
-          previewId: eventData.preview_file_id
-        }).then(() => {
-          if (this.$refs['preview-movie']) {
-            this.$refs['preview-movie'].reloadAnnotations()
-          } else if (this.$refs['preview-picture']) {
-            this.$refs['preview-picture'].reloadAnnotations()
-          }
+        const preview = this.currentTaskPreviews.filter((preview) => {
+          return preview.id === eventData.preview_file_id
         })
+        if (preview) {
+          this.refreshPreview({
+            taskId: this.currentTask.id,
+            previewId: eventData.preview_file_id
+          }).then(() => {
+            if (this.$refs['preview-movie']) {
+              if (!this.$refs['preview-movie'].isDrawing) {
+                this.$refs['preview-movie'].reloadAnnotations()
+              }
+            } else if (this.$refs['preview-picture']) {
+              if (!this.$refs['preview-picture'].isDrawing) {
+                this.$refs['preview-picture'].reset()
+              }
+            }
+          })
+        }
       }
     }
   },
@@ -1419,6 +1441,8 @@ video {
 
 .add-comment {
   margin-bottom: 1em;
+  padding: 1em;
+  box-shadow: 0px 0px 6px #E0E0E0;
 }
 
 .no-comment {
@@ -1426,6 +1450,11 @@ video {
   box-shadow: 0px 0px 6px #E0E0E0;
   padding: 1em;
   border-radius: 5px;
+}
+
+.comment {
+  box-shadow: 0px 0px 6px #E0E0E0;
+  margin-top: 0.3em;
 }
 
 .task-columns {
@@ -1438,9 +1467,6 @@ video {
   width: 50%;
   padding: 1em;
   overflow-y: auto;
-}
-
-.comments-column {
 }
 
 .preview-column-content {

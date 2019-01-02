@@ -10,9 +10,6 @@
           <th class="short-name">
             {{ $t('task_status.fields.short_name') }}
           </th>
-          <th class="is-reviewable">
-            {{ $t('task_status.fields.is_reviewable') }}
-          </th>
           <th class="is-done">
             {{ $t('task_status.fields.is_done') }}
           </th>
@@ -38,9 +35,6 @@
             {{ entry.name }}
           </td>
           <task-status-name class="short-name" :entry="entry" />
-          <td class="is-reviewable">
-            {{ translateBoolean(entry.is_reviewable) }}
-          </td>
           <td class="is-done">
             {{ translateBoolean(entry.is_done) }}
           </td>

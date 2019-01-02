@@ -6,8 +6,8 @@
     class="tag dynamic"
     v-if="!isStatic && !isCurrentUserClient"
     :style="{
-      background: this.backgroundColor,
-      color: this.color,
+      background: backgroundColor,
+      color: color
   }">
     {{ taskStatus.short_name }}
   </router-link>
@@ -15,14 +15,14 @@
   <span
     class="tag"
     :style="{
-      background: this.backgroundColor,
-      color: this.color,
+      background: backgroundColor,
+      color: color,
+      cursor: cursor
     }"
     v-else
   >
     {{ taskStatus.short_name }}
   </span>
-
   <span class="priority" v-if="isPriority && !isCurrentUserClient">
     {{ priority }}
   </span>
@@ -33,8 +33,8 @@
     class="tag dynamic"
     v-if="!isStatic && !isCurrentUserClient"
     :style="{
-      background: this.backgroundColor,
-      color: this.color,
+      background: backgroundColor,
+      color: color
   }">
      &nbsp;
   </router-link>
@@ -42,8 +42,9 @@
   <span
     class="tag"
     :style="{
-      background: this.backgroundColor,
-      color: this.color,
+      background: backgroundColor,
+      color: color,
+      cursor: cursor
     }"
     v-else
   >
@@ -55,6 +56,8 @@
 
 <script>
 import { mapGetters } from 'vuex'
+import colors from '../../lib/colors'
+
 export default {
   name: 'validation-tag',
   props: {
@@ -73,6 +76,10 @@ export default {
     minimized: {
       default: false,
       type: Boolean
+    },
+    pointer: {
+      default: false,
+      type: Boolean
     }
   },
 
@@ -88,6 +95,10 @@ export default {
       'isCurrentUserClient'
     ]),
 
+    cursor () {
+      return this.pointer ? 'pointer' : 'default'
+    },
+
     taskStatus () {
       if (this.task) {
         const taskStatusId = this.task.task_status_id
@@ -100,6 +111,8 @@ export default {
     backgroundColor () {
       if (this.taskStatus.short_name === 'todo' && this.isDarkTheme) {
         return '#5F626A'
+      } else if (this.isDarkTheme) {
+        return colors.darkenColor(this.taskStatus.color)
       } else {
         return this.taskStatus.color
       }
@@ -160,7 +173,6 @@ export default {
 <style scoped>
 .tag {
   text-transform: uppercase;
-  cursor: default;
 }
 
 .tag.dynamic:hover {

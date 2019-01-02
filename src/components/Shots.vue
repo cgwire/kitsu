@@ -1,142 +1,154 @@
 <template>
-  <div class="shots page fixed-page">
-    <div class="shot-list-header page-header">
-      <div class="level header-title">
-        <div class="level-left flexcolumn">
-          <div class="filters-area flexcolumn-item">
-            <search-field
-              ref="shot-search-field"
-              :can-save="true"
-              @change="onSearchChange"
-              placeholder="ex: e01 s01 anim=wip"
-              @save="saveSearchQuery"
+<div class="columns fixed-page">
+  <div class="column main-column">
+    <div class="shots page">
+      <div class="shot-list-header page-header">
+        <div class="level header-title">
+          <div class="level-left flexcolumn">
+            <div class="filters-area flexcolumn-item">
+              <search-field
+                ref="shot-search-field"
+                :can-save="true"
+                @change="onSearchChange"
+                @save="saveSearchQuery"
+                placeholder="ex: e01 s01 anim=wip"
+              />
+            </div>
+          </div>
+
+          <div class="level-right" v-if="isCurrentUserManager">
+            <show-assignations-button class="level-item"/>
+            <button-link
+              class="level-item"
+              :text="$t('main.csv.import_file')"
+              icon="upload"
+              :is-responsive="true"
+              :path="importPath"
+            />
+            <button-href-link
+              class="level-item"
+              :text="$t('main.csv.export_file')"
+              icon="download"
+              :is-responsive="true"
+              :path="'/api/export/csv/projects/' + currentProduction.id + '/shots.csv'"
+            />
+            <button-link
+              class="level-item"
+              :text="$t('shots.manage')"
+              icon="plus"
+              :is-responsive="true"
+              :path="manageShotsPath"
             />
           </div>
         </div>
 
-        <div class="level-right" v-if="isCurrentUserManager">
-          <show-assignations-button class="level-item"/>
-          <button-link
-            class="level-item"
-            :text="$t('main.csv.import_file')"
-            icon="upload"
-            :is-responsive="true"
-            :path="importPath"
-          />
-          <button-href-link
-            class="level-item"
-            :text="$t('main.csv.export_file')"
-            icon="download"
-            :is-responsive="true"
-            :path="'/api/export/csv/projects/' + currentProduction.id + '/shots.csv'"
-          />
-          <button-link
-            class="level-item"
-            :text="$t('shots.manage')"
-            icon="plus"
-            :is-responsive="true"
-            :path="manageShotsPath"
+        <div class="query-list">
+          <search-query-list
+            :queries="shotSearchQueries"
+            @changesearch="changeSearch"
+            @removesearch="removeSearchQuery"
+            v-if="!isShotsLoading && !initialLoading"
           />
         </div>
       </div>
 
-      <div class="query-list flexcolumn-item">
-        <search-query-list
-          :queries="shotSearchQueries"
-          @changesearch="changeSearch"
-          @removesearch="removeSearchQuery"
-          v-if="!isShotsLoading && !initialLoading"
-        />
-      </div>
-
+      <shot-list
+        ref="shot-list"
+        :entries="displayedShots"
+        :is-loading="isShotsLoading || initialLoading"
+        :is-error="isShotsLoadingError"
+        :validation-columns="shotValidationColumns"
+        @scroll="saveScrollPosition"
+        @delete-all-tasks="onDeleteAllTasksClicked"
+      />
     </div>
-
-    <shot-list
-      ref="shot-list"
-      :entries="displayedShots"
-      :is-loading="isShotsLoading || initialLoading"
-      :is-error="isShotsLoadingError"
-      :validation-columns="shotValidationColumns"
-      @scroll="saveScrollPosition"
-      @delete-all-tasks="onDeleteAllTasksClicked"
-    />
-
-    <manage-shots-modal
-      :active="modals.isManageDisplayed"
-      :is-loading="loading.manage"
-      :is-error="false"
-      :is-success="false"
-      :cancel-route="shotsPath"
-    />
-
-    <edit-shot-modal
-      :active="modals.isNewDisplayed"
-      :is-loading="loading.edit"
-      :is-loading-stay="loading.stay"
-      :is-error="editShot.isCreateError"
-      :is-success="editShot.isSuccess"
-      :cancel-route="shotsPath"
-      :shot-to-edit="shotToEdit"
-      @confirm="confirmEditShot"
-      @confirmAndStay="confirmNewShotStay"
-    />
-
-    <delete-modal
-      :active="modals.isDeleteDisplayed"
-      :is-loading="deleteShot.isLoading"
-      :is-error="deleteShot.isError"
-      :cancel-route="shotsPath"
-      :text="deleteText()"
-      :error-text="$t('shots.delete_error')"
-      @confirm="confirmDeleteShot"
-    />
-
-    <delete-modal
-      :active="modals.isRestoreDisplayed"
-      :is-loading="restoreShot.isLoading"
-      :is-error="restoreShot.isError"
-      :cancel-route="shotsPath"
-      :text="restoreText()"
-      :error-text="$t('shots.restore_error')"
-      @confirm="confirmRestoreShot"
-    />
-
-    <hard-delete-modal
-      :active="modals.isDeleteAllTasksDisplayed"
-      :is-loading="loading.deleteAllTasks"
-      :is-error="errors.deleteAllTasks"
-      :cancel-route="shotsPath"
-      :text="deleteAllTasksText()"
-      :error-text="$t('tasks.delete_all_error')"
-      :lock-text="deleteAllTasksLockText"
-      @confirm="confirmDeleteAllTasks"
-    />
-
-    <import-modal
-      :active="modals.isImportDisplayed"
-      :is-loading="loading.importing"
-      :is-error="errors.importing"
-      :cancel-route="shotsPath"
-      :form-data="shotsCsvFormData"
-      :columns="columns"
-      @fileselected="selectFile"
-      @confirm="uploadImportFile"
-    />
-
-    <create-tasks-modal
-      :active="modals.isCreateTasksDisplayed"
-      :is-loading="loading.creatingTasks"
-      :is-loading-stay="loading.creatingTasksStay"
-      :is-error="errors.creatingTasks"
-      :cancel-route="shotsPath"
-      :title="$t('tasks.create_tasks_shot')"
-      :text="$t('tasks.create_tasks_shot_explaination')"
-      :error-text="$t('tasks.create_tasks_shot_failed')"
-      @confirm="confirmCreateTasks"
-      @confirm-and-stay="confirmCreateTasksAndStay"
-    />
-
   </div>
+
+  <div
+    class="column side-column"
+    v-if="nbSelectedTasks === 1"
+  >
+    <task-info
+      :task="Object.values(selectedTasks)[0]"
+    />
+  </div>
+
+  <manage-shots-modal
+    :active="modals.isManageDisplayed"
+    :is-loading="loading.manage"
+    :is-error="false"
+    :is-success="false"
+    :cancel-route="shotsPath"
+  />
+
+  <edit-shot-modal
+    :active="modals.isNewDisplayed"
+    :is-loading="loading.edit"
+    :is-loading-stay="loading.stay"
+    :is-error="editShot.isCreateError"
+    :is-success="editShot.isSuccess"
+    :cancel-route="shotsPath"
+    :shot-to-edit="shotToEdit"
+    @confirm="confirmEditShot"
+    @confirmAndStay="confirmNewShotStay"
+  />
+
+  <delete-modal
+    :active="modals.isDeleteDisplayed"
+    :is-loading="deleteShot.isLoading"
+    :is-error="deleteShot.isError"
+    :cancel-route="shotsPath"
+    :text="deleteText()"
+    :error-text="$t('shots.delete_error')"
+    @confirm="confirmDeleteShot"
+  />
+
+  <delete-modal
+    :active="modals.isRestoreDisplayed"
+    :is-loading="restoreShot.isLoading"
+    :is-error="restoreShot.isError"
+    :cancel-route="shotsPath"
+    :text="restoreText()"
+    :error-text="$t('shots.restore_error')"
+    @confirm="confirmRestoreShot"
+  />
+
+  <hard-delete-modal
+    :active="modals.isDeleteAllTasksDisplayed"
+    :is-loading="loading.deleteAllTasks"
+    :is-error="errors.deleteAllTasks"
+    :cancel-route="shotsPath"
+    :text="deleteAllTasksText()"
+    :error-text="$t('tasks.delete_all_error')"
+    :lock-text="deleteAllTasksLockText"
+    @confirm="confirmDeleteAllTasks"
+  />
+
+  <import-modal
+    :active="modals.isImportDisplayed"
+    :is-loading="loading.importing"
+    :is-error="errors.importing"
+    :cancel-route="shotsPath"
+    :form-data="shotsCsvFormData"
+    :columns="columns"
+    @fileselected="selectFile"
+    @confirm="uploadImportFile"
+  />
+
+  <create-tasks-modal
+    :active="modals.isCreateTasksDisplayed"
+    :is-loading="loading.creatingTasks"
+    :is-loading-stay="loading.creatingTasksStay"
+    :is-error="errors.creatingTasks"
+    :cancel-route="shotsPath"
+    :title="$t('tasks.create_tasks_shot')"
+    :text="$t('tasks.create_tasks_shot_explaination')"
+    :error-text="$t('tasks.create_tasks_shot_failed')"
+    @confirm="confirmCreateTasks"
+    @confirm-and-stay="confirmCreateTasksAndStay"
+  />
+
+</div>
 </template>
 
 <script>
@@ -157,6 +169,7 @@ import SearchField from './widgets/SearchField'
 import SearchQueryList from './widgets/SearchQueryList'
 import ShowAssignationsButton from './widgets/ShowAssignationsButton'
 import ShotList from './lists/ShotList.vue'
+import TaskInfo from './sides/TaskInfo.vue'
 
 export default {
   name: 'shots',
@@ -176,7 +189,8 @@ export default {
     SearchIcon,
     SearchQueryList,
     ShowAssignationsButton,
-    ShotList
+    ShotList,
+    TaskInfo
   },
 
   data () {
@@ -232,9 +246,11 @@ export default {
       'isShotsLoadingError',
       'isShowAssignations',
       'isTVShow',
+      'nbSelectedTasks',
       'openProductions',
       'restoreShot',
       'sequences',
+      'selectedTasks',
       'shotMap',
       'shotsCsvFormData',
       'shotSearchQueries',
@@ -673,4 +689,25 @@ export default {
 .flexcolumn {
   align-items: flex-start;
 }
+
+.shots {
+  display: flex;
+  flex-direction: column;
+}
+
+.columns {
+  display: flex;
+  flex-direction: row;
+  padding: 0;
+}
+
+.column {
+  overflow-y: auto;
+  padding: 0;
+}
+
+.main-column {
+  border-right: 3px solid #CCC;
+}
+
 </style>

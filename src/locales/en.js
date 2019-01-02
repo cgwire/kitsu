@@ -49,13 +49,16 @@ export default {
 
   comments: {
     add_comment: 'Add a comment...',
+    add_preview: 'Attach preview',
     change_preview: 'Change preview',
     empty_text: 'This comment is empty',
     edit_title: 'Edit comment',
-    post_status: 'Post status',
+    no_file_attached: 'No file attached',
+    post_status: 'Post comment',
     retake: 'Retake',
     validated: 'Validated!',
     validation_required: 'Validation Required',
+    with_status: 'with status',
     fields: {
       text: 'text'
     }
@@ -132,6 +135,7 @@ export default {
     confirmation_and_stay: 'Confirm and stay',
     dark_theme: 'Dark Theme',
     empty_comment: 'Empty comment',
+    history: 'history',
     info: 'Information',
     or: 'or',
     no: 'no',
@@ -186,6 +190,7 @@ export default {
     delete_text: 'Are you sure you want to remove {personName} from your database?',
     edit_title: 'Edit person',
     new_person: 'Add a new employee',
+    no_task_assigned: 'There is no running tasks assigned to you.',
     persons: 'person | persons',
     running_tasks: 'Running tasks',
     select_person: 'Select a person...',

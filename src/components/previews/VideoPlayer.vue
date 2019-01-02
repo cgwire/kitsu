@@ -77,12 +77,16 @@
             active: isRepeating
           }"
           @click="onRepeatClicked"
+          v-if="!light"
         >
           <repeat-icon class="icon smaller" />
         </button>
 
         <span class="flexrow-item time-indicator">
-          {{ currentTime }} / {{ maxDuration }}
+          {{ currentTime }}
+        </span>
+        <span class="flexrow-item time-indicator" v-if="!light">
+          / {{ maxDuration }}
         </span>
 
         <button
@@ -120,22 +124,6 @@
           v-if="isFullScreenEnabled"
         >
           <x-icon class="icon" />
-        </button>
-
-        <button
-          class="button flexrow-item"
-          @click="onRectAnnotateClicked"
-          v-if="isFullScreenEnabled"
-        >
-          <square-icon class="icon" />
-        </button>
-
-        <button
-          class="button flexrow-item"
-          @click="onCircleAnnotateClicked"
-          v-if="isFullScreenEnabled"
-        >
-          <circle-icon class="icon" />
         </button>
 
         <button
@@ -218,6 +206,10 @@ export default {
     taskTypeMap: {
       type: Object,
       default: () => {}
+    },
+    light: {
+      type: Boolean,
+      default: false
     }
   },
 
@@ -381,7 +373,7 @@ export default {
       if (this.isFullScreen()) {
         return screen.height
       } else {
-        return screen.width > 1300 ? 500 : 300
+        return screen.width > 1300 && !this.light ? 500 : 200
       }
     },
 
@@ -832,8 +824,26 @@ export default {
     saveAnnotations () {
       const currentTime = this.video.currentTime
       const annotation = this.getAnnotation(currentTime)
+
+      this.fabricCanvas.getObjects().forEach((obj) => {
+        if (obj.type === 'path') {
+          if (!obj.canvasWidth) obj.canvasWidth = this.fabricCanvas.width
+          obj.setControlsVisibility({
+            mt: false,
+            mb: false,
+            ml: false,
+            mr: false,
+            bl: false,
+            br: false,
+            tl: false,
+            tr: false,
+            mtr: false
+          })
+        }
+      })
+
       if (annotation) {
-        annotation.drawing = this.fabricCanvas.toJSON()
+        annotation.drawing = this.fabricCanvas.toJSON(['canvasWidth'])
         annotation.width = this.fabricCanvas.width
         if (annotation.drawing && annotation.drawing.objects.length === 1) {
           const index = this.annotations.findIndex(
@@ -845,7 +855,7 @@ export default {
         this.annotations.push({
           time: currentTime,
           width: this.fabricCanvas.width,
-          drawing: this.fabricCanvas.toJSON()
+          drawing: this.fabricCanvas.toJSON(['canvasWidth'])
         })
         this.annotations = this.annotations.sort((a, b) => {
           return a.time < b.time
@@ -901,12 +911,29 @@ export default {
           this.fabricCanvas.add(circle)
           circle.set({strokeWidth: 2})
         } else if (obj.type === 'path') {
+          let strokeMultiplier = 1
+          if (obj.canvasWidth) {
+            strokeMultiplier = obj.canvasWidth / this.fabricCanvas.width
+          }
           const path = new fabric.Path(
             obj.path,
             {
-              ...base
+              ...base,
+              strokeWidth: 3 * strokeMultiplier,
+              canvasWidth: obj.canvasWidth
             }
           )
+          path.setControlsVisibility({
+            mt: false,
+            mb: false,
+            ml: false,
+            mr: false,
+            bl: false,
+            br: false,
+            tl: false,
+            tr: false,
+            mtr: false
+          })
           this.fabricCanvas.add(path)
         }
       })
@@ -915,6 +942,7 @@ export default {
     },
 
     reloadAnnotations () {
+      this.annotations = []
       if (this.preview.annotations) {
         const annotations = []
         this.preview.annotations.forEach(a => annotations.push({...a}))

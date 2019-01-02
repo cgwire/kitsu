@@ -1,6 +1,6 @@
 <template>
   <article class="add-comment media">
-    <figure class="media-left">
+    <figure class="media-left" v-if="!light">
       <div class="level">
         <div class="level-left">
           <people-avatar class="level-item" :person="user" />
@@ -8,46 +8,63 @@
       </div>
     </figure>
     <div class="media-content">
-      <p class="control">
-        <textarea
-          class="textarea"
-          :placeholder="$t('comments.add_comment')"
-          @keyup.enter.ctrl="runAddComment(text, task_status_id)"
-          :disabled="isAddCommentLoading"
-          v-model="text"
-          ref="commentTextarea"
-          v-focus>
-        </textarea>
-        <span class="select">
-          <select
-            ref="statusSelect"
-            @change="updateValue"
-          >
-            <option
-              v-for="(option, i) in taskStatusOptions"
-              :key="i + '-' + option.label"
-              :value="option.value"
-              :selected="option.value === task_status_id"
-            >
-              {{ option.label }}
-            </option>
-          </select>
-        </span>
+      <textarea
+        ref="commentTextarea"
+        class="textarea flexrow-item"
+        :placeholder="$t('comments.add_comment')"
+        :disabled="isLoading"
+        v-model="text"
+        @keyup.enter.ctrl="runAddComment(text, task_status_id)"
+        v-focus>
+      </textarea>
+      <div class="flexrow">
         <button
-          v-bind:class="{
+          :class="{
+            'flexrow-item': true,
             'button': true,
-            'is-loading': isAddCommentLoading
+            'is-loading': isLoading
           }"
           @click="runAddComment(text, task_status_id)"
         >
           {{ $t('comments.post_status') }}
         </button>
-      </p>
+        <span class="flexrow-item">
+          {{ $t('comments.with_status') }}
+        </span>
+        <combobox
+          :options="taskStatusOptions"
+          :is-simple="true"
+          v-model="task_status_id"
+        />
+      </div>
+      <div class="flexrow">
+        <button
+          class="button flexrow-item"
+          @click="$emit('add-preview')"
+        >
+          {{ $t('comments.add_preview') }}
+        </button>
+        <span
+          class="attachment-file flexrow-item"
+        >
+          <em
+            v-if="!isFileAttached"
+          >
+            {{ $t('comments.no_file_attached') }}
+          </em>
+          <em
+            v-if="isFileAttached"
+          >
+            {{ attachedFileName }}
+          </em>
+        </span>
+      </div>
     </div>
   </article>
 </template>
 
 <script>
+import Combobox from './Combobox.vue'
 import PeopleAvatar from './PeopleAvatar.vue'
 
 export default {
@@ -58,38 +75,70 @@ export default {
       task_status_id: this.task.task_status_id
     }
   },
+
   components: {
+    Combobox,
     PeopleAvatar
   },
+
   props: {
-    user: {
-      type: Object,
-      default: () => {}
-    },
     addComment: {
       type: Function,
       default: null
     },
-    isAddCommentLoading: {
+    isLoading: {
       type: Boolean,
       default: null
+    },
+    light: {
+      type: Boolean,
+      default: false
+    },
+    task: {
+      type: Object,
+      default: () => []
     },
     taskStatusOptions: {
       type: Array,
       default: () => []
     },
-    task: {
+    user: {
       type: Object,
-      default: () => []
+      default: () => {}
+    },
+    attachedFileName: {
+      type: String,
+      default: ''
     }
   },
+
+  computed: {
+    isFileAttached () {
+      return (
+        this.attachedFileName !== undefined &&
+        this.attachedFileName.length > 0
+      )
+    }
+  },
+
   methods: {
     runAddComment (text, taskStatusId) {
-      this.addComment(text, taskStatusId)
+      this.$emit('add-comment', text, taskStatusId)
       this.text = ''
     },
+
     updateValue (value) {
       this.task_status_id = this.$refs.statusSelect.value
+    },
+
+    focus () {
+      this.$refs.commentTextarea.focus()
+    }
+  },
+
+  watch: {
+    task () {
+      this.task_status_id = this.task.task_status_id
     }
   }
 }
@@ -98,8 +147,6 @@ export default {
 <style scoped>
 .add-comment {
   border-radius: 5px;
-  padding: 1em;
-  box-shadow: 0px 0px 6px #E0E0E0;
   background: white;
 }
 
@@ -111,5 +158,9 @@ export default {
 .add-comment textarea:focus,
 .add-comment textarea:active {
   border-color: #00B242;
+}
+
+.control {
+  margin-bottom: 0.1em;
 }
 </style>
