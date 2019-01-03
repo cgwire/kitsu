@@ -1,48 +1,27 @@
 <template>
   <div class="page fixed-page">
     <div class="page-header">
-      <div class="flexrow navigation-buttons">
-        <router-link
-          :to="previousEntity"
-          class="flexrow-item arrow"
-          :title="$t('tasks.previous')"
-          v-if="previousEntity"
-        >
-          &larr;
-        </router-link>
-
-        <router-link
-          :to="entityPage"
-          class="flexrow-item has-text-centered"
-        >
-          {{ $t('tasks.back_to_list')}}
-        </router-link>
-
-        <router-link
-          :to="nextEntity"
-          class="next-link flexrow-item arrow"
-          :title="$t('tasks.next')"
-          v-if="nextEntity"
-        >
-          &rarr;
-        </router-link>
-      </div>
-
       <div
         class="flexrow header-title"
         v-if="currentTask"
       >
+        <router-link
+          :to="entityPage"
+          class="flexrow-item has-text-centered back-link"
+        >
+          <chevron-left-icon />
+        </router-link>
+        <div class="title flexrow-item">
+          <router-link :to="taskEntityPath">
+            {{ currentTask ? title : 'Loading...'}}
+          </router-link>
+        </div>
         <task-type-name
           class="flexrow-item task-type"
           :task-type="currentTaskType"
           :production-id="currentProduction.id"
           v-if="currentTaskType"
         />
-        <div class="title flexrow-item">
-          <router-link :to="taskEntityPath">
-            {{ currentTask ? title : 'Loading...'}}
-          </router-link>
-        </div>
         <subscribe-button
           class="flexrow-item action-button"
           :subscribed="isAssigned || isSubscribed"
@@ -1389,7 +1368,7 @@ h2.subtitle {
 }
 
 .page-header {
-  padding: 0 1em 1em 1em;
+  padding: 1em;
   margin-top: 1em;
   background: white;
   box-shadow: 0px 0px 6px #E0E0E0;
@@ -1528,6 +1507,10 @@ video {
 
 .set-main-preview {
   height: 30px;
+}
+
+.back-link {
+  padding-top: 6px;
 }
 
 @media screen and (max-width: 768px) {

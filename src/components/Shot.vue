@@ -1,27 +1,21 @@
 <template>
-<div class="page">
+<div class="page shot">
 
-  <div class="page-header">
+  <div class="page-header flexrow">
     <router-link
+      class="flexrow-item has-text-centered back-link"
       :to="shotsPath"
-      class="flexrow-item has-text-centered"
     >
-      {{ $t('tasks.back_to_list')}}
+      <chevron-left-icon />
     </router-link>
-
-    <div class="flexrow">
-      <div class="flexrow-item">
-        <entity-thumbnail
-          class="shot-thumbnail"
-          :entity="currentShot"
-          :empty-width="100"
-          :empty-height="66.66"
-          v-if="currentShot"
-        />
-      </div>
-      <div class="flexrow-item">
-        <page-title class="entity-title" :text="title" />
-     </div>
+    <entity-thumbnail
+      class="shot-thumbnail flexrow-item"
+      :entity="currentShot"
+      :with-link="false"
+      v-if="currentShot"
+    />
+    <div class="flexrow-item">
+      <page-title :text="title" class="entity-title" />
     </div>
   </div>
 
@@ -130,6 +124,7 @@
 
 <script>
 import { mapGetters, mapActions } from 'vuex'
+import { ChevronLeftIcon } from 'vue-feather-icons'
 
 import DescriptionCell from './cells/DescriptionCell'
 import PageTitle from './widgets/PageTitle'
@@ -141,6 +136,7 @@ import TableInfo from './widgets/TableInfo'
 export default {
   name: 'shot',
   components: {
+    ChevronLeftIcon,
     DescriptionCell,
     EntityThumbnail,
     EntityTaskList,
@@ -364,6 +360,19 @@ h2.subtitle {
 .field-label {
   font-weight: bold;
   width: 140px;
+}
+
+.page-header {
+  align-items: center;
+}
+
+.page-header .thumbnail-picture {
+  margin: 0 1em 0 0;
+  max-width: 80px;
+}
+
+.back-link {
+  padding-top: 3px;
 }
 
 @media screen and (max-width: 768px) {

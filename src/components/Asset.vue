@@ -1,28 +1,20 @@
 <template>
-<div class="page">
-  <div class="page-header">
-    <div class="flexrow navigation-buttons">
-      <router-link
-        :to="assetsPath"
-        class="flexrow-item has-text-centered"
-      >
-        {{ $t('tasks.back_to_list')}}
-      </router-link>
-    </div>
-
-    <div class="flexrow">
-      <div class="flexrow-item">
-        <entity-thumbnail
-          class="asset-thumbnail"
-          :entity="currentAsset"
-          :empty-width="100"
-          :empty-height="66.6"
-          v-if="currentAsset"
-        />
-      </div>
-      <div class="flexrow-item">
-        <page-title :text="title" class="entity-title" />
-      </div>
+<div class="page asset">
+  <div class="page-header flexrow">
+    <router-link
+      class="flexrow-item has-text-centered back-link"
+      :to="assetsPath"
+    >
+      <chevron-left-icon />
+    </router-link>
+    <entity-thumbnail
+      class="asset-thumbnail flexrow-item"
+      :entity="currentAsset"
+      :with-link="false"
+      v-if="currentAsset"
+    />
+    <div class="flexrow-item">
+      <page-title :text="title" class="entity-title" />
     </div>
   </div>
 
@@ -110,16 +102,18 @@
 <script>
 import { mapGetters, mapActions } from 'vuex'
 
+import { ChevronLeftIcon } from 'vue-feather-icons'
 import DescriptionCell from './cells/DescriptionCell'
+import EntityTaskList from './lists/EntityTaskList'
+import EntityThumbnail from './widgets/EntityThumbnail'
 import PageTitle from './widgets/PageTitle'
 import PageSubtitle from './widgets/PageSubtitle'
-import EntityThumbnail from './widgets/EntityThumbnail'
 import TableInfo from './widgets/TableInfo'
-import EntityTaskList from './lists/EntityTaskList'
 
 export default {
   name: 'asset',
   components: {
+    ChevronLeftIcon,
     DescriptionCell,
     EntityThumbnail,
     EntityTaskList,
@@ -296,10 +290,6 @@ h2.subtitle {
   box-shadow: 0px 0px 6px #E0E0E0;
 }
 
-.asset-thumbnail {
-  max-width: 100px;
-}
-
 .thumbnail-picture {
   margin-bottom: 0.5em;
 }
@@ -337,6 +327,19 @@ h2.subtitle {
 .field-label {
   font-weight: bold;
   width: 120px;
+}
+
+.page-header {
+  align-items: center;
+}
+
+.page-header .thumbnail-picture {
+  margin: 0 1em 0 0;
+  max-width: 80px;
+}
+
+.back-link {
+  padding-top: 3px;
 }
 
 @media screen and (max-width: 768px) {
