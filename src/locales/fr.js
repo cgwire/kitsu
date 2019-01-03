@@ -211,7 +211,7 @@ export default {
     delete_preview: 'Êtes vous sûr de vouloir supprimer ce commentaire ?',
     delete_preview_error: 'Une erreur est survenue en supprimant la preview.',
     done: 'Terminées',
-    download_pdf_file: 'Télécharger le fichier',
+    download_pdf_file: 'Télécharger le fichier .{extension}',
     feedback: 'retours',
     full_screen: 'Afficher en plein écran',
     hide_assignations: 'Cacher assignations',
@@ -439,9 +439,10 @@ export default {
   },
 
   notifications: {
-    title: 'Notifications',
-    commented_on: 'a commenté',
     and_change_status: 'et changé le statut à',
+    commented_on: 'a commenté',
+    no_notifications: 'Il n\'y a pas encore de notifications pour vous pour les projets en cours',
+    title: 'Notifications',
     with_preview: 'avec une version'
   },
 

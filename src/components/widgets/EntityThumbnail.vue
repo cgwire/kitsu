@@ -119,12 +119,6 @@ export default {
   border-color: #36393F;
 }
 
-.thumbnail-picture {
-  margin-left: 0.3em;
-  margin-top: 7px;
-  border: 1px solid #CCC;
-}
-
 span.thumbnail-empty {
   background: #F3F3F3;
   display: block;

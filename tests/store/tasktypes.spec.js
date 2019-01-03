@@ -93,13 +93,9 @@ describe('taskTypes', () => {
     it('loadTaskTypes', (done) => {
       helpers.runAction('loadTaskTypes', (err) => {
         expect(err).to.be.null
-        expect(state.isTaskTypesLoading).to.equal(false)
-        expect(state.isTaskTypesLoadingError).to.equal(false)
         expect(state.taskTypes).to.deep.equal(taskTypes)
         done()
       })
-      expect(state.isTaskTypesLoading).to.equal(true)
-      expect(state.isTaskTypesLoadingError).to.equal(false)
     })
 
     it('newTaskType', (done) => {
@@ -161,21 +157,15 @@ describe('taskTypes', () => {
   describe('mutations', () => {
     it('LOAD_TASK_TYPES_START', () => {
       store.commit(LOAD_TASK_TYPES_START)
-      expect(state.isTaskTypesLoading).to.equal(true)
-      expect(state.isTaskTypesLoadingError).to.equal(false)
     })
 
     it('LOAD_TASK_TYPES_ERROR', () => {
       store.commit(LOAD_TASK_TYPES_ERROR)
-      expect(state.isTaskTypesLoading).to.equal(false)
-      expect(state.isTaskTypesLoadingError).to.equal(true)
       expect(state.taskTypes).to.deep.equal([])
     })
 
     it('LOAD_TASK_TYPES_END', () => {
       store.commit(LOAD_TASK_TYPES_END, taskTypes)
-      expect(state.isTaskTypesLoading).to.equal(false)
-      expect(state.isTaskTypesLoadingError).to.equal(false)
       expect(state.taskTypes).to.deep.equal(taskTypes)
       expect(state.taskTypes[0].name).to.equal('Animation')
       expect(state.taskTypes[1].name).to.equal('Modeling')

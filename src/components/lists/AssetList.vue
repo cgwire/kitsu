@@ -107,7 +107,7 @@
     v-if="!isLoading"
   >
     <table
-      class="table splitted-table"
+      class="table splitted-table unselectable"
       v-if="isListVisible"
     >
       <tbody

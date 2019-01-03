@@ -179,6 +179,7 @@ export default {
   notifications: {
     and_change_status: 'and changed status to',
     commented_on: 'commented on',
+    no_notifications: 'There is currently no notification for you for your current projects.',
     title: 'Notifications',
     with_preview: 'with a preview'
   },
@@ -190,7 +191,7 @@ export default {
     delete_text: 'Are you sure you want to remove {personName} from your database?',
     edit_title: 'Edit person',
     new_person: 'Add a new employee',
-    no_task_assigned: 'There is no running tasks assigned to you.',
+    no_task_assigned: 'There is no assigned running tasks.',
     persons: 'person | persons',
     running_tasks: 'Running tasks',
     select_person: 'Select a person...',
@@ -428,7 +429,7 @@ export default {
     delete_preview_error: 'An error occured while deleting preview.',
     edit_comment: 'Edit comment',
     done: 'Done',
-    download_pdf_file: 'Download file',
+    download_pdf_file: 'Download .{extension} file',
     feedback: 'feedback',
     full_screen: 'Display in full screen',
     hide_assignations: 'Hide assignations',
