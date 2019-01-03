@@ -215,3 +215,25 @@ export const getTaskEntityPath = (task, episodeId) => {
     }
   }
 }
+
+export const getEntityPath = (entityId, productionId, section, episodeId) => {
+  let route = {
+    name: section,
+    params: {
+      production_id: productionId
+    }
+  }
+
+  if (episodeId) {
+    route.name = `episode-${section}`
+    route.params.episode_id = episodeId
+  }
+
+  if (section === 'shot') {
+    route.params.shot_id = entityId
+  } else if (section === 'asset') {
+    route.params.asset_id = entityId
+  }
+
+  return route
+}

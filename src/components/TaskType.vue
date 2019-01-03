@@ -1,148 +1,141 @@
 <template>
-  <div class="page">
-    <div
-      v-if="this.currentTaskType.for_shots"
-    >
-      <router-link :to="shotsPath">
-        {{ $t('tasks.back_to_list') }}
-      </router-link>
-    </div>
-    <div
-      v-else
-    >
-      <router-link :to="assetsPath">
-        {{ $t('tasks.back_to_list') }}
-      </router-link>
-    </div>
+<div class="columns fixed-page">
+  <div class="column main-column">
+    <div class="task-type page">
 
-    <h1 class="subtitle flexrow">
-      <task-type-name
-        class="flexrow-item"
-        :task-type="currentTaskType"
+      <div class="header flexrow">
+        <router-link
+          class="back-link flexrow-item"
+          :to="shotsPath"
+          v-if="this.currentTaskType.for_shots"
+        >
+          <chevron-left-icon />
+        </router-link>
+        <router-link
+          class="back-link flexrow-item"
+          :to="assetsPath"
+          v-else
+        >
+          <chevron-left-icon />
+        </router-link>
+        <task-type-name
+          class=""
+          :task-type="currentTaskType"
+        />
+      </div>
+
+      <table-info
+        :is-loading="loading.entities"
+        :is-error="errors.entities"
       />
-    </h1>
 
-    <table-info
-      :is-loading="loading.entities"
-      :is-error="errors.entities"
-    />
-
-    <div
-      v-if="!this.currentTaskType.for_shots"
-    >
       <div
-        class="supervisor-type-assets"
-        :key="typeAssets.length > 0 ? typeAssets[0].asset_type_name : ''"
-        v-if="Object.keys(assetMap).length > 0"
-        v-for="typeAssets in assetsByType"
+        v-if="!this.currentTaskType.for_shots"
       >
-        <div class="supervisor-asset-type">
-          {{ typeAssets.length > 0 ? typeAssets[0].asset_type_name : '' }}
-        </div>
-        <div class="supervisor-asset-list">
-          <div
-            class="supervisor-asset"
-            :key="asset.id"
-            v-for="asset in typeAssets"
-          >
-            <router-link
-              class="asset-block"
-              :to="getPath(asset.id, 'asset')"
-            >
-              <entity-thumbnail
-                :entity="asset"
-                :square="true"
-                :empty-width="60"
-                :empty-height="60"
-              />
-              <span class="asset-name">
-                {{ asset.name }}
-              </span>
-            </router-link>
-            <validation-tag
-              :task="taskMap[asset.validations[currentTaskType.id]]"
-              v-if="asset.validations[currentTaskType.id] && taskMap[asset.validations[currentTaskType.id]]"
+        <div
+          :key="getAssetTypeName(typeAssets)"
+          class="supervisor-type-assets"
+          v-if="isAssets"
+          v-for="typeAssets in assetsByType"
+        >
+          <div class="supervisor-asset-type">
+            {{ getAssetTypeName(typeAssets) }}
+          </div>
+          <div class="supervisor-asset-list">
+            <task-type-entity-block
+              :key="asset.id"
+              :ref="asset.id"
+              :entity="asset"
+              :task-type="currentTaskType"
+              entity-type="asset"
+              :selected="selection[asset.id]"
+              @select="onSelect"
+              @unselect="onUnselect"
+              v-for="asset in typeAssets"
             />
           </div>
         </div>
       </div>
-    </div>
 
-    <div
-      v-else
-    >
       <div
-        class="supervisor-sequences"
-        :key="sequenceShots.length > 0 ? sequenceShots[0].id : ''"
-        v-for="sequenceShots in shotsByEpisode"
-        v-if="Object.keys(shotMap).length > 0"
+        v-else
       >
-        <div class="supervisor-sequence flexrow">
-          <span class="flexrow-item">
-            {{ sequenceShots.length > 0 ? sequenceShots[0].episode_name + ' / ': '' }}
-            {{ sequenceShots.length > 0 ? sequenceShots[0].sequence_name : '' }}
-          </span>
-          <subscribe-button
-            class="flexrow-item"
-            :subscribed="isSubscribed(sequenceShots[0].sequence_id)"
-            @click="toggleSubscribe(sequenceShots[0].sequence_id)"
-            v-if="sequenceShots.length > 0"
-          />
-        </div>
-        <div class="supervisor-shot-list">
-          <div
-            class="supervisor-shot"
-            :key="shot.id"
-            v-for="shot in sequenceShots"
-          >
-            <router-link
-              class="shot-block"
-              :to="getPath(shot.id, 'shot')"
-            >
-              <entity-thumbnail
-                :entity="shot"
-                :square="true"
-                :empty-width="60"
-                :empty-height="60"
-              />
-              <span class="shot-name">
-                {{ shot.name }}
-              </span>
-            </router-link>
-            <validation-tag
-              :task="taskMap[shot.validations[currentTaskType.id]]"
-              v-if="shot.validations[currentTaskType.id]"
+        <div
+          class="supervisor-sequences"
+          :key="sequenceShots.length > 0 ? sequenceShots[0].id : ''"
+          v-for="sequenceShots in shotsByEpisode"
+          v-if="Object.keys(shotMap).length > 0"
+        >
+          <div class="supervisor-sequence flexrow">
+            <span class="flexrow-item">
+              {{ sequenceShots.length > 0 ? sequenceShots[0].episode_name + ' / ': '' }}
+              {{ sequenceShots.length > 0 ? sequenceShots[0].sequence_name : '' }}
+            </span>
+            <subscribe-button
+              class="flexrow-item"
+              :subscribed="isSubscribed(sequenceShots[0].sequence_id)"
+              @click="toggleSubscribe(sequenceShots[0].sequence_id)"
+              v-if="sequenceShots.length > 0"
+            />
+          </div>
+          <div class="supervisor-shot-list">
+            <task-type-entity-block
+              :ref="shot.id"
+              :key="shot.id"
+              :entity="shot"
+              :task-type="currentTaskType"
+              entity-type="shot"
+              v-for="shot in sequenceShots"
             />
           </div>
         </div>
       </div>
     </div>
   </div>
+
+  <div
+    class="column side-column"
+  >
+    <task-info
+      :task="currentTask"
+    />
+  </div>
+</div>
 </template>
 
 <script>
 import { mapGetters, mapActions } from 'vuex'
 
+import { ChevronLeftIcon } from 'vue-feather-icons'
 import EntityThumbnail from './widgets/EntityThumbnail'
 import PageTitle from './widgets/PageTitle'
+import TaskInfo from './sides/TaskInfo'
 import SubscribeButton from './widgets/SubscribeButton'
 import TableInfo from './widgets/TableInfo'
+import TaskTypeEntityBlock from './pages/tasktype/TaskTypeEntityBlock'
 import TaskTypeName from './widgets/TaskTypeName'
 import ValidationTag from './widgets/ValidationTag'
 
 export default {
   name: 'task-type-page',
   components: {
+    ChevronLeftIcon,
     EntityThumbnail,
     PageTitle,
     SubscribeButton,
     TableInfo,
+    TaskInfo,
+    TaskTypeEntityBlock,
     TaskTypeName,
     ValidationTag
   },
 
+  entityListCache: [],
+
   data () {
     return {
+      currentTask: null,
+      selection: {},
       loading: {
         entities: false
       },
@@ -152,34 +145,62 @@ export default {
     }
   },
 
+  created () {
+    if (!this.currentProduction) {
+      this.setProduction(this.$route.params.production_id)
+    }
+  },
+
+  mounted () {
+    setTimeout(() => {
+      this.initData(false)
+    }, 100)
+    this.selection = {}
+    window.addEventListener('keydown', this.onKeyDown, false)
+  },
+
+  beforeDestroy () {
+    window.removeEventListener('keydown', this.onKeyDown)
+  },
+
   computed: {
     ...mapGetters([
-      'assetMap',
       'assetsByType',
+      'assetMap',
       'assetsPath',
       'currentEpisode',
       'currentProduction',
-      'currentTaskType',
-      'displayedAssets',
       'isTVShow',
       'sequenceSubscriptions',
       'shotsByEpisode',
       'shotMap',
       'shotsPath',
-      'taskTypeMap',
       'taskMap'
     ]),
 
+    isAssets () {
+      return Object.keys(this.assetMap).length > 0
+    },
+
     title () {
-      return `${this.currentProduction.name} / ${this.currentTaskType.name}`
+      if (this.currentProduction) {
+        if (this.isTVShow && this.currentEpisode) {
+          return `${this.currentProduction.name} / ` +
+                 `${this.currentEpisode.name} / ` +
+                 `${this.currentTaskType.name}`
+        } else {
+          return `${this.currentProduction.name} / ${this.currentTaskType.name}`
+        }
+      } else {
+        return 'Loading...'
+      }
     }
   },
 
   methods: {
     ...mapActions([
       'initTaskType',
-      'loadShots',
-      'loadAssets',
+      'setProduction',
       'subscribeToSequence',
       'unsubscribeFromSequence'
     ]),
@@ -190,12 +211,21 @@ export default {
       this.initTaskType(force)
         .then(() => {
           this.loading.entities = false
+          if (this.assetsByType) {
+            this.$options.entityListCache = [].concat(...this.assetsByType)
+          } else {
+            this.$options.entityListCache = [].concat(...this.shotsByEpisode)
+          }
         })
         .catch((err) => {
           console.error(err)
           this.loading.entities = false
           this.errors.entities = true
         })
+    },
+
+    getAssetTypeName (typeAssets) {
+      return typeAssets.length > 0 ? typeAssets[0].asset_type_name : ''
     },
 
     isSubscribed (sequenceId) {
@@ -211,33 +241,59 @@ export default {
       }
     },
 
-    getPath (entityId, section) {
-      let route = {
-        name: section,
-        params: {
-          production_id: this.currentProduction.id
+    onSelect (selectionInfo) {
+      this.currentTask = selectionInfo.task
+      this.selection = {}
+      this.selection[selectionInfo.entity.id] = true
+    },
+
+    onUnselect (selectionInfo) {
+      this.currentTask = null
+      this.selection = {}
+    },
+
+    getCurrentIndex () {
+      let index = 0
+      const selectedEntities = Object.keys(this.selection)
+      if (selectedEntities.length > 0) {
+        const currentSelectionId = selectedEntities[0]
+        index = this.$options.entityListCache.findIndex(
+          (entity) => entity.id === currentSelectionId
+        )
+      }
+      return index
+    },
+
+    selectPreviousTask () {
+      let index = this.getCurrentIndex() - 1
+      if (Object.keys(this.selection).length > 0 && index < 0) {
+        index = this.$options.entityListCache.length - 1
+      }
+      const entity = this.$options.entityListCache[index]
+      this.$refs[entity.id][0].select()
+    },
+
+    selectNextTask () {
+      const maxLength = this.$options.entityListCache.length - 1
+      let index = this.getCurrentIndex() + 1
+      if (index > maxLength) index = 0
+      const entity = this.$options.entityListCache[index]
+      this.$refs[entity.id][0].select()
+    },
+
+    onKeyDown (event) {
+      if (event.ctrlKey) {
+        if (event.keyCode === 37) {
+          this.selectPreviousTask()
+        } else if (event.keyCode === 38) {
+          this.selectPreviousTask()
+        } else if (event.keyCode === 39) {
+          this.selectNextTask()
+        } else if (event.keyCode === 40) {
+          this.selectNextTask()
         }
       }
-
-      if (this.isTVShow && this.currentEpisode) {
-        route.name = `episode-${section}`
-        route.params.episode_id = this.currentEpisode.id
-      }
-
-      if (section === 'shot') {
-        route.params.shot_id = entityId
-      } else if (section === 'asset') {
-        route.params.asset_id = entityId
-      }
-
-      return route
     }
-  },
-
-  mounted () {
-    setTimeout(() => {
-      this.initData(false)
-    }, 100)
   },
 
   watch: {
@@ -285,21 +341,12 @@ export default {
   flex-wrap: wrap;
 }
 
-.supervisor-shot,
-.supervisor-asset {
-  text-align: center;
-  display: flex;
-  flex-direction: column;
-  max-width: 60px;
-  min-width: 60px;
-  margin-right: 2em;
-  font-size: 0.8em;
-  margin-bottom: 2em;
-  word-wrap: break-word;
+.header {
+  margin-top: 0.5em;
+  margin-bottom: 1.5em;
 }
 
-.shot-block,
-.asset-block {
-  flex: 1;
+.header .back-link {
+  padding-top: 5px;
 }
 </style>

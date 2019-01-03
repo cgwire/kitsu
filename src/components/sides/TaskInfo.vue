@@ -1,9 +1,8 @@
 <template>
-  <div class="side task-info">
+  <div class="side task-info" v-if="task">
     <div class="page-header">
       <div
         class="flexrow header-title"
-        v-if="task"
       >
         <div class="title flexrow-item">
           <router-link :to="taskEntityPath">
@@ -19,7 +18,6 @@
       </div>
       <div
         class="flexrow task-information"
-        v-if="task"
       >
         <span class="flexrow-item">{{ $t('tasks.current_status') }}</span>
         <validation-tag
@@ -53,16 +51,17 @@
             </div>
 
             <div
+              class="preview-standard-file"
               v-else-if="isStandardPreview"
             >
               <a
-                class="button mt2"
+                class="button"
                 ref="preview-file"
                 :href="currentPreviewPath"
               >
                 <download-icon class="icon" />
                 <span class="text">
-                  {{ $t('tasks.download_pdf_file') }}
+                  {{ $t('tasks.download_pdf_file', {extension}) }}
                 </span>
               </a>
             </div>
@@ -93,7 +92,7 @@
       </div>
 
       <div class="task-column comments-column">
-        <div v-if="task">
+        <div>
           <div>
             <add-comment
               ref="add-comment"
@@ -125,8 +124,8 @@
           </div>
         </div>
 
-        <div class="has-text-centered" v-else>
-          <img src="../../assets/spinner.svg" />
+        <div class="has-text-centered" v-if="loading.task">
+          <spinner />
         </div>
       </div>
     </div>
@@ -154,6 +153,9 @@
     />
 
   </div>
+  <div class="side task-info has-text-centered" v-else>
+    No task selected.
+  </div>
 </template>
 
 <script>
@@ -176,6 +178,7 @@ import Comment from '../widgets/Comment'
 import ModelViewer from '../widgets/ModelViewer'
 import PeopleName from '../widgets/PeopleName'
 import PictureViewer from '../previews/PictureViewer'
+import Spinner from '../widgets/Spinner'
 import TaskTypeName from '../widgets/TaskTypeName'
 import ValidationTag from '../widgets/ValidationTag'
 import VideoPlayer from '../previews/VideoPlayer'
@@ -193,6 +196,7 @@ export default {
     ModelViewer,
     PeopleName,
     PictureViewer,
+    Spinner,
     TaskTypeName,
     ValidationTag,
     VideoPlayer
@@ -369,21 +373,23 @@ export default {
     ]),
 
     loadTaskData () {
-      this.loading.task = true
-      this.errors.task = false
-      this.loadTaskComments({
-        taskId: this.task.id,
-        entityId: this.task.entity_id,
-        callback: (err) => {
-          this.loading.task = false
-          if (err) {
-            console.log(err)
-            this.errors.task = true
-          } else {
-            this.reset()
+      if (this.task) {
+        this.loading.task = true
+        this.errors.task = false
+        this.loadTaskComments({
+          taskId: this.task.id,
+          entityId: this.task.entity_id,
+          callback: (err) => {
+            this.loading.task = false
+            if (err) {
+              console.log(err)
+              this.errors.task = true
+            } else {
+              this.reset()
+            }
           }
-        }
-      })
+        })
+      }
     },
 
     reset () {
@@ -664,5 +670,10 @@ export default {
 
 .preview-colum-content {
   box-shadow: 0px 0px 6px #E0E0E0;
+}
+
+.preview-standard-file {
+  text-align: center;
+  padding: 1em;
 }
 </style>
