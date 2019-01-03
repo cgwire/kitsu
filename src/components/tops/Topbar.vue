@@ -127,9 +127,9 @@
 import { mapGetters, mapActions } from 'vuex'
 import { BellIcon } from 'vue-feather-icons'
 
-import Combobox from './widgets/Combobox'
-import PeopleAvatar from './widgets/PeopleAvatar'
-import PeopleName from './widgets/PeopleName'
+import Combobox from '../widgets/Combobox'
+import PeopleAvatar from '../widgets/PeopleAvatar'
+import PeopleName from '../widgets/PeopleName'
 
 export default {
   name: 'topbar',

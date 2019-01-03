@@ -2,7 +2,7 @@
   <div class="task-types page fixed-page">
     <div class="level page-header">
       <div class="level-left">
-        <page-title :text="$t('task_types.title')"></page-title>
+        <page-title :text="$t('task_types.title')" />
       </div>
       <div class="level-right">
         <div class="level-item">
@@ -11,16 +11,15 @@
             icon="plus"
             :text="$t('task_types.new_task_type')"
             path="/task-types/new"
-          >
-          </button-link>
+          />
         </div>
       </div>
     </div>
 
     <task-type-list
       :entries="taskTypes"
-      :is-loading="isTaskTypesLoading"
-      :is-error="isTaskTypesLoadingError"
+      :is-loading="loading.taskTypes"
+      :is-error="errors.taskTypes"
     />
 
     <edit-task-type-modal
@@ -47,11 +46,11 @@
 
 <script>
 import { mapGetters, mapActions } from 'vuex'
-import TaskTypeList from './lists/TaskTypeList'
-import EditTaskTypeModal from './modals/EditTaskTypeModal'
-import DeleteModal from './widgets/DeleteModal'
-import PageTitle from './widgets/PageTitle'
 import ButtonLink from './widgets/ButtonLink'
+import DeleteModal from './widgets/DeleteModal'
+import EditTaskTypeModal from './modals/EditTaskTypeModal'
+import PageTitle from './widgets/PageTitle'
+import TaskTypeList from './lists/TaskTypeList'
 
 export default {
   name: 'task-types',
@@ -66,6 +65,12 @@ export default {
 
   data () {
     return {
+      errors: {
+        taskTypes: false
+      },
+      loading: {
+        taskTypes: false
+      },
       modals: {
         isNewDisplayed: false,
         isDeleteDisplayed: false
@@ -80,15 +85,17 @@ export default {
       'editTaskType',
       'deleteTaskType',
       'getTaskType',
-      'isTaskTypesLoading',
-      'isTaskTypesLoadingError',
       'taskTypes'
     ])
   },
 
-  created () {
+  mounted () {
+    this.loading.taskTypes = true
+    this.errors.taskTypes = false
     this.loadTaskTypes((err) => {
       if (!err) this.handleModalsDisplay()
+      else this.errors.taskTypes = true
+      this.loading.taskTypes = false
     })
   },
 

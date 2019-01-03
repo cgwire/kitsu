@@ -289,7 +289,6 @@ body {
 }
 
 .dark .splitted-table tbody {
-  user-select: none;
   border-bottom: 1px solid #25282E;
 }
 
@@ -735,7 +734,6 @@ input.search-input:focus {
 }
 
 .splitted-table tbody {
-  user-select: none;
   border-bottom: 1px solid #CCC;
 }
 
@@ -787,6 +785,12 @@ input.search-input:focus {
   border-color: #666;
 }
 
+.thumbnail-picture {
+  margin-left: 0.3em;
+  margin-top: 7px;
+  border: 1px solid #CCC;
+}
+
 .modal-content .button {
   margin-left: 0.5em;
 }
@@ -803,6 +807,21 @@ input.search-input:focus {
 
 .unselectable {
   user-select: none;
+}
+
+.columns {
+  display: flex;
+  flex-direction: row;
+  padding: 0;
+}
+
+.column {
+  overflow-y: auto;
+  padding: 0;
+}
+
+.main-column {
+  border-right: 3px solid #CCC;
 }
 
 .playlist-column .video-player-box .video-js {
@@ -825,6 +844,11 @@ input.search-input:focus {
   background: white;
   margin-right: 10px;
   margin-bottom: 10px;
+}
+
+.empty-list {
+  margin-top: 2em;
+  font-size: 1.5em;
 }
 
 .tooltip {

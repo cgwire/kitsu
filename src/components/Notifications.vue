@@ -2,6 +2,18 @@
   <div class="page">
     <page-title :text="$t('notifications.title')" />
     <div
+      class="empty-list has-text-centered"
+      v-if="!loading.notifications && (!notifications || notifications.length === 0)"
+    >
+      {{ $t('notifications.no_notifications') }}
+    </div>
+    <div
+      class="has-text-centered"
+      v-if="loading.notifications"
+    >
+      <spinner />
+    </div>
+    <div
       :class="{
         flexrow: true,
         notification: true,
@@ -91,6 +103,7 @@ import moment from 'moment-timezone'
 import EntityThumbnail from './widgets/EntityThumbnail'
 import PageTitle from './widgets/PageTitle'
 import PeopleAvatar from './widgets/PeopleAvatar'
+import Spinner from './widgets/Spinner'
 import TaskTypeName from './widgets/TaskTypeName'
 import ValidationTag from './widgets/ValidationTag'
 
@@ -100,6 +113,7 @@ export default {
     EntityThumbnail,
     PageTitle,
     PeopleAvatar,
+    Spinner,
     TaskTypeName,
     ValidationTag
   },

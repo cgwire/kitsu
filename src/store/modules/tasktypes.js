@@ -24,8 +24,6 @@ import {
 const initialState = {
   taskTypes: [],
   taskTypeMap: {},
-  isTaskTypesLoading: false,
-  isTaskTypesLoadingError: false,
   sequenceSubscriptions: {},
 
   editTaskType: {
@@ -48,18 +46,11 @@ const getters = {
   taskTypeMap: state => state.taskTypeMap,
   sequenceSubscriptions: state => state.sequenceSubscriptions,
 
-  isTaskTypesLoading: state => state.isTaskTypesLoading,
-  isTaskTypesLoadingError: state => state.isTaskTypesLoadingError,
-
   editTaskType: state => state.editTaskType,
   deleteTaskType: state => state.deleteTaskType,
 
   currentTaskType: (state, getters, rootState) => {
     return state.taskTypeMap[rootState.route.params.task_type_id] || {}
-  },
-
-  getTaskType: (state, getters) => (id) => {
-    return state.taskTypeMap[id]
   },
 
   getTaskTypeOptions: state => state.taskTypes.map(
@@ -76,7 +67,11 @@ const getters = {
     .filter((taskType) => taskType.for_shots)
     .map(
       (type) => { return { label: type.name, value: type.id } }
-    )
+    ),
+
+  getTaskType: (state, getters) => (id) => {
+    return state.taskTypeMap[id]
+  }
 }
 
 const actions = {
@@ -93,11 +88,8 @@ const actions = {
   newTaskType ({ commit, state }, payload) {
     commit(EDIT_TASK_TYPE_START, payload.data)
     taskTypesApi.newTaskType(payload.data, (err, taskType) => {
-      if (err) {
-        commit(EDIT_TASK_TYPE_ERROR)
-      } else {
-        commit(EDIT_TASK_TYPE_END, taskType)
-      }
+      if (err) commit(EDIT_TASK_TYPE_ERROR)
+      else commit(EDIT_TASK_TYPE_END, taskType)
       if (payload.callback) payload.callback(err)
     })
   },
@@ -105,11 +97,8 @@ const actions = {
   editTaskType ({ commit, state }, payload) {
     commit(EDIT_TASK_TYPE_START)
     taskTypesApi.updateTaskType(payload.data, (err, taskType) => {
-      if (err) {
-        commit(EDIT_TASK_TYPE_ERROR)
-      } else {
-        commit(EDIT_TASK_TYPE_END, taskType)
-      }
+      if (err) commit(EDIT_TASK_TYPE_ERROR)
+      else commit(EDIT_TASK_TYPE_END, taskType)
       if (payload.callback) payload.callback(err)
     })
   },
@@ -118,11 +107,8 @@ const actions = {
     commit(DELETE_TASK_TYPE_START)
     const taskType = payload.taskType
     taskTypesApi.deleteTaskType(taskType, (err) => {
-      if (err) {
-        commit(DELETE_TASK_TYPE_ERROR)
-      } else {
-        commit(DELETE_TASK_TYPE_END, taskType)
-      }
+      if (err) commit(DELETE_TASK_TYPE_ERROR)
+      else commit(DELETE_TASK_TYPE_END, taskType)
       if (payload.callback) payload.callback(err)
     })
   },
@@ -176,22 +162,15 @@ const actions = {
 
 const mutations = {
   [LOAD_TASK_TYPES_START] (state) {
-    state.isTaskTypesLoading = true
-    state.isTaskTypesLoadingError = false
   },
 
   [LOAD_TASK_TYPES_ERROR] (state) {
-    state.isTaskTypesLoading = false
-    state.isTaskTypesLoadingError = true
     state.taskTypes = []
     state.taskTypeMap = {}
   },
 
   [LOAD_TASK_TYPES_END] (state, taskTypes) {
-    state.isTaskTypesLoading = false
-    state.isTaskTypesLoadingError = false
-    state.taskTypes = taskTypes
-    state.taskTypes = sortTaskTypes(state.taskTypes)
+    state.taskTypes = sortTaskTypes(taskTypes)
     state.taskTypeMap = {}
     taskTypes.forEach((taskType) => {
       state.taskTypeMap[taskType.id] = taskType

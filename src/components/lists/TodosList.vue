@@ -410,9 +410,4 @@ td.last-comment {
   width: 60px;
   padding: 0;
 }
-
-.empty-list {
-  margin-top: 2em;
-  font-size: 1.5em;
-}
 </style>

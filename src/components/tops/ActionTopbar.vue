@@ -8,7 +8,9 @@
 
         <div class="flexrow-item more-menu-icon" @click="toggleMenu">
           <div class="flexrow">
-            <span class="flexrow-item hide-small-screen">{{ currentMenuLabel }}</span>
+            <span class="flexrow-item hide-small-screen">
+              {{ currentMenuLabel }}
+            </span>
             <chevron-down-icon class="flexrow-item" />
           </div>
         </div>
@@ -176,7 +178,7 @@
               >
                 <input type="hidden" id="personid" name="personid" :value="user.id">
                 <input type="hidden" id="personemail" name="personemail" :value="user.email">
-                <input type="hidden" id="projectid" name="projectid" :value="currentProduction.id">
+                <input type="hidden" id="projectid" name="projectid" :value="currrentPrduction ? currentProduction.id : null">
                 <input type="hidden" id="currentpath" name="currentpath" :value="currentUrl">
                 <input type="hidden" id="currentserver" name="currentserver" :value="currentHost">
                 <input type="hidden" id="selection" name="selection" :value="selectedTaskIds">
@@ -275,12 +277,13 @@
 
 <script>
 import { mapGetters, mapActions } from 'vuex'
-import ButtonHrefLink from './widgets/ButtonHrefLink'
-import Combobox from './widgets/Combobox'
-import PeopleField from './widgets/PeopleField'
-import Spinner from './widgets/Spinner'
+import { sortPeople } from '../../lib/sorting'
+
 import { ChevronDownIcon, XIcon, MoreVerticalIcon } from 'vue-feather-icons'
-import { sortPeople } from '../lib/sorting'
+import ButtonHrefLink from '../widgets/ButtonHrefLink'
+import Combobox from '../widgets/Combobox'
+import PeopleField from '../widgets/PeopleField'
+import Spinner from '../widgets/Spinner'
 
 export default {
   name: 'action-topbar',
@@ -410,7 +413,7 @@ export default {
     },
 
     currentProductionTeam () {
-      return this.currentProduction.team
+      return this.currentProduction ? this.currentProduction.team : []
     },
 
     currentMenuLabel () {
@@ -620,6 +623,7 @@ export default {
   position: fixed;
   left: 0;
   right: 0;
+  bottom: 0;
 }
 
 div.assignation {
@@ -680,7 +684,7 @@ div.combobox-item {
   width: 200px;
   z-index: 200;
   left: 0;
-  top: 60px;
+  bottom: 60px;
   background: #5e60ba;
   color: white;
   box-shadow: 0px 0px 6px rgba(0,0,0,0.2);

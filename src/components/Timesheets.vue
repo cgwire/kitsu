@@ -157,18 +157,23 @@ export default {
       return range(year, currentYear)
         .map(year => ({
           label: year,
-          value: year
+          value: `${year}`
         }))
     },
 
     monthOptions () {
+      const currentYear = `${moment().year()}`
       const month = 1
       const currentMonth = moment().month() + 1
-      return range(month, currentMonth)
-        .map(month => ({
-          label: monthToString(month),
-          value: `${month}`
-        }))
+      let monthRange = range(month, 12)
+      if (currentYear === this.yearString) {
+        monthRange = range(month, currentMonth)
+      }
+
+      return monthRange.map(month => ({
+        label: monthToString(month),
+        value: `${month}`
+      }))
     }
   },
 
@@ -317,19 +322,24 @@ export default {
 
     yearString () {
       const year = Number(this.yearString)
+      const currentMonth = moment().month()
       if (this.currentYear !== year) {
         if (this.detailLevel === 'month') {
           this.$router.push({
             name: 'timesheets-month',
-            params: {
-              year: year
-            }
+            params: { year }
           })
         } else if (this.detailLevel === 'week') {
           this.$router.push({
             name: 'timesheets-week',
+            params: { year }
+          })
+        } else {
+          this.$router.push({
+            name: 'timesheets-day',
             params: {
-              year: year
+              year: year,
+              month: Math.min(Number(this.monthString), currentMonth)
             }
           })
         }
