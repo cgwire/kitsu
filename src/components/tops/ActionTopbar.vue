@@ -178,7 +178,7 @@
               >
                 <input type="hidden" id="personid" name="personid" :value="user.id">
                 <input type="hidden" id="personemail" name="personemail" :value="user.email">
-                <input type="hidden" id="projectid" name="projectid" :value="currentProduction.id">
+                <input type="hidden" id="projectid" name="projectid" :value="currrentPrduction ? currentProduction.id : null">
                 <input type="hidden" id="currentpath" name="currentpath" :value="currentUrl">
                 <input type="hidden" id="currentserver" name="currentserver" :value="currentHost">
                 <input type="hidden" id="selection" name="selection" :value="selectedTaskIds">
@@ -413,7 +413,7 @@ export default {
     },
 
     currentProductionTeam () {
-      return this.currentProduction.team
+      return this.currentProduction ? this.currentProduction.team : []
     },
 
     currentMenuLabel () {
