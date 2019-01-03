@@ -107,7 +107,10 @@
               v-if="isCommentingAllowed"
             />
 
-            <div class="comments" v-if="taskComments.length > 0">
+            <div
+              class="comments"
+              v-if="taskComments.length > 0 && !loading.task"
+            >
               <comment
                 :key="'comment' + comment.id"
                 :comment="comment"
@@ -116,7 +119,7 @@
                 v-for="comment in taskComments"
               />
             </div>
-            <div class="no-comment" v-else>
+            <div class="no-comment" v-else-if="!loading.task">
               <em>
                 {{ $t('tasks.no_comment')}}
               </em>
