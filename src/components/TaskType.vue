@@ -170,6 +170,7 @@ export default {
       'assetsPath',
       'currentEpisode',
       'currentProduction',
+      'currentTaskType',
       'isTVShow',
       'sequenceSubscriptions',
       'shotsByEpisode',
