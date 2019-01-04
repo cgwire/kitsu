@@ -623,7 +623,6 @@ export default {
   position: fixed;
   left: 0;
   right: 0;
-  bottom: 0;
 }
 
 div.assignation {
@@ -684,7 +683,7 @@ div.combobox-item {
   width: 200px;
   z-index: 200;
   left: 0;
-  bottom: 60px;
+  top: 60px;
   background: #5e60ba;
   color: white;
   box-shadow: 0px 0px 6px rgba(0,0,0,0.2);
