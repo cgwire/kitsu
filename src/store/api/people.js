@@ -10,7 +10,7 @@ export default {
     const data = {
       first_name: person.first_name,
       last_name: person.last_name,
-      email: person.email,
+      email: person.email.trim(),
       phone: person.phone,
       role: person.role,
       active: person.active
@@ -22,7 +22,7 @@ export default {
     const data = {
       first_name: person.first_name,
       last_name: person.last_name,
-      email: person.email,
+      email: person.email.trim(),
       phone: person.phone,
       timezone: person.timezone,
       locale: person.locale,
