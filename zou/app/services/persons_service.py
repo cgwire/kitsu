@@ -151,6 +151,8 @@ def create_person(
     Create a new person entry in the database. No operation are performed on
     password, so encrypted password is expected.
     """
+    if email is not None:
+        email = email.strip()
     person = Person.create(
         email=email,
         password=password,
@@ -181,6 +183,8 @@ def update_person(person_id, data):
     Update person entry with data given in parameter.
     """
     person = Person.get(person_id)
+    if "email" in data and data["email"] is not None:
+        data["email"] = data["email"].strip()
     person.update(data)
     events.emit("person:update", {
         "person_id": person_id
