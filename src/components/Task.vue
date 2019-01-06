@@ -45,7 +45,6 @@
         <span
           class="flexrow-item avatar-wrapper"
           :key="personId"
-          v-if="currentTask.assignees"
           v-for="personId in currentTask.assignees"
         >
           <people-avatar
@@ -56,10 +55,6 @@
             :font-size="16"
           />
        </span>
-       <span
-         v-else
-       >
-       </span>
       </div>
     </div>
 
@@ -68,7 +63,7 @@
         <div v-if="currentTask">
           <div>
             <add-comment
-              :isAddCommentLoading="loading.addComment"
+              :is-loading="loading.addComment"
               :user="user"
               :task="currentTask"
               :taskStatusOptions="taskStatusOptionsForCurrentUser"
@@ -96,7 +91,7 @@
         </div>
 
         <div class="has-text-centered" v-else>
-          <img src="../assets/spinner.svg" />
+          <spinner />
         </div>
       </div>
 
@@ -283,6 +278,7 @@ import PeopleAvatar from './widgets/PeopleAvatar'
 import PeopleName from './widgets/PeopleName'
 import PictureViewer from './previews/PictureViewer'
 import PreviewRow from './widgets/PreviewRow'
+import Spinner from './widgets/Spinner'
 import SubscribeButton from './widgets/SubscribeButton'
 import TaskTypeName from './widgets/TaskTypeName'
 import ValidationTag from './widgets/ValidationTag'
@@ -306,6 +302,7 @@ export default {
     PeopleName,
     PreviewRow,
     PictureViewer,
+    Spinner,
     SubscribeButton,
     TaskTypeName,
     ValidationTag,
@@ -315,6 +312,7 @@ export default {
   data () {
     return {
       attachedFileName: '',
+      currentPreviewId: null,
       entityPage: this.getEntityPage(),
       selectedTab: 'validation',
       taskLoading: {
@@ -368,6 +366,11 @@ export default {
 
   mounted () {
     this.handleModalsDisplay()
+    let previewId = this.route.params.preview_id
+    if (!previewId && this.currentTaskPreviews.length > 0) {
+      previewId = this.currentTaskPreviews[0].id
+    }
+    this.currentPreviewId = previewId
     this.$nextTick(() => {
       if (this.$refs['task-columns']) {
         this.$refs['task-columns'].scrollTop = 100
@@ -572,16 +575,6 @@ export default {
           name: 'open-productions'
         }
       }
-    },
-
-    currentPreviewId () {
-      let previewId = this.route.params.preview_id
-
-      if (!previewId && this.currentTaskPreviews.length > 0) {
-        previewId = this.currentTaskPreviews[0].id
-      }
-
-      return previewId
     },
 
     title () {
@@ -914,18 +907,18 @@ export default {
             this.errors.addComment = true
           } else {
             this.errors.addComment = false
-            this.reset()
             if (this.attachedFileName) {
               this.addCommentPreview({
                 taskId: this.route.params.task_id,
                 commentId: this.currentTaskComments[0].id,
                 callback: (err, preview) => {
                   if (err) {
-                    this.errors.addComment = true
+                    console.log(err)
                   } else {
                     this.$refs['add-preview-modal'].reset()
                     this.loading.addComment = false
                     this.attachedFileName = ''
+                    this.reset()
                     this.resetPreview({
                       id: preview.id
                     })
@@ -1295,6 +1288,12 @@ export default {
       this.handleModalsDisplay()
       if (this.$route.params.task_id !== this.currentTask.id) {
         this.loadTaskData()
+      } else if (
+        this.$route.params.preview_id &&
+        this.$route.params.preview_ïd !== this.currentPreviewId
+      ) {
+        this.currentPreviewId = this.$route.params.preview_id
+        this.reset()
       }
     }
   },

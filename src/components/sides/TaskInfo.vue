@@ -67,6 +67,7 @@
             </div>
 
             <model-viewer
+              class="model-viewer"
               :preview-url="currentPreviewPath"
               :light="true"
               v-else-if="is3DModelPreview"
@@ -678,5 +679,9 @@ export default {
 .preview-standard-file {
   text-align: center;
   padding: 1em;
+}
+
+.model-viewer {
+  padding: 0.3em;
 }
 </style>

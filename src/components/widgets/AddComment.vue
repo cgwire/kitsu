@@ -163,4 +163,8 @@ export default {
 .control {
   margin-bottom: 0.1em;
 }
+
+.dark textarea:disabled {
+  background: #555;
+}
 </style>
