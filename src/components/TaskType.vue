@@ -80,11 +80,14 @@
           </div>
           <div class="supervisor-shot-list">
             <task-type-entity-block
-              :ref="shot.id"
               :key="shot.id"
+              :ref="shot.id"
               :entity="shot"
               :task-type="currentTaskType"
               entity-type="shot"
+              :selected="selection[shot.id]"
+              @select="onSelect"
+              @unselect="onUnselect"
               v-for="shot in sequenceShots"
             />
           </div>
@@ -212,7 +215,11 @@ export default {
       this.initTaskType(force)
         .then(() => {
           this.loading.entities = false
-          if (this.assetsByType) {
+          if (
+            this.assetsByType &&
+            this.assetsByType.length > 0 &&
+            this.assetsByType[0].length > 0
+          ) {
             this.$options.entityListCache = [].concat(...this.assetsByType)
           } else {
             this.$options.entityListCache = [].concat(...this.shotsByEpisode)
@@ -271,7 +278,7 @@ export default {
         index = this.$options.entityListCache.length - 1
       }
       const entity = this.$options.entityListCache[index]
-      this.$refs[entity.id][0].select()
+      if (entity) this.$refs[entity.id][0].select()
     },
 
     selectNextTask () {
@@ -279,7 +286,7 @@ export default {
       let index = this.getCurrentIndex() + 1
       if (index > maxLength) index = 0
       const entity = this.$options.entityListCache[index]
-      this.$refs[entity.id][0].select()
+      if (entity) this.$refs[entity.id][0].select()
     },
 
     onKeyDown (event) {
