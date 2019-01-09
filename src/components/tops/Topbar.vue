@@ -79,7 +79,9 @@
           @click="toggleUserMenu"
         >
           <people-avatar
+            ref="avatar"
             class="avatar"
+            :no-cache="true"
             :person="user"
             :is-link="false"
           />
@@ -445,6 +447,12 @@ export default {
         if (this.user.id === eventData.person_id) {
           const notificationId = eventData.notification_id
           this.loadNotification(notificationId)
+        }
+      },
+
+      'person:update' (eventData) {
+        if (this.user.id === eventData.person_id) {
+          this.$refs.avatar.reloadAvatar()
         }
       }
     }

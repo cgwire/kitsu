@@ -78,9 +78,16 @@ export default {
     'no-cache': { type: Boolean, default: false }
   },
 
+  methods: {
+    reloadAvatar () {
+      this.avatarPath =
+        this.person.avatarPath + '&stamp=' + new Date().toISOString()
+    }
+  },
+
   watch: {
     person () {
-      this.avatarPath = this.person.avatarPath + '&stamp=' + new Date().toISOString()
+      this.reloadAvatar()
     }
   }
 }

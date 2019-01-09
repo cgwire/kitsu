@@ -4,7 +4,13 @@
 
       <div class="has-text-centered profile-header">
         <div class="profile-header-content has-text-centered">
-          <people-avatar :person="this.user" :size="150" :font-size="60" />
+          <people-avatar
+            ref="avatar"
+            :no-cache="true"
+            :person="this.user"
+            :size="150"
+            :font-size="60"
+          />
 
           <p>
             <router-link
@@ -161,8 +167,7 @@
       :form-data="changeAvatar.formData"
       @fileselected="selectFile"
       @confirm="uploadAvatarFile"
-    >
-    </change-avatar-modal>
+    />
 
   </div>
 </template>
@@ -274,6 +279,7 @@ export default {
           this.changeAvatar.isError = true
         }
         this.changeAvatar.isLoading = false
+        this.$refs.avatar.reloadAvatar()
         this.$router.push({name: 'profile'})
       })
     },
