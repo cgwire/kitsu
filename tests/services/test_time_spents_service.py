@@ -47,6 +47,9 @@ class TimeSpentsServiceTestCase(ApiDBTestCase):
         tasks_service.create_or_update_time_spent(
             task_id, self.user_id, "2018-06-03", 600
         )
+        tasks_service.create_or_update_time_spent(
+            task_id, self.person_id, "2019-01-02", 850
+        )
 
     def test_get_month_table(self):
         month_table = time_spents_service.get_month_table("2018")
@@ -88,6 +91,16 @@ class TimeSpentsServiceTestCase(ApiDBTestCase):
         self.assertEqual(len(tasks), 1)
         self.assertEqual(tasks[0]["entity_name"], "Tree")
         self.assertEqual(tasks[0]["duration"], 600)
+
+    def test_get_week_time_spents_first_week_of_the_year(self):
+        tasks = time_spents_service.get_week_time_spents(
+            self.person_id,
+            "2019",
+            "1"
+        )
+        self.assertEqual(len(tasks), 1)
+        self.assertEqual(tasks[0]["duration"], 850)
+
 
     def test_get_day_time_spents(self):
         tasks = time_spents_service.get_day_time_spents(

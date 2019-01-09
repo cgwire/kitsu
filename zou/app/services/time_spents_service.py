@@ -1,4 +1,5 @@
 import datetime
+import isoweek
 
 from dateutil import relativedelta
 
@@ -144,10 +145,7 @@ def get_week_time_spents(person_id, year, week):
        or year < 2010 or week < 1 or week > 52:
         raise WrongDateFormatException
 
-    date = datetime.datetime.strptime(
-        '%s-%s-0' % (year, int(week) - 1),
-        "%Y-%W-%w"
-    )
+    date = isoweek.Week(year, week).monday()
     next_week = date + relativedelta.relativedelta(days=7)
 
     entries = get_person_time_spent_entries(
