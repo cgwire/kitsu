@@ -366,11 +366,7 @@ export default {
 
   mounted () {
     this.handleModalsDisplay()
-    let previewId = this.route.params.preview_id
-    if (!previewId && this.currentTaskPreviews.length > 0) {
-      previewId = this.currentTaskPreviews[0].id
-    }
-    this.currentPreviewId = previewId
+    this.reset()
     this.$nextTick(() => {
       if (this.$refs['task-columns']) {
         this.$refs['task-columns'].scrollTop = 100
@@ -792,10 +788,7 @@ export default {
                       isError: true
                     }
                   } else {
-                    this.currentTaskComments = this.getCurrentTaskComments()
-                    this.currentTaskPreviews = this.getCurrentTaskPreviews()
-                    this.setOtherPreviews()
-                    this.currentPreviewPath = this.getOriginalPath()
+                    this.reset()
                     this.entityPage = this.getEntityPage()
                     this.taskLoading = {
                       isLoading: false,
@@ -940,6 +933,11 @@ export default {
       this.setOtherPreviews()
       this.currentPreviewPath = this.getOriginalPath()
       this.currentTask = this.getCurrentTask()
+      let previewId = this.route.params.preview_id
+      if (!previewId && this.currentTaskPreviews.length > 0) {
+        previewId = this.currentTaskPreviews[0].id
+      }
+      this.currentPreviewId = previewId
     },
 
     handleModalsDisplay () {
@@ -1133,10 +1131,7 @@ export default {
           if (err) {
             this.errors.deleteComment = true
           } else {
-            this.currentTaskComments = this.getCurrentTaskComments()
-            this.currentTaskPreviews = this.getCurrentTaskPreviews()
-            this.setOtherPreviews()
-            this.currentPreviewPath = this.getOriginalPath()
+            this.reset()
             if (this.currentTaskPreviews.length > 0) {
               this.resetPreview(this.currentTaskPreviews[0])
             } else {
@@ -1288,13 +1283,12 @@ export default {
       this.handleModalsDisplay()
       if (this.$route.params.task_id !== this.currentTask.id) {
         this.loadTaskData()
-      } else if (
-        this.$route.params.preview_id &&
-        this.$route.params.preview_ïd !== this.currentPreviewId
-      ) {
-        this.currentPreviewId = this.$route.params.preview_id
-        this.reset()
       }
+      let previewId = this.route.params.preview_id
+      if (!previewId && this.currentTaskPreviews.length > 0) {
+        previewId = this.currentTaskPreviews[0].id
+      }
+      this.currentPreviewId = previewId
     }
   },
 
