@@ -103,29 +103,31 @@
       </div>
 
       <div class="addition-column column">
-        <page-subtitle :text="$t('playlists.add_shots')" />
-
         <spinner v-if="isShotsLoading" />
         <div v-else>
-          <div class="flexrow" v-if="episodes.length > 0 || !isTVShow">
-            <div class="flexrow-item">
-              <combobox
-                :label="$t('shots.fields.sequence')"
-                :options="sequenceOptions"
-                v-model="sequenceId"
-                v-if="sequenceOptions.length > 0"
-              />
-              <div v-if="sequenceOptions.length === 0">
-                {{ $t('playlists.no_sequence_for_episode') }}
+          <div class="addition-header">
+            <page-subtitle :text="$t('playlists.add_shots')" />
+
+            <div class="flexrow" v-if="episodes.length > 0 || !isTVShow">
+              <div class="flexrow-item">
+                <combobox
+                  :label="$t('shots.fields.sequence')"
+                  :options="sequenceOptions"
+                  v-model="sequenceId"
+                  v-if="sequenceOptions.length > 0"
+                />
+                <div v-if="sequenceOptions.length === 0">
+                  {{ $t('playlists.no_sequence_for_episode') }}
+                </div>
               </div>
             </div>
-          </div>
-          <div v-else>
-            {{ $t('playlists.no_shot_for_production') }}
-          </div>
+            <div v-else>
+              {{ $t('playlists.no_shot_for_production') }}
+            </div>
 
-          <div v-if="sequenceShots.length === 0 && sequenceId">
-            {{ $t('playlists.no_shot_for_sequence') }}
+            <div v-if="sequenceShots.length === 0 && sequenceId">
+              {{ $t('playlists.no_shot_for_sequence') }}
+            </div>
           </div>
 
           <div
@@ -783,5 +785,17 @@ span.thumbnail-picture {
   min-height: 150px;
   margin-top: 1em;
   overflow-x: auto;
+}
+
+.addition-column .thumbnail-empty {
+  margin-left: 1.5em;
+}
+
+.addition-header {
+  padding: 0 1.5em;
+}
+
+.addition-header .subtitle {
+  margin-top: 1.5em;
 }
 </style>
