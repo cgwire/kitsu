@@ -415,7 +415,7 @@ def get_last_notifications(notification_id=None):
     result = []
     query = Notification.query \
         .filter_by(person_id=current_user.id) \
-        .order_by(Notification.created_at) \
+        .order_by(Notification.created_at.desc()) \
         .join(Task, Project, Comment) \
         .add_columns(
             Project.id,
