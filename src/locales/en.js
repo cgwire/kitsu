@@ -367,7 +367,7 @@ export default {
     delete_text: 'Are you sure you want to remove {name} from your database?',
     delete_error: 'An error occured while deleting this shot. There are probably data linked to it. Are you sure this shot has no task linked to it?',
     edit_success: 'Shot {name} successfully edited.',
-    edit_fail: 'Creation or edition failed, an error occured.',
+    edit_fail: 'Creation or edition failed, an error occured. Make sure that you are not renaming the shot with a name already listed for given sequence.',
     edit_title: 'Edit shot',
     empty_list: 'There is no shot in the production. What about creating some?',
     empty_list_client: 'There is no shot in this production.',

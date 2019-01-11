@@ -358,7 +358,7 @@ export default {
     new_sequences: 'Ajouter des séquences',
     new_episodes: 'Ajouter des épisodes',
     manage: 'Créer des plans',
-    edit_fail: 'La création ou l\'édition a échoué, une erreur est survenue.',
+    edit_fail: 'La création ou l\'édition a échoué, une erreur est survenue. Assurez-vous qu\'il n\'y pas déjà un shot portant le nom que vous donnez pour la séqence choisie.',
     new_success: 'Plan {name} créé avec succès.',
     edit_success: 'Plan {name} édité avec succès.',
     description: 'Description',
