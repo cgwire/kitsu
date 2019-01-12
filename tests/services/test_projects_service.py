@@ -1,5 +1,7 @@
 from tests.base import ApiDBTestCase
 
+from zou.app.models.entity import Entity
+from zou.app.models.metadata_descriptor import MetadataDescriptor
 from zou.app.models.project_status import ProjectStatus
 from zou.app.services import projects_service
 from zou.app.services.exception import ProjectNotFoundException
@@ -93,3 +95,76 @@ class ProjectServiceTestCase(ApiDBTestCase):
         projects_service.remove_team_member(self.project.id, self.person.id)
         project = projects_service.get_project(self.project.id)
         self.assertEqual(project["team"], [])
+
+    def test_add_asset_metadata_descriptor(self):
+        descriptor = projects_service.add_metadata_descriptor(
+            self.project.id,
+            "Asset",
+            "Is Outdoor"
+        )
+        self.assertIsNotNone(MetadataDescriptor.get(descriptor["id"]))
+        descriptor = projects_service.add_metadata_descriptor(
+            self.project.id,
+            "Asset",
+            "Contractor"
+        )
+        descriptors = projects_service.get_metadata_descriptors(
+            self.project.id,
+            "Asset"
+        )
+        self.assertEqual(len(descriptors), 2)
+        self.assertEqual(descriptors[0]["id"], descriptor["id"])
+        self.assertEqual(descriptors[0]["field_name"], "contractor")
+        self.assertEqual(descriptors[1]["field_name"], "is_outdoor")
+
+    def test_update_metadata_descriptor(self):
+        asset = self.generate_fixture_asset_type()
+        asset = self.generate_fixture_asset()
+        descriptor = projects_service.add_metadata_descriptor(
+            self.project.id,
+            "Asset",
+            "Contractor"
+        )
+        asset.update({
+            "data": {
+                "contractor": "contractor 1"
+            }
+        })
+        self.assertTrue("contractor" in asset.data)
+        projects_service.update_metadata_descriptor(
+            descriptor["id"],
+            {"name": "Team"}
+        )
+        descriptors = projects_service.get_metadata_descriptors(
+            self.project.id,
+            "Asset"
+        )
+        self.assertEqual(len(descriptors), 1)
+        asset = Entity.get(asset.id)
+        self.assertEqual(asset.data.get("team"), "contractor 1")
+
+    def test_add_delete_metadata_descriptor(self):
+        asset = self.generate_fixture_asset_type()
+        asset = self.generate_fixture_asset()
+        descriptor = projects_service.add_metadata_descriptor(
+            self.project.id,
+            "Asset",
+            "Contractor"
+        )
+        asset.update({
+            "data": {
+                "contractor": "contractor 1"
+            }
+        })
+        self.assertTrue("contractor" in asset.data)
+
+        projects_service.remove_metadata_descriptor(
+            descriptor["id"]
+        )
+        descriptors = projects_service.get_metadata_descriptors(
+            self.project.id,
+            "Asset"
+        )
+        self.assertEqual(len(descriptors), 0)
+        asset = Entity.get(asset.id)
+        self.assertFalse("contractor" in asset.data)

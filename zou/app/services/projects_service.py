@@ -1,9 +1,16 @@
-from zou.app.models.project import Project
+import slugify
+
 from zou.app.models.entity import Entity
 from zou.app.models.entity_type import EntityType
+from zou.app.models.metadata_descriptor import MetadataDescriptor
 from zou.app.models.person import Person
+from zou.app.models.project import Project
 from zou.app.models.project_status import ProjectStatus
-from zou.app.services.exception import ProjectNotFoundException
+from zou.app.services import base_service
+from zou.app.services.exception import (
+    ProjectNotFoundException,
+    MetadataDescriptorNotFoundException
+)
 
 from zou.app.utils import fields, events
 
@@ -43,8 +50,6 @@ def get_projects_with_first_episode(query):
                 project_dict["first_episode_id"] = \
                     fields.serialize_value(first_episode.id)
         projects.append(project_dict)
-
-
     return projects
 
 
@@ -199,3 +204,77 @@ def remove_team_member(project_id, person_id):
     project.team.remove(person)
     project.save()
     return project.serialize()
+
+
+def add_metadata_descriptor(project_id, entity_type, name):
+    descriptor = MetadataDescriptor.create(
+        project_id=project_id,
+        entity_type=entity_type,
+        name=name,
+        field_name=slugify.slugify(name, separator="_")
+    )
+    return descriptor.serialize()
+
+
+def get_metadata_descriptors(project_id, entity_type):
+    """
+    Get all metadata descriptors for given project and entity type.
+    """
+    descriptors = MetadataDescriptor.get_all_by(
+        project_id=project_id,
+        entity_type=entity_type
+    )
+    return fields.serialize_models(descriptors)
+
+
+def get_metadata_descriptor_raw(metadata_descriptor_id):
+    """
+    Get metadata descriptor for given id as active record.
+    """
+    return base_service.get_instance(
+        MetadataDescriptor,
+        metadata_descriptor_id,
+        MetadataDescriptorNotFoundException
+    )
+
+
+def get_metadata_descriptor(metadata_descriptor_id):
+    """
+    Get metadata descriptor for given id as dict.
+    """
+    return get_metadata_descriptor_raw(metadata_descriptor_id).serialize()
+
+
+def update_metadata_descriptor(metadata_descriptor_id, changes):
+    """
+    Update metadata descriptor information for given id.
+    """
+    descriptor = get_metadata_descriptor_raw(metadata_descriptor_id)
+    entities = Entity.get_all_by(project_id=descriptor.project_id)
+    if "name" in changes and len(changes["name"]) > 0:
+        changes["field_name"] = slugify.slugify(changes["name"])
+        for entity in entities:
+            metadata = fields.serialize_value(entity.data)
+            value = metadata.pop(descriptor.field_name)
+            metadata[changes["field_name"]] = value
+            entity.update({
+                "data": metadata
+            })
+    descriptor.update(changes)
+    return descriptor.serialize()
+
+
+def remove_metadata_descriptor(metadata_descriptor_id):
+    """
+    Deletee metadata descriptor and related informations.
+    """
+    descriptor = get_metadata_descriptor_raw(metadata_descriptor_id)
+    entities = Entity.get_all_by(project_id=descriptor.project_id)
+    for entity in entities:
+        metadata = fields.serialize_value(entity.data)
+        metadata.pop(descriptor.field_name)
+        entity.update({
+            "data": metadata
+        })
+    descriptor.delete()
+    return descriptor.serialize()
