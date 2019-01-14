@@ -190,6 +190,7 @@ export default {
     delete_error: 'An error occured while deleting this person. There are probably data linked to it. Are you sure this person has no assignation or wrote no comment?',
     delete_text: 'Are you sure you want to remove {personName} from your database?',
     edit_title: 'Edit person',
+    empty_team: 'There is noone listed in the project team.',
     new_person: 'Add a new employee',
     no_task_assigned: 'There is no assigned running tasks.',
     persons: 'person | persons',

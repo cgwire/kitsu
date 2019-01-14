@@ -6,7 +6,7 @@ export default {
     delete_text: 'Êtes vous sûr de vouloir retirer {personName} de la base de données?',
     delete_error: 'Une erreur est survenue lors de la suppression. Il y a probablement des données liées à elle. Etes vous sur que cette personne n\'a aucune tâche assignée et n\'a fait aucun commentaire ?',
     edit_title: 'Modifier les informations de',
-    empty_team: 'Personne n\'a été affecté à cette production',
+    empty_team: 'Personne n\'a été affecté à cette production.',
     no_task_assigned: 'Il n\'y a aucune tâche assignée.',
     new_person: 'Ajouter un employé',
     persons: 'Personnes',
