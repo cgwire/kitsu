@@ -94,21 +94,22 @@ validate it by **Confirm** button.
 
 These tasks will be added to all the assets.
 
-If some assets don't match the task (as environment and setup) just change the
-status of this task on ![N/A](../img/getting-started/na_icon.png), or delete it.
+If some assets don't match the task (as environment and setup) we will just delete the
+status of this task.
 
 To change a status click directly on the status you want to change (1).
 
 ![Task on asset](../img/getting-started/asset_task_added.png)
 
-A new page is opened, and here you can change a status and add a comment to
+A pannel on the right of the screen appears, and here you can change a status, post a preview and add a comment to
 explain the status change (1). Choose a new status for the task (2). Then, 
 click on the **Post status** button (3).  
 
 ![Changing status](../img/getting-started/changing_status.png)
 
-If you want to delete a task, click on the **delete** button 
-![Delete button](../img/getting-started/delete_button.png) on the right top
+If you want to delete a task, click on the menu to change the action (1), 
+then select the **delete tasks** button (2) 
+![Delete button](../img/getting-started/delete_task.png) on the left top
 of the page.
 
 Now that we have created all the assets and related tasks, we can now add the
@@ -167,11 +168,11 @@ We can now get back to the **ASSETS** page via drop down menu
 
 Now its time to do your first assignment! 
 
-Click on the empty space on the right of the status (1) you want to assign.
+Click on the status (1) you want to assign.
 
 ![Assigned a task](../img/getting-started/task_assigned.png)
 
-A new blue line on top of the screen appears. 
+The **Action Menu** on top of the screen appears. 
 
 ![Blue menu](../img/getting-started/blue_menu.png)
 
@@ -359,7 +360,7 @@ status of the task (1).
 
 ![Shot status](../img/getting-started/shot_status.png)
 
-It will open a new page, and here you can post a comment (1) and change the
+It will make appear a pannel on the right, and here you can post a comment (1) and change the
 status (2), and validate the post and the new status with **Post status**
 button (3).
 
