@@ -12,7 +12,11 @@ from flask_mail import Mail
 
 from . import config
 from .stores import auth_tokens_store
-from .services.exception import PersonNotFoundException, WrongIdFormatException
+from .services.exception import (
+    PersonNotFoundException,
+    WrongIdFormatException,
+    WrongParameterException
+)
 from .utils import fs
 
 from zou.app.utils import cache
@@ -55,7 +59,7 @@ def shutdown_session(exception=None):
 
 @app.errorhandler(404)
 def page_not_found(error):
-    return jsonify(error=404, text=str(error)), 404
+    return jsonify(error=404, message=str(error)), 404
 
 
 @app.errorhandler(WrongIdFormatException)
@@ -63,6 +67,14 @@ def id_parameter_format_error(error):
     return jsonify(
         error=True,
         message="One of the ID sent in parameter is not properly formatted."
+    ), 400
+
+
+@app.errorhandler(WrongParameterException)
+def wrong_parameter(error):
+    return jsonify(
+        error=True,
+        message=str(error)
     ), 400
 
 

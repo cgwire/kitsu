@@ -151,3 +151,7 @@ class ArgumentsException(Exception):
 
 class WrongIdFormatException(Exception):
     pass
+
+
+class WrongParameterException(Exception):
+    pass

@@ -216,14 +216,11 @@ def add_metadata_descriptor(project_id, entity_type, name):
     return descriptor.serialize()
 
 
-def get_metadata_descriptors(project_id, entity_type):
+def get_metadata_descriptors(project_id):
     """
     Get all metadata descriptors for given project and entity type.
     """
-    descriptors = MetadataDescriptor.get_all_by(
-        project_id=project_id,
-        entity_type=entity_type
-    )
+    descriptors = MetadataDescriptor.get_all_by(project_id=project_id)
     return fields.serialize_models(descriptors)
 
 
@@ -254,12 +251,13 @@ def update_metadata_descriptor(metadata_descriptor_id, changes):
     if "name" in changes and len(changes["name"]) > 0:
         changes["field_name"] = slugify.slugify(changes["name"])
         for entity in entities:
-            metadata = fields.serialize_value(entity.data)
-            value = metadata.pop(descriptor.field_name)
-            metadata[changes["field_name"]] = value
-            entity.update({
-                "data": metadata
-            })
+            metadata = fields.serialize_value(entity.data) or {}
+            value = metadata.pop(descriptor.field_name, None)
+            if value is not None:
+                metadata[changes["field_name"]] = value
+                entity.update({
+                    "data": metadata
+                })
     descriptor.update(changes)
     return descriptor.serialize()
 
