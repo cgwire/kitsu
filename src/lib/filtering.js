@@ -3,7 +3,7 @@ import {
   indexSearch
 } from './indexing'
 
-const EQUAL_REGEX = /([^ ]*)=([^ ]*)|\[(.*)\]=([^ ]*)/g
+const EQUAL_REGEX = /([^ ]*)=([^ ]*)|\[([^[]*)\]=([^ ]*)/g
 
 /*
  * Look in the search query for task type filter like anim=wip.
