@@ -439,7 +439,6 @@ const actions = {
     { commit, getters, state },
     { taskId, commentId, callback }
   ) {
-    const fileName = state.previewFormData.get('file').name
     const previewData = {
       taskId,
       commentId
@@ -449,15 +448,9 @@ const actions = {
       if (err && callback) {
         callback(err)
       } else {
-        tasksApi.uploadPreview(preview.id, state.previewFormData, (err) => {
+        tasksApi.uploadPreview(preview.id, state.previewFormData, (err, preview) => {
           if (!err) {
             const comment = getters.getTaskComment(taskId, commentId)
-            const extension = fileName.slice(fileName.length - 3)
-            if (extension.startsWith('.')) {
-              preview.extension = extension.substring(1)
-            } else {
-              preview.extension = extension
-            }
             commit(ADD_PREVIEW_END, {
               preview,
               taskId,
