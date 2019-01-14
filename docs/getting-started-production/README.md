@@ -374,13 +374,12 @@ Click on the empty space on the right of the status/assignation on a task (1).
 
 ![Task assigned](../img/getting-started/task_assigned.png)
 
-The blue menu on the top of the screen will appear. 
+The action menu on the top of the screen will appear. 
 
 ![Blue menu](../img/getting-started/blue_menu.png)
 
-You can change its purpose by clicking on the 3 vertical dots on the left part
-of the screen  ![Blue menu dot](../img/getting-started/blue_menu_dot.png), a
-new menu will appear and there you can choose **Change status**.
+You can change its purpose by clicking on the name on the left part
+of the screen, a new menu will appear and there you can choose **Change status**.
 
 ![Blue menu status](../img/getting-started/blue_menu_status.png)
 
@@ -400,12 +399,11 @@ near a status task (1).
 
 ![Task assigned](../img/getting-started/task_assigned.png)
 
-The blue menu will appear on the top of the screen. 
+The action menu will appear on the top of the screen. 
 
 ![Blue menu](../img/getting-started/blue_menu.png)
 
-Click on the 3 dots menu button 
-![Blue menu dot](../img/getting-started/blue_menu_dot.png), and choose 
+Click on the name on the left on the action menu, and choose 
 **Change priority**.
 
 ![Change priority](../img/getting-started/change_priority.png)
@@ -443,8 +441,12 @@ performs some changes. Or you can change it to ![Done](../img/getting-started/do
 that his work is validated.
 
 You can also use the preview as a **thumbnail** on the asset or shot spreadsheet. It
-will help to recognize the assets/shots on the main pages.  Below your preview,
-click on the **Set this preview as thumbnail**. You can do this at each version 
+will help to recognize the assets/shots on the main pages. 
+On the list page, click on the status you want, then on the rigt pannel, click on **history** (1).
+
+![History](../img/getting-started/pannel_history.png)
+
+On the new page, above your preview, click on the **Set this preview as thumbnail**. You can do this at each version 
 of your work if needed.
 
 ![Preview as a thumbnail](../img/getting-started/preview_thumbnail.png)
