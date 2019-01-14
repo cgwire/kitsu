@@ -144,6 +144,7 @@ class BaseMixin(object):
             self.updated_at = datetime.datetime.now()
             for key, value in data.items():
                 setattr(self, key, value)
+            db.session.add(self)
             db.session.commit()
         except:
             db.session.rollback()
