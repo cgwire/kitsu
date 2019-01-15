@@ -7,7 +7,8 @@ On your first connection, we encourage you to fill your contact information
 into your profile.
 Click on your name on the top right of the screen (1) then on **Profile** (2).
 
-NB: A link to this documentation is available in this menu too (3).
+NB: A link to this **Documentation** is available (4) in this menu 
+and you can switch to the **Dark Theme** too (3).
  
 ![User profile](../img/getting-started/user_profil.png)
  
@@ -102,7 +103,8 @@ page, the last comment posted on each task will be available too.
 
 ![My tasks page](../img/getting-started/my_task_page2.png)
 
-You can also see the tasks validated as ![NA](../img/getting-started/na_icon.png) on the **Done** tab.
+You can also see the tasks validated as ![Validated](../img/getting-started/done_icon.png) and the discard tasks as ![NA](../img/getting-started/na_icon.png)
+on the **Done** tab.
 
 ![My done tasks page](../img/getting-started/done_page.png)
 
