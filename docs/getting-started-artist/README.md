@@ -26,9 +26,10 @@ encourage you to change the default password with one of your own.
  
 ## See your assignments
  
-The main part for you, on **Kitsu**, will be the **My tasks** page. You can
-find it on the main menu ![Main menu](../img/getting-started/main_button.png),
-under the **User** section of **MY TASKS**. The CGWire logo is a shortcut too,
+The main part for you, on **Kitsu**, will be the **My tasks** page. 
+It's the first landing page when you log in.
+You can also find it on the main menu ![Main menu](../img/getting-started/main_button.png),
+under the **User** section of **MY TASKS**. The Kistu logo is a shortcut too,
 to your task list.
 
 ![My tasks](../img/getting-started/my_tasks.png)
@@ -41,13 +42,14 @@ You can see per **Production** (1) the **Entity** (2) you are assigned to, the
 ## Share your progress
 
 When you start a new task you are assigned to, click on the status ![Todo](../img/getting-started/todo_icon.png)
-(1) on the shots or assets page.
+(1) on your my taks page. You can also do it on the shots or assets page.
 
-![Shot status](../img/getting-started/shot_status.png)
+![Shot status](../img/getting-started/my_task_status.png)
 
-It will open a new page where you can communicate about your work. Let your
-teammates know what you are doing. For instance show them you start working
-on something. Each time you change the status of a task, you can attach a
+It will open a pannel on the right of the screen, where you can 
+communicate about your work. Let your teammates know what you are doing. 
+For instance show them you start working on something. 
+Each time you change the status of a task, you can attach a
 text comment to it.
 
 For example when you start a **new task** you can say that everything is ok.
@@ -60,23 +62,21 @@ one you want (2) and validate your comment and the new status by clicking on
 
 ![Changing status](../img/getting-started/changing_status.png)
 
-You can edit your last comment by using the **edit** button 
+You can edit your last comment by clicking on the "history" button and then 
+using the **edit** button 
 ![Edit button](../img/getting-started/edit_button.png).
 
 
 ## Ask for a review
 
 You can ask for a review by switching the status of a task to 
-(**Waiting for Approval** ![wfa](../img/getting-started/wfa_icon.png)). This status allows you to share your progress by
-posting a preview of your work. The first step is to change the status of your
+(**Waiting for Approval** ![wfa](../img/getting-started/wfa_icon.png)). 
+The first step is to change the status of your
 task and post a comment. 
 
 ![Waiting for approval](../img/getting-started/wfa_status.png)
 
-Then click on the **Add preview** button on your new post 
-![Add preview](../img/getting-started/add_preview_button.png). 
-
-A new window is displayed.
+Then click on the **Attach preview** button.
 
 ![Add preview file](../img/getting-started/add_preview.png)
 
