@@ -84,7 +84,7 @@ export default {
     text: {
       default: '',
       type: String
-    },
+    }
   },
   computed: {
     isText () {

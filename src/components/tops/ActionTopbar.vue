@@ -337,19 +337,19 @@ export default {
 
   computed: {
     ...mapGetters([
+      'allCustomActionOptions',
       'assetMap',
-      'personMap',
+      'assetCustomActionOptions',
+      'currentProduction',
       'getPersonOptions',
-      'taskStatusOptions',
-      'selectedTasks',
+      'isCurrentUserManager',
       'nbSelectedTasks',
       'nbSelectedValidations',
-      'isCurrentUserManager',
-      'currentProduction',
-      'allCustomActionOptions',
-      'assetCustomActionOptions',
-      'shotCustomActionOptions',
       'people',
+      'personMap',
+      'selectedTasks',
+      'shotCustomActionOptions',
+      'taskStatusOptions',
       'user'
     ]),
 

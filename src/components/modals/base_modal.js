@@ -6,10 +6,18 @@
 
 export const modalMixin = {
 
+  beforeDestroy () {
+    window.removeEventListener('keydown', this.onKeyDown)
+  },
+
   computed: {
   },
 
   methods: {
+
+    /*
+     * Allow to close the modal when escape key is pressed.
+     */
     onKeyDown (event) {
       if (event.key === 'Escape') {
         this.$emit('cancel')
@@ -18,6 +26,11 @@ export const modalMixin = {
   },
 
   watch: {
+
+    /*
+     * Make sure that the keydown event is removed each time, the modla is
+     * hidden.
+     */
     active () {
       if (this.active) {
         window.addEventListener('keydown', this.onKeyDown, false)
