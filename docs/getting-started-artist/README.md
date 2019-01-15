@@ -7,8 +7,8 @@ On your first connection, we encourage you to fill your contact information
 into your profile.
 Click on your name on the top right of the screen (1) then on **Profile** (2).
 
-NB: A link to this **Documentation** is available (4) in this menu 
-and you can switch to the **Dark Theme** too (3).
+NB: A link to this **Documentation** is available (4) 
+and you can switch to the **Dark Theme**  in this menu too (3).
  
 ![User profile](../img/getting-started/user_profil.png)
  
@@ -73,7 +73,7 @@ using the **edit** button
 You can ask for a review by switching the status of a task to 
 (**Waiting for Approval** ![wfa](../img/getting-started/wfa_icon.png)). 
 The first step is to change the status of your
-task and post a comment. 
+task. 
 
 ![Waiting for approval](../img/getting-started/wfa_status.png)
 
@@ -83,7 +83,7 @@ Then click on the **Attach preview** button.
 
 You can either drag and drop you pic or video on the **Choose a file** button,
 or navigate through your system and pick your file, validate with the
-**Confirm** button.
+**Confirm** button. And then use the **Post comment** button.
 
 Your work will appear on the right part of the screen as a V1. 
 
