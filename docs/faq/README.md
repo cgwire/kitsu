@@ -132,24 +132,25 @@ For example, let's search all the **FX** assets.
 Another example get **shots page** of a specific **sequence**.
 Ex: see only the shots of the second sequence of the first episode.
 
-Select the second episode on the drop down menu, then search `se02`, the result
+Select the first episode on the drop down menu, then search `se02`, the result
  will get all the shots of all the episodes from sequence 2.
 
 ![Search bar sequence episode](../img/faq/filter_ep_seq.png)
 
 In the same way, you can search **specific status** link to task. Type the
-**name of the task** (or the **first letters**), then add the sign **equal**
+**name of the task** (or the between `[` `]` if the task name is more than one word `[modeling low]`),
+ then add the sign **equal**
 (`=`) and the **status** you are looking for.
 
 For example, search all the shots which are **Waiting for approval** ![WFA](../img/faq/wfa_icon.png)
-at the **render** stage. So on the search bar you will type : `render=wfa`.
+at the **render** stage. So on the search bar you will type : `render=wfa animation=retake`.
 
 ![Search layout wfa](../img/faq/filter_lay_wfa.png)
 
 You can be even more specific, lets focus on the shots that are still 
-on retake at the Animation stage : on the search
+on retake at the animation stage : on the search
 bar add a **space** after the previous search and type `animation=retake`. 
-The research will be `animation=retake render=wfa`.
+The research will be `render=wfa animation=retake`.
 
 ![Search layout wfa seq2](../img/faq/filter_lay_wfa_s002.png)
 
@@ -171,8 +172,8 @@ you to run common queries faster.
 
 You can create **filters** about **entities**:
 
-* **Sequences** : `se01`, `se02` etc. or exclude : '-se01', '-se02' etc.
-* **Asset Type** : `characters`, `environment`, `fx` etc. or exclude '-characters', '-fx', etc.
+* **Sequences** : `se01`, `se02` etc. or exclude : `-se01`, `-se02` etc.
+* **Asset Type** : `characters`, `environment`, `fx` etc. or exclude `-characters`, `-fx`, etc.
 
 You can also create **filters** about **task status** by following this syntax:
 **task=status**.
@@ -256,8 +257,7 @@ then on the **history** button on the right pannel.
 ![history button](../img/faq/pannel_history.png)
 
 On the top right side of the page you can see an **eye** button 
-![Notification off](../img/faq/notification_off.png), next to the
-**delete task** button.
+![Notification off](../img/faq/notification_off.png).
 
 ![Follow button](../img/faq/notification_other_task.png)
 
