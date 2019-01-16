@@ -250,7 +250,10 @@ As an artist you will receive a notification
 the status of one of your task, or post a comment.
 
 You can also choose to follow specifics tasks. Go into the task page you want
-to follow: on the **assets** or **shots** pages click onto the status icon.
+to follow: on the **assets** or **shots** pages click onto the status icon, 
+then on the **history** button on the right pannel.
+
+![history button](../img/faq/pannel_history.png)
 
 On the top right side of the page you can see an **eye** button 
 ![Notification off](../img/faq/notification_off.png), next to the
