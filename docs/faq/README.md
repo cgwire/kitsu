@@ -9,12 +9,11 @@
 You can ask for a review by switching the status of a task to 
 (**Waiting for Approval** ![wfa](../img/getting-started/wfa_icon.png)). This
 status allows you to share your progress by posting a preview of your work. The
-first step is to change the status of your task and post a comment. 
+first step is to change the status of your task and write a comment. 
 
 ![Waiting for approval](../img/getting-started/wfa_status.png)
 
-Then click on the **Add preview** button on your new post 
-![Add preview](../img/getting-started/add_preview_button.png). 
+Then click on the **Attach preview** button.
 
 A new window is displayed.
 
@@ -22,7 +21,7 @@ A new window is displayed.
 
 You can either drag and drop you pic or video on the **Choose a file** button,
 or navigate through your system and pick your file, validate with the
-**Confirm** button.
+**Confirm** button. Then click on the **Post comment** button.
 
 Your work will appear on the right part of the screen as a V1. 
 
@@ -39,7 +38,7 @@ Each time you add a new revision, the previous versions are still available.
 
 Click on your name on the top right of the screen (1) then on **Profile** (2).
 
-NB: A link to this documentation is available in this menu too (3).
+NB: A link to this documentation is available and the Dark Theme in this menu too (3).
  
 ![User profile](../img/getting-started/user_profil.png)
 
@@ -52,7 +51,7 @@ encourage you to change the default password with one of your own.
 
 ## How to have an overview of the production?
 
-### Task type overview page
+### Task type overview page / Supervisor page
 
 To access to the task type overview, you can click click on the **task type** name.
 
@@ -118,8 +117,8 @@ NB: The **search bar** is available too in people episodes list.
 The **search bar** query is applied everytime a new character is typed. You
 don't need to type everything to get a prompt result.
 
-For example, in the assets page, type the letter `V` and you wil get the
-result of all the assets starting with a `V`.  
+For example, in the assets page, type the letter `O` and you wil get the
+result of all the assets starting with a `O`.  
 
 ![Search bar result](../img/faq/filter_autocompletion.png)
 
@@ -131,10 +130,10 @@ For example, let's search all the **FX** assets.
 ![Search asset type](../img/faq/filter_asset_type.png)
 
 Another example get **shots page** of a specific **sequence**.
-Ex: see only the shots of the first sequence of the first episode.
+Ex: see only the shots of the second sequence of the first episode.
 
-Select the first episode on the drop down menu, then search `s001`, the result
- will get all the shots of all the episodes from sequence 1.
+Select the second episode on the drop down menu, then search `se02`, the result
+ will get all the shots of all the episodes from sequence 2.
 
 ![Search bar sequence episode](../img/faq/filter_ep_seq.png)
 
@@ -143,14 +142,14 @@ In the same way, you can search **specific status** link to task. Type the
 (`=`) and the **status** you are looking for.
 
 For example, search all the shots which are **Waiting for approval** ![WFA](../img/faq/wfa_icon.png)
-at the **layout** stage. So on the search bar you will type : `layout=wfa` or
-`lay=wfa`.
+at the **render** stage. So on the search bar you will type : `render=wfa`.
 
 ![Search layout wfa](../img/faq/filter_lay_wfa.png)
 
-You can be even more specific, lets focus on the first sequence : on the search
-bar add a **space** after the previous search and type `s001`. 
-The research will be `lay=wfa s001` or `s001 layout=wfa`.
+You can be even more specific, lets focus on the shots that are still 
+on retake at the Animation stage : on the search
+bar add a **space** after the previous search and type `animation=retake`. 
+The research will be `animation=retake render=wfa`.
 
 ![Search layout wfa seq2](../img/faq/filter_lay_wfa_s002.png)
 
@@ -172,19 +171,19 @@ you to run common queries faster.
 
 You can create **filters** about **entities**:
 
-* **Episodes** : `e001`, `e002` etc.  
-* **Sequences** : `e001 s001`, `s001 s001` etc.
-* **Asset Type** : `characters`, `environment`, `fx` etc.
+* **Sequences** : `se01`, `se02` etc. or exclude : '-se01', '-se02' etc.
+* **Asset Type** : `characters`, `environment`, `fx` etc. or exclude '-characters', '-fx', etc.
 
 You can also create **filters** about **task status** by following this syntax:
-**task=status**. You don't have to type all the letter of the task, Kitsu will
-understand the first letters. The status name has to be fully typed.
+**task=status**.
 
 Expemples:
 
-* Layout is Work in progress (wip) : `layout=wip` or `lay=wip`
-* Concept is waiting for approval (wfa) only for the fx : `concept=wfa fx` or `fx con=wfa`
-* On sequence 2 Layout is wip : `s002 lay=wip` or `layout=wip s002`
+* Layout is work in progress (wip) : `layout=wip`
+* Concept is waiting for approval (wfa) only for the fx : `concept=wfa fx`
+* On sequence 2 Layout is wip : `se02 layout=wip`
+* Animation is Retake and Render is waiting for approval (wfa) `animation=retake render=wfa`.
+
 
 
 ### How to delete filters?
@@ -205,7 +204,7 @@ bar ![Search delete](../img/faq/filter_cross_delete.png)
 The notification symbol is the **Bell** button next to your name, top right of
 the screen.  Its color is **grey** 
 ![Notification off](../img/faq/notification_icon_off.png) when you don't have
-any notification, and **green** 
+any notification, and **orange** 
 ![Notification on](../img/faq/notification_icon_on.png) when you have a new
 one.
 
@@ -230,12 +229,12 @@ Each part is a **link** you can use it to jump on the information you need. If
 you click on the **status**, you will jump to the status page of the entity. So
 you can react quickly to this new change.
 
-For example, let's assign Jacques to a new task and ask him to work on it.
+For example, let's give Alicia a retake.
 
 ![Notification example 01](../img/faq/notification_example01.png)
 
-Jacques receives immediately a notification, the **bell** button change color
-![Notification on](../img/faq/notification_icon_on.png), and he can read the
+Alicia receives immediately a notification, the **bell** button change color
+![Notification on](../img/faq/notification_icon_on.png), and she can read the
 new comment.
 
 **All the notifications and comments appear in real time**. No need to refresh
