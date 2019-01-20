@@ -64,6 +64,7 @@ def get_projects_with_extra_data(query):
             if first_episode is not None:
                 project_dict["first_episode_id"] = \
                     fields.serialize_value(first_episode.id)
+
         projects.append(project_dict)
     return projects
 
@@ -221,13 +222,18 @@ def remove_team_member(project_id, person_id):
     return project.serialize()
 
 
-def add_metadata_descriptor(project_id, entity_type, name):
+def add_metadata_descriptor(project_id, entity_type, name, choices):
     descriptor = MetadataDescriptor.create(
         project_id=project_id,
         entity_type=entity_type,
         name=name,
+        choices=choices,
         field_name=slugify.slugify(name, separator="_")
     )
+
+    events.emit("metadata-descriptor:new", {
+        "descriptor_id": str(descriptor.id)
+    })
     return descriptor.serialize()
 
 
@@ -274,6 +280,9 @@ def update_metadata_descriptor(metadata_descriptor_id, changes):
                     "data": metadata
                 })
     descriptor.update(changes)
+    events.emit("metadata-descriptor:update", {
+        "descriptor_id": str(descriptor.id)
+    })
     return descriptor.serialize()
 
 
@@ -285,9 +294,13 @@ def remove_metadata_descriptor(metadata_descriptor_id):
     entities = Entity.get_all_by(project_id=descriptor.project_id)
     for entity in entities:
         metadata = fields.serialize_value(entity.data)
-        metadata.pop(descriptor.field_name)
-        entity.update({
-            "data": metadata
-        })
+        if metadata is not None:
+            metadata.pop(descriptor.field_name, None)
+            entity.update({
+                "data": metadata
+            })
     descriptor.delete()
+    events.emit("metadata-descriptor:delete", {
+        "descriptor_id": str(descriptor.id)
+    })
     return descriptor.serialize()
