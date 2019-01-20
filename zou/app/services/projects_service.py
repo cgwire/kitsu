@@ -23,22 +23,37 @@ def open_projects(name=None):
     """
     query = Project.query \
         .join(ProjectStatus) \
+        .outerjoin(MetadataDescriptor) \
         .filter(ProjectStatus.name.in_(("Active", "open", "Open"))) \
         .order_by(Project.name)
 
     if name is not None:
         query = query.filter(Project.name == name)
 
-    return get_projects_with_first_episode(query)
+    return get_projects_with_extra_data(query)
 
 
-def get_projects_with_first_episode(query):
+def get_projects_with_extra_data(query):
     """
-    Helpers function to attach first episode name to curent project.
+    Helpers function to attach:
+    * First episode name to current project when it's a TV Show.
+    * Add metadata descriptors for this project.
     """
     projects = []
     for project in query.all():
         project_dict = project.serialize()
+
+        descriptors = MetadataDescriptor.get_all_by(project_id=project.id)
+        project_dict["descriptors"] = []
+        for descriptor in descriptors:
+            project_dict["descriptors"].append({
+                "id": fields.serialize_value(descriptor.id),
+                "name": descriptor.name,
+                "field_name": descriptor.field_name,
+                "choices": descriptor.choices,
+                "entity_type": descriptor.entity_type
+            })
+
         if project.production_type == "tvshow":
             first_episode = Entity.query \
                 .join(EntityType) \
