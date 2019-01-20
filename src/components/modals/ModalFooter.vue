@@ -51,7 +51,7 @@ export default {
       type: Boolean,
       default: false
     }
-  }
+  },
 
   computed: {
     ...mapGetters([
