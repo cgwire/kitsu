@@ -517,6 +517,10 @@ input.input:focus {
   font-weight: bold;
 }
 
+.pull-right {
+  float: right;
+}
+
 .footer-info {
   font-style: italic;
 }
