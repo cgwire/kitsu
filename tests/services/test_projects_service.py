@@ -100,18 +100,17 @@ class ProjectServiceTestCase(ApiDBTestCase):
         descriptor = projects_service.add_metadata_descriptor(
             self.project.id,
             "Asset",
-            "Is Outdoor"
+            "Is Outdoor",
+            []
         )
         self.assertIsNotNone(MetadataDescriptor.get(descriptor["id"]))
         descriptor = projects_service.add_metadata_descriptor(
             self.project.id,
             "Asset",
-            "Contractor"
+            "Contractor",
+            ["contractor 1", "contractor 2"]
         )
-        descriptors = projects_service.get_metadata_descriptors(
-            self.project.id,
-            "Asset"
-        )
+        descriptors = projects_service.get_metadata_descriptors(self.project.id)
         self.assertEqual(len(descriptors), 2)
         self.assertEqual(descriptors[0]["id"], descriptor["id"])
         self.assertEqual(descriptors[0]["field_name"], "contractor")
@@ -123,7 +122,8 @@ class ProjectServiceTestCase(ApiDBTestCase):
         descriptor = projects_service.add_metadata_descriptor(
             self.project.id,
             "Asset",
-            "Contractor"
+            "Contractor",
+            []
         )
         asset.update({
             "data": {
@@ -135,10 +135,7 @@ class ProjectServiceTestCase(ApiDBTestCase):
             descriptor["id"],
             {"name": "Team"}
         )
-        descriptors = projects_service.get_metadata_descriptors(
-            self.project.id,
-            "Asset"
-        )
+        descriptors = projects_service.get_metadata_descriptors(self.project.id)
         self.assertEqual(len(descriptors), 1)
         asset = Entity.get(asset.id)
         self.assertEqual(asset.data.get("team"), "contractor 1")
@@ -149,7 +146,8 @@ class ProjectServiceTestCase(ApiDBTestCase):
         descriptor = projects_service.add_metadata_descriptor(
             self.project.id,
             "Asset",
-            "Contractor"
+            "Contractor",
+            []
         )
         asset.update({
             "data": {
@@ -161,10 +159,7 @@ class ProjectServiceTestCase(ApiDBTestCase):
         projects_service.remove_metadata_descriptor(
             descriptor["id"]
         )
-        descriptors = projects_service.get_metadata_descriptors(
-            self.project.id,
-            "Asset"
-        )
+        descriptors = projects_service.get_metadata_descriptors(self.project.id)
         self.assertEqual(len(descriptors), 0)
         asset = Entity.get(asset.id)
         self.assertFalse("contractor" in asset.data)

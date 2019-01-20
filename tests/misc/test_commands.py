@@ -66,4 +66,4 @@ class CommandsTestCase(ApiDBTestCase):
         task_types = TaskType.get_all()
         asset_types = EntityType.get_all()
         self.assertEqual(len(task_types), 11)
-        self.assertEqual(len(asset_types), 8)
+        self.assertEqual(len(asset_types), 7)

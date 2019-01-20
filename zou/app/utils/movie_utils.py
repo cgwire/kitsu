@@ -3,8 +3,6 @@ import math
 import ffmpeg
 from PIL import Image
 
-from moviepy.editor import VideoFileClip
-
 
 def save_file(tmp_folder, instance_id, file_to_save):
     """
