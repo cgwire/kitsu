@@ -19,26 +19,6 @@
       </textarea>
       <div class="flexrow">
         <button
-          :class="{
-            'flexrow-item': true,
-            'button': true,
-            'is-loading': isLoading
-          }"
-          @click="runAddComment(text, task_status_id)"
-        >
-          {{ $t('comments.post_status') }}
-        </button>
-        <span class="flexrow-item">
-          {{ $t('comments.with_status') }}
-        </span>
-        <combobox
-          :options="taskStatusOptions"
-          :is-simple="true"
-          v-model="task_status_id"
-        />
-      </div>
-      <div class="flexrow">
-        <button
           class="button flexrow-item"
           @click="$emit('add-preview')"
         >
@@ -59,13 +39,38 @@
           </em>
         </span>
       </div>
+      <div class="flexrow mt1">
+        <span class="flexrow-item">
+          {{ $t('comments.set_status_to') }}
+        </span>
+        <combobox
+          class="flexrow-item status-selector"
+          :options="taskStatusOptions"
+          :is-simple="true"
+          v-model="task_status_id"
+        />
+
+        <div class="flexrow-item post-button-wrapper">
+        <button
+          :class="{
+            'button': true,
+            'button': true,
+            'is-primary': true,
+            'is-loading': isLoading
+          }"
+          @click="runAddComment(text, task_status_id)"
+        >
+          {{ $t('comments.post_status') }}
+        </button>
+        </div>
+      </div>
     </div>
   </article>
 </template>
 
 <script>
-import Combobox from './Combobox.vue'
-import PeopleAvatar from './PeopleAvatar.vue'
+import Combobox from './Combobox'
+import PeopleAvatar from './PeopleAvatar'
 
 export default {
   name: 'add-comment',
@@ -166,5 +171,18 @@ export default {
 
 .dark textarea:disabled {
   background: #555;
+}
+
+.post-button-wrapper {
+  flex: 1;
+  text-align: right
+}
+
+.mt1 {
+  margin-top: 0.5em;
+}
+
+.status-selector {
+  margin-top: 4px;
 }
 </style>
