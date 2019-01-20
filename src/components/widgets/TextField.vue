@@ -14,6 +14,7 @@
     />
     <button
       class="button flexrow-item"
+      @click="emitEnter()"
       v-if="buttonLabel"
     >
       {{ buttonLabel }}
