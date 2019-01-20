@@ -81,7 +81,9 @@ export default {
     confirmation_and_stay: 'Confirmer et rester',
     clear_selection: 'Effacer la sélection',
     close: 'Fermer',
+    edit: 'Modifier',
     dark_theme: 'Thème sombre',
+    delete: 'Supprimer',
     delete_all: 'Supprimer tout',
     documentation: 'Documentation',
     delete_text: 'Etes vous sûr de vouloir supprimer {name} de la base de données ?',
@@ -157,6 +159,18 @@ export default {
       status: 'Status',
       type: 'Type'
     },
+    metadata: {
+      add_explaination: 'Ajouter des données spécifiques au projet.',
+      add_failed: 'Une erreur s\'est produite en ajoutant des métadonnées au projet.',
+      add_new_values: 'Il n\'y a pour le moment aucune valeur enregistrée.',
+      available_values: 'Valeurs disponibles',
+      choices: 'Liste de valeurs',
+      delete_text: 'Êtes vous sûr de vouloir supprimmer cette colonne et toutes les données liées?',
+      delete_error: 'Une erreur est survenue en supprimant la colone de métadonnées.',
+      error: 'Une erreur est survenue en ajoutant la colone de métadonnées. Assurez vous qu\'aucune colonne ne porte le même nom et que les champs sont bien renseignés. Si le problème persiste, contactez le support.',
+      free: 'Valeur libre',
+      title: 'Ajouter une colonne de métadonnées'
+    },
     status: {
       open: 'Ouvert',
       closed: 'Fermé'
@@ -176,9 +190,9 @@ export default {
     no_file_attached: 'Aucun fichier attaché',
     post_status: 'Publier',
     retake: 'Reprise',
+    set_status_to: 'Positionner le statut à',
     validated: 'Validé !',
     validation_required: 'Validation requise',
-    with_status: 'avec le statut',
     fields: {
       text: 'Texte'
     }

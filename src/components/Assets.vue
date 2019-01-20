@@ -18,6 +18,7 @@
 
           <div class="level-right flexrow" v-if="isCurrentUserManager">
             <show-assignations-button class="flexrow-item" />
+            <!--show-details-button class="flexrow-item" /-->
             <button-link
               class="flexrow-item"
               :text="$t('main.csv.import_file')"
@@ -59,6 +60,9 @@
         :validation-columns="assetValidationColumns"
         @scroll="saveScrollPosition"
         @delete-all-tasks="onDeleteAllTasksClicked"
+        @add-metadata="onAddMetadataClicked"
+        @delete-metadata="onDeleteMetadataClicked"
+        @edit-metadata="onEditMetadataClicked"
       />
     </div>
   </div>
@@ -86,6 +90,7 @@
   />
 
   <delete-modal
+    ref="delete-asset-modal"
     :active="modals.isDeleteDisplayed"
     :is-loading="deleteAsset.isLoading"
     :is-error="deleteAsset.isError"
@@ -96,6 +101,7 @@
   />
 
   <delete-modal
+    ref="restore-asset-modal"
     :active="modals.isRestoreDisplayed"
     :is-loading="restoreAsset.isLoading"
     :is-error="restoreAsset.isDeleteError"
@@ -106,6 +112,7 @@
   />
 
   <hard-delete-modal
+    ref="delete-all-tasks-modal"
     :active="modals.isDeleteAllTasksDisplayed"
     :is-loading="loading.deleteAllTasks"
     :is-error="errors.deleteAllTasks"
@@ -114,6 +121,17 @@
     :error-text="$t('tasks.delete_all_error')"
     :lock-text="deleteAllTasksLockText"
     @confirm="confirmDeleteAllTasks"
+  />
+
+  <delete-modal
+    ref="delete-metadata-modal"
+    :active="modals.isDeleteMetadataDisplayed"
+    :is-loading="loading.deleteMetadata"
+    :is-error="errors.deleteMetadata"
+    @cancel="modals.isDeleteMetadataDisplayed = false"
+    :text="$t('productions.metadata.delete_text')"
+    :error-text="$t('productions.metadata.delete_error')"
+    @confirm="confirmDeleteMetadata"
   />
 
   <import-modal
@@ -139,6 +157,16 @@
     @confirm="confirmCreateTasks"
     @confirm-and-stay="confirmCreateTasksAndStay"
   />
+
+  <add-metadata-modal
+    :active="modals.isAddMetadataDisplayed"
+    :is-loading="loading.addMetadata"
+    :is-loading-stay="loading.addMetadata"
+    :is-error="errors.addMetadata"
+    :descriptor-to-edit="descriptorToEdit"
+    @cancel="modals.isAddMetadataDisplayed = false"
+    @confirm="confirmAddMetadata"
+  />
 </div>
 </template>
 
@@ -146,6 +174,7 @@
 import { mapGetters, mapActions } from 'vuex'
 
 import AssetList from './lists/AssetList'
+import AddMetadataModal from './modals/AddMetadataModal'
 import ButtonHrefLink from './widgets/ButtonHrefLink'
 import ButtonLink from './widgets/ButtonLink'
 import CreateTasksModal from './modals/CreateTasksModal'
@@ -164,6 +193,7 @@ export default {
 
   components: {
     AssetList,
+    AddMetadataModal,
     ButtonLink,
     ButtonHrefLink,
     CreateTasksModal,
@@ -182,21 +212,27 @@ export default {
     return {
       initialLoading: true,
       modals: {
+        isAddMetadataDisplayed: false,
         isCreateTasksDisplayed: false,
         isDeleteDisplayed: false,
         isDeleteAllTasksDisplayed: false,
+        isDeleteMetadataDisplayed: false,
         isImportDisplayed: false,
         isNewDisplayed: false
       },
       loading: {
+        addMetadata: false,
         creatingTasks: false,
         deleteAllTasks: false,
+        deleteMetadata: false,
         edit: false,
         importing: false,
         stay: false,
         taskStay: false
       },
       errors: {
+        addMetadata: false,
+        deleteMetadata: false,
         creatingTasks: false,
         importing: false
       },
@@ -212,7 +248,7 @@ export default {
       assetFilterTypes: [
         'Type'
       ],
-      choices: [],
+      descriptorToEdit: {},
       columns: [
         'Type',
         'Name',
@@ -305,7 +341,9 @@ export default {
 
   methods: {
     ...mapActions([
+      'addMetadataDescriptor',
       'deleteAllTasks',
+      'deleteMetadataDescriptor',
       'loadAssets',
       'loadComment',
       'removeAssetSearch',
@@ -433,6 +471,21 @@ export default {
         })
     },
 
+    confirmDeleteMetadata () {
+      this.errors.deleteMetadata = false
+      this.loading.deleteMetadata = true
+      this.deleteMetadataDescriptor(this.descriptorIdToDelete)
+        .then(() => {
+          this.errors.deleteMetadata = false
+          this.loading.deleteMetadata = false
+          this.modals.isDeleteMetadataDisplayed = false
+        }).catch((err) => {
+          console.error(err)
+          this.errors.deleteMetadata = true
+          this.loading.deleteMetadata = false
+        })
+    },
+
     resetLightEditModal () {
       const form = {
         name: '',
@@ -508,12 +561,14 @@ export default {
         this.modals.isCreateTasksDisplayed = true
       } else {
         this.modals = {
-          isNewDisplayed: false,
-          isDeleteDisplayed: false,
+          isAddMetadataDisplayed: false,
+          isCreateTasksDisplayed: false,
           isDeleteAllTasksDisplayed: false,
-          isRestoreDisplayed: false,
+          isDeleteDisplayed: false,
+          isDeleteMetadataDisplayed: false,
           isImportDisplayed: false,
-          isCreateTasksDisplayed: false
+          isNewDisplayed: false,
+          isRestoreDisplayed: false
         }
       }
     },
@@ -602,6 +657,38 @@ export default {
       route.params.task_type_id = taskTypeId
       this.deleteAllTasksLockText = taskType.name
       this.$router.push(route)
+    },
+
+    confirmAddMetadata (form) {
+      this.loading.addMetadata = true
+      form.entity_type = 'Asset'
+      this.addMetadataDescriptor(form)
+        .then(() => {
+          this.loading.addMetadata = false
+          this.modals.isAddMetadataDisplayed = false
+        })
+        .catch((err) => {
+          console.error(err)
+          this.loading.addMetadata = false
+          this.errors.addMetadata = true
+        })
+    },
+
+    onAddMetadataClicked () {
+      this.descriptorToEdit = {}
+      this.modals.isAddMetadataDisplayed = true
+    },
+
+    onDeleteMetadataClicked (descriptorId) {
+      this.descriptorIdToDelete = descriptorId
+      this.modals.isDeleteMetadataDisplayed = true
+    },
+
+    onEditMetadataClicked (descriptorId) {
+      this.descriptorToEdit = this.currentProduction.descriptors.find(
+        d => d.id === descriptorId
+      )
+      this.modals.isAddMetadataDisplayed = true
     }
   },
 

@@ -9,6 +9,13 @@
     @delete-all-clicked="onDeleteAllTasksClicked()"
   />
 
+  <table-metadata-header-menu
+    ref="headerMetadataMenu"
+    :is-current-user-admin="isCurrentUserAdmin"
+    @edit-clicked="onEditMetadataClicked()"
+    @delete-clicked="onDeleteMetadataClicked()"
+  />
+
   <div class="table-header-wrapper">
     <table class="table table-header" ref="headerWrapper">
       <thead>
@@ -18,13 +25,38 @@
           </th>
           <th class="thumbnail" ref="th-thumbnail"></th>
           <th class="name" ref="th-name">{{ $t('assets.fields.name') }}</th>
+
           <th
             class="description"
             ref="th-description"
             v-if="!isCurrentUserClient"
           >
             {{ $t('assets.fields.description') }}
+            <button-simple
+              class="is-small"
+              icon="plus"
+              :text="''"
+              @click="onAddMetadataClicked"
+              v-if="isCurrentUserAdmin && !isLoading"
+            />
           </th>
+
+          <th
+            class="metadata-descriptor"
+            :key="descriptor.id"
+            v-for="descriptor in assetMetadataDescriptors"
+          >
+            <div class="flexrow">
+              <span class="flexrow-item">
+              {{ descriptor.name }}
+              </span>
+              <chevron-down-icon
+                @click="showMetadataHeaderMenu(descriptor.id, $event)"
+                class="header-icon flexrow-item"
+              />
+            </div>
+          </th>
+
           <th
             :class="{
               'validation-cell': !hiddenColumns[columnId],
@@ -145,6 +177,13 @@
             v-if="!isCurrentUserClient"
             :entry="asset"
           />
+          <td
+            class="metadata-descriptor"
+            :key="asset.id + '-' + descriptor.id"
+            v-for="descriptor in assetMetadataDescriptors"
+          >
+            {{ asset.data ? asset.data[descriptor.field_name] : '' }}
+          </td>
           <validation-cell
             :class="{
               'validation-cell': !hiddenColumns[columnId],
@@ -193,20 +232,23 @@ import {
   ChevronDownIcon
 } from 'vue-feather-icons'
 import { entityListMixin } from './base'
+import { selectionListMixin } from './selection'
 
 import DescriptionCell from '../cells/DescriptionCell'
-import RowActions from '../widgets/RowActions'
-import ButtonLink from '../widgets/ButtonLink'
 import ButtonHrefLink from '../widgets/ButtonHrefLink'
+import ButtonLink from '../widgets/ButtonLink'
+import ButtonSimple from '../widgets/ButtonSimple'
 import EntityThumbnail from '../widgets/EntityThumbnail'
 import PageTitle from '../widgets/PageTitle'
+import RowActions from '../widgets/RowActions'
 import TableHeaderMenu from '../widgets/TableHeaderMenu'
 import TableInfo from '../widgets/TableInfo'
+import TableMetadataHeaderMenu from '../widgets/TableMetadataHeaderMenu'
 import ValidationCell from '../cells/ValidationCell'
 
 export default {
   name: 'asset-list',
-  mixins: [entityListMixin],
+  mixins: [entityListMixin, selectionListMixin],
 
   props: {
     displayedAssets: {
@@ -237,6 +279,7 @@ export default {
 
   components: {
     ButtonLink,
+    ButtonSimple,
     ButtonHrefLink,
     DescriptionCell,
     EntityThumbnail,
@@ -245,6 +288,7 @@ export default {
     RowActions,
     TableInfo,
     TableHeaderMenu,
+    TableMetadataHeaderMenu,
     ValidationCell
   },
 
@@ -252,6 +296,7 @@ export default {
     ...mapGetters([
       'assets',
       'assetFilledColumns',
+      'assetMetadataDescriptors',
       'assetSearchText',
       'assetSelectionGrid',
       'episodeMap',
@@ -451,6 +496,12 @@ export default {
   min-width: 200px;
   max-width: 200px;
   width: 200px;
+}
+
+.metadata-descriptor {
+  min-width: 100px;
+  max-width: 100px;
+  width: 100px;
 }
 
 .validation-cell {

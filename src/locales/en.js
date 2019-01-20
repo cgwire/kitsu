@@ -58,7 +58,7 @@ export default {
     retake: 'Retake',
     validated: 'Validated!',
     validation_required: 'Validation Required',
-    with_status: 'with status',
+    set_status_to: 'Set status to',
     fields: {
       text: 'text'
     }
@@ -127,13 +127,15 @@ export default {
     admin: 'Admin',
     cancel: 'Cancel',
     clear_selection: 'Clear current selection',
-    delete_all: 'Delete all',
-    delete_text: 'Are you sure you want to remove {name} from your database?',
     documentation: 'Documentation',
     close: 'Close',
     confirmation: 'Confirm',
     confirmation_and_stay: 'Confirm and stay',
     dark_theme: 'Dark Theme',
+    delete: 'Delete',
+    delete_all: 'Delete all',
+    delete_text: 'Are you sure you want to remove {name} from your database?',
+    edit: 'Edit',
     empty_comment: 'Empty comment',
     history: 'history',
     info: 'Information',
@@ -142,6 +144,7 @@ export default {
     loading_data: 'Loading data',
     loading_error: 'An error occured while loading data.',
     logout: 'Logout',
+    modify: 'Modify',
     minimize: 'Minimize',
     maximize: 'Maximize',
     profile: 'Profile',
@@ -279,6 +282,18 @@ export default {
       resolution: 'Resolution',
       status: 'Status',
       type: 'Type'
+    },
+    metadata: {
+      add_explaination: 'Add specific data required by this project.',
+      add_failed: 'An error occured while adding metadata to your project.',
+      add_new_values: 'There is currently no available values.',
+      available_values: 'Available values',
+      choices: 'List of values',
+      delete_text: 'Are you sure you want to delete this column and related data for all assets of this production?',
+      delete_error: 'An error occured while deleting this metadata column.',
+      error: 'An error occured while adding the metadata column. Make sure there is no column with similar name and that all fields are filled. If the problem is persists, please contact the support team.',
+      free: 'Free value',
+      title: 'Add metadata column'
     },
     status: {
       closed: 'Closed',

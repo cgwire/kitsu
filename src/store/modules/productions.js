@@ -134,7 +134,7 @@ const getters = {
   },
 
   assetMetadataDescriptors: (state) => {
-    return sortByName(
+    return !state.currentProduction ? [] : sortByName(
       state.currentProduction.descriptors
         .filter(d => d.entity_type === 'Asset')
     )
