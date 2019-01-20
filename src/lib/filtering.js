@@ -13,6 +13,7 @@ export const applyFilters = (entries, filters, taskMap) => {
   const isStatus = { status: true }
   const isAssignation = { assignation: true }
   const isExclusion = { exclusion: true }
+  const isDescriptor = { descriptor: true }
 
   if (filters && filters.length > 0) {
     return entries.filter((entry) => {
@@ -35,6 +36,9 @@ export const applyFilters = (entries, filters, taskMap) => {
           }
         } else if (isExclusion[filter.type]) {
           isOk = !filter.excludedIds[entry.id]
+        } else if (isDescriptor[filter.type]) {
+          isOk = entry.data &&
+            entry.data[filter.descriptor.field_name] === filter.value
         }
       })
       return isOk
@@ -83,10 +87,12 @@ export const getExcludingKeyWords = (queryText) => {
  * * exclusion filters
  */
 export const getFilters = (
-  entryIndex, taskTypes, taskStatuses, query
+  entryIndex, taskTypes, taskStatuses, descriptors, query
 ) => {
-  const filters = getTaskTypeFilters(taskTypes, taskStatuses, query)
+  let filters = getTaskTypeFilters(taskTypes, taskStatuses, query)
+  const descFilters = getDescFilters(descriptors, query)
   const excludingKeywords = getExcludingKeyWords(query) || []
+  filters = filters.concat(descFilters)
   excludingKeywords.forEach((keyword) => {
     let excludedMap = {}
     let excludedEntries = indexSearch(entryIndex, [keyword]) || []
@@ -149,6 +155,38 @@ export const getTaskTypeFilters = (
             type: 'status'
           })
         }
+      }
+    })
+  }
+  return results
+}
+
+/*
+ * Extract metadata filters (like size=big or size=small) from given
+ * query.
+ */
+export const getDescFilters = (descriptors, queryText) => {
+  if (!queryText) return []
+
+  const results = []
+  const rgxMatches = queryText.match(EQUAL_REGEX)
+  const descriptorNameIndex = buildNameIndex(descriptors, false)
+
+  if (rgxMatches) {
+    rgxMatches.forEach((rgxMatch) => {
+      const pattern = rgxMatch.split('=')
+      const value = pattern[1]
+      let descriptorName = pattern[0]
+      if (descriptorName[0] === '[') {
+        descriptorName = descriptorName.substring(1, descriptorName.length - 1)
+      }
+      const descriptors = descriptorNameIndex[descriptorName.toLowerCase()]
+      if (descriptors) {
+        results.push({
+          descriptor: descriptors[0],
+          value,
+          type: 'descriptor'
+        })
       }
     })
   }
