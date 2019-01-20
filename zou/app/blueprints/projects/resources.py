@@ -97,9 +97,9 @@ class ProductionMetadataDescriptorsResource(Resource, ArgsMixin):
     @jwt_required
     def post(self, project_id):
         args = self.get_args([
-            ("entity_type", "Asset", True),
+            ("entity_type", "Asset", False),
             ("name", "", True),
-            ("choices", [], True)
+            ("choices", [], False, "append")
         ])
         permissions.check_admin_permissions()
 
@@ -110,13 +110,14 @@ class ProductionMetadataDescriptorsResource(Resource, ArgsMixin):
 
         if len(args["name"]) == 0:
             raise WrongParameterException(
-                "Name cannot be empty."
+                "Name cannot be empty.",
             )
 
         return projects_service.add_metadata_descriptor(
             project_id,
             args["entity_type"],
-            args["name"]
+            args["name"],
+            args["choices"]
         ), 201
 
 
@@ -135,7 +136,7 @@ class ProductionMetadataDescriptorResource(Resource, ArgsMixin):
     def put(self, project_id, descriptor_id):
         args = self.get_args([
             ("name", "", False),
-            ("choices", [], False)
+            ("choices", [], False, "append")
         ])
         permissions.check_admin_permissions()
 
