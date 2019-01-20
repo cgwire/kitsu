@@ -372,9 +372,10 @@ const actions = {
     const taskStatusMap = rootGetters.taskStatusMap
     const taskTypeMap = rootGetters.taskTypeMap
     const taskMap = rootGetters.taskMap
+    const production = rootGetters.currentProduction
     commit(
       SET_ASSET_SEARCH,
-      { assetSearch, taskMap, taskStatusMap, taskTypeMap }
+      { assetSearch, taskMap, taskStatusMap, taskTypeMap, production }
     )
   },
 
@@ -421,7 +422,8 @@ const actions = {
     commit(DISPLAY_MORE_ASSETS, {
       taskTypeMap: rootGetters.taskTypeMap,
       taskStatusMap: rootGetters.taskStatusMap,
-      taskMap: rootGetters.taskMap
+      taskMap: rootGetters.taskMap,
+      production: rootGetters.currentProduction
     })
   },
 
@@ -700,7 +702,7 @@ const mutations = {
   },
 
   [SET_ASSET_SEARCH] (
-    state, { assetSearch, taskStatusMap, taskTypeMap, taskMap }
+    state, { assetSearch, taskStatusMap, taskTypeMap, taskMap, production }
   ) {
     const taskTypes = Object.values(taskTypeMap)
     const taskStatuses = Object.keys(taskStatusMap).map((id) => {
@@ -713,6 +715,7 @@ const mutations = {
       cache.assetIndex,
       taskTypes,
       taskStatuses,
+      production.descriptors || [],
       query
     )
     let result = indexSearch(cache.assetIndex, keywords) || cache.assets
@@ -747,7 +750,8 @@ const mutations = {
   [DISPLAY_MORE_ASSETS] (state, {
     taskTypeMap,
     taskStatusMap,
-    taskMap
+    taskMap,
+    production
   }) {
     let assets
     if (state.assetSearchText.length > 0) {
@@ -759,6 +763,7 @@ const mutations = {
         cache.assetIndex,
         taskTypes,
         taskStatuses,
+        production.descriptors || [],
         query
       )
       assets = indexSearch(cache.assetIndex, keywords) || cache.assets

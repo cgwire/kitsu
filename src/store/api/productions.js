@@ -72,5 +72,66 @@ export default {
         }
       )
     })
+  },
+
+  addMetadataDescriptor (productionId, descriptor) {
+    return new Promise((resolve, reject) => {
+      const data = {
+        name: descriptor.name,
+        choices: descriptor.values,
+        entity_type: descriptor.entity_type
+      }
+      client.post(
+        `/api/data/projects/${productionId}/metadata-descriptors`,
+        data,
+        (err, descriptor) => {
+          if (err) reject(err)
+          else resolve(descriptor)
+        }
+      )
+    })
+  },
+
+  getMetadataDescriptor (productionId, descriptorId) {
+    return new Promise((resolve, reject) => {
+      client.get(
+        `/api/data/projects/${productionId}/metadata-descriptors/${descriptorId}`,
+        (err, descriptor) => {
+          if (err) reject(err)
+          else resolve(descriptor)
+        }
+      )
+    })
+  },
+
+  updateMetadataDescriptor (productionId, descriptor) {
+    return new Promise((resolve, reject) => {
+      const data = {
+        id: descriptor.id,
+        name: descriptor.name,
+        choices: descriptor.values,
+        entity_type: descriptor.entity_type
+      }
+      client.put(
+        `/api/data/projects/${productionId}/metadata-descriptors/${descriptor.id}`,
+        data,
+        (err, descriptor) => {
+          if (err) reject(err)
+          else resolve(descriptor)
+        }
+      )
+    })
+  },
+
+  deleteMetadataDescriptor (productionId, descriptorId) {
+    return new Promise((resolve, reject) => {
+      client.del(
+        `/api/data/projects/${productionId}/metadata-descriptors/${descriptorId}`,
+        (err) => {
+          if (err) reject(err)
+          else resolve()
+        }
+      )
+    })
   }
 }
