@@ -132,8 +132,18 @@ export const getWeekRange = (year, currentYear) => {
   }
 }
 
-export const remove = (items, valueToRemove) => {
-  return items.filter(item => item !== valueToRemove)
+export const updateModelFromList = (items, modelToUpdate) => {
+  const item = items.find(item => item.id === modelToUpdate.id)
+  if (item) Object.assign(item, modelToUpdate)
+  return item
+}
+
+export const removeModelFromList = (items, valueToRemove) => {
+  return items.filter(item => item.id !== valueToRemove.id)
+}
+
+export const remove = (items, modelToRemove) => {
+  return items.filter(item => item !== modelToRemove)
 }
 
 export const getFilledColumns = (entries) => {
