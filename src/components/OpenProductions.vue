@@ -50,13 +50,6 @@
           >
             {{ $t('shots.title') }}
           </router-link>
-          -
-          <router-link
-            class="secondary"
-            :to="sequencesPath(production)"
-          >
-            {{ $t('sequences.title') }}
-          </router-link>
         </div>
       </div>
       <div class="has-text-centered new-production-link">
@@ -205,12 +198,6 @@ export default {
         callback: (err, production) => {
           if (!err) {
             this.modals.isNewDisplayed = false
-            this.$router.push({
-              name: 'assets',
-              params: {
-                production_id: production.id
-              }
-            })
           }
         }
       })
