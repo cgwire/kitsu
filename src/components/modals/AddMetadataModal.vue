@@ -43,7 +43,9 @@
             :key="value"
             v-for="value in form.values"
           >
-            {{ value }}
+            <span>
+              {{ value }}
+            </span>
             <span
               class="remove-button pull-right"
               @click="removeValue(value)"
@@ -207,6 +209,14 @@ export default {
 </script>
 
 <style scoped>
+.dark  .content .choice-value {
+  border-color: #666;
+}
+
+.dark .remove-button:hover {
+  background: #666;
+}
+
 .modal-content .box p.text {
   margin-bottom: 1em;
 }
@@ -231,22 +241,26 @@ export default {
 }
 
 .content .choice-value {
-  border: 1px solid #666;
+  border: 1px solid #CCC;
+  border-bottom: 0;
   margin: 0;
   padding: 0.5em;
+}
+
+.content .choice-value:last-child{
+  border-bottom: 1px solid #CCC;
 }
 
 .remove-button {
   color: #999;
   width: 20px;
-  line-height: 20px;
   text-align: center;
   padding: 0;
   cursor: pointer;
 }
 
 .remove-button:hover {
-  background: #666;
+  background: #EEE;
   border-radius: 50%;
 }
 </style>
