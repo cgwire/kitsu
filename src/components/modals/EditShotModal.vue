@@ -19,60 +19,60 @@
           :label="$t('shots.fields.sequence')"
           :options="getSequenceOptions"
           v-model="form.sequence_id"
-        >
-        </combobox>
+        />
         <text-field
           ref="nameField"
           :label="$t('shots.fields.name')"
           v-model="form.name"
           @enter="runConfirmation"
           v-focus
-        >
-        </text-field>
+        />
         <textarea-field
           ref="descriptionField"
           :label="$t('shots.fields.description')"
           v-model="form.description"
           @enter="runConfirmation"
-        >
-        </textarea-field>
+        />
         <text-field
           ref="frameInField"
           :label="$t('shots.fields.frame_in')"
           v-model="form.frameIn"
           type="number"
-        >
-        </text-field>
+        />
         <text-field
           ref="frameOutField"
           :label="$t('shots.fields.frame_out')"
           v-model="form.frameOut"
           type="number"
           @enter="runConfirmation"
-        >
-        </text-field>
+        />
         <text-field
           ref="fpsField"
           :label="$t('shots.fields.fps')"
           v-model="form.fps"
           type="number"
           @enter="runConfirmation"
+        />
+        <div
+          :key="descriptor.id"
+          v-for="descriptor in shotMetadataDescriptors"
         >
-        </text-field>
+          <combobox
+            v-if="descriptor.choices.length > 0"
+            :label="descriptor.name"
+            :options="getDescriptorChoicesOptions(descriptor)"
+            v-model="form.data[descriptor.field_name]"
+          />
+          <text-field
+            :label="descriptor.name"
+            v-model="form.data[descriptor.field_name]"
+            @enter="runConfirmation"
+            v-else
+          />
+        </div>
       </form>
 
       <div class="has-text-right">
-        <a
-          :class="{
-            button: true,
-            'is-primary': true,
-            'is-loading': isLoadingStay
-          }"
-          @click="confirmAndStayClicked"
-          v-if="!shotToEdit || !shotToEdit.id"
-        >
-          {{ $t("main.confirmation_and_stay") }}
-        </a>
         <a
           :class="{
             button: true,
@@ -85,9 +85,18 @@
         </a>
         <router-link
           :to="cancelRoute"
-          class="button is-link">
-          {{ $t("main.cancel") }}
+          class="button is-link"
+          v-if="cancelRoute"
+        >
+          {{ $t("main.close") }}
         </router-link>
+        <button
+          class="button is-link"
+          @click="$emit('cancel')"
+          v-else
+        >
+          {{ $t("main.close") }}
+        </button>
         <p class="error has-text-right info-message" v-if="isError">
           {{ $t("shots.edit_fail") }}
         </p>
@@ -102,16 +111,19 @@
 
 <script>
 import { mapGetters, mapActions } from 'vuex'
+import { modalMixin } from './base_modal'
 import TextField from '../widgets/TextField'
 import TextareaField from '../widgets/TextareaField'
 import Combobox from '../widgets/Combobox'
 
 export default {
   name: 'edit-shot-modal',
+  mixins: [modalMixin],
+
   components: {
+    Combobox,
     TextField,
-    TextareaField,
-    Combobox
+    TextareaField
   },
 
   props: [
@@ -128,45 +140,24 @@ export default {
   ],
 
   data () {
-    if (this.shotToEdit && this.shotToEdit.id) {
-      return {
-        form: {
-          name: this.shotToEdit.name,
-          description: this.shotToEdit.description,
-          sequence_id: this.shotToEdit.sequence_id,
-          production_id: this.shotToEdit.project_id,
-          frameIn: this.frameIn,
-          frameOut: this.frameOut,
-          fps: this.fps
-        },
-        shotSuccessText: ''
-      }
-    } else {
-      return {
-        form: {
-          name: '',
-          description: '',
-          entity_type_id: '',
-          project_id: '',
-          frameIn: '',
-          frameOut: '',
-          fps: ''
-        },
-        shotSuccessText: ''
-      }
+    return {
+      form: {
+        data: {}
+      },
+      shotSuccessText: ''
     }
   },
 
   computed: {
     ...mapGetters([
-      'shots',
-      'shotCreated',
-
-      'sequences',
-      'openProductions',
+      'currentProduction',
       'getSequenceOptions',
       'getOpenProductionOptions',
-      'currentProduction'
+      'openProductions',
+      'sequences',
+      'shots',
+      'shotCreated',
+      'shotMetadataDescriptors'
     ]),
 
     frameIn () {
@@ -193,11 +184,18 @@ export default {
         this.confirmAndStayClicked()
       }
     },
+
     confirmAndStayClicked () {
       this.$emit('confirmAndStay', this.form)
     },
+
     confirmClicked () {
       this.$emit('confirm', this.form)
+    },
+
+    getDescriptorChoicesOptions (descriptor) {
+      const values = descriptor.choices.map(c => ({label: c, value: c}))
+      return [{label: '', value: ''}, ...values]
     },
 
     isEditing () {
@@ -208,13 +206,15 @@ export default {
       this.shotSuccessText = ''
       if (!this.isEditing()) {
         if (this.openProductions.length > 0) {
-          this.form.project_id = this.currentProduction.id
+          this.form.project_id =
+            this.currentProduction ? this.currentProduction.id : ''
         }
         if (this.sequences.length > 0) {
           this.form.sequence_id = this.sequences[0].id
         }
         this.form.name = ''
         this.form.description = ''
+        this.form.data = {}
       } else {
         this.form = {
           sequence_id: this.shotToEdit.sequence_id,
@@ -223,7 +223,8 @@ export default {
           description: this.shotToEdit.description,
           frameIn: this.frameIn,
           frameOut: this.frameOut,
-          fps: this.fps
+          fps: this.fps,
+          data: {...this.shotToEdit.data} || {}
         }
       }
     }
@@ -235,12 +236,19 @@ export default {
 
   watch: {
     active () {
+      this.shotSuccessText = ''
       this.resetForm()
+      if (this.active) {
+        setTimeout(() => {
+          this.$refs.nameField.focus()
+        }, 100)
+      }
     },
 
     shotToEdit () {
       this.resetForm()
     },
+
     shotCreated () {
       if (this.isEditing()) {
         this.shotSuccessText = this.$t('shots.edit_success', {
@@ -272,5 +280,9 @@ export default {
 }
 .info-message {
   margin-top: 1em;
+}
+
+.modal-content {
+  max-height: 80%;
 }
 </style>

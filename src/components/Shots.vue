@@ -60,6 +60,10 @@
         :validation-columns="shotValidationColumns"
         @scroll="saveScrollPosition"
         @delete-all-tasks="onDeleteAllTasksClicked"
+        @add-metadata="onAddMetadataClicked"
+        @delete-metadata="onDeleteMetadataClicked"
+        @edit-metadata="onEditMetadataClicked"
+
       />
     </div>
   </div>
@@ -90,10 +94,10 @@
     :cancel-route="shotsPath"
     :shot-to-edit="shotToEdit"
     @confirm="confirmEditShot"
-    @confirmAndStay="confirmNewShotStay"
   />
 
   <delete-modal
+    ref="delete-shot-modal"
     :active="modals.isDeleteDisplayed"
     :is-loading="deleteShot.isLoading"
     :is-error="deleteShot.isError"
@@ -104,6 +108,7 @@
   />
 
   <delete-modal
+    ref="restore-shot-modal"
     :active="modals.isRestoreDisplayed"
     :is-loading="restoreShot.isLoading"
     :is-error="restoreShot.isError"
@@ -113,7 +118,19 @@
     @confirm="confirmRestoreShot"
   />
 
+  <delete-modal
+    ref="delete-metadata-modal"
+    :active="modals.isDeleteMetadataDisplayed"
+    :is-loading="loading.deleteMetadata"
+    :is-error="errors.deleteMetadata"
+    @cancel="modals.isDeleteMetadataDisplayed = false"
+    :text="$t('productions.metadata.delete_text')"
+    :error-text="$t('productions.metadata.delete_error')"
+    @confirm="confirmDeleteMetadata"
+  />
+
   <hard-delete-modal
+    ref="delete-all-tasks-modal"
     :active="modals.isDeleteAllTasksDisplayed"
     :is-loading="loading.deleteAllTasks"
     :is-error="errors.deleteAllTasks"
@@ -148,6 +165,15 @@
     @confirm-and-stay="confirmCreateTasksAndStay"
   />
 
+  <add-metadata-modal
+    :active="modals.isAddMetadataDisplayed"
+    :is-loading="loading.addMetadata"
+    :is-loading-stay="loading.addMetadata"
+    :is-error="errors.addMetadata"
+    :descriptor-to-edit="descriptorToEdit"
+    @cancel="closeMetadataModal"
+    @confirm="confirmAddMetadata"
+  />
 </div>
 </template>
 
@@ -155,6 +181,7 @@
 import { mapGetters, mapActions } from 'vuex'
 import { SearchIcon } from 'vue-feather-icons'
 
+import AddMetadataModal from './modals/AddMetadataModal'
 import ButtonHrefLink from './widgets/ButtonHrefLink'
 import ButtonLink from './widgets/ButtonLink'
 import Combobox from './widgets/Combobox'
@@ -175,6 +202,7 @@ export default {
   name: 'shots',
 
   components: {
+    AddMetadataModal,
     ButtonLink,
     ButtonHrefLink,
     Combobox,
@@ -197,26 +225,33 @@ export default {
     return {
       initialLoading: true,
       modals: {
+        isAddMetadataDisplayed: false,
         isCreateTasksDisplayed: false,
         isDeleteDisplayed: false,
+        isDeleteMetadataDisplayed: false,
         isDeleteAllTasksDisplayed: false,
         isImportDisplayed: false,
         isNewDisplayed: false,
         isRestoreDisplayed: false
       },
       loading: {
+        addMetadata: false,
         creatingTasks: false,
         creatingTasksStay: false,
         deleteAllTasks: false,
+        deleteMetadata: false,
         edit: false,
         importing: false,
         stay: false
       },
       errors: {
+        addMetadata: false,
+        deleteMetadata: false,
         creatingTasks: false,
         deleteAllTasks: false,
         importing: false
       },
+      descriptorToEdit: {},
       shotToDelete: null,
       shotToEdit: null,
       columns: [
@@ -316,7 +351,9 @@ export default {
 
   methods: {
     ...mapActions([
+      'addMetadataDescriptor',
       'deleteAllTasks',
+      'deleteMetadataDescriptor',
       'loadShots',
       'loadComment',
       'removeShotSearch',
@@ -327,26 +364,56 @@ export default {
       'hideAssignations'
     ]),
 
-    confirmNewShotStay (form) {
-      let action = 'newShot'
-      this.loading.stay = true
-      this.editShot.isSuccess = false
-      this.editShot.isError = false
+    confirmAddMetadata (form) {
+      this.loading.addMetadata = true
+      form.entity_type = 'Shot'
+      this.addMetadataDescriptor(form)
+        .then(() => {
+          this.loading.addMetadata = false
+          this.modals.isAddMetadataDisplayed = false
+        })
+        .catch((err) => {
+          console.error(err)
+          this.loading.addMetadata = false
+          this.errors.addMetadata = true
+        })
+    },
 
-      this.$store.dispatch(action, {
-        data: form,
-        callback: (err) => {
-          this.loading.stay = false
-          if (!err) {
-            this.resetEditModal()
-            this.editShot.shotCreated = form.name
-            this.editShot.isSuccess = true
-          } else {
-            this.loading.edit = false
-            this.editShot.isCreateError = true
-          }
-        }
-      })
+    closeMetadataModal () {
+      console.log('cool')
+      this.modals.isAddMetadataDisplayed = false
+    },
+
+    confirmDeleteMetadata () {
+      this.errors.deleteMetadata = false
+      this.loading.deleteMetadata = true
+      this.deleteMetadataDescriptor(this.descriptorIdToDelete)
+        .then(() => {
+          this.errors.deleteMetadata = false
+          this.loading.deleteMetadata = false
+          this.modals.isDeleteMetadataDisplayed = false
+        }).catch((err) => {
+          console.error(err)
+          this.errors.deleteMetadata = true
+          this.loading.deleteMetadata = false
+        })
+    },
+
+    onAddMetadataClicked () {
+      this.descriptorToEdit = {}
+      this.modals.isAddMetadataDisplayed = true
+    },
+
+    onDeleteMetadataClicked (descriptorId) {
+      this.descriptorIdToDelete = descriptorId
+      this.modals.isDeleteMetadataDisplayed = true
+    },
+
+    onEditMetadataClicked (descriptorId) {
+      this.descriptorToEdit = this.currentProduction.descriptors.find(
+        d => d.id === descriptorId
+      )
+      this.modals.isAddMetadataDisplayed = true
     },
 
     confirmEditShot (form) {
@@ -494,6 +561,7 @@ export default {
       this.editShot.isError = false
 
       this.modals = {
+        isAddMetadataDisplayed: false,
         isCreateTasksDisplayed: false,
         isDeleteDisplayed: false,
         isDeleteAllTasksDisplayed: false,

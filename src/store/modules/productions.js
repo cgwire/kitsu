@@ -140,6 +140,13 @@ const getters = {
     )
   },
 
+  shotMetadataDescriptors: (state) => {
+    return !state.currentProduction ? [] : sortByName(
+      state.currentProduction.descriptors
+        .filter(d => d.entity_type === 'Shot')
+    )
+  },
+
   productionStatusOptions: state => state.productionStatus.map(
     (status) => { return { label: status.name, value: status.id } }
   ),

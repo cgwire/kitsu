@@ -582,4 +582,8 @@ tbody:last-child .empty-line:last-child {
 .splitted-table tbody {
   border: 0;
 }
+
+.table th {
+  vertical-align: middle;
+}
 </style>
