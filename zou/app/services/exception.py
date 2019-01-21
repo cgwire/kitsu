@@ -101,6 +101,10 @@ class SubscriptionNotFoundException(NotFound):
     pass
 
 
+class MetadataDescriptorNotFoundException(NotFound):
+    pass
+
+
 class MalformedFileTreeException(Exception):
     pass
 
@@ -146,4 +150,8 @@ class ArgumentsException(Exception):
 
 
 class WrongIdFormatException(Exception):
+    pass
+
+
+class WrongParameterException(Exception):
     pass

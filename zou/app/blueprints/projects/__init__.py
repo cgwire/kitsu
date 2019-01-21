@@ -5,7 +5,9 @@ from .resources import (
     AllProjectsResource,
     OpenProjectsResource,
     ProductionTeamResource,
-    ProductionTeamRemoveResource
+    ProductionTeamRemoveResource,
+    ProductionMetadataDescriptorResource,
+    ProductionMetadataDescriptorsResource
 )
 
 routes = [
@@ -13,7 +15,18 @@ routes = [
     ("/data/projects/all", AllProjectsResource),
 
     ("/data/projects/<project_id>/team", ProductionTeamResource),
-    ("/data/projects/<project_id>/team/<person_id>", ProductionTeamRemoveResource)
+    (
+        "/data/projects/<project_id>/team/<person_id>",
+        ProductionTeamRemoveResource
+    ),
+    (
+        "/data/projects/<project_id>/metadata-descriptors",
+        ProductionMetadataDescriptorsResource
+    ),
+    (
+        "/data/projects/<project_id>/metadata-descriptors/<descriptor_id>",
+        ProductionMetadataDescriptorResource
+    )
 ]
 
 blueprint = Blueprint("projects", "projects")

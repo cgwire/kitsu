@@ -142,7 +142,6 @@ class CreatePreviewFilePictureResource(Resource):
                 {"extension": "png"}
             )
             self.emit_app_preview_event(instance_id)
-            print(preview_file)
             return preview_file, 201
 
         elif extension in ALLOWED_MOVIE_EXTENSION:
@@ -434,6 +433,16 @@ class BaseCreatePictureResource(Resource):
     def prepare_creation(self, instance_id):
         pass
 
+    def clear_cache_file(self, preview_file_id):
+        if config.FS_BACKEND != "local":
+            file_path = os.path.join(
+                config.TMP_DIR,
+                "cache-%s-%s.%s" % ("thumbnails", preview_file_id, "png")
+            )
+            if os.path.exists(file_path):
+                os.remove(file_path)
+        return preview_file_id
+
     @jwt_required
     def post(self, instance_id):
         if not self.is_exist(instance_id):
@@ -455,6 +464,7 @@ class BaseCreatePictureResource(Resource):
         )
         file_store.add_picture("thumbnails", instance_id, thumbnail_path)
         os.remove(thumbnail_path)
+        self.clear_cache_file(instance_id)
 
         thumbnail_url_path = \
             thumbnail_utils.url_path(
