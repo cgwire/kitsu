@@ -57,7 +57,8 @@ export default {
       'getTask',
       'loadComment',
       'loadPersonTasks',
-      'refreshPreview'
+      'refreshPreview',
+      'refreshMetadataDescriptor'
     ]),
 
     onAssignation (eventData) {
@@ -99,6 +100,20 @@ export default {
 
       'task:update' (eventData) {
         this.getTask({ taskId: eventData.task_id })
+      },
+
+      'metadata-descriptor:new' (eventData) {
+        this.refreshMetadataDescriptor(eventData.descriptor_id)
+      },
+
+      'metadata-descriptor:update' (eventData) {
+        this.refreshMetadataDescriptor(eventData.descriptor_id)
+      },
+
+      'metadata-descriptor:delete' (eventData) {
+        this.$store.commit('DELETE_METADATA_DESCRIPTOR_END', {
+          id: eventData.descriptor_id
+        })
       }
     }
   }
@@ -500,6 +515,10 @@ input.input:focus {
 
 .strong {
   font-weight: bold;
+}
+
+.pull-right {
+  float: right;
 }
 
 .footer-info {

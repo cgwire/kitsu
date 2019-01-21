@@ -26,7 +26,8 @@ export default {
       name: asset.name,
       description: asset.description,
       entity_type_id: asset.entity_type_id,
-      project_id: asset.project_id
+      project_id: asset.project_id,
+      data: asset.data
     }
     if (asset.source_id !== 'null') {
       data.source_id = asset.source_id
@@ -40,7 +41,8 @@ export default {
       name: asset.name,
       description: asset.description,
       entity_type_id: asset.entity_type_id,
-      project_id: asset.project_id
+      project_id: asset.project_id,
+      data: asset.data
     }
     if (asset.source_id === 'null' || asset.source_id) {
       data.source_id = asset.source_id

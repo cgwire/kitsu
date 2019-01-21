@@ -9,6 +9,13 @@
     @delete-all-clicked="onDeleteAllTasksClicked()"
   />
 
+  <table-metadata-header-menu
+    ref="headerMetadataMenu"
+    :is-current-user-admin="isCurrentUserAdmin"
+    @edit-clicked="onEditMetadataClicked()"
+    @delete-clicked="onDeleteMetadataClicked()"
+  />
+
   <div class="table-header-wrapper">
     <table class="table table-header" ref="headerWrapper">
       <thead>
@@ -20,6 +27,33 @@
           <th class="name shot-name" ref="th-shot" >
             {{ $t('shots.fields.name') }}
           </th>
+          <th class="description" v-if="!isCurrentUserClient">
+            {{ $t('shots.fields.description') }}
+            <button-simple
+              class="is-small"
+              icon="plus"
+              :text="''"
+              @click="onAddMetadataClicked"
+              v-if="isCurrentUserAdmin && !isLoading"
+            />
+          </th>
+
+          <th
+            class="metadata-descriptor"
+            :key="descriptor.id"
+            v-for="descriptor in shotMetadataDescriptors"
+          >
+            <div class="flexrow">
+              <span class="flexrow-item">
+              {{ descriptor.name }}
+              </span>
+              <chevron-down-icon
+                @click="showMetadataHeaderMenu(descriptor.id, $event)"
+                class="header-icon flexrow-item"
+              />
+            </div>
+          </th>
+
           <th class="framein" v-if="isFrameIn">
             {{ $t('shots.fields.frame_in') }}
           </th>
@@ -27,9 +61,7 @@
             {{ $t('shots.fields.frame_out') }}
           </th>
           <th class="fps" v-if="isFps">{{ $t('shots.fields.fps') }}</th>
-          <th class="description" v-if="!isCurrentUserClient">
-            {{ $t('shots.fields.description') }}
-          </th>
+
           <th
             :class="{
               'validation-cell': !hiddenColumns[columnId],
@@ -123,6 +155,18 @@
               {{ shot.name }}
             </router-link>
           </td>
+          <description-cell
+            class="description"
+            :entry="shot"
+            v-if="!isCurrentUserClient"
+          />
+          <td
+            class="metadata-descriptor"
+            :key="shot.id + '-' + descriptor.id"
+            v-for="descriptor in shotMetadataDescriptors"
+          >
+            {{ shot.data ? shot.data[descriptor.field_name] : '' }}
+          </td>
           <td class="framein" v-if="isFrameIn">
             {{ shot.data && shot.data.frame_in ? shot.data.frame_in : ''}}
           </td>
@@ -132,11 +176,6 @@
           <td class="fps" v-if="isFps">
             {{ shot.data && shot.data.fps ? shot.data.fps : ''}}
           </td>
-          <description-cell
-            class="description"
-            :entry="shot"
-            v-if="!isCurrentUserClient"
-          />
           <validation-cell
             :class="{
               'validation-cell': !hiddenColumns[columnId],
@@ -182,23 +221,24 @@ import { mapGetters, mapActions } from 'vuex'
 import {
   ChevronDownIcon
 } from 'vue-feather-icons'
-import {
-  entityListMixin
-} from './base'
+import { entityListMixin } from './base'
+import { selectionListMixin } from './selection'
 
-import DescriptionCell from '../cells/DescriptionCell'
-import ValidationCell from '../cells/ValidationCell'
-import RowActions from '../widgets/RowActions'
-import ButtonLink from '../widgets/ButtonLink'
 import ButtonHrefLink from '../widgets/ButtonHrefLink'
+import ButtonLink from '../widgets/ButtonLink'
+import ButtonSimple from '../widgets/ButtonSimple'
+import DescriptionCell from '../cells/DescriptionCell'
+import EntityThumbnail from '../widgets/EntityThumbnail'
+import TableMetadataHeaderMenu from '../widgets/TableMetadataHeaderMenu'
 import PageTitle from '../widgets/PageTitle'
+import RowActions from '../widgets/RowActions'
 import TableHeaderMenu from '../widgets/TableHeaderMenu'
 import TableInfo from '../widgets/TableInfo'
-import EntityThumbnail from '../widgets/EntityThumbnail'
+import ValidationCell from '../cells/ValidationCell'
 
 export default {
   name: 'shot-list',
-  mixins: [entityListMixin],
+  mixins: [entityListMixin, selectionListMixin],
 
   props: [
     'entries',
@@ -216,14 +256,16 @@ export default {
   },
 
   components: {
-    ButtonLink,
     ButtonHrefLink,
+    ButtonLink,
+    ButtonSimple,
     ChevronDownIcon,
     DescriptionCell,
     EntityThumbnail,
     PageTitle,
     RowActions,
     TableHeaderMenu,
+    TableMetadataHeaderMenu,
     TableInfo,
     ValidationCell
   },
@@ -244,6 +286,7 @@ export default {
       'nbSelectedTasks',
       'shotFilledColumns',
       'shotMap',
+      'shotMetadataDescriptors',
       'shotSearchText',
       'shotSelectionGrid',
       'taskMap',
@@ -495,5 +538,15 @@ span.thumbnail-empty {
 
 tbody {
   user-select: none;
+}
+
+.metadata-descriptor {
+  min-width: 100px;
+  max-width: 100px;
+  width: 100px;
+}
+
+.table th {
+  vertical-align: middle;
 }
 </style>

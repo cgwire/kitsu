@@ -21,9 +21,18 @@
           </a>
           <router-link
             :to="cancelRoute"
-            class="button is-link">
+            class="button is-link"
+            v-if="cancelRoute"
+          >
             {{ $t("main.cancel") }}
           </router-link>
+          <button
+            class="button is-link"
+            @click="$emit('cancel')"
+            v-else
+          >
+            {{ $t("main.cancel") }}
+          </button>
         </p>
     </div>
   </div>

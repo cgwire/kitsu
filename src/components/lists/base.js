@@ -83,42 +83,6 @@ export const entityListMixin = {
       }
     },
 
-    scrollToValidationCell (validationCell) {
-      if (validationCell) {
-        const margin = 20
-        const rect = validationCell.$el.getBoundingClientRect()
-        const listRect = this.$refs.body.getBoundingClientRect()
-        const isBelow = rect.bottom > listRect.bottom - margin
-        const isAbove = rect.top < listRect.top + margin
-        const isRight = rect.right > listRect.right - margin
-        const isLeft = rect.left < listRect.left + margin
-
-        if (isBelow) {
-          const scrollingRequired = rect.bottom - listRect.bottom + margin
-          this.setScrollPosition(
-            this.$refs.body.scrollTop + scrollingRequired
-          )
-        } else if (isAbove) {
-          const scrollingRequired = listRect.top - rect.top + margin
-          this.setScrollPosition(
-            this.$refs.body.scrollTop - scrollingRequired
-          )
-        }
-
-        if (isRight) {
-          const scrollingRequired = rect.right - listRect.right + margin
-          this.setScrollLeftPosition(
-            this.$refs.body.scrollLeft + scrollingRequired
-          )
-        } else if (isLeft) {
-          const scrollingRequired = listRect.left - rect.left + margin
-          this.setScrollLeftPosition(
-            this.$refs.body.scrollLeft - scrollingRequired
-          )
-        }
-      }
-    },
-
     getValidationStyle (columnId) {
       const taskType = this.taskTypeMap[columnId]
       return {
@@ -198,33 +162,6 @@ export const entityListMixin = {
       }
     },
 
-    onKeyDown (event) {
-      const lastSelection =
-        this.lastSelection ? this.lastSelection : { x: 0, y: 0 }
-      const i = lastSelection.x
-      const j = lastSelection.y
-      let validationCell = null
-      if (event.ctrlKey) {
-        if (event.keyCode === 37) {
-          validationCell = this.select(i, j - 1)
-        } else if (event.keyCode === 38) {
-          validationCell = this.select(i - 1, j)
-        } else if (event.keyCode === 39) {
-          validationCell = this.select(i, j + 1)
-        } else if (event.keyCode === 40) {
-          validationCell = this.select(i + 1, j)
-        }
-        this.scrollToValidationCell(validationCell)
-      }
-    },
-
-    select (i, j) {
-      const ref = 'validation-' + i + '-' + j
-      const validationCell = this.$refs[ref]
-      if (validationCell) validationCell[0].$el.click()
-      return validationCell ? validationCell[0] : 0
-    },
-
     showHeaderMenu (columnId, event) {
       const headerMenuEl = this.$refs.headerMenu.$el
       if (headerMenuEl.className === 'header-menu') {
@@ -246,6 +183,24 @@ export const entityListMixin = {
       this.lastHeaderMenuDisplayed = columnId
     },
 
+    showMetadataHeaderMenu (columnId, event) {
+      const headerMenuEl = this.$refs.headerMetadataMenu.$el
+      if (headerMenuEl.className === 'header-menu') {
+        headerMenuEl.className = 'header-menu hidden'
+      } else {
+        headerMenuEl.className = 'header-menu'
+        let headerElement = event.srcElement.parentNode.parentNode
+        const headerBox = headerElement.getBoundingClientRect()
+        const left = headerBox.left + 11
+        const top = headerBox.bottom + 10
+        const width = Math.max(100, headerBox.width - 1)
+        headerMenuEl.style.left = left + 'px'
+        headerMenuEl.style.top = top + 'px'
+        headerMenuEl.style.width = width + 'px'
+      }
+      this.lastMetadaDataHeaderMenuDisplayed = columnId
+    },
+
     onMinimizeColumnToggled () {
       this.hideColumn(this.lastHeaderMenuDisplayed)
       this.showHeaderMenu()
@@ -254,6 +209,20 @@ export const entityListMixin = {
     onDeleteAllTasksClicked () {
       this.$emit('delete-all-tasks', this.lastHeaderMenuDisplayed)
       this.showHeaderMenu()
+    },
+
+    onAddMetadataClicked () {
+      this.$emit('add-metadata')
+    },
+
+    onEditMetadataClicked () {
+      this.$emit('edit-metadata', this.lastMetadaDataHeaderMenuDisplayed)
+      this.showMetadataHeaderMenu()
+    },
+
+    onDeleteMetadataClicked () {
+      this.$emit('delete-metadata', this.lastMetadaDataHeaderMenuDisplayed)
+      this.showMetadataHeaderMenu()
     }
   }
 }

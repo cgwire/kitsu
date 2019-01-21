@@ -55,7 +55,11 @@ describe('lib/filtering', () => {
 
   describe('getFilters', () => {
     const entryIndex = {
-      'props': [{id: 'asset-1'}]
+      'props': [
+        {id: 'asset-1', data: {family: 'big'}},
+        {id: 'asset-2', data: {family: 'small'}},
+        {id: 'asset-3', data: {family: 'small'}},
+      ]
     }
     const taskTypes = [
       {
@@ -71,6 +75,13 @@ describe('lib/filtering', () => {
         id: 'task-type-3'
       }
     ]
+    const descriptors = [
+      {
+        id: 'descriptor-1',
+        name: 'Family',
+        field_name: 'family'
+      }
+    ]
     const taskStatuses = [
       { id: '1', short_name: 'wip' },
       { id: '2', short_name: 'wfa' },
@@ -82,6 +93,7 @@ describe('lib/filtering', () => {
         entryIndex,
         taskTypes,
         taskStatuses,
+        descriptors,
         'modeling=wip'
       )
       expect(filters.length).to.equal(1)
@@ -97,6 +109,7 @@ describe('lib/filtering', () => {
         entryIndex,
         taskTypes,
         taskStatuses,
+        descriptors,
         'mode=wip'
       )
       expect(filters.length).to.equal(1)
@@ -110,6 +123,7 @@ describe('lib/filtering', () => {
         entryIndex,
         taskTypes,
         taskStatuses,
+        descriptors,
         '[modeling facial]=wip'
       )
       expect(filters.length).to.equal(1)
@@ -123,6 +137,7 @@ describe('lib/filtering', () => {
         entryIndex,
         taskTypes,
         taskStatuses,
+        descriptors,
         'compo=wip'
       )
       expect(filters.length).to.equal(0)
@@ -133,6 +148,7 @@ describe('lib/filtering', () => {
         entryIndex,
         taskTypes,
         taskStatuses,
+        descriptors,
         'toto'
       )
       expect(filters.length).to.equal(0)
@@ -143,6 +159,7 @@ describe('lib/filtering', () => {
         entryIndex,
         taskTypes,
         taskStatuses,
+        descriptors,
         ''
       )
       expect(filters.length).to.equal(0)
@@ -153,6 +170,7 @@ describe('lib/filtering', () => {
         entryIndex,
         taskTypes,
         taskStatuses,
+        descriptors,
         'mode=wip anim=wfa chars'
       )
       expect(filters.length).to.equal(2)
@@ -169,6 +187,7 @@ describe('lib/filtering', () => {
         entryIndex,
         taskTypes,
         taskStatuses,
+        descriptors,
         'mode=assigned'
       )
       expect(filters.length).to.equal(1)
@@ -184,6 +203,7 @@ describe('lib/filtering', () => {
         entryIndex,
         taskTypes,
         taskStatuses,
+        descriptors,
         'mode=unassigned'
       )
       expect(filters.length).to.equal(1)
@@ -199,12 +219,28 @@ describe('lib/filtering', () => {
         entryIndex,
         taskTypes,
         taskStatuses,
+        descriptors,
         '-props'
       )
       expect(filters.length).to.equal(1)
       let filter = filters[0]
       expect(filter.type).to.equal('exclusion')
       expect(filter.excludedIds['asset-1']).to.be.ok
+    })
+
+    it('descriptor query case', () => {
+      const filters = getFilters(
+        entryIndex,
+        taskTypes,
+        taskStatuses,
+        descriptors,
+        'family=big'
+      )
+      expect(filters.length).to.equal(1)
+      let filter = filters[0]
+      expect(filter.type).to.equal('descriptor')
+      expect(filter.value).to.equal('big')
+      expect(filter.descriptor.id).to.equal('descriptor-1')
     })
   })
 
@@ -226,22 +262,27 @@ describe('lib/filtering', () => {
     const entries = [
       {
         name: 'SH01', sequence_name: 'S01', episode_name: 'E01', id: 'shot-1',
+        data: {color: 'blue'},
         validations: {'task-type-1': 'task-1'}
       },
       {
         name: 'SH02', sequence_name: 'S01', episode_name: 'E01', id: 'shot-2',
+        data: {color: 'blue'},
         validations: {'task-type-1': 'task-2'}
       },
       {
         name: 'SH01', sequence_name: 'S02', episode_name: 'E01', id: 'shot-3',
+        data: {color: 'blue'},
         validations: {'task-type-1': 'task-3'}
       },
       {
         name: 'SH01', sequence_name: 'S01', episode_name: 'E02', id: 'shot-4',
+        data: {color: 'blue'},
         validations: {'task-type-1': 'task-4'}
       },
       {
         name: 'SH02', sequence_name: 'S01', episode_name: 'E02', id: 'shot-5',
+        data: {color: 'red'},
         validations: {
           'task-type-1': 'task-5',
           'task-type-3': 'task-6'
@@ -284,6 +325,13 @@ describe('lib/filtering', () => {
       'task-status-1': { id: 'task-status-1', short_name: 'wip' },
       'task-status-2': { id: 'task-status-2', short_name: 'done' }
     }
+    const descriptors = [
+      {
+        id: 'descriptor-1',
+        name: 'Color',
+        field_name: 'color'
+      }
+    ]
 
     it('animation=wip', () => {
       const filters = [
@@ -371,6 +419,22 @@ describe('lib/filtering', () => {
             'shot-2': true
           },
           type: 'exclusion'
+        }
+      ]
+      let results = applyFilters(
+        entries,
+        filters,
+        taskMap
+      )
+      expect(results.length).to.equal(4)
+    })
+
+    it('color=blue', () => {
+      const filters = [
+        {
+          descriptor: descriptors[0],
+          value: 'blue',
+          type: 'descriptor'
         }
       ]
       let results = applyFilters(

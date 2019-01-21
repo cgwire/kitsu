@@ -1,5 +1,6 @@
 import productionsApi from '../api/productions'
 import { sortProductions, sortByName } from '../../lib/sorting'
+import { updateModelFromList, removeModelFromList } from '../../lib/helpers'
 import {
   LOAD_PRODUCTIONS_START,
   LOAD_PRODUCTIONS_ERROR,
@@ -28,6 +29,10 @@ import {
 
   TEAM_ADD_PERSON,
   TEAM_REMOVE_PERSON,
+
+  ADD_METADATA_DESCRIPTOR_END,
+  UPDATE_METADATA_DESCRIPTOR_END,
+  DELETE_METADATA_DESCRIPTOR_END,
 
   RESET_ALL
 } from '../mutation-types'
@@ -126,6 +131,20 @@ const getters = {
   isTVShow: (state) => {
     const production = getters.currentProduction(state)
     return production && production.production_type === 'tvshow'
+  },
+
+  assetMetadataDescriptors: (state) => {
+    return !state.currentProduction ? [] : sortByName(
+      state.currentProduction.descriptors
+        .filter(d => d.entity_type === 'Asset')
+    )
+  },
+
+  shotMetadataDescriptors: (state) => {
+    return !state.currentProduction ? [] : sortByName(
+      state.currentProduction.descriptors
+        .filter(d => d.entity_type === 'Shot')
+    )
   },
 
   productionStatusOptions: state => state.productionStatus.map(
@@ -270,7 +289,84 @@ const actions = {
         .then(resolve)
         .catch(reject)
     })
+  },
+
+  addMetadataDescriptor ({ commit, state }, descriptor) {
+    return new Promise((resolve, reject) => {
+      if (descriptor.id) {
+        return productionsApi.updateMetadataDescriptor(
+          state.currentProduction.id,
+          descriptor
+        )
+          .then((descriptor) => {
+            commit(UPDATE_METADATA_DESCRIPTOR_END, {
+              production: state.currentProduction,
+              descriptor
+            })
+            resolve()
+          })
+          .catch(reject)
+      } else {
+        return productionsApi.addMetadataDescriptor(
+          state.currentProduction.id,
+          descriptor
+        )
+          .then((descriptor) => {
+            commit(ADD_METADATA_DESCRIPTOR_END, {
+              production: state.currentProduction,
+              descriptor
+            })
+            resolve()
+          })
+          .catch(reject)
+      }
+    })
+  },
+
+  deleteMetadataDescriptor ({ commit, state }, descriptorId) {
+    return new Promise((resolve, reject) => {
+      return productionsApi.deleteMetadataDescriptor(
+        state.currentProduction.id,
+        descriptorId
+      )
+        .then(() => {
+          commit(DELETE_METADATA_DESCRIPTOR_END, {id: descriptorId})
+          resolve()
+        })
+        .catch(reject)
+    })
+  },
+
+  refreshMetadataDescriptor ({ commit, state }, descriptorId) {
+    return new Promise((resolve, reject) => {
+      return productionsApi.getMetadataDescriptor(
+        state.currentProduction.id,
+        descriptorId
+      )
+        .then((descriptor) => {
+          const descriptorMap = {}
+          state.openProductions.forEach((production) => {
+            production.descriptors.forEach((desc) => {
+              descriptorMap[desc.id] = desc
+            })
+          })
+          if (!descriptorMap[descriptor.id]) {
+            commit(ADD_METADATA_DESCRIPTOR_END, {
+              production: state.productionMap[descriptor.project_id],
+              descriptor
+            })
+          } else {
+            commit(UPDATE_METADATA_DESCRIPTOR_END, {
+              production: state.productionMap[descriptor.project_id],
+              descriptor
+            })
+          }
+          resolve()
+        })
+        .catch(reject)
+    })
   }
+
 }
 
 const mutations = {
@@ -461,6 +557,37 @@ const mutations = {
     )
     if (personIndex !== null) {
       state.currentProduction.team.splice(personIndex, 1)
+    }
+  },
+
+  [ADD_METADATA_DESCRIPTOR_END] (state, { production, descriptor }) {
+    if (production) {
+      if (production.descriptors) {
+        production.descriptors.push(descriptor)
+      } else {
+        production.descriptors = [descriptor]
+      }
+    }
+  },
+
+  [UPDATE_METADATA_DESCRIPTOR_END] (state, { production, descriptor }) {
+    if (production) {
+      if (production.descriptors) {
+        updateModelFromList(production.descriptors, descriptor)
+      } else {
+        production.descriptors = []
+      }
+    }
+  },
+
+  [DELETE_METADATA_DESCRIPTOR_END] (state, descriptor) {
+    const production = state.openProductions.find((production) => {
+      return production.descriptors.find((d) => d.id === descriptor.id)
+    })
+
+    if (production) {
+      production.descriptors =
+        removeModelFromList(production.descriptors, descriptor)
     }
   },
 

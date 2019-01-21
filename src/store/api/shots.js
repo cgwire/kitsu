@@ -63,14 +63,15 @@ export default {
     const data = {
       name: shot.name,
       parent_id: shot.sequence_id,
-      description: shot.description
+      description: shot.description,
+      data: shot.data
     }
     if (shot.frameIn || shot.frameOut || shot.fps) {
-      data.data = {
+      Object.assign(data.data, {
         frame_in: shot.frameIn,
         frame_out: shot.frameOut,
         fps: shot.fps
-      }
+      })
     }
     client.put(`/api/data/entities/${shot.id}`, data, callback)
   },

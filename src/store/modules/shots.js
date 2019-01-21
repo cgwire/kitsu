@@ -559,9 +559,10 @@ const actions = {
     const taskStatusMap = rootGetters.taskStatusMap
     const taskTypeMap = rootGetters.taskTypeMap
     const taskMap = rootGetters.taskMap
+    const production = rootGetters.currentProduction
     commit(
       SET_SHOT_SEARCH,
-      { shotSearch, taskStatusMap, taskMap, taskTypeMap }
+      { shotSearch, taskStatusMap, taskMap, taskTypeMap, production }
     )
   },
 
@@ -998,7 +999,7 @@ const mutations = {
 
   [SET_SHOT_SEARCH] (
     state,
-    { shotSearch, taskStatusMap, taskMap, taskTypeMap }
+    { shotSearch, taskStatusMap, taskMap, taskTypeMap, production }
   ) {
     const taskTypes = Object.values(taskTypeMap)
     const taskStatuses = Object.values(taskStatusMap)
@@ -1009,6 +1010,7 @@ const mutations = {
       cache.shotIndex,
       taskTypes,
       taskStatuses,
+      production.descriptors,
       query
     )
     let result = indexSearch(cache.shotIndex, keywords) || cache.shots
@@ -1116,7 +1118,8 @@ const mutations = {
   [DISPLAY_MORE_SHOTS] (state, {
     taskTypeMap,
     taskStatusMap,
-    taskMap
+    taskMap,
+    production
   }) {
     let shots = cache.shots
     if (state.shotSearchText.length > 0) {
@@ -1128,6 +1131,7 @@ const mutations = {
         cache.shotIndex,
         taskTypes,
         taskStatuses,
+        production.descriptors || [],
         query
       )
       shots = indexSearch(cache.shotIndex, keywords) || cache.shots

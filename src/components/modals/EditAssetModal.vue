@@ -39,6 +39,23 @@
           v-model="form.description"
           v-focus
         />
+        <div
+          :key="descriptor.id"
+          v-for="descriptor in assetMetadataDescriptors"
+        >
+          <combobox
+            v-if="descriptor.choices.length > 0"
+            :label="descriptor.name"
+            :options="getDescriptorChoicesOptions(descriptor)"
+            v-model="form.data[descriptor.field_name]"
+          />
+          <text-field
+            :label="descriptor.name"
+            v-model="form.data[descriptor.field_name]"
+            @enter="runConfirmation"
+            v-else
+          />
+        </div>
       </form>
 
       <div class="has-text-right">
@@ -67,9 +84,18 @@
         </a>
         <router-link
           :to="cancelRoute"
-          class="button is-link">
+          class="button is-link"
+          v-if="cancelRoute"
+        >
           {{ $t("main.close") }}
         </router-link>
+        <button
+          class="button is-link"
+          @click="$emit('cancel')"
+          v-else
+        >
+          {{ $t("main.close") }}
+        </button>
         <p class="error has-text-right info-message" v-if="isError">
           {{ $t("assets.edit_fail") }}
         </p>
@@ -84,12 +110,16 @@
 
 <script>
 import { mapGetters, mapActions } from 'vuex'
+import { modalMixin } from './base_modal'
+
 import TextField from '../widgets/TextField'
 import TextareaField from '../widgets/TextareaField'
 import Combobox from '../widgets/Combobox'
 
 export default {
   name: 'edit-asset-modal',
+  mixins: [modalMixin],
+
   components: {
     TextField,
     TextareaField,
@@ -110,28 +140,11 @@ export default {
   ],
 
   data () {
-    if (this.assetToEdit && this.assetToEdit.id) {
-      return {
-        form: {
-          name: this.assetToEdit.name,
-          description: this.assetToEdit.description,
-          entity_type_id: this.assetToEdit.entity_type_id,
-          production_id: this.currentProduction.id,
-          source_id: this.assetToEdit.source_id || this.assetToEdit.episode_id
-        },
-        assetSuccessText: ''
-      }
-    } else {
-      return {
-        form: {
-          name: '',
-          description: '',
-          entity_type_id: '',
-          project_id: '',
-          source_id: this.currentEpisode ? this.currentEpisode.id : null
-        },
-        assetSuccessText: ''
-      }
+    return {
+      form: {
+        data: {}
+      },
+      assetSuccessText: ''
     }
   },
 
@@ -139,6 +152,7 @@ export default {
     ...mapGetters([
       'assets',
       'assetCreated',
+      'assetMetadataDescriptors',
       'assetTypes',
       'currentProduction',
       'currentEpisode',
@@ -199,6 +213,11 @@ export default {
       return this.assetToEdit && this.assetToEdit.id
     },
 
+    getDescriptorChoicesOptions (descriptor) {
+      const values = descriptor.choices.map(c => ({label: c, value: c}))
+      return [{label: '', value: ''}, ...values]
+    },
+
     resetForm () {
       if (!this.isEditing()) {
         if (!this.form.entity_type_id && this.assetTypes.length > 0) {
@@ -206,19 +225,21 @@ export default {
         }
         if (this.openProductions.length > 0) {
           this.form.project_id =
-            this.currentProduction.id ? this.currentProduction.id : ''
+            this.currentProduction ? this.currentProduction.id : ''
         }
         this.form.name = ''
         this.form.description = ''
         this.form.source_id =
           this.currentEpisode ? this.currentEpisode.id : null
+        this.form.data = {}
       } else {
         this.form = {
           entity_type_id: this.assetToEdit.asset_type_id,
           project_id: this.assetToEdit.project_id,
           name: this.assetToEdit.name,
           description: this.assetToEdit.description,
-          source_id: this.assetToEdit.source_id || this.assetToEdit.episode_id
+          source_id: this.assetToEdit.source_id || this.assetToEdit.episode_id,
+          data: {...this.assetToEdit.data} || {}
         }
       }
     }
@@ -243,6 +264,7 @@ export default {
 
     active () {
       this.assetSuccessText = ''
+      this.resetForm()
       if (this.active) {
         setTimeout(() => {
           this.$refs.nameField.focus()

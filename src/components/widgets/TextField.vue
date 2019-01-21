@@ -1,9 +1,9 @@
 <template>
 <div class="field">
   <label class="label">{{ label }}</label>
-  <p class="control">
+  <p class="control flexrow">
     <input
-      :class="'input ' + inputClass"
+      :class="'input flexrow-item' + inputClass"
       ref="input"
       :placeholder="placeholder"
       :type="type"
@@ -12,6 +12,13 @@
       @input="updateValue()"
       @keyup.enter="emitEnter()"
     />
+    <button
+      class="button flexrow-item"
+      @click="emitEnter()"
+      v-if="buttonLabel"
+    >
+      {{ buttonLabel }}
+    </button>
   </p>
 </div>
 </template>
@@ -41,6 +48,10 @@ export default {
     inputClass: {
       default: '',
       type: String
+    },
+    buttonLabel: {
+      default: '',
+      type: String
     }
   },
   computed: {
@@ -50,12 +61,15 @@ export default {
   methods: {
     ...mapActions([
     ]),
+
     emitEnter () {
       this.$emit('enter', this.$refs.input.value)
     },
+
     updateValue () {
       this.$emit('input', this.$refs.input.value)
     },
+
     focus () {
       this.$refs.input.focus()
     }
@@ -64,6 +78,14 @@ export default {
 </script>
 <style scoped>
 input.input {
+  font-size: 1.2em;
+}
+
+.flexrow-item {
+  margin: 0;
+}
+
+button {
   font-size: 1.2em;
 }
 </style>

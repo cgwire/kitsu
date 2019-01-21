@@ -17,12 +17,19 @@
     <div class="flexrow-item">
       <page-title :text="title" class="entity-title" />
     </div>
+    <div class="flexrow-item">
+      <button-simple
+        icon="edit"
+        @click="modals.edit = true"
+      />
+    </div>
   </div>
 
   <div class="columns">
     <div class="column task-column">
     <page-subtitle :text="$t('shots.tasks')" />
     <entity-task-list
+      class="task-list"
       :entries="currentShot ? currentShot.tasks : []"
       :is-loading="!currentShot"
       :is-error="false"
@@ -61,9 +68,19 @@
                 :full="true"
               />
             </tr>
+            <tr
+              :key="descriptor.id"
+              v-for="descriptor in shotMetadataDescriptors"
+            >
+              <td class="field-label">{{ descriptor.name }}</td>
+              <td>
+                {{ currentShot.data ? currentShot.data[descriptor.field_name] : '' }}
+              </td>
+            </tr>
+
           </tbody>
-        </table>
-      </div>
+      </table>
+    </div>
     </div>
   </div>
 
@@ -119,6 +136,16 @@
     >
     </table-info>
   </div>
+
+  <edit-shot-modal
+    ref="edit-shot-modal"
+    :active="modals.edit"
+    :is-loading="loading.edit"
+    :is-error="errors.edit"
+    :shot-to-edit="currentShot"
+    @cancel="modals.edit = false"
+    @confirm="confirmEditShot"
+  />
 </div>
 </template>
 
@@ -126,18 +153,22 @@
 import { mapGetters, mapActions } from 'vuex'
 import { ChevronLeftIcon } from 'vue-feather-icons'
 
+import ButtonSimple from './widgets/ButtonSimple'
 import DescriptionCell from './cells/DescriptionCell'
-import PageTitle from './widgets/PageTitle'
-import PageSubtitle from './widgets/PageSubtitle'
+import EditShotModal from './modals/EditShotModal'
 import EntityThumbnail from './widgets/EntityThumbnail'
 import EntityTaskList from './lists/EntityTaskList'
+import PageTitle from './widgets/PageTitle'
+import PageSubtitle from './widgets/PageSubtitle'
 import TableInfo from './widgets/TableInfo'
 
 export default {
   name: 'shot',
   components: {
+    ButtonSimple,
     ChevronLeftIcon,
     DescriptionCell,
+    EditShotModal,
     EntityThumbnail,
     EntityTaskList,
     PageSubtitle,
@@ -151,6 +182,15 @@ export default {
       casting: {
         isLoading: false,
         isError: false
+      },
+      errors: {
+        edit: false
+      },
+      loading: {
+        edit: false
+      },
+      modals: {
+        edit: false
       }
     }
   },
@@ -203,6 +243,7 @@ export default {
       'currentProduction',
       'route',
       'shotMap',
+      'shotMetadataDescriptors',
       'shotsPath'
     ]),
 
@@ -235,15 +276,40 @@ export default {
 
   methods: {
     ...mapActions([
+      'editShot',
       'loadShot',
       'loadShotCasting',
       'clearSelectedTasks'
     ]),
+
     changeTab (tab) {
       this.selectedTab = tab
     },
+
     getCurrentShot () {
       return this.shotMap[this.route.params.shot_id] || null
+    },
+
+    onEditClicked () {
+      this.modals.edit = true
+    },
+
+    confirmEditShot (form) {
+      form.id = this.currentShot.id
+      this.loading.edit = true
+      this.errors.edit = false
+      this.editShot({
+        data: form,
+        callback: (err) => {
+          if (err) {
+            this.loading.edit = false
+            this.errors.edit = true
+          } else {
+            this.loading.edit = false
+            this.modals.edit = false
+          }
+        }
+      })
     }
   },
 
@@ -272,6 +338,11 @@ export default {
   background: #46494F;
   border-color: #25282E;
   box-shadow: 0px 0px 6px #333;
+}
+
+.dark .task-list,
+.dark .table-body {
+  border: 1px solid #25282E;
 }
 
 h2.subtitle {
@@ -305,6 +376,7 @@ h2.subtitle {
   background: white;
   padding: 1em;
   box-shadow: 0px 0px 6px #E0E0E0;
+  margin: 0;
 }
 
 .column:first-child {
@@ -373,6 +445,15 @@ h2.subtitle {
 
 .back-link {
   padding-top: 3px;
+}
+
+.task-list,
+.table-body {
+  border: 1px solid #CCC;
+}
+
+.task-list {
+  width: 100%;
 }
 
 @media screen and (max-width: 768px) {
