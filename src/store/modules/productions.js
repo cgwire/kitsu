@@ -134,17 +134,25 @@ const getters = {
   },
 
   assetMetadataDescriptors: (state) => {
-    return !state.currentProduction ? [] : sortByName(
-      state.currentProduction.descriptors
-        .filter(d => d.entity_type === 'Asset')
-    )
+    if (!state.currentProduction || !state.currentProduction.descriptors) {
+      return []
+    } else {
+      return sortByName(
+        state.currentProduction.descriptors
+          .filter(d => d.entity_type === 'Asset')
+      )
+    }
   },
 
   shotMetadataDescriptors: (state) => {
-    return !state.currentProduction ? [] : sortByName(
-      state.currentProduction.descriptors
-        .filter(d => d.entity_type === 'Shot')
-    )
+    if (!state.currentProduction || !state.currentProduction.descriptors) {
+      return []
+    } else {
+      return sortByName(
+        state.currentProduction.descriptors
+          .filter(d => d.entity_type === 'Shot')
+      )
+    }
   },
 
   productionStatusOptions: state => state.productionStatus.map(
