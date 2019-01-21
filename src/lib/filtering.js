@@ -27,6 +27,7 @@ export const applyFilters = (entries, filters, taskMap) => {
         }
         if (isStatus[filter.type]) {
           isOk = task && task.task_status_id === filter.taskStatus.id
+          if (filter.excluding) isOk = !isOk
         } else if (isAssignation[filter.type]) {
           if (filter.assigned) {
             isOk = task && task.assignees && task.assignees.length > 0
@@ -37,8 +38,17 @@ export const applyFilters = (entries, filters, taskMap) => {
         } else if (isExclusion[filter.type]) {
           isOk = !filter.excludedIds[entry.id]
         } else if (isDescriptor[filter.type]) {
-          isOk = entry.data &&
-            entry.data[filter.descriptor.field_name] === filter.value
+          if (
+            entry.data &&
+            entry.data[filter.descriptor.field_name] &&
+            filter.value
+          ) {
+            const dataValue = entry.data[filter.descriptor.field_name]
+            isOk = dataValue.toLowerCase() === filter.value.toLowerCase()
+          } else {
+            isOk = false
+          }
+          if (filter.excluding) isOk = !isOk
         }
       })
       return isOk
@@ -123,13 +133,15 @@ export const getTaskTypeFilters = (
   const taskTypeNameIndex = buildNameIndex(taskTypes, false)
   const taskStatusShortNameIndex = {}
   taskStatuses.forEach((taskStatus) => {
-    taskStatusShortNameIndex[taskStatus.short_name] = taskStatus
+    taskStatusShortNameIndex[taskStatus.short_name.toLowerCase()] = taskStatus
   })
 
   if (rgxMatches) {
     rgxMatches.forEach((rgxMatch) => {
       const pattern = rgxMatch.split('=')
-      const value = pattern[1]
+      let value = pattern[1]
+      const excluding = value.startsWith('-')
+      if (excluding) value = value.substring(1)
       let taskTypeName = pattern[0]
       if (taskTypeName[0] === '[') {
         taskTypeName = taskTypeName.substring(1, taskTypeName.length - 1)
@@ -148,11 +160,12 @@ export const getTaskTypeFilters = (
             assigned: true,
             type: 'assignation'
           })
-        } else if (taskStatusShortNameIndex[value]) {
+        } else if (value && taskStatusShortNameIndex[value.toLowerCase()]) {
           results.push({
             taskType: taskTypes[0],
-            taskStatus: taskStatusShortNameIndex[value],
-            type: 'status'
+            taskStatus: taskStatusShortNameIndex[value.toLowerCase()],
+            type: 'status',
+            excluding
           })
         }
       }
@@ -175,17 +188,20 @@ export const getDescFilters = (descriptors, queryText) => {
   if (rgxMatches) {
     rgxMatches.forEach((rgxMatch) => {
       const pattern = rgxMatch.split('=')
-      const value = pattern[1]
+      let value = pattern[1]
       let descriptorName = pattern[0]
       if (descriptorName[0] === '[') {
         descriptorName = descriptorName.substring(1, descriptorName.length - 1)
       }
       const descriptors = descriptorNameIndex[descriptorName.toLowerCase()]
+      const excluding = value.startsWith('-')
+      if (excluding) value = value.substring(1)
       if (descriptors) {
         results.push({
           descriptor: descriptors[0],
           value,
-          type: 'descriptor'
+          type: 'descriptor',
+          excluding
         })
       }
     })
