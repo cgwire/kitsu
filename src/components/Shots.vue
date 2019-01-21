@@ -563,8 +563,9 @@ export default {
       this.modals = {
         isAddMetadataDisplayed: false,
         isCreateTasksDisplayed: false,
-        isDeleteDisplayed: false,
         isDeleteAllTasksDisplayed: false,
+        isDeleteDisplayed: false,
+        isDeleteMetadataDisplayed: false,
         isImportDisplayed: false,
         isManagedDisplayed: false,
         isNewDisplayed: false,
