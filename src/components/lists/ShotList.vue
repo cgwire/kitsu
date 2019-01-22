@@ -541,12 +541,20 @@ tbody {
 }
 
 .metadata-descriptor {
-  min-width: 100px;
-  max-width: 100px;
-  width: 100px;
+  min-width: 120px;
+  max-width: 120px;
+  width: 120px;
 }
 
 .table th {
   vertical-align: middle;
+}
+
+.header-icon {
+  min-width: 15px;
+}
+
+th {
+  word-break: break-all
 }
 </style>

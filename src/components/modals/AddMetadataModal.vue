@@ -194,6 +194,7 @@ export default {
           values: [...this.descriptorToEdit.choices]
         }
       }
+      this.type = this.form.values.length > 0 ? 'choices' : 'free'
     }
   },
 

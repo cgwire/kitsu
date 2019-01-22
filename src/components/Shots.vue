@@ -380,7 +380,6 @@ export default {
     },
 
     closeMetadataModal () {
-      console.log('cool')
       this.modals.isAddMetadataDisplayed = false
     },
 
@@ -619,7 +618,6 @@ export default {
 
     onDeleteAllTasksClicked (taskTypeId) {
       const route = this.getPath('delete-all-shot-tasks')
-      console.log(taskTypeId, this.taskTypeMap)
       const taskType = this.taskTypeMap[taskTypeId]
       route.params.task_type_id = taskTypeId
       this.deleteAllTasksLockText = taskType.name
