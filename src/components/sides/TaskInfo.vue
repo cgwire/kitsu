@@ -104,6 +104,7 @@
               :light="true"
               :is-loading="loading.addComment"
               :attached-file-name="attachedFileName"
+              :is-error="errors.addComment"
               @add-comment="addComment"
               @add-preview="onAddPreviewClicked"
               v-if="isCommentingAllowed"
@@ -371,6 +372,7 @@ export default {
       'addCommentPreview',
       'addCommentExtraPreview',
       'commentTask',
+      'commentTaskWithPreview',
       'loadPreviewFileFormData',
       'loadTask',
       'loadTaskComments',
@@ -436,40 +438,30 @@ export default {
     },
 
     addComment (comment, taskStatusId) {
-      this.loading.addComment = true
-      this.errors.addComment = false
-      this.commentTask({
+      const finalize = (err) => {
+        if (err) {
+          this.errors.addComment = true
+        } else {
+          this.$refs['add-preview-modal'].reset()
+          this.reset()
+          this.attachedFileName = ''
+        }
+        this.loading.addComment = false
+      }
+      const params = {
         taskId: this.task.id,
         taskStatusId: taskStatusId,
+        commentText: comment,
         comment: comment,
-        callback: (err) => {
-          if (err) {
-            console.log(err)
-            this.errors.addComment = true
-          } else {
-            this.errors.addComment = false
-            if (this.attachedFileName) {
-              this.addCommentPreview({
-                taskId: this.task.id,
-                commentId: this.taskComments[0].id,
-                callback: (err, preview) => {
-                  if (err) {
-                    this.errors.addComment = true
-                  } else {
-                    this.$refs['add-preview-modal'].reset()
-                    this.reset()
-                    this.loading.addComment = false
-                    this.attachedFileName = ''
-                  }
-                }
-              })
-            } else {
-              this.loading.addComment = false
-              this.reset()
-            }
-          }
-        }
-      })
+        callback: finalize
+      }
+      this.loading.addComment = true
+      this.errors.addComment = false
+      if (this.attachedFileName) {
+        this.commentTaskWithPreview(params)
+      } else {
+        this.commentTask(params)
+      }
     },
 
     createExtraPreview () {

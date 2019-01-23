@@ -64,6 +64,12 @@
         </button>
         </div>
       </div>
+      <div
+        class="error pull-right"
+        v-if="isError"
+      >
+        <em>$t('comments.error')</em>
+      </div>
     </div>
   </article>
 </template>
@@ -92,6 +98,10 @@ export default {
       default: null
     },
     isLoading: {
+      type: Boolean,
+      default: null
+    },
+    isError: {
       type: Boolean,
       default: null
     },

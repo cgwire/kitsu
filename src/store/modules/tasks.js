@@ -29,6 +29,7 @@ import {
   DELETE_COMMENT_END,
 
   PREVIEW_FILE_SELECTED,
+  ADD_PREVIEW_START,
   ADD_PREVIEW_END,
   CHANGE_PREVIEW_END,
   UPDATE_PREVIEW_ANNOTATION,
@@ -67,6 +68,7 @@ const initialState = {
   nbSelectedValidations: 0,
   isShowAssignations: true,
 
+  isSavingCommentPreview: false,
   previewFormData: null
 }
 
@@ -118,6 +120,7 @@ const getters = {
   isShowAssignations: state => state.isShowAssignations,
   taskEntityPreviews: state => state.taskEntityPreviews,
   previewFormData: state => state.previewFormData,
+  isSavingCommentPreview: state => state.isSavingCommentPreview,
 
   assetValidationColumns: (state, getters) => {
     return sortValidationColumns(
@@ -435,30 +438,37 @@ const actions = {
     })
   },
 
-  addCommentPreview (
+  commentTaskWithPreview (
     { commit, getters, state },
-    { taskId, commentId, callback }
+    { taskId, commentText, taskStatusId, callback }
   ) {
-    const previewData = {
-      taskId,
-      commentId
-    }
-
-    tasksApi.addPreview(previewData, (err, preview) => {
-      if (err && callback) {
+    const data = { taskId, taskStatusId, comment: commentText }
+    commit(ADD_PREVIEW_START)
+    tasksApi.commentTask(data, (err, comment) => {
+      if (err) {
         callback(err)
       } else {
-        tasksApi.uploadPreview(preview.id, state.previewFormData, (err, preview) => {
-          if (!err) {
-            const comment = getters.getTaskComment(taskId, commentId)
-            commit(ADD_PREVIEW_END, {
-              preview,
-              taskId,
-              commentId,
-              comment
+        const previewData = {
+          taskId,
+          commentId: comment.id
+        }
+        tasksApi.addPreview(previewData, (err, preview) => {
+          if (err && callback) {
+            callback(err)
+          } else {
+            tasksApi.uploadPreview(preview.id, state.previewFormData, (err, preview) => {
+              if (!err) {
+                commit(NEW_TASK_COMMENT_END, {comment, taskId})
+                commit(ADD_PREVIEW_END, {
+                  preview,
+                  taskId,
+                  commentId: comment.id,
+                  comment
+                })
+              }
+              if (callback) callback(err, preview)
             })
           }
-          if (callback) callback(err, preview)
         })
       }
     })
@@ -783,7 +793,12 @@ const mutations = {
     state.previewFormData = formData
   },
 
+  [ADD_PREVIEW_START] (state) {
+    state.isSavingCommentPreview = true
+  },
+
   [ADD_PREVIEW_END] (state, { preview, taskId, commentId, comment }) {
+    state.isSavingCommentPreview = false
     const newPreview = {
       id: preview.id,
       feedback: false,
