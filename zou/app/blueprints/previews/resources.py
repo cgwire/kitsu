@@ -395,7 +395,7 @@ class PreviewFileDownloadResource(PreviewFileResource):
             abort(403)
 
         preview_file = files_service.get_preview_file(instance_id)
-        extension = preview_file.extension
+        extension = preview_file["extension"]
 
         try:
             if extension == "png":
