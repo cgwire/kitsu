@@ -39,14 +39,6 @@ class NotificationsServiceTestCase(ApiDBTestCase):
             "first comment"
         )
 
-    def test_get_full_entity_name(self):
-        (asset_name, episode_id) = \
-            notifications_service.get_full_entity_name(self.asset.id)
-        (shot_name, episode_id) = \
-            notifications_service.get_full_entity_name(self.shot.id)
-        self.assertEquals(asset_name, "Props / Tree")
-        self.assertEquals(shot_name, "E01 / S01 / P01")
-
     def test_create_notification(self):
         self.generate_fixture_comment()
         notification = notifications_service.create_notification(

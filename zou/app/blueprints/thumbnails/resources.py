@@ -9,12 +9,13 @@ from flask_fs.errors import FileNotFound
 from zou.app.stores import file_store
 from zou.app import config
 from zou.app.services import (
+    entities_service,
     files_service,
+    names_service,
     persons_service,
     projects_service,
     tasks_service,
     user_service,
-    entities_service
 )
 from zou.app.utils import (
     events,
@@ -34,7 +35,8 @@ ALLOWED_FILE_EXTENSION = [
 def send_standard_file(
     preview_file_id,
     extension,
-    mimetype="application/octet-stream"
+    mimetype="application/octet-stream",
+    as_attachment=False
 ):
     return send_storage_file(
         file_store.get_local_file_path,
@@ -42,29 +44,32 @@ def send_standard_file(
         "previews",
         preview_file_id,
         extension,
-        mimetype=mimetype
+        mimetype=mimetype,
+        as_attachment=as_attachment
     )
 
 
-def send_movie_file(preview_file_id):
+def send_movie_file(preview_file_id, as_attachment=False):
     return send_storage_file(
         file_store.get_local_movie_path,
         file_store.open_movie,
         "previews",
         preview_file_id,
         "mp4",
-        mimetype="video/mp4"
+        mimetype="video/mp4",
+        as_attachment=as_attachment
     )
 
 
-def send_picture_file(prefix, preview_file_id):
+def send_picture_file(prefix, preview_file_id, as_attachment=False):
     return send_storage_file(
         file_store.get_local_picture_path,
         file_store.open_picture,
         prefix,
         preview_file_id,
         "png",
-        mimetype="image/png"
+        mimetype="image/png",
+        as_attachment=as_attachment
     )
 
 
@@ -74,7 +79,8 @@ def send_storage_file(
     prefix,
     preview_file_id,
     extension,
-    mimetype="application/octet-stream"
+    mimetype="application/octet-stream",
+    as_attachment=False
 ):
     """
     Send file from storage. If it's not a local storage, cache the file in
@@ -92,11 +98,18 @@ def send_storage_file(
                 for chunk in open_file(prefix, preview_file_id):
                     tmp_file.write(chunk)
 
+    attachment_filename = ""
+    if as_attachment:
+        attachment_filename = \
+            names_service.get_preview_file_name(preview_file_id)
+
     try:
         return flask_send_file(
             file_path,
             conditional=True,
-            mimetype=mimetype
+            mimetype=mimetype,
+            as_attachment=as_attachment,
+            attachment_filename=attachment_filename
         )
     except IOError:
         return {
@@ -303,6 +316,26 @@ class PreviewFileMovieResource(Resource):
             abort(404)
 
 
+class PreviewFileMovieDownloadResource(PreviewFileMovieResource):
+    """
+    Allow to download a movie preview.
+    """
+
+    @jwt_required
+    def get(self, instance_id):
+        if not self.is_allowed(instance_id):
+            abort(403)
+
+        try:
+            return send_movie_file(
+                instance_id,
+                as_attachment=True
+            )
+        except FileNotFound:
+            current_app.logger.error("File was not found for: %s" % instance_id)
+            abort(404)
+
+
 class PreviewFileResource(Resource):
     """
     Allow to download a generic file preview.
@@ -343,6 +376,47 @@ class PreviewFileResource(Resource):
             else:
                 return send_standard_file(instance_id, extension)
 
+        except FileNotFound:
+            current_app.logger.error("File was not found for: %s" % instance_id)
+            abort(404)
+
+
+class PreviewFileDownloadResource(PreviewFileResource):
+    """
+    Allow to download a generic file preview as attachment.
+    """
+
+    def __init__(self):
+        PreviewFileResource.__init__(self)
+
+    @jwt_required
+    def get(self, instance_id):
+        if not self.is_allowed(instance_id):
+            abort(403)
+
+        preview_file = files_service.get_preview_file(instance_id)
+        extension = preview_file.extension
+
+        try:
+            if extension == "png":
+                return send_picture_file(
+                    instance_id,
+                    as_attachment=True
+                )
+            elif extension == "pdf":
+                mimetype = "application/pdf"
+                return send_standard_file(
+                    instance_id,
+                    extension,
+                    mimetype,
+                    as_attachment=True
+                )
+            else:
+                return send_standard_file(
+                    instance_id,
+                    extension,
+                    as_attachment=True
+                )
         except FileNotFound:
             current_app.logger.error("File was not found for: %s" % instance_id)
             abort(404)

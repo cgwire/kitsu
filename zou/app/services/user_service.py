@@ -13,6 +13,7 @@ from zou.app.models.comment import Comment
 from zou.app.services import (
     assets_service,
     notifications_service,
+    names_service,
     persons_service,
     projects_service,
     shots_service,
@@ -443,7 +444,7 @@ def get_last_notifications(notification_id=None):
         task_entity_id
     ) in notifications:
         (full_entity_name, episode_id) = \
-            notifications_service.get_full_entity_name(task_entity_id)
+            names_service.get_full_entity_name(task_entity_id)
         result.append(fields.serialize_dict({
             "id": notification.id,
             "author_id": notification.author_id,

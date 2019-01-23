@@ -504,7 +504,8 @@ def create_preview_file_raw(
     revision,
     task_id,
     person_id,
-    source="webgui"
+    source="webgui",
+    extension="mp4"
 ):
     return PreviewFile.create(
         name=name,
@@ -512,6 +513,7 @@ def create_preview_file_raw(
         source=source,
         task_id=task_id,
         person_id=person_id,
+        extension=extension
     )
 
 
@@ -520,14 +522,16 @@ def create_preview_file(
     revision,
     task_id,
     person_id,
-    source="webgui"
+    source="webgui",
+    extension="mp4"
 ):
     return create_preview_file_raw(
         name,
         revision,
         task_id,
         person_id,
-        source
+        source,
+        extension
     ).serialize()
 
 
