@@ -142,6 +142,9 @@ export default {
   data () {
     return {
       form: {
+        name: '',
+        description: '',
+        source_id: null,
         data: {}
       },
       assetSuccessText: ''
@@ -279,15 +282,18 @@ export default {
 .modal-content .box p.text {
   margin-bottom: 1em;
 }
+
 .is-danger {
   color: #ff3860;
   font-style: italic;
 }
+
 .title {
   border-bottom: 2px solid #DDD;
   padding-bottom: 0.5em;
   margin-bottom: 1.2em;
 }
+
 .info-message {
   margin-top: 1em;
 }
