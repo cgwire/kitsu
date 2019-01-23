@@ -893,7 +893,6 @@ export default {
       return `/api/pictures/originals/preview-files/${previewId}/download`
     },
 
-
     getPreviewPath () {
       let previewId = this.route.params.preview_id
       if (!previewId && this.currentTaskPreviews.length > 0) {

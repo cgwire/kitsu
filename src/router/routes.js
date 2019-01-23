@@ -111,11 +111,6 @@ export const routes = [
         component: OpenProductions,
         name: 'open-productions'
       },
-      {
-        path: '/open-productions/new',
-        component: OpenProductions,
-        name: 'open-productions-new'
-      },
 
       { path: '/people', component: People, name: 'people' },
       { path: '/people/new', component: People, name: 'new-people' },
@@ -497,21 +492,6 @@ export const routes = [
         path: '/productions/:production_id/:type/tasks/:task_id/delete',
         component: Task
       },
-      {
-        name: 'task-add-preview',
-        path: '/productions/:production_id/:type/tasks/:task_id/comments/:comment_id/add-preview',
-        component: Task
-      },
-      {
-        name: 'task-add-extra-preview',
-        path: '/productions/:production_id/:type/tasks/:task_id/comments/:comment_id/preview-files/:preview_id/add-extra-preview',
-        component: Task
-      },
-      {
-        name: 'task-remove-extra-preview',
-        path: '/productions/:production_id/:type/tasks/:task_id/comments/:comment_id/preview-files/:preview_id/remove-extra-preview/:extra_preview_id',
-        component: Task
-      },
 
       {
         name: 'task-change-preview',
@@ -542,21 +522,6 @@ export const routes = [
       {
         name: 'episode-task-delete',
         path: '/productions/:production_id/episodes/:episode_id/:type/tasks/:task_id/delete',
-        component: Task
-      },
-      {
-        name: 'episode-task-add-preview',
-        path: '/productions/:production_id/episodes/:episode_id/:type/tasks/:task_id/comments/:comment_id/add-preview',
-        component: Task
-      },
-      {
-        name: 'episode-task-add-extra-preview',
-        path: '/productions/:production_id/episodes/:episode_id/:type/tasks/:task_id/comments/:comment_id/preview-files/:preview_id/add-extra-preview',
-        component: Task
-      },
-      {
-        name: 'episode-task-remove-extra-preview',
-        path: '/productions/:production_id/episodes/:episode_id/:type/tasks/:task_id/comments/:comment_id/preview-files/:preview_id/remove-extra-preview/:extra_preview_id',
         component: Task
       },
 
