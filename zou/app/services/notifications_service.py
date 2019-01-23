@@ -19,33 +19,6 @@ from zou.app.services.exception import (
 from zou.app.utils import events, fields
 
 
-def get_full_entity_name(entity_id):
-    """
-    Get full entity name whether it's an asset or a shot. If it's a shot
-    the result is "Episode name / Sequence name / Shot name". If it's an
-    asset the result is "Asset type name / Asset name".
-    """
-    entity = Entity.get(entity_id)
-    episode_id = None
-    if shots_service.is_shot(entity.serialize()):
-        sequence = Entity.get(entity.parent_id)
-        if sequence.parent_id is None:
-            name = "%s / %s" % (sequence.name, entity.name)
-        else:
-            episode = Entity.get(sequence.parent_id)
-            episode_id = str(episode.id)
-            name = "%s / %s / %s" % (
-                episode.name,
-                sequence.name,
-                entity.name
-            )
-    else:
-        asset_type = EntityType.get(entity.entity_type_id)
-        episode_id = entity.source_id
-        name = "%s / %s" % (asset_type.name, entity.name)
-    return (name, episode_id)
-
-
 def create_notification(person, comment, read=False, change=False):
     """
     Create a new notification for given person and comment.
