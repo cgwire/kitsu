@@ -78,8 +78,7 @@
             :text="$t('productions.home.create_new')"
             :path="{name: 'open-productions-new'}"
             :is-responsive="false"
-          >
-          </button-link>
+          />
         </p>
       </div>
       <div v-else-if="isCurrentUserClient">
