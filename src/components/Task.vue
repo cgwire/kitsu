@@ -165,17 +165,18 @@
             <a
               class="button mt2"
               ref="preview-file"
-              :href="currentPreviewPath"
+              :href="currentPreviewDlPath"
               v-else-if="isDlPreviewFile"
             >
               <download-icon class="icon" />
               <span class="text">
-                {{ $t('tasks.download_pdf_file') }}
+                {{ $t('tasks.download_pdf_file', {extension}) }}
               </span>
             </a>
 
             <model-viewer
               :preview-url="currentPreviewPath"
+              :preview-dl-path="currentPreviewDlPath"
               v-else-if="currentTaskPreviews.length > 0 && extension === 'obj'"
             />
 
@@ -273,7 +274,7 @@ import Comment from './widgets/Comment'
 import DeleteModal from './widgets/DeleteModal'
 import EditCommentModal from './modals/EditCommentModal'
 import EntityThumbnail from './widgets/EntityThumbnail'
-import ModelViewer from './widgets/ModelViewer'
+import ModelViewer from './previews/ModelViewer'
 import PeopleAvatar from './widgets/PeopleAvatar'
 import PeopleName from './widgets/PeopleName'
 import PictureViewer from './previews/PictureViewer'
@@ -355,7 +356,8 @@ export default {
       addExtraPreviewFormData: null,
       changePreviewFormData: null,
       isSubscribed: false,
-      currentPreviewPath: ''
+      currentPreviewPath: '',
+      currentPreviewDlPath: ''
     }
   },
 
@@ -819,6 +821,7 @@ export default {
               this.currentTaskPreviews = this.getCurrentTaskPreviews()
               this.setOtherPreviews()
               this.currentPreviewPath = this.getOriginalPath()
+              this.currentPreviewDlPath = this.getOriginalDlPath()
               this.entityPage = this.getEntityPage()
               this.setOtherPreviews()
               this.loadTaskSubscribed({
@@ -879,6 +882,18 @@ export default {
       return `/api/pictures/originals/preview-files/${previewId}.${extension}`
     },
 
+    getOriginalDlPath () {
+      let previewId = this.route.params.preview_id
+      if (!previewId &&
+          this.currentTaskPreviews &&
+          this.currentTaskPreviews.length > 0
+      ) {
+        previewId = this.currentTaskPreviews[0].id
+      }
+      return `/api/pictures/originals/preview-files/${previewId}/download`
+    },
+
+
     getPreviewPath () {
       let previewId = this.route.params.preview_id
       if (!previewId && this.currentTaskPreviews.length > 0) {
@@ -932,6 +947,7 @@ export default {
       this.currentTaskPreviews = this.getCurrentTaskPreviews()
       this.setOtherPreviews()
       this.currentPreviewPath = this.getOriginalPath()
+      this.currentPreviewDlPath = this.getOriginalDlPath()
       this.currentTask = this.getCurrentTask()
       let previewId = this.route.params.preview_id
       if (!previewId && this.currentTaskPreviews.length > 0) {
@@ -1055,6 +1071,7 @@ export default {
       this.currentTaskPreviews = this.getCurrentTaskPreviews()
       this.setOtherPreviews()
       this.currentPreviewPath = this.getOriginalPath()
+      this.currentPreviewDlPath = this.getOriginalDlPath()
       this.$router.push(this.previewPath(preview.id))
     },
 

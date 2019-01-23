@@ -57,7 +57,7 @@
               <a
                 class="button"
                 ref="preview-file"
-                :href="currentPreviewPath"
+                :href="currentPreviewDlPath"
               >
                 <download-icon class="icon" />
                 <span class="text">
@@ -69,6 +69,7 @@
             <model-viewer
               class="model-viewer"
               :preview-url="currentPreviewPath"
+              :preview-dl-path="currentPreviewDlPath"
               :light="true"
               v-else-if="is3DModelPreview"
             />
@@ -179,7 +180,7 @@ import AddComment from '../widgets/AddComment'
 import AddPreviewModal from '../modals/AddPreviewModal'
 import ButtonLink from '../widgets/ButtonLink'
 import Comment from '../widgets/Comment'
-import ModelViewer from '../widgets/ModelViewer'
+import ModelViewer from '../previews/ModelViewer'
 import PeopleName from '../widgets/PeopleName'
 import PictureViewer from '../previews/PictureViewer'
 import Spinner from '../widgets/Spinner'
@@ -218,6 +219,7 @@ export default {
       addExtraPreviewFormData: null,
       attachedFileName: '',
       currentPreviewPath: '',
+      currentPreviewDlPath: '',
       taskComments: [],
       taskPreviews: [],
       errors: {
@@ -401,6 +403,7 @@ export default {
       this.taskPreviews = this.getTaskPreviews(this.task.id)
       this.setOtherPreviews()
       this.currentPreviewPath = this.getOriginalPath()
+      this.currentPreviewDlPath = this.getOriginalDlPath()
       this.$nextTick(() => {
         this.$refs['add-comment'].focus()
       })
@@ -410,6 +413,11 @@ export default {
       let previewId = this.currentPreviewId
       const extension = this.extension ? this.extension : 'png'
       return `/api/pictures/originals/preview-files/${previewId}.${extension}`
+    },
+
+    getOriginalDlPath () {
+      let previewId = this.currentPreviewId
+      return `/api/pictures/originals/preview-files/${previewId}/download`
     },
 
     setOtherPreviews () {

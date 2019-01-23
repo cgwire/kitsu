@@ -83,9 +83,8 @@
       </button>
 
       <a
-        target="_blank"
         class="button flexrow-item"
-        :href="picturePath"
+        :href="pictureDlPath"
       >
         <download-icon class="icon" />
       </a>
@@ -179,6 +178,11 @@ export default {
     picturePath () {
       const previewId = this.preview.previews[this.currentIndex - 1].id
       return `/api/pictures/originals/preview-files/${previewId}.png`
+    },
+
+    pictureDlPath () {
+      const previewId = this.preview.previews[this.currentIndex - 1].id
+      return `/api/pictures/originals/preview-files/${previewId}/download`
     },
 
     isFullScreenEnabled () {

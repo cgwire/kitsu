@@ -147,9 +147,8 @@
         </button>
 
         <a
-          target="_blank"
           class="button flexrow-item"
-          :href="moviePath"
+          :href="movieDlPath"
         >
           <download-icon class="icon" />
         </a>
@@ -281,6 +280,10 @@ export default {
 
     moviePath () {
       return `/api/movies/originals/preview-files/${this.preview.id}.mp4`
+    },
+
+    movieDlPath () {
+      return `/api/movies/originals/preview-files/${this.preview.id}/download`
     },
 
     posterPath () {

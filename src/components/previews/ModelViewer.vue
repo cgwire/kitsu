@@ -9,13 +9,16 @@
   >
   </div>
   <div class="viewer-actions">
+    <a
+      :href="previewDlPath"
+      class="button pull-right"
+    >
+      <download-icon class="icon" />
+    </a>
     <button
-      class="button"
+      class="button pull-right"
       @click="goFullScreen">
-      <maximize-2-icon class="icon" />
-      <span class="text">
-        {{ $t('tasks.full_screen') }}
-      </span>
+      <maximize-icon class="icon" />
     </button>
   </div>
 </div>
@@ -23,7 +26,8 @@
 
 <script>
 import {
-  Maximize2Icon
+  DownloadIcon,
+  MaximizeIcon
 } from 'vue-feather-icons'
 import {
   clearScene,
@@ -36,11 +40,16 @@ export default {
   name: 'model-viewer',
 
   components: {
-    Maximize2Icon
+    DownloadIcon,
+    MaximizeIcon
   },
 
   props: {
     previewUrl: {
+      default: '',
+      type: String
+    },
+    previewDlPath: {
       default: '',
       type: String
     },
@@ -88,7 +97,7 @@ export default {
 }
 
 .viewer-actions {
-  padding-top: 1em;
+  padding: 0.2em 0;
   text-align: left;
 }
 </style>
