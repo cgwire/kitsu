@@ -114,10 +114,7 @@
     <button-link
       class="level-item big-button"
       :text="$t('assets.new_assets')"
-      :path="{
-        name: 'new-asset',
-        params: {production_id: currentProduction.id}
-      }"
+      :path="newAssetPath()"
     />
   </div>
   <div
@@ -371,6 +368,10 @@ export default {
         j++
       }
       return i + index
+    },
+
+    newAssetPath () {
+      return this.getPath('new-asset')
     },
 
     assetPath (assetId) {
