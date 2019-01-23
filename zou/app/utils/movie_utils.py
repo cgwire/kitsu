@@ -61,20 +61,26 @@ def normalize_movie(movie_path):
     if width % 2 == 1:
         width = width + 1
 
-    ffmpeg \
-        .input(movie_path) \
-        .output(
-          file_target_path,
-          pix_fmt='yuv420p',
-          format="mp4",
-          r="24.00",
-          b="28M",
-          preset="medium",
-          vcodec="libx264",
-          s="%sx%s" % (width, height)
-        ) \
-        .run(
-            quiet=True
-        )
+    try:
+        ffmpeg \
+            .input(movie_path) \
+            .output(
+            file_target_path,
+            pix_fmt='yuv420p',
+            format="mp4",
+            r="24.00",
+            b="28M",
+            preset="medium",
+            vcodec="libx264",
+            s="%sx%s" % (width, height)
+            ) \
+            .run(
+                quiet=False,
+                capture_stderr=True
+            )
+    except ffmpeg.Error as exc:
+        from flask import current_app
+        current_app.logger.error(exc.stderr)
+        raise
 
     return file_target_path
