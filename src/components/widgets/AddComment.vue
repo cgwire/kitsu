@@ -163,6 +163,7 @@ export default {
 .add-comment {
   border-radius: 5px;
   background: white;
+  word-break: break-all;
 }
 
 .add-comment textarea {

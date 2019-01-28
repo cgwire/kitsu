@@ -203,6 +203,7 @@ export default {
   border-left: 6px solid #CCC;
   border-radius: 0 5px 5px 0;
   padding: 0.6em;
+  word-break: break-all;
 }
 
 .comment:first-child {
