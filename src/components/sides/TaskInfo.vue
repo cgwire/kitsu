@@ -57,7 +57,7 @@
               <a
                 class="button"
                 ref="preview-file"
-                :href="currentPreviewPath"
+                :href="currentPreviewDlPath"
               >
                 <download-icon class="icon" />
                 <span class="text">
@@ -69,6 +69,7 @@
             <model-viewer
               class="model-viewer"
               :preview-url="currentPreviewPath"
+              :preview-dl-path="currentPreviewDlPath"
               :light="true"
               v-else-if="is3DModelPreview"
             />
@@ -103,6 +104,7 @@
               :light="true"
               :is-loading="loading.addComment"
               :attached-file-name="attachedFileName"
+              :is-error="errors.addComment"
               @add-comment="addComment"
               @add-preview="onAddPreviewClicked"
               v-if="isCommentingAllowed"
@@ -179,7 +181,7 @@ import AddComment from '../widgets/AddComment'
 import AddPreviewModal from '../modals/AddPreviewModal'
 import ButtonLink from '../widgets/ButtonLink'
 import Comment from '../widgets/Comment'
-import ModelViewer from '../widgets/ModelViewer'
+import ModelViewer from '../previews/ModelViewer'
 import PeopleName from '../widgets/PeopleName'
 import PictureViewer from '../previews/PictureViewer'
 import Spinner from '../widgets/Spinner'
@@ -218,6 +220,7 @@ export default {
       addExtraPreviewFormData: null,
       attachedFileName: '',
       currentPreviewPath: '',
+      currentPreviewDlPath: '',
       taskComments: [],
       taskPreviews: [],
       errors: {
@@ -366,9 +369,9 @@ export default {
 
   methods: {
     ...mapActions([
-      'addCommentPreview',
       'addCommentExtraPreview',
       'commentTask',
+      'commentTaskWithPreview',
       'loadPreviewFileFormData',
       'loadTask',
       'loadTaskComments',
@@ -396,11 +399,39 @@ export default {
       }
     },
 
+    addComment (comment, taskStatusId) {
+      const finalize = (err, preview) => {
+        if (err) {
+          this.errors.addComment = true
+        } else {
+          this.$refs['add-preview-modal'].reset()
+          this.reset()
+          this.attachedFileName = ''
+        }
+        this.loading.addComment = false
+      }
+      const params = {
+        taskId: this.task.id,
+        taskStatusId: taskStatusId,
+        commentText: comment,
+        comment: comment,
+        callback: finalize
+      }
+      this.loading.addComment = true
+      this.errors.addComment = false
+      if (this.attachedFileName) {
+        this.commentTaskWithPreview(params)
+      } else {
+        this.commentTask(params)
+      }
+    },
+
     reset () {
       this.taskComments = this.getTaskComments(this.task.id)
       this.taskPreviews = this.getTaskPreviews(this.task.id)
       this.setOtherPreviews()
       this.currentPreviewPath = this.getOriginalPath()
+      this.currentPreviewDlPath = this.getOriginalDlPath()
       this.$nextTick(() => {
         this.$refs['add-comment'].focus()
       })
@@ -410,6 +441,11 @@ export default {
       let previewId = this.currentPreviewId
       const extension = this.extension ? this.extension : 'png'
       return `/api/pictures/originals/preview-files/${previewId}.${extension}`
+    },
+
+    getOriginalDlPath () {
+      let previewId = this.currentPreviewId
+      return `/api/pictures/originals/preview-files/${previewId}/download`
     },
 
     setOtherPreviews () {
@@ -425,43 +461,6 @@ export default {
     selectFile (formData) {
       this.loadPreviewFileFormData(formData)
       this.attachedFileName = formData.get('file').name
-    },
-
-    addComment (comment, taskStatusId) {
-      this.loading.addComment = true
-      this.errors.addComment = false
-      this.commentTask({
-        taskId: this.task.id,
-        taskStatusId: taskStatusId,
-        comment: comment,
-        callback: (err) => {
-          if (err) {
-            console.log(err)
-            this.errors.addComment = true
-          } else {
-            this.errors.addComment = false
-            if (this.attachedFileName) {
-              this.addCommentPreview({
-                taskId: this.task.id,
-                commentId: this.taskComments[0].id,
-                callback: (err, preview) => {
-                  if (err) {
-                    this.errors.addComment = true
-                  } else {
-                    this.$refs['add-preview-modal'].reset()
-                    this.reset()
-                    this.loading.addComment = false
-                    this.attachedFileName = ''
-                  }
-                }
-              })
-            } else {
-              this.loading.addComment = false
-              this.reset()
-            }
-          }
-        }
-      })
     },
 
     createExtraPreview () {

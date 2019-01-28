@@ -53,11 +53,11 @@
         </div>
       </div>
       <div class="has-text-centered new-production-link">
-        <router-link
-          :to="{name: 'open-productions-new'}"
+        <a
+          @click="showNewModal"
         >
           {{ $t('productions.home.create_new') }}
-        </router-link>
+        </a>
       </div>
     </div>
 
@@ -97,10 +97,9 @@
       :active="modals.isNewDisplayed"
       :is-loading="editProduction.isLoading"
       :is-error="editProduction.isError"
-      :cancel-route="'/open-productions'"
       @confirm="confirmEditProduction"
-    >
-    </edit-production-modal>
+      @cancel="hideNewModal"
+    />
 
   </div>
 </template>
@@ -202,24 +201,17 @@ export default {
       })
     },
 
-    handleModalsDisplay () {
-      const path = this.$store.state.route.path
+    showNewModal () {
+      this.modals.isNewDisplayed = true
+    },
 
-      if (path.indexOf('new') > 0) {
-        this.modals.isNewDisplayed = true
-      } else {
-        this.modals.isNewDisplayed = false
-      }
+    hideNewModal () {
+      this.modals.isNewDisplayed = false
     }
+
   },
 
-  watch: {
-    $route () { this.handleModalsDisplay() }
-  },
-
-  created () {
-    this.handleModalsDisplay()
-  },
+  watch: {},
 
   metaInfo () {
     return {

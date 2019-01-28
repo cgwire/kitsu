@@ -53,6 +53,7 @@ export default {
     change_preview: 'Change preview',
     empty_text: 'This comment is empty',
     edit_title: 'Edit comment',
+    error: 'An error occured while posting comment',
     no_file_attached: 'No file attached',
     post_status: 'Post comment',
     retake: 'Retake',

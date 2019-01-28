@@ -64,6 +64,7 @@
           <div>
             <add-comment
               :is-loading="loading.addComment"
+              :is-error="errors.addComment"
               :user="user"
               :task="currentTask"
               :taskStatusOptions="taskStatusOptionsForCurrentUser"
@@ -72,7 +73,7 @@
               @add-preview="onAddPreviewClicked"
               v-if="isCommentingAllowed"
             />
-            <div class="comments" v-if="currentTaskComments.length > 0">
+            <div class="comments" v-if="currentTaskComments && currentTaskComments.length > 0">
               <comment
                 :comment="comment"
                 :highlighted="isHighlighted(comment)"
@@ -112,7 +113,7 @@
                   'is-loading': loading.setPreview
                 }"
                 @click="setPreview"
-                v-if="currentTaskPreviews.length > 0 && isCurrentUserManager"
+                v-if="currentTaskPreviews && currentTaskPreviews.length > 0 && isCurrentUserManager"
               >
                 <image-icon class="icon" />
                 <span class="text">
@@ -165,27 +166,28 @@
             <a
               class="button mt2"
               ref="preview-file"
-              :href="currentPreviewPath"
+              :href="currentPreviewDlPath"
               v-else-if="isDlPreviewFile"
             >
               <download-icon class="icon" />
               <span class="text">
-                {{ $t('tasks.download_pdf_file') }}
+                {{ $t('tasks.download_pdf_file', {extension}) }}
               </span>
             </a>
 
             <model-viewer
               :preview-url="currentPreviewPath"
-              v-else-if="currentTaskPreviews.length > 0 && extension === 'obj'"
+              :preview-dl-path="currentPreviewDlPath"
+              v-else-if="currentTaskPreviews && currentTaskPreviews.length > 0 && extension === 'obj'"
             />
 
             <picture-viewer
               :preview="currentPreview"
               @annotation-changed="onAnnotationChanged"
               @add-preview="onAddExtraPreview"
-              @remove-extra-preview="onRemoveExtraPreview"
+              @remove-extra-preview="showRemoveExtraPreviewModal"
               ref="preview-picture"
-              v-else-if="currentTaskPreviews.length > 0 && extension === 'png'"
+              v-else-if="currentTaskPreviews && currentTaskPreviews.length > 0 && extension === 'png'"
             />
           </div>
         </div>
@@ -208,9 +210,9 @@
       :active="modals.addExtraPreview"
       :is-loading="loading.addExtraPreview"
       :is-error="errors.addExtraPreview"
-      :cancel-route="taskPath()"
       :form-data="addExtraPreviewFormData"
       extensions=".png,.jpg"
+      @cancel="hideExtraPreviewModal"
       @fileselected="selectFile"
       @confirm="createExtraPreview"
     />
@@ -250,9 +252,9 @@
       :active="modals.deleteExtraPreview"
       :is-loading="loading.deleteExtraPreview"
       :is-error="errors.deleteExtraPreview"
-      :cancel-route="taskPath()"
       :text="$t('tasks.delete_preview')"
       :error-text="$t('tasks.delete_preview_error')"
+      @cancel="hideRemoveExtraPreviewModal"
       @confirm="confirmDeleteTaskPreview"
     />
   </div>
@@ -273,7 +275,7 @@ import Comment from './widgets/Comment'
 import DeleteModal from './widgets/DeleteModal'
 import EditCommentModal from './modals/EditCommentModal'
 import EntityThumbnail from './widgets/EntityThumbnail'
-import ModelViewer from './widgets/ModelViewer'
+import ModelViewer from './previews/ModelViewer'
 import PeopleAvatar from './widgets/PeopleAvatar'
 import PeopleName from './widgets/PeopleName'
 import PictureViewer from './previews/PictureViewer'
@@ -313,6 +315,7 @@ export default {
     return {
       attachedFileName: '',
       currentPreviewId: null,
+      currentExtraPreviewId: null,
       entityPage: this.getEntityPage(),
       selectedTab: 'validation',
       taskLoading: {
@@ -322,6 +325,7 @@ export default {
       modals: {
         addPreview: false,
         addExtraPreview: false,
+        deleteExtraPreview: false,
         changePreview: false,
         deleteTask: false,
         deleteComment: false,
@@ -355,7 +359,8 @@ export default {
       addExtraPreviewFormData: null,
       changePreviewFormData: null,
       isSubscribed: false,
-      currentPreviewPath: ''
+      currentPreviewPath: '',
+      currentPreviewDlPath: ''
     }
   },
 
@@ -417,7 +422,7 @@ export default {
 
     commentToEdit () {
       let commentToEdit = {}
-      if (this.currentTask && this.currentTaskComments.length > 0) {
+      if (this.currentTask && this.currentTaskComments && this.currentTaskComments.length > 0) {
         commentToEdit = this.currentTaskComments[0]
       }
       return commentToEdit
@@ -611,7 +616,7 @@ export default {
     },
 
     isMovie () {
-      if (this.currentTaskPreviews.length > 0) {
+      if (this.currentTaskPreviews) {
         let previewId = this.route.params.preview_id
         let currentPreview = this.currentTaskPreviews[0]
         if (previewId) {
@@ -626,7 +631,7 @@ export default {
     },
 
     extension () {
-      if (this.currentTaskPreviews.length > 0) {
+      if (this.currentTaskPreviews) {
         let previewId = this.route.params.preview_id
         let currentPreview = this.currentTaskPreviews[0]
         if (previewId) {
@@ -642,7 +647,7 @@ export default {
 
     moviePath () {
       let previewId = this.route.params.preview_id
-      if (!previewId && this.currentTaskPreviews.length > 0) {
+      if (!previewId && this.currentTaskPreviews) {
         previewId = this.currentTaskPreviews[0].id
       }
       return `/api/movies/originals/preview-files/${previewId}.mp4`
@@ -668,7 +673,7 @@ export default {
     },
 
     isDlPreviewFile () {
-      return this.currentTaskPreviews.length > 0 &&
+      return this.currentTaskPreviews &&
         ['pdf', 'ma', 'mb', 'rar', 'zip'].includes(this.extension)
     },
 
@@ -705,6 +710,7 @@ export default {
       'addCommentPreview',
       'addCommentExtraPreview',
       'commentTask',
+      'commentTaskWithPreview',
       'changeCommentPreview',
       'clearSelectedTasks',
       'deleteTask',
@@ -819,6 +825,7 @@ export default {
               this.currentTaskPreviews = this.getCurrentTaskPreviews()
               this.setOtherPreviews()
               this.currentPreviewPath = this.getOriginalPath()
+              this.currentPreviewDlPath = this.getOriginalDlPath()
               this.entityPage = this.getEntityPage()
               this.setOtherPreviews()
               this.loadTaskSubscribed({
@@ -879,52 +886,56 @@ export default {
       return `/api/pictures/originals/preview-files/${previewId}.${extension}`
     },
 
+    getOriginalDlPath () {
+      let previewId = this.route.params.preview_id
+      if (!previewId &&
+          this.currentTaskPreviews &&
+          this.currentTaskPreviews.length > 0
+      ) {
+        previewId = this.currentTaskPreviews[0].id
+      }
+      return `/api/pictures/originals/preview-files/${previewId}/download`
+    },
+
     getPreviewPath () {
       let previewId = this.route.params.preview_id
-      if (!previewId && this.currentTaskPreviews.length > 0) {
+      if (!previewId &&
+          this.currentTaskPreviews &&
+          this.currentTaskPreviews.length > 0
+      ) {
         previewId = this.currentTaskPreviews[0].id
       }
       return `/api/pictures/previews/preview-files/${previewId}.png`
     },
 
     addComment (comment, taskStatusId) {
+      const finalize = (err, preview) => {
+        if (err) {
+          this.errors.addComment = true
+        } else {
+          this.$refs['add-preview-modal'].reset()
+          this.reset()
+          if (preview && preview.type === 'PreviewFile') {
+            this.resetPreview(preview)
+          }
+          this.attachedFileName = ''
+        }
+        this.loading.addComment = false
+      }
+      const params = {
+        taskId: this.currentTask.id,
+        taskStatusId: taskStatusId,
+        commentText: comment,
+        comment: comment,
+        callback: finalize
+      }
       this.loading.addComment = true
       this.errors.addComment = false
-      this.commentTask({
-        taskId: this.route.params.task_id,
-        taskStatusId: taskStatusId,
-        comment: comment,
-        callback: (err) => {
-          if (err) {
-            console.log(err)
-            this.errors.addComment = true
-          } else {
-            this.errors.addComment = false
-            if (this.attachedFileName) {
-              this.addCommentPreview({
-                taskId: this.route.params.task_id,
-                commentId: this.currentTaskComments[0].id,
-                callback: (err, preview) => {
-                  if (err) {
-                    console.log(err)
-                  } else {
-                    this.$refs['add-preview-modal'].reset()
-                    this.loading.addComment = false
-                    this.attachedFileName = ''
-                    this.reset()
-                    this.resetPreview({
-                      id: preview.id
-                    })
-                  }
-                }
-              })
-            } else {
-              this.loading.addComment = false
-              this.reset()
-            }
-          }
-        }
-      })
+      if (this.attachedFileName) {
+        this.commentTaskWithPreview(params)
+      } else {
+        this.commentTask(params)
+      }
     },
 
     reset () {
@@ -932,9 +943,10 @@ export default {
       this.currentTaskPreviews = this.getCurrentTaskPreviews()
       this.setOtherPreviews()
       this.currentPreviewPath = this.getOriginalPath()
+      this.currentPreviewDlPath = this.getOriginalDlPath()
       this.currentTask = this.getCurrentTask()
       let previewId = this.route.params.preview_id
-      if (!previewId && this.currentTaskPreviews.length > 0) {
+      if (!previewId && this.currentTaskPreviews) {
         previewId = this.currentTaskPreviews[0].id
       }
       this.currentPreviewId = previewId
@@ -946,18 +958,13 @@ export default {
       this.modals = {
         addPreview: false,
         addExtraPreview: false,
+        deleteExtraPreview: false,
         changePreview: false,
         deleteTask: false,
         deleteComment: false,
         editComment: false
       }
-      if (path.indexOf('add-preview') > 0) {
-        this.modals.addPreview = true
-      } else if (path.indexOf('add-extra-preview') > 0) {
-        this.modals.addExtraPreview = true
-      } else if (path.indexOf('remove-extra-preview') > 0) {
-        this.modals.deleteExtraPreview = true
-      } else if (path.indexOf('change-preview') > 0) {
+      if (path.indexOf('change-preview') > 0) {
         this.modals.changePreview = true
       } else if (
         path.indexOf('delete') > 0 && path.indexOf('comments') < 0
@@ -1005,8 +1012,8 @@ export default {
         return comment.previews.findIndex((p) => p.id === previewId) >= 0
       })
       this.addCommentExtraPreview({
-        taskId: this.route.params.task_id,
-        previewId: this.$route.params.preview_id,
+        taskId: this.currentTask.id,
+        previewId: this.currentPreview.id,
         commentId: comment.id,
         callback: (err, preview) => {
           this.loading.addExtraPreview = false
@@ -1024,6 +1031,7 @@ export default {
             setTimeout(() => {
               this.$refs['preview-picture'].displayLast()
             }, 0)
+            this.modals.addExtraPreview = false
           }
         }
       })
@@ -1055,6 +1063,7 @@ export default {
       this.currentTaskPreviews = this.getCurrentTaskPreviews()
       this.setOtherPreviews()
       this.currentPreviewPath = this.getOriginalPath()
+      this.currentPreviewDlPath = this.getOriginalDlPath()
       this.$router.push(this.previewPath(preview.id))
     },
 
@@ -1075,12 +1084,16 @@ export default {
     },
 
     setOtherPreviews () {
-      this.otherPreviews = this.currentTaskPreviews.filter((p) => {
-        return (
-          p.id !== this.currentPreviewId &&
-          p.extension === 'mp4'
-        )
-      })
+      if (this.currentTaskPreviews) {
+        this.otherPreviews = this.currentTaskPreviews.filter((p) => {
+          return (
+            p.id !== this.currentPreviewId &&
+            p.extension === 'mp4'
+          )
+        })
+      } else {
+        this.otherPreviews = []
+      }
       return this.otherPreviews
     },
 
@@ -1132,7 +1145,7 @@ export default {
             this.errors.deleteComment = true
           } else {
             this.reset()
-            if (this.currentTaskPreviews.length > 0) {
+            if (this.currentTaskPreviews) {
               this.resetPreview(this.currentTaskPreviews[0])
             } else {
               this.$router.push(this.taskPath())
@@ -1145,16 +1158,21 @@ export default {
     confirmDeleteTaskPreview () {
       this.loading.deleteExtraPreview = true
       this.errors.deleteExtraPreview = false
+      const previewId = this.currentPreviewId
+      const comment = this.getCurrentTaskComments().find((comment) => {
+        return comment.previews.findIndex((p) => p.id === previewId) >= 0
+      })
 
       this.$refs['preview-picture'].displayFirst()
       this.deleteTaskPreview({
-        taskId: this.$route.params.task_id,
-        commentId: this.$route.params.comment_id,
-        previewId: this.$route.params.extra_preview_id
+        taskId: this.currentTask.id,
+        commentId: comment.id,
+        previewId: this.currentExtraPreviewId
       })
         .then(() => {
           this.loading.deleteExtraPreview = false
           this.resetPreview(this.currentPreview)
+          this.hideRemoveExtraPreviewModal()
         })
         .catch((err) => {
           console.error(err)
@@ -1250,19 +1268,20 @@ export default {
     },
 
     onAddExtraPreview () {
-      const route = this.taskPath(this.currentTask, 'task-add-extra-preview')
-      route.params.preview_id = this.currentPreviewId ||
-        this.currentPreview.id
-      route.params.comment_id = this.currentTaskComments[0].id
-      this.$router.push(route)
+      this.modals.addExtraPreview = true
     },
 
-    onRemoveExtraPreview (preview) {
-      const route = this.taskPath(this.currentTask, 'task-remove-extra-preview')
-      route.params.preview_id = this.currentPreviewId
-      route.params.extra_preview_id = preview.id
-      route.params.comment_id = this.currentTaskComments[0].id
-      this.$router.push(route)
+    hideExtraPreviewModal () {
+      this.modals.addExtraPreview = false
+    },
+
+    showRemoveExtraPreviewModal (preview) {
+      this.currentExtraPreviewId = preview.id
+      this.modals.deleteExtraPreview = true
+    },
+
+    hideRemoveExtraPreviewModal () {
+      this.modals.deleteExtraPreview = false
     },
 
     onAddPreviewClicked () {
@@ -1285,7 +1304,11 @@ export default {
         this.loadTaskData()
       }
       let previewId = this.route.params.preview_id
-      if (!previewId && this.currentTaskPreviews.length > 0) {
+      if (
+        !previewId &&
+        this.currentTaskPreviews &&
+        this.currentTaskPreviews.length > 0
+      ) {
         previewId = this.currentTaskPreviews[0].id
       }
       this.currentPreviewId = previewId

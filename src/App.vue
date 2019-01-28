@@ -27,6 +27,7 @@ export default {
       'isLoginLoading',
       'isDataLoading',
       'isDarkTheme',
+      'isSavingCommentPreview',
       'route',
       'user'
     ])
@@ -95,7 +96,7 @@ export default {
 
       'comment:new' (eventData) {
         const commentId = eventData.comment_id
-        this.loadComment({ commentId })
+        if (!this.isSavingCommentPreview) this.loadComment({ commentId })
       },
 
       'task:update' (eventData) {

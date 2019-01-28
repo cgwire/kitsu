@@ -1,7 +1,8 @@
 <template>
 <div class="columns fixed-page">
   <div class="column main-column">
-    <div class="people page">
+    <div class="person page">
+
       <div class="flexrow page-header">
         <div class="flexrow-item" v-if="person">
           <people-avatar
@@ -376,6 +377,10 @@ export default {
   margin-top: 2em;
 }
 
+.task-tabs ul {
+  margin: 0;
+}
+
 .data-list {
   margin-top: 0;
 }
@@ -384,7 +389,7 @@ export default {
   border-right: 3px solid #666;
 }
 
-.todos {
+.person {
   display: flex;
   flex-direction: column;
 }

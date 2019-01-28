@@ -79,9 +79,18 @@
         </a>
         <router-link
           :to="cancelRoute"
-          class="button is-link">
+          class="button is-link"
+          v-if="cancelRoute"
+        >
           {{ $t("main.cancel") }}
         </router-link>
+        <button
+          @click="$emit('cancel')"
+          class="button is-link"
+          v-else
+        >
+          {{ $t("main.cancel") }}
+        </button>
       </p>
       <p class="error has-text-right info-message" v-if="isError">
         {{ $t("assets.edit_fail") }}
@@ -93,12 +102,15 @@
 
 <script>
 import { mapGetters, mapActions } from 'vuex'
+import { modalMixin } from './base_modal'
+
 import Combobox from '../widgets/Combobox'
 import FileUpload from '../widgets/FileUpload'
 import TextField from '../widgets/TextField'
 
 export default {
   name: 'edit-production-modal',
+  mixins: [modalMixin],
   components: {
     Combobox,
     FileUpload,

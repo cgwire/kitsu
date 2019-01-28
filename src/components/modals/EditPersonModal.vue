@@ -20,36 +20,36 @@
           :label="$t('people.fields.first_name')"
           ref="name-field"
           @enter="confirmClicked()"
-          v-model="form.first_name">
-        </text-field>
+          v-model="form.first_name"
+        />
         <text-field
           :label="$t('people.fields.last_name')"
           @enter="confirmClicked()"
-          v-model="form.last_name">
-        </text-field>
+          v-model="form.last_name"
+        />
         <text-field
           :label="$t('people.fields.email')"
           @enter="confirmClicked()"
-          v-model="form.email">
-        </text-field>
+          v-model="form.email"
+        />
         <text-field
           :label="$t('people.fields.phone')"
           @enter="confirmClicked()"
-          v-model="form.phone">
-        </text-field>
+          v-model="form.phone"
+        />
         <combobox
           :label="$t('people.fields.role')"
           :options="roleOptions"
           localeKeyPrefix="people.role."
           @enter="confirmClicked()"
-          v-model="form.role">
-        </combobox>
+          v-model="form.role"
+        />
         <combobox
           :label="$t('people.fields.active')"
           :options="activeOptions"
           @enter="confirmClicked()"
-          v-model="form.active">
-        </combobox>
+          v-model="form.active"
+        />
       </form>
 
       <p class="has-text-right">
@@ -59,6 +59,7 @@
             'is-primary': true,
             'is-loading': isLoading
           }"
+          :disabled="!isValidEmail"
           @click="confirmClicked">
           {{ $t("main.confirmation") }}
         </a>
@@ -92,6 +93,7 @@ export default {
 
   data () {
     return {
+      isValidEmail: false,
       form: {
         first_name: '',
         last_name: '',
@@ -121,7 +123,8 @@ export default {
 
   computed: {
     ...mapGetters([
-      'personToEdit'
+      'personToEdit',
+      'people'
     ]),
 
     personName () {
@@ -132,10 +135,9 @@ export default {
       }
     }
   },
-  methods: {
-    ...mapActions([
 
-    ]),
+  methods: {
+    ...mapActions([]),
 
     confirmClicked () {
       this.form.active =
@@ -156,6 +158,20 @@ export default {
           active: !this.personToEdit.id || this.personToEdit.active ? 'true' : 'false'
         }
       }
+      this.checkEmailValidity()
+    },
+
+    checkEmailValidity () {
+      const regex = /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/
+      const isExist = this.people.some((p) => {
+        return p.email === this.form.email && (
+          !this.personToEdit || this.personToEdit.email !== p.email
+        )
+      })
+      this.isValidEmail =
+        this.form.email &&
+        regex.test(this.form.email) &&
+        !isExist
     }
   },
 
@@ -171,6 +187,10 @@ export default {
           this.$refs['name-field'].focus()
         }, 100)
       }
+    },
+
+    'form.email' () {
+      this.checkEmailValidity()
     }
   }
 }
