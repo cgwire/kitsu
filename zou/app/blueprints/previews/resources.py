@@ -369,7 +369,7 @@ class PreviewFileResource(Resource):
 
         try:
             if extension == "png":
-                return send_picture_file("orginals", instance_id)
+                return send_picture_file("original", instance_id)
             elif extension == "pdf":
                 mimetype = "application/pdf"
                 return send_standard_file(instance_id, extension, mimetype)
