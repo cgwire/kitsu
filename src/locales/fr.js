@@ -222,7 +222,7 @@ export default {
     delete_comment_error: 'Une erreur est survenue en supprimant le commentaire.',
     delete_error: 'Une erreur est survenue en supprimant la tâche.',
     delete_for_selection: 'Delete selected tasks:',
-    delete_preview: 'Êtes vous sûr de vouloir supprimer ce commentaire ?',
+    delete_preview: 'Êtes vous sûr de vouloir supprimer cette préviz ?',
     delete_preview_error: 'Une erreur est survenue en supprimant la preview.',
     done: 'Terminées',
     download_pdf_file: 'Télécharger le fichier .{extension}',

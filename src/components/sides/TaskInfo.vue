@@ -369,7 +369,6 @@ export default {
 
   methods: {
     ...mapActions([
-      'addCommentPreview',
       'addCommentExtraPreview',
       'commentTask',
       'commentTaskWithPreview',
@@ -397,6 +396,33 @@ export default {
             }
           }
         })
+      }
+    },
+
+    addComment (comment, taskStatusId) {
+      const finalize = (err, preview) => {
+        if (err) {
+          this.errors.addComment = true
+        } else {
+          this.$refs['add-preview-modal'].reset()
+          this.reset()
+          this.attachedFileName = ''
+        }
+        this.loading.addComment = false
+      }
+      const params = {
+        taskId: this.task.id,
+        taskStatusId: taskStatusId,
+        commentText: comment,
+        comment: comment,
+        callback: finalize
+      }
+      this.loading.addComment = true
+      this.errors.addComment = false
+      if (this.attachedFileName) {
+        this.commentTaskWithPreview(params)
+      } else {
+        this.commentTask(params)
       }
     },
 
@@ -435,33 +461,6 @@ export default {
     selectFile (formData) {
       this.loadPreviewFileFormData(formData)
       this.attachedFileName = formData.get('file').name
-    },
-
-    addComment (comment, taskStatusId) {
-      const finalize = (err) => {
-        if (err) {
-          this.errors.addComment = true
-        } else {
-          this.$refs['add-preview-modal'].reset()
-          this.reset()
-          this.attachedFileName = ''
-        }
-        this.loading.addComment = false
-      }
-      const params = {
-        taskId: this.task.id,
-        taskStatusId: taskStatusId,
-        commentText: comment,
-        comment: comment,
-        callback: finalize
-      }
-      this.loading.addComment = true
-      this.errors.addComment = false
-      if (this.attachedFileName) {
-        this.commentTaskWithPreview(params)
-      } else {
-        this.commentTask(params)
-      }
     },
 
     createExtraPreview () {
