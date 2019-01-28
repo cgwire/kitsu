@@ -241,7 +241,10 @@ def get_metadata_descriptors(project_id):
     """
     Get all metadata descriptors for given project and entity type.
     """
-    descriptors = MetadataDescriptor.get_all_by(project_id=project_id)
+    descriptors = MetadataDescriptor.query \
+        .filter(MetadataDescriptor.project_id == project_id) \
+        .order_by(MetadataDescriptor.name) \
+        .all()
     return fields.serialize_models(descriptors)
 
 
