@@ -1,10 +1,10 @@
 from tests.base import ApiDBTestCase
 
 
-class OutputFileTestCase(ApiDBTestCase):
+class ShotCsvExportTestCase(ApiDBTestCase):
 
     def setUp(self):
-        super(OutputFileTestCase, self).setUp()
+        super(ShotCsvExportTestCase, self).setUp()
 
         self.generate_fixture_project_status()
         self.generate_fixture_project()
@@ -21,9 +21,25 @@ class OutputFileTestCase(ApiDBTestCase):
         self.generate_fixture_shot_task()
 
     def test_get_output_files(self):
-        csv_projects = self.get_raw(
+        csv_shots = self.get_raw(
             "/export/csv/projects/%s/shots.csv" % self.project.id
         )
         expected_result = """Project,Episode,Sequence,Name,Description,Frame In,Frame Out,Animation\r
 Cosmos Landromat,E01,S01,P01,Description Shot 01,0,100,opn\r\n"""
-        self.assertEqual(csv_projects, expected_result)
+        self.assertEqual(csv_shots, expected_result)
+
+    def test_get_asset_csv_with_metadata(self):
+        self.generate_fixture_metadata_descriptor('Shot')
+        self.shot.update({
+            "data": {
+                "frame_in": "0",
+                "frame_out": "100",
+                "contractor": "Contractor 1"
+            }
+        })
+        csv_shots = self.get_raw(
+            "/export/csv/projects/%s/shots.csv" % self.project.id
+        )
+        expected_result = """Project,Episode,Sequence,Name,Description,Frame In,Frame Out,Contractor,Animation\r
+Cosmos Landromat,E01,S01,P01,Description Shot 01,0,100,Contractor 1,opn\r\n"""
+        self.assertEqual(csv_shots, expected_result)
