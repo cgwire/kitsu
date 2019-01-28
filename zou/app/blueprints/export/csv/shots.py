@@ -23,12 +23,16 @@ class ShotsCsvExport(Resource):
 
         csv_content = []
         results = self.get_shots_data(project_id)
+        metadata_infos = self.get_metadata_infos(project_id)
         validation_columns = self.get_validation_columns(results)
-        csv_content.append(self.build_headers(validation_columns))
+        headers = self.build_headers(metadata_infos, validation_columns)
+        csv_content.append(headers)
 
         for result in results:
             result["project_name"] = project["name"]
-            csv_content.append(self.build_row(result, validation_columns))
+            csv_content.append(
+                self.build_row(result, metadata_infos, validation_columns)
+            )
 
         file_name = "%s shots" % project["name"]
         return csv_utils.build_csv_response(csv_content, slugify(file_name))
@@ -36,7 +40,7 @@ class ShotsCsvExport(Resource):
     def check_permissions(self, project_id):
         user_service.check_project_access(project_id)
 
-    def build_headers(self, validation_columns):
+    def build_headers(self, metadata_infos, validation_columns):
         headers = [
             "Project",
             "Episode",
@@ -46,7 +50,12 @@ class ShotsCsvExport(Resource):
             "Frame In",
             "Frame Out"
         ]
-        return headers + validation_columns
+
+        metadata_headers = [
+            name for (name, field_name) in metadata_infos
+        ]
+
+        return headers + metadata_headers + validation_columns
 
     def get_shots_data(self, project_id):
         results = shots_service.get_shots_and_tasks({
@@ -60,6 +69,31 @@ class ShotsCsvExport(Resource):
                 shot["name"]
             )
         )
+
+    def build_row(self, result, metadata_infos, validation_columns):
+        row = [
+            result["project_name"],
+            result["episode_name"],
+            result["sequence_name"],
+            result["name"],
+            result["description"],
+            result.get("data", {}).get("frame_in", ""),
+            result.get("data", {}).get("frame_out", "")
+        ]
+        task_map = {}
+
+        for task in result["tasks"]:
+            task_status = self.task_status_map[task["task_status_id"]]
+            task_type = self.task_type_map[task["task_type_id"]]
+            task_map[task_type["name"]] = task_status["short_name"]
+
+        for (_, field_name) in metadata_infos:
+            row.append(result.get("data", {}).get(field_name, ""))
+
+        for column in validation_columns:
+            row.append(task_map.get(column, ""))
+
+        return row
 
     def get_validation_columns(self, results):
         validation_map = {}
@@ -84,24 +118,20 @@ class ShotsCsvExport(Resource):
 
         return validation_columns
 
-    def build_row(self, result, validation_columns):
-        row = [
-            result["project_name"],
-            result["episode_name"],
-            result["sequence_name"],
-            result["name"],
-            result["description"],
-            result.get("data", {}).get("frame_in", ""),
-            result.get("data", {}).get("frame_out", "")
+    def get_metadata_infos(self, project_id):
+        descriptors = [
+            descriptor
+            for descriptor
+            in projects_service.get_metadata_descriptors(project_id)
+            if descriptor["entity_type"] == "Shot"
         ]
-        task_map = {}
 
-        for task in result["tasks"]:
-            task_status = self.task_status_map[task["task_status_id"]]
-            task_type = self.task_type_map[task["task_type_id"]]
-            task_map[task_type["name"]] = task_status["short_name"]
+        columns = [
+            (
+                descriptor["name"],
+                descriptor["field_name"]
+            )
+            for descriptor in descriptors
+        ]
 
-        for column in validation_columns:
-            row.append(task_map.get(column, ""))
-
-        return row
+        return columns

@@ -26,3 +26,17 @@ class AssetsCsvExportTestCase(ApiDBTestCase):
         expected_result = """Project,Type,Name,Description,Shaders\r
 Cosmos Landromat,Props,Tree,Description Tree,opn\r\n"""
         self.assertEqual(csv_assets, expected_result)
+
+    def test_get_asset_csv_with_metadata(self):
+        self.generate_fixture_metadata_descriptor()
+        self.asset.update({
+            "data": {
+                "contractor": "Contractor 1"
+            }
+        })
+        csv_assets = self.get_raw(
+            "/export/csv/projects/%s/assets.csv" % self.project.id
+        )
+        expected_result = """Project,Type,Name,Description,Contractor,Shaders\r
+Cosmos Landromat,Props,Tree,Description Tree,Contractor 1,opn\r\n"""
+        self.assertEqual(csv_assets, expected_result)

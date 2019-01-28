@@ -19,6 +19,7 @@ from zou.app.models.department import Department
 from zou.app.models.entity import Entity
 from zou.app.models.entity_type import EntityType
 from zou.app.models.file_status import FileStatus
+from zou.app.models.metadata_descriptor import MetadataDescriptor
 from zou.app.models.output_file import OutputFile
 from zou.app.models.output_type import OutputType
 from zou.app.models.project import Project
@@ -784,6 +785,16 @@ class ApiDBTestCase(ApiTestCase):
             relative_path
         )
         return file_path_fixture
+
+    def generate_fixture_metadata_descriptor(self, entity_type="Asset"):
+        self.meta_descriptor = MetadataDescriptor.create(
+            project_id=self.project.id,
+            name="Contractor",
+            field_name="contractor",
+            choices=["value 1", "value 2"],
+            entity_type=entity_type
+        )
+        return self.meta_descriptor
 
     def generate_assigned_task(self):
         self.generate_fixture_asset()
