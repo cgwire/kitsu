@@ -145,7 +145,8 @@ def create_person(
     first_name,
     last_name,
     phone="",
-    role="user"
+    role="user",
+    desktop_login=""
 ):
     """
     Create a new person entry in the database. No operation are performed on
@@ -159,7 +160,8 @@ def create_person(
         first_name=first_name,
         last_name=last_name,
         phone=phone,
-        role=role
+        role=role,
+        desktop_login=desktop_login
     )
     events.emit("person:new", {
         "person_id": person.id
