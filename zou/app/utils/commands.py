@@ -181,11 +181,11 @@ def sync_with_ldap_server():
             if person is None and last_name != "[]":
                 email = "%s@%s" % (desktop_login, EMAIL_DOMAIN)
                 persons_service.create_person(
-                    email.encode("utf-8"),
+                    email,
                     "default".encode("utf-8"),
-                    first_name.encode("utf-8"),
-                    last_name.encode("utf-8"),
-                    desktop_login=desktop_login.encode("utf-8")
+                    first_name,
+                    last_name,
+                    desktop_login=desktop_login
                 )
                 print("User %s created!" % desktop_login)
             elif last_name != "[]":
