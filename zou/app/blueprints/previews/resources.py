@@ -111,7 +111,8 @@ def send_storage_file(
             as_attachment=as_attachment,
             attachment_filename=attachment_filename
         )
-    except IOError:
+    except IOError as e:
+        current_app.logger.error(e)
         return {
             "error": True,
             "message": "File not found for: %s %s" % (

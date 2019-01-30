@@ -3,7 +3,8 @@ import json
 import datetime
 from ldap3 import Server, Connection, ALL, NTLM
 
-from zou.app.stores import auth_tokens_store
+from zou.app.utils import thumbnail as thumbnail_utils
+from zou.app.stores import auth_tokens_store, file_store
 from zou.app.services import (
     assets_service,
     persons_service,
@@ -154,23 +155,31 @@ def sync_with_ldap_server():
             raise_exceptions=True,
             auto_bind=True
         )
-        attributes = ["givenName", "sn", "sAMAccountName", "mail"]
+        attributes = [
+            "givenName", "sn", "sAMAccountName", "mail", "thumbnailPhoto"
+        ]
         conn.search(LDAP_BASE_DN, '(objectclass=person)', attributes=attributes)
         return [
             {
                 "first_name": entry.givenName,
                 "last_name": entry.sn,
-                "desktop_login": entry.sAMAccountName
+                "desktop_login": entry.sAMAccountName,
+                "thumbnail": entry.thumbnailPhoto.raw_values
             }
             for entry in conn.entries
             if entry.sAMAccountName not in excluded_accounts
         ]
 
-    def update_prod_tracker_with_ldap_users(users):
+    def update_person_list_with_ldap_users(users):
         for user in users:
             first_name = str(user["first_name"])
             last_name = str(user["last_name"])
             desktop_login = str(user["desktop_login"])
+            if len(user["thumbnail"]) > 0:
+                thumbnail = user["thumbnail"][0]
+            else:
+                thumbnail = ""
+
             person = None
             try:
                 person = persons_service.get_person_by_desktop_login(
@@ -178,9 +187,9 @@ def sync_with_ldap_server():
                 )
             except PersonNotFoundException:
                 pass
-            if person is None and last_name != "[]":
+            if person is None:
                 email = "%s@%s" % (desktop_login, EMAIL_DOMAIN)
-                persons_service.create_person(
+                person = persons_service.create_person(
                     email,
                     "default".encode("utf-8"),
                     first_name,
@@ -188,8 +197,34 @@ def sync_with_ldap_server():
                     desktop_login=desktop_login
                 )
                 print("User %s created!" % desktop_login)
-            elif last_name != "[]":
+            else:
                 print("User %s already in database" % desktop_login)
 
+            if len(thumbnail) > 0:
+                save_thumbnail(person, thumbnail)
+
+    def save_thumbnail(person, thumbnail):
+        from zou.app import app
+        with app.app_context():
+            thumbnail_path = "/tmp/ldap_th.jpg"
+            with open(thumbnail_path, "wb") as th_file:
+                th_file.write(thumbnail)
+            thumbnail_png_path = thumbnail_utils.convert_jpg_to_png(
+                thumbnail_path
+            )
+            thumbnail_utils.turn_into_thumbnail(
+                thumbnail_png_path,
+                size=thumbnail_utils.BIG_SQUARE_SIZE
+            )
+            file_store.add_picture(
+                "thumbnails",
+                person["id"],
+                thumbnail_png_path
+            )
+            os.remove(thumbnail_png_path)
+            persons_service.update_person(person["id"], {
+                "has_avatar": True
+            })
+
     ldap_users = get_ldap_users()
-    update_prod_tracker_with_ldap_users(ldap_users)
+    update_person_list_with_ldap_users(ldap_users)
