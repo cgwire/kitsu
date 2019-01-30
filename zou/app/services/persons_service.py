@@ -260,3 +260,7 @@ def get_presence_logs(year, month):
             row[day] = "X"
         csv_content.append(row)
     return csv_content
+
+
+def is_admin(person):
+    return person["role"] == "admin"

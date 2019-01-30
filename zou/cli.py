@@ -146,6 +146,14 @@ def set_default_password(email):
 
 
 @cli.command()
+def sync_with_ldap_server():
+    """
+    For each user account in your LDAP server, it creates a new user.
+    """
+    commands.sync_with_ldap_server()
+
+
+@cli.command()
 def patch_set_done_flag_on_task_status():
     """
     Patch to run after upgrade from 0.4.8 or lower to 0.4.9 or superior.
