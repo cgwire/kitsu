@@ -4,9 +4,12 @@ from flask_jwt_extended import get_jti
 from ldap3 import (
     Server,
     Connection,
-    AUTO_BIND_NO_TLS,
-    SUBTREE,
-    ALL_ATTRIBUTES
+    ALL,
+    NTLM
+)
+from ldap3.core.exceptions import (
+    LDAPSocketOpenError,
+    LDAPInvalidCredentialsResult
 )
 
 from zou.app.services import persons_service
@@ -34,8 +37,8 @@ def check_auth(app, email, password):
         user = local_auth_strategy(email, password, app)
     elif strategy == "auth_local_no_password":
         user = no_password_auth_strategy(email)
-    elif strategy == "auth_remote_active_directory":
-        user = active_directory_auth_strategy(email, password, app)
+    elif strategy == "auth_remote_ldap":
+        user = ldap_auth_strategy(email, password, app)
     else:
         raise NoAuthStrategyConfigured
 
@@ -103,39 +106,57 @@ def local_auth_strategy(email, password, app=None):
     return check_credentials(email, password, app)
 
 
-def active_directory_auth_strategy(email, password, app):
+def ldap_auth_strategy(email, password, app):
     """
     Connect to an active directory server to know if given user can be
     authenticated.
     """
-    username = email.split("@")[0]
-    domain = app.config["AUTH_AD_DOMAIN"]
-    user = "%s\\%s" % (domain, username)
-
-    server_ip = app.config["AUTH_AD_HOST"]
-    server_port = app.config["AUTH_AD_PORT"]
-    server = Server(server_ip, port=server_port, use_ssl=False)
+    person = None
+    try:
+        person = persons_service.get_person_by_email(email)
+    except PersonNotFoundException:
+        person = persons_service.get_person_by_desktop_login(email)
 
     try:
-        with Connection(
+        ldap_server = "%s:%s" % (
+            app.config["LDAP_HOST"],
+            app.config["LDAP_PORT"]
+        )
+        server = Server(ldap_server, get_info=ALL)
+        user = "%s\%s" % (
+            app.config["LDAP_DOMAIN"],
+            person["desktop_login"]
+        )
+        conn = Connection(
             server,
-            auto_bind=AUTO_BIND_NO_TLS,
-            read_only=True,
-            check_names=True,
             user=user,
             password=password,
-            pool_lifetime=3600
-        ) as connection:
-            connection.search(
-                search_base='CN=Users,DC=domain,DC=local',
-                search_filter='(&(samAccountName=%s))' % username,
-                search_scope=SUBTREE,
-                attributes=ALL_ATTRIBUTES,
-                get_operational_attributes=True
-            )
-            return persons_service.get_person_by_email_username(email)
-    except:
-        raise PersonNotFoundException
+            authentication=NTLM,
+            raise_exceptions=True
+        )
+        conn.bind()
+        return person
+
+    except LDAPSocketOpenError:
+        app.logger.error("Cannot connect to LDAP/Active directory server")
+        return ldap_auth_strategy_fallback(email, password, app, person)
+
+    except LDAPInvalidCredentialsResult:
+        app.logger.error("LDAP cannot authenticate user: %s" % email)
+        return ldap_auth_strategy_fallback(email, password, app, person)
+
+
+def ldap_auth_strategy_fallback(email, password, app, person):
+    """
+    When ldap auth fails, admin users can try to connect with default
+    auth strategy.
+    (only if fallback is activated (via LDAP_FALLBACK flag) in configuration)
+    """
+    if app.config["LDAP_FALLBACK"] and persons_service.is_admin(person):
+        person = persons_service.get_person_by_email(email)
+        return local_auth_strategy(email, password, app)
+    else:
+        raise WrongPasswordException
 
 
 def register_tokens(app, access_token, refresh_token=None):

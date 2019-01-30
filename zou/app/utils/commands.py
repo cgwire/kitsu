@@ -1,12 +1,19 @@
+import os
 import json
 import datetime
+from ldap3 import Server, Connection, ALL, NTLM
 
 from zou.app.stores import auth_tokens_store
 from zou.app.services import (
     assets_service,
+    persons_service,
     projects_service,
     shots_service,
     tasks_service
+)
+
+from zou.app.services.exception import (
+    PersonNotFoundException
 )
 
 
@@ -119,3 +126,67 @@ def init_data():
         is_done=True
     )
     print("Task status initialized.")
+
+
+def sync_with_ldap_server():
+    """
+    Connect to a LDAP server, then creates all related accounts.
+    """
+    LDAP_HOST = os.getenv("LDAP_HOST", "127.0.0.1")
+    LDAP_PORT = os.getenv("LDAP_PORT", "389")
+    LDAP_PASSWORD = os.getenv("LDAP_PASSWORD", "password")
+    LDAP_BASE_DN = os.getenv("LDAP_BASE_DN", "cn=Users,dc=studio,dc=local")
+    LDAP_DOMAIN = os.getenv("LDAP_DOMAIN", "")
+    LDAP_USER = os.getenv("LDAP_USER", "")
+    EMAIL_DOMAIN = os.getenv("EMAIL_DN", "studio.local")
+    LDAP_EXCLUDED_ACCOUNTS = os.getenv("LDAP_EXCLUDED_ACCOUNTS", "")
+
+    def get_ldap_users():
+        excluded_accounts = LDAP_EXCLUDED_ACCOUNTS.split(",")
+        ldap_server = "%s:%s" % (LDAP_HOST, LDAP_PORT)
+        server = Server(ldap_server, get_info=ALL)
+        user = "%s\%s" % (LDAP_DOMAIN, LDAP_USER)
+        conn = Connection(
+            server,
+            user=user,
+            password=LDAP_PASSWORD,
+            authentication=NTLM,
+            raise_exceptions=True,
+            auto_bind=True
+        )
+        attributes = ["givenName", "sn", "sAMAccountName", "mail"]
+        conn.search(LDAP_BASE_DN, '(objectclass=person)', attributes=attributes)
+        return [
+            {
+                "first_name": entry.givenName,
+                "last_name": entry.sn,
+                "desktop_login": entry.sAMAccountName
+            }
+            for entry in conn.entries
+            if entry.sAMAccountName not in excluded_accounts
+        ]
+
+    def update_prod_tracker_with_ldap_users(users):
+        for user in users:
+            first_name = str(user["first_name"])
+            last_name = str(user["last_name"])
+            desktop_login = str(user["desktop_login"])
+            person = None
+            try:
+                person = persons_service.get_person_by_desktop_login(desktop_login)
+            except PersonNotFoundException:
+                pass
+            if person is None and last_name != "[]":
+                persons_service.create_person(
+                    "%s@%s" % (desktop_login, EMAIL_DOMAIN),
+                    "default",
+                    first_name,
+                    last_name,
+                    desktop_login=desktop_login
+                )
+                print("User %s created!" % desktop_login)
+            elif last_name != "[]":
+                print("User %s already in database" % desktop_login)
+
+    ldap_users = get_ldap_users()
+    update_prod_tracker_with_ldap_users(ldap_users)

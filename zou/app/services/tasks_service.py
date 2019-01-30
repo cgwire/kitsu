@@ -715,8 +715,8 @@ def get_or_create_department(name):
     Create a new department it doesn't exist. If it exists, it returns the
     department from database.
     """
-    departmemt = Department.get_by(name=name)
-    if departmemt is None:
+    department = Department.get_by(name=name)
+    if department is None:
         department = Department(
             name=name,
             color="#000000"

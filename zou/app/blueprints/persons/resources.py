@@ -28,7 +28,8 @@ class NewPersonResource(Resource):
             data["first_name"],
             data["last_name"],
             data["phone"],
-            role=data["role"]
+            role=data["role"],
+            desktop_login=data["desktop_login"]
         )
         return person, 201
 
@@ -51,6 +52,7 @@ class NewPersonResource(Resource):
         )
         parser.add_argument("phone", default="")
         parser.add_argument("role", default="user")
+        parser.add_argument("desktop_login", default="")
         args = parser.parse_args()
         return args
 
