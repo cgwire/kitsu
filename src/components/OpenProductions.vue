@@ -73,11 +73,11 @@
           {{ $t('productions.home.empty') }}
         </p>
         <p class="has-text-centered">
-          <button-link
+          <button-simple
             class="level-item big-button"
             :text="$t('productions.home.create_new')"
-            :path="{name: 'open-productions-new'}"
             :is-responsive="false"
+            @click="showNewModal"
           />
         </p>
       </div>
@@ -109,7 +109,7 @@ import { mapGetters, mapActions } from 'vuex'
 import { ActivityIcon } from 'vue-feather-icons'
 
 import colors from '../lib/colors.js'
-import ButtonLink from './widgets/ButtonLink'
+import ButtonSimple from './widgets/ButtonSimple'
 import EditProductionModal from './modals/EditProductionModal'
 import Spinner from './widgets/Spinner'
 
@@ -118,7 +118,7 @@ export default {
 
   components: {
     ActivityIcon,
-    ButtonLink,
+    ButtonSimple,
     EditProductionModal,
     Spinner
   },
