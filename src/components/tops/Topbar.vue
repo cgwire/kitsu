@@ -13,14 +13,6 @@
           ≡
         </a>
 
-        <!--router-link
-          class="nav-item home-button"
-          to="/"
-        >
-          <img src="../assets/logo.png" v-if="!isDarkTheme" />
-          <img src="../assets/logo-dark.svg" v-else />
-        </router-link-->
-
         <div :class="{
           'nav-item': true,
         }" v-if="isProductionContext">
@@ -120,6 +112,9 @@
         <li @click="onLogoutClicked">
           {{ $t("main.logout") }}
         </li>
+        <li class="version">
+          Kitsu {{ kitsuVersion }}
+        </li>
       </ul>
     </nav>
   </div>
@@ -132,6 +127,7 @@ import { BellIcon } from 'vue-feather-icons'
 import Combobox from '../widgets/Combobox'
 import PeopleAvatar from '../widgets/PeopleAvatar'
 import PeopleName from '../widgets/PeopleName'
+import { version } from '../../../package.json'
 
 export default {
   name: 'topbar',
@@ -147,6 +143,7 @@ export default {
       currentProductionId: this.$route.params.production_id,
       currentEpisodeId: this.$route.params.episode_id,
       currentProjectSection: this.getCurrentSectionFromRoute(),
+      kitsuVersion: version,
       silent: false
     }
   },
@@ -579,6 +576,10 @@ export default {
 
 strong {
   margin-right: 1em;
+}
+
+.version {
+  color: #999;
 }
 
 @media screen and (max-width: 768px) {
