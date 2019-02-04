@@ -1,7 +1,7 @@
 export default {
 
   assets: {
-    cast_in: '参演其中',
+    cast_in: '角色分配',
     delete_error: '删除此资源时出现错误. 很可能存在有链接至此的数据. 您确定没有任务链接至此资源类型吗?',
     delete_text: '您确定要从您的数据库移除{name}吗?',
     edit_fail: '创建或编辑失败, 有错误出现.',
@@ -12,7 +12,7 @@ export default {
     new_asset: '添加资源',
     new_assets: '添加多个资源',
     new_success: '已成功创建资源{name}.',
-    no_cast_in: '任何镜头中都没有此资源的参演.',
+    no_cast_in: '任何镜头中都没为此资源分配角色.',
     number: '资源 | 资源(多个)',
     restore_text: '您确定要将{name}恢复进您的数据库吗?',
     restore_error: '恢复此资源时出现错误.',
@@ -20,7 +20,8 @@ export default {
     title: '资源(多个)',
     fields: {
       description: '说明',
-      name: '资源',
+      episode: '片段',
+      name: '名称',
       production: '制作',
       type: '类型'
     }
@@ -48,13 +49,17 @@ export default {
 
   comments: {
     add_comment: '添加注释...',
+    add_preview: '附加预览',
     change_preview: '更换预览',
     empty_text: '此条注释为空',
     edit_title: '编辑注释',
-    post_status: '发布状态',
+    error: '发布注释时出现错误',
+    no_file_attached: '未附加文件',
+    post_status: '发布注释',
     retake: '重拍',
     validated: '已确认!',
     validation_required: '需要得到确认',
+    set_status_to: '将状态设为',
     fields: {
       text: '文本'
     }
@@ -96,36 +101,60 @@ export default {
   },
 
   login: {
+    forgot_password: '密码忘记了?',
     login: '登录',
-    login_failed: '登录失败, 请验证您的凭据',
+    login_failed: '登录失败, 请核实您的凭据',
+    login_page: '取消',
+    reset_change_password: '更改密码',
+    reset_change_password_form_failed: '您给出的密码有问题. 请核实密码长度大于6个字符且两次密码一致.',
+    reset_change_password_failed: '更改密码失败. 请再次重启整个步骤.',
+    reset_change_password_succeed: '您的密码已成功更改. 请返回到登录页面来使用它.',
+    reset_change_password_title: '输入新密码',
+    reset_password: '重置密码',
+    reset_password_failed: '重置密码失败. 请核实您的电子邮箱.',
+    reset_password_succeed: '已成功重置密码. 请查看您的收件箱.',
+    reset_password_title: '进入您的电子邮件来重置密码',
     title: '登录Kitsu',
     fields: {
       email: '电子邮箱',
-      password: '密码'
+      password: '密码',
+      password2: '再次输入密码'
     }
   },
 
   main: {
     add: '添加',
+    all: '全部',
     admin: '管理员',
     cancel: '取消',
     clear_selection: '清除当前所选',
-    delete_text: '您确定要从您的数据库移除{name}吗?',
+    documentation: '文档',
     close: '关闭',
     confirmation: '确认',
-    confirmation_and_stay: '确认保持这种状态',
+    confirmation_and_stay: '做确认, 之后不离开',
+    dark_theme: '黑色主题',
+    delete: '删除',
+    delete_all: '全部删除',
+    delete_text: '您确定要从您的数据库移除{name}吗?',
+    edit: '编辑',
     empty_comment: '空注释',
+    history: '历史',
     info: '信息',
     or: '或',
     no: '否',
+    loading_data: '正在加载数据',
     loading_error: '加载数据时出现错误.',
     logout: '退出',
+    modify: '修改',
+    minimize: '最小化',
+    maximize: '最大化',
     profile: '简介',
     production: '制作',
+    remove: '移除',
     save: '保存',
-
     studio: '工作室',
     user: '用户',
+    white_theme: '白色主题',
     yes: '是',
     csv: {
       export_file: '导出',
@@ -142,6 +171,7 @@ export default {
     change_priority: '更改优先级',
     change_status: '更改状态',
     create_tasks: '创建多个任务',
+    delete_tasks: '删除多个任务',
     run_custom_action: '执行自定义操作'
   },
 
@@ -153,18 +183,26 @@ export default {
   notifications: {
     and_change_status: ', 也已经将状态更改为了',
     commented_on: '已给出针对性注释, 注释对象为',
+    no_notifications: '目前没有关于您当前项目的通知.',
     title: '通知(多个)',
     with_preview: '带有预览'
   },
 
   people: {
+    active: '活动',
+    add_member_to_team: '向团队添加成员: ',
     delete_error: '删除此人员时出现错误. 很可能存在有链接至此的数据. 您确定此人员没有分配任务或是没写注释吗?',
     delete_text: '您确定要从您的数据库移除{personName}吗?',
     edit_title: '编辑人员',
+    empty_team: '项目团队里没有所列人员.',
     new_person: '添加新员工',
+    no_task_assigned: '在执行任务未进行分配.',
     persons: '人员 | 人员(多名)',
-    running_tasks: '执行多个任务',
+    running_tasks: '在执行任务',
+    select_person: '选择人员...',
+    team: '团队',
     title: '人员(多名)',
+    unactive: '非活动',
     csv: {
       import_file: '导入.csv文件',
       export_file: '下载为.csv文件',
@@ -192,7 +230,7 @@ export default {
       active: '活动'
     },
     role: {
-      admin: '管理员',
+      admin: '工作室经理',
       client: '客户',
       manager: '监制',
       user: 'CG艺术家'
@@ -210,6 +248,7 @@ export default {
     no_selection: '请从左侧选择播放列表.',
     no_sequence_for_episode: '此片段没有序列',
     no_shot_for_production: '此制作没有镜头',
+    no_shot_for_sequence: '此序列没有镜头',
     select_shot: '请从右列中选择镜头',
     select_playlist: '请从左列中选择播放列表',
     title: '播放列表(多个)',
@@ -226,6 +265,7 @@ export default {
     edit_title: '编辑制作',
     new_production: '添加制作',
     number: '制作 | 制作(多个)',
+    open_productions: '我的制作',
     picture: '更换图片',
     title: '制作(多个)',
     home: {
@@ -237,12 +277,35 @@ export default {
       welcome: '欢迎使用Kitsu'
     },
     fields: {
+      fps: 'FPS',
       name: '名称',
-      status: '状态'
+      ratio: '宽高比',
+      resolution: '分辨率',
+      status: '状态',
+      type: '类型'
+    },
+    metadata: {
+      add_explaination: '添加此项目需要的特定数据.',
+      add_failed: '向您的项目添加元数据时出现错误.',
+      add_new_values: '当前没有可用值.',
+      available_values: '可用值',
+      choices: '值列表',
+      delete_text: '您确定要删除此列以及此制作的所有资源方面的相关数据吗?',
+      delete_error: '删除此元数据列时出现错误.',
+      error: '添加元数据列时出现错误. 要确保没有相似名称的列, 还要确保填充了所有字段. 如果问题仍然存在, 还请联系我们的支持团队.',
+      free: '空闲值',
+      title: '添加元数据列'
     },
     status: {
-      closed: '关闭',
-      open: '打开'
+      closed: '已关闭',
+      open: '开启',
+      active: '开启',
+      archived: '已关闭'
+    },
+    type: {
+      short: '短片',
+      featurefilm: '故事片',
+      tvshow: '电视节目'
     }
   },
 
@@ -252,12 +315,13 @@ export default {
     password_title: '更改密码',
     timezone: '时区',
     title: '您的简介',
+    change_avatar: '更换头像',
     avatar: {
       title: '更换头像'
     },
     change_password: {
       button: '更改密码',
-      error: '更改密码时出现错误. 请验证您当前的密码.',
+      error: '更改密码时出现错误. 请核实您当前的密码.',
       success: '您的密码已成功更改!',
       unvalid: '您的确认密码与新密码不相符或您的密码长度太短(预期至少是7个字符).'
     },
@@ -276,8 +340,9 @@ export default {
     title: '任务状态(多种)',
     fields: {
       color: '颜色',
-      is_reviewable: '可回顾',
       is_done: '已完成',
+      is_reviewable: '可回顾',
+      is_artist_allowed: '得到了艺术家的获准',
       name: '名称',
       short_name: '短名称'
     }
@@ -319,7 +384,7 @@ export default {
     delete_text: '您确定要从您的数据库移除{name}吗?',
     delete_error: '删除此镜头时出现错误. 很可能存在有链接至此的数据. 您确定没有任务链接至此镜头吗?',
     edit_success: '已成功编辑镜头{name}.',
-    edit_fail: '创建或编辑失败, 有错误出现.',
+    edit_fail: '创建或编辑失败, 有错误出现. 要确保您没要重命名其名称已为给定序列列出的镜头.',
     edit_title: '编辑镜头',
     empty_list: '制作中没有镜头. 要创建一些吗?',
     empty_list_client: '此制作中没有镜头.',
@@ -329,7 +394,7 @@ export default {
     new_episodes: '添加多个片段',
     no_casting: '镜头的角色分配为空.',
     number: '镜头 | 镜头(多个)',
-    manage: '管理多个镜头',
+    manage: '创建多个镜头',
     new_success: '已成功创建镜头{name}.',
     restore_text: '您确定要将{name}恢复进您的数据库吗?',
     restore_error: '恢复此镜头时出现错误.',
@@ -371,12 +436,17 @@ export default {
     create_tasks_asset_failed: '继续进行多个创建时出现服务器错误.',
     current: '待执行任务',
     current_status: '当前状态:',
+    delete_all_text: '您确定要删除所有给定{name}的任务吗? 请通过在文本字段输入您想要删除的那些任务的任务类型名称来确认.',
+    delete_all_error: '删除所有给定任务类型的任务失败.',
     delete_error: '删除任务时出现错误.',
     delete_comment: '您确定要删除最新注释吗?',
     delete_comment_error: '删除注释时出现错误',
+    delete_for_selection: '删除所选的多个任务:',
+    delete_preview: '您确定要删除此预览吗?',
+    delete_preview_error: '删除预览时出现错误.',
     edit_comment: '编辑注释',
     done: '已完成',
-    download_pdf_file: '下载PDF文件',
+    download_pdf_file: '下载.{extension}文件',
     feedback: '反馈',
     full_screen: '全屏显示',
     hide_assignations: '隐藏多个任务分配',
@@ -387,11 +457,13 @@ export default {
     no_preview: '此任务当前没有预览.',
     preview: '预览(多个)',
     previous: '上一个任务',
+    unsubscribe_notifications: '通过通知取消订阅',
     set_preview: '将此预览设置为缩略图',
     set_preview_error: '将预览设置为缩略图时出现错误',
     set_preview_done: '此预览被用作当前实体的缩略图.',
     select_preview_file: '请从您的硬盘选择一张要被用作当前任务的预览的图片:',
     show_assignations: '显示多个任务分配',
+    subscribe_notifications: '订阅通知',
     validation: '确认',
     tasks: '任务(多个)',
     fields: {
