@@ -163,6 +163,7 @@ def sync_with_ldap_server():
             {
                 "first_name": entry.givenName,
                 "last_name": entry.sn,
+                "email": entry.mail,
                 "desktop_login": entry.sAMAccountName,
                 "thumbnail": entry.thumbnailPhoto.raw_values
             }
@@ -175,6 +176,7 @@ def sync_with_ldap_server():
             first_name = str(user["first_name"])
             last_name = str(user["last_name"])
             desktop_login = str(user["desktop_login"])
+            email = str(user["email"])
             if len(user["thumbnail"]) > 0:
                 thumbnail = user["thumbnail"][0]
             else:
@@ -188,7 +190,8 @@ def sync_with_ldap_server():
             except PersonNotFoundException:
                 pass
             if person is None:
-                email = "%s@%s" % (desktop_login, EMAIL_DOMAIN)
+                if len(email) == 0:
+                    email = "%s@%s" % (desktop_login, EMAIL_DOMAIN)
                 person = persons_service.create_person(
                     email,
                     "default".encode("utf-8"),
@@ -196,9 +199,17 @@ def sync_with_ldap_server():
                     last_name,
                     desktop_login=desktop_login
                 )
-                print("User %s created!" % desktop_login)
+                print("User %s created." % desktop_login)
             else:
-                print("User %s already in database" % desktop_login)
+                person = persons_service.get_person_by_desktop_login(
+                    desktop_login
+                )
+                persons_service.update_person(person["id"], {
+                    "email": email,
+                    "first_name": first_name,
+                    "last_name": last_name
+                })
+                print("User %s updated." % desktop_login)
 
             if len(thumbnail) > 0:
                 save_thumbnail(person, thumbnail)
