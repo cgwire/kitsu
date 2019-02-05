@@ -18,17 +18,20 @@
       <form v-on:submit.prevent>
         <text-field
           :label="$t('people.fields.first_name')"
+          :disabled="isLdap"
           ref="name-field"
           @enter="confirmClicked()"
           v-model="form.first_name"
         />
         <text-field
           :label="$t('people.fields.last_name')"
+          :disabled="isLdap"
           @enter="confirmClicked()"
           v-model="form.last_name"
         />
         <text-field
           :label="$t('people.fields.email')"
+          :disabled="isLdap"
           @enter="confirmClicked()"
           v-model="form.email"
         />
@@ -123,6 +126,7 @@ export default {
 
   computed: {
     ...mapGetters([
+      'isLdap',
       'personToEdit',
       'people'
     ]),

@@ -15,17 +15,23 @@ import {
 } from '../mutation-types'
 import auth from '../../lib/auth'
 
-const state = {
+const initialState = {
   email: '',
   password: '',
+  isLdap: false,
   isLoginLoading: false,
   isLoginError: false,
   isDataLoading: false
 }
 
+const state = {
+  ...initialState
+}
+
 const getters = {
   email: state => state.email,
   password: state => state.password,
+  isLdap: state => state.isLdap,
   isLoginLoading: state => state.isLoginLoading,
   isLoginError: state => state.isLoginError,
   isDataLoading: state => state.isDataLoading
@@ -116,8 +122,9 @@ const mutations = {
     state.isLoginError = false
   },
 
-  [DATA_LOADING_START] (state) {
+  [DATA_LOADING_START] (state, payload) {
     state.isDataLoading = true
+    if (payload && payload.isLdap !== undefined) state.isLdap = payload.isLdap
   },
 
   [DATA_LOADING_END] (state) {
@@ -125,10 +132,7 @@ const mutations = {
   },
 
   [RESET_ALL] (state, email) {
-    state.email = ''
-    state.password = ''
-    state.isLoginLoading = false
-    state.isLoginError = false
+    Object.assign(state, {...initialState})
   }
 }
 
