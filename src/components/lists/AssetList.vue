@@ -29,7 +29,7 @@
           <th
             class="description"
             ref="th-description"
-            v-if="!isCurrentUserClient"
+            v-if="!isCurrentUserClient && isShowInfos"
           >
             {{ $t('assets.fields.description') }}
             <button-simple
@@ -45,6 +45,7 @@
             class="metadata-descriptor"
             :key="descriptor.id"
             v-for="descriptor in assetMetadataDescriptors"
+            v-if="isShowInfos"
           >
             <div class="flexrow">
               <span class="flexrow-item">
@@ -65,7 +66,7 @@
             :key="columnId"
             :style="getValidationStyle(columnId)"
             v-for="columnId in sortedValidationColumns"
-            v-if="!isLoading"
+            v-if="!isLoading && (!hiddenColumns[columnId] || isShowInfos)"
           >
             <div class="flexrow">
               <router-link
@@ -171,13 +172,14 @@
           </td>
           <description-cell
             class="description"
-            v-if="!isCurrentUserClient"
+            v-if="!isCurrentUserClient && isShowInfos"
             :entry="asset"
           />
           <td
             class="metadata-descriptor"
             :key="asset.id + '-' + descriptor.id"
             v-for="descriptor in assetMetadataDescriptors"
+            v-if="isShowInfos"
           >
             {{ asset.data ? asset.data[descriptor.field_name] : '' }}
           </td>
@@ -199,6 +201,7 @@
             @select="onTaskSelected"
             @unselect="onTaskUnselected"
             v-for="(columnId, j) in sortedValidationColumns"
+            v-if="!hiddenColumns[columnId] || isShowInfos"
           />
           <row-actions v-if="isCurrentUserManager"
             :entry="asset"
@@ -304,6 +307,7 @@ export default {
       'isCurrentUserAdmin',
       'isCurrentUserClient',
       'isCurrentUserManager',
+      'isShowInfos',
       'isTVShow',
       'selectedTasks',
       'taskMap',

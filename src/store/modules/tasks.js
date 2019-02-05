@@ -43,6 +43,7 @@ import {
 
   SET_PREVIEW,
   SET_IS_SHOW_ASSIGNATIONS,
+  SET_IS_SHOW_INFOS,
   DELETE_PREVIEW_END,
 
   LOAD_PERSON_TASKS_END,
@@ -67,6 +68,7 @@ const initialState = {
   nbSelectedTasks: 0,
   nbSelectedValidations: 0,
   isShowAssignations: true,
+  isShowInfos: true,
 
   isSavingCommentPreview: false,
   previewFormData: null
@@ -118,6 +120,7 @@ const getters = {
   nbSelectedTasks: state => state.nbSelectedTasks,
   nbSelectedValidations: state => state.nbSelectedValidations,
   isShowAssignations: state => state.isShowAssignations,
+  isShowInfos: state => state.isShowInfos,
   taskEntityPreviews: state => state.taskEntityPreviews,
   previewFormData: state => state.previewFormData,
   isSavingCommentPreview: state => state.isSavingCommentPreview,
@@ -596,6 +599,14 @@ const actions = {
     commit(SET_IS_SHOW_ASSIGNATIONS, false)
   },
 
+  showInfos ({ commit, state }) {
+    commit(SET_IS_SHOW_INFOS, true)
+  },
+
+  hideInfos ({ commit, state }) {
+    commit(SET_IS_SHOW_INFOS, false)
+  },
+
   clearSelectedTasks ({ commit, state }) {
     commit(CLEAR_SELECTED_TASKS)
   },
@@ -972,6 +983,10 @@ const mutations = {
 
   [SET_IS_SHOW_ASSIGNATIONS] (state, isShowAssignations) {
     state.isShowAssignations = isShowAssignations
+  },
+
+  [SET_IS_SHOW_INFOS] (state, isShowInfos) {
+    state.isShowInfos = isShowInfos
   },
 
   [LOAD_PERSON_TASKS_END] (state, { tasks }) {

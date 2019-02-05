@@ -16,19 +16,23 @@
             </div>
           </div>
 
-          <div class="level-right flexrow" v-if="isCurrentUserManager">
-            <show-assignations-button class="flexrow-item" />
-            <!--show-details-button class="flexrow-item" /-->
+          <div class="level-right flexrow">
+            <div class="flexrow">
+              <show-assignations-button class="flexrow-item" />
+              <show-infos-button class="flexrow-item" />
+              <div class="flexrow-item"></div>
+            </div>
+            <div class="flexrow" v-if="isCurrentUserManager">
             <button-link
               class="flexrow-item"
-              :text="$t('main.csv.import_file')"
+              :title="$t('main.csv.import_file')"
               icon="upload"
               :is-responsive="true"
               :path="importPath"
             />
             <button-href-link
               class="flexrow-item"
-              :text="$t('main.csv.export_file')"
+              :title="$t('main.csv.export_file')"
               icon="download"
               :is-responsive="true"
               :path="'/api/export/csv/projects/' + currentProduction.id + '/assets.csv'"
@@ -40,6 +44,7 @@
               :is-responsive="true"
               :path="newAssetPath"
             />
+            </div>
           </div>
         </div>
         <div class="query-list">
@@ -186,6 +191,7 @@ import PageTitle from './widgets/PageTitle'
 import SearchField from './widgets/SearchField'
 import SearchQueryList from './widgets/SearchQueryList'
 import ShowAssignationsButton from './widgets/ShowAssignationsButton'
+import ShowInfosButton from './widgets/ShowInfosButton'
 import TaskInfo from './sides/TaskInfo.vue'
 
 export default {
@@ -205,6 +211,7 @@ export default {
     SearchField,
     SearchQueryList,
     ShowAssignationsButton,
+    ShowInfosButton,
     TaskInfo
   },
 

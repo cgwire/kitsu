@@ -16,29 +16,35 @@
             </div>
           </div>
 
-          <div class="level-right" v-if="isCurrentUserManager">
-            <show-assignations-button class="level-item"/>
-            <button-link
-              class="level-item"
-              :text="$t('main.csv.import_file')"
-              icon="upload"
-              :is-responsive="true"
-              :path="importPath"
-            />
-            <button-href-link
-              class="level-item"
-              :text="$t('main.csv.export_file')"
-              icon="download"
-              :is-responsive="true"
-              :path="'/api/export/csv/projects/' + currentProduction.id + '/shots.csv'"
-            />
-            <button-link
-              class="level-item"
-              :text="$t('shots.manage')"
-              icon="plus"
-              :is-responsive="true"
-              :path="manageShotsPath"
-            />
+          <div class="level-right">
+            <div class="flexrow">
+              <show-assignations-button class="flexrow-item" />
+              <show-infos-button class="flexrow-item" />
+              <div class="flexrow-item"></div>
+            </div>
+            <div class="flexrow" v-if="isCurrentUserManager">
+              <button-link
+                class="flexrow-item"
+                :title="$t('main.csv.import_file')"
+                icon="upload"
+                :is-responsive="true"
+                :path="importPath"
+              />
+              <button-href-link
+                class="flexrow-item"
+                :title="$t('main.csv.export_file')"
+                icon="download"
+                :is-responsive="true"
+                :path="'/api/export/csv/projects/' + currentProduction.id + '/shots.csv'"
+              />
+              <button-link
+                class="flexrow-item"
+                :text="$t('shots.manage')"
+                icon="plus"
+                :is-responsive="true"
+                :path="manageShotsPath"
+              />
+            </div>
           </div>
         </div>
 
@@ -195,6 +201,7 @@ import PageTitle from './widgets/PageTitle'
 import SearchField from './widgets/SearchField'
 import SearchQueryList from './widgets/SearchQueryList'
 import ShowAssignationsButton from './widgets/ShowAssignationsButton'
+import ShowInfosButton from './widgets/ShowInfosButton'
 import ShotList from './lists/ShotList.vue'
 import TaskInfo from './sides/TaskInfo.vue'
 
@@ -217,6 +224,7 @@ export default {
     SearchIcon,
     SearchQueryList,
     ShowAssignationsButton,
+    ShowInfosButton,
     ShotList,
     TaskInfo
   },

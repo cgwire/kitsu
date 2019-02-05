@@ -984,6 +984,20 @@ input.search-input:focus {
   width: 250px;
 }
 
+.dark .button.is-on {
+  box-shadow: inset 0 0 10px #111;
+  border-color: #25282E;
+}
+
+.button.is-toggle {
+  transition: box-shadow ease 0.3s
+}
+
+.button.is-on {
+  box-shadow: inset 0 0 10px #999;
+  border: 0;
+}
+
 @media screen and (max-width: 1000px) {
   .button .icon.is-small {
     margin-right: 0;
