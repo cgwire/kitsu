@@ -66,7 +66,11 @@ export default {
       description: shot.description,
       data: shot.data
     }
-    if (shot.frameIn || shot.frameOut || shot.fps) {
+    if (
+      shot.frameOut !== undefined ||
+      shot.frameIn !== undefined ||
+      shot.fps !== undefined
+    ) {
       Object.assign(data.data, {
         frame_in: shot.frameIn,
         frame_out: shot.frameOut,
