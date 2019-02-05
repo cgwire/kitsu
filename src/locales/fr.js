@@ -289,14 +289,15 @@ export default {
   },
 
   task_status: {
-    title: 'Statut des tâches',
+    title: 'Statuts de tâche',
     edit_title: 'Modifier statut',
-    number: 'statut | task statuts',
+    number: 'statut | statuts de tâche',
     new_task_status: 'Ajouter un statut de tâche',
     fields: {
       name: 'Nom',
       short_name: 'Nom court',
       color: 'Couleur',
+      is_retake: 'A valeur de retake',
       is_reviewable: 'Est vérifiable',
       is_done: 'Est terminé',
       is_artist_allowed: 'Autorisé aux artistes'

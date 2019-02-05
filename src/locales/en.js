@@ -339,10 +339,11 @@ export default {
     new_task_status: 'Add a task status',
     title: 'Task Status',
     fields: {
+      is_artist_allowed: 'Is artist allowed',
       color: 'Color',
       is_done: 'Is done',
       is_reviewable: 'Is reviewable',
-      is_artist_allowed: 'Is artist allowed',
+      is_retake: 'Has retake value',
       name: 'Name',
       short_name: 'Short name'
     }
