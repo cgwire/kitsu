@@ -1187,9 +1187,15 @@ const mutations = {
     state.currentEpisode = null
   },
 
-  [SET_PREVIEW] (state, {entityId, taskId, previewId}) {
+  [SET_PREVIEW] (state, { entityId, taskId, previewId, taskMap }) {
     const shot = state.shotMap[entityId]
-    if (shot) shot.preview_file_id = previewId
+    if (shot) {
+      shot.preview_file_id = previewId
+      shot.tasks.forEach((taskId) => {
+        const task = taskMap[taskId]
+        task.entity.preview_file_id = previewId
+      })
+    }
   },
 
   [SET_SHOT_LIST_SCROLL_POSITION] (state, scrollPosition) {

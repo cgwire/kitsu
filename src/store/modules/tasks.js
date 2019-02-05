@@ -525,12 +525,13 @@ const actions = {
     })
   },
 
-  setPreview ({ commit, state }, {taskId, entityId, previewId, callback}) {
+  setPreview ({ commit, state }, { taskId, entityId, previewId, callback }) {
+    const taskMap = state.taskMap
     tasksApi.setPreview(entityId, previewId, (err, entity) => {
       if (err && callback) {
         callback(err)
       } else if (callback) {
-        commit(SET_PREVIEW, {taskId, entityId, previewId})
+        commit(SET_PREVIEW, { taskId, entityId, previewId, taskMap })
         callback(err, entity)
       }
     })
@@ -963,7 +964,7 @@ const mutations = {
     })
   },
 
-  [SET_PREVIEW] (state, {taskId, previewId}) {
+  [SET_PREVIEW] (state, { taskId, previewId }) {
     if (state.taskMap[taskId]) {
       state.taskMap[taskId].entity.preview_file_id = previewId
     }
