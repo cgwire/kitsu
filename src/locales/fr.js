@@ -400,7 +400,7 @@ export default {
   },
 
   sequences: {
-    title: 'Séquences',
+    title: 'Stats séquence',
     number: 'séquence | séquences',
     new_sequence: 'Nouvelle séquence',
     edit_title: 'Éditer séquence',
@@ -414,7 +414,7 @@ export default {
   },
 
   episodes: {
-    title: 'Épisodes',
+    title: 'Stats épisodes',
     number: 'épisode | épisodes',
     new_episode: 'Nouvel épisode',
     edit_title: 'Éditer épisode',
