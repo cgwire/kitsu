@@ -1,5 +1,5 @@
 <template>
-<h1 class="title">{{ text }}</h1>
+<h1 class="title hide-small-screen">{{ text }}</h1>
 </template>
 
 <script>
