@@ -15,6 +15,7 @@ class TaskStatus(db.Model, BaseMixin, SerializerMixin):
 
     is_done = db.Column(db.Boolean(), default=False, index=True)
     is_artist_allowed = db.Column(db.Boolean(), default=True)
+    is_retake = db.Column(db.Boolean(), default=False)
 
     shotgun_id = db.Column(db.Integer)
-    is_reviewable = db.Column(db.Boolean(), default=False) # deprecated
+    is_reviewable = db.Column(db.Boolean(), default=False)  # deprecated

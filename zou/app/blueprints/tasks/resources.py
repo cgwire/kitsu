@@ -61,11 +61,14 @@ class CommentTaskResource(Resource):
         )
 
         status_changed = task_status_id != task["task_status_id"]
+        new_data = {
+            "task_status_id": task_status_id,
+            "last_comment_date": comment["created_at"]
+        }
+        if status_changed and task_status["is_retake"]:
+            new_data["retake_count"] = task["retake_count"] + 1
 
-        tasks_service.update_task(
-            task_id,
-            {"task_status_id": task_status_id}
-        )
+        tasks_service.update_task(task_id, new_data)
 
         notifications_service.create_notifications_for_task_and_comment(
             task, comment, change=status_changed

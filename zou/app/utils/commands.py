@@ -118,7 +118,8 @@ def init_data():
     tasks_service.get_or_create_status(
         "Retake",
         "retake",
-        "#ff3860"
+        "#ff3860",
+        is_retake=True
     )
     tasks_service.get_or_create_status(
         "Done",
