@@ -30,6 +30,7 @@
       :person="personMap[personId]"
       :size="20"
       :font-size="10"
+      :is-link="false"
       v-if="isAssignees && isShowAssignations && !isCurrentUserClient"
       v-for="personId in assignees"
     />
