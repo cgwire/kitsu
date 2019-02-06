@@ -20,12 +20,14 @@ class TaskRoutesTestCase(ApiDBTestCase):
         self.generate_fixture_person()
         self.generate_fixture_assigner()
         self.generate_fixture_task_status_wip()
+        self.generate_fixture_task_status_retake()
         self.todo_status = tasks_service.get_or_create_status("Todo")
         self.asset_id = str(self.asset.id)
         self.shot_id = str(self.shot.id)
         self.task_type_id = str(self.task_type.id)
 
         self.wip_status_id = self.task_status_wip.id
+        self.retake_status_id = self.task_status_retake.id
         self.person_id = self.person.id
 
     def test_create_asset_tasks(self):
@@ -127,11 +129,38 @@ class TaskRoutesTestCase(ApiDBTestCase):
         tasks = self.get("/data/tasks")
         self.assertEqual(len(tasks), 1)
         self.assertEqual(tasks[0]["task_status_id"], str(self.wip_status_id))
+        self.assertIsNotNone(tasks[0]["last_comment_date"])
 
         comments = self.get("/data/comments/")
         self.assertEqual(len(comments), 1)
         self.assertEqual(comments[0]["text"], data["comment"])
         self.assertEqual(comments[0]["person_id"], str(self.user.id))
+
+    def test_comment_task_with_retake(self):
+        self.generate_fixture_task()
+        path = "/actions/tasks/%s/comment/" % self.task.id
+        data = {
+            "task_status_id": self.retake_status_id,
+            "comment": "retake test"
+        }
+        data_wip = {
+            "task_status_id": self.wip_status_id,
+            "comment": "wip test"
+        }
+        self.post(path, data)
+        tasks = self.get("/data/tasks")
+        self.assertEqual(len(tasks), 1)
+        tasks = self.get("/data/tasks")
+        self.assertEqual(tasks[0]["retake_count"], 1)
+        self.post(path, data)
+        tasks = self.get("/data/tasks")
+        self.assertEqual(tasks[0]["retake_count"], 1)
+        self.post(path, data_wip)
+        tasks = self.get("/data/tasks")
+        self.assertEqual(tasks[0]["retake_count"], 1)
+        self.post(path, data)
+        tasks = self.get("/data/tasks")
+        self.assertEqual(tasks[0]["retake_count"], 2)
 
     def test_task_comments(self):
         self.generate_fixture_project_standard()

@@ -105,7 +105,8 @@ class AuthenticatedResource(Resource):
             person = persons_service.get_person_by_email(get_jwt_identity())
             return {
                 "authenticated": True,
-                "user": person
+                "user": person,
+                "ldap": app.config["AUTH_STRATEGY"] == "auth_remote_ldap"
             }
         except PersonNotFoundException:
             abort(401)
@@ -167,6 +168,7 @@ class LoginResource(Resource):
             if is_from_browser(request.user_agent):
                 response = jsonify({
                     "user": user,
+                    "ldap": app.config["AUTH_STRATEGY"] == "auth_remote_ldap",
                     "login": True
                 })
                 set_access_cookies(response, access_token)
@@ -176,6 +178,7 @@ class LoginResource(Resource):
                 response = {
                     "login": True,
                     "user": user,
+                    "ldap": app.config["AUTH_STRATEGY"] == "auth_remote_ldap",
                     "access_token": access_token,
                     "refresh_token": refresh_token
                 }

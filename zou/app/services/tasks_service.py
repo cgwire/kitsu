@@ -674,7 +674,8 @@ def get_or_create_status(
     name,
     short_name="",
     color="#f5f5f5",
-    is_done=False
+    is_done=False,
+    is_retake=False
 ):
     """
     Create a new task status if it doesn't exist. If it exists, it returns the
@@ -690,7 +691,8 @@ def get_or_create_status(
             short_name=short_name or name.lower(),
             color=color,
             is_reviewable=True,
-            is_done=is_done
+            is_done=is_done,
+            is_retake=is_retake
         )
         events.emit("task_status:new", {
             "task_status_id": task_status.id

@@ -559,6 +559,14 @@ class ApiDBTestCase(ApiTestCase):
             color="#FFFFFF"
         )
 
+    def generate_fixture_task_status_retake(self):
+        self.task_status_retake = TaskStatus.create(
+            name="Retake",
+            short_name="rtk",
+            color="#FFFFFF",
+            is_retake=True
+        )
+
     def generate_fixture_assigner(self):
         self.assigner = Person.create(first_name="Ema", last_name="Peel")
 

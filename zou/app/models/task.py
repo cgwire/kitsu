@@ -34,11 +34,13 @@ class Task(db.Model, BaseMixin, SerializerMixin):
     duration = db.Column(db.Integer, default=0)
     estimation = db.Column(db.Integer, default=0)
     completion_rate = db.Column(db.Integer, default=0)
+    retake_count = db.Column(db.Integer, default=0)
     sort_order = db.Column(db.Integer, default=0)
     start_date = db.Column(db.DateTime)
     end_date = db.Column(db.DateTime)
     due_date = db.Column(db.DateTime)
     real_start_date = db.Column(db.DateTime)
+    last_comment_date = db.Column(db.DateTime)
     shotgun_id = db.Column(db.Integer)
 
     project_id = db.Column(
@@ -63,7 +65,6 @@ class Task(db.Model, BaseMixin, SerializerMixin):
         UUIDType(binary=False),
         db.ForeignKey('person.id')
     )
-
     assignees = db.relationship(
         'Person',
         secondary=assignees_table
