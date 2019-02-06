@@ -432,20 +432,14 @@ const actions = {
       const productionId = rootState.route.params.production_id
       dispatch('setLastProductionScreen', 'production-asset-types')
 
-      if (cache.assets.length === 0 ||
-          cache.assets[0].production_id !== productionId) {
-        dispatch('loadAssets', (err) => {
-          if (err) {
-            reject(err)
-          } else {
-            dispatch('computeAssetTypeStats')
-            resolve()
-          }
-        })
-      } else {
-        dispatch('computeAssetTypeStats')
-        resolve()
-      }
+      dispatch('loadAssets', (err) => {
+        if (err) {
+          reject(err)
+        } else {
+          dispatch('computeAssetTypeStats')
+          resolve()
+        }
+      })
     })
   },
 
