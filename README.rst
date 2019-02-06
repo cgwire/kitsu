@@ -55,6 +55,7 @@ Sponsors
 
 |Unit Image Logo|
 |Les Fées Spéciales Logo|
+|NKI Logo|
 
 About authors
 ~~~~~~~~~~~~~
@@ -82,3 +83,5 @@ Visit `cg-wire.com <https://cg-wire.com>`__ for more information.
    :target: https://www.unit-image.fr
 .. |Les Fées Spéciales Logo| image:: https://www.cg-wire.com/images/logo-les-fees-speciales.png
    :target: https://www.les-fees-speciales.coop
+.. |NKI Image Logo| image:: https://www.cg-wire.com/images/logo-nki.png
+   :target: https://www.nki.tv
