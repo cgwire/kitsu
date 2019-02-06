@@ -102,6 +102,7 @@ export default {
   watch: {
     active () {
       if (this.active) {
+        this.userLockText = ''
         this.$nextTick(() => {
           if (this.$refs['confirmation-name']) {
             this.$refs['confirmation-name'].focus()
