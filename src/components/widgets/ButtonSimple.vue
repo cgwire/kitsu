@@ -1,6 +1,7 @@
 <template>
 <button
   class="button"
+  :title="title"
   @click="$emit('click')"
 >
   <plus-icon
@@ -27,6 +28,12 @@
       'is-small': true,
       'only-icon': !isText
     }" v-if="icon === 'edit'" />
+  <image-icon
+    :class="{
+      icon: true,
+      'is-small': true,
+      'only-icon': !isText
+    }" v-if="icon === 'image'" />
   <trash-icon
     :class="{
       icon: true,
@@ -56,6 +63,7 @@
 import {
   DownloadIcon,
   EditIcon,
+  ImageIcon,
   PlusIcon,
   RotateCcwIcon,
   TrashIcon,
@@ -67,6 +75,7 @@ export default {
   components: {
     DownloadIcon,
     EditIcon,
+    ImageIcon,
     PlusIcon,
     RotateCcwIcon,
     TrashIcon,
@@ -82,6 +91,10 @@ export default {
       type: Boolean
     },
     text: {
+      default: '',
+      type: String
+    },
+    title: {
       default: '',
       type: String
     }

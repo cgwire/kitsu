@@ -1,5 +1,6 @@
 <template>
 <a
+  :title="title"
   :class="'button ' + styleclass"
   :href="path"
   :target="target"
@@ -28,7 +29,7 @@ export default {
   },
   props: {
     text: {
-      default: 'button',
+      default: '',
       type: String
     },
     path: {
@@ -36,6 +37,10 @@ export default {
       type: String
     },
     icon: {
+      default: '',
+      type: String
+    },
+    title: {
       default: '',
       type: String
     },
@@ -52,4 +57,7 @@ export default {
 </script>
 
 <style scoped>
+.button .icon.is-small {
+  margin: 0;
+}
 </style>

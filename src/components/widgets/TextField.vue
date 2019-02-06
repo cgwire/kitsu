@@ -8,6 +8,7 @@
       :placeholder="placeholder"
       :type="type"
       :value="value"
+      :disabled="disabled"
       min="0"
       @input="updateValue()"
       @keyup.enter="emitEnter()"
@@ -29,6 +30,10 @@ import { mapGetters, mapActions } from 'vuex'
 export default {
   name: 'text-field',
   props: {
+    disabled: {
+      default: false,
+      type: Boolean
+    },
     label: {
       default: '',
       type: String
@@ -54,10 +59,12 @@ export default {
       type: String
     }
   },
+
   computed: {
     ...mapGetters([
     ])
   },
+
   methods: {
     ...mapActions([
     ]),

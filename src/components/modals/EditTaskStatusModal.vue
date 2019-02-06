@@ -36,6 +36,11 @@
           v-model="form.is_done"
         />
         <combobox
+          :label="$t('task_status.fields.is_retake')"
+          :options="isRetakeOptions"
+          v-model="form.is_retake"
+        />
+        <combobox
           :label="$t('task_status.fields.is_artist_allowed')"
           :options="isArtistAllowedOptions"
           v-model="form.is_artist_allowed"
@@ -107,6 +112,10 @@ export default {
         is_reviewable: 'true',
         is_done: 'false'
       },
+      isRetakeOptions: [
+        {label: this.$t('main.yes'), value: 'true'},
+        {label: this.$t('main.no'), value: 'false'}
+      ],
       isDoneOptions: [
         {label: this.$t('main.yes'), value: 'true'},
         {label: this.$t('main.no'), value: 'false'}
@@ -160,6 +169,7 @@ export default {
           color: this.taskStatusToEdit.color,
           is_reviewable: String(this.taskStatusToEdit.is_reviewable),
           is_done: String(this.taskStatusToEdit.is_done),
+          is_retake: String(this.taskStatusToEdit.is_retake || false),
           is_artist_allowed: String(this.taskStatusToEdit.is_artist_allowed)
         }
       }

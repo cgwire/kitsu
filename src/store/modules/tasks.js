@@ -43,6 +43,7 @@ import {
 
   SET_PREVIEW,
   SET_IS_SHOW_ASSIGNATIONS,
+  SET_IS_SHOW_INFOS,
   DELETE_PREVIEW_END,
 
   LOAD_PERSON_TASKS_END,
@@ -67,6 +68,7 @@ const initialState = {
   nbSelectedTasks: 0,
   nbSelectedValidations: 0,
   isShowAssignations: true,
+  isShowInfos: true,
 
   isSavingCommentPreview: false,
   previewFormData: null
@@ -118,6 +120,7 @@ const getters = {
   nbSelectedTasks: state => state.nbSelectedTasks,
   nbSelectedValidations: state => state.nbSelectedValidations,
   isShowAssignations: state => state.isShowAssignations,
+  isShowInfos: state => state.isShowInfos,
   taskEntityPreviews: state => state.taskEntityPreviews,
   previewFormData: state => state.previewFormData,
   isSavingCommentPreview: state => state.isSavingCommentPreview,
@@ -525,12 +528,13 @@ const actions = {
     })
   },
 
-  setPreview ({ commit, state }, {taskId, entityId, previewId, callback}) {
+  setPreview ({ commit, state }, { taskId, entityId, previewId, callback }) {
+    const taskMap = state.taskMap
     tasksApi.setPreview(entityId, previewId, (err, entity) => {
       if (err && callback) {
         callback(err)
       } else if (callback) {
-        commit(SET_PREVIEW, {taskId, entityId, previewId})
+        commit(SET_PREVIEW, { taskId, entityId, previewId, taskMap })
         callback(err, entity)
       }
     })
@@ -593,6 +597,14 @@ const actions = {
 
   hideAssignations ({ commit, state }) {
     commit(SET_IS_SHOW_ASSIGNATIONS, false)
+  },
+
+  showInfos ({ commit, state }) {
+    commit(SET_IS_SHOW_INFOS, true)
+  },
+
+  hideInfos ({ commit, state }) {
+    commit(SET_IS_SHOW_INFOS, false)
   },
 
   clearSelectedTasks ({ commit, state }) {
@@ -963,7 +975,7 @@ const mutations = {
     })
   },
 
-  [SET_PREVIEW] (state, {taskId, previewId}) {
+  [SET_PREVIEW] (state, { taskId, previewId }) {
     if (state.taskMap[taskId]) {
       state.taskMap[taskId].entity.preview_file_id = previewId
     }
@@ -971,6 +983,10 @@ const mutations = {
 
   [SET_IS_SHOW_ASSIGNATIONS] (state, isShowAssignations) {
     state.isShowAssignations = isShowAssignations
+  },
+
+  [SET_IS_SHOW_INFOS] (state, isShowInfos) {
+    state.isShowInfos = isShowInfos
   },
 
   [LOAD_PERSON_TASKS_END] (state, { tasks }) {

@@ -12,7 +12,7 @@
             :font-size="60"
           />
 
-          <p>
+          <p v-if="!isLdap">
             <router-link
               class="button is-link"
               :to="{name: 'change-avatar'}"
@@ -32,14 +32,17 @@
         </h2>
         <text-field
           :label="$t('people.fields.first_name')"
+          :disabled="isLdap"
           v-model="form.first_name"
         />
         <text-field
           :label="$t('people.fields.last_name')"
+          :disabled="isLdap"
           v-model="form.last_name"
         />
         <text-field
           :label="$t('people.fields.email')"
+          :disabled="isLdap"
           v-model="form.email"
         />
         <text-field
@@ -222,11 +225,12 @@ export default {
 
   computed: {
     ...mapGetters([
-      'user',
+      'changePassword',
+      'isCurrentUserAdmin',
+      'isLdap',
       'isSaveProfileLoading',
       'isSaveProfileLoadingError',
-      'isCurrentUserAdmin',
-      'changePassword'
+      'user'
     ]),
     departments () {
       return [{name: 'Animation'}, {name: 'Modeling'}]

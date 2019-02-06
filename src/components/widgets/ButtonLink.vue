@@ -1,6 +1,7 @@
 <template>
 <router-link
   class="button"
+  :title="title"
   :to="path"
 >
   <span class="icon is-small" v-if="icon.length > 0 && icon.startsWith('fa')">
@@ -47,7 +48,9 @@
     :class="{
       text: true,
       'is-hidden-touch': isResponsive
-    }" v-if="isText">
+    }"
+    v-if="isText"
+  >
     {{ text }}
   </span>
 </router-link>
@@ -75,6 +78,10 @@ export default {
   },
   props: {
     text: {
+      default: '',
+      type: String
+    },
+    title: {
       default: '',
       type: String
     },

@@ -27,7 +27,10 @@
           <th class="name shot-name" ref="th-shot" >
             {{ $t('shots.fields.name') }}
           </th>
-          <th class="description" v-if="!isCurrentUserClient">
+          <th
+            class="description"
+            v-if="!isCurrentUserClient && isShowInfos"
+          >
             {{ $t('shots.fields.description') }}
             <button-simple
               class="is-small"
@@ -37,11 +40,11 @@
               v-if="isCurrentUserAdmin && !isLoading"
             />
           </th>
-
           <th
             class="metadata-descriptor"
             :key="descriptor.id"
             v-for="descriptor in shotMetadataDescriptors"
+            v-if="isShowInfos"
           >
             <div class="flexrow">
               <span class="flexrow-item">
@@ -70,7 +73,7 @@
             :key="columnId"
             :style="getValidationStyle(columnId)"
             v-for="columnId in sortedValidationColumns"
-            v-if="!isLoading"
+            v-if="!isLoading && (!hiddenColumns[columnId] || isShowInfos)"
           >
             <div class="flexrow">
               <router-link
@@ -158,12 +161,13 @@
           <description-cell
             class="description"
             :entry="shot"
-            v-if="!isCurrentUserClient"
+            v-if="!isCurrentUserClient && isShowInfos"
           />
           <td
             class="metadata-descriptor"
             :key="shot.id + '-' + descriptor.id"
             v-for="descriptor in shotMetadataDescriptors"
+            v-if="isShowInfos"
           >
             {{ shot.data ? shot.data[descriptor.field_name] : '' }}
           </td>
@@ -193,6 +197,7 @@
             @select="onTaskSelected"
             @unselect="onTaskUnselected"
             v-for="(columnId, j) in sortedValidationColumns"
+            v-if="!isLoading && (!hiddenColumns[columnId] || isShowInfos)"
           />
           <row-actions v-if="isCurrentUserManager"
             :entry="shot"
@@ -282,6 +287,7 @@ export default {
       'isFrameIn',
       'isFrameOut',
       'isSingleEpisode',
+      'isShowInfos',
       'isTVShow',
       'nbSelectedTasks',
       'shotFilledColumns',

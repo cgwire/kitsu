@@ -26,10 +26,25 @@
           :is-static="true"
         />
         <router-link
+          class="flexrow-item history-button"
           :to="taskPath"
         >
           {{ $t('main.history') }}
         </router-link>
+        <button-simple
+          class="flexrow-item set-thumbnail-button"
+          icon="image"
+          :disabled="!isSetThumbnailAllowed"
+          :title="$t('tasks.set_preview')"
+          @click="setCurrentPreviewAsEntityThumbnail"
+          v-if="isCurrentUserManager"
+        />
+        <subscribe-button
+          class="flexrow-item"
+          :subscribed="isAssigned || isSubscribed"
+          @click="toggleSubscribe"
+          v-if="!isAssigned"
+        />
       </div>
     </div>
 
@@ -180,11 +195,13 @@ import {
 import AddComment from '../widgets/AddComment'
 import AddPreviewModal from '../modals/AddPreviewModal'
 import ButtonLink from '../widgets/ButtonLink'
+import ButtonSimple from '../widgets/ButtonSimple'
 import Comment from '../widgets/Comment'
 import ModelViewer from '../previews/ModelViewer'
 import PeopleName from '../widgets/PeopleName'
 import PictureViewer from '../previews/PictureViewer'
 import Spinner from '../widgets/Spinner'
+import SubscribeButton from '../widgets/SubscribeButton'
 import TaskTypeName from '../widgets/TaskTypeName'
 import ValidationTag from '../widgets/ValidationTag'
 import VideoPlayer from '../previews/VideoPlayer'
@@ -195,6 +212,7 @@ export default {
     AddComment,
     AddPreviewModal,
     ButtonLink,
+    ButtonSimple,
     Comment,
     ChevronLeftIcon,
     DownloadIcon,
@@ -203,6 +221,7 @@ export default {
     PeopleName,
     PictureViewer,
     Spinner,
+    SubscribeButton,
     TaskTypeName,
     ValidationTag,
     VideoPlayer
@@ -221,6 +240,7 @@ export default {
       attachedFileName: '',
       currentPreviewPath: '',
       currentPreviewDlPath: '',
+      isSubscribed: false,
       taskComments: [],
       taskPreviews: [],
       errors: {
@@ -282,10 +302,27 @@ export default {
       }
     },
 
+    isAssigned () {
+      if (this.task) {
+        return this.task.assignees.some((assigneeId) => {
+          return assigneeId === this.user.id
+        })
+      } else {
+        return false
+      }
+    },
+
     isCommentingAllowed () {
       return this.isCurrentUserManager || this.task.assignees.find(
         (personId) => personId === this.user.id
       )
+    },
+
+    isSetThumbnailAllowed () {
+      return this.currentPreviewId &&
+        this.task &&
+        this.task.entity &&
+        this.currentPreviewId !== this.task.entity.preview_file_id
     },
 
     currentTaskType () {
@@ -375,7 +412,11 @@ export default {
       'loadPreviewFileFormData',
       'loadTask',
       'loadTaskComments',
+      'loadTaskSubscribed',
       'refreshPreview',
+      'setPreview',
+      'subscribeToTask',
+      'unsubscribeFromTask',
       'updatePreviewAnnotation'
     ]),
 
@@ -387,12 +428,19 @@ export default {
           taskId: this.task.id,
           entityId: this.task.entity_id,
           callback: (err) => {
-            this.loading.task = false
             if (err) {
               console.log(err)
               this.errors.task = true
             } else {
-              this.reset()
+              this.loadTaskSubscribed({
+                taskId: this.task.id,
+                callback: (err, subscribed) => {
+                  if (err) console.log(err)
+                  this.loading.task = false
+                  this.reset()
+                  this.isSubscribed = subscribed
+                }
+              })
             }
           }
         })
@@ -535,6 +583,27 @@ export default {
 
     onCloseExtraPreview () {
       this.modals.addExtraPreview = false
+    },
+
+    setCurrentPreviewAsEntityThumbnail () {
+      this.setPreview({
+        taskId: this.task.id,
+        entityId: this.task.entity.id,
+        previewId: this.currentPreviewId,
+        callback: () => {}
+      })
+    },
+
+    toggleSubscribe () {
+      if (this.task && !this.isAssigned) {
+        if (this.isSubscribed) {
+          this.unsubscribeFromTask(this.task.id)
+          this.isSubscribed = false
+        } else {
+          this.subscribeToTask(this.task.id)
+          this.isSubscribed = true
+        }
+      }
     }
   },
 
@@ -622,10 +691,16 @@ export default {
 .title {
   margin: 0;
   flex: 1;
+  font-size: 1.3em;
+  line-height: 1.5em;
 }
 
 .title a {
   color: inherit;
+}
+
+.history-button {
+  flex: 1;
 }
 
 .no-comment {
@@ -643,10 +718,6 @@ export default {
 
 .task-column {
   margin-top: 1em;
-}
-.title {
-  font-size: 1.3em;
-  line-height: 1.5em;
 }
 
 .comment {
@@ -682,5 +753,9 @@ export default {
 
 .model-viewer {
   padding: 0.3em;
+}
+
+.set-thumbnail-button {
+  margin-right: 0.2em;
 }
 </style>

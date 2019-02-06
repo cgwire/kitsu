@@ -12,6 +12,7 @@
     class="thumbnail-picture"
     :style="imgStyle"
     v-lazy="thumbnailPath"
+    :key="thumbnailKey"
   />
 </a>
 
@@ -19,6 +20,7 @@
   class="thumbnail-picture"
   style="imgStyle"
   v-lazy="thumbnailPath"
+  :key="thumbnailKey"
   v-else-if="isPreview && !withLink"
 />
 
@@ -86,6 +88,18 @@ export default {
              this.entity.preview_file_id.length > 0
     },
 
+    imgStyle () {
+      const style = {}
+      if (this.width) {
+        style.width = this.width + 'px'
+      }
+
+      if (this.height) {
+        style.height = this.height + 'px'
+      }
+      return style
+    },
+
     thumbnailPath () {
       const previewFileId = this.previewFileId || this.entity.preview_file_id
 
@@ -98,16 +112,9 @@ export default {
       }
     },
 
-    imgStyle () {
-      const style = {}
-      if (this.width) {
-        style.width = this.width + 'px'
-      }
-
-      if (this.height) {
-        style.height = this.height + 'px'
-      }
-      return style
+    thumbnailKey () {
+      const previewFileId = this.previewFileId || this.entity.preview_file_id
+      return `thumbnail-${previewFileId}`
     }
   }
 }

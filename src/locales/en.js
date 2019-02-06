@@ -93,7 +93,7 @@ export default {
     empty_list_client: 'There is no episode in this production.',
     new_episode: 'New episode',
     number: 'episode | episodes',
-    title: 'Episodes',
+    title: 'Episode Stats',
     fields: {
       name: 'name',
       description: 'description'
@@ -339,10 +339,11 @@ export default {
     new_task_status: 'Add a task status',
     title: 'Task Status',
     fields: {
+      is_artist_allowed: 'Is artist allowed',
       color: 'Color',
       is_done: 'Is done',
       is_reviewable: 'Is reviewable',
-      is_artist_allowed: 'Is artist allowed',
+      is_retake: 'Has retake value',
       name: 'Name',
       short_name: 'Short name'
     }
@@ -372,7 +373,7 @@ export default {
     empty_list_client: 'There is no sequence in this production.',
     new_sequence: 'New sequence',
     number: 'sequence | sequences',
-    title: 'Sequences',
+    title: 'Sequence Stats',
     fields: {
       name: 'name',
       description: 'description'
@@ -450,6 +451,7 @@ export default {
     feedback: 'feedback',
     full_screen: 'Display in full screen',
     hide_assignations: 'Hide assignations',
+    hide_infos: 'Hide additional information',
     my_tasks: 'My tasks',
     next: 'next task',
     no_assignation_right: 'you are no allowed to manage assignations',
@@ -463,6 +465,7 @@ export default {
     set_preview_done: 'This preview is used as thumbnail for the current entity.',
     select_preview_file: 'Please select a picture from your hard drive to be used as a preview for the current task:',
     show_assignations: 'Show assignations',
+    show_infos: 'Show additional information',
     subscribe_notifications: 'Subscribe to notifications',
     validation: 'Validation',
     tasks: 'Tasks',

@@ -18,7 +18,8 @@ const auth = {
         else {
           if (res.body.login) {
             const user = res.body.user
-            store.commit(DATA_LOADING_START, user)
+            const isLdap = res.body.ldap
+            store.commit(DATA_LOADING_START, { isLdap })
             callback(null, user)
           } else {
             store.commit(USER_LOGIN_FAIL)
@@ -77,8 +78,9 @@ const auth = {
           callback(err)
         } else {
           const user = res.body.user
+          const isLdap = res.body.ldap
           store.commit(USER_LOGIN, user)
-          callback(null, user)
+          callback(null, isLdap)
         }
       })
   },
@@ -86,27 +88,27 @@ const auth = {
   // Needed for router to know if a redirection to login page is required or
   // not.
   requireAuth (to, from, next) {
-    const finalize = () => {
+    const finalize = (isLdap) => {
       if (!store.state.user.isAuthenticated) {
         next({
           path: '/login',
           query: { redirect: to.fullPath }
         })
       } else {
-        store.commit(DATA_LOADING_START)
+        store.commit(DATA_LOADING_START, { isLdap })
         next()
       }
     }
 
     if (store.state.user.user === null) {
-      auth.isServerLoggedIn((err) => {
+      auth.isServerLoggedIn((err, isLdap) => {
         if (err) {
           next({
             path: '/server-down',
             query: { redirect: to.fullPath }
           })
         } else {
-          finalize()
+          finalize(isLdap)
         }
       })
     } else {

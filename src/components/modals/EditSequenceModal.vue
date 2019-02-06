@@ -21,15 +21,13 @@
           v-model="form.name"
           @enter="runConfirmation"
           v-focus
-        >
-        </text-field>
+        />
         <textarea-field
           ref="descriptionField"
           :label="$t('sequences.fields.description')"
           v-model="form.description"
-          @enter="runConfirmation"
-        >
-        </textarea-field>
+          @keyup.ctrl.enter="runConfirmation"
+        />
       </form>
 
       <div class="has-text-right">

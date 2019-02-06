@@ -13,6 +13,9 @@
           <th class="is-done">
             {{ $t('task_status.fields.is_done') }}
           </th>
+          <th class="is-retake">
+            {{ $t('task_status.fields.is_retake') }}
+          </th>
           <th class="is-artist-allowed">
             {{ $t('task_status.fields.is_artist_allowed') }}
           </th>
@@ -38,6 +41,9 @@
           <td class="is-done">
             {{ translateBoolean(entry.is_done) }}
           </td>
+          <td class="is-retake">
+            {{ translateBoolean(entry.is_retake) }}
+          </td>
           <td class="is-artist-allowed">
             {{ translateBoolean(entry.is_artist_allowed) }}
           </td>
@@ -51,6 +57,7 @@
               name: 'delete-task-status',
               params: {task_status_id: entry.id}
             }"
+            :hide-edit="entry.short_name === 'todo'"
             :hide-delete="entry.short_name === 'todo'"
           />
         </tr>
@@ -118,6 +125,7 @@ export default {
 
 .is-reviewable,
 .is-done,
+.is-retake,
 .is-artist-allowed {
   width: 140px;
   min-width: 140px;

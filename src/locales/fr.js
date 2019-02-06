@@ -229,6 +229,7 @@ export default {
     feedback: 'retours',
     full_screen: 'Afficher en plein écran',
     hide_assignations: 'Cacher assignations',
+    hide_infos: 'Cacher informations additionnelles',
     my_tasks: 'Mes tâches',
     no_preview: 'Il n\'y a pas de préviz pour cette tâche.',
     no_comment: 'Il n\'y a pas de commentaires pour cette tâche.',
@@ -242,6 +243,7 @@ export default {
     set_preview_done: 'Cette previz sert de vignette à l\'entité courante.',
     subscribe_notifications: 'S\'abonner aux notifications',
     show_assignations: 'Voir assignations',
+    show_infos: 'Montrer informations additionnelles',
     unsubscribe_notifications: 'Se désabonner des notifications',
     tasks: 'Tâches',
     validation: 'Validation',
@@ -289,14 +291,15 @@ export default {
   },
 
   task_status: {
-    title: 'Statut des tâches',
+    title: 'Statuts de tâche',
     edit_title: 'Modifier statut',
-    number: 'statut | task statuts',
+    number: 'statut | statuts de tâche',
     new_task_status: 'Ajouter un statut de tâche',
     fields: {
       name: 'Nom',
       short_name: 'Nom court',
       color: 'Couleur',
+      is_retake: 'A valeur de retake',
       is_reviewable: 'Est vérifiable',
       is_done: 'Est terminé',
       is_artist_allowed: 'Autorisé aux artistes'
@@ -397,7 +400,7 @@ export default {
   },
 
   sequences: {
-    title: 'Séquences',
+    title: 'Stats séquence',
     number: 'séquence | séquences',
     new_sequence: 'Nouvelle séquence',
     edit_title: 'Éditer séquence',
@@ -411,7 +414,7 @@ export default {
   },
 
   episodes: {
-    title: 'Épisodes',
+    title: 'Stats épisodes',
     number: 'épisode | épisodes',
     new_episode: 'Nouvel épisode',
     edit_title: 'Éditer épisode',

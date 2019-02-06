@@ -31,7 +31,7 @@
           ref="descriptionField"
           :label="$t('shots.fields.description')"
           v-model="form.description"
-          @enter="runConfirmation"
+          @keyup.ctrl.enter="runConfirmation"
         />
         <text-field
           ref="frameInField"
