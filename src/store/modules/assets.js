@@ -429,9 +429,7 @@ const actions = {
 
   initAssetTypes ({ commit, dispatch, state, rootState, rootGetters }) {
     return new Promise((resolve, reject) => {
-      const productionId = rootState.route.params.production_id
       dispatch('setLastProductionScreen', 'production-asset-types')
-
       dispatch('loadAssets', (err) => {
         if (err) {
           reject(err)

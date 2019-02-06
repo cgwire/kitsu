@@ -329,7 +329,7 @@ export default {
   },
 
   asset_types: {
-    title: 'Types d\'assets',
+    title: 'Stats types d\'assets',
     edit_title: 'Modifier le type d\'asset',
     number: 'type d\'asset | types d\'assets',
     new_asset_type: 'Ajouter un type d\'asset',
