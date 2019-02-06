@@ -18,5 +18,5 @@ before_script:
   - psql -c 'create database zoudb;' -U postgres
   - mkdir /home/travis/build/cgwire/zou/previews
 env:
-  - MAIL_DEBUG=1 PREVIEW_FOLDER=/home/travis/build/cgwire/zou/previews
+  - DEBUG=1 MAIL_DEBUG=1 FLASK_APP=zou.app PREVIEW_FOLDER=/home/travis/build/cgwire/zou/previews
 script: py.test
