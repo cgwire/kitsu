@@ -543,7 +543,8 @@ const actions = {
     commit(DISPLAY_MORE_SHOTS, {
       taskTypeMap: rootGetters.taskTypeMap,
       taskStatusMap: rootGetters.taskStatusMap,
-      taskMap: rootGetters.taskMap
+      taskMap: rootGetters.taskMap,
+      production: rootGetters.currentProduction
     })
   },
 
