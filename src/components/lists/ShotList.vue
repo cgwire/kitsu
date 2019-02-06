@@ -91,13 +91,15 @@
           </th>
           <th class="actions">
             <button-link
-              class="is-small"
+              :class="{
+                'is-small': true,
+                highlighted: isEmptyTask
+              }"
               icon="plus"
               :text="$t('tasks.create_tasks')"
               :path="createTasksPath"
               v-if="isCurrentUserManager"
-            >
-            </button-link>
+            />
           </th>
         </tr>
       </thead>
@@ -325,6 +327,13 @@ export default {
       }
 
       return route
+    },
+
+    isEmptyTask () {
+      return !this.isEmptyList &&
+      !this.isLoading &&
+      this.validationColumns &&
+      this.validationColumns.length === 0
     }
   },
 

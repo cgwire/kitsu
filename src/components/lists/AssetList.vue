@@ -542,11 +542,6 @@ td.name {
   color: inherit
 }
 
-.highlighted {
-  background: #00B242;
-  color: white;
-}
-
 thead tr {
   border-right: 1px solid transparent;
   border-left: 1px solid transparent;

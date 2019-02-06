@@ -597,6 +597,11 @@ input.input:focus {
   margin-right: 0em;
 }
 
+.button.highlighted {
+  background: #00B242;
+  color: white;
+}
+
 .search-input {
   border: 0;
   box-shadow: none;
