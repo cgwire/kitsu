@@ -613,8 +613,7 @@ input.search-input:focus {
   border-color: #8F91EB;
 }
 
-.filters-area {
-}
+.filters-area {}
 
 .query-list {
   margin-top: 1em;
@@ -998,9 +997,18 @@ input.search-input:focus {
   transition: box-shadow ease 0.3s
 }
 
+.button.is-toggle:active,
+.button.is-toggle:focus {
+  border-color: #dbdbdb;
+}
+
+.dark .button.is-toggle:active,
+.dark .button.is-toggle:focus {
+  border-color: #25282E;
+}
+
 .button.is-on {
-  box-shadow: inset 0 0 10px #999;
-  border: 0;
+  box-shadow: inset 0 0 4px #999;
 }
 
 @media screen and (max-width: 1000px) {
