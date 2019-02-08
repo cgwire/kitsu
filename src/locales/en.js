@@ -33,7 +33,8 @@ export default {
     edit_title: 'Edit asset type',
     new_asset_type: 'Add an asset type',
     number: 'asset type | asset types',
-    title: 'Asset Types Stats',
+    title: 'Asset Types',
+    production_title: 'Asset Types Stats',
     fields: {
       name: 'Name'
     }
