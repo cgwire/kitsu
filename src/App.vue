@@ -471,6 +471,14 @@ a:hover {
   margin-top: 2em;
 }
 
+.ml1 {
+  margin-left: 1em;
+}
+
+.mr1 {
+  margin-right: 1em;
+}
+
 .select select:hover,
 .select select:active,
 .select select:focus,

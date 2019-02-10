@@ -133,7 +133,7 @@ span.thumbnail-empty {
   margin-top: 7px;
 }
 
-span.square {
+.thumbnail-picture.square {
   width: 100px;
   height: 100px;
 }

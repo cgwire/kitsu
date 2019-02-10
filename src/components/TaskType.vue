@@ -7,7 +7,7 @@
         <router-link
           class="back-link flexrow-item"
           :to="shotsPath"
-          v-if="this.currentTaskType.for_shots"
+          v-if="currentTaskType.for_shots"
         >
           <chevron-left-icon />
         </router-link>
@@ -19,9 +19,14 @@
           <chevron-left-icon />
         </router-link>
         <task-type-name
-          class=""
+          class="flexrow-item"
           :task-type="currentTaskType"
         />
+        <div
+          class="flexrow-item ml1"
+        >
+          <search-field />
+        </div>
       </div>
 
       <table-info
@@ -30,6 +35,7 @@
       />
 
       <div
+          class="mt2"
         v-if="!this.currentTaskType.for_shots"
       >
         <div
@@ -42,6 +48,11 @@
             {{ getAssetTypeName(typeAssets) }}
           </div>
           <div class="supervisor-asset-list">
+            <task-list
+              :tasks="getTasks(typeAssets)"
+            />
+          </div>
+          <!--div class="supervisor-asset-list">
             <task-type-entity-block
               :key="asset.id"
               :ref="asset.id"
@@ -53,7 +64,7 @@
               @unselect="onUnselect"
               v-for="asset in typeAssets"
             />
-          </div>
+          </div-->
         </div>
       </div>
 
@@ -113,7 +124,9 @@ import { ChevronLeftIcon } from 'vue-feather-icons'
 import EntityThumbnail from './widgets/EntityThumbnail'
 import PageTitle from './widgets/PageTitle'
 import TaskInfo from './sides/TaskInfo'
+import SearchField from './widgets/SearchField'
 import SubscribeButton from './widgets/SubscribeButton'
+import TaskList from './lists/TaskList'
 import TableInfo from './widgets/TableInfo'
 import TaskTypeEntityBlock from './pages/tasktype/TaskTypeEntityBlock'
 import TaskTypeName from './widgets/TaskTypeName'
@@ -125,7 +138,9 @@ export default {
     ChevronLeftIcon,
     EntityThumbnail,
     PageTitle,
+    SearchField,
     SubscribeButton,
+    TaskList,
     TableInfo,
     TaskInfo,
     TaskTypeEntityBlock,
@@ -301,6 +316,11 @@ export default {
           this.selectNextTask()
         }
       }
+    },
+
+    getTasks (assets) {
+      const tasks = []
+      return tasks
     }
   },
 
