@@ -121,6 +121,8 @@ class ApiTestCase(unittest.TestCase):
             data=json.dumps(clean_data),
             headers=self.post_headers
         )
+        if (response.status_code == 500):
+            print(response.data)
         self.assertEqual(response.status_code, code)
         return json.loads(response.data.decode("utf-8"))
 

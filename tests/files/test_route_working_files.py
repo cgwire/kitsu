@@ -146,6 +146,7 @@ class WorkingFilesTestCase(ApiDBTestCase):
         current_date = working_file["updated_at"]
         self.assertTrue(previous_date < current_date)
 
+        time.sleep(1)
         now = self.now()
         self.assertTrue(current_date < now)
 
