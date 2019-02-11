@@ -1,4 +1,4 @@
-[![Kitsu](https://kitsu.cg-wire.com/img/kitsu.png)](https://kitsu.cg-wire.com)
+[![Kitsu](https://www.cg-wire.com/en/images/kitsu.png)](https://kitsu.cg-wire.com)
 
 # Kitsu, CG Production Manager
 
