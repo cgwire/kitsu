@@ -17,4 +17,4 @@ class PluginTestCase(ApiTestCase):
         plugins = api.load_plugin_modules("tests/fixtures/plugins")
         plugin = plugins[0]
         api.load_plugin(app, plugin)
-        print(self.get("/plugins/hello"))
+        self.get("/plugins/hello")

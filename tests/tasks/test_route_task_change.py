@@ -1,4 +1,4 @@
-import datetime
+import time
 
 from tests.base import ApiDBTestCase
 
@@ -50,12 +50,13 @@ class RouteTaskChangeTestCase(ApiDBTestCase):
             self
         )
 
-        now = datetime.datetime.now()
+        now = self.now()
+        time.sleep(1)
         self.put("/actions/tasks/%s/start" % self.task.id, {})
         task = self.get("data/tasks/%s" % self.task.id)
 
         self.assertEqual(task["task_status_id"], self.wip_status_id)
-        self.assertGreater(task["real_start_date"], now.isoformat())
+        self.assertGreater(task["real_start_date"], now)
         self.assert_event_is_fired()
 
     def test_status_to_wip_again(self):
@@ -65,4 +66,7 @@ class RouteTaskChangeTestCase(ApiDBTestCase):
         real_start_date = Task.get(task_id).real_start_date
         self.put("/actions/tasks/%s/start" % task_id, {})
         task = self.get("data/tasks/%s" % task_id)
-        self.assertEquals(real_start_date.isoformat(), task["real_start_date"])
+        self.assertEquals(
+            real_start_date.replace(microsecond=0).isoformat(),
+            task["real_start_date"]
+        )

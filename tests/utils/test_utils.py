@@ -19,11 +19,14 @@ class UtilsTestCase(unittest.TestCase):
 
     def test_serialize_value(self):
         now = datetime.datetime.now()
-        self.assertEqual(now.isoformat(), fields.serialize_value(now))
+        self.assertEqual(
+            now.replace(microsecond=0).isoformat(),
+            fields.serialize_value(now)
+        )
         unique_id = uuid.uuid4()
         self.assertEqual(str(unique_id), fields.serialize_value(unique_id))
         self.assertEqual(
-            {"now": now.isoformat()},
+            {"now": now.replace(microsecond=0).isoformat()},
             fields.serialize_value({"now": now})
         )
         self.assertEqual(
@@ -49,7 +52,7 @@ class UtilsTestCase(unittest.TestCase):
             "string": "test"
         }
         result = {
-            "now": now.isoformat(),
+            "now": now.replace(microsecond=0).isoformat(),
             "unique_id": str(unique_id),
             "string": "test"
         }

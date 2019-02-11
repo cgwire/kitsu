@@ -416,7 +416,7 @@ def create_asset(
     )
     asset_dict = asset.serialize(obj_type="Asset")
     events.emit("asset:new", {
-        "asset": asset.id,
+        "asset_id": asset.id,
         "asset_type": asset_type.id,
         "project_id": project.id
     })
