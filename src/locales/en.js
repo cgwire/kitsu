@@ -455,7 +455,7 @@ export default {
     hide_infos: 'Hide additional information',
     my_tasks: 'My tasks',
     next: 'next task',
-    no_assignation_right: 'you are no allowed to manage assignations',
+    no_assignation_right: 'You are not allowed to manage assignations',
     no_comment: 'There is currently no comment for this task.',
     no_preview: 'There is currently no preview for this task.',
     preview: 'Previews',
