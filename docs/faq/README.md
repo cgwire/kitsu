@@ -1,4 +1,4 @@
-# Frequetly Asked Questions
+# Frequently Asked Questions
 
 [[toc]]
 

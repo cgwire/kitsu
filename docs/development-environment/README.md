@@ -12,8 +12,8 @@ the following elements installed:
 Eventually you can use our [Docker image]() but it will require you to give two
 environment variables: 
 
-* `KITSU_API_TARGET` (default: http://localohst:5000): The URL where the API can be reached.
-* `KITSU_EVENT_TARGET` (default: http://localohst:5001): The URL where the event stream can be reached.
+* `KITSU_API_TARGET` (default: http://localhost:5000): The URL where the API can be reached.
+* `KITSU_EVENT_TARGET` (default: http://localhost:5001): The URL where the event stream can be reached.
 
 ## Develop
 
