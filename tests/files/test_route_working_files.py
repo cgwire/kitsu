@@ -1,7 +1,6 @@
-import datetime
+import time
 
 from tests.base import ApiDBTestCase
-from zou.app.utils import fields
 
 from zou.app.models.task import Task
 from zou.app.services import projects_service
@@ -142,11 +141,12 @@ class WorkingFilesTestCase(ApiDBTestCase):
     def test_update_modification_date(self):
         path = "/actions/working-files/%s/modified" % self.working_file.id
         previous_date = self.working_file.serialize()["updated_at"]
+        time.sleep(1)
         working_file = self.put(path, {})
         current_date = working_file["updated_at"]
         self.assertTrue(previous_date < current_date)
 
-        now = fields.serialize_value(datetime.datetime.utcnow())
+        now = self.now()
         self.assertTrue(current_date < now)
 
     def test_get_untyped_file(self):
@@ -170,7 +170,10 @@ class WorkingFilesTestCase(ApiDBTestCase):
         self.log_in_cg_artist()
         path = "/data/files/%s" % output_file_id
         self.get(path, 403)
-        projects_service.add_team_member(self.project_id, self.user_cg_artist.id)
+        projects_service.add_team_member(
+            self.project_id,
+            self.user_cg_artist.id
+        )
         self.get(path)
 
     def test_comment_working_file(self):

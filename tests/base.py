@@ -823,4 +823,4 @@ class ApiDBTestCase(ApiTestCase):
         self.generate_fixture_scene()
 
     def now(self):
-        return datetime.datetime.now().isoformat()
+        return datetime.datetime.now().replace(microsecond=0).isoformat()

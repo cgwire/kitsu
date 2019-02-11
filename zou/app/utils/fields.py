@@ -14,7 +14,7 @@ def serialize_value(value):
     if isinstance(value, datetime.datetime):
         return value.replace(microsecond=0).isoformat()
     if isinstance(value, datetime.date):
-        return value.replace(microsecond=0).isoformat()
+        return value.isoformat()
     elif isinstance(value, uuid.UUID):
         return str(value)
     elif isinstance(value, dict):
