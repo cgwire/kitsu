@@ -12,9 +12,9 @@ def serialize_value(value):
     The aim is to make the result JSON serializable
     """
     if isinstance(value, datetime.datetime):
-        return value.isoformat()
+        return value.replace(microsecond=0).isoformat()
     if isinstance(value, datetime.date):
-        return value.isoformat()
+        return value.replace(microsecond=0).isoformat()
     elif isinstance(value, uuid.UUID):
         return str(value)
     elif isinstance(value, dict):
