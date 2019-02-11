@@ -329,15 +329,16 @@ export default {
   },
 
   asset_types: {
-    title: 'Stats types d\'assets',
+    delete_error: 'Une erreur est survenue en supprimant un type d\'asset. Êtes vous sûr qu\'aucun asset est lié à ce type d\'asset?',
+    delete_text: 'Êtes vous sur de vouloir enlever {name} de la base de données ?',
     edit_title: 'Modifier le type d\'asset',
-    number: 'type d\'asset | types d\'assets',
     new_asset_type: 'Ajouter un type d\'asset',
+    number: 'type d\'asset | types d\'assets',
+    production_title: 'Stats types d\'assets',
+    title: 'Types d\'assets',
     fields: {
       name: 'Nom'
-    },
-    delete_text: 'Êtes vous sur de vouloir enlever {name} de la base de données ?',
-    delete_error: 'Une erreur est survenue en supprimant un type d\'asset. Êtes vous sûr qu\'aucun asset est lié à ce type d\'asset?'
+    }
   },
 
   assets: {

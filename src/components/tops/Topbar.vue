@@ -211,7 +211,7 @@ export default {
         {label: this.$t('shots.title'), value: 'shots'},
         {label: this.$t('sequences.title'), value: 'sequences'},
         {label: this.$t('episodes.title'), value: 'episodes'},
-        {label: this.$t('asset_types.title'), value: 'assetTypes'},
+        {label: this.$t('asset_types.production_title'), value: 'assetTypes'},
         {label: this.$t('breakdown.title'), value: 'breakdown'},
         {label: this.$t('playlists.title'), value: 'playlists'},
         {label: this.$t('people.team'), value: 'team'}

@@ -159,7 +159,7 @@ export default {
 
   metaInfo () {
     return {
-      title: `${this.currentProduction.name} | ${this.$t('asset_types.title')} - Kitsu`
+      title: `${this.currentProduction.name} | ${this.$t('asset_types.production_title')} - Kitsu`
     }
   }
 }
