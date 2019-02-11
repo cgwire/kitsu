@@ -20,5 +20,12 @@ module.exports = {
         ws: true
       }
     }
-  }
+  },
+  css: {
+    loaderOptions: {
+      sass: {
+        data: `@import "@/variables.scss";`
+      }
+    }
+  },
 }

@@ -121,7 +121,7 @@ export default {
 }
 </script>
 
-<style>
+<style lang="scss">
 :focus {outline:none;}
 ::-moz-focus-inner {border:0;}
 
@@ -143,228 +143,230 @@ body {
   border: 0;
 }
 
-.dark .hero {
-  background-color: #25282E;
-}
+.dark {
+  .hero {
+    background-color: $dark-grey;
+  }
 
-.dark .input,
-.dark select,
-.dark textarea,
-.dark .page,
-.dark .loading-info,
-.dark .side-column {
-  background: #36393F;
-  color: #EEEEEE;
-}
+  .input,
+  select,
+  textarea,
+  .page,
+  .loading-info,
+  .side-column {
+    background: #36393F;
+    color: $white-grey;
+  }
 
-.dark textarea[disabled] {
-  background: #36393F;
-  color: #BBB;
-  border-color: #25282E;
-}
+  textarea[disabled] {
+    background: #36393F;
+    color: #BBB;
+    border-color: #25282E;
+  }
 
-.dark select,
-.dark textarea,
-.dark .input {
-  border-color: #25282E;
-}
+  select,
+  textarea,
+  .input {
+    border-color: #25282E;
+  }
 
-.dark .select::after {
-  border-color: #00B242;
-}
+  .select::after {
+    border-color: #00B242;
+  }
 
-.dark .is-top select {
-  background-color: #222427;
-}
+  .is-top select {
+    background-color: #222427;
+  }
 
-.dark .title,
-.dark .subtitle {
-  color: #EEEEEE;
-}
+  .title,
+  .subtitle {
+    color: $white-grey;
+  }
 
-.dark label.label {
-  color: #EEEEEE;
-}
+   label.label {
+    color: $white-grey;
+  }
 
-.dark .box .title,
-.dark .box {
-  background: #3D4048;
-  color: #EEEEEE;
-}
+  .box .title,
+  .box {
+    background: #3D4048;
+    color: $white-grey;
+  }
 
-.dark .button.is-link {
-  background: transparent;
-  border-color: transparent;
-  color: #DDDDDD;
-}
+  .button.is-link {
+    background: transparent;
+    border-color: transparent;
+    color: #DDDDDD;
+  }
 
-.dark .is-link:hover {
-  color: #DDDDDD;
-  background: #5E6169;
-}
+  .is-link:hover {
+    color: #DDDDDD;
+    background: #5E6169;
+  }
 
-.dark .button {
-  background: #4E5159;
-  border-color: #25282E;
-  color: #EEEEEE;
-}
+  .button {
+    background: #4E5159;
+    border-color: #25282E;
+    color: $white-grey;
+  }
 
-.dark .button.is-danger {
-  background: #FF2B56;
-}
+  .button.is-danger {
+    background: #FF2B56;
+  }
 
-.dark .main-button {
-  background: #00B242;
-  border-bottom: 3px solid #008732;
-}
+  .main-button {
+    background: #00B242;
+    border-bottom: 3px solid #008732;
+  }
 
-.dark .add-comment .select select {
-  background: #4E5159;
-}
+  .add-comment .select select {
+    background: #4E5159;
+  }
 
-.dark .hero .box h1.title {
-  color: #DDD;
-}
+  .hero .box h1.title {
+    color: #DDD;
+  }
 
-.dark .table-body .table tr:nth-child(odd) {
-  color: #EEEEEE;
-  background: #46494F;
-}
+  .table-body .table tr:nth-child(odd) {
+    color: $white-grey;
+    background: #46494F;
+  }
 
-.dark .table-header,
-.dark .table-header tr:hover,
-.dark .table-body .table tr:nth-child(even) {
-  color: #EEEEEE;
-  background: #36393F;
-}
+  .table-header,
+  .table-header tr:hover,
+  .table-body .table tr:nth-child(even) {
+    color: $white-grey;
+    background: #36393F;
+  }
 
-.dark .table-header th {
-  color: #EEEEEE;
-  border-color: #666666;
-}
+  .table-header th {
+    color: $white-grey;
+    border-color: #666666;
+  }
 
-.dark .table-body td {
-  border-color: #25282E;
-}
+  .table-body td {
+    border-color: #25282E;
+  }
 
-.dark .table-body .table tr:hover {
-  color: #EEEEEE;
-  background: #5E6169;
-}
+  .table-body .table tr:hover {
+    color: $white-grey;
+    background: #5E6169;
+  }
 
-.dark .table tr.type-header {
-  border-top: 1px solid #25282E;
-  font-size: 1.1em;
-}
+   .table tr.type-header {
+    border-top: 1px solid #25282E;
+    font-size: 1.1em;
+  }
 
-.dark .table tr.type-header:hover {
-  background: #46494F;
-}
+  .table tr.type-header:hover {
+    background: #46494F;
+  }
 
-.dark .table tr.type-header td {
-  font-weight: bold;
-  padding-left: 0.3em;
-}
+  .table tr.type-header td {
+    font-weight: bold;
+    padding-left: 0.3em;
+  }
 
-.dark .splitted-table {
-  border-left: 1px solid #36393F;
-}
+  .splitted-table {
+    border-left: 1px solid #36393F;
+  }
 
-.dark .splitted-table tr {
-  border-right: 1px solid #25282E;
-  border-left: 1px solid #25282E;
-}
+  .splitted-table tr {
+    border-right: 1px solid #25282E;
+    border-left: 1px solid #25282E;
+  }
 
-.dark .splitted-table thead tr {
-  border-right: 1px solid transparent;
-  border-left: 1px solid transparent;
-}
+  .splitted-table thead tr {
+    border-right: 1px solid transparent;
+    border-left: 1px solid transparent;
+  }
 
-.dark .splitted-table thead tr a {
-  color: #7A7A7A;
-}
+  .splitted-table thead tr a {
+    color: #7A7A7A;
+  }
 
-.dark .splitted-table .table-body {
-  padding-top: 1em;
-  position: relative;
-  z-index: 1;
-}
+  .splitted-table .table-body {
+    padding-top: 1em;
+    position: relative;
+    z-index: 1;
+  }
 
-.dark .splitted-table tbody:first-child tr:first-child {
-  border-top: 1px solid #25282E;
-}
+  .splitted-table tbody:first-child tr:first-child {
+    border-top: 1px solid #25282E;
+  }
 
-.dark .splitted-table .empty-line {
-  border: 0;
-}
+  .splitted-table .empty-line {
+    border: 0;
+  }
 
-.dark .splitted-table .empty-line td {
-  border-color: #36393F;
-  background: #36393F;
-  border: 0;
-}
+  .splitted-table .empty-line td {
+    border-color: #36393F;
+    background: #36393F;
+    border: 0;
+  }
 
-.dark .splitted-table tbody {
-  border-bottom: 1px solid #25282E;
-}
+  .splitted-table tbody {
+    border-bottom: 1px solid #25282E;
+  }
 
-.dark .search-input {
-  border-color: #888;
-}
+  .search-input {
+    border-color: #888;
+  }
 
-.dark .erase-search .tag {
-  background-color: #999;
-  color: #333
-}
+  .erase-search .tag {
+    background-color: #999;
+    color: #333
+  }
 
-.dark .erase-search .tag:hover {
-  background-color: #CCC;
-}
+  .erase-search .tag:hover {
+    background-color: #CCC;
+  }
 
-.dark .tabs a {
-  color: #EEEEEE;
-}
+  .tabs a {
+    color: $white-grey;
+  }
 
-.dark .tabs a:hover {
-  border-color: #EEEEEE;
-}
+  .tabs a:hover {
+    border-color: $white-grey;
+  }
 
-.dark .tabs li.is-active a:hover {
-  border-color: #00C252;
-  color: #00C252;
-}
+  .tabs li.is-active a:hover {
+    border-color: #00C252;
+    color: #00C252;
+  }
 
-.dark .tabs li.is-active a:hover {
-  border-color: #00C252;
-  color: #00C252;
-}
+  .tabs li.is-active a:hover {
+    border-color: #00C252;
+    color: #00C252;
+  }
 
-.dark .search-queries .tag {
-  color: #EEE;
-  background-color: #5E6169;
-}
+  .search-queries .tag {
+    color: #EEE;
+    background-color: #5E6169;
+  }
 
-.dark .current-date .datepicker .vdp-datepicker__calendar {
-  background-color: #36393F;
-  border-color: #25282E;
-}
-.dark .current-date .datepicker .vdp-datepicker__calendar header span:hover {
-  background: #36393F;
-}
-.dark .current-date .datepicker .vdp-datepicker__calendar header .prev::after {
-  border-right-color: #EEE;
-}
-.dark .current-date .datepicker .vdp-datepicker__calendar header .next::after {
-  border-left-color: #EEE;
-}
+  .current-date .datepicker .vdp-datepicker__calendar {
+    background-color: #36393F;
+    border-color: #25282E;
+  }
+  .current-date .datepicker .vdp-datepicker__calendar header span:hover {
+    background: #36393F;
+  }
+  .current-date .datepicker .vdp-datepicker__calendar header .prev::after {
+    border-right-color: #EEE;
+  }
+  .current-date .datepicker .vdp-datepicker__calendar header .next::after {
+    border-left-color: #EEE;
+  }
 
-.dark .current-date .datepicker .vdp-datepicker__calendar header .next.disabled::after {
-  border-left-color: #666;
-}
+  .current-date .datepicker .vdp-datepicker__calendar header .next.disabled::after {
+    border-left-color: #666;
+  }
 
-.dark .hero .control .icon {
-  color: #555;
-}
+  .hero .control .icon {
+    color: #555;
+  }
+} // End dark theme
 
 #app .router-link-active {
   color: #00d1b2;
@@ -1005,6 +1007,12 @@ input.search-input:focus {
 .dark .button.is-toggle:active,
 .dark .button.is-toggle:focus {
   border-color: #25282E;
+}
+
+.break-word {
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+  hyphens: auto;
 }
 
 .button.is-on {
