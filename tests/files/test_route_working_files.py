@@ -141,8 +141,8 @@ class WorkingFilesTestCase(ApiDBTestCase):
     def test_update_modification_date(self):
         path = "/actions/working-files/%s/modified" % self.working_file.id
         previous_date = self.working_file.serialize()["updated_at"]
-        time.sleep(1)
         working_file = self.put(path, {})
+        time.sleep(1)
         current_date = working_file["updated_at"]
         self.assertTrue(previous_date < current_date)
 
