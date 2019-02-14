@@ -631,7 +631,7 @@ input.search-input:focus {
 
 .query-list .tag .delete {
   margin-left: 0.5em;
-  transform: scale(0.6)
+  transform: rotate(45deg) scale(0.7)
 }
 
 .query-list .tag:hover {
