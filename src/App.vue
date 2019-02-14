@@ -775,6 +775,31 @@ input.search-input:focus {
   margin-top: 1em;
 }
 
+.table-body {
+  position: relative;
+  z-index: 1;
+}
+
+tbody:last-child .empty-line:last-child {
+  border: 0;
+}
+
+.table-body .table .empty-line {
+  background: inherit;
+}
+
+.table-header-wrapper {
+  position: relative;
+}
+
+.table th {
+  vertical-align: middle;
+}
+
+.header-icon {
+  min-width: 15px;
+}
+
 .flexrow {
   display: flex;
   align-items: center;
@@ -1025,6 +1050,12 @@ input.search-input:focus {
 
 .button.is-on {
   box-shadow: inset 0 0 4px #999;
+}
+
+.break-word {
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+  hyphens: auto;
 }
 
 @media screen and (max-width: 1000px) {
