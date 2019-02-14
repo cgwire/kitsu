@@ -481,7 +481,7 @@ export default {
       this.currentPreviewPath = this.getOriginalPath()
       this.currentPreviewDlPath = this.getOriginalDlPath()
       this.$nextTick(() => {
-        this.$refs['add-comment'].focus()
+        if (this.$refs['add-comment']) this.$refs['add-comment'].focus()
       })
     },
 
