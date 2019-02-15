@@ -174,6 +174,12 @@ def get_shots_and_tasks(criterions={}):
             Task.task_type_id,
             Task.task_status_id,
             Task.priority,
+            Task.estimation,
+            Task.duration,
+            Task.retake_count,
+            Task.real_start_date,
+            Task.end_date,
+            Task.last_comment_date,
             assignees_table.columns.person
         ) \
         .filter(Entity.entity_type_id == shot_type["id"]) \
@@ -194,6 +200,12 @@ def get_shots_and_tasks(criterions={}):
         task_type_id,
         task_status_id,
         task_priority,
+        task_estimation,
+        task_duration,
+        task_retake_count,
+        task_real_start_date,
+        task_real_end_date,
+        task_last_comment_date,
         person_id
     ) in query.all():
         shot_id = str(shot.id)
@@ -227,6 +239,18 @@ def get_shots_and_tasks(criterions={}):
                     "task_status_id": str(task_status_id),
                     "task_type_id": str(task_type_id),
                     "priority": task_priority or 0,
+                    "estimation": task_estimation,
+                    "duration": task_duration,
+                    "retake_count": task_retake_count,
+                    "real_start_date": fields.serialize_value(
+                        task_real_start_date
+                    ),
+                    "real_end_date": fields.serialize_value(
+                        task_real_end_date
+                    ),
+                    "last_comment_date": fields.serialize_value(
+                        task_last_comment_date
+                    ),
                     "assignees": []
                 }
                 task_map[task_id] = task_dict

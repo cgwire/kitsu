@@ -65,8 +65,19 @@ class CommentTaskResource(Resource):
             "task_status_id": task_status_id,
             "last_comment_date": comment["created_at"]
         }
-        if status_changed and task_status["is_retake"]:
-            new_data["retake_count"] = task["retake_count"] + 1
+        if status_changed:
+            if task_status["is_retake"]:
+                retake_count = task["retake_count"]
+                if retake_count is None or retake_count == 'NoneType':
+                    retake_count = 0
+                new_data["retake_count"] = retake_count + 1
+
+            if task_status["is_done"]:
+                new_data["end_date"] = datetime.datetime.now()
+
+            if task_status["short_name"] == "wip" \
+               and task["real_start_date"] is None:
+                new_data["real_start_date"] = datetime.datetime.now()
 
         tasks_service.update_task(task_id, new_data)
 

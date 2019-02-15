@@ -1,5 +1,6 @@
 from tests.base import ApiDBTestCase
 
+
 from zou.app.services import tasks_service, time_spents_service
 
 
@@ -23,6 +24,7 @@ class TimeSpentsServiceTestCase(ApiDBTestCase):
 
         self.generate_fixture_task()
         task_id = str(self.task.id)
+        self.task_id = task_id
 
         self.generate_fixture_sequence()
         self.generate_fixture_shot()
@@ -50,6 +52,10 @@ class TimeSpentsServiceTestCase(ApiDBTestCase):
         tasks_service.create_or_update_time_spent(
             task_id, self.person_id, "2019-01-02", 850
         )
+
+    def test_get_task(self):
+        task = tasks_service.get_task(self.task_id)
+        self.assertEqual(task["duration"], 3150)
 
     def test_get_month_table(self):
         month_table = time_spents_service.get_month_table("2018")

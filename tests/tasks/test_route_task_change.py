@@ -22,12 +22,16 @@ class RouteTaskChangeTestCase(ApiDBTestCase):
         self.generate_fixture_task_type()
         self.generate_fixture_task_status()
         self.generate_fixture_task_status_wip()
+        self.generate_fixture_task_status_retake()
+        self.generate_fixture_task_status_done()
         self.generate_fixture_person()
         self.generate_fixture_assigner()
         self.generate_fixture_task()
 
         self.open_status_id = str(self.task_status.id)
         self.wip_status_id = str(self.task_status_wip.id)
+        self.retake_status_id = str(self.task_status_wip.id)
+        self.done_status_id = str(self.task_status_wip.id)
 
         self.is_event_fired = False
         events.unregister_all()
