@@ -29,6 +29,7 @@ export default {
       'isDarkTheme',
       'isSavingCommentPreview',
       'route',
+      'taskMap',
       'user'
     ])
   },
@@ -100,7 +101,9 @@ export default {
       },
 
       'task:update' (eventData) {
-        this.getTask({ taskId: eventData.task_id })
+        if (this.taskMap[eventData.task_id]) {
+          this.getTask({ taskId: eventData.task_id })
+        }
       },
 
       'metadata-descriptor:new' (eventData) {
