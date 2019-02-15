@@ -1,117 +1,76 @@
 <template>
-<div class="columns fixed-page">
+<div class="task-type columns fixed-page">
   <div class="column main-column">
     <div class="task-type page">
 
-      <div class="header flexrow">
-        <router-link
-          class="back-link flexrow-item"
-          :to="shotsPath"
-          v-if="currentTaskType.for_shots"
-        >
-          <chevron-left-icon />
-        </router-link>
-        <router-link
-          class="back-link flexrow-item"
-          :to="assetsPath"
-          v-else
-        >
-          <chevron-left-icon />
-        </router-link>
-        <task-type-name
-          class="flexrow-item"
-          :task-type="currentTaskType"
-        />
-        <div
-          class="flexrow-item ml1"
-        >
-          <search-field />
+      <div class="task-type-header page-header">
+        <div class="flexcolumn-item flexrow">
+          <router-link
+            class="back-link flexrow-item"
+            :to="shotsPath"
+            v-if="currentTaskType.for_shots"
+          >
+            <chevron-left-icon />
+          </router-link>
+          <router-link
+            class="back-link flexrow-item"
+            :to="assetsPath"
+            v-else
+          >
+            <chevron-left-icon />
+          </router-link>
+          <task-type-name
+            class="flexrow-item"
+            :task-type="currentTaskType"
+          />
+          <div
+            class="flexrow-item ml1"
+          >
+            <search-field
+              ref="task-search-field"
+              :can-save="true"
+              @change="onSearchChange"
+              @save="saveSearchQuery"
+              placeholder="ex: rtk chars"
+            />
+          </div>
+          <div class="flexrow-item ml1">
+            {{ $t('main.sorted_by') }}
+          </div>
+          <div class="flexrow-item ml1 sorting-combobox">
+            <combobox
+              :options="sortOptions"
+              locale-key-prefix="tasks.fields."
+              v-model="currentSort"
+            />
+          </div>
         </div>
       </div>
-
-      <table-info
+      <div class="query-list">
+        <search-query-list
+          :queries="searchQueries"
+          @changesearch="changeSearch"
+          @removesearch="removeSearchQuery"
+          v-if="!loading.entities"
+        />
+      </div>
+      <task-list
+        ref="task-list"
+        :tasks="tasks"
+        :is-assets="isAssets"
         :is-loading="loading.entities"
         :is-error="errors.entities"
+        @task-selected="onTaskSelected"
       />
-
-      <div
-          class="mt2"
-        v-if="!this.currentTaskType.for_shots"
-      >
-        <div
-          :key="getAssetTypeName(typeAssets)"
-          class="supervisor-type-assets"
-          v-if="isAssets"
-          v-for="typeAssets in assetsByType"
-        >
-          <div class="supervisor-asset-type">
-            {{ getAssetTypeName(typeAssets) }}
-          </div>
-          <div class="supervisor-asset-list">
-            <task-list
-              :tasks="getTasks(typeAssets)"
-            />
-          </div>
-          <!--div class="supervisor-asset-list">
-            <task-type-entity-block
-              :key="asset.id"
-              :ref="asset.id"
-              :entity="asset"
-              :task-type="currentTaskType"
-              entity-type="asset"
-              :selected="selection[asset.id]"
-              @select="onSelect"
-              @unselect="onUnselect"
-              v-for="asset in typeAssets"
-            />
-          </div-->
-        </div>
-      </div>
-
-      <div
-        v-else
-      >
-        <div
-          class="supervisor-sequences"
-          :key="sequenceShots.length > 0 ? sequenceShots[0].id : ''"
-          v-for="sequenceShots in shotsByEpisode"
-          v-if="Object.keys(shotMap).length > 0"
-        >
-          <div class="supervisor-sequence flexrow">
-            <span class="flexrow-item">
-              {{ sequenceShots.length > 0 ? sequenceShots[0].episode_name + ' / ': '' }}
-              {{ sequenceShots.length > 0 ? sequenceShots[0].sequence_name : '' }}
-            </span>
-            <subscribe-button
-              class="flexrow-item"
-              :subscribed="isSubscribed(sequenceShots[0].sequence_id)"
-              @click="toggleSubscribe(sequenceShots[0].sequence_id)"
-              v-if="sequenceShots.length > 0"
-            />
-          </div>
-          <div class="supervisor-shot-list">
-            <task-type-entity-block
-              :key="shot.id"
-              :ref="shot.id"
-              :entity="shot"
-              :task-type="currentTaskType"
-              entity-type="shot"
-              :selected="selection[shot.id]"
-              @select="onSelect"
-              @unselect="onUnselect"
-              v-for="shot in sequenceShots"
-            />
-          </div>
-        </div>
-      </div>
     </div>
   </div>
 
   <div
     class="column side-column"
+    v-if="nbSelectedTasks === 1"
   >
     <task-info
-      :task="currentTask"
+      :task="Object.values(selectedTasks)[0]"
     />
   </div>
 </div>
@@ -119,12 +78,16 @@
 
 <script>
 import { mapGetters, mapActions } from 'vuex'
+import firstBy from 'thenby'
+import { buildSupervisorTaskIndex, indexSearch } from '../lib/indexing'
+import { applyFilters, getKeyWords, getTaskFilters } from '../lib/filtering'
 
 import { ChevronLeftIcon } from 'vue-feather-icons'
+import Combobox from './widgets/Combobox'
 import EntityThumbnail from './widgets/EntityThumbnail'
-import PageTitle from './widgets/PageTitle'
 import TaskInfo from './sides/TaskInfo'
 import SearchField from './widgets/SearchField'
+import SearchQueryList from './widgets/SearchQueryList'
 import SubscribeButton from './widgets/SubscribeButton'
 import TaskList from './lists/TaskList'
 import TableInfo from './widgets/TableInfo'
@@ -136,9 +99,10 @@ export default {
   name: 'task-type-page',
   components: {
     ChevronLeftIcon,
+    Combobox,
     EntityThumbnail,
-    PageTitle,
     SearchField,
+    SearchQueryList,
     SubscribeButton,
     TaskList,
     TableInfo,
@@ -152,7 +116,10 @@ export default {
 
   data () {
     return {
+      currentSort: 'entity_name',
       currentTask: null,
+      isAssets: true,
+      tasks: [],
       selection: {},
       loading: {
         entities: false
@@ -170,15 +137,13 @@ export default {
   },
 
   mounted () {
+    this.isAssets = this.$route.path.includes('assets')
     setTimeout(() => {
       this.initData(false)
     }, 100)
-    this.selection = {}
-    window.addEventListener('keydown', this.onKeyDown, false)
   },
 
   beforeDestroy () {
-    window.removeEventListener('keydown', this.onKeyDown)
   },
 
   computed: {
@@ -190,15 +155,22 @@ export default {
       'currentProduction',
       'currentTaskType',
       'isTVShow',
+      'nbSelectedTasks',
+      'selectedTasks',
       'sequenceSubscriptions',
       'shotsByEpisode',
       'shotMap',
       'shotsPath',
+      'taskSearchQueries',
       'taskMap'
     ]),
 
-    isAssets () {
-      return Object.keys(this.assetMap).length > 0
+    assetTasks () {
+      return this.getTasks(Object.values(this.assetMap))
+    },
+
+    shotTasks () {
+      return this.getTasks(Object.values(this.shotMap))
     },
 
     title () {
@@ -213,12 +185,35 @@ export default {
       } else {
         return 'Loading...'
       }
+    },
+
+    sortOptions () {
+      return [
+        'entity_name',
+        'estimation',
+        'duration',
+        'retake_count',
+        'real_start_date',
+        'real_end_date',
+        'last_comment_date'
+      ].map((name) => ({ label: name, value: name }))
+    },
+
+    searchQueries () {
+      if (this.isAssets) {
+        return this.taskSearchQueries.filter(t => t.entity_type === 'Asset')
+      } else {
+        return this.taskSearchQueries
+      }
     }
   },
 
   methods: {
     ...mapActions([
+      'clearSelectedTasks',
       'initTaskType',
+      'saveTaskSearch',
+      'removeTaskSearch',
       'setProduction',
       'subscribeToSequence',
       'unsubscribeFromSequence'
@@ -230,15 +225,18 @@ export default {
       this.initTaskType(force)
         .then(() => {
           this.loading.entities = false
-          if (
-            this.assetsByType &&
-            this.assetsByType.length > 0 &&
-            this.assetsByType[0].length > 0
-          ) {
-            this.$options.entityListCache = [].concat(...this.assetsByType)
+          if (this.isAssets) {
+            this.tasks = this.assetTasks
+            this.$options.taskIndex = buildSupervisorTaskIndex(
+              this.assetTasks
+            )
           } else {
-            this.$options.entityListCache = [].concat(...this.shotsByEpisode)
+            this.tasks = this.shotTasks
+            this.$options.taskIndex = buildSupervisorTaskIndex(
+              this.shotTasks
+            )
           }
+          this.$refs['task-search-field'].focus()
         })
         .catch((err) => {
           console.error(err)
@@ -247,80 +245,68 @@ export default {
         })
     },
 
-    getAssetTypeName (typeAssets) {
-      return typeAssets.length > 0 ? typeAssets[0].asset_type_name : ''
+    changeSearch (searchQuery) {
+      this.$refs['task-search-field'].setValue(searchQuery.search_query)
+      this.$refs['task-search-field'].$emit('change', searchQuery.search_query)
     },
 
-    isSubscribed (sequenceId) {
-      return this.sequenceSubscriptions[sequenceId]
-    },
-
-    toggleSubscribe (sequenceId) {
-      let taskTypeId = this.currentTaskType.id
-      if (!this.isSubscribed(sequenceId)) {
-        this.subscribeToSequence({sequenceId, taskTypeId})
+    onSearchChange (query) {
+      if (query) {
+        query = query.toLowerCase().trim()
+        const keywords = getKeyWords(query) || []
+        const filters = getTaskFilters(this.$options.taskIndex, query)
+        this.tasks = indexSearch(this.$options.taskIndex, keywords)
+        this.tasks = applyFilters(this.tasks, filters, this.taskMap)
       } else {
-        this.unsubscribeFromSequence({sequenceId, taskTypeId})
-      }
-    },
-
-    onSelect (selectionInfo) {
-      this.currentTask = selectionInfo.task
-      this.selection = {}
-      this.selection[selectionInfo.entity.id] = true
-    },
-
-    onUnselect (selectionInfo) {
-      this.currentTask = null
-      this.selection = {}
-    },
-
-    getCurrentIndex () {
-      let index = 0
-      const selectedEntities = Object.keys(this.selection)
-      if (selectedEntities.length > 0) {
-        const currentSelectionId = selectedEntities[0]
-        index = this.$options.entityListCache.findIndex(
-          (entity) => entity.id === currentSelectionId
-        )
-      }
-      return index
-    },
-
-    selectPreviousTask () {
-      let index = this.getCurrentIndex() - 1
-      if (Object.keys(this.selection).length > 0 && index < 0) {
-        index = this.$options.entityListCache.length - 1
-      }
-      const entity = this.$options.entityListCache[index]
-      if (entity) this.$refs[entity.id][0].select()
-    },
-
-    selectNextTask () {
-      const maxLength = this.$options.entityListCache.length - 1
-      let index = this.getCurrentIndex() + 1
-      if (index > maxLength) index = 0
-      const entity = this.$options.entityListCache[index]
-      if (entity) this.$refs[entity.id][0].select()
-    },
-
-    onKeyDown (event) {
-      if (event.ctrlKey) {
-        if (event.keyCode === 37) {
-          this.selectPreviousTask()
-        } else if (event.keyCode === 38) {
-          this.selectPreviousTask()
-        } else if (event.keyCode === 39) {
-          this.selectNextTask()
-        } else if (event.keyCode === 40) {
-          this.selectNextTask()
+        if (this.isAssets) {
+          this.tasks = this.assetTasks
+        } else {
+          this.tasks = this.shotTasks
         }
       }
     },
 
-    getTasks (assets) {
+    onTaskSelected (task) {
+      this.currentTask = task
+    },
+
+    getTasks (entities) {
       const tasks = []
+      entities.forEach((entity) => {
+        entity.tasks.forEach((taskId) => {
+          const task = this.taskMap[taskId]
+          if (task && task.task_type_id === this.currentTaskType.id) {
+            tasks.push(task)
+          }
+        })
+      })
       return tasks
+    },
+
+    sortTasks () {
+      return this.tasks.sort(
+        firstBy(this.currentSort, this.currentSort === 'entity_name' ? 1 : -1)
+          .thenBy('entity_name')
+      )
+    },
+
+    saveSearchQuery (searchQuery) {
+      const entityType = this.isAssets ? 'Asset' : 'Shot'
+      this.saveTaskSearch({ searchQuery, entityType })
+        .then(() => {
+        })
+        .catch((err) => {
+          if (err) console.log('error')
+        })
+    },
+
+    removeSearchQuery (searchQuery) {
+      this.removeTaskSearch(searchQuery)
+        .then(() => {
+        })
+        .catch((err) => {
+          if (err) console.log('error')
+        })
     }
   },
 
@@ -331,6 +317,12 @@ export default {
 
     currentProduction () {
       this.initData(true)
+    },
+
+    currentSort () {
+      this.sortTasks()
+      this.$refs['task-list'].resetSelection()
+      this.clearSelectedTasks()
     }
   },
 
@@ -342,21 +334,25 @@ export default {
 }
 </script>
 
-<style scoped>
-.page {
+<style scoped lang="scss">
+.page-header {
   margin-top: 1em;
+}
+
+.page {
   height: 100%;
 }
 
-.production-name {
-  font-size: 1.5em;
+.back-link {
+  padding-top: 5px;
+  margin-right: 5px;
 }
 
 .supervisor-asset-type,
 .supervisor-sequence {
   text-transform: uppercase;
-  color: #999;
-  border-bottom: 1px solid #CCC;
+  color: $grey;
+  border-bottom: 1px solid $light-grey;
   font-size: 1.2em;
   margin-bottom: 1em;
   padding-bottom: 0.5em;
@@ -369,12 +365,30 @@ export default {
   flex-wrap: wrap;
 }
 
-.header {
-  margin-top: 0.5em;
-  margin-bottom: 1.5em;
+.task-type {
+  display: flex;
+  flex-direction: column;
 }
 
-.header .back-link {
-  padding-top: 5px;
+.columns {
+  display: flex;
+  flex-direction: row;
+}
+
+.column {
+  overflow-y: auto;
+  padding: 0;
+}
+
+.main-column {
+  border-right: 3px solid #CCC;
+}
+
+.sorting-combobox {
+  padding-top: 3px;
+}
+
+.field {
+  margin: 0;
 }
 </style>

@@ -146,6 +146,8 @@ const helpers = {
 
   populateTask (task, shot, production) {
     task.name = helpers.getTaskType(task.task_type_id).priority.toString()
+    task.short_name =
+      helpers.getTaskStatus(task.task_status_id).short_name
 
     let entityName = `${shot.sequence_name} / ${shot.name}`
     if (shot.episode_name) {
@@ -580,6 +582,7 @@ const actions = {
           searchQuery,
           searchQuery,
           production.id,
+          null,
           (err, searchQuery) => {
             commit(SAVE_SHOT_SEARCH_END, { searchQuery, production })
             if (err) {

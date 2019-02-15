@@ -69,7 +69,7 @@
         v-if="comment.text"
       >
       </p>
-      <p class="comment-text empty" v-else>
+      <p class="comment-text empty word-break" v-else>
         {{ $t('comments.empty_text') }}
       </p>
     </div>
@@ -203,7 +203,6 @@ export default {
   border-left: 6px solid #CCC;
   border-radius: 0 5px 5px 0;
   padding: 0.6em;
-  word-break: break-all;
 }
 
 .comment:first-child {

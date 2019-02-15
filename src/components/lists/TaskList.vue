@@ -1,14 +1,56 @@
 <template>
 <div class="data-list">
-
-  toto
-
   <div class="table-header-wrapper">
     <table class="table table-header" ref="headerWrapper">
       <thead>
+        <tr>
+          <th class="thumbnail" ref="th-thumbnail">
+          </th>
+          <th class="asset-type" ref="th-type" v-if="isAssets">
+            {{ $t('tasks.fields.asset_type') }}
+          </th>
+          <th class="sequence" ref="th-type" v-else>
+            {{ $t('tasks.fields.sequence') }}
+          </th>
+          <th class="name" ref="th-name">
+            {{ $t('tasks.fields.entity_name') }}
+          </th>
+          <th class="status" ref="th-status">
+            {{ $t('tasks.fields.task_status') }}
+          </th>
+          <th class="assignees" ref="th-assignees">
+            {{ $t('tasks.fields.assignees') }}
+          </th>
+          <th class="estimation" ref="th-estimation">
+            {{ $t('tasks.fields.estimation').substring(0, 3) }}.
+          </th>
+          <th class="duration" ref="th-duration">
+            {{ $t('tasks.fields.duration').substring(0, 3) }}.
+          </th>
+          <th class="retake-count" ref="th-retake-count">
+            {{ $t('tasks.fields.retake_count') }}
+          </th>
+          <th class="real-start-date" ref="th-status">
+            {{ $t('tasks.fields.real_start_date') }}
+          </th>
+          <th class="real-end-date" ref="th-status">
+            {{ $t('tasks.fields.real_end_date') }}
+          </th>
+          <th class="last-comment-date" ref="th-status">
+            {{ $t('tasks.fields.last_comment_date') }}
+          </th>
+          <th class="empty" ref="">
+            &nbsp;
+          </th>
+        </tr>
       </thead>
     </table>
   </div>
+
+  <table-info
+    :is-loading="isLoading"
+    :is-error="isError"
+  />
 
   <div
     ref="body"
@@ -17,34 +59,102 @@
     v-if="!isLoading"
   >
     <table
-      class="table splitted-table unselectable"
-      v-if="isListVisible"
+      class="table unselectable"
     >
       <tbody
         class="tbody"
         ref="body-tbody"
       >
+        <tr
+          :key="task.id"
+          :class="{
+            'task-line': true,
+            selected: selectionGrid[task.id]
+          }"
+          @click="selectTask($event, index, task)"
+          v-for="(task, index) in tasks"
+        >
+          <td class="thumbnail">
+            <entity-thumbnail
+              :entity="getEntity(task.entity.id)"
+              :width="50"
+            />
+          </td>
+          <td class="asset-type" v-if="isAssets">
+            {{ getEntity(task.entity.id).asset_type_name }}
+          </td>
+          <td class="sequence" v-else>
+            {{ getEntity(task.entity.id).sequence_name }}
+          </td>
+          <td class="name">
+            {{ getEntity(task.entity.id).name }}
+          </td>
+          <validation-cell
+            class="status unselectable"
+            :task-test="task"
+            :is-border="false"
+            :is-assignees="false"
+            :selectable="false"
+          />
+          <td class="assignees">
+            <div class="flexrow">
+              <people-avatar
+                class="flexrow-item"
+                :key="task.id + '-' + personId"
+                :person="personMap[personId]"
+                :size="30"
+                :font-size="15"
+                v-for="personId in task.assignees"
+              />
+            </div>
+          </td>
+          <td class="estimation">
+            {{ task.estimation }}
+          </td>
+          <td class="duration">
+            {{ formatDuration(task.duration) }}
+          </td>
+          <td class="retake-count">
+            <span
+              v-for="index in task.retake_count"
+              :key="index"
+            >
+              &bull;
+            </span>
+          </td>
+          <td class="real-start-date">
+            {{ formatDate(task.real_start_date) }}
+          </td>
+          <td class="real-end-date">
+            {{ formatDate(task.real_end_date) }}
+          </td>
+          <td class="last-comment-date">
+            {{ formatDate(task.last_comment_date) }}
+          </td>
+          <td>
+          </td>
+        </tr>
       </tbody>
     </table>
   </div>
 
   <p
-    class="has-text-centered nb-assets"
-    v-if="!isEmptyList && !isLoading"
+    class="has-text-centered nb-tasks"
+    v-if="!isLoading"
   >
-0 entities
+    {{ tasks.length }} tasks
   </p>
-
 </div>
 </template>
 
 <script>
+import Vue from 'vue'
 import { mapGetters, mapActions } from 'vuex'
+import moment from 'moment-timezone'
 import {
   ChevronDownIcon
 } from 'vue-feather-icons'
-import { entityListMixin } from './base'
-import { selectionListMixin } from './selection'
+import { range } from '../../lib/helpers'
 
 import DescriptionCell from '../cells/DescriptionCell'
 import ButtonHrefLink from '../widgets/ButtonHrefLink'
@@ -56,38 +166,12 @@ import RowActions from '../widgets/RowActions'
 import TableHeaderMenu from '../widgets/TableHeaderMenu'
 import TableInfo from '../widgets/TableInfo'
 import TableMetadataHeaderMenu from '../widgets/TableMetadataHeaderMenu'
+import PeopleAvatar from '../widgets/PeopleAvatar'
 import ValidationCell from '../cells/ValidationCell'
 
 export default {
-  name: 'asset-list',
-  mixins: [entityListMixin, selectionListMixin],
-
-  props: {
-    displayedAssets: {
-      type: Array,
-      default: () => []
-    },
-    isLoading: {
-      type: Boolean,
-      default: true
-    },
-    isError: {
-      type: Boolean,
-      default: true
-    },
-    validationColumns: {
-      type: Array,
-      default: () => []
-    }
-  },
-
-  data () {
-    return {
-      lastSelection: null,
-      hiddenColumns: {},
-      lastHeaderMenuDisplayed: null
-    }
-  },
+  name: 'task-list',
+  mixins: [],
 
   components: {
     ButtonLink,
@@ -96,6 +180,7 @@ export default {
     DescriptionCell,
     EntityThumbnail,
     ChevronDownIcon,
+    PeopleAvatar,
     PageTitle,
     RowActions,
     TableInfo,
@@ -104,306 +189,254 @@ export default {
     ValidationCell
   },
 
+  props: {
+    tasks: {
+      type: Array,
+      default: () => []
+    },
+    isLoading: {
+      type: Boolean,
+      default: false
+    },
+    isError: {
+      type: Boolean,
+      default: false
+    },
+    isAssets: {
+      type: Boolean,
+      default: true
+    },
+    taskType: {
+      type: Object,
+      default: () => {}
+    }
+  },
+
+  data () {
+    return {
+      lastSelection: null,
+      options: [],
+      selectionGrid: {}
+    }
+  },
+
   computed: {
     ...mapGetters([
-      'assets',
-      'assetFilledColumns',
-      'assetMetadataDescriptors',
-      'assetSearchText',
-      'assetSelectionGrid',
-      'episodeMap',
-      'currentEpisode',
-      'currentProduction',
-      'displayedAssetsLength',
+      'assetMap',
+      'shotMap',
       'nbSelectedTasks',
-      'isCurrentUserAdmin',
-      'isCurrentUserClient',
-      'isCurrentUserManager',
-      'isShowInfos',
-      'isTVShow',
       'selectedTasks',
-      'taskMap',
-      'taskTypeMap'
-    ]),
+      'personMap'
+    ])
+  },
 
-    createTasksPath () {
-      return this.getPath('create-asset-tasks')
-    },
+  mounted () {
+    window.addEventListener('keydown', this.onKeyDown, false)
+  },
 
-    isEmptyList () {
-      return this.displayedAssetsLength === 0 &&
-             !this.isLoading &&
-             !this.isError &&
-             (!this.assetSearchText || this.assetSearchText.length === 0)
-    },
-
-    isEmptyTask () {
-      return !this.isEmptyList &&
-      !this.isLoading &&
-      this.validationColumns &&
-      this.validationColumns.length === 0
-    },
-
-    isListVisible () {
-      return (
-        !this.isLoading &&
-        !this.isError &&
-        (
-          this.displayedAssetsLength > 0
-        )
-      )
-    }
+  beforeDestroy () {
+    window.removeEventListener('keydown', this.onKeyDown)
   },
 
   methods: {
     ...mapActions([
-      'displayMoreAssets'
+      'addSelectedTask',
+      'addSelectedTasks',
+      'clearSelectedTasks',
+      'removeSelectedTask'
     ]),
+
+    formatDuration (duration) {
+      if (duration) {
+        return (duration / 60 / 8).toLocaleString(
+          'fullwide', { maximumFractionDigits: 1 }
+        )
+      } else {
+        return 0
+      }
+    },
+
+    formatDate (date) {
+      if (date) return moment(date).format('YYYY-MM-DD')
+      else return ''
+    },
 
     onBodyScroll (event, position) {
       this.$refs.headerWrapper.style.left = `-${position.scrollLeft}px`
       this.$emit('scroll', position.scrollTop)
+    },
 
-      const maxHeight =
-        this.$refs.body.scrollHeight - this.$refs.body.offsetHeight
-      if (maxHeight < (position.scrollTop + 100)) {
-        this.loadMoreAssets()
+    selectTask (event, index, task) {
+      const isSelected = this.selectionGrid[task.id]
+      const isManySelection = Object.keys(this.selectionGrid).length > 1
+      if (!event.ctrlKey && !event.shiftKey) {
+        this.clearSelectedTasks({ task })
+        this.resetSelection()
       }
-    },
 
-    loadMoreAssets () {
-      this.displayMoreAssets()
-      this.$nextTick(this.resizeHeaders)
-    },
-
-    getIndex (i, k) {
-      let j = 0
-      let index = 0
-      while (j < k) {
-        index += this.displayedAssets[j].length
-        j++
-      }
-      return i + index
-    },
-
-    newAssetPath () {
-      return this.getPath('new-asset')
-    },
-
-    assetPath (assetId) {
-      return this.getPath('asset', assetId)
-    },
-
-    editPath (assetId) {
-      return this.getPath('edit-asset', assetId)
-    },
-
-    deletePath (assetId) {
-      return this.getPath('delete-asset', assetId)
-    },
-
-    restorePath (assetId) {
-      return this.getPath('restore-asset', assetId)
-    },
-
-    taskTypePath (taskTypeId) {
-      let route = {
-        name: 'task-type',
-        params: {
-          production_id: this.currentProduction.id,
-          task_type_id: taskTypeId,
-          type: 'assets'
+      if (!event.shiftKey) {
+        if (this.selectionGrid[task.id]) {
+          this.removeSelectedTask({ task })
+          Vue.set(this.selectionGrid, task.id, undefined)
+        } else if (!isSelected || isManySelection) {
+          this.addSelectedTask({ task })
+          this.$emit('task-selected', task)
+          Vue.set(this.selectionGrid, task.id, true)
+          this.lastSelection = index
         }
-      }
-
-      if (this.isTVShow && this.currentEpisode) {
-        route.name = `episode-task-type`
-        route.params.episode_id = this.currentEpisode.id
-      }
-
-      return route
-    },
-
-    getPath (section, assetId) {
-      let route = {
-        name: section,
-        params: {
-          production_id: this.currentProduction.id
-        }
-      }
-
-      if (this.isTVShow && this.currentEpisode) {
-        route.name = `episode-${section}`
-        route.params.episode_id = this.currentEpisode.id
-      }
-
-      if (assetId) {
-        route.params.asset_id = assetId
-      }
-
-      return route
-    },
-
-    resizeHeaders () {
-      if (
-        this.$refs['body-tbody'] &&
-        this.$refs['body-tbody'][0] &&
-        this.$refs['body-tbody'][0].children.length > 0
-      ) {
-        if (this.$refs['th-episode']) {
-          const episodeWidth =
-            this.$refs['body-tbody'][0].children[1].children[0].offsetWidth
-          this.$refs['th-episode'].style['min-width'] = `${episodeWidth}px`
-          const nameWidth =
-            this.$refs['body-tbody'][0].children[1].children[2].offsetWidth
-          this.$refs['th-name'].style['min-width'] = `${nameWidth}px`
+      } else {
+        this.selectionGrid = {}
+        let taskIndices = []
+        if (this.lastSelection > index) {
+          taskIndices = range(index, this.lastSelection)
         } else {
-          const thumbnailWidth =
-            this.$refs['body-tbody'][0].children[1].children[0].offsetWidth
-          this.$refs['th-thumbnail'].style['min-width'] = `${thumbnailWidth}px`
-          const nameWidth =
-            this.$refs['body-tbody'][0].children[1].children[1].offsetWidth
-          this.$refs['th-name'].style['min-width'] = `${nameWidth}px`
-          const descriptionWidth =
-            this.$refs['body-tbody'][0].children[1].children[2].offsetWidth
-          this.$refs['th-description'].style['min-width'] =
-            `${descriptionWidth}px`
+          taskIndices = range(this.lastSelection, index)
         }
+        const selection = taskIndices.map(i => ({ task: this.tasks[i] }))
+        selection.forEach(task => {
+          Vue.set(this.selectionGrid, task.task.id, true)
+        })
+        this.addSelectedTasks(selection)
+      }
+    },
+
+    onKeyDown (event) {
+      if (this.tasks.length > 0 && event.ctrlKey) {
+        let index = this.lastSelection ? this.lastSelection : 0
+        if ([37, 38].includes(event.keyCode)) {
+          index = (index - 1) < 0 ? index = this.tasks.length - 1 : index - 1
+          this.selectTask({}, index, this.tasks[index])
+        } else if ([39, 40].includes(event.keyCode)) {
+          index = (index + 1) >= this.tasks.length ? index = 0 : index + 1
+          this.selectTask({}, index, this.tasks[index])
+        }
+      }
+    },
+
+    resetSelection () {
+      this.selectionGrid = {}
+      this.lastSelection = null
+    },
+
+    getEntity (entityId) {
+      if (this.isAssets) {
+        return this.assetMap[entityId]
+      } else {
+        return this.shotMap[entityId]
       }
     }
   },
 
   watch: {
-    validationColumns () {
-      this.initHiddenColumns(this.validationColumns, this.hiddenColumns)
+    tasks () {
+      this.resetSelection()
+    },
+
+    nbSelectedTasks () {
+      if (this.nbSelectedTasks === 0) this.resetSelection()
     }
   }
 }
 </script>
 
-<style scoped>
-.dark thead tr a {
-  color: #CCC;
-}
-
-.table {
-  min-width: 1000px;
-}
-
-.actions {
-  min-width: 150px;
-  padding: 0.4em;
-}
-
-.name {
-  min-width: 200px;
-  width: 200px;
-}
-
-.episode {
-  min-width: 50px;
-  width: 50px;
-}
-
-.bold {
-  font-weight: bold;
-}
-
-.description {
-  min-width: 200px;
-  max-width: 200px;
-  width: 200px;
-}
-
-.metadata-descriptor {
-  min-width: 120px;
-  max-width: 120px;
-  width: 120px;
-}
-
-.validation-cell {
-  min-width: 120px;
-  max-width: 120px;
-  width: 120px;
-  margin-right: 1em;
-}
-
-.hidden-validation-cell {
-  min-width: 30px;
-  max-width: 30px;
-  width: 30px;
-  padding: 4px;
-}
-
-td.name {
-  font-size: 1.2em;
+<style scoped lang="scss">
+.dark .table-body tr.task-line.selected {
+  background: $dark-purple;
 }
 
 .thumbnail {
-  min-width: 50px;
-  max-width: 50px;
-  width: 50px;
-  padding: 0;
+  min-width: 80px;
+  width: 80px;
+  max-width: 80px;
 }
 
-.thumbnail img {
-  margin-top: 5px;
+.asset-type {
+  min-width: 120px;
+  width: 120px;
 }
 
-.asset-link {
-  color: inherit
+.sequence {
+  min-width: 120px;
+  width: 120px;
 }
 
-thead tr {
-  border-right: 1px solid transparent;
-  border-left: 1px solid transparent;
+.name {
+  min-width: 120px;
+  width: 120px;
+  font-weight: bold;
 }
 
-thead tr a {
-  color: #7A7A7A;
+.status {
+  min-width: 80px;
+  width: 80px;
+}
+
+.assignees {
+  min-width: 130px;
+  width: 130px;
+}
+
+.estimation {
+  min-width: 60px;
+  width: 60px;
+  text-align: center;
+}
+
+.duration {
+  min-width: 60px;
+  width: 60px;
+  text-align: center;
+}
+
+.retake-count {
+  min-width: 80px;
+  width: 80px;
+}
+
+.last-comment-date,
+.real-start-date,
+.real-end-date {
+  min-width: 130px;
+  width: 130px;
+}
+
+.empty {
+  width: 100%
+}
+
+.avatar {
+  display: inline-block;
+  padding-left: 0.3em;
+}
+
+td.retake-count {
+  color: $red;
+  font-weight: bold;
+  font-size: 1.6em;
+  padding-left: 2px;
+}
+
+.nb-tasks {
+  padding: 0.5em;
+}
+
+.table-header th {
+  padding: 0.5em 0;
 }
 
 .table-body {
-  padding-top: 1em;
-  position: relative;
-  z-index: 1;
-}
+  td,
+  tr {
+    padding: 0;
+  }
 
-tbody:first-child tr:first-child {
-}
+  tr.task-line {
+    cursor: pointer;
 
-tbody:last-child .empty-line:last-child {
-  border: 0;
-}
-
-.table-body .table .empty-line {
-  background: inherit;
-}
-
-.empty-line {
-  border-right: 0;
-  border-left: 0;
-  height: 1em;
-  color: red;
-}
-
-.table-header-wrapper {
-  position: relative;
-}
-
-.splitted-table tbody {
-  border: 0;
-}
-
-.table th {
-  vertical-align: middle;
-}
-
-.header-icon {
-  min-width: 15px;
-}
-
-th {
-  word-break: break-all
+    &.selected {
+      border: 0;
+      background: $purple;
+    }
+  }
 }
 </style>

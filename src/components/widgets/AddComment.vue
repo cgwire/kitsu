@@ -1,5 +1,5 @@
 <template>
-  <article class="add-comment media">
+  <article class="add-comment word-break media">
     <figure class="media-left" v-if="!light">
       <div class="level">
         <div class="level-left">
@@ -68,7 +68,7 @@
         class="error pull-right"
         v-if="isError"
       >
-        <em>$t('comments.error')</em>
+        <em>{{ $t('comments.error') }}</em>
       </div>
     </div>
   </article>
@@ -163,7 +163,6 @@ export default {
 .add-comment {
   border-radius: 5px;
   background: white;
-  word-break: break-all;
 }
 
 .add-comment textarea {

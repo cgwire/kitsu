@@ -131,6 +131,7 @@ span.thumbnail-empty {
   display: block;
   margin-bottom: 0.3em;
   margin-top: 7px;
+  margin-bottom: 7px;
 }
 
 .thumbnail-picture.square {

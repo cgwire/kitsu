@@ -103,6 +103,7 @@ export default {
     studio: 'Studio',
     user: 'Utilisateur',
     save: 'Enregistrer',
+    sorted_by: 'Tâches triées par :',
     white_theme: 'Thème blanc',
     yes: 'oui',
     csv: {
@@ -121,7 +122,8 @@ export default {
     change_status: 'Changer le statut',
     change_priority: 'Change priority',
     delete_tasks: 'Supprimer des tâches',
-    run_custom_action: 'Lancer des actions'
+    run_custom_action: 'Lancer des actions',
+    set_estimations: 'Définir estimations'
   },
 
   login: {
@@ -238,6 +240,7 @@ export default {
     preview: 'Pré-visualisation',
     previous: 'Précédente',
     select_preview_file: 'Choisissez une preview sur votre disque dur:',
+    set_estimations: 'Donner une estimation pour les tâches sélectionnées :',
     set_preview: 'Utilisez cette previz comme vignette',
     set_preview_error: 'Une erreur est survenue en utilisant cette vignette.',
     set_preview_done: 'Cette previz sert de vignette à l\'entité courante.',
@@ -248,13 +251,22 @@ export default {
     tasks: 'Tâches',
     validation: 'Validation',
     fields: {
-      task_type: 'Type',
-      production: 'Prod',
+      asset_type: 'Type d\'asset',
+      assignees: 'Assignés',
+      duration: 'Duration',
+      end_date: 'Date de fin',
+      estimation: 'Estimation',
       entity: 'Entité',
+      entity_name: 'Nom',
+      last_comment_date: 'Dernier comm.',
+      production: 'Prod',
+      real_end_date: 'Date de valid.',
+      real_start_date: 'Date de début',
+      retake_count: 'Retakes',
+      sequence: 'Séquence',
       task_status: 'Statut',
       last_comment: 'Dernier commentaire',
-      assignees: 'Assignation',
-      end_date: 'Date de fin'
+      task_type: 'Type'
     },
     priority: {
       emergency: 'Urgence',

@@ -2,7 +2,7 @@
 <div class="search-queries">
   <span
     class="tag"
-    @click="changeSearch(searchQuery)"
+    @click="changeSearch($event, searchQuery)"
     :key="searchQuery.id"
     v-for="searchQuery in queries"
   >
@@ -35,8 +35,10 @@ export default {
   computed: {
   },
   methods: {
-    changeSearch (searchQuery) {
-      this.$emit('changesearch', searchQuery)
+    changeSearch (event, searchQuery) {
+      if (event.target.className !== 'delete') {
+        this.$emit('changesearch', searchQuery)
+      }
     },
 
     removeSearch (searchQuery) {

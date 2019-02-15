@@ -345,6 +345,7 @@ const actions = {
           searchQuery,
           searchQuery,
           null,
+          null,
           (err, searchQuery) => {
             commit(SAVE_PERSON_TASKS_SEARCH_END, { searchQuery })
             if (err) {
