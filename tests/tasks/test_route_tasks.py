@@ -21,6 +21,7 @@ class TaskRoutesTestCase(ApiDBTestCase):
         self.generate_fixture_assigner()
         self.generate_fixture_task_status_wip()
         self.generate_fixture_task_status_retake()
+        self.generate_fixture_task_status_done()
         self.todo_status = tasks_service.get_or_create_status("Todo")
         self.asset_id = str(self.asset.id)
         self.shot_id = str(self.shot.id)
@@ -28,6 +29,7 @@ class TaskRoutesTestCase(ApiDBTestCase):
 
         self.wip_status_id = self.task_status_wip.id
         self.retake_status_id = self.task_status_retake.id
+        self.done_status_id = self.task_status_done.id
         self.person_id = self.person.id
 
     def test_create_asset_tasks(self):
@@ -161,6 +163,34 @@ class TaskRoutesTestCase(ApiDBTestCase):
         self.post(path, data)
         tasks = self.get("/data/tasks")
         self.assertEqual(tasks[0]["retake_count"], 2)
+
+    def test_comment_task_with_wip(self):
+        self.generate_fixture_task()
+        self.task.update({
+            "real_start_date": None
+        })
+        path = "/actions/tasks/%s/comment/" % self.task.id
+        data = {
+            "task_status_id": self.wip_status_id,
+            "comment": "wip test"
+        }
+        self.post(path, data)
+        tasks = self.get("/data/tasks")
+        self.assertIsNotNone(tasks[0]["real_start_date"])
+
+    def test_comment_task_with_done(self):
+        self.generate_fixture_task()
+        self.task.update({
+            "end_date": None
+        })
+        path = "/actions/tasks/%s/comment/" % self.task.id
+        data = {
+            "task_status_id": self.done_status_id,
+            "comment": "wip test"
+        }
+        self.post(path, data)
+        tasks = self.get("/data/tasks")
+        self.assertIsNotNone(tasks[0]["end_date"])
 
     def test_task_comments(self):
         self.generate_fixture_project_standard()

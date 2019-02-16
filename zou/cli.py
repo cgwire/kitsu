@@ -305,6 +305,20 @@ def patch_team():
                 project.team.append(person)
                 project.save()
 
+@cli.command()
+def patch_task_data():
+    """
+    Patch to run after upgrade from 0.9.8 or lower to 0.9.9 or superior.
+    """
+    from zou.app.models.task import Task
+    from zou.app.services import projects_service, deletion_service
+
+    for project in projects_service.open_projects():
+        print("Cleaning tasks for project %s" % project["name"])
+        for task in Task.get_all_by(project_id=project["id"]):
+            deletion_service.reset_task_data(task.id)
+    print("Task cleaning done.")
+
 
 if __name__ == '__main__':
     cli()

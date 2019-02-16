@@ -776,7 +776,9 @@ def create_or_update_time_spent(task_id, person_id, date, duration, add=False):
         raise WrongDateFormatException
 
     if time_spent is not None:
-        if add:
+        if duration == 0:
+            time_spent.delete()
+        elif add:
             time_spent.update({"duration": time_spent.duration + duration})
         else:
             time_spent.update({"duration": duration})
@@ -787,6 +789,14 @@ def create_or_update_time_spent(task_id, person_id, date, duration, add=False):
             date=date,
             duration=duration
         )
+
+    task = Task.get(task_id)
+    task.duration = 0
+    time_spents = TimeSpent.get_all_by(task_id=task_id)
+    for time_spent in time_spents:
+        task.duration += time_spent.duration
+    task.save()
+
     return time_spent.serialize()
 
 

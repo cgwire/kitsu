@@ -5,6 +5,7 @@ from zou.app.models.notifications import Notification
 from zou.app.models.output_file import OutputFile
 from zou.app.models.preview_file import PreviewFile
 from zou.app.models.task import Task
+from zou.app.models.task_status import TaskStatus
 from zou.app.models.time_spent import TimeSpent
 from zou.app.models.working_file import WorkingFile
 
@@ -33,9 +34,71 @@ def remove_comment(comment_id):
         for preview in previews:
             remove_preview_file(preview)
 
+        reset_task_data(comment.object_id)
+        events.emit("comment:delete", {
+            "task_id": comment.id
+        })
         return comment.serialize()
     else:
         raise CommentNotFoundException
+
+
+def reset_task_data(task_id):
+    task = Task.get(task_id)
+    retake_count = 0
+    real_start_date = None
+    last_comment_date = None
+    end_date = None
+    task_status_id = TaskStatus.get_by(short_name="todo").id
+    comments = Comment.query \
+        .join(TaskStatus) \
+        .filter(Comment.object_id == task_id) \
+        .order_by(Comment.created_at) \
+        .add_columns(
+            TaskStatus.is_retake,
+            TaskStatus.is_done,
+            TaskStatus.short_name
+        ) \
+        .all()
+
+    previous_is_retake = False
+    for (
+        comment,
+        task_status_is_retake,
+        task_status_is_done,
+        task_status_short_name
+    ) in comments:
+        if task_status_is_retake and not previous_is_retake:
+            retake_count += 1
+        previous_is_retake = task_status_is_retake
+
+        if task_status_short_name.lower() == "wip" \
+           and real_start_date is None:
+            real_start_date = comment.created_at
+
+        if task_status_is_done:
+            end_date = comment.created_at
+
+        task_status_id = comment.task_status_id
+        last_comment_date = comment.created_at
+
+    duration = 0
+    time_spents = TimeSpent.get_all_by(task_id=task.id)
+    for time_spent in time_spents:
+        duration += time_spent.duration
+
+    task.update({
+        "duration": duration,
+        "retake_count": retake_count,
+        "real_start_date": real_start_date,
+        "last_comment_date": last_comment_date,
+        "end_date": end_date,
+        "task_status_id": task_status_id
+    })
+    events.emit("task:new", {
+        "task_id": task.id
+    })
+    return task.serialize()
 
 
 def remove_task(task_id, force=False):

@@ -65,8 +65,19 @@ class CommentTaskResource(Resource):
             "task_status_id": task_status_id,
             "last_comment_date": comment["created_at"]
         }
-        if status_changed and task_status["is_retake"]:
-            new_data["retake_count"] = task["retake_count"] + 1
+        if status_changed:
+            if task_status["is_retake"]:
+                retake_count = task["retake_count"]
+                if retake_count is None or retake_count == 'NoneType':
+                    retake_count = 0
+                new_data["retake_count"] = retake_count + 1
+
+            if task_status["is_done"]:
+                new_data["end_date"] = datetime.datetime.now()
+
+            if task_status["short_name"] == "wip" \
+               and task["real_start_date"] is None:
+                new_data["real_start_date"] = datetime.datetime.now()
 
         tasks_service.update_task(task_id, new_data)
 
@@ -180,22 +191,8 @@ class TaskCommentResource(Resource):
     def delete(self, task_id, comment_id):
         task = tasks_service.get_task(task_id)
         user_service.check_project_access(task["project_id"])
-        comment = self.remove_comment_and_related(comment_id)
-        self.update_task_status(task_id)
-        return comment, 204
-
-    def remove_comment_and_related(self, comment_id):
         deletion_service.remove_comment(comment_id)
-
-    def update_task_status(self, task_id):
-        tasks_service.get_task(task_id)
-        new_status_id = tasks_service.get_todo_status()["id"]
-        comments = tasks_service.get_comments(task_id)
-        if len(comments) > 0:
-            new_status_id = comments[0]["task_status_id"]
-        tasks_service.update_task(task_id, {
-            "task_status_id": new_status_id
-        })
+        return None, 204
 
 
 class PersonTasksResource(Resource):
@@ -630,7 +627,7 @@ class GetTimeSpentResource(Resource):
             abort(404)
 
 
-class DeletAllTasksForTaskTypeResource(Resource):
+class DeleteAllTasksForTaskTypeResource(Resource):
     """
     Delete all tasks for a given task type and project. It's mainly used
     when tasks are created by mistake at the beginning of the project.
