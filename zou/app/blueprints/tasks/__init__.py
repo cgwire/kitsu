@@ -4,7 +4,7 @@ from zou.app.utils.api import configure_api_from_blueprint
 from .resources import (
     TaskFullResource,
     TaskForEntityResource,
-    DeletAllTasksForTaskTypeResource,
+    DeleteAllTasksForTaskTypeResource,
 
     TaskAssignResource,
     TasksAssignResource,
@@ -44,7 +44,7 @@ routes = [
     ),
     (
         "/data/projects/<project_id>/task-types/<task_type_id>/tasks/",
-        DeletAllTasksForTaskTypeResource
+        DeleteAllTasksForTaskTypeResource
     ),
 
     ("/actions/tasks/<task_id>/comment", CommentTaskResource),
