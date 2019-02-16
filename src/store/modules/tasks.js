@@ -1044,11 +1044,13 @@ const mutations = {
     const currentTask = state.taskMap[task.id]
     if (currentTask) {
       Object.assign(state.taskMap[task.id], {
+        task_status_id: task.task_status_id,
         priority: task.priority,
         estimation: task.estimation,
         duration: task.duration,
         real_start_date: task.real_start_date,
         end_date: task.end_date,
+        real_end_date: task.end_date,
         last_comment_date: task.last_comment_date,
         retake_count: task.retake_count
       })
