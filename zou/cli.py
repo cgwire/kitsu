@@ -310,61 +310,13 @@ def patch_task_data():
     """
     Patch to run after upgrade from 0.9.8 or lower to 0.9.9 or superior.
     """
-    from zou.app.models.comment import Comment
     from zou.app.models.task import Task
-    from zou.app.models.task_status import TaskStatus
-    from zou.app.models.time_spent import TimeSpent
-    from zou.app.services import projects_service
+    from zou.app.services import projects_service, deletion_service
 
     for project in projects_service.open_projects():
         print("Cleaning tasks for project %s" % project["name"])
         for task in Task.get_all_by(project_id=project["id"]):
-            retake_count = 0
-            real_start_date = None
-            last_comment_date = None
-            end_date = None
-            duration = None
-            comments = Comment.query \
-                .join(TaskStatus) \
-                .filter(Comment.object_id == task.id) \
-                .order_by(Comment.created_at) \
-                .add_columns(
-                    TaskStatus.is_retake,
-                    TaskStatus.is_done,
-                    TaskStatus.short_name
-                ) \
-                .all()
-
-            previous_is_retake = False
-            for (
-                comment,
-                task_status_is_retake,
-                task_status_is_done,
-                task_status_short_name
-            ) in comments:
-                if task_status_is_retake and not previous_is_retake:
-                    retake_count += 1
-                previous_is_retake = task_status_is_retake
-
-                if task_status_short_name.lower() == "wip":
-                    real_start_date = comment.created_at
-
-                if task_status_is_done:
-                    end_date = comment.created_at
-
-                last_comment_date = comment.created_at
-
-            time_spents = TimeSpent.get_all_by(task_id=task.id)
-            for time_spent in time_spents:
-                duration += time_spent.duration
-
-            task.update({
-                "duration": duration,
-                "retake_count": retake_count,
-                "real_start_date": real_start_date,
-                "last_comment_date": last_comment_date,
-                "end_date": end_date
-            })
+            deletion_service.reset_task_data(task.id)
     print("Task cleaning done.")
 
 

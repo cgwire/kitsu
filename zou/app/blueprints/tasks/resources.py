@@ -191,22 +191,8 @@ class TaskCommentResource(Resource):
     def delete(self, task_id, comment_id):
         task = tasks_service.get_task(task_id)
         user_service.check_project_access(task["project_id"])
-        comment = self.remove_comment_and_related(comment_id)
-        self.update_task_status(task_id)
-        return comment, 204
-
-    def remove_comment_and_related(self, comment_id):
         deletion_service.remove_comment(comment_id)
-
-    def update_task_status(self, task_id):
-        tasks_service.get_task(task_id)
-        new_status_id = tasks_service.get_todo_status()["id"]
-        comments = tasks_service.get_comments(task_id)
-        if len(comments) > 0:
-            new_status_id = comments[0]["task_status_id"]
-        tasks_service.update_task(task_id, {
-            "task_status_id": new_status_id
-        })
+        return 204
 
 
 class PersonTasksResource(Resource):
