@@ -34,10 +34,16 @@
                 {{ $t('main.confirmation') }}
               </button>
             </div>
-            <div class="flexrow-item hide-small-screen" v-if="!isAssignationLoading">
+            <div
+              class="flexrow-item hide-small-screen"
+              v-if="!isAssignationLoading"
+            >
               {{ $t('main.or') }}
             </div>
-            <div class="flexrow-item hide-small-screen" v-if="!isAssignationLoading">
+            <div
+              class="flexrow-item hide-small-screen"
+              v-if="!isAssignationLoading"
+            >
               <button
                 class="button is-link clear-assignation-button hide-small-screen"
                 @click="clearAssignation"
@@ -63,8 +69,7 @@
               <combobox
                 :options="taskStatusOptions"
                 v-model="taskStatusId"
-              >
-              </combobox>
+              />
             </div>
             <div class="flexrow-item" v-if="!isChangeStatusLoading">
               <button
@@ -93,8 +98,7 @@
               <combobox
                 :options="priorityOptions"
                 v-model="priority"
-              >
-              </combobox>
+              />
             </div>
             <div class="flexrow-item" v-if="!isChangePriorityLoading">
               <button
@@ -103,10 +107,40 @@
               >
                 {{ $t('main.confirmation') }}
               </button>
+            </div>
+            <div class="flexrow-item" v-if="isChangePriorityLoading">
+              <spinner :is-white="true" />
+            </div>
+          </div>
+        </div>
 
-              <div class="" v-if="isChangePriorityLoading">
-                <spinner :is-white="true" />
-              </div>
+        <div
+          class="flexrow-item"
+          v-if="selectedBar === 'estimations'"
+        >
+          <div class="flexrow">
+            <div class="flexrow-item strong bigger hide-small-screen">
+              {{ $t('tasks.set_estimations') }}
+            </div>
+            <div class="flexrow-item combobox-item">
+            <input
+              class="input estimation-input"
+              type="number"
+              min="0"
+              v-model="estimation"
+            />
+            </div>
+            <div class="flexrow-item" v-if="!isChangeEstimationLoading">
+              <button
+                class="button is-success confirm-button"
+                @click="confirmEstimationChange"
+              >
+                {{ $t('main.confirmation') }}
+              </button>
+
+            </div>
+            <div class="flexrow-item" v-if="isChangeEstimationLoading">
+              <spinner :is-white="true" />
             </div>
           </div>
         </div>
@@ -240,7 +274,15 @@
 
         <div
           class="more-menu-item"
-          v-if="isCurrentViewAsset || isCurrentViewShot"
+          v-if="isCurrentViewTaskType"
+          @click="selectBar('estimations')"
+        >
+          {{ $t('menu.set_estimations') }}
+        </div>
+
+        <div
+          class="more-menu-item"
+          v-if="(isCurrentViewAsset || isCurrentViewShot) && !isCurrentViewTaskType"
           @click="selectBar('tasks')"
         >
           {{ $t('menu.create_tasks') }}
@@ -256,6 +298,7 @@
 
         <div
           class="more-menu-item"
+          v-if="!isCurrentViewTaskType"
           @click="selectBar('custom-actions')"
         >
           {{ $t('menu.run_custom_action') }}
@@ -300,18 +343,20 @@ export default {
 
   data () {
     return {
-      isMoreMenuDisplayed: true,
       isAssignationLoading: false,
-      isChangeStatusLoading: false,
+      isChangeEstimationLoading: false,
       isChangePriorityLoading: false,
+      isChangeStatusLoading: false,
       isCreationLoading: false,
       isDeletionLoading: false,
+      isMoreMenuDisplayed: true,
       selectedBar: 'assignation',
       person: null,
       taskStatusId: '',
       customActionUrl: '',
       selectedTaskIds: [],
       customActionOptions: [],
+      estimation: 0,
       priority: '0',
       currentTeam: [],
       priorityOptions: [
@@ -404,6 +449,10 @@ export default {
       return this.$route.path.indexOf('todos') > 0
     },
 
+    isCurrentViewTaskType () {
+      return this.$route.path.indexOf('task-type') > 0
+    },
+
     isList () {
       return this.isCurrentViewAsset || this.isCurrentViewShot
     },
@@ -419,6 +468,7 @@ export default {
     currentMenuLabel () {
       const labels = {
         'assignation': 'menu.assign_tasks',
+        'estimations': 'menu.set_estimations',
         'change-status': 'menu.change_status',
         'priorities': 'menu.change_priority',
         'tasks': 'menu.create_tasks',
@@ -426,12 +476,22 @@ export default {
         'custom-actions': 'menu.run_custom_action'
       }
       return this.$t(labels[this.selectedBar])
+    },
+
+    storagePrefix () {
+      let prefix = 'todos-'
+      if (this.isCurrentViewAsset || this.isCurrentViewShot) {
+        prefix = 'entities-'
+      }
+      if (this.isCurrentViewTaskType) prefix = 'tasks-'
+      return prefix
     }
   },
 
   methods: {
     ...mapActions([
       'assignSelectedTasks',
+      'changeSelectedEstimations',
       'createSelectedTasks',
       'deleteSelectedTasks',
       'unassignSelectedTasks',
@@ -476,6 +536,17 @@ export default {
       })
     },
 
+    confirmEstimationChange () {
+      this.isChangeEstimationLoading = true
+      this.changeSelectedEstimations(this.estimation)
+        .then(() => {
+          this.isChangeEstimationLoading = false
+        })
+        .catch((err) => {
+          console.error(err)
+        })
+    },
+
     confirmTaskCreation () {
       const type = this.$route.path.indexOf('shots') > 0 ? 'shots' : 'assets'
       this.isCreationLoading = true
@@ -509,9 +580,8 @@ export default {
     },
 
     selectBar (barName) {
-      const prefix = this.isList ? 'entities-' : 'todos-'
-      this.$cookie.set(
-        `${prefix}-selected-bar`,
+      localStorage.setItem(
+        `${this.storagePrefix}-selected-bar`,
         barName,
         { expires: '1M' }
       )
@@ -545,9 +615,8 @@ export default {
   watch: {
     isHidden () {
       if (!this.isHidden) {
-        const prefix = this.isList ? 'entities-' : 'todos-'
-        const lastSelection = this.$cookie.get(`${prefix}-selected-bar`)
-
+        const prefix = this.storagePrefix
+        const lastSelection = localStorage.getItem(`${prefix}-selected-bar`)
         if (lastSelection) {
           this.selectedBar = lastSelection
         } else {
@@ -713,6 +782,10 @@ div.combobox-item {
 
 .clear-selection .flexrow-item:first-child {
   margin-left: auto;
+}
+
+.estimation-input {
+  width: 90px;
 }
 
 @media screen and (max-width: 768px) {

@@ -452,10 +452,12 @@ export default {
           const nameWidth =
             this.$refs['body-tbody'][0].children[1].children[1].offsetWidth
           this.$refs['th-name'].style['min-width'] = `${nameWidth}px`
-          const descriptionWidth =
-            this.$refs['body-tbody'][0].children[1].children[2].offsetWidth
-          this.$refs['th-description'].style['min-width'] =
-            `${descriptionWidth}px`
+          if (this.$refs['th-description']) {
+            const descriptionWidth =
+              this.$refs['body-tbody'][0].children[1].children[2].offsetWidth
+            this.$refs['th-description'].style['min-width'] =
+              `${descriptionWidth}px`
+          }
         }
       }
     }

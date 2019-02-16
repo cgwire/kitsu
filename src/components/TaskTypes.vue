@@ -93,8 +93,7 @@ export default {
     this.loading.taskTypes = true
     this.errors.taskTypes = false
     this.loadTaskTypes((err) => {
-      if (!err) this.handleModalsDisplay()
-      else this.errors.taskTypes = true
+      if (err) this.errors.taskTypes = true
       this.loading.taskTypes = false
     })
   },
@@ -137,25 +136,6 @@ export default {
         return this.$t('task_types.delete_text', {name: taskType.name})
       } else {
         return ''
-      }
-    },
-
-    handleModalsDisplay () {
-      const path = this.$store.state.route.path
-      const taskTypeId = this.$store.state.route.params.task_type_id
-
-      if (path.indexOf('new') > 0) {
-        this.taskTypeToEdit = {color: '#999999'}
-        this.modals.isNewDisplayed = true
-      } else if (path.indexOf('edit') > 0) {
-        this.taskTypeToEdit = this.getTaskType(taskTypeId)
-        this.modals.isNewDisplayed = true
-      } else if (path.indexOf('delete') > 0) {
-        this.taskTypeToDelete = this.getTaskType(taskTypeId)
-        this.modals.isDeleteDisplayed = true
-      } else {
-        this.modals.isNewDisplayed = false
-        this.modals.isDeleteDisplayed = false
       }
     }
   },

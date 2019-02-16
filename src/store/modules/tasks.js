@@ -1,6 +1,7 @@
 import async from 'async'
 
 import tasksApi from '../api/tasks'
+import peopleApi from '../api/people'
 import playlistsApi from '../api/playlists'
 import { sortByName, sortValidationColumns } from '../../lib/sorting'
 import personStore from './people'
@@ -49,6 +50,9 @@ import {
   LOAD_PERSON_TASKS_END,
   USER_LOAD_TODOS_END,
 
+  SAVE_TASK_SEARCH_END,
+  REMOVE_TASK_SEARCH_END,
+
   RESET_ALL
 } from '../mutation-types'
 
@@ -64,6 +68,7 @@ const initialState = {
   taskEntityPreviews: {},
   selectedTasks: {},
   selectedValidations: {},
+  taskSearchQueries: [],
 
   nbSelectedTasks: 0,
   nbSelectedValidations: 0,
@@ -119,6 +124,7 @@ const getters = {
   selectedTasks: state => state.selectedTasks,
   nbSelectedTasks: state => state.nbSelectedTasks,
   nbSelectedValidations: state => state.nbSelectedValidations,
+  taskSearchQueries: state => state.taskSearchQueries,
   isShowAssignations: state => state.isShowAssignations,
   isShowInfos: state => state.isShowInfos,
   taskEntityPreviews: state => state.taskEntityPreviews,
@@ -396,6 +402,28 @@ const actions = {
     })
   },
 
+  changeSelectedEstimations ({ commit, state, rootGetters }, estimation) {
+    return new Promise((resolve, reject) => {
+      async.eachSeries(Object.keys(state.selectedTasks), (taskId, next) => {
+        const task = state.taskMap[taskId]
+        const taskType = rootGetters.taskTypeMap[task.task_type_id]
+        if (task && task.estimation !== estimation) {
+          tasksApi.updateTask(taskId, { estimation }, (err, task) => {
+            if (!err) {
+              commit(EDIT_TASK_END, { task, taskType })
+            }
+            next(err)
+          })
+        } else {
+          next()
+        }
+      }, (err) => {
+        if (err) reject(err)
+        else resolve()
+      })
+    })
+  },
+
   getTask ({ commit, rootGetters }, { taskId, callback }) {
     tasksApi.getTask(taskId, (err, task) => {
       if (!err) {
@@ -607,12 +635,64 @@ const actions = {
     commit(SET_IS_SHOW_INFOS, false)
   },
 
-  clearSelectedTasks ({ commit, state }) {
-    commit(CLEAR_SELECTED_TASKS)
-  },
-
   loadPreviewFileFormData ({ commit }, previewFormData) {
     commit('PREVIEW_FILE_SELECTED', previewFormData)
+  },
+
+  addSelectedTask ({ commit }, task) {
+    commit(ADD_SELECTED_TASK, task)
+  },
+
+  addSelectedTasks ({ commit }, selection) {
+    commit(ADD_SELECTED_TASKS, selection)
+  },
+
+  clearSelectedTasks ({ commit }, selection) {
+    commit(CLEAR_SELECTED_TASKS, selection)
+  },
+
+  removeSelectedTask ({ commit }, task) {
+    commit(REMOVE_SELECTED_TASK, task)
+  },
+
+  saveTaskSearch ({ commit, rootGetters }, { searchQuery, entityType }) {
+    return new Promise((resolve, reject) => {
+      const query = state.taskSearchQueries.find(
+        (query) => query.name === searchQuery
+      )
+      const production = rootGetters.currentProduction
+
+      if (!query) {
+        peopleApi.createFilter(
+          'task',
+          searchQuery,
+          searchQuery,
+          production.id,
+          entityType,
+          (err, searchQuery) => {
+            commit(SAVE_TASK_SEARCH_END, { searchQuery, production })
+            if (err) {
+              reject(err)
+            } else {
+              resolve(searchQuery)
+            }
+          }
+        )
+      } else {
+        resolve()
+      }
+    })
+  },
+
+  removeTaskSearch ({ commit, rootGetters }, searchQuery) {
+    return new Promise((resolve, reject) => {
+      const production = rootGetters.currentProduction
+      peopleApi.removeFilter(searchQuery, (err) => {
+        commit(REMOVE_TASK_SEARCH_END, { searchQuery, production })
+        if (err) reject(err)
+        else resolve()
+      })
+    })
   }
 }
 
@@ -621,7 +701,7 @@ const mutations = {
     state.assetValidationColumns = []
   },
 
-  [LOAD_ASSETS_END] (state, { assets, personMap }) {
+  [LOAD_ASSETS_END] (state, { production, assets, personMap, userFilters }) {
     const validationColumns = {}
     state.taskMap = {}
     assets.forEach((asset) => {
@@ -647,13 +727,18 @@ const mutations = {
       })
     })
     state.assetValidationColumns = validationColumns
+    if (userFilters.task && userFilters.task[production.id]) {
+      state.taskSearchQueries = userFilters.task[production.id]
+    } else {
+      state.taskSearchQueries = []
+    }
   },
 
   [LOAD_SHOTS_START] (state, assets) {
     state.shotValidationColumns = {}
   },
 
-  [LOAD_SHOTS_END] (state, { shots, personMap }) {
+  [LOAD_SHOTS_END] (state, { production, shots, personMap, userFilters }) {
     const validationColumns = {}
     state.taskMap = {}
     shots.forEach((shot) => {
@@ -679,6 +764,11 @@ const mutations = {
       })
     })
     state.shotValidationColumns = validationColumns
+    if (userFilters.task && userFilters.task[production.id]) {
+      state.taskSearchQueries = userFilters.task[production.id]
+    } else {
+      state.taskSearchQueries = []
+    }
   },
 
   [LOAD_TASK_END] (state, task) {
@@ -953,7 +1043,17 @@ const mutations = {
   [EDIT_TASK_END] (state, { task }) {
     const currentTask = state.taskMap[task.id]
     if (currentTask) {
-      state.taskMap[task.id].priority = task.priority
+      Object.assign(state.taskMap[task.id], {
+        task_status_id: task.task_status_id,
+        priority: task.priority,
+        estimation: task.estimation,
+        duration: task.duration,
+        real_start_date: task.real_start_date,
+        end_date: task.end_date,
+        real_end_date: task.end_date,
+        last_comment_date: task.last_comment_date,
+        retake_count: task.retake_count
+      })
     }
   },
 
@@ -1008,6 +1108,22 @@ const mutations = {
 
       state.taskMap[task.id] = task
     })
+  },
+
+  [SAVE_TASK_SEARCH_END] (state, { searchQuery }) {
+    if (!state.taskSearchQueries.includes(searchQuery)) {
+      state.taskSearchQueries.push(searchQuery)
+      state.taskSearchQueries = sortByName(state.taskSearchQueries)
+    }
+  },
+
+  [REMOVE_TASK_SEARCH_END] (state, { searchQuery }) {
+    const queryIndex = state.taskSearchQueries.findIndex(
+      (query) => query.name === searchQuery.name
+    )
+    if (queryIndex >= 0) {
+      state.taskSearchQueries.splice(queryIndex, 1)
+    }
   },
 
   [RESET_ALL] (state, shots) {

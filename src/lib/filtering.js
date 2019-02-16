@@ -118,6 +118,26 @@ export const getFilters = (
 }
 
 /*
+ *  Extract filters from a query dedicated to task list.
+ */
+export const getTaskFilters = (entryIndex, query) => {
+  const filters = []
+  const excludingKeywords = getExcludingKeyWords(query) || []
+  excludingKeywords.forEach((keyword) => {
+    let excludedMap = {}
+    let excludedEntries = indexSearch(entryIndex, [keyword]) || []
+    excludedEntries.forEach((entry) => {
+      excludedMap[entry.id] = true
+    })
+    filters.push({
+      type: 'exclusion',
+      excludedIds: excludedMap
+    })
+  })
+  return filters
+}
+
+/*
  * Extract task type filters (like anim=wip or [mode facial]=wip) from given
  * query.
  */

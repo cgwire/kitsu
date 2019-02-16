@@ -102,6 +102,8 @@ const helpers = {
 
   populateTask (task, asset, production) {
     task.name = helpers.getTaskType(task.task_type_id).priority.toString()
+    task.task_status_short_name =
+      helpers.getTaskStatus(task.task_status_id).short_name
 
     Object.assign(task, {
       project_id: asset.production_id,
@@ -392,6 +394,7 @@ const actions = {
           searchQuery,
           searchQuery,
           production.id,
+          null,
           (err, searchQuery) => {
             commit(SAVE_ASSET_SEARCH_END, { searchQuery, production })
             if (err) {
