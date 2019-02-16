@@ -946,7 +946,9 @@ export default {
       this.currentPreviewDlPath = this.getOriginalDlPath()
       this.currentTask = this.getCurrentTask()
       let previewId = this.route.params.preview_id
-      if (!previewId && this.currentTaskPreviews) {
+      if (!previewId &&
+          this.currentTaskPreviews &&
+          this.currentTaskPreviews.length > 0) {
         previewId = this.currentTaskPreviews[0].id
       }
       this.currentPreviewId = previewId
@@ -1064,7 +1066,7 @@ export default {
       this.setOtherPreviews()
       this.currentPreviewPath = this.getOriginalPath()
       this.currentPreviewDlPath = this.getOriginalDlPath()
-      this.$router.push(this.previewPath(preview.id))
+      if (preview) this.$router.push(this.previewPath(preview.id))
     },
 
     setPreview () {
@@ -1145,7 +1147,8 @@ export default {
             this.errors.deleteComment = true
           } else {
             this.reset()
-            if (this.currentTaskPreviews) {
+            if (this.currentTaskPreviews &&
+                this.currentTaskPreviews.length > 0) {
               this.resetPreview(this.currentTaskPreviews[0])
             } else {
               this.$router.push(this.taskPath())
