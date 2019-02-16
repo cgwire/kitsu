@@ -11,7 +11,7 @@ class SearchFilter(db.Model, BaseMixin, SerializerMixin):
     sequence list, todo-list...
     """
     list_type = db.Column(db.String(80), nullable=False, index=True)
-    entity_type = db.Column(db.String(80), nullable=False)
+    entity_type = db.Column(db.String(80))
     name = db.Column(db.String(200), nullable=False, default="")
     search_query = db.Column(db.String(200), nullable=False, default="")
 

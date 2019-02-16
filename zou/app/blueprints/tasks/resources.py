@@ -192,7 +192,7 @@ class TaskCommentResource(Resource):
         task = tasks_service.get_task(task_id)
         user_service.check_project_access(task["project_id"])
         deletion_service.remove_comment(comment_id)
-        return 204
+        return None, 204
 
 
 class PersonTasksResource(Resource):
