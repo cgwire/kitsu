@@ -233,6 +233,7 @@ const actions = {
           searchQuery,
           searchQuery,
           null,
+          null,
           (err, searchQuery) => {
             commit(SAVE_TODO_SEARCH_END, { searchQuery })
             if (err) {
@@ -480,14 +481,14 @@ const mutations = {
 
   [SAVE_ASSET_SEARCH_END] (state, { searchQuery, production }) {
     if (production) {
-      if (!state.userFilters.asset) state.userFilters.asset = {}
-      if (!state.userFilters.asset[production.id]) {
-        state.userFilters.asset[production.id] = []
+      if (!state.userFilters.task) state.userFilters.task = {}
+      if (!state.userFilters.task[production.id]) {
+        state.userFilters.task[production.id] = []
       }
-      if (!state.userFilters.asset[production.id].includes(searchQuery)) {
-        state.userFilters.asset[production.id].push(searchQuery)
-        state.userFilters.asset[production.id] =
-          sortByName(state.userFilters.asset[production.id])
+      if (!state.userFilters.task[production.id].includes(searchQuery)) {
+        state.userFilters.task[production.id].push(searchQuery)
+        state.userFilters.task[production.id] =
+          sortByName(state.userFilters.task[production.id])
       }
     }
   },

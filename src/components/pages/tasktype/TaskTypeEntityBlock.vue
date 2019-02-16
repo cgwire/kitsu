@@ -12,10 +12,10 @@
     <entity-thumbnail
       :entity="entity"
       :square="true"
-      :empty-width="40"
-      :empty-height="40"
-      :width="40"
-      :height="40"
+      :empty-width="60"
+      :empty-height="60"
+      :width="60"
+      :height="60"
       :with-link="false"
     />
     <span class="entity-name">
@@ -133,6 +133,6 @@ export default {
 }
 
 .thumbnail-picture {
-  margin: 0;
+  margin: 0 auto;
 }
 </style>

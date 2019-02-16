@@ -9,14 +9,14 @@
         <div class="level-item">
           <button-link v-if="isCurrentUserAdmin"
             class="level-item"
-            :text="$t('main.csv.import_file')"
+            :title="$t('main.csv.import_file')"
             :is-responsive="true"
             icon="upload"
             path="/people/import"
           />
           <button-href-link
             class="level-item"
-            :text="$t('main.csv.export_file')"
+            :title="$t('main.csv.export_file')"
             icon="download"
             path="/api/export/csv/persons.csv"
           />

@@ -153,6 +153,7 @@ export default {
     production: 'Production',
     remove: 'Remove',
     save: 'Save',
+    sorted_by: 'Tasks sorted by:',
     studio: 'Studio',
     user: 'User',
     white_theme: 'White Theme',
@@ -173,7 +174,8 @@ export default {
     change_status: 'Change status',
     create_tasks: 'Create tasks',
     delete_tasks: 'Delete tasks',
-    run_custom_action: 'Run custom action'
+    run_custom_action: 'Run custom action',
+    set_estimations: 'Set estimations'
   },
 
   not_found: {
@@ -461,6 +463,7 @@ export default {
     preview: 'Previews',
     previous: 'previous task',
     unsubscribe_notifications: 'Unsubscribe from notifications',
+    set_estimations: 'Set estimations for selected tasks:',
     set_preview: 'Set this preview as thumbnail',
     set_preview_error: 'An error occured while setting preview as thumbnail',
     set_preview_done: 'This preview is used as thumbnail for the current entity.',
@@ -471,11 +474,20 @@ export default {
     validation: 'Validation',
     tasks: 'Tasks',
     fields: {
+      asset_type: 'Asset type',
       assignees: 'Assignees',
       end_date: 'End date',
+      duration: 'Duration',
       entity: 'Entity',
+      entity_name: 'Name',
+      estimation: 'Estimation',
       last_comment: 'Last comment',
+      last_comment_date: 'Last comment',
       production: 'Prod',
+      real_end_date: 'Validation date',
+      real_start_date: 'WIP date',
+      retake_count: 'Retakes',
+      sequence: 'Sequence',
       task_status: 'Status',
       task_type: 'Type'
     },
