@@ -332,7 +332,6 @@ export default {
         this.$refs['body-tbody'] &&
         this.$refs['body-tbody'].children.length > 0
       ) {
-        console.log('ok')
         const bodyElement = this.$refs['body-tbody'].children[0]
         const columnDescriptors = [
           {index: 1, name: 'type'},
@@ -444,12 +443,20 @@ td.retake-count {
 
 .table-header th {
   padding: 0.5em 0;
+
+  &.status {
+    padding-left: 1em;
+  }
 }
 
 .table-body {
   td,
   tr {
     padding: 0;
+  }
+
+  td.status {
+    padding-left: 1em;
   }
 
   tr.task-line {

@@ -373,6 +373,7 @@ export default {
             this.resetLightEditModal()
             this.$refs['edit-asset-modal'].focusName()
             this.editAsset.isSuccess = true
+            this.resizeHeaders()
           } else {
             this.loading.edit = false
           }
@@ -396,6 +397,7 @@ export default {
             this.loading.edit = false
             this.modals.isNewDisplayed = false
             this.$router.push(this.assetsPath)
+            this.resizeHeaders()
           } else {
             this.loading.edit = false
             this.editAsset.isCreateError = true
