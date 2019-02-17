@@ -2,7 +2,7 @@
 <div class="data-list">
   <div class="table-header-wrapper">
     <table class="table table-header" ref="headerWrapper">
-      <thead>
+      <thead ref="thead">
         <tr>
           <th class="thumbnail" ref="th-thumbnail">
           </th>
@@ -103,7 +103,7 @@
                 :key="task.id + '-' + personId"
                 :person="personMap[personId]"
                 :size="30"
-                :font-size="15"
+                :font-size="17"
                 v-for="personId in task.assignees"
               />
             </div>
@@ -232,6 +232,7 @@ export default {
 
   mounted () {
     window.addEventListener('keydown', this.onKeyDown, false)
+    this.$nextTick(this.resizeHeaders)
   },
 
   beforeDestroy () {
@@ -324,12 +325,35 @@ export default {
       } else {
         return this.shotMap[entityId]
       }
+    },
+
+    resizeHeaders () {
+      if (
+        this.$refs['body-tbody'] &&
+        this.$refs['body-tbody'].children.length > 0
+      ) {
+        console.log('ok')
+        const bodyElement = this.$refs['body-tbody'].children[0]
+        const columnDescriptors = [
+          {index: 1, name: 'type'},
+          {index: 2, name: 'name'},
+          {index: 4, name: 'assignees'}
+        ]
+        columnDescriptors.forEach(desc => {
+          const width = Math.max(
+            bodyElement.children[desc.index].offsetWidth,
+            100
+          )
+          this.$refs['th-' + desc.name].style['min-width'] = `${width}px`
+        })
+      }
     }
   },
 
   watch: {
     tasks () {
       this.resetSelection()
+      this.$nextTick(this.resizeHeaders)
     },
 
     nbSelectedTasks () {
@@ -405,8 +429,6 @@ export default {
 }
 
 .avatar {
-  display: inline-block;
-  padding-left: 0.3em;
 }
 
 td.retake-count {
