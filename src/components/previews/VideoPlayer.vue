@@ -9,6 +9,9 @@
       ref="movie"
       class="annotation-movie"
       preload="auto"
+      :style="{
+        display: isLoading ? 'none' : 'block'
+      }"
       :src="moviePath"
       :poster="posterPath"
     >
@@ -240,6 +243,14 @@ export default {
           this.configureVideo()
           this.isLoading = false
           this.setDefaultComparisonTaskType()
+        })
+
+        this.video.addEventListener('ended', () => {
+          this.isLoading = false
+        })
+
+        this.video.addEventListener('error', () => {
+          this.isLoading = false
         })
 
         window.addEventListener('keydown', this.onKeyDown, false)
@@ -1068,14 +1079,22 @@ export default {
 </script>
 
 <style lang="scss" scoped>
+.video-wrapper {
+  width: 100%;
+}
+
 .loading-background {
   width: 100%;
   height: 100%;
   background: black;
   display: flex;
-  background: black;
   align-items: center;
   justify-content: center;
+  text-align: center;
+}
+
+.spinner {
+  margin: auto;
 }
 
 .icon {
