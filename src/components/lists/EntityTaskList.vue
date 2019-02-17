@@ -137,7 +137,7 @@ export default {
 }
 </script>
 
-<style scoped>
+<style lang="scss" scoped>
 .data-list {
   max-width: 500px;
 }

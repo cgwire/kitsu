@@ -86,7 +86,7 @@ export default {
 }
 </script>
 
-<style scoped>
+<style lang="scss" scoped>
 .value {
   font-size: 1.5em;
   font-weight: bold;

@@ -646,7 +646,7 @@ export default {
 }
 </script>
 
-<style scoped>
+<style lang="scss" scoped>
 .dark .add-comment,
 .dark .comment,
 .dark .preview-column-content,

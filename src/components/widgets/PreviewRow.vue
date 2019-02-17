@@ -50,7 +50,7 @@ export default {
 }
 </script>
 
-<style scoped>
+<style lang="scss" scoped>
 .preview-row {
   margin-right: 0.5em;
 }

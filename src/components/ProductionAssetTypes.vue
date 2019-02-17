@@ -165,7 +165,7 @@ export default {
 }
 </script>
 
-<style scoped>
+<style lang="scss" scoped>
 .data-list {
   margin-top: 0;
 }

@@ -260,7 +260,7 @@ export default {
 }
 </script>
 
-<style scoped>
+<style lang="scss" scoped>
 .title {
   border-bottom: 2px solid #DDD;
   padding-bottom: 0.5em;

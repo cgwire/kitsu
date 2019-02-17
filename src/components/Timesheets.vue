@@ -371,7 +371,7 @@ export default {
 }
 </script>
 
-<style scoped>
+<style lang="scss" scoped>
 .dark .main-column {
   border-color: #5E6169;
 }

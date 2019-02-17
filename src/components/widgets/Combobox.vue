@@ -104,7 +104,7 @@ export default {
 }
 </script>
 
-<style scoped>
+<style lang="scss" scoped>
 .is-top select {
   font-size: 1.2em;
   border: 0;

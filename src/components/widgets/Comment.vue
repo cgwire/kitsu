@@ -193,7 +193,7 @@ export default {
 }
 </script>
 
-<style scoped>
+<style lang="scss" scoped>
 .dark .comment-text {
   color: #EEE;
 }

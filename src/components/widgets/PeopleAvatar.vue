@@ -93,7 +93,7 @@ export default {
 }
 </script>
 
-<style scoped>
+<style lang="scss" scoped>
 .avatar img {
   max-height: 100%;
   height: 100%;

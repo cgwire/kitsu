@@ -1067,7 +1067,7 @@ export default {
 }
 </script>
 
-<style scoped>
+<style lang="scss" scoped>
 .loading-background {
   width: 100%;
   height: 100%;

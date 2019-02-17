@@ -311,7 +311,7 @@ export default {
 }
 </script>
 
-<style scoped>
+<style lang="scss" scoped>
 .dark .profile {
   background: #36393F;
   color: #EEEEEE;

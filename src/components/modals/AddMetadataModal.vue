@@ -209,7 +209,7 @@ export default {
 }
 </script>
 
-<style scoped>
+<style lang="scss" scoped>
 .dark  .content .choice-value {
   border-color: #666;
 }

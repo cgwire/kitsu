@@ -35,7 +35,7 @@ export default {
   }
 }
 </script>
-<style scoped>
+<style lang="scss" scoped>
 .dark .shot:hover {
   background-color: #56595F;
 }

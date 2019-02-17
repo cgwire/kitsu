@@ -106,7 +106,7 @@ export default {
 }
 </script>
 
-<style scoped>
+<style lang="scss" scoped>
 .add-people {
   font-size: 1.3em;
 }

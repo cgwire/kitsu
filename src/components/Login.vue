@@ -111,7 +111,7 @@ export default {
 }
 </script>
 
-<style scoped>
+<style lang="scss" scoped>
 .box h1.title {
   color: #6a6a6a;
   font-weight: 500;

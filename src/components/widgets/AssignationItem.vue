@@ -39,7 +39,7 @@ export default {
 }
 </script>
 
-<style scoped>
+<style lang="scss" scoped>
 .dark div {
   background-color: #36393F;
   border-color: #25282E;

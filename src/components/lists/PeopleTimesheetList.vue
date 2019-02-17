@@ -335,7 +335,7 @@ export default {
 }
 </script>
 
-<style scoped>
+<style lang="scss" scoped>
 .dark .weekend {
   background-color: #25282E;
 }

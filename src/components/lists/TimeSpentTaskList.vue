@@ -148,7 +148,7 @@ export default {
 }
 </script>
 
-<style scoped>
+<style lang="scss" scoped>
 .dark .table {
   border-color: #25282E;
 }

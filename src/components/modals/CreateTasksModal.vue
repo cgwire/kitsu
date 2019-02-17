@@ -128,7 +128,7 @@ export default {
 }
 </script>
 
-<style scoped>
+<style lang="scss" scoped>
 .info-message {
   margin-top: 1em;
 }

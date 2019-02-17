@@ -321,7 +321,7 @@ export default {
 }
 </script>
 
-<style scoped>
+<style lang="scss" scoped>
 .task-tabs {
   margin-top: 1em;
   margin-bottom: 1em;

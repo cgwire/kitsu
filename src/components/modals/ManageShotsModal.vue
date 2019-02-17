@@ -352,7 +352,7 @@ export default {
 }
 </script>
 
-<style scoped>
+<style lang="scss" scoped>
 .shot-columns {
   display: flex;
   height: 300px;

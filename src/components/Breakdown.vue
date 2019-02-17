@@ -351,7 +351,7 @@ export default {
 }
 </script>
 
-<style scoped>
+<style lang="scss" scoped>
 .breakdown {
   position: fixed;
   left: 0;

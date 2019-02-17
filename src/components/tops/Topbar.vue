@@ -457,7 +457,7 @@ export default {
 }
 </script>
 
-<style scoped>
+<style lang="scss" scoped>
 .dark .topbar .nav,
 .dark .user-menu {
   background-color: #222427;

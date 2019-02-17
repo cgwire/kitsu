@@ -56,7 +56,7 @@ export default {
 }
 </script>
 
-<style scoped>
+<style lang="scss" scoped>
 .button .icon.is-small {
   margin: 0;
 }

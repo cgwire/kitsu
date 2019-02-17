@@ -648,7 +648,7 @@ export default {
 }
 </script>
 
-<style scoped>
+<style lang="scss" scoped>
 .dark .playlist-item {
   background: #46494F;
   box-shadow: 0px 0px 6px #333;

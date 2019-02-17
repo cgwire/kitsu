@@ -262,7 +262,7 @@ export default {
 }
 </script>
 
-<style scoped>
+<style lang="scss" scoped>
 .search {
   margin-top: 2em;
 }

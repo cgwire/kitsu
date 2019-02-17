@@ -182,7 +182,7 @@ export default {
 }
 </script>
 
-<style scoped>
+<style lang="scss" scoped>
 .dark .close-button:hover {
   background: #5E6169;
 }

@@ -113,7 +113,7 @@ export default {
 }
 </script>
 
-<style scoped>
+<style lang="scss" scoped>
 .dark aside {
   background-color: #2F3136;
   color: #EEE;

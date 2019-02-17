@@ -46,7 +46,7 @@ export default {
 }
 </script>
 
-<style scoped>
+<style lang="scss" scoped>
 .dark .header-menu {
   background-color: #36393F;
   box-shadow: 0px 2px 6px #333;

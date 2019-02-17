@@ -681,7 +681,7 @@ export default {
 }
 </script>
 
-<style scoped>
+<style lang="scss" scoped>
 .action-topbar {
   background: #5e60ba;
   color: white;

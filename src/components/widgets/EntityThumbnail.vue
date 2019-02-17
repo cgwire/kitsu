@@ -120,7 +120,7 @@ export default {
 }
 </script>
 
-<style scoped>
+<style lang="scss" scoped>
 .dark .thumbnail-picture {
   background-color: #4E5159;
   border-color: #36393F;

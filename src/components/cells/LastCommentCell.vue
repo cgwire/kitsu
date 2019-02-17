@@ -102,7 +102,7 @@ export default {
 }
 </script>
 
-<style scoped>
+<style lang="scss" scoped>
 .no-avatar {
   width: 30px;
 }

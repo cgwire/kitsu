@@ -77,7 +77,7 @@ export default {
 }
 </script>
 
-<style scoped>
+<style lang="scss" scoped>
 .dark .asset {
   background-color: #5E6169;
 }

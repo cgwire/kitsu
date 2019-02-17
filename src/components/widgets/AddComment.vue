@@ -159,7 +159,7 @@ export default {
 }
 </script>
 
-<style scoped>
+<style lang="scss" scoped>
 .add-comment {
   border-radius: 5px;
   background: white;

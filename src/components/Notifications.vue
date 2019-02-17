@@ -238,7 +238,7 @@ export default {
 }
 </script>
 
-<style scoped>
+<style lang="scss" scoped>
 .dark .notification {
   background: #3D4048;
   color: #EEEEEE;

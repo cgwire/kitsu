@@ -471,7 +471,7 @@ export default {
 }
 </script>
 
-<style scoped>
+<style lang="scss" scoped>
 .dark thead tr a {
   color: #CCC;
 }

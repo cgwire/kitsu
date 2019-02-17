@@ -87,7 +87,7 @@ export default {
 }
 </script>
 
-<style scoped>
+<style lang="scss" scoped>
 #model-viewer {
   height: 500px;
 }

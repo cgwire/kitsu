@@ -294,7 +294,7 @@ export default {
 }
 </script>
 
-<style scoped>
+<style lang="scss" scoped>
 .dark .page {
   background: #3D4048;
   padding-bottom: 1em;
