@@ -132,7 +132,7 @@ export default {
 }
 
 .input:focus {
-  border: 1px solid #00B242;
+  border: 1px solid $green;
 }
 
 img {

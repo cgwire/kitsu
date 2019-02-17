@@ -41,13 +41,13 @@ export default {
 
 <style lang="scss" scoped>
 .dark div {
-  background-color: #36393F;
-  border-color: #25282E;
-  color: #EEE;
+  background-color: $dark-grey-light;
+  border-color: $dark-grey;
+  color: $white-grey;
 }
 
 .dark div:hover {
-  background-color: #5E6169;
+  background-color: $dark-grey-lightest;
 }
 
 div {
@@ -55,7 +55,7 @@ div {
   width: 100%;
   padding: 0.5em;
   border-bottom: 1px solid #DDD;
-  border-left: 1px solid #CCC;
-  border-right: 1px solid #CCC;
+  border-left: 1px solid $light-grey;
+  border-right: 1px solid $light-grey;
 }
 </style>

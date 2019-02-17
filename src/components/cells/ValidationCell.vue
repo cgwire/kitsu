@@ -215,7 +215,7 @@ export default {
   watch: {
     selected () {
       if (this.selected) {
-        const background = this.isDarkTheme ? '#5E60BA' : '#D1C4E9'
+        const background = this.isDarkTheme ? '$dark-purple' : '$purple'
         this.changeStyle(background)
       } else {
         const background = this.getBackground(this.column.color)

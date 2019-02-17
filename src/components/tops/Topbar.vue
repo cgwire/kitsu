@@ -460,18 +460,18 @@ export default {
 <style lang="scss" scoped>
 .dark .topbar .nav,
 .dark .user-menu {
-  background-color: #222427;
-  color: #EEE;
+  background-color: $dark-grey-strong;
+  color: $white-grey;
   border-left: 1px solid #2F3136;
   border-bottom: 1px solid #2F3136;
 }
 
 .dark .user-menu a {
-  color: #EEE;
+  color: $white-grey;
 }
 
 .dark #toggle-menu-button:hover {
-  color: #EEE;
+  color: $white-grey;
 }
 
 .nav {
@@ -511,8 +511,8 @@ export default {
   transition-property: all;
   transition-duration: .5s;
   transition-timing-function: cubic-bezier(0, 1, 0.5, 1);
-  border-left: 1px solid #EEE;
-  border-bottom: 1px solid #EEE;
+  border-left: 1px solid $white-grey;
+  border-bottom: 1px solid $white-grey;
 }
 
 .user-menu ul {
@@ -562,7 +562,7 @@ export default {
 
 .has-no-notifications {
   margin-top: 5px;
-  color: #CCC;
+  color: $light-grey;
 }
 
 .has-notifications {
@@ -579,7 +579,7 @@ strong {
 }
 
 .version {
-  color: #999;
+  color: $grey;
 }
 
 @media screen and (max-width: 768px) {

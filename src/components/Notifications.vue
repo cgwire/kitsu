@@ -240,8 +240,8 @@ export default {
 
 <style lang="scss" scoped>
 .dark .notification {
-  background: #3D4048;
-  color: #EEEEEE;
+  background: $dark-grey-light;
+  color: $white-grey;
 }
 
 .dark a {
@@ -250,7 +250,7 @@ export default {
 
 a {
   font-weight: bold;
-  color: #666;
+  color: $grey-strong;
 }
 
 .flexrow-item:first-child {

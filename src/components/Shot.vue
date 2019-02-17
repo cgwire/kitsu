@@ -327,7 +327,7 @@ export default {
 
 <style lang="scss" scoped>
 .dark .page {
-  background: #3D4048;
+  background: $dark-grey-light;
   height: 100%;
   padding-bottom: 1em;
 }
@@ -336,13 +336,13 @@ export default {
 .dark .shot-casting,
 .dark .column {
   background: #46494F;
-  border-color: #25282E;
+  border-color: $dark-grey;
   box-shadow: 0px 0px 6px #333;
 }
 
 .dark .task-list,
 .dark .table-body {
-  border: 1px solid #25282E;
+  border: 1px solid $dark-grey;
 }
 
 h2.subtitle {
@@ -402,7 +402,7 @@ h2.subtitle {
 .asset-type {
   text-transform: uppercase;
   font-size: 1.2em;
-  color: #999;
+  color: $grey;
   margin-top: 2em;
   margin-bottom: 0.4em;
 }
@@ -449,7 +449,7 @@ h2.subtitle {
 
 .task-list,
 .table-body {
-  border: 1px solid #CCC;
+  border: 1px solid $light-grey;
 }
 
 .task-list {

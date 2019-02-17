@@ -56,7 +56,7 @@ export default {
 }
 
 .preview-row a {
-  border: 3px solid #CCC;
+  border: 3px solid $light-grey;
 }
 
 .preview-row:hover a {

@@ -386,7 +386,7 @@ export default {
 }
 
 .dark .main-column {
-  border-right: 3px solid #666;
+  border-right: 3px solid $grey-strong;
 }
 
 .person {
@@ -406,6 +406,6 @@ export default {
 }
 
 .main-column {
-  border-right: 3px solid #CCC;
+  border-right: 3px solid $light-grey;
 }
 </style>

@@ -211,11 +211,11 @@ export default {
 
 <style lang="scss" scoped>
 .dark  .content .choice-value {
-  border-color: #666;
+  border-color: $grey-strong;
 }
 
 .dark .remove-button:hover {
-  background: #666;
+  background: $grey-strong;
 }
 
 .modal-content .box p.text {
@@ -242,18 +242,18 @@ export default {
 }
 
 .content .choice-value {
-  border: 1px solid #CCC;
+  border: 1px solid $light-grey;
   border-bottom: 0;
   margin: 0;
   padding: 0.5em;
 }
 
 .content .choice-value:last-child{
-  border-bottom: 1px solid #CCC;
+  border-bottom: 1px solid $light-grey;
 }
 
 .remove-button {
-  color: #999;
+  color: $grey;
   width: 20px;
   text-align: center;
   padding: 0;
@@ -261,7 +261,7 @@ export default {
 }
 
 .remove-button:hover {
-  background: #EEE;
+  background: $white-grey;
   border-radius: 50%;
 }
 </style>

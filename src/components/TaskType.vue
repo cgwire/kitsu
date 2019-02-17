@@ -381,7 +381,7 @@ export default {
 }
 
 .main-column {
-  border-right: 3px solid #CCC;
+  border-right: 3px solid $light-grey;
 }
 
 .sorting-combobox {

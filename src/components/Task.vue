@@ -1361,7 +1361,7 @@ export default {
 
 <style lang="scss" scoped>
 .dark .page {
-  background: #3D4048;
+  background: $dark-grey-light;
   padding-bottom: 1em;
 }
 
@@ -1372,7 +1372,7 @@ export default {
 .dark .preview-column-content,
 .dark .column {
   background: #46494F;
-  border-color: #25282E;
+  border-color: $dark-grey;
   box-shadow: 0px 0px 6px #333;
 }
 
@@ -1406,7 +1406,7 @@ h2.subtitle {
 }
 
 .navigation-buttons a {
-  color: #999;
+  color: $grey;
 }
 
 .task-information {
@@ -1483,7 +1483,7 @@ video {
 .page-header .tag {
   border-radius: 0;
   font-weight: bold;
-  color: #666;
+  color: $grey-strong;
 }
 
 .assignees {

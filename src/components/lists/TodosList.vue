@@ -401,7 +401,7 @@ td.last-comment {
 .end-date {
   width: 100%;
   min-width: 150px;
-  color: #999;
+  color: $grey;
 }
 
 .thumbnail {

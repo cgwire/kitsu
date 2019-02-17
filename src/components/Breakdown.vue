@@ -391,15 +391,15 @@ export default {
 }
 
 .assets-column {
-  border-left: 4px solid #EEE;
+  border-left: 4px solid $white-grey;
   padding-left: 1em;
 }
 
 .asset-type,
 .sequence {
   text-transform: uppercase;
-  color: #999;
-  border-bottom: 1px solid #CCC;
+  color: $grey;
+  border-bottom: 1px solid $light-grey;
   font-size: 1.2em;
   margin-bottom: 1em;
 }

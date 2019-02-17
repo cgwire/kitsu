@@ -112,7 +112,7 @@ export default {
     return {
       form: {
         name: '',
-        color: '#999999',
+        color: '$grey999',
         priority: '',
         for_shots: 'false',
         allow_timelog: 'false'

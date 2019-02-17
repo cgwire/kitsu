@@ -373,7 +373,7 @@ export default {
 
 <style lang="scss" scoped>
 .dark .main-column {
-  border-color: #5E6169;
+  border-color: $dark-grey-lightest;
 }
 
 .data-list {
@@ -399,7 +399,7 @@ export default {
 }
 
 .main-column {
-  border-right: 3px solid #CCC;
+  border-right: 3px solid $light-grey;
   margin: 0;
 }
 </style>

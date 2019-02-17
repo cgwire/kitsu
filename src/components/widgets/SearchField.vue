@@ -90,9 +90,10 @@ export default {
   }
 }
 </script>
-<style>
+
+<style lang="scss" scoped>
 .dark .button.save-button:hover {
-  color: #EEE;
+  color: $white-grey;
 }
 
 .erase-search {
@@ -110,17 +111,17 @@ export default {
 }
 
 .search-input::placeholder {
-  color: #CCC;
+  color: $light-grey;
 }
 
 .save-search .button {
   margin-left: 0.5em;
   border: 0;
-  color: #777;
+  color: $grey-strong;
 }
 
 .save-search .button:hover {
-  color: #333;
+  color: $dark-grey-light;
 }
 
 .button.save-button {

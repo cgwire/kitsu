@@ -184,7 +184,7 @@ export default {
 
 <style lang="scss" scoped>
 .dark .close-button:hover {
-  background: #5E6169;
+  background: $dark-grey-lightest;
 }
 
 .people-timesheet-info {
@@ -212,7 +212,7 @@ export default {
 
 .close-button:hover {
   display: inline-block;
-  background: #EEE;
+  background: $white-grey;
   border-radius: 50%;
 }
 </style>

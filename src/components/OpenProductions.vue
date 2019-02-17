@@ -280,7 +280,7 @@ h1 {
 .production-name {
   font-size: 1.4em;
   text-transform: uppercase;
-  color: #999;
+  color: $grey;
   margin-top: 0.5em;
 }
 

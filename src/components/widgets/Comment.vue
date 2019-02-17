@@ -195,12 +195,12 @@ export default {
 
 <style lang="scss" scoped>
 .dark .comment-text {
-  color: #EEE;
+  color: $white-grey;
 }
 
 .comment {
   background: white;
-  border-left: 6px solid #CCC;
+  border-left: 6px solid $light-grey;
   border-radius: 0 5px 5px 0;
   padding: 0.6em;
 }
@@ -218,13 +218,13 @@ export default {
 }
 
 .comment-date {
-  color: #999;
+  color: $grey;
   margin-left: 0.5em;
   flex: 1;
 }
 
 a.revision {
-  color: #999;
+  color: $grey;
   font-size: 0.8em;
   font-style: italic;
   margin: 0 1em 0 0;

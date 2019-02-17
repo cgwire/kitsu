@@ -652,19 +652,19 @@ export default {
 .dark .playlist-item {
   background: #46494F;
   box-shadow: 0px 0px 6px #333;
-  border-color: #25282E;
-  color: #EEE;
+  border-color: $dark-grey;
+  color: $white-grey;
 }
 
 .dark .playlist-list-column {
-  background: #3D4048;
-  border-color: #25282E;
+  background: $dark-grey-light;
+  border-color: $dark-grey;
   box-shadow: 0px 0px 6px #333;
 }
 
 .dark .addition-column {
-  background: #3D4048;
-  border-left: 1px solid #25282E;
+  background: $dark-grey-light;
+  border-left: 1px solid $dark-grey;
   box-shadow: 0px 0px 6px #333;
 }
 
@@ -704,13 +704,13 @@ export default {
   background: white;
   padding: 1em;
   margin: 0.2em;
-  border: 1px solid #EEE;
+  border: 1px solid $white-grey;
   box-shadow: 0px 0px 6px #DDD;
-  color: #666;
+  color: $grey-strong;
 }
 
 .playlist-item.selected {
-  border-right: 3px solid #67BE4B;
+  border-right: 3px solid $light-green;
 }
 
 .addition-column {
@@ -755,7 +755,7 @@ span.thumbnail-picture {
 
 .playlist-header {
   align-items: center;
-  border-bottom: 1px solid #CCC;
+  border-bottom: 1px solid $light-grey;
   padding-bottom: 0.5em;
   margin-bottom: 1em;
   min-height: 50px;

@@ -122,12 +122,12 @@ export default {
 
 <style lang="scss" scoped>
 .dark .thumbnail-picture {
-  background-color: #4E5159;
-  border-color: #36393F;
+  background-color: $dark-grey-lighter;
+  border-color: $dark-grey-light;
 }
 
 span.thumbnail-empty {
-  background: #F3F3F3;
+  background: $white-grey;
   display: block;
   margin-bottom: 0.3em;
   margin-top: 7px;

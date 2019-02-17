@@ -72,7 +72,7 @@ export default {
 
 <style lang="scss" scoped>
 .dark .asset {
-  background-color: #5E6169;
+  background-color: $dark-grey-lightest;
 }
 
 .dark .asset.casted,
@@ -126,7 +126,7 @@ export default {
   margin-bottom: 3.5em;
   font-size: 0.8em;
   cursor: default;
-  background: #EEE;
+  background: $white-grey;
 }
 
 .asset-picture {
@@ -150,7 +150,7 @@ export default {
 }
 
 .asset.casted {
-  background: #D1C4E9;
+  background: $purple;
 }
 
 .active {

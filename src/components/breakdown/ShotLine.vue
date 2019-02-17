@@ -47,7 +47,7 @@ export default {
 .shot {
   font-size: 1.1em;
   padding: 0.5em 0 0.2em 0.2em;
-  border-bottom: 1px solid #CCC;
+  border-bottom: 1px solid $light-grey;
   cursor: pointer;
 }
 
@@ -56,7 +56,7 @@ export default {
 }
 
 .shot.selected {
-  background: #D1C4E9;
+  background: $purple;
   border: 0;
 }
 </style>

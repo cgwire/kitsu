@@ -368,7 +368,7 @@ export default {
   margin-right: 10px;
   overflow-y: scroll;
   flex: 1;
-  border: 1px solid #CCC;
+  border: 1px solid $light-grey;
   border-bottom: 0;
 }
 
@@ -397,7 +397,7 @@ export default {
 }
 
 .entity-line.selected {
-  background: #D1C4E9;
+  background: $purple;
   border: 0;
 }
 

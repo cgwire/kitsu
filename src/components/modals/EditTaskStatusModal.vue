@@ -108,7 +108,7 @@ export default {
       form: {
         name: '',
         short_name: '',
-        color: '#999999',
+        color: '$grey999',
         is_reviewable: 'true',
         is_done: 'false'
       },

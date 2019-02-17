@@ -314,16 +314,16 @@ export default {
 <style lang="scss" scoped>
 .dark .profile {
   background: #36393F;
-  color: #EEEEEE;
+  color: $white-grey;
 }
 
 .dark .profile-content {
-  background: #4E5159;
-  color: #EEEEEE;
+  background: $dark-grey-lighter;
+  color: $white-grey;
 }
 
 .profile {
-  background: #EEEEEE;
+  background: $white-grey;
   width: 100%;
   flex: 1 1 auto;
   height: 100%;
@@ -351,7 +351,7 @@ input, select, span.select {
 }
 
 .profile-header {
-  background: #67BE4B;
+  background: $light-green;
   padding: 2em;
   max-height:170px;
 }
@@ -389,20 +389,20 @@ h2:first-child {
 }
 
 .select:after {
-  border-color: #67BE4B;
+  border-color: $light-green;
 }
 
 .save-button {
   border-radius: 5px;
   width: 100%;
-  background: #00B242;
-  border-color: #00B242;
+  background: $green;
+  border-color: $green;
   color: white;
 }
 
 .save-button:hover {
-  background: #67BE4B;
-  border-color: #67BE4B;
+  background: $light-green;
+  border-color: $light-green;
 }
 
 .avatar {

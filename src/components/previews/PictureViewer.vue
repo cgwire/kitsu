@@ -722,7 +722,7 @@ export default {
 }
 
 .bar-element {
-  color: #CCC;
+  color: $light-grey;
   padding-left: 1em;
 }
 

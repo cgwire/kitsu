@@ -116,7 +116,7 @@ export default {
 <style lang="scss" scoped>
 .dark aside {
   background-color: #2F3136;
-  color: #EEE;
+  color: $white-grey;
 }
 
 aside {
@@ -142,7 +142,7 @@ aside.hidden {
 aside p a {
   font-size: 1.2em;
   text-transform: uppercase;
-  color: #999;
+  color: $grey;
 }
 
 aside section {

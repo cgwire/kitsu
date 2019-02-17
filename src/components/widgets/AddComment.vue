@@ -172,7 +172,7 @@ export default {
 
 .add-comment textarea:focus,
 .add-comment textarea:active {
-  border-color: #00B242;
+  border-color: $green;
 }
 
 .control {

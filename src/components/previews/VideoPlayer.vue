@@ -1117,7 +1117,7 @@ export default {
 }
 
 .time-indicator {
-  color: #CCC;
+  color: $light-grey;
   padding-left: 0.8em;
 }
 
@@ -1148,7 +1148,7 @@ export default {
   margin: 0;
   padding: 0;
   border: 0;
-  background: #999;
+  background: $grey;
   height: 8px;
 }
 
@@ -1166,7 +1166,7 @@ progress {
   margin: 0;
   padding: 0;
   border: 0;
-  background: #999;
+  background: $grey;
   height: 8px;
   display: block;
 }

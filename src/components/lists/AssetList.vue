@@ -473,7 +473,7 @@ export default {
 
 <style lang="scss" scoped>
 .dark thead tr a {
-  color: #CCC;
+  color: $light-grey;
 }
 
 .table {
