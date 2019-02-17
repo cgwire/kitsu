@@ -62,11 +62,11 @@
 import moment from 'moment-timezone'
 import { mapGetters, mapActions } from 'vuex'
 
-import Combobox from './widgets/Combobox'
-import PeopleTimesheetList from './lists/PeopleTimesheetList'
-import PeopleTimesheetInfo from './sides/PeopleTimesheetInfo'
-import PageTitle from './widgets/PageTitle'
-import { range, monthToString } from '../lib/helpers'
+import Combobox from '../widgets/Combobox'
+import PeopleTimesheetList from '../lists/PeopleTimesheetList'
+import PeopleTimesheetInfo from '../sides/PeopleTimesheetInfo'
+import PageTitle from '../widgets/PageTitle'
+import { range, monthToString } from '../../lib/helpers'
 
 export default {
   name: 'people',

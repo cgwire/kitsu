@@ -3,7 +3,7 @@
     <div class="container has-text-centered">
       <div class="box has-text-left">
         <div class="has-text-centered login-header">
-          <img src="../assets/kitsu.png" />
+          <img src="../../assets/kitsu.png" />
           <h1 class="title">
             {{ $t("login.title") }}
           </h1>

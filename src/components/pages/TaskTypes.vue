@@ -46,11 +46,11 @@
 
 <script>
 import { mapGetters, mapActions } from 'vuex'
-import ButtonLink from './widgets/ButtonLink'
-import DeleteModal from './widgets/DeleteModal'
-import EditTaskTypeModal from './modals/EditTaskTypeModal'
-import PageTitle from './widgets/PageTitle'
-import TaskTypeList from './lists/TaskTypeList'
+import ButtonLink from '../widgets/ButtonLink'
+import DeleteModal from '../widgets/DeleteModal'
+import EditTaskTypeModal from '../modals/EditTaskTypeModal'
+import PageTitle from '../widgets/PageTitle'
+import TaskTypeList from '../lists/TaskTypeList'
 
 export default {
   name: 'task-types',

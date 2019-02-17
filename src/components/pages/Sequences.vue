@@ -47,11 +47,11 @@
 <script>
 import { mapGetters, mapActions } from 'vuex'
 import { SearchIcon } from 'vue-feather-icons'
-import SequenceList from './lists/SequenceList.vue'
-import DeleteModal from './widgets/DeleteModal'
-import EditSequenceModal from './modals/EditSequenceModal'
-import PageTitle from './widgets/PageTitle'
-import SearchField from './widgets/SearchField'
+import SequenceList from '../lists/SequenceList.vue'
+import DeleteModal from '../widgets/DeleteModal'
+import EditSequenceModal from '../modals/EditSequenceModal'
+import PageTitle from '../widgets/PageTitle'
+import SearchField from '../widgets/SearchField'
 
 export default {
   name: 'sequences',

@@ -9,7 +9,7 @@
 
 <script>
 import { mapGetters, mapActions } from 'vuex'
-import auth from '../lib/auth'
+import auth from '../../lib/auth'
 
 export default {
   name: 'server-down',

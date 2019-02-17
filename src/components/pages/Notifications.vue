@@ -100,12 +100,12 @@ import { mapGetters, mapActions } from 'vuex'
 import marked from 'marked'
 import moment from 'moment-timezone'
 
-import EntityThumbnail from './widgets/EntityThumbnail'
-import PageTitle from './widgets/PageTitle'
-import PeopleAvatar from './widgets/PeopleAvatar'
-import Spinner from './widgets/Spinner'
-import TaskTypeName from './widgets/TaskTypeName'
-import ValidationTag from './widgets/ValidationTag'
+import EntityThumbnail from '../widgets/EntityThumbnail'
+import PageTitle from '../widgets/PageTitle'
+import PeopleAvatar from '../widgets/PeopleAvatar'
+import Spinner from '../widgets/Spinner'
+import TaskTypeName from '../widgets/TaskTypeName'
+import ValidationTag from '../widgets/ValidationTag'
 
 export default {
   name: 'notification-page',

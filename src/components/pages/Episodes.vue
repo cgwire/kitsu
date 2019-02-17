@@ -44,11 +44,11 @@
 <script>
 import { mapGetters, mapActions } from 'vuex'
 import { SearchIcon } from 'vue-feather-icons'
-import EpisodeList from './lists/EpisodeList.vue'
-import DeleteModal from './widgets/DeleteModal'
-import EditEpisodeModal from './modals/EditEpisodeModal'
-import PageTitle from './widgets/PageTitle'
-import SearchField from './widgets/SearchField'
+import EpisodeList from '../lists/EpisodeList.vue'
+import DeleteModal from '../widgets/DeleteModal'
+import EditEpisodeModal from '../modals/EditEpisodeModal'
+import PageTitle from '../widgets/PageTitle'
+import SearchField from '../widgets/SearchField'
 
 export default {
   name: 'episodes',

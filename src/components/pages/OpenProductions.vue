@@ -63,7 +63,7 @@
 
     <div class="has-text-centered welcome" v-else>
       <p class="kitsu-logo info">
-        <img src="../assets/illustrations/studio_collaboration.png" />
+        <img src="../../assets/illustrations/studio_collaboration.png" />
       </p>
       <h1 class="title has-text-centered">
         {{ $t('productions.home.welcome') }}
@@ -108,10 +108,10 @@
 import { mapGetters, mapActions } from 'vuex'
 import { ActivityIcon } from 'vue-feather-icons'
 
-import colors from '../lib/colors.js'
-import ButtonSimple from './widgets/ButtonSimple'
-import EditProductionModal from './modals/EditProductionModal'
-import Spinner from './widgets/Spinner'
+import colors from '../../lib/colors.js'
+import ButtonSimple from '../widgets/ButtonSimple'
+import EditProductionModal from '../modals/EditProductionModal'
+import Spinner from '../widgets/Spinner'
 
 export default {
   name: 'open-productions',

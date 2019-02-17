@@ -34,8 +34,8 @@
 
 <script>
 import { mapGetters } from 'vuex'
-import Combobox from '../widgets/Combobox'
-import EntityThumbnail from '../widgets/EntityThumbnail'
+import Combobox from '../../widgets/Combobox'
+import EntityThumbnail from '../../widgets/EntityThumbnail'
 
 export default {
   name: 'playlisted-shot',

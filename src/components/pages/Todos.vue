@@ -110,12 +110,12 @@
 import { mapGetters, mapActions } from 'vuex'
 import moment from 'moment-timezone'
 
-import TimesheetList from './lists/TimesheetList'
-import TodosList from './lists/TodosList'
-import PageTitle from './widgets/PageTitle'
-import SearchField from './widgets/SearchField'
-import SearchQueryList from './widgets/SearchQueryList'
-import TaskInfo from './sides/TaskInfo'
+import TimesheetList from '../lists/TimesheetList'
+import TodosList from '../lists/TodosList'
+import PageTitle from '../widgets/PageTitle'
+import SearchField from '../widgets/SearchField'
+import SearchQueryList from '../widgets/SearchQueryList'
+import TaskInfo from '../sides/TaskInfo'
 
 export default {
   name: 'todos',

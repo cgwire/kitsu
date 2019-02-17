@@ -49,11 +49,11 @@
 
 <script>
 import { mapGetters, mapActions } from 'vuex'
-import CustomActionList from './lists/CustomActionList'
-import EditCustomActionModal from './modals/EditCustomActionModal'
-import DeleteModal from './widgets/DeleteModal'
-import PageTitle from './widgets/PageTitle'
-import ButtonLink from './widgets/ButtonLink'
+import CustomActionList from '../lists/CustomActionList'
+import EditCustomActionModal from '../modals/EditCustomActionModal'
+import DeleteModal from '../widgets/DeleteModal'
+import PageTitle from '../widgets/PageTitle'
+import ButtonLink from '../widgets/ButtonLink'
 
 export default {
   name: 'custom-actions',

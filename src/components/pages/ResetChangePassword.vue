@@ -73,7 +73,7 @@
 import { mapGetters, mapActions } from 'vuex'
 
 import { LockIcon } from 'vue-feather-icons'
-import auth from '../lib/auth'
+import auth from '../../lib/auth'
 
 export default {
   name: 'reset-password',

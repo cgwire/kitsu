@@ -2,7 +2,7 @@
   <div class="people page fixed-page">
     <div class="level page-header">
       <div class="level-left">
-        <page-title class="flexrow-item" :text="$t('people.title')"></page-title>
+        <page-title class="flexrow-item" :text="$t('people.title')" />
       </div>
 
       <div class="level-right">
@@ -43,7 +43,7 @@
       :entries="displayedPeople"
       :is-loading="isPeopleLoading"
       :is-error="isPeopleLoadingError"
-    ></people-list>
+    />
 
     <import-modal
       :active="isImportPeopleModalShown"
@@ -54,8 +54,7 @@
       :columns="csvColumns"
       @fileselected="selectFile"
       @confirm="uploadImportFile"
-    >
-    </import-modal>
+    />
 
     <edit-person-modal
       :active="isEditModalShown"
@@ -63,8 +62,7 @@
       :is-error="isEditLoadingError"
       :cancel-route="'/people'"
       @confirm="confirmEditPeople"
-    >
-    </edit-person-modal>
+    />
 
     <delete-modal
       :active="isDeleteModalShown"
@@ -74,22 +72,22 @@
       :text="deleteText"
       :error-text="$t('people.delete_error')"
       @confirm="confirmDeletePeople"
-    >
-    </delete-modal>
+    />
 
   </div>
 </template>
 
 <script>
 import { mapGetters, mapActions } from 'vuex'
-import PeopleList from './lists/PeopleList'
-import DeleteModal from './widgets/DeleteModal'
-import EditPersonModal from './modals/EditPersonModal'
-import ImportModal from './modals/ImportModal'
-import ButtonLink from './widgets/ButtonLink'
-import ButtonHrefLink from './widgets/ButtonHrefLink'
-import PageTitle from './widgets/PageTitle'
-import SearchField from './widgets/SearchField'
+
+import PeopleList from '../lists/PeopleList'
+import DeleteModal from '../widgets/DeleteModal'
+import EditPersonModal from '../modals/EditPersonModal'
+import ImportModal from '../modals/ImportModal'
+import ButtonLink from '../widgets/ButtonLink'
+import ButtonHrefLink from '../widgets/ButtonHrefLink'
+import PageTitle from '../widgets/PageTitle'
+import SearchField from '../widgets/SearchField'
 
 export default {
   name: 'people',

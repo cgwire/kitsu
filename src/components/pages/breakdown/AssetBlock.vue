@@ -62,8 +62,10 @@ export default {
       type: Boolean
     }
   },
+
   computed: {
   },
+
   methods: {
     removeOneAsset (event) {
       let assetId = event.target.parentElement.id.substring('casting-'.length)

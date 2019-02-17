@@ -129,14 +129,14 @@
 import { mapGetters, mapActions } from 'vuex'
 
 import { ChevronLeftIcon } from 'vue-feather-icons'
-import ButtonSimple from './widgets/ButtonSimple'
-import DescriptionCell from './cells/DescriptionCell'
-import EditAssetModal from './modals/EditAssetModal'
-import EntityTaskList from './lists/EntityTaskList'
-import EntityThumbnail from './widgets/EntityThumbnail'
-import PageTitle from './widgets/PageTitle'
-import PageSubtitle from './widgets/PageSubtitle'
-import TableInfo from './widgets/TableInfo'
+import ButtonSimple from '../widgets/ButtonSimple'
+import DescriptionCell from '../cells/DescriptionCell'
+import EditAssetModal from '../modals/EditAssetModal'
+import EntityTaskList from '../lists/EntityTaskList'
+import EntityThumbnail from '../widgets/EntityThumbnail'
+import PageTitle from '../widgets/PageTitle'
+import PageSubtitle from '../widgets/PageSubtitle'
+import TableInfo from '../widgets/TableInfo'
 
 export default {
   name: 'asset',

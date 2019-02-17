@@ -134,14 +134,14 @@
 import moment from 'moment-timezone'
 import { mapGetters, mapActions } from 'vuex'
 
-import PageTitle from './widgets/PageTitle'
-import PageSubtitle from './widgets/PageSubtitle'
-import PeopleAvatar from './widgets/PeopleAvatar'
-import SearchField from './widgets/SearchField'
-import SearchQueryList from './widgets/SearchQueryList'
-import TimesheetList from './lists/TimesheetList'
-import TodosList from './lists/TodosList'
-import TaskInfo from './sides/TaskInfo'
+import PageTitle from '../widgets/PageTitle'
+import PageSubtitle from '../widgets/PageSubtitle'
+import PeopleAvatar from '../widgets/PeopleAvatar'
+import SearchField from '../widgets/SearchField'
+import SearchQueryList from '../widgets/SearchQueryList'
+import TimesheetList from '../lists/TimesheetList'
+import TodosList from '../lists/TodosList'
+import TaskInfo from '../sides/TaskInfo'
 
 export default {
   name: 'person',

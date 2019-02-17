@@ -112,11 +112,12 @@
 
 <script>
 import { mapGetters, mapActions } from 'vuex'
-import PageTitle from './widgets/PageTitle'
-import Spinner from './widgets/Spinner'
-import Combobox from './widgets/Combobox'
-import SearchField from './widgets/SearchField.vue'
-import ErrorText from './widgets/ErrorText'
+
+import PageTitle from '../widgets/PageTitle'
+import Spinner from '../widgets/Spinner'
+import Combobox from '../widgets/Combobox'
+import SearchField from '../widgets/SearchField.vue'
+import ErrorText from '../widgets/ErrorText'
 import ShotLine from './breakdown/ShotLine'
 import AssetBlock from './breakdown/AssetBlock'
 import AvailableAssetBlock from './breakdown/AvailableAssetBlock'

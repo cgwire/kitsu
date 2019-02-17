@@ -179,9 +179,9 @@
 import moment from 'moment-timezone'
 import { mapGetters, mapActions } from 'vuex'
 
-import ChangeAvatarModal from './modals/ChangeAvatarModal'
-import PeopleAvatar from './widgets/PeopleAvatar'
-import TextField from './widgets/TextField'
+import ChangeAvatarModal from '../modals/ChangeAvatarModal'
+import PeopleAvatar from '../widgets/PeopleAvatar'
+import TextField from '../widgets/TextField'
 
 export default {
   name: 'profile',
