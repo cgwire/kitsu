@@ -234,7 +234,7 @@ export default {
 }
 </script>
 
-<style scoped>
+<style lang="scss" scoped>
 .dark td.selected,
 .dark td.selected.validation:hover {
   background-color: #8F91EB;

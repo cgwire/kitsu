@@ -14,7 +14,7 @@ export default {
 }
 </script>
 
-<style scoped>
+<style lang="scss" scoped>
 .subtitle {
   margin-top: 2em;
   margin-bottom: 1em;

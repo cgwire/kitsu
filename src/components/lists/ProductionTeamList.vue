@@ -103,7 +103,7 @@ export default {
 }
 </script>
 
-<style scoped>
+<style lang="scss" scoped>
 .name {
   width: 230px;
   min-width: 230px;

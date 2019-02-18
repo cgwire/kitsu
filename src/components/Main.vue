@@ -27,6 +27,6 @@ export default {
   height: 100%;
   display: flex;
   flex-direction: column;
-  background: #EEE;
+  background: $white-grey;
 }
 </style>

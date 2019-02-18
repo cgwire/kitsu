@@ -104,22 +104,22 @@ export default {
 }
 </script>
 
-<style scoped>
+<style lang="scss" scoped>
 .is-top select {
   font-size: 1.2em;
   border: 0;
-  border-bottom: 1px solid #CCC;
+  border-bottom: 1px solid $light-grey;
   border-radius: 0;
   height: 38px;
 }
 
 .is-top select:focus {
-  border-color: #00B242;
+  border-color: $green;
   outline: 0;
 }
 
 .is-top:after {
-  border: 2px solid #00B242;
+  border: 2px solid $green;
   border-right: 0;
   border-top: 0;
 }

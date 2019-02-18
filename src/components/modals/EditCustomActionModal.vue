@@ -155,7 +155,7 @@ export default {
 }
 </script>
 
-<style scoped>
+<style lang="scss" scoped>
 .modal-content .box p.text {
   margin-bottom: 1em;
 }

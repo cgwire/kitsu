@@ -100,9 +100,9 @@ export default {
 }
 </script>
 
-<style scoped>
+<style lang="scss" scoped>
 .dark .selected {
-  background-color: #5E60BA;
+  background-color: $dark-purple;
 }
 
 .selected {

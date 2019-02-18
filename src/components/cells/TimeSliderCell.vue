@@ -39,7 +39,7 @@ export default {
         tooltipDir: 'bottom',
         tooltipStyle: {
           'background-color': '#FFFFFF',
-          color: '#666666',
+          color: '$grey-strong666',
           'z-index': 2000
         },
         processStyle: {
@@ -86,7 +86,7 @@ export default {
 }
 </script>
 
-<style scoped>
+<style lang="scss" scoped>
 .value {
   font-size: 1.5em;
   font-weight: bold;

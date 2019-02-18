@@ -444,7 +444,8 @@ export default {
           this.$refs['th-episode'].style['min-width'] = `${episodeWidth}px`
           const nameWidth =
             this.$refs['body-tbody'][0].children[1].children[2].offsetWidth
-          this.$refs['th-name'].style['min-width'] = `${nameWidth}px`
+          this.$refs['th-name'].style['min-width'] =
+            `${Math.max(nameWidth, 120)}px`
         } else {
           const thumbnailWidth =
             this.$refs['body-tbody'][0].children[1].children[0].offsetWidth
@@ -471,9 +472,9 @@ export default {
 }
 </script>
 
-<style scoped>
+<style lang="scss" scoped>
 .dark thead tr a {
-  color: #CCC;
+  color: $light-grey;
 }
 
 .table {

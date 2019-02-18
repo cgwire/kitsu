@@ -32,7 +32,7 @@ export default {
       type: String
     },
     value: {
-      default: '#999999',
+      default: '$grey999',
       type: String
     },
     placeholder: {
@@ -45,7 +45,7 @@ export default {
     },
     colors: {
       default: () => [
-        '#999999',
+        '$grey999',
         '#8D6E63',
         '#43A047',
         '#7CB342',
@@ -67,7 +67,7 @@ export default {
   },
   data () {
     return {
-      selectedColor: '#999999'
+      selectedColor: '$grey999'
     }
   },
   computed: {
@@ -100,6 +100,6 @@ export default {
 }
 
 .selected {
-  border: 3px solid #67BE4B;
+  border: 3px solid $light-green;
 }
 </style>

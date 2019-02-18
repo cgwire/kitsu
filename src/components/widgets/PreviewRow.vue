@@ -50,13 +50,13 @@ export default {
 }
 </script>
 
-<style scoped>
+<style lang="scss" scoped>
 .preview-row {
   margin-right: 0.5em;
 }
 
 .preview-row a {
-  border: 3px solid #CCC;
+  border: 3px solid $light-grey;
 }
 
 .preview-row:hover a {

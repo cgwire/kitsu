@@ -23,8 +23,8 @@ export default {
 }
 </script>
 
-<style scoped>
+<style lang="scss" scoped>
 .dark .person-name {
-  color: #EEE;
+  color: $white-grey;
 }
 </style>

@@ -81,7 +81,7 @@ export default {
     extensions: {
       type: String,
       default:
-        '.png,.jpg,.mp4,.mov,.obj,.pdf,.ma,.mb,.zip,.rar,.jpeg,.blend,.wmv'
+        '.png,.jpg,.mp4,.mov,.obj,.pdf,.ma,.mb,.zip,.rar,.jpeg,.blend,.wmv,.m4v'
     }
   },
 
@@ -123,7 +123,7 @@ export default {
 }
 </script>
 
-<style scoped>
+<style lang="scss" scoped>
 .modal-content .box p.text {
   margin-bottom: 1em;
 }

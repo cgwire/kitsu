@@ -113,7 +113,7 @@ export default {
 }
 </script>
 
-<style scoped>
+<style lang="scss" scoped>
 .is-danger {
   color: #ff3860;
   font-style: italic;

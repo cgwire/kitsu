@@ -122,6 +122,7 @@
               :is-error="errors.addComment"
               @add-comment="addComment"
               @add-preview="onAddPreviewClicked"
+              @file-drop="selectFile"
               v-if="isCommentingAllowed"
             />
 
@@ -646,13 +647,13 @@ export default {
 }
 </script>
 
-<style scoped>
+<style lang="scss" scoped>
 .dark .add-comment,
 .dark .comment,
 .dark .preview-column-content,
 .dark .no-comment {
   background: #46494F;
-  border-color: #25282E;
+  border-color: $dark-grey;
   box-shadow: 0px 0px 6px #333;
 }
 
@@ -661,7 +662,7 @@ export default {
 }
 
 .dark .preview-picture {
-  border: 1px solid #25282E;
+  border: 1px solid $dark-grey;
 }
 
 .dark .side {
@@ -721,9 +722,9 @@ export default {
 }
 
 .comment {
-  border-top: 1px solid #EEE;
-  border-bottom: 1px solid #EEE;
-  border-right: 1px solid #EEE;
+  border-top: 1px solid $white-grey;
+  border-bottom: 1px solid $white-grey;
+  border-right: 1px solid $white-grey;
   margin-top: 0.1em;
   box-shadow: 0px 0px 6px #E0E0E0;
 }

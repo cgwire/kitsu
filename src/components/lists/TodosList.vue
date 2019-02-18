@@ -353,7 +353,7 @@ export default {
 }
 </script>
 
-<style scoped>
+<style lang="scss" scoped>
 .name {
   width: 230px;
   min-width: 230px;
@@ -401,7 +401,7 @@ td.last-comment {
 .end-date {
   width: 100%;
   min-width: 150px;
-  color: #999;
+  color: $grey;
 }
 
 .thumbnail {

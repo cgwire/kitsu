@@ -116,25 +116,25 @@ export default {
 
 <style>
 .dark .v-autocomplete .v-autocomplete-input-group .v-autocomplete-input {
-  background-color: #36393F;
-  border-color: #25282E;
-  color: #EEE;
+  background-color: $dark-grey-light;
+  border-color: $dark-grey;
+  color: $white-grey;
 }
 
 .dark .v-autocomplete .v-autocomplete-input-group .v-autocomplete-input:focus {
-  border-color: #00B242;
+  border-color: $green;
 }
 
 .dark .v-autocomplete .v-autocomplete-list {
-  box-shadow: 2px 2px 2px 0px #333;
-  border-color: #25282E;
+  box-shadow: 2px 2px 2px 0px $dark-grey-light;
+  border-color: $dark-grey;
 }
 
 .v-autocomplete .v-autocomplete-list {
   width: 100%;
   max-height: 300px;
   overflow-y: auto;
-  box-shadow: 2px 2px 2px 0px #DDD;
+  box-shadow: 2px 2px 2px 0px $light-grey;
   z-index: 100;
 }
 
@@ -143,13 +143,13 @@ export default {
 }
 
 .v-autocomplete .v-autocomplete-list-item.v-autocomplete-item-active {
-  background: #BCB;
+  background: $light-grey-light;
 }
 
 .v-autocomplete .v-autocomplete-input-group .v-autocomplete-input {
   width: 300px;
   padding: 0.5em;
   margin-bottom: 3px;
-  border: 1px solid #CCC;
+  border: 1px solid $light-grey;
 }
 </style>

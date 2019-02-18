@@ -180,7 +180,7 @@ export default {
 }
 </script>
 
-<style scoped>
+<style lang="scss" scoped>
 .project {
   min-width: 60px;
   width: 60px;

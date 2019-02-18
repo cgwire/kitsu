@@ -66,7 +66,7 @@ export default {
   }
 }
 </script>
-<style scoped>
+<style lang="scss" scoped>
 textarea {
   min-height: 8em;
   padding: 0.5em;
