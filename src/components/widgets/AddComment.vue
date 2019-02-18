@@ -1,5 +1,16 @@
 <template>
-  <article class="add-comment word-break media">
+  <article
+    ref="wrapper"
+    @drop="onDrop"
+    @dragover="onDragover"
+    @dragleave="onDragleave"
+    :class="{
+      'add-comment': true,
+      'word-break': true,
+      media: true,
+      'is-dragging': isDragging
+    }"
+  >
     <figure class="media-left" v-if="!light">
       <div class="level">
         <div class="level-left">
@@ -82,6 +93,7 @@ export default {
   name: 'add-comment',
   data () {
     return {
+      isDragging: false,
       text: '',
       task_status_id: this.task.task_status_id
     }
@@ -127,6 +139,18 @@ export default {
     }
   },
 
+  mounted () {
+    [
+      'drag', 'dragstart', 'dragend', 'dragover',
+      'dragenter', 'dragleave', 'drop'
+    ].forEach((evt) => {
+      this.$refs.wrapper.addEventListener(evt, (e) => {
+        e.preventDefault()
+        e.stopPropagation()
+      })
+    })
+  },
+
   computed: {
     isFileAttached () {
       return (
@@ -148,6 +172,23 @@ export default {
 
     focus () {
       this.$refs.commentTextarea.focus()
+    },
+
+    onDragover () {
+      this.isDragging = true
+    },
+
+    onDragleave () {
+      this.isDragging = false
+    },
+
+    onDrop (event) {
+      for (let i = 0; i < event.dataTransfer.files.length; i++) {
+        const form = new FormData()
+        form.append('file', event.dataTransfer.files[i])
+        this.$emit('file-drop', form)
+      }
+      this.isDragging = false
     }
   },
 
@@ -163,6 +204,7 @@ export default {
 .add-comment {
   border-radius: 5px;
   background: white;
+  transition: background 0.2s ease;
 }
 
 .add-comment textarea {
@@ -194,5 +236,9 @@ export default {
 
 .status-selector {
   margin-top: 4px;
+}
+
+.is-dragging {
+  background-color: $purple;
 }
 </style>

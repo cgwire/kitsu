@@ -122,6 +122,7 @@
               :is-error="errors.addComment"
               @add-comment="addComment"
               @add-preview="onAddPreviewClicked"
+              @file-drop="selectFile"
               v-if="isCommentingAllowed"
             />
 

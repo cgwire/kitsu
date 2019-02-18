@@ -71,6 +71,7 @@
               :attached-file-name="attachedFileName"
               @add-comment="addComment"
               @add-preview="onAddPreviewClicked"
+              @file-drop="selectFile"
               v-if="isCommentingAllowed"
             />
             <div class="comments" v-if="currentTaskComments && currentTaskComments.length > 0">
