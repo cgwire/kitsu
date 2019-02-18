@@ -146,7 +146,7 @@ const helpers = {
 
   populateTask (task, shot, production) {
     task.name = helpers.getTaskType(task.task_type_id).priority.toString()
-    task.short_name =
+    task.task_status_short_name =
       helpers.getTaskStatus(task.task_status_id).short_name
 
     let entityName = `${shot.sequence_name} / ${shot.name}`

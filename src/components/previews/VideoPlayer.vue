@@ -439,7 +439,6 @@ export default {
         this.clearCanvas()
         this.$nextTick(() => {
           this.mountVideo()
-          this.isLoading = false
         })
       }
     },
@@ -459,7 +458,7 @@ export default {
     },
 
     showVideo () {
-      if (!this.isVideoShown) {
+      if (!this.isVideoShown && this.canvas) {
         this.canvas.style.display = 'none'
         this.video.style.display = 'block'
         let elements = document.getElementsByClassName('canvas-container')
@@ -1051,7 +1050,6 @@ export default {
   watch: {
     preview () {
       this.maxDuration = '00:00.00'
-      this.isLoading = true
       this.reloadAnnotations()
       if (this.isComparing) {
         this.isComparing = false

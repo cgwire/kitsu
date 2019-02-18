@@ -31,7 +31,7 @@
               :can-save="true"
               @change="onSearchChange"
               @save="saveSearchQuery"
-              placeholder="ex: rtk chars"
+              placeholder="ex: retake chara"
             />
           </div>
           <div class="flexrow-item ml1">
@@ -192,6 +192,7 @@ export default {
         'entity_name',
         'estimation',
         'duration',
+        'task_status_short_name',
         'retake_count',
         'real_start_date',
         'real_end_date',
@@ -255,19 +256,29 @@ export default {
         query = query.toLowerCase().trim()
         const keywords = getKeyWords(query) || []
         const filters = getTaskFilters(this.$options.taskIndex, query)
-        this.tasks = indexSearch(this.$options.taskIndex, keywords)
-        this.tasks = applyFilters(this.tasks, filters, this.taskMap)
-      } else {
-        if (this.isAssets) {
-          this.tasks = this.assetTasks
+        if (keywords && keywords.length > 0) {
+          this.tasks = indexSearch(this.$options.taskIndex, keywords)
         } else {
-          this.tasks = this.shotTasks
+          this.resetTasks()
         }
+        this.tasks = applyFilters(this.tasks, filters, this.taskMap)
+        this.tasks = this.sortTasks()
+      } else {
+        this.resetTasks()
       }
     },
 
     onTaskSelected (task) {
       this.currentTask = task
+    },
+
+    resetTasks () {
+      if (this.isAssets) {
+        this.tasks = this.assetTasks
+      } else {
+        this.tasks = this.shotTasks
+      }
+      this.tasks = this.sortTasks()
     },
 
     getTasks (entities) {
@@ -284,8 +295,11 @@ export default {
     },
 
     sortTasks () {
+      const isName = ['task_status_short_name', 'entity_name'].includes(
+        this.currentSort
+      )
       return this.tasks.sort(
-        firstBy(this.currentSort, this.currentSort === 'entity_name' ? 1 : -1)
+        firstBy(this.currentSort, isName ? 1 : -1)
           .thenBy('entity_name')
       )
     },

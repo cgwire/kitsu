@@ -259,6 +259,7 @@ export default {
       entity: 'Entité',
       entity_name: 'Nom',
       last_comment_date: 'Dernier comm.',
+      priority: 'Priorité',
       production: 'Prod',
       real_end_date: 'Date de valid.',
       real_start_date: 'Date de début',
@@ -266,6 +267,7 @@ export default {
       sequence: 'Séquence',
       task_status: 'Statut',
       last_comment: 'Dernier commentaire',
+      last_status_short_name: 'Statut',
       task_type: 'Type'
     },
     priority: {

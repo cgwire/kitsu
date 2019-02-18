@@ -483,12 +483,14 @@ export default {
       estimation: 'Estimation',
       last_comment: 'Last comment',
       last_comment_date: 'Last comment',
+      priority: 'Priority',
       production: 'Prod',
       real_end_date: 'Validation date',
       real_start_date: 'WIP date',
       retake_count: 'Retakes',
       sequence: 'Sequence',
       task_status: 'Status',
+      task_status_short_name: 'Status',
       task_type: 'Type'
     },
     priority: {

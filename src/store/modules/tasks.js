@@ -1045,6 +1045,8 @@ const mutations = {
     if (currentTask) {
       Object.assign(state.taskMap[task.id], {
         task_status_id: task.task_status_id,
+        task_status_short_name:
+          state.taskStatusMap[task.task_status_id].short_name,
         priority: task.priority,
         estimation: task.estimation,
         duration: task.duration,

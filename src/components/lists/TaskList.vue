@@ -66,6 +66,7 @@
         ref="body-tbody"
       >
         <tr
+          :ref="'task-' + task.id"
           :key="task.id"
           :class="{
             'task-line': true,
@@ -95,6 +96,7 @@
             :is-border="false"
             :is-assignees="false"
             :selectable="false"
+            :is-static="true"
           />
           <td class="assignees">
             <div class="flexrow">
@@ -299,6 +301,7 @@ export default {
         })
         this.addSelectedTasks(selection)
       }
+      this.scrollToLine(task.id)
     },
 
     onKeyDown (event) {
@@ -310,6 +313,36 @@ export default {
         } else if ([39, 40].includes(event.keyCode)) {
           index = (index + 1) >= this.tasks.length ? index = 0 : index + 1
           this.selectTask({}, index, this.tasks[index])
+        }
+      }
+    },
+
+    setScrollPosition (scrollPosition) {
+      if (this.$refs.body) {
+        this.$refs.body.scrollTop = scrollPosition
+      }
+    },
+
+    scrollToLine (taskId) {
+      const taskLine = this.$refs['task-' + taskId]
+      console.log(taskId, taskLine)
+      if (taskLine) {
+        const margin = 30
+        const rect = taskLine[0].getBoundingClientRect()
+        const listRect = this.$refs.body.getBoundingClientRect()
+        const isBelow = rect.bottom > listRect.bottom - margin
+        const isAbove = rect.top < listRect.top + margin
+
+        if (isBelow) {
+          const scrollingRequired = rect.bottom - listRect.bottom + margin
+          this.setScrollPosition(
+            this.$refs.body.scrollTop + scrollingRequired
+          )
+        } else if (isAbove) {
+          const scrollingRequired = listRect.top - rect.top + margin
+          this.setScrollPosition(
+            this.$refs.body.scrollTop - scrollingRequired
+          )
         }
       }
     },
@@ -390,8 +423,8 @@ export default {
 }
 
 .status {
-  min-width: 80px;
-  width: 80px;
+  min-width: 100px;
+  width: 100px;
 }
 
 .assignees {
@@ -414,6 +447,10 @@ export default {
 .retake-count {
   min-width: 80px;
   width: 80px;
+}
+
+td.retake-count {
+  line-height: 0.5em;
 }
 
 .last-comment-date,
@@ -446,6 +483,7 @@ td.retake-count {
 
   &.status {
     padding-left: 1em;
+    padding-right: 1em;
   }
 }
 
@@ -457,6 +495,7 @@ td.retake-count {
 
   td.status {
     padding-left: 1em;
+    padding-right: 1em;
   }
 
   tr.task-line {

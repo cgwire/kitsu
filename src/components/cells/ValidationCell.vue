@@ -20,7 +20,7 @@
     <validation-tag
       class="validation-tag"
       :task="task"
-      :is-static="selectable"
+      :is-static="selectable || isStatic"
       :pointer="true"
       v-if="task"
     />
