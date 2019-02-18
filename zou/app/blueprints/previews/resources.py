@@ -26,9 +26,12 @@ from zou.app.utils import (
 
 
 ALLOWED_PICTURE_EXTENSION = [".png", ".jpg", ".jpeg", ".PNG", ".JPG", ".JPEG"]
-ALLOWED_MOVIE_EXTENSION = [".mp4", ".mov", ".wmv", ".MP4", ".MOV", ".WMV"]
+ALLOWED_MOVIE_EXTENSION = [
+    ".mp4", ".mov", ".wmv", ".m4v", ".MP4", ".MOV", ".WMV", ".M4V"
+]
 ALLOWED_FILE_EXTENSION = [
-    ".obj", ".pdf", ".ma", ".mb", ".rar", ".zip", ".blend"
+    ".obj", ".pdf", ".ma", ".mb", ".rar", ".zip", ".blend",
+    ".OBJ", ".PDF", ".MA", ".MB", ".RAR", ".ZIP", ".BLEND",
 ]
 
 
@@ -147,7 +150,7 @@ class CreatePreviewFilePictureResource(Resource):
 
         uploaded_file = request.files["file"]
 
-        extension = "." + uploaded_file.filename.split(".")[-1].lower()
+        extension = ".%s" % uploaded_file.filename.split(".")[-1].lower()
 
         if extension in ALLOWED_PICTURE_EXTENSION:
             self.save_picture_preview(instance_id, uploaded_file)
