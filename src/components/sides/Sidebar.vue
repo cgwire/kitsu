@@ -161,7 +161,7 @@ aside section {
 
 #c-mask {
   position: fixed;
-  z-index: 100;
+  z-index: 204;
   top: 0;
   left: 0;
   overflow: hidden;
