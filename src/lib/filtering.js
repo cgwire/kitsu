@@ -43,8 +43,10 @@ export const applyFilters = (entries, filters, taskMap) => {
             entry.data[filter.descriptor.field_name] &&
             filter.value
           ) {
-            const dataValue = entry.data[filter.descriptor.field_name]
-            isOk = dataValue.toLowerCase() === filter.value.toLowerCase()
+            let dataValue = entry.data[filter.descriptor.field_name]
+            dataValue = dataValue.toLowerCase()
+            console.log(dataValue, filter)
+            isOk = dataValue.indexOf(filter.value.toLowerCase()) >= 0
           } else {
             isOk = false
           }
