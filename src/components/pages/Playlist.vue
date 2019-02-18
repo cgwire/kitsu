@@ -397,6 +397,7 @@ export default {
           name: this.$t('playlists.no_selection')
         }
         this.currentShots = {}
+        this.handleModalsDisplay()
       }
     },
 
