@@ -365,7 +365,7 @@ def get_filters():
     return result
 
 
-def create_filter(list_type, name, query, project_id=None):
+def create_filter(list_type, name, query, project_id=None, entity_type=None):
     """
     Add a new search filter to the database.
     """
@@ -375,7 +375,8 @@ def create_filter(list_type, name, query, project_id=None):
         name=name,
         search_query=query,
         project_id=project_id,
-        person_id=current_user.id
+        person_id=current_user.id,
+        entity_type=entity_type
     )
     search_filter.serialize()
     return search_filter.serialize()

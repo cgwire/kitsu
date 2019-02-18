@@ -9,6 +9,7 @@ from flask_fs.errors import FileNotFound
 from zou.app.stores import file_store
 from zou.app import config
 from zou.app.services import (
+    deletion_service,
     entities_service,
     files_service,
     names_service,
@@ -26,9 +27,12 @@ from zou.app.utils import (
 
 
 ALLOWED_PICTURE_EXTENSION = [".png", ".jpg", ".jpeg", ".PNG", ".JPG", ".JPEG"]
-ALLOWED_MOVIE_EXTENSION = [".mp4", ".mov", ".wmv", ".MP4", ".MOV", ".WMV"]
+ALLOWED_MOVIE_EXTENSION = [
+    ".mp4", ".mov", ".wmv", ".m4v", ".MP4", ".MOV", ".WMV", ".M4V"
+]
 ALLOWED_FILE_EXTENSION = [
-    ".obj", ".pdf", ".ma", ".mb", ".rar", ".zip", ".blend"
+    ".obj", ".pdf", ".ma", ".mb", ".rar", ".zip", ".blend",
+    ".OBJ", ".PDF", ".MA", ".MB", ".RAR", ".ZIP", ".BLEND",
 ]
 
 
@@ -147,7 +151,7 @@ class CreatePreviewFilePictureResource(Resource):
 
         uploaded_file = request.files["file"]
 
-        extension = "." + uploaded_file.filename.split(".")[-1].lower()
+        extension = ".%s" % uploaded_file.filename.split(".")[-1].lower()
 
         if extension in ALLOWED_PICTURE_EXTENSION:
             self.save_picture_preview(instance_id, uploaded_file)
@@ -179,6 +183,7 @@ class CreatePreviewFilePictureResource(Resource):
         else:
             current_app.logger.info(
                 "Wrong file format, extension: %s", extension)
+            deletion_service.remove_preview_file_by_id(instance_id)
             abort(400, "Wrong file format, extension: %s" % extension)
 
     def save_picture_preview(self, instance_id, uploaded_file):

@@ -13,8 +13,10 @@ class PluginTestCase(ApiTestCase):
         plugin = plugins[0]
         self.assertTrue(hasattr(plugin, "routes"))
 
+    """
     def test_load_plugin(self):
         plugins = api.load_plugin_modules("tests/fixtures/plugins")
         plugin = plugins[0]
         api.load_plugin(app, plugin)
         self.get("/plugins/hello")
+    """

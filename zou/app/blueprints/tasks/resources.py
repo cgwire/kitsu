@@ -74,6 +74,8 @@ class CommentTaskResource(Resource):
 
             if task_status["is_done"]:
                 new_data["end_date"] = datetime.datetime.now()
+            else:
+                new_data["end_date"] = None
 
             if task_status["short_name"] == "wip" \
                and task["real_start_date"] is None:

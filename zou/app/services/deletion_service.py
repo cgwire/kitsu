@@ -78,9 +78,10 @@ def reset_task_data(task_id):
 
         if task_status_is_done:
             end_date = comment.created_at
+        else:
+            end_date = None
 
         task_status_id = comment.task_status_id
-        last_comment_date = comment.created_at
 
     duration = 0
     time_spents = TimeSpent.get_all_by(task_id=task.id)
