@@ -391,4 +391,9 @@ export default {
 .field {
   margin: 0;
 }
+
+.query-list {
+  margin-bottom: 0;
+  margin-left: 11em;
+}
 </style>
