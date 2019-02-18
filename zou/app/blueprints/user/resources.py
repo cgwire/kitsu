@@ -208,7 +208,8 @@ class FiltersResource(Resource, ArgsMixin):
             arguments["list_type"],
             arguments["name"],
             arguments["query"],
-            arguments["project_id"]
+            arguments["project_id"],
+            arguments["entity_type"]
         ), 201
 
     def get_arguments(self):
@@ -216,7 +217,8 @@ class FiltersResource(Resource, ArgsMixin):
             ("name", "", True),
             ("query", "", True),
             ("list_type", "todo", True),
-            ("project_id", None, False)
+            ("project_id", None, False),
+            ("entity_type", None, False)
         ])
 
 
