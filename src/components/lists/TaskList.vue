@@ -225,10 +225,10 @@ export default {
   computed: {
     ...mapGetters([
       'assetMap',
-      'shotMap',
       'nbSelectedTasks',
+      'personMap',
       'selectedTasks',
-      'personMap'
+      'shotMap'
     ])
   },
 
@@ -325,7 +325,6 @@ export default {
 
     scrollToLine (taskId) {
       const taskLine = this.$refs['task-' + taskId]
-      console.log(taskId, taskLine)
       if (taskLine) {
         const margin = 30
         const rect = taskLine[0].getBoundingClientRect()
@@ -379,6 +378,42 @@ export default {
           this.$refs['th-' + desc.name].style['min-width'] = `${width}px`
         })
       }
+    },
+
+    getTableData () {
+      const headers = [
+        this.isAssets ? this.$t('tasks.fields.asset_type') : this.$t('tasks.fields.sequence'),
+        this.$t('tasks.fields.entity_name'),
+        this.$t('tasks.fields.task_status'),
+        this.$t('tasks.fields.assignees'),
+        this.$t('tasks.fields.estimation'),
+        this.$t('tasks.fields.duration'),
+        this.$t('tasks.fields.retake_count'),
+        this.$t('tasks.fields.real_start_date'),
+        this.$t('tasks.fields.real_end_date'),
+        this.$t('tasks.fields.last_comment_date')
+      ]
+      const taskLines = [headers]
+      this.tasks.forEach((task) => {
+        const assignees = task.assignees.map(personId => {
+          const person = this.personMap[personId]
+          if (person) return person.name
+          else return ''
+        }).join(', ')
+        taskLines.push([
+          this.isAssets ? this.getEntity(task.entity.id).asset_type_name : this.getEntity(task.entity.id).sequence_name,
+          this.getEntity(task.entity.id).name,
+          task.task_status_short_name,
+          assignees,
+          task.estimation,
+          this.formatDuration(task.duration),
+          task.retake_count,
+          this.formatDate(task.real_start_date),
+          this.formatDate(task.real_end_date),
+          this.formatDate(task.last_comment_date)
+        ])
+      })
+      return taskLines
     }
   },
 
@@ -445,12 +480,16 @@ export default {
 }
 
 .retake-count {
-  min-width: 80px;
-  width: 80px;
+  min-width: 90px;
+  width: 90px;
 }
 
 td.retake-count {
   line-height: 0.5em;
+  color: $red;
+  font-weight: bold;
+  font-size: 1.6em;
+  padding-left: 2px;
 }
 
 .last-comment-date,
@@ -467,13 +506,6 @@ td.retake-count {
 .avatar {
 }
 
-td.retake-count {
-  color: $red;
-  font-weight: bold;
-  font-size: 1.6em;
-  padding-left: 2px;
-}
-
 .nb-tasks {
   padding: 0.5em;
 }
@@ -481,9 +513,12 @@ td.retake-count {
 .table-header th {
   padding: 0.5em 0;
 
+  &.retake-count {
+    padding-right: 1em;
+  }
+
   &.status {
     padding-left: 1em;
-    padding-right: 1em;
   }
 }
 
@@ -491,6 +526,10 @@ td.retake-count {
   td,
   tr {
     padding: 0;
+  }
+
+  td.retake-count {
+    padding-right: 1em;
   }
 
   td.status {

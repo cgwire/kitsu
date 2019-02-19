@@ -37,11 +37,18 @@
           <div class="flexrow-item ml1">
             {{ $t('main.sorted_by') }}
           </div>
-          <div class="flexrow-item ml1 sorting-combobox">
+          <div class="flexrow-item sorting-combobox">
             <combobox
               :options="sortOptions"
               locale-key-prefix="tasks.fields."
               v-model="currentSort"
+            />
+          </div>
+          <div class="flexrow-item push-right">
+            <button-simple
+              icon="download"
+              :title="$t('main.csv.export_file')"
+              @click="onExportClick"
             />
           </div>
         </div>
@@ -79,6 +86,8 @@
 <script>
 import { mapGetters, mapActions } from 'vuex'
 import firstBy from 'thenby'
+import moment from 'moment'
+import { slugify } from '../../lib/helpers'
 import { buildSupervisorTaskIndex, indexSearch } from '../../lib/indexing'
 import { applyFilters, getKeyWords, getTaskFilters } from '../../lib/filtering'
 
@@ -88,6 +97,7 @@ import EntityThumbnail from '../widgets/EntityThumbnail'
 import TaskInfo from '../sides/TaskInfo'
 import SearchField from '../widgets/SearchField'
 import SearchQueryList from '../widgets/SearchQueryList'
+import ButtonSimple from '../widgets/ButtonSimple'
 import SubscribeButton from '../widgets/SubscribeButton'
 import TaskList from '../lists/TaskList'
 import TableInfo from '../widgets/TableInfo'
@@ -98,6 +108,7 @@ import ValidationTag from '../widgets/ValidationTag'
 export default {
   name: 'task-type-page',
   components: {
+    ButtonSimple,
     ChevronLeftIcon,
     Combobox,
     EntityThumbnail,
@@ -190,9 +201,10 @@ export default {
     sortOptions () {
       return [
         'entity_name',
+        'task_status_short_name',
+        'priority',
         'estimation',
         'duration',
-        'task_status_short_name',
         'retake_count',
         'real_start_date',
         'real_end_date',
@@ -226,17 +238,7 @@ export default {
       this.initTaskType(force)
         .then(() => {
           this.loading.entities = false
-          if (this.isAssets) {
-            this.tasks = this.assetTasks
-            this.$options.taskIndex = buildSupervisorTaskIndex(
-              this.assetTasks
-            )
-          } else {
-            this.tasks = this.shotTasks
-            this.$options.taskIndex = buildSupervisorTaskIndex(
-              this.shotTasks
-            )
-          }
+          this.resetTaskIndex()
           this.$refs['task-search-field'].focus()
         })
         .catch((err) => {
@@ -281,6 +283,20 @@ export default {
       this.tasks = this.sortTasks()
     },
 
+    resetTaskIndex () {
+      if (this.isAssets) {
+        this.tasks = this.assetTasks
+        this.$options.taskIndex = buildSupervisorTaskIndex(
+          this.assetTasks
+        )
+      } else {
+        this.tasks = this.shotTasks
+        this.$options.taskIndex = buildSupervisorTaskIndex(
+          this.shotTasks
+        )
+      }
+    },
+
     getTasks (entities) {
       const tasks = []
       entities.forEach((entity) => {
@@ -321,6 +337,35 @@ export default {
         .catch((err) => {
           if (err) console.log('error')
         })
+    },
+
+    onExportClick () {
+      const taskLines = this.$refs['task-list'].getTableData()
+      const nameData = [
+        moment().format('YYYY-MM-DD'),
+        this.currentProduction.name,
+        this.currentTaskType.name,
+        'tasks'
+      ]
+      if (this.currentEpisode) {
+        nameData.splice(1, 0, this.currentEpisode.name)
+      }
+      const name = slugify(nameData.join('_'))
+
+      const lineArray = []
+      taskLines.forEach((infoArray, index) => {
+        const line = infoArray.join(';')
+        lineArray.push(
+          index === 0 ? 'data:text/csv;charset=utf-8,' + line : line
+        )
+      })
+      const csvContent = lineArray.join('\n')
+      const encodedUri = encodeURI(csvContent)
+      const link = document.createElement('a')
+      link.setAttribute('href', encodedUri)
+      link.setAttribute('download', `${name}.csv`)
+      document.body.appendChild(link)
+      link.click()
     }
   },
 
@@ -337,6 +382,16 @@ export default {
       this.sortTasks()
       this.$refs['task-list'].resetSelection()
       this.clearSelectedTasks()
+    }
+  },
+
+  socket: {
+    events: {
+      'task:update' (eventData) {
+        if (this.taskMap[eventData.task_id]) {
+          setTimeout(this.resetTaskIndex, 1000)
+        }
+      }
     }
   },
 
@@ -409,5 +464,10 @@ export default {
 .query-list {
   margin-bottom: 0;
   margin-left: 11em;
+}
+
+.push-right {
+  flex: 1;
+  text-align: right;
 }
 </style>
