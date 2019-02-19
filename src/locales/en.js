@@ -197,7 +197,7 @@ export default {
     edit_title: 'Edit person',
     empty_team: 'There is no one listed in the project team.',
     new_person: 'Add a new employee',
-    no_task_assigned: 'There is no assigned running tasks.',
+    no_task_assigned: 'There are no assigned running tasks.',
     persons: 'person | persons',
     running_tasks: 'Running tasks',
     select_person: 'Select a person...',
