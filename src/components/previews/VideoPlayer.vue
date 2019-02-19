@@ -88,8 +88,11 @@
         <span class="flexrow-item time-indicator">
           {{ currentTime }}
         </span>
-        <span class="flexrow-item time-indicator" v-if="!light">
-          / {{ maxDuration }}
+        <span class="flexrow-item time-indicator" v-if="!light || isFullScreen()">
+        /
+        </span>
+        <span class="flexrow-item time-indicator" v-if="!light || isFullScreen()">
+         {{ maxDuration }}
         </span>
 
         <button
@@ -250,6 +253,7 @@ export default {
         })
 
         this.video.addEventListener('error', () => {
+          this.$refs.movie.style.height = (this.getDefaultHeight() - 80) + 'px'
           this.isLoading = false
         })
 
@@ -1128,23 +1132,18 @@ export default {
 
 .annotation-movie {
   margin: auto;
-}
-
-.pull-bottom {
+  width: 100%;
 }
 
 .time-indicator {
   color: $light-grey;
   padding-left: 0.8em;
+  margin-right: 0;
 }
 
 #annotation-canvas {
   display: block;
   width: 0;
-}
-
-#annotation-movie {
-  width: 100%;
 }
 
 .video-player {
