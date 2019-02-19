@@ -205,6 +205,7 @@ export default {
   border-radius: 5px;
   background: white;
   transition: background 0.2s ease;
+  word-break: break-all;
 }
 
 .add-comment textarea {
