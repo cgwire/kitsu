@@ -3,9 +3,9 @@
 # Kitsu, CG Production Manager
 
 Kitsu is a web tool to improve validation tracking in CG productions. By
-offering a clean UI and shared database, it allows you to communicate
-efficiently with all shareholders of production, such as CG artists, 
-production managers, TDs, supervisors, and clients.
+offering a clean UI and shared database, efficient communication with
+shareholders of production, such as CG artists, 
+production managers, TDs, supervisors, and clients is enabled.
 
 [![Build
 badge](https://travis-ci.org/cgwire/kitsu.svg?branch=master)](https://travis-ci.org/cgwire/kitsu)
@@ -39,7 +39,7 @@ To install the development environment, follow [the dedicated guide](https://kit
 ## About authors
 
 Kitsu is written by CG Wire, a company based in France. We help small to
-midsize CG studios manage their productions and build pipelines efficiently.
+mid-sized CG studios manage their productions and build pipelines efficiently.
 
 We apply software craftsmanship principles as much as possible. We love coding
 and consider strong qualities and good developer experience to matter a lot.
