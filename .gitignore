@@ -47,6 +47,7 @@ selenium-debug.log
 test/test-bundle.js
 
 TODO
+QA
 .package-lock.json
 .idea/
 release.sh
