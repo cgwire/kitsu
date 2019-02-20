@@ -115,7 +115,7 @@
               ref="add-comment"
               :user="user"
               :task="task"
-              :task-status-options="taskStatusOptionsForCurrentUser"
+              :task-status="taskStatusForCurrentUser"
               :light="true"
               :is-loading="loading.addComment"
               :attached-file-name="attachedFileName"
@@ -281,7 +281,7 @@ export default {
       'personMap',
       'previewFormData',
       'taskEntityPreviews',
-      'taskStatusOptions',
+      'taskStatusForCurrentUser',
       'taskTypeMap',
       'user'
     ]),
@@ -375,14 +375,6 @@ export default {
         previewId = this.taskPreviews[0].id
       }
       return `/api/movies/originals/preview-files/${previewId}.mp4`
-    },
-
-    taskStatusOptionsForCurrentUser () {
-      if (this.isCurrentUserManager) {
-        return this.taskStatusOptions
-      } else {
-        return this.taskStatusOptions.filter(status => status.isArtistAllowed)
-      }
     },
 
     tasktypeStyle () {

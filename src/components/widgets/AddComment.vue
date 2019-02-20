@@ -54,10 +54,9 @@
         <span class="flexrow-item">
           {{ $t('comments.set_status_to') }}
         </span>
-        <combobox
+        <combobox-status
           class="flexrow-item status-selector"
-          :options="taskStatusOptions"
-          :is-simple="true"
+          :task-status-list="taskStatus"
           v-model="task_status_id"
         />
 
@@ -86,22 +85,23 @@
 </template>
 
 <script>
-import Combobox from './Combobox'
+import ComboboxStatus from './ComboboxStatus'
 import PeopleAvatar from './PeopleAvatar'
 
 export default {
   name: 'add-comment',
+
+  components: {
+    ComboboxStatus,
+    PeopleAvatar
+  },
+
   data () {
     return {
       isDragging: false,
       text: '',
       task_status_id: this.task.task_status_id
     }
-  },
-
-  components: {
-    Combobox,
-    PeopleAvatar
   },
 
   props: {
@@ -123,6 +123,10 @@ export default {
     },
     task: {
       type: Object,
+      default: () => []
+    },
+    taskStatus: {
+      type: Array,
       default: () => []
     },
     taskStatusOptions: {
@@ -233,10 +237,6 @@ export default {
 
 .mt1 {
   margin-top: 0.5em;
-}
-
-.status-selector {
-  margin-top: 4px;
 }
 
 .is-dragging {
