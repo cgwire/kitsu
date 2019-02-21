@@ -163,9 +163,10 @@ export default {
 }
 
 .status-line {
-  cursor: pointer;
   background: $white;
+  cursor: pointer;
   padding: 0.4em;
+  margin: 0;
   text-transform: uppercase;
 
   &:hover {
@@ -182,6 +183,7 @@ export default {
 }
 
 .select-input {
+  background: $white;
   width: 120px;
   position: fixed;
   border: 1px solid $light-grey-light;

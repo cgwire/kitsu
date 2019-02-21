@@ -45,7 +45,7 @@ export default {
     },
     colors: {
       default: () => [
-        '$grey999',
+        '#999999',
         '#8D6E63',
         '#43A047',
         '#7CB342',
@@ -83,7 +83,7 @@ export default {
   }
 }
 </script>
-<style>
+<style lang="scss" scoped>
 .color {
   display: inline-block;
   cursor: pointer;
