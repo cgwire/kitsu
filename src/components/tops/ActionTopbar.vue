@@ -65,9 +65,9 @@
             <div class="flexrow-item strong bigger hide-small-screen">
               {{ $t('tasks.change_status_to') }}
             </div>
-            <div class="flexrow-item combobox-item">
-              <combobox
-                :options="taskStatusOptions"
+            <div class="flexrow-item">
+              <combobox-status
+                :task-status-list="taskStatusForCurrentUser"
                 v-model="taskStatusId"
               />
             </div>
@@ -80,7 +80,7 @@
               </button>
 
               <div class="" v-if="isChangeStatusLoading">
-                <spinner :is-white="true"></spinner>
+                <spinner :is-white="true" />
               </div>
             </div>
           </div>
@@ -325,6 +325,7 @@ import { sortPeople } from '../../lib/sorting'
 import { ChevronDownIcon, XIcon, MoreVerticalIcon } from 'vue-feather-icons'
 import ButtonHrefLink from '../widgets/ButtonHrefLink'
 import Combobox from '../widgets/Combobox'
+import ComboboxStatus from '../widgets/ComboboxStatus'
 import PeopleField from '../widgets/PeopleField'
 import Spinner from '../widgets/Spinner'
 
@@ -334,6 +335,7 @@ export default {
   components: {
     ChevronDownIcon,
     Combobox,
+    ComboboxStatus,
     MoreVerticalIcon,
     PeopleField,
     Spinner,
@@ -394,7 +396,7 @@ export default {
       'personMap',
       'selectedTasks',
       'shotCustomActionOptions',
-      'taskStatusOptions',
+      'taskStatusForCurrentUser',
       'user'
     ]),
 

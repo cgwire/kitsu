@@ -27,9 +27,16 @@ const state = initialState
 const getters = {
   taskStatus: state => state.taskStatus,
   taskStatusMap: state => state.taskStatusMap,
-
   editTaskStatus: state => state.editTaskStatus,
-  deleteTaskStatus: state => state.deleteTaskStatus
+  deleteTaskStatus: state => state.deleteTaskStatus,
+
+  taskStatusForCurrentUser: (state, getters, rootState, rootGetters) => {
+    if (rootGetters.isCurrentUserManager) {
+      return state.taskStatus
+    } else {
+      return state.taskStatus.filter(status => status.isArtistAllowed)
+    }
+  }
 }
 
 const actions = {

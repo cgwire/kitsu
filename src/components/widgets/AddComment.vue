@@ -28,7 +28,7 @@
         @keyup.enter.ctrl="runAddComment(text, task_status_id)"
         v-focus>
       </textarea>
-      <div class="flexrow">
+      <div class="flexrow preview-section">
         <button
           class="button flexrow-item"
           @click="$emit('add-preview')"
@@ -54,10 +54,9 @@
         <span class="flexrow-item">
           {{ $t('comments.set_status_to') }}
         </span>
-        <combobox
+        <combobox-status
           class="flexrow-item status-selector"
-          :options="taskStatusOptions"
-          :is-simple="true"
+          :task-status-list="taskStatus"
           v-model="task_status_id"
         />
 
@@ -86,22 +85,23 @@
 </template>
 
 <script>
-import Combobox from './Combobox'
+import ComboboxStatus from './ComboboxStatus'
 import PeopleAvatar from './PeopleAvatar'
 
 export default {
   name: 'add-comment',
+
+  components: {
+    ComboboxStatus,
+    PeopleAvatar
+  },
+
   data () {
     return {
       isDragging: false,
       text: '',
       task_status_id: this.task.task_status_id
     }
-  },
-
-  components: {
-    Combobox,
-    PeopleAvatar
   },
 
   props: {
@@ -123,6 +123,10 @@ export default {
     },
     task: {
       type: Object,
+      default: () => []
+    },
+    taskStatus: {
+      type: Array,
       default: () => []
     },
     taskStatusOptions: {
@@ -201,29 +205,32 @@ export default {
 </script>
 
 <style lang="scss" scoped>
+.dark textarea:disabled {
+  background: #555;
+}
+
 .add-comment {
   border-radius: 5px;
   background: white;
   transition: background 0.2s ease;
-  word-break: break-all;
-}
 
-.add-comment textarea {
-  min-height: 7em;
-  margin-bottom: 0.3em;
-}
+  textarea {
+    min-height: 7em;
+    margin-bottom: 0.3em;
+  }
 
-.add-comment textarea:focus,
-.add-comment textarea:active {
-  border-color: $green;
+  textarea:focus,
+  textarea:active {
+    border-color: $green;
+  }
 }
 
 .control {
   margin-bottom: 0.1em;
 }
 
-.dark textarea:disabled {
-  background: #555;
+.preview-section {
+  word-break: break-all;
 }
 
 .post-button-wrapper {
@@ -233,10 +240,6 @@ export default {
 
 .mt1 {
   margin-top: 0.5em;
-}
-
-.status-selector {
-  margin-top: 4px;
 }
 
 .is-dragging {

@@ -67,7 +67,7 @@
               :is-error="errors.addComment"
               :user="user"
               :task="currentTask"
-              :taskStatusOptions="taskStatusOptionsForCurrentUser"
+              :task-status="taskStatusForCurrentUser"
               :attached-file-name="attachedFileName"
               @add-comment="addComment"
               @add-preview="onAddPreviewClicked"
@@ -397,7 +397,8 @@ export default {
       'productionMap',
       'route',
       'taskEntityPreviews',
-      'taskStatusOptions',
+      'taskStatus',
+      'taskStatusForCurrentUser',
       'taskMap',
       'taskTypeMap',
       'user'
@@ -695,14 +696,6 @@ export default {
         })
       }
       return currentPreview
-    },
-
-    taskStatusOptionsForCurrentUser () {
-      if (this.isCurrentUserManager) {
-        return this.taskStatusOptions
-      } else {
-        return this.taskStatusOptions.filter(status => status.isArtistAllowed)
-      }
     }
   },
 
