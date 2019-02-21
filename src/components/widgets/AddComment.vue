@@ -28,7 +28,7 @@
         @keyup.enter.ctrl="runAddComment(text, task_status_id)"
         v-focus>
       </textarea>
-      <div class="flexrow">
+      <div class="flexrow preview-section">
         <button
           class="button flexrow-item"
           @click="$emit('add-preview')"
@@ -205,29 +205,32 @@ export default {
 </script>
 
 <style lang="scss" scoped>
+.dark textarea:disabled {
+  background: #555;
+}
+
 .add-comment {
   border-radius: 5px;
   background: white;
   transition: background 0.2s ease;
-  word-break: break-all;
-}
 
-.add-comment textarea {
-  min-height: 7em;
-  margin-bottom: 0.3em;
-}
+  textarea {
+    min-height: 7em;
+    margin-bottom: 0.3em;
+  }
 
-.add-comment textarea:focus,
-.add-comment textarea:active {
-  border-color: $green;
+  textarea:focus,
+  textarea:active {
+    border-color: $green;
+  }
 }
 
 .control {
   margin-bottom: 0.1em;
 }
 
-.dark textarea:disabled {
-  background: #555;
+.preview-section {
+  word-break: break-all;
 }
 
 .post-button-wrapper {
