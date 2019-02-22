@@ -34,7 +34,9 @@ const getters = {
     if (rootGetters.isCurrentUserManager) {
       return state.taskStatus
     } else {
-      return state.taskStatus.filter(status => status.isArtistAllowed)
+      return state.taskStatus.filter(taskStatus => {
+        return taskStatus.is_artist_allowed
+      })
     }
   }
 }
