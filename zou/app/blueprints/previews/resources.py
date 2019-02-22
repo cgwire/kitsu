@@ -163,7 +163,12 @@ class CreatePreviewFilePictureResource(Resource):
             return preview_file, 201
 
         elif extension in ALLOWED_MOVIE_EXTENSION:
-            self.save_movie_preview(instance_id, uploaded_file)
+            try:
+                self.save_movie_preview(instance_id, uploaded_file)
+            except:
+                current_app.logger.info("Normalization failed.")
+                deletion_service.remove_preview_file_by_id(instance_id)
+                abort(400, "Normalization failed.")
             preview_file = files_service.update_preview_file(
                 instance_id,
                 {"extension": "mp4"}
