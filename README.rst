@@ -18,13 +18,13 @@ Features
 
 Zou can:
 
--  store production data, such as projects, shots, assets, tasks, metadata files,
+-  Store production data, such as projects, shots, assets, tasks, metadata files,
    and validations.
--  provide folder and file paths for any task.
--  import data from Shotgun or CSV files.
--  export main data to CSV files.
--  provide helpers to manage workflow tasks (start, publish, retake).
--  listen to events to plug external modules on it.
+-  Provide folder and file paths for any task.
+-  Import data from Shotgun or CSV files.
+-  Export main data to CSV files.
+-  Provide helpers to manage workflow tasks (start, publish, retake).
+-  Listen to events to plug external modules on it.
 
 Installation and documentation
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
