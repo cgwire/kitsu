@@ -4,12 +4,10 @@
 Zou is the memory of your CG production
 ---------------------------------------
 
-Zou is an API that allows to store and manage the data of your CG
-production. Through it you can link all the tools of your pipeline and
-make sure they are all synchronized. 
+Zou is an API that stores and manages data pertaining to CG
+production, while also enabling synchronization via pipelining of tools. 
 
-To integrate it quickly in your tools you can rely on the dedicated
-Python client named `Gazu <https://gazu.cg-wire.com>`__. 
+A dedicated Python client, `Gazu <https://gazu.cg-wire.com>`_, allows users to integrate Zou into the tools. 
 
 |Build badge|
 
@@ -20,33 +18,32 @@ Features
 
 Zou can:
 
--  Store production data: projects, shots, assets, tasks, files metadata
+-  Store production data, such as projects, shots, assets, tasks, metadata files,
    and validations.
 -  Provide folder and file paths for any task.
--  Data import from Shotgun or CSV files.
+-  Import data from Shotgun or CSV files.
 -  Export main data to CSV files.
--  Provide helpers to manage task workflow (start, publish, retake).
+-  Provide helpers to manage workflow tasks (start, publish, retake).
 -  Listen to events to plug external modules on it.
 
 Installation and documentation
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-Installation of Zou itself is pretty straightforward but it requires the
-setup of third-parties tool like a database instance. So we recommend
-you to jump directly to the full documentation:
+Installation of Zou requires the setup of third-party tools such as a database instance, so it is recommended
+to the follow the documentation:
 
 `https://zou.cg-wire.com/ <https://zou.cg-wire.com>`__
 
 Contributing
 ------------
 
-All contributions are welcome as long as they respect the `C4
-contract <https://rfc.zeromq.org/spec:42/C4>`__.
+Contributions are welcomed so long as the `C4
+contract <https://rfc.zeromq.org/spec:42/C4>`__ is respected.
 
 Zou is based on Python and the `Flask <http://flask.pocoo.org/>`__
 framework.
 
-Instruction for setting up a development environment are available in
+Instructions for setting up a development environment are available in
 `the documentation <https://zou.cg-wire.com/development/>`__
 
 
@@ -64,10 +61,10 @@ Zou is written by CG Wire, a company based in France. We help small to
 midsize CG studios to manage their production and build pipeline
 efficiently.
 
-We apply software craftmanship principles as much as possible. We love
-coding and consider that strong quality and good developer experience
-matter a lot. Through our diverse experiences, we allow studios to get
-better at doing software and focus more on the artistic work.
+We apply software craftsmanship principles as much as possible. We love
+coding and consider strong qualities and good developer experience to
+matter a lot. Through our diverse experiences, we enable studios to produce quality
+software, so that they can focus more on the artistic work.
 
 Visit `cg-wire.com <https://cg-wire.com>`__ for more information.
 
