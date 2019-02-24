@@ -202,7 +202,7 @@ def delete_person(person_id):
     person = Person.get(person_id)
     person_dict = person.serialize()
     person.delete()
-    events.emit("person:deletetion", {
+    events.emit("person:delete", {
         "person_id": person_id
     })
     clear_person_cache()

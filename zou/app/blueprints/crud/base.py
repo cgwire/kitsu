@@ -308,4 +308,4 @@ class BaseModelResource(Resource):
             current_app.logger.error(str(exception))
             return {"message": str(exception)}, 400
 
-        return {"deletion_success": True}, 204
+        return '', 204

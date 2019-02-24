@@ -80,7 +80,7 @@ class ProductionTeamRemoveResource(Resource):
     def delete(self, project_id, person_id):
         user_service.check_manager_project_access(project_id)
         project = projects_service.remove_team_member(project_id, person_id)
-        return fields.serialize_value(project), 204
+        return '', 204
 
 
 class ProductionMetadataDescriptorsResource(Resource, ArgsMixin):
