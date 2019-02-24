@@ -295,7 +295,7 @@ class BaseModelResource(Resource):
             self.check_delete_permissions(instance_dict)
             instance.delete()
             events.emit(
-                "%s:deletion" % self.model.__tablename__,
+                "%s:delete" % self.model.__tablename__,
                 {"%s_id" % self.model.__tablename__: instance.id}
             )
             self.post_delete(instance_dict)
