@@ -7,7 +7,6 @@ from sqlalchemy import engine_from_config, pool
 from logging.config import fileConfig
 from flask import current_app
 
-import sqlalchemy_utils
 import logging
 
 # this is the Alembic Config object, which provides
@@ -91,6 +90,7 @@ def run_migrations_online():
 def render_item(type_, obj, autogen_context):
     """Apply custom rendering for selected items."""
 
+    import sqlalchemy_utils
     if type_ == 'type' and \
        isinstance(obj, sqlalchemy_utils.types.uuid.UUIDType):
         autogen_context.imports.add("import sqlalchemy_utils")

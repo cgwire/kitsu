@@ -26,6 +26,7 @@ class Project(db.Model, BaseMixin, SerializerMixin):
     Describes a CG production the studio works on.
     """
     name = db.Column(db.String(80), nullable=False, unique=True, index=True)
+    code = db.Column(db.String(80))
     description = db.Column(db.String(200))
     shotgun_id = db.Column(db.Integer)
     file_tree = db.Column(JSONB)
