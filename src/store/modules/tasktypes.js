@@ -85,6 +85,13 @@ const actions = {
     })
   },
 
+  loadTaskType ({ commit, state }, taskTypeId) {
+    taskTypesApi.getTaskType(taskTypeId, (err, taskType) => {
+      if (err) console.error(err)
+      else commit(EDIT_TASK_TYPE_END, taskType)
+    })
+  },
+
   newTaskType ({ commit, state }, payload) {
     commit(EDIT_TASK_TYPE_START, payload.data)
     taskTypesApi.newTaskType(payload.data, (err, taskType) => {
