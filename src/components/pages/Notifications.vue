@@ -215,7 +215,7 @@ export default {
 
   socket: {
     events: {
-      'preview:add' (eventData) {
+      'preview-file:add-file' (eventData) {
         const commentId = eventData.comment_id
         const previewId = eventData.preview_file_id
         this.$store.commit('NOTIFICATION_ADD_PREVIEW', {

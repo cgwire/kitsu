@@ -440,7 +440,7 @@ export default {
 
   socket: {
     events: {
-      'notifications:new' (eventData) {
+      'notification:new' (eventData) {
         if (this.user.id === eventData.person_id) {
           const notificationId = eventData.notification_id
           this.loadNotification(notificationId)
