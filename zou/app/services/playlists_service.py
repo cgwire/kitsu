@@ -5,7 +5,10 @@ from zou.app.utils import fields
 
 from zou.app.services import tasks_service
 
-from zou.app.services.exception import PlaylistNotFoundException
+from zou.app.services.exception import (
+    PlaylistNotFoundException,
+    ShotNotFoundException
+)
 
 
 def all_playlists_for_project(project_id):
@@ -38,9 +41,12 @@ def get_playlist_with_preview_file_revisions(playlist_id):
         playlist_dict["shots"] = []
 
     for shot in playlist_dict["shots"]:
-        shot["preview_files"] = get_preview_files_for_shot(
-            shot["shot_id"]
-        )
+        try:
+            shot["preview_files"] = get_preview_files_for_shot(
+                shot["shot_id"]
+            )
+        except ShotNotFoundException:
+            playlist_dict["shots"].remove(shot)
     return playlist_dict
 
 
