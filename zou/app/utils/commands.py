@@ -1,3 +1,5 @@
+# coding: utf-8
+
 import os
 import json
 import datetime
@@ -140,7 +142,7 @@ def sync_with_ldap_server():
     LDAP_BASE_DN = os.getenv("LDAP_BASE_DN", "cn=Users,dc=studio,dc=local")
     LDAP_DOMAIN = os.getenv("LDAP_DOMAIN", "")
     LDAP_USER = os.getenv("LDAP_USER", "")
-    EMAIL_DOMAIN = os.getenv("EMAIL_DN", "studio.local")
+    EMAIL_DOMAIN = os.getenv("EMAIL_DOMAIN", "studio.local")
     LDAP_EXCLUDED_ACCOUNTS = os.getenv("LDAP_EXCLUDED_ACCOUNTS", "")
 
     def get_ldap_users():
@@ -156,6 +158,7 @@ def sync_with_ldap_server():
             raise_exceptions=True,
             auto_bind=True
         )
+
         attributes = [
             "givenName", "sn", "sAMAccountName", "mail", "thumbnailPhoto"
         ]
@@ -169,7 +172,7 @@ def sync_with_ldap_server():
                 "thumbnail": entry.thumbnailPhoto.raw_values
             }
             for entry in conn.entries
-            if entry.sAMAccountName not in excluded_accounts
+            if str(entry.sAMAccountName) not in excluded_accounts
         ]
 
     def update_person_list_with_ldap_users(users):
@@ -191,7 +194,7 @@ def sync_with_ldap_server():
             except PersonNotFoundException:
                 pass
             if person is None:
-                if len(email) == 0:
+                if len(email) == 0 or email == "[]":
                     email = "%s@%s" % (desktop_login, EMAIL_DOMAIN)
                 person = persons_service.create_person(
                     email,
