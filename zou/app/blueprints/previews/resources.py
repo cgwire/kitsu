@@ -259,7 +259,7 @@ class CreatePreviewFilePictureResource(Resource):
         if comment is not None:
             comment_id = comment["id"]
 
-        events.emit("preview:add", {
+        events.emit("preview-file:add-file", {
             "comment_id": comment_id,
             "task_id": preview_file["task_id"],
             "preview_file_id": preview_file["id"],
