@@ -501,15 +501,17 @@ export default {
 
     rebuildCurrentShots () {
       this.currentShots = {}
-      if (this.currentPlaylist) {
+      if (this.currentPlaylist && this.currentPlaylist.shots) {
         this.currentPlaylist.shots.forEach((shotPreview) => {
           const shot = this.shotMap[shotPreview.shot_id]
-          this.currentShots[shotPreview.shot_id] = {
-            id: shotPreview.shot_id,
-            name: shot.name,
-            entity_name: shot.tasks[0].entity_name,
-            preview_files: shotPreview.preview_files,
-            preview_file_id: shotPreview.preview_file_id || shot.preview_file_id
+          if (shot) {
+            this.currentShots[shotPreview.shot_id] = {
+              id: shotPreview.shot_id,
+              name: shot.name,
+              entity_name: shot.tasks[0].entity_name,
+              preview_files: shotPreview.preview_files,
+              preview_file_id: shotPreview.preview_file_id || shot.preview_file_id
+            }
           }
         })
       }
