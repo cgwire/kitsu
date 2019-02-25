@@ -97,7 +97,7 @@ def create_notifications_for_task_and_comment(task, comment, change=False):
             notification = create_notification(
                 person, comment, read=False, change=change
             )
-            events.emit("notifications:new", {
+            events.emit("notification:new", {
                 "notification_id": notification["id"],
                 "person_id": recipient_id
             })

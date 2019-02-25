@@ -229,7 +229,8 @@ class FilterResource(Resource):
 
     @jwt_required
     def delete(self, filter_id):
-        return user_service.remove_filter(filter_id), 204
+        user_service.remove_filter(filter_id)
+        return '', 204
 
 
 class DesktopLoginLogsResource(Resource):

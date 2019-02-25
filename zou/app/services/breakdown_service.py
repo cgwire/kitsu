@@ -62,7 +62,7 @@ def update_casting(shot_id, casting):
             entity_out_id=cast["asset_id"],
             nb_occurences=cast["nb_occurences"]
         )
-    events.emit("casting:update", {
+    events.emit("shot:casting-update", {
         "shot": shot_id,
         "casting": casting_ids
     })

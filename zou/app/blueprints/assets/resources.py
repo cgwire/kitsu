@@ -35,7 +35,7 @@ class AssetResource(Resource):
         user_service.check_manager_project_access(asset["project_id"])
 
         deleted_asset = assets_service.remove_asset(asset_id, force=force)
-        return deleted_asset, 204
+        return '', 204
 
 
 class AllAssetsResource(Resource):

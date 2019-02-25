@@ -443,7 +443,7 @@ def create_comment(
 def delete_comment(comment_id):
     comment = get_comment_raw(comment_id)
     comment.delete()
-    events.emit("comment:deletion", {
+    events.emit("comment:delete", {
         "comment_id": comment_id,
     })
     return comment.serialize()

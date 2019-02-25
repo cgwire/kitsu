@@ -75,7 +75,7 @@ class TaskResource(BaseModelResource):
             self.check_delete_permissions(instance_dict)
             deletion_service.remove_task(instance_id, force=args["force"])
             events.emit(
-                "%s:deletion" % self.model.__tablename__,
+                "%s:delete" % self.model.__tablename__,
                 {"%s_id" % self.model.__tablename__: instance.id}
             )
             self.post_delete(instance_dict)
@@ -84,4 +84,4 @@ class TaskResource(BaseModelResource):
             current_app.logger.error(str(exception))
             return {"message": str(exception)}, 400
 
-        return {"deletion_success": True}, 204
+        return '', 204

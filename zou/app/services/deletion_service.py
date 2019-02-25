@@ -143,7 +143,7 @@ def remove_task(task_id, force=False):
             time_spent.delete()
 
     task.delete()
-    events.emit("task:deletion", {
+    events.emit("task:delete", {
         "task_id": task_id
     })
     return task.serialize()

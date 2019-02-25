@@ -52,7 +52,7 @@ class ShotResource(Resource):
         except permissions.PermissionDenied:
             abort(403)
 
-        return deleted_shot, 204
+        return '', 204
 
 
 class SceneResource(Resource):
@@ -74,7 +74,7 @@ class SceneResource(Resource):
         scene = shots_service.get_scene(scene_id)
         user_service.check_manager_project_access(scene["project_id"])
         deleted_scene = shots_service.remove_scene(scene_id)
-        return deleted_scene, 204
+        return '', 204
 
 
 class ShotsResource(Resource):
@@ -518,7 +518,7 @@ class RemoveShotAssetInstanceResource(Resource, ArgsMixin):
             shot_id,
             asset_instance_id
         )
-        return shot, 204
+        return '', 204
 
 
 class SceneAssetInstancesResource(Resource, ArgsMixin):
@@ -595,4 +595,5 @@ class RemoveShotFromSceneResource(Resource):
         scene = shots_service.get_scene(scene_id)
         user_service.check_project_access(scene["project_id"])
         shot = shots_service.get_shot(shot_id)
-        return scenes_service.remove_shot_from_scene(scene, shot), 204
+        scenes_service.remove_shot_from_scene(scene, shot)
+        return '', 204

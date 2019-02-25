@@ -692,7 +692,7 @@ def remove_shot(shot_id, force=False):
         shot.delete()
 
     deleted_shot = shot.serialize(obj_type="Shot")
-    events.emit("shot:deletion", {
+    events.emit("shot:delete", {
         "shot_id": shot_id
     })
     return deleted_shot
@@ -709,7 +709,7 @@ def remove_scene(scene_id):
     except IntegrityError:
         scene.update({"canceled": True})
     deleted_scene = scene.serialize(obj_type="Scene")
-    events.emit("scene:deletion", {
+    events.emit("scene:delete", {
         "scene_id": scene_id
     })
     return deleted_scene
