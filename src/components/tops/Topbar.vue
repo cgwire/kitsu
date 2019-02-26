@@ -495,6 +495,7 @@ export default {
 
 .user-nav {
   cursor: pointer;
+  min-width: 150px;
 }
 
 .user-nav.active {
@@ -504,6 +505,7 @@ export default {
   position: fixed;
   top: 60px;
   width: 200px;
+  min-width: 150px;
   right: 0;
   background-color: white;
   padding: 1em 1em 1em 1em;
