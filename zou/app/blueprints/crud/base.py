@@ -160,7 +160,7 @@ class BaseModelsResource(Resource):
             instance.save()
             instance_dict = self.post_creation(instance)
             events.emit(
-                "%s:new" % self.model.__tablename__,
+                "%s:new" % self.model.__tablename__.replace('_', '-'),
                 {"%s_id" % self.model.__tablename__: instance.id}
             )
             return instance_dict, 201
@@ -244,6 +244,9 @@ class BaseModelResource(Resource):
     def post_delete(self, instance_dict):
         pass
 
+    def pre_delete(self, instance_dict):
+        pass
+
     @jwt_required
     def put(self, instance_id):
         """
@@ -293,6 +296,7 @@ class BaseModelResource(Resource):
         try:
             instance_dict = instance.serialize()
             self.check_delete_permissions(instance_dict)
+            self.pre_delete(instance_dict)
             instance.delete()
             events.emit(
                 "%s:delete" % self.model.__tablename__,

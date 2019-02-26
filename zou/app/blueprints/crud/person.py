@@ -1,6 +1,8 @@
 from flask import abort
 
 from zou.app.models.person import Person
+from zou.app.models.notifications import Notification
+from zou.app.models.search_filters import SearchFilter
 from zou.app.services import persons_service
 from zou.app.utils import permissions
 
@@ -73,6 +75,11 @@ class PersonResource(BaseModelResource):
 
     def post_update(self, instance_dict):
         persons_service.clear_person_cache()
+        return instance_dict
+
+    def pre_delete(self, instance_dict):
+        Notification.delete_all_by(person_id=instance_dict["id"])
+        SearchFilter.delete_all_by(person_id=instance_dict["id"])
         return instance_dict
 
     def post_delete(self, instance_dict):

@@ -23,20 +23,30 @@ class BaseCsvImportResource(Resource):
 
         file_path = os.path.join(app.config["TMP_DIR"], file_name)
         uploaded_file.save(file_path)
-        result = []
 
         try:
-            self.check_permissions()
-            self.prepare_import()
-            with open(file_path) as csvfile:
-                reader = csv.DictReader(csvfile)
-                for row in reader:
-                    row = self.import_row(row)
-                    result.append(row)
-
+            result = self.run_import(file_path, ",")
             return result, 201
         except KeyError as e:
-            return {"error": "A column is missing: %s" % e}, 400
+            try:
+                result = self.run_import(file_path, ";")
+                return result, 201
+            except KeyError as e:
+                return {
+                    "error": True,
+                    "message": "A column is missing: %s" % e
+                }, 400
+
+    def run_import(self, file_path, delimiter):
+        result = []
+        self.check_permissions()
+        self.prepare_import()
+        with open(file_path) as csvfile:
+            reader = csv.DictReader(csvfile, delimiter=delimiter)
+            for row in reader:
+                row = self.import_row(row)
+                result.append(row)
+        return result
 
     def prepare_import(self):
         pass
@@ -68,21 +78,31 @@ class BaseCsvProjectImportResource(BaseCsvImportResource):
         file_name = "%s.csv" % uuid.uuid4()
         file_path = os.path.join(app.config["TMP_DIR"], file_name)
         uploaded_file.save(file_path)
-        result = []
 
         try:
-            self.check_project_permissions(project_id)
-            self.prepare_import()
-            with open(file_path) as csvfile:
-                reader = csv.DictReader(csvfile)
-                for row in reader:
-                    row = self.import_row(row, project_id)
-                    result.append(row)
-
+            result = self.run_import(project_id, file_path, ",")
             return result, 201
         except KeyError as e:
             print(e)
-            return {"error": "A column is missing: %s" % e}, 400
+            try:
+                result = self.run_import(project_id, file_path, ";")
+                return result, 201
+            except KeyError as e:
+                return {
+                    "error": True,
+                    "message": "A column is missing: %s" % e
+                }, 400
+
+    def run_import(self, project_id, file_path, delimiter):
+        result = []
+        self.check_project_permissions(project_id)
+        self.prepare_import()
+        with open(file_path) as csvfile:
+            reader = csv.DictReader(csvfile, delimiter=delimiter)
+            for row in reader:
+                row = self.import_row(row, project_id)
+                result.append(row)
+        return result
 
     def check_project_permissions(self, project_id):
         return user_service.check_manager_project_access(project_id)
