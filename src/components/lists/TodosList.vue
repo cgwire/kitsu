@@ -243,7 +243,7 @@ export default {
       const taskType = this.taskTypeMap[entry.task_type_id]
       const production = this.productionMap[entry.project_id]
       taskType.episode_id = entry.episode_id
-      if (production.production_type === 'tvshow' && !entry.episode_id) {
+      if (production && production.production_type === 'tvshow' && !entry.episode_id) {
         taskType.episode_id = production.first_episode_id
       }
       return taskType
@@ -266,7 +266,7 @@ export default {
 
       const production = this.productionMap[entity.project_id]
       let episodeId = entity.episode_id
-      if (production.production_type === 'tvshow' && !episodeId) {
+      if (production && production.production_type === 'tvshow' && !episodeId) {
         episodeId = production.first_episode_id
       }
 
