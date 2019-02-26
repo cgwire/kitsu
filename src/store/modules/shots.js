@@ -331,7 +331,7 @@ const actions = {
     const taskTypeMap = rootGetters.taskTypeMap
     const personMap = rootGetters.personMap
     const isTVShow = rootGetters.isTVShow
-    const episode = rootGetters.currentEpisode
+    const episode = isTVShow ? rootGetters.currentEpisode : null
 
     if (isTVShow && !episode) {
       return callback()
@@ -828,6 +828,8 @@ const mutations = {
 
     if (state.episodes.length > 0) {
       state.currentEpisode = state.episodes[0]
+    } else {
+      state.currentEpisode = null
     }
   },
 

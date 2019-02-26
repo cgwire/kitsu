@@ -354,6 +354,7 @@ export default {
             this.updateComboFromRoute()
           })
         } else {
+          this.clearEpisodes()
           this.updateComboFromRoute()
         }
       } else if (

@@ -171,7 +171,6 @@ export default {
       'shots',
       'sequences',
       'shotMap',
-      'shotsBySequence',
 
       'castingSequenceId',
       'castingCurrentShot',

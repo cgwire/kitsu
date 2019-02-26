@@ -10,7 +10,7 @@
           }"
           @click="addPlaylist"
         >
-          <plus-icon class="icon is-small"></plus-icon>
+          <plus-icon class="icon is-small" />
           {{ $t('playlists.new_playlist') }}
         </button>
 
@@ -27,7 +27,7 @@
             {{ playlist.name }}
           </router-link>
         </div>
-        <spinner v-else></spinner>
+        <spinner v-else />
         <error-text
           text="$t('playlists.loading_error')"
           v-if="errors.playlistLoading"
@@ -625,11 +625,20 @@ export default {
       this.setAdditionShots()
     },
 
-    currentEpisode () {
+    currentProduction () {
       this.setAdditionSequences()
       this.loadShotsData(() => {
         this.resetPlaylist()
       })
+    },
+
+    currentEpisode () {
+      if (this.currentEpisode) {
+        this.setAdditionSequences()
+        this.loadShotsData(() => {
+          this.resetPlaylist()
+        })
+      }
     }
   },
 
