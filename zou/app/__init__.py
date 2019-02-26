@@ -59,7 +59,7 @@ def shutdown_session(exception=None):
 
 @app.errorhandler(404)
 def page_not_found(error):
-    return jsonify(error=404, message=str(error)), 404
+    return jsonify(error=True, message=str(error)), 404
 
 
 @app.errorhandler(WrongIdFormatException)
@@ -84,7 +84,7 @@ if not config.DEBUG:
         stacktrace = traceback.format_exc()
         current_app.logger.error(stacktrace)
         return jsonify(
-            error=500,
+            error=True,
             message=str(error),
             stacktrace=stacktrace
         ), 500
