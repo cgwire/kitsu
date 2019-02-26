@@ -218,7 +218,7 @@ const getters = {
   },
 
   assetsByType: state => {
-    return helpers.groupAssetsByType(Object.values(state.assetMap))
+    return helpers.groupAssetsByType(Object.values(state.displayedAssets))
   },
 
   editAsset: state => state.editAsset,
