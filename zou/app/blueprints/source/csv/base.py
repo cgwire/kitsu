@@ -83,6 +83,7 @@ class BaseCsvProjectImportResource(BaseCsvImportResource):
             result = self.run_import(project_id, file_path, ",")
             return result, 201
         except KeyError as e:
+            print(e)
             try:
                 result = self.run_import(project_id, file_path, ";")
                 return result, 201
@@ -97,7 +98,7 @@ class BaseCsvProjectImportResource(BaseCsvImportResource):
         self.check_project_permissions(project_id)
         self.prepare_import()
         with open(file_path) as csvfile:
-            reader = csv.DictReader(csvfile, delimiter=";")
+            reader = csv.DictReader(csvfile, delimiter=delimiter)
             for row in reader:
                 row = self.import_row(row, project_id)
                 result.append(row)
