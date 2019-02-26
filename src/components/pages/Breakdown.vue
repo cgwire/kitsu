@@ -68,7 +68,12 @@
         </div>
       </div>
 
-      <div class="breakdown-column assets-column" v-if="isCurrentUserManager">
+      <div
+        ref="asset-list"
+        v-scroll="onAssetListScroll"
+        class="breakdown-column assets-column"
+        v-if="isCurrentUserManager"
+      >
         <h2 class="subtitle">
           {{ $t('breakdown.all_assets') }}
         </h2>
@@ -166,7 +171,6 @@ export default {
       'shots',
       'sequences',
       'shotMap',
-      'shotsBySequence',
 
       'castingSequenceId',
       'castingCurrentShot',
@@ -197,6 +201,7 @@ export default {
 
   methods: {
     ...mapActions([
+      'displayMoreAssets',
       'loadShots',
       'loadAssets',
       'saveCasting',
@@ -236,6 +241,7 @@ export default {
               this.isLoading = false
             }
           })
+          this.displayMoreAssets()
         })
       })
     },
@@ -287,6 +293,14 @@ export default {
     removeTenAssets (assetId) {
       this.removeAssetFromCasting({assetId, nbOccurences: 10})
       this.saveCasting()
+    },
+
+    onAssetListScroll (event, position) {
+      const assetList = this.$refs['asset-list']
+      const maxHeight = assetList.scrollHeight - assetList.offsetHeight
+      if (maxHeight < (position.scrollTop + 100)) {
+        this.displayMoreAssets()
+      }
     }
   },
 

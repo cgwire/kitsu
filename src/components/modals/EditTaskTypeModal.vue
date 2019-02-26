@@ -20,21 +20,25 @@
           ref="nameField"
           :label="$t('task_types.fields.name')"
           v-model="form.name"
+          @enter="confirmClicked"
           v-focus
         />
         <combobox
           :label="$t('task_types.fields.priority')"
           :options="priorityOptions"
+          @enter="confirmClicked"
           v-model="form.priority"
         />
         <combobox
           :label="$t('task_types.fields.dedicated_to')"
           :options="dedicatedToOptions"
+          @enter="confirmClicked"
           v-model="form.for_shots"
         />
         <combobox
           :label="$t('task_types.fields.allow_timelog')"
           :options="allowTimelogOptions"
+          @enter="confirmClicked"
           v-model="form.allow_timelog"
         />
         <color-field

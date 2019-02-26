@@ -30,6 +30,7 @@ export default {
       'isSavingCommentPreview',
       'route',
       'taskMap',
+      'taskTypeMap',
       'user'
     ])
   },
@@ -56,11 +57,14 @@ export default {
 
   methods: {
     ...mapActions([
+      'loadAsset',
       'getTask',
       'loadComment',
       'loadPersonTasks',
+      'loadTaskType',
       'refreshPreview',
-      'refreshMetadataDescriptor'
+      'refreshMetadataDescriptor',
+      'removeAsset'
     ]),
 
     onAssignation (eventData) {
@@ -87,6 +91,27 @@ export default {
 
   socket: {
     events: {
+      'task-type:new' (eventData) {
+        if (!this.taskTypeMap[eventData.task_type_id]) {
+          this.loadTaskType(eventData.task_type_id)
+        }
+      },
+
+      'task-type:update' (eventData) {
+        if (this.taskTypeMap[eventData.task_type_id]) {
+          this.loadTaskType(eventData.task_type_id)
+        }
+      },
+
+      'task-type:delete' (eventData) {
+        if (this.taskTypeMap[eventData.task_type_id]) {
+          this.$store.commit(
+            'DELETE_TASK_TYPE_END',
+            {id: eventData.task_type_id}
+          )
+        }
+      },
+
       'task:assign' (eventData) {
         this.onAssignation(eventData)
       },

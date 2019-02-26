@@ -238,6 +238,7 @@ export default {
       this.initTaskType(force)
         .then(() => {
           this.loading.entities = false
+          this.resetTasks()
           this.resetTaskIndex()
           this.$refs['task-search-field'].focus()
         })
@@ -268,6 +269,7 @@ export default {
       } else {
         this.resetTasks()
       }
+      this.clearSelectedTasks()
     },
 
     onTaskSelected (task) {
@@ -285,12 +287,10 @@ export default {
 
     resetTaskIndex () {
       if (this.isAssets) {
-        this.tasks = this.assetTasks
         this.$options.taskIndex = buildSupervisorTaskIndex(
           this.assetTasks
         )
       } else {
-        this.tasks = this.shotTasks
         this.$options.taskIndex = buildSupervisorTaskIndex(
           this.shotTasks
         )

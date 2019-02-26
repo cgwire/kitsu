@@ -354,6 +354,7 @@ export default {
             this.updateComboFromRoute()
           })
         } else {
+          this.clearEpisodes()
           this.updateComboFromRoute()
         }
       } else if (
@@ -440,7 +441,7 @@ export default {
 
   socket: {
     events: {
-      'notifications:new' (eventData) {
+      'notification:new' (eventData) {
         if (this.user.id === eventData.person_id) {
           const notificationId = eventData.notification_id
           this.loadNotification(notificationId)
@@ -494,6 +495,7 @@ export default {
 
 .user-nav {
   cursor: pointer;
+  min-width: 150px;
 }
 
 .user-nav.active {
@@ -503,6 +505,7 @@ export default {
   position: fixed;
   top: 60px;
   width: 200px;
+  min-width: 150px;
   right: 0;
   background-color: white;
   padding: 1em 1em 1em 1em;

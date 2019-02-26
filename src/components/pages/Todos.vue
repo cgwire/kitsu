@@ -200,6 +200,7 @@ export default {
   methods: {
     ...mapActions([
       'loadTodos',
+      'loadOpenProductions',
       'removeTodoSearch',
       'saveTodoSearch',
       'setTodoListScrollPosition',
@@ -279,17 +280,19 @@ export default {
 
     onAssignation (eventData) {
       if (this.user.id === eventData.person_id) {
-        this.loadTodos({
-          forced: true,
-          date: this.selectedDate,
-          callback: () => {
-            if (this.todoList) {
-              this.$nextTick(() => {
-                this.todoList.setScrollPosition(this.todoListScrollPosition)
-              })
+        this.loadOpenProductions(() => {
+          this.loadTodos({
+            forced: true,
+            date: this.selectedDate,
+            callback: () => {
+              if (this.todoList) {
+                this.$nextTick(() => {
+                  this.todoList.setScrollPosition(this.todoListScrollPosition)
+                })
+              }
+              this.resizeHeaders()
             }
-            this.resizeHeaders()
-          }
+          })
         })
       }
     }

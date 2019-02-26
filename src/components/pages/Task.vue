@@ -1314,7 +1314,7 @@ export default {
 
   socket: {
     events: {
-      'preview:add' (eventData) {
+      'preview-file:add-file' (eventData) {
         this.onPreviewAdded(eventData)
       },
 

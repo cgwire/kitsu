@@ -132,8 +132,6 @@
     ref="body"
     class="table-body"
     v-scroll="onBodyScroll"
-    infinite-scroll-disabled="busy"
-    infinite-scroll-distance="120"
     v-if="!isLoading"
   >
     <table

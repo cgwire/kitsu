@@ -499,9 +499,14 @@ const mutations = {
     if (personToEditIndex >= 0) {
       state.people[personToEditIndex] = state.personToEdit
     } else {
-      state.people.push(state.personToEdit)
+      state.people = [
+        ...state.people,
+        state.personToEdit
+      ]
       state.personMap[state.personToEdit.id] = state.personToEdit
+      state.displayedPeople.push(state.personToEdit)
       sortPeople(state.people)
+      sortPeople(state.displayedPeople)
     }
     state.personToEdit = {
       role: 'user'

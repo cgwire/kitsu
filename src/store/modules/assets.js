@@ -218,7 +218,7 @@ const getters = {
   },
 
   assetsByType: state => {
-    return helpers.groupAssetsByType(Object.values(state.assetMap))
+    return helpers.groupAssetsByType(Object.values(state.displayedAssets))
   },
 
   editAsset: state => state.editAsset,
@@ -580,7 +580,7 @@ const mutations = {
       state.displayedAssets.push(newAsset)
       state.displayedAssets = sortAssets(state.displayedAssets)
       state.assetFilledColumns = getFilledColumns(state.displayedAssets)
-      state.displayedAssetsLength = state.displayedAssets.length
+      state.displayedAssetsLength = cache.assets.length
 
       const maxX = state.displayedAssets.length
       const maxY = state.nbValidationColumns
@@ -622,6 +622,10 @@ const mutations = {
       state.displayedAssets.splice(displayAssetToDeleteIndex, 1)
       state.assetFilledColumns = getFilledColumns(state.displayedAssets)
       state.assetMap[assetToDelete.id] = undefined
+      state.displayedAssetsLength = Math.max(
+        state.displayedAssetsLength - 1,
+        0
+      )
     }
 
     state.deleteAsset = {
