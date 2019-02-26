@@ -106,6 +106,7 @@ export default {
     },
 
     people () {
+      console.log('yeah', this.people.length)
       this.items = null
       this.items = this.people
       this.index = buildNameIndex(this.people)

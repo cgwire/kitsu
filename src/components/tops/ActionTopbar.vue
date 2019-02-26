@@ -676,6 +676,10 @@ export default {
       this.setCurrentTeam()
     },
 
+    people () {
+      this.setCurrentTeam()
+    },
+
     $route () {
       this.clearSelectedTasks()
     }
