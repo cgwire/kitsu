@@ -89,6 +89,13 @@ class BaseMixin(object):
         return instance
 
     @classmethod
+    def delete_all_by(cls, **kw):
+        """
+        Shorthand to delete data by using filters.
+        """
+        return cls.query.filter_by(**kw).delete()
+
+    @classmethod
     def get_id_map(cls, field="shotgun_id"):
         """
         Build a map to easily match a field value with an id. It's useful during
