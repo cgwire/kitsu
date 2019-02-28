@@ -77,13 +77,11 @@ task.
 
 ![Waiting for approval](../img/getting-started/wfa_status.png)
 
-Then click on the **Attach preview** button.
+You can drag ans drop your file directly or, click on the **Attach preview** button.
 
 ![Add preview file](../img/getting-started/add_preview.png)
 
-You can either drag and drop you pic or video on the **Choose a file** button,
-or navigate through your system and pick your file, validate with the
-**Confirm** button. And then use the **Post comment** button.
+And then use the **Post comment** button.
 
 Your work will appear on the right part of the screen as a V1. 
 
