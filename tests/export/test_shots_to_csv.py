@@ -25,7 +25,7 @@ class ShotCsvExportTestCase(ApiDBTestCase):
             "/export/csv/projects/%s/shots.csv" % self.project.id
         )
         expected_result = """Project,Episode,Sequence,Name,Description,Time Spent,Nb Frames,Frame In,Frame Out,Animation\r
-Cosmos Landromat,E01,S01,P01,Description Shot 01,0,0.00,0,100,opn\r\n"""
+Cosmos Landromat,E01,S01,P01,Description Shot 01,0.00,,0,100,opn\r\n"""
         self.assertEqual(csv_shots, expected_result)
 
     def test_get_asset_csv_with_metadata(self):
@@ -41,5 +41,5 @@ Cosmos Landromat,E01,S01,P01,Description Shot 01,0,0.00,0,100,opn\r\n"""
             "/export/csv/projects/%s/shots.csv" % self.project.id
         )
         expected_result = """Project,Episode,Sequence,Name,Description,Time Spent,Nb Frames,Frame In,Frame Out,Contractor,Animation\r
-Cosmos Landromat,E01,S01,P01,Description Shot 01,0,0.00,0,100,Contractor 1,opn\r\n"""
+Cosmos Landromat,E01,S01,P01,Description Shot 01,0.00,0,100,Contractor 1,opn\r\n"""
         self.assertEqual(csv_shots, expected_result)
