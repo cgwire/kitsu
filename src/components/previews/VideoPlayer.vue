@@ -70,7 +70,7 @@
           @click="onPlayPauseClicked"
         >
           <pause-icon class="icon" v-if="isPlaying" />
-          <play-icon class="icon" v-else />
+          <play-icon class="icon" v-if="!isPlaying" />
         </button>
 
         <button
@@ -99,10 +99,11 @@
           :class="{
             button: true,
             'flexrow-item': true,
-            active: isComparing
+            active: isComparing,
+            'comparison-button': true
           }"
           @click="onCompareClicked"
-          v-if="taskTypeOptions.length > 0"
+          v-if="taskTypeOptions.length > 0 && (!light || isFullScreen())"
         >
           <copy-icon class="icon smaller" />
         </button>
@@ -1230,5 +1231,9 @@ progress {
 
 .comparison-combobox {
   margin-bottom: 0;
+}
+
+.buttons .comparison-button {
+  margin-left: 1em;
 }
 </style>

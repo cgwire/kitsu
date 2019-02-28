@@ -203,6 +203,8 @@ export default {
   border-left: 6px solid $light-grey;
   border-radius: 0 5px 5px 0;
   padding: 0.6em;
+  word-wrap: anywhere;
+  hyphens: auto;
 }
 
 .comment:first-child {

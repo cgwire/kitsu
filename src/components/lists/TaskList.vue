@@ -21,6 +21,9 @@
           <th class="assignees" ref="th-assignees">
             {{ $t('tasks.fields.assignees') }}
           </th>
+          <th class="frames" ref="th-frames" v-if="!isAssets">
+            {{ $t('tasks.fields.frames') }}
+          </th>
           <th class="estimation" ref="th-estimation">
             {{ $t('tasks.fields.estimation').substring(0, 3) }}.
           </th>
@@ -111,6 +114,9 @@
               />
             </div>
           </td>
+          <td class="frames" v-if="!isAssets">
+            {{ getEntity(task.entity.id).nb_frames }}
+          </td>
           <td class="estimation">
             {{ formatEstimation(task.estimation) }}
           </td>
@@ -145,7 +151,9 @@
     class="has-text-centered nb-tasks"
     v-if="!isLoading"
   >
-    {{ tasks.length }} tasks
+    {{ tasks.length }} {{ $tc('tasks.number', tasks.length) }}
+    ({{ formatDuration(timeSpent) }}
+     {{ $tc('main.days_spent', Math.floor((timeSpent ? timeSpent : 0) / 60) / 8) }}<span v-if="!isAssets">, {{ nbFrames }} {{ $tc('main.nb_frames', nbFrames) }}</span>)
   </p>
 </div>
 </template>
@@ -158,6 +166,7 @@ import {
   ChevronDownIcon
 } from 'vue-feather-icons'
 import { range } from '../../lib/helpers'
+import { formatListMixin } from './format_mixin'
 
 import DescriptionCell from '../cells/DescriptionCell'
 import ButtonHrefLink from '../widgets/ButtonHrefLink'
@@ -174,7 +183,7 @@ import ValidationCell from '../cells/ValidationCell'
 
 export default {
   name: 'task-list',
-  mixins: [],
+  mixins: [formatListMixin],
 
   components: {
     ButtonLink,
@@ -230,7 +239,24 @@ export default {
       'personMap',
       'selectedTasks',
       'shotMap'
-    ])
+    ]),
+
+    timeSpent () {
+      let total = 0
+      this.tasks.forEach(t => {
+        total += t.duration
+      })
+      return total
+    },
+
+    nbFrames () {
+      let total = 0
+      this.tasks.forEach(t => {
+        const entity = this.shotMap[t.entity.id]
+        if (entity && entity.nb_frames) total += entity.nb_frames
+      })
+      return total
+    }
   },
 
   mounted () {
@@ -257,16 +283,6 @@ export default {
         } else {
           return this.formatDuration(estimation)
         }
-      } else {
-        return 0
-      }
-    },
-
-    formatDuration (duration) {
-      if (duration) {
-        return (duration / 60 / 8).toLocaleString(
-          'fullwide', { maximumFractionDigits: 1 }
-        )
       } else {
         return 0
       }
@@ -406,6 +422,9 @@ export default {
         this.$t('tasks.fields.real_end_date'),
         this.$t('tasks.fields.last_comment_date')
       ]
+      if (!this.isAssets) {
+        headers.splice(4, 0, 'otot')
+      }
       const taskLines = [headers]
       this.tasks.forEach((task) => {
         const assignees = task.assignees.map(personId => {
@@ -413,7 +432,7 @@ export default {
           if (person) return person.name
           else return ''
         }).join(', ')
-        taskLines.push([
+        const line = [
           this.isAssets ? this.getEntity(task.entity.id).asset_type_name : this.getEntity(task.entity.id).sequence_name,
           this.getEntity(task.entity.id).name,
           task.task_status_short_name,
@@ -424,7 +443,12 @@ export default {
           this.formatDate(task.real_start_date),
           this.formatDate(task.real_end_date),
           this.formatDate(task.last_comment_date)
-        ])
+        ]
+        if (!this.isAssets) {
+          const value = this.getEntity(task.entity.id).nb_frames
+          line.splice(4, 0, value)
+        }
+        taskLines.push(line)
       })
       return taskLines
     }
@@ -480,13 +504,9 @@ export default {
   width: 130px;
 }
 
+.frames,
+.duration,
 .estimation {
-  min-width: 60px;
-  width: 60px;
-  text-align: center;
-}
-
-.duration {
   min-width: 60px;
   width: 60px;
   text-align: center;

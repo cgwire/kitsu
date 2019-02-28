@@ -703,6 +703,7 @@ input.search-input:focus {
 
 .table td {
   vertical-align: middle;
+  word-wrap: anywhere;
 }
 
 .table-header-wrapper {
@@ -1071,9 +1072,9 @@ tbody:last-child .empty-line:last-child {
 }
 
 .break-word {
-  word-wrap: break-word;
   overflow-wrap: break-word;
   hyphens: auto;
+  word-wrap: anywhere;
 }
 
 .button.is-on {

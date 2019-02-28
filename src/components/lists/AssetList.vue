@@ -57,7 +57,9 @@
               />
             </div>
           </th>
-
+          <th class="time-spent" ref="th-spent">
+            {{ $t('assets.fields.time_spent') }}
+          </th>
           <th
             :class="{
               'validation-cell': !hiddenColumns[columnId],
@@ -181,6 +183,13 @@
           >
             {{ asset.data ? asset.data[descriptor.field_name] : '' }}
           </td>
+          <td
+            class="time-spent"
+            v-if="!isCurrentUserClient && isShowInfos"
+          >
+            {{ formatDuration(asset.timeSpent) }}
+          </td>
+
           <validation-cell
             :class="{
               'validation-cell': !hiddenColumns[columnId],
@@ -230,6 +239,7 @@ import {
   ChevronDownIcon
 } from 'vue-feather-icons'
 import { entityListMixin } from './base'
+import { formatListMixin } from './format_mixin'
 import { selectionListMixin } from './selection'
 
 import DescriptionCell from '../cells/DescriptionCell'
@@ -246,7 +256,7 @@ import ValidationCell from '../cells/ValidationCell'
 
 export default {
   name: 'asset-list',
-  mixins: [entityListMixin, selectionListMixin],
+  mixins: [entityListMixin, formatListMixin, selectionListMixin],
 
   props: {
     displayedAssets: {
@@ -487,6 +497,12 @@ export default {
 .name {
   min-width: 200px;
   width: 200px;
+}
+
+th.time-spent,
+td.time-spent {
+  min-width: 80px;
+  width: 80px;
 }
 
 .episode {

@@ -409,6 +409,9 @@ export default {
         this.isCurrentViewAsset ||
         this.isCurrentViewTodos ||
         this.isCurrentViewShot
+      ) ||
+      (
+        !this.isCurrentViewTodos && !this.isCurrentUserManager
       )
     },
 

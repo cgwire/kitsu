@@ -66,26 +66,28 @@ import {
 
 const helpers = {
   addAdditionalInformation (person) {
-    if (person.first_name && person.last_name) {
-      person.name = `${person.first_name} ${person.last_name}`
-      person.initials = `${person.first_name[0]}${person.last_name[0]}`
-    } else if (person.first_name) {
-      person.name = person.first_name
-      person.initials = person.first_name[0]
-    } else if (person.last_name) {
-      person.name = person.last_name
-      person.initials = person.last_name[0]
-    } else {
-      person.name = person.email
-      person.initials = person.email[0]
-    }
-    person.initials = person.initials.toUpperCase()
-    person.color = colors.fromString(person.name)
-    if (person.has_avatar) {
-      const randomHash = Math.random().toString(36).substring(7)
-      person.avatarPath =
-        `/api/pictures/thumbnails/persons/${person.id}` +
-        `.png?unique=${randomHash}`
+    if (person) {
+      if (person.first_name && person.last_name) {
+        person.name = `${person.first_name} ${person.last_name}`
+        person.initials = `${person.first_name[0]}${person.last_name[0]}`
+      } else if (person.first_name) {
+        person.name = person.first_name
+        person.initials = person.first_name[0]
+      } else if (person.last_name) {
+        person.name = person.last_name
+        person.initials = person.last_name[0]
+      } else {
+        person.name = person.email
+        person.initials = person.email[0]
+      }
+      person.initials = person.initials.toUpperCase()
+      person.color = colors.fromString(person.name)
+      if (person.has_avatar) {
+        const randomHash = Math.random().toString(36).substring(7)
+        person.avatarPath =
+          `/api/pictures/thumbnails/persons/${person.id}` +
+          `.png?unique=${randomHash}`
+      }
     }
     return person
   },

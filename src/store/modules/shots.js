@@ -167,6 +167,18 @@ const helpers = {
     })
 
     return task
+  },
+
+  setListStats (state, shots) {
+    let timeSpent = 0
+    let nbFrames = 0
+    state.displayedShotsLength = shots.length
+    state.displayedShots.forEach((shot) => {
+      timeSpent += shot.timeSpent
+      nbFrames += shot.nb_frames
+    })
+    state.displayedShotsTimeSpent = timeSpent
+    state.displayedShotsFrames = nbFrames
   }
 }
 
@@ -190,6 +202,8 @@ const initialState = {
 
   displayedShots: [],
   displayedShotsLength: 0,
+  displayedShotsTimeSpent: 0,
+  displayedShotsFrames: 0,
   displayedSequences: [],
   displayedSequencesLength: 0,
   displayedEpisodes: [],
@@ -256,6 +270,8 @@ const getters = {
 
   displayedShots: state => state.displayedShots,
   displayedShotsLength: state => state.displayedShotsLength,
+  displayedShotsTimeSpent: state => state.displayedShotsTimeSpent,
+  displayedShotsFrames: state => state.displayedShotsFrames,
   displayedSequences: state => state.displayedSequences,
   displayedSequencesLength: state => state.displayedSequencesLength,
   displayedEpisodes: state => state.displayedEpisodes,
@@ -714,6 +730,8 @@ const mutations = {
     state.sequenceIndex = {}
     state.displayedShots = []
     state.displayedShotsLength = 0
+    state.displayedTimeSpent = 0
+    state.displayedFrames = 0
     state.shotSearchQueries = []
     state.displayedSequences = []
     state.displayedSequencesLength = 0
@@ -738,11 +756,14 @@ const mutations = {
 
     state.shotMap = {}
     shots.forEach((shot) => {
+      let timeSpent = 0
       shot.production_id = production.id
       shot.tasks.forEach((task) => {
         helpers.populateTask(task, shot, production)
         validationColumns[task.task_type_id] = true
+        timeSpent += task.duration
       })
+      shot.timeSpent = timeSpent
 
       if (!isFps && shot.data.fps) isFps = true
       if (!isFrameIn && shot.data.frame_in) isFrameIn = true
@@ -762,7 +783,7 @@ const mutations = {
     cache.shotIndex = buildShotIndex(shots)
 
     state.displayedShots = shots.slice(0, PAGE_SIZE)
-    state.displayedShotsLength = shots.length
+    helpers.setListStats(state, shots)
     state.shotFilledColumns = getFilledColumns(state.displayedShots)
     cache.shots = shots
 
@@ -941,6 +962,12 @@ const mutations = {
       state.displayedShots.splice(displayedShotToDeleteIndex, 1)
       state.shotMap[shotToDelete.id] = undefined
       state.displayedShotsLength = Math.max(state.displayedShotsLength - 1, 0)
+      if (shotToDelete.timeSpent) {
+        state.displayedShotsTimeSpent -= shotToDelete.timeSpent
+      }
+      if (shot.nb_frames) {
+        state.displayedShotsFrames -= shotToDelete.nb_frames
+      }
     }
 
     state.deleteShot = {
@@ -1026,7 +1053,7 @@ const mutations = {
     result = applyFilters(result, filters, taskMap)
 
     state.displayedShots = result.slice(0, PAGE_SIZE)
-    state.displayedShotsLength = result.length
+    helpers.setListStats(state, result)
     state.shotFilledColumns = getFilledColumns(state.displayedShots)
     state.shotSearchText = shotSearch
 
@@ -1074,7 +1101,7 @@ const mutations = {
     cache.shots.push(shot)
     cache.shots = sortShots(cache.shots)
     state.displayedShots = cache.shots.slice(0, PAGE_SIZE)
-    state.displayedShotsLength = cache.shots.length
+    helpers.setListStats(state, cache)
     state.shotFilledColumns = getFilledColumns(state.displayedShots)
     state.shotMap[shot.id] = shot
     cache.shotIndex = buildShotIndex(cache.shots)
