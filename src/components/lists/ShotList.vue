@@ -57,13 +57,21 @@
             </div>
           </th>
 
-          <th class="framein" v-if="isFrameIn">
+          <th class="time-spent" v-if="isShowInfos">
+            {{ $t('shots.fields.time_spent') }}
+          </th>
+          <th class="frames" v-if="isShowInfos">
+            {{ $t('shots.fields.nb_frames') }}
+          </th>
+          <th class="framein" v-if="isFrameIn && isShowInfos">
             {{ $t('shots.fields.frame_in') }}
           </th>
-          <th class="frameout" v-if="isFrameOut">
+          <th class="frameout" v-if="isFrameOut && isShowInfos">
             {{ $t('shots.fields.frame_out') }}
           </th>
-          <th class="fps" v-if="isFps">{{ $t('shots.fields.fps') }}</th>
+          <th class="fps" v-if="isFps && isShowInfos">
+            {{ $t('shots.fields.fps') }}
+          </th>
 
           <th
             :class="{
@@ -173,6 +181,12 @@
           >
             {{ shot.data ? shot.data[descriptor.field_name] : '' }}
           </td>
+          <td class="time-spent">
+            {{ formatDuration(shot.timeSpent) }}
+          </td>
+          <td class="frames">
+            {{ shot.nb_frames }}
+          </td>
           <td class="framein" v-if="isFrameIn">
             {{ shot.data && shot.data.frame_in ? shot.data.frame_in : ''}}
           </td>
@@ -218,6 +232,7 @@
     v-if="!isEmptyList && !isLoading"
   >
     {{ displayedShotsLength }} {{ $tc('shots.number', displayedShotsLength) }}
+    ({{ formatDuration(displayedShotsTimeSpent) }} {{ displayedShotsFrames }})
   </p>
 
 </div>
@@ -230,6 +245,7 @@ import {
 } from 'vue-feather-icons'
 import { entityListMixin } from './base'
 import { selectionListMixin } from './selection'
+import { formatListMixin } from './format_mixin'
 
 import ButtonHrefLink from '../widgets/ButtonHrefLink'
 import ButtonLink from '../widgets/ButtonLink'
@@ -245,7 +261,7 @@ import ValidationCell from '../cells/ValidationCell'
 
 export default {
   name: 'shot-list',
-  mixins: [entityListMixin, selectionListMixin],
+  mixins: [entityListMixin, selectionListMixin, formatListMixin],
 
   props: [
     'entries',
@@ -282,6 +298,8 @@ export default {
       'currentProduction',
       'currentEpisode',
       'displayedShotsLength',
+      'displayedShotsTimeSpent',
+      'displayedShotsFrames',
       'isCurrentUserAdmin',
       'isCurrentUserManager',
       'isCurrentUserClient',
@@ -508,6 +526,18 @@ th.actions {
   min-width: 150px;
   max-width: 150px;
   width: 150px;
+}
+
+.frames {
+  min-width: 80px;
+  max-width: 80px;
+  width: 80px;
+}
+
+.time-spent {
+  min-width: 80px;
+  max-width: 80px;
+  width: 80px;
 }
 
 td.name {

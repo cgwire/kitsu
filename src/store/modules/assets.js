@@ -485,6 +485,7 @@ const mutations = {
 
     state.assetMap = {}
     assets.forEach((asset) => {
+      let timeSpent = 0
       if (!assetTypeMap[asset.asset_type]) {
         assetTypeMap[asset.asset_type_id] = {
           id: asset.asset_type_id,
@@ -496,7 +497,9 @@ const mutations = {
       asset.tasks.forEach((task) => {
         helpers.populateTask(task, asset)
         validationColumns[task.task_type_id] = true
+        timeSpent += task.duration
       })
+      asset.timeSpent = timeSpent
 
       state.assetMap[asset.id] = asset
     })
