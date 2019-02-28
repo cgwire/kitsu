@@ -194,7 +194,7 @@ def sync_with_ldap_server():
             except PersonNotFoundException:
                 pass
             if person is None:
-                if len(email) == 0 or email == "[]":
+                if len(email) == 0 or email == "[]" or type(email) != str:
                     email = "%s@%s" % (desktop_login, EMAIL_DOMAIN)
                 person = persons_service.create_person(
                     email,

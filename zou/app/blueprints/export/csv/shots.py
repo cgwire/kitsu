@@ -47,6 +47,8 @@ class ShotsCsvExport(Resource):
             "Sequence",
             "Name",
             "Description",
+            "Time Spent",
+            "Nb Frames",
             "Frame In",
             "Frame Out"
         ]
@@ -77,6 +79,8 @@ class ShotsCsvExport(Resource):
             result["sequence_name"],
             result["name"],
             result["description"],
+            self.get_time_spent(result),
+            result["nb_frames"],
             result.get("data", {}).get("frame_in", ""),
             result.get("data", {}).get("frame_out", "")
         ]
@@ -135,3 +139,12 @@ class ShotsCsvExport(Resource):
         ]
 
         return columns
+
+    def get_time_spent(self, result):
+        time_spent = 0
+        for task in result["tasks"]:
+            if task["duration"] is not None:
+                time_spent += task["duration"]
+        if time_spent > 0:
+            time_spent = time_spent / 8 / 60
+        return "%.2f" % time_spent

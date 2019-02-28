@@ -217,6 +217,7 @@ def get_shots_and_tasks(criterions={}):
                 "id": str(shot.id),
                 "name": shot.name,
                 "description": shot.description,
+                "nb_frames": shot.nb_frames,
                 "frame_in": shot.data.get("frame_in", None),
                 "frame_out": shot.data.get("frame_out", None),
                 "fps": shot.data.get("fps", None),
