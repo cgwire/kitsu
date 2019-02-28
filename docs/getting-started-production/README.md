@@ -442,16 +442,11 @@ that his work is validated.
 
 You can also use the preview as a **thumbnail** on the asset or shot spreadsheet. It
 will help to recognize the assets/shots on the main pages. 
-On the list page, click on the status you want, then on the rigt pannel, click on **history** (1).
+On the list page, click on the status you want, then on the rigt pannel, click on **Preview** button (1).
 
 ![History](../img/getting-started/pannel_history.png)
 
-On the new page, above your preview, click on the **Set this preview as thumbnail**. You can do this at each version 
-of your work if needed.
 
-![Preview as a thumbnail](../img/getting-started/preview_thumbnail.png)
+Once you have clicked on the button, you will see the thumbnail appears, and the button turn gray.
 
-Once you have clicked on the button a message appears instead to confirm the
-modification.
 
-![Preview confirmed](../img/getting-started/preview_confirmed.png)
