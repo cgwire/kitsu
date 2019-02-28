@@ -40,7 +40,7 @@ export default {
     },
     value: {
       default: '',
-      type: String
+      type: [String, Number]
     },
     placeholder: {
       default: '',
