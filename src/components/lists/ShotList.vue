@@ -57,7 +57,11 @@
             </div>
           </th>
 
-          <th class="time-spent" v-if="isShowInfos">
+          <th
+            ref="th-spent"
+            class="time-spent"
+            v-if="!isCurrentUserClient && isShowInfos"
+           >
             {{ $t('shots.fields.time_spent') }}
           </th>
           <th class="frames" v-if="isShowInfos">
@@ -181,19 +185,24 @@
           >
             {{ shot.data ? shot.data[descriptor.field_name] : '' }}
           </td>
-          <td class="time-spent">
+          <td
+            class="time-spent"
+            v-if="!isCurrentUserClient && isShowInfos"
+          >
             {{ formatDuration(shot.timeSpent) }}
           </td>
-          <td class="frames">
+          <td class="frames"
+            v-if="!isCurrentUserClient && isShowInfos"
+          >
             {{ shot.nb_frames }}
           </td>
-          <td class="framein" v-if="isFrameIn">
+          <td class="framein" v-if="isFrameIn && isShowInfos">
             {{ shot.data && shot.data.frame_in ? shot.data.frame_in : ''}}
           </td>
-          <td class="frameout" v-if="isFrameOut">
+          <td class="frameout" v-if="isFrameIn && isShowInfos">
             {{ shot.data && shot.data.frame_out ? shot.data.frame_out : ''}}
           </td>
-          <td class="fps" v-if="isFps">
+          <td class="fps" v-if="isFps && isShowInfos">
             {{ shot.data && shot.data.fps ? shot.data.fps : ''}}
           </td>
           <validation-cell

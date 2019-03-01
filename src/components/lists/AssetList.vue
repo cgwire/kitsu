@@ -57,7 +57,11 @@
               />
             </div>
           </th>
-          <th class="time-spent" ref="th-spent">
+          <th
+            class="time-spent"
+            ref="th-spent"
+            v-if="!isCurrentUserClient && isShowInfos"
+          >
             {{ $t('assets.fields.time_spent') }}
           </th>
           <th
