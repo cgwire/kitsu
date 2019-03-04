@@ -6,6 +6,10 @@ export default {
     client.get('/api/data/persons', callback)
   },
 
+  getPerson (personId, callback) {
+    client.get(`/api/data/persons/${personId}`, callback)
+  },
+
   newPerson (person, callback) {
     const data = {
       first_name: person.first_name,

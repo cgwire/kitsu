@@ -226,7 +226,9 @@ const mutations = {
     const taskTypeToDeleteIndex = state.taskTypes.findIndex(
       (taskType) => taskType.id === taskTypeToDelete.id
     )
-    state.taskTypes.splice(taskTypeToDeleteIndex, 1)
+    if (taskTypeToDeleteIndex >= 0) {
+      state.taskTypes.splice(taskTypeToDeleteIndex, 1)
+    }
     delete state.taskTypeMap[taskTypeToDelete.id]
 
     state.deleteTaskType = {

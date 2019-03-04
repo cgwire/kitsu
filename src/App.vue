@@ -24,12 +24,15 @@ export default {
 
   computed: {
     ...mapGetters([
+      'assetTypeMap',
       'isLoginLoading',
       'isDataLoading',
       'isDarkTheme',
       'isSavingCommentPreview',
       'route',
+      'personMap',
       'taskMap',
+      'taskStatusMap',
       'taskTypeMap',
       'user'
     ])
@@ -57,10 +60,13 @@ export default {
 
   methods: {
     ...mapActions([
-      'loadAsset',
       'getTask',
+      'loadAsset',
+      'loadAssetType',
       'loadComment',
+      'loadPerson',
       'loadPersonTasks',
+      'loadTaskStatus',
       'loadTaskType',
       'refreshPreview',
       'refreshMetadataDescriptor',
@@ -109,6 +115,68 @@ export default {
             'DELETE_TASK_TYPE_END',
             {id: eventData.task_type_id}
           )
+        }
+      },
+
+      'task-status:new' (eventData) {
+        if (!this.taskStatusMap[eventData.task_status_id]) {
+          this.loadTaskStatus(eventData.task_status_id)
+        }
+      },
+
+      'task-status:update' (eventData) {
+        if (this.taskStatusMap[eventData.task_status_id]) {
+          this.loadTaskStatus(eventData.task_status_id)
+        }
+      },
+
+      'task-status:delete' (eventData) {
+        if (this.taskStatusMap[eventData.task_status_id]) {
+          this.$store.commit(
+            'DELETE_TASK_STATUS_END',
+            {id: eventData.task_status_id}
+          )
+        }
+      },
+
+      'entity-type:new' (eventData) {
+        if (!this.assetTypeMap[eventData.entity_type_id]) {
+          this.loadAssetType(eventData.entity_type_id)
+        }
+      },
+
+      'entity-type:update' (eventData) {
+        if (this.assetTypeMap[eventData.entity_type_id]) {
+          this.loadAssetType(eventData.entity_type_id)
+        }
+      },
+
+      'entity-type:delete' (eventData) {
+        if (this.assetTypeMap[eventData.entity_type_id]) {
+          this.$store.commit(
+            'DELETE_ASSET_TYPE_END',
+            {id: eventData.entity_type_id}
+          )
+        }
+      },
+
+      'person:new' (eventData) {
+        if (!this.personMap[eventData.person_id]) {
+          this.loadPerson(eventData.person_id)
+        }
+      },
+
+      'person:update' (eventData) {
+        if (this.personMap[eventData.person_id]) {
+          this.loadPerson(eventData.person_id)
+        }
+      },
+
+      'person:delete' (eventData) {
+        const person = this.personMap[eventData.person_id]
+        if (person) {
+          this.$store.commit('DELETE_PEOPLE_START', person)
+          this.$store.commit('DELETE_PEOPLE_END', person)
         }
       },
 

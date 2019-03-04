@@ -5,6 +5,10 @@ export default {
     client.get('/api/data/asset-types', callback)
   },
 
+  getAssetType (assetTypeId, callback) {
+    client.get(`/api/data/entity-types/${assetTypeId}`, callback)
+  },
+
   newAssetType (assetType, callback) {
     const data = {
       name: assetType.name
