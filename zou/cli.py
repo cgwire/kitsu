@@ -4,6 +4,8 @@ import sys
 import flask_migrate
 import click
 
+from sqlalchemy.exc import IntegrityError
+
 from zou.app.utils import dbhelpers, auth, commands
 from zou.app.services import (
     persons_service,
@@ -89,7 +91,8 @@ def stamp_db():
 
 @cli.command()
 @click.argument("email")
-def create_admin(email):
+@click.option('--p', default="default")
+def create_admin(email, p):
     "Create an admin user to allow usage of the API when database is empty."
     "Set password is 'default'."
 
@@ -97,7 +100,7 @@ def create_admin(email):
         # Allow "admin@example.com" to be invalid.
         if email != "admin@example.com":
             auth.validate_email(email)
-        password = auth.encrypt_password("default")
+        password = auth.encrypt_password(p)
         persons_service.create_person(
             email,
             password,
@@ -106,6 +109,10 @@ def create_admin(email):
             role="admin"
         )
         print("Admin successfully created.")
+
+    except IntegrityError:
+        print("User already exists for this email.")
+        sys.exit(1)
 
     except auth.PasswordsNoMatchException:
         print("Passwords don't match.")
