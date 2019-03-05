@@ -1,6 +1,8 @@
 import superagent from 'superagent'
 import store from '../store'
+import router from '../router'
 import {
+  RESET_ALL,
   USER_LOGIN,
   USER_LOGOUT,
   USER_LOGIN_FAIL,
@@ -14,8 +16,15 @@ const auth = {
       .post('/api/auth/login')
       .send({ email, password })
       .end((err, res) => {
-        if (err) return callback(err)
-        else {
+        if (err) {
+          if (res.body.default_password) {
+            router.push({
+              name: 'reset-change-password',
+              params: {token: res.body.token}
+            })
+          }
+          callback(err)
+        } else {
           if (res.body.login) {
             const user = res.body.user
             const isLdap = res.body.ldap
@@ -33,10 +42,19 @@ const auth = {
     superagent
       .get('/api/auth/logout')
       .end((err, res) => {
-        if (err) return callback(err)
+        if (err) {
+          console.error(err)
+          callback(err)
+        }
         store.commit(USER_LOGOUT)
         callback()
       })
+  },
+
+  backToLogin () {
+    router.push('/login')
+    store.commit(RESET_ALL)
+    store.commit(USER_LOGOUT)
   },
 
   resetPassword (email) {
