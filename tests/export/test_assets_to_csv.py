@@ -39,4 +39,4 @@ Cosmos Landromat;Props;Tree;Description Tree;0.10;opn\r\n"""
         )
         expected_result = """Project;Type;Name;Description;Time Spent;Contractor;Shaders\r
 Cosmos Landromat;Props;Tree;Description Tree;0.10;Contractor 1;opn\r\n"""
-        self.assertEqual(csv_assets; expected_result)
+        self.assertEqual(csv_assets, expected_result)
