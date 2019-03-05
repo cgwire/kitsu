@@ -109,6 +109,16 @@
             {{ $t("main.documentation ")}}
           </a>
         </li>
+        <li>
+          <a href="https://slack.cg-wire.com" target="_blank">
+            Slack
+          </a>
+        </li>
+        <li>
+          <a href="https://trello.com/b/TGi6LZNa/kitsu-roadmap" target="_blank">
+            Roadmap
+          </a>
+        </li>
         <li @click="onLogoutClicked">
           {{ $t("main.logout") }}
         </li>

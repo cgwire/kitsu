@@ -88,7 +88,10 @@ const actions = {
   resetChangePassword ({ commit }, { token, password, password2 }) {
     return new Promise((resolve, reject) => {
       auth.resetChangePassword(token, password, password2)
-        .then(resolve)
+        .then(() => {
+          commit(LOGIN_SUCCESS)
+          resolve()
+        })
         .catch(reject)
     })
   }
@@ -110,6 +113,7 @@ const mutations = {
 
   [LOGIN_SUCCESS] (state, email) {
     state.isLoginLoading = false
+    state.isLoginError = false
   },
 
   [LOGIN_FAILURE] (state, email) {

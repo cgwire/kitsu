@@ -13,8 +13,12 @@ const sanitizeTaskStatus = (taskStatus) => {
 }
 
 export default {
-  getTaskStatus (callback) {
+  getTaskStatuses (callback) {
     client.get('/api/data/task-status', callback)
+  },
+
+  getTaskStatus (taskStatusId, callback) {
+    client.get(`/api/data/task-status/${taskStatusId}`, callback)
   },
 
   newTaskStatus (taskStatus, callback) {

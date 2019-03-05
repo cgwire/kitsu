@@ -93,6 +93,10 @@ export default {
     }
   },
 
+  mounted () {
+    this.$store.commit('LOGIN_SUCCESS')
+  },
+
   computed: {
     ...mapGetters([
     ])

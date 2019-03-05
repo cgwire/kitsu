@@ -14,12 +14,7 @@ import {
 
   RESET_ALL
 } from '../mutation-types'
-
-const sortAssetTypes = (assetTypes) => {
-  return assetTypes.sort((a, b) => {
-    return a.name.localeCompare(b.name)
-  })
-}
+import { sortByName } from '../../lib/sorting'
 
 const initialState = {
   assetTypes: [],
@@ -69,6 +64,13 @@ const actions = {
       if (err) commit(LOAD_ASSET_TYPES_ERROR)
       else commit(LOAD_ASSET_TYPES_END, assetTypes)
       if (callback) callback(err)
+    })
+  },
+
+  loadAssetType ({ commit, state }, assetTypeId) {
+    assetTypesApi.getAssetType(assetTypeId, (err, assetType) => {
+      if (err) console.error(err)
+      else commit(EDIT_ASSET_TYPE_END, assetType)
     })
   },
 
@@ -125,7 +127,7 @@ const mutations = {
     state.isAssetTypesLoading = false
     state.isAssetTypesLoadingError = false
     state.assetTypes = assetTypes
-    state.assetTypes = sortAssetTypes(state.assetTypes)
+    state.assetTypes = sortByName(state.assetTypes)
     state.assetTypeMap = {}
     state.assetTypes.forEach((assetType) => {
       state.assetTypeMap[assetType.id] = assetType
@@ -149,13 +151,13 @@ const mutations = {
       Object.assign(assetType, newAssetType)
     } else {
       state.assetTypes.push(newAssetType)
-      state.assetTypes = sortAssetTypes(state.assetTypes)
       state.assetTypeMap[newAssetType.id] = newAssetType
     }
     state.editAssetType = {
       isLoading: false,
       isError: false
     }
+    state.assetTypes = sortByName(state.assetTypes)
   },
 
   [DELETE_ASSET_TYPE_START] (state) {
@@ -174,7 +176,9 @@ const mutations = {
     const assetTypeToDeleteIndex = state.assetTypes.findIndex(
       (assetType) => assetType.id === assetTypeToDelete.id
     )
-    state.assetTypes.splice(assetTypeToDeleteIndex, 1)
+    if (assetTypeToDeleteIndex >= 0) {
+      state.assetTypes.splice(assetTypeToDeleteIndex, 1)
+    }
     delete state.assetTypeMap[assetTypeToDelete.id]
 
     state.deleteAssetType = {
