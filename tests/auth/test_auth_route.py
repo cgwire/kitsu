@@ -4,6 +4,7 @@ from tests.base import ApiDBTestCase
 
 from zou.app.utils import auth, fields
 from zou.app.stores import auth_tokens_store
+from zou.app.services import persons_service
 
 
 class AuthTestCase(ApiDBTestCase):
@@ -195,15 +196,6 @@ class AuthTestCase(ApiDBTestCase):
         self.logout(tokens)
         self.assertIsNotAuthenticated(tokens)
 
-    def test_person_list(self):
-        self.assertIsNotAuthenticated({}, code=422)
-        self.get("auth/person-list", 401)
-        self.generate_fixture_user_cg_artist()
-        self.log_in_cg_artist()
-        persons = self.get("auth/person-list")
-        self.assertEquals(len(persons), 3)
-        self.log_out()
-
     def test_cookies_auth(self):
         user_agent = "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_10_1)" \
                      " AppleWebKit/537.36 (KHTML, like Gecko)" \
@@ -246,3 +238,36 @@ class AuthTestCase(ApiDBTestCase):
             "email": self.user.email,
             "password": new_password
         }, 200)
+
+    def test_unactive(self):
+        self.person.update({"active": False})
+        self.post("auth/login", self.credentials, 400)
+
+        self.person.update({"active": True})
+        self.person.save()
+        persons_service.clear_person_cache()
+        tokens = self.post("auth/login", self.credentials, 200)
+        headers = self.get_auth_headers(tokens)
+        headers["Content-type"] = "application/json"
+        self.assertIsAuthenticated(tokens)
+        self.app.get("data/persons/", headers=headers)
+        self.app.put(
+            "data/persons/%s" % self.person_dict["id"],
+            data=json.dumps({"active": False}),
+            headers=headers
+        )
+        self.assertIsNotAuthenticated(tokens)
+
+    def test_default_password(self):
+        self.person.update({
+            "password": auth.encrypt_password("default"),
+        })
+        self.credentials["password"] = "default"
+        response = self.post("auth/login", self.credentials, 400)
+        self.assertTrue(response["default_password"])
+        data = {
+            "token": response["token"],
+            "password": "complex22pass",
+            "password2": "complex22pass"
+        }
+        response = self.put("auth/reset-password", data, 200)

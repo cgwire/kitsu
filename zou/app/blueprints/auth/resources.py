@@ -11,6 +11,7 @@ from flask_principal import (
     identity_loaded
 )
 from flask_mail import Message
+from werkzeug.exceptions import Unauthorized
 
 from sqlalchemy.exc import OperationalError, TimeoutError
 
@@ -61,8 +62,28 @@ def is_from_browser(user_agent):
     ]
 
 
+def logout():
+    try:
+        current_token = get_raw_jwt()
+        jti = current_token['jti']
+        auth_service.revoke_tokens(app, jti)
+    except:
+        pass
+
+
+def wrong_auth_handler(identity_user=None):
+    if request.path not in [
+        "/auth/login",
+        "/auth/logout"
+    ]:
+        abort(401)
+    else:
+        return identity_user
+
+
 @identity_loaded.connect_via(app)
 def on_identity_loaded(sender, identity):
+
     if identity.id is not None:
         from zou.app.services import persons_service
         try:
@@ -78,17 +99,22 @@ def on_identity_loaded(sender, identity):
             if identity.user["role"] == "manager":
                 identity.provides.add(RoleNeed("manager"))
 
+            if not identity.user["active"]:
+                current_app.logger.error("Current user is not active anymore")
+                logout()
+                return wrong_auth_handler(identity.user)
+
             return identity
         except PersonNotFoundException:
-            return None
+            return wrong_auth_handler()
         except TimeoutError:
             current_app.logger.error("Identity loading timed out")
-            return None
+            return wrong_auth_handler()
         except Exception as exception:
             current_app.logger.error(exception)
             if hasattr(exception, 'message'):
                 current_app.logger.error(exception.message)
-            return None
+            return wrong_auth_handler()
 
 
 class AuthenticatedResource(Resource):
@@ -121,9 +147,7 @@ class LogoutResource(Resource):
     @jwt_required
     def get(self):
         try:
-            current_token = get_raw_jwt()
-            jti = current_token['jti']
-            auth_service.revoke_tokens(app, jti)
+            logout()
             identity_changed.send(
                 current_app._get_current_object(),
                 identity=AnonymousIdentity()
