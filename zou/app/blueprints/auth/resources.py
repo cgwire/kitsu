@@ -157,6 +157,21 @@ class LoginResource(Resource):
         (email, password) = self.get_arguments()
         try:
             user = auth_service.check_auth(app, email, password)
+
+            if password == "default":
+                token = uuid.uuid4()
+                auth_tokens_store.add(
+                    "reset-%s" % token,
+                    email,
+                    ttl=3600 * 2
+                )
+                current_app.logger.info("User must change his password.")
+                return {
+                    "login": False,
+                    "default_password": True,
+                    "token": str(token)
+                }, 400
+
             access_token = create_access_token(identity=user["email"])
             refresh_token = create_refresh_token(identity=user["email"])
             auth_service.register_tokens(app, access_token, refresh_token)
@@ -454,7 +469,6 @@ class ResetPasswordResource(Resource, ArgsMixin):
 
     def post(self):
         args = self.get_arguments()
-        token = uuid.uuid4()
         try:
             user = persons_service.get_person_by_email(args["email"])
         except PersonNotFoundException:
@@ -463,6 +477,7 @@ class ResetPasswordResource(Resource, ArgsMixin):
                 "message": "Email not listed in database."
             }, 400
 
+        token = uuid.uuid4()
         auth_tokens_store.add(
             "reset-%s" % token,
             args["email"],
