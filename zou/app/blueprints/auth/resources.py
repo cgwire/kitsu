@@ -413,26 +413,6 @@ class ChangePasswordResource(Resource):
         )
 
 
-class PersonListResource(Resource):
-    """
-    Resource used to list people available in the database without
-    having too much information. Just, the bare minimum.
-    """
-
-    @jwt_required
-    def get(self):
-        person_names = []
-        for person in persons_service.get_persons():
-            person_names.append({
-                "id": person["id"],
-                "first_name": person["first_name"],
-                "last_name": person["last_name"],
-                "desktop_login": person["desktop_login"],
-                "active": person["active"]
-            })
-        return person_names
-
-
 class ResetPasswordResource(Resource, ArgsMixin):
     """
     Ressource to allow a user to change his password when he forgets it.
