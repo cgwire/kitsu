@@ -261,7 +261,7 @@ class BaseModelResource(Resource):
             data = self.update_data(data, instance_id)
             instance.update(data)
             events.emit(
-                "%s:update" % self.model.__tablename__,
+                "%s:update" % self.model.__tablename__.replace('_', '-'),
                 {"%s_id" % self.model.__tablename__: instance.id}
             )
 
@@ -299,7 +299,7 @@ class BaseModelResource(Resource):
             self.pre_delete(instance_dict)
             instance.delete()
             events.emit(
-                "%s:delete" % self.model.__tablename__,
+                "%s:delete" % self.model.__tablename__.replace('_', '-'),
                 {"%s_id" % self.model.__tablename__: instance.id}
             )
             self.post_delete(instance_dict)

@@ -52,17 +52,7 @@ class PersonResource(BaseModelResource):
         self.check_escalation_permissions(instance)
 
     def check_escalation_permissions(self, instance, data=None):
-        is_allowed = \
-            permissions.admin_permission.can() or \
-            (
-                permissions.manager_permission.can() and
-                instance["role"] not in ['admin', 'manager']
-            )
-
-        if is_allowed and data and not permissions.admin_permission.can():
-            del data["role"]
-
-        if is_allowed:
+        if permissions.admin_permission.can():
             return True
         else:
             raise permissions.PermissionDenied

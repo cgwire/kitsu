@@ -11,6 +11,7 @@ from flask_principal import (
     identity_loaded
 )
 from flask_mail import Message
+from werkzeug.exceptions import Unauthorized
 
 from sqlalchemy.exc import OperationalError, TimeoutError
 
@@ -61,8 +62,28 @@ def is_from_browser(user_agent):
     ]
 
 
+def logout():
+    try:
+        current_token = get_raw_jwt()
+        jti = current_token['jti']
+        auth_service.revoke_tokens(app, jti)
+    except:
+        pass
+
+
+def wrong_auth_handler(identity_user=None):
+    if request.path not in [
+        "/auth/login",
+        "/auth/logout"
+    ]:
+        abort(401)
+    else:
+        return identity_user
+
+
 @identity_loaded.connect_via(app)
 def on_identity_loaded(sender, identity):
+
     if identity.id is not None:
         from zou.app.services import persons_service
         try:
@@ -78,17 +99,22 @@ def on_identity_loaded(sender, identity):
             if identity.user["role"] == "manager":
                 identity.provides.add(RoleNeed("manager"))
 
+            if not identity.user["active"]:
+                current_app.logger.error("Current user is not active anymore")
+                logout()
+                return wrong_auth_handler(identity.user)
+
             return identity
         except PersonNotFoundException:
-            return None
+            return wrong_auth_handler()
         except TimeoutError:
             current_app.logger.error("Identity loading timed out")
-            return None
+            return wrong_auth_handler()
         except Exception as exception:
             current_app.logger.error(exception)
             if hasattr(exception, 'message'):
                 current_app.logger.error(exception.message)
-            return None
+            return wrong_auth_handler()
 
 
 class AuthenticatedResource(Resource):
@@ -121,9 +147,7 @@ class LogoutResource(Resource):
     @jwt_required
     def get(self):
         try:
-            current_token = get_raw_jwt()
-            jti = current_token['jti']
-            auth_service.revoke_tokens(app, jti)
+            logout()
             identity_changed.send(
                 current_app._get_current_object(),
                 identity=AnonymousIdentity()
@@ -157,6 +181,21 @@ class LoginResource(Resource):
         (email, password) = self.get_arguments()
         try:
             user = auth_service.check_auth(app, email, password)
+
+            if password == "default":
+                token = uuid.uuid4()
+                auth_tokens_store.add(
+                    "reset-%s" % token,
+                    email,
+                    ttl=3600 * 2
+                )
+                current_app.logger.info("User must change his password.")
+                return {
+                    "login": False,
+                    "default_password": True,
+                    "token": str(token)
+                }, 400
+
             access_token = create_access_token(identity=user["email"])
             refresh_token = create_refresh_token(identity=user["email"])
             auth_service.register_tokens(app, access_token, refresh_token)
@@ -413,26 +452,6 @@ class ChangePasswordResource(Resource):
         )
 
 
-class PersonListResource(Resource):
-    """
-    Resource used to list people available in the database without
-    having too much information. Just, the bare minimum.
-    """
-
-    @jwt_required
-    def get(self):
-        person_names = []
-        for person in persons_service.get_persons():
-            person_names.append({
-                "id": person["id"],
-                "first_name": person["first_name"],
-                "last_name": person["last_name"],
-                "desktop_login": person["desktop_login"],
-                "active": person["active"]
-            })
-        return person_names
-
-
 class ResetPasswordResource(Resource, ArgsMixin):
     """
     Ressource to allow a user to change his password when he forgets it.
@@ -474,7 +493,6 @@ class ResetPasswordResource(Resource, ArgsMixin):
 
     def post(self):
         args = self.get_arguments()
-        token = uuid.uuid4()
         try:
             user = persons_service.get_person_by_email(args["email"])
         except PersonNotFoundException:
@@ -483,6 +501,7 @@ class ResetPasswordResource(Resource, ArgsMixin):
                 "message": "Email not listed in database."
             }, 400
 
+        token = uuid.uuid4()
         auth_tokens_store.add(
             "reset-%s" % token,
             args["email"],

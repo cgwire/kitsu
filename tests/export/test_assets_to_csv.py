@@ -23,8 +23,8 @@ class AssetsCsvExportTestCase(ApiDBTestCase):
         csv_assets = self.get_raw(
             "/export/csv/projects/%s/assets.csv" % self.project.id
         )
-        expected_result = """Project,Type,Name,Description,Time Spent,Shaders\r
-Cosmos Landromat,Props,Tree,Description Tree,0.10,opn\r\n"""
+        expected_result = """Project;Type;Name;Description;Time Spent;Shaders\r
+Cosmos Landromat;Props;Tree;Description Tree;0.10;opn\r\n"""
         self.assertEqual(csv_assets, expected_result)
 
     def test_get_asset_csv_with_metadata(self):
@@ -37,6 +37,6 @@ Cosmos Landromat,Props,Tree,Description Tree,0.10,opn\r\n"""
         csv_assets = self.get_raw(
             "/export/csv/projects/%s/assets.csv" % self.project.id
         )
-        expected_result = """Project,Type,Name,Description,Time Spent,Contractor,Shaders\r
-Cosmos Landromat,Props,Tree,Description Tree,0.10,Contractor 1,opn\r\n"""
+        expected_result = """Project;Type;Name;Description;Time Spent;Contractor;Shaders\r
+Cosmos Landromat;Props;Tree;Description Tree;0.10;Contractor 1;opn\r\n"""
         self.assertEqual(csv_assets, expected_result)

@@ -36,7 +36,7 @@ def build_csv_string(csv_content):
     Build a CSV formatted string from an array.
     """
     string_wrapper = StringIO()
-    csv_writer = csv.writer(string_wrapper)
+    csv_writer = csv.writer(string_wrapper, delimiter=";")
     csv_writer.writerows(csv_content)
     return string_wrapper.getvalue()
 

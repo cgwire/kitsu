@@ -74,14 +74,13 @@ class PermissionTestCase(ApiDBTestCase):
         }
         self.put("data/persons/%s" % self.user.id, data, 403)
 
-    def test_manager_cannot_update_role(self):
+    def test_manager_cannot_update_person(self):
         self.log_in_manager()
         data = {
             "role": "admin"
         }
-        self.put("data/persons/%s" % self.user_cg_artist_id, data)
-        person = self.get("data/persons/%s" % self.user_cg_artist_id)
-        self.assertEquals(person["role"], "user")
+        self.put("data/persons/%s" % self.user_cg_artist_id, data, 403)
+        self.get("data/persons/%s" % self.user_cg_artist_id)
 
     def test_admin_can_update_admin(self):
         self.log_in_admin()

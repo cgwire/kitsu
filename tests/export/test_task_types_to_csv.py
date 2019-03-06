@@ -14,8 +14,8 @@ class TasksCsvExportTestCase(ApiDBTestCase):
 
     def test_get_output_files(self):
         csv_task_types = self.get_raw("export/csv/task-types.csv")
-        expected_result = """Department,Name\r
-Animation,Animation\r
-Modeling,Shaders\r
+        expected_result = """Department;Name\r
+Animation;Animation\r
+Modeling;Shaders\r
 """
         self.assertEqual(csv_task_types, expected_result)
