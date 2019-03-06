@@ -1,3 +1,5 @@
+import sys
+
 from flask_restful import Resource
 from flask_jwt_extended import jwt_required
 from slugify import slugify
@@ -145,6 +147,8 @@ class ShotsCsvExport(Resource):
         for task in result["tasks"]:
             if task["duration"] is not None:
                 time_spent += task["duration"]
+
         if time_spent > 0:
-            time_spent = time_spent / 8 / 60
+            time_spent = time_spent / 8.0 / 60.0
+
         return "%.2f" % time_spent
