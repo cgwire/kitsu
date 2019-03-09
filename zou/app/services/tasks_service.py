@@ -574,6 +574,7 @@ def get_person_tasks(person_id, projects, is_done=None):
             "sequence_name": sequence_name,
             "episode_id": str(episode_id),
             "episode_name": episode_name,
+            "task_estimation": task.estimation,
             "task_type_name": task_type_name,
             "task_status_name": task_status_name,
             "task_type_color": task_type_color,
