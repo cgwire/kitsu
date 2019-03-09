@@ -223,7 +223,6 @@ export default {
     sortedTasks () {
       const isName = this.currentSort === 'entity_name'
       const tasks = [...this.displayedTodos]
-      console.log(tasks)
       if (isName) {
         return tasks.sort(
           firstBy('project_name')

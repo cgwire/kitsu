@@ -12,7 +12,7 @@
           </th>
           <th class="thumbnail">
           </th>
-          <th class="name">
+          <th class="name" ref="th-name">
             {{ $t('tasks.fields.entity') }}
           </th>
           <th class="description">
@@ -352,8 +352,18 @@ export default {
       const tableBody = this.$refs['body-tbody']
       const isTableBodyContainLines = tableBody && tableBody.children
       if (isTableBodyContainLines) {
-        const typeColumnWidth = tableBody.children[0].children[1].offsetWidth
-        this.$refs['th-type'].style['min-width'] = `${typeColumnWidth}px`
+        const bodyElement = tableBody.children[0]
+        const columnDescriptors = [
+          {index: 1, name: 'type'},
+          {index: 3, name: 'name'}
+        ]
+        columnDescriptors.forEach(desc => {
+          const width = Math.max(
+            bodyElement.children[desc.index].offsetWidth,
+            100
+          )
+          this.$refs['th-' + desc.name].style['min-width'] = `${width}px`
+        })
       }
     }
   }

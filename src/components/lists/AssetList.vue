@@ -528,6 +528,8 @@ td.time-spent {
   min-width: 120px;
   max-width: 120px;
   width: 120px;
+  overflow-wrap: break-word;
+  hyphens: auto;
 }
 
 .validation-cell {
