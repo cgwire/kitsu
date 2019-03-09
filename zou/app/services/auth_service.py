@@ -74,11 +74,15 @@ def check_credentials(email, password, app=None):
             return person
         else:
             if app is not None:
-                app.logger.error("Wrong password for person: %s" % person)
+                app.logger.error(
+                    "Wrong password for person: %s" % person["full_name"]
+                )
             raise WrongPasswordException()
     except ValueError:
         if app is not None:
-            app.logger.error("Wrong password for: %s" % person)
+            app.logger.error(
+                "Wrong password for: %s" % person["full_name"]
+            )
         raise WrongPasswordException()
 
 
