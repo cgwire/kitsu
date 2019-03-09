@@ -18,6 +18,9 @@
           <th class="description">
             {{ $t('assets.fields.description') }}
           </th>
+          <th class="estimation">
+            {{ $t('tasks.fields.estimation').substring(0, 3) }}.
+          </th>
           <th class="status">
             {{ $t('tasks.fields.task_status') }}
           </th>
@@ -69,6 +72,9 @@
             class="description"
             :entry="{description: entry.entity_description}"
           />
+          <td class="estimation">
+            {{ formatDuration(entry.estimation) }}
+          </td>
           <validation-cell
             class="status unselectable"
             :ref="'validation-' + i + '-0'"
@@ -131,10 +137,11 @@ import LastCommentCell from '../cells/LastCommentCell'
 import ProductionNameCell from '../cells/ProductionNameCell'
 import ValidationCell from '../cells/ValidationCell'
 import { selectionListMixin } from './selection'
+import { formatListMixin } from './format_mixin'
 
 export default {
   name: 'todos-list',
-  mixins: [selectionListMixin],
+  mixins: [formatListMixin, selectionListMixin],
 
   components: {
     EntityThumbnail,
@@ -387,6 +394,11 @@ export default {
 .status {
   width: 90px;
   min-width: 90px;
+}
+
+.estimation {
+  width: 60px;
+  min-width: 60px;
 }
 
 th.last-comment {

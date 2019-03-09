@@ -38,17 +38,30 @@
         </ul>
       </div>
 
-      <search-field
-        :class="{
-          'search-field': true
-        }"
-        ref="todos-search-field"
-        @change="onSearchChange"
-        @save="saveSearchQuery"
-        :can-save="true"
-        v-if="!isTabActive('done')"
-      />
-
+      <div class="flexrow">
+        <search-field
+          :class="{
+            'search-field': true,
+            'flexrow-item': true
+          }"
+          ref="todos-search-field"
+          @change="onSearchChange"
+          @save="saveSearchQuery"
+          :can-save="true"
+          v-if="!isTabActive('done')"
+        />
+        <span class="flexrow-item push-right">
+        </span>
+        <span class="flexrow-item">
+          {{ $t('main.sorted_by') }}
+        </span>
+        <combobox
+          class="flexrow-item"
+          :options="sortOptions"
+          locale-key-prefix="tasks.fields."
+          v-model="currentSort"
+        />
+      </div>
       <div
         class="query-list"
         v-if="isTabActive('todos') || isTabActive('timesheets')"
@@ -62,7 +75,7 @@
 
       <todos-list
         ref="todo-list"
-        :entries="displayedTodos"
+        :entries="sortedTasks"
         :is-loading="isTodosLoading"
         :is-error="isTodosLoadingError"
         :selection-grid="todoSelectionGrid"
@@ -109,30 +122,41 @@
 <script>
 import { mapGetters, mapActions } from 'vuex'
 import moment from 'moment-timezone'
+import firstBy from 'thenby'
 
-import TimesheetList from '../lists/TimesheetList'
-import TodosList from '../lists/TodosList'
+import Combobox from '../widgets/Combobox'
 import PageTitle from '../widgets/PageTitle'
 import SearchField from '../widgets/SearchField'
 import SearchQueryList from '../widgets/SearchQueryList'
 import TaskInfo from '../sides/TaskInfo'
+import TimesheetList from '../lists/TimesheetList'
+import TodosList from '../lists/TodosList'
 
 export default {
   name: 'todos',
 
   components: {
-    TimesheetList,
-    TodosList,
+    Combobox,
     PageTitle,
     SearchField,
     SearchQueryList,
-    TaskInfo
+    TaskInfo,
+    TimesheetList,
+    TodosList
   },
 
   data () {
     return {
       activeTab: 'todos',
-      selectedDate: moment().format('YYYY-MM-DD')
+      currentSort: 'priority',
+      selectedDate: moment().format('YYYY-MM-DD'),
+      sortOptions: [
+        'entity_name',
+        'priority',
+        'task_status_short_name',
+        'estimation',
+        'last_comment_date'
+      ].map((name) => ({ label: name, value: name }))
     }
   },
 
@@ -194,6 +218,26 @@ export default {
 
     haveDoneList () {
       return this.$refs['done-list']
+    },
+
+    sortedTasks () {
+      const isName = this.currentSort === 'entity_name'
+      const tasks = [...this.displayedTodos]
+      console.log(tasks)
+      if (isName) {
+        return tasks.sort(
+          firstBy('project_name')
+            .thenBy('task_type_name')
+            .thenBy('entity_name')
+        )
+      } else {
+        return tasks.sort(
+          firstBy(this.currentSort, -1)
+            .thenBy('project_name')
+            .thenBy('task_type_name')
+            .thenBy('entity_name')
+        )
+      }
     }
   },
 
@@ -376,5 +420,14 @@ export default {
 
 .main-column {
   border-right: 3px solid $light-grey;
+}
+
+.push-right {
+  flex: 1;
+  text-align: right;
+}
+
+.field {
+  margin-bottom: 0;
 }
 </style>

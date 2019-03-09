@@ -241,7 +241,9 @@
     v-if="!isEmptyList && !isLoading"
   >
     {{ displayedShotsLength }} {{ $tc('shots.number', displayedShotsLength) }}
-    ({{ formatDuration(displayedShotsTimeSpent) }} {{ displayedShotsFrames }})
+    ({{ formatDuration(displayedShotsTimeSpent) }}
+     {{ $tc('main.days_spent', displayedShotsTimeSpent) }}, {{ displayedShotsFrames }} {{ $tc('main.nb_frames', displayedShotsFrames) }})
+
   </p>
 
 </div>

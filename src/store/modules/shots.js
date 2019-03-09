@@ -173,7 +173,7 @@ const helpers = {
     let timeSpent = 0
     let nbFrames = 0
     state.displayedShotsLength = shots.length
-    state.displayedShots.forEach((shot) => {
+    shots.forEach((shot) => {
       timeSpent += shot.timeSpent
       nbFrames += shot.nb_frames
     })
@@ -720,6 +720,7 @@ const actions = {
 const mutations = {
   [LOAD_SHOTS_START] (state) {
     cache.shots = []
+    cache.result = []
     cache.shotIndex = {}
     state.shotMap = {}
 
@@ -909,6 +910,12 @@ const mutations = {
     cache.shotIndex = buildShotIndex(cache.shots)
     state.shotCreated = newShot.name
 
+    if (state.shotSearchText) {
+      helpers.setListStats(state, cache.result)
+    } else {
+      helpers.setListStats(state, cache.shots)
+    }
+
     if (newShot.data.fps) state.isFps = true
     if (newShot.data.frame_in) state.isFrameIn = true
     if (newShot.data.frame_out) state.isFrameOut = true
@@ -1051,6 +1058,7 @@ const mutations = {
     )
     let result = indexSearch(cache.shotIndex, keywords) || cache.shots
     result = applyFilters(result, filters, taskMap)
+    cache.result = result
 
     state.displayedShots = result.slice(0, PAGE_SIZE)
     helpers.setListStats(state, result)
@@ -1357,6 +1365,7 @@ const mutations = {
     Object.assign(state, {...initialState})
 
     cache.shots = []
+    cache.result = []
     cache.shotIndex = {}
   }
 }
