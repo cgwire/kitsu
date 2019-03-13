@@ -72,7 +72,7 @@ def turn_into_thumbnail(file_path, size=None):
     else:
         size = im.size
 
-    im = im.resize(size)
+    im = im.resize(size, Image.LANCZOS)
     im.save(file_path)
     return file_path
 
