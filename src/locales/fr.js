@@ -472,7 +472,9 @@ export default {
 
   notifications: {
     and_change_status: 'et changé le statut à',
+    assigned_you: 'vous a assigné à',
     commented_on: 'a commenté',
+    mention_you_on: 'vous a mentionné sur',
     no_notifications: 'Il n\'y a pas encore de notifications pour vous pour les projets en cours',
     title: 'Notifications',
     with_preview: 'avec une version'
