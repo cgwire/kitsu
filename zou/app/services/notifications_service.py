@@ -106,6 +106,52 @@ def create_notifications_for_task_and_comment(task, comment, change=False):
     return recipient_ids
 
 
+def reset_notifications_for_mentions(comment):
+    """
+    For given task and comment, delete all mention notifications related
+    to the comment and recreate notifications for the mentions listed in the
+    comment.
+    """
+    Notification.delete_all_by(
+        type="mention",
+        comment_id=comment["id"]
+    )
+
+    notifications = []
+    for recipient_id in comment["mentions"]:
+        notification = create_notification(
+            recipient_id,
+            comment_id=comment["id"],
+            author_id=comment["person_id"],
+            task_id=comment["object_id"],
+            type="mention"
+        )
+        notifications.append(notification)
+        events.emit("notification:new", {
+            "notification_id": notification["id"],
+            "person_id": recipient_id
+        }, persist=False)
+
+    return notifications
+
+
+def create_assignation_notification(task_id, person_id):
+    """
+    Create a notification following a task assignation.
+    """
+    task = tasks_service.get_task_raw(task_id)
+    notification = create_notification(
+        person_id,
+        author_id=task.assigner_id,
+        task_id=task_id,
+        type="assignation"
+    )
+    events.emit("notification:new", {
+        "notification_id": notification["id"],
+        "person_id": person_id
+    }, persist=False)
+
+
 def get_task_subscription_raw(person_id, task_id):
     """
     Return subscription matching given person and task.
