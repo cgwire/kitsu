@@ -64,7 +64,7 @@
       </p>
 
       <p
-        v-html="compileMarkdown(comment.text)"
+        v-html="renderComment(comment.text, comment.mentions, personMap)"
         class="comment-text"
         v-if="comment.text"
       >
@@ -78,9 +78,9 @@
 </template>
 
 <script>
-import marked from 'marked'
 import moment from 'moment-timezone'
 import { mapGetters } from 'vuex'
+import { renderComment } from '../../lib/helpers'
 
 import PeopleAvatar from './PeopleAvatar.vue'
 import PeopleName from './PeopleName.vue'
@@ -116,6 +116,7 @@ export default {
   computed: {
     ...mapGetters([
       'currentProduction',
+      'personMap',
       'taskMap',
       'taskTypeMap'
     ]),
@@ -171,10 +172,6 @@ export default {
       }
     },
 
-    compileMarkdown (input) {
-      return marked(input || '')
-    },
-
     getPath (name) {
       let route = {
         name: name,
@@ -188,7 +185,9 @@ export default {
         route.params.episode_id = this.$route.params.episode_id
       }
       return route
-    }
+    },
+
+    renderComment
   }
 }
 </script>
@@ -251,5 +250,4 @@ a.revision:hover {
     align-items: flex-start;
   }
 }
-
 </style>

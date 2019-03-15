@@ -1,3 +1,4 @@
+import marked from 'marked'
 import moment from 'moment-timezone'
 
 export const populateTask = (task) => {
@@ -261,4 +262,18 @@ export const slugify = (str) => {
   return str.replace(/[^a-z0-9 -]/g, '')
     .replace(/\s+/g, '_')
     .replace(/-+/g, '_')
+}
+
+export const renderComment = (input, mentions, personMap) => {
+  let compiled = marked(input || '')
+  if (mentions) {
+    mentions.forEach((personId) => {
+      const person = personMap[personId]
+      compiled = compiled.replace(
+        `@${person.full_name}`,
+        `<a class="mention" href="/people/${person.id}">@${person.full_name}</a>`
+      )
+    })
+  }
+  return compiled
 }

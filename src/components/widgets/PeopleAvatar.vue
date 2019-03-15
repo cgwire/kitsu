@@ -18,6 +18,7 @@
           person_id: person.id
         }
       }"
+      :title="person.full_name"
       class="avatar-link"
     >
       <img
@@ -38,6 +39,7 @@
 
 <span
    class="avatar has-text-centered"
+   :title="person.full_name"
    :style="{
      background: person.color,
      width: size +'px',

@@ -90,8 +90,8 @@ export const sortPlaylists = (playlists) => {
 export const sortPeople = (people) => {
   return people.sort(
     firstBy('active', -1)
-      .thenBy((a, b) => a.first_name.localeCompare(b.first_name))
-      .thenBy((a, b) => a.last_name.localeCompare(b.last_name))
+      .thenBy((a, b) => (a.first_name ? a.first_name.localeCompare(b.first_name) : -1))
+      .thenBy((a, b) => (a.last_name ? a.last_name.localeCompare(b.last_name) : -1))
   )
 }
 
