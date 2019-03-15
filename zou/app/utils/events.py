@@ -50,7 +50,7 @@ def unregister_all():
     handlers = {}
 
 
-def emit(event, data={}):
+def emit(event, data={}, persist=True):
     """
     Emit an event which leads to the execution of all event handlers registered
     for that event name.
@@ -60,7 +60,8 @@ def emit(event, data={}):
     event_handlers = handlers.get(event, {})
     data = fields.serialize_dict(data)
     publisher_store.publish(event, data)
-    save_event(event, data)
+    if persist:
+        save_event(event, data)
 
     from zou.app.config import ENABLE_JOB_QUEUE
     for func in event_handlers.values():

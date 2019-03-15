@@ -3,15 +3,12 @@ from sqlalchemy.exc import StatementError
 from zou.app.models.comment import Comment
 from zou.app.models.project import Project
 from zou.app.models.entity import Entity
-from zou.app.models.entity_type import EntityType
 from zou.app.models.notifications import Notification
 from zou.app.models.subscription import Subscription
 from zou.app.models.task_type import TaskType
 
 from zou.app.services import (
-    tasks_service,
-    persons_service,
-    shots_service
+    tasks_service
 )
 from zou.app.services.exception import (
     PersonNotFoundException
@@ -19,18 +16,26 @@ from zou.app.services.exception import (
 from zou.app.utils import events, fields
 
 
-def create_notification(person, comment, read=False, change=False):
+def create_notification(
+    person_id,
+    comment_id=None,
+    author_id=None,
+    task_id=None,
+    read=False,
+    change=False,
+    type="comment"
+):
     """
     Create a new notification for given person and comment.
     """
     notification = Notification.create(
         read=read,
         change=change,
-        person_id=person["id"],
-        author_id=comment["person_id"],
-        comment_id=comment["id"],
-        task_id=comment["object_id"]
-
+        person_id=person_id,
+        author_id=author_id,
+        comment_id=comment_id,
+        task_id=task_id,
+        type=type
     )
     return notification.serialize()
 
@@ -93,17 +98,82 @@ def create_notifications_for_task_and_comment(task, comment, change=False):
 
     for recipient_id in recipient_ids:
         try:
-            person = persons_service.get_person(recipient_id)
             notification = create_notification(
-                person, comment, read=False, change=change
+                recipient_id,
+                comment_id=comment["id"],
+                author_id=comment["person_id"],
+                task_id=comment["object_id"],
+                read=False,
+                change=change,
+                type="comment"
             )
             events.emit("notification:new", {
                 "notification_id": notification["id"],
                 "person_id": recipient_id
-            })
+            }, persist=False)
         except PersonNotFoundException:
             pass
+
+    for recipient_id in comment["mentions"]:
+        notification = create_notification(
+            recipient_id,
+            comment_id=comment["id"],
+            author_id=comment["person_id"],
+            task_id=comment["object_id"],
+            type="mention"
+        )
+        events.emit("notification:new", {
+            "notification_id": notification["id"],
+            "person_id": recipient_id
+        }, persist=False)
+
     return recipient_ids
+
+
+def reset_notifications_for_mentions(comment):
+    """
+    For given task and comment, delete all mention notifications related
+    to the comment and recreate notifications for the mentions listed in the
+    comment.
+    """
+    Notification.delete_all_by(
+        type="mention",
+        comment_id=comment["id"]
+    )
+
+    notifications = []
+    for recipient_id in comment["mentions"]:
+        notification = create_notification(
+            recipient_id,
+            comment_id=comment["id"],
+            author_id=comment["person_id"],
+            task_id=comment["object_id"],
+            type="mention"
+        )
+        notifications.append(notification)
+        events.emit("notification:new", {
+            "notification_id": notification["id"],
+            "person_id": recipient_id
+        }, persist=False)
+
+    return notifications
+
+
+def create_assignation_notification(task_id, person_id):
+    """
+    Create a notification following a task assignation.
+    """
+    task = tasks_service.get_task_raw(task_id)
+    notification = create_notification(
+        person_id,
+        author_id=task.assigner_id,
+        task_id=task_id,
+        type="assignation"
+    )
+    events.emit("notification:new", {
+        "notification_id": notification["id"],
+        "person_id": person_id
+    }, persist=False)
 
 
 def get_task_subscription_raw(person_id, task_id):
@@ -226,7 +296,6 @@ def get_all_sequence_subscriptions(person_id, project_id, task_type_id):
         .filter(Project.id == project_id) \
         .filter(TaskType.id == task_type_id) \
         .all()
-    print(subscriptions)
 
     return fields.serialize_value([
         subscription.entity_id for subscription in subscriptions
@@ -238,3 +307,16 @@ def delete_notifications_for_comment(comment_id):
     for notification in notifications:
         notification.delete()
     return fields.serialize_list(notifications)
+
+
+def get_last_notifications(notification_type=None):
+    """
+    Return last notification created. This function is used mainly for testing
+    purpose.
+    """
+    query = Notification.query
+    if notification_type is not None:
+        query = query.filter_by(type=notification_type)
+    return fields.serialize_value(
+        query.limit(100).all()
+    )

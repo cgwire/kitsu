@@ -424,3 +424,24 @@ class TaskServiceTestCase(ApiDBTestCase):
         self.assertIsNone(Task.get(task_2_id))
         self.assertIsNotNone(Task.get(task_3_id))
         self.assertIsNotNone(Task.get(task_4_id))
+
+    def test_get_comment_mentions(self):
+        mentions = tasks_service.get_comment_mentions(
+            self.task_id,
+            "Test @Emma Doe"
+        )
+        self.assertEquals(len(mentions), 0)
+        mentions = tasks_service.get_comment_mentions(
+            self.task_id,
+            "Test @John Doe"
+        )
+        self.assertEquals(mentions[0], self.person)
+
+    def test_create_comment(self):
+        comment = tasks_service.create_comment(
+            self.task_id,
+            self.task_status.id,
+            self.person.id,
+            "Test @John Doe"
+        )
+        self.assertEquals(comment["mentions"][0], str(self.person.id))

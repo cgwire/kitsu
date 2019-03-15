@@ -4,6 +4,7 @@ import sqlalchemy.orm as orm
 
 from pytz import tzinfo
 from babel import Locale
+from sqlalchemy_utils.types.choice import Choice
 
 
 def serialize_value(value):
@@ -17,6 +18,8 @@ def serialize_value(value):
         return value.isoformat()
     elif isinstance(value, uuid.UUID):
         return str(value)
+    elif isinstance(value, Choice):
+        return value.code
     elif isinstance(value, dict):
         return serialize_dict(value)
     elif isinstance(value, orm.collections.InstrumentedList):

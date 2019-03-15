@@ -1,6 +1,6 @@
 from tests.base import ApiDBTestCase
 
-from zou.app.services import tasks_service
+from zou.app.services import tasks_service, notifications_service
 
 
 class TaskRoutesTestCase(ApiDBTestCase):
@@ -68,6 +68,14 @@ class TaskRoutesTestCase(ApiDBTestCase):
         self.put("/actions/tasks/%s/assign" % task_id, data, 200)
         task = self.get("data/tasks/%s" % task_id)
         self.assertEqual(task["assignees"][0], person_id)
+        notifications = notifications_service.get_last_notifications(
+            "assignation"
+        )
+        self.assertEqual(len(notifications), 1)
+        self.assertEqual(
+            str(notifications[0]["person_id"]),
+            str(self.person.id)
+        )
 
     def test_task_assign_404(self):
         person_id = str(self.person.id)
@@ -97,6 +105,8 @@ class TaskRoutesTestCase(ApiDBTestCase):
         self.assertEquals(len(task["assignees"]), 1)
         task = tasks_service.get_task(shot_task_id)
         self.assertEquals(len(task["assignees"]), 1)
+        notifications = notifications_service.get_last_notifications()
+        self.assertEqual(len(notifications), 2)
 
     def test_clear_assignation(self):
         self.generate_fixture_task()
@@ -114,6 +124,14 @@ class TaskRoutesTestCase(ApiDBTestCase):
         self.assertEquals(len(task["assignees"]), 0)
 
     def test_comment_task(self):
+        self.generate_fixture_user_manager()
+        self.generate_fixture_user_cg_artist()
+        self.project.team = [
+            self.person,
+            self.user_cg_artist,
+            self.user_manager
+        ]
+        self.project.save()
         self.generate_fixture_task()
         path = "/actions/tasks/%s/comment/" % self.task.id
         data = {
@@ -137,6 +155,49 @@ class TaskRoutesTestCase(ApiDBTestCase):
         self.assertEqual(len(comments), 1)
         self.assertEqual(comments[0]["text"], data["comment"])
         self.assertEqual(comments[0]["person_id"], str(self.user.id))
+
+        notifications = notifications_service.get_last_notifications("comment")
+        self.assertEqual(len(notifications), 1)
+        notifications = notifications_service.get_last_notifications("mention")
+        self.assertEqual(len(notifications), 0)
+
+        data = {
+            "task_status_id": self.wip_status_id,
+            "comment": "comment test @John Did2"
+        }
+        comment = self.post(path, data)
+        notifications = notifications_service.get_last_notifications("comment")
+        self.assertEqual(len(notifications), 2)
+        notifications = notifications_service.get_last_notifications("mention")
+        self.assertEqual(len(notifications), 1)
+
+    def test_edit_comment(self):
+        self.generate_fixture_user_manager()
+        self.generate_fixture_user_cg_artist()
+        self.project.team = [
+            self.person,
+            self.user,
+            self.user_cg_artist,
+            self.user_manager
+        ]
+        self.project.save()
+        self.generate_fixture_task()
+        path = "/actions/tasks/%s/comment/" % self.task.id
+        data = {
+            "task_status_id": self.wip_status_id,
+            "comment": "comment test @John Doe"
+        }
+        comment = self.post(path, data)
+        notifications = notifications_service.get_last_notifications("mention")
+        self.assertEqual(len(notifications), 1)
+
+        path = "/data/comments/%s" % comment["id"]
+        data = {
+            "text": "comment test @John Did2 @John Did3"
+        }
+        comment = self.put(path, data)
+        notifications = notifications_service.get_last_notifications("mention")
+        self.assertEqual(len(notifications), 2)
 
     def test_comment_task_with_retake(self):
         self.generate_fixture_task()

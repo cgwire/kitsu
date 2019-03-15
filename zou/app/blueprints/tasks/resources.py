@@ -403,6 +403,10 @@ class TasksAssignResource(Resource):
         for task_id in task_ids:
             try:
                 task = self.assign_task(task_id, person_id)
+                notifications_service.create_assignation_notification(
+                    task_id,
+                    person_id
+                )
                 tasks.append(task)
             except TaskNotFoundException:
                 pass
@@ -448,6 +452,10 @@ class TaskAssignResource(Resource):
             user_service.check_manager_project_access(task["project_id"])
 
             self.assign_task(task_id, person_id)
+            notifications_service.create_assignation_notification(
+                task_id,
+                person_id
+            )
             projects_service.add_team_member(
                 task["project_id"],
                 person_id
@@ -467,7 +475,7 @@ class TaskAssignResource(Resource):
         args = parser.parse_args()
 
         return (
-            args.get("person_id", ""),
+            args.get("person_id", "")
         )
 
     def assign_task(self, task_id, person_id):

@@ -23,6 +23,24 @@ preview_link_table = db.Table(
 )
 
 
+mentions_table = db.Table(
+    "comment_mentions",
+    db.Column(
+        "comment",
+        UUIDType(binary=False),
+        db.ForeignKey("comment.id"),
+        primary_key=True
+    ),
+    db.Column(
+        "person",
+        UUIDType(binary=False),
+        db.ForeignKey("person.id"),
+        primary_key=True
+    )
+)
+
+
+
 class Comment(db.Model, BaseMixin, SerializerMixin):
     """
     Comment can occurs on any object but they are mainly used on tasks.
@@ -55,6 +73,10 @@ class Comment(db.Model, BaseMixin, SerializerMixin):
         "PreviewFile",
         secondary=preview_link_table,
         backref="comments"
+    )
+    mentions = db.relationship(
+        "Person",
+        secondary=mentions_table
     )
 
     def __repr__(self):

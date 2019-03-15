@@ -1,4 +1,5 @@
 import datetime
+import re
 import uuid
 
 from sqlalchemy.exc import StatementError, IntegrityError, DataError
@@ -432,12 +433,27 @@ def create_comment(
         object_type=object_type,
         task_status_id=task_status_id,
         person_id=person_id,
+        mentions=get_comment_mentions(object_id, text),
         text=text
     )
     events.emit("comment:new", {
         "comment_id": comment.id,
     })
     return comment.serialize()
+
+
+def get_comment_mentions(object_id, text):
+    """
+    Check for people mention (@full name) in text and returns matching person
+    active records.
+    """
+    task = get_task_raw(object_id)
+    project = Project.get(task.project_id)
+    mentions = []
+    for person in project.team:
+        if re.search("@%s( |$)" % person.full_name(), text) is not None:
+            mentions.append(person)
+    return mentions
 
 
 def delete_comment(comment_id):
@@ -941,3 +957,15 @@ def add_preview_file_to_comment(comment_id, person_id, task_id, revision=0):
     comment.previews.append(preview_file)
     comment.save()
     return preview_file.serialize()
+
+
+def reset_mentions(comment):
+    task = get_task(comment["object_id"])
+    mentions = get_comment_mentions(
+        task["id"],
+        comment["text"]
+    )
+    comment_to_update = Comment.get(comment["id"])
+    comment_to_update.mentions = mentions
+    comment_to_update.save()
+    return comment_to_update.serialize()
