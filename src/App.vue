@@ -512,6 +512,11 @@ ul {
   margin-right: 0px;
 }
 
+.mention,
+.mention:hover {
+  color: $blue;
+}
+
 .th-project {
   width: 30px;
   border-radius: 50%;
@@ -561,6 +566,10 @@ a:hover {
 
 .field {
   margin-bottom: 2em;
+}
+
+.mt1 {
+  margin-top: 1em;
 }
 
 .mt2 {

@@ -114,6 +114,7 @@
             <add-comment
               ref="add-comment"
               :user="user"
+              :team="currentTeam"
               :task="task"
               :task-status="taskStatusForCurrentUser"
               :light="true"
@@ -176,7 +177,7 @@
 
   </div>
   <div class="side task-info has-text-centered" v-else>
-    No task selected.
+    $t('tasks.no_task_selected')
   </div>
 </template>
 
@@ -232,6 +233,10 @@ export default {
     task: {
       type: Object,
       default: () => {}
+    },
+    isLoading: {
+      type: Boolean,
+      default: true
     }
   },
 
@@ -285,6 +290,10 @@ export default {
       'taskTypeMap',
       'user'
     ]),
+
+    currentTeam () {
+      return this.currentProduction.team.map(id => this.personMap[id])
+    },
 
     title () {
       if (this.task) {
@@ -604,6 +613,10 @@ export default {
     task () {
       this.attachedFileName = ''
       this.loadTaskData()
+    },
+
+    isLoading () {
+      this.task.loading = this.isLoading
     }
   },
 
@@ -706,7 +719,6 @@ export default {
 .task-columns {
   display: flex;
   flex-direction: column;
-  overflow-y: auto;
 }
 
 .task-column {

@@ -11,13 +11,36 @@
       </h1>
 
       <form v-on:submit.prevent>
-        <textarea-field
-          ref="textField"
-          :label="$t('comments.fields.text')"
-          v-model="form.text"
-          @keyup.ctrl="runConfirmation"
-          v-focus >
-        </textarea-field>
+        <div class="field">
+          <at-ta
+            :members="team"
+            name-key="full_name"
+            limit="2"
+          >
+            <template slot="item" slot-scope="team">
+              <div class="flexrow">
+                <people-avatar
+                  class="flexrow-item"
+                  :person="team.item"
+                  :size="20"
+                  :no-cache="true"
+                />
+                <span class="flexrow-item">
+                  {{ team.item.full_name }}
+                </span>
+              </div>
+            </template>
+
+            <textarea
+              class="input"
+              ref="textField"
+              v-model="form.text"
+              @keyup.ctrl="runConfirmation"
+              v-focus
+            >
+            </textarea>
+          </at-ta>
+        </div>
       </form>
 
       <p class="has-text-right">
@@ -46,13 +69,17 @@
 </template>
 
 <script>
+import AtTa from 'vue-at/dist/vue-at-textarea'
 import Combobox from '../widgets/Combobox'
+import PeopleAvatar from '../widgets/PeopleAvatar'
 import TextareaField from '../widgets/TextareaField'
 
 export default {
   name: 'edit-comment-modal',
   components: {
+    AtTa,
     Combobox,
+    PeopleAvatar,
     TextareaField
   },
 
@@ -61,7 +88,8 @@ export default {
     'cancelRoute',
     'isLoading',
     'isError',
-    'commentToEdit'
+    'commentToEdit',
+    'team'
   ],
 
   watch: {
@@ -122,5 +150,13 @@ export default {
   border-bottom: 2px solid #DDD;
   padding-bottom: 0.5em;
   margin-bottom: 1.2em;
+}
+
+textarea {
+  min-height: 8em;
+}
+
+.modal-content {
+  overflow: initial;
 }
 </style>

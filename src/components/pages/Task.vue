@@ -1,5 +1,6 @@
 <template>
   <div class="page fixed-page">
+  <div style="overflow-y: auto;">
     <div class="page-header">
       <div
         class="flexrow header-title"
@@ -66,6 +67,7 @@
               :is-loading="loading.addComment"
               :is-error="errors.addComment"
               :user="user"
+              :team="currentTeam"
               :task="currentTask"
               :task-status="taskStatusForCurrentUser"
               :attached-file-name="attachedFileName"
@@ -236,6 +238,7 @@
       :is-error="errors.editComment"
       :cancel-route="taskPath()"
       :comment-to-edit="commentToEdit"
+      :team="currentTeam"
       @confirm="confirmEditTaskComment"
     />
 
@@ -258,6 +261,7 @@
       @cancel="hideRemoveExtraPreviewModal"
       @confirm="confirmDeleteTaskPreview"
     />
+  </div>
   </div>
 </template>
 
@@ -696,6 +700,10 @@ export default {
         })
       }
       return currentPreview
+    },
+
+    currentTeam () {
+      return this.currentProduction.team.map(id => this.personMap[id])
     }
   },
 
@@ -1452,13 +1460,11 @@ video {
 .task-columns {
   display: flex;
   flex-direction: row;
-  overflow-y: auto;
 }
 
 .task-column {
   width: 50%;
   padding: 1em;
-  overflow-y: auto;
 }
 
 .preview-column-content {
