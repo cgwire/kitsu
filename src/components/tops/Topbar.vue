@@ -580,7 +580,7 @@ export default {
 
 .has-notifications {
   margin-top: 5px;
-  color: #f57f17;
+  color: $orange;
 }
 
 .icon-link {
