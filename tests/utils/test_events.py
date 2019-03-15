@@ -25,6 +25,12 @@ class EventsTestCase(ApiDBTestCase):
         events.emit("task:start")
         self.assertEqual(self.counter, 3)
 
+        event_models = events_service.get_last_events()
+        self.assertEquals(len(event_models), 3)
+        events.emit("task:start", persist=False)
+        event_models = events_service.get_last_events()
+        self.assertEquals(len(event_models), 3)
+
     def test_unregister(self):
         events.register("task:start", "inc_counter", self)
         events.unregister("task:start", "inc_counter")

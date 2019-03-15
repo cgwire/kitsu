@@ -1,6 +1,6 @@
 from zou.app.models.comment import Comment
 
-from zou.app.services import tasks_service, user_service
+from zou.app.services import notifications_service, tasks_service, user_service
 from zou.app.utils import permissions
 
 from .base import BaseModelResource, BaseModelsResource
@@ -16,6 +16,11 @@ class CommentResource(BaseModelResource):
 
     def __init__(self):
         BaseModelResource.__init__(self, Comment)
+
+    def post_update(self, instance_dict):
+        comment = tasks_service.reset_mentions(instance_dict)
+        notifications_service.reset_notifications_for_mentions(comment)
+        return comment
 
     def check_read_permissions(self, instance):
         if permissions.has_admin_permissions():

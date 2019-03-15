@@ -42,10 +42,10 @@ class NotificationsServiceTestCase(ApiDBTestCase):
     def test_create_notification(self):
         self.generate_fixture_comment()
         notification = notifications_service.create_notification(
-            self.person.serialize(),
-            self.comment,
-            False,
-            False
+            self.person.id,
+            comment_id=self.comment["id"],
+            author_id=self.comment["person_id"],
+            task_id=self.comment["object_id"]
         )
         notification_again = Notification.get(notification["id"])
         self.assertIsNotNone(notification_again)
@@ -65,6 +65,30 @@ class NotificationsServiceTestCase(ApiDBTestCase):
         notifications = Notification.get_all()
         self.assertEqual(len(notifications), 1)
         self.assertEqual(notifications[0].author_id, self.user.id)
+
+    def test_create_notifications_for_task_and_comment_with_mentions(self):
+        self.generate_fixture_comment()
+        self.comment["mentions"] = [self.person.id]
+        notifications_service.create_notifications_for_task_and_comment(
+            self.task_dict,
+            self.comment
+        )
+        notifications = Notification.get_all()
+        self.assertEqual(len(notifications), 2)
+
+    def test_create_assignation_notification(self):
+        self.generate_fixture_comment()
+        notifications_service.create_assignation_notification(
+            self.task_dict["id"],
+            self.person.id
+        )
+        notifications = Notification.get_all()
+        self.assertEqual(len(notifications), 1)
+        self.assertEqual(notifications[0].type, "assignation")
+        self.assertEqual(
+            str(notifications[0].author_id),
+            self.task_dict["assigner_id"]
+        )
 
     def test_subscribe_task(self):
         self.generate_fixture_comment()

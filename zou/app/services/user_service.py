@@ -418,12 +418,13 @@ def get_last_notifications(notification_id=None):
     query = Notification.query \
         .filter_by(person_id=current_user.id) \
         .order_by(Notification.created_at.desc()) \
-        .join(Task, Project, Comment) \
+        .join(Task, Project) \
+        .outerjoin(Comment) \
         .add_columns(
             Project.id,
             Project.name,
             Task.task_type_id,
-            Comment.preview_file_id,
+            Comment.id,
             Comment.task_status_id,
             Comment.text,
             Task.entity_id
@@ -439,20 +440,31 @@ def get_last_notifications(notification_id=None):
         project_id,
         project_name,
         task_type_id,
-        preview_file_id,
+        comment_id,
         task_status_id,
         comment_text,
         task_entity_id
     ) in notifications:
         (full_entity_name, episode_id) = \
             names_service.get_full_entity_name(task_entity_id)
+        preview_file_id = None
+        mentions = []
+        if comment_id is not None:
+            comment = Comment.get(comment_id)
+            if len(comment.previews) > 0:
+                preview_file_id = comment.previews[0].id
+            mentions = comment.mentions or []
+
         result.append(fields.serialize_dict({
             "id": notification.id,
+            "type": "Notification",
+            "notification_type": notification.type,
             "author_id": notification.author_id,
             "comment_id": notification.comment_id,
             "task_id": notification.task_id,
             "task_type_id": task_type_id,
             "task_status_id": task_status_id,
+            "mentions": mentions,
             "preview_file_id": preview_file_id,
             "project_id": project_id,
             "project_name": project_name,
