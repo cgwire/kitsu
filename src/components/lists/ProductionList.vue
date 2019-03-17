@@ -88,6 +88,7 @@
             class="name"
             :with-avatar="false"
             :entry="entry"
+            :no-link="true"
             :last-production-screen="lastProductionScreen"
           />
           <td class="type">
