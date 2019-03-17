@@ -1,6 +1,7 @@
 import redis
 import requests
 
+from flask import Response
 from flask_restful import Resource
 from zou import __version__
 
@@ -16,10 +17,9 @@ class IndexResource(Resource):
             "version": __version__
         }
 
+class BaseStatusResource(Resource):
 
-class StatusResource(Resource):
-
-    def get(self):
+    def get_status(self):
         is_db_up = True
         try:
             projects_service.get_open_status()
@@ -44,10 +44,60 @@ class StatusResource(Resource):
         except:
             is_es_up = False
 
+        version = __version__
+
+        api_name = app.config["APP_NAME"]
+
+        return (
+            api_name,
+            version,
+            is_db_up,
+            is_kv_up,
+            is_es_up
+        )
+
+
+class StatusResource(BaseStatusResource):
+
+    def get(self):
+        (
+            api_name,
+            version,
+            is_db_up,
+            is_kv_up,
+            is_es_up
+        ) = self.get_status()
+
         return {
-            "api": app.config["APP_NAME"],
-            "version": __version__,
+            "name": api_name,
+            "version": version,
             "database-up": is_db_up,
             "key-value-store-up": is_kv_up,
             "event-stream-up": is_es_up
         }
+
+
+class TxtStatusResource(BaseStatusResource):
+
+    def get(self):
+        (
+            api_name,
+            version,
+            is_db_up,
+            is_kv_up,
+            is_es_up
+        ) = self.get_status()
+
+        text = """name: %s
+version: %s
+is_db_up: %s
+is_kv_up: %s
+is_es_up: %s
+""" % (
+    api_name,
+    version,
+    "up" if is_db_up else "down",
+    "up" if is_kv_up else "down",
+    "up" if is_es_up else "down"
+)
+        return Response(text, mimetype='text')
