@@ -68,6 +68,14 @@
                 :full="true"
               />
             </tr>
+
+            <tr>
+              <td class="field-label">{{ $t('shots.fields.nb_frames') }}</td>
+              <td>
+                {{ currentShot ? currentShot.nb_frames : '' }}
+              </td>
+            </tr>
+
             <tr
               :key="descriptor.id"
               v-for="descriptor in shotMetadataDescriptors"
@@ -196,6 +204,14 @@ export default {
   },
 
   created () {
+    if (!this.currentProduction) {
+      this.setProduction(this.$route.params.production_id)
+    } else {
+      const options = { productionId: this.currentProduction.id }
+      if (this.currentEpisode) options.episodeId = this.currentEpisode.id
+      this.$store.commit('RESET_PRODUCTION_PATH', options)
+    }
+
     this.clearSelectedTasks()
 
     this.currentShot = this.getCurrentShot()

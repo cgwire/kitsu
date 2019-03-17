@@ -172,6 +172,14 @@ export default {
   },
 
   created () {
+    if (!this.currentProduction) {
+      this.setProduction(this.$route.params.production_id)
+    } else {
+      const options = { productionId: this.currentProduction.id }
+      if (this.currentEpisode) options.episodeId = this.currentEpisode.id
+      this.$store.commit('RESET_PRODUCTION_PATH', options)
+    }
+
     this.clearSelectedTasks()
     this.currentAsset = this.getCurrentAsset()
 
