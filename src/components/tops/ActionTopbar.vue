@@ -228,16 +228,20 @@
           </div>
         </div>
 
-        <div class="flexrow-item clear-selection-container">
-          <div
-            class="clear-selection flexrow"
-            @click="clearSelectedTasks"
-          >
-            <x-icon class="flexrow-item">
-            </x-icon>
-            <span class="flexrow-item hide-small-screen">
-              {{ $t('main.clear_selection') }}
-            </span>
+        <div class="flexrow-item clear-selection-container has-text-right">
+          <div class="flexrow has-text-right">
+            <div style="flex: 1"></div>
+            <notification-bell class="flexrow-item" :is-white="true" />
+            <div
+              class="clear-selection flexrow flexrow-item"
+              @click="clearSelectedTasks"
+            >
+              <x-icon class="flexrow-item">
+              </x-icon>
+              <span class="flexrow-item hide-small-screen">
+                {{ $t('main.clear_selection') }}
+              </span>
+            </div>
           </div>
         </div>
       </div>
@@ -326,6 +330,7 @@ import { ChevronDownIcon, XIcon, MoreVerticalIcon } from 'vue-feather-icons'
 import ButtonHrefLink from '../widgets/ButtonHrefLink'
 import Combobox from '../widgets/Combobox'
 import ComboboxStatus from '../widgets/ComboboxStatus'
+import NotificationBell from '../widgets/NotificationBell'
 import PeopleField from '../widgets/PeopleField'
 import Spinner from '../widgets/Spinner'
 
@@ -336,6 +341,7 @@ export default {
     ChevronDownIcon,
     Combobox,
     ComboboxStatus,
+    NotificationBell,
     MoreVerticalIcon,
     PeopleField,
     Spinner,
