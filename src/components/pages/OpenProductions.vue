@@ -227,9 +227,13 @@ h1 {
   margin-bottom: 3em;
 }
 
-.avatar {
-  width: 100px;
-  height: 100px;
+.is-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill,minmax(200px, 1fr));
+
+  .open-production {
+    margin: 1em auto 0 auto;
+  }
 }
 
 .open-productions-list {
@@ -240,63 +244,55 @@ h1 {
   flex-direction: row;
   flex-wrap: wrap;
   text-align: center;
-}
 
-.is-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill,minmax(200px, 1fr));
-}
+  .avatar {
+    width: 100px;
+    height: 100px;
+    margin: auto;
+    font-size: 64px;
+    font-weight: bold;
+    border-radius: 1em;
+  }
 
-.open-production {
-  width: 200px;
-  max-width: 250px;
-  overflow-wrap: break-word;
-  padding: 10px;
-  cursor: pointer;
-  padding: 1em;
-  flex: 1;
-}
+  .avatar img {
+    border-radius: 1em;
+    width: 100%;
+    height: 100%;
+  }
 
-.is-grid .open-production {
-  margin: 1em auto 0 auto;
-}
+  .open-production {
+    overflow-wrap: break-word;
+    padding: 10px;
+    cursor: pointer;
+    padding: 1em;
+    flex: 1;
+  }
 
-.avatar {
-  margin: auto;
-  font-size: 64px;
-  font-weight: bold;
-  border-radius: 1em;
-}
-
-.avatar img {
-  border-radius: 1em;
-  width: 100%;
-  height: 100%;
-}
-
-.open-production:hover .avatar{
-  transform: scale(1.1);
-  transition: transform .2s ease-in-out;
+  .open-production:hover .avatar{
+    transform: scale(1.1);
+    transition: transform .2s ease-in-out;
+  }
 }
 
 .production-name {
   font-size: 1.4em;
   text-transform: uppercase;
   color: $grey;
-  margin-top: 0.5em;
+  margin: 0.5em auto;
+  width: 200px;
 }
 
 .welcome {
   max-width: 1000px;
   margin: auto;
+
+  h1 {
+    margin-top: 1em;
+  }
 }
 
 .kitsu-logo {
   margin-top: 4em;
-}
-
-.welcome h1 {
-  margin-top: 1em;
 }
 
 a.secondary {
@@ -309,10 +305,10 @@ a.secondary:hover {
 
 .new-production-link {
   margin-top: 4em;
-}
 
-.new-production-link a {
-  color: #BBB;
+  a {
+    color: #BBB;
+  }
 }
 
 @media screen and (max-width: 768px) {
