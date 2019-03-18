@@ -1,12 +1,12 @@
 import superagent from 'superagent'
-import auth from '../../lib/auth'
+import errors from '../../lib/errors'
 
 const client = {
   get (path, callback) {
     superagent
       .get(path)
       .end((err, res) => {
-        if (res.statusCode === 401) return auth.backToLogin()
+        if (res.statusCode === 401) return errors.backToLogin()
         callback(err, res.body)
       })
   },
@@ -16,7 +16,7 @@ const client = {
       .post(path)
       .send(data)
       .end((err, res) => {
-        if (res.statusCode === 401) return auth.backToLogin()
+        if (res.statusCode === 401) return errors.backToLogin()
         callback(err, res.body)
       })
   },
@@ -26,7 +26,7 @@ const client = {
       .put(path)
       .send(data)
       .end((err, res) => {
-        if (res.statusCode === 401) return auth.backToLogin()
+        if (res.statusCode === 401) return errors.backToLogin()
         callback(err, res.body)
       })
   },
@@ -35,7 +35,7 @@ const client = {
     superagent
       .del(path)
       .end((err, res) => {
-        if (res.statusCode === 401) return auth.backToLogin()
+        if (res.statusCode === 401) return errors.backToLogin()
         callback(err, res.body)
       })
   }

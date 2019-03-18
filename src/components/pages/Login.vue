@@ -97,7 +97,16 @@ export default {
 
     confirmLogIn () {
       this.logIn((err, success) => {
-        if (err) console.log(err)
+        if (err) {
+          if (err.default_password) {
+            this.$router.push({
+              name: 'reset-change-password',
+              params: {token: err.token}
+            })
+          } else {
+            console.log(err)
+          }
+        }
         if (success) this.$router.push('/')
       })
     }

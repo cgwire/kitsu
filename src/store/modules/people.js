@@ -467,6 +467,7 @@ const mutations = {
 
   [DELETE_PEOPLE_END] (state, person) {
     state.isDeleteLoading = false
+    state.personToDelete = undefined
     const personToDeleteIndex = state.people.findIndex(
       (p) => p.id === person.id
     )
@@ -513,7 +514,6 @@ const mutations = {
     )
     state.personToEdit = helpers.addAdditionalInformation(state.personToEdit)
     if (personToEditIndex >= 0) {
-      console.log('ok', state.personToEdit.name)
       delete state.people[personToEditIndex]
       state.personMap[state.personToEdit.id] = {...state.personToEdit}
       state.people[personToEditIndex] = state.personMap[state.personToEdit.id]
