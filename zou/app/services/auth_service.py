@@ -5,7 +5,8 @@ from ldap3 import (
     Server,
     Connection,
     ALL,
-    NTLM
+    NTLM,
+    SIMPLE
 )
 from ldap3.core.exceptions import (
     LDAPSocketOpenError,
@@ -127,15 +128,24 @@ def ldap_auth_strategy(email, password, app):
             app.config["LDAP_PORT"]
         )
         server = Server(ldap_server, get_info=ALL)
-        user = "%s\%s" % (
-            app.config["LDAP_DOMAIN"],
-            person["desktop_login"]
-        )
+        if app.config["LDAP_IS_AD"]:
+            user = "%s\%s" % (
+                app.config["LDAP_DOMAIN"],
+                person["desktop_login"]
+            )
+            authentication = NTLM
+        else:
+            user = "uid=%s,%s" % (
+                person["desktop_login"],
+                app.config["LDAP_BASE_DN"]
+            )
+            authentication = SIMPLE
+
         conn = Connection(
             server,
             user=user,
             password=password,
-            authentication=NTLM,
+            authentication=authentication,
             raise_exceptions=True
         )
         conn.bind()
