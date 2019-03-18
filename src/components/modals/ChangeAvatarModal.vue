@@ -18,7 +18,7 @@
       <file-upload
         ref="uploadAvatarField"
         @fileselected="onFileSelected"
-        accept=".png">
+        accept=".png,.jpg,.jpeg">
       </file-upload>
 
       <p class="error" v-if="isError">

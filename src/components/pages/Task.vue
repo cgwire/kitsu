@@ -214,7 +214,7 @@
       :is-loading="loading.addExtraPreview"
       :is-error="errors.addExtraPreview"
       :form-data="addExtraPreviewFormData"
-      extensions=".png,.jpg"
+      extensions=".png,.jpg,.jpeg"
       @cancel="hideExtraPreviewModal"
       @fileselected="selectFile"
       @confirm="createExtraPreview"
