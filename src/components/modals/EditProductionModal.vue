@@ -61,7 +61,7 @@
           <span class="label">{{ $t("productions.picture") }}</span>
           <file-upload
             ref="fileField"
-            accept=".png"
+            accept=".png,.jpg,.jpeg"
             @fileselected="onFileSelected"
           />
         </div>
