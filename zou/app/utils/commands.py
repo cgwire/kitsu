@@ -3,8 +3,8 @@
 import os
 import json
 import datetime
-from ldap3 import Server, Connection, ALL, NTLM
 
+from ldap3 import Server, Connection, ALL, NTLM, SIMPLE
 from zou.app.utils import thumbnail as thumbnail_utils
 from zou.app.stores import auth_tokens_store, file_store
 from zou.app.services import (
@@ -144,44 +144,83 @@ def sync_with_ldap_server():
     LDAP_USER = os.getenv("LDAP_USER", "")
     EMAIL_DOMAIN = os.getenv("EMAIL_DOMAIN", "studio.local")
     LDAP_EXCLUDED_ACCOUNTS = os.getenv("LDAP_EXCLUDED_ACCOUNTS", "")
+    LDAP_IS_AD = os.getenv("LDAP_IS_AD", False)
+
+    def clean_value(value):
+        cleaned_value = str(value)
+        if cleaned_value == "[]":
+            cleaned_value = ""
+        return cleaned_value
+
+    def search_ad_users(conn, excluded_accounts):
+        attributes = [
+            "givenName", "sn", "sAMAccountName", "mail", "thumbnailPhoto"
+        ]
+        conn.search(
+            LDAP_BASE_DN,
+            '(objectclass=person)',
+            attributes=attributes
+        )
+        return [
+            {
+                "first_name": clean_value(entry.givenName),
+                "last_name": clean_value(entry.sn),
+                "email": clean_value(entry.mail),
+                "desktop_login": clean_value(entry.sAMAccountName),
+                "thumbnail": clean_value(entry.thumbnailPhoto.raw_values)
+            }
+            for entry in conn.entries
+            if clean_value(entry.sAMAccountName) not in excluded_accounts
+        ]
+
+    def search_ldap_users(conn, excluded_accounts):
+        attributes = [
+            "givenName", "sn", "mail", "cn", "uid"
+        ]
+        conn.search(LDAP_BASE_DN, '(objectclass=person)', attributes=attributes)
+        return [
+            {
+                "first_name": clean_value(entry.givenName),
+                "last_name": clean_value(entry.sn),
+                "email": clean_value(entry.mail),
+                "desktop_login": clean_value(entry.uid),
+            }
+            for entry in conn.entries
+            if clean_value(entry.uid) not in excluded_accounts
+        ]
 
     def get_ldap_users():
         excluded_accounts = LDAP_EXCLUDED_ACCOUNTS.split(",")
         ldap_server = "%s:%s" % (LDAP_HOST, LDAP_PORT)
         server = Server(ldap_server, get_info=ALL)
-        user = "%s\%s" % (LDAP_DOMAIN, LDAP_USER)
+        if LDAP_IS_AD:
+            user = "%s\%s" % (LDAP_DOMAIN, LDAP_USER)
+            authentication = NTLM
+        else:
+            user = "uid=%s,%s" % (LDAP_USER, LDAP_BASE_DN)
+            authentication = SIMPLE
+
         conn = Connection(
             server,
             user=user,
             password=LDAP_PASSWORD,
-            authentication=NTLM,
+            authentication=authentication,
             raise_exceptions=True,
             auto_bind=True
         )
 
-        attributes = [
-            "givenName", "sn", "sAMAccountName", "mail", "thumbnailPhoto"
-        ]
-        conn.search(LDAP_BASE_DN, '(objectclass=person)', attributes=attributes)
-        return [
-            {
-                "first_name": entry.givenName,
-                "last_name": entry.sn,
-                "email": entry.mail,
-                "desktop_login": entry.sAMAccountName,
-                "thumbnail": entry.thumbnailPhoto.raw_values
-            }
-            for entry in conn.entries
-            if str(entry.sAMAccountName) not in excluded_accounts
-        ]
+        if LDAP_IS_AD:
+            return search_ad_users(conn, excluded_accounts)
+        else:
+            return search_ldap_users(conn, excluded_accounts)
 
     def update_person_list_with_ldap_users(users):
         for user in users:
-            first_name = str(user["first_name"])
-            last_name = str(user["last_name"])
-            desktop_login = str(user["desktop_login"])
-            email = str(user["email"])
-            if len(user["thumbnail"]) > 0:
+            first_name = user["first_name"]
+            last_name = user["last_name"]
+            desktop_login = user["desktop_login"]
+            email = user["email"]
+            if "thumbnail" in user and len(user["thumbnail"]) > 0:
                 thumbnail = user["thumbnail"][0]
             else:
                 thumbnail = ""
@@ -193,9 +232,10 @@ def sync_with_ldap_server():
                 )
             except PersonNotFoundException:
                 pass
+            if len(email) == 0 or email == "[]" or type(email) != str:
+                email = "%s@%s" % (desktop_login, EMAIL_DOMAIN)
+
             if person is None:
-                if len(email) == 0 or email == "[]" or type(email) != str:
-                    email = "%s@%s" % (desktop_login, EMAIL_DOMAIN)
                 person = persons_service.create_person(
                     email,
                     "default".encode("utf-8"),
@@ -204,6 +244,7 @@ def sync_with_ldap_server():
                     desktop_login=desktop_login
                 )
                 print("User %s created." % desktop_login)
+
             else:
                 person = persons_service.get_person_by_desktop_login(
                     desktop_login

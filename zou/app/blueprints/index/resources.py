@@ -90,9 +90,9 @@ class TxtStatusResource(BaseStatusResource):
 
         text = """name: %s
 version: %s
-is_db_up: %s
-is_kv_up: %s
-is_es_up: %s
+database-up: %s
+event-stream-up: %s
+key-value-store-up: %s
 """ % (
     api_name,
     version,
