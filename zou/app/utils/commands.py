@@ -167,7 +167,7 @@ def sync_with_ldap_server():
                 "last_name": clean_value(entry.sn),
                 "email": clean_value(entry.mail),
                 "desktop_login": clean_value(entry.sAMAccountName),
-                "thumbnail": clean_value(entry.thumbnailPhoto.raw_values)
+                "thumbnail": entry.thumbnailPhoto.raw_values
             }
             for entry in conn.entries
             if clean_value(entry.sAMAccountName) not in excluded_accounts
