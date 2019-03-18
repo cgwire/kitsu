@@ -32,7 +32,7 @@ export default {
 }
 </script>
 
-<style scoped>
+<style lang="scss" scoped>
 .people-name {
   display: flex;
   align-items: center;

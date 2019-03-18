@@ -24,11 +24,16 @@ export default {
 
   computed: {
     ...mapGetters([
+      'assetTypeMap',
       'isLoginLoading',
       'isDataLoading',
       'isDarkTheme',
       'isSavingCommentPreview',
       'route',
+      'personMap',
+      'taskMap',
+      'taskStatusMap',
+      'taskTypeMap',
       'user'
     ])
   },
@@ -56,10 +61,16 @@ export default {
   methods: {
     ...mapActions([
       'getTask',
+      'loadAsset',
+      'loadAssetType',
       'loadComment',
+      'loadPerson',
       'loadPersonTasks',
+      'loadTaskStatus',
+      'loadTaskType',
       'refreshPreview',
-      'refreshMetadataDescriptor'
+      'refreshMetadataDescriptor',
+      'removeAsset'
     ]),
 
     onAssignation (eventData) {
@@ -86,6 +97,89 @@ export default {
 
   socket: {
     events: {
+      'task-type:new' (eventData) {
+        if (!this.taskTypeMap[eventData.task_type_id]) {
+          this.loadTaskType(eventData.task_type_id)
+        }
+      },
+
+      'task-type:update' (eventData) {
+        if (this.taskTypeMap[eventData.task_type_id]) {
+          this.loadTaskType(eventData.task_type_id)
+        }
+      },
+
+      'task-type:delete' (eventData) {
+        if (this.taskTypeMap[eventData.task_type_id]) {
+          this.$store.commit(
+            'DELETE_TASK_TYPE_END',
+            {id: eventData.task_type_id}
+          )
+        }
+      },
+
+      'task-status:new' (eventData) {
+        if (!this.taskStatusMap[eventData.task_status_id]) {
+          this.loadTaskStatus(eventData.task_status_id)
+        }
+      },
+
+      'task-status:update' (eventData) {
+        if (this.taskStatusMap[eventData.task_status_id]) {
+          this.loadTaskStatus(eventData.task_status_id)
+        }
+      },
+
+      'task-status:delete' (eventData) {
+        if (this.taskStatusMap[eventData.task_status_id]) {
+          this.$store.commit(
+            'DELETE_TASK_STATUS_END',
+            {id: eventData.task_status_id}
+          )
+        }
+      },
+
+      'entity-type:new' (eventData) {
+        if (!this.assetTypeMap[eventData.entity_type_id]) {
+          this.loadAssetType(eventData.entity_type_id)
+        }
+      },
+
+      'entity-type:update' (eventData) {
+        if (this.assetTypeMap[eventData.entity_type_id]) {
+          this.loadAssetType(eventData.entity_type_id)
+        }
+      },
+
+      'entity-type:delete' (eventData) {
+        if (this.assetTypeMap[eventData.entity_type_id]) {
+          this.$store.commit(
+            'DELETE_ASSET_TYPE_END',
+            {id: eventData.entity_type_id}
+          )
+        }
+      },
+
+      'person:new' (eventData) {
+        if (!this.personMap[eventData.person_id]) {
+          this.loadPerson(eventData.person_id)
+        }
+      },
+
+      'person:update' (eventData) {
+        if (this.personMap[eventData.person_id]) {
+          this.loadPerson(eventData.person_id)
+        }
+      },
+
+      'person:delete' (eventData) {
+        const person = this.personMap[eventData.person_id]
+        if (person) {
+          this.$store.commit('DELETE_PEOPLE_START', person)
+          this.$store.commit('DELETE_PEOPLE_END', person)
+        }
+      },
+
       'task:assign' (eventData) {
         this.onAssignation(eventData)
       },
@@ -100,7 +194,9 @@ export default {
       },
 
       'task:update' (eventData) {
-        this.getTask({ taskId: eventData.task_id })
+        if (this.taskMap[eventData.task_id]) {
+          this.getTask({ taskId: eventData.task_id })
+        }
       },
 
       'metadata-descriptor:new' (eventData) {
@@ -416,6 +512,11 @@ ul {
   margin-right: 0px;
 }
 
+.mention,
+.mention:hover {
+  color: $blue;
+}
+
 .th-project {
   width: 30px;
   border-radius: 50%;
@@ -467,8 +568,20 @@ a:hover {
   margin-bottom: 2em;
 }
 
+.mt1 {
+  margin-top: 1em;
+}
+
 .mt2 {
   margin-top: 2em;
+}
+
+.ml1 {
+  margin-left: 1em;
+}
+
+.mr1 {
+  margin-right: 1em;
 }
 
 .select select:hover,
@@ -667,6 +780,7 @@ input.search-input:focus {
 
 .table td {
   vertical-align: middle;
+  word-wrap: anywhere;
 }
 
 .table-header-wrapper {
@@ -765,6 +879,31 @@ input.search-input:focus {
 
 .splitted-table {
   margin-top: 1em;
+}
+
+.table-body {
+  position: relative;
+  z-index: 1;
+}
+
+tbody:last-child .empty-line:last-child {
+  border: 0;
+}
+
+.table-body .table .empty-line {
+  background: inherit;
+}
+
+.table-header-wrapper {
+  position: relative;
+}
+
+.table th {
+  vertical-align: middle;
+}
+
+.header-icon {
+  min-width: 15px;
 }
 
 .flexrow {
@@ -1010,13 +1149,19 @@ input.search-input:focus {
 }
 
 .break-word {
-  word-wrap: break-word;
   overflow-wrap: break-word;
   hyphens: auto;
+  word-wrap: anywhere;
 }
 
 .button.is-on {
   box-shadow: inset 0 0 4px #999;
+}
+
+.break-word {
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+  hyphens: auto;
 }
 
 @media screen and (max-width: 1000px) {

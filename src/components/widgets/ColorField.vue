@@ -32,7 +32,7 @@ export default {
       type: String
     },
     value: {
-      default: '#999999',
+      default: '$grey999',
       type: String
     },
     placeholder: {
@@ -67,7 +67,7 @@ export default {
   },
   data () {
     return {
-      selectedColor: '#999999'
+      selectedColor: '$grey999'
     }
   },
   computed: {
@@ -83,7 +83,7 @@ export default {
   }
 }
 </script>
-<style>
+<style lang="scss" scoped>
 .color {
   display: inline-block;
   cursor: pointer;
@@ -100,6 +100,6 @@ export default {
 }
 
 .selected {
-  border: 3px solid #67BE4B;
+  border: 3px solid $light-green;
 }
 </style>

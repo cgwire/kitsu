@@ -43,8 +43,10 @@ export const applyFilters = (entries, filters, taskMap) => {
             entry.data[filter.descriptor.field_name] &&
             filter.value
           ) {
-            const dataValue = entry.data[filter.descriptor.field_name]
-            isOk = dataValue.toLowerCase() === filter.value.toLowerCase()
+            let dataValue = entry.data[filter.descriptor.field_name]
+            dataValue = dataValue.toLowerCase()
+            console.log(dataValue, filter)
+            isOk = dataValue.indexOf(filter.value.toLowerCase()) >= 0
           } else {
             isOk = false
           }
@@ -103,6 +105,26 @@ export const getFilters = (
   const descFilters = getDescFilters(descriptors, query)
   const excludingKeywords = getExcludingKeyWords(query) || []
   filters = filters.concat(descFilters)
+  excludingKeywords.forEach((keyword) => {
+    let excludedMap = {}
+    let excludedEntries = indexSearch(entryIndex, [keyword]) || []
+    excludedEntries.forEach((entry) => {
+      excludedMap[entry.id] = true
+    })
+    filters.push({
+      type: 'exclusion',
+      excludedIds: excludedMap
+    })
+  })
+  return filters
+}
+
+/*
+ *  Extract filters from a query dedicated to task list.
+ */
+export const getTaskFilters = (entryIndex, query) => {
+  const filters = []
+  const excludingKeywords = getExcludingKeyWords(query) || []
   excludingKeywords.forEach((keyword) => {
     let excludedMap = {}
     let excludedEntries = indexSearch(entryIndex, [keyword]) || []

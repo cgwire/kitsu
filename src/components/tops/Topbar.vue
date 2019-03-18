@@ -51,16 +51,7 @@
       </div>
 
       <div class="nav-right">
-        <div
-          class="nav-item"
-        >
-          <router-link :to="{name: 'notifications'}">
-            <bell-icon
-              :class="notificationBellClass"
-            />
-          </router-link>
-        </div>
-
+        <notification-bell />
         <div
           :class="{
             'nav-item': true,
@@ -109,6 +100,16 @@
             {{ $t("main.documentation ")}}
           </a>
         </li>
+        <li>
+          <a href="https://slack.cg-wire.com" target="_blank">
+            Slack
+          </a>
+        </li>
+        <li>
+          <a href="https://trello.com/b/TGi6LZNa/kitsu-roadmap" target="_blank">
+            Roadmap
+          </a>
+        </li>
         <li @click="onLogoutClicked">
           {{ $t("main.logout") }}
         </li>
@@ -122,9 +123,9 @@
 
 <script>
 import { mapGetters, mapActions } from 'vuex'
-import { BellIcon } from 'vue-feather-icons'
 
 import Combobox from '../widgets/Combobox'
+import NotificationBell from '../widgets/NotificationBell'
 import PeopleAvatar from '../widgets/PeopleAvatar'
 import PeopleName from '../widgets/PeopleName'
 import { version } from '../../../package.json'
@@ -132,8 +133,8 @@ import { version } from '../../../package.json'
 export default {
   name: 'topbar',
   components: {
-    BellIcon,
     Combobox,
+    NotificationBell,
     PeopleName,
     PeopleAvatar
   },
@@ -180,14 +181,6 @@ export default {
       'productionMap',
       'user'
     ]),
-
-    notificationBellClass () {
-      if (this.isNewNotification) {
-        return 'has-notifications'
-      } else {
-        return 'has-no-notifications'
-      }
-    },
 
     isShotPage () {
       return this.$route.params.episode_id
@@ -354,6 +347,7 @@ export default {
             this.updateComboFromRoute()
           })
         } else {
+          this.clearEpisodes()
           this.updateComboFromRoute()
         }
       } else if (
@@ -440,7 +434,7 @@ export default {
 
   socket: {
     events: {
-      'notifications:new' (eventData) {
+      'notification:new' (eventData) {
         if (this.user.id === eventData.person_id) {
           const notificationId = eventData.notification_id
           this.loadNotification(notificationId)
@@ -457,21 +451,21 @@ export default {
 }
 </script>
 
-<style scoped>
+<style lang="scss" scoped>
 .dark .topbar .nav,
 .dark .user-menu {
-  background-color: #222427;
-  color: #EEE;
+  background-color: $dark-grey-strong;
+  color: $white-grey;
   border-left: 1px solid #2F3136;
   border-bottom: 1px solid #2F3136;
 }
 
 .dark .user-menu a {
-  color: #EEE;
+  color: $white-grey;
 }
 
 .dark #toggle-menu-button:hover {
-  color: #EEE;
+  color: $white-grey;
 }
 
 .nav {
@@ -494,6 +488,7 @@ export default {
 
 .user-nav {
   cursor: pointer;
+  min-width: 150px;
 }
 
 .user-nav.active {
@@ -503,6 +498,7 @@ export default {
   position: fixed;
   top: 60px;
   width: 200px;
+  min-width: 150px;
   right: 0;
   background-color: white;
   padding: 1em 1em 1em 1em;
@@ -511,8 +507,8 @@ export default {
   transition-property: all;
   transition-duration: .5s;
   transition-timing-function: cubic-bezier(0, 1, 0.5, 1);
-  border-left: 1px solid #EEE;
-  border-bottom: 1px solid #EEE;
+  border-left: 1px solid $white-grey;
+  border-bottom: 1px solid $white-grey;
 }
 
 .user-menu ul {
@@ -560,16 +556,6 @@ export default {
   margin-right: 1em;
 }
 
-.has-no-notifications {
-  margin-top: 5px;
-  color: #CCC;
-}
-
-.has-notifications {
-  margin-top: 5px;
-  color: #f57f17;
-}
-
 .icon-link {
   margin: 0 0.5em;
 }
@@ -579,7 +565,7 @@ strong {
 }
 
 .version {
-  color: #999;
+  color: $grey;
 }
 
 @media screen and (max-width: 768px) {

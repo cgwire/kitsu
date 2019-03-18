@@ -85,6 +85,13 @@ const actions = {
     })
   },
 
+  loadTaskType ({ commit, state }, taskTypeId) {
+    taskTypesApi.getTaskType(taskTypeId, (err, taskType) => {
+      if (err) console.error(err)
+      else commit(EDIT_TASK_TYPE_END, taskType)
+    })
+  },
+
   newTaskType ({ commit, state }, payload) {
     commit(EDIT_TASK_TYPE_START, payload.data)
     taskTypesApi.newTaskType(payload.data, (err, taskType) => {
@@ -219,7 +226,9 @@ const mutations = {
     const taskTypeToDeleteIndex = state.taskTypes.findIndex(
       (taskType) => taskType.id === taskTypeToDelete.id
     )
-    state.taskTypes.splice(taskTypeToDeleteIndex, 1)
+    if (taskTypeToDeleteIndex >= 0) {
+      state.taskTypes.splice(taskTypeToDeleteIndex, 1)
+    }
     delete state.taskTypeMap[taskTypeToDelete.id]
 
     state.deleteTaskType = {

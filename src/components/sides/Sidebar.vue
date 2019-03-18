@@ -113,10 +113,10 @@ export default {
 }
 </script>
 
-<style scoped>
+<style lang="scss" scoped>
 .dark aside {
   background-color: #2F3136;
-  color: #EEE;
+  color: $white-grey;
 }
 
 aside {
@@ -142,7 +142,7 @@ aside.hidden {
 aside p a {
   font-size: 1.2em;
   text-transform: uppercase;
-  color: #999;
+  color: $grey;
 }
 
 aside section {
@@ -161,7 +161,7 @@ aside section {
 
 #c-mask {
   position: fixed;
-  z-index: 100;
+  z-index: 204;
   top: 0;
   left: 0;
   overflow: hidden;

@@ -26,7 +26,7 @@ export default {
     ...mapGetters([
     ]),
     color () {
-      if (this.entry.color.toUpperCase() === '#000000') return '#666'
+      if (this.entry.color.toUpperCase() === '#000000') return '$grey-strong'
       else return this.entry.color
     }
   },
@@ -37,12 +37,12 @@ export default {
 }
 </script>
 
-<style scoped>
+<style lang="scss" scoped>
 .tag {
   margin: 0.7em;
   padding: 1em;
   font-size: 1em;
-  color: #666;
+  color: $grey-strong;
   border-radius: 0;
   font-weight: bold;
 }

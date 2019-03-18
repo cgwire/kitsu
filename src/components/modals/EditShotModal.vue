@@ -34,6 +34,14 @@
           @keyup.ctrl.enter="runConfirmation"
         />
         <text-field
+          ref="nbFramesField"
+          :label="$t('shots.fields.nb_frames')"
+          type="number"
+          v-model="form.nb_frames"
+          @enter="runConfirmation"
+          v-focus
+        />
+        <text-field
           ref="frameInField"
           :label="$t('shots.fields.frame_in')"
           v-model="form.frameIn"
@@ -214,6 +222,7 @@ export default {
         }
         this.form.name = ''
         this.form.description = ''
+        this.form.nb_frames = 0
         this.form.data = {}
       } else {
         this.form = {
@@ -221,6 +230,7 @@ export default {
           project_id: this.shotToEdit.project_id,
           name: this.shotToEdit.name,
           description: this.shotToEdit.description,
+          nb_frames: this.shotToEdit.nb_frames,
           frameIn: this.frameIn,
           frameOut: this.frameOut,
           fps: this.fps,
@@ -265,7 +275,7 @@ export default {
 }
 </script>
 
-<style scoped>
+<style lang="scss" scoped>
 .modal-content .box p.text {
   margin-bottom: 1em;
 }

@@ -20,7 +20,7 @@
     <validation-tag
       class="validation-tag"
       :task="task"
-      :is-static="selectable"
+      :is-static="selectable || isStatic"
       :pointer="true"
       v-if="task"
     />
@@ -234,7 +234,7 @@ export default {
 }
 </script>
 
-<style scoped>
+<style lang="scss" scoped>
 .dark td.selected,
 .dark td.selected.validation:hover {
   background-color: #8F91EB;

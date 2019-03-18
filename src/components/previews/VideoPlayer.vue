@@ -9,6 +9,9 @@
       ref="movie"
       class="annotation-movie"
       preload="auto"
+      :style="{
+        display: isLoading ? 'none' : 'block'
+      }"
       :src="moviePath"
       :poster="posterPath"
     >
@@ -67,7 +70,7 @@
           @click="onPlayPauseClicked"
         >
           <pause-icon class="icon" v-if="isPlaying" />
-          <play-icon class="icon" v-else />
+          <play-icon class="icon" v-if="!isPlaying" />
         </button>
 
         <button
@@ -85,18 +88,22 @@
         <span class="flexrow-item time-indicator">
           {{ currentTime }}
         </span>
-        <span class="flexrow-item time-indicator" v-if="!light">
-          / {{ maxDuration }}
+        <span class="flexrow-item time-indicator" v-if="!light || isFullScreen()">
+        /
+        </span>
+        <span class="flexrow-item time-indicator" v-if="!light || isFullScreen()">
+         {{ maxDuration }}
         </span>
 
         <button
           :class="{
             button: true,
             'flexrow-item': true,
-            active: isComparing
+            active: isComparing,
+            'comparison-button': true
           }"
           @click="onCompareClicked"
-          v-if="taskTypeOptions.length > 0"
+          v-if="taskTypeOptions.length > 0 && (!light || isFullScreen())"
         >
           <copy-icon class="icon smaller" />
         </button>
@@ -240,6 +247,15 @@ export default {
           this.configureVideo()
           this.isLoading = false
           this.setDefaultComparisonTaskType()
+        })
+
+        this.video.addEventListener('ended', () => {
+          this.isLoading = false
+        })
+
+        this.video.addEventListener('error', () => {
+          this.$refs.movie.style.height = (this.getDefaultHeight() - 80) + 'px'
+          this.isLoading = false
         })
 
         window.addEventListener('keydown', this.onKeyDown, false)
@@ -428,7 +444,6 @@ export default {
         this.clearCanvas()
         this.$nextTick(() => {
           this.mountVideo()
-          this.isLoading = false
         })
       }
     },
@@ -448,7 +463,7 @@ export default {
     },
 
     showVideo () {
-      if (!this.isVideoShown) {
+      if (!this.isVideoShown && this.canvas) {
         this.canvas.style.display = 'none'
         this.video.style.display = 'block'
         let elements = document.getElementsByClassName('canvas-container')
@@ -1040,7 +1055,6 @@ export default {
   watch: {
     preview () {
       this.maxDuration = '00:00.00'
-      this.isLoading = true
       this.reloadAnnotations()
       if (this.isComparing) {
         this.isComparing = false
@@ -1067,15 +1081,23 @@ export default {
 }
 </script>
 
-<style scoped>
+<style lang="scss" scoped>
+.video-wrapper {
+  width: 100%;
+}
+
 .loading-background {
   width: 100%;
   height: 100%;
   background: black;
   display: flex;
-  background: black;
   align-items: center;
   justify-content: center;
+  text-align: center;
+}
+
+.spinner {
+  margin: auto;
 }
 
 .icon {
@@ -1111,23 +1133,18 @@ export default {
 
 .annotation-movie {
   margin: auto;
-}
-
-.pull-bottom {
+  width: 100%;
 }
 
 .time-indicator {
-  color: #CCC;
+  color: $light-grey;
   padding-left: 0.8em;
+  margin-right: 0;
 }
 
 #annotation-canvas {
   display: block;
   width: 0;
-}
-
-#annotation-movie {
-  width: 100%;
 }
 
 .video-player {
@@ -1148,7 +1165,7 @@ export default {
   margin: 0;
   padding: 0;
   border: 0;
-  background: #999;
+  background: $grey;
   height: 8px;
 }
 
@@ -1166,7 +1183,7 @@ progress {
   margin: 0;
   padding: 0;
   border: 0;
-  background: #999;
+  background: $grey;
   height: 8px;
   display: block;
 }
@@ -1214,5 +1231,9 @@ progress {
 
 .comparison-combobox {
   margin-bottom: 0;
+}
+
+.buttons .comparison-button {
+  margin-left: 1em;
 }
 </style>

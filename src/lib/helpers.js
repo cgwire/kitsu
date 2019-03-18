@@ -1,3 +1,4 @@
+import marked from 'marked'
 import moment from 'moment-timezone'
 
 export const populateTask = (task) => {
@@ -246,4 +247,33 @@ export const getEntityPath = (entityId, productionId, section, episodeId) => {
   }
 
   return route
+}
+
+export const slugify = (str) => {
+  str = str.replace(/^\s+|\s+$/g, '')
+    .toLowerCase()
+
+  const from = 'àáäâèéëêìíïîòóöôùúüûñç·/_,:'
+  const to = 'aaaaeeeeiiiioooouuuunc------'
+  for (let i = 0, l = from.length; i < l; i++) {
+    str = str.replace(new RegExp(from.charAt(i), 'g'), to.charAt(i))
+  }
+
+  return str.replace(/[^a-z0-9 -]/g, '')
+    .replace(/\s+/g, '_')
+    .replace(/-+/g, '_')
+}
+
+export const renderComment = (input, mentions, personMap) => {
+  let compiled = marked(input || '')
+  if (mentions) {
+    mentions.forEach((personId) => {
+      const person = personMap[personId]
+      compiled = compiled.replace(
+        `@${person.full_name}`,
+        `<a class="mention" href="/people/${person.id}">@${person.full_name}</a>`
+      )
+    })
+  }
+  return compiled
 }

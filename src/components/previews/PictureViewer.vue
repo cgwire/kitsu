@@ -668,7 +668,7 @@ export default {
 }
 </script>
 
-<style scoped>
+<style lang="scss" scoped>
 .loading-background {
   width: 100%;
   height: 100%;
@@ -722,7 +722,7 @@ export default {
 }
 
 .bar-element {
-  color: #CCC;
+  color: $light-grey;
   padding-left: 1em;
 }
 

@@ -34,10 +34,16 @@
                 {{ $t('main.confirmation') }}
               </button>
             </div>
-            <div class="flexrow-item hide-small-screen" v-if="!isAssignationLoading">
+            <div
+              class="flexrow-item hide-small-screen"
+              v-if="!isAssignationLoading"
+            >
               {{ $t('main.or') }}
             </div>
-            <div class="flexrow-item hide-small-screen" v-if="!isAssignationLoading">
+            <div
+              class="flexrow-item hide-small-screen"
+              v-if="!isAssignationLoading"
+            >
               <button
                 class="button is-link clear-assignation-button hide-small-screen"
                 @click="clearAssignation"
@@ -59,12 +65,11 @@
             <div class="flexrow-item strong bigger hide-small-screen">
               {{ $t('tasks.change_status_to') }}
             </div>
-            <div class="flexrow-item combobox-item">
-              <combobox
-                :options="taskStatusOptions"
+            <div class="flexrow-item">
+              <combobox-status
+                :task-status-list="taskStatusForCurrentUser"
                 v-model="taskStatusId"
-              >
-              </combobox>
+              />
             </div>
             <div class="flexrow-item" v-if="!isChangeStatusLoading">
               <button
@@ -75,7 +80,7 @@
               </button>
 
               <div class="" v-if="isChangeStatusLoading">
-                <spinner :is-white="true"></spinner>
+                <spinner :is-white="true" />
               </div>
             </div>
           </div>
@@ -93,8 +98,7 @@
               <combobox
                 :options="priorityOptions"
                 v-model="priority"
-              >
-              </combobox>
+              />
             </div>
             <div class="flexrow-item" v-if="!isChangePriorityLoading">
               <button
@@ -103,10 +107,40 @@
               >
                 {{ $t('main.confirmation') }}
               </button>
+            </div>
+            <div class="flexrow-item" v-if="isChangePriorityLoading">
+              <spinner :is-white="true" />
+            </div>
+          </div>
+        </div>
 
-              <div class="" v-if="isChangePriorityLoading">
-                <spinner :is-white="true" />
-              </div>
+        <div
+          class="flexrow-item"
+          v-if="selectedBar === 'estimations'"
+        >
+          <div class="flexrow">
+            <div class="flexrow-item strong bigger hide-small-screen">
+              {{ $t('tasks.set_estimations') }}
+            </div>
+            <div class="flexrow-item combobox-item">
+            <input
+              class="input estimation-input"
+              type="number"
+              min="0"
+              v-model="estimation"
+            />
+            </div>
+            <div class="flexrow-item" v-if="!isChangeEstimationLoading">
+              <button
+                class="button is-success confirm-button"
+                @click="confirmEstimationChange"
+              >
+                {{ $t('main.confirmation') }}
+              </button>
+
+            </div>
+            <div class="flexrow-item" v-if="isChangeEstimationLoading">
+              <spinner :is-white="true" />
             </div>
           </div>
         </div>
@@ -194,16 +228,20 @@
           </div>
         </div>
 
-        <div class="flexrow-item clear-selection-container">
-          <div
-            class="clear-selection flexrow"
-            @click="clearSelectedTasks"
-          >
-            <x-icon class="flexrow-item">
-            </x-icon>
-            <span class="flexrow-item hide-small-screen">
-              {{ $t('main.clear_selection') }}
-            </span>
+        <div class="flexrow-item clear-selection-container has-text-right">
+          <div class="flexrow has-text-right">
+            <div style="flex: 1"></div>
+            <notification-bell class="flexrow-item" :is-white="true" />
+            <div
+              class="clear-selection flexrow flexrow-item"
+              @click="clearSelectedTasks"
+            >
+              <x-icon class="flexrow-item">
+              </x-icon>
+              <span class="flexrow-item hide-small-screen">
+                {{ $t('main.clear_selection') }}
+              </span>
+            </div>
           </div>
         </div>
       </div>
@@ -240,7 +278,15 @@
 
         <div
           class="more-menu-item"
-          v-if="isCurrentViewAsset || isCurrentViewShot"
+          v-if="isCurrentViewTaskType"
+          @click="selectBar('estimations')"
+        >
+          {{ $t('menu.set_estimations') }}
+        </div>
+
+        <div
+          class="more-menu-item"
+          v-if="(isCurrentViewAsset || isCurrentViewShot) && !isCurrentViewTaskType"
           @click="selectBar('tasks')"
         >
           {{ $t('menu.create_tasks') }}
@@ -256,6 +302,7 @@
 
         <div
           class="more-menu-item"
+          v-if="!isCurrentViewTaskType"
           @click="selectBar('custom-actions')"
         >
           {{ $t('menu.run_custom_action') }}
@@ -282,6 +329,8 @@ import { sortPeople } from '../../lib/sorting'
 import { ChevronDownIcon, XIcon, MoreVerticalIcon } from 'vue-feather-icons'
 import ButtonHrefLink from '../widgets/ButtonHrefLink'
 import Combobox from '../widgets/Combobox'
+import ComboboxStatus from '../widgets/ComboboxStatus'
+import NotificationBell from '../widgets/NotificationBell'
 import PeopleField from '../widgets/PeopleField'
 import Spinner from '../widgets/Spinner'
 
@@ -291,6 +340,8 @@ export default {
   components: {
     ChevronDownIcon,
     Combobox,
+    ComboboxStatus,
+    NotificationBell,
     MoreVerticalIcon,
     PeopleField,
     Spinner,
@@ -300,18 +351,20 @@ export default {
 
   data () {
     return {
-      isMoreMenuDisplayed: true,
       isAssignationLoading: false,
-      isChangeStatusLoading: false,
+      isChangeEstimationLoading: false,
       isChangePriorityLoading: false,
+      isChangeStatusLoading: false,
       isCreationLoading: false,
       isDeletionLoading: false,
+      isMoreMenuDisplayed: true,
       selectedBar: 'assignation',
       person: null,
       taskStatusId: '',
       customActionUrl: '',
       selectedTaskIds: [],
       customActionOptions: [],
+      estimation: 0,
       priority: '0',
       currentTeam: [],
       priorityOptions: [
@@ -349,7 +402,7 @@ export default {
       'personMap',
       'selectedTasks',
       'shotCustomActionOptions',
-      'taskStatusOptions',
+      'taskStatusForCurrentUser',
       'user'
     ]),
 
@@ -362,6 +415,9 @@ export default {
         this.isCurrentViewAsset ||
         this.isCurrentViewTodos ||
         this.isCurrentViewShot
+      ) ||
+      (
+        !this.isCurrentViewTodos && !this.isCurrentUserManager
       )
     },
 
@@ -404,6 +460,10 @@ export default {
       return this.$route.path.indexOf('todos') > 0
     },
 
+    isCurrentViewTaskType () {
+      return this.$route.path.indexOf('task-type') > 0
+    },
+
     isList () {
       return this.isCurrentViewAsset || this.isCurrentViewShot
     },
@@ -419,6 +479,7 @@ export default {
     currentMenuLabel () {
       const labels = {
         'assignation': 'menu.assign_tasks',
+        'estimations': 'menu.set_estimations',
         'change-status': 'menu.change_status',
         'priorities': 'menu.change_priority',
         'tasks': 'menu.create_tasks',
@@ -426,12 +487,22 @@ export default {
         'custom-actions': 'menu.run_custom_action'
       }
       return this.$t(labels[this.selectedBar])
+    },
+
+    storagePrefix () {
+      let prefix = 'todos-'
+      if (this.isCurrentViewAsset || this.isCurrentViewShot) {
+        prefix = 'entities-'
+      }
+      if (this.isCurrentViewTaskType) prefix = 'tasks-'
+      return prefix
     }
   },
 
   methods: {
     ...mapActions([
       'assignSelectedTasks',
+      'changeSelectedEstimations',
       'createSelectedTasks',
       'deleteSelectedTasks',
       'unassignSelectedTasks',
@@ -455,7 +526,7 @@ export default {
     confirmTaskStatusChange () {
       this.isChangeStatusLoading = true
       if (!this.taskStatusId) {
-        this.taskStatusId = this.taskStatusOptions[0].value
+        this.taskStatusId = this.taskStatusForCurrentUser[0].id
       }
 
       this.changeSelectedTaskStatus({
@@ -474,6 +545,20 @@ export default {
           this.isChangePriorityLoading = false
         }
       })
+    },
+
+    confirmEstimationChange () {
+      this.isChangeEstimationLoading = true
+      const estimation = Math.floor(this.estimation * 8 * 60)
+      this.changeSelectedEstimations(estimation)
+        .then(() => {
+          this.isChangeEstimationLoading = false
+        })
+        .catch((err) => {
+          this.isChangeEstimationLoading = false
+          this.isChangeEstimationError = true
+          console.error(err)
+        })
     },
 
     confirmTaskCreation () {
@@ -509,9 +594,8 @@ export default {
     },
 
     selectBar (barName) {
-      const prefix = this.isList ? 'entities-' : 'todos-'
-      this.$cookie.set(
-        `${prefix}-selected-bar`,
+      localStorage.setItem(
+        `${this.storagePrefix}-selected-bar`,
         barName,
         { expires: '1M' }
       )
@@ -545,9 +629,8 @@ export default {
   watch: {
     isHidden () {
       if (!this.isHidden) {
-        const prefix = this.isList ? 'entities-' : 'todos-'
-        const lastSelection = this.$cookie.get(`${prefix}-selected-bar`)
-
+        const prefix = this.storagePrefix
+        const lastSelection = localStorage.getItem(`${prefix}-selected-bar`)
         if (lastSelection) {
           this.selectedBar = lastSelection
         } else {
@@ -605,6 +688,10 @@ export default {
       this.setCurrentTeam()
     },
 
+    people () {
+      this.setCurrentTeam()
+    },
+
     $route () {
       this.clearSelectedTasks()
     }
@@ -612,7 +699,7 @@ export default {
 }
 </script>
 
-<style scoped>
+<style lang="scss" scoped>
 .action-topbar {
   background: #5e60ba;
   color: white;
@@ -713,6 +800,10 @@ div.combobox-item {
 
 .clear-selection .flexrow-item:first-child {
   margin-left: auto;
+}
+
+.estimation-input {
+  width: 90px;
 }
 
 @media screen and (max-width: 768px) {

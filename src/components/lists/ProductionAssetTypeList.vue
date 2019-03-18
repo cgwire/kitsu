@@ -234,12 +234,15 @@ export default {
       }
 
       return route
+    },
+
+    resizeHeaders () {
     }
   }
 }
 </script>
 
-<style scoped>
+<style lang="scss" scoped>
 .name {
   min-width: 200px;
   width: 200px;

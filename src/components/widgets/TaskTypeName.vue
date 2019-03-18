@@ -35,7 +35,7 @@ export default {
     ]),
 
     color () {
-      if (this.taskType.color.toUpperCase() === '#000000') return '#666'
+      if (this.taskType.color.toUpperCase() === '#000000') return '$grey-strong'
       else return this.taskType.color
     },
 
@@ -66,20 +66,20 @@ export default {
 }
 </script>
 
-<style scoped>
+<style lang="scss" scoped>
 .tag {
   margin: 0;
   padding: 0 0.7em;
   font-size: 0.9em;
   line-height: 0.8em;
-  color: #666;
+  color: $grey-strong;
   border-radius: 0;
   font-weight: bold;
 }
 
 .dark .tag {
-  color: #EEEEEE;
-  background: #5E6169;
+  color: $white-grey;
+  background: $dark-grey-lightest;
 }
 
 .no-link {

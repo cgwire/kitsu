@@ -107,7 +107,7 @@ export default {
 }
 </script>
 
-<style scoped>
+<style lang="scss" scoped>
 .button .icon.is-small.only-icon {
   margin-right: 0;
 }

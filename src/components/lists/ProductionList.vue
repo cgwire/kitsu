@@ -88,6 +88,7 @@
             class="name"
             :with-avatar="false"
             :entry="entry"
+            :no-link="true"
             :last-production-screen="lastProductionScreen"
           />
           <td class="type">
@@ -180,7 +181,7 @@ export default {
 }
 </script>
 
-<style scoped>
+<style lang="scss" scoped>
 .project {
   min-width: 60px;
   width: 60px;

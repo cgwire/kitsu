@@ -335,9 +335,9 @@ export default {
 }
 </script>
 
-<style scoped>
+<style lang="scss" scoped>
 .dark .weekend {
-  background-color: #25282E;
+  background-color: $dark-grey;
 }
 
 .dark .duration:hover {
@@ -393,11 +393,11 @@ a:hover {
 }
 
 .weekend {
-  background-color: #EEE;
+  background-color: $white-grey;
 }
 
 .selected .duration {
-  background: #D1C4E9;
+  background: $purple;
 }
 
 .duration {

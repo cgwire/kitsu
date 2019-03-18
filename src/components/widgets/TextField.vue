@@ -40,7 +40,7 @@ export default {
     },
     value: {
       default: '',
-      type: String
+      type: [String, Number]
     },
     placeholder: {
       default: '',
@@ -83,7 +83,7 @@ export default {
   }
 }
 </script>
-<style scoped>
+<style lang="scss" scoped>
 input.input {
   font-size: 1.2em;
 }

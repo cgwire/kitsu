@@ -289,7 +289,7 @@ export default {
 }
 </script>
 
-<style scoped>
+<style lang="scss" scoped>
 .episode {
   min-width: 100px;
   width: 100px;

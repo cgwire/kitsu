@@ -64,12 +64,12 @@
       </p>
 
       <p
-        v-html="compileMarkdown(comment.text)"
+        v-html="renderComment(comment.text, comment.mentions, personMap)"
         class="comment-text"
         v-if="comment.text"
       >
       </p>
-      <p class="comment-text empty" v-else>
+      <p class="comment-text empty word-break" v-else>
         {{ $t('comments.empty_text') }}
       </p>
     </div>
@@ -78,9 +78,9 @@
 </template>
 
 <script>
-import marked from 'marked'
 import moment from 'moment-timezone'
 import { mapGetters } from 'vuex'
+import { renderComment } from '../../lib/helpers'
 
 import PeopleAvatar from './PeopleAvatar.vue'
 import PeopleName from './PeopleName.vue'
@@ -116,6 +116,7 @@ export default {
   computed: {
     ...mapGetters([
       'currentProduction',
+      'personMap',
       'taskMap',
       'taskTypeMap'
     ]),
@@ -171,10 +172,6 @@ export default {
       }
     },
 
-    compileMarkdown (input) {
-      return marked(input || '')
-    },
-
     getPath (name) {
       let route = {
         name: name,
@@ -188,22 +185,25 @@ export default {
         route.params.episode_id = this.$route.params.episode_id
       }
       return route
-    }
+    },
+
+    renderComment
   }
 }
 </script>
 
-<style scoped>
+<style lang="scss" scoped>
 .dark .comment-text {
-  color: #EEE;
+  color: $white-grey;
 }
 
 .comment {
   background: white;
-  border-left: 6px solid #CCC;
+  border-left: 6px solid $light-grey;
   border-radius: 0 5px 5px 0;
   padding: 0.6em;
-  word-break: break-all;
+  word-wrap: anywhere;
+  hyphens: auto;
 }
 
 .comment:first-child {
@@ -219,13 +219,13 @@ export default {
 }
 
 .comment-date {
-  color: #999;
+  color: $grey;
   margin-left: 0.5em;
   flex: 1;
 }
 
 a.revision {
-  color: #999;
+  color: $grey;
   font-size: 0.8em;
   font-style: italic;
   margin: 0 1em 0 0;
@@ -250,5 +250,4 @@ a.revision:hover {
     align-items: flex-start;
   }
 }
-
 </style>

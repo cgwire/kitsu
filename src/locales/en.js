@@ -23,6 +23,7 @@ export default {
       episode: 'Ep.',
       name: 'Name',
       production: 'Prod',
+      time_spent: 'Time',
       type: 'Type'
     }
   },
@@ -134,6 +135,7 @@ export default {
     confirmation: 'Confirm',
     confirmation_and_stay: 'Confirm and stay',
     dark_theme: 'Dark Theme',
+    days_spent: 'day spent | days spent',
     delete: 'Delete',
     delete_all: 'Delete all',
     delete_text: 'Are you sure you want to remove {name} from your database?',
@@ -149,10 +151,12 @@ export default {
     modify: 'Modify',
     minimize: 'Minimize',
     maximize: 'Maximize',
+    nb_frames: 'frame | frames',
     profile: 'Profile',
     production: 'Production',
     remove: 'Remove',
     save: 'Save',
+    sorted_by: 'Tasks sorted by:',
     studio: 'Studio',
     user: 'User',
     white_theme: 'White Theme',
@@ -173,7 +177,8 @@ export default {
     change_status: 'Change status',
     create_tasks: 'Create tasks',
     delete_tasks: 'Delete tasks',
-    run_custom_action: 'Run custom action'
+    run_custom_action: 'Run custom action',
+    set_estimations: 'Set estimations'
   },
 
   not_found: {
@@ -183,7 +188,9 @@ export default {
 
   notifications: {
     and_change_status: 'and changed status to',
+    assigned_you: 'assigned you to',
     commented_on: 'commented on',
+    mention_you_on: 'mentioned you on',
     no_notifications: 'There is currently no notification for you for your current projects.',
     title: 'Notifications',
     with_preview: 'with a preview'
@@ -404,13 +411,15 @@ export default {
     title: 'Shots',
     fields: {
       description: 'Description',
+      nb_frames: 'Frames',
       episode: 'Episode',
       frame_in: 'In',
       frame_out: 'Out',
       fps: 'FPS',
       name: 'Shot',
       production: 'Prod',
-      sequence: 'Sequence'
+      sequence: 'Sequence',
+      time_spent: 'Time'
     }
   },
 
@@ -458,9 +467,11 @@ export default {
     no_assignation_right: 'You are not allowed to manage assignations',
     no_comment: 'There is currently no comment for this task.',
     no_preview: 'There is currently no preview for this task.',
+    number: 'task | tasks',
     preview: 'Previews',
     previous: 'previous task',
     unsubscribe_notifications: 'Unsubscribe from notifications',
+    set_estimations: 'Set estimations for selected tasks:',
     set_preview: 'Set this preview as thumbnail',
     set_preview_error: 'An error occured while setting preview as thumbnail',
     set_preview_done: 'This preview is used as thumbnail for the current entity.',
@@ -471,12 +482,24 @@ export default {
     validation: 'Validation',
     tasks: 'Tasks',
     fields: {
+      asset_type: 'Asset type',
       assignees: 'Assignees',
       end_date: 'End date',
+      duration: 'Duration',
       entity: 'Entity',
+      entity_name: 'Name',
+      estimation: 'Estimation',
+      frames: 'Fram.',
       last_comment: 'Last comment',
+      last_comment_date: 'Last comment',
+      priority: 'Priority',
       production: 'Prod',
+      real_end_date: 'Validation date',
+      real_start_date: 'WIP date',
+      retake_count: 'Retakes',
+      sequence: 'Sequence',
       task_status: 'Status',
+      task_status_short_name: 'Status',
       task_type: 'Type'
     },
     priority: {

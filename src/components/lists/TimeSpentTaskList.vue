@@ -148,9 +148,9 @@ export default {
 }
 </script>
 
-<style scoped>
+<style lang="scss" scoped>
 .dark .table {
-  border-color: #25282E;
+  border-color: $dark-grey;
 }
 
 .name {
@@ -166,8 +166,8 @@ export default {
 }
 
 .table {
-  border-top: 1px solid #CCC;
-  border-bottom: 1px solid #CCC;
+  border-top: 1px solid $light-grey;
+  border-bottom: 1px solid $light-grey;
   margin-bottom: 1em;
   margin-top: 0.5em;
 }

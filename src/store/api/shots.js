@@ -31,6 +31,7 @@ export default {
   newShot (shot, callback) {
     const data = {
       name: shot.name,
+      description: shot.description,
       sequence_id: shot.sequence_id
     }
     client.post(`/api/data/projects/${shot.project_id}/shots`, data, callback)
@@ -64,6 +65,7 @@ export default {
       name: shot.name,
       parent_id: shot.sequence_id,
       description: shot.description,
+      nb_frames: parseInt(shot.nb_frames),
       data: shot.data
     }
     if (

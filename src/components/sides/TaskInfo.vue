@@ -114,14 +114,16 @@
             <add-comment
               ref="add-comment"
               :user="user"
+              :team="currentTeam"
               :task="task"
-              :task-status-options="taskStatusOptionsForCurrentUser"
+              :task-status="taskStatusForCurrentUser"
               :light="true"
               :is-loading="loading.addComment"
               :attached-file-name="attachedFileName"
               :is-error="errors.addComment"
               @add-comment="addComment"
               @add-preview="onAddPreviewClicked"
+              @file-drop="selectFile"
               v-if="isCommentingAllowed"
             />
 
@@ -175,7 +177,7 @@
 
   </div>
   <div class="side task-info has-text-centered" v-else>
-    No task selected.
+    $t('tasks.no_task_selected')
   </div>
 </template>
 
@@ -231,6 +233,10 @@ export default {
     task: {
       type: Object,
       default: () => {}
+    },
+    isLoading: {
+      type: Boolean,
+      default: true
     }
   },
 
@@ -280,10 +286,14 @@ export default {
       'personMap',
       'previewFormData',
       'taskEntityPreviews',
-      'taskStatusOptions',
+      'taskStatusForCurrentUser',
       'taskTypeMap',
       'user'
     ]),
+
+    currentTeam () {
+      return this.currentProduction.team.map(id => this.personMap[id])
+    },
 
     title () {
       if (this.task) {
@@ -374,14 +384,6 @@ export default {
         previewId = this.taskPreviews[0].id
       }
       return `/api/movies/originals/preview-files/${previewId}.mp4`
-    },
-
-    taskStatusOptionsForCurrentUser () {
-      if (this.isCurrentUserManager) {
-        return this.taskStatusOptions
-      } else {
-        return this.taskStatusOptions.filter(status => status.isArtistAllowed)
-      }
     },
 
     tasktypeStyle () {
@@ -481,7 +483,7 @@ export default {
       this.currentPreviewPath = this.getOriginalPath()
       this.currentPreviewDlPath = this.getOriginalDlPath()
       this.$nextTick(() => {
-        this.$refs['add-comment'].focus()
+        if (this.$refs['add-comment']) this.$refs['add-comment'].focus()
       })
     },
 
@@ -611,12 +613,16 @@ export default {
     task () {
       this.attachedFileName = ''
       this.loadTaskData()
+    },
+
+    isLoading () {
+      this.task.loading = this.isLoading
     }
   },
 
   socket: {
     events: {
-      'preview:add' (eventData) {
+      'preview-file:add-file' (eventData) {
         this.onPreviewAdded(eventData)
       },
 
@@ -646,13 +652,13 @@ export default {
 }
 </script>
 
-<style scoped>
+<style lang="scss" scoped>
 .dark .add-comment,
 .dark .comment,
 .dark .preview-column-content,
 .dark .no-comment {
   background: #46494F;
-  border-color: #25282E;
+  border-color: $dark-grey;
   box-shadow: 0px 0px 6px #333;
 }
 
@@ -661,7 +667,7 @@ export default {
 }
 
 .dark .preview-picture {
-  border: 1px solid #25282E;
+  border: 1px solid $dark-grey;
 }
 
 .dark .side {
@@ -713,7 +719,6 @@ export default {
 .task-columns {
   display: flex;
   flex-direction: column;
-  overflow-y: auto;
 }
 
 .task-column {
@@ -721,9 +726,9 @@ export default {
 }
 
 .comment {
-  border-top: 1px solid #EEE;
-  border-bottom: 1px solid #EEE;
-  border-right: 1px solid #EEE;
+  border-top: 1px solid $white-grey;
+  border-bottom: 1px solid $white-grey;
+  border-right: 1px solid $white-grey;
   margin-top: 0.1em;
   box-shadow: 0px 0px 6px #E0E0E0;
 }

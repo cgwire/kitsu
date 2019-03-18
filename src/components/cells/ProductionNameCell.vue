@@ -157,7 +157,7 @@ export default {uname: 'production-name-cell',
 }
 </script>
 
-<style scoped>
+<style lang="scss" scoped>
 .production-name a {
   color: inherit;
 }

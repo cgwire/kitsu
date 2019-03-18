@@ -27,19 +27,35 @@ const state = initialState
 const getters = {
   taskStatus: state => state.taskStatus,
   taskStatusMap: state => state.taskStatusMap,
-
   editTaskStatus: state => state.editTaskStatus,
-  deleteTaskStatus: state => state.deleteTaskStatus
+  deleteTaskStatus: state => state.deleteTaskStatus,
+
+  taskStatusForCurrentUser: (state, getters, rootState, rootGetters) => {
+    if (rootGetters.isCurrentUserManager) {
+      return state.taskStatus
+    } else {
+      return state.taskStatus.filter(taskStatus => {
+        return taskStatus.is_artist_allowed
+      })
+    }
+  }
 }
 
 const actions = {
 
-  loadTaskStatus ({ commit, state }, callback) {
+  loadTaskStatuses ({ commit, state }, callback) {
     commit(LOAD_TASK_STATUSES_START)
-    taskStatusApi.getTaskStatus((err, taskStatus) => {
+    taskStatusApi.getTaskStatuses((err, taskStatus) => {
       if (err) commit(LOAD_TASK_STATUSES_ERROR)
       else commit(LOAD_TASK_STATUSES_END, taskStatus)
       if (callback) callback(err)
+    })
+  },
+
+  loadTaskStatus ({ commit, state }, taskStatusId) {
+    taskStatusApi.getTaskStatus(taskStatusId, (err, taskStatus) => {
+      if (err) console.error(err)
+      else commit(EDIT_TASK_STATUS_END, taskStatus)
     })
   },
 
@@ -126,7 +142,9 @@ const mutations = {
     const taskStatusToDeleteIndex = state.taskStatus.findIndex(
       (taskStatus) => taskStatus.id === taskStatusToDelete.id
     )
-    state.taskStatus.splice(taskStatusToDeleteIndex, 1)
+    if (taskStatusToDeleteIndex >= 0) {
+      state.taskStatus.splice(taskStatusToDeleteIndex, 1)
+    }
     delete state.taskStatusMap[taskStatusToDelete.id]
   },
 

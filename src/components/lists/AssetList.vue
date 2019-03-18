@@ -57,7 +57,13 @@
               />
             </div>
           </th>
-
+          <th
+            class="time-spent"
+            ref="th-spent"
+            v-if="!isCurrentUserClient && isShowInfos"
+          >
+            {{ $t('assets.fields.time_spent') }}
+          </th>
           <th
             :class="{
               'validation-cell': !hiddenColumns[columnId],
@@ -132,8 +138,6 @@
     ref="body"
     class="table-body"
     v-scroll="onBodyScroll"
-    infinite-scroll-disabled="busy"
-    infinite-scroll-distance="120"
     v-if="!isLoading"
   >
     <table
@@ -183,6 +187,13 @@
           >
             {{ asset.data ? asset.data[descriptor.field_name] : '' }}
           </td>
+          <td
+            class="time-spent"
+            v-if="!isCurrentUserClient && isShowInfos"
+          >
+            {{ formatDuration(asset.timeSpent) }}
+          </td>
+
           <validation-cell
             :class="{
               'validation-cell': !hiddenColumns[columnId],
@@ -232,6 +243,7 @@ import {
   ChevronDownIcon
 } from 'vue-feather-icons'
 import { entityListMixin } from './base'
+import { formatListMixin } from './format_mixin'
 import { selectionListMixin } from './selection'
 
 import DescriptionCell from '../cells/DescriptionCell'
@@ -248,7 +260,7 @@ import ValidationCell from '../cells/ValidationCell'
 
 export default {
   name: 'asset-list',
-  mixins: [entityListMixin, selectionListMixin],
+  mixins: [entityListMixin, formatListMixin, selectionListMixin],
 
   props: {
     displayedAssets: {
@@ -444,7 +456,8 @@ export default {
           this.$refs['th-episode'].style['min-width'] = `${episodeWidth}px`
           const nameWidth =
             this.$refs['body-tbody'][0].children[1].children[2].offsetWidth
-          this.$refs['th-name'].style['min-width'] = `${nameWidth}px`
+          this.$refs['th-name'].style['min-width'] =
+            `${Math.max(nameWidth, 120)}px`
         } else {
           const thumbnailWidth =
             this.$refs['body-tbody'][0].children[1].children[0].offsetWidth
@@ -452,10 +465,12 @@ export default {
           const nameWidth =
             this.$refs['body-tbody'][0].children[1].children[1].offsetWidth
           this.$refs['th-name'].style['min-width'] = `${nameWidth}px`
-          const descriptionWidth =
-            this.$refs['body-tbody'][0].children[1].children[2].offsetWidth
-          this.$refs['th-description'].style['min-width'] =
-            `${descriptionWidth}px`
+          if (this.$refs['th-description']) {
+            const descriptionWidth =
+              this.$refs['body-tbody'][0].children[1].children[2].offsetWidth
+            this.$refs['th-description'].style['min-width'] =
+              `${descriptionWidth}px`
+          }
         }
       }
     }
@@ -469,9 +484,9 @@ export default {
 }
 </script>
 
-<style scoped>
+<style lang="scss" scoped>
 .dark thead tr a {
-  color: #CCC;
+  color: $light-grey;
 }
 
 .table {
@@ -486,6 +501,12 @@ export default {
 .name {
   min-width: 200px;
   width: 200px;
+}
+
+th.time-spent,
+td.time-spent {
+  min-width: 80px;
+  width: 80px;
 }
 
 .episode {
@@ -507,6 +528,8 @@ export default {
   min-width: 120px;
   max-width: 120px;
   width: 120px;
+  overflow-wrap: break-word;
+  hyphens: auto;
 }
 
 .validation-cell {

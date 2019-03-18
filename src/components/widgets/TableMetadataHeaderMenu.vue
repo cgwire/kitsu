@@ -46,17 +46,17 @@ export default {
 }
 </script>
 
-<style scoped>
+<style lang="scss" scoped>
 .dark .header-menu {
-  background-color: #36393F;
-  box-shadow: 0px 2px 6px #333;
+  background-color: $dark-grey-light;
+  box-shadow: 0px 2px 6px $dark-grey-light;
 }
 
 .header-menu {
   position: absolute;
   background: white;
   width: 118px;
-  box-shadow: 0px 2px 6px #CCC;
+  box-shadow: 0px 2px 6px $light-grey;
   top: 90px;
   z-index: 100;
 }

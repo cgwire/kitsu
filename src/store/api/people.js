@@ -6,6 +6,10 @@ export default {
     client.get('/api/data/persons', callback)
   },
 
+  getPerson (personId, callback) {
+    client.get(`/api/data/persons/${personId}`, callback)
+  },
+
   newPerson (person, callback) {
     const data = {
       first_name: person.first_name,
@@ -81,11 +85,12 @@ export default {
     client.get('/api/data/user/filters', callback)
   },
 
-  createFilter (listType, name, query, productionId, callback) {
+  createFilter (listType, name, query, productionId, entityType, callback) {
     const data = {
       list_type: listType,
       name,
       query: query,
+      entity_type: entityType,
       project_id: productionId
     }
     client.post('/api/data/user/filters', data, callback)

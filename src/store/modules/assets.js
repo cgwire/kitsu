@@ -102,6 +102,8 @@ const helpers = {
 
   populateTask (task, asset, production) {
     task.name = helpers.getTaskType(task.task_type_id).priority.toString()
+    task.task_status_short_name =
+      helpers.getTaskStatus(task.task_status_id).short_name
 
     Object.assign(task, {
       project_id: asset.production_id,
@@ -216,7 +218,7 @@ const getters = {
   },
 
   assetsByType: state => {
-    return helpers.groupAssetsByType(Object.values(state.assetMap))
+    return helpers.groupAssetsByType(Object.values(state.displayedAssets))
   },
 
   editAsset: state => state.editAsset,
@@ -392,6 +394,7 @@ const actions = {
           searchQuery,
           searchQuery,
           production.id,
+          null,
           (err, searchQuery) => {
             commit(SAVE_ASSET_SEARCH_END, { searchQuery, production })
             if (err) {
@@ -482,6 +485,7 @@ const mutations = {
 
     state.assetMap = {}
     assets.forEach((asset) => {
+      let timeSpent = 0
       if (!assetTypeMap[asset.asset_type]) {
         assetTypeMap[asset.asset_type_id] = {
           id: asset.asset_type_id,
@@ -493,7 +497,9 @@ const mutations = {
       asset.tasks.forEach((task) => {
         helpers.populateTask(task, asset)
         validationColumns[task.task_type_id] = true
+        timeSpent += task.duration
       })
+      asset.timeSpent = timeSpent
 
       state.assetMap[asset.id] = asset
     })
@@ -577,7 +583,7 @@ const mutations = {
       state.displayedAssets.push(newAsset)
       state.displayedAssets = sortAssets(state.displayedAssets)
       state.assetFilledColumns = getFilledColumns(state.displayedAssets)
-      state.displayedAssetsLength = state.displayedAssets.length
+      state.displayedAssetsLength = cache.assets.length
 
       const maxX = state.displayedAssets.length
       const maxY = state.nbValidationColumns
@@ -619,6 +625,10 @@ const mutations = {
       state.displayedAssets.splice(displayAssetToDeleteIndex, 1)
       state.assetFilledColumns = getFilledColumns(state.displayedAssets)
       state.assetMap[assetToDelete.id] = undefined
+      state.displayedAssetsLength = Math.max(
+        state.displayedAssetsLength - 1,
+        0
+      )
     }
 
     state.deleteAsset = {
