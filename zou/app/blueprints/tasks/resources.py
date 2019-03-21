@@ -121,7 +121,7 @@ class AddPreviewResource(Resource):
         user_service.check_project_access(task["project_id"])
 
         comment = tasks_service.get_comment(comment_id)
-        task_status = tasks_service.get_task_status(
+        tasks_service.get_task_status(
             comment["task_status_id"]
         )
         person = persons_service.get_current_user()
@@ -154,7 +154,7 @@ class AddExtraPreviewResource(Resource):
     def delete(self, task_id, comment_id, preview_file_id):
         task = tasks_service.get_task(task_id)
         user_service.check_project_access(task["project_id"])
-        preview_file = deletion_service.remove_preview_file_by_id(
+        deletion_service.remove_preview_file_by_id(
             preview_file_id
         )
         return '', 204
@@ -403,9 +403,11 @@ class TasksAssignResource(Resource):
         for task_id in task_ids:
             try:
                 task = self.assign_task(task_id, person_id)
+                author = persons_service.get_current_user()
                 notifications_service.create_assignation_notification(
                     task_id,
-                    person_id
+                    person_id,
+                    author["id"]
                 )
                 tasks.append(task)
             except TaskNotFoundException:

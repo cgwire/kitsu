@@ -813,6 +813,7 @@ def create_or_update_time_spent(task_id, person_id, date, duration, add=False):
     for time_spent in time_spents:
         task.duration += time_spent.duration
     task.save()
+    events.emit("task:update", {"task_id": task_id})
 
     return time_spent.serialize()
 
