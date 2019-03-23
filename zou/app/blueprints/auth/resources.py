@@ -18,7 +18,7 @@ from sqlalchemy.exc import OperationalError, TimeoutError
 from zou.app import app, mail
 from zou.app.mixin import ArgsMixin
 from zou.app.utils import auth
-from zou.app.services import persons_service, auth_service
+from zou.app.services import persons_service, auth_service, events_service
 from zou.app.stores import auth_tokens_store
 from zou.app.services.exception import (
     NoAuthStrategyConfigured,
@@ -212,8 +212,18 @@ class LoginResource(Resource):
                 })
                 set_access_cookies(response, access_token)
                 set_refresh_cookies(response, refresh_token)
+                events_service.create_login_log(
+                    user["id"],
+                    request.remote_addr,
+                    "web"
+                )
 
             else:
+                events_service.create_login_log(
+                    user["id"],
+                    request.remote_addr,
+                    "script"
+                )
                 response = {
                     "login": True,
                     "user": user,

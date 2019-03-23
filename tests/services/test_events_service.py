@@ -49,3 +49,16 @@ class EventsServiceTestCase(ApiDBTestCase):
         date = fields.get_date_object(asset["created_at"], "%Y-%m-%dT%H:%M:%S")
         events = events_service.get_last_events(before=date)
         self.assertEqual(len(events), 2)
+
+    def test_get_last_login_logs(self):
+        self.generate_fixture_person()
+        login_logs = events_service.get_last_login_logs()
+        self.assertEqual(len(login_logs), 1)
+
+        events_service.create_login_log(self.person.id, "127.0.0.1", "web")
+        events_service.create_login_log(self.person.id, "127.0.0.1", "web")
+        events_service.create_login_log(self.person.id, "127.0.0.1", "web")
+        login_logs = events_service.get_last_login_logs()
+        self.assertEqual(len(login_logs), 4)
+        login_logs = events_service.get_last_login_logs(page_size=2)
+        self.assertEqual(len(login_logs), 2)

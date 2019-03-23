@@ -271,3 +271,15 @@ class AuthTestCase(ApiDBTestCase):
             "password2": "complex22pass"
         }
         response = self.put("auth/reset-password", data, 200)
+
+    def test_get_last_login_logs(self):
+        user_artist = self.generate_fixture_user_cg_artist().serialize()
+        user_manager = self.generate_fixture_user_manager().serialize()
+
+        self.log_in(user_artist["email"])
+        self.log_in(user_manager["email"])
+        self.log_in("john.did@gmail.com")
+        login_logs = self.get("/data/events/login-logs/last")
+        self.assertEqual(len(login_logs), 4)
+        login_logs = self.get("/data/events/login-logs/last?page_size=2")
+        self.assertEqual(len(login_logs), 2)
