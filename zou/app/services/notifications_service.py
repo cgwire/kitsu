@@ -3,7 +3,7 @@ from sqlalchemy.exc import StatementError
 from zou.app.models.comment import Comment
 from zou.app.models.project import Project
 from zou.app.models.entity import Entity
-from zou.app.models.notifications import Notification
+from zou.app.models.notification import Notification
 from zou.app.models.subscription import Subscription
 from zou.app.models.task_type import TaskType
 

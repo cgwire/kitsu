@@ -9,7 +9,7 @@ from sqlalchemy.exc import StatementError
 from flask_jwt_extended import get_jwt_identity
 
 from zou.app.models.person import Person
-from zou.app.models.desktop_login_logs import DesktopLoginLog
+from zou.app.models.desktop_login_log import DesktopLoginLog
 
 from zou.app.utils import fields, events, cache
 

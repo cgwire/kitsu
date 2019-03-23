@@ -4,8 +4,8 @@ from zou.app.models.entity import Entity
 from zou.app.models.entity_type import EntityType
 from zou.app.models.project import Project
 from zou.app.models.project_status import ProjectStatus
-from zou.app.models.search_filters import SearchFilter
-from zou.app.models.notifications import Notification
+from zou.app.models.search_filter import SearchFilter
+from zou.app.models.notification import Notification
 from zou.app.models.task import Task
 from zou.app.models.task_type import TaskType
 from zou.app.models.comment import Comment

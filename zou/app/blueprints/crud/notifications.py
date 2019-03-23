@@ -1,4 +1,4 @@
-from zou.app.models.notifications import Notification
+from zou.app.models.notification import Notification
 from zou.app.utils import permissions
 
 from .base import BaseModelResource, BaseModelsResource

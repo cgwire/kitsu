@@ -1,6 +1,6 @@
 from tests.base import ApiDBTestCase
 
-from zou.app.models.notifications import Notification
+from zou.app.models.notification import Notification
 from zou.app.services import notifications_service, tasks_service
 
 
