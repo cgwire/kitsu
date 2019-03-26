@@ -1,6 +1,10 @@
 from tests.base import ApiDBTestCase
 
-from zou.app.services import tasks_service, notifications_service
+from zou.app.services import (
+    tasks_service,
+    notifications_service,
+    persons_service
+)
 
 
 class TaskRoutesTestCase(ApiDBTestCase):
@@ -126,10 +130,14 @@ class TaskRoutesTestCase(ApiDBTestCase):
     def test_comment_task(self):
         self.generate_fixture_user_manager()
         self.generate_fixture_user_cg_artist()
+        user_cg_artist = \
+            persons_service.get_person_raw(self.user_cg_artist["id"])
+        user_manager = \
+            persons_service.get_person_raw(self.user_manager["id"])
         self.project.team = [
             self.person,
-            self.user_cg_artist,
-            self.user_manager
+            user_cg_artist,
+            user_manager
         ]
         self.project.save()
         self.generate_fixture_task()
@@ -142,7 +150,7 @@ class TaskRoutesTestCase(ApiDBTestCase):
         self.assertEqual(comment["text"], data["comment"])
         self.assertEqual(
             comment["person"]["first_name"],
-            str(self.user.first_name)
+            self.user["first_name"]
         )
         self.assertEqual(comment["task_status"]["short_name"], "wip")
 
@@ -154,7 +162,7 @@ class TaskRoutesTestCase(ApiDBTestCase):
         comments = self.get("/data/comments/")
         self.assertEqual(len(comments), 1)
         self.assertEqual(comments[0]["text"], data["comment"])
-        self.assertEqual(comments[0]["person_id"], str(self.user.id))
+        self.assertEqual(comments[0]["person_id"], self.user["id"])
 
         notifications = notifications_service.get_last_notifications("comment")
         self.assertEqual(len(notifications), 1)
@@ -174,11 +182,18 @@ class TaskRoutesTestCase(ApiDBTestCase):
     def test_edit_comment(self):
         self.generate_fixture_user_manager()
         self.generate_fixture_user_cg_artist()
+
+        user = persons_service.get_person_raw(self.user["id"])
+        user_cg_artist = \
+            persons_service.get_person_raw(self.user_cg_artist["id"])
+        user_manager = \
+            persons_service.get_person_raw(self.user_manager["id"])
+
         self.project.team = [
             self.person,
-            self.user,
-            self.user_cg_artist,
-            self.user_manager
+            user,
+            user_cg_artist,
+            user_manager
         ]
         self.project.save()
         self.generate_fixture_task()
@@ -283,7 +298,7 @@ class TaskRoutesTestCase(ApiDBTestCase):
         self.assertEqual(comments[0]["text"], data["comment"])
         self.assertEqual(
             comments[0]["person"]["first_name"],
-            str(self.user.first_name)
+            self.user["first_name"]
         )
         self.assertEqual(comments[0]["task_status"]["short_name"], "wip")
 
@@ -360,7 +375,7 @@ class TaskRoutesTestCase(ApiDBTestCase):
         self.assertEquals(len(tasks), 1)
         self.assertTrue(str(self.person.id) in tasks[0]["assignees"])
 
-        tasks = self.get("/data/persons/%s/tasks" % self.user.id)
+        tasks = self.get("/data/persons/%s/tasks" % self.user["id"])
         self.assertEquals(len(tasks), 0)
 
     def test_get_done_tasks_for_person(self):

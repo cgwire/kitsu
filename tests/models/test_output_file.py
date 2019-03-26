@@ -82,8 +82,7 @@ class OutputFileTestCase(ApiDBTestCase):
     def test_get_output_file_permission(self):
         output_file_id = self.get_first("data/output-files")["id"]
         self.generate_fixture_user_cg_artist()
-        cg_artist_id = self.user_cg_artist.id
-
+        cg_artist_id = self.user_cg_artist["id"]
         self.log_in_cg_artist()
         output_files = self.get("data/output-files")
         self.assertEquals(len(output_files), 0)

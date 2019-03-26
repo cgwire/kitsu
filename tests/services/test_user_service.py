@@ -1,6 +1,7 @@
 # -*- coding: UTF-8 -*-
 from tests.base import ApiDBTestCase
 
+from zou.app.models.person import Person
 from zou.app.services import user_service, persons_service
 
 from zou.app.utils import permissions
@@ -49,10 +50,10 @@ class UserServiceTestCase(ApiDBTestCase):
         persons_service.get_current_user_raw = self.old_get_current_user_raw
 
     def get_current_user(self):
-        return self.user.serialize()
+        return self.user
 
     def get_current_user_raw(self):
-        return self.user
+        return Person.get(self.user["id"])
 
     def test_check_project_access(self):
         from zou.app import app
@@ -62,7 +63,7 @@ class UserServiceTestCase(ApiDBTestCase):
             with self.assertRaises(permissions.PermissionDenied):
                 user_service.check_project_access(self.project_id)
 
-            self.project.team.append(self.user)
+            self.project.team.append(self.get_current_user_raw())
             self.project.save()
             self.assertTrue(
                 user_service.check_project_access(self.project_id))
@@ -71,7 +72,8 @@ class UserServiceTestCase(ApiDBTestCase):
         projects = user_service.related_projects()
         self.assertEqual(len(projects), 0)
 
-        self.project.team.append(self.user)
+        self.project.team.append(self.get_current_user_raw())
+
         self.project.save()
         projects = user_service.related_projects()
         self.assertEqual(len(projects), 1)

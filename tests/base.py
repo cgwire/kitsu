@@ -64,13 +64,13 @@ class ApiTestCase(unittest.TestCase):
         self.post_headers.update(self.auth_headers)
 
     def log_in_admin(self):
-        self.log_in(self.user.email)
+        self.log_in(self.user["email"])
 
     def log_in_manager(self):
-        self.log_in(self.user_manager.email)
+        self.log_in(self.user_manager["email"])
 
     def log_in_cg_artist(self):
-        self.log_in(self.user_cg_artist.email)
+        self.log_in(self.user_cg_artist["email"])
 
     def log_out(self):
         try:
@@ -468,7 +468,7 @@ class ApiDBTestCase(ApiTestCase):
             role="admin",
             email=u"john.did@gmail.com",
             password=auth.encrypt_password("mypassword")
-        )
+        ).serialize()
         return self.user
 
     def generate_fixture_user_manager(self):
@@ -478,7 +478,7 @@ class ApiDBTestCase(ApiTestCase):
             role="manager",
             email=u"john.did.manager@gmail.com",
             password=auth.encrypt_password("mypassword")
-        )
+        ).serialize()
         return self.user_manager
 
     def generate_fixture_user_cg_artist(self):
@@ -488,7 +488,7 @@ class ApiDBTestCase(ApiTestCase):
             email=u"john.did.cg.artist@gmail.com",
             role="user",
             password=auth.encrypt_password("mypassword")
-        )
+        ).serialize()
         return self.user_cg_artist
 
     def generate_fixture_person(

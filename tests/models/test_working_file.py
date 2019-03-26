@@ -37,8 +37,7 @@ class WorkingFileTestCase(ApiDBTestCase):
 
     def test_get_working_file(self):
         self.generate_fixture_user_cg_artist()
-        user_cg_artist_id = self.user_cg_artist.id
-
+        user_cg_artist_id = self.user_cg_artist["id"]
         working_file = self.get_first("data/working-files")
         working_file_again = self.get(
             "data/working-files/%s" % working_file["id"])

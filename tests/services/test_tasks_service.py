@@ -295,7 +295,7 @@ class TaskServiceTestCase(ApiDBTestCase):
 
     def test_get_time_spents(self):
         person_id = self.person.id
-        user_id = self.user.id
+        user_id = self.user["id"]
         task_id = self.task.id
         TimeSpent.create(
             person_id=person_id,
@@ -325,11 +325,11 @@ class TaskServiceTestCase(ApiDBTestCase):
 
     def test_get_tasks_for_person(self):
         projects = [self.project.serialize()]
-        tasks = tasks_service.get_person_tasks(self.user.id, projects)
+        tasks = tasks_service.get_person_tasks(self.user["id"], projects)
         self.assertEqual(len(tasks), 0)
 
-        tasks_service.assign_task(self.task.id, self.user.id)
-        tasks = tasks_service.get_person_tasks(self.user.id, projects)
+        tasks_service.assign_task(self.task.id, self.user["id"])
+        tasks = tasks_service.get_person_tasks(self.user["id"], projects)
         self.assertEqual(len(tasks), 1)
 
         tasks_service.create_comment(
@@ -354,11 +354,11 @@ class TaskServiceTestCase(ApiDBTestCase):
 
     def test_get_done_tasks_for_person(self):
         projects = [self.project.serialize()]
-        tasks = tasks_service.get_person_done_tasks(self.user.id, projects)
+        tasks = tasks_service.get_person_done_tasks(self.user["id"], projects)
         self.assertEqual(len(tasks), 0)
 
-        tasks_service.assign_task(self.task.id, self.user.id)
-        tasks = tasks_service.get_person_done_tasks(self.user.id, projects)
+        tasks_service.assign_task(self.task.id, self.user["id"])
+        tasks = tasks_service.get_person_done_tasks(self.user["id"], projects)
         self.assertEqual(len(tasks), 0)
 
         done_status = tasks_service.get_done_status()
@@ -366,7 +366,7 @@ class TaskServiceTestCase(ApiDBTestCase):
             self.task.id,
             {"task_status_id": done_status["id"]}
         )
-        tasks = tasks_service.get_person_done_tasks(self.user.id, projects)
+        tasks = tasks_service.get_person_done_tasks(self.user["id"], projects)
         self.assertEqual(len(tasks), 1)
 
     def test_update_task(self):
