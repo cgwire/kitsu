@@ -42,9 +42,13 @@ def get_playlist_with_preview_file_revisions(playlist_id):
 
     for shot in playlist_dict["shots"]:
         try:
-            shot["preview_files"] = get_preview_files_for_shot(
-                shot["shot_id"]
-            )
+            preview_file = PreviewFile.get(shot["preview_file_id"])
+            shot["extension"] = preview_file.extension
+        except:
+            pass
+
+        try:
+            shot["preview_files"] = get_preview_files_for_shot(shot["shot_id"])
         except ShotNotFoundException:
             playlist_dict["shots"].remove(shot)
     return playlist_dict
@@ -68,7 +72,8 @@ def get_preview_files_for_shot(shot_id):
             previews[task_type_id] = [
                 {
                     "id": str(preview_file.id),
-                    "revision": preview_file.revision
+                    "revision": preview_file.revision,
+                    "extension": preview_file.extension
                 }
                 for preview_file in preview_files
             ]  # Do not add too much field to avoid building too big responses
@@ -95,7 +100,8 @@ def get_preview_files_for_entity(entity_id):
             previews[task_type_id] = [
                 {
                     "id": str(preview_file.id),
-                    "revision": preview_file.revision
+                    "revision": preview_file.revision,
+                    "extension": preview_file.extension
                 }
                 for preview_file in preview_files
             ]  # Do not add too much field to avoid building too big responses
