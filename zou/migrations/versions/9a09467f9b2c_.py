@@ -31,7 +31,6 @@ def upgrade():
     sa.PrimaryKeyConstraint('id'),
     sa.UniqueConstraint('name')
     )
-    op.drop_column('search_filter', 'task_type_id')
     # ### end Alembic commands ###
 
 
