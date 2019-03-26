@@ -129,9 +129,11 @@ class AuthenticatedResource(Resource):
     def get(self):
         try:
             person = persons_service.get_person_by_email(get_jwt_identity())
+            organisation = persons_service.get_organisation()
             return {
                 "authenticated": True,
                 "user": person,
+                "organisation": organisation,
                 "ldap": app.config["AUTH_STRATEGY"] == "auth_remote_ldap"
             }
         except PersonNotFoundException:
@@ -205,8 +207,10 @@ class LoginResource(Resource):
             )
 
             if is_from_browser(request.user_agent):
+                organisation = persons_service.get_organisation()
                 response = jsonify({
                     "user": user,
+                    "organisation": organisation,
                     "ldap": app.config["AUTH_STRATEGY"] == "auth_remote_ldap",
                     "login": True
                 })

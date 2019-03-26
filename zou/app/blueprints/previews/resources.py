@@ -628,6 +628,42 @@ class PersonThumbnailResource(BasePictureResource):
         return persons_service.get_person(person_id) is not None
 
 
+class CreateOrganisationThumbnailResource(BaseCreatePictureResource):
+
+    def __init__(self):
+        BaseCreatePictureResource.__init__(
+            self,
+            "organisations",
+            thumbnail_utils.BIG_SQUARE_SIZE
+        )
+
+    def is_exist(self, organisation_id):
+        return True
+
+    def check_permissions(self, organisation_id):
+        if not permissions.has_admin_permissions():
+            raise permissions.PermissionDenied
+
+    def prepare_creation(self, organisation_id):
+        return persons_service.update_organisation(
+            organisation_id,
+            {"has_avatar": True}
+        )
+
+
+class OrganisationThumbnailResource(BasePictureResource):
+
+    def __init__(self):
+        BasePictureResource.__init__(
+            self,
+            "organisations"
+        )
+
+    def is_exist(self, organisation_id):
+        return True
+
+
+
 class CreateProjectThumbnailResource(BaseCreatePictureResource):
 
     def __init__(self):
