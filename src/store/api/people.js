@@ -2,6 +2,53 @@ import client from './client'
 
 export default {
 
+  getOrganisation () {
+    return new Promise((resolve, reject) => {
+      client.get(`/api/data/organisations`, (err, organisations) => {
+        if (err) reject(err)
+        else {
+          let organisation = {
+            name: 'Kitsu',
+            hours_by_day: 8,
+            has_avatar: false
+          }
+          if (organisations.length > 0) organisation = organisations[0]
+          resolve(organisation)
+        }
+      })
+    })
+  },
+
+  updateOrganisation (organisation) {
+    return new Promise((resolve, reject) => {
+      const data = {
+        name: organisation.name,
+        hours_by_day: organisation.hours_by_day
+      }
+      client.put(
+        `/api/data/organisations/${organisation.id}`,
+        data,
+        (err, organisation) => {
+          if (err) reject(err)
+          else resolve(organisation)
+        }
+      )
+    })
+  },
+
+  postOrganisationLogo (organisationId, formData) {
+    return new Promise((resolve, reject) => {
+      client.post(
+        `/api/pictures/thumbnails/organisations/${organisationId}`,
+        formData,
+        (err, organisation) => {
+          if (err) reject(err)
+          else resolve(organisation)
+        }
+      )
+    })
+  },
+
   getPeople (callback) {
     client.get('/api/data/persons', callback)
   },

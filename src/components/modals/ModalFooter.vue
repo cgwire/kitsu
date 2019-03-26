@@ -30,7 +30,7 @@
 import { mapGetters, mapActions } from 'vuex'
 
 export default {
-  name: 'add-metadata-modal',
+  name: 'modal-footer',
 
   components: {},
 

@@ -57,6 +57,8 @@ import {
   PEOPLE_TIMESHEET_LOADED,
   PERSON_LOAD_TIME_SPENTS_END,
 
+  SET_ORGANISATION,
+
   SET_PERSON_TASKS_SCROLL_POSITION,
 
   PEOPLE_SEARCH_CHANGE,
@@ -101,6 +103,12 @@ const helpers = {
 }
 
 const initialState = {
+  organisation: {
+    name: 'Kitsu',
+    hours_by_day: 8,
+    has_avatar: false
+  },
+
   people: [],
   displayedPeople: [],
   peopleIndex: {},
@@ -146,6 +154,8 @@ const state = {
 }
 
 const getters = {
+  organisation: state => state.organisation,
+
   people: state => state.people,
   displayedPeople: state => state.displayedPeople,
   peopleIndex: state => state.peopleIndex,
@@ -192,6 +202,42 @@ const getters = {
 }
 
 const actions = {
+
+  getOrganisation ({ commit }) {
+    return new Promise((resolve, reject) => {
+      peopleApi.getOrganisation()
+        .then((organisation) => {
+          commit(SET_ORGANISATION, organisation)
+          resolve()
+        })
+        .catch(reject)
+    })
+  },
+
+  saveOrganisation ({ commit }, form) {
+    return new Promise((resolve, reject) => {
+      form.id = state.organisation.id
+      peopleApi.updateOrganisation(form)
+        .then((organisation) => {
+          commit(SET_ORGANISATION, organisation)
+          resolve()
+        })
+        .catch(reject)
+    })
+  },
+
+  uploadOrganisationLogo ({ commit, state }, formData) {
+    return new Promise((resolve, reject) => {
+      const organisationId = state.organisation.id
+      console.log(formData)
+      peopleApi.postOrganisationLogo(organisationId, formData)
+        .then((organisation) => {
+          commit(SET_ORGANISATION, { has_avatar: true })
+          resolve()
+        })
+        .catch(reject)
+    })
+  },
 
   loadPeople ({ commit, state }, callback) {
     commit(LOAD_PEOPLE_START)
@@ -735,6 +781,12 @@ const mutations = {
       Object.assign(person, form)
       helpers.addAdditionalInformation(person)
     }
+  },
+
+  [SET_ORGANISATION] (state, organisation) {
+    console.log(organisation.name)
+    Object.assign(state.organisation, organisation)
+    state.organisation = {...state.organisation}
   },
 
   [RESET_ALL] (state, people) {

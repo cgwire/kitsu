@@ -110,6 +110,11 @@
             Roadmap
           </a>
         </li>
+        <li>
+          <a href="https://cg-wire.com/en/about.html" target="_blank">
+            {{ $t("main.about ")}}
+          </a>
+        </li>
         <li @click="onLogoutClicked">
           {{ $t("main.logout") }}
         </li>
