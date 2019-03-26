@@ -1,3 +1,5 @@
+import { mapGetters } from 'vuex'
+
 export const formatListMixin = {
 
   created () {
@@ -10,12 +12,15 @@ export const formatListMixin = {
   },
 
   computed: {
+    ...mapGetters([
+      'organisation'
+    ])
   },
 
   methods: {
     formatDuration (duration) {
       if (duration) {
-        return (duration / 60 / 8).toLocaleString(
+        return (duration / 60 / this.organisation.hours_by_day).toLocaleString(
           'fullwide', { maximumFractionDigits: 1 }
         )
       } else {

@@ -28,6 +28,7 @@ import ResetPassword from '../components/pages/ResetPassword'
 import ResetChangePassword from '../components/pages/ResetChangePassword'
 import ServerDown from '../components/pages/ServerDown'
 import Sequences from '../components/pages/Sequences'
+import Settings from '../components/pages/Settings'
 import Shot from '../components/pages/Shot'
 import Shots from '../components/pages/Shots'
 import Team from '../components/pages/Team'
@@ -110,6 +111,12 @@ export const routes = [
         path: '/open-productions',
         component: OpenProductions,
         name: 'open-productions'
+      },
+
+      {
+        path: '/settings',
+        component: Settings,
+        name: 'settings'
       },
 
       { path: '/people', component: People, name: 'people' },

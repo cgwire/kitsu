@@ -90,7 +90,7 @@
             <router-link
               :class="{
                 duration: true,
-                'warning': weekDuration(week, person.id) > 35
+                'warning': weekDuration(week, person.id) > 5 * organisation.hours_by_day
               }"
               :to="{
                 name: 'timesheets-week-person',
@@ -231,6 +231,7 @@ export default {
   computed: {
     ...mapGetters([
       'isCurrentUserManager',
+      'organisation',
       'route'
     ]),
 

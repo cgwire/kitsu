@@ -13,12 +13,12 @@
           />
 
           <p v-if="!isLdap">
-            <router-link
-              class="button is-link"
-              :to="{name: 'change-avatar'}"
+            <button
+              class="button is-link change-avatar-button"
+              @click="showAvatarModal"
             >
             {{ $t('profile.change_avatar') }}
-            </router-link>
+            </button>
           </p>
           <h1>
           {{ $t('profile.title') }}
@@ -166,10 +166,11 @@
       :active="changeAvatar.isModalShown"
       :is-loading="changeAvatar.isLoading"
       :is-error="changeAvatar.isLoadingError"
-      :cancel-route="{name: 'profile'}"
       :form-data="changeAvatar.formData"
+      :title="$t('profile.avatar.title')"
       @fileselected="selectFile"
       @confirm="uploadAvatarFile"
+      @cancel="hideAvatarModal"
     />
 
   </div>
@@ -218,9 +219,7 @@ export default {
   watch: {
     user () {
       Object.assign(this.form, this.user)
-    },
-
-    $route () { this.handleModalsDisplay() }
+    }
   },
 
   computed: {
@@ -284,23 +283,21 @@ export default {
         }
         this.changeAvatar.isLoading = false
         this.$refs.avatar.reloadAvatar()
-        this.$router.push({name: 'profile'})
+        this.hideAvatarModal()
       })
     },
 
-    handleModalsDisplay () {
-      const path = this.$store.state.route.path
-      if (path.indexOf('change-avatar') > 0) {
-        this.changeAvatar.isModalShown = true
-      } else {
-        this.changeAvatar.isModalShown = false
-      }
+    hideAvatarModal () {
+      this.changeAvatar.isModalShown = false
+    },
+
+    showAvatarModal () {
+      this.changeAvatar.isModalShown = true
     }
   },
 
   mounted () {
     this.form = Object.assign(this.form, this.user)
-    this.handleModalsDisplay()
   },
 
   metaInfo () {
@@ -408,6 +405,10 @@ h2:first-child {
 .avatar {
   margin: auto;
   border: 5px solid white;
+}
+
+.change-avatar-button {
+  color: white;
 }
 
 .change-password-message {

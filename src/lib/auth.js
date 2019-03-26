@@ -1,10 +1,11 @@
 import superagent from 'superagent'
 import store from '../store'
 import {
+  DATA_LOADING_START,
+  SET_ORGANISATION,
   USER_LOGIN,
   USER_LOGOUT,
-  USER_LOGIN_FAIL,
-  DATA_LOADING_START
+  USER_LOGIN_FAIL
 } from '../store/mutation-types.js'
 
 const auth = {
@@ -86,7 +87,9 @@ const auth = {
           callback(err)
         } else {
           const user = res.body.user
+          const organisation = res.body.organisation
           const isLdap = res.body.ldap
+          store.commit(SET_ORGANISATION, organisation)
           store.commit(USER_LOGIN, user)
           callback(null, isLdap)
         }
@@ -98,10 +101,20 @@ const auth = {
   requireAuth (to, from, next) {
     const finalize = (isLdap) => {
       if (!store.state.user.isAuthenticated) {
-        next({
-          path: '/login',
-          query: { redirect: to.fullPath }
-        })
+        store.dispatch('getOrganisation')
+          .then(() => {
+            next({
+              path: '/login',
+              query: { redirect: to.fullPath }
+            })
+          })
+          .catch((err) => {
+            console.error(err)
+            next({
+              path: '/login',
+              query: { redirect: to.fullPath }
+            })
+          })
       } else {
         store.commit(DATA_LOADING_START, { isLdap })
         next()

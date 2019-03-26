@@ -480,6 +480,22 @@ export default {
     with_preview: 'avec une version'
   },
 
+  settings: {
+    change_logo: 'Changer logo',
+    logo: 'Logo du studio',
+    no_logo: 'Aucun logo n\' a été positionné.',
+    set_logo: 'Changer le logo',
+    title: 'Paramètres',
+    fields: {
+      name: 'Nom du studio',
+      hours_by_day: 'Heures par jour'
+    },
+    save: {
+      button: 'Sauvegarder les paramètres',
+      error: 'Une erreur serveur est survenue en sauvegardant les paramètres'
+    }
+  },
+
   server_down: {
     title: 'Kitsu a rencontré une erreur en communiquant avec son API de données.',
     text: 'Contactez votre fournisseur, votre administrateur système ou votre département informatique pour comprendre ce qui ne va pas.'

@@ -7,7 +7,7 @@
   <div class="modal-content">
     <div class="box content">
 
-      <page-title :text="title"></page-title>
+      <page-title :text="title" />
 
       <p>{{ text }}</p>
 
@@ -16,8 +16,7 @@
           :label="$t('tasks.fields.task_type')"
           :options="isAssetTasks ? getAssetTaskTypeOptions : getShotTaskTypeOptions"
           v-model="form.task_type_id"
-        >
-        </combobox>
+        />
       </form>
 
       <div class="has-text-right">
