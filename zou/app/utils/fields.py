@@ -4,6 +4,7 @@ import sqlalchemy.orm as orm
 
 from pytz import tzinfo
 from babel import Locale
+from ipaddress import IPv4Address
 from sqlalchemy_utils.types.choice import Choice
 
 
@@ -18,8 +19,6 @@ def serialize_value(value):
         return value.isoformat()
     elif isinstance(value, uuid.UUID):
         return str(value)
-    elif isinstance(value, Choice):
-        return value.code
     elif isinstance(value, dict):
         return serialize_dict(value)
     elif isinstance(value, orm.collections.InstrumentedList):
@@ -30,12 +29,16 @@ def serialize_value(value):
         return value
     elif isinstance(value, int):
         return value
+    elif isinstance(value, list):
+        return serialize_list(value)
     elif isinstance(value, Locale):
         return str(value)
     elif isinstance(value, tzinfo.DstTzInfo):
         return str(value)
-    elif isinstance(value, list):
-        return serialize_list(value)
+    elif isinstance(value, Choice):
+        return value.code
+    elif isinstance(value, IPv4Address):
+        return str(value)
     elif value is None:
         return None
     elif isinstance(value, object):

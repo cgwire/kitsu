@@ -24,7 +24,7 @@ class RouteTimeSpentTestCase(ApiDBTestCase):
 
     def create_time_spents(self):
         self.person_id = str(self.person.id)
-        self.user_id = str(self.user.id)
+        self.user_id = self.user["id"]
 
         task_id = str(self.task.id)
         self.generate_fixture_sequence()
@@ -82,7 +82,7 @@ class RouteTimeSpentTestCase(ApiDBTestCase):
 
     def test_get_time_spent(self):
         person_id = str(self.person.id)
-        user_id = str(self.user.id)
+        user_id = str(self.user["id"])
         task_id = str(self.task.id)
         data = {"duration": 3600}
         path = "/actions/tasks/%s/time-spents/2017-09-27/persons/%s" % (

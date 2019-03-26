@@ -38,7 +38,7 @@ class NamesServiceTestCase(ApiDBTestCase):
             "main",
             3,
             self.shot_task["id"],
-            self.user.id,
+            self.user["id"],
             source="webgui"
         )
         name = names_service.get_preview_file_name(preview_file["id"])
@@ -48,7 +48,7 @@ class NamesServiceTestCase(ApiDBTestCase):
             "main",
             3,
             self.asset_task["id"],
-            self.user.id,
+            self.user["id"],
             source="webgui"
         )
         name = names_service.get_preview_file_name(preview_file["id"])

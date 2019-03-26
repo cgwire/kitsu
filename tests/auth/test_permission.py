@@ -9,7 +9,7 @@ class PermissionTestCase(ApiDBTestCase):
         super(PermissionTestCase, self).setUp()
 
         self.generate_fixture_user_cg_artist()
-        self.user_cg_artist_id = self.user_cg_artist.id
+        self.user_cg_artist_id = self.user_cg_artist["id"]
         self.generate_fixture_user_manager()
         self.generate_fixture_project_status()
         self.generate_fixture_project()
@@ -19,17 +19,17 @@ class PermissionTestCase(ApiDBTestCase):
         self.log_out()
 
     def test_admin_can_create_project(self):
-        self.log_in(self.user.email)
+        self.log_in(self.user["email"])
         data = {
             "name": "Cosmos Landromat 2"
         }
         self.post("data/projects/", data, 201)
 
     def test_admin_can_edit_project(self):
-        self.log_in(self.user.email)
+        self.log_in(self.user["email"])
 
     def test_admin_can_read_project(self):
-        self.log_in(self.user.email)
+        self.log_in(self.user["email"])
 
     def test_cg_artist_cannot_create_project(self):
         self.log_in_cg_artist()
@@ -72,7 +72,7 @@ class PermissionTestCase(ApiDBTestCase):
         data = {
             "email": "john.doe2@gmail.com"
         }
-        self.put("data/persons/%s" % self.user.id, data, 403)
+        self.put("data/persons/%s" % self.user["id"], data, 403)
 
     def test_manager_cannot_update_person(self):
         self.log_in_manager()
@@ -87,11 +87,11 @@ class PermissionTestCase(ApiDBTestCase):
         data = {
             "first_name": "Super admin"
         }
-        self.put("data/persons/%s" % self.user.id, data, 200)
+        self.put("data/persons/%s" % self.user["id"], data, 200)
 
     def test_manager_cannot_delete_admin(self):
         self.log_in_manager()
-        self.delete("data/persons/%s" % self.user.id, 403)
+        self.delete("data/persons/%s" % self.user["id"], 403)
 
     def test_user_projects(self):
         self.generate_fixture_project_standard()
@@ -100,7 +100,7 @@ class PermissionTestCase(ApiDBTestCase):
         self.generate_fixture_asset_type()
         self.generate_fixture_asset()
         self.log_in_cg_artist()
-        user_id = str(self.user_cg_artist.id)
+        user_id = str(self.user_cg_artist["id"])
         projects = self.get("data/projects")
         self.assertEquals(len(projects), 0)
 
@@ -113,12 +113,13 @@ class PermissionTestCase(ApiDBTestCase):
         self.assertEquals(len(projects), 1)
 
     def test_is_in_team(self):
-        self.log_in_cg_artist()
         self.generate_fixture_asset_type()
         self.generate_fixture_asset()
-        self.get("data/assets/%s" % self.asset.id, 403)
+        asset_id = self.asset.id
+        self.log_in_cg_artist()
+        self.get("data/assets/%s" % asset_id, 403)
         projects_service.add_team_member(
             self.project_id,
-            self.user_cg_artist.id
+            self.user_cg_artist["id"]
         )
-        self.get("data/assets/%s" % self.asset.id, 200)
+        self.get("data/assets/%s" % asset_id, 200)

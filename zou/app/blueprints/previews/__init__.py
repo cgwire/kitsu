@@ -12,6 +12,8 @@ from .resources import (
     PreviewFilePreviewResource,
     PreviewFileOriginalResource,
 
+    CreateOrganisationThumbnailResource,
+    OrganisationThumbnailResource,
     CreateProjectThumbnailResource,
     ProjectThumbnailResource,
     CreatePersonThumbnailResource,
@@ -60,6 +62,14 @@ routes = [
         PreviewFilePreviewResource
     ),
 
+    (
+        "/pictures/thumbnails/organisations/<instance_id>",
+        CreateOrganisationThumbnailResource
+    ),
+    (
+        "/pictures/thumbnails/organisations/<instance_id>.png",
+        OrganisationThumbnailResource
+    ),
     (
         "/pictures/thumbnails/persons/<instance_id>",
         CreatePersonThumbnailResource

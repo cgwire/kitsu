@@ -73,7 +73,7 @@ class WorkingFilesTestCase(ApiDBTestCase):
     def test_new_working_file(self):
         task = Task.get(self.task_id)
         self.assertEquals(len(task.assignees), 1)
-        self.assertNotEquals(str(self.user), str(task.assignees[0]))
+        self.assertNotEquals(self.user["id"], str(task.assignees[0].id))
 
         path = "/data/tasks/%s/working-files/new" % self.task_id
         working_file = self.post(path, {
@@ -87,7 +87,7 @@ class WorkingFilesTestCase(ApiDBTestCase):
         assignees = [person.serialize() for person in task.assignees]
         assignees = sorted(assignees, key=lambda x: x["last_name"])
 
-        self.assertEquals(str(self.user.id), assignees[0]["id"])
+        self.assertEquals(self.user["id"], assignees[0]["id"])
 
         task = Task.get(self.task_id)
         path = "/data/tasks/%s/working-files/new" % self.task_id
@@ -173,7 +173,7 @@ class WorkingFilesTestCase(ApiDBTestCase):
         self.get(path, 403)
         projects_service.add_team_member(
             self.project_id,
-            self.user_cg_artist.id
+            self.user_cg_artist["id"]
         )
         self.get(path)
 
@@ -191,7 +191,7 @@ class WorkingFilesTestCase(ApiDBTestCase):
     def test_update_working_file_permission(self):
         working_file = self.working_file.serialize()
         self.generate_fixture_user_cg_artist()
-        user = self.user_cg_artist.serialize()
+        user = self.user_cg_artist
         self.log_in_cg_artist()
         comment_data = {
             "comment": "test working file comment"

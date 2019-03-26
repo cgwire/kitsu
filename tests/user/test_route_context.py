@@ -3,6 +3,7 @@ from tests.base import ApiDBTestCase
 from zou.app.services import tasks_service, notifications_service
 
 from zou.app.models.project import Project
+from zou.app.models.person import Person
 
 
 class UserContextRoutesTestCase(ApiDBTestCase):
@@ -38,12 +39,13 @@ class UserContextRoutesTestCase(ApiDBTestCase):
         self.maxDiff = None
 
         self.project_closed_id = self.project_closed.id
-        self.user_id = str(self.user.id)
+        self.user_id = self.user["id"]
 
     def assign_user(self, task_id):
-        tasks_service.assign_task(task_id, self.user.id)
+        tasks_service.assign_task(task_id, self.user_id)
         project = Project.get(self.project_id)
-        project.team.append(self.user)
+        person = Person.get(self.user_id)
+        project.team.append(person)
         project.save()
 
     def test_get_project_sequences(self):
@@ -198,7 +200,8 @@ class UserContextRoutesTestCase(ApiDBTestCase):
         self.assertEquals(len(projects), 0)
 
         project = Project.get(self.project_id)
-        project.team.append(self.user)
+        person = Person.get(self.user_id)
+        project.team.append(person)
         project.save()
 
         projects = self.get("data/user/projects/open")
@@ -328,12 +331,12 @@ class UserContextRoutesTestCase(ApiDBTestCase):
 
         logs = self.get(path)
         self.assertEqual(len(logs), 2)
-        self.assertEqual(logs[0]["person_id"], str(self.user.id))
+        self.assertEqual(logs[0]["person_id"], str(self.user_id))
         self.assertEqual(logs[0]["date"], date_2)
 
     def test_get_notifications(self):
         person_id = str(self.person.id)
-        tasks_service.assign_task(self.task.id, self.user.id)
+        tasks_service.assign_task(self.task.id, self.user_id)
         self.generate_fixture_comment()
         notifications_service.create_notifications_for_task_and_comment(
             self.task_dict,
@@ -345,7 +348,7 @@ class UserContextRoutesTestCase(ApiDBTestCase):
         self.assertEqual(notifications[0]["author_id"], person_id)
 
     def test_get_notification(self):
-        tasks_service.assign_task(self.task.id, self.user.id)
+        tasks_service.assign_task(self.task.id, self.user_id)
         self.generate_fixture_comment()
         notifications_service.create_notifications_for_task_and_comment(
             self.task_dict,

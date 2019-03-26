@@ -7,6 +7,7 @@ from .project import ProjectResource, ProjectsResource
 from .task_type import TaskTypesResource, TaskTypeResource
 from .task_status import TaskStatusesResource, TaskStatusResource
 from .department import DepartmentsResource, DepartmentResource
+from .organisation import OrganisationsResource, OrganisationResource
 from .task import TasksResource, TaskResource
 from .file_status import FileStatusesResource, FileStatusResource
 from .output_file import OutputFilesResource, OutputFileResource
@@ -61,6 +62,8 @@ routes = [
     ("/data/tasks/<instance_id>", TaskResource),
     ("/data/departments", DepartmentsResource),
     ("/data/departments/<instance_id>", DepartmentResource),
+    ("/data/organisations", OrganisationsResource),
+    ("/data/organisations/<instance_id>", OrganisationResource),
     ("/data/file-status/", FileStatusesResource),
     ("/data/file-status/<instance_id>", FileStatusResource),
     ("/data/softwares", SoftwaresResource),

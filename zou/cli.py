@@ -91,8 +91,8 @@ def stamp_db():
 
 @cli.command()
 @click.argument("email")
-@click.option('--p', default="default")
-def create_admin(email, p):
+@click.option('--password', default="default")
+def create_admin(email, password):
     "Create an admin user to allow usage of the API when database is empty."
     "Set password is 'default'."
 
@@ -100,7 +100,7 @@ def create_admin(email, p):
         # Allow "admin@example.com" to be invalid.
         if email != "admin@example.com":
             auth.validate_email(email)
-        password = auth.encrypt_password(p)
+        password = auth.encrypt_password(password)
         persons_service.create_person(
             email,
             password,
@@ -311,6 +311,7 @@ def patch_team():
             if task is not None:
                 project.team.append(person)
                 project.save()
+
 
 @cli.command()
 def patch_task_data():

@@ -1,8 +1,8 @@
 from flask import abort
 
 from zou.app.models.person import Person
-from zou.app.models.notifications import Notification
-from zou.app.models.search_filters import SearchFilter
+from zou.app.models.notification import Notification
+from zou.app.models.search_filter import SearchFilter
 from zou.app.services import persons_service
 from zou.app.utils import permissions
 

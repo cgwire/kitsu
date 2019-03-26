@@ -8,8 +8,9 @@ from sqlalchemy.exc import StatementError
 
 from flask_jwt_extended import get_jwt_identity
 
+from zou.app.models.desktop_login_log import DesktopLoginLog
+from zou.app.models.organisation import Organisation
 from zou.app.models.person import Person
-from zou.app.models.desktop_login_logs import DesktopLoginLog
 
 from zou.app.utils import fields, events, cache
 
@@ -264,3 +265,25 @@ def get_presence_logs(year, month):
 
 def is_admin(person):
     return person["role"] == "admin"
+
+
+def get_organisation():
+    """
+    Return organisation set up on this instance. It creates it if none exists.
+    """
+    organisation = Organisation.query.first()
+    if organisation is None:
+        organisation = Organisation.create(name="Kitsu")
+    return organisation.present()
+
+
+def update_organisation(organisation_id, data):
+    """
+    Update organisation entry with data given in parameter.
+    """
+    organisation = Organisation.get(organisation_id)
+    organisation.update(data)
+    events.emit("organisation:update", {
+        "organisation_id": organisation_id
+    })
+    return organisation.present()

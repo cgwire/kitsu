@@ -18,7 +18,7 @@ from sqlalchemy.exc import OperationalError, TimeoutError
 from zou.app import app, mail
 from zou.app.mixin import ArgsMixin
 from zou.app.utils import auth
-from zou.app.services import persons_service, auth_service
+from zou.app.services import persons_service, auth_service, events_service
 from zou.app.stores import auth_tokens_store
 from zou.app.services.exception import (
     NoAuthStrategyConfigured,
@@ -129,9 +129,11 @@ class AuthenticatedResource(Resource):
     def get(self):
         try:
             person = persons_service.get_person_by_email(get_jwt_identity())
+            organisation = persons_service.get_organisation()
             return {
                 "authenticated": True,
                 "user": person,
+                "organisation": organisation,
                 "ldap": app.config["AUTH_STRATEGY"] == "auth_remote_ldap"
             }
         except PersonNotFoundException:
@@ -205,15 +207,27 @@ class LoginResource(Resource):
             )
 
             if is_from_browser(request.user_agent):
+                organisation = persons_service.get_organisation()
                 response = jsonify({
                     "user": user,
+                    "organisation": organisation,
                     "ldap": app.config["AUTH_STRATEGY"] == "auth_remote_ldap",
                     "login": True
                 })
                 set_access_cookies(response, access_token)
                 set_refresh_cookies(response, refresh_token)
+                events_service.create_login_log(
+                    user["id"],
+                    request.remote_addr,
+                    "web"
+                )
 
             else:
+                events_service.create_login_log(
+                    user["id"],
+                    request.remote_addr,
+                    "script"
+                )
                 response = {
                     "login": True,
                     "user": user,
