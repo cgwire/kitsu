@@ -229,7 +229,6 @@ const actions = {
   uploadOrganisationLogo ({ commit, state }, formData) {
     return new Promise((resolve, reject) => {
       const organisationId = state.organisation.id
-      console.log(formData)
       peopleApi.postOrganisationLogo(organisationId, formData)
         .then((organisation) => {
           commit(SET_ORGANISATION, { has_avatar: true })
@@ -784,7 +783,6 @@ const mutations = {
   },
 
   [SET_ORGANISATION] (state, organisation) {
-    console.log(organisation.name)
     Object.assign(state.organisation, organisation)
     state.organisation = {...state.organisation}
   },

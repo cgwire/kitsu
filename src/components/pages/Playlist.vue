@@ -64,17 +64,27 @@
               'is-hidden': Object.keys(currentShots).length === 0
             }"
           >
-            <video
-              class="video-player"
-              ref="videoPlayer"
-              src=""
-              @ended="playNext"
-              controls
-            >
-            </video>
-            <p v-if="Object.values(currentShots)[currentShot]">
-            {{ Object.values(currentShots)[currentShot].entity_name }}
-            </p>
+            <div>
+              <video
+                class="video-player"
+                ref="videoPlayer1"
+                src=""
+                @ended="playNext"
+                preload="auto"
+                controls
+              >
+              </video>
+              <video
+                class="video-player"
+                style="display: none"
+                ref="videoPlayer2"
+                src=""
+                @ended="playNext"
+                preload="auto"
+                controls
+              >
+              </video>
+            </div>
           </div>
           <p
             :class="{
@@ -212,6 +222,8 @@ export default {
       currentPlaylist: { name: this.$t('playlists.no_selection') },
       currentShots: {},
       currentShot: 0,
+      currentPlayer: null,
+      nextPlayer: null,
       modals: {
         isDeleteDisplayed: false,
         isEditDisplayed: false
@@ -265,7 +277,7 @@ export default {
     },
 
     player () {
-      return this.$refs.videoPlayer
+      return this.$refs.videoPlayer1
     },
 
     currentPlaylistRoute () {
@@ -508,9 +520,11 @@ export default {
             this.currentShots[shotPreview.shot_id] = {
               id: shotPreview.shot_id,
               name: shot.name,
+              sequence_name: shot.sequence_name,
               entity_name: shot.tasks[0].entity_name,
               preview_files: shotPreview.preview_files,
-              preview_file_id: shotPreview.preview_file_id || shot.preview_file_id
+              preview_file_id: shotPreview.preview_file_id || shot.preview_file_id,
+              preview_file_extension: shotPreview.extension || shot.preview_file_extension
             }
           }
         })
@@ -519,44 +533,98 @@ export default {
 
     getMoviePath () {
       const currentIndex = this.currentShot
-      if (this.currentShots && Object.keys(this.currentShots).length > 0) {
+      if (this.currentShots && this.getShotNumber() > 0) {
         const currentShotId = Object.keys(this.currentShots)[currentIndex]
         const currentShot = this.currentShots[currentShotId]
-        const previewId = currentShot.preview_file_id
+        return this.getShotMoviePath(currentShot)
+      } else {
+        return ''
+      }
+    },
+
+    getShotMoviePath (shot) {
+      if (shot && shot.preview_file_extension === 'mp4') {
+        const previewId = shot.preview_file_id
         return `/api/movies/originals/preview-files/${previewId}.mp4`
       } else {
         return ''
       }
     },
 
-    playNext () {
-      let currentIndex = this.currentShot + 1
-      if (currentIndex >= Object.keys(this.currentShots).length) {
-        currentIndex = 0
+    getNextShotMoviePath () {
+      return this.getShotMoviePath(this.getNextShot())
+    },
+
+    getNextShot () {
+      const index = this.getNextIndex()
+      return this.currentShots[Object.keys(this.currentShots)[index]]
+    },
+
+    getNextIndex () {
+      let initialIndex = this.currentShot
+      let shot = null
+      let index = initialIndex + 1
+      while (
+        (!shot || shot.preview_file_extension !== 'mp4') &&
+        index !== initialIndex
+      ) {
+        if (index >= this.getShotNumber()) index = 0
+        shot = this.currentShots[Object.keys(this.currentShots)[index]]
+        if (shot.preview_file_extension !== 'mp4') index++
       }
-      this.currentShot = currentIndex
-      this.player.src = this.getMoviePath()
-      this.player.play()
+      return index
+    },
+
+    playNext () {
+      this.playShot(this.getNextIndex())
+    },
+
+    getShotNumber () {
+      return Object.keys(this.currentShots).length
     },
 
     configurePlayer () {
       const moviePath = this.getMoviePath()
-      this.player.src = moviePath
-    },
-
-    onPlayerReady (player) {
-      if (this.player) {
-        this.player.on('playlistitem', () => {
-          this.onCurrentShotChange()
-        })
+      if (moviePath) {
+        const player = this.player || this.$refs.videoPlayer1
+        if (player) player.src = moviePath
+        const player2 = this.$refs.videoPlayer2
+        if (player2) player2.src = this.getNextShotMoviePath()
+        this.currentPlayer = player
       }
     },
 
     playShot (shotIndex) {
-      if (this.player) {
-        this.currentShot = shotIndex
-        this.player.src = this.getMoviePath()
-        this.player.play()
+      this.currentShot = shotIndex
+      const moviePath = this.getMoviePath()
+
+      if (moviePath) {
+        const player = this.player || this.$refs.videoPlayer1
+        const player2 = this.$refs.videoPlayer2
+
+        if (!this.currentPlayer) {
+          this.currentPlayer = player
+          this.currentPlayer.src = moviePath
+          this.nextPlayer = player2
+        } else if (this.currentPlayer === player2) {
+          this.currentPlayer = player
+          this.nextPlayer = player2
+        } else {
+          this.currentPlayer = player2
+          this.nextPlayer = player
+        }
+
+        if (this.currentPlayer) {
+          this.nextPlayer.style = 'display: none'
+          this.currentPlayer.style = 'display: block'
+          this.currentPlayer.play()
+          this.nextPlayer.src = this.getNextShotMoviePath()
+        }
+      } else {
+        if (this.currentPlayer) this.currentPlayer.pause()
+        setTimeout(() => {
+          this.playNext()
+        }, 10 * 1000)
       }
     },
 
@@ -781,6 +849,7 @@ span.thumbnail-picture {
 
 .video-wrapper video {
   max-height: calc(100vh - 450px);
+  margin: auto;
 }
 
 .playlist-name {
@@ -797,6 +866,7 @@ span.thumbnail-picture {
   min-height: 150px;
   margin-top: 1em;
   overflow-x: auto;
+  align-items: flex-start;
 }
 
 .addition-column .thumbnail-empty {
