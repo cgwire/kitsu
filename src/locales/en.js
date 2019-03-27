@@ -328,7 +328,8 @@ export default {
     title: 'Your Profile',
     change_avatar: 'Change avatar',
     avatar: {
-      title: 'Change avatar'
+      title: 'Change avatar',
+      error_upload: 'There was an error while uploading picture.'
     },
     change_password: {
       button: 'Change password',

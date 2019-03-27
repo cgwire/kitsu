@@ -61,7 +61,8 @@ export default {
       error: 'Une erreur est survenue pendant la sauvegarde de vos changememts.'
     },
     avatar: {
-      title: 'Changer votre avatar'
+      title: 'Changer votre avatar',
+      error_upload: 'Une erreur est survenue en envoyant l\'image.'
     },
     change_password: {
       button: 'Changez de mot de passe',
