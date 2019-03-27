@@ -197,6 +197,7 @@ const mutations = {
     playlist.shots.push({
       shot_id: shot.id,
       preview_file_id: shot.preview_file_id,
+      preview_file_extension: shot.preview_file_extension,
       preview_files: shot.preview_files
     })
   },

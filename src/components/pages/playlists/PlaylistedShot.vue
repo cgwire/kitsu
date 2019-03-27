@@ -8,14 +8,16 @@
   <div @click.prevent="onPlayClick">
     <entity-thumbnail
       class="shot-thumbnail"
+      :empty-width="150"
+      :empty-height="103"
       :entity="shot"
       :preview-file-id="previewFileId"
     />
   </div>
 
-  <div class="shot-title">{{ shot.entity_name }}</div>
+  <div class="shot-title">{{ shot.sequence_name }} / {{ shot.name }}</div>
 
-  <div class="preview-choice">
+  <div class="preview-choice" v-if="taskTypeOptions.length > 0">
     <combobox
       :options="taskTypeOptions"
       v-model="taskTypeId"
@@ -24,6 +26,9 @@
       :options="previewFileOptions"
       v-model="previewFileId"
     />
+  </div>
+  <div v-else>
+    There is no preview
   </div>
 
   <a class="remove-button" @click.prevent="onRemoveClick">
