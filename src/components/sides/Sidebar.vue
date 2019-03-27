@@ -10,7 +10,14 @@
           <div
             class="company-logo has-text-centered"
           >
-            <img :src="logoPath" />
+            <img
+              :src="logoPath"
+              v-if="organisation && organisation.has_avatar"
+            />
+            <img
+              src="../../assets/kitsu.png"
+              v-else
+            />
           </div>
         </router-link>
 
@@ -126,18 +133,13 @@ export default {
 
     reset () {
       this.title = this.organisation.name
-      if (this.organisation && this.organisation.has_avatar) {
-        this.logoPath = `/api/pictures/thumbnails/organisations/` +
-          `${this.organisation.id}.png?t=` + new Date().toISOString()
-      } else {
-        this.logoPath = '../../assets/kitsu.png'
-      }
+      this.logoPath = `/api/pictures/thumbnails/organisations/` +
+        `${this.organisation.id}.png?t=` + new Date().toISOString()
     }
   },
 
   watch: {
     organisation () {
-      console.log('colo')
       this.reset()
     }
   }
