@@ -366,6 +366,9 @@ class SequencesResource(Resource):
         string.
         """
         criterions = query.get_query_criterions_from_request(request)
+        if "parent_id" in criterions:
+            episode = shots_service.get_episode(criterions["parent_id"])
+            criterions["project_id"] = episode["project_id"]
         user_service.check_project_access(criterions.get("project_id", None))
         return shots_service.get_sequences(criterions)
 
