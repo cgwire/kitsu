@@ -34,11 +34,11 @@
           @click="runConfirmation">
           {{ $t("main.confirmation") }}
         </a>
-        <router-link
-          :to="cancelRoute"
+        <button
+          @click="$emit('cancel')"
           class="button is-link">
           {{ $t("main.cancel") }}
-        </router-link>
+        </button>
       </p>
 
       <p class="error has-text-right info-message" v-if="isError">
@@ -53,8 +53,11 @@
 import Combobox from '../widgets/Combobox'
 import TextField from '../widgets/TextField'
 
+import { modalMixin } from './base_modal'
+
 export default {
   name: 'edit-playlist-modal',
+  mixins: [modalMixin],
   components: {
     Combobox,
     TextField

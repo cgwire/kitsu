@@ -5,47 +5,69 @@
   @click="$emit('click')"
 >
   <plus-icon
-    :class="{
-      icon: true,
-      'is-small': true,
-      'only-icon': !isText
-    }" v-if="icon === 'plus'" />
+    :class="iconClass"
+    v-if="icon === 'plus'"
+  />
+  <message-square-icon
+    :class="iconClass"
+    v-if="icon === 'comment'"
+  />
   <download-icon
-    :class="{
-      icon: true,
-      'is-small': true,
-      'only-icon': !isText
-    }" v-if="icon === 'download'" />
+    :class="iconClass"
+    v-if="icon === 'download'"
+  />
   <upload-icon
-    :class="{
-      icon: true,
-      'is-small': true,
-      'only-icon': !isText
-    }" v-if="icon === 'upload'" />
+    :class="iconClass"
+    v-if="icon === 'upload'"
+  />
+  <film-icon
+    :class="iconClass"
+    v-if="icon === 'film'"
+  />
+  <play-icon
+    :class="iconClass"
+    v-if="icon === 'play'"
+  />
+  <pause-icon
+    :class="iconClass"
+    v-if="icon === 'pause'"
+  />
   <edit-icon
-    :class="{
-      icon: true,
-      'is-small': true,
-      'only-icon': !isText
-    }" v-if="icon === 'edit'" />
+    :class="iconClass"
+    v-if="icon === 'edit'"
+  />
   <image-icon
-    :class="{
-      icon: true,
-      'is-small': true,
-      'only-icon': !isText
-    }" v-if="icon === 'image'" />
+    :class="iconClass"
+    v-if="icon === 'image'"
+  />
+  <maximize-icon
+    :class="iconClass"
+    v-if="icon === 'maximize'"
+  />
   <trash-icon
-    :class="{
-      icon: true,
-      'is-small': true,
-      'only-icon': !isText
-    }" v-if="icon === 'delete'" />
+    :class="iconClass"
+    v-if="icon === 'delete'"
+  />
   <rotate-ccw-icon
-    :class="{
-      icon: true,
-      'is-small': true,
-      'only-icon': !isText
-    }" v-if="icon === 'restore'" />
+    :class="iconClass"
+    v-if="icon === 'restore'"
+  />
+  <skip-back-icon
+    :class="iconClass"
+    v-if="icon === 'back'"
+  />
+  <skip-forward-icon
+    :class="iconClass"
+    v-if="icon === 'forward'"
+  />
+  <chevron-left-icon
+    :class="iconClass"
+    v-if="icon === 'left'"
+  />
+  <chevron-right-icon
+    :class="iconClass"
+    v-if="icon === 'right'"
+  />
 
   <span
     :class="{
@@ -61,11 +83,20 @@
 
 <script>
 import {
+  ChevronLeftIcon,
+  ChevronRightIcon,
   DownloadIcon,
   EditIcon,
+  FilmIcon,
   ImageIcon,
+  MaximizeIcon,
+  MessageSquareIcon,
+  PauseIcon,
+  PlayIcon,
   PlusIcon,
   RotateCcwIcon,
+  SkipBackIcon,
+  SkipForwardIcon,
   TrashIcon,
   UploadIcon
 } from 'vue-feather-icons'
@@ -73,14 +104,24 @@ import {
 export default {
   name: 'button-simple',
   components: {
+    ChevronLeftIcon,
+    ChevronRightIcon,
     DownloadIcon,
     EditIcon,
+    FilmIcon,
     ImageIcon,
+    MaximizeIcon,
+    MessageSquareIcon,
+    PauseIcon,
+    PlayIcon,
     PlusIcon,
     RotateCcwIcon,
+    SkipBackIcon,
+    SkipForwardIcon,
     TrashIcon,
     UploadIcon
   },
+
   props: {
     icon: {
       default: '',
@@ -99,16 +140,25 @@ export default {
       type: String
     }
   },
+
   computed: {
     isText () {
       return this.text && this.text.length > 0
+    },
+
+    iconClass () {
+      return {
+        icon: true,
+        'is-small': true,
+        'only-icon': !this.isText
+      }
     }
   }
 }
 </script>
 
 <style lang="scss" scoped>
-.button .icon.is-small.only-icon {
+.icon.is-small.only-icon {
   margin-right: 0;
 }
 </style>
