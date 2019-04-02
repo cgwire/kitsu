@@ -235,6 +235,7 @@ export default {
     hide_infos: 'Cacher informations additionnelles',
     my_tasks: 'Mes tâches',
     no_preview: 'Il n\'y a pas de préviz pour cette tâche.',
+    no_task_selected: 'Pas de tâche sélectionnée',
     no_comment: 'Il n\'y a pas de commentaires pour cette tâche.',
     no_assignation_right: 'vous n\'êtes pas autorisé à gérer les assigations.',
     next: 'Suivante',

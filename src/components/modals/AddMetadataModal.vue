@@ -72,7 +72,7 @@
         :is-loading="isLoading"
         :is-disabled="!isFormFilled"
         @confirm="confirm"
-        @cancel="console.log('otot') ; $emit('cancel')"
+        @cancel="$emit('cancel')"
       />
     </div>
   </div>

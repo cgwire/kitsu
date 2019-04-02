@@ -9,6 +9,7 @@
             'is-loading': loading.addPlaylist
           }"
           @click="addPlaylist"
+          v-if="isCurrentUserManager"
         >
           <plus-icon class="icon is-small" />
           {{ $t('playlists.new_playlist') }}
@@ -35,84 +36,19 @@
       </div>
 
       <div class="playlist-column column">
-        <div class="playlist-header flexrow">
-          <div class="flexrow-item playlist-name">
-            {{ currentPlaylist.name }}
-          </div>
-          <div class="flexrow-item">
-            <button-link
-              :path="editPath"
-              class="edit-button"
-              icon="edit"
-              v-if="currentPlaylist.id"
-            />
-          </div>
-          <div class="flexrow-item">
-            <button-link
-              :path="deletePath"
-              class="delete-button"
-              icon="delete"
-              v-if="currentPlaylist.id"
-            />
-          </div>
-        </div>
-
-        <div class="has-text-centered player">
-          <div
-            :class="{
-              'video-wrapper': true,
-              'is-hidden': Object.keys(currentShots).length === 0
-            }"
-          >
-            <div>
-              <video
-                class="video-player"
-                ref="videoPlayer1"
-                src=""
-                @ended="playNext"
-                preload="auto"
-                controls
-              >
-              </video>
-              <video
-                class="video-player"
-                style="display: none"
-                ref="videoPlayer2"
-                src=""
-                @ended="playNext"
-                preload="auto"
-                controls
-              >
-              </video>
-            </div>
-          </div>
-          <p
-            :class="{
-              'is-hidden': Object.keys(currentShots).length > 0 || !currentPlaylist.id
-            }"
-          >
-            {{ $t('playlists.select_shot') }}
-          </p>
-        </div>
-        <div class="playlisted-shots flexrow">
-          <div
-            class="flexrow-item has-text-centered"
-            :key="shot.id"
-            v-for="(shot, index) in playlistedShots"
-          >
-            <playlisted-shot
-              :index="index"
-              :shot="shot"
-              :is-playing="currentShot === index"
-              @play-click="playShot"
-              @remove-click="removeShot"
-              @preview-changed="onPreviewChanged"
-            />
-          </div>
-        </div>
+        <playlist-player
+          :playlist="currentPlaylist"
+          :shots="currentShots"
+          @preview-changed="onPreviewChanged"
+          @playlist-deleted="goFirstPlaylist"
+          @remove-shot="removeShot"
+        />
       </div>
 
-      <div class="addition-column column">
+      <div
+        class="addition-column column"
+        v-if="isCurrentUserManager"
+      >
         <spinner v-if="isShotsLoading" />
         <div v-else>
           <div class="addition-header">
@@ -159,25 +95,6 @@
         </div>
       </div>
     </div>
-
-    <edit-playlist-modal
-      :active="modals.isEditDisplayed"
-      :is-loading="loading.editPlaylist"
-      :is-error="errors.editError"
-      :cancel-route="currentPlaylistRoute"
-      :playlist-to-edit="currentPlaylist"
-      @confirm="runEditPlaylist"
-    />
-
-    <delete-modal
-      :active="modals.isDeleteDisplayed"
-      :is-loading="loading.deletePlaylist"
-      :is-error="errors.deletePlaylist"
-      :cancel-route="currentPlaylistRoute"
-      :text="deleteText"
-      :error-text="$t('playlists.delete_error')"
-      @confirm="removePlaylist"
-    />
   </div>
 </template>
 <script>
@@ -188,14 +105,12 @@ import { PlusIcon } from 'vue-feather-icons'
 
 import ButtonLink from '../widgets/ButtonLink'
 import Combobox from '../widgets/Combobox'
-import DeleteModal from '../widgets/DeleteModal'
-import EditPlaylistModal from '../modals/EditPlaylistModal'
 import EntityThumbnail from '../widgets/EntityThumbnail'
 import ErrorText from '../widgets/ErrorText'
 import PageSubtitle from '../widgets/PageSubtitle'
-import PageTitle from '../widgets/PageTitle'
-import PlaylistedShot from './playlists/PlaylistedShot'
 import Spinner from '../widgets/Spinner'
+
+import PlaylistPlayer from './playlists/PlaylistPlayer'
 
 export default {
   name: 'productions',
@@ -203,13 +118,10 @@ export default {
   components: {
     ButtonLink,
     Combobox,
-    DeleteModal,
-    EditPlaylistModal,
     EntityThumbnail,
     ErrorText,
     PageSubtitle,
-    PageTitle,
-    PlaylistedShot,
+    PlaylistPlayer,
     PlusIcon,
     Spinner
   },
@@ -222,8 +134,6 @@ export default {
       currentPlaylist: { name: this.$t('playlists.no_selection') },
       currentShots: {},
       currentShot: 0,
-      currentPlayer: null,
-      nextPlayer: null,
       modals: {
         isDeleteDisplayed: false,
         isEditDisplayed: false
@@ -237,11 +147,6 @@ export default {
         playlistLoading: false,
         addPlaylist: false,
         deletePlaylist: false
-      },
-      playerOptions: {
-        muted: true,
-        fluid: true,
-        sources: []
       }
     }
   },
@@ -254,6 +159,7 @@ export default {
       'getEpisodeOptions',
       'isShotsLoading',
       'isTVShow',
+      'isCurrentUserManager',
       'playlistMap',
       'playlists',
       'playlistsPath',
@@ -262,22 +168,8 @@ export default {
       'taskTypeMap'
     ]),
 
-    deleteText () {
-      if (this.currentPlaylist) {
-        return this.$t('playlists.delete_text', {
-          name: this.currentPlaylist.name
-        })
-      } else {
-        return ''
-      }
-    },
-
     playlistedShots () {
       return Object.values(this.currentShots)
-    },
-
-    player () {
-      return this.$refs.videoPlayer1
     },
 
     currentPlaylistRoute () {
@@ -286,25 +178,6 @@ export default {
       } else {
         return this.playlistsPath
       }
-    },
-
-    currentMovieSrc () {
-      if (this.currentShots.length > 0) {
-        const currentIndex = this.currentShot
-        const currentShot = this.currentShots[currentIndex]
-        const previewId = currentShot.preview_file_id
-        return `/api/movies/originals/preview-files/${previewId}.mp4`
-      } else {
-        return ''
-      }
-    },
-
-    editPath () {
-      return this.getPlaylistPath(this.currentPlaylist.id, 'edit')
-    },
-
-    deletePath () {
-      return this.getPlaylistPath(this.currentPlaylist.id, 'delete')
     }
   },
 
@@ -333,10 +206,8 @@ export default {
     },
 
     resetPlaylist () {
-      this.handleModalsDisplay()
       this.clearCurrentPlaylist()
       this.setCurrentPlaylist()
-      this.configurePlayer()
     },
 
     addPlaylist () {
@@ -357,22 +228,6 @@ export default {
           if (err) this.errors.addPlaylist = true
           this.$router.push(this.getPlaylistPath(playlist.id))
           this.loading.addPlaylist = false
-        }
-      })
-    },
-
-    runEditPlaylist (form) {
-      this.loading.editPlaylist = true
-      this.errors.editPlaylist = false
-      this.editPlaylist({
-        data: {
-          name: form.name,
-          id: this.currentPlaylist.id
-        },
-        callback: (err) => {
-          if (err) this.errors.editPlaylist = true
-          this.loading.editPlaylist = false
-          this.$router.push(this.currentPlaylistRoute)
         }
       })
     },
@@ -400,7 +255,6 @@ export default {
             if (err) console.log(err)
             this.currentPlaylist = playlist
             this.rebuildCurrentShots()
-            this.configurePlayer()
             if (callback) callback()
           }
         })
@@ -409,7 +263,6 @@ export default {
           name: this.$t('playlists.no_selection')
         }
         this.currentShots = {}
-        this.handleModalsDisplay()
       }
     },
 
@@ -424,17 +277,6 @@ export default {
         })
       } else {
         this.$router.push(this.playlistsPath)
-      }
-    },
-
-    handleModalsDisplay () {
-      const path = this.$store.state.route.path
-      this.modals.isDeleteDisplayed = false
-      this.modals.isEditDisplayed = false
-      if (path.indexOf('delete') > 0) {
-        this.modals.isDeleteDisplayed = true
-      } else if (path.indexOf('edit') > 0) {
-        this.modals.isEditDisplayed = true
       }
     },
 
@@ -478,7 +320,6 @@ export default {
               shot,
               callback: () => {
                 this.rebuildCurrentShots()
-                this.configurePlayer()
               }
             })
           }
@@ -492,10 +333,8 @@ export default {
           playlist: this.currentPlaylist,
           shot,
           callback: () => {
-            this.currentShots = {}
-            setTimeout(() => {
-              this.rebuildCurrentShots()
-            }, 100)
+            delete this.currentShots[shot.id]
+            this.currentShots = {...this.currentShots}
           }
         })
       }
@@ -508,7 +347,6 @@ export default {
         previewFileId
       })
       this.rebuildCurrentShots()
-      this.configurePlayer()
     },
 
     rebuildCurrentShots () {
@@ -524,108 +362,16 @@ export default {
               entity_name: shot.tasks[0].entity_name,
               preview_files: shotPreview.preview_files,
               preview_file_id: shotPreview.preview_file_id || shot.preview_file_id,
-              preview_file_extension: shotPreview.extension || shot.preview_file_extension
+              preview_file_extension: shotPreview.extension || shot.preview_file_extension,
+              preview_file_task_id: shotPreview.task_id || shot.preview_file_task_id
             }
           }
         })
       }
     },
 
-    getMoviePath () {
-      const currentIndex = this.currentShot
-      if (this.currentShots && this.getShotNumber() > 0) {
-        const currentShotId = Object.keys(this.currentShots)[currentIndex]
-        const currentShot = this.currentShots[currentShotId]
-        return this.getShotMoviePath(currentShot)
-      } else {
-        return ''
-      }
-    },
-
-    getShotMoviePath (shot) {
-      if (shot && shot.preview_file_extension === 'mp4') {
-        const previewId = shot.preview_file_id
-        return `/api/movies/originals/preview-files/${previewId}.mp4`
-      } else {
-        return ''
-      }
-    },
-
-    getNextShotMoviePath () {
-      return this.getShotMoviePath(this.getNextShot())
-    },
-
-    getNextShot () {
-      const index = this.getNextIndex()
-      return this.currentShots[Object.keys(this.currentShots)[index]]
-    },
-
-    getNextIndex () {
-      let initialIndex = this.currentShot
-      let shot = null
-      let index = initialIndex + 1
-      while (
-        (!shot || shot.preview_file_extension !== 'mp4') &&
-        index !== initialIndex
-      ) {
-        if (index >= this.getShotNumber()) index = 0
-        shot = this.currentShots[Object.keys(this.currentShots)[index]]
-        if (shot.preview_file_extension !== 'mp4') index++
-      }
-      return index
-    },
-
-    playNext () {
-      this.playShot(this.getNextIndex())
-    },
-
     getShotNumber () {
       return Object.keys(this.currentShots).length
-    },
-
-    configurePlayer () {
-      const moviePath = this.getMoviePath()
-      if (moviePath) {
-        const player = this.player || this.$refs.videoPlayer1
-        if (player) player.src = moviePath
-        const player2 = this.$refs.videoPlayer2
-        if (player2) player2.src = this.getNextShotMoviePath()
-        this.currentPlayer = player
-      }
-    },
-
-    playShot (shotIndex) {
-      this.currentShot = shotIndex
-      const moviePath = this.getMoviePath()
-
-      if (moviePath) {
-        const player = this.player || this.$refs.videoPlayer1
-        const player2 = this.$refs.videoPlayer2
-
-        if (!this.currentPlayer) {
-          this.currentPlayer = player
-          this.currentPlayer.src = moviePath
-          this.nextPlayer = player2
-        } else if (this.currentPlayer === player2) {
-          this.currentPlayer = player
-          this.nextPlayer = player2
-        } else {
-          this.currentPlayer = player2
-          this.nextPlayer = player
-        }
-
-        if (this.currentPlayer) {
-          this.nextPlayer.style = 'display: none'
-          this.currentPlayer.style = 'display: block'
-          this.currentPlayer.play()
-          this.nextPlayer.src = this.getNextShotMoviePath()
-        }
-      } else {
-        if (this.currentPlayer) this.currentPlayer.pause()
-        setTimeout(() => {
-          this.playNext()
-        }, 10 * 1000)
-      }
     },
 
     loadShotsData (callback) {
@@ -645,7 +391,6 @@ export default {
         if (err) this.errors.loadPlaylists = true
         this.loading.playlists = false
         if (!err) {
-          this.handleModalsDisplay()
           this.setCurrentPlaylist(() => {
             if (!this.currentPlaylist || !this.currentPlaylist.id) {
               this.goFirstPlaylist()
@@ -684,9 +429,7 @@ export default {
 
   watch: {
     $route () {
-      this.setCurrentPlaylist(() => {
-        this.handleModalsDisplay()
-      })
+      this.setCurrentPlaylist()
     },
 
     sequenceId () {
@@ -729,27 +472,29 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-.dark .playlist-item {
-  background: #46494F;
-  box-shadow: 0px 0px 6px #333;
-  border-color: $dark-grey;
-  color: $white-grey;
-}
+.dark {
+  .playlist-item {
+    background: #46494F;
+    box-shadow: 0px 0px 6px #333;
+    border-color: $dark-grey;
+    color: $white-grey;
+  }
 
-.dark .playlist-list-column {
-  background: $dark-grey-light;
-  border-color: $dark-grey;
-  box-shadow: 0px 0px 6px #333;
-}
+  .playlist-list-column {
+    background: $dark-grey-light;
+    border-color: $dark-grey;
+    box-shadow: 0px 0px 6px #333;
+  }
 
-.dark .addition-column {
-  background: $dark-grey-light;
-  border-left: 1px solid $dark-grey;
-  box-shadow: 0px 0px 6px #333;
-}
+  .addition-column {
+    background: $dark-grey-light;
+    border-left: 1px solid $dark-grey;
+    box-shadow: 0px 0px 6px #333;
+  }
 
-.dark span.thumbnail-picture {
-  box-shadow: 0px 0px 6px #333;
+  span.thumbnail-picture {
+    box-shadow: 0px 0px 6px #333;
+  }
 }
 
 .page {
@@ -759,15 +504,10 @@ export default {
   padding-bottom: 0;
 }
 
-.columns {
+.page .columns {
   margin-bottom: 0;
   overflow-y: auto;
   flex: 1;
-}
-
-.title {
-  border-bottom: 2px solid #DDD;
-  padding-bottom: 7px;
 }
 
 .playlist-list-column {
@@ -822,51 +562,14 @@ span.thumbnail-picture {
 }
 
 .playlist-column {
-  padding: 2em 1.5em 1.5em 1.5em;
-  display: flex;
-  flex-direction: column;
+  margin-top: 10px;
+  padding: 0;
   overflow: hidden;
   flex: 1;
 }
 
 .playlist-list-column .button {
   width: 100%;
-}
-
-.playlist-header {
-  align-items: center;
-  border-bottom: 1px solid $light-grey;
-  padding-bottom: 0.5em;
-  margin-bottom: 1em;
-  min-height: 50px;
-}
-
-.video-wrapper {
-  display: flex;
-  flex: 1;
-  flex-direction: column;
-}
-
-.video-wrapper video {
-  max-height: calc(100vh - 450px);
-  margin: auto;
-}
-
-.playlist-name {
-  flex: 1;
-  font-size: 1.5em;
-}
-
-.player {
-  flex: 1;
-  overflow-y: hidden;
-}
-
-.playlisted-shots {
-  min-height: 150px;
-  margin-top: 1em;
-  overflow-x: auto;
-  align-items: flex-start;
 }
 
 .addition-column .thumbnail-empty {

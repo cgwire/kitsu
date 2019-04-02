@@ -13,6 +13,7 @@
       <select
         class="select-input"
         ref="select"
+        :disabled="disabled"
         @keyup.enter="emitEnter()"
         @change="updateValue"
       >
@@ -79,6 +80,10 @@ export default {
     isSimple: {
       default: false,
       type: Boolean
+    },
+    disabled: {
+      default: false,
+      type: Boolean
     }
   },
 
@@ -105,6 +110,11 @@ export default {
 </script>
 
 <style lang="scss" scoped>
+.dark select:disabled {
+  background: $dark-grey;
+  border-color: $dark-grey-strong;
+}
+
 .is-top select {
   font-size: 1.2em;
   border: 0;

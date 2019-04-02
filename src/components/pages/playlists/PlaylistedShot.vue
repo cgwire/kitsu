@@ -5,7 +5,15 @@
     playing: isPlaying
   }"
 >
-  <div @click.prevent="onPlayClick">
+  <div class="thumbnail-wrapper" @click.prevent="onPlayClick">
+    <span
+      class="remove-button flexrow-item"
+      :title="$t('playlists.remove')"
+      @click.prevent="onRemoveClick"
+      v-if="isCurrentUserManager"
+    >
+    X
+    </span>
     <entity-thumbnail
       class="shot-thumbnail"
       :empty-width="150"
@@ -18,27 +26,32 @@
   <div class="shot-title">{{ shot.sequence_name }} / {{ shot.name }}</div>
 
   <div class="preview-choice" v-if="taskTypeOptions.length > 0">
-    <combobox
-      :options="taskTypeOptions"
-      v-model="taskTypeId"
-    />
-    <combobox
-      :options="previewFileOptions"
-      v-model="previewFileId"
-    />
+    <div>
+      <combobox
+        :options="taskTypeOptions"
+        :disabled="!isCurrentUserManager"
+        v-model="taskTypeId"
+      />
+    </div>
+    <div class="flexrow">
+      <combobox
+        class="flexrow-item"
+        :options="previewFileOptions"
+        :disabled="!isCurrentUserManager"
+        v-model="previewFileId"
+      />
+      <span class="filler"></span>
+    </div>
   </div>
   <div v-else>
     There is no preview
   </div>
-
-  <a class="remove-button" @click.prevent="onRemoveClick">
-    {{ $t('playlists.remove') }}
-  </a>
 </div>
 </template>
 
 <script>
 import { mapGetters } from 'vuex'
+import ButtonSimple from '../../widgets/ButtonSimple'
 import Combobox from '../../widgets/Combobox'
 import EntityThumbnail from '../../widgets/EntityThumbnail'
 
@@ -46,6 +59,7 @@ export default {
   name: 'playlisted-shot',
 
   components: {
+    ButtonSimple,
     Combobox,
     EntityThumbnail
   },
@@ -74,7 +88,8 @@ export default {
 
   computed: {
     ...mapGetters([
-      'taskTypeMap'
+      'taskTypeMap',
+      'isCurrentUserManager'
     ]),
 
     taskTypeOptions () {
@@ -113,8 +128,10 @@ export default {
       this.$emit('play-click', this.index)
     },
 
-    onRemoveClick () {
-      this.$emit('remove-click', this.shot)
+    onRemoveClick (event) {
+      event.preventDefault()
+      event.stopPropagation()
+      this.$emit('remove-shot', this.shot)
     }
   },
 
@@ -129,7 +146,9 @@ export default {
             return previewFile.id === this.shot.preview_file_id
           })
         })
-      } else {
+      }
+
+      if (!this.taskTypeId) {
         this.taskTypeId = taskTypeIds[0]
       }
     }
@@ -139,8 +158,11 @@ export default {
     taskTypeId () {
       const previewFiles = this.shot.preview_files[this.taskTypeId]
       if (previewFiles && previewFiles.length > 0) {
-        if (!this.previewFileId) {
-          this.previewFileId = this.shot.preview_file_id || previewFiles[0].id
+        const isPreviewFile = previewFiles.some(previewFile => {
+          return previewFile.id === this.shot.preview_file_id
+        })
+        if (isPreviewFile) {
+          this.previewFileId = this.shot.preview_file_id
         } else {
           this.previewFileId = previewFiles[0].id
         }
@@ -156,28 +178,45 @@ export default {
 
 <style lang="scss" scoped>
 .playlisted-shot {
+  border-top: 3px solid transparent;
   display: flex;
   flex-direction: column;
-  padding-top: 5px;
-  border-top: 3px solid transparent;
-}
+  min-width: 150px;
+  padding:0;
 
-.playlisted-shot.playing {
-  border-top: 3px solid #CADFCA;
+  &.playing {
+    border-top: 3px solid $green;
+  }
 }
 
 .field {
-  margin-bottom: 0.2em;
+  margin-bottom: 0;
 }
 
 .shot-title {
   margin-bottom: 0.6em;
 }
 
+.thumbnail-wrapper {
+  position: relative;
+}
+
 .remove-button {
-  margin-top: 0.1em;
-  color: #AAA;
-  text-align: left;
-  font-size: 0.9em
+  position: absolute;
+  border-radius: 2em;
+  width: 20px;
+  height: 20px;
+  right: 0;
+  font-size: 10px;
+  padding: 0.2em;
+  margin: 0.4em;
+  background: rgba(0, 0, 0, 0.3);
+  text-align: center;
+  cursor: pointer;
+  z-index: 100;
+
+  &:hover {
+    background: rgba(0, 0, 0, 0.2);
+  }
 }
 </style>
