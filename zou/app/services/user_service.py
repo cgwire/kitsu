@@ -276,9 +276,9 @@ def check_working_on_entity(entity_id):
     """
     Return True if user has task assigned which is related to given entity.
     """
-    current_user = persons_service.get_current_service()
+    current_user = persons_service.get_current_user_raw()
     query = Task.query \
-        .filter(Task.id == current_user["id"]) \
+        .filter(Task.assignees.contains(current_user)) \
         .filter(Task.entity_id == entity_id)
 
     if query.first() is None:
