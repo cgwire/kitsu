@@ -126,16 +126,27 @@ export default {
   border-color: $dark-grey-light;
 }
 
+.thumbnail-picture {
+  margin: 0;
+}
+
 span.thumbnail-empty {
   background: $white-grey;
   display: block;
-  margin-bottom: 0.3em;
-  margin-top: 7px;
-  margin-bottom: 7px;
+  margin: 0;
 }
 
 .thumbnail-picture.square {
   width: 100px;
   height: 100px;
 }
+
+table .thumbnail-picture.thumbnail-empty {
+  margin: 5px;
+}
+
+table .thumbnail-picture {
+  margin: 7px 5px 0 5px;
+}
+
 </style>
