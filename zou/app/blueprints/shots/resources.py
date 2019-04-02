@@ -88,6 +88,8 @@ class ShotsResource(Resource):
         if "sequence_id" in criterions:
             sequence = shots_service.get_sequence(criterions["sequence_id"])
             criterions["project_id"] = sequence["project_id"]
+            criterions["parent_id"] = sequence["id"]
+            del criterions["sequence_id"]
         user_service.check_project_access(criterions.get("project_id", None))
         return shots_service.get_shots(criterions)
 
@@ -366,6 +368,11 @@ class SequencesResource(Resource):
         string.
         """
         criterions = query.get_query_criterions_from_request(request)
+        if "episode_id" in criterions:
+            episode = shots_service.get_episode(criterions["episode_id"])
+            criterions["project_id"] = episode["project_id"]
+            criterions["parent_id"] = episode["id"]
+            del criterions["episode_id"]
         user_service.check_project_access(criterions.get("project_id", None))
         return shots_service.get_sequences(criterions)
 
