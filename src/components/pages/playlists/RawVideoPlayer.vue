@@ -96,6 +96,10 @@ export default {
       return i
     },
 
+    clear () {
+      if (this.currentPlayer) this.currentPlayer.src = ''
+    },
+
     goPreviousFrame () {
       let newTime = this.currentPlayer.currentTime - 1 / 25
       if (newTime < 0) {
@@ -183,7 +187,7 @@ export default {
     },
 
     setCurrentTime (currentTime) {
-      this.currentPlayer.currentTime = currentTime
+      if (this.currentPlayer) this.currentPlayer.currentTime = currentTime
     },
 
     switchPlayers () {

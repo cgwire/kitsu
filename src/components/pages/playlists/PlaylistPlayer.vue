@@ -656,6 +656,12 @@ export default {
       this.shotList = Object.values(this.shots)
       this.playingShotIndex = 0
       this.updateTaskPanel()
+      if (this.shotList.length === 0) {
+        this.rawPlayer.clear(0)
+        this.rawPlayer.setCurrentTime(0)
+        this.maxDurationRaw = 0
+        this.maxDuration = '00:00.00'
+      }
     }
   }
 }
