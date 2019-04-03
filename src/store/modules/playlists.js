@@ -190,6 +190,20 @@ const mutations = {
     const shotToChange = playlist.shots.find(
       (playlistShot) => playlistShot.shot_id === shot.id)
     shotToChange.preview_files = previewFiles
+    const previewFileList = []
+    const previewFileMap = {}
+    Object.keys(previewFiles).forEach(taskTypeId => {
+      previewFiles[taskTypeId].forEach(previewFile => {
+        previewFileList.push(previewFile)
+        previewFileMap[previewFile.id] = previewFile
+      })
+    })
+    if (previewFileList.length > 0) {
+      let preview = previewFileMap[shot.preview_file_id]
+      if (!preview) preview = previewFileList[0]
+      shot.preview_file_id = preview.id
+      shot.preview_file_extension = preview.extension
+    }
   },
 
   [ADD_SHOT_TO_PLAYLIST] (state, {playlist, shot}) {
