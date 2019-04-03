@@ -535,17 +535,27 @@ export default {
 
 .addition-column {
   max-width: 200px;
+  margin-right: 12px;
+  padding: 0;
   background: #F4F5F9;
   overflow-y: auto;
   border-left: 1px solid #DDD;
   box-shadow: 0px 0px 6px #F0F0F0;
+  overflow-y: scroll;
 }
 
 .addition-shot {
+  padding: 0;
   cursor: pointer;
   text-align: center;
-  margin-bottom: 0.5em;
-  opacity: 0.5
+  margin: 0 0 0.5em 0;
+  opacity: 0.5;
+  display: flex;
+  flex-direction: column;
+}
+
+.addition-shot a {
+  margin: auto;
 }
 
 .addition-shot:hover {

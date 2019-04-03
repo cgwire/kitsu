@@ -246,14 +246,12 @@ export default {
     this.shotList = Object.values(this.shots)
     setTimeout(() => {
       window.addEventListener('keydown', this.onKeyDown, false)
-      window.addEventListener('resize', this.onWindowResize)
       this.$el.onmousemove = this.onMouseMove
     }, 0)
   },
 
   beforeDestroy () {
     window.removeEventListener('keydown', this.onKeyDown)
-    window.removeEventListener('resize', this.onWindowResize)
   },
 
   computed: {
@@ -551,17 +549,6 @@ export default {
       }
     },
 
-    onWindowResize (callback) {
-      const now = (new Date().getTime())
-      this.lastCall = this.lastCall || 0
-      if (now - this.lastCall > 600) {
-        this.lastCall = now
-        this.$nextTick(() => {
-          if (callback && typeof callback === 'function') callback()
-        })
-      }
-    },
-
     onKeyDown (event) {
       this.displayBars()
       if (!['INPUT', 'TEXTAREA'].includes(event.target.tagName)) {
@@ -604,7 +591,11 @@ export default {
     },
 
     onTimeUpdate () {
-      this.currentTimeRaw = this.rawPlayer.currentPlayer.currentTime
+      if (this.rawPlayer.currentPlayer) {
+        this.currentTimeRaw = this.rawPlayer.currentPlayer.currentTime
+      } else {
+        this.currentTimeRaw = 0
+      }
       this.currentTime = this.formatTime(this.currentTimeRaw)
       this.updateProgressBar()
     },
@@ -655,10 +646,11 @@ export default {
     shots () {
       this.shotList = Object.values(this.shots)
       this.playingShotIndex = 0
+      this.pause()
+      this.rawPlayer.setCurrentTime(0)
       this.updateTaskPanel()
       if (this.shotList.length === 0) {
-        this.rawPlayer.clear(0)
-        this.rawPlayer.setCurrentTime(0)
+        this.rawPlayer.clear()
         this.maxDurationRaw = 0
         this.maxDuration = '00:00.00'
       }

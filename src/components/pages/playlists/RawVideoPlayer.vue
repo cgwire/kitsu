@@ -158,7 +158,7 @@ export default {
     },
 
     pause () {
-      this.currentPlayer.pause()
+      if (this.currentPlayer) this.currentPlayer.pause()
       this.isPlaying = false
     },
 
@@ -180,10 +180,23 @@ export default {
       this.updateMaxDuration()
     },
 
+    /*
+    onWindowResize () {
+      const now = (new Date().getTime())
+      this.lastCall = this.lastCall || 0
+      if (now - this.lastCall > 600) {
+        this.lastCall = now
+        this.$nextTick(this.resetHeight)
+      }
+    },
+    */
+
     resetHeight () {
-      let height = this.container.offsetHeight
-      if (this.currentPlayer) this.currentPlayer.style.height = `${height}px`
-      if (this.nextPlayer) this.nextPlayer.style.height = `${height}px`
+      this.$nextTick(() => {
+        let height = this.container.offsetHeight
+        if (this.currentPlayer) this.currentPlayer.style.height = `${height}px`
+        if (this.nextPlayer) this.nextPlayer.style.height = `${height}px`
+      })
     },
 
     setCurrentTime (currentTime) {
@@ -213,7 +226,11 @@ export default {
 
   watch: {
     shots () {
-      if (this.shots.length > 0) this.loadShot(0)
+      if (this.shots.length > 0) {
+        this.loadShot(0)
+        this.pause()
+        this.setCurrentTime(0)
+      }
       setTimeout(this.resetHeight, 300)
     }
   }
@@ -223,5 +240,9 @@ export default {
 <style lang="scss" scoped>
 .video-wrapper {
   height: 100%;
+}
+
+.container {
+  max-height: 100%;
 }
 </style>

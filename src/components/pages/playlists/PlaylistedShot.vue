@@ -51,6 +51,8 @@
 
 <script>
 import { mapGetters } from 'vuex'
+import firstBy from 'thenby'
+
 import ButtonSimple from '../../widgets/ButtonSimple'
 import Combobox from '../../widgets/Combobox'
 import EntityThumbnail from '../../widgets/EntityThumbnail'
@@ -93,15 +95,16 @@ export default {
     ]),
 
     taskTypeOptions () {
-      const taskTypeIds = Object.keys(this.shot.preview_files)
-
-      return taskTypeIds.map((taskTypeId) => {
-        const taskType = this.taskTypeMap[taskTypeId]
-        return {
-          label: taskType.name,
-          value: taskType.id
-        }
-      })
+      return Object
+        .keys(this.shot.preview_files)
+        .map(id => this.taskTypeMap[id])
+        .sort(firstBy('priority', -1).thenBy('name'))
+        .map((taskType) => {
+          return {
+            label: taskType.name,
+            value: taskType.id
+          }
+        })
     },
 
     previewFileOptions () {
