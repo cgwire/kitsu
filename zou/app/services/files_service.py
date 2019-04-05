@@ -5,6 +5,7 @@ from zou.app.models.working_file import WorkingFile
 from zou.app.models.output_file import OutputFile
 from zou.app.models.output_type import OutputType
 from zou.app.models.preview_file import PreviewFile
+from zou.app.models.project import Project
 from zou.app.models.software import Software
 from zou.app.models.task import Task
 
@@ -634,3 +635,13 @@ def remove_preview_file(preview_file_id):
         "preview_file_id": preview_file_id
     })
     return preview_file.serialize()
+
+
+def get_project_from_preview_file(preview_file_id):
+    """
+    Get project dict of related preview file.
+    """
+    preview_file = get_preview_file_raw(preview_file_id)
+    task = Task.get(preview_file.task_id)
+    project = Project.get(task.project_id)
+    return project.serialize()
