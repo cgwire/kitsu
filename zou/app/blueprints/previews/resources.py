@@ -165,7 +165,8 @@ class CreatePreviewFilePictureResource(Resource):
         elif extension in ALLOWED_MOVIE_EXTENSION:
             try:
                 self.save_movie_preview(instance_id, uploaded_file)
-            except:
+            except Exception as e:
+                current_app.logger.error(e)
                 current_app.logger.info("Normalization failed.")
                 deletion_service.remove_preview_file_by_id(instance_id)
                 abort(400, "Normalization failed.")
@@ -210,12 +211,19 @@ class CreatePreviewFilePictureResource(Resource):
         everything in the file storage.
         """
         tmp_folder = current_app.config["TMP_DIR"]
+        fps = "24.00"
         uploaded_movie_path = movie_utils.save_file(
             tmp_folder,
             instance_id,
             uploaded_file
         )
-        normalized_movie_path = movie_utils.normalize_movie(uploaded_movie_path)
+        project = files_service.get_project_from_preview_file(instance_id)
+        if project["fps"] is not None:
+            fps = "%.2f" % float(project["fps"].replace(",", "."))
+
+        normalized_movie_path = movie_utils.normalize_movie(
+            uploaded_movie_path, fps=fps
+        )
         file_store.add_movie("previews", instance_id, normalized_movie_path)
         original_tmp_path = movie_utils.generate_thumbnail(
             normalized_movie_path
@@ -661,7 +669,6 @@ class OrganisationThumbnailResource(BasePictureResource):
 
     def is_exist(self, organisation_id):
         return True
-
 
 
 class CreateProjectThumbnailResource(BaseCreatePictureResource):

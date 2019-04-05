@@ -45,7 +45,7 @@ def get_movie_size(movie_path):
     return im.size
 
 
-def normalize_movie(movie_path):
+def normalize_movie(movie_path, fps="24.00"):
     """
     Turn movie in a 1080p movie file.
     """
@@ -68,7 +68,7 @@ def normalize_movie(movie_path):
             file_target_path,
             pix_fmt='yuv420p',
             format="mp4",
-            r="24.00",
+            r=fps,
             b="28M",
             preset="medium",
             vcodec="libx264",
