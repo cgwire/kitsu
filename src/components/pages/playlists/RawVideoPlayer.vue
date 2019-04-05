@@ -56,6 +56,7 @@ export default {
 
   computed: {
     ...mapGetters([
+      'currentProduction'
     ]),
 
     container () {
@@ -68,6 +69,10 @@ export default {
 
     player2 () {
       return this.$refs.player2
+    },
+
+    fps () {
+      return this.currentProduction.fps || 24
     }
   },
 
@@ -101,7 +106,7 @@ export default {
     },
 
     goPreviousFrame () {
-      let newTime = this.currentPlayer.currentTime - 1 / 25
+      let newTime = this.currentPlayer.currentTime - 1 / this.fps
       if (newTime < 0) {
         this.setCurrentTime(0)
       } else {
@@ -110,7 +115,7 @@ export default {
     },
 
     goNextFrame () {
-      let newTime = this.currentPlayer.currentTime + 1 / 25
+      let newTime = this.currentPlayer.currentTime + 1 / this.fps
       if (newTime > this.currentPlayer.duration) {
         this.setCurrentTime(this.video.duration)
       } else {

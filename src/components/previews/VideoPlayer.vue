@@ -166,6 +166,7 @@
 </template>
 
 <script>
+import { mapGetters } from 'vuex'
 import { fabric } from 'fabric'
 import {
   CircleIcon,
@@ -271,12 +272,20 @@ export default {
   },
 
   computed: {
+    ...mapGetters([
+      'currentProduction'
+    ]),
+
     canvas () {
       return this.$refs['annotation-canvas']
     },
 
     container () {
       return this.$refs.container
+    },
+
+    fps () {
+      return this.currentProduction.fps || 24
     },
 
     isFullScreenEnabled () {
@@ -600,7 +609,7 @@ export default {
     },
 
     goPreviousFrame () {
-      let newTime = this.video.currentTime - 1 / 25
+      let newTime = this.video.currentTime - 1 / this.fps
       if (newTime < 0) {
         this.setCurrentTime(0)
       } else {
@@ -609,7 +618,7 @@ export default {
     },
 
     goNextFrame () {
-      let newTime = this.video.currentTime + 1 / 25
+      let newTime = this.video.currentTime + 1 / this.fps
       if (newTime > this.video.duration) {
         this.setCurrentTime(this.video.duration)
       } else {
