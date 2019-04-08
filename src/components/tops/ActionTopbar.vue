@@ -270,7 +270,7 @@
 
         <div
           class="more-menu-item"
-          v-if="isCurrentViewAsset || isCurrentViewShot"
+          v-if="isCurrentViewAsset || isCurrentViewShot || isCurrentViewPerson"
           @click="selectBar('priorities')"
         >
           {{ $t('menu.change_priority') }}
@@ -278,7 +278,7 @@
 
         <div
           class="more-menu-item"
-          v-if="isCurrentViewTaskType"
+          v-if="isCurrentViewTaskType || isCurrentViewPerson"
           @click="selectBar('estimations')"
         >
           {{ $t('menu.set_estimations') }}
@@ -454,6 +454,10 @@ export default {
     isCurrentViewTodos () {
       return this.$route.path.indexOf('todos') > 0 ||
              this.$route.path.indexOf('people/') > 0
+    },
+
+    isCurrentViewPerson () {
+      return this.$route.path.indexOf('people/') > 0
     },
 
     isCurrentViewPersonTasks () {
