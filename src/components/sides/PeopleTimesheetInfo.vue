@@ -187,6 +187,10 @@ export default {
   background: $dark-grey-lightest;
 }
 
+.data-list {
+  padding-bottom: 5em;
+}
+
 .people-timesheet-info {
   padding: 1em;
 }

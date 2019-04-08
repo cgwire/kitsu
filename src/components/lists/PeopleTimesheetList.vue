@@ -9,7 +9,7 @@
           </th>
 
           <th
-            class="time"
+            class="time month"
             :key="'month-' + month"
             v-for="month in monthRange"
             v-if="detailLevel === 'month'"
@@ -53,6 +53,7 @@
           <td
             :class="{
               time: true,
+              month: true,
               selected: isMonthSelected(person.id, year, month)
             }"
             :key="'month-' + month + '-' + person.id"
@@ -357,6 +358,11 @@ export default {
 .time {
   width: 60px;
   min-width: 60px;
+
+  &.month {
+    width: 80px;
+    min-width: 80px;
+  }
 }
 
 .daytime {
@@ -402,7 +408,7 @@ a:hover {
 }
 
 .duration {
-  border-radius: 50%;
+  border-radius: 0.3em;
   padding: 0.5em;
 }
 
