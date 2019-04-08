@@ -142,6 +142,7 @@ export default {
     delete_text: 'Are you sure you want to remove {name} from your database?',
     edit: 'Edit',
     empty_comment: 'Empty comment',
+    go_productions: 'Go to productions',
     history: 'history',
     info: 'Information',
     or: 'or',

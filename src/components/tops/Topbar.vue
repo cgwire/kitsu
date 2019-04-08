@@ -48,6 +48,18 @@
             </div>
           </div>
         </div>
+        <div
+          class="nav-item"
+          v-else-if="lastProduction && $route.path !== '/open-productions'"
+        >
+          <router-link
+            :to="lastSectionPath"
+            class="flexrow"
+          >
+            <chevron-left-icon />
+            {{ $t('main.go_productions') }}
+          </router-link>
+        </div>
       </div>
 
       <div class="nav-right">
@@ -128,6 +140,7 @@
 
 <script>
 import { mapGetters, mapActions } from 'vuex'
+import { ChevronLeftIcon } from 'vue-feather-icons'
 
 import Combobox from '../widgets/Combobox'
 import NotificationBell from '../widgets/NotificationBell'
@@ -139,6 +152,7 @@ export default {
   name: 'topbar',
   components: {
     Combobox,
+    ChevronLeftIcon,
     NotificationBell,
     PeopleName,
     PeopleAvatar
@@ -181,6 +195,8 @@ export default {
       'isUserMenuHidden',
       'isTVShow',
       'isNewNotification',
+      'lastProductionScreen',
+      'lastProductionViewed',
       'openProductions',
       'openProductionOptions',
       'productionMap',
@@ -201,6 +217,33 @@ export default {
              this.isShotPage &&
              // Do not display combobox if there is no episode
              this.episodes.length > 0
+    },
+
+    lastProduction () {
+      let production = this.productionMap[this.lastProductionViewed]
+      if (!production) {
+        production = this.currentProduction
+      }
+      return production
+    },
+
+    lastSectionPath () {
+      const production = this.lastProduction
+      const section = this.lastProductionScreen
+      let route = {
+        name: section,
+        params: {
+          production_id: production.id
+        }
+      }
+      console.log(production.name)
+      console.log(production.production_type)
+      console.log(production.first_episode_id)
+      if (production.production_type === 'tvshow') {
+        route.name = `episode-${section}`
+        route.params.episode_id = production.first_episode_id
+      }
+      return route
     },
 
     navigationOptions () {
@@ -457,20 +500,23 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-.dark .topbar .nav,
-.dark .user-menu {
-  background-color: $dark-grey-strong;
-  color: $white-grey;
-  border-left: 1px solid #2F3136;
-  border-bottom: 1px solid #2F3136;
-}
+.dark {
+  a,
+  .user-menu a {
+    color: $white-grey;
+  }
 
-.dark .user-menu a {
-  color: $white-grey;
-}
+  #toggle-menu-button:hover {
+    color: $white-grey;
+  }
 
-.dark #toggle-menu-button:hover {
-  color: $white-grey;
+  .topbar .nav,
+  .user-menu {
+    background-color: $dark-grey-strong;
+    color: $white-grey;
+    border-left: 1px solid #2F3136;
+    border-bottom: 1px solid #2F3136;
+  }
 }
 
 .nav {

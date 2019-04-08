@@ -5,15 +5,18 @@ import {
 
   SET_LAST_PRODUCTION_SCREEN,
 
+  SET_CURRENT_PRODUCTION,
+
   RESET_ALL
 } from '../mutation-types'
 
 const initialState = {
+  currentProductionScreen: 'assets',
   isDarkTheme: false,
   isSidebarHidden: true,
   isUserMenuHidden: true,
   lastProductionScreen: 'assets',
-  currentProductionScreen: 'assets'
+  lastProductionViewed: null
 }
 
 const state = {...initialState}
@@ -23,6 +26,7 @@ const getters = {
   isSidebarHidden: state => state.isSidebarHidden,
   isUserMenuHidden: state => state.isUserMenuHidden,
   lastProductionScreen: state => state.lastProductionScreen,
+  lastProductionViewed: state => state.lastProductionViewed,
   currentProductionScreen: state => state.currentProductionScreen
 }
 
@@ -62,6 +66,10 @@ const mutations = {
 
   [SET_LAST_PRODUCTION_SCREEN] (state, lastProductionScreen) {
     state.lastProductionScreen = lastProductionScreen
+  },
+
+  [SET_CURRENT_PRODUCTION] (state, productionId) {
+    if (productionId) state.lastProductionViewed = productionId
   },
 
   [RESET_ALL] (state) {

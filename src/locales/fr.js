@@ -89,6 +89,7 @@ export default {
     documentation: 'Documentation',
     delete_text: 'Etes vous sûr de vouloir supprimer {name} de la base de données ?',
     empty_comment: 'Commentaire vide',
+    go_productions: 'Aller aux productions',
     history: 'Historique',
     info: 'Information',
     loading_data: 'Chargement des données',
