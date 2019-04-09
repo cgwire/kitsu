@@ -209,6 +209,29 @@ he's assigned.
 
 Now, everybody know what to do, and who is doing what!
 
+## Add an estimation for a task
+
+Click on the name of a task type.
+
+![Task type](../img/getting-started/supervisor_tasktype.png)
+
+The new page is the **Supervisor view**. You have more detailed information specific to this task type.
+
+![Task type](../img/getting-started/supervisor_page.png)
+ 
+(1) You can see and change the status of a task
+(2) You can assign people to tasks
+(3) You can add an estimation for the task (in day)
+
+(1) to (3) is filled with the action menu.
+
+(4) Kitsu calculate the sum of the timesheet fed by the artists
+(5) The number of back and forth with the retake status
+(6)(7) the wip and validation dates will be automatically filled
+(8) the Last comment section will help you to keep an eye on the last activity of this task type.
+
+(4) to (8) is automatically filled.
+ 
 
 ## Create sequences and shots
 
