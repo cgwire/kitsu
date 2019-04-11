@@ -217,8 +217,19 @@ Click on the name of a task type.
 
 The new page is the **Supervisor view**. You have more detailed information specific to this task type.
 
-![Task type](../img/getting-started/supervisor_page.png)
+![Supervisor page](../img/getting-started/supervisor_page.png)
+
+To add an estimation to a task, click on the line, and choose **Set estimations** on the **Action Menu**.
+
+![Drop Down menu](../img/getting-started/set_estimation_menu.png)
+
+You can now enter the number of days you estimate. As for any action with the **Action Menu**, you can select
+multiple assets or shots on the same time.
  
+![Drop Down menu](../img/getting-started/set_estimation.png)
+ 
+ 
+To go further in detail with the Supervisor view :  
 (1) You can see and change the status of a task
 (2) You can assign people to tasks
 (3) You can add an estimation for the task (in day)
