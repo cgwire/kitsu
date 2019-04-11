@@ -38,6 +38,8 @@ colored background. You can change with a picture if you want.
 
 ![Edit the details of a production](../img/getting-started/production_edit_popup.png)
 
+
+
 ## Create some assets
 
 So, now you have the first script for your production. It's time to do the
@@ -526,5 +528,28 @@ On the list page, click on the status you want, then on the rigt pannel, click o
 
 
 Once you have clicked on the button, you will see the thumbnail appears, and the button turn gray.
+
+
+## Simplify the global page
+
+You may need to reduce a task type column on a global page. For example, you may be 
+only interrested in layout and animation but not so much about the shipment for the client.
+
+Next to each task type name, you can click on the arrow ![Arrow](../img/getting-started/arrow.png) to unfold a submenu. 
+
+You can choose to **Minimize** or **Delete** the task type.
+
+![Tasktype submenu](../img/getting-started/tasktype_minimize.png)
+
+Once the column is minimized, only colored dots will show the status.
+
+![Tasktype submenu](../img/getting-started/tasktype_small.png)
+
+
+You can also hide all the non essential column, like **Description**, **Custom column**, 
+and the minimize columns.
+
+Just click on the **Hide additional information** ![minimize button](../img/getting-started/minimize.png) button on the top right of the page.
+
 
 
