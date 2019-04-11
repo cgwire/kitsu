@@ -42,6 +42,7 @@
           @preview-changed="onPreviewChanged"
           @playlist-deleted="goFirstPlaylist"
           @remove-shot="removeShot"
+          @order-change="onOrderChange"
         />
       </div>
 
@@ -196,6 +197,7 @@ export default {
   methods: {
     ...mapActions([
       'addShotPreviewToPlaylist',
+      'changePlaylistOrder',
       'changePlaylistPreview',
       'deletePlaylist',
       'editPlaylist',
@@ -454,6 +456,13 @@ export default {
       }
 
       return route
+    },
+
+    onOrderChange (info) {
+      this.changePlaylistOrder({
+        playlist: this.currentPlaylist,
+        info
+      })
     }
   },
 

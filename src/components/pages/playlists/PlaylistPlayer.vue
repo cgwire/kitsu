@@ -147,6 +147,7 @@
         @play-click="playShot"
         @remove-shot="removeShot"
         @preview-changed="onPreviewChanged"
+        @shot-dropped="onShotDropped"
       />
     </div>
   </div>

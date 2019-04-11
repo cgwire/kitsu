@@ -19,6 +19,7 @@ import {
   DELETE_PLAYLIST_END,
 
   CHANGE_PLAYLIST_PREVIEW,
+  CHANGE_PLAYLIST_ORDER,
   ADD_SHOT_TO_PLAYLIST,
   REMOVE_SHOT_FROM_PLAYLIST,
   LOAD_SHOT_PREVIEW_FILES_END,
@@ -130,6 +131,13 @@ const actions = {
     dispatch('editPlaylist', {data: playlist, callback})
   },
 
+  changePlaylistOrder (
+    { commit, dispatch }, { playlist, info, callback }
+  ) {
+    commit(CHANGE_PLAYLIST_ORDER, { playlist, info })
+    dispatch('editPlaylist', { data: playlist, callback })
+  },
+
   changePlaylistPreview (
     { commit, dispatch },
     { playlist, shot, previewFileId, callback }
@@ -237,9 +245,21 @@ const mutations = {
     playlist.shots.splice(shotPlaylistToDeleteIndex, 1)
   },
 
-  [CHANGE_PLAYLIST_PREVIEW] (state, { playlist, shotId, previewFileId }) {
-    const shotToChange = playlist.shots.find((shot) => shot.shot_id === shotId)
-    shotToChange.preview_file_id = previewFileId
+  [CHANGE_PLAYLIST_ORDER] (state, { playlist, info }) {
+    const shotToMove = playlist.shots.find(
+      (shotPlaylist) => shotPlaylist.shot_id === info.after
+    )
+    const shotToMoveIndex = playlist.shots.findIndex(
+      (shotPlaylist) => shotPlaylist.shot_id === info.after
+    )
+    let targetShotIndex = playlist.shots.findIndex(
+      (shotPlaylist) => shotPlaylist.shot_id === info.before
+    )
+    if (shotToMoveIndex >= 0 && targetShotIndex >= 0) {
+      playlist.shots.splice(shotToMoveIndex, 1)
+      if (shotToMoveIndex > targetShotIndex) targetShotIndex++
+      playlist.shots.splice(targetShotIndex, 0, shotToMove)
+    }
   },
 
   [RESET_ALL] (state) {
