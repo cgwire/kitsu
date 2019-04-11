@@ -54,17 +54,28 @@
           <div class="addition-header">
             <page-subtitle :text="$t('playlists.add_shots')" />
 
-            <div class="flexrow" v-if="episodes.length > 0 || !isTVShow">
-              <div class="flexrow-item">
+            <div v-if="episodes.length > 0 || !isTVShow">
+              <div>
                 <combobox
                   :label="$t('shots.fields.sequence')"
                   :options="sequenceOptions"
+                  class="select-shot-combobox"
                   v-model="sequenceId"
                   v-if="sequenceOptions.length > 0"
                 />
                 <div v-if="sequenceOptions.length === 0">
                   {{ $t('playlists.no_sequence_for_episode') }}
                 </div>
+                <button
+                  :class="{
+                    button: true,
+                    'add-sequence': true,
+                    'is-loading': this.loading.addSequence
+                  }"
+                  @click="addSequence"
+                >
+                  {{ $t('playlists.add_sequence') }}
+                </button>
               </div>
             </div>
             <div v-else>
@@ -108,9 +119,8 @@ import Combobox from '../widgets/Combobox'
 import EntityThumbnail from '../widgets/EntityThumbnail'
 import ErrorText from '../widgets/ErrorText'
 import PageSubtitle from '../widgets/PageSubtitle'
-import Spinner from '../widgets/Spinner'
-
 import PlaylistPlayer from './playlists/PlaylistPlayer'
+import Spinner from '../widgets/Spinner'
 
 export default {
   name: 'productions',
@@ -141,6 +151,7 @@ export default {
       loading: {
         playlists: false,
         addPlaylist: false,
+        addSequence: false,
         deletePlaylist: false
       },
       errors: {
@@ -310,22 +321,48 @@ export default {
     },
 
     addShot (shot) {
-      if (this.currentPlaylist.id && !this.currentShots[shot.id]) {
-        this.loadShotPreviewFiles({
-          playlist: this.currentPlaylist,
-          shot,
-          callback: (err, previewFiles) => {
-            if (err) console.log(err)
-            this.addShotPreviewToPlaylist({
-              playlist: this.currentPlaylist,
-              previewFiles: previewFiles,
-              shot,
-              callback: () => {
-                this.rebuildCurrentShots()
-              }
-            })
-          }
-        })
+      return new Promise((resolve, reject) => {
+        if (this.currentPlaylist.id && !this.currentShots[shot.id]) {
+          this.loadShotPreviewFiles({
+            playlist: this.currentPlaylist,
+            shot,
+            callback: (err, previewFiles) => {
+              if (err) console.log(err)
+              this.addShotPreviewToPlaylist({
+                playlist: this.currentPlaylist,
+                previewFiles: previewFiles,
+                shot,
+                callback: () => {
+                  this.rebuildCurrentShots()
+                  resolve()
+                }
+              })
+            }
+          })
+        }
+      })
+    },
+
+    addSequence (shot) {
+      this.$options.silent = true
+      this.loading.addSequence = true
+      const shots = [...this.sequenceShots].reverse()
+      this.addShots(shots, () => {
+        console.log('finisehd')
+        this.loading.addSequence = false
+        this.$options.silent = false
+      })
+    },
+
+    addShots (shots, callback) {
+      if (shots && shots.length > 0) {
+        const shot = shots.pop()
+        this.addShot(shot)
+          .then(() => {
+            this.addShots(shots, callback)
+          })
+      } else {
+        callback()
       }
     },
 
@@ -517,6 +554,7 @@ export default {
     background: $dark-grey-light;
     border-color: $dark-grey;
     box-shadow: 0px 0px 6px #333;
+    z-index: 201;
   }
 
   .addition-column {
@@ -575,6 +613,7 @@ export default {
   border-left: 1px solid #DDD;
   box-shadow: 0px 0px 6px #F0F0F0;
   overflow-y: scroll;
+  z-index: 201;
 }
 
 .addition-shot {
@@ -620,10 +659,18 @@ span.thumbnail-picture {
 }
 
 .addition-header {
-  padding: 0 1.5em;
+  padding: 0 1em;
+
+  .subtitle {
+    margin-top: 1.5em;
+  }
 }
 
-.addition-header .subtitle {
-  margin-top: 1.5em;
+.select-shot-combobox {
+  margin-bottom: 1em;
+}
+
+.add-sequence {
+  margin-bottom: 0.4em;
 }
 </style>

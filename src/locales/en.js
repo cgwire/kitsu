@@ -249,12 +249,14 @@ export default {
 
   playlists: {
     add_shots: 'Select shots',
+    add_sequence: 'Add whole sequence',
     delete_text: 'Are you sure you want to remove {name} from your database?',
     delete_error: 'An error occured while deleting this playlist.',
     edit_title: 'Edit playlist',
     loading_error: 'A server error occured. Playlists cannot be loaded.',
     new_playlist: 'Add a playlist',
     no_playlist: 'There is currently no playlist for this project.',
+    no_preview: 'No preview for this shot',
     no_selection: 'Please select a playlist on the left.',
     no_sequence_for_episode: 'There is no sequence for this episode',
     no_shot_for_production: 'There is no shot for this production',
