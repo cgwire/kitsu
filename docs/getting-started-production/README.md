@@ -532,7 +532,7 @@ Once you have clicked on the button, you will see the thumbnail appears, and the
 
 ## Simplify the global page
 
-You may need to reduce a task type column on a global page. For example, you may be 
+You may need to reduce a task type column in a global page. For example, you may be 
 only interrested in layout and animation but not so much about the shipment for the client.
 
 Next to each task type name, you can click on the arrow ![Arrow](../img/getting-started/arrow.png) to unfold a submenu. 
@@ -550,6 +550,8 @@ You can also hide all the non essential column, like **Description**, **Custom c
 and the minimize columns.
 
 Just click on the **Hide additional information** ![minimize button](../img/getting-started/minimize.png) button on the top right of the page.
+
+To make reappear the information, click on the same button,![maximize button](../img/getting-started/maximize.png) it won't have the grey highlight.
 
 
 
