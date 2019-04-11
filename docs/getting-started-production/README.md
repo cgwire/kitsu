@@ -230,16 +230,16 @@ multiple assets or shots on the same time.
  
  
 To go further in detail with the Supervisor view :  
-(1) You can see and change the status of a task
-(2) You can assign people to tasks
-(3) You can add an estimation for the task (in day)
+- (1) You can see and change the status of a task
+- (2) You can assign people to tasks
+- (3) You can add an estimation for the task (in day)
 
 (1) to (3) is filled with the action menu.
 
-(4) Kitsu calculate the sum of the timesheet fed by the artists
-(5) The number of back and forth with the retake status
-(6)(7) the wip and validation dates will be automatically filled
-(8) the Last comment section will help you to keep an eye on the last activity of this task type.
+- (4) Kitsu calculate the sum of the timesheet fed by the artists
+- (5) The number of back and forth with the retake status
+- (6)(7) the wip and validation dates will be automatically filled
+- (8) the Last comment section will help you to keep an eye on the last activity of this task type.
 
 (4) to (8) is automatically filled.
  
@@ -387,6 +387,46 @@ Now the frameranges appear on the general spreadsheet of the shot page.
 ![Shot framerange detail](../img/getting-started/shot_framerange_detail.png)
 
 
+## Add Custom columns in general spreadsheet pages
+
+To add more information on the general spreadsheet pages, you will have to create a 
+**Custom column**.
+
+
+Click on the **+** Near the Description.
+
+![Custom Column](../img/getting-started/add_column_custom.png)
+
+You may have extra information to add on your pages as the **level of difficulties**, 
+the **name of the studios**, when a production is splitted.
+
+In the custom column you add store all kind of information : a **list of value** or a **free value**.
+
+The **free value** will be filed asset/shot by asset/shot.
+
+The **list of value** has to be filled now. 
+
+![Custom Column list](../img/getting-started/custom_column_list.png)
+
+Type the elements of the list below **Available values**, and confirm then by clickin on "Add value".
+
+Validate the creation of the custom column with the **Confirm** button.
+
+![Custom Column detail](../img/getting-started/custom_column_detail.png)
+
+You can fill this information with the edit button ![Edit button](../img/getting-started/edit_button.png).
+
+You can now see a new line on the edit pop-up. You can select the information from the list, 
+or enter the free values, depending of your previous choice.
+Don't forget to press the **Confirm** button when you are done.
+
+![Custom Column detail](../img/getting-started/edit_asset_custom.png)
+
+If you need to **edit** or **delete** the custom column, go back to the general spreadsheet page.
+Nearby the name of your custom column, click on the arrow. Select on the menu if you want to 
+edit the name of the custom column and its information. Or you can choose to remove it.
+
+![Custom Column detail](../img/getting-started//custom_column_edit.png)
 ## Validation per batch
 
 To do a validation (or changing the status of a task) you can click on the
