@@ -163,6 +163,7 @@ export default {
       'playlistMap',
       'playlists',
       'playlistsPath',
+      'playlistMap',
       'sequences',
       'shotMap',
       'taskTypeMap'
@@ -192,6 +193,7 @@ export default {
       'loadShotPreviewFiles',
       'loadShots',
       'newPlaylist',
+      'refreshPlaylist',
       'removeShotPreviewFromPlaylist'
     ]),
 
@@ -465,6 +467,37 @@ export default {
         title: `${this.currentProduction ? this.currentProduction.name : ''}` +
                ` ${this.$t('playlists.title')}` +
                ` - Kitsu`
+      }
+    }
+  },
+
+  socket: {
+    events: {
+      'playlist:new' (eventData) {
+        if (!this.playlistMap[eventData.playlist_id]) {
+          this.refreshPlaylist(eventData.playlist_id)
+        }
+      },
+
+      'playlist:update' (eventData) {
+        if (
+          this.playlistMap[eventData.playlist_id] &&
+          !this.$options.silent
+        ) {
+          this.refreshPlaylist(eventData.playlist_id)
+            .then((playlist) => {
+              if (this.currentPlaylist.id === playlist.id) {
+                Object.assign(this.currentPlaylist, playlist)
+                this.rebuildCurrentShots()
+              }
+            })
+        }
+      },
+
+      'playlist:delete' (eventData) {
+        this.$store.commit('DELETE_PLAYLIST_END', {
+          id: eventData.playlist_id
+        })
       }
     }
   }

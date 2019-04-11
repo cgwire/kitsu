@@ -69,6 +69,19 @@ const actions = {
       })
   },
 
+  refreshPlaylist ({ commit, rootGetters }, id) {
+    return new Promise((resolve, reject) => {
+      const currentProduction = rootGetters.currentProduction
+      playlistsApi.getPlaylist(currentProduction, { id }, (err, playlist) => {
+        if (err) reject(err)
+        else {
+          commit(EDIT_PLAYLIST_END, playlist)
+          resolve(playlist)
+        }
+      })
+    })
+  },
+
   loadShotPreviewFiles ({ commit }, { playlist, shot, callback }) {
     playlistsApi.getShotPreviewFiles(shot, (err, previewFiles) => {
       if (callback) callback(err, previewFiles)
