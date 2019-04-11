@@ -387,44 +387,48 @@ Now the frameranges appear on the general spreadsheet of the shot page.
 ![Shot framerange detail](../img/getting-started/shot_framerange_detail.png)
 
 
-## Add Custom columns in general spreadsheet pages
+## Add a Custom columns
 
 To add more information on the general spreadsheet pages, you will have to create a 
 **Custom column**.
 
 
-Click on the **+** Near the Description.
+Click on the **+** near the Description column.
 
 ![Custom Column](../img/getting-started/add_column_custom.png)
 
-You may have extra information to add on your pages as the **level of difficulties**, 
-the **name of the studios**, when a production is splitted.
+You may have extra information to add on your pages as for example : the **level of difficulties**,
+the **name of the studios**, when a production is splitted, etc.
 
-In the custom column you add store all kind of information : a **list of value** or a **free value**.
+In the custom column you can store all kind of information : a **list of value** or a **free value**.
 
-The **free value** will be filed asset/shot by asset/shot.
+The **free value** will be different on each entities.
 
-The **list of value** has to be filled now. 
+The **list of value** will give you the same choice for eache entities. And has to be filled now. 
 
 ![Custom Column list](../img/getting-started/custom_column_list.png)
 
-Type the elements of the list below **Available values**, and confirm then by clickin on "Add value".
+Type the elements of the list below **Available values**, and confirm them by clickin on **Add value**.
 
 Validate the creation of the custom column with the **Confirm** button.
 
 ![Custom Column detail](../img/getting-started/custom_column_detail.png)
 
-You can fill this information with the edit button ![Edit button](../img/getting-started/edit_button.png).
+Back on the global spreadsheets page, uou can fill these information with the edit 
+button ![Edit button](../img/getting-started/edit_button.png).
 
-You can now see a new line on the edit pop-up. You can select the information from the list, 
+You will now see a new line on the edit pop-up. You can select the information from the list, 
 or enter the free values, depending of your previous choice.
+
 Don't forget to press the **Confirm** button when you are done.
 
 ![Custom Column detail](../img/getting-started/edit_asset_custom.png)
 
 If you need to **edit** or **delete** the custom column, go back to the general spreadsheet page.
-Nearby the name of your custom column, click on the arrow. Select on the menu if you want to 
-edit the name of the custom column and its information. Or you can choose to remove it.
+Nearby the name of your custom column, click on the arrow ![Custom Column detail](../img/getting-started/arrow.png). 
+
+Select in the menu if you want to 
+edit the name of the custom column and its information, or you want to remove it.
 
 ![Custom Column detail](../img/getting-started//custom_column_edit.png)
 ## Validation per batch
