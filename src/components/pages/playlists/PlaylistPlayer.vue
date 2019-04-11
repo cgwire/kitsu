@@ -17,7 +17,7 @@
     />
   </div>
 
-  <div class="filler flexrow">
+  <div class="filler flexrow" ref="video-container">
     <raw-video-player
       class="raw-player"
       ref="raw-player"
@@ -125,7 +125,7 @@
       v-if="taskTypeOptions"
     />
     <combobox
-      class="playlist-button flexrow-item"
+      class="playlist-button flexrow-item comparison-list"
       :options="taskTypeOptions"
       v-model="taskTypeToCompare"
       v-if="isComparing"
@@ -278,12 +278,14 @@ export default {
     this.updateProgressBar()
     setTimeout(() => {
       window.addEventListener('keydown', this.onKeyDown, false)
+      window.addEventListener('resize', this.onWindowResize)
       this.$el.onmousemove = this.onMouseMove
     }, 0)
   },
 
   beforeDestroy () {
     window.removeEventListener('keydown', this.onKeyDown)
+    window.removeEventListener('resize', this.onWindowResize)
   },
 
   computed: {
@@ -544,7 +546,6 @@ export default {
         this.container.msRequestFullscreen()
       }
       this.container.setAttribute('data-fullscreen', !!true)
-      setTimeout(this.updateProgressBar, 100)
     },
 
     exitFullScreen () {
@@ -558,7 +559,6 @@ export default {
         document.msExitFullscreen()
       }
       this.container.setAttribute('data-fullscreen', !!false)
-      setTimeout(this.updateProgressBar, 100)
     },
 
     isFullScreen () {
@@ -640,26 +640,54 @@ export default {
       }
     },
 
+    resetHeight () {
+      this.$nextTick(() => {
+        let height = this.$refs['container'].offsetHeight
+        height -= this.$refs['header'].offsetHeight
+        height -= this.$refs['playlist-progress'].offsetHeight
+        height -= this.$refs['button-bar'].offsetHeight
+        height -= this.$refs['playlisted-shots'].offsetHeight
+        this.$refs['video-container'].style.height = `${height}px`
+        if (!this.isCommentsHidden) {
+          this.$refs['task-info'].$el.style.height = `${height}px`
+        }
+        this.rawPlayer.resetHeight()
+        if (this.isComparing) {
+          this.$refs['raw-player-comparison'].resetHeight()
+        }
+        this.$nextTick(() => {
+          this.updateProgressBar()
+        })
+      })
+    },
+
+    onWindowResize () {
+      const now = (new Date().getTime())
+      this.lastCall = this.lastCall || 0
+      if (now - this.lastCall > 600) {
+        this.lastCall = now
+        this.$nextTick(this.resetHeight)
+      }
+    },
+
     onFilmClicked () {
       this.isShotsHidden = !this.isShotsHidden
       this.$nextTick(() => {
-        this.rawPlayer.resetHeight()
-        if (this.$refs['raw-player-comparison']) {
-          this.$refs['raw-player-comparison'].resetHeight()
-        }
+        this.resetHeight()
         this.scrollToShot(this.playingShotIndex)
-        this.updateProgressBar()
       })
     },
 
     onCommentClicked () {
+      let height = this.$refs['video-container'].offsetHeight
       this.isCommentsHidden = !this.isCommentsHidden
-      this.$refs['task-info'].focusCommentTextarea()
-      this.rawPlayer.resetHeight()
-      this.updateProgressBar()
-      if (this.$refs['raw-player-comparison']) {
-        this.$refs['raw-player-comparison'].resetHeight()
+      if (!this.isCommentsHidden) {
+        this.$refs['task-info'].$el.style.height = `${height}px`
       }
+      this.$nextTick(() => {
+        this.$refs['task-info'].focusCommentTextarea()
+        this.resetHeight()
+      })
     },
 
     onCompareClicked () {
@@ -735,6 +763,7 @@ export default {
             value: this.taskTypeMap[taskTypeId].id
           }
         })
+        this.taskTypeToCompare = this.taskTypeOptions[0].value
       } else {
         this.taskTypeOptions = []
       }
@@ -857,6 +886,7 @@ export default {
   overflow-x: auto;
   align-items: flex-start;
   height: 240px;
+  min-height: 240px;
 }
 
 .task-info-column {
@@ -1014,5 +1044,14 @@ progress {
   height: 14px;
   z-index: 200;
   cursor: pointer;
+}
+
+.comparison-list,
+.comparison-list p,
+.comparison-list select {
+  font-size: 0.8em;
+}
+.comparison-list select {
+  height: 2.2em;
 }
 </style>

@@ -187,19 +187,10 @@ export default {
       this.updateMaxDuration()
     },
 
-    /*
-    onWindowResize () {
-      const now = (new Date().getTime())
-      this.lastCall = this.lastCall || 0
-      if (now - this.lastCall > 600) {
-        this.lastCall = now
-        this.$nextTick(this.resetHeight)
-      }
-    },
-    */
-
     resetHeight () {
       this.$nextTick(() => {
+        if (this.currentPlayer) this.currentPlayer.style.height = `0px`
+        if (this.nextPlayer) this.nextPlayer.style.height = `0px`
         let height = this.container.offsetHeight
         if (this.currentPlayer) this.currentPlayer.style.height = `${height}px`
         if (this.nextPlayer) this.nextPlayer.style.height = `${height}px`
