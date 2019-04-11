@@ -1,4 +1,6 @@
 <template>
+<div class="flexrow wrapper">
+<drag @drag="onDragged" :transfer-data="shot.id">
 <div
   :class="{
     'playlisted-shot': true,
@@ -44,8 +46,14 @@
     </div>
   </div>
   <div v-else>
-    There is no preview
+    {{ $t('playlists.no_preview') }}
   </div>
+</div>
+</drag>
+<drop @drop="onDropped">
+ <div class="drop-area" ref="drop-area">
+ </div>
+</drop>
 </div>
 </template>
 
@@ -88,6 +96,32 @@ export default {
     }
   },
 
+  mounted () {
+    const taskTypeIds = Object.keys(this.shot.preview_files)
+
+    if (taskTypeIds.length > 0) {
+      if (this.shot.preview_file_id) {
+        this.taskTypeId = taskTypeIds.find((taskTypeId) => {
+          const previewFiles = this.shot.preview_files[taskTypeId]
+          return previewFiles.find((previewFile) => {
+            return previewFile.id === this.shot.preview_file_id
+          })
+        })
+      }
+
+      if (!this.taskTypeId) {
+        this.taskTypeId = taskTypeIds[0]
+      }
+    }
+
+    this.$refs['drop-area'].addEventListener('dragover', () => {
+      this.$refs['drop-area'].style.background = '#438561'
+    })
+    this.$refs['drop-area'].addEventListener('dragleave', () => {
+      this.$refs['drop-area'].style.background = 'transparent'
+    })
+  },
+
   computed: {
     ...mapGetters([
       'taskTypeMap',
@@ -127,6 +161,17 @@ export default {
   },
 
   methods: {
+    onDragged () {
+    },
+
+    onDropped (shotId) {
+      this.$refs['drop-area'].style.background = 'transparent'
+      this.$emit('shot-dropped', {
+        before: this.shot.id,
+        after: shotId
+      })
+    },
+
     onPlayClick () {
       this.$emit('play-click', this.index)
     },
@@ -135,25 +180,6 @@ export default {
       event.preventDefault()
       event.stopPropagation()
       this.$emit('remove-shot', this.shot)
-    }
-  },
-
-  mounted () {
-    const taskTypeIds = Object.keys(this.shot.preview_files)
-
-    if (taskTypeIds.length > 0) {
-      if (this.shot.preview_file_id) {
-        this.taskTypeId = taskTypeIds.find((taskTypeId) => {
-          const previewFiles = this.shot.preview_files[taskTypeId]
-          return previewFiles.find((previewFile) => {
-            return previewFile.id === this.shot.preview_file_id
-          })
-        })
-      }
-
-      if (!this.taskTypeId) {
-        this.taskTypeId = taskTypeIds[0]
-      }
     }
   },
 
@@ -221,5 +247,15 @@ export default {
   &:hover {
     background: rgba(0, 0, 0, 0.2);
   }
+}
+
+.drop-area {
+  width: 10px;
+  margin-left: 10px;
+  height: 100%;
+}
+
+.wrapper {
+  align-items: stretch;
 }
 </style>
