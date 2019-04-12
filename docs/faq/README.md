@@ -63,7 +63,7 @@ for this **specific task type** per asset or per shot.
 ![Overview asset task](../img/faq/supervisor_page.png)
 
 You will find on these pages more information than on the global page. 
-You can also [assigned](../getting-started-production/#assign-tasks-to-a-cg-artist) people from this page, and add an [estimation](../getting-started-production/#assign-tasks-to-a-cg-artist) on the tasks.
+You can also [assigned](../getting-started-production/#assign-tasks-to-a-cg-artist) people from this page, and add an [estimation](../getting-started-production/#add-an-estimation-for-a-task) on the tasks.
 
 You can also sort the information of the page, to focus on the important subject.
 

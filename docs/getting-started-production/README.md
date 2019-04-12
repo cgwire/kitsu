@@ -516,8 +516,23 @@ a picture, a movie or an `.obj` file. All can be reviewed from the browser.
 Other files like `.pdf`, `.zip`, `.rar`, `.ma` or `.mb` but they need to be
 downloaded to be reviewed.
 
+You can watch the version from the right pannel, or enlarge it fullscreen ![Fullscreen](../img/getting-started/fullscreen.png).
+
+You can draw directly on the version with the **pencil** icon ![Pencil](../img/getting-started/pencil.png).
+
+If you need to move your line, click again on the **pencil** icon, the cursor will change to a multi directional cross ![Pencil](../img/getting-started/direction_arrow.png), and then you will be able to select your line and move it around.
+
+If you need to delete a line, select it with the directional cross, and then press the **delete** icon ![Delete line](../img/getting-started/delete_line.png)
+
+
 From there you can change the status to ![Retake](../img/getting-started/retake_icon.png) if you want that the CG artist
-performs some changes. Or you can change it to ![Done](../img/getting-started/done_icon.png), to notifiy the CG artist
+performs some changes. 
+
+You can also **tag** someone of the team on the comments. Type the `@`and it will open a sub menu with the list of the team. 
+
+![Tag someone](../img/getting-started/tag_team.png)
+
+Or you can change it to ![Done](../img/getting-started/done_icon.png), to notifiy the CG artist
 that his work is validated.
 
 You can also use the preview as a **thumbnail** on the asset or shot spreadsheet. It
