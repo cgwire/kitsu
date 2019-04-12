@@ -2,12 +2,12 @@
 <div ref="container" class="video-wrapper filler flexrow-item">
   <video
     ref="player1"
-    preload="true"
+    preload="auto"
     @ended="playNext"
   />
   <video
     ref="player2"
-    preload="true"
+    preload="auto"
     @ended="playNext"
   />
 </div>
@@ -134,32 +134,34 @@ export default {
     },
 
     loadShot (index = 0) {
-      const nextIndex = this.getNextIndex(index)
-      const shot = this.shots[index]
-      const nextShot = this.shots[nextIndex]
+      if (index < this.shots.length) {
+        const nextIndex = this.getNextIndex(index)
+        const shot = this.shots[index]
+        const nextShot = this.shots[nextIndex]
 
-      this.currentIndex = index
-      this.currentPlayer = this.player1
-      this.nextPlayer = this.player2
-      this.currentPlayer.removeEventListener(
-        'loadedmetadata',
-        this.updateMaxDuration
-      )
-      this.currentPlayer.addEventListener(
-        'loadedmetadata',
-        this.updateMaxDuration
-      )
+        this.currentIndex = index
+        this.currentPlayer = this.player1
+        this.nextPlayer = this.player2
+        this.currentPlayer.removeEventListener(
+          'loadedmetadata',
+          this.updateMaxDuration
+        )
+        this.currentPlayer.addEventListener(
+          'loadedmetadata',
+          this.updateMaxDuration
+        )
 
-      this.currentPlayer.src = this.getMoviePath(shot.preview_file_id)
-      this.nextPlayer.src = this.getMoviePath(nextShot.preview_file_id)
-      this.currentPlayer.style.display = 'block'
-      this.nextPlayer.style.display = 'none'
-      this.resetHeight()
+        this.currentPlayer.src = this.getMoviePath(shot.preview_file_id)
+        this.nextPlayer.src = this.getMoviePath(nextShot.preview_file_id)
+        this.currentPlayer.style.display = 'block'
+        this.nextPlayer.style.display = 'none'
+        this.resetHeight()
 
-      this.currentPlayer.removeEventListener('timeupdate', this.updateTime)
-      this.currentPlayer.addEventListener('timeupdate', this.updateTime)
+        this.currentPlayer.removeEventListener('timeupdate', this.updateTime)
+        this.currentPlayer.addEventListener('timeupdate', this.updateTime)
 
-      this.$emit('shot-change', this.currentIndex)
+        this.$emit('shot-change', this.currentIndex)
+      }
     },
 
     pause () {
@@ -168,7 +170,7 @@ export default {
     },
 
     play () {
-      this.currentPlayer.play()
+      if (this.currentPlayer) this.currentPlayer.play()
       this.isPlaying = true
     },
 
@@ -185,19 +187,10 @@ export default {
       this.updateMaxDuration()
     },
 
-    /*
-    onWindowResize () {
-      const now = (new Date().getTime())
-      this.lastCall = this.lastCall || 0
-      if (now - this.lastCall > 600) {
-        this.lastCall = now
-        this.$nextTick(this.resetHeight)
-      }
-    },
-    */
-
     resetHeight () {
       this.$nextTick(() => {
+        if (this.currentPlayer) this.currentPlayer.style.height = `0px`
+        if (this.nextPlayer) this.nextPlayer.style.height = `0px`
         let height = this.container.offsetHeight
         if (this.currentPlayer) this.currentPlayer.style.height = `${height}px`
         if (this.nextPlayer) this.nextPlayer.style.height = `${height}px`

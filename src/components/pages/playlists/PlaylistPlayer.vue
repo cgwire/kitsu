@@ -17,7 +17,7 @@
     />
   </div>
 
-  <div class="filler flexrow">
+  <div class="filler flexrow" ref="video-container">
     <raw-video-player
       class="raw-player"
       ref="raw-player"
@@ -25,6 +25,12 @@
       @shot-change="onShotChange"
       @time-update="onTimeUpdate"
       @max-duration-update="onMaxDurationUpdate"
+    />
+    <raw-video-player
+      class="raw-player"
+      ref="raw-player-comparison"
+      :shots="shotListToCompare"
+      v-if="isComparing"
     />
     <task-info
       ref="task-info"
@@ -38,8 +44,9 @@
     />
   </div>
 
+  <div class="progress-cursor" ref="progress-cursor"></div>
   <div class="playlist-progress" ref="playlist-progress">
-    <div class="video-progress pull-bottom">
+    <div class="video-progress">
       <progress
         ref="progress"
         value="0"
@@ -102,9 +109,26 @@
       icon="back"
     />
     <button-simple
-      class="button playlist-button flexrow-item"
+      class="playlist-button flexrow-item"
       @click="onPlayNextShotClicked"
       icon="forward"
+    />
+    <button-simple
+      :class="{
+        'comparison-button': true,
+        'flexrow-item': true,
+        'playlist-button': true,
+        active: isComparing
+      }"
+      icon="compare"
+      @click="onCompareClicked"
+      v-if="taskTypeOptions"
+    />
+    <combobox
+      class="playlist-button flexrow-item comparison-list"
+      :options="taskTypeOptions"
+      v-model="taskTypeToCompare"
+      v-if="isComparing"
     />
 
     <span class="filler"></span>
@@ -147,6 +171,7 @@
         @play-click="playShot"
         @remove-shot="removeShot"
         @preview-changed="onPreviewChanged"
+        @shot-dropped="onShotDropped"
       />
     </div>
   </div>
@@ -181,6 +206,7 @@ import { mapActions, mapGetters } from 'vuex'
 import { removeModelFromList } from '../../../lib/helpers'
 
 import ButtonSimple from '../../widgets/ButtonSimple'
+import Combobox from '../../widgets/Combobox'
 import DeleteModal from '../../widgets/DeleteModal'
 import EditPlaylistModal from '../../modals/EditPlaylistModal'
 import PlaylistedShot from './PlaylistedShot'
@@ -193,6 +219,7 @@ export default {
 
   components: {
     ButtonSimple,
+    Combobox,
     DeleteModal,
     EditPlaylistModal,
     PlaylistedShot,
@@ -217,6 +244,7 @@ export default {
       currentTime: '00:00.00',
       currentTimeRaw: 0,
       isCommentsHidden: true,
+      isComparing: false,
       isLoading: false,
       isPlaying: false,
       isShotsHidden: false,
@@ -224,7 +252,10 @@ export default {
       maxDurationRaw: 0,
       playingShotIndex: 0,
       shotList: [],
+      shotListToCompare: [],
       task: null,
+      taskTypeOptions: [],
+      taskTypeToCompare: null,
       modals: {
         edit: false,
         delete: false
@@ -244,19 +275,23 @@ export default {
 
   mounted () {
     this.shotList = Object.values(this.shots)
+    this.updateProgressBar()
     setTimeout(() => {
       window.addEventListener('keydown', this.onKeyDown, false)
+      window.addEventListener('resize', this.onWindowResize)
       this.$el.onmousemove = this.onMouseMove
     }, 0)
   },
 
   beforeDestroy () {
     window.removeEventListener('keydown', this.onKeyDown)
+    window.removeEventListener('resize', this.onWindowResize)
   },
 
   computed: {
     ...mapGetters([
-      'taskMap'
+      'taskMap',
+      'taskTypeMap'
     ]),
 
     isFullScreenEnabled () {
@@ -279,12 +314,20 @@ export default {
       return this.$refs['raw-player']
     },
 
+    rawPlayerComparison () {
+      return this.$refs['raw-player-comparison']
+    },
+
     progress () {
       return this.$refs.progress
     },
 
     progressBar () {
       return this.$refs['progress-bar']
+    },
+
+    progressCursor () {
+      return this.$refs['progress-cursor']
     },
 
     video () {
@@ -408,6 +451,10 @@ export default {
       const factor = this.currentTimeRaw / this.maxDurationRaw
       this.progress.value = this.currentTimeRaw
       this.progressBar.style.width = Math.floor(factor * 100) + '%'
+      const progressCoordinates = this.progress.getBoundingClientRect()
+      const x = progressCoordinates.width * factor + progressCoordinates.x
+      this.progressCursor.style.left = Math.round(x - 7) + 'px'
+      this.progressCursor.style.top = Math.round(progressCoordinates.y - 3) + 'px'
     },
 
     updateTaskPanel () {
@@ -442,11 +489,15 @@ export default {
 
     play () {
       this.rawPlayer.play()
+      if (this.isComparing) {
+        this.$refs['raw-player-comparison'].play()
+      }
       this.isPlaying = true
     },
 
     pause () {
       this.rawPlayer.pause()
+      if (this.isComparing) this.$refs['raw-player-comparison'].pause()
       this.isPlaying = false
     },
 
@@ -455,21 +506,33 @@ export default {
         this.playingShotIndex = shotIndex
         this.scrollToShot(this.playingShotIndex)
         this.rawPlayer.loadShot(shotIndex)
-        if (this.isPlaying) this.rawPlayer.play()
+        if (this.isComparing) {
+          this.$refs['raw-player-comparison'].loadShot(shotIndex)
+        }
+        if (this.isPlaying) {
+          this.rawPlayer.play()
+          if (this.isComparing) this.$refs['raw-player-comparison'].play()
+        }
+      }
+    },
+
+    goPreviousFrame () {
+      this.rawPlayer.goPreviousFrame()
+      if (this.isComparing) {
+        this.$refs['raw-player-comparison'].goPreviousFrame()
+      }
+    },
+
+    goNextFrame () {
+      this.rawPlayer.goNextFrame()
+      if (this.isComparing) {
+        this.$refs['raw-player-comparison'].goNextFrame()
       }
     },
 
     removeShot (shot) {
       this.$emit('remove-shot', shot)
       this.shotList = removeModelFromList(this.shotList, shot)
-    },
-
-    goPreviousFrame () {
-      this.rawPlayer.goPreviousFrame()
-    },
-
-    goNextFrame () {
-      this.rawPlayer.goNextFrame()
     },
 
     setFullScreen () {
@@ -513,6 +576,9 @@ export default {
         (e.pageX - this.progress.offsetLeft) / this.progress.offsetWidth
       const currentTime = pos * this.maxDurationRaw
       this.rawPlayer.setCurrentTime(currentTime)
+      if (this.isComparing) {
+        this.$refs['raw-player-comparison'].setCurrentTime(currentTime)
+      }
     },
 
     onPreviousFrameClicked () {
@@ -525,11 +591,17 @@ export default {
 
     onPlayPreviousShotClicked () {
       this.rawPlayer.loadPreviousShot()
+      if (this.isComparing) {
+        this.$refs['raw-player-comparison'].loadPreviousShot()
+      }
       if (this.isPlaying) this.play()
     },
 
     onPlayNextShotClicked () {
       this.rawPlayer.loadNextShot()
+      if (this.isComparing) {
+        this.$refs['raw-player-comparison'].loadNextShot()
+      }
       if (this.isPlaying) this.play()
     },
 
@@ -568,18 +640,37 @@ export default {
       }
     },
 
+    onWindowResize () {
+      const now = (new Date().getTime())
+      this.lastCall = this.lastCall || 0
+      if (now - this.lastCall > 600) {
+        this.lastCall = now
+        this.$nextTick(this.resetHeight)
+      }
+    },
+
     onFilmClicked () {
       this.isShotsHidden = !this.isShotsHidden
       this.$nextTick(() => {
-        this.rawPlayer.resetHeight()
+        this.resetHeight()
         this.scrollToShot(this.playingShotIndex)
       })
     },
 
     onCommentClicked () {
+      let height = this.$refs['video-container'].offsetHeight
       this.isCommentsHidden = !this.isCommentsHidden
-      this.$refs['task-info'].focusCommentTextarea()
-      this.rawPlayer.resetHeight()
+      if (!this.isCommentsHidden) {
+        this.$refs['task-info'].$el.style.height = `${height}px`
+      }
+      this.$nextTick(() => {
+        this.$refs['task-info'].focusCommentTextarea()
+        this.resetHeight()
+      })
+    },
+
+    onCompareClicked () {
+      this.isComparing = !this.isComparing
     },
 
     onPlayClicked () {
@@ -629,18 +720,97 @@ export default {
 
     onPreviewChanged (shot, previewFileId) {
       this.$emit('preview-changed', shot, previewFileId)
+    },
+
+    onShotDropped (info) {
+      this.$emit('order-change', info)
+    },
+
+    resetHeight () {
+      this.$nextTick(() => {
+        let height = this.$refs['container'].offsetHeight
+        height -= this.$refs['header'].offsetHeight
+        height -= this.$refs['playlist-progress'].offsetHeight
+        height -= this.$refs['button-bar'].offsetHeight
+        height -= this.$refs['playlisted-shots'].offsetHeight
+        this.$refs['video-container'].style.height = `${height}px`
+        if (!this.isCommentsHidden) {
+          this.$refs['task-info'].$el.style.height = `${height}px`
+        }
+        this.rawPlayer.resetHeight()
+        if (this.isComparing) {
+          this.$refs['raw-player-comparison'].resetHeight()
+        }
+        this.$nextTick(() => {
+          this.updateProgressBar()
+        })
+      })
+    },
+
+    rebuildComparisonOptions () {
+      const shots = Object.values(this.shots)
+      if (shots.length > 0) {
+        let taskTypeIds = Object.keys(shots[0].preview_files)
+        Object.values(this.shots).forEach((shot) => {
+          const shotTaskTypeIds = Object.keys(shot.preview_files)
+          taskTypeIds = taskTypeIds.filter(
+            value => shotTaskTypeIds.includes(value)
+          )
+        })
+        this.taskTypeOptions = taskTypeIds.map((taskTypeId) => {
+          return {
+            label: this.taskTypeMap[taskTypeId].name,
+            value: this.taskTypeMap[taskTypeId].id
+          }
+        })
+        if (this.taskTypeOptions.length > 0) {
+          this.taskTypeToCompare = this.taskTypeOptions[0].value
+        }
+      } else {
+        this.taskTypeOptions = []
+      }
+    },
+
+    rebuildShotListToCompare () {
+      if (this.taskTypeToCompare) {
+        this.shotListToCompare = this.shotList.map((shot) => {
+          const preview = shot.preview_files[this.taskTypeToCompare][0]
+          return ({
+            preview_file_id: preview.id,
+            preview_file_extension: 'mp4'
+          })
+        })
+      } else {
+        this.buildShotListToCompare = []
+      }
+    },
+
+    resetComparison () {
+      this.rebuildShotListToCompare()
+      this.$nextTick(() => {
+        this.pause()
+        const player = this.$refs['raw-player-comparison']
+        player.loadShot(this.playingShotIndex)
+        player.setCurrentTime(this.currentTimeRaw)
+      })
     }
   },
 
   watch: {
-    preview () {
-    },
-
-    previewToCompareId () {
-    },
-
     playingShotIndex () {
       this.updateTaskPanel()
+    },
+
+    isComparing () {
+      if (this.isComparing) {
+        this.resetComparison()
+      }
+    },
+
+    taskTypeToCompare () {
+      if (this.isComparing) {
+        this.resetComparison()
+      }
     },
 
     shots () {
@@ -649,10 +819,18 @@ export default {
       this.pause()
       this.rawPlayer.setCurrentTime(0)
       this.updateTaskPanel()
+      this.rebuildComparisonOptions()
       if (this.shotList.length === 0) {
         this.rawPlayer.clear()
+        if (this.isComparing) {
+          this.$refs['raw-player-comparison'].clear()
+        }
         this.maxDurationRaw = 0
         this.maxDuration = '00:00.00'
+      } else {
+        this.$nextTick(() => {
+          this.playShot(0)
+        })
       }
     }
   }
@@ -710,6 +888,7 @@ export default {
   overflow-x: auto;
   align-items: flex-start;
   height: 240px;
+  min-height: 240px;
 }
 
 .task-info-column {
@@ -799,19 +978,6 @@ export default {
   height: 32px;
 }
 
-.buttons .button {
-  background: #26292F;
-  border-radius: 0;
-  color: #BBB;
-  border: 0;
-  margin: 0;
-}
-
-.buttons .button.active,
-.buttons .button:hover {
-  color: #43B581;
-}
-
 .comparison-combobox {
   margin-bottom: 0;
 }
@@ -869,5 +1035,25 @@ progress {
 .playlist-progress,
 .playlist-progress {
   transition: opacity 0.5s ease
+}
+
+.progress-cursor {
+  position: absolute;
+  display: block;
+  background-color: #43B581;
+  border-radius: 50%;
+  width: 14px;
+  height: 14px;
+  z-index: 200;
+  cursor: pointer;
+}
+
+.comparison-list,
+.comparison-list p,
+.comparison-list select {
+  font-size: 0.8em;
+}
+.comparison-list select {
+  height: 2.2em;
 }
 </style>

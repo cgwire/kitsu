@@ -1,51 +1,58 @@
 <template>
-<div
-  :class="{
-    'playlisted-shot': true,
-    playing: isPlaying
-  }"
->
-  <div class="thumbnail-wrapper" @click.prevent="onPlayClick">
-    <span
-      class="remove-button flexrow-item"
-      :title="$t('playlists.remove')"
-      @click.prevent="onRemoveClick"
-      v-if="isCurrentUserManager"
+<div class="flexrow wrapper">
+  <drag @drag="onDragged" :transfer-data="shot.id">
+    <div
+      :class="{
+        'playlisted-shot': true,
+        playing: isPlaying
+      }"
     >
-    X
-    </span>
-    <entity-thumbnail
-      class="shot-thumbnail"
-      :empty-width="150"
-      :empty-height="103"
-      :entity="shot"
-      :preview-file-id="previewFileId"
-    />
-  </div>
+      <div class="thumbnail-wrapper" @click.prevent="onPlayClick">
+        <span
+          class="remove-button flexrow-item"
+          :title="$t('playlists.remove')"
+          @click.prevent="onRemoveClick"
+          v-if="isCurrentUserManager"
+        >
+        X
+        </span>
+        <entity-thumbnail
+          class="shot-thumbnail"
+          :empty-width="150"
+          :empty-height="103"
+          :entity="shot"
+          :preview-file-id="previewFileId"
+        />
+      </div>
 
-  <div class="shot-title">{{ shot.sequence_name }} / {{ shot.name }}</div>
+      <div class="shot-title">{{ shot.sequence_name }} / {{ shot.name }}</div>
 
-  <div class="preview-choice" v-if="taskTypeOptions.length > 0">
-    <div>
-      <combobox
-        :options="taskTypeOptions"
-        :disabled="!isCurrentUserManager"
-        v-model="taskTypeId"
-      />
+      <div class="preview-choice" v-if="taskTypeOptions.length > 0">
+        <div>
+          <combobox
+            :options="taskTypeOptions"
+            :disabled="!isCurrentUserManager"
+            v-model="taskTypeId"
+          />
+        </div>
+        <div class="flexrow">
+          <combobox
+            class="flexrow-item"
+            :options="previewFileOptions"
+            :disabled="!isCurrentUserManager"
+            v-model="previewFileId"
+          />
+          <span class="filler"></span>
+        </div>
+      </div>
+      <div v-else>
+        {{ $t('playlists.no_preview') }}
+      </div>
     </div>
-    <div class="flexrow">
-      <combobox
-        class="flexrow-item"
-        :options="previewFileOptions"
-        :disabled="!isCurrentUserManager"
-        v-model="previewFileId"
-      />
-      <span class="filler"></span>
-    </div>
-  </div>
-  <div v-else>
-    There is no preview
-  </div>
+  </drag>
+  <drop @drop="onDropped">
+    <div class="drop-area" ref="drop-area"></div>
+  </drop>
 </div>
 </template>
 
@@ -88,11 +95,41 @@ export default {
     }
   },
 
+  mounted () {
+    const taskTypeIds = Object.keys(this.shot.preview_files)
+
+    if (taskTypeIds.length > 0) {
+      if (this.shot.preview_file_id) {
+        this.taskTypeId = taskTypeIds.find((taskTypeId) => {
+          const previewFiles = this.shot.preview_files[taskTypeId]
+          return previewFiles.find((previewFile) => {
+            return previewFile.id === this.shot.preview_file_id
+          })
+        })
+      }
+
+      if (!this.taskTypeId) {
+        this.taskTypeId = taskTypeIds[0]
+      }
+    }
+
+    this.dropArea.addEventListener('dragover', () => {
+      this.dropArea.style.background = '#00B242'
+    })
+    this.dropArea.addEventListener('dragleave', () => {
+      this.dropArea.style.background = 'transparent'
+    })
+  },
+
   computed: {
     ...mapGetters([
       'taskTypeMap',
       'isCurrentUserManager'
     ]),
+
+    dropArea () {
+      return this.$refs['drop-area']
+    },
 
     taskTypeOptions () {
       return Object
@@ -127,6 +164,17 @@ export default {
   },
 
   methods: {
+    onDragged () {
+    },
+
+    onDropped (shotId) {
+      this.$refs['drop-area'].style.background = 'transparent'
+      this.$emit('shot-dropped', {
+        before: this.shot.id,
+        after: shotId
+      })
+    },
+
     onPlayClick () {
       this.$emit('play-click', this.index)
     },
@@ -135,25 +183,6 @@ export default {
       event.preventDefault()
       event.stopPropagation()
       this.$emit('remove-shot', this.shot)
-    }
-  },
-
-  mounted () {
-    const taskTypeIds = Object.keys(this.shot.preview_files)
-
-    if (taskTypeIds.length > 0) {
-      if (this.shot.preview_file_id) {
-        this.taskTypeId = taskTypeIds.find((taskTypeId) => {
-          const previewFiles = this.shot.preview_files[taskTypeId]
-          return previewFiles.find((previewFile) => {
-            return previewFile.id === this.shot.preview_file_id
-          })
-        })
-      }
-
-      if (!this.taskTypeId) {
-        this.taskTypeId = taskTypeIds[0]
-      }
     }
   },
 
@@ -180,6 +209,16 @@ export default {
 </script>
 
 <style lang="scss" scoped>
+.wrapper {
+  align-items: stretch;
+}
+
+.drop-area {
+  width: 10px;
+  margin-left: 10px;
+  height: 100%;
+}
+
 .playlisted-shot {
   border-top: 3px solid transparent;
   display: flex;

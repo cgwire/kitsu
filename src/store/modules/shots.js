@@ -1,4 +1,5 @@
 import Vue from 'vue'
+import moment from 'moment'
 import shotsApi from '../api/shots'
 import peopleApi from '../api/people'
 import tasksStore from './tasks'
@@ -327,6 +328,33 @@ const getters = {
 }
 
 const actions = {
+
+  getPending (daily = false) {
+    return new Promise((resolve, reject) => {
+      const shots = []
+      cache.shots.forEach((shot) => {
+        let isPending = false
+        shot.tasks.forEach((taskId) => {
+          const task = tasksStore.state.taskMap[taskId]
+          if (!isPending) {
+            if (daily) {
+              if (task.last_comment_date) {
+                const lastCommentDate = moment(task.last_comment_date)
+                const yesterday = moment().subtract(1, 'days')
+                isPending =
+                  task.task_status_short_name === 'wfa' &&
+                  lastCommentDate.isAfter(yesterday)
+              }
+            } else {
+              isPending = task.task_status_short_name === 'wfa'
+            }
+          }
+        })
+        if (isPending) shots.push(shot)
+      })
+      resolve(shots)
+    })
+  },
 
   clearEpisodes ({ commit }) {
     commit(CLEAR_EPISODES)

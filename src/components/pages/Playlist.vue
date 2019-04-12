@@ -42,6 +42,7 @@
           @preview-changed="onPreviewChanged"
           @playlist-deleted="goFirstPlaylist"
           @remove-shot="removeShot"
+          @order-change="onOrderChange"
         />
       </div>
 
@@ -53,18 +54,49 @@
         <div v-else>
           <div class="addition-header">
             <page-subtitle :text="$t('playlists.add_shots')" />
+            <button
+              :class="{
+                button: true,
+                'add-sequence': true,
+                'is-loading': this.loading.addSequence
+              }"
+              @click="addAllPending"
+            >
+              {{ $t('playlists.build_weekly') }}
+            </button>
+            <button
+              :class="{
+                button: true,
+                'add-sequence': true,
+                'is-loading': this.loading.addSequence
+              }"
+              @click="addDailyPending"
+            >
+              {{ $t('playlists.build_daily') }}
+            </button>
 
-            <div class="flexrow" v-if="episodes.length > 0 || !isTVShow">
-              <div class="flexrow-item">
+            <div v-if="episodes.length > 0 || !isTVShow">
+              <div>
                 <combobox
                   :label="$t('shots.fields.sequence')"
                   :options="sequenceOptions"
+                  class="select-shot-combobox"
                   v-model="sequenceId"
                   v-if="sequenceOptions.length > 0"
                 />
                 <div v-if="sequenceOptions.length === 0">
                   {{ $t('playlists.no_sequence_for_episode') }}
                 </div>
+                <button
+                  :class="{
+                    button: true,
+                    'add-sequence': true,
+                    'is-loading': this.loading.addSequence
+                  }"
+                  @click="addSequence"
+                >
+                  {{ $t('playlists.add_sequence') }}
+                </button>
               </div>
             </div>
             <div v-else>
@@ -99,7 +131,6 @@
 </template>
 <script>
 import { mapGetters, mapActions } from 'vuex'
-
 import moment from 'moment-timezone'
 import { PlusIcon } from 'vue-feather-icons'
 
@@ -108,9 +139,8 @@ import Combobox from '../widgets/Combobox'
 import EntityThumbnail from '../widgets/EntityThumbnail'
 import ErrorText from '../widgets/ErrorText'
 import PageSubtitle from '../widgets/PageSubtitle'
-import Spinner from '../widgets/Spinner'
-
 import PlaylistPlayer from './playlists/PlaylistPlayer'
+import Spinner from '../widgets/Spinner'
 
 export default {
   name: 'productions',
@@ -128,12 +158,12 @@ export default {
 
   data () {
     return {
+      currentPlaylist: { name: this.$t('playlists.no_selection') },
+      currentShot: 0,
+      currentShots: {},
       sequenceId: null,
       sequenceOptions: [],
       sequenceShots: [],
-      currentPlaylist: { name: this.$t('playlists.no_selection') },
-      currentShots: {},
-      currentShot: 0,
       modals: {
         isDeleteDisplayed: false,
         isEditDisplayed: false
@@ -141,6 +171,7 @@ export default {
       loading: {
         playlists: false,
         addPlaylist: false,
+        addSequence: false,
         deletePlaylist: false
       },
       errors: {
@@ -163,6 +194,7 @@ export default {
       'playlistMap',
       'playlists',
       'playlistsPath',
+      'playlistMap',
       'sequences',
       'shotMap',
       'taskTypeMap'
@@ -184,16 +216,84 @@ export default {
   methods: {
     ...mapActions([
       'addShotPreviewToPlaylist',
+      'changePlaylistOrder',
       'changePlaylistPreview',
       'deletePlaylist',
       'editPlaylist',
+      'getPending',
       'loadPlaylist',
       'loadPlaylists',
       'loadShotPreviewFiles',
       'loadShots',
       'newPlaylist',
+      'refreshPlaylist',
       'removeShotPreviewFromPlaylist'
     ]),
+
+    getPlaylistPath (playlistId, section) {
+      let route = {
+        name: section ? `${section}-playlist` : 'playlist',
+        params: {
+          production_id: this.currentProduction.id,
+          playlist_id: playlistId
+        }
+      }
+      if (this.isTVShow && this.currentEpisode) {
+        route.name = `episode-${route.name}`
+        route.params.episode_id = this.currentEpisode.id
+      }
+      return route
+    },
+
+    getShotNumber () {
+      return Object.keys(this.currentShots).length
+    },
+
+    loadShotsData (callback) {
+      this.loadShots(() => {
+        if (this.episodes.length > 0 || !this.isTVShow) {
+          this.setAdditionSequences()
+        }
+        this.loadPlaylistsData()
+        if (callback) callback()
+      })
+    },
+
+    loadPlaylistsData () {
+      this.loading.playlists = true
+      this.loadPlaylists((err) => {
+        if (err) this.errors.loadPlaylists = true
+        this.loading.playlists = false
+        if (!err) {
+          this.setCurrentPlaylist(() => {
+            if (!this.currentPlaylist || !this.currentPlaylist.id) {
+              this.goFirstPlaylist()
+            }
+          })
+        }
+      })
+    },
+
+    rebuildCurrentShots () {
+      this.currentShots = {}
+      if (this.currentPlaylist && this.currentPlaylist.shots) {
+        this.currentPlaylist.shots.forEach((shotPreview) => {
+          const shot = this.shotMap[shotPreview.shot_id]
+          if (shot) {
+            this.currentShots[shotPreview.shot_id] = {
+              id: shotPreview.shot_id,
+              name: shot.name,
+              sequence_name: shot.sequence_name,
+              entity_name: shot.tasks[0].entity_name,
+              preview_files: shotPreview.preview_files,
+              preview_file_id: shotPreview.preview_file_id || shot.preview_file_id,
+              preview_file_extension: shotPreview.extension || shot.preview_file_extension,
+              preview_file_task_id: shotPreview.task_id || shot.preview_file_task_id
+            }
+          }
+        })
+      }
+    },
 
     clearAdditionColumn () {
       this.sequenceOptions = []
@@ -212,7 +312,7 @@ export default {
 
     addPlaylist () {
       const newPlaylist = {
-        name: moment().format('YYYY-MM-DD HH:mm'),
+        name: moment().format('YYYY-MM-DD HH:mm:ss'),
         production_id: this.currentProduction.id
       }
 
@@ -308,22 +408,67 @@ export default {
     },
 
     addShot (shot) {
-      if (this.currentPlaylist.id && !this.currentShots[shot.id]) {
-        this.loadShotPreviewFiles({
-          playlist: this.currentPlaylist,
-          shot,
-          callback: (err, previewFiles) => {
-            if (err) console.log(err)
-            this.addShotPreviewToPlaylist({
-              playlist: this.currentPlaylist,
-              previewFiles: previewFiles,
-              shot,
-              callback: () => {
-                this.rebuildCurrentShots()
-              }
-            })
-          }
+      return new Promise((resolve, reject) => {
+        if (this.currentPlaylist.id && !this.currentShots[shot.id]) {
+          this.loadShotPreviewFiles({
+            playlist: this.currentPlaylist,
+            shot,
+            callback: (err, previewFiles) => {
+              if (err) console.log(err)
+              this.addShotPreviewToPlaylist({
+                playlist: this.currentPlaylist,
+                previewFiles: previewFiles,
+                shot,
+                callback: () => {
+                  this.rebuildCurrentShots()
+                  resolve()
+                }
+              })
+            }
+          })
+        }
+      })
+    },
+
+    addSequence () {
+      this.$options.silent = true
+      this.loading.addSequence = true
+      const shots = [...this.sequenceShots].reverse()
+      this.addShots(shots, () => {
+        this.loading.addSequence = false
+        this.$options.silent = false
+      })
+    },
+
+    addAllPending () {
+      this.$options.silent = true
+      this.getPending(false)
+        .then((shots) => {
+          this.addShots(shots.reverse(), () => {
+            this.$options.silent = false
+          })
         })
+    },
+
+    addDailyPending () {
+      this.$options.silent = true
+      this.getPending(true)
+        .then((shots) => {
+          this.addShots(shots.reverse(), () => {
+            this.$options.silent = false
+          })
+        })
+    },
+
+    addShots (shots, callback) {
+      if (shots && shots.length > 0) {
+        const shot = shots.pop()
+        this.addShot(shot)
+          .then(() => {
+            this.addShots(shots, callback)
+          })
+      } else {
+        callback()
       }
     },
 
@@ -349,72 +494,11 @@ export default {
       this.rebuildCurrentShots()
     },
 
-    rebuildCurrentShots () {
-      this.currentShots = {}
-      if (this.currentPlaylist && this.currentPlaylist.shots) {
-        this.currentPlaylist.shots.forEach((shotPreview) => {
-          const shot = this.shotMap[shotPreview.shot_id]
-          if (shot) {
-            this.currentShots[shotPreview.shot_id] = {
-              id: shotPreview.shot_id,
-              name: shot.name,
-              sequence_name: shot.sequence_name,
-              entity_name: shot.tasks[0].entity_name,
-              preview_files: shotPreview.preview_files,
-              preview_file_id: shotPreview.preview_file_id || shot.preview_file_id,
-              preview_file_extension: shotPreview.extension || shot.preview_file_extension,
-              preview_file_task_id: shotPreview.task_id || shot.preview_file_task_id
-            }
-          }
-        })
-      }
-    },
-
-    getShotNumber () {
-      return Object.keys(this.currentShots).length
-    },
-
-    loadShotsData (callback) {
-      this.loadShots(() => {
-        if (this.episodes.length > 0 || !this.isTVShow) {
-          this.setAdditionSequences()
-        }
-
-        this.loadPlaylistsData()
-        if (callback) callback()
+    onOrderChange (info) {
+      this.changePlaylistOrder({
+        playlist: this.currentPlaylist,
+        info
       })
-    },
-
-    loadPlaylistsData () {
-      this.loading.playlists = true
-      this.loadPlaylists((err) => {
-        if (err) this.errors.loadPlaylists = true
-        this.loading.playlists = false
-        if (!err) {
-          this.setCurrentPlaylist(() => {
-            if (!this.currentPlaylist || !this.currentPlaylist.id) {
-              this.goFirstPlaylist()
-            }
-          })
-        }
-      })
-    },
-
-    getPlaylistPath (playlistId, section) {
-      let route = {
-        name: section ? `${section}-playlist` : 'playlist',
-        params: {
-          production_id: this.currentProduction.id,
-          playlist_id: playlistId
-        }
-      }
-
-      if (this.isTVShow && this.currentEpisode) {
-        route.name = `episode-${route.name}`
-        route.params.episode_id = this.currentEpisode.id
-      }
-
-      return route
     }
   },
 
@@ -467,6 +551,37 @@ export default {
                ` - Kitsu`
       }
     }
+  },
+
+  socket: {
+    events: {
+      'playlist:new' (eventData) {
+        if (!this.playlistMap[eventData.playlist_id]) {
+          this.refreshPlaylist(eventData.playlist_id)
+        }
+      },
+
+      'playlist:update' (eventData) {
+        if (
+          this.playlistMap[eventData.playlist_id] &&
+          !this.$options.silent
+        ) {
+          this.refreshPlaylist(eventData.playlist_id)
+            .then((playlist) => {
+              if (this.currentPlaylist.id === playlist.id) {
+                Object.assign(this.currentPlaylist, playlist)
+                this.rebuildCurrentShots()
+              }
+            })
+        }
+      },
+
+      'playlist:delete' (eventData) {
+        this.$store.commit('DELETE_PLAYLIST_END', {
+          id: eventData.playlist_id
+        })
+      }
+    }
   }
 }
 </script>
@@ -484,6 +599,7 @@ export default {
     background: $dark-grey-light;
     border-color: $dark-grey;
     box-shadow: 0px 0px 6px #333;
+    z-index: 201;
   }
 
   .addition-column {
@@ -533,6 +649,10 @@ export default {
   border-right: 3px solid $light-green;
 }
 
+.playlist-list-column .button {
+  width: 100%;
+}
+
 .addition-column {
   max-width: 200px;
   margin-right: 12px;
@@ -542,6 +662,7 @@ export default {
   border-left: 1px solid #DDD;
   box-shadow: 0px 0px 6px #F0F0F0;
   overflow-y: scroll;
+  z-index: 201;
 }
 
 .addition-shot {
@@ -552,18 +673,18 @@ export default {
   opacity: 0.5;
   display: flex;
   flex-direction: column;
-}
 
-.addition-shot a {
-  margin: auto;
-}
+  a {
+    margin: auto;
+  }
 
-.addition-shot:hover {
-  opacity: 0.75
-}
+  &:hover {
+    opacity: 0.75
+  }
 
-.addition-shot.playlisted {
-  opacity: 1
+  &.playlisted {
+    opacity: 1
+  }
 }
 
 span.thumbnail-picture {
@@ -571,26 +692,30 @@ span.thumbnail-picture {
   margin-bottom: 2px;
 }
 
-.playlist-column {
-  margin-top: 10px;
-  padding: 0;
-  overflow: hidden;
-  flex: 1;
-}
-
-.playlist-list-column .button {
-  width: 100%;
-}
-
 .addition-column .thumbnail-empty {
   margin-left: 1.5em;
 }
 
 .addition-header {
-  padding: 0 1.5em;
+  padding: 0 1em;
+
+  .subtitle {
+    margin-top: 1.5em;
+  }
 }
 
-.addition-header .subtitle {
-  margin-top: 1.5em;
+.select-shot-combobox {
+  margin-bottom: 1em;
+}
+
+.add-sequence {
+  margin-bottom: 0.4em;
+}
+
+.playlist-column {
+  margin-top: 10px;
+  padding: 0;
+  overflow: hidden;
+  flex: 1;
 }
 </style>

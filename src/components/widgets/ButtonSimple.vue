@@ -68,6 +68,10 @@
     :class="iconClass"
     v-if="icon === 'right'"
   />
+  <copy-icon
+    :class="iconClass"
+    v-if="icon === 'compare'"
+  />
 
   <span
     :class="{
@@ -85,6 +89,7 @@
 import {
   ChevronLeftIcon,
   ChevronRightIcon,
+  CopyIcon,
   DownloadIcon,
   EditIcon,
   FilmIcon,
@@ -106,6 +111,7 @@ export default {
   components: {
     ChevronLeftIcon,
     ChevronRightIcon,
+    CopyIcon,
     DownloadIcon,
     EditIcon,
     FilmIcon,

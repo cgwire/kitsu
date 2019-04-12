@@ -507,12 +507,14 @@ export default {
     },
 
     setOtherPreviews () {
-      this.otherPreviews = this.taskPreviews.filter((p) => {
-        return (
-          p.id !== this.currentPreviewId &&
-          p.extension === 'mp4'
-        )
-      })
+      if (this.taskPreviews) {
+        this.otherPreviews = this.taskPreviews.filter((p) => {
+          return (
+            p.id !== this.currentPreviewId &&
+            p.extension === 'mp4'
+          )
+        })
+      }
       return this.otherPreviews
     },
 

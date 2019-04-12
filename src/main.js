@@ -11,6 +11,7 @@ import Chart from 'chart.js'
 import Meta from 'vue-meta'
 import VueChartkick from 'vue-chartkick'
 import VueCookie from 'vue-cookie'
+import VueDragDrop from 'vue-drag-drop'
 import VueLazyload from 'vue-lazyload'
 import vuescroll from 'vue-scroll'
 import VueWebsocket from 'vue-websocket'
@@ -25,6 +26,7 @@ Vue.use(VueChartkick, {adapter: Chart})
 Vue.use(VueCookie)
 Vue.use(VueLazyload)
 Vue.use(vuescroll)
+Vue.use(VueDragDrop)
 Vue.use(VueWebsocket, '/events')
 Vue.use(VTooltip)
 

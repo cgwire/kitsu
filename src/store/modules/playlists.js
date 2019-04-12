@@ -19,6 +19,7 @@ import {
   DELETE_PLAYLIST_END,
 
   CHANGE_PLAYLIST_PREVIEW,
+  CHANGE_PLAYLIST_ORDER,
   ADD_SHOT_TO_PLAYLIST,
   REMOVE_SHOT_FROM_PLAYLIST,
   LOAD_SHOT_PREVIEW_FILES_END,
@@ -69,6 +70,19 @@ const actions = {
       })
   },
 
+  refreshPlaylist ({ commit, rootGetters }, id) {
+    return new Promise((resolve, reject) => {
+      const currentProduction = rootGetters.currentProduction
+      playlistsApi.getPlaylist(currentProduction, { id }, (err, playlist) => {
+        if (err) reject(err)
+        else {
+          commit(EDIT_PLAYLIST_END, playlist)
+          resolve(playlist)
+        }
+      })
+    })
+  },
+
   loadShotPreviewFiles ({ commit }, { playlist, shot, callback }) {
     playlistsApi.getShotPreviewFiles(shot, (err, previewFiles) => {
       if (callback) callback(err, previewFiles)
@@ -115,6 +129,13 @@ const actions = {
   ) {
     commit(REMOVE_SHOT_FROM_PLAYLIST, { playlist, shot })
     dispatch('editPlaylist', {data: playlist, callback})
+  },
+
+  changePlaylistOrder (
+    { commit, dispatch }, { playlist, info, callback }
+  ) {
+    commit(CHANGE_PLAYLIST_ORDER, { playlist, info })
+    dispatch('editPlaylist', { data: playlist, callback })
   },
 
   changePlaylistPreview (
@@ -222,6 +243,23 @@ const mutations = {
       (shotPlaylist) => shotPlaylist.shot_id === shot.id
     )
     playlist.shots.splice(shotPlaylistToDeleteIndex, 1)
+  },
+
+  [CHANGE_PLAYLIST_ORDER] (state, { playlist, info }) {
+    const shotToMove = playlist.shots.find(
+      (shotPlaylist) => shotPlaylist.shot_id === info.after
+    )
+    const shotToMoveIndex = playlist.shots.findIndex(
+      (shotPlaylist) => shotPlaylist.shot_id === info.after
+    )
+    let targetShotIndex = playlist.shots.findIndex(
+      (shotPlaylist) => shotPlaylist.shot_id === info.before
+    )
+    if (shotToMoveIndex >= 0 && targetShotIndex >= 0) {
+      playlist.shots.splice(shotToMoveIndex, 1)
+      if (shotToMoveIndex > targetShotIndex) targetShotIndex++
+      playlist.shots.splice(targetShotIndex, 0, shotToMove)
+    }
   },
 
   [CHANGE_PLAYLIST_PREVIEW] (state, { playlist, shotId, previewFileId }) {
