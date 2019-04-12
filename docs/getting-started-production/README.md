@@ -574,4 +574,32 @@ Just click on the **Hide additional information** ![minimize button](../img/gett
 To make reappear the information, click on the same button,![maximize button](../img/getting-started/maximize.png) it won't have the grey highlight.
 
 
+## The timesheets
+
+As production you can use the main menu to check the timesheets.
+
+Open the main menu with the ![main button](../img/getting-started/main_button.png) button. 
+
+On the menu choose the **Timesheets** page.
+![main button](../img/getting-started/timesheet_menu.png)
+
+![main button](../img/getting-started/timesheet_day.png)
+
+You can choose which **month** or **year** you want to display.
+
+You can also choose the level of detail : **day**, **week**, **month**.
+
+Per week, kitsu highlight the overdue time per CG Artist.
+
+![main button](../img/getting-started/timesheet_week.png)
+
+If you click on a number, a side panel will open with the details of the time spent per task on this week.
+
+You can also setup the number of working hours per day. 
+
+Go back to the main menu, and select **Settings**. 
+
+![Setting](../img/getting-started/setting.png)
+
+
 
