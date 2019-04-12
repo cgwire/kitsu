@@ -63,6 +63,7 @@ for this **specific task type** per asset or per shot.
 ![Overview asset task](../img/faq/supervisor_page.png)
 
 You will find on these pages more information than on the global page. 
+You can also [assigned](../getting-started-production/#assign-tasks-to-a-cg-artist) people from this page, and add an [estimation](../getting-started-production/#assign-tasks-to-a-cg-artist) on the tasks.
 
 You can also sort the information of the page, to focus on the important subject.
 
@@ -229,10 +230,15 @@ assigned to you.
 Notifications include the following information: 
 
 * If it's a notification ![Notification page](../img/faq/notification_icon_comment.png) or a tag ![Notification page](../img/faq/notification_icon_tag.png)
+
 * the name of the **author** ![Notification page](../img/faq/notification_author.png)
+
 * the related **entity** ![Notification page](../img/faq/notification_entities.png)
+
 * the related **task** ![Notification page](../img/faq/notification_task.png)
+
 * the new **status** ![Notification page](../img/faq/wfa_icon.png)
+
 * the **attached file** ![Notification page](../img/faq/notification_attached_files.png)
 
 and the comment.
@@ -517,3 +523,14 @@ Then you can delete the sequence, with the
 
 ![Delete sequence](../img/faq/delete_sequence.png)
 
+-----------------------
+
+## How to delete a task type
+
+To delete a task type (shot or asset), go to the global spreadsheet page, 
+and click on the arrow next to the name of the task type ![Delete sequence](../img/faq/arrow.png). 
+
+A sub menu will appear with the option **Delete all** the tasks.
+Once you have click on it, an message will appear and ask you to type the name of the task. You need to type it as it shows, it's case sensitive.
+
+![Delete sequence](../img/faq/delete_tasktype.png). 
