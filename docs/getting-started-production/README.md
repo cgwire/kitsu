@@ -85,8 +85,13 @@ the line.
 On the main asset page, to extend the description, click on the first words
 (2), and a pop-up will open with the full description.
 
+## Create tasks for the assets
+
 And now we can create tasks for the assets (3), like **Concept**, **Modeling**,
-**Texture**, **Setup**, and other if needed.
+**Texture**, **Setup**, and other if needed (see 
+[How to customize the workflow](.../faq/#how-to-customize-the-worklfow)
+).
+
 
 Click on the **+ Add tasks** (3) on top of the spreadsheet, a new window will
 open and on the list under **Type** you can choose the task you need to add,
