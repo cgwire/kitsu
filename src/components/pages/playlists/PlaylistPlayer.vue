@@ -489,7 +489,7 @@ export default {
 
     play () {
       this.rawPlayer.play()
-      if (this.$refs['raw-player-comparison']) {
+      if (this.isComparing) {
         this.$refs['raw-player-comparison'].play()
       }
       this.isPlaying = true
@@ -497,7 +497,7 @@ export default {
 
     pause () {
       this.rawPlayer.pause()
-      if (this.$refs['raw-player-comparison']) this.$refs['raw-player-comparison'].pause()
+      if (this.isComparing) this.$refs['raw-player-comparison'].pause()
       this.isPlaying = false
     },
 
@@ -506,33 +506,33 @@ export default {
         this.playingShotIndex = shotIndex
         this.scrollToShot(this.playingShotIndex)
         this.rawPlayer.loadShot(shotIndex)
-        if (this.$refs['raw-player-comparison']) {
+        if (this.isComparing) {
           this.$refs['raw-player-comparison'].loadShot(shotIndex)
         }
         if (this.isPlaying) {
           this.rawPlayer.play()
-          if (this.$refs['raw-player-comparison']) this.$refs['raw-player-comparison'].play()
+          if (this.isComparing) this.$refs['raw-player-comparison'].play()
         }
       }
     },
 
-    removeShot (shot) {
-      this.$emit('remove-shot', shot)
-      this.shotList = removeModelFromList(this.shotList, shot)
-    },
-
     goPreviousFrame () {
       this.rawPlayer.goPreviousFrame()
-      if (this.$refs['raw-player-comparison']) {
+      if (this.isComparing) {
         this.$refs['raw-player-comparison'].goPreviousFrame()
       }
     },
 
     goNextFrame () {
       this.rawPlayer.goNextFrame()
-      if (this.$refs['raw-player-comparison']) {
+      if (this.isComparing) {
         this.$refs['raw-player-comparison'].goNextFrame()
       }
+    },
+
+    removeShot (shot) {
+      this.$emit('remove-shot', shot)
+      this.shotList = removeModelFromList(this.shotList, shot)
     },
 
     setFullScreen () {
@@ -576,7 +576,7 @@ export default {
         (e.pageX - this.progress.offsetLeft) / this.progress.offsetWidth
       const currentTime = pos * this.maxDurationRaw
       this.rawPlayer.setCurrentTime(currentTime)
-      if (this.$refs['raw-player-comparison']) {
+      if (this.isComparing) {
         this.$refs['raw-player-comparison'].setCurrentTime(currentTime)
       }
     },
@@ -591,7 +591,7 @@ export default {
 
     onPlayPreviousShotClicked () {
       this.rawPlayer.loadPreviousShot()
-      if (this.$refs['raw-player-comparison']) {
+      if (this.isComparing) {
         this.$refs['raw-player-comparison'].loadPreviousShot()
       }
       if (this.isPlaying) this.play()
@@ -599,7 +599,7 @@ export default {
 
     onPlayNextShotClicked () {
       this.rawPlayer.loadNextShot()
-      if (this.$refs['raw-player-comparison']) {
+      if (this.isComparing) {
         this.$refs['raw-player-comparison'].loadNextShot()
       }
       if (this.isPlaying) this.play()
@@ -638,27 +638,6 @@ export default {
           this.onPlayPauseClicked()
         }
       }
-    },
-
-    resetHeight () {
-      this.$nextTick(() => {
-        let height = this.$refs['container'].offsetHeight
-        height -= this.$refs['header'].offsetHeight
-        height -= this.$refs['playlist-progress'].offsetHeight
-        height -= this.$refs['button-bar'].offsetHeight
-        height -= this.$refs['playlisted-shots'].offsetHeight
-        this.$refs['video-container'].style.height = `${height}px`
-        if (!this.isCommentsHidden) {
-          this.$refs['task-info'].$el.style.height = `${height}px`
-        }
-        this.rawPlayer.resetHeight()
-        if (this.isComparing) {
-          this.$refs['raw-player-comparison'].resetHeight()
-        }
-        this.$nextTick(() => {
-          this.updateProgressBar()
-        })
-      })
     },
 
     onWindowResize () {
@@ -747,6 +726,27 @@ export default {
       this.$emit('order-change', info)
     },
 
+    resetHeight () {
+      this.$nextTick(() => {
+        let height = this.$refs['container'].offsetHeight
+        height -= this.$refs['header'].offsetHeight
+        height -= this.$refs['playlist-progress'].offsetHeight
+        height -= this.$refs['button-bar'].offsetHeight
+        height -= this.$refs['playlisted-shots'].offsetHeight
+        this.$refs['video-container'].style.height = `${height}px`
+        if (!this.isCommentsHidden) {
+          this.$refs['task-info'].$el.style.height = `${height}px`
+        }
+        this.rawPlayer.resetHeight()
+        if (this.isComparing) {
+          this.$refs['raw-player-comparison'].resetHeight()
+        }
+        this.$nextTick(() => {
+          this.updateProgressBar()
+        })
+      })
+    },
+
     rebuildComparisonOptions () {
       const shots = Object.values(this.shots)
       if (shots.length > 0) {
@@ -822,7 +822,7 @@ export default {
       this.rebuildComparisonOptions()
       if (this.shotList.length === 0) {
         this.rawPlayer.clear()
-        if (this.$refs['raw-player-comparison']) {
+        if (this.isComparing) {
           this.$refs['raw-player-comparison'].clear()
         }
         this.maxDurationRaw = 0
