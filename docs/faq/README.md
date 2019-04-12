@@ -60,10 +60,21 @@ To access to the task type overview, you can click click on the **task type** na
 It will go to a page where you can see the state of all the **status** 
 for this **specific task type** per asset or per shot.
 
-![Overview asset task](../img/faq/global_view_task.png)
+![Overview asset task](../img/faq/supervisor_page.png)
 
-![Overview shot task](../img/faq/global_view_task01.png)
+You will find on these pages more information than on the global page. 
+![see how to assign people](../getting-started-production/#assign-tasks-to-a-cg-artist), 
+![see how to add an estimation for a task](../getting-started-production/#add-an-estimation-for-a-task)
 
+
+You can also sort the information of the page, to focus on the important subject.
+
+![Overview asset task](../img/faq/supervisor_page_sort.png)
+
+You can also filter the information. As you already are in a task, you will just need to type the status needed : 
+`wip`, `wfa`, `-done`, etc.
+
+You can also earch per sequence or type of asset (`character`, or `seq01`)
 
 ### Sequence overview page
 
@@ -138,7 +149,7 @@ Select the first episode on the drop down menu, then search `se02`, the result
 ![Search bar sequence episode](../img/faq/filter_ep_seq.png)
 
 In the same way, you can search **specific status** link to task. Type the
-**name of the task** (or the between `[` `]` if the task name is more than one word `[modeling low]`),
+**name of the task** (or between `[` `]` if the task name is more than one word `[modeling low]`),
  then add the sign **equal**
 (`=`) and the **status** you are looking for.
 
@@ -154,6 +165,8 @@ The research will be `render=wfa animation=retake`.
 
 ![Search layout wfa seq2](../img/faq/filter_lay_wfa_s002.png)
 
+You can also searche for unassigned task for a specific type task.
+For example `Animation = unassigned`.
 
 ### How to save filter queries?
 
