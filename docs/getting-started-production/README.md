@@ -89,7 +89,7 @@ On the main asset page, to extend the description, click on the first words
 
 And now we can create tasks for the assets (3), like **Concept**, **Modeling**,
 **Texture**, **Setup**, and other if needed (see 
-[How to customize the workflow](.../faq/#how-to-customize-the-worklfow)
+[How to customize the workflow](.../faq/#how-to-customize-the-workflow)
 ).
 
 

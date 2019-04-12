@@ -357,7 +357,7 @@ button.
 
 ------------------------------------
 
-## How to customize the worklfow?
+## How to customize the workflow?
 
 ### How to edit an existing task type?
 
