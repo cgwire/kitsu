@@ -518,7 +518,7 @@ downloaded to be reviewed.
 
 You can watch the version from the right pannel, or enlarge it fullscreen ![Fullscreen](../img/getting-started/fullscreen.png).
 
-You can draw directly on the version with the **pencil** icon ![Pencil](../img/getting-started/pencil.png).
+You can draw directly on the version with the **pencil** icon ![Pencil](../img/getting-started/draw.png).
 
 If you need to move your line, click again on the **pencil** icon, the cursor will change to a multi directional cross ![Pencil](../img/getting-started/direction_arrow.png), and then you will be able to select your line and move it around.
 
