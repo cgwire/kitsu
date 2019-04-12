@@ -64,8 +64,6 @@ for this **specific task type** per asset or per shot.
 
 You will find on these pages more information than on the global page. 
 
-
-
 You can also sort the information of the page, to focus on the important subject.
 
 ![Overview asset task](../img/faq/supervisor_page_sort.png)
@@ -230,13 +228,16 @@ assigned to you.
 
 Notifications include the following information: 
 
-* (1) the name of the **author**
-* (2) the related **entity**
-* (3) the related **task**
-* (4) the new **status**
-* (5) the **attached file**
+* If it's a notification ![Notification page](../img/faq/notification_icon_comment.png) or a tag ![Notification page](../img/faq/notification_icon_tag.png)
+* the name of the **author** ![Notification page](../img/faq/notification_author.png)
+* the related **entity** ![Notification page](../img/faq/notification_entities.png)
+* the related **task** ![Notification page](../img/faq/notification_task.png)
+* the new **status** ![Notification page](../img/faq/wfa_icon.png)
+* the **attached file** ![Notification page](../img/faq/notification_attached_files.png)
 
-and (6) the comment.
+and the comment.
+
+When you click on the empty space of the notification, the comments pannel on the right is displayed. You can answer directly from this page to any element.
 
 Each part is a **link** you can use it to jump on the information you need. If
 you click on the **status**, you will jump to the status page of the entity. So
@@ -259,8 +260,8 @@ to stay up to date.
 ### How to get notified?
 
 As an artist you will receive a notification 
-![Notification](../img/faq/notification_icon_on.png) as soon as someone change
-the status of one of your task, or post a comment.
+![Notification](../img/faq/notification_icon_on.png) as soon as someone assigned you to a task, change
+the status of one of your task, post a comment, or tag you on a comment.
 
 You can also choose to follow specifics tasks. Go into the task page you want
 to follow: on the **assets** or **shots** pages click onto the status icon, 
