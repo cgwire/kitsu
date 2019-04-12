@@ -250,6 +250,8 @@ export default {
   playlists: {
     add_shots: 'Select shots',
     add_sequence: 'Add whole sequence',
+    build_daily: 'Daily pending',
+    build_weekly: 'All Pending',
     delete_text: 'Are you sure you want to remove {name} from your database?',
     delete_error: 'An error occured while deleting this playlist.',
     edit_title: 'Edit playlist',

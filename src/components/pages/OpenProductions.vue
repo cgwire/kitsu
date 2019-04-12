@@ -52,7 +52,10 @@
           </router-link>
         </div>
       </div>
-      <div class="has-text-centered new-production-link">
+      <div
+        class="has-text-centered new-production-link"
+        v-if="!isCurrentUserClient"
+      >
         <a
           @click="showNewModal"
         >

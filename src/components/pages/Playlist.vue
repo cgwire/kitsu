@@ -54,6 +54,26 @@
         <div v-else>
           <div class="addition-header">
             <page-subtitle :text="$t('playlists.add_shots')" />
+            <button
+              :class="{
+                button: true,
+                'add-sequence': true,
+                'is-loading': this.loading.addSequence
+              }"
+              @click="addAllPending"
+            >
+              {{ $t('playlists.build_weekly') }}
+            </button>
+            <button
+              :class="{
+                button: true,
+                'add-sequence': true,
+                'is-loading': this.loading.addSequence
+              }"
+              @click="addDailyPending"
+            >
+              {{ $t('playlists.build_daily') }}
+            </button>
 
             <div v-if="episodes.length > 0 || !isTVShow">
               <div>
@@ -201,6 +221,7 @@ export default {
       'changePlaylistPreview',
       'deletePlaylist',
       'editPlaylist',
+      'getPending',
       'loadPlaylist',
       'loadPlaylists',
       'loadShotPreviewFiles',
@@ -345,15 +366,34 @@ export default {
       })
     },
 
-    addSequence (shot) {
+    addSequence () {
       this.$options.silent = true
       this.loading.addSequence = true
       const shots = [...this.sequenceShots].reverse()
       this.addShots(shots, () => {
-        console.log('finisehd')
         this.loading.addSequence = false
         this.$options.silent = false
       })
+    },
+
+    addAllPending () {
+      this.$options.silent = true
+      this.getPending(false)
+        .then((shots) => {
+          this.addShots(shots.reverse(), () => {
+            this.$options.silent = false
+          })
+        })
+    },
+
+    addDailyPending () {
+      this.$options.silent = true
+      this.getPending(true)
+        .then((shots) => {
+          this.addShots(shots.reverse(), () => {
+            this.$options.silent = false
+          })
+        })
     },
 
     addShots (shots, callback) {

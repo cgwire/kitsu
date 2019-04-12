@@ -262,6 +262,11 @@ const mutations = {
     }
   },
 
+  [CHANGE_PLAYLIST_PREVIEW] (state, { playlist, shotId, previewFileId }) {
+    const shotToChange = playlist.shots.find((shot) => shot.shot_id === shotId)
+    shotToChange.preview_file_id = previewFileId
+  },
+
   [RESET_ALL] (state) {
     Object.assign(state, {...initialState})
   }

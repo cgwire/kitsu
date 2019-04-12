@@ -763,7 +763,9 @@ export default {
             value: this.taskTypeMap[taskTypeId].id
           }
         })
-        this.taskTypeToCompare = this.taskTypeOptions[0].value
+        if (this.taskTypeOptions.length > 0) {
+          this.taskTypeToCompare = this.taskTypeOptions[0].value
+        }
       } else {
         this.taskTypeOptions = []
       }
