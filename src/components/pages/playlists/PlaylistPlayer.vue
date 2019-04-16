@@ -32,6 +32,7 @@
       :shots="shotListToCompare"
       v-if="isComparing"
     />
+
     <task-info
       ref="task-info"
       :class="{
@@ -892,7 +893,8 @@ export default {
 }
 
 .task-info-column {
-  min-width: 350px;
+  min-width: 450px;
+  max-width: 450px;
   overflow-y: auto;
 }
 
