@@ -464,6 +464,12 @@ export default {
 
       return route
     }
+  },
+
+  watch: {
+    validationColumns () {
+      this.initHiddenColumns(this.validationColumns, this.hiddenColumns)
+    }
   }
 }
 </script>
