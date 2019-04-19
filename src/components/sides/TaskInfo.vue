@@ -174,8 +174,8 @@
       @fileselected="selectFile"
       @confirm="createExtraPreview"
     />
-
   </div>
+
   <div class="side task-info has-text-centered" v-else>
     {{ $t('tasks.no_task_selected') }}
   </div>

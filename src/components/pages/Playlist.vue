@@ -43,6 +43,7 @@
           @playlist-deleted="goFirstPlaylist"
           @remove-shot="removeShot"
           @order-change="onOrderChange"
+          @annotationchanged="onAnnotationChanged"
         />
       </div>
 
@@ -227,7 +228,8 @@ export default {
       'loadShots',
       'newPlaylist',
       'refreshPlaylist',
-      'removeShotPreviewFromPlaylist'
+      'removeShotPreviewFromPlaylist',
+      'updatePreviewAnnotation'
     ]),
 
     getPlaylistPath (playlistId, section) {
@@ -288,7 +290,8 @@ export default {
               preview_files: shotPreview.preview_files,
               preview_file_id: shotPreview.preview_file_id || shot.preview_file_id,
               preview_file_extension: shotPreview.extension || shot.preview_file_extension,
-              preview_file_task_id: shotPreview.task_id || shot.preview_file_task_id
+              preview_file_task_id: shotPreview.task_id || shot.preview_file_task_id,
+              preview_file_annotations: shotPreview.annotations || shot.preview_file_annotations
             }
           }
         })
@@ -499,6 +502,11 @@ export default {
         playlist: this.currentPlaylist,
         info
       })
+    },
+
+    onAnnotationChanged ({ preview, annotations }) {
+      const taskId = preview.task_id
+      this.updatePreviewAnnotation({ taskId, preview, annotations })
     }
   },
 
@@ -599,7 +607,6 @@ export default {
     background: $dark-grey-light;
     border-color: $dark-grey;
     box-shadow: 0px 0px 6px #333;
-    z-index: 201;
   }
 
   .addition-column {
@@ -633,6 +640,7 @@ export default {
   padding: 2em 1em 1em 2em;
   border-right: 1px solid #DDD;
   box-shadow: 0px 0px 6px #F0F0F0;
+  z-index: 201;
 }
 
 .playlist-item {

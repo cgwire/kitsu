@@ -224,6 +224,7 @@ const mutations = {
       if (!preview) preview = previewFileList[0]
       shot.preview_file_id = preview.id
       shot.preview_file_extension = preview.extension
+      shot.preview_file_annotations = preview.annotations
     }
   },
 
@@ -233,6 +234,7 @@ const mutations = {
       shot_id: shot.id,
       preview_file_id: shot.preview_file_id,
       preview_file_extension: shot.preview_file_extension,
+      preview_file_annotations: shot.preview_file_annotations,
       preview_files: shot.preview_files
     })
   },
