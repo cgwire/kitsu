@@ -72,6 +72,14 @@
     :class="iconClass"
     v-if="icon === 'compare'"
   />
+  <x-icon
+    :class="iconClass"
+    v-if="icon === 'remove'"
+  />
+  <edit2-icon
+    :class="iconClass"
+    v-if="icon === 'pencil'"
+  />
 
   <span
     :class="{
@@ -92,6 +100,7 @@ import {
   CopyIcon,
   DownloadIcon,
   EditIcon,
+  Edit2Icon,
   FilmIcon,
   ImageIcon,
   MaximizeIcon,
@@ -103,7 +112,8 @@ import {
   SkipBackIcon,
   SkipForwardIcon,
   TrashIcon,
-  UploadIcon
+  UploadIcon,
+  XIcon
 } from 'vue-feather-icons'
 
 export default {
@@ -114,6 +124,7 @@ export default {
     CopyIcon,
     DownloadIcon,
     EditIcon,
+    Edit2Icon,
     FilmIcon,
     ImageIcon,
     MaximizeIcon,
@@ -125,7 +136,8 @@ export default {
     SkipBackIcon,
     SkipForwardIcon,
     TrashIcon,
-    UploadIcon
+    UploadIcon,
+    XIcon
   },
 
   props: {
