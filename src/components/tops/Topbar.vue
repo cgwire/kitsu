@@ -236,9 +236,6 @@ export default {
           production_id: production.id
         }
       }
-      console.log(production.name)
-      console.log(production.production_type)
-      console.log(production.first_episode_id)
       if (production.production_type === 'tvshow') {
         route.name = `episode-${section}`
         route.params.episode_id = production.first_episode_id
