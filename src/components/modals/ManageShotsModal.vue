@@ -353,6 +353,21 @@ export default {
 </script>
 
 <style lang="scss" scoped>
+
+.dark {
+  .entity-line.selected {
+    background: $purple-strong;
+  }
+
+  .entity-line:hover {
+    background: $green;
+  }
+
+  .shot-column .list {
+    border: 1px solid $dark-grey;
+  }
+}
+
 .shot-columns {
   display: flex;
   height: 300px;
@@ -393,7 +408,7 @@ export default {
 }
 
 .entity-line:hover {
-  background: #ecfaec;
+  background: $light-green;
 }
 
 .entity-line.selected {
