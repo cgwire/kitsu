@@ -13,6 +13,7 @@ class ImportCsvShotsTestCase(ApiDBTestCase):
 
         self.generate_fixture_project_status()
         self.generate_fixture_project()
+        self.generate_fixture_metadata_descriptor(entity_type="Shot")
 
     def test_import_shots(self):
         path = "/import/csv/projects/%s/shots" % self.project.id
@@ -29,3 +30,6 @@ class ImportCsvShotsTestCase(ApiDBTestCase):
 
         entity_types = EntityType.query.all()
         self.assertEqual(len(entity_types), 3)
+
+        shot = shots[0]
+        self.assertEquals(shot["data"].get("contractor", None), "contractor 1")

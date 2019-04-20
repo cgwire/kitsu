@@ -8,7 +8,7 @@ from flask_jwt_extended import jwt_required
 
 from zou.app import app
 from zou.app.utils import permissions
-from zou.app.services import user_service
+from zou.app.services import user_service, projects_service
 
 
 class BaseCsvImportResource(Resource):
@@ -96,7 +96,7 @@ class BaseCsvProjectImportResource(BaseCsvImportResource):
     def run_import(self, project_id, file_path, delimiter):
         result = []
         self.check_project_permissions(project_id)
-        self.prepare_import()
+        self.prepare_import(project_id)
         with open(file_path) as csvfile:
             reader = csv.DictReader(csvfile, delimiter=delimiter)
             for row in reader:
@@ -109,3 +109,11 @@ class BaseCsvProjectImportResource(BaseCsvImportResource):
 
     def import_row(self, project_id):
         pass
+
+    def get_descriptor_field_map(self, project_id, entity_type):
+        descriptor_map = {}
+        descriptors = projects_service.get_metadata_descriptors(project_id)
+        for descriptor in descriptors:
+            if descriptor["entity_type"] == entity_type:
+                descriptor_map[descriptor["name"]] = descriptor["field_name"]
+        return descriptor_map
