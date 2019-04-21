@@ -60,7 +60,7 @@
           <th
             ref="th-spent"
             class="time-spent"
-            v-if="!isCurrentUserClient && isShowInfos"
+            v-if="!isCurrentUserClient && isShowInfos && isTime"
            >
             {{ $t('shots.fields.time_spent') }}
           </th>
@@ -187,7 +187,7 @@
           </td>
           <td
             class="time-spent"
-            v-if="!isCurrentUserClient && isShowInfos"
+            v-if="!isCurrentUserClient && isShowInfos && isTime"
           >
             {{ formatDuration(shot.timeSpent) }}
           </td>
@@ -319,6 +319,7 @@ export default {
       'isFrameOut',
       'isSingleEpisode',
       'isShowInfos',
+      'isTime',
       'isTVShow',
       'nbSelectedTasks',
       'shotFilledColumns',

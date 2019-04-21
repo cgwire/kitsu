@@ -60,7 +60,7 @@
           <th
             class="time-spent"
             ref="th-spent"
-            v-if="!isCurrentUserClient && isShowInfos"
+            v-if="!isCurrentUserClient && isShowInfos && isAssetTime"
           >
             {{ $t('assets.fields.time_spent') }}
           </th>
@@ -189,7 +189,7 @@
           </td>
           <td
             class="time-spent"
-            v-if="!isCurrentUserClient && isShowInfos"
+            v-if="!isCurrentUserClient && isShowInfos && isAssetTime"
           >
             {{ formatDuration(asset.timeSpent) }}
           </td>
@@ -320,6 +320,7 @@ export default {
       'isCurrentUserClient',
       'isCurrentUserManager',
       'isShowInfos',
+      'isAssetTime',
       'isTVShow',
       'selectedTasks',
       'taskMap',
