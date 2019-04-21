@@ -78,7 +78,8 @@ export default {
     fields: {
       name: 'Name',
       url: 'URL',
-      entity_type: 'Entity Type'
+      entity_type: 'Entity Type',
+      is_ajax: 'Use AJAX'
     },
     entity_types: {
       all: 'All',

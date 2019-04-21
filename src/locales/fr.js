@@ -336,7 +336,8 @@ export default {
     fields: {
       name: 'Nom',
       url: 'URL',
-      entity_type: 'Type d\'entité'
+      entity_type: 'Type d\'entité',
+      is_ajax: 'Utiliser AJAX'
     },
     entity_types: {
       all: 'Tous',
