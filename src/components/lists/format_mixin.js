@@ -26,6 +26,10 @@ export const formatListMixin = {
       } else {
         return 0
       }
+    },
+
+    formatBoolean (booleanValue) {
+      return booleanValue ? this.$t('main.yes') : this.$t('main.no')
     }
   }
 }

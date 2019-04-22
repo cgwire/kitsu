@@ -78,7 +78,8 @@ export default {
     fields: {
       name: 'Name',
       url: 'URL',
-      entity_type: 'Entity Type'
+      entity_type: 'Entity Type',
+      is_ajax: 'Use AJAX'
     },
     entity_types: {
       all: 'All',
@@ -108,7 +109,7 @@ export default {
     login_failed: 'Log in failed, please verify your credentials',
     login_page: 'Cancel',
     reset_change_password: 'Change password',
-    reset_change_password_form_failed: 'There is a problem with the password you gave. Please, verify that it is more than 6 chars long and that both passwords match.',
+    reset_change_password_form_failed: 'There is a problem with the password you gave. Please, verify that it is at least 7 chars long and that both passwords match.',
     reset_change_password_failed: 'Changing password failed. Please, restart the whole procedure again.',
     reset_change_password_succeed: 'Your password was changed successfully. Please, go back to the login page to use it.',
     reset_change_password_title: 'Enter a new password',

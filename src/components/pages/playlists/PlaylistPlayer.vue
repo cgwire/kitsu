@@ -17,7 +17,7 @@
     />
   </div>
 
-  <div class="filler flexrow" ref="video-container">
+  <div class="filler flexrow video-container" ref="video-container">
     <raw-video-player
       class="raw-player"
       ref="raw-player"
@@ -32,6 +32,14 @@
       :shots="shotListToCompare"
       v-if="isComparing"
     />
+    <div class="canvas-wrapper">
+      <canvas
+        id="annotation-canvas"
+        ref="annotation-canvas"
+        class="canvas"
+      >
+      </canvas>
+    </div>
 
     <task-info
       ref="task-info"
@@ -60,6 +68,19 @@
         ></span>
       </progress>
     </div>
+  </div>
+
+  <div class="playlist-annotations" ref="playlist-annotation">
+    <span
+      :key="`annotation-${annotation.time}`"
+      class="annotation-mark"
+      :style="{
+        left: getAnnotationPosition(annotation) + 'px'
+      }"
+      @click="loadAnnotation(annotation)"
+      v-for="annotation in annotations"
+    >
+    </span>
   </div>
 
   <div class="playlist-footer flexrow" ref="button-bar">
@@ -131,15 +152,29 @@
       v-model="taskTypeToCompare"
       v-if="isComparing"
     />
-
     <span class="filler"></span>
+
+    <button-simple
+      :class="{
+        'playlist-button': true,
+        'flexrow-item': true,
+        active: isDrawing
+      }"
+      @click="onAnnotateClicked"
+      icon="pencil"
+    />
+    <button-simple
+      class="playlist-button flexrow-item"
+      icon="remove"
+      @click="onDeleteClicked"
+    />
     <button-simple
       class="button playlist-button flexrow-item"
       @click="onCommentClicked"
       icon="comment"
     />
     <button-simple
-      class="button playlist-button flexrow-item"
+      class="playlist-button flexrow-item"
       @click="onFilmClicked"
       icon="film"
     />
@@ -205,6 +240,7 @@
  */
 import { mapActions, mapGetters } from 'vuex'
 import { removeModelFromList } from '../../../lib/helpers'
+import { fabric } from 'fabric'
 
 import ButtonSimple from '../../widgets/ButtonSimple'
 import Combobox from '../../widgets/Combobox'
@@ -242,10 +278,13 @@ export default {
 
   data () {
     return {
+      annotations: [],
       currentTime: '00:00.00',
       currentTimeRaw: 0,
+      fabricCanvas: null,
       isCommentsHidden: true,
       isComparing: false,
+      isDrawing: false,
       isLoading: false,
       isPlaying: false,
       isShotsHidden: false,
@@ -277,11 +316,12 @@ export default {
   mounted () {
     this.shotList = Object.values(this.shots)
     this.updateProgressBar()
-    setTimeout(() => {
+    this.$nextTick(() => {
       window.addEventListener('keydown', this.onKeyDown, false)
       window.addEventListener('resize', this.onWindowResize)
       this.$el.onmousemove = this.onMouseMove
-    }, 0)
+      this.setupCanvas()
+    })
   },
 
   beforeDestroy () {
@@ -305,6 +345,10 @@ export default {
         document.webkitFullscreenEnabled ||
         document.createElement('video').webkitRequestFullScreen
       )
+    },
+
+    canvas () {
+      return this.$refs['annotation-canvas']
     },
 
     container () {
@@ -494,16 +538,22 @@ export default {
         this.$refs['raw-player-comparison'].play()
       }
       this.isPlaying = true
+      this.hideCanvas()
+      this.clearCanvas()
     },
 
     pause () {
+      this.showCanvas()
       this.rawPlayer.pause()
       if (this.isComparing) this.$refs['raw-player-comparison'].pause()
       this.isPlaying = false
     },
 
     playShot (shotIndex) {
-      if (this.shotList[shotIndex].preview_file_extension === 'mp4') {
+      const shot = this.shotList[shotIndex]
+      this.clearCanvas()
+      if (shot.preview_file_extension === 'mp4') {
+        this.annotations = shot.preview_file_annotations || []
         this.playingShotIndex = shotIndex
         this.scrollToShot(this.playingShotIndex)
         this.rawPlayer.loadShot(shotIndex)
@@ -573,6 +623,7 @@ export default {
     },
 
     onProgressBarClicked (e) {
+      this.clearCanvas()
       var pos =
         (e.pageX - this.progress.offsetLeft) / this.progress.offsetWidth
       const currentTime = pos * this.maxDurationRaw
@@ -625,7 +676,9 @@ export default {
     onKeyDown (event) {
       this.displayBars()
       if (!['INPUT', 'TEXTAREA'].includes(event.target.tagName)) {
-        if (event.keyCode === 37) {
+        if (event.keyCode === 46 && this.fabricCanvas) {
+          this.deleteSelection()
+        } else if (event.keyCode === 37) {
           event.preventDefault()
           event.stopPropagation()
           this.goPreviousFrame()
@@ -734,6 +787,7 @@ export default {
         height -= this.$refs['playlist-progress'].offsetHeight
         height -= this.$refs['button-bar'].offsetHeight
         height -= this.$refs['playlisted-shots'].offsetHeight
+        height -= this.$refs['playlist-annotation'].offsetHeight
         this.$refs['video-container'].style.height = `${height}px`
         if (!this.isCommentsHidden) {
           this.$refs['task-info'].$el.style.height = `${height}px`
@@ -743,9 +797,20 @@ export default {
           this.$refs['raw-player-comparison'].resetHeight()
         }
         this.$nextTick(() => {
+          this.resetCanvas()
           this.updateProgressBar()
         })
       })
+    },
+
+    resetCanvas () {
+      const width = this.$refs['raw-player'].$el.offsetWidth
+      const height = this.$refs['raw-player'].$el.offsetHeight
+      this.fabricCanvas.setDimensions({ width, height })
+      this.fabricCanvas.renderAll()
+      this.clearCanvas()
+      const annotation = this.getAnnotation(this.currentTimeRaw)
+      if (annotation) this.loadAnnotation(annotation)
     },
 
     rebuildComparisonOptions () {
@@ -794,6 +859,206 @@ export default {
         player.loadShot(this.playingShotIndex)
         player.setCurrentTime(this.currentTimeRaw)
       })
+    },
+
+    clearCanvas () {
+      if (this.fabricCanvas) {
+        this.fabricCanvas.getObjects().forEach((obj) => {
+          this.fabricCanvas.remove(obj)
+        })
+      }
+    },
+
+    clearAnnotations () {
+      if (this.fabricCanvas && this.fabricCanvas.getObjects().length > 0) {
+        this.fabricCanvas.getObjects().forEach((obj) => {
+          if (['rect', 'circle', 'path'].includes(obj.type)) {
+            this.fabricCanvas.remove(obj)
+          }
+        })
+      }
+    },
+
+    onAnnotateClicked () {
+      this.showCanvas()
+      if (this.isDrawing) {
+        this.fabricCanvas.isDrawingMode = false
+        this.isDrawing = false
+      } else {
+        this.fabricCanvas.isDrawingMode = true
+        this.isDrawing = true
+      }
+    },
+
+    showCanvas () {
+      this.canvas.style.display = 'block'
+    },
+
+    hideCanvas () {
+      this.canvas.style.display = 'none'
+    },
+
+    setupCanvas () {
+      this.fabricCanvas = new fabric.Canvas('annotation-canvas', {
+        width: 400,
+        height: 400
+      })
+      this.fabricCanvas.freeDrawingBrush.color = '#ff3860'
+      this.fabricCanvas.freeDrawingBrush.width = 4
+      this.fabricCanvas.on('object:moved', this.saveAnnotations)
+      this.fabricCanvas.on('mouse:up', () => {
+        if (this.isDrawing) this.saveAnnotations()
+      })
+      this.resetCanvas()
+      this.fabricCanvas.renderAll()
+    },
+
+    getAnnotationPosition (annotation) {
+      const factor = annotation.time / this.maxDurationRaw
+      this.progressBar.style.width = Math.floor(factor * 100) + '%'
+      const progressCoordinates = this.progress.getBoundingClientRect()
+      return progressCoordinates.width * factor - 3
+    },
+
+    loadAnnotation (annotation) {
+      this.pause()
+      const currentTime = annotation.time
+      this.rawPlayer.setCurrentTime(currentTime)
+      if (this.isComparing) {
+        this.$refs['raw-player-comparison'].setCurrentTime(currentTime)
+      }
+      this.currentTimeRaw = currentTime
+      this.updateProgressBar()
+
+      this.fabricCanvas.isDrawingMode = false
+      this.isDrawing = false
+      this.clearAnnotations()
+
+      let scaleMultiplierX = 1
+      let scaleMultiplierY = 1
+      if (annotation.width) {
+        scaleMultiplierX = this.fabricCanvas.width / annotation.width
+        scaleMultiplierY = this.fabricCanvas.width / annotation.width
+      }
+      if (annotation.height) {
+        scaleMultiplierY = this.fabricCanvas.height / annotation.height
+      }
+
+      annotation.drawing.objects.forEach((obj) => {
+        const base = {
+          left: obj.left * scaleMultiplierX,
+          top: obj.top * scaleMultiplierY,
+          fill: 'transparent',
+          stroke: '#ff3860',
+          strokeWidth: 4,
+          radius: obj.radius,
+          width: obj.width,
+          height: obj.height,
+          scaleX: obj.scaleX * scaleMultiplierX,
+          scaleY: obj.scaleY * scaleMultiplierY
+        }
+        if (obj.type === 'path') {
+          let strokeMultiplier = 1
+          if (obj.canvasWidth) {
+            strokeMultiplier = obj.canvasWidth / this.fabricCanvas.width
+          }
+          const path = new fabric.Path(
+            obj.path,
+            {
+              ...base,
+              strokeWidth: 3 * strokeMultiplier,
+              canvasWidth: obj.canvasWidth
+            }
+          )
+          path.setControlsVisibility({
+            mt: false,
+            mb: false,
+            ml: false,
+            mr: false,
+            bl: false,
+            br: false,
+            tl: false,
+            tr: false,
+            mtr: false
+          })
+          this.fabricCanvas.add(path)
+        }
+      })
+    },
+
+    saveAnnotations () {
+      const currentTime = this.currentTimeRaw
+      if (!this.annotations) return
+      const annotation = this.getAnnotation(currentTime)
+
+      this.fabricCanvas.getObjects().forEach((obj) => {
+        if (obj.type === 'path') {
+          if (!obj.canvasWidth) obj.canvasWidth = this.fabricCanvas.width
+          obj.setControlsVisibility({
+            mt: false,
+            mb: false,
+            ml: false,
+            mr: false,
+            bl: false,
+            br: false,
+            tl: false,
+            tr: false,
+            mtr: false
+          })
+        }
+      })
+
+      if (annotation) {
+        annotation.drawing = this.fabricCanvas.toJSON(['canvasWidth'])
+        annotation.width = this.fabricCanvas.width
+        if (annotation.drawing && annotation.drawing.objects.length < 1) {
+          const index = this.annotations.findIndex(
+            (annotation) => annotation.time === currentTime
+          )
+          this.annotations.splice(index, 1)
+        }
+      } else {
+        this.annotations.push({
+          time: currentTime,
+          width: this.fabricCanvas.width,
+          height: this.fabricCanvas.height,
+          drawing: this.fabricCanvas.toJSON(['canvasWidth'])
+        })
+        this.annotations = this.annotations.sort((a, b) => {
+          return a.time < b.time
+        }) || []
+      }
+      const annotations = []
+      this.annotations.forEach(a => annotations.push({...a}))
+      const shot = this.shotList[this.playingShotIndex]
+      const preview = {
+        id: shot.preview_file_id,
+        task_id: shot.preview_file_task_id,
+        annotations: shot.preview_file_annotations
+      }
+      this.$emit('annotationchanged', {
+        preview: preview,
+        annotations: annotations
+      })
+    },
+
+    onDeleteClicked () {
+      this.deleteSelection()
+    },
+
+    deleteSelection () {
+      this.fabricCanvas.remove(this.fabricCanvas.getActiveObject())
+      this.saveAnnotations()
+    },
+
+    getAnnotation (time) {
+      if (this.annotations) {
+        return this.annotations.find(
+          (annotation) => annotation.time === time
+        )
+      } else {
+        return null
+      }
     }
   },
 
@@ -806,6 +1071,7 @@ export default {
       if (this.isComparing) {
         this.resetComparison()
       }
+      this.clearCanvas()
     },
 
     taskTypeToCompare () {
@@ -821,6 +1087,8 @@ export default {
       this.rawPlayer.setCurrentTime(0)
       this.updateTaskPanel()
       this.rebuildComparisonOptions()
+      this.clearCanvas()
+      this.annotations = []
       if (this.shotList.length === 0) {
         this.rawPlayer.clear()
         if (this.isComparing) {
@@ -854,6 +1122,10 @@ export default {
 
     &:hover {
       background: $dark-grey-lighter;
+    }
+
+    &.active {
+      color: $green;
     }
   }
 }
@@ -954,26 +1226,33 @@ export default {
   margin-right: 0;
 }
 
-#annotation-canvas {
-  display: block;
-  width: 0;
+.video-container {
+  position: relative;
+}
+
+.canvas-wrapper {
+  position: absolute;
+  top: 0;
+  left: 0;
 }
 
 .video-annotation {
   background: #26292F;
-  height: 12px;
+  height: 10px;
   text-align: left;
   margin-top: 0px;
   padding: 0;
 }
 
 .annotation-mark {
-  display: flex;
   background: #ff3860;
   width: 8px;
   height: 8px;
   display: inline-block;
-  top: -6px;
+  top: 6px;
+  position: absolute;
+  border-radius: 50%;
+  cursor: pointer;
 }
 
 .buttons {
@@ -1031,6 +1310,12 @@ progress {
 
 .playlist-progress {
   width: 100%;
+}
+
+.playlist-annotations {
+  width: 100%;
+  height: 20px;
+  position: relative;
 }
 
 .playlist-header,

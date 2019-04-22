@@ -35,16 +35,6 @@ const initialState = {
 
 const state = {...initialState}
 
-const helpers = {
-  getOptions (customAction) {
-    return {
-      label: customAction.name,
-      value: customAction.url,
-      entity_type: customAction.entity_type
-    }
-  }
-}
-
 const getters = {
   customActions: state => state.customActions,
 
@@ -60,24 +50,21 @@ const getters = {
     )
   },
 
-  allCustomActionOptions: (state) => {
+  allCustomActions: (state) => {
     return state
       .customActions
-      .map(helpers.getOptions)
       .filter((action) => action.entity_type === 'all')
   },
 
-  assetCustomActionOptions: (state) => {
+  assetCustomActions: (state) => {
     return state
       .customActions
-      .map(helpers.getOptions)
       .filter((action) => ['all', 'asset'].includes(action.entity_type))
   },
 
-  shotCustomActionOptions: (state) => {
+  shotCustomActions: (state) => {
     return state
       .customActions
-      .map(helpers.getOptions)
       .filter((action) => ['all', 'shot'].includes(action.entity_type))
   }
 }
@@ -127,6 +114,10 @@ const actions = {
       }
       if (callback) callback(err)
     })
+  },
+
+  postCustomAction ({ commit }, { data, url }) {
+    customActionsApi.postCustomAction(url, data)
   }
 }
 

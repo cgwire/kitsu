@@ -7,6 +7,7 @@
           <th class="name">{{ $t('custom_actions.fields.name') }}</th>
           <th class="url">{{ $t('custom_actions.fields.url') }}</th>
           <th class="entity-type">{{ $t('custom_actions.fields.entity_type') }}</th>
+          <th class="is-ajax">{{ $t('custom_actions.fields.is_ajax') }}</th>
           <th class="actions">&nbsp;</th>
         </tr>
       </thead>
@@ -26,6 +27,9 @@
           <td class="name">{{ customAction.name }}</td>
           <td class="url">{{ customAction.url }}</td>
           <td class="entity-type">{{ customAction.entity_type }}</td>
+          <td class="is-ajax">
+            {{ formatBoolean(customAction.is_ajax) }}
+          </td>
           <row-actions
             :entry-id="customAction.id"
             :edit-route="{
@@ -36,8 +40,7 @@
               name: 'delete-custom-action',
               params: {custom_action_id: customAction.id}
             }"
-          >
-          </row-actions>
+          />
         </tr>
       </tbody>
     </table>
@@ -52,12 +55,15 @@
 
 <script>
 import { mapGetters, mapActions } from 'vuex'
+import { formatListMixin } from './format_mixin'
 import RowActions from '../widgets/RowActions'
 import TableInfo from '../widgets/TableInfo'
 import TaskTypeName from '../cells/TaskTypeName'
 
 export default {
   name: 'custom-action-list',
+  mixins: [formatListMixin],
+
   props: [
     'entries',
     'isLoading',
@@ -106,6 +112,11 @@ export default {
 .entity-type {
   width: 200px;
   min-width: 200px;
+}
+
+.is-ajax {
+  width: 150px;
+  min-width: 150px;
 }
 
 .thead {

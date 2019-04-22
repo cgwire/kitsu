@@ -396,11 +396,13 @@ const mutations = {
     state.productions = sortProductions(productions)
 
     const productionMap = {}
-    state.productions.forEach((production) => {
+    const addProductionToMap = (production) => {
       if (!productionMap[production.id]) {
         productionMap[production.id] = production
       }
-    })
+    }
+    state.openProductions.forEach(addProductionToMap)
+    state.productions.forEach(addProductionToMap)
     state.productionMap = productionMap
   },
 

@@ -200,6 +200,7 @@ const initialState = {
   isFps: false,
   isFrameIn: false,
   isFrameOut: false,
+  isTime: false,
 
   displayedShots: [],
   displayedShotsLength: 0,
@@ -262,6 +263,7 @@ const getters = {
   isFps: state => state.isFps,
   isFrameIn: state => state.isFrameIn,
   isFrameOut: state => state.isFrameOut,
+  isTime: state => state.isTime,
 
   shotSearchText: state => state.shotSearchText,
   sequenceSearchText: state => state.sequenceSearchText,
@@ -781,6 +783,7 @@ const mutations = {
     let isFps = false
     let isFrameIn = false
     let isFrameOut = false
+    let isTime = false
     shots = sortShots(shots)
 
     state.shotMap = {}
@@ -797,6 +800,7 @@ const mutations = {
       if (!isFps && shot.data.fps) isFps = true
       if (!isFrameIn && shot.data.frame_in) isFrameIn = true
       if (!isFrameOut && shot.data.frame_out) isFrameOut = true
+      if (!isTime && shot.timeSpent > 0) isTime = true
 
       state.shotMap[shot.id] = shot
     })
@@ -808,6 +812,7 @@ const mutations = {
     state.isFps = isFps
     state.isFrameIn = isFrameIn
     state.isFrameOut = isFrameOut
+    state.isTime = isTime
 
     cache.shotIndex = buildShotIndex(shots)
 

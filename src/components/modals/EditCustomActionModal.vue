@@ -21,16 +21,14 @@
           :label="$t('custom_actions.fields.name')"
           v-model="form.name"
           v-focus
-        >
-        </text-field>
+        />
 
         <text-field
           ref="urlField"
           :label="$t('custom_actions.fields.url')"
           v-model="form.url"
           @enter="confirmClicked"
-        >
-        </text-field>
+        />
 
         <combobox
           :label="$t('custom_actions.fields.entity_type')"
@@ -38,9 +36,13 @@
           v-model="form.entityType"
           locale-key-prefix="custom_actions.entity_types."
           @enter="confirmClicked"
-        >
-        </combobox>
+        />
 
+        <combobox-boolean
+          :label="$t('custom_actions.fields.is_ajax')"
+          v-model="form.isAjax"
+          @enter="confirmClicked"
+        />
       </form>
 
       <p class="has-text-right">
@@ -68,16 +70,18 @@
 
 <script>
 import { mapGetters, mapActions } from 'vuex'
-import TextField from '../widgets/TextField'
-import Combobox from '../widgets/Combobox.vue'
 import ColorField from '../widgets/ColorField'
+import Combobox from '../widgets/Combobox'
+import ComboboxBoolean from '../widgets/ComboboxBoolean'
+import TextField from '../widgets/TextField'
 
 export default {
   name: 'edit-custom-action-modal',
   components: {
-    TextField,
     ColorField,
-    Combobox
+    Combobox,
+    ComboboxBoolean,
+    TextField
   },
 
   props: [
@@ -96,7 +100,8 @@ export default {
       form: {
         name: '',
         url: '',
-        entityType: 'all'
+        entityType: 'all',
+        isAjax: 'false'
       },
       entityTypeOptions: [
         {
@@ -139,7 +144,8 @@ export default {
         this.form = {
           name: this.customActionToEdit.name,
           url: this.customActionToEdit.url,
-          entityType: this.customActionToEdit.entity_type
+          entityType: this.customActionToEdit.entity_type,
+          isAjax: Boolean(this.customActionToEdit.is_ajax).toString()
         }
       }
     },

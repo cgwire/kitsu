@@ -872,7 +872,7 @@ export default {
       if (annotation) {
         annotation.drawing = this.fabricCanvas.toJSON(['canvasWidth'])
         annotation.width = this.fabricCanvas.width
-        if (annotation.drawing && annotation.drawing.objects.length === 1) {
+        if (annotation.drawing && annotation.drawing.objects.length <= 1) {
           const index = this.annotations.findIndex(
             (annotation) => annotation.time === currentTime
           )
@@ -882,6 +882,7 @@ export default {
         this.annotations.push({
           time: currentTime,
           width: this.fabricCanvas.width,
+          height: this.fabricCanvas.height,
           drawing: this.fabricCanvas.toJSON(['canvasWidth'])
         })
         this.annotations = this.annotations.sort((a, b) => {
@@ -907,23 +908,28 @@ export default {
 
       this.clearAnnotations()
 
-      let scaleMultiplier = 1
+      let scaleMultiplierX = 1
+      let scaleMultiplierY = 1
       if (annotation.width) {
-        scaleMultiplier = this.fabricCanvas.width / annotation.width
+        scaleMultiplierX = this.fabricCanvas.width / annotation.width
+        scaleMultiplierY = this.fabricCanvas.width / annotation.width
+      }
+      if (annotation.height) {
+        scaleMultiplierY = this.fabricCanvas.height / annotation.height
       }
 
       annotation.drawing.objects.forEach((obj) => {
         const base = {
-          left: obj.left * scaleMultiplier,
-          top: obj.top * scaleMultiplier,
+          left: obj.left * scaleMultiplierX,
+          top: obj.top * scaleMultiplierY,
           fill: 'transparent',
           stroke: '#ff3860',
           strokeWidth: 4,
           radius: obj.radius,
           width: obj.width,
           height: obj.height,
-          scaleX: obj.scaleX * scaleMultiplier,
-          scaleY: obj.scaleY * scaleMultiplier
+          scaleX: obj.scaleX * scaleMultiplierX,
+          scaleY: obj.scaleY * scaleMultiplierY
         }
         if (obj.type === 'rect') {
           const rect = new fabric.Rect({

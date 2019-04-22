@@ -165,6 +165,7 @@ const initialState = {
 
   isAssetsLoading: false,
   isAssetsLoadingError: false,
+  isAssetTime: false,
   assetsCsvFormData: null,
 
   assetCreated: '',
@@ -225,6 +226,8 @@ const getters = {
   deleteAsset: state => state.deleteAsset,
   restoreAsset: state => state.restoreAsset,
   assetCreated: state => state.assetCreated,
+
+  isAssetTime: state => state.isAssetTime,
 
   assetsCsvFormData: state => state.assetsCsvFormData
 }
@@ -481,6 +484,7 @@ const mutations = {
   [LOAD_ASSETS_END] (state, { production, assets, userFilters }) {
     const validationColumns = {}
     const assetTypeMap = {}
+    let isTime = false
     assets = sortAssets(assets)
 
     state.assetMap = {}
@@ -501,8 +505,12 @@ const mutations = {
       })
       asset.timeSpent = timeSpent
 
+      if (!isTime && timeSpent > 0) isTime = true
+
       state.assetMap[asset.id] = asset
     })
+
+    state.isAssetTime = isTime
 
     cache.assets = assets
     state.isAssetsLoading = false
