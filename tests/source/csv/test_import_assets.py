@@ -13,6 +13,7 @@ class ImportCsvAssetsTestCase(ApiDBTestCase):
 
         self.generate_fixture_project_status()
         self.generate_fixture_project()
+        self.generate_fixture_metadata_descriptor(entity_type="Shot")
 
     def test_import_assets(self):
         path = "/import/csv/projects/%s/assets" % self.project.id
@@ -27,6 +28,9 @@ class ImportCsvAssetsTestCase(ApiDBTestCase):
 
         entity_types = EntityType.query.all()
         self.assertEqual(len(entity_types), 2)
+
+        asset = entities[0]
+        self.assertEquals(asset.data.get("contractor", None), "contractor 1")
 
     def test_import_assets_duplicates(self):
         path = "/import/csv/projects/%s/assets" % self.project.id

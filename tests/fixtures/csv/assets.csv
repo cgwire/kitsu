@@ -1,4 +1,4 @@
-Type,Name,Description
-Prop,Cassette Player,Description 01
-Prop,Wood Stick,Description 02
-Character,Victor,Description 03
+Type,Name,Description,Contractor
+Prop,Cassette Player,Description 01,contractor 1
+Prop,Wood Stick,Description 02,contractor 2
+Character,Victor,Description 03,contractor 2

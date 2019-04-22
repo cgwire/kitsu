@@ -8,11 +8,15 @@ from sqlalchemy.exc import IntegrityError
 
 class AssetsCsvImportResource(BaseCsvProjectImportResource):
 
-    def prepare_import(self):
+    def prepare_import(self, project_id):
         self.entity_types = {}
+        self.descriptor_fields = self.get_descriptor_field_map(
+            project_id,
+            "Shot"
+        )
 
     def import_row(self, row, project_id):
-        name = row["Name"]
+        asset_name = row["Name"]
         entity_type_name = row["Type"]
         description = row["Description"]
 
@@ -26,18 +30,24 @@ class AssetsCsvImportResource(BaseCsvProjectImportResource):
             entity_type_name
         )
 
+        data = {}
+        for name, field_name in self.descriptor_fields.items():
+            if name in row:
+                data[field_name] = row[name]
+
         try:
             entity = Entity.get_by(
-                name=name,
+                name=asset_name,
                 project_id=project_id,
                 entity_type_id=entity_type_id
             )
             if entity is None:
                 entity = Entity.create(
-                    name=name,
+                    name=asset_name,
                     description=description,
                     project_id=project_id,
-                    entity_type_id=entity_type_id
+                    entity_type_id=entity_type_id,
+                    data=data
                 )
         except IntegrityError:
             pass

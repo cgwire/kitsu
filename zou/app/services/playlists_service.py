@@ -58,6 +58,7 @@ def get_playlist_with_preview_file_revisions(playlist_id):
             if preview_file is not None:
                 shot["preview_file_id"] = str(preview_file.id)
                 shot["extension"] = preview_file.extension
+                shot["annotations"] = preview_file.annotations
                 shot["task_id"] = fields.serialize_value(preview_file.task_id)
             else:
                 del shot["preview_file_id"]
@@ -96,6 +97,7 @@ def get_preview_files_for_shot(shot_id):
                     "id": str(preview_file.id),
                     "revision": preview_file.revision,
                     "extension": preview_file.extension,
+                    "annotations": preview_file.annotations,
                     "task_id": str(preview_file.task_id)
                 }
                 for preview_file in preview_files
