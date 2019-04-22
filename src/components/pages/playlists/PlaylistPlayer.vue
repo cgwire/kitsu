@@ -804,13 +804,17 @@ export default {
     },
 
     resetCanvas () {
-      const width = this.$refs['raw-player'].$el.offsetWidth
-      const height = this.$refs['raw-player'].$el.offsetHeight
-      this.fabricCanvas.setDimensions({ width, height })
+      this.resetCanvasSize()
       this.fabricCanvas.renderAll()
       this.clearCanvas()
       const annotation = this.getAnnotation(this.currentTimeRaw)
       if (annotation) this.loadAnnotation(annotation)
+    },
+
+    resetCanvasSize () {
+      const width = this.$refs['raw-player'].$el.offsetWidth
+      const height = this.$refs['raw-player'].$el.offsetHeight
+      this.fabricCanvas.setDimensions({ width, height })
     },
 
     rebuildComparisonOptions () {
@@ -1071,7 +1075,7 @@ export default {
       if (this.isComparing) {
         this.resetComparison()
       }
-      this.clearCanvas()
+      this.$nextTick(this.resetCanvas)
     },
 
     taskTypeToCompare () {
