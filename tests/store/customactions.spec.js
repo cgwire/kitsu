@@ -92,17 +92,17 @@ describe('customActions', () => {
     })
 
     it('assetCustomActionOptions', () => {
-      const customActions = getters.assetCustomActionOptions(state)
+      const customActions = getters.assetCustomActions(state)
       expect(customActions.length).to.equal(2)
-      expect(customActions[0].label).to.equal('Change status')
-      expect(customActions[1].label).to.equal('Send to render farm')
+      expect(customActions[0].name).to.equal('Change status')
+      expect(customActions[1].name).to.equal('Send to render farm')
     })
 
     it('shotCustomActionOptions', () => {
-      const customActions = getters.shotCustomActionOptions(state)
+      const customActions = getters.shotCustomActions(state)
       expect(customActions.length).to.equal(2)
-      expect(customActions[0].label).to.equal('Build Playlist')
-      expect(customActions[1].label).to.equal('Change status')
+      expect(customActions[0].name).to.equal('Build Playlist')
+      expect(customActions[1].name).to.equal('Change status')
     })
 
   })
