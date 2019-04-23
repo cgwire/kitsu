@@ -57,11 +57,12 @@ def update_casting(shot_id, casting):
     shot.update({"entities_out": []})
     casting_ids = []
     for cast in casting:
-        EntityLink.create(
-            entity_in_id=shot.id,
-            entity_out_id=cast["asset_id"],
-            nb_occurences=cast["nb_occurences"]
-        )
+        if "asset_id" in cast and "nb_occurences" in cast:
+            EntityLink.create(
+                entity_in_id=shot.id,
+                entity_out_id=cast["asset_id"],
+                nb_occurences=cast["nb_occurences"]
+            )
     events.emit("shot:casting-update", {
         "shot": shot_id,
         "casting": casting_ids
