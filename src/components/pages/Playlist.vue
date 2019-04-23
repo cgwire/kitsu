@@ -9,13 +9,17 @@
             'is-loading': loading.addPlaylist
           }"
           @click="addPlaylist"
+          key="new-playlist-button"
           v-if="isCurrentUserManager"
         >
           <plus-icon class="icon is-small" />
           {{ $t('playlists.new_playlist') }}
         </button>
 
-        <div class="playlists" v-if="!loading.playlists">
+        <div
+          class="playlists"
+          v-if="!loading.playlists"
+        >
           <router-link
             :key="playlist.id"
             :to="getPlaylistPath(playlist.id)"
@@ -28,7 +32,10 @@
             {{ playlist.name }}
           </router-link>
         </div>
-        <spinner v-else />
+        <spinner
+          class="mt2"
+          v-else
+        />
         <error-text
           text="$t('playlists.loading_error')"
           v-if="errors.playlistLoading"
@@ -51,10 +58,16 @@
         class="addition-column column"
         v-if="isCurrentUserManager"
       >
-        <spinner v-if="isShotsLoading" />
+        <spinner
+          class="mt2"
+          key="shot-loader"
+          v-if="isShotsLoading"
+        />
         <div v-else>
           <div class="addition-header">
-            <page-subtitle :text="$t('playlists.add_shots')" />
+            <page-subtitle
+              :text="$t('playlists.add_shots')"
+            />
             <button
               :class="{
                 button: true,
@@ -76,12 +89,16 @@
               {{ $t('playlists.build_daily') }}
             </button>
 
-            <div v-if="episodes.length > 0 || !isTVShow">
+            <div
+              class="mt1"
+              key="shot-list-header"
+              v-if="episodes.length > 0 || !isTVShow"
+            >
               <div>
                 <combobox
+                  class="select-sequence-combobox"
                   :label="$t('shots.fields.sequence')"
                   :options="sequenceOptions"
-                  class="select-shot-combobox"
                   v-model="sequenceId"
                   v-if="sequenceOptions.length > 0"
                 />
@@ -188,7 +205,6 @@ export default {
       'currentEpisode',
       'currentProduction',
       'episodes',
-      'getEpisodeOptions',
       'isShotsLoading',
       'isTVShow',
       'isCurrentUserManager',
@@ -199,19 +215,7 @@ export default {
       'sequences',
       'shotMap',
       'taskTypeMap'
-    ]),
-
-    playlistedShots () {
-      return Object.values(this.currentShots)
-    },
-
-    currentPlaylistRoute () {
-      if (this.currentPlaylist.id) {
-        return this.getPlaylistPath(this.currentPlaylist.id)
-      } else {
-        return this.playlistsPath
-      }
-    }
+    ])
   },
 
   methods: {
@@ -219,8 +223,6 @@ export default {
       'addShotPreviewToPlaylist',
       'changePlaylistOrder',
       'changePlaylistPreview',
-      'deletePlaylist',
-      'editPlaylist',
       'getPending',
       'loadPlaylist',
       'loadPlaylists',
@@ -245,10 +247,6 @@ export default {
         route.params.episode_id = this.currentEpisode.id
       }
       return route
-    },
-
-    getShotNumber () {
-      return Object.keys(this.currentShots).length
     },
 
     loadShotsData (callback) {
@@ -298,11 +296,6 @@ export default {
       }
     },
 
-    clearAdditionColumn () {
-      this.sequenceOptions = []
-      this.sequenceId = null
-    },
-
     clearCurrentPlaylist () {
       this.currentPlaylist = {}
       this.currentShots = {}
@@ -331,19 +324,6 @@ export default {
           if (err) this.errors.addPlaylist = true
           this.$router.push(this.getPlaylistPath(playlist.id))
           this.loading.addPlaylist = false
-        }
-      })
-    },
-
-    removePlaylist () {
-      this.loading.deletePlaylist = true
-      this.errors.deletePlaylist = false
-      this.deletePlaylist({
-        playlist: this.currentPlaylist,
-        callback: (err) => {
-          if (err) this.errors.deletePlaylist = true
-          this.loading.deletePlaylist = false
-          this.goFirstPlaylist()
         }
       })
     },
@@ -383,6 +363,11 @@ export default {
       }
     },
 
+    clearAdditionColumn () {
+      this.sequenceOptions = []
+      this.sequenceId = null
+    },
+
     setAdditionSequences () {
       let sequences = []
       if (this.isTVShow && this.currentEpisode) {
@@ -394,14 +379,9 @@ export default {
       }
 
       this.sequenceOptions = sequences.map(
-        (sequence) => { return { label: sequence.name, value: sequence.id } }
+        (sequence) => ({ label: sequence.name, value: sequence.id })
       )
-
-      if (sequences.length > 0) {
-        this.sequenceId = sequences[0].id
-      } else {
-        this.sequenceId = null
-      }
+      this.sequenceId = sequences.length > 0 ? sequences[0].id : null
     },
 
     setAdditionShots () {
@@ -511,9 +491,9 @@ export default {
   },
 
   mounted () {
-    this.setAdditionSequences()
     setTimeout(() => { // Needed to ensure playlist is loaded after topbar
       this.loadShotsData(() => {
+        this.setAdditionSequences()
         this.resetPlaylist()
       })
     }, 0)
@@ -529,16 +509,16 @@ export default {
     },
 
     currentProduction () {
-      this.setAdditionSequences()
       this.loadShotsData(() => {
+        this.setAdditionSequences()
         this.resetPlaylist()
       })
     },
 
     currentEpisode () {
       if (this.currentEpisode) {
-        this.setAdditionSequences()
         this.loadShotsData(() => {
+          this.setAdditionSequences()
           this.resetPlaylist()
         })
       }
@@ -712,7 +692,7 @@ span.thumbnail-picture {
   }
 }
 
-.select-shot-combobox {
+.select-sequence-combobox {
   margin-bottom: 1em;
 }
 

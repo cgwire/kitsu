@@ -331,7 +331,7 @@ const getters = {
 
 const actions = {
 
-  getPending (daily = false) {
+  getPending ({ commit }, daily = false) {
     return new Promise((resolve, reject) => {
       const shots = []
       cache.shots.forEach((shot) => {

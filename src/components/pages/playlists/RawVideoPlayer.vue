@@ -63,16 +63,16 @@ export default {
       return this.$refs.container
     },
 
+    fps () {
+      return this.currentProduction.fps || 24
+    },
+
     player1 () {
       return this.$refs.player1
     },
 
     player2 () {
       return this.$refs.player2
-    },
-
-    fps () {
-      return this.currentProduction.fps || 24
     }
   },
 
@@ -102,7 +102,11 @@ export default {
     },
 
     clear () {
-      if (this.currentPlayer) this.currentPlayer.src = ''
+      if (this.currentPlayer) {
+        this.currentPlayer.src = ''
+        this.currentPlayer.removeAttribute('src')
+        this.currentPlayer.load()
+      }
     },
 
     goPreviousFrame () {
@@ -209,8 +213,10 @@ export default {
       this.nextPlayer = this.tmpPlayer
       this.nextPlayer.src = this.getMoviePath(nextShot.preview_file_id)
       this.resetHeight()
-      this.currentPlayer.addEventListener('timeupdate', this.updateTime)
+
+      this.currentPlayer.removeEventListener('timeupdate', this.updateTime)
       this.nextPlayer.removeEventListener('timeupdate', this.updateTime)
+      this.currentPlayer.addEventListener('timeupdate', this.updateTime)
     },
 
     updateTime (time) {

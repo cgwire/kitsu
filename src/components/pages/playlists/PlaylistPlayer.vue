@@ -513,21 +513,25 @@ export default {
     },
 
     scrollToShot (index) {
-      const shotWidget = this.$refs['shot-' + index][0].$el
-      const playlistEl = this.$refs['playlisted-shots']
-      if (shotWidget) {
-        const margin = 30
-        const rect = shotWidget.getBoundingClientRect()
-        const listRect = playlistEl.getBoundingClientRect()
-        const isRight = rect.right > listRect.right - margin
-        const isLeft = rect.left < listRect.left - margin
+      if (this.$refs['shot-' + index]) {
+        const shotWidget = this.$refs['shot-' + index][0].$el
+        const playlistEl = this.$refs['playlisted-shots']
+        const shot = this.shotList[index]
+        this.annotations = shot.preview_file_annotations || []
+        if (shotWidget) {
+          const margin = 30
+          const rect = shotWidget.getBoundingClientRect()
+          const listRect = playlistEl.getBoundingClientRect()
+          const isRight = rect.right > listRect.right - margin
+          const isLeft = rect.left < listRect.left - margin
 
-        if (isLeft) {
-          const scrollingRequired = rect.left - listRect.left - margin
-          playlistEl.scrollLeft = playlistEl.scrollLeft + scrollingRequired
-        } else if (isRight) {
-          const scrollingRequired = rect.right - listRect.right + margin
-          playlistEl.scrollLeft = playlistEl.scrollLeft + scrollingRequired
+          if (isLeft) {
+            const scrollingRequired = rect.left - listRect.left - margin
+            playlistEl.scrollLeft = playlistEl.scrollLeft + scrollingRequired
+          } else if (isRight) {
+            const scrollingRequired = rect.right - listRect.right + margin
+            playlistEl.scrollLeft = playlistEl.scrollLeft + scrollingRequired
+          }
         }
       }
     },
@@ -564,6 +568,8 @@ export default {
           this.rawPlayer.play()
           if (this.isComparing) this.$refs['raw-player-comparison'].play()
         }
+      } else {
+        this.annotations = []
       }
     },
 

@@ -14,7 +14,7 @@
           @click.prevent="onRemoveClick"
           v-if="isCurrentUserManager"
         >
-        X
+          <x-icon />
         </span>
         <entity-thumbnail
           class="shot-thumbnail"
@@ -27,7 +27,10 @@
 
       <div class="shot-title">{{ shot.sequence_name }} / {{ shot.name }}</div>
 
-      <div class="preview-choice" v-if="taskTypeOptions.length > 0">
+      <div
+        class="preview-choice"
+        v-if="taskTypeOptions.length > 0"
+      >
         <div>
           <combobox
             :options="taskTypeOptions"
@@ -57,8 +60,14 @@
 </template>
 
 <script>
-import { mapGetters } from 'vuex'
+/*
+ * Widget to describe a shot listed in a playlist. It allows to select a given
+ * prevision for a given task type for current shot.
+ * It fires events about drag'n'drop reordering too.
+ */
 import firstBy from 'thenby'
+import { mapGetters } from 'vuex'
+import { XIcon } from 'vue-feather-icons'
 
 import ButtonSimple from '../../widgets/ButtonSimple'
 import Combobox from '../../widgets/Combobox'
@@ -70,7 +79,8 @@ export default {
   components: {
     ButtonSimple,
     Combobox,
-    EntityThumbnail
+    EntityThumbnail,
+    XIcon
   },
 
   data () {
@@ -96,29 +106,8 @@ export default {
   },
 
   mounted () {
-    const taskTypeIds = Object.keys(this.shot.preview_files)
-
-    if (taskTypeIds.length > 0) {
-      if (this.shot.preview_file_id) {
-        this.taskTypeId = taskTypeIds.find((taskTypeId) => {
-          const previewFiles = this.shot.preview_files[taskTypeId]
-          return previewFiles.find((previewFile) => {
-            return previewFile.id === this.shot.preview_file_id
-          })
-        })
-      }
-
-      if (!this.taskTypeId) {
-        this.taskTypeId = taskTypeIds[0]
-      }
-    }
-
-    this.dropArea.addEventListener('dragover', () => {
-      this.dropArea.style.background = '#00B242'
-    })
-    this.dropArea.addEventListener('dragleave', () => {
-      this.dropArea.style.background = 'transparent'
-    })
+    this.setCurrentParameters()
+    this.setListeners()
   },
 
   computed: {
@@ -145,26 +134,54 @@ export default {
     },
 
     previewFileOptions () {
-      if (this.taskTypeId) {
-        const previewFiles = this.shot.preview_files[this.taskTypeId]
-        if (previewFiles && previewFiles.length > 0) {
-          return previewFiles.map((previewFile) => {
-            return {
-              label: `v${previewFile.revision}`,
-              value: previewFile.id
-            }
-          })
-        } else {
-          return []
-        }
-      } else {
-        return []
-      }
+      const previewFiles = this.shot.preview_files[this.taskTypeId] || []
+      return previewFiles.map(previewFile => ({
+        label: `v${previewFile.revision}`,
+        value: previewFile.id
+      }))
     }
   },
 
   methods: {
+    getTaskTypeIdForPreviewFile (taskTypeIds, previewFileId) {
+      return taskTypeIds.find((taskTypeId) => {
+        const previewFiles = this.shot.preview_files[taskTypeId]
+        return previewFiles.find(previewFile => {
+          return previewFile.id === previewFileId
+        })
+      })
+    },
+
+    setCurrentParameters () {
+      // Find task type matching current preview.
+      const taskTypeIds = Object.keys(this.shot.preview_files)
+      if (taskTypeIds.length > 0) {
+        if (this.shot.preview_file_id) {
+          this.taskTypeId = this.getTaskTypeIdForPreviewFile(
+            taskTypeIds,
+            this.shot.previewFileId
+          )
+        }
+        if (!this.taskTypeId) {
+          this.taskTypeId = taskTypeIds[0]
+        }
+      }
+    },
+
+    setListeners () {
+      this.dropArea.addEventListener('dragover', this.onDragover)
+      this.dropArea.addEventListener('dragleave', this.onDragleave)
+    },
+
     onDragged () {
+    },
+
+    onDragleave () {
+      this.dropArea.style.background = 'transparent'
+    },
+
+    onDragover () {
+      this.dropArea.style.background = '#00B242'
     },
 
     onDropped (shotId) {
@@ -188,6 +205,9 @@ export default {
 
   watch: {
     taskTypeId () {
+      // Set current previe was last preview selected. If there is no preview
+      // matching this task type, it selects the first preview available for
+      // this task type.
       const previewFiles = this.shot.preview_files[this.taskTypeId]
       if (previewFiles && previewFiles.length > 0) {
         const isPreviewFile = previewFiles.some(previewFile => {
@@ -231,10 +251,6 @@ export default {
   }
 }
 
-.field {
-  margin-bottom: 0;
-}
-
 .shot-title {
   margin-bottom: 0.6em;
 }
@@ -243,22 +259,29 @@ export default {
   position: relative;
 }
 
+.field {
+  margin-bottom: 0em;
+}
+
 .remove-button {
   position: absolute;
-  border-radius: 2em;
   width: 20px;
   height: 20px;
   right: 0;
-  font-size: 10px;
-  padding: 0.2em;
   margin: 0.4em;
-  background: rgba(0, 0, 0, 0.3);
+  border-radius: 2em;
   text-align: center;
+  background: rgba(0, 0, 0, 0.3);
   cursor: pointer;
   z-index: 100;
 
   &:hover {
     background: rgba(0, 0, 0, 0.2);
+  }
+
+  svg {
+    width: 10px;
+    height: 10px;
   }
 }
 </style>
