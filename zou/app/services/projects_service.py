@@ -15,6 +15,7 @@ from zou.app.services.exception import (
 from zou.app.utils import fields, events
 
 from sqlalchemy.exc import StatementError
+from sqlalchemy.orm.exc import ObjectDeletedError
 
 
 def open_projects(name=None):
@@ -302,7 +303,10 @@ def remove_metadata_descriptor(metadata_descriptor_id):
             entity.update({
                 "data": metadata
             })
-    descriptor.delete()
+    try:
+        descriptor.delete()
+    except ObjectDeletedError:
+        pass
     events.emit("metadata-descriptor:delete", {
         "descriptor_id": str(descriptor.id)
     })

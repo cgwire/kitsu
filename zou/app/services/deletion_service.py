@@ -36,7 +36,7 @@ def remove_comment(comment_id):
 
         reset_task_data(comment.object_id)
         events.emit("comment:delete", {
-            "task_id": comment.id
+            "comment_id": comment.id
         })
         return comment.serialize()
     else:
@@ -134,8 +134,6 @@ def remove_task(task_id, force=False):
 
         preview_files = PreviewFile.query.filter_by(task_id=task_id)
         for preview_file in preview_files:
-            if entity.preview_file_id == preview_file.id:
-                entity.update({"preview_file_id": None})
             remove_preview_file(preview_file)
 
         time_spents = TimeSpent.query.filter_by(task_id=task_id)
@@ -159,6 +157,11 @@ def remove_preview_file(preview_file):
     Remove all files related to given preview file, then remove the preview file
     entry from the database.
     """
+    task = Task.get(preview_file.task_id)
+    entity = Entity.get(task.entity_id)
+    if entity.preview_file_id == preview_file.id:
+        entity.update({"preview_file_id": None})
+
     if preview_file.extension == "png":
         clear_picture_files(preview_file.id)
     elif preview_file.extension == "mp4":
