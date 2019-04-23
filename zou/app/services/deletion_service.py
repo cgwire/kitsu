@@ -140,6 +140,10 @@ def remove_task(task_id, force=False):
         for time_spent in time_spents:
             time_spent.delete()
 
+        notifications = Notification.query.filter_by(task_id=task_id)
+        for notification in notifications:
+            notification.delete()
+
     task.delete()
     events.emit("task:delete", {
         "task_id": task_id
