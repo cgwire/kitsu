@@ -178,6 +178,35 @@
       @click="onFilmClicked"
       icon="film"
     />
+
+    <div class="flexrow-item playlist-button" style="position: relative">
+      <a
+        :class="{
+          'dl-button': true,
+          'zip-button': true,
+          hidden: isDlButtonsHidden
+        }"
+        :href="zipDlPath"
+      >
+        .zip
+      </a>
+      <a
+        :class="{
+          'dl-button': true,
+          'mp4-button': true,
+          hidden: isDlButtonsHidden
+        }"
+        :href="movieDlPath"
+      >
+        .mp4
+      </a>
+      <button-simple
+        class="playlist-button"
+        icon="download"
+        @click="toggleDlButtons"
+      />
+    </div>
+
     <button-simple
       class="button playlist-button flexrow-item"
       @click="onFullscreenClicked"
@@ -242,6 +271,7 @@ import { mapActions, mapGetters } from 'vuex'
 import { removeModelFromList } from '../../../lib/helpers'
 import { fabric } from 'fabric'
 
+import ButtonHrefLink from '../../widgets/ButtonHrefLink'
 import ButtonSimple from '../../widgets/ButtonSimple'
 import Combobox from '../../widgets/Combobox'
 import DeleteModal from '../../widgets/DeleteModal'
@@ -255,6 +285,7 @@ export default {
   name: 'playlist-player',
 
   components: {
+    ButtonHrefLink,
     ButtonSimple,
     Combobox,
     DeleteModal,
@@ -282,6 +313,7 @@ export default {
       currentTime: '00:00.00',
       currentTimeRaw: 0,
       fabricCanvas: null,
+      isDlButtonsHidden: true,
       isCommentsHidden: true,
       isComparing: false,
       isDrawing: false,
@@ -345,6 +377,14 @@ export default {
         document.webkitFullscreenEnabled ||
         document.createElement('video').webkitRequestFullScreen
       )
+    },
+
+    zipDlPath () {
+      return `/api/data/playlists/${this.playlist.id}/download/zip`
+    },
+
+    movieDlPath () {
+      return `/api/data/playlists/${this.playlist.id}/build/mp4`
     },
 
     canvas () {
@@ -1069,6 +1109,10 @@ export default {
       } else {
         return null
       }
+    },
+
+    toggleDlButtons () {
+      this.isDlButtonsHidden = !this.isDlButtonsHidden
     }
   },
 
@@ -1352,5 +1396,26 @@ progress {
 }
 .comparison-list select {
   height: 2.2em;
+}
+
+.dl-button {
+  background: $dark-grey;
+  border: 1px solid $dark-grey;
+  color: $white;
+  position: absolute;
+  width: 60px;
+  padding: 0.3em;
+
+  &:hover {
+    background: $dark-grey-light;
+  }
+
+  &.zip-button {
+    top: -34px;
+  }
+
+  &.mp4-button {
+    top: -64px;
+  }
 }
 </style>
