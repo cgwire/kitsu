@@ -145,6 +145,12 @@
           <edit-2-icon class="icon" />
         </button>
 
+        <button-href-link
+          class="flexrow-item"
+          icon="download"
+          :path="movieDlPath"
+        />
+
         <button
           class="button flexrow-item"
           @click="onFullscreenClicked"
@@ -152,13 +158,6 @@
         >
           <maximize-icon class="icon" />
         </button>
-
-        <a
-          class="button flexrow-item"
-          :href="movieDlPath"
-        >
-          <download-icon class="icon" />
-        </a>
       </div>
     </div>
   </div>
@@ -180,6 +179,7 @@ import {
   SquareIcon,
   XIcon
 } from 'vue-feather-icons'
+import ButtonHrefLink from '../widgets/ButtonHrefLink'
 import Combobox from '../widgets/Combobox'
 import Spinner from '../widgets/Spinner'
 
@@ -187,6 +187,7 @@ export default {
   name: 'video-player',
 
   components: {
+    ButtonHrefLink,
     CircleIcon,
     CopyIcon,
     Combobox,
