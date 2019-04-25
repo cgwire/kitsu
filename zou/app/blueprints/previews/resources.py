@@ -6,8 +6,8 @@ from flask_restful import Resource
 from flask_jwt_extended import jwt_required
 from flask_fs.errors import FileNotFound
 
-from zou.app.stores import file_store
 from zou.app import config
+from zou.app.stores import file_store
 from zou.app.services import (
     deletion_service,
     entities_service,

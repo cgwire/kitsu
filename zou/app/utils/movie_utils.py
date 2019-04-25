@@ -84,3 +84,33 @@ def normalize_movie(movie_path, fps="24.00"):
         raise
 
     return file_target_path
+
+
+def build_playlist_movie(tmp_file_paths, movie_file_path, fps="24.00"):
+    in_files = []
+    if len(tmp_file_paths) > 0:
+        (first_movie_file_path, _) = tmp_file_paths[0]
+        (width, height) = get_movie_size(first_movie_file_path)
+
+        for tmp_file_path, file_name in tmp_file_paths:
+            in_file = ffmpeg.input(tmp_file_path)
+            in_files.append(in_file)
+
+        try:
+            ffmpeg \
+                .concat(*in_files) \
+                .output(
+                    movie_file_path,
+                    pix_fmt='yuv420p',
+                    format="mp4",
+                    r=fps,
+                    b="28M",
+                    preset="medium",
+                    vcodec="libx264",
+                    s="%sx%s" % (width, height)
+                ) \
+                .overwrite_output() \
+                .run()
+        except Exception as e:
+            print(e)
+    return movie_file_path
