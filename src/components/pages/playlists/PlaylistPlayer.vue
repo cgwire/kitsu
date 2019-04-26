@@ -70,18 +70,13 @@
     </div>
   </div>
 
-  <div class="playlist-annotations" ref="playlist-annotation">
-    <span
-      :key="`annotation-${annotation.time}`"
-      class="annotation-mark"
-      :style="{
-        left: getAnnotationPosition(annotation) + 'px'
-      }"
-      @click="loadAnnotation(annotation)"
-      v-for="annotation in annotations"
-    >
-    </span>
-  </div>
+  <annotation-bar
+    class="playlist-annotations"
+    ref="playlist-annotation"
+    :annotations="annotations"
+    :max-duration-raw="maxDurationRaw"
+    @select-annotation="loadAnnotation"
+  />
 
   <div class="playlist-footer flexrow" ref="button-bar">
     <button-simple
@@ -271,6 +266,7 @@ import { mapActions, mapGetters } from 'vuex'
 import { removeModelFromList } from '../../../lib/helpers'
 import { fabric } from 'fabric'
 
+import AnnotationBar from './AnnotationBar'
 import ButtonHrefLink from '../../widgets/ButtonHrefLink'
 import ButtonSimple from '../../widgets/ButtonSimple'
 import Combobox from '../../widgets/Combobox'
@@ -285,6 +281,7 @@ export default {
   name: 'playlist-player',
 
   components: {
+    AnnotationBar,
     ButtonHrefLink,
     ButtonSimple,
     Combobox,
@@ -963,13 +960,6 @@ export default {
       this.fabricCanvas.renderAll()
     },
 
-    getAnnotationPosition (annotation) {
-      const factor = annotation.time / this.maxDurationRaw
-      this.progressBar.style.width = Math.floor(factor * 100) + '%'
-      const progressCoordinates = this.progress.getBoundingClientRect()
-      return progressCoordinates.width * factor - 3
-    },
-
     loadAnnotation (annotation) {
       this.pause()
       const currentTime = annotation.time
@@ -1290,25 +1280,6 @@ export default {
   left: 0;
 }
 
-.video-annotation {
-  background: #26292F;
-  height: 10px;
-  text-align: left;
-  margin-top: 0px;
-  padding: 0;
-}
-
-.annotation-mark {
-  background: #ff3860;
-  width: 8px;
-  height: 8px;
-  display: inline-block;
-  top: 6px;
-  position: absolute;
-  border-radius: 50%;
-  cursor: pointer;
-}
-
 .buttons {
   height: 32px;
 }
@@ -1364,12 +1335,6 @@ progress {
 
 .playlist-progress {
   width: 100%;
-}
-
-.playlist-annotations {
-  width: 100%;
-  height: 20px;
-  position: relative;
 }
 
 .playlist-header,
