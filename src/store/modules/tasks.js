@@ -231,33 +231,33 @@ const actions = {
       if (err) {
         callback(err)
       } else {
-        commit(LOAD_TASK_COMMENTS_END, {comments, taskId})
+        commit(LOAD_TASK_COMMENTS_END, { comments, taskId })
         dispatch('loadTaskEntityPreviewFiles', { callback, entityId })
       }
     })
   },
 
   loadTaskEntityPreviewFiles ({ commit, state }, { callback, entityId }) {
-    const entity = {id: entityId}
+    const entity = { id: entityId }
     playlistsApi.getEntityPreviewFiles(entity, (err, previewFiles) => {
       commit(LOAD_TASK_ENTITY_PREVIEW_FILES_END, previewFiles)
       if (callback) callback(err)
     })
   },
 
-  commentTask ({ commit, state }, {taskId, taskStatusId, comment, callback}) {
-    tasksApi.commentTask({taskId, taskStatusId, comment}, (err, comment) => {
+  commentTask ({ commit, state }, { taskId, taskStatusId, comment, callback }) {
+    tasksApi.commentTask({ taskId, taskStatusId, comment }, (err, comment) => {
       if (!err) {
-        commit(NEW_TASK_COMMENT_END, {comment, taskId})
+        commit(NEW_TASK_COMMENT_END, { comment, taskId })
       }
       if (callback) callback(err, comment)
     })
   },
 
-  loadComment ({ commit, state }, {commentId, callback}) {
-    tasksApi.getTaskComment({id: commentId}, (err, comment) => {
+  loadComment ({ commit, state }, { commentId, callback }) {
+    tasksApi.getTaskComment({ id: commentId }, (err, comment) => {
       if (!err) {
-        commit(NEW_TASK_COMMENT_END, {comment, taskId: comment.object_id})
+        commit(NEW_TASK_COMMENT_END, { comment, taskId: comment.object_id })
       }
       if (callback) callback(err, comment)
     })
@@ -351,7 +351,7 @@ const actions = {
     })
   },
 
-  changeSelectedTaskStatus ({ commit, state }, {taskStatusId, callback}) {
+  changeSelectedTaskStatus ({ commit, state }, { taskStatusId, callback }) {
     async.eachSeries(Object.keys(state.selectedTasks), (taskId, next) => {
       const task = state.taskMap[taskId]
       if (task && task.task_status_id !== taskStatusId) {
@@ -481,7 +481,7 @@ const actions = {
           } else {
             tasksApi.uploadPreview(preview.id, state.previewFormData, (err, preview) => {
               if (!err) {
-                commit(NEW_TASK_COMMENT_END, {comment, taskId})
+                commit(NEW_TASK_COMMENT_END, { comment, taskId })
                 commit(ADD_PREVIEW_END, {
                   preview,
                   taskId,
@@ -784,7 +784,7 @@ const mutations = {
     state.taskEntityPreviews = previewFiles
   },
 
-  [LOAD_TASK_COMMENTS_END] (state, {taskId, comments}) {
+  [LOAD_TASK_COMMENTS_END] (state, { taskId, comments }) {
     comments.forEach((comment) => {
       comment.person = personStore.helpers.addAdditionalInformation(
         comment.person
@@ -818,7 +818,7 @@ const mutations = {
 
   [LOAD_TASK_SUBSCRIBE_END] (state, { taskId, subscribed }) {},
 
-  [NEW_TASK_COMMENT_END] (state, {comment, taskId}) {
+  [NEW_TASK_COMMENT_END] (state, { comment, taskId }) {
     const task = state.taskMap[taskId]
     if (comment.task_status === undefined) {
       const getTaskStatus = getters.getTaskStatus(state, getters)
@@ -911,7 +911,7 @@ const mutations = {
         existingPreview.previews.push(newPreview)
       }
     } else {
-      newPreview.previews = [{...newPreview}]
+      newPreview.previews = [{ ...newPreview }]
       state.taskPreviews[taskId] =
         [newPreview].concat(state.taskPreviews[taskId])
 
@@ -1122,7 +1122,7 @@ const mutations = {
   },
 
   [RESET_ALL] (state, shots) {
-    Object.assign(state, {...initialState})
+    Object.assign(state, { ...initialState })
   }
 }
 

@@ -394,7 +394,7 @@ const mutations = {
     }
   },
 
-  [NEW_TASK_COMMENT_END] (state, {comment, taskId}) {
+  [NEW_TASK_COMMENT_END] (state, { comment, taskId }) {
     const task = state.todos.find((task) => task.id === taskId)
 
     if (task) {
@@ -508,7 +508,7 @@ const mutations = {
   },
 
   [RESET_ALL] (state) {
-    Object.assign(state, {...initialState})
+    Object.assign(state, { ...initialState })
   }
 }
 

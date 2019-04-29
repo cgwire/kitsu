@@ -6,7 +6,7 @@ import tasksStore from './tasks'
 import peopleStore from './people'
 import taskTypesStore from './tasktypes'
 
-import {PAGE_SIZE} from '../../lib/pagination'
+import { PAGE_SIZE } from '../../lib/pagination'
 import {
   sortShots,
   sortSequences,
@@ -430,7 +430,7 @@ const actions = {
     })
   },
 
-  newShot ({ commit, dispatch, rootGetters }, {shot, callback}) {
+  newShot ({ commit, dispatch, rootGetters }, { shot, callback }) {
     commit(NEW_SHOT_START)
     shotsApi.newShot(shot, (err, shot) => {
       if (err) {
@@ -604,7 +604,7 @@ const actions = {
     commit(DISPLAY_MORE_EPISODES)
   },
 
-  setShotSearch ({commit, rootGetters}, shotSearch) {
+  setShotSearch ({ commit, rootGetters }, shotSearch) {
     const taskStatusMap = rootGetters.taskStatusMap
     const taskTypeMap = rootGetters.taskTypeMap
     const taskMap = rootGetters.taskMap
@@ -1071,7 +1071,7 @@ const mutations = {
     cache.shotIndex = buildShotIndex(cache.shots)
   },
 
-  [NEW_TASK_COMMENT_END] (state, {comment, taskId}) {},
+  [NEW_TASK_COMMENT_END] (state, { comment, taskId }) {},
 
   [SET_SHOT_SEARCH] (
     state,
@@ -1184,7 +1184,7 @@ const mutations = {
       if (task) {
         const shot = state.shotMap[task.entity_id]
         if (shot) {
-          const validations = {...shot.validations}
+          const validations = { ...shot.validations }
           Vue.set(validations, task.task_type_id, task.id)
           delete shot.validations
           Vue.set(shot, 'validations', validations)
@@ -1357,7 +1357,7 @@ const mutations = {
       if (task) {
         const shot = state.shotMap[task.entity_id]
         if (shot) {
-          const validations = {...shot.validations}
+          const validations = { ...shot.validations }
           Vue.set(validations, task.task_type_id, task.id)
           delete shot.validations
           Vue.set(shot, 'validations', validations)
@@ -1395,7 +1395,7 @@ const mutations = {
   },
 
   [RESET_ALL] (state) {
-    Object.assign(state, {...initialState})
+    Object.assign(state, { ...initialState })
 
     cache.shots = []
     cache.result = []
