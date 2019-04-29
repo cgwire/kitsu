@@ -140,12 +140,12 @@
           <edit-2-icon class="icon" />
         </button>
 
-        <button
+        <a
+          :href="movieDlPath"
           class="button flexrow-item"
-          icon="download"
         >
-          <download-icon />
-        </button>
+          <download-icon class="icon" />
+        </a>
 
         <button
           class="button flexrow-item"
@@ -984,7 +984,6 @@ export default {
 }
 
 .icon {
-  margin-top: -4px;
   height: 20px;
 }
 
