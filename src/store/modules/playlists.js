@@ -32,7 +32,7 @@ const initialState = {
   playlistMap: {}
 }
 
-const state = {...initialState}
+const state = { ...initialState }
 
 const getters = {
   playlists: state => state.playlists,
@@ -98,7 +98,7 @@ const actions = {
     })
   },
 
-  editPlaylist ({ commit }, {data, callback}) {
+  editPlaylist ({ commit }, { data, callback }) {
     commit(EDIT_PLAYLIST_START)
     playlistsApi.updatePlaylist(data, (err, playlist) => {
       if (err) commit(EDIT_PLAYLIST_ERROR)
@@ -119,16 +119,16 @@ const actions = {
   addShotPreviewToPlaylist (
     { commit, dispatch }, { playlist, shot, previewFiles, callback }
   ) {
-    commit(ADD_SHOT_TO_PLAYLIST, {playlist, shot})
+    commit(ADD_SHOT_TO_PLAYLIST, { playlist, shot })
     commit(LOAD_SHOT_PREVIEW_FILES_END, { playlist, shot, previewFiles })
     dispatch('editPlaylist', { data: playlist, callback })
   },
 
   removeShotPreviewFromPlaylist (
-    { commit, dispatch }, {playlist, shot, callback}
+    { commit, dispatch }, { playlist, shot, callback }
   ) {
     commit(REMOVE_SHOT_FROM_PLAYLIST, { playlist, shot })
-    dispatch('editPlaylist', {data: playlist, callback})
+    dispatch('editPlaylist', { data: playlist, callback })
   },
 
   changePlaylistOrder (
@@ -147,7 +147,7 @@ const actions = {
       shotId: shot.id,
       previewFileId
     })
-    dispatch('editPlaylist', {data: playlist, callback})
+    dispatch('editPlaylist', { data: playlist, callback })
   }
 }
 
@@ -228,7 +228,7 @@ const mutations = {
     }
   },
 
-  [ADD_SHOT_TO_PLAYLIST] (state, {playlist, shot}) {
+  [ADD_SHOT_TO_PLAYLIST] (state, { playlist, shot }) {
     if (!playlist.shots) playlist.shots = []
     playlist.shots.push({
       shot_id: shot.id,
@@ -239,7 +239,7 @@ const mutations = {
     })
   },
 
-  [REMOVE_SHOT_FROM_PLAYLIST] (state, {playlist, shot}) {
+  [REMOVE_SHOT_FROM_PLAYLIST] (state, { playlist, shot }) {
     if (!playlist.shots) playlist.shots = []
     const shotPlaylistToDeleteIndex = playlist.shots.findIndex(
       (shotPlaylist) => shotPlaylist.shot_id === shot.id
@@ -270,7 +270,7 @@ const mutations = {
   },
 
   [RESET_ALL] (state) {
-    Object.assign(state, {...initialState})
+    Object.assign(state, { ...initialState })
   }
 }
 

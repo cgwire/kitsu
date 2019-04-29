@@ -431,7 +431,7 @@ const actions = {
     })
   },
 
-  setTimeSpent ({ commit }, {personId, taskId, date, duration}) {
+  setTimeSpent ({ commit }, { personId, taskId, date, duration }) {
     return new Promise((resolve, reject) => {
       peopleApi.setTimeSpent(
         taskId,
@@ -560,7 +560,7 @@ const mutations = {
     state.personToEdit = helpers.addAdditionalInformation(state.personToEdit)
     if (personToEditIndex >= 0) {
       delete state.people[personToEditIndex]
-      state.personMap[state.personToEdit.id] = {...state.personToEdit}
+      state.personMap[state.personToEdit.id] = { ...state.personToEdit }
       state.people[personToEditIndex] = state.personMap[state.personToEdit.id]
     } else {
       state.people = [
@@ -701,7 +701,7 @@ const mutations = {
     }
   },
 
-  [NEW_TASK_COMMENT_END] (state, {comment, taskId}) {
+  [NEW_TASK_COMMENT_END] (state, { comment, taskId }) {
     const task = state.personTasks.find((task) => task.id === taskId)
 
     if (task) {
@@ -784,11 +784,11 @@ const mutations = {
 
   [SET_ORGANISATION] (state, organisation) {
     Object.assign(state.organisation, organisation)
-    state.organisation = {...state.organisation}
+    state.organisation = { ...state.organisation }
   },
 
   [RESET_ALL] (state, people) {
-    Object.assign(state, {...initialState})
+    Object.assign(state, { ...initialState })
   }
 }
 
