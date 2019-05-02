@@ -19,7 +19,7 @@ const initialState = {
   lastProductionViewed: null
 }
 
-const state = {...initialState}
+const state = { ...initialState }
 
 const getters = {
   isDarkTheme: state => state.isDarkTheme,
@@ -74,7 +74,7 @@ const mutations = {
 
   [RESET_ALL] (state) {
     const isDarkTheme = state.isDarkTheme
-    Object.assign(state, {...initialState})
+    Object.assign(state, { ...initialState })
     state.isDarkTheme = isDarkTheme
   }
 }
