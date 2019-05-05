@@ -97,8 +97,11 @@
     <span class="flexrow-item time-indicator">
     /
     </span>
-    <span class="flexrow-item time-indicator mr1">
+    <span class="flexrow-item time-indicator">
       {{ maxDuration }}
+    </span>
+    <span class="flexrow-item time-indicator mr1">
+      ({{ currentFrame }})
     </span>
     <button-simple
       class="button playlist-button flexrow-item"
@@ -360,6 +363,7 @@ export default {
 
   computed: {
     ...mapGetters([
+      'currentProduction',
       'taskMap',
       'taskTypeMap'
     ]),
@@ -390,6 +394,14 @@ export default {
 
     container () {
       return this.$refs.container
+    },
+
+    currentFrame () {
+      return `${Math.floor(this.currentTimeRaw * this.fps)}`.padStart(3, '0')
+    },
+
+    fps () {
+      return this.currentProduction.fps || 24
     },
 
     rawPlayer () {
@@ -812,6 +824,13 @@ export default {
 
     onShotChange (shotIndex) {
       this.playingShotIndex = shotIndex
+      const comparisonIndex = this.rawPlayerComparison.playingIndex
+      if (comparisonIndex < shotIndex) {
+        this.rawPlayerComparison.playNext()
+      } else {
+        this.rawPlayerComparison.setCurrentTime(0)
+        this.rawPlayerComparison.play()
+      }
       this.scrollToShot(this.playingShotIndex)
     },
 
