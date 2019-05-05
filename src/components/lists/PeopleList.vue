@@ -37,7 +37,7 @@
       </tr>
       <tbody>
         <tr v-for="entry in activePeople" :key="entry.id">
-          <people-name-cell class="name" :entry="entry" />
+          <people-name-cell class="name" :person="entry" />
           <td class="email">{{ entry.email }}</td>
           <td class="phone">{{ entry.phone }}</td>
           <td class="role">{{ $t('people.role.' + entry.role) }}</td>
@@ -68,7 +68,7 @@
       </tr>
       <tbody>
         <tr v-for="entry in unactivePeople" :key="entry.id">
-          <people-name-cell class="name" :entry="entry" />
+          <people-name-cell class="name" :person="entry" />
           <td class="email">{{ entry.email }}</td>
           <td class="phone">{{ entry.phone }}</td>
           <td class="role">{{ $t('people.role.' + entry.role) }}</td>

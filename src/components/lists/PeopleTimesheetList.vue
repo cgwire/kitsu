@@ -49,7 +49,7 @@
     <table class="table">
       <tbody>
         <tr v-for="person in people" :key="person.id">
-          <people-name-cell class="name" :entry="person" />
+          <people-name-cell class="name" :person="person" />
           <td
             :class="{
               time: true,
@@ -356,8 +356,8 @@ export default {
 }
 
 .time {
-  width: 60px;
-  min-width: 60px;
+  width: 70px;
+  min-width: 70px;
 
   &.month {
     width: 80px;
@@ -366,8 +366,8 @@ export default {
 }
 
 .daytime {
-  width: 50px;
-  min-width: 50px;
+  width: 80px;
+  min-width: 80px;
 }
 
 .time,
