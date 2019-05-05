@@ -88,10 +88,9 @@ const helpers = {
       person.initials = person.initials.toUpperCase()
       person.color = colors.fromString(person.name)
       if (person.has_avatar) {
-        const randomHash = Math.random().toString(36).substring(7)
         person.avatarPath =
           `/api/pictures/thumbnails/persons/${person.id}` +
-          `.png?unique=${randomHash}`
+          `.png`
       }
     }
     return person
@@ -636,12 +635,11 @@ const mutations = {
   },
 
   [UPLOAD_AVATAR_END] (state, personId) {
-    const randomHash = Math.random().toString(36).substring(7)
     const person = state.personMap[personId]
     person.has_avatar = true
     person.avatarPath =
       `/api/pictures/thumbnails/persons/${person.id}` +
-      `.png?unique=${randomHash}`
+      `.png`
   },
 
   [LOAD_PERSON_TASKS_END] (
