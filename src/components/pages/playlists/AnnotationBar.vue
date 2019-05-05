@@ -24,14 +24,23 @@ export default {
     maxDurationRaw: {
       default: 0,
       type: Number
+    },
+    width: {
+      default: 0,
+      type: Number
     }
   },
 
   methods: {
     getAnnotationPosition (annotation) {
       const factor = annotation.time / this.maxDurationRaw
-      const progressCoordinates = this.$parent.progress.getBoundingClientRect()
-      return progressCoordinates.width * factor - 3
+      let width = this.width
+      if (width === 0) {
+        const progressBar = this.$parent.progress
+        const progressCoordinates = progressBar.getBoundingClientRect()
+        width = progressCoordinates.width
+      }
+      return width * factor - 3
     }
   }
 }
@@ -43,6 +52,7 @@ export default {
   height: 20px;
   position: relative;
   background: $dark-grey;
+  overflow: hidden;
 }
 
 .annotation-mark {

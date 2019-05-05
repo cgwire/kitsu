@@ -830,7 +830,9 @@ export default {
         height -= this.$refs['playlist-progress'].offsetHeight
         height -= this.$refs['button-bar'].offsetHeight
         height -= this.$refs['playlisted-shots'].offsetHeight
-        height -= this.$refs['playlist-annotation'].offsetHeight
+        if (this.$refs['playlist-annotation']) {
+          height -= this.$refs['playlist-annotation'].$el.offsetHeight
+        }
         this.$refs['video-container'].style.height = `${height}px`
         if (!this.isCommentsHidden) {
           this.$refs['task-info'].$el.style.height = `${height}px`
@@ -1069,7 +1071,7 @@ export default {
         }) || []
       }
       const annotations = []
-      this.annotations.forEach(a => annotations.push({...a}))
+      this.annotations.forEach(a => annotations.push({ ...a }))
       const shot = this.shotList[this.playingShotIndex]
       const preview = {
         id: shot.preview_file_id,

@@ -624,6 +624,8 @@ export default {
       this.annotations = []
       this.reloadAnnotations()
       this.mountPicture()
+      this.isDrawing = false
+      if (this.fabricCanvas) this.fabricCanvas.isDrawingMode = false
     },
 
     fixCanvasSize () {
