@@ -115,17 +115,18 @@ def create_notifications_for_task_and_comment(task, comment, change=False):
             pass
 
     for recipient_id in comment["mentions"]:
-        notification = create_notification(
-            recipient_id,
-            comment_id=comment["id"],
-            author_id=comment["person_id"],
-            task_id=comment["object_id"],
-            type="mention"
-        )
-        events.emit("notification:new", {
-            "notification_id": notification["id"],
-            "person_id": recipient_id
-        }, persist=False)
+        if recipient_id != comment["person_id"]:
+            notification = create_notification(
+                recipient_id,
+                comment_id=comment["id"],
+                author_id=comment["person_id"],
+                task_id=comment["object_id"],
+                type="mention"
+            )
+            events.emit("notification:new", {
+                "notification_id": notification["id"],
+                "person_id": recipient_id
+            }, persist=False)
 
     return recipient_ids
 
@@ -167,16 +168,20 @@ def create_assignation_notification(task_id, person_id, author_id=None):
     if author_id is None:
         author_id = task.assigner_id
 
-    notification = create_notification(
-        person_id,
-        author_id=author_id,
-        task_id=task_id,
-        type="assignation"
-    )
-    events.emit("notification:new", {
-        "notification_id": notification["id"],
-        "person_id": person_id
-    }, persist=False)
+    if str(author_id) != person_id:
+        notification = create_notification(
+            person_id,
+            author_id=author_id,
+            task_id=task_id,
+            type="assignation"
+        )
+        events.emit("notification:new", {
+            "notification_id": notification["id"],
+            "person_id": person_id
+        }, persist=False)
+        return notification.serialize()
+    else:
+        return None
 
 
 def get_task_subscription_raw(person_id, task_id):

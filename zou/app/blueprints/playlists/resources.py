@@ -52,7 +52,9 @@ class EntityPreviewsResource(Resource):
         as a dict. Keys are related task type ids and values are arrays
         of preview for this task type.
         """
+        print("ok")
         entity = entities_service.get_entity(entity_id)
+        print("bad")
         user_service.check_project_access(entity["project_id"])
         return playlists_service.get_preview_files_for_entity(entity_id)
 
