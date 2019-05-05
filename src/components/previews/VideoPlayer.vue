@@ -246,6 +246,7 @@ export default {
       if (this.video) {
         this.video.addEventListener('loadedmetadata', () => {
           this.configureVideo()
+          this.onWindowResize()
           this.isLoading = false
           this.setDefaultComparisonTaskType()
         })
@@ -523,7 +524,6 @@ export default {
     },
 
     play () {
-      this.hideCanvas()
       this.clearAnnotations()
       this.isPlaying = true
       this.fabricCanvas.isDrawingMode = false
@@ -538,7 +538,6 @@ export default {
     pause () {
       this.isPlaying = false
       this.video.pause()
-      this.showCanvas()
       if (this.isComparing) {
         const comparisonVideo = document.getElementById('comparison-movie')
         if (comparisonVideo) comparisonVideo.pause()
@@ -919,14 +918,6 @@ export default {
       }
     },
 
-    showCanvas () {
-      this.canvas.style.display = 'block'
-    },
-
-    hideCanvas () {
-      this.canvas.style.display = 'none'
-    },
-
     resetCanvas () {
       if (!this.fabricCanvas) this.setupFabricCanvas()
       this.resetCanvasSize()
@@ -967,10 +958,6 @@ export default {
 
     taskTypeId () {
       this.setDefaultComparisonPreview()
-    },
-
-    isDrawing () {
-      this.showCanvas()
     }
   }
 }
