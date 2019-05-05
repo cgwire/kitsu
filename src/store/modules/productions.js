@@ -29,6 +29,7 @@ import {
 
   TEAM_ADD_PERSON,
   TEAM_REMOVE_PERSON,
+  ASSIGN_TASKS,
 
   ADD_METADATA_DESCRIPTOR_END,
   UPDATE_METADATA_DESCRIPTOR_END,
@@ -598,6 +599,15 @@ const mutations = {
     if (production) {
       production.descriptors =
         removeModelFromList(production.descriptors, descriptor)
+    }
+  },
+
+  [ASSIGN_TASKS] (state, { personId }) {
+    const isTeamMember = state.currentProduction.team.some(
+      pId => pId === personId
+    )
+    if (!isTeamMember) {
+      state.currentProduction.team.push(personId)
     }
   },
 
