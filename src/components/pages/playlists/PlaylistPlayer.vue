@@ -824,12 +824,14 @@ export default {
 
     onShotChange (shotIndex) {
       this.playingShotIndex = shotIndex
-      const comparisonIndex = this.rawPlayerComparison.playingIndex
-      if (comparisonIndex < shotIndex) {
-        this.rawPlayerComparison.playNext()
-      } else {
-        this.rawPlayerComparison.setCurrentTime(0)
-        this.rawPlayerComparison.play()
+      if (this.rawPlayerComparison) {
+        const comparisonIndex = this.rawPlayerComparison.playingIndex
+        if (comparisonIndex < shotIndex) {
+          this.rawPlayerComparison.playNext()
+        } else {
+          this.rawPlayerComparison.setCurrentTime(0)
+          this.rawPlayerComparison.play()
+        }
       }
       this.scrollToShot(this.playingShotIndex)
     },
