@@ -403,9 +403,9 @@ export default {
       ) {
         const bodyElement = this.$refs['body-tbody'].children[0]
         const columnDescriptors = [
-          {index: 1, name: 'type'},
-          {index: 2, name: 'name'},
-          {index: 4, name: 'assignees'}
+          { index: 1, name: 'type' },
+          { index: 2, name: 'name' },
+          { index: 4, name: 'assignees' }
         ]
         columnDescriptors.forEach(desc => {
           const width = Math.max(

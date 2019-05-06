@@ -101,7 +101,7 @@ export default {
           if (err.default_password) {
             this.$router.push({
               name: 'reset-change-password',
-              params: {token: err.token}
+              params: { token: err.token }
             })
           } else {
             console.log(err)

@@ -537,7 +537,7 @@ export default {
     deleteText () {
       const shot = this.shotToDelete
       if (shot) {
-        return this.$t('shots.delete_text', {name: shot.name})
+        return this.$t('shots.delete_text', { name: shot.name })
       } else {
         return ''
       }
@@ -546,7 +546,7 @@ export default {
     deleteAllTasksText () {
       const taskType = this.taskTypeMap[this.$route.params.task_type_id]
       if (taskType) {
-        return this.$t('tasks.delete_all_text', {name: taskType.name})
+        return this.$t('tasks.delete_all_text', { name: taskType.name })
       } else {
         return ''
       }
@@ -555,7 +555,7 @@ export default {
     restoreText () {
       const shot = this.shotToRestore
       if (shot) {
-        return this.$t('shots.restore_text', {name: shot.name})
+        return this.$t('shots.restore_text', { name: shot.name })
       } else {
         return ''
       }

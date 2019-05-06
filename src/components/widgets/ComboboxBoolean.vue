@@ -45,8 +45,8 @@ export default {
   data () {
     return {
       booleanOptions: [
-        {label: this.$t('main.yes'), value: 'true'},
-        {label: this.$t('main.no'), value: 'false'}
+        { label: this.$t('main.yes'), value: 'true' },
+        { label: this.$t('main.no'), value: 'false' }
       ]
     }
   },

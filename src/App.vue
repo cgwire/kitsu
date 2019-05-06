@@ -113,7 +113,7 @@ export default {
         if (this.taskTypeMap[eventData.task_type_id]) {
           this.$store.commit(
             'DELETE_TASK_TYPE_END',
-            {id: eventData.task_type_id}
+            { id: eventData.task_type_id }
           )
         }
       },
@@ -134,7 +134,7 @@ export default {
         if (this.taskStatusMap[eventData.task_status_id]) {
           this.$store.commit(
             'DELETE_TASK_STATUS_END',
-            {id: eventData.task_status_id}
+            { id: eventData.task_status_id }
           )
         }
       },
@@ -155,7 +155,7 @@ export default {
         if (this.assetTypeMap[eventData.entity_type_id]) {
           this.$store.commit(
             'DELETE_ASSET_TYPE_END',
-            {id: eventData.entity_type_id}
+            { id: eventData.entity_type_id }
           )
         }
       },

@@ -217,8 +217,8 @@ export default {
     },
 
     getDescriptorChoicesOptions (descriptor) {
-      const values = descriptor.choices.map(c => ({label: c, value: c}))
-      return [{label: '', value: ''}, ...values]
+      const values = descriptor.choices.map(c => ({ label: c, value: c }))
+      return [{ label: '', value: '' }, ...values]
     },
 
     resetForm () {
@@ -242,7 +242,7 @@ export default {
           name: this.assetToEdit.name,
           description: this.assetToEdit.description,
           source_id: this.assetToEdit.source_id || this.assetToEdit.episode_id,
-          data: {...this.assetToEdit.data} || {}
+          data: { ...this.assetToEdit.data } || {}
         }
       }
     }

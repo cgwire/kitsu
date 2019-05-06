@@ -193,7 +193,7 @@ export default {
     deleteText () {
       const sequence = this.sequenceToDelete
       if (sequence) {
-        return this.$t('sequences.delete_text', {name: sequence.name})
+        return this.$t('sequences.delete_text', { name: sequence.name })
       } else {
         return ''
       }

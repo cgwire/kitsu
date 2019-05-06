@@ -62,7 +62,7 @@ export default {
       localStorage.setItem(
         'show-infos',
         this.isShowInfos,
-        {expires: '1M'}
+        { expires: '1M' }
       )
     }
   }

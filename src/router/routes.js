@@ -55,22 +55,22 @@ export const routes = [
           if (store.state.productions.openProductions.length === 0) {
             init((err) => {
               if (err) {
-                next({name: 'server-down'})
+                next({ name: 'server-down' })
               } else {
                 if (!userStore.getters.isCurrentUserCGArtist(userStore.state)) {
-                  next({name: 'open-productions'})
+                  next({ name: 'open-productions' })
                 } else {
-                  next({name: 'todos'})
+                  next({ name: 'todos' })
                 }
               }
             })
           } else {
             if (!userStore.getters.isCurrentUserCGArtist(userStore.state)) {
               store.commit('DATA_LOADING_END')
-              next({name: 'open-productions'})
+              next({ name: 'open-productions' })
             } else {
               store.commit('DATA_LOADING_END')
-              next({name: 'todos'})
+              next({ name: 'todos' })
             }
           }
         }

@@ -120,7 +120,7 @@ export default {
           if (err) {
             this.editStatus.isError = true
           } else {
-            this.$router.push({name: 'task-status'}) // Close modal
+            this.$router.push({ name: 'task-status' }) // Close modal
           }
         }
       })
@@ -136,7 +136,7 @@ export default {
           if (err) {
             this.deleteStatus.isError = true
           } else {
-            this.$router.push({name: 'task-status'}) // Close modal
+            this.$router.push({ name: 'task-status' }) // Close modal
           }
         }
       })
@@ -145,7 +145,7 @@ export default {
     deleteText () {
       const taskStatus = this.taskStatusToDelete
       if (taskStatus) {
-        return this.$t('task_status.delete_text', {name: taskStatus.name})
+        return this.$t('task_status.delete_text', { name: taskStatus.name })
       } else {
         return ''
       }
@@ -156,7 +156,7 @@ export default {
       const taskStatusId = this.$store.state.route.params.task_status_id
 
       if (path.indexOf('new') > 0) {
-        this.taskStatusToEdit = {color: '#000000'}
+        this.taskStatusToEdit = { color: '#000000' }
         this.modals.isNewDisplayed = true
       } else if (path.indexOf('edit') > 0) {
         this.taskStatusToEdit = this.taskStatusMap[taskStatusId]

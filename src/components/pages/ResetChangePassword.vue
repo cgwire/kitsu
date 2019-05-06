@@ -59,7 +59,7 @@
           class="has-text-centered"
         >
           <router-link
-            :to="{name: 'login'}"
+            :to="{ name: 'login' }"
           >
             {{ $t("login.login_page")}}
           </router-link>
@@ -122,7 +122,7 @@ export default {
             this.isLoading = false
             this.isSuccess = true
             setTimeout(() => {
-              this.$router.push({name: 'login'})
+              this.$router.push({ name: 'login' })
             }, 3000)
           })
           .catch(() => {

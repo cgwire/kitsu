@@ -516,7 +516,7 @@ export default {
     deleteText () {
       const asset = this.assetToDelete
       if (asset) {
-        return this.$t('assets.delete_text', {name: asset.name})
+        return this.$t('assets.delete_text', { name: asset.name })
       } else {
         return ''
       }
@@ -525,7 +525,7 @@ export default {
     deleteAllTasksText () {
       const taskType = this.taskTypeMap[this.$route.params.task_type_id]
       if (taskType) {
-        return this.$t('tasks.delete_all_text', {name: taskType.name})
+        return this.$t('tasks.delete_all_text', { name: taskType.name })
       } else {
         return ''
       }
@@ -534,7 +534,7 @@ export default {
     restoreText () {
       const asset = this.assetToRestore
       if (asset) {
-        return this.$t('assets.restore_text', {name: asset.name})
+        return this.$t('assets.restore_text', { name: asset.name })
       } else {
         return ''
       }

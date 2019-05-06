@@ -187,7 +187,7 @@ export default {
   assignTasks (personId, selectedTaskIds, callback) {
     client.put(
       `/api/actions/persons/${personId}/assign`,
-      {task_ids: selectedTaskIds},
+      { task_ids: selectedTaskIds },
       callback
     )
   },
@@ -195,7 +195,7 @@ export default {
   unassignTasks (selectedTaskIds, callback) {
     client.put(
       `/api/actions/tasks/clear-assignation`,
-      {task_ids: selectedTaskIds},
+      { task_ids: selectedTaskIds },
       callback
     )
   }

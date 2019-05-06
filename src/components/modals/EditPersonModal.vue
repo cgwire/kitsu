@@ -107,14 +107,14 @@ export default {
       },
 
       roleOptions: [
-        {label: 'user', value: 'user'},
-        {label: 'manager', value: 'manager'},
-        {label: 'admin', value: 'admin'},
-        {label: 'client', value: 'client'}
+        { label: 'user', value: 'user' },
+        { label: 'manager', value: 'manager' },
+        { label: 'admin', value: 'admin' },
+        { label: 'client', value: 'client' }
       ],
       activeOptions: [
-        {label: this.$t('main.yes'), value: 'true'},
-        {label: this.$t('main.no'), value: 'false'}
+        { label: this.$t('main.yes'), value: 'true' },
+        { label: this.$t('main.no'), value: 'false' }
       ]
     }
   },

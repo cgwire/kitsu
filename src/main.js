@@ -22,7 +22,7 @@ import 'v-autocomplete/dist/v-autocomplete.css'
 Vue.config.productionTip = false
 Vue.use(Autocomplete)
 Vue.use(Meta)
-Vue.use(VueChartkick, {adapter: Chart})
+Vue.use(VueChartkick, { adapter: Chart })
 Vue.use(VueCookie)
 Vue.use(VueLazyload)
 Vue.use(vuescroll)

@@ -202,8 +202,8 @@ export default {
     },
 
     getDescriptorChoicesOptions (descriptor) {
-      const values = descriptor.choices.map(c => ({label: c, value: c}))
-      return [{label: '', value: ''}, ...values]
+      const values = descriptor.choices.map(c => ({ label: c, value: c }))
+      return [{ label: '', value: '' }, ...values]
     },
 
     isEditing () {
@@ -234,7 +234,7 @@ export default {
           frameIn: this.frameIn,
           frameOut: this.frameOut,
           fps: this.fps,
-          data: {...this.shotToEdit.data} || {}
+          data: { ...this.shotToEdit.data } || {}
         }
       }
     }

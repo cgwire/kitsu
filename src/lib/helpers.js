@@ -39,7 +39,7 @@ export const buildSelectionGrid = (maxX, maxY) => {
 }
 
 export const appendSelectionGrid = (grid, previousX, maxX, maxY) => {
-  const result = {...grid}
+  const result = { ...grid }
   for (let i = previousX; i < maxX; i++) {
     if (!result[i]) result[i] = {}
     for (let j = 0; j < maxY; j++) {

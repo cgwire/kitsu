@@ -113,16 +113,16 @@ export default {
         is_done: 'false'
       },
       isRetakeOptions: [
-        {label: this.$t('main.yes'), value: 'true'},
-        {label: this.$t('main.no'), value: 'false'}
+        { label: this.$t('main.yes'), value: 'true' },
+        { label: this.$t('main.no'), value: 'false' }
       ],
       isDoneOptions: [
-        {label: this.$t('main.yes'), value: 'true'},
-        {label: this.$t('main.no'), value: 'false'}
+        { label: this.$t('main.yes'), value: 'true' },
+        { label: this.$t('main.no'), value: 'false' }
       ],
       isArtistAllowedOptions: [
-        {label: this.$t('main.yes'), value: 'true'},
-        {label: this.$t('main.no'), value: 'false'}
+        { label: this.$t('main.yes'), value: 'true' },
+        { label: this.$t('main.no'), value: 'false' }
       ],
       colors: [
         '#000000',

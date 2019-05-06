@@ -125,12 +125,12 @@ export default {
         return { label: `${v}`, value: `${v}` }
       }),
       dedicatedToOptions: [
-        {label: this.$t('assets.title'), value: 'false'},
-        {label: this.$t('shots.title'), value: 'true'}
+        { label: this.$t('assets.title'), value: 'false' },
+        { label: this.$t('shots.title'), value: 'true' }
       ],
       allowTimelogOptions: [
-        {label: this.$t('main.yes'), value: 'true'},
-        {label: this.$t('main.no'), value: 'false'}
+        { label: this.$t('main.yes'), value: 'true' },
+        { label: this.$t('main.no'), value: 'false' }
       ]
     }
   },

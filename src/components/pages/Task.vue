@@ -526,7 +526,7 @@ export default {
           }
         }
 
-        return this.taskPath({id: taskId})
+        return this.taskPath({ id: taskId })
       } else {
         return {
           name: 'open-productions'
@@ -576,7 +576,7 @@ export default {
           }
         }
 
-        return this.taskPath({id: taskId})
+        return this.taskPath({ id: taskId })
       } else {
         return {
           name: 'open-productions'
@@ -737,7 +737,7 @@ export default {
       if (this.currentTask) {
         let route = {
           name: this.$route.params.type,
-          params: {production_id: this.currentTask.project_id}
+          params: { production_id: this.currentTask.project_id }
         }
 
         if (route.name === 'asset') {
@@ -1213,9 +1213,9 @@ export default {
           comment
         })
         if (this.currentPreviewId) {
-          this.resetPreview({id: this.currentPreviewId})
+          this.resetPreview({ id: this.currentPreviewId })
         } else {
-          this.resetPreview({id: previewId})
+          this.resetPreview({ id: previewId })
         }
       }
     },

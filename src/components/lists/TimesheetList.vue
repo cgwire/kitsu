@@ -129,7 +129,7 @@
 import { mapGetters, mapActions } from 'vuex'
 import moment from 'moment-timezone'
 import Datepicker from 'vuejs-datepicker'
-import {en, fr} from 'vuejs-datepicker/dist/locale'
+import { en, fr } from 'vuejs-datepicker/dist/locale'
 
 import EntityThumbnail from '../widgets/EntityThumbnail'
 import PageSubtitle from '../widgets/PageSubtitle'

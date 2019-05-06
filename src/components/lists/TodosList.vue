@@ -212,7 +212,7 @@ export default {
             const ref = 'validation-' + i + '-' + 0
             const validationCell = this.$refs[ref][0]
             if (!this.selectionGrid[i][0]) {
-              validationCell.select({ctrlKey: true, isUserClick: false})
+              validationCell.select({ ctrlKey: true, isUserClick: false })
             }
           }
         }
@@ -354,8 +354,8 @@ export default {
       if (isTableBodyContainLines) {
         const bodyElement = tableBody.children[0]
         const columnDescriptors = [
-          {index: 1, name: 'type'},
-          {index: 3, name: 'name'}
+          { index: 1, name: 'type' },
+          { index: 3, name: 'name' }
         ]
         columnDescriptors.forEach(desc => {
           const width = Math.max(

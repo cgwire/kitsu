@@ -182,7 +182,7 @@ export default {
     deleteText () {
       const episode = this.episodeToDelete
       if (episode) {
-        return this.$t('episodes.delete_text', {name: episode.name})
+        return this.$t('episodes.delete_text', { name: episode.name })
       } else {
         return ''
       }
@@ -241,7 +241,7 @@ export default {
       if (this.currentProduction.id !== productionId) {
         const newPath = {
           name: 'episodes',
-          params: {production_id: this.currentProduction.id}
+          params: { production_id: this.currentProduction.id }
         }
         this.$refs['episode-search-field'].setValue('')
         this.$store.commit('SET_SEQUENCE_LIST_SCROLL_POSITION', 0)

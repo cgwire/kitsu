@@ -127,7 +127,7 @@ export default {
     deleteText () {
       const assetType = this.assetTypeToDelete
       if (assetType) {
-        return this.$t('asset_types.delete_text', {name: assetType.name})
+        return this.$t('asset_types.delete_text', { name: assetType.name })
       } else {
         return ''
       }
@@ -138,7 +138,7 @@ export default {
       const assetTypeId = this.$store.state.route.params.asset_type_id
 
       if (path.indexOf('new') > 0) {
-        this.assetTypeToEdit = {color: '#FFFFFF'}
+        this.assetTypeToEdit = { ccolor: '#FFFFFF' }
         this.modals.isNewDisplayed = true
       } else if (path.indexOf('edit') > 0) {
         this.assetTypeToEdit = this.getAssetType(assetTypeId)

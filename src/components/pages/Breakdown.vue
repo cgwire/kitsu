@@ -276,22 +276,22 @@ export default {
     },
 
     addOneAsset (assetId) {
-      this.addAssetToCasting({assetId, nbOccurences: 1})
+      this.addAssetToCasting({ assetId, nbOccurences: 1 })
       this.saveCasting()
     },
 
     addTenAssets (assetId) {
-      this.addAssetToCasting({assetId, nbOccurences: 10})
+      this.addAssetToCasting({ assetId, nbOccurences: 10 })
       this.saveCasting()
     },
 
     removeOneAsset (assetId) {
-      this.removeAssetFromCasting({assetId, nbOccurences: 1})
+      this.removeAssetFromCasting({ assetId, nbOccurences: 1 })
       this.saveCasting()
     },
 
     removeTenAssets (assetId) {
-      this.removeAssetFromCasting({assetId, nbOccurences: 10})
+      this.removeAssetFromCasting({ assetId, nbOccurences: 10 })
       this.saveCasting()
     },
 

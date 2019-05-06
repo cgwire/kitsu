@@ -232,7 +232,7 @@ export default {
       'user'
     ]),
     departments () {
-      return [{name: 'Animation'}, {name: 'Modeling'}]
+      return [{ name: 'Animation' }, { name: 'Modeling' }]
     },
     timezones () {
       return moment.tz.names().filter((timezone) => {

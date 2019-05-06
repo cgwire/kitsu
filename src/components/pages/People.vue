@@ -158,7 +158,7 @@ export default {
       const person = this.personToDelete
       if (person !== undefined) {
         const personName = `${person.first_name} ${person.last_name}`
-        return this.$t('people.delete_text', {personName: personName})
+        return this.$t('people.delete_text', { personName })
       } else {
         return ''
       }

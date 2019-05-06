@@ -166,7 +166,7 @@ export default {
           }
         }
       } else {
-        return {name: 'timesheets'}
+        return { name: 'timesheets' }
       }
     }
   },
