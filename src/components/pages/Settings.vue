@@ -14,7 +14,7 @@
         <div class="logo-wrapper" v-if="organisation.has_avatar">
           <img :src="organisationLogoPath" />
         </div>
-        <p v-else>
+        <p class="no-logo" v-else>
           {{ $t('settings.no_logo') }}
         </p>
         <p>
@@ -150,10 +150,13 @@ export default {
       this.errors.saveAvatar = false
       this.uploadOrganisationLogo(formData)
         .then(() => {
-          this.loading.saveAvatar = false
-          this.modals.avatar = false
-          this.organisationLogoPath = `/api/pictures/thumbnails/organisations/` +
+          setTimeout(() => {
+            this.loading.saveAvatar = false
+            this.modals.avatar = false
+            this.organisationLogoPath =
+              `/api/pictures/thumbnails/organisations/` +
               `${this.organisation.id}.png?t=` + new Date().toISOString()
+          }, 500)
         })
         .catch((err) => {
           console.error(err)
@@ -241,5 +244,9 @@ h2:first-child {
   img {
     width: 100px;
   }
+}
+
+.no-logo {
+  margin-bottom: 1em;
 }
 </style>

@@ -59,7 +59,8 @@
 import colors from '../../lib/colors.js'
 import { mapGetters, mapActions } from 'vuex'
 
-export default {uname: 'production-name-cell',
+export default {
+  name: 'production-name-cell',
 
   props: {
     entry: {
@@ -111,9 +112,9 @@ export default {uname: 'production-name-cell',
     },
 
     productionInfo () {
-      const fps = this.entry.fps
-      const ratio = this.entry.ratio
-      const resolution = this.entry.resolution
+      const fps = this.entry ? this.entry.fps : null
+      const ratio = this.entry ? this.entry.ratio : null
+      const resolution = this.entry ? this.entry.resolution : null
       const infos = []
       if (fps) infos.push(`${this.$t('productions.fields.fps')}: ${fps}`)
       if (ratio) infos.push(`${this.$t('productions.fields.ratio')}: ${ratio}`)

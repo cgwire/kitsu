@@ -596,11 +596,11 @@ const actions = {
     })
   },
 
-  displayMoreSequences ({commit}) {
+  displayMoreSequences ({ commit }) {
     commit(DISPLAY_MORE_SEQUENCES)
   },
 
-  displayMoreEpisodes ({commit}) {
+  displayMoreEpisodes ({ commit }) {
     commit(DISPLAY_MORE_EPISODES)
   },
 
@@ -674,7 +674,7 @@ const actions = {
     })
   },
 
-  setSequenceSearch ({commit}, searchQuery) {
+  setSequenceSearch ({ commit }, searchQuery) {
     commit(SET_SEQUENCE_SEARCH, searchQuery)
   },
 
@@ -727,7 +727,7 @@ const actions = {
     })
   },
 
-  setEpisodeSearch ({commit}, searchQuery) {
+  setEpisodeSearch ({ commit }, searchQuery) {
     commit(SET_EPISODE_SEARCH, searchQuery)
   },
 

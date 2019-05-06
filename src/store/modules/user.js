@@ -386,11 +386,10 @@ const mutations = {
 
   [UPLOAD_AVATAR_END] (state) {
     if (state.user) {
-      const randomHash = Math.random().toString(36).substring(7)
       state.user.has_avatar = true
       state.user.avatarPath =
         `/api/pictures/thumbnails/persons/${state.user.id}` +
-        `.png?unique=${randomHash}`
+        `.png`
     }
   },
 
@@ -439,7 +438,10 @@ const mutations = {
   },
 
   [REMOVE_SELECTED_TASK] (state, validationInfo) {
-    if (state.todoSelectionGrid && state.todoSelectionGrid[0]) {
+    if (
+      state.todoSelectionGrid &&
+      state.todoSelectionGrid[validationInfo.x]
+    ) {
       state.todoSelectionGrid[validationInfo.x][validationInfo.y] = false
     }
   },

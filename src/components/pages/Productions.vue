@@ -140,7 +140,7 @@ export default {
     deleteText () {
       const production = this.productionToDelete
       if (production) {
-        return this.$t('productions.delete_text', {name: production.name})
+        return this.$t('productions.delete_text', { name: production.name })
       } else {
         return ''
       }

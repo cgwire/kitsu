@@ -88,10 +88,9 @@ const helpers = {
       person.initials = person.initials.toUpperCase()
       person.color = colors.fromString(person.name)
       if (person.has_avatar) {
-        const randomHash = Math.random().toString(36).substring(7)
         person.avatarPath =
           `/api/pictures/thumbnails/persons/${person.id}` +
-          `.png?unique=${randomHash}`
+          `.png`
       }
     }
     return person
@@ -431,7 +430,7 @@ const actions = {
     })
   },
 
-  setTimeSpent ({ commit }, {personId, taskId, date, duration}) {
+  setTimeSpent ({ commit }, { personId, taskId, date, duration }) {
     return new Promise((resolve, reject) => {
       peopleApi.setTimeSpent(
         taskId,
@@ -560,7 +559,7 @@ const mutations = {
     state.personToEdit = helpers.addAdditionalInformation(state.personToEdit)
     if (personToEditIndex >= 0) {
       delete state.people[personToEditIndex]
-      state.personMap[state.personToEdit.id] = {...state.personToEdit}
+      state.personMap[state.personToEdit.id] = { ...state.personToEdit }
       state.people[personToEditIndex] = state.personMap[state.personToEdit.id]
     } else {
       state.people = [
@@ -636,12 +635,11 @@ const mutations = {
   },
 
   [UPLOAD_AVATAR_END] (state, personId) {
-    const randomHash = Math.random().toString(36).substring(7)
     const person = state.personMap[personId]
     person.has_avatar = true
     person.avatarPath =
       `/api/pictures/thumbnails/persons/${person.id}` +
-      `.png?unique=${randomHash}`
+      `.png`
   },
 
   [LOAD_PERSON_TASKS_END] (
@@ -701,7 +699,7 @@ const mutations = {
     }
   },
 
-  [NEW_TASK_COMMENT_END] (state, {comment, taskId}) {
+  [NEW_TASK_COMMENT_END] (state, { comment, taskId }) {
     const task = state.personTasks.find((task) => task.id === taskId)
 
     if (task) {
@@ -784,11 +782,11 @@ const mutations = {
 
   [SET_ORGANISATION] (state, organisation) {
     Object.assign(state.organisation, organisation)
-    state.organisation = {...state.organisation}
+    state.organisation = { ...state.organisation }
   },
 
   [RESET_ALL] (state, people) {
-    Object.assign(state, {...initialState})
+    Object.assign(state, { ...initialState })
   }
 }
 

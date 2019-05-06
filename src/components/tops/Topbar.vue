@@ -101,15 +101,15 @@
         </li>
         <li @click="toggleDarkTheme">
           <span v-if="!isDarkTheme">
-            {{ $t("main.dark_theme ")}}
+            {{ $t("main.dark_theme")}}
           </span>
           <span v-else>
-            {{ $t("main.white_theme ")}}
+            {{ $t("main.white_theme")}}
           </span>
         </li>
         <li>
           <a href="https://kitsu.cg-wire.com" target="_blank">
-            {{ $t("main.documentation ")}}
+            {{ $t("main.documentation")}}
           </a>
         </li>
         <li>
@@ -124,7 +124,7 @@
         </li>
         <li>
           <a href="https://cg-wire.com/en/about.html" target="_blank">
-            {{ $t("main.about ")}}
+            {{ $t("main.about")}}
           </a>
         </li>
         <li @click="onLogoutClicked">
@@ -245,14 +245,14 @@ export default {
 
     navigationOptions () {
       const options = [
-        {label: this.$t('assets.title'), value: 'assets'},
-        {label: this.$t('shots.title'), value: 'shots'},
-        {label: this.$t('sequences.title'), value: 'sequences'},
-        {label: this.$t('episodes.title'), value: 'episodes'},
-        {label: this.$t('asset_types.production_title'), value: 'assetTypes'},
-        {label: this.$t('breakdown.title'), value: 'breakdown'},
-        {label: this.$t('playlists.title'), value: 'playlists'},
-        {label: this.$t('people.team'), value: 'team'}
+        { label: this.$t('assets.title'), value: 'assets' },
+        { label: this.$t('shots.title'), value: 'shots' },
+        { label: this.$t('sequences.title'), value: 'sequences' },
+        { label: this.$t('episodes.title'), value: 'episodes' },
+        { label: this.$t('asset_types.production_title'), value: 'assetTypes' },
+        { label: this.$t('breakdown.title'), value: 'breakdown' },
+        { label: this.$t('playlists.title'), value: 'playlists' },
+        { label: this.$t('people.team'), value: 'team' }
       ]
       if (!this.isTVShow) { // Remove episode Section from the list.
         options.splice(3, 1)
@@ -532,6 +532,7 @@ export default {
 
 .avatar {
   margin-right: 10px;
+  min-width: 40px;
 }
 
 .user-nav {
@@ -614,6 +615,11 @@ strong {
 
 .version {
   color: $grey;
+}
+
+.user-name {
+  min-width: 130px;
+  text-align: left;
 }
 
 @media screen and (max-width: 768px) {

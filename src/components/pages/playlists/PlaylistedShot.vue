@@ -146,7 +146,7 @@ export default {
     getTaskTypeIdForPreviewFile (taskTypeIds, previewFileId) {
       return taskTypeIds.find((taskTypeId) => {
         const previewFiles = this.shot.preview_files[taskTypeId]
-        return previewFiles.find(previewFile => {
+        return previewFiles.some(previewFile => {
           return previewFile.id === previewFileId
         })
       })
@@ -159,7 +159,7 @@ export default {
         if (this.shot.preview_file_id) {
           this.taskTypeId = this.getTaskTypeIdForPreviewFile(
             taskTypeIds,
-            this.shot.previewFileId
+            this.shot.preview_file_id
           )
         }
         if (!this.taskTypeId) {
@@ -205,7 +205,7 @@ export default {
 
   watch: {
     taskTypeId () {
-      // Set current previe was last preview selected. If there is no preview
+      // Set current preview was last preview selected. If there is no preview
       // matching this task type, it selects the first preview available for
       // this task type.
       const previewFiles = this.shot.preview_files[this.taskTypeId]

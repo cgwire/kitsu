@@ -207,7 +207,7 @@ export default {
     edit_title: 'Edit person',
     empty_team: 'There is no one listed in the project team.',
     new_person: 'Add a new employee',
-    no_task_assigned: 'There are no assigned running tasks.',
+    no_task_assigned: 'There are no running tasks assigned to you',
     persons: 'person | persons',
     running_tasks: 'Running tasks',
     select_person: 'Select a person...',
@@ -352,7 +352,7 @@ export default {
   settings: {
     change_logo: 'Change logo',
     logo: 'Studio logo',
-    no_logo: 'There is no set logo.',
+    no_logo: 'There is no logo set.',
     set_logo: 'Set studio logo',
     title: 'Settings',
     fields: {

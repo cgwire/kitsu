@@ -246,6 +246,7 @@ export default {
       if (this.video) {
         this.video.addEventListener('loadedmetadata', () => {
           this.configureVideo()
+          this.onWindowResize()
           this.isLoading = false
           this.setDefaultComparisonTaskType()
         })
@@ -359,9 +360,16 @@ export default {
         })
         .map((taskTypeId) => {
           const taskType = this.taskTypeMap[taskTypeId]
-          return {
-            label: taskType.name,
-            value: taskType.id
+          if (taskType) {
+            return {
+              label: taskType.name,
+              value: taskType.id
+            }
+          } else {
+            return {
+              label: '',
+              value: ''
+            }
           }
         })
     },
@@ -516,7 +524,6 @@ export default {
     },
 
     play () {
-      this.hideCanvas()
       this.clearAnnotations()
       this.isPlaying = true
       this.fabricCanvas.isDrawingMode = false
@@ -531,7 +538,6 @@ export default {
     pause () {
       this.isPlaying = false
       this.video.pause()
-      this.showCanvas()
       if (this.isComparing) {
         const comparisonVideo = document.getElementById('comparison-movie')
         if (comparisonVideo) comparisonVideo.pause()
@@ -777,7 +783,7 @@ export default {
         }) || []
       }
       const annotations = []
-      this.annotations.forEach(a => annotations.push({...a}))
+      this.annotations.forEach(a => annotations.push({ ...a }))
       this.$emit('annotationchanged', {
         preview: this.preview,
         annotations: annotations
@@ -854,7 +860,7 @@ export default {
       this.annotations = []
       if (this.preview.annotations) {
         const annotations = []
-        this.preview.annotations.forEach(a => annotations.push({...a}))
+        this.preview.annotations.forEach(a => annotations.push({ ...a }))
         this.annotations = annotations.sort((a, b) => {
           return a.time < b.time
         }) || []
@@ -912,14 +918,6 @@ export default {
       }
     },
 
-    showCanvas () {
-      this.canvas.style.display = 'block'
-    },
-
-    hideCanvas () {
-      this.canvas.style.display = 'none'
-    },
-
     resetCanvas () {
       if (!this.fabricCanvas) this.setupFabricCanvas()
       this.resetCanvasSize()
@@ -960,9 +958,6 @@ export default {
 
     taskTypeId () {
       this.setDefaultComparisonPreview()
-    },
-
-    isDrawing () {
     }
   }
 }

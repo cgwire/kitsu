@@ -27,12 +27,13 @@
       />
       <img
         v-lazy="avatarPath"
+        :key="avatarKey"
         v-else-if="person.has_avatar"
       />
       <span
         v-if="!person.has_avatar"
       >
-       {{ person.initials }}
+       {{ initials }}
       </span>
     </router-link>
   </span>
@@ -57,7 +58,7 @@
     v-else-if="person.has_avatar"
   />
   <span v-else>
-    {{ person.initials }}
+    {{ initials }}
   </span>
 </span>
 </template>
@@ -68,7 +69,9 @@ export default {
 
   data () {
     return {
-      avatarPath: `${this.person.avatarPath}`
+      avatarPath: `${this.person.avatarPath}`,
+      avatarKey: `${this.person.id}-${new Date().toISOString()}`,
+      initials: ''
     }
   },
 
@@ -82,14 +85,27 @@ export default {
 
   methods: {
     reloadAvatar () {
-      this.avatarPath =
-        this.person.avatarPath + '&stamp=' + new Date().toISOString()
+      setTimeout(() => {
+        this.avatarPath =
+          this.person.avatarPath + '?stamp=' + new Date().toISOString()
+        this.avatarKey =
+          this.person.id + '-' + new Date().toISOString()
+      }, 300)
     }
+  },
+
+  mounted () {
+    this.initials = this.person.initials
   },
 
   watch: {
     person () {
       this.reloadAvatar()
+      this.initials = this.person.initials
+    },
+
+    'person.initials' () {
+      this.initials = this.person.initials
     }
   }
 }

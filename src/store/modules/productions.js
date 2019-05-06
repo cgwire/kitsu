@@ -29,6 +29,7 @@ import {
 
   TEAM_ADD_PERSON,
   TEAM_REMOVE_PERSON,
+  ASSIGN_TASKS,
 
   ADD_METADATA_DESCRIPTOR_END,
   UPDATE_METADATA_DESCRIPTOR_END,
@@ -59,17 +60,17 @@ const initialState = {
     isError: false
   },
 
-  assetsPath: {name: 'open-productions'},
-  assetTypesPath: {name: 'open-productions'},
-  shotsPath: {name: 'open-productions'},
-  sequencesPath: {name: 'open-productions'},
-  episodesPath: {name: 'open-productions'},
-  breakdownPath: {name: 'open-productions'},
-  playlistsPath: {name: 'open-productions'},
-  teamPath: {name: 'open-productions'}
+  assetsPath: { name: 'open-productions' },
+  assetTypesPath: { name: 'open-productions' },
+  shotsPath: { name: 'open-productions' },
+  sequencesPath: { name: 'open-productions' },
+  episodesPath: { name: 'open-productions' },
+  breakdownPath: { name: 'open-productions' },
+  playlistsPath: { name: 'open-productions' },
+  teamPath: { name: 'open-productions' }
 }
 
-let state = {...initialState}
+let state = { ...initialState }
 
 const helpers = {
   getProductionComponentPath (routeName, productionId, episodeId) {
@@ -89,7 +90,7 @@ const helpers = {
         }
       }
     } else {
-      return {name: 'open-productions'}
+      return { name: 'open-productions' }
     }
   }
 }
@@ -338,7 +339,7 @@ const actions = {
         descriptorId
       )
         .then(() => {
-          commit(DELETE_METADATA_DESCRIPTOR_END, {id: descriptorId})
+          commit(DELETE_METADATA_DESCRIPTOR_END, { id: descriptorId })
           resolve()
         })
         .catch(reject)
@@ -601,8 +602,17 @@ const mutations = {
     }
   },
 
+  [ASSIGN_TASKS] (state, { personId }) {
+    const isTeamMember = state.currentProduction.team.some(
+      pId => pId === personId
+    )
+    if (!isTeamMember) {
+      state.currentProduction.team.push(personId)
+    }
+  },
+
   [RESET_ALL] (state) {
-    Object.assign(state, {...initialState})
+    Object.assign(state, { ...initialState })
   }
 }
 

@@ -7,7 +7,7 @@ import taskTypesStore from './tasktypes'
 import productionsStore from './productions'
 import peopleStore from './people'
 
-import {PAGE_SIZE} from '../../lib/pagination'
+import { PAGE_SIZE } from '../../lib/pagination'
 import {
   sortAssets,
   sortTasks,
@@ -457,7 +457,7 @@ const actions = {
     commit(COMPUTE_ASSET_TYPE_STATS, { taskStatusMap, taskMap })
   },
 
-  setAssetTypeSearch ({commit}, searchQuery) {
+  setAssetTypeSearch ({ commit }, searchQuery) {
     commit(SET_ASSET_TYPE_SEARCH, searchQuery)
   }
 }
@@ -708,7 +708,7 @@ const mutations = {
     }
   },
 
-  [NEW_TASK_COMMENT_END] (state, {comment, taskId}) {
+  [NEW_TASK_COMMENT_END] (state, { comment, taskId }) {
   },
 
   [SET_ASSET_SEARCH] (
@@ -864,7 +864,7 @@ const mutations = {
       if (task) {
         const asset = state.assetMap[task.entity_id]
         if (asset) {
-          const validations = {...asset.validations}
+          const validations = { ...asset.validations }
           Vue.set(validations, task.task_type_id, task.id)
           delete asset.validations
           Vue.set(asset, 'validations', validations)
@@ -894,7 +894,7 @@ const mutations = {
     cache.assets = []
     cache.assetIndex = {}
 
-    Object.assign(state, {...initialState})
+    Object.assign(state, { ...initialState })
   }
 }
 

@@ -136,7 +136,7 @@ const mutations = {
   },
 
   [RESET_ALL] (state, email) {
-    Object.assign(state, {...initialState})
+    Object.assign(state, { ...initialState })
   }
 }
 

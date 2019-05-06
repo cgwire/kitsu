@@ -462,7 +462,7 @@ export default {
           shot,
           callback: () => {
             delete this.currentShots[shot.id]
-            this.currentShots = {...this.currentShots}
+            this.currentShots = { ...this.currentShots }
           }
         })
       }

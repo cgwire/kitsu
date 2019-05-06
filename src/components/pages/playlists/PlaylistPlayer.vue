@@ -97,8 +97,11 @@
     <span class="flexrow-item time-indicator">
     /
     </span>
-    <span class="flexrow-item time-indicator mr1">
+    <span class="flexrow-item time-indicator">
       {{ maxDuration }}
+    </span>
+    <span class="flexrow-item time-indicator mr1">
+      ({{ currentFrame }})
     </span>
     <button-simple
       class="button playlist-button flexrow-item"
@@ -360,6 +363,7 @@ export default {
 
   computed: {
     ...mapGetters([
+      'currentProduction',
       'taskMap',
       'taskTypeMap'
     ]),
@@ -390,6 +394,14 @@ export default {
 
     container () {
       return this.$refs.container
+    },
+
+    currentFrame () {
+      return `${Math.floor(this.currentTimeRaw * this.fps)}`.padStart(3, '0')
+    },
+
+    fps () {
+      return this.currentProduction.fps || 24
     },
 
     rawPlayer () {
@@ -812,6 +824,15 @@ export default {
 
     onShotChange (shotIndex) {
       this.playingShotIndex = shotIndex
+      if (this.rawPlayerComparison) {
+        const comparisonIndex = this.rawPlayerComparison.playingIndex
+        if (comparisonIndex < shotIndex) {
+          this.rawPlayerComparison.playNext()
+        } else {
+          this.rawPlayerComparison.setCurrentTime(0)
+          this.rawPlayerComparison.play()
+        }
+      }
       this.scrollToShot(this.playingShotIndex)
     },
 
@@ -830,7 +851,9 @@ export default {
         height -= this.$refs['playlist-progress'].offsetHeight
         height -= this.$refs['button-bar'].offsetHeight
         height -= this.$refs['playlisted-shots'].offsetHeight
-        height -= this.$refs['playlist-annotation'].offsetHeight
+        if (this.$refs['playlist-annotation']) {
+          height -= this.$refs['playlist-annotation'].$el.offsetHeight
+        }
         this.$refs['video-container'].style.height = `${height}px`
         if (!this.isCommentsHidden) {
           this.$refs['task-info'].$el.style.height = `${height}px`
@@ -1069,7 +1092,7 @@ export default {
         }) || []
       }
       const annotations = []
-      this.annotations.forEach(a => annotations.push({...a}))
+      this.annotations.forEach(a => annotations.push({ ...a }))
       const shot = this.shotList[this.playingShotIndex]
       const preview = {
         id: shot.preview_file_id,

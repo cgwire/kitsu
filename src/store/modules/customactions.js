@@ -33,7 +33,7 @@ const initialState = {
   }
 }
 
-const state = {...initialState}
+const state = { ...initialState }
 
 const getters = {
   customActions: state => state.customActions,
@@ -80,7 +80,7 @@ const actions = {
     })
   },
 
-  newCustomAction ({ commit, state }, {data, callback}) {
+  newCustomAction ({ commit, state }, { data, callback }) {
     commit(EDIT_CUSTOM_ACTION_START, data)
     customActionsApi.newCustomAction(data, (err, customAction) => {
       if (err) {
@@ -92,7 +92,7 @@ const actions = {
     })
   },
 
-  editCustomAction ({ commit, state }, {data, callback}) {
+  editCustomAction ({ commit, state }, { data, callback }) {
     commit(EDIT_CUSTOM_ACTION_START)
     customActionsApi.updateCustomAction(data, (err, customAction) => {
       if (err) {
@@ -104,7 +104,7 @@ const actions = {
     })
   },
 
-  deleteCustomAction ({ commit, state }, {customAction, callback}) {
+  deleteCustomAction ({ commit, state }, { customAction, callback }) {
     commit(DELETE_CUSTOM_ACTION_START)
     customActionsApi.deleteCustomAction(customAction, (err) => {
       if (err) {
@@ -189,7 +189,7 @@ const mutations = {
   },
 
   [RESET_ALL] (state) {
-    Object.assign(state, {...initialState})
+    Object.assign(state, { ...initialState })
   }
 }
 

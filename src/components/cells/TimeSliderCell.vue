@@ -20,6 +20,7 @@
 <script>
 import { mapGetters, mapActions } from 'vuex'
 import VueSlider from 'vue-slider-component'
+import 'vue-slider-component/theme/antd.css'
 
 export default {
   name: 'time-slider-cell',
@@ -35,15 +36,13 @@ export default {
         interval: 0.5,
         lazy: true,
         piecewise: true,
-        tooltip: 'hover',
-        tooltipDir: 'bottom',
-        tooltipStyle: {
-          'background-color': '#FFFFFF',
-          color: '$grey-strong666',
-          'z-index': 2000
-        },
+        tooltip: 'focus',
+        tooltipPlacement: 'bottom',
         processStyle: {
           'background-color': '#8F91EB'
+        },
+        railStyle: {
+          background: '#CCC'
         }
       }
     }
@@ -80,7 +79,9 @@ export default {
 
   watch: {
     value () {
-      this.$emit('change', {taskId: this.taskId, duration: this.value})
+      this.$emit('change', {
+        taskId: this.taskId, duration: this.value
+      })
     }
   }
 }
@@ -90,7 +91,7 @@ export default {
 .value {
   font-size: 1.5em;
   font-weight: bold;
-  width: 20px;
+  width: 30px;
 }
 
 .slider {
