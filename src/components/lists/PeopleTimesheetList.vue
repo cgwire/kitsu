@@ -366,8 +366,8 @@ export default {
 }
 
 .daytime {
-  width: 80px;
-  min-width: 80px;
+  width: 60px;
+  min-width: 60px;
 }
 
 .time,
