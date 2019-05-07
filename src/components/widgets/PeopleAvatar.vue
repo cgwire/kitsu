@@ -69,28 +69,35 @@ export default {
 
   data () {
     return {
-      avatarPath: `${this.person.avatarPath}`,
-      avatarKey: `${this.person.id}-${new Date().toISOString()}`,
+      avatarPath: '',
+      avatarKey: '',
       initials: ''
     }
   },
 
   props: {
-    person: { type: Object, default: () => { return { color: '#FFF' } } },
+    person: {
+      type: Object,
+      default: () => ({
+        id: 'empty', color: '#FFF'
+      })
+    },
     size: { type: Number, default: 40 },
     'font-size': { type: Number, default: 18 },
     'is-link': { type: Boolean, default: true },
     'no-cache': { type: Boolean, default: false }
   },
 
+  created () {
+    this.reloadAvatar()
+  },
+
   methods: {
     reloadAvatar () {
-      setTimeout(() => {
-        this.avatarPath =
-          this.person.avatarPath + '?stamp=' + new Date().toISOString()
-        this.avatarKey =
-          this.person.id + '-' + new Date().toISOString()
-      }, 300)
+      this.avatarPath =
+        this.person.avatarPath + '?unique=' + this.person.uniqueHash
+      this.avatarKey =
+        this.person.id + '-' + this.person.uniqueHash
     }
   },
 
@@ -101,11 +108,6 @@ export default {
   watch: {
     person () {
       this.reloadAvatar()
-      this.initials = this.person.initials
-    },
-
-    'person.initials' () {
-      this.initials = this.person.initials
     }
   }
 }

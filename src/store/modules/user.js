@@ -1,3 +1,4 @@
+import Vue from 'vue'
 import peopleApi from '../api/people'
 import peopleStore from './people'
 import taskStatusStore from './taskstatus'
@@ -386,7 +387,9 @@ const mutations = {
 
   [UPLOAD_AVATAR_END] (state) {
     if (state.user) {
+      const randomHash = Math.random().toString(36).substring(7)
       state.user.has_avatar = true
+      Vue.set(state.user, 'uniqueHash', randomHash)
       state.user.avatarPath =
         `/api/pictures/thumbnails/persons/${state.user.id}` +
         `.png`

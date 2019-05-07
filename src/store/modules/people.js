@@ -1,3 +1,4 @@
+import Vue from 'vue'
 import peopleApi from '../api/people'
 import colors from '../../lib/colors'
 import { populateTask, clearSelectionGrid } from '../../lib/helpers'
@@ -85,7 +86,7 @@ const helpers = {
         person.initials = 'NN'
       }
 
-      person.initials = person.initials.toUpperCase()
+      Vue.set(person, 'initials', person.initials.toUpperCase())
       person.color = colors.fromString(person.name)
       if (person.has_avatar) {
         person.avatarPath =
@@ -558,8 +559,8 @@ const mutations = {
     )
     state.personToEdit = helpers.addAdditionalInformation(state.personToEdit)
     if (personToEditIndex >= 0) {
-      delete state.people[personToEditIndex]
       state.personMap[state.personToEdit.id] = { ...state.personToEdit }
+      delete state.people[personToEditIndex]
       state.people[personToEditIndex] = state.personMap[state.personToEdit.id]
     } else {
       state.people = [
@@ -568,9 +569,9 @@ const mutations = {
       ]
       state.personMap[state.personToEdit.id] = state.personToEdit
       state.displayedPeople.push(state.personToEdit)
-      sortPeople(state.people)
-      sortPeople(state.displayedPeople)
     }
+    sortPeople(state.people)
+    sortPeople(state.displayedPeople)
     state.personToEdit = {
       role: 'user'
     }
@@ -636,10 +637,13 @@ const mutations = {
 
   [UPLOAD_AVATAR_END] (state, personId) {
     const person = state.personMap[personId]
-    person.has_avatar = true
-    person.avatarPath =
-      `/api/pictures/thumbnails/persons/${person.id}` +
-      `.png`
+    if (person) {
+      const randomHash = Math.random().toString(36).substring(7)
+      person.has_avatar = true
+      Vue.set(state.user, 'uniqueHash', randomHash)
+      person.avatarPath =
+        `/api/pictures/thumbnails/persons/${person.id}.png`
+    }
   },
 
   [LOAD_PERSON_TASKS_END] (
