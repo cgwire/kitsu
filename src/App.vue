@@ -784,6 +784,9 @@ input.search-input:focus {
 
 .table td {
   vertical-align: middle;
+}
+
+.table td.metadata-descriptor {
   word-wrap: anywhere;
 }
 
