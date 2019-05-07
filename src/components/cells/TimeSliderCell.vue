@@ -20,7 +20,7 @@
 <script>
 import { mapGetters, mapActions } from 'vuex'
 import VueSlider from 'vue-slider-component'
-import 'vue-slider-component/theme/antd.css'
+import 'vue-slider-component/theme/default.css'
 
 export default {
   name: 'time-slider-cell',
@@ -35,6 +35,8 @@ export default {
         max: 10,
         interval: 0.5,
         lazy: true,
+        marks: true,
+        hideLabel: true,
         piecewise: true,
         tooltip: 'focus',
         tooltipPlacement: 'bottom',

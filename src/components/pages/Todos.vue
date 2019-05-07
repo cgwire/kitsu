@@ -26,7 +26,7 @@
           </li>
           <li
             :class="{'is-active': isTabActive('timesheets')}"
-            @click="selectTab('timesheet')"
+            @click="selectTab('timesheets')"
           >
             <router-link :to="{
               name: 'todos-tab',
