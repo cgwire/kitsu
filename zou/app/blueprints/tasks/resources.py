@@ -11,17 +11,18 @@ from zou.app.services.exception import (
     WrongDateFormatException
 )
 from zou.app.services import (
-    deletion_service,
-    tasks_service,
-    shots_service,
     assets_service,
-    persons_service,
-    projects_service,
+    deletion_service,
+    entities_service,
     files_service,
     file_tree_service,
-    user_service,
-    entities_service,
-    notifications_service
+    news_service,
+    notifications_service,
+    persons_service,
+    projects_service,
+    shots_service,
+    tasks_service,
+    user_service
 )
 from zou.app.utils import query, permissions
 
@@ -84,6 +85,9 @@ class CommentTaskResource(Resource):
         tasks_service.update_task(task_id, new_data)
 
         notifications_service.create_notifications_for_task_and_comment(
+            task, comment, change=status_changed
+        )
+        news_service.create_news_for_task_and_comment(
             task, comment, change=status_changed
         )
 

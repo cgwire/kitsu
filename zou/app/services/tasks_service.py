@@ -11,6 +11,7 @@ from zou.app.utils import events
 from zou.app.models.comment import Comment
 from zou.app.models.department import Department
 from zou.app.models.entity import Entity
+from zou.app.models.news import News
 from zou.app.models.person import Person
 from zou.app.models.task import Task
 from zou.app.models.task_type import TaskType
@@ -944,6 +945,7 @@ def add_preview_file_to_comment(comment_id, person_id, task_id, revision=0):
     (add 1 if it's a new preview, keep the preview revision in other cases).
     """
     comment = get_comment_raw(comment_id)
+    news = News.get_by(comment_id=comment_id)
     if revision == 0 and len(comment.previews) == 0:
         revision = get_next_preview_revision(task_id)
     elif revision == 0:
@@ -957,6 +959,10 @@ def add_preview_file_to_comment(comment_id, person_id, task_id, revision=0):
     )
     comment.previews.append(preview_file)
     comment.save()
+
+    if news is not None:
+        news.update({"preview_file_id": preview_file.id})
+
     return preview_file.serialize()
 
 
