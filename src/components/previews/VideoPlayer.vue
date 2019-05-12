@@ -776,6 +776,7 @@ export default {
       if (annotation) {
         annotation.drawing = this.fabricCanvas.toJSON(['canvasWidth'])
         annotation.width = this.fabricCanvas.width
+        annotation.height = this.fabricCanvas.height
         if (annotation.drawing && annotation.drawing.objects.length < 1) {
           const index = this.annotations.findIndex(
             (annotation) => annotation.time === currentTime

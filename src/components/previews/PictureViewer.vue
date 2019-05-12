@@ -1,18 +1,19 @@
 <template>
 <div ref="container" class="picture-player">
   <div ref="picture-wrapper" class="picture-wrapper">
-    <div class="loading-background" v-if="isLoading" >
-      <spinner class="spinner" />
+    <div class="canvas-wrapper">
+      <canvas
+        :style="{
+          display: 'block'
+        }"
+        id="annotation-canvas"
+        ref="annotation-canvas"
+        class="canvas"
+        v-if="!readOnly"
+      >
+      </canvas>
     </div>
-    <canvas
-      :style="{
-        display: 'block'
-      }"
-      id="annotation-canvas"
-      ref="annotation-canvas"
-      class="canvas"
-    >
-    </canvas>
+    <img ref="picture" :src="picturePath" />
   </div>
 
   <div class="buttons flexrow pull-bottom" ref="button-bar">
@@ -142,7 +143,7 @@ export default {
     },
     readOnly: {
       type: Boolean,
-      default: true
+      default: false
     }
   },
 
@@ -161,7 +162,6 @@ export default {
     this.container.style.height = this.getDefaultHeight() + 'px'
     setTimeout(() => {
       this.mountPicture()
-
       window.addEventListener('keydown', this.onKeyDown)
       window.addEventListener('resize', this.onWindowResize)
     }, 0)
@@ -229,49 +229,17 @@ export default {
     },
 
     mountPicture () {
-      this.isResizing = true
-      this.isLoading = true
-      this.clearCanvas(() => {
-        this.setupFabricPicture((fabricCanvas) => {
-          this.isLoading = false
-          this.fabricCanvas = fabricCanvas
-          this.loadAnnotation(0)
-          this.isResizing = false
-          this.fixCanvasSize()
-          if (this.fabricCanvas) this.fabricCanvas.calcOffset()
-        })
-      })
+      if (!this.fabricCanvas) this.setupFabricCanvas()
+      this.loadAnnotation(0)
+      this.$nextTick(this.fixCanvasSize)
     },
 
-    clearCanvas (callback) {
+    clearCanvas () {
       if (this.fabricCanvas) {
         this.fabricCanvas.getObjects().forEach((obj) => {
           this.fabricCanvas.remove(obj)
         })
       }
-      if (this.$refs['annotation-canvas']) {
-        this.$refs['annotation-canvas'].innerHTML = ''
-        this.$refs['annotation-canvas'].innerText = ''
-        this.$refs['annotation-canvas'].html = ''
-      }
-
-      setTimeout(() => {
-        if (this.fabricCanvas) {
-          try {
-            this.fabricCanvas.clear()
-          } catch (err) {
-            console.log(err)
-          }
-
-          try {
-            this.fabricCanvas.dispose()
-          } catch (err) {
-            console.log(err)
-          }
-        }
-        this.fabricCanvas = null
-        if (callback) callback()
-      }, 0)
     },
 
     getDefaultHeight () {
@@ -282,8 +250,8 @@ export default {
       }
     },
 
-    getDimensions (picture) {
-      const ratio = picture.height / picture.width
+    getDimensions () {
+      const ratio = this.picture.naturalHeight / this.picture.naturalWidth
       let width = this.container.offsetWidth - 1
       let height = Math.floor(width * ratio)
       if (height > this.getDefaultHeight()) {
@@ -295,9 +263,9 @@ export default {
       return { width, height }
     },
 
-    setupFabricPicture (callback) {
-      fabric.Image.fromURL(this.picturePath, (fabricPicture) => {
-        const dimensions = this.getDimensions(fabricPicture)
+    setupFabricCanvas () {
+      if (!this.readOnly) {
+        const dimensions = this.getDimensions()
         const width = dimensions.width
         const height = dimensions.height
         const fabricCanvas = new fabric.Canvas('annotation-canvas')
@@ -307,21 +275,6 @@ export default {
           width: width,
           height: height
         })
-        this.pictureWrapper.style.width = width + 'px'
-        this.pictureWrapper.style.height = height + 'px'
-
-        fabricPicture = fabricPicture.set({
-          left: 0,
-          top: 0,
-          objectCaching: false,
-          selectable: false
-        })
-
-        fabricCanvas.add(fabricPicture)
-        fabricPicture.sendToBack()
-        this.fabricPicture = fabricPicture
-        this.fabricPicture.scaleToWidth(width)
-        this.fabricPicture.scaleToHeight(height)
 
         fabricCanvas.freeDrawingBrush.color = '#ff3860'
         fabricCanvas.freeDrawingBrush.width = 4
@@ -337,8 +290,8 @@ export default {
         fabricCanvas.on('object:scaled', this.saveAnnotations)
         fabricCanvas.off('mouse:up', this.onMouseUp)
         fabricCanvas.on('mouse:up', this.onMouseUp)
-        callback(fabricCanvas)
-      })
+        this.fabricCanvas = fabricCanvas
+      }
     },
 
     onAddPreviewClicked () {
@@ -403,9 +356,11 @@ export default {
       if (now - this.lastCall > 600) {
         this.lastCall = now
         setTimeout(() => {
+          this.clearCanvas()
           this.mountPicture()
           this.reloadAnnotations()
-        }, 0)
+          this.$nextTick(this.fixCanvasSize)
+        }, 10)
       }
     },
 
@@ -449,14 +404,14 @@ export default {
       if (annotation) {
         annotation.drawing = this.fabricCanvas.toJSON(['canvasWidth'])
         annotation.width = this.fabricCanvas.width
-        if (annotation.drawing && annotation.drawing.objects.length === 1) {
-          this.annotations.splice(0, 1)
-        }
+        annotation.height = this.fabricCanvas.height
       } else {
         this.annotations = []
+        const dimensions = this.getDimensions()
         const annotation = {
           time: 0,
-          width: this.fabricCanvas.width,
+          width: dimensions.width,
+          height: dimensions.height,
           drawing: this.fabricCanvas.toJSON(['canvasWidth'])
         }
         this.annotations.push(annotation)
@@ -486,28 +441,34 @@ export default {
       const annotation = this.getAnnotation(time)
       this.clearAnnotations()
 
-      let scaleMultiplier = 1
       if (annotation) {
+        const dimensions = this.getDimensions()
+        let scaleMultiplierX = 1
+        let scaleMultiplierY = 1
         if (annotation.width) {
-          scaleMultiplier = this.fabricCanvas.width / annotation.width
+          scaleMultiplierX = dimensions.width / annotation.width
+          scaleMultiplierY = dimensions.width / annotation.width
+        }
+        if (annotation.height) {
+          scaleMultiplierY = dimensions.height / annotation.height
         }
 
         annotation.drawing.objects.forEach((obj) => {
           const base = {
-            left: obj.left * scaleMultiplier,
-            top: obj.top * scaleMultiplier,
+            left: obj.left * scaleMultiplierX,
+            top: obj.top * scaleMultiplierY,
             fill: 'transparent',
             stroke: '#ff3860',
-            radius: obj.radius * scaleMultiplier,
+            radius: obj.radius * scaleMultiplierX,
             width: obj.width,
             height: obj.height,
-            scaleX: obj.scaleX * scaleMultiplier,
-            scaleY: obj.scaleY * scaleMultiplier
+            scaleX: obj.scaleX * scaleMultiplierX,
+            scaleY: obj.scaleY * scaleMultiplierY
           }
           if (obj.type === 'path') {
             let strokeMultiplier = 1
             if (obj.canvasWidth) {
-              strokeMultiplier = obj.canvasWidth / this.fabricCanvas.width
+              strokeMultiplier = obj.canvasWidth / dimensions.width
             }
             const path = new fabric.Path(
               obj.path,
@@ -586,15 +547,19 @@ export default {
     },
 
     fixCanvasSize () {
-      if (this.fabricPicture) {
-        const dimensions = this.getDimensions(this.fabricPicture)
-        const width = dimensions.width
-        const height = dimensions.height
+      const dimensions = this.getDimensions()
+      const width = dimensions.width
+      const height = dimensions.height
+      this.picture.width = width
+      this.picture.height = height
+      if (this.fabricCanvas) {
+        this.fabricCanvas.setDimensions({ width, height })
         let elements = document.getElementsByClassName('canvas-container')
         for (let i = 0; i < elements.length; i++) {
           const element = elements[i]
           element.style.width = width + 'px'
           element.style.height = height + 'px'
+          element.style.margin = 'auto'
         }
         elements = document.getElementsByClassName('upper-canvas')
         for (let i = 0; i < elements.length; i++) {
@@ -605,7 +570,7 @@ export default {
           element.setAttribute('height', height)
         }
         setTimeout(() => {
-          if (this.fabricCanvas) this.fabricCanvas.calcOffset()
+          this.fabricCanvas.calcOffset()
         }, 10)
       }
     }
@@ -665,12 +630,15 @@ export default {
 
 .picture-wrapper {
   flex: 1;
+  position: relative;
   display: flex;
   background: black;
   align-items: center;
   justify-content: center;
   text-align: center;
   width: 100%;
+
+  z-index: 300;
 }
 
 .annotation-picture {
@@ -724,5 +692,16 @@ export default {
 .buttons .button.active,
 .buttons .button:hover {
   color: #43B581;
+}
+
+.canvas-wrapper {
+  width: 100%;
+  position: absolute;
+  left: 0;
+  z-index: 300;
+
+  div {
+    margin: auto;
+  }
 }
 </style>
