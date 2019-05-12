@@ -18,14 +18,16 @@
   <div class="buttons flexrow pull-bottom" ref="button-bar">
     <div class="left flexrow">
       <button
-        @click="onPreviousClicked"
         class="button flexrow-item"
+        @click="onPreviousClicked"
+        v-if="!readOnly"
       >
         <chevron-left-icon class="icon" />
       </button>
 
       <span
         class="flexrow-item bar-element"
+        v-if="!readOnly"
       >
         {{ currentIndex }} / {{ preview.previews.length }}
       </span>
@@ -33,6 +35,7 @@
       <button
         class="button flexrow-item"
         @click="onNextClicked"
+        v-if="!readOnly"
       >
         <chevron-right-icon class="icon" />
       </button>
@@ -40,6 +43,7 @@
       <button
         class="button flexrow-item"
         @click="onAddPreviewClicked"
+        v-if="!readOnly"
       >
         <plus-icon class="icon" />
       </button>
@@ -47,7 +51,7 @@
       <button
         class="button flexrow-item"
         @click="onRemovePreviewClicked"
-        v-if="currentIndex > 1 && !light"
+        v-if="currentIndex > 1 && !light && !readOnly"
       >
         <trash-icon class="icon" />
       </button>
@@ -57,7 +61,7 @@
       <button
         class="button flexrow-item"
         @click="onDeleteClicked"
-        v-if="isFullScreenEnabled"
+        v-if="isFullScreenEnabled && !readOnly"
       >
         <x-icon class="icon" />
       </button>
@@ -69,7 +73,7 @@
           active: isDrawing
         }"
         @click="onPencilAnnotateClicked"
-        v-if="isFullScreenEnabled"
+        v-if="isFullScreenEnabled && !readOnly"
       >
         <edit-2-icon class="icon" />
       </button>
@@ -85,6 +89,7 @@
       <a
         class="button flexrow-item"
         :href="pictureDlPath"
+        v-if="!readOnly"
       >
         <download-icon class="icon" />
       </a>
@@ -134,6 +139,10 @@ export default {
     light: {
       type: Boolean,
       default: false
+    },
+    readOnly: {
+      type: Boolean,
+      default: true
     }
   },
 
@@ -378,46 +387,6 @@ export default {
       this.deleteSelection()
     },
 
-    onRectAnnotateClicked () {
-      this.fabricCanvas.isDrawingMode = false
-      this.isDrawing = false
-
-      const rect = new fabric.Rect({
-        left: Math.floor(this.fabricCanvas.width / 2) - 25,
-        top: Math.floor(this.fabricCanvas.height / 2) - 25,
-        fill: 'transparent',
-        strokeWidth: 4,
-        stroke: '#ff3860',
-        width: 50,
-        height: 50
-      })
-
-      this.fabricCanvas.add(rect)
-      this.fabricCanvas.setActiveObject(rect)
-      this.saveAnnotations()
-    },
-
-    onCircleAnnotateClicked () {
-      this.fabricCanvas.isDrawingMode = false
-      this.isDrawing = false
-
-      const circle = new fabric.Circle({
-        left: this.fabricCanvas.width / 2 - 25,
-        top: this.fabricCanvas.height / 2 - 25,
-        radius: 20,
-        fill: 'transparent',
-        strokeWidth: 4,
-        stroke: '#ff3860',
-        width: 50,
-        height: 50
-      })
-
-      this.fabricCanvas.add(circle)
-      this.fabricCanvas.setActiveObject(circle)
-      circle.bringToFront()
-      this.saveAnnotations()
-    },
-
     onPencilAnnotateClicked () {
       if (this.fabricCanvas.isDrawingMode) {
         this.fabricCanvas.isDrawingMode = false
@@ -535,19 +504,7 @@ export default {
             scaleX: obj.scaleX * scaleMultiplier,
             scaleY: obj.scaleY * scaleMultiplier
           }
-          if (obj.type === 'rect') {
-            const rect = new fabric.Rect({
-              ...base
-            })
-            this.fabricCanvas.add(rect)
-            rect.set({ strokeWidth: 8 / (obj.scaleX + obj.scaleY) })
-          } else if (obj.type === 'circle') {
-            const circle = new fabric.Circle({
-              ...base
-            })
-            this.fabricCanvas.add(circle)
-            circle.set({ strokeWidth: 8 / (obj.scaleX + obj.scaleY) })
-          } else if (obj.type === 'path') {
+          if (obj.type === 'path') {
             let strokeMultiplier = 1
             if (obj.canvasWidth) {
               strokeMultiplier = obj.canvasWidth / this.fabricCanvas.width
