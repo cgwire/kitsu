@@ -184,6 +184,13 @@ export default {
     set_estimations: 'Set estimations'
   },
 
+  news: {
+    commented_on: 'commented on',
+    set_preview_on: 'set preview on',
+    no_news: 'There is no news for this production.',
+    title: 'News Feed'
+  },
+
   not_found: {
     text: 'There was something wrong with the link you clicked on, we encourage you to come back on the home page.',
     title: 'Page not found... are your looking for something you deleted?'
