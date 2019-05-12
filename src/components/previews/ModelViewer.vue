@@ -4,19 +4,21 @@
     ref="model-viewer"
     id="model-viewer"
     :class="{
-      light: light
+      light: light && !readOnly
     }"
   >
   </div>
-  <div class="viewer-actions">
+  <div class="viewer-actions flexrow">
+    <span class="filler"></span>
     <a
       :href="previewDlPath"
-      class="button pull-right"
+      class="button flexrow-item"
+      v-if="!readOnly"
     >
       <download-icon class="icon" />
     </a>
     <button
-      class="button pull-right"
+      class="button flexrow-item"
       @click="goFullScreen">
       <maximize-icon class="icon" />
     </button>
@@ -54,6 +56,10 @@ export default {
       type: String
     },
     light: {
+      default: false,
+      type: Boolean
+    },
+    readOnly: {
       default: false,
       type: Boolean
     }

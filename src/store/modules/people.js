@@ -89,6 +89,8 @@ const helpers = {
       Vue.set(person, 'initials', person.initials.toUpperCase())
       person.color = colors.fromString(person.name)
       if (person.has_avatar) {
+        const randomHash = Math.random().toString(36).substring(7)
+        Vue.set(person, 'uniqueHash', randomHash)
         person.avatarPath =
           `/api/pictures/thumbnails/persons/${person.id}` +
           `.png`
@@ -637,10 +639,12 @@ const mutations = {
 
   [UPLOAD_AVATAR_END] (state, personId) {
     const person = state.personMap[personId]
+    console.log('toto')
     if (person) {
+      console.log('toto 2')
       const randomHash = Math.random().toString(36).substring(7)
       person.has_avatar = true
-      Vue.set(state.user, 'uniqueHash', randomHash)
+      Vue.set(person, 'uniqueHash', randomHash)
       person.avatarPath =
         `/api/pictures/thumbnails/persons/${person.id}.png`
     }

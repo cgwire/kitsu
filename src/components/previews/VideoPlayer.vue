@@ -9,6 +9,7 @@
         id="annotation-canvas"
         ref="annotation-canvas"
         class="canvas"
+        v-if="!readOnly"
       >
       </canvas>
     </div>
@@ -56,6 +57,7 @@
       :maxDurationRaw="videoDuration"
       @select-annotation="loadAnnotation"
       ref="annotation-bar"
+      v-if="!readOnly"
     />
 
     <div class="buttons flexrow pull-bottom">
@@ -75,7 +77,7 @@
             active: isRepeating
           }"
           @click="onRepeatClicked"
-          v-if="!light"
+          v-if="!light || readOnly"
         >
           <repeat-icon class="icon smaller" />
         </button>
@@ -83,10 +85,10 @@
         <span class="flexrow-item time-indicator">
           {{ currentTime }}
         </span>
-        <span class="flexrow-item time-indicator" v-if="!light || isFullScreen()">
+        <span class="flexrow-item time-indicator" v-if="!light || readOnly|| isFullScreen()">
         /
         </span>
-        <span class="flexrow-item time-indicator" v-if="!light || isFullScreen()">
+        <span class="flexrow-item time-indicator" v-if="!light || readOnly || isFullScreen()">
          {{ maxDuration }}
         </span>
 
@@ -98,7 +100,7 @@
             'comparison-button': true
           }"
           @click="onCompareClicked"
-          v-if="taskTypeOptions.length > 0 && (!light || isFullScreen())"
+          v-if="!readOnly && taskTypeOptions.length > 0 && (!light || isFullScreen())"
         >
           <copy-icon class="icon smaller" />
         </button>
@@ -108,14 +110,14 @@
           :options="taskTypeOptions"
           :is-dark="true"
           v-model="taskTypeId"
-          v-if="isComparing && (!light || isFullScreen())"
+          v-if="!readOnly && isComparing && (!light || isFullScreen())"
         />
         <combobox
           class="comparison-combobox"
           :options="previewFileOptions"
           :is-dark="true"
           v-model="previewToCompareId"
-          v-if="isComparing && (!light || isFullScreen())"
+          v-if="!readOnly && isComparing && (!light || isFullScreen())"
         />
       </div>
 
@@ -123,7 +125,7 @@
         <button
           class="button flexrow-item"
           @click="onDeleteClicked"
-          v-if="isFullScreenEnabled"
+          v-if="!readOnly && isFullScreenEnabled"
         >
           <x-icon class="icon" />
         </button>
@@ -135,7 +137,7 @@
             active: isDrawing
           }"
           @click="onPencilAnnotateClicked"
-          v-if="isFullScreenEnabled"
+          v-if="!readOnly && isFullScreenEnabled"
         >
           <edit-2-icon class="icon" />
         </button>
@@ -143,6 +145,7 @@
         <a
           :href="movieDlPath"
           class="button flexrow-item"
+          v-if="!readOnly"
         >
           <download-icon class="icon" />
         </a>
@@ -214,6 +217,10 @@ export default {
       default: () => {}
     },
     light: {
+      type: Boolean,
+      default: false
+    },
+    readOnly: {
       type: Boolean,
       default: false
     }
@@ -409,7 +416,7 @@ export default {
       if (this.isFullScreen()) {
         return screen.height
       } else {
-        return screen.width > 1300 && !this.light ? 500 : 200
+        return screen.width > 1300 && (!this.light || this.readOnly) ? 700 : 200
       }
     },
 
@@ -495,7 +502,7 @@ export default {
             this.videoWrapper.style.height = height + 'px'
           }
         }
-        this.resetCanvas()
+        if (!this.readOnly) this.resetCanvas()
       }
     },
 
@@ -508,6 +515,8 @@ export default {
     },
 
     setupFabricCanvas () {
+      if (this.readOnly) return
+
       this.fabricCanvas = new fabric.Canvas('annotation-canvas')
       this.fabricCanvas.on('object:moved', this.saveAnnotations)
       this.fabricCanvas.on('object:scaled', this.saveAnnotations)
@@ -526,8 +535,10 @@ export default {
     play () {
       this.clearAnnotations()
       this.isPlaying = true
-      this.fabricCanvas.isDrawingMode = false
-      this.isDrawing = false
+      if (!this.readOnly) {
+        this.fabricCanvas.isDrawingMode = false
+        this.isDrawing = false
+      }
       this.video.play()
       if (this.isComparing) {
         const comparisonVideo = document.getElementById('comparison-movie')
@@ -857,6 +868,7 @@ export default {
     },
 
     reloadAnnotations () {
+      if (this.readOnly) return
       this.annotations = []
       if (this.preview.annotations) {
         const annotations = []
@@ -885,6 +897,7 @@ export default {
     },
 
     setDefaultComparisonTaskType () {
+      if (this.readOnly) return
       const taskTypeIds = Object.keys(this.entityPreviewFiles)
       if (taskTypeIds && taskTypeIds.length > 0) {
         const taskTypeOption = this.taskTypeOptions.find((option) => {
