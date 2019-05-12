@@ -522,6 +522,7 @@ export default {
 .timeline {
   border-left: 4px solid $blue-light;
   padding-left: 25px;
+  padding-bottom: 2em;
 
   .subtitle {
     margin-top: 2em;
