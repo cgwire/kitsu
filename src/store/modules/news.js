@@ -92,12 +92,14 @@ const mutations = {
   },
 
   [NEWS_ADD_PREVIEW] (state, { commentId, previewId, extension }) {
-    const news = state.newsList.find((news) => {
-      return news.comment_id === commentId
-    })
-    if (news) {
-      news.preview_file_id = previewId
-      news.preview_file_extension = extension
+    if (commentId) {
+      const news = state.newsList.find((news) => {
+        return news.comment_id === commentId
+      })
+      if (news) {
+        news.preview_file_id = previewId
+        news.preview_file_extension = extension
+      }
     }
   },
 
