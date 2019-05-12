@@ -73,6 +73,7 @@ export default {
   },
 
   main: {
+    about: 'À propos',
     add: 'Ajouter',
     all: 'Tous',
     admin: 'Admin',
@@ -136,6 +137,13 @@ export default {
       email: 'Adresse Mail',
       password: 'Mot de passe'
     }
+  },
+
+  news: {
+    commented_on: 'a commenté sur',
+    set_preview_on: 'a mis un nouveau preview sur',
+    no_news: 'Il n\'y a pas de nouveautés pour cette production',
+    title: 'Flux de nouveautés '
   },
 
   productions: {
