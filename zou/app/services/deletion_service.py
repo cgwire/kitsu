@@ -2,6 +2,7 @@ from zou.app.models.comment import Comment
 from zou.app.models.entity import Entity
 from zou.app.models.subscription import Subscription
 from zou.app.models.notification import Notification
+from zou.app.models.news import News
 from zou.app.models.output_file import OutputFile
 from zou.app.models.preview_file import PreviewFile
 from zou.app.models.task import Task
@@ -21,6 +22,10 @@ def remove_comment(comment_id):
         notifications = Notification.query.filter_by(comment_id=comment.id)
         for notification in notifications:
             notification.delete()
+
+        news_list = News.query.filter_by(comment_id=comment.id)
+        for news in news_list:
+            news.delete()
 
         if comment.preview_file_id is not None:
             preview_file = PreviewFile.get(comment.preview_file_id)
@@ -109,8 +114,6 @@ def remove_task(task_id, force=False):
     related. This will lead to the deletion of all of them.
     """
     task = Task.get(task_id)
-    entity = Entity.get(task.entity_id)
-
     if force:
         working_files = WorkingFile.query.filter_by(task_id=task_id)
         for working_file in working_files:
@@ -126,6 +129,9 @@ def remove_task(task_id, force=False):
             notifications = Notification.query.filter_by(comment_id=comment.id)
             for notification in notifications:
                 notification.delete()
+            news_list = Notification.query.filter_by(comment_id=comment.id)
+            for news in news_list:
+                news.delete()
             comment.delete()
 
         subscriptions = Subscription.query.filter_by(task_id=task_id)
@@ -143,6 +149,10 @@ def remove_task(task_id, force=False):
         notifications = Notification.query.filter_by(task_id=task_id)
         for notification in notifications:
             notification.delete()
+
+        news_list = Notification.query.filter_by(task_id=task.id)
+        for news in news_list:
+            news.delete()
 
     task.delete()
     events.emit("task:delete", {

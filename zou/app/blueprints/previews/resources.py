@@ -276,7 +276,6 @@ class CreatePreviewFilePictureResource(Resource):
             "comment_id": comment_id,
             "task_id": preview_file["task_id"],
             "preview_file_id": preview_file["id"],
-            "is_movie": preview_file["is_movie"],
             "revision": preview_file["revision"],
             "extension": preview_file["extension"]
         })

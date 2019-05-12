@@ -34,7 +34,7 @@ def convert_jpg_to_png(file_source_path):
     file_target_path = os.path.join(folder_path, file_target_name)
 
     im = Image.open(file_source_path)
-    im.save(file_target_path)
+    im.save(file_target_path, "PNG")
     fs.rm_file(file_source_path)
     return file_target_path
 

@@ -2,6 +2,7 @@ from tests.base import ApiDBTestCase
 
 from zou.app.services import (
     tasks_service,
+    news_service,
     notifications_service,
     persons_service
 )
@@ -128,6 +129,7 @@ class TaskRoutesTestCase(ApiDBTestCase):
         self.assertEquals(len(task["assignees"]), 0)
 
     def test_comment_task(self):
+        self.project_id = self.project.id
         self.generate_fixture_user_manager()
         self.generate_fixture_user_cg_artist()
         user_cg_artist = \
@@ -178,6 +180,9 @@ class TaskRoutesTestCase(ApiDBTestCase):
         self.assertEqual(len(notifications), 2)
         notifications = notifications_service.get_last_notifications("mention")
         self.assertEqual(len(notifications), 1)
+
+        news_list = news_service.get_last_news_for_project(self.project_id)
+        self.assertEqual(len(news_list), 2)
 
     def test_edit_comment(self):
         self.generate_fixture_user_manager()
