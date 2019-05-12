@@ -46,7 +46,10 @@
             }"
             @click.prevent="onNewsSelected(news)"
           >
-            <span class="dot"></span>
+            <span :class="{
+              dot: true,
+              red: hasRetakeValue(news)
+            }"></span>
             <span class="date flexrow-item">
               {{ formatTime(news.created_at) }}
             </span>
@@ -266,7 +269,10 @@ export default {
     if (
       (
         this.newsList.length === 0 ||
-        this.newsList[0].project_id !== this.currentProduction.id
+        (
+          this.currentProduction &&
+          this.newsList[0].project_id !== this.currentProduction.id
+        )
       ) &&
       !this.loading.news
     ) {
@@ -280,8 +286,8 @@ export default {
       'newsList',
       'newsListByDay',
       'personMap',
-      'taskTypeMap',
-      'taskStatusMap'
+      'taskStatusMap',
+      'taskTypeMap'
     ])
   },
 
@@ -385,6 +391,11 @@ export default {
     getPreviewDlPath (news) {
       let previewId = news.preview_file_id
       return `/api/pictures/originals/preview-files/${previewId}/download`
+    },
+
+    hasRetakeValue (news) {
+      const taskStatus = this.taskStatusMap[news.task_status_id]
+      return taskStatus ? taskStatus.is_retake : false
     }
   },
 
@@ -538,6 +549,10 @@ export default {
       width: 8px;
       height: 8px;
       border-radius: 4px;
+
+      &.red {
+        background: $red;
+      }
     }
   }
 
