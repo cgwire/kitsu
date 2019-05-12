@@ -34,6 +34,16 @@ describe('ProductionNewsFeed', () => {
           'task-type-1': {
             name: 'Modeling'
           }
+        }),
+        taskStatusMap: () => ({
+          'task-status-1': {
+            name: 'WIP',
+            is_retake: false
+          },
+          'task-status-2': {
+            name: 'Retake',
+            is_retake: true
+          }
         })
       },
       actions: {
@@ -166,6 +176,23 @@ describe('ProductionNewsFeed', () => {
       expect(path).toEqual(
         '/api/pictures/originals/preview-files/preview-1/download'
       )
+    })
+
+    test('hasRetakeValue', () => {
+      let news = {
+        id: 'news-1',
+        preview_file_id: 'preview-1',
+        preview_file_extension: 'mp4',
+        task_status_id: 'task-status-1'
+      }
+      expect(wrapper.vm.hasRetakeValue(news)).toBeFalsy()
+      news = {
+        id: 'news-2',
+        preview_file_id: 'preview-2',
+        preview_file_extension: 'mp4',
+        task_status_id: 'task-status-2'
+      }
+      expect(wrapper.vm.hasRetakeValue(news)).toBeTruthy()
     })
 
     test('onBodyScroll', () => {

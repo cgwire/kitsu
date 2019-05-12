@@ -81,10 +81,12 @@ describe('News store', () => {
         ]
       }
     })
+
     test('CLEAR_NEWS', () => {
       store.mutations.CLEAR_NEWS(state)
       expect(state.newsList).toEqual([])
     })
+
     test('ADD_PREVIOUS_NEWS', () => {
       store.mutations.ADD_PREVIOUS_NEWS(state, [
         { id: 'news-before-3', created_at: '2019-05-01T23:12:23' },
@@ -100,6 +102,7 @@ describe('News store', () => {
         { id: 'news-before-1', created_at: '2019-04-29T23:12:23' }
       ])
     })
+
     test('ADD_FIRST_NEWS', () => {
       store.mutations.ADD_FIRST_NEWS(state, {
         id: 'news-4', created_at: '2019-05-06T23:12:23',
@@ -111,7 +114,16 @@ describe('News store', () => {
         { id: 'news-1', created_at: '2019-05-02T23:12:23' }
       ])
     })
+
     test('NEWS_ADD_PREVIEW', () => {
+      state.newsList[1].comment_id = 'comment-1'
+      store.mutations.NEWS_ADD_PREVIEW(state, {
+        commentId: 'comment-1',
+        previewId: 'preview-1',
+        extension: 'mp4'
+      })
+      expect(state.newsList[1].preview_file_id).toEqual('preview-1')
+      expect(state.newsList[1].preview_file_extension).toEqual('mp4')
     })
   })
 })
