@@ -11,12 +11,13 @@ from .blueprints.crud import blueprint as crud_blueprint
 from .blueprints.events import blueprint as events_blueprint
 from .blueprints.export import blueprint as export_blueprint
 from .blueprints.files import blueprint as files_blueprint
-from .blueprints.source import blueprint as import_blueprint
 from .blueprints.index import blueprint as index_blueprint
+from .blueprints.news import blueprint as news_blueprint
 from .blueprints.persons import blueprint as persons_blueprint
 from .blueprints.playlists import blueprint as playlists_blueprint
 from .blueprints.projects import blueprint as projects_blueprint
 from .blueprints.previews import blueprint as previews_blueprint
+from .blueprints.source import blueprint as import_blueprint
 from .blueprints.shots import blueprint as shots_blueprint
 from .blueprints.tasks import blueprint as tasks_blueprint
 from .blueprints.user import blueprint as user_blueprint
@@ -47,6 +48,7 @@ def configure_api_routes(app):
     app.register_blueprint(files_blueprint)
     app.register_blueprint(import_blueprint)
     app.register_blueprint(index_blueprint)
+    app.register_blueprint(news_blueprint)
     app.register_blueprint(persons_blueprint)
     app.register_blueprint(playlists_blueprint)
     app.register_blueprint(projects_blueprint)
