@@ -15,6 +15,7 @@ import CustomActions from '../components/pages/CustomActions'
 import Episodes from '../components/pages/Episodes'
 import Login from '../components/pages/Login'
 import Main from '../components/Main'
+import ProductionNewsFeed from '../components/pages/ProductionNewsFeed'
 import NotFound from '../components/pages/NotFound'
 import Notifications from '../components/pages/Notifications'
 import OpenProductions from '../components/pages/OpenProductions'
@@ -229,6 +230,12 @@ export const routes = [
         path: '/productions/:production_id/team',
         component: Team,
         name: 'team'
+      },
+
+      {
+        path: '/productions/:production_id/news-feed',
+        component: ProductionNewsFeed,
+        name: 'news-feed'
       },
 
       {

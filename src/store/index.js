@@ -9,6 +9,7 @@ import breakdown from './modules/breakdown'
 import customActions from './modules/customactions'
 import login from './modules/login'
 import main from './modules/main'
+import news from './modules/news'
 import notifications from './modules/notifications'
 import people from './modules/people'
 import user from './modules/user'
@@ -31,6 +32,7 @@ let modules = {
   people,
   playlists,
   productions,
+  news,
   notifications,
   shots,
   tasks,

@@ -39,22 +39,23 @@
   </span>
 
 <span
-   class="avatar has-text-centered"
-   :title="person.full_name"
-   :style="{
-     background: person.color,
-     width: size +'px',
-     height: size + 'px',
-     'font-size': fontSize + 'px'
-   }"
-   v-else
+  class="avatar has-text-centered"
+  :title="person.full_name"
+  :style="{
+    background: person.color,
+    width: size +'px',
+    height: size + 'px',
+    'font-size': fontSize + 'px'
+  }"
+  v-else
 >
   <img
     :src="avatarPath"
     v-if="person.has_avatar && noCache"
   />
   <img
-    v-lazy="person.avatarPath"
+    v-lazy="avatarPath"
+    :key="avatarKey"
     v-else-if="person.has_avatar"
   />
   <span v-else>
@@ -107,6 +108,12 @@ export default {
 
   watch: {
     person () {
+      console.log('cool')
+      this.reloadAvatar()
+    },
+
+    'person.uniqueHash' () {
+      console.log('cool unique')
       this.reloadAvatar()
     }
   }

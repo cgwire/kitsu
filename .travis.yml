@@ -6,7 +6,7 @@ env:
         - NODE_ENV=test
 script:
     - npm install
-    - npm run test:store
+    - npm run test:unit
 branches:
     only:
         - master
