@@ -14,6 +14,7 @@
       </canvas>
     </div>
     <img ref="picture" :src="picturePath" />
+    <spinner v-if="isLoading"/>
   </div>
 
   <div class="buttons flexrow pull-bottom" ref="button-bar">
@@ -161,7 +162,15 @@ export default {
   mounted () {
     this.container.style.height = this.getDefaultHeight() + 'px'
     setTimeout(() => {
-      this.mountPicture()
+      if (this.picture.complete) {
+        this.isLoading = false
+        this.mountPicture()
+      } else {
+        this.picture.addEventListener('load', () => {
+          this.isLoading = false
+          this.mountPicture()
+        })
+      }
       window.addEventListener('keydown', this.onKeyDown)
       window.addEventListener('resize', this.onWindowResize)
     }, 0)
@@ -246,14 +255,19 @@ export default {
       if (this.isFullScreen()) {
         return screen.height
       } else {
-        return screen.width > 1300 && !this.light ? 500 : 200
+        return screen.width > 1300 && (!this.light || this.readOnly) ? 500 : 200
       }
     },
 
     getDimensions () {
-      const ratio = this.picture.naturalHeight / this.picture.naturalWidth
+      let ratio
+      if (this.picture.naturalWidth) {
+        ratio = this.picture.naturalHeight / this.picture.naturalWidth
+      } else {
+      }
       let width = this.container.offsetWidth - 1
       let height = Math.floor(width * ratio)
+      console.log(ratio, width, height)
       if (height > this.getDefaultHeight()) {
         height = this.getDefaultHeight()
       }

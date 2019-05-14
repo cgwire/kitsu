@@ -15,6 +15,7 @@ describe('ProductionNewsFeed', () => {
   let newsStore
   let productionStore
   let taskStore
+  let userStore
   let wrapper
 
   beforeEach(() => {
@@ -38,11 +39,18 @@ describe('ProductionNewsFeed', () => {
         taskStatusMap: () => ({
           'task-status-1': {
             name: 'WIP',
-            is_retake: false
+            is_retake: false,
+            is_done: false
           },
           'task-status-2': {
             name: 'Retake',
-            is_retake: true
+            is_retake: true,
+            is_done: false
+          },
+          'task-status-3': {
+            name: 'Done',
+            is_retake: false,
+            is_done: true
           }
         })
       },
@@ -57,13 +65,20 @@ describe('ProductionNewsFeed', () => {
       actions: {
       }
     }
+    userStore = {
+      getters: {
+        user: () => ({ id: 'user-1', timezone: 'Europe/Paris' })
+      },
+      actions: {}
+    }
 
     store = new Vuex.Store({
       strict: true,
       modules: {
         tasks: taskStore,
         news: newsStore,
-        productions: productionStore
+        productions: productionStore,
+        user: userStore
       }
     })
 
@@ -105,7 +120,7 @@ describe('ProductionNewsFeed', () => {
 
     test('formatTime', () => {
       const formattedTime = wrapper.vm.formatTime('2019-04-02T12:23:20')
-      expect(formattedTime).toEqual('12:23')
+      expect(formattedTime).toEqual('14:23')
     })
 
     test('buildTaskFromNews', () => {
@@ -183,16 +198,37 @@ describe('ProductionNewsFeed', () => {
         id: 'news-1',
         preview_file_id: 'preview-1',
         preview_file_extension: 'mp4',
-        task_status_id: 'task-status-1'
+        task_status_id: 'task-status-1',
+        change: true
       }
       expect(wrapper.vm.hasRetakeValue(news)).toBeFalsy()
       news = {
         id: 'news-2',
         preview_file_id: 'preview-2',
         preview_file_extension: 'mp4',
-        task_status_id: 'task-status-2'
+        task_status_id: 'task-status-2',
+        change: true
       }
       expect(wrapper.vm.hasRetakeValue(news)).toBeTruthy()
+    })
+
+    test('hasDoneValue', () => {
+      let news = {
+        id: 'news-1',
+        preview_file_id: 'preview-1',
+        preview_file_extension: 'mp4',
+        task_status_id: 'task-status-1',
+        change: true
+      }
+      expect(wrapper.vm.hasDoneValue(news)).toBeFalsy()
+      news = {
+        id: 'news-2',
+        preview_file_id: 'preview-2',
+        preview_file_extension: 'mp4',
+        task_status_id: 'task-status-3',
+        change: true
+      }
+      expect(wrapper.vm.hasDoneValue(news)).toBeTruthy()
     })
 
     test('onBodyScroll', () => {

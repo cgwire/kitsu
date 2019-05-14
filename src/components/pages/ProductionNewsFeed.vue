@@ -48,7 +48,8 @@
           >
             <span :class="{
               dot: true,
-              red: hasRetakeValue(news)
+              red: hasRetakeValue(news),
+              green: hasDoneValue(news)
             }"></span>
             <span class="date flexrow-item">
               {{ formatTime(news.created_at) }}
@@ -287,8 +288,13 @@ export default {
       'newsListByDay',
       'personMap',
       'taskStatusMap',
-      'taskTypeMap'
-    ])
+      'taskTypeMap',
+      'user'
+    ]),
+
+    timezone () {
+      return this.user.timezone || moment.tz.guess()
+    }
   },
 
   methods: {
@@ -314,12 +320,12 @@ export default {
     },
 
     formatDay (date) {
-      const utcDate = moment.tz(date, 'UTC')
+      const utcDate = moment.tz(date, 'UTC').tz(this.timezone)
       return utcDate.format('LL')
     },
 
     formatTime (date) {
-      const utcDate = moment.tz(date, 'UTC')
+      const utcDate = moment.tz(date, 'UTC').tz(this.timezone)
       return utcDate.format('HH:mm')
     },
 
@@ -395,7 +401,12 @@ export default {
 
     hasRetakeValue (news) {
       const taskStatus = this.taskStatusMap[news.task_status_id]
-      return taskStatus ? taskStatus.is_retake : false
+      return taskStatus ? news.change && taskStatus.is_retake : false
+    },
+
+    hasDoneValue (news) {
+      const taskStatus = this.taskStatusMap[news.task_status_id]
+      return taskStatus ? news.change && taskStatus.is_done : false
     }
   },
 
@@ -553,6 +564,10 @@ export default {
 
       &.red {
         background: $red;
+      }
+
+      &.green {
+        background: $light-green;
       }
     }
   }
