@@ -287,8 +287,13 @@ export default {
       'newsListByDay',
       'personMap',
       'taskStatusMap',
-      'taskTypeMap'
-    ])
+      'taskTypeMap',
+      'user'
+    ]),
+
+    timezone () {
+      return this.user.timezone || moment.tz.guess()
+    }
   },
 
   methods: {
@@ -314,12 +319,12 @@ export default {
     },
 
     formatDay (date) {
-      const utcDate = moment.tz(date, 'UTC')
+      const utcDate = moment.tz(date, 'UTC').tz(this.timezone)
       return utcDate.format('LL')
     },
 
     formatTime (date) {
-      const utcDate = moment.tz(date, 'UTC')
+      const utcDate = moment.tz(date, 'UTC').tz(this.timezone)
       return utcDate.format('HH:mm')
     },
 
