@@ -97,7 +97,7 @@ def send_storage_file(
             config.TMP_DIR,
             "cache-%s-%s.%s" % (prefix, preview_file_id, extension)
         )
-        if not os.path.exists(file_path):
+        if not os.path.exists(file_path) or os.path.getsize(file_path) == 0:
             with open(file_path, 'wb') as tmp_file:
                 for chunk in open_file(prefix, preview_file_id):
                     tmp_file.write(chunk)
