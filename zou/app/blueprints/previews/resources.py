@@ -31,8 +31,8 @@ ALLOWED_MOVIE_EXTENSION = [
     ".mp4", ".mov", ".wmv", ".m4v", ".MP4", ".MOV", ".WMV", ".M4V"
 ]
 ALLOWED_FILE_EXTENSION = [
-    ".obj", ".pdf", ".ma", ".mb", ".rar", ".zip", ".blend",
-    ".OBJ", ".PDF", ".MA", ".MB", ".RAR", ".ZIP", ".BLEND",
+    ".obj", ".pdf", ".ma", ".mb", ".ai", ".rar", ".zip", ".blend",
+    ".OBJ", ".PDF", ".MA", ".MB", ".AI", ".RAR", ".ZIP", ".BLEND",
 ]
 
 
