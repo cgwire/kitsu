@@ -253,7 +253,7 @@ export default {
         { label: this.$t('breakdown.title'), value: 'breakdown' },
         { label: this.$t('playlists.title'), value: 'playlists' },
         { label: this.$t('people.team'), value: 'team' },
-        { label: this.$t('news.title'), value: 'news-feed' }
+        { label: this.$t('news.title'), value: 'newsFeed' }
       ]
       if (!this.isTVShow) { // Remove episode Section from the list.
         options.splice(3, 1)
@@ -298,6 +298,7 @@ export default {
       }
 
       if (name === 'asset-types') name = 'assetTypes'
+      if (name === 'news-feed') name = 'newsFeed'
       return name
     },
 
@@ -317,6 +318,8 @@ export default {
           this.$route.params.episode_id &&
           this.$route.params.episode_id !== this.currentEpisodeId
         )
+
+      if (section && section === 'newsFeed') section = 'news-feed'
 
       if (isProperContext && isContextChanged) {
         if (section === 'assetTypes') section = 'production-asset-types'

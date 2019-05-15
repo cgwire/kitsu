@@ -48,19 +48,19 @@ const getters = {
 }
 
 const actions = {
-  loadNews ({ commit, state }, productionId) {
+  loadNews ({ commit, state }, params) {
     return new Promise((resolve, reject) => {
       commit(CLEAR_NEWS)
-      newsApi.getLastNews(productionId)
+      newsApi.getLastNews(params)
         .then((newsList) => commit(ADD_PREVIOUS_NEWS, newsList))
         .then(resolve)
         .catch(reject)
     })
   },
 
-  loadMoreNews ({ commit, state }, { productionId, page }) {
+  loadMoreNews ({ commit, state }, params) {
     return new Promise((resolve, reject) => {
-      newsApi.getLastNews(productionId, page)
+      newsApi.getLastNews(params)
         .then((newsList) => commit(ADD_PREVIOUS_NEWS, newsList))
         .then(resolve)
         .catch(reject)

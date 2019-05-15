@@ -92,12 +92,6 @@ export default {
 
   },
 
-  mounted () {
-  },
-
-  watch: {
-  },
-
   metaInfo () {
     return {
       title: `${this.currentProduction.name} | ${this.$t('people.team')} - Kitsu`

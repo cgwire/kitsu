@@ -15,6 +15,8 @@ describe('ProductionNewsFeed', () => {
   let newsStore
   let productionStore
   let taskStore
+  let taskStatusStore
+  let taskTypeStore
   let userStore
   let wrapper
 
@@ -57,7 +59,21 @@ describe('ProductionNewsFeed', () => {
       actions: {
         loadTask: jest.fn()
       }
-    }
+    },
+    taskStatusStore = {
+      getters: {
+        taskStatus: () => []
+      },
+      actions: {
+      }
+    },
+    taskTypeStore = {
+      getters: {
+        taskTypes: () => []
+      },
+      actions: {
+      }
+    },
     productionStore = {
       getters: {
         currentProduction: () => ({ id: 'production-1', name: 'Prod 1' })
@@ -78,6 +94,8 @@ describe('ProductionNewsFeed', () => {
         tasks: taskStore,
         news: newsStore,
         productions: productionStore,
+        taskStatusStore: taskStatusStore,
+        taskTypeStore: taskTypeStore,
         user: userStore
       }
     })

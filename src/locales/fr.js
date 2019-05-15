@@ -85,6 +85,7 @@ export default {
     close: 'Fermer',
     edit: 'Modifier',
     dark_theme: 'Thème sombre',
+    days_spents: 'Jours passés',
     delete: 'Supprimer',
     delete_all: 'Supprimer tout',
     documentation: 'Documentation',
@@ -98,6 +99,7 @@ export default {
     logout: 'Se déconnecter',
     maximize: 'Maximiser',
     minimize: 'Minimiser',
+    nb_frames: 'Nb de frames',
     no: 'non',
     or: 'ou',
     production: 'Production',
@@ -140,9 +142,15 @@ export default {
   },
 
   news: {
+    all: 'Tous',
     commented_on: 'a commenté sur',
-    set_preview_on: 'a mis un nouveau preview sur',
-    no_news: 'Il n\'y a pas de nouveautés pour cette production',
+    infos: 'Infos',
+    no_news: 'Il n\'y a pas de nouveautés pour cette production ou ce filtre',
+    only_comments: 'Seulement les commentaires',
+    only_previews: 'Seulement les previews',
+    set_preview_on: 'a mis un preview sur',
+    task_status: 'Statut de tâche :',
+    task_type: 'Type de tâche :',
     title: 'Flux de nouveautés '
   },
 
@@ -414,6 +422,7 @@ export default {
       frame_in: 'In',
       frame_out: 'Out',
       fps: 'FPS',
+      nb_frames: 'Frames',
       description: 'Description',
       production: 'Prod'
     },

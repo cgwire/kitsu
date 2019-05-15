@@ -11,192 +11,225 @@
       v-scroll="onBodyScroll"
     >
       <div class="timeline-wrapper">
-      <div class="timeline">
-      <div
-        class="empty-list has-text-centered"
-        v-if="!loading.news && (!newsList || newsList.length === 0)"
-      >
-        {{ $t('news.no_news') }}
-      </div>
-      <div
-        class="has-text-centered"
-        v-if="loading.news"
-      >
-        <spinner />
-      </div>
-
-      <div
-        :key="dayList.length > 0 ? dayList[0].created_at : ''"
-        v-for="dayList in newsListByDay"
-      >
-        <div class="has-text-centered subtitle timeline-entry">
-          <span class="big-dot"></span>
-          {{ dayList.length > 0 ? formatDay(dayList[0].created_at) : ''}}
+        <div class="filters flexrow">
+          <span class="flexrow-item">
+            {{ $t('news.infos') }}
+          </span>
+          <combobox
+            class="flexrow-item selector"
+            :options="previewOptions"
+            v-model="previewMode"
+          />
+          <span class="flexrow-item">
+            {{ $t('news.task_status') }}
+          </span>
+          <combobox-status
+            class="flexrow-item selector"
+            :task-status-list="taskStatusList"
+            v-model="taskStatusId"
+          />
+          <span class="flexrow-item">
+            {{ $t('news.task_type') }}
+          </span>
+          <combobox-task-type
+            class="flexrow-item selector"
+            :task-type-list="taskTypeList"
+            v-model="taskTypeId"
+          />
         </div>
-        <div
-          :key="'news-' + news.id"
-          v-for="news in dayList"
-        >
+
+        <div class="timeline">
           <div
-            :class="{
-              'news-line': true,
-              'timeline-entry': true,
-              flexrow: true,
-              selected: news.id === currentNewsId
-            }"
-            @click.prevent="onNewsSelected(news)"
+            class="empty-list has-text-centered"
+            v-if="!loading.news && (!newsList || newsList.length === 0)"
           >
-            <span :class="{
-              dot: true,
-              red: hasRetakeValue(news),
-              green: hasDoneValue(news)
-            }"></span>
-            <span class="date flexrow-item">
-              {{ formatTime(news.created_at) }}
-            </span>
-
-            <div class="flexrow-item task-type-wrapper">
-              <task-type-name
-                class="task-type-name"
-                :task-type="buildTaskTypeFromNews(news)"
-                :production-id="currentProduction.id"
-              />
-            </div>
-
-            <div class="flexrow-item validation-wrapper">
-              <validation-tag
-                class="validation-tag"
-                :task="buildTaskFromNews(news)"
-                v-if="news.change"
-              />
-            </div>
-
-            <div class="flexrow-item comment-content">
-              <div>
-                <div class="news-info flexrow">
-                  <people-avatar
-                    class="flexrow-item"
-                    :person="personMap[news.author_id]"
-                    :size="30"
-                    :no-link="true"
-                    v-if="personMap[news.author_id]"
-                  />
-                  <span
-                    class="explaination flexrow-item"
-                  >
-                    <span class="strong person-name">
-                      {{ personName(news) }}
-                    </span>
-                    <span>
-                      {{ $t('news.commented_on') }}
-                    </span>
-                    <span class="strong">
-                      {{ ' ' + news.project_name }} / {{ news.full_entity_name }}
-                    </span>
-                  </span>
-                </div>
-              </div>
-            </div>
+            {{ $t('news.no_news') }}
+          </div>
+          <div
+            class="has-text-centered mt2"
+            v-if="loading.news"
+          >
+            <spinner />
           </div>
 
-          <div class="preview" v-if="news.preview_file_id">
+          <div
+            :key="dayList.length > 0 ? dayList[0].created_at : ''"
+            v-for="dayList in newsListByDay"
+          >
+            <div class="has-text-centered subtitle timeline-entry">
+              <span class="big-dot"></span>
+              {{ dayList.length > 0 ? formatDay(dayList[0].created_at) : ''}}
+            </div>
             <div
-              :class="{
-                'news-line': true,
-                'timeline-entry': true,
-                flexrow: true,
-                selected: news.id === currentNewsId
-              }"
-              @click.prevent="onNewsSelected(news)"
+              :key="'news-' + news.id"
+              v-for="news in dayList"
             >
-              <span class="date flexrow-item">
-              </span>
-              <div class="flexrow-item task-type-wrapper">
-              </div>
-              <div class="flexrow-item validation-wrapper">
-              </div>
+              <div v-if="previewMode === 'comments' || news.preview_file_id">
+                <div
+                  :class="{
+                    'news-line': true,
+                    'timeline-entry': true,
+                    flexrow: true,
+                    selected: news.id === currentNewsId
+                  }"
+                  @click.prevent="onNewsSelected(news)"
+                >
+                  <span :class="{
+                    dot: true,
+                    red: hasRetakeValue(news),
+                    green: hasDoneValue(news)
+                  }"></span>
+                  <span class="date flexrow-item">
+                    {{ formatTime(news.created_at) }}
+                  </span>
 
-              <div class="flexrow-item comment-content">
-                <div>
-                  <div class="news-info flexrow">
-                    <people-avatar
-                      class="flexrow-item"
-                      :person="personMap[news.author_id]"
-                      :size="30"
-                      :no-link="true"
-                      v-if="personMap[news.author_id]"
+                  <div class="flexrow-item task-type-wrapper">
+                    <task-type-name
+                      class="task-type-name"
+                      :task-type="buildTaskTypeFromNews(news)"
+                      :production-id="currentProduction.id"
                     />
-                    <span
-                      class="explaination flexrow-item"
-                    >
-                      <span class="strong person-name">
-                        {{ personName(news) }}
-                      </span>
-                      <span>
-                        {{ $t('news.set_preview_on') }}
-                      </span>
-                      <span class="strong">
-                        {{ ' ' + news.project_name }} / {{ news.full_entity_name }}
-                      </span>
-                    </span>
+                  </div>
+
+                  <div class="flexrow-item validation-wrapper">
+                    <validation-tag
+                      class="validation-tag"
+                      :task="buildTaskFromNews(news)"
+                      v-if="news.change"
+                    />
+                  </div>
+
+                  <div class="flexrow-item comment-content">
+                    <div>
+                      <div class="news-info flexrow">
+                        <people-avatar
+                          class="flexrow-item"
+                          :person="personMap[news.author_id]"
+                          :size="30"
+                          :no-link="true"
+                          v-if="personMap[news.author_id]"
+                        />
+                        <span
+                          class="explaination flexrow-item"
+                        >
+                          <span class="strong person-name">
+                            {{ personName(news) }}
+                          </span>
+                          <span>
+                            {{ $t('news.commented_on') }}
+                          </span>
+                          <span class="strong">
+                            {{ ' ' + news.project_name }} / {{ news.full_entity_name }}
+                          </span>
+                        </span>
+                      </div>
+                    </div>
                   </div>
                 </div>
               </div>
-            </div>
-
-            <div
-              class="has-text-centered"
-            >
-              <div
-                v-if="news.preview_file_extension == 'mp4'"
-              >
-                <video-player
-                  :preview="{id: news.preview_file_id}"
-                  :task-type-map="taskTypeMap"
-                  :read-only="true"
-                  :light="true"
-                />
-              </div>
-
-              <model-viewer
-                class="model-viewer"
-                :preview-url="getPreviewPath(news)"
-                :preview-dl-path="getPreviewDlPath(news)"
-                :light="true"
-                :read-only="true"
-                v-else-if="news.preview_file_extension == 'obj'"
-              />
-
-              <picture-viewer
-                :preview="{previews: [{id: news.preview_file_id}]}"
-                :light="true"
-                :read-only="true"
-                ref="preview-picture"
-                v-else-if="news.preview_file_extension == 'png'"
-              />
 
               <div
-                class="preview-standard-file"
-                v-else
+                class="preview"
+                v-if="news.preview_file_id && previewMode == 'previews'"
               >
-                <a
-                  class="button"
-                  ref="preview-file"
-                  :href="getPreviewDlPath(news)"
+                <div
+                  :class="{
+                    'news-line': true,
+                    'timeline-entry': true,
+                    flexrow: true,
+                    selected: news.id === currentNewsId
+                  }"
+                  @click.prevent="onNewsSelected(news)"
                 >
-                  <download-icon class="icon" />
-                  <span class="text">
-                    {{ $t('tasks.download_pdf_file', {extension: news.preview_file_extension}) }}
+                  <span class="date flexrow-item">
                   </span>
-                </a>
+                  <div class="flexrow-item task-type-wrapper">
+                  </div>
+                  <div class="flexrow-item validation-wrapper">
+                  </div>
+
+                  <div class="flexrow-item comment-content">
+                    <div>
+                      <div class="news-info flexrow">
+                        <people-avatar
+                          class="flexrow-item"
+                          :person="personMap[news.author_id]"
+                          :size="30"
+                          :no-link="true"
+                          v-if="personMap[news.author_id]"
+                        />
+                        <span
+                          class="explaination flexrow-item"
+                        >
+                          <span class="strong person-name">
+                            {{ personName(news) }}
+                          </span>
+                          <span>
+                            {{ $t('news.set_preview_on') }}
+                          </span>
+                          <span class="strong">
+                            {{ ' ' + news.project_name }} / {{ news.full_entity_name }}
+                          </span>
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <div
+                  class="has-text-centered"
+                  v-if="previewMode == 'previews'"
+                >
+                  <div
+                    v-if="news.preview_file_extension == 'mp4'"
+                  >
+                    <video-player
+                      :preview="{id: news.preview_file_id}"
+                      :task-type-map="taskTypeMap"
+                      :read-only="true"
+                      :light="true"
+                    />
+                  </div>
+
+                  <model-viewer
+                    class="model-viewer"
+                    :preview-url="getPreviewPath(news)"
+                    :preview-dl-path="getPreviewDlPath(news)"
+                    :light="true"
+                    :read-only="true"
+                    v-else-if="news.preview_file_extension == 'obj'"
+                  />
+
+                  <picture-viewer
+                    :preview="{previews: [{id: news.preview_file_id}]}"
+                    :light="true"
+                    :read-only="true"
+                    ref="preview-picture"
+                    v-else-if="news.preview_file_extension == 'png'"
+                  />
+
+                  <div
+                    class="preview-standard-file"
+                    v-else
+                  >
+                    <a
+                      class="button"
+                      ref="preview-file"
+                      :href="getPreviewDlPath(news)"
+                    >
+                      <download-icon class="icon" />
+                      <span class="text">
+                        {{ $t('tasks.download_pdf_file', {extension: news.preview_file_extension}) }}
+                      </span>
+                    </a>
+                  </div>
+                </div>
               </div>
             </div>
           </div>
         </div>
       </div>
     </div>
-  </div>
-  </div>
   </div>
 
   <div
@@ -224,7 +257,11 @@ import {
   DownloadIcon
 } from 'vue-feather-icons'
 import moment from 'moment-timezone'
+import { sortByName } from '../../lib/sorting'
 
+import Combobox from '../widgets/Combobox'
+import ComboboxStatus from '../widgets/ComboboxStatus'
+import ComboboxTaskType from '../widgets/ComboboxTaskType'
 import EntityThumbnail from '../widgets/EntityThumbnail'
 import ModelViewer from '../previews/ModelViewer'
 import PeopleAvatar from '../widgets/PeopleAvatar'
@@ -238,6 +275,9 @@ import VideoPlayer from '../previews/VideoPlayer'
 export default {
   name: 'news-page',
   components: {
+    Combobox,
+    ComboboxStatus,
+    ComboboxTaskType,
     DownloadIcon,
     EntityThumbnail,
     ModelViewer,
@@ -252,21 +292,43 @@ export default {
 
   data () {
     return {
+      currentNewsId: null,
+      currentPage: 1,
+      currentTask: null,
+      errors: {
+        news: false
+      },
       loading: {
         more: false,
         news: false,
         currentTask: true
       },
-      errors: {
-        news: false
-      },
-      currentNewsId: null,
-      currentPage: 1,
-      currentTask: null
+      previewMode: 'comments',
+      previewOptions: [
+        {
+          label: this.$t('news.only_comments'),
+          value: 'comments'
+        },
+        {
+          label: this.$t('news.only_previews'),
+          value: 'previews'
+        }
+      ],
+      taskStatusId: '',
+      taskTypeId: ''
     }
   },
 
   mounted () {
+    this.$options.silent = true
+    this.previewMode =
+      localStorage.getItem('news:preview-mode') || 'comments'
+    this.taskTypeId =
+      localStorage.getItem('news:task-type-id') || ''
+    this.taskStatusId =
+      localStorage.getItem('news:task-status-id') || ''
+    this.$options.silent = false
+
     if (
       (
         this.newsList.length === 0 ||
@@ -289,8 +351,39 @@ export default {
       'personMap',
       'taskStatusMap',
       'taskTypeMap',
+      'taskStatus',
+      'taskTypes',
       'user'
     ]),
+
+    params () {
+      const params = {
+        productionId: this.currentProduction.id,
+        only_preview: this.previewMode === 'previews',
+        page_size: this.previewMode === 'previews' ? 6 : 50,
+        task_type_id: this.taskTypeId !== '' ? this.taskTypeId : undefined,
+        task_status_id:
+          this.taskStatusId !== '' ? this.taskStatusId : undefined,
+        page: this.currentPage
+      }
+      return params
+    },
+
+    taskStatusList () {
+      return [{
+        id: '',
+        color: '#999',
+        short_name: this.$t('news.all')
+      }].concat(sortByName([...this.taskStatus]))
+    },
+
+    taskTypeList () {
+      return [{
+        id: '',
+        color: '#999',
+        name: this.$t('news.all')
+      }].concat(sortByName([...this.taskTypes]))
+    },
 
     timezone () {
       return this.user.timezone || moment.tz.guess()
@@ -309,10 +402,7 @@ export default {
       if (!this.loading.more && !this.loading.news) {
         this.loading.more = true
         this.currentPage += 1
-        this.loadMoreNews({
-          productionId: this.currentProduction.id,
-          page: this.currentPage
-        })
+        this.loadMoreNews(this.params)
           .then(() => {
             this.loading.more = false
           })
@@ -368,7 +458,7 @@ export default {
       this.loading.news = true
       this.errors.news = false
       this.currentTask = null
-      this.loadNews(this.currentProduction.id)
+      this.loadNews(this.params)
         .then(() => {
           this.loading.news = false
         })
@@ -383,7 +473,16 @@ export default {
       const maxHeight =
         this.$refs.body.scrollHeight - this.$refs.body.offsetHeight
       if (maxHeight < (position.scrollTop + 100) &&
-         this.newsList.length % 50 === 0) {
+         (
+           (
+             this.newsList.length % 50 === 0 &&
+             this.previewMode === 'comments') ||
+           (
+             this.newsList.length % 6 === 0 &&
+             this.previewMode === 'previews'
+           )
+         )
+      ) {
         this.loadFollowingNews()
       }
     },
@@ -410,12 +509,6 @@ export default {
     }
   },
 
-  watch: {
-    currentProduction () {
-      if (!this.loading.news) this.init()
-    }
-  },
-
   socket: {
     events: {
       'preview-file:add-file' (eventData) {
@@ -430,14 +523,41 @@ export default {
       },
 
       'news:new' (eventData) {
-        console.log(eventData, eventData.project_id, this.currentProduction.id)
-        if (eventData.project_id === this.currentProduction.id) {
+        if (
+          eventData.project_id === this.currentProduction.id &&
+          (!this.taskTypeId || this.taskTypeId === eventData.task_type_id) &&
+          (
+            !this.taskStatusId ||
+            this.taskStatusId === eventData.task_status_id
+          )
+        ) {
           this.loadSingleNews({
             productionId: this.currentProduction.id,
             newsId: eventData.news_id
           })
         }
       }
+    }
+  },
+
+  watch: {
+    currentProduction () {
+      if (!this.$options.silent) if (!this.loading.news) this.init()
+    },
+
+    previewMode () {
+      localStorage.setItem('news:preview-mode', this.previewMode)
+      if (!this.$options.silent) this.init()
+    },
+
+    taskTypeId () {
+      localStorage.setItem('news:task-type-id', this.taskTypeId)
+      if (!this.$options.silent) this.init()
+    },
+
+    taskStatusId () {
+      localStorage.setItem('news:task-status-id', this.taskStatusId)
+      this.init()
     }
   },
 
@@ -631,5 +751,10 @@ export default {
   width: 450px;
   min-width: 450px;
   max-width: 450px;
+}
+
+.selector {
+  margin-bottom: 0;
+  margin-right: 1em;
 }
 </style>
