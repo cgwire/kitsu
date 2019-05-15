@@ -150,10 +150,6 @@ export default {
       type: Array,
       default: () => []
     },
-    taskStatusOptions: {
-      type: Array,
-      default: () => []
-    },
     user: {
       type: Object,
       default: () => {}

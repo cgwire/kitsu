@@ -83,6 +83,5 @@ export default {
 }
 
 .no-link {
-  cursor: default
 }
 </style>

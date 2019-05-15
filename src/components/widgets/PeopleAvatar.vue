@@ -108,12 +108,10 @@ export default {
 
   watch: {
     person () {
-      console.log('cool')
       this.reloadAvatar()
     },
 
     'person.uniqueHash' () {
-      console.log('cool unique')
       this.reloadAvatar()
     }
   }
