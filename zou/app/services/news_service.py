@@ -46,7 +46,9 @@ def create_news_for_task_and_comment(task, comment, change=False):
     )
     events.emit("news:new", {
         "news_id": news["id"],
-        "project_id": task["project_id"]
+        "project_id": task["project_id"],
+        "task_status_id": comment["task_status_id"],
+        "task_type_id": task["task_type_id"]
     }, persist=False)
     return news
 
@@ -66,14 +68,17 @@ def get_last_news_for_project(
     project_id,
     filters={},
     news_id=None,
-    page=1
+    only_preview=False,
+    task_type_id=None,
+    task_status_id=None,
+    page=1,
+    page_size=50
 ):
     """
     Return last 100 user notifications. Add related information to make it
     displayable.
     """
-    limit = 50
-    offset = (page - 1) * limit
+    offset = (page - 1) * page_size
 
     query = News.query \
         .order_by(News.created_at.desc()) \
@@ -95,9 +100,18 @@ def get_last_news_for_project(
     if news_id is not None:
         query = query.filter(News.id == news_id)
 
-    query = query.limit(limit)
+    if task_status_id is not None:
+        query = query.filter(Comment.task_status_id == task_status_id)
+
+    if task_type_id is not None:
+        query = query.filter(Task.task_type_id == task_type_id)
+
+    if only_preview:
+        query = query.filter(News.preview_file_id != None)
+
+    query = query.limit(page_size)
     query = query.offset(offset)
-    news_list = query.limit(50).all()
+    news_list = query.all()
     result = []
 
     for (
