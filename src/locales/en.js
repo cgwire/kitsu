@@ -185,9 +185,15 @@ export default {
   },
 
   news: {
+    all: 'All',
     commented_on: 'commented on',
+    infos: 'Infos:',
+    no_news: 'There is no news for this production or for this filter.',
+    only_comments: 'Only comments',
+    only_previews: 'Only previews',
     set_preview_on: 'set preview on',
-    no_news: 'There is no news for this production.',
+    task_status: 'Task status:',
+    task_type: 'Task type:',
     title: 'News Feed'
   },
 
