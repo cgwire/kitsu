@@ -9,7 +9,7 @@ import {
 
 describe('lib/filtering', () => {
 
-  describe('getExcludingKeyWords', () => {
+  describe('getKeyWords', () => {
     it('classic query', () => {
       const keyWords = getKeyWords(
         'chars bunny modeling=wip -bunnyfat'

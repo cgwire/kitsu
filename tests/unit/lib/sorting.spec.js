@@ -5,6 +5,7 @@ import {
   sortPeople,
   sortPlaylists,
   sortProductions,
+  sortSequences,
   sortShots,
   sortTaskTypes,
   sortTasks,
@@ -199,6 +200,54 @@ describe('lib/sorting', () => {
     results = sortShots([])
     expect(results.length).toEqual(0)
   })
+
+  it('sortSequences', () => {
+    const entries = [
+      {
+        canceled: false,
+        episode_name: 'E02',
+        name: 'SE02',
+        name: 'SH03',
+        id: 4
+      },
+      {
+        canceled: false,
+        episode_name: 'E02',
+        name: 'SE01',
+        id: 3
+      },
+      {
+        canceled: true,
+        episode_name: 'E01',
+        name: 'SE03',
+        id: 5
+      },
+      {
+        canceled: false,
+        episode_name: 'E01',
+        name: 'SE01',
+        id: 1
+      },
+      {
+        canceled: false,
+        episode_name: 'E01',
+        name: 'SE02',
+        id: 2
+      }
+    ]
+    let results = sortSequences(entries)
+
+    expect(results.length).toEqual(5)
+    expect(results[0].id).toEqual(1)
+    expect(results[1].id).toEqual(2)
+    expect(results[2].id).toEqual(3)
+    expect(results[3].id).toEqual(4)
+    expect(results[4].id).toEqual(5)
+
+    results = sortSequences([])
+    expect(results.length).toEqual(0)
+  })
+
 
   it('sortProductions', () => {
     const entries = [

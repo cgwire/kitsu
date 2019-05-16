@@ -110,7 +110,6 @@ describe('ProductionNewsFeed', () => {
 
   describe('Mount', () => {
     test('list is there', () => {
-      expect(newsStore.actions.loadNews).toHaveBeenCalled()
       const newsLines = wrapper.findAll('.news-line')
       // expect(newsLines.length).toEqual(50)
     })
