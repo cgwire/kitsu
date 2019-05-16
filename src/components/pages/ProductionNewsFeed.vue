@@ -624,11 +624,10 @@ export default {
 }
 
 .main-column {
-  border-right: 3px solid $light-grey;
   flex: 1 1 auto;
   padding-top: 70px;
   background: $white-grey-light;
-  overflow-y: hidden;
+  overflow-y: scroll;
   height: 100%;
 }
 
