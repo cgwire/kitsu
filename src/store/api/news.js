@@ -2,11 +2,10 @@ import client from './client'
 import { buildQueryString } from '../../lib/query'
 
 export default {
-  getLastNews (params, page = 1) {
+  getLastNews (params) {
     return new Promise((resolve, reject) => {
       const productionId = params.productionId
       delete params.productionId
-      params.page = page
       const path = buildQueryString(
         `/api/data/projects/${productionId}/news`,
         params
