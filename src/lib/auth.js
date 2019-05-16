@@ -89,6 +89,8 @@ const auth = {
           const user = res.body.user
           const organisation = res.body.organisation
           const isLdap = res.body.ldap
+          organisation.use_original_file_name =
+            organisation.use_original_file_name ? 'true' : 'false'
           store.commit(SET_ORGANISATION, organisation)
           store.commit(USER_LOGIN, user)
           callback(null, isLdap)
