@@ -151,13 +151,18 @@ class CreatePreviewFilePictureResource(Resource):
 
         uploaded_file = request.files["file"]
 
-        extension = ".%s" % uploaded_file.filename.split(".")[-1].lower()
+        file_name_parts = uploaded_file.filename.split(".")
+        extension = ".%s" % file_name_parts.pop().lower()
+        original_file_name = ".".join(file_name_parts)
 
         if extension in ALLOWED_PICTURE_EXTENSION:
             self.save_picture_preview(instance_id, uploaded_file)
             preview_file = files_service.update_preview_file(
                 instance_id,
-                {"extension": "png"}
+                {
+                    "extension": "png",
+                    "original_name": original_file_name
+                }
             )
             self.emit_app_preview_event(instance_id)
             return preview_file, 201
@@ -172,7 +177,10 @@ class CreatePreviewFilePictureResource(Resource):
                 abort(400, "Normalization failed.")
             preview_file = files_service.update_preview_file(
                 instance_id,
-                {"extension": "mp4"}
+                {
+                    "extension": "mp4",
+                    "original_name": original_file_name
+                }
             )
             self.emit_app_preview_event(instance_id)
             return preview_file, 201
@@ -181,7 +189,10 @@ class CreatePreviewFilePictureResource(Resource):
             self.save_file_preview(instance_id, uploaded_file, extension)
             preview_file = files_service.update_preview_file(
                 instance_id,
-                {"extension": extension[1:]}
+                {
+                    "extension": extension[1:],
+                    "original_name": original_file_name
+                }
             )
             self.emit_app_preview_event(instance_id)
             return preview_file, 201
