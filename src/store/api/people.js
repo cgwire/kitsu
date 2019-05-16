@@ -10,9 +10,12 @@ export default {
           let organisation = {
             name: 'Kitsu',
             hours_by_day: 8,
-            has_avatar: false
+            has_avatar: false,
+            use_original_file_name: false
           }
           if (organisations.length > 0) organisation = organisations[0]
+          organisation.use_original_file_name =
+            organisation.use_original_file_name ? 'true' : 'false'
           resolve(organisation)
         }
       })
@@ -23,7 +26,8 @@ export default {
     return new Promise((resolve, reject) => {
       const data = {
         name: organisation.name,
-        hours_by_day: organisation.hours_by_day
+        hours_by_day: organisation.hours_by_day,
+        use_original_file_name: organisation.use_original_file_name === 'true'
       }
       client.put(
         `/api/data/organisations/${organisation.id}`,

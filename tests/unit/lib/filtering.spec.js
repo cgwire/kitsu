@@ -1,5 +1,3 @@
-import { expect } from 'chai'
-import test from '../../../src/lib/string'
 import {
   applyFilters,
   getKeyWords,
@@ -16,19 +14,19 @@ describe('lib/filtering', () => {
       const keyWords = getKeyWords(
         'chars bunny modeling=wip -bunnyfat'
       )
-      expect(keyWords).to.deep.equal(['chars', 'bunny'])
+      expect(keyWords).toEqual(['chars', 'bunny'])
     })
 
     it('no keyword query', () => {
       const keyWords = getKeyWords(
         'modeling=wip -bunnyfat'
       )
-      expect(keyWords).to.deep.equal([])
+      expect(keyWords).toEqual([])
     })
 
     it('empty query', () => {
       const keyWords = getKeyWords('')
-      expect(keyWords).to.deep.equal([])
+      expect(keyWords).toEqual([])
     })
   })
 
@@ -37,19 +35,19 @@ describe('lib/filtering', () => {
       const keyWords = getExcludingKeyWords(
         '-chars bunny modeling=wip -bunnyfat'
       )
-      expect(keyWords).to.deep.equal(['chars', 'bunnyfat'])
+      expect(keyWords).toEqual(['chars', 'bunnyfat'])
     })
 
     it('no excluding keyword query', () => {
       const keyWords = getExcludingKeyWords(
         'chars bunny'
       )
-      expect(keyWords).to.deep.equal([])
+      expect(keyWords).toEqual([])
     })
 
     it('empty query', () => {
       const keyWords = getExcludingKeyWords('')
-      expect(keyWords).to.deep.equal([])
+      expect(keyWords).toEqual([])
     })
   })
 
@@ -96,12 +94,12 @@ describe('lib/filtering', () => {
         descriptors,
         'modeling=wip'
       )
-      expect(filters.length).to.equal(1)
+      expect(filters.length).toEqual(1)
       const filter = filters[0]
-      expect(filter.taskType).to.deep.equal(taskTypes[1])
-      expect(filter.taskStatus.short_name).to.equal('wip')
-      expect(filter.assigned).to.be.undefined
-      expect(filter.type).to.equal('status')
+      expect(filter.taskType).toEqual(taskTypes[1])
+      expect(filter.taskStatus.short_name).toEqual('wip')
+      expect(filter.assigned).toBeUndefined()
+      expect(filter.type).toEqual('status')
     })
 
     it('shortcut case', () => {
@@ -112,10 +110,10 @@ describe('lib/filtering', () => {
         descriptors,
         'mode=wip'
       )
-      expect(filters.length).to.equal(1)
+      expect(filters.length).toEqual(1)
       const filter = filters[0]
-      expect(filter.taskType).to.deep.equal(taskTypes[1])
-      expect(filter.taskStatus.short_name).to.equal('wip')
+      expect(filter.taskType).toEqual(taskTypes[1])
+      expect(filter.taskStatus.short_name).toEqual('wip')
     })
 
     it('task type with space case', () => {
@@ -126,10 +124,10 @@ describe('lib/filtering', () => {
         descriptors,
         '[modeling facial]=wip'
       )
-      expect(filters.length).to.equal(1)
+      expect(filters.length).toEqual(1)
       const filter = filters[0]
-      expect(filter.taskType).to.deep.equal(taskTypes[2])
-      expect(filter.taskStatus.short_name).to.equal('wip')
+      expect(filter.taskType).toEqual(taskTypes[2])
+      expect(filter.taskStatus.short_name).toEqual('wip')
     })
 
     it('non existing task type case', () => {
@@ -140,7 +138,7 @@ describe('lib/filtering', () => {
         descriptors,
         'compo=wip'
       )
-      expect(filters.length).to.equal(0)
+      expect(filters.length).toEqual(0)
     })
 
     it('no task type in query case', () => {
@@ -151,7 +149,7 @@ describe('lib/filtering', () => {
         descriptors,
         'toto'
       )
-      expect(filters.length).to.equal(0)
+      expect(filters.length).toEqual(0)
     })
 
     it('empty query case', () => {
@@ -162,7 +160,7 @@ describe('lib/filtering', () => {
         descriptors,
         ''
       )
-      expect(filters.length).to.equal(0)
+      expect(filters.length).toEqual(0)
     })
 
     it('multiple task type query case', () => {
@@ -173,13 +171,13 @@ describe('lib/filtering', () => {
         descriptors,
         'mode=wip anim=wfa chars'
       )
-      expect(filters.length).to.equal(2)
+      expect(filters.length).toEqual(2)
       let filter = filters[0]
-      expect(filter.taskType).to.deep.equal(taskTypes[1])
-      expect(filter.taskStatus.short_name).to.equal('wip')
+      expect(filter.taskType).toEqual(taskTypes[1])
+      expect(filter.taskStatus.short_name).toEqual('wip')
       filter = filters[1]
-      expect(filter.taskType).to.deep.equal(taskTypes[0])
-      expect(filter.taskStatus.short_name).to.equal('wfa')
+      expect(filter.taskType).toEqual(taskTypes[0])
+      expect(filter.taskStatus.short_name).toEqual('wfa')
     })
 
     it('assigned query case', () => {
@@ -190,12 +188,12 @@ describe('lib/filtering', () => {
         descriptors,
         'mode=assigned'
       )
-      expect(filters.length).to.equal(1)
+      expect(filters.length).toEqual(1)
       let filter = filters[0]
-      expect(filter.taskType).to.deep.equal(taskTypes[1])
-      expect(filter.taskStatus).to.be.undefined
-      expect(filter.assigned).to.equal(true)
-      expect(filter.type).to.equal('assignation')
+      expect(filter.taskType).toEqual(taskTypes[1])
+      expect(filter.taskStatus).toBeUndefined()
+      expect(filter.assigned).toEqual(true)
+      expect(filter.type).toEqual('assignation')
     })
 
     it('unassigned query case', () => {
@@ -206,12 +204,12 @@ describe('lib/filtering', () => {
         descriptors,
         'mode=unassigned'
       )
-      expect(filters.length).to.equal(1)
+      expect(filters.length).toEqual(1)
       let filter = filters[0]
-      expect(filter.taskType).to.deep.equal(taskTypes[1])
-      expect(filter.taskStatus).to.be.undefined
-      expect(filter.assigned).to.equal(false)
-      expect(filter.type).to.equal('assignation')
+      expect(filter.taskType).toEqual(taskTypes[1])
+      expect(filter.taskStatus).toBeUndefined()
+      expect(filter.assigned).toEqual(false)
+      expect(filter.type).toEqual('assignation')
     })
 
     it('exclusion query case', () => {
@@ -222,10 +220,10 @@ describe('lib/filtering', () => {
         descriptors,
         '-props'
       )
-      expect(filters.length).to.equal(1)
+      expect(filters.length).toEqual(1)
       let filter = filters[0]
-      expect(filter.type).to.equal('exclusion')
-      expect(filter.excludedIds['asset-1']).to.be.ok
+      expect(filter.type).toEqual('exclusion')
+      expect(filter.excludedIds['asset-1']).toBeTruthy()
     })
 
     it('descriptor query case', () => {
@@ -236,11 +234,11 @@ describe('lib/filtering', () => {
         descriptors,
         'family=big'
       )
-      expect(filters.length).to.equal(1)
+      expect(filters.length).toEqual(1)
       let filter = filters[0]
-      expect(filter.type).to.equal('descriptor')
-      expect(filter.value).to.equal('big')
-      expect(filter.descriptor.id).to.equal('descriptor-1')
+      expect(filter.type).toEqual('descriptor')
+      expect(filter.value).toEqual('big')
+      expect(filter.descriptor.id).toEqual('descriptor-1')
     })
   })
 
@@ -346,7 +344,7 @@ describe('lib/filtering', () => {
         filters,
         taskMap
       )
-      expect(results.length).to.equal(3)
+      expect(results.length).toEqual(3)
     })
 
     it('empty filter', () => {
@@ -356,7 +354,7 @@ describe('lib/filtering', () => {
         filters,
         taskMap
       )
-      expect(results.length).to.equal(5)
+      expect(results.length).toEqual(5)
     })
 
     it('multiple filters', () => {
@@ -377,7 +375,7 @@ describe('lib/filtering', () => {
         filters,
         taskMap
       )
-      expect(results.length).to.equal(1)
+      expect(results.length).toEqual(1)
     })
 
     it('animation=unassigned', () => {
@@ -393,7 +391,7 @@ describe('lib/filtering', () => {
         filters,
         taskMap
       )
-      expect(results.length).to.equal(3)
+      expect(results.length).toEqual(3)
     })
 
     it('animation=assigned', () => {
@@ -409,7 +407,7 @@ describe('lib/filtering', () => {
         filters,
         taskMap
       )
-      expect(results.length).to.equal(2)
+      expect(results.length).toEqual(2)
     })
 
     it('exclusion', () => {
@@ -426,7 +424,7 @@ describe('lib/filtering', () => {
         filters,
         taskMap
       )
-      expect(results.length).to.equal(4)
+      expect(results.length).toEqual(4)
     })
 
     it('color=blue', () => {
@@ -442,7 +440,7 @@ describe('lib/filtering', () => {
         filters,
         taskMap
       )
-      expect(results.length).to.equal(4)
+      expect(results.length).toEqual(4)
     })
   })
 })

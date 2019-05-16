@@ -108,7 +108,8 @@ const initialState = {
   organisation: {
     name: 'Kitsu',
     hours_by_day: 8,
-    has_avatar: false
+    has_avatar: false,
+    use_original_file_name: 'false'
   },
 
   people: [],

@@ -370,7 +370,8 @@ export default {
     title: 'Settings',
     fields: {
       name: 'Studio name',
-      hours_by_day: 'Hours by day'
+      hours_by_day: 'Hours by day',
+      use_original_name: 'Use original file name for downloads'
     },
     save: {
       button: 'Save settings',

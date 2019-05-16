@@ -509,7 +509,8 @@ export default {
     title: 'Paramètres',
     fields: {
       name: 'Nom du studio',
-      hours_by_day: 'Heures par jour'
+      hours_by_day: 'Heures par jour',
+      use_original_name: 'Utiliser les noms de fichiers originaux pour le téléchargement'
     },
     save: {
       button: 'Sauvegarder les paramètres',

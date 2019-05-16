@@ -34,6 +34,11 @@
           @enter="saveSettings()"
           v-model="form.hours_by_day"
         />
+        <combobox-boolean
+          :label="$t('settings.fields.use_original_name')"
+          @enter="saveSettings()"
+          v-model="form.use_original_file_name"
+        />
 
         <button
           :class="{
@@ -74,6 +79,7 @@
 import { mapGetters, mapActions } from 'vuex'
 
 import ChangeAvatarModal from '../modals/ChangeAvatarModal'
+import ComboboxBoolean from '../widgets/ComboboxBoolean'
 import TextField from '../widgets/TextField'
 
 export default {
@@ -81,6 +87,7 @@ export default {
 
   components: {
     ChangeAvatarModal,
+    ComboboxBoolean,
     TextField
   },
 
@@ -90,7 +97,8 @@ export default {
       organisationLogoPath: '',
       form: {
         name: '',
-        hours_by_day: 0
+        hours_by_day: 0,
+        original_file_name: 'false'
       },
       errors: {
         save: false,

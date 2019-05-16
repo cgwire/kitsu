@@ -11,6 +11,7 @@
     >
       <task-type-name
         :task-type="currentTaskType"
+        v-if="currentTaskType"
       />
     </div>
     <chevron-down-icon class="down-icon flexrow-item"/>

@@ -1,4 +1,3 @@
-import { expect } from 'chai'
 import {
   sortAssets,
   sortByName,
@@ -31,13 +30,13 @@ describe('lib/sorting', () => {
       {name: 'Gazu', id: 1},
     ]
     let results = sortByName(entries)
-    expect(results.length).to.equal(3)
-    expect(results[0].id).to.equal(1)
-    expect(results[1].id).to.equal(2)
-    expect(results[2].id).to.equal(3)
+    expect(results.length).toEqual(3)
+    expect(results[0].id).toEqual(1)
+    expect(results[1].id).toEqual(2)
+    expect(results[2].id).toEqual(3)
 
     results = sortByName([])
-    expect(results.length).to.equal(0)
+    expect(results.length).toEqual(0)
   })
 
   it('sortAssets', () => {
@@ -72,14 +71,14 @@ describe('lib/sorting', () => {
       }
     ]
     let results = sortAssets(entries)
-    expect(results.length).to.equal(4)
-    expect(results[0].id).to.equal(1)
-    expect(results[1].id).to.equal(2)
-    expect(results[2].id).to.equal(3)
-    expect(results[3].id).to.equal(4)
+    expect(results.length).toEqual(4)
+    expect(results[0].id).toEqual(1)
+    expect(results[1].id).toEqual(2)
+    expect(results[2].id).toEqual(3)
+    expect(results[3].id).toEqual(4)
 
     results = sortAssets([])
-    expect(results.length).to.equal(0)
+    expect(results.length).toEqual(0)
   })
 
   it('sortShots', () => {
@@ -129,16 +128,16 @@ describe('lib/sorting', () => {
     ]
     let results = sortShots(entries)
 
-    expect(results.length).to.equal(6)
-    expect(results[0].id).to.equal(1)
-    expect(results[1].id).to.equal(2)
-    expect(results[2].id).to.equal(3)
-    expect(results[3].id).to.equal(4)
-    expect(results[4].id).to.equal(5)
-    expect(results[5].id).to.equal(6)
+    expect(results.length).toEqual(6)
+    expect(results[0].id).toEqual(1)
+    expect(results[1].id).toEqual(2)
+    expect(results[2].id).toEqual(3)
+    expect(results[3].id).toEqual(4)
+    expect(results[4].id).toEqual(5)
+    expect(results[5].id).toEqual(6)
 
     results = sortShots([])
-    expect(results.length).to.equal(0)
+    expect(results.length).toEqual(0)
   })
 
   it('sortShots - without episodes', () => {
@@ -188,17 +187,17 @@ describe('lib/sorting', () => {
     ]
     let results = sortShots(entries)
 
-    expect(results.length).to.equal(7)
-    expect(results[0].id).to.equal(1)
-    expect(results[1].id).to.equal(2)
-    expect(results[2].id).to.equal(3)
-    expect(results[3].id).to.equal(4)
-    expect(results[4].id).to.equal(5)
-    expect(results[5].id).to.equal(6)
-    expect(results[6].id).to.equal(7)
+    expect(results.length).toEqual(7)
+    expect(results[0].id).toEqual(1)
+    expect(results[1].id).toEqual(2)
+    expect(results[2].id).toEqual(3)
+    expect(results[3].id).toEqual(4)
+    expect(results[4].id).toEqual(5)
+    expect(results[5].id).toEqual(6)
+    expect(results[6].id).toEqual(7)
 
     results = sortShots([])
-    expect(results.length).to.equal(0)
+    expect(results.length).toEqual(0)
   })
 
   it('sortProductions', () => {
@@ -208,13 +207,13 @@ describe('lib/sorting', () => {
       {project_status_name: 'open', name: 'Agent 327', id: 1},
     ]
     let results = sortProductions(entries)
-    expect(results.length).to.equal(3)
-    expect(results[0].id).to.equal(1)
-    expect(results[1].id).to.equal(2)
-    expect(results[2].id).to.equal(3)
+    expect(results.length).toEqual(3)
+    expect(results[0].id).toEqual(1)
+    expect(results[1].id).toEqual(2)
+    expect(results[2].id).toEqual(3)
 
     results = sortProductions([])
-    expect(results.length).to.equal(0)
+    expect(results.length).toEqual(0)
   })
 
   it('sortTaskTypes', () => {
@@ -226,15 +225,15 @@ describe('lib/sorting', () => {
       {for_shots: true, priority: 1, name: 'Animation', id: 1}
     ]
     let results = sortProductions(entries)
-    expect(results.length).to.equal(5)
-    expect(results[0].id).to.equal(1)
-    expect(results[1].id).to.equal(2)
-    expect(results[2].id).to.equal(3)
-    expect(results[3].id).to.equal(4)
-    expect(results[4].id).to.equal(5)
+    expect(results.length).toEqual(5)
+    expect(results[0].id).toEqual(1)
+    expect(results[1].id).toEqual(2)
+    expect(results[2].id).toEqual(3)
+    expect(results[3].id).toEqual(4)
+    expect(results[4].id).toEqual(5)
 
     results = sortProductions([])
-    expect(results.length).to.equal(0)
+    expect(results.length).toEqual(0)
   })
 
   it('sortTasks', () => {
@@ -277,15 +276,15 @@ describe('lib/sorting', () => {
       }
     ]
     let results = sortTasks(entries, taskTypeMap)
-    expect(results.length).to.equal(5)
-    expect(results[0].id).to.equal(5)
-    expect(results[1].id).to.equal(1)
-    expect(results[2].id).to.equal(2)
-    expect(results[3].id).to.equal(3)
-    expect(results[4].id).to.equal(4)
+    expect(results.length).toEqual(5)
+    expect(results[0].id).toEqual(5)
+    expect(results[1].id).toEqual(1)
+    expect(results[2].id).toEqual(2)
+    expect(results[3].id).toEqual(3)
+    expect(results[4].id).toEqual(4)
 
     results = sortProductions([])
-    expect(results.length).to.equal(0)
+    expect(results.length).toEqual(0)
   })
 
   it('sortTaskTypes', () => {
@@ -297,27 +296,27 @@ describe('lib/sorting', () => {
       {for_shots: true, priority: 1, name: 'Animation', id: 1}
     ]
     let results = sortProductions(entries)
-    expect(results.length).to.equal(5)
-    expect(results[0].id).to.equal(1)
-    expect(results[1].id).to.equal(2)
-    expect(results[2].id).to.equal(3)
-    expect(results[3].id).to.equal(4)
-    expect(results[4].id).to.equal(5)
+    expect(results.length).toEqual(5)
+    expect(results[0].id).toEqual(1)
+    expect(results[1].id).toEqual(2)
+    expect(results[2].id).toEqual(3)
+    expect(results[3].id).toEqual(4)
+    expect(results[4].id).toEqual(5)
 
     results = sortProductions([])
-    expect(results.length).to.equal(0)
+    expect(results.length).toEqual(0)
   })
 
   it('sortValidationColumns', () => {
     const entries = ['task-type-3', 'task-type-2', 'task-type-1']
     let results = sortValidationColumns(entries, taskTypeMap)
-    expect(results.length).to.equal(3)
-    expect(results[0]).to.equal('task-type-1')
-    expect(results[1]).to.equal('task-type-2')
-    expect(results[2]).to.equal('task-type-3')
+    expect(results.length).toEqual(3)
+    expect(results[0]).toEqual('task-type-1')
+    expect(results[1]).toEqual('task-type-2')
+    expect(results[2]).toEqual('task-type-3')
 
     results = sortValidationColumns([])
-    expect(results.length).to.equal(0)
+    expect(results.length).toEqual(0)
   })
 
   it('sortPlaylist', () => {
@@ -327,10 +326,10 @@ describe('lib/sorting', () => {
       { id: 3, created_at: '2018-09-18-18:19:00', name: 'Playlist3'},
     ]
     let results = sortByDate(entries)
-    expect(results.length).to.equal(3)
-    expect(results[0].id).to.equal(3)
-    expect(results[1].id).to.equal(2)
-    expect(results[2].id).to.equal(1)
+    expect(results.length).toEqual(3)
+    expect(results[0].id).toEqual(3)
+    expect(results[1].id).toEqual(2)
+    expect(results[2].id).toEqual(1)
   })
 
   it('sortPeople', () => {
@@ -341,10 +340,10 @@ describe('lib/sorting', () => {
     ]
 
     let results = sortPeople(people)
-    expect(results.length).to.equal(3)
-    expect(results[0].id).to.equal(1)
-    expect(results[1].id).to.equal(3)
-    expect(results[2].id).to.equal(2)
+    expect(results.length).toEqual(3)
+    expect(results[0].id).toEqual(1)
+    expect(results[1].id).toEqual(3)
+    expect(results[2].id).toEqual(2)
   })
 
   it('sortByDate', () => {
@@ -354,9 +353,9 @@ describe('lib/sorting', () => {
       { id: 3, created_at: '2018-09-18-18:19:00'}
     ]
     let results = sortByDate(entries)
-    expect(results.length).to.equal(3)
-    expect(results[0].id).to.equal(3)
-    expect(results[1].id).to.equal(2)
-    expect(results[2].id).to.equal(1)
+    expect(results.length).toEqual(3)
+    expect(results[0].id).toEqual(3)
+    expect(results[1].id).toEqual(2)
+    expect(results[2].id).toEqual(1)
   })
 })
