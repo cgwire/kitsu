@@ -1,4 +1,3 @@
-import { expect } from 'chai'
 import test from '../../../src/lib/string'
 import {
   buildNameIndex,
@@ -18,11 +17,11 @@ describe('lib/indexing', () => {
       {name: 'Test', id: 4}
     ]
     const index = buildNameIndex(entries)
-    expect(index['A']).to.be.undefined
-    expect(index['Ca']).to.be.undefined
-    expect(index['a'].length).to.equal(2)
-    expect(index['bunny'].length).to.equal(1)
-    expect(index['bunny'][0].id).to.equal(3)
+    expect(index['A']).toBeUndefined()
+    expect(index['Ca']).toBeUndefined()
+    expect(index['a'].length).toEqual(2)
+    expect(index['bunny'].length).toEqual(1)
+    expect(index['bunny'][0].id).toEqual(3)
   })
 
   it('buildAssetIndex', () => {
@@ -34,13 +33,13 @@ describe('lib/indexing', () => {
       {name: 'New object', asset_type_name: 'Props', id: 5}
     ]
     const index = buildAssetIndex(entries)
-    expect(index['A']).to.be.undefined
-    expect(index['cs']).to.be.undefined
-    expect(index['ch'].length).to.equal(3)
-    expect(index['a'].length).to.equal(2)
-    expect(index['bunny'].length).to.equal(1)
-    expect(index['bunny'][0].id).to.equal(3)
-    expect(index['o'][0].id).to.equal(5)
+    expect(index['A']).toBeUndefined()
+    expect(index['cs']).toBeUndefined()
+    expect(index['ch'].length).toEqual(3)
+    expect(index['a'].length).toEqual(2)
+    expect(index['bunny'].length).toEqual(1)
+    expect(index['bunny'][0].id).toEqual(3)
+    expect(index['o'][0].id).toEqual(5)
   })
 
   it('buildShotIndex', () => {
@@ -52,9 +51,9 @@ describe('lib/indexing', () => {
       {name: 'SH02', sequence_name: 'S01', episode_name: 'E02', id: 5}
     ]
     const index = buildShotIndex(entries)
-    expect(index['e01'].length).to.equal(3)
-    expect(index['s01'].length).to.equal(4)
-    expect(index['sh01'].length).to.equal(3)
+    expect(index['e01'].length).toEqual(3)
+    expect(index['s01'].length).toEqual(4)
+    expect(index['sh01'].length).toEqual(3)
   })
 
   it('buildTaskIndex', () => {
@@ -96,10 +95,10 @@ describe('lib/indexing', () => {
       }
     ]
     const index = buildTaskIndex(entries)
-    expect(index['e01'].length).to.equal(2)
-    expect(index['wip'].length).to.equal(3)
-    expect(index['caminandes'].length).to.equal(4)
-    expect(index['agent327'].length).to.equal(1)
+    expect(index['e01'].length).toEqual(2)
+    expect(index['wip'].length).toEqual(3)
+    expect(index['caminandes'].length).toEqual(4)
+    expect(index['agent327'].length).toEqual(1)
   })
 
   it('indexSearch', () => {
@@ -110,10 +109,10 @@ describe('lib/indexing', () => {
       {name: 'Test', id: 4}
     ]
     const index = buildNameIndex(entries)
-    expect(indexSearch(index, ['A']).length).to.equal(2)
-    expect(indexSearch(index, ['Ca']).length).to.equal(0)
-    expect(indexSearch(index, ['a']).length).to.equal(2)
-    expect(indexSearch(index, ['bunny']).length).to.equal(1)
-    expect(indexSearch(index, ['bunny'])[0].id).to.equal(3)
+    expect(indexSearch(index, ['A']).length).toEqual(2)
+    expect(indexSearch(index, ['Ca']).length).toEqual(0)
+    expect(indexSearch(index, ['a']).length).toEqual(2)
+    expect(indexSearch(index, ['bunny']).length).toEqual(1)
+    expect(indexSearch(index, ['bunny'])[0].id).toEqual(3)
   })
 })

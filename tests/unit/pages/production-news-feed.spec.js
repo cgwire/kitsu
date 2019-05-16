@@ -94,8 +94,8 @@ describe('ProductionNewsFeed', () => {
         tasks: taskStore,
         news: newsStore,
         productions: productionStore,
-        taskStatusStore: taskStatusStore,
-        taskTypeStore: taskTypeStore,
+        taskStatus: taskStatusStore,
+        taskTypes: taskTypeStore,
         user: userStore
       }
     })
@@ -113,6 +113,35 @@ describe('ProductionNewsFeed', () => {
       expect(newsStore.actions.loadNews).toHaveBeenCalled()
       const newsLines = wrapper.findAll('.news-line')
       // expect(newsLines.length).toEqual(50)
+    })
+  })
+
+  describe('Getters', () => {
+    test('params', () => {
+      expect(wrapper.vm.params).toEqual({
+        only_preview: false,
+        page: 1,
+        page_size: 50,
+        productionId: "production-1",
+        task_status_id: undefined,
+        task_type_id: undefined
+      })
+      wrapper.vm.previewMode = 'previews'
+      wrapper.vm.taskStatusId = 'task-status-1'
+      wrapper.vm.taskTypeId = 'task-type-1'
+      wrapper.vm.currentPage = 2
+      expect(wrapper.vm.params).toEqual({
+        only_preview: true,
+        page: 2,
+        page_size: 6,
+        productionId: "production-1",
+        task_status_id: 'task-status-1',
+        task_type_id: 'task-type-1'
+      })
+      wrapper.vm.previewMode = 'comments'
+      wrapper.vm.currentPage = 1
+      wrapper.vm.taskStatusId = null
+      wrapper.vm.taskTypeId = null
     })
   })
 
