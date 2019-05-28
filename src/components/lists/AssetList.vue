@@ -618,4 +618,8 @@ tbody:last-child .empty-line:last-child {
 th {
   word-break: break-all
 }
+
+.info img {
+  max-width: 80vh;
+}
 </style>

@@ -111,6 +111,8 @@
     class="has-text-centered empty-list"
     v-if="entries.length === 0 && !isLoading"
   >
+    <br />
+    <img src="../../assets/illustrations/empty_todo.png" />
     {{ $t('people.no_task_assigned') }}
   </p>
 
@@ -431,5 +433,9 @@ td.last-comment {
   max-width: 60px;
   width: 60px;
   padding: 0;
+}
+
+.empty-list img {
+  max-width: 80vh;
 }
 </style>

@@ -556,7 +556,7 @@ a:hover {
 }
 
 .info {
-  margin-top: 2em;
+  margin-top: 1em;
   font-size: 1.4em;
 }
 
