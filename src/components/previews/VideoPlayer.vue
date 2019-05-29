@@ -951,6 +951,8 @@ export default {
   watch: {
     preview () {
       this.maxDuration = '00:00.00'
+      this.fabricCanvas.isDrawingMode = false
+      this.isDrawing = false
       this.reloadAnnotations()
       if (this.isComparing) {
         this.isComparing = false
