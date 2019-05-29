@@ -53,16 +53,18 @@
           class="revision"
           v-if="light && comment.previews.length > 0"
         >
-          revision {{ comment.previews[0].revision }}
+          {{ $t('comments.revision') }} {{ comment.previews[0].revision }}
         </router-link>
       </div>
 
       <p v-if="comment.task_status.name === 'Done'">
         <span :style="{'color': comment.task_status.color}">
-        {{ $t('comments.validated') }}
+          {{ $t('comments.validated') }}
         </span>
       </p>
-
+      <p v-if="comment.task_status.name === 'Done'">
+          <img src="../../assets/illustrations/validated.png" />
+      </p>
       <p
         v-html="renderComment(comment.text, comment.mentions, personMap)"
         class="comment-text"
