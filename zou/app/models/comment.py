@@ -55,6 +55,8 @@ class Comment(db.Model, BaseMixin, SerializerMixin):
     object_type = db.Column(db.String(80), nullable=False, index=True)
     text = db.Column(db.Text())
     data = db.Column(JSONB)
+    checklist = db.Column(JSONB)
+    pinned = db.Column(db.Boolean)
 
     task_status_id = db.Column(
         UUIDType(binary=False),

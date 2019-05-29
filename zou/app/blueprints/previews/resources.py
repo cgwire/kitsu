@@ -33,6 +33,8 @@ ALLOWED_MOVIE_EXTENSION = [
 ALLOWED_FILE_EXTENSION = [
     ".obj", ".pdf", ".ma", ".mb", ".ai", ".rar", ".zip", ".blend",
     ".OBJ", ".PDF", ".MA", ".MB", ".AI", ".RAR", ".ZIP", ".BLEND",
+    ".comp", ".psd", ".hip", ".exr",
+    ".COMP", ".PSD", ".HIP", ".EXR"
 ]
 
 
