@@ -78,10 +78,20 @@
               >
                 {{ $t('main.confirmation') }}
               </button>
-
-              <div class="" v-if="isChangeStatusLoading">
-                <spinner :is-white="true" />
-              </div>
+            </div>
+            <div class="flexrow-item" v-if="isChangeStatusLoading">
+              <spinner :is-white="true" />
+            </div>
+             <div
+              class="flexrow-item"
+              v-if="!isChangeStatusLoading"
+            >
+              <input
+                class="comment-text"
+                type="text"
+                :placeholder="$t('tasks.with_comment')"
+                v-model="statusComment"
+              />
             </div>
           </div>
         </div>
@@ -402,6 +412,10 @@ export default {
 
   data () {
     return {
+      currentTeam: [],
+      customAction: {},
+      customActions: [],
+      estimation: 0,
       isAssignationLoading: false,
       isChangeEstimationLoading: false,
       isChangePriorityLoading: false,
@@ -411,13 +425,10 @@ export default {
       isMoreMenuDisplayed: true,
       selectedBar: 'assignation',
       person: null,
-      taskStatusId: '',
-      customAction: {},
-      selectedTaskIds: [],
-      customActions: [],
-      estimation: 0,
       priority: '0',
-      currentTeam: [],
+      selectedTaskIds: [],
+      taskStatusId: '',
+      statusComment: '',
       priorityOptions: [
         {
           label: this.$t('tasks.priority.normal'),
@@ -587,8 +598,10 @@ export default {
 
       this.changeSelectedTaskStatus({
         taskStatusId: this.taskStatusId,
+        comment: this.statusComment,
         callback: () => {
           this.isChangeStatusLoading = false
+          this.statusComment = ''
         }
       })
     },
@@ -876,6 +889,10 @@ div.combobox-item {
 
 .estimation-input {
   width: 90px;
+}
+
+.comment-text {
+  padding: 8px;
 }
 
 @media screen and (max-width: 768px) {

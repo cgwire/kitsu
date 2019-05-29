@@ -351,14 +351,18 @@ const actions = {
     })
   },
 
-  changeSelectedTaskStatus ({ commit, state }, { taskStatusId, callback }) {
+  changeSelectedTaskStatus ({ commit, state }, {
+    taskStatusId,
+    comment,
+    callback
+  }) {
     async.eachSeries(Object.keys(state.selectedTasks), (taskId, next) => {
       const task = state.taskMap[taskId]
       if (task && task.task_status_id !== taskStatusId) {
         actions.commentTask({ commit, state }, {
           taskId: taskId,
           taskStatusId: taskStatusId,
-          comment: '',
+          comment: comment || '',
           callback: (err) => {
             next(err)
           }
