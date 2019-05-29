@@ -210,7 +210,11 @@ export default {
     no_file_attached: 'Aucun fichier attaché',
     post_status: 'Publier',
     retake: 'Reprise',
+    revision: 'révision',
+    pin: 'Épingler',
+    pinned: 'Épinglé',
     set_status_to: 'Positionner le statut à',
+    unpin: 'Désépingler',
     validated: 'Validé !',
     validation_required: 'Validation requise',
     fields: {
@@ -269,6 +273,7 @@ export default {
     show_infos: 'Montrer informations additionnelles',
     unsubscribe_notifications: 'Se désabonner des notifications',
     tasks: 'Tâches',
+    with_comment: 'Avec un commentaire...',
     validation: 'Validation',
     fields: {
       asset_type: 'Type d\'asset',

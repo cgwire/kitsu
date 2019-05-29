@@ -171,6 +171,7 @@
                 :comment="comment"
                 :light="true"
                 :add-preview="onAddPreviewClicked"
+                @pin-comment="onPinComment"
                 v-for="comment in taskComments"
               />
             </div>
@@ -473,6 +474,7 @@ export default {
       'loadTaskComments',
       'loadTaskSubscribed',
       'refreshPreview',
+      'pinComment',
       'setPreview',
       'subscribeToTask',
       'unsubscribeFromTask',
@@ -686,6 +688,10 @@ export default {
       } else {
         panel.parentElement.style['min-width'] = '350px'
       }
+    },
+
+    onPinComment (comment) {
+      this.pinComment(comment)
     }
   },
 

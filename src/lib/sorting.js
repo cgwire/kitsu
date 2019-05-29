@@ -72,6 +72,13 @@ export const sortTasks = (tasks, taskTypeMap) => {
   )
 }
 
+export const sortComments = (comments) => {
+  return comments.sort(
+    firstBy('pinned', -1)
+      .thenBy('created_at', -1)
+  )
+}
+
 export const sortTaskTypes = (taskTypes) => {
   return taskTypes.sort(
     firstBy('for_shots')
