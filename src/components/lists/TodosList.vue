@@ -107,14 +107,17 @@
     :is-error="isError"
   />
 
-  <p
+  <div
     class="has-text-centered empty-list"
     v-if="entries.length === 0 && !isLoading"
   >
-    <br />
-    <img src="../../assets/illustrations/empty_todo.png" />
-    {{ $t('people.no_task_assigned') }}
-  </p>
+    <p>
+      <img src="../../assets/illustrations/empty_todo.png" />
+    </p>
+    <p>
+      {{ $t('people.no_task_assigned') }}
+    </p>
+  </div>
 
   <p
     class="has-text-centered footer-info"

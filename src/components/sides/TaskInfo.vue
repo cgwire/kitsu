@@ -1,5 +1,10 @@
 <template>
-  <div class="side task-info" v-if="task">
+  <div
+    class="side task-info"
+    :style="panelStyle"
+    ref="side-panel"
+    v-if="task"
+  >
     <div class="page-header">
       <div
         class="flexrow header-title"
@@ -19,16 +24,19 @@
       <div
         class="flexrow task-information"
       >
-        <!--validation-tag
-          class="is-medium flexrow-item"
-          :task="task"
-          :is-static="true"
-        /-->
         <button-simple
-          class="flexrow-item"
-          icon="maximize"
+          class="flexrow-item change-wideness-button"
+          icon="right"
           :title="$t('tasks.bigger')"
           @click="toggleWidth"
+          v-if="isWide && isPreview"
+        />
+        <button-simple
+          class="flexrow-item change-wideness-button"
+          icon="left"
+          :title="$t('tasks.bigger')"
+          @click="toggleWidth"
+          v-else-if="isPreview"
         />
         <button-simple
           class="flexrow-item set-thumbnail-button"
@@ -44,8 +52,13 @@
           @click="toggleSubscribe"
           v-if="!isAssigned"
         />
+        <validation-tag
+          class="is-medium flexrow-item"
+          :task="task"
+          :is-static="true"
+        />
         <div class="filler"></div>
-        <div class="preview-list flexrow">
+        <div class="preview-list flexrow" v-if="isPreview">
           <span
             :class="{
               'flexrow-item': true,
@@ -80,7 +93,7 @@
                   :preview="currentPreview"
                   :entity-preview-files="taskEntityPreviews"
                   :task-type-map="taskTypeMap"
-                  :light="true"
+                  :light="!isWide"
                   @annotationchanged="onAnnotationChanged"
                   ref="preview-movie"
                 />
@@ -106,13 +119,13 @@
                 class="model-viewer"
                 :preview-url="currentPreviewPath"
                 :preview-dl-path="currentPreviewDlPath"
-                :light="true"
+                :light="!isWide"
                 v-else-if="is3DModelPreview"
               />
 
               <picture-viewer
                 :preview="currentPreview"
-                :light="true"
+                :light="!isWide"
                 @annotation-changed="onAnnotationChanged"
                 @add-preview="onAddExtraPreview"
                 ref="preview-picture"
@@ -274,6 +287,7 @@ export default {
       currentPreviewPath: '',
       currentPreviewDlPath: '',
       isSubscribed: false,
+      isWide: false,
       otherPreviews: [],
       taskComments: [],
       taskPreviews: [],
@@ -440,6 +454,12 @@ export default {
 
     lastFivePreviews () {
       return this.taskPreviews.slice(0, 5)
+    },
+
+    panelStyle () {
+      return {
+        width: this.isWide ? 700 : 350
+      }
     }
   },
 
@@ -659,6 +679,13 @@ export default {
     },
 
     toggleWidth () {
+      this.isWide = !this.isWide
+      const panel = this.$refs['side-panel']
+      if (this.isWide) {
+        panel.parentElement.style['min-width'] = '700px'
+      } else {
+        panel.parentElement.style['min-width'] = '350px'
+      }
     }
   },
 
@@ -707,29 +734,38 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-.dark .add-comment,
-.dark .comment,
-.dark .preview-column-content,
-.dark .no-comment {
-  background: #46494F;
-  border-color: $dark-grey;
-  box-shadow: 0px 0px 6px #333;
-}
+.dark {
+  .add-comment,
+  .comment,
+  .preview-column-content,
+  .no-comment {
+    background: #46494F;
+    border-color: $dark-grey;
+    box-shadow: 0px 0px 6px #333;
+  }
 
-.dark .no-preview {
-  padding: 0.5em;
-}
+  .no-preview {
+    padding: 0.5em;
+  }
 
-.dark .preview-picture {
-  border: 1px solid $dark-grey;
-}
+  .preview-picture {
+    border: 1px solid $dark-grey;
+  }
 
-.dark .side {
-  background: #36393F;
-}
+  .side {
+    background: #36393F;
+  }
 
-.dark .task-info {
-  color: white;
+  .task-info {
+    color: white;
+  }
+
+  .preview-list span {
+    &:hover,
+    &.selected {
+      color: $dark-grey;
+    }
+  }
 }
 
 .side {
@@ -818,6 +854,7 @@ export default {
   padding: 0.3em;
 }
 
+.change-wideness-button,
 .set-thumbnail-button {
   margin-right: 0.2em;
 }
@@ -835,7 +872,7 @@ export default {
     border-radius: 3px;
 
     &:hover {
-      background: $light-green;
+      background: $light-green-light;
     }
 
     &.selected {

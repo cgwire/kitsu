@@ -416,7 +416,7 @@ export default {
       if (this.isFullScreen()) {
         return screen.height
       } else {
-        return screen.width > 1300 && (!this.light || this.readOnly) ? 700 : 200
+        return screen.width > 1300 && (!this.light || this.readOnly) ? 500 : 200
       }
     },
 
@@ -972,6 +972,10 @@ export default {
 
     taskTypeId () {
       this.setDefaultComparisonPreview()
+    },
+
+    light () {
+      this.onWindowResize()
     }
   }
 }

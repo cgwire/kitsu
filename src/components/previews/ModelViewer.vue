@@ -88,6 +88,15 @@ export default {
     previewUrl () {
       clearScene(this.scene)
       loadObject(this.scene, this.previewUrl)
+    },
+
+    light () {
+      clearScene(this.scene)
+      this.element.innerHTML = ''
+      setTimeout(() => {
+        this.scene = prepareScene(this.element)
+        loadObject(this.scene, this.previewUrl)
+      }, 100)
     }
   }
 }

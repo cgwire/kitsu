@@ -835,7 +835,7 @@ input.search-input:focus {
 }
 
 .table-body .table tr:hover {
-  background: #F0FFF0;
+  background: $light-green-lightest;
 }
 
 .table tr.type-header {
