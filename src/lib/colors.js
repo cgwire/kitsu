@@ -1,3 +1,4 @@
+import ColorHash from 'color-hash'
 import Color from 'color'
 
 const darkenColorIndex = {}

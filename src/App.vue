@@ -556,7 +556,7 @@ a:hover {
 }
 
 .info {
-  margin-top: 2em;
+  margin-top: 1em;
   font-size: 1.4em;
 }
 
@@ -835,7 +835,7 @@ input.search-input:focus {
 }
 
 .table-body .table tr:hover {
-  background: #F0FFF0;
+  background: $light-green-lightest;
 }
 
 .table tr.type-header {

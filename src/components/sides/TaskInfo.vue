@@ -1,5 +1,10 @@
 <template>
-  <div class="side task-info" v-if="task">
+  <div
+    class="side task-info"
+    :style="panelStyle"
+    ref="side-panel"
+    v-if="task"
+  >
     <div class="page-header">
       <div
         class="flexrow header-title"
@@ -19,18 +24,20 @@
       <div
         class="flexrow task-information"
       >
-        <span class="flexrow-item">{{ $t('tasks.current_status') }}</span>
-        <validation-tag
-          class="is-medium flexrow-item"
-          :task="task"
-          :is-static="true"
+        <button-simple
+          class="flexrow-item change-wideness-button"
+          icon="right"
+          :title="$t('tasks.bigger')"
+          @click="toggleWidth"
+          v-if="isWide && isPreview"
         />
-        <router-link
-          class="flexrow-item history-button"
-          :to="taskPath"
-        >
-          {{ $t('main.history') }}
-        </router-link>
+        <button-simple
+          class="flexrow-item change-wideness-button"
+          icon="left"
+          :title="$t('tasks.bigger')"
+          @click="toggleWidth"
+          v-else-if="isPreview"
+        />
         <button-simple
           class="flexrow-item set-thumbnail-button"
           icon="image"
@@ -45,63 +52,91 @@
           @click="toggleSubscribe"
           v-if="!isAssigned"
         />
+        <validation-tag
+          class="is-medium flexrow-item"
+          :task="task"
+          :is-static="true"
+        />
+        <div class="filler"></div>
+        <div class="preview-list flexrow" v-if="isPreview">
+          <span
+            :class="{
+              'flexrow-item': true,
+              selected: currentPreviewIndex === index
+            }"
+            :key="'preview-' + preview.revision"
+            @click="onPreviewChanged(index)"
+            v-for="(preview, index) in lastFivePreviews"
+          >
+            {{ preview.revision }}
+          </span>
+          <router-link
+            class="history-button flexrow-item"
+            :to="taskPath"
+            v-if="taskPreviews.length > 0"
+          >
+            ...
+          </router-link>
+        </div>
       </div>
     </div>
 
     <div class="task-columns" ref="task-columns">
       <div class="task-column preview-column" v-if="isPreview">
         <div class="preview-column-content">
-          <div class="preview-picture">
-            <div
-              v-if="isMoviePreview"
-            >
-              <video-player
-                :preview="currentPreview"
-                :entity-preview-files="taskEntityPreviews"
-                :task-type-map="taskTypeMap"
-                :light="true"
-                @annotationchanged="onAnnotationChanged"
-                ref="preview-movie"
-              />
-            </div>
-
-            <div
-              class="preview-standard-file"
-              v-else-if="isStandardPreview"
-            >
-              <a
-                class="button"
-                ref="preview-file"
-                :href="currentPreviewDlPath"
+          <div class="preview">
+            <div class="preview-picture">
+              <div
+                v-if="isMoviePreview"
               >
-                <download-icon class="icon" />
-                <span class="text">
-                  {{ $t('tasks.download_pdf_file', {extension}) }}
-                </span>
-              </a>
-            </div>
+                <video-player
+                  :preview="currentPreview"
+                  :entity-preview-files="taskEntityPreviews"
+                  :task-type-map="taskTypeMap"
+                  :light="!isWide"
+                  @annotationchanged="onAnnotationChanged"
+                  ref="preview-movie"
+                />
+              </div>
 
-            <model-viewer
-              class="model-viewer"
-              :preview-url="currentPreviewPath"
-              :preview-dl-path="currentPreviewDlPath"
-              :light="true"
-              v-else-if="is3DModelPreview"
-            />
+              <div
+                class="preview-standard-file"
+                v-else-if="isStandardPreview"
+              >
+                <a
+                  class="button"
+                  ref="preview-file"
+                  :href="currentPreviewDlPath"
+                >
+                  <download-icon class="icon" />
+                  <span class="text">
+                    {{ $t('tasks.download_pdf_file', {extension}) }}
+                  </span>
+                </a>
+              </div>
 
-            <picture-viewer
-              :preview="currentPreview"
-              :light="true"
-              @annotation-changed="onAnnotationChanged"
-              @add-preview="onAddExtraPreview"
-              ref="preview-picture"
-              v-else-if="isPicturePreview"
-            />
-            <div
-              class="no-preview"
-              v-if="!taskPreviews || taskPreviews.length === 0"
-            >
-              <em>{{ $t('tasks.no_preview') }}</em>
+              <model-viewer
+                class="model-viewer"
+                :preview-url="currentPreviewPath"
+                :preview-dl-path="currentPreviewDlPath"
+                :light="!isWide"
+                v-else-if="is3DModelPreview"
+              />
+
+              <picture-viewer
+                :preview="currentPreview"
+                :light="!isWide"
+                @annotation-changed="onAnnotationChanged"
+                @add-preview="onAddExtraPreview"
+                ref="preview-picture"
+                v-else-if="isPicturePreview"
+              />
+              <div
+                class="no-preview"
+                v-if="!taskPreviews || taskPreviews.length === 0"
+              >
+                <em>{{ $t('tasks.no_preview') }}</em>
+              </div>
             </div>
           </div>
 
@@ -136,6 +171,7 @@
                 :comment="comment"
                 :light="true"
                 :add-preview="onAddPreviewClicked"
+                @pin-comment="onPinComment"
                 v-for="comment in taskComments"
               />
             </div>
@@ -248,9 +284,11 @@ export default {
     return {
       addExtraPreviewFormData: null,
       attachedFileName: '',
+      currentPreviewIndex: 0,
       currentPreviewPath: '',
       currentPreviewDlPath: '',
       isSubscribed: false,
+      isWide: false,
       otherPreviews: [],
       taskComments: [],
       taskPreviews: [],
@@ -344,32 +382,40 @@ export default {
     },
 
     currentPreview () {
+      const index = this.currentPreviewIndex
       return this.taskPreviews &&
-        this.taskPreviews.length > 0 ? this.taskPreviews[0] : null
+        this.taskPreviews.length > 0 ? this.taskPreviews[index] : null
     },
 
     currentPreviewId () {
+      const index = this.currentPreviewIndex
       return this.taskPreviews &&
-        this.taskPreviews.length > 0 ? this.taskPreviews[0].id : null
+        this.taskPreviews.length > 0 ? this.taskPreviews[index].id : null
     },
 
     extension () {
+      const index = this.currentPreviewIndex
       return this.taskPreviews &&
-        this.taskPreviews.length > 0 ? this.taskPreviews[0].extension : ''
+        this.taskPreviews.length > 0 ? this.taskPreviews[index].extension : ''
     },
 
     isStandardPreview () {
       return this.taskPreviews && this.taskPreviews.length > 0 &&
-        ['pdf', 'ma', 'mb', 'rar', 'zip', 'blend'].includes(this.extension)
+        [
+          'ai',
+          'blend',
+          'ma',
+          'mb',
+          'pdf',
+          'psd',
+          'rar',
+          'zip'
+        ].includes(this.extension)
     },
 
     isMoviePreview () {
-      if (this.taskPreviews && this.taskPreviews.length > 0) {
-        let currentPreview = this.taskPreviews[0]
-        return currentPreview && currentPreview.extension === 'mp4'
-      } else {
-        return false
-      }
+      return this.taskPreviews &&
+       this.taskPreviews.length > 0 && this.extension === 'mp4'
     },
 
     isPicturePreview () {
@@ -384,9 +430,7 @@ export default {
 
     moviePath () {
       let previewId = null
-      if (!previewId && this.taskPreviews && this.taskPreviews.length > 0) {
-        previewId = this.taskPreviews[0].id
-      }
+      previewId = this.currentPreview.id
       return `/api/movies/originals/preview-files/${previewId}.mp4`
     },
 
@@ -407,6 +451,16 @@ export default {
     taskEntityPath () {
       const episodeId = this.$route.params.episode_id
       return getTaskEntityPath(this.task, episodeId)
+    },
+
+    lastFivePreviews () {
+      return this.taskPreviews.slice(0, 5)
+    },
+
+    panelStyle () {
+      return {
+        width: this.isWide ? 700 : 350
+      }
     }
   },
 
@@ -420,6 +474,7 @@ export default {
       'loadTaskComments',
       'loadTaskSubscribed',
       'refreshPreview',
+      'pinComment',
       'setPreview',
       'subscribeToTask',
       'unsubscribeFromTask',
@@ -524,12 +579,13 @@ export default {
     },
 
     createExtraPreview () {
+      const index = this.currentPreviewIndex
       this.errors.addExtraPreview = false
       this.loading.addExtraPreview = true
       this.addCommentExtraPreview({
         taskId: this.task.id,
         commentId: this.taskComments[0].id,
-        previewId: this.taskPreviews[0].id,
+        previewId: this.taskPreviews[index].id,
         callback: (err, preview) => {
           this.loading.addExtraPreview = false
           if (err) {
@@ -597,6 +653,12 @@ export default {
       this.modals.addExtraPreview = false
     },
 
+    onPreviewChanged (index) {
+      const preview = this.taskPreviews[index]
+      console.log(preview.revision)
+      this.currentPreviewIndex = index
+    },
+
     setCurrentPreviewAsEntityThumbnail () {
       this.setPreview({
         taskId: this.task.id,
@@ -616,12 +678,27 @@ export default {
           this.isSubscribed = true
         }
       }
+    },
+
+    toggleWidth () {
+      this.isWide = !this.isWide
+      const panel = this.$refs['side-panel']
+      if (this.isWide) {
+        panel.parentElement.style['min-width'] = '700px'
+      } else {
+        panel.parentElement.style['min-width'] = '350px'
+      }
+    },
+
+    onPinComment (comment) {
+      this.pinComment(comment)
     }
   },
 
   watch: {
     task () {
       this.attachedFileName = ''
+      this.currentIndex = 0
       this.loadTaskData()
     },
 
@@ -663,29 +740,38 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-.dark .add-comment,
-.dark .comment,
-.dark .preview-column-content,
-.dark .no-comment {
-  background: #46494F;
-  border-color: $dark-grey;
-  box-shadow: 0px 0px 6px #333;
-}
+.dark {
+  .add-comment,
+  .comment,
+  .preview-column-content,
+  .no-comment {
+    background: #46494F;
+    border-color: $dark-grey;
+    box-shadow: 0px 0px 6px #333;
+  }
 
-.dark .no-preview {
-  padding: 0.5em;
-}
+  .no-preview {
+    padding: 0.5em;
+  }
 
-.dark .preview-picture {
-  border: 1px solid $dark-grey;
-}
+  .preview-picture {
+    border: 1px solid $dark-grey;
+  }
 
-.dark .side {
-  background: #36393F;
-}
+  .side {
+    background: #36393F;
+  }
 
-.dark .task-info {
-  color: white;
+  .task-info {
+    color: white;
+  }
+
+  .preview-list span {
+    &:hover,
+    &.selected {
+      color: $dark-grey;
+    }
+  }
 }
 
 .side {
@@ -774,7 +860,30 @@ export default {
   padding: 0.3em;
 }
 
+.change-wideness-button,
 .set-thumbnail-button {
   margin-right: 0.2em;
+}
+
+.preview {
+  position: relative;
+}
+
+.preview-list {
+  span {
+    cursor: pointer;
+    padding: 0.2em;
+    margin: 0.2em;
+    text-align: center;
+    border-radius: 3px;
+
+    &:hover {
+      background: $light-green-light;
+    }
+
+    &.selected {
+      background: $purple;
+    }
+  }
 }
 </style>

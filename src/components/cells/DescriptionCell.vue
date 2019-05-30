@@ -54,7 +54,7 @@ export default {
         show: this.isOpen,
         trigger: 'manual',
         delay: {
-          hide: 5000
+          hide: 6000
         }
       }
     }
@@ -75,7 +75,7 @@ export default {
       if (this.isOpen) {
         this.timeout = setTimeout(() => {
           this.isOpen = false
-        }, 3000)
+        }, 6000)
       } else {
         clearTimeout(this.timeout)
       }

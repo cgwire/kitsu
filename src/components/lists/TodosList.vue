@@ -107,12 +107,17 @@
     :is-error="isError"
   />
 
-  <p
+  <div
     class="has-text-centered empty-list"
     v-if="entries.length === 0 && !isLoading"
   >
-    {{ $t('people.no_task_assigned') }}
-  </p>
+    <p>
+      <img src="../../assets/illustrations/empty_todo.png" />
+    </p>
+    <p>
+      {{ $t('people.no_task_assigned') }}
+    </p>
+  </div>
 
   <p
     class="has-text-centered footer-info"
@@ -431,5 +436,9 @@ td.last-comment {
   max-width: 60px;
   width: 60px;
   padding: 0;
+}
+
+.empty-list img {
+  max-width: 80vh;
 }
 </style>

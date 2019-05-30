@@ -239,6 +239,7 @@ export default {
 
     mountPicture () {
       if (!this.fabricCanvas) this.setupFabricCanvas()
+      this.container.style.height = this.getDefaultHeight() + 'px'
       this.loadAnnotation(0)
       this.$nextTick(this.fixCanvasSize)
     },
@@ -260,14 +261,12 @@ export default {
     },
 
     getDimensions () {
-      let ratio
+      let ratio = 1
       if (this.picture.naturalWidth) {
         ratio = this.picture.naturalHeight / this.picture.naturalWidth
-      } else {
       }
       let width = this.container.offsetWidth - 1
       let height = Math.floor(width * ratio)
-      console.log(ratio, width, height)
       if (height > this.getDefaultHeight()) {
         height = this.getDefaultHeight()
       }
@@ -601,6 +600,10 @@ export default {
 
     currentIndex () {
       this.reset()
+    },
+
+    light () {
+      this.onWindowResize()
     }
   }
 }

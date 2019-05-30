@@ -3,7 +3,11 @@ import async from 'async'
 import tasksApi from '../api/tasks'
 import peopleApi from '../api/people'
 import playlistsApi from '../api/playlists'
-import { sortByName, sortValidationColumns } from '../../lib/sorting'
+import {
+  sortComments,
+  sortByName,
+  sortValidationColumns
+} from '../../lib/sorting'
 import personStore from './people'
 import taskTypeStore from './tasktypes'
 
@@ -28,6 +32,7 @@ import {
   DELETE_TASK_END,
   EDIT_COMMENT_END,
   DELETE_COMMENT_END,
+  PIN_COMMENT,
 
   PREVIEW_FILE_SELECTED,
   ADD_PREVIEW_START,
@@ -351,14 +356,18 @@ const actions = {
     })
   },
 
-  changeSelectedTaskStatus ({ commit, state }, { taskStatusId, callback }) {
+  changeSelectedTaskStatus ({ commit, state }, {
+    taskStatusId,
+    comment,
+    callback
+  }) {
     async.eachSeries(Object.keys(state.selectedTasks), (taskId, next) => {
       const task = state.taskMap[taskId]
       if (task && task.task_status_id !== taskStatusId) {
         actions.commentTask({ commit, state }, {
           taskId: taskId,
           taskStatusId: taskStatusId,
-          comment: '',
+          comment: comment || '',
           callback: (err) => {
             next(err)
           }
@@ -685,6 +694,11 @@ const actions = {
         else resolve()
       })
     })
+  },
+
+  pinComment ({ commit }, comment) {
+    commit(PIN_COMMENT, comment)
+    tasksApi.pinComment(comment)
   }
 }
 
@@ -790,7 +804,7 @@ const mutations = {
         comment.person
       )
     })
-    state.taskComments[taskId] = comments
+    state.taskComments[taskId] = sortComments(comments)
     state.taskPreviews[taskId] = comments.reduce((previews, comment) => {
       if (comment.previews && comment.previews.length > 0) {
         const preview = comment.previews[0]
@@ -1119,6 +1133,13 @@ const mutations = {
     if (queryIndex >= 0) {
       state.taskSearchQueries.splice(queryIndex, 1)
     }
+  },
+
+  [PIN_COMMENT] (state, comment) {
+    comment.pinned = !comment.pinned
+    state.taskComments[comment.object_id] =
+      sortComments(state.taskComments[comment.object_id])
+    console.log(state.taskComments[comment.object_id])
   },
 
   [RESET_ALL] (state, shots) {

@@ -198,5 +198,21 @@ export default {
       { task_ids: selectedTaskIds },
       callback
     )
+  },
+
+  pinComment (comment) {
+    return new Promise((resolve, reject) => {
+      const data = {
+        pinned: comment.pinned
+      }
+      client.put(
+        `/api/data/comments/${comment.id}`,
+        data,
+        (err, comment) => {
+          if (err) reject(err)
+          else resolve(comment)
+        }
+      )
+    })
   }
 }

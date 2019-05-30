@@ -59,6 +59,10 @@ export default {
     no_file_attached: 'No file attached',
     post_status: 'Post comment',
     retake: 'Retake',
+    pin: 'Pin',
+    pinned: 'Pinned',
+    revision: 'revision',
+    unpin: 'Unpin',
     validated: 'Validated!',
     validation_required: 'Validation Required',
     set_status_to: 'Set status to',
@@ -522,6 +526,7 @@ export default {
     subscribe_notifications: 'Subscribe to notifications',
     validation: 'Validation',
     tasks: 'Tasks',
+    with_comment: 'With a comment...',
     fields: {
       asset_type: 'Asset type',
       assignees: 'Assignees',

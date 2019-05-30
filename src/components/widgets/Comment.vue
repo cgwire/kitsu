@@ -3,13 +3,13 @@
   :class="{
     media: true,
     comment: true,
+    pinned: comment.pinned,
     highlighted: highlighted
   }"
   :style="{
     'border-left': '6px solid ' + comment.task_status.color
   }"
 >
-
   <figure class="media-left">
     <people-avatar class="level-item" :person="comment.person" />
   </figure>
@@ -29,7 +29,7 @@
             class="revision"
             v-if="!light && comment.previews.length > 0"
           >
-            revision {{ comment.previews[0].revision }}
+            {{ $t('comments.revision') }} {{ comment.previews[0].revision }}
           </router-link>
         </div>
         <div class="flexrow-item" v-if="!light">
@@ -46,6 +46,18 @@
             v-if="editable"
           />
         </div>
+        <span class="filler"></span>
+        <div class="flexrow-item menu-wrapper" v-if="light">
+          <chevron-down-icon
+            class="menu-icon"
+            @click="showCommentMenu"
+          />
+          <comment-menu
+            :is-pinned="comment.pinned"
+            @pin-clicked="$emit('pin-comment', comment)"
+            ref="menu"
+          />
+        </div>
       </div>
       <div>
         <router-link
@@ -53,16 +65,18 @@
           class="revision"
           v-if="light && comment.previews.length > 0"
         >
-          revision {{ comment.previews[0].revision }}
+          {{ $t('comments.revision') }} {{ comment.previews[0].revision }}
         </router-link>
       </div>
 
       <p v-if="comment.task_status.name === 'Done'">
         <span :style="{'color': comment.task_status.color}">
-        {{ $t('comments.validated') }}
+          {{ $t('comments.validated') }}
         </span>
       </p>
-
+      <p v-if="comment.task_status.name === 'Done'">
+          <img src="../../assets/illustrations/validated.png" />
+      </p>
       <p
         v-html="renderComment(comment.text, comment.mentions, personMap)"
         class="comment-text"
@@ -71,6 +85,9 @@
       </p>
       <p class="comment-text empty word-break" v-else>
         {{ $t('comments.empty_text') }}
+      </p>
+      <p class="pinned-text" v-if="comment.pinned">
+        {{ $t('comments.pinned') }}
       </p>
     </div>
   </div>
@@ -82,16 +99,20 @@ import moment from 'moment-timezone'
 import { mapGetters } from 'vuex'
 import { renderComment } from '../../lib/helpers'
 
+import { ChevronDownIcon } from 'vue-feather-icons'
+import CommentMenu from './CommentMenu.vue'
+import ButtonLink from './ButtonLink.vue'
 import PeopleAvatar from './PeopleAvatar.vue'
 import PeopleName from './PeopleName.vue'
-import ButtonLink from './ButtonLink.vue'
 
 export default {
   name: 'comment',
   components: {
+    ButtonLink,
+    ChevronDownIcon,
+    CommentMenu,
     PeopleAvatar,
-    PeopleName,
-    ButtonLink
+    PeopleName
   },
 
   props: {
@@ -187,6 +208,10 @@ export default {
       return route
     },
 
+    showCommentMenu () {
+      this.$refs.menu.toggle()
+    },
+
     renderComment
   }
 }
@@ -242,6 +267,27 @@ a.revision:hover {
 .comment-text.empty {
   font-style: italic;
   color: #AAA;
+}
+
+.menu-icon {
+  width: 20px;
+  cursor: pointer;
+  color: $light-grey;
+}
+
+.menu-wrapper {
+  position: relative;
+}
+
+.pinned {
+  transform: scale(1.04)
+}
+
+.pinned-text {
+  font-size: 0.8em;
+  margin: 0;
+  text-align: right;
+  color: $light-grey;
 }
 
 @media screen and (max-width: 768px) {

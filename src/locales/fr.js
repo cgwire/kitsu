@@ -210,7 +210,11 @@ export default {
     no_file_attached: 'Aucun fichier attaché',
     post_status: 'Publier',
     retake: 'Reprise',
+    revision: 'révision',
+    pin: 'Épingler',
+    pinned: 'Épinglé',
     set_status_to: 'Positionner le statut à',
+    unpin: 'Désépingler',
     validated: 'Validé !',
     validation_required: 'Validation requise',
     fields: {
@@ -223,6 +227,7 @@ export default {
     add_preview_error: 'Une erreur est survenue en ajoutant la preview.',
     assign: 'Assigner une tâche à : | Assigner {nbSelectedTasks} tâches à :',
     back_to_list: 'Retour à la liste',
+    bigger: 'Make panel wider',
     change_status_to: 'Changer le statut de la tâche à : ',
     change_priority: 'Changer le priorité de la tâche à : ',
     change_preview: 'Modifier preview',
@@ -268,6 +273,7 @@ export default {
     show_infos: 'Montrer informations additionnelles',
     unsubscribe_notifications: 'Se désabonner des notifications',
     tasks: 'Tâches',
+    with_comment: 'Avec un commentaire...',
     validation: 'Validation',
     fields: {
       asset_type: 'Type d\'asset',
@@ -390,6 +396,7 @@ export default {
       episode: 'Ép.',
       name: 'Nom',
       production: 'Prod',
+      time_spent: 'Jours',
       type: 'Type'
     },
     delete_text: 'Etes vous sûr de vouloir retirer {name} de la base de données ?',

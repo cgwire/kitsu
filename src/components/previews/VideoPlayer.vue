@@ -416,7 +416,7 @@ export default {
       if (this.isFullScreen()) {
         return screen.height
       } else {
-        return screen.width > 1300 && (!this.light || this.readOnly) ? 700 : 200
+        return screen.width > 1300 && (!this.light || this.readOnly) ? 500 : 200
       }
     },
 
@@ -951,6 +951,8 @@ export default {
   watch: {
     preview () {
       this.maxDuration = '00:00.00'
+      this.fabricCanvas.isDrawingMode = false
+      this.isDrawing = false
       this.reloadAnnotations()
       if (this.isComparing) {
         this.isComparing = false
@@ -972,6 +974,10 @@ export default {
 
     taskTypeId () {
       this.setDefaultComparisonPreview()
+    },
+
+    light () {
+      this.onWindowResize()
     }
   }
 }
