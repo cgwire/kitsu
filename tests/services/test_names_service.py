@@ -8,6 +8,7 @@ class NamesServiceTestCase(ApiDBTestCase):
     def setUp(self):
         super(NamesServiceTestCase, self).setUp()
 
+        self.generate_fixture_organisation()
         self.generate_fixture_project_status()
         self.generate_fixture_project()
         self.generate_fixture_asset_type()

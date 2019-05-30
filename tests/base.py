@@ -22,6 +22,7 @@ from zou.app.models.file_status import FileStatus
 from zou.app.models.metadata_descriptor import MetadataDescriptor
 from zou.app.models.output_file import OutputFile
 from zou.app.models.output_type import OutputType
+from zou.app.models.organisation import Organisation
 from zou.app.models.project import Project
 from zou.app.models.project_status import ProjectStatus
 from zou.app.models.person import Person
@@ -788,6 +789,13 @@ class ApiDBTestCase(ApiTestCase):
             name="3dsMax",
             short_name="max",
             file_extension=".max"
+        )
+
+    def generate_fixture_organisation(self):
+        self.organisation = Organisation.create(
+            name="My Studio",
+            hours_by_day=8,
+            use_original_file_name=False
         )
 
     def generate_fixture_preview_file(self, revision=1):
