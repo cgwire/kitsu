@@ -41,23 +41,27 @@ def get_movie_size(movie_path):
     """
     image_path = generate_thumbnail(movie_path)
     im = Image.open(image_path)
+    size = im.size
     im.close()
-    return im.size
+    os.remove(image_path)
+    return size
 
 
-def normalize_movie(movie_path, fps="24.00"):
+def normalize_movie(movie_path, fps="24.00", width=None, height=1080):
     """
-    Turn movie in a 1080p movie file.
+    Turn movie in a 1080p movie file (or use resolution given in parameter).
     """
     folder_path = os.path.dirname(movie_path)
     file_source_name = os.path.basename(movie_path)
     file_target_name = "%s.mp4" % file_source_name[:-8]
     file_target_path = os.path.join(folder_path, file_target_name)
 
-    (width, h) = get_movie_size(movie_path)
-    resize_factor = width / h
-    height = 1080
-    width = math.floor(resize_factor * height)
+    (w, h) = get_movie_size(movie_path)
+    resize_factor = w / h
+
+    if width is None:
+        width = math.floor(resize_factor * height)
+
     if width % 2 == 1:
         width = width + 1
 
@@ -65,14 +69,14 @@ def normalize_movie(movie_path, fps="24.00"):
         ffmpeg \
             .input(movie_path) \
             .output(
-            file_target_path,
-            pix_fmt='yuv420p',
-            format="mp4",
-            r=fps,
-            b="28M",
-            preset="medium",
-            vcodec="libx264",
-            s="%sx%s" % (width, height)
+                file_target_path,
+                pix_fmt='yuv420p',
+                format="mp4",
+                r=fps,
+                b="28M",
+                preset="medium",
+                vcodec="libx264",
+                s="%sx%s" % (width, height)
             ) \
             .run(
                 quiet=False,
@@ -87,6 +91,9 @@ def normalize_movie(movie_path, fps="24.00"):
 
 
 def build_playlist_movie(tmp_file_paths, movie_file_path, fps="24.00"):
+    """
+    Build a single movie file from a playlist.
+    """
     in_files = []
     if len(tmp_file_paths) > 0:
         (first_movie_file_path, _) = tmp_file_paths[0]
@@ -94,21 +101,15 @@ def build_playlist_movie(tmp_file_paths, movie_file_path, fps="24.00"):
 
         for tmp_file_path, file_name in tmp_file_paths:
             in_file = ffmpeg.input(tmp_file_path)
-            in_files.append(in_file)
+            in_files.append(in_file['v'])
+            in_files.append(in_file['a'])
+        joined = ffmpeg.concat(*in_files, v=1, a=1).node
+        video = joined[0]
+        audio = joined[1]
 
         try:
             ffmpeg \
-                .concat(*in_files) \
-                .output(
-                    movie_file_path,
-                    pix_fmt='yuv420p',
-                    format="mp4",
-                    r=fps,
-                    b="28M",
-                    preset="medium",
-                    vcodec="libx264",
-                    s="%sx%s" % (width, height)
-                ) \
+                .output(audio, video, movie_file_path) \
                 .overwrite_output() \
                 .run()
         except Exception as e:

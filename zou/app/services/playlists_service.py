@@ -233,11 +233,7 @@ def build_playlist_movie_file(playlist):
     tmp_file_paths = retrieve_playlist_tmp_files(playlist)
     movie_file_path = get_playlist_movie_file_path(playlist)
     project = projects_service.get_project(playlist["project_id"])
-    fps = "24.00"
-    if project["fps"] is not None:
-        fps = "%.2f" % float(project["fps"].replace(",", "."))
-
-    movie_utils.build_playlist_movie(tmp_file_paths, movie_file_path, fps)
+    movie_utils.build_playlist_movie(tmp_file_paths, movie_file_path)
     return movie_file_path
 
 
