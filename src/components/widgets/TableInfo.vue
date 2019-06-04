@@ -1,6 +1,6 @@
 <template>
 <div>
-  <spinner class="table-info" v-if="isLoading"></spinner>
+  <spinner class="table-info" v-if="isLoading" />
   <div class="has-text-centered table-info" v-if="isError">
     <span class="tag is-danger">
       {{ $t('main.loading_error') }}

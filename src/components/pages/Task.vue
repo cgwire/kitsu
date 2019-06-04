@@ -85,6 +85,8 @@
                 :editable="comment.person && user.id === comment.person.id && index === 0"
                 :is-last="index === 0"
                 @pin-comment="onPinComment"
+                @edit-comment="onEditComment"
+                @delete-comment="onDeleteComment"
                 v-for="(comment, index) in currentTaskComments"
               />
             </div>
@@ -238,20 +240,21 @@
       :active="modals.editComment"
       :is-loading="loading.editComment"
       :is-error="errors.editComment"
-      :cancel-route="taskPath()"
       :comment-to-edit="commentToEdit"
       :team="currentTeam"
       @confirm="confirmEditTaskComment"
+      @cancel="onCancelEditComment"
     />
 
     <delete-modal
       :active="modals.deleteComment"
       :is-loading="loading.deleteComment"
       :is-error="errors.deleteComment"
-      :cancel-route="taskPath()"
       :text="$t('tasks.delete_comment')"
       :error-text="$t('tasks.delete_comment_error')"
       @confirm="confirmDeleteTaskComment"
+      @cancel="onCancelDeleteComment"
+    />
     />
 
     <delete-modal
@@ -977,14 +980,6 @@ export default {
         path.indexOf('delete') > 0 && path.indexOf('comments') < 0
       ) {
         this.modals.deleteTask = true
-      } else if (
-        path.indexOf('delete') > 0 && path.indexOf('comments') > 0
-      ) {
-        this.modals.deleteComment = true
-      } else if (
-        path.indexOf('edit') > 0 && path.indexOf('comments') > 0
-      ) {
-        this.modals.editComment = true
       }
     },
 
@@ -1132,7 +1127,7 @@ export default {
           if (err) {
             this.errors.editComment = true
           } else {
-            this.$router.push(this.taskPath())
+            this.modals.editComment = false
           }
         }
       })
@@ -1141,7 +1136,7 @@ export default {
     confirmDeleteTaskComment () {
       this.loading.deleteComment = true
       this.errors.deleteComment = false
-      const commentId = this.route.params.comment_id
+      const commentId = this.commentToEdit.id
 
       this.deleteTaskComment({
         taskId: this.currentTask.id,
@@ -1155,9 +1150,8 @@ export default {
             if (this.currentTaskPreviews &&
                 this.currentTaskPreviews.length > 0) {
               this.resetPreview(this.currentTaskPreviews[0])
-            } else {
-              this.$router.push(this.taskPath())
             }
+            this.modals.deleteComment = false
           }
         }
       })
@@ -1302,6 +1296,22 @@ export default {
 
     onPinComment (comment) {
       this.pinComment(comment)
+    },
+
+    onEditComment (comment) {
+      this.modals.editComment = true
+    },
+
+    onDeleteComment (comment) {
+      this.modals.deleteComment = true
+    },
+
+    onCancelEditComment (comment) {
+      this.modals.editComment = false
+    },
+
+    onCancelDeleteComment (comment) {
+      this.modals.deleteComment = false
     }
   },
 

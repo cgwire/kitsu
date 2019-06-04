@@ -32,20 +32,6 @@
             {{ $t('comments.revision') }} {{ comment.previews[0].revision }}
           </router-link>
         </div>
-        <div class="flexrow-item" v-if="!light">
-          <button-link
-            icon="edit"
-            class=""
-            :path="editCommentPath"
-            v-if="editable"
-          />
-          <button-link
-            icon="delete"
-            class=""
-            :path="deleteCommentPath"
-            v-if="editable"
-          />
-        </div>
         <span class="filler"></span>
         <div class="flexrow-item menu-wrapper">
           <chevron-down-icon
@@ -54,7 +40,10 @@
           />
           <comment-menu
             :is-pinned="comment.pinned"
+            :is-editable="editable"
             @pin-clicked="$emit('pin-comment', comment)"
+            @edit-clicked="$emit('edit-comment', comment)"
+            @delete-clicked="$emit('delete-comment', comment)"
             ref="menu"
           />
         </div>
