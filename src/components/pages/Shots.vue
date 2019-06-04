@@ -744,7 +744,6 @@ export default {
       }
     }
   }
-
 }
 </script>
 
@@ -784,5 +783,4 @@ export default {
 .main-column {
   border-right: 3px solid $light-grey;
 }
-
 </style>

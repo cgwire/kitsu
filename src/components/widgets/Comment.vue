@@ -47,7 +47,7 @@
           />
         </div>
         <span class="filler"></span>
-        <div class="flexrow-item menu-wrapper" v-if="light">
+        <div class="flexrow-item menu-wrapper">
           <chevron-down-icon
             class="menu-icon"
             @click="showCommentMenu"
@@ -74,8 +74,8 @@
           {{ $t('comments.validated') }}
         </span>
       </p>
-      <p v-if="comment.task_status.name === 'Done'">
-          <img src="../../assets/illustrations/validated.png" />
+      <p v-if="comment.task_status.name === 'Done' && isLast">
+        <img src="../../assets/illustrations/validated.png" />
       </p>
       <p
         v-html="renderComment(comment.text, comment.mentions, personMap)"
@@ -129,6 +129,10 @@ export default {
       default: false
     },
     light: {
+      type: Boolean,
+      default: false
+    },
+    isLast: {
       type: Boolean,
       default: false
     }
@@ -280,7 +284,7 @@ a.revision:hover {
 }
 
 .pinned {
-  transform: scale(1.04)
+  transform: scale(1.03)
 }
 
 .pinned-text {

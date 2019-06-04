@@ -171,8 +171,9 @@
                 :comment="comment"
                 :light="true"
                 :add-preview="onAddPreviewClicked"
+                :is-last="index === 0"
                 @pin-comment="onPinComment"
-                v-for="comment in taskComments"
+                v-for="(comment, index) in taskComments"
               />
             </div>
             <div class="no-comment" v-else-if="!loading.task">

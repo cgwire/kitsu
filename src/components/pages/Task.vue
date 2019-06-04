@@ -83,6 +83,8 @@
                 :key="comment.id"
                 :current-user="user"
                 :editable="comment.person && user.id === comment.person.id && index === 0"
+                :is-last="index === 0"
+                @pin-comment="onPinComment"
                 v-for="(comment, index) in currentTaskComments"
               />
             </div>
@@ -727,6 +729,7 @@ export default {
       'loadTaskComments',
       'loadTaskSubscribed',
       'refreshPreview',
+      'pinComment',
       'subscribeToTask',
       'setCurrentEpisode',
       'unsubscribeFromTask',
@@ -1295,6 +1298,10 @@ export default {
 
     closeAddPreviewModal () {
       this.modals.addPreview = false
+    },
+
+    onPinComment (comment) {
+      this.pinComment(comment)
     }
   },
 
