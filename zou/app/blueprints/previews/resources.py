@@ -1,4 +1,5 @@
 import os
+import re
 
 from flask import abort, request, current_app
 from flask import send_file as flask_send_file
@@ -220,22 +221,21 @@ class CreatePreviewFilePictureResource(Resource):
 
     def save_movie_preview(self, instance_id, uploaded_file):
         """
-        Get uploaded movie, normalize it (720p) then build thumbnails then save
+        Get uploaded movie, normalize it then build thumbnails then save
         everything in the file storage.
         """
         tmp_folder = current_app.config["TMP_DIR"]
-        fps = "24.00"
         uploaded_movie_path = movie_utils.save_file(
             tmp_folder,
             instance_id,
             uploaded_file
         )
-        project = files_service.get_project_from_preview_file(instance_id)
-        if project["fps"] is not None:
-            fps = "%.2f" % float(project["fps"].replace(",", "."))
 
+        project = files_service.get_project_from_preview_file(instance_id)
+        fps = self.get_fps(project)
+        (width, height) = self.get_dimensions(project)
         normalized_movie_path = movie_utils.normalize_movie(
-            uploaded_movie_path, fps=fps
+            uploaded_movie_path, fps=fps, width=int(width), height=int(height)
         )
         file_store.add_movie("previews", instance_id, normalized_movie_path)
         original_tmp_path = movie_utils.generate_thumbnail(
@@ -245,6 +245,21 @@ class CreatePreviewFilePictureResource(Resource):
         os.remove(uploaded_movie_path)
         os.remove(normalized_movie_path)
         return self.save_variants(original_tmp_path, instance_id)
+
+    def get_fps(self, project):
+        fps = "24.00"
+        if project["fps"] is not None:
+            fps = "%.2f" % float(project["fps"].replace(",", "."))
+        return fps
+
+    def get_dimensions(self, project):
+        resolution = project["resolution"]
+        height = 1080
+        width = None
+        if resolution is not None \
+           and bool(re.match(r"\d*x\d*", resolution)):
+            [width, height] = resolution.split("x")
+        return (width, height)
 
     def save_file_preview(self, instance_id, uploaded_file, extension):
         """

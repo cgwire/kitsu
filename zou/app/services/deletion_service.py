@@ -173,8 +173,13 @@ def remove_preview_file(preview_file):
     """
     task = Task.get(preview_file.task_id)
     entity = Entity.get(task.entity_id)
+    news = News.get_by(preview_file_id=preview_file.id)
+
     if entity.preview_file_id == preview_file.id:
         entity.update({"preview_file_id": None})
+
+    if news is not None:
+        news.update({"preview_file_id": None})
 
     if preview_file.extension == "png":
         clear_picture_files(preview_file.id)

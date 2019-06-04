@@ -41,11 +41,13 @@ def get_movie_size(movie_path):
     """
     image_path = generate_thumbnail(movie_path)
     im = Image.open(image_path)
+    size = im.size
     im.close()
-    return im.size
+    os.remove(image_path)
+    return size
 
 
-def normalize_movie(movie_path, fps="24.00"):
+def normalize_movie(movie_path, fps="24.00", width=None, height=1080):
     """
     Turn movie in a 1080p movie file.
     """
@@ -54,10 +56,12 @@ def normalize_movie(movie_path, fps="24.00"):
     file_target_name = "%s.mp4" % file_source_name[:-8]
     file_target_path = os.path.join(folder_path, file_target_name)
 
-    (width, h) = get_movie_size(movie_path)
-    resize_factor = width / h
-    height = 1080
-    width = math.floor(resize_factor * height)
+    (w, h) = get_movie_size(movie_path)
+    resize_factor = w / h
+
+    if width is None:
+        width = math.floor(resize_factor * height)
+
     if width % 2 == 1:
         width = width + 1
 
