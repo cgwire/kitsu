@@ -1,7 +1,6 @@
 <template>
 <article
   :class="{
-    media: true,
     comment: true,
     pinned: comment.pinned,
     highlighted: highlighted
@@ -10,6 +9,7 @@
     'border-left': '6px solid ' + comment.task_status.color
   }"
 >
+  <div class="media">
   <figure class="media-left">
     <people-avatar class="level-item" :person="comment.person" />
   </figure>
@@ -32,29 +32,18 @@
             {{ $t('comments.revision') }} {{ comment.previews[0].revision }}
           </router-link>
         </div>
-        <div class="flexrow-item" v-if="!light">
-          <button-link
-            icon="edit"
-            class=""
-            :path="editCommentPath"
-            v-if="editable"
-          />
-          <button-link
-            icon="delete"
-            class=""
-            :path="deleteCommentPath"
-            v-if="editable"
-          />
-        </div>
         <span class="filler"></span>
-        <div class="flexrow-item menu-wrapper" v-if="light">
+        <div class="flexrow-item menu-wrapper">
           <chevron-down-icon
             class="menu-icon"
-            @click="showCommentMenu"
+            @click="toggleCommentMenu"
           />
           <comment-menu
             :is-pinned="comment.pinned"
+            :is-editable="editable"
             @pin-clicked="$emit('pin-comment', comment)"
+            @edit-clicked="$emit('edit-comment', comment); toggleCommentMenu()"
+            @delete-clicked="$emit('delete-comment', comment); toggleCommentMenu()"
             ref="menu"
           />
         </div>
@@ -74,8 +63,8 @@
           {{ $t('comments.validated') }}
         </span>
       </p>
-      <p v-if="comment.task_status.name === 'Done'">
-          <img src="../../assets/illustrations/validated.png" />
+      <p v-if="taskStatus.is_done && isLast">
+        <img src="../../assets/illustrations/validated.png" />
       </p>
       <p
         v-html="renderComment(comment.text, comment.mentions, personMap)"
@@ -86,10 +75,51 @@
       <p class="comment-text empty word-break" v-else>
         {{ $t('comments.empty_text') }}
       </p>
+      <div
+        v-if="checklist.length > 0"
+      >
+        <div
+          :class="{
+            'checklist-entry': true,
+            flexrow: true,
+            checked: entry.checked
+          }"
+          :key="'comment-checklist-' + comment.id + '-' + index"
+          v-for="(entry, index) in checklist"
+        >
+          <span
+            class="flexrow-item"
+            @click="toggleEntryChecked(entry)"
+          >
+            <check-square-icon class="icon" v-if="entry.checked" />
+            <square-icon class="icon" v-else />
+          </span>
+          <input
+            type="text"
+            class="flexrow-item"
+            :ref="`checklist-entry-${index}`"
+            @keyup.enter="addChecklistEntry(index)"
+            @keyup.backspace="removeChecklistEntry(index)"
+            @keyup.up="focusPrevious(index)"
+            @keyup.down="focusNext(index)"
+            @keyup="emitChangeEvent"
+            v-model="entry.text"
+          />
+        </div>
+      </div>
+
       <p class="pinned-text" v-if="comment.pinned">
         {{ $t('comments.pinned') }}
       </p>
     </div>
+  </div>
+  </div>
+  <div
+    class="has-text-centered add-checklist"
+    @click="addChecklistEntry(-1)"
+    v-if="taskStatus.is_retake && checklist.length === 0"
+  >
+    {{ $t('comments.add_checklist') }}
   </div>
 </article>
 </template>
@@ -97,9 +127,13 @@
 <script>
 import moment from 'moment-timezone'
 import { mapGetters } from 'vuex'
-import { renderComment } from '../../lib/helpers'
+import { renderComment, remove } from '../../lib/helpers'
 
-import { ChevronDownIcon } from 'vue-feather-icons'
+import {
+  CheckSquareIcon,
+  ChevronDownIcon,
+  SquareIcon
+} from 'vue-feather-icons'
 import CommentMenu from './CommentMenu.vue'
 import ButtonLink from './ButtonLink.vue'
 import PeopleAvatar from './PeopleAvatar.vue'
@@ -109,10 +143,18 @@ export default {
   name: 'comment',
   components: {
     ButtonLink,
+    CheckSquareIcon,
     ChevronDownIcon,
     CommentMenu,
     PeopleAvatar,
-    PeopleName
+    PeopleName,
+    SquareIcon
+  },
+
+  data () {
+    return {
+      checklist: []
+    }
   },
 
   props: {
@@ -131,7 +173,15 @@ export default {
     light: {
       type: Boolean,
       default: false
+    },
+    isLast: {
+      type: Boolean,
+      default: false
     }
+  },
+
+  mounted () {
+    if (this.comment.checklist) this.checklist = [...this.comment.checklist]
   },
 
   computed: {
@@ -139,7 +189,8 @@ export default {
       'currentProduction',
       'personMap',
       'taskMap',
-      'taskTypeMap'
+      'taskTypeMap',
+      'taskStatusMap'
     ]),
 
     previewRoute () {
@@ -180,6 +231,11 @@ export default {
 
     addPreviewPath () {
       return this.getPath('task-add-preview')
+    },
+
+    taskStatus () {
+      const status = this.taskStatusMap[this.comment.task_status.id]
+      return status || this.comment.task_status
     }
   },
 
@@ -208,11 +264,70 @@ export default {
       return route
     },
 
-    showCommentMenu () {
+    toggleCommentMenu () {
       this.$refs.menu.toggle()
     },
 
+    addChecklistEntry (index) {
+      if (index === -1 || index === this.checklist.length - 1) {
+        this.checklist.push({
+          text: '',
+          checked: false
+        })
+      }
+
+      this.$nextTick(() => {
+        this.focusNext(index)
+      })
+    },
+
+    removeChecklistEntry (index) {
+      const entry = this.checklist[index]
+      if (entry.text.length === 0) {
+        this.checklist = remove(this.checklist, entry)
+        this.focusPrevious(index)
+      }
+    },
+
+    toggleEntryChecked (entry) {
+      entry.checked = !entry.checked
+      this.emitChangeEvent()
+    },
+
+    focusPrevious (index) {
+      if (this.checklist.length > 0) {
+        if (index === 0) index = this.checklist.length
+        index--
+        const entryRef = `checklist-entry-${index}`
+        this.$refs[entryRef][0].focus()
+      }
+    },
+
+    focusNext (index) {
+      if (this.checklist.length > 0) {
+        if (index === this.checklist.length - 1) index = -1
+        index++
+        const entryRef = `checklist-entry-${index}`
+        this.$refs[entryRef][0].focus()
+      }
+    },
+
+    emitChangeEvent () {
+      const now = (new Date().getTime())
+      this.lastCall = this.lastCall || 0
+      if (now - this.lastCall > 1000) {
+        this.lastCall = now
+        this.$emit('checklist-updated', this.comment, this.checklist)
+      }
+    },
+
     renderComment
+  },
+
+  watch: {
+    checklist () {
+      this.emitChangeEvent()
+    }
   }
 }
 </script>
@@ -226,9 +341,13 @@ export default {
   background: white;
   border-left: 6px solid $light-grey;
   border-radius: 0 5px 5px 0;
-  padding: 0.6em;
+  padding: 0;
   word-wrap: anywhere;
   hyphens: auto;
+}
+
+.media {
+  padding: 0.6em;
 }
 
 .comment:first-child {
@@ -280,7 +399,7 @@ a.revision:hover {
 }
 
 .pinned {
-  transform: scale(1.04)
+  transform: scale(1.03)
 }
 
 .pinned-text {
@@ -288,6 +407,69 @@ a.revision:hover {
   margin: 0;
   text-align: right;
   color: $light-grey;
+}
+
+.add-checklist {
+  background: $white-grey-light;
+  color: $grey;
+  text-transform: uppercase;
+  cursor: pointer;
+  font-size: 0.8em;
+  padding: 0.5em;
+}
+
+.dark {
+  .add-checklist {
+    background: $dark-grey-lighter;
+  }
+
+  .checklist-entry {
+
+    input {
+      color: $light-grey-light;
+      background: transparent;
+
+      &:active,
+      &:focus,
+      &:hover {
+        background: $dark-grey;
+        border: 1px solid $dark-grey-strong;
+      }
+    }
+  }
+}
+
+.checklist-entry {
+  color: $grey;
+
+  input {
+    font-size: 0.9em;
+    padding: 0.2em;
+    margin-right: 0.5em;
+    width: 100%;
+    border: 1px solid transparent;
+
+    &:focus,
+    &:active,
+    &:hover {
+      border: 1px solid $light-grey;
+    }
+  }
+
+  &.checked input {
+    text-decoration: line-through;
+  }
+
+  span {
+    cursor: pointer;
+    padding: 0.2em 0 0 0;
+    margin-right: 0.2em;
+    margin-left: 0;
+
+    .icon {
+      width: 20px;
+    }
+  }
 }
 
 @media screen and (max-width: 768px) {

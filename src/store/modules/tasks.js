@@ -58,6 +58,8 @@ import {
   SAVE_TASK_SEARCH_END,
   REMOVE_TASK_SEARCH_END,
 
+  UPDATE_COMMENT_CHECKLIST,
+
   RESET_ALL
 } from '../mutation-types'
 
@@ -444,7 +446,10 @@ const actions = {
     })
   },
 
-  editTaskComment ({ commit }, { taskId, comment, callback }) {
+  editTaskComment ({ commit }, { taskId, comment, checklist, callback }) {
+    if (checklist) {
+      commit(UPDATE_COMMENT_CHECKLIST, { taskId, comment, checklist })
+    }
     tasksApi.editTaskComment(comment, (err, comment) => {
       if (!err) {
         commit(EDIT_COMMENT_END, { taskId, comment })
@@ -854,7 +859,7 @@ const mutations = {
     if (!state.taskComments[taskId].find((cmt) => cmt.id === comment.id)) {
       state.taskComments[taskId].unshift(comment)
     }
-
+    state.taskComments[taskId] = sortComments(state.taskComments[taskId])
     if (task) {
       Object.assign(task, {
         task_status_id: comment.task_status_id,
@@ -876,25 +881,46 @@ const mutations = {
     todoStatus
   }) {
     const task = state.taskMap[taskId]
-    let newStatus = todoStatus
-    state.taskComments[taskId] = [...state.taskComments[taskId]].splice(1)
-    state.taskPreviews[taskId] = [...state.taskPreviews[taskId]].splice(1)
+    let comments = state.taskComments[taskId]
+    const oldCommentIndex = comments.findIndex(c => c.id === commentId)
+    const oldComment = comments.find(c => c.id === commentId)
+    const pinnedCount = comments.filter(c => c.pinned).length
 
-    if (state.taskComments[taskId].length > 0) {
-      const newStatusId = state.taskComments[taskId][0].task_status_id
-      newStatus = taskStatusMap[newStatusId]
-    }
+    comments = comments.filter(
+      c => c.id !== commentId
+    )
+    state.taskComments[taskId] = comments
+    state.taskPreviews[taskId] = [...state.taskPreviews[taskId]].filter(
+      p => !(
+        oldComment.previews.length > 0 &&
+        oldComment.previews[0].id === p.id
+      )
+    )
 
-    if (task) {
-      Object.assign(task, {
-        task_status_id: newStatus.id,
-        task_status_priority: newStatus.priority
-      })
+    if (oldCommentIndex === pinnedCount) {
+      let newStatus = todoStatus
+      if (comments.length > 0) {
+        let newStatusId = comments[0].task_status_id
+        if (pinnedCount < comments.length) {
+          newStatusId = comments[pinnedCount].task_status_id
+        }
+        newStatus = taskStatusMap[newStatusId]
+      }
+
+      if (task) {
+        Object.assign(task, {
+          task_status_id: newStatus.id,
+          task_status_priority: newStatus.priority
+        })
+      }
     }
   },
 
   [EDIT_COMMENT_END] (state, { taskId, comment }) {
-    state.taskComments[taskId][0].text = comment.text
+    const oldComment = state.taskComments[taskId].find(
+      c => c.id === comment.id
+    )
+    oldComment.text = comment.text
   },
 
   [PREVIEW_FILE_SELECTED] (state, formData) {
@@ -1139,7 +1165,10 @@ const mutations = {
     comment.pinned = !comment.pinned
     state.taskComments[comment.object_id] =
       sortComments(state.taskComments[comment.object_id])
-    console.log(state.taskComments[comment.object_id])
+  },
+
+  [UPDATE_COMMENT_CHECKLIST] (state, { comment, checklist }) {
+    comment.checklist = checklist
   },
 
   [RESET_ALL] (state, shots) {

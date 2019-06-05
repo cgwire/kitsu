@@ -8,6 +8,19 @@
       </span>
       <span v-else>{{ $t('comments.pin') }}</span>
     </div>
+    <div
+      @click="$emit('edit-clicked')"
+      v-if="isEditable"
+    >
+      {{ $t('main.edit')}}
+    </div>
+    <div
+      class="error"
+      @click="$emit('delete-clicked')"
+      v-if="isEditable"
+    >
+      {{ $t('main.delete')}}
+    </div>
   </div>
 </template>
 
@@ -25,6 +38,10 @@ export default {
     isCurrentUserAdmin: {
       type: Boolean,
       default: false
+    },
+    isEditable: {
+      type: Boolean,
+      default: true
     }
   },
 
@@ -63,6 +80,7 @@ export default {
 .dark .comment-menu {
   background-color: $dark-grey-light;
   box-shadow: 0px 2px 6px $dark-grey-light;
+  color: $light-grey-light;
 }
 
 .comment-menu {

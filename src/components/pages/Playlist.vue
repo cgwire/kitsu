@@ -456,16 +456,14 @@ export default {
     },
 
     removeShot (shot) {
-      if (shot.preview_file_id) {
-        this.removeShotPreviewFromPlaylist({
-          playlist: this.currentPlaylist,
-          shot,
-          callback: () => {
-            delete this.currentShots[shot.id]
-            this.currentShots = { ...this.currentShots }
-          }
-        })
-      }
+      this.removeShotPreviewFromPlaylist({
+        playlist: this.currentPlaylist,
+        shot,
+        callback: () => {
+          delete this.currentShots[shot.id]
+          this.currentShots = { ...this.currentShots }
+        }
+      })
     },
 
     onPreviewChanged (shot, previewFileId) {

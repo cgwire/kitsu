@@ -312,4 +312,8 @@ td.name {
 th.actions {
   padding: 0.4em;
 }
+
+.info img {
+  max-width: 80vh;
+}
 </style>

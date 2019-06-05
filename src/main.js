@@ -68,3 +68,5 @@ document.addEventListener('keyup', (evt) => {
     store.commit('CLEAR_SELECTED_TASKS')
   }
 })
+
+Vue.config.keyCodes.backspace = 8

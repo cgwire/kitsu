@@ -53,11 +53,12 @@
           @click="runConfirmation">
           {{ $t("main.confirmation") }}
         </a>
-        <router-link
-          :to="cancelRoute"
-          class="button is-link">
+        <button
+          class="button is-link"
+          @click="$emit('cancel')"
+        >
           {{ $t("main.cancel") }}
-        </router-link>
+        </button>
       </p>
 
       <p class="error has-text-right info-message" v-if="isError">
@@ -154,6 +155,7 @@ export default {
 
 textarea {
   min-height: 8em;
+  padding: 0.5em;
 }
 
 .modal-content {

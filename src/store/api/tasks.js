@@ -68,7 +68,8 @@ export default {
 
   editTaskComment (comment, callback) {
     const commentData = {
-      text: comment.text
+      text: comment.text,
+      checklist: comment.checklist
     }
     client.put(`/api/data/comments/${comment.id}`, commentData, callback)
   },
