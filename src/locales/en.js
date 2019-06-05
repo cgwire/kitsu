@@ -51,6 +51,7 @@ export default {
 
   comments: {
     add_comment: 'Add a comment...',
+    add_checklist: 'Add checklist',
     add_preview: 'Attach preview',
     change_preview: 'Change preview',
     empty_text: 'This comment is empty',
@@ -477,6 +478,7 @@ export default {
     add_preview_error: 'An error occured while adding preview.',
     assign: 'Assign one task to: | Assign {nbSelectedTasks} tasks to:',
     back_to_list: 'back to list',
+    bigger: 'Widen task panel',
     change_status_to: 'Change task status to:',
     change_preview: 'Change preview',
     change_priority: 'Change priority to:',

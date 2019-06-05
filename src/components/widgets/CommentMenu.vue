@@ -80,6 +80,7 @@ export default {
 .dark .comment-menu {
   background-color: $dark-grey-light;
   box-shadow: 0px 2px 6px $dark-grey-light;
+  color: $light-grey-light;
 }
 
 .comment-menu {

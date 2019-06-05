@@ -82,11 +82,12 @@
                 :highlighted="isHighlighted(comment)"
                 :key="comment.id"
                 :current-user="user"
-                :editable="comment.person && user.id === comment.person.id && index === 0"
-                :is-last="index === 0"
+                :editable="comment.person && user.id === comment.person.id"
+                :is-last="index === pinnedCount"
                 @pin-comment="onPinComment"
                 @edit-comment="onEditComment"
                 @delete-comment="onDeleteComment"
+                @checklist-updated="saveComment"
                 v-for="(comment, index) in currentTaskComments"
               />
             </div>
@@ -255,7 +256,6 @@
       @confirm="confirmDeleteTaskComment"
       @cancel="onCancelDeleteComment"
     />
-    />
 
     <delete-modal
       :active="modals.deleteExtraPreview"
@@ -364,6 +364,7 @@ export default {
       currentTask: null,
       currentTaskComments: [],
       currentTaskPreviews: [],
+      commentToEdit: null,
       otherPreviews: [],
       addPreviewFormData: null,
       addExtraPreviewFormData: null,
@@ -429,14 +430,6 @@ export default {
 
     deleteTaskPath () {
       return this.taskPath(this.currentTask, 'task-delete')
-    },
-
-    commentToEdit () {
-      let commentToEdit = {}
-      if (this.currentTask && this.currentTaskComments && this.currentTaskComments.length > 0) {
-        commentToEdit = this.currentTaskComments[0]
-      }
-      return commentToEdit
     },
 
     isPreviews () {
@@ -709,6 +702,10 @@ export default {
 
     currentTeam () {
       return this.currentProduction.team.map(id => this.personMap[id])
+    },
+
+    pinnedCount () {
+      return this.currentTaskComments.filter(c => c.pinned).length
     }
   },
 
@@ -1133,6 +1130,14 @@ export default {
       })
     },
 
+    saveComment (comment, checklist) {
+      this.editTaskComment({
+        taskId: this.currentTask.id,
+        comment,
+        checklist
+      })
+    },
+
     confirmDeleteTaskComment () {
       this.loading.deleteComment = true
       this.errors.deleteComment = false
@@ -1299,10 +1304,12 @@ export default {
     },
 
     onEditComment (comment) {
+      this.commentToEdit = comment
       this.modals.editComment = true
     },
 
     onDeleteComment (comment) {
+      this.commentToEdit = comment
       this.modals.deleteComment = true
     },
 

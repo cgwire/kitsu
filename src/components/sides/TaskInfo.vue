@@ -171,8 +171,12 @@
                 :comment="comment"
                 :light="true"
                 :add-preview="onAddPreviewClicked"
-                :is-last="index === 0"
+                :is-last="index === pinnedCount"
+                :editable="comment.person && user.id === comment.person.id"
                 @pin-comment="onPinComment"
+                @edit-comment="onEditComment"
+                @delete-comment="onDeleteComment"
+                @checklist-updated="saveComment"
                 v-for="(comment, index) in taskComments"
               />
             </div>
@@ -211,6 +215,26 @@
       @fileselected="selectFile"
       @confirm="createExtraPreview"
     />
+
+    <edit-comment-modal
+      :active="modals.editComment"
+      :is-loading="loading.editComment"
+      :is-error="errors.editComment"
+      :comment-to-edit="commentToEdit"
+      :team="currentTeam"
+      @confirm="confirmEditTaskComment"
+      @cancel="onCancelEditComment"
+    />
+
+    <delete-modal
+      :active="modals.deleteComment"
+      :is-loading="loading.deleteComment"
+      :is-error="errors.deleteComment"
+      :text="$t('tasks.delete_comment')"
+      :error-text="$t('tasks.delete_comment_error')"
+      @confirm="confirmDeleteTaskComment"
+      @cancel="onCancelDeleteComment"
+    />
   </div>
 
   <div class="side task-info has-text-centered" v-else>
@@ -236,6 +260,8 @@ import AddPreviewModal from '../modals/AddPreviewModal'
 import ButtonLink from '../widgets/ButtonLink'
 import ButtonSimple from '../widgets/ButtonSimple'
 import Comment from '../widgets/Comment'
+import DeleteModal from '../widgets/DeleteModal'
+import EditCommentModal from '../modals/EditCommentModal'
 import ModelViewer from '../previews/ModelViewer'
 import PeopleName from '../widgets/PeopleName'
 import PictureViewer from '../previews/PictureViewer'
@@ -255,6 +281,8 @@ export default {
     Comment,
     ChevronLeftIcon,
     DownloadIcon,
+    DeleteModal,
+    EditCommentModal,
     ImageIcon,
     ModelViewer,
     PeopleName,
@@ -288,6 +316,7 @@ export default {
       currentPreviewIndex: 0,
       currentPreviewPath: '',
       currentPreviewDlPath: '',
+      commentToEdit: null,
       isSubscribed: false,
       isWide: false,
       otherPreviews: [],
@@ -297,17 +326,23 @@ export default {
         addComment: false,
         addPreview: false,
         addExtraPreview: false,
+        editComment: false,
+        deleteComment: false,
         task: false
       },
       loading: {
         addComment: false,
         addPreview: false,
         addExtraPreview: false,
+        editComment: false,
+        deleteComment: false,
         task: false
       },
       modals: {
         addPreview: false,
-        addExtraPreview: false
+        addExtraPreview: false,
+        editComment: false,
+        deleteComment: false
       }
     }
   },
@@ -462,6 +497,10 @@ export default {
       return {
         width: this.isWide ? 700 : 350
       }
+    },
+
+    pinnedCount () {
+      return this.taskComments.filter(c => c.pinned).length
     }
   },
 
@@ -470,6 +509,8 @@ export default {
       'addCommentExtraPreview',
       'commentTask',
       'commentTaskWithPreview',
+      'deleteTaskComment',
+      'editTaskComment',
       'loadPreviewFileFormData',
       'loadTask',
       'loadTaskComments',
@@ -693,6 +734,69 @@ export default {
 
     onPinComment (comment) {
       this.pinComment(comment)
+    },
+
+    onEditComment (comment) {
+      this.commentToEdit = comment
+      this.modals.editComment = true
+    },
+
+    onDeleteComment (comment) {
+      this.commentToEdit = comment
+      this.modals.deleteComment = true
+    },
+
+    onCancelEditComment (comment) {
+      this.modals.editComment = false
+    },
+
+    onCancelDeleteComment (comment) {
+      this.modals.deleteComment = false
+    },
+
+    saveComment (comment, checklist) {
+      this.editTaskComment({
+        taskId: this.task.id,
+        comment,
+        checklist
+      })
+    },
+
+    confirmDeleteTaskComment () {
+      this.loading.deleteComment = true
+      this.errors.deleteComment = false
+      const commentId = this.commentToEdit.id
+
+      this.deleteTaskComment({
+        taskId: this.task.id,
+        commentId,
+        callback: (err) => {
+          this.loading.deleteComment = false
+          if (err) {
+            this.errors.deleteComment = true
+          } else {
+            this.reset()
+            this.modals.deleteComment = false
+          }
+        }
+      })
+    },
+
+    confirmEditTaskComment (comment) {
+      this.loading.editComment = true
+      this.errors.editComment = false
+      this.editTaskComment({
+        taskId: this.task.id,
+        comment,
+        callback: (err) => {
+          this.loading.editComment = false
+          if (err) {
+            this.errors.editComment = true
+          } else {
+            this.modals.editComment = false
+          }
+        }
+      })
     }
   },
 

@@ -203,6 +203,7 @@ export default {
   },
 
   comments: {
+    add_checklist: 'Ajout checklist',
     add_comment: 'Ajouter un commentaire...',
     add_preview: 'Attacher un fichier',
     edit_title: 'Modifier le commentaire',
@@ -227,7 +228,7 @@ export default {
     add_preview_error: 'Une erreur est survenue en ajoutant la preview.',
     assign: 'Assigner une tâche à : | Assigner {nbSelectedTasks} tâches à :',
     back_to_list: 'Retour à la liste',
-    bigger: 'Make panel wider',
+    bigger: 'Élargir le panneau de tâche',
     change_status_to: 'Changer le statut de la tâche à : ',
     change_priority: 'Changer le priorité de la tâche à : ',
     change_preview: 'Modifier preview',
