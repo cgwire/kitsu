@@ -33,7 +33,7 @@ def init():
             db=redis_db,
             decode_responses=True
         )
-        publisher_store.get(None)
+        publisher_store.get("test")
         socketio = SocketIO(message_queue=redis_url)
     except redis.ConnectionError:
         pass

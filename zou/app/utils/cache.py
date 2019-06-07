@@ -19,7 +19,7 @@ try:
         db=config.MEMOIZE_DB_INDEX,
         decode_responses=True
     )
-    redis_cache.get(None)
+    redis_cache.get('test')
     cache = Cache(config={
         "CACHE_TYPE": "redis",
         "CACHE_REDIS_HOST": config.KEY_VALUE_STORE["host"],

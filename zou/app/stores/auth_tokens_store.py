@@ -11,7 +11,7 @@ try:
         db=config.AUTH_TOKEN_BLACKLIST_KV_INDEX,
         decode_responses=True
     )
-    revoked_tokens_store.get(None)
+    revoked_tokens_store.get('test')
 except redis.ConnectionError:
     try:
         import fakeredis

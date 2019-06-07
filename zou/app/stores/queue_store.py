@@ -13,7 +13,7 @@ try:
             db=config.KV_JOB_DB_INDEX,
             decode_responses=True
         )
-        queue_store.get(None)
+        queue_store.get("test")
 except redis.ConnectionError:
     try:
         import fakeredis
