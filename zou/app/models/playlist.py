@@ -1,5 +1,6 @@
 from sqlalchemy_utils import UUIDType
 from sqlalchemy.dialects.postgresql import JSONB
+from sqlalchemy.orm import relationship
 
 from zou.app import db
 from zou.app.models.serializer import SerializerMixin
@@ -14,14 +15,16 @@ class Playlist(db.Model, BaseMixin, SerializerMixin):
     name = db.Column(db.String(80), nullable=False)
     shots = db.Column(JSONB)
 
-    project_id = db.Column(UUIDType(binary=False), db.ForeignKey('project.id'))
-    episode_id = db.Column(UUIDType(binary=False), db.ForeignKey('entity.id'))
+    project_id = db.Column(UUIDType(binary=False), db.ForeignKey("project.id"))
+    episode_id = db.Column(UUIDType(binary=False), db.ForeignKey("entity.id"))
+
+    build_jobs = relationship("BuildJob")
 
     __table_args__ = (
         db.UniqueConstraint(
-            'name',
-            'project_id',
-            'episode_id',
-            name='playlist_uc'
+            "name",
+            "project_id",
+            "episode_id",
+            name="playlist_uc"
         ),
     )

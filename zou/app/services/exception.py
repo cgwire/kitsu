@@ -85,6 +85,10 @@ class EntityTypeNotFoundException(NotFound):
     pass
 
 
+class BuildJobNotFoundException(NotFound):
+    pass
+
+
 class PlaylistNotFoundException(NotFound):
     pass
 
