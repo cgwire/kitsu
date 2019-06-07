@@ -46,6 +46,7 @@
         <playlist-player
           :playlist="currentPlaylist"
           :shots="currentShots"
+          :is-loading="loading.playlist"
           @preview-changed="onPreviewChanged"
           @playlist-deleted="goFirstPlaylist"
           @remove-shot="removeShot"
@@ -151,6 +152,7 @@
 import { mapGetters, mapActions } from 'vuex'
 import moment from 'moment-timezone'
 import { PlusIcon } from 'vue-feather-icons'
+import { updateModelFromList, removeModelFromList } from '../../lib/helpers'
 
 import ButtonLink from '../widgets/ButtonLink'
 import Combobox from '../widgets/Combobox'
@@ -187,6 +189,7 @@ export default {
         isEditDisplayed: false
       },
       loading: {
+        playlist: false,
         playlists: false,
         addPlaylist: false,
         addSequence: false,
@@ -220,6 +223,7 @@ export default {
 
   methods: {
     ...mapActions([
+      'addNewBuildJob',
       'addShotPreviewToPlaylist',
       'changePlaylistOrder',
       'changePlaylistPreview',
@@ -228,9 +232,11 @@ export default {
       'loadPlaylists',
       'loadShotPreviewFiles',
       'loadShots',
+      'markBuildJobAsDone',
       'newPlaylist',
       'refreshPlaylist',
       'removeShotPreviewFromPlaylist',
+      'removeBuildJobFromList',
       'updatePreviewAnnotation'
     ]),
 
@@ -276,11 +282,12 @@ export default {
 
     rebuildCurrentShots () {
       this.currentShots = {}
+      const tmpShots = {}
       if (this.currentPlaylist && this.currentPlaylist.shots) {
         this.currentPlaylist.shots.forEach((shotPreview) => {
           const shot = this.shotMap[shotPreview.shot_id]
           if (shot) {
-            this.currentShots[shotPreview.shot_id] = {
+            tmpShots[shotPreview.shot_id] = {
               id: shotPreview.shot_id,
               name: shot.name,
               sequence_name: shot.sequence_name,
@@ -294,6 +301,7 @@ export default {
           }
         })
       }
+      this.currentShots = tmpShots
     },
 
     clearCurrentPlaylist () {
@@ -331,10 +339,12 @@ export default {
     setCurrentPlaylist (callback) {
       const playlistId = this.$route.params.playlist_id
       const playlist = this.playlistMap[playlistId]
+      this.loading.playlist = true
       if (playlist) {
         this.loadPlaylist({
           playlist,
           callback: (err, playlist) => {
+            this.loading.playlist = false
             if (err) console.log(err)
             this.currentPlaylist = playlist
             this.rebuildCurrentShots()
@@ -566,6 +576,35 @@ export default {
         this.$store.commit('DELETE_PLAYLIST_END', {
           id: eventData.playlist_id
         })
+      },
+
+      'build-job:new' (eventData) {
+        if (eventData.playlist_id === this.currentPlaylist.id) {
+          this.currentPlaylist.build_jobs = [{
+            id: eventData.build_job_id,
+            created_at: eventData.created_at,
+            status: 'running',
+            playlist_id: this.currentPlaylist.id
+          }].concat(this.currentPlaylist.build_jobs)
+        }
+      },
+
+      'build-job:success' (eventData) {
+        if (eventData.playlist_id === this.currentPlaylist.id) {
+          updateModelFromList(this.currentPlaylist.build_jobs, {
+            id: eventData.build_job_id,
+            status: 'succeeded'
+          })
+        }
+      },
+
+      'build-job:delete' (eventData) {
+        if (eventData.playlist_id === this.currentPlaylist.id) {
+          this.currentPlaylist.build_jobs =
+            removeModelFromList(this.currentPlaylist.build_jobs, {
+              id: eventData.build_job_id
+            })
+        }
       }
     }
   }
