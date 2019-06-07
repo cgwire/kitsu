@@ -58,7 +58,7 @@ def get_playlist_with_preview_file_revisions(playlist_id):
     playlist_dict = playlist.serialize()
 
     playlist_dict["build_jobs"] = []
-    for build_job in playlist.build_jobs:
+    for build_job in reversed(playlist.build_jobs):
         playlist_dict["build_jobs"].append(fields.serialize_dict({
           "id": build_job.id,
           "status": build_job.status,
