@@ -207,9 +207,10 @@ def retrieve_playlist_tmp_files(playlist):
                 config.TMP_DIR,
                 "cache-previews-%s.%s" % (preview_file_id, "mp4")
             )
-            if not os.path.exists(file_path):
+            if not os.path.exists(file_path) \
+               or os.path.getsize(file_path) == 0:
                 with open(file_path, 'wb') as tmp_file:
-                    for chunk in file_store.open_file(
+                    for chunk in file_store.open_movie(
                         "previews",
                         preview_file_id
                     ):
@@ -246,7 +247,7 @@ def build_playlist_movie_file(playlist):
     movie_file_path = get_playlist_movie_file_path(playlist, job)
     movie_utils.build_playlist_movie(tmp_file_paths, movie_file_path)
     end_build_job(playlist, job)
-    return movie_file_path
+    return job
 
 
 def start_build_job(playlist):
@@ -288,13 +289,16 @@ def build_playlist_job(playlist, email):
     """
     from zou.app import app, mail
     with app.app_context():
-        build_playlist_movie_file(
-            playlist
-        )
+        try:
+            job = build_playlist_movie_file(playlist)
+        except:
+            end_build_job(playlist, job)
+            raise
+
         message_text = """
 Your playlist %s is available at:
-https://%s/api/data/playlists/%s/download/mp4
-""" % (playlist["name"], config.DOMAIN_NAME, playlist["id"])
+https://%s/api/data/playlists/%s/jobs/%s/build/mp4
+""" % (playlist["name"], config.DOMAIN_NAME, playlist["id"], job["id"])
         message = Message(
             body=message_text,
             subject="CGWire playlist download",
