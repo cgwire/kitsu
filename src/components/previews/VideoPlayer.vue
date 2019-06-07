@@ -664,8 +664,11 @@ export default {
     },
 
     onProgressClicked (e) {
-      var pos =
-        (e.pageX - this.progress.offsetLeft) / this.progress.offsetWidth
+      let left = this.progress.offsetLeft
+      if (left === 0 && !this.isFullScreen()) {
+        left = this.progress.parentElement.offsetParent.offsetLeft - 10
+      }
+      const pos = (e.pageX - left) / this.progress.offsetWidth
       const currentTime = pos * this.video.duration
       this.setCurrentTime(currentTime)
     },

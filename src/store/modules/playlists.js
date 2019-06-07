@@ -1,5 +1,7 @@
+import Vue from 'vue'
 import playlistsApi from '../api/playlists'
 import { sortPlaylists } from '../../lib/sorting'
+import { removeModelFromList, updateModelFromList } from '../../lib/helpers'
 
 import {
   LOAD_PLAYLISTS_START,
@@ -23,6 +25,10 @@ import {
   ADD_SHOT_TO_PLAYLIST,
   REMOVE_SHOT_FROM_PLAYLIST,
   LOAD_SHOT_PREVIEW_FILES_END,
+
+  ADD_NEW_JOB,
+  MARK_JOB_AS_DONE,
+  REMOVE_BUILD_JOB,
 
   RESET_ALL
 } from '../mutation-types'
@@ -148,6 +154,23 @@ const actions = {
       previewFileId
     })
     dispatch('editPlaylist', { data: playlist, callback })
+  },
+
+  removeBuildJob ({ commit }, job) {
+    commit(REMOVE_BUILD_JOB, job)
+    playlistsApi.deleteBuildJob(job)
+  },
+
+  removeBuildJobFromList ({ commit }, job) {
+    commit(REMOVE_BUILD_JOB, job)
+  },
+
+  addNewBuildJob ({ commit }, job) {
+    commit(ADD_NEW_JOB, job)
+  },
+
+  markBuildJobAsDone ({ commit }, job) {
+    commit(MARK_JOB_AS_DONE, job)
   }
 }
 
@@ -174,7 +197,8 @@ const mutations = {
   [LOAD_PLAYLIST_ERROR] (state) {
   },
 
-  [LOAD_PLAYLIST_END] (state) {
+  [LOAD_PLAYLIST_END] (state, playlist) {
+    state.playlistMap[playlist.id].build_jobs = playlist.build_jobs
   },
 
   [EDIT_PLAYLIST_START] (state, data) {
@@ -267,6 +291,29 @@ const mutations = {
   [CHANGE_PLAYLIST_PREVIEW] (state, { playlist, shotId, previewFileId }) {
     const shotToChange = playlist.shots.find((shot) => shot.shot_id === shotId)
     shotToChange.preview_file_id = previewFileId
+  },
+
+  [ADD_NEW_JOB] (state, job) {
+    const playlist = state.playlistMap[job.playlist_id]
+    playlist.build_jobs = [{
+      id: job.build_job_id,
+      created_at: job.created_at,
+      status: 'running',
+      playlist_id: playlist.id
+    }].concat(playlist.build_jobs)
+  },
+
+  [MARK_JOB_AS_DONE] (state, job) {
+    const playlist = state.playlistMap[job.playlist_id]
+    updateModelFromList(playlist.build_jobs, {
+      id: job.build_job_id,
+      status: 'succeeded'
+    })
+  },
+
+  [REMOVE_BUILD_JOB] (state, job) {
+    const playlist = state.playlistMap[job.playlist_id]
+    Vue.set(playlist, 'build_jobs', removeModelFromList(playlist.build_jobs, job))
   },
 
   [RESET_ALL] (state) {

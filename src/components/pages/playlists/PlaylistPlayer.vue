@@ -186,7 +186,7 @@
         }"
         :href="zipDlPath"
       >
-        .zip
+        Download .zip
       </a>
       <a
         :class="{
@@ -194,10 +194,50 @@
           'mp4-button': true,
           hidden: isDlButtonsHidden
         }"
+        target="_blank"
         :href="movieDlPath"
       >
-        .mp4
+        Build .mp4
       </a>
+      <div
+        :class="{
+          'build-list': true,
+          hidden: isDlButtonsHidden
+        }"
+      >
+        <span v-if="!playlist.build_jobs || playlist.build_jobs.length === 0">
+          No build
+          {{ playlist.build_jobs }}
+        </span>
+        <div
+          v-else
+        >
+          <div class="build-title">
+            Available builds
+          </div>
+          <div
+            class="flexrow"
+            :key="job.id"
+            v-for="job in playlist.build_jobs"
+          >
+            <a
+              class="flexrow-item"
+              :href="getBuildPath(job)"
+            >
+              {{ formatDate(job.created_at) }}
+            </a>
+            <span class="filler"></span>
+            <spinner class="build-spinner" v-if="job.status === 'running'" />
+            <button
+              class="delete-job-button"
+              @click="onRemoveBuildJob(job)"
+              v-else
+            >
+            X
+            </button>
+          </div>
+        </div>
+      </div>
       <button-simple
         class="playlist-button"
         icon="download"
@@ -221,10 +261,12 @@
     }"
     ref="playlisted-shots"
   >
+    <spinner class="spinner" v-if="isLoading" />
     <div
       class="flexrow-item has-text-centered"
       :key="shot.id"
       v-for="(shot, index) in shotList"
+      v-else
     >
       <playlisted-shot
         :ref="'shot-' + index"
@@ -265,6 +307,7 @@
  * This modules manages all the options available while playing a playlist.
  * It is made to work with a single playlist.
  */
+import moment from 'moment-timezone'
 import { mapActions, mapGetters } from 'vuex'
 import { removeModelFromList } from '../../../lib/helpers'
 import { fabric } from 'fabric'
@@ -304,6 +347,10 @@ export default {
     shots: {
       type: Object,
       default: () => {}
+    },
+    isLoading: {
+      type: Boolean,
+      default: false
     }
   },
 
@@ -317,7 +364,6 @@ export default {
       isCommentsHidden: true,
       isComparing: false,
       isDrawing: false,
-      isLoading: false,
       isPlaying: false,
       isShotsHidden: false,
       maxDuration: '00:00.00',
@@ -365,7 +411,8 @@ export default {
     ...mapGetters([
       'currentProduction',
       'taskMap',
-      'taskTypeMap'
+      'taskTypeMap',
+      'user'
     ]),
 
     isFullScreenEnabled () {
@@ -434,14 +481,28 @@ export default {
       } else {
         return ''
       }
+    },
+
+    timezone () {
+      return this.user.timezone || moment.tz.guess()
     }
   },
 
   methods: {
     ...mapActions([
       'deletePlaylist',
-      'editPlaylist'
+      'editPlaylist',
+      'removeBuildJob'
     ]),
+
+    getBuildPath (job) {
+      return `/api/data/playlists/${this.playlist.id}/jobs/${job.id}/build/mp4`
+    },
+
+    formatDate (creationDate) {
+      const date = moment.tz(creationDate, 'UTC').tz(this.timezone)
+      return date.format('YYYY-MM-DD HH:MM')
+    },
 
     formatTime (seconds) {
       let milliseconds = `.${Math.round((seconds % 1) * 100)}`
@@ -1127,6 +1188,11 @@ export default {
 
     toggleDlButtons () {
       this.isDlButtonsHidden = !this.isDlButtonsHidden
+    },
+
+    onRemoveBuildJob (job) {
+      job.playlist_id = this.playlist.id
+      this.removeBuildJob(job)
     }
   },
 
@@ -1392,19 +1458,59 @@ progress {
   border: 1px solid $dark-grey;
   color: $white;
   position: absolute;
-  width: 60px;
-  padding: 0.3em;
+  width: 180px;
+  padding: 8px;
 
   &:hover {
     background: $dark-grey-light;
   }
 
   &.zip-button {
-    top: -34px;
+    left: -110px;
+    top: -200px;
   }
 
   &.mp4-button {
-    top: -64px;
+    left: -110px;
+    top: -160px;
   }
+}
+
+.build-list {
+  background: $dark-grey;
+  border: 1px solid $dark-grey;
+  position: absolute;
+  width: 180px;
+  left: -110px;
+  top: -120px;
+  height: 120px;
+  overflow-y: auto;
+  padding: 8px;
+}
+
+.build-title {
+  margin-bottom: 0.5em;
+}
+
+.delete-job-button {
+  background: transparent;
+  border-radius: 50%;
+  color: $light-grey-light;
+  cursor: pointer;
+  padding: 3px;
+
+  &:hover {
+    background: $dark-grey-light;
+  }
+}
+
+.build-spinner {
+  width: 15px;
+  max-width: 15px;
+}
+
+.spinner {
+  margin-top: 80px;
+  margin-left: 1em;
 }
 </style>
