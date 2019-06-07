@@ -2,6 +2,7 @@ from flask import Blueprint
 from zou.app.utils.api import configure_api_from_blueprint
 
 from .resources import (
+    BuildJobResource,
     BuildPlaylistMovieResource,
     EntityPreviewsResource,
     EpisodePlaylistsResource,
@@ -27,12 +28,16 @@ routes = [
         EntityPreviewsResource
     ),
     (
-        "/data/playlists/<playlist_id>/download/mp4",
-        PlaylistDownloadResource
+        "/data/playlists/<playlist_id>/jobs/<build_job_id>",
+        BuildJobResource
     ),
     (
         "/data/playlists/<playlist_id>/build/mp4",
         BuildPlaylistMovieResource
+    ),
+    (
+        "/data/playlists/<playlist_id>/jobs/<build_job_id>/build/mp4",
+        PlaylistDownloadResource
     ),
     (
         "/data/playlists/<playlist_id>/download/zip",

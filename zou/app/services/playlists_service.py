@@ -1,5 +1,4 @@
 import os
-import ffmpeg
 from slugify import slugify
 
 from shutil import copyfile
@@ -10,12 +9,13 @@ from flask_mail import Message
 from zou.app import config
 from zou.app.stores import file_store
 
+from zou.app.models.build_job import BuildJob
 from zou.app.models.playlist import Playlist
+from zou.app.models.preview_file import PreviewFile
 from zou.app.models.task import Task
 from zou.app.models.task_type import TaskType
-from zou.app.models.preview_file import PreviewFile
 
-from zou.app.utils import fields, movie_utils
+from zou.app.utils import fields, movie_utils, events
 
 from zou.app.services import (
     base_service,
@@ -25,6 +25,7 @@ from zou.app.services import (
 )
 
 from zou.app.services.exception import (
+    BuildJobNotFoundException,
     PlaylistNotFoundException,
     ShotNotFoundException
 )
@@ -55,6 +56,14 @@ def get_playlist_with_preview_file_revisions(playlist_id):
         raise PlaylistNotFoundException()
 
     playlist_dict = playlist.serialize()
+
+    playlist_dict["build_jobs"] = []
+    for build_job in playlist.build_jobs:
+        playlist_dict["build_jobs"].append(fields.serialize_dict({
+          "id": build_job.id,
+          "status": build_job.status,
+          "created_at": build_job.created_at
+        }))
 
     if playlist_dict["shots"] is None:
         playlist_dict["shots"] = []
@@ -232,11 +241,44 @@ def build_playlist_movie_file(playlist):
     """
     Build a movie for all files for a given playlist into the temporary folder.
     """
+    job = start_build_job(playlist)
     tmp_file_paths = retrieve_playlist_tmp_files(playlist)
-    movie_file_path = get_playlist_movie_file_path(playlist)
-    project = projects_service.get_project(playlist["project_id"])
+    movie_file_path = get_playlist_movie_file_path(playlist, job)
     movie_utils.build_playlist_movie(tmp_file_paths, movie_file_path)
+    end_build_job(playlist, job)
     return movie_file_path
+
+
+def start_build_job(playlist):
+    """
+    Register in database that a new build is running. Emits an event to notify
+    clients that a new job is running.
+    """
+    job = BuildJob.create(
+        status="running",
+        job_type="movie",
+        playlist_id=playlist["id"]
+    )
+    events.emit("build-job:new", {
+        "build_job_id": str(job.id),
+        "playlist_id": playlist["id"],
+        "created_at": fields.serialize_value(job.created_at)
+    })
+    return job.serialize()
+
+
+def end_build_job(playlist, job):
+    """
+    Register in database that a build is finished. Emits an event to notify
+    clients that the build is done.
+    """
+    build_job = BuildJob.get(job["id"])
+    build_job.end()
+    events.emit("build-job:success", {
+        "build_job_id": str(build_job.id),
+        "playlist_id": playlist["id"]
+    })
+    return build_job.serialize()
 
 
 def build_playlist_job(playlist, email):
@@ -273,11 +315,14 @@ def get_playlist_file_name(playlist):
     return slugify(attachment_filename)
 
 
-def get_playlist_movie_file_path(playlist):
+def get_playlist_movie_file_path(playlist, build_job):
     """
     Build file path for the movie file matching given playlist.
     """
-    movie_file_name = "%s.mp4" % get_playlist_file_name(playlist)
+    movie_file_name = "%s-%s.mp4" % (
+        get_playlist_file_name(playlist),
+        build_job["id"]
+    )
     return os.path.join(config.TMP_DIR, movie_file_name)
 
 
@@ -287,3 +332,38 @@ def get_playlist_zip_file_path(playlist):
     """
     zip_file_name = "%s.zip" % get_playlist_file_name(playlist)
     return os.path.join(config.TMP_DIR, zip_file_name)
+
+
+def get_build_job_raw(build_job_id):
+    """
+    Return given build job as active record.
+    """
+    return base_service.get_instance(
+        BuildJob,
+        build_job_id,
+        BuildJobNotFoundException
+    )
+
+
+def get_build_job(build_job_id):
+    """
+    Return given build job as a dict.
+    """
+    return get_build_job_raw(build_job_id).serialize()
+
+
+def remove_build_job(playlist, build_job_id):
+    """
+    Remove build job from database and remove related temporary file from
+    hard drive.
+    """
+    job = BuildJob.get(build_job_id)
+    movie_file_path = get_playlist_movie_file_path(playlist, job.serialize())
+    if os.path.exists(movie_file_path):
+        os.remove(movie_file_path)
+    job.delete()
+    events.emit("build-job:delete", {
+        "build_job_id": build_job_id,
+        "playlist_id": playlist["id"]
+    })
+    return movie_file_path

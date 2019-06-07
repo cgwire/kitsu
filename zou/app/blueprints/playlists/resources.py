@@ -1,7 +1,5 @@
 import os
 
-from slugify import slugify
-
 from flask import send_file as flask_send_file
 from flask_restful import Resource
 from flask_jwt_extended import jwt_required
@@ -12,7 +10,6 @@ from zou.app.services import (
     entities_service,
     playlists_service,
     persons_service,
-    projects_service,
     shots_service,
     user_service
 )
@@ -63,20 +60,28 @@ class EntityPreviewsResource(Resource):
 class PlaylistDownloadResource(Resource):
 
     @jwt_required
-    def get(self, playlist_id):
+    def get(self, playlist_id, build_job_id):
         playlist = playlists_service.get_playlist(playlist_id)
+        build_job = playlists_service.get_build_job(build_job_id)
         user_service.check_project_access(playlist["project_id"])
-        movie_file_path = playlists_service.get_playlist_movie_file_path(
-            playlist
-        )
-        attachment_filename = movie_file_path.split(os.sep)[-1]
-        return flask_send_file(
-            movie_file_path,
-            conditional=True,
-            mimetype="video/mp4",
-            as_attachment=True,
-            attachment_filename=attachment_filename
-        )
+
+        if build_job["status"] != "succeeded":
+            return {
+                "error": True,
+                "message": "Build is not finished"
+            }, 400
+        else:
+            movie_file_path = playlists_service.get_playlist_movie_file_path(
+                playlist, build_job
+            )
+            attachment_filename = movie_file_path.split(os.sep)[-1]
+            return flask_send_file(
+                movie_file_path,
+                conditional=True,
+                mimetype="video/mp4",
+                as_attachment=True,
+                attachment_filename=attachment_filename
+            )
 
 
 class BuildPlaylistMovieResource(Resource):
@@ -95,17 +100,8 @@ class BuildPlaylistMovieResource(Resource):
             )
             return {"job": "running"}
         else:
-            movie_file_path = playlists_service.build_playlist_movie_file(
-                playlist
-            )
-            attachment_filename = movie_file_path.split(os.sep)[-1]
-            return flask_send_file(
-                movie_file_path,
-                conditional=True,
-                mimetype="video/mp4",
-                as_attachment=True,
-                attachment_filename=attachment_filename
-            )
+            playlists_service.build_playlist_movie_file(playlist)
+            return {"job": "succeeded"}
 
 
 class PlaylistZipDownloadResource(Resource):
@@ -123,3 +119,19 @@ class PlaylistZipDownloadResource(Resource):
             as_attachment=True,
             attachment_filename=attachment_filename
         )
+
+
+class BuildJobResource(Resource):
+
+    @jwt_required
+    def get(self, playlist_id, build_job_id):
+        playlist = playlists_service.get_playlist(playlist_id)
+        user_service.check_project_access(playlist["project_id"])
+        return playlists_service.get_build_job(build_job_id)
+
+    @jwt_required
+    def delete(self, playlist_id, build_job_id):
+        playlist = playlists_service.get_playlist(playlist_id)
+        user_service.check_project_access(playlist["project_id"])
+        playlists_service.remove_build_job(playlist, build_job_id)
+        return "", 204
