@@ -53,8 +53,14 @@
     />
   </div>
 
-  <div class="progress-cursor" ref="progress-cursor"></div>
-  <div class="playlist-progress" ref="playlist-progress">
+  <div
+    class="progress-cursor"
+    ref="progress-cursor"
+  ></div>
+  <div
+    class="playlist-progress"
+    ref="playlist-progress"
+  >
     <div class="video-progress">
       <progress
         ref="progress"
@@ -76,9 +82,14 @@
     :annotations="annotations"
     :max-duration-raw="maxDurationRaw"
     @select-annotation="loadAnnotation"
+    v-if="playlist.id"
   />
 
-  <div class="playlist-footer flexrow" ref="button-bar">
+  <div
+    class="playlist-footer flexrow"
+    ref="button-bar"
+    v-if="playlist.id"
+  >
     <button-simple
       class="button playlist-button flexrow-item"
       @click="onPlayClicked"
@@ -186,19 +197,18 @@
         }"
         :href="zipDlPath"
       >
-        Download .zip
+        {{ $t('playlists.download_zip') }}
       </a>
-      <a
+      <span
         :class="{
           'dl-button': true,
           'mp4-button': true,
           hidden: isDlButtonsHidden
         }"
-        target="_blank"
-        :href="movieDlPath"
+        @click="onBuildClicked"
       >
-        Build .mp4
-      </a>
+        {{ $t('playlists.build_mp4') }}
+      </span>
       <div
         :class="{
           'build-list': true,
@@ -206,14 +216,13 @@
         }"
       >
         <span v-if="!playlist.build_jobs || playlist.build_jobs.length === 0">
-          No build
-          {{ playlist.build_jobs }}
+        {{ $t('playlists.no_build') }}
         </span>
         <div
           v-else
         >
           <div class="build-title">
-            Available builds
+            {{ $t('playlists.available_build') }}
           </div>
           <div
             class="flexrow"
@@ -227,13 +236,16 @@
               {{ formatDate(job.created_at) }}
             </a>
             <span class="filler"></span>
-            <spinner class="build-spinner" v-if="job.status === 'running'" />
+            <spinner
+              class="build-spinner"
+              v-if="job.status === 'running'"
+            />
             <button
               class="delete-job-button"
               @click="onRemoveBuildJob(job)"
               v-else
             >
-            X
+              x
             </button>
           </div>
         </div>
@@ -260,6 +272,7 @@
       hidden: isShotsHidden
     }"
     ref="playlisted-shots"
+    v-if="playlist.id"
   >
     <spinner class="spinner" v-if="isLoading" />
     <div
@@ -431,10 +444,6 @@ export default {
       return `/api/data/playlists/${this.playlist.id}/download/zip`
     },
 
-    movieDlPath () {
-      return `/api/data/playlists/${this.playlist.id}/build/mp4`
-    },
-
     canvas () {
       return this.$refs['annotation-canvas']
     },
@@ -492,7 +501,8 @@ export default {
     ...mapActions([
       'deletePlaylist',
       'editPlaylist',
-      'removeBuildJob'
+      'removeBuildJob',
+      'runPlaylistBuild'
     ]),
 
     getBuildPath (job) {
@@ -624,6 +634,7 @@ export default {
 
     scrollToShot (index) {
       if (this.$refs['shot-' + index]) {
+        console.log('cool')
         const shotWidget = this.$refs['shot-' + index][0].$el
         const playlistEl = this.$refs['playlisted-shots']
         const shot = this.shotList[index]
@@ -643,6 +654,12 @@ export default {
             playlistEl.scrollLeft = playlistEl.scrollLeft + scrollingRequired
           }
         }
+      }
+    },
+
+    scrollToRight () {
+      if (this.shotList.length > 0) {
+        this.scrollToShot(this.shotList.length - 1)
       }
     },
 
@@ -1190,6 +1207,10 @@ export default {
       this.isDlButtonsHidden = !this.isDlButtonsHidden
     },
 
+    onBuildClicked () {
+      this.runPlaylistBuild(this.playlist)
+    },
+
     onRemoveBuildJob (job) {
       job.playlist_id = this.playlist.id
       this.removeBuildJob(job)
@@ -1231,10 +1252,14 @@ export default {
         this.maxDurationRaw = 0
         this.maxDuration = '00:00.00'
       } else {
-        this.$nextTick(() => {
-          this.playShot(0)
-        })
+        this.playShot(0)
       }
+    },
+
+    playlist () {
+      this.$nextTick(() => {
+        this.updateProgressBar()
+      })
     }
   }
 }
@@ -1473,6 +1498,7 @@ progress {
   &.mp4-button {
     left: -110px;
     top: -160px;
+    cursor: pointer;
   }
 }
 

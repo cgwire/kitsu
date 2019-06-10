@@ -171,6 +171,10 @@ const actions = {
 
   markBuildJobAsDone ({ commit }, job) {
     commit(MARK_JOB_AS_DONE, job)
+  },
+
+  runPlaylistBuild ({ commit }, playlist) {
+    playlistsApi.runPlaylistBuild(playlist)
   }
 }
 

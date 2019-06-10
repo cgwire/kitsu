@@ -480,20 +480,25 @@ export default {
   },
 
   playlists: {
-    add_shots: 'Selectonner les plans',
-    title: 'Playlists',
-    new_playlist: 'Ajouter une playlist',
-    loading_error: 'Une erreur serveur est apparue, les playlists ne peuvent pas être chargées.',
-    no_selection: 'Séléctionnez une playlist sur la gauche.',
+    add_shots: 'Sélectonner les plans',
+    available_build: 'Builds disponibles',
+    build_daily: 'Valid. quotidienne',
+    build_weekly: 'Valid. hebodomadaire',
+    build_mp4: 'Construire .mp4',
     delete_text: 'Êtes vous sûr de vouloir supprimer {name} de la base de données ?',
     delete_error: 'Une erreur est survenue en supprimant la playlist.',
     edit_title: 'Modifier la playlist',
+    remove: 'enlever',
+    loading_error: 'Une erreur serveur est apparue, les playlists ne peuvent pas être chargées.',
+    new_playlist: 'Ajouter une playlist',
+    no_build: 'Pas de build',
     no_playlist: 'Il n\'y a pas de playlist pour ce projet.',
+    no_selection: 'Séléctionnez une playlist sur la gauche.',
     no_sequence_for_episode: 'Il n\'y a pas de séquence pour cette épisode',
     no_shot_for_production: 'Il n\'y pas de plan pour cette production',
     select_shot: 'Sélectionnez un plan dans la colonne de droite',
     select_playlist: 'Sélectionnez une playlist dans la colonne de gauche',
-    remove: 'enlever',
+    title: 'Playlists',
     fields: {
       name: 'Nom'
     }

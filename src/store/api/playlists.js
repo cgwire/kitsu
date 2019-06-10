@@ -57,5 +57,15 @@ export default {
         else resolve()
       })
     })
+  },
+
+  runPlaylistBuild (playlist) {
+    return new Promise((resolve, reject) => {
+      const path = `/api/data/playlists/${playlist.id}/build/mp4`
+      client.get(path, (err) => {
+        if (err) reject(err)
+        else resolve()
+      })
+    })
   }
 }

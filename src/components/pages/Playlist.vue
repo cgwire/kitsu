@@ -44,6 +44,7 @@
 
       <div class="playlist-column column">
         <playlist-player
+          ref="playlist-player"
           :playlist="currentPlaylist"
           :shots="currentShots"
           :is-loading="loading.playlist"
@@ -73,8 +74,9 @@
               :class="{
                 button: true,
                 'add-sequence': true,
-                'is-loading': this.loading.addSequence
+                'is-loading': this.loading.addWeekly
               }"
+              :disabled="isAdditionLoading"
               @click="addAllPending"
             >
               {{ $t('playlists.build_weekly') }}
@@ -83,8 +85,9 @@
               :class="{
                 button: true,
                 'add-sequence': true,
-                'is-loading': this.loading.addSequence
+                'is-loading': this.loading.addDaily
               }"
+              :disabled="isAdditionLoading"
               @click="addDailyPending"
             >
               {{ $t('playlists.build_daily') }}
@@ -112,6 +115,7 @@
                     'add-sequence': true,
                     'is-loading': this.loading.addSequence
                   }"
+                  :disabled="isAdditionLoading"
                   @click="addSequence"
                 >
                   {{ $t('playlists.add_sequence') }}
@@ -192,7 +196,9 @@ export default {
         playlist: false,
         playlists: false,
         addPlaylist: false,
+        addDaily: false,
         addSequence: false,
+        addWeekly: false,
         deletePlaylist: false
       },
       errors: {
@@ -218,7 +224,15 @@ export default {
       'sequences',
       'shotMap',
       'taskTypeMap'
-    ])
+    ]),
+
+    isAdditionLoading () {
+      return (
+        this.loading.addSequence ||
+        this.loading.addWeekly ||
+        this.loading.addDaily
+      )
+    }
   },
 
   methods: {
@@ -414,11 +428,16 @@ export default {
                 shot,
                 callback: () => {
                   this.rebuildCurrentShots()
+                  setTimeout(() => {
+                    this.$refs['playlist-player'].scrollToRight()
+                  }, 500)
                   resolve()
                 }
               })
             }
           })
+        } else {
+          resolve()
         }
       })
     },
@@ -427,7 +446,9 @@ export default {
       this.$options.silent = true
       this.loading.addSequence = true
       const shots = [...this.sequenceShots].reverse()
+      console.log('run')
       this.addShots(shots, () => {
+        console.log('toto')
         this.loading.addSequence = false
         this.$options.silent = false
       })
@@ -435,32 +456,40 @@ export default {
 
     addAllPending () {
       this.$options.silent = true
+      this.loading.addWeekly = true
       this.getPending(false)
         .then((shots) => {
           this.addShots(shots.reverse(), () => {
+            this.loading.addWeekly = false
             this.$options.silent = false
           })
         })
     },
 
     addDailyPending () {
+      this.loading.addDaily = true
       this.$options.silent = true
       this.getPending(true)
         .then((shots) => {
           this.addShots(shots.reverse(), () => {
+            this.loading.addDaily = false
             this.$options.silent = false
           })
         })
     },
 
     addShots (shots, callback) {
+      console.log('addShots')
       if (shots && shots.length > 0) {
         const shot = shots.pop()
+        console.log('shot add', shot.id)
         this.addShot(shot)
           .then(() => {
+            console.log('shot added', shot.id)
             this.addShots(shots, callback)
           })
       } else {
+        console.log('end')
         callback()
       }
     },
