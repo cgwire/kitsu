@@ -91,11 +91,59 @@ def get_playlist_with_preview_file_revisions(playlist_id):
         except Exception as e:
             print(e)
 
-        try:
-            shot["preview_files"] = get_preview_files_for_shot(shot["shot_id"])
-        except ShotNotFoundException:
-            playlist_dict["shots"].remove(shot)
+    playlist_dict = set_preview_files_for_shots(playlist_dict)
     return playlist_dict
+
+
+def set_preview_files_for_shots(playlist_dict):
+    """
+    """
+    print(playlist_dict["shots"])
+    shot_ids = [
+        shot["shot_id"] for shot in playlist_dict["shots"]
+    ]
+    previews = {}
+
+    preview_files = PreviewFile.query \
+        .filter_by(extension="mp4") \
+        .join(Task) \
+        .join(TaskType) \
+        .filter(Task.entity_id.in_(shot_ids)) \
+        .order_by(TaskType.priority.desc()) \
+        .order_by(TaskType.name) \
+        .order_by(PreviewFile.revision.desc()) \
+        .add_column(Task.task_type_id) \
+        .add_column(Task.entity_id) \
+        .all()
+
+    for (
+        preview_file,
+        task_type_id,
+        shot_id
+    ) in preview_files:
+        shot_id = str(shot_id)
+        task_type_id = str(task_type_id)
+        if shot_id not in previews:
+            previews[shot_id] = {}
+
+        if task_type_id not in previews[shot_id]:
+            previews[shot_id][task_type_id] = []
+
+        previews[shot_id][task_type_id].append({
+            "id": str(preview_file.id),
+            "revision": preview_file.revision,
+            "extension": preview_file.extension,
+            "annotations": preview_file.annotations,
+            "task_id": str(preview_file.task_id)
+        })  # Do not add too much field to avoid building too big responses
+
+    for shot in playlist_dict["shots"]:
+        if str(shot["shot_id"]) in previews:
+            shot["preview_files"] = previews[str(shot["shot_id"])]
+        else:
+            shot["preview_files"] = []
+
+    return fields.serialize_value(playlist_dict)
 
 
 def get_preview_files_for_shot(shot_id):
