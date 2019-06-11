@@ -528,13 +528,14 @@ class ResetPasswordResource(Resource, ArgsMixin):
 
 You have requested for a password reset. You can connect here to change your
 password:
-https://%s/reset-change-password/%s
+%s://%s/reset-change-password/%s
 
 Regards,
 
 CGWire Team
 """ % (
             user["first_name"],
+            current_app.config["DOMAIN_PROTOCOL"],
             current_app.config["DOMAIN_NAME"],
             token
         )

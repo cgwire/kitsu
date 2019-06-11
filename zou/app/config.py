@@ -68,6 +68,7 @@ MAIL_USE_TLS = os.getenv("MAIL_USE_TLS", False)
 MAIL_USE_SSL = os.getenv("MAIL_USE_SSL", False)
 MAIL_DEFAULT_SENDER = os.getenv("MAIL_DEFAULT_SENDER", "no-reply@cg-wire.com")
 DOMAIN_NAME = os.getenv("DOMAIN_NAME", "localhost:8080")
+DOMAIN_PROTOCOL = os.getenv("DOMAIN_PROTOCOL", "https")
 
 PLUGIN_FOLDER = os.getenv(
     "PLUGIN_FOLDER",
