@@ -98,7 +98,6 @@ def get_playlist_with_preview_file_revisions(playlist_id):
 def set_preview_files_for_shots(playlist_dict):
     """
     """
-    print(playlist_dict["shots"])
     shot_ids = [
         shot["shot_id"] for shot in playlist_dict["shots"]
     ]
