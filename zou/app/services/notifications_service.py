@@ -179,7 +179,7 @@ def create_assignation_notification(task_id, person_id, author_id=None):
             "notification_id": notification["id"],
             "person_id": person_id
         }, persist=False)
-        return notification.serialize()
+        return notification
     else:
         return None
 
