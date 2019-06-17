@@ -281,6 +281,8 @@ def build_playlist_zip_file(playlist):
     """
     tmp_file_paths = retrieve_playlist_tmp_files(playlist)
     zip_file_path = get_playlist_zip_file_path(playlist)
+    if os.path.exists(zip_file_path):
+        os.remove(zip_file_path)
     with ZipFile(zip_file_path, 'w') as zip:
         for file_path, file_name in tmp_file_paths:
             zip.write(file_path, file_name)
