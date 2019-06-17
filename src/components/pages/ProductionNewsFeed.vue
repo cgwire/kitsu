@@ -118,8 +118,16 @@
                           <span>
                             {{ $t('news.commented_on') }}
                           </span>
+                          <entity-thumbnail
+                            class="ml1 mr05"
+                            :entity="{
+                              id: news.task_entity_id,
+                              preview_file_id: news.entity_preview_file_id
+                            }"
+                          />
+
                           <span class="strong">
-                            {{ ' ' + news.project_name }} / {{ news.full_entity_name }}
+                            {{ news.full_entity_name }}
                           </span>
                         </span>
                       </div>
@@ -167,8 +175,15 @@
                           <span>
                             {{ $t('news.set_preview_on') }}
                           </span>
+                          <entity-thumbnail
+                            class="ml1 mr05"
+                            :entity="{
+                              id: news.task_entity_id,
+                              preview_file_id: news.entity_preview_file_id
+                            }"
+                          />
                           <span class="strong">
-                            {{ ' ' + news.project_name }} / {{ news.full_entity_name }}
+                            {{ news.full_entity_name }}
                           </span>
                         </span>
                       </div>
@@ -582,8 +597,13 @@ export default {
   }
 
   .news-line {
+    &:hover {
+      border-left: 6px solid $green;
+    }
+
     &.selected {
       border-left: 6px solid $dark-purple;
+      background: $purple-strong;
     }
   }
 
@@ -730,14 +750,16 @@ export default {
   padding-left: 1em;
   align-items: middle;
   cursor: pointer;
-  margin: 1em 0;
+  padding-top: 0.5em;
+  padding-bottom: 0.5em;
 
   &:hover {
-    border-left: 6px solid $grey;
+    border-left: 6px solid $light-green-light;
   }
 
   &.selected {
     border-left: 6px solid $purple;
+    background: $light-purple;
   }
 }
 
