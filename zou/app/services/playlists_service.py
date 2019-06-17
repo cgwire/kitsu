@@ -26,8 +26,7 @@ from zou.app.services import (
 
 from zou.app.services.exception import (
     BuildJobNotFoundException,
-    PlaylistNotFoundException,
-    ShotNotFoundException
+    PlaylistNotFoundException
 )
 
 
@@ -68,19 +67,14 @@ def get_playlist_with_preview_file_revisions(playlist_id):
     if playlist_dict["shots"] is None:
         playlist_dict["shots"] = []
 
+    (
+        playlist_dict,
+        preview_file_map
+    ) = set_preview_files_for_shots(playlist_dict)
+
     for shot in playlist_dict["shots"]:
         try:
-            preview_file = PreviewFile.get(shot["preview_file_id"])
-            if preview_file is None or preview_file.extension != 'mp4':
-                preview_file = PreviewFile.query \
-                    .filter_by(task_id=preview_file.task_id) \
-                    .filter_by(extension="mp4") \
-                    .join(Task) \
-                    .join(TaskType) \
-                    .order_by(TaskType.priority.desc()) \
-                    .order_by(TaskType.name) \
-                    .order_by(PreviewFile.revision.desc()) \
-                    .first()
+            preview_file = preview_file_map.get(shot["preview_file_id"], None)
             if preview_file is not None:
                 shot["preview_file_id"] = str(preview_file.id)
                 shot["extension"] = preview_file.extension
@@ -91,7 +85,6 @@ def get_playlist_with_preview_file_revisions(playlist_id):
         except Exception as e:
             print(e)
 
-    playlist_dict = set_preview_files_for_shots(playlist_dict)
     return playlist_dict
 
 
@@ -102,6 +95,7 @@ def set_preview_files_for_shots(playlist_dict):
         shot["shot_id"] for shot in playlist_dict["shots"]
     ]
     previews = {}
+    preview_file_map = {}
 
     preview_files = PreviewFile.query \
         .filter_by(extension="mp4") \
@@ -128,13 +122,18 @@ def set_preview_files_for_shots(playlist_dict):
         if task_type_id not in previews[shot_id]:
             previews[shot_id][task_type_id] = []
 
+        task_id = str(preview_file.task_id)
+        preview_file_id = str(preview_file.id)
+
         previews[shot_id][task_type_id].append({
-            "id": str(preview_file.id),
+            "id": preview_file_id,
             "revision": preview_file.revision,
             "extension": preview_file.extension,
             "annotations": preview_file.annotations,
-            "task_id": str(preview_file.task_id)
+            "task_id": task_id
         })  # Do not add too much field to avoid building too big responses
+
+        preview_file_map[preview_file_id] = preview_file
 
     for shot in playlist_dict["shots"]:
         if str(shot["shot_id"]) in previews:
@@ -142,7 +141,10 @@ def set_preview_files_for_shots(playlist_dict):
         else:
             shot["preview_files"] = []
 
-    return fields.serialize_value(playlist_dict)
+    return (
+        fields.serialize_value(playlist_dict),
+        preview_file_map
+    )
 
 
 def get_preview_files_for_shot(shot_id):
