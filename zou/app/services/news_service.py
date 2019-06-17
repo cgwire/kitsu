@@ -1,4 +1,5 @@
 from zou.app.models.comment import Comment
+from zou.app.models.entity import Entity
 from zou.app.models.news import News
 from zou.app.models.preview_file import PreviewFile
 from zou.app.models.project import Project
@@ -84,6 +85,7 @@ def get_last_news_for_project(
         .order_by(News.created_at.desc()) \
         .join(Task, News.task_id == Task.id) \
         .join(Project) \
+        .join(Entity, Task.entity_id == Entity.id) \
         .outerjoin(Comment, News.comment_id == Comment.id) \
         .outerjoin(PreviewFile, News.preview_file_id == PreviewFile.id) \
         .filter(Task.project_id == project_id) \
@@ -94,7 +96,8 @@ def get_last_news_for_project(
             Comment.id,
             Comment.task_status_id,
             Task.entity_id,
-            PreviewFile.extension
+            PreviewFile.extension,
+            Entity.preview_file_id
         )
 
     if news_id is not None:
@@ -122,7 +125,8 @@ def get_last_news_for_project(
         comment_id,
         task_status_id,
         task_entity_id,
-        preview_file_extension
+        preview_file_extension,
+        entity_preview_file_id
     ) in news_list:
         (full_entity_name, episode_id) = \
             names_service.get_full_entity_name(task_entity_id)
@@ -134,6 +138,7 @@ def get_last_news_for_project(
             "task_id": news.task_id,
             "task_type_id": task_type_id,
             "task_status_id": task_status_id,
+            "task_entity_id": task_entity_id,
             "preview_file_id": news.preview_file_id,
             "preview_file_extension": preview_file_extension,
             "project_id": project_id,
@@ -141,6 +146,7 @@ def get_last_news_for_project(
             "created_at": news.created_at,
             "change": news.change,
             "full_entity_name": full_entity_name,
-            "episode_id": episode_id
+            "episode_id": episode_id,
+            "entity_preview_file_id": entity_preview_file_id
         }))
     return result
