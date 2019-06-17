@@ -1,3 +1,5 @@
+import re
+
 from sqlalchemy import func
 from sqlalchemy.orm import aliased
 from sqlalchemy.exc import IntegrityError, StatementError
@@ -904,3 +906,29 @@ def get_episode_stats_for_project(project_id):
         }
 
     return results
+
+
+def get_preview_dimensions(project):
+    """
+    Return dimensions set at project level or default dimensions if the
+    dimensions are not set.
+    """
+    resolution = project["resolution"]
+    height = 1080
+    width = None
+    if resolution is not None and bool(re.match(r"\d*x\d*", resolution)):
+        [width, height] = resolution.split("x")
+        width = int(width)
+        height = int(height)
+    return (width, height)
+
+
+def get_preview_fps(project):
+    """
+    Return fps set at project level or default fps if the dimensions are not
+    set.
+    """
+    fps = "24.00"
+    if project["fps"] is not None:
+        fps = "%.2f" % float(project["fps"].replace(",", "."))
+    return fps

@@ -90,18 +90,29 @@ def normalize_movie(movie_path, fps="24.00", width=None, height=1080):
     return file_target_path
 
 
-def build_playlist_movie(tmp_file_paths, movie_file_path, fps="24.00"):
+def build_playlist_movie(
+    tmp_file_paths,
+    movie_file_path,
+    width=None,
+    height=1080,
+    fps="24.00"
+):
     """
     Build a single movie file from a playlist.
     """
     in_files = []
     if len(tmp_file_paths) > 0:
         (first_movie_file_path, _) = tmp_file_paths[0]
-        (width, height) = get_movie_size(first_movie_file_path)
+        if width is None:
+            (width, height) = get_movie_size(first_movie_file_path)
 
         for tmp_file_path, file_name in tmp_file_paths:
             in_file = ffmpeg.input(tmp_file_path)
-            in_files.append(in_file['v'])
+            in_files.append(
+                in_file['v']
+                    .filter('setsar', '1/1')
+                    .filter('scale', width, height)
+            )
             in_files.append(in_file['a'])
         joined = ffmpeg.concat(*in_files, v=1, a=1).node
         video = joined[0]

@@ -20,6 +20,7 @@ from zou.app.utils import fields, movie_utils, events
 from zou.app.services import (
     base_service,
     projects_service,
+    shots_service,
     tasks_service,
     names_service
 )
@@ -238,7 +239,8 @@ def retrieve_playlist_tmp_files(playlist):
     """
     preview_file_ids = []
     for shot in playlist["shots"]:
-        if shot["preview_file_id"] is not None \
+        if "preview_file_id" in shot \
+           and shot["preview_file_id"] is not None \
            and len(shot["preview_file_id"]) > 0:
             preview_file = PreviewFile.get(shot["preview_file_id"])
             if preview_file is not None and preview_file.extension == "mp4":
@@ -294,9 +296,20 @@ def build_playlist_movie_file(playlist):
     Build a movie for all files for a given playlist into the temporary folder.
     """
     job = start_build_job(playlist)
+
+    project = projects_service.get_project(playlist["project_id"])
     tmp_file_paths = retrieve_playlist_tmp_files(playlist)
     movie_file_path = get_playlist_movie_file_path(playlist, job)
-    movie_utils.build_playlist_movie(tmp_file_paths, movie_file_path)
+    (width, height) = shots_service.get_preview_dimensions(project)
+    fps = shots_service.get_preview_fps(project)
+
+    movie_utils.build_playlist_movie(
+        tmp_file_paths,
+        movie_file_path,
+        width,
+        height,
+        fps
+    )
     end_build_job(playlist, job)
     return job
 

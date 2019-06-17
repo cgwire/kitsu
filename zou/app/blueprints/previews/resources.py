@@ -1,5 +1,4 @@
 import os
-import re
 
 from flask import abort, request, current_app
 from flask import send_file as flask_send_file
@@ -16,6 +15,7 @@ from zou.app.services import (
     names_service,
     persons_service,
     projects_service,
+    shots_service,
     tasks_service,
     user_service,
 )
@@ -232,8 +232,8 @@ class CreatePreviewFilePictureResource(Resource):
         )
 
         project = files_service.get_project_from_preview_file(instance_id)
-        fps = self.get_fps(project)
-        (width, height) = self.get_dimensions(project)
+        fps = shots_service.get_preview_fps(project)
+        (width, height) = shots_service.get_preview_dimensions(project)
         normalized_movie_path = movie_utils.normalize_movie(
             uploaded_movie_path, fps=fps, width=width, height=height
         )
@@ -245,31 +245,6 @@ class CreatePreviewFilePictureResource(Resource):
         os.remove(uploaded_movie_path)
         os.remove(normalized_movie_path)
         return self.save_variants(original_tmp_path, instance_id)
-
-    def get_fps(self, project):
-        """
-        Return fps set at project level or default fps if the dimensions are not
-        set.
-        """
-        fps = "24.00"
-        if project["fps"] is not None:
-            fps = "%.2f" % float(project["fps"].replace(",", "."))
-        return fps
-
-    def get_dimensions(self, project):
-        """
-        Return dimensions set at project level or default dimensions if the
-        dimensions are not set.
-        """
-        resolution = project["resolution"]
-        height = 1080
-        width = None
-        if resolution is not None \
-           and bool(re.match(r"\d*x\d*", resolution)):
-            [width, height] = resolution.split("x")
-            width = int(width)
-            height = int(height)
-        return (width, height)
 
     def save_file_preview(self, instance_id, uploaded_file, extension):
         """
