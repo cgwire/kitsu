@@ -568,6 +568,10 @@ a:hover {
   margin-bottom: 2em;
 }
 
+.ml05 {
+  margin-left: 0.5em;
+}
+
 .ml1 {
   margin-left: 1em;
 }
