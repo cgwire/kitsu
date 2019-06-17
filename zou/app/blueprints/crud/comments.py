@@ -5,6 +5,7 @@ from zou.app.models.comment import Comment
 from zou.app.services import (
     deletion_service,
     notifications_service,
+    persons_service,
     tasks_service,
     user_service
 )
@@ -36,6 +37,14 @@ class CommentResource(BaseModelResource):
             comment = self.get_model_or_404(instance["id"])
             task = tasks_service.get_task(comment.object_id)
             return user_service.check_project_access(task["project_id"])
+
+    def check_update_permissions(self, instance, data):
+        if permissions.has_admin_permissions():
+            return True
+        else:
+            comment = self.get_model_or_404(instance["id"])
+            current_user = persons_service.get_current_user()
+            return current_user["id"] == str(comment.person_id)
 
     @jwt_required
     def delete(self, instance_id):
