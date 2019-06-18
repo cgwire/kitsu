@@ -20,14 +20,14 @@ from zou.app.utils import fields, movie_utils, events
 from zou.app.services import (
     base_service,
     projects_service,
+    shots_service,
     tasks_service,
     names_service
 )
 
 from zou.app.services.exception import (
     BuildJobNotFoundException,
-    PlaylistNotFoundException,
-    ShotNotFoundException
+    PlaylistNotFoundException
 )
 
 
@@ -68,19 +68,14 @@ def get_playlist_with_preview_file_revisions(playlist_id):
     if playlist_dict["shots"] is None:
         playlist_dict["shots"] = []
 
+    (
+        playlist_dict,
+        preview_file_map
+    ) = set_preview_files_for_shots(playlist_dict)
+
     for shot in playlist_dict["shots"]:
         try:
-            preview_file = PreviewFile.get(shot["preview_file_id"])
-            if preview_file is None or preview_file.extension != 'mp4':
-                preview_file = PreviewFile.query \
-                    .filter_by(task_id=preview_file.task_id) \
-                    .filter_by(extension="mp4") \
-                    .join(Task) \
-                    .join(TaskType) \
-                    .order_by(TaskType.priority.desc()) \
-                    .order_by(TaskType.name) \
-                    .order_by(PreviewFile.revision.desc()) \
-                    .first()
+            preview_file = preview_file_map.get(shot["preview_file_id"], None)
             if preview_file is not None:
                 shot["preview_file_id"] = str(preview_file.id)
                 shot["extension"] = preview_file.extension
@@ -91,7 +86,6 @@ def get_playlist_with_preview_file_revisions(playlist_id):
         except Exception as e:
             print(e)
 
-    playlist_dict = set_preview_files_for_shots(playlist_dict)
     return playlist_dict
 
 
@@ -102,6 +96,7 @@ def set_preview_files_for_shots(playlist_dict):
         shot["shot_id"] for shot in playlist_dict["shots"]
     ]
     previews = {}
+    preview_file_map = {}
 
     preview_files = PreviewFile.query \
         .filter_by(extension="mp4") \
@@ -128,13 +123,18 @@ def set_preview_files_for_shots(playlist_dict):
         if task_type_id not in previews[shot_id]:
             previews[shot_id][task_type_id] = []
 
+        task_id = str(preview_file.task_id)
+        preview_file_id = str(preview_file.id)
+
         previews[shot_id][task_type_id].append({
-            "id": str(preview_file.id),
+            "id": preview_file_id,
             "revision": preview_file.revision,
             "extension": preview_file.extension,
             "annotations": preview_file.annotations,
-            "task_id": str(preview_file.task_id)
+            "task_id": task_id
         })  # Do not add too much field to avoid building too big responses
+
+        preview_file_map[preview_file_id] = preview_file
 
     for shot in playlist_dict["shots"]:
         if str(shot["shot_id"]) in previews:
@@ -142,7 +142,10 @@ def set_preview_files_for_shots(playlist_dict):
         else:
             shot["preview_files"] = []
 
-    return fields.serialize_value(playlist_dict)
+    return (
+        fields.serialize_value(playlist_dict),
+        preview_file_map
+    )
 
 
 def get_preview_files_for_shot(shot_id):
@@ -236,7 +239,8 @@ def retrieve_playlist_tmp_files(playlist):
     """
     preview_file_ids = []
     for shot in playlist["shots"]:
-        if shot["preview_file_id"] is not None \
+        if "preview_file_id" in shot \
+           and shot["preview_file_id"] is not None \
            and len(shot["preview_file_id"]) > 0:
             preview_file = PreviewFile.get(shot["preview_file_id"])
             if preview_file is not None and preview_file.extension == "mp4":
@@ -279,6 +283,8 @@ def build_playlist_zip_file(playlist):
     """
     tmp_file_paths = retrieve_playlist_tmp_files(playlist)
     zip_file_path = get_playlist_zip_file_path(playlist)
+    if os.path.exists(zip_file_path):
+        os.remove(zip_file_path)
     with ZipFile(zip_file_path, 'w') as zip:
         for file_path, file_name in tmp_file_paths:
             zip.write(file_path, file_name)
@@ -290,17 +296,29 @@ def build_playlist_movie_file(playlist):
     Build a movie for all files for a given playlist into the temporary folder.
     """
     job = start_build_job(playlist)
+
+    project = projects_service.get_project(playlist["project_id"])
     tmp_file_paths = retrieve_playlist_tmp_files(playlist)
     movie_file_path = get_playlist_movie_file_path(playlist, job)
-    movie_utils.build_playlist_movie(tmp_file_paths, movie_file_path)
+    (width, height) = shots_service.get_preview_dimensions(project)
+    fps = shots_service.get_preview_fps(project)
+
+    movie_utils.build_playlist_movie(
+        tmp_file_paths,
+        movie_file_path,
+        width,
+        height,
+        fps
+    )
+    file_store.add_movie("playlists", job["id"], movie_file_path)
     end_build_job(playlist, job)
     return job
 
 
 def start_build_job(playlist):
     """
-    Register in database that a new build is running. Emits an event to notify
     clients that a new job is running.
+    Register in database that a new build is running. Emits an event to notify
     """
     job = BuildJob.create(
         status="running",
@@ -360,8 +378,8 @@ def get_playlist_file_name(playlist):
     """
     project = projects_service.get_project(playlist["project_id"])
     attachment_filename = "%s_%s" % (
-        project["name"],
-        playlist["name"]
+        slugify(project["name"]),
+        slugify(playlist["name"]),
     )
     return slugify(attachment_filename)
 
@@ -370,10 +388,7 @@ def get_playlist_movie_file_path(playlist, build_job):
     """
     Build file path for the movie file matching given playlist.
     """
-    movie_file_name = "%s-%s.mp4" % (
-        get_playlist_file_name(playlist),
-        build_job["id"]
-    )
+    movie_file_name = "cache-playlists-%s.mp4" % build_job["id"]
     return os.path.join(config.TMP_DIR, movie_file_name)
 
 
@@ -381,7 +396,7 @@ def get_playlist_zip_file_path(playlist):
     """
     Build file path for the archive file matching given playlist.
     """
-    zip_file_name = "%s.zip" % get_playlist_file_name(playlist)
+    zip_file_name = "%s.zip" % playlist["id"]
     return os.path.join(config.TMP_DIR, zip_file_name)
 
 
@@ -401,6 +416,18 @@ def get_build_job(build_job_id):
     Return given build job as a dict.
     """
     return get_build_job_raw(build_job_id).serialize()
+
+
+def remove_playlist(playlist_id):
+    """
+    Remove given playlist from database (and delete related build jobs).
+    """
+    playlist = get_playlist_raw(playlist_id)
+    playlist_dict = playlist.serialize()
+    query = BuildJob.query.filter_by(playlist_id=playlist_id)
+    for job in query.all():
+        remove_build_job(playlist_dict, job.id)
+    playlist.delete()
 
 
 def remove_build_job(playlist, build_job_id):
