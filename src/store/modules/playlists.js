@@ -127,7 +127,20 @@ const actions = {
   ) {
     commit(ADD_SHOT_TO_PLAYLIST, { playlist, shot })
     commit(LOAD_SHOT_PREVIEW_FILES_END, { playlist, shot, previewFiles })
-    dispatch('editPlaylist', { data: playlist, callback })
+    dispatch('editPlaylist', {
+      data: playlist,
+      callback: () => {
+        const playlistPreview = {
+          shot_id: shot.id,
+          preview_file_id: shot.preview_file_id,
+          preview_file_extension: shot.preview_file_extension,
+          preview_file_annotations: shot.preview_file_annotations,
+          preview_file_task_id: shot.preview_file_task_id,
+          preview_files: previewFiles
+        }
+        callback(null, playlistPreview)
+      }
+    })
   },
 
   removeShotPreviewFromPlaylist (
@@ -218,9 +231,9 @@ const mutations = {
       Object.assign(playlist, newPlaylist)
     } else {
       state.playlists.push(newPlaylist)
-      state.playlists = sortPlaylists(state.playlists)
+      state.playlistMap[newPlaylist.id] = newPlaylist
     }
-    state.playlistMap[newPlaylist.id] = newPlaylist
+    state.playlists = sortPlaylists(state.playlists)
   },
 
   [DELETE_PLAYLIST_START] (state) {
@@ -228,10 +241,7 @@ const mutations = {
   [DELETE_PLAYLIST_ERROR] (state) {
   },
   [DELETE_PLAYLIST_END] (state, playlistToDelete) {
-    const playlistToDeleteIndex = state.playlists.findIndex(
-      (playlist) => playlist.id === playlistToDelete.id
-    )
-    state.playlists.splice(playlistToDeleteIndex, 1)
+    state.playlists = removeModelFromList(state.playlists, playlistToDelete)
     delete state.playlistMap[playlistToDelete.id]
   },
 
