@@ -299,23 +299,35 @@ export default {
       const tmpShots = {}
       if (this.currentPlaylist && this.currentPlaylist.shots) {
         this.currentPlaylist.shots.forEach((shotPreview) => {
-          const shot = this.shotMap[shotPreview.shot_id]
-          if (shot) {
-            tmpShots[shotPreview.shot_id] = {
-              id: shotPreview.shot_id,
-              name: shot.name,
-              sequence_name: shot.sequence_name,
-              entity_name: shot.tasks[0].entity_name,
-              preview_files: shotPreview.preview_files,
-              preview_file_id: shotPreview.preview_file_id || shot.preview_file_id,
-              preview_file_extension: shotPreview.extension || shot.preview_file_extension,
-              preview_file_task_id: shotPreview.task_id || shot.preview_file_task_id,
-              preview_file_annotations: shotPreview.annotations || shot.preview_file_annotations
-            }
-          }
+          this.addShotToCurrentShots(shotPreview, tmpShots)
         })
       }
       this.currentShots = tmpShots
+    },
+
+    addShotToCurrentShots (shotPreview, playlistShotMap) {
+      const shot = this.shotMap[shotPreview.shot_id]
+      if (shot) {
+        const playlistShot = {
+          id: shotPreview.shot_id,
+          name: shot.name,
+          sequence_name: shot.sequence_name,
+          entity_name: shot.tasks[0].entity_name,
+          preview_files: shotPreview.preview_files,
+          preview_file_id:
+            shotPreview.preview_file_id || shot.preview_file_id,
+          preview_file_extension:
+            shotPreview.extension || shot.preview_file_extension,
+          preview_file_task_id:
+            shotPreview.task_id || shot.preview_file_task_id,
+          preview_file_annotations:
+            shotPreview.annotations || shot.preview_file_annotations
+        }
+        playlistShotMap[shotPreview.shot_id] = playlistShot
+        return playlistShot
+      } else {
+        return null
+      }
     },
 
     clearCurrentPlaylist () {
@@ -416,22 +428,36 @@ export default {
 
     addShot (shot) {
       return new Promise((resolve, reject) => {
+        console.log('add')
         if (this.currentPlaylist.id && !this.currentShots[shot.id]) {
           this.loadShotPreviewFiles({
             playlist: this.currentPlaylist,
             shot,
             callback: (err, previewFiles) => {
               if (err) console.log(err)
+              const shotInfo = { ...shot }
+              if (
+                !shotInfo.preview_file_id &&
+                Object.keys(previewFiles).length > 0
+              ) {
+                const previewFile =
+                  previewFiles[Object.keys(previewFiles)[0]][0]
+                shotInfo.preview_file_id = previewFile.id
+                shotInfo.preview_file_task_id = previewFile.task_id
+              }
               this.addShotPreviewToPlaylist({
                 playlist: this.currentPlaylist,
                 previewFiles: previewFiles,
-                shot,
-                callback: () => {
-                  this.rebuildCurrentShots()
-                  setTimeout(() => {
+                shot: shotInfo,
+                callback: (err, shotPreview) => {
+                  if (err) console.error(err)
+                  const playlistShot =
+                    this.addShotToCurrentShots(shotPreview, this.currentShots)
+                  this.$refs['playlist-player'].shotList.push(playlistShot)
+                  this.$nextTick(() => {
                     this.$refs['playlist-player'].scrollToRight()
-                  }, 500)
-                  resolve()
+                    resolve()
+                  })
                 }
               })
             }
@@ -446,9 +472,7 @@ export default {
       this.$options.silent = true
       this.loading.addSequence = true
       const shots = [...this.sequenceShots].reverse()
-      console.log('run')
       this.addShots(shots, () => {
-        console.log('toto')
         this.loading.addSequence = false
         this.$options.silent = false
       })
@@ -479,17 +503,13 @@ export default {
     },
 
     addShots (shots, callback) {
-      console.log('addShots')
       if (shots && shots.length > 0) {
         const shot = shots.pop()
-        console.log('shot add', shot.id)
         this.addShot(shot)
           .then(() => {
-            console.log('shot added', shot.id)
             this.addShots(shots, callback)
           })
       } else {
-        console.log('end')
         callback()
       }
     },
@@ -500,7 +520,6 @@ export default {
         shot,
         callback: () => {
           delete this.currentShots[shot.id]
-          this.currentShots = { ...this.currentShots }
         }
       })
     },

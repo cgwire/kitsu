@@ -322,7 +322,7 @@
  */
 import moment from 'moment-timezone'
 import { mapActions, mapGetters } from 'vuex'
-import { removeModelFromList } from '../../../lib/helpers'
+// import { removeModelFromList } from '../../../lib/helpers'
 import { fabric } from 'fabric'
 
 import AnnotationBar from './AnnotationBar'
@@ -634,7 +634,6 @@ export default {
 
     scrollToShot (index) {
       if (this.$refs['shot-' + index]) {
-        console.log('cool')
         const shotWidget = this.$refs['shot-' + index][0].$el
         const playlistEl = this.$refs['playlisted-shots']
         const shot = this.shotList[index]
@@ -716,7 +715,12 @@ export default {
 
     removeShot (shot) {
       this.$emit('remove-shot', shot)
-      this.shotList = removeModelFromList(this.shotList, shot)
+      this.$options.silent = true
+      const shotIndex = this.shotList.findIndex(s => s.id === shot.id)
+      this.shotList.splice(shotIndex, 1)
+      setTimeout(() => {
+        this.$options.silent = false
+      }, 1000)
     },
 
     setFullScreen () {
@@ -911,7 +915,7 @@ export default {
           this.rawPlayerComparison.play()
         }
       }
-      this.scrollToShot(this.playingShotIndex)
+      if (!this.$options.silent) this.scrollToShot(this.playingShotIndex)
     },
 
     onPreviewChanged (shot, previewFileId) {
@@ -1240,6 +1244,7 @@ export default {
       this.playingShotIndex = 0
       this.pause()
       this.rawPlayer.setCurrentTime(0)
+      this.updateProgressBar()
       this.updateTaskPanel()
       this.rebuildComparisonOptions()
       this.clearCanvas()
@@ -1252,7 +1257,6 @@ export default {
         this.maxDurationRaw = 0
         this.maxDuration = '00:00.00'
       } else {
-        this.playShot(0)
       }
     },
 
