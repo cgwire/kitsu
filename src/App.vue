@@ -568,6 +568,22 @@ a:hover {
   margin-bottom: 2em;
 }
 
+.ml05 {
+  margin-left: 0.5em;
+}
+
+.ml1 {
+  margin-left: 1em;
+}
+
+.mr05 {
+  margin-right: 0.5em;
+}
+
+.mr1 {
+  margin-right: 1em;
+}
+
 .mt1 {
   margin-top: 1em;
 }

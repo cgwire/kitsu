@@ -87,7 +87,7 @@ const auth = {
           callback(err)
         } else {
           const user = res.body.user
-          const organisation = res.body.organisation
+          const organisation = res.body.organisation || {}
           const isLdap = res.body.ldap
           organisation.use_original_file_name =
             organisation.use_original_file_name ? 'true' : 'false'

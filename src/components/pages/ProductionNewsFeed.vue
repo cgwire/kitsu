@@ -64,7 +64,7 @@
               :key="'news-' + news.id"
               v-for="news in dayList"
             >
-              <div v-if="previewMode === 'comments' || news.preview_file_id">
+              <div v-if="previewMode === 'comments'">
                 <div
                   :class="{
                     'news-line': true,
@@ -118,8 +118,17 @@
                           <span>
                             {{ $t('news.commented_on') }}
                           </span>
+                          <entity-thumbnail
+                            class="ml05"
+                            :entity="{
+                              id: news.task_entity_id,
+                              preview_file_id: news.entity_preview_file_id
+                            }"
+                            v-if="news.entity_preview_file_id"
+                          />
+
                           <span class="strong">
-                            {{ ' ' + news.project_name }} / {{ news.full_entity_name }}
+                            {{ news.full_entity_name }}
                           </span>
                         </span>
                       </div>
@@ -130,7 +139,7 @@
 
               <div
                 class="preview"
-                v-if="news.preview_file_id && previewMode == 'previews'"
+                v-if="news.preview_file_id && previewMode === 'previews'"
               >
                 <div
                   :class="{
@@ -141,11 +150,21 @@
                   }"
                   @click.prevent="onNewsSelected(news)"
                 >
+                  <span :class="{
+                    dot: true,
+                    red: hasRetakeValue(news),
+                    green: hasDoneValue(news)
+                  }"></span>
                   <span class="date flexrow-item">
+                    {{ formatTime(news.created_at) }}
                   </span>
+
                   <div class="flexrow-item task-type-wrapper">
-                  </div>
-                  <div class="flexrow-item validation-wrapper">
+                    <task-type-name
+                      class="task-type-name"
+                      :task-type="buildTaskTypeFromNews(news)"
+                      :production-id="currentProduction.id"
+                    />
                   </div>
 
                   <div class="flexrow-item comment-content">
@@ -167,8 +186,16 @@
                           <span>
                             {{ $t('news.set_preview_on') }}
                           </span>
+                          <entity-thumbnail
+                            class="ml05"
+                            :entity="{
+                              id: news.task_entity_id,
+                              preview_file_id: news.entity_preview_file_id
+                            }"
+                            v-if="news.entity_preview_file_id"
+                          />
                           <span class="strong">
-                            {{ ' ' + news.project_name }} / {{ news.full_entity_name }}
+                            {{ news.full_entity_name }}
                           </span>
                         </span>
                       </div>
@@ -582,8 +609,13 @@ export default {
   }
 
   .news-line {
+    &:hover {
+      border-left: 6px solid $green;
+    }
+
     &.selected {
       border-left: 6px solid $dark-purple;
+      background: $purple-strong;
     }
   }
 
@@ -706,6 +738,10 @@ export default {
   .explaination,
   .explaination span {
     display: inline;
+
+    &.entity-thumbnail {
+      display: inline-block;
+    }
   }
 }
 
@@ -730,14 +766,16 @@ export default {
   padding-left: 1em;
   align-items: middle;
   cursor: pointer;
-  margin: 1em 0;
+  padding-top: 0.5em;
+  padding-bottom: 0.5em;
 
   &:hover {
-    border-left: 6px solid $grey;
+    border-left: 6px solid $light-green-light;
   }
 
   &.selected {
     border-left: 6px solid $purple;
+    background: $light-purple;
   }
 }
 
