@@ -310,14 +310,15 @@ def build_playlist_movie_file(playlist):
         height,
         fps
     )
+    file_store.add_movie("playlists", job["id"], movie_file_path)
     end_build_job(playlist, job)
     return job
 
 
 def start_build_job(playlist):
     """
-    Register in database that a new build is running. Emits an event to notify
     clients that a new job is running.
+    Register in database that a new build is running. Emits an event to notify
     """
     job = BuildJob.create(
         status="running",
@@ -377,8 +378,8 @@ def get_playlist_file_name(playlist):
     """
     project = projects_service.get_project(playlist["project_id"])
     attachment_filename = "%s_%s" % (
-        project["name"],
-        playlist["name"]
+        slugify(project["name"]),
+        slugify(playlist["name"]),
     )
     return slugify(attachment_filename)
 
@@ -387,10 +388,7 @@ def get_playlist_movie_file_path(playlist, build_job):
     """
     Build file path for the movie file matching given playlist.
     """
-    movie_file_name = "%s-%s.mp4" % (
-        get_playlist_file_name(playlist),
-        build_job["id"]
-    )
+    movie_file_name = "cache-playlists-%s.mp4" % build_job["id"]
     return os.path.join(config.TMP_DIR, movie_file_name)
 
 
@@ -398,7 +396,7 @@ def get_playlist_zip_file_path(playlist):
     """
     Build file path for the archive file matching given playlist.
     """
-    zip_file_name = "%s.zip" % get_playlist_file_name(playlist)
+    zip_file_name = "%s.zip" % playlist["id"]
     return os.path.join(config.TMP_DIR, zip_file_name)
 
 
@@ -418,6 +416,18 @@ def get_build_job(build_job_id):
     Return given build job as a dict.
     """
     return get_build_job_raw(build_job_id).serialize()
+
+
+def remove_playlist(playlist_id):
+    """
+    Remove given playlist from database (and delete related build jobs).
+    """
+    playlist = get_playlist_raw(playlist_id)
+    playlist_dict = playlist.serialize()
+    query = BuildJob.query.filter_by(playlist_id=playlist_id)
+    for job in query.all():
+        remove_build_job(playlist_dict, job.id)
+    playlist.delete()
 
 
 def remove_build_job(playlist, build_job_id):
