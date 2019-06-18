@@ -20,6 +20,7 @@ from zou.app.services import (
     user_service,
 )
 from zou.app.utils import (
+    fs,
     events,
     movie_utils,
     permissions,
@@ -81,7 +82,7 @@ def send_picture_file(prefix, preview_file_id, as_attachment=False):
 
 
 def send_storage_file(
-    get_path,
+    get_local_path,
     open_file,
     prefix,
     preview_file_id,
@@ -93,17 +94,14 @@ def send_storage_file(
     Send file from storage. If it's not a local storage, cache the file in
     a temporary folder before sending it. It accepts conditional headers.
     """
-    if config.FS_BACKEND == "local":
-        file_path = get_path(prefix, preview_file_id)
-    else:
-        file_path = os.path.join(
-            config.TMP_DIR,
-            "cache-%s-%s.%s" % (prefix, preview_file_id, extension)
-        )
-        if not os.path.exists(file_path) or os.path.getsize(file_path) == 0:
-            with open(file_path, 'wb') as tmp_file:
-                for chunk in open_file(prefix, preview_file_id):
-                    tmp_file.write(chunk)
+    file_path = fs.get_file_path(
+        config,
+        get_local_path,
+        open_file,
+        prefix,
+        preview_file_id,
+        extension
+    )
 
     attachment_filename = ""
     if as_attachment:
