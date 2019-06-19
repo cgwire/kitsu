@@ -34,6 +34,8 @@ def convert_jpg_to_png(file_source_path):
     file_target_path = os.path.join(folder_path, file_target_name)
 
     im = Image.open(file_source_path)
+    if im.mode == "CMYK":
+        im = im.convert("RGB")
     im.save(file_target_path, "PNG")
     fs.rm_file(file_source_path)
     return file_target_path
@@ -73,6 +75,8 @@ def turn_into_thumbnail(file_path, size=None):
         size = im.size
 
     im = im.resize(size, Image.LANCZOS)
+    if im.mode == "CMYK":
+        im = im.convert("RGB")
     im.save(file_path, "PNG")
     return file_path
 
