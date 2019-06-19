@@ -296,7 +296,6 @@ def build_playlist_movie_file(playlist):
     Build a movie for all files for a given playlist into the temporary folder.
     """
     job = start_build_job(playlist)
-
     project = projects_service.get_project(playlist["project_id"])
     tmp_file_paths = retrieve_playlist_tmp_files(playlist)
     movie_file_path = get_playlist_movie_file_path(playlist, job)
@@ -354,10 +353,12 @@ def build_playlist_job(playlist, email):
     """
     from zou.app import app, mail
     with app.app_context():
+        job = None
         try:
             job = build_playlist_movie_file(playlist)
         except:
-            end_build_job(playlist, job)
+            if job is not None:
+                end_build_job(playlist, job)
             raise
 
         message_text = """
