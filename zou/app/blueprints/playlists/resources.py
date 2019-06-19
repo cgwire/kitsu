@@ -1,4 +1,3 @@
-import os
 import slugify
 
 from flask import send_file as flask_send_file
@@ -110,7 +109,8 @@ class BuildPlaylistMovieResource(Resource):
             queue_store.job_queue.enqueue(
                 playlists_service.build_playlist_job,
                 playlist,
-                current_user["email"]
+                current_user["email"],
+                job_timeout=7200
             )
             return {"job": "running"}
         else:
