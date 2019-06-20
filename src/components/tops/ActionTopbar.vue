@@ -689,13 +689,13 @@ export default {
     runCustomAction () {
       this.postCustomAction({
         data: {
-          entityType: this.currentEntityType,
-          originUrl: this.currentUrl,
-          originServer: this.currentHost,
+          entitytype: this.currentEntityType,
+          originurl: this.currentUrl,
+          originserver: this.currentHost,
           selection: this.selectedTaskIds,
-          productionId: this.currentProduction.id,
-          userId: this.user.id,
-          userEmail: this.user.email
+          productionid: this.currentProduction.id,
+          userid: this.user.id,
+          useremail: this.user.email
         },
         url: this.customAction.url
       })
