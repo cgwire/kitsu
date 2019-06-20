@@ -19,7 +19,7 @@ export default {
       name: customAction.name,
       url: customAction.url,
       entity_type: customAction.entityType,
-      is_ajax: Boolean(customAction.isAjax)
+      is_ajax: customAction.isAjax === 'true'
     }
     client.put(`/api/data/custom-actions/${customAction.id}`, data, callback)
   },
