@@ -65,41 +65,44 @@
     <page-subtitle :text="$t('assets.cast_in')"></page-subtitle>
     <div v-if="currentAsset">
       <div
-        class="sequence-shots"
-        :key="sequenceShots.length > 0 ? sequenceShots[0].sequence_name : ''"
-        v-for="sequenceShots in currentAsset.castInShotsBySequence"
         v-if="currentAsset.castInShotsBySequence[0].length > 0"
       >
-        <div class="shot-sequence">
-          {{ sequenceShots.length > 0 ? sequenceShots[0].sequence_name : '' }}
-        </div>
-        <div class="shot-list">
-          <router-link
-            class="shot-link"
-            :key="shot.shot_id"
-            :to="{
-              name: 'shot',
-              params: {
-                production_id: currentProduction.id,
-                shot_id: shot.shot_id
-              }
-            }"
-            v-for="shot in sequenceShots"
-          >
-            <entity-thumbnail
-              :entity="shot"
-              :square="true"
-              :empty-width="100"
-              :empty-height="100"
-              :with-link="false"
-            />
-            <div>
-              <span>{{ shot.name }}</span>
-              <span v-if="shot.nb_occurences > 1">
-                ({{ shot.nb_occurences }})
-              </span>
-            </div>
-          </router-link>
+        <div
+          class="sequence-shots"
+          :key="sequenceShots.length > 0 ? sequenceShots[0].sequence_name : ''"
+          v-for="sequenceShots in currentAsset.castInShotsBySequence"
+        >
+          <div class="shot-sequence">
+            {{ sequenceShots.length > 0 ? sequenceShots[0].sequence_name : '' }}
+          </div>
+          <div class="shot-list">
+            <router-link
+              class="shot-link"
+              :key="shot.shot_id"
+              :to="{
+                name: 'shot',
+                params: {
+                  production_id: currentProduction.id,
+                  shot_id: shot.shot_id
+                }
+              }"
+              v-for="shot in sequenceShots"
+            >
+              <entity-thumbnail
+                :entity="shot"
+                :square="true"
+                :empty-width="100"
+                :empty-height="100"
+                :with-link="false"
+              />
+              <div>
+                <span>{{ shot.name }}</span>
+                <span v-if="shot.nb_occurences > 1">
+                  ({{ shot.nb_occurences }})
+                </span>
+              </div>
+            </router-link>
+          </div>
         </div>
       </div>
       <div v-else>

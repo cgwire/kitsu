@@ -322,11 +322,9 @@
  */
 import moment from 'moment-timezone'
 import { mapActions, mapGetters } from 'vuex'
-// import { removeModelFromList } from '../../../lib/helpers'
 import { fabric } from 'fabric'
 
 import AnnotationBar from './AnnotationBar'
-import ButtonHrefLink from '../../widgets/ButtonHrefLink'
 import ButtonSimple from '../../widgets/ButtonSimple'
 import Combobox from '../../widgets/Combobox'
 import DeleteModal from '../../widgets/DeleteModal'
@@ -341,7 +339,6 @@ export default {
 
   components: {
     AnnotationBar,
-    ButtonHrefLink,
     ButtonSimple,
     Combobox,
     DeleteModal,
@@ -511,7 +508,7 @@ export default {
 
     formatDate (creationDate) {
       const date = moment.tz(creationDate, 'UTC').tz(this.timezone)
-      return date.format('YYYY-MM-DD HH:MM')
+      return date.format('YYYY-MM-DD HH:mm')
     },
 
     formatTime (seconds) {
@@ -889,7 +886,8 @@ export default {
     },
 
     onMouseMove () {
-      if (this.$refs['button-bar'].style.opacity !== 1) {
+      const buttonBar = this.$refs['button-bar']
+      if (buttonBar && buttonBar.style.opacity !== 1) {
         this.displayBars()
       }
       let isMovieFullScreen =
@@ -1516,6 +1514,7 @@ progress {
   height: 120px;
   overflow-y: auto;
   padding: 8px;
+  z-index: 300;
 }
 
 .build-title {

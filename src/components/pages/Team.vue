@@ -34,13 +34,11 @@ import { mapGetters, mapActions } from 'vuex'
 import { sortPeople } from '../../lib/sorting'
 
 import ProductionTeamList from '../lists/ProductionTeamList'
-import PageTitle from '../widgets/PageTitle'
 import PeopleField from '../widgets/PeopleField'
 
 export default {
   name: 'people',
   components: {
-    PageTitle,
     PeopleField,
     ProductionTeamList
   },

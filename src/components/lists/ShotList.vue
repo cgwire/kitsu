@@ -258,13 +258,11 @@ import { entityListMixin } from './base'
 import { selectionListMixin } from './selection'
 import { formatListMixin } from './format_mixin'
 
-import ButtonHrefLink from '../widgets/ButtonHrefLink'
 import ButtonLink from '../widgets/ButtonLink'
 import ButtonSimple from '../widgets/ButtonSimple'
 import DescriptionCell from '../cells/DescriptionCell'
 import EntityThumbnail from '../widgets/EntityThumbnail'
 import TableMetadataHeaderMenu from '../widgets/TableMetadataHeaderMenu'
-import PageTitle from '../widgets/PageTitle'
 import RowActions from '../widgets/RowActions'
 import TableHeaderMenu from '../widgets/TableHeaderMenu'
 import TableInfo from '../widgets/TableInfo'
@@ -290,13 +288,11 @@ export default {
   },
 
   components: {
-    ButtonHrefLink,
     ButtonLink,
     ButtonSimple,
     ChevronDownIcon,
     DescriptionCell,
     EntityThumbnail,
-    PageTitle,
     RowActions,
     TableHeaderMenu,
     TableMetadataHeaderMenu,

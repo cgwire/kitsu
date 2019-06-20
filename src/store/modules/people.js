@@ -266,17 +266,15 @@ const actions = {
     })
   },
 
-  newPeople ({ commit, state }, payload) {
-    commit(EDIT_PEOPLE_START, payload.data)
+  newPeople ({ commit, state }, { data, callback }) {
+    commit(EDIT_PEOPLE_START, data)
     peopleApi.newPerson(state.personToEdit, (err, person) => {
       if (err) {
         commit(EDIT_PEOPLE_ERROR)
       } else {
-        commit(NEW_PEOPLE_END, person.id)
-        commit(EDIT_PEOPLE_END)
         commit(HIDE_EDIT_PEOPLE_MODAL)
       }
-      if (payload.callback) payload.callback(err)
+      if (callback) callback(err)
     })
   },
 
@@ -516,13 +514,15 @@ const mutations = {
   [DELETE_PEOPLE_END] (state, person) {
     state.isDeleteLoading = false
     state.personToDelete = undefined
-    const personToDeleteIndex = state.people.findIndex(
-      (p) => p.id === person.id
-    )
-    if (personToDeleteIndex >= 0) {
-      state.people.splice(personToDeleteIndex, 1)
+    if (person) {
+      const personToDeleteIndex = state.people.findIndex(
+        (p) => p.id === person.id
+      )
+      if (personToDeleteIndex >= 0) {
+        state.people.splice(personToDeleteIndex, 1)
+      }
+      delete state.personMap[person.id]
     }
-    delete state.personMap[person.id]
   },
 
   [DELETE_PEOPLE_ERROR] (state) {
@@ -550,33 +550,38 @@ const mutations = {
     state.personToEdit = Object.assign(state.personToEdit, data)
   },
 
-  [NEW_PEOPLE_END] (state, personId) {
-    state.personToEdit.id = personId
+  [NEW_PEOPLE_END] (state) {
   },
 
   [EDIT_PEOPLE_END] (state, form) {
     state.isEditLoading = false
     state.isEditLoadingError = false
+
+    console.log('edit end')
+    let personToAdd = { ...form }
+    personToAdd = helpers.addAdditionalInformation(personToAdd)
+
     const personToEditIndex = state.people.findIndex(
-      (person) => person.id === state.personToEdit.id
+      (person) => person.id === personToAdd.id
     )
-    state.personToEdit = helpers.addAdditionalInformation(state.personToEdit)
-    if (personToEditIndex >= 0) {
-      state.personMap[state.personToEdit.id] = { ...state.personToEdit }
-      delete state.people[personToEditIndex]
-      state.people[personToEditIndex] = state.personMap[state.personToEdit.id]
-    } else {
-      state.people = [
-        ...state.people,
-        state.personToEdit
-      ]
-      state.personMap[state.personToEdit.id] = state.personToEdit
-      state.displayedPeople.push(state.personToEdit)
-    }
-    sortPeople(state.people)
-    sortPeople(state.displayedPeople)
-    state.personToEdit = {
-      role: 'user'
+    if (personToAdd.name) {
+      if (personToEditIndex >= 0) {
+        console.log('edit')
+        state.personMap[state.personToEdit.id] = personToAdd
+        delete state.people[personToEditIndex]
+        state.people[personToEditIndex] = state.personMap[state.personToEdit.id]
+      } else if (!state.personMap[personToAdd.id]) {
+        console.log('add')
+        state.people.push(personToAdd)
+        state.personMap[personToAdd.id] = personToAdd
+      }
+      state.people = sortPeople(state.people)
+      console.log(state.people)
+      state.displayedPeople = state.people
+      state.peopleIndex = buildNameIndex(state.people)
+      state.personToEdit = {
+        role: 'user'
+      }
     }
   },
 

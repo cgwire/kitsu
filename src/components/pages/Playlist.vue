@@ -137,7 +137,7 @@
               playlisted: currentShots[shot.id] !== undefined
             }"
             :key="shot.id"
-            @click.prevent="addShot(shot)"
+            @click.prevent="addShotToPlaylist(shot)"
             v-for="shot in sequenceShots"
           >
             <entity-thumbnail
@@ -158,7 +158,6 @@ import moment from 'moment-timezone'
 import { PlusIcon } from 'vue-feather-icons'
 import { updateModelFromList, removeModelFromList } from '../../lib/helpers'
 
-import ButtonLink from '../widgets/ButtonLink'
 import Combobox from '../widgets/Combobox'
 import EntityThumbnail from '../widgets/EntityThumbnail'
 import ErrorText from '../widgets/ErrorText'
@@ -170,7 +169,6 @@ export default {
   name: 'productions',
 
   components: {
-    ButtonLink,
     Combobox,
     EntityThumbnail,
     ErrorText,
@@ -428,7 +426,6 @@ export default {
 
     addShot (shot) {
       return new Promise((resolve, reject) => {
-        console.log('add')
         if (this.currentPlaylist.id && !this.currentShots[shot.id]) {
           this.loadShotPreviewFiles({
             playlist: this.currentPlaylist,
@@ -466,6 +463,16 @@ export default {
           resolve()
         }
       })
+    },
+
+    addShotToPlaylist (shot) {
+      this.$options.silent = true
+      this.addShot(shot)
+        .then(() => {
+          setTimeout(() => {
+            this.$options.silent = false
+          }, 500)
+        })
     },
 
     addSequence () {

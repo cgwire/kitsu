@@ -261,8 +261,8 @@
                 />
                 <input
                   type="hidden"
-                  id="entity_type"
-                  name="entity_type"
+                  id="entitytype"
+                  name="entitytype"
                   :value="currentEntityType"
                 />
                 <button
@@ -385,8 +385,7 @@
 import { mapGetters, mapActions } from 'vuex'
 import { sortPeople } from '../../lib/sorting'
 
-import { ChevronDownIcon, XIcon, MoreVerticalIcon } from 'vue-feather-icons'
-import ButtonHrefLink from '../widgets/ButtonHrefLink'
+import { ChevronDownIcon, XIcon } from 'vue-feather-icons'
 import Combobox from '../widgets/Combobox'
 import ComboboxModel from '../widgets/ComboboxModel'
 import ComboboxStatus from '../widgets/ComboboxStatus'
@@ -403,10 +402,8 @@ export default {
     ComboboxModel,
     ComboboxStatus,
     NotificationBell,
-    MoreVerticalIcon,
     PeopleField,
     Spinner,
-    ButtonHrefLink,
     XIcon
   },
 
@@ -692,13 +689,13 @@ export default {
     runCustomAction () {
       this.postCustomAction({
         data: {
-          entityType: this.currentEntityType,
-          originUrl: this.currentUrl,
-          originServer: this.currentHost,
+          entitytype: this.currentEntityType,
+          originurl: this.currentUrl,
+          originserver: this.currentHost,
           selection: this.selectedTaskIds,
-          productionId: this.currentProduction.id,
-          userId: this.user.id,
-          userEmail: this.user.email
+          productionid: this.currentProduction.id,
+          userid: this.user.id,
+          useremail: this.user.email
         },
         url: this.customAction.url
       })

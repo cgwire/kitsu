@@ -7,10 +7,14 @@ export const buildNameIndex = (entries, split = true) => {
   entries.forEach((entry) => {
     if (entry) {
       let words
-      if (split) {
-        words = entry.name.split(' ')
+      if (entry.name) {
+        if (split) {
+          words = entry.name.split(' ')
+        } else {
+          words = [entry.name]
+        }
       } else {
-        words = [entry.name]
+        words = []
       }
       indexWords(index, entryIndex, entry, words)
     }
