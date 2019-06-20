@@ -1,5 +1,6 @@
 from flask import abort
 
+from zou.app.models.login_log import LoginLog
 from zou.app.models.person import Person
 from zou.app.models.notification import Notification
 from zou.app.models.search_filter import SearchFilter
@@ -70,6 +71,7 @@ class PersonResource(BaseModelResource):
     def pre_delete(self, instance_dict):
         Notification.delete_all_by(person_id=instance_dict["id"])
         SearchFilter.delete_all_by(person_id=instance_dict["id"])
+        LoginLog.delete_all_by(person_id=instance_dict["id"])
         return instance_dict
 
     def post_delete(self, instance_dict):

@@ -108,8 +108,7 @@ class BuildPlaylistMovieResource(Resource):
             current_user = persons_service.get_current_user()
             queue_store.job_queue.enqueue(
                 playlists_service.build_playlist_job,
-                playlist,
-                current_user["email"],
+                args=(playlist, current_user["email"],),
                 job_timeout=7200
             )
             return {"job": "running"}
