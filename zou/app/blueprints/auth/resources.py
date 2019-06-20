@@ -11,7 +11,6 @@ from flask_principal import (
     identity_loaded
 )
 from flask_mail import Message
-from werkzeug.exceptions import Unauthorized
 
 from sqlalchemy.exc import OperationalError, TimeoutError
 
@@ -208,6 +207,10 @@ class LoginResource(Resource):
                 identity=Identity(user["id"])
             )
 
+            ip_address = request.environ.get(
+                'HTTP_X_REAL_IP',
+                request.remote_addr
+            )
             if is_from_browser(request.user_agent):
                 organisation = persons_service.get_organisation()
                 response = jsonify({
@@ -220,14 +223,14 @@ class LoginResource(Resource):
                 set_refresh_cookies(response, refresh_token)
                 events_service.create_login_log(
                     user["id"],
-                    request.remote_addr,
+                    ip_address,
                     "web"
                 )
 
             else:
                 events_service.create_login_log(
                     user["id"],
-                    request.remote_addr,
+                    ip_address,
                     "script"
                 )
                 response = {

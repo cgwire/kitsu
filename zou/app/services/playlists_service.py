@@ -440,6 +440,7 @@ def remove_build_job(playlist, build_job_id):
     movie_file_path = get_playlist_movie_file_path(playlist, job.serialize())
     if os.path.exists(movie_file_path):
         os.remove(movie_file_path)
+    file_store.remove_movie("playlists", build_job_id)
     job.delete()
     events.emit("build-job:delete", {
         "build_job_id": build_job_id,

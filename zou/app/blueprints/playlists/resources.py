@@ -82,10 +82,16 @@ class PlaylistDownloadResource(Resource):
                 build_job_id,
                 "mp4"
             )
+            context_name = slugify.slugify(project["name"], separator="_")
+            if project["production_type"] == "tvshow":
+                episode = shots_service.get_episode(playlist["episode_id"])
+                context_name += "_%s" % slugify.slugify(
+                    episode["name"], separator="_"
+                )
             attachment_filename = "%s_%s_%s.mp4" % (
                 slugify.slugify(build_job["created_at"], separator="")
                        .replace("t", "_"),
-                slugify.slugify(project["name"], separator="_"),
+                context_name,
                 slugify.slugify(playlist["name"], separator="_")
             )
             return flask_send_file(
@@ -108,8 +114,7 @@ class BuildPlaylistMovieResource(Resource):
             current_user = persons_service.get_current_user()
             queue_store.job_queue.enqueue(
                 playlists_service.build_playlist_job,
-                playlist,
-                current_user["email"],
+                args=(playlist, current_user["email"],),
                 job_timeout=7200
             )
             return {"job": "running"}
@@ -126,10 +131,18 @@ class PlaylistZipDownloadResource(Resource):
         project = projects_service.get_project(playlist["project_id"])
         user_service.check_project_access(playlist["project_id"])
         zip_file_path = playlists_service.build_playlist_zip_file(playlist)
+
+        context_name = slugify.slugify(project["name"], separator="_")
+        if project["production_type"] == "tvshow":
+            episode = shots_service.get_episode(playlist["episode_id"])
+            context_name += "_%s" % slugify.slugify(
+                episode["name"], separator="_"
+            )
         attachment_filename = "%s_%s.zip" % (
-            slugify.slugify(project["name"], separator="_"),
+            context_name,
             slugify.slugify(playlist["name"], separator="_")
         )
+
         return flask_send_file(
             zip_file_path,
             conditional=True,
