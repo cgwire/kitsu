@@ -191,6 +191,7 @@ export default {
       if (this.personToEdit.id === undefined) {
         action = 'newPeople'
       }
+      console.log(action)
       this.$store.dispatch(action, {
         data: form,
         callback: (err) => {
