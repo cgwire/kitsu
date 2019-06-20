@@ -261,8 +261,8 @@
                 />
                 <input
                   type="hidden"
-                  id="entity_type"
-                  name="entity_type"
+                  id="entitytype"
+                  name="entitytype"
                   :value="currentEntityType"
                 />
                 <button
@@ -385,8 +385,7 @@
 import { mapGetters, mapActions } from 'vuex'
 import { sortPeople } from '../../lib/sorting'
 
-import { ChevronDownIcon, XIcon, MoreVerticalIcon } from 'vue-feather-icons'
-import ButtonHrefLink from '../widgets/ButtonHrefLink'
+import { ChevronDownIcon, XIcon } from 'vue-feather-icons'
 import Combobox from '../widgets/Combobox'
 import ComboboxModel from '../widgets/ComboboxModel'
 import ComboboxStatus from '../widgets/ComboboxStatus'
@@ -403,10 +402,8 @@ export default {
     ComboboxModel,
     ComboboxStatus,
     NotificationBell,
-    MoreVerticalIcon,
     PeopleField,
     Spinner,
-    ButtonHrefLink,
     XIcon
   },
 

@@ -2,7 +2,7 @@
   <div class="custom-actions page fixed-page">
     <div class="level page-header">
       <div class="level-left">
-        <page-title :text="$t('custom_actions.title')"></page-title>
+        <page-title :text="$t('custom_actions.title')" />
       </div>
       <div class="level-right">
         <div class="level-item">
@@ -11,8 +11,7 @@
             icon="plus"
             :text="$t('custom_actions.new_custom_action')"
             path="/custom-actions/new"
-          >
-          </button-link>
+          />
         </div>
       </div>
     </div>
