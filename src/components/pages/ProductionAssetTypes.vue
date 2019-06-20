@@ -24,9 +24,7 @@
 
 <script>
 import { mapGetters, mapActions } from 'vuex'
-import { SearchIcon } from 'vue-feather-icons'
 import ProductionAssetTypeList from '../lists/ProductionAssetTypeList.vue'
-import PageTitle from '../widgets/PageTitle'
 import SearchField from '../widgets/SearchField'
 
 export default {
@@ -34,9 +32,7 @@ export default {
 
   components: {
     ProductionAssetTypeList,
-    PageTitle,
-    SearchField,
-    SearchIcon
+    SearchField
   },
 
   data () {

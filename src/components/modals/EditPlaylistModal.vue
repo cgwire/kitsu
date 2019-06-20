@@ -50,7 +50,6 @@
 </template>
 
 <script>
-import Combobox from '../widgets/Combobox'
 import TextField from '../widgets/TextField'
 
 import { modalMixin } from './base_modal'
@@ -59,7 +58,6 @@ export default {
   name: 'edit-playlist-modal',
   mixins: [modalMixin],
   components: {
-    Combobox,
     TextField
   },
 

@@ -167,7 +167,6 @@
 import { mapGetters } from 'vuex'
 import { fabric } from 'fabric'
 import {
-  CircleIcon,
   CopyIcon,
   DownloadIcon,
   Edit2Icon,
@@ -175,11 +174,9 @@ import {
   PauseIcon,
   PlayIcon,
   RepeatIcon,
-  SquareIcon,
   XIcon
 } from 'vue-feather-icons'
 import AnnotationBar from '../pages/playlists/AnnotationBar'
-import ButtonHrefLink from '../widgets/ButtonHrefLink'
 import Combobox from '../widgets/Combobox'
 import Spinner from '../widgets/Spinner'
 
@@ -188,8 +185,6 @@ export default {
 
   components: {
     AnnotationBar,
-    ButtonHrefLink,
-    CircleIcon,
     CopyIcon,
     Combobox,
     DownloadIcon,
@@ -199,7 +194,6 @@ export default {
     PlayIcon,
     RepeatIcon,
     Spinner,
-    SquareIcon,
     XIcon
   },
 

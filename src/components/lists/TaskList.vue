@@ -165,22 +165,11 @@
 import Vue from 'vue'
 import { mapGetters, mapActions } from 'vuex'
 import moment from 'moment-timezone'
-import {
-  ChevronDownIcon
-} from 'vue-feather-icons'
 import { range } from '../../lib/helpers'
 import { formatListMixin } from './format_mixin'
 
-import DescriptionCell from '../cells/DescriptionCell'
-import ButtonHrefLink from '../widgets/ButtonHrefLink'
-import ButtonLink from '../widgets/ButtonLink'
-import ButtonSimple from '../widgets/ButtonSimple'
 import EntityThumbnail from '../widgets/EntityThumbnail'
-import PageTitle from '../widgets/PageTitle'
-import RowActions from '../widgets/RowActions'
-import TableHeaderMenu from '../widgets/TableHeaderMenu'
 import TableInfo from '../widgets/TableInfo'
-import TableMetadataHeaderMenu from '../widgets/TableMetadataHeaderMenu'
 import PeopleAvatar from '../widgets/PeopleAvatar'
 import ValidationCell from '../cells/ValidationCell'
 
@@ -189,18 +178,9 @@ export default {
   mixins: [formatListMixin],
 
   components: {
-    ButtonLink,
-    ButtonSimple,
-    ButtonHrefLink,
-    DescriptionCell,
     EntityThumbnail,
-    ChevronDownIcon,
     PeopleAvatar,
-    PageTitle,
-    RowActions,
     TableInfo,
-    TableHeaderMenu,
-    TableMetadataHeaderMenu,
     ValidationCell
   },
 

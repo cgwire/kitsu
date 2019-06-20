@@ -50,7 +50,6 @@
 import { mapGetters, mapActions } from 'vuex'
 
 import TableInfo from '../widgets/TableInfo'
-import ValidationTag from '../widgets/ValidationTag'
 import ProductionName from '../widgets/ProductionName'
 import TaskTypeName from '../widgets/TaskTypeName'
 import { sortByName } from '../../lib/sorting'
@@ -61,8 +60,7 @@ export default {
   components: {
     TableInfo,
     ProductionName,
-    TaskTypeName,
-    ValidationTag
+    TaskTypeName
   },
 
   data () {

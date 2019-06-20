@@ -93,17 +93,12 @@ import { applyFilters, getKeyWords, getTaskFilters } from '../../lib/filtering'
 
 import { ChevronLeftIcon } from 'vue-feather-icons'
 import Combobox from '../widgets/Combobox'
-import EntityThumbnail from '../widgets/EntityThumbnail'
 import TaskInfo from '../sides/TaskInfo'
 import SearchField from '../widgets/SearchField'
 import SearchQueryList from '../widgets/SearchQueryList'
 import ButtonSimple from '../widgets/ButtonSimple'
-import SubscribeButton from '../widgets/SubscribeButton'
 import TaskList from '../lists/TaskList'
-import TableInfo from '../widgets/TableInfo'
-import TaskTypeEntityBlock from '../pages/tasktype/TaskTypeEntityBlock'
 import TaskTypeName from '../widgets/TaskTypeName'
-import ValidationTag from '../widgets/ValidationTag'
 
 export default {
   name: 'task-type-page',
@@ -111,16 +106,11 @@ export default {
     ButtonSimple,
     ChevronLeftIcon,
     Combobox,
-    EntityThumbnail,
     SearchField,
     SearchQueryList,
-    SubscribeButton,
     TaskList,
-    TableInfo,
     TaskInfo,
-    TaskTypeEntityBlock,
-    TaskTypeName,
-    ValidationTag
+    TaskTypeName
   },
 
   entityListCache: [],

@@ -47,7 +47,6 @@ import { mapGetters, mapActions } from 'vuex'
 import { XIcon } from 'vue-feather-icons'
 import PageTitle from '../widgets/PageTitle'
 import PeopleAvatar from '../widgets/PeopleAvatar'
-import TableInfo from '../widgets/TableInfo'
 import TimeSpentTaskList from '../lists/TimeSpentTaskList'
 import { monthToString } from '../../lib/helpers'
 
@@ -58,7 +57,6 @@ export default {
     XIcon,
     PageTitle,
     PeopleAvatar,
-    TableInfo,
     TimeSpentTaskList
   },
 

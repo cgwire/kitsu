@@ -135,14 +135,12 @@ import {
   SquareIcon
 } from 'vue-feather-icons'
 import CommentMenu from './CommentMenu.vue'
-import ButtonLink from './ButtonLink.vue'
 import PeopleAvatar from './PeopleAvatar.vue'
 import PeopleName from './PeopleName.vue'
 
 export default {
   name: 'comment',
   components: {
-    ButtonLink,
     CheckSquareIcon,
     ChevronDownIcon,
     CommentMenu,

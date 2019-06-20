@@ -187,7 +187,6 @@ import DeleteModal from '../widgets/DeleteModal'
 import EditAssetModal from '../modals/EditAssetModal'
 import ImportModal from '../modals/ImportModal'
 import HardDeleteModal from '../modals/HardDeleteModal'
-import PageTitle from '../widgets/PageTitle'
 import SearchField from '../widgets/SearchField'
 import SearchQueryList from '../widgets/SearchQueryList'
 import ShowAssignationsButton from '../widgets/ShowAssignationsButton'
@@ -207,7 +206,6 @@ export default {
     EditAssetModal,
     HardDeleteModal,
     ImportModal,
-    PageTitle,
     SearchField,
     SearchQueryList,
     ShowAssignationsButton,

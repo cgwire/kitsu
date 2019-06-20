@@ -125,7 +125,6 @@ import moment from 'moment-timezone'
 import firstBy from 'thenby'
 
 import Combobox from '../widgets/Combobox'
-import PageTitle from '../widgets/PageTitle'
 import SearchField from '../widgets/SearchField'
 import SearchQueryList from '../widgets/SearchQueryList'
 import TaskInfo from '../sides/TaskInfo'
@@ -137,7 +136,6 @@ export default {
 
   components: {
     Combobox,
-    PageTitle,
     SearchField,
     SearchQueryList,
     TaskInfo,

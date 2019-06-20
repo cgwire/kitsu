@@ -52,13 +52,11 @@
 <script>
 import { mapGetters, mapActions } from 'vuex'
 import TextField from '../widgets/TextField'
-import ColorField from '../widgets/ColorField'
 
 export default {
   name: 'edit-asset-type-modal',
   components: {
-    TextField,
-    ColorField
+    TextField
   },
 
   props: [

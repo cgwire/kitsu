@@ -245,9 +245,7 @@
 <script>
 import { mapGetters, mapActions } from 'vuex'
 import {
-  ChevronLeftIcon,
-  DownloadIcon,
-  ImageIcon
+  DownloadIcon
 } from 'vue-feather-icons'
 import {
   getTaskEntityPath,
@@ -257,13 +255,11 @@ import {
 
 import AddComment from '../widgets/AddComment'
 import AddPreviewModal from '../modals/AddPreviewModal'
-import ButtonLink from '../widgets/ButtonLink'
 import ButtonSimple from '../widgets/ButtonSimple'
 import Comment from '../widgets/Comment'
 import DeleteModal from '../widgets/DeleteModal'
 import EditCommentModal from '../modals/EditCommentModal'
 import ModelViewer from '../previews/ModelViewer'
-import PeopleName from '../widgets/PeopleName'
 import PictureViewer from '../previews/PictureViewer'
 import Spinner from '../widgets/Spinner'
 import SubscribeButton from '../widgets/SubscribeButton'
@@ -276,16 +272,12 @@ export default {
   components: {
     AddComment,
     AddPreviewModal,
-    ButtonLink,
     ButtonSimple,
     Comment,
-    ChevronLeftIcon,
     DownloadIcon,
     DeleteModal,
     EditCommentModal,
-    ImageIcon,
     ModelViewer,
-    PeopleName,
     PictureViewer,
     Spinner,
     SubscribeButton,

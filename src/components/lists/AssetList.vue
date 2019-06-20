@@ -247,11 +247,9 @@ import { formatListMixin } from './format_mixin'
 import { selectionListMixin } from './selection'
 
 import DescriptionCell from '../cells/DescriptionCell'
-import ButtonHrefLink from '../widgets/ButtonHrefLink'
 import ButtonLink from '../widgets/ButtonLink'
 import ButtonSimple from '../widgets/ButtonSimple'
 import EntityThumbnail from '../widgets/EntityThumbnail'
-import PageTitle from '../widgets/PageTitle'
 import RowActions from '../widgets/RowActions'
 import TableHeaderMenu from '../widgets/TableHeaderMenu'
 import TableInfo from '../widgets/TableInfo'
@@ -292,11 +290,9 @@ export default {
   components: {
     ButtonLink,
     ButtonSimple,
-    ButtonHrefLink,
     DescriptionCell,
     EntityThumbnail,
     ChevronDownIcon,
-    PageTitle,
     RowActions,
     TableInfo,
     TableHeaderMenu,
