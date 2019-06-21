@@ -65,7 +65,7 @@
     <page-subtitle :text="$t('assets.cast_in')"></page-subtitle>
     <div v-if="currentAsset">
       <div
-        v-if="currentAsset.castInShotsBySequence[0].length > 0"
+        v-if="currentAsset.castInShotsBySequence && currentAsset.castInShotsBySequence[0].length > 0"
       >
         <div
           class="sequence-shots"

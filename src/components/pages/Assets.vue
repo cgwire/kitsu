@@ -344,6 +344,10 @@ export default {
     }
   },
 
+  destroyed () {
+    this.$store.commit('CLEAR_ASSETS')
+  },
+
   methods: {
     ...mapActions([
       'addMetadataDescriptor',

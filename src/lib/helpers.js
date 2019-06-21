@@ -204,6 +204,7 @@ export const getTaskPath = (
 export const getTaskEntityPath = (task, episodeId) => {
   if (task) {
     const type = task.entity_type_name
+    console.log(type, task)
     const entityId = task.entity ? task.entity.id : task.entity_id
     const route = {
       name: type === 'Shot' ? 'shot' : 'asset',

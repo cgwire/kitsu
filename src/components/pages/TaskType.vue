@@ -2,7 +2,6 @@
 <div class="task-type columns fixed-page">
   <div class="column main-column">
     <div class="task-type page">
-
       <div class="task-type-header page-header">
         <div class="flexcolumn-item flexrow">
           <router-link

@@ -367,15 +367,8 @@ export default {
 
     title () {
       if (this.task) {
-        const type = this.task.entity_type_name
         let entityName =
           this.task.full_entity_name || this.task.entity_name
-        if (this.isSingleEpisode && type === 'Shot') {
-          entityName = entityName
-            .split('/')
-            .splice(1)
-            .join('/')
-        }
         return `${entityName}`
       } else {
         return 'Loading...'
