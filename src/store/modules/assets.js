@@ -786,13 +786,11 @@ const mutations = {
     const maxX = displayedAssets.length
     const maxY = state.nbValidationColumns
 
-    Object.assign(state, {
-      displayedAssets: displayedAssets,
-      assetFilledColumns: getFilledColumns(displayedAssets),
-      displayedAssetsLength: result ? result.length : 0,
-      assetSearchText: query,
-      assetSelectionGrid: buildSelectionGrid(maxX, maxY)
-    })
+    state.displayedAssets = displayedAssets
+    state.assetFilledColumns = getFilledColumns(displayedAssets)
+    state.displayedAssetsLength = result ? result.length : 0
+    state.assetSearchText = query
+    state.assetSelectionGrid = buildSelectionGrid(maxX, maxY)
   },
 
   [SAVE_ASSET_SEARCH_END] (state, { searchQuery }) {

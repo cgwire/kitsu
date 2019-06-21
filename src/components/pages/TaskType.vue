@@ -251,14 +251,15 @@ export default {
       if (query) {
         query = query.toLowerCase().trim()
         const keywords = getKeyWords(query) || []
-        const filters = getTaskFilters(this.$options.taskIndex, query)
         if (keywords && keywords.length > 0) {
-          this.tasks = indexSearch(this.$options.taskIndex, keywords)
+          let tasks = []
+          const filters = getTaskFilters(this.$options.taskIndex, query)
+          tasks = indexSearch(this.$options.taskIndex, keywords)
+          tasks = applyFilters(tasks, filters, this.taskMap)
+          this.tasks = this.sortTasks(tasks)
         } else {
           this.resetTasks()
         }
-        this.tasks = applyFilters(this.tasks, filters, this.taskMap)
-        this.tasks = this.sortTasks()
       } else {
         this.resetTasks()
       }
@@ -303,11 +304,12 @@ export default {
       return tasks
     },
 
-    sortTasks () {
+    sortTasks (tasks) {
+      if (!tasks) tasks = this.tasks
       const isName = ['task_status_short_name', 'entity_name'].includes(
         this.currentSort
       )
-      return this.tasks.sort(
+      return tasks.sort(
         firstBy(this.currentSort, isName ? 1 : -1)
           .thenBy('entity_name')
       )
