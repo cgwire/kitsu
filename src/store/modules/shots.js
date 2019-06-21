@@ -8,10 +8,11 @@ import taskTypesStore from './tasktypes'
 
 import { PAGE_SIZE } from '../../lib/pagination'
 import {
-  sortShots,
+  sortByName,
   sortSequences,
+  sortShots,
   sortTasks,
-  sortByName
+  sortValidationColumns
 } from '../../lib/sorting'
 import {
   appendSelectionGrid,
@@ -33,6 +34,8 @@ import {
 } from '../../lib/filtering'
 
 import {
+  CLEAR_SHOTS,
+
   LOAD_SHOTS_START,
   LOAD_SHOTS_ERROR,
   LOAD_SHOTS_END,
@@ -159,7 +162,7 @@ const helpers = {
       project_id: shot.production_id,
 
       entity_name: entityName,
-      entity_type_name: shot.shot_type_name,
+      entity_type_name: 'Shot',
       sequence_name: shot.sequence_name,
       entity: {
         id: shot.id,
@@ -173,13 +176,15 @@ const helpers = {
   setListStats (state, shots) {
     let timeSpent = 0
     let nbFrames = 0
-    state.displayedShotsLength = shots.length
     shots.forEach((shot) => {
       timeSpent += shot.timeSpent
       nbFrames += shot.nb_frames
     })
-    state.displayedShotsTimeSpent = timeSpent
-    state.displayedShotsFrames = nbFrames
+    Object.assign(state, {
+      displayedShotsLength: shots.length,
+      displayedShotsTimeSpent: timeSpent,
+      displayedShotsFrames: nbFrames
+    })
   }
 }
 
@@ -240,7 +245,9 @@ const initialState = {
 
   shotListScrollPosition: 0,
   sequenceListScrollPosition: 0,
-  episodeListScrollPosition: 0
+  episodeListScrollPosition: 0,
+
+  shotValidationColumns: []
 }
 
 const state = {
@@ -254,6 +261,7 @@ const getters = {
   episodes: state => state.episodes,
   episodeMap: state => state.episodeMap,
   episodeStats: state => state.episodeStats,
+  shotValidationColumns: state => state.shotValidationColumns,
 
   currentEpisode: state => state.currentEpisode,
 
@@ -375,6 +383,7 @@ const actions = {
     const production = rootGetters.currentProduction
     const userFilters = rootGetters.userFilters
     const taskTypeMap = rootGetters.taskTypeMap
+    const taskMap = rootGetters.taskMap
     const personMap = rootGetters.personMap
     const isTVShow = rootGetters.isTVShow
     const episode = isTVShow ? rootGetters.currentEpisode : null
@@ -394,14 +403,17 @@ const actions = {
         shotsApi.getShots(production, episode, (err, shots) => {
           if (err) commit(LOAD_SHOTS_ERROR)
           else {
-            shots.forEach((shot) => {
-              shot.project_name = production.name
-              return shot
-            })
             commit(LOAD_SEQUENCES_END, sequences)
             commit(
               LOAD_SHOTS_END,
-              { production, shots, userFilters, taskTypeMap, personMap }
+              {
+                production,
+                shots,
+                userFilters,
+                taskTypeMap,
+                taskMap,
+                personMap
+              }
             )
           }
           if (callback) callback(err)
@@ -438,7 +450,7 @@ const actions = {
         if (callback) callback(err)
       } else {
         commit(NEW_SHOT_END, shot)
-        const taskTypeIds = Object.values(rootGetters.shotValidationColumns)
+        const taskTypeIds = state.shotValidationColumns
         const createTaskPromises = taskTypeIds.map(
           (taskTypeId) => dispatch('createTask', {
             entityId: shot.id,
@@ -748,11 +760,31 @@ const actions = {
 }
 
 const mutations = {
+  [CLEAR_SHOTS] (state) {
+    cache.shots = []
+    cache.result = []
+    cache.shotIndex = {}
+    state.shotMap = {}
+
+    state.sequences = []
+    state.sequenceIndex = {}
+    state.displayedShots = []
+    state.displayedShotsLength = 0
+    state.displayedTimeSpent = 0
+    state.displayedFrames = 0
+    state.shotSearchQueries = []
+    state.displayedSequences = []
+    state.displayedSequencesLength = 0
+    state.displayedEpisodes = []
+    state.displayedEpisodesLength = 0
+  },
+
   [LOAD_SHOTS_START] (state) {
     cache.shots = []
     cache.result = []
     cache.shotIndex = {}
     state.shotMap = {}
+    state.shotValidationColumns = []
 
     state.sequences = []
     state.isShotsLoading = true
@@ -777,7 +809,7 @@ const mutations = {
 
   [LOAD_SHOTS_END] (
     state,
-    { production, shots, userFilters, taskTypeMap }
+    { production, shots, userFilters, taskMap, taskTypeMap, personMap }
   ) {
     const validationColumns = {}
     let isFps = false
@@ -785,16 +817,37 @@ const mutations = {
     let isFrameOut = false
     let isTime = false
     shots = sortShots(shots)
+    cache.shots = shots
+    cache.shotIndex = buildShotIndex(shots)
 
     state.shotMap = {}
     shots.forEach((shot) => {
+      const taskIds = []
+      const validations = {}
       let timeSpent = 0
+      shot.project_name = production.name
       shot.production_id = production.id
       shot.tasks.forEach((task) => {
         helpers.populateTask(task, shot, production)
-        validationColumns[task.task_type_id] = true
         timeSpent += task.duration
+        task.episode_id = shot.episode_id
+
+        taskMap[task.id] = task
+        validations[task.task_type_id] = task.id
+        taskIds.push(task.id)
+
+        const taskType = taskTypeMap[task.task_type_id]
+        if (!validationColumns[taskType.name]) {
+          validationColumns[taskType.name] = taskType.id
+        }
+        if (task.assignees.length > 1) {
+          task.assignees = task.assignees.sort((a, b) => {
+            return personMap[a].name.localeCompare(personMap[b])
+          })
+        }
       })
+      shot.tasks = taskIds
+      shot.validations = validations
       shot.timeSpent = timeSpent
 
       if (!isFps && shot.data.fps) isFps = true
@@ -805,25 +858,29 @@ const mutations = {
       state.shotMap[shot.id] = shot
     })
 
-    state.isShotsLoading = false
-    state.isShotsLoadingError = false
-    state.nbValidationColumns = Object.keys(validationColumns).length
+    state.shotValidationColumns = sortValidationColumns(
+      Object.values(validationColumns), taskTypeMap
+    )
+    const displayedShots = shots.slice(0, PAGE_SIZE)
 
-    state.isFps = isFps
-    state.isFrameIn = isFrameIn
-    state.isFrameOut = isFrameOut
-    state.isTime = isTime
+    Object.assign(state, {
+      isShotsLoading: false,
+      isShotsLoadingError: false,
+      nbValidationColumns: state.shotValidationColumns.length,
 
-    cache.shotIndex = buildShotIndex(shots)
+      isFps: isFps,
+      isFrameIn: isFrameIn,
+      isFrameOut: isFrameOut,
+      isTime: isTime,
 
-    state.displayedShots = shots.slice(0, PAGE_SIZE)
-    helpers.setListStats(state, shots)
-    state.shotFilledColumns = getFilledColumns(state.displayedShots)
-    cache.shots = shots
+      displayedShots: displayedShots,
+      shotFilledColumns: getFilledColumns(displayedShots)
+    })
 
     const maxX = state.displayedShots.length
     const maxY = state.nbValidationColumns
     state.shotSelectionGrid = buildSelectionGrid(maxX, maxY)
+    helpers.setListStats(state, shots)
 
     if (userFilters.shot && userFilters.shot[production.id]) {
       state.shotSearchQueries = userFilters.shot[production.id]
@@ -860,12 +917,14 @@ const mutations = {
         }
       }
     })
-    state.sequenceMap = sequenceMap
-    state.sequences = sortSequences(sequences)
-
-    state.sequenceIndex = buildSequenceIndex(state.sequences)
-    state.displayedSequences = state.sequences.slice(0, PAGE_SIZE)
-    state.displayedSequencesLength = state.sequences.length
+    const sortedSequences = sortSequences(sequences)
+    Object.assign(state, {
+      sequenceMap: sequenceMap,
+      sequences: sortedSequences,
+      sequenceIndex: buildSequenceIndex(sortedSequences),
+      displayedSequences: sortedSequences.slice(0, PAGE_SIZE),
+      displayedSequencesLength: sortedSequences.length
+    })
   },
 
   [LOAD_EPISODES_END] (state, episodes) {
@@ -1093,14 +1152,17 @@ const mutations = {
     result = applyFilters(result, filters, taskMap)
     cache.result = result
 
-    state.displayedShots = result.slice(0, PAGE_SIZE)
-    helpers.setListStats(state, result)
-    state.shotFilledColumns = getFilledColumns(state.displayedShots)
-    state.shotSearchText = shotSearch
-
-    const maxX = state.displayedShots.length
+    const displayedShots = result.slice(0, PAGE_SIZE)
+    const maxX = displayedShots.length
     const maxY = state.nbValidationColumns
-    state.shotSelectionGrid = buildSelectionGrid(maxX, maxY)
+
+    helpers.setListStats(state, result)
+    Object.assign(state, {
+      displayedShots: displayedShots,
+      shotFilledColumns: getFilledColumns(displayedShots),
+      shotSearchText: shotSearch,
+      shotSelectionGrid: buildSelectionGrid(maxX, maxY)
+    })
   },
 
   [SET_SEQUENCE_SEARCH] (state, sequenceSearch) {

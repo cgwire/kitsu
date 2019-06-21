@@ -96,7 +96,7 @@
     <page-subtitle :text="$t('shots.casting')" />
     <div v-if="currentShot">
       <div
-          v-if="currentShot.castingAssetsByType[0].length > 0"
+          v-if="currentShot.castingAssetsByType && currentShot.castingAssetsByType[0].length > 0"
       >
         <div
           class="type-assets"

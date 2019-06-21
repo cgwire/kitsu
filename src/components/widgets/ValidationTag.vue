@@ -139,6 +139,8 @@ export default {
           return '!!'
         } else if (this.task.priority === 1) {
           return '!'
+        } else {
+          return ''
         }
       } else {
         return ''

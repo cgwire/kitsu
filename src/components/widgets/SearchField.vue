@@ -34,7 +34,7 @@
 </template>
 
 <script>
-import { SaveIcon, SearchIcon, XIcon } from 'vue-feather-icons'
+import { SaveIcon, SearchIcon } from 'vue-feather-icons'
 
 export default {
   name: 'search-field',
@@ -52,8 +52,7 @@ export default {
 
   components: {
     SaveIcon,
-    SearchIcon,
-    XIcon
+    SearchIcon
   },
 
   computed: {

@@ -9,9 +9,10 @@ import peopleStore from './people'
 
 import { PAGE_SIZE } from '../../lib/pagination'
 import {
+  sortByName,
   sortAssets,
   sortTasks,
-  sortByName
+  sortValidationColumns
 } from '../../lib/sorting'
 import {
   appendSelectionGrid,
@@ -32,6 +33,8 @@ import {
 } from '../../lib/filtering'
 
 import {
+  CLEAR_ASSETS,
+
   LOAD_ASSETS_START,
   LOAD_ASSETS_ERROR,
   LOAD_ASSETS_END,
@@ -107,6 +110,7 @@ const helpers = {
 
     Object.assign(task, {
       project_id: asset.production_id,
+      episode_id: asset.source_id,
       entity_name: `${asset.asset_type_name} / ${asset.name}`,
       entity_type_name: asset.asset_type_name,
       entity: {
@@ -148,6 +152,7 @@ const cache = {
 
 const initialState = {
   assetMap: {},
+  assetValidationColumns: [],
   nbValidationColumns: 0,
 
   filteredAssets: [],
@@ -198,6 +203,7 @@ const getters = {
   assetSearchText: state => state.assetSearchText,
   assetSearchQueries: state => state.assetSearchQueries,
   assetSelectionGrid: state => state.assetSelectionGrid,
+  assetValidationColumns: state => state.assetValidationColumns,
 
   isAssetsLoading: state => state.isAssetsLoading,
   isAssetsLoadingError: state => state.isAssetsLoadingError,
@@ -240,6 +246,8 @@ const actions = {
     const personMap = rootGetters.personMap
     const episode = rootGetters.currentEpisode
     const isTVShow = rootGetters.isTVShow
+    const taskTypeMap = rootGetters.taskTypeMap
+    const taskMap = rootGetters.taskMap
 
     if (isTVShow && !episode) {
       if (callback) return callback()
@@ -254,13 +262,9 @@ const actions = {
     assetsApi.getAssets(production, episode, (err, assets) => {
       if (err) commit(LOAD_ASSETS_ERROR)
       else {
-        assets.forEach((asset) => {
-          asset.project_name = production.name
-          return asset
-        })
         commit(
           LOAD_ASSETS_END,
-          { production, assets, userFilters, personMap }
+          { production, assets, userFilters, personMap, taskMap, taskTypeMap }
         )
       }
       if (callback) callback(err)
@@ -300,7 +304,7 @@ const actions = {
       } else {
         const assetTypeMap = rootGetters.assetTypeMap
         commit(EDIT_ASSET_END, { newAsset: asset, assetTypeMap })
-        const taskTypeIds = Object.values(rootGetters.assetValidationColumns)
+        const taskTypeIds = state.assetValidationColumns
         const createTaskPromises = taskTypeIds.map(
           (taskTypeId) => dispatch('createTask', {
             entityId: asset.id,
@@ -463,11 +467,24 @@ const actions = {
 }
 
 const mutations = {
+  [CLEAR_ASSETS] (state) {
+    cache.assets = []
+    state.assetMap = {}
+    state.assetValidationColumns = []
+
+    cache.assetIndex = {}
+    state.displayedAssets = []
+    state.assetFilledColumns = {}
+    state.displayedAssetsLength = 0
+    state.assetSearchQueries = []
+  },
+
   [LOAD_ASSETS_START] (state) {
     cache.assets = []
     state.assetMap = {}
     state.isAssetsLoading = true
     state.isAssetsLoadingError = false
+    state.assetValidationColumns = []
 
     cache.assetIndex = {}
     state.displayedAssets = []
@@ -481,15 +498,25 @@ const mutations = {
     state.isAssetsLoadingError = true
   },
 
-  [LOAD_ASSETS_END] (state, { production, assets, userFilters }) {
+  [LOAD_ASSETS_END] (state, {
+    production,
+    assets,
+    userFilters,
+    personMap,
+    taskMap,
+    taskTypeMap
+  }) {
     const validationColumns = {}
     const assetTypeMap = {}
     let isTime = false
     assets = sortAssets(assets)
-
+    cache.assets = assets
+    cache.assetIndex = buildAssetIndex(assets)
     state.assetMap = {}
+
     assets.forEach((asset) => {
       let timeSpent = 0
+      const validations = {}
       if (!assetTypeMap[asset.asset_type]) {
         assetTypeMap[asset.asset_type_id] = {
           id: asset.asset_type_id,
@@ -497,35 +524,59 @@ const mutations = {
         }
       }
       asset.production_id = production.id
+      asset.project_name = production.name
 
+      const taskIds = []
       asset.tasks.forEach((task) => {
         helpers.populateTask(task, asset)
-        validationColumns[task.task_type_id] = true
+
+        if (task.assignees.length > 1) {
+          task.assignees = task.assignees.sort((a, b) => {
+            return personMap[a].name.localeCompare(personMap[b].name)
+          })
+        }
+
+        const taskType = taskTypeMap[task.task_type_id]
+        if (!validationColumns[taskType.name]) {
+          validationColumns[taskType.name] = task.task_type_id
+        }
+
         timeSpent += task.duration
+        taskIds.push(task.id)
+        validations[task.task_type_id] = task.id
+        taskMap[task.id] = task
       })
+
+      asset.tasks = taskIds
+      asset.validations = validations
       asset.timeSpent = timeSpent
-
       if (!isTime && timeSpent > 0) isTime = true
-
       state.assetMap[asset.id] = asset
     })
+    const assetTypes = Object.values(assetTypeMap)
+    cache.assetTypeIndex = buildNameIndex(assetTypes)
 
-    state.isAssetTime = isTime
+    state.assetValidationColumns = sortValidationColumns(
+      Object.values(validationColumns),
+      taskTypeMap
+    )
 
-    cache.assets = assets
-    state.isAssetsLoading = false
-    state.isAssetsLoadingError = false
-    state.nbValidationColumns = Object.keys(validationColumns).length
+    const displayedAssets = cache.assets.slice(0, PAGE_SIZE)
+    Object.assign(state, {
+      isAssetTime: isTime,
 
-    cache.assetIndex = buildAssetIndex(assets)
-    state.displayedAssets = cache.assets.slice(0, PAGE_SIZE)
-    state.displayedAssetsLength = cache.assets ? cache.assets.length : 0
-    state.assetFilledColumns = getFilledColumns(state.displayedAssets)
+      isAssetsLoading: false,
+      isAssetsLoadingError: false,
+      nbValidationColumns: state.assetValidationColumns.length,
 
-    state.assetTypes = Object.values(assetTypeMap)
-    state.displayedAssetTypes = state.assetTypes
-    state.displayedAssetTypesLength = state.assetTypes.length
-    cache.assetTypeIndex = buildNameIndex(state.assetTypes)
+      displayedAssets: displayedAssets,
+      displayedAssetsLength: cache.assets ? cache.assets.length : 0,
+      assetFilledColumns: getFilledColumns(displayedAssets),
+
+      assetTypes: assetTypes,
+      displayedAssetTypes: assetTypes,
+      displayedAssetTypesLength: assetTypes.length
+    })
 
     const maxX = state.displayedAssets.length
     const maxY = state.nbValidationColumns
@@ -731,13 +782,14 @@ const mutations = {
     let result = indexSearch(cache.assetIndex, keywords) || cache.assets
     result = applyFilters(result, filters, taskMap)
 
-    state.displayedAssets = result.slice(0, PAGE_SIZE)
-    state.assetFilledColumns = getFilledColumns(state.displayedAssets)
+    const displayedAssets = result.slice(0, PAGE_SIZE)
+    const maxX = displayedAssets.length
+    const maxY = state.nbValidationColumns
+
+    state.displayedAssets = displayedAssets
+    state.assetFilledColumns = getFilledColumns(displayedAssets)
     state.displayedAssetsLength = result ? result.length : 0
     state.assetSearchText = query
-
-    const maxX = state.displayedAssets.length
-    const maxY = state.nbValidationColumns
     state.assetSelectionGrid = buildSelectionGrid(maxX, maxY)
   },
 
@@ -879,9 +931,11 @@ const mutations = {
       searchQuery
     ) || state.assetTypes
 
-    state.displayedAssetTypes = result
-    state.displayedAssetTypesLength = result ? result.length : 0
-    state.assetTypeSearchText = searchQuery
+    Object.assign(state, {
+      displayedAssetTypes: result,
+      displayedAssetTypesLength: result ? result.length : 0,
+      assetTypeSearchText: searchQuery
+    })
   },
 
   [COMPUTE_ASSET_TYPE_STATS] (state, { taskStatusMap, taskMap }) {

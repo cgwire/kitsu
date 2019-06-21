@@ -129,7 +129,6 @@ import moment from 'moment-timezone'
 import Datepicker from 'vuejs-datepicker'
 import { en, fr } from 'vuejs-datepicker/dist/locale'
 
-import EntityThumbnail from '../widgets/EntityThumbnail'
 import PageSubtitle from '../widgets/PageSubtitle'
 import ProductionNameCell from '../cells/ProductionNameCell'
 import TaskTypeName from '../cells/TaskTypeName'
@@ -141,7 +140,6 @@ export default {
 
   components: {
     Datepicker,
-    EntityThumbnail,
     ProductionNameCell,
     PageSubtitle,
     TableInfo,

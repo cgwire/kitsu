@@ -105,13 +105,11 @@ import { fabric } from 'fabric'
 import {
   ChevronLeftIcon,
   ChevronRightIcon,
-  CircleIcon,
   DownloadIcon,
   Edit2Icon,
   MaximizeIcon,
   PlusIcon,
   TrashIcon,
-  SquareIcon,
   XIcon
 } from 'vue-feather-icons'
 import Spinner from '../widgets/Spinner'
@@ -122,12 +120,10 @@ export default {
   components: {
     ChevronLeftIcon,
     ChevronRightIcon,
-    CircleIcon,
     DownloadIcon,
     Edit2Icon,
     MaximizeIcon,
     PlusIcon,
-    SquareIcon,
     Spinner,
     TrashIcon,
     XIcon

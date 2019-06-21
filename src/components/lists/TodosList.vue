@@ -135,7 +135,6 @@ import moment from 'moment-timezone'
 import EntityThumbnail from '../widgets/EntityThumbnail'
 import TaskTypeName from '../cells/TaskTypeName'
 import TableInfo from '../widgets/TableInfo'
-import ValidationTag from '../widgets/ValidationTag'
 
 import DescriptionCell from '../cells/DescriptionCell'
 import LastCommentCell from '../cells/LastCommentCell'
@@ -155,8 +154,7 @@ export default {
     ProductionNameCell,
     TableInfo,
     TaskTypeName,
-    ValidationCell,
-    ValidationTag
+    ValidationCell
   },
 
   props: [

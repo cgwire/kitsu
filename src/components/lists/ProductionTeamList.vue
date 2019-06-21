@@ -62,15 +62,11 @@
 <script>
 import { mapGetters, mapActions } from 'vuex'
 import PeopleNameCell from '../cells/PeopleNameCell'
-import RowActions from '../widgets/RowActions'
-import TableInfo from '../widgets/TableInfo'
 
 export default {
   name: 'production-team-list',
   components: {
-    PeopleNameCell,
-    RowActions,
-    TableInfo
+    PeopleNameCell
   },
 
   props: [

@@ -135,7 +135,6 @@ import moment from 'moment-timezone'
 import { mapGetters, mapActions } from 'vuex'
 
 import PageTitle from '../widgets/PageTitle'
-import PageSubtitle from '../widgets/PageSubtitle'
 import PeopleAvatar from '../widgets/PeopleAvatar'
 import SearchField from '../widgets/SearchField'
 import SearchQueryList from '../widgets/SearchQueryList'
@@ -147,7 +146,6 @@ export default {
   name: 'person',
   components: {
     PageTitle,
-    PageSubtitle,
     PeopleAvatar,
     SearchField,
     SearchQueryList,

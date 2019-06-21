@@ -5,15 +5,12 @@ import peopleApi from '../api/people'
 import playlistsApi from '../api/playlists'
 import {
   sortComments,
-  sortByName,
-  sortValidationColumns
+  sortByName
 } from '../../lib/sorting'
 import personStore from './people'
 import taskTypeStore from './tasktypes'
 
 import {
-  LOAD_ASSETS_START,
-  LOAD_SHOTS_START,
   LOAD_ASSETS_END,
   LOAD_SHOTS_END,
 
@@ -66,8 +63,6 @@ import {
 const initialState = {
   taskMap: {},
   taskStatusMap: {},
-  assetValidationColumns: [],
-  shotValidationColumns: [],
 
   taskStatuses: [],
   taskComments: {},
@@ -136,19 +131,7 @@ const getters = {
   isShowInfos: state => state.isShowInfos,
   taskEntityPreviews: state => state.taskEntityPreviews,
   previewFormData: state => state.previewFormData,
-  isSavingCommentPreview: state => state.isSavingCommentPreview,
-
-  assetValidationColumns: (state, getters) => {
-    return sortValidationColumns(
-      Object.values(state.assetValidationColumns), getters.taskTypeMap
-    )
-  },
-
-  shotValidationColumns: (state, getters) => {
-    return sortValidationColumns(
-      Object.values(state.shotValidationColumns), getters.taskTypeMap
-    )
-  }
+  isSavingCommentPreview: state => state.isSavingCommentPreview
 }
 
 const actions = {
@@ -708,36 +691,8 @@ const actions = {
 }
 
 const mutations = {
-  [LOAD_ASSETS_START] (state, assets) {
-    state.assetValidationColumns = []
-  },
 
-  [LOAD_ASSETS_END] (state, { production, assets, personMap, userFilters }) {
-    const validationColumns = {}
-    state.taskMap = {}
-    assets.forEach((asset) => {
-      asset.validations = {}
-      asset.tasks.forEach((task) => {
-        const taskType = helpers.getTaskType(task.task_type_id)
-        if (!validationColumns[taskType.name]) {
-          validationColumns[taskType.name] = task.task_type_id
-        }
-
-        if (task.assignees.length > 1) {
-          task.assignees = task.assignees.sort((a, b) => {
-            return personMap[a].name.localeCompare(personMap[b].name)
-          })
-        }
-
-        asset.validations[task.task_type_id] = task.id
-        task.episode_id = asset.source_id
-        state.taskMap[task.id] = task
-      })
-      asset.tasks = asset.tasks.map((task) => {
-        return task.id
-      })
-    })
-    state.assetValidationColumns = validationColumns
+  [LOAD_ASSETS_END] (state, { production, userFilters }) {
     if (userFilters.task && userFilters.task[production.id]) {
       state.taskSearchQueries = userFilters.task[production.id]
     } else {
@@ -745,36 +700,7 @@ const mutations = {
     }
   },
 
-  [LOAD_SHOTS_START] (state, assets) {
-    state.shotValidationColumns = {}
-  },
-
-  [LOAD_SHOTS_END] (state, { production, shots, personMap, userFilters }) {
-    const validationColumns = {}
-    state.taskMap = {}
-    shots.forEach((shot) => {
-      shot.validations = {}
-      shot.tasks.forEach((task) => {
-        const taskType = helpers.getTaskType(task.task_type_id)
-        if (!validationColumns[taskType.name]) {
-          validationColumns[taskType.name] = task.task_type_id
-        }
-
-        if (task.assignees.length > 1) {
-          task.assignees = task.assignees.sort((a, b) => {
-            return personMap[a].name.localeCompare(personMap[b])
-          })
-        }
-
-        shot.validations[task.task_type_id] = task.id
-        task.episode_id = shot.episode_id
-        state.taskMap[task.id] = task
-      })
-      shot.tasks = shot.tasks.map((task) => {
-        return task.id
-      })
-    })
-    state.shotValidationColumns = validationColumns
+  [LOAD_SHOTS_END] (state, { production, userFilters }) {
     if (userFilters.task && userFilters.task[production.id]) {
       state.taskSearchQueries = userFilters.task[production.id]
     } else {

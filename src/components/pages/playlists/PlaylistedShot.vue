@@ -69,7 +69,6 @@ import firstBy from 'thenby'
 import { mapGetters } from 'vuex'
 import { XIcon } from 'vue-feather-icons'
 
-import ButtonSimple from '../../widgets/ButtonSimple'
 import Combobox from '../../widgets/Combobox'
 import EntityThumbnail from '../../widgets/EntityThumbnail'
 
@@ -77,7 +76,6 @@ export default {
   name: 'playlisted-shot',
 
   components: {
-    ButtonSimple,
     Combobox,
     EntityThumbnail,
     XIcon

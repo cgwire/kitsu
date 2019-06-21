@@ -118,15 +118,13 @@
 <script>
 import { mapGetters, mapActions } from 'vuex'
 
-import PageTitle from '../widgets/PageTitle'
-import Spinner from '../widgets/Spinner'
-import Combobox from '../widgets/Combobox'
-import SearchField from '../widgets/SearchField.vue'
-import ErrorText from '../widgets/ErrorText'
-import ShotLine from './breakdown/ShotLine'
 import AssetBlock from './breakdown/AssetBlock'
 import AvailableAssetBlock from './breakdown/AvailableAssetBlock'
-import { SaveIcon, SearchIcon } from 'vue-feather-icons'
+import Combobox from '../widgets/Combobox'
+import ErrorText from '../widgets/ErrorText'
+import SearchField from '../widgets/SearchField.vue'
+import ShotLine from './breakdown/ShotLine'
+import Spinner from '../widgets/Spinner'
 
 export default {
   name: 'asset-types',
@@ -136,9 +134,6 @@ export default {
     AvailableAssetBlock,
     Combobox,
     ErrorText,
-    PageTitle,
-    SaveIcon,
-    SearchIcon,
     SearchField,
     ShotLine,
     Spinner

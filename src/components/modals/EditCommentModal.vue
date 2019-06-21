@@ -71,17 +71,13 @@
 
 <script>
 import AtTa from 'vue-at/dist/vue-at-textarea'
-import Combobox from '../widgets/Combobox'
 import PeopleAvatar from '../widgets/PeopleAvatar'
-import TextareaField from '../widgets/TextareaField'
 
 export default {
   name: 'edit-comment-modal',
   components: {
     AtTa,
-    Combobox,
-    PeopleAvatar,
-    TextareaField
+    PeopleAvatar
   },
 
   props: [

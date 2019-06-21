@@ -58,7 +58,6 @@ import { mapGetters, mapActions } from 'vuex'
 import { formatListMixin } from './format_mixin'
 import RowActions from '../widgets/RowActions'
 import TableInfo from '../widgets/TableInfo'
-import TaskTypeName from '../cells/TaskTypeName'
 
 export default {
   name: 'custom-action-list',
@@ -74,7 +73,6 @@ export default {
   },
   components: {
     RowActions,
-    TaskTypeName,
     TableInfo
   },
   computed: {

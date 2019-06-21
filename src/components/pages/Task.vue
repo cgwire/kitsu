@@ -280,14 +280,11 @@ import {
 
 import AddComment from '../widgets/AddComment'
 import AddPreviewModal from '../modals/AddPreviewModal'
-import ButtonLink from '../widgets/ButtonLink'
 import Comment from '../widgets/Comment'
 import DeleteModal from '../widgets/DeleteModal'
 import EditCommentModal from '../modals/EditCommentModal'
-import EntityThumbnail from '../widgets/EntityThumbnail'
 import ModelViewer from '../previews/ModelViewer'
 import PeopleAvatar from '../widgets/PeopleAvatar'
-import PeopleName from '../widgets/PeopleName'
 import PictureViewer from '../previews/PictureViewer'
 import PreviewRow from '../widgets/PreviewRow'
 import Spinner from '../widgets/Spinner'
@@ -301,17 +298,14 @@ export default {
   components: {
     AddComment,
     AddPreviewModal,
-    ButtonLink,
     Comment,
     ChevronLeftIcon,
     DeleteModal,
     DownloadIcon,
-    EntityThumbnail,
     EditCommentModal,
     ImageIcon,
     ModelViewer,
     PeopleAvatar,
-    PeopleName,
     PreviewRow,
     PictureViewer,
     Spinner,

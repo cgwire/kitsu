@@ -2,7 +2,6 @@
 <div class="task-type columns fixed-page">
   <div class="column main-column">
     <div class="task-type page">
-
       <div class="task-type-header page-header">
         <div class="flexcolumn-item flexrow">
           <router-link
@@ -93,17 +92,12 @@ import { applyFilters, getKeyWords, getTaskFilters } from '../../lib/filtering'
 
 import { ChevronLeftIcon } from 'vue-feather-icons'
 import Combobox from '../widgets/Combobox'
-import EntityThumbnail from '../widgets/EntityThumbnail'
 import TaskInfo from '../sides/TaskInfo'
 import SearchField from '../widgets/SearchField'
 import SearchQueryList from '../widgets/SearchQueryList'
 import ButtonSimple from '../widgets/ButtonSimple'
-import SubscribeButton from '../widgets/SubscribeButton'
 import TaskList from '../lists/TaskList'
-import TableInfo from '../widgets/TableInfo'
-import TaskTypeEntityBlock from '../pages/tasktype/TaskTypeEntityBlock'
 import TaskTypeName from '../widgets/TaskTypeName'
-import ValidationTag from '../widgets/ValidationTag'
 
 export default {
   name: 'task-type-page',
@@ -111,16 +105,11 @@ export default {
     ButtonSimple,
     ChevronLeftIcon,
     Combobox,
-    EntityThumbnail,
     SearchField,
     SearchQueryList,
-    SubscribeButton,
     TaskList,
-    TableInfo,
     TaskInfo,
-    TaskTypeEntityBlock,
-    TaskTypeName,
-    ValidationTag
+    TaskTypeName
   },
 
   entityListCache: [],
@@ -262,14 +251,15 @@ export default {
       if (query) {
         query = query.toLowerCase().trim()
         const keywords = getKeyWords(query) || []
-        const filters = getTaskFilters(this.$options.taskIndex, query)
         if (keywords && keywords.length > 0) {
-          this.tasks = indexSearch(this.$options.taskIndex, keywords)
+          let tasks = []
+          const filters = getTaskFilters(this.$options.taskIndex, query)
+          tasks = indexSearch(this.$options.taskIndex, keywords)
+          tasks = applyFilters(tasks, filters, this.taskMap)
+          this.tasks = this.sortTasks(tasks)
         } else {
           this.resetTasks()
         }
-        this.tasks = applyFilters(this.tasks, filters, this.taskMap)
-        this.tasks = this.sortTasks()
       } else {
         this.resetTasks()
       }
@@ -314,11 +304,12 @@ export default {
       return tasks
     },
 
-    sortTasks () {
+    sortTasks (tasks) {
+      if (!tasks) tasks = this.tasks
       const isName = ['task_status_short_name', 'entity_name'].includes(
         this.currentSort
       )
-      return this.tasks.sort(
+      return tasks.sort(
         firstBy(this.currentSort, isName ? 1 : -1)
           .thenBy('entity_name')
       )

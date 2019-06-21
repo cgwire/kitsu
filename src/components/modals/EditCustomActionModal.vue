@@ -70,7 +70,6 @@
 
 <script>
 import { mapGetters, mapActions } from 'vuex'
-import ColorField from '../widgets/ColorField'
 import Combobox from '../widgets/Combobox'
 import ComboboxBoolean from '../widgets/ComboboxBoolean'
 import TextField from '../widgets/TextField'
@@ -78,7 +77,6 @@ import TextField from '../widgets/TextField'
 export default {
   name: 'edit-custom-action-modal',
   components: {
-    ColorField,
     Combobox,
     ComboboxBoolean,
     TextField
