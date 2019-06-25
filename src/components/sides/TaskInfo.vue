@@ -681,8 +681,6 @@ export default {
     },
 
     onPreviewChanged (index) {
-      const preview = this.taskPreviews[index]
-      console.log(preview.revision)
       this.currentPreviewIndex = index
     },
 
