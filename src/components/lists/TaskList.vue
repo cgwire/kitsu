@@ -76,7 +76,7 @@
             selected: selectionGrid[task.id]
           }"
           @click="selectTask($event, index, task)"
-          v-for="(task, index) in tasks"
+          v-for="(task, index) in displayedTasks"
         >
           <td class="thumbnail">
             <entity-thumbnail
@@ -184,6 +184,14 @@ export default {
     ValidationCell
   },
 
+  data () {
+    return {
+      lastSelection: null,
+      page: 1,
+      selectionGrid: {}
+    }
+  },
+
   props: {
     isAssets: {
       type: Boolean,
@@ -204,13 +212,6 @@ export default {
     taskType: {
       type: Object,
       default: () => {}
-    }
-  },
-
-  data () {
-    return {
-      lastSelection: null,
-      selectionGrid: {}
     }
   },
 
@@ -247,6 +248,14 @@ export default {
         if (entity && entity.nb_frames) total += entity.nb_frames
       })
       return total
+    },
+
+    displayedTasks () {
+      if (this.tasks && this.tasks.length > 0) {
+        return this.tasks.slice(0, 60 * this.page)
+      } else {
+        return []
+      }
     }
   },
 
@@ -284,6 +293,11 @@ export default {
     onBodyScroll (event, position) {
       this.$refs.headerWrapper.style.left = `-${position.scrollLeft}px`
       this.$emit('scroll', position.scrollTop)
+      const maxHeight =
+        this.$refs.body.scrollHeight - this.$refs.body.offsetHeight
+      if (maxHeight < (position.scrollTop + 100)) {
+        this.page++
+      }
     },
 
     getEntity (entityId) {
@@ -444,6 +458,7 @@ export default {
 
   watch: {
     tasks () {
+      this.page = 1
       this.resetSelection()
       this.$nextTick(this.resizeHeaders)
     },
