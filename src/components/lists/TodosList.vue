@@ -1,5 +1,5 @@
 <template>
-<div class="data-list">
+<div class="data-list task-list">
   <div style="overflow: hidden">
     <table class="table table-header" ref="headerWrapper">
       <thead>
@@ -43,7 +43,14 @@
   >
     <table class="table">
       <tbody ref="body-tbody">
-        <tr v-for="(entry, i) in entries" :key="entry + '-' + i">
+        <tr
+          v-for="(entry, i) in entries"
+          :key="entry + '-' + i"
+          :class="{
+            selected: selectionGrid && selectionGrid[i] ? selectionGrid[i][0] : false
+          }"
+          @click="onLineClicked(i, $event)"
+        >
           <production-name-cell
             class="production"
             :is-tooltip="true"
@@ -82,6 +89,7 @@
             :is-border="false"
             :is-assignees="false"
             :selectable="!done"
+            :clickable="false"
             :selected="selectionGrid && selectionGrid[i] ? selectionGrid[i][0] : false"
             :rowX="i"
             :columnY="0"
@@ -199,6 +207,12 @@ export default {
     onBodyScroll (event, position) {
       this.$refs.headerWrapper.style.left = `-${position.scrollLeft}px`
       this.$emit('scroll', position.scrollTop)
+    },
+
+    onLineClicked (i, event) {
+      const ref = 'validation-' + i + '-0'
+      const validationCell = this.$refs[ref][0]
+      validationCell.select(event)
     },
 
     onTaskSelected (validationInfo) {
@@ -438,5 +452,31 @@ td.last-comment {
 
 .empty-list img {
   max-width: 80vh;
+}
+
+.table-body .table tr.selected,
+.table-body .table tr.selected:hover {
+  background-color: #D1C4E9;
+}
+
+.table-body .table tr {
+  cursor: pointer;
+  user-select: none;
+}
+.table-body .table tr:hover {
+  background: #CCFFCC;
+}
+
+.dark {
+  tr.selected,
+  tr.selected.validation:hover {
+    background: #8F91EB;
+  }
+
+  .table-body .table tr {
+    &:hover {
+      background: #878B97;
+    }
+  }
 }
 </style>
