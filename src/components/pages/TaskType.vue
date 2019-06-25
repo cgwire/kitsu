@@ -248,7 +248,7 @@ export default {
     },
 
     onSearchChange (query) {
-      if (query) {
+      if (query && query.length !== 1) {
         query = query.toLowerCase().trim()
         const keywords = getKeyWords(query) || []
         if (keywords && keywords.length > 0) {
