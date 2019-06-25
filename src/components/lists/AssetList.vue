@@ -209,6 +209,7 @@
             :columnY="j"
             :minimized="hiddenColumns[columnId]"
             :is-static="true"
+            :is-assignees="isShowAssignations"
             @select="onTaskSelected"
             @unselect="onTaskUnselected"
             v-for="(columnId, j) in sortedValidationColumns"
@@ -315,6 +316,7 @@ export default {
       'isCurrentUserAdmin',
       'isCurrentUserClient',
       'isCurrentUserManager',
+      'isShowAssignations',
       'isShowInfos',
       'isAssetTime',
       'isTVShow',
