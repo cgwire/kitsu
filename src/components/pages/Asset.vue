@@ -26,7 +26,7 @@
 
   <div class="columns">
     <div class="column task-column">
-      <page-subtitle :text="$t('assets.tasks')"></page-subtitle>
+      <page-subtitle :text="$t('assets.tasks')" />
       <entity-task-list
         class="task-list"
         :entries="currentAsset ? currentAsset.tasks : []"
@@ -35,7 +35,7 @@
       />
     </div>
     <div class="column">
-      <page-subtitle :text="$t('main.info')"></page-subtitle>
+      <page-subtitle :text="$t('main.info')" />
       <div class="table-body">
         <table class="table" v-if="currentAsset">
           <tbody>
@@ -428,7 +428,7 @@ h2.subtitle {
 }
 
 .task-list {
-  width: 100%;
+  max-width: 100%;
 }
 
 @media screen and (max-width: 768px) {
