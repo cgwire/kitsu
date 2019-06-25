@@ -14,6 +14,7 @@
           <th class="assignees">
             {{ $t('tasks.fields.assignees') }}
           </th>
+          <th class="end-cell"></th>
         </tr>
       </thead>
     </table>
@@ -58,6 +59,7 @@
               </div>
             </div>
           </td>
+          <td class="end-cell"></td>
        </tr>
       </tbody>
     </table>
@@ -155,6 +157,10 @@ export default {
 .assignees {
   max-width: 150px;
   min-width: 150px;
+}
+
+.end-cell {
+  width: 100%;
 }
 
 .flexrow-item {
