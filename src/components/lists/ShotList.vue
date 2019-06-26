@@ -219,6 +219,7 @@
             :selected="shotSelectionGrid[i][j]"
             :rowX="i"
             :columnY="j"
+            :is-assignees="isShowAssignations"
             @select="onTaskSelected"
             @unselect="onTaskUnselected"
             v-for="(columnId, j) in sortedValidationColumns"
@@ -314,6 +315,7 @@ export default {
       'isFrameIn',
       'isFrameOut',
       'isSingleEpisode',
+      'isShowAssignations',
       'isShowInfos',
       'isTime',
       'isTVShow',

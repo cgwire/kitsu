@@ -90,6 +90,7 @@
                 class="comment-text"
                 type="text"
                 :placeholder="$t('tasks.with_comment')"
+                @keyup.ctrl.enter="confirmTaskStatusChange"
                 v-model="statusComment"
               />
             </div>

@@ -121,6 +121,7 @@
 import { mapGetters, mapActions } from 'vuex'
 import { entityListMixin } from './base'
 import ButtonLink from '../widgets/ButtonLink'
+import RowActions from '../widgets/RowActions'
 import TableInfo from '../widgets/TableInfo'
 
 export default {
@@ -144,6 +145,7 @@ export default {
 
   components: {
     ButtonLink,
+    RowActions,
     TableInfo
   },
 

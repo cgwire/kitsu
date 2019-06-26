@@ -457,6 +457,10 @@ h2.subtitle {
   align-items: center;
 }
 
+.data-list {
+  max-width: 100%;
+}
+
 .page-header .thumbnail-picture {
   margin: 0 1em 0 0;
   max-width: 80px;

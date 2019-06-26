@@ -608,8 +608,10 @@ export default {
 
     onSearchChange () {
       const searchQuery = this.$refs['asset-search-field'].getValue()
-      this.setAssetSearch(searchQuery)
-      this.resizeHeaders()
+      if (searchQuery.length !== 1) {
+        this.setAssetSearch(searchQuery)
+        this.resizeHeaders()
+      }
     },
 
     changeSearch (searchQuery) {
