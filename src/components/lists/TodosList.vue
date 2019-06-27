@@ -468,9 +468,9 @@ td.last-comment {
 }
 
 .dark {
-  tr.selected,
-  tr.selected.validation:hover {
-    background: #8F91EB;
+  .table-body .table tr.selected,
+  .table-body .table tr.selected:hover {
+    background: #5E60BA;
   }
 
   .table-body .table tr {
