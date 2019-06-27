@@ -4,8 +4,8 @@
 Zou is the memory of your CG production
 ---------------------------------------
 
-Zou is an API that stores and manages data pertaining to CG
-production, while also enabling synchronization via pipelining of tools. 
+Zou is an API that stores and manages data related to CG
+productions. All your pipeline tools can be synchronized together through it. 
 
 A dedicated Python client, `Gazu <https://gazu.cg-wire.com>`_, allows users to integrate Zou into the tools. 
 
