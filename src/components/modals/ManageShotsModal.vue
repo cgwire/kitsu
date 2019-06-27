@@ -8,7 +8,8 @@
 
     <div class="box">
 
-      <page-title :text="$t('shots.manage')" />
+      <page-title class="title" :text="$t('shots.manage')" />
+      <div class="explaination">{{ $t('shots.creation_explaination') }}</div>
 
       <div class="shot-columns">
         <div class="shot-column" v-if="isTVShow">
@@ -176,7 +177,7 @@ export default {
 
   props: {
     active: {
-      default: false,
+      default: true,
       type: Boolean
     }
   },
@@ -461,5 +462,13 @@ export default {
 
 input::placeholder {
   color: #BBB;
+}
+
+.title {
+  margin-bottom: 0em;
+}
+
+.explaination {
+  margin-bottom: 1em;
 }
 </style>
