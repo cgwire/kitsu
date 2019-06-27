@@ -936,6 +936,10 @@ tbody:last-child .empty-line:last-child {
 
 .flexrow-item {
   margin-right: 1em;
+
+  &.no-margin {
+    margin-right: 0;
+  }
 }
 
 .flexcolumn {
