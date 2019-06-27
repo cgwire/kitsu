@@ -12,7 +12,7 @@
 
       <div class="shot-columns">
         <div class="shot-column" v-if="isTVShow">
-          <h2 class="subtitle">Episodes</h2>
+          <h2 class="subtitle">{{ $t('shots.episodes') }}</h2>
 
           <div class="list">
             <div
@@ -53,7 +53,7 @@
         </div>
 
         <div class="shot-column">
-          <h2 class="subtitle">Sequences</h2>
+          <h2 class="subtitle">{{ $t('shots.sequences') }}</h2>
           <div class="list">
             <div
               :class="{
@@ -91,7 +91,7 @@
         </div>
 
         <div class="shot-column">
-          <h2 class="subtitle">Shots</h2>
+          <h2 class="subtitle">{{ $t('shots.title') }}</h2>
           <div class="list">
             <div
               class="entity-line"
@@ -110,6 +110,23 @@
               @keyup.enter="addShot"
               v-model="names.shot"
             />
+          </div>
+          <div>
+            <div class="flexrow">
+              <span class="filler">
+              </span>
+              <span class="flexrow-item">
+                {{ $t('shots.padding') }}
+              </span>
+              <combobox
+                ref="shot-padding"
+                :options="shotPaddingOptions"
+                class="shot-padding flexrow-itemn"
+                v-model="shotPadding"
+              />
+            </div>
+          </div>
+          <div class="field">
             <button
               :class="{
                 button: true,
@@ -126,11 +143,12 @@
       </div>
 
       <p class="has-text-right modal-footer">
-        <router-link
-          :to="cancelRoute"
-          class="button is-link">
+        <button
+          @click="$emit('cancel')"
+          class="button is-link"
+        >
           {{ $t("main.close") }}
-        </router-link>
+        </button>
       </p>
     </div>
 
@@ -140,22 +158,28 @@
 
 <script>
 import { mapGetters, mapActions } from 'vuex'
+
+import { modalMixin } from './base_modal'
+
+import Combobox from '../widgets/Combobox'
 import PageTitle from '../widgets/PageTitle'
 import stringHelpers from '../../lib/string'
 
 export default {
   name: 'manage-shot-modal',
+  mixins: [modalMixin],
+
   components: {
+    Combobox,
     PageTitle
   },
 
-  props: [
-    'onConfirmClicked',
-    'text',
-    'active',
-    'cancelRoute',
-    'errorText'
-  ],
+  props: {
+    active: {
+      default: false,
+      type: Boolean
+    }
+  },
 
   data () {
     return {
@@ -172,13 +196,29 @@ export default {
       displayedSequences: [],
       displayedShots: [],
       selectedEpisodeId: null,
-      selectedSequenceId: null
+      selectedSequenceId: null,
+      shotPaddingOptions: [
+        {
+          label: '1',
+          padding: '1'
+        },
+        {
+          label: '2',
+          padding: '2'
+        },
+        {
+          label: '10',
+          padding: '10'
+        }
+      ],
+      shotPadding: '1'
     }
   },
 
   watch: {
     active () {
       if (this.active) {
+        this.shotPadding = '1'
         setTimeout(() => {
           if (this.isTVShow) {
             this.$refs.addEpisodeInput.focus()
@@ -199,11 +239,9 @@ export default {
     ...mapGetters([
       'currentProduction',
       'episodes',
-      'sequences',
-      'shotMap',
-      'sequences',
       'isTVShow',
-      'currentProduction'
+      'sequences',
+      'shotMap'
     ]),
 
     isAddEpisodeAllowed () {
@@ -233,7 +271,6 @@ export default {
 
   methods: {
     ...mapActions([
-      'loadShots',
       'newEpisode',
       'newSequence',
       'newShot',
@@ -342,7 +379,10 @@ export default {
               if (err) console.log(err)
               this.loading.addShot = false
               this.selectSequence(this.selectedSequenceId)
-              this.names.shot = stringHelpers.generateNextName(shot.name)
+              this.names.shot = stringHelpers.generateNextName(
+                shot.name,
+                parseInt(this.shotPadding)
+              )
             }
           })
         }
@@ -353,7 +393,6 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-
 .dark {
   .entity-line.selected {
     background: $purple-strong;

@@ -446,6 +446,7 @@ export default {
     edit_title: 'Edit shot',
     empty_list: 'There is no shot in the production. What about creating some?',
     empty_list_client: 'There is no shot in this production.',
+    episodes: 'Episodes',
     new_shot: 'Add a shot',
     new_shots: 'Add shots',
     new_sequences: 'Add sequences',
@@ -454,8 +455,10 @@ export default {
     number: 'shot | shots',
     manage: 'Create shots',
     new_success: 'Shot {name} successfully created.',
+    padding: 'Padding:',
     restore_text: 'Are you sure you want to restore {name} into your database?',
     restore_error: 'An error occured while restoring this shot.',
+    sequences: 'Sequences',
     tasks: 'Shot Tasks',
     title: 'Shots',
     fields: {
