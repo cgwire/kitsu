@@ -94,17 +94,19 @@
             <check-square-icon class="icon" v-if="entry.checked" />
             <square-icon class="icon" v-else />
           </span>
-          <input
+          <textarea-autosize
             type="text"
-            class="flexrow-item"
+            class="checklist-text flexrow-item"
             :ref="`checklist-entry-${index}`"
-            @keyup.enter="addChecklistEntry(index)"
-            @keyup.backspace="removeChecklistEntry(index)"
-            @keyup.up="focusPrevious(index)"
-            @keyup.down="focusNext(index)"
-            @keyup="emitChangeEvent"
+            rows="1"
+            @keypress.enter.prevent.native="addChecklistEntry(index, $event)"
+            @keyup.backspace.native="removeChecklistEntry(index)"
+            @keyup.up.native="focusPrevious(index)"
+            @keyup.down.native="focusNext(index)"
+            @keyup.native="emitChangeEvent($event)"
+            :disabled="!isChangeChecklistAllowed"
             v-model="entry.text"
-          />
+          ></textarea-autosize>
         </div>
       </div>
 
@@ -117,7 +119,7 @@
   <div
     class="has-text-centered add-checklist"
     @click="addChecklistEntry(-1)"
-    v-if="taskStatus.is_retake && checklist.length === 0"
+    v-if="isAddChecklistAllowed"
   >
     {{ $t('comments.add_checklist') }}
   </div>
@@ -185,6 +187,7 @@ export default {
   computed: {
     ...mapGetters([
       'currentProduction',
+      'user',
       'personMap',
       'taskMap',
       'taskTypeMap',
@@ -234,6 +237,17 @@ export default {
     taskStatus () {
       const status = this.taskStatusMap[this.comment.task_status.id]
       return status || this.comment.task_status
+    },
+
+    isAddChecklistAllowed () {
+      return this.taskStatus.is_retake &&
+        this.checklist.length === 0 &&
+        this.user.id === this.comment.person_id
+    },
+
+    isChangeChecklistAllowed () {
+      return this.taskStatus.is_retake &&
+        this.user.id === this.comment.person_id
     }
   },
 
@@ -266,7 +280,10 @@ export default {
       this.$refs.menu.toggle()
     },
 
-    addChecklistEntry (index) {
+    addChecklistEntry (index, event) {
+      if (event) {
+        this.checklist[index].text = this.checklist[index].text.trim()
+      }
       if (index === -1 || index === this.checklist.length - 1) {
         this.checklist.push({
           text: '',
@@ -297,7 +314,7 @@ export default {
         if (index === 0) index = this.checklist.length
         index--
         const entryRef = `checklist-entry-${index}`
-        this.$refs[entryRef][0].focus()
+        this.$refs[entryRef][0].$el.focus()
       }
     },
 
@@ -306,11 +323,11 @@ export default {
         if (index === this.checklist.length - 1) index = -1
         index++
         const entryRef = `checklist-entry-${index}`
-        this.$refs[entryRef][0].focus()
+        this.$refs[entryRef][0].$el.focus()
       }
     },
 
-    emitChangeEvent () {
+    emitChangeEvent (event) {
       const now = (new Date().getTime())
       this.lastCall = this.lastCall || 0
       if (now - this.lastCall > 1000) {
@@ -423,7 +440,7 @@ a.revision:hover {
 
   .checklist-entry {
 
-    input {
+    .checklist-text {
       color: $light-grey-light;
       background: transparent;
 
@@ -433,17 +450,32 @@ a.revision:hover {
         background: $dark-grey;
         border: 1px solid $dark-grey-strong;
       }
+
+      &:disabled {
+        background: transparent;
+        color: white;
+
+        &:hover {
+          border: 1px solid transparent;
+        }
+      }
     }
   }
 }
 
 .checklist-entry {
   color: $grey;
+  display: flex;
+  flex-direction: row;
+  align-items: flex-start;
+  margin-bottom: 0.3em;
 
-  input {
+  .checklist-text {
     font-size: 0.9em;
     padding: 0.2em;
+    padding-top: 0em;
     margin-right: 0.5em;
+    margin-top: 4px;
     width: 100%;
     border: 1px solid transparent;
 
@@ -452,9 +484,18 @@ a.revision:hover {
     &:hover {
       border: 1px solid $light-grey;
     }
+
+    &:disabled {
+      background-color: white;
+      color: #333;
+
+      &:hover {
+        border: 1px solid transparent;
+      }
+    }
   }
 
-  &.checked input {
+  &.checked .checklist-text {
     text-decoration: line-through;
   }
 
