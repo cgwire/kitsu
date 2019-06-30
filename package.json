@@ -43,6 +43,7 @@
     "vue-router": "3.0.6",
     "vue-scroll": "2.1.9",
     "vue-slider-component": "3.0.30",
+    "vue-textarea-autosize": "1.0.4",
     "vue-upload-component": "2.8.20",
     "vue-websocket": "0.2.3",
     "vuejs-datepicker": "1.5.4",

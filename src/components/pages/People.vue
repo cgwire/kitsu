@@ -58,10 +58,16 @@
 
     <edit-person-modal
       :active="isEditModalShown"
-      :is-loading="isEditLoading"
+      :is-loading="loading.edit"
+      :is-invite-loading="loading.invite"
+      :is-create-invite-loading="loading.createAndInvite"
       :is-error="isEditLoadingError"
+      :is-invitation-success="success.invite"
+      :is-invitation-error="errors.invite"
       :cancel-route="'/people'"
       @confirm="confirmEditPeople"
+      @confirm-invite="confirmCreateAndInvite"
+      @invite="confirmInvite"
     />
 
     <delete-modal
@@ -104,6 +110,17 @@ export default {
 
   data () {
     return {
+      errors: {
+        invite: false
+      },
+      loading: {
+        createAndInvite: false,
+        edit: false,
+        invite: false
+      },
+      success: {
+        invite: false
+      },
       csvColumns: [
         'First Name',
         'Last Name',
@@ -167,6 +184,10 @@ export default {
 
   methods: {
     ...mapActions([
+      'invitePerson',
+      'editPerson',
+      'newPerson',
+      'newPersonAndInvite',
       'loadPeople',
       'peopleSearchChange'
     ]),
@@ -187,19 +208,44 @@ export default {
     },
 
     confirmEditPeople (form) {
-      let action = 'editPeople'
-      if (this.personToEdit.id === undefined) {
-        action = 'newPeople'
-      }
-      console.log(action)
-      this.$store.dispatch(action, {
-        data: form,
-        callback: (err) => {
-          if (!err) {
-            this.$router.push('/people')
-          }
-        }
-      })
+      let action = 'editPerson'
+      if (this.personToEdit.id === undefined) action = 'newPerson'
+      this.loading.edit = true
+      this[action](form)
+        .then(() => {
+          this.$router.push('/people')
+          this.loading.edit = false
+        })
+        .catch(() => {
+          this.loading.edit = false
+        })
+    },
+
+    confirmCreateAndInvite (form) {
+      this.loading.createAndInvite = true
+      this.newPersonAndInvite(form)
+        .then(() => {
+          this.loading.createAndInvite = false
+          this.$router.push('/people')
+        })
+        .catch(() => {
+          this.loading.createAndInvite = false
+        })
+    },
+
+    confirmInvite (form) {
+      this.loading.invite = true
+      this.invitePerson(form)
+        .then(() => {
+          this.loading.invite = false
+          this.success.invite = true
+          this.errors.invite = false
+        })
+        .catch(() => {
+          this.loading.invite = false
+          this.success.invite = false
+          this.errors.invite = true
+        })
     },
 
     confirmDeletePeople () {
@@ -231,6 +277,8 @@ export default {
     },
 
     showEditModalIfNeeded (path, personId) {
+      this.errors.invite = false
+      this.success.invite = false
       if (path.indexOf('new') > 0) {
         this.$store.dispatch('showPersonEditModal')
       } else if (path.indexOf('edit') > 0) {

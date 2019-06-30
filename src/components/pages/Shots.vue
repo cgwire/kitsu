@@ -37,12 +37,13 @@
                 :is-responsive="true"
                 :path="'/api/export/csv/projects/' + currentProduction.id + '/shots.csv'"
               />
-              <button-link
+              <button-simple
                 class="flexrow-item"
                 :text="$t('shots.manage')"
                 icon="plus"
                 :is-responsive="true"
                 :path="manageShotsPath"
+                @click="showManageShots"
               />
             </div>
           </div>
@@ -89,6 +90,7 @@
     :is-error="false"
     :is-success="false"
     :cancel-route="shotsPath"
+    @cancel="hideManageShots"
   />
 
   <edit-shot-modal
@@ -189,6 +191,7 @@ import { mapGetters, mapActions } from 'vuex'
 import AddMetadataModal from '../modals/AddMetadataModal'
 import ButtonHrefLink from '../widgets/ButtonHrefLink'
 import ButtonLink from '../widgets/ButtonLink'
+import ButtonSimple from '../widgets/ButtonSimple'
 import CreateTasksModal from '../modals/CreateTasksModal'
 import DeleteModal from '../widgets/DeleteModal'
 import EditShotModal from '../modals/EditShotModal'
@@ -209,6 +212,7 @@ export default {
     AddMetadataModal,
     ButtonLink,
     ButtonHrefLink,
+    ButtonSimple,
     CreateTasksModal,
     DeleteModal,
     EditShotModal,
@@ -233,6 +237,7 @@ export default {
         isDeleteMetadataDisplayed: false,
         isDeleteAllTasksDisplayed: false,
         isImportDisplayed: false,
+        isManageDisplayed: false,
         isNewDisplayed: false,
         isRestoreDisplayed: false
       },
@@ -572,7 +577,7 @@ export default {
         isDeleteDisplayed: false,
         isDeleteMetadataDisplayed: false,
         isImportDisplayed: false,
-        isManagedDisplayed: false,
+        isManageDisplayed: false,
         isNewDisplayed: false,
         isRestoreDisplayed: false
       }
@@ -595,8 +600,6 @@ export default {
         this.modals.isImportDisplayed = true
       } else if (path.indexOf('create-tasks') > 0) {
         this.modals.isCreateTasksDisplayed = true
-      } else if (path.indexOf('manage') > 0) {
-        this.modals.isManageDisplayed = true
       }
     },
 
@@ -689,6 +692,14 @@ export default {
         route.params.episode_id = this.currentEpisode.id
       }
       return route
+    },
+
+    showManageShots () {
+      this.modals.isManageDisplayed = true
+    },
+
+    hideManageShots () {
+      this.modals.isManageDisplayed = false
     }
   },
 

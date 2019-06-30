@@ -13,6 +13,8 @@ import taskTypeStore from './tasktypes'
 import {
   LOAD_ASSETS_END,
   LOAD_SHOTS_END,
+  CLEAR_SHOTS,
+  CLEAR_ASSETS,
 
   LOAD_TASK_END,
   LOAD_TASK_STATUSES_END,
@@ -1095,6 +1097,14 @@ const mutations = {
 
   [UPDATE_COMMENT_CHECKLIST] (state, { comment, checklist }) {
     comment.checklist = checklist
+  },
+
+  [CLEAR_ASSETS] (state) {
+    state.taskMap = {}
+  },
+
+  [CLEAR_SHOTS] (state) {
+    state.taskMap = {}
   },
 
   [RESET_ALL] (state, shots) {

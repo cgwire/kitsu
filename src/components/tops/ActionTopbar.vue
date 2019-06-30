@@ -87,7 +87,7 @@
               v-if="!isChangeStatusLoading"
             >
               <input
-                class="comment-text"
+                class="comment-text input"
                 type="text"
                 :placeholder="$t('tasks.with_comment')"
                 @keyup.ctrl.enter="confirmTaskStatusChange"
