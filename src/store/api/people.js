@@ -61,16 +61,30 @@ export default {
     client.get(`/api/data/persons/${personId}`, callback)
   },
 
-  newPerson (person, callback) {
-    const data = {
-      first_name: person.first_name,
-      last_name: person.last_name,
-      email: person.email.trim(),
-      phone: person.phone,
-      role: person.role,
-      active: person.active
-    }
-    client.post(`/api/data/persons/new`, data, callback)
+  newPerson (person) {
+    return new Promise((resolve, reject) => {
+      const data = {
+        first_name: person.first_name,
+        last_name: person.last_name,
+        email: person.email.trim(),
+        phone: person.phone,
+        role: person.role,
+        active: person.active
+      }
+      client.post(`/api/data/persons/new`, data, (err, person) => {
+        if (err) reject(err)
+        else resolve(person)
+      })
+    })
+  },
+
+  invitePerson (person) {
+    return new Promise((resolve, reject) => {
+      client.get(`/api/actions/persons/${person.id}/invite`, (err) => {
+        if (err) reject(err)
+        else resolve(person)
+      })
+    })
   },
 
   updatePerson (person, callback) {

@@ -266,28 +266,54 @@ const actions = {
     })
   },
 
-  newPeople ({ commit, state }, { data, callback }) {
-    commit(EDIT_PEOPLE_START, data)
-    peopleApi.newPerson(state.personToEdit, (err, person) => {
-      if (err) {
-        commit(EDIT_PEOPLE_ERROR)
-      } else {
-        commit(HIDE_EDIT_PEOPLE_MODAL)
-      }
-      if (callback) callback(err)
+  newPerson ({ commit, state }, data) {
+    return new Promise((resolve, reject) => {
+      commit(EDIT_PEOPLE_START, data)
+      peopleApi.newPerson(state.personToEdit)
+        .then((person) => {
+          commit(HIDE_EDIT_PEOPLE_MODAL)
+          resolve(person)
+        })
+        .catch((err) => {
+          commit(EDIT_PEOPLE_ERROR)
+          reject(err)
+        })
     })
   },
 
-  editPeople ({ commit, state }, payload) {
-    commit(EDIT_PEOPLE_START, payload.data)
-    peopleApi.updatePerson(state.personToEdit, (err, people) => {
-      if (err) {
-        commit(EDIT_PEOPLE_ERROR)
-      } else {
-        commit(EDIT_PEOPLE_END, state.personToEdit)
-        commit(HIDE_EDIT_PEOPLE_MODAL)
-      }
-      if (payload.callback) payload.callback(err)
+  newPersonAndInvite ({ commit, state }, data) {
+    return new Promise((resolve, reject) => {
+      commit(EDIT_PEOPLE_START, data)
+      peopleApi.newPerson(state.personToEdit)
+        .then(peopleApi.invitePerson)
+        .then(() => {
+          commit(HIDE_EDIT_PEOPLE_MODAL)
+          resolve()
+        })
+        .catch((err) => {
+          commit(EDIT_PEOPLE_ERROR)
+          reject(err)
+        })
+    })
+  },
+
+  invitePerson ({ commit, state }) {
+    return peopleApi.invitePerson(state.personToEdit)
+  },
+
+  editPerson ({ commit, state }, data) {
+    return new Promise((resolve, reject) => {
+      commit(EDIT_PEOPLE_START, data)
+      peopleApi.updatePerson(state.personToEdit)
+        .then((person) => {
+          commit(EDIT_PEOPLE_END, state.personToEdit)
+          commit(HIDE_EDIT_PEOPLE_MODAL)
+          resolve(person)
+        })
+        .catch((err) => {
+          commit(EDIT_PEOPLE_ERROR)
+          reject(err)
+        })
     })
   },
 
