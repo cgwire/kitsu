@@ -3,6 +3,7 @@ from zou.app.utils.api import configure_api_from_blueprint
 
 from .resources import (
     DesktopLoginsResource,
+    InvitePersonResource,
     NewPersonResource,
     PersonMonthTimeSpentsResource,
     PersonWeekTimeSpentsResource,
@@ -26,7 +27,9 @@ routes = [
     ("/data/persons/<person_id>/time-spents/day/<year>/<month>/<day>", PersonDayTimeSpentsResource),
     ("/data/persons/time-spents/month-table/<year>", TimeSpentYearResource),
     ("/data/persons/time-spents/week-table/<year>", TimeSpentWeekResource),
-    ("/data/persons/time-spents/day-table/<year>/<month>", TimeSpentMonthResource)
+    ("/data/persons/time-spents/day-table/<year>/<month>", TimeSpentMonthResource),
+
+    ("/actions/persons/<person_id>/invite", InvitePersonResource)
 ]
 
 blueprint = Blueprint("persons", "persons")
