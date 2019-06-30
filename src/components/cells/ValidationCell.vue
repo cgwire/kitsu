@@ -54,7 +54,7 @@
         v-if="personMap[personId].has_avatar"
       />
       <span v-else>
-        {{ initials }}
+        {{ personMap[personId].initials }}
       </span>
     </span>
   </div>
