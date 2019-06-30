@@ -208,3 +208,17 @@ class TimeSpentWeekResource(Resource):
     def get(self, year):
         permissions.check_admin_permissions()
         return time_spents_service.get_week_table(year)
+
+
+class InvitePersonResource(Resource):
+    """
+    Sends an email to given person to invite him/her to connect to Kitsu
+    """
+    @jwt_required
+    def get(self, person_id):
+        permissions.check_admin_permissions()
+        persons_service.invite_person(person_id)
+        return {
+            "success": True,
+            "message": "Email sent"
+        }

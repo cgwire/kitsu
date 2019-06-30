@@ -12,7 +12,8 @@ from zou.app.models.desktop_login_log import DesktopLoginLog
 from zou.app.models.organisation import Organisation
 from zou.app.models.person import Person
 
-from zou.app.utils import fields, events, cache
+from zou.app.utils import fields, events, cache, emails
+from zou.app import config
 
 from zou.app.services.exception import (
     PersonNotFoundException
@@ -265,6 +266,41 @@ def get_presence_logs(year, month):
 
 def is_admin(person):
     return person["role"] == "admin"
+
+
+def invite_person(person_id):
+    """
+    Send an invitation email to given person (a mail telling him/her how to
+    connect on Kitsu).
+    """
+    organisation = get_organisation()
+    person = get_person_raw(person_id)
+    subject = "You are invited by %s to join their Kitsu production tracker" % (
+      organisation["name"]
+    )
+    body = """Hello %s,
+
+Your are invited by %s to collaborate on their Kitsu production tracker.
+You can connect here to start using it:
+
+https://%s
+
+Your login is: %s
+Your password is: default
+
+You will be invited to modify your password on first connection.
+
+Thank you and see you soon on Kitsu,
+
+%s Team
+""" % (
+        person.first_name,
+        organisation["name"],
+        config.DOMAIN_NAME,
+        person.email,
+        organisation["name"]
+    )
+    emails.send_email(subject, body, person.email)
 
 
 def get_organisation():
