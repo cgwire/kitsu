@@ -34,7 +34,7 @@ class BaseStatusResource(Resource):
                 db=config.AUTH_TOKEN_BLACKLIST_KV_INDEX,
                 decode_responses=True
             )
-            store.get(None)
+            store.get("test")
         except redis.ConnectionError:
             is_kv_up = False
 
@@ -94,10 +94,10 @@ database-up: %s
 event-stream-up: %s
 key-value-store-up: %s
 """ % (
-    api_name,
-    version,
-    "up" if is_db_up else "down",
-    "up" if is_kv_up else "down",
-    "up" if is_es_up else "down"
-)
+            api_name,
+            version,
+            "up" if is_db_up else "down",
+            "up" if is_kv_up else "down",
+            "up" if is_es_up else "down"
+        )
         return Response(text, mimetype='text')
