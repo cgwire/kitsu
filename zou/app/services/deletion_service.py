@@ -150,7 +150,7 @@ def remove_task(task_id, force=False):
         for notification in notifications:
             notification.delete()
 
-        news_list = Notification.query.filter_by(task_id=task.id)
+        news_list = News.query.filter_by(task_id=task.id)
         for news in news_list:
             news.delete()
 
