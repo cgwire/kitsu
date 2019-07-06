@@ -1,5 +1,8 @@
 <template>
 <div
+  class="schedule-wrapper"
+>
+<div
   class="schedule unselectable"
   ref="schedule"
 >
@@ -28,16 +31,16 @@
         class="day"
         :key="'header-' + day.toISOString()"
         :style="dayStyle(day)"
-        v-for="day in daysAvailable"
+        v-for="(day, index) in daysAvailable"
       >
         <span
           class="month-name"
-          v-if="day.newMonth"
+          v-if="day.newMonth || index === 0"
         >
           {{ day.format('MMMM') }}
         </span>
         <span
-          :class="dayClass(day)"
+          :class="dayClass(day, index)"
           v-if="!day.weekend"
         >
           {{ day.format('ddd')[0] }} /
@@ -90,6 +93,7 @@
       </div>
     </div>
   </div>
+</div>
 </div>
 </template>
 
@@ -230,12 +234,14 @@ export default {
     },
 
     changeDates (event) {
-      console.log('a')
       const change = event.clientX - this.initialClientX - 30
       const dayChange = Math.ceil(change / CELL_WIDTH)
 
       const startDateString = this.lastStartDate.format('YYYY-MM-DD')
-      // const length = this.lastEndDate.diff(this.lastStartDate, 'days')
+      const endDateString = this.lastEndDate.format('YYYY-MM-DD')
+      const startDateIndex = this.displayedDaysIndex[startDateString]
+      const endDateIndex = this.displayedDaysIndex[endDateString]
+      const length = endDateIndex - startDateIndex
       let currentIndex = this.displayedDaysIndex[startDateString]
 
       currentIndex += dayChange - 1
@@ -243,47 +249,28 @@ export default {
 
       let newStartDate = this.displayedDays[currentIndex]
       if (newStartDate) {
-        /*
-        let newEndDate = newStartDate.clone().add(length, 'days')
-        if (newEndDate.day() === 6) newEndDate.add(-1, 'days')
-        if (newEndDate.day() === 7) newEndDate.add(1, 'days')
-        let newEndDateString = newEndDate.format('YYYY-MM-DD')
-        let newEndDateIndex = this.displayedDaysIndex[newEndDateString]
-        if (!newEndDateIndex) {
-          const index = this.displayedDaysIndex.length - 1 - length
-          newStartDate = this.displayedDaysIndex[index]
-          if (!newStartDate) return
-          newEndDate = newStartDate.clone().add(length, 'days')
+        let newEndDate = this.displayedDays[currentIndex + length]
+        if (newEndDate) {
+          this.currentElement.startDate = newStartDate
+          this.currentElement.endDate = newEndDate
         }
-        */
-
-        this.currentElement.startDate = newStartDate
-        // this.currentElement.endDate = newEndDate
       }
     },
 
     changeStartDate (event) {
       const change = event.clientX - this.initialClientX
       const dayChange = Math.floor(change / CELL_WIDTH)
-      console.log('dayChange', dayChange)
 
       const startDateString = this.lastStartDate.format('YYYY-MM-DD')
-      const endDateString = this.currentElement.endDate.format('YYYY-MM-DD')
       let currentIndex = this.displayedDaysIndex[startDateString]
-      let endDateIndex = this.displayedDaysIndex[endDateString]
-      console.log(startDateString, endDateString, currentIndex, endDateIndex)
-
       currentIndex += dayChange
-      // if (currentIndex >= endDateIndex) currentIndex = endDateIndex - 1
-      // if (currentIndex < 0) currentIndex = 0
 
       let newStartDate = this.displayedDays[currentIndex]
-      console.log(currentIndex, newStartDate.format('YYYY-MM-DD'))
       this.currentElement.startDate = newStartDate
     },
 
     changeEndDate (event) {
-      console.log('c')
+      // console.log('c')
       const change = event.clientX - this.initialClientX + 30
       const dayChange = Math.ceil(change / CELL_WIDTH)
 
@@ -349,7 +336,7 @@ export default {
     },
 
     moveTimebar (timeElement, event) {
-      console.log('moveTimebar')
+      // console.log('moveTimebar')
       if (!this.isChangeStartDate) {
         this.isChangeDates = true
         this.isChangeStartDate = false
@@ -363,7 +350,6 @@ export default {
     },
 
     moveTimebarLeftSide (timeElement, event) {
-      console.log('moveTimebarLeftStide')
       if (!this.isChangeDates) {
         this.isChangeDates = false
         this.isChangeStartDate = true
@@ -378,7 +364,7 @@ export default {
     moveTimebarRightSide (timeElement, event) {
       this.isChangeDates = false
       this.isChangeStartDate = false
-      this.isChangeEnd = true
+      this.isChangeEndDate = true
       this.currentElement = timeElement
       this.lastEndDate = timeElement.endDate.clone()
       this.initialClientX = event.clientX
@@ -388,20 +374,38 @@ export default {
     // Helpers
 
     businessDiff (startDate, endDate) {
-      let days = endDate.diff(startDate, 'days')
-      days = days - (Math.floor(days / 7) * 2)
-      if (endDate.day() === 6) days--
-      if (startDate.day() === 7) days--
-      return days
+      const first = startDate.clone().endOf('week')
+      const last = endDate.clone().startOf('week')
+      const diff = last.diff(first, 'days')
+
+      if (endDate.diff(startDate, 'days') > 6) {
+        const days = diff * 5 / 7
+
+        let wfirst = first.day() - startDate.day()
+        if (startDate.day() === 0) --wfirst
+
+        let wlast = endDate.day() - last.day()
+        if (endDate.day() === 6) --wlast
+
+        return wfirst + days + wlast - 1
+      } else {
+        let day = moment(startDate)
+        let businessDays = 0
+        while (day.isBefore(endDate, 'day')) {
+          if (day.day() !== 0 && day.day() !== 6) businessDays++
+          day.add(1, 'days')
+        }
+        return businessDays
+      }
     },
 
     // Styles
 
-    dayClass (day) {
+    dayClass (day, index = 0) {
       return {
         'day-name': true,
         'new-week': day.newWeek || false,
-        'new-month': day.newMonth || false
+        'new-month': day.newMonth || index === 0 || false
       }
     },
 
@@ -428,8 +432,6 @@ export default {
     getTimebarLeft (timeElement) {
       const startDate = timeElement.startDate || this.startDate
       let startDiff = this.businessDiff(this.startDate, startDate) || 0
-      console.log('getTimebarLeft', this.startDate.format('YYYY-MM-DD'), startDate.diff(this.startDate, 'days'))
-      console.log('getTimebarLeft', startDiff, startDate.format('YYYY-MM-DD'))
       return ((startDiff) * CELL_WIDTH) + CELL_WIDTH / 2
     },
 
@@ -437,8 +439,14 @@ export default {
       const startDate =
         timeElement.startDate || this.startDate
       const endDate =
-        timeElement.endDate || timeElement.startDate || this.startDate
+        timeElement.endDate ||
+        (
+          timeElement.startDate &&
+          timeElement.startDate.clone().add(1, 'days')
+        ) ||
+        this.startDate.clone().add(1, 'days')
       let lengthDiff = this.businessDiff(startDate, endDate) || 1
+      // console.log('getTimebarWidth', lengthDiff)
       return lengthDiff * CELL_WIDTH
     }
   },
@@ -447,6 +455,12 @@ export default {
   },
 
   watch: {
+    startDate () {
+      this.resetScheduleSize()
+    },
+    endDate () {
+      this.resetScheduleSize()
+    }
   }
 }
 
@@ -484,6 +498,10 @@ export default {
   }
 }
 
+.schedule-wrapper {
+  position: relative;
+}
+
 .schedule {
   position: absolute;
   top: 0;
@@ -502,7 +520,7 @@ export default {
   margin-top: 75px;
   min-width: 200px;
   overflow: hidden;
-  z-index: 150;
+  z-index: 2;
 
   .entity-line {
     max-width: 200px;

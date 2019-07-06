@@ -148,6 +148,7 @@ export default {
     delete_text: 'Are you sure you want to remove {name} from your database?',
     edit: 'Edit',
     empty_comment: 'Empty comment',
+    end_date: 'End date:',
     go_productions: 'Go to productions',
     history: 'history',
     info: 'Information',
@@ -164,6 +165,7 @@ export default {
     production: 'Production',
     remove: 'Remove',
     save: 'Save',
+    start_date: 'Start date:',
     sorted_by: 'Tasks sorted by:',
     studio: 'Studio',
     user: 'User',
@@ -439,6 +441,10 @@ export default {
       name: 'name',
       description: 'description'
     }
+  },
+
+  schedule: {
+    title: 'Schedule'
   },
 
   shots: {
