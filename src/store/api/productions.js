@@ -29,7 +29,9 @@ export default {
       production_type: production.production_type,
       fps: production.fps,
       ratio: production.ratio,
-      resolution: production.resolution
+      resolution: production.resolution,
+      start_date: production.start_date,
+      end_date: production.end_date
     }
     client.put(`/api/data/projects/${production.id}`, data, callback)
   },
