@@ -36,6 +36,8 @@ class Project(db.Model, BaseMixin, SerializerMixin):
     ratio = db.Column(db.String(10))
     resolution = db.Column(db.String(12))
     production_type = db.Column(db.String(20), default="short")
+    start_date = db.Column(db.Date())
+    end_date = db.Column(db.Date())
 
     project_status_id = db.Column(
         UUIDType(binary=False),
