@@ -8,6 +8,7 @@ from zou.app.models.subscription import Subscription
 from zou.app.models.task_type import TaskType
 
 from zou.app.services import (
+    emails_service,
     tasks_service
 )
 from zou.app.services.exception import (
@@ -95,17 +96,24 @@ def create_notifications_for_task_and_comment(task, comment, change=False):
     task = tasks_service.get_task(task["id"])
     recipient_ids = get_notification_recipients(task)
     recipient_ids.remove(comment["person_id"])
+    author_id = comment["person_id"]
 
     for recipient_id in recipient_ids:
         try:
             notification = create_notification(
                 recipient_id,
                 comment_id=comment["id"],
-                author_id=comment["person_id"],
+                author_id=author_id,
                 task_id=comment["object_id"],
                 read=False,
                 change=change,
                 type="comment"
+            )
+            emails_service.send_comment_notification(
+                recipient_id,
+                author_id,
+                comment,
+                task
             )
             events.emit("notification:new", {
                 "notification_id": notification["id"],
@@ -122,6 +130,12 @@ def create_notifications_for_task_and_comment(task, comment, change=False):
                 author_id=comment["person_id"],
                 task_id=comment["object_id"],
                 type="mention"
+            )
+            emails_service.send_mention_notification(
+                recipient_id,
+                author_id,
+                comment,
+                task
             )
             events.emit("notification:new", {
                 "notification_id": notification["id"],
@@ -141,22 +155,28 @@ def reset_notifications_for_mentions(comment):
         type="mention",
         comment_id=comment["id"]
     )
-
     notifications = []
+    task = tasks_service.get_task(["object_id"])
+    author_id = comment["person_id"]
     for recipient_id in comment["mentions"]:
         notification = create_notification(
             recipient_id,
             comment_id=comment["id"],
-            author_id=comment["person_id"],
+            author_id=author_id,
             task_id=comment["object_id"],
             type="mention"
+        )
+        emails_service.send_mention_notification(
+            recipient_id,
+            author_id,
+            comment,
+            task
         )
         notifications.append(notification)
         events.emit("notification:new", {
             "notification_id": notification["id"],
             "person_id": recipient_id
         }, persist=False)
-
     return notifications
 
 
@@ -174,6 +194,11 @@ def create_assignation_notification(task_id, person_id, author_id=None):
             author_id=author_id,
             task_id=task_id,
             type="assignation"
+        )
+        emails_service.send_assignation_notification(
+            person_id,
+            author_id,
+            task.serialize()
         )
         events.emit("notification:new", {
             "notification_id": notification["id"],

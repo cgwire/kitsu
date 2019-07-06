@@ -538,6 +538,7 @@ class ApiDBTestCase(ApiTestCase):
             name="Animation",
             short_name="anim",
             color="#FFFFFF",
+            for_shots=True,
             department_id=self.department_animation.id
         )
 
