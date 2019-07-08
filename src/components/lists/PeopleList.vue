@@ -72,7 +72,6 @@
           <td class="email">{{ entry.email }}</td>
           <td class="phone">{{ entry.phone }}</td>
           <td class="role">{{ $t('people.role.' + entry.role) }}</td>
-          <td class="active">{{ entry.active ? $t('main.yes') : $t('main.no') }}</td>
           <row-actions
             v-if="isCurrentUserAdmin"
             :entry-id="entry.id"
