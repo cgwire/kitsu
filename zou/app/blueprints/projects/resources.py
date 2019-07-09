@@ -4,7 +4,7 @@ from flask_jwt_extended import jwt_required
 from flask import request
 
 from zou.app.mixin import ArgsMixin
-from zou.app.services import projects_service, user_service
+from zou.app.services import projects_service, user_service, schedule_service
 from zou.app.utils import permissions, fields
 from zou.app.services.exception import WrongParameterException
 
@@ -79,7 +79,7 @@ class ProductionTeamRemoveResource(Resource):
     @jwt_required
     def delete(self, project_id, person_id):
         user_service.check_manager_project_access(project_id)
-        project = projects_service.remove_team_member(project_id, person_id)
+        projects_service.remove_team_member(project_id, person_id)
         return '', 204
 
 
@@ -150,3 +150,14 @@ class ProductionMetadataDescriptorResource(Resource, ArgsMixin):
         permissions.check_admin_permissions()
         projects_service.remove_metadata_descriptor(descriptor_id)
         return '', 204
+
+
+class ProductionScheduleItemsResource(Resource, ArgsMixin):
+    """
+    Resource to retrieve schedule items for given production.
+    """
+
+    @jwt_required
+    def get(self, project_id):
+        user_service.check_project_access(project_id)
+        return schedule_service.get_schedule_items(project_id)

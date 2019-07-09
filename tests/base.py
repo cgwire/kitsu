@@ -541,6 +541,14 @@ class ApiDBTestCase(ApiTestCase):
             for_shots=True,
             department_id=self.department_animation.id
         )
+        self.task_type_layout = TaskType.create(
+            name="Layout",
+            short_name="layout",
+            color="#FFFFFF",
+            for_shots=True,
+            department_id=self.department_animation.id
+        )
+
 
     def generate_fixture_task_status(self):
         self.task_status = TaskStatus.create(

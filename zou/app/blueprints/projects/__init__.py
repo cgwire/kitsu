@@ -7,7 +7,8 @@ from .resources import (
     ProductionTeamResource,
     ProductionTeamRemoveResource,
     ProductionMetadataDescriptorResource,
-    ProductionMetadataDescriptorsResource
+    ProductionMetadataDescriptorsResource,
+    ProductionScheduleItemsResource
 )
 
 routes = [
@@ -26,6 +27,10 @@ routes = [
     (
         "/data/projects/<project_id>/metadata-descriptors/<descriptor_id>",
         ProductionMetadataDescriptorResource
+    ),
+    (
+        "/data/projects/<project_id>/schedule-items",
+        ProductionScheduleItemsResource
     )
 ]
 

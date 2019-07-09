@@ -2,45 +2,49 @@ from flask import Blueprint
 
 from zou.app.utils.api import configure_api_from_blueprint
 
-from .person import PersonResource, PersonsResource
-from .project import ProjectResource, ProjectsResource
-from .task_type import TaskTypesResource, TaskTypeResource
-from .task_status import TaskStatusesResource, TaskStatusResource
+from .asset_instance import AssetInstanceResource, AssetInstancesResource
+from .comments import CommentsResource, CommentResource
+from .custom_action import CustomActionsResource, CustomActionResource
 from .department import DepartmentsResource, DepartmentResource
-from .organisation import OrganisationsResource, OrganisationResource
-from .task import TasksResource, TaskResource
-from .file_status import FileStatusesResource, FileStatusResource
-from .output_file import OutputFilesResource, OutputFileResource
-from .output_type import OutputTypeResource, OutputTypesResource
-from .software import (
-    SoftwaresResource,
-    SoftwareResource
-)
-from .preview_file import (
-    PreviewFilesResource,
-    PreviewFileResource
-)
-from .working_file import (
-    WorkingFilesResource,
-    WorkingFileResource
-)
-from .project_status import (
-    ProjectStatusResource,
-    ProjectStatussResource
-)
 from .entity import EntityResource, EntitiesResource
 from .entity_type import (
     EntityTypesResource,
     EntityTypeResource
 )
-from .comments import CommentsResource, CommentResource
-from .time_spent import TimeSpentsResource, TimeSpentResource
-from .custom_action import CustomActionsResource, CustomActionResource
-from .asset_instance import AssetInstanceResource, AssetInstancesResource
-from .playlist import PlaylistsResource, PlaylistResource
 from .event import EventsResource, EventResource
+from .file_status import FileStatusesResource, FileStatusResource
 from .notifications import NotificationsResource, NotificationResource
+from .organisation import OrganisationsResource, OrganisationResource
+from .output_file import OutputFilesResource, OutputFileResource
+from .output_type import OutputTypeResource, OutputTypesResource
+from .person import PersonResource, PersonsResource
+from .preview_file import (
+    PreviewFilesResource,
+    PreviewFileResource
+)
+from .playlist import PlaylistsResource, PlaylistResource
+from .project import ProjectResource, ProjectsResource
+from .project_status import (
+    ProjectStatusResource,
+    ProjectStatussResource
+)
+from .schedule_item import (
+    ScheduleItemsResource,
+    ScheduleItemResource
+)
 from .search_filters import SearchFiltersResource, SearchFilterResource
+from .software import (
+    SoftwaresResource,
+    SoftwareResource
+)
+from .task_type import TaskTypesResource, TaskTypeResource
+from .task_status import TaskStatusesResource, TaskStatusResource
+from .task import TasksResource, TaskResource
+from .time_spent import TimeSpentsResource, TimeSpentResource
+from .working_file import (
+    WorkingFilesResource,
+    WorkingFileResource
+)
 
 
 routes = [
@@ -91,7 +95,9 @@ routes = [
     ("/data/notifications/", NotificationsResource),
     ("/data/notifications/<instance_id>", NotificationResource),
     ("/data/search-filters/", SearchFilterResource),
-    ("/data/search-filters/<instance_id>", SearchFiltersResource)
+    ("/data/search-filters/<instance_id>", SearchFiltersResource),
+    ("/data/schedule-items/", ScheduleItemsResource),
+    ("/data/schedule-items/<instance_id>", ScheduleItemResource)
 ]
 
 blueprint = Blueprint("/data", "data")

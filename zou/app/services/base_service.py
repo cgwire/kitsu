@@ -33,3 +33,12 @@ def get_or_create_instance_by_name(model, **kwargs):
             "%s_id" % model.__tablename__: instance.id
         })
     return instance.serialize()
+
+
+def get_model_map_from_array(models):
+    """
+    Return a map matching based on given model list. The maps keys are the model
+    IDs and the values are the models. It's convenient to check find a model by
+    its ID.
+    """
+    return {model["id"]: model for model in models}

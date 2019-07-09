@@ -276,6 +276,18 @@ def get_task_types_for_entity(entity_id):
     return fields.serialize_models(task_types)
 
 
+def get_task_types_for_project(project_id):
+    """
+    Return all task types for which there is a task related to given project.
+    """
+    task_types = TaskType.query \
+        .join(Task) \
+        .filter(Task.project_id == project_id) \
+        .distinct(TaskType.id) \
+        .all()
+    return fields.serialize_models(task_types)
+
+
 def get_task_type_map():
     """
     Return a dict of which keys are task type ids and values are task types.
