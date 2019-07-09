@@ -129,7 +129,7 @@ def remove_task(task_id, force=False):
             notifications = Notification.query.filter_by(comment_id=comment.id)
             for notification in notifications:
                 notification.delete()
-            news_list = Notification.query.filter_by(comment_id=comment.id)
+            news_list = News.query.filter_by(comment_id=comment.id)
             for news in news_list:
                 news.delete()
             comment.delete()
