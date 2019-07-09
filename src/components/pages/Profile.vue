@@ -78,6 +78,13 @@
           </span>
         </div>
 
+        <div class="field">
+          <combobox-boolean
+            :label="$t('profile.notifications_enabled')"
+            v-model="form.notifications_enabled"
+          />
+        </div>
+
         <button
           :class="{
             button: true,
@@ -180,17 +187,27 @@
 import moment from 'moment-timezone'
 import { mapGetters, mapActions } from 'vuex'
 
+import ComboboxBoolean from '../widgets/ComboboxBoolean'
 import ChangeAvatarModal from '../modals/ChangeAvatarModal'
 import PeopleAvatar from '../widgets/PeopleAvatar'
 import TextField from '../widgets/TextField'
 
 export default {
   name: 'profile',
+
+  components: {
+    ComboboxBoolean,
+    PeopleAvatar,
+    ChangeAvatarModal,
+    TextField
+  },
+
   data () {
     return {
       form: {
         first_name: '',
         last_name: '',
+        notifications_enabled: 'false',
         email: '',
         phone: '',
         timezone: 'Europe/Paris',
@@ -208,12 +225,6 @@ export default {
         formData: null
       }
     }
-  },
-
-  components: {
-    PeopleAvatar,
-    ChangeAvatarModal,
-    TextField
   },
 
   watch: {
@@ -298,6 +309,8 @@ export default {
 
   mounted () {
     this.form = Object.assign(this.form, this.user)
+    this.form.notifications_enabled =
+      this.form.notifications_enabled ? 'true' : 'false'
   },
 
   metaInfo () {

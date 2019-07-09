@@ -96,7 +96,8 @@ export default {
       timezone: person.timezone,
       locale: person.locale,
       role: person.role,
-      active: person.active
+      active: person.active,
+      notifications_enabled: person.notifications_enabled === 'true'
     }
     client.put(`/api/data/persons/${person.id}`, data, callback)
   },

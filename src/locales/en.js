@@ -353,12 +353,13 @@ export default {
   },
 
   profile: {
+    change_avatar: 'Change avatar',
     info_title: 'Information',
     language: 'Language',
+    notifications_enabled: 'Email notifications enabled',
     password_title: 'Change password',
     timezone: 'Timezone',
     title: 'Your Profile',
-    change_avatar: 'Change avatar',
     avatar: {
       title: 'Change avatar',
       error_upload: 'There was an error while uploading picture.'

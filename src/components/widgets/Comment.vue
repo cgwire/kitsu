@@ -332,7 +332,11 @@ export default {
       this.lastCall = this.lastCall || 0
       if (now - this.lastCall > 1000) {
         this.lastCall = now
-        this.$emit('checklist-updated', this.comment, this.checklist)
+        this.$emit(
+          'checklist-updated',
+          this.comment,
+          this.checklist.filter(item => item.text && item.text.length > 0)
+        )
       }
     },
 

@@ -54,16 +54,13 @@ export default {
   },
 
   profile: {
-    title: 'Votre Profil',
+    change_avatar: 'Changer Avatar',
     info_title: 'Informations',
+    language: 'Langue',
+    notifications_enabled: 'Notifications mail activées',
     password_title: 'Changement de mot de passe',
     timezone: 'Fuseau horaire',
-    language: 'Langue',
-    change_avatar: 'Changer Avatar',
-    save: {
-      button: 'Sauvegardez vos changements',
-      error: 'Une erreur est survenue pendant la sauvegarde de vos changememts.'
-    },
+    title: 'Votre Profil',
     avatar: {
       title: 'Changer votre avatar',
       error_upload: 'Une erreur est survenue en envoyant l\'image.'
@@ -73,6 +70,10 @@ export default {
       success: 'Votre mot de passe a été changé avec succès !',
       unvalid: 'Les nouveaux mots de passe sont différents ou votre mot de passe est trop court (7 caractères minimum).',
       error: 'Une erreur s\'est produite lors du changement de mot de passe. Veuillez vérifier votre mot de pass actuel.'
+    },
+    save: {
+      button: 'Sauvegardez vos changements',
+      error: 'Une erreur est survenue pendant la sauvegarde de vos changememts.'
     }
   },
 
