@@ -121,3 +121,12 @@ export const sortValidationColumns = (columns, taskTypeMap) => {
     }
   })
 }
+
+export const sortScheduleItems = (scheduleItems, taskTypeMap) => {
+  return scheduleItems.sort(
+    firstBy('for_shots')
+      .thenBy('priority')
+      .thenBy('name')
+      .thenBy('start_date')
+  )
+}

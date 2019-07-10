@@ -77,6 +77,13 @@ export default {
     }
   },
 
+  schedule: {
+    title: 'Planning',
+    overall_man_days: 'Jour Hommes Pour le projet :',
+    md: 'jh',
+    zoom_level: 'Niveau de zoom'
+  },
+
   main: {
     about: 'À propos',
     add: 'Ajouter',
