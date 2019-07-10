@@ -2,98 +2,128 @@
 <div
   class="schedule-wrapper"
 >
-<div
-  class="schedule unselectable"
-  ref="schedule"
->
   <div
-    ref="entity-list"
-    class="entities"
-    @mousedown="startBrowsingY"
+    :class="scheduleClass"
+    ref="schedule"
   >
     <div
-      class="entity-line"
-      :key="'entity-' + rootElement.id"
-      :style="entityLineStyle(rootElement)"
-      v-for="rootElement in hierarchy"
-    >
-      {{ rootElement.name }}
-    </div>
-  </div>
-
-  <div class="timeline">
-    <div
-      ref="timeline-header"
-      class="timeline-header"
-      @mousedown="startBrowsingX"
+      ref="entity-list"
+      class="entities"
+      @mousedown="startBrowsingY"
     >
       <div
-        class="day"
-        :key="'header-' + day.toISOString()"
-        :style="dayStyle(day)"
-        v-for="(day, index) in daysAvailable"
+        class="entity-line entity-name"
+        :key="'entity-' + rootElement.id"
+        :style="entityLineStyle(rootElement)"
+        v-for="rootElement in hierarchy"
       >
-        <span
-          class="month-name"
-          v-if="day.newMonth || index === 0"
-        >
-          {{ day.format('MMMM') }}
+        <span class="filler">
+        {{ rootElement.name }}
         </span>
-        <span
-          :class="dayClass(day, index)"
-          v-if="!day.weekend"
-        >
-          {{ day.format('ddd')[0] }} /
-        </span>
-        <span
-          class="day-number"
-          v-if="!day.weekend"
-        >
-          {{ day.format('DD') }}
+        <input
+          type="number"
+          placeholder="0"
+          min="0"
+          @input="$emit('item-changed', rootElement)"
+          v-model="rootElement.man_days"
+        />
+        <span class="man-days-unit">
+          {{ $t('schedule.md') }}
         </span>
       </div>
     </div>
 
-    <div
-      ref="timeline-content-wrapper"
-      class="timeline-content-wrapper"
-    >
+    <div class="timeline">
       <div
-        ref="timeline-content"
-        class="timeline-content"
-        @mousedown="startBrowsing"
+        ref="timeline-header"
+        class="timeline-header"
+        @mousedown="startBrowsingX"
       >
         <div
-          class="entity-line"
-          :key="'entity-line-' + rootElement.id"
-          :style="entityLineStyle(rootElement)"
-          v-for="rootElement in hierarchy"
+          class="day"
+          :key="'header-' + day.toISOString()"
+          :style="dayStyle(day)"
+          v-for="(day, index) in daysAvailable"
+        >
+          <span
+            class="month-name"
+            v-if="day.newMonth || index === 0"
+          >
+            {{ day.format('MMMM') }}
+          </span>
+          <div
+            :class="dayClass(day, index)"
+          >
+            <span
+              v-if="!day.weekend && zoomLevel > 2"
+            >
+              {{ day.format('ddd')[0] }} /
+            </span>
+            <span
+              class="day-number"
+              v-if="!day.weekend"
+            >
+              {{ day.format('DD') }}
+            </span>
+          </div>
+        </div>
+      </div>
+
+      <div
+        ref="timeline-content-wrapper"
+        class="timeline-content-wrapper"
+      >
+        <div
+          ref="timeline-content"
+          class="timeline-content"
+          @mousedown="startBrowsing"
+          @mousewheel="$emit('change-zoom', $event)"
         >
           <div
-            class="timebar"
-            :style="timebarStyle(rootElement)"
+            ref="timeline-position"
+            class="timeline-position"
+            :style="timelinePositionStyle"
+          >
+          </div>
+          <div
+            class="entity-line"
+            :key="'entity-line-' + rootElement.id"
+            :style="entityLineStyle(rootElement)"
+            v-for="rootElement in hierarchy"
           >
             <div
-              class="timebar-left-hand"
-              @mousedown="moveTimebarLeftSide(rootElement, $event)"
+              class="timebar"
+              :style="timebarStyle(rootElement)"
             >
-            </div>
-            <div
-              class="filler"
-              @mousedown="moveTimebar(rootElement, $event)"
-            >
-            </div>
-            <div
-              class="timebar-right-hand"
-              @mousedown="moveTimebarRightSide(rootElement, $event)"
-            >
+              <div
+                :class="{
+                  'timebar-left-hand': isCurrentUserAdmin
+                }"
+                @mousedown="moveTimebarLeftSide(rootElement, $event)"
+              >
+              </div>
+              <div
+                class="filler"
+                @mousedown="moveTimebar(rootElement, $event)"
+              >
+              </div>
+              <div
+                :class="{
+                  'timebar-right-hand': isCurrentUserAdmin
+                }"
+                @mousedown="moveTimebarRightSide(rootElement, $event)"
+              >
+              </div>
             </div>
           </div>
         </div>
       </div>
     </div>
   </div>
-</div>
+  <spinner
+    class="mt1"
+    v-if="true"
+  />
 </div>
 </template>
 
@@ -104,11 +134,13 @@
 import { mapGetters, mapActions } from 'vuex'
 import moment from 'moment-timezone'
 
-const CELL_WIDTH = 60
+import Spinner from '../../widgets/Spinner'
 
 export default {
   name: 'schedule',
-  components: {},
+  components: {
+    Spinner
+  },
 
   data () {
     return {
@@ -131,6 +163,18 @@ export default {
     startDate: {
       type: Object,
       required: true
+    },
+    zoomLevel: {
+      type: Number,
+      default: 2
+    },
+    isError: {
+      type: Boolean,
+      default: false
+    },
+    isLoading: {
+      type: Boolean,
+      default: true
     }
   },
 
@@ -150,7 +194,12 @@ export default {
 
   computed: {
     ...mapGetters([
+      'isCurrentUserAdmin'
     ]),
+
+    cellWidth () {
+      return this.zoomLevel * 20
+    },
 
     daysAvailable () {
       const days = []
@@ -184,6 +233,19 @@ export default {
       return dayIndex
     },
 
+    scheduleClass () {
+      const className = {
+        schedule: true,
+        unselectable: true
+      }
+      className['zoom-level-' + this.zoomLevel] = true
+      return className
+    },
+
+    timelinePositionStyle () {
+      return { width: this.cellWidth + 'px' }
+    },
+
     // References
 
     entityList () {
@@ -204,6 +266,10 @@ export default {
 
     timelineHeader () {
       return this.$refs['timeline-header']
+    },
+
+    timelinePosition () {
+      return this.$refs['timeline-position']
     }
   },
 
@@ -213,7 +279,7 @@ export default {
 
     resetScheduleSize () {
       this.timelineContent.style.width =
-        this.nbDisplayedDays * CELL_WIDTH + 'px'
+        this.nbDisplayedDays * this.cellWidth + 'px'
       this.timelineContentWrapper.style.height =
         this.schedule.offsetHeight - 118 + 'px'
       this.entityList.style.height =
@@ -231,11 +297,20 @@ export default {
         if (this.isBrowsingX) this.scrollScheduleLeft(event)
         if (this.isBrowsingY) this.scrollScheduleTop(event)
       }
+
+      this.updatePositionBarPosition(event)
+    },
+
+    updatePositionBarPosition (event) {
+      let position = this.timelineContentWrapper.scrollLeft + event.clientX
+      position -= 262
+      position = Math.round(position / this.cellWidth) * this.cellWidth
+      this.timelinePosition.style.left = position + 'px'
     },
 
     changeDates (event) {
-      const change = event.clientX - this.initialClientX - 30
-      const dayChange = Math.ceil(change / CELL_WIDTH)
+      const change = event.clientX - this.initialClientX - this.cellWidth / 2
+      const dayChange = Math.ceil(change / this.cellWidth)
 
       const startDateString = this.lastStartDate.format('YYYY-MM-DD')
       const endDateString = this.lastEndDate.format('YYYY-MM-DD')
@@ -244,7 +319,7 @@ export default {
       const length = endDateIndex - startDateIndex
       let currentIndex = this.displayedDaysIndex[startDateString]
 
-      currentIndex += dayChange - 1
+      currentIndex += dayChange
       if (currentIndex < 0) currentIndex = 0
 
       let newStartDate = this.displayedDays[currentIndex]
@@ -253,13 +328,14 @@ export default {
         if (newEndDate) {
           this.currentElement.startDate = newStartDate
           this.currentElement.endDate = newEndDate
+          this.$emit('item-changed', this.currentElement)
         }
       }
     },
 
     changeStartDate (event) {
       const change = event.clientX - this.initialClientX
-      const dayChange = Math.floor(change / CELL_WIDTH)
+      const dayChange = Math.floor(change / this.cellWidth)
 
       const startDateString = this.lastStartDate.format('YYYY-MM-DD')
       let currentIndex = this.displayedDaysIndex[startDateString]
@@ -267,12 +343,12 @@ export default {
 
       let newStartDate = this.displayedDays[currentIndex]
       this.currentElement.startDate = newStartDate
+      this.$emit('item-changed', this.currentElement)
     },
 
     changeEndDate (event) {
-      // console.log('c')
-      const change = event.clientX - this.initialClientX + 30
-      const dayChange = Math.ceil(change / CELL_WIDTH)
+      const change = event.clientX - this.initialClientX + this.cellWidth / 2
+      const dayChange = Math.ceil(change / this.cellWidth)
 
       const startDateString =
         this.currentElement.startDate.format('YYYY-MM-DD')
@@ -288,6 +364,7 @@ export default {
 
       let newEndDate = this.displayedDays[currentIndex]
       this.currentElement.endDate = newEndDate
+      this.$emit('item-changed', this.currentElement)
     },
 
     scrollScheduleLeft (event) {
@@ -336,8 +413,7 @@ export default {
     },
 
     moveTimebar (timeElement, event) {
-      // console.log('moveTimebar')
-      if (!this.isChangeStartDate) {
+      if (!this.isChangeStartDate && this.isCurrentUserAdmin) {
         this.isChangeDates = true
         this.isChangeStartDate = false
         this.isChangeEnd = false
@@ -350,7 +426,7 @@ export default {
     },
 
     moveTimebarLeftSide (timeElement, event) {
-      if (!this.isChangeDates) {
+      if (!this.isChangeDates && this.isCurrentUserAdmin) {
         this.isChangeDates = false
         this.isChangeStartDate = true
         this.isChangeEnd = false
@@ -362,13 +438,15 @@ export default {
     },
 
     moveTimebarRightSide (timeElement, event) {
-      this.isChangeDates = false
-      this.isChangeStartDate = false
-      this.isChangeEndDate = true
-      this.currentElement = timeElement
-      this.lastEndDate = timeElement.endDate.clone()
-      this.initialClientX = event.clientX
-      document.body.style.cursor = 'e-resize'
+      if (!this.isChangeDates && this.isCurrentUserAdmin) {
+        this.isChangeDates = false
+        this.isChangeStartDate = false
+        this.isChangeEndDate = true
+        this.currentElement = timeElement
+        this.lastEndDate = timeElement.endDate.clone()
+        this.initialClientX = event.clientX
+        document.body.style.cursor = 'e-resize'
+      }
     },
 
     // Helpers
@@ -411,8 +489,8 @@ export default {
 
     dayStyle (day) {
       return {
-        'min-width': day.weekend ? '0px' : '60px',
-        'max-width': day.weekend ? '0px' : '60px'
+        'min-width': day.weekend ? '0px' : this.cellWidth + 'px',
+        'max-width': day.weekend ? '0px' : this.cellWidth + 'px'
       }
     },
 
@@ -425,14 +503,15 @@ export default {
     timebarStyle (timeElement) {
       return {
         left: this.getTimebarLeft(timeElement) + 'px',
-        width: this.getTimebarWidth(timeElement) + 'px'
+        width: this.getTimebarWidth(timeElement) + 'px',
+        cursor: this.isCurrentUserAdmin ? 'ew-resize' : 'default'
       }
     },
 
     getTimebarLeft (timeElement) {
       const startDate = timeElement.startDate || this.startDate
       let startDiff = this.businessDiff(this.startDate, startDate) || 0
-      return ((startDiff) * CELL_WIDTH) + CELL_WIDTH / 2
+      return ((startDiff) * this.cellWidth) + this.cellWidth / 2
     },
 
     getTimebarWidth (timeElement) {
@@ -446,8 +525,7 @@ export default {
         ) ||
         this.startDate.clone().add(1, 'days')
       let lengthDiff = this.businessDiff(startDate, endDate) || 1
-      // console.log('getTimebarWidth', lengthDiff)
-      return lengthDiff * CELL_WIDTH
+      return lengthDiff * this.cellWidth
     }
   },
 
@@ -460,10 +538,15 @@ export default {
     },
     endDate () {
       this.resetScheduleSize()
+    },
+    zoomLevel () {
+      this.resetScheduleSize()
+    },
+    isLoading () {
+      this.$nextTick(this.resetScheduleSize)
     }
   }
 }
-
 </script>
 
 <style lang="scss" scoped>
@@ -472,15 +555,27 @@ export default {
     background: #36393F;
   }
 
-  .timeline {
-    .timeline-content-wrapper {
-      .timeline-content {
-        background-image: url('../../../assets/background/schedule-dark.png');
-      }
+  .schedule.zoom-level-1 {
+    .timeline-content {
+      background-image: url('../../../assets/background/schedule-dark-1.png');
     }
+  }
 
+  .schedule.zoom-level-2 {
+    .timeline-content {
+      background-image: url('../../../assets/background/schedule-dark-2.png');
+    }
+  }
+
+  .schedule.zoom-level-3 {
+    .timeline-content {
+      background-image: url('../../../assets/background/schedule-dark-3.png');
+    }
+  }
+  .timeline {
     .timeline-header {
       background: #36393F;
+      color: white;
 
       .day {
         .day-number {
@@ -488,10 +583,17 @@ export default {
         }
 
         .day-name {
+          margin: 0;
+          padding-bottom: 0;
           &.new-month,
           &.new-week {
             border-left: 2px solid white;
           }
+        }
+
+        .month-name {
+          border-left: 2px solid white;
+          color: white;
         }
       }
     }
@@ -518,13 +620,13 @@ export default {
 .entities {
   background: white;
   margin-top: 75px;
-  min-width: 200px;
+  min-width: 230px;
   overflow: hidden;
   z-index: 2;
 
   .entity-line {
-    max-width: 200px;
-    min-width: 200px;
+    max-width: 230px;
+    min-width: 230px;
   }
 }
 
@@ -555,13 +657,14 @@ export default {
     .day {
       display: inline-block;
       font-size: 0.8em;
+      padding-bottom: 0;
 
       .day-name {
         border-left: 2px solid transparent;
         color: $grey;
-        padding-left: 15px;
-        padding-bottom: 0.5em;
-        padding-top: 0.5em;
+        padding-bottom: 0em;
+        padding-left: 10px;
+        padding-top: 0em;
         text-transform: uppercase;
 
         &.new-month,
@@ -572,16 +675,17 @@ export default {
 
       .day-number {
         color: black;
+        padding-top: 0.5em;
       }
 
       .month-name {
         border-left: 2px solid black;
         font-size: 0.9em;
         position: absolute;
-
         padding-bottom: 12px;
         padding-left: 1em;
         top: 15px;
+        bottom: 0;
         text-transform: uppercase;
         color: black;
       }
@@ -595,7 +699,18 @@ export default {
     overflow-y: hidden;
 
     .timeline-content {
-      background-image: url('../../../assets/background/schedule-white.png');
+      height: 100%;
+      position: relative;
+
+      .timeline-position {
+        visibility: hidden;
+        position: absolute;
+        left: 0px;
+        top: 0;
+        bottom: 0;
+        background: rgba(200, 255, 200, 0.3);
+        z-index: 100;
+      }
 
       .entity-line {
         width: 100%;
@@ -607,8 +722,8 @@ export default {
           height: 14px;
           background: rgba(255, 255, 255, 0.4);
           border-radius: 1em;
-          cursor: ew-resize;
           display: flex;
+          z-index: 101;
 
           .timebar-left-hand {
             cursor: w-resize;
@@ -622,6 +737,76 @@ export default {
         }
       }
     }
+
+    .timeline-content:hover {
+      .timeline-position {
+        visibility: visible;
+      }
+    }
+  }
+}
+
+.zoom-level-1 {
+  .timeline-content {
+    background-image: url('../../../assets/background/schedule-white-1.png');
+  }
+
+  .timeline {
+    .timeline-header {
+      .day {
+        font-size: 0.8em;
+        padding-left: 0px;
+
+        .day-name {
+          padding-left: 0px;
+          &.new-week {
+            border-left: solid 2px transparent;
+          }
+          &.new-month {
+            padding-left: 4px;
+            border-left: solid 2px white;
+          }
+        }
+      }
+    }
+  }
+}
+
+.schedule.zoom-level-2 {
+  .timeline-content {
+    background-image: url('../../../assets/background/schedule-white-2.png');
+  }
+}
+
+.schedule.zoom-level-3 {
+  .timeline-content {
+    background-image: url('../../../assets/background/schedule-white-3.png');
+  }
+}
+
+.entity-name {
+  display: flex;
+  align-items: center;
+
+  span {
+    color: white;
+  }
+
+  input {
+    width: 50px;
+    text-align: right;
+    background: transparent;
+    color: white;
+    margin-right: 0.2em;
+    font-size: 1.1em;
+
+    &::placeholder {
+      color: white;
+    }
+  }
+
+  .man-days-unit {
+    font-size: 0.7em;
   }
 }
 </style>

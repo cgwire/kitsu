@@ -26,7 +26,7 @@
       <div class="flexrow-item">
         <datepicker
           wrapper-class="datepicker"
-          input-class="date input"
+          input-class="date-input input"
           :language="locale"
           :disabled-dates="{ days: [6, 0] }"
           :monday-first="true"
@@ -34,12 +34,35 @@
           v-model="selectedEndDate"
         />
       </div>
+      <div class="flexrow-item">
+        {{ $t('schedule.overall_man_days') }}
+      </div>
+      <text-field
+        class="flexrow-item overall-man-days"
+        type="number"
+        v-model="overallManDays"
+        :disabled="!isCurrentUserAdmin"
+        v-focus
+      />
+      <div class="flexrow-item">
+        {{ $t('schedule.zoom_level') }}
+      </div>
+      <combobox-number
+        class="flexrow-item"
+        :options="zoomOptions"
+        v-model="zoomLevel"
+      />
     </div>
 
     <schedule
       :start-date="startDate"
       :end-date="endDate"
-      :hierarchy="entityDates"
+      :hierarchy="scheduleItems"
+      :zoom-level="zoomLevel"
+      :is-loading="loading.schedule"
+      :is-error="errors.schedule"
+      @item-changed="saveScheduleItem"
+      @change-zoom="changeZoom"
     />
   </div>
 
@@ -66,93 +89,44 @@ import moment from 'moment-timezone'
 import { en, fr } from 'vuejs-datepicker/dist/locale'
 import Datepicker from 'vuejs-datepicker'
 
+import { sortScheduleItems } from '../../lib/sorting'
+
+import ComboboxNumber from '../widgets/ComboboxNumber'
 import TaskInfo from '../sides/TaskInfo'
+import TextField from '../widgets/TextField'
 import Schedule from './schedule/Schedule'
 
 export default {
   name: 'production-schedule',
   components: {
-    // Spinner,
+    ComboboxNumber,
     Datepicker,
     Schedule,
-    TaskInfo
+    TaskInfo,
+    TextField
   },
 
   data () {
     return {
       currentTask: null,
+      overallManDays: 0,
       endDate: moment().add(6, 'months'),
-      entityDates: [
-        {
-          id: 1,
-          name: 'Modeling',
-          color: '#5C6BC0',
-          startDate: moment('2019-07-16', 'YYYY-MM-DD'),
-          endDate: moment('2019-08-01', 'YYYY-MM-DD')
-        },
-        {
-          id: 2,
-          name: 'Setup',
-          color: '#64B5F6',
-          startDate: moment('2019-07-31', 'YYYY-MM-DD'),
-          endDate: moment('2019-08-15', 'YYYY-MM-DD')
-        },
-        {
-          id: 3,
-          name: 'Texture',
-          color: '#F9A825',
-          startDate: moment('2019-08-15', 'YYYY-MM-DD'),
-          endDate: moment('2019-08-30', 'YYYY-MM-DD')
-        },
-        {
-          id: 4,
-          name: 'Modeling',
-          color: '#5C6BC0'
-        },
-        {
-          id: 5,
-          name: 'Setup',
-          color: '#64B5F6'
-        },
-        {
-          id: 6,
-          name: 'Texture',
-          color: '#F9A825'
-        },
-        {
-          id: 7,
-          name: 'Modeling',
-          color: '#5C6BC0'
-        },
-        {
-          id: 8,
-          name: 'Setup',
-          color: '#64B5F6'
-        },
-        {
-          id: 9,
-          name: 'Texture',
-          color: '#F9A825'
-        },
-        {
-          id: 10,
-          name: 'Modeling',
-          color: '#5C6BC0'
-        },
-        {
-          id: 11,
-          name: 'Setup',
-          color: '#64B5F6'
-        },
-        {
-          id: 12,
-          name: 'Texture',
-          color: '#F9A825'
-        }
-      ],
+      scheduleItems: [],
       startDate: moment(),
       selectedStartDate: null,
-      selectedEndDate: null
+      selectedEndDate: null,
+      zoomLevel: 1,
+      zoomOptions: [
+        { label: '1', value: 1 },
+        { label: '2', value: 2 },
+        { label: '3', value: 3 }
+      ],
+      loading: {
+        schedule: false
+      },
+      errors: {
+        schedule: false
+      }
     }
   },
 
@@ -163,14 +137,18 @@ export default {
     if (this.currentProduction.end_date) {
       this.endDate = moment(this.currentProduction.end_date)
     }
+    this.overallManDays = this.currentProduction.man_days
     this.selectedStartDate = this.startDate.toDate()
     this.selectedEndDate = this.endDate.toDate()
+    this.loadData()
   },
 
   computed: {
     ...mapGetters([
       'currentEpisode',
       'currentProduction',
+      'isCurrentUserAdmin',
+      'taskTypeMap',
       'user'
     ]),
 
@@ -185,10 +163,40 @@ export default {
 
   methods: {
     ...mapActions([
-      'editProduction'
+      'editProduction',
+      'loadScheduleItems',
+      'saveScheduleItem'
     ]),
 
-    onBodyScroll () {
+    loadData () {
+      this.loading.schedule = true
+      this.loadScheduleItems(this.currentProduction)
+        .then((scheduleItems) => {
+          scheduleItems = scheduleItems.map((item) => {
+            const taskType = this.taskTypeMap[item.task_type_id]
+            return {
+              ...item,
+              color: taskType.color,
+              for_shots: taskType.for_shots,
+              name: taskType.name,
+              priority: taskType.priority,
+              startDate: moment(item.start_date, 'YYYY-MM-DD'),
+              endDate: moment(item.end_date, 'YYYY-MM-DD')
+            }
+          })
+          this.scheduleItems =
+            sortScheduleItems(scheduleItems, this.taskTypeMap)
+          this.loading.schedule = false
+        })
+        .catch((err) => {
+          console.error(err)
+          this.loading.schedule = false
+        })
+    },
+
+    changeZoom (event) {
+      if (event.wheelDelta < 0 && this.zoomLevel > 1) this.zoomLevel--
+      if (event.wheelDelta > 0 && this.zoomLevel < 3) this.zoomLevel++
     }
   },
 
@@ -197,23 +205,34 @@ export default {
 
   watch: {
     selectedStartDate () {
-      this.startDate = moment(this.selectedStartDate)
+      const startDate = moment(this.selectedStartDate)
       this.editProduction({
         data: {
           ...this.currentProduction,
-          start_date: this.startDate.format('YYYY-MM-DD')
+          start_date: startDate.format('YYYY-MM-DD')
         }
       })
     },
 
     selectedEndDate () {
-      this.endDate = moment(this.selectedEndDate)
+      const endDate = moment(this.selectedEndDate)
       this.editProduction({
         data: {
           ...this.currentProduction,
-          end_date: this.endDate.format('YYYY-MM-DD')
+          end_date: endDate.format('YYYY-MM-DD')
         }
       })
+    },
+
+    overallManDays () {
+      if (this.overallManDays !== this.currentProduction.man_days) {
+        this.editProduction({
+          data: {
+            ...this.currentProduction,
+            man_days: this.overallManDays
+          }
+        })
+      }
     }
   },
 
@@ -236,12 +255,27 @@ export default {
 
 <style lang="scss" scoped>
 .dark {
+  .project-dates {
+    color: $white-grey;
+    border-bottom: 1px solid $grey;
+  }
 }
 
 .project-dates {
   border-bottom: 1px solid #EEE;
-  margin-left: 205px;
+  margin-left: 235px;
   padding-bottom: 1em;
+
+  .field {
+    padding-bottom: 0;
+    margin-bottom: 0;
+  }
+
+  .overall-man-days {
+    width: 80px;
+    font-size: 0.9em;
+    margin-right: 1em;
+  }
 }
 
 .fixed-page {

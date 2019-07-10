@@ -5,6 +5,7 @@ import {
   sortPeople,
   sortPlaylists,
   sortProductions,
+  sortScheduleItems,
   sortSequences,
   sortShots,
   sortTaskTypes,
@@ -393,6 +394,46 @@ describe('lib/sorting', () => {
     expect(results[0].id).toEqual(1)
     expect(results[1].id).toEqual(3)
     expect(results[2].id).toEqual(2)
+  })
+
+  it('sortScheduleTime', () => {
+    const scheduleItems = [
+      {
+        id: 1,
+        for_shots: false,
+        priority: 2,
+        name: 'Modeling',
+        start_date:'2019-08-01'
+      },
+      {
+        id: 2,
+        for_shots: true,
+        priority: 2,
+        name: 'Animation',
+        start_date:'2019-08-01'
+      },
+      {
+        id: 3,
+        for_shots: false,
+        priority: 1,
+        name: 'Concept',
+        start_date:'2019-08-01'
+      },
+      {
+        id: 4,
+        for_shots: true,
+        priority: 1,
+        name: 'Layout',
+        start_date:'2019-08-01'
+      }
+    ]
+
+    let results = sortScheduleItems(scheduleItems)
+    expect(results.length).toEqual(4)
+    expect(results[0].id).toEqual(3)
+    expect(results[1].id).toEqual(1)
+    expect(results[2].id).toEqual(4)
+    expect(results[3].id).toEqual(2)
   })
 
   it('sortByDate', () => {

@@ -95,7 +95,8 @@ describe('Schedule', () => {
     wrapper = shallowMount(Schedule, {
       propsData: {
         startDate: moment('2019-07-01', 'YYYY-MM-DD'),
-        endDate: moment('2020-01-01', 'YYYY-MM-DD')
+        endDate: moment('2020-01-01', 'YYYY-MM-DD'),
+        zoomLevel: 3
       },
       store,
       localVue,
@@ -161,15 +162,20 @@ describe('Schedule', () => {
         movementX: 100,
         movementY: 50
       }
-      const timeElement = {
-        startDate: moment('2019-08-15', 'YYYY-MM-DD'),
-        endDate: moment('2019-09-03', 'YYYY-MM-DD')
-      }
+      let timeElement = null
+
+      beforeEach(() => {
+        timeElement = {
+          startDate: moment('2019-08-15', 'YYYY-MM-DD'),
+          endDate: moment('2019-09-03', 'YYYY-MM-DD')
+        }
+      })
+
       test('changeDates', () => {
         wrapper.vm.moveTimebar(timeElement, initialEvent)
         wrapper.vm.changeDates(event)
         expect(wrapper.vm.currentElement.startDate.format('YYYY-MM-DD'))
-          .toEqual(moment('2019-08-12').format('YYYY-MM-DD'))
+          .toEqual(moment('2019-08-13').format('YYYY-MM-DD'))
         expect(wrapper.vm.currentElement.endDate.format('YYYY-MM-DD'))
           .toEqual(moment('2019-08-30').format('YYYY-MM-DD'))
       })
@@ -177,7 +183,7 @@ describe('Schedule', () => {
         wrapper.vm.moveTimebarLeftSide(timeElement, initialEvent)
         wrapper.vm.changeStartDate(event)
         expect(wrapper.vm.currentElement.startDate.format('YYYY-MM-DD'))
-          .toEqual(moment('2019-08-12').format('YYYY-MM-DD'))
+          .toEqual(moment('2019-08-13').format('YYYY-MM-DD'))
       })
       test('changeEndDate', () => {
          wrapper.vm.moveTimebarRightSide(timeElement, initialEvent)
@@ -304,7 +310,6 @@ describe('Schedule', () => {
       })
     })
 
-    /*
     describe('Styles', () => {
       test('dayClass', () => {
         const days = wrapper.vm.daysAvailable
@@ -350,7 +355,7 @@ describe('Schedule', () => {
         })
         expect(timebarStyle).toEqual({
           'left': (33 * 60 + 30) + 'px',
-          'width': 13 * 60 + 'px'
+          'width': 12 * 60 - 2 * 30 + 'px'
         })
       })
 
@@ -367,9 +372,8 @@ describe('Schedule', () => {
           startDate: moment('2019-08-15', 'YYYY-MM-DD'),
           endDate: moment('2019-09-01', 'YYYY-MM-DD')
         })
-        expect(timebarWidth).toEqual(13 * 60)
+        expect(timebarWidth).toEqual(12 * 60 - 2 * 30)
       })
     })
-    */
   })
 })

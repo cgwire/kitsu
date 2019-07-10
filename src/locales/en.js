@@ -444,7 +444,10 @@ export default {
   },
 
   schedule: {
-    title: 'Schedule'
+    title: 'Schedule',
+    overall_man_days: 'Overall man-days:',
+    md: 'md',
+    zoom_level: 'Zoom level:'
   },
 
   shots: {

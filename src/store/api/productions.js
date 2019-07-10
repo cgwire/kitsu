@@ -31,7 +31,8 @@ export default {
       ratio: production.ratio,
       resolution: production.resolution,
       start_date: production.start_date,
-      end_date: production.end_date
+      end_date: production.end_date,
+      man_days: production.man_days
     }
     client.put(`/api/data/projects/${production.id}`, data, callback)
   },
@@ -132,6 +133,36 @@ export default {
         (err) => {
           if (err) reject(err)
           else resolve()
+        }
+      )
+    })
+  },
+
+  getScheduleItems (production) {
+    return new Promise((resolve, reject) => {
+      client.get(
+        `/api/data/projects/${production.id}/schedule-items`,
+        (err, scheduleItems) => {
+          if (err) reject(err)
+          else resolve(scheduleItems)
+        }
+      )
+    })
+  },
+
+  updateScheduleItem (scheduleItem) {
+    return new Promise((resolve, reject) => {
+      const data = {
+        start_date: scheduleItem.startDate.format('YYYY-MM-DD'),
+        end_date: scheduleItem.endDate.format('YYYY-MM-DD'),
+        man_days: scheduleItem.man_days
+      }
+      client.put(
+        `/api/data/schedule-items/${scheduleItem.id}`,
+        data,
+        (err, scheduleItem) => {
+          if (err) reject(err)
+          else resolve(scheduleItem)
         }
       )
     })
