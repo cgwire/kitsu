@@ -375,7 +375,6 @@ const actions = {
         .catch(reject)
     })
   }
-
 }
 
 const mutations = {

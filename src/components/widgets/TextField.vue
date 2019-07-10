@@ -1,6 +1,6 @@
 <template>
 <div class="field">
-  <label class="label">{{ label }}</label>
+  <label class="label" v-if="label">{{ label }}</label>
   <p class="control flexrow">
     <input
       :class="'input flexrow-item' + inputClass"

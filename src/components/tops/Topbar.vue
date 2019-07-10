@@ -253,7 +253,8 @@ export default {
         { label: this.$t('breakdown.title'), value: 'breakdown' },
         { label: this.$t('playlists.title'), value: 'playlists' },
         { label: this.$t('people.team'), value: 'team' },
-        { label: this.$t('news.title'), value: 'newsFeed' }
+        { label: this.$t('news.title'), value: 'newsFeed' },
+        { label: this.$t('schedule.title'), value: 'schedule' }
       ]
       if (!this.isTVShow) { // Remove episode Section from the list.
         options.splice(3, 1)

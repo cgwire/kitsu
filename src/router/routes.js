@@ -27,6 +27,7 @@ import Playlist from '../components/pages/Playlist'
 import Profile from '../components/pages/Profile'
 import ResetPassword from '../components/pages/ResetPassword'
 import ResetChangePassword from '../components/pages/ResetChangePassword'
+import ProductionSchedule from '../components/pages/ProductionSchedule'
 import ServerDown from '../components/pages/ServerDown'
 import Sequences from '../components/pages/Sequences'
 import Settings from '../components/pages/Settings'
@@ -239,6 +240,17 @@ export const routes = [
       },
 
       {
+        path: '/productions/:production_id/schedule',
+        component: ProductionSchedule,
+        name: 'schedule'
+      },
+      {
+        path: '/productions/:production_id/episodes/:episode_id/schedule',
+        component: ProductionSchedule,
+        name: 'episode-schedule'
+      },
+
+      {
         path: '/productions/:production_id/assets',
         component: Assets,
         name: 'assets'
@@ -349,11 +361,6 @@ export const routes = [
         path: '/productions/:production_id/shots',
         component: Shots,
         name: 'shots'
-      },
-      {
-        path: '/productions/:production_id/shots/manage',
-        component: Shots,
-        name: 'manage-shots'
       },
       {
         path: '/productions/:production_id/shots/import',

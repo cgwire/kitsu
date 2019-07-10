@@ -15,6 +15,7 @@ import people from './modules/people'
 import user from './modules/user'
 import playlists from './modules/playlists'
 import productions from './modules/productions'
+import schedule from './modules/schedule'
 import shots from './modules/shots'
 import taskTypes from './modules/tasktypes'
 import taskStatus from './modules/taskstatus'
@@ -34,6 +35,7 @@ let modules = {
   productions,
   news,
   notifications,
+  schedule,
   shots,
   tasks,
   taskTypes,

@@ -356,10 +356,6 @@ export default {
     }
   },
 
-  destroyed () {
-    this.$store.commit('CLEAR_SHOTS')
-  },
-
   methods: {
     ...mapActions([
       'addMetadataDescriptor',
