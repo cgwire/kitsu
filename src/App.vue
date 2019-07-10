@@ -441,20 +441,28 @@ body {
     background-color: #5E6169;
   }
 
+  .project-dates .vdp-datepicker__calendar,
   .current-date .datepicker .vdp-datepicker__calendar {
     background-color: #36393F;
     border-color: #25282E;
+    z-index: 150;
   }
+  .project-dates .datepicker .vdp-datepicker__calendar .prev,
+  .project-dates .datepicker .vdp-datepicker__calendar .next,
+  .project-dates .datepicker .vdp-datepicker__calendar .day__month_btn,
   .current-date .datepicker .vdp-datepicker__calendar header span:hover {
     background: #36393F;
   }
+  .project-dates .datepicker .vdp-datepicker__calendar header .prev::after,
   .current-date .datepicker .vdp-datepicker__calendar header .prev::after {
     border-right-color: #EEE;
   }
+  .project-dates .datepicker .vdp-datepicker__calendar header .next::after,
   .current-date .datepicker .vdp-datepicker__calendar header .next::after {
     border-left-color: #EEE;
   }
 
+  .projects-dates .datepicker .vdp-datepicker__calendar header .next.disabled::after,
   .current-date .datepicker .vdp-datepicker__calendar header .next.disabled::after {
     border-left-color: #666;
   }
@@ -1154,6 +1162,10 @@ tbody:last-child .empty-line:last-child {
 .datepicker .date-field {
   font-size: 1.6em;
   width: 250px;
+}
+
+.project-dates .date-input {
+  width: 150px;
 }
 
 .dark .button.is-on {
