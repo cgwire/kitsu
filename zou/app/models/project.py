@@ -38,6 +38,7 @@ class Project(db.Model, BaseMixin, SerializerMixin):
     production_type = db.Column(db.String(20), default="short")
     start_date = db.Column(db.Date())
     end_date = db.Column(db.Date())
+    man_days = db.Column(db.Integer)
 
     project_status_id = db.Column(
         UUIDType(binary=False),
