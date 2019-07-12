@@ -203,14 +203,35 @@ export default {
 
     daysAvailable () {
       const days = []
-      let day = moment(this.startDate).add(-1, 'days')
-      while (day.isBefore(this.endDate)) {
-        const nextDay = moment(day).add(1, 'days')
-        if (nextDay.isoWeek() !== day.isoWeek()) nextDay.newWeek = true
-        if (nextDay.month() !== day.month()) nextDay.newMonth = true
-        if ([6, 7].includes(nextDay.isoWeekday())) nextDay.weekend = true
-        days.push(nextDay)
-        day = nextDay
+      let day = this.startDate.add(-1, 'days')
+      let dayDate = day.toDate()
+      let endDayDate = this.endDate.toDate()
+      dayDate.isoweekday = day.isoWeekday()
+      dayDate.monthday = day.month()
+
+      while (dayDate < endDayDate) {
+        let nextDay = new Date(Number(dayDate))
+        nextDay.setDate(dayDate.getDate() + 1) // Add 1 day
+
+        nextDay.isoweekday = dayDate.isoweekday + 1
+        if (nextDay.isoweekday > 7) {
+          nextDay.isoweekday = 1
+          nextDay.newWeek = true
+        }
+        nextDay.monthday = dayDate.monthday + 1
+        if (nextDay.monthday > 27 &&
+            nextDay.getMonth() !== dayDate.getMonth()) {
+          nextDay.newMonth = true
+          nextDay.monthday = 1
+        }
+        if ([6, 7].includes(nextDay.isoweekday)) nextDay.weekend = true
+
+        let momentDay = moment(nextDay)
+        momentDay.newWeek = nextDay.newWeek
+        momentDay.newMonth = nextDay.newMonth
+        momentDay.weekend = nextDay.weekend
+        days.push(momentDay)
+        dayDate = nextDay
       }
       return days
     },
