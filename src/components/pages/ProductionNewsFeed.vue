@@ -659,7 +659,6 @@ export default {
   flex: 1 1 auto;
   padding-top: 70px;
   background: $white-grey-light;
-  overflow-y: scroll;
   height: 100%;
 }
 
