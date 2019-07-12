@@ -532,7 +532,7 @@ export default {
     getTimebarLeft (timeElement) {
       const startDate = timeElement.startDate || this.startDate
       let startDiff = this.businessDiff(this.startDate, startDate) || 0
-      return ((startDiff) * this.cellWidth) + this.cellWidth / 2
+      return ((startDiff) * this.cellWidth) + 5
     },
 
     getTimebarWidth (timeElement) {
@@ -546,7 +546,7 @@ export default {
         ) ||
         this.startDate.clone().add(1, 'days')
       let lengthDiff = this.businessDiff(startDate, endDate) || 1
-      return lengthDiff * this.cellWidth
+      return (lengthDiff + 1) * this.cellWidth - 10
     }
   },
 
