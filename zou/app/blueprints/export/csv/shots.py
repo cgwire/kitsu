@@ -52,7 +52,8 @@ class ShotsCsvExport(Resource):
             "Time Spent",
             "Nb Frames",
             "Frame In",
-            "Frame Out"
+            "Frame Out",
+            "FPS"
         ]
 
         metadata_headers = [
@@ -84,7 +85,8 @@ class ShotsCsvExport(Resource):
             self.get_time_spent(result),
             result["nb_frames"],
             result.get("data", {}).get("frame_in", ""),
-            result.get("data", {}).get("frame_out", "")
+            result.get("data", {}).get("frame_out", ""),
+            result.get("data", {}).get("fps", "")
         ]
         task_map = {}
 

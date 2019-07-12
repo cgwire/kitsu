@@ -21,9 +21,11 @@ class ShotsCsvImportResource(BaseCsvProjectImportResource):
         sequence_name = row["Sequence"]
         shot_name = row["Name"]
         description = row["Description"]
+        nb_frames = row.get("Nb Frames", None)
         data = {
             "frame_in": row["Frame In"],
-            "frame_out": row["Frame Out"]
+            "frame_out": row["Frame Out"],
+            "fps": row.get("FPS", None),
         }
         for name, field_name in self.descriptor_fields.items():
             if name in row:
@@ -47,14 +49,26 @@ class ShotsCsvImportResource(BaseCsvProjectImportResource):
 
         shot_type = shots_service.get_shot_type()
         try:
-            entity = Entity.create(
-                name=shot_name,
-                description=description,
-                project_id=project_id,
-                parent_id=sequence_id,
-                entity_type_id=shot_type["id"],
-                data=data
-            )
+            if nb_frames is None or len(nb_frames) == 0:
+                entity = Entity.create(
+                    name=shot_name,
+                    description=description,
+                    project_id=project_id,
+                    parent_id=sequence_id,
+                    entity_type_id=shot_type["id"],
+                    data=data
+                )
+            else:
+                entity = Entity.create(
+                    name=shot_name,
+                    description=description,
+                    project_id=project_id,
+                    parent_id=sequence_id,
+                    entity_type_id=shot_type["id"],
+                    nb_frames=nb_frames,
+                    data=data
+                )
+
         except IntegrityError:
             entity = Entity.get_by(
                 name=shot_name,
