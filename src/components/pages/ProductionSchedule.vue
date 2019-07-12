@@ -131,16 +131,7 @@ export default {
   },
 
   mounted () {
-    if (this.currentProduction.start_date) {
-      this.startDate = moment(this.currentProduction.start_date)
-    }
-    if (this.currentProduction.end_date) {
-      this.endDate = moment(this.currentProduction.end_date)
-    }
-    this.overallManDays = this.currentProduction.man_days
-    this.selectedStartDate = this.startDate.toDate()
-    this.selectedEndDate = this.endDate.toDate()
-    this.loadData()
+    this.reset()
   },
 
   computed: {
@@ -197,6 +188,19 @@ export default {
     changeZoom (event) {
       if (event.wheelDelta < 0 && this.zoomLevel > 1) this.zoomLevel--
       if (event.wheelDelta > 0 && this.zoomLevel < 3) this.zoomLevel++
+    },
+
+    reset () {
+      if (this.currentProduction.start_date) {
+        this.startDate = moment(this.currentProduction.start_date)
+      }
+      if (this.currentProduction.end_date) {
+        this.endDate = moment(this.currentProduction.end_date)
+      }
+      this.overallManDays = this.currentProduction.man_days
+      this.selectedStartDate = this.startDate.toDate()
+      this.selectedEndDate = this.endDate.toDate()
+      this.loadData()
     }
   },
 
@@ -233,6 +237,10 @@ export default {
           }
         })
       }
+    },
+
+    currentProduction () {
+      this.reset()
     }
   },
 
