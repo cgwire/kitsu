@@ -88,7 +88,12 @@ import firstBy from 'thenby'
 import moment from 'moment'
 import { slugify } from '../../lib/helpers'
 import { buildSupervisorTaskIndex, indexSearch } from '../../lib/indexing'
-import { applyFilters, getKeyWords, getTaskFilters } from '../../lib/filtering'
+import {
+  applyFilters,
+  getExcludingKeyWords,
+  getKeyWords,
+  getTaskFilters
+} from '../../lib/filtering'
 
 import { ChevronLeftIcon } from 'vue-feather-icons'
 import Combobox from '../widgets/Combobox'
@@ -251,10 +256,15 @@ export default {
       if (query && query.length !== 1) {
         query = query.toLowerCase().trim()
         const keywords = getKeyWords(query) || []
-        if (keywords && keywords.length > 0) {
+        const excludingKeyWords = getExcludingKeyWords(query) || []
+        if (keywords.length > 0 || excludingKeyWords.length > 0) {
           let tasks = []
           const filters = getTaskFilters(this.$options.taskIndex, query)
-          tasks = indexSearch(this.$options.taskIndex, keywords)
+          if (keywords.length > 0) {
+            tasks = indexSearch(this.$options.taskIndex, keywords)
+          } else {
+            tasks = this.tasks
+          }
           tasks = applyFilters(tasks, filters, this.taskMap)
           this.tasks = this.sortTasks(tasks)
         } else {
