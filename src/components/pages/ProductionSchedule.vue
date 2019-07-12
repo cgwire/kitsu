@@ -115,7 +115,7 @@ export default {
       startDate: moment(),
       selectedStartDate: null,
       selectedEndDate: null,
-      zoomLevel: 1,
+      zoomLevel: 3,
       zoomOptions: [
         { label: '1', value: 1 },
         { label: '2', value: 2 },
