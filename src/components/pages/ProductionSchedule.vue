@@ -209,21 +209,21 @@ export default {
 
   watch: {
     selectedStartDate () {
-      const startDate = moment(this.selectedStartDate)
+      this.startDate = moment(this.selectedStartDate)
       this.editProduction({
         data: {
           ...this.currentProduction,
-          start_date: startDate.format('YYYY-MM-DD')
+          start_date: this.startDate.format('YYYY-MM-DD')
         }
       })
     },
 
     selectedEndDate () {
-      const endDate = moment(this.selectedEndDate)
+      this.endDate = moment(this.selectedEndDate)
       this.editProduction({
         data: {
           ...this.currentProduction,
-          end_date: endDate.format('YYYY-MM-DD')
+          end_date: this.endDate.format('YYYY-MM-DD')
         }
       })
     },
