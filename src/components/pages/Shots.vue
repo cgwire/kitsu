@@ -566,17 +566,16 @@ export default {
       this.editShot.isSuccess = false
       this.editShot.isError = false
 
-      this.modals = {
+      Object.assign(this.modals, {
         isAddMetadataDisplayed: false,
         isCreateTasksDisplayed: false,
         isDeleteAllTasksDisplayed: false,
         isDeleteDisplayed: false,
         isDeleteMetadataDisplayed: false,
         isImportDisplayed: false,
-        isManageDisplayed: false,
         isNewDisplayed: false,
         isRestoreDisplayed: false
-      }
+      })
 
       if (path.indexOf('new') > 0) {
         this.resetEditModal()
