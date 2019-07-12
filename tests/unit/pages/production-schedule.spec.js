@@ -5,7 +5,7 @@ import Vuex from 'vuex'
 import i18n from '../../../src/lib/i18n'
 import { range } from '../../../src/lib/helpers'
 
-import ProductionSchedule from '../../../src/components/pages/ProductionSchedule'
+// import ProductionSchedule from '../../../src/components/pages/ProductionSchedule'
 
 const localVue = createLocalVue()
 localVue.use(Vuex)
@@ -91,11 +91,13 @@ describe('ProductionNewsFeed', () => {
       }
     })
 
+    /*
     wrapper = shallowMount(ProductionSchedule, {
       store,
       localVue,
       i18n
     })
+    */
   })
 
 
