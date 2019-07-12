@@ -132,10 +132,10 @@
       <img src="../../assets/illustrations/empty_shot.png" />
     </p>
     <p class="info">{{ $t('shots.empty_list') }}</p>
-    <button-link
+    <button-simple
       class="level-item big-button"
       :text="$t('shots.new_shots')"
-      :path="manageShotsPath"
+      @click="$emit('add-shots')"
     />
   </div>
   <div

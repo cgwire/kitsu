@@ -70,7 +70,7 @@
         @add-metadata="onAddMetadataClicked"
         @delete-metadata="onDeleteMetadataClicked"
         @edit-metadata="onEditMetadataClicked"
-
+        @add-shots="showManageShots"
       />
     </div>
   </div>
@@ -694,6 +694,7 @@ export default {
     },
 
     hideManageShots () {
+      console.log('cancel')
       this.modals.isManageDisplayed = false
     }
   },
