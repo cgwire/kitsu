@@ -76,7 +76,8 @@ describe('Schedule', () => {
     }
     userStore = {
       getters: {
-        user: () => ({ id: 'user-1', timezone: 'Europe/Paris' })
+        user: () => ({ id: 'user-1', timezone: 'Europe/Paris' }),
+        isCurrentUserAdmin: () => true
       },
       actions: {}
     }
@@ -354,8 +355,9 @@ describe('Schedule', () => {
           endDate: moment('2019-09-01', 'YYYY-MM-DD')
         })
         expect(timebarStyle).toEqual({
-          'left': (33 * 60 + 30) + 'px',
-          'width': 12 * 60 - 2 * 30 + 'px'
+          'cursor': 'ew-resize',
+          'left': (33 * 60 + 5) + 'px',
+          'width': 12 * 60 - 10 + 'px'
         })
       })
 
@@ -364,7 +366,7 @@ describe('Schedule', () => {
           startDate: moment('2019-08-15', 'YYYY-MM-DD'),
           endDate: moment('2019-09-01', 'YYYY-MM-DD')
         })
-        expect(timebarLeft).toEqual(33 * 60 + 30)
+        expect(timebarLeft).toEqual(33 * 60 + 5)
       })
 
       test('getTimebarWidth', () => {
@@ -372,7 +374,7 @@ describe('Schedule', () => {
           startDate: moment('2019-08-15', 'YYYY-MM-DD'),
           endDate: moment('2019-09-01', 'YYYY-MM-DD')
         })
-        expect(timebarWidth).toEqual(12 * 60 - 2 * 30)
+        expect(timebarWidth).toEqual(12 * 60 - 10)
       })
     })
   })

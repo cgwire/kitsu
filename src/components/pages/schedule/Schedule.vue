@@ -12,6 +12,12 @@
       @mousedown="startBrowsingY"
     >
       <div
+        class="has-text-right total-man-days"
+      >
+        <span class="mr1">{{ totalManDays }}</span>
+        <span>{{ $t('schedule.md') }}</span>
+      </div>
+      <div
         class="entity-line entity-name"
         :key="'entity-' + rootElement.id"
         :style="entityLineStyle(rootElement)"
@@ -203,14 +209,35 @@ export default {
 
     daysAvailable () {
       const days = []
-      let day = moment(this.startDate).add(-1, 'days')
-      while (day.isBefore(this.endDate)) {
-        const nextDay = moment(day).add(1, 'days')
-        if (nextDay.isoWeek() !== day.isoWeek()) nextDay.newWeek = true
-        if (nextDay.month() !== day.month()) nextDay.newMonth = true
-        if ([6, 7].includes(nextDay.isoWeekday())) nextDay.weekend = true
-        days.push(nextDay)
-        day = nextDay
+      let day = this.startDate.add(-1, 'days')
+      let dayDate = day.toDate()
+      let endDayDate = this.endDate.toDate()
+      dayDate.isoweekday = day.isoWeekday()
+      dayDate.monthday = day.month()
+
+      while (dayDate < endDayDate) {
+        let nextDay = new Date(Number(dayDate))
+        nextDay.setDate(dayDate.getDate() + 1) // Add 1 day
+
+        nextDay.isoweekday = dayDate.isoweekday + 1
+        if (nextDay.isoweekday > 7) {
+          nextDay.isoweekday = 1
+          nextDay.newWeek = true
+        }
+        nextDay.monthday = dayDate.monthday + 1
+        if (nextDay.monthday > 27 &&
+            nextDay.getMonth() !== dayDate.getMonth()) {
+          nextDay.newMonth = true
+          nextDay.monthday = 1
+        }
+        if ([6, 7].includes(nextDay.isoweekday)) nextDay.weekend = true
+
+        let momentDay = moment(nextDay)
+        momentDay.newWeek = nextDay.newWeek
+        momentDay.newMonth = nextDay.newMonth
+        momentDay.weekend = nextDay.weekend
+        days.push(momentDay)
+        dayDate = nextDay
       }
       return days
     },
@@ -244,6 +271,14 @@ export default {
 
     timelinePositionStyle () {
       return { width: this.cellWidth + 'px' }
+    },
+
+    totalManDays () {
+      return this.hierarchy.reduce((acc, timeElement) => {
+        let value = acc
+        if (timeElement.man_days) value = acc + timeElement.man_days
+        return value
+      }, 0)
     },
 
     // References
@@ -511,7 +546,7 @@ export default {
     getTimebarLeft (timeElement) {
       const startDate = timeElement.startDate || this.startDate
       let startDiff = this.businessDiff(this.startDate, startDate) || 0
-      return ((startDiff) * this.cellWidth) + this.cellWidth / 2
+      return ((startDiff) * this.cellWidth) + 5
     },
 
     getTimebarWidth (timeElement) {
@@ -525,7 +560,7 @@ export default {
         ) ||
         this.startDate.clone().add(1, 'days')
       let lengthDiff = this.businessDiff(startDate, endDate) || 1
-      return lengthDiff * this.cellWidth
+      return (lengthDiff + 1) * this.cellWidth - 10
     }
   },
 
@@ -619,7 +654,7 @@ export default {
 
 .entities {
   background: white;
-  margin-top: 75px;
+  margin-top: 35px;
   min-width: 230px;
   overflow: hidden;
   z-index: 2;
@@ -807,6 +842,16 @@ export default {
 
   .man-days-unit {
     font-size: 0.7em;
+  }
+}
+
+.total-man-days {
+  color: white;
+  padding-bottom: 10px;
+  margin-right: 1em;
+
+  .mr1 {
+    font-size: 20px;
   }
 }
 </style>
