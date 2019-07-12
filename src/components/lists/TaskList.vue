@@ -366,7 +366,7 @@ export default {
       const taskLine = this.$refs['task-' + taskId]
       if (taskLine) {
         const margin = 30
-        const rect = taskLine[0].getBoundingClientRect()
+        const rect = taskLine.getBoundingClientRect()
         const listRect = this.$refs.body.getBoundingClientRect()
         const isBelow = rect.bottom > listRect.bottom - margin
         const isAbove = rect.top < listRect.top + margin
