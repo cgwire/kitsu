@@ -12,6 +12,12 @@
       @mousedown="startBrowsingY"
     >
       <div
+        class="has-text-right total-man-days"
+      >
+        <span class="mr1">{{ totalManDays }}</span>
+        <span>{{ $t('schedule.md') }}</span>
+      </div>
+      <div
         class="entity-line entity-name"
         :key="'entity-' + rootElement.id"
         :style="entityLineStyle(rootElement)"
@@ -265,6 +271,14 @@ export default {
 
     timelinePositionStyle () {
       return { width: this.cellWidth + 'px' }
+    },
+
+    totalManDays () {
+      return this.hierarchy.reduce((acc, timeElement) => {
+        let value = acc
+        if (timeElement.man_days) value = acc + timeElement.man_days
+        return value
+      }, 0)
     },
 
     // References
@@ -640,7 +654,7 @@ export default {
 
 .entities {
   background: white;
-  margin-top: 75px;
+  margin-top: 35px;
   min-width: 230px;
   overflow: hidden;
   z-index: 2;
@@ -828,6 +842,16 @@ export default {
 
   .man-days-unit {
     font-size: 0.7em;
+  }
+}
+
+.total-man-days {
+  color: white;
+  padding-bottom: 10px;
+  margin-right: 1em;
+
+  .mr1 {
+    font-size: 20px;
   }
 }
 </style>
