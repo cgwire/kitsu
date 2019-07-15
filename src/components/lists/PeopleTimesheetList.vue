@@ -48,7 +48,7 @@
   <div class="table-body" v-scroll="onBodyScroll" v-if="!isLoading" ref="body">
     <table class="table">
       <tbody>
-        <tr v-for="person in people" :key="person.id">
+          <tr v-for="person in people" :key="person.id">
           <people-name-cell class="name" :person="person" />
           <td
             :class="{
@@ -147,7 +147,10 @@
     </table>
   </div>
 
-  <p class="has-text-centered footer-info" v-if="!isLoading">
+  <p
+    class="has-text-centered footer-info"
+    v-if="!isLoading"
+  >
     {{ people.length }} {{ $tc('people.persons', people.length) }}
   </p>
 </div>
