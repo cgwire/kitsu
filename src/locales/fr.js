@@ -317,13 +317,14 @@ export default {
   },
 
   timesheets: {
+    detail_level: 'Niveau de détail',
+    done_tasks: 'Tâches terminées',
+    export_timesheet: 'Exporter la feuille de temps',
+    month: 'Mois',
+    hours: 'heures',
     title: 'Feuille de temps',
     time_spents: 'Temps passé (heures)',
-    hours: 'heures',
-    done_tasks: 'Tâches terminées',
-    detail_level: 'Niveau de détail',
-    year: 'Année',
-    month: 'Mois'
+    year: 'Année'
   },
 
   task_types: {

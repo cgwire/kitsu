@@ -583,6 +583,7 @@ export default {
   timesheets: {
     detail_level: 'Detail level',
     done_tasks: 'Done tasks',
+    export_timesheet: 'Export Timesheet',
     hours: 'hours',
     month: 'Month',
     time_spents: 'Time Spent (hours)',
