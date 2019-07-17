@@ -429,6 +429,8 @@ def remove_playlist(playlist_id):
     for job in query.all():
         remove_build_job(playlist_dict, job.id)
     playlist.delete()
+    events.emit("playlist:delete", {"playlist_id": playlist_dict["id"]})
+    return playlist_dict
 
 
 def remove_build_job(playlist, build_job_id):

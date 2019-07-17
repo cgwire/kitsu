@@ -159,10 +159,7 @@ class BaseModelsResource(Resource):
             instance = self.model(**data)
             instance.save()
             instance_dict = self.post_creation(instance)
-            events.emit(
-                "%s:new" % self.model.__tablename__.replace('_', '-'),
-                {"%s_id" % self.model.__tablename__: instance.id}
-            )
+            self.emit_create_event(instance_dict)
             return instance_dict, 201
 
         except TypeError as exception:
@@ -180,6 +177,12 @@ class BaseModelsResource(Resource):
         except ArgumentsException as exception:
             current_app.logger.error(str(exception))
             return {"message": str(exception)}, 400
+
+    def emit_create_event(self, instance_dict):
+        return events.emit(
+            "%s:new" % self.model.__tablename__.replace('_', '-'),
+            {"%s_id" % self.model.__tablename__: instance_dict["id"]}
+        )
 
 
 class BaseModelResource(Resource):
@@ -260,12 +263,8 @@ class BaseModelResource(Resource):
             self.check_update_permissions(instance.serialize(), data)
             data = self.update_data(data, instance_id)
             instance.update(data)
-            events.emit(
-                "%s:update" % self.model.__tablename__.replace('_', '-'),
-                {"%s_id" % self.model.__tablename__: instance.id}
-            )
-
             instance_dict = instance.serialize()
+            self.emit_update_event(instance_dict)
             self.post_update(instance_dict)
             return instance_dict, 200
 
@@ -298,10 +297,7 @@ class BaseModelResource(Resource):
             self.check_delete_permissions(instance_dict)
             self.pre_delete(instance_dict)
             instance.delete()
-            events.emit(
-                "%s:delete" % self.model.__tablename__.replace('_', '-'),
-                {"%s_id" % self.model.__tablename__: instance.id}
-            )
+            self.emit_delete_event(instance_dict)
             self.post_delete(instance_dict)
 
         except IntegrityError as exception:
@@ -313,3 +309,15 @@ class BaseModelResource(Resource):
             return {"message": str(exception)}, 400
 
         return '', 204
+
+    def emit_update_event(self, instance_dict):
+        return events.emit(
+            "%s:update" % self.model.__tablename__.replace('_', '-'),
+            {"%s_id" % self.model.__tablename__: instance_dict["id"]}
+        )
+
+    def emit_delete_event(self, instance_dict):
+        return events.emit(
+            "%s:delete" % self.model.__tablename__.replace('_', '-'),
+            {"%s_id" % self.model.__tablename__: instance_dict["id"]}
+        )
