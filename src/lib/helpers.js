@@ -1,4 +1,4 @@
-import marked from 'marked'
+ import marked from 'marked'
 import moment from 'moment-timezone'
 
 export const populateTask = (task) => {
@@ -78,14 +78,18 @@ export const computeStats = (entities, idField, taskStatusMap, taskMap) => {
             if (!results[sequenceId][taskTypeId]) {
               results[sequenceId][taskTypeId] = {}
             }
-            if (!results[sequenceId][taskTypeId][taskStatusId]) {
+            let statusStats = results[sequenceId][taskTypeId][taskStatusId]
+            if (!statusStats) {
               results[sequenceId][taskTypeId][taskStatusId] = {
                 name: taskStatus.short_name,
                 color: taskStatus.color,
-                value: 0
+                count: 0,
+                frames: 0
               }
+              statusStats = results[sequenceId][taskTypeId][taskStatusId]
             }
-            results[sequenceId][taskTypeId][taskStatusId].value++
+            statusStats.count++
+            if (entity.nb_frames) statusStats.frames += entity.nb_frames
           }
         }
       })
