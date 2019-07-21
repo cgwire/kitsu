@@ -276,7 +276,11 @@ export default {
     totalManDays () {
       return this.hierarchy.reduce((acc, timeElement) => {
         let value = acc
-        if (timeElement.man_days) value = acc + timeElement.man_days
+        let manDays = timeElement.man_days
+        if (timeElement.man_days) {
+          if (typeof manDays === 'string') manDays = parseInt(manDays)
+          value = acc + manDays
+        }
         return value
       }, 0)
     },
@@ -607,6 +611,7 @@ export default {
       background-image: url('../../../assets/background/schedule-dark-3.png');
     }
   }
+
   .timeline {
     .timeline-header {
       background: #36393F;
@@ -632,6 +637,10 @@ export default {
         }
       }
     }
+  }
+
+  .total-man-days {
+    color: white;
   }
 }
 
@@ -846,7 +855,6 @@ export default {
 }
 
 .total-man-days {
-  color: white;
   padding-bottom: 10px;
   margin-right: 1em;
 
