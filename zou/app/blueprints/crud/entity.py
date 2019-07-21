@@ -6,7 +6,8 @@ from flask_jwt_extended import jwt_required
 from sqlalchemy.exc import IntegrityError, StatementError
 
 from zou.app.models.entity import Entity
-from zou.app.services import user_service
+from zou.app.services import user_service, shots_service
+from zou.app.utils import events
 
 from werkzeug.exceptions import NotFound
 
@@ -20,6 +21,17 @@ class EntitiesResource(BaseModelsResource):
 
     def check_create_permissions(self, entity):
         user_service.check_manager_project_access(entity["project_id"])
+
+    def emit_create_event(self, instance_id, entity_dict):
+        instance_id = entity_dict["id"]
+        if shots_service.is_shot(entity_dict):
+            events.emit("shot:new", {"shot_id": instance_id})
+        elif shots_service.is_sequence(entity_dict):
+            events.emit("sequence:new", {"sequence_id": instance_id})
+        elif shots_service.is_episode(entity_dict):
+            events.emit("episode:new", {"episode_id": instance_id})
+        else:
+            events.emit("asset:new", {"asset_id": instance_id})
 
 
 class EntityResource(BaseModelResource):
@@ -66,7 +78,10 @@ class EntityResource(BaseModelResource):
             if data.get("source_id", None) == "null":
                 data["source_id"] = None
             entity.update(data)
-            return entity.serialize(), 200
+
+            entity_dict = entity.serialize()
+            self.emit_update_event(entity_dict)
+            return entity_dict, 200
 
         except StatementError as exception:
             current_app.logger.error(str(exception))
@@ -85,3 +100,25 @@ class EntityResource(BaseModelResource):
         except Exception as exception:
             current_app.logger.error(str(exception))
             return {"error": True, "message": str(exception)}, 400
+
+    def emit_update_event(self, instance_id, entity_dict):
+        instance_id = entity_dict["id"]
+        if shots_service.is_shot(entity_dict):
+            events.emit("shot:update", {"shot_id": instance_id})
+        elif shots_service.is_sequence(entity_dict):
+            events.emit("sequence:update", {"sequence_id": instance_id})
+        elif shots_service.is_episode(entity_dict):
+            events.emit("episode:update", {"episode_id": instance_id})
+        else:
+            events.emit("asset:update", {"asset_id": instance_id})
+
+    def emit_delete_event(self, instance_id, entity_dict):
+        instance_id = entity_dict["id"]
+        if shots_service.is_shot(entity_dict):
+            events.emit("shot:delete", {"shot_id": instance_id})
+        elif shots_service.is_sequence(entity_dict):
+            events.emit("sequence:delete", {"sequence_id": instance_id})
+        elif shots_service.is_episode(entity_dict):
+            events.emit("episode:delete", {"episode_id": instance_id})
+        else:
+            events.emit("asset:delete", {"asset_id": instance_id})

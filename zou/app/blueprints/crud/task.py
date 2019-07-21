@@ -77,10 +77,6 @@ class TaskResource(BaseModelResource):
             instance_dict = instance.serialize()
             self.check_delete_permissions(instance_dict)
             deletion_service.remove_task(instance_id, force=args["force"])
-            events.emit(
-                "%s:delete" % self.model.__tablename__,
-                {"%s_id" % self.model.__tablename__: instance.id}
-            )
             self.post_delete(instance_dict)
 
         except IntegrityError as exception:
