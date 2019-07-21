@@ -358,6 +358,7 @@ export default {
         isTVShow &&
         section !== 'team' &&
         section !== 'news-feed' &&
+        section !== 'schedule' &&
         section !== 'episodes'
 
       if (isEpisodeContext) {
