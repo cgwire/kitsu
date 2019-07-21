@@ -86,8 +86,9 @@
 import { mapGetters, mapActions } from 'vuex'
 import firstBy from 'thenby'
 import moment from 'moment'
-import { slugify } from '../../lib/helpers'
+import csv from '../../lib/csv'
 import { buildSupervisorTaskIndex, indexSearch } from '../../lib/indexing'
+import { slugify } from '../../lib/helpers'
 import {
   applyFilters,
   getExcludingKeyWords,
@@ -356,21 +357,7 @@ export default {
         nameData.splice(1, 0, this.currentEpisode.name)
       }
       const name = slugify(nameData.join('_'))
-
-      const lineArray = []
-      taskLines.forEach((infoArray, index) => {
-        const line = infoArray.join(';')
-        lineArray.push(
-          index === 0 ? 'data:text/csv;charset=utf-8,' + line : line
-        )
-      })
-      const csvContent = lineArray.join('\n')
-      const encodedUri = encodeURI(csvContent)
-      const link = document.createElement('a')
-      link.setAttribute('href', encodedUri)
-      link.setAttribute('download', `${name}.csv`)
-      document.body.appendChild(link)
-      link.click()
+      csv.buildCsvFile(name, taskLines)
     }
   },
 

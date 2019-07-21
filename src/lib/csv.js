@@ -16,7 +16,19 @@ const csv = {
     currentMonth,
     currentWeek
   ) {
-    const entries = []
+    const headers = csv.getTimesheetHeaders()
+    const entries = csv.getTimesheetEntries(headers, people, timesheet)
+    csv.buildCsvFile(name, entries)
+  },
+
+  getTimesheetHeaders (
+    detailLevel,
+    year,
+    month,
+    currentYear,
+    currentMonth,
+    currentWeek
+  ) {
     const headers = ['Person']
     let range = []
     if (detailLevel === 'month') {
@@ -27,7 +39,11 @@ const csv = {
       range = getDayRange(year, month, currentYear, currentMonth)
     }
     for (let unit in range) headers.push(unit)
-    entries.push(headers)
+    return headers
+  },
+
+  getTimesheetEntries (headers, people, timesheet) {
+    const entries = [headers]
     people.forEach((person) => {
       const line = [person.full_name]
       headers.forEach((h, index) => {
@@ -46,7 +62,7 @@ const csv = {
       })
       entries.push(line)
     })
-    csv.buildCsvFile(name, entries)
+    return entries
   },
 
   buildCsvFile (name, entries) {
