@@ -174,8 +174,15 @@ export default {
     },
 
     play () {
-      if (this.currentPlayer) this.currentPlayer.play()
-      this.isPlaying = true
+      let shot = this.shots[this.currentIndex]
+      if (shot) {
+        if (!shot.preview_file_id) this.loadNextShot()
+        shot = this.shots[this.currentIndex]
+        if (shot.preview_file_id) {
+          if (this.currentPlayer) this.currentPlayer.play()
+          this.isPlaying = true
+        }
+      }
     },
 
     playNext () {
@@ -234,6 +241,9 @@ export default {
         this.loadShot(0)
         this.pause()
         this.setCurrentTime(0)
+
+        const shot = this.shots[this.currentIndex]
+        if (shot && !shot.preview_file_id) this.loadNextShot()
       }
       setTimeout(this.resetHeight, 300)
     }
