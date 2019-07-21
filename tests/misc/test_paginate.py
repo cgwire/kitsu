@@ -18,8 +18,10 @@ class PaginationTestCase(ApiDBTestCase):
         self.assertEqual(len(persons), 51)
 
     def test_404(self):
-        self.get("data/persons?page=4", 404)
-        self.get("data/persons?page=0", 404)
+        persons = self.get("data/persons?page=4")["data"]
+        self.assertEqual(len(persons), 0)
+        persons = self.get("data/persons?page=0")["data"]
+        self.assertEqual(len(persons), 0)
 
     def test_metadata(self):
         pagination_infos = self.get("data/persons?page=2")

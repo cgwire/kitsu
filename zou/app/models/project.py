@@ -50,3 +50,36 @@ class Project(db.Model, BaseMixin, SerializerMixin):
         "Person",
         secondary="project_person_link"
     )
+
+    def set_team(self, person_ids):
+        for person_id in person_ids:
+            link = ProjectPersonLink.query.filter_by(
+                project_id=self.id,
+                person_id=person_id
+            ).first()
+            if link is None:
+                link = ProjectPersonLink(
+                    project_id=self.id,
+                    person_id=person_id
+                )
+                db.session.add(link)
+        db.session.commit()
+
+    @classmethod
+    def create_from_import(cls, data):
+        previous_project = cls.get(data["id"])
+        person_ids = data.get("team", None)
+        del data["team"]
+        del data["type"]
+
+        if previous_project is None:
+            previous_project = cls.create(**data)
+            previous_project.save()
+        else:
+            previous_project.update(data)
+            previous_project.save()
+
+        if person_ids is not None:
+            previous_project.set_team(person_ids)
+
+        return previous_project

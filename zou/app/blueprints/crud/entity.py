@@ -43,7 +43,7 @@ class EntitiesResource(BaseModelsResource, EntityEventMixin):
         user_service.check_manager_project_access(entity["project_id"])
 
     def emit_create_event(self, entity_dict):
-        self.emit_event("create", entity_dict)
+        self.emit_event("new", entity_dict)
 
 
 class EntityResource(BaseModelResource, EntityEventMixin):

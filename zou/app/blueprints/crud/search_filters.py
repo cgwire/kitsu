@@ -1,5 +1,4 @@
 from zou.app.models.search_filter import SearchFilter
-from zou.app.utils import permissions
 
 from .base import BaseModelResource, BaseModelsResource
 
@@ -13,4 +12,4 @@ class SearchFiltersResource(BaseModelsResource):
 class SearchFilterResource(BaseModelResource):
 
     def __init__(self):
-        BaseModelResource.__init__(self, SearchFilterResource)
+        BaseModelResource.__init__(self, SearchFilter)

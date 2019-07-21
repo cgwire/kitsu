@@ -339,9 +339,10 @@ def end_build_job(playlist, job):
     """
     build_job = BuildJob.get(job["id"])
     build_job.end()
-    events.emit("build-job:success", {
+    events.emit("build-job:update", {
         "build_job_id": str(build_job.id),
-        "playlist_id": playlist["id"]
+        "playlist_id": playlist["id"],
+        "status": "success"
     })
     return build_job.serialize()
 
@@ -449,3 +450,13 @@ def remove_build_job(playlist, build_job_id):
         "playlist_id": playlist["id"]
     })
     return movie_file_path
+
+
+def get_build_jobs_for_project(project_id):
+    """
+    Return all build_jobs for given project.
+    """
+    build_jobs = BuildJob.query \
+        .join(Playlist) \
+        .filter(Playlist.project_id == project_id)
+    return fields.serialize_list(build_jobs)

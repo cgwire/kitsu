@@ -22,6 +22,11 @@ from .resources import (
     AddPreviewResource,
     AddExtraPreviewResource,
 
+    ProjectSubscriptionsResource,
+    ProjectNotificationsResource,
+    ProjectCommentsResource,
+    ProjectPreviewFilesResource,
+
     CreateShotTasksResource,
     CreateAssetTasksResource,
 
@@ -46,6 +51,10 @@ routes = [
         "/data/projects/<project_id>/task-types/<task_type_id>/tasks/",
         DeleteAllTasksForTaskTypeResource
     ),
+    ("/data/projects/<project_id>/subscriptions", ProjectSubscriptionsResource),
+    ("/data/projects/<project_id>/notifications", ProjectNotificationsResource),
+    ("/data/projects/<project_id>/comments", ProjectCommentsResource),
+    ("/data/projects/<project_id>/preview-files", ProjectPreviewFilesResource),
 
     ("/actions/tasks/<task_id>/comment", CommentTaskResource),
     ("/actions/tasks/<task_id>/assign", TaskAssignResource),

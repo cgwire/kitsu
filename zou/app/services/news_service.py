@@ -50,7 +50,7 @@ def create_news_for_task_and_comment(task, comment, change=False):
         "project_id": task["project_id"],
         "task_status_id": comment["task_status_id"],
         "task_type_id": task["task_type_id"]
-    }, persist=False)
+    })
     return news
 
 
@@ -62,6 +62,7 @@ def delete_news_for_comment(comment_id):
     news_list = News.get_all_by(comment_id=comment_id)
     for news in news_list:
         news.delete()
+        events.emit("news:delete", {"news_id": news.id})
     return fields.serialize_list(news_list)
 
 
@@ -133,6 +134,7 @@ def get_last_news_for_project(
 
         result.append(fields.serialize_dict({
             "id": news.id,
+            "type": "News",
             "author_id": news.author_id,
             "comment_id": news.comment_id,
             "task_id": news.task_id,

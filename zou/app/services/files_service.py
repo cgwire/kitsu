@@ -648,3 +648,13 @@ def get_project_from_preview_file(preview_file_id):
     task = Task.get(preview_file.task_id)
     project = Project.get(task.project_id)
     return project.serialize()
+
+
+def get_preview_files_for_project(project_id):
+    """
+    Return all preview files for given project.
+    """
+    preview_files = PreviewFile.query \
+        .join(Task) \
+        .filter(Task.project_id == project_id)
+    return fields.serialize_list(preview_files)

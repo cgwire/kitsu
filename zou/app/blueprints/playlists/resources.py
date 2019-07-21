@@ -5,6 +5,7 @@ from flask_restful import Resource
 from flask_jwt_extended import jwt_required
 
 from zou.app import config
+from zou.app.utils import permissions
 
 from zou.app.services import (
     entities_service,
@@ -166,3 +167,16 @@ class BuildJobResource(Resource):
         user_service.check_project_access(playlist["project_id"])
         playlists_service.remove_build_job(playlist, build_job_id)
         return "", 204
+
+
+class ProjectBuildJobsResource(Resource):
+    """
+    Retrieve all build jobs related to given project.
+    It's mainly used for synchronisation purpose.
+    """
+
+    @jwt_required
+    def get(self, project_id):
+        permissions.check_admin_permissions()
+        projects_service.get_project(project_id)
+        return playlists_service.get_build_jobs_for_project(project_id)

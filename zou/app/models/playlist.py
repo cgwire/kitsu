@@ -28,3 +28,14 @@ class Playlist(db.Model, BaseMixin, SerializerMixin):
             name="playlist_uc"
         ),
     )
+
+    @classmethod
+    def create_from_import(cls, data):
+        del data["type"]
+        del data["build_jobs"]
+        previous_data = cls.get(data["id"])
+        if previous_data is None:
+            return cls.create(**data)
+        else:
+            previous_data.update(data)
+            return previous_data

@@ -22,7 +22,7 @@ class AssetInstanceLink(db.Model):
     )
 
 
-class EntityLink(db.Model, BaseMixin):
+class EntityLink(db.Model, BaseMixin, SerializerMixin):
     __tablename__ = "entity_link"
     entity_in_id = db.Column(
         UUIDType(binary=False),
@@ -36,6 +36,20 @@ class EntityLink(db.Model, BaseMixin):
     )
     nb_occurences = db.Column(db.Integer, default=1)
     label = db.Column(db.String(80), default="")
+
+    @classmethod
+    def create_from_import(cls, data):
+        del data["id"]
+        del data["type"]
+        entity_link = cls.get_by(
+            entity_in_id=data["entity_in_id"],
+            entity_out_id=data["entity_out_id"]
+        )
+        if entity_link is None:
+            return cls.create(**data)
+        else:
+            entity_link.update(data)
+            return entity_link
 
 
 class Entity(db.Model, BaseMixin, SerializerMixin):
@@ -113,3 +127,32 @@ class Entity(db.Model, BaseMixin, SerializerMixin):
             name="entity_uc"
         ),
     )
+
+    def set_entities_out(self, entity_ids):
+        self.entities_out = []
+        for entity_id in entity_ids:
+            entity = Entity.get(entity_id)
+            if entity is not None:
+                self.entities_out.append(entity)
+        self.save()
+
+    @classmethod
+    def create_from_import(cls, data):
+        previous_entity = cls.get(data["id"])
+        entity_ids = data.get("entities_out", None)
+        del data["entities_in"]
+        del data["entities_out"]
+        del data["preview_file_id"]
+        del data["type"]
+
+        if previous_entity is None:
+            previous_entity = cls.create(**data)
+            previous_entity.save()
+        else:
+            previous_entity.update(data)
+            previous_entity.save()
+
+        if entity_ids is not None:
+            previous_entity.set_entities_out(entity_ids)
+
+        return previous_entity

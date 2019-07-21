@@ -40,7 +40,6 @@ mentions_table = db.Table(
 )
 
 
-
 class Comment(db.Model, BaseMixin, SerializerMixin):
     """
     Comment can occurs on any object but they are mainly used on tasks.
@@ -83,3 +82,46 @@ class Comment(db.Model, BaseMixin, SerializerMixin):
 
     def __repr__(self):
         return "<Comment of %s>" % self.object_id
+
+    def set_preview_files(self, person_ids):
+        from zou.app.models.preview_file import PreviewFile
+        self.preview_files = []
+        for person_id in person_ids:
+            person = PreviewFile.get(person_id)
+            if person is not None:
+                self.preview_files.append(person)
+        self.save()
+
+    def set_mentions(self, person_ids):
+        from zou.app.models.person import Person
+        self.mentions = []
+        for person_id in person_ids:
+            person = Person.get(person_id)
+            if person is not None:
+                self.mentions.append(person)
+        self.save()
+
+
+    @classmethod
+    def create_from_import(cls, data):
+        previous_comment = cls.get(data["id"])
+        preview_file_ids = data.get("previews", None)
+        mention_ids = data.get("mentions", None)
+        del data["previews"]
+        del data["mentions"]
+        del data["type"]
+
+        if previous_comment is None:
+            previous_comment = cls.create(**data)
+            previous_comment.save()
+        else:
+            previous_comment.update(data)
+            previous_comment.save()
+
+        if preview_file_ids is not None:
+            previous_comment.set_preview_files(preview_file_ids)
+
+        if mention_ids is not None:
+            previous_comment.set_mentions(mention_ids)
+
+        return previous_comment

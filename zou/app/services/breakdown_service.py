@@ -65,15 +65,22 @@ def update_casting(shot_id, casting):
                 cast["asset_id"],
                 cast["nb_occurences"]
             )
+    entity_id = str(entity.id)
     if shots_service.is_shot(entity.serialize()):
         events.emit("shot:casting-update", {
-            "shot": str(entity.id),
+            "shot": entity_id,
             "casting": casting_ids
+        })
+        events.emit("shot:update", {
+            "shot_id": entity_id,
         })
     else:
         events.emit("asset:casting-update", {
-            "asset": str(entity.id),
+            "asset": entity_id,
             "casting": casting_ids
+        })
+        events.emit("asset:update", {
+            "asset_id": entity_id
         })
     return casting
 

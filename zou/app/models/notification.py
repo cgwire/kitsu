@@ -59,6 +59,20 @@ class Notification(db.Model, BaseMixin, SerializerMixin):
         obj_dict = {
             attr: serialize_value(getattr(self, attr)) for attr in attrs
         }
-        obj_dict["notitfication_type"] = obj_dict["type"]
+        obj_dict["notification_type"] = obj_dict["type"]
         obj_dict["type"] = obj_type or type(self).__name__
         return obj_dict
+
+    @classmethod
+    def create_from_import(cls, data):
+        notification_type = ""
+        if "notification_type" in data:
+            notification_type = data.get("notification_type", "")
+            del data["notification_type"]
+        data["type"] = notification_type
+        previous_data = cls.get(data["id"])
+        if previous_data is None:
+            return cls.create(**data)
+        else:
+            previous_data.update(data)
+            return previous_data

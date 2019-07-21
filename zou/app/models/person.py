@@ -1,14 +1,15 @@
 import sys
 
-from zou.app import db
-from zou.app.models.serializer import SerializerMixin
-from zou.app.models.base import BaseMixin
-
 from sqlalchemy_utils import UUIDType, EmailType, LocaleType, TimezoneType
 from sqlalchemy.dialects.postgresql import JSONB
 
 from pytz import timezone as pytz_timezone
 from babel import Locale
+
+from zou.app import db
+from zou.app.models.serializer import SerializerMixin
+from zou.app.models.base import BaseMixin
+from zou.app.utils import auth
 
 
 department_link = db.Table(
@@ -87,3 +88,16 @@ class Person(db.Model, BaseMixin, SerializerMixin):
         del data["phone"]
         del data["email"]
         return data
+
+    @classmethod
+    def create_from_import(cls, person):
+        del person["type"]
+        del person["full_name"]
+        previous_person = cls.get(person["id"])
+        password = auth.encrypt_password("default")
+        person["password"] = password
+        if previous_person is None:
+            return cls.create(**person)
+        else:
+            previous_person.update(person)
+            return previous_person

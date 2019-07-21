@@ -651,12 +651,62 @@ class DeleteAllTasksForTaskTypeResource(Resource):
 
     @jwt_required
     def delete(self, project_id, task_type_id):
-        if permissions.has_admin_permissions():
-            projects_service.get_project(project_id)
-            deletion_service.remove_tasks_for_project_and_task_type(
-                project_id,
-                task_type_id
-            )
-            return '', 204
-        else:
-            return 403
+        permissions.check_admin_permissions()
+        projects_service.get_project(project_id)
+        deletion_service.remove_tasks_for_project_and_task_type(
+            project_id,
+            task_type_id
+        )
+        return '', 204
+
+
+class ProjectSubscriptionsResource(Resource):
+    """
+    Retrieve all subcriptions to tasks related to given project.
+    It's mainly used for synchronisation purpose.
+    """
+
+    @jwt_required
+    def get(self, project_id):
+        permissions.check_admin_permissions()
+        projects_service.get_project(project_id)
+        return notifications_service.get_subscriptions_for_project(project_id)
+
+
+class ProjectNotificationsResource(Resource):
+    """
+    Retrieve all notifications related to given project.
+    It's mainly used for synchronisation purpose.
+    """
+
+    @jwt_required
+    def get(self, project_id):
+        permissions.check_admin_permissions()
+        projects_service.get_project(project_id)
+        return notifications_service.get_notifications_for_project(project_id)
+
+
+class ProjectCommentsResource(Resource):
+    """
+    Retrieve all comments to tasks related to given project.
+    It's mainly used for synchronisation purpose.
+    """
+
+    @jwt_required
+    def get(self, project_id):
+        permissions.check_admin_permissions()
+        projects_service.get_project(project_id)
+        return tasks_service.get_comments_for_project(project_id)
+
+
+class ProjectPreviewFilesResource(Resource):
+    """
+    Retrieve all comments to tasks related to given project.
+    It's mainly used for synchronisation purpose.
+    """
+
+    @jwt_required
+    def get(self, project_id):
+        permissions.check_admin_permissions()
+        projects_service.get_project(project_id)
+        return files_service.get_preview_files_for_project(project_id)

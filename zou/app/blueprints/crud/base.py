@@ -29,21 +29,28 @@ class BaseModelsResource(Resource):
         limit = current_app.config['NB_RECORDS_PER_PAGE']
         offset = (page - 1) * limit
 
-        if (total < offset) or (page < 1):
-            abort(404)
-
         nb_pages = int(math.ceil(total / float(limit)))
         query = query.limit(limit)
         query = query.offset(offset)
 
-        result = {
-            "data": self.all_entries(query),
-            "total": total,
-            "nb_pages": nb_pages,
-            "limit": limit,
-            "offset": offset,
-            "page": page
-        }
+        if (total < offset) or (page < 1):
+            result = {
+                "data": [],
+                "total": 0,
+                "nb_pages": nb_pages,
+                "limit": limit,
+                "offset": offset,
+                "page": page
+            }
+        else:
+            result = {
+                "data": self.all_entries(query),
+                "total": total,
+                "nb_pages": nb_pages,
+                "limit": limit,
+                "offset": offset,
+                "page": page
+            }
         return result
 
     def build_filters(self, options):

@@ -34,3 +34,22 @@ class News(db.Model, BaseMixin, SerializerMixin):
         nullable=True,
         index=True
     )
+
+    @classmethod
+    def create_from_import(cls, data):
+        data = {
+            "id": data["id"],
+            "updated_at": data["created_at"],
+            "created_at": data["created_at"],
+            "change": data["change"],
+            "author_id": data["author_id"],
+            "comment_id": data["comment_id"],
+            "preview_file_id": data["preview_file_id"],
+            "task_id": data["task_id"]
+        }
+        previous_data = cls.get(data["id"])
+        if previous_data is None:
+            return cls.create(**data)
+        else:
+            previous_data.update(data)
+            return previous_data

@@ -4,6 +4,7 @@ from flask_jwt_extended import jwt_required
 
 from zou.app.services import (
     breakdown_service,
+    entities_service,
     projects_service,
     playlists_service,
     scenes_service,
@@ -603,3 +604,16 @@ class RemoveShotFromSceneResource(Resource):
         shot = shots_service.get_shot(shot_id)
         scenes_service.remove_shot_from_scene(scene, shot)
         return '', 204
+
+
+class ProjectEntityLinksResource(Resource):
+    """
+    Retrieve all entity links related to given project.
+    It's mainly used for synchronisation purpose.
+    """
+
+    @jwt_required
+    def get(self, project_id):
+        permissions.check_admin_permissions()
+        projects_service.get_project(project_id)
+        return entities_service.get_entity_links_for_project(project_id)

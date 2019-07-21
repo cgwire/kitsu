@@ -82,3 +82,31 @@ class Task(db.Model, BaseMixin, SerializerMixin):
 
     def assignees_as_string(self):
         return ", ".join([x.full_name() for x in self.assignees])
+
+    def set_assignees(self, person_ids):
+        from zou.app.models.person import Person
+        self.assignees = []
+        for person_id in person_ids:
+            person = Person.get(person_id)
+            if person is not None:
+                self.assignees.append(person)
+        self.save()
+
+    @classmethod
+    def create_from_import(cls, data):
+        previous_task = cls.get(data["id"])
+        person_ids = data.get("assignees", None)
+        del data["assignees"]
+        del data["type"]
+
+        if previous_task is None:
+            previous_task = cls.create(**data)
+            previous_task.save()
+        else:
+            previous_task.update(data)
+            previous_task.save()
+
+        if person_ids is not None:
+            previous_task.set_assignees(person_ids)
+
+        return previous_task

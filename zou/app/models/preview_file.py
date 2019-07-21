@@ -22,11 +22,11 @@ class PreviewFile(db.Model, BaseMixin, SerializerMixin):
     extension = db.Column(db.String(6))
     shotgun_id = db.Column(db.Integer, unique=True)
 
-    is_movie = db.Column(db.Boolean, default=False) # deprecated
+    is_movie = db.Column(db.Boolean, default=False)  # deprecated
 
-    url = db.Column(db.String(600)) # deprecated
-    uploaded_movie_url = db.Column(db.String(600)) # deprecated
-    uploaded_movie_name = db.Column(db.String(150)) # deprecated
+    url = db.Column(db.String(600))  # deprecated
+    uploaded_movie_url = db.Column(db.String(600))  # deprecated
+    uploaded_movie_name = db.Column(db.String(150))  # deprecated
 
     annotations = db.Column(JSONB)
 
@@ -56,3 +56,14 @@ class PreviewFile(db.Model, BaseMixin, SerializerMixin):
 
     def __repr__(self):
         return "<PreviewFile %s>" % self.id
+
+    @classmethod
+    def create_from_import(cls, data):
+        del data["type"]
+        del data["comments"]
+        previous_data = cls.get(data["id"])
+        if previous_data is None:
+            return cls.create(**data)
+        else:
+            previous_data.update(data)
+            return previous_data

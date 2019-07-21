@@ -209,6 +209,7 @@ def add_team_member(project_id, person_id):
     person = Person.get(person_id)
     project.team.append(person)
     project.save()
+    events.emit("project:update", {"project_id": project_id})
     return project.serialize()
 
 
@@ -220,6 +221,7 @@ def remove_team_member(project_id, person_id):
     person = Person.get(person_id)
     project.team.remove(person)
     project.save()
+    events.emit("project:update", {"project_id": project_id})
     return project.serialize()
 
 

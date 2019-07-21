@@ -5,6 +5,7 @@ from zou.app.models.project import Project
 from zou.app.models.entity import Entity
 from zou.app.models.notification import Notification
 from zou.app.models.subscription import Subscription
+from zou.app.models.task import Task
 from zou.app.models.task_type import TaskType
 
 from zou.app.services import (
@@ -353,3 +354,23 @@ def get_last_notifications(notification_type=None):
     return fields.serialize_value(
         query.limit(100).all()
     )
+
+
+def get_subscriptions_for_project(project_id):
+    """
+    Return all subscriptions for given project.
+    """
+    subscriptions = Subscription.query \
+        .join(Task) \
+        .filter(Task.project_id == project_id)
+    return fields.serialize_list(subscriptions)
+
+
+def get_notifications_for_project(project_id):
+    """
+    Return all notifications for given project.
+    """
+    notifications = Notification.query \
+        .join(Task) \
+        .filter(Task.project_id == project_id)
+    return fields.serialize_list(notifications)

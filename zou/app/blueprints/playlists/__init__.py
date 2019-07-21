@@ -1,4 +1,5 @@
 from flask import Blueprint
+
 from zou.app.utils.api import configure_api_from_blueprint
 
 from .resources import (
@@ -7,6 +8,7 @@ from .resources import (
     EntityPreviewsResource,
     EpisodePlaylistsResource,
     ProjectPlaylistsResource,
+    ProjectBuildJobsResource,
     ProjectPlaylistResource,
     PlaylistDownloadResource,
     PlaylistZipDownloadResource
@@ -30,6 +32,10 @@ routes = [
     (
         "/data/playlists/<playlist_id>/jobs/<build_job_id>",
         BuildJobResource
+    ),
+    (
+        "/data/projects/<project_id>/build-jobs",
+        ProjectBuildJobsResource
     ),
     (
         "/data/playlists/<playlist_id>/build/mp4",

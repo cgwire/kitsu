@@ -94,8 +94,8 @@ routes = [
     ("/data/events/<instance_id>", EventResource),
     ("/data/notifications/", NotificationsResource),
     ("/data/notifications/<instance_id>", NotificationResource),
-    ("/data/search-filters/", SearchFilterResource),
-    ("/data/search-filters/<instance_id>", SearchFiltersResource),
+    ("/data/search-filters/", SearchFiltersResource),
+    ("/data/search-filters/<instance_id>", SearchFilterResource),
     ("/data/schedule-items/", ScheduleItemsResource),
     ("/data/schedule-items/<instance_id>", ScheduleItemResource)
 ]

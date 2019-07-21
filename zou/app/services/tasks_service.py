@@ -812,6 +812,7 @@ def create_or_update_time_spent(task_id, person_id, date, duration, add=False):
             time_spent.update({"duration": time_spent.duration + duration})
         else:
             time_spent.update({"duration": duration})
+        events.emit("time-spent:update", {"time_spent_id": str(time_spent.id)})
     else:
         time_spent = TimeSpent.create(
             task_id=task_id,
@@ -819,6 +820,7 @@ def create_or_update_time_spent(task_id, person_id, date, duration, add=False):
             date=date,
             duration=duration
         )
+        events.emit("time-spent:new", {"time_spent_id": str(time_spent.id)})
 
     task = Task.get(task_id)
     task.duration = 0
@@ -856,6 +858,7 @@ def clear_assignation(task_id):
             "person_id": assignee["id"],
             "task_id": task_id
         })
+        events.emit("task:update", {"task_id": task_id})
     return task_dict
 
 
@@ -872,6 +875,7 @@ def assign_task(task_id, person_id):
         "task_id": task.id,
         "person_id": person.id
     })
+    events.emit("task:update", {"task_id": task_id})
     return task_dict
 
 
@@ -971,10 +975,11 @@ def add_preview_file_to_comment(comment_id, person_id, task_id, revision=0):
     )
     comment.previews.append(preview_file)
     comment.save()
-
     if news is not None:
         news.update({"preview_file_id": preview_file.id})
-
+    events.emit("comment:update", {
+        "comment_id": comment.id
+    })
     return preview_file.serialize()
 
 
@@ -988,3 +993,14 @@ def reset_mentions(comment):
     comment_to_update.mentions = mentions
     comment_to_update.save()
     return comment_to_update.serialize()
+
+
+def get_comments_for_project(project_id):
+    """
+    Return all comments for given project.
+    """
+    comments = Comment.query \
+        .join(Task, Task.id == Comment.object_id) \
+        .filter(Task.project_id == project_id)
+
+    return fields.serialize_list(comments)

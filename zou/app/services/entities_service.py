@@ -1,7 +1,7 @@
 from zou.app.utils import events
 from zou.app.services import base_service
 
-from zou.app.models.entity import Entity
+from zou.app.models.entity import Entity, EntityLink
 from zou.app.models.entity_type import EntityType
 from zou.app.models.preview_file import PreviewFile
 
@@ -76,6 +76,13 @@ def update_entity_preview(entity_id, preview_file_id):
         "entity_id": entity_id,
         "preview_file_id": preview_file_id
     })
+    entity_type = EntityType.get(entity.entity_type_id)
+    entity_type_name = "asset"
+    if entity_type.name in ["Shot", "Scene", "Sequence", "Episode"]:
+        entity_type_name = entity_type.name.lower()
+    events.emit("%s:update" % entity_type_name, {
+        "%s_id" % entity_type_name: str(entity_type.id)
+    })
     return entity.serialize()
 
 
@@ -90,3 +97,14 @@ def get_entities_for_project(project_id, entity_type_id, obj_type="Entity"):
         .order_by(Entity.name) \
         .all()
     return Entity.serialize_list(result, obj_type=obj_type)
+
+
+def get_entity_links_for_project(project_id):
+    """
+    Retrieve entity links for
+    """
+    result = EntityLink.query \
+        .join(Entity, EntityLink.entity_in_id == Entity.id) \
+        .filter(Entity.project_id == project_id) \
+        .all()
+    return Entity.serialize_list(result)
