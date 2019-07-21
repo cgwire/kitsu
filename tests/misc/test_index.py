@@ -8,7 +8,7 @@ class VersionTestCase(ApiTestCase):
 
     def test_version_route(self):
         data = self.get("/")
-        self.assertEquals(data, {
+        self.assertEqual(data, {
             "api": app.config["APP_NAME"],
             "version": __version__
         })

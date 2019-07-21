@@ -63,9 +63,9 @@ class RouteTimeSpentTestCase(ApiDBTestCase):
             data
         )
         time_spents = self.get("data/time-spents")
-        self.assertEquals(time_spents[0]["date"], "2017-09-23")
-        self.assertEquals(len(time_spents), 1)
-        self.assertEquals(time_spents[0]["duration"], data["duration"])
+        self.assertEqual(time_spents[0]["date"], "2017-09-23")
+        self.assertEqual(len(time_spents), 1)
+        self.assertEqual(time_spents[0]["duration"], data["duration"])
 
     def test_set_time_spent_wrong_date(self):
         data = {
@@ -101,9 +101,9 @@ class RouteTimeSpentTestCase(ApiDBTestCase):
         time_spents = self.get(
             "/actions/tasks/%s/time-spents/2017-09-23/" % task_id
         )
-        self.assertEquals(time_spents["total"], 10800)
-        self.assertEquals(time_spents[user_id]["duration"], 7200)
-        self.assertEquals(time_spents[person_id]["duration"], 3600)
+        self.assertEqual(time_spents["total"], 10800)
+        self.assertEqual(time_spents[user_id]["duration"], 7200)
+        self.assertEqual(time_spents[person_id]["duration"], 3600)
 
     def test_add_time_spent(self):
         person_id = str(self.person.id)
@@ -127,9 +127,9 @@ class RouteTimeSpentTestCase(ApiDBTestCase):
             data
         )
         time_spents = self.get("data/time-spents")
-        self.assertEquals(time_spents[0]["duration"], 14400)
-        self.assertEquals(time_spents[0]["date"], "2017-09-23")
-        self.assertEquals(len(time_spents), 1)
+        self.assertEqual(time_spents[0]["duration"], 14400)
+        self.assertEqual(time_spents[0]["date"], "2017-09-23")
+        self.assertEqual(len(time_spents), 1)
 
     def test_get_month_table(self):
         self.create_time_spents()

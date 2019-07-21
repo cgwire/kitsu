@@ -38,13 +38,13 @@ class ShotUtilsTestCase(ApiDBTestCase):
 
     def test_get_episodes(self):
         episodes = shots_service.get_episodes()
-        self.assertEquals(len(episodes), 1)
-        self.assertEquals(episodes[0]["id"], str(self.episode.id))
+        self.assertEqual(len(episodes), 1)
+        self.assertEqual(episodes[0]["id"], str(self.episode.id))
 
     def test_get_sequences(self):
         sequences = shots_service.get_sequences()
-        self.assertEquals(len(sequences), 1)
-        self.assertEquals(sequences[0]["id"], str(self.sequence.id))
+        self.assertEqual(len(sequences), 1)
+        self.assertEqual(sequences[0]["id"], str(self.sequence.id))
 
     def test_get_shots(self):
         shots = shots_service.get_shots()
@@ -55,14 +55,14 @@ class ShotUtilsTestCase(ApiDBTestCase):
 
     def test_get_scenes(self):
         scenes = shots_service.get_scenes()
-        self.assertEquals(len(scenes), 1)
-        self.assertEquals(scenes[0]["id"], str(self.scene.id))
+        self.assertEqual(len(scenes), 1)
+        self.assertEqual(scenes[0]["id"], str(self.scene.id))
 
     def test_get_episode_map(self):
         self.generate_fixture_episode("E02")
         episode_map = shots_service.get_episode_map()
-        self.assertEquals(len(episode_map.keys()), 2)
-        self.assertEquals(
+        self.assertEqual(len(episode_map.keys()), 2)
+        self.assertEqual(
             episode_map[str(self.episode.id)]["name"],
             self.episode.name
         )
@@ -97,7 +97,7 @@ class ShotUtilsTestCase(ApiDBTestCase):
         )
 
     def test_get_shot(self):
-        self.assertEquals(
+        self.assertEqual(
             str(self.shot.id),
             shots_service.get_shot(self.shot.id)["id"]
         )
@@ -111,44 +111,44 @@ class ShotUtilsTestCase(ApiDBTestCase):
         self.generate_fixture_shot_task()
 
         shot = shots_service.get_full_shot(self.shot.id)
-        self.assertEquals(shot["id"], str(self.shot.id))
-        self.assertEquals(shot["sequence_name"], str(self.sequence.name))
-        self.assertEquals(shot["episode_name"], str(self.episode.name))
-        self.assertEquals(len(shot["tasks"]), 1)
+        self.assertEqual(shot["id"], str(self.shot.id))
+        self.assertEqual(shot["sequence_name"], str(self.sequence.name))
+        self.assertEqual(shot["episode_name"], str(self.episode.name))
+        self.assertEqual(len(shot["tasks"]), 1)
 
     def test_get_scene(self):
-        self.assertEquals(
+        self.assertEqual(
             str(self.scene.id),
             shots_service.get_scene(self.scene.id)["id"]
         )
 
     def test_get_full_scene(self):
         scene = shots_service.get_full_scene(self.scene.id)
-        self.assertEquals(scene["id"], str(self.scene.id))
-        self.assertEquals(scene["sequence_name"], str(self.sequence.name))
-        self.assertEquals(scene["episode_name"], str(self.episode.name))
+        self.assertEqual(scene["id"], str(self.scene.id))
+        self.assertEqual(scene["sequence_name"], str(self.sequence.name))
+        self.assertEqual(scene["episode_name"], str(self.episode.name))
 
     def test_get_sequence(self):
-        self.assertEquals(
+        self.assertEqual(
             str(self.sequence.id),
             shots_service.get_sequence(self.sequence.id)["id"]
         )
 
     def test_get_full_sequence(self):
         sequence = shots_service.get_full_sequence(self.sequence.id)
-        self.assertEquals(sequence["id"], str(self.sequence.id))
-        self.assertEquals(sequence["episode_name"], str(self.episode.name))
+        self.assertEqual(sequence["id"], str(self.sequence.id))
+        self.assertEqual(sequence["episode_name"], str(self.episode.name))
 
     def test_get_episode(self):
-        self.assertEquals(
+        self.assertEqual(
             str(self.episode.id),
             shots_service.get_episode(self.episode.id)["id"]
         )
 
     def test_get_full_episode(self):
         episode = shots_service.get_full_episode(self.episode.id)
-        self.assertEquals(episode["id"], str(self.episode.id))
-        self.assertEquals(episode["project_name"], str(self.project.name))
+        self.assertEqual(episode["id"], str(self.episode.id))
+        self.assertEqual(episode["project_name"], str(self.project.name))
 
     def test_is_shot(self):
         self.assertTrue(shots_service.is_shot(self.shot.serialize()))
@@ -164,13 +164,13 @@ class ShotUtilsTestCase(ApiDBTestCase):
 
     def test_get_sequence_from_shot(self):
         sequence = shots_service.get_sequence_from_shot(self.shot.serialize())
-        self.assertEquals(sequence["name"], 'S01')
+        self.assertEqual(sequence["name"], 'S01')
 
     def test_get_episode_from_shot(self):
         episode = shots_service.get_episode_from_sequence(
             self.sequence.serialize()
         )
-        self.assertEquals(episode["name"], 'E01')
+        self.assertEqual(episode["name"], 'E01')
 
     def test_get_sequence_from_shot_no_sequence(self):
         self.shot_noseq = Entity.create(
@@ -194,21 +194,21 @@ class ShotUtilsTestCase(ApiDBTestCase):
             self.project.id,
             episode_name
         )
-        self.assertEquals(episode["name"], episode_name)
+        self.assertEqual(episode["name"], episode_name)
 
     def test_get_or_create_episode(self):
-        self.assertEquals(len(shots_service.get_episodes()), 1)
+        self.assertEqual(len(shots_service.get_episodes()), 1)
         episode_name = "NE01"
         shots_service.get_or_create_episode(
             self.project.id,
             episode_name
         )
-        self.assertEquals(len(shots_service.get_episodes()), 2)
+        self.assertEqual(len(shots_service.get_episodes()), 2)
         shots_service.get_or_create_episode(
             self.project.id,
             episode_name
         )
-        self.assertEquals(len(shots_service.get_episodes()), 2)
+        self.assertEqual(len(shots_service.get_episodes()), 2)
 
     def test_create_sequence(self):
         sequence_name = "NSE01"
@@ -218,8 +218,8 @@ class ShotUtilsTestCase(ApiDBTestCase):
             parent_id,
             sequence_name
         )
-        self.assertEquals(sequence["name"], sequence_name)
-        self.assertEquals(sequence["parent_id"], parent_id)
+        self.assertEqual(sequence["name"], sequence_name)
+        self.assertEqual(sequence["parent_id"], parent_id)
 
     def test_create_shot(self):
         shot_name = "NSH01"
@@ -229,8 +229,8 @@ class ShotUtilsTestCase(ApiDBTestCase):
             parent_id,
             shot_name
         )
-        self.assertEquals(shot["name"], shot_name)
-        self.assertEquals(shot["parent_id"], parent_id)
+        self.assertEqual(shot["name"], shot_name)
+        self.assertEqual(shot["parent_id"], parent_id)
 
     def test_create_scene(self):
         scene_name = "NSC01"
@@ -240,8 +240,8 @@ class ShotUtilsTestCase(ApiDBTestCase):
             parent_id,
             scene_name
         )
-        self.assertEquals(scene["name"], scene_name)
-        self.assertEquals(scene["parent_id"], parent_id)
+        self.assertEqual(scene["name"], scene_name)
+        self.assertEqual(scene["parent_id"], parent_id)
 
     def test_remove_scene(self):
         scene_id = self.scene.id
@@ -256,7 +256,7 @@ class ShotUtilsTestCase(ApiDBTestCase):
             sequence_id=self.sequence.id
         )
         scenes = shots_service.get_scenes_for_project(self.project.id)
-        self.assertEquals(len(scenes), 1)
+        self.assertEqual(len(scenes), 1)
 
     def test_get_scenes_for_sequence(self):
         self.generate_fixture_project_standard()
@@ -267,4 +267,4 @@ class ShotUtilsTestCase(ApiDBTestCase):
             sequence_id=self.sequence.id
         )
         scenes = shots_service.get_scenes_for_sequence(self.sequence.id)
-        self.assertEquals(len(scenes), 1)
+        self.assertEqual(len(scenes), 1)

@@ -30,17 +30,17 @@ class ShotTestCase(ApiDBTestCase):
 
     def test_get_shots(self):
         shots = self.get("data/shots/all")
-        self.assertEquals(len(shots), 3)
+        self.assertEqual(len(shots), 3)
         self.assertDictEqual(shots[0], self.shot_dict)
 
     def test_remove_shot(self):
         self.generate_fixture_asset()
         path = "data/shots/%s" % self.shot.id
         shots = shots_service.get_shots()
-        self.assertEquals(len(shots), 3)
+        self.assertEqual(len(shots), 3)
         self.delete(path)
         shots = shots_service.get_shots()
-        self.assertEquals(len(shots), 2)
+        self.assertEqual(len(shots), 2)
 
     def test_get_shot(self):
         self.generate_fixture_person()
@@ -51,18 +51,18 @@ class ShotTestCase(ApiDBTestCase):
         self.generate_fixture_shot_task()
 
         shot = self.get("data/shots/%s" % self.shot.id)
-        self.assertEquals(shot["id"], str(self.shot.id))
-        self.assertEquals(shot["name"], self.shot.name)
-        self.assertEquals(shot["sequence_name"], self.sequence.name)
-        self.assertEquals(shot["sequence_id"], str(self.sequence.id))
-        self.assertEquals(shot["episode_name"], self.episode.name)
-        self.assertEquals(shot["episode_id"], str(self.episode.id))
-        self.assertEquals(shot["project_name"], self.project.name)
-        self.assertEquals(len(shot["tasks"]), 1)
+        self.assertEqual(shot["id"], str(self.shot.id))
+        self.assertEqual(shot["name"], self.shot.name)
+        self.assertEqual(shot["sequence_name"], self.sequence.name)
+        self.assertEqual(shot["sequence_id"], str(self.sequence.id))
+        self.assertEqual(shot["episode_name"], self.episode.name)
+        self.assertEqual(shot["episode_id"], str(self.episode.id))
+        self.assertEqual(shot["project_name"], self.project.name)
+        self.assertEqual(len(shot["tasks"]), 1)
 
     def test_get_shot_by_name(self):
         shots = self.get("data/shots/all?name=%s" % self.shot.name.lower())
-        self.assertEquals(shots[0]["id"], str(self.shot.id))
+        self.assertEqual(shots[0]["id"], str(self.shot.id))
 
     def test_remove_shot_with_tasks(self):
         self.generate_fixture_person()
@@ -75,8 +75,8 @@ class ShotTestCase(ApiDBTestCase):
         path = "data/shots/%s" % self.shot.id
         self.delete(path)
         shots = shots_service.get_shots()
-        self.assertEquals(len(shots), 3)
-        self.assertEquals(shots[2]["canceled"], True)
+        self.assertEqual(len(shots), 3)
+        self.assertEqual(shots[2]["canceled"], True)
 
     def test_create_shot(self):
         shot_name = "NSH01"
@@ -95,8 +95,8 @@ class ShotTestCase(ApiDBTestCase):
             data
         )
         shot = self.get("data/shots/%s" % shot["id"])
-        self.assertEquals(shot["name"], shot_name)
-        self.assertEquals(shot["parent_id"], sequence_id)
+        self.assertEqual(shot["name"], shot_name)
+        self.assertEqual(shot["parent_id"], sequence_id)
         self.assertDictEqual(shot["data"], data["data"])
 
     def test_get_shots_for_project(self):
@@ -104,7 +104,7 @@ class ShotTestCase(ApiDBTestCase):
         self.generate_fixture_shot_standard("SH01")
         self.generate_fixture_shot_standard("SH02")
         shots = self.get("data/projects/%s/shots" % self.project.id)
-        self.assertEquals(len(shots), 3)
+        self.assertEqual(len(shots), 3)
         self.assertDictEqual(shots[0], self.serialized_shot)
 
     def test_get_shots_for_project_404(self):
@@ -115,7 +115,7 @@ class ShotTestCase(ApiDBTestCase):
         shots = self.get(
             "data/shots/all?project_id=%s&name=SH02" % self.project_id
         )
-        self.assertEquals(shots[0]["id"], str(self.shot_02_id))
+        self.assertEqual(shots[0]["id"], str(self.shot_02_id))
 
         self.generate_fixture_user_cg_artist()
         self.log_in_cg_artist()

@@ -34,13 +34,13 @@ class ScheduleItemTestCase(ApiDBTestCase):
 
     def test_get_schedule_items(self):
         schedule_items = self.get("data/schedule-items")
-        self.assertEquals(len(schedule_items), 3)
+        self.assertEqual(len(schedule_items), 3)
 
     def test_get_schedule_item(self):
         schedule_item = self.get_first("data/schedule-items")
         schedule_item_again = self.get(
             "data/schedule-items/%s" % schedule_item["id"])
-        self.assertEquals(schedule_item, schedule_item_again)
+        self.assertEqual(schedule_item, schedule_item_again)
         self.get_404("data/schedule-items/%s" % fields.gen_uuid())
 
     def test_create_schedule_item(self):
@@ -52,7 +52,7 @@ class ScheduleItemTestCase(ApiDBTestCase):
         }
         self.schedule_item = self.post("data/schedule-items", data)
         schedule_items = self.get("data/schedule-items")
-        self.assertEquals(len(schedule_items), 4)
+        self.assertEqual(len(schedule_items), 4)
 
     def test_update_schedule_item(self):
         schedule_item = self.get_first("data/schedule-items")
@@ -62,14 +62,14 @@ class ScheduleItemTestCase(ApiDBTestCase):
         self.put("data/schedule-items/%s" % schedule_item["id"], data)
         schedule_item_again = self.get(
             "data/schedule-items/%s" % schedule_item["id"])
-        self.assertEquals(data["end_date"][:10], schedule_item_again["end_date"])
+        self.assertEqual(data["end_date"][:10], schedule_item_again["end_date"])
         self.put_404("data/schedule-items/%s" % fields.gen_uuid(), data)
 
     def test_delete_schedule_item(self):
         schedule_items = self.get("data/schedule-items")
-        self.assertEquals(len(schedule_items), 3)
+        self.assertEqual(len(schedule_items), 3)
         schedule_item = schedule_items[0]
         self.delete("data/schedule-items/%s" % schedule_item["id"])
         schedule_items = self.get("data/schedule-items")
-        self.assertEquals(len(schedule_items), 2)
+        self.assertEqual(len(schedule_items), 2)
         self.delete_404("data/schedule-items/%s" % fields.gen_uuid())

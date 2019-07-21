@@ -70,7 +70,7 @@ class RouteTaskChangeTestCase(ApiDBTestCase):
         real_start_date = Task.get(task_id).real_start_date
         self.put("/actions/tasks/%s/start" % task_id, {})
         task = self.get("data/tasks/%s" % task_id)
-        self.assertEquals(
+        self.assertEqual(
             real_start_date.replace(microsecond=0).isoformat(),
             task["real_start_date"]
         )

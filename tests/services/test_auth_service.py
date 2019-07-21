@@ -95,7 +95,7 @@ class AuthTestCase(ApiDBTestCase):
 
     def test_no_password_auth_strategy(self):
         person = auth_service.no_password_auth_strategy("john.doe@gmail.com")
-        self.assertEquals(person["first_name"], "John")
+        self.assertEqual(person["first_name"], "John")
 
     def test_local_auth_strategy(self):
         self.person.update({
@@ -117,7 +117,7 @@ class AuthTestCase(ApiDBTestCase):
             "john.doe@gmail.com",
             "mypassword"
         )
-        self.assertEquals(person["first_name"], "John")
+        self.assertEqual(person["first_name"], "John")
 
     def test_register_tokens(self):
         # Complex to test, jwt extended requires a proper flask context to run.

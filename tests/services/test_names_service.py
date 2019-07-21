@@ -31,8 +31,8 @@ class NamesServiceTestCase(ApiDBTestCase):
             names_service.get_full_entity_name(self.asset.id)
         (shot_name, episode_id) = \
             names_service.get_full_entity_name(self.shot.id)
-        self.assertEquals(asset_name, "Props / Tree")
-        self.assertEquals(shot_name, "E01 / S01 / P01")
+        self.assertEqual(asset_name, "Props / Tree")
+        self.assertEqual(shot_name, "E01 / S01 / P01")
 
     def test_get_preview_file_name(self):
         preview_file = files_service.create_preview_file(

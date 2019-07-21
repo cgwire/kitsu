@@ -48,7 +48,7 @@ class PlaylistsServiceTestCase(ApiDBTestCase):
     def test_get_playlist_for_project(self):
         self.generate_fixture_playlist()
         playlists = playlists_service.all_playlists_for_project(self.project.id)
-        self.assertEquals(len(playlists), 2)
+        self.assertEqual(len(playlists), 2)
         self.assertTrue(
             "Playlist 2" not in [playlists[0]["name"], playlists[1]["name"]]
         )
@@ -56,8 +56,8 @@ class PlaylistsServiceTestCase(ApiDBTestCase):
     def test_get_playlist_for_episode(self):
         self.generate_fixture_playlist()
         playlists = playlists_service.all_playlists_for_episode(self.episode.id)
-        self.assertEquals(len(playlists), 1)
-        self.assertEquals(playlists[0]["name"], "Playlist 1")
+        self.assertEqual(len(playlists), 1)
+        self.assertEqual(playlists[0]["name"], "Playlist 1")
 
     def test_get_playlist(self):
         pass

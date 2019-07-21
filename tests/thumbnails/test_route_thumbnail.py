@@ -108,7 +108,7 @@ class RouteThumbnailTestCase(ApiDBTestCase):
         ), {})
 
         asset = assets_service.get_asset(self.asset_id)
-        self.assertEquals(
+        self.assertEqual(
             asset["preview_file_id"],
             str(self.preview_file_id)
         )

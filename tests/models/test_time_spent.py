@@ -29,13 +29,13 @@ class TimeSpentTestCase(ApiDBTestCase):
 
     def test_get_time_spents(self):
         time_spents = self.get("data/time-spents")
-        self.assertEquals(len(time_spents), 3)
-        self.assertEquals(time_spents[0]["type"], "TimeSpent")
+        self.assertEqual(len(time_spents), 3)
+        self.assertEqual(time_spents[0]["type"], "TimeSpent")
 
     def test_get_time_spent(self):
         time_spent = self.get_first("data/time-spents")
         time_spent_again = self.get("data/time-spents/%s" % time_spent["id"])
-        self.assertEquals(time_spent, time_spent_again)
+        self.assertEqual(time_spent, time_spent_again)
         self.get_404("data/time-spents/%s" % fields.gen_uuid())
 
     def test_create_time_spent(self):
@@ -49,7 +49,7 @@ class TimeSpentTestCase(ApiDBTestCase):
         self.assertIsNotNone(self.time_spent["id"])
 
         time_spents = self.get("data/time-spents")
-        self.assertEquals(len(time_spents), 4)
+        self.assertEqual(len(time_spents), 4)
 
     def test_update_time_spent(self):
         time_spent = self.get_first("data/time-spents")
@@ -58,16 +58,16 @@ class TimeSpentTestCase(ApiDBTestCase):
         }
         self.put("data/time-spents/%s" % time_spent["id"], data)
         time_spent_again = self.get("data/time-spents/%s" % time_spent["id"])
-        self.assertEquals(data["duration"], time_spent_again["duration"])
+        self.assertEqual(data["duration"], time_spent_again["duration"])
         self.put_404("data/time-spents/%s" % fields.gen_uuid(), data)
 
     def test_delete_time_spent(self):
         time_spents = self.get("data/time-spents")
-        self.assertEquals(len(time_spents), 3)
+        self.assertEqual(len(time_spents), 3)
 
         time_spent = time_spents[0]
         self.delete("data/time-spents/%s" % time_spent["id"])
 
         time_spents = self.get("data/time-spents")
-        self.assertEquals(len(time_spents), 2)
+        self.assertEqual(len(time_spents), 2)
         self.delete_404("data/time-spents/%s" % fields.gen_uuid())

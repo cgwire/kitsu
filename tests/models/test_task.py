@@ -33,12 +33,12 @@ class TaskTestCase(ApiDBTestCase):
 
     def test_get_tasks(self):
         tasks = self.get("data/tasks")
-        self.assertEquals(len(tasks), 3)
+        self.assertEqual(len(tasks), 3)
 
     def test_get_task(self):
         task = self.get_first("data/tasks")
         task_again = self.get("data/tasks/%s" % task["id"])
-        self.assertEquals(task, task_again)
+        self.assertEqual(task, task_again)
         self.get_404("data/tasks/%s" % fields.gen_uuid())
 
     def test_create_task(self):
@@ -53,22 +53,22 @@ class TaskTestCase(ApiDBTestCase):
         }
         self.task = self.post("data/tasks", data)
         self.assertIsNotNone(self.task["id"])
-        self.assertEquals(
+        self.assertEqual(
             str(self.person.id),
             self.task["assignees"][0]
         )
-        self.assertEquals(
+        self.assertEqual(
             str(self.person.id),
             self.task["assignees"][0]
         )
 
         tasks = self.get("data/tasks")
-        self.assertEquals(len(tasks), 4)
+        self.assertEqual(len(tasks), 4)
 
         del self.task["assignees"]
         data["name"] = "Task without assignees"
         self.task = self.post("data/tasks", data)
-        self.assertEquals(len(tasks), 4)
+        self.assertEqual(len(tasks), 4)
 
     def test_update_task(self):
         task = self.get_first("data/tasks")
@@ -77,27 +77,27 @@ class TaskTestCase(ApiDBTestCase):
         }
         self.put("data/tasks/%s" % task["id"], data)
         task_again = self.get("data/tasks/%s" % task["id"])
-        self.assertEquals(data["name"], task_again["name"])
+        self.assertEqual(data["name"], task_again["name"])
         self.put_404("data/tasks/%s" % fields.gen_uuid(), data)
 
     def test_delete_task(self):
         tasks = self.get("data/tasks")
-        self.assertEquals(len(tasks), 3)
+        self.assertEqual(len(tasks), 3)
         task = tasks[0]
         self.delete("data/tasks/%s" % task["id"])
         tasks = self.get("data/tasks")
-        self.assertEquals(len(tasks), 2)
+        self.assertEqual(len(tasks), 2)
         self.delete_404("data/tasks/%s" % fields.gen_uuid())
 
     def test_filter_by_assignee(self):
         tasks = self.get("data/tasks?assignees=%s" % self.person.id)
-        self.assertEquals(len(tasks), 3)
+        self.assertEqual(len(tasks), 3)
 
     def test_full_task(self):
         task = self.get("data/tasks/%s/full" % (self.tasks[0].id))
-        self.assertEquals(task["task_type"]["name"], "Shaders")
-        self.assertEquals(task["persons"][0]["first_name"], "John")
-        self.assertEquals(task["task_status"]["name"], "Open")
-        self.assertEquals(task["project"]["name"], "Cosmos Landromat")
-        self.assertEquals(task["entity"]["name"], "Tree")
-        self.assertEquals(task["assigner"]["first_name"], "Ema")
+        self.assertEqual(task["task_type"]["name"], "Shaders")
+        self.assertEqual(task["persons"][0]["first_name"], "John")
+        self.assertEqual(task["task_status"]["name"], "Open")
+        self.assertEqual(task["project"]["name"], "Cosmos Landromat")
+        self.assertEqual(task["entity"]["name"], "Tree")
+        self.assertEqual(task["assigner"]["first_name"], "Ema")

@@ -58,7 +58,7 @@ class NewsRoutesTestCase(ApiDBTestCase):
         news_list = self.get(
             "/data/projects/%s/news" % self.task_dict["project_id"]
         )
-        self.assertEquals(len(news_list), 50)
+        self.assertEqual(len(news_list), 50)
         news = news_list[0]
         self.assertEqual(news["project_name"], "Cosmos Landromat")
         self.assertEqual(news["full_entity_name"], "E01 / S01 / P01")
@@ -67,7 +67,7 @@ class NewsRoutesTestCase(ApiDBTestCase):
         news_list = self.get(
             "/data/projects/%s/news?page=2" % self.task_dict["project_id"]
         )
-        self.assertEquals(len(news_list), 30)
+        self.assertEqual(len(news_list), 30)
 
         news_list = self.get(
             "/data/projects/%s/news/%s" % (
@@ -75,4 +75,4 @@ class NewsRoutesTestCase(ApiDBTestCase):
                 news["id"]
             )
         )
-        self.assertEquals(len(news_list), 1)
+        self.assertEqual(len(news_list), 1)

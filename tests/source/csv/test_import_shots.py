@@ -32,4 +32,4 @@ class ImportCsvShotsTestCase(ApiDBTestCase):
         self.assertEqual(len(entity_types), 3)
 
         shot = shots[0]
-        self.assertEquals(shot["data"].get("contractor", None), "contractor 1")
+        self.assertEqual(shot["data"].get("contractor", None), "contractor 1")

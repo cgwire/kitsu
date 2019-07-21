@@ -102,15 +102,15 @@ class PermissionTestCase(ApiDBTestCase):
         self.log_in_cg_artist()
         user_id = str(self.user_cg_artist["id"])
         projects = self.get("data/projects")
-        self.assertEquals(len(projects), 0)
+        self.assertEqual(len(projects), 0)
 
         projects_service.add_team_member(self.project_id, user_id)
         projects = self.get("data/projects")
-        self.assertEquals(len(projects), 1)
+        self.assertEqual(len(projects), 1)
         projects = self.get("data/projects/all")
-        self.assertEquals(len(projects), 1)
+        self.assertEqual(len(projects), 1)
         projects = self.get("data/projects/open")
-        self.assertEquals(len(projects), 1)
+        self.assertEqual(len(projects), 1)
 
     def test_is_in_team(self):
         self.generate_fixture_asset_type()

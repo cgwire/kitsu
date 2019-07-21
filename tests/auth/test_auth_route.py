@@ -46,7 +46,7 @@ class AuthTestCase(ApiDBTestCase):
         response = self.app.get("auth/authenticated", headers=headers)
         self.assertEqual(response.status_code, 200)
         data = json.loads(response.data.decode("utf-8"))
-        self.assertEquals(data["authenticated"], True)
+        self.assertEqual(data["authenticated"], True)
 
     def assertIsNotAuthenticated(self, tokens, code=401):
         headers = self.get_auth_headers(tokens)
@@ -205,7 +205,7 @@ class AuthTestCase(ApiDBTestCase):
         }
 
         response = self.app.get("data/persons")
-        self.assertEquals(response.status_code, 401)
+        self.assertEqual(response.status_code, 401)
         response = self.app.post(
             "auth/login",
             data=fields.serialize_value(self.credentials),
@@ -213,7 +213,7 @@ class AuthTestCase(ApiDBTestCase):
         )
         self.assertTrue("access_token" in response.headers["Set-Cookie"])
         response = self.app.get("data/persons")
-        self.assertEquals(response.status_code, 200)
+        self.assertEqual(response.status_code, 200)
         response = self.app.get("auth/logout", headers=headers)
 
     def test_reset_password(self):

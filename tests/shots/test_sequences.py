@@ -24,26 +24,26 @@ class SequenceTestCase(ApiDBTestCase):
 
     def test_get_sequences(self):
         sequences = self.get("data/sequences")
-        self.assertEquals(len(sequences), 3)
+        self.assertEqual(len(sequences), 3)
         self.assertDictEqual(sequences[0], self.serialized_sequence)
 
     def test_get_sequence(self):
         sequence = self.get("data/sequences/%s" % self.sequence.id)
-        self.assertEquals(sequence["id"], str(self.sequence.id))
-        self.assertEquals(sequence["name"], self.sequence.name)
-        self.assertEquals(sequence["episode_name"], self.episode.name)
-        self.assertEquals(sequence["episode_id"], str(self.episode.id))
-        self.assertEquals(sequence["project_name"], self.project.name)
+        self.assertEqual(sequence["id"], str(self.sequence.id))
+        self.assertEqual(sequence["name"], self.sequence.name)
+        self.assertEqual(sequence["episode_name"], self.episode.name)
+        self.assertEqual(sequence["episode_id"], str(self.episode.id))
+        self.assertEqual(sequence["project_name"], self.project.name)
 
     def test_get_sequence_by_name(self):
         sequences = self.get(
             "data/sequences?name=%s" % self.sequence.name.lower())
-        self.assertEquals(sequences[0]["id"], str(self.sequence.id))
+        self.assertEqual(sequences[0]["id"], str(self.sequence.id))
 
     def test_get_sequence_tasks(self):
         self.generate_fixture_sequence_task()
         tasks = self.get("data/sequences/%s/tasks" % self.sequence.id)
-        self.assertEquals(len(tasks), 1)
+        self.assertEqual(len(tasks), 1)
         self.assertEqual(tasks[0]["id"], str(self.sequence_task.id))
 
     def test_create_sequence(self):
@@ -57,12 +57,12 @@ class SequenceTestCase(ApiDBTestCase):
             data
         )
         sequence = self.get("data/sequences/%s" % sequence["id"])
-        self.assertEquals(sequence["name"], sequence_name)
-        self.assertEquals(sequence["parent_id"], episode_id)
+        self.assertEqual(sequence["name"], sequence_name)
+        self.assertEqual(sequence["parent_id"], episode_id)
 
     def test_get_sequences_for_project(self):
         sequences = self.get("data/projects/%s/sequences" % self.project.id)
-        self.assertEquals(len(sequences), 3)
+        self.assertEqual(len(sequences), 3)
         self.assertDictEqual(
             sequences[0],
             self.serialized_sequence
@@ -75,7 +75,7 @@ class SequenceTestCase(ApiDBTestCase):
         self.generate_fixture_shot()
         shot = self.shot.serialize(obj_type="Shot")
         shots = self.get("data/sequences/%s/shots" % self.sequence.id)
-        self.assertEquals(len(shots), 1)
+        self.assertEqual(len(shots), 1)
         self.assertEqual(shots[0]["id"], shot["id"])
 
     def test_get_sequences_by_project_and_name(self):
@@ -83,7 +83,7 @@ class SequenceTestCase(ApiDBTestCase):
         sequences = self.get(
             "data/sequences?project_id=%s&name=SE02" % self.project_id
         )
-        self.assertEquals(sequences[0]["id"], str(self.sequence_02_id))
+        self.assertEqual(sequences[0]["id"], str(self.sequence_02_id))
 
         self.generate_fixture_user_cg_artist()
         self.log_in_cg_artist()

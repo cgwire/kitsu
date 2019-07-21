@@ -94,10 +94,10 @@ class TaskServiceTestCase(ApiDBTestCase):
         status = tasks_service.get_todo_status()
         task = tasks_service.create_task(task_type, shot)
         task = tasks_service.get_task(task["id"])
-        self.assertEquals(task["entity_id"], shot["id"])
-        self.assertEquals(task["task_type_id"], task_type["id"])
-        self.assertEquals(task["project_id"], shot["project_id"])
-        self.assertEquals(task["task_status_id"], status["id"])
+        self.assertEqual(task["entity_id"], shot["id"])
+        self.assertEqual(task["task_type_id"], task_type["id"])
+        self.assertEqual(task["project_id"], shot["project_id"])
+        self.assertEqual(task["task_status_id"], status["id"])
 
     def test_status_to_wip(self):
         events.register(
@@ -146,12 +146,12 @@ class TaskServiceTestCase(ApiDBTestCase):
         self.assertEqual(task.task_status_id, self.to_review_status_id)
         self.assert_event_is_fired()
 
-        self.assertEquals(
+        self.assertEqual(
             data["previous_task_status_id"],
             str(self.open_status_id)
         )
 
-        self.assertEquals(data["comment"], "my comment")
+        self.assertEqual(data["comment"], "my comment")
 
     def test_assign_task(self):
         tasks_service.assign_task(self.task.id, self.assigner.id)
@@ -272,7 +272,7 @@ class TaskServiceTestCase(ApiDBTestCase):
             date="2017-09-23",
             duration=duration
         )
-        self.assertEquals(time_spent["duration"], duration)
+        self.assertEqual(time_spent["duration"], duration)
 
         duration = 7200
         time_spent = tasks_service.create_or_update_time_spent(
@@ -281,7 +281,7 @@ class TaskServiceTestCase(ApiDBTestCase):
             date="2017-09-23",
             duration=duration
         )
-        self.assertEquals(time_spent["duration"], duration)
+        self.assertEqual(time_spent["duration"], duration)
 
         duration = 7200
         time_spent = tasks_service.create_or_update_time_spent(
@@ -291,7 +291,7 @@ class TaskServiceTestCase(ApiDBTestCase):
             duration=duration,
             add=True
         )
-        self.assertEquals(time_spent["duration"], 2 * duration)
+        self.assertEqual(time_spent["duration"], 2 * duration)
 
     def test_get_time_spents(self):
         person_id = self.person.id
@@ -312,16 +312,16 @@ class TaskServiceTestCase(ApiDBTestCase):
         time_spents = self.get(
             "/actions/tasks/%s/time-spents/2017-09-23/" % task_id
         )
-        self.assertEquals(time_spents["total"], 10800)
-        self.assertEquals(time_spents[str(user_id)]["duration"], 7200)
-        self.assertEquals(time_spents[str(person_id)]["duration"], 3600)
+        self.assertEqual(time_spents["total"], 10800)
+        self.assertEqual(time_spents[str(user_id)]["duration"], 7200)
+        self.assertEqual(time_spents[str(person_id)]["duration"], 3600)
 
     def test_clear_assignation(self):
         task_id = self.task.id
         tasks_service.assign_task(self.task.id, self.person.id)
         tasks_service.clear_assignation(task_id)
         task = tasks_service.get_task(task_id)
-        self.assertEquals(len(task["assignees"]), 0)
+        self.assertEqual(len(task["assignees"]), 0)
 
     def test_get_tasks_for_person(self):
         projects = [self.project.serialize()]
@@ -375,7 +375,7 @@ class TaskServiceTestCase(ApiDBTestCase):
             self.task.id,
             {"task_status_id": done_status["id"]}
         )
-        self.assertEquals(str(self.task.task_status_id), done_status["id"])
+        self.assertEqual(str(self.task.task_status_id), done_status["id"])
         self.assertIsNotNone(self.task.end_date)
         self.assertLess(self.task.end_date, datetime.datetime.now())
 
@@ -430,12 +430,12 @@ class TaskServiceTestCase(ApiDBTestCase):
             self.task_id,
             "Test @Emma Doe"
         )
-        self.assertEquals(len(mentions), 0)
+        self.assertEqual(len(mentions), 0)
         mentions = tasks_service.get_comment_mentions(
             self.task_id,
             "Test @John Doe"
         )
-        self.assertEquals(mentions[0], self.person)
+        self.assertEqual(mentions[0], self.person)
 
     def test_create_comment(self):
         comment = tasks_service.create_comment(
@@ -444,4 +444,4 @@ class TaskServiceTestCase(ApiDBTestCase):
             self.person.id,
             "Test @John Doe"
         )
-        self.assertEquals(comment["mentions"][0], str(self.person.id))
+        self.assertEqual(comment["mentions"][0], str(self.person.id))

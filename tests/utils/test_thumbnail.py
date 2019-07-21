@@ -64,7 +64,7 @@ class ThumbnailTestCase(unittest.TestCase):
         thumbnail.convert_jpg_to_png(file_path)
         result_path = os.path.join(TEST_FOLDER, "th04.png")
         im = Image.open(result_path)
-        self.assertEquals(len(im.info.keys()), 0)
+        self.assertEqual(len(im.info.keys()), 0)
         self.assertTrue(os.path.exists(result_path))
 
     def test_save_file(self):
@@ -95,29 +95,29 @@ class ThumbnailTestCase(unittest.TestCase):
 
     def test_flat(self):
         flatten_tupple = thumbnail.flat(1.2, 3.1, 4.2)
-        self.assertEquals(flatten_tupple, (1, 3, 4))
+        self.assertEqual(flatten_tupple, (1, 3, 4))
 
     def test_get_full_size_from_width(self):
         file_path_fixture = self.get_fixture_file_path("thumbnails/th01.png")
         im = Image.open(file_path_fixture)
         size = thumbnail.get_full_size_from_width(im, 1200)
-        self.assertEquals(size, (1200, 674))
+        self.assertEqual(size, (1200, 674))
 
     def test_prepare_image_for_thumbnail(self):
         file_path_fixture = self.get_fixture_file_path("thumbnails/th01.png")
         im = Image.open(file_path_fixture)
         im = thumbnail.prepare_image_for_thumbnail(im, thumbnail.SQUARE_SIZE)
-        self.assertEquals(im.size, (101, 101))
+        self.assertEqual(im.size, (101, 101))
 
         file_path_fixture = self.get_fixture_file_path("thumbnails/th02.png")
         im = Image.open(file_path_fixture)
         im = thumbnail.prepare_image_for_thumbnail(im, thumbnail.RECTANGLE_SIZE)
-        self.assertEquals(im.size, (152, 101))
+        self.assertEqual(im.size, (152, 101))
 
         file_path_fixture = self.get_fixture_file_path("thumbnails/th03.png")
         im = Image.open(file_path_fixture)
         im = thumbnail.prepare_image_for_thumbnail(im, thumbnail.RECTANGLE_SIZE)
-        self.assertEquals(im.size, (180, 120))
+        self.assertEqual(im.size, (180, 120))
 
     def test_generate_preview_variants(self):
         preview_id = "123413-12312"

@@ -128,7 +128,7 @@ class AssetServiceTestCase(ApiDBTestCase):
         self.assertDictEqual(
             asset_type, self.asset_type.serialize(obj_type="AssetType"))
         asset_type = assets_service.get_or_create_asset_type("New asset type")
-        self.assertEquals(asset_type["name"], new_name)
+        self.assertEqual(asset_type["name"], new_name)
 
     def test_is_asset(self):
         self.assertTrue(assets_service.is_asset(self.asset))
@@ -190,7 +190,7 @@ class AssetServiceTestCase(ApiDBTestCase):
             self.asset_character.id
         )
         asset = assets_service.get_asset(self.asset.id)
-        self.assertEquals(
+        self.assertEqual(
             asset["entities_out"][0],
             str(self.asset_character.id)
         )
@@ -207,4 +207,4 @@ class AssetServiceTestCase(ApiDBTestCase):
             self.asset_character.id
         )
         asset = assets_service.get_asset(self.asset.id)
-        self.assertEquals(len(asset["entities_out"]), 0)
+        self.assertEqual(len(asset["entities_out"]), 0)

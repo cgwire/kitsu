@@ -27,16 +27,16 @@ class QueryTestCase(ApiDBTestCase):
 
     def test_get_by_name(self):
         entities = self.get("data/entities")
-        self.assertEquals(len(entities), 5)
+        self.assertEqual(len(entities), 5)
         entities = self.get("data/entities?name=%s" % entities[0]['name'])
-        self.assertEquals(len(entities), 1)
+        self.assertEqual(len(entities), 1)
         entities = self.get("data/entities?name=%s&project_id=%s" % (
             entities[0]['name'],
             self.project_id)
         )
-        self.assertEquals(len(entities), 1)
+        self.assertEqual(len(entities), 1)
         entities = self.get("data/entities?name=%s&project_id=%s" % (
             entities[0]['name'],
             self.project2_id)
         )
-        self.assertEquals(len(entities), 0)
+        self.assertEqual(len(entities), 0)
