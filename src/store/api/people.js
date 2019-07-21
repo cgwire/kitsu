@@ -87,19 +87,24 @@ export default {
     })
   },
 
-  updatePerson (person, callback) {
-    const data = {
-      first_name: person.first_name,
-      last_name: person.last_name,
-      email: person.email.trim(),
-      phone: person.phone,
-      timezone: person.timezone,
-      locale: person.locale,
-      role: person.role,
-      active: person.active,
-      notifications_enabled: person.notifications_enabled === 'true'
-    }
-    client.put(`/api/data/persons/${person.id}`, data, callback)
+  updatePerson (person) {
+    return new Promise((resolve, reject) => {
+      const data = {
+        first_name: person.first_name,
+        last_name: person.last_name,
+        email: person.email.trim(),
+        phone: person.phone,
+        timezone: person.timezone,
+        locale: person.locale,
+        role: person.role,
+        active: person.active,
+        notifications_enabled: person.notifications_enabled === 'true'
+      }
+      client.put(`/api/data/persons/${person.id}`, data, (err, person) => {
+        if (err) reject(err)
+        else resolve(person)
+      })
+    })
   },
 
   deletePerson (personId, callback) {
