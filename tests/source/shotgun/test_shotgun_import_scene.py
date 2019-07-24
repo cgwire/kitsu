@@ -71,7 +71,7 @@ class ImportShotgunSceneTestCase(ShotgunTestCase):
         self.post(api_path, [self.sg_scene], 200)
         self.scenes = self.get("data/scenes/all")
         scene = self.scenes[0]
-        self.assertEquals(self.sg_scene["code"], scene["name"])
+        self.assertEqual(self.sg_scene["code"], scene["name"])
 
     def test_remove_scene(self):
         self.load_fixture('projects')

@@ -72,7 +72,7 @@ class WorkingFilesTestCase(ApiDBTestCase):
 
     def test_new_working_file(self):
         task = Task.get(self.task_id)
-        self.assertEquals(len(task.assignees), 1)
+        self.assertEqual(len(task.assignees), 1)
         self.assertNotEquals(self.user["id"], str(task.assignees[0].id))
 
         path = "/data/tasks/%s/working-files/new" % self.task_id
@@ -87,7 +87,7 @@ class WorkingFilesTestCase(ApiDBTestCase):
         assignees = [person.serialize() for person in task.assignees]
         assignees = sorted(assignees, key=lambda x: x["last_name"])
 
-        self.assertEquals(self.user["id"], assignees[0]["id"])
+        self.assertEqual(self.user["id"], assignees[0]["id"])
 
         task = Task.get(self.task_id)
         path = "/data/tasks/%s/working-files/new" % self.task_id
@@ -156,13 +156,13 @@ class WorkingFilesTestCase(ApiDBTestCase):
 
         path = "/data/files/%s" % working_file_id
         remote_file = self.get(path)
-        self.assertEquals(remote_file["id"], working_file_id)
-        self.assertEquals(remote_file["type"], "WorkingFile")
+        self.assertEqual(remote_file["id"], working_file_id)
+        self.assertEqual(remote_file["type"], "WorkingFile")
 
         path = "/data/files/%s" % output_file_id
         remote_file = self.get(path)
-        self.assertEquals(remote_file["id"], output_file_id)
-        self.assertEquals(remote_file["type"], "OutputFile")
+        self.assertEqual(remote_file["id"], output_file_id)
+        self.assertEqual(remote_file["type"], "OutputFile")
 
         path = "/data/files/%s" % self.task_id
         self.get(path, 404)

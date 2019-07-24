@@ -13,15 +13,15 @@ class CustomActionTestCase(ApiDBTestCase):
 
     def test_get_custom_actions(self):
         custom_actions = self.get("data/custom-actions")
-        self.assertEquals(len(custom_actions), 3)
-        self.assertEquals(custom_actions[0]["type"], "CustomAction")
+        self.assertEqual(len(custom_actions), 3)
+        self.assertEqual(custom_actions[0]["type"], "CustomAction")
 
     def test_get_custom_action(self):
         custom_action = self.get_first("data/custom-actions")
         custom_action_again = self.get(
             "data/custom-actions/%s" % custom_action["id"]
         )
-        self.assertEquals(custom_action, custom_action_again)
+        self.assertEqual(custom_action, custom_action_again)
         self.get_404("data/custom-actions/%s" % fields.gen_uuid())
 
     def test_create_custom_action(self):
@@ -33,7 +33,7 @@ class CustomActionTestCase(ApiDBTestCase):
         self.assertIsNotNone(self.custom_action["id"])
 
         custom_actions = self.get("data/custom-actions")
-        self.assertEquals(len(custom_actions), 4)
+        self.assertEqual(len(custom_actions), 4)
 
     def test_create_custom_action_with_no_data(self):
         data = {}
@@ -54,18 +54,18 @@ class CustomActionTestCase(ApiDBTestCase):
         custom_action_again = self.get(
             "data/custom-actions/%s" % custom_action["id"]
         )
-        self.assertEquals(data["name"], custom_action_again["name"])
+        self.assertEqual(data["name"], custom_action_again["name"])
         self.put_404("data/custom-actions/%s" % fields.gen_uuid(), data)
 
     def test_delete_custom_action(self):
         custom_actions = self.get("data/custom-actions")
-        self.assertEquals(len(custom_actions), 3)
+        self.assertEqual(len(custom_actions), 3)
 
         custom_action = custom_actions[1]
         self.delete("data/custom-actions/%s" % custom_action["id"])
         custom_actions = self.get("data/custom-actions")
-        self.assertEquals(len(custom_actions), 2)
+        self.assertEqual(len(custom_actions), 2)
 
         self.delete_404("data/custom_actions/%s" % fields.gen_uuid())
         custom_actions = self.get("data/custom-actions")
-        self.assertEquals(len(custom_actions), 2)
+        self.assertEqual(len(custom_actions), 2)

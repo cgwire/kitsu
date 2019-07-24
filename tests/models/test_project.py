@@ -15,12 +15,12 @@ class ProjectTestCase(ApiDBTestCase):
 
     def test_get_projects(self):
         projects = self.get("data/projects")
-        self.assertEquals(len(projects), 3)
+        self.assertEqual(len(projects), 3)
 
     def test_get_project(self):
         project = self.get_first("data/projects")
         project_again = self.get("data/projects/%s" % project["id"])
-        self.assertEquals(project, project_again)
+        self.assertEqual(project, project_again)
         self.get_404("data/projects/%s" % fields.gen_uuid())
 
     def test_create_project(self):
@@ -30,13 +30,13 @@ class ProjectTestCase(ApiDBTestCase):
         }
         self.project = self.post("data/projects", data)
         self.assertIsNotNone(self.project["id"])
-        self.assertEquals(
+        self.assertEqual(
             self.project["project_status_id"],
             str(self.open_status_id)
         )
 
         projects = self.get("data/projects")
-        self.assertEquals(len(projects), 4)
+        self.assertEqual(len(projects), 4)
 
     def test_update_project(self):
         project = self.get_first("data/projects")
@@ -45,16 +45,16 @@ class ProjectTestCase(ApiDBTestCase):
         }
         self.put("data/projects/%s" % project["id"], data)
         project_again = self.get("data/projects/%s" % project["id"])
-        self.assertEquals(data["name"], project_again["name"])
+        self.assertEqual(data["name"], project_again["name"])
         self.put_404("data/projects/%s" % fields.gen_uuid(), data)
 
     def test_delete_project(self):
         projects = self.get("data/projects")
-        self.assertEquals(len(projects), 3)
+        self.assertEqual(len(projects), 3)
         project = projects[0]
         self.delete("data/projects/%s" % project["id"])
         projects = self.get("data/projects")
-        self.assertEquals(len(projects), 2)
+        self.assertEqual(len(projects), 2)
         self.delete_404("data/projects/%s" % fields.gen_uuid())
 
     def test_project_status(self):
@@ -76,11 +76,11 @@ class ProjectTestCase(ApiDBTestCase):
         self.project = self.post("data/projects", data)
         self.assertIsNotNone(self.project["id"])
         project_again = self.get("data/projects/%s" % self.project["id"])
-        self.assertEquals(
+        self.assertEqual(
             project_again['project_status_id'], self.open_status["id"])
 
     def test_get_project_by_name(self):
         project_before = self.get("data/projects")[1]
         project = self.get_first(
             "data/projects?name=%s" % project_before["name"].lower())
-        self.assertEquals(project["id"], project_before["id"])
+        self.assertEqual(project["id"], project_before["id"])

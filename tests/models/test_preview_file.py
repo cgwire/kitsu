@@ -28,13 +28,13 @@ class PreviewFileTestCase(ApiDBTestCase):
 
     def test_get_preview_files(self):
         preview_files = self.get("data/preview-files")
-        self.assertEquals(len(preview_files), 3)
+        self.assertEqual(len(preview_files), 3)
 
     def test_get_preview_file(self):
         preview_file = self.get_first("data/preview-files")
         preview_file_again = self.get(
             "data/preview-files/%s" % preview_file["id"])
-        self.assertEquals(preview_file, preview_file_again)
+        self.assertEqual(preview_file, preview_file_again)
         self.get_404("data/preview-files/%s" % fields.gen_uuid())
 
     def test_create_preview_file(self):
@@ -49,7 +49,7 @@ class PreviewFileTestCase(ApiDBTestCase):
         self.assertIsNotNone(self.preview_file["id"])
 
         preview_files = self.get("data/preview-files")
-        self.assertEquals(len(preview_files), 4)
+        self.assertEqual(len(preview_files), 4)
 
     def test_update_preview_file(self):
         preview_file = self.get_first("data/preview-files")
@@ -59,14 +59,14 @@ class PreviewFileTestCase(ApiDBTestCase):
         self.put("data/preview-files/%s" % preview_file["id"], data)
         preview_file_again = self.get(
             "data/preview-files/%s" % preview_file["id"])
-        self.assertEquals(data["name"], preview_file_again["name"])
+        self.assertEqual(data["name"], preview_file_again["name"])
         self.put_404("data/preview-files/%s" % fields.gen_uuid(), data)
 
     def test_delete_preview_file(self):
         preview_files = self.get("data/preview-files")
-        self.assertEquals(len(preview_files), 3)
+        self.assertEqual(len(preview_files), 3)
         preview_file = preview_files[0]
         self.delete("data/preview-files/%s" % preview_file["id"])
         preview_files = self.get("data/preview-files")
-        self.assertEquals(len(preview_files), 2)
+        self.assertEqual(len(preview_files), 2)
         self.delete_404("data/preview-files/%s" % fields.gen_uuid())

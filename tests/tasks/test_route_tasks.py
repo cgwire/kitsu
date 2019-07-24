@@ -107,9 +107,9 @@ class TaskRoutesTestCase(ApiDBTestCase):
         self.put("/actions/persons/%s/assign" % person_id, data)
 
         task = tasks_service.get_task(task_id)
-        self.assertEquals(len(task["assignees"]), 1)
+        self.assertEqual(len(task["assignees"]), 1)
         task = tasks_service.get_task(shot_task_id)
-        self.assertEquals(len(task["assignees"]), 1)
+        self.assertEqual(len(task["assignees"]), 1)
         notifications = notifications_service.get_last_notifications()
         self.assertEqual(len(notifications), 2)
 
@@ -124,9 +124,9 @@ class TaskRoutesTestCase(ApiDBTestCase):
         self.put("/actions/tasks/clear-assignation", data)
 
         task = tasks_service.get_task(task_id)
-        self.assertEquals(len(task["assignees"]), 0)
+        self.assertEqual(len(task["assignees"]), 0)
         task = tasks_service.get_task(shot_task_id)
-        self.assertEquals(len(task["assignees"]), 0)
+        self.assertEqual(len(task["assignees"]), 0)
 
     def test_comment_task(self):
         self.project_id = self.project.id
@@ -347,14 +347,14 @@ class TaskRoutesTestCase(ApiDBTestCase):
             entity_id,
             task_type_id
         ))
-        self.assertEquals(len(tasks), 1)
+        self.assertEqual(len(tasks), 1)
         self.assertDictEqual(tasks[0], self.task.serialize())
 
         tasks = self.get("/data/entities/%s/task-types/%s/tasks" % (
             entity_id,
             task_type_animation_id
         ))
-        self.assertEquals(len(tasks), 0)
+        self.assertEqual(len(tasks), 0)
 
     def test_get_tasks_for_person(self):
         self.generate_fixture_task()
@@ -377,11 +377,11 @@ class TaskRoutesTestCase(ApiDBTestCase):
             tasks[0]["last_comment"]["person_id"],
             str(self.person.id)
         )
-        self.assertEquals(len(tasks), 1)
+        self.assertEqual(len(tasks), 1)
         self.assertTrue(str(self.person.id) in tasks[0]["assignees"])
 
         tasks = self.get("/data/persons/%s/tasks" % self.user["id"])
-        self.assertEquals(len(tasks), 0)
+        self.assertEqual(len(tasks), 0)
 
     def test_get_done_tasks_for_person(self):
         self.generate_fixture_task()
@@ -395,7 +395,7 @@ class TaskRoutesTestCase(ApiDBTestCase):
         })
 
         tasks = self.get("/data/persons/%s/done-tasks" % self.person.id)
-        self.assertEquals(len(tasks), 1)
+        self.assertEqual(len(tasks), 1)
 
     def test_delete_all_task_types(self):
         self.generate_fixture_project_standard()

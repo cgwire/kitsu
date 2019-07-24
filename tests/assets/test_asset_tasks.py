@@ -24,7 +24,7 @@ class AssetTasksTestCase(ApiDBTestCase):
 
     def test_get_tasks_for_asset(self):
         tasks = self.get("data/assets/%s/tasks" % self.asset.id)
-        self.assertEquals(len(tasks), 1)
+        self.assertEqual(len(tasks), 1)
         self.assertEqual(tasks[0]["id"], str(self.task.id))
 
     def test_get_assets_and_tasks(self):
@@ -38,7 +38,7 @@ class AssetTasksTestCase(ApiDBTestCase):
 
     def test_get_task_types_for_asset(self):
         task_types = self.get("data/assets/%s/task-types" % self.asset_id)
-        self.assertEquals(len(task_types), 1)
+        self.assertEqual(len(task_types), 1)
         self.assertDictEqual(
             task_types[0],
             self.task_type_dict

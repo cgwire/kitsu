@@ -130,7 +130,7 @@ class FileTreeTestCase(ApiDBTestCase):
             self.shot.serialize(),
             self.shot_task.serialize()
         )
-        self.assertEquals(path, self.project.name)
+        self.assertEqual(path, self.project.name)
 
     def test_get_folder_from_datatype_shot(self):
         path = file_tree_service.get_folder_from_datatype(
@@ -138,7 +138,7 @@ class FileTreeTestCase(ApiDBTestCase):
             self.shot.serialize(),
             self.shot_task.serialize()
         )
-        self.assertEquals(path, self.shot.name)
+        self.assertEqual(path, self.shot.name)
 
     def test_get_folder_from_datatype_sequence_shot(self):
         path = file_tree_service.get_folder_from_datatype(
@@ -146,7 +146,7 @@ class FileTreeTestCase(ApiDBTestCase):
             self.shot.serialize(),
             self.shot_task.serialize()
         )
-        self.assertEquals(path, self.sequence.name)
+        self.assertEqual(path, self.sequence.name)
 
     def test_get_folder_from_datatype_sequence_sequence(self):
         path = file_tree_service.get_folder_from_datatype(
@@ -154,7 +154,7 @@ class FileTreeTestCase(ApiDBTestCase):
             self.sequence.serialize(),
             self.shot_task.serialize()
         )
-        self.assertEquals(path, self.sequence.name)
+        self.assertEqual(path, self.sequence.name)
 
     def test_get_folder_from_datatype_episode(self):
         path = file_tree_service.get_folder_from_datatype(
@@ -162,13 +162,13 @@ class FileTreeTestCase(ApiDBTestCase):
             self.shot.serialize(),
             self.task.serialize()
         )
-        self.assertEquals(path, "E01")
+        self.assertEqual(path, "E01")
         path = file_tree_service.get_folder_from_datatype(
             "Episode",
             self.sequence.serialize(),
             self.task.serialize()
         )
-        self.assertEquals(path, "E01")
+        self.assertEqual(path, "E01")
 
     def test_get_folder_from_datatype_entity(self):
         path = file_tree_service.get_folder_from_datatype(
@@ -176,7 +176,7 @@ class FileTreeTestCase(ApiDBTestCase):
             self.asset.serialize(),
             self.task.serialize()
         )
-        self.assertEquals(path, self.asset.name)
+        self.assertEqual(path, self.asset.name)
 
     def test_get_folder_from_datatype_entity_type(self):
         path = file_tree_service.get_folder_from_datatype(
@@ -184,7 +184,7 @@ class FileTreeTestCase(ApiDBTestCase):
             self.asset.serialize(),
             self.task.serialize()
         )
-        self.assertEquals(path, self.asset_type.name)
+        self.assertEqual(path, self.asset_type.name)
 
     def test_get_folder_from_datatype_department(self):
         path = file_tree_service.get_folder_from_datatype(
@@ -192,7 +192,7 @@ class FileTreeTestCase(ApiDBTestCase):
             self.asset.serialize(),
             self.task.serialize()
         )
-        self.assertEquals(path, self.department.name)
+        self.assertEqual(path, self.department.name)
 
     def test_get_folder_from_datatype_task(self):
         path = file_tree_service.get_folder_from_datatype(
@@ -200,7 +200,7 @@ class FileTreeTestCase(ApiDBTestCase):
             self.asset.serialize(),
             self.task.serialize()
         )
-        self.assertEquals(path, self.task.name)
+        self.assertEqual(path, self.task.name)
 
     def test_get_folder_from_datatype_task_type(self):
         path = file_tree_service.get_folder_from_datatype(
@@ -208,13 +208,13 @@ class FileTreeTestCase(ApiDBTestCase):
             self.asset.serialize(),
             task=self.task.serialize()
         )
-        self.assertEquals(path, self.task_type.name)
+        self.assertEqual(path, self.task_type.name)
         path = file_tree_service.get_folder_from_datatype(
             "TaskType",
             self.asset.serialize(),
             task_type=self.task_type.serialize()
         )
-        self.assertEquals(path, self.task_type.name)
+        self.assertEqual(path, self.task_type.name)
 
     def test_get_folder_from_datatype_software(self):
         path = file_tree_service.get_folder_from_datatype(
@@ -223,7 +223,7 @@ class FileTreeTestCase(ApiDBTestCase):
             self.task.serialize(),
             software=self.software.serialize()
         )
-        self.assertEquals(path, "Blender")
+        self.assertEqual(path, "Blender")
 
     def test_get_folder_from_datatype_output_type(self):
         path = file_tree_service.get_folder_from_datatype(
@@ -232,7 +232,7 @@ class FileTreeTestCase(ApiDBTestCase):
             self.task.serialize(),
             output_type=self.output_type_cache
         )
-        self.assertEquals(path, "cache")
+        self.assertEqual(path, "cache")
 
     def test_get_folder_raise_exception(self):
         self.assertRaises(
@@ -248,7 +248,7 @@ class FileTreeTestCase(ApiDBTestCase):
             self.shot_task.serialize(),
             software=self.software_max.serialize()
         )
-        self.assertEquals(
+        self.assertEqual(
             path,
             "/simple/productions/cosmos_landromat/shots/s01/p01/animation/"
             "3dsmax"
@@ -260,7 +260,7 @@ class FileTreeTestCase(ApiDBTestCase):
             software=self.software_max.serialize(),
             sep="\\"
         )
-        self.assertEquals(
+        self.assertEqual(
             path,
             "/simple\\productions\\cosmos_landromat\\shots\\s01\\p01\\"
             "animation\\3dsmax"
@@ -273,7 +273,7 @@ class FileTreeTestCase(ApiDBTestCase):
             task_type=self.task_type_animation.serialize(),
             sep="/"
         )
-        self.assertEquals(
+        self.assertEqual(
             path,
             "/simple/productions/export/cosmos_landromat/shots/s01/p01/"
             "animation/cache"
@@ -284,7 +284,7 @@ class FileTreeTestCase(ApiDBTestCase):
             self.task.serialize(),
             software=self.software.serialize()
         )
-        self.assertEquals(
+        self.assertEqual(
             path,
             "/simple/productions/cosmos_landromat/assets/props/tree/shaders/"
             "blender"
@@ -295,7 +295,7 @@ class FileTreeTestCase(ApiDBTestCase):
             self.task.serialize(),
             revision=3
         )
-        self.assertEquals(file_name, "cosmos_landromat_props_tree_shaders_v003")
+        self.assertEqual(file_name, "cosmos_landromat_props_tree_shaders_v003")
 
     def test_get_output_file_name_asset(self):
         file_name = file_tree_service.get_output_file_name(
@@ -303,7 +303,7 @@ class FileTreeTestCase(ApiDBTestCase):
             name="main",
             revision=3
         )
-        self.assertEquals(
+        self.assertEqual(
             file_name,
             "cosmos_landromat_props_tree_geometry_main_v003"
         )
@@ -316,7 +316,7 @@ class FileTreeTestCase(ApiDBTestCase):
             output_type=self.output_type_image,
             nb_elements=50
         )
-        self.assertEquals(
+        self.assertEqual(
             file_name,
             "cosmos_landromat_s01_p01_images_main_v003_[1-50]"
         )
@@ -326,7 +326,7 @@ class FileTreeTestCase(ApiDBTestCase):
             self.shot_task.serialize(),
             revision=3
         )
-        self.assertEquals(file_name, "cosmos_landromat_s01_p01_animation_v003")
+        self.assertEqual(file_name, "cosmos_landromat_s01_p01_animation_v003")
 
     def test_get_working_file_path_asset(self):
         file_name = file_tree_service.get_working_file_path(
@@ -334,7 +334,7 @@ class FileTreeTestCase(ApiDBTestCase):
             software=self.software.serialize(),
             revision=3
         )
-        self.assertEquals(
+        self.assertEqual(
             file_name,
             "/simple/productions/cosmos_landromat/assets/props/tree/shaders/"
             "blender/"
@@ -348,7 +348,7 @@ class FileTreeTestCase(ApiDBTestCase):
             software=self.software_max.serialize(),
             revision=3
         )
-        self.assertEquals(
+        self.assertEqual(
             file_name,
             "/simple/productions/cosmos_landromat/scenes/s01/sc01/animation/"
             "3dsmax/"
@@ -368,7 +368,7 @@ class FileTreeTestCase(ApiDBTestCase):
             task_type=self.task_type_animation.serialize(),
             representation="abc"
         )
-        self.assertEquals(
+        self.assertEqual(
             path,
             "/simple/productions/export/cosmos_landromat/shot/s01/p01/"
             "animation/cache/props/tree/instance_0001/abc"
@@ -388,7 +388,7 @@ class FileTreeTestCase(ApiDBTestCase):
             name="main",
             revision=3
         )
-        self.assertEquals(
+        self.assertEqual(
             file_name,
             "cosmos_landromat_s01_p01_animation_cache_main" +
             "_tree_0001_v003"
@@ -403,7 +403,7 @@ class FileTreeTestCase(ApiDBTestCase):
             output_type=self.output_type_cache,
             representation="abc"
         )
-        self.assertEquals(
+        self.assertEqual(
             path,
             "/simple/productions/export/cosmos_landromat/scene/s01/sc01/"
             "animation/cache/props/tree/instance_0001/abc"
@@ -420,7 +420,7 @@ class FileTreeTestCase(ApiDBTestCase):
             revision=3
         )
 
-        self.assertEquals(
+        self.assertEqual(
             file_name,
             "cosmos_landromat_s01_sc01_animation_cache_main_"
             "tree_0001_v003"
@@ -437,7 +437,7 @@ class FileTreeTestCase(ApiDBTestCase):
             output_type=self.output_type_materials,
             representation="ml"
         )
-        self.assertEquals(
+        self.assertEqual(
             path,
             "/simple/productions/export/cosmos_landromat/assets/props/tree/"
             "shaders/materials/character/rabbit/instance_0001/ml"
@@ -456,7 +456,7 @@ class FileTreeTestCase(ApiDBTestCase):
             revision=3
         )
 
-        self.assertEquals(
+        self.assertEqual(
             file_name,
             "cosmos_landromat_props_tree_shaders_materials_main_"
             "rabbit_0001_v003"
@@ -471,7 +471,7 @@ class FileTreeTestCase(ApiDBTestCase):
             output_type=self.output_type_cache,
             representation="abc"
         )
-        self.assertEquals(
+        self.assertEqual(
             path,
             "/simple/productions/export/cosmos_landromat/scene/s01/sc01/"
             "animation/cache/props/tree/instance_0001/abc"
@@ -488,7 +488,7 @@ class FileTreeTestCase(ApiDBTestCase):
             asset=self.asset.serialize(),
             task=self.task.serialize()
         )
-        self.assertEquals(name, "props_tree")
+        self.assertEqual(name, "props_tree")
 
     def test_apply_style(self):
         file_name = "Shaders"
@@ -503,4 +503,4 @@ class FileTreeTestCase(ApiDBTestCase):
             asset=self.asset.serialize(),
             task=self.task.serialize()
         )
-        self.assertEquals(name, "shd")
+        self.assertEqual(name, "shd")

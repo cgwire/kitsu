@@ -16,7 +16,7 @@ class AuthTokensTestCase(ApiTestCase):
     def test_get_and_add(self):
         self.assertIsNone(self.store.get("key-1"))
         self.store.add("key-1", "true")
-        self.assertEquals(self.store.get("key-1"), "true")
+        self.assertEqual(self.store.get("key-1"), "true")
 
     def test_delete(self):
         self.store.add("key-1", "true")

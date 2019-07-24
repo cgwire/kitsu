@@ -27,12 +27,12 @@ class CommentTestCase(ApiDBTestCase):
 
     def test_get_comments(self):
         comments = self.get("data/comments")
-        self.assertEquals(len(comments), 3)
+        self.assertEqual(len(comments), 3)
 
     def test_get_comment(self):
         comment = self.get_first("data/comments")
         comment_again = self.get("data/comments/%s" % comment["id"])
-        self.assertEquals(comment, comment_again)
+        self.assertEqual(comment, comment_again)
         self.get_404("data/comments/%s/" % fields.gen_uuid())
 
     def test_create_comment(self):
@@ -46,7 +46,7 @@ class CommentTestCase(ApiDBTestCase):
         self.assertIsNotNone(self.comment["id"])
 
         comments = self.get("data/comments")
-        self.assertEquals(len(comments), 4)
+        self.assertEqual(len(comments), 4)
 
     def test_update_comment(self):
         comment = self.get_first("data/comments")
@@ -55,15 +55,15 @@ class CommentTestCase(ApiDBTestCase):
         }
         self.put("data/comments/%s" % comment["id"], data)
         comment_again = self.get("data/comments/%s" % comment["id"])
-        self.assertEquals(data["text"], comment_again["text"])
+        self.assertEqual(data["text"], comment_again["text"])
         comment_id = fields.gen_uuid()
         self.put_404("data/comments/%s" % comment_id, data)
 
     def test_delete_comment(self):
         comments = self.get("data/comments")
-        self.assertEquals(len(comments), 3)
+        self.assertEqual(len(comments), 3)
         comment = comments[0]
         self.delete("data/comments/%s" % comment["id"])
         comments = self.get("data/comments")
-        self.assertEquals(len(comments), 2)
+        self.assertEqual(len(comments), 2)
         self.delete_404("data/comments/%s" % fields.gen_uuid())

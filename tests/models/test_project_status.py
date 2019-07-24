@@ -12,13 +12,13 @@ class ProjectStatusTestCase(ApiDBTestCase):
 
     def test_get_project_statuss(self):
         project_statuss = self.get("data/project-status")
-        self.assertEquals(len(project_statuss), 3)
+        self.assertEqual(len(project_statuss), 3)
 
     def test_get_project_status(self):
         project_status = self.get_first("data/project-status")
         project_status_again = self.get(
             "data/project-status/%s" % project_status["id"])
-        self.assertEquals(project_status, project_status_again)
+        self.assertEqual(project_status, project_status_again)
         self.get_404("data/project-status/%s" % fields.gen_uuid())
 
     def test_create_project_status(self):
@@ -30,7 +30,7 @@ class ProjectStatusTestCase(ApiDBTestCase):
         self.assertIsNotNone(self.project_status["id"])
 
         project_statuss = self.get("data/project-status")
-        self.assertEquals(len(project_statuss), 4)
+        self.assertEqual(len(project_statuss), 4)
 
     def test_update_project_status(self):
         project_status = self.get_first("data/project-status")
@@ -40,14 +40,14 @@ class ProjectStatusTestCase(ApiDBTestCase):
         self.put("data/project-status/%s" % project_status["id"], data)
         project_status_again = self.get(
             "data/project-status/%s" % project_status["id"])
-        self.assertEquals(data["color"], project_status_again["color"])
+        self.assertEqual(data["color"], project_status_again["color"])
         self.put_404("data/project-status/%s" % fields.gen_uuid(), data)
 
     def test_delete_project_status(self):
         project_statuss = self.get("data/project-status")
-        self.assertEquals(len(project_statuss), 3)
+        self.assertEqual(len(project_statuss), 3)
         project_status = project_statuss[0]
         self.delete("data/project-status/%s" % project_status["id"])
         project_statuss = self.get("data/project-status")
-        self.assertEquals(len(project_statuss), 2)
+        self.assertEqual(len(project_statuss), 2)
         self.delete_404("data/project-status/%s" % fields.gen_uuid())

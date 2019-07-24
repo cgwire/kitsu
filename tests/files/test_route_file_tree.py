@@ -31,7 +31,7 @@ class FolderPathTestCase(ApiDBTestCase):
         }
         result = self.post(
             "/data/tasks/%s/working-file-path" % self.shot_task.id, data, 200)
-        self.assertEquals(
+        self.assertEqual(
             result["path"],
             "/simple/productions/cosmos_landromat/shots/s01/p01/animation/"
             "3ds_max"
@@ -46,7 +46,7 @@ class FolderPathTestCase(ApiDBTestCase):
             data,
             200
         )
-        self.assertEquals(
+        self.assertEqual(
             result["path"],
             "/simple/productions/cosmos_landromat/scenes/s01/sc01/animation/"
             "3ds_max"
@@ -67,12 +67,12 @@ class FolderPathTestCase(ApiDBTestCase):
             data,
             200
         )
-        self.assertEquals(
+        self.assertEqual(
             result["path"],
             "/simple/productions/cosmos_landromat/assets/props/tree/shaders/"
             "3ds_max"
         )
-        self.assertEquals(
+        self.assertEqual(
             result["name"],
             "cosmos_landromat_props_tree_shaders_main_v001"
         )
@@ -82,7 +82,7 @@ class FolderPathTestCase(ApiDBTestCase):
         }
         result = self.post(
             "/data/tasks/%s/working-file-path" % task_id, data, 200)
-        self.assertEquals(
+        self.assertEqual(
             result["name"],
             "cosmos_landromat_props_tree_shaders_hotfix_v005"
         )
@@ -93,7 +93,7 @@ class FolderPathTestCase(ApiDBTestCase):
         }
         result = self.post(
             "/data/tasks/%s/working-file-path" % task_id, data, 200)
-        self.assertEquals(
+        self.assertEqual(
             result["name"],
             "cosmos_landromat_props_tree_shaders_hotfix_v003"
         )
@@ -103,7 +103,7 @@ class FolderPathTestCase(ApiDBTestCase):
         result = self.post(
             "/data/tasks/%s/working-file-path" % self.task.id, data, 200
         )
-        self.assertEquals(
+        self.assertEqual(
             result["path"],
             "/simple/productions/cosmos_landromat/assets/props/tree/"
             "shaders/3ds_max"
@@ -132,12 +132,12 @@ class FolderPathTestCase(ApiDBTestCase):
             data,
             200
         )
-        self.assertEquals(
+        self.assertEqual(
             result["folder_path"],
             "/simple/productions/export/cosmos_landromat/shot/s01/p01/"
             "animation/cache/props/tree/instance_0001/abc"
         )
-        self.assertEquals(
+        self.assertEqual(
             result["file_name"],
             "cosmos_landromat_s01_p01_animation_cache_main_tree_0001_v003"
         )
@@ -161,12 +161,12 @@ class FolderPathTestCase(ApiDBTestCase):
             data,
             200
         )
-        self.assertEquals(
+        self.assertEqual(
             result["folder_path"],
             "/simple/productions/export/cosmos_landromat/scene/s01/sc01/"
             "animation/cache/props/tree/instance_0001/abc"
         )
-        self.assertEquals(
+        self.assertEqual(
             result["file_name"],
             "cosmos_landromat_s01_sc01_animation_cache_main_tree_0001_v003"
         )
@@ -192,12 +192,12 @@ class FolderPathTestCase(ApiDBTestCase):
             data,
             200
         )
-        self.assertEquals(
+        self.assertEqual(
             result["folder_path"],
             "/simple/productions/export/cosmos_landromat/assets/props/"
             "tree/shaders/materials/character/rabbit/instance_0001/abc"
         )
-        self.assertEquals(
+        self.assertEqual(
             result["file_name"],
             "cosmos_landromat_props_tree_shaders_materials_main_rabbit"
             "_0001_v003"
@@ -209,7 +209,7 @@ class FolderPathTestCase(ApiDBTestCase):
         }
         result = self.post(
             "/data/tasks/%s/working-file-path" % self.task.id, data, 200)
-        self.assertEquals(
+        self.assertEqual(
             result["path"],
             "/simple/productions/cosmos_landromat/assets/props/tree/shaders/"
             "blender"
@@ -221,12 +221,12 @@ class FolderPathTestCase(ApiDBTestCase):
         }
         result = self.post(
             "/data/tasks/%s/working-file-path" % self.task.id, data, 200)
-        self.assertEquals(
+        self.assertEqual(
             result["path"],
             "/simple/productions/cosmos_landromat/assets/props/tree/shaders/"
             "3ds_max"
         )
-        self.assertEquals(
+        self.assertEqual(
             result["name"],
             "cosmos_landromat_props_tree_shaders_main_v003"
         )
@@ -240,7 +240,7 @@ class FolderPathTestCase(ApiDBTestCase):
             data,
             200
         )
-        self.assertEquals(
+        self.assertEqual(
             result["path"],
             "/simple\\productions\\cosmos_landromat\\assets\\props\\tree\\"
             "shaders\\3ds_max"
@@ -252,7 +252,7 @@ class FolderPathTestCase(ApiDBTestCase):
         }
         result = self.post(
             "data/tasks/%s/working-file-path" % self.task.id, data, 200)
-        self.assertEquals(
+        self.assertEqual(
             result["path"],
             "/simple\\productions\\cosmos_landromat\\assets\\props\\tree\\"
             "shaders\\3ds_max"

@@ -22,7 +22,7 @@ class ShotTasksTestCase(ApiDBTestCase):
 
     def test_get_tasks_for_shot(self):
         tasks = self.get("data/shots/%s/tasks" % self.shot.id)
-        self.assertEquals(len(tasks), 1)
+        self.assertEqual(len(tasks), 1)
         self.assertEqual(tasks[0]["id"], str(self.shot_task.id))
 
     def test_get_shots_and_tasks(self):
@@ -36,7 +36,7 @@ class ShotTasksTestCase(ApiDBTestCase):
 
     def test_get_task_types_for_shot(self):
         task_types = self.get("/data/shots/%s/task-types" % self.shot.id)
-        self.assertEquals(len(task_types), 1)
+        self.assertEqual(len(task_types), 1)
         self.assertDictEqual(
             task_types[0],
             self.task_type_animation.serialize()

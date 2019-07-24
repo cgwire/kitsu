@@ -13,7 +13,7 @@ class EmailsServiceTestCase(ApiDBTestCase):
 
     def test_get_signature(self):
         signature = emails_service.get_signature()
-        self.assertEquals(signature, """
+        self.assertEqual(signature, """
 Best,
 
 Kitsu Team""")
@@ -27,11 +27,11 @@ Kitsu Team""")
             self.person.id,
             self.task.serialize()
         )
-        self.assertEquals(
+        self.assertEqual(
             task_name,
             "Cosmos Landromat / Props / Tree / Shaders"
         )
-        self.assertEquals(
+        self.assertEqual(
             task_url,
             "https://localhost:8080/productions/%s/assets/tasks/%s" % (
                 self.project.id,
@@ -47,11 +47,11 @@ Kitsu Team""")
             self.person.id,
             self.shot_task.serialize()
         )
-        self.assertEquals(
+        self.assertEqual(
             task_name,
             "Cosmos Landromat / E01 / S01 / P01 / Animation"
         )
-        self.assertEquals(
+        self.assertEqual(
             task_url,
             "https://localhost:8080/productions/%s/shots/tasks/%s" % (
                 self.project.id,

@@ -881,31 +881,97 @@ def get_episode_stats_for_project(project_id):
         ) \
         .add_columns(
             func.count(Task.id)
+        ) \
+        .add_columns(
+            func.sum(Entity.nb_frames)
         )
 
     results = {}
-    for (
-        project_id,
-        episode_id,
-        task_type_id,
-        task_status_id,
-        task_status_short_name,
-        task_status_color,
-        task_count
-    ) in query.all():
-        episode_id = str(episode_id)
-        task_type_id = str(task_type_id)
-        task_status_id = str(task_status_id)
-        results.setdefault(episode_id, {})
-        results[episode_id].setdefault(task_type_id, {})
-        results[episode_id][task_type_id].setdefault(task_status_id, {})
-        results[episode_id][task_type_id][task_status_id] = {
-            "name": task_status_short_name,
-            "value": task_count,
-            "color": task_status_color
-        }
-
+    for data in query.all():
+        add_entry_to_stats(results, *data)
+        add_entry_to_all_stats(results, *data)
     return results
+
+
+def add_entry_to_stats(
+    results,
+    project_id,
+    episode_id,
+    task_type_id,
+    task_status_id,
+    task_status_short_name,
+    task_status_color,
+    task_count,
+    entity_nb_frames
+):
+    """
+    Add to stats results, information of given count for given entity, task
+    type and task satus.
+    """
+    episode_id = str(episode_id)
+    task_type_id = str(task_type_id)
+    task_status_id = str(task_status_id)
+    results.setdefault(episode_id, {})
+    results[episode_id].setdefault(task_type_id, {})
+    results[episode_id][task_type_id].setdefault(task_status_id, {})
+    results[episode_id][task_type_id][task_status_id] = {
+        "name": task_status_short_name,
+        "color": task_status_color,
+        "count": task_count,
+        "frames": entity_nb_frames or 0
+    }
+
+    # Aggregate for episode
+    results[episode_id].setdefault("all", {})
+    results[episode_id]["all"].setdefault(task_status_id, {
+        "name": task_status_short_name,
+        "color": task_status_color,
+        "count": 0,
+        "frames": 0
+    })
+    results[episode_id]["all"][task_status_id]["count"] += task_count or 0
+    results[episode_id]["all"][task_status_id]["frames"] += \
+        entity_nb_frames or 0
+
+
+def add_entry_to_all_stats(
+    results,
+    project_id,
+    episode_id,
+    task_type_id,
+    task_status_id,
+    task_status_short_name,
+    task_status_color,
+    task_count,
+    entity_nb_frames
+):
+    """
+    Add to aggregated entry of stats results, information of given count for
+    given entity, task type and task satus.
+    """
+    task_type_id = str(task_type_id)
+    task_status_id = str(task_status_id)
+    results.setdefault("all", {"all": {}})
+
+    results["all"].setdefault(task_type_id, {})
+    results["all"][task_type_id].setdefault(task_status_id, {
+        "name": task_status_short_name,
+        "color": task_status_color,
+        "count": 0,
+        "frames": 0,
+    })
+    results["all"][task_type_id][task_status_id]["count"] += task_count or 0
+    results["all"][task_type_id][task_status_id]["frames"] += \
+        entity_nb_frames or 0
+
+    results["all"]["all"].setdefault(task_status_id, {
+        "name": task_status_short_name,
+        "color": task_status_color,
+        "count": 0,
+        "frames": 0
+    })
+    results["all"]["all"][task_status_id]["count"] += task_count or 0
+    results["all"]["all"][task_status_id]["frames"] += entity_nb_frames or 0
 
 
 def get_preview_dimensions(project):

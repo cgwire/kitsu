@@ -51,20 +51,20 @@ class EntityServiceTestCase(ApiDBTestCase):
 
     def test_get_entity_type(self):
         entity_type = entities_service.get_entity_type(self.asset_type.id)
-        self.assertEquals(entity_type, self.asset_type.serialize())
+        self.assertEqual(entity_type, self.asset_type.serialize())
 
     def test_get_entity_type_by_name(self):
         entity_type = \
             entities_service.get_entity_type_by_name(self.asset_type.name)
-        self.assertEquals(entity_type, self.asset_type.serialize())
+        self.assertEqual(entity_type, self.asset_type.serialize())
 
     def test_get_entity_raw(self):
         entity = entities_service.get_entity_raw(self.asset.id)
-        self.assertEquals(entity.id, self.asset.id)
+        self.assertEqual(entity.id, self.asset.id)
 
     def test_get_entity(self):
         entity = entities_service.get_entity(self.asset.id)
-        self.assertEquals(entity, self.asset.serialize())
+        self.assertEqual(entity, self.asset.serialize())
 
     def test_update_entity_preview(self):
         entities_service.update_entity_preview(
@@ -72,7 +72,7 @@ class EntityServiceTestCase(ApiDBTestCase):
             str(self.preview_file.id)
         )
         asset = assets_service.get_asset(self.asset.id)
-        self.assertEquals(asset["preview_file_id"], str(self.preview_file.id))
+        self.assertEqual(asset["preview_file_id"], str(self.preview_file.id))
 
         with pytest.raises(EntityNotFoundException):
             entities_service.update_entity_preview(

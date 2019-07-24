@@ -53,33 +53,33 @@ class BreakdownServiceTestCase(ApiDBTestCase):
 
         casting = breakdown_service.get_casting(self.shot.id)
         casting = sorted(casting, key=lambda x: x["nb_occurences"])
-        self.assertEquals(casting[0]["asset_id"], new_casting[0]["asset_id"])
-        self.assertEquals(
+        self.assertEqual(casting[0]["asset_id"], new_casting[0]["asset_id"])
+        self.assertEqual(
             casting[0]["nb_occurences"],
             new_casting[0]["nb_occurences"]
         )
-        self.assertEquals(casting[1]["asset_id"], new_casting[1]["asset_id"])
-        self.assertEquals(
+        self.assertEqual(casting[1]["asset_id"], new_casting[1]["asset_id"])
+        self.assertEqual(
             casting[1]["nb_occurences"],
             new_casting[1]["nb_occurences"]
         )
-        self.assertEquals(
+        self.assertEqual(
             casting[1]["asset_name"],
             self.asset_character.name
         )
-        self.assertEquals(
+        self.assertEqual(
             casting[1]["asset_type_name"],
             self.asset_type_character.name
         )
 
         cast_in = breakdown_service.get_cast_in(self.asset_character.id)
-        self.assertEquals(cast_in[0]["shot_name"], self.shot.name)
-        self.assertEquals(cast_in[0]["sequence_name"], self.sequence.name)
-        self.assertEquals(cast_in[0]["episode_name"], self.episode.name)
+        self.assertEqual(cast_in[0]["shot_name"], self.shot.name)
+        self.assertEqual(cast_in[0]["sequence_name"], self.sequence.name)
+        self.assertEqual(cast_in[0]["episode_name"], self.episode.name)
 
     def test_add_instance_to_shot(self):
         instances = breakdown_service.get_asset_instances_for_shot(self.shot.id)
-        self.assertEquals(instances, {})
+        self.assertEqual(instances, {})
 
         asset_instance = self.new_scene_instance(self.asset_id)
         self.new_shot_instance(asset_instance["id"])
@@ -89,15 +89,15 @@ class BreakdownServiceTestCase(ApiDBTestCase):
         self.new_shot_instance(asset_instance["id"])
 
         instances = breakdown_service.get_asset_instances_for_shot(self.shot.id)
-        self.assertEquals(len(instances[self.asset_id]), 2)
-        self.assertEquals(len(instances[self.asset_character_id]), 1)
-        self.assertEquals(instances[self.asset_id][0]["number"], 1)
-        self.assertEquals(instances[self.asset_id][1]["number"], 2)
-        self.assertEquals(
+        self.assertEqual(len(instances[self.asset_id]), 2)
+        self.assertEqual(len(instances[self.asset_character_id]), 1)
+        self.assertEqual(instances[self.asset_id][0]["number"], 1)
+        self.assertEqual(instances[self.asset_id][1]["number"], 2)
+        self.assertEqual(
             instances[self.asset_id][1]["name"],
             "tree_0002"
         )
-        self.assertEquals(instances[self.asset_character_id][0]["number"], 1)
+        self.assertEqual(instances[self.asset_character_id][0]["number"], 1)
 
         instances = breakdown_service.remove_asset_instance_for_shot(
             self.shot.id, asset_instance["id"]
@@ -108,16 +108,16 @@ class BreakdownServiceTestCase(ApiDBTestCase):
     def test_build_asset_instance_name(self):
         name = breakdown_service.build_asset_instance_name(
             self.asset_id, 3)
-        self.assertEquals(name, "tree_0003")
+        self.assertEqual(name, "tree_0003")
         name = breakdown_service.build_asset_instance_name(
             self.asset_character_id, 5)
-        self.assertEquals(name, "rabbit_0005")
+        self.assertEqual(name, "rabbit_0005")
 
     def test_get_shot_asset_instances_for_asset(self):
         instances = breakdown_service.get_shot_asset_instances_for_asset(
             self.asset.id
         )
-        self.assertEquals(instances, {})
+        self.assertEqual(instances, {})
 
         asset_instance = self.new_scene_instance(self.asset_id)
         self.new_shot_instance(asset_instance["id"])
@@ -129,13 +129,13 @@ class BreakdownServiceTestCase(ApiDBTestCase):
         instances = breakdown_service.get_shot_asset_instances_for_asset(
             self.asset.id
         )
-        self.assertEquals(len(instances[self.shot_id]), 2)
+        self.assertEqual(len(instances[self.shot_id]), 2)
 
     def test_add_instance_to_scene(self):
         instances = breakdown_service.get_asset_instances_for_scene(
             self.scene.id
         )
-        self.assertEquals(instances, {})
+        self.assertEqual(instances, {})
 
         self.new_scene_instance(self.asset_id)
         self.new_scene_instance(self.asset_id)
@@ -144,17 +144,17 @@ class BreakdownServiceTestCase(ApiDBTestCase):
         instances = breakdown_service.get_asset_instances_for_scene(
             self.scene.id
         )
-        self.assertEquals(len(instances[self.asset_id]), 2)
-        self.assertEquals(len(instances[self.asset_character_id]), 1)
-        self.assertEquals(instances[self.asset_id][0]["number"], 1)
-        self.assertEquals(instances[self.asset_id][1]["number"], 2)
-        self.assertEquals(instances[self.asset_character_id][0]["number"], 1)
+        self.assertEqual(len(instances[self.asset_id]), 2)
+        self.assertEqual(len(instances[self.asset_character_id]), 1)
+        self.assertEqual(instances[self.asset_id][0]["number"], 1)
+        self.assertEqual(instances[self.asset_id][1]["number"], 2)
+        self.assertEqual(instances[self.asset_character_id][0]["number"], 1)
 
     def test_get_scene_asset_instances_for_asset(self):
         instances = breakdown_service.get_scene_asset_instances_for_asset(
             self.asset.id
         )
-        self.assertEquals(instances, {})
+        self.assertEqual(instances, {})
 
         self.new_scene_instance(self.asset.id)
         self.new_scene_instance(self.asset.id)
@@ -162,4 +162,4 @@ class BreakdownServiceTestCase(ApiDBTestCase):
         instances = breakdown_service.get_scene_asset_instances_for_asset(
             self.asset.id
         )
-        self.assertEquals(len(instances[self.scene_id]), 2)
+        self.assertEqual(len(instances[self.scene_id]), 2)

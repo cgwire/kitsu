@@ -31,12 +31,12 @@ class EpisodeTestCase(ApiDBTestCase):
 
     def test_get_sequences_for_episode(self):
         sequences = self.get("data/episodes/%s/sequences" % self.episode_id)
-        self.assertEquals(len(sequences), 4)
+        self.assertEqual(len(sequences), 4)
         self.assertDictEqual(sequences[0], self.serialized_sequence)
 
     def test_get_episodes(self):
         episodes = self.get("data/episodes")
-        self.assertEquals(len(episodes), 3)
+        self.assertEqual(len(episodes), 3)
         self.assertDictEqual(
             episodes[0],
             self.serialized_episode
@@ -44,25 +44,25 @@ class EpisodeTestCase(ApiDBTestCase):
 
     def test_get_episode(self):
         episode = self.get("data/episodes/%s" % self.episode.id)
-        self.assertEquals(episode["id"], str(self.episode.id))
-        self.assertEquals(episode["name"], self.episode.name)
-        self.assertEquals(episode["project_name"], self.project.name)
+        self.assertEqual(episode["id"], str(self.episode.id))
+        self.assertEqual(episode["name"], self.episode.name)
+        self.assertEqual(episode["project_name"], self.project.name)
 
     def test_get_episode_by_name(self):
         episodes = self.get("data/episodes?name=%s" % self.episode.name.lower())
-        self.assertEquals(episodes[0]["id"], str(self.episode.id))
+        self.assertEqual(episodes[0]["id"], str(self.episode.id))
 
     def test_create_episode(self):
         episode_name = "NE01"
         data = {"name": episode_name}
         episode = self.post("data/projects/%s/episodes" % self.project.id, data)
         episode = self.get("data/episodes/%s" % episode["id"])
-        self.assertEquals(episode["name"], episode_name)
+        self.assertEqual(episode["name"], episode_name)
 
     def test_get_episodes_for_project(self):
         episodes = self.get("data/projects/%s/episodes" % self.project.id)
-        self.assertEquals(len(episodes), 3)
-        self.assertEquals(episodes[0], self.serialized_episode)
+        self.assertEqual(len(episodes), 3)
+        self.assertEqual(episodes[0], self.serialized_episode)
 
     def test_get_episodes_for_project_404(self):
         self.get("data/projects/unknown/episodes", 404)
@@ -72,7 +72,7 @@ class EpisodeTestCase(ApiDBTestCase):
         episodes = self.get(
             "data/episodes?project_id=%s&name=E02" % self.project_id
         )
-        self.assertEquals(episodes[0]["id"], str(self.episode_02_id))
+        self.assertEqual(episodes[0]["id"], str(self.episode_02_id))
 
         self.generate_fixture_user_cg_artist()
         self.log_in_cg_artist()

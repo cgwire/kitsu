@@ -16,12 +16,12 @@ class EntityTestCase(ApiDBTestCase):
 
     def test_get_entities(self):
         entities = self.get("data/entities")
-        self.assertEquals(len(entities), 3)
+        self.assertEqual(len(entities), 3)
 
     def test_get_entity(self):
         entity = self.get_first("data/entities")
         entity_again = self.get("data/entities/%s" % entity["id"])
-        self.assertEquals(entity, entity_again)
+        self.assertEqual(entity, entity_again)
         self.get_404("data/entities/%s" % fields.gen_uuid())
 
     def test_create_entity(self):
@@ -35,7 +35,7 @@ class EntityTestCase(ApiDBTestCase):
         self.assertIsNotNone(self.asset["id"])
 
         entities = self.get("data/entities")
-        self.assertEquals(len(entities), 4)
+        self.assertEqual(len(entities), 4)
 
     def test_update_entity(self):
         entity = self.get_first("data/entities")
@@ -47,8 +47,8 @@ class EntityTestCase(ApiDBTestCase):
         }
         self.put("data/entities/%s" % entity["id"], data)
         entity_again = self.get("data/entities/%s" % entity["id"])
-        self.assertEquals(entity_again["name"], data["name"])
-        self.assertEquals(entity_again["data"], data["data"])
+        self.assertEqual(entity_again["name"], data["name"])
+        self.assertEqual(entity_again["data"], data["data"])
 
         data = {
             "data": {
@@ -57,7 +57,7 @@ class EntityTestCase(ApiDBTestCase):
         }
         self.put("data/entities/%s" % entity["id"], data)
         entity_again = self.get("data/entities/%s" % entity["id"])
-        self.assertEquals(entity_again["data"], {
+        self.assertEqual(entity_again["data"], {
             "extra_work": True,
             "extra_field": True
         })
@@ -66,9 +66,9 @@ class EntityTestCase(ApiDBTestCase):
 
     def test_delete_entity(self):
         entities = self.get("data/entities")
-        self.assertEquals(len(entities), 3)
+        self.assertEqual(len(entities), 3)
         entity = entities[0]
         self.delete("data/entities/%s" % entity["id"])
         entities = self.get("data/entities")
-        self.assertEquals(len(entities), 2)
+        self.assertEqual(len(entities), 2)
         self.delete_404("data/entities/%s" % fields.gen_uuid())

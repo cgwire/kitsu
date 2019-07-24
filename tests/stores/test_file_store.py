@@ -30,7 +30,7 @@ class FileStoreTestCase(unittest.TestCase):
 
     def test_path(self):
         file_name = "thumbnails-63e453f1-9655-49ad-acba-ff7f27c49e9d"
-        self.assertEquals(
+        self.assertEqual(
             file_store.path(file_store.pictures, file_name),
             os.path.join(
                 self.preview_path,

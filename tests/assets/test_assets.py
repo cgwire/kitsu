@@ -34,35 +34,35 @@ class AssetsTestCase(ApiDBTestCase):
 
     def test_get_assets(self):
         assets = self.get("data/assets/all")
-        self.assertEquals(len(assets), 1)
-        self.assertEquals(assets[0]["name"], self.asset_dict["name"])
+        self.assertEqual(len(assets), 1)
+        self.assertEqual(assets[0]["name"], self.asset_dict["name"])
 
     def test_get_asset(self):
         asset = self.get("data/assets/%s" % self.asset.id)
-        self.assertEquals(asset["id"], str(self.asset.id))
-        self.assertEquals(asset["project_name"], self.project.name)
-        self.assertEquals(asset["entity_type_id"], str(self.asset_type.id))
-        self.assertEquals(asset["asset_type_name"], str(self.asset_type.name))
-        self.assertEquals(len(asset["tasks"]), 2)
+        self.assertEqual(asset["id"], str(self.asset.id))
+        self.assertEqual(asset["project_name"], self.project.name)
+        self.assertEqual(asset["entity_type_id"], str(self.asset_type.id))
+        self.assertEqual(asset["asset_type_name"], str(self.asset_type.name))
+        self.assertEqual(len(asset["tasks"]), 2)
 
     def test_get_asset_by_name(self):
         assets = self.get("data/assets/all?name=%s" % self.asset.name.lower())
-        self.assertEquals(assets[0]["id"], str(self.asset.id))
+        self.assertEqual(assets[0]["id"], str(self.asset.id))
 
     def test_get_project_assets(self):
         assets = self.get("data/projects/%s/assets" % self.project.id)
-        self.assertEquals(len(assets), 1)
-        self.assertEquals(assets[0]["type"], "Asset")
+        self.assertEqual(len(assets), 1)
+        self.assertEqual(assets[0]["type"], "Asset")
 
     def test_get_shot_assets(self):
         assets = self.get("data/shots/%s/assets" % self.shot.id)
-        self.assertEquals(len(assets), 0)
+        self.assertEqual(len(assets), 0)
 
         self.shot.entities_out = [self.asset]
         self.shot.save()
         assets = self.get("data/shots/%s/assets" % self.shot.id)
-        self.assertEquals(len(assets), 1)
-        self.assertEquals(assets[0]["type"], "Asset")
+        self.assertEqual(len(assets), 1)
+        self.assertEqual(assets[0]["type"], "Asset")
 
     def test_get_project_and_type_assets(self):
         asset_type = assets_service.get_or_create_asset_type("VFX")
@@ -74,7 +74,7 @@ class AssetsTestCase(ApiDBTestCase):
         path_ids = (self.project.id, self.asset_type.id)
         path = "data/projects/%s/asset-types/%s/assets" % path_ids
         assets = self.get(path)
-        self.assertEquals(len(assets), 1)
+        self.assertEqual(len(assets), 1)
         self.assertDictEqual(assets[0], self.asset_dict)
 
     def test_create_asset(self):
@@ -95,12 +95,12 @@ class AssetsTestCase(ApiDBTestCase):
         asset = self.post(path, self.asset_data)
         assets = assets_service.get_assets()
         self.assertIsNotNone(asset.get("id", None))
-        self.assertEquals(len(assets), 2)
-        self.assertEquals(
+        self.assertEqual(len(assets), 2)
+        self.assertEqual(
             assets[1]["name"],
             self.asset_data["name"]
         )
-        self.assertEquals(
+        self.assertEqual(
             assets[1]["description"],
             self.asset_data["description"]
         )
@@ -115,12 +115,12 @@ class AssetsTestCase(ApiDBTestCase):
         path = "data/assets/%s" % self.asset_character.id
         self.delete(path)
         assets = assets_service.get_assets()
-        self.assertEquals(len(assets), 1)
+        self.assertEqual(len(assets), 1)
         self.get(path, 404)
 
     def test_remove_asset_with_tasks(self):
         path = "data/assets/%s" % self.asset_dict["id"]
         self.delete(path)
         assets = assets_service.get_assets()
-        self.assertEquals(len(assets), 1)
-        self.assertEquals(assets[0]["canceled"], True)
+        self.assertEqual(len(assets), 1)
+        self.assertEqual(assets[0]["canceled"], True)

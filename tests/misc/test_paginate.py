@@ -11,11 +11,11 @@ class PaginationTestCase(ApiDBTestCase):
 
     def test_paginate(self):
         persons = self.get("data/persons?page=1")["data"]
-        self.assertEquals(len(persons), 100)
+        self.assertEqual(len(persons), 100)
         persons = self.get("data/persons?page=2")["data"]
-        self.assertEquals(len(persons), 100)
+        self.assertEqual(len(persons), 100)
         persons = self.get("data/persons?page=3")["data"]
-        self.assertEquals(len(persons), 51)
+        self.assertEqual(len(persons), 51)
 
     def test_404(self):
         self.get("data/persons?page=4", 404)
@@ -23,8 +23,8 @@ class PaginationTestCase(ApiDBTestCase):
 
     def test_metadata(self):
         pagination_infos = self.get("data/persons?page=2")
-        self.assertEquals(pagination_infos["total"], 251)
-        self.assertEquals(pagination_infos["nb_pages"], 3)
-        self.assertEquals(pagination_infos["page"], 2)
-        self.assertEquals(pagination_infos["offset"], 100)
-        self.assertEquals(pagination_infos["limit"], 100)
+        self.assertEqual(pagination_infos["total"], 251)
+        self.assertEqual(pagination_infos["nb_pages"], 3)
+        self.assertEqual(pagination_infos["page"], 2)
+        self.assertEqual(pagination_infos["offset"], 100)
+        self.assertEqual(pagination_infos["limit"], 100)

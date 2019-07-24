@@ -53,32 +53,32 @@ class UserContextRoutesTestCase(ApiDBTestCase):
         sequences = self.get(
             "data/user/projects/%s/sequences" % self.project.id
         )
-        self.assertEquals(len(sequences), 1)
+        self.assertEqual(len(sequences), 1)
 
     def test_get_project_episodes(self):
         self.assign_user(self.shot_task.id)
         episodes = self.get(
             "data/user/projects/%s/episodes" % self.project.id
         )
-        self.assertEquals(len(episodes), 1)
-        self.assertEquals(episodes[0]["name"], "E01")
-        self.assertEquals(episodes[0]["type"], "Episode")
+        self.assertEqual(len(episodes), 1)
+        self.assertEqual(episodes[0]["name"], "E01")
+        self.assertEqual(episodes[0]["type"], "Episode")
 
     def test_get_sequence_shots(self):
         self.assign_user(self.shot_task.id)
         shots = self.get("data/user/sequences/%s/shots" % self.sequence.id)
-        self.assertEquals(len(shots), 1)
-        self.assertEquals(shots[0]["type"], "Shot")
-        self.assertEquals(shots[0]["name"], "P01")
+        self.assertEqual(len(shots), 1)
+        self.assertEqual(shots[0]["type"], "Shot")
+        self.assertEqual(shots[0]["name"], "P01")
 
     def test_get_sequence_scenes(self):
         self.generate_fixture_scene()
         self.generate_fixture_scene_task()
         self.assign_user(self.scene_task.id)
         scenes = self.get("data/user/sequences/%s/scenes" % self.sequence.id)
-        self.assertEquals(len(scenes), 1)
-        self.assertEquals(scenes[0]["type"], "Scene")
-        self.assertEquals(scenes[0]["name"], "SC01")
+        self.assertEqual(len(scenes), 1)
+        self.assertEqual(scenes[0]["type"], "Scene")
+        self.assertEqual(scenes[0]["name"], "SC01")
 
     def test_get_project_asset_types(self):
         task_id = self.task.id
@@ -93,7 +93,7 @@ class UserContextRoutesTestCase(ApiDBTestCase):
         asset_types = self.get(
             "data/user/projects/%s/asset-types" % self.project.id
         )
-        self.assertEquals(len(asset_types), 0)
+        self.assertEqual(len(asset_types), 0)
 
         self.assign_user(task_id)
         self.assign_user(task2_id)
@@ -102,7 +102,7 @@ class UserContextRoutesTestCase(ApiDBTestCase):
         asset_types = self.get(
             "data/user/projects/%s/asset-types" % self.project.id
         )
-        self.assertEquals(len(asset_types), 2)
+        self.assertEqual(len(asset_types), 2)
 
     def test_get_project_asset_types_assets(self):
         task_id = self.task.id
@@ -112,7 +112,7 @@ class UserContextRoutesTestCase(ApiDBTestCase):
                 self.asset_type.id
             )
         )
-        self.assertEquals(len(assets), 0)
+        self.assertEqual(len(assets), 0)
         self.assign_user(task_id)
 
         assets = self.get(
@@ -121,29 +121,29 @@ class UserContextRoutesTestCase(ApiDBTestCase):
                 self.asset_type.id
             )
         )
-        self.assertEquals(len(assets), 1)
+        self.assertEqual(len(assets), 1)
 
     def test_get_asset_tasks(self):
         path = "data/user/assets/%s/tasks" % self.asset.id
         task_id = self.task.id
 
         tasks = self.get(path)
-        self.assertEquals(len(tasks), 0)
+        self.assertEqual(len(tasks), 0)
 
         self.assign_user(task_id)
         tasks = self.get(path)
-        self.assertEquals(len(tasks), 1)
+        self.assertEqual(len(tasks), 1)
 
     def test_get_shot_tasks(self):
         path = "data/user/shots/%s/tasks" % self.shot.id
         shot_task_id = self.shot_task.id
 
         tasks = self.get(path)
-        self.assertEquals(len(tasks), 0)
+        self.assertEqual(len(tasks), 0)
 
         self.assign_user(shot_task_id)
         tasks = self.get(path)
-        self.assertEquals(len(tasks), 1)
+        self.assertEqual(len(tasks), 1)
 
     def test_get_scene_tasks(self):
         self.generate_fixture_scene()
@@ -152,11 +152,11 @@ class UserContextRoutesTestCase(ApiDBTestCase):
         path = "data/user/scenes/%s/tasks" % self.scene.id
 
         tasks = self.get(path)
-        self.assertEquals(len(tasks), 0)
+        self.assertEqual(len(tasks), 0)
 
         self.assign_user(scene_task_id)
         tasks = self.get(path)
-        self.assertEquals(len(tasks), 1)
+        self.assertEqual(len(tasks), 1)
 
     def test_get_asset_task_types(self):
         path = "data/user/assets/%s/task-types" % self.asset.id
@@ -164,23 +164,23 @@ class UserContextRoutesTestCase(ApiDBTestCase):
         task_type_id = self.task_type.id
 
         task_types = self.get(path)
-        self.assertEquals(len(task_types), 0)
+        self.assertEqual(len(task_types), 0)
 
         self.assign_user(task_id)
         task_types = self.get(path)
-        self.assertEquals(len(task_types), 1)
-        self.assertEquals(task_types[0]["id"], str(task_type_id))
+        self.assertEqual(len(task_types), 1)
+        self.assertEqual(task_types[0]["id"], str(task_type_id))
 
     def test_get_shot_task_types(self):
         path = "data/user/shots/%s/task-types" % self.shot.id
         shot_task_id = self.shot_task.id
 
         task_types = self.get(path)
-        self.assertEquals(len(task_types), 0)
+        self.assertEqual(len(task_types), 0)
 
         self.assign_user(shot_task_id)
         task_types = self.get(path)
-        self.assertEquals(len(task_types), 1)
+        self.assertEqual(len(task_types), 1)
 
     def test_get_scene_task_types(self):
         self.generate_fixture_scene()
@@ -189,15 +189,15 @@ class UserContextRoutesTestCase(ApiDBTestCase):
         scene_task_id = self.scene_task.id
 
         task_types = self.get(path)
-        self.assertEquals(len(task_types), 0)
+        self.assertEqual(len(task_types), 0)
 
         self.assign_user(scene_task_id)
         task_types = self.get(path)
-        self.assertEquals(len(task_types), 1)
+        self.assertEqual(len(task_types), 1)
 
     def test_get_open_projects(self):
         projects = self.get("data/user/projects/open")
-        self.assertEquals(len(projects), 0)
+        self.assertEqual(len(projects), 0)
 
         project = Project.get(self.project_id)
         person = Person.get(self.user_id)
@@ -205,14 +205,14 @@ class UserContextRoutesTestCase(ApiDBTestCase):
         project.save()
 
         projects = self.get("data/user/projects/open")
-        self.assertEquals(len(projects), 1)
+        self.assertEqual(len(projects), 1)
 
         project = Project.get(self.project_id)
         project.team[:] = []
         project.save()
 
         projects = self.get("data/user/projects/open")
-        self.assertEquals(len(projects), 0)
+        self.assertEqual(len(projects), 0)
 
     def test_get_todos(self):
         task_id = self.task.id
@@ -220,14 +220,14 @@ class UserContextRoutesTestCase(ApiDBTestCase):
 
         path = "data/user/tasks/"
         tasks = self.get(path)
-        self.assertEquals(len(tasks), 0)
+        self.assertEqual(len(tasks), 0)
 
         self.assign_user(task_id)
         self.assign_user(shot_task_id)
 
         path = "data/user/tasks/"
         tasks = self.get(path)
-        self.assertEquals(len(tasks), 2)
+        self.assertEqual(len(tasks), 2)
 
         tasks_service.update_task(shot_task_id, {
             "task_status_id": tasks_service.get_done_status()["id"]
@@ -235,20 +235,20 @@ class UserContextRoutesTestCase(ApiDBTestCase):
 
         path = "data/user/tasks/"
         tasks = self.get(path)
-        self.assertEquals(len(tasks), 1)
+        self.assertEqual(len(tasks), 1)
 
     def test_get_done_tasks(self):
         task_id = self.task.id
 
         path = "data/user/done-tasks/"
         tasks = self.get(path)
-        self.assertEquals(len(tasks), 0)
+        self.assertEqual(len(tasks), 0)
 
         self.assign_user(task_id)
 
         path = "data/user/done-tasks/"
         tasks = self.get(path)
-        self.assertEquals(len(tasks), 0)
+        self.assertEqual(len(tasks), 0)
 
         done_status = tasks_service.get_done_status()
         tasks_service.update_task(task_id, {
@@ -257,7 +257,7 @@ class UserContextRoutesTestCase(ApiDBTestCase):
 
         path = "data/user/done-tasks/"
         tasks = self.get(path)
-        self.assertEquals(len(tasks), 1)
+        self.assertEqual(len(tasks), 1)
 
     def test_get_filters(self):
         project_id = str(self.project.id)

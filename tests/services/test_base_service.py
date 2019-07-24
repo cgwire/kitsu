@@ -19,7 +19,7 @@ class BaseServiceTestCase(ApiDBTestCase):
             project.id,
             ProjectNotFoundException
         )
-        self.assertEquals(project.id, project_again.id)
+        self.assertEqual(project.id, project_again.id)
         project.delete()
         with pytest.raises(ProjectNotFoundException):
             base_service.get_instance(
@@ -35,7 +35,7 @@ class BaseServiceTestCase(ApiDBTestCase):
         self.assertIsNotNone(Project.get_by(name="Test"))
         project_again = \
             base_service.get_or_create_instance_by_name(Project, name="Test")
-        self.assertEquals(project["id"], project_again["id"])
+        self.assertEqual(project["id"], project_again["id"])
 
     def test_get_model_map_from_array(self):
         models = [
@@ -44,6 +44,6 @@ class BaseServiceTestCase(ApiDBTestCase):
             {"id": "3", "name": "third"}
         ]
         model_map = base_service.get_model_map_from_array(models)
-        self.assertEquals(model_map["1"]["name"], "first")
-        self.assertEquals(model_map["2"]["name"], "second")
-        self.assertEquals(model_map["3"]["name"], "third")
+        self.assertEqual(model_map["1"]["name"], "first")
+        self.assertEqual(model_map["2"]["name"], "second")
+        self.assertEqual(model_map["3"]["name"], "third")

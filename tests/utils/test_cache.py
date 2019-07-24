@@ -26,5 +26,5 @@ class CacheTestCase(unittest.TestCase):
         result2 = self.memoized_function2("param1")
         result3 = self.memoized_function2("param2")
 
-        self.assertEquals(result, result2)
+        self.assertEqual(result, result2)
         self.assertNotEquals(result, result3)

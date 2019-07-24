@@ -38,7 +38,7 @@ class Person(db.Model, BaseMixin, SerializerMixin):
     active = db.Column(db.Boolean(), default=True)
     last_presence = db.Column(db.Date())
 
-    password = db.Column(db.Binary(60))
+    password = db.Column(db.LargeBinary(60))
     desktop_login = db.Column(db.String(80))
     shotgun_id = db.Column(db.Integer, unique=True)
     timezone = db.Column(

@@ -85,8 +85,8 @@ class FileServiceTestCase(ApiDBTestCase):
         self.generate_fixture_working_file(name="main", revision=4)
         self.generate_fixture_working_file(name="main", revision=5)
         working_files = files_service.get_working_files_for_task(self.task.id)
-        self.assertEquals(len(working_files), 5)
-        self.assertEquals(working_files[0]["revision"], 5)
+        self.assertEqual(len(working_files), 5)
+        self.assertEqual(working_files[0]["revision"], 5)
 
     def test_get_last_working_files_for_task(self):
         self.generate_fixture_working_file(name="main", revision=2)
@@ -99,8 +99,8 @@ class FileServiceTestCase(ApiDBTestCase):
         working_files = files_service.get_last_working_files_for_task(
             self.task.id
         )
-        self.assertEquals(working_files["main"]["revision"], 5)
-        self.assertEquals(working_files["hotfix"]["revision"], 3)
+        self.assertEqual(working_files["main"]["revision"], 5)
+        self.assertEqual(working_files["hotfix"]["revision"], 3)
 
     def get_next_working_revision(self):
         self.generate_fixture_working_file(name="main", revision=2)
@@ -108,7 +108,7 @@ class FileServiceTestCase(ApiDBTestCase):
         self.generate_fixture_working_file(name="main", revision=4)
         self.generate_fixture_working_file(name="main", revision=5)
         revision = files_service.get_next_working_revision(self.task.id, "main")
-        self.assertEquals(revision)
+        self.assertEqual(revision)
 
     def test_create_new_working_revision(self):
         self.working_file.delete()
@@ -130,7 +130,7 @@ class FileServiceTestCase(ApiDBTestCase):
         )
         working_files = files_service.get_working_files_for_task(self.task.id)
         self.assertEqual(working_file["revision"], 2)
-        self.assertEquals(len(working_files), 2)
+        self.assertEqual(len(working_files), 2)
 
         with pytest.raises(EntryAlreadyExistsException):
             working_file = files_service.create_new_working_revision(
@@ -204,11 +204,11 @@ class FileServiceTestCase(ApiDBTestCase):
         last_output_files = files_service.get_last_output_files_for_entity(
             self.asset.id
         )
-        self.assertEquals(
+        self.assertEqual(
             last_output_files[str(geometry.id)][geometry_file.name]["revision"],
             5
         )
-        self.assertEquals(
+        self.assertEqual(
             last_output_files[str(cache.id)][cache_file.name]["revision"],
             3
         )
@@ -229,7 +229,7 @@ class FileServiceTestCase(ApiDBTestCase):
                 self.asset.id,
                 geometry.id
             )
-        self.assertEquals(len(output_files), 8)
+        self.assertEqual(len(output_files), 8)
 
         output_files = \
             files_service.get_output_files_for_output_type_and_entity(
@@ -237,7 +237,7 @@ class FileServiceTestCase(ApiDBTestCase):
                 geometry.id,
                 representation="obj"
             )
-        self.assertEquals(len(output_files), 4)
+        self.assertEqual(len(output_files), 4)
 
         output_files = \
             files_service.get_output_files_for_output_type_and_entity(
@@ -245,7 +245,7 @@ class FileServiceTestCase(ApiDBTestCase):
                 geometry.id,
                 representation="max"
             )
-        self.assertEquals(len(output_files), 3)
+        self.assertEqual(len(output_files), 3)
 
     def test_get_output_files_for_output_type_and_scene_asset_instance(self):
         self.generate_fixture_asset()
@@ -289,7 +289,7 @@ class FileServiceTestCase(ApiDBTestCase):
                 scene_id,
                 geometry.id
             )
-        self.assertEquals(len(output_files), 7)
+        self.assertEqual(len(output_files), 7)
 
         output_files = \
             files_service.get_output_files_for_output_type_and_asset_instance(
@@ -298,7 +298,7 @@ class FileServiceTestCase(ApiDBTestCase):
                 geometry.id,
                 representation="obj"
             )
-        self.assertEquals(len(output_files), 4)
+        self.assertEqual(len(output_files), 4)
 
         output_files = \
             files_service.get_output_files_for_output_type_and_asset_instance(
@@ -307,7 +307,7 @@ class FileServiceTestCase(ApiDBTestCase):
                 geometry.id,
                 representation="max"
             )
-        self.assertEquals(len(output_files), 3)
+        self.assertEqual(len(output_files), 3)
 
     def test_get_output_files_for_output_type_and_shot_asset_instance(self):
         self.generate_fixture_asset()
@@ -357,7 +357,7 @@ class FileServiceTestCase(ApiDBTestCase):
                 shot_id,
                 geometry.id
             )
-        self.assertEquals(len(output_files), 7)
+        self.assertEqual(len(output_files), 7)
 
         output_files = \
             files_service.get_output_files_for_output_type_and_asset_instance(
@@ -366,7 +366,7 @@ class FileServiceTestCase(ApiDBTestCase):
                 geometry.id,
                 representation="obj"
             )
-        self.assertEquals(len(output_files), 4)
+        self.assertEqual(len(output_files), 4)
 
         output_files = \
             files_service.get_output_files_for_output_type_and_asset_instance(
@@ -375,7 +375,7 @@ class FileServiceTestCase(ApiDBTestCase):
                 geometry.id,
                 representation="max"
             )
-        self.assertEquals(len(output_files), 3)
+        self.assertEqual(len(output_files), 3)
 
     def test_get_output_files_for_output_type_and_asset_asset_instance(self):
         self.generate_fixture_asset_types()
@@ -420,7 +420,7 @@ class FileServiceTestCase(ApiDBTestCase):
                 asset_character_id,
                 geometry.id
             )
-        self.assertEquals(len(output_files), 7)
+        self.assertEqual(len(output_files), 7)
 
         output_files = \
             files_service.get_output_files_for_output_type_and_asset_instance(
@@ -429,7 +429,7 @@ class FileServiceTestCase(ApiDBTestCase):
                 geometry.id,
                 representation="obj"
             )
-        self.assertEquals(len(output_files), 4)
+        self.assertEqual(len(output_files), 4)
 
         output_files = \
             files_service.get_output_files_for_output_type_and_asset_instance(
@@ -438,4 +438,4 @@ class FileServiceTestCase(ApiDBTestCase):
                 geometry.id,
                 representation="max"
             )
-        self.assertEquals(len(output_files), 3)
+        self.assertEqual(len(output_files), 3)

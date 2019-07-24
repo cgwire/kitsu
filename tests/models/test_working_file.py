@@ -33,7 +33,7 @@ class WorkingFileTestCase(ApiDBTestCase):
 
     def test_get_working_files(self):
         working_files = self.get("data/working-files")
-        self.assertEquals(len(working_files), 3)
+        self.assertEqual(len(working_files), 3)
 
     def test_get_working_file(self):
         self.generate_fixture_user_cg_artist()
@@ -41,7 +41,7 @@ class WorkingFileTestCase(ApiDBTestCase):
         working_file = self.get_first("data/working-files")
         working_file_again = self.get(
             "data/working-files/%s" % working_file["id"])
-        self.assertEquals(working_file, working_file_again)
+        self.assertEqual(working_file, working_file_again)
         self.get_404("data/working-files/%s" % fields.gen_uuid())
 
         self.log_in_cg_artist()
@@ -65,7 +65,7 @@ class WorkingFileTestCase(ApiDBTestCase):
         self.assertIsNotNone(self.working_file["id"])
 
         working_files = self.get("data/working-files")
-        self.assertEquals(len(working_files), 4)
+        self.assertEqual(len(working_files), 4)
 
     def test_update_working_file(self):
         working_file = self.get_first("data/working-files")
@@ -75,16 +75,16 @@ class WorkingFileTestCase(ApiDBTestCase):
         self.put("data/working-files/%s" % working_file["id"], data)
         working_file_again = self.get(
             "data/working-files/%s" % working_file["id"])
-        self.assertEquals(data["name"], working_file_again["name"])
+        self.assertEqual(data["name"], working_file_again["name"])
         self.put_404("data/working-files/%s" % fields.gen_uuid(), data)
 
     def test_delete_working_file(self):
         working_files = self.get("data/working-files")
-        self.assertEquals(len(working_files), 3)
+        self.assertEqual(len(working_files), 3)
         working_file = working_files[0]
         self.delete("data/working-files/%s" % working_file["id"])
         working_files = self.get("data/working-files")
-        self.assertEquals(len(working_files), 2)
+        self.assertEqual(len(working_files), 2)
         self.delete_404("data/working-files/%s" % fields.gen_uuid())
 
     def test_serialize_outputs(self):
@@ -95,7 +95,7 @@ class WorkingFileTestCase(ApiDBTestCase):
         output_file = self.generate_fixture_output_file()
         output_file.source_file_id = working_file.id
         output_file.save()
-        self.assertEquals(
+        self.assertEqual(
             working_file.serialize()["outputs"],
             [str(output_file.id)]
         )

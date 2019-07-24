@@ -88,7 +88,7 @@ class NewsServiceTestCase(ApiDBTestCase):
         news_list = news_service.get_last_news_for_project(
             self.task_dict["project_id"]
         )
-        self.assertEquals(len(news_list), 50)
+        self.assertEqual(len(news_list), 50)
         news = news_list[0]
         self.assertEqual(news["project_name"], "Cosmos Landromat")
         self.assertEqual(news["full_entity_name"], "E01 / S01 / P01")
@@ -98,10 +98,10 @@ class NewsServiceTestCase(ApiDBTestCase):
             self.task_dict["project_id"],
             page=2
         )
-        self.assertEquals(len(news_list), 30)
+        self.assertEqual(len(news_list), 30)
 
         news_list = news_service.get_last_news_for_project(
             self.task_dict["project_id"],
             news_id=news["id"]
         )
-        self.assertEquals(len(news_list), 1)
+        self.assertEqual(len(news_list), 1)

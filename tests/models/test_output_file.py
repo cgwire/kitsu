@@ -34,13 +34,13 @@ class OutputFileTestCase(ApiDBTestCase):
 
     def test_get_output_files(self):
         output_files = self.get("data/output-files")
-        self.assertEquals(len(output_files), 3)
+        self.assertEqual(len(output_files), 3)
 
     def test_get_output_file(self):
         output_file = self.get_first("data/output-files")
         output_file_again = self.get(
             "data/output-files/%s" % output_file["id"])
-        self.assertEquals(output_file, output_file_again)
+        self.assertEqual(output_file, output_file_again)
         self.get_404("data/output-files/%s" % fields.gen_uuid())
 
     def test_create_output_file(self):
@@ -57,7 +57,7 @@ class OutputFileTestCase(ApiDBTestCase):
         self.assertIsNotNone(self.output_file["id"])
 
         output_files = self.get("data/output-files")
-        self.assertEquals(len(output_files), 4)
+        self.assertEqual(len(output_files), 4)
 
     def test_update_output_file(self):
         output_file = self.get_first("data/output-files")
@@ -67,16 +67,16 @@ class OutputFileTestCase(ApiDBTestCase):
         self.put("data/output-files/%s" % output_file["id"], data)
         output_file_again = self.get(
             "data/output-files/%s" % output_file["id"])
-        self.assertEquals(data["name"], output_file_again["name"])
+        self.assertEqual(data["name"], output_file_again["name"])
         self.put_404("data/output-files/%s" % fields.gen_uuid(), data)
 
     def test_delete_output_file(self):
         output_files = self.get("data/output-files")
-        self.assertEquals(len(output_files), 3)
+        self.assertEqual(len(output_files), 3)
         output_file = output_files[0]
         self.delete("data/output-files/%s" % output_file["id"])
         output_files = self.get("data/output-files")
-        self.assertEquals(len(output_files), 2)
+        self.assertEqual(len(output_files), 2)
         self.delete_404("data/output-files/%s" % fields.gen_uuid())
 
     def test_get_output_file_permission(self):
@@ -85,10 +85,10 @@ class OutputFileTestCase(ApiDBTestCase):
         cg_artist_id = self.user_cg_artist["id"]
         self.log_in_cg_artist()
         output_files = self.get("data/output-files")
-        self.assertEquals(len(output_files), 0)
+        self.assertEqual(len(output_files), 0)
         self.get("data/output-files/%s" % output_file_id, 403)
 
         projects_service.add_team_member(self.project_id, cg_artist_id)
         self.get("data/output-files/%s" % output_file_id)
         output_files = self.get("data/output-files")
-        self.assertEquals(len(output_files), 3)
+        self.assertEqual(len(output_files), 3)

@@ -36,10 +36,10 @@ class CommandsTestCase(ApiDBTestCase):
             },
             "revoked": True
         }).encode("utf-8"))
-        self.assertEquals(len(self.store.keys()), 2)
+        self.assertEqual(len(self.store.keys()), 2)
         commands.clean_auth_tokens()
-        self.assertEquals(len(self.store.keys()), 1)
-        self.assertEquals(self.store.keys()[0], "testkey")
+        self.assertEqual(len(self.store.keys()), 1)
+        self.assertEqual(self.store.keys()[0], "testkey")
 
     def test_clean_auth_tokens_expired(self):
         now = datetime.datetime.now()
@@ -56,10 +56,10 @@ class CommandsTestCase(ApiDBTestCase):
             "revoked": False
         }).encode("utf-8"))
 
-        self.assertEquals(len(self.store.keys()), 2)
+        self.assertEqual(len(self.store.keys()), 2)
         commands.clean_auth_tokens()
-        self.assertEquals(len(self.store.keys()), 1)
-        self.assertEquals(self.store.keys()[0], "testkey2")
+        self.assertEqual(len(self.store.keys()), 1)
+        self.assertEqual(self.store.keys()[0], "testkey2")
 
     def test_init_data(self):
         commands.init_data()

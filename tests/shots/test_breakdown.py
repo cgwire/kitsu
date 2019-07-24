@@ -43,29 +43,29 @@ class BreakdownTestCase(ApiDBTestCase):
 
         casting = self.get("/data/shots/%s/casting" % self.shot_id)
         casting = sorted(casting, key=lambda x: x["nb_occurences"])
-        self.assertEquals(casting[0]["asset_id"], newCasting[0]["asset_id"])
-        self.assertEquals(
+        self.assertEqual(casting[0]["asset_id"], newCasting[0]["asset_id"])
+        self.assertEqual(
             casting[0]["nb_occurences"],
             newCasting[0]["nb_occurences"]
         )
-        self.assertEquals(casting[1]["asset_id"], newCasting[1]["asset_id"])
-        self.assertEquals(
+        self.assertEqual(casting[1]["asset_id"], newCasting[1]["asset_id"])
+        self.assertEqual(
             casting[1]["nb_occurences"],
             newCasting[1]["nb_occurences"]
         )
-        self.assertEquals(
+        self.assertEqual(
             casting[1]["asset_name"],
             self.asset_character.name
         )
-        self.assertEquals(
+        self.assertEqual(
             casting[1]["asset_type_name"],
             self.asset_type_character.name
         )
 
         cast_in = self.get("/data/assets/%s/cast-in" % self.asset_id)
-        self.assertEquals(cast_in[0]["shot_name"], self.shot.name)
-        self.assertEquals(cast_in[0]["sequence_name"], self.sequence.name)
-        self.assertEquals(cast_in[0]["episode_name"], self.episode.name)
+        self.assertEqual(cast_in[0]["shot_name"], self.shot.name)
+        self.assertEqual(cast_in[0]["sequence_name"], self.sequence.name)
+        self.assertEqual(cast_in[0]["episode_name"], self.episode.name)
 
     def test_get_assets_for_shots(self):
         self.entities = self.generate_data(
@@ -80,7 +80,7 @@ class BreakdownTestCase(ApiDBTestCase):
         self.shot.save()
 
         assets = self.get("data/shots/%s/assets" % self.shot.id)
-        self.assertEquals(len(assets), 3)
+        self.assertEqual(len(assets), 3)
         self.assertDictEqual(
             assets[0],
             self.entities[0].serialize(obj_type="Asset")
