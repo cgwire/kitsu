@@ -9,6 +9,7 @@ from flask_principal import Principal, identity_changed, Identity
 from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import Migrate
 from flask_mail import Mail
+from jwt import ExpiredSignatureError
 
 from . import config
 from .stores import auth_tokens_store
@@ -70,6 +71,14 @@ def wrong_parameter(error):
         error=True,
         message=str(error)
     ), 400
+
+
+@app.errorhandler(ExpiredSignatureError)
+def wrong_token_signature(error):
+    return jsonify(
+        error=True,
+        message=str(error)
+    ), 401
 
 
 if not config.DEBUG:

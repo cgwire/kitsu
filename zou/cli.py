@@ -128,6 +128,7 @@ def create_admin(email, password):
 @cli.command('clean_auth_tokens')
 def clean_auth_tokens():
     "Remove revoked and expired tokens."
+    print("tata")
     commands.clean_auth_tokens()
 
 

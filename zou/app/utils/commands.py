@@ -28,15 +28,19 @@ def clean_auth_tokens():
     for key in auth_tokens_store.keys():
         value = json.loads(auth_tokens_store.get(key))
 
-        is_revoked = value["revoked"] == True
-        expiration = datetime.datetime.fromtimestamp(value["token"]["exp"])
-        is_expired = expiration < datetime.datetime.now()
-
-        if is_revoked or is_expired:
+        if type(value) is bool:
             auth_tokens_store.delete(key)
 
+        else:
+            is_revoked = value["revoked"] == True
+            expiration = datetime.datetime.fromtimestamp(value["token"]["exp"])
+            is_expired = expiration < datetime.datetime.now()
 
-def delete_auth_tokens():
+            if is_revoked or is_expired:
+                auth_tokens_store.delete(key)
+
+
+def clear_all_auth_tokens():
     """
     Remove all authentication tokens from the key value store.
     """
