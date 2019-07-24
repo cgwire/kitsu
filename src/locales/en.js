@@ -29,6 +29,7 @@ export default {
   },
 
   asset_types: {
+    all_asset_types: 'All asset types',
     delete_text: 'Are you sure you want to remove {name} from your database?',
     delete_error: 'An error occured while deleting this asset type. There are probably data linked to it. Are you sure this asset type has no asset linked to it?',
     edit_title: 'Edit asset type',
@@ -94,6 +95,7 @@ export default {
   },
 
   episodes: {
+    all_episodes: 'All episodes',
     delete_error: 'An error occured while deleting this episode. There are probably data linked to it. Are you sure this episode has no sequence linked to it?',
     delete_text: 'Are you sure you want to remove {name} from your database?',
     edit_title: 'Edit episode',
@@ -430,6 +432,7 @@ export default {
   },
 
   sequences: {
+    all_sequences: 'All sequences',
     delete_text: 'Are you sure you want to remove {name} from your database?',
     delete_error: 'An error occured while deleting this sequence. There are probably data linked to it. Are you sure this sequence has no shot linked to it?',
     edit_title: 'Edit sequence',
@@ -493,6 +496,15 @@ export default {
   server_down: {
     text: 'Please contact your vendor support, your system administrator or your IT department to understand what is going wrong.',
     title: 'Kitsu encountered an error while reaching its data API.'
+  },
+
+  statistics: {
+    count: 'Counts',
+    count_mode: 'Count mode:',
+    display_mode: 'Display mode:',
+    frames: 'Frames',
+    pie: 'Pie charts',
+    shots: 'Shots'
   },
 
   tasks: {

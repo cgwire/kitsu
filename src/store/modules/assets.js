@@ -18,9 +18,11 @@ import {
   appendSelectionGrid,
   buildSelectionGrid,
   clearSelectionGrid,
-  getFilledColumns,
-  computeStats
+  getFilledColumns
 } from '../../lib/helpers'
+import {
+  computeStats
+} from '../../lib/stats'
 import {
   buildAssetIndex,
   buildNameIndex,
@@ -926,10 +928,9 @@ const mutations = {
   },
 
   [SET_ASSET_TYPE_SEARCH] (state, searchQuery) {
-    let result = indexSearch(
-      cache.assetTypeIndex,
-      searchQuery
-    ) || state.assetTypes
+    const keywords = getKeyWords(searchQuery)
+    let result =
+      indexSearch(cache.assetTypeIndex, keywords) || state.assetTypes
 
     Object.assign(state, {
       displayedAssetTypes: result,

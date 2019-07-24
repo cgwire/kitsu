@@ -18,9 +18,11 @@ import {
   appendSelectionGrid,
   buildSelectionGrid,
   clearSelectionGrid,
-  computeStats,
   getFilledColumns
 } from '../../lib/helpers'
+import {
+  computeStats
+} from '../../lib/stats'
 import {
   buildShotIndex,
   buildSequenceIndex,
@@ -1169,7 +1171,6 @@ const mutations = {
     const keywords = getKeyWords(sequenceSearch)
     const result =
       indexSearch(state.sequenceIndex, keywords) || state.sequences
-
     state.displayedSequences = result.slice(0, PAGE_SIZE)
     state.displayedSequencesLength = result.length
     state.sequenceSearchText = sequenceSearch
@@ -1446,12 +1447,13 @@ const mutations = {
 
   [SET_EPISODE_STATS] (state, episodeStats) {
     const validationColumnsMap = {}
-    Object.keys(episodeStats).forEach((episodeId) => {
-      Object.keys(episodeStats[episodeId]).forEach((taskTypeId) => {
-        validationColumnsMap[taskTypeId] = true
+    if (episodeStats.all) {
+      Object.keys(episodeStats.all).forEach((entryId) => {
+        if (entryId !== 'all' && !episodeStats.all[entryId].name) {
+          validationColumnsMap[entryId] = true
+        }
       })
-    })
-
+    }
     state.episodeStats = episodeStats
     state.episodeValidationColumns = Object.keys(validationColumnsMap)
   },

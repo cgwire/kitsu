@@ -8,6 +8,7 @@
             {{ $t('shots.fields.sequence') }}
           </th>
           <th class="description">{{ $t('shots.fields.description') }}</th>
+          <th class="validation">{{ $t('main.all') }}</th>
           <th
             class="validation"
             :style="getValidationStyle(columnId)"
@@ -41,12 +42,6 @@
       <img src="../../assets/illustrations/empty_shot.png" />
     </p>
     <p class="info">{{ $t('sequences.empty_list') }}</p>
-    <button-link
-      class="level-item big-button"
-      :text="$t('shots.new_sequences')"
-      :path="manageShotPath"
-    >
-    </button-link>
   </div>
   <div
     class="has-text-centered"
@@ -66,6 +61,40 @@
   >
     <table class="table">
       <tbody ref="body-tbody">
+
+        <tr
+          class="all-line"
+          v-if="showAll"
+        >
+          <td class="name">
+            {{ $t('sequences.all_sequences') }}
+          </td>
+
+          <td class="description"></td>
+
+          <stats-cell
+            :colors="chartColors('all', 'all')"
+            :data="chartData('all', 'all')"
+            :frames-data="chartData('all', 'all', 'frames')"
+            :countMode="countMode"
+            :displayMode="displayMode"
+          />
+
+          <stats-cell
+            :style="getValidationStyle(columnId)"
+            :key="'all-' + columnId"
+            :colors="chartColors('all', columnId)"
+            :data="chartData('all', columnId)"
+            :frames-data="chartData('all', columnId, 'frames')"
+            :countMode="countMode"
+            :displayMode="displayMode"
+            v-for="columnId in sortedValidationColumns"
+          />
+
+          <td class="actions">
+          </td>
+        </tr>
+
         <tr
           :key="entry.id"
           v-for="entry in entries"
@@ -79,19 +108,29 @@
             {{ entry.description }}
           </td>
 
-          <td
-            class="validation"
+          <stats-cell
+            :colors="chartColors(entry.id, 'all')"
+            :data="chartData(entry.id, 'all')"
+            :frames-data="chartData(entry.id, 'all', 'frames')"
+            :countMode="countMode"
+            :displayMode="displayMode"
+          />
+
+          <stats-cell
+            :key="entry.id + columnId"
             :style="getValidationStyle(columnId)"
-            :key="columnId"
-            v-for="columnId in sortedValidationColumns">
-            <pie-chart
-              width="70px"
-              height="50px"
-              :legend="false"
-              :colors="chartColors(entry, taskTypeMap[columnId])"
-              :data="chartData(entry, taskTypeMap[columnId])"
-              v-if="isStats(entry, taskTypeMap[columnId])"
-            />
+            :colors="chartColors(entry.id, columnId)"
+            :data="chartData(entry.id, columnId)"
+            :frames-data="chartData(entry.id, columnId, 'frames')"
+            :countMode="countMode"
+            :displayMode="displayMode"
+            v-if="isStats(entry.id, columnId)"
+            v-for="columnId in sortedValidationColumns"
+          />
+          <td
+            :style="getValidationStyle(columnId)"
+            v-else
+          >
           </td>
 
           <row-actions v-if="isCurrentUserManager"
@@ -99,7 +138,6 @@
             :edit-route="editPath(entry.id)"
             :delete-route="deletePath(entry.id)"
           />
-
           <td class="actions" v-else>
           </td>
         </tr>
@@ -119,34 +157,62 @@
 
 <script>
 import { mapGetters, mapActions } from 'vuex'
+import { getChartColors, getChartData } from '../../lib/stats'
 import { entityListMixin } from './base'
-import ButtonLink from '../widgets/ButtonLink'
 import RowActions from '../widgets/RowActions'
 import TableInfo from '../widgets/TableInfo'
+import StatsCell from '../cells/StatsCell'
 
 export default {
   name: 'sequence-list',
   mixins: [entityListMixin],
 
-  props: [
-    'entries',
-    'isLoading',
-    'isError',
-    'sequenceStats',
-    'validationColumns'
-  ],
+  components: {
+    RowActions,
+    StatsCell,
+    TableInfo
+  },
+
+  props: {
+    countMode: {
+      type: String,
+      default: 'count'
+    },
+    displayMode: {
+      type: String,
+      default: 'pie'
+    },
+    entries: {
+      type: Array,
+      default: () => []
+    },
+    isLoading: {
+      type: Boolean,
+      default: false
+    },
+    isError: {
+      type: Boolean,
+      default: false
+    },
+    sequenceStats: {
+      type: Object,
+      default: () => {}
+    },
+    showAll: {
+      type: Boolean,
+      default: false
+    },
+    validationColumns: {
+      type: Array,
+      default: () => []
+    }
+  },
 
   data () {
     return {
       busy: false,
       lastSelection: null
     }
-  },
-
-  components: {
-    ButtonLink,
-    RowActions,
-    TableInfo
   },
 
   computed: {
@@ -168,10 +234,6 @@ export default {
              !this.isLoading &&
              !this.isError &&
              (!this.sequenceSearchText || this.sequenceSearchText.length === 0)
-    },
-
-    manageShotPath () {
-      return this.getPath('manage-shots')
     }
   },
 
@@ -181,28 +243,17 @@ export default {
       'loadMoreSequences'
     ]),
 
-    chartColors (entry, column) {
-      const stats = this.sequenceStats[entry.id][column.id]
-      const taskStatusIds = Object.keys(stats)
-      return taskStatusIds.map((key) => {
-        const data = this.sequenceStats[entry.id][column.id][key]
-        let color = data.name === 'todo' ? '#5F626A' : data.color
-        return color
-      })
+    chartColors (entryId, columnId) {
+      return getChartColors(this.sequenceStats, entryId, columnId)
     },
 
-    chartData (entry, column) {
-      return Object.keys(this.sequenceStats[entry.id][column.id]).map((key) => {
-        return [
-          this.sequenceStats[entry.id][column.id][key].name,
-          this.sequenceStats[entry.id][column.id][key].value
-        ]
-      })
+    chartData (entryId, columnId, dataType = 'count') {
+      return getChartData(this.sequenceStats, entryId, columnId, dataType)
     },
 
-    isStats (entry, column) {
-      return this.sequenceStats[entry.id] &&
-             this.sequenceStats[entry.id][column.id]
+    isStats (entryId, columnId) {
+      return this.sequenceStats[entryId] &&
+             this.sequenceStats[entryId][columnId]
     },
 
     onHeaderScroll (event, position) {
@@ -294,8 +345,8 @@ export default {
 }
 
 .name {
-  min-width: 100px;
-  width: 100px;
+  min-width: 150px;
+  width: 150px;
   font-weight: bold;
 }
 
@@ -313,9 +364,9 @@ td.name {
 }
 
 .validation {
-  min-width: 110px;
-  max-width: 110px;
-  width: 110px;
+  min-width: 170px;
+  max-width: 170px;
+  width: 170px;
   word-wrap: break-word;
 }
 

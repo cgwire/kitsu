@@ -1,24 +1,42 @@
 <template>
   <div class="sequences page fixed-page">
-    <div class="sequence-list-header page-header">
-      <div class="level header-title">
-        <div class="level-left filters-area">
-          <search-field
-            ref="sequence-search-field"
-            @change="onSearchChange"
-            placeholder="ex: e01 s01 anim=wip"
-          />
-        </div>
-      </div>
+    <div class="sequence-list-header page-header flexrow">
+      <search-field
+        class="flexrow-item"
+        ref="sequence-search-field"
+        @change="onSearchChange"
+        placeholder="ex: e01 s01 anim=wip"
+      />
+      <span class="flexrow-item">
+        {{ $t('statistics.display_mode') }}
+      </span>
+      <combobox
+        class="mb0 flexrow-item"
+        locale-key-prefix="statistics."
+        :options="displayModeOptions"
+        v-model="displayMode"
+      />
+      <span class="flexrow-item">
+        {{ $t('statistics.count_mode') }}
+      </span>
+      <combobox
+        class="mb0 flexrow-item"
+        locale-key-prefix="statistics."
+        :options="countModeOptions"
+        v-model="countMode"
+      />
     </div>
 
     <sequence-list
       ref="sequence-list"
+      :count-mode="countMode"
+      :display-mode="displayMode"
       :entries="displayedSequences"
       :is-loading="isShotsLoading || initialLoading"
       :is-error="isShotsLoadingError"
       :validation-columns="shotValidationColumns"
       :sequence-stats="sequenceStats"
+      :show-all="sequenceSearchText.length === 0"
       @scroll="saveScrollPosition"
     />
 
@@ -46,38 +64,50 @@
 
 <script>
 import { mapGetters, mapActions } from 'vuex'
-import SequenceList from '../lists/SequenceList.vue'
+import Combobox from '../widgets/Combobox'
 import DeleteModal from '../widgets/DeleteModal'
 import EditSequenceModal from '../modals/EditSequenceModal'
 import SearchField from '../widgets/SearchField'
+import SequenceList from '../lists/SequenceList.vue'
 
 export default {
   name: 'sequences',
 
   components: {
-    SequenceList,
-    EditSequenceModal,
+    Combobox,
     DeleteModal,
-    SearchField
+    EditSequenceModal,
+    SearchField,
+    SequenceList
   },
 
   data () {
     return {
+      countMode: 'count',
+      displayMode: 'pie',
       initialLoading: true,
-      modals: {
-        isNewDisplayed: false,
-        isDeleteDisplayed: false
+      sequenceToDelete: null,
+      sequenceToEdit: null,
+      countModeOptions: [
+        { label: 'shots', value: 'count' },
+        { label: 'frames', value: 'frames' }
+      ],
+      displayModeOptions: [
+        { label: 'pie', value: 'pie' },
+        { label: 'count', value: 'count' }
+      ],
+      errors: {
+        edit: false,
+        del: false
       },
       loading: {
         edit: false,
         del: false
       },
-      errors: {
-        edit: false,
-        del: false
-      },
-      sequenceToDelete: null,
-      sequenceToEdit: null
+      modals: {
+        isNewDisplayed: false,
+        isDeleteDisplayed: false
+      }
     }
   },
 
@@ -294,11 +324,7 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-.data-list {
-  margin-top: 0;
-}
-
-.filters-area {
-  margin-bottom: 2em;
+.mb0 {
+  margin-bottom: 0;
 }
 </style>

@@ -19,7 +19,7 @@
       >
         <option
           v-for="(option, i) in options"
-          :key="i + '-' + option.label + '-' + option.value"
+          :key="`${i}-${option.label}-${option.value}`"
           :value="option.value || option.label"
           :selected="value === option.value"
         >
@@ -41,7 +41,7 @@
   >
     <option
       v-for="(option, i) in options"
-      :key="i + '-' + option.label + '-' + option.value"
+      :key="`${i}-${option.label}-${option.value}`"
       :value="option.value || option.label"
       :selected="value === option.value"
     >
@@ -94,6 +94,7 @@ export default {
     updateValue () {
       this.$emit('input', this.$refs.select.value)
     },
+
     emitEnter () {
       this.$emit('enter', this.$refs.select.value)
     },

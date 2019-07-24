@@ -1,4 +1,4 @@
- import marked from 'marked'
+import marked from 'marked'
 import moment from 'moment-timezone'
 
 export const populateTask = (task) => {
@@ -58,45 +58,6 @@ export const clearSelectionGrid = (selectionGrid) => {
     }
   }
   return selectionGrid
-}
-
-export const computeStats = (entities, idField, taskStatusMap, taskMap) => {
-  const results = {}
-  entities.forEach((entity) => {
-    if (!entity.canceled) {
-      const sequenceId = entity[idField]
-      if (!results[sequenceId]) results[sequenceId] = {}
-
-      entity.tasks.forEach((taskId) => {
-        const task = taskMap[taskId]
-        if (task) {
-          const taskTypeId = task.task_type_id
-          const taskStatus = taskStatusMap[task.task_status_id]
-
-          if (taskStatus) {
-            const taskStatusId = taskStatus.color
-            if (!results[sequenceId][taskTypeId]) {
-              results[sequenceId][taskTypeId] = {}
-            }
-            let statusStats = results[sequenceId][taskTypeId][taskStatusId]
-            if (!statusStats) {
-              results[sequenceId][taskTypeId][taskStatusId] = {
-                name: taskStatus.short_name,
-                color: taskStatus.color,
-                count: 0,
-                frames: 0
-              }
-              statusStats = results[sequenceId][taskTypeId][taskStatusId]
-            }
-            statusStats.count++
-            if (entity.nb_frames) statusStats.frames += entity.nb_frames
-          }
-        }
-      })
-    }
-  })
-
-  return results
 }
 
 export const range = (start, end) => {

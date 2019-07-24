@@ -1,13 +1,21 @@
 <template>
   <div class="asset-types page fixed-page">
-    <div class="asset-type-list-header page-header">
-      <div class="filters-area">
-        <search-field
-          ref="asset-type-search-field"
-          @change="onSearchChange"
-          placeholder="ex: chars, agent327"
-        />
-      </div>
+    <div class="asset-type-list-header page-header flexrow">
+      <search-field
+        class="flexrow-item"
+        ref="asset-type-search-field"
+        @change="onSearchChange"
+        placeholder="ex: chars, agent327"
+      />
+      <span class="flexrow-item">
+        {{ $t('statistics.display_mode') }}
+      </span>
+      <combobox
+        class="mb0 flexrow-item"
+        locale-key-prefix="statistics."
+        :options="displayModeOptions"
+        v-model="displayMode"
+      />
     </div>
 
     <production-asset-type-list
@@ -17,6 +25,8 @@
       :is-error="isAssetsLoadingError"
       :validation-columns="assetValidationColumns"
       :asset-type-stats="assetTypeStats"
+      :display-mode="displayMode"
+      :show-all="assetTypeSearchText.length === 0"
       @scroll="saveScrollPosition"
     />
   </div>
@@ -24,6 +34,7 @@
 
 <script>
 import { mapGetters, mapActions } from 'vuex'
+import Combobox from '../widgets/Combobox'
 import ProductionAssetTypeList from '../lists/ProductionAssetTypeList.vue'
 import SearchField from '../widgets/SearchField'
 
@@ -31,13 +42,19 @@ export default {
   name: 'production-asset-types',
 
   components: {
+    Combobox,
     ProductionAssetTypeList,
     SearchField
   },
 
   data () {
     return {
-      initialLoading: true
+      initialLoading: true,
+      displayMode: 'pie',
+      displayModeOptions: [
+        { label: 'pie', value: 'pie' },
+        { label: 'count', value: 'count' }
+      ]
     }
   },
 
@@ -162,11 +179,4 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-.data-list {
-  margin-top: 0;
-}
-
-.filters-area {
-  margin-bottom: 2em;
-}
 </style>
