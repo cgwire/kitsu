@@ -341,6 +341,12 @@ export default {
 
   mounted () {
     this.loadTaskData()
+    this.$refs['add-comment'].text = this.lastCommentDraft
+  },
+
+  beforeDestroy () {
+    const lastComment = `${this.$refs['add-comment'].text}`
+    this.$store.commit('SET_LAST_COMMENT_DRAFT', lastComment)
   },
 
   computed: {
@@ -353,6 +359,7 @@ export default {
       'isCurrentUserManager',
       'isSingleEpisode',
       'isTVShow',
+      'lastCommentDraft',
       'personMap',
       'previewFormData',
       'taskEntityPreviews',

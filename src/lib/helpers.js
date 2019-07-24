@@ -60,41 +60,6 @@ export const clearSelectionGrid = (selectionGrid) => {
   return selectionGrid
 }
 
-export const computeStats = (entities, idField, taskStatusMap, taskMap) => {
-  const results = {}
-  entities.forEach((entity) => {
-    if (!entity.canceled) {
-      const sequenceId = entity[idField]
-      if (!results[sequenceId]) results[sequenceId] = {}
-
-      entity.tasks.forEach((taskId) => {
-        const task = taskMap[taskId]
-        if (task) {
-          const taskTypeId = task.task_type_id
-          const taskStatus = taskStatusMap[task.task_status_id]
-
-          if (taskStatus) {
-            const taskStatusId = taskStatus.color
-            if (!results[sequenceId][taskTypeId]) {
-              results[sequenceId][taskTypeId] = {}
-            }
-            if (!results[sequenceId][taskTypeId][taskStatusId]) {
-              results[sequenceId][taskTypeId][taskStatusId] = {
-                name: taskStatus.short_name,
-                color: taskStatus.color,
-                value: 0
-              }
-            }
-            results[sequenceId][taskTypeId][taskStatusId].value++
-          }
-        }
-      })
-    }
-  })
-
-  return results
-}
-
 export const range = (start, end) => {
   return [...Array(end - start + 1).keys()]
     .map(i => i + start)
@@ -204,7 +169,6 @@ export const getTaskPath = (
 export const getTaskEntityPath = (task, episodeId) => {
   if (task) {
     const type = task.entity_type_name
-    console.log(type, task)
     const entityId = task.entity ? task.entity.id : task.entity_id
     const route = {
       name: type === 'Shot' ? 'shot' : 'asset',

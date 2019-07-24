@@ -664,7 +664,7 @@ export default {
       if (this.isComparing) {
         this.$refs['raw-player-comparison'].play()
       }
-      this.isPlaying = true
+      this.isPlaying = this.$refs['raw-player'].isPlaying
       this.hideCanvas()
       this.clearCanvas()
     },

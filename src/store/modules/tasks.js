@@ -58,6 +58,7 @@ import {
   REMOVE_TASK_SEARCH_END,
 
   UPDATE_COMMENT_CHECKLIST,
+  SET_LAST_COMMENT_DRAFT,
 
   RESET_ALL
 } from '../mutation-types'
@@ -80,7 +81,9 @@ const initialState = {
   isShowInfos: true,
 
   isSavingCommentPreview: false,
-  previewFormData: null
+  previewFormData: null,
+
+  lastCommentDraft: ''
 }
 
 const state = {
@@ -133,7 +136,8 @@ const getters = {
   isShowInfos: state => state.isShowInfos,
   taskEntityPreviews: state => state.taskEntityPreviews,
   previewFormData: state => state.previewFormData,
-  isSavingCommentPreview: state => state.isSavingCommentPreview
+  isSavingCommentPreview: state => state.isSavingCommentPreview,
+  lastCommentDraft: state => state.lastCommentDraft
 }
 
 const actions = {
@@ -1105,6 +1109,10 @@ const mutations = {
 
   [CLEAR_SHOTS] (state) {
     state.taskMap = {}
+  },
+
+  [SET_LAST_COMMENT_DRAFT] (state, lastCommentDraft) {
+    state.lastCommentDraft = lastCommentDraft
   },
 
   [RESET_ALL] (state, shots) {

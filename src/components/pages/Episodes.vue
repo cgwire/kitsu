@@ -1,13 +1,30 @@
 <template>
   <div class="episodes page fixed-page">
-    <div class="episode-list-header page-header">
-      <div class="filters-area">
-        <search-field
-          ref="episode-search-field"
-          @change="onSearchChange"
-          placeholder="ex: e01 s01, anim=wip"
-        />
-      </div>
+    <div class="episode-list-header page-header flexrow">
+      <search-field
+        class="flexrow-item"
+        ref="episode-search-field"
+        @change="onSearchChange"
+        placeholder="ex: e01 s01, anim=wip"
+      />
+      <span class="flexrow-item">
+        {{ $t('statistics.display_mode') }}
+      </span>
+      <combobox
+        class="mb0 flexrow-item"
+        locale-key-prefix="statistics."
+        :options="displayModeOptions"
+        v-model="displayMode"
+      />
+      <span class="flexrow-item">
+        {{ $t('statistics.count_mode') }}
+      </span>
+      <combobox
+        class="mb0 flexrow-item"
+        locale-key-prefix="statistics."
+        :options="countModeOptions"
+        v-model="countMode"
+      />
     </div>
 
     <episode-list
@@ -17,6 +34,9 @@
       :is-error="isShotsLoadingError"
       :validation-columns="episodeValidationColumns"
       :episode-stats="episodeStats"
+      :count-mode="countMode"
+      :display-mode="displayMode"
+      :show-all="episodeSearchText.length === 0"
       @scroll="saveScrollPosition"
     />
 
@@ -43,15 +63,17 @@
 
 <script>
 import { mapGetters, mapActions } from 'vuex'
-import EpisodeList from '../lists/EpisodeList.vue'
+import Combobox from '../widgets/Combobox'
 import DeleteModal from '../widgets/DeleteModal'
 import EditEpisodeModal from '../modals/EditEpisodeModal'
+import EpisodeList from '../lists/EpisodeList.vue'
 import SearchField from '../widgets/SearchField'
 
 export default {
   name: 'episodes',
 
   components: {
+    Combobox,
     EpisodeList,
     EditEpisodeModal,
     DeleteModal,
@@ -60,6 +82,22 @@ export default {
 
   data () {
     return {
+      countMode: 'count',
+      displayMode: 'pie',
+      episodeToDelete: null,
+      episodeToEdit: null,
+      countModeOptions: [
+        { label: 'shots', value: 'count' },
+        { label: 'frames', value: 'frames' }
+      ],
+      displayModeOptions: [
+        { label: 'pie', value: 'pie' },
+        { label: 'count', value: 'count' }
+      ],
+      errors: {
+        edit: false,
+        del: false
+      },
       modals: {
         isNewDisplayed: false,
         isDeleteDisplayed: false
@@ -67,13 +105,7 @@ export default {
       loading: {
         edit: false,
         del: false
-      },
-      errors: {
-        edit: false,
-        del: false
-      },
-      episodeToDelete: null,
-      episodeToEdit: null
+      }
     }
   },
 
@@ -281,11 +313,4 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-.data-list {
-  margin-top: 0;
-}
-
-.filters-area {
-  margin-bottom: 2em;
-}
 </style>

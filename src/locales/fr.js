@@ -3,7 +3,6 @@ export default {
   people: {
     active: 'Présents',
     add_member_to_team: 'Ajouter un membre à l\'équipe: ',
-    creation_explaination: 'Pour ajouter des shot, you devez d\'abord créer un épisode. Taper le nom de l\'épisode dans la colonne de gauche en bas. Séléctionnez cette épisode et répétez l\'opération pour créer une séquence. Enfin créez un shot en sélectionnant la séquence créée, en tapant son nom en bas de la colonne de droite. Cliquez sur le bouton add pour ajouter le shot. Vous pouvez maintenant créer de nombreux shots. Si cette production n\'est pas une série, vous pouvez directement créer une séquence).',
     delete_text: 'Êtes vous sûr de vouloir retirer {personName} de la base de données?',
     delete_error: 'Une erreur est survenue lors de la suppression. Il y a probablement des données liées à elle. Etes vous sur que cette personne n\'a aucune tâche assignée et n\'a fait aucun commentaire ?',
     edit_title: 'Modifier les informations de',
@@ -16,7 +15,6 @@ export default {
     picture: 'Changer l\'image',
     running_tasks: 'Tâches en cours',
     select_person: 'Sélectionner une personne...',
-    sequences: 'Séquences',
     team: 'Équipe',
     title: 'Employés',
     unactive: 'Absents',
@@ -95,6 +93,7 @@ export default {
     confirmation_and_stay: 'Confirmer et rester',
     clear_selection: 'Effacer la sélection',
     close: 'Fermer',
+    days_spent: 'Jours passés',
     edit: 'Modifier',
     dark_theme: 'Thème sombre',
     days_spents: 'Jours passés',
@@ -383,6 +382,7 @@ export default {
   },
 
   asset_types: {
+    all_asset_types: 'Tous les types d\'assets',
     delete_error: 'Une erreur est survenue en supprimant un type d\'asset. Êtes vous sûr qu\'aucun asset est lié à ce type d\'asset?',
     delete_text: 'Êtes vous sur de vouloir enlever {name} de la base de données ?',
     edit_title: 'Modifier le type d\'asset',
@@ -423,6 +423,8 @@ export default {
   },
 
   shots: {
+    creation_explaination: 'Pour ajouter des shot, you devez d\'abord créer un épisode. Taper le nom de l\'épisode dans la colonne de gauche en bas. Séléctionnez cette épisode et répétez l\'opération pour créer une séquence. Enfin créez un shot en sélectionnant la séquence créée, en tapant son nom en bas de la colonne de droite. Cliquez sur le bouton add pour ajouter le shot. Vous pouvez maintenant créer de nombreux shots. Si cette production n\'est pas une série, vous pouvez directement créer une séquence).',
+    padding: 'Distance',
     title: 'Plans',
     edit_title: 'Modifier plan',
     number: 'plan | plans',
@@ -435,6 +437,8 @@ export default {
     new_success: 'Plan {name} créé avec succès.',
     edit_success: 'Plan {name} édité avec succès.',
     description: 'Description',
+    sequence: 'Séquence',
+    sequences: 'Séquences',
     empty_list: 'Il n\'y a pas de plans dans la production. Voulez vous en créer ?',
     fields: {
       name: 'Plan',
@@ -457,6 +461,7 @@ export default {
   },
 
   sequences: {
+    all_sequences: 'Toutes les séquences',
     title: 'Stats séquence',
     number: 'séquence | séquences',
     new_sequence: 'Nouvelle séquence',
@@ -471,6 +476,7 @@ export default {
   },
 
   episodes: {
+    all_episodes: 'Tous les épisodes',
     title: 'Stats épisodes',
     number: 'épisode | épisodes',
     new_episode: 'Nouvel épisode',
@@ -547,6 +553,14 @@ export default {
   server_down: {
     title: 'Kitsu a rencontré une erreur en communiquant avec son API de données.',
     text: 'Contactez votre fournisseur, votre administrateur système ou votre département informatique pour comprendre ce qui ne va pas.'
-  }
+  },
 
+  statistics: {
+    count: 'Comptages',
+    count_mode: 'Mode de comptage :',
+    display_mode: ' Mode d\'affichage :',
+    frames: 'Frames',
+    pie: 'Graphiques',
+    shots: 'Plans'
+  }
 }

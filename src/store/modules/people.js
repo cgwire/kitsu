@@ -583,7 +583,6 @@ const mutations = {
     state.isEditLoading = false
     state.isEditLoadingError = false
 
-    console.log('edit end')
     let personToAdd = { ...form }
     personToAdd = helpers.addAdditionalInformation(personToAdd)
 
@@ -592,17 +591,14 @@ const mutations = {
     )
     if (personToAdd.name) {
       if (personToEditIndex >= 0) {
-        console.log('edit')
         state.personMap[state.personToEdit.id] = personToAdd
         delete state.people[personToEditIndex]
         state.people[personToEditIndex] = state.personMap[state.personToEdit.id]
       } else if (!state.personMap[personToAdd.id]) {
-        console.log('add')
         state.people.push(personToAdd)
         state.personMap[personToAdd.id] = personToAdd
       }
       state.people = sortPeople(state.people)
-      console.log(state.people)
       state.displayedPeople = state.people
       state.peopleIndex = buildNameIndex(state.people)
       state.personToEdit = {
@@ -671,9 +667,7 @@ const mutations = {
 
   [UPLOAD_AVATAR_END] (state, personId) {
     const person = state.personMap[personId]
-    console.log('toto')
     if (person) {
-      console.log('toto 2')
       const randomHash = Math.random().toString(36).substring(7)
       person.has_avatar = true
       Vue.set(person, 'uniqueHash', randomHash)

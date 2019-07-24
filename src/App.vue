@@ -608,6 +608,10 @@ a:hover {
   margin-right: 1em;
 }
 
+.mb0 {
+  margin-bottom: 0;
+}
+
 .filler {
   flex: 1;
 }

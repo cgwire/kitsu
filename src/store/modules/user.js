@@ -130,15 +130,15 @@ const getters = {
 const actions = {
   saveProfile ({ commit, state }, payload) {
     commit(USER_SAVE_PROFILE_LOADING)
-    peopleApi.updatePerson(payload.form, (err) => {
-      if (err) {
-        commit(USER_SAVE_PROFILE_ERROR)
-      } else {
+    peopleApi.updatePerson(payload.form)
+      .then(() => {
         payload.form.id = state.user.id
         commit(USER_SAVE_PROFILE_SUCCESS, payload.form)
-      }
-      if (payload.callback) payload.callback()
-    })
+      })
+      .catch((err) => {
+        console.error(err)
+        commit(USER_SAVE_PROFILE_ERROR)
+      })
   },
 
   checkNewPasswordValidityAndSave ({ commit, state }, { form, callback }) {
