@@ -45,12 +45,6 @@ flask_fs.init_app(app)  # To save files in object storage
 mail = Mail()
 mail.init_app(app)  # To send emails
 
-# Hack required during development, because Flask SocketIO changes the default
-# Flask CLI.
-if config.DEBUG:
-    from flask_socketio import SocketIO
-    SocketIO(app, async_mode="threading")
-
 
 @app.teardown_appcontext
 def shutdown_session(exception=None):
