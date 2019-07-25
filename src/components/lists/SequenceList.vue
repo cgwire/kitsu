@@ -64,7 +64,7 @@
 
         <tr
           class="all-line"
-          v-if="showAll"
+          v-if="showAll && !isEmptyList"
         >
           <td class="name">
             {{ $t('sequences.all_sequences') }}
@@ -114,7 +114,12 @@
             :frames-data="chartData(entry.id, 'all', 'frames')"
             :countMode="countMode"
             :displayMode="displayMode"
+            v-if="isStats(entry.id, 'all')"
           />
+          <td
+            v-else
+          >
+          </td>
 
           <stats-cell
             :key="entry.id + columnId"
