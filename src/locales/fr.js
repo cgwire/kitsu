@@ -201,13 +201,16 @@ export default {
 
   playlists: {
     add_shots: 'Sélectonner les plans',
+    add_sequence: 'Ajouter séquence',
     available_build: 'Builds disponibles',
     build_daily: 'Valid. quotidienne',
     build_weekly: 'Valid. hebodomadaire',
     build_mp4: 'Construire .mp4',
     delete_text: 'Êtes vous sûr de vouloir supprimer {name} de la base de données ?',
     delete_error: 'Une erreur est survenue en supprimant la playlist.',
+    download_zip: 'Télécharger en .zip',
     edit_title: 'Modifier la playlist',
+    no_preview: 'Aucun preview',
     remove: 'enlever',
     loading_error: 'Une erreur serveur est apparue, les playlists ne peuvent pas être chargées.',
     new_playlist: 'Ajouter une playlist',
@@ -349,7 +352,7 @@ export default {
 
   sequences: {
     all_sequences: 'Toutes les séquences',
-    title: 'Stats séquence',
+    title: 'Stats séquences',
     number: 'séquence | séquences',
     new_sequence: 'Nouvelle séquence',
     edit_title: 'Éditer séquence',
