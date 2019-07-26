@@ -176,6 +176,8 @@ import {
   RepeatIcon,
   XIcon
 } from 'vue-feather-icons'
+
+import { roundToFrame } from '../../lib/helpers'
 import AnnotationBar from '../pages/playlists/AnnotationBar'
 import Combobox from '../widgets/Combobox'
 import Spinner from '../widgets/Spinner'
@@ -440,6 +442,7 @@ export default {
     },
 
     setCurrentTime (currentTime) {
+      currentTime = roundToFrame(currentTime, this.fps)
       this.progress.value = currentTime
       this.progressBar.style.width = Math.floor(
         (currentTime / this.video.duration) * 100
@@ -556,6 +559,8 @@ export default {
       } else {
         this.setCurrentTime(newTime)
       }
+      const annotation = this.getAnnotation(this.video.currentTime)
+      if (annotation) this.loadAnnotation(annotation)
     },
 
     goNextFrame () {
@@ -565,6 +570,8 @@ export default {
       } else {
         this.setCurrentTime(newTime)
       }
+      const annotation = this.getAnnotation(this.video.currentTime)
+      if (annotation) this.loadAnnotation(annotation)
     },
 
     formatTime (seconds) {
@@ -734,6 +741,7 @@ export default {
     },
 
     getAnnotation (time) {
+      time = roundToFrame(time, this.fps)
       return this.annotations.find(
         (annotation) => annotation.time === time
       )
@@ -750,7 +758,7 @@ export default {
     },
 
     saveAnnotations () {
-      const currentTime = this.video.currentTime
+      const currentTime = roundToFrame(this.currentTime, this.fps)
       const annotation = this.getAnnotation(currentTime)
 
       this.fabricCanvas.getObjects().forEach((obj) => {

@@ -1,13 +1,13 @@
 <template>
   <div class="annotation-bar" ref="playlist-annotation">
     <span
-      :key="`annotation-${annotation.time}`"
+      :key="`annotation-${index}`"
       class="annotation-mark"
       :style="{
         left: getAnnotationPosition(annotation) + 'px'
       }"
       @click="$emit('select-annotation', annotation)"
-      v-for="annotation in annotations"
+      v-for="(annotation, index) in annotations"
     >
     </span>
   </div>

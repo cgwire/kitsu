@@ -324,6 +324,7 @@ import moment from 'moment-timezone'
 import { mapActions, mapGetters } from 'vuex'
 import { fabric } from 'fabric'
 
+import { roundToFrame } from '../../../lib/helpers'
 import AnnotationBar from './AnnotationBar'
 import ButtonSimple from '../../widgets/ButtonSimple'
 import Combobox from '../../widgets/Combobox'
@@ -697,17 +698,23 @@ export default {
     },
 
     goPreviousFrame () {
+      this.clearAnnotations()
       this.rawPlayer.goPreviousFrame()
       if (this.isComparing) {
         this.$refs['raw-player-comparison'].goPreviousFrame()
       }
+      const annotation = this.getAnnotation(this.rawPlayer.getCurrentTime())
+      if (annotation) this.loadAnnotation(annotation)
     },
 
     goNextFrame () {
+      this.clearAnnotations()
       this.rawPlayer.goNextFrame()
       if (this.isComparing) {
         this.$refs['raw-player-comparison'].goNextFrame()
       }
+      const annotation = this.getAnnotation(this.rawPlayer.getCurrentTime())
+      if (annotation) this.loadAnnotation(annotation)
     },
 
     removeShot (shot) {
@@ -929,8 +936,12 @@ export default {
         let height = this.$refs['container'].offsetHeight
         height -= this.$refs['header'].offsetHeight
         height -= this.$refs['playlist-progress'].offsetHeight
-        height -= this.$refs['button-bar'].offsetHeight
-        height -= this.$refs['playlisted-shots'].offsetHeight
+        if (this.$refs['button-bar']) {
+          height -= this.$refs['button-bar'].offsetHeight
+        }
+        if (this.$refs['playlisted-shots']) {
+          height -= this.$refs['playlisted-shots'].offsetHeight
+        }
         if (this.$refs['playlist-annotation']) {
           height -= this.$refs['playlist-annotation'].$el.offsetHeight
         }
@@ -958,9 +969,11 @@ export default {
     },
 
     resetCanvasSize () {
-      const width = this.$refs['raw-player'].$el.offsetWidth
-      const height = this.$refs['raw-player'].$el.offsetHeight
-      this.fabricCanvas.setDimensions({ width, height })
+      if (this.rawPlayer) {
+        const width = this.rawPlayer.$el.offsetWidth
+        const height = this.rawPlayer.$el.offsetHeight
+        this.fabricCanvas.setDimensions({ width, height })
+      }
     },
 
     rebuildComparisonOptions () {
@@ -1130,7 +1143,7 @@ export default {
     },
 
     saveAnnotations () {
-      const currentTime = this.currentTimeRaw
+      const currentTime = roundToFrame(this.currentTimeRaw, this.fps)
       if (!this.annotations) return
       const annotation = this.getAnnotation(currentTime)
 
@@ -1196,6 +1209,7 @@ export default {
     },
 
     getAnnotation (time) {
+      time = roundToFrame(time, this.fps)
       if (this.annotations) {
         return this.annotations.find(
           (annotation) => annotation.time === time
@@ -1255,7 +1269,15 @@ export default {
         this.maxDurationRaw = 0
         this.maxDuration = '00:00.00'
       } else {
+        if (
+          this.shotList[0].preview_file_extension !== 'mp4'
+        ) {
+          this.$nextTick(() => {
+            this.rawPlayer.loadNextShot()
+          })
+        }
       }
+      this.resetHeight()
     },
 
     playlist () {

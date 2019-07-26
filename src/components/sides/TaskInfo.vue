@@ -341,7 +341,9 @@ export default {
 
   mounted () {
     this.loadTaskData()
-    this.$refs['add-comment'].text = this.lastCommentDraft
+    if (this.$refs['add-comment']) {
+      this.$refs['add-comment'].text = this.lastCommentDraft
+    }
   },
 
   beforeDestroy () {

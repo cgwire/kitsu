@@ -20,6 +20,7 @@
  * players so the blink does not occur.
  */
 import { mapGetters } from 'vuex'
+import { roundToFrame } from '../../../lib/helpers'
 
 export default {
   name: 'raw-video-player',
@@ -208,7 +209,12 @@ export default {
       })
     },
 
+    getCurrentTime () {
+      return this.currentPlayer.currentTime
+    },
+
     setCurrentTime (currentTime) {
+      currentTime = roundToFrame(currentTime, this.fps)
       if (this.currentPlayer) this.currentPlayer.currentTime = currentTime
     },
 
