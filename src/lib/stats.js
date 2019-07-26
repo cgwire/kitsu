@@ -158,3 +158,11 @@ const computeTaskResult = (
     }
   }
 }
+
+export const getPercentage = (value, total) => {
+  let percent = 0
+  if (total > 0) {
+    percent = (value / total) * 100
+  }
+  return percent.toFixed(2)
+}

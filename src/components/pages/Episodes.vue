@@ -25,6 +25,13 @@
         :options="countModeOptions"
         v-model="countMode"
       />
+      <span class="filler">
+      </span>
+      <button-simple
+        class="flexrow-item"
+        icon="download"
+        @click="exportStatisticsToCsv"
+      />
     </div>
 
     <episode-list
@@ -62,7 +69,12 @@
 </template>
 
 <script>
+import moment from 'moment'
 import { mapGetters, mapActions } from 'vuex'
+import csv from '../../lib/csv'
+import { slugify } from '../../lib/helpers'
+
+import ButtonSimple from '../widgets/ButtonSimple'
 import Combobox from '../widgets/Combobox'
 import DeleteModal from '../widgets/DeleteModal'
 import EditEpisodeModal from '../modals/EditEpisodeModal'
@@ -73,6 +85,7 @@ export default {
   name: 'episodes',
 
   components: {
+    ButtonSimple,
     Combobox,
     EpisodeList,
     EditEpisodeModal,
@@ -123,7 +136,9 @@ export default {
       'episodeStats',
       'episodeSearchText',
       'episodeListScrollPosition',
-      'episodeValidationColumns'
+      'episodeValidationColumns',
+      'taskStatusMap',
+      'taskTypeMap'
     ])
   },
 
@@ -254,6 +269,24 @@ export default {
           this.$refs['episode-list'].resizeHeaders()
         }
       }, 0)
+    },
+
+    exportStatisticsToCsv () {
+      const nameData = [
+        moment().format('YYYYMMDD'),
+        this.currentProduction.name,
+        'episodes',
+        'statistics'
+      ]
+      const name = slugify(nameData.join('_'))
+      csv.generateStatReports(
+        name,
+        this.episodeStats,
+        this.taskTypeMap,
+        this.taskStatusMap,
+        this.episodeMap,
+        this.countMode
+      )
     }
   },
 

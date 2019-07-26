@@ -3,6 +3,9 @@ import {
   getMonthRange,
   getWeekRange
 } from './helpers'
+import {
+  getPercentage
+} from './stats'
 
 const csv = {
   generateTimesheet (
@@ -78,6 +81,122 @@ const csv = {
     link.setAttribute('download', `${name}.csv`)
     document.body.appendChild(link)
     link.click()
+    return lineArray
+  },
+
+  generateStatReports (
+    name,
+    mainStats,
+    taskTyeMap,
+    taskStatusMap,
+    entryMap,
+    countMode
+  ) {
+    const headers =
+      csv.getStatReportsHeaders(mainStats, taskTyeMap, taskStatusMap)
+    const entries = csv.getStatReportsEntries(
+      mainStats,
+      taskTyeMap,
+      taskStatusMap,
+      entryMap,
+      countMode
+    )
+    const lines = [headers, ...entries]
+    return csv.buildCsvFile(name, lines)
+  },
+
+  getStatReportsHeaders (mainStats, taskTypeMap, taskStatusMap) {
+    let headers = ['name', '', 'All', '']
+    const taskTypeIds =
+      Object.keys(mainStats.all)
+        .sort((a, b) => {
+          if (a === 'all') return 1
+          if (b === 'all') return -1
+          return taskTypeMap[a].priority - taskTypeMap[b].priority
+        })
+
+    taskTypeIds.forEach((taskTypeId) => {
+      if (taskTypeId !== 'all') {
+        const taskType = taskTypeMap[taskTypeId]
+        headers = headers.concat([taskType.name, ''])
+      }
+    })
+    return headers
+  },
+
+  getStatReportsEntries (
+    mainStats, taskTypeMap, taskStatusMap, entryMap, countMode = 'count'
+  ) {
+    let entries = []
+    const entryIds =
+      Object.keys(mainStats)
+        .sort((a, b) => {
+          if (a === 'all') return -1
+          if (b === 'all') return 1
+          return entryMap[a].name.localeCompare(entryMap[b].name)
+        })
+    const taskTypeIds =
+      Object.keys(mainStats.all)
+        .sort((a, b) => {
+          if (a === 'all') return 1
+          if (b === 'all') return -1
+          return taskTypeMap[a].priority - taskTypeMap[b].priority
+        })
+
+    entryIds.forEach((entryId) => {
+      const lineMap = {}
+      const taskStatusIds = Object.keys(mainStats[entryId].all)
+      let total = 0
+      taskStatusIds.forEach((taskStatusId) => {
+        const taskStatusStats = mainStats[entryId].all[taskStatusId]
+        total += taskStatusStats[countMode]
+      })
+
+      taskStatusIds.forEach((taskStatusId) => {
+        const taskStatus = taskStatusMap[taskStatusId]
+        const entry = entryMap[entryId]
+        const name = entry ? entry.name : 'All'
+        const taskStatusStats = mainStats[entryId].all[taskStatusId]
+        const count = taskStatusStats[countMode]
+        const percentage = getPercentage(count, total)
+        lineMap[taskStatusId] =
+          [name, taskStatus.name, count, percentage + '%']
+      })
+
+      taskTypeIds.forEach((taskTypeId) => {
+        if (taskTypeId !== 'all') {
+          const taskTypeStats = mainStats[entryId][taskTypeId]
+          if (taskTypeStats) {
+            let total = 0
+            const taskTypeStats = mainStats[entryId][taskTypeId]
+            Object.keys(taskTypeStats).forEach((taskStatusId) => {
+              const taskStatusStats =
+                mainStats[entryId][taskTypeId][taskStatusId]
+              total += taskStatusStats[countMode]
+            })
+
+            taskStatusIds.forEach((taskStatusId) => {
+              const taskStatusStats =
+                mainStats[entryId][taskTypeId][taskStatusId]
+              let count = 0
+              if (taskStatusStats) count = taskStatusStats[countMode]
+              const percentage = getPercentage(count, total)
+              lineMap[taskStatusId].push([count, percentage + '%'])
+            })
+          } else {
+            Object.keys(mainStats[entryId].all).forEach((taskStatusId) => {
+              lineMap[taskStatusId].push(['', ''])
+            })
+          }
+        }
+      })
+
+      entries = entries.concat(Object.values(lineMap).sort((a, b) => {
+        return a[1].localeCompare(b[1])
+      }))
+      entries.push([''])
+    })
+    return entries
   }
 }
 

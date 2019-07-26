@@ -25,6 +25,13 @@
         :options="countModeOptions"
         v-model="countMode"
       />
+      <span class="filler">
+      </span>
+      <button-simple
+        class="flexrow-item"
+        icon="download"
+        @click="exportStatisticsToCsv"
+      />
     </div>
 
     <sequence-list
@@ -63,7 +70,12 @@
 </template>
 
 <script>
+import moment from 'moment'
 import { mapGetters, mapActions } from 'vuex'
+import csv from '../../lib/csv'
+import { slugify } from '../../lib/helpers'
+
+import ButtonSimple from '../widgets/ButtonSimple'
 import Combobox from '../widgets/Combobox'
 import DeleteModal from '../widgets/DeleteModal'
 import EditSequenceModal from '../modals/EditSequenceModal'
@@ -74,6 +86,7 @@ export default {
   name: 'sequences',
 
   components: {
+    ButtonSimple,
     Combobox,
     DeleteModal,
     EditSequenceModal,
@@ -126,7 +139,9 @@ export default {
       'sequenceStats',
       'sequenceSearchText',
       'sequenceListScrollPosition',
-      'shotValidationColumns'
+      'shotValidationColumns',
+      'taskTypeMap',
+      'taskStatusMap'
     ])
   },
 
@@ -262,6 +277,27 @@ export default {
           this.$refs['sequence-list'].resizeHeaders()
         }
       }, 0)
+    },
+
+    exportStatisticsToCsv () {
+      const nameData = [
+        moment().format('YYYYMMDD'),
+        this.currentProduction.name,
+        'sequences',
+        'statistics'
+      ]
+      if (this.currentEpisode) {
+        nameData.splice(2, 0, this.currentEpisode.name)
+      }
+      const name = slugify(nameData.join('_'))
+      csv.generateStatReports(
+        name,
+        this.sequenceStats,
+        this.taskTypeMap,
+        this.taskStatusMap,
+        this.sequenceMap,
+        this.countMode
+      )
     }
   },
 
