@@ -65,7 +65,7 @@
 
         <tr
           class="all-line"
-          v-if="showAll"
+          v-if="showAll && !isEmptyList"
         >
           <td class="name">
             {{ $t('asset_types.all_asset_types') }}
@@ -103,7 +103,12 @@
             :colors="chartColors(entry.id, 'all')"
             :data="chartData(entry.id, 'all')"
             :displayMode="displayMode"
+            v-if="isStats(entry.id, 'all')"
           />
+          <td
+            v-else
+          >
+          </td>
 
           <stats-cell
             :key="entry.id + columnId"

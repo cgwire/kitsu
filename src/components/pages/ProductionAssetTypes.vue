@@ -16,6 +16,12 @@
         :options="displayModeOptions"
         v-model="displayMode"
       />
+      <span class="filler"></span>
+      <button-simple
+        class="flexrow-item"
+        icon="download"
+        @click="exportStatisticsToCsv"
+      />
     </div>
 
     <production-asset-type-list
@@ -33,7 +39,11 @@
 </template>
 
 <script>
+import moment from 'moment'
 import { mapGetters, mapActions } from 'vuex'
+import csv from '../../lib/csv'
+import { slugify } from '../../lib/helpers'
+import ButtonSimple from '../widgets/ButtonSimple'
 import Combobox from '../widgets/Combobox'
 import ProductionAssetTypeList from '../lists/ProductionAssetTypeList.vue'
 import SearchField from '../widgets/SearchField'
@@ -42,6 +52,7 @@ export default {
   name: 'production-asset-types',
 
   components: {
+    ButtonSimple,
     Combobox,
     ProductionAssetTypeList,
     SearchField
@@ -60,6 +71,7 @@ export default {
 
   computed: {
     ...mapGetters([
+      'assetTypeMap',
       'assetTypePath',
       'assetTypeStats',
       'assetTypeSearchText',
@@ -70,7 +82,9 @@ export default {
       'displayedAssetTypes',
       'isAssetsLoading',
       'isAssetsLoadingError',
-      'isTVShow'
+      'isTVShow',
+      'taskStatusMap',
+      'taskTypeMap'
     ])
   },
 
@@ -125,6 +139,27 @@ export default {
 
     saveScrollPosition (scrollPosition) {
       this.setAssetTypeListScrollPosition(scrollPosition)
+    },
+
+    exportStatisticsToCsv () {
+      const nameData = [
+        moment().format('YYYYMMDD'),
+        this.currentProduction.name,
+        'asset_types',
+        'statistics'
+      ]
+      if (this.currentEpisode) {
+        nameData.splice(2, 0, this.currentEpisode.name)
+      }
+      const name = slugify(nameData.join('_'))
+      csv.generateStatReports(
+        name,
+        this.assetTypeStats,
+        this.taskTypeMap,
+        this.taskStatusMap,
+        this.assetTypeMap,
+        this.countMode
+      )
     }
   },
 
