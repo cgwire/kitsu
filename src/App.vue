@@ -254,6 +254,16 @@ body {
     color: $white-grey;
   }
 
+  strong {
+    color: white;
+  }
+
+  code {
+    background: $dark-grey;
+    border-color: black;
+    color: $white-grey;
+  }
+
   textarea[disabled] {
     background: #36393F;
     color: #BBB;
