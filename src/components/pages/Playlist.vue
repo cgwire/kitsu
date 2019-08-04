@@ -29,7 +29,12 @@
             }"
             v-for="playlist in playlists"
           >
+            <span>
             {{ playlist.name }}
+            </span>
+            <span class="playlist-date">
+            {{ formatDate(playlist.created_at)}}
+            </span>
           </router-link>
         </div>
         <spinner
@@ -117,6 +122,7 @@
                   }"
                   :disabled="isAdditionLoading"
                   @click="addSequence"
+                  v-if="sequenceOptions.length > 0"
                 >
                   {{ $t('playlists.add_sequence') }}
                 </button>
@@ -252,6 +258,10 @@ export default {
       'updatePreviewAnnotation'
     ]),
 
+    formatDate (dateString) {
+      return moment(dateString).format('YYYY-MM-DD HH:mm:ss')
+    },
+
     getPlaylistPath (playlistId, section) {
       let route = {
         name: section ? `${section}-playlist` : 'playlist',
@@ -340,7 +350,7 @@ export default {
 
     addPlaylist () {
       const newPlaylist = {
-        name: moment().format('YYYY-MM-DD HH:mm:ss'),
+        name: 'New playlist',
         production_id: this.currentProduction.id
       }
 
@@ -797,5 +807,11 @@ span.thumbnail-picture {
   padding: 0;
   overflow: hidden;
   flex: 1;
+}
+
+.playlist-date {
+  display: block;
+  color: $grey;
+  font-size: 0.8em;
 }
 </style>

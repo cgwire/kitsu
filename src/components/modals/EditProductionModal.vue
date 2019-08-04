@@ -261,9 +261,7 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-.title {
-  border-bottom: 2px solid #DDD;
-  padding-bottom: 0.5em;
-  margin-bottom: 1.2em;
+.box {
+  padding-bottom: 1.5em;
 }
 </style>

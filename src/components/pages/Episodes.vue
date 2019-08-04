@@ -2,25 +2,21 @@
   <div class="episodes page fixed-page">
     <div class="episode-list-header page-header flexrow">
       <search-field
-        class="flexrow-item"
+        class="flexrow-item mt1"
         ref="episode-search-field"
         @change="onSearchChange"
         placeholder="ex: e01 s01, anim=wip"
       />
-      <span class="flexrow-item">
-        {{ $t('statistics.display_mode') }}
-      </span>
       <combobox
         class="mb0 flexrow-item"
         locale-key-prefix="statistics."
+        :label="$t('statistics.display_mode')"
         :options="displayModeOptions"
         v-model="displayMode"
       />
-      <span class="flexrow-item">
-        {{ $t('statistics.count_mode') }}
-      </span>
       <combobox
         class="mb0 flexrow-item"
+        :label="$t('statistics.count_mode')"
         locale-key-prefix="statistics."
         :options="countModeOptions"
         v-model="countMode"

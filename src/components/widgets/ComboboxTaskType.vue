@@ -1,35 +1,40 @@
 <template>
-<div
-  class="task-type-combo"
->
+<div class="field">
+  <label class="label" v-if="label.length > 0">
+    {{ label }}
+  </label>
   <div
-    class="flexrow"
-    @click="toggleTaskTypeList"
+    class="task-type-combo"
   >
     <div
-      class="selected-task-type-line flexrow-item"
+      class="flexrow"
+      @click="toggleTaskTypeList"
     >
-      <task-type-name
-        :task-type="currentTaskType"
-        v-if="currentTaskType"
-      />
+      <div
+        class="selected-task-type-line flexrow-item"
+      >
+        <task-type-name
+          :task-type="currentTaskType"
+          v-if="currentTaskType"
+        />
+      </div>
+      <chevron-down-icon class="down-icon flexrow-item"/>
     </div>
-    <chevron-down-icon class="down-icon flexrow-item"/>
-  </div>
-  <div
-    class="select-input"
-    ref="select"
-    v-if="showTaskTypeList"
-  >
     <div
-      class="task-type-line"
-      v-for="taskType in taskTypeList"
-      @click="selectTaskType(taskType)"
-      :key="taskType.id"
+      class="select-input"
+      ref="select"
+      v-if="showTaskTypeList"
     >
-      <task-type-name
-        :task-type="taskType"
-      />
+      <div
+        class="task-type-line"
+        v-for="taskType in taskTypeList"
+        @click="selectTaskType(taskType)"
+        :key="taskType.id"
+      >
+        <task-type-name
+          :task-type="taskType"
+        />
+      </div>
     </div>
   </div>
 </div>
@@ -57,6 +62,10 @@ export default {
   },
 
   props: {
+    label: {
+      default: null,
+      type: String
+    },
     taskTypeList: {
       default: () => [],
       type: Array
@@ -115,13 +124,18 @@ export default {
 
 .task-type-combo {
   background: $white;
-  min-width: 150px;
-  width: 150px;
+  min-width: 170px;
+  width: 170px;
   border: 1px solid $light-grey-light;
   user-select: none;
   cursor: pointer;
   border-radius: 3px;
   margin: 0;
+  padding: 0.15em;
+}
+
+.task-type-combo:hover {
+  border: 1px solid $green;
 }
 
 .selected-task-type-line {
@@ -147,18 +161,22 @@ export default {
   width: 15px;
   min-width: 15px;
   margin-right: 0.4em;
-  color: $grey;
+  color: $green;
   cursor: pointer;
 }
 
 .select-input {
   background: $white;
-  width: 150px;
+  width: 170px;
   position: fixed;
   border: 1px solid $light-grey-light;
   z-index: 200;
   margin-left: -1px;
   max-height: 180px;
   overflow-y: auto;
+}
+
+.field .label {
+  padding-top: 5px;
 }
 </style>

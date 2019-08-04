@@ -364,9 +364,9 @@ export default {
 
     scrollToLine (taskId) {
       const taskLine = this.$refs['task-' + taskId]
-      if (taskLine) {
+      if (taskLine && this.$refs.body) {
         const margin = 30
-        const rect = taskLine.getBoundingClientRect()
+        const rect = taskLine[0].getBoundingClientRect()
         const listRect = this.$refs.body.getBoundingClientRect()
         const isBelow = rect.bottom > listRect.bottom - margin
         const isAbove = rect.top < listRect.top + margin

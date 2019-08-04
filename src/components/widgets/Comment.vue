@@ -369,10 +369,6 @@ export default {
   padding: 0.6em;
 }
 
-.comment:first-child {
-  padding-top: 1em;
-}
-
 .comment.highlighted {
   background: #F1EEFF;
 }

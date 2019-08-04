@@ -1,50 +1,54 @@
 <template>
-<div
-  class="status-combo"
->
+<div class="field">
+  <label class="label" v-if="label.length > 0">
+    {{ label }}
+  </label>
   <div
-    class="flexrow"
-    @click="toggleStatusList"
+    class="status-combo"
   >
     <div
-      class="selected-status-line flexrow-item"
+      class="flexrow"
+      @click="toggleStatusList"
     >
-      <span
-        class="tag"
-        :style="{
-          background: backgroundColor(currentStatus),
-          color: color(currentStatus)
-        }"
+      <div
+        class="selected-status-line flexrow-item"
       >
-        {{ currentStatus.short_name }}
-      </span>
+        <span
+          class="tag"
+          :style="{
+            background: backgroundColor(currentStatus),
+            color: color(currentStatus)
+          }"
+        >
+          {{ currentStatus.short_name }}
+        </span>
+      </div>
+      <chevron-down-icon class="down-icon flexrow-item"/>
     </div>
-    <chevron-down-icon class="down-icon flexrow-item"/>
-  </div>
-  <div
-    class="select-input"
-    ref="select"
-    v-if="showStatusList"
-  >
     <div
-      class="status-line"
-      v-for="status in taskStatusList"
-      @click="selectStatus(status)"
-      :key="status.id"
+      class="select-input"
+      ref="select"
+      v-if="showStatusList"
     >
-      <span
-        class="tag"
-        :style="{
-          background: backgroundColor(status),
-          color: color(status)
-        }"
+      <div
+        class="status-line"
+        v-for="status in taskStatusList"
+        @click="selectStatus(status)"
+        :key="status.id"
       >
-        {{ status.short_name }}
-      </span>
+        <span
+          class="tag"
+          :style="{
+            background: backgroundColor(status),
+            color: color(status)
+          }"
+        >
+          {{ status.short_name }}
+        </span>
+      </div>
     </div>
   </div>
 </div>
-
 </template>
 
 <script>
@@ -67,6 +71,10 @@ export default {
   },
 
   props: {
+    label: {
+      default: '',
+      type: String
+    },
     taskStatusList: {
       default: () => [],
       type: Array
@@ -151,13 +159,17 @@ export default {
   border: 1px solid $light-grey-light;
   user-select: none;
   cursor: pointer;
-  border-radius: 3px;
   margin: 0;
+  margin-top: 1px;
+  vertical-align: middle;
+}
+
+.status-combo:hover {
+  border: 1px solid $green;
 }
 
 .selected-status-line {
   background: $white;
-  padding: 0.4em;
   text-transform: uppercase;
   flex: 1;
 }
@@ -165,7 +177,6 @@ export default {
 .status-line {
   background: $white;
   cursor: pointer;
-  padding: 0.4em;
   margin: 0;
   text-transform: uppercase;
 
@@ -178,7 +189,7 @@ export default {
   width: 15px;
   min-width: 15px;
   margin-right: 0.4em;
-  color: $grey;
+  color: $green;
   cursor: pointer;
 }
 
@@ -191,5 +202,9 @@ export default {
   margin-left: -1px;
   max-height: 180px;
   overflow-y: auto;
+}
+
+.field .label {
+  padding-top: 5px;
 }
 </style>

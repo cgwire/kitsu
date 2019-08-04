@@ -2,16 +2,14 @@
   <div class="asset-types page fixed-page">
     <div class="asset-type-list-header page-header flexrow">
       <search-field
-        class="flexrow-item"
+        class="flexrow-item mt1"
         ref="asset-type-search-field"
         @change="onSearchChange"
         placeholder="ex: chars, agent327"
       />
-      <span class="flexrow-item">
-        {{ $t('statistics.display_mode') }}
-      </span>
       <combobox
         class="mb0 flexrow-item"
+        :label="$t('statistics.display_mode')"
         locale-key-prefix="statistics."
         :options="displayModeOptions"
         v-model="displayMode"

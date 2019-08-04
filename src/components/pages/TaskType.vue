@@ -22,6 +22,16 @@
             class="flexrow-item"
             :task-type="currentTaskType"
           />
+          <div class="filler"></div>
+          <div class="flexrow-item">
+            <button-simple
+              icon="download"
+              :title="$t('main.csv.export_file')"
+              @click="onExportClick"
+            />
+          </div>
+        </div>
+        <div class="flexcolumn-item flexrow">
           <div
             class="flexrow-item ml1"
           >
@@ -33,21 +43,13 @@
               placeholder="ex: retake chara"
             />
           </div>
-          <div class="flexrow-item ml1">
-            {{ $t('main.sorted_by') }}
-          </div>
+          <div class="filler"></div>
           <div class="flexrow-item sorting-combobox">
             <combobox
+              :label="$t('main.sorted_by')"
               :options="sortOptions"
               locale-key-prefix="tasks.fields."
               v-model="currentSort"
-            />
-          </div>
-          <div class="flexrow-item push-right">
-            <button-simple
-              icon="download"
-              :title="$t('main.csv.export_file')"
-              @click="onExportClick"
             />
           </div>
         </div>
@@ -455,7 +457,7 @@ export default {
 
 .query-list {
   margin-bottom: 0;
-  margin-left: 11em;
+  margin-left: 1em;
 }
 
 .push-right {

@@ -366,6 +366,17 @@ input, select, span.select {
   max-height:170px;
 }
 
+.profile-content,
+.profile-header {
+  border-top-left-radius: 1em;
+  border-top-right-radius: 1em;
+}
+
+.profile-content {
+  border-bottom-left-radius: 1em;
+  border-bottom-right-radius: 1em;
+}
+
 .profile-header-content {
   position: relative;
   top: -8em;
@@ -403,7 +414,7 @@ h2:first-child {
 }
 
 .save-button {
-  border-radius: 5px;
+  border-radius: 2em;
   width: 100%;
   background: $green;
   border-color: $green;
@@ -426,5 +437,9 @@ h2:first-child {
 
 .change-password-message {
   margin-top: 1em;
+}
+
+select {
+  height: 3em;
 }
 </style>

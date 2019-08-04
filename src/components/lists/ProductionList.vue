@@ -69,7 +69,7 @@
         </tr>
       </tbody>
     </table>
-    <table class="table splitted-table">
+    <table class="table splitted-table" v-if="closedProductions.length > 0">
       <tbody>
         <tr class="type-header">
           <td colspan="30">
