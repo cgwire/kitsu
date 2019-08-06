@@ -159,10 +159,14 @@
   </div>
 </template>
 <script>
-import { mapGetters, mapActions } from 'vuex'
 import moment from 'moment-timezone'
+import { mapGetters, mapActions } from 'vuex'
 import { PlusIcon } from 'vue-feather-icons'
-import { updateModelFromList, removeModelFromList } from '../../lib/helpers'
+import {
+  formatDate,
+  updateModelFromList,
+  removeModelFromList
+} from '../../lib/helpers'
 
 import Combobox from '../widgets/Combobox'
 import EntityThumbnail from '../widgets/EntityThumbnail'
@@ -259,7 +263,7 @@ export default {
     ]),
 
     formatDate (dateString) {
-      return moment(dateString).format('YYYY-MM-DD HH:mm:ss')
+      return formatDate(dateString)
     },
 
     getPlaylistPath (playlistId, section) {
@@ -350,7 +354,7 @@ export default {
 
     addPlaylist () {
       const newPlaylist = {
-        name: 'New playlist',
+        name: `${moment().format('YYYY-MM-DD HH:mm:ss')}`,
         production_id: this.currentProduction.id
       }
 

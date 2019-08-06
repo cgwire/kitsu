@@ -127,9 +127,8 @@
 </template>
 
 <script>
-import moment from 'moment-timezone'
 import { mapGetters } from 'vuex'
-import { renderComment, remove } from '../../lib/helpers'
+import { formatDate, renderComment, remove } from '../../lib/helpers'
 
 import {
   CheckSquareIcon,
@@ -253,12 +252,7 @@ export default {
 
   methods: {
     formatDate (date) {
-      const utcDate = moment.tz(date, 'UTC')
-      if (moment().diff(utcDate, 'days') > 1) {
-        return utcDate.format('YYYY-MM-DD HH:mm')
-      } else {
-        return moment(utcDate.format()).fromNow()
-      }
+      return formatDate(date)
     },
 
     getPath (name) {
