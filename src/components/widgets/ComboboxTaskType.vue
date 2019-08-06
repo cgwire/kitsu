@@ -63,7 +63,7 @@ export default {
 
   props: {
     label: {
-      default: null,
+      default: '',
       type: String
     },
     taskTypeList: {
