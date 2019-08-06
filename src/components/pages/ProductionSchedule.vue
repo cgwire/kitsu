@@ -7,9 +7,9 @@
   >
     <div class="flexrow project-dates">
       <div class="flexrow-item">
-        {{ $t('main.start_date') }}
-      </div>
-      <div class="flexrow-item">
+        <label class="label">
+          {{ $t('main.start_date') }}
+        </label>
         <datepicker
           wrapper-class="datepicker"
           input-class="date-input input"
@@ -20,10 +20,10 @@
           v-model="selectedStartDate"
         />
       </div>
-      <div class="flexrow-item">
-        {{ $t('main.end_date') }}
-      </div>
-      <div class="flexrow-item">
+      <div class="flexrow-item field">
+        <label class="label">
+          {{ $t('main.end_date') }}
+        </label>
         <datepicker
           wrapper-class="datepicker"
           input-class="date-input input"
@@ -34,21 +34,17 @@
           v-model="selectedEndDate"
         />
       </div>
-      <div class="flexrow-item">
-        {{ $t('schedule.overall_man_days') }}
-      </div>
       <text-field
         class="flexrow-item overall-man-days"
         type="number"
         v-model="overallManDays"
+        :label="$t('schedule.overall_man_days')"
         :disabled="!isCurrentUserAdmin"
         v-focus
       />
-      <div class="flexrow-item">
-        {{ $t('schedule.zoom_level') }}
-      </div>
       <combobox-number
-        class="flexrow-item"
+        class="flexrow-item zoom-level"
+        :label="$t('schedule.zoom_level')"
         :options="zoomOptions"
         v-model="zoomLevel"
       />
@@ -280,7 +276,7 @@ export default {
   }
 
   .overall-man-days {
-    width: 80px;
+    width: 120px;
     font-size: 0.9em;
     margin-right: 1em;
   }
@@ -297,5 +293,9 @@ export default {
   border: 0;
   overflow: hidden;
   flex-direction: column;
+}
+
+.zoom-level {
+  margin-top: -10px;
 }
 </style>

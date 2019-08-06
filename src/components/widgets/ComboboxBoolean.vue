@@ -1,6 +1,5 @@
 <template>
 <combobox
-
   :label="label"
   :disabled="disabled"
   :options="booleanOptions"

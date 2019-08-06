@@ -150,7 +150,7 @@ export default {
     delete_text: 'Are you sure you want to remove {name} from your database?',
     edit: 'Edit',
     empty_comment: 'Empty comment',
-    end_date: 'End date:',
+    end_date: 'End date',
     go_productions: 'Go to productions',
     history: 'history',
     info: 'Information',
@@ -167,8 +167,8 @@ export default {
     production: 'Production',
     remove: 'Remove',
     save: 'Save',
-    start_date: 'Start date:',
-    sorted_by: 'Tasks sorted by:',
+    start_date: 'Start date',
+    sorted_by: 'Tasks sorted by',
     studio: 'Studio',
     user: 'User',
     white_theme: 'White Theme',
@@ -196,13 +196,13 @@ export default {
   news: {
     all: 'All',
     commented_on: 'commented on',
-    infos: 'Infos:',
+    infos: 'Infos',
     no_news: 'There is no news for this production or for this filter.',
     only_comments: 'Only comments',
     only_previews: 'Only previews',
     set_preview_on: 'set preview on',
-    task_status: 'Task status:',
-    task_type: 'Task type:',
+    task_status: 'Task status',
+    task_type: 'Task type',
     title: 'News Feed'
   },
 
@@ -275,7 +275,7 @@ export default {
   },
 
   playlists: {
-    add_shots: 'Select shots',
+    add_shots: 'Add shots',
     add_sequence: 'Add whole sequence',
     available_build: 'Available builds',
     build_daily: 'Daily pending',
@@ -449,9 +449,9 @@ export default {
 
   schedule: {
     title: 'Schedule',
-    overall_man_days: 'Overall man-days:',
+    overall_man_days: 'Man-days',
     md: 'md',
-    zoom_level: 'Zoom level:'
+    zoom_level: 'Zoom level'
   },
 
   shots: {
@@ -473,7 +473,7 @@ export default {
     number: 'shot | shots',
     manage: 'Create shots',
     new_success: 'Shot {name} successfully created.',
-    padding: 'Padding:',
+    padding: 'Shot Padding',
     restore_text: 'Are you sure you want to restore {name} into your database?',
     restore_error: 'An error occured while restoring this shot.',
     sequences: 'Sequences',
@@ -500,8 +500,8 @@ export default {
 
   statistics: {
     count: 'Counts',
-    count_mode: 'Count mode:',
-    display_mode: 'Display mode:',
+    count_mode: 'Count mode',
+    display_mode: 'Display mode',
     frames: 'Frames',
     pie: 'Pie charts',
     shots: 'Shots'

@@ -30,12 +30,12 @@
   <div class="table-body" v-scroll="onBodyScroll">
 
     <table class="table splitted-table" v-if="activePeople.length > 0">
-      <tr class="type-header">
-        <td colspan="30">
-          {{ $t('people.active') }}
-        </td>
-      </tr>
       <tbody>
+        <tr class="type-header">
+          <td colspan="30">
+            {{ $t('people.active') }}
+          </td>
+        </tr>
         <tr v-for="entry in activePeople" :key="entry.id">
           <people-name-cell class="name" :person="entry" />
           <td class="email">{{ entry.email }}</td>

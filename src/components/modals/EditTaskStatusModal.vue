@@ -30,19 +30,16 @@
           v-model="form.short_name"
           v-focus
         />
-        <combobox
+        <combobox-boolean
           :label="$t('task_status.fields.is_done')"
-          :options="isDoneOptions"
           v-model="form.is_done"
         />
-        <combobox
+        <combobox-boolean
           :label="$t('task_status.fields.is_retake')"
-          :options="isRetakeOptions"
           v-model="form.is_retake"
         />
-        <combobox
+        <combobox-boolean
           :label="$t('task_status.fields.is_artist_allowed')"
-          :options="isArtistAllowedOptions"
           v-model="form.is_artist_allowed"
         />
 
@@ -81,13 +78,13 @@
 <script>
 import { mapGetters, mapActions } from 'vuex'
 import TextField from '../widgets/TextField'
-import Combobox from '../widgets/Combobox.vue'
+import ComboboxBoolean from '../widgets/ComboboxBoolean'
 import ColorField from '../widgets/ColorField'
 
 export default {
   name: 'edit-task-status-modal',
   components: {
-    Combobox,
+    ComboboxBoolean,
     TextField,
     ColorField
   },
@@ -196,11 +193,5 @@ export default {
 <style lang="scss" scoped>
 .modal-content .box p.text {
   margin-bottom: 1em;
-}
-
-.title {
-  border-bottom: 2px solid #DDD;
-  padding-bottom: 0.5em;
-  margin-bottom: 1.2em;
 }
 </style>

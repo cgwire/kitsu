@@ -193,9 +193,9 @@ export default {
 
   computed: {
     ...mapGetters([
-      'taskTypeMap',
       'nbSelectedTasks',
       'productionMap',
+      'taskTypeMap',
       'user'
     ]),
 

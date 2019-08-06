@@ -18,7 +18,7 @@
           {{ $t('settings.no_logo') }}
         </p>
         <p>
-          <button class="button" @click="showAvatarModal">
+          <button class="button set-logo-button" @click="showAvatarModal">
             {{ $t('settings.set_logo') }}
           </button>
         </p>
@@ -190,14 +190,25 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-.dark .settings {
-  background: #36393F;
-  color: $white-grey;
+.dark {
+  .settings {
+    background: #36393F;
+    color: $white-grey;
+  }
+
+  .settings-content {
+    background: $dark-grey-lighter;
+    color: $white-grey;
+  }
+
+  .set-logo-button {
+    background-color: $grey;
+    color: $dark-grey
+  }
 }
 
-.dark .settings-content {
-  background: $dark-grey-lighter;
-  color: $white-grey;
+strong {
+  text-transform: uppercase;
 }
 
 .settings {
@@ -234,11 +245,12 @@ h2:first-child {
 }
 
 .save-button {
-  border-radius: 5px;
-  width: 100%;
-  background: $green;
+  border-radius: 2em;
   border-color: $green;
   color: white;
+  padding: 1.4em;
+  width: 100%;
+  background: $green;
 }
 
 .save-button:hover {

@@ -31,13 +31,15 @@
       </div>
     </div>
 
-    <search-field
-      class="search"
-      ref="people-search-field"
-      :can-save="false"
-      @change="onSearchChange"
-      placeholder="ex: John Doe"
-    />
+    <div class="flexrow">
+      <search-field
+        class="search flexrow-item"
+        ref="people-search-field"
+        :can-save="false"
+        @change="onSearchChange"
+        placeholder="ex: John Doe"
+      />
+    </div>
 
     <people-list
       :entries="displayedPeople"

@@ -10,6 +10,19 @@
 
       <page-title class="title" :text="$t('shots.manage')" />
       <div class="explaination">{{ $t('shots.creation_explaination') }}</div>
+      <div>
+        <div class="flexrow">
+          <span class="filler">
+          </span>
+          <combobox
+            ref="shot-padding"
+            :label="$t('shots.padding')"
+            :options="shotPaddingOptions"
+            class="shot-padding flexrow-item"
+            v-model="shotPadding"
+          />
+        </div>
+      </div>
 
       <div class="shot-columns">
         <div class="shot-column" v-if="isTVShow">
@@ -111,21 +124,6 @@
               @keyup.enter="addShot"
               v-model="names.shot"
             />
-          </div>
-          <div>
-            <div class="flexrow">
-              <span class="filler">
-              </span>
-              <span class="flexrow-item">
-                {{ $t('shots.padding') }}
-              </span>
-              <combobox
-                ref="shot-padding"
-                :options="shotPaddingOptions"
-                class="shot-padding flexrow-itemn"
-                v-model="shotPadding"
-              />
-            </div>
           </div>
           <div class="field">
             <button
@@ -464,11 +462,15 @@ input::placeholder {
   color: #BBB;
 }
 
-.title {
-  margin-bottom: 0em;
-}
-
 .explaination {
   margin-bottom: 1em;
+}
+
+.subtitle {
+  margin-bottom: 0;
+}
+
+.shot-padding {
+  margin-right: 1em;
 }
 </style>
