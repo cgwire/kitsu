@@ -6,7 +6,7 @@
       </span>
       <people-field
         ref="people-field"
-        class="flexrow-item"
+        class="flexrow-item add-people-field"
         :people="unlistedPeople"
         @enter="addPerson"
         v-model="person"
@@ -99,11 +99,8 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-.add-people {
+.add-people-field {
   font-size: 1.3em;
-}
-
-.people-field-label {
-  padding-bottom: 7px;
+  border-bottom: 2px solid $grey;
 }
 </style>

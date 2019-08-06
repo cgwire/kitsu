@@ -53,10 +53,10 @@
         <span class="flexrow-item push-right">
         </span>
         <span class="flexrow-item">
-          {{ $t('main.sorted_by') }}
         </span>
         <combobox
           class="flexrow-item"
+          :label="$t('main.sorted_by')"
           :options="sortOptions"
           locale-key-prefix="tasks.fields."
           v-model="currentSort"
@@ -370,6 +370,10 @@ export default {
   margin-top: 1em;
   margin-bottom: 1em;
   font-size: 1.1em;
+
+  ul {
+    margin-left: 0;
+  }
 }
 
 .data-list {
@@ -382,9 +386,7 @@ export default {
 }
 
 .query-list {
-  margin-left: 2.5em;
   margin-bottom: 2em;
-  margin-top: 0.2em;
 }
 
 .dark .main-column {

@@ -3,9 +3,9 @@
     <div class="has-text-centered" v-if="isOpenProductionsLoading">
       <spinner />
     </div>
-    <div v-else-if="openProductions.length > 0">
+    <div class="open-productions-box" v-else-if="openProductions.length > 0">
+      <img src="">
       <h1 class="title has-text-centered">
-        <activity-icon />
         {{ $t('productions.home.title') }}
       </h1>
       <div
@@ -109,7 +109,6 @@
 
 <script>
 import { mapGetters, mapActions } from 'vuex'
-import { ActivityIcon } from 'vue-feather-icons'
 
 import colors from '../../lib/colors.js'
 import ButtonSimple from '../widgets/ButtonSimple'
@@ -120,7 +119,6 @@ export default {
   name: 'open-productions',
 
   components: {
-    ActivityIcon,
     ButtonSimple,
     EditProductionModal,
     Spinner
@@ -225,9 +223,27 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-h1 {
-  margin-top: 3em;
-  margin-bottom: 3em;
+.dark {
+  .open-productions {
+    background: $dark-grey-light;
+  }
+
+  .open-productions-box {
+    background: $dark-grey-lighter;
+    box-shadow: 0 0 4px 2px #333;
+  }
+
+  .open-productions-list {
+    .open-production:hover .avatar{
+      box-shadow: 0 0 4px 2px #444;
+    }
+  }
+}
+
+h1.title {
+  margin-bottom: 0;
+  text-transform: uppercase;
+  color: #999;
 }
 
 .is-grid {
@@ -273,7 +289,8 @@ h1 {
 
   .open-production:hover .avatar{
     transform: scale(1.1);
-    transition: transform .2s ease-in-out;
+    transition: all .2s ease-in-out;
+    box-shadow: 0 0 4px 2px #DDD;
   }
 }
 
@@ -312,6 +329,21 @@ a.secondary:hover {
   a {
     color: #BBB;
   }
+}
+
+.open-productions {
+  background: #FAFAFA;
+}
+
+.open-productions-box {
+  background: white;
+  box-shadow: 0 0 3px 3px #EEE;
+  border-radius: 2em;
+  max-width: 800px;
+  margin-left: auto;
+  margin-right: auto;
+  padding: 3em 2em 2em 2em;
+  margin-top: 2em;
 }
 
 @media screen and (max-width: 768px) {

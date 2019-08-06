@@ -12,30 +12,26 @@
     >
       <div class="timeline-wrapper">
         <div class="filters flexrow">
-          <span class="flexrow-item">
-            {{ $t('news.infos') }}
-          </span>
+          <span class="filler"></span>
           <combobox
             class="flexrow-item selector"
+            :label="$t('news.infos')"
             :options="previewOptions"
             v-model="previewMode"
           />
-          <span class="flexrow-item">
-            {{ $t('news.task_status') }}
-          </span>
           <combobox-status
             class="flexrow-item selector"
+            :label="$t('news.task_status')"
             :task-status-list="taskStatusList"
             v-model="taskStatusId"
           />
-          <span class="flexrow-item">
-            {{ $t('news.task_type') }}
-          </span>
           <combobox-task-type
             class="flexrow-item selector"
+            :label="$t('news.task_type')"
             :task-type-list="taskTypeList"
             v-model="taskTypeId"
           />
+          <span class="filler"></span>
         </div>
 
         <div class="timeline">

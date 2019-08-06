@@ -70,22 +70,23 @@
         </span>
       </div>
       <div class="flexrow mt1">
-        <span class="flexrow-item">
-          {{ $t('comments.set_status_to') }}
-        </span>
-        <combobox-status
-          class="flexrow-item status-selector"
-          :task-status-list="taskStatus"
-          v-model="task_status_id"
-        />
-
+        <div class="filler"></div>
+        <div class="flexrow-item status-combo-wrapper">
+          <combobox-status
+            class="status-selector"
+            :task-status-list="taskStatus"
+            v-model="task_status_id"
+          />
+        </div>
         <div class="flexrow-item post-button-wrapper">
         <button
           :class="{
             'button': true,
-            'button': true,
             'is-primary': true,
             'is-loading': isLoading
+          }"
+          :style="{
+            'background-color': taskStatusColor
           }"
           @click="runAddComment(text, task_status_id)"
         >
@@ -182,6 +183,13 @@ export default {
         this.attachedFileName !== undefined &&
         this.attachedFileName.length > 0
       )
+    },
+
+    taskStatusColor () {
+      let status = this.taskStatus.find(t => t.id === this.task_status_id) ||
+        this.taskStatus[0]
+      if (status.short_name === 'todo') return '#666'
+      return status.color
     }
   },
 
@@ -255,8 +263,14 @@ export default {
 }
 
 .post-button-wrapper {
-  flex: 1;
-  text-align: right
+  margin: 0;
+
+  .button.is-primary {
+    border-top-left-radius: 0;
+    border-bottom-left-radius: 0;
+    height: 34px;
+    margin-top: 1px;
+  }
 }
 
 .mt1 {
@@ -265,5 +279,13 @@ export default {
 
 .is-dragging {
   background-color: $purple;
+}
+
+.button.is-primary {
+  border-radius: 2em;
+}
+
+.status-selector {
+  margin: 0;
 }
 </style>

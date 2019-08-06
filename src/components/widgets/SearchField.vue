@@ -1,13 +1,13 @@
 <template>
-<div class="flexrow">
+<div class="flexrow search-field-wrapper">
   <div class="flexrow-item">
-    <search-icon />
+    <search-icon class="search-icon" />
   </div>
 
   <div class="flexrow-item search-field">
     <input
       ref="input"
-      class="input search-input"
+      class="search-input"
       type="text"
       :placeholder="placeholder"
       @input="onSearchChange"
@@ -91,8 +91,18 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-.dark .button.save-button:hover {
-  color: $white-grey;
+.dark {
+  .button.save-button:hover {
+    color: $white-grey;
+  }
+
+  .search-field-wrapper {
+    border: 1px solid #666;
+  }
+
+  .search-input {
+    color: white;
+  }
 }
 
 .erase-search {
@@ -107,16 +117,22 @@ export default {
 
 .search-input {
   width: 300px;
+  background: inherit;
 }
 
 .search-input::placeholder {
   color: $light-grey;
 }
 
+.save-search {
+  margin-right: 0;
+}
+
 .save-search .button {
   margin-left: 0.5em;
   border: 0;
   color: $grey-strong;
+  padding-right: 0;
 }
 
 .save-search .button:hover {
@@ -125,6 +141,22 @@ export default {
 
 .button.save-button {
   background: transparent;
+}
+
+.search-field-wrapper {
+  border: 1px solid #DDD;
+  border-radius: 2em;
+  padding: 0.2em 1em;
+}
+
+.search-field-wrapper:focus,
+.search-field-wrapper:hover {
+  border-color: $green;
+}
+
+.search-icon {
+  width: 20px;
+  margin-top: 5px;
 }
 
 @media screen and (max-width: 768px) {

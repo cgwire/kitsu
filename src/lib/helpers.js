@@ -60,6 +60,15 @@ export const clearSelectionGrid = (selectionGrid) => {
   return selectionGrid
 }
 
+export const formatDate = (date) => {
+  const utcDate = moment.tz(date, 'UTC')
+  if (moment().diff(utcDate, 'days') > 1) {
+    return utcDate.format('YYYY-MM-DD HH:mm')
+  } else {
+    return moment(utcDate.format()).fromNow()
+  }
+}
+
 export const range = (start, end) => {
   return [...Array(end - start + 1).keys()]
     .map(i => i + start)

@@ -104,12 +104,6 @@ export default {
   margin-top: 1em;
 }
 
-.title {
-  border-bottom: 2px solid #DDD;
-  padding-bottom: 0.5em;
-  margin-bottom: 1.2em;
-}
-
 .description {
   margin-bottom: 1em;
 }

@@ -143,11 +143,6 @@ export default {
   color: #ff3860;
   font-style: italic;
 }
-.title {
-  border-bottom: 2px solid #DDD;
-  padding-bottom: 0.5em;
-  margin-bottom: 1.2em;
-}
 
 textarea {
   min-height: 8em;

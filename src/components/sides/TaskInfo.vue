@@ -73,7 +73,6 @@
           <router-link
             class="history-button flexrow-item"
             :to="taskPath"
-            v-if="taskPreviews.length > 0"
           >
             ...
           </router-link>

@@ -129,13 +129,21 @@ export default {
   outline: 0;
 }
 
-.is-top:after {
+.select-input {
+  height: 3em;
+}
+
+.select::after {
+  border: 1px solid $green;
+  border-right: 0;
+  border-top: 0;
+  margin-top: -2px;
+}
+
+.select.is-top::after {
   border: 2px solid $green;
   border-right: 0;
   border-top: 0;
-}
-
-.select-input {
-  height: 31px;
+  margin-top: -4px;
 }
 </style>

@@ -153,7 +153,7 @@ export default {
     studio: 'Studio',
     user: 'Utilisateur',
     save: 'Enregistrer',
-    sorted_by: 'Tâches triées par :',
+    sorted_by: 'Tâches triées par',
     white_theme: 'Thème blanc',
     yes: 'oui',
     csv: {
@@ -194,8 +194,8 @@ export default {
     only_comments: 'Seulement les commentaires',
     only_previews: 'Seulement les previews',
     set_preview_on: 'a mis un preview sur',
-    task_status: 'Statut de tâche :',
-    task_type: 'Type de tâche :',
+    task_status: 'Statut de tâche',
+    task_type: 'Type de tâche',
     title: 'Flux de nouveautés '
   },
 
@@ -389,7 +389,7 @@ export default {
 
   schedule: {
     md: 'jh',
-    overall_man_days: 'Jour Hommes Pour le projet :',
+    overall_man_days: 'Jours Homme',
     title: 'Planning',
     zoom_level: 'Niveau de zoom'
   },
@@ -435,8 +435,8 @@ export default {
 
   statistics: {
     count: 'Comptages',
-    count_mode: 'Mode de comptage :',
-    display_mode: ' Mode d\'affichage :',
+    count_mode: 'Mode de comptage',
+    display_mode: ' Mode d\'affichage',
     frames: 'Frames',
     pie: 'Graphiques',
     shots: 'Plans'
