@@ -1,0 +1,15 @@
+Entity Type,Episode,Parent,Name,Asset Type,Asset,Occurences,Label
+Asset,,Environment,Lake,Props,Boat,1,setdress
+Asset,,Environment,Lake,Props,Pool,1,setdress
+Asset,,Environment,Lake,Props,Flowers,12,setdress
+Asset,,Environment,Mine,Props,Block,2,setdress
+Asset,,Environment,Mine,Props,Wagon,3,setdress
+Shot,E01,SEQ01,SH01,Character,Victor,1,animate
+Shot,E01,SEQ01,SH01,Character,John,1,animate
+Shot,E01,SEQ02,SH01,Environment,Lake,12,layout
+Shot,E01,SEQ01,SH02,Character,Victor,1,animate
+Shot,E01,SEQ01,SH02,Environment,Mine,2,layout
+Shot,E02,SEQ02,SH01,Character,John,1,animate
+Shot,E02,SEQ02,SH01,Environment,Lake,2,layout
+Shot,E02,SEQ01,SH01,Character,Victor,1,animate
+Shot,E02,SEQ01,SH01,Environment,Mine,2,layout

@@ -10,6 +10,7 @@ from zou.app.utils import fields, events
 
 from zou.app.services import (
     assets_service,
+    entities_service,
     shots_service
 )
 
@@ -58,16 +59,25 @@ def update_casting(shot_id, casting):
     casting_ids = []
     for cast in casting:
         if "asset_id" in cast and "nb_occurences" in cast:
-            EntityLink.create(
-                entity_in_id=shot.id,
-                entity_out_id=cast["asset_id"],
-                nb_occurences=cast["nb_occurences"]
+            create_casting_link(
+                shot.id,
+                cast["asset_id"],
+                cast["nb_occurences"]
             )
     events.emit("shot:casting-update", {
         "shot": shot_id,
         "casting": casting_ids
     })
     return casting
+
+
+def create_casting_link(entity_in_id, asset_id, nb_occurences=1, label=""):
+    return EntityLink.create(
+        entity_in_id=entity_in_id,
+        entity_out_id=asset_id,
+        nb_occurences=nb_occurences,
+        label=label
+    )
 
 
 def get_cast_in(asset_id):
@@ -352,3 +362,11 @@ def add_asset_instance_to_asset(
         "asset_instance_id": asset_instance["id"]
     })
     return asset_instance
+
+
+def get_entity_casting(entity_id):
+    """
+    Get entities related to entity as external entities.
+    """
+    entity = entities_service.get_entity_raw(entity_id)
+    return Entity.serialize_list(entity.entities_out, obj_type="Asset")

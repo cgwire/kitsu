@@ -16,8 +16,7 @@ from zou.app.mixin import ArgsMixin
 from zou.app.utils import query, permissions
 
 from zou.app.services.exception import (
-    ShotNotFoundException,
-    WrongIdFormatException
+    ShotNotFoundException
 )
 
 
@@ -46,7 +45,7 @@ class ShotResource(Resource):
             shot = shots_service.get_shot(shot_id)
             user_service.check_manager_project_access(shot["project_id"])
 
-            deleted_shot = shots_service.remove_shot(shot_id, force=force)
+            shots_service.remove_shot(shot_id, force=force)
         except ShotNotFoundException:
             abort(404)
         except permissions.PermissionDenied:
@@ -73,7 +72,7 @@ class SceneResource(Resource):
         """
         scene = shots_service.get_scene(scene_id)
         user_service.check_manager_project_access(scene["project_id"])
-        deleted_scene = shots_service.remove_scene(scene_id)
+        shots_service.remove_scene(scene_id)
         return '', 204
 
 
@@ -116,7 +115,7 @@ class ShotAssetsResource(Resource):
         """
         shot = shots_service.get_shot(shot_id)
         user_service.check_project_access(shot["project_id"])
-        return shots_service.get_entities_out(shot_id)
+        return breakdown_service.get_entity_casting(shot_id)
 
 
 class ShotTaskTypesResource(Resource):

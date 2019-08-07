@@ -841,14 +841,6 @@ def update_shot(shot_id, data_dict):
     return shot.serialize()
 
 
-def get_entities_out(shot_id):
-    """
-    Get entities related to shot as external entities.
-    """
-    shot = get_shot_raw(shot_id)
-    return Entity.serialize_list(shot.entities_out, obj_type="Asset")
-
-
 def get_episode_stats_for_project(project_id):
     """
     Retrieve number of tasks by status, task_types and episodes

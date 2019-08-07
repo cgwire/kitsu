@@ -12,6 +12,7 @@ class Organisation(db.Model, BaseMixin, SerializerMixin):
     hours_by_day = db.Column(db.Integer(), default=8, nullable=False)
     has_avatar = db.Column(db.Boolean(), default=False)
     use_original_file_name = db.Column(db.Boolean(), default=False)
+    chat_token_slack = db.Column(db.String(80), default="")
 
     def present(self):
         return fields.serialize_dict({
@@ -19,5 +20,6 @@ class Organisation(db.Model, BaseMixin, SerializerMixin):
             "name": self.name,
             "has_avatar": self.has_avatar,
             "hours_by_day": self.hours_by_day,
-            "use_original_file_name": self.use_original_file_name
+            "use_original_file_name": self.use_original_file_name,
+            "chat_token_slack": self.chat_token_slack
         })

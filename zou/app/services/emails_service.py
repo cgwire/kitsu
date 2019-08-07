@@ -1,5 +1,5 @@
 from zou.app import config
-from zou.app.utils import emails
+from zou.app.utils import emails, chats
 
 from zou.app.services import (
     entities_service,
@@ -21,10 +21,23 @@ def send_notification(person_id, subject, message):
         if config.ENABLE_JOB_QUEUE:
             queue_store.job_queue.enqueue(
                 emails.send_email,
-                args=(subject, message, person.email)
+                args=(subject, message + get_signature(), person.email)
             )
         else:
             emails.send_email(subject, message, person.email)
+
+    if person.notifications_slack_enabled:
+        organisation = persons_service.get_organisation()
+        userid = person.notifications_slack_userid
+        token = organisation.get("chat_token_slack", "")
+        if config.ENABLE_JOB_QUEUE:
+            queue_store.job_queue.enqueue(
+                chats.send_to_slack,
+                args=(token, userid, message)
+            )
+        else:
+            chats.send_to_slack(token, userid, message)
+
     return True
 
 
@@ -34,7 +47,7 @@ def send_comment_notification(person_id, author_id, comment, task):
     matching given person id.
     """
     person = persons_service.get_person_raw(person_id)
-    if person.notifications_enabled:
+    if person.notifications_enabled or person.notifications_slack_enabled:
         task_status = tasks_service.get_task_status(task["task_status_id"])
         (author, task_name, task_url) = get_task_descriptors(author_id, task)
         subject = "[Kitsu] %s - %s commented on %s" % (
@@ -48,18 +61,16 @@ def send_comment_notification(person_id, author_id, comment, task):
 
 To reply connect to this URL:
 %s
-%s
 """ % (
             author["full_name"],
             task_name,
             task_status["short_name"],
             comment["text"],
-            task_url,
-            get_signature()
+            task_url
         )
-        return send_notification(person_id, subject, message)
-    else:
-        return True
+        send_notification(person_id, subject, message)
+
+    return True
 
 
 def send_mention_notification(person_id, author_id, comment, task):
@@ -68,7 +79,7 @@ def send_mention_notification(person_id, author_id, comment, task):
     person matching given person id.
     """
     person = persons_service.get_person_raw(person_id)
-    if person.notifications_enabled:
+    if person.notifications_enabled or person.notifications_slack_enabled:
         (author, task_name, task_url) = get_task_descriptors(author_id, task)
         subject = "[Kitsu] %s mentioned you on %s" % (
             author["first_name"],
@@ -80,13 +91,11 @@ def send_mention_notification(person_id, author_id, comment, task):
 
 To reply connect to this URL:
 %s
-%s
 """ % (
             author["full_name"],
             task_name,
             comment["text"],
-            task_url,
-            get_signature()
+            task_url
         )
         return send_notification(person_id, subject, message)
     else:
@@ -99,19 +108,17 @@ def send_assignation_notification(person_id, author_id, task):
     person matching given person id.
     """
     person = persons_service.get_person_raw(person_id)
-    if person.notifications_enabled:
+    if person.notifications_enabled or person.notifications_slack_enabled:
         (author, task_name, task_url) = get_task_descriptors(author_id, task)
         subject = "[Kitsu] You were assigned to %s" % task_name
         message = """ %s assigned you to %s.
 
     To see the task details connect to this URL:
     %s
-    %s
     """ % (
             author["full_name"],
             task_name,
-            task_url,
-            get_signature()
+            task_url
         )
         return send_notification(person_id, subject, message)
     return True
