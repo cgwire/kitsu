@@ -283,13 +283,17 @@ class ApiDBTestCase(ApiTestCase):
     def generate_fixture_asset(
         self,
         name="Tree",
-        description="Description Tree"
+        description="Description Tree",
+        asset_type_id=None
     ):
+        if asset_type_id is None:
+            asset_type_id = self.asset_type.id
+
         self.asset = Entity.create(
             name=name,
             description=description,
             project_id=self.project.id,
-            entity_type_id=self.asset_type.id
+            entity_type_id=asset_type_id
         )
         return self.asset
 
@@ -510,6 +514,7 @@ class ApiDBTestCase(ApiTestCase):
 
     def generate_fixture_asset_type(self):
         self.asset_type = EntityType.create(name="Props")
+        self.asset_type_props = self.asset_type
         self.shot_type = EntityType.create(name="Shot")
         self.sequence_type = EntityType.create(name="Sequence")
         self.episode_type = EntityType.create(name="Episode")
@@ -548,7 +553,6 @@ class ApiDBTestCase(ApiTestCase):
             for_shots=True,
             department_id=self.department_animation.id
         )
-
 
     def generate_fixture_task_status(self):
         self.task_status = TaskStatus.create(
@@ -858,3 +862,9 @@ class ApiDBTestCase(ApiTestCase):
 
     def now(self):
         return datetime.datetime.now().replace(microsecond=0).isoformat()
+
+    def upload_csv(self, path, name):
+        file_path_fixture = self.get_fixture_file_path(
+            os.path.join("csv", "%s.csv" % name)
+        )
+        self.upload_file(path, file_path_fixture)

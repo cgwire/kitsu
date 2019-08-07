@@ -144,6 +144,18 @@ class ProjectAssetTypeAssetsResource(Resource):
         return assets_service.get_assets(criterions)
 
 
+class AssetAssetsResource(Resource):
+
+    @jwt_required
+    def get(self, asset_id):
+        """
+        Retrieve all assets for a given shot.
+        """
+        asset = assets_service.get_asset(asset_id)
+        user_service.check_project_access(asset["project_id"])
+        return breakdown_service.get_entity_casting(asset_id)
+
+
 class AssetTasksResource(Resource):
 
     @jwt_required

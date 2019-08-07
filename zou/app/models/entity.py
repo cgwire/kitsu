@@ -35,6 +35,7 @@ class EntityLink(db.Model, BaseMixin):
         primary_key=True
     )
     nb_occurences = db.Column(db.Integer, default=1)
+    label = db.Column(db.String(80), default="")
 
 
 class Entity(db.Model, BaseMixin, SerializerMixin):
