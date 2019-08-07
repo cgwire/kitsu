@@ -47,7 +47,7 @@ def send_comment_notification(person_id, author_id, comment, task):
     matching given person id.
     """
     person = persons_service.get_person_raw(person_id)
-    if person.notifications_enabled:
+    if person.notifications_enabled or person.notifications_slack_enabled:
         task_status = tasks_service.get_task_status(task["task_status_id"])
         (author, task_name, task_url) = get_task_descriptors(author_id, task)
         subject = "[Kitsu] %s - %s commented on %s" % (
@@ -79,7 +79,7 @@ def send_mention_notification(person_id, author_id, comment, task):
     person matching given person id.
     """
     person = persons_service.get_person_raw(person_id)
-    if person.notifications_enabled:
+    if person.notifications_enabled or person.notifications_slack_enabled:
         (author, task_name, task_url) = get_task_descriptors(author_id, task)
         subject = "[Kitsu] %s mentioned you on %s" % (
             author["first_name"],
@@ -108,7 +108,7 @@ def send_assignation_notification(person_id, author_id, task):
     person matching given person id.
     """
     person = persons_service.get_person_raw(person_id)
-    if person.notifications_enabled:
+    if person.notifications_enabled or person.notifications_slack_enabled:
         (author, task_name, task_url) = get_task_descriptors(author_id, task)
         subject = "[Kitsu] You were assigned to %s" % task_name
         message = """ %s assigned you to %s.

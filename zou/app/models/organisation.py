@@ -20,5 +20,6 @@ class Organisation(db.Model, BaseMixin, SerializerMixin):
             "name": self.name,
             "has_avatar": self.has_avatar,
             "hours_by_day": self.hours_by_day,
-            "use_original_file_name": self.use_original_file_name
+            "use_original_file_name": self.use_original_file_name,
+            "chat_token_slack": self.chat_token_slack
         })
