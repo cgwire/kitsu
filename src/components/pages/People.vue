@@ -7,12 +7,13 @@
 
       <div class="level-right">
         <div class="level-item">
-          <button-link v-if="isCurrentUserAdmin"
+          <button-simple
             class="level-item"
             :title="$t('main.csv.import_file')"
             :is-responsive="true"
             icon="upload"
-            path="/people/import"
+            @click="showImportModal"
+            v-if="isCurrentUserAdmin"
           />
           <button-href-link
             class="level-item"
@@ -20,12 +21,13 @@
             icon="download"
             path="/api/export/csv/persons.csv"
           />
-          <button-link v-if="isCurrentUserAdmin"
+          <button-link
             class="level-item"
             :text="$t('people.new_person')"
             :is-responsive="true"
             icon="plus"
             path="/people/new"
+            v-if="isCurrentUserAdmin"
           />
         </div>
       </div>
@@ -48,14 +50,14 @@
     />
 
     <import-modal
-      :active="isImportPeopleModalShown"
+      :active="modals.importModal"
       :is-loading="isImportPeopleLoading"
       :is-error="isImportPeopleLoadingError"
-      :cancel-route="'/people'"
       :form-data="personCsvFormData"
       :columns="csvColumns"
       @fileselected="selectFile"
       @confirm="uploadImportFile"
+      @cancel="hideImportModal"
     />
 
     <edit-person-modal
@@ -94,19 +96,21 @@ import EditPersonModal from '../modals/EditPersonModal'
 import ImportModal from '../modals/ImportModal'
 import ButtonLink from '../widgets/ButtonLink'
 import ButtonHrefLink from '../widgets/ButtonHrefLink'
+import ButtonSimple from '../widgets/ButtonSimple'
 import PageTitle from '../widgets/PageTitle'
 import SearchField from '../widgets/SearchField'
 
 export default {
   name: 'people',
   components: {
-    PeopleList,
-    DeleteModal,
-    EditPersonModal,
-    ImportModal,
     ButtonLink,
     ButtonHrefLink,
+    ButtonSimple,
+    EditPersonModal,
+    DeleteModal,
+    ImportModal,
     PageTitle,
+    PeopleList,
     SearchField
   },
 
@@ -119,6 +123,9 @@ export default {
         createAndInvite: false,
         edit: false,
         invite: false
+      },
+      modals: {
+        importModal: false
       },
       success: {
         invite: false
@@ -198,7 +205,7 @@ export default {
       this.$store.dispatch('uploadPersonFile', (err) => {
         if (!err) {
           this.$store.dispatch('loadPeople')
-          this.$router.push('/people')
+          this.hideImportModal()
         }
       })
     },
@@ -262,14 +269,6 @@ export default {
       this.$store.commit('PERSON_CSV_FILE_SELECTED', formData)
     },
 
-    showImportModalIfNeeded (path) {
-      if (path.indexOf('import') > 0) {
-        this.$store.dispatch('showPersonImportModal')
-      } else {
-        this.$store.dispatch('hidePersonImportModal')
-      }
-    },
-
     showDeleteModalIfNeeded (path, personId) {
       if (path.indexOf('delete') > 0) {
         this.$store.dispatch('showPersonDeleteModal', personId)
@@ -295,11 +294,18 @@ export default {
       const personId = this.$store.state.route.params.person_id
       this.showDeleteModalIfNeeded(path, personId)
       this.showEditModalIfNeeded(path, personId)
-      this.showImportModalIfNeeded(path, personId)
     },
 
     onSearchChange () {
       this.peopleSearchChange(this.$refs['people-search-field'].getValue())
+    },
+
+    showImportModal () {
+      this.modals.importModal = true
+    },
+
+    hideImportModal () {
+      this.modals.importModal = false
     }
   },
 

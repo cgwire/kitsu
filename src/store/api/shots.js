@@ -145,5 +145,18 @@ export default {
         }
       )
     })
+  },
+
+  postCastingCsv (production, formData) {
+    return new Promise((resolve, reject) => {
+      client.post(
+        `/api/import/csv/projects/${production.id}/casting`,
+        formData,
+        (err) => {
+          if (err) reject(err)
+          else resolve()
+        }
+      )
+    })
   }
 }

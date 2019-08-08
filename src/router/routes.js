@@ -134,11 +134,6 @@ export const routes = [
         component: People
       },
       {
-        path: '/people/import',
-        component: People,
-        name: 'import-people'
-      },
-      {
         path: '/people/:person_id',
         component: Person,
         name: 'person'
@@ -283,11 +278,6 @@ export const routes = [
         name: 'restore-asset'
       },
       {
-        path: '/productions/:production_id/assets/import',
-        component: Assets,
-        name: 'import-assets'
-      },
-      {
         path: '/productions/:production_id/assets/create-tasks',
         component: Assets,
         name: 'create-asset-tasks'
@@ -331,11 +321,6 @@ export const routes = [
         name: 'episode-restore-asset'
       },
       {
-        path: '/productions/:production_id/episodes/:episode_id/assets/import',
-        component: Assets,
-        name: 'episode-import-assets'
-      },
-      {
         path: '/productions/:production_id/episodes/:episode_id/assets/create-tasks',
         component: Assets,
         name: 'episode-create-asset-tasks'
@@ -361,11 +346,6 @@ export const routes = [
         path: '/productions/:production_id/shots',
         component: Shots,
         name: 'shots'
-      },
-      {
-        path: '/productions/:production_id/shots/import',
-        component: Shots,
-        name: 'import-shots'
       },
       {
         path: '/productions/:production_id/shots/create-tasks',
@@ -408,11 +388,6 @@ export const routes = [
         path: '/productions/:production_id/episodes/:episode_id/shots/manage',
         component: Shots,
         name: 'episode-manage-shots'
-      },
-      {
-        path: '/productions/:production_id/episodes/:episode_id/shots/import',
-        component: Shots,
-        name: 'episode-import-shots'
       },
       {
         path: '/productions/:production_id/episodes/:episode_id/shots/create-tasks',

@@ -23,12 +23,13 @@
               <div class="flexrow-item"></div>
             </div>
             <div class="flexrow" v-if="isCurrentUserManager">
-            <button-link
+            <button-simple
               class="flexrow-item"
               :title="$t('main.csv.import_file')"
               icon="upload"
               :is-responsive="true"
               :path="importPath"
+              @click="showImportModal"
             />
             <button-href-link
               class="flexrow-item"
@@ -143,11 +144,11 @@
     :active="modals.isImportDisplayed"
     :is-loading="loading.importing"
     :is-error="errors.importing"
-    :cancel-route="assetsPath"
     :form-data="assetsCsvFormData"
     :columns="columns"
     @fileselected="selectFile"
     @confirm="uploadImportFile"
+    @cancel="hideImportModal"
   />
 
   <create-tasks-modal
@@ -182,6 +183,7 @@ import AssetList from '../lists/AssetList'
 import AddMetadataModal from '../modals/AddMetadataModal'
 import ButtonHrefLink from '../widgets/ButtonHrefLink'
 import ButtonLink from '../widgets/ButtonLink'
+import ButtonSimple from '../widgets/ButtonSimple'
 import CreateTasksModal from '../modals/CreateTasksModal'
 import DeleteModal from '../widgets/DeleteModal'
 import EditAssetModal from '../modals/EditAssetModal'
@@ -201,6 +203,7 @@ export default {
     AddMetadataModal,
     ButtonLink,
     ButtonHrefLink,
+    ButtonSimple,
     CreateTasksModal,
     DeleteModal,
     EditAssetModal,
@@ -562,8 +565,6 @@ export default {
       } else if (path.indexOf('restore') > 0) {
         this.assetToRestore = this.assetMap[assetId]
         this.modals.isRestoreDisplayed = true
-      } else if (path.indexOf('import') > 0) {
-        this.modals.isImportDisplayed = true
       } else if (path.indexOf('create-tasks') > 0) {
         this.modals.isCreateTasksDisplayed = true
       } else {
@@ -594,7 +595,7 @@ export default {
           this.loadAssets(() => {
             this.resizeHeaders()
           })
-          this.$router.push(this.assetsPath)
+          this.hideImportModal()
         } else {
           this.loading.importing = false
           this.errors.importing = true
@@ -698,6 +699,14 @@ export default {
         d => d.id === descriptorId
       )
       this.modals.isAddMetadataDisplayed = true
+    },
+
+    showImportModal () {
+      this.modals.isImportDisplayed = true
+    },
+
+    hideImportModal () {
+      this.modals.isImportDisplayed = false
     }
   },
 

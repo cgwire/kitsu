@@ -208,6 +208,11 @@ const actions = {
 
       if (callback) callback(err)
     })
+  },
+
+  uploadCastingFile ({ commit, state, rootGetters }, formData) {
+    const currentProduction = rootGetters.currentProduction
+    return shotsApi.postCastingCsv(currentProduction, formData)
   }
 }
 
