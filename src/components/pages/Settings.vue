@@ -39,6 +39,14 @@
           @enter="saveSettings()"
           v-model="form.use_original_file_name"
         />
+        <h2>
+          {{ $t('settings.integrations') }}
+        </h2>
+        <text-field
+          :label="$t('settings.fields.slack_token')"
+          @enter="saveSettings()"
+          v-model="form.chat_token_slack"
+        />
 
         <button
           :class="{
@@ -98,7 +106,8 @@ export default {
       form: {
         name: '',
         hours_by_day: 0,
-        original_file_name: 'false'
+        original_file_name: 'false',
+        chat_token_slack: ''
       },
       errors: {
         save: false,
@@ -223,6 +232,7 @@ strong {
   margin-top: 2em;
   margin-bottom: 2em;
   box-shadow: rgba(0,0,0,0.15) 0px 1px 4px 2px;
+  border-radius: 1em;
 }
 
 .settings-body {
