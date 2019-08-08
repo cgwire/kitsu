@@ -1,5 +1,5 @@
 <template>
-<div class="flexrow search-field-wrapper">
+<div class="flexrow search-field-wrapper" ref="wrapper" @click="focus">
   <div class="flexrow-item">
     <search-icon class="search-icon" />
   </div>
@@ -12,6 +12,8 @@
       :placeholder="placeholder"
       @input="onSearchChange"
       @keyup.enter="onSaveClicked"
+      @focus="setFocusedStyle"
+      @blur="unsetFocusedStyle"
       v-focus
     />
   </div>
@@ -38,6 +40,11 @@ import { SaveIcon, SearchIcon } from 'vue-feather-icons'
 
 export default {
   name: 'search-field',
+
+  data () {
+    return {
+    }
+  },
 
   props: {
     placeholder: {
@@ -85,6 +92,14 @@ export default {
     clearSearch () {
       this.setValue('')
       this.onSearchChange()
+    },
+
+    setFocusedStyle () {
+      this.$refs['wrapper'].className = 'flexrow search-field-wrapper focused'
+    },
+
+    unsetFocusedStyle () {
+      this.$refs['wrapper'].className = 'flexrow search-field-wrapper'
     }
   }
 }
@@ -147,6 +162,12 @@ export default {
   border: 1px solid #DDD;
   border-radius: 2em;
   padding: 0.2em 1em;
+
+  &.focused {
+    border: 1px solid $green;
+    box-shadow: 0 0 4px 3px #EEE;
+    transition: all 0.5s ease-in-out;
+  }
 }
 
 .search-field-wrapper:focus,
