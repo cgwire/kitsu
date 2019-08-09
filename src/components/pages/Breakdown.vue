@@ -4,12 +4,20 @@
 
       <div class="breakdown-column shot-column">
         <div class="flexrow mb1">
+          <span class="filler"></span>
           <button-simple
             class="flexrow-item"
             :title="$t('main.csv.import_file')"
             icon="upload"
             :is-responsive="true"
             @click="showImportModal"
+          />
+          <button-href-link
+            class="flexrow-item"
+            :title="$t('main.csv.export_file')"
+            icon="download"
+            :is-responsive="true"
+            :path="exportUrlPath"
           />
         </div>
         <spinner class="mt1" v-if="isShotsLoading" />
@@ -138,6 +146,7 @@ import { mapGetters, mapActions } from 'vuex'
 
 import AssetBlock from './breakdown/AssetBlock'
 import AvailableAssetBlock from './breakdown/AvailableAssetBlock'
+import ButtonHrefLink from '../widgets/ButtonHrefLink.vue'
 import ButtonSimple from '../widgets/ButtonSimple'
 import Combobox from '../widgets/Combobox'
 import ErrorText from '../widgets/ErrorText'
@@ -152,6 +161,7 @@ export default {
   components: {
     AssetBlock,
     AvailableAssetBlock,
+    ButtonHrefLink,
     ButtonSimple,
     Combobox,
     ErrorText,
@@ -232,6 +242,12 @@ export default {
         if (newGroup.length > 0) result.push(newGroup)
       })
       return result
+    },
+
+    exportUrlPath () {
+      return (
+        `/api/export/csv/projects/${this.currentProduction.id}/casting.csv`
+      )
     }
   },
 
