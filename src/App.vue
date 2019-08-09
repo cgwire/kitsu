@@ -254,6 +254,10 @@ body {
     color: $white-grey;
   }
 
+  textarea.input:focus {
+    border-color: $green;
+  }
+
   strong {
     color: white;
   }
@@ -662,6 +666,10 @@ input.input:focus {
   box-shadow: none;
 }
 
+textarea.input:focus {
+  border-color: $green;
+}
+
 .button.is-primary {
   border-radius: 2px;
   background: #00B242;
@@ -874,9 +882,11 @@ input.input:focus {
 
   thead th {
     border-width: 0 0 1px;
-    &.validation-cell {
-      font-size: 0.8em;
+      font-size: 0.9em;
 
+    &.metadata-descriptor,
+    &.validation-cell {
+      .descriptor-name,
       .validation-name {
         flex: 1;
       }

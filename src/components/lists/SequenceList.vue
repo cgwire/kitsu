@@ -10,7 +10,7 @@
           <th class="description">{{ $t('shots.fields.description') }}</th>
           <th class="validation">{{ $t('main.all') }}</th>
           <th
-            class="validation"
+            class="validation validation-cell"
             :style="getValidationStyle(columnId)"
             :key="columnId"
             v-for="columnId in sortedValidationColumns"

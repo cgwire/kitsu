@@ -48,7 +48,7 @@
             v-if="isShowInfos"
           >
             <div class="flexrow">
-              <span class="flexrow-item">
+              <span class="flexrow-item descriptor-name">
               {{ descriptor.name }}
               </span>
               <chevron-down-icon

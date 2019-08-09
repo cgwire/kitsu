@@ -113,6 +113,10 @@ export default {
 
   .search-field-wrapper {
     border: 1px solid #666;
+
+    &.focused {
+      box-shadow: 0 0 4px 3px #222;
+    }
   }
 
   .search-input {
@@ -162,11 +166,12 @@ export default {
   border: 1px solid #DDD;
   border-radius: 2em;
   padding: 0.2em 1em;
+  margin-right: 1em;
+  transition: all 0.5s ease-in-out;
 
   &.focused {
     border: 1px solid $green;
     box-shadow: 0 0 4px 3px #EEE;
-    transition: all 0.5s ease-in-out;
   }
 }
 

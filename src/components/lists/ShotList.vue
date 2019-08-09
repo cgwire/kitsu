@@ -28,12 +28,14 @@
             {{ $t('shots.fields.name') }}
           </th>
           <th
-            class="description"
+            class="description flexrow"
             v-if="!isCurrentUserClient && isShowInfos"
           >
-            {{ $t('shots.fields.description') }}
+            <span class="flexrow-item">
+              {{ $t('shots.fields.description') }}
+            </span>
             <button-simple
-              class="is-small"
+              class="is-small flexrow"
               icon="plus"
               :text="''"
               @click="onAddMetadataClicked"
@@ -47,7 +49,7 @@
             v-if="isShowInfos"
           >
             <div class="flexrow">
-              <span class="flexrow-item">
+              <span class="flexrow-item descriptor-name">
               {{ descriptor.name }}
               </span>
               <chevron-down-icon

@@ -12,7 +12,7 @@
           </th>
           <th class="validation">{{ $t('main.all') }}</th>
           <th
-            class="validation"
+            class="validation validation-cell"
             :style="getValidationStyle(columnId)"
             :key="taskTypeMap[columnId].id"
             v-for="columnId in sortedValidationColumns">

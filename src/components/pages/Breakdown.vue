@@ -448,6 +448,17 @@ export default {
 </script>
 
 <style lang="scss" scoped>
+.dark {
+  .breakdown {
+    background: $dark-grey-2;
+  }
+  .breakdown-column {
+    background: $dark-grey-light;
+    border: 1px solid #222;
+    box-shadow: 0px 0px 6px #222;
+  }
+}
+
 .breakdown {
   position: fixed;
   left: 0;
