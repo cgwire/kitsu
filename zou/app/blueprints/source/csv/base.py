@@ -32,6 +32,7 @@ class BaseCsvImportResource(Resource):
                 result = self.run_import(file_path, ";")
                 return result, 201
             except KeyError as e:
+                print(e)
                 return {
                     "error": True,
                     "message": "A column is missing: %s" % e
