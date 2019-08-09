@@ -230,6 +230,7 @@ export default {
   people: {
     active: 'Présents',
     add_member_to_team: 'Ajouter un membre à l\'équipe: ',
+    create_invite: 'Créer et envoyer une invitation',
     delete_text: 'Êtes vous sûr de vouloir retirer {personName} de la base de données?',
     delete_error: 'Une erreur est survenue lors de la suppression. Il y a probablement des données liées à elle. Etes vous sur que cette personne n\'a aucune tâche assignée et n\'a fait aucun commentaire ?',
     edit_title: 'Modifier les informations de',
@@ -331,6 +332,8 @@ export default {
     info_title: 'Informations',
     language: 'Langue',
     notifications_enabled: 'Notifications mail activées',
+    notifications_slack_enabled: 'Notifications Slack activées',
+    notifications_slack_user: 'Nom d\'utilisateur Slack',
     password_title: 'Changement de mot de passe',
     timezone: 'Fuseau horaire',
     title: 'Votre Profil',
@@ -367,12 +370,14 @@ export default {
 
   settings: {
     change_logo: 'Changer logo',
+    integrations: 'Intégrations',
     logo: 'Logo du studio',
     no_logo: 'Aucun logo n\' a été positionné.',
     set_logo: 'Changer le logo',
     title: 'Paramètres',
     fields: {
       name: 'Nom du studio',
+      slack_token: 'Token Slack (optionnel)',
       hours_by_day: 'Heures par jour',
       use_original_name: 'Utiliser les noms de fichiers originaux pour le téléchargement'
     },

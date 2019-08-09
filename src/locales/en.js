@@ -361,6 +361,8 @@ export default {
     info_title: 'Information',
     language: 'Language',
     notifications_enabled: 'Email notifications enabled',
+    notifications_slack_enabled: 'Notifications Slack activées',
+    notifications_slack_user: 'Nom d\'utilisateur Slack',
     password_title: 'Change password',
     timezone: 'Timezone',
     title: 'Your Profile',
@@ -382,6 +384,7 @@ export default {
 
   settings: {
     change_logo: 'Change logo',
+    integrations: 'Integrations',
     logo: 'Studio logo',
     no_logo: 'There is no logo set.',
     set_logo: 'Set studio logo',
@@ -389,6 +392,7 @@ export default {
     fields: {
       name: 'Studio name',
       hours_by_day: 'Hours by day',
+      slack_token: 'Slack Token (Optional)',
       use_original_name: 'Use original file name for downloads'
     },
     save: {

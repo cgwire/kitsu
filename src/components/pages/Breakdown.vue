@@ -1,10 +1,27 @@
 <template>
   <div class="breakdown page">
-    <div class="breakdown-columns mt2">
+    <div class="breakdown-columns mt1">
 
       <div class="breakdown-column shot-column">
-        <spinner v-if="isShotsLoading" />
-        <div v-else>
+        <div class="flexrow mb1">
+          <span class="filler"></span>
+          <button-simple
+            class="flexrow-item"
+            :title="$t('main.csv.import_file')"
+            icon="upload"
+            :is-responsive="true"
+            @click="showImportModal"
+          />
+          <button-href-link
+            class="flexrow-item"
+            :title="$t('main.csv.export_file')"
+            icon="download"
+            :is-responsive="true"
+            :path="exportUrlPath"
+          />
+        </div>
+        <spinner class="mt1" v-if="isShotsLoading" />
+        <div class="mt1" v-else>
           <combobox
             :label="$t('shots.fields.sequence')"
             :options="castingSequenceOptions"
@@ -78,13 +95,11 @@
           {{ $t('breakdown.all_assets') }}
         </h2>
 
-        <div class="filters-area">
-          <div class="level">
-            <search-field
-              @change="onSearchChange"
-            >
-            </search-field>
-          </div>
+        <div class="filters-area flexrow">
+          <search-field
+            class="flexrow-item"
+            @change="onSearchChange"
+          />
         </div>
 
         <spinner v-if="isAssetsLoading" />
@@ -112,6 +127,17 @@
       </div>
 
     </div>
+
+    <import-modal
+      :active="modals.importing"
+      :is-loading="loading.importing"
+      :is-error="errors.importing"
+      :form-data="importCsvFormData"
+      :columns="csvColumns"
+      @fileselected="selectFile"
+      @confirm="uploadImportFile"
+      @cancel="hideImportModal"
+    />
   </div>
 </template>
 
@@ -120,8 +146,11 @@ import { mapGetters, mapActions } from 'vuex'
 
 import AssetBlock from './breakdown/AssetBlock'
 import AvailableAssetBlock from './breakdown/AvailableAssetBlock'
+import ButtonHrefLink from '../widgets/ButtonHrefLink.vue'
+import ButtonSimple from '../widgets/ButtonSimple'
 import Combobox from '../widgets/Combobox'
 import ErrorText from '../widgets/ErrorText'
+import ImportModal from '../modals/ImportModal'
 import SearchField from '../widgets/SearchField.vue'
 import ShotLine from './breakdown/ShotLine'
 import Spinner from '../widgets/Spinner'
@@ -132,8 +161,11 @@ export default {
   components: {
     AssetBlock,
     AvailableAssetBlock,
+    ButtonHrefLink,
+    ButtonSimple,
     Combobox,
     ErrorText,
+    ImportModal,
     SearchField,
     ShotLine,
     Spinner
@@ -141,13 +173,37 @@ export default {
 
   data () {
     return {
+      csvColumns: [
+        'Episode',
+        'Parent',
+        'Name',
+        'Asset Type',
+        'Asset',
+        'Occurences',
+        'Label'
+      ],
+      importCsvFormData: {},
       isLoading: false,
       isSaving: false,
       isSavingError: false,
       sequenceId: '',
       episodeId: '',
-      shotId: ''
+      shotId: '',
+      modals: {
+        importing: false
+      },
+      loading: {
+        importing: false
+      },
+      errors: {
+        importing: false
+      }
     }
+  },
+
+  mounted () {
+    this.reset()
+    this.setLastProductionScreen('breakdown')
   },
 
   computed: {
@@ -186,27 +242,29 @@ export default {
         if (newGroup.length > 0) result.push(newGroup)
       })
       return result
-    }
-  },
+    },
 
-  mounted () {
-    this.reset()
-    this.setLastProductionScreen('breakdown')
+    exportUrlPath () {
+      return (
+        `/api/export/csv/projects/${this.currentProduction.id}/casting.csv`
+      )
+    }
   },
 
   methods: {
     ...mapActions([
+      'addAssetToCasting',
       'displayMoreAssets',
       'loadShots',
       'loadAssets',
+      'removeAssetFromCasting',
       'saveCasting',
       'setAssetSearch',
       'setCastingEpisode',
       'setCastingSequence',
       'setCastingShot',
-      'addAssetToCasting',
-      'removeAssetFromCasting',
-      'setLastProductionScreen'
+      'setLastProductionScreen',
+      'uploadCastingFile'
     ]),
 
     reset () {
@@ -296,6 +354,34 @@ export default {
       if (maxHeight < (position.scrollTop + 100)) {
         this.displayMoreAssets()
       }
+    },
+
+    showImportModal () {
+      this.modals.importing = true
+    },
+
+    hideImportModal () {
+      this.modals.importing = false
+    },
+
+    selectFile (formData) {
+      this.importCsvFormData = formData
+    },
+
+    uploadImportFile () {
+      this.loading.importing = true
+      this.errors.importing = false
+      this.uploadCastingFile(this.importCsvFormData)
+        .then(() => {
+          this.loading.importing = false
+          this.hideImportModal()
+          this.reloadShots()
+        })
+        .catch(() => {
+          console.log('bad 2')
+          this.loading.importing = false
+          this.errors.importing = true
+        })
     }
   },
 
@@ -370,10 +456,10 @@ export default {
   bottom: 0;
   display: flex;
   flex-direction: column;
-}
-
-.title {
-  margin-top: 1em;
+  background: #FAFAFA;
+  padding-left: 1em;
+  padding-right: 1em;
+  padding-bottom: 1em;
 }
 
 .breakdown-columns {
@@ -386,23 +472,26 @@ export default {
 .breakdown-column {
   flex: 1;
   overflow-y: auto;
+  padding: 1em;
+  background: white;
+  border: 1px solid #EEE;
+  box-shadow: 0px 0px 6px #E0E0E0;
+  border-radius: 1em;
+  margin-left: 0.5em;
 }
 
 .breakdown-column:first-child {
   max-width: 250px;
+  margin-left: 0;
 }
 
 .shot-column {
-  padding: 0 1em 0 0;
 }
 
 .casting-column {
-  padding: 0 1em;
 }
 
 .assets-column {
-  border-left: 4px solid $white-grey;
-  padding-left: 1em;
 }
 
 .asset-type,

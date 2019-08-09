@@ -11,7 +11,8 @@ export default {
             name: 'Kitsu',
             hours_by_day: 8,
             has_avatar: false,
-            use_original_file_name: false
+            use_original_file_name: false,
+            chat_token_slack: ''
           }
           if (organisations.length > 0) organisation = organisations[0]
           organisation.use_original_file_name =
@@ -27,7 +28,8 @@ export default {
       const data = {
         name: organisation.name,
         hours_by_day: organisation.hours_by_day,
-        use_original_file_name: organisation.use_original_file_name === 'true'
+        use_original_file_name: organisation.use_original_file_name === 'true',
+        chat_token_slack: organisation.chat_token_slack
       }
       client.put(
         `/api/data/organisations/${organisation.id}`,
@@ -98,7 +100,9 @@ export default {
         locale: person.locale,
         role: person.role,
         active: person.active,
-        notifications_enabled: person.notifications_enabled === 'true'
+        notifications_enabled: person.notifications_enabled === 'true',
+        notifications_slack_enabled: person.notifications_slack_enabled === 'true',
+        notifications_slack_userid: person.notifications_slack_userid
       }
       client.put(`/api/data/persons/${person.id}`, data, (err, person) => {
         if (err) reject(err)

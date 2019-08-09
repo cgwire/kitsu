@@ -85,6 +85,19 @@
           />
         </div>
 
+        <div class="field">
+          <combobox-boolean
+            :label="$t('profile.notifications_slack_enabled')"
+            v-model="form.notifications_slack_enabled"
+          />
+        </div>
+
+        <text-field
+          :label="$t('profile.notifications_slack_user')"
+          v-model="form.notifications_slack_userid"
+          v-if="form.notifications_slack_enabled === 'true'"
+        />
+
         <button
           :class="{
             button: true,
@@ -208,6 +221,8 @@ export default {
         first_name: '',
         last_name: '',
         notifications_enabled: 'false',
+        notifications_slack_enabled: 'false',
+        notifications_slack_userid: '',
         email: '',
         phone: '',
         timezone: 'Europe/Paris',
@@ -311,6 +326,8 @@ export default {
     this.form = Object.assign(this.form, this.user)
     this.form.notifications_enabled =
       this.form.notifications_enabled ? 'true' : 'false'
+    this.form.notifications_slack_enabled =
+      this.form.notifications_slack_enabled ? 'true' : 'false'
   },
 
   metaInfo () {

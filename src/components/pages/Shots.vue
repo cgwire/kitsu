@@ -23,12 +23,12 @@
               <div class="flexrow-item"></div>
             </div>
             <div class="flexrow" v-if="isCurrentUserManager">
-              <button-link
+              <button-simple
                 class="flexrow-item"
                 :title="$t('main.csv.import_file')"
                 icon="upload"
                 :is-responsive="true"
-                :path="importPath"
+                @click="showImportModal"
               />
               <button-href-link
                 class="flexrow-item"
@@ -42,7 +42,6 @@
                 :text="$t('shots.manage')"
                 icon="plus"
                 :is-responsive="true"
-                :path="manageShotsPath"
                 @click="showManageShots"
               />
             </div>
@@ -153,9 +152,9 @@
     :active="modals.isImportDisplayed"
     :is-loading="loading.importing"
     :is-error="errors.importing"
-    :cancel-route="shotsPath"
     :form-data="shotsCsvFormData"
     :columns="columns"
+    @cancel="hideImportModal"
     @fileselected="selectFile"
     @confirm="uploadImportFile"
   />
@@ -190,7 +189,6 @@ import { mapGetters, mapActions } from 'vuex'
 
 import AddMetadataModal from '../modals/AddMetadataModal'
 import ButtonHrefLink from '../widgets/ButtonHrefLink'
-import ButtonLink from '../widgets/ButtonLink'
 import ButtonSimple from '../widgets/ButtonSimple'
 import CreateTasksModal from '../modals/CreateTasksModal'
 import DeleteModal from '../widgets/DeleteModal'
@@ -210,7 +208,6 @@ export default {
 
   components: {
     AddMetadataModal,
-    ButtonLink,
     ButtonHrefLink,
     ButtonSimple,
     CreateTasksModal,
@@ -301,15 +298,7 @@ export default {
       'shotValidationColumns',
       'shotListScrollPosition',
       'taskTypeMap'
-    ]),
-
-    importPath () {
-      return this.getPath('import-shots')
-    },
-
-    manageShotsPath () {
-      return this.getPath('manage-shots')
-    }
+    ])
   },
 
   created () {
@@ -572,7 +561,6 @@ export default {
         isDeleteAllTasksDisplayed: false,
         isDeleteDisplayed: false,
         isDeleteMetadataDisplayed: false,
-        isImportDisplayed: false,
         isNewDisplayed: false,
         isRestoreDisplayed: false
       })
@@ -591,8 +579,6 @@ export default {
       } else if (path.indexOf('restore') > 0) {
         this.shotToRestore = this.shotMap[shotId]
         this.modals.isRestoreDisplayed = true
-      } else if (path.indexOf('import') > 0) {
-        this.modals.isImportDisplayed = true
       } else if (path.indexOf('create-tasks') > 0) {
         this.modals.isCreateTasksDisplayed = true
       }
@@ -609,7 +595,7 @@ export default {
       this.$store.dispatch('uploadShotFile', (err) => {
         if (!err) {
           this.loading.importing = false
-          this.modals.isImportDisplayed = false
+          this.hideImportModal()
           this.loadShots(() => {
             this.resizeHeaders()
           })
@@ -694,8 +680,15 @@ export default {
     },
 
     hideManageShots () {
-      console.log('cancel')
       this.modals.isManageDisplayed = false
+    },
+
+    showImportModal () {
+      this.modals.isImportDisplayed = true
+    },
+
+    hideImportModal () {
+      this.modals.isImportDisplayed = false
     }
   },
 

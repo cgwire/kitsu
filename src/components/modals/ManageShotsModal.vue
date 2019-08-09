@@ -294,7 +294,7 @@ export default {
       } else {
         this.selectedEpisodeId = episodeId
         this.$router.push({
-          name: 'episode-manage-shots',
+          name: 'episode-shots',
           params: {
             production_id: this.currentProduction.id,
             episode_id: episodeId
