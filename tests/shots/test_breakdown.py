@@ -85,3 +85,54 @@ class BreakdownTestCase(ApiDBTestCase):
             assets[0],
             self.entities[0].serialize(obj_type="Asset")
         )
+
+    def test_update_asset_casting(self):
+        self.asset_id = str(self.asset.id)
+        self.asset_character_id = str(self.asset_character.id)
+        self.asset_type_character_id = str(self.asset_type_character.id)
+
+        casting = self.get("/data/assets/%s/casting" % self.asset_id)
+        self.assertListEqual(casting, [])
+        newCasting = [
+            {
+                "asset_id": self.asset_character_id,
+                "nb_occurences": 3
+            }
+        ]
+        path = "/data/assets/%s/casting" % str(self.asset_id)
+        self.put(path, newCasting, 200)
+
+        casting = self.get("/data/assets/%s/casting" % self.asset_id)
+        casting = sorted(casting, key=lambda x: x["nb_occurences"])
+        self.assertEqual(casting[0]["asset_id"], newCasting[0]["asset_id"])
+        self.assertEqual(
+            casting[0]["nb_occurences"],
+            newCasting[0]["nb_occurences"]
+        )
+        self.assertEqual(
+            casting[0]["asset_name"],
+            self.asset_character.name
+        )
+
+        cast_in = self.get("/data/assets/%s/cast-in" % self.asset_character_id)
+        self.assertEqual(len(cast_in), 1)
+        self.assertEqual(cast_in[0]["asset_name"], self.asset.name)
+
+    def test_get_casting_for_assets(self):
+        self.entities = self.generate_data(
+            Entity, 3,
+            entities_out=[],
+            entities_in=[],
+            instance_casting=[],
+            project_id=self.project.id,
+            entity_type_id=self.asset_type.id
+        )
+        self.asset.entities_out = self.entities
+        self.asset.save()
+
+        assets = self.get("data/assets/%s/assets" % self.asset.id)
+        self.assertEqual(len(assets), 3)
+        self.assertDictEqual(
+            assets[0],
+            self.entities[0].serialize(obj_type="Asset")
+        )

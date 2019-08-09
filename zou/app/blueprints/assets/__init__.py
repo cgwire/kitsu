@@ -6,6 +6,8 @@ from .resources import (
     AssetAssetInstancesResource,
     AssetResource,
     AssetAssetsResource,
+    AssetCastingResource,
+    AssetCastInResource,
     AssetShotAssetInstancesResource,
     AssetSceneAssetInstancesResource,
     AssetTypeResource,
@@ -13,7 +15,6 @@ from .resources import (
     AssetTasksResource,
     AssetTaskTypesResource,
     AllAssetsResource,
-    CastInResource,
     NewAssetResource,
     ProjectAssetsResource,
     ProjectAssetTypeAssetsResource,
@@ -31,7 +32,8 @@ routes = [
     ("/data/assets/<asset_id>/assets", AssetAssetsResource),
     ("/data/assets/<asset_id>/tasks", AssetTasksResource),
     ("/data/assets/<asset_id>/task-types", AssetTaskTypesResource),
-    ("/data/assets/<asset_id>/cast-in", CastInResource),
+    ("/data/assets/<asset_id>/cast-in", AssetCastInResource),
+    ("/data/assets/<asset_id>/casting", AssetCastingResource),
     (
         "/data/assets/<asset_id>/shot-asset-instances",
         AssetShotAssetInstancesResource

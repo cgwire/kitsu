@@ -34,7 +34,7 @@ class AssetResource(Resource):
         asset = assets_service.get_full_asset(asset_id)
         user_service.check_manager_project_access(asset["project_id"])
 
-        deleted_asset = assets_service.remove_asset(asset_id, force=force)
+        assets_service.remove_asset(asset_id, force=force)
         return '', 204
 
 
@@ -221,7 +221,29 @@ class NewAssetResource(Resource):
         )
 
 
-class CastInResource(Resource):
+class AssetCastingResource(Resource):
+
+    @jwt_required
+    def get(self, asset_id):
+        """
+        Resource to retrieve the casting of a given asset.
+        """
+        asset = assets_service.get_asset(asset_id)
+        user_service.check_project_access(asset["project_id"])
+        return breakdown_service.get_casting(asset_id)
+
+    @jwt_required
+    def put(self, asset_id):
+        """
+        Resource to allow the modification of assets linked to a asset.
+        """
+        casting = request.json
+        asset = assets_service.get_asset(asset_id)
+        user_service.check_project_access(asset["project_id"])
+        return breakdown_service.update_casting(asset_id, casting)
+
+
+class AssetCastInResource(Resource):
 
     @jwt_required
     def get(self, asset_id):
