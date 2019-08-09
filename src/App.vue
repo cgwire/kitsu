@@ -874,6 +874,13 @@ input.input:focus {
 
   thead th {
     border-width: 0 0 1px;
+    &.validation-cell {
+      font-size: 0.8em;
+
+      .validation-name {
+        flex: 1;
+      }
+    }
   }
 
   th.actions {

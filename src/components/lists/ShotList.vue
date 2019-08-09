@@ -89,7 +89,7 @@
           >
             <div class="flexrow">
               <router-link
-                class="flexrow-item"
+                class="flexrow-item validation-name"
                 style="margin-right: 0;"
                 :to="taskTypePath(columnId)"
               >
