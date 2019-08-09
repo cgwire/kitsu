@@ -27,13 +27,15 @@
           <th class="name" ref="th-name">{{ $t('assets.fields.name') }}</th>
 
           <th
-            class="description"
+            class="description flexrow"
             ref="th-description"
             v-if="!isCurrentUserClient && isShowInfos"
           >
+            <span class="flexrow-item">
             {{ $t('assets.fields.description') }}
+            </span>
             <button-simple
-              class="is-small"
+              class="is-small flexrow-item"
               icon="plus"
               :text="''"
               @click="onAddMetadataClicked"
