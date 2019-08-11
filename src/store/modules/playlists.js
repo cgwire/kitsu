@@ -1,7 +1,7 @@
 import Vue from 'vue'
 import playlistsApi from '../api/playlists'
 import { sortPlaylists } from '../../lib/sorting'
-import { removeModelFromList, updateModelFromList } from '../../lib/helpers'
+import { removeModelFromList, updateModelFromList } from '../../lib/models'
 
 import {
   LOAD_PLAYLISTS_START,

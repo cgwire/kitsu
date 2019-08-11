@@ -162,11 +162,11 @@
 import moment from 'moment-timezone'
 import { mapGetters, mapActions } from 'vuex'
 import { PlusIcon } from 'vue-feather-icons'
+import { formatDate } from '../../lib/time'
 import {
-  formatDate,
   updateModelFromList,
   removeModelFromList
-} from '../../lib/helpers'
+} from '../../lib/models'
 
 import Combobox from '../widgets/Combobox'
 import EntityThumbnail from '../widgets/EntityThumbnail'

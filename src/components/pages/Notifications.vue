@@ -167,7 +167,7 @@ import {
 } from 'vue-feather-icons'
 import marked from 'marked'
 import moment from 'moment-timezone'
-import { renderComment } from '../../lib/helpers'
+import { renderComment } from '../../lib/render'
 
 import EntityThumbnail from '../widgets/EntityThumbnail'
 import PeopleAvatar from '../widgets/PeopleAvatar'

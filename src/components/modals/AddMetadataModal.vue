@@ -82,7 +82,7 @@
 <script>
 import { mapGetters, mapActions } from 'vuex'
 import { modalMixin } from './base_modal'
-import { remove } from '../../lib/helpers'
+import { remove } from '../../lib/models'
 
 import Combobox from '../widgets/Combobox'
 import ModalFooter from './ModalFooter'

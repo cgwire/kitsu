@@ -1,7 +1,8 @@
 import Vue from 'vue'
 import peopleApi from '../api/people'
 import colors from '../../lib/colors'
-import { populateTask, clearSelectionGrid } from '../../lib/helpers'
+import { clearSelectionGrid } from '../../lib/selection'
+import { populateTask } from '../../lib/models'
 import { sortTasks, sortPeople, sortByName } from '../../lib/sorting'
 import {
   indexSearch,

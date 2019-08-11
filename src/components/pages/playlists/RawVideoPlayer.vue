@@ -20,7 +20,7 @@
  * players so the blink does not occur.
  */
 import { mapGetters } from 'vuex'
-import { roundToFrame } from '../../../lib/helpers'
+import { roundToFrame } from '../../../lib/video'
 
 export default {
   name: 'raw-video-player',

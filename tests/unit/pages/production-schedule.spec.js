@@ -3,7 +3,7 @@ import vuescroll from 'vue-scroll'
 import Vuex from 'vuex'
 
 import i18n from '../../../src/lib/i18n'
-import { range } from '../../../src/lib/helpers'
+import { range } from '../../../src/lib/time'
 
 // import ProductionSchedule from '../../../src/components/pages/ProductionSchedule'
 
@@ -12,7 +12,7 @@ localVue.use(Vuex)
 localVue.use(vuescroll)
 
 
-describe('ProductionNewsFeed', () => {
+describe('ProductionSchedule', () => {
   let store
   let newsStore
   let productionStore

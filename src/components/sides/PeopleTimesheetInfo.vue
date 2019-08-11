@@ -48,7 +48,7 @@ import { XIcon } from 'vue-feather-icons'
 import PageTitle from '../widgets/PageTitle'
 import PeopleAvatar from '../widgets/PeopleAvatar'
 import TimeSpentTaskList from '../lists/TimeSpentTaskList'
-import { monthToString } from '../../lib/helpers'
+import { monthToString } from '../../lib/time'
 
 export default {
   name: 'people-timesheet-info',

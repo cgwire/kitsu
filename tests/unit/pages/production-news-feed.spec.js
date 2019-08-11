@@ -3,7 +3,7 @@ import vuescroll from 'vue-scroll'
 import Vuex from 'vuex'
 import i18n from '../../../src/lib/i18n'
 import ProductionNewsFeed from '../../../src/components/pages/ProductionNewsFeed'
-import { range } from '../../../src/lib/helpers'
+import { range } from '../../../src/lib/time'
 
 const localVue = createLocalVue()
 localVue.use(Vuex)

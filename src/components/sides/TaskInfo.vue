@@ -248,9 +248,11 @@ import {
 } from 'vue-feather-icons'
 import {
   getTaskEntityPath,
-  getTaskPath,
+  getTaskPath
+} from '../../lib/path'
+import {
   getTaskTypeStyle
-} from '../../lib/helpers'
+} from '../../lib/render'
 
 import AddComment from '../widgets/AddComment'
 import AddPreviewModal from '../modals/AddPreviewModal'

@@ -128,7 +128,9 @@
 
 <script>
 import { mapGetters } from 'vuex'
-import { formatDate, renderComment, remove } from '../../lib/helpers'
+import { formatDate } from '../../lib/time'
+import { renderComment } from '../../lib/render'
+import { remove } from '../../lib/models'
 
 import {
   CheckSquareIcon,

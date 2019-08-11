@@ -324,7 +324,7 @@ import moment from 'moment-timezone'
 import { mapActions, mapGetters } from 'vuex'
 import { fabric } from 'fabric'
 
-import { roundToFrame } from '../../../lib/helpers'
+import { roundToFrame } from '../../../lib/video'
 import AnnotationBar from './AnnotationBar'
 import ButtonSimple from '../../widgets/ButtonSimple'
 import Combobox from '../../widgets/Combobox'

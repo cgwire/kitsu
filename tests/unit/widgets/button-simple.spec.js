@@ -39,7 +39,7 @@ describe('ButtonSimple', () => {
       const newWrapper = mount(ButtonSimple, {
         propsData: {
           icon: 'download',
-          text: 'My Button',
+          text: '',
           title: 'My Button title'
         }
       })

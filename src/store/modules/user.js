@@ -6,11 +6,11 @@ import auth from '../../lib/auth'
 import { sortTasks, sortByName } from '../../lib/sorting'
 import { indexSearch, buildTaskIndex } from '../../lib/indexing'
 import { getKeyWords } from '../../lib/filtering'
+import { populateTask } from '../../lib/models'
 import {
-  populateTask,
   buildSelectionGrid,
   clearSelectionGrid
-} from '../../lib/helpers'
+} from '../../lib/selection'
 
 import {
   USER_LOGIN,

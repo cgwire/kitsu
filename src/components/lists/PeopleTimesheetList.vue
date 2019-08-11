@@ -165,7 +165,7 @@ import {
   getMonthRange,
   getWeekRange,
   getDayRange
-} from '../../lib/helpers'
+} from '../../lib/time'
 import PeopleNameCell from '../cells/PeopleNameCell'
 import TableInfo from '../widgets/TableInfo'
 

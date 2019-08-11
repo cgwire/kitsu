@@ -77,7 +77,7 @@ import { mapGetters, mapActions } from 'vuex'
 import TextField from '../widgets/TextField'
 import Combobox from '../widgets/Combobox.vue'
 import ColorField from '../widgets/ColorField'
-import { range } from '../../lib/helpers'
+import { range } from '../../lib/time'
 
 export default {
   name: 'edit-task-type-modal',

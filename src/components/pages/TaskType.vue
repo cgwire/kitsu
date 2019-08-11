@@ -90,7 +90,7 @@ import firstBy from 'thenby'
 import moment from 'moment'
 import csv from '../../lib/csv'
 import { buildSupervisorTaskIndex, indexSearch } from '../../lib/indexing'
-import { slugify } from '../../lib/helpers'
+import { slugify } from '../../lib/string'
 import {
   applyFilters,
   getExcludingKeyWords,

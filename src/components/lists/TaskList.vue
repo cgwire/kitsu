@@ -165,7 +165,7 @@
 import Vue from 'vue'
 import { mapGetters, mapActions } from 'vuex'
 import moment from 'moment-timezone'
-import { range } from '../../lib/helpers'
+import { range } from '../../lib/time'
 import { formatListMixin } from './format_mixin'
 
 import EntityThumbnail from '../widgets/EntityThumbnail'

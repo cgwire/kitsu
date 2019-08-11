@@ -2,7 +2,7 @@ import test from '../../../src/lib/string'
 import {
   getFilledColumns,
   populateTask
-} from '../../../src/lib/helpers'
+} from '../../../src/lib/models'
 
 describe('lib/helpers', () => {
 

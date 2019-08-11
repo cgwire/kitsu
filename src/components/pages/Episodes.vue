@@ -68,7 +68,7 @@
 import moment from 'moment'
 import { mapGetters, mapActions } from 'vuex'
 import csv from '../../lib/csv'
-import { slugify } from '../../lib/helpers'
+import { slugify } from '../../lib/string'
 
 import ButtonSimple from '../widgets/ButtonSimple'
 import Combobox from '../widgets/Combobox'

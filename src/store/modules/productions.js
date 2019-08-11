@@ -1,6 +1,6 @@
 import productionsApi from '../api/productions'
 import { sortProductions, sortByName } from '../../lib/sorting'
-import { updateModelFromList, removeModelFromList } from '../../lib/helpers'
+import { updateModelFromList, removeModelFromList } from '../../lib/models'
 import {
   LOAD_PRODUCTIONS_START,
   LOAD_PRODUCTIONS_ERROR,
