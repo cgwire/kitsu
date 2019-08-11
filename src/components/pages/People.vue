@@ -91,7 +91,7 @@
 import { mapGetters, mapActions } from 'vuex'
 
 import PeopleList from '../lists/PeopleList'
-import DeleteModal from '../widgets/DeleteModal'
+import DeleteModal from '../modals/DeleteModal'
 import EditPersonModal from '../modals/EditPersonModal'
 import ImportModal from '../modals/ImportModal'
 import ButtonLink from '../widgets/ButtonLink'

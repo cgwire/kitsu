@@ -49,7 +49,7 @@
 import { mapGetters, mapActions } from 'vuex'
 import ProductionList from '../lists/ProductionList'
 import EditProductionModal from '../modals/EditProductionModal'
-import DeleteModal from '../widgets/DeleteModal'
+import DeleteModal from '../modals/DeleteModal'
 import ButtonLink from '../widgets/ButtonLink'
 import PageTitle from '../widgets/PageTitle'
 

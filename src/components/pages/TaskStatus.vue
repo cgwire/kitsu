@@ -50,7 +50,7 @@ import { mapGetters, mapActions } from 'vuex'
 import TaskStatusList from '../lists/TaskStatusList'
 import EditTaskStatusModal from '../modals/EditTaskStatusModal'
 import PageTitle from '../widgets/PageTitle'
-import DeleteModal from '../widgets/DeleteModal'
+import DeleteModal from '../modals/DeleteModal'
 import ButtonLink from '../widgets/ButtonLink'
 
 export default {

@@ -48,7 +48,7 @@
 import { mapGetters, mapActions } from 'vuex'
 import CustomActionList from '../lists/CustomActionList'
 import EditCustomActionModal from '../modals/EditCustomActionModal'
-import DeleteModal from '../widgets/DeleteModal'
+import DeleteModal from '../modals/DeleteModal'
 import PageTitle from '../widgets/PageTitle'
 import ButtonLink from '../widgets/ButtonLink'
 

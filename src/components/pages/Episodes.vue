@@ -72,7 +72,7 @@ import { slugify } from '../../lib/helpers'
 
 import ButtonSimple from '../widgets/ButtonSimple'
 import Combobox from '../widgets/Combobox'
-import DeleteModal from '../widgets/DeleteModal'
+import DeleteModal from '../modals/DeleteModal'
 import EditEpisodeModal from '../modals/EditEpisodeModal'
 import EpisodeList from '../lists/EpisodeList.vue'
 import SearchField from '../widgets/SearchField'
