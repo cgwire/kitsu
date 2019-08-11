@@ -91,14 +91,14 @@
             </div>
           </th>
           <th class="actions">
-            <button-link
+            <button-simple
               :class="{
                 'is-small': true,
                 highlighted: isEmptyTask
               }"
               icon="plus"
               :text="$t('tasks.create_tasks')"
-              :path="createTasksPath"
+              @click="$emit('create-tasks')"
               v-if="isCurrentUserManager && displayedAssets.length > 0 && !isLoading"
             />
           </th>

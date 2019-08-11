@@ -40,12 +40,12 @@
         >
           {{ $t("main.confirmation") }}
         </a>
-        <router-link
-          :to="cancelRoute"
+        <button
+          @click="$emit('cancel')"
           class="button is-link"
         >
           {{ $t("main.cancel") }}
-        </router-link>
+        </button>
         <p class="error has-text-right info-message" v-if="isError">
           {{ errorText }}
         </p>
@@ -58,28 +58,53 @@
 
 <script>
 import { mapGetters, mapActions } from 'vuex'
+import { modalMixin } from './base_modal'
 import Combobox from '../widgets/Combobox'
 import PageTitle from '../widgets/PageTitle'
 
 export default {
   name: 'create-task-modal',
+  mixins: [modalMixin],
+
   components: {
     PageTitle,
     Combobox
   },
 
-  props: [
-    'active',
-    'cancelRoute',
-    'errorText',
-    'isError',
-    'isLoading',
-    'isLoadingStay',
-    'isSuccess',
-    'onConfirmClicked',
-    'text',
-    'title'
-  ],
+  props: {
+    active: {
+      type: Boolean,
+      default: false
+    },
+    errorText: {
+      type: String,
+      default: ''
+    },
+    isError: {
+      type: Boolean,
+      default: false
+    },
+    isLoading: {
+      type: Boolean,
+      default: false
+    },
+    isLoadingStay: {
+      type: Boolean,
+      default: false
+    },
+    isSuccess: {
+      type: Boolean,
+      default: false
+    },
+    text: {
+      type: String,
+      default: ''
+    },
+    title: {
+      type: String,
+      default: ''
+    }
+  },
 
   data () {
     return {
