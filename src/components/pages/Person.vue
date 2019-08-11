@@ -9,7 +9,7 @@
             :person="person"
             :size="80"
             :font-size="30"
-            :is-link="false"
+            :is-text="false"
           />
         </div>
         <div class="flexrow-item">
@@ -63,16 +63,19 @@
         </ul>
       </div>
 
-      <search-field
-        :class="{
-          'search-field': true
-        }"
-        ref="person-tasks-search-field"
-        @change="onSearchChange"
-        @save="saveSearchQuery"
-        :can-save="true"
-        v-if="!isActiveTab('done')"
-      />
+      <div class="flexrow">
+        <search-field
+          :class="{
+            'search-field': true,
+            'flexrow-item': true
+          }"
+          ref="person-tasks-search-field"
+          @change="onSearchChange"
+          @save="saveSearchQuery"
+          :can-save="true"
+          v-if="!isActiveTab('done')"
+        />
+      </div>
 
       <div
         class="query-list"
