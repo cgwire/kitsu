@@ -534,9 +534,9 @@ td.time-spent {
 }
 
 .validation-cell {
-  min-width: 120px;
-  max-width: 120px;
-  width: 120px;
+  min-width: 150px;
+  max-width: 150px;
+  width: 150px;
   margin-right: 1em;
 }
 

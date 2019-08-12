@@ -361,7 +361,7 @@ span.person-avatar:nth-child(2) {
   display: flex;
   align-items: center;
   justify-content: center;
-  margin-right: 3px;
+  margin-right: 2px;
 }
 
 .avatar span {
@@ -375,7 +375,7 @@ span.person-avatar:nth-child(2) {
 
 .tag {
   text-transform: uppercase;
-  margin-right: 0.3em;
+  margin-right: 0.1em;
   margin-bottom: 0.3em;
 }
 
