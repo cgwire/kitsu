@@ -9,37 +9,38 @@ import store from '../store/'
 
 import Asset from '../components/pages/Asset'
 import Assets from '../components/pages/Assets'
-import AssetTypes from '../components/pages/AssetTypes'
-import Breakdown from '../components/pages/Breakdown'
-import CustomActions from '../components/pages/CustomActions'
-import Episodes from '../components/pages/Episodes'
 import Login from '../components/pages/Login'
 import Main from '../components/Main'
-import ProductionNewsFeed from '../components/pages/ProductionNewsFeed'
-import NotFound from '../components/pages/NotFound'
 import Notifications from '../components/pages/Notifications'
 import OpenProductions from '../components/pages/OpenProductions'
-import People from '../components/pages/People'
-import Person from '../components/pages/Person'
-import Productions from '../components/pages/Productions'
-import ProductionAssetTypes from '../components/pages/ProductionAssetTypes'
-import Playlist from '../components/pages/Playlist'
-import Profile from '../components/pages/Profile'
-import ResetPassword from '../components/pages/ResetPassword'
-import ResetChangePassword from '../components/pages/ResetChangePassword'
-import ProductionSchedule from '../components/pages/ProductionSchedule'
-import ServerDown from '../components/pages/ServerDown'
+import ProductionNewsFeed from '../components/pages/ProductionNewsFeed'
 import Sequences from '../components/pages/Sequences'
-import Settings from '../components/pages/Settings'
 import Shot from '../components/pages/Shot'
 import Shots from '../components/pages/Shots'
 import Team from '../components/pages/Team'
 import TaskType from '../components/pages/TaskType'
-import Task from '../components/pages/Task'
-import TaskTypes from '../components/pages/TaskTypes'
-import TaskStatus from '../components/pages/TaskStatus'
 import Timesheets from '../components/pages/Timesheets'
 import Todos from '../components/pages/Todos'
+
+const AssetTypes = () => import('../components/pages/AssetTypes')
+const Breakdown = () => import('../components/pages/Breakdown')
+const CustomActions = () => import('../components/pages/CustomActions')
+const Episodes = () => import('../components/pages/Episodes')
+const NotFound = () => import('../components/pages/NotFound')
+const Person = () => import('../components/pages/Person')
+const People = () => import('../components/pages/People')
+const Playlist = () => import('../components/pages/Playlist')
+const Productions = () => import('../components/pages/Productions')
+const ProductionAssetTypes = () => import('../components/pages/ProductionAssetTypes')
+const ProductionSchedule = () => import('../components/pages/ProductionSchedule')
+const Profile = () => import('../components/pages/Profile')
+const ResetPassword = () => import('../components/pages/ResetPassword')
+const ResetChangePassword = () => import('../components/pages/ResetChangePassword')
+const ServerDown = () => import('../components/pages/ServerDown')
+const Settings = () => import('../components/pages/Settings')
+const Task = () => import('../components/pages/Task')
+const TaskStatus = () => import('../components/pages/TaskStatus')
+const TaskTypes = () => import('../components/pages/TaskTypes')
 
 export const routes = [
 
