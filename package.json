@@ -12,7 +12,6 @@
   },
   "dependencies": {
     "async": "2.6.2",
-    "bulma": "0.7.4",
     "chart.js": "2.8.0",
     "color": "3.1.1",
     "color-hash": "1.0.3",
@@ -22,7 +21,6 @@
     "marked": "0.6.2",
     "moment": "2.24.0",
     "moment-timezone": "0.5.25",
-    "ncu": "0.2.1",
     "pify": "4.0.1",
     "superagent": "5.0.4",
     "textarea-caret": "3.1.0",
@@ -66,6 +64,7 @@
     "eslint": "5.16.0",
     "eslint-plugin-vue": "5.2.2",
     "localStorage": "1.0.4",
+    "ncu": "0.2.1",
     "node-sass": "4.12.0",
     "sass-loader": "7.1.0",
     "vue-template-compiler": "2.6.10",
