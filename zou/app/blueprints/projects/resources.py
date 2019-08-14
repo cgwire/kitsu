@@ -56,7 +56,7 @@ class ProductionTeamResource(Resource, ArgsMixin):
     @jwt_required
     def get(self, project_id):
         user_service.check_project_access(project_id)
-        project = projects_service.get_project()
+        project = projects_service.get_project_raw(project_id)
         return fields.serialize_value(project.team)
 
     @jwt_required
