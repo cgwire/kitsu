@@ -592,10 +592,13 @@ def get_output_files_for_output_type_and_entity(
     """
     Get output files created for given entity and output type.
     """
-    query = OutputFile.query \
-        .filter(OutputFile.entity_id == entity_id) \
-        .filter(OutputFile.output_type_id == output_type_id) \
-        .order_by(desc(OutputFile.revision)) \
+    query = (
+        OutputFile.query
+        .filter(OutputFile.entity_id == entity_id)
+        .filter(OutputFile.asset_instance_id == None)  # noqa. Entity only
+        .filter(OutputFile.output_type_id == output_type_id)
+        .order_by(desc(OutputFile.revision))
+    )
 
     if representation is not None:
         query = query.filter(OutputFile.representation == representation)
