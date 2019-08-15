@@ -47,7 +47,7 @@
 <script>
 import { mapGetters, mapActions } from 'vuex'
 import ButtonLink from '../widgets/ButtonLink'
-import DeleteModal from '../widgets/DeleteModal'
+import DeleteModal from '../modals/DeleteModal'
 import EditTaskTypeModal from '../modals/EditTaskTypeModal'
 import PageTitle from '../widgets/PageTitle'
 import TaskTypeList from '../lists/TaskTypeList'

@@ -104,14 +104,14 @@
             </div>
           </th>
           <th class="actions">
-            <button-link
+            <button-simple
               :class="{
                 'is-small': true,
                 highlighted: isEmptyTask
               }"
               icon="plus"
               :text="$t('tasks.create_tasks')"
-              :path="createTasksPath"
+              @click="$emit('create-tasks')"
               v-if="isCurrentUserManager"
             />
           </th>
@@ -261,7 +261,6 @@ import { entityListMixin } from './base'
 import { selectionListMixin } from './selection'
 import { formatListMixin } from './format_mixin'
 
-import ButtonLink from '../widgets/ButtonLink'
 import ButtonSimple from '../widgets/ButtonSimple'
 import DescriptionCell from '../cells/DescriptionCell'
 import EntityThumbnail from '../widgets/EntityThumbnail'
@@ -291,7 +290,6 @@ export default {
   },
 
   components: {
-    ButtonLink,
     ButtonSimple,
     ChevronDownIcon,
     DescriptionCell,

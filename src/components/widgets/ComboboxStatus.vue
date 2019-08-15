@@ -162,6 +162,7 @@ export default {
   margin: 0;
   margin-top: 1px;
   vertical-align: middle;
+  position: relative;
 }
 
 .status-combo:hover {
@@ -196,11 +197,13 @@ export default {
 .select-input {
   background: $white;
   width: 120px;
-  position: fixed;
+  position: absolute;
   border: 1px solid $light-grey-light;
   z-index: 200;
   margin-left: -1px;
   max-height: 180px;
+  top: 33px;
+  left: 0;
   overflow-y: auto;
 }
 

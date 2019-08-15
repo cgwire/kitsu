@@ -69,11 +69,11 @@
 import moment from 'moment'
 import { mapGetters, mapActions } from 'vuex'
 import csv from '../../lib/csv'
-import { slugify } from '../../lib/helpers'
+import { slugify } from '../../lib/string'
 
 import ButtonSimple from '../widgets/ButtonSimple'
 import Combobox from '../widgets/Combobox'
-import DeleteModal from '../widgets/DeleteModal'
+import DeleteModal from '../modals/DeleteModal'
 import EditSequenceModal from '../modals/EditSequenceModal'
 import SearchField from '../widgets/SearchField'
 import SequenceList from '../lists/SequenceList.vue'

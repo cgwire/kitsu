@@ -27,13 +27,15 @@
           <th class="name" ref="th-name">{{ $t('assets.fields.name') }}</th>
 
           <th
-            class="description"
+            class="description flexrow"
             ref="th-description"
             v-if="!isCurrentUserClient && isShowInfos"
           >
+            <span class="flexrow-item">
             {{ $t('assets.fields.description') }}
+            </span>
             <button-simple
-              class="is-small"
+              class="is-small flexrow-item"
               icon="plus"
               :text="''"
               @click="onAddMetadataClicked"
@@ -89,14 +91,14 @@
             </div>
           </th>
           <th class="actions">
-            <button-link
+            <button-simple
               :class="{
                 'is-small': true,
                 highlighted: isEmptyTask
               }"
               icon="plus"
               :text="$t('tasks.create_tasks')"
-              :path="createTasksPath"
+              @click="$emit('create-tasks')"
               v-if="isCurrentUserManager && displayedAssets.length > 0 && !isLoading"
             />
           </th>
@@ -532,9 +534,9 @@ td.time-spent {
 }
 
 .validation-cell {
-  min-width: 120px;
-  max-width: 120px;
-  width: 120px;
+  min-width: 150px;
+  max-width: 150px;
+  width: 150px;
   margin-right: 1em;
 }
 

@@ -1,35 +1,31 @@
 <template>
   <div class="people page fixed-page">
-    <div class="level page-header">
-      <div class="level-left">
-        <page-title class="flexrow-item" :text="$t('people.title')" />
-      </div>
+    <div class="flexrow page-header">
+      <page-title class="flexrow-item filler" :text="$t('people.title')" />
 
-      <div class="level-right">
-        <div class="level-item">
-          <button-simple
-            class="level-item"
-            :title="$t('main.csv.import_file')"
-            :is-responsive="true"
-            icon="upload"
-            @click="showImportModal"
-            v-if="isCurrentUserAdmin"
-          />
-          <button-href-link
-            class="level-item"
-            :title="$t('main.csv.export_file')"
-            icon="download"
-            path="/api/export/csv/persons.csv"
-          />
-          <button-link
-            class="level-item"
-            :text="$t('people.new_person')"
-            :is-responsive="true"
-            icon="plus"
-            path="/people/new"
-            v-if="isCurrentUserAdmin"
-          />
-        </div>
+      <div class="flexrow-item">
+        <button-simple
+          class="flexrow-item"
+          :title="$t('main.csv.import_file')"
+          :is-responsive="true"
+          icon="upload"
+          @click="showImportModal"
+          v-if="isCurrentUserAdmin"
+        />
+        <button-href-link
+          class="flexrow-item"
+          :title="$t('main.csv.export_file')"
+          icon="download"
+          path="/api/export/csv/persons.csv"
+        />
+        <button-link
+          class="flexrow-item"
+          :text="$t('people.new_person')"
+          :is-responsive="true"
+          icon="plus"
+          path="/people/new"
+          v-if="isCurrentUserAdmin"
+        />
       </div>
     </div>
 
@@ -91,7 +87,7 @@
 import { mapGetters, mapActions } from 'vuex'
 
 import PeopleList from '../lists/PeopleList'
-import DeleteModal from '../widgets/DeleteModal'
+import DeleteModal from '../modals/DeleteModal'
 import EditPersonModal from '../modals/EditPersonModal'
 import ImportModal from '../modals/ImportModal'
 import ButtonLink from '../widgets/ButtonLink'

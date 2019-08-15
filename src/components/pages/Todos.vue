@@ -83,6 +83,9 @@
         @scroll="setTodoListScrollPosition"
       />
 
+      <div v-if="isTabActive('done')">
+        &nbsp;
+      </div>
       <todos-list
         ref="done-list"
         :entries="displayedDoneTasks"
@@ -100,7 +103,7 @@
         :is-error="isTodosLoadingError"
         :time-spent-map="timeSpentMap"
         :time-spent-total="timeSpentTotal"
-        :hide-done="todosSearchText.length > 0"
+        :hide-done="todosSearchText.length > 0 || loggableDoneTasks.length === 0"
         @date-changed="onDateChanged"
         @time-spent-change="onTimeSpentChange"
         v-if="isTabActive('timesheets')"

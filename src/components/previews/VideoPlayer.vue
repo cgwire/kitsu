@@ -177,7 +177,7 @@ import {
   XIcon
 } from 'vue-feather-icons'
 
-import { roundToFrame } from '../../lib/helpers'
+import { roundToFrame } from '../../lib/video'
 import AnnotationBar from '../pages/playlists/AnnotationBar'
 import Combobox from '../widgets/Combobox'
 import Spinner from '../widgets/Spinner'

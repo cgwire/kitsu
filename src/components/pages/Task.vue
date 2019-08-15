@@ -281,7 +281,7 @@ import {
 import AddComment from '../widgets/AddComment'
 import AddPreviewModal from '../modals/AddPreviewModal'
 import Comment from '../widgets/Comment'
-import DeleteModal from '../widgets/DeleteModal'
+import DeleteModal from '../modals/DeleteModal'
 import EditCommentModal from '../modals/EditCommentModal'
 import ModelViewer from '../previews/ModelViewer'
 import PeopleAvatar from '../widgets/PeopleAvatar'

@@ -4,7 +4,7 @@ import Vuex from 'vuex'
 import moment from 'moment'
 
 import i18n from '../../../src/lib/i18n'
-import { range } from '../../../src/lib/helpers'
+import { range } from '../../../src/lib/time'
 
 import Schedule from '../../../src/components/pages/schedule/Schedule'
 

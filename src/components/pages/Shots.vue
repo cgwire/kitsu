@@ -64,6 +64,7 @@
         :is-loading="isShotsLoading || initialLoading"
         :is-error="isShotsLoadingError"
         :validation-columns="shotValidationColumns"
+        @create-tasks="showCreateTasksModal"
         @scroll="saveScrollPosition"
         @delete-all-tasks="onDeleteAllTasksClicked"
         @add-metadata="onAddMetadataClicked"
@@ -164,10 +165,10 @@
     :is-loading="loading.creatingTasks"
     :is-loading-stay="loading.creatingTasksStay"
     :is-error="errors.creatingTasks"
-    :cancel-route="shotsPath"
     :title="$t('tasks.create_tasks_shot')"
     :text="$t('tasks.create_tasks_shot_explaination')"
     :error-text="$t('tasks.create_tasks_shot_failed')"
+    @cancel="hideCreateTasksModal"
     @confirm="confirmCreateTasks"
     @confirm-and-stay="confirmCreateTasksAndStay"
   />
@@ -191,7 +192,7 @@ import AddMetadataModal from '../modals/AddMetadataModal'
 import ButtonHrefLink from '../widgets/ButtonHrefLink'
 import ButtonSimple from '../widgets/ButtonSimple'
 import CreateTasksModal from '../modals/CreateTasksModal'
-import DeleteModal from '../widgets/DeleteModal'
+import DeleteModal from '../modals/DeleteModal'
 import EditShotModal from '../modals/EditShotModal'
 import ImportModal from '../modals/ImportModal'
 import HardDeleteModal from '../modals/HardDeleteModal'
@@ -501,7 +502,7 @@ export default {
           if (err) {
             this.errors.creatingTasks = true
           } else {
-            this.modals.isCreateTasks = false
+            this.hideCreateTasksModal()
             this.loadShots(() => {
               this.resizeHeaders()
             })
@@ -579,8 +580,6 @@ export default {
       } else if (path.indexOf('restore') > 0) {
         this.shotToRestore = this.shotMap[shotId]
         this.modals.isRestoreDisplayed = true
-      } else if (path.indexOf('create-tasks') > 0) {
-        this.modals.isCreateTasksDisplayed = true
       }
     },
 
@@ -689,6 +688,14 @@ export default {
 
     hideImportModal () {
       this.modals.isImportDisplayed = false
+    },
+
+    showCreateTasksModal () {
+      this.modals.isCreateTasksDisplayed = true
+    },
+
+    hideCreateTasksModal () {
+      this.modals.isCreateTasksDisplayed = false
     }
   },
 

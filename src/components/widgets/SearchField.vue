@@ -167,7 +167,7 @@ export default {
   border-radius: 2em;
   padding: 0.2em 1em;
   margin-right: 1em;
-  transition: all 0.5s ease-in-out;
+  transition: border 0.5s ease-in-out, box-shadow 0.5s ease-in-out;
 
   &.focused {
     border: 1px solid $green;

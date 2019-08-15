@@ -68,11 +68,11 @@
 import moment from 'moment'
 import { mapGetters, mapActions } from 'vuex'
 import csv from '../../lib/csv'
-import { slugify } from '../../lib/helpers'
+import { slugify } from '../../lib/string'
 
 import ButtonSimple from '../widgets/ButtonSimple'
 import Combobox from '../widgets/Combobox'
-import DeleteModal from '../widgets/DeleteModal'
+import DeleteModal from '../modals/DeleteModal'
 import EditEpisodeModal from '../modals/EditEpisodeModal'
 import EpisodeList from '../lists/EpisodeList.vue'
 import SearchField from '../widgets/SearchField'

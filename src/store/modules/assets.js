@@ -17,9 +17,11 @@ import {
 import {
   appendSelectionGrid,
   buildSelectionGrid,
-  clearSelectionGrid,
+  clearSelectionGrid
+} from '../../lib/selection'
+import {
   getFilledColumns
-} from '../../lib/helpers'
+} from '../../lib/models'
 import {
   computeStats
 } from '../../lib/stats'

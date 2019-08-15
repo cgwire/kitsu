@@ -132,6 +132,7 @@ export default {
   border-radius: 3px;
   margin: 0;
   padding: 0.15em;
+  position: relative;
 }
 
 .task-type-combo:hover {
@@ -168,7 +169,7 @@ export default {
 .select-input {
   background: $white;
   width: 170px;
-  position: fixed;
+  position: absolute;
   border: 1px solid $light-grey-light;
   z-index: 200;
   margin-left: -1px;

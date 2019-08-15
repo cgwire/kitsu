@@ -61,12 +61,12 @@
     </table>
 
     <table class="table splitted-table" v-if="unactivePeople.length > 0">
-      <tr class="type-header">
-        <td colspan="30">
-          {{ $t('people.unactive') }}
-        </td>
-      </tr>
       <tbody>
+        <tr class="type-header">
+          <td colspan="30">
+            {{ $t('people.unactive') }}
+          </td>
+        </tr>
         <tr v-for="entry in unactivePeople" :key="entry.id">
           <people-name-cell class="name" :person="entry" />
           <td class="email">{{ entry.email }}</td>

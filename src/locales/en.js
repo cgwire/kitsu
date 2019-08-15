@@ -155,7 +155,7 @@ export default {
     history: 'history',
     info: 'Information',
     or: 'or',
-    no: 'no',
+    no: 'No',
     loading_data: 'Loading data',
     loading_error: 'An error occured while loading data.',
     logout: 'Logout',
@@ -172,7 +172,7 @@ export default {
     studio: 'Studio',
     user: 'User',
     white_theme: 'White Theme',
-    yes: 'yes',
+    yes: 'Yes',
     csv: {
       export_file: 'Export',
       error_upload: 'An error occured while uploading your CSV file.',

@@ -2,7 +2,7 @@ import {
   getDayRange,
   getMonthRange,
   getWeekRange
-} from './helpers'
+} from './time'
 import {
   getPercentage
 } from './stats'

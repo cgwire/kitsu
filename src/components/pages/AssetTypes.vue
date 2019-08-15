@@ -48,7 +48,7 @@
 import { mapGetters, mapActions } from 'vuex'
 import AssetTypeList from '../lists/AssetTypeList'
 import EditAssetTypeModal from '../modals/EditAssetTypeModal'
-import DeleteModal from '../widgets/DeleteModal'
+import DeleteModal from '../modals/DeleteModal'
 import ButtonLink from '../widgets/ButtonLink'
 import PageTitle from '../widgets/PageTitle'
 

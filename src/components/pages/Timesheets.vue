@@ -75,7 +75,8 @@ import PeopleTimesheetList from '../lists/PeopleTimesheetList'
 import PeopleTimesheetInfo from '../sides/PeopleTimesheetInfo'
 import PageTitle from '../widgets/PageTitle'
 import csv from '../../lib/csv'
-import { monthToString, range, slugify } from '../../lib/helpers'
+import { monthToString, range } from '../../lib/time'
+import { slugify } from '../../lib/string'
 
 export default {
   name: 'people',

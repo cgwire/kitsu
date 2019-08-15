@@ -9,37 +9,38 @@ import store from '../store/'
 
 import Asset from '../components/pages/Asset'
 import Assets from '../components/pages/Assets'
-import AssetTypes from '../components/pages/AssetTypes'
-import Breakdown from '../components/pages/Breakdown'
-import CustomActions from '../components/pages/CustomActions'
-import Episodes from '../components/pages/Episodes'
 import Login from '../components/pages/Login'
 import Main from '../components/Main'
-import ProductionNewsFeed from '../components/pages/ProductionNewsFeed'
-import NotFound from '../components/pages/NotFound'
 import Notifications from '../components/pages/Notifications'
 import OpenProductions from '../components/pages/OpenProductions'
-import People from '../components/pages/People'
-import Person from '../components/pages/Person'
-import Productions from '../components/pages/Productions'
-import ProductionAssetTypes from '../components/pages/ProductionAssetTypes'
-import Playlist from '../components/pages/Playlist'
-import Profile from '../components/pages/Profile'
-import ResetPassword from '../components/pages/ResetPassword'
-import ResetChangePassword from '../components/pages/ResetChangePassword'
-import ProductionSchedule from '../components/pages/ProductionSchedule'
-import ServerDown from '../components/pages/ServerDown'
+import ProductionNewsFeed from '../components/pages/ProductionNewsFeed'
 import Sequences from '../components/pages/Sequences'
-import Settings from '../components/pages/Settings'
 import Shot from '../components/pages/Shot'
 import Shots from '../components/pages/Shots'
 import Team from '../components/pages/Team'
 import TaskType from '../components/pages/TaskType'
-import Task from '../components/pages/Task'
-import TaskTypes from '../components/pages/TaskTypes'
-import TaskStatus from '../components/pages/TaskStatus'
 import Timesheets from '../components/pages/Timesheets'
 import Todos from '../components/pages/Todos'
+
+const AssetTypes = () => import('../components/pages/AssetTypes')
+const Breakdown = () => import('../components/pages/Breakdown')
+const CustomActions = () => import('../components/pages/CustomActions')
+const Episodes = () => import('../components/pages/Episodes')
+const NotFound = () => import('../components/pages/NotFound')
+const Person = () => import('../components/pages/Person')
+const People = () => import('../components/pages/People')
+const Playlist = () => import('../components/pages/Playlist')
+const Productions = () => import('../components/pages/Productions')
+const ProductionAssetTypes = () => import('../components/pages/ProductionAssetTypes')
+const ProductionSchedule = () => import('../components/pages/ProductionSchedule')
+const Profile = () => import('../components/pages/Profile')
+const ResetPassword = () => import('../components/pages/ResetPassword')
+const ResetChangePassword = () => import('../components/pages/ResetChangePassword')
+const ServerDown = () => import('../components/pages/ServerDown')
+const Settings = () => import('../components/pages/Settings')
+const Task = () => import('../components/pages/Task')
+const TaskStatus = () => import('../components/pages/TaskStatus')
+const TaskTypes = () => import('../components/pages/TaskTypes')
 
 export const routes = [
 
@@ -109,570 +110,609 @@ export const routes = [
         path: '',
         name: 'home'
       },
+
       {
-        path: '/open-productions',
+        path: 'asset-types',
+        component: AssetTypes,
+        children: [
+          { path: 'new', component: AssetTypes },
+          {
+            name: 'edit-asset-type',
+            path: 'edit/:asset_type_id',
+            component: AssetTypes
+          },
+          {
+            name: 'delete-asset-type',
+            path: 'delete/:asset_type_id',
+            component: AssetTypes
+          }
+        ]
+      },
+
+      {
+        name: 'custom-actions',
+        path: 'custom-actions',
+        component: CustomActions,
+        children: [
+          {
+            name: 'custom-actions-new',
+            path: 'new',
+            component: CustomActions
+          },
+          {
+            name: 'edit-custom-action',
+            path: 'edit/:custom_action_id',
+            component: CustomActions
+          },
+          {
+            name: 'delete-custom-action',
+            path: 'delete/:custom_action_id',
+            component: CustomActions
+          }
+        ]
+      },
+
+      {
+        name: 'notifications',
+        path: 'notifications',
+        component: Notifications
+      },
+
+      {
+        path: 'open-productions',
         component: OpenProductions,
         name: 'open-productions'
       },
 
       {
-        path: '/settings',
+        path: 'people',
+        component: People,
+        name: 'people',
+        children: [
+          { path: 'new', component: People, name: 'new-people' },
+          {
+            path: 'edit/:person_id',
+            component: People,
+            name: 'edit-person'
+          },
+          {
+            name: 'delete-person',
+            path: 'delete/:person_id',
+            component: People
+          },
+          {
+            path: ':person_id',
+            component: Person,
+            name: 'person'
+          },
+          {
+            path: ':person_id/:tab',
+            component: Person,
+            name: 'person-tab'
+          }
+        ]
+      },
+      {
+        path: '/timesheets',
+        component: Timesheets,
+        name: 'timesheets',
+        children: [
+          {
+            path: 'month/:year',
+            component: Timesheets,
+            name: 'timesheets-month'
+          },
+          {
+            path: 'month/:year/:month/persons/:person_id',
+            component: Timesheets,
+            name: 'timesheets-month-person'
+          },
+          {
+            path: 'week/:year',
+            component: Timesheets,
+            name: 'timesheets-week'
+          },
+          {
+            path: 'week/:year/:week/persons/:person_id',
+            component: Timesheets,
+            name: 'timesheets-week-person'
+          },
+          {
+            path: 'day/:year/:month',
+            component: Timesheets,
+            name: 'timesheets-day'
+          },
+          {
+            path: 'day/:year/:month/:day/persons/:person_id',
+            component: Timesheets,
+            name: 'timesheets-day-person'
+          }
+        ]
+      },
+
+      {
+        path: 'profile',
+        component: Profile,
+        name: 'profile',
+        children: [
+          {
+            path: 'change-avatar',
+            component: Profile,
+            name: 'change-avatar'
+          }
+        ]
+      },
+
+      {
+        path: 'settings',
         component: Settings,
         name: 'settings'
       },
 
-      { path: '/people', component: People, name: 'people' },
-      { path: '/people/new', component: People, name: 'new-people' },
       {
-        path: '/people/edit/:person_id',
-        component: People,
-        name: 'edit-person'
-      },
-      {
-        name: 'delete-person',
-        path: '/people/delete/:person_id',
-        component: People
-      },
-      {
-        path: '/people/:person_id',
-        component: Person,
-        name: 'person'
-      },
-      {
-        path: '/people/:person_id/:tab',
-        component: Person,
-        name: 'person-tab'
+        name: 'task-types',
+        path: 'task-types',
+        component: TaskTypes,
+        children: [
+          { path: 'new', component: TaskTypes },
+          {
+            name: 'edit-task-type',
+            path: 'edit/:task_type_id',
+            component: TaskTypes
+          },
+          {
+            name: 'delete-task-type',
+            path: 'delete/:task_type_id',
+            component: TaskTypes
+          }
+        ]
       },
 
       {
-        path: '/timesheets',
-        component: Timesheets,
-        name: 'timesheets'
-      },
-      {
-        path: '/timesheets/month/:year',
-        component: Timesheets,
-        name: 'timesheets-month'
-      },
-      {
-        path: '/timesheets/month/:year/:month/persons/:person_id',
-        component: Timesheets,
-        name: 'timesheets-month-person'
-      },
-      {
-        path: '/timesheets/week/:year',
-        component: Timesheets,
-        name: 'timesheets-week'
-      },
-      {
-        path: '/timesheets/week/:year/:week/persons/:person_id',
-        component: Timesheets,
-        name: 'timesheets-week-person'
-      },
-      {
-        path: '/timesheets/day/:year/:month',
-        component: Timesheets,
-        name: 'timesheets-day'
-      },
-      {
-        path: '/timesheets/day/:year/:month/:day/persons/:person_id',
-        component: Timesheets,
-        name: 'timesheets-day-person'
+        name: 'task-status',
+        path: 'task-status',
+        component: TaskStatus,
+        children: [
+          {
+            name: 'new-task-status',
+            path: 'new',
+            component: TaskStatus
+          },
+          {
+            name: 'edit-task-status',
+            path: 'edit/:task_status_id',
+            component: TaskStatus
+          },
+          {
+            name: 'delete-task-status',
+            path: 'delete/:task_status_id',
+            component: TaskStatus
+          }
+        ]
       },
 
       {
-        path: '/productions',
-        component: Productions,
-        name: 'productions'
-      },
-      {
-        path: '/productions/new',
-        component: Productions,
-        name: 'productions-new'
-      },
-      {
-        path: '/productions/edit/:production_edit_id',
-        component: Productions,
-        name: 'edit-production'
-      },
-      {
-        path: '/productions/delete/:production_delete_id',
-        component: Productions,
-        name: 'delete-production'
+        path: 'todos',
+        component: Todos,
+        name: 'todos',
+        children: [
+          { path: ':tab', component: Todos, name: 'todos-tab' }
+        ]
       },
 
       {
-        path: '/productions/:production_id/breakdown',
-        component: Breakdown,
-        name: 'breakdown'
-      },
-      {
-        path: '/productions/:production_id/breakdown/:shot_id',
-        component: Breakdown,
-        name: 'breakdown-shot'
-      },
-      {
-        path: '/productions/:production_id/episodes/:episode_id/breakdown',
-        component: Breakdown,
-        name: 'episode-breakdown'
-      },
-      {
-        path: '/productions/:production_id/episodes/:episode_id/breakdown/:shot_id',
-        component: Breakdown,
-        name: 'episode-breakdown-shot'
+        path: 'productions',
+        component: Productions,
+        name: 'productions',
+        children: [
+          {
+            path: 'new',
+            component: Productions,
+            name: 'productions-new'
+          },
+          {
+            path: 'edit/:production_edit_id',
+            component: Productions,
+            name: 'edit-production'
+          },
+          {
+            path: 'delete/:production_delete_id',
+            component: Productions,
+            name: 'delete-production'
+          }
+        ]
       },
 
       {
-        path: '/productions/:production_id/team',
+        path: 'productions/:production_id/team',
         component: Team,
         name: 'team'
       },
 
       {
-        path: '/productions/:production_id/news-feed',
+        path: 'productions/:production_id/news-feed',
         component: ProductionNewsFeed,
         name: 'news-feed'
       },
 
       {
-        path: '/productions/:production_id/schedule',
+        path: 'productions/:production_id/schedule',
         component: ProductionSchedule,
         name: 'schedule'
       },
+
       {
-        path: '/productions/:production_id/episodes/:episode_id/schedule',
-        component: ProductionSchedule,
-        name: 'episode-schedule'
+        path: 'productions/:production_id/playlists',
+        component: Playlist,
+        name: 'playlists',
+        children: [
+          {
+            name: 'playlist',
+            path: ':playlist_id',
+            component: Playlist
+          },
+          {
+            name: 'delete-playlist',
+            path: ':playlist_id/delete',
+            component: Playlist
+          },
+          {
+            name: 'edit-playlist',
+            path: ':playlist_id/edit',
+            component: Playlist
+          }
+        ]
       },
 
       {
-        path: '/productions/:production_id/assets',
-        component: Assets,
-        name: 'assets'
-      },
-      {
-        path: '/productions/:production_id/assets/new',
-        component: Assets,
-        name: 'new-asset'
-      },
-      {
-        path:
-        '/productions/:production_id/assets/:asset_id',
-        component: Asset,
-        name: 'asset'
-      },
-      {
-        path:
-        '/productions/:production_id/assets/edit/:asset_id',
-        component: Assets,
-        name: 'edit-asset'
-      },
-      {
-        path: '/productions/:production_id/assets/delete/:asset_id',
-        component: Assets,
-        name: 'delete-asset'
-      },
-      {
-        path: '/productions/:production_id/assets/restore/:asset_id',
-        component: Assets,
-        name: 'restore-asset'
-      },
-      {
-        path: '/productions/:production_id/assets/create-tasks',
-        component: Assets,
-        name: 'create-asset-tasks'
-      },
-      {
-        path: '/productions/:production_id/assets/delete-all-tasks/:task_type_id',
-        component: Assets,
-        name: 'delete-all-asset-tasks'
+        path: 'productions/:production_id/breakdown',
+        component: Breakdown,
+        name: 'breakdown',
+        children: [
+          {
+            path: ':shot_id',
+            component: Breakdown,
+            name: 'breakdown-shot'
+          }
+        ]
       },
 
       {
-        path: '/productions/:production_id/episodes/:episode_id/assets',
+        path: 'productions/:production_id/assets',
         component: Assets,
-        name: 'episode-assets'
-      },
-      {
-        path: '/productions/:production_id/episodes/:episode_id/assets/new',
-        component: Assets,
-        name: 'episode-new-asset'
-      },
-      {
-        path:
-        '/productions/:production_id/episodes/:episode_id/assets/:asset_id',
-        component: Asset,
-        name: 'episode-asset'
-      },
-      {
-        path:
-        '/productions/:production_id/episodes/:episode_id/assets/edit/:asset_id',
-        component: Assets,
-        name: 'episode-edit-asset'
-      },
-      {
-        path: '/productions/:production_id/episodes/:episode_id/assets/delete/:asset_id',
-        component: Assets,
-        name: 'episode-delete-asset'
-      },
-      {
-        path: '/productions/:production_id/episodes/:episode_id/assets/restore/:asset_id',
-        component: Assets,
-        name: 'episode-restore-asset'
-      },
-      {
-        path: '/productions/:production_id/episodes/:episode_id/assets/create-tasks',
-        component: Assets,
-        name: 'episode-create-asset-tasks'
-      },
-      {
-        path: '/productions/:production_id/episodes/:episode_id/assets/delete-all-tasks/:task_type_id',
-        component: Assets,
-        name: 'episode-delete-all-asset-tasks'
+        name: 'assets',
+        children: [
+          {
+            path: 'new',
+            component: Assets,
+            name: 'new-asset'
+          },
+          {
+            path:
+            ':asset_id',
+            component: Asset,
+            name: 'asset'
+          },
+          {
+            path:
+            'edit/:asset_id',
+            component: Assets,
+            name: 'edit-asset'
+          },
+          {
+            path: 'delete/:asset_id',
+            component: Assets,
+            name: 'delete-asset'
+          },
+          {
+            path: 'restore/:asset_id',
+            component: Assets,
+            name: 'restore-asset'
+          },
+          {
+            path: 'delete-all-tasks/:task_type_id',
+            component: Assets,
+            name: 'delete-all-asset-tasks'
+          }
+        ]
       },
 
       {
-        path: '/productions/:production_id/asset-types',
+        path: 'productions/:production_id/shots',
+        component: Shots,
+        name: 'shots',
+        children: [
+          {
+            path: 'delete-all-tasks/:task_type_id',
+            component: Shots,
+            name: 'delete-all-shot-tasks'
+          },
+          {
+            path: 'edit/:shot_id',
+            component: Shots,
+            name: 'edit-shot'
+          },
+          {
+            path: 'delete/:shot_id',
+            component: Shots,
+            name: 'delete-shot'
+          },
+          {
+            path: 'restore/:shot_id',
+            component: Shots,
+            name: 'restore-shot'
+          },
+          {
+            path: ':shot_id',
+            component: Shot,
+            name: 'shot'
+          }
+        ]
+      },
+
+      {
+        path: 'productions/:production_id/sequences',
+        component: Sequences,
+        name: 'sequences',
+        children: [
+          {
+            path: 'edit/:sequence_id',
+            component: Sequences,
+            name: 'edit-sequence'
+          },
+          {
+            path: 'delete/:sequence_id',
+            component: Sequences,
+            name: 'delete-sequence'
+          }
+        ]
+      },
+
+      {
+        path: 'productions/:production_id/asset-types',
         component: ProductionAssetTypes,
         name: 'production-asset-types'
       },
+
       {
-        path: '/productions/:production_id/episodes/:episode_id/asset-types',
+        path: 'productions/:production_id/:type/task-types/:task_type_id',
+        component: TaskType,
+        name: 'task-type'
+      },
+
+      {
+        name: 'task',
+        path: 'productions/:production_id/:type/tasks/:task_id',
+        component: Task,
+        children: [
+          {
+            name: 'task-delete',
+            path: 'delete',
+            component: Task
+          },
+          {
+            name: 'task-change-preview',
+            path: 'comments/:comment_id/change-preview',
+            component: Task
+          },
+          {
+            name: 'task-preview',
+            path: 'previews/:preview_id',
+            component: Task
+          },
+          {
+            name: 'task-edit-comment',
+            path: 'comments/:comment_id/edit',
+            component: Task
+          },
+          {
+            name: 'task-delete-comment',
+            path: 'comments/:comment_id/delete',
+            component: Task
+          }
+        ]
+      },
+
+      {
+        path: 'productions/:production_id/episodes',
+        component: Episodes,
+        name: 'episodes',
+        children: [
+          {
+            path: 'edit/:episode_id',
+            component: Episodes,
+            name: 'edit-episode'
+          },
+          {
+            path: 'delete/:episode_id',
+            component: Episodes,
+            name: 'delete-episode'
+          }
+        ]
+      },
+
+      {
+        path: 'productions/:production_id/episodes/:episode_id/schedule',
+        component: ProductionSchedule,
+        name: 'episode-schedule'
+      },
+      {
+        path: 'productions/:production_id/episodes/:episode_id/playlists',
+        component: Playlist,
+        name: 'episode-playlists',
+        children: [
+          {
+            name: 'episode-playlist',
+            path: ':playlist_id',
+            component: Playlist
+          },
+          {
+            name: 'episode-delete-playlist',
+            path: ':playlist_id/delete',
+            component: Playlist
+          },
+          {
+            name: 'episode-edit-playlist',
+            path: ':playlist_id/edit',
+            component: Playlist
+          }
+        ]
+      },
+
+      {
+        path: 'productions/:production_id/episodes/:episode_id/breakdown',
+        component: Breakdown,
+        name: 'episode-breakdown',
+        children: [
+          {
+            path: 'shot_id',
+            component: Breakdown,
+            name: 'episode-breakdown-shot'
+          }
+        ]
+      },
+
+      {
+        path: 'productions/:production_id/episodes/:episode_id/assets',
+        component: Assets,
+        name: 'episode-assets',
+        children: [
+          {
+            path: 'new',
+            component: Assets,
+            name: 'episode-new-asset'
+          },
+          {
+            path: ':asset_id',
+            component: Asset,
+            name: 'episode-asset'
+          },
+          {
+            path: 'edit/:asset_id',
+            component: Assets,
+            name: 'episode-edit-asset'
+          },
+          {
+            path: 'delete/:asset_id',
+            component: Assets,
+            name: 'episode-delete-asset'
+          },
+          {
+            path: 'restore/:asset_id',
+            component: Assets,
+            name: 'episode-restore-asset'
+          },
+          {
+            path: 'delete-all-tasks/:task_type_id',
+            component: Assets,
+            name: 'episode-delete-all-asset-tasks'
+          }
+        ]
+      },
+
+      {
+        path: 'productions/:production_id/episodes/:episode_id/shots',
+        component: Shots,
+        name: 'episode-shots',
+        children: [
+          {
+            path: 'shots/manage',
+            component: Shots,
+            name: 'episode-manage-shots'
+          },
+          {
+            path: 'delete-all-tasks/:task_type_id',
+            component: Shots,
+            name: 'episode-delete-all-shot-tasks'
+          },
+          {
+            path: 'edit/:shot_id',
+            component: Shots,
+            name: 'episode-edit-shot'
+          },
+          {
+            path: 'delete/:shot_id',
+            component: Shots,
+            name: 'episode-delete-shot'
+          },
+          {
+            path: 'shots/restore/:shot_id',
+            component: Shots,
+            name: 'episode-restore-shot'
+          },
+          {
+            path: ':shot_id',
+            component: Shot,
+            name: 'episode-shot'
+          }
+        ]
+      },
+
+      {
+        path: 'productions/:production_id/episodes/:episode_id/asset-types',
         component: ProductionAssetTypes,
         name: 'episode-production-asset-types'
       },
 
       {
-        path: '/productions/:production_id/shots',
-        component: Shots,
-        name: 'shots'
-      },
-      {
-        path: '/productions/:production_id/shots/create-tasks',
-        component: Shots,
-        name: 'create-shot-tasks'
-      },
-      {
-        path: '/productions/:production_id/shots/delete-all-tasks/:task_type_id',
-        component: Shots,
-        name: 'delete-all-shot-tasks'
+        path: 'productions/:production_id/episodes/:episode_id/sequences',
+        component: Sequences,
+        name: 'episode-sequences',
+        children: [
+          {
+            path: 'edit/:sequence_id',
+            component: Sequences,
+            name: 'episode-edit-sequence'
+          },
+          {
+            path: 'delete/:sequence_id',
+            component: Sequences,
+            name: 'episode-delete-sequence'
+          }
+        ]
       },
 
       {
-        path: '/productions/:production_id/shots/edit/:shot_id',
-        component: Shots,
-        name: 'edit-shot'
-      },
-      {
-        path: '/productions/:production_id/shots/delete/:shot_id',
-        component: Shots,
-        name: 'delete-shot'
-      },
-      {
-        path: '/productions/:production_id/shots/restore/:shot_id',
-        component: Shots,
-        name: 'restore-shot'
-      },
-      {
-        path: '/productions/:production_id/shots/:shot_id',
-        component: Shot,
-        name: 'shot'
-      },
-
-      {
-        path: '/productions/:production_id/episodes/:episode_id/shots',
-        component: Shots,
-        name: 'episode-shots'
-      },
-      {
-        path: '/productions/:production_id/episodes/:episode_id/shots/manage',
-        component: Shots,
-        name: 'episode-manage-shots'
-      },
-      {
-        path: '/productions/:production_id/episodes/:episode_id/shots/create-tasks',
-        component: Shots,
-        name: 'episode-create-shot-tasks'
-      },
-      {
-        path: '/productions/:production_id/episodes/:episode_id/shots/delete-all-tasks/:task_type_id',
-        component: Shots,
-        name: 'episode-delete-all-shot-tasks'
-      },
-      {
-        path: '/productions/:production_id/episodes/:episode_id/shots/edit/:shot_id',
-        component: Shots,
-        name: 'episode-edit-shot'
-      },
-      {
-        path: '/productions/:production_id/episodes/:episode_id/shots/delete/:shot_id',
-        component: Shots,
-        name: 'episode-delete-shot'
-      },
-      {
-        path: '/productions/:production_id/episodes/:episode_id/shots/restore/:shot_id',
-        component: Shots,
-        name: 'episode-restore-shot'
-      },
-      {
-        path: '/productions/:production_id/episodes/:episode_id/shots/:shot_id',
-        component: Shot,
-        name: 'episode-shot'
-      },
-
-      {
-        path: '/productions/:production_id/sequences',
-        component: Sequences,
-        name: 'sequences'
-      },
-      {
-        path: '/productions/:production_id/sequences/edit/:sequence_id',
-        component: Sequences,
-        name: 'edit-sequence'
-      },
-      {
-        path: '/productions/:production_id/sequences/delete/:sequence_id',
-        component: Sequences,
-        name: 'delete-sequence'
-      },
-      {
-        path: '/productions/:production_id/episodes/:episode_id/sequences',
-        component: Sequences,
-        name: 'episode-sequences'
-      },
-      {
-        path: '/productions/:production_id/episodes/:episode_id/sequences/edit/:sequence_id',
-        component: Sequences,
-        name: 'episode-edit-sequence'
-      },
-      {
-        path: '/productions/:production_id/episodes/:episode_id/sequences/delete/:sequence_id',
-        component: Sequences,
-        name: 'episode-delete-sequence'
-      },
-
-      {
-        path: '/productions/:production_id/episodes',
-        component: Episodes,
-        name: 'episodes'
-      },
-      {
-        path: '/productions/:production_id/episodes/edit/:episode_id',
-        component: Episodes,
-        name: 'edit-episode'
-      },
-      {
-        path: '/productions/:production_id/episodes/delete/:episode_id',
-        component: Episodes,
-        name: 'delete-episode'
-      },
-
-      {
-        path: '/productions/:production_id/:type/task-types/:task_type_id',
-        component: TaskType,
-        name: 'task-type'
-      },
-      {
-        path: '/productions/:production_id/episodes/:episode_id/:type/task-types/:task_type_id',
+        path: 'productions/:production_id/episodes/:episode_id/:type/task-types/:task_type_id',
         component: TaskType,
         name: 'episode-task-type'
       },
 
       {
-        name: 'task',
-        path: '/productions/:production_id/:type/tasks/:task_id',
-        component: Task
-      },
-      {
-        name: 'task-delete',
-        path: '/productions/:production_id/:type/tasks/:task_id/delete',
-        component: Task
-      },
-
-      {
-        name: 'task-change-preview',
-        path: '/productions/:production_id/:type/tasks/:task_id/comments/:comment_id/change-preview',
-        component: Task
-      },
-      {
-        name: 'task-preview',
-        path: '/productions/:production_id/:type/tasks/:task_id/previews/:preview_id',
-        component: Task
-      },
-      {
-        name: 'task-edit-comment',
-        path: '/productions/:production_id/:type/tasks/:task_id/comments/:comment_id/edit',
-        component: Task
-      },
-      {
-        name: 'task-delete-comment',
-        path: '/productions/:production_id/:type/tasks/:task_id/comments/:comment_id/delete',
-        component: Task
-      },
-
-      {
+        path: 'productions/:production_id/episodes/:episode_id/:type/tasks/:task_id',
         name: 'episode-task',
-        path: '/productions/:production_id/episodes/:episode_id/:type/tasks/:task_id',
-        component: Task
-      },
-      {
-        name: 'episode-task-delete',
-        path: '/productions/:production_id/episodes/:episode_id/:type/tasks/:task_id/delete',
-        component: Task
-      },
-
-      {
-        name: 'episode-task-change-preview',
-        path: '/productions/:production_id/episodes/:episode_id/:type/tasks/:task_id/comments/:comment_id/change-preview',
-        component: Task
-      },
-      {
-        name: 'episode-task-preview',
-        path: '/productions/:production_id/episodes/:episode_id/:type/tasks/:task_id/previews/:preview_id',
-        component: Task
-      },
-      {
-        name: 'episode-task-edit-comment',
-        path: '/productions/:production_id/episodes/:episode_id/:type/tasks/:task_id/comments/:comment_id/edit',
-        component: Task
-      },
-      {
-        name: 'episode-task-delete-comment',
-        path: '/productions/:production_id/episodes/:episode_id/:type/tasks/:task_id/comments/:comment_id/delete',
-        component: Task
-      },
-
-      { path: '/asset-types', component: AssetTypes },
-      { path: '/asset-types/new', component: AssetTypes },
-      {
-        name: 'edit-asset-type',
-        path: '/asset-types/edit/:asset_type_id',
-        component: AssetTypes
-      },
-      {
-        name: 'delete-asset-type',
-        path: '/asset-types/delete/:asset_type_id',
-        component: AssetTypes
-      },
-
-      { path: '/task-types', component: TaskTypes },
-      { path: '/task-types/new', component: TaskTypes },
-      {
-        name: 'edit-task-type',
-        path: '/task-types/edit/:task_type_id',
-        component: TaskTypes
-      },
-      {
-        name: 'delete-task-type',
-        path: '/task-types/delete/:task_type_id',
-        component: TaskTypes
-      },
-
-      {
-        name: 'task-status',
-        path: '/task-status',
-        component: TaskStatus
-      },
-      {
-        name: 'new-task-status',
-        path: '/task-status/new',
-        component: TaskStatus
-      },
-      {
-        name: 'edit-task-status',
-        path: '/task-status/edit/:task_status_id',
-        component: TaskStatus
-      },
-      {
-        name: 'delete-task-status',
-        path: '/task-status/delete/:task_status_id',
-        component: TaskStatus
-      },
-      {
-        name: 'task-types',
-        path: '/task-types',
-        component: TaskTypes
-      },
-
-      {
-        name: 'custom-actions',
-        path: '/custom-actions',
-        component: CustomActions
-      },
-      {
-        name: 'custom-actions-new',
-        path: '/custom-actions/new',
-        component: CustomActions
-      },
-      {
-        name: 'edit-custom-action',
-        path: '/custom-actions/edit/:custom_action_id',
-        component: CustomActions
-      },
-      {
-        name: 'delete-custom-action',
-        path: '/custom-actions/delete/:custom_action_id',
-        component: CustomActions
-      },
-
-      { path: '/todos', component: Todos, name: 'todos' },
-      { path: '/todos/:tab', component: Todos, name: 'todos-tab' },
-
-      { path: '/profile', component: Profile, name: 'profile' },
-      {
-        path: '/profile/change-avatar',
-        component: Profile,
-        name: 'change-avatar'
-      },
-
-      {
-        name: 'playlists',
-        path: '/productions/:production_id/playlists',
-        component: Playlist
-      },
-      {
-        name: 'playlist',
-        path: '/productions/:production_id/playlists/:playlist_id',
-        component: Playlist
-      },
-      {
-        name: 'delete-playlist',
-        path: '/productions/:production_id/playlists/:playlist_id/delete',
-        component: Playlist
-      },
-      {
-        name: 'edit-playlist',
-        path: '/productions/:production_id/playlists/:playlist_id/edit',
-        component: Playlist
-      },
-      {
-        name: 'episode-playlists',
-        path: '/productions/:production_id/episodes/:episode_id/playlists',
-        component: Playlist
-      },
-      {
-        name: 'episode-playlist',
-        path: '/productions/:production_id/episodes/:episode_id/playlists/:playlist_id',
-        component: Playlist
-      },
-      {
-        name: 'episode-delete-playlist',
-        path: '/productions/:production_id/playlists/:playlist_id/delete',
-        component: Playlist
-      },
-      {
-        name: 'episode-edit-playlist',
-        path: '/productions/:production_id/playlists/:playlist_id/edit',
-        component: Playlist
-      },
-
-      {
-        name: 'notifications',
-        path: '/notifications',
-        component: Notifications
+        component: Task,
+        children: [
+          {
+            name: 'episode-task-delete',
+            path: 'delete',
+            component: Task
+          },
+          {
+            name: 'episode-task-change-preview',
+            path: 'comments/:comment_id/change-preview',
+            component: Task
+          },
+          {
+            name: 'episode-task-preview',
+            path: 'previews/:preview_id',
+            component: Task
+          },
+          {
+            name: 'episode-task-edit-comment',
+            path: 'comments/:comment_id/edit',
+            component: Task
+          },
+          {
+            name: 'episode-task-delete-comment',
+            path: 'comments/:comment_id/delete',
+            component: Task
+          }
+        ]
       }
     ]
   },
+
   {
     path: '/login',
     component: Login,
@@ -693,6 +733,7 @@ export const routes = [
     component: ServerDown,
     name: 'server-down'
   },
+
   {
     path: '/*',
     component: NotFound,
