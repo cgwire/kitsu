@@ -60,7 +60,7 @@
 
       <shot-list
         ref="shot-list"
-        :entries="displayedShots"
+        :displayed-shots="displayedShotsBySequence"
         :is-loading="isShotsLoading || initialLoading"
         :is-error="isShotsLoadingError"
         :validation-columns="shotValidationColumns"
@@ -277,7 +277,7 @@ export default {
       'currentEpisode',
       'currentProduction',
       'deleteShot',
-      'displayedShots',
+      'displayedShotsBySequence',
       'editShot',
       'episodeMap',
       'episodes',

@@ -20,7 +20,8 @@ import {
   clearSelectionGrid
 } from '../../lib/selection'
 import {
-  getFilledColumns
+  getFilledColumns,
+  groupEntitiesByParents
 } from '../../lib/models'
 import {
   computeStats
@@ -292,6 +293,10 @@ const getters = {
   displayedEpisodes: state => state.displayedEpisodes,
   displayedEpisodesLength: state => state.displayedEpisodesLength,
   shotFilledColumns: state => state.shotFilledColumns,
+
+  displayedShotsBySequence: state => {
+    return groupEntitiesByParents(state.displayedShots, 'sequence_name')
+  },
 
   isShotsLoading: state => state.isShotsLoading,
   isShotsLoadingError: state => state.isShotsLoadingError,

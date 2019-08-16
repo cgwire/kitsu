@@ -446,33 +446,17 @@ export default {
     },
 
     resizeHeaders () {
-      if (
-        this.$refs['body-tbody'] &&
-        this.$refs['body-tbody'][0] &&
-        this.$refs['body-tbody'][0].children.length > 0
-      ) {
-        if (this.$refs['th-episode']) {
-          const episodeWidth =
-            this.$refs['body-tbody'][0].children[1].children[0].offsetWidth
-          this.$refs['th-episode'].style['min-width'] = `${episodeWidth}px`
-          const nameWidth =
-            this.$refs['body-tbody'][0].children[1].children[2].offsetWidth
-          this.$refs['th-name'].style['min-width'] =
-            `${Math.max(nameWidth, 120)}px`
-        } else {
-          const thumbnailWidth =
-            this.$refs['body-tbody'][0].children[1].children[0].offsetWidth
-          this.$refs['th-thumbnail'].style['min-width'] = `${thumbnailWidth}px`
-          const nameWidth =
-            this.$refs['body-tbody'][0].children[1].children[1].offsetWidth
-          this.$refs['th-name'].style['min-width'] = `${nameWidth}px`
-          if (this.$refs['th-description']) {
-            const descriptionWidth =
-              this.$refs['body-tbody'][0].children[1].children[2].offsetWidth
-            this.$refs['th-description'].style['min-width'] =
-              `${descriptionWidth}px`
-          }
-        }
+      if (this.$refs['th-episode']) {
+        this.resizeSplittedTableHeaders([
+          { index: 0, name: 'episode' },
+          { index: 1, name: 'thumbnail' },
+          { index: 2, name: 'name' }
+        ])
+      } else {
+        this.resizeSplittedTableHeaders([
+          { index: 0, name: 'thumbnail' },
+          { index: 1, name: 'name' }
+        ])
       }
     }
   },
@@ -579,9 +563,6 @@ thead tr a {
   padding-top: 1em;
   position: relative;
   z-index: 1;
-}
-
-tbody:first-child tr:first-child {
 }
 
 tbody:last-child .empty-line:last-child {

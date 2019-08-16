@@ -21,9 +21,6 @@
       <thead>
         <tr>
           <th class="thumbnail"></th>
-          <th class="sequence" ref="th-sequence" >
-            {{ $t('shots.fields.sequence') }}
-          </th>
           <th class="name shot-name" ref="th-shot" >
             {{ $t('shots.fields.name') }}
           </th>
@@ -123,8 +120,7 @@
   <table-info
     :is-loading="isLoading"
     :is-error="isError"
-  >
-  </table-info>
+  />
 
   <div
     class="has-text-centered"
@@ -156,18 +152,28 @@
     v-scroll="onBodyScroll"
     v-if="!isLoading"
   >
-    <table class="table">
-      <tbody ref="body-tbody">
+    <table
+      class="table splitted-table unselectable"
+      v-if="isListVisible"
+    >
+      <tbody
+        class="tbody"
+        ref="body-tbody"
+        :key="group[0] ? group[0].sequence_id + group[0].canceled : ''"
+        v-for="(group, k) in displayedShots"
+      >
+        <tr class="type-header">
+          <td colspan="30">
+            {{ group[0] ? group[0].sequence_name : '' }}
+          </td>
+        </tr>
         <tr
           :key="shot.id"
           :class="{canceled: shot.canceled}"
-          v-for="(shot, i) in entries"
+          v-for="(shot, i) in group"
         >
           <td class="thumbnail">
             <entity-thumbnail :entity="shot" />
-          </td>
-          <td :class="{name: true, bold: !shot.canceled}">
-            {{ shot.sequence_name }}
           </td>
           <td :class="{'shot-name': true, name: true, bold: !shot.canceled}">
             <router-link :to="shotPath(shot.id)">
@@ -212,14 +218,14 @@
               'validation-cell': !hiddenColumns[columnId],
               'hidden-validation-cell': hiddenColumns[columnId]
             }"
-            :key="columnId + '-' + shot.id"
-            :ref="'validation-' + i + '-' + j"
+            :key="`${columnId}-${shot.id}`"
+            :ref="`validation-${getIndex(i, k)}-${j}`"
             :column="taskTypeMap[columnId]"
             :entity="shot"
             :task-test="taskMap[shot.validations[columnId]]"
             :minimized="hiddenColumns[columnId]"
-            :selected="shotSelectionGrid[i][j]"
-            :rowX="i"
+            :selected="shotSelectionGrid[getIndex(i, k)][j]"
+            :rowX="getIndex(i, k)"
             :columnY="j"
             :is-assignees="isShowAssignations"
             @select="onTaskSelected"
@@ -227,14 +233,16 @@
             v-for="(columnId, j) in sortedValidationColumns"
             v-if="!isLoading && (!hiddenColumns[columnId] || isShowInfos)"
           />
-          <row-actions v-if="isCurrentUserManager"
+          <row-actions
             :entry="shot"
             :edit-route="editPath(shot.id)"
             :restore-route="restorePath(shot.id)"
             :delete-route="deletePath(shot.id)"
+            v-if="isCurrentUserManager"
           />
           <td class="actions" v-else></td>
         </tr>
+        <tr class="empty-line"><td colspan="30"></td></tr>
       </tbody>
     </table>
   </div>
@@ -274,12 +282,24 @@ export default {
   name: 'shot-list',
   mixins: [entityListMixin, selectionListMixin, formatListMixin],
 
-  props: [
-    'entries',
-    'isLoading',
-    'isError',
-    'validationColumns'
-  ],
+  props: {
+    displayedShots: {
+      type: Array,
+      default: () => []
+    },
+    isError: {
+      type: Boolean,
+      default: false
+    },
+    isLoading: {
+      type: Boolean,
+      default: false
+    },
+    validationColumns: {
+      type: Array,
+      default: () => []
+    }
+  },
 
   data () {
     return {
@@ -330,8 +350,8 @@ export default {
     ]),
 
     isEmptyList () {
-      return this.entries &&
-             this.entries.length === 0 &&
+      return this.displayedShots &&
+             this.displayedShots.length === 0 &&
              !this.isLoading &&
              !this.isError &&
              (!this.shotSearchText || this.shotSearchText.length === 0)
@@ -362,6 +382,16 @@ export default {
       !this.isLoading &&
       this.validationColumns &&
       this.validationColumns.length === 0
+    },
+
+    isListVisible () {
+      return (
+        !this.isLoading &&
+        !this.isError &&
+        (
+          this.displayedShotsLength > 0
+        )
+      )
     }
   },
 
@@ -390,19 +420,9 @@ export default {
     },
 
     resizeHeaders () {
-      if (
-        this.$refs['body-tbody'] &&
-        this.$refs['body-tbody'].children.length > 0
-      ) {
-        let sequenceWidth, shotWidth
-        sequenceWidth =
-          this.$refs['body-tbody'].children[0].children[1].offsetWidth
-        shotWidth =
-          this.$refs['body-tbody'].children[0].children[2].offsetWidth
-
-        this.$refs['th-sequence'].style = `min-width: ${sequenceWidth}px`
-        this.$refs['th-shot'].style = `min-width: ${shotWidth}px`
-      }
+      this.resizeSplittedTableHeaders([
+        { index: 1, name: 'shot' }
+      ])
     },
 
     taskTypePath (taskTypeId) {
@@ -462,6 +482,16 @@ export default {
       }
 
       return route
+    },
+
+    getIndex (i, k) {
+      let j = 0
+      let index = 0
+      while (j < k) {
+        index += this.displayedShots[j].length
+        j++
+      }
+      return i + index
     }
   },
 
@@ -621,5 +651,20 @@ th {
 
 .info img {
   max-width: 80vh;
+}
+
+tbody:last-child .empty-line:last-child {
+  border: 0;
+}
+
+.table-body .table .empty-line {
+  background: inherit;
+}
+
+.empty-line {
+  border-right: 0;
+  border-left: 0;
+  height: 1em;
+  color: red;
 }
 </style>

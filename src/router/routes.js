@@ -179,19 +179,23 @@ export const routes = [
             name: 'delete-person',
             path: 'delete/:person_id',
             component: People
-          },
+          }
+        ]
+      },
+
+      {
+        path: 'people/:person_id',
+        component: Person,
+        name: 'person',
+        children: [
           {
-            path: ':person_id',
-            component: Person,
-            name: 'person'
-          },
-          {
-            path: ':person_id/:tab',
+            path: ':tab',
             component: Person,
             name: 'person-tab'
           }
         ]
       },
+
       {
         path: '/timesheets',
         component: Timesheets,

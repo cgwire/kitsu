@@ -20,7 +20,8 @@ import {
   clearSelectionGrid
 } from '../../lib/selection'
 import {
-  getFilledColumns
+  getFilledColumns,
+  groupEntitiesByParents
 } from '../../lib/models'
 import {
   computeStats
@@ -124,27 +125,6 @@ const helpers = {
     })
 
     return task
-  },
-
-  groupAssetsByType: (assets) => {
-    const assetsByType = []
-    let assetTypeAssets = []
-    let previousAsset = null
-
-    for (let asset of assets) {
-      if (
-        previousAsset &&
-        asset.asset_type_name !== previousAsset.asset_type_name
-      ) {
-        assetsByType.push(assetTypeAssets.slice(0))
-        assetTypeAssets = []
-      }
-      assetTypeAssets.push(asset)
-      previousAsset = asset
-    }
-    assetsByType.push(assetTypeAssets)
-
-    return assetsByType
   }
 }
 
@@ -225,11 +205,14 @@ const getters = {
   assetListScrollPosition: state => state.assetListScrollPosition,
 
   displayedAssetsByType: state => {
-    return helpers.groupAssetsByType(state.displayedAssets)
+    return groupEntitiesByParents(state.displayedAssets, 'asset_type_name')
   },
 
   assetsByType: state => {
-    return helpers.groupAssetsByType(Object.values(state.displayedAssets))
+    return groupEntitiesByParents(
+      Object.values(state.displayedAssets),
+      'asset_type_name'
+    )
   },
 
   editAsset: state => state.editAsset,

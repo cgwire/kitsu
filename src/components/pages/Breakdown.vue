@@ -59,8 +59,7 @@
           :align-right="true"
           :hidden="!isSavingError"
           :text="$t('breakdown.save_error')"
-        >
-        </error-text>
+        />
         <spinner v-if="isLoading" />
         <div
           class="type-assets"
@@ -79,8 +78,7 @@
               @remove-one="removeOneAsset"
               @remove-ten="removeTenAssets"
               v-for="asset in typeAssets"
-            >
-            </asset-block>
+            />
           </div>
         </div>
       </div>
@@ -416,6 +414,7 @@ export default {
     },
 
     castingSequenceOptions () {
+      console.log('options changed', this.castingSequenceOptions)
       if (this.castingSequenceOptions.length > 0) {
         const shot = this.shotMap[this.shotId]
         if (this.shotId && shot) {
@@ -436,6 +435,10 @@ export default {
       if (this.currentEpisode && this.episodeId !== this.currentEpisode.id) {
         this.reset()
       }
+    },
+
+    sequences () {
+      this.$store.commit('CASTING_SET_SEQUENCES', this.sequences)
     }
   },
 
