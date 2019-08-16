@@ -449,10 +449,12 @@ export default {
       if (this.$refs['th-episode']) {
         this.resizeSplittedTableHeaders([
           { index: 0, name: 'episode' },
+          { index: 1, name: 'thumbnail' },
           { index: 2, name: 'name' }
         ])
       } else {
         this.resizeSplittedTableHeaders([
+          { index: 0, name: 'thumbnail' },
           { index: 1, name: 'name' }
         ])
       }
