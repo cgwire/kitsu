@@ -490,7 +490,7 @@ export default {
       frame_in: 'In',
       frame_out: 'Out',
       fps: 'FPS',
-      name: 'Shot',
+      name: 'Name',
       production: 'Prod',
       sequence: 'Sequence',
       time_spent: 'Time'

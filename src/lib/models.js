@@ -58,3 +58,24 @@ export const getFilledColumns = (entries) => {
   })
   return filledColumns
 }
+
+export const groupEntitiesByParents = (entities, parentNameField) => {
+  const entitiesByParents = []
+  let parentEntities = []
+  let previousEntity = null
+
+  for (let entity of entities) {
+    if (
+      previousEntity &&
+      entity[parentNameField] !== previousEntity[parentNameField]
+    ) {
+      entitiesByParents.push(parentEntities.slice(0))
+      parentEntities = []
+    }
+    parentEntities.push(entity)
+    previousEntity = entity
+  }
+  entitiesByParents.push(parentEntities)
+
+  return entitiesByParents
+}
