@@ -47,7 +47,7 @@
           </li>
           <li
             :class="{'is-active': isActiveTab('timesheets')}"
-            @click="selectTab('timesheet')"
+            @click="selectTab('timesheets')"
             v-if="isCurrentUserManager"
           >
             <router-link :to="{
