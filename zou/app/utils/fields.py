@@ -52,15 +52,15 @@ def serialize_value(value):
 
 def serialize_list(list_value):
     """
-    Serialize a list of any kind of objects into data structures JSON
-    serializable.
+    Serialize a list of any kind of objects into data structures
+    that are JSON serializable.
     """
     return [serialize_value(value) for value in list_value]
 
 
 def serialize_dict(dict_value):
     """
-    Serialize a dict of any kind of objects into data structures JSON
+    Serialize a dict of any kind of objects into data structures that are JSON
     serializable.
     """
     result = {}
