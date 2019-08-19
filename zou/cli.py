@@ -35,7 +35,10 @@ def init_db():
 
 @cli.command()
 def migrate_db():
-    "Upgrade database schema."
+    """
+    Generate migration files to describe a new revision of the database schema
+    (for development only).
+    """
 
     from zou.app import app
     with app.app_context():
@@ -78,7 +81,7 @@ def upgrade_db():
 
 @cli.command()
 def stamp_db():
-    "Upgrade database schema."
+    "Set the database schema revision to current one."
 
     from zou.app import app
     with app.app_context():
@@ -140,6 +143,7 @@ def clear_all_auth_tokens():
 
 @cli.command('init_data')
 def init_data():
+    "Generates minimal data set required to run Kitsu."
     commands.init_data()
 
 
