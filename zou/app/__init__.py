@@ -104,10 +104,11 @@ def configure_auth():
     def add_permissions(callback):
         try:
             user = persons_service.get_current_user()
-            identity_changed.send(
-                current_app._get_current_object(),
-                identity=Identity(user["id"])
-            )
+            if user is not None:
+                identity_changed.send(
+                    current_app._get_current_object(),
+                    identity=Identity(user["id"])
+                )
             return user
         except PersonNotFoundException:
             return None
