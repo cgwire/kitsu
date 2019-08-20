@@ -27,20 +27,22 @@
           <th class="name" ref="th-name">{{ $t('assets.fields.name') }}</th>
 
           <th
-            class="description flexrow"
+            class="description"
             ref="th-description"
             v-if="!isCurrentUserClient && isShowInfos"
           >
-            <span class="flexrow-item">
-            {{ $t('assets.fields.description') }}
-            </span>
-            <button-simple
-              class="is-small flexrow-item"
-              icon="plus"
-              :text="''"
-              @click="onAddMetadataClicked"
-              v-if="isCurrentUserAdmin && !isLoading"
-            />
+            <div class="flexrow">
+              <span class="flexrow-item">
+              {{ $t('assets.fields.description') }}
+              </span>
+              <button-simple
+                class="is-small flexrow-item"
+                icon="plus"
+                :text="''"
+                @click="onAddMetadataClicked"
+                v-if="isCurrentUserAdmin && !isLoading"
+              />
+            </div>
           </th>
 
           <th

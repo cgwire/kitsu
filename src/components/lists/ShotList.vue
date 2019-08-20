@@ -25,19 +25,21 @@
             {{ $t('shots.fields.name') }}
           </th>
           <th
-            class="description flexrow"
+            class="description"
             v-if="!isCurrentUserClient && isShowInfos"
           >
-            <span class="flexrow-item">
-              {{ $t('shots.fields.description') }}
-            </span>
-            <button-simple
-              class="is-small flexrow"
-              icon="plus"
-              :text="''"
-              @click="onAddMetadataClicked"
-              v-if="isCurrentUserAdmin && !isLoading"
-            />
+            <div class="flexrow">
+              <span class="flexrow-item">
+                {{ $t('shots.fields.description') }}
+              </span>
+              <button-simple
+                class="is-small flexrow"
+                icon="plus"
+                :text="''"
+                @click="onAddMetadataClicked"
+                v-if="isCurrentUserAdmin && !isLoading"
+              />
+            </div>
           </th>
           <th
             class="metadata-descriptor"
