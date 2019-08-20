@@ -228,7 +228,7 @@ export default {
         return tasks.sort(
           firstBy('project_name')
             .thenBy('task_type_name')
-            .thenBy('entity_name')
+            .thenBy('full_entity_name')
         )
       } else {
         return tasks.sort(
