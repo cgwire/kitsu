@@ -1,15 +1,21 @@
 import { shallowMount, createLocalVue } from '@vue/test-utils'
 import vuescroll from 'vue-scroll'
 import Vuex from 'vuex'
+import moment from 'moment'
 
 import i18n from '../../../src/lib/i18n'
 import { range } from '../../../src/lib/time'
 
-// import ProductionSchedule from '../../../src/components/pages/ProductionSchedule'
+import ProductionSchedule from '../../../src/components/pages/ProductionSchedule'
 
 const localVue = createLocalVue()
 localVue.use(Vuex)
 localVue.use(vuescroll)
+localVue.directive('focus', {
+  inserted (el) {
+    el.focus()
+  }
+})
 
 
 describe('ProductionSchedule', () => {
@@ -75,9 +81,21 @@ describe('ProductionSchedule', () => {
     }
     userStore = {
       getters: {
-        user: () => ({ id: 'user-1', timezone: 'Europe/Paris' })
+        user: () => ({ id: 'user-1', timezone: 'Europe/Paris' }),
+        isCurrentUserAdmin: () => true
       },
-      actions: {}
+      actions: {
+        editProduction (production) {
+          return new Promise((resolve, reject) => {
+            resolve(production)
+          })
+        },
+        loadScheduleItems () {
+          return new Promise((resolve, reject) => {
+            resolve([])
+          })
+        }
+      }
     }
 
     store = new Vuex.Store({
@@ -91,13 +109,11 @@ describe('ProductionSchedule', () => {
       }
     })
 
-    /*
     wrapper = shallowMount(ProductionSchedule, {
       store,
       localVue,
       i18n
     })
-    */
   })
 
 
@@ -113,6 +129,24 @@ describe('ProductionSchedule', () => {
 
   describe('Methods', () => {
     test('onBodyScroll', () => {
+    })
+
+    test('convertScheduleItems', () => {
+      let item = wrapper.vm.convertScheduleItems([{
+        name: 'Characters',
+        start_date: '2019-08-15',
+        end_date: '2019-09-01'
+      }])
+      expect(item[0]).toEqual({
+        name: 'Characters',
+        start_date: '2019-08-15',
+        end_date: '2019-09-01',
+        startDate: moment('2019-08-15', 'YYYY-MM-DD'),
+        endDate: moment('2019-09-01', 'YYYY-MM-DD'),
+        expanded: false,
+        loading: false,
+        children: []
+      })
     })
   })
 })

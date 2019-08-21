@@ -150,6 +150,31 @@ export default {
     })
   },
 
+  getAssetTypeScheduleItems (production, taskType) {
+    return this.getEntitycheduleItems(production, taskType, 'asset-types')
+  },
+
+  getSequenceScheduleItems (production, taskType) {
+    return this.getEntitycheduleItems(production, taskType, 'sequences')
+  },
+
+  getEpisodeScheduleItems (production, taskType) {
+    return this.getEntitycheduleItems(production, taskType, 'episodes')
+  },
+
+  getEntitycheduleItems (production, taskType, entity) {
+    return new Promise((resolve, reject) => {
+      client.get(
+        `/api/data/projects/${production.id}/schedule-items/` +
+        `${taskType.id}/${entity}`,
+        (err, scheduleItems) => {
+          if (err) reject(err)
+          else resolve(scheduleItems)
+        }
+      )
+    })
+  },
+
   updateScheduleItem (scheduleItem) {
     return new Promise((resolve, reject) => {
       const data = {

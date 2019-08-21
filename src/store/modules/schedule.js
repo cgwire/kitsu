@@ -15,6 +15,18 @@ const actions = {
     return productionsApi.getScheduleItems(production)
   },
 
+  loadAssetTypeScheduleItems ({ commit }, { production, taskType }) {
+    return productionsApi.getAssetTypeScheduleItems(production, taskType)
+  },
+
+  loadSequenceScheduleItems ({ commit }, { production, taskType }) {
+    return productionsApi.getSequenceScheduleItems(production, taskType)
+  },
+
+  loadEpisodeScheduleItems ({ commit }, { production, taskType }) {
+    return productionsApi.getEpisodeScheduleItems(production, taskType)
+  },
+
   saveScheduleItem ({ commit }, scheduleItem) {
     return productionsApi.updateScheduleItem(scheduleItem)
   }

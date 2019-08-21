@@ -17,25 +17,67 @@
         <span class="mr1">{{ totalManDays }}</span>
         <span>{{ $t('schedule.md') }}</span>
       </div>
+
       <div
-        class="entity-line entity-name"
+        class=""
         :key="'entity-' + rootElement.id"
-        :style="entityLineStyle(rootElement)"
         v-for="rootElement in hierarchy"
       >
-        <span class="filler">
-        {{ rootElement.name }}
-        </span>
-        <input
-          type="number"
-          placeholder="0"
-          min="0"
-          @input="$emit('item-changed', rootElement)"
-          v-model="rootElement.man_days"
-        />
-        <span class="man-days-unit">
-          {{ $t('schedule.md') }}
-        </span>
+        <div
+          class="entity-line entity-name flexrow"
+          :style="entityLineStyle(rootElement)"
+        >
+          <span
+            class="expand flexrow-item mr1"
+            @click="expandRootElement(rootElement)"
+          >
+            <chevron-right-icon v-if="!rootElement.expanded"/>
+            <chevron-down-icon v-else />
+          </span>
+          <span class="filler flexrow-item">
+            {{ rootElement.name }}
+          </span>
+          <input
+            class="flexrow-item"
+            type="number"
+            placeholder="0"
+            min="0"
+            @input="$emit('item-changed', rootElement)"
+            v-model="rootElement.man_days"
+          />
+          <span class="man-days-unit flexrow-item">
+            {{ $t('schedule.md') }}
+          </span>
+        </div>
+
+        <div class="children" v-if="rootElement.expanded">
+          <div class="flexrow" v-if="rootElement.loading">
+            <spinner
+              style="width: 20px; margin: 0 0 10px 10px;"
+              class="child-spinner flexrow-item"
+            />
+          </div>
+          <div
+            class="child-name"
+            :key="'entity-' + childElement.id"
+            v-for="childElement in rootElement.children"
+          >
+            <div
+              class="entity-line entity-name child-line flexrow"
+            >
+              <span
+                class="expand flexrow-item"
+                @click="expandChildElement(childElement)"
+              >
+                <chevron-right-icon />
+              </span>
+              <span class="filler flexrow-item">
+                {{ childElement.name }}
+              </span>
+            </div>
+          </div>
+        </div>
+
       </div>
     </div>
 
@@ -92,36 +134,84 @@
           >
           </div>
           <div
-            class="entity-line"
             :key="'entity-line-' + rootElement.id"
-            :style="entityLineStyle(rootElement)"
             v-for="rootElement in hierarchy"
           >
+
             <div
-              class="timebar"
-              :style="timebarStyle(rootElement)"
+              class="entity-line"
+              :style="entityLineStyle(rootElement)"
             >
               <div
-                :class="{
-                  'timebar-left-hand': isCurrentUserAdmin
-                }"
-                @mousedown="moveTimebarLeftSide(rootElement, $event)"
+                class="timebar"
+                :style="timebarStyle(rootElement)"
               >
-              </div>
-              <div
-                class="filler"
-                @mousedown="moveTimebar(rootElement, $event)"
-              >
-              </div>
-              <div
-                :class="{
-                  'timebar-right-hand': isCurrentUserAdmin
-                }"
-                @mousedown="moveTimebarRightSide(rootElement, $event)"
-              >
+                <div
+                  :class="{
+                    'timebar-left-hand': isCurrentUserAdmin
+                  }"
+                  @mousedown="moveTimebarLeftSide(rootElement, $event)"
+                >
+                </div>
+                <div
+                  class="filler"
+                  @mousedown="moveTimebar(rootElement, $event)"
+                >
+                </div>
+                <div
+                  :class="{
+                    'timebar-right-hand': isCurrentUserAdmin
+                  }"
+                  @mousedown="moveTimebarRightSide(rootElement, $event)"
+                >
+                </div>
               </div>
             </div>
+
+            <div class="children" v-if="rootElement.expanded">
+              <div class="flexrow" v-if="rootElement.loading">
+                <spinner
+                  style="width: 20px; margin: 0 0 10px 10px; opacity: 0"
+                  class="child-spinner flexrow-item"
+                />
+              </div>
+
+              <div
+                class="entity-line child-line"
+                :key="'entity-line-' + childElement.id"
+                v-for="childElement in rootElement.children"
+              >
+                <div
+                  class="timebar"
+                  :title="childElement.name"
+                  :style="timebarStyle(childElement)"
+                >
+                  <div
+                    :class="{
+                      'timebar-left-hand': isCurrentUserAdmin
+                    }"
+                    @mousedown="moveTimebarLeftSide(childElement, $event)"
+                  >
+                  </div>
+                  <div
+                    class="filler"
+                    @mousedown="moveTimebar(childElement, $event)"
+                  >
+                   {{ childElement.name }}
+                  </div>
+                  <div
+                    :class="{
+                      'timebar-right-hand': isCurrentUserAdmin
+                    }"
+                    @mousedown="moveTimebarRightSide(childElement, $event)"
+                  >
+                  </div>
+                </div>
+              </div>
+            </div>
+
           </div>
+
         </div>
       </div>
     </div>
@@ -141,10 +231,13 @@ import { mapGetters, mapActions } from 'vuex'
 import moment from 'moment-timezone'
 
 import Spinner from '../../widgets/Spinner'
+import { ChevronRightIcon, ChevronDownIcon } from 'vue-feather-icons'
 
 export default {
   name: 'schedule',
   components: {
+    ChevronDownIcon,
+    ChevronRightIcon,
     Spinner
   },
 
@@ -565,6 +658,16 @@ export default {
         this.startDate.clone().add(1, 'days')
       let lengthDiff = this.businessDiff(startDate, endDate) || 1
       return (lengthDiff + 1) * this.cellWidth - 10
+    },
+
+    // Children
+    expandRootElement (rootElement) {
+      this.$emit('root-element-expanded', rootElement)
+    },
+
+    expandChildElement (element) {
+      if (element) {
+      }
     }
   },
 
@@ -637,10 +740,25 @@ export default {
         }
       }
     }
+
+    .timeline-content-wrapper {
+      .timeline-content {
+        .entity-line.child-line {
+          .timebar {
+            background: rgba(200, 200, 250, 0.8);
+            color: $dark-grey;
+          }
+        }
+      }
+    }
   }
 
   .total-man-days {
     color: white;
+  }
+
+  .child-name .entity-name span {
+    color: $white;
   }
 }
 
@@ -679,7 +797,20 @@ export default {
   font-size: 1.2em;
   height: 40px;
   margin-bottom: 20px;
-  padding: 0.5em 1em;
+  padding: 0.5em;
+
+  .flexrow-item {
+    margin: 0;
+  }
+
+  .expand {
+    cursor: pointer;
+    margin-right: 0.5em;
+  }
+
+  &.child-line {
+    height: 25px;
+  }
 }
 
 .timeline {
@@ -779,6 +910,16 @@ export default {
             width: 30px;
           }
         }
+
+        &.child-line {
+          padding: 0;
+
+          .timebar {
+            background: rgba(0, 0, 50, 0.2);
+            top: 6px;
+            font-size: 0.6em;
+          }
+        }
       }
     }
 
@@ -831,6 +972,7 @@ export default {
 .entity-name {
   display: flex;
   align-items: center;
+  line-height: 1.1em;
 
   span {
     color: white;
@@ -854,6 +996,15 @@ export default {
   }
 }
 
+.child-name .entity-name span {
+  color: $dark-grey;
+
+  .filler {
+    margin: 0;
+    margin: 0;
+  }
+}
+
 .total-man-days {
   padding-bottom: 10px;
   margin-right: 1em;
@@ -861,5 +1012,9 @@ export default {
   .mr1 {
     font-size: 20px;
   }
+}
+
+.child-spinner {
+  font-size: 10px;
 }
 </style>

@@ -59,6 +59,7 @@
       :is-error="errors.schedule"
       @item-changed="saveScheduleItem"
       @change-zoom="changeZoom"
+      @root-element-expanded="expandTaskTypeElement"
     />
   </div>
 
@@ -132,9 +133,11 @@ export default {
 
   computed: {
     ...mapGetters([
+      'assetTypeMap',
       'currentEpisode',
       'currentProduction',
       'isCurrentUserAdmin',
+      'isTVShow',
       'taskTypeMap',
       'user'
     ]),
@@ -152,6 +155,9 @@ export default {
     ...mapActions([
       'editProduction',
       'loadScheduleItems',
+      'loadAssetTypeScheduleItems',
+      'loadSequenceScheduleItems',
+      'loadEpisodeScheduleItems',
       'saveScheduleItem'
     ]),
 
@@ -168,7 +174,10 @@ export default {
               name: taskType.name,
               priority: taskType.priority,
               startDate: moment(item.start_date, 'YYYY-MM-DD'),
-              endDate: moment(item.end_date, 'YYYY-MM-DD')
+              endDate: moment(item.end_date, 'YYYY-MM-DD'),
+              expanded: false,
+              loading: false,
+              children: []
             }
           })
           this.scheduleItems =
@@ -197,6 +206,47 @@ export default {
       this.selectedStartDate = this.startDate.toDate()
       this.selectedEndDate = this.endDate.toDate()
       this.loadData()
+    },
+
+    convertScheduleItems (scheduleItems) {
+      return scheduleItems.map((item) => {
+        return {
+          ...item,
+          startDate: moment(item.start_date, 'YYYY-MM-DD'),
+          endDate: moment(item.end_date, 'YYYY-MM-DD'),
+          expanded: false,
+          loading: false,
+          children: []
+        }
+      })
+    },
+
+    expandTaskTypeElement (taskTypeElement) {
+      const parameters = {
+        production: this.currentProduction,
+        taskType: this.taskTypeMap[taskTypeElement.task_type_id]
+      }
+
+      taskTypeElement.expanded = !taskTypeElement.expanded
+      if (taskTypeElement.expanded) {
+        taskTypeElement.loading = true
+        let action = 'loadAssetTypeScheduleItems'
+        if (taskTypeElement.for_shots) {
+          if (this.isTVShow) action = 'loadEpisodeScheduleItems'
+          else action = 'loadSequenceScheduleItems'
+        }
+
+        this[action](parameters)
+          .then((scheduleItems) => {
+            taskTypeElement.loading = false
+            taskTypeElement.children = this.convertScheduleItems(scheduleItems)
+          })
+          .catch((err) => {
+            console.error(err)
+            taskTypeElement.loading = false
+            taskTypeElement.children = []
+          })
+      }
     }
   },
 
