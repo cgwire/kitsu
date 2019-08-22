@@ -452,12 +452,14 @@ export default {
         this.resizeSplittedTableHeaders([
           { index: 0, name: 'episode' },
           { index: 1, name: 'thumbnail' },
-          { index: 2, name: 'name' }
+          { index: 2, name: 'name' },
+          { index: 3, name: 'description' }
         ])
       } else {
         this.resizeSplittedTableHeaders([
           { index: 0, name: 'thumbnail' },
-          { index: 1, name: 'name' }
+          { index: 1, name: 'name' },
+          { index: 2, name: 'description' }
         ])
       }
     }
