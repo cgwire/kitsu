@@ -637,6 +637,13 @@ def get_sequences_for_project(project_id):
     )
 
 
+def get_sequences_for_episode(episode_id):
+    """
+    Retrieve all sequences related to given episode.
+    """
+    return get_episodes({"parent_id": episode_id})
+
+
 def get_shots_for_project(project_id):
     """
     Retrieve all shots related to given project.

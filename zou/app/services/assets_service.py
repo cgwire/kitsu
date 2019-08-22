@@ -209,13 +209,13 @@ def get_asset_types_for_project(project_id):
     """
     Retrieve all asset types related to asset of a given project.
     """
-    asset_type_ids = [
+    asset_type_ids = {
         x["entity_type_id"] for x in get_assets({"project_id": project_id})
-    ]
+    }
 
     if len(asset_type_ids) > 0:
         result = EntityType.query \
-            .filter(EntityType.id.in_(asset_type_ids)) \
+            .filter(EntityType.id.in_(list(asset_type_ids))) \
             .all()
     else:
         result = []
@@ -227,11 +227,11 @@ def get_asset_types_for_shot(shot_id):
     Retrieve all asset types related to asset casted in a given shot.
     """
     shot = Entity.get(shot_id)
-    asset_type_ids = [x.entity_type_id for x in shot.entities_out]
+    asset_type_ids = {x.entity_type_id for x in shot.entities_out}
 
     if len(asset_type_ids) > 0:
         query = EntityType.query
-        query = query.filter(EntityType.id.in_(asset_type_ids))
+        query = query.filter(EntityType.id.in_(list(asset_type_ids)))
         result = query.all()
     else:
         result = []

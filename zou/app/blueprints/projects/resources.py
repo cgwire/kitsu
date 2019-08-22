@@ -152,7 +152,7 @@ class ProductionMetadataDescriptorResource(Resource, ArgsMixin):
         return '', 204
 
 
-class ProductionScheduleItemsResource(Resource, ArgsMixin):
+class ProductionScheduleItemsResource(Resource):
     """
     Resource to retrieve schedule items for given production.
     """
@@ -160,4 +160,46 @@ class ProductionScheduleItemsResource(Resource, ArgsMixin):
     @jwt_required
     def get(self, project_id):
         user_service.check_project_access(project_id)
-        return schedule_service.get_schedule_items(project_id)
+        return schedule_service.get_task_types_schedule_items(project_id)
+
+
+class ProductionAssetTypesScheduleItemsResource(Resource):
+    """
+    Resource to retrieve asset types schedule items for given task type.
+    """
+
+    @jwt_required
+    def get(self, project_id, task_type_id):
+        user_service.check_project_access(project_id)
+        return schedule_service.get_asset_types_schedule_items(
+            project_id,
+            task_type_id
+        )
+
+
+class ProductionEpisodesScheduleItemsResource(Resource):
+    """
+    Resource to retrieve asset types schedule items for given task type.
+    """
+
+    @jwt_required
+    def get(self, project_id, task_type_id):
+        user_service.check_project_access(project_id)
+        return schedule_service.get_episodes_schedule_items(
+            project_id,
+            task_type_id
+        )
+
+
+class ProductionSequencesScheduleItemsResource(Resource):
+    """
+    Resource to retrieve asset types schedule items for given task type.
+    """
+
+    @jwt_required
+    def get(self, project_id, task_type_id):
+        user_service.check_project_access(project_id)
+        return schedule_service.get_sequences_schedule_items(
+            project_id,
+            task_type_id
+        )

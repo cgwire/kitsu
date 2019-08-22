@@ -25,11 +25,10 @@ class ScheduleItem(db.Model, BaseMixin, SerializerMixin):
         db.ForeignKey('task_type.id'),
         index=True
     )
-    entity_id = db.Column(
+    object_id = db.Column(
         UUIDType(binary=False),
-        db.ForeignKey('task_type.id'),
         index=True
-    )   # Sequence or Episode
+    ) # Sequence or Episode or Asset Type
 
     def present(self):
         return fields.serialize_dict({
@@ -38,5 +37,6 @@ class ScheduleItem(db.Model, BaseMixin, SerializerMixin):
             "end_date": self.end_date,
             "man_days": self.man_days,
             "project_id": self.project_id,
-            "task_type_id": self.task_type_id
+            "task_type_id": self.task_type_id,
+            "object_id": self.object_id
         })
