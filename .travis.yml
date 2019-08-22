@@ -10,3 +10,7 @@ script:
 branches:
     only:
         - master
+addons:
+    apt:
+        packages:
+            - libgif-dev
