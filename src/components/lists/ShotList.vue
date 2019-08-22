@@ -353,7 +353,7 @@ export default {
 
     isEmptyList () {
       return this.displayedShots &&
-             this.displayedShots.length === 0 &&
+             this.displayedShots[0].length === 0 &&
              !this.isLoading &&
              !this.isError &&
              (!this.shotSearchText || this.shotSearchText.length === 0)
