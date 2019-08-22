@@ -15,18 +15,23 @@ from zou.app.services import (
 )
 
 from zou.app.models.asset_instance import AssetInstance
+from zou.app.models.build_job import BuildJob
 from zou.app.models.department import Department
 from zou.app.models.entity import Entity
 from zou.app.models.entity_type import EntityType
 from zou.app.models.file_status import FileStatus
 from zou.app.models.metadata_descriptor import MetadataDescriptor
+from zou.app.models.milestone import Milestone
+from zou.app.models.notification import Notification
 from zou.app.models.output_file import OutputFile
 from zou.app.models.output_type import OutputType
 from zou.app.models.organisation import Organisation
+from zou.app.models.person import Person
+from zou.app.models.playlist import Playlist
+from zou.app.models.preview_file import PreviewFile
 from zou.app.models.project import Project
 from zou.app.models.project_status import ProjectStatus
-from zou.app.models.person import Person
-from zou.app.models.preview_file import PreviewFile
+from zou.app.models.subscription import Subscription
 from zou.app.models.task import Task
 from zou.app.models.task_status import TaskStatus
 from zou.app.models.task_type import TaskType
@@ -841,6 +846,57 @@ class ApiDBTestCase(ApiTestCase):
             entity_type=entity_type
         )
         return self.meta_descriptor
+
+    def generate_fixture_playlist(self, name, project_id=None):
+        if project_id is None:
+            project_id = self.project.id
+        self.playlist = Playlist.create(
+            name=name,
+            project_id=project_id
+        )
+        return self.playlist.serialize()
+
+    def generate_fixture_build_job(self, ended_at, playlist_id=None):
+        if playlist_id is None:
+            playlist_id = self.playlist.id
+        self.build_job = BuildJob.create(
+            status="succeeded",
+            job_type="movie",
+            ended_at=ended_at,
+            playlist_id=playlist_id
+        )
+        return self.build_job.serialize()
+
+    def generate_fixture_subscription(self, task_id=None):
+        task = self.task
+        if task_id is not None:
+            task = Task.get(task_id)
+
+        self.subscription = Subscription.create(
+            person_id=self.user["id"],
+            task_id=task.id,
+            entity_id=task.entity_id,
+            task_type_id=task.task_type_id
+        )
+        return self.subscription.serialize()
+
+    def generate_fixture_notification(self):
+        self.notification = Notification.create(
+            type="comment",
+            person_id=self.user["id"],
+            author_id=self.person.id,
+            comment_id=self.comment["id"],
+            task_id=self.task.id
+        )
+        return self.notification.serialize()
+
+    def generate_fixture_milestone(self):
+        self.milestone = Milestone.create(
+            name="Test Milestone",
+            project_id=self.project.id,
+            task_type_id=self.task_type.id
+        )
+        return self.milestone.serialize()
 
     def generate_assigned_task(self):
         self.generate_fixture_asset()
