@@ -6,7 +6,7 @@ const client = {
     superagent
       .get(path)
       .end((err, res) => {
-        if (res.statusCode === 401) return errors.backToLogin()
+        // if (res.statusCode === 401) return errors.backToLogin()
         callback(err, res.body)
       })
   },
