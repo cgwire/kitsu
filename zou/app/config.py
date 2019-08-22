@@ -36,7 +36,7 @@ RESTFUL_JSON = {
     "ensure_ascii": False
 }
 DATABASE = {
-    "drivername": os.getenv("DB_DRIVER", "postgres"),
+    "drivername": os.getenv("DB_DRIVER", "postgresql"),
     "host": os.getenv("DB_HOST", "localhost"),
     "port": os.getenv("DB_PORT", "5432"),
     "username": os.getenv("DB_USERNAME", "postgres"),
