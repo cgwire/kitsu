@@ -76,13 +76,13 @@ const auth = {
     superagent
       .get('/api/auth/authenticated')
       .end((err, res) => {
-        if (err && [401, 422].includes(res.statusCode)) {
+        if (err && res && [401, 422].includes(res.statusCode)) {
           store.commit(USER_LOGIN_FAIL)
           callback(null)
         } else if (err) {
           store.commit(USER_LOGIN_FAIL)
           callback(err)
-        } else if (res.body === null) {
+        } else if (res && res.body === null) {
           store.commit(USER_LOGIN_FAIL)
           callback(err)
         } else {
