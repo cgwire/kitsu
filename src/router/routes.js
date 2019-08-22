@@ -393,12 +393,6 @@ export const routes = [
           },
           {
             path:
-            ':asset_id',
-            component: Asset,
-            name: 'asset'
-          },
-          {
-            path:
             'edit/:asset_id',
             component: Assets,
             name: 'edit-asset'
@@ -419,6 +413,12 @@ export const routes = [
             name: 'delete-all-asset-tasks'
           }
         ]
+      },
+
+      {
+        path: 'productions/:production_id/assets/:shot_id',
+        component: Asset,
+        name: 'asset'
       },
 
       {
@@ -445,13 +445,14 @@ export const routes = [
             path: 'restore/:shot_id',
             component: Shots,
             name: 'restore-shot'
-          },
-          {
-            path: ':shot_id',
-            component: Shot,
-            name: 'shot'
           }
         ]
+      },
+
+      {
+        path: 'productions/:production_id/shots/:shot_id',
+        component: Shot,
+        name: 'shot'
       },
 
       {
@@ -587,11 +588,6 @@ export const routes = [
             name: 'episode-new-asset'
           },
           {
-            path: ':asset_id',
-            component: Asset,
-            name: 'episode-asset'
-          },
-          {
             path: 'edit/:asset_id',
             component: Assets,
             name: 'episode-edit-asset'
@@ -612,6 +608,12 @@ export const routes = [
             name: 'episode-delete-all-asset-tasks'
           }
         ]
+      },
+
+      {
+        path: 'productions/:production_id/episodes/:episode_id/assets/:shot_id',
+        component: Asset,
+        name: 'episode-asset'
       },
 
       {
@@ -643,13 +645,14 @@ export const routes = [
             path: 'shots/restore/:shot_id',
             component: Shots,
             name: 'episode-restore-shot'
-          },
-          {
-            path: ':shot_id',
-            component: Shot,
-            name: 'episode-shot'
           }
         ]
+      },
+
+      {
+        path: 'productions/:production_id/episodes/:episode_id/shots/:shot_id',
+        component: Shot,
+        name: 'episode-shot'
       },
 
       {
