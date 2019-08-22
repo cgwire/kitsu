@@ -110,6 +110,39 @@ class BaseMixin(object):
             entry_map[getattr(entry, field)] = entry.id
         return entry_map
 
+    @classmethod
+    def create_from_import(cls, data):
+        """
+        Create a new instance of the model based on data that comes from the Zou
+        API.
+        """
+        del data["type"]
+        previous_data = cls.get(data["id"])
+        if previous_data is None:
+            return cls.create(**data)
+        else:
+            previous_data.update(data)
+            return previous_data
+
+    @classmethod
+    def create_from_import_list(cls, data_list):
+        """
+        Create a list of instances of the model based on data that comes from
+        the Zou API.
+        """
+        for data in data_list:
+            cls.create_from_import(data)
+
+    @classmethod
+    def delete_from_import(cls, instance_id):
+        """
+        Delete an entry and its related base on the entry id.
+        """
+        instance = cls.get(instance_id)
+        if instance is not None:
+            instance.delete()
+        return instance_id
+
     def save(self):
         """
         Shorthand to create an entry via the database session based on current
@@ -160,18 +193,3 @@ class BaseMixin(object):
             db.session.rollback()
             db.session.remove()
             raise
-
-    @classmethod
-    def create_from_import(cls, data):
-        del data["type"]
-        previous_data = cls.get(data["id"])
-        if previous_data is None:
-            return cls.create(**data)
-        else:
-            previous_data.update(data)
-            return previous_data
-
-    @classmethod
-    def create_from_import_list(cls, data_list):
-        for data in data_list:
-            cls.create_from_import(data)
