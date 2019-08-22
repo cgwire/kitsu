@@ -668,6 +668,20 @@ class ApiDBTestCase(ApiTestCase):
         self.project.save()
         return self.shot_task
 
+    def generate_fixture_episode_task(self, name="Master"):
+        self.episode_task = Task.create(
+            name=name,
+            project_id=self.project.id,
+            task_type_id=self.task_type_animation.id,
+            task_status_id=self.task_status.id,
+            entity_id=self.episode.id,
+            assignees=[self.person],
+            assigner_id=self.assigner.id,
+        )
+        self.project.team.append(self.person)
+        self.project.save()
+        return self.episode_task
+
     def generate_fixture_scene_task(self, name="Master"):
         self.scene_task = Task.create(
             name=name,

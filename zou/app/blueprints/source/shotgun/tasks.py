@@ -65,8 +65,12 @@ class ImportShotgunTasksResource(BaseImportShotgunResource):
                 entity_id = self.get_shot_id(entity_sg_id)
             elif entity_type == "Scene":
                 entity_id = self.get_scene_id(entity_sg_id)
-            else:
+            elif entity_type == "Sequence":
                 entity_id = self.get_sequence_id(entity_sg_id)
+            elif entity_type == "Episode":
+                entity_id = self.get_episode_id(entity_sg_id)
+            else:
+                return None
 
         return entity_id
 

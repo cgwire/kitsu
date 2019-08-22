@@ -12,6 +12,7 @@ from .resources import (
 
     SceneResource,
     ScenesResource,
+    SceneAndTasksResource,
     SceneTasksResource,
     SceneTaskTypesResource,
     SceneShotsResource,
@@ -26,11 +27,15 @@ from .resources import (
 
     EpisodeResource,
     EpisodesResource,
+    EpisodeAndTasksResource,
     EpisodeSequencesResource,
+    EpisodeTasksResource,
+    EpisodeTaskTypesResource,
 
     SequenceResource,
     SequencesResource,
     SequenceShotsResource,
+    SequenceAndTasksResource,
     SequenceScenesResource,
     SequenceTasksResource,
     SequenceTaskTypesResource,
@@ -39,6 +44,7 @@ from .resources import (
     RemoveShotAssetInstanceResource,
     SceneAssetInstancesResource,
     SceneCameraInstancesResource,
+
 
     CastingResource
 )
@@ -54,6 +60,7 @@ routes = [
     ("/data/shots/<shot_id>/preview-files", ShotPreviewsResource),
 
     ("/data/scenes/all", ScenesResource),
+    ("/data/scenes/with-tasks", SceneAndTasksResource),
     ("/data/scenes/<scene_id>", SceneResource),
     ("/data/scenes/<scene_id>/tasks", SceneTasksResource),
     ("/data/scenes/<scene_id>/task-types", SceneTaskTypesResource),
@@ -61,10 +68,14 @@ routes = [
     ("/data/scenes/<scene_id>/shots/<shot_id>", RemoveShotFromSceneResource),
 
     ("/data/episodes", EpisodesResource),
+    ("/data/episodes/with-tasks", EpisodeAndTasksResource),
     ("/data/episodes/<episode_id>", EpisodeResource),
     ("/data/episodes/<episode_id>/sequences", EpisodeSequencesResource),
+    ("/data/episodes/<episode_id>/tasks", EpisodeTasksResource),
+    ("/data/episodes/<episode_id>/task-types", EpisodeTaskTypesResource),
 
     ("/data/sequences", SequencesResource),
+    ("/data/sequences/with-tasks", SequenceAndTasksResource),
     ("/data/sequences/<sequence_id>", SequenceResource),
     ("/data/sequences/<sequence_id>/shots", SequenceShotsResource),
     ("/data/sequences/<sequence_id>/scenes", SequenceScenesResource),
