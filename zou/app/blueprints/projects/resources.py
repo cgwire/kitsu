@@ -152,6 +152,17 @@ class ProductionMetadataDescriptorResource(Resource, ArgsMixin):
         return '', 204
 
 
+class ProductionMilestonesResource(Resource):
+    """
+    Resource to retrieve milestones for given production.
+    """
+
+    @jwt_required
+    def get(self, project_id):
+        user_service.check_project_access(project_id)
+        return schedule_service.get_milestones_for_project(project_id)
+
+
 class ProductionScheduleItemsResource(Resource):
     """
     Resource to retrieve schedule items for given production.

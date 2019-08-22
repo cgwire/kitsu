@@ -86,6 +86,9 @@ def update_casting(shot_id, casting):
 
 
 def create_casting_link(entity_in_id, asset_id, nb_occurences=1, label=""):
+    """
+    Add a link between given entity and given asset.
+    """
     link = EntityLink.get_by(
         entity_in_id=entity_in_id,
         entity_out_id=asset_id

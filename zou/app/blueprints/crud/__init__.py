@@ -13,6 +13,7 @@ from .entity_type import (
 )
 from .event import EventsResource, EventResource
 from .file_status import FileStatusesResource, FileStatusResource
+from .milestone import MilestonesResource, MilestoneResource
 from .notifications import NotificationsResource, NotificationResource
 from .organisation import OrganisationsResource, OrganisationResource
 from .output_file import OutputFilesResource, OutputFileResource
@@ -97,7 +98,9 @@ routes = [
     ("/data/search-filters/", SearchFiltersResource),
     ("/data/search-filters/<instance_id>", SearchFilterResource),
     ("/data/schedule-items/", ScheduleItemsResource),
-    ("/data/schedule-items/<instance_id>", ScheduleItemResource)
+    ("/data/schedule-items/<instance_id>", ScheduleItemResource),
+    ("/data/milestones/", MilestonesResource),
+    ("/data/milestones/<instance_id>", MilestoneResource)
 ]
 
 blueprint = Blueprint("/data", "data")

@@ -2,6 +2,7 @@ from datetime import date, timedelta
 
 from zou.app.models.entity import Entity
 from zou.app.models.entity_type import EntityType
+from zou.app.models.milestone import Milestone
 from zou.app.models.schedule_item import ScheduleItem
 from zou.app.utils import events
 from zou.app.services import (
@@ -179,3 +180,11 @@ def get_entity_schedule_items(
         results.append(result)
 
     return sorted(results, key=lambda x: x["name"])
+
+
+def get_milestones_for_project(project_id):
+    """
+    Return all milestones related to given project.
+    """
+    query = Milestone.query.filter_by(project_id=project_id)
+    return [milestone.present() for milestone in  query.all()]
