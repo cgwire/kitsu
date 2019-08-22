@@ -89,7 +89,7 @@ const helpers = {
 
       Vue.set(person, 'initials', person.initials.toUpperCase())
       person.color = colors.fromString(person.name)
-      if (person.has_avatar) {
+      if (person.has_avatar && !person.uniqueHash) {
         const randomHash = Math.random().toString(36).substring(7)
         Vue.set(person, 'uniqueHash', randomHash)
         person.avatarPath =
