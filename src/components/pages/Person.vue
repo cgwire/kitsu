@@ -75,6 +75,14 @@
           :can-save="true"
           v-if="!isActiveTab('done')"
         />
+        <span class="filler"></span>
+        <combobox
+          class="flexrow-item"
+          :label="$t('main.sorted_by')"
+          :options="sortOptions"
+          locale-key-prefix="tasks.fields."
+          v-model="currentSort"
+        />
       </div>
 
       <div
@@ -90,7 +98,7 @@
 
       <todos-list
         ref="task-list"
-        :entries="displayedPersonTasks"
+        :entries="sortedTasks"
         :is-loading="isTasksLoading"
         :is-error="isTasksLoadingError"
         :selection-grid="personTaskSelectionGrid"
@@ -135,8 +143,10 @@
 
 <script>
 import moment from 'moment-timezone'
+import firstBy from 'thenby'
 import { mapGetters, mapActions } from 'vuex'
 
+import Combobox from '../widgets/Combobox'
 import PageTitle from '../widgets/PageTitle'
 import PeopleAvatar from '../widgets/PeopleAvatar'
 import SearchField from '../widgets/SearchField'
@@ -148,6 +158,7 @@ import TaskInfo from '../sides/TaskInfo'
 export default {
   name: 'person',
   components: {
+    Combobox,
     PageTitle,
     PeopleAvatar,
     SearchField,
@@ -163,7 +174,15 @@ export default {
       isTasksLoading: false,
       isTasksLoadingError: false,
       person: null,
-      selectedDate: moment().format('YYYY-MM-DD')
+      selectedDate: moment().format('YYYY-MM-DD'),
+      currentSort: 'entity_name',
+      sortOptions: [
+        'entity_name',
+        'priority',
+        'task_status_short_name',
+        'estimation',
+        'last_comment_date'
+      ].map((name) => ({ label: name, value: name }))
     }
   },
 
@@ -219,6 +238,25 @@ export default {
 
     haveDoneList () {
       return this.$refs['done-list']
+    },
+
+    sortedTasks () {
+      const isName = this.currentSort === 'entity_name'
+      const tasks = [...this.displayedPersonTasks]
+      if (isName) {
+        return tasks.sort(
+          firstBy('project_name')
+            .thenBy('task_type_name')
+            .thenBy('full_entity_name')
+        )
+      } else {
+        return tasks.sort(
+          firstBy(this.currentSort, -1)
+            .thenBy('project_name')
+            .thenBy('task_type_name')
+            .thenBy('entity_name')
+        )
+      }
     }
   },
 
