@@ -35,6 +35,7 @@ To install the development environment, follow [the dedicated guide](https://kit
 [![Cube](https://www.cg-wire.com/images/logo-cube.png)](https://www.cube-creative.com)
 [![TNZPV](https://www.cg-wire.com/images/logo-tnzpv.png)](https://nousvoir.com/en/home/)
 [![Karlab](https://www.cg-wire.com/images/logo-karlab.png)](https://www.karlab.fr)
+[![Lee Film](https://www.cg-wire.com/images/logo-lee.png)](https://leefilm.se/)
 
 ## About authors
 
@@ -43,8 +44,10 @@ mid-sized CG studios manage their productions and build pipelines efficiently.
 
 We apply software craftsmanship principles as much as possible. We love coding
 and consider strong qualities and good developer experience to matter a lot.
-Our extensive experience allows studios to get better at producing software and
-focus more on the artistic work.
+Our extensive experience allows studios to get better at managing production
+and doing software. They can focus more on the artistic work.
+
+ocus more on the artistic work.
 
 Visit [cg-wire.com](https://cg-wire.com) for more information.
 
