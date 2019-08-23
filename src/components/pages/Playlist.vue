@@ -327,13 +327,21 @@ export default {
           entity_name: shot.tasks[0].entity_name,
           preview_files: shotPreview.preview_files,
           preview_file_id:
-            shotPreview.preview_file_id || shot.preview_file_id,
+            shotPreview.id ||
+            shotPreview.preview_file_id ||
+            shot.preview_file_id,
           preview_file_extension:
-            shotPreview.extension || shot.preview_file_extension,
+            shotPreview.extension ||
+            shotPreview.preview_file_extension ||
+            shot.preview_file_extension,
           preview_file_task_id:
-            shotPreview.task_id || shot.preview_file_task_id,
+            shotPreview.task_id ||
+            shotPreview.preview_file_task_id ||
+            shot.preview_file_task_id,
           preview_file_annotations:
-            shotPreview.annotations || shot.preview_file_annotations
+            shotPreview.annotations ||
+            shotPreview.preview_file_annotations ||
+            shot.preview_file_annotations
         }
         playlistShotMap[shotPreview.shot_id] = playlistShot
         return playlistShot
@@ -447,15 +455,6 @@ export default {
             callback: (err, previewFiles) => {
               if (err) console.log(err)
               const shotInfo = { ...shot }
-              if (
-                !shotInfo.preview_file_id &&
-                Object.keys(previewFiles).length > 0
-              ) {
-                const previewFile =
-                  previewFiles[Object.keys(previewFiles)[0]][0]
-                shotInfo.preview_file_id = previewFile.id
-                shotInfo.preview_file_task_id = previewFile.task_id
-              }
               this.addShotPreviewToPlaylist({
                 playlist: this.currentPlaylist,
                 previewFiles: previewFiles,
@@ -551,7 +550,6 @@ export default {
         shot,
         previewFileId
       })
-      this.rebuildCurrentShots()
     },
 
     onOrderChange (info) {

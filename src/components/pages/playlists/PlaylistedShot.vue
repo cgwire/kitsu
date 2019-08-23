@@ -31,22 +31,17 @@
         class="preview-choice"
         v-if="taskTypeOptions.length > 0"
       >
-        <div>
-          <combobox
-            :options="taskTypeOptions"
-            :disabled="!isCurrentUserManager"
-            v-model="taskTypeId"
-          />
-        </div>
-        <div class="flexrow">
-          <combobox
-            class="flexrow-item"
-            :options="previewFileOptions"
-            :disabled="!isCurrentUserManager"
-            v-model="previewFileId"
-          />
-          <span class="filler"></span>
-        </div>
+        <combobox
+          :options="taskTypeOptions"
+          :disabled="!isCurrentUserManager"
+          v-model="taskTypeId"
+        />
+        <combobox
+          class="version-combo"
+          :options="previewFileOptions"
+          :disabled="!isCurrentUserManager"
+          v-model="previewFileId"
+        />
       </div>
       <div v-else>
         {{ $t('playlists.no_preview') }}
@@ -122,7 +117,7 @@ export default {
       return Object
         .keys(this.shot.preview_files)
         .map(id => this.taskTypeMap[id])
-        .sort(firstBy('priority', -1).thenBy('name'))
+        .sort(firstBy('priority', 1).thenBy('name'))
         .map((taskType) => {
           return {
             label: taskType.name,
@@ -259,6 +254,10 @@ export default {
 
 .field {
   margin-bottom: 0em;
+}
+
+.version-combo {
+  margin-top: 0.6em;
 }
 
 .remove-button {

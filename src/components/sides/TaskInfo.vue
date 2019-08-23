@@ -573,14 +573,16 @@ export default {
     },
 
     reset () {
-      this.taskComments = this.getTaskComments(this.task.id)
-      this.taskPreviews = this.getTaskPreviews(this.task.id)
-      this.setOtherPreviews()
-      this.currentPreviewPath = this.getOriginalPath()
-      this.currentPreviewDlPath = this.getOriginalDlPath()
-      this.$nextTick(() => {
-        if (this.$refs['add-comment']) this.$refs['add-comment'].focus()
-      })
+      if (this.task) {
+        this.taskComments = this.getTaskComments(this.task.id)
+        this.taskPreviews = this.getTaskPreviews(this.task.id)
+        this.setOtherPreviews()
+        this.currentPreviewPath = this.getOriginalPath()
+        this.currentPreviewDlPath = this.getOriginalDlPath()
+        this.$nextTick(() => {
+          if (this.$refs['add-comment']) this.$refs['add-comment'].focus()
+        })
+      }
     },
 
     focusCommentTextarea () {
