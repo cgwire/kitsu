@@ -54,6 +54,16 @@ Sponsors
 |Les Fées Spéciales Logo|
 |NKI Logo|
 
+Contributors
+------------
+
+* @aboellinger
+* @BigRoy (Colorbleed)
+* @flablog (Les Fées Spéciales)
+* @frankrousseau (CGWire) - *maintainer*
+* @g-Lul (TNZPV)
+* @pcharmoille (Unit Image)
+
 About authors
 ~~~~~~~~~~~~~
 
@@ -61,10 +71,11 @@ Zou is written by CG Wire, a company based in France. We help small to
 midsize CG studios to manage their production and build pipeline
 efficiently.
 
-We apply software craftsmanship principles as much as possible. We love
-coding and consider strong qualities and good developer experience to
-matter a lot. Through our diverse experiences, we enable studios to produce quality
-software, so that they can focus more on the artistic work.
+We apply software craftmanship principles as much as possible. We love
+coding and consider that strong quality and good developer experience
+matter a lot. Our extensive experience allows studios to get better at
+managing production and doing software. They can focus more on the artistic
+work.
 
 Visit `cg-wire.com <https://cg-wire.com>`__ for more information.
 
