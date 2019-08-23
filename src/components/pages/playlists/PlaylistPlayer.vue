@@ -631,8 +631,9 @@ export default {
     },
 
     scrollToShot (index) {
-      if (this.$refs['shot-' + index]) {
-        const shotWidget = this.$refs['shot-' + index][0].$el
+      const shotEl = this.$refs['shot-' + index]
+      if (shotEl && shotEl[0]) {
+        const shotWidget = shotEl[0].$el
         const playlistEl = this.$refs['playlisted-shots']
         const shot = this.shotList[index]
         this.annotations = shot.preview_file_annotations || []
@@ -1252,6 +1253,8 @@ export default {
     },
 
     shots () {
+      const playlistEl = this.$refs['playlisted-shots']
+      const scrollLeft = playlistEl ? playlistEl.scrollLeft : 0
       this.shotList = Object.values(this.shots)
       this.playingShotIndex = 0
       this.pause()
@@ -1276,6 +1279,9 @@ export default {
             this.rawPlayer.loadNextShot()
           })
         }
+        this.$nextTick(() => {
+          if (playlistEl) playlistEl.scrollLeft = scrollLeft
+        })
       }
       this.resetHeight()
     },
