@@ -83,13 +83,13 @@ class Comment(db.Model, BaseMixin, SerializerMixin):
     def __repr__(self):
         return "<Comment of %s>" % self.object_id
 
-    def set_preview_files(self, person_ids):
+    def set_preview_files(self, preview_file_ids):
         from zou.app.models.preview_file import PreviewFile
         self.preview_files = []
-        for person_id in person_ids:
-            person = PreviewFile.get(person_id)
-            if person is not None:
-                self.preview_files.append(person)
+        for preview_file_id in preview_file_ids:
+            preview_file = PreviewFile.get(preview_file_id)
+            if preview_file is not None:
+                self.previews.append(preview_file)
         self.save()
 
     def set_mentions(self, person_ids):

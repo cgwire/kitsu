@@ -138,12 +138,18 @@ class Entity(db.Model, BaseMixin, SerializerMixin):
 
     @classmethod
     def create_from_import(cls, data):
+        from zou.app.models.preview_file import PreviewFile
+
         previous_entity = cls.get(data["id"])
         entity_ids = data.get("entities_out", None)
         del data["entities_in"]
         del data["entities_out"]
-        del data["preview_file_id"]
         del data["type"]
+
+        if "preview_file_id" in data:
+            preview_file = PreviewFile.get(data["preview_file_id"])
+            if preview_file is None:
+                del data["preview_file_id"]
 
         if previous_entity is None:
             previous_entity = cls.create(**data)
