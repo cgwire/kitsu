@@ -10,9 +10,11 @@ from .resources import (
     ProductionMetadataDescriptorsResource,
     ProductionMilestonesResource,
     ProductionScheduleItemsResource,
+    ProductionTaskTypeScheduleItemsResource,
     ProductionAssetTypesScheduleItemsResource,
     ProductionEpisodesScheduleItemsResource,
-    ProductionSequencesScheduleItemsResource
+    ProductionSequencesScheduleItemsResource,
+    ProductionTimeSpentsResource
 )
 
 routes = [
@@ -41,16 +43,24 @@ routes = [
         ProductionScheduleItemsResource
     ),
     (
+        "/data/projects/<project_id>/schedule-items/task-types",
+        ProductionTaskTypeScheduleItemsResource
+    ),
+    (
         "/data/projects/<project_id>/schedule-items/<task_type_id>/asset-types",
-        ProductionAssetTypesScheduleItemsResource,
+        ProductionAssetTypesScheduleItemsResource
     ),
     (
         "/data/projects/<project_id>/schedule-items/<task_type_id>/episodes",
-        ProductionEpisodesScheduleItemsResource,
+        ProductionEpisodesScheduleItemsResource
     ),
     (
         "/data/projects/<project_id>/schedule-items/<task_type_id>/sequences",
-        ProductionSequencesScheduleItemsResource,
+        ProductionSequencesScheduleItemsResource
+    ),
+    (
+        "/data/projects/<project_id>/time-spents",
+        ProductionTimeSpentsResource
     )
 ]
 

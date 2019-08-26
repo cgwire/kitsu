@@ -4,7 +4,12 @@ from flask_jwt_extended import jwt_required
 from flask import request
 
 from zou.app.mixin import ArgsMixin
-from zou.app.services import projects_service, user_service, schedule_service
+from zou.app.services import (
+    projects_service,
+    schedule_service,
+    tasks_service,
+    user_service
+)
 from zou.app.utils import permissions, fields
 from zou.app.services.exception import WrongParameterException
 
@@ -152,6 +157,17 @@ class ProductionMetadataDescriptorResource(Resource, ArgsMixin):
         return '', 204
 
 
+class ProductionTimeSpentsResource(Resource):
+    """
+    Resource to retrieve time spents for given production.
+    """
+
+    @jwt_required
+    def get(self, project_id):
+        user_service.check_project_access(project_id)
+        return tasks_service.get_time_spents_for_project(project_id)
+
+
 class ProductionMilestonesResource(Resource):
     """
     Resource to retrieve milestones for given production.
@@ -164,6 +180,17 @@ class ProductionMilestonesResource(Resource):
 
 
 class ProductionScheduleItemsResource(Resource):
+    """
+    Resource to retrieve schedule items for given production.
+    """
+
+    @jwt_required
+    def get(self, project_id):
+        user_service.check_project_access(project_id)
+        return schedule_service.get_schedule_items(project_id)
+
+
+class ProductionTaskTypeScheduleItemsResource(Resource):
     """
     Resource to retrieve schedule items for given production.
     """

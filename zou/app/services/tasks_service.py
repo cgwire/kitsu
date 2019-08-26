@@ -437,8 +437,8 @@ def get_comment_by_preview_file_id(preview_file_id):
     """
     preview_file = files_service.get_preview_file_raw(preview_file_id)
     comment = Comment.query \
-         .filter(Comment.previews.contains(preview_file)) \
-         .first()
+        .filter(Comment.previews.contains(preview_file)) \
+        .first()
     if comment is not None:
         return comment.serialize()
     else:
@@ -1020,5 +1020,14 @@ def get_comments_for_project(project_id):
     comments = Comment.query \
         .join(Task, Task.id == Comment.object_id) \
         .filter(Task.project_id == project_id)
-
     return fields.serialize_list(comments)
+
+
+def get_time_spents_for_project(project_id):
+    """
+    Return all time spents for given project.
+    """
+    time_spents = TimeSpent.query \
+        .join(Task) \
+        .filter(Task.project_id == project_id)
+    return fields.serialize_list(time_spents)

@@ -4,13 +4,23 @@ from zou.app.models.entity import Entity
 from zou.app.models.entity_type import EntityType
 from zou.app.models.milestone import Milestone
 from zou.app.models.schedule_item import ScheduleItem
-from zou.app.utils import events
+from zou.app.utils import events, fields
 from zou.app.services import (
     assets_service,
     base_service,
     shots_service,
     tasks_service
 )
+
+
+def get_schedule_items(project_id):
+    """
+    Get all project schedule items (mainly for sync purpose).
+    """
+    schedule_items = ScheduleItem.query \
+        .filter_by(project_id=project_id) \
+        .all()
+    return fields.serialize_list(schedule_items)
 
 
 def get_task_types_schedule_items(project_id):
