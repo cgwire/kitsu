@@ -144,11 +144,14 @@ class BaseModelsResource(Resource):
                 else:
                     return self.all_entries(query)
         except StatementError as exception:
-            return {
-                "error": True,
-                "message": "One of the value of the filter has not the "
-                           "proper format: %s" % exception.message
-            }, 400
+            if hasattr(exception, 'message'):
+                return {
+                    "error": True,
+                    "message": "One of the value of the filter has not the "
+                            "proper format: %s" % exception.message
+                }, 400
+            else:
+                raise exception
         except permissions.PermissionDenied:
             abort(403)
 
