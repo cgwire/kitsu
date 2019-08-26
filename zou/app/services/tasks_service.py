@@ -988,6 +988,9 @@ def add_preview_file_to_comment(comment_id, person_id, task_id, revision=0):
         task_id,
         person_id
     )
+    events.emit("preview-file:create", {
+        "preview_file_id": preview_file.id
+    })
     comment.previews.append(preview_file)
     comment.save()
     if news is not None:

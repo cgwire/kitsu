@@ -551,6 +551,7 @@ def update_output_file(output_file_id, data):
 def update_preview_file(preview_file_id, data):
     preview_file = get_preview_file_raw(preview_file_id)
     preview_file.update(data)
+    events.emit("preview-file:update", {"preview_file_id": preview_file_id})
     return preview_file.serialize()
 
 

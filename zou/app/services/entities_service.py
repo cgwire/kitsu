@@ -84,7 +84,7 @@ def update_entity_preview(entity_id, preview_file_id):
     if entity_type.name in ["Shot", "Scene", "Sequence", "Episode"]:
         entity_type_name = entity_type.name.lower()
     events.emit("%s:update" % entity_type_name, {
-        "%s_id" % entity_type_name: str(entity_type.id)
+        "%s_id" % entity_type_name: str(entity.id)
     })
     return entity.serialize()
 
