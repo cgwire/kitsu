@@ -335,14 +335,14 @@ def patch_task_data():
 
 @cli.command()
 @click.option("--target", default="http://localhost:5000")
-def run_sync(target):
+def sync_full(target):
     """
     Retrieve all data from target instance.
     """
     print("Start syncing.")
     login = os.getenv("SYNC_LOGIN")
     password = os.getenv("SYNC_PASSWORD")
-    sync.init(login, password)
+    sync.init(target, login, password)
     sync.run_main_data_sync()
     sync.run_open_project_data_sync()
     sync.run_other_sync()
@@ -365,6 +365,18 @@ def sync_changes(event_target, target):
     sync.add_project_sync_listeners(event_client)
     print("Start listening.")
     sync.run_listeners(event_client)
+
+
+@cli.command()
+@click.option("--target", default="http://localhost:8080/api")
+def sync_last_events(target):
+    login = os.getenv("SYNC_LOGIN")
+    password = os.getenv("SYNC_PASSWORD")
+    sync.init(target, login, password)
+    print("Syncing started.")
+    sync.run_last_events_sync()
+    print("Syncing ended.")
+
 
 
 if __name__ == '__main__':

@@ -9,6 +9,7 @@ from zou.app.models.entity_type import EntityType
 from zou.app.models.event import ApiEvent
 from zou.app.models.organisation import Organisation
 from zou.app.models.metadata_descriptor import MetadataDescriptor
+from zou.app.models.milestone import Milestone
 from zou.app.models.news import News
 from zou.app.models.notification import Notification
 from zou.app.models.person import Person
@@ -25,6 +26,62 @@ from zou.app.models.task_type import TaskType
 from zou.app.models.time_spent import TimeSpent
 
 from zou.app.utils import events
+
+event_name_model_map = {
+    "build-job": BuildJob,
+    "custom-action": CustomAction,
+    "comment": Comment,
+    "department": Department,
+    "entity": Entity,
+    "entity-link": EntityLink,
+    "entity-type": EntityType,
+    "event": ApiEvent,
+    "organisation": Organisation,
+    "metadata-descriptor": MetadataDescriptor,
+    "milestone": Milestone,
+    "news": News,
+    "notification": Notification,
+    "person": Person,
+    "playlist": Playlist,
+    "preview-file": PreviewFile,
+    "project": Project,
+    "project-status": ProjectStatus,
+    "schedule-item": ScheduleItem,
+    "subscription": Subscription,
+    "search-filter": SearchFilter,
+    "task": Task,
+    "task-status": TaskStatus,
+    "task-type": TaskType,
+    "time-spent": TimeSpent
+}
+
+event_name_model_path_map = {
+    "build-job": "build-jobs",
+    "custom-action": "custom-actions",
+    "comment": "comments",
+    "department": "departments",
+    "entity": "entities",
+    "entity-link": "entity-links",
+    "entity-type": "entity-types",
+    "event": "events",
+    "organisation": "organisations",
+    "metadata-descriptor": "metadata-descriptors",
+    "milestone": "milestones",
+    "news": "news",
+    "notification": "notifications",
+    "person": "persons",
+    "playlist": "playlists",
+    "preview-file": "preview-files",
+    "project": "projects",
+    "project-status": "project-status",
+    "schedule-item": "schedule-items",
+    "subscription": "subscriptions",
+    "search-filter": "search-filters",
+    "task": "tasks",
+    "task-status": "task-status",
+    "task-type": "task-types",
+    "time-spent": "time-spents"
+}
 
 
 def init(target, login, password):
@@ -104,6 +161,7 @@ def run_open_project_data_sync():
         sync_project_entries(project, "notifications", Notification)
         sync_project_entries(project, "entity-links", EntityLink)
         sync_project_entries(project, "news", News)
+        sync_project_entries(project, "milestones", Milestone)
         sync_entity_thumbnails(project, "assets")
         sync_entity_thumbnails(project, "shots")
         print("Sync of %s complete." % project["name"])
@@ -135,7 +193,8 @@ def sync_entries(model_name, model):
             page += 1
             init = False
 
-    model.create_from_import_list(instances)
+            model.create_from_import_list(results["data"])
+            print("%s %s synced." % (len(results["data"]), model_name))
     print("%s %s synced." % (len(instances), model_name))
 
 
@@ -145,21 +204,9 @@ def sync_project_entries(project, model_name, model):
     init = True
     results = {"nb_pages": 2}
 
-    if model_name in [
-        "assets",
-        "build-jobs",
-        "comments",
-        "entity-links",
-        "episodes",
-        "events",
-        "metadata-descriptors",
-        "news",
-        "notifications",
-        "playlists",
-        "preview-files",
-        "sequences",
-        "shots",
-        "subscriptions"
+    if model_name not in [
+        "tasks",
+        "schedule-items"
     ]:
         results = gazu.client.fetch_all(
             "projects/%s/%s" % (project["id"], model_name)
@@ -196,7 +243,7 @@ def add_main_sync_listeners(event_client):
     add_sync_listeners(
         event_client, "task-status", "task-status", TaskStatus)
     add_sync_listeners(
-        event_client, "news", "news", TaskStatus)
+        event_client, "news", "news", News)
 
 
 def add_project_sync_listeners(event_client):
@@ -249,12 +296,16 @@ def create_entry(model_name, event_name, model, event_type):
         try:
             instance = gazu.client.fetch_one(model_name, model_id)
             model.create_from_import(instance)
-            events.emit("%s:%s" % (event_name, event_type), {
+            import os
+            full_event_name = "%s:%s" % (event_name, event_type)
+            print("emit", os.getenv("KV_PORT"), full_event_name)
+            events.emit(full_event_name, {
                 model_id_field_name: model_id,
                 "sync": True
             })
             print("%s created/updated %s" % (event_name, model_id))
-        except gazu.exception.RouteNotFoundException:
+        except gazu.exception.RouteNotFoundException as e:
+            print(e)
             print("Fail %s created/updated %s" % (event_name, model_id))
     return create
 
@@ -268,3 +319,21 @@ def delete_entry(model_name, event_name, model):
         model.delete_all_by(id=model_id)
         print("%s deleted %s" % (model_name, model_id))
     return delete
+
+
+def run_last_events_sync():
+    events = gazu.client.fetch_all("events/last")
+    for event in events:
+        event_name = event["name"]
+        print(event_name)
+        [event_name, action] = event_name.split(":")
+        if event_name in event_name_model_map:
+            model = event_name_model_map[event_name]
+            path = event_name_model_path_map[event_name]
+            print(event)
+            instance_id = event["data"]["%s_id" % event_name.replace("-", "_")]
+            if action in ["update", "create"]:
+                instance = gazu.client.fetch_one(path, instance_id)
+                model.create_from_import(instance)
+            elif action in ["delete"]:
+                model.delete_from_import(instance_id)
