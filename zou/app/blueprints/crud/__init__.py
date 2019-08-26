@@ -18,6 +18,7 @@ from .notifications import NotificationsResource, NotificationResource
 from .organisation import OrganisationsResource, OrganisationResource
 from .output_file import OutputFilesResource, OutputFileResource
 from .output_type import OutputTypeResource, OutputTypesResource
+from .news import NewssResource, NewsResource
 from .person import PersonResource, PersonsResource
 from .preview_file import (
     PreviewFilesResource,
@@ -99,6 +100,8 @@ routes = [
     ("/data/search-filters/<instance_id>", SearchFilterResource),
     ("/data/schedule-items/", ScheduleItemsResource),
     ("/data/schedule-items/<instance_id>", ScheduleItemResource),
+    ("/data/news/", NewssResource),
+    ("/data/news/<instance_id>", NewsResource),
     ("/data/milestones/", MilestonesResource),
     ("/data/milestones/<instance_id>", MilestoneResource)
 ]
