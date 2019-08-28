@@ -28,6 +28,7 @@ class Milestone(db.Model, BaseMixin, SerializerMixin):
         return fields.serialize_dict({
             "id": self.id,
             "date": self.date,
+            "name": self.name,
             "project_id": self.project_id,
             "task_type_id": self.task_type_id
         })
