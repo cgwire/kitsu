@@ -416,7 +416,7 @@ export const routes = [
       },
 
       {
-        path: 'productions/:production_id/assets/:shot_id',
+        path: 'productions/:production_id/assets/:asset_id',
         component: Asset,
         name: 'asset'
       },
@@ -611,7 +611,7 @@ export const routes = [
       },
 
       {
-        path: 'productions/:production_id/episodes/:episode_id/assets/:shot_id',
+        path: 'productions/:production_id/episodes/:episode_id/assets/:asset_id',
         component: Asset,
         name: 'episode-asset'
       },
