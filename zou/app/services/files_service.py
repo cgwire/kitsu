@@ -5,7 +5,6 @@ from zou.app.models.working_file import WorkingFile
 from zou.app.models.output_file import OutputFile
 from zou.app.models.output_type import OutputType
 from zou.app.models.preview_file import PreviewFile
-from zou.app.models.project import Project
 from zou.app.models.software import Software
 from zou.app.models.task import Task
 
@@ -24,10 +23,11 @@ from zou.app.services.exception import (
     EntryAlreadyExistsException
 )
 
-from zou.app.utils import fields, events, query as query_utils
+from zou.app.utils import fields, events
 
-from sqlalchemy import desc
+from sqlalchemy import desc, func
 from sqlalchemy.exc import StatementError, IntegrityError
+from sqlalchemy.sql.expression import and_
 
 
 def get_default_status():
@@ -397,8 +397,8 @@ def get_output_files_for_entity(
     Return output files for given entity ordered by revision.
     """
     query = OutputFile.query.filter_by(
-            entity_id=entity_id
-        )
+        entity_id=entity_id
+    )
 
     if task_type_id:
         query = query.filter(
@@ -462,53 +462,119 @@ def get_output_files_for_instance(
     return fields.serialize_models(output_files)
 
 
-def get_last_output_files_for_entity(entity_id):
+def get_last_output_files_for_entity(
+        entity_id,
+        task_type_id=None,
+        output_type_id=None,
+        name=None,
+        representation=None):
     """
-    Get last output files for given entity grouped by output type and name.
+    Get last output files for given parameters.
+
+    We use a subquery to get maximum revision and then filter with given
+    params.
     """
-    result = {}
-    output_files = get_output_files_for_entity(entity_id)
+    # Query maximum revision for each possible arguments
+    query = OutputFile.query.with_entities(
+        OutputFile.task_type_id,
+        OutputFile.output_type_id,
+        OutputFile.name,
+        OutputFile.representation,
+        func.max(OutputFile.revision).label("MAX")
+    ).group_by(
+        OutputFile.task_type_id,
+        OutputFile.output_type_id,
+        OutputFile.name,
+        OutputFile.representation
+    )
+    query = query.filter(OutputFile.entity_id == entity_id)
+    query = query.filter(OutputFile.asset_instance_id == None)
+    statement = query.subquery()
 
-    # We assume here that output files are returned in the right order.
-    for output_file in output_files:
-        output_type_id = output_file["output_type_id"]
-        name = output_file["name"]
+    # Create a join query to retrieve maximum revision and filter by
+    # specified arguments
+    query = OutputFile.query.join(
+        statement, and_(
+            OutputFile.task_type_id == statement.c.task_type_id,
+            OutputFile.output_type_id == statement.c.output_type_id,
+            OutputFile.name == statement.c.name,
+            OutputFile.representation == statement.c.representation,
+            OutputFile.revision == statement.c.MAX
+        )
+    )
 
-        if output_type_id not in result:
-            result[output_type_id] = {}
+    # Filter by specified arguments
+    if task_type_id:
+        query = query.filter(OutputFile.task_type_id == task_type_id)
+    if output_type_id:
+        query = query.filter(OutputFile.output_type_id == output_type_id)
+    if name:
+        query = query.filter(OutputFile.name == name)
+    if representation:
+        query = query.filter(OutputFile.representation == representation)
 
-        if name not in result[output_type_id]:
-            result[output_type_id][name] = output_file
+    query = query.filter(OutputFile.entity_id == entity_id)
 
-    return result
+    # query
+    output_files = query.all()
+    return fields.serialize_models(output_files)
 
 
 def get_last_output_files_for_instance(
-    asset_instance_id,
-    temporal_entity_id
-):
-    """
-    Get last output files for given instance grouped by output type and name.
-    """
-    result = {}
-
-    output_files = get_output_files_for_instance(
         asset_instance_id,
-        temporal_entity_id
+        temporal_entity_id,
+        task_type_id=None,
+        output_type_id=None,
+        name=None,
+        representation=None):
+    """
+    Get last output files for given entity grouped by output type and name.
+    """
+    # Query maximum revision for each possible arguments
+    query = OutputFile.query.with_entities(
+        OutputFile.temporal_entity_id,
+        OutputFile.task_type_id,
+        OutputFile.output_type_id,
+        OutputFile.name,
+        OutputFile.representation,
+        func.max(OutputFile.revision).label("MAX")
+    ).group_by(
+        OutputFile.temporal_entity_id,
+        OutputFile.task_type_id,
+        OutputFile.output_type_id,
+        OutputFile.name,
+        OutputFile.representation
+    )
+    query = query.filter(OutputFile.asset_instance_id == asset_instance_id)
+    query = query.filter(OutputFile.temporal_entity_id == temporal_entity_id)
+    statement = query.subquery()
+
+    # Create a join query to retrieve maximum revision
+    query = OutputFile.query.join(
+        statement, and_(
+            OutputFile.temporal_entity_id == statement.c.temporal_entity_id,
+            OutputFile.task_type_id == statement.c.task_type_id,
+            OutputFile.output_type_id == statement.c.output_type_id,
+            OutputFile.name == statement.c.name,
+            OutputFile.representation == statement.c.representation,
+            OutputFile.revision == statement.c.MAX
+        )
     )
 
-    # We assume here that output files are returned in the right order.
-    for output_file in output_files:
-        output_type_id = output_file["output_type_id"]
-        name = output_file["name"]
+    # Filter by specified arguments
+    query = query.filter(OutputFile.asset_instance_id == asset_instance_id)
+    query = query.filter(OutputFile.temporal_entity_id == temporal_entity_id)
+    if task_type_id:
+        query = query.filter(OutputFile.task_type_id == task_type_id)
+    if output_type_id:
+        query = query.filter(OutputFile.output_type_id == output_type_id)
+    if name:
+        query = query.filter(OutputFile.name == name)
+    if representation:
+        query = query.filter(OutputFile.representation == representation)
 
-        if output_type_id not in result:
-            result[output_type_id] = {}
-
-        if name not in result[output_type_id]:
-            result[output_type_id][name] = output_file
-
-    return result
+    output_files = query.all()
+    return fields.serialize_models(output_files)
 
 
 def get_preview_file_raw(preview_file_id):
@@ -546,13 +612,13 @@ def get_preview_files_for_task(task_id):
     return fields.serialize_models(previews)
 
 
-def create_preview_file_raw(
+def create_preview_file(
     name,
     revision,
     task_id,
     person_id,
-    source="webgui",
-    extension="mp4"
+    is_movie,
+    source="webgui"
 ):
     return PreviewFile.create(
         name=name,
@@ -560,25 +626,7 @@ def create_preview_file_raw(
         source=source,
         task_id=task_id,
         person_id=person_id,
-        extension=extension
-    )
-
-
-def create_preview_file(
-    name,
-    revision,
-    task_id,
-    person_id,
-    source="webgui",
-    extension="mp4"
-):
-    return create_preview_file_raw(
-        name,
-        revision,
-        task_id,
-        person_id,
-        source,
-        extension
+        is_movie=is_movie
     ).serialize()
 
 
@@ -597,7 +645,6 @@ def update_output_file(output_file_id, data):
 def update_preview_file(preview_file_id, data):
     preview_file = get_preview_file_raw(preview_file_id)
     preview_file.update(data)
-    events.emit("preview-file:update", {"preview_file_id": preview_file_id})
     return preview_file.serialize()
 
 
@@ -642,7 +689,7 @@ def get_output_files_for_output_type_and_entity(
     query = (
         OutputFile.query
         .filter(OutputFile.entity_id == entity_id)
-        .filter(OutputFile.asset_instance_id == None)  # noqa. Entity only
+        .filter(OutputFile.asset_instance_id == None)  # noqa Entity only
         .filter(OutputFile.output_type_id == output_type_id)
         .order_by(desc(OutputFile.revision))
     )
@@ -681,27 +728,7 @@ def get_output_files_for_output_type_and_asset_instance(
 def remove_preview_file(preview_file_id):
     preview_file = get_preview_file_raw(preview_file_id)
     preview_file.delete()
-    events.emit("preview_file:delete", {
+    events.emit("preview_file:deletion", {
         "preview_file_id": preview_file_id
     })
     return preview_file.serialize()
-
-
-def get_project_from_preview_file(preview_file_id):
-    """
-    Get project dict of related preview file.
-    """
-    preview_file = get_preview_file_raw(preview_file_id)
-    task = Task.get(preview_file.task_id)
-    project = Project.get(task.project_id)
-    return project.serialize()
-
-
-def get_preview_files_for_project(project_id, page=-1):
-    """
-    Return all preview files for given project.
-    """
-    query = PreviewFile.query \
-       .join(Task) \
-       .filter(Task.project_id == project_id)
-    return query_utils.get_paginated_results(query, page)
