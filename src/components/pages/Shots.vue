@@ -479,8 +479,8 @@ export default {
 
     confirmCreateTasks (form) {
       this.loading.creatingTasks = true
-      this.runTasksCreation(form, (err) => {
-        if (!err) this.$router.push(this.shotsPath)
+      this.runTasksCreation(form, () => {
+        this.hideCreateTasksModal()
         this.loading.creatingTasks = false
       })
     },
@@ -502,7 +502,6 @@ export default {
           if (err) {
             this.errors.creatingTasks = true
           } else {
-            this.hideCreateTasksModal()
             this.loadShots(() => {
               this.resizeHeaders()
             })
