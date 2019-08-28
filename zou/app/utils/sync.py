@@ -28,6 +28,8 @@ from zou.app.models.time_spent import TimeSpent
 from zou.app.utils import events
 
 event_name_model_map = {
+    "asset": Entity,
+    "asset-type": EntityType,
     "build-job": BuildJob,
     "custom-action": CustomAction,
     "comment": Comment,
@@ -35,6 +37,7 @@ event_name_model_map = {
     "entity": Entity,
     "entity-link": EntityLink,
     "entity-type": EntityType,
+    "episode": Entity,
     "event": ApiEvent,
     "organisation": Organisation,
     "metadata-descriptor": MetadataDescriptor,
@@ -46,6 +49,8 @@ event_name_model_map = {
     "preview-file": PreviewFile,
     "project": Project,
     "project-status": ProjectStatus,
+    "sequence": Entity,
+    "shot": Entity,
     "schedule-item": ScheduleItem,
     "subscription": Subscription,
     "search-filter": SearchFilter,
@@ -56,12 +61,17 @@ event_name_model_map = {
 }
 
 event_name_model_path_map = {
+    "asset": "assets",
+    "episode": "episodes",
+    "sequence": "sequences",
+    "shot": "shots",
     "build-job": "build-jobs",
     "custom-action": "custom-actions",
     "comment": "comments",
     "department": "departments",
     "entity": "entities",
     "entity-link": "entity-links",
+    "asset-type": "entity-types",
     "entity-type": "entity-types",
     "event": "events",
     "organisation": "organisations",
@@ -82,6 +92,38 @@ event_name_model_path_map = {
     "task-type": "task-types",
     "time-spent": "time-spents"
 }
+
+project_events = [
+    "episodes",
+    "sequences",
+    "assets",
+    "shots",
+    "tasks",
+    "time-spents"
+    "preview-files",
+    "playlists",
+    "build-jobs",
+    "comments",
+    "metadata-descriptors",
+    "schedule-items",
+    "subscriptions",
+    "notifications",
+    "entity-links",
+    "news",
+    "milestones"
+]
+
+main_events = [
+    "person",
+    "organisation",
+    "project-status",
+    "departements",
+    "task-types",
+    "task-status",
+    "custom-actions",
+    "asset-types",
+    "projects"
+]
 
 
 def init(target, login, password):
@@ -126,42 +168,20 @@ def sync_entity_thumbnails(project, model_name):
 
 
 def run_main_data_sync():
-    sync_entries("persons", Person)
-    sync_entries("organisations", Organisation)
-    sync_entries("project-status", ProjectStatus)
-    sync_entries("departments", Department)
-    sync_entries("task-types", TaskType)
-    sync_entries("task-status", TaskStatus)
-    sync_entries("custom-actions", CustomAction)
-    sync_entries("entity-types", EntityType)
-    sync_entries("projects", Project)
+    for event in main_events:
+        path = event_name_model_path_map[event]
+        model = event_name_model_map[event]
+        sync_entries(path, model)
 
 
 def run_open_project_data_sync():
     projects = gazu.project.all_open_projects()
     for project in projects:
         print("Syncing %s..." % project["name"])
-        sync_project_entries(project, "episodes", Entity)
-        sync_project_entries(project, "sequences", Entity)
-        sync_project_entries(project, "assets", Entity)
-        sync_project_entries(project, "shots", Entity)
-        sync_project_entries(project, "tasks", Task)
-        sync_project_entries(project, "time-spents", TimeSpent)
-        sync_project_entries(project, "preview-files", PreviewFile)
-        sync_project_entries(project, "playlists", Playlist)
-        sync_project_entries(project, "build-jobs", BuildJob)
-        sync_project_entries(project, "comments", Comment)
-        sync_project_entries(
-            project,
-            "metadata-descriptors",
-            MetadataDescriptor
-        )
-        sync_project_entries(project, "schedule-items", ScheduleItem)
-        sync_project_entries(project, "subscriptions", Subscription)
-        sync_project_entries(project, "notifications", Notification)
-        sync_project_entries(project, "entity-links", EntityLink)
-        sync_project_entries(project, "news", News)
-        sync_project_entries(project, "milestones", Milestone)
+        for event in project_events:
+            path = event_name_model_path_map[event]
+            model = event_name_model_map[event]
+            sync_project_entries(path, model)
         sync_entity_thumbnails(project, "assets")
         sync_entity_thumbnails(project, "shots")
         print("Sync of %s complete." % project["name"])
@@ -226,47 +246,17 @@ def sync_project_entries(project, model_name, model):
 
 
 def add_main_sync_listeners(event_client):
-    add_sync_listeners(
-        event_client, "custom-actions", "custom-action", CustomAction)
-    add_sync_listeners(
-        event_client, "entity-types", "asset-type", EntityType)
-    add_sync_listeners(
-        event_client, "organisations", "organisation", Organisation)
-    add_sync_listeners(
-        event_client, "persons", "person", Person)
-    add_sync_listeners(
-        event_client, "project-status", "project-status", Project)
-    add_sync_listeners(
-        event_client, "projects", "project", Project)
-    add_sync_listeners(
-        event_client, "task-types", "task-type", TaskType)
-    add_sync_listeners(
-        event_client, "task-status", "task-status", TaskStatus)
-    add_sync_listeners(
-        event_client, "news", "news", News)
+    for event in main_events:
+        path = event_name_model_path_map[event]
+        model = event_name_model_map[event]
+        add_sync_listeners(event_client, path, event, model)
 
 
 def add_project_sync_listeners(event_client):
-    add_sync_listeners(
-        event_client, "entities", "asset", Entity)
-    add_sync_listeners(
-        event_client, "entities", "shot", Entity)
-    add_sync_listeners(
-        event_client, "entities", "sequence", Entity)
-    add_sync_listeners(
-        event_client, "entities", "episodes", Entity)
-    add_sync_listeners(
-        event_client, "tasks", "task", Task)
-    add_sync_listeners(
-        event_client, "comments", "comment", Comment)
-    add_sync_listeners(
-        event_client, "preview-files", "preview-file", PreviewFile)
-    add_sync_listeners(
-        event_client, "playlists", "playlist", Playlist)
-    add_sync_listeners(
-        event_client, "time-spents", "time-spent", TimeSpent)
-    add_sync_listeners(
-        event_client, "build-jobs", "build-job", TimeSpent)
+    for event in project_events:
+        path = event_name_model_path_map[event]
+        model = event_name_model_map[event]
+        add_sync_listeners(event_client, path, event, model)
 
 
 def add_sync_listeners(event_client, model_name, event_name, model):
@@ -323,15 +313,16 @@ def delete_entry(model_name, event_name, model):
 
 def run_last_events_sync():
     events = gazu.client.fetch_all("events/last")
+
     for event in events:
         event_name = event["name"]
-        print(event_name)
         [event_name, action] = event_name.split(":")
+
         if event_name in event_name_model_map:
             model = event_name_model_map[event_name]
             path = event_name_model_path_map[event_name]
-            print(event)
             instance_id = event["data"]["%s_id" % event_name.replace("-", "_")]
+
             if action in ["update", "create"]:
                 instance = gazu.client.fetch_one(path, instance_id)
                 model.create_from_import(instance)
