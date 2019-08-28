@@ -387,13 +387,36 @@ def get_last_output_revision(
     return output_files[0].serialize()
 
 
-def get_output_files_for_entity(entity_id):
+def get_output_files_for_entity(
+        entity_id,
+        task_type_id=None,
+        output_type_id=None,
+        name=None,
+        representation=None):
     """
     Return output files for given entity ordered by revision.
     """
-    output_files = OutputFile.query.filter_by(
-        entity_id=entity_id
-    ).filter(
+    query = OutputFile.query.filter_by(
+            entity_id=entity_id
+        )
+
+    if task_type_id:
+        query = query.filter(
+            OutputFile.task_type_id == task_type_id)
+    if output_type_id:
+        query = query.filter(
+            OutputFile.output_type_id == output_type_id)
+    if name:
+        query = query.filter(
+            OutputFile.name == name)
+    if representation:
+        query = query.filter(
+            OutputFile.representation == representation)
+
+    query = query.filter(OutputFile.asset_instance_id == None)
+    query = query.filter(OutputFile.temporal_entity_id == None)
+
+    output_files = query.filter(
         OutputFile.revision >= 0
     ).order_by(
         desc(OutputFile.revision)
@@ -401,14 +424,37 @@ def get_output_files_for_entity(entity_id):
     return fields.serialize_models(output_files)
 
 
-def get_output_files_for_instance(asset_instance_id, temporal_entity_id):
+def get_output_files_for_instance(
+        asset_instance_id,
+        temporal_entity_id,
+        task_type_id=None,
+        output_type_id=None,
+        name=None,
+        representation=None):
     """
     Return output files for given instance ordered by revision.
     """
-    output_files = OutputFile.query.filter_by(
-        asset_instance_id=asset_instance_id,
-        temporal_entity_id=temporal_entity_id
-    ).filter(
+    query = OutputFile.query.filter_by(
+        asset_instance_id=asset_instance_id
+    )
+
+    if temporal_entity_id:
+        query = query.filter(
+            OutputFile.temporal_entity_id == temporal_entity_id)
+    if task_type_id:
+        query = query.filter(
+            OutputFile.task_type_id == task_type_id)
+    if output_type_id:
+        query = query.filter(
+            OutputFile.output_type_id == output_type_id)
+    if name:
+        query = query.filter(
+            OutputFile.name == name)
+    if representation:
+        query = query.filter(
+            OutputFile.representation == representation)
+
+    output_files = query.filter(
         OutputFile.revision >= 0
     ).order_by(
         desc(OutputFile.revision)
