@@ -99,23 +99,11 @@ validate it by **Confirm** button.
 
 You added tasks to all the assets.
 
-If some assets don't match the task (as environment and setup), we delete the
-status of this task.
 
-To change a status click directly on the status you want to change (1).
-
-![Task on asset](../img/getting-started/asset_task_added.png)
-
-A panel on the right of the screen appears, and here you can change a status, post a preview, and add a comment to
-explain the status change (1). Choose a new status for the task (2). Then, 
-click on the **Post status** button (3).  
-
-![Changing status](../img/getting-started/changing_status.png)
-
-If you want to delete a task, click on the menu to change the action (1), 
-then select the **delete tasks** button (2) 
-![Delete button](../img/getting-started/delete_task.png) on the left top
+If you want to delete a task,If some assets don't match the task (as environment and setup), click on the menu to change the action (1), 
+then select the **delete tasks** (2) on the left top
 of the page.
+![Delete button](../img/getting-started/delete_task.png) 
 
 Now that we have created all the assets and related tasks, we can now add the
 artists to the team and assign tasks to them.
@@ -435,9 +423,11 @@ Select in the menu if you want to
 edit the name of the custom column and its information, or you want to remove it.
 
 ![Custom Column detail](../img/getting-started//custom_column_edit.png)
-## Validation per batch
 
-To do a validation (or changing the status of a task), you can click on the
+
+## Comment and validation
+
+To write a comment and to change the status of a task, you can click on the
 status of the task (1). 
 
 ![Shot status](../img/getting-started/shot_status.png)
@@ -446,7 +436,7 @@ It makes appear a panel on the right, and here you can post a comment (1) and ch
 status (2), and validate the post and the new status with **Post status**
 button (3).
 
-![Changing status](../img/getting-started/changing_status.png)
+![Changing status](../img/getting-started/changing_status_shot.png)
 
 Alternatively, you can do it per **batch**. 
 
