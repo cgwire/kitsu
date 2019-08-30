@@ -361,7 +361,7 @@ export default {
     info_title: 'Information',
     language: 'Language',
     notifications_enabled: 'Email notifications enabled',
-    notifications_slack_enabled: 'Slack notificitations enabled',
+    notifications_slack_enabled: 'Slack notifications enabled',
     notifications_slack_user: 'Slack username',
     password_title: 'Change password',
     timezone: 'Timezone',
