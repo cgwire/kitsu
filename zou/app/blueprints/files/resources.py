@@ -979,3 +979,24 @@ class SetTreeResource(Resource):
         args = parser.parse_args()
 
         return args.get("tree_name", "")
+
+
+class EntityWorkingFilesResource(Resource):
+    """
+    Get all working files for a given entity and possibly a task and a name
+    """
+
+    @jwt_required
+    def get(self, entity_id):
+        task_id = request.args.get("task_id", None)
+        name = request.args.get("name", None)
+
+        entity = entities_service.get_entity(entity_id)
+        user_service.check_project_access(entity["project_id"])
+
+        return \
+            files_service.get_working_files_for_entity(
+                entity_id,
+                task_id=task_id,
+                name=name,
+            )

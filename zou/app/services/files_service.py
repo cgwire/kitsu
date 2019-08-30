@@ -311,6 +311,31 @@ def get_working_files_for_task(task_id):
     return fields.serialize_models(working_files)
 
 
+def get_working_files_for_entity(
+        entity_id,
+        task_id=None,
+        name=None):
+    """
+    Retrieve all working files for a given entity and specified parameters
+    ordered by revision from biggest to smallest revision.
+    """
+    query = WorkingFile.query.filter_by(entity_id=entity_id)
+
+    if task_id:
+        query = query.filter(WorkingFile.task_id == task_id)
+    if name:
+        query = query.filter(WorkingFile.name == name)
+
+    query = query.filter(
+        WorkingFile.revision >= 0
+    ).order_by(
+        desc(WorkingFile.revision)
+    )
+
+    working_files = query.all()
+    return fields.serialize_models(working_files)
+
+
 def get_next_working_file_revision(task_id, name):
     """
     Get next working file revision available for given task and given name.
