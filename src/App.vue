@@ -113,7 +113,7 @@ export default {
         if (this.taskTypeMap[eventData.task_type_id]) {
           this.$store.commit(
             'DELETE_TASK_TYPE_END',
-            {id: eventData.task_type_id}
+            { id: eventData.task_type_id }
           )
         }
       },
@@ -134,7 +134,7 @@ export default {
         if (this.taskStatusMap[eventData.task_status_id]) {
           this.$store.commit(
             'DELETE_TASK_STATUS_END',
-            {id: eventData.task_status_id}
+            { id: eventData.task_status_id }
           )
         }
       },
@@ -155,7 +155,7 @@ export default {
         if (this.assetTypeMap[eventData.entity_type_id]) {
           this.$store.commit(
             'DELETE_ASSET_TYPE_END',
-            {id: eventData.entity_type_id}
+            { id: eventData.entity_type_id }
           )
         }
       },
@@ -254,6 +254,20 @@ body {
     color: $white-grey;
   }
 
+  textarea.input:focus {
+    border-color: $green;
+  }
+
+  strong {
+    color: white;
+  }
+
+  code {
+    background: $dark-grey;
+    border-color: black;
+    color: $white-grey;
+  }
+
   textarea[disabled] {
     background: #36393F;
     color: #BBB;
@@ -312,7 +326,6 @@ body {
 
   .main-button {
     background: #00B242;
-    border-bottom: 3px solid #008732;
   }
 
   .add-comment .select select {
@@ -323,16 +336,19 @@ body {
     color: #DDD;
   }
 
-  .table-body .table tr:nth-child(odd) {
-    color: $white-grey;
-    background: #46494F;
+  .table-header tr:hover {
+    background: transparent;
   }
 
   .table-header,
-  .table-header tr:hover,
-  .table-body .table tr:nth-child(even) {
+  .table-body .table tr:nth-child(odd) {
     color: $white-grey;
     background: #36393F;
+  }
+
+  .table-body .table tr:nth-child(even) {
+    color: $white-grey;
+    background: #46494F;
   }
 
   .table-header th {
@@ -349,13 +365,13 @@ body {
     background: #5E6169;
   }
 
-   .table tr.type-header {
-    border-top: 1px solid #25282E;
+  .table tr.type-header {
+    border: 1px solid #36393F;
     font-size: 1.1em;
   }
 
   .table tr.type-header:hover {
-    background: #46494F;
+    background: #36393F;
   }
 
   .table tr.type-header td {
@@ -365,44 +381,45 @@ body {
 
   .splitted-table {
     border-left: 1px solid #36393F;
-  }
 
-  .splitted-table tr {
-    border-right: 1px solid #25282E;
-    border-left: 1px solid #25282E;
-  }
+    tr {
+      border-right: 1px solid #25282E;
+      border-left: 1px solid #25282E;
+    }
 
-  .splitted-table thead tr {
-    border-right: 1px solid transparent;
-    border-left: 1px solid transparent;
-  }
+    thead tr {
+      border-right: 1px solid transparent;
+      border-left: 1px solid transparent;
+    }
 
-  .splitted-table thead tr a {
-    color: #7A7A7A;
-  }
+    thead tr a {
+      color: #7A7A7A;
+    }
 
-  .splitted-table .table-body {
-    padding-top: 1em;
-    position: relative;
-    z-index: 1;
-  }
+    .table-body {
+      padding-top: 1em;
+      position: relative;
+      z-index: 1;
+    }
 
-  .splitted-table tbody:first-child tr:first-child {
-    border-top: 1px solid #25282E;
-  }
+    tbody {
+      border-bottom: 1px solid #25282E;
+    }
 
-  .splitted-table .empty-line {
-    border: 0;
-  }
+    tbody tr:first-child {
+      border-top: 0;
+      background: transparent;
+    }
 
-  .splitted-table .empty-line td {
-    border-color: #36393F;
-    background: #36393F;
-    border: 0;
-  }
+    .empty-line {
+      border: 0;
+    }
 
-  .splitted-table tbody {
-    border-bottom: 1px solid #25282E;
+    .empty-line td {
+      border-color: #36393F;
+      background: #36393F;
+      border: 0;
+    }
   }
 
   .search-input {
@@ -441,20 +458,28 @@ body {
     background-color: #5E6169;
   }
 
+  .project-dates .vdp-datepicker__calendar,
   .current-date .datepicker .vdp-datepicker__calendar {
     background-color: #36393F;
     border-color: #25282E;
+    z-index: 150;
   }
+  .project-dates .datepicker .vdp-datepicker__calendar .prev,
+  .project-dates .datepicker .vdp-datepicker__calendar .next,
+  .project-dates .datepicker .vdp-datepicker__calendar .day__month_btn,
   .current-date .datepicker .vdp-datepicker__calendar header span:hover {
     background: #36393F;
   }
+  .project-dates .datepicker .vdp-datepicker__calendar header .prev::after,
   .current-date .datepicker .vdp-datepicker__calendar header .prev::after {
     border-right-color: #EEE;
   }
+  .project-dates .datepicker .vdp-datepicker__calendar header .next::after,
   .current-date .datepicker .vdp-datepicker__calendar header .next::after {
     border-left-color: #EEE;
   }
 
+  .projects-dates .datepicker .vdp-datepicker__calendar header .next.disabled::after,
   .current-date .datepicker .vdp-datepicker__calendar header .next.disabled::after {
     border-left-color: #666;
   }
@@ -473,7 +498,7 @@ body {
 }
 
 .hidden {
-  display: none;
+  display: none !important;
 }
 
 .page {
@@ -497,7 +522,7 @@ ul {
 }
 
 .hero {
-  background-color: #CFCFCF;
+  background-color: #F3F3F3;
 }
 
 .avatar {
@@ -556,7 +581,7 @@ a:hover {
 }
 
 .info {
-  margin-top: 2em;
+  margin-top: 1em;
   font-size: 1.4em;
 }
 
@@ -566,6 +591,22 @@ a:hover {
 
 .field {
   margin-bottom: 2em;
+}
+
+.ml05 {
+  margin-left: 0.5em;
+}
+
+.ml1 {
+  margin-left: 1em;
+}
+
+.mr05 {
+  margin-right: 0.5em;
+}
+
+.mr1 {
+  margin-right: 1em;
 }
 
 .mt1 {
@@ -584,6 +625,30 @@ a:hover {
   margin-right: 1em;
 }
 
+.mb0 {
+  margin-bottom: 0;
+}
+
+.filler {
+  flex: 1;
+}
+
+ label.label {
+  color: $grey;
+  text-transform: uppercase;
+  font-size: 0.8em;
+  margin-left: 2px;
+}
+
+span.select {
+}
+
+texarea,
+input.input {
+  padding: 1em;
+  height: 3em;
+}
+
 .select select:hover,
 .select select:active,
 .select select:focus,
@@ -592,8 +657,17 @@ input.input:focus {
   outline: none;
 }
 
+.button,
+.button.is-small {
+  border-radius: 2em;
+}
+
 .button:focus {
   box-shadow: none;
+}
+
+textarea.input:focus {
+  border-color: $green;
 }
 
 .button.is-primary {
@@ -647,19 +721,18 @@ input.input:focus {
 }
 
 .main-button {
-  border-radius: 2px;
-  min-height: 2.8em;
+  border-radius: 5px;
+  min-height: 2.6em;
   color: white;
   border-color: #5e60ba;
   padding: 12px 12px 12px 12px;
   margin: .3em 0 0em 0;
-  font-size: 16px;
+  font-size: 1.4em;
   font-weight: 500;
   letter-spacing: 1px;
   background: #00B242;
   color: #fff;
   border: 0;
-  border-bottom: 3px solid #008732;
   transition: all 0.15s ease;
   width: 100%;
   display: block;
@@ -669,10 +742,26 @@ input.input:focus {
 .main-button:hover {
   background: #67BE4B;
   color: #fff;
-  border-bottom: 3px solid #119843;
 }
 
 .main-button:focus { outline: 0; }
+
+.modal-content {
+  .box {
+    border-radius: 1em;
+    padding: 1.5em 1.5em 1.5em 1.5em;
+
+    h1.title {
+      font-weight: 300;
+      font-size: 2em;
+      border: 0;
+    }
+
+    .button {
+      border-radius: 2em;
+    }
+  }
+}
 
 .hero .box {
   margin-top: 30%;
@@ -721,19 +810,13 @@ input.input:focus {
   border: 0;
   box-shadow: none;
   border-radius: 0;
-  border-bottom: 2px solid #CCC
-}
-
-input.search-input:focus {
-  border-color: #8F91EB;
 }
 
 .filters-area {}
 
 .query-list {
-  margin-top: 1em;
   margin-bottom: 2em;
-  margin-left: 2.5em;
+  margin-left: 1em;
 }
 
 .query-list .tag {
@@ -780,6 +863,9 @@ input.search-input:focus {
 
 .table td {
   vertical-align: middle;
+}
+
+.table td.metadata-descriptor {
   word-wrap: anywhere;
 }
 
@@ -793,20 +879,33 @@ input.search-input:focus {
   margin-bottom: 0;
   flex-wrap: wrap;
   position: relative;
-}
 
-.table-header th.actions {
-  width: 100%;
-}
+  thead th {
+    border-width: 0 0 1px;
+      font-size: 0.9em;
 
-.table-header .header-icon {
-  width: 15px;
-  cursor: pointer;
-  opacity: 0;
-}
+    &.metadata-descriptor,
+    &.validation-cell {
+      .descriptor-name,
+      .validation-name {
+        flex: 1;
+      }
+    }
+  }
 
-.table-header th:hover .header-icon {
-  opacity: 100;
+  th.actions {
+    width: 100%;
+  }
+
+  th:hover .header-icon {
+    opacity: 100;
+  }
+
+  .header-icon {
+    width: 15px;
+    cursor: pointer;
+    opacity: 0;
+  }
 }
 
 .table-body {
@@ -828,11 +927,11 @@ input.search-input:focus {
 }
 
 .table-body .table tr:hover {
-  background: #F0FFF0;
+  background: $light-green-lightest;
 }
 
 .table tr.type-header {
-  border-top: 1px solid #CCC;
+  border: 1px solid transparent;
   font-size: 1.1em;
 }
 
@@ -845,7 +944,7 @@ input.search-input:focus {
   padding-left: 0.3em;
 }
 
-.splitted-table tr {
+.splitted-table tbody tr {
   border-right: 1px solid #CCC;
   border-left: 1px solid #CCC;
 }
@@ -865,8 +964,9 @@ input.search-input:focus {
   z-index: 1;
 }
 
-.splitted-table tbody:first-child tr:first-child {
-  border-top: 1px solid #CCC;
+.splitted-table tbody tr:first-child {
+  color: #999;
+  text-transform: uppercase;
 }
 
 .splitted-table tbody:last-child .empty-line:last-child {
@@ -913,6 +1013,10 @@ tbody:last-child .empty-line:last-child {
 
 .flexrow-item {
   margin-right: 1em;
+
+  &.no-margin {
+    margin-right: 0;
+  }
 }
 
 .flexcolumn {
@@ -1125,8 +1229,11 @@ tbody:last-child .empty-line:last-child {
 }
 
 .datepicker .date-field {
-  font-size: 1.6em;
   width: 250px;
+}
+
+.project-dates .date-input {
+  width: 150px;
 }
 
 .dark .button.is-on {
@@ -1162,6 +1269,43 @@ tbody:last-child .empty-line:last-child {
   word-wrap: break-word;
   overflow-wrap: break-word;
   hyphens: auto;
+}
+
+.status-combo {
+  padding: 0.3em;
+  border-radius: 3px;
+
+  .selected-status-line,
+  .status-line {
+    padding: 0.4em;
+  }
+}
+
+.status-combo-wrapper {
+  margin: 0;
+
+  .status-combo {
+    border-top-left-radius: 2em;
+    border-bottom-left-radius: 2em;
+  }
+
+  .selected-status-line {
+    padding: 0.1em;
+    padding-left: 0.2em;
+  }
+}
+
+.project-dates .vdp-datepicker__calendar .cell.day.selected,
+.current-date .datepicker .vdp-datepicker__calendar .cell.day.selected {
+  background: $purple;
+}
+.project-dates .vdp-datepicker__calendar .cell.day:not(.blank):not(.disabled):hover,
+.current-date .datepicker .vdp-datepicker__calendar .cell.day:not(.blank):not(.disabled):hover {
+  border: 1px solid $light-green;
+}
+.project-dates .vdp-datepicker__calendar .cell.day.disabled:hover,
+.current-date .datepicker .vdp-datepicker__calendar .cell.day.disabled:hover {
+  border: 1px solid transparent;
 }
 
 @media screen and (max-width: 1000px) {

@@ -62,14 +62,12 @@
 import { mapGetters, mapActions } from 'vuex'
 import TextField from '../widgets/TextField'
 import TextareaField from '../widgets/TextareaField'
-import Combobox from '../widgets/Combobox'
 
 export default {
   name: 'edit-sequence-modal',
   components: {
     TextField,
-    TextareaField,
-    Combobox
+    TextareaField
   },
 
   props: [
@@ -170,11 +168,6 @@ export default {
 .is-danger {
   color: #ff3860;
   font-style: italic;
-}
-.title {
-  border-bottom: 2px solid #DDD;
-  padding-bottom: 0.5em;
-  margin-bottom: 1.2em;
 }
 .info-message {
   margin-top: 1em;

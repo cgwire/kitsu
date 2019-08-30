@@ -85,8 +85,7 @@
            class="production"
            :entry="productionMap[task.project_id]"
            :only-avatar="true"
-         >
-         </production-name-cell>
+         />
          <task-type-name
            class="type"
            :production-id="task.project_id"
@@ -95,8 +94,7 @@
              name: task.task_type_name,
              color: task.task_type_color
            }"
-         >
-         </task-type-name>
+         />
 
          <td class="name">
            <router-link :to="task.entity_path">
@@ -129,9 +127,8 @@
 import { mapGetters, mapActions } from 'vuex'
 import moment from 'moment-timezone'
 import Datepicker from 'vuejs-datepicker'
-import {en, fr} from 'vuejs-datepicker/dist/locale'
+import { en, fr } from 'vuejs-datepicker/dist/locale'
 
-import EntityThumbnail from '../widgets/EntityThumbnail'
 import PageSubtitle from '../widgets/PageSubtitle'
 import ProductionNameCell from '../cells/ProductionNameCell'
 import TaskTypeName from '../cells/TaskTypeName'
@@ -143,7 +140,6 @@ export default {
 
   components: {
     Datepicker,
-    EntityThumbnail,
     ProductionNameCell,
     PageSubtitle,
     TableInfo,
@@ -197,9 +193,9 @@ export default {
 
   computed: {
     ...mapGetters([
-      'taskTypeMap',
       'nbSelectedTasks',
       'productionMap',
+      'taskTypeMap',
       'user'
     ]),
 

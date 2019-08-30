@@ -47,9 +47,8 @@ import { mapGetters, mapActions } from 'vuex'
 import { XIcon } from 'vue-feather-icons'
 import PageTitle from '../widgets/PageTitle'
 import PeopleAvatar from '../widgets/PeopleAvatar'
-import TableInfo from '../widgets/TableInfo'
 import TimeSpentTaskList from '../lists/TimeSpentTaskList'
-import { monthToString } from '../../lib/helpers'
+import { monthToString } from '../../lib/time'
 
 export default {
   name: 'people-timesheet-info',
@@ -58,7 +57,6 @@ export default {
     XIcon,
     PageTitle,
     PeopleAvatar,
-    TableInfo,
     TimeSpentTaskList
   },
 
@@ -166,7 +164,7 @@ export default {
           }
         }
       } else {
-        return {name: 'timesheets'}
+        return { name: 'timesheets' }
       }
     }
   },
@@ -185,6 +183,10 @@ export default {
 <style lang="scss" scoped>
 .dark .close-button:hover {
   background: $dark-grey-lightest;
+}
+
+.data-list {
+  padding-bottom: 5em;
 }
 
 .people-timesheet-info {

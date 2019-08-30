@@ -54,7 +54,7 @@ const actions = {
       (err) => {
         if (err) {
           commit(LOGIN_FAILURE)
-          callback(null, false)
+          callback(err, false)
         } else {
           commit(LOGIN_SUCCESS)
           callback(null, true)
@@ -136,7 +136,7 @@ const mutations = {
   },
 
   [RESET_ALL] (state, email) {
-    Object.assign(state, {...initialState})
+    Object.assign(state, { ...initialState })
   }
 }
 

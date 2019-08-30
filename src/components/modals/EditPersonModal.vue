@@ -56,6 +56,31 @@
       </form>
 
       <p class="has-text-right">
+        <button
+          :class="{
+            button: true,
+            'is-primary': true,
+            'is-loading': isCreateInviteLoading
+          }"
+          :disabled="!isValidEmail"
+          @click="createAndInvite"
+          v-if="isCreating && isCurrentUserAdmin"
+        >
+          {{ $t('people.create_invite') }}
+        </button>
+        <button
+          :class="{
+            button: true,
+            'is-primary': true,
+            'is-loading': isInviteLoading
+          }"
+          :disabled="!isValidEmail"
+          @click="invite"
+          v-else-if="isCurrentUserAdmin"
+        >
+          {{ $t('people.invite') }}
+        </button>
+
         <a
           :class="{
             button: true,
@@ -64,14 +89,27 @@
           }"
           :disabled="!isValidEmail"
           @click="confirmClicked">
-          {{ $t("main.confirmation") }}
+          {{ $t('main.confirmation') }}
         </a>
         <router-link
           :to="cancelRoute"
           class="button is-link">
-          {{ $t("main.cancel") }}
+          {{ $t('main.cancel') }}
         </router-link>
       </p>
+
+      <div
+        class="success has-text-right mt1"
+        v-if="isInvitationSuccess"
+      >
+        {{ $t('people.invite_success') }}
+      </div>
+      <div
+        class="error has-text-right mt1"
+        v-if="isInvitationError"
+      >
+        {{ $t('people.invite_error') }}
+      </div>
     </div>
   </div>
 </div>
@@ -90,6 +128,10 @@ export default {
     'active',
     'cancelRoute',
     'isLoading',
+    'isCreateInviteLoading',
+    'isInvitationSuccess',
+    'isInvitationError',
+    'isInviteLoading',
     'isError',
     'errorText'
   ],
@@ -107,14 +149,14 @@ export default {
       },
 
       roleOptions: [
-        {label: 'user', value: 'user'},
-        {label: 'manager', value: 'manager'},
-        {label: 'admin', value: 'admin'},
-        {label: 'client', value: 'client'}
+        { label: 'user', value: 'user' },
+        { label: 'manager', value: 'manager' },
+        { label: 'admin', value: 'admin' },
+        { label: 'client', value: 'client' }
       ],
       activeOptions: [
-        {label: this.$t('main.yes'), value: 'true'},
-        {label: this.$t('main.no'), value: 'false'}
+        { label: this.$t('main.yes'), value: 'true' },
+        { label: this.$t('main.no'), value: 'false' }
       ]
     }
   },
@@ -127,9 +169,14 @@ export default {
   computed: {
     ...mapGetters([
       'isLdap',
+      'isCurrentUserAdmin',
       'personToEdit',
       'people'
     ]),
+
+    isCreating () {
+      return this.personToEdit.id === undefined
+    },
 
     personName () {
       if (this.personToEdit !== undefined) {
@@ -142,6 +189,14 @@ export default {
 
   methods: {
     ...mapActions([]),
+
+    createAndInvite () {
+      this.$emit('confirm-invite', this.form)
+    },
+
+    invite () {
+      this.$emit('invite', this.form)
+    },
 
     confirmClicked () {
       this.form.active =
@@ -207,10 +262,5 @@ export default {
 .is-danger {
   color: #ff3860;
   font-style: italic;
-}
-.title {
-  border-bottom: 2px solid #DDD;
-  padding-bottom: 0.5em;
-  margin-bottom: 1.2em;
 }
 </style>

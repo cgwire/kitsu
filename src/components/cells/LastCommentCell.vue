@@ -16,7 +16,6 @@
     <span
       class="flexrow-item last-comment pointer"
       v-if="commentText && commentText.length > 0"
-      v-tooltip="tooltipOptions"
       v-html="compileMarkdown(commentText)"
       @click="onClick"
     >
@@ -66,17 +65,6 @@ export default {
       }
 
       return result
-    },
-
-    tooltipOptions () {
-      return {
-        content: this.compileMarkdown(this.task.last_comment.text),
-        show: this.isOpen,
-        trigger: 'manual',
-        delay: {
-          hide: 5000
-        }
-      }
     }
   },
 
@@ -90,13 +78,6 @@ export default {
 
     onClick () {
       this.isOpen = !this.isOpen
-      if (this.isOpen) {
-        this.timeout = setTimeout(() => {
-          this.isOpen = false
-        }, 3000)
-      } else {
-        clearTimeout(this.timeout)
-      }
     }
   }
 }

@@ -77,7 +77,7 @@ import { mapGetters, mapActions } from 'vuex'
 import TextField from '../widgets/TextField'
 import Combobox from '../widgets/Combobox.vue'
 import ColorField from '../widgets/ColorField'
-import { range } from '../../lib/helpers'
+import { range } from '../../lib/time'
 
 export default {
   name: 'edit-task-type-modal',
@@ -125,12 +125,12 @@ export default {
         return { label: `${v}`, value: `${v}` }
       }),
       dedicatedToOptions: [
-        {label: this.$t('assets.title'), value: 'false'},
-        {label: this.$t('shots.title'), value: 'true'}
+        { label: this.$t('assets.title'), value: 'false' },
+        { label: this.$t('shots.title'), value: 'true' }
       ],
       allowTimelogOptions: [
-        {label: this.$t('main.yes'), value: 'true'},
-        {label: this.$t('main.no'), value: 'false'}
+        { label: this.$t('main.yes'), value: 'true' },
+        { label: this.$t('main.no'), value: 'false' }
       ]
     }
   },
@@ -162,10 +162,5 @@ export default {
 .is-danger {
   color: #ff3860;
   font-style: italic;
-}
-.title {
-  border-bottom: 2px solid #DDD;
-  padding-bottom: 0.5em;
-  margin-bottom: 1.2em;
 }
 </style>

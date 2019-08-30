@@ -1,13 +1,33 @@
 <template>
   <div class="episodes page fixed-page">
-    <div class="episode-list-header page-header">
-      <div class="filters-area">
-        <search-field
-          ref="episode-search-field"
-          @change="onSearchChange"
-          placeholder="ex: e01 s01, anim=wip"
-        />
-      </div>
+    <div class="episode-list-header page-header flexrow">
+      <search-field
+        class="flexrow-item mt1"
+        ref="episode-search-field"
+        @change="onSearchChange"
+        placeholder="ex: e01 s01, anim=wip"
+      />
+      <combobox
+        class="mb0 flexrow-item"
+        locale-key-prefix="statistics."
+        :label="$t('statistics.display_mode')"
+        :options="displayModeOptions"
+        v-model="displayMode"
+      />
+      <combobox
+        class="mb0 flexrow-item"
+        :label="$t('statistics.count_mode')"
+        locale-key-prefix="statistics."
+        :options="countModeOptions"
+        v-model="countMode"
+      />
+      <span class="filler">
+      </span>
+      <button-simple
+        class="flexrow-item"
+        icon="download"
+        @click="exportStatisticsToCsv"
+      />
     </div>
 
     <episode-list
@@ -17,6 +37,9 @@
       :is-error="isShotsLoadingError"
       :validation-columns="episodeValidationColumns"
       :episode-stats="episodeStats"
+      :count-mode="countMode"
+      :display-mode="displayMode"
+      :show-all="episodeSearchText.length === 0"
       @scroll="saveScrollPosition"
     />
 
@@ -42,28 +65,48 @@
 </template>
 
 <script>
+import moment from 'moment'
 import { mapGetters, mapActions } from 'vuex'
-import { SearchIcon } from 'vue-feather-icons'
-import EpisodeList from '../lists/EpisodeList.vue'
-import DeleteModal from '../widgets/DeleteModal'
+import csv from '../../lib/csv'
+import { slugify } from '../../lib/string'
+
+import ButtonSimple from '../widgets/ButtonSimple'
+import Combobox from '../widgets/Combobox'
+import DeleteModal from '../modals/DeleteModal'
 import EditEpisodeModal from '../modals/EditEpisodeModal'
-import PageTitle from '../widgets/PageTitle'
+import EpisodeList from '../lists/EpisodeList.vue'
 import SearchField from '../widgets/SearchField'
 
 export default {
   name: 'episodes',
 
   components: {
+    ButtonSimple,
+    Combobox,
     EpisodeList,
     EditEpisodeModal,
     DeleteModal,
-    PageTitle,
-    SearchField,
-    SearchIcon
+    SearchField
   },
 
   data () {
     return {
+      countMode: 'count',
+      displayMode: 'pie',
+      episodeToDelete: null,
+      episodeToEdit: null,
+      countModeOptions: [
+        { label: 'shots', value: 'count' },
+        { label: 'frames', value: 'frames' }
+      ],
+      displayModeOptions: [
+        { label: 'pie', value: 'pie' },
+        { label: 'count', value: 'count' }
+      ],
+      errors: {
+        edit: false,
+        del: false
+      },
       modals: {
         isNewDisplayed: false,
         isDeleteDisplayed: false
@@ -71,13 +114,7 @@ export default {
       loading: {
         edit: false,
         del: false
-      },
-      errors: {
-        edit: false,
-        del: false
-      },
-      episodeToDelete: null,
-      episodeToEdit: null
+      }
     }
   },
 
@@ -95,7 +132,9 @@ export default {
       'episodeStats',
       'episodeSearchText',
       'episodeListScrollPosition',
-      'episodeValidationColumns'
+      'episodeValidationColumns',
+      'taskStatusMap',
+      'taskTypeMap'
     ])
   },
 
@@ -182,7 +221,7 @@ export default {
     deleteText () {
       const episode = this.episodeToDelete
       if (episode) {
-        return this.$t('episodes.delete_text', {name: episode.name})
+        return this.$t('episodes.delete_text', { name: episode.name })
       } else {
         return ''
       }
@@ -226,6 +265,24 @@ export default {
           this.$refs['episode-list'].resizeHeaders()
         }
       }, 0)
+    },
+
+    exportStatisticsToCsv () {
+      const nameData = [
+        moment().format('YYYYMMDD'),
+        this.currentProduction.name,
+        'episodes',
+        'statistics'
+      ]
+      const name = slugify(nameData.join('_'))
+      csv.generateStatReports(
+        name,
+        this.episodeStats,
+        this.taskTypeMap,
+        this.taskStatusMap,
+        this.episodeMap,
+        this.countMode
+      )
     }
   },
 
@@ -241,7 +298,7 @@ export default {
       if (this.currentProduction.id !== productionId) {
         const newPath = {
           name: 'episodes',
-          params: {production_id: this.currentProduction.id}
+          params: { production_id: this.currentProduction.id }
         }
         this.$refs['episode-search-field'].setValue('')
         this.$store.commit('SET_SEQUENCE_LIST_SCROLL_POSITION', 0)
@@ -285,11 +342,4 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-.data-list {
-  margin-top: 0;
-}
-
-.filters-area {
-  margin-bottom: 2em;
-}
 </style>

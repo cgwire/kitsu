@@ -369,7 +369,7 @@ describe('people', () => {
     it('DELETE_PEOPLE_END', () => {
       store.commit(LOAD_PEOPLE_END, people)
       store.commit(SHOW_DELETE_PEOPLE_MODAL, 'person-3')
-      store.commit(DELETE_PEOPLE_END)
+      store.commit(DELETE_PEOPLE_END, {id: 'person-3'})
       expect(store._vm.isDeleteLoading).to.equal(false)
       expect(store._vm.isDeleteLoadingError).to.equal(false)
       expect(store._vm.personToDelete).to.equal(undefined)

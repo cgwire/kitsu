@@ -1,13 +1,25 @@
 <template>
   <div class="asset-types page fixed-page">
-    <div class="asset-type-list-header page-header">
-      <div class="filters-area">
-        <search-field
-          ref="asset-type-search-field"
-          @change="onSearchChange"
-          placeholder="ex: chars, agent327"
-        />
-      </div>
+    <div class="asset-type-list-header page-header flexrow">
+      <search-field
+        class="flexrow-item mt1"
+        ref="asset-type-search-field"
+        @change="onSearchChange"
+        placeholder="ex: chars, agent327"
+      />
+      <combobox
+        class="mb0 flexrow-item"
+        :label="$t('statistics.display_mode')"
+        locale-key-prefix="statistics."
+        :options="displayModeOptions"
+        v-model="displayMode"
+      />
+      <span class="filler"></span>
+      <button-simple
+        class="flexrow-item"
+        icon="download"
+        @click="exportStatisticsToCsv"
+      />
     </div>
 
     <production-asset-type-list
@@ -17,36 +29,47 @@
       :is-error="isAssetsLoadingError"
       :validation-columns="assetValidationColumns"
       :asset-type-stats="assetTypeStats"
+      :display-mode="displayMode"
+      :show-all="assetTypeSearchText.length === 0"
       @scroll="saveScrollPosition"
     />
   </div>
 </template>
 
 <script>
+import moment from 'moment'
 import { mapGetters, mapActions } from 'vuex'
-import { SearchIcon } from 'vue-feather-icons'
+import csv from '../../lib/csv'
+import { slugify } from '../../lib/string'
+import ButtonSimple from '../widgets/ButtonSimple'
+import Combobox from '../widgets/Combobox'
 import ProductionAssetTypeList from '../lists/ProductionAssetTypeList.vue'
-import PageTitle from '../widgets/PageTitle'
 import SearchField from '../widgets/SearchField'
 
 export default {
   name: 'production-asset-types',
 
   components: {
+    ButtonSimple,
+    Combobox,
     ProductionAssetTypeList,
-    PageTitle,
-    SearchField,
-    SearchIcon
+    SearchField
   },
 
   data () {
     return {
-      initialLoading: true
+      initialLoading: true,
+      displayMode: 'pie',
+      displayModeOptions: [
+        { label: 'pie', value: 'pie' },
+        { label: 'count', value: 'count' }
+      ]
     }
   },
 
   computed: {
     ...mapGetters([
+      'assetTypeMap',
       'assetTypePath',
       'assetTypeStats',
       'assetTypeSearchText',
@@ -57,7 +80,9 @@ export default {
       'displayedAssetTypes',
       'isAssetsLoading',
       'isAssetsLoadingError',
-      'isTVShow'
+      'isTVShow',
+      'taskStatusMap',
+      'taskTypeMap'
     ])
   },
 
@@ -112,6 +137,27 @@ export default {
 
     saveScrollPosition (scrollPosition) {
       this.setAssetTypeListScrollPosition(scrollPosition)
+    },
+
+    exportStatisticsToCsv () {
+      const nameData = [
+        moment().format('YYYYMMDD'),
+        this.currentProduction.name,
+        'asset_types',
+        'statistics'
+      ]
+      if (this.currentEpisode) {
+        nameData.splice(2, 0, this.currentEpisode.name)
+      }
+      const name = slugify(nameData.join('_'))
+      csv.generateStatReports(
+        name,
+        this.assetTypeStats,
+        this.taskTypeMap,
+        this.taskStatusMap,
+        this.assetTypeMap,
+        this.countMode
+      )
     }
   },
 
@@ -166,11 +212,4 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-.data-list {
-  margin-top: 0;
-}
-
-.filters-area {
-  margin-bottom: 2em;
-}
 </style>

@@ -81,7 +81,7 @@ const initialState = {
   isCastingDirty: false
 }
 
-const state = {...initialState}
+const state = { ...initialState }
 
 const getters = {
   castingSequenceId: state => state.castingSequenceId,
@@ -107,7 +107,7 @@ const getters = {
 
 const actions = {
 
-  setCastingShot ({commit, state, rootState}, {shotId, callback}) {
+  setCastingShot ({ commit, state, rootState }, { shotId, callback }) {
     if (shotId) {
       const shot = rootState.shots.shotMap[shotId]
       const assetMap = rootState.assets.assetMap
@@ -136,7 +136,7 @@ const actions = {
     }
   },
 
-  setCastingSequence ({commit, state, rootState, rootGetters}, sequenceId) {
+  setCastingSequence ({ commit, state, rootState, rootGetters }, sequenceId) {
     if (!sequenceId) {
       if (state.castingCurrentShot) {
         sequenceId = state.castingCurrentShot.sequence_id
@@ -154,7 +154,7 @@ const actions = {
     commit(CASTING_SET_SHOTS, castingSequenceShots)
   },
 
-  setCastingEpisode ({commit, state, rootState, rootGetters}, episodeId) {
+  setCastingEpisode ({ commit, state, rootState, rootGetters }, episodeId) {
     if (!episodeId) {
       if (state.castingCurrentShot) {
         episodeId = state.castingCurrentShot.episode_id
@@ -175,23 +175,23 @@ const actions = {
     commit(CASTING_SET_EPISODE, episodeId)
   },
 
-  addAssetToCasting ({commit, state, rootState}, {assetId, nbOccurences}) {
+  addAssetToCasting ({ commit, state, rootState }, { assetId, nbOccurences }) {
     if (state.castingCurrentShot) {
       const asset = rootState.assets.assetMap[assetId]
-      commit(CASTING_ADD_TO_CASTING, {asset, nbOccurences})
+      commit(CASTING_ADD_TO_CASTING, { asset, nbOccurences })
     }
   },
 
   removeAssetFromCasting (
-    {commit, state, rootState}, {assetId, nbOccurences}
+    { commit, state, rootState }, { assetId, nbOccurences }
   ) {
     if (state.castingCurrentShot && state.casting[assetId]) {
       const asset = rootState.assets.assetMap[assetId]
-      commit(CASTING_REMOVE_FROM_CASTING, {asset, nbOccurences})
+      commit(CASTING_REMOVE_FROM_CASTING, { asset, nbOccurences })
     }
   },
 
-  saveCasting ({commit, state, rootState}, callback) {
+  saveCasting ({ commit, state, rootState }, callback) {
     const casting = []
     Object.values(state.casting).forEach((asset) => {
       casting.push({
@@ -208,6 +208,11 @@ const actions = {
 
       if (callback) callback(err)
     })
+  },
+
+  uploadCastingFile ({ commit, state, rootGetters }, formData) {
+    const currentProduction = rootGetters.currentProduction
+    return shotsApi.postCastingCsv(currentProduction, formData)
   }
 }
 
@@ -259,7 +264,7 @@ const mutations = {
     state.isCastingDirty = isDirty
   },
 
-  [CASTING_ADD_TO_CASTING] (state, {asset, nbOccurences}) {
+  [CASTING_ADD_TO_CASTING] (state, { asset, nbOccurences }) {
     if (state.casting[asset.id]) {
       state.casting[asset.id].nb_occurences += nbOccurences
     } else {
@@ -270,7 +275,7 @@ const mutations = {
     state.isCastingDirty = true
   },
 
-  [CASTING_REMOVE_FROM_CASTING] (state, {asset, nbOccurences}) {
+  [CASTING_REMOVE_FROM_CASTING] (state, { asset, nbOccurences }) {
     const cast = state.casting[asset.id]
     if (cast) {
       cast.nb_occurences -= nbOccurences
@@ -282,7 +287,7 @@ const mutations = {
     state.isCastingDirty = true
   },
 
-  [LOAD_SHOT_CASTING_END] ({state, rootState}, {shot, casting}) {
+  [LOAD_SHOT_CASTING_END] ({ state, rootState }, { shot, casting }) {
     shot.casting = casting
     Vue.set(
       shot,
@@ -291,7 +296,7 @@ const mutations = {
     )
   },
 
-  [LOAD_ASSET_CAST_IN_END] ({state, rootState}, {asset, castIn}) {
+  [LOAD_ASSET_CAST_IN_END] ({ state, rootState }, { asset, castIn }) {
     castIn.forEach((shot) => {
       if (shot.episode_name) {
         shot.sequence_name = `${shot.episode_name} / ${shot.sequence_name}`
@@ -306,7 +311,7 @@ const mutations = {
   },
 
   [RESET_ALL] (state) {
-    Object.assign(state, {...initialState})
+    Object.assign(state, { ...initialState })
   }
 }
 

@@ -8,7 +8,7 @@
 
     <div class="box content">
       <h1 class="title">
-        {{ $t("profile.avatar.title") }}
+        {{ title }}
       </h1>
 
       <p>
@@ -18,30 +18,20 @@
       <file-upload
         ref="uploadAvatarField"
         @fileselected="onFileSelected"
-        accept=".png,.jpg,.jpeg">
-      </file-upload>
+        accept=".png,.jpg,.jpeg"
+      />
 
       <p class="error" v-if="isError">
         {{ $t("profile.avatar.error_upload") }}
       </p>
 
-      <p class="has-text-right">
-        <a
-          :class="{
-            button: true,
-            'is-primary': true,
-            'is-loading': isLoading,
-            'is-disabled': formData == undefined
-          }"
-          @click="onConfirmClicked">
-          {{ $t("main.confirmation") }}
-        </a>
-        <router-link
-          :to="cancelRoute"
-          class="button is-link">
-          {{ $t("main.cancel") }}
-        </router-link>
-      </p>
+      <modal-footer
+        :error-text="$t('productions.metadata.error')"
+        :is-loading="isLoading"
+        :is-disabled="!formData"
+        @confirm="onConfirmClicked"
+        @cancel="$emit('cancel')"
+      />
 
     </div>
   </div>
@@ -50,37 +40,50 @@
 
 <script>
 import { mapGetters, mapActions } from 'vuex'
+import { modalMixin } from './base_modal'
 import FileUpload from '../widgets/FileUpload.vue'
+import ModalFooter from './ModalFooter.vue'
 
 export default {
   name: 'change-avatar-modal',
+  mixins: [modalMixin],
+
+  components: {
+    FileUpload,
+    ModalFooter
+  },
+
   props: [
     'active',
     'cancelRoute',
     'isLoading',
-    'isError'
+    'isError',
+    'title'
   ],
+
   data () {
     return {
       formData: null
     }
   },
-  components: {
-    FileUpload
-  },
+
   computed: {
     ...mapGetters([
     ])
   },
+
   methods: {
+
     ...mapActions([
     ]),
+
     onFileSelected (formData) {
       this.formData = formData
       this.$emit('fileselected', formData)
     },
+
     onConfirmClicked () {
-      this.$emit('confirm')
+      this.$emit('confirm', this.formData)
     }
   },
   watch: {
@@ -99,12 +102,6 @@ export default {
 
 .error {
   margin-top: 1em;
-}
-
-.title {
-  border-bottom: 2px solid #DDD;
-  padding-bottom: 0.5em;
-  margin-bottom: 1.2em;
 }
 
 .description {

@@ -23,12 +23,12 @@
               <div class="flexrow-item"></div>
             </div>
             <div class="flexrow" v-if="isCurrentUserManager">
-              <button-link
+              <button-simple
                 class="flexrow-item"
                 :title="$t('main.csv.import_file')"
                 icon="upload"
                 :is-responsive="true"
-                :path="importPath"
+                @click="showImportModal"
               />
               <button-href-link
                 class="flexrow-item"
@@ -37,12 +37,12 @@
                 :is-responsive="true"
                 :path="'/api/export/csv/projects/' + currentProduction.id + '/shots.csv'"
               />
-              <button-link
+              <button-simple
                 class="flexrow-item"
                 :text="$t('shots.manage')"
                 icon="plus"
                 :is-responsive="true"
-                :path="manageShotsPath"
+                @click="showManageShots"
               />
             </div>
           </div>
@@ -60,16 +60,17 @@
 
       <shot-list
         ref="shot-list"
-        :entries="displayedShots"
+        :displayed-shots="displayedShotsBySequence"
         :is-loading="isShotsLoading || initialLoading"
         :is-error="isShotsLoadingError"
         :validation-columns="shotValidationColumns"
+        @create-tasks="showCreateTasksModal"
         @scroll="saveScrollPosition"
         @delete-all-tasks="onDeleteAllTasksClicked"
         @add-metadata="onAddMetadataClicked"
         @delete-metadata="onDeleteMetadataClicked"
         @edit-metadata="onEditMetadataClicked"
-
+        @add-shots="showManageShots"
       />
     </div>
   </div>
@@ -89,6 +90,7 @@
     :is-error="false"
     :is-success="false"
     :cancel-route="shotsPath"
+    @cancel="hideManageShots"
   />
 
   <edit-shot-modal
@@ -151,9 +153,9 @@
     :active="modals.isImportDisplayed"
     :is-loading="loading.importing"
     :is-error="errors.importing"
-    :cancel-route="shotsPath"
     :form-data="shotsCsvFormData"
     :columns="columns"
+    @cancel="hideImportModal"
     @fileselected="selectFile"
     @confirm="uploadImportFile"
   />
@@ -163,10 +165,10 @@
     :is-loading="loading.creatingTasks"
     :is-loading-stay="loading.creatingTasksStay"
     :is-error="errors.creatingTasks"
-    :cancel-route="shotsPath"
     :title="$t('tasks.create_tasks_shot')"
     :text="$t('tasks.create_tasks_shot_explaination')"
     :error-text="$t('tasks.create_tasks_shot_failed')"
+    @cancel="hideCreateTasksModal"
     @confirm="confirmCreateTasks"
     @confirm-and-stay="confirmCreateTasksAndStay"
   />
@@ -185,19 +187,16 @@
 
 <script>
 import { mapGetters, mapActions } from 'vuex'
-import { SearchIcon } from 'vue-feather-icons'
 
 import AddMetadataModal from '../modals/AddMetadataModal'
 import ButtonHrefLink from '../widgets/ButtonHrefLink'
-import ButtonLink from '../widgets/ButtonLink'
-import Combobox from '../widgets/Combobox'
+import ButtonSimple from '../widgets/ButtonSimple'
 import CreateTasksModal from '../modals/CreateTasksModal'
-import DeleteModal from '../widgets/DeleteModal'
+import DeleteModal from '../modals/DeleteModal'
 import EditShotModal from '../modals/EditShotModal'
 import ImportModal from '../modals/ImportModal'
 import HardDeleteModal from '../modals/HardDeleteModal'
 import ManageShotsModal from '../modals/ManageShotsModal'
-import PageTitle from '../widgets/PageTitle'
 import SearchField from '../widgets/SearchField'
 import SearchQueryList from '../widgets/SearchQueryList'
 import ShowAssignationsButton from '../widgets/ShowAssignationsButton'
@@ -210,18 +209,15 @@ export default {
 
   components: {
     AddMetadataModal,
-    ButtonLink,
     ButtonHrefLink,
-    Combobox,
+    ButtonSimple,
     CreateTasksModal,
     DeleteModal,
     EditShotModal,
     ImportModal,
     HardDeleteModal,
     ManageShotsModal,
-    PageTitle,
     SearchField,
-    SearchIcon,
     SearchQueryList,
     ShowAssignationsButton,
     ShowInfosButton,
@@ -239,6 +235,7 @@ export default {
         isDeleteMetadataDisplayed: false,
         isDeleteAllTasksDisplayed: false,
         isImportDisplayed: false,
+        isManageDisplayed: false,
         isNewDisplayed: false,
         isRestoreDisplayed: false
       },
@@ -280,7 +277,7 @@ export default {
       'currentEpisode',
       'currentProduction',
       'deleteShot',
-      'displayedShots',
+      'displayedShotsBySequence',
       'editShot',
       'episodeMap',
       'episodes',
@@ -302,15 +299,7 @@ export default {
       'shotValidationColumns',
       'shotListScrollPosition',
       'taskTypeMap'
-    ]),
-
-    importPath () {
-      return this.getPath('import-shots')
-    },
-
-    manageShotsPath () {
-      return this.getPath('manage-shots')
-    }
+    ])
   },
 
   created () {
@@ -513,7 +502,7 @@ export default {
           if (err) {
             this.errors.creatingTasks = true
           } else {
-            this.modals.isCreateTasks = false
+            this.hideCreateTasksModal()
             this.loadShots(() => {
               this.resizeHeaders()
             })
@@ -537,7 +526,7 @@ export default {
     deleteText () {
       const shot = this.shotToDelete
       if (shot) {
-        return this.$t('shots.delete_text', {name: shot.name})
+        return this.$t('shots.delete_text', { name: shot.name })
       } else {
         return ''
       }
@@ -546,7 +535,7 @@ export default {
     deleteAllTasksText () {
       const taskType = this.taskTypeMap[this.$route.params.task_type_id]
       if (taskType) {
-        return this.$t('tasks.delete_all_text', {name: taskType.name})
+        return this.$t('tasks.delete_all_text', { name: taskType.name })
       } else {
         return ''
       }
@@ -555,7 +544,7 @@ export default {
     restoreText () {
       const shot = this.shotToRestore
       if (shot) {
-        return this.$t('shots.restore_text', {name: shot.name})
+        return this.$t('shots.restore_text', { name: shot.name })
       } else {
         return ''
       }
@@ -567,17 +556,15 @@ export default {
       this.editShot.isSuccess = false
       this.editShot.isError = false
 
-      this.modals = {
+      Object.assign(this.modals, {
         isAddMetadataDisplayed: false,
         isCreateTasksDisplayed: false,
         isDeleteAllTasksDisplayed: false,
         isDeleteDisplayed: false,
         isDeleteMetadataDisplayed: false,
-        isImportDisplayed: false,
-        isManagedDisplayed: false,
         isNewDisplayed: false,
         isRestoreDisplayed: false
-      }
+      })
 
       if (path.indexOf('new') > 0) {
         this.resetEditModal()
@@ -593,12 +580,6 @@ export default {
       } else if (path.indexOf('restore') > 0) {
         this.shotToRestore = this.shotMap[shotId]
         this.modals.isRestoreDisplayed = true
-      } else if (path.indexOf('import') > 0) {
-        this.modals.isImportDisplayed = true
-      } else if (path.indexOf('create-tasks') > 0) {
-        this.modals.isCreateTasksDisplayed = true
-      } else if (path.indexOf('manage') > 0) {
-        this.modals.isManageDisplayed = true
       }
     },
 
@@ -613,7 +594,7 @@ export default {
       this.$store.dispatch('uploadShotFile', (err) => {
         if (!err) {
           this.loading.importing = false
-          this.modals.isImportDisplayed = false
+          this.hideImportModal()
           this.loadShots(() => {
             this.resizeHeaders()
           })
@@ -634,8 +615,10 @@ export default {
 
     onSearchChange (event) {
       const searchQuery = this.$refs['shot-search-field'].getValue()
-      this.setShotSearch(searchQuery)
-      this.resizeHeaders()
+      if (searchQuery.length !== 1) {
+        this.setShotSearch(searchQuery)
+        this.resizeHeaders()
+      }
     },
 
     saveScrollPosition (scrollPosition) {
@@ -689,6 +672,30 @@ export default {
         route.params.episode_id = this.currentEpisode.id
       }
       return route
+    },
+
+    showManageShots () {
+      this.modals.isManageDisplayed = true
+    },
+
+    hideManageShots () {
+      this.modals.isManageDisplayed = false
+    },
+
+    showImportModal () {
+      this.modals.isImportDisplayed = true
+    },
+
+    hideImportModal () {
+      this.modals.isImportDisplayed = false
+    },
+
+    showCreateTasksModal () {
+      this.modals.isCreateTasksDisplayed = true
+    },
+
+    hideCreateTasksModal () {
+      this.modals.isCreateTasksDisplayed = false
     }
   },
 
@@ -744,7 +751,6 @@ export default {
       }
     }
   }
-
 }
 </script>
 
@@ -784,5 +790,4 @@ export default {
 .main-column {
   border-right: 3px solid $light-grey;
 }
-
 </style>

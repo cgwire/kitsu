@@ -26,7 +26,7 @@
           </li>
           <li
             :class="{'is-active': isTabActive('timesheets')}"
-            @click="selectTab('timesheet')"
+            @click="selectTab('timesheets')"
           >
             <router-link :to="{
               name: 'todos-tab',
@@ -53,10 +53,10 @@
         <span class="flexrow-item push-right">
         </span>
         <span class="flexrow-item">
-          {{ $t('main.sorted_by') }}
         </span>
         <combobox
           class="flexrow-item"
+          :label="$t('main.sorted_by')"
           :options="sortOptions"
           locale-key-prefix="tasks.fields."
           v-model="currentSort"
@@ -83,6 +83,9 @@
         @scroll="setTodoListScrollPosition"
       />
 
+      <div v-if="isTabActive('done')">
+        &nbsp;
+      </div>
       <todos-list
         ref="done-list"
         :entries="displayedDoneTasks"
@@ -100,7 +103,7 @@
         :is-error="isTodosLoadingError"
         :time-spent-map="timeSpentMap"
         :time-spent-total="timeSpentTotal"
-        :hide-done="todosSearchText.length > 0"
+        :hide-done="todosSearchText.length > 0 || loggableDoneTasks.length === 0"
         @date-changed="onDateChanged"
         @time-spent-change="onTimeSpentChange"
         v-if="isTabActive('timesheets')"
@@ -125,7 +128,6 @@ import moment from 'moment-timezone'
 import firstBy from 'thenby'
 
 import Combobox from '../widgets/Combobox'
-import PageTitle from '../widgets/PageTitle'
 import SearchField from '../widgets/SearchField'
 import SearchQueryList from '../widgets/SearchQueryList'
 import TaskInfo from '../sides/TaskInfo'
@@ -137,7 +139,6 @@ export default {
 
   components: {
     Combobox,
-    PageTitle,
     SearchField,
     SearchQueryList,
     TaskInfo,
@@ -227,7 +228,7 @@ export default {
         return tasks.sort(
           firstBy('project_name')
             .thenBy('task_type_name')
-            .thenBy('entity_name')
+            .thenBy('full_entity_name')
         )
       } else {
         return tasks.sort(
@@ -372,6 +373,10 @@ export default {
   margin-top: 1em;
   margin-bottom: 1em;
   font-size: 1.1em;
+
+  ul {
+    margin-left: 0;
+  }
 }
 
 .data-list {
@@ -384,9 +389,7 @@ export default {
 }
 
 .query-list {
-  margin-left: 2.5em;
   margin-bottom: 2em;
-  margin-top: 0.2em;
 }
 
 .dark .main-column {

@@ -8,11 +8,25 @@
 
     <div class="box">
 
-      <page-title :text="$t('shots.manage')" />
+      <page-title class="title" :text="$t('shots.manage')" />
+      <div class="explaination">{{ $t('shots.creation_explaination') }}</div>
+      <div>
+        <div class="flexrow">
+          <span class="filler">
+          </span>
+          <combobox
+            ref="shot-padding"
+            :label="$t('shots.padding')"
+            :options="shotPaddingOptions"
+            class="shot-padding flexrow-item"
+            v-model="shotPadding"
+          />
+        </div>
+      </div>
 
       <div class="shot-columns">
         <div class="shot-column" v-if="isTVShow">
-          <h2 class="subtitle">Episodes</h2>
+          <h2 class="subtitle">{{ $t('shots.episodes') }}</h2>
 
           <div class="list">
             <div
@@ -53,7 +67,7 @@
         </div>
 
         <div class="shot-column">
-          <h2 class="subtitle">Sequences</h2>
+          <h2 class="subtitle">{{ $t('shots.sequences') }}</h2>
           <div class="list">
             <div
               :class="{
@@ -91,7 +105,7 @@
         </div>
 
         <div class="shot-column">
-          <h2 class="subtitle">Shots</h2>
+          <h2 class="subtitle">{{ $t('shots.title') }}</h2>
           <div class="list">
             <div
               class="entity-line"
@@ -110,6 +124,8 @@
               @keyup.enter="addShot"
               v-model="names.shot"
             />
+          </div>
+          <div class="field">
             <button
               :class="{
                 button: true,
@@ -126,11 +142,12 @@
       </div>
 
       <p class="has-text-right modal-footer">
-        <router-link
-          :to="cancelRoute"
-          class="button is-link">
+        <button
+          @click="$emit('cancel')"
+          class="button is-link"
+        >
           {{ $t("main.close") }}
-        </router-link>
+        </button>
       </p>
     </div>
 
@@ -140,22 +157,28 @@
 
 <script>
 import { mapGetters, mapActions } from 'vuex'
+
+import { modalMixin } from './base_modal'
+
+import Combobox from '../widgets/Combobox'
 import PageTitle from '../widgets/PageTitle'
 import stringHelpers from '../../lib/string'
 
 export default {
   name: 'manage-shot-modal',
+  mixins: [modalMixin],
+
   components: {
+    Combobox,
     PageTitle
   },
 
-  props: [
-    'onConfirmClicked',
-    'text',
-    'active',
-    'cancelRoute',
-    'errorText'
-  ],
+  props: {
+    active: {
+      default: true,
+      type: Boolean
+    }
+  },
 
   data () {
     return {
@@ -172,13 +195,29 @@ export default {
       displayedSequences: [],
       displayedShots: [],
       selectedEpisodeId: null,
-      selectedSequenceId: null
+      selectedSequenceId: null,
+      shotPaddingOptions: [
+        {
+          label: '1',
+          padding: '1'
+        },
+        {
+          label: '2',
+          padding: '2'
+        },
+        {
+          label: '10',
+          padding: '10'
+        }
+      ],
+      shotPadding: '1'
     }
   },
 
   watch: {
     active () {
       if (this.active) {
+        this.shotPadding = '1'
         setTimeout(() => {
           if (this.isTVShow) {
             this.$refs.addEpisodeInput.focus()
@@ -199,11 +238,9 @@ export default {
     ...mapGetters([
       'currentProduction',
       'episodes',
-      'sequences',
-      'shotMap',
-      'sequences',
       'isTVShow',
-      'currentProduction'
+      'sequences',
+      'shotMap'
     ]),
 
     isAddEpisodeAllowed () {
@@ -233,7 +270,6 @@ export default {
 
   methods: {
     ...mapActions([
-      'loadShots',
       'newEpisode',
       'newSequence',
       'newShot',
@@ -258,7 +294,7 @@ export default {
       } else {
         this.selectedEpisodeId = episodeId
         this.$router.push({
-          name: 'episode-manage-shots',
+          name: 'episode-shots',
           params: {
             production_id: this.currentProduction.id,
             episode_id: episodeId
@@ -342,7 +378,10 @@ export default {
               if (err) console.log(err)
               this.loading.addShot = false
               this.selectSequence(this.selectedSequenceId)
-              this.names.shot = stringHelpers.generateNextName(shot.name)
+              this.names.shot = stringHelpers.generateNextName(
+                shot.name,
+                parseInt(this.shotPadding)
+              )
             }
           })
         }
@@ -353,6 +392,20 @@ export default {
 </script>
 
 <style lang="scss" scoped>
+.dark {
+  .entity-line.selected {
+    background: $purple-strong;
+  }
+
+  .entity-line:hover {
+    background: $green;
+  }
+
+  .shot-column .list {
+    border: 1px solid $dark-grey;
+  }
+}
+
 .shot-columns {
   display: flex;
   height: 300px;
@@ -393,7 +446,7 @@ export default {
 }
 
 .entity-line:hover {
-  background: #ecfaec;
+  background: $light-green;
 }
 
 .entity-line.selected {
@@ -407,5 +460,17 @@ export default {
 
 input::placeholder {
   color: #BBB;
+}
+
+.explaination {
+  margin-bottom: 1em;
+}
+
+.subtitle {
+  margin-bottom: 0;
+}
+
+.shot-padding {
+  margin-right: 1em;
 }
 </style>

@@ -223,6 +223,20 @@ export const entityListMixin = {
     onDeleteMetadataClicked () {
       this.$emit('delete-metadata', this.lastMetadaDataHeaderMenuDisplayed)
       this.showMetadataHeaderMenu()
+    },
+
+    resizeSplittedTableHeaders (columnDescriptors) {
+      if (
+        this.$refs['body-tbody'] &&
+        this.$refs['body-tbody'].length > 0 &&
+        this.$refs['body-tbody'][0].children.length > 1
+      ) {
+        const bodyElement = this.$refs['body-tbody'][0].children[1]
+        columnDescriptors.forEach(desc => {
+          const width = bodyElement.children[desc.index].offsetWidth
+          this.$refs['th-' + desc.name].style['min-width'] = `${width}px`
+        })
+      }
     }
   }
 }

@@ -4,6 +4,11 @@ module.exports = {
       alias: {
         vue$: 'vue/dist/vue.js'
       }
+    },
+    optimization: {
+      splitChunks: {
+        chunks: 'all'
+      }
     }
   },
   devServer: {
@@ -27,5 +32,5 @@ module.exports = {
         data: `@import "@/variables.scss";`
       }
     }
-  },
+  }
 }

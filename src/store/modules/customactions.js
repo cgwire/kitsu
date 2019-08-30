@@ -33,17 +33,7 @@ const initialState = {
   }
 }
 
-const state = {...initialState}
-
-const helpers = {
-  getOptions (customAction) {
-    return {
-      label: customAction.name,
-      value: customAction.url,
-      entity_type: customAction.entity_type
-    }
-  }
-}
+const state = { ...initialState }
 
 const getters = {
   customActions: state => state.customActions,
@@ -60,24 +50,21 @@ const getters = {
     )
   },
 
-  allCustomActionOptions: (state) => {
+  allCustomActions: (state) => {
     return state
       .customActions
-      .map(helpers.getOptions)
       .filter((action) => action.entity_type === 'all')
   },
 
-  assetCustomActionOptions: (state) => {
+  assetCustomActions: (state) => {
     return state
       .customActions
-      .map(helpers.getOptions)
       .filter((action) => ['all', 'asset'].includes(action.entity_type))
   },
 
-  shotCustomActionOptions: (state) => {
+  shotCustomActions: (state) => {
     return state
       .customActions
-      .map(helpers.getOptions)
       .filter((action) => ['all', 'shot'].includes(action.entity_type))
   }
 }
@@ -93,7 +80,7 @@ const actions = {
     })
   },
 
-  newCustomAction ({ commit, state }, {data, callback}) {
+  newCustomAction ({ commit, state }, { data, callback }) {
     commit(EDIT_CUSTOM_ACTION_START, data)
     customActionsApi.newCustomAction(data, (err, customAction) => {
       if (err) {
@@ -105,7 +92,7 @@ const actions = {
     })
   },
 
-  editCustomAction ({ commit, state }, {data, callback}) {
+  editCustomAction ({ commit, state }, { data, callback }) {
     commit(EDIT_CUSTOM_ACTION_START)
     customActionsApi.updateCustomAction(data, (err, customAction) => {
       if (err) {
@@ -117,7 +104,7 @@ const actions = {
     })
   },
 
-  deleteCustomAction ({ commit, state }, {customAction, callback}) {
+  deleteCustomAction ({ commit, state }, { customAction, callback }) {
     commit(DELETE_CUSTOM_ACTION_START)
     customActionsApi.deleteCustomAction(customAction, (err) => {
       if (err) {
@@ -127,6 +114,10 @@ const actions = {
       }
       if (callback) callback(err)
     })
+  },
+
+  postCustomAction ({ commit }, { data, url }) {
+    customActionsApi.postCustomAction(url, data)
   }
 }
 
@@ -198,7 +189,7 @@ const mutations = {
   },
 
   [RESET_ALL] (state) {
-    Object.assign(state, {...initialState})
+    Object.assign(state, { ...initialState })
   }
 }
 

@@ -52,13 +52,11 @@
 <script>
 import { mapGetters, mapActions } from 'vuex'
 import TextField from '../widgets/TextField'
-import ColorField from '../widgets/ColorField'
 
 export default {
   name: 'edit-asset-type-modal',
   components: {
-    TextField,
-    ColorField
+    TextField
   },
 
   props: [
@@ -123,11 +121,5 @@ export default {
 .is-danger {
   color: #ff3860;
   font-style: italic;
-}
-
-.title {
-  border-bottom: 2px solid #DDD;
-  padding-bottom: 0.5em;
-  margin-bottom: 1.2em;
 }
 </style>

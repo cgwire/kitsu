@@ -2,7 +2,6 @@
 <div class="task-type columns fixed-page">
   <div class="column main-column">
     <div class="task-type page">
-
       <div class="task-type-header page-header">
         <div class="flexcolumn-item flexrow">
           <router-link
@@ -23,6 +22,16 @@
             class="flexrow-item"
             :task-type="currentTaskType"
           />
+          <div class="filler"></div>
+          <div class="flexrow-item">
+            <button-simple
+              icon="download"
+              :title="$t('main.csv.export_file')"
+              @click="onExportClick"
+            />
+          </div>
+        </div>
+        <div class="flexcolumn-item flexrow">
           <div
             class="flexrow-item ml1"
           >
@@ -34,21 +43,13 @@
               placeholder="ex: retake chara"
             />
           </div>
-          <div class="flexrow-item ml1">
-            {{ $t('main.sorted_by') }}
-          </div>
+          <div class="filler"></div>
           <div class="flexrow-item sorting-combobox">
             <combobox
+              :label="$t('main.sorted_by')"
               :options="sortOptions"
               locale-key-prefix="tasks.fields."
               v-model="currentSort"
-            />
-          </div>
-          <div class="flexrow-item push-right">
-            <button-simple
-              icon="download"
-              :title="$t('main.csv.export_file')"
-              @click="onExportClick"
             />
           </div>
         </div>
@@ -87,23 +88,24 @@
 import { mapGetters, mapActions } from 'vuex'
 import firstBy from 'thenby'
 import moment from 'moment'
-import { slugify } from '../../lib/helpers'
+import csv from '../../lib/csv'
 import { buildSupervisorTaskIndex, indexSearch } from '../../lib/indexing'
-import { applyFilters, getKeyWords, getTaskFilters } from '../../lib/filtering'
+import { slugify } from '../../lib/string'
+import {
+  applyFilters,
+  getExcludingKeyWords,
+  getKeyWords,
+  getTaskFilters
+} from '../../lib/filtering'
 
 import { ChevronLeftIcon } from 'vue-feather-icons'
 import Combobox from '../widgets/Combobox'
-import EntityThumbnail from '../widgets/EntityThumbnail'
 import TaskInfo from '../sides/TaskInfo'
 import SearchField from '../widgets/SearchField'
 import SearchQueryList from '../widgets/SearchQueryList'
 import ButtonSimple from '../widgets/ButtonSimple'
-import SubscribeButton from '../widgets/SubscribeButton'
 import TaskList from '../lists/TaskList'
-import TableInfo from '../widgets/TableInfo'
-import TaskTypeEntityBlock from '../pages/tasktype/TaskTypeEntityBlock'
 import TaskTypeName from '../widgets/TaskTypeName'
-import ValidationTag from '../widgets/ValidationTag'
 
 export default {
   name: 'task-type-page',
@@ -111,16 +113,11 @@ export default {
     ButtonSimple,
     ChevronLeftIcon,
     Combobox,
-    EntityThumbnail,
     SearchField,
     SearchQueryList,
-    SubscribeButton,
     TaskList,
-    TableInfo,
     TaskInfo,
-    TaskTypeEntityBlock,
-    TaskTypeName,
-    ValidationTag
+    TaskTypeName
   },
 
   entityListCache: [],
@@ -163,7 +160,6 @@ export default {
 
   computed: {
     ...mapGetters([
-      'assetsByType',
       'assetMap',
       'assetsPath',
       'currentEpisode',
@@ -259,17 +255,23 @@ export default {
     },
 
     onSearchChange (query) {
-      if (query) {
+      if (query && query.length !== 1) {
         query = query.toLowerCase().trim()
         const keywords = getKeyWords(query) || []
-        const filters = getTaskFilters(this.$options.taskIndex, query)
-        if (keywords && keywords.length > 0) {
-          this.tasks = indexSearch(this.$options.taskIndex, keywords)
+        const excludingKeyWords = getExcludingKeyWords(query) || []
+        if (keywords.length > 0 || excludingKeyWords.length > 0) {
+          let tasks = []
+          const filters = getTaskFilters(this.$options.taskIndex, query)
+          if (keywords.length > 0) {
+            tasks = indexSearch(this.$options.taskIndex, keywords)
+          } else {
+            tasks = this.tasks
+          }
+          tasks = applyFilters(tasks, filters, this.taskMap)
+          this.tasks = this.sortTasks(tasks)
         } else {
           this.resetTasks()
         }
-        this.tasks = applyFilters(this.tasks, filters, this.taskMap)
-        this.tasks = this.sortTasks()
       } else {
         this.resetTasks()
       }
@@ -314,11 +316,12 @@ export default {
       return tasks
     },
 
-    sortTasks () {
+    sortTasks (tasks) {
+      if (!tasks) tasks = this.tasks
       const isName = ['task_status_short_name', 'entity_name'].includes(
         this.currentSort
       )
-      return this.tasks.sort(
+      return tasks.sort(
         firstBy(this.currentSort, isName ? 1 : -1)
           .thenBy('entity_name')
       )
@@ -355,21 +358,7 @@ export default {
         nameData.splice(1, 0, this.currentEpisode.name)
       }
       const name = slugify(nameData.join('_'))
-
-      const lineArray = []
-      taskLines.forEach((infoArray, index) => {
-        const line = infoArray.join(';')
-        lineArray.push(
-          index === 0 ? 'data:text/csv;charset=utf-8,' + line : line
-        )
-      })
-      const csvContent = lineArray.join('\n')
-      const encodedUri = encodeURI(csvContent)
-      const link = document.createElement('a')
-      link.setAttribute('href', encodedUri)
-      link.setAttribute('download', `${name}.csv`)
-      document.body.appendChild(link)
-      link.click()
+      csv.buildCsvFile(name, taskLines)
     }
   },
 
@@ -467,7 +456,7 @@ export default {
 
 .query-list {
   margin-bottom: 0;
-  margin-left: 11em;
+  margin-left: 1em;
 }
 
 .push-right {

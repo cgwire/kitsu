@@ -27,37 +27,39 @@
       />
       <img
         v-lazy="avatarPath"
+        :key="avatarKey"
         v-else-if="person.has_avatar"
       />
       <span
         v-if="!person.has_avatar"
       >
-       {{ person.initials }}
+       {{ initials }}
       </span>
     </router-link>
   </span>
 
 <span
-   class="avatar has-text-centered"
-   :title="person.full_name"
-   :style="{
-     background: person.color,
-     width: size +'px',
-     height: size + 'px',
-     'font-size': fontSize + 'px'
-   }"
-   v-else
+  class="avatar has-text-centered"
+  :title="person.full_name"
+  :style="{
+    background: person.color,
+    width: size +'px',
+    height: size + 'px',
+    'font-size': fontSize + 'px'
+  }"
+  v-else
 >
   <img
     :src="avatarPath"
     v-if="person.has_avatar && noCache"
   />
   <img
-    v-lazy="person.avatarPath"
+    v-lazy="avatarPath"
+    :key="avatarKey"
     v-else-if="person.has_avatar"
   />
   <span v-else>
-    {{ person.initials }}
+    {{ initials }}
   </span>
 </span>
 </template>
@@ -68,27 +70,48 @@ export default {
 
   data () {
     return {
-      avatarPath: `${this.person.avatarPath}`
+      avatarPath: '',
+      avatarKey: '',
+      initials: ''
     }
   },
 
   props: {
-    person: { type: Object, default: () => { return { color: '#FFF' } } },
+    person: {
+      type: Object,
+      default: () => ({
+        id: 'empty', color: '#FFF'
+      })
+    },
     size: { type: Number, default: 40 },
     'font-size': { type: Number, default: 18 },
     'is-link': { type: Boolean, default: true },
     'no-cache': { type: Boolean, default: false }
   },
 
+  created () {
+    this.reloadAvatar()
+  },
+
   methods: {
     reloadAvatar () {
       this.avatarPath =
-        this.person.avatarPath + '&stamp=' + new Date().toISOString()
+        this.person.avatarPath + '?unique=' + this.person.uniqueHash
+      this.avatarKey =
+        this.person.id + '-' + this.person.uniqueHash
     }
+  },
+
+  mounted () {
+    this.initials = this.person.initials
   },
 
   watch: {
     person () {
+      this.reloadAvatar()
+    },
+
+    'person.uniqueHash' () {
       this.reloadAvatar()
     }
   }

@@ -82,7 +82,12 @@
                 :highlighted="isHighlighted(comment)"
                 :key="comment.id"
                 :current-user="user"
-                :editable="comment.person && user.id === comment.person.id && index === 0"
+                :editable="comment.person && user.id === comment.person.id"
+                :is-last="index === pinnedCount"
+                @pin-comment="onPinComment"
+                @edit-comment="onEditComment"
+                @delete-comment="onDeleteComment"
+                @checklist-updated="saveComment"
                 v-for="(comment, index) in currentTaskComments"
               />
             </div>
@@ -236,20 +241,20 @@
       :active="modals.editComment"
       :is-loading="loading.editComment"
       :is-error="errors.editComment"
-      :cancel-route="taskPath()"
       :comment-to-edit="commentToEdit"
       :team="currentTeam"
       @confirm="confirmEditTaskComment"
+      @cancel="onCancelEditComment"
     />
 
     <delete-modal
       :active="modals.deleteComment"
       :is-loading="loading.deleteComment"
       :is-error="errors.deleteComment"
-      :cancel-route="taskPath()"
       :text="$t('tasks.delete_comment')"
       :error-text="$t('tasks.delete_comment_error')"
       @confirm="confirmDeleteTaskComment"
+      @cancel="onCancelDeleteComment"
     />
 
     <delete-modal
@@ -275,14 +280,11 @@ import {
 
 import AddComment from '../widgets/AddComment'
 import AddPreviewModal from '../modals/AddPreviewModal'
-import ButtonLink from '../widgets/ButtonLink'
 import Comment from '../widgets/Comment'
-import DeleteModal from '../widgets/DeleteModal'
+import DeleteModal from '../modals/DeleteModal'
 import EditCommentModal from '../modals/EditCommentModal'
-import EntityThumbnail from '../widgets/EntityThumbnail'
 import ModelViewer from '../previews/ModelViewer'
 import PeopleAvatar from '../widgets/PeopleAvatar'
-import PeopleName from '../widgets/PeopleName'
 import PictureViewer from '../previews/PictureViewer'
 import PreviewRow from '../widgets/PreviewRow'
 import Spinner from '../widgets/Spinner'
@@ -296,17 +298,14 @@ export default {
   components: {
     AddComment,
     AddPreviewModal,
-    ButtonLink,
     Comment,
     ChevronLeftIcon,
     DeleteModal,
     DownloadIcon,
-    EntityThumbnail,
     EditCommentModal,
     ImageIcon,
     ModelViewer,
     PeopleAvatar,
-    PeopleName,
     PreviewRow,
     PictureViewer,
     Spinner,
@@ -359,6 +358,7 @@ export default {
       currentTask: null,
       currentTaskComments: [],
       currentTaskPreviews: [],
+      commentToEdit: null,
       otherPreviews: [],
       addPreviewFormData: null,
       addExtraPreviewFormData: null,
@@ -424,14 +424,6 @@ export default {
 
     deleteTaskPath () {
       return this.taskPath(this.currentTask, 'task-delete')
-    },
-
-    commentToEdit () {
-      let commentToEdit = {}
-      if (this.currentTask && this.currentTaskComments && this.currentTaskComments.length > 0) {
-        commentToEdit = this.currentTaskComments[0]
-      }
-      return commentToEdit
     },
 
     isPreviews () {
@@ -526,7 +518,7 @@ export default {
           }
         }
 
-        return this.taskPath({id: taskId})
+        return this.taskPath({ id: taskId })
       } else {
         return {
           name: 'open-productions'
@@ -576,7 +568,7 @@ export default {
           }
         }
 
-        return this.taskPath({id: taskId})
+        return this.taskPath({ id: taskId })
       } else {
         return {
           name: 'open-productions'
@@ -704,6 +696,10 @@ export default {
 
     currentTeam () {
       return this.currentProduction.team.map(id => this.personMap[id])
+    },
+
+    pinnedCount () {
+      return this.currentTaskComments.filter(c => c.pinned).length
     }
   },
 
@@ -727,6 +723,7 @@ export default {
       'loadTaskComments',
       'loadTaskSubscribed',
       'refreshPreview',
+      'pinComment',
       'subscribeToTask',
       'setCurrentEpisode',
       'unsubscribeFromTask',
@@ -737,7 +734,7 @@ export default {
       if (this.currentTask) {
         let route = {
           name: this.$route.params.type,
-          params: {production_id: this.currentTask.project_id}
+          params: { production_id: this.currentTask.project_id }
         }
 
         if (route.name === 'asset') {
@@ -974,14 +971,6 @@ export default {
         path.indexOf('delete') > 0 && path.indexOf('comments') < 0
       ) {
         this.modals.deleteTask = true
-      } else if (
-        path.indexOf('delete') > 0 && path.indexOf('comments') > 0
-      ) {
-        this.modals.deleteComment = true
-      } else if (
-        path.indexOf('edit') > 0 && path.indexOf('comments') > 0
-      ) {
-        this.modals.editComment = true
       }
     },
 
@@ -1129,16 +1118,24 @@ export default {
           if (err) {
             this.errors.editComment = true
           } else {
-            this.$router.push(this.taskPath())
+            this.modals.editComment = false
           }
         }
+      })
+    },
+
+    saveComment (comment, checklist) {
+      this.editTaskComment({
+        taskId: this.currentTask.id,
+        comment,
+        checklist
       })
     },
 
     confirmDeleteTaskComment () {
       this.loading.deleteComment = true
       this.errors.deleteComment = false
-      const commentId = this.route.params.comment_id
+      const commentId = this.commentToEdit.id
 
       this.deleteTaskComment({
         taskId: this.currentTask.id,
@@ -1152,9 +1149,8 @@ export default {
             if (this.currentTaskPreviews &&
                 this.currentTaskPreviews.length > 0) {
               this.resetPreview(this.currentTaskPreviews[0])
-            } else {
-              this.$router.push(this.taskPath())
             }
+            this.modals.deleteComment = false
           }
         }
       })
@@ -1213,9 +1209,9 @@ export default {
           comment
         })
         if (this.currentPreviewId) {
-          this.resetPreview({id: this.currentPreviewId})
+          this.resetPreview({ id: this.currentPreviewId })
         } else {
-          this.resetPreview({id: previewId})
+          this.resetPreview({ id: previewId })
         }
       }
     },
@@ -1295,6 +1291,28 @@ export default {
 
     closeAddPreviewModal () {
       this.modals.addPreview = false
+    },
+
+    onPinComment (comment) {
+      this.pinComment(comment)
+    },
+
+    onEditComment (comment) {
+      this.commentToEdit = comment
+      this.modals.editComment = true
+    },
+
+    onDeleteComment (comment) {
+      this.commentToEdit = comment
+      this.modals.deleteComment = true
+    },
+
+    onCancelEditComment (comment) {
+      this.modals.editComment = false
+    },
+
+    onCancelDeleteComment (comment) {
+      this.modals.deleteComment = false
     }
   },
 

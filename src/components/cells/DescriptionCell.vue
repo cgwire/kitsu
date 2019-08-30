@@ -52,10 +52,7 @@ export default {
       return {
         content: this.compileMarkdown(this.entry.description),
         show: this.isOpen,
-        trigger: 'manual',
-        delay: {
-          hide: 5000
-        }
+        trigger: 'manual'
       }
     }
   },
@@ -72,13 +69,6 @@ export default {
 
     onClick () {
       this.isOpen = !this.isOpen
-      if (this.isOpen) {
-        this.timeout = setTimeout(() => {
-          this.isOpen = false
-        }, 3000)
-      } else {
-        clearTimeout(this.timeout)
-      }
     }
   }
 }

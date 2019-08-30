@@ -9,7 +9,7 @@
           </th>
 
           <th
-            class="time"
+            class="time month"
             :key="'month-' + month"
             v-for="month in monthRange"
             v-if="detailLevel === 'month'"
@@ -48,11 +48,12 @@
   <div class="table-body" v-scroll="onBodyScroll" v-if="!isLoading" ref="body">
     <table class="table">
       <tbody>
-        <tr v-for="person in people" :key="person.id">
-          <people-name-cell class="name" :entry="person" />
+          <tr v-for="person in people" :key="person.id">
+          <people-name-cell class="name" :person="person" />
           <td
             :class="{
               time: true,
+              month: true,
               selected: isMonthSelected(person.id, year, month)
             }"
             :key="'month-' + month + '-' + person.id"
@@ -90,7 +91,7 @@
             <router-link
               :class="{
                 duration: true,
-                'warning': weekDuration(week, person.id) > 35
+                'warning': weekDuration(week, person.id) > 5 * organisation.hours_by_day
               }"
               :to="{
                 name: 'timesheets-week-person',
@@ -146,7 +147,10 @@
     </table>
   </div>
 
-  <p class="has-text-centered footer-info" v-if="!isLoading">
+  <p
+    class="has-text-centered footer-info"
+    v-if="!isLoading"
+  >
     {{ people.length }} {{ $tc('people.persons', people.length) }}
   </p>
 </div>
@@ -161,7 +165,7 @@ import {
   getMonthRange,
   getWeekRange,
   getDayRange
-} from '../../lib/helpers'
+} from '../../lib/time'
 import PeopleNameCell from '../cells/PeopleNameCell'
 import TableInfo from '../widgets/TableInfo'
 
@@ -231,6 +235,7 @@ export default {
   computed: {
     ...mapGetters([
       'isCurrentUserManager',
+      'organisation',
       'route'
     ]),
 
@@ -354,13 +359,18 @@ export default {
 }
 
 .time {
-  width: 60px;
-  min-width: 60px;
+  width: 70px;
+  min-width: 70px;
+
+  &.month {
+    width: 80px;
+    min-width: 80px;
+  }
 }
 
 .daytime {
-  width: 50px;
-  min-width: 50px;
+  width: 60px;
+  min-width: 60px;
 }
 
 .time,
@@ -401,7 +411,7 @@ a:hover {
 }
 
 .duration {
-  border-radius: 50%;
+  border-radius: 0.3em;
   padding: 0.5em;
 }
 

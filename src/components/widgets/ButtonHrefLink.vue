@@ -1,16 +1,13 @@
 <template>
 <a
+  class="button"
   :title="title"
-  :class="'button ' + styleclass"
   :href="path"
   :target="target"
 >
-  <span class="icon is-small" v-if="icon.length > 0 && icon.startsWith('fa')">
-    <i :class="'fa ' + icon"></i>
-  </span>
-  <plus-icon class="icon is-small" v-if="icon === 'plus'"></plus-icon>
-  <download-icon class="icon is-small" v-if="icon === 'download'"></download-icon>
-  <upload-icon class="icon is-small" v-if="icon === 'upload'"></upload-icon>
+  <plus-icon class="icon is-small" v-if="icon === 'plus'" />
+  <download-icon class="icon is-small" v-if="icon === 'download'" />
+  <upload-icon class="icon is-small" v-if="icon === 'upload'" />
   <span class="text is-hidden-touch">
     {{ text }}
   </span>

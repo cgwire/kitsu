@@ -53,11 +53,12 @@
           @click="runConfirmation">
           {{ $t("main.confirmation") }}
         </a>
-        <router-link
-          :to="cancelRoute"
-          class="button is-link">
+        <button
+          class="button is-link"
+          @click="$emit('cancel')"
+        >
           {{ $t("main.cancel") }}
-        </router-link>
+        </button>
       </p>
 
       <p class="error has-text-right info-message" v-if="isError">
@@ -70,17 +71,13 @@
 
 <script>
 import AtTa from 'vue-at/dist/vue-at-textarea'
-import Combobox from '../widgets/Combobox'
 import PeopleAvatar from '../widgets/PeopleAvatar'
-import TextareaField from '../widgets/TextareaField'
 
 export default {
   name: 'edit-comment-modal',
   components: {
     AtTa,
-    Combobox,
-    PeopleAvatar,
-    TextareaField
+    PeopleAvatar
   },
 
   props: [
@@ -146,14 +143,10 @@ export default {
   color: #ff3860;
   font-style: italic;
 }
-.title {
-  border-bottom: 2px solid #DDD;
-  padding-bottom: 0.5em;
-  margin-bottom: 1.2em;
-}
 
 textarea {
   min-height: 8em;
+  padding: 0.5em;
 }
 
 .modal-content {

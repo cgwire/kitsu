@@ -1,3 +1,4 @@
+import Vue from 'vue'
 import peopleApi from '../api/people'
 import peopleStore from './people'
 import taskStatusStore from './taskstatus'
@@ -5,11 +6,11 @@ import auth from '../../lib/auth'
 import { sortTasks, sortByName } from '../../lib/sorting'
 import { indexSearch, buildTaskIndex } from '../../lib/indexing'
 import { getKeyWords } from '../../lib/filtering'
+import { populateTask } from '../../lib/models'
 import {
-  populateTask,
   buildSelectionGrid,
   clearSelectionGrid
-} from '../../lib/helpers'
+} from '../../lib/selection'
 
 import {
   USER_LOGIN,
@@ -129,15 +130,15 @@ const getters = {
 const actions = {
   saveProfile ({ commit, state }, payload) {
     commit(USER_SAVE_PROFILE_LOADING)
-    peopleApi.updatePerson(payload.form, (err) => {
-      if (err) {
-        commit(USER_SAVE_PROFILE_ERROR)
-      } else {
+    peopleApi.updatePerson(payload.form)
+      .then(() => {
         payload.form.id = state.user.id
         commit(USER_SAVE_PROFILE_SUCCESS, payload.form)
-      }
-      if (payload.callback) payload.callback()
-    })
+      })
+      .catch((err) => {
+        console.error(err)
+        commit(USER_SAVE_PROFILE_ERROR)
+      })
   },
 
   checkNewPasswordValidityAndSave ({ commit, state }, { form, callback }) {
@@ -388,13 +389,14 @@ const mutations = {
     if (state.user) {
       const randomHash = Math.random().toString(36).substring(7)
       state.user.has_avatar = true
+      Vue.set(state.user, 'uniqueHash', randomHash)
       state.user.avatarPath =
         `/api/pictures/thumbnails/persons/${state.user.id}` +
-        `.png?unique=${randomHash}`
+        `.png`
     }
   },
 
-  [NEW_TASK_COMMENT_END] (state, {comment, taskId}) {
+  [NEW_TASK_COMMENT_END] (state, { comment, taskId }) {
     const task = state.todos.find((task) => task.id === taskId)
 
     if (task) {
@@ -439,7 +441,10 @@ const mutations = {
   },
 
   [REMOVE_SELECTED_TASK] (state, validationInfo) {
-    if (state.todoSelectionGrid && state.todoSelectionGrid[0]) {
+    if (
+      state.todoSelectionGrid &&
+      state.todoSelectionGrid[validationInfo.x]
+    ) {
       state.todoSelectionGrid[validationInfo.x][validationInfo.y] = false
     }
   },
@@ -508,7 +513,7 @@ const mutations = {
   },
 
   [RESET_ALL] (state) {
-    Object.assign(state, {...initialState})
+    Object.assign(state, { ...initialState })
   }
 }
 

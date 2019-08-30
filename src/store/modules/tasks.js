@@ -3,15 +3,18 @@ import async from 'async'
 import tasksApi from '../api/tasks'
 import peopleApi from '../api/people'
 import playlistsApi from '../api/playlists'
-import { sortByName, sortValidationColumns } from '../../lib/sorting'
+import {
+  sortComments,
+  sortByName
+} from '../../lib/sorting'
 import personStore from './people'
 import taskTypeStore from './tasktypes'
 
 import {
-  LOAD_ASSETS_START,
-  LOAD_SHOTS_START,
   LOAD_ASSETS_END,
   LOAD_SHOTS_END,
+  CLEAR_SHOTS,
+  CLEAR_ASSETS,
 
   LOAD_TASK_END,
   LOAD_TASK_STATUSES_END,
@@ -28,6 +31,7 @@ import {
   DELETE_TASK_END,
   EDIT_COMMENT_END,
   DELETE_COMMENT_END,
+  PIN_COMMENT,
 
   PREVIEW_FILE_SELECTED,
   ADD_PREVIEW_START,
@@ -53,14 +57,15 @@ import {
   SAVE_TASK_SEARCH_END,
   REMOVE_TASK_SEARCH_END,
 
+  UPDATE_COMMENT_CHECKLIST,
+  SET_LAST_COMMENT_DRAFT,
+
   RESET_ALL
 } from '../mutation-types'
 
 const initialState = {
   taskMap: {},
   taskStatusMap: {},
-  assetValidationColumns: [],
-  shotValidationColumns: [],
 
   taskStatuses: [],
   taskComments: {},
@@ -76,7 +81,9 @@ const initialState = {
   isShowInfos: true,
 
   isSavingCommentPreview: false,
-  previewFormData: null
+  previewFormData: null,
+
+  lastCommentDraft: ''
 }
 
 const state = {
@@ -130,18 +137,7 @@ const getters = {
   taskEntityPreviews: state => state.taskEntityPreviews,
   previewFormData: state => state.previewFormData,
   isSavingCommentPreview: state => state.isSavingCommentPreview,
-
-  assetValidationColumns: (state, getters) => {
-    return sortValidationColumns(
-      Object.values(state.assetValidationColumns), getters.taskTypeMap
-    )
-  },
-
-  shotValidationColumns: (state, getters) => {
-    return sortValidationColumns(
-      Object.values(state.shotValidationColumns), getters.taskTypeMap
-    )
-  }
+  lastCommentDraft: state => state.lastCommentDraft
 }
 
 const actions = {
@@ -231,33 +227,33 @@ const actions = {
       if (err) {
         callback(err)
       } else {
-        commit(LOAD_TASK_COMMENTS_END, {comments, taskId})
+        commit(LOAD_TASK_COMMENTS_END, { comments, taskId })
         dispatch('loadTaskEntityPreviewFiles', { callback, entityId })
       }
     })
   },
 
   loadTaskEntityPreviewFiles ({ commit, state }, { callback, entityId }) {
-    const entity = {id: entityId}
+    const entity = { id: entityId }
     playlistsApi.getEntityPreviewFiles(entity, (err, previewFiles) => {
       commit(LOAD_TASK_ENTITY_PREVIEW_FILES_END, previewFiles)
       if (callback) callback(err)
     })
   },
 
-  commentTask ({ commit, state }, {taskId, taskStatusId, comment, callback}) {
-    tasksApi.commentTask({taskId, taskStatusId, comment}, (err, comment) => {
+  commentTask ({ commit, state }, { taskId, taskStatusId, comment, callback }) {
+    tasksApi.commentTask({ taskId, taskStatusId, comment }, (err, comment) => {
       if (!err) {
-        commit(NEW_TASK_COMMENT_END, {comment, taskId})
+        commit(NEW_TASK_COMMENT_END, { comment, taskId })
       }
       if (callback) callback(err, comment)
     })
   },
 
-  loadComment ({ commit, state }, {commentId, callback}) {
-    tasksApi.getTaskComment({id: commentId}, (err, comment) => {
+  loadComment ({ commit, state }, { commentId, callback }) {
+    tasksApi.getTaskComment({ id: commentId }, (err, comment) => {
       if (!err) {
-        commit(NEW_TASK_COMMENT_END, {comment, taskId: comment.object_id})
+        commit(NEW_TASK_COMMENT_END, { comment, taskId: comment.object_id })
       }
       if (callback) callback(err, comment)
     })
@@ -351,14 +347,18 @@ const actions = {
     })
   },
 
-  changeSelectedTaskStatus ({ commit, state }, {taskStatusId, callback}) {
+  changeSelectedTaskStatus ({ commit, state }, {
+    taskStatusId,
+    comment,
+    callback
+  }) {
     async.eachSeries(Object.keys(state.selectedTasks), (taskId, next) => {
       const task = state.taskMap[taskId]
       if (task && task.task_status_id !== taskStatusId) {
         actions.commentTask({ commit, state }, {
           taskId: taskId,
           taskStatusId: taskStatusId,
-          comment: '',
+          comment: comment || '',
           callback: (err) => {
             next(err)
           }
@@ -435,7 +435,10 @@ const actions = {
     })
   },
 
-  editTaskComment ({ commit }, { taskId, comment, callback }) {
+  editTaskComment ({ commit }, { taskId, comment, checklist, callback }) {
+    if (checklist) {
+      commit(UPDATE_COMMENT_CHECKLIST, { taskId, comment, checklist })
+    }
     tasksApi.editTaskComment(comment, (err, comment) => {
       if (!err) {
         commit(EDIT_COMMENT_END, { taskId, comment })
@@ -481,7 +484,7 @@ const actions = {
           } else {
             tasksApi.uploadPreview(preview.id, state.previewFormData, (err, preview) => {
               if (!err) {
-                commit(NEW_TASK_COMMENT_END, {comment, taskId})
+                commit(NEW_TASK_COMMENT_END, { comment, taskId })
                 commit(ADD_PREVIEW_END, {
                   preview,
                   taskId,
@@ -685,40 +688,17 @@ const actions = {
         else resolve()
       })
     })
+  },
+
+  pinComment ({ commit }, comment) {
+    commit(PIN_COMMENT, comment)
+    tasksApi.pinComment(comment)
   }
 }
 
 const mutations = {
-  [LOAD_ASSETS_START] (state, assets) {
-    state.assetValidationColumns = []
-  },
 
-  [LOAD_ASSETS_END] (state, { production, assets, personMap, userFilters }) {
-    const validationColumns = {}
-    state.taskMap = {}
-    assets.forEach((asset) => {
-      asset.validations = {}
-      asset.tasks.forEach((task) => {
-        const taskType = helpers.getTaskType(task.task_type_id)
-        if (!validationColumns[taskType.name]) {
-          validationColumns[taskType.name] = task.task_type_id
-        }
-
-        if (task.assignees.length > 1) {
-          task.assignees = task.assignees.sort((a, b) => {
-            return personMap[a].name.localeCompare(personMap[b].name)
-          })
-        }
-
-        asset.validations[task.task_type_id] = task.id
-        task.episode_id = asset.source_id
-        state.taskMap[task.id] = task
-      })
-      asset.tasks = asset.tasks.map((task) => {
-        return task.id
-      })
-    })
-    state.assetValidationColumns = validationColumns
+  [LOAD_ASSETS_END] (state, { production, userFilters }) {
     if (userFilters.task && userFilters.task[production.id]) {
       state.taskSearchQueries = userFilters.task[production.id]
     } else {
@@ -726,36 +706,7 @@ const mutations = {
     }
   },
 
-  [LOAD_SHOTS_START] (state, assets) {
-    state.shotValidationColumns = {}
-  },
-
-  [LOAD_SHOTS_END] (state, { production, shots, personMap, userFilters }) {
-    const validationColumns = {}
-    state.taskMap = {}
-    shots.forEach((shot) => {
-      shot.validations = {}
-      shot.tasks.forEach((task) => {
-        const taskType = helpers.getTaskType(task.task_type_id)
-        if (!validationColumns[taskType.name]) {
-          validationColumns[taskType.name] = task.task_type_id
-        }
-
-        if (task.assignees.length > 1) {
-          task.assignees = task.assignees.sort((a, b) => {
-            return personMap[a].name.localeCompare(personMap[b])
-          })
-        }
-
-        shot.validations[task.task_type_id] = task.id
-        task.episode_id = shot.episode_id
-        state.taskMap[task.id] = task
-      })
-      shot.tasks = shot.tasks.map((task) => {
-        return task.id
-      })
-    })
-    state.shotValidationColumns = validationColumns
+  [LOAD_SHOTS_END] (state, { production, userFilters }) {
     if (userFilters.task && userFilters.task[production.id]) {
       state.taskSearchQueries = userFilters.task[production.id]
     } else {
@@ -784,13 +735,13 @@ const mutations = {
     state.taskEntityPreviews = previewFiles
   },
 
-  [LOAD_TASK_COMMENTS_END] (state, {taskId, comments}) {
+  [LOAD_TASK_COMMENTS_END] (state, { taskId, comments }) {
     comments.forEach((comment) => {
       comment.person = personStore.helpers.addAdditionalInformation(
         comment.person
       )
     })
-    state.taskComments[taskId] = comments
+    state.taskComments[taskId] = sortComments(comments)
     state.taskPreviews[taskId] = comments.reduce((previews, comment) => {
       if (comment.previews && comment.previews.length > 0) {
         const preview = comment.previews[0]
@@ -818,7 +769,7 @@ const mutations = {
 
   [LOAD_TASK_SUBSCRIBE_END] (state, { taskId, subscribed }) {},
 
-  [NEW_TASK_COMMENT_END] (state, {comment, taskId}) {
+  [NEW_TASK_COMMENT_END] (state, { comment, taskId }) {
     const task = state.taskMap[taskId]
     if (comment.task_status === undefined) {
       const getTaskStatus = getters.getTaskStatus(state, getters)
@@ -840,7 +791,7 @@ const mutations = {
     if (!state.taskComments[taskId].find((cmt) => cmt.id === comment.id)) {
       state.taskComments[taskId].unshift(comment)
     }
-
+    state.taskComments[taskId] = sortComments(state.taskComments[taskId])
     if (task) {
       Object.assign(task, {
         task_status_id: comment.task_status_id,
@@ -862,25 +813,46 @@ const mutations = {
     todoStatus
   }) {
     const task = state.taskMap[taskId]
-    let newStatus = todoStatus
-    state.taskComments[taskId] = [...state.taskComments[taskId]].splice(1)
-    state.taskPreviews[taskId] = [...state.taskPreviews[taskId]].splice(1)
+    let comments = state.taskComments[taskId]
+    const oldCommentIndex = comments.findIndex(c => c.id === commentId)
+    const oldComment = comments.find(c => c.id === commentId)
+    const pinnedCount = comments.filter(c => c.pinned).length
 
-    if (state.taskComments[taskId].length > 0) {
-      const newStatusId = state.taskComments[taskId][0].task_status_id
-      newStatus = taskStatusMap[newStatusId]
-    }
+    comments = comments.filter(
+      c => c.id !== commentId
+    )
+    state.taskComments[taskId] = comments
+    state.taskPreviews[taskId] = [...state.taskPreviews[taskId]].filter(
+      p => !(
+        oldComment.previews.length > 0 &&
+        oldComment.previews[0].id === p.id
+      )
+    )
 
-    if (task) {
-      Object.assign(task, {
-        task_status_id: newStatus.id,
-        task_status_priority: newStatus.priority
-      })
+    if (oldCommentIndex === pinnedCount) {
+      let newStatus = todoStatus
+      if (comments.length > 0) {
+        let newStatusId = comments[0].task_status_id
+        if (pinnedCount < comments.length) {
+          newStatusId = comments[pinnedCount].task_status_id
+        }
+        newStatus = taskStatusMap[newStatusId]
+      }
+
+      if (task) {
+        Object.assign(task, {
+          task_status_id: newStatus.id,
+          task_status_priority: newStatus.priority
+        })
+      }
     }
   },
 
   [EDIT_COMMENT_END] (state, { taskId, comment }) {
-    state.taskComments[taskId][0].text = comment.text
+    const oldComment = state.taskComments[taskId].find(
+      c => c.id === comment.id
+    )
+    oldComment.text = comment.text
   },
 
   [PREVIEW_FILE_SELECTED] (state, formData) {
@@ -911,7 +883,7 @@ const mutations = {
         existingPreview.previews.push(newPreview)
       }
     } else {
-      newPreview.previews = [{...newPreview}]
+      newPreview.previews = [{ ...newPreview }]
       state.taskPreviews[taskId] =
         [newPreview].concat(state.taskPreviews[taskId])
 
@@ -1121,8 +1093,30 @@ const mutations = {
     }
   },
 
+  [PIN_COMMENT] (state, comment) {
+    comment.pinned = !comment.pinned
+    state.taskComments[comment.object_id] =
+      sortComments(state.taskComments[comment.object_id])
+  },
+
+  [UPDATE_COMMENT_CHECKLIST] (state, { comment, checklist }) {
+    comment.checklist = checklist
+  },
+
+  [CLEAR_ASSETS] (state) {
+    state.taskMap = {}
+  },
+
+  [CLEAR_SHOTS] (state) {
+    state.taskMap = {}
+  },
+
+  [SET_LAST_COMMENT_DRAFT] (state, lastCommentDraft) {
+    state.lastCommentDraft = lastCommentDraft
+  },
+
   [RESET_ALL] (state, shots) {
-    Object.assign(state, {...initialState})
+    Object.assign(state, { ...initialState })
   }
 }
 

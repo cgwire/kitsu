@@ -1,43 +1,43 @@
 <template>
   <div class="people page fixed-page">
-    <div class="level page-header">
-      <div class="level-left">
-        <page-title class="flexrow-item" :text="$t('people.title')" />
-      </div>
+    <div class="flexrow page-header">
+      <page-title class="flexrow-item filler" :text="$t('people.title')" />
 
-      <div class="level-right">
-        <div class="level-item">
-          <button-link v-if="isCurrentUserAdmin"
-            class="level-item"
-            :title="$t('main.csv.import_file')"
-            :is-responsive="true"
-            icon="upload"
-            path="/people/import"
-          />
-          <button-href-link
-            class="level-item"
-            :title="$t('main.csv.export_file')"
-            icon="download"
-            path="/api/export/csv/persons.csv"
-          />
-          <button-link v-if="isCurrentUserAdmin"
-            class="level-item"
-            :text="$t('people.new_person')"
-            :is-responsive="true"
-            icon="plus"
-            path="/people/new"
-          />
-        </div>
+      <div class="flexrow-item">
+        <button-simple
+          class="flexrow-item"
+          :title="$t('main.csv.import_file')"
+          :is-responsive="true"
+          icon="upload"
+          @click="showImportModal"
+          v-if="isCurrentUserAdmin"
+        />
+        <button-href-link
+          class="flexrow-item"
+          :title="$t('main.csv.export_file')"
+          icon="download"
+          path="/api/export/csv/persons.csv"
+        />
+        <button-link
+          class="flexrow-item"
+          :text="$t('people.new_person')"
+          :is-responsive="true"
+          icon="plus"
+          path="/people/new"
+          v-if="isCurrentUserAdmin"
+        />
       </div>
     </div>
 
-    <search-field
-      class="search"
-      ref="people-search-field"
-      :can-save="false"
-      @change="onSearchChange"
-      placeholder="ex: John Doe"
-    />
+    <div class="flexrow">
+      <search-field
+        class="search flexrow-item"
+        ref="people-search-field"
+        :can-save="false"
+        @change="onSearchChange"
+        placeholder="ex: John Doe"
+      />
+    </div>
 
     <people-list
       :entries="displayedPeople"
@@ -46,22 +46,28 @@
     />
 
     <import-modal
-      :active="isImportPeopleModalShown"
+      :active="modals.importModal"
       :is-loading="isImportPeopleLoading"
       :is-error="isImportPeopleLoadingError"
-      :cancel-route="'/people'"
       :form-data="personCsvFormData"
       :columns="csvColumns"
       @fileselected="selectFile"
       @confirm="uploadImportFile"
+      @cancel="hideImportModal"
     />
 
     <edit-person-modal
       :active="isEditModalShown"
-      :is-loading="isEditLoading"
+      :is-loading="loading.edit"
+      :is-invite-loading="loading.invite"
+      :is-create-invite-loading="loading.createAndInvite"
       :is-error="isEditLoadingError"
+      :is-invitation-success="success.invite"
+      :is-invitation-error="errors.invite"
       :cancel-route="'/people'"
       @confirm="confirmEditPeople"
+      @confirm-invite="confirmCreateAndInvite"
+      @invite="confirmInvite"
     />
 
     <delete-modal
@@ -81,29 +87,45 @@
 import { mapGetters, mapActions } from 'vuex'
 
 import PeopleList from '../lists/PeopleList'
-import DeleteModal from '../widgets/DeleteModal'
+import DeleteModal from '../modals/DeleteModal'
 import EditPersonModal from '../modals/EditPersonModal'
 import ImportModal from '../modals/ImportModal'
 import ButtonLink from '../widgets/ButtonLink'
 import ButtonHrefLink from '../widgets/ButtonHrefLink'
+import ButtonSimple from '../widgets/ButtonSimple'
 import PageTitle from '../widgets/PageTitle'
 import SearchField from '../widgets/SearchField'
 
 export default {
   name: 'people',
   components: {
-    PeopleList,
-    DeleteModal,
-    EditPersonModal,
-    ImportModal,
     ButtonLink,
     ButtonHrefLink,
+    ButtonSimple,
+    EditPersonModal,
+    DeleteModal,
+    ImportModal,
     PageTitle,
+    PeopleList,
     SearchField
   },
 
   data () {
     return {
+      errors: {
+        invite: false
+      },
+      loading: {
+        createAndInvite: false,
+        edit: false,
+        invite: false
+      },
+      modals: {
+        importModal: false
+      },
+      success: {
+        invite: false
+      },
       csvColumns: [
         'First Name',
         'Last Name',
@@ -158,7 +180,7 @@ export default {
       const person = this.personToDelete
       if (person !== undefined) {
         const personName = `${person.first_name} ${person.last_name}`
-        return this.$t('people.delete_text', {personName: personName})
+        return this.$t('people.delete_text', { personName })
       } else {
         return ''
       }
@@ -167,6 +189,10 @@ export default {
 
   methods: {
     ...mapActions([
+      'invitePerson',
+      'editPerson',
+      'newPerson',
+      'newPersonAndInvite',
       'loadPeople',
       'peopleSearchChange'
     ]),
@@ -175,7 +201,7 @@ export default {
       this.$store.dispatch('uploadPersonFile', (err) => {
         if (!err) {
           this.$store.dispatch('loadPeople')
-          this.$router.push('/people')
+          this.hideImportModal()
         }
       })
     },
@@ -187,18 +213,44 @@ export default {
     },
 
     confirmEditPeople (form) {
-      let action = 'editPeople'
-      if (this.personToEdit.id === undefined) {
-        action = 'newPeople'
-      }
-      this.$store.dispatch(action, {
-        data: form,
-        callback: (err) => {
-          if (!err) {
-            this.$router.push('/people')
-          }
-        }
-      })
+      let action = 'editPerson'
+      if (this.personToEdit.id === undefined) action = 'newPerson'
+      this.loading.edit = true
+      this[action](form)
+        .then(() => {
+          this.$router.push('/people')
+          this.loading.edit = false
+        })
+        .catch(() => {
+          this.loading.edit = false
+        })
+    },
+
+    confirmCreateAndInvite (form) {
+      this.loading.createAndInvite = true
+      this.newPersonAndInvite(form)
+        .then(() => {
+          this.loading.createAndInvite = false
+          this.$router.push('/people')
+        })
+        .catch(() => {
+          this.loading.createAndInvite = false
+        })
+    },
+
+    confirmInvite (form) {
+      this.loading.invite = true
+      this.invitePerson(form)
+        .then(() => {
+          this.loading.invite = false
+          this.success.invite = true
+          this.errors.invite = false
+        })
+        .catch(() => {
+          this.loading.invite = false
+          this.success.invite = false
+          this.errors.invite = true
+        })
     },
 
     confirmDeletePeople () {
@@ -213,14 +265,6 @@ export default {
       this.$store.commit('PERSON_CSV_FILE_SELECTED', formData)
     },
 
-    showImportModalIfNeeded (path) {
-      if (path.indexOf('import') > 0) {
-        this.$store.dispatch('showPersonImportModal')
-      } else {
-        this.$store.dispatch('hidePersonImportModal')
-      }
-    },
-
     showDeleteModalIfNeeded (path, personId) {
       if (path.indexOf('delete') > 0) {
         this.$store.dispatch('showPersonDeleteModal', personId)
@@ -230,6 +274,8 @@ export default {
     },
 
     showEditModalIfNeeded (path, personId) {
+      this.errors.invite = false
+      this.success.invite = false
       if (path.indexOf('new') > 0) {
         this.$store.dispatch('showPersonEditModal')
       } else if (path.indexOf('edit') > 0) {
@@ -244,11 +290,18 @@ export default {
       const personId = this.$store.state.route.params.person_id
       this.showDeleteModalIfNeeded(path, personId)
       this.showEditModalIfNeeded(path, personId)
-      this.showImportModalIfNeeded(path, personId)
     },
 
     onSearchChange () {
       this.peopleSearchChange(this.$refs['people-search-field'].getValue())
+    },
+
+    showImportModal () {
+      this.modals.importModal = true
+    },
+
+    hideImportModal () {
+      this.modals.importModal = false
     }
   },
 

@@ -26,27 +26,14 @@
 
       <file-upload @fileselected="onFileSelected"></file-upload>
 
-      <p class="error" v-if="isError">
-        {{ $t("main.csv.error_upload") }}
-      </p>
-
-      <p class="has-text-right">
-        <a
-          :class="{
-            button: true,
-            'is-primary': true,
-            'is-loading': isLoading,
-            'is-disabled': formData == undefined
-          }"
-          @click="onConfirmClicked">
-          {{ $t("main.confirmation") }}
-        </a>
-        <router-link
-          :to="cancelRoute"
-          class="button is-link">
-          {{ $t("main.cancel") }}
-        </router-link>
-      </p>
+      <modal-footer
+        :error-text="$t('productions.metadata.error')"
+        :is-loading="isLoading"
+        :is-disabled="formData === undefined"
+        :is-error="isError"
+        @confirm="onConfirmClicked"
+        @cancel="$emit('cancel')"
+      />
 
     </div>
   </div>
@@ -55,34 +42,52 @@
 
 <script>
 import { mapGetters, mapActions } from 'vuex'
+import { modalMixin } from './base_modal'
 import FileUpload from '../widgets/FileUpload.vue'
+import ModalFooter from './ModalFooter'
 
 export default {
   name: 'import-people-modal',
-  props: [
-    'active',
-    'cancelRoute',
-    'isLoading',
-    'isError',
-    'columns'
-  ],
-  watch: {
+  mixins: [modalMixin],
+  components: {
+    FileUpload,
+    ModalFooter
   },
+
   data () {
     return {
       formData: null
     }
   },
-  components: {
-    FileUpload
+
+  props: {
+    active: {
+      type: Boolean,
+      default: false
+    },
+    columns: {
+      type: Array,
+      default: () => []
+    },
+    isLoading: {
+      type: Boolean,
+      default: false
+    },
+    isError: {
+      type: Boolean,
+      default: false
+    }
   },
+
+  mounted () {
+    this.formData = null
+  },
+
   computed: {
     ...mapGetters([
     ])
   },
-  mounted () {
-    this.formData = null
-  },
+
   methods: {
     ...mapActions([
     ]),
@@ -93,6 +98,9 @@ export default {
     onConfirmClicked () {
       this.$emit('confirm')
     }
+  },
+
+  watch: {
   }
 }
 </script>
@@ -104,12 +112,6 @@ export default {
 
 .error {
   margin-top: 1em;
-}
-
-.title {
-  border-bottom: 2px solid #DDD;
-  padding-bottom: 0.5em;
-  margin-bottom: 1.2em;
 }
 
 .description {

@@ -4,6 +4,15 @@
     <div class="loading-background" v-if="isLoading" >
       <spinner class="spinner" />
     </div>
+    <div class="canvas-wrapper">
+      <canvas
+        id="annotation-canvas"
+        ref="annotation-canvas"
+        class="canvas"
+        v-if="!readOnly"
+      >
+      </canvas>
+    </div>
     <video
       id="annotation-movie"
       ref="movie"
@@ -26,13 +35,6 @@
       v-if="isComparing && previewToCompareId"
     >
     </video>
-    <canvas
-      id="annotation-canvas"
-      ref="annotation-canvas"
-      style="display: none;"
-      class="canvas"
-    >
-    </canvas>
   </div>
 
   <div class="button-bar" ref="button-bar">
@@ -49,19 +51,14 @@
         ></span>
       </progress>
     </div>
-    <div
-      class="video-annotation pull-bottom"
+
+    <annotation-bar
+      :annotations="annotations"
+      :maxDurationRaw="videoDuration"
+      @select-annotation="loadAnnotation"
       ref="annotation-bar"
-    >
-      <span
-        class="annotation-mark"
-        :key="`annotation-${annotation.time}`"
-        :style="getAnnotationStyles(annotation, index)"
-        @click="loadAnnotation(annotation.time)"
-        v-for="(annotation, index) in annotations"
-      >
-      </span>
-    </div>
+      v-if="!readOnly"
+    />
 
     <div class="buttons flexrow pull-bottom">
       <div class="left flexrow">
@@ -80,7 +77,7 @@
             active: isRepeating
           }"
           @click="onRepeatClicked"
-          v-if="!light"
+          v-if="!light || readOnly"
         >
           <repeat-icon class="icon smaller" />
         </button>
@@ -88,10 +85,10 @@
         <span class="flexrow-item time-indicator">
           {{ currentTime }}
         </span>
-        <span class="flexrow-item time-indicator" v-if="!light || isFullScreen()">
+        <span class="flexrow-item time-indicator" v-if="!light || readOnly|| isFullScreen()">
         /
         </span>
-        <span class="flexrow-item time-indicator" v-if="!light || isFullScreen()">
+        <span class="flexrow-item time-indicator" v-if="!light || readOnly || isFullScreen()">
          {{ maxDuration }}
         </span>
 
@@ -103,7 +100,7 @@
             'comparison-button': true
           }"
           @click="onCompareClicked"
-          v-if="taskTypeOptions.length > 0 && (!light || isFullScreen())"
+          v-if="!readOnly && taskTypeOptions.length > 0 && (!light || isFullScreen())"
         >
           <copy-icon class="icon smaller" />
         </button>
@@ -113,14 +110,14 @@
           :options="taskTypeOptions"
           :is-dark="true"
           v-model="taskTypeId"
-          v-if="isComparing"
+          v-if="!readOnly && isComparing && (!light || isFullScreen())"
         />
         <combobox
           class="comparison-combobox"
           :options="previewFileOptions"
           :is-dark="true"
           v-model="previewToCompareId"
-          v-if="isComparing"
+          v-if="!readOnly && isComparing && (!light || isFullScreen())"
         />
       </div>
 
@@ -128,7 +125,7 @@
         <button
           class="button flexrow-item"
           @click="onDeleteClicked"
-          v-if="isFullScreenEnabled"
+          v-if="!readOnly && isFullScreenEnabled"
         >
           <x-icon class="icon" />
         </button>
@@ -140,10 +137,18 @@
             active: isDrawing
           }"
           @click="onPencilAnnotateClicked"
-          v-if="isFullScreenEnabled"
+          v-if="!readOnly && isFullScreenEnabled"
         >
           <edit-2-icon class="icon" />
         </button>
+
+        <a
+          :href="movieDlPath"
+          class="button flexrow-item"
+          v-if="!readOnly"
+        >
+          <download-icon class="icon" />
+        </a>
 
         <button
           class="button flexrow-item"
@@ -152,13 +157,6 @@
         >
           <maximize-icon class="icon" />
         </button>
-
-        <a
-          class="button flexrow-item"
-          :href="movieDlPath"
-        >
-          <download-icon class="icon" />
-        </a>
       </div>
     </div>
   </div>
@@ -166,9 +164,9 @@
 </template>
 
 <script>
+import { mapGetters } from 'vuex'
 import { fabric } from 'fabric'
 import {
-  CircleIcon,
   CopyIcon,
   DownloadIcon,
   Edit2Icon,
@@ -176,9 +174,11 @@ import {
   PauseIcon,
   PlayIcon,
   RepeatIcon,
-  SquareIcon,
   XIcon
 } from 'vue-feather-icons'
+
+import { roundToFrame } from '../../lib/video'
+import AnnotationBar from '../pages/playlists/AnnotationBar'
 import Combobox from '../widgets/Combobox'
 import Spinner from '../widgets/Spinner'
 
@@ -186,7 +186,7 @@ export default {
   name: 'video-player',
 
   components: {
-    CircleIcon,
+    AnnotationBar,
     CopyIcon,
     Combobox,
     DownloadIcon,
@@ -196,7 +196,6 @@ export default {
     PlayIcon,
     RepeatIcon,
     Spinner,
-    SquareIcon,
     XIcon
   },
 
@@ -214,6 +213,10 @@ export default {
       default: () => {}
     },
     light: {
+      type: Boolean,
+      default: false
+    },
+    readOnly: {
       type: Boolean,
       default: false
     }
@@ -241,10 +244,12 @@ export default {
     this.reloadAnnotations()
     this.container.style.height = this.getDefaultHeight() + 'px'
     this.isLoading = true
+    this.setupFabricCanvas()
     setTimeout(() => {
       if (this.video) {
         this.video.addEventListener('loadedmetadata', () => {
           this.configureVideo()
+          this.onWindowResize()
           this.isLoading = false
           this.setDefaultComparisonTaskType()
         })
@@ -254,7 +259,7 @@ export default {
         })
 
         this.video.addEventListener('error', () => {
-          this.$refs.movie.style.height = (this.getDefaultHeight() - 80) + 'px'
+          this.$refs.movie.style.height = (this.getDefaultHeight() - 90) + 'px'
           this.isLoading = false
         })
 
@@ -271,12 +276,20 @@ export default {
   },
 
   computed: {
+    ...mapGetters([
+      'currentProduction'
+    ]),
+
     canvas () {
       return this.$refs['annotation-canvas']
     },
 
     container () {
       return this.$refs.container
+    },
+
+    fps () {
+      return this.currentProduction.fps || 24
     },
 
     isFullScreenEnabled () {
@@ -350,9 +363,16 @@ export default {
         })
         .map((taskTypeId) => {
           const taskType = this.taskTypeMap[taskTypeId]
-          return {
-            label: taskType.name,
-            value: taskType.id
+          if (taskType) {
+            return {
+              label: taskType.name,
+              value: taskType.id
+            }
+          } else {
+            return {
+              label: '',
+              value: ''
+            }
           }
         })
     },
@@ -392,7 +412,7 @@ export default {
       if (this.isFullScreen()) {
         return screen.height
       } else {
-        return screen.width > 1300 && !this.light ? 500 : 200
+        return screen.width > 1300 && (!this.light || this.readOnly) ? 500 : 200
       }
     },
 
@@ -400,7 +420,7 @@ export default {
       const ratio = this.video.videoHeight / this.video.videoWidth
       let width = this.container.offsetWidth - 1
       let height = Math.floor(width * ratio)
-      height = Math.min(height, this.getDefaultHeight()) - 55
+      height = Math.min(height, this.getDefaultHeight() - 60)
       width = Math.floor(height / ratio)
       return { width, height }
     },
@@ -422,6 +442,7 @@ export default {
     },
 
     setCurrentTime (currentTime) {
+      currentTime = roundToFrame(currentTime, this.fps)
       this.progress.value = currentTime
       this.progressBar.style.width = Math.floor(
         (currentTime / this.video.duration) * 100
@@ -432,52 +453,19 @@ export default {
         const comparisonVideo = document.getElementById('comparison-movie')
         if (comparisonVideo) comparisonVideo.currentTime = currentTime
       }
-      this.showVideo()
     },
 
     configureVideo () {
       this.reloadAnnotations()
       this.video.addEventListener('timeupdate', this.updateProgressBar)
       this.video.onended = this.onVideoEnd
-      this.showVideo()
       if (this.video.currentTime === 0) {
         this.clearCanvas()
-        this.$nextTick(() => {
-          this.mountVideo()
-        })
-      }
-    },
-
-    showCanvas (callback) {
-      if (this.isVideoShown) {
-        this.isComparing = false
-        this.canvas.style.display = 'block'
-        this.video.style.display = 'none'
         this.mountVideo()
-        this.isVideoShown = false
-        this.loadAnnotation(this.video.currentTime)
-        if (callback) callback()
-      } else if (callback) {
-        callback()
       }
-    },
-
-    showVideo () {
-      if (!this.isVideoShown && this.canvas) {
-        this.canvas.style.display = 'none'
-        this.video.style.display = 'block'
-        let elements = document.getElementsByClassName('canvas-container')
-        for (let i = 0; i < elements.length; i++) {
-          const element = elements[i]
-          element.style.display = 'none'
-        }
-      }
-      this.isVideoShown = true
     },
 
     mountVideo () {
-      this.clearCanvas()
-
       this.video.mute = true
       this.videoDuration = this.video.duration
       this.progress.setAttribute('max', this.videoDuration)
@@ -498,14 +486,6 @@ export default {
             this.video.style.height = height + 'px'
             this.videoWrapper.style.width = width + 'px'
             this.videoWrapper.style.height = height + 'px'
-
-            this.fabricCanvas = this.setupFabricVideo(width, height)
-            this.fabricCanvas.on('object:moved', this.saveAnnotations)
-            this.fabricCanvas.on('object:scaled', this.saveAnnotations)
-            this.fabricCanvas.on('mouse:up', () => {
-              if (this.isDrawing) this.saveAnnotations()
-            })
-            this.fixCanvasSize()
           } else {
             this.container.style.height = this.getDefaultHeight() + 'px'
             this.video.style.width = (width / 2) + 'px'
@@ -519,6 +499,7 @@ export default {
             this.videoWrapper.style.height = height + 'px'
           }
         }
+        if (!this.readOnly) this.resetCanvas()
       }
     },
 
@@ -528,61 +509,33 @@ export default {
           this.fabricCanvas.remove(obj)
         })
       }
-      try {
-        if (this.fabricCanvas) this.fabricCanvas.clear()
-      } catch (err) { }
-      try {
-        if (this.fabricCanvas) this.fabricCanvas.dispose()
-      } catch (err) { }
     },
 
-    setupFabricVideo (width, height, update = false) {
-      let fabricCanvas = this.fabricCanvas
-      if (!update) {
-        fabricCanvas = new fabric.Canvas('annotation-canvas')
-        fabricCanvas.setDimensions({
-          width: width,
-          height: height
-        })
-      }
-      const fabricVideo = new fabric.Image(this.video, {
-        left: 0,
-        top: 0,
-        width: this.video.videoWidth,
-        height: this.video.videoHeight,
-        objectCaching: false,
-        selectable: false
+    setupFabricCanvas () {
+      if (this.readOnly) return
+
+      this.fabricCanvas = new fabric.Canvas('annotation-canvas')
+      this.fabricCanvas.on('object:moved', this.saveAnnotations)
+      this.fabricCanvas.on('object:scaled', this.saveAnnotations)
+      this.fabricCanvas.on('mouse:up', () => {
+        if (this.isDrawing) this.saveAnnotations()
       })
-      fabricVideo.scaleToWidth(width)
-      fabricVideo.scaleToHeight(height)
-      fabricCanvas.add(fabricVideo)
-      fabricVideo.sendToBack()
-      this.fabricVideo = fabricVideo
-
-      fabricCanvas.freeDrawingBrush.color = '#ff3860'
-      fabricCanvas.freeDrawingBrush.width = 4
-
-      fabricCanvas.off('object:scaling', this.onScaled)
-      fabricCanvas.on('object:scaling', this.onScaled)
-      fabricCanvas.off('object:scaled', this.onScaled)
-      fabricCanvas.on('object:scaled', this.onScaled)
-
-      fabric.util.requestAnimFrame(function render () {
-        try {
-          fabricCanvas.renderAll()
-        } catch (err) { }
-        fabric.util.requestAnimFrame(render)
+      this.fabricCanvas.setDimensions({
+        width: 100,
+        height: 100
       })
-
-      return fabricCanvas
+      this.fabricCanvas.freeDrawingBrush.color = '#ff3860'
+      this.fabricCanvas.freeDrawingBrush.width = 4
+      return this.fabricCanvas
     },
 
     play () {
       this.clearAnnotations()
       this.isPlaying = true
-      this.showVideo()
-      this.fabricCanvas.isDrawingMode = false
-      this.isDrawing = false
+      if (!this.readOnly) {
+        this.fabricCanvas.isDrawingMode = false
+        this.isDrawing = false
+      }
       this.video.play()
       if (this.isComparing) {
         const comparisonVideo = document.getElementById('comparison-movie')
@@ -600,21 +553,25 @@ export default {
     },
 
     goPreviousFrame () {
-      let newTime = this.video.currentTime - 1 / 25
+      let newTime = this.video.currentTime - 1 / this.fps
       if (newTime < 0) {
         this.setCurrentTime(0)
       } else {
         this.setCurrentTime(newTime)
       }
+      const annotation = this.getAnnotation(this.video.currentTime)
+      if (annotation) this.loadAnnotation(annotation)
     },
 
     goNextFrame () {
-      let newTime = this.video.currentTime + 1 / 25
+      let newTime = this.video.currentTime + 1 / this.fps
       if (newTime > this.video.duration) {
         this.setCurrentTime(this.video.duration)
       } else {
         this.setCurrentTime(newTime)
       }
+      const annotation = this.getAnnotation(this.video.currentTime)
+      if (annotation) this.loadAnnotation(annotation)
     },
 
     formatTime (seconds) {
@@ -698,15 +655,21 @@ export default {
         if (this.fabricCanvas) this.fabricCanvas.isDrawingMode = false
         this.isDrawing = false
         this.$nextTick(() => {
-          if (!this.isVideoShown) this.showVideo()
           this.mountVideo()
+          this.$nextTick(() => {
+            const annotation = this.getAnnotation(this.video.currentTime)
+            this.loadAnnotation(annotation)
+          })
         })
       }
     },
 
     onProgressClicked (e) {
-      var pos =
-        (e.pageX - this.progress.offsetLeft) / this.progress.offsetWidth
+      let left = this.progress.offsetLeft
+      if (left === 0 && !this.isFullScreen()) {
+        left = this.progress.parentElement.offsetParent.offsetLeft - 10
+      }
+      const pos = (e.pageX - left) / this.progress.offsetWidth
       const currentTime = pos * this.video.duration
       this.setCurrentTime(currentTime)
     },
@@ -736,55 +699,14 @@ export default {
       if (obj) obj.set({ strokeWidth: 8 / (obj.scaleX + obj.scaleY) })
     },
 
-    onRectAnnotateClicked () {
-      this.showCanvas(() => {
-        this.fabricCanvas.isDrawingMode = false
-        this.isDrawing = false
-        const rect = new fabric.Rect({
-          left: this.fabricCanvas.width / 2 - 25,
-          top: this.fabricCanvas.height / 2 - 25,
-          fill: 'transparent',
-          strokeWidth: 4,
-          stroke: '#ff3860',
-          width: 50,
-          height: 50
-        })
-        this.fabricCanvas.add(rect)
-        this.fabricCanvas.setActiveObject(rect)
-        this.saveAnnotations()
-      })
-    },
-
-    onCircleAnnotateClicked () {
-      this.showCanvas(() => {
-        this.fabricCanvas.isDrawingMode = false
-        this.isDrawing = false
-        const circle = new fabric.Circle({
-          left: this.fabricCanvas.width / 2 - 25,
-          top: this.fabricCanvas.height / 2 - 25,
-          radius: 20,
-          fill: 'transparent',
-          strokeWidth: 4,
-          stroke: '#ff3860',
-          width: 50,
-          height: 50
-        })
-        this.fabricCanvas.add(circle)
-        this.fabricCanvas.setActiveObject(circle)
-        this.saveAnnotations()
-      })
-    },
-
     onPencilAnnotateClicked () {
-      this.showCanvas(() => {
-        if (this.fabricCanvas.isDrawingMode) {
-          this.fabricCanvas.isDrawingMode = false
-          this.isDrawing = false
-        } else {
-          this.fabricCanvas.isDrawingMode = true
-          this.isDrawing = true
-        }
-      })
+      if (this.isDrawing) {
+        this.fabricCanvas.isDrawingMode = false
+        this.isDrawing = false
+      } else {
+        this.fabricCanvas.isDrawingMode = true
+        this.isDrawing = true
+      }
     },
 
     onWindowResize (callback) {
@@ -795,15 +717,10 @@ export default {
         this.$nextTick(() => {
           this.mountVideo()
           this.reloadAnnotations()
-          this.loadAnnotation(this.video.currentTime)
-          if (this.isVideoShown) {
-            this.canvas.style.display = 'none'
-            let elements = document.getElementsByClassName('canvas-container')
-            for (let i = 0; i < elements.length; i++) {
-              const element = elements[i]
-              element.style.display = 'none'
-            }
-          }
+          const annotation = this.getAnnotation(this.video.currentTime)
+          this.$nextTick(() => {
+            this.loadAnnotation(annotation)
+          })
           if (callback && typeof callback === 'function') callback()
         })
       }
@@ -824,6 +741,7 @@ export default {
     },
 
     getAnnotation (time) {
+      time = roundToFrame(time, this.fps)
       return this.annotations.find(
         (annotation) => annotation.time === time
       )
@@ -840,7 +758,7 @@ export default {
     },
 
     saveAnnotations () {
-      const currentTime = this.video.currentTime
+      const currentTime = roundToFrame(this.currentTime, this.fps)
       const annotation = this.getAnnotation(currentTime)
 
       this.fabricCanvas.getObjects().forEach((obj) => {
@@ -863,7 +781,8 @@ export default {
       if (annotation) {
         annotation.drawing = this.fabricCanvas.toJSON(['canvasWidth'])
         annotation.width = this.fabricCanvas.width
-        if (annotation.drawing && annotation.drawing.objects.length === 1) {
+        annotation.height = this.fabricCanvas.height
+        if (annotation.drawing && annotation.drawing.objects.length < 1) {
           const index = this.annotations.findIndex(
             (annotation) => annotation.time === currentTime
           )
@@ -873,6 +792,7 @@ export default {
         this.annotations.push({
           time: currentTime,
           width: this.fabricCanvas.width,
+          height: this.fabricCanvas.height,
           drawing: this.fabricCanvas.toJSON(['canvasWidth'])
         })
         this.annotations = this.annotations.sort((a, b) => {
@@ -880,55 +800,51 @@ export default {
         }) || []
       }
       const annotations = []
-      this.annotations.forEach(a => annotations.push({...a}))
+      this.annotations.forEach(a => annotations.push({ ...a }))
       this.$emit('annotationchanged', {
         preview: this.preview,
         annotations: annotations
       })
     },
 
-    loadAnnotation (time) {
-      const annotation = this.getAnnotation(time)
+    loadAnnotation (annotation) {
       if (!annotation) return
-
+      const time = annotation.time
       this.video.pause()
+
+      if (!this.fabricCanvas) this.setupFabricCanvas()
+      this.resetCanvasSize()
+
       this.video.currentTime = time
       this.fabricCanvas.isDrawingMode = false
       this.isDrawing = false
 
       this.clearAnnotations()
 
-      let scaleMultiplier = 1
+      let scaleMultiplierX = 1
+      let scaleMultiplierY = 1
       if (annotation.width) {
-        scaleMultiplier = this.fabricCanvas.width / annotation.width
+        scaleMultiplierX = this.fabricCanvas.width / annotation.width
+        scaleMultiplierY = this.fabricCanvas.width / annotation.width
+      }
+      if (annotation.height) {
+        scaleMultiplierY = this.fabricCanvas.height / annotation.height
       }
 
       annotation.drawing.objects.forEach((obj) => {
         const base = {
-          left: obj.left * scaleMultiplier,
-          top: obj.top * scaleMultiplier,
+          left: obj.left * scaleMultiplierX,
+          top: obj.top * scaleMultiplierY,
           fill: 'transparent',
           stroke: '#ff3860',
           strokeWidth: 4,
           radius: obj.radius,
           width: obj.width,
           height: obj.height,
-          scaleX: obj.scaleX * scaleMultiplier,
-          scaleY: obj.scaleY * scaleMultiplier
+          scaleX: obj.scaleX * scaleMultiplierX,
+          scaleY: obj.scaleY * scaleMultiplierY
         }
-        if (obj.type === 'rect') {
-          const rect = new fabric.Rect({
-            ...base
-          })
-          this.fabricCanvas.add(rect)
-          rect.set({strokeWidth: 4})
-        } else if (obj.type === 'circle') {
-          const circle = new fabric.Circle({
-            ...base
-          })
-          this.fabricCanvas.add(circle)
-          circle.set({strokeWidth: 2})
-        } else if (obj.type === 'path') {
+        if (obj.type === 'path') {
           let strokeMultiplier = 1
           if (obj.canvasWidth) {
             strokeMultiplier = obj.canvasWidth / this.fabricCanvas.width
@@ -955,15 +871,14 @@ export default {
           this.fabricCanvas.add(path)
         }
       })
-
-      if (this.isVideoShown) this.showCanvas()
     },
 
     reloadAnnotations () {
+      if (this.readOnly) return
       this.annotations = []
       if (this.preview.annotations) {
         const annotations = []
-        this.preview.annotations.forEach(a => annotations.push({...a}))
+        this.preview.annotations.forEach(a => annotations.push({ ...a }))
         this.annotations = annotations.sort((a, b) => {
           return a.time < b.time
         }) || []
@@ -987,37 +902,8 @@ export default {
       this.saveAnnotations()
     },
 
-    fixCanvasSize () {
-      if (this.fabricVideo) {
-        const dimensions = this.getDimensions()
-        const width = dimensions.width
-        const height = dimensions.height
-        if (height > 0) {
-          let elements = document.getElementsByClassName('canvas-container')
-          for (let i = 0; i < elements.length; i++) {
-            const element = elements[i]
-            element.style.width = width + 'px'
-            element.style.height = height + 'px'
-          }
-          elements = document.getElementsByClassName('upper-canvas')
-          for (let i = 0; i < elements.length; i++) {
-            const element = elements[i]
-            element.style.width = width + 'px'
-            element.style.height = height + 'px'
-            element.setAttribute('width', width)
-            element.setAttribute('height', height)
-          }
-
-          setTimeout(() => {
-            this.fabricCanvas.calcOffset()
-            this.fabricVideo.scaleToWidth(width)
-            this.fabricVideo.scaleToHeight(height)
-          }, 10)
-        }
-      }
-    },
-
     setDefaultComparisonTaskType () {
+      if (this.readOnly) return
       const taskTypeIds = Object.keys(this.entityPreviewFiles)
       if (taskTypeIds && taskTypeIds.length > 0) {
         const taskTypeOption = this.taskTypeOptions.find((option) => {
@@ -1049,12 +935,29 @@ export default {
       } else {
         this.previewToCompareId = null
       }
+    },
+
+    resetCanvas () {
+      if (!this.fabricCanvas) this.setupFabricCanvas()
+      this.resetCanvasSize()
+      this.fabricCanvas.renderAll()
+      this.clearCanvas()
+      const annotation = this.getAnnotation(this.currentTimeRaw)
+      if (annotation) this.loadAnnotation(annotation)
+    },
+
+    resetCanvasSize () {
+      const width = this.$refs['movie'].offsetWidth
+      const height = this.$refs['movie'].offsetHeight
+      this.fabricCanvas.setDimensions({ width, height })
     }
   },
 
   watch: {
     preview () {
       this.maxDuration = '00:00.00'
+      this.fabricCanvas.isDrawingMode = false
+      this.isDrawing = false
       this.reloadAnnotations()
       if (this.isComparing) {
         this.isComparing = false
@@ -1076,16 +979,16 @@ export default {
 
     taskTypeId () {
       this.setDefaultComparisonPreview()
+    },
+
+    light () {
+      this.onWindowResize()
     }
   }
 }
 </script>
 
 <style lang="scss" scoped>
-.video-wrapper {
-  width: 100%;
-}
-
 .loading-background {
   width: 100%;
   height: 100%;
@@ -1101,7 +1004,6 @@ export default {
 }
 
 .icon {
-  margin-top: -4px;
   height: 20px;
 }
 
@@ -1129,6 +1031,7 @@ export default {
   text-align: center;
   margin: auto;
   width: 100%;
+  position: relative;
 }
 
 .annotation-movie {
@@ -1142,9 +1045,11 @@ export default {
   margin-right: 0;
 }
 
-#annotation-canvas {
-  display: block;
-  width: 0;
+.canvas-wrapper {
+  margin: auto;
+  position: absolute;
+  left: 0;
+  z-index: 300;
 }
 
 .video-player {
@@ -1193,23 +1098,6 @@ progress {
   margin: 0;
   padding: 0;
   background-color: #43B581;
-}
-
-.video-annotation {
-  background: #26292F;
-  height: 12px;
-  text-align: left;
-  margin-top: 0px;
-  padding: 0;
-}
-
-.annotation-mark {
-  display: flex;
-  background: #ff3860;
-  width: 8px;
-  height: 8px;
-  display: inline-block;
-  top: -6px;
 }
 
 .buttons {

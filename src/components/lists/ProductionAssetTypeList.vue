@@ -5,6 +5,7 @@
       <thead>
         <tr>
           <th class="name">{{ $t('asset_types.fields.name') }}</th>
+          <th class="validation">{{ $t('main.all') }}</th>
           <th
             class="validation"
             :style="getValidationStyle(columnId)"
@@ -61,6 +62,34 @@
   >
     <table class="table">
       <tbody>
+
+        <tr
+          class="all-line"
+          v-if="showAll && !isEmptyList"
+        >
+          <td class="name">
+            {{ $t('asset_types.all_asset_types') }}
+          </td>
+
+          <stats-cell
+            :colors="chartColors('all', 'all')"
+            :data="chartData('all', 'all')"
+            :displayMode="displayMode"
+          />
+
+          <stats-cell
+            :style="getValidationStyle(columnId)"
+            :key="'all-' + columnId"
+            :colors="chartColors('all', columnId)"
+            :data="chartData('all', columnId)"
+            :displayMode="displayMode"
+            v-for="columnId in sortedValidationColumns"
+          />
+
+          <td class="actions">
+          </td>
+        </tr>
+
         <tr
           :key="entry.id"
           v-for="entry in entries"
@@ -70,20 +99,30 @@
             {{ entry.name }}
           </td>
 
+          <stats-cell
+            :colors="chartColors(entry.id, 'all')"
+            :data="chartData(entry.id, 'all')"
+            :displayMode="displayMode"
+            v-if="isStats(entry.id, 'all')"
+          />
           <td
-            class="validation"
-            :style="getValidationStyle(columnId)"
-            :key="columnId"
-            v-for="columnId in sortedValidationColumns"
+            v-else
           >
-            <pie-chart
-              width="70px"
-              height="50px"
-              :legend="false"
-              :colors="chartColors(entry, taskTypeMap[columnId])"
-              :data="chartData(entry, taskTypeMap[columnId])"
-              v-if="isStats(entry, taskTypeMap[columnId])"
-            />
+          </td>
+
+          <stats-cell
+            :key="entry.id + columnId"
+            :style="getValidationStyle(columnId)"
+            :colors="chartColors(entry.id, columnId)"
+            :data="chartData(entry.id, columnId)"
+            :displayMode="displayMode"
+            v-if="isStats(entry.id, columnId)"
+            v-for="columnId in sortedValidationColumns"
+          />
+          <td
+            :style="getValidationStyle(columnId)"
+            v-else
+          >
           </td>
 
           <td class="actions"></td>
@@ -104,24 +143,46 @@
 
 <script>
 import { mapGetters, mapActions } from 'vuex'
-
 import { entityListMixin } from './base'
-import RowActions from '../widgets/RowActions'
+import { getChartColors, getChartData } from '../../lib/stats'
 import ButtonLink from '../widgets/ButtonLink'
-import PageTitle from '../widgets/PageTitle'
+import StatsCell from '../cells/StatsCell'
 import TableInfo from '../widgets/TableInfo'
 
 export default {
   name: 'production-asset-type-list',
   mixins: [entityListMixin],
 
-  props: [
-    'entries',
-    'isLoading',
-    'isError',
-    'assetTypeStats',
-    'validationColumns'
-  ],
+  props: {
+    displayMode: {
+      type: String,
+      default: 'pie'
+    },
+    entries: {
+      type: Array,
+      default: () => []
+    },
+    isLoading: {
+      type: Boolean,
+      default: false
+    },
+    isError: {
+      type: Boolean,
+      default: false
+    },
+    assetTypeStats: {
+      type: Object,
+      default: () => {}
+    },
+    showAll: {
+      type: Boolean,
+      default: false
+    },
+    validationColumns: {
+      type: Array,
+      default: () => []
+    }
+  },
 
   data () {
     return {
@@ -132,8 +193,7 @@ export default {
 
   components: {
     ButtonLink,
-    PageTitle,
-    RowActions,
+    StatsCell,
     TableInfo
   },
 
@@ -177,30 +237,17 @@ export default {
     ...mapActions([
     ]),
 
-    chartColors (entry, column) {
-      const stats = this.assetTypeStats[entry.id][column.id]
-      const taskStatusIds = Object.keys(stats)
-      return taskStatusIds.map((key) => {
-        const data = this.assetTypeStats[entry.id][column.id][key]
-        let color = data.name === 'todo' ? '#5F626A' : data.color
-        return color
-      })
+    chartColors (entryId, columnId) {
+      return getChartColors(this.assetTypeStats, entryId, columnId)
     },
 
-    chartData (entry, column) {
-      return Object.keys(this.assetTypeStats[entry.id][column.id]).map(
-        (key) => {
-          return [
-            this.assetTypeStats[entry.id][column.id][key].name,
-            this.assetTypeStats[entry.id][column.id][key].value
-          ]
-        }
-      )
+    chartData (entryId, columnId) {
+      return getChartData(this.assetTypeStats, entryId, columnId)
     },
 
-    isStats (entry, column) {
-      return this.assetTypeStats[entry.id] &&
-             this.assetTypeStats[entry.id][column.id]
+    isStats (entryId, columnId) {
+      return this.assetTypeStats[entryId] &&
+             this.assetTypeStats[entryId][columnId]
     },
 
     onHeaderScroll (event, position) {
@@ -258,9 +305,9 @@ td.name {
 }
 
 .validation {
-  min-width: 100px;
-  max-width: 100px;
-  width: 100px;
+  min-width: 170px;
+  max-width: 170px;
+  width: 170px;
   word-wrap: break-word;
 }
 
@@ -270,5 +317,9 @@ td.name {
 
 th.actions {
   padding: 0.4em;
+}
+
+.info img {
+  max-width: 80vh;
 }
 </style>

@@ -60,19 +60,19 @@ describe('taskStatus', () => {
   beforeEach(() => {
     taskStatus = [
       {
-        id: 1,
+        id: 'task-status-1',
         name: 'Todo',
         color: '#FFFFFF',
         is_reviewable: false
       },
       {
-        id: 2,
+        id: 'task-status-2',
         name: 'Retake',
         color: '#000000',
         is_reviewable: false
       },
       {
-        id: 3,
+        id: 'task-status-3',
         name: 'Waiting For Approval',
         color: '#333333',
         is_reviewable: false
@@ -84,7 +84,29 @@ describe('taskStatus', () => {
     it('loadTaskStatus', (done) => {
       helpers.runAction('loadTaskStatus', (err) => {
         expect(err).to.be.null
-        expect(state.taskStatus).to.deep.equal(taskStatus)
+        expect(state.taskStatus).to.deep.equal([
+          {
+            id: 'task-status-2',
+            name: 'Retake',
+            short_name: 'rtk',
+            color: '#000000',
+            is_reviewable: false
+          },
+          {
+            id: 'task-status-1',
+            name: 'Todo',
+            short_name: 'todo',
+            color: '#FFFFFF',
+            is_reviewable: false
+          },
+          {
+            id: 'task-status-3',
+            name: 'Waiting For Approval',
+            short_name: 'wfa',
+            color: '#333333',
+            is_reviewable: false
+          }
+        ])
         done()
       })
     })
@@ -108,14 +130,14 @@ describe('taskStatus', () => {
       store.commit(LOAD_TASK_STATUSES_END, taskStatus)
       helpers.runAction('saveTaskStatus', {
         form: {
-          id: 2,
+          id: 'task-status-2',
           name: 'Modeling edited',
           color: '#AAAAAA'
         },
         callback: (err) => {
           expect(err).to.be.null
           expect(state.taskStatus.length).to.equal(3)
-          const taskStatusName = state.taskStatusMap[2].name
+          const taskStatusName = state.taskStatusMap['task-status-2'].name
           expect(taskStatusName).to.equal('Modeling edited')
           done()
         }
@@ -129,7 +151,7 @@ describe('taskStatus', () => {
         callback: (err) => {
           expect(err).to.be.null
           expect(state.taskStatus.length).to.equal(2)
-          expect(state.taskStatusMap[1]).to.be.undefined
+          expect(state.taskStatusMap['task-status-1']).to.be.undefined
           done()
         }
       })
@@ -171,19 +193,21 @@ describe('taskStatus', () => {
     it('EDIT_TASK_STATUS_END', () => {
       store.commit(LOAD_TASK_STATUSES_END, taskStatus)
       store.commit(EDIT_TASK_STATUS_END, {
-        id: 4,
+        id: 'task-status-4',
         name: 'New task status'
       })
       expect(state.taskStatus.length).to.equal(4)
-      expect(state.taskStatusMap[4].name).to.equal('New task status')
+      expect(state.taskStatusMap['task-status-4'].name)
+        .to.equal('New task status')
       store.commit(EDIT_TASK_STATUS_END, {
-        id: 2,
+        id: 'task-status-2',
         name: 'Retake edited'
       })
       expect(state.taskStatus.length).to.equal(4)
-      const taskStatusName = state.taskStatusMap[2].name
+      const taskStatusName = state.taskStatusMap['task-status-2'].name
       expect(taskStatusName).to.equal('Retake edited')
-      expect(state.taskStatusMap[2].name).to.equal('Retake edited')
+      expect(state.taskStatusMap['task-status-2'].name)
+        .to.equal('Retake edited')
       store.commit(DELETE_TASK_STATUS_END, taskStatus[2])
     })
 

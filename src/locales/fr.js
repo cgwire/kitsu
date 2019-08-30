@@ -1,14 +1,244 @@
 export default {
 
+  asset_types: {
+    all_asset_types: 'Tous les types d\'assets',
+    delete_error: 'Une erreur est survenue en supprimant un type d\'asset. Êtes vous sûr qu\'aucun asset est lié à ce type d\'asset?',
+    delete_text: 'Êtes vous sur de vouloir enlever {name} de la base de données ?',
+    edit_title: 'Modifier le type d\'asset',
+    new_asset_type: 'Ajouter un type d\'asset',
+    number: 'type d\'asset | types d\'assets',
+    production_title: 'Stats types d\'assets',
+    title: 'Types d\'assets',
+    fields: {
+      name: 'Nom'
+    }
+  },
+
+  assets: {
+    cast_in: 'Présent dans',
+    delete_text: 'Etes vous sûr de vouloir retirer {name} de la base de données ?',
+    delete_error: 'Une erreur est survenue en créant l\'asset, êtes vous sûr de vouloir que l\'asset n\'ait plus aucun lien ?',
+    edit_fail: 'La création ou l\'édition a échoué, une erreur est survenue.',
+    edit_title: 'Modifier asset',
+    edit_success: 'Asset {name} édité avec succès.',
+    empty_list: 'Il n\'y a pas d\'assets dans la production. Voulez vous en créer ?',
+    new_asset: 'Ajouter un asset',
+    new_assets: 'Ajouter des assets',
+    new_success: 'Asset {name} créé avec succès.',
+    no_cast_in: 'Cet asset n\'apparait dans aucun shot.',
+    number: 'asset | assets',
+    restore_text: 'Êtes vous sûr de vouloir restaurer {name} dans votre base de données ?',
+    restore_error: 'Une erreur est survenue en restaurant l\'asset.',
+    tasks: 'Tâches de fabrication',
+    title: 'Assets',
+    fields: {
+      description: 'Description',
+      episode: 'Ép.',
+      name: 'Nom',
+      production: 'Prod',
+      time_spent: 'Jours',
+      type: 'Type'
+    }
+  },
+
+  breakdown: {
+    all_assets: 'Tous les assets disponibles',
+    save_error: 'Une erreur est survenue en sauvegardant le casting.',
+    select_shot: 'Sélectionnez un shot à gauche pour gérer son casting',
+    selected_shot: 'Assets présents dans le casting de {sequence_name} / {name}',
+    title: 'Casting'
+  },
+
+  comments: {
+    add_checklist: 'Ajout checklist',
+    add_comment: 'Ajouter un commentaire...',
+    add_preview: 'Attacher un fichier',
+    edit_title: 'Modifier le commentaire',
+    empty_text: 'Ce commentaire est vide',
+    no_file_attached: 'Aucun fichier attaché',
+    pin: 'Épingler',
+    pinned: 'Épinglé',
+    post_status: 'Publier',
+    retake: 'Reprise',
+    revision: 'révision',
+    set_status_to: 'Positionner le statut à',
+    unpin: 'Désépingler',
+    validated: 'Validé !',
+    validation_required: 'Validation requise',
+    fields: {
+      text: 'Texte'
+    }
+  },
+
+  custom_actions: {
+    delete_text: 'Êtes-vous sûr de supprimer l\'action personnalisée {name} de la base de données?',
+    delete_error: 'Une erreur est survenue en supprimant l\'action personnalisée.',
+    edit_title: 'Modifier une action personnalisée',
+    new_custom_action: 'Ajouter une action personnalisée',
+    number: 'action pesonnalisée | actions personnalisées',
+    run_for_selection: 'Lancer une action personnalisée pour les tâche sélectionnées :',
+    title: 'Actions',
+    fields: {
+      name: 'Nom',
+      url: 'URL',
+      entity_type: 'Type d\'entité',
+      is_ajax: 'Utiliser AJAX'
+    },
+    entity_types: {
+      all: 'Tous',
+      shot: 'Plan',
+      asset: 'Asset'
+    }
+  },
+
+  episodes: {
+    all_episodes: 'Tous les épisodes',
+    edit_title: 'Éditer épisode',
+    delete_text: 'Etes vous sûr de vouloir retirer {name} de la base de données ?',
+    delete_error: 'Une erreur est survenue en créant le plan, êtes vous sûr que la séquence n\'a plus aucun lien ?',
+    empty_list: 'Il n\'y a pas d\'épisodes dans la production. Voulez vous en créer ?',
+    new_episode: 'Nouvel épisode',
+    number: 'épisode | épisodes',
+    title: 'Stats épisodes',
+    fields: {
+      name: 'Nom',
+      description: 'Description'
+    }
+  },
+
+  login: {
+    login: 'Se connecter',
+    login_failed: 'La connexion a échoué, vérifiez vos identifiants',
+    title: 'Se connecter à Kitsu',
+    fields: {
+      email: 'Adresse Mail',
+      password: 'Mot de passe'
+    }
+  },
+
+  main: {
+    about: 'À propos',
+    add: 'Ajouter',
+    all: 'Tous',
+    admin: 'Admin',
+    back_to_list: 'retour à la liste',
+    cancel: 'Annuler',
+    confirmation: 'Confirmer',
+    confirmation_and_stay: 'Confirmer et rester',
+    clear_selection: 'Effacer la sélection',
+    close: 'Fermer',
+    days_spent: 'Jours passés',
+    edit: 'Modifier',
+    dark_theme: 'Thème sombre',
+    days_spents: 'Jours passés',
+    delete: 'Supprimer',
+    delete_all: 'Supprimer tout',
+    documentation: 'Documentation',
+    delete_text: 'Etes vous sûr de vouloir supprimer {name} de la base de données ?',
+    empty_comment: 'Commentaire vide',
+    go_productions: 'Aller aux productions',
+    history: 'Historique',
+    info: 'Information',
+    loading_data: 'Chargement des données',
+    loading_error: 'Une erreur est survenue en chargeant les données.',
+    logout: 'Se déconnecter',
+    maximize: 'Maximiser',
+    minimize: 'Minimiser',
+    nb_frames: 'Nb de frames',
+    no: 'non',
+    or: 'ou',
+    production: 'Production',
+    profile: 'Profil',
+    remove: 'Enlever',
+    studio: 'Studio',
+    user: 'Utilisateur',
+    save: 'Enregistrer',
+    sorted_by: 'Tâches triées par',
+    white_theme: 'Thème blanc',
+    yes: 'oui',
+    csv: {
+      import_file: 'Importer',
+      export_file: 'Exporter',
+      import_title: 'Importer depuis un .csv',
+      required_fields: 'Le fichier CSV à importer doit comporter les colonnes suivantes :',
+      select_file: 'Sélectionner un fichier depuis votre dossier :',
+      error_upload: 'Une erreur est survenue en téleversant votre fichier .csv.'
+    }
+  },
+
+  menu: {
+    assign_tasks: 'Assigner des tâches',
+    create_tasks: 'Créer des tâches',
+    change_status: 'Changer le statut',
+    change_priority: 'Change priority',
+    delete_tasks: 'Supprimer des tâches',
+    run_custom_action: 'Lancer des actions',
+    set_estimations: 'Définir estimations'
+  },
+
+  notifications: {
+    and_change_status: 'et changé le statut à',
+    assigned_you: 'vous a assigné à',
+    commented_on: 'a commenté',
+    mention_you_on: 'vous a mentionné sur',
+    no_notifications: 'Il n\'y a pas encore de notifications pour vous pour les projets en cours',
+    title: 'Notifications',
+    with_preview: 'avec une version'
+  },
+
+  news: {
+    all: 'Tous',
+    commented_on: 'a commenté sur',
+    infos: 'Infos',
+    no_news: 'Il n\'y a pas de nouveautés pour cette production ou ce filtre',
+    only_comments: 'Seulement les commentaires',
+    only_previews: 'Seulement les previews',
+    set_preview_on: 'a mis un preview sur',
+    task_status: 'Statut de tâche',
+    task_type: 'Type de tâche',
+    title: 'Flux de nouveautés '
+  },
+
+  playlists: {
+    add_shots: 'Sélectonner les plans',
+    add_sequence: 'Ajouter séquence',
+    available_build: 'Builds disponibles',
+    build_daily: 'Valid. quotidienne',
+    build_weekly: 'Valid. hebodomadaire',
+    build_mp4: 'Construire .mp4',
+    delete_text: 'Êtes vous sûr de vouloir supprimer {name} de la base de données ?',
+    delete_error: 'Une erreur est survenue en supprimant la playlist.',
+    download_zip: 'Télécharger en .zip',
+    edit_title: 'Modifier la playlist',
+    no_preview: 'Aucun preview',
+    remove: 'enlever',
+    loading_error: 'Une erreur serveur est apparue, les playlists ne peuvent pas être chargées.',
+    new_playlist: 'Ajouter une playlist',
+    no_build: 'Pas de build',
+    no_playlist: 'Il n\'y a pas de playlist pour ce projet.',
+    no_selection: 'Séléctionnez une playlist sur la gauche.',
+    no_sequence_for_episode: 'Il n\'y a pas de séquence pour cette épisode',
+    no_shot_for_production: 'Il n\'y pas de plan pour cette production',
+    select_shot: 'Sélectionnez un plan dans la colonne de droite',
+    select_playlist: 'Sélectionnez une playlist dans la colonne de gauche',
+    title: 'Playlists',
+    fields: {
+      name: 'Nom'
+    }
+  },
+
   people: {
     active: 'Présents',
     add_member_to_team: 'Ajouter un membre à l\'équipe: ',
+    create_invite: 'Créer et envoyer une invitation',
     delete_text: 'Êtes vous sûr de vouloir retirer {personName} de la base de données?',
     delete_error: 'Une erreur est survenue lors de la suppression. Il y a probablement des données liées à elle. Etes vous sur que cette personne n\'a aucune tâche assignée et n\'a fait aucun commentaire ?',
     edit_title: 'Modifier les informations de',
     empty_team: 'Personne n\'a été affecté à cette production.',
+    episodes: 'Épisodes',
     no_task_assigned: 'Il n\'y a aucune tâche assignée.',
     new_person: 'Ajouter un employé',
+    padding: 'Ecart',
     persons: 'Personnes',
     picture: 'Changer l\'image',
     running_tasks: 'Tâches en cours',
@@ -46,93 +276,6 @@ export default {
       manager: 'Superviseur',
       user: 'Graphiste',
       client: 'Client'
-    }
-  },
-
-  profile: {
-    title: 'Votre Profil',
-    info_title: 'Informations',
-    password_title: 'Changement de mot de passe',
-    timezone: 'Fuseau horaire',
-    language: 'Langue',
-    change_avatar: 'Changer Avatar',
-    save: {
-      button: 'Sauvegardez vos changements',
-      error: 'Une erreur est survenue pendant la sauvegarde de vos changememts.'
-    },
-    avatar: {
-      title: 'Changer votre avatar'
-    },
-    change_password: {
-      button: 'Changez de mot de passe',
-      success: 'Votre mot de passe a été changé avec succès !',
-      unvalid: 'Les nouveaux mots de passe sont différents ou votre mot de passe est trop court (7 caractères minimum).',
-      error: 'Une erreur s\'est produite lors du changement de mot de passe. Veuillez vérifier votre mot de pass actuel.'
-    }
-  },
-
-  main: {
-    add: 'Ajouter',
-    all: 'Tous',
-    admin: 'Admin',
-    back_to_list: 'retour à la liste',
-    cancel: 'Annuler',
-    confirmation: 'Confirmer',
-    confirmation_and_stay: 'Confirmer et rester',
-    clear_selection: 'Effacer la sélection',
-    close: 'Fermer',
-    edit: 'Modifier',
-    dark_theme: 'Thème sombre',
-    delete: 'Supprimer',
-    delete_all: 'Supprimer tout',
-    documentation: 'Documentation',
-    delete_text: 'Etes vous sûr de vouloir supprimer {name} de la base de données ?',
-    empty_comment: 'Commentaire vide',
-    history: 'Historique',
-    info: 'Information',
-    loading_data: 'Chargement des données',
-    loading_error: 'Une erreur est survenue en chargeant les données.',
-    logout: 'Se déconnecter',
-    maximize: 'Maximiser',
-    minimize: 'Minimiser',
-    no: 'non',
-    or: 'ou',
-    production: 'Production',
-    profile: 'Profil',
-    remove: 'Enlever',
-    studio: 'Studio',
-    user: 'Utilisateur',
-    save: 'Enregistrer',
-    sorted_by: 'Tâches triées par :',
-    white_theme: 'Thème blanc',
-    yes: 'oui',
-    csv: {
-      import_file: 'Importer',
-      export_file: 'Exporter',
-      import_title: 'Importer depuis un .csv',
-      required_fields: 'Le fichier CSV à importer doit comporter les colonnes suivantes :',
-      select_file: 'Sélectionner un fichier depuis votre dossier :',
-      error_upload: 'Une erreur est survenue en téleversant votre fichier .csv.'
-    }
-  },
-
-  menu: {
-    assign_tasks: 'Assigner des tâches',
-    create_tasks: 'Créer des tâches',
-    change_status: 'Changer le statut',
-    change_priority: 'Change priority',
-    delete_tasks: 'Supprimer des tâches',
-    run_custom_action: 'Lancer des actions',
-    set_estimations: 'Définir estimations'
-  },
-
-  login: {
-    title: 'Se connecter à Kitsu',
-    login: 'Se connecter',
-    login_failed: 'La connexion a échoué, vérifiez vos identifiants',
-    fields: {
-      email: 'Adresse Mail',
-      password: 'Mot de passe'
     }
   },
 
@@ -184,19 +327,157 @@ export default {
     }
   },
 
-  comments: {
-    add_comment: 'Ajouter un commentaire...',
-    add_preview: 'Attacher un fichier',
-    edit_title: 'Modifier le commentaire',
-    empty_text: 'Ce commentaire est vide',
-    no_file_attached: 'Aucun fichier attaché',
-    post_status: 'Publier',
-    retake: 'Reprise',
-    set_status_to: 'Positionner le statut à',
-    validated: 'Validé !',
-    validation_required: 'Validation requise',
+  profile: {
+    change_avatar: 'Changer Avatar',
+    info_title: 'Informations',
+    language: 'Langue',
+    notifications_enabled: 'Notifications mail activées',
+    notifications_slack_enabled: 'Notifications Slack activées',
+    notifications_slack_user: 'Nom d\'utilisateur Slack',
+    password_title: 'Changement de mot de passe',
+    timezone: 'Fuseau horaire',
+    title: 'Votre Profil',
+    avatar: {
+      title: 'Changer votre avatar',
+      error_upload: 'Une erreur est survenue en envoyant l\'image.'
+    },
+    change_password: {
+      button: 'Changez de mot de passe',
+      success: 'Votre mot de passe a été changé avec succès !',
+      unvalid: 'Les nouveaux mots de passe sont différents ou votre mot de passe est trop court (7 caractères minimum).',
+      error: 'Une erreur s\'est produite lors du changement de mot de passe. Veuillez vérifier votre mot de pass actuel.'
+    },
+    save: {
+      button: 'Sauvegardez vos changements',
+      error: 'Une erreur est survenue pendant la sauvegarde de vos changememts.'
+    }
+  },
+
+  sequences: {
+    all_sequences: 'Toutes les séquences',
+    title: 'Stats séquences',
+    number: 'séquence | séquences',
+    new_sequence: 'Nouvelle séquence',
+    edit_title: 'Éditer séquence',
+    delete_text: 'Etes vous sûr de vouloir retirer {name} de la base de données ?',
+    delete_error: 'Une erreur est survenue en créant le plan, êtes vous sûr que la séquence n\'a plus aucun lien ?',
+    empty_list: 'Il n\'y a pas de séquence dans la production. Voulez vous en créer ?',
     fields: {
-      text: 'Texte'
+      name: 'Nom',
+      description: 'Description'
+    }
+  },
+
+  settings: {
+    change_logo: 'Changer logo',
+    integrations: 'Intégrations',
+    logo: 'Logo du studio',
+    no_logo: 'Aucun logo n\' a été positionné.',
+    set_logo: 'Changer le logo',
+    title: 'Paramètres',
+    fields: {
+      name: 'Nom du studio',
+      slack_token: 'Token Slack (optionnel)',
+      hours_by_day: 'Heures par jour',
+      use_original_name: 'Utiliser les noms de fichiers originaux pour le téléchargement'
+    },
+    save: {
+      button: 'Sauvegarder les paramètres',
+      error: 'Une erreur serveur est survenue en sauvegardant les paramètres'
+    }
+  },
+
+  server_down: {
+    text: 'Contactez votre fournisseur, votre administrateur système ou votre département informatique pour comprendre ce qui ne va pas.',
+    title: 'Kitsu a rencontré une erreur en communiquant avec son API de données.'
+  },
+
+  schedule: {
+    md: 'jh',
+    overall_man_days: 'Jours Homme',
+    title: 'Planning',
+    zoom_level: 'Niveau de zoom'
+  },
+
+  shots: {
+    casting: 'Casting',
+    creation_explaination: 'Pour ajouter des shot, you devez d\'abord créer un épisode. Taper le nom de l\'épisode dans la colonne de gauche en bas. Séléctionnez cette épisode et répétez l\'opération pour créer une séquence. Enfin créez un shot en sélectionnant la séquence créée, en tapant son nom en bas de la colonne de droite. Cliquez sur le bouton add pour ajouter le shot. Vous pouvez maintenant créer de nombreux shots. Si cette production n\'est pas une série, vous pouvez directement créer une séquence).',
+    delete_text: 'Etes vous sûr de vouloir retirer {name} de la base de données ?',
+    delete_error: 'Une erreur est survenue en créant le plan, êtes vous sûr que le plan n\'a plus aucun lien ?',
+    description: 'Description',
+    edit_fail: 'La création ou l\'édition a échoué, une erreur est survenue. Assurez-vous qu\'il n\'y pas déjà un shot portant le nom que vous donnez pour la séqence choisie.',
+    episodes: 'Épisodes',
+    edit_title: 'Modifier plan',
+    edit_success: 'Plan {name} édité avec succès.',
+    empty_list: 'Il n\'y a pas de plans dans la production. Voulez vous en créer ?',
+    no_casting: 'Le casting du plan est vide.',
+    number: 'plan | plans',
+    new_episodes: 'Ajouter des épisodes',
+    new_sequences: 'Ajouter des séquences',
+    new_shot: 'Ajouter un plan',
+    new_shots: 'Ajouter des plans',
+    new_success: 'Plan {name} créé avec succès.',
+    manage: 'Créer des plans',
+    restore_error: 'Une erreur est survenue en restorant le plan.',
+    restore_text: 'Etes vous sûr de vouloir restorer {name} dans la base de données ?',
+    sequence: 'Séquence',
+    sequences: 'Séquences',
+    tasks: 'Tâches de fabrication',
+    padding: 'Distance',
+    title: 'Plans',
+    fields: {
+      name: 'Plan',
+      episode: 'Épisode',
+      sequence: 'Séquence',
+      frame_in: 'In',
+      frame_out: 'Out',
+      fps: 'FPS',
+      nb_frames: 'Frames',
+      description: 'Description',
+      production: 'Prod'
+    }
+  },
+
+  statistics: {
+    count: 'Comptages',
+    count_mode: 'Mode de comptage',
+    display_mode: ' Mode d\'affichage',
+    frames: 'Frames',
+    pie: 'Graphiques',
+    shots: 'Plans'
+  },
+
+  task_status: {
+    delete_text: 'Êtes vous sur de vouloir retirer {name} de la base de données ?',
+    delete_error: 'Une erreur est survenue lors de la suppression du statut de tâche. Êtes vous sûr qu\'aucune tâche n\'est lié à ce statut de tâche ?',
+    edit_title: 'Modifier statut',
+    number: 'statut | statuts de tâche',
+    new_task_status: 'Ajouter un statut de tâche',
+    title: 'Statuts de tâche',
+    fields: {
+      name: 'Nom',
+      short_name: 'Nom court',
+      color: 'Couleur',
+      is_retake: 'A valeur de retake',
+      is_reviewable: 'Est vérifiable',
+      is_done: 'Est terminé',
+      is_artist_allowed: 'Autorisé aux artistes'
+    }
+  },
+
+  task_types: {
+    delete_text: 'Êtes vous sur de vouloir retirer {name} de la base de données ?',
+    delete_error: 'Une erreur est survenue lors de la suppression du type de tâche. Êtes vous sûr qu\'aucune tâche n\'est lié à ce type de tâche ?',
+    edit_title: 'Modifier le type de tâches',
+    number: 'type de tâche | types de tâches',
+    new_task_type: 'Ajouter un type de tâche',
+    title: 'Types de tâches',
+    fields: {
+      allow_timelog: 'Temps passé',
+      name: 'Nom',
+      color: 'Couleur',
+      priority: 'Priorité',
+      dedicated_to: 'Pour'
     }
   },
 
@@ -205,6 +486,7 @@ export default {
     add_preview_error: 'Une erreur est survenue en ajoutant la preview.',
     assign: 'Assigner une tâche à : | Assigner {nbSelectedTasks} tâches à :',
     back_to_list: 'Retour à la liste',
+    bigger: 'Élargir le panneau de tâche',
     change_status_to: 'Changer le statut de la tâche à : ',
     change_priority: 'Changer le priorité de la tâche à : ',
     change_preview: 'Modifier preview',
@@ -234,6 +516,7 @@ export default {
     hide_infos: 'Cacher informations additionnelles',
     my_tasks: 'Mes tâches',
     no_preview: 'Il n\'y a pas de préviz pour cette tâche.',
+    no_task_selected: 'Pas de tâche sélectionnée',
     no_comment: 'Il n\'y a pas de commentaires pour cette tâche.',
     no_assignation_right: 'vous n\'êtes pas autorisé à gérer les assigations.',
     next: 'Suivante',
@@ -249,6 +532,7 @@ export default {
     show_infos: 'Montrer informations additionnelles',
     unsubscribe_notifications: 'Se désabonner des notifications',
     tasks: 'Tâches',
+    with_comment: 'Avec un commentaire...',
     validation: 'Validation',
     fields: {
       asset_type: 'Type d\'asset',
@@ -279,210 +563,13 @@ export default {
   },
 
   timesheets: {
+    detail_level: 'Niveau de détail',
+    done_tasks: 'Tâches terminées',
+    export_timesheet: 'Exporter la feuille de temps',
+    month: 'Mois',
+    hours: 'heures',
     title: 'Feuille de temps',
     time_spents: 'Temps passé (heures)',
-    hours: 'heures',
-    done_tasks: 'Tâches terminées',
-    detail_level: 'Niveau de détail',
-    year: 'Année',
-    month: 'Mois'
-  },
-
-  task_types: {
-    title: 'Types de tâches',
-    edit_title: 'Modifier le type de tâches',
-    number: 'type de tâche | types de tâches',
-    new_task_type: 'Ajouter un type de tâche',
-    fields: {
-      allow_timelog: 'Temps passé',
-      name: 'Nom',
-      color: 'Couleur',
-      priority: 'Priorité',
-      dedicated_to: 'Pour'
-    },
-    delete_text: 'Êtes vous sur de vouloir retirer {name} de la base de données ?',
-    delete_error: 'Une erreur est survenue lors de la suppression du type de tâche. Êtes vous sûr qu\'aucune tâche n\'est lié à ce type de tâche ?'
-  },
-
-  task_status: {
-    title: 'Statuts de tâche',
-    edit_title: 'Modifier statut',
-    number: 'statut | statuts de tâche',
-    new_task_status: 'Ajouter un statut de tâche',
-    fields: {
-      name: 'Nom',
-      short_name: 'Nom court',
-      color: 'Couleur',
-      is_retake: 'A valeur de retake',
-      is_reviewable: 'Est vérifiable',
-      is_done: 'Est terminé',
-      is_artist_allowed: 'Autorisé aux artistes'
-    },
-    delete_text: 'Êtes vous sur de vouloir retirer {name} de la base de données ?',
-    delete_error: 'Une erreur est survenue lors de la suppression du statut de tâche. Êtes vous sûr qu\'aucune tâche n\'est lié à ce statut de tâche ?'
-  },
-
-  custom_actions: {
-    title: 'Actions',
-    new_custom_action: 'Ajouter une action personnalisée',
-    edit_title: 'Modifier une action personnalisée',
-    number: 'action pesonnalisée | actions personnalisées',
-    run_for_selection: 'Lancer une action personnalisée pour les tâche sélectionnées :',
-    delete_text: 'Êtes-vous sûr de supprimer l\'action personnalisée {name} de la base de données?',
-    delete_error: 'Une erreur est survenue en supprimant l\'action personnalisée.',
-    fields: {
-      name: 'Nom',
-      url: 'URL',
-      entity_type: 'Type d\'entité'
-    },
-    entity_types: {
-      all: 'Tous',
-      shot: 'Plan',
-      asset: 'Asset'
-    }
-  },
-
-  asset_types: {
-    delete_error: 'Une erreur est survenue en supprimant un type d\'asset. Êtes vous sûr qu\'aucun asset est lié à ce type d\'asset?',
-    delete_text: 'Êtes vous sur de vouloir enlever {name} de la base de données ?',
-    edit_title: 'Modifier le type d\'asset',
-    new_asset_type: 'Ajouter un type d\'asset',
-    number: 'type d\'asset | types d\'assets',
-    production_title: 'Stats types d\'assets',
-    title: 'Types d\'assets',
-    fields: {
-      name: 'Nom'
-    }
-  },
-
-  assets: {
-    title: 'Assets',
-    edit_title: 'Modifier asset',
-    number: 'asset | assets',
-    new_asset: 'Ajouter un asset',
-    new_assets: 'Ajouter des assets',
-    edit_success: 'Asset {name} édité avec succès.',
-    edit_fail: 'La création ou l\'édition a échoué, une erreur est survenue.',
-    new_success: 'Asset {name} créé avec succès.',
-    empty_list: 'Il n\'y a pas d\'assets dans la production. Voulez vous en créer ?',
-    fields: {
-      description: 'Description',
-      episode: 'Ép.',
-      name: 'Nom',
-      production: 'Prod',
-      type: 'Type'
-    },
-    delete_text: 'Etes vous sûr de vouloir retirer {name} de la base de données ?',
-    delete_error: 'Une erreur est survenue en créant l\'asset, êtes vous sûr de vouloir que l\'asset n\'ait plus aucun lien ?',
-    restore_text: 'Êtes vous sûr de vouloir restaurer {name} dans votre base de données ?',
-    restore_error: 'Une erreur est survenue en restaurant l\'asset.',
-    tasks: 'Tâches de fabrication',
-    cast_in: 'Présent dans',
-    no_cast_in: 'Cet asset n\'apparait dans aucun shot.'
-  },
-
-  shots: {
-    title: 'Plans',
-    edit_title: 'Modifier plan',
-    number: 'plan | plans',
-    new_shot: 'Ajouter un plan',
-    new_shots: 'Ajouter des plans',
-    new_sequences: 'Ajouter des séquences',
-    new_episodes: 'Ajouter des épisodes',
-    manage: 'Créer des plans',
-    edit_fail: 'La création ou l\'édition a échoué, une erreur est survenue. Assurez-vous qu\'il n\'y pas déjà un shot portant le nom que vous donnez pour la séqence choisie.',
-    new_success: 'Plan {name} créé avec succès.',
-    edit_success: 'Plan {name} édité avec succès.',
-    description: 'Description',
-    empty_list: 'Il n\'y a pas de plans dans la production. Voulez vous en créer ?',
-    fields: {
-      name: 'Plan',
-      episode: 'Épisode',
-      sequence: 'Séquence',
-      frame_in: 'In',
-      frame_out: 'Out',
-      fps: 'FPS',
-      description: 'Description',
-      production: 'Prod'
-    },
-    delete_text: 'Etes vous sûr de vouloir retirer {name} de la base de données ?',
-    delete_error: 'Une erreur est survenue en créant le plan, êtes vous sûr que le plan n\'a plus aucun lien ?',
-    restore_text: 'Etes vous sûr de vouloir restorer {name} dans la base de données ?',
-    restore_error: 'Une erreur est survenue en restorant le plan.',
-    tasks: 'Tâches de fabrication',
-    casting: 'Casting',
-    no_casting: 'Le casting du plan est vide.'
-  },
-
-  sequences: {
-    title: 'Stats séquence',
-    number: 'séquence | séquences',
-    new_sequence: 'Nouvelle séquence',
-    edit_title: 'Éditer séquence',
-    delete_text: 'Etes vous sûr de vouloir retirer {name} de la base de données ?',
-    delete_error: 'Une erreur est survenue en créant le plan, êtes vous sûr que la séquence n\'a plus aucun lien ?',
-    empty_list: 'Il n\'y a pas de séquence dans la production. Voulez vous en créer ?',
-    fields: {
-      name: 'Nom',
-      description: 'Description'
-    }
-  },
-
-  episodes: {
-    title: 'Stats épisodes',
-    number: 'épisode | épisodes',
-    new_episode: 'Nouvel épisode',
-    edit_title: 'Éditer épisode',
-    delete_text: 'Etes vous sûr de vouloir retirer {name} de la base de données ?',
-    delete_error: 'Une erreur est survenue en créant le plan, êtes vous sûr que la séquence n\'a plus aucun lien ?',
-    empty_list: 'Il n\'y a pas d\'épisodes dans la production. Voulez vous en créer ?',
-    fields: {
-      name: 'Nom',
-      description: 'Description'
-    }
-  },
-
-  breakdown: {
-    title: 'Casting',
-    select_shot: 'Sélectionnez un shot à gauche pour gérer son casting',
-    selected_shot: 'Assets présents dans le casting de {sequence_name} / {name}',
-    all_assets: 'Tous les assets disponibles',
-    save_error: 'Une erreur est survenue en sauvegardant le casting.'
-  },
-
-  playlists: {
-    add_shots: 'Selectonner les plans',
-    title: 'Playlists',
-    new_playlist: 'Ajouter une playlist',
-    loading_error: 'Une erreur serveur est apparue, les playlists ne peuvent pas être chargées.',
-    no_selection: 'Séléctionnez une playlist sur la gauche.',
-    delete_text: 'Êtes vous sûr de vouloir supprimer {name} de la base de données ?',
-    delete_error: 'Une erreur est survenue en supprimant la playlist.',
-    edit_title: 'Modifier la playlist',
-    no_playlist: 'Il n\'y a pas de playlist pour ce projet.',
-    no_sequence_for_episode: 'Il n\'y a pas de séquence pour cette épisode',
-    no_shot_for_production: 'Il n\'y pas de plan pour cette production',
-    select_shot: 'Sélectionnez un plan dans la colonne de droite',
-    select_playlist: 'Sélectionnez une playlist dans la colonne de gauche',
-    remove: 'enlever',
-    fields: {
-      name: 'Nom'
-    }
-  },
-
-  notifications: {
-    and_change_status: 'et changé le statut à',
-    assigned_you: 'vous a assigné à',
-    commented_on: 'a commenté',
-    mention_you_on: 'vous a mentionné sur',
-    no_notifications: 'Il n\'y a pas encore de notifications pour vous pour les projets en cours',
-    title: 'Notifications',
-    with_preview: 'avec une version'
-  },
-
-  server_down: {
-    title: 'Kitsu a rencontré une erreur en communiquant avec son API de données.',
-    text: 'Contactez votre fournisseur, votre administrateur système ou votre département informatique pour comprendre ce qui ne va pas.'
+    year: 'Année'
   }
-
 }

@@ -10,8 +10,9 @@
           <th class="description">
             {{ $t('shots.fields.description') }}
           </th>
+          <th class="validation">{{ $t('main.all') }}</th>
           <th
-            class="validation"
+            class="validation validation-cell"
             :style="getValidationStyle(columnId)"
             :key="taskTypeMap[columnId].id"
             v-for="columnId in sortedValidationColumns">
@@ -38,14 +39,6 @@
       <img src="../../assets/illustrations/empty_shot.png" />
     </p>
     <p class="info">{{ $t('episodes.empty_list') }}</p>
-    <button-link
-      class="level-item big-button"
-      :text="$t('shots.new_episodes')"
-      :path="{
-        name: 'manage-shots',
-        params: {production_id: currentProduction.id}
-      }"
-    />
   </div>
   <div class="has-text-centered" v-if="isEmptyList && isCurrentUserClient">
     <p class="info">
@@ -61,6 +54,39 @@
   >
     <table class="table">
       <tbody ref="body-tbody">
+
+        <tr
+          class="all-line"
+          v-if="showAll && !isEmptyList"
+        >
+          <td class="name">
+            {{ $t('episodes.all_episodes') }}
+          </td>
+
+          <td class="description"></td>
+
+          <stats-cell
+            :colors="chartColors('all', 'all')"
+            :data="chartData('all', 'all')"
+            :frames-data="chartData('all', 'all', 'frames')"
+            :countMode="countMode"
+            :displayMode="displayMode"
+          />
+
+          <stats-cell
+            :style="getValidationStyle(columnId)"
+            :key="'all-' + columnId"
+            :colors="chartColors('all', columnId)"
+            :data="chartData('all', columnId)"
+            :frames-data="chartData('all', columnId, 'frames')"
+            :countMode="countMode"
+            :displayMode="displayMode"
+            v-for="columnId in sortedValidationColumns"
+          />
+
+          <td class="actions"></td>
+        </tr>
+
         <tr
           :key="entry.id"
           v-for="entry in entries"
@@ -74,19 +100,34 @@
             {{ entry.description }}
           </td>
 
+          <stats-cell
+            :colors="chartColors(entry.id, 'all')"
+            :data="chartData(entry.id, 'all')"
+            :frames-data="chartData(entry.id, 'all', 'frames')"
+            :countMode="countMode"
+            :displayMode="displayMode"
+            v-if="isStats(entry.id, 'all')"
+          />
           <td
-            class="validation"
+            v-else
+          >
+          </td>
+
+          <stats-cell
+            :key="entry.id + columnId"
             :style="getValidationStyle(columnId)"
-            :key="columnId"
-            v-for="columnId in sortedValidationColumns">
-            <pie-chart
-              width="70px"
-              height="50px"
-              :legend="false"
-              :colors="chartColors(entry, taskTypeMap[columnId])"
-              :data="chartData(entry, taskTypeMap[columnId])"
-              v-if="isStats(entry, taskTypeMap[columnId])"
-            />
+            :colors="chartColors(entry.id, columnId)"
+            :data="chartData(entry.id, columnId)"
+            :frames-data="chartData(entry.id, columnId, 'frames')"
+            :countMode="countMode"
+            :displayMode="displayMode"
+            v-for="columnId in sortedValidationColumns"
+            v-if="isStats(entry.id, columnId)"
+          />
+          <td
+            :style="getValidationStyle(columnId)"
+            v-else
+          >
           </td>
 
           <row-actions v-if="isCurrentUserManager"
@@ -106,7 +147,6 @@
               }
             }"
           />
-
           <td class="actions" v-else>
           </td>
         </tr>
@@ -124,35 +164,61 @@
 <script>
 import { mapGetters, mapActions } from 'vuex'
 import { entityListMixin } from './base'
+import { getChartColors, getChartData } from '../../lib/stats'
 import RowActions from '../widgets/RowActions'
-import ButtonLink from '../widgets/ButtonLink'
-import PageTitle from '../widgets/PageTitle'
+import StatsCell from '../cells/StatsCell'
 import TableInfo from '../widgets/TableInfo'
 
 export default {
   name: 'episode-list',
   mixins: [entityListMixin],
 
-  props: [
-    'entries',
-    'isLoading',
-    'isError',
-    'episodeStats',
-    'validationColumns'
-  ],
+  components: {
+    RowActions,
+    StatsCell,
+    TableInfo
+  },
+
+  props: {
+    countMode: {
+      type: String,
+      default: 'count'
+    },
+    displayMode: {
+      type: String,
+      default: 'pie'
+    },
+    entries: {
+      type: Array,
+      default: () => []
+    },
+    isLoading: {
+      type: Boolean,
+      default: false
+    },
+    isError: {
+      type: Boolean,
+      default: false
+    },
+    episodeStats: {
+      type: Object,
+      default: () => {}
+    },
+    showAll: {
+      type: Boolean,
+      default: false
+    },
+    validationColumns: {
+      type: Array,
+      default: () => []
+    }
+  },
 
   data () {
     return {
       busy: false,
       lastSelection: null
     }
-  },
-
-  components: {
-    ButtonLink,
-    PageTitle,
-    RowActions,
-    TableInfo
   },
 
   computed: {
@@ -181,28 +247,17 @@ export default {
       'loadMoreEpisodes'
     ]),
 
-    chartColors (entry, column) {
-      const stats = this.episodeStats[entry.id][column.id]
-      const taskStatusIds = Object.keys(stats)
-      return taskStatusIds.map((key) => {
-        const data = this.episodeStats[entry.id][column.id][key]
-        let color = data.name === 'todo' ? '#5F626A' : data.color
-        return color
-      })
+    chartColors (entryId, columnId) {
+      return getChartColors(this.episodeStats, entryId, columnId)
     },
 
-    chartData (entry, column) {
-      return Object.keys(this.episodeStats[entry.id][column.id]).map((key) => {
-        return [
-          this.episodeStats[entry.id][column.id][key].name,
-          this.episodeStats[entry.id][column.id][key].value
-        ]
-      })
+    chartData (entryId, columnId, dataType = 'count') {
+      return getChartData(this.episodeStats, entryId, columnId, dataType)
     },
 
-    isStats (entry, column) {
-      return this.episodeStats[entry.id] &&
-             this.episodeStats[entry.id][column.id]
+    isStats (entryId, columnId) {
+      return this.episodeStats[entryId] &&
+             this.episodeStats[entryId][columnId]
     },
 
     onHeaderScroll (event, position) {
@@ -250,7 +305,7 @@ export default {
         params: {
           production_id: this.currentProduction.id,
           task_type_id: taskTypeId,
-          type: 'shots'
+          type: 'count'
         }
       }
 
@@ -299,9 +354,9 @@ td.name {
 }
 
 .validation {
-  min-width: 110px;
-  max-width: 110px;
-  width: 110px;
+  min-width: 170px;
+  max-width: 170px;
+  width: 170px;
   word-wrap: break-word;
 }
 
@@ -311,5 +366,9 @@ td.name {
 
 th.actions {
   padding: 0.4em;
+}
+
+.info img {
+  max-width: 80vh;
 }
 </style>

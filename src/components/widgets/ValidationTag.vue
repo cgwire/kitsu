@@ -1,62 +1,85 @@
 <template>
 <span>
-<span v-if="!minimized">
-  <router-link
-    :to="taskPath(task)"
-    class="tag dynamic"
-    v-if="!isStatic && !isCurrentUserClient"
-    :style="{
-      background: backgroundColor,
-      color: color
-  }">
-    {{ taskStatus.short_name }}
-  </router-link>
+  <span v-if="!minimized">
+    <router-link
+      :to="taskPath(task)"
+      class="tag dynamic"
+      v-if="!isStatic && !isCurrentUserClient"
+      :style="{
+        background: backgroundColor,
+        color: color
+    }">
+      {{ taskStatus.short_name }}
+    </router-link>
 
-  <span
-    class="tag"
-    :style="{
-      background: backgroundColor,
-      color: color,
-      cursor: cursor
-    }"
-    v-else
-  >
-    {{ taskStatus.short_name }}
+    <span
+      class="tag"
+      :style="{
+        background: backgroundColor,
+        color: color,
+        cursor: cursor
+      }"
+      v-else
+    >
+      {{ taskStatus.short_name }}
+    </span>
+    <span class="priority" v-if="isPriority && !isCurrentUserClient">
+      {{ priority }}
+    </span>
   </span>
-  <span class="priority" v-if="isPriority && !isCurrentUserClient">
-    {{ priority }}
-  </span>
-</span>
-<span v-else>
-  <router-link
-    :to="taskPath(task)"
-    class="tag dynamic"
-    v-if="!isStatic && !isCurrentUserClient"
-    :style="{
-      background: backgroundColor,
-      color: color
-  }">
-     &nbsp;
-  </router-link>
+  <span v-else>
+    <router-link
+      :to="taskPath(task)"
+      class="tag dynamic"
+      v-if="!isStatic && !isCurrentUserClient"
+      :style="{
+        background: backgroundColor,
+        color: color
+    }">
+       &nbsp;
+    </router-link>
 
-  <span
-    class="tag"
-    :style="{
-      background: backgroundColor,
-      color: color,
-      cursor: cursor
-    }"
-    v-else
-  >
-    &nbsp;
+    <span
+      class="tag"
+      :style="{
+        background: backgroundColor,
+        color: color,
+        cursor: cursor
+      }"
+      v-else
+    >
+      &nbsp;
+    </span>
   </span>
-</span>
 </span>
 </template>
 
 <script>
 import { mapGetters } from 'vuex'
 import colors from '../../lib/colors'
+
+/*
+    isDarkTheme: {
+      default: false,
+      type: Boolean
+    },
+    isCurrentUserClient: {
+      default: false,
+      type: Boolean
+    },
+    personMap: {
+      default: () => {},
+      type: Object
+    },
+    taskMap: {
+      default: () => {},
+      type: Object
+    },
+    taskStatusMap: {
+      default: () => {},
+      type: Object
+    }
+    */
 
 export default {
   name: 'validation-tag',
@@ -139,6 +162,8 @@ export default {
           return '!!'
         } else if (this.task.priority === 1) {
           return '!'
+        } else {
+          return ''
         }
       } else {
         return ''

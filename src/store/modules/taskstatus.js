@@ -59,7 +59,7 @@ const actions = {
     })
   },
 
-  newTaskStatus ({ commit, state }, {form, callback}) {
+  newTaskStatus ({ commit, state }, { form, callback }) {
     commit(EDIT_TASK_STATUS_START, form)
     taskStatusApi.newTaskStatus(form, (err, taskStatus) => {
       if (err) {
@@ -71,7 +71,7 @@ const actions = {
     })
   },
 
-  saveTaskStatus ({ commit, state }, {form, callback}) {
+  saveTaskStatus ({ commit, state }, { form, callback }) {
     commit(EDIT_TASK_STATUS_START)
     taskStatusApi.updateTaskStatus(form, (err, taskStatus) => {
       if (err) {
@@ -83,7 +83,7 @@ const actions = {
     })
   },
 
-  deleteTaskStatus ({ commit, state }, {taskStatus, callback}) {
+  deleteTaskStatus ({ commit, state }, { taskStatus, callback }) {
     commit(DELETE_TASK_STATUS_START)
     taskStatusApi.deleteTaskStatus(taskStatus, (err) => {
       if (err) {
@@ -149,7 +149,7 @@ const mutations = {
   },
 
   [RESET_ALL] (state) {
-    Object.assign(state, {...initialState})
+    Object.assign(state, { ...initialState })
   }
 }
 

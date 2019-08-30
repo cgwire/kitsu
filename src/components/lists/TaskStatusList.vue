@@ -39,13 +39,13 @@
           </td>
           <task-status-name class="short-name" :entry="entry" />
           <td class="is-done">
-            {{ translateBoolean(entry.is_done) }}
+            {{ formatBoolean(entry.is_done) }}
           </td>
           <td class="is-retake">
-            {{ translateBoolean(entry.is_retake) }}
+            {{ formatBoolean(entry.is_retake) }}
           </td>
           <td class="is-artist-allowed">
-            {{ translateBoolean(entry.is_artist_allowed) }}
+            {{ formatBoolean(entry.is_artist_allowed) }}
           </td>
           <row-actions
             :entry-id="entry.id"
@@ -74,12 +74,14 @@
 
 <script>
 import { mapGetters, mapActions } from 'vuex'
+import { formatListMixin } from './format_mixin'
 import RowActions from '../widgets/RowActions'
 import TableInfo from '../widgets/TableInfo'
 import TaskStatusName from '../cells/TaskStatusName'
 
 export default {
   name: 'task-status-list',
+  mixins: [formatListMixin],
   props: [
     'entries',
     'isLoading',
@@ -103,10 +105,6 @@ export default {
 
     onBodyScroll (event, position) {
       this.$refs.headerWrapper.style.left = `-${position.scrollLeft}px`
-    },
-
-    translateBoolean (booleanValue) {
-      return booleanValue ? this.$t('main.yes') : this.$t('main.no')
     }
   }
 }

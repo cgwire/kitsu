@@ -29,6 +29,7 @@ export default {
   },
 
   asset_types: {
+    all_asset_types: 'All asset types',
     delete_text: 'Are you sure you want to remove {name} from your database?',
     delete_error: 'An error occured while deleting this asset type. There are probably data linked to it. Are you sure this asset type has no asset linked to it?',
     edit_title: 'Edit asset type',
@@ -51,6 +52,7 @@ export default {
 
   comments: {
     add_comment: 'Add a comment...',
+    add_checklist: 'Add checklist',
     add_preview: 'Attach preview',
     change_preview: 'Change preview',
     empty_text: 'This comment is empty',
@@ -59,6 +61,10 @@ export default {
     no_file_attached: 'No file attached',
     post_status: 'Post comment',
     retake: 'Retake',
+    pin: 'Pin',
+    pinned: 'Pinned',
+    revision: 'revision',
+    unpin: 'Unpin',
     validated: 'Validated!',
     validation_required: 'Validation Required',
     set_status_to: 'Set status to',
@@ -78,7 +84,8 @@ export default {
     fields: {
       name: 'Name',
       url: 'URL',
-      entity_type: 'Entity Type'
+      entity_type: 'Entity Type',
+      is_ajax: 'Use AJAX'
     },
     entity_types: {
       all: 'All',
@@ -88,6 +95,7 @@ export default {
   },
 
   episodes: {
+    all_episodes: 'All episodes',
     delete_error: 'An error occured while deleting this episode. There are probably data linked to it. Are you sure this episode has no sequence linked to it?',
     delete_text: 'Are you sure you want to remove {name} from your database?',
     edit_title: 'Edit episode',
@@ -108,7 +116,7 @@ export default {
     login_failed: 'Log in failed, please verify your credentials',
     login_page: 'Cancel',
     reset_change_password: 'Change password',
-    reset_change_password_form_failed: 'There is a problem with the password you gave. Please, verify that it is more than 6 chars long and that both passwords match.',
+    reset_change_password_form_failed: 'There is a problem with the password you gave. Please, verify that it is at least 7 chars long and that both passwords match.',
     reset_change_password_failed: 'Changing password failed. Please, restart the whole procedure again.',
     reset_change_password_succeed: 'Your password was changed successfully. Please, go back to the login page to use it.',
     reset_change_password_title: 'Enter a new password',
@@ -125,6 +133,7 @@ export default {
   },
 
   main: {
+    about: 'About',
     add: 'add',
     all: 'All',
     admin: 'Admin',
@@ -141,10 +150,12 @@ export default {
     delete_text: 'Are you sure you want to remove {name} from your database?',
     edit: 'Edit',
     empty_comment: 'Empty comment',
+    end_date: 'End date',
+    go_productions: 'Go to productions',
     history: 'history',
     info: 'Information',
     or: 'or',
-    no: 'no',
+    no: 'No',
     loading_data: 'Loading data',
     loading_error: 'An error occured while loading data.',
     logout: 'Logout',
@@ -156,11 +167,12 @@ export default {
     production: 'Production',
     remove: 'Remove',
     save: 'Save',
-    sorted_by: 'Tasks sorted by:',
+    start_date: 'Start date',
+    sorted_by: 'Tasks sorted by',
     studio: 'Studio',
     user: 'User',
     white_theme: 'White Theme',
-    yes: 'yes',
+    yes: 'Yes',
     csv: {
       export_file: 'Export',
       error_upload: 'An error occured while uploading your CSV file.',
@@ -181,6 +193,19 @@ export default {
     set_estimations: 'Set estimations'
   },
 
+  news: {
+    all: 'All',
+    commented_on: 'commented on',
+    infos: 'Infos',
+    no_news: 'There is no news for this production or for this filter.',
+    only_comments: 'Only comments',
+    only_previews: 'Only previews',
+    set_preview_on: 'set preview on',
+    task_status: 'Task status',
+    task_type: 'Task type',
+    title: 'News Feed'
+  },
+
   not_found: {
     text: 'There was something wrong with the link you clicked on, we encourage you to come back on the home page.',
     title: 'Page not found... are your looking for something you deleted?'
@@ -199,12 +224,16 @@ export default {
   people: {
     active: 'Active',
     add_member_to_team: 'Add a member to the team: ',
+    create_invite: 'Create and send invitation',
     delete_error: 'An error occured while deleting this person. There are probably data linked to it. Are you sure this person has no assignation or wrote no comment?',
     delete_text: 'Are you sure you want to remove {personName} from your database?',
     edit_title: 'Edit person',
     empty_team: 'There is no one listed in the project team.',
+    invite: 'Send invitation',
+    invite_error: 'An error occured while sending the invitation',
+    invite_success: 'Invitation was successfully sent',
     new_person: 'Add a new employee',
-    no_task_assigned: 'There are no assigned running tasks.',
+    no_task_assigned: 'There are no running tasks assigned to you',
     persons: 'person | persons',
     running_tasks: 'Running tasks',
     select_person: 'Select a person...',
@@ -246,13 +275,21 @@ export default {
   },
 
   playlists: {
-    add_shots: 'Select shots',
+    add_shots: 'Add shots',
+    add_sequence: 'Add whole sequence',
+    available_build: 'Available builds',
+    build_daily: 'Daily pending',
+    build_weekly: 'All Pending',
+    build_mp4: 'Build .mp4',
     delete_text: 'Are you sure you want to remove {name} from your database?',
     delete_error: 'An error occured while deleting this playlist.',
+    download_zip: 'Download .zip',
     edit_title: 'Edit playlist',
     loading_error: 'A server error occured. Playlists cannot be loaded.',
     new_playlist: 'Add a playlist',
+    no_build: 'No build',
     no_playlist: 'There is currently no playlist for this project.',
+    no_preview: 'No preview for this shot',
     no_selection: 'Please select a playlist on the left.',
     no_sequence_for_episode: 'There is no sequence for this episode',
     no_shot_for_production: 'There is no shot for this production',
@@ -304,12 +341,14 @@ export default {
       free: 'Free value',
       title: 'Add metadata column'
     },
+
     status: {
       closed: 'Closed',
       open: 'Open',
       active: 'Open',
       archived: 'Closed'
     },
+
     type: {
       short: 'Short',
       featurefilm: 'Feature Film',
@@ -318,14 +357,18 @@ export default {
   },
 
   profile: {
+    change_avatar: 'Change avatar',
     info_title: 'Information',
     language: 'Language',
+    notifications_enabled: 'Email notifications enabled',
+    notifications_slack_enabled: 'Notifications Slack activées',
+    notifications_slack_user: 'Nom d\'utilisateur Slack',
     password_title: 'Change password',
     timezone: 'Timezone',
     title: 'Your Profile',
-    change_avatar: 'Change avatar',
     avatar: {
-      title: 'Change avatar'
+      title: 'Change avatar',
+      error_upload: 'There was an error while uploading picture.'
     },
     change_password: {
       button: 'Change password',
@@ -336,6 +379,25 @@ export default {
     save: {
       button: 'Save changes',
       error: 'An error occured while saving changes'
+    }
+  },
+
+  settings: {
+    change_logo: 'Change logo',
+    integrations: 'Integrations',
+    logo: 'Studio logo',
+    no_logo: 'There is no logo set.',
+    set_logo: 'Set studio logo',
+    title: 'Settings',
+    fields: {
+      name: 'Studio name',
+      hours_by_day: 'Hours by day',
+      slack_token: 'Slack Token (Optional)',
+      use_original_name: 'Use original file name for downloads'
+    },
+    save: {
+      button: 'Save settings',
+      error: 'A server error occured while saving settings'
     }
   },
 
@@ -374,6 +436,7 @@ export default {
   },
 
   sequences: {
+    all_sequences: 'All sequences',
     delete_text: 'Are you sure you want to remove {name} from your database?',
     delete_error: 'An error occured while deleting this sequence. There are probably data linked to it. Are you sure this sequence has no shot linked to it?',
     edit_title: 'Edit sequence',
@@ -388,8 +451,16 @@ export default {
     }
   },
 
+  schedule: {
+    title: 'Schedule',
+    overall_man_days: 'Man-days',
+    md: 'md',
+    zoom_level: 'Zoom level'
+  },
+
   shots: {
     casting: 'Shot casting',
+    creation_explaination: 'To add shots you need first to create an episode and a sequence. Type an episode name in the bottom of the left column then click on add to create a new episode. Select this episode and repeat the same operation for sequence. Finally select a sequence and type a shot name in the field in the bottom of the right column. Click on the add button below. Your first shot was created. You can now add many more! If it\'s not a TV Show, you have to directly create a sequence.',
     delete_text: 'Are you sure you want to remove {name} from your database?',
     delete_error: 'An error occured while deleting this shot. There are probably data linked to it. Are you sure this shot has no task linked to it?',
     edit_success: 'Shot {name} successfully edited.',
@@ -397,6 +468,7 @@ export default {
     edit_title: 'Edit shot',
     empty_list: 'There is no shot in the production. What about creating some?',
     empty_list_client: 'There is no shot in this production.',
+    episodes: 'Episodes',
     new_shot: 'Add a shot',
     new_shots: 'Add shots',
     new_sequences: 'Add sequences',
@@ -405,8 +477,10 @@ export default {
     number: 'shot | shots',
     manage: 'Create shots',
     new_success: 'Shot {name} successfully created.',
+    padding: 'Shot Padding',
     restore_text: 'Are you sure you want to restore {name} into your database?',
     restore_error: 'An error occured while restoring this shot.',
+    sequences: 'Sequences',
     tasks: 'Shot Tasks',
     title: 'Shots',
     fields: {
@@ -416,7 +490,7 @@ export default {
       frame_in: 'In',
       frame_out: 'Out',
       fps: 'FPS',
-      name: 'Shot',
+      name: 'Name',
       production: 'Prod',
       sequence: 'Sequence',
       time_spent: 'Time'
@@ -428,11 +502,21 @@ export default {
     title: 'Kitsu encountered an error while reaching its data API.'
   },
 
+  statistics: {
+    count: 'Counts',
+    count_mode: 'Count mode',
+    display_mode: 'Display mode',
+    frames: 'Frames',
+    pie: 'Pie charts',
+    shots: 'Shots'
+  },
+
   tasks: {
     add_preview: 'Add preview',
     add_preview_error: 'An error occured while adding preview.',
     assign: 'Assign one task to: | Assign {nbSelectedTasks} tasks to:',
     back_to_list: 'back to list',
+    bigger: 'Widen task panel',
     change_status_to: 'Change task status to:',
     change_preview: 'Change preview',
     change_priority: 'Change priority to:',
@@ -467,6 +551,7 @@ export default {
     no_assignation_right: 'You are not allowed to manage assignations',
     no_comment: 'There is currently no comment for this task.',
     no_preview: 'There is currently no preview for this task.',
+    no_task_selected: 'No task selected',
     number: 'task | tasks',
     preview: 'Previews',
     previous: 'previous task',
@@ -481,6 +566,7 @@ export default {
     subscribe_notifications: 'Subscribe to notifications',
     validation: 'Validation',
     tasks: 'Tasks',
+    with_comment: 'With a comment...',
     fields: {
       asset_type: 'Asset type',
       assignees: 'Assignees',
@@ -513,6 +599,7 @@ export default {
   timesheets: {
     detail_level: 'Detail level',
     done_tasks: 'Done tasks',
+    export_timesheet: 'Export Timesheet',
     hours: 'hours',
     month: 'Month',
     time_spents: 'Time Spent (hours)',

@@ -82,7 +82,7 @@
 <script>
 import { mapGetters, mapActions } from 'vuex'
 import { modalMixin } from './base_modal'
-import { remove } from '../../lib/helpers'
+import { remove } from '../../lib/models'
 
 import Combobox from '../widgets/Combobox'
 import ModalFooter from './ModalFooter'
@@ -224,12 +224,6 @@ export default {
 
 .error {
   margin-top: 1em;
-}
-
-.title {
-  border-bottom: 2px solid #DDD;
-  padding-bottom: 0.5em;
-  margin-bottom: 1.2em;
 }
 
 .description {

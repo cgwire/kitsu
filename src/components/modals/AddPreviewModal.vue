@@ -81,7 +81,8 @@ export default {
     extensions: {
       type: String,
       default:
-        '.png,.jpg,.mp4,.mov,.obj,.pdf,.ma,.mb,.zip,.rar,.jpeg,.blend,.wmv,.m4v'
+        '.png,.jpg,.mp4,.mov,.obj,.pdf,.ma,.mb,.zip,.rar,.jpeg,' +
+        '.blend,.wmv,.m4v,.ai,.comp,.exr,.psd,.hip'
     }
   },
 
@@ -130,12 +131,6 @@ export default {
 
 .error {
   margin-top: 1em;
-}
-
-.title {
-  border-bottom: 2px solid #DDD;
-  padding-bottom: 0.5em;
-  margin-bottom: 1.2em;
 }
 
 .description {

@@ -10,8 +10,14 @@
           <div
             class="company-logo has-text-centered"
           >
-            <img src="../../assets/kitsu.png" />
-            <h2 class="subtitle sidebar-title">Kitsu</h2>
+            <img
+              :src="logoPath"
+              v-if="organisation && organisation.has_avatar"
+            />
+            <img
+              src="../../assets/kitsu.png"
+              v-else
+            />
           </div>
         </router-link>
 
@@ -75,6 +81,11 @@
              {{ $t("custom_actions.title") }}
              </router-link>
            </p>
+           <p @click="toggleSidebar()">
+             <router-link :to="{name: 'settings'}">
+               {{ $t("settings.title") }}
+             </router-link>
+           </p>
          </div>
 
         </section>
@@ -92,23 +103,45 @@ import { mapGetters, mapActions } from 'vuex'
 
 export default {
   name: 'sidebar',
+
   data () {
     return {
+      title: '',
+      logoPath: ''
     }
   },
+
+  mounted () {
+    this.reset()
+  },
+
   computed: {
     ...mapGetters([
       'isSidebarHidden',
       'isCurrentUserClient',
       'isCurrentUserCGArtist',
       'isCurrentUserManager',
-      'isCurrentUserAdmin'
+      'isCurrentUserAdmin',
+      'organisation'
     ])
   },
+
   methods: {
     ...mapActions([
       'toggleSidebar'
-    ])
+    ]),
+
+    reset () {
+      this.title = this.organisation.name
+      this.logoPath = `/api/pictures/thumbnails/organisations/` +
+        `${this.organisation.id}.png?t=` + new Date().toISOString()
+    }
+  },
+
+  watch: {
+    organisation () {
+      this.reset()
+    }
   }
 }
 </script>
@@ -150,13 +183,15 @@ aside section {
 }
 
 .sidebar-title {
-  margin-top: 0;
-  margin-bottom: 3em;
+  margin-top: 0.5em;
+  margin-bottom: 1.5em;
   text-align: center;
+  font-size: 1.6em;
 }
 
 .company-logo {
-  text-align: center;
+  width: 150px;
+  margin: auto;
 }
 
 #c-mask {

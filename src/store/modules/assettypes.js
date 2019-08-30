@@ -33,7 +33,7 @@ const initialState = {
   }
 }
 
-const state = {...initialState}
+const state = { ...initialState }
 
 const getters = {
   assetTypes: state => state.assetTypes,
@@ -188,7 +188,7 @@ const mutations = {
   },
 
   [RESET_ALL] (state) {
-    Object.assign(state, {...initialState})
+    Object.assign(state, { ...initialState })
   }
 }
 

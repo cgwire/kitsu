@@ -25,6 +25,13 @@
             v-model="monthString"
             v-if="detailLevelString === 'day'"
           />
+          <div class="filler"></div>
+          <button-simple
+            class="flexrow-item"
+            :title="$t('timesheets.export_timesheet')"
+            icon="download"
+            @click="exportTimesheet"
+          />
         </div>
 
         <people-timesheet-list
@@ -62,19 +69,23 @@
 import moment from 'moment-timezone'
 import { mapGetters, mapActions } from 'vuex'
 
+import ButtonSimple from '../widgets/ButtonSimple'
 import Combobox from '../widgets/Combobox'
 import PeopleTimesheetList from '../lists/PeopleTimesheetList'
 import PeopleTimesheetInfo from '../sides/PeopleTimesheetInfo'
 import PageTitle from '../widgets/PageTitle'
-import { range, monthToString } from '../../lib/helpers'
+import csv from '../../lib/csv'
+import { monthToString, range } from '../../lib/time'
+import { slugify } from '../../lib/string'
 
 export default {
   name: 'people',
   components: {
+    ButtonSimple,
     Combobox,
+    PageTitle,
     PeopleTimesheetList,
-    PeopleTimesheetInfo,
-    PageTitle
+    PeopleTimesheetInfo
   },
 
   data () {
@@ -288,6 +299,27 @@ export default {
       } else {
         return {}
       }
+    },
+
+    exportTimesheet () {
+      const nameData = [
+        'timesheet',
+        this.detailLevel,
+        this.currentYear
+      ]
+      if (this.detailLevel === 'day') nameData.push(this.currentMonth)
+      const name = slugify(nameData.join('_'))
+      csv.generateTimesheet(
+        name,
+        this.timesheet,
+        this.filteredPeople,
+        this.detailLevel,
+        this.currentYear,
+        this.currentMonth,
+        moment().month() + 1,
+        moment().year(),
+        moment().week()
+      )
     }
   },
 

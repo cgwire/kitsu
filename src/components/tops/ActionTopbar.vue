@@ -78,10 +78,21 @@
               >
                 {{ $t('main.confirmation') }}
               </button>
-
-              <div class="" v-if="isChangeStatusLoading">
-                <spinner :is-white="true" />
-              </div>
+            </div>
+            <div class="flexrow-item" v-if="isChangeStatusLoading">
+              <spinner :is-white="true" />
+            </div>
+             <div
+              class="flexrow-item"
+              v-if="!isChangeStatusLoading"
+            >
+              <input
+                class="comment-text input"
+                type="text"
+                :placeholder="$t('tasks.with_comment')"
+                @keyup.ctrl.enter="confirmTaskStatusChange"
+                v-model="statusComment"
+              />
             </div>
           </div>
         </div>
@@ -199,31 +210,80 @@
               {{ $t('custom_actions.run_for_selection') }}
             </div>
             <div class="flexrow-item combobox-item">
-              <combobox
-                :options="customActionOptions"
-                v-model="customActionUrl"
+              <combobox-model
+                :models="customActions"
+                v-model="customAction"
               />
             </div>
-            <div class="flexrow-item">
+            <div
+              class="flexrow-item"
+              v-if="customAction && !customAction.is_ajax"
+            >
               <form
                 target="_blank"
                 method="POST"
-                :action="customActionUrl"
+                :action="customAction.url"
               >
-                <input type="hidden" id="personid" name="personid" :value="user.id">
-                <input type="hidden" id="personemail" name="personemail" :value="user.email">
-                <input type="hidden" id="projectid" name="projectid" :value="currrentPrduction ? currentProduction.id : null">
-                <input type="hidden" id="currentpath" name="currentpath" :value="currentUrl">
-                <input type="hidden" id="currentserver" name="currentserver" :value="currentHost">
-                <input type="hidden" id="selection" name="selection" :value="selectedTaskIds">
-                <input type="hidden" id="entity_type" name="entity_type" :value="currentEntityType">
+                <input
+                  type="hidden"
+                  id="personid"
+                  name="personid"
+                  :value="user.id"
+                />
+                <input
+                  type="hidden"
+                  id="personemail"
+                  name="personemail"
+                  :value="user.email"
+                />
+                <input
+                  type="hidden"
+                  id="projectid"
+                  name="projectid"
+                  :value="currentProduction ? currentProduction.id : null"
+                />
+                <input
+                  type="hidden"
+                  id="currentpath"
+                  name="currentpath"
+                  :value="currentUrl"
+                >
+                <input
+                  type="hidden"
+                  id="currentserver"
+                  name="currentserver"
+                  :value="currentHost"
+                />
+                <input
+                  type="hidden"
+                  id="selection"
+                  name="selection"
+                  :value="selectedTaskIds"
+                />
+                <input
+                  type="hidden"
+                  id="entitytype"
+                  name="entitytype"
+                  :value="currentEntityType"
+                />
+                <button
+                  class="button is-success"
+                  type="submit"
+                >
+                  {{ $t('main.confirmation') }}
+                </button>
+              </form>
+            </div>
+            <div
+              class="flexrow-item"
+              v-else
+            >
               <button
                 class="button is-success"
-                type="submit"
+                @click="runCustomAction"
               >
                 {{ $t('main.confirmation') }}
               </button>
-              </form>
             </div>
           </div>
         </div>
@@ -270,7 +330,7 @@
 
         <div
           class="more-menu-item"
-          v-if="isCurrentViewAsset || isCurrentViewShot"
+          v-if="isCurrentViewAsset || isCurrentViewShot || isCurrentViewPerson"
           @click="selectBar('priorities')"
         >
           {{ $t('menu.change_priority') }}
@@ -278,7 +338,7 @@
 
         <div
           class="more-menu-item"
-          v-if="isCurrentViewTaskType"
+          v-if="isCurrentViewTaskType || isCurrentViewPerson"
           @click="selectBar('estimations')"
         >
           {{ $t('menu.set_estimations') }}
@@ -326,9 +386,9 @@
 import { mapGetters, mapActions } from 'vuex'
 import { sortPeople } from '../../lib/sorting'
 
-import { ChevronDownIcon, XIcon, MoreVerticalIcon } from 'vue-feather-icons'
-import ButtonHrefLink from '../widgets/ButtonHrefLink'
+import { ChevronDownIcon, XIcon } from 'vue-feather-icons'
 import Combobox from '../widgets/Combobox'
+import ComboboxModel from '../widgets/ComboboxModel'
 import ComboboxStatus from '../widgets/ComboboxStatus'
 import NotificationBell from '../widgets/NotificationBell'
 import PeopleField from '../widgets/PeopleField'
@@ -340,17 +400,20 @@ export default {
   components: {
     ChevronDownIcon,
     Combobox,
+    ComboboxModel,
     ComboboxStatus,
     NotificationBell,
-    MoreVerticalIcon,
     PeopleField,
     Spinner,
-    ButtonHrefLink,
     XIcon
   },
 
   data () {
     return {
+      currentTeam: [],
+      customAction: {},
+      customActions: [],
+      estimation: 0,
       isAssignationLoading: false,
       isChangeEstimationLoading: false,
       isChangePriorityLoading: false,
@@ -360,13 +423,10 @@ export default {
       isMoreMenuDisplayed: true,
       selectedBar: 'assignation',
       person: null,
-      taskStatusId: '',
-      customActionUrl: '',
-      selectedTaskIds: [],
-      customActionOptions: [],
-      estimation: 0,
       priority: '0',
-      currentTeam: [],
+      selectedTaskIds: [],
+      taskStatusId: '',
+      statusComment: '',
       priorityOptions: [
         {
           label: this.$t('tasks.priority.normal'),
@@ -390,9 +450,9 @@ export default {
 
   computed: {
     ...mapGetters([
-      'allCustomActionOptions',
+      'allCustomActions',
       'assetMap',
-      'assetCustomActionOptions',
+      'assetCustomActions',
       'currentProduction',
       'getPersonOptions',
       'isCurrentUserManager',
@@ -401,7 +461,7 @@ export default {
       'people',
       'personMap',
       'selectedTasks',
-      'shotCustomActionOptions',
+      'shotCustomActions',
       'taskStatusForCurrentUser',
       'user'
     ]),
@@ -433,11 +493,11 @@ export default {
       return this.isCurrentViewAsset ? 'asset' : 'shot'
     },
 
-    defaultCustomActionUrl () {
-      if (this.customActionOptions.length > 0) {
-        return this.customActionOptions[0].value
+    defaultCustomAction () {
+      if (this.customActions.length > 0) {
+        return this.customActions[0]
       } else {
-        return ''
+        return {}
       }
     },
 
@@ -454,6 +514,10 @@ export default {
     isCurrentViewTodos () {
       return this.$route.path.indexOf('todos') > 0 ||
              this.$route.path.indexOf('people/') > 0
+    },
+
+    isCurrentViewPerson () {
+      return this.$route.path.indexOf('people/') > 0
     },
 
     isCurrentViewPersonTasks () {
@@ -508,7 +572,8 @@ export default {
       'unassignSelectedTasks',
       'changeSelectedTaskStatus',
       'changeSelectedPriorities',
-      'clearSelectedTasks'
+      'clearSelectedTasks',
+      'postCustomAction'
     ]),
 
     confirmAssign () {
@@ -531,8 +596,10 @@ export default {
 
       this.changeSelectedTaskStatus({
         taskStatusId: this.taskStatusId,
+        comment: this.statusComment,
         callback: () => {
           this.isChangeStatusLoading = false
+          this.statusComment = ''
         }
       })
     },
@@ -618,11 +685,26 @@ export default {
         this.currentTeam = this.people
       }
       return this.currentTeam
+    },
+
+    runCustomAction () {
+      this.postCustomAction({
+        data: {
+          entitytype: this.currentEntityType,
+          originurl: this.currentUrl,
+          originserver: this.currentHost,
+          selection: this.selectedTaskIds,
+          productionid: this.currentProduction.id,
+          userid: this.user.id,
+          useremail: this.user.email
+        },
+        url: this.customAction.url
+      })
     }
   },
 
   mounted () {
-    this.customActionUrl = this.defaultCustomActionUrl
+    this.customAction = this.defaultCustomAction
     this.setCurrentTeam()
   },
 
@@ -660,21 +742,22 @@ export default {
         }
 
         if (isShotSelected && isAssetSelected) {
-          this.customActionOptions = this.allCustomActionOptions
+          this.customActions = this.allCustomActions
         } else if (isShotSelected) {
-          this.customActionOptions = this.shotCustomActionOptions
+          this.customActions = this.shotCustomActions
         } else {
-          this.customActionOptions = this.assetCustomActionOptions
+          this.customActions = this.assetCustomActions
         }
 
-        if (this.customActionOptions.length > 0) {
+        if (this.customActions.length > 0) {
           const isUrlSelected =
-            this.customActionOptions.findIndex((action) => {
-              return action.url === this.customActionUrl
+            this.customAction.url &&
+            this.customActions.findIndex((action) => {
+              return action.id === this.customAction.id
             }) >= 0
 
           if (!isUrlSelected) {
-            this.customActionUrl = this.customActionOptions[0].value
+            this.customAction = this.customActions[0]
           }
         }
       }
@@ -804,6 +887,10 @@ div.combobox-item {
 
 .estimation-input {
   width: 90px;
+}
+
+.comment-text {
+  padding: 8px;
 }
 
 @media screen and (max-width: 768px) {

@@ -11,40 +11,66 @@
   }"
   @mouseover="onMouseOver"
   @mouseout="onMouseOut"
-  @click="select"
+  @click="onClick"
 >
   <div
     class="wrapper"
     v-if="!minimized"
   >
-    <validation-tag
-      class="validation-tag"
-      :task="task"
-      :is-static="selectable || isStatic"
-      :pointer="true"
+    <span
       v-if="task"
-    />
-    <people-avatar
-      class="person-avatar"
-      :key="task.id + '-' + personId"
-      :person="personMap[personId]"
-      :size="20"
-      :font-size="10"
-      :is-link="false"
-      v-if="isAssignees && isShowAssignations && !isCurrentUserClient"
+    >
+      <span
+        class="tag"
+        :style="{
+          background: backgroundColor,
+          color: color
+        }"
+      >
+        {{ taskStatus.short_name }}
+      </span>
+      <span class="priority" v-if="!isCurrentUserClient">
+        {{ priority }}
+      </span>
+    </span>
+    <span
+      class="avatar has-text-centered"
+      :title="personMap[personId].full_name"
+      :style="{
+        background: personMap[personId].color,
+        width: '20px',
+        height: '20px',
+        'font-size': '10px'
+      }"
+      :key="'avatar-' + personId"
       v-for="personId in assignees"
-    />
+      v-if="isAssignees"
+    >
+      <img
+        v-lazy="avatarPath(personId)"
+        :key="avatarKey(personId)"
+        width="20"
+        height="20"
+        v-if="personMap[personId].has_avatar"
+      />
+      <span v-else>
+        {{ personMap[personId].initials }}
+      </span>
+    </span>
   </div>
   <div
     class="wrapper"
     v-else
   >
-    <validation-tag
-      class="validation-tag"
-      :task="task"
-      :minimized="minimized"
-      v-if="task"
-    />
+    <span
+      class="tag"
+      :style="{
+        background: backgroundColor,
+        color: color
+      }"
+    >
+      &nbsp;
+    </span>
   </div>
 </td>
 </template>
@@ -52,9 +78,6 @@
 <script>
 import { mapGetters, mapActions } from 'vuex'
 import colors from '../../lib/colors'
-
-import ValidationTag from '../widgets/ValidationTag'
-import PeopleAvatar from '../widgets/PeopleAvatar'
 
 export default {
   name: 'validation-cell',
@@ -66,8 +89,6 @@ export default {
   },
 
   components: {
-    ValidationTag,
-    PeopleAvatar
   },
 
   props: {
@@ -103,6 +124,10 @@ export default {
       default: true,
       type: Boolean
     },
+    clickable: {
+      default: true,
+      type: Boolean
+    },
     selected: {
       default: false,
       type: Boolean
@@ -129,11 +154,7 @@ export default {
     ...mapGetters([
       'isDarkTheme',
       'isCurrentUserClient',
-      'isShowAssignations',
-      'nbSelectedTasks',
       'personMap',
-      'selectedTasks',
-      'selectedValidations',
       'taskMap',
       'taskStatusMap'
     ]),
@@ -143,6 +164,54 @@ export default {
         return this.task.assignees
       } else {
         return []
+      }
+    },
+
+    backgroundColor () {
+      if (this.taskStatus.short_name === 'todo' && !this.isDarkTheme) {
+        return '#ECECEC'
+      } else if (this.taskStatus.short_name === 'todo' && this.isDarkTheme) {
+        return '#5F626A'
+      } else if (this.isDarkTheme) {
+        return colors.darkenColor(this.taskStatus.color)
+      } else {
+        return this.taskStatus.color
+      }
+    },
+
+    color () {
+      if (this.taskStatus.short_name !== 'todo' || this.isDarkTheme) {
+        return 'white'
+      } else {
+        return '#333'
+      }
+    },
+
+    priority () {
+      if (
+        this.task.priority &&
+        !this.taskStatus.is_done
+      ) {
+        if (this.task.priority === 3) {
+          return '!!!'
+        } else if (this.task.priority === 2) {
+          return '!!'
+        } else if (this.task.priority === 1) {
+          return '!'
+        } else {
+          return ''
+        }
+      } else {
+        return ''
+      }
+    },
+
+    taskStatus () {
+      if (this.task) {
+        const taskStatusId = this.task.task_status_id
+        return this.taskStatusMap ? this.taskStatusMap[taskStatusId] : {}
+      } else {
+        return {}
       }
     }
   },
@@ -171,6 +240,12 @@ export default {
       if (this.selectable && !this.selected) {
         const background = this.getBackground()
         this.changeStyle(background)
+      }
+    },
+
+    onClick (event) {
+      if (this.clickable) {
+        this.select(event)
       }
     },
 
@@ -208,6 +283,24 @@ export default {
             isUserClick: isUserClick
           })
         }
+      }
+    },
+
+    avatarPath (personId) {
+      const person = this.personMap[personId]
+      if (person) {
+        return person.avatarPath + '?unique=' + person.uniqueHash
+      } else {
+        return ''
+      }
+    },
+
+    avatarKey (personId) {
+      const person = this.personMap[personId]
+      if (person) {
+        return person.id + '-' + person.uniqueHash
+      } else {
+        return ''
       }
     }
   },
@@ -259,6 +352,35 @@ span.person-avatar:nth-child(2) {
 }
 
 .person-avatar {
+  margin-right: 3px;
+}
+
+.avatar {
+  border-radius: 50%;
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-right: 2px;
+}
+
+.avatar span {
+  flex: 1;
+}
+
+.avatar img {
+  width: 20px;
+  height: 20px;
+}
+
+.tag {
+  text-transform: uppercase;
+  margin-right: 0.1em;
+  margin-bottom: 0.3em;
+}
+
+.priority {
+  color: red;
   margin-right: 3px;
 }
 </style>

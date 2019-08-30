@@ -61,7 +61,7 @@ export default {
       localStorage.setItem(
         'show-assignations',
         this.isShowAssignations,
-        {expires: '1M'}
+        { expires: '1M' }
       )
     }
   }

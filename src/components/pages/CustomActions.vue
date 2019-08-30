@@ -2,7 +2,7 @@
   <div class="custom-actions page fixed-page">
     <div class="level page-header">
       <div class="level-left">
-        <page-title :text="$t('custom_actions.title')"></page-title>
+        <page-title :text="$t('custom_actions.title')" />
       </div>
       <div class="level-right">
         <div class="level-item">
@@ -11,8 +11,7 @@
             icon="plus"
             :text="$t('custom_actions.new_custom_action')"
             path="/custom-actions/new"
-          >
-          </button-link>
+          />
         </div>
       </div>
     </div>
@@ -21,7 +20,7 @@
       :entries="customActions"
       :is-loading="isCustomActionsLoading"
       :is-error="isCustomActionsLoadingError"
-    ></custom-action-list>
+    />
 
     <edit-custom-action-modal
       :active="modals.isNewDisplayed"
@@ -30,8 +29,7 @@
       :cancel-route="'/custom-actions'"
       :custom-action-to-edit="customActionToEdit"
       @confirm="confirmEditCustomAction"
-    >
-    </edit-custom-action-modal>
+    />
 
     <delete-modal
       :active="modals.isDeleteDisplayed"
@@ -41,8 +39,7 @@
       :text="deleteText()"
       :error-text="$t('custom_actions.delete_error')"
       @confirm="confirmDeleteCustomAction"
-    >
-    </delete-modal>
+    />
 
   </div>
 </template>
@@ -51,7 +48,7 @@
 import { mapGetters, mapActions } from 'vuex'
 import CustomActionList from '../lists/CustomActionList'
 import EditCustomActionModal from '../modals/EditCustomActionModal'
-import DeleteModal from '../widgets/DeleteModal'
+import DeleteModal from '../modals/DeleteModal'
 import PageTitle from '../widgets/PageTitle'
 import ButtonLink from '../widgets/ButtonLink'
 
@@ -129,7 +126,7 @@ export default {
     deleteText () {
       const customAction = this.customActionToDelete
       if (customAction) {
-        return this.$t('custom_actions.delete_text', {name: customAction.name})
+        return this.$t('custom_actions.delete_text', { name: customAction.name })
       } else {
         return ''
       }
@@ -140,7 +137,7 @@ export default {
       const customActionId = this.$store.state.route.params.custom_action_id
 
       if (path.indexOf('new') > 0) {
-        this.customActionToEdit = {color: '#FFFFFF'}
+        this.customActionToEdit = { color: '#FFFFFF' }
         this.modals.isNewDisplayed = true
       } else if (path.indexOf('edit') > 0) {
         this.customActionToEdit = this.customAction(customActionId)

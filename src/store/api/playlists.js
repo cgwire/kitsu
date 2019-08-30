@@ -47,5 +47,25 @@ export default {
 
   deletePlaylist (playlist, callback) {
     client.del(`/api/data/playlists/${playlist.id}`, callback)
+  },
+
+  deleteBuildJob (job, callback) {
+    return new Promise((resolve, reject) => {
+      const path = `/api/data/playlists/${job.playlist_id}/jobs/${job.id}`
+      client.del(path, (err) => {
+        if (err) reject(err)
+        else resolve()
+      })
+    })
+  },
+
+  runPlaylistBuild (playlist) {
+    return new Promise((resolve, reject) => {
+      const path = `/api/data/playlists/${playlist.id}/build/mp4`
+      client.get(path, (err) => {
+        if (err) reject(err)
+        else resolve()
+      })
+    })
   }
 }

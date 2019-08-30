@@ -72,6 +72,13 @@ export const sortTasks = (tasks, taskTypeMap) => {
   )
 }
 
+export const sortComments = (comments) => {
+  return comments.sort(
+    firstBy('pinned', -1)
+      .thenBy('created_at', -1)
+  )
+}
+
 export const sortTaskTypes = (taskTypes) => {
   return taskTypes.sort(
     firstBy('for_shots')
@@ -113,4 +120,13 @@ export const sortValidationColumns = (columns, taskTypeMap) => {
       return taskTypeA.name.localeCompare(taskTypeB.name)
     }
   })
+}
+
+export const sortScheduleItems = (scheduleItems, taskTypeMap) => {
+  return scheduleItems.sort(
+    firstBy('for_shots')
+      .thenBy('priority')
+      .thenBy('name')
+      .thenBy('start_date')
+  )
 }

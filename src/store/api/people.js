@@ -2,6 +2,59 @@ import client from './client'
 
 export default {
 
+  getOrganisation () {
+    return new Promise((resolve, reject) => {
+      client.get(`/api/data/organisations`, (err, organisations) => {
+        if (err) reject(err)
+        else {
+          let organisation = {
+            name: 'Kitsu',
+            hours_by_day: 8,
+            has_avatar: false,
+            use_original_file_name: false,
+            chat_token_slack: ''
+          }
+          if (organisations.length > 0) organisation = organisations[0]
+          organisation.use_original_file_name =
+            organisation.use_original_file_name ? 'true' : 'false'
+          resolve(organisation)
+        }
+      })
+    })
+  },
+
+  updateOrganisation (organisation) {
+    return new Promise((resolve, reject) => {
+      const data = {
+        name: organisation.name,
+        hours_by_day: organisation.hours_by_day,
+        use_original_file_name: organisation.use_original_file_name === 'true',
+        chat_token_slack: organisation.chat_token_slack
+      }
+      client.put(
+        `/api/data/organisations/${organisation.id}`,
+        data,
+        (err, organisation) => {
+          if (err) reject(err)
+          else resolve(organisation)
+        }
+      )
+    })
+  },
+
+  postOrganisationLogo (organisationId, formData) {
+    return new Promise((resolve, reject) => {
+      client.post(
+        `/api/pictures/thumbnails/organisations/${organisationId}`,
+        formData,
+        (err, organisation) => {
+          if (err) reject(err)
+          else resolve(organisation)
+        }
+      )
+    })
+  },
+
   getPeople (callback) {
     client.get('/api/data/persons', callback)
   },
@@ -10,30 +63,52 @@ export default {
     client.get(`/api/data/persons/${personId}`, callback)
   },
 
-  newPerson (person, callback) {
-    const data = {
-      first_name: person.first_name,
-      last_name: person.last_name,
-      email: person.email.trim(),
-      phone: person.phone,
-      role: person.role,
-      active: person.active
-    }
-    client.post(`/api/data/persons/new`, data, callback)
+  newPerson (person) {
+    return new Promise((resolve, reject) => {
+      const data = {
+        first_name: person.first_name,
+        last_name: person.last_name,
+        email: person.email.trim(),
+        phone: person.phone,
+        role: person.role,
+        active: person.active
+      }
+      client.post(`/api/data/persons/new`, data, (err, person) => {
+        if (err) reject(err)
+        else resolve(person)
+      })
+    })
   },
 
-  updatePerson (person, callback) {
-    const data = {
-      first_name: person.first_name,
-      last_name: person.last_name,
-      email: person.email.trim(),
-      phone: person.phone,
-      timezone: person.timezone,
-      locale: person.locale,
-      role: person.role,
-      active: person.active
-    }
-    client.put(`/api/data/persons/${person.id}`, data, callback)
+  invitePerson (person) {
+    return new Promise((resolve, reject) => {
+      client.get(`/api/actions/persons/${person.id}/invite`, (err) => {
+        if (err) reject(err)
+        else resolve(person)
+      })
+    })
+  },
+
+  updatePerson (person) {
+    return new Promise((resolve, reject) => {
+      const data = {
+        first_name: person.first_name,
+        last_name: person.last_name,
+        email: person.email.trim(),
+        phone: person.phone,
+        timezone: person.timezone,
+        locale: person.locale,
+        role: person.role,
+        active: person.active,
+        notifications_enabled: person.notifications_enabled === 'true',
+        notifications_slack_enabled: person.notifications_slack_enabled === 'true',
+        notifications_slack_userid: person.notifications_slack_userid
+      }
+      client.put(`/api/data/persons/${person.id}`, data, (err, person) => {
+        if (err) reject(err)
+        else resolve(person)
+      })
+    })
   },
 
   deletePerson (personId, callback) {

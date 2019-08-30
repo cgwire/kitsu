@@ -1,39 +1,69 @@
 <template>
-<div
-  :class="{
-    'playlisted-shot': true,
-    playing: isPlaying
-  }"
->
-  <div @click.prevent="onPlayClick">
-    <entity-thumbnail
-      class="shot-thumbnail"
-      :entity="shot"
-      :preview-file-id="previewFileId"
-    />
-  </div>
+<div class="flexrow wrapper">
+  <drag @drag="onDragged" :transfer-data="shot.id">
+    <div
+      :class="{
+        'playlisted-shot': true,
+        playing: isPlaying
+      }"
+    >
+      <div class="thumbnail-wrapper" @click.prevent="onPlayClick">
+        <span
+          class="remove-button flexrow-item"
+          :title="$t('playlists.remove')"
+          @click.prevent="onRemoveClick"
+          v-if="isCurrentUserManager"
+        >
+          <x-icon />
+        </span>
+        <entity-thumbnail
+          class="shot-thumbnail"
+          :empty-width="150"
+          :empty-height="103"
+          :entity="shot"
+          :preview-file-id="previewFileId"
+        />
+      </div>
 
-  <div class="shot-title">{{ shot.entity_name }}</div>
+      <div class="shot-title">{{ shot.sequence_name }} / {{ shot.name }}</div>
 
-  <div class="preview-choice">
-    <combobox
-      :options="taskTypeOptions"
-      v-model="taskTypeId"
-    />
-    <combobox
-      :options="previewFileOptions"
-      v-model="previewFileId"
-    />
-  </div>
-
-  <a class="remove-button" @click.prevent="onRemoveClick">
-    {{ $t('playlists.remove') }}
-  </a>
+      <div
+        class="preview-choice"
+        v-if="taskTypeOptions.length > 0"
+      >
+        <combobox
+          :options="taskTypeOptions"
+          :disabled="!isCurrentUserManager"
+          v-model="taskTypeId"
+        />
+        <combobox
+          class="version-combo"
+          :options="previewFileOptions"
+          :disabled="!isCurrentUserManager"
+          v-model="previewFileId"
+        />
+      </div>
+      <div v-else>
+        {{ $t('playlists.no_preview') }}
+      </div>
+    </div>
+  </drag>
+  <drop @drop="onDropped">
+    <div class="drop-area" ref="drop-area"></div>
+  </drop>
 </div>
 </template>
 
 <script>
+/*
+ * Widget to describe a shot listed in a playlist. It allows to select a given
+ * prevision for a given task type for current shot.
+ * It fires events about drag'n'drop reordering too.
+ */
+import firstBy from 'thenby'
 import { mapGetters } from 'vuex'
+import { XIcon } from 'vue-feather-icons'
+
 import Combobox from '../../widgets/Combobox'
 import EntityThumbnail from '../../widgets/EntityThumbnail'
 
@@ -42,7 +72,8 @@ export default {
 
   components: {
     Combobox,
-    EntityThumbnail
+    EntityThumbnail,
+    XIcon
   },
 
   data () {
@@ -67,75 +98,116 @@ export default {
     }
   },
 
+  mounted () {
+    this.setCurrentParameters()
+    this.setListeners()
+  },
+
   computed: {
     ...mapGetters([
-      'taskTypeMap'
+      'taskTypeMap',
+      'isCurrentUserManager'
     ]),
 
-    taskTypeOptions () {
-      const taskTypeIds = Object.keys(this.shot.preview_files)
+    dropArea () {
+      return this.$refs['drop-area']
+    },
 
-      return taskTypeIds.map((taskTypeId) => {
-        const taskType = this.taskTypeMap[taskTypeId]
-        return {
-          label: taskType.name,
-          value: taskType.id
-        }
-      })
+    taskTypeOptions () {
+      return Object
+        .keys(this.shot.preview_files)
+        .map(id => this.taskTypeMap[id])
+        .sort(firstBy('priority', 1).thenBy('name'))
+        .map((taskType) => {
+          return {
+            label: taskType.name,
+            value: taskType.id
+          }
+        })
     },
 
     previewFileOptions () {
-      if (this.taskTypeId) {
-        const previewFiles = this.shot.preview_files[this.taskTypeId]
-        if (previewFiles && previewFiles.length > 0) {
-          return previewFiles.map((previewFile) => {
-            return {
-              label: `v${previewFile.revision}`,
-              value: previewFile.id
-            }
-          })
-        } else {
-          return []
-        }
-      } else {
-        return []
-      }
+      const previewFiles = this.shot.preview_files[this.taskTypeId] || []
+      return previewFiles.map(previewFile => ({
+        label: `v${previewFile.revision}`,
+        value: previewFile.id
+      }))
     }
   },
 
   methods: {
+    getTaskTypeIdForPreviewFile (taskTypeIds, previewFileId) {
+      return taskTypeIds.find((taskTypeId) => {
+        const previewFiles = this.shot.preview_files[taskTypeId]
+        return previewFiles.some(previewFile => {
+          return previewFile.id === previewFileId
+        })
+      })
+    },
+
+    setCurrentParameters () {
+      // Find task type matching current preview.
+      const taskTypeIds = Object.keys(this.shot.preview_files)
+      if (taskTypeIds.length > 0) {
+        if (this.shot.preview_file_id) {
+          this.taskTypeId = this.getTaskTypeIdForPreviewFile(
+            taskTypeIds,
+            this.shot.preview_file_id
+          )
+        }
+        if (!this.taskTypeId) {
+          this.taskTypeId = taskTypeIds[0]
+        }
+      }
+    },
+
+    setListeners () {
+      this.dropArea.addEventListener('dragover', this.onDragover)
+      this.dropArea.addEventListener('dragleave', this.onDragleave)
+    },
+
+    onDragged () {
+    },
+
+    onDragleave () {
+      this.dropArea.style.background = 'transparent'
+    },
+
+    onDragover () {
+      this.dropArea.style.background = '#00B242'
+    },
+
+    onDropped (shotId) {
+      this.$refs['drop-area'].style.background = 'transparent'
+      this.$emit('shot-dropped', {
+        before: this.shot.id,
+        after: shotId
+      })
+    },
+
     onPlayClick () {
       this.$emit('play-click', this.index)
     },
 
-    onRemoveClick () {
-      this.$emit('remove-click', this.shot)
-    }
-  },
-
-  mounted () {
-    const taskTypeIds = Object.keys(this.shot.preview_files)
-
-    if (taskTypeIds.length > 0) {
-      if (this.shot.preview_file_id) {
-        this.taskTypeId = taskTypeIds.find((taskTypeId) => {
-          const previewFiles = this.shot.preview_files[taskTypeId]
-          return previewFiles.find((previewFile) => {
-            return previewFile.id === this.shot.preview_file_id
-          })
-        })
-      } else {
-        this.taskTypeId = taskTypeIds[0]
-      }
+    onRemoveClick (event) {
+      event.preventDefault()
+      event.stopPropagation()
+      this.$emit('remove-shot', this.shot)
     }
   },
 
   watch: {
     taskTypeId () {
+      // Set current preview was last preview selected. If there is no preview
+      // matching this task type, it selects the first preview available for
+      // this task type.
       const previewFiles = this.shot.preview_files[this.taskTypeId]
       if (previewFiles && previewFiles.length > 0) {
-        if (!this.previewFileId) {
-          this.previewFileId = this.shot.preview_file_id || previewFiles[0].id
+        const isPreviewFile = previewFiles.some(previewFile => {
+          return previewFile.id === this.shot.preview_file_id
+        })
+        if (isPreviewFile) {
+          this.previewFileId = this.shot.preview_file_id
         } else {
           this.previewFileId = previewFiles[0].id
         }
@@ -150,29 +222,63 @@ export default {
 </script>
 
 <style lang="scss" scoped>
+.wrapper {
+  align-items: stretch;
+}
+
+.drop-area {
+  width: 10px;
+  margin-left: 10px;
+  height: 100%;
+}
+
 .playlisted-shot {
+  border-top: 3px solid transparent;
   display: flex;
   flex-direction: column;
-  padding-top: 5px;
-  border-top: 3px solid transparent;
-}
+  min-width: 150px;
+  padding:0;
 
-.playlisted-shot.playing {
-  border-top: 3px solid #CADFCA;
-}
-
-.field {
-  margin-bottom: 0.2em;
+  &.playing {
+    border-top: 3px solid $green;
+  }
 }
 
 .shot-title {
   margin-bottom: 0.6em;
 }
 
+.thumbnail-wrapper {
+  position: relative;
+}
+
+.field {
+  margin-bottom: 0em;
+}
+
+.version-combo {
+  margin-top: 0.6em;
+}
+
 .remove-button {
-  margin-top: 0.1em;
-  color: #AAA;
-  text-align: left;
-  font-size: 0.9em
+  position: absolute;
+  width: 20px;
+  height: 20px;
+  right: 0;
+  margin: 0.4em;
+  border-radius: 2em;
+  text-align: center;
+  background: rgba(0, 0, 0, 0.3);
+  cursor: pointer;
+  z-index: 100;
+
+  &:hover {
+    background: rgba(0, 0, 0, 0.2);
+  }
+
+  svg {
+    width: 10px;
+    height: 10px;
+  }
 }
 </style>

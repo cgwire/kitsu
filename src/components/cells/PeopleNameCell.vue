@@ -1,8 +1,8 @@
 <template>
 <td class="name">
   <div class="people-name">
-    <people-avatar class="avatar" :person="entry"></people-avatar>
-    <people-name class="people-name" :person="entry"></people-name>
+    <people-avatar class="avatar" :person="person" />
+    <people-name class="people-name" :person="person" />
   </div>
 </td>
 </template>
@@ -18,9 +18,14 @@ export default {
     PeopleName,
     PeopleAvatar
   },
-  props: [
-    'entry'
-  ],
+
+  props: {
+    person: {
+      type: Object,
+      required: true
+    }
+  },
+
   computed: {
     ...mapGetters([
     ])

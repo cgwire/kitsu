@@ -1,5 +1,5 @@
 <template>
-<div class="field" v-if="!isSimple">
+<div class="field">
   <label class="label" v-if="label.length > 0">
     {{ label }}
   </label>
@@ -13,12 +13,13 @@
       <select
         class="select-input"
         ref="select"
+        :disabled="disabled"
         @keyup.enter="emitEnter()"
         @change="updateValue"
       >
         <option
           v-for="(option, i) in options"
-          :key="i + '-' + option.label + '-' + option.value"
+          :key="`${i}-${option.label}-${option.value}`"
           :value="option.value || option.label"
           :selected="value === option.value"
         >
@@ -28,27 +29,6 @@
     </span>
   </p>
 </div>
-<span
-  class="select"
-  v-else
->
-  <select
-    class="select-input"
-    ref="select"
-    @keyup.enter="emitEnter()"
-    @change="updateValue"
-  >
-    <option
-      v-for="(option, i) in options"
-      :key="i + '-' + option.label + '-' + option.value"
-      :value="option.value || option.label"
-      :selected="value === option.value"
-    >
-      {{ getOptionLabel(option) }}
-    </option>
-  </select>
-</span>
-
 </template>
 
 <script>
@@ -62,7 +42,7 @@ export default {
     },
     value: {
       default: '',
-      type: [String, Boolean]
+      type: String
     },
     options: {
       default: () => [],
@@ -76,7 +56,7 @@ export default {
       default: false,
       type: Boolean
     },
-    isSimple: {
+    disabled: {
       default: false,
       type: Boolean
     }
@@ -89,6 +69,7 @@ export default {
     updateValue () {
       this.$emit('input', this.$refs.select.value)
     },
+
     emitEnter () {
       this.$emit('enter', this.$refs.select.value)
     },
@@ -105,6 +86,11 @@ export default {
 </script>
 
 <style lang="scss" scoped>
+.dark select:disabled {
+  background: $dark-grey;
+  border-color: $dark-grey-strong;
+}
+
 .is-top select {
   font-size: 1.2em;
   border: 0;
@@ -118,13 +104,21 @@ export default {
   outline: 0;
 }
 
-.is-top:after {
+.select-input {
+  height: 3em;
+}
+
+.select::after {
+  border: 1px solid $green;
+  border-right: 0;
+  border-top: 0;
+  margin-top: -2px;
+}
+
+.select.is-top::after {
   border: 2px solid $green;
   border-right: 0;
   border-top: 0;
-}
-
-.select-input {
-  height: 31px;
+  margin-top: -4px;
 }
 </style>

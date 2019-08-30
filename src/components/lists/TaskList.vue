@@ -76,7 +76,7 @@
             selected: selectionGrid[task.id]
           }"
           @click="selectTask($event, index, task)"
-          v-for="(task, index) in tasks"
+          v-for="(task, index) in displayedTasks"
         >
           <td class="thumbnail">
             <entity-thumbnail
@@ -165,22 +165,11 @@
 import Vue from 'vue'
 import { mapGetters, mapActions } from 'vuex'
 import moment from 'moment-timezone'
-import {
-  ChevronDownIcon
-} from 'vue-feather-icons'
-import { range } from '../../lib/helpers'
+import { range } from '../../lib/time'
 import { formatListMixin } from './format_mixin'
 
-import DescriptionCell from '../cells/DescriptionCell'
-import ButtonHrefLink from '../widgets/ButtonHrefLink'
-import ButtonLink from '../widgets/ButtonLink'
-import ButtonSimple from '../widgets/ButtonSimple'
 import EntityThumbnail from '../widgets/EntityThumbnail'
-import PageTitle from '../widgets/PageTitle'
-import RowActions from '../widgets/RowActions'
-import TableHeaderMenu from '../widgets/TableHeaderMenu'
 import TableInfo from '../widgets/TableInfo'
-import TableMetadataHeaderMenu from '../widgets/TableMetadataHeaderMenu'
 import PeopleAvatar from '../widgets/PeopleAvatar'
 import ValidationCell from '../cells/ValidationCell'
 
@@ -189,19 +178,18 @@ export default {
   mixins: [formatListMixin],
 
   components: {
-    ButtonLink,
-    ButtonSimple,
-    ButtonHrefLink,
-    DescriptionCell,
     EntityThumbnail,
-    ChevronDownIcon,
     PeopleAvatar,
-    PageTitle,
-    RowActions,
     TableInfo,
-    TableHeaderMenu,
-    TableMetadataHeaderMenu,
     ValidationCell
+  },
+
+  data () {
+    return {
+      lastSelection: null,
+      page: 1,
+      selectionGrid: {}
+    }
   },
 
   props: {
@@ -224,13 +212,6 @@ export default {
     taskType: {
       type: Object,
       default: () => {}
-    }
-  },
-
-  data () {
-    return {
-      lastSelection: null,
-      selectionGrid: {}
     }
   },
 
@@ -267,6 +248,14 @@ export default {
         if (entity && entity.nb_frames) total += entity.nb_frames
       })
       return total
+    },
+
+    displayedTasks () {
+      if (this.tasks && this.tasks.length > 0) {
+        return this.tasks.slice(0, 60 * this.page)
+      } else {
+        return []
+      }
     }
   },
 
@@ -304,6 +293,11 @@ export default {
     onBodyScroll (event, position) {
       this.$refs.headerWrapper.style.left = `-${position.scrollLeft}px`
       this.$emit('scroll', position.scrollTop)
+      const maxHeight =
+        this.$refs.body.scrollHeight - this.$refs.body.offsetHeight
+      if (maxHeight < (position.scrollTop + 100)) {
+        this.page++
+      }
     },
 
     getEntity (entityId) {
@@ -370,7 +364,7 @@ export default {
 
     scrollToLine (taskId) {
       const taskLine = this.$refs['task-' + taskId]
-      if (taskLine) {
+      if (taskLine && this.$refs.body) {
         const margin = 30
         const rect = taskLine[0].getBoundingClientRect()
         const listRect = this.$refs.body.getBoundingClientRect()
@@ -403,9 +397,9 @@ export default {
       ) {
         const bodyElement = this.$refs['body-tbody'].children[0]
         const columnDescriptors = [
-          {index: 1, name: 'type'},
-          {index: 2, name: 'name'},
-          {index: 4, name: 'assignees'}
+          { index: 1, name: 'type' },
+          { index: 2, name: 'name' },
+          { index: 4, name: 'assignees' }
         ]
         columnDescriptors.forEach(desc => {
           const width = Math.max(
@@ -464,6 +458,7 @@ export default {
 
   watch: {
     tasks () {
+      this.page = 1
       this.resetSelection()
       this.$nextTick(this.resizeHeaders)
     },

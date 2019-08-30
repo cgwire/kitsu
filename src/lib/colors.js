@@ -8,9 +8,9 @@ export default {
    * Convert a string (it can be anything) into a HTML color hash.
    */
   fromString (str) {
-    let colorHash = new ColorHash({lightness: 0.7, saturation: 0.8})
+    let colorHash = new ColorHash({ lightness: 0.7, saturation: 0.8 })
     if (localStorage && localStorage.getItem('dark-theme') === 'true') {
-      colorHash = new ColorHash({lightness: 0.6, saturation: 0.8})
+      colorHash = new ColorHash({ lightness: 0.6, saturation: 0.8 })
     }
     return colorHash.hex(str)
   },

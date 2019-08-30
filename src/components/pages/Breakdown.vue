@@ -1,10 +1,27 @@
 <template>
   <div class="breakdown page">
-    <div class="breakdown-columns mt2">
+    <div class="breakdown-columns mt1">
 
       <div class="breakdown-column shot-column">
-        <spinner v-if="isShotsLoading" />
-        <div v-else>
+        <div class="flexrow mb1">
+          <span class="filler"></span>
+          <button-simple
+            class="flexrow-item"
+            :title="$t('main.csv.import_file')"
+            icon="upload"
+            :is-responsive="true"
+            @click="showImportModal"
+          />
+          <button-href-link
+            class="flexrow-item"
+            :title="$t('main.csv.export_file')"
+            icon="download"
+            :is-responsive="true"
+            :path="exportUrlPath"
+          />
+        </div>
+        <spinner class="mt1" v-if="isShotsLoading" />
+        <div class="mt1" v-else>
           <combobox
             :label="$t('shots.fields.sequence')"
             :options="castingSequenceOptions"
@@ -42,8 +59,7 @@
           :align-right="true"
           :hidden="!isSavingError"
           :text="$t('breakdown.save_error')"
-        >
-        </error-text>
+        />
         <spinner v-if="isLoading" />
         <div
           class="type-assets"
@@ -62,8 +78,7 @@
               @remove-one="removeOneAsset"
               @remove-ten="removeTenAssets"
               v-for="asset in typeAssets"
-            >
-            </asset-block>
+            />
           </div>
         </div>
       </div>
@@ -78,13 +93,11 @@
           {{ $t('breakdown.all_assets') }}
         </h2>
 
-        <div class="filters-area">
-          <div class="level">
-            <search-field
-              @change="onSearchChange"
-            >
-            </search-field>
-          </div>
+        <div class="filters-area flexrow">
+          <search-field
+            class="flexrow-item"
+            @change="onSearchChange"
+          />
         </div>
 
         <spinner v-if="isAssetsLoading" />
@@ -112,21 +125,33 @@
       </div>
 
     </div>
+
+    <import-modal
+      :active="modals.importing"
+      :is-loading="loading.importing"
+      :is-error="errors.importing"
+      :form-data="importCsvFormData"
+      :columns="csvColumns"
+      @fileselected="selectFile"
+      @confirm="uploadImportFile"
+      @cancel="hideImportModal"
+    />
   </div>
 </template>
 
 <script>
 import { mapGetters, mapActions } from 'vuex'
 
-import PageTitle from '../widgets/PageTitle'
-import Spinner from '../widgets/Spinner'
-import Combobox from '../widgets/Combobox'
-import SearchField from '../widgets/SearchField.vue'
-import ErrorText from '../widgets/ErrorText'
-import ShotLine from './breakdown/ShotLine'
 import AssetBlock from './breakdown/AssetBlock'
 import AvailableAssetBlock from './breakdown/AvailableAssetBlock'
-import { SaveIcon, SearchIcon } from 'vue-feather-icons'
+import ButtonHrefLink from '../widgets/ButtonHrefLink.vue'
+import ButtonSimple from '../widgets/ButtonSimple'
+import Combobox from '../widgets/Combobox'
+import ErrorText from '../widgets/ErrorText'
+import ImportModal from '../modals/ImportModal'
+import SearchField from '../widgets/SearchField.vue'
+import ShotLine from './breakdown/ShotLine'
+import Spinner from '../widgets/Spinner'
 
 export default {
   name: 'asset-types',
@@ -134,11 +159,11 @@ export default {
   components: {
     AssetBlock,
     AvailableAssetBlock,
+    ButtonHrefLink,
+    ButtonSimple,
     Combobox,
     ErrorText,
-    PageTitle,
-    SaveIcon,
-    SearchIcon,
+    ImportModal,
     SearchField,
     ShotLine,
     Spinner
@@ -146,13 +171,37 @@ export default {
 
   data () {
     return {
+      csvColumns: [
+        'Episode',
+        'Parent',
+        'Name',
+        'Asset Type',
+        'Asset',
+        'Occurences',
+        'Label'
+      ],
+      importCsvFormData: {},
       isLoading: false,
       isSaving: false,
       isSavingError: false,
       sequenceId: '',
       episodeId: '',
-      shotId: ''
+      shotId: '',
+      modals: {
+        importing: false
+      },
+      loading: {
+        importing: false
+      },
+      errors: {
+        importing: false
+      }
     }
+  },
+
+  mounted () {
+    this.reset()
+    this.setLastProductionScreen('breakdown')
   },
 
   computed: {
@@ -191,27 +240,29 @@ export default {
         if (newGroup.length > 0) result.push(newGroup)
       })
       return result
-    }
-  },
+    },
 
-  mounted () {
-    this.reset()
-    this.setLastProductionScreen('breakdown')
+    exportUrlPath () {
+      return (
+        `/api/export/csv/projects/${this.currentProduction.id}/casting.csv`
+      )
+    }
   },
 
   methods: {
     ...mapActions([
+      'addAssetToCasting',
       'displayMoreAssets',
       'loadShots',
       'loadAssets',
+      'removeAssetFromCasting',
       'saveCasting',
       'setAssetSearch',
       'setCastingEpisode',
       'setCastingSequence',
       'setCastingShot',
-      'addAssetToCasting',
-      'removeAssetFromCasting',
-      'setLastProductionScreen'
+      'setLastProductionScreen',
+      'uploadCastingFile'
     ]),
 
     reset () {
@@ -276,22 +327,22 @@ export default {
     },
 
     addOneAsset (assetId) {
-      this.addAssetToCasting({assetId, nbOccurences: 1})
+      this.addAssetToCasting({ assetId, nbOccurences: 1 })
       this.saveCasting()
     },
 
     addTenAssets (assetId) {
-      this.addAssetToCasting({assetId, nbOccurences: 10})
+      this.addAssetToCasting({ assetId, nbOccurences: 10 })
       this.saveCasting()
     },
 
     removeOneAsset (assetId) {
-      this.removeAssetFromCasting({assetId, nbOccurences: 1})
+      this.removeAssetFromCasting({ assetId, nbOccurences: 1 })
       this.saveCasting()
     },
 
     removeTenAssets (assetId) {
-      this.removeAssetFromCasting({assetId, nbOccurences: 10})
+      this.removeAssetFromCasting({ assetId, nbOccurences: 10 })
       this.saveCasting()
     },
 
@@ -301,6 +352,34 @@ export default {
       if (maxHeight < (position.scrollTop + 100)) {
         this.displayMoreAssets()
       }
+    },
+
+    showImportModal () {
+      this.modals.importing = true
+    },
+
+    hideImportModal () {
+      this.modals.importing = false
+    },
+
+    selectFile (formData) {
+      this.importCsvFormData = formData
+    },
+
+    uploadImportFile () {
+      this.loading.importing = true
+      this.errors.importing = false
+      this.uploadCastingFile(this.importCsvFormData)
+        .then(() => {
+          this.loading.importing = false
+          this.hideImportModal()
+          this.reloadShots()
+        })
+        .catch(() => {
+          console.log('bad 2')
+          this.loading.importing = false
+          this.errors.importing = true
+        })
     }
   },
 
@@ -335,6 +414,7 @@ export default {
     },
 
     castingSequenceOptions () {
+      console.log('options changed', this.castingSequenceOptions)
       if (this.castingSequenceOptions.length > 0) {
         const shot = this.shotMap[this.shotId]
         if (this.shotId && shot) {
@@ -355,6 +435,10 @@ export default {
       if (this.currentEpisode && this.episodeId !== this.currentEpisode.id) {
         this.reset()
       }
+    },
+
+    sequences () {
+      this.$store.commit('CASTING_SET_SEQUENCES', this.sequences)
     }
   },
 
@@ -367,6 +451,17 @@ export default {
 </script>
 
 <style lang="scss" scoped>
+.dark {
+  .breakdown {
+    background: $dark-grey-2;
+  }
+  .breakdown-column {
+    background: $dark-grey-light;
+    border: 1px solid #222;
+    box-shadow: 0px 0px 6px #222;
+  }
+}
+
 .breakdown {
   position: fixed;
   left: 0;
@@ -375,10 +470,10 @@ export default {
   bottom: 0;
   display: flex;
   flex-direction: column;
-}
-
-.title {
-  margin-top: 1em;
+  background: #FAFAFA;
+  padding-left: 1em;
+  padding-right: 1em;
+  padding-bottom: 1em;
 }
 
 .breakdown-columns {
@@ -391,23 +486,26 @@ export default {
 .breakdown-column {
   flex: 1;
   overflow-y: auto;
+  padding: 1em;
+  background: white;
+  border: 1px solid #EEE;
+  box-shadow: 0px 0px 6px #E0E0E0;
+  border-radius: 1em;
+  margin-left: 0.5em;
 }
 
 .breakdown-column:first-child {
   max-width: 250px;
+  margin-left: 0;
 }
 
 .shot-column {
-  padding: 0 1em 0 0;
 }
 
 .casting-column {
-  padding: 0 1em;
 }
 
 .assets-column {
-  border-left: 4px solid $white-grey;
-  padding-left: 1em;
 }
 
 .asset-type,

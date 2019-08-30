@@ -49,7 +49,7 @@
 import { mapGetters, mapActions } from 'vuex'
 import ProductionList from '../lists/ProductionList'
 import EditProductionModal from '../modals/EditProductionModal'
-import DeleteModal from '../widgets/DeleteModal'
+import DeleteModal from '../modals/DeleteModal'
 import ButtonLink from '../widgets/ButtonLink'
 import PageTitle from '../widgets/PageTitle'
 
@@ -140,7 +140,7 @@ export default {
     deleteText () {
       const production = this.productionToDelete
       if (production) {
-        return this.$t('productions.delete_text', {name: production.name})
+        return this.$t('productions.delete_text', { name: production.name })
       } else {
         return ''
       }

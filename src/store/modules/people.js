@@ -1,6 +1,8 @@
+import Vue from 'vue'
 import peopleApi from '../api/people'
 import colors from '../../lib/colors'
-import { populateTask, clearSelectionGrid } from '../../lib/helpers'
+import { clearSelectionGrid } from '../../lib/selection'
+import { populateTask } from '../../lib/models'
 import { sortTasks, sortPeople, sortByName } from '../../lib/sorting'
 import {
   indexSearch,
@@ -57,6 +59,8 @@ import {
   PEOPLE_TIMESHEET_LOADED,
   PERSON_LOAD_TIME_SPENTS_END,
 
+  SET_ORGANISATION,
+
   SET_PERSON_TASKS_SCROLL_POSITION,
 
   PEOPLE_SEARCH_CHANGE,
@@ -83,13 +87,14 @@ const helpers = {
         person.initials = 'NN'
       }
 
-      person.initials = person.initials.toUpperCase()
+      Vue.set(person, 'initials', person.initials.toUpperCase())
       person.color = colors.fromString(person.name)
-      if (person.has_avatar) {
+      if (person.has_avatar && !person.uniqueHash) {
         const randomHash = Math.random().toString(36).substring(7)
+        Vue.set(person, 'uniqueHash', randomHash)
         person.avatarPath =
           `/api/pictures/thumbnails/persons/${person.id}` +
-          `.png?unique=${randomHash}`
+          `.png`
       }
     }
     return person
@@ -101,6 +106,13 @@ const helpers = {
 }
 
 const initialState = {
+  organisation: {
+    name: 'Kitsu',
+    hours_by_day: 8,
+    has_avatar: false,
+    use_original_file_name: 'false'
+  },
+
   people: [],
   displayedPeople: [],
   peopleIndex: {},
@@ -146,6 +158,8 @@ const state = {
 }
 
 const getters = {
+  organisation: state => state.organisation,
+
   people: state => state.people,
   displayedPeople: state => state.displayedPeople,
   peopleIndex: state => state.peopleIndex,
@@ -193,6 +207,41 @@ const getters = {
 
 const actions = {
 
+  getOrganisation ({ commit }) {
+    return new Promise((resolve, reject) => {
+      peopleApi.getOrganisation()
+        .then((organisation) => {
+          commit(SET_ORGANISATION, organisation)
+          resolve()
+        })
+        .catch(reject)
+    })
+  },
+
+  saveOrganisation ({ commit }, form) {
+    return new Promise((resolve, reject) => {
+      form.id = state.organisation.id
+      peopleApi.updateOrganisation(form)
+        .then((organisation) => {
+          commit(SET_ORGANISATION, organisation)
+          resolve()
+        })
+        .catch(reject)
+    })
+  },
+
+  uploadOrganisationLogo ({ commit, state }, formData) {
+    return new Promise((resolve, reject) => {
+      const organisationId = state.organisation.id
+      peopleApi.postOrganisationLogo(organisationId, formData)
+        .then((organisation) => {
+          commit(SET_ORGANISATION, { has_avatar: true })
+          resolve()
+        })
+        .catch(reject)
+    })
+  },
+
   loadPeople ({ commit, state }, callback) {
     commit(LOAD_PEOPLE_START)
     peopleApi.getPeople((err, people) => {
@@ -218,30 +267,54 @@ const actions = {
     })
   },
 
-  newPeople ({ commit, state }, payload) {
-    commit(EDIT_PEOPLE_START, payload.data)
-    peopleApi.newPerson(state.personToEdit, (err, person) => {
-      if (err) {
-        commit(EDIT_PEOPLE_ERROR)
-      } else {
-        commit(NEW_PEOPLE_END, person.id)
-        commit(EDIT_PEOPLE_END)
-        commit(HIDE_EDIT_PEOPLE_MODAL)
-      }
-      if (payload.callback) payload.callback(err)
+  newPerson ({ commit, state }, data) {
+    return new Promise((resolve, reject) => {
+      commit(EDIT_PEOPLE_START, data)
+      peopleApi.newPerson(state.personToEdit)
+        .then((person) => {
+          commit(HIDE_EDIT_PEOPLE_MODAL)
+          resolve(person)
+        })
+        .catch((err) => {
+          commit(EDIT_PEOPLE_ERROR)
+          reject(err)
+        })
     })
   },
 
-  editPeople ({ commit, state }, payload) {
-    commit(EDIT_PEOPLE_START, payload.data)
-    peopleApi.updatePerson(state.personToEdit, (err, people) => {
-      if (err) {
-        commit(EDIT_PEOPLE_ERROR)
-      } else {
-        commit(EDIT_PEOPLE_END, state.personToEdit)
-        commit(HIDE_EDIT_PEOPLE_MODAL)
-      }
-      if (payload.callback) payload.callback(err)
+  newPersonAndInvite ({ commit, state }, data) {
+    return new Promise((resolve, reject) => {
+      commit(EDIT_PEOPLE_START, data)
+      peopleApi.newPerson(state.personToEdit)
+        .then(peopleApi.invitePerson)
+        .then(() => {
+          commit(HIDE_EDIT_PEOPLE_MODAL)
+          resolve()
+        })
+        .catch((err) => {
+          commit(EDIT_PEOPLE_ERROR)
+          reject(err)
+        })
+    })
+  },
+
+  invitePerson ({ commit, state }) {
+    return peopleApi.invitePerson(state.personToEdit)
+  },
+
+  editPerson ({ commit, state }, data) {
+    return new Promise((resolve, reject) => {
+      commit(EDIT_PEOPLE_START, data)
+      peopleApi.updatePerson(state.personToEdit)
+        .then((person) => {
+          commit(EDIT_PEOPLE_END, state.personToEdit)
+          commit(HIDE_EDIT_PEOPLE_MODAL)
+          resolve(person)
+        })
+        .catch((err) => {
+          commit(EDIT_PEOPLE_ERROR)
+          reject(err)
+        })
     })
   },
 
@@ -386,7 +459,7 @@ const actions = {
     })
   },
 
-  setTimeSpent ({ commit }, {personId, taskId, date, duration}) {
+  setTimeSpent ({ commit }, { personId, taskId, date, duration }) {
     return new Promise((resolve, reject) => {
       peopleApi.setTimeSpent(
         taskId,
@@ -467,13 +540,16 @@ const mutations = {
 
   [DELETE_PEOPLE_END] (state, person) {
     state.isDeleteLoading = false
-    const personToDeleteIndex = state.people.findIndex(
-      (p) => p.id === person.id
-    )
-    if (personToDeleteIndex >= 0) {
-      state.people.splice(personToDeleteIndex, 1)
+    state.personToDelete = undefined
+    if (person) {
+      const personToDeleteIndex = state.people.findIndex(
+        (p) => p.id === person.id
+      )
+      if (personToDeleteIndex >= 0) {
+        state.people.splice(personToDeleteIndex, 1)
+      }
+      delete state.personMap[person.id]
     }
-    delete state.personMap[person.id]
   },
 
   [DELETE_PEOPLE_ERROR] (state) {
@@ -501,34 +577,34 @@ const mutations = {
     state.personToEdit = Object.assign(state.personToEdit, data)
   },
 
-  [NEW_PEOPLE_END] (state, personId) {
-    state.personToEdit.id = personId
+  [NEW_PEOPLE_END] (state) {
   },
 
   [EDIT_PEOPLE_END] (state, form) {
     state.isEditLoading = false
     state.isEditLoadingError = false
+
+    let personToAdd = { ...form }
+    personToAdd = helpers.addAdditionalInformation(personToAdd)
+
     const personToEditIndex = state.people.findIndex(
-      (person) => person.id === state.personToEdit.id
+      (person) => person.id === personToAdd.id
     )
-    state.personToEdit = helpers.addAdditionalInformation(state.personToEdit)
-    if (personToEditIndex >= 0) {
-      console.log('ok', state.personToEdit.name)
-      delete state.people[personToEditIndex]
-      state.personMap[state.personToEdit.id] = {...state.personToEdit}
-      state.people[personToEditIndex] = state.personMap[state.personToEdit.id]
-    } else {
-      state.people = [
-        ...state.people,
-        state.personToEdit
-      ]
-      state.personMap[state.personToEdit.id] = state.personToEdit
-      state.displayedPeople.push(state.personToEdit)
-      sortPeople(state.people)
-      sortPeople(state.displayedPeople)
-    }
-    state.personToEdit = {
-      role: 'user'
+    if (personToAdd.name) {
+      if (personToEditIndex >= 0) {
+        state.personMap[state.personToEdit.id] = personToAdd
+        delete state.people[personToEditIndex]
+        state.people[personToEditIndex] = state.personMap[state.personToEdit.id]
+      } else if (!state.personMap[personToAdd.id]) {
+        state.people.push(personToAdd)
+        state.personMap[personToAdd.id] = personToAdd
+      }
+      state.people = sortPeople(state.people)
+      state.displayedPeople = state.people
+      state.peopleIndex = buildNameIndex(state.people)
+      state.personToEdit = {
+        role: 'user'
+      }
     }
   },
 
@@ -591,12 +667,14 @@ const mutations = {
   },
 
   [UPLOAD_AVATAR_END] (state, personId) {
-    const randomHash = Math.random().toString(36).substring(7)
     const person = state.personMap[personId]
-    person.has_avatar = true
-    person.avatarPath =
-      `/api/pictures/thumbnails/persons/${person.id}` +
-      `.png?unique=${randomHash}`
+    if (person) {
+      const randomHash = Math.random().toString(36).substring(7)
+      person.has_avatar = true
+      Vue.set(person, 'uniqueHash', randomHash)
+      person.avatarPath =
+        `/api/pictures/thumbnails/persons/${person.id}.png`
+    }
   },
 
   [LOAD_PERSON_TASKS_END] (
@@ -656,7 +734,7 @@ const mutations = {
     }
   },
 
-  [NEW_TASK_COMMENT_END] (state, {comment, taskId}) {
+  [NEW_TASK_COMMENT_END] (state, { comment, taskId }) {
     const task = state.personTasks.find((task) => task.id === taskId)
 
     if (task) {
@@ -737,8 +815,13 @@ const mutations = {
     }
   },
 
+  [SET_ORGANISATION] (state, organisation) {
+    Object.assign(state.organisation, organisation)
+    state.organisation = { ...state.organisation }
+  },
+
   [RESET_ALL] (state, people) {
-    Object.assign(state, {...initialState})
+    Object.assign(state, { ...initialState })
   }
 }
 

@@ -47,7 +47,7 @@
 <script>
 import { mapGetters, mapActions } from 'vuex'
 import ButtonLink from '../widgets/ButtonLink'
-import DeleteModal from '../widgets/DeleteModal'
+import DeleteModal from '../modals/DeleteModal'
 import EditTaskTypeModal from '../modals/EditTaskTypeModal'
 import PageTitle from '../widgets/PageTitle'
 import TaskTypeList from '../lists/TaskTypeList'
@@ -134,7 +134,7 @@ export default {
     deleteText () {
       const taskType = this.taskTypeToDelete
       if (taskType) {
-        return this.$t('task_types.delete_text', {name: taskType.name})
+        return this.$t('task_types.delete_text', { name: taskType.name })
       } else {
         return ''
       }
@@ -144,7 +144,7 @@ export default {
       const path = this.$store.state.route.path
       const taskTypeId = this.$store.state.route.params.task_type_id
       if (path.indexOf('new') > 0) {
-        this.taskTypeToEdit = {color: '#999999'}
+        this.taskTypeToEdit = { color: '#999999' }
         this.modals.isNewDisplayed = true
       } else if (path.indexOf('edit') > 0) {
         this.taskTypeToEdit = this.getTaskType(taskTypeId)

@@ -1,9 +1,8 @@
-import { expect } from 'chai'
 import test from '../../../src/lib/string'
 import {
   getFilledColumns,
   populateTask
-} from '../../../src/lib/helpers'
+} from '../../../src/lib/models'
 
 describe('lib/helpers', () => {
 
@@ -13,7 +12,7 @@ describe('lib/helpers', () => {
       'entity_type_name': 'Characters'
     }
     populateTask(task)
-    expect(task.full_entity_name).to.equal('Characters / Agent 327')
+    expect(task.full_entity_name).toEqual('Characters / Agent 327')
 
     task = {
       'entity_name': 'SH01',
@@ -22,7 +21,7 @@ describe('lib/helpers', () => {
       'episode_name': 'E01'
     }
     populateTask(task)
-    expect(task.full_entity_name).to.equal('E01 / SQ01 / SH01')
+    expect(task.full_entity_name).toEqual('E01 / SQ01 / SH01')
 
     task = {
       'entity_name': 'SH01',
@@ -30,7 +29,7 @@ describe('lib/helpers', () => {
       'sequence_name': 'SQ01'
     }
     populateTask(task)
-    expect(task.full_entity_name).to.equal('SQ01 / SH01')
+    expect(task.full_entity_name).toEqual('SQ01 / SH01')
   })
 
   it('getFilledColumns', () => {
@@ -56,8 +55,8 @@ describe('lib/helpers', () => {
       }
     ]
     const filledColumns = getFilledColumns(assets)
-    expect(filledColumns['task-type-1']).to.be.ok
-    expect(filledColumns['task-type-2']).to.be.ok
-    expect(filledColumns['task-type-3']).to.be.ok
+    expect(filledColumns['task-type-1']).toBeTruthy()
+    expect(filledColumns['task-type-2']).toBeTruthy()
+    expect(filledColumns['task-type-3']).toBeTruthy()
   })
 })

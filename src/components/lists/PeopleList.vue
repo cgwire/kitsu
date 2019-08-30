@@ -30,14 +30,14 @@
   <div class="table-body" v-scroll="onBodyScroll">
 
     <table class="table splitted-table" v-if="activePeople.length > 0">
-      <tr class="type-header">
-        <td colspan="30">
-          {{ $t('people.active') }}
-        </td>
-      </tr>
       <tbody>
+        <tr class="type-header">
+          <td colspan="30">
+            {{ $t('people.active') }}
+          </td>
+        </tr>
         <tr v-for="entry in activePeople" :key="entry.id">
-          <people-name-cell class="name" :entry="entry" />
+          <people-name-cell class="name" :person="entry" />
           <td class="email">{{ entry.email }}</td>
           <td class="phone">{{ entry.phone }}</td>
           <td class="role">{{ $t('people.role.' + entry.role) }}</td>
@@ -61,18 +61,17 @@
     </table>
 
     <table class="table splitted-table" v-if="unactivePeople.length > 0">
-      <tr class="type-header">
-        <td colspan="30">
-          {{ $t('people.unactive') }}
-        </td>
-      </tr>
       <tbody>
+        <tr class="type-header">
+          <td colspan="30">
+            {{ $t('people.unactive') }}
+          </td>
+        </tr>
         <tr v-for="entry in unactivePeople" :key="entry.id">
-          <people-name-cell class="name" :entry="entry" />
+          <people-name-cell class="name" :person="entry" />
           <td class="email">{{ entry.email }}</td>
           <td class="phone">{{ entry.phone }}</td>
           <td class="role">{{ $t('people.role.' + entry.role) }}</td>
-          <td class="active">{{ entry.active ? $t('main.yes') : $t('main.no') }}</td>
           <row-actions
             v-if="isCurrentUserAdmin"
             :entry-id="entry.id"

@@ -17,8 +17,6 @@
 </template>
 
 <script>
-import { SaveIcon, SearchIcon, XIcon } from 'vue-feather-icons'
-
 export default {
   name: 'search-query-list',
   props: {
@@ -28,9 +26,6 @@ export default {
     }
   },
   components: {
-    XIcon,
-    SaveIcon,
-    SearchIcon
   },
   computed: {
   },

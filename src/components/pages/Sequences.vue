@@ -1,24 +1,45 @@
 <template>
   <div class="sequences page fixed-page">
-    <div class="sequence-list-header page-header">
-      <div class="level header-title">
-        <div class="level-left filters-area">
-          <search-field
-            ref="sequence-search-field"
-            @change="onSearchChange"
-            placeholder="ex: e01 s01 anim=wip"
-          />
-        </div>
-      </div>
+    <div class="sequence-list-header page-header flexrow">
+      <search-field
+        class="flexrow-item mt1"
+        ref="sequence-search-field"
+        @change="onSearchChange"
+        placeholder="ex: e01 s01 anim=wip"
+      />
+      <combobox
+        class="mb0 flexrow-item"
+        :label="$t('statistics.display_mode')"
+        locale-key-prefix="statistics."
+        :options="displayModeOptions"
+        v-model="displayMode"
+      />
+      <combobox
+        class="mb0 flexrow-item"
+        :label="$t('statistics.count_mode')"
+        locale-key-prefix="statistics."
+        :options="countModeOptions"
+        v-model="countMode"
+      />
+      <span class="filler">
+      </span>
+      <button-simple
+        class="flexrow-item"
+        icon="download"
+        @click="exportStatisticsToCsv"
+      />
     </div>
 
     <sequence-list
       ref="sequence-list"
+      :count-mode="countMode"
+      :display-mode="displayMode"
       :entries="displayedSequences"
       :is-loading="isShotsLoading || initialLoading"
       :is-error="isShotsLoadingError"
       :validation-columns="shotValidationColumns"
       :sequence-stats="sequenceStats"
+      :show-all="sequenceSearchText.length === 0"
       @scroll="saveScrollPosition"
     />
 
@@ -45,43 +66,57 @@
 </template>
 
 <script>
+import moment from 'moment'
 import { mapGetters, mapActions } from 'vuex'
-import { SearchIcon } from 'vue-feather-icons'
-import SequenceList from '../lists/SequenceList.vue'
-import DeleteModal from '../widgets/DeleteModal'
+import csv from '../../lib/csv'
+import { slugify } from '../../lib/string'
+
+import ButtonSimple from '../widgets/ButtonSimple'
+import Combobox from '../widgets/Combobox'
+import DeleteModal from '../modals/DeleteModal'
 import EditSequenceModal from '../modals/EditSequenceModal'
-import PageTitle from '../widgets/PageTitle'
 import SearchField from '../widgets/SearchField'
+import SequenceList from '../lists/SequenceList.vue'
 
 export default {
   name: 'sequences',
 
   components: {
-    SequenceList,
-    EditSequenceModal,
+    ButtonSimple,
+    Combobox,
     DeleteModal,
-    PageTitle,
+    EditSequenceModal,
     SearchField,
-    SearchIcon
+    SequenceList
   },
 
   data () {
     return {
+      countMode: 'count',
+      displayMode: 'pie',
       initialLoading: true,
-      modals: {
-        isNewDisplayed: false,
-        isDeleteDisplayed: false
+      sequenceToDelete: null,
+      sequenceToEdit: null,
+      countModeOptions: [
+        { label: 'shots', value: 'count' },
+        { label: 'frames', value: 'frames' }
+      ],
+      displayModeOptions: [
+        { label: 'pie', value: 'pie' },
+        { label: 'count', value: 'count' }
+      ],
+      errors: {
+        edit: false,
+        del: false
       },
       loading: {
         edit: false,
         del: false
       },
-      errors: {
-        edit: false,
-        del: false
-      },
-      sequenceToDelete: null,
-      sequenceToEdit: null
+      modals: {
+        isNewDisplayed: false,
+        isDeleteDisplayed: false
+      }
     }
   },
 
@@ -100,7 +135,9 @@ export default {
       'sequenceStats',
       'sequenceSearchText',
       'sequenceListScrollPosition',
-      'shotValidationColumns'
+      'shotValidationColumns',
+      'taskTypeMap',
+      'taskStatusMap'
     ])
   },
 
@@ -193,7 +230,7 @@ export default {
     deleteText () {
       const sequence = this.sequenceToDelete
       if (sequence) {
-        return this.$t('sequences.delete_text', {name: sequence.name})
+        return this.$t('sequences.delete_text', { name: sequence.name })
       } else {
         return ''
       }
@@ -236,6 +273,27 @@ export default {
           this.$refs['sequence-list'].resizeHeaders()
         }
       }, 0)
+    },
+
+    exportStatisticsToCsv () {
+      const nameData = [
+        moment().format('YYYYMMDD'),
+        this.currentProduction.name,
+        'sequences',
+        'statistics'
+      ]
+      if (this.currentEpisode) {
+        nameData.splice(2, 0, this.currentEpisode.name)
+      }
+      const name = slugify(nameData.join('_'))
+      csv.generateStatReports(
+        name,
+        this.sequenceStats,
+        this.taskTypeMap,
+        this.taskStatusMap,
+        this.sequenceMap,
+        this.countMode
+      )
     }
   },
 
@@ -298,11 +356,7 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-.data-list {
-  margin-top: 0;
-}
-
-.filters-area {
-  margin-bottom: 2em;
+.mb0 {
+  margin-bottom: 0;
 }
 </style>

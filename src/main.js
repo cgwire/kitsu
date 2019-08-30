@@ -11,8 +11,10 @@ import Chart from 'chart.js'
 import Meta from 'vue-meta'
 import VueChartkick from 'vue-chartkick'
 import VueCookie from 'vue-cookie'
+import VueDragDrop from 'vue-drag-drop'
 import VueLazyload from 'vue-lazyload'
 import vuescroll from 'vue-scroll'
+import VueTextareaAutosize from 'vue-textarea-autosize'
 import VueWebsocket from 'vue-websocket'
 import VTooltip from 'v-tooltip'
 
@@ -21,12 +23,14 @@ import 'v-autocomplete/dist/v-autocomplete.css'
 Vue.config.productionTip = false
 Vue.use(Autocomplete)
 Vue.use(Meta)
-Vue.use(VueChartkick, {adapter: Chart})
+Vue.use(VTooltip)
+Vue.use(VueChartkick, { adapter: Chart })
 Vue.use(VueCookie)
 Vue.use(VueLazyload)
 Vue.use(vuescroll)
+Vue.use(VueDragDrop)
+Vue.use(VueTextareaAutosize)
 Vue.use(VueWebsocket, '/events')
-Vue.use(VTooltip)
 
 // Make the current route part of the main state.
 sync(store, router)
@@ -66,3 +70,5 @@ document.addEventListener('keyup', (evt) => {
     store.commit('CLEAR_SELECTED_TASKS')
   }
 })
+
+Vue.config.keyCodes.backspace = 8

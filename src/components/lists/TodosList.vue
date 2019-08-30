@@ -1,5 +1,5 @@
 <template>
-<div class="data-list">
+<div class="data-list task-list">
   <div style="overflow: hidden">
     <table class="table table-header" ref="headerWrapper">
       <thead>
@@ -43,7 +43,14 @@
   >
     <table class="table">
       <tbody ref="body-tbody">
-        <tr v-for="(entry, i) in entries" :key="entry + '-' + i">
+        <tr
+          v-for="(entry, i) in entries"
+          :key="entry + '-' + i"
+          :class="{
+            selected: selectionGrid && selectionGrid[i] ? selectionGrid[i][0] : false
+          }"
+          @click="onLineClicked(i, $event)"
+        >
           <production-name-cell
             class="production"
             :is-tooltip="true"
@@ -82,6 +89,7 @@
             :is-border="false"
             :is-assignees="false"
             :selectable="!done"
+            :clickable="false"
             :selected="selectionGrid && selectionGrid[i] ? selectionGrid[i][0] : false"
             :rowX="i"
             :columnY="0"
@@ -107,12 +115,17 @@
     :is-error="isError"
   />
 
-  <p
+  <div
     class="has-text-centered empty-list"
     v-if="entries.length === 0 && !isLoading"
   >
-    {{ $t('people.no_task_assigned') }}
-  </p>
+    <p>
+      <img src="../../assets/illustrations/empty_todo.png" />
+    </p>
+    <p>
+      {{ $t('people.no_task_assigned') }}
+    </p>
+  </div>
 
   <p
     class="has-text-centered footer-info"
@@ -130,7 +143,6 @@ import moment from 'moment-timezone'
 import EntityThumbnail from '../widgets/EntityThumbnail'
 import TaskTypeName from '../cells/TaskTypeName'
 import TableInfo from '../widgets/TableInfo'
-import ValidationTag from '../widgets/ValidationTag'
 
 import DescriptionCell from '../cells/DescriptionCell'
 import LastCommentCell from '../cells/LastCommentCell'
@@ -150,8 +162,7 @@ export default {
     ProductionNameCell,
     TableInfo,
     TaskTypeName,
-    ValidationCell,
-    ValidationTag
+    ValidationCell
   },
 
   props: [
@@ -198,6 +209,12 @@ export default {
       this.$emit('scroll', position.scrollTop)
     },
 
+    onLineClicked (i, event) {
+      const ref = 'validation-' + i + '-0'
+      const validationCell = this.$refs[ref][0]
+      validationCell.select(event)
+    },
+
     onTaskSelected (validationInfo) {
       if (validationInfo.isShiftKey) {
         if (this.lastSelection) {
@@ -212,7 +229,7 @@ export default {
             const ref = 'validation-' + i + '-' + 0
             const validationCell = this.$refs[ref][0]
             if (!this.selectionGrid[i][0]) {
-              validationCell.select({ctrlKey: true, isUserClick: false})
+              validationCell.select({ ctrlKey: true, isUserClick: false })
             }
           }
         }
@@ -354,8 +371,8 @@ export default {
       if (isTableBodyContainLines) {
         const bodyElement = tableBody.children[0]
         const columnDescriptors = [
-          {index: 1, name: 'type'},
-          {index: 3, name: 'name'}
+          { index: 1, name: 'type' },
+          { index: 3, name: 'name' }
         ]
         columnDescriptors.forEach(desc => {
           const width = Math.max(
@@ -431,5 +448,35 @@ td.last-comment {
   max-width: 60px;
   width: 60px;
   padding: 0;
+}
+
+.empty-list img {
+  max-width: 80vh;
+}
+
+.table-body .table tr.selected,
+.table-body .table tr.selected:hover {
+  background-color: #D1C4E9;
+}
+
+.table-body .table tr {
+  cursor: pointer;
+  user-select: none;
+}
+.table-body .table tr:hover {
+  background: #CCFFCC;
+}
+
+.dark {
+  .table-body .table tr.selected,
+  .table-body .table tr.selected:hover {
+    background: #5E60BA;
+  }
+
+  .table-body .table tr {
+    &:hover {
+      background: #878B97;
+    }
+  }
 }
 </style>

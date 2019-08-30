@@ -31,14 +31,18 @@
             ref="th-description"
             v-if="!isCurrentUserClient && isShowInfos"
           >
-            {{ $t('assets.fields.description') }}
-            <button-simple
-              class="is-small"
-              icon="plus"
-              :text="''"
-              @click="onAddMetadataClicked"
-              v-if="isCurrentUserAdmin && !isLoading"
-            />
+            <div class="flexrow">
+              <span class="flexrow-item">
+              {{ $t('assets.fields.description') }}
+              </span>
+              <button-simple
+                class="is-small flexrow-item"
+                icon="plus"
+                :text="''"
+                @click="onAddMetadataClicked"
+                v-if="isCurrentUserAdmin && !isLoading"
+              />
+            </div>
           </th>
 
           <th
@@ -48,7 +52,7 @@
             v-if="isShowInfos"
           >
             <div class="flexrow">
-              <span class="flexrow-item">
+              <span class="flexrow-item descriptor-name">
               {{ descriptor.name }}
               </span>
               <chevron-down-icon
@@ -60,7 +64,7 @@
           <th
             class="time-spent"
             ref="th-spent"
-            v-if="!isCurrentUserClient && isShowInfos"
+            v-if="!isCurrentUserClient && isShowInfos && isAssetTime"
           >
             {{ $t('assets.fields.time_spent') }}
           </th>
@@ -76,7 +80,7 @@
           >
             <div class="flexrow">
               <router-link
-                class="flexrow-item"
+                class="flexrow-item validation-name"
                 style="margin-right: 0;"
                 :to="taskTypePath(columnId)"
               >
@@ -89,14 +93,14 @@
             </div>
           </th>
           <th class="actions">
-            <button-link
+            <button-simple
               :class="{
                 'is-small': true,
                 highlighted: isEmptyTask
               }"
               icon="plus"
               :text="$t('tasks.create_tasks')"
-              :path="createTasksPath"
+              @click="$emit('create-tasks')"
               v-if="isCurrentUserManager && displayedAssets.length > 0 && !isLoading"
             />
           </th>
@@ -189,7 +193,7 @@
           </td>
           <td
             class="time-spent"
-            v-if="!isCurrentUserClient && isShowInfos"
+            v-if="!isCurrentUserClient && isShowInfos && isAssetTime"
           >
             {{ formatDuration(asset.timeSpent) }}
           </td>
@@ -209,6 +213,7 @@
             :columnY="j"
             :minimized="hiddenColumns[columnId]"
             :is-static="true"
+            :is-assignees="isShowAssignations"
             @select="onTaskSelected"
             @unselect="onTaskUnselected"
             v-for="(columnId, j) in sortedValidationColumns"
@@ -247,11 +252,9 @@ import { formatListMixin } from './format_mixin'
 import { selectionListMixin } from './selection'
 
 import DescriptionCell from '../cells/DescriptionCell'
-import ButtonHrefLink from '../widgets/ButtonHrefLink'
 import ButtonLink from '../widgets/ButtonLink'
 import ButtonSimple from '../widgets/ButtonSimple'
 import EntityThumbnail from '../widgets/EntityThumbnail'
-import PageTitle from '../widgets/PageTitle'
 import RowActions from '../widgets/RowActions'
 import TableHeaderMenu from '../widgets/TableHeaderMenu'
 import TableInfo from '../widgets/TableInfo'
@@ -292,11 +295,9 @@ export default {
   components: {
     ButtonLink,
     ButtonSimple,
-    ButtonHrefLink,
     DescriptionCell,
     EntityThumbnail,
     ChevronDownIcon,
-    PageTitle,
     RowActions,
     TableInfo,
     TableHeaderMenu,
@@ -319,7 +320,9 @@ export default {
       'isCurrentUserAdmin',
       'isCurrentUserClient',
       'isCurrentUserManager',
+      'isShowAssignations',
       'isShowInfos',
+      'isAssetTime',
       'isTVShow',
       'selectedTasks',
       'taskMap',
@@ -445,33 +448,19 @@ export default {
     },
 
     resizeHeaders () {
-      if (
-        this.$refs['body-tbody'] &&
-        this.$refs['body-tbody'][0] &&
-        this.$refs['body-tbody'][0].children.length > 0
-      ) {
-        if (this.$refs['th-episode']) {
-          const episodeWidth =
-            this.$refs['body-tbody'][0].children[1].children[0].offsetWidth
-          this.$refs['th-episode'].style['min-width'] = `${episodeWidth}px`
-          const nameWidth =
-            this.$refs['body-tbody'][0].children[1].children[2].offsetWidth
-          this.$refs['th-name'].style['min-width'] =
-            `${Math.max(nameWidth, 120)}px`
-        } else {
-          const thumbnailWidth =
-            this.$refs['body-tbody'][0].children[1].children[0].offsetWidth
-          this.$refs['th-thumbnail'].style['min-width'] = `${thumbnailWidth}px`
-          const nameWidth =
-            this.$refs['body-tbody'][0].children[1].children[1].offsetWidth
-          this.$refs['th-name'].style['min-width'] = `${nameWidth}px`
-          if (this.$refs['th-description']) {
-            const descriptionWidth =
-              this.$refs['body-tbody'][0].children[1].children[2].offsetWidth
-            this.$refs['th-description'].style['min-width'] =
-              `${descriptionWidth}px`
-          }
-        }
+      if (this.$refs['th-episode']) {
+        this.resizeSplittedTableHeaders([
+          { index: 0, name: 'episode' },
+          { index: 1, name: 'thumbnail' },
+          { index: 2, name: 'name' },
+          { index: 3, name: 'description' }
+        ])
+      } else {
+        this.resizeSplittedTableHeaders([
+          { index: 0, name: 'thumbnail' },
+          { index: 1, name: 'name' },
+          { index: 2, name: 'description' }
+        ])
       }
     }
   },
@@ -533,9 +522,9 @@ td.time-spent {
 }
 
 .validation-cell {
-  min-width: 120px;
-  max-width: 120px;
-  width: 120px;
+  min-width: 150px;
+  max-width: 150px;
+  width: 150px;
   margin-right: 1em;
 }
 
@@ -580,9 +569,6 @@ thead tr a {
   z-index: 1;
 }
 
-tbody:first-child tr:first-child {
-}
-
 tbody:last-child .empty-line:last-child {
   border: 0;
 }
@@ -616,5 +602,9 @@ tbody:last-child .empty-line:last-child {
 
 th {
   word-break: break-all
+}
+
+.info img {
+  max-width: 80vh;
 }
 </style>

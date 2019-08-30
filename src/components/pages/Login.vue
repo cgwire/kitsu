@@ -5,10 +5,10 @@
         <div class="has-text-centered login-header">
           <img src="../../assets/kitsu.png" />
           <h1 class="title">
-            {{ $t("login.title") }}
+            Kitsu
           </h1>
         </div>
-        <div class="field mt2">
+        <div class="field mt1">
           <p class="control has-icon">
             <input
               class="input is-medium email"
@@ -97,7 +97,16 @@ export default {
 
     confirmLogIn () {
       this.logIn((err, success) => {
-        if (err) console.log(err)
+        if (err) {
+          if (err.default_password) {
+            this.$router.push({
+              name: 'reset-change-password',
+              params: { token: err.token }
+            })
+          } else {
+            console.log(err)
+          }
+        }
         if (success) this.$router.push('/')
       })
     }
@@ -112,15 +121,20 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-.box h1.title {
-  color: #6a6a6a;
-  font-weight: 500;
-  font-size: 1.8em;
-}
+.box {
+  border-radius: 1em;
 
-.box h2.subtitle {
-  color: #4a4a4a;
-  margin-bottom: 1em;
+  h1.title {
+    color: #6a6a6a;
+    font-weight: 300;
+    font-size: 1.8em;
+    margin-bottom: 1em;
+  }
+
+  h2.subtitle {
+    color: #4a4a4a;
+    margin-bottom: 1em;
+  }
 }
 
 .field {
@@ -128,15 +142,21 @@ export default {
 }
 
 .input {
-  height: 2.4em;
+  height: 3em;
+  padding: 1.5em;
+  border-radius: 4px;
+
+  &::placeholder {
+    color: #999;
+  }
+
+  &:focus {
+    border: 1px solid $green;
+  }
 }
 
-.input:focus {
-  border: 1px solid $green;
-}
-
-img {
-  margin-bottom: 2em;
+.icon {
+  padding: 0.25em;
 }
 
 @media (min-width: 500px) {

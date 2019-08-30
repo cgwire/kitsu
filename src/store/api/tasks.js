@@ -68,7 +68,8 @@ export default {
 
   editTaskComment (comment, callback) {
     const commentData = {
-      text: comment.text
+      text: comment.text,
+      checklist: comment.checklist
     }
     client.put(`/api/data/comments/${comment.id}`, commentData, callback)
   },
@@ -187,7 +188,7 @@ export default {
   assignTasks (personId, selectedTaskIds, callback) {
     client.put(
       `/api/actions/persons/${personId}/assign`,
-      {task_ids: selectedTaskIds},
+      { task_ids: selectedTaskIds },
       callback
     )
   },
@@ -195,8 +196,24 @@ export default {
   unassignTasks (selectedTaskIds, callback) {
     client.put(
       `/api/actions/tasks/clear-assignation`,
-      {task_ids: selectedTaskIds},
+      { task_ids: selectedTaskIds },
       callback
     )
+  },
+
+  pinComment (comment) {
+    return new Promise((resolve, reject) => {
+      const data = {
+        pinned: comment.pinned
+      }
+      client.put(
+        `/api/data/comments/${comment.id}`,
+        data,
+        (err, comment) => {
+          if (err) reject(err)
+          else resolve(comment)
+        }
+      )
+    })
   }
 }

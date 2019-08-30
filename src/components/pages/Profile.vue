@@ -13,12 +13,12 @@
           />
 
           <p v-if="!isLdap">
-            <router-link
-              class="button is-link"
-              :to="{name: 'change-avatar'}"
+            <button
+              class="button is-link change-avatar-button"
+              @click="showAvatarModal"
             >
             {{ $t('profile.change_avatar') }}
-            </router-link>
+            </button>
           </p>
           <h1>
           {{ $t('profile.title') }}
@@ -77,6 +77,26 @@
             </select>
           </span>
         </div>
+
+        <div class="field">
+          <combobox-boolean
+            :label="$t('profile.notifications_enabled')"
+            v-model="form.notifications_enabled"
+          />
+        </div>
+
+        <div class="field">
+          <combobox-boolean
+            :label="$t('profile.notifications_slack_enabled')"
+            v-model="form.notifications_slack_enabled"
+          />
+        </div>
+
+        <text-field
+          :label="$t('profile.notifications_slack_user')"
+          v-model="form.notifications_slack_userid"
+          v-if="form.notifications_slack_enabled === 'true'"
+        />
 
         <button
           :class="{
@@ -166,10 +186,11 @@
       :active="changeAvatar.isModalShown"
       :is-loading="changeAvatar.isLoading"
       :is-error="changeAvatar.isLoadingError"
-      :cancel-route="{name: 'profile'}"
       :form-data="changeAvatar.formData"
+      :title="$t('profile.avatar.title')"
       @fileselected="selectFile"
       @confirm="uploadAvatarFile"
+      @cancel="hideAvatarModal"
     />
 
   </div>
@@ -179,17 +200,29 @@
 import moment from 'moment-timezone'
 import { mapGetters, mapActions } from 'vuex'
 
+import ComboboxBoolean from '../widgets/ComboboxBoolean'
 import ChangeAvatarModal from '../modals/ChangeAvatarModal'
 import PeopleAvatar from '../widgets/PeopleAvatar'
 import TextField from '../widgets/TextField'
 
 export default {
   name: 'profile',
+
+  components: {
+    ComboboxBoolean,
+    PeopleAvatar,
+    ChangeAvatarModal,
+    TextField
+  },
+
   data () {
     return {
       form: {
         first_name: '',
         last_name: '',
+        notifications_enabled: 'false',
+        notifications_slack_enabled: 'false',
+        notifications_slack_userid: '',
         email: '',
         phone: '',
         timezone: 'Europe/Paris',
@@ -209,18 +242,10 @@ export default {
     }
   },
 
-  components: {
-    PeopleAvatar,
-    ChangeAvatarModal,
-    TextField
-  },
-
   watch: {
     user () {
       Object.assign(this.form, this.user)
-    },
-
-    $route () { this.handleModalsDisplay() }
+    }
   },
 
   computed: {
@@ -233,7 +258,7 @@ export default {
       'user'
     ]),
     departments () {
-      return [{name: 'Animation'}, {name: 'Modeling'}]
+      return [{ name: 'Animation' }, { name: 'Modeling' }]
     },
     timezones () {
       return moment.tz.names().filter((timezone) => {
@@ -284,23 +309,25 @@ export default {
         }
         this.changeAvatar.isLoading = false
         this.$refs.avatar.reloadAvatar()
-        this.$router.push({name: 'profile'})
+        this.hideAvatarModal()
       })
     },
 
-    handleModalsDisplay () {
-      const path = this.$store.state.route.path
-      if (path.indexOf('change-avatar') > 0) {
-        this.changeAvatar.isModalShown = true
-      } else {
-        this.changeAvatar.isModalShown = false
-      }
+    hideAvatarModal () {
+      this.changeAvatar.isModalShown = false
+    },
+
+    showAvatarModal () {
+      this.changeAvatar.isModalShown = true
     }
   },
 
   mounted () {
     this.form = Object.assign(this.form, this.user)
-    this.handleModalsDisplay()
+    this.form.notifications_enabled =
+      this.form.notifications_enabled ? 'true' : 'false'
+    this.form.notifications_slack_enabled =
+      this.form.notifications_slack_enabled ? 'true' : 'false'
   },
 
   metaInfo () {
@@ -356,6 +383,17 @@ input, select, span.select {
   max-height:170px;
 }
 
+.profile-content,
+.profile-header {
+  border-top-left-radius: 1em;
+  border-top-right-radius: 1em;
+}
+
+.profile-content {
+  border-bottom-left-radius: 1em;
+  border-bottom-right-radius: 1em;
+}
+
 .profile-header-content {
   position: relative;
   top: -8em;
@@ -393,7 +431,7 @@ h2:first-child {
 }
 
 .save-button {
-  border-radius: 5px;
+  border-radius: 2em;
   width: 100%;
   background: $green;
   border-color: $green;
@@ -410,7 +448,15 @@ h2:first-child {
   border: 5px solid white;
 }
 
+.change-avatar-button {
+  color: white;
+}
+
 .change-password-message {
   margin-top: 1em;
+}
+
+select {
+  height: 3em;
 }
 </style>

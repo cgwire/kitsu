@@ -23,12 +23,13 @@
               <div class="flexrow-item"></div>
             </div>
             <div class="flexrow" v-if="isCurrentUserManager">
-            <button-link
+            <button-simple
               class="flexrow-item"
               :title="$t('main.csv.import_file')"
               icon="upload"
               :is-responsive="true"
               :path="importPath"
+              @click="showImportModal"
             />
             <button-href-link
               class="flexrow-item"
@@ -63,6 +64,7 @@
         :is-loading="isAssetsLoading || initialLoading"
         :is-error="isAssetsLoadingError"
         :validation-columns="assetValidationColumns"
+        @create-tasks="showCreateTasksModal"
         @scroll="saveScrollPosition"
         @delete-all-tasks="onDeleteAllTasksClicked"
         @add-metadata="onAddMetadataClicked"
@@ -143,11 +145,11 @@
     :active="modals.isImportDisplayed"
     :is-loading="loading.importing"
     :is-error="errors.importing"
-    :cancel-route="assetsPath"
     :form-data="assetsCsvFormData"
     :columns="columns"
     @fileselected="selectFile"
     @confirm="uploadImportFile"
+    @cancel="hideImportModal"
   />
 
   <create-tasks-modal
@@ -155,10 +157,10 @@
     :is-loading="loading.creatingTasks"
     :is-loading-stay="loading.taskStay"
     :is-error="errors.creatingTasks"
-    :cancel-route="assetsPath"
     :title="$t('tasks.create_tasks_asset')"
     :text="$t('tasks.create_tasks_asset_explaination')"
     :error-text="$t('tasks.create_tasks_asset_failed')"
+    @cancel="hideCreateTasksModal"
     @confirm="confirmCreateTasks"
     @confirm-and-stay="confirmCreateTasksAndStay"
   />
@@ -182,12 +184,12 @@ import AssetList from '../lists/AssetList'
 import AddMetadataModal from '../modals/AddMetadataModal'
 import ButtonHrefLink from '../widgets/ButtonHrefLink'
 import ButtonLink from '../widgets/ButtonLink'
+import ButtonSimple from '../widgets/ButtonSimple'
 import CreateTasksModal from '../modals/CreateTasksModal'
-import DeleteModal from '../widgets/DeleteModal'
+import DeleteModal from '../modals/DeleteModal'
 import EditAssetModal from '../modals/EditAssetModal'
 import ImportModal from '../modals/ImportModal'
 import HardDeleteModal from '../modals/HardDeleteModal'
-import PageTitle from '../widgets/PageTitle'
 import SearchField from '../widgets/SearchField'
 import SearchQueryList from '../widgets/SearchQueryList'
 import ShowAssignationsButton from '../widgets/ShowAssignationsButton'
@@ -202,12 +204,12 @@ export default {
     AddMetadataModal,
     ButtonLink,
     ButtonHrefLink,
+    ButtonSimple,
     CreateTasksModal,
     DeleteModal,
     EditAssetModal,
     HardDeleteModal,
     ImportModal,
-    PageTitle,
     SearchField,
     SearchQueryList,
     ShowAssignationsButton,
@@ -451,7 +453,7 @@ export default {
           if (err) {
             this.errors.creatingTasks = true
           } else {
-            this.modals.isCreateTasks = false
+            this.hideCreateTasksModal()
             this.loadAssets(() => {
               this.resizeHeaders()
             })
@@ -516,7 +518,7 @@ export default {
     deleteText () {
       const asset = this.assetToDelete
       if (asset) {
-        return this.$t('assets.delete_text', {name: asset.name})
+        return this.$t('assets.delete_text', { name: asset.name })
       } else {
         return ''
       }
@@ -525,7 +527,7 @@ export default {
     deleteAllTasksText () {
       const taskType = this.taskTypeMap[this.$route.params.task_type_id]
       if (taskType) {
-        return this.$t('tasks.delete_all_text', {name: taskType.name})
+        return this.$t('tasks.delete_all_text', { name: taskType.name })
       } else {
         return ''
       }
@@ -534,7 +536,7 @@ export default {
     restoreText () {
       const asset = this.assetToRestore
       if (asset) {
-        return this.$t('assets.restore_text', {name: asset.name})
+        return this.$t('assets.restore_text', { name: asset.name })
       } else {
         return ''
       }
@@ -564,10 +566,6 @@ export default {
       } else if (path.indexOf('restore') > 0) {
         this.assetToRestore = this.assetMap[assetId]
         this.modals.isRestoreDisplayed = true
-      } else if (path.indexOf('import') > 0) {
-        this.modals.isImportDisplayed = true
-      } else if (path.indexOf('create-tasks') > 0) {
-        this.modals.isCreateTasksDisplayed = true
       } else {
         this.modals = {
           isAddMetadataDisplayed: false,
@@ -596,7 +594,7 @@ export default {
           this.loadAssets(() => {
             this.resizeHeaders()
           })
-          this.$router.push(this.assetsPath)
+          this.hideImportModal()
         } else {
           this.loading.importing = false
           this.errors.importing = true
@@ -606,8 +604,10 @@ export default {
 
     onSearchChange () {
       const searchQuery = this.$refs['asset-search-field'].getValue()
-      this.setAssetSearch(searchQuery)
-      this.resizeHeaders()
+      if (searchQuery.length !== 1) {
+        this.setAssetSearch(searchQuery)
+        this.resizeHeaders()
+      }
     },
 
     changeSearch (searchQuery) {
@@ -698,6 +698,22 @@ export default {
         d => d.id === descriptorId
       )
       this.modals.isAddMetadataDisplayed = true
+    },
+
+    showImportModal () {
+      this.modals.isImportDisplayed = true
+    },
+
+    hideImportModal () {
+      this.modals.isImportDisplayed = false
+    },
+
+    showCreateTasksModal () {
+      this.modals.isCreateTasksDisplayed = true
+    },
+
+    hideCreateTasksModal () {
+      this.modals.isCreateTasksDisplayed = false
     }
   },
 

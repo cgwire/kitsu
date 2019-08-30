@@ -4,19 +4,21 @@
     ref="model-viewer"
     id="model-viewer"
     :class="{
-      light: light
+      light: light && !readOnly
     }"
   >
   </div>
-  <div class="viewer-actions">
+  <div class="viewer-actions flexrow">
+    <span class="filler"></span>
     <a
       :href="previewDlPath"
-      class="button pull-right"
+      class="button flexrow-item"
+      v-if="!readOnly"
     >
       <download-icon class="icon" />
     </a>
     <button
-      class="button pull-right"
+      class="button flexrow-item"
       @click="goFullScreen">
       <maximize-icon class="icon" />
     </button>
@@ -56,6 +58,10 @@ export default {
     light: {
       default: false,
       type: Boolean
+    },
+    readOnly: {
+      default: false,
+      type: Boolean
     }
   },
 
@@ -82,6 +88,15 @@ export default {
     previewUrl () {
       clearScene(this.scene)
       loadObject(this.scene, this.previewUrl)
+    },
+
+    light () {
+      clearScene(this.scene)
+      this.element.innerHTML = ''
+      setTimeout(() => {
+        this.scene = prepareScene(this.element)
+        loadObject(this.scene, this.previewUrl)
+      }, 100)
     }
   }
 }

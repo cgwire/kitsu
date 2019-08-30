@@ -48,6 +48,18 @@
             </div>
           </div>
         </div>
+        <div
+          class="nav-item"
+          v-else-if="lastProduction && $route.path !== '/open-productions'"
+        >
+          <router-link
+            :to="lastSectionPath"
+            class="flexrow"
+          >
+            <chevron-left-icon />
+            {{ $t('main.go_productions') }}
+          </router-link>
+        </div>
       </div>
 
       <div class="nav-right">
@@ -89,15 +101,15 @@
         </li>
         <li @click="toggleDarkTheme">
           <span v-if="!isDarkTheme">
-            {{ $t("main.dark_theme ")}}
+            {{ $t("main.dark_theme")}}
           </span>
           <span v-else>
-            {{ $t("main.white_theme ")}}
+            {{ $t("main.white_theme")}}
           </span>
         </li>
         <li>
           <a href="https://kitsu.cg-wire.com" target="_blank">
-            {{ $t("main.documentation ")}}
+            {{ $t("main.documentation")}}
           </a>
         </li>
         <li>
@@ -108,6 +120,11 @@
         <li>
           <a href="https://trello.com/b/TGi6LZNa/kitsu-roadmap" target="_blank">
             Roadmap
+          </a>
+        </li>
+        <li>
+          <a href="https://cg-wire.com/en/about.html" target="_blank">
+            {{ $t("main.about")}}
           </a>
         </li>
         <li @click="onLogoutClicked">
@@ -123,6 +140,7 @@
 
 <script>
 import { mapGetters, mapActions } from 'vuex'
+import { ChevronLeftIcon } from 'vue-feather-icons'
 
 import Combobox from '../widgets/Combobox'
 import NotificationBell from '../widgets/NotificationBell'
@@ -134,6 +152,7 @@ export default {
   name: 'topbar',
   components: {
     Combobox,
+    ChevronLeftIcon,
     NotificationBell,
     PeopleName,
     PeopleAvatar
@@ -176,6 +195,8 @@ export default {
       'isUserMenuHidden',
       'isTVShow',
       'isNewNotification',
+      'lastProductionScreen',
+      'lastProductionViewed',
       'openProductions',
       'openProductionOptions',
       'productionMap',
@@ -198,16 +219,42 @@ export default {
              this.episodes.length > 0
     },
 
+    lastProduction () {
+      let production = this.productionMap[this.lastProductionViewed]
+      if (!production) {
+        production = this.currentProduction
+      }
+      return production
+    },
+
+    lastSectionPath () {
+      const production = this.lastProduction
+      const section = this.lastProductionScreen
+      let route = {
+        name: section,
+        params: {
+          production_id: production.id
+        }
+      }
+      if (production.production_type === 'tvshow') {
+        route.name = `episode-${section}`
+        route.params.episode_id = production.first_episode_id
+      }
+      return route
+    },
+
     navigationOptions () {
       const options = [
-        {label: this.$t('assets.title'), value: 'assets'},
-        {label: this.$t('shots.title'), value: 'shots'},
-        {label: this.$t('sequences.title'), value: 'sequences'},
-        {label: this.$t('episodes.title'), value: 'episodes'},
-        {label: this.$t('asset_types.production_title'), value: 'assetTypes'},
-        {label: this.$t('breakdown.title'), value: 'breakdown'},
-        {label: this.$t('playlists.title'), value: 'playlists'},
-        {label: this.$t('people.team'), value: 'team'}
+        { label: this.$t('assets.title'), value: 'assets' },
+        { label: this.$t('shots.title'), value: 'shots' },
+        { label: this.$t('sequences.title'), value: 'sequences' },
+        { label: this.$t('episodes.title'), value: 'episodes' },
+        { label: this.$t('asset_types.production_title'), value: 'assetTypes' },
+        { label: this.$t('breakdown.title'), value: 'breakdown' },
+        { label: this.$t('playlists.title'), value: 'playlists' },
+        { label: this.$t('people.team'), value: 'team' },
+        { label: this.$t('news.title'), value: 'newsFeed' },
+        { label: this.$t('schedule.title'), value: 'schedule' }
       ]
       if (!this.isTVShow) { // Remove episode Section from the list.
         options.splice(3, 1)
@@ -252,6 +299,7 @@ export default {
       }
 
       if (name === 'asset-types') name = 'assetTypes'
+      if (name === 'news-feed') name = 'newsFeed'
       return name
     },
 
@@ -271,6 +319,8 @@ export default {
           this.$route.params.episode_id &&
           this.$route.params.episode_id !== this.currentEpisodeId
         )
+
+      if (section && section === 'newsFeed') section = 'news-feed'
 
       if (isProperContext && isContextChanged) {
         if (section === 'assetTypes') section = 'production-asset-types'
@@ -307,6 +357,8 @@ export default {
       const isEpisodeContext =
         isTVShow &&
         section !== 'team' &&
+        section !== 'news-feed' &&
+        section !== 'schedule' &&
         section !== 'episodes'
 
       if (isEpisodeContext) {
@@ -452,20 +504,23 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-.dark .topbar .nav,
-.dark .user-menu {
-  background-color: $dark-grey-strong;
-  color: $white-grey;
-  border-left: 1px solid #2F3136;
-  border-bottom: 1px solid #2F3136;
-}
+.dark {
+  a,
+  .user-menu a {
+    color: $white-grey;
+  }
 
-.dark .user-menu a {
-  color: $white-grey;
-}
+  #toggle-menu-button:hover {
+    color: $white-grey;
+  }
 
-.dark #toggle-menu-button:hover {
-  color: $white-grey;
+  .topbar .nav,
+  .user-menu {
+    background-color: $dark-grey-strong;
+    color: $white-grey;
+    border-left: 1px solid #2F3136;
+    border-bottom: 1px solid #2F3136;
+  }
 }
 
 .nav {
@@ -484,6 +539,7 @@ export default {
 
 .avatar {
   margin-right: 10px;
+  min-width: 40px;
 }
 
 .user-nav {
@@ -566,6 +622,11 @@ strong {
 
 .version {
   color: $grey;
+}
+
+.user-name {
+  min-width: 130px;
+  text-align: left;
 }
 
 @media screen and (max-width: 768px) {
