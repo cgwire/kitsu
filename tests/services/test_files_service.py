@@ -202,23 +202,31 @@ class FileServiceTestCase(ApiDBTestCase):
         self.generate_fixture_output_file(cache, 2)
         cache_file = self.generate_fixture_output_file(cache, 3)
 
-        # test last geometry file revision
         last_output_files = files_service.get_last_output_files_for_entity(
-            self.asset.id,
-            output_type_id=str(geometry.id),
-            name=geometry_file.name
+            self.asset.id
         )
-        self.assertEqual(len(last_output_files), 0)
-        self.assertEqual(last_output_files[0]['revision'], 5)
+
+        # test last geometry file revision
+        last_file = [
+            f
+            for f in last_output_files
+            if (
+                f['output_type_id'] == str(geometry.id)
+                and f['name'] == geometry_file.name
+            )
+        ][0]
+        self.assertEqual(last_file["revision"], 5)
 
         # test last cache file revision
-        last_output_files = files_service.get_last_output_files_for_entity(
-            self.asset.id,
-            output_type_id=str(cache.id),
-            name=cache_file.name
-        )
-        self.assertEqual(len(last_output_files), 0)
-        self.assertEqual(last_output_files[0]['revision'], 3)
+        last_file = [
+            f
+            for f in last_output_files
+            if (
+                f['output_type_id'] == str(cache.id)
+                and f['name'] == cache_file.name
+            )
+        ][0]
+        self.assertEqual(last_file["revision"], 3)
 
     def test_get_output_files_for_output_type_and_entity(self):
         geometry = self.output_type

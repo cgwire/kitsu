@@ -8,6 +8,7 @@ from .resources import (
     CommentWorkingFileResource,
     NewWorkingFileResource,
     TaskWorkingFilesResource,
+    EntityWorkingFilesResource,
 
     EntityOutputFilePathResource,
     GetNextEntityOutputFileRevisionResource,
@@ -71,6 +72,11 @@ routes = [
         "/data/asset-instances/<asset_instance_id>"
         "/entities/<temporal_entity_id>/output-file-path",
         InstanceOutputFilePathResource
+    ),
+
+    (
+        "/data/entities/<entity_id>/working-files",
+        EntityWorkingFilesResource
     ),
 
     (
