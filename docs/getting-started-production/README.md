@@ -432,32 +432,46 @@ status of the task (1).
 
 ![Shot status](../img/getting-started/shot_status.png)
 
-It makes appear a panel on the right, and here you can post a comment (1) and change the
-status (2), and validate the post and the new status with **Post status**
-button (3).
+It makes appear a panel on the right, and here you can write a comment (1) and change the status (2), attach a file (3).
+
+
+Validate the post and the new status with **Post status**
 
 ![Changing status](../img/getting-started/changing_status_shot.png)
 
+## Add preview
+
+You can add a preview to any comments. It can be a picture (.png, .jpg, .jpeg),or a video (.mp4, .mov, .wmv), 
+or an `.obj` file. All can be reviewed from the browser.
+
+Other files like `.pdf`, `.zip`, `.rar`, `.ma` or `.mb` however, they need to be
+downloaded to be reviewed.
+
+Click on the "Attach preview" button, the explorer opens and lets you choose your file.
+
+![attach preview](../img/getting-started/attach_preview.png)
+
+Once your file is selected, you see its name near the "Attach preview" button.
+
+![attach preview confimed](../img/getting-started/attach_preview_confirm.png)
+
+You can also **drag & drop** the file in the comment section.
+
+![attach preview drag drop](../img/getting-started/drag_drop_preview.png)
+
+## Validation per batch
+
 Alternatively, you can do it per **batch**. 
 
-We use the same technique as for the assignation.
+You can select multiple shots or assets, by pressing the **crtl** or
+**shift** key.
 
-Click on the space on the right of the status/assignation on a task (1).
+Then go to the **Change status** section on the action menu.
 
-![Task assigned](../img/getting-started/task_assigned.png)
+![action menu status](../img/getting-started/blue_menu_status.png.png
 
-The action menu on the top of the screen appears. 
-
-![Blue menu](../img/getting-started/blue_menu.png)
-
-You can change its purpose by clicking on the name on the left part
-of the screen, a new menu appears, and there you can choose **Change status**.
-
-![Blue menu status](../img/getting-started/blue_menu_status.png)
-
-You can now make your shots or assets selection, by pressing the **crtl** or
-**shift** key (1) and then choose the new status for your selected tasks (2).
-You validate the new status with the **Confirm** button (3).
+Choose the new status for your selected tasks (1). You can also add a comment for all the selected tasks (2)
+You validate the new status with the **Confirm** button.
 
 ![Change status per batch](../img/getting-started/change_status_batch.png)
 
@@ -501,14 +515,13 @@ more there are, the more urgent the task is.
 
 ## Perform a review
 
-When a CG artist asks for a review ![wfa](../img/getting-started/wfa_icon.png) 
-You can go to the task page to see the result.  The CG artist may have sent you
-a picture, a movie or an `.obj` file. All can be reviewed from the browser.
+When a CG artist needs a review, he change the status of his task to ![wfa](../img/getting-started/wfa_icon.png).
 
-Other files like `.pdf`, `.zip`, `.rar`, `.ma` or `.mb` however, they need to be
-downloaded to be reviewed.
+Click on the status (1) to open the right panel and start the review. 
 
-You can watch the version from the right panel, or enlarge it fullscreen ![Fullscreen](../img/getting-started/fullscreen.png).
+![review on global page](../img/getting-started/review_global.png)
+
+You can watch the version from the right panel, or enlarge it (2)or even go fullscreen (3)  ![Fullscreen](../img/getting-started/fullscreen.png).
 
 You can draw directly on the version with the **pencil** icon ![Pencil](../img/getting-started/draw.png).
 
