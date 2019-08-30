@@ -521,7 +521,9 @@ Click on the status (1) to open the right panel and start the review.
 
 ![review on global page](../img/getting-started/review_global.png)
 
-You can watch the version from the right panel, or enlarge it (2)or even go fullscreen (3)  ![Fullscreen](../img/getting-started/fullscreen.png).
+You can watch the version from the right panel, or enlarge it (2), or even go fullscreen   ![Fullscreen](../img/getting-started/fullscreen.png) (3).
+
+![review](../img/getting-started/review.png)
 
 You can draw directly on the version with the **pencil** icon ![Pencil](../img/getting-started/draw.png).
 
