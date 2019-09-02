@@ -235,7 +235,7 @@ def add_metadata_descriptor(project_id, entity_type, name, choices):
     )
 
     events.emit("metadata-descriptor:new", {
-        "descriptor_id": str(descriptor.id)
+        "metadata_descriptor_id": str(descriptor.id)
     })
     return descriptor.serialize()
 
@@ -287,7 +287,7 @@ def update_metadata_descriptor(metadata_descriptor_id, changes):
                 })
     descriptor.update(changes)
     events.emit("metadata-descriptor:update", {
-        "descriptor_id": str(descriptor.id)
+        "metadata_descriptor_id": str(descriptor.id)
     })
     return descriptor.serialize()
 
@@ -310,6 +310,6 @@ def remove_metadata_descriptor(metadata_descriptor_id):
     except ObjectDeletedError:
         pass
     events.emit("metadata-descriptor:delete", {
-        "descriptor_id": str(descriptor.id)
+        "metadata_descriptor_id": str(descriptor.id)
     })
     return descriptor.serialize()
