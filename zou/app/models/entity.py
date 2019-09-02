@@ -39,7 +39,6 @@ class EntityLink(db.Model, BaseMixin, SerializerMixin):
 
     @classmethod
     def create_from_import(cls, data):
-        del data["id"]
         del data["type"]
         entity_link = cls.get_by(
             entity_in_id=data["entity_in_id"],
@@ -146,7 +145,7 @@ class Entity(db.Model, BaseMixin, SerializerMixin):
         del data["entities_out"]
         del data["type"]
 
-        if "preview_file_id" in data:
+        if "preview_file_id" in data and data["preview_file_id"] is not None:
             preview_file = PreviewFile.get(data["preview_file_id"])
             if preview_file is None:
                 del data["preview_file_id"]

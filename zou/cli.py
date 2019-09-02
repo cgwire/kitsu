@@ -6,7 +6,7 @@ import click
 
 from sqlalchemy.exc import IntegrityError
 
-from zou.app.utils import dbhelpers, auth, commands, sync
+from zou.app.utils import dbhelpers, auth, commands
 from zou.app.services import (
     persons_service,
     tasks_service
@@ -337,15 +337,14 @@ def patch_task_data():
 @click.option("--target", default="http://localhost:5000")
 def sync_full(target):
     """
-    Retrieve all data from target instance.
+    Retrieve all data from target instance. It expects that credentials to
+    connect to target instance are given through SYNC_LOGIN and SYNC_PASSWORD
+    environment variables.
     """
     print("Start syncing.")
     login = os.getenv("SYNC_LOGIN")
     password = os.getenv("SYNC_PASSWORD")
-    sync.init(target, login, password)
-    sync.run_main_data_sync()
-    sync.run_open_project_data_sync()
-    sync.run_other_sync()
+    commands.import_data_from_another_instance(target, login, password)
     print("Syncing ended.")
 
 
@@ -353,30 +352,27 @@ def sync_full(target):
 @click.option("--event-target", default="http://localhost:8080")
 @click.option("--target", default="http://localhost:8080/api")
 def sync_changes(event_target, target):
+    """
+    Run a daemon that import data related to any change happening on target
+    instance. It expects that credentials to connect to target instance are
+    given through SYNC_LOGIN and SYNC_PASSWORD environment variables.
+    """
     login = os.getenv("SYNC_LOGIN")
     password = os.getenv("SYNC_PASSWORD")
-    event_client = sync.init_events_listener(
-        target,
-        event_target,
-        login,
-        password
-    )
-    sync.add_main_sync_listeners(event_client)
-    sync.add_project_sync_listeners(event_client)
-    print("Start listening.")
-    sync.run_listeners(event_client)
+    commands.run_sync_change_daemon(event_target, target, login, password)
 
 
 @cli.command()
 @click.option("--target", default="http://localhost:8080/api")
 def sync_last_events(target):
+    """
+    Retrieve last events that occured on target instance and import data related
+    to them. It expects that credentials to connect to target instance are
+    given through SYNC_LOGIN and SYNC_PASSWORD environment variables.
+    """
     login = os.getenv("SYNC_LOGIN")
     password = os.getenv("SYNC_PASSWORD")
-    sync.init(target, login, password)
-    print("Syncing started.")
-    sync.run_last_events_sync()
-    print("Syncing ended.")
-
+    commands.import_last_changes_from_another_instance(target, login, password)
 
 
 if __name__ == '__main__':

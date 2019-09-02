@@ -94,35 +94,43 @@ event_name_model_path_map = {
 }
 
 project_events = [
-    "episodes",
-    "sequences",
-    "assets",
-    "shots",
-    "tasks",
-    "time-spents"
-    "preview-files",
-    "playlists",
-    "build-jobs",
-    "comments",
-    "metadata-descriptors",
-    "schedule-items",
-    "subscriptions",
-    "notifications",
-    "entity-links",
+    "episode",
+    "sequence",
+    "asset",
+    "shot",
+    "task",
+    "time-spent",
+    "preview-file",
+    "playlist",
+    "build-job",
+    "comment",
+    "metadata-descriptor",
+    "schedule-item",
+    "subscription",
+    "notification",
+    "entity-link",
     "news",
-    "milestones"
+    "milestone"
 ]
 
 main_events = [
     "person",
     "organisation",
     "project-status",
-    "departements",
-    "task-types",
+    "department",
+    "task-type",
     "task-status",
-    "custom-actions",
-    "asset-types",
-    "projects"
+    "custom-action",
+    "asset-type",
+    "project"
+]
+
+special_events = [
+    "preview-file:add-file",
+    "preview-file:set-main",
+    "shot:casting-update",
+    "task:unassign",
+    "task:assign"
 ]
 
 
@@ -181,7 +189,7 @@ def run_open_project_data_sync():
         for event in project_events:
             path = event_name_model_path_map[event]
             model = event_name_model_map[event]
-            sync_project_entries(path, model)
+            sync_project_entries(project, path, model)
         sync_entity_thumbnails(project, "assets")
         sync_entity_thumbnails(project, "shots")
         print("Sync of %s complete." % project["name"])
@@ -200,6 +208,7 @@ def sync_entries(model_name, model):
         "persons"
     ]:
         instances = gazu.client.fetch_all(model_name)
+        print("%s %s synced." % (len(instances), model_name))
     else:
         page = 1
         init = True
@@ -215,7 +224,7 @@ def sync_entries(model_name, model):
 
             model.create_from_import_list(results["data"])
             print("%s %s synced." % (len(results["data"]), model_name))
-    print("%s %s synced." % (len(instances), model_name))
+        print("Overall: %s %s synced." % (len(instances), model_name))
 
 
 def sync_project_entries(project, model_name, model):
@@ -259,6 +268,11 @@ def add_project_sync_listeners(event_client):
         add_sync_listeners(event_client, path, event, model)
 
 
+def add_special_sync_listeners(event_client):
+    for event in special_events:
+        gazu.events.add_listener(event_client, event, forward_event(event))
+
+
 def add_sync_listeners(event_client, model_name, event_name, model):
     gazu.events.add_listener(
         event_client,
@@ -293,7 +307,10 @@ def create_entry(model_name, event_name, model, event_type):
                 model_id_field_name: model_id,
                 "sync": True
             })
-            print("%s created/updated %s" % (event_name, model_id))
+            if event_type == "new":
+                print("Creation: %s created %s" % (event_name, model_id))
+            else:
+                print("Update: %s updated %s" % (event_name, model_id))
         except gazu.exception.RouteNotFoundException as e:
             print(e)
             print("Fail %s created/updated %s" % (event_name, model_id))
@@ -307,8 +324,17 @@ def delete_entry(model_name, event_name, model):
 
         model_id = data[event_name.replace('-', "_") + "_id"]
         model.delete_all_by(id=model_id)
-        print("%s deleted %s" % (model_name, model_id))
+        print("Deletion: %s deleted %s" % (model_name, model_id))
     return delete
+
+
+def forward_event(event_name):
+    def forward(data):
+        if not data.get("sync", False):
+            data["sync"] = True
+            print("Forwarding event: %s" % event_name)
+            events.emit(event_name, data, persist=False)
+    return forward
 
 
 def run_last_events_sync():
@@ -321,6 +347,9 @@ def run_last_events_sync():
         if event_name in event_name_model_map:
             model = event_name_model_map[event_name]
             path = event_name_model_path_map[event_name]
+            if event_name == "metadata-descriptor":
+                if "metadata_descriptor_id" not in event["data"]:
+                    event_name = "descriptor"
             instance_id = event["data"]["%s_id" % event_name.replace("-", "_")]
 
             if action in ["update", "create"]:

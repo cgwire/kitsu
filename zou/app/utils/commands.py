@@ -4,6 +4,7 @@ import os
 import json
 import datetime
 
+
 from ldap3 import Server, Connection, ALL, NTLM, SIMPLE
 from zou.app.utils import thumbnail as thumbnail_utils
 from zou.app.stores import auth_tokens_store, file_store
@@ -12,6 +13,7 @@ from zou.app.services import (
     persons_service,
     projects_service,
     shots_service,
+    sync_service,
     tasks_service
 )
 
@@ -288,3 +290,43 @@ def sync_with_ldap_server():
 
     ldap_users = get_ldap_users()
     update_person_list_with_ldap_users(ldap_users)
+
+
+def import_data_from_another_instance(target, login, password):
+    """
+    Retrieve and save all the data from another API instance. It doesn't
+    change the IDs.
+    """
+    sync_service.init(target, login, password)
+    sync_service.run_main_data_sync()
+    sync_service.run_open_project_data_sync()
+    sync_service.run_other_sync()
+
+
+def run_sync_change_daemon(event_target, target, login, password):
+    """
+    Listen to event websocket. Each time a change occurs, it retreves the
+    related data and save it in the current instance.
+    """
+    event_client = sync_service.init_events_listener(
+        target,
+        event_target,
+        login,
+        password
+    )
+    sync_service.add_main_sync_listeners(event_client)
+    sync_service.add_project_sync_listeners(event_client)
+    sync_service.add_special_sync_listeners(event_client)
+    print("Start listening.")
+    sync_service.run_listeners(event_client)
+
+
+def import_last_changes_from_another_instance(target, login, password):
+    """
+    Retrieve and save all the data related most recent events from another API
+    instance. It doesn't change the IDs.
+    """
+    sync_service.init(target, login, password)
+    print("Syncing started.")
+    sync_service.run_last_events_sync()
+    print("Syncing ended.")

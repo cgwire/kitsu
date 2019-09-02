@@ -116,7 +116,8 @@ class BaseMixin(object):
         Create a new instance of the model based on data that comes from the Zou
         API.
         """
-        del data["type"]
+        if "type" in data:
+            del data["type"]
         previous_data = cls.get(data["id"])
         if previous_data is None:
             return cls.create(**data)
