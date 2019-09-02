@@ -463,7 +463,7 @@ You can also **drag & drop** the file in the comment section.
 
 ![attach preview drag drop](../img/getting-started/drag_drop_preview.png)
 
-once you have uploaded an image, you have the possibility to add another one.
+Once you have uploaded an image, you have the possibility to add another one.
 
 ![attach preview drag drop](../img/getting-started/
 upload_several_pictures.png)
