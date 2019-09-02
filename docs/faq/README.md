@@ -172,8 +172,8 @@ NB: The **search bar** is available too in people episodes list.
 The **search bar** query is applied every time a new character is typed. You
 don't need to type everything to get a quick result.
 
-For example, in the assets page, type the letter `O` and you get the
-result of all the assets starting with an `O`.  
+For example, in the assets page, type the letters `Ot` and you get the
+result of all the assets starting with an `Ot`.  
 
 ![Search bar result](../img/faq/filter_autocompletion.png)
 
@@ -187,7 +187,7 @@ For example, let's search all the **FX** assets.
 Another example gets **shots page** of a specific **sequence**.
 Ex: see only the shots of the second sequence of the first episode.
 
-Select the first episode on the drop-down menu, then search `se02`, the result
+Select the first episode on the drop-down menu, then search `sq002`, the result
  gets all the shots of all the episodes from sequence 2.
 
 ![Search bar sequence episode](../img/faq/filter_ep_seq.png)
@@ -198,13 +198,13 @@ In the same way, you can search **specific status** link to the task. Type the
 (`=`) also, the **status** you are looking.
 
 For example, search all the shots which are **Waiting for approval** ![WFA](../img/faq/wfa_icon.png)
-at the **render** stage. So on the search bar, you type: `render=wfa animation=retake`.
+at the **Animation** stage. So on the search bar, you type: `animation=wfa`.
 
 ![Search layout wfa](../img/faq/filter_lay_wfa.png)
 
 You can be even more specific, let's focus on the shots that are still on retake at the animation stage: on the search
-bar add a **space** after the previous search and type `animation=retake`. 
-The research is `render=wfa animation=retake`.
+bar add a **space** after the previous search and type `render=wip`. 
+The research is `animation=wfa render=wip`.
 
 ![Search layout wfa seq2](../img/faq/filter_lay_wfa_s002.png)
 
