@@ -200,16 +200,16 @@ export default {
       },
 
       'metadata-descriptor:new' (eventData) {
-        this.refreshMetadataDescriptor(eventData.descriptor_id)
+        this.refreshMetadataDescriptor(eventData.metadata_descriptor_id)
       },
 
       'metadata-descriptor:update' (eventData) {
-        this.refreshMetadataDescriptor(eventData.descriptor_id)
+        this.refreshMetadataDescriptor(eventData.metadata_descriptor_id)
       },
 
       'metadata-descriptor:delete' (eventData) {
         this.$store.commit('DELETE_METADATA_DESCRIPTOR_END', {
-          id: eventData.descriptor_id
+          id: eventData.metadata_descriptor_id
         })
       }
     }

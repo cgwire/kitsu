@@ -414,3 +414,8 @@ export const SET_PREVIEW = 'SET_PREVIEW'
 export const SET_IS_SHOW_ASSIGNATIONS = 'SET_IS_SHOW_ASSIGNATIONS'
 export const SET_IS_SHOW_INFOS = 'SET_IS_SHOW_INFOS'
 export const RESET_ALL = 'RESET_ALL'
+
+// Schedule
+
+export const ADD_MILESTONE = 'ADD_MILESTONE'
+export const ADD_MILESTONES = 'ADD_MILESTONES'
