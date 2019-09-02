@@ -2,6 +2,7 @@ import ColorHash from 'color-hash'
 import Color from 'color'
 
 const darkenColorIndex = {}
+const lightenColorIndex = {}
 
 export default {
   /*
@@ -81,5 +82,17 @@ export default {
       darkenColorIndex[colorHash] = Color(colorHash).darken(0.3).saturate(0.6)
     }
     return darkenColorIndex[colorHash]
+  },
+
+  /*
+   * Turn hexadecimal color (#FFFFFF) to a lighter and less saturated version.
+   * Uses a cache for to not recompute the target color each time this function
+   * is called.
+   */
+  lightenColor (colorHash, level = 0.3) {
+    if (!lightenColorIndex[colorHash + level]) {
+      lightenColorIndex[colorHash + level] = Color(colorHash).fade(level)
+    }
+    return lightenColorIndex[colorHash + level]
   }
 }
