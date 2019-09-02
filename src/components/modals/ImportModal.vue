@@ -24,10 +24,10 @@
         {{ $t("main.csv.select_file") }}
       </p>
 
-      <file-upload @fileselected="onFileSelected"></file-upload>
+      <file-upload @fileselected="onFileSelected" />
 
       <modal-footer
-        :error-text="$t('productions.metadata.error')"
+        :error-text="$t('main.csv.error_upload')"
         :is-loading="isLoading"
         :is-disabled="formData === undefined"
         :is-error="isError"
