@@ -553,13 +553,23 @@ You can draw directly on the preview with the **pencil** tool ![Pencil](../img/g
 
 If you need to delete your line, click again on the **pencil** icon, the cursor changes to a multi-directional cross ![Pencil](../img/getting-started/direction_arrow.png), and then you can select your line and move it around.
 
-![review drawing](../img/getting-started/review_edit.png.png)
+![review drawing](../img/getting-started/review_edit.png)
 
 Select the line with the directional cross, and then press the **delete** icon ![Delete line](../img/getting-started/delete_line.png)
 
 
 From there you can change the status to ![Retake](../img/getting-started/retake_icon.png) if you want that the CG artist
 performs some changes. 
+
+You can add a **checklist** to your comments.
+
+You need to first post your retake comments. Then the **ADD CHECKLIST** appears.
+
+![add checklist](../img/getting-started/add_checklist.png)
+
+Type your comments, and hit **Enter** key to add another line on your checklist.
+
+![checklist](../img/getting-started/checklist_detailed.png)
 
 You can also **tag** someone of the team in the comments. Type the `@`and it opens a sub-menu with the list of the team. 
 
@@ -568,7 +578,10 @@ You can also **tag** someone of the team in the comments. Type the `@`and it ope
 Alternatively, you can change it to ![Done](../img/getting-started/done_icon.png), to notify the CG artist
 that his work is validated.
 
-You can also use the preview as a **thumbnail** on the asset or shot spreadsheet. It
+## Add a thumbnail
+
+
+You can use the preview as a **thumbnail** on the asset or shot spreadsheet. It
 helps to recognize the assets/shots on the main pages. 
 On the list page, click on the status you want, then on the right pannel, click on **Preview** button (1).
 
