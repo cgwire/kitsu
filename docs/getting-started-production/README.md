@@ -343,6 +343,11 @@ Now your **Breakdown** page should look like this.
 
 ![Breakdown page fill](../img/getting-started/breakdown_full.png)
 
+
+You can also import or export your breakdownlist, with a `.csv`file.
+
+Click on the **import** button ![Import button](../img/getting-started/import.png)
+
 We can now assign people on the shots tasks. If the animation and so, are done
 elsewhere, you can create an account for this studio and assign it to tasks.
 They can see your progress.

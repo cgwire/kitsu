@@ -76,7 +76,7 @@ You can also search per sequence or type of asset (`character`, or `seq01`)
 
 ### Sequence overview page
 
-The other way is to go to the **Sequences** page. You can go there with the drop-down menu on top of a page.
+The other way is to go to the **Sequence Stats** page. You can go there with the drop-down menu on top of a page.
 
 
 ![Drop down menu](../img/faq/drop_down_menu.png)
@@ -93,8 +93,47 @@ distribution.
 
 ![Overview sequence detail](../img/faq/global_view_sequence_detail.png)
 
+You can also display the statistique as percentage.
+
+![Overview sequence detail](../img/faq/global_view_sequence_detail_perc.png)
+
+You can also choose between 2 count mode: per shots or per frames.
+
+![Overview sequence detail](../img/faq/global_view_sequence_detail_count.png)
+
+
 You can also click on the **tasks name** to have the detailed shots about this
-task.
+task (page supervisor).
+
+### Asset overview page
+
+
+The other way is to go to the **Sequence Stats** page. You can go there with the drop-down menu on top of a page.
+
+
+![Drop down menu](../img/faq/drop_down_menu.png)
+
+![Drop down menu sequence](../img/faq/drop_down_menu_asset.png)
+
+
+With this view, you can see all the status distribution per tasks on each
+sequences.
+
+![Overview sequence task](../img/faq/global_view_asset.png)
+
+You can fly over the pie chart to have more detailed information about the
+distribution.
+
+![Overview sequence detail](../img/faq/global_view_asset_detail.png)
+
+You can also display the statistique as percentage.
+
+![Overview sequence detail](../img/faq/global_view_sequence_detail_perc.png)
+
+
+You can also click on the **tasks name** to have the detailed shots about this
+task (page supervisor).
+
 
 
 -----------------------------------------    
