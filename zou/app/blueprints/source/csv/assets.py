@@ -12,7 +12,7 @@ class AssetsCsvImportResource(BaseCsvProjectImportResource):
         self.entity_types = {}
         self.descriptor_fields = self.get_descriptor_field_map(
             project_id,
-            "Shot"
+            "Asset"
         )
 
     def import_row(self, row, project_id):
@@ -49,6 +49,11 @@ class AssetsCsvImportResource(BaseCsvProjectImportResource):
                     entity_type_id=entity_type_id,
                     data=data
                 )
+            else:
+                entity.update({
+                    "description": description,
+                    "data": data
+                })
         except IntegrityError:
             pass
 

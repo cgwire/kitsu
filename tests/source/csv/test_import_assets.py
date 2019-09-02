@@ -13,7 +13,7 @@ class ImportCsvAssetsTestCase(ApiDBTestCase):
 
         self.generate_fixture_project_status()
         self.generate_fixture_project()
-        self.generate_fixture_metadata_descriptor(entity_type="Shot")
+        self.generate_fixture_metadata_descriptor(entity_type="Asset")
 
     def test_import_assets(self):
         path = "/import/csv/projects/%s/assets" % self.project.id
