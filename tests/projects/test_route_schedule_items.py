@@ -17,7 +17,7 @@ class ProjectScheduleRouteTestCase(ApiDBTestCase):
         self.asset_type_id = str(self.asset_type.id)
 
     def test_get_schedule_items(self):
-        path = "/data/projects/%s/schedule-items" % self.project_id
+        path = "/data/projects/%s/schedule-items/task-types" % self.project_id
         items = self.get(path)
         self.assertEqual(len(items), 2)
         task_type_ids = [item["task_type_id"] for item in items]

@@ -280,22 +280,22 @@ class CreatePreviewFilePictureResource(Resource):
             preview_file_id
         )
         comment_id = None
-        if comment is not None:
-            comment_id = comment["id"]
-
         events.emit("preview-file:update", {
             "preview_file_id": preview_file["id"]
         })
-        events.emit("comment:update", {
-            "comment_id": comment["id"]
-        })
-        events.emit("preview-file:add-file", {
-            "comment_id": comment_id,
-            "task_id": preview_file["task_id"],
-            "preview_file_id": preview_file["id"],
-            "revision": preview_file["revision"],
-            "extension": preview_file["extension"]
-        })
+
+        if comment is not None:
+            comment_id = comment["id"]
+            events.emit("comment:update", {
+                "comment_id": comment_id
+            })
+            events.emit("preview-file:add-file", {
+                "comment_id": comment_id,
+                "task_id": preview_file["task_id"],
+                "preview_file_id": preview_file["id"],
+                "revision": preview_file["revision"],
+                "extension": preview_file["extension"]
+            })
 
     def is_allowed(self, preview_file_id):
         """
