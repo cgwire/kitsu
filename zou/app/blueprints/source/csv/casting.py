@@ -41,7 +41,9 @@ class CastingCsvImportResource(BaseCsvProjectImportResource):
         return "%s%s" % (asset_type_name, slugify(asset["name"]))
 
     def get_sequence_key(self, sequence):
-        episode_name = self.episode_map[sequence["parent_id"]]
+        episode_name = ""
+        if sequence["parent_id"] in self.episode_map:
+            episode_name = self.episode_map[sequence["parent_id"]]
         return "%s%s" % (episode_name, slugify(sequence["name"]))
 
     def get_shot_key(self, shot):
