@@ -441,11 +441,15 @@ Validate the post and the new status with **Post status**
 
 ## Add preview
 
-You can add a preview to any comments. It can be a picture (.png, .jpg, .jpeg),or a video (.mp4, .mov, .wmv), 
+You can add a preview to any comments. It can be a picture (`.png`, `.jpg`, `.jpeg`), or a video (`.mp4`, `.mov`, `.wmv`), 
 or an `.obj` file. All can be reviewed from the browser.
 
 Other files like `.pdf`, `.zip`, `.rar`, `.ma` or `.mb` however, they need to be
 downloaded to be reviewed.
+
+If you have defined a **FPS** for the production, Kitsu will conform the uploaded video to this FPS.
+
+Otherwise the video will be compressed to 1080P, and 30mbits/sec. 
 
 Click on the "Attach preview" button, the explorer opens and lets you choose your file.
 
@@ -458,6 +462,18 @@ Once your file is selected, you see its name near the "Attach preview" button.
 You can also **drag & drop** the file in the comment section.
 
 ![attach preview drag drop](../img/getting-started/drag_drop_preview.png)
+
+once you have uploaded an image, you have the possibility to add another one.
+
+![attach preview drag drop](../img/getting-started/
+upload_several_pictures.png)
+
+The **Add preview** popup opens, and ask you to choose a file.
+
+You can navigate through the pictures uploaded.
+
+![attach preview drag drop](../img/getting-started/
+upload_second_pictures.png)
 
 ## Validation per batch
 
@@ -525,11 +541,21 @@ You can watch the version from the right panel, or enlarge it (2), or even go fu
 
 ![review](../img/getting-started/review.png)
 
-You can draw directly on the version with the **pencil** icon ![Pencil](../img/getting-started/draw.png).
+You can compare two task type or version side by side when you click on the **Compare** button 
+![compare button](../img/getting-started/compare_button.png).
 
-If you need to move your line, click again on the **pencil** icon, the cursor changes to a multi-directional cross ![Pencil](../img/getting-started/direction_arrow.png), and then you can select your line and move it around.
+![compare button](../img/getting-started/compare_version.png)
 
-If you need to delete a line, select it with the directional cross, and then press the **delete** icon ![Delete line](../img/getting-started/delete_line.png)
+You can draw directly on the preview with the **pencil** tool ![Pencil](../img/getting-started/draw.png).
+
+![review drawing](../img/getting-started/review_comment.png)
+
+
+If you need to delete your line, click again on the **pencil** icon, the cursor changes to a multi-directional cross ![Pencil](../img/getting-started/direction_arrow.png), and then you can select your line and move it around.
+
+![review drawing](../img/getting-started/review_edit.png.png)
+
+Select the line with the directional cross, and then press the **delete** icon ![Delete line](../img/getting-started/delete_line.png)
 
 
 From there you can change the status to ![Retake](../img/getting-started/retake_icon.png) if you want that the CG artist
