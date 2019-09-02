@@ -49,9 +49,7 @@ encourage you to change the default password with one of your own.
 
  -----------------------------------------    
 
-## How to have an overview of the production?
-
-### Task type overview page / Supervisor page
+## How to have an overview of a task type?
 
 To access to the task type overview, you can click click on the **task type** name.
 
@@ -74,6 +72,7 @@ You can also filter the information. As you already are in a task, you need to t
 
 You can also search per sequence or type of asset (`character`, or `seq01`)
 
+## How to have an overview of the production?
 ### Sequence overview page
 
 The other way is to go to the **Sequence Stats** page. You can go there with the drop-down menu on top of a page.
@@ -134,6 +133,15 @@ You can also display the statistique as percentage.
 You can also click on the **tasks name** to have the detailed shots about this
 task (page supervisor).
 
+On both sequence and asset stats page, you can download an export of your date, as a `.csv` file.
+
+Click on the **export* button.
+
+![download](../img/faq/export.png)
+
+You can open the `.csv` file with a spreadsheet sofware.
+
+![download](../img/faq/export_csv_asset.png)
 
 
 -----------------------------------------    
