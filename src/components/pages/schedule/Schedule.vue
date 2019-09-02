@@ -486,12 +486,14 @@ export default {
     ]),
 
     resetScheduleSize () {
-      this.timelineContent.style.width =
-        this.nbDisplayedDays * this.cellWidth + 'px'
-      this.timelineContentWrapper.style.height =
-        this.schedule.offsetHeight - 250 + 'px'
-      this.entityList.style.height =
-        this.schedule.offsetHeight - 227 + 'px'
+      if (this.timelineContent) {
+        this.timelineContent.style.width =
+          this.nbDisplayedDays * this.cellWidth + 'px'
+        this.timelineContentWrapper.style.height =
+          this.schedule.offsetHeight - 250 + 'px'
+        this.entityList.style.height =
+          this.schedule.offsetHeight - 227 + 'px'
+      }
     },
 
     onMouseMove (event) {

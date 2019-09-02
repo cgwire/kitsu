@@ -15,8 +15,10 @@ localVue.use(vuescroll)
 
 describe('Schedule', () => {
   let store
+
   let newsStore
   let productionStore
+  let scheduleStore
   let taskStore
   let taskStatusStore
   let taskTypeStore
@@ -81,6 +83,13 @@ describe('Schedule', () => {
       },
       actions: {}
     }
+    scheduleStore = {
+      getters: {
+        milestones: () => ({})
+      },
+      actions: {
+      }
+    }
 
     store = new Vuex.Store({
       strict: true,
@@ -89,7 +98,8 @@ describe('Schedule', () => {
         productions: productionStore,
         taskStatus: taskStatusStore,
         taskTypes: taskTypeStore,
-        user: userStore
+        user: userStore,
+        schedule: scheduleStore
       }
     })
 
@@ -149,8 +159,8 @@ describe('Schedule', () => {
         wrapper.vm.resetScheduleSize()
         expect(wrapper.vm.timelineContent.style.width).toEqual('7980px')
         expect(wrapper.vm.timelineContentWrapper.style.height)
-          .toEqual('-118px')
-        expect(wrapper.vm.entityList.style.height).toEqual('-118px')
+          .toEqual('-250px')
+        expect(wrapper.vm.entityList.style.height).toEqual('-227px')
       })
     })
 
