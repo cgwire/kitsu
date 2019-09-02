@@ -12,9 +12,9 @@
       @mousedown="startBrowsingY"
     >
       <div
-        class="has-text-right total-man-days"
+        class="has-text-right total-man-days mr0"
       >
-        <span class="mr1">{{ totalManDays }}</span>
+        <span class="total-value">{{ totalManDays }}</span>
         <span>{{ $t('schedule.md') }}</span>
       </div>
 
@@ -41,7 +41,6 @@
             class="flexrow-item"
             type="number"
             placeholder="0"
-            min="0"
             @input="$emit('item-changed', rootElement)"
             v-model="rootElement.man_days"
           />
@@ -50,7 +49,11 @@
           </span>
         </div>
 
-        <div class="children" v-if="rootElement.expanded">
+        <div
+          class="children"
+          :style="childrenStyle(rootElement)"
+          v-if="rootElement.expanded"
+        >
           <div class="flexrow" v-if="rootElement.loading">
             <spinner
               style="width: 20px; margin: 0 0 10px 10px;"
@@ -60,17 +63,12 @@
           <div
             class="child-name"
             :key="'entity-' + childElement.id"
-            v-for="childElement in rootElement.children"
+            v-for="(childElement, j) in rootElement.children"
           >
             <div
               class="entity-line entity-name child-line flexrow"
+              :style="childNameStyle(rootElement, j)"
             >
-              <span
-                class="expand flexrow-item"
-                @click="expandChildElement(childElement)"
-              >
-                <chevron-right-icon />
-              </span>
               <span class="filler flexrow-item">
                 {{ childElement.name }}
               </span>
@@ -93,26 +91,64 @@
           :style="dayStyle(day)"
           v-for="(day, index) in daysAvailable"
         >
-          <span
-            class="month-name"
-            v-if="day.newMonth || index === 0"
-          >
-            {{ day.format('MMMM') }}
-          </span>
           <div
-            :class="dayClass(day, index)"
+            class="milestone"
+            @click="showEditMilestoneModal(day, milestones[day.format('YYYY-MM-DD')])"
+            v-if="milestones[day.format('YYYY-MM-DD')]"
           >
-            <span
-              v-if="!day.weekend && zoomLevel > 2"
+            <div class="milestone-tooltip flexrow">
+              <span class="bull flexrow-item">&bull;</span>
+              <span class="flexrow-item">
+                {{ milestones[day.format('YYYY-MM-DD')].name }}
+              </span>
+              <span class="filler">
+              </span>
+              <edit2-icon class="edit-icon flexrow-item" />
+            </div>
+            <div>
+              <span class="bull">&bull;</span>
+            </div>
+          </div>
+          <div
+            class="milestone"
+            v-else
+          >
+            <div>
+              <span class="bull">&nbsp;</span>
+            </div>
+          </div>
+
+          <div class="date-widget">
+            <div
+              class="add-milestone"
+              :title="addMilestoneTitle(day)"
+              @click="showEditMilestoneModal(day, milestones[day.format('YYYY-MM-DD')])"
             >
-              {{ day.format('ddd')[0] }} /
-            </span>
-            <span
-              class="day-number"
-              v-if="!day.weekend"
-            >
-              {{ day.format('DD') }}
-            </span>
+              <span>+</span>
+            </div>
+            <div class="date-name">
+              <span
+                class="month-name"
+                v-if="day.newMonth || index === 0"
+              >
+                {{ day.format('MMMM') }}
+              </span>
+              <div
+                :class="dayClass(day, index)"
+              >
+                <span
+                  v-if="!day.weekend && zoomLevel > 2"
+                >
+                  {{ day.format('ddd')[0] }} /
+                </span>
+                <span
+                  class="day-number"
+                  v-if="!day.weekend"
+                >
+                  {{ day.format('DD') }}
+                </span>
+              </div>
+            </div>
           </div>
         </div>
       </div>
@@ -131,6 +167,13 @@
             ref="timeline-position"
             class="timeline-position"
             :style="timelinePositionStyle"
+          >
+          </div>
+          <div
+            class="milestone-vertical-line"
+            :style="milestoneLineStyle(milestone)"
+            :key="'milestone-' + milestone.date"
+            v-for="milestone in Object.values(milestones)"
           >
           </div>
           <div
@@ -168,7 +211,11 @@
               </div>
             </div>
 
-            <div class="children" v-if="rootElement.expanded">
+            <div
+              class="children"
+              :style="childrenStyle(rootElement)"
+              v-if="rootElement.expanded"
+            >
               <div class="flexrow" v-if="rootElement.loading">
                 <spinner
                   style="width: 20px; margin: 0 0 10px 10px; opacity: 0"
@@ -184,7 +231,7 @@
                 <div
                   class="timebar"
                   :title="childElement.name"
-                  :style="timebarStyle(childElement)"
+                  :style="timebarChildStyle(childElement, rootElement, true)"
                 >
                   <div
                     :class="{
@@ -209,7 +256,6 @@
                 </div>
               </div>
             </div>
-
           </div>
 
         </div>
@@ -220,6 +266,17 @@
     class="mt1"
     v-if="true"
   />
+
+  <edit-milestone-modal
+    ref="edit-milestone-modal"
+    :active="modals.edit"
+    :is-loading="loading.edit"
+    :is-error="errors.edit"
+    :milestone-to-edit="milestoneToEdit"
+    @confirm="confirmEditMilestone"
+    @cancel="hideEditMilestoneModal"
+  />
+
 </div>
 </template>
 
@@ -229,24 +286,41 @@
  */
 import { mapGetters, mapActions } from 'vuex'
 import moment from 'moment-timezone'
+import colors from '../../../lib/colors'
 
+import EditMilestoneModal from '../../modals/EditMilestoneModal'
 import Spinner from '../../widgets/Spinner'
-import { ChevronRightIcon, ChevronDownIcon } from 'vue-feather-icons'
+import { ChevronRightIcon, ChevronDownIcon, Edit2Icon } from 'vue-feather-icons'
 
 export default {
   name: 'schedule',
   components: {
     ChevronDownIcon,
     ChevronRightIcon,
+    Edit2Icon,
+    EditMilestoneModal,
     Spinner
   },
 
   data () {
     return {
+      currentMilestoneDate: null,
       isBrowsingX: false,
       isBrowsingY: false,
       isChangeSize: false,
-      timelineDisplayedDaysIndex: {}
+      milestoneToEdit: {
+        date: moment()
+      },
+      timelineDisplayedDaysIndex: {},
+      modals: {
+        edit: false
+      },
+      errors: {
+        edit: false
+      },
+      loading: {
+        edit: false
+      }
     }
   },
 
@@ -293,7 +367,8 @@ export default {
 
   computed: {
     ...mapGetters([
-      'isCurrentUserAdmin'
+      'isCurrentUserAdmin',
+      'milestones'
     ]),
 
     cellWidth () {
@@ -407,15 +482,16 @@ export default {
 
   methods: {
     ...mapActions([
+      'saveMilestone'
     ]),
 
     resetScheduleSize () {
       this.timelineContent.style.width =
         this.nbDisplayedDays * this.cellWidth + 'px'
       this.timelineContentWrapper.style.height =
-        this.schedule.offsetHeight - 118 + 'px'
+        this.schedule.offsetHeight - 250 + 'px'
       this.entityList.style.height =
-        this.schedule.offsetHeight - 118 + 'px'
+        this.schedule.offsetHeight - 227 + 'px'
     },
 
     onMouseMove (event) {
@@ -508,7 +584,7 @@ export default {
 
     scrollScheduleTop (event) {
       const previousTop = this.timelineContentWrapper.scrollTop
-      let newTop = previousTop - event.movementY
+      const newTop = previousTop - event.movementY
       this.timelineContentWrapper.scrollTop = newTop
       this.entityList.scrollTop = newTop
     },
@@ -575,6 +651,9 @@ export default {
         this.isChangeStartDate = false
         this.isChangeEndDate = true
         this.currentElement = timeElement
+        if (!timeElement.endDate) {
+          timeElement.endDate = timeElement.startDate.clone().add('days', 1)
+        }
         this.lastEndDate = timeElement.endDate.clone()
         this.initialClientX = event.clientX
         document.body.style.cursor = 'e-resize'
@@ -627,9 +706,13 @@ export default {
     },
 
     entityLineStyle (timeElement) {
-      return {
+      const style = {
         'background-color': timeElement.color
       }
+      if (timeElement.expanded) {
+        style['margin-bottom'] = '0'
+      }
+      return style
     },
 
     timebarStyle (timeElement) {
@@ -637,6 +720,15 @@ export default {
         left: this.getTimebarLeft(timeElement) + 'px',
         width: this.getTimebarWidth(timeElement) + 'px',
         cursor: this.isCurrentUserAdmin ? 'ew-resize' : 'default'
+      }
+    },
+
+    timebarChildStyle (timeElement, rootElement) {
+      return {
+        left: this.getTimebarLeft(timeElement) + 'px',
+        width: this.getTimebarWidth(timeElement) + 'px',
+        cursor: this.isCurrentUserAdmin ? 'ew-resize' : 'default',
+        background: rootElement.color
       }
     },
 
@@ -661,6 +753,7 @@ export default {
     },
 
     // Children
+
     expandRootElement (rootElement) {
       this.$emit('root-element-expanded', rootElement)
     },
@@ -668,11 +761,67 @@ export default {
     expandChildElement (element) {
       if (element) {
       }
+    },
+
+    childNameStyle (rootElement, index) {
+      const isOdd = index % 2 === 0
+      const level = isOdd ? 0.7 : 0.9
+      return {
+        'background': colors.lightenColor(rootElement.color, level)
+      }
+    },
+
+    childrenStyle (rootElement) {
+      return {
+        'border-bottom': '1px solid ' + rootElement.color
+      }
+    },
+
+    // Milestones
+
+    showEditMilestoneModal (day, milestone) {
+      this.modals.edit = true
+      if (milestone) {
+        milestone.date = moment(milestone.date, 'YYYY-MM-DD')
+        this.milestoneToEdit = milestone
+      } else {
+        this.milestoneToEdit = { date: day }
+      }
+    },
+
+    hideEditMilestoneModal () {
+      this.modals.edit = false
+    },
+
+    confirmEditMilestone (milestone) {
+      this.loading.edit = true
+      this.saveMilestone(milestone)
+        .then(() => {
+          this.modals.edit = false
+          this.loading.edit = false
+        })
+        .catch((err) => {
+          console.error(err)
+          this.loading.edit = false
+          this.errors.edit = true
+        })
+    },
+
+    milestoneLineStyle (milestone) {
+      const endDate = moment(milestone.date, 'YYYY-MM-DD')
+      const lengthDiff = this.businessDiff(this.startDate, endDate)
+
+      return {
+        left: (lengthDiff + 0.5) * this.cellWidth + 'px'
+      }
+    },
+
+    addMilestoneTitle (day) {
+      return `${this.$t('schedule.milestone.add_milestone')} ${day.format('YYYY-MM-DD')}`
     }
   },
 
-  socket: {
-  },
+  socket: {},
 
   watch: {
     startDate () {
@@ -749,6 +898,10 @@ export default {
             color: $dark-grey;
           }
         }
+
+        .milestone-vertical-line {
+          border-left: 1px dashed white;
+        }
       }
     }
   }
@@ -759,6 +912,22 @@ export default {
 
   .child-name .entity-name span {
     color: $white;
+  }
+
+  .milestone {
+    .milestone-tooltip {
+      background: $dark-grey-lighter;
+      border: 1px solid $dark-grey;
+      box-shadow: 0 2px 2px 0px $dark-grey-strong;
+    }
+    .milestone-tooltip:after {
+      border-color: transparent;
+      border-top-color: $dark-grey-lighter;
+    }
+    .milestone-tooltip:before {
+      border-color: transparent;
+      border-top-color: $dark-grey-lighter;
+    }
   }
 }
 
@@ -772,7 +941,6 @@ export default {
   right: 0;
   left: 0;
   bottom: 0;
-  height: 100%;
   height: 100vh;
   overflow: hidden;
   display: flex;
@@ -781,7 +949,7 @@ export default {
 
 .entities {
   background: white;
-  margin-top: 35px;
+  margin-top: 57px;
   min-width: 230px;
   overflow: hidden;
   z-index: 2;
@@ -809,7 +977,17 @@ export default {
   }
 
   &.child-line {
-    height: 25px;
+    height: 40px;
+    margin-bottom: 0px;
+    font-size: 1em;
+
+    &:nth-child(even) {
+      background: transparent;
+    }
+
+    &:nth-child(odd) {
+      background: rgba(200, 200, 200, 0.2);
+    }
   }
 }
 
@@ -818,26 +996,27 @@ export default {
   flex-direction: column;
   overflow: hidden;
   padding-top: 0px;
-  padding-left: 2px;
 
   .timeline-header {
     white-space: nowrap;
     position: relative;
     margin-left: 1px;
     background: white;
-    padding-bottom: 14px;
+    padding-bottom: 4px;
     overflow: hidden;
-    padding-top: 40px;
+    padding-top: 20px;
 
     .day {
       display: inline-block;
       font-size: 0.8em;
       padding-bottom: 0;
+      height: 30px;
 
       .day-name {
         border-left: 2px solid transparent;
         color: $grey;
         padding-bottom: 0em;
+        margin-bottom: 0em;
         padding-left: 10px;
         padding-top: 0em;
         text-transform: uppercase;
@@ -870,11 +1049,10 @@ export default {
   .timeline-content-wrapper {
     background-repeat: repeat;
     margin-left: 2px;
-    overflow-x: hidden;
-    overflow-y: hidden;
+    overflow-x: auto;
+    overflow-y: auto;
 
     .timeline-content {
-      height: 100%;
       position: relative;
 
       .timeline-position {
@@ -885,6 +1063,17 @@ export default {
         bottom: 0;
         background: rgba(200, 255, 200, 0.3);
         z-index: 100;
+      }
+
+      .milestone-vertical-line {
+        position: absolute;
+        left: 0px;
+        top: 0;
+        bottom: 0;
+        background: rgba(200, 255, 200, 0.3);
+        z-index: 100;
+        width: 1px;
+        border-left: 1px dashed black;
       }
 
       .entity-line {
@@ -916,7 +1105,7 @@ export default {
 
           .timebar {
             background: rgba(0, 0, 50, 0.2);
-            top: 6px;
+            top: 13px;
             font-size: 0.6em;
           }
         }
@@ -996,8 +1185,13 @@ export default {
   }
 }
 
+.children {
+  margin-bottom: 1em;
+}
+
 .child-name .entity-name span {
   color: $dark-grey;
+  padding-left: 2.5em;
 
   .filler {
     margin: 0;
@@ -1007,14 +1201,123 @@ export default {
 
 .total-man-days {
   padding-bottom: 10px;
-  margin-right: 1em;
+  margin-right: 0.5em;
 
-  .mr1 {
+  .total-value {
+    margin-right: 15px;
     font-size: 20px;
   }
 }
 
 .child-spinner {
   font-size: 10px;
+  padding-top: 20px;
+}
+
+.milestone {
+  cursor: pointer;
+  margin-bottom: 0px;
+  position: relative;
+  text-align: center;
+  min-height: 35px;
+
+  .flexrow-item {
+    margin-left: 5px;
+    margin-right: 0px;
+  }
+
+  .bull {
+    font-size: 20px;
+    line-height: 10px;
+  }
+
+  .milestone-tooltip {
+    border: 1px solid #EEE;
+    border-radius: 5px;
+    box-shadow: 0 2px 2px 0px #EEE;
+    font-size: 0.8em;
+    font-weight: bold;
+    opacity: 0;
+    padding: 2px;
+    position: relative;
+    border: 1px solid #eeeeee;
+    width: 140px;
+    left: -40px;
+    top: -5px;
+    background: white;
+    z-index: 100;
+
+    .bull {
+      font-size: 10px;
+    }
+
+    .edit-icon {
+      width: 10px;
+      height: 10px;
+      color: #AAA;
+    }
+  }
+
+  &:hover {
+    .milestone-tooltip {
+      opacity: 1;
+    }
+  }
+
+  .milestone-tooltip:after, .milestone-tooltip:before {
+    top: 100%;
+    left: 50%;
+    border: solid transparent;
+    content: " ";
+    height: 0;
+    width: 0;
+    position: absolute;
+    pointer-events: none;
+  }
+
+  .milestone-tooltip:after {
+    border-color: rgba(255, 255, 255, 0);
+    border-top-color: #ffffff;
+    border-width: 5px;
+    margin-left: -5px;
+  }
+  .milestone-tooltip:before {
+    border-color: rgba(238, 238, 238, 0);
+    border-top-color: #eeeeee;
+    border-width: 6px;
+    margin-left: -6px;
+  }
+}
+
+.date-widget {
+  padding-top: 8px;
+
+  .add-milestone {
+    display: none;
+    cursor: pointer;
+    text-align: center;
+
+    span {
+      background: black;
+      color: white;
+      border-radius: 50%;
+      font-size: 1.4em;
+      line-height: 0.6em;
+      font-weight: bold;
+      padding: 0 6px 2px 6px;
+    }
+  }
+
+  &:hover {
+    background: $light-green-light;
+    height: 100%;
+    .add-milestone {
+      display: block;
+    }
+
+    .date-name {
+      display: none;
+    }
+  }
 }
 </style>

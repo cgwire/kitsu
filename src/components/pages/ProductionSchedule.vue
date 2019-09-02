@@ -154,10 +154,11 @@ export default {
   methods: {
     ...mapActions([
       'editProduction',
-      'loadScheduleItems',
       'loadAssetTypeScheduleItems',
-      'loadSequenceScheduleItems',
       'loadEpisodeScheduleItems',
+      'loadMilestones',
+      'loadScheduleItems',
+      'loadSequenceScheduleItems',
       'saveScheduleItem'
     ]),
 
@@ -184,6 +185,7 @@ export default {
             sortScheduleItems(scheduleItems, this.taskTypeMap)
           this.loading.schedule = false
         })
+        .then(this.loadMilestones)
         .catch((err) => {
           console.error(err)
           this.loading.schedule = false

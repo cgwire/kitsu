@@ -455,7 +455,13 @@ export default {
     title: 'Schedule',
     overall_man_days: 'Man-days',
     md: 'md',
-    zoom_level: 'Zoom level'
+    zoom_level: 'Zoom level',
+    milestone: {
+      add_milestone: 'Add milestone for',
+      edit_milestone: 'Edit milestone for',
+      name: 'Name',
+      error: 'An error occured while adding or editing the milestone. Please try again.'
+    }
   },
 
   shots: {
