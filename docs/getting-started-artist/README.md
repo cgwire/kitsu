@@ -119,12 +119,11 @@ The **Add preview** popup opens, and ask you to choose a file.
 
 You can navigate through the pictures uploaded.
 
-![attach preview drag drop](../img/getting-started/
-upload_second_pictures.png)
+![attach preview drag drop](../img/getting-started/upload_second_pictures.png)
 
 
-This detailed page of the task is your way to communicate with others.
-They also use this page to answer your questions, give you feedback, and asking for a retake. The history of the conversation is always available.
+This detailed page of the tasks is your way to communicate with others.
+They also use this page to answer your questions, give you feedback, and ask for a retake. The history of the conversation is always available.
 
 For quicker access to the information, when you get back to your todo
 page, the last comment posted on each task is available too.
