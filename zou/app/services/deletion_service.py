@@ -102,7 +102,7 @@ def reset_task_data(task_id):
         "end_date": end_date,
         "task_status_id": task_status_id
     })
-    events.emit("task:new", {
+    events.emit("task:update", {
         "task_id": task.id
     })
     return task.serialize()
