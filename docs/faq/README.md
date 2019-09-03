@@ -503,7 +503,7 @@ On the new pop up you can define your personalized task:
 - (4) If the artists need to time log their work for tasks with this task type
 - (5) The color 
 
-![Add task](../img/faq/edit_task.png)
+![Edit task](../img/faq/edit_task.png)
 
 Click on **Confirm** to save your changes.
 
