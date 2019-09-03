@@ -42,7 +42,7 @@ NB: A link to this documentation is available and the Dark Theme in this menu to
  
 ![User profile](../img/getting-started/user_profil.png)
 
-If you keep scrolling you can change your password. We
+If you keep scrolling, you can change your password. We
 encourage you to change the default password with one of your own.
 
 ![User password](../img/getting-started/user_password.png)
@@ -92,11 +92,11 @@ distribution.
 
 ![Overview sequence detail](../img/faq/global_view_sequence_detail.png)
 
-You can also display the statistique as percentage.
+You can also display the statistic as a percentage.
 
 ![Overview sequence detail](../img/faq/global_view_sequence_detail_perc.png)
 
-You can also choose between 2 count modes: per shots or per frames.
+You can also choose between 2 count modes: per shots or frames.
 
 ![Overview sequence detail](../img/faq/global_view_sequence_detail_count.png)
 
@@ -110,11 +110,7 @@ task (page supervisor).
 The other way is to go to the **
 Asset Types Stats** page. You can go there with the drop-down menu on top of a page.
 
-
 ![Drop down menu](../img/faq/drop_down_menu_stat.png)
-
-![Drop down menu sequence](../img/faq/drop_down_menu_asset.png)
-
 
 With this view, you can see all the status distribution per tasks on each
 asset type.
@@ -126,7 +122,7 @@ distribution.
 
 ![Overview sequence detail](../img/faq/global_view_sequence_detail.png)
 
-You can also display the statistique as percentage.
+You can also display the statistic as a percentage.
 
 ![Overview sequence detail](../img/faq/global_view_sequence_detail_perc.png)
 
@@ -134,11 +130,11 @@ You can also display the statistique as percentage.
 You can also click on the **tasks name** to have the detailed shots about this
 task (page supervisor).
 
-On both sequence and asset stats page, you can download an export of your date, as a `.csv` file.
+On both sequence and asset stats page, you can download an export of your data, as a `.csv` file.
 
 Click on the **export** button ![download](../img/faq/export.png).
 
-You can open the `.csv` file with a spreadsheet sofware.
+You can open the `.csv` file with spreadsheet software.
 
 ![download](../img/faq/export_csv_asset.png)
 
@@ -233,7 +229,7 @@ You can create **filters** about **entities**:
 You can also create **filters** about **task status** by following this syntax:
 **task=status**.
 
-Expemples:
+Examples:
 
 * Layout is work in progress (wip) : `layout=wip`
 * Concept is waiting for approval (wfa) only for the fx : `concept=wfa fx`
@@ -341,7 +337,7 @@ you won't receive notifications any more.
 
 ## How to be notified of everything?
 
-The **Newsfeed** page is here to keep you aware of all the changes on the production.
+The **News feed** page is here to keep you aware of all the changes on the production.
 
 You can go there with the drop-down menu on top of a page.
 
@@ -355,21 +351,23 @@ You can choose to see all the **status** or a specific one.
 
 ![newsfeed change status](../img/faq/newsfeed_status.png)
 
-The same thing with the **task types**, you can choose to see them all, or one a specific one.
+The same thing with the **task types**, you can choose to see them all, or a specific one.
 
 ![newsfeed change task](../img/faq/newsfeed_tasktype.png)
 
-You can click on each element to open the right panel and see the detail of this task. You can review and comment also from this page.
+You can click on each element to open the right panel and see the detail of this task. You can review and comment on this page.
 
 ![newsfeed comments](../img/faq/newsfeed_comment_panel.png)
 
-You can also display the **previews** instead of the **status**.
+You can display the **previews** instead of the **status**.
 
 ![Newsfeed preview option](../img/faq/newsfeed_preview_global.png)
 
-You can now see all the **previews**, images and videos, posted during the production.
+You can now see all the **previews** (images and videos), posted during the production.
 
-![Newsfeed preview](../img/faq/newsfeed_preview.png)
+![Newsfeed preview option](../img/faq/newsfeed_preview.png)
+
+
 
 You can also select a specific **status** or a specific **task type**.
 
@@ -389,11 +387,11 @@ You can find the **Playlists** page on the drop-down menu.
 
 ![Playlist main menu](../img/faq/drop_down_menu_playlist.png)
 
-The **playlists** page is separated in 3 parts: 
+The **playlist** page is separated into 3 parts: 
 
-* (1): The playlist list where you can **create** a playlist, or load an existing one.
-* (2): The shots of the current playlist. 
-* (3): The **shots** you want to show.
+* (1) The playlist list where you can **create** a playlist, or load an existing one.
+* (2) The shots of the current playlist. 
+* (3) The **shots** you want to show.
 
 ![Playlist page](../img/faq/playlist_page.png)
 
@@ -431,21 +429,21 @@ Click on the **Compare** button ![Compare button](../img/faq/compare_button.png)
 
 ### How to comment on the playlist?
 
-The main purpose of the playlist is to help you with the review of the shots.
+The primary purpose of the playlist is to help you with the review of the shots.
 
-You can comment directly the shots from the preview.
+You can comment the shots directly from the preview.
 
 Click on the **comment** button.
 
 ![Playlist comment](../img/faq/playlist_comment_button.png)
 
-You now have acces to the right panel, with all the history of the comments and status.
+You now have access to the right panel, with all the history of the comments and status.
 
-You can also see the drawing comment on the video (the red dot below the timeline).
+You can see the drawing comment on the video (the red dot below the timeline).
 
 ![Playlist comment](../img/faq/playlist_comment.png)
 
-You can also draw on the video (same than for the shot review), with the **draw** button ![draw button](../img/faq/draw.png)
+You can draw on the video (same than for the shot review), with the **draw** button ![draw button](../img/faq/draw.png)
 
 
 
