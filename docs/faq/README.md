@@ -17,11 +17,11 @@ Then click on the **Attach preview** button.
 
 A new window is displayed.
 
-![Add preview file](../img/getting-started/add_preview.png)
-
 You can either drag and drop your pic or video on the **Choose a file** button,
 or navigate through your system and pick your file, validate with the
 **Confirm** button. Then click on the **Post comment** button.
+
+![Add preview file](../img/getting-started/add_preview.png)
 
 Your work appears on the right part of the screen as a V1. 
 
@@ -38,11 +38,11 @@ Each time you add a new revision, the previous versions are still available.
 
 Click on your name on the top right of the screen (1) then on **Profile** (2).
 
-NB: A link to this documentation is available and the Dark Theme in this menu too (3).
+NB: A link to this documentation is available and the Dark Theme in this menu too (4).
  
 ![User profile](../img/getting-started/user_profil.png)
 
-If you keep scrolling you can also change your password if you want. We
+If you keep scrolling you can change your password. We
 encourage you to change the default password with one of your own.
 
 ![User password](../img/getting-started/user_password.png)
@@ -51,12 +51,12 @@ encourage you to change the default password with one of your own.
 
 ## How to have an overview of a task type?
 
-To access to the task type overview, you can click click on the **task type** name.
+To access to the task type overview, you can click click on the **task type** name on a global page.
 
 ![Overview asset page](../img/faq/global_view_asset_task.png)
 
 It goes to a page where you can see the state of all the **status** 
-for this **specific task type** per asset or per shot.
+for this **specific task type** (per asset or per shot).
 
 ![Overview asset task](../img/faq/supervisor_page.png)
 
@@ -96,7 +96,7 @@ You can also display the statistique as percentage.
 
 ![Overview sequence detail](../img/faq/global_view_sequence_detail_perc.png)
 
-You can also choose between 2 count mode: per shots or per frames.
+You can also choose between 2 count modes: per shots or per frames.
 
 ![Overview sequence detail](../img/faq/global_view_sequence_detail_count.png)
 
@@ -107,7 +107,8 @@ task (page supervisor).
 ### Asset overview page
 
 
-The other way is to go to the **Sequence Stats** page. You can go there with the drop-down menu on top of a page.
+The other way is to go to the **
+Asset Types Stats** page. You can go there with the drop-down menu on top of a page.
 
 
 ![Drop down menu](../img/faq/drop_down_menu.png)
@@ -116,7 +117,7 @@ The other way is to go to the **Sequence Stats** page. You can go there with the
 
 
 With this view, you can see all the status distribution per tasks on each
-sequences.
+asset type.
 
 ![Overview sequence task](../img/faq/global_view_asset.png)
 
@@ -135,9 +136,7 @@ task (page supervisor).
 
 On both sequence and asset stats page, you can download an export of your date, as a `.csv` file.
 
-Click on the **export* button.
-
-![download](../img/faq/export.png)
+Click on the **export** button ![download](../img/faq/export.png).
 
 You can open the `.csv` file with a spreadsheet sofware.
 
@@ -202,14 +201,14 @@ at the **Animation** stage. So on the search bar, you type: `animation=wfa`.
 
 ![Search layout wfa](../img/faq/filter_lay_wfa.png)
 
-You can be even more specific, let's focus on the shots that are still on retake at the animation stage: on the search
+You can be even more specific, let's focus on the shots that are still on retake at the animation stage, and already started at the render stage: on the search
 bar add a **space** after the previous search and type `render=wip`. 
 The research is `animation=wfa render=wip`.
 
 ![Search layout wfa seq2](../img/faq/filter_lay_wfa_s002.png)
 
-You can also search for an unassigned task for a specific type of task.
-For example `Animation = unassigned`.
+You can also search for an **assigned** or **unassigned** task for a specific type of task.
+For example `Animation = unassigned`, `modeling=assigned`.
 
 ### How to save filter queries?
 
@@ -286,7 +285,7 @@ Notifications include the following information:
 
 * the **attached file** ![Notification page](../img/faq/notification_attached_files.png)
 
-so the comment.
+* and the comment.
 
 When you click on the space of the notification, the comments panel on the right is displayed. You can answer directly from this page to any element.
 
@@ -316,12 +315,12 @@ the status of one of your task, post a comment, or tag you on a comment.
 
 You can also choose to follow specifics tasks. Go into the task page you want
 to follow: on the **assets** or **shots** pages click onto the status icon, 
-then on the **history** button on the right panel.
-
-![history button](../img/faq/pannel_history.png)
-
-On the top right side of the page, you can see an **eye** button 
+then on the top right side of the page, you can see an **eye** button 
 ![Notification off](../img/faq/notification_off.png).
+
+![history button](../img/faq/pannel_notif.png)
+
+
 
 ![Follow button](../img/faq/notification_other_task.png)
 
@@ -340,6 +339,46 @@ If you don't want to follow a task anymore, click on the **eye** button
 ![Notification on](../img/faq/notification_on.png) on the task page. It is crossed ![notification off](../img/faq/notification_off.png), meaning
 you won't receive notifications any more.
 
+
+------------------------------------
+
+## How to be notified of everything?
+
+The easiest way to be aware of every change on the production, instead of clicking one by one on all the eyes is to go to the **News Feed** page.
+
+You can go there with the drop-down menu on top of a page.
+
+![newsfeed dropdown menu](../img/faq/drop_down_menu_newsfeed.png)
+ 
+On the **News Feed** page, you can see all the change of status during the production. It gives you a global view of what happen.
+
+![newsfeed page](../img/faq/newsfeed_comment_all.png)
+
+You can choose to see all the **status** or a specific one.
+
+![newsfeed change status](../img/faq/newsfeed_status.png)
+
+Same thing with the **task types**, you can choose to see them all, or one a specific one.
+
+![newsfeed change task](../img/faq/newsfeed_tasktype.png)
+
+You can click on each element to open the right panel and see the detail of this task. You can review and comment also from this page.
+
+![newsfeed comments](../img/faq/newsfeed_comment_panel.png)
+
+You can also display the **previews** instead of the **status**.
+
+![Newsfeed preview option](../img/faq/newsfeed_preview_global.png)
+
+You can now see all the **previews**, images and videos, posted during the production.
+
+![Newsfeed preview](../img/faq/newsfeed_preview.png)
+
+You can also select a specific **status** or a specific **task type**.
+
+And you can also comment and review any previews from this page.
+
+![newsfeed preview comment(../img/faq/newsfeed_preview_comment.png)
 
 ------------------------------------
 
