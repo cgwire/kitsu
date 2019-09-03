@@ -111,7 +111,7 @@ The other way is to go to the **
 Asset Types Stats** page. You can go there with the drop-down menu on top of a page.
 
 
-![Drop down menu](../img/faq/drop_down_menu.png)
+![Drop down menu](../img/faq/drop_down_menu_stat.png)
 
 ![Drop down menu sequence](../img/faq/drop_down_menu_asset.png)
 
@@ -124,7 +124,7 @@ asset type.
 You can fly over the pie chart to have more detailed information about the
 distribution.
 
-![Overview sequence detail](../img/faq/global_view_asset_detail.png)
+![Overview sequence detail](../img/faq/global_view_sequence_detail.png)
 
 You can also display the statistique as percentage.
 
@@ -223,7 +223,7 @@ Now under the **search bar** you can see your saved queries as buttons.
 Every time you get back to this page, the buttons are there. It helps
 you to run common queries faster.
 
-### What filters can I create?
+## What filters can I create?
 
 You can create **filters** about **entities**:
 
@@ -318,11 +318,8 @@ to follow: on the **assets** or **shots** pages click onto the status icon,
 then on the top right side of the page, you can see an **eye** button 
 ![Notification off](../img/faq/notification_off.png).
 
-![history button](../img/faq/pannel_notif.png)
+![pannel notification](../img/faq/pannel_notif.png)
 
-
-
-![Follow button](../img/faq/notification_other_task.png)
 
 By default you are following all the tasks you are assigned to, on the task
 page the icon is on (eye open) ![Notification on](../img/faq/notification_on.png). 
@@ -344,13 +341,13 @@ you won't receive notifications any more.
 
 ## How to be notified of everything?
 
-The easiest way to be aware of every change on the production, instead of clicking one by one on all the eyes is to go to the **News Feed** page.
+The **Newsfeed** page is here to keep you aware of all the changes on the production.
 
 You can go there with the drop-down menu on top of a page.
 
 ![newsfeed dropdown menu](../img/faq/drop_down_menu_newsfeed.png)
  
-On the **News Feed** page, you can see all the change of status during the production. It gives you a global view of what happen.
+On the **News Feed** page, you can see all the change of status during the production. It gives you a global view of what happened.
 
 ![newsfeed page](../img/faq/newsfeed_comment_all.png)
 
@@ -358,7 +355,7 @@ You can choose to see all the **status** or a specific one.
 
 ![newsfeed change status](../img/faq/newsfeed_status.png)
 
-Same thing with the **task types**, you can choose to see them all, or one a specific one.
+The same thing with the **task types**, you can choose to see them all, or one a specific one.
 
 ![newsfeed change task](../img/faq/newsfeed_tasktype.png)
 
@@ -376,7 +373,7 @@ You can now see all the **previews**, images and videos, posted during the produ
 
 You can also select a specific **status** or a specific **task type**.
 
-And you can also comment and review any previews from this page.
+Moreover, you can also comment and review any previews from this page.
 
 ![newsfeed preview comment(../img/faq/newsfeed_preview_comment.png)
 
@@ -407,7 +404,7 @@ is the date and the hour. You can change it later via the
 
 ![Playlist add page](../img/faq/playlist_add_page.png)
 
-Once the playlist created, via the right pane, you can select which shots to add
+Once the playlist created, via the right panel, you can select which shots to add
 to your playlist.  Start by selecting the **episode** and the **sequence**.
 The sequences shots are now listed. Click on the shots you want to add to the
 playlist to see them playlisted.
@@ -425,6 +422,31 @@ For each playlisted shot you can choose the **task** and the
 
 ![Playlist task selection](../img/faq/playlist_task_selection.png)
 ![Playlist version selection](../img/faq/playlist_version_selection.png)
+
+You can also play side by side two tasks of a shot.
+
+Click on the **Compare** button ![Compare button](../img/faq/compare_button.png) and choose the second task type.
+
+![Playlist side by side](../img/faq/playlist_side_by_side.png)
+
+### How to comment on the playlist?
+
+The main purpose of the playlist is to help you with the review of the shots.
+
+You can comment directly the shots from the preview.
+
+Click on the **comment** button.
+
+![Playlist comment](../img/faq/playlist_comment_button.png)
+
+You now have acces to the right panel, with all the history of the comments and status.
+
+You can also see the drawing comment on the video (the red dot below the timeline).
+
+![Playlist comment](../img/faq/playlist_comment.png)
+
+You can also draw on the video (same than for the shot review), with the **draw** button ![draw button](../img/faq/draw.png)
+
 
 
 ### How to delete a playlist?
