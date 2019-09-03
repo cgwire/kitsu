@@ -503,7 +503,7 @@ On the new pop up you can define your personalized task:
 - (4) If the artists need to time log their work for tasks with this task type
 - (5) The color 
 
-![Add task](../img/faq/add_task.png)
+![Add task](../img/faq/edit_task.png)
 
 Click on **Confirm** to save your changes.
 
@@ -525,9 +525,10 @@ system.
 You can change : 
 - (1) The name of the status
 - (2) His short name, useful for the filters
-- (3) If you can upload a preview with this task
-- (4) If it's the end of the task
-- (5) The color 
+- (3) If it's the end of the task
+- (4) If it will count as a retake (for the supervisor page)
+- (5) If the CG artist can use this status
+- (6) The color 
 
 ![Edit status](../img/faq/edit_status.png)
 
