@@ -136,6 +136,7 @@ export default {
     documentation: 'Documentation',
     delete_text: 'Etes vous sûr de vouloir supprimer {name} de la base de données ?',
     empty_comment: 'Commentaire vide',
+    end_date: 'Date de fin',
     go_productions: 'Aller aux productions',
     history: 'Historique',
     info: 'Information',
@@ -154,6 +155,7 @@ export default {
     user: 'Utilisateur',
     save: 'Enregistrer',
     sorted_by: 'Tâches triées par',
+    start_date: 'Date de début',
     white_theme: 'Thème blanc',
     yes: 'oui',
     csv: {
@@ -396,7 +398,14 @@ export default {
     md: 'jh',
     overall_man_days: 'Jours Homme',
     title: 'Planning',
-    zoom_level: 'Niveau de zoom'
+    zoom_level: 'Niveau de zoom',
+    milestone: {
+      add_milestone: 'Ajouter milestone',
+      delete_milestone: 'Supprimer milestone',
+      edit_milestone: 'Modifier milestone',
+      error: 'Error',
+      name: 'Name'
+    }
   },
 
   shots: {
