@@ -38,6 +38,16 @@ const client = {
         if (res.statusCode === 401) return errors.backToLogin()
         callback(err, res.body)
       })
+  },
+
+  getModel (modelName, modelId) {
+    return new Promise((resolve, reject) => {
+      const path = `/api/data/${modelName}/${modelId}`
+      client.get(path, (err, model) => {
+        if (err) reject(err)
+        else resolve(model)
+      })
+    })
   }
 }
 
