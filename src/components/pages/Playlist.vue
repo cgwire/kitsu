@@ -656,11 +656,11 @@ export default {
         }
       },
 
-      'build-job:success' (eventData) {
+      'build-job:update' (eventData) {
         if (eventData.playlist_id === this.currentPlaylist.id) {
           updateModelFromList(this.currentPlaylist.build_jobs, {
             id: eventData.build_job_id,
-            status: 'succeeded'
+            status: eventData.status
           })
         }
       },
