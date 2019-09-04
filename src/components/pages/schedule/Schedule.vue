@@ -275,6 +275,7 @@
     :milestone-to-edit="milestoneToEdit"
     @confirm="confirmEditMilestone"
     @cancel="hideEditMilestoneModal"
+    @remove-milestone="removeMilestone"
   />
 
 </div>
@@ -482,6 +483,7 @@ export default {
 
   methods: {
     ...mapActions([
+      'deletMilestone',
       'saveMilestone'
     ]),
 
@@ -798,6 +800,20 @@ export default {
     confirmEditMilestone (milestone) {
       this.loading.edit = true
       this.saveMilestone(milestone)
+        .then(() => {
+          this.modals.edit = false
+          this.loading.edit = false
+        })
+        .catch((err) => {
+          console.error(err)
+          this.loading.edit = false
+          this.errors.edit = true
+        })
+    },
+
+    removeMilestone (milestone) {
+      this.loading.edit = true
+      this.deleteMilestone(milestone)
         .then(() => {
           this.modals.edit = false
           this.loading.edit = false

@@ -2,6 +2,7 @@ import scheduleApi from '../api/schedule'
 import {
   ADD_MILESTONE,
   ADD_MILESTONES,
+  REMOVE_MILESTONE,
   RESET_ALL
 } from '../mutation-types'
 
@@ -57,6 +58,13 @@ const actions = {
           commit(ADD_MILESTONE, milestone)
         })
     }
+  },
+
+  deleteMilestone ({ commit, rootState }, milestone) {
+    return scheduleApi.deleteMilestone(milestone)
+      .then((milestone) => {
+        commit(REMOVE_MILESTONE, milestone)
+      })
   }
 }
 
@@ -70,6 +78,12 @@ const mutations = {
     milestones.forEach((milestone) => {
       state.milestones[milestone.date] = milestone
     })
+  },
+
+  [REMOVE_MILESTONE] (state, milestone) {
+    const tmpMilestones = { ...state.milestones }
+    delete tmpMilestones[milestone.date]
+    state.milestones = tmpMilestones
   },
 
   [RESET_ALL] (state) {
