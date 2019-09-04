@@ -49,14 +49,16 @@ export const entityListMixin = {
     },
 
     initHiddenColumns (validationColumns, hiddenColumns) {
-      validationColumns.forEach((columnId) => {
-        const key = this.buildHideKey(columnId)
-        Vue.set(
-          hiddenColumns,
-          columnId,
-          localStorage.getItem(key) === 'true'
-        )
-      })
+      if (validationColumns && hiddenColumns) {
+        validationColumns.forEach((columnId) => {
+          const key = this.buildHideKey(columnId)
+          Vue.set(
+            hiddenColumns,
+            columnId,
+            localStorage.getItem(key) === 'true'
+          )
+        })
+      }
     },
 
     hideColumn (columnId) {
