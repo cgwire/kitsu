@@ -2,8 +2,7 @@ import client from './client'
 
 export default {
   getShot (shotId, callback) {
-    const path = `/api/data/shots/${shotId}`
-    client.get(path, callback)
+    return client.getModel('shots', shotId)
   },
 
   getShots (production, episode, callback) {
@@ -13,10 +12,18 @@ export default {
     client.get(path, callback)
   },
 
+  getSequence (sequenceId) {
+    return client.getModel('sequences', sequenceId)
+  },
+
   getSequences (production, episode, callback) {
     let path = `/api/data/projects/${production.id}/sequences`
     if (episode) path = `/api/data/episodes/${episode.id}/sequences`
     client.get(path, callback)
+  },
+
+  getEpisode (episodeId) {
+    return client.getModel('episodes', episodeId)
   },
 
   getEpisodes (production, callback) {
