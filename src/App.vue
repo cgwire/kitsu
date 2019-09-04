@@ -24,13 +24,19 @@ export default {
 
   computed: {
     ...mapGetters([
+      'assetMap',
       'assetTypeMap',
+      'currentProduction',
+      'episodeMap',
       'isLoginLoading',
       'isDataLoading',
       'isDarkTheme',
       'isSavingCommentPreview',
       'route',
       'personMap',
+      'productionMap',
+      'sequenceMap',
+      'shotMap',
       'taskMap',
       'taskStatusMap',
       'taskTypeMap',
@@ -64,8 +70,12 @@ export default {
       'loadAsset',
       'loadAssetType',
       'loadComment',
+      'loadEpisode',
       'loadPerson',
       'loadPersonTasks',
+      'loadProduction',
+      'loadSequence',
+      'loadShot',
       'loadTaskStatus',
       'loadTaskType',
       'refreshPreview',
@@ -73,7 +83,18 @@ export default {
       'removeAsset'
     ]),
 
-    onAssignation (eventData) {
+    onAssignation (eventData, assign = true) {
+      const personId = eventData.person_id
+      const selectedTaskIds = [eventData.task_id]
+
+      // for entity lists
+      if (assign) {
+        this.$store.commit('ASSIGN_TASKS', { selectedTaskIds, personId })
+      } else {
+        this.$store.commit('UNASSIGN_TASKS', selectedTaskIds)
+      }
+
+      // for todo lists
       if (this.route.path.indexOf(eventData.person_id) > 0) {
         this.loadPersonTasks({
           personId: eventData.person_id,
@@ -97,6 +118,104 @@ export default {
 
   socket: {
     events: {
+      'project:new' (eventData) {
+        if (!this.productionMap[eventData.project_id]) {
+          this.loadProduction(eventData.project_id)
+        }
+      },
+
+      'project:update' (eventData) {
+        if (this.productionMap[eventData.project_id]) {
+          this.loadProduction(eventData.project_id)
+        }
+      },
+
+      'project:delete' (eventData) {
+        if (this.productionMap[eventData.project_id]) {
+          this.$store.commit('REMOVE_PRODUCTION', { id: eventData.project_id })
+        }
+      },
+
+      'sequence:new' (eventData) {
+        if (
+          !this.sequenceMap[eventData.sequence_id] &&
+          this.currentProduction &&
+          this.currentProduction.id === eventData.project_id
+        ) {
+          this.loadSequence(eventData.sequence_id)
+        }
+      },
+
+      'sequence:update' (eventData) {
+        if (this.sequenceMap[eventData.sequence_id]) {
+          this.loadSequence(eventData.sequence_id)
+        }
+      },
+
+      'sequence:delete' (eventData) {
+        if (this.sequenceMap[eventData.sequence_id]) {
+          this.$store.commit('REMOVE_SEQUENCE', { id: eventData.sequence_id })
+        }
+      },
+
+      'episode:new' (eventData) {
+        if (
+          !this.episodeMap[eventData.episode_id] &&
+          this.currentProduction &&
+          this.currentProduction.id === eventData.project_id
+        ) {
+          this.loadEpisode(eventData.episode_id)
+        }
+      },
+
+      'episode:update' (eventData) {
+        if (this.episodeMap[eventData.episode_id]) {
+          this.loadEpisode(eventData.episode_id)
+        }
+      },
+
+      'episode:delete' (eventData) {
+        if (this.episodeMap[eventData.episode_id]) {
+          this.$store.commit('REMOVE_EPISODE', { id: eventData.episode_id })
+        }
+      },
+
+      'shot:new' (eventData) {
+        if (
+          !this.shotMap[eventData.shot_id] &&
+          this.currentProduction &&
+          this.currentProduction.id === eventData.project_id
+        ) {
+          this.loadShot(eventData.shot_id)
+        }
+      },
+
+      'shot:update' (eventData) {
+        if (this.shotMap[eventData.shot_id]) {
+          this.loadShot(eventData.shot_id)
+        }
+      },
+
+      'shot:delete' (eventData) {
+        if (this.shotMap[eventData.shot_id]) {
+          this.$store.commit('REMOVE_SHOT', { id: eventData.shot_id })
+        }
+      },
+
+      'asset:new' (eventData) {
+        if (!this.assetMap[eventData.asset_id]) {
+          setTimeout(() => {
+            this.loadAsset({ assetId: eventData.asset_id })
+          }, 1000)
+        }
+      },
+
+      'asset:update' (eventData) {
+        if (this.assetMap[eventData.asset_id]) {
+          this.loadAsset({ assetId: eventData.asset_id })
+        }
+      },
+
       'task-type:new' (eventData) {
         if (!this.taskTypeMap[eventData.task_type_id]) {
           this.loadTaskType(eventData.task_type_id)
@@ -139,23 +258,23 @@ export default {
         }
       },
 
-      'entity-type:new' (eventData) {
-        if (!this.assetTypeMap[eventData.entity_type_id]) {
-          this.loadAssetType(eventData.entity_type_id)
+      'asset-type:new' (eventData) {
+        if (!this.assetTypeMap[eventData.asset_type_id]) {
+          this.loadAssetType(eventData.asset_type_id)
         }
       },
 
-      'entity-type:update' (eventData) {
-        if (this.assetTypeMap[eventData.entity_type_id]) {
-          this.loadAssetType(eventData.entity_type_id)
+      'asset-type:update' (eventData) {
+        if (this.assetTypeMap[eventData.asset_type_id]) {
+          this.loadAssetType(eventData.asset_type_id)
         }
       },
 
-      'entity-type:delete' (eventData) {
-        if (this.assetTypeMap[eventData.entity_type_id]) {
+      'asset-type:delete' (eventData) {
+        if (this.assetTypeMap[eventData.asset_type_id]) {
           this.$store.commit(
             'DELETE_ASSET_TYPE_END',
-            { id: eventData.entity_type_id }
+            { id: eventData.asset_type_id }
           )
         }
       },
@@ -185,7 +304,7 @@ export default {
       },
 
       'task:unassign' (eventData) {
-        this.onAssignation(eventData)
+        this.onAssignation(eventData, false)
       },
 
       'comment:new' (eventData) {
