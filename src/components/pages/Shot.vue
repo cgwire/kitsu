@@ -223,25 +223,21 @@ export default {
     this.casting.isError = false
 
     if (!this.currentShot) {
-      this.loadShot({
-        shotId: this.route.params.shot_id,
-        callback: (err) => {
-          if (!err) {
-            this.currentShot = this.getCurrentShot()
-            this.loadShotCasting({
-              shot: this.currentShot,
-              callback: (err, casting) => {
-                if (err) {
-                  this.casting.isError = true
-                } else {
-                  this.casting.isError = false
-                }
-                this.casting.isLoading = true
+      this.loadShot(this.route.params.shot_id)
+        .then((shot) => {
+          this.currentShot = this.getCurrentShot()
+          this.loadShotCasting({
+            shot: this.currentShot,
+            callback: (err, casting) => {
+              if (err) {
+                this.casting.isError = true
+              } else {
+                this.casting.isError = false
               }
-            })
-          }
-        }
-      })
+              this.casting.isLoading = true
+            }
+          })
+        })
     } else {
       this.loadShotCasting({
         shot: this.currentShot,

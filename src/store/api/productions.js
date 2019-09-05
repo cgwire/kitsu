@@ -6,7 +6,7 @@ export default {
   },
 
   getProduction (productionId) {
-    return client.getModel('productions', productionId)
+    return client.getModel('projects', productionId)
   },
 
   getOpenProductions (callback) {

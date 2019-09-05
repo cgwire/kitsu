@@ -186,7 +186,9 @@ export default {
           this.currentProduction &&
           this.currentProduction.id === eventData.project_id
         ) {
-          this.loadShot(eventData.shot_id)
+          setTimeout(() => {
+            this.loadShot(eventData.shot_id)
+          }, 1000)
         }
       },
 
@@ -203,16 +205,26 @@ export default {
       },
 
       'asset:new' (eventData) {
-        if (!this.assetMap[eventData.asset_id]) {
+        if (
+          !this.assetMap[eventData.asset_id] &&
+          this.currentProduction &&
+          this.currentProduction.id === eventData.project_id
+        ) {
           setTimeout(() => {
-            this.loadAsset({ assetId: eventData.asset_id })
+            this.loadAsset(eventData.asset_id)
           }, 1000)
         }
       },
 
       'asset:update' (eventData) {
         if (this.assetMap[eventData.asset_id]) {
-          this.loadAsset({ assetId: eventData.asset_id })
+          this.loadAsset(eventData.asset_id)
+        }
+      },
+
+      'asset:delete' (eventData) {
+        if (this.assetMap[eventData.asset_id]) {
+          this.$store.commit('REMOVE_ASSET', { id: eventData.asset_id })
         }
       },
 
