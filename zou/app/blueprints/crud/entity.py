@@ -30,7 +30,10 @@ class EntityEventMixin(object):
         type_name = self.get_type_name(entity_dict)
         events.emit(
             "%s:%s" % (type_name, event_name),
-            {"%s_id" % type_name: instance_id}
+            {
+                "%s_id" % type_name: instance_id,
+                "project_id": entity_dict["project_id"]
+            }
         )
 
 
