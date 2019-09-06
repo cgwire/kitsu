@@ -40,6 +40,8 @@ class EntityLink(db.Model, BaseMixin, SerializerMixin):
     @classmethod
     def create_from_import(cls, data):
         del data["type"]
+        if "project_name" in data:
+            del data["project_name"]
         entity_link = cls.get_by(
             entity_in_id=data["entity_in_id"],
             entity_out_id=data["entity_out_id"]
@@ -137,18 +139,8 @@ class Entity(db.Model, BaseMixin, SerializerMixin):
 
     @classmethod
     def create_from_import(cls, data):
-        from zou.app.models.preview_file import PreviewFile
-
         previous_entity = cls.get(data["id"])
-        entity_ids = data.get("entities_out", None)
-        del data["entities_in"]
-        del data["entities_out"]
-        del data["type"]
-
-        if "preview_file_id" in data and data["preview_file_id"] is not None:
-            preview_file = PreviewFile.get(data["preview_file_id"])
-            if preview_file is None:
-                del data["preview_file_id"]
+        (data, entity_ids) = cls.sanitize_import_data(data)
 
         if previous_entity is None:
             previous_entity = cls.create(**data)
@@ -161,3 +153,63 @@ class Entity(db.Model, BaseMixin, SerializerMixin):
             previous_entity.set_entities_out(entity_ids)
 
         return previous_entity
+
+    @classmethod
+    def sanitize_import_data(self, data):
+        from zou.app.models.preview_file import PreviewFile
+        from zou.app.models.entity_type import EntityType
+
+        entity_ids = []
+        model_type = data.get("type", "Shot")
+
+        if "entities_out" in data:
+            entity_ids = data["entities_out"]
+            del data["entities_out"]
+
+        if "asset_type_id" in data:
+            data["entity_type_id"] = data["asset_type_id"]
+            del data["asset_type_id"]
+            del data["asset_type_name"]
+
+        if "sequence_id" in data:
+            data["parent_id"] = data["sequence_id"]
+            del data["sequence_id"]
+
+        if "preview_file_id" in data \
+           and data["preview_file_id"] is not None \
+           and len(data["preview_file_id"]) > 0:
+            preview_file = PreviewFile.get(data["preview_file_id"])
+            if preview_file is None:
+                del data["preview_file_id"]
+        elif "preview_file_id" in data:
+            del data["preview_file_id"]
+
+        if "frame_in" in data:
+            data["data"]["frame_in"] = data["frame_in"]
+            del data["frame_in"]
+
+        if "frame_out" in data:
+            data["data"]["frame_out"] = data["frame_out"]
+            del data["frame_out"]
+
+        if "fps" in data:
+            data["data"]["fps"] = data["fps"]
+            del data["fps"]
+
+        for field in [
+            "entities_in",
+            "episode_id",
+            "episode_name",
+            "project_name",
+            "sequence_name",
+            "tasks",
+            "type"
+        ]:
+            if field in data:
+                del data[field]
+
+        if model_type in ["Shot", "Sequence", "Episode"]:
+            entity_type = EntityType.get_by(name=model_type)
+            data["entity_type_id"] = entity_type.id
+
+        return (data, entity_ids)

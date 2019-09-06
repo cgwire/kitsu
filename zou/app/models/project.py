@@ -72,6 +72,9 @@ class Project(db.Model, BaseMixin, SerializerMixin):
         del data["team"]
         del data["type"]
 
+        if "project_status_name" in data:
+            del data["project_status_name"]
+
         if previous_project is None:
             previous_project = cls.create(**data)
             previous_project.save()
