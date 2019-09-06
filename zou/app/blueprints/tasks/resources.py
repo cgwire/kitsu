@@ -25,6 +25,7 @@ from zou.app.services import (
     user_service
 )
 from zou.app.utils import query, permissions
+from zou.app.mixin import ArgsMixin
 
 
 class CommentTaskResource(Resource):
@@ -673,7 +674,7 @@ class ProjectSubscriptionsResource(Resource):
         return notifications_service.get_subscriptions_for_project(project_id)
 
 
-class ProjectNotificationsResource(Resource):
+class ProjectNotificationsResource(Resource, ArgsMixin):
     """
     Retrieve all notifications related to given project.
     It's mainly used for synchronisation purpose.
@@ -683,10 +684,28 @@ class ProjectNotificationsResource(Resource):
     def get(self, project_id):
         permissions.check_admin_permissions()
         projects_service.get_project(project_id)
-        return notifications_service.get_notifications_for_project(project_id)
+        page = self.get_page()
+        return notifications_service.get_notifications_for_project(
+            project_id,
+            page
+        )
 
 
-class ProjectCommentsResource(Resource):
+class ProjectTasksResource(Resource, ArgsMixin):
+    """
+    Retrieve all tasks related to given project.
+    It's mainly used for synchronisation purpose.
+    """
+
+    @jwt_required
+    def get(self, project_id):
+        permissions.check_admin_permissions()
+        projects_service.get_project(project_id)
+        page = self.get_page()
+        return tasks_service.get_tasks_for_project(project_id, page)
+
+
+class ProjectCommentsResource(Resource, ArgsMixin):
     """
     Retrieve all comments to tasks related to given project.
     It's mainly used for synchronisation purpose.
@@ -696,10 +715,11 @@ class ProjectCommentsResource(Resource):
     def get(self, project_id):
         permissions.check_admin_permissions()
         projects_service.get_project(project_id)
-        return tasks_service.get_comments_for_project(project_id)
+        page = self.get_page()
+        return tasks_service.get_comments_for_project(project_id, page)
 
 
-class ProjectPreviewFilesResource(Resource):
+class ProjectPreviewFilesResource(Resource, ArgsMixin):
     """
     Retrieve all comments to tasks related to given project.
     It's mainly used for synchronisation purpose.
@@ -709,4 +729,5 @@ class ProjectPreviewFilesResource(Resource):
     def get(self, project_id):
         permissions.check_admin_permissions()
         projects_service.get_project(project_id)
-        return files_service.get_preview_files_for_project(project_id)
+        page = self.get_page()
+        return files_service.get_preview_files_for_project(project_id, page)
