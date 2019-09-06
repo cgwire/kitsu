@@ -33,12 +33,14 @@ def build_asset_type_filter():
     scene_type = shots_service.get_scene_type()
     sequence_type = shots_service.get_sequence_type()
     episode_type = shots_service.get_episode_type()
-    return ~Entity.entity_type_id.in_([
+    ids_to_exclude = [
         shot_type["id"],
-        scene_type["id"],
         sequence_type["id"],
         episode_type["id"]
-    ])
+    ]
+    if scene_type is not None:
+        ids_to_exclude.append(scene_type["id"])
+    return ~Entity.entity_type_id.in_(ids_to_exclude)
 
 
 def build_entity_type_asset_type_filter():
@@ -121,6 +123,9 @@ def get_assets_and_tasks(criterions={}, page=1):
             EntityType.name,
             Entity.name
         )
+
+    if "id" in criterions:
+        query = query.filter(Entity.id == criterions["id"])
 
     if "project_id" in criterions:
         query = query.filter(Entity.project_id == criterions["project_id"])
@@ -284,28 +289,25 @@ def get_full_asset(asset_id):
     Return asset matching given id with additional information (project name,
     asset type name and tasks).
     """
-    asset = get_asset(asset_id)
-    asset_type = get_asset_type(asset["entity_type_id"])
-    project = Project.get(asset["project_id"])
+    assets = get_assets_and_tasks({"id": asset_id})
+    if len(assets) > 0:
+        asset = get_asset(asset_id)
+        asset_type = get_asset_type(asset["entity_type_id"])
+        project = Project.get(asset["project_id"])
 
-    asset["project_name"] = project.name
-    asset["asset_type_id"] = asset_type["id"]
-    asset["asset_type_name"] = asset_type["name"]
-
-    tasks = Task.query \
-        .filter_by(entity_id=asset_id) \
-        .all()
-    task_dicts = []
-    for task in tasks:
-        task_dicts.append({
-            "id": str(task.id),
-            "task_status_id": str(task.task_status_id),
-            "task_type_id": str(task.task_type_id),
-            "assignees": [str(assignee.id) for assignee in task.assignees]
-        })
-    asset["tasks"] = task_dicts
-
-    return asset
+        asset["project_name"] = project.name
+        asset["asset_type_id"] = asset_type["id"]
+        asset["asset_type_name"] = asset_type["name"]
+        del asset["source_id"]
+        del asset["shotgun_id"]
+        del asset["nb_frames"]
+        del asset["parent_id"]
+        del asset["entities_in"]
+        del asset["entity_type_id"]
+        asset.update(assets[0])
+        return asset
+    else:
+        return None
 
 
 def get_asset_instance_raw(asset_instance_id):
@@ -463,15 +465,18 @@ def remove_asset(asset_id, force=False):
 
     if is_tasks_related and not force:
         asset.update({"canceled": True})
+        events.emit("asset:update", {
+            "asset_id": asset_id
+        })
     else:
         tasks = Task.query.filter_by(entity_id=asset_id).all()
         for task in tasks:
             deletion_service.remove_task(task.id, force=True)
         asset.delete()
+        events.emit("asset:delete", {
+            "asset_id": asset_id
+        })
     deleted_asset = asset.serialize(obj_type="Asset")
-    events.emit("asset:delete", {
-        "asset_id": asset_id
-    })
     return deleted_asset
 
 

@@ -163,6 +163,7 @@ def get_shots_and_tasks(criterions={}):
     Episode = aliased(Entity, name='episode')
 
     query = Entity.query \
+        .join(Project) \
         .join(Sequence, Sequence.id == Entity.parent_id) \
         .outerjoin(Episode, Episode.id == Sequence.parent_id) \
         .outerjoin(Task, Task.entity_id == Entity.id) \
@@ -182,9 +183,14 @@ def get_shots_and_tasks(criterions={}):
             Task.real_start_date,
             Task.end_date,
             Task.last_comment_date,
-            assignees_table.columns.person
+            assignees_table.columns.person,
+            Project.id,
+            Project.name
         ) \
         .filter(Entity.entity_type_id == shot_type["id"]) \
+
+    if "id" in criterions:
+        query = query.filter(Entity.id == criterions["id"])
 
     if "project_id" in criterions:
         query = query.filter(Entity.project_id == criterions["project_id"])
@@ -208,7 +214,9 @@ def get_shots_and_tasks(criterions={}):
         task_real_start_date,
         task_real_end_date,
         task_last_comment_date,
-        person_id
+        person_id,
+        project_id,
+        project_name
     ) in query.all():
         shot_id = str(shot.id)
 
@@ -230,11 +238,12 @@ def get_shots_and_tasks(criterions={}):
                 "sequence_name": sequence_name,
                 "canceled": shot.canceled,
                 "data": fields.serialize_value(shot.data),
-                "tasks": []
+                "tasks": [],
+                    "project_id": str(project_id),
+                "project_name": project_name
             }
 
         if task_id is not None:
-
             if task_id not in task_map:
                 task_dict = {
                     "id": str(task_id),
@@ -297,30 +306,11 @@ def get_full_shot(shot_id):
     Return given shot as a dictionary with extra data like project and
     sequence names.
     """
-    shot = get_shot(shot_id)
-    sequence = get_sequence(shot["parent_id"])
-    project = projects_service.get_project(shot["project_id"])
-    shot["project_name"] = project["name"]
-    shot["sequence_id"] = sequence["id"]
-    shot["sequence_name"] = sequence["name"]
-    if sequence["parent_id"] is not None:
-        episode = get_episode(sequence["parent_id"])
-        shot["episode_id"] = episode["id"]
-        shot["episode_name"] = episode["name"]
-
-    task_dicts = []
-    tasks = Task.query \
-        .filter_by(entity_id=shot_id) \
-        .all()
-    for task in tasks:
-        task_dicts.append({
-            "id": str(task.id),
-            "task_status_id": str(task.task_status_id),
-            "task_type_id": str(task.task_type_id),
-            "assignees": [str(assignee.id) for assignee in task.assignees]
-        })
-    shot["tasks"] = task_dicts
-    return shot
+    shots = get_shots_and_tasks({"id": shot_id})
+    if len(shots) > 0:
+        return shots[0]
+    else:
+        return None
 
 
 def get_scene_raw(scene_id):
@@ -690,6 +680,9 @@ def remove_shot(shot_id, force=False):
 
     if is_tasks_related and not force:
         shot.update({"canceled": True})
+        events.emit("shot:update", {
+            "shot_id": shot_id
+        })
     else:
         tasks = Task.query.filter_by(entity_id=shot_id).all()
         for task in tasks:
@@ -700,11 +693,11 @@ def remove_shot(shot_id, force=False):
             subscription.delete()
 
         shot.delete()
+        events.emit("shot:delete", {
+            "shot_id": shot_id
+        })
 
     deleted_shot = shot.serialize(obj_type="Shot")
-    events.emit("shot:delete", {
-        "shot_id": shot_id
-    })
     return deleted_shot
 
 
@@ -742,7 +735,8 @@ def create_episode(project_id, name):
             name=name
         )
     events.emit("episode:new", {
-        "episode_id": episode.id
+        "episode_id": episode.id,
+        "project_id": project_id
     })
     return episode.serialize(obj_type="Episode")
 
@@ -770,7 +764,8 @@ def create_sequence(project_id, episode_id, name):
             name=name
         )
     events.emit("sequence:new", {
-        "sequence_id": sequence.id
+        "sequence_id": sequence.id,
+        "project_id": project_id
     })
     return sequence.serialize(obj_type="Sequence")
 
@@ -799,7 +794,8 @@ def create_shot(project_id, sequence_id, name, data={}):
             data=data
         )
     events.emit("shot:new", {
-        "shot_id": shot.id
+        "shot_id": shot.id,
+        "project_id": project_id
     })
     return shot.serialize(obj_type="Shot")
 
@@ -831,7 +827,8 @@ def create_scene(project_id, sequence_id, name):
             data={}
         )
     events.emit("scene:new", {
-        "scene_id": scene.id
+        "scene_id": scene.id,
+        "project_id": project_id
     })
     return scene.serialize(obj_type="Scene")
 
