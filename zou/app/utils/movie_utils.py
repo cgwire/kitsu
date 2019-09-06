@@ -125,4 +125,10 @@ def build_playlist_movie(
                 .run()
         except Exception as e:
             print(e)
-    return movie_file_path
+            return {
+                "success": False,
+                "message": str(e)
+            }
+    return {
+        "success": True
+    }
