@@ -24,7 +24,7 @@ from zou.app.services.exception import (
     EntryAlreadyExistsException
 )
 
-from zou.app.utils import fields, events
+from zou.app.utils import fields, events, query as query_utils
 
 from sqlalchemy import desc
 from sqlalchemy.exc import StatementError, IntegrityError
@@ -651,11 +651,11 @@ def get_project_from_preview_file(preview_file_id):
     return project.serialize()
 
 
-def get_preview_files_for_project(project_id):
+def get_preview_files_for_project(project_id, page=-1):
     """
     Return all preview files for given project.
     """
-    preview_files = PreviewFile.query \
-        .join(Task) \
-        .filter(Task.project_id == project_id)
-    return fields.serialize_list(preview_files)
+    query = PreviewFile.query \
+       .join(Task) \
+       .filter(Task.project_id == project_id)
+    return query_utils.get_paginated_results(query, page)

@@ -4,6 +4,7 @@ from slugify import slugify
 from shutil import copyfile
 from zipfile import ZipFile
 
+from flask import current_app
 from flask_mail import Message
 
 from zou.app import config
@@ -302,7 +303,7 @@ def build_playlist_movie_file(playlist):
     (width, height) = shots_service.get_preview_dimensions(project)
     fps = shots_service.get_preview_fps(project)
 
-    movie_utils.build_playlist_movie(
+    result = movie_utils.build_playlist_movie(
         tmp_file_paths,
         movie_file_path,
         width,
@@ -310,7 +311,7 @@ def build_playlist_movie_file(playlist):
         fps
     )
     file_store.add_movie("playlists", job["id"], movie_file_path)
-    end_build_job(playlist, job)
+    end_build_job(playlist, job, result)
     return job
 
 
@@ -332,17 +333,20 @@ def start_build_job(playlist):
     return job.serialize()
 
 
-def end_build_job(playlist, job):
+def end_build_job(playlist, job, result):
     """
     Register in database that a build is finished. Emits an event to notify
     clients that the build is done.
     """
     build_job = BuildJob.get(job["id"])
     build_job.end()
+    status = "succeeded"
+    if not result["success"]:
+        status = "failed"
     events.emit("build-job:update", {
         "build_job_id": str(build_job.id),
         "playlist_id": playlist["id"],
-        "status": "success"
+        "status": status
     })
     return build_job.serialize()
 
@@ -443,7 +447,12 @@ def remove_build_job(playlist, build_job_id):
     movie_file_path = get_playlist_movie_file_path(playlist, job.serialize())
     if os.path.exists(movie_file_path):
         os.remove(movie_file_path)
-    file_store.remove_movie("playlists", build_job_id)
+    try:
+        file_store.remove_movie("playlists", build_job_id)
+    except:
+        current_app.logger.error(
+            "Playlist file can't be deleted: %s" % build_job_id
+        )
     job.delete()
     events.emit("build-job:delete", {
         "build_job_id": build_job_id,

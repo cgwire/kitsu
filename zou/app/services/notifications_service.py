@@ -15,7 +15,7 @@ from zou.app.services import (
 from zou.app.services.exception import (
     PersonNotFoundException
 )
-from zou.app.utils import events, fields
+from zou.app.utils import events, fields, query as query_utils
 
 
 def create_notification(
@@ -366,11 +366,11 @@ def get_subscriptions_for_project(project_id):
     return fields.serialize_list(subscriptions)
 
 
-def get_notifications_for_project(project_id):
+def get_notifications_for_project(project_id, page=0):
     """
     Return all notifications for given project.
     """
-    notifications = Notification.query \
+    query = Notification.query \
         .join(Task) \
         .filter(Task.project_id == project_id)
-    return fields.serialize_list(notifications)
+    return query_utils.get_paginated_results(query, page)

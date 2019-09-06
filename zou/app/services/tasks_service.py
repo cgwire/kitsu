@@ -21,7 +21,7 @@ from zou.app.models.project import Project
 from zou.app.models.entity_type import EntityType
 from zou.app.models.preview_file import PreviewFile
 
-from zou.app.utils import fields
+from zou.app.utils import fields, query as query_utils
 
 from zou.app.services.exception import (
     CommentNotFoundException,
@@ -1013,21 +1013,30 @@ def reset_mentions(comment):
     return comment_to_update.serialize()
 
 
-def get_comments_for_project(project_id):
+def get_comments_for_project(project_id, page=0):
     """
     Return all comments for given project.
     """
-    comments = Comment.query \
+    query = Comment.query \
         .join(Task, Task.id == Comment.object_id) \
         .filter(Task.project_id == project_id)
-    return fields.serialize_list(comments)
+    return query_utils.get_paginated_results(query, page)
 
 
-def get_time_spents_for_project(project_id):
+def get_time_spents_for_project(project_id, page=0):
     """
     Return all time spents for given project.
     """
-    time_spents = TimeSpent.query \
+    query = TimeSpent.query \
         .join(Task) \
         .filter(Task.project_id == project_id)
-    return fields.serialize_list(time_spents)
+    return query_utils.get_paginated_results(query, page)
+
+
+def get_tasks_for_project(project_id, page=0):
+    """
+    Return all tasks for given project.
+    """
+    query = Task.query \
+        .filter(Task.project_id == project_id)
+    return query_utils.get_paginated_results(query, page)
