@@ -245,6 +245,7 @@ class BaseModelResource(Resource):
             instance = self.get_model_or_404(instance_id)
             result = self.serialize_instance(instance)
             self.check_read_permissions(result)
+            result = self.clean_get_result(result)
 
         except StatementError as exception:
             current_app.logger.error(str(exception))

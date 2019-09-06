@@ -1,4 +1,5 @@
 from zou.app.models.project import Project
+from zou.app.models.project_status import ProjectStatus
 from zou.app.services import user_service, projects_service, shots_service
 from zou.app.utils import permissions, fields
 
@@ -51,3 +52,8 @@ class ProjectResource(BaseModelResource):
             project_dict["first_episode_id"] = \
                 fields.serialize_value(episode["id"])
         return project_dict
+
+    def clean_get_result(self, data):
+        project_status = ProjectStatus.get(data["project_status_id"])
+        data["project_status_name"] = project_status.name
+        return data
