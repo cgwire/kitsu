@@ -1,4 +1,7 @@
+import logging
+import sys
 import gazu
+import sqlalchemy
 
 from zou.app.models.build_job import BuildJob
 from zou.app.models.custom_action import CustomAction
@@ -26,6 +29,14 @@ from zou.app.models.task_type import TaskType
 from zou.app.models.time_spent import TimeSpent
 
 from zou.app.utils import events
+
+logger = logging.getLogger()
+logger.setLevel(logging.INFO)
+console_handler = logging.StreamHandler(sys.stdout)
+formatter = logging.Formatter("%(asctime)s - %(levelname)s - %(message)s")
+console_handler.setFormatter(formatter)
+logger.addHandler(console_handler)
+
 
 event_name_model_map = {
     "asset": Entity,
@@ -156,7 +167,123 @@ def run_listeners(event_client):
     """
     Run event listener which will run all previously associated callbacks to
     """
-    gazu.events.run_client(event_client)
+    try:
+        gazu.events.run_client(event_client)
+    except KeyboardInterrupt:
+        raise
+    except Exception:
+        logger.error("An error occured.", exc_info=1)
+        run_listeners(event_client)
+
+
+def run_main_data_sync():
+    for event in main_events:
+        path = event_name_model_path_map[event]
+        model = event_name_model_map[event]
+        sync_entries(path, model)
+
+
+def run_open_project_data_sync():
+    projects = gazu.project.all_open_projects()
+    for project in projects:
+        logger.info("Syncing %s..." % project["name"])
+        for event in project_events:
+            path = event_name_model_path_map[event]
+            model = event_name_model_map[event]
+            sync_project_entries(project, path, model)
+        sync_entity_thumbnails(project, "assets")
+        sync_entity_thumbnails(project, "shots")
+        logger.info("Sync of %s complete." % project["name"])
+
+
+def run_other_sync():
+    sync_entries("search-filters", SearchFilter)
+    sync_entries("events", ApiEvent)
+
+
+def run_last_events_sync():
+    events = gazu.client.fetch_all("events/last")
+    for event in events:
+        event_name = event["name"]
+        [event_name, action] = event_name.split(":")
+        if event_name in event_name_model_map:
+            sync_event(event, event_name, action)
+
+
+def sync_event(event, event_name, action):
+    model = event_name_model_map[event_name]
+    path = event_name_model_path_map[event_name]
+    if event_name == "metadata-descriptor":
+        if "metadata_descriptor_id" not in event["data"]:
+            event_name = "descriptor"
+    instance_id = event["data"]["%s_id" % event_name.replace("-", "_")]
+
+    if action in ["update", "create"]:
+        instance = gazu.client.fetch_one(path, instance_id)
+        model.create_from_import(instance)
+    elif action in ["delete"]:
+        model.delete_from_import(instance_id)
+
+
+def sync_entries(model_name, model):
+    instances = []
+
+    if model_name in [
+        "organisations",
+        "persons"
+    ]:
+        instances = gazu.client.fetch_all(model_name)
+    else:
+        page = 1
+        init = True
+        results = {"nb_pages": 2}
+        while init or results["nb_pages"] >= page:
+            results = gazu.client.fetch_all(
+                "%s?page=%d" % (model_name, page)
+            )
+            instances += results["data"]
+            page += 1
+            init = False
+            model.create_from_import_list(results["data"])
+
+    logger.info("%s %s synced." % (len(instances), model_name))
+
+
+def sync_project_entries(project, model_name, model):
+    instances = []
+    page = 1
+    init = True
+    results = {"nb_pages": 2}
+
+    if model_name not in [
+        "tasks",
+        "comments",
+        "notifications",
+        "preview-files"
+    ]:
+        results = gazu.client.fetch_all(
+            "projects/%s/%s" % (project["id"], model_name)
+        )
+        instances += results
+        try:
+            model.create_from_import_list(instances)
+        except sqlalchemy.exc.IntegrityError:
+            logger.error("An error occured", exc_info=1)
+
+    else:
+        while init or results["nb_pages"] >= page:
+            results = gazu.client.fetch_all(
+                "projects/%s/%s?page=%d" % (project["id"], model_name, page)
+            )
+            instances += results["data"]
+            try:
+                model.create_from_import_list(results["data"])
+            except sqlalchemy.exc.IntegrityError:
+                logger.error("An error occured", exc_info=1)
+            page += 1
+            init = False
+
+    logger.info("    %s %s synced." % (len(instances), model_name))
 
 
 def sync_entity_thumbnails(project, model_name):
@@ -172,86 +299,7 @@ def sync_entity_thumbnails(project, model_name):
                 "updated_at": result["updated_at"]
             })
             total += 1
-    print("    %s %s thumbnails synced." % (total, model_name))
-
-
-def run_main_data_sync():
-    for event in main_events:
-        path = event_name_model_path_map[event]
-        model = event_name_model_map[event]
-        sync_entries(path, model)
-
-
-def run_open_project_data_sync():
-    projects = gazu.project.all_open_projects()
-    for project in projects:
-        print("Syncing %s..." % project["name"])
-        for event in project_events:
-            path = event_name_model_path_map[event]
-            model = event_name_model_map[event]
-            sync_project_entries(project, path, model)
-        sync_entity_thumbnails(project, "assets")
-        sync_entity_thumbnails(project, "shots")
-        print("Sync of %s complete." % project["name"])
-
-
-def run_other_sync():
-    sync_entries("search-filters", SearchFilter)
-    sync_entries("events", ApiEvent)
-
-
-def sync_entries(model_name, model):
-    instances = []
-
-    if model_name in [
-        "organisations",
-        "persons"
-    ]:
-        instances = gazu.client.fetch_all(model_name)
-        print("%s %s synced." % (len(instances), model_name))
-    else:
-        page = 1
-        init = True
-        results = {"nb_pages": 2}
-
-        while init or results["nb_pages"] >= page:
-            results = gazu.client.fetch_all(
-                "%s?page=%d" % (model_name, page)
-            )
-            instances += results["data"]
-            page += 1
-            init = False
-
-            model.create_from_import_list(results["data"])
-            print("%s %s synced." % (len(results["data"]), model_name))
-        print("Overall: %s %s synced." % (len(instances), model_name))
-
-
-def sync_project_entries(project, model_name, model):
-    instances = []
-    page = 1
-    init = True
-    results = {"nb_pages": 2}
-
-    if model_name not in [
-        "tasks",
-        "schedule-items"
-    ]:
-        results = gazu.client.fetch_all(
-            "projects/%s/%s" % (project["id"], model_name)
-        )
-        instances += results
-    else:
-        while init or results["nb_pages"] >= page:
-            results = gazu.client.fetch_all(
-                "%s?project_id=%s&page=%d" % (model_name, project["id"], page)
-            )
-            instances += results["data"]
-            page += 1
-            init = False
-
-    print("    %s %s synced." % (len(instances), model_name))
-    model.create_from_import_list(instances)
+    logger.info("    %s %s thumbnails synced." % (total, model_name))
 
 
 def add_main_sync_listeners(event_client):
@@ -278,7 +326,7 @@ def add_sync_listeners(event_client, model_name, event_name, model):
         event_client,
         "%s:new" % event_name,
         create_entry(model_name, event_name, model, "new")
-        )
+    )
     gazu.events.add_listener(
         event_client,
         "%s:update" % event_name,
@@ -300,20 +348,14 @@ def create_entry(model_name, event_name, model, event_type):
         try:
             instance = gazu.client.fetch_one(model_name, model_id)
             model.create_from_import(instance)
-            import os
-            full_event_name = "%s:%s" % (event_name, event_type)
-            print("emit", os.getenv("KV_PORT"), full_event_name)
-            events.emit(full_event_name, {
-                model_id_field_name: model_id,
-                "sync": True
-            })
+            forward_base_event(event_name, event_type, data)
             if event_type == "new":
-                print("Creation: %s created %s" % (event_name, model_id))
+                logger.info("Creation: %s %s" % (event_name, model_id))
             else:
-                print("Update: %s updated %s" % (event_name, model_id))
+                logger.info("Update: %s %s" % (event_name, model_id))
         except gazu.exception.RouteNotFoundException as e:
-            print(e)
-            print("Fail %s created/updated %s" % (event_name, model_id))
+            logger.error("Route not found: %s" % e)
+            logger.error("Fail %s created/updated %s" % (event_name, model_id))
     return create
 
 
@@ -321,10 +363,10 @@ def delete_entry(model_name, event_name, model):
     def delete(data):
         if data.get("sync", False):
             return
-
         model_id = data[event_name.replace('-', "_") + "_id"]
         model.delete_all_by(id=model_id)
-        print("Deletion: %s deleted %s" % (model_name, model_id))
+        forward_base_event(event_name, "delete", data)
+        logger.info("Deletion: %s %s" % (model_name, model_id))
     return delete
 
 
@@ -332,28 +374,13 @@ def forward_event(event_name):
     def forward(data):
         if not data.get("sync", False):
             data["sync"] = True
-            print("Forwarding event: %s" % event_name)
+            logger.info("Forward event: %s" % event_name)
             events.emit(event_name, data, persist=False)
     return forward
 
 
-def run_last_events_sync():
-    events = gazu.client.fetch_all("events/last")
-
-    for event in events:
-        event_name = event["name"]
-        [event_name, action] = event_name.split(":")
-
-        if event_name in event_name_model_map:
-            model = event_name_model_map[event_name]
-            path = event_name_model_path_map[event_name]
-            if event_name == "metadata-descriptor":
-                if "metadata_descriptor_id" not in event["data"]:
-                    event_name = "descriptor"
-            instance_id = event["data"]["%s_id" % event_name.replace("-", "_")]
-
-            if action in ["update", "create"]:
-                instance = gazu.client.fetch_one(path, instance_id)
-                model.create_from_import(instance)
-            elif action in ["delete"]:
-                model.delete_from_import(instance_id)
+def forward_base_event(event_name, event_type, data):
+    full_event_name = "%s:%s" % (event_name, event_type)
+    data["sync"] = True
+    logger.info("Forward event: %s" % event_name)
+    events.emit(full_event_name, data)
