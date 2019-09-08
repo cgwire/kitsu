@@ -303,7 +303,7 @@ def import_data_from_another_instance(target, login, password):
     sync_service.run_other_sync()
 
 
-def run_sync_change_daemon(event_target, target, login, password):
+def run_sync_change_daemon(event_target, target, login, password, logs_dir):
     """
     Listen to event websocket. Each time a change occurs, it retreves the
     related data and save it in the current instance.
@@ -312,7 +312,8 @@ def run_sync_change_daemon(event_target, target, login, password):
         target,
         event_target,
         login,
-        password
+        password,
+        logs_dir
     )
     sync_service.add_main_sync_listeners(event_client)
     sync_service.add_project_sync_listeners(event_client)

@@ -1,5 +1,7 @@
 import logging
+import os
 import sys
+
 import gazu
 import sqlalchemy
 
@@ -36,7 +38,6 @@ console_handler = logging.StreamHandler(sys.stdout)
 formatter = logging.Formatter("%(asctime)s - %(levelname)s - %(message)s")
 console_handler.setFormatter(formatter)
 logger.addHandler(console_handler)
-
 
 event_name_model_map = {
     "asset": Entity,
@@ -153,13 +154,19 @@ def init(target, login, password):
     gazu.log_in(login, password)
 
 
-def init_events_listener(target, event_target, login, password):
+def init_events_listener(target, event_target, login, password, logs_dir=None):
     """
     Set parameters for the client that will listen to events from the target.
     """
     gazu.set_event_host(event_target)
     gazu.set_host(target)
     gazu.log_in(login, password)
+    if logs_dir is not None:
+        file_name = os.path.join(logs_dir, "zou_sync_changes.log")
+        file_handler = logging.TimedRotatingFileHandler(file_name, when="D")
+        file_handler.setFormatter(formatter)
+        logger.addHandler(file_handler)
+
     return gazu.events.init()
 
 
@@ -382,5 +389,5 @@ def forward_event(event_name):
 def forward_base_event(event_name, event_type, data):
     full_event_name = "%s:%s" % (event_name, event_type)
     data["sync"] = True
-    logger.info("Forward event: %s" % event_name)
+    logger.info("Forward event: %s" % full_event_name)
     events.emit(full_event_name, data)

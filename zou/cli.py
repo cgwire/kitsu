@@ -351,7 +351,8 @@ def sync_full(target):
 @cli.command()
 @click.option("--event-target", default="http://localhost:8080")
 @click.option("--target", default="http://localhost:8080/api")
-def sync_changes(event_target, target):
+@click.option("--logs-directory", default=None)
+def sync_changes(event_target, target, logs_directory):
     """
     Run a daemon that import data related to any change happening on target
     instance. It expects that credentials to connect to target instance are
@@ -359,7 +360,13 @@ def sync_changes(event_target, target):
     """
     login = os.getenv("SYNC_LOGIN")
     password = os.getenv("SYNC_PASSWORD")
-    commands.run_sync_change_daemon(event_target, target, login, password)
+    commands.run_sync_change_daemon(
+        event_target,
+        target,
+        login,
+        password,
+        logs_directory
+    )
 
 
 @cli.command()
