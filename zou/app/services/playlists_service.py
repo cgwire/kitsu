@@ -132,6 +132,9 @@ def set_preview_files_for_shots(playlist_dict):
             "revision": preview_file.revision,
             "extension": preview_file.extension,
             "annotations": preview_file.annotations,
+            "created_at": fields.serialize_value(
+                preview_file.created_at
+            ),
             "task_id": task_id
         })  # Do not add too much field to avoid building too big responses
 
@@ -175,6 +178,9 @@ def get_preview_files_for_shot(shot_id):
                     "revision": preview_file.revision,
                     "extension": preview_file.extension,
                     "annotations": preview_file.annotations,
+                    "created_at": fields.serialize_value(
+                        preview_file.created_at
+                    ),
                     "task_id": str(preview_file.task_id)
                 }
                 for preview_file in preview_files
