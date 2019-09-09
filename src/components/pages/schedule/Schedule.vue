@@ -487,7 +487,7 @@ export default {
 
   methods: {
     ...mapActions([
-      'deletMilestone',
+      'deleteMilestone',
       'saveMilestone'
     ]),
 

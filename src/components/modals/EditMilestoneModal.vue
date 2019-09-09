@@ -24,6 +24,7 @@
         class="button is-link error"
         text="Delete milestone"
         @click="$emit('remove-milestone', milestoneToEdit)"
+        v-if="isEdit"
       />
 
       <modal-footer
