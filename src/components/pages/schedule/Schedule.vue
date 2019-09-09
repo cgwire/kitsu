@@ -87,19 +87,19 @@
       >
         <div
           class="day"
-          :key="'header-' + day.toISOString()"
+          :key="'header-' + day.text"
           :style="dayStyle(day)"
           v-for="(day, index) in daysAvailable"
         >
           <div
             class="milestone"
-            @click="showEditMilestoneModal(day, milestones[day.format('YYYY-MM-DD')])"
-            v-if="milestones[day.format('YYYY-MM-DD')]"
+            @click="showEditMilestoneModal(day, milestones[day.text])"
+            v-if="milestones[day.text]"
           >
             <div class="milestone-tooltip flexrow">
               <span class="bull flexrow-item">&bull;</span>
               <span class="flexrow-item">
-                {{ milestones[day.format('YYYY-MM-DD')].name }}
+                {{ milestones[day.text].name }}
               </span>
               <span class="filler">
               </span>
@@ -122,7 +122,7 @@
             <div
               class="add-milestone"
               :title="addMilestoneTitle(day)"
-              @click="showEditMilestoneModal(day, milestones[day.format('YYYY-MM-DD')])"
+              @click="showEditMilestoneModal(day, milestones[day.text])"
             >
               <span>+</span>
             </div>
@@ -131,7 +131,7 @@
                 class="month-name"
                 v-if="day.newMonth || index === 0"
               >
-                {{ day.format('MMMM') }}
+                {{ day.monthText }}
               </span>
               <div
                 :class="dayClass(day, index)"
@@ -139,13 +139,13 @@
                 <span
                   v-if="!day.weekend && zoomLevel > 2"
                 >
-                  {{ day.format('ddd')[0] }} /
+                  {{ day.dayText }} /
                 </span>
                 <span
                   class="day-number"
                   v-if="!day.weekend"
                 >
-                  {{ day.format('DD') }}
+                  {{ day.dayNumber }}
                 </span>
               </div>
             </div>
@@ -378,7 +378,7 @@ export default {
 
     daysAvailable () {
       const days = []
-      let day = this.startDate.add(-1, 'days')
+      let day = this.startDate.clone().add(-1, 'days')
       let dayDate = day.toDate()
       let endDayDate = this.endDate.toDate()
       dayDate.isoweekday = day.isoWeekday()
@@ -405,6 +405,10 @@ export default {
         momentDay.newWeek = nextDay.newWeek
         momentDay.newMonth = nextDay.newMonth
         momentDay.weekend = nextDay.weekend
+        momentDay.text = momentDay.format('YYYY-MM-DD')
+        momentDay.monthText = momentDay.format('MMMM')
+        momentDay.dayNumber = momentDay.format('DD')
+        momentDay.dayText = momentDay.format('ddd')[0]
         days.push(momentDay)
         dayDate = nextDay
       }
@@ -423,7 +427,7 @@ export default {
       let index = 0
       const dayIndex = {}
       this.displayedDays.forEach((d) => {
-        dayIndex[d.format('YYYY-MM-DD')] = index
+        dayIndex[d.text] = index
         index++
       })
       return dayIndex
@@ -680,7 +684,7 @@ export default {
         let wlast = endDate.day() - last.day()
         if (endDate.day() === 6) --wlast
 
-        return wfirst + days + wlast - 1
+        return Math.ceil(wfirst + days + wlast - 1)
       } else {
         let day = moment(startDate)
         let businessDays = 0
@@ -786,7 +790,7 @@ export default {
     showEditMilestoneModal (day, milestone) {
       this.modals.edit = true
       if (milestone) {
-        milestone.date = moment(milestone.date, 'YYYY-MM-DD')
+        milestone.date = moment(milestone.date, 'YYYY-MM-DD', 'en')
         this.milestoneToEdit = milestone
       } else {
         this.milestoneToEdit = { date: day }
@@ -826,9 +830,8 @@ export default {
     },
 
     milestoneLineStyle (milestone) {
-      const endDate = moment(milestone.date, 'YYYY-MM-DD')
+      const endDate = moment(milestone.date, 'YYYY-MM-DD', 'en')
       const lengthDiff = this.businessDiff(this.startDate, endDate)
-
       return {
         left: (lengthDiff + 0.5) * this.cellWidth + 'px'
       }

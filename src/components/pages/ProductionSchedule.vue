@@ -139,6 +139,7 @@ export default {
       'isCurrentUserAdmin',
       'isTVShow',
       'taskTypeMap',
+      'timezone',
       'user'
     ]),
 
@@ -199,7 +200,8 @@ export default {
 
     reset () {
       if (this.currentProduction.start_date) {
-        this.startDate = moment(this.currentProduction.start_date)
+        this.startDate =
+          moment.utc(this.currentProduction.start_date, 'YYYY-MM-DD', 'en')
       }
       if (this.currentProduction.end_date) {
         this.endDate = moment(this.currentProduction.end_date)
@@ -214,8 +216,8 @@ export default {
       return scheduleItems.map((item) => {
         return {
           ...item,
-          startDate: moment(item.start_date, 'YYYY-MM-DD'),
-          endDate: moment(item.end_date, 'YYYY-MM-DD'),
+          startDate: moment(item.start_date, 'YYYY-MM-DD', 'en'),
+          endDate: moment(item.end_date, 'YYYY-MM-DD', 'en'),
           expanded: false,
           loading: false,
           children: []
@@ -257,7 +259,7 @@ export default {
 
   watch: {
     selectedStartDate () {
-      this.startDate = moment(this.selectedStartDate)
+      this.startDate = moment.utc(this.selectedStartDate, 'YYYY-MM-DD', 'en')
       this.editProduction({
         data: {
           ...this.currentProduction,
