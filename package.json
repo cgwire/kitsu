@@ -12,6 +12,7 @@
   },
   "dependencies": {
     "async": "2.6.2",
+    "bowser": "2.6.0",
     "chart.js": "2.8.0",
     "color": "3.1.1",
     "color-hash": "1.0.3",

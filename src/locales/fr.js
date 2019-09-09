@@ -580,5 +580,10 @@ export default {
     title: 'Feuille de temps',
     time_spents: 'Temps passé (heures)',
     year: 'Année'
+  },
+
+  wrong_browser: {
+    title: 'Votre navigateur n\'est pas pris en charges par Kitsu',
+    text: 'Kitsu ne peut être utilisé qu\'avec les navigateurs Firefox et Chrome.'
   }
 }
