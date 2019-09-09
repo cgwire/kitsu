@@ -188,6 +188,9 @@ export default {
   },
 
   watch: {
+    organisation () {
+      this.form = Object.assign(this.form, this.organisation)
+    }
   },
 
   metaInfo () {
@@ -255,12 +258,11 @@ h2:first-child {
 }
 
 .save-button {
+  background: $green;
   border-radius: 2em;
   border-color: $green;
   color: white;
-  padding: 1.4em;
   width: 100%;
-  background: $green;
 }
 
 .save-button:hover {

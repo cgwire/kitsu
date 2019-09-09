@@ -208,14 +208,10 @@ const getters = {
 const actions = {
 
   getOrganisation ({ commit }) {
-    return new Promise((resolve, reject) => {
-      peopleApi.getOrganisation()
-        .then((organisation) => {
-          commit(SET_ORGANISATION, organisation)
-          resolve()
-        })
-        .catch(reject)
-    })
+    return peopleApi.getOrganisation()
+      .then((organisation) => {
+        commit(SET_ORGANISATION, organisation)
+      })
   },
 
   saveOrganisation ({ commit }, form) {

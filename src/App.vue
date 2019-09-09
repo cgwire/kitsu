@@ -28,9 +28,10 @@ export default {
       'assetTypeMap',
       'currentProduction',
       'episodeMap',
-      'isLoginLoading',
+      'isCurrentUserAdmin',
       'isDataLoading',
       'isDarkTheme',
+      'isLoginLoading',
       'isSavingCommentPreview',
       'route',
       'personMap',
@@ -66,6 +67,7 @@ export default {
 
   methods: {
     ...mapActions([
+      'getOrganisation',
       'getTask',
       'loadAsset',
       'loadAssetType',
@@ -342,6 +344,12 @@ export default {
         this.$store.commit('DELETE_METADATA_DESCRIPTOR_END', {
           id: eventData.metadata_descriptor_id
         })
+      },
+
+      'organisation:update' (eventData) {
+        if (this.isCurrentUserAdmin) {
+          this.getOrganisation()
+        }
       }
     }
   }
