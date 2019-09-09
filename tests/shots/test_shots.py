@@ -20,6 +20,8 @@ class ShotTestCase(ApiDBTestCase):
         self.serialized_shot = self.shot.serialize(obj_type="Shot")
         self.shot_id = str(self.shot.id)
         self.serialized_sequence = self.sequence.serialize(obj_type="Sequence")
+        self.serialized_episode = self.episode.serialize(obj_type="Episode")
+        self.serialized_project = self.project.serialize()
 
         shot_02 = self.generate_fixture_shot("SH02")
         self.shot_02_id = str(shot_02.id)
@@ -53,11 +55,12 @@ class ShotTestCase(ApiDBTestCase):
         shot = self.get("data/shots/%s" % self.shot.id)
         self.assertEqual(shot["id"], str(self.shot.id))
         self.assertEqual(shot["name"], self.shot.name)
-        self.assertEqual(shot["sequence_name"], self.sequence.name)
-        self.assertEqual(shot["sequence_id"], str(self.sequence.id))
-        self.assertEqual(shot["episode_name"], self.episode.name)
-        self.assertEqual(shot["episode_id"], str(self.episode.id))
-        self.assertEqual(shot["project_name"], self.project.name)
+        self.assertEqual(
+            shot["sequence_name"], self.serialized_sequence["name"])
+        self.assertEqual(shot["sequence_id"], self.serialized_sequence["id"])
+        self.assertEqual(shot["episode_name"], self.serialized_episode["name"])
+        self.assertEqual(shot["episode_id"], self.serialized_episode["id"])
+        self.assertEqual(shot["project_name"], self.serialized_project["name"])
         self.assertEqual(len(shot["tasks"]), 1)
 
     def test_get_shot_by_name(self):
@@ -96,7 +99,7 @@ class ShotTestCase(ApiDBTestCase):
         )
         shot = self.get("data/shots/%s" % shot["id"])
         self.assertEqual(shot["name"], shot_name)
-        self.assertEqual(shot["parent_id"], sequence_id)
+        self.assertEqual(shot["sequence_id"], sequence_id)
         self.assertDictEqual(shot["data"], data["data"])
 
     def test_get_shots_for_project(self):

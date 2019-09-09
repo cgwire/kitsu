@@ -310,7 +310,7 @@ def get_full_shot(shot_id):
     if len(shots) > 0:
         return shots[0]
     else:
-        return None
+        raise ShotNotFoundException
 
 
 def get_scene_raw(scene_id):

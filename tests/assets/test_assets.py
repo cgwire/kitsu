@@ -41,7 +41,7 @@ class AssetsTestCase(ApiDBTestCase):
         asset = self.get("data/assets/%s" % self.asset.id)
         self.assertEqual(asset["id"], str(self.asset.id))
         self.assertEqual(asset["project_name"], self.project.name)
-        self.assertEqual(asset["entity_type_id"], str(self.asset_type.id))
+        self.assertEqual(asset["asset_type_id"], str(self.asset_type.id))
         self.assertEqual(asset["asset_type_name"], str(self.asset_type.name))
         self.assertEqual(len(asset["tasks"]), 2)
 

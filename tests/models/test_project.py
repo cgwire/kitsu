@@ -20,6 +20,7 @@ class ProjectTestCase(ApiDBTestCase):
     def test_get_project(self):
         project = self.get_first("data/projects")
         project_again = self.get("data/projects/%s" % project["id"])
+        project["project_status_name"] = "Open"
         self.assertEqual(project, project_again)
         self.get_404("data/projects/%s" % fields.gen_uuid())
 

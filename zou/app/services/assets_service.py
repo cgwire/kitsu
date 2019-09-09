@@ -307,7 +307,7 @@ def get_full_asset(asset_id):
         asset.update(assets[0])
         return asset
     else:
-        return None
+        raise AssetNotFoundException
 
 
 def get_asset_instance_raw(asset_instance_id):
