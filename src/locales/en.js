@@ -611,5 +611,10 @@ export default {
     time_spents: 'Time Spent (hours)',
     title: 'Timesheets',
     year: 'Year'
+  },
+
+  wrong_browser: {
+    title: 'Your browser is not supported by Kitsu',
+    text: 'Kitsu can only be used with Firefox and Chrome browsers.'
   }
 }

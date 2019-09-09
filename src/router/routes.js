@@ -1,3 +1,5 @@
+import Bowser from 'bowser'
+
 import auth from '../lib/auth'
 import lang from '../lib/lang'
 import timezone from '../lib/timezone'
@@ -41,6 +43,7 @@ const Settings = () => import('../components/pages/Settings')
 const Task = () => import('../components/pages/Task')
 const TaskStatus = () => import('../components/pages/TaskStatus')
 const TaskTypes = () => import('../components/pages/TaskTypes')
+const WrongBrowser = () => import('../components/pages/WrongBrowser')
 
 export const routes = [
 
@@ -49,6 +52,15 @@ export const routes = [
     component: Main,
 
     beforeEnter: (to, from, next) => {
+      const browser = Bowser.getParser(window.navigator.userAgent)
+      const isValidBrowser = browser.satisfies({
+        chrome: '>20.1.1432',
+        firefox: '>31'
+      })
+      if (!isValidBrowser) {
+        return next({ name: 'wrong-browser' })
+      }
+
       auth.requireAuth(to, from, (nextPath) => {
         if (nextPath) {
           next(nextPath)
@@ -739,6 +751,11 @@ export const routes = [
     path: '/server-down',
     component: ServerDown,
     name: 'server-down'
+  },
+  {
+    path: '/wrong-browser',
+    component: WrongBrowser,
+    name: 'wrong-browser'
   },
 
   {

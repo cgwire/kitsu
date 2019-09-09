@@ -392,6 +392,9 @@ a.revision:hover {
 
 .comment-text {
   margin-top: 1em;
+  word-break: break-word;
+  hyphens: auto;
+  hyphenate-limit-chars: 8 6 2;
 }
 
 .comment-text.empty {

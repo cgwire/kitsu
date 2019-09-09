@@ -365,6 +365,7 @@ export default {
       'lastCommentDraft',
       'personMap',
       'previewFormData',
+      'productionMap',
       'taskEntityPreviews',
       'taskStatusForCurrentUser',
       'taskTypeMap',
@@ -372,7 +373,8 @@ export default {
     ]),
 
     currentTeam () {
-      return this.currentProduction.team.map(id => this.personMap[id])
+      const production = this.productionMap[this.task.project_id]
+      return production.team.map(id => this.personMap[id])
     },
 
     title () {

@@ -1,7 +1,9 @@
 import moment from 'moment-timezone'
 
 export const range = (start, end) => {
-  return [...Array(end - start + 1).keys()]
+  let length = end - start + 1
+  if (length < 0) length = 0
+  return [...Array(length).keys()]
     .map(i => i + start)
 }
 
@@ -30,10 +32,10 @@ export const getMonthRange = (year, currentYear, currentMonth) => {
 export const getDayRange = (year, month, currentYear, currentMonth) => {
   if (currentYear === year &&
       currentMonth === month) {
-    return range(1, moment().date() + 1)
+    return range(1, moment().date())
   } else {
     const currentDate = moment(
-      `${year}-${Number(month)}`, 'YYYY-M'
+      `${year}-${Number(month)}`, 'YYYY-M', 'en'
     )
     return range(1, currentDate.endOf('month').date())
   }
