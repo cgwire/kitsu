@@ -12,9 +12,8 @@ export default {
     client.get(path, callback)
   },
 
-  getAsset (assetId, callback) {
-    const path = `/api/data/assets/${assetId}`
-    client.get(path, callback)
+  getAsset (assetId) {
+    return client.getModel('assets', assetId)
   },
 
   getCastIn (asset, callback) {

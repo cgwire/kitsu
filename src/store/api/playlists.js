@@ -16,9 +16,9 @@ export default {
     client.get(path, callback)
   },
 
-  getShotPreviewFiles (shot, callback) {
+  getShotPreviewFiles (shot) {
     const path = `/api/data/shots/${shot.id}/preview-files`
-    client.get(path, callback)
+    return client.pget(path)
   },
 
   getEntityPreviewFiles (entity, callback) {

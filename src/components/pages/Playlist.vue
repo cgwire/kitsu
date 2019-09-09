@@ -317,33 +317,38 @@ export default {
       this.currentShots = tmpShots
     },
 
-    addShotToCurrentShots (shotPreview, playlistShotMap) {
-      const shot = this.shotMap[shotPreview.shot_id]
+    /*
+     * Add to current playlist the shot related to given preview.
+     * Use given preview as current preview for this shot and store other
+     * previews in given shot.
+     */
+    addShotToCurrentShots (previewFile, playlistShotMap) {
+      const shot = this.shotMap[previewFile.shot_id]
       if (shot) {
         const playlistShot = {
-          id: shotPreview.shot_id,
+          id: previewFile.shot_id,
           name: shot.name,
           sequence_name: shot.sequence_name,
           entity_name: shot.tasks[0].entity_name,
-          preview_files: shotPreview.preview_files,
+          preview_files: previewFile.preview_files,
           preview_file_id:
-            shotPreview.id ||
-            shotPreview.preview_file_id ||
+            previewFile.id ||
+            previewFile.preview_file_id ||
             shot.preview_file_id,
           preview_file_extension:
-            shotPreview.extension ||
-            shotPreview.preview_file_extension ||
+            previewFile.extension ||
+            previewFile.preview_file_extension ||
             shot.preview_file_extension,
           preview_file_task_id:
-            shotPreview.task_id ||
-            shotPreview.preview_file_task_id ||
+            previewFile.task_id ||
+            previewFile.preview_file_task_id ||
             shot.preview_file_task_id,
           preview_file_annotations:
-            shotPreview.annotations ||
-            shotPreview.preview_file_annotations ||
+            previewFile.annotations ||
+            previewFile.preview_file_annotations ||
             shot.preview_file_annotations
         }
-        playlistShotMap[shotPreview.shot_id] = playlistShot
+        playlistShotMap[previewFile.shot_id] = playlistShot
         return playlistShot
       } else {
         return null
@@ -446,36 +451,26 @@ export default {
       })
     },
 
+    // if (this.currentPlaylist.id && !this.currentShots[shot.id]) {
     addShot (shot) {
-      return new Promise((resolve, reject) => {
-        if (this.currentPlaylist.id && !this.currentShots[shot.id]) {
-          this.loadShotPreviewFiles({
-            playlist: this.currentPlaylist,
-            shot,
-            callback: (err, previewFiles) => {
-              if (err) console.log(err)
-              const shotInfo = { ...shot }
-              this.addShotPreviewToPlaylist({
-                playlist: this.currentPlaylist,
-                previewFiles: previewFiles,
-                shot: shotInfo,
-                callback: (err, shotPreview) => {
-                  if (err) console.error(err)
-                  const playlistShot =
-                    this.addShotToCurrentShots(shotPreview, this.currentShots)
-                  this.$refs['playlist-player'].shotList.push(playlistShot)
-                  this.$nextTick(() => {
-                    this.$refs['playlist-player'].scrollToRight()
-                    resolve()
-                  })
-                }
-              })
-            }
+      return this.loadShotPreviewFiles(shot)
+        .then(previewFiles => this.addShotPreviewToPlaylist({
+          playlist: this.currentPlaylist,
+          previewFiles: previewFiles,
+          shot: { ...shot }
+        }))
+        .then((shotPreview) => {
+          return new Promise((resolve, reject) => {
+            const playlistShot =
+              this.addShotToCurrentShots(shotPreview, this.currentShots)
+            this.$refs['playlist-player'].shotList.push(playlistShot)
+            this.$nextTick(() => {
+              this.$refs['playlist-player'].scrollToRight()
+              resolve()
+            })
           })
-        } else {
-          resolve()
-        }
-      })
+        })
+        .catch((err) => console.error(err))
     },
 
     addShotToPlaylist (shot) {
@@ -656,11 +651,11 @@ export default {
         }
       },
 
-      'build-job:success' (eventData) {
+      'build-job:update' (eventData) {
         if (eventData.playlist_id === this.currentPlaylist.id) {
           updateModelFromList(this.currentPlaylist.build_jobs, {
             id: eventData.build_job_id,
-            status: 'succeeded'
+            status: eventData.status
           })
         }
       },

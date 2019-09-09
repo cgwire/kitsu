@@ -21,7 +21,8 @@ import {
 } from '../../lib/selection'
 import {
   getFilledColumns,
-  groupEntitiesByParents
+  groupEntitiesByParents,
+  removeModelFromList
 } from '../../lib/models'
 import {
   computeStats
@@ -86,11 +87,22 @@ import {
 
   DELETE_SEQUENCE_START,
   DELETE_SEQUENCE_ERROR,
-  DELETE_SEQUENCE_END,
 
   DELETE_EPISODE_START,
   DELETE_EPISODE_ERROR,
-  DELETE_EPISODE_END,
+
+  ADD_EPISODE,
+  UPDATE_EPISODE,
+  REMOVE_EPISODE,
+
+  ADD_SEQUENCE,
+  UPDATE_SEQUENCE,
+  REMOVE_SEQUENCE,
+
+  ADD_SHOT,
+  UPDATE_SHOT,
+  REMOVE_SHOT,
+  CANCEL_SHOT,
 
   RESTORE_SHOT_START,
   RESTORE_SHOT_ERROR,
@@ -431,14 +443,50 @@ const actions = {
     })
   },
 
-  loadShot ({ commit, state, rootGetters }, { shotId, callback }) {
+  loadEpisode ({ commit, state }, episodeId) {
+    return shotsApi.getEpisode(episodeId)
+      .then((episode) => {
+        if (state.episodeMap[episode.id]) {
+          commit(UPDATE_EPISODE, episode)
+        } else {
+          commit(ADD_EPISODE, episode)
+        }
+      })
+      .catch((err) => console.error(err))
+  },
+
+  loadSequence ({ commit, state }, sequenceId) {
+    return shotsApi.getSequence(sequenceId)
+      .then((sequence) => {
+        if (state.sequenceMap[sequence.id]) {
+          commit(UPDATE_SEQUENCE, sequence)
+        } else {
+          commit(ADD_SEQUENCE, sequence)
+        }
+      })
+      .catch((err) => console.error(err))
+  },
+
+  loadShot ({ commit, state, rootGetters }, shotId) {
+    const personMap = rootGetters.personMap
+    const production = rootGetters.currentProduction
+    const taskMap = rootGetters.taskMap
     const taskTypeMap = rootGetters.taskTypeMap
-    shotsApi.getShot(shotId, (err, shot) => {
-      if (!err) {
-        commit(LOAD_SHOT_END, { shot, taskTypeMap })
-      }
-      if (callback) callback(err)
-    })
+    return shotsApi.getShot(shotId)
+      .then((shot) => {
+        if (state.shotMap[shot.id]) {
+          commit(UPDATE_SHOT, shot)
+        } else {
+          commit(ADD_SHOT, {
+            shot,
+            taskTypeMap,
+            taskMap,
+            personMap,
+            production
+          })
+        }
+      })
+      .catch((err) => console.error(err))
   },
 
   loadShotCasting ({ commit, rootGetters }, { shot, callback }) {
@@ -550,6 +598,16 @@ const actions = {
       if (err) {
         commit(DELETE_SHOT_ERROR)
       } else {
+        const previousShot = state.shotMap[shot.id]
+        if (
+          previousShot &&
+          previousShot.tasks.length > 0 &&
+          !previousShot.canceled
+        ) {
+          commit(CANCEL_SHOT, previousShot)
+        } else {
+          commit(REMOVE_SHOT, shot)
+        }
         commit(DELETE_SHOT_END, shot)
       }
       if (callback) callback(err)
@@ -564,7 +622,7 @@ const actions = {
           commit(DELETE_EPISODE_ERROR)
           reject(err)
         } else {
-          commit(DELETE_EPISODE_END, episode)
+          commit(REMOVE_EPISODE, episode)
           resolve(episode)
         }
       })
@@ -578,7 +636,7 @@ const actions = {
         if (err) {
           commit(DELETE_SEQUENCE_ERROR)
         } else {
-          commit(DELETE_SEQUENCE_END, sequence)
+          commit(REMOVE_SEQUENCE, sequence)
         }
         if (err) reject(err)
         else resolve(sequence)
@@ -1054,68 +1112,19 @@ const mutations = {
       isError: true
     }
   },
+
   [DELETE_SHOT_END] (state, shotToDelete) {
-    const shot = state.shotMap[shotToDelete.id]
-
-    if (shot.tasks.length > 0 && !shot.canceled) {
-      shot.canceled = true
-    } else {
-      const shotToDeleteIndex = cache.shots.findIndex(
-        (shot) => shot.id === shotToDelete.id
-      )
-      const displayedShotToDeleteIndex = state.displayedShots.findIndex(
-        (shot) => shot.id === shotToDelete.id
-      )
-      cache.shots.splice(shotToDeleteIndex, 1)
-      state.displayedShots.splice(displayedShotToDeleteIndex, 1)
-      state.shotMap[shotToDelete.id] = undefined
-      state.displayedShotsLength = Math.max(state.displayedShotsLength - 1, 0)
-      if (shotToDelete.timeSpent) {
-        state.displayedShotsTimeSpent -= shotToDelete.timeSpent
-      }
-      if (shot.nb_frames) {
-        state.displayedShotsFrames -= shotToDelete.nb_frames
-      }
-    }
-
     state.deleteShot = {
       isLoading: false,
       isError: false
     }
-    cache.shotIndex = buildShotIndex(cache.shots)
   },
 
   [DELETE_SEQUENCE_START] (state) {},
   [DELETE_SEQUENCE_ERROR] (state) {},
-  [DELETE_SEQUENCE_END] (state, sequenceToDelete) {
-    const sequenceToDeleteIndex = state.sequences.findIndex(
-      (sequence) => sequence.id === sequenceToDelete.id
-    )
-    const displayedSequenceToDeleteIndex = state.sequences.findIndex(
-      (sequence) => sequence.id === sequenceToDelete.id
-    )
-    state.sequences.splice(sequenceToDeleteIndex, 1)
-    state.displayedSequences.splice(displayedSequenceToDeleteIndex, 1)
-    state.displayedSequencesLength = state.displayedSequences.length
-    state.sequenceMap[sequenceToDelete.id] = undefined
-    state.sequenceIndex = buildSequenceIndex(state.sequences)
-  },
 
   [DELETE_EPISODE_START] (state) {},
   [DELETE_EPISODE_ERROR] (state) {},
-  [DELETE_EPISODE_END] (state, episodeToDelete) {
-    const episodeToDeleteIndex = state.episodes.findIndex(
-      (episode) => episode.id === episodeToDelete.id
-    )
-    const displayedEpisodeToDeleteIndex = state.episodes.findIndex(
-      (episode) => episode.id === episodeToDelete.id
-    )
-    state.episodes.splice(episodeToDeleteIndex, 1)
-    state.displayedEpisodes.splice(displayedEpisodeToDeleteIndex, 1)
-    state.displayedEpisodesLength = state.displayedEpisodes.length
-    state.episodeMap[episodeToDelete.id] = undefined
-    state.episodeIndex = buildEpisodeIndex(state.episodes)
-  },
 
   [RESTORE_SHOT_START] (state) {
     state.restoreShot = {
@@ -1377,24 +1386,6 @@ const mutations = {
     state.shotSelectionGrid = clearSelectionGrid(tmpGrid)
   },
 
-  [COMPUTE_SEQUENCE_STATS] (state, { taskMap, taskStatusMap }) {
-    state.sequenceStats = computeStats(
-      cache.shots,
-      'sequence_id',
-      taskStatusMap,
-      taskMap
-    )
-  },
-
-  [COMPUTE_EPISODE_STATS] (state, { taskMap, taskStatusMap }) {
-    state.episodeStats = computeStats(
-      cache.shots,
-      'episode_id',
-      taskStatusMap,
-      taskMap
-    )
-  },
-
   [NEW_TASK_END] (state, task) {
     const shot = state.shotMap[task.entity_id]
     if (shot && task) {
@@ -1463,6 +1454,149 @@ const mutations = {
     }
     state.episodeStats = episodeStats
     state.episodeValidationColumns = Object.keys(validationColumnsMap)
+  },
+
+  [COMPUTE_SEQUENCE_STATS] (state, { taskMap, taskStatusMap }) {
+    state.sequenceStats = computeStats(
+      cache.shots,
+      'sequence_id',
+      taskStatusMap,
+      taskMap
+    )
+  },
+
+  [COMPUTE_EPISODE_STATS] (state, { taskMap, taskStatusMap }) {
+    state.episodeStats = computeStats(
+      cache.shots,
+      'episode_id',
+      taskStatusMap,
+      taskMap
+    )
+  },
+
+  [ADD_EPISODE] (state, episode) {
+    state.episodes.push(episode)
+    const sortedEpisodes = sortByName(state.episodes)
+    state.episodeMap[episode.id] = episode
+    state.episodes = sortedEpisodes
+    state.displayedEpisodes.push(episode)
+    state.displayedEpisodes = sortByName(state.displayedEpisodes)
+    state.episodeIndex = buildEpisodeIndex(sortedEpisodes)
+    state.displayedEpisodesLength = sortedEpisodes.length
+  },
+
+  [UPDATE_EPISODE] (state, episode) {
+    Object.assign(state.episodeMap[episode.id], episode)
+    state.episodeIndex = buildSequenceIndex(state.episodes)
+  },
+
+  [REMOVE_EPISODE] (state, episode) {
+    delete state.episodeMap[episode.id]
+    state.episodes = removeModelFromList(state.episodes, episode)
+    state.displayedEpisodes =
+      removeModelFromList(state.displayedEpisodes, episode)
+    state.episodeIndex = buildEpisodeIndex(state.episodes)
+  },
+
+  [ADD_SEQUENCE] (state, sequence) {
+    state.sequences.push(sequence)
+    const sortedSequences = sortSequences(state.sequences)
+    state.sequenceMap[sequence.id] = sequence
+    if (sequence.parent_id) {
+      const episode = state.episodeMap[sequence.parent_id]
+      if (episode) {
+        Object.assign(sequence, {
+          episode_id: episode.id,
+          episode_name: episode.name
+        })
+      }
+    }
+    state.sequences = sortedSequences
+    state.displayedSequences.push(sequence)
+    state.displayedSequences = sortSequences(state.displayedSequences)
+    state.sequenceIndex = buildSequenceIndex(sortedSequences)
+    state.displayedSequencesLength = sortedSequences.length
+  },
+
+  [UPDATE_SEQUENCE] (state, sequence) {
+    Object.assign(state.sequenceMap[sequence.id], sequence)
+    state.sequenceIndex = buildSequenceIndex(state.sequences)
+  },
+
+  [REMOVE_SEQUENCE] (state, sequence) {
+    delete state.sequenceMap[sequence.id]
+    state.sequences = removeModelFromList(state.sequences, sequence)
+    state.displayedSequences =
+      removeModelFromList(state.displayedSequences, sequence)
+    state.sequenceIndex = buildSequenceIndex(state.sequences)
+  },
+
+  [ADD_SHOT] (state, {
+    taskTypeMap,
+    taskMap,
+    personMap,
+    production,
+    shot
+  }) {
+    const taskIds = []
+    const validations = {}
+    let timeSpent = 0
+    shot.project_name = production.name
+    shot.production_id = production.id
+    shot.tasks.forEach((task) => {
+      helpers.populateTask(task, shot, production)
+      timeSpent += task.duration
+      task.episode_id = shot.episode_id
+
+      taskMap[task.id] = task
+      validations[task.task_type_id] = task.id
+      taskIds.push(task.id)
+
+      if (task.assignees.length > 1) {
+        task.assignees = task.assignees.sort((a, b) => {
+          return personMap[a].name.localeCompare(personMap[b])
+        })
+      }
+    })
+    shot.tasks = taskIds
+    shot.validations = validations
+    shot.timeSpent = timeSpent
+
+    cache.shots.push(shot)
+    cache.shots = sortShots(cache.shots)
+    state.shotMap[shot.id] = shot
+
+    state.displayedShots.push(shot)
+    state.displayedShots = sortShots(state.displayedShots)
+    state.displayedShotsLength = cache.shots.length
+    state.shotFilledColumns = getFilledColumns(state.displayedShots)
+
+    const maxX = state.displayedShots.length
+    const maxY = state.nbValidationColumns
+    state.shotSelectionGrid = buildSelectionGrid(maxX, maxY)
+    state.shotMap[shot.id] = shot
+  },
+
+  [UPDATE_SHOT] (state, shot) {
+    Object.assign(state.shotMap[shot.id], shot)
+    cache.shotIndex = buildShotIndex(cache.shots)
+  },
+
+  [REMOVE_SHOT] (state, shotToDelete) {
+    cache.shots = removeModelFromList(cache.shots, shotToDelete)
+    state.displayedShots =
+      removeModelFromList(state.displayedShots, shotToDelete)
+    delete state.shotMap[shotToDelete.id]
+    if (shotToDelete.timeSpent) {
+      state.displayedShotsTimeSpent -= shotToDelete.timeSpent
+    }
+    if (shotToDelete.nb_frames) {
+      state.displayedShotsFrames -= shotToDelete.nb_frames
+    }
+  },
+
+  [CANCEL_SHOT] (state, shot) {
+    shot.canceled = true
   },
 
   [RESET_ALL] (state) {

@@ -19,7 +19,14 @@ const csv = {
     currentMonth,
     currentWeek
   ) {
-    const headers = csv.getTimesheetHeaders()
+    const headers = csv.getTimesheetHeaders(
+      detailLevel,
+      year,
+      month,
+      currentYear,
+      currentMonth,
+      currentWeek
+    )
     const entries = csv.getTimesheetEntries(headers, people, timesheet)
     csv.buildCsvFile(name, entries)
   },

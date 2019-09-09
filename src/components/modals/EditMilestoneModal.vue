@@ -20,6 +20,11 @@
         @enter="confirm"
         v-focus
       />
+      <button-simple
+        class="button is-link error"
+        text="Delete milestone"
+        @click="$emit('remove-milestone', milestoneToEdit)"
+      />
 
       <modal-footer
         :error-text="$t('schedule.milestone.error')"
@@ -40,6 +45,7 @@
 import { mapGetters, mapActions } from 'vuex'
 import { modalMixin } from './base_modal'
 
+import ButtonSimple from '../widgets/ButtonSimple'
 import ModalFooter from './ModalFooter'
 import TextField from '../widgets/TextField'
 
@@ -48,6 +54,7 @@ export default {
   mixins: [modalMixin],
 
   components: {
+    ButtonSimple,
     ModalFooter,
     TextField
   },

@@ -1,6 +1,6 @@
 import Vue from 'vue'
 import playlistsApi from '../api/playlists'
-import { sortPlaylists } from '../../lib/sorting'
+import { sortPlaylists, sortByDate } from '../../lib/sorting'
 import { removeModelFromList, updateModelFromList } from '../../lib/models'
 
 import {
@@ -89,10 +89,8 @@ const actions = {
     })
   },
 
-  loadShotPreviewFiles ({ commit }, { playlist, shot, callback }) {
-    playlistsApi.getShotPreviewFiles(shot, (err, previewFiles) => {
-      if (callback) callback(err, previewFiles)
-    })
+  loadShotPreviewFiles ({ commit }, shot) {
+    return playlistsApi.getShotPreviewFiles(shot)
   },
 
   newPlaylist ({ commit }, { data, callback }) {
@@ -125,21 +123,23 @@ const actions = {
   addShotPreviewToPlaylist (
     { commit, dispatch }, { playlist, shot, previewFiles, callback }
   ) {
-    commit(ADD_SHOT_TO_PLAYLIST, { playlist, shot })
-    commit(LOAD_SHOT_PREVIEW_FILES_END, { playlist, shot, previewFiles })
-    dispatch('editPlaylist', {
-      data: playlist,
-      callback: () => {
-        const playlistPreview = {
-          shot_id: shot.id,
-          preview_file_id: shot.preview_file_id,
-          preview_file_extension: shot.preview_file_extension,
-          preview_file_annotations: shot.preview_file_annotations,
-          preview_file_task_id: shot.preview_file_task_id,
-          preview_files: previewFiles
+    return new Promise((resolve, reject) => {
+      commit(LOAD_SHOT_PREVIEW_FILES_END, { playlist, shot, previewFiles })
+      commit(ADD_SHOT_TO_PLAYLIST, { playlist, shot })
+      dispatch('editPlaylist', {
+        data: playlist,
+        callback: () => {
+          const previewFile = {
+            shot_id: shot.id,
+            id: shot.preview_file_id,
+            extension: shot.preview_file_extension,
+            annotations: shot.preview_file_annotations,
+            task_id: shot.preview_file_task_id,
+            preview_files: previewFiles
+          }
+          resolve(previewFile)
         }
-        callback(null, playlistPreview)
-      }
+      })
     })
   },
 
@@ -246,24 +246,20 @@ const mutations = {
   },
 
   [LOAD_SHOT_PREVIEW_FILES_END] (state, { playlist, shot, previewFiles }) {
-    const shotToChange = playlist.shots.find(
-      (playlistShot) => playlistShot.shot_id === shot.id)
-    shotToChange.preview_files = previewFiles
-    const previewFileList = []
-    const previewFileMap = {}
+    let previewFileList = []
     Object.keys(previewFiles).forEach(taskTypeId => {
       previewFiles[taskTypeId].forEach(previewFile => {
         previewFileList.push(previewFile)
-        previewFileMap[previewFile.id] = previewFile
       })
     })
+    previewFileList = sortByDate(previewFileList)
     if (previewFileList.length > 0) {
-      let preview = previewFileMap[shot.preview_file_id]
-      if (!preview) preview = previewFileList[0]
+      const preview = previewFileList[0]
       shot.preview_file_id = preview.id
       shot.preview_file_extension = preview.extension
       shot.preview_file_annotations = preview.annotations
     }
+    shot.preview_files = previewFiles
   },
 
   [ADD_SHOT_TO_PLAYLIST] (state, { playlist, shot }) {

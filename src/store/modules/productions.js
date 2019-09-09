@@ -22,6 +22,10 @@ import {
   DELETE_PRODUCTION_ERROR,
   DELETE_PRODUCTION_END,
 
+  ADD_PRODUCTION,
+  UPDATE_PRODUCTION,
+  REMOVE_PRODUCTION,
+
   RESET_PRODUCTION_PATH,
   SET_CURRENT_PRODUCTION,
   PRODUCTION_PICTURE_FILE_SELECTED,
@@ -43,6 +47,7 @@ const initialState = {
   productionMap: {},
   openProductions: [],
   productionStatus: [],
+  productionStatusMap: {},
   currentProduction: null,
   productionAvatarFormData: null,
 
@@ -206,6 +211,18 @@ const actions = {
     })
   },
 
+  loadProduction ({ commit, state }, productionId) {
+    return productionsApi.getProduction(productionId)
+      .then((production) => {
+        if (state.productionMap[production.id]) {
+          commit(UPDATE_PRODUCTION, production)
+        } else {
+          commit(ADD_PRODUCTION, production)
+        }
+      })
+      .catch((err) => console.error(err))
+  },
+
   newProduction ({ commit, state }, { data, callback }) {
     commit(EDIT_PRODUCTION_START, data)
     productionsApi.newProduction(data, (err, production) => {
@@ -237,7 +254,8 @@ const actions = {
       if (err) {
         commit(DELETE_PRODUCTION_ERROR)
       } else {
-        commit(DELETE_PRODUCTION_END, production)
+        commit(REMOVE_PRODUCTION, production)
+        commit(DELETE_PRODUCTION_END)
       }
       if (payload.callback) payload.callback(err)
     })
@@ -434,7 +452,12 @@ const mutations = {
   [LOAD_PRODUCTION_STATUS_ERROR] (state) {
   },
   [LOAD_PRODUCTION_STATUS_END] (state, productionStatus) {
+    const productionStatusMap = {}
+    productionStatus.forEach((status) => {
+      productionStatusMap[status.id] = status
+    })
     state.productionStatus = productionStatus
+    state.productionStatusMap = productionStatusMap
   },
 
   [EDIT_PRODUCTION_START] (state, data) {
@@ -498,24 +521,63 @@ const mutations = {
     }
   },
 
+  [ADD_PRODUCTION] (state, production) {
+    state.productions.push(production)
+    state.openProductions.push(production)
+    state.productions = sortProductions(state.productions)
+    state.openProductions = sortByName(state.openProductions)
+    state.productionMap[production.id] = production
+  },
+
+  [UPDATE_PRODUCTION] (state, production) {
+    const previousProduction = state.productionMap[production.id]
+    const productionStatus =
+      state.productionStatusMap[production.project_status_id]
+    const openProduction =
+      state.openProductions.find(p => p.id === production.id)
+    const isStatusChanged =
+      previousProduction.project_status_id !== productionStatus.id
+
+    production.project_status_name = productionStatus.name
+    Object.assign(previousProduction, production)
+    if (openProduction) Object.assign(openProduction, production)
+    if (isStatusChanged) {
+      if (production.project_status_name === 'Open') {
+        state.openProductions.push(previousProduction)
+      } else {
+        state.openProductions = removeModelFromList(
+          state.openProductions,
+          previousProduction
+        )
+      }
+    }
+    state.productions = sortProductions(state.productions)
+    state.openProductions = sortByName(state.openProductions)
+  },
+
   [DELETE_PRODUCTION_START] (state) {
     state.deleteProduction = {
       isLoading: true,
       isError: false
     }
   },
+
   [DELETE_PRODUCTION_ERROR] (state) {
     state.deleteProduction = {
       isLoading: false,
       isError: true
     }
   },
-  [DELETE_PRODUCTION_END] (state, productionToDelete) {
-    const productionToDeleteIndex = state.productions.findIndex(
-      (production) => production.id === productionToDelete.id
-    )
-    state.productions.splice(productionToDeleteIndex, 1)
 
+  [REMOVE_PRODUCTION] (state, productionToDelete) {
+    state.productions =
+      removeModelFromList(state.productions, productionToDelete)
+    state.openProductions =
+      removeModelFromList(state.openProductions, productionToDelete)
+    delete state.productionMap[productionToDelete.id]
+  },
+
+  [DELETE_PRODUCTION_END] (state, productionToDelete) {
     state.deleteProduction = {
       isLoading: false,
       isError: false
@@ -602,9 +664,11 @@ const mutations = {
   },
 
   [ASSIGN_TASKS] (state, { personId }) {
-    const isTeamMember = state.currentProduction.team.some(
-      pId => pId === personId
-    )
+    const isTeamMember =
+      state.currentProduction &&
+      state.currentProduction.team.some(
+        pId => pId === personId
+      )
     if (!isTeamMember) {
       state.currentProduction.team.push(personId)
     }

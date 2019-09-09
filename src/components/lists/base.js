@@ -49,14 +49,16 @@ export const entityListMixin = {
     },
 
     initHiddenColumns (validationColumns, hiddenColumns) {
-      validationColumns.forEach((columnId) => {
-        const key = this.buildHideKey(columnId)
-        Vue.set(
-          hiddenColumns,
-          columnId,
-          localStorage.getItem(key) === 'true'
-        )
-      })
+      if (validationColumns && hiddenColumns) {
+        validationColumns.forEach((columnId) => {
+          const key = this.buildHideKey(columnId)
+          Vue.set(
+            hiddenColumns,
+            columnId,
+            localStorage.getItem(key) === 'true'
+          )
+        })
+      }
     },
 
     hideColumn (columnId) {
@@ -234,7 +236,9 @@ export const entityListMixin = {
         const bodyElement = this.$refs['body-tbody'][0].children[1]
         columnDescriptors.forEach(desc => {
           const width = bodyElement.children[desc.index].offsetWidth
-          this.$refs['th-' + desc.name].style['min-width'] = `${width}px`
+          if (this.$refs['th-' + desc.name]) {
+            this.$refs['th-' + desc.name].style['min-width'] = `${width}px`
+          }
         })
       }
     }

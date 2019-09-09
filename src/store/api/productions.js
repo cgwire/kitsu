@@ -5,6 +5,10 @@ export default {
     client.get('/api/data/projects/all', callback)
   },
 
+  getProduction (productionId) {
+    return client.getModel('projects', productionId)
+  },
+
   getOpenProductions (callback) {
     client.get('/api/data/projects/open', callback)
   },
