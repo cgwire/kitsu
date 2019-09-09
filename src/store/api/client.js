@@ -40,6 +40,15 @@ const client = {
       })
   },
 
+  pget (path) {
+    return new Promise((resolve, reject) => {
+      client.get(path, (err, model) => {
+        if (err) reject(err)
+        else resolve(model)
+      })
+    })
+  },
+
   getModel (modelName, modelId) {
     return new Promise((resolve, reject) => {
       const path = `/api/data/${modelName}/${modelId}`
