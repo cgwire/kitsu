@@ -27,6 +27,7 @@ describe('ProductionSchedule', () => {
   let taskTypeStore
   let userStore
   let wrapper
+  let scheduleStore
 
   beforeEach(() => {
     taskStore = {
@@ -97,6 +98,17 @@ describe('ProductionSchedule', () => {
         }
       }
     }
+    scheduleStore = {
+      getters: {
+      },
+      actions: {
+        loadMilestones () {
+          return new Promise((resolve, reject) => {
+            resolve([])
+          })
+        }
+      }
+    }
 
     store = new Vuex.Store({
       strict: true,
@@ -105,7 +117,8 @@ describe('ProductionSchedule', () => {
         productions: productionStore,
         taskStatus: taskStatusStore,
         taskTypes: taskTypeStore,
-        user: userStore
+        user: userStore,
+        schedule: scheduleStore
       }
     })
 
@@ -141,8 +154,8 @@ describe('ProductionSchedule', () => {
         name: 'Characters',
         start_date: '2019-08-15',
         end_date: '2019-09-01',
-        startDate: moment('2019-08-15', 'YYYY-MM-DD'),
-        endDate: moment('2019-09-01', 'YYYY-MM-DD'),
+        startDate: moment('2019-08-15', 'YYYY-MM-DD', 'en'),
+        endDate: moment('2019-09-01', 'YYYY-MM-DD', 'en'),
         expanded: false,
         loading: false,
         children: []
