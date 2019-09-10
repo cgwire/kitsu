@@ -41,12 +41,13 @@
 
   <div
     class="table-body"
+    ref="body"
     v-scroll="onBodyScroll"
     v-if="tasks.length > 0 && !isLoading"
   >
     <table class="table">
       <tbody>
-        <tr v-for="(task, i) in tasks" :key="task.id + '-' + i">
+        <tr v-for="(task, i) in displayedTasks" :key="task.id + '-' + i">
           <production-name-cell
             class="production"
             :entry="productionMap[task.project_id]"
@@ -129,6 +130,7 @@ import moment from 'moment-timezone'
 import Datepicker from 'vuejs-datepicker'
 import { en, fr } from 'vuejs-datepicker/dist/locale'
 
+import { PAGE_SIZE } from '../../lib/pagination'
 import PageSubtitle from '../widgets/PageSubtitle'
 import ProductionNameCell from '../cells/ProductionNameCell'
 import TaskTypeName from '../cells/TaskTypeName'
@@ -149,10 +151,11 @@ export default {
 
   data () {
     return {
-      selectedDate: moment().toDate(), // By default current day.
       disabledDates: {
         from: moment().toDate() // Disable dates after today.
-      }
+      },
+      page: 1,
+      selectedDate: moment().toDate() // By default current day.
     }
   },
 
@@ -205,6 +208,10 @@ export default {
       } else {
         return en
       }
+    },
+
+    displayedTasks () {
+      return this.tasks.slice(0, this.page * (PAGE_SIZE / 2))
     }
   },
 
@@ -214,6 +221,11 @@ export default {
 
     onBodyScroll (event, position) {
       this.$refs.headerWrapper.style.left = `-${position.scrollLeft}px`
+      const maxHeight =
+        this.$refs.body.scrollHeight - this.$refs.body.offsetHeight
+      if (maxHeight < (position.scrollTop + 100)) {
+        this.page++
+      }
     },
 
     currentDate () {
