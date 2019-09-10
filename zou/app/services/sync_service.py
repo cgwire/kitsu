@@ -164,6 +164,7 @@ def init_events_listener(target, event_target, login, password, logs_dir=None):
     if logs_dir is not None:
         file_name = os.path.join(logs_dir, "zou_sync_changes.log")
         file_handler = logging.TimedRotatingFileHandler(file_name, when="D")
+
         file_handler.setFormatter(formatter)
         logger.addHandler(file_handler)
 
@@ -184,6 +185,9 @@ def run_listeners(event_client):
 
 
 def run_main_data_sync():
+    """
+    Retrieve and import all cross-projects data from target instance.
+    """
     for event in main_events:
         path = event_name_model_path_map[event]
         model = event_name_model_map[event]
@@ -191,6 +195,9 @@ def run_main_data_sync():
 
 
 def run_open_project_data_sync():
+    """
+    Retrieve and import all data related to projects from target instance.
+    """
     projects = gazu.project.all_open_projects()
     for project in projects:
         logger.info("Syncing %s..." % project["name"])
@@ -204,28 +211,41 @@ def run_open_project_data_sync():
 
 
 def run_other_sync():
+    """
+    Retrieve and import all search filters and events from target instance.
+    """
     sync_entries("search-filters", SearchFilter)
     sync_entries("events", ApiEvent)
 
 
 def run_last_events_sync():
+    """
+    Retrieve last events from target instance and import related data and
+    action.
+    """
     events = gazu.client.fetch_all("events/last")
-    for event in events:
+    for event in events.reverse():
         event_name = event["name"]
-        [event_name, action] = event_name.split(":")
         if event_name in event_name_model_map:
-            sync_event(event, event_name, action)
+            sync_event(event)
 
 
-def sync_event(event, event_name, action):
+def sync_event(event):
+    """
+    From information given by an event, retrieve related data and apply it.
+    """
+    event_name = event["name"]
+    [event_name, action] = event_name.split(":")
+
     model = event_name_model_map[event_name]
     path = event_name_model_path_map[event_name]
-    if event_name == "metadata-descriptor":
+
+    if event_name == "metadata-descriptor":  # Backward compatibility
         if "metadata_descriptor_id" not in event["data"]:
             event_name = "descriptor"
     instance_id = event["data"]["%s_id" % event_name.replace("-", "_")]
 
-    if action in ["update", "create"]:
+    if action in ["update", "new"]:
         instance = gazu.client.fetch_one(path, instance_id)
         model.create_from_import(instance)
     elif action in ["delete"]:
@@ -233,6 +253,9 @@ def sync_event(event, event_name, action):
 
 
 def sync_entries(model_name, model):
+    """
+    Retrieve cross-projects data from target instance.
+    """
     instances = []
 
     if model_name in [
@@ -257,6 +280,9 @@ def sync_entries(model_name, model):
 
 
 def sync_project_entries(project, model_name, model):
+    """
+    Retrieve all project data from target instance.
+    """
     instances = []
     page = 1
     init = True
@@ -289,11 +315,15 @@ def sync_project_entries(project, model_name, model):
                 logger.error("An error occured", exc_info=1)
             page += 1
             init = False
-
     logger.info("    %s %s synced." % (len(instances), model_name))
 
 
 def sync_entity_thumbnails(project, model_name):
+    """
+    Once every preview files and entities has been imported, this function
+    allows you to import project entities again to set thumbnails (link to
+    a preview file) all entities.
+    """
     results = gazu.client.fetch_all(
         "projects/%s/%s" % (project["id"], model_name)
     )
@@ -310,6 +340,9 @@ def sync_entity_thumbnails(project, model_name):
 
 
 def add_main_sync_listeners(event_client):
+    """
+    Add listeners to manage CRUD events related to general data.
+    """
     for event in main_events:
         path = event_name_model_path_map[event]
         model = event_name_model_map[event]
@@ -317,6 +350,9 @@ def add_main_sync_listeners(event_client):
 
 
 def add_project_sync_listeners(event_client):
+    """
+    Add listeners to manage CRUD events related to open projects data.
+    """
     for event in project_events:
         path = event_name_model_path_map[event]
         model = event_name_model_map[event]
@@ -324,11 +360,18 @@ def add_project_sync_listeners(event_client):
 
 
 def add_special_sync_listeners(event_client):
+    """
+    Add listeners to forward all non CRUD events to local event broadcaster.
+    """
     for event in special_events:
         gazu.events.add_listener(event_client, event, forward_event(event))
 
 
 def add_sync_listeners(event_client, model_name, event_name, model):
+    """
+    Add Create, Update and Delete event listeners for givent model name to given
+    event client.
+    """
     gazu.events.add_listener(
         event_client,
         "%s:new" % event_name,
@@ -347,6 +390,12 @@ def add_sync_listeners(event_client, model_name, event_name, model):
 
 
 def create_entry(model_name, event_name, model, event_type):
+    """
+    Generate a function that creates a model each time a related creation event
+    is retrieved. If it's an update event, it updates the model related to the
+    event. Data are retrived through the HTTP client.
+    It's useful to generate callbacks for event listener.
+    """
     def create(data):
         if data.get("sync", False):
             return
@@ -367,6 +416,11 @@ def create_entry(model_name, event_name, model, event_type):
 
 
 def delete_entry(model_name, event_name, model):
+    """
+    Generate a function that delete a model each time a related deletion event
+    is retrieved.
+    It's useful to generate callbacks for event listener.
+    """
     def delete(data):
         if data.get("sync", False):
             return
@@ -378,6 +432,11 @@ def delete_entry(model_name, event_name, model):
 
 
 def forward_event(event_name):
+    """
+    Generate a function that takes data in argument and that forwards it as
+    given event name to the local event brodcaster.
+    It's useful to generate callbacks for event listener.
+    """
     def forward(data):
         if not data.get("sync", False):
             data["sync"] = True
@@ -387,6 +446,9 @@ def forward_event(event_name):
 
 
 def forward_base_event(event_name, event_type, data):
+    """
+    Forward given event to current instance event queue.
+    """
     full_event_name = "%s:%s" % (event_name, event_type)
     data["sync"] = True
     logger.info("Forward event: %s" % full_event_name)
