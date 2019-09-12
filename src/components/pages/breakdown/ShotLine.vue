@@ -6,12 +6,38 @@
     selected: selected
   }"
   @click="onClicked"
-  >
-  {{ name }}
+>
+  <div class="flexrow">
+    <div class="shot-name flexrow-item">
+      {{ name }}
+    </div>
+    <div class="asset-list flexrow-item">
+      <div
+        class="asset-type-line flexrow"
+        :key="typeAssets.length > 0 ? typeAssets[0].asset_type_name : ''"
+        v-for="typeAssets in assets"
+      >
+        <span class="asset-type-name flexrow-item">
+          {{ typeAssets.length > 0 ? typeAssets[0].asset_type_name : '' }}
+        </span>
+        <asset-block
+          class="flexrow-item"
+          :key="asset.id"
+          :asset="asset"
+          :nb-occurences="asset.nb_occurences"
+          @remove-one="removeOneAsset"
+          @remove-ten="removeTenAssets"
+          v-for="asset in typeAssets"
+        />
+      </div>
+    </div>
+  </div>
 </div>
 </template>
 
 <script>
+import AssetBlock from './AssetBlock'
+
 export default {
   name: 'shot-line',
   props: {
@@ -20,17 +46,32 @@ export default {
       type: String
     },
     selected: {
-      default: () => {},
+      default: false,
       type: Boolean
     },
     name: {
       default: '',
       type: String
+    },
+    assets: {
+      default: () => [],
+      type: Array
     }
   },
+
+  components: {
+    AssetBlock
+  },
+
   methods: {
-    onClicked (event) {
-      this.$emit('click', event.target.id)
+    onClicked () {
+      this.$emit('click', this.shotId)
+    },
+    removeOneAsset (assetId) {
+      this.$emit('remove-one', assetId)
+    },
+    removeTenAssets (assetId) {
+      this.$emit('remove-ten', assetId)
     }
   }
 }
@@ -42,6 +83,26 @@ export default {
 
 .dark .shot.selected {
   background-color: #8F91EB;
+}
+
+.asset-list {
+  border-left: 1px solid $light-grey;
+  padding-left: 1em;
+}
+
+.asset-type-line {
+  padding-bottom: 0.5em;
+}
+
+.shot-name {
+  width: 100px;
+}
+
+.asset-type-name {
+  color: $grey;
+  text-transform: uppercase;
+  width: 130px;
+  margin-right: 1em;
 }
 
 .shot {

@@ -2,8 +2,13 @@
   <div class="breakdown page">
     <div class="breakdown-columns mt1">
 
-      <div class="breakdown-column shot-column">
+      <div class="breakdown-column casting-column">
         <div class="flexrow mb1">
+          <combobox-styled
+            :label="$t('shots.fields.sequence')"
+            :options="castingSequenceOptions"
+            v-model="sequenceId"
+          />
           <span class="filler"></span>
           <button-simple
             class="flexrow-item"
@@ -22,64 +27,15 @@
         </div>
         <spinner class="mt1" v-if="isShotsLoading" />
         <div class="mt1" v-else>
-          <combobox
-            :label="$t('shots.fields.sequence')"
-            :options="castingSequenceOptions"
-            v-model="sequenceId"
-          />
-          <p class="shots-title">{{ $t('shots.title')}}</p>
           <shot-line
             :key="shot.id"
             :shot-id="shot.id"
             :selected="castingCurrentShot && castingCurrentShot.id === shot.id"
             :name="shot.name"
+            :assets="castingByType[shot.id] || []"
             @click="selectShot"
             v-for="shot in castingSequenceShots"
           />
-        </div>
-      </div>
-
-      <div class="breakdown-column casting-column">
-        <div class="level">
-          <div class="level-left">
-            <h2 class="subtitle" v-if="castingCurrentShot">
-              {{
-                $t('breakdown.selected_shot', {
-                  sequence_name: castingCurrentShot.sequence_name,
-                  name: castingCurrentShot.name
-                })
-              }}
-            </h2>
-            <em v-else>
-              {{ $t('breakdown.select_shot') }}
-            </em>
-          </div>
-        </div>
-        <error-text
-          :align-right="true"
-          :hidden="!isSavingError"
-          :text="$t('breakdown.save_error')"
-        />
-        <spinner v-if="isLoading" />
-        <div
-          class="type-assets"
-          :key="typeAssets.length > 0 ? typeAssets[0].asset_type_name : ''"
-          v-for="typeAssets in castingAssetsByType"
-          v-else
-        >
-          <div class="asset-type">
-            {{ typeAssets.length > 0 ? typeAssets[0].asset_type_name : '' }}
-          </div>
-          <div class="asset-list">
-            <asset-block
-              :key="asset.id"
-              :asset="asset"
-              :nb-occurences="asset.nb_occurences"
-              @remove-one="removeOneAsset"
-              @remove-ten="removeTenAssets"
-              v-for="asset in typeAssets"
-            />
-          </div>
         </div>
       </div>
 
@@ -123,7 +79,6 @@
           </div>
         </div>
       </div>
-
     </div>
 
     <import-modal
@@ -142,27 +97,23 @@
 <script>
 import { mapGetters, mapActions } from 'vuex'
 
-import AssetBlock from './breakdown/AssetBlock'
 import AvailableAssetBlock from './breakdown/AvailableAssetBlock'
 import ButtonHrefLink from '../widgets/ButtonHrefLink.vue'
 import ButtonSimple from '../widgets/ButtonSimple'
-import Combobox from '../widgets/Combobox'
-import ErrorText from '../widgets/ErrorText'
+import ComboboxStyled from '../widgets/ComboboxStyled'
 import ImportModal from '../modals/ImportModal'
 import SearchField from '../widgets/SearchField.vue'
 import ShotLine from './breakdown/ShotLine'
 import Spinner from '../widgets/Spinner'
 
 export default {
-  name: 'asset-types',
+  name: 'breakdown',
 
   components: {
-    AssetBlock,
     AvailableAssetBlock,
     ButtonHrefLink,
     ButtonSimple,
-    Combobox,
-    ErrorText,
+    ComboboxStyled,
     ImportModal,
     SearchField,
     ShotLine,
@@ -171,6 +122,7 @@ export default {
 
   data () {
     return {
+      castingMap: {},
       csvColumns: [
         'Episode',
         'Parent',
@@ -226,7 +178,7 @@ export default {
       'castingSequenceShots',
       'isCastingSaveActive',
       'casting',
-      'castingAssetsByType',
+      'castingByType',
       'isCastingDirty',
       'isCastingSaveActive',
 
@@ -284,14 +236,6 @@ export default {
         }
 
         this.loadAssets(() => {
-          this.isLoading = true
-          this.shotId = this.$route.params.shot_id
-          this.setCastingShot({
-            shotId: this.shotId,
-            callback: () => {
-              this.isLoading = false
-            }
-          })
           this.displayMoreAssets()
         })
       })
@@ -302,19 +246,8 @@ export default {
     },
 
     selectShot (shotId) {
-      let route = {
-        name: 'breakdown-shot',
-        params: {
-          production_id: this.currentProduction.id,
-          shot_id: shotId
-        }
-      }
-
-      if (this.currentEpisode) {
-        route.name = 'episode-breakdown-shot'
-        route.params.episode_id = this.currentEpisode.id
-      }
-      this.$router.push(route)
+      console.log('selectShot', shotId)
+      this.shotId = shotId
     },
 
     onSaveClicked () {
@@ -384,37 +317,17 @@ export default {
   },
 
   watch: {
-    $route () {
-      const shotId = this.$route.params.shot_id
-      if (shotId && this.shotId !== shotId) {
-        this.shotId = shotId
-      }
-    },
-
-    shotId () {
-      if (this.shotId) {
-        this.isLoading = true
-        this.setCastingShot({
-          shotId: this.shotId,
-          callback: () => {
-            this.isLoading = false
-          }
-        })
-      }
-    },
+    $route () {},
 
     sequenceId () {
-      this.setCastingSequence(this.sequenceId)
-    },
-
-    episodeId () {
-      if (this.episodeId !== this.$route.params.episode_id) {
-        // this.reloadShots()
+      if (this.sequences && this.sequences.length > 0) {
+        this.setCastingSequence(this.sequenceId)
       }
     },
 
+    episodeId () {},
+
     castingSequenceOptions () {
-      console.log('options changed', this.castingSequenceOptions)
       if (this.castingSequenceOptions.length > 0) {
         const shot = this.shotMap[this.shotId]
         if (this.shotId && shot) {
@@ -494,18 +407,15 @@ export default {
   margin-left: 0.5em;
 }
 
-.breakdown-column:first-child {
-  max-width: 250px;
-  margin-left: 0;
-}
-
 .shot-column {
 }
 
 .casting-column {
+  flex: 1;
 }
 
 .assets-column {
+  max-width: 460px;
 }
 
 .asset-type,
@@ -515,11 +425,6 @@ export default {
   border-bottom: 1px solid $light-grey;
   font-size: 1.2em;
   margin-bottom: 1em;
-}
-
-.type-assets:not(:first-child),
-.sequence-shots:not(:first-child) {
-  margin-top: 2em;
 }
 
 .asset-list {
@@ -534,5 +439,9 @@ export default {
 
 .shots-title {
   font-weight: bold;
+}
+
+.filters-area {
+  margin-bottom: 2em;
 }
 </style>

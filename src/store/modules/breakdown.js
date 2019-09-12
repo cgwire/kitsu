@@ -11,7 +11,6 @@ import {
   CASTING_SET_CASTING,
   CASTING_SET_SHOTS,
   CASTING_SET_SEQUENCES,
-  CASTING_SET_ISDIRTY,
 
   CASTING_ADD_TO_CASTING,
   CASTING_REMOVE_FROM_CASTING,
@@ -77,8 +76,7 @@ const initialState = {
 
   castingCurrentShot: null,
   casting: {},
-  castingAssetsByType: [],
-  isCastingDirty: false
+  castingByType: []
 }
 
 const state = { ...initialState }
@@ -92,58 +90,24 @@ const getters = {
 
   castingCurrentShot: state => state.castingCurrentShot,
   casting: state => state.casting,
-  castingAssetsByType: state => state.castingAssetsByType,
-  isCastingDirty: state => state.isCastingDirty,
+  castingByType: state => state.castingByType,
 
   isCastingSaveActive: (state) => {
     return state.castingCurrentShot !== null && state.isCastingDirty
   },
 
-  getCastingAssetsByType (state) {
+  getCastingByType (state) {
     const casting = sortAssets(Object.values(state.casting))
-    return helpers.buildCastingAssetsByType(casting)
+    return helpers.buildCastingByType(casting)
   }
 }
 
 const actions = {
 
-  setCastingShot ({ commit, state, rootState }, { shotId, callback }) {
-    if (shotId) {
-      const shot = rootState.shots.shotMap[shotId]
-      const assetMap = rootState.assets.assetMap
-
-      commit(CASTING_SET_CASTING, [])
-      commit(CASTING_SET_SHOT, shot)
-      if (state.castingCurrentShot) {
-        shotsApi.getCasting(state.castingCurrentShot, (err, casting) => {
-          if (!err) {
-            const castingMap = {}
-            casting.forEach((cast) => {
-              castingMap[cast.asset_id] = assetMap[cast.asset_id]
-              castingMap[cast.asset_id].nb_occurences = cast.nb_occurences
-            })
-            commit(CASTING_SET_CASTING, castingMap)
-          }
-          if (callback) callback(err)
-        })
-      } else {
-        if (callback) callback()
-      }
-    } else {
-      commit(CASTING_SET_CASTING, [])
-      commit(CASTING_SET_SHOT, null)
-      if (callback) callback()
-    }
-  },
-
   setCastingSequence ({ commit, state, rootState, rootGetters }, sequenceId) {
     if (!sequenceId) {
-      if (state.castingCurrentShot) {
-        sequenceId = state.castingCurrentShot.sequence_id
-      } else {
-        const sequence = rootGetters.getSequenceOptions[0]
-        if (sequence) sequenceId = sequence.value
-      }
+      const sequence = rootGetters.getSequenceOptions[0]
+      if (sequence) sequenceId = sequence.value
     }
 
     const shots = Object.values(rootState.shots.shotMap)
@@ -152,6 +116,11 @@ const actions = {
     })
     commit(CASTING_SET_SEQUENCE, sequenceId)
     commit(CASTING_SET_SHOTS, castingSequenceShots)
+    return shotsApi.getSequenceCasting(sequenceId)
+      .then((casting) => {
+        const assetMap = rootState.assets.assetMap
+        commit(CASTING_SET_CASTING, { casting, assetMap })
+      })
   },
 
   setCastingEpisode ({ commit, state, rootState, rootGetters }, episodeId) {
@@ -202,8 +171,6 @@ const actions = {
     shotsApi.updateCasting(state.castingCurrentShot, casting, (err) => {
       if (err) {
         console.log(err)
-      } else {
-        commit(CASTING_SET_ISDIRTY, false)
       }
 
       if (callback) callback(err)
@@ -254,14 +221,20 @@ const mutations = {
     state.castingEpisodeId = episodeId
   },
 
-  [CASTING_SET_CASTING] (state, casting) {
+  [CASTING_SET_CASTING] (state, { casting, assetMap }) {
+    const castingMap = {}
+    const shotCastingByType = {}
+    const shotCastingKeys = Object.keys(casting)
+    shotCastingKeys.forEach((shotId) => {
+      const shotCasting = casting[shotId]
+      shotCasting.forEach((cast) => {
+        castingMap[cast.asset_id] = assetMap[cast.asset_id]
+        castingMap[cast.asset_id].nb_occurences = cast.nb_occurences
+      })
+      shotCastingByType[shotId] = helpers.buildCastingAssetsByType(shotCasting)
+    })
     state.casting = casting
-    state.castingAssetsByType = getters.getCastingAssetsByType(state)
-    state.isCastingDirty = false
-  },
-
-  [CASTING_SET_ISDIRTY] (state, isDirty) {
-    state.isCastingDirty = isDirty
+    state.castingByType = shotCastingByType
   },
 
   [CASTING_ADD_TO_CASTING] (state, { asset, nbOccurences }) {
@@ -271,8 +244,7 @@ const mutations = {
       state.casting[asset.id] = asset
       state.casting[asset.id].nb_occurences = nbOccurences
     }
-    state.castingAssetsByType = getters.getCastingAssetsByType(state)
-    state.isCastingDirty = true
+    state.castingAssetsByType = getters.getCastingByType(state)
   },
 
   [CASTING_REMOVE_FROM_CASTING] (state, { asset, nbOccurences }) {
@@ -283,8 +255,7 @@ const mutations = {
         delete state.casting[asset.id]
       }
     }
-    state.castingAssetsByType = getters.getCastingAssetsByType(state)
-    state.isCastingDirty = true
+    state.castingAssetsByType = getters.getCastingByType(state)
   },
 
   [LOAD_SHOT_CASTING_END] ({ state, rootState }, { shot, casting }) {
