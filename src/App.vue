@@ -1447,6 +1447,23 @@ tbody:last-child .empty-line:last-child {
   border: 1px solid transparent;
 }
 
+.c-mask {
+  position: fixed;
+  z-index: 204;
+  top: 0;
+  left: 0;
+  overflow: hidden;
+  width: 0;
+  height: 0;
+  background-color: #000;
+  opacity: 0;
+}
+
+.c-mask.is-active {
+  width: 100%;
+  height: 100%;
+}
+
 @media screen and (max-width: 1000px) {
   .button .icon.is-small {
     margin-right: 0;
