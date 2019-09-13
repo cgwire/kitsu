@@ -182,8 +182,11 @@ import AnnotationBar from '../pages/playlists/AnnotationBar'
 import Combobox from '../widgets/Combobox'
 import Spinner from '../widgets/Spinner'
 
+import { annotationMixin } from './annotation_mixin'
+
 export default {
   name: 'video-player',
+  mixins: [annotationMixin],
 
   components: {
     AnnotationBar,
@@ -447,7 +450,7 @@ export default {
       this.progressBar.style.width = Math.floor(
         (currentTime / this.video.duration) * 100
       ) + '%'
-      this.clearAnnotations()
+      this.clearCanvas()
       this.video.currentTime = currentTime
       if (this.isComparing) {
         const comparisonVideo = document.getElementById('comparison-movie')
@@ -505,9 +508,7 @@ export default {
 
     clearCanvas () {
       if (this.fabricCanvas) {
-        this.fabricCanvas.getObjects().forEach((obj) => {
-          this.fabricCanvas.remove(obj)
-        })
+        this.fabricCanvas.clear()
       }
     },
 
@@ -530,7 +531,7 @@ export default {
     },
 
     play () {
-      this.clearAnnotations()
+      this.clearCanvas()
       this.isPlaying = true
       if (!this.readOnly) {
         this.fabricCanvas.isDrawingMode = false
@@ -658,7 +659,7 @@ export default {
           this.mountVideo()
           this.$nextTick(() => {
             const annotation = this.getAnnotation(this.video.currentTime)
-            this.loadAnnotation(annotation)
+            if (annotation) this.loadAnnotation(annotation)
           })
         })
       }
@@ -719,7 +720,7 @@ export default {
           this.reloadAnnotations()
           const annotation = this.getAnnotation(this.video.currentTime)
           this.$nextTick(() => {
-            this.loadAnnotation(annotation)
+            if (annotation) this.loadAnnotation(annotation)
           })
           if (callback && typeof callback === 'function') callback()
         })
@@ -747,60 +748,10 @@ export default {
       )
     },
 
-    clearAnnotations () {
-      if (this.fabricCanvas && this.fabricCanvas.getObjects().length > 0) {
-        this.fabricCanvas.getObjects().forEach((obj) => {
-          if (['rect', 'circle', 'path'].includes(obj.type)) {
-            this.fabricCanvas.remove(obj)
-          }
-        })
-      }
-    },
-
     saveAnnotations () {
-      const currentTime = roundToFrame(this.currentTime, this.fps)
+      const currentTime = roundToFrame(this.video.currentTime, this.fps)
       const annotation = this.getAnnotation(currentTime)
-
-      this.fabricCanvas.getObjects().forEach((obj) => {
-        if (obj.type === 'path') {
-          if (!obj.canvasWidth) obj.canvasWidth = this.fabricCanvas.width
-          obj.setControlsVisibility({
-            mt: false,
-            mb: false,
-            ml: false,
-            mr: false,
-            bl: false,
-            br: false,
-            tl: false,
-            tr: false,
-            mtr: false
-          })
-        }
-      })
-
-      if (annotation) {
-        annotation.drawing = this.fabricCanvas.toJSON(['canvasWidth'])
-        annotation.width = this.fabricCanvas.width
-        annotation.height = this.fabricCanvas.height
-        if (annotation.drawing && annotation.drawing.objects.length < 1) {
-          const index = this.annotations.findIndex(
-            (annotation) => annotation.time === currentTime
-          )
-          this.annotations.splice(index, 1)
-        }
-      } else {
-        this.annotations.push({
-          time: currentTime,
-          width: this.fabricCanvas.width,
-          height: this.fabricCanvas.height,
-          drawing: this.fabricCanvas.toJSON(['canvasWidth'])
-        })
-        this.annotations = this.annotations.sort((a, b) => {
-          return a.time < b.time
-        }) || []
-      }
-      const annotations = []
-      this.annotations.forEach(a => annotations.push({ ...a }))
+      const annotations = this.getNewAnnotations(currentTime, annotation)
       this.$emit('annotationchanged', {
         preview: this.preview,
         annotations: annotations
@@ -808,18 +759,22 @@ export default {
     },
 
     loadAnnotation (annotation) {
-      if (!annotation) return
-      const time = annotation.time
+      if (!annotation || !annotation.time) {
+        console.error('Annotations are malformed and cannot be loaded.')
+        return
+      }
+      let currentTime = annotation.time
+      currentTime = roundToFrame(currentTime, this.fps)
       this.video.pause()
 
       if (!this.fabricCanvas) this.setupFabricCanvas()
       this.resetCanvasSize()
 
-      this.video.currentTime = time
+      this.video.currentTime = currentTime
       this.fabricCanvas.isDrawingMode = false
       this.isDrawing = false
 
-      this.clearAnnotations()
+      this.clearCanvas()
 
       let scaleMultiplierX = 1
       let scaleMultiplierY = 1
@@ -942,7 +897,7 @@ export default {
       this.resetCanvasSize()
       this.fabricCanvas.renderAll()
       this.clearCanvas()
-      const annotation = this.getAnnotation(this.currentTimeRaw)
+      const annotation = this.getAnnotation(this.video.currentTime)
       if (annotation) this.loadAnnotation(annotation)
     },
 

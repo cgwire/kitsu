@@ -32,7 +32,7 @@
       :shots="shotListToCompare"
       v-if="isComparing"
     />
-    <div class="canvas-wrapper">
+    <div class="canvas-wrapper" ref="canvas-wrapper">
       <canvas
         id="annotation-canvas"
         ref="annotation-canvas"
@@ -335,8 +335,11 @@ import RawVideoPlayer from './RawVideoPlayer'
 import Spinner from '../../widgets/Spinner'
 import TaskInfo from '../../sides/TaskInfo'
 
+import { annotationMixin } from '../../previews/annotation_mixin'
+
 export default {
   name: 'playlist-player',
+  mixins: [annotationMixin],
 
   components: {
     AnnotationBar,
@@ -443,7 +446,7 @@ export default {
     },
 
     canvas () {
-      return this.$refs['annotation-canvas']
+      return this.$refs['canvas-wrapper']
     },
 
     container () {
@@ -680,6 +683,7 @@ export default {
 
     playShot (shotIndex) {
       const shot = this.shotList[shotIndex]
+      this.hideCanvas()
       this.clearCanvas()
       if (shot.preview_file_extension === 'mp4') {
         this.annotations = shot.preview_file_annotations || []
@@ -699,7 +703,7 @@ export default {
     },
 
     goPreviousFrame () {
-      this.clearAnnotations()
+      this.clearCanvas()
       this.rawPlayer.goPreviousFrame()
       if (this.isComparing) {
         this.$refs['raw-player-comparison'].goPreviousFrame()
@@ -709,7 +713,7 @@ export default {
     },
 
     goNextFrame () {
-      this.clearAnnotations()
+      this.clearCanvas()
       this.rawPlayer.goNextFrame()
       if (this.isComparing) {
         this.$refs['raw-player-comparison'].goNextFrame()
@@ -1026,21 +1030,14 @@ export default {
     },
 
     clearCanvas () {
+      this.fabricCanvas.clear()
+      /*
       if (this.fabricCanvas) {
         this.fabricCanvas.getObjects().forEach((obj) => {
           this.fabricCanvas.remove(obj)
         })
       }
-    },
-
-    clearAnnotations () {
-      if (this.fabricCanvas && this.fabricCanvas.getObjects().length > 0) {
-        this.fabricCanvas.getObjects().forEach((obj) => {
-          if (['rect', 'circle', 'path'].includes(obj.type)) {
-            this.fabricCanvas.remove(obj)
-          }
-        })
-      }
+      */
     },
 
     onAnnotateClicked () {
@@ -1089,7 +1086,7 @@ export default {
 
       this.fabricCanvas.isDrawingMode = false
       this.isDrawing = false
-      this.clearAnnotations()
+      this.clearCanvas()
 
       let scaleMultiplierX = 1
       let scaleMultiplierY = 1
@@ -1147,47 +1144,7 @@ export default {
       const currentTime = roundToFrame(this.currentTimeRaw, this.fps)
       if (!this.annotations) return
       const annotation = this.getAnnotation(currentTime)
-
-      this.fabricCanvas.getObjects().forEach((obj) => {
-        if (obj.type === 'path') {
-          if (!obj.canvasWidth) obj.canvasWidth = this.fabricCanvas.width
-          obj.setControlsVisibility({
-            mt: false,
-            mb: false,
-            ml: false,
-            mr: false,
-            bl: false,
-            br: false,
-            tl: false,
-            tr: false,
-            mtr: false
-          })
-        }
-      })
-
-      if (annotation) {
-        annotation.drawing = this.fabricCanvas.toJSON(['canvasWidth'])
-        annotation.width = this.fabricCanvas.width
-        annotation.height = this.fabricCanvas.height
-        if (annotation.drawing && annotation.drawing.objects.length < 1) {
-          const index = this.annotations.findIndex(
-            (annotation) => annotation.time === currentTime
-          )
-          this.annotations.splice(index, 1)
-        }
-      } else {
-        this.annotations.push({
-          time: currentTime,
-          width: this.fabricCanvas.width,
-          height: this.fabricCanvas.height,
-          drawing: this.fabricCanvas.toJSON(['canvasWidth'])
-        })
-        this.annotations = this.annotations.sort((a, b) => {
-          return a.time < b.time
-        }) || []
-      }
-      const annotations = []
-      this.annotations.forEach(a => annotations.push({ ...a }))
+      const annotations = this.getNewAnnotations(currentTime, annotation)
       const shot = this.shotList[this.playingShotIndex]
       const preview = {
         id: shot.preview_file_id,
