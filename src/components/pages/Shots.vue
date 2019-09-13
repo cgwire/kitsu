@@ -351,6 +351,7 @@ export default {
       'addMetadataDescriptor',
       'deleteAllTasks',
       'deleteMetadataDescriptor',
+      'hideAssignations',
       'loadShots',
       'loadComment',
       'removeShotSearch',
@@ -358,7 +359,7 @@ export default {
       'setLastProductionScreen',
       'setShotSearch',
       'showAssignations',
-      'hideAssignations'
+      'uploadShotFile'
     ]),
 
     confirmAddMetadata (form) {
@@ -590,7 +591,7 @@ export default {
       this.loading.importing = true
       this.errors.importing = false
 
-      this.$store.dispatch('uploadShotFile', (err) => {
+      this.uploadShotFile((err) => {
         if (!err) {
           this.loading.importing = false
           this.hideImportModal()
