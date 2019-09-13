@@ -75,7 +75,7 @@
 
       <todos-list
         ref="todo-list"
-        :entries="sortedTasks"
+        :tasks="sortedTasks"
         :is-loading="isTodosLoading"
         :is-error="isTodosLoadingError"
         :selection-grid="todoSelectionGrid"
@@ -88,7 +88,7 @@
       </div>
       <todos-list
         ref="done-list"
-        :entries="displayedDoneTasks"
+        :tasks="displayedDoneTasks"
         :is-loading="isTodosLoading"
         :is-error="isTodosLoadingError"
         :done="true"
@@ -181,22 +181,29 @@ export default {
     })
   },
 
+  afterDestroy () {
+    this.$store.commit(
+      'USER_LOAD_TODOS_END',
+      { tasks: [], userFilters: {}, taskTypeMap: this.taskTypeMap }
+    )
+  },
+
   computed: {
     ...mapGetters([
-      'user',
-      'displayedTodos',
       'displayedDoneTasks',
-      'todosSearchText',
+      'displayedTodos',
       'isTodosLoading',
       'isTodosLoadingError',
       'nbSelectedTasks',
       'selectedTasks',
       'taskTypeMap',
+      'todosSearchText',
       'timeSpentMap',
       'timeSpentTotal',
       'todoListScrollPosition',
       'todoSelectionGrid',
-      'todoSearchQueries'
+      'todoSearchQueries',
+      'user'
     ]),
 
     loggableTodos () {

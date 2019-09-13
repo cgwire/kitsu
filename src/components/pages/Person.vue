@@ -98,7 +98,7 @@
 
       <todos-list
         ref="task-list"
-        :entries="sortedTasks"
+        :tasks="sortedTasks"
         :is-loading="isTasksLoading"
         :is-error="isTasksLoadingError"
         :selection-grid="personTaskSelectionGrid"
@@ -108,7 +108,7 @@
 
       <todos-list
         ref="done-list"
-        :entries="displayedPersonDoneTasks"
+        :tasks="displayedPersonDoneTasks"
         :is-loading="isTasksLoading"
         :is-error="isTasksLoadingError"
         :done="true"
@@ -195,6 +195,13 @@ export default {
       if (this.searchField) this.searchField.focus()
     }, 100)
     this.loadPerson(this.$route.params.person_id)
+  },
+
+  afterDestroy () {
+    this.$store.commit(
+      'LOAD_PERSON_TASKS_END',
+      { tasks: [], userFilters: {}, taskTypeMap: this.taskTypeMap }
+    )
   },
 
   computed: {

@@ -39,12 +39,12 @@
     ref="body"
     class="table-body"
     v-scroll="onBodyScroll"
-    v-if="entries.length > 0"
+    v-if="tasks.length > 0"
   >
     <table class="table">
       <tbody ref="body-tbody">
         <tr
-          v-for="(entry, i) in entries"
+          v-for="(entry, i) in displayedTasks"
           :key="entry + '-' + i"
           :class="{
             selected: selectionGrid && selectionGrid[i] ? selectionGrid[i][0] : false
@@ -117,7 +117,7 @@
 
   <div
     class="has-text-centered empty-list"
-    v-if="entries.length === 0 && !isLoading"
+    v-if="tasks.length === 0 && !isLoading"
   >
     <p>
       <img src="../../assets/illustrations/empty_todo.png" />
@@ -129,9 +129,9 @@
 
   <p
     class="has-text-centered footer-info"
-    v-if="entries.length && !isLoading"
+    v-if="tasks.length && !isLoading"
   >
-    {{ entries.length }} {{ $tc('tasks.tasks', entries.length) }}
+    {{ tasks.length }} {{ $tc('tasks.tasks', tasks.length) }}
   </p>
 </div>
 </template>
@@ -150,6 +150,7 @@ import ProductionNameCell from '../cells/ProductionNameCell'
 import ValidationCell from '../cells/ValidationCell'
 import { selectionListMixin } from './selection'
 import { formatListMixin } from './format_mixin'
+import { PAGE_SIZE } from '../../lib/pagination'
 
 export default {
   name: 'todos-list',
@@ -167,13 +168,20 @@ export default {
 
   props: [
     'done',
-    'entries',
+    'tasks',
     'isLoading',
     'isError',
     'selectionGrid'
   ],
 
+  data () {
+    return {
+      page: 1
+    }
+  },
+
   mounted () {
+    this.page = 1
     this.resizeHeaders()
     window.addEventListener('keydown', this.onKeyDown, false)
   },
@@ -187,7 +195,11 @@ export default {
       'nbSelectedTasks',
       'taskTypeMap',
       'productionMap'
-    ])
+    ]),
+
+    displayedTasks () {
+      return this.tasks.slice(0, this.page * PAGE_SIZE)
+    }
   },
 
   methods: {
@@ -207,6 +219,11 @@ export default {
     onBodyScroll (event, position) {
       this.$refs.headerWrapper.style.left = `-${position.scrollLeft}px`
       this.$emit('scroll', position.scrollTop)
+      const maxHeight =
+        this.$refs.body.scrollHeight - this.$refs.body.offsetHeight
+      if (maxHeight < (position.scrollTop + 100)) {
+        this.page++
+      }
     },
 
     onLineClicked (i, event) {
