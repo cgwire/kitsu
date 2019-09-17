@@ -24,18 +24,15 @@
     <img
       v-lazy="'/api/pictures/thumbnails-square/preview-files/' + asset.preview_file_id + '.png'"
     />
+    <span class="nb-occurences" v-if="nbOccurences > 1">
+      {{ nbOccurences }}
+    </span>
   </div>
-  <div class="asset-picture" v-else>
+  <div class="asset-nb-occurences" v-else>
     <span class="empty-picture">
       {{ asset.name }}
     </span>
   </div>
-  <p class="asset-name">
-    <span v-if="nbOccurences > 1">
-    ({{ nbOccurences }})
-    </span>
-  </p>
-
 </div>
 </template>
 
@@ -65,12 +62,10 @@ export default {
 
   methods: {
     removeOneAsset (event) {
-      let assetId = event.target.parentElement.id.substring('casting-'.length)
-      this.$emit('remove-one', assetId)
+      this.$emit('remove-one', this.asset.asset_id)
     },
     removeTenAssets (event) {
-      let assetId = event.target.parentElement.id.substring('casting-'.length)
-      this.$emit('remove-ten', assetId)
+      this.$emit('remove-ten', this.asset.asset_id)
     }
   }
 }
@@ -165,6 +160,10 @@ export default {
   z-index: 2;
   width: 40px;
   height: 40px;
+
+  img {
+    border-radius: 5px;
+  }
 }
 
 .asset-name {
@@ -175,10 +174,18 @@ export default {
 }
 
 .nb-occurences {
-  margin-left: 0.4em;
+  background: rgba(160, 160, 180, 0.8);
+  font-size: 0.8em;
+  border-radius: 2px;
+  color: white;
+  position: absolute;
+  padding: 2px;
+  right: 2px;
+  bottom: 2px;
 }
 
 .asset.casted {
   background: $purple;
+  border-radius: 5px;
 }
 </style>

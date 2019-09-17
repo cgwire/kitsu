@@ -3,9 +3,10 @@
   :id="shotId"
   :class="{
     shot: true,
-    selected: selected
+    selected: selected,
+    unselectable: true
   }"
-  @click="onClicked"
+  @click="onClicked($event)"
 >
   <div class="flexrow">
     <div class="shot-name flexrow-item">
@@ -29,6 +30,12 @@
           @remove-ten="removeTenAssets"
           v-for="asset in typeAssets"
         />
+      </div>
+      <div
+        class="asset-type-line flexrow empty"
+        v-if="assets.length === 0"
+      >
+        {{ $t('breakdown.empty') }}
       </div>
     </div>
   </div>
@@ -64,14 +71,14 @@ export default {
   },
 
   methods: {
-    onClicked () {
-      this.$emit('click', this.shotId)
+    onClicked (event) {
+      this.$emit('click', this.shotId, event)
     },
     removeOneAsset (assetId) {
-      this.$emit('remove-one', assetId)
+      this.$emit('remove-one', assetId, this.shotId)
     },
     removeTenAssets (assetId) {
-      this.$emit('remove-ten', assetId)
+      this.$emit('remove-ten', assetId, this.shotId)
     }
   }
 }
@@ -96,6 +103,7 @@ export default {
 
 .shot-name {
   width: 100px;
+  padding-left: 0.4em;
 }
 
 .asset-type-name {
@@ -117,7 +125,11 @@ export default {
 }
 
 .shot.selected {
-  background: $purple;
-  border: 0;
+  background: $light-purple;
+}
+
+.empty {
+  font-style: italic;
+  color: $light-grey;
 }
 </style>

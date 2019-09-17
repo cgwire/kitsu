@@ -44,9 +44,7 @@ export default {
 
   breakdown: {
     all_assets: 'All available assets',
-    select_shot: 'Please select a shot on the left to manage its casting.',
-    selected_shot: 'Assets in {sequence_name} / {name} casting',
-    save_error: 'An error occured while saving breakdown.',
+    empty: 'Empty casting',
     title: 'Breakdown'
   },
 

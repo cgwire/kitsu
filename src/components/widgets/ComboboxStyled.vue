@@ -29,6 +29,7 @@
         class="option-line"
         v-for="option in options"
         @click="selectOption(option)"
+        @click.middle="openRoute(option)"
         :key="option.id"
       >
         {{ option.label }}
@@ -101,6 +102,13 @@ export default {
       this.showList = false
     },
 
+    openRoute (option) {
+      const ahref = this.$router.resolve(option.route).href
+      const url =
+        `${window.location.protocol}//${window.location.host}${ahref}`
+      window.open(url, '_blank')
+    },
+
     toggleList () {
       this.showList = !this.showList
     }
@@ -109,7 +117,12 @@ export default {
   watch: {
     options () {
       if (this.options.length > 0) {
-        this.selectedOption = this.options[0]
+        const option = this.options.find(o => o.value === this.value)
+        if (option) {
+          this.selectedOption = option
+        } else {
+          this.selectedOption = this.options[0]
+        }
       }
     }
   }

@@ -30,9 +30,11 @@
           <shot-line
             :key="shot.id"
             :shot-id="shot.id"
-            :selected="castingCurrentShot && castingCurrentShot.id === shot.id"
+            :selected="selection[shot.id]"
             :name="shot.name"
             :assets="castingByType[shot.id] || []"
+            @remove-one="removeOneAsset"
+            @remove-ten="removeTenAssets"
             @click="selectShot"
             v-for="shot in castingSequenceShots"
           />
@@ -71,7 +73,7 @@
               :key="asset.id"
               :asset="asset"
               :casted="casting[asset.id] !== undefined"
-              :active="castingCurrentShot ? true : false"
+              :active="Object.keys(selection).length > 0"
               @add-one="addOneAsset"
               @add-ten="addTenAssets"
               v-for="asset in typeAssets"
@@ -96,6 +98,7 @@
 
 <script>
 import { mapGetters, mapActions } from 'vuex'
+import { range } from '../../lib/time'
 
 import AvailableAssetBlock from './breakdown/AvailableAssetBlock'
 import ButtonHrefLink from '../widgets/ButtonHrefLink.vue'
@@ -122,7 +125,6 @@ export default {
 
   data () {
     return {
-      castingMap: {},
       csvColumns: [
         'Episode',
         'Parent',
@@ -134,11 +136,9 @@ export default {
       ],
       importCsvFormData: {},
       isLoading: false,
-      isSaving: false,
-      isSavingError: false,
       sequenceId: '',
       episodeId: '',
-      shotId: '',
+      selection: {},
       modals: {
         importing: false
       },
@@ -152,7 +152,7 @@ export default {
   },
 
   mounted () {
-    this.reset()
+    // this.reset()
     this.setLastProductionScreen('breakdown')
   },
 
@@ -169,6 +169,7 @@ export default {
       'castingSequenceOptions',
       'isAssetsLoading',
       'isShotsLoading',
+      'sequenceMap',
       'shots',
       'sequences',
       'shotMap',
@@ -218,25 +219,32 @@ export default {
     ]),
 
     reset () {
+      this.isLoading = true
       setTimeout(() => {
         this.reloadShots()
       }, 100)
     },
 
     reloadShots () {
+      this.isLoading = true
       this.loadShots(() => {
         if (this.isTVShow) {
           if (this.currentEpisode) {
             this.episodeId = this.currentEpisode.id
           }
-
           this.setCastingEpisode(this.episodeId)
         } else {
           this.setCastingEpisode(null)
         }
-
         this.loadAssets(() => {
+          this.isLoading = false
           this.displayMoreAssets()
+
+          const selection = {}
+          this.castingSequenceShots.forEach((shot) => {
+            selection[shot.id] = false
+          })
+          this.selection = selection
         })
       })
     },
@@ -245,38 +253,71 @@ export default {
       this.setAssetSearch(searchQuery)
     },
 
-    selectShot (shotId) {
-      console.log('selectShot', shotId)
-      this.shotId = shotId
+    selectShot (shotId, event) {
+      if (!event.ctrlKey && !event.shitKey) {
+        this.clearSelection()
+      }
+
+      if (this.previousShotId && event.shiftKey) {
+        this.selectRange(this.previousShotId, shotId)
+      }
+
+      this.previousShotId = shotId
+      this.selection[shotId] = true
     },
 
-    onSaveClicked () {
-      this.isSaving = true
-      this.isSavingError = false
-      this.saveCasting((err) => {
-        if (err) this.isSavingError = true
-        this.isSaving = false
+    clearSelection () {
+      Object.keys(this.selection)
+        .filter(k => this.selection[k])
+        .forEach((shotId) => {
+          this.selection[shotId] = false
+        })
+    },
+
+    selectRange (previousShotId, shotId) {
+      const keys = Object.keys(this.selection)
+      const previousIndex = keys.findIndex(k => k === previousShotId)
+      const index = keys.findIndex(k => k === shotId)
+
+      let indexRange = []
+      if (previousIndex < index) indexRange = range(previousIndex, index)
+      else indexRange = range(index, previousIndex)
+
+      indexRange.forEach((i) => {
+        if (i > 0) this.selection[keys[i]] = true
       })
     },
 
     addOneAsset (assetId) {
-      this.addAssetToCasting({ assetId, nbOccurences: 1 })
-      this.saveCasting()
+      Object.keys(this.selection)
+        .filter(key => this.selection[key])
+        .forEach((shotId) => {
+          this.addAssetToCasting({ shotId, assetId, nbOccurences: 1 })
+          this.saveCasting(shotId)
+            .catch(console.error)
+        })
     },
 
     addTenAssets (assetId) {
-      this.addAssetToCasting({ assetId, nbOccurences: 10 })
-      this.saveCasting()
+      Object.keys(this.selection)
+        .filter(key => this.selection[key])
+        .forEach((shotId) => {
+          this.addAssetToCasting({ shotId, assetId, nbOccurences: 10 })
+          this.saveCasting(shotId)
+            .catch(console.error)
+        })
     },
 
-    removeOneAsset (assetId) {
-      this.removeAssetFromCasting({ assetId, nbOccurences: 1 })
-      this.saveCasting()
+    removeOneAsset (assetId, shotId) {
+      this.removeAssetFromCasting({ shotId, assetId, nbOccurences: 1 })
+      this.saveCasting(shotId)
+        .catch(console.error)
     },
 
-    removeTenAssets (assetId) {
-      this.removeAssetFromCasting({ assetId, nbOccurences: 10 })
-      this.saveCasting()
+    removeTenAssets (assetId, shotId) {
+      this.removeAssetFromCasting({ shotId, assetId, nbOccurences: 10 })
+      this.saveCasting(shotId)
+        .catch(console.error)
     },
 
     onAssetListScroll (event, position) {
@@ -309,10 +350,27 @@ export default {
           this.reloadShots()
         })
         .catch(() => {
-          console.log('bad 2')
           this.loading.importing = false
           this.errors.importing = true
         })
+    },
+
+    updateUrl () {
+      const sequenceId = this.$route.params.sequence_id
+      if (sequenceId !== this.sequenceId) {
+        const route = {
+          name: 'breakdown-sequence',
+          params: {
+            production_id: this.currentProduction.id,
+            sequence_id: this.sequenceId
+          }
+        }
+        if (this.currentEpisode) {
+          route.name = `episode-${route.name}`
+          route.params.episode_id = this.currentEpisode.id
+        }
+        this.$router.push(route)
+      }
     }
   },
 
@@ -322,19 +380,21 @@ export default {
     sequenceId () {
       if (this.sequences && this.sequences.length > 0) {
         this.setCastingSequence(this.sequenceId)
+        this.updateUrl()
       }
     },
 
     episodeId () {},
 
     castingSequenceOptions () {
-      if (this.castingSequenceOptions.length > 0) {
-        const shot = this.shotMap[this.shotId]
-        if (this.shotId && shot) {
-          this.sequenceId = shot.sequence_id
-        } else {
-          this.sequenceId = this.castingSequenceOptions[0].value
-        }
+      const sequenceId = this.$route.params.sequence_id
+      if (
+        sequenceId &&
+        this.sequenceMap[sequenceId]
+      ) {
+        this.sequenceId = sequenceId
+      } else if (this.castingSequenceOptions.length > 0) {
+        this.sequenceId = this.castingSequenceOptions[0].value
       } else {
         this.sequenceId = ''
       }
@@ -345,7 +405,11 @@ export default {
     },
 
     currentEpisode () {
-      if (this.currentEpisode && this.episodeId !== this.currentEpisode.id) {
+      if (
+        this.currentEpisode &&
+        this.episodeId !== this.currentEpisode.id &&
+        !this.isLoading
+      ) {
         this.reset()
       }
     },

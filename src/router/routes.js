@@ -386,9 +386,9 @@ export const routes = [
         name: 'breakdown',
         children: [
           {
-            path: ':shot_id',
+            path: 'sequences/:sequence_id',
             component: Breakdown,
-            name: 'breakdown-shot'
+            name: 'breakdown-sequence'
           }
         ]
       },
@@ -582,9 +582,9 @@ export const routes = [
         name: 'episode-breakdown',
         children: [
           {
-            path: 'shot_id',
+            path: 'sequences/:sequence_id',
             component: Breakdown,
-            name: 'episode-breakdown-shot'
+            name: 'episode-breakdown-sequence'
           }
         ]
       },

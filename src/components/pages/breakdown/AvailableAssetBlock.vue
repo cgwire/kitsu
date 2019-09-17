@@ -57,12 +57,15 @@ export default {
   },
   methods: {
     addOneAsset (event) {
-      let assetId = event.target.parentElement.id.substring('casting-'.length)
-      this.$emit('add-one', assetId)
+      if (this.active) {
+        console.log(this.asset)
+        this.$emit('add-one', this.asset.id)
+      }
     },
     addTenAssets (event) {
-      let assetId = event.target.parentElement.id.substring('casting-'.length)
-      this.$emit('add-ten', assetId)
+      if (this.active) {
+        this.$emit('add-ten', this.asset.id)
+      }
     }
   }
 }
@@ -125,6 +128,7 @@ export default {
   font-size: 0.8em;
   cursor: default;
   background: $white-grey;
+  border-radius: 8px;
 }
 
 .asset-picture {
@@ -138,6 +142,10 @@ export default {
   z-index: 2;
   width: 60px;
   height: 60px;
+
+  img {
+    border-radius: 8px;
+  }
 }
 
 .asset-name {
