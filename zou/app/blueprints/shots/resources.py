@@ -480,6 +480,18 @@ class CastingResource(Resource):
         return breakdown_service.update_casting(shot_id, casting)
 
 
+class SequenceCastingResource(Resource):
+
+    @jwt_required
+    def get(self, sequence_id):
+        """
+        Resource to retrieve the casting of shots from given sequence.
+        """
+        sequence = shots_service.get_sequence(sequence_id)
+        user_service.check_project_access(sequence["project_id"])
+        return breakdown_service.get_sequence_casting(sequence_id)
+
+
 class ProjectScenesResource(Resource):
 
     @jwt_required

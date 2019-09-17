@@ -50,6 +50,40 @@ def get_casting(shot_id):
     return casting
 
 
+def get_sequence_casting(sequence_id):
+    """
+    Return all assets and their number of occurences listed in shots
+    (or asset for set dressing) of given sequence.
+    Result is returned as a map where keys are shot IDs and values are casting
+    for given shot.
+    """
+    castings = {}
+    Shot = aliased(Entity, name="shot")
+    links = EntityLink.query \
+        .join(Shot, EntityLink.entity_in_id == Shot.id) \
+        .join(Entity, EntityLink.entity_out_id == Entity.id) \
+        .join(EntityType, Entity.entity_type_id == EntityType.id) \
+        .filter(Shot.parent_id == sequence_id) \
+        .filter(Entity.canceled != True) \
+        .add_columns(Entity.name, EntityType.name, Entity.preview_file_id) \
+        .order_by(EntityType.name, Entity.name)
+
+    for (link, entity_name, entity_type_name, entity_preview_file_id) in links:
+        shot_id = str(link.entity_in_id)
+        if shot_id not in castings:
+            castings[shot_id] = []
+        castings[shot_id].append({
+            "asset_id": fields.serialize_value(link.entity_out_id),
+            "name": entity_name,
+            "asset_name": entity_name,
+            "asset_type_name": entity_type_name,
+            "preview_file_id": fields.serialize_value(entity_preview_file_id),
+            "nb_occurences": link.nb_occurences
+        })
+    return castings
+
+
+
 def update_casting(shot_id, casting):
     """
     Update casting for given shot. Casting is an array of dictionaries made of

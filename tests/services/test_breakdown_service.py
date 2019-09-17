@@ -22,6 +22,40 @@ class BreakdownServiceTestCase(ApiDBTestCase):
         self.asset_id = str(self.asset.id)
         self.asset_character_id = str(self.asset_character.id)
 
+    def test_get_sequence_casting(self):
+        self.shot_id = str(self.shot.id)
+        self.sequence_id = str(self.sequence.id)
+        self.asset_id = str(self.asset.id)
+        self.asset_character_id = str(self.asset_character.id)
+
+        casting = breakdown_service.get_casting(self.shot.id)
+        self.assertListEqual(casting, [])
+        new_casting = [
+            {
+                "asset_id": self.asset_id,
+                "nb_occurences": 1
+            },
+            {
+                "asset_id": self.asset_character_id,
+                "nb_occurences": 3
+            }
+        ]
+        breakdown_service.update_casting(self.shot.id, new_casting)
+        self.generate_fixture_shot("SH02")
+        new_casting = [
+            {
+                "asset_id": self.asset_id,
+                "nb_occurences": 1
+            }
+        ]
+        breakdown_service.update_casting(self.shot.id, new_casting)
+        casting = breakdown_service.get_sequence_casting(self.sequence.id)
+        self.maxDiff = 10000
+        self.assertTrue(self.shot_id in casting)
+        self.assertTrue(str(self.shot.id) in casting)
+        self.assertEqual(len(casting[self.shot_id]), 2)
+        self.assertEqual(len(casting[str(self.shot.id)]), 1)
+
     def new_shot_instance(self, asset_instance_id):
         return breakdown_service.add_asset_instance_to_shot(
             self.shot_id, asset_instance_id
