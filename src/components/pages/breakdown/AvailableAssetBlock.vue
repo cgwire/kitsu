@@ -6,6 +6,7 @@
     casted: casted,
     active: active
   }"
+  :title="asset.name"
 >
   <div
     class="asset-add"
@@ -26,12 +27,9 @@
   </div>
   <div class="asset-picture" v-else>
     <span class="empty-picture">
-      no pic
+      {{ asset.name }}
     </span>
   </div>
-  <p class="asset-name">
-    {{ asset.name }}
-  </p>
 </div>
 </template>
 
@@ -59,12 +57,15 @@ export default {
   },
   methods: {
     addOneAsset (event) {
-      let assetId = event.target.parentElement.id.substring('casting-'.length)
-      this.$emit('add-one', assetId)
+      if (this.active) {
+        console.log(this.asset)
+        this.$emit('add-one', this.asset.id)
+      }
     },
     addTenAssets (event) {
-      let assetId = event.target.parentElement.id.substring('casting-'.length)
-      this.$emit('add-ten', assetId)
+      if (this.active) {
+        this.$emit('add-ten', this.asset.id)
+      }
     }
   }
 }
@@ -123,10 +124,11 @@ export default {
   width: 60px;
   height: 60px;
   margin-right: 1em;
-  margin-bottom: 3.5em;
+  margin-bottom: 1em;
   font-size: 0.8em;
   cursor: default;
   background: $white-grey;
+  border-radius: 8px;
 }
 
 .asset-picture {
@@ -140,6 +142,10 @@ export default {
   z-index: 2;
   width: 60px;
   height: 60px;
+
+  img {
+    border-radius: 8px;
+  }
 }
 
 .asset-name {

@@ -126,14 +126,6 @@ export default {
     client.put(`/api/data/entities/${shot.id}`, data, callback)
   },
 
-  getCasting (shot, callback) {
-    client.get(`/api/data/shots/${shot.id}/casting`, callback)
-  },
-
-  updateCasting (shot, casting, callback) {
-    client.put(`/api/data/shots/${shot.id}/casting`, casting, callback)
-  },
-
   postCsv (production, formData, callback) {
     client.post(
       `/api/import/csv/projects/${production.id}/shots`,
@@ -143,27 +135,6 @@ export default {
   },
 
   getEpisodeStats (productionId) {
-    return new Promise((resolve, reject) => {
-      client.get(
-        `/api/data/projects/${productionId}/episodes/stats`,
-        (err, episodeStats) => {
-          if (err) reject(err)
-          else resolve(episodeStats)
-        }
-      )
-    })
-  },
-
-  postCastingCsv (production, formData) {
-    return new Promise((resolve, reject) => {
-      client.post(
-        `/api/import/csv/projects/${production.id}/casting`,
-        formData,
-        (err) => {
-          if (err) reject(err)
-          else resolve()
-        }
-      )
-    })
+    return client.pget(`/api/data/projects/${productionId}/episodes/stats`)
   }
 }

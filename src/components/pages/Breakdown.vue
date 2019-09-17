@@ -2,8 +2,13 @@
   <div class="breakdown page">
     <div class="breakdown-columns mt1">
 
-      <div class="breakdown-column shot-column">
+      <div class="breakdown-column casting-column">
         <div class="flexrow mb1">
+          <combobox-styled
+            :label="$t('shots.fields.sequence')"
+            :options="castingSequenceOptions"
+            v-model="sequenceId"
+          />
           <span class="filler"></span>
           <button-simple
             class="flexrow-item"
@@ -22,64 +27,17 @@
         </div>
         <spinner class="mt1" v-if="isShotsLoading" />
         <div class="mt1" v-else>
-          <combobox
-            :label="$t('shots.fields.sequence')"
-            :options="castingSequenceOptions"
-            v-model="sequenceId"
-          />
-          <p class="shots-title">{{ $t('shots.title')}}</p>
           <shot-line
             :key="shot.id"
             :shot-id="shot.id"
-            :selected="castingCurrentShot && castingCurrentShot.id === shot.id"
+            :selected="selection[shot.id]"
             :name="shot.name"
+            :assets="castingByType[shot.id] || []"
+            @remove-one="removeOneAsset"
+            @remove-ten="removeTenAssets"
             @click="selectShot"
             v-for="shot in castingSequenceShots"
           />
-        </div>
-      </div>
-
-      <div class="breakdown-column casting-column">
-        <div class="level">
-          <div class="level-left">
-            <h2 class="subtitle" v-if="castingCurrentShot">
-              {{
-                $t('breakdown.selected_shot', {
-                  sequence_name: castingCurrentShot.sequence_name,
-                  name: castingCurrentShot.name
-                })
-              }}
-            </h2>
-            <em v-else>
-              {{ $t('breakdown.select_shot') }}
-            </em>
-          </div>
-        </div>
-        <error-text
-          :align-right="true"
-          :hidden="!isSavingError"
-          :text="$t('breakdown.save_error')"
-        />
-        <spinner v-if="isLoading" />
-        <div
-          class="type-assets"
-          :key="typeAssets.length > 0 ? typeAssets[0].asset_type_name : ''"
-          v-for="typeAssets in castingAssetsByType"
-          v-else
-        >
-          <div class="asset-type">
-            {{ typeAssets.length > 0 ? typeAssets[0].asset_type_name : '' }}
-          </div>
-          <div class="asset-list">
-            <asset-block
-              :key="asset.id"
-              :asset="asset"
-              :nb-occurences="asset.nb_occurences"
-              @remove-one="removeOneAsset"
-              @remove-ten="removeTenAssets"
-              v-for="asset in typeAssets"
-            />
-          </div>
         </div>
       </div>
 
@@ -115,7 +73,7 @@
               :key="asset.id"
               :asset="asset"
               :casted="casting[asset.id] !== undefined"
-              :active="castingCurrentShot ? true : false"
+              :active="Object.keys(selection).length > 0"
               @add-one="addOneAsset"
               @add-ten="addTenAssets"
               v-for="asset in typeAssets"
@@ -123,7 +81,6 @@
           </div>
         </div>
       </div>
-
     </div>
 
     <import-modal
@@ -141,28 +98,25 @@
 
 <script>
 import { mapGetters, mapActions } from 'vuex'
+import { range } from '../../lib/time'
 
-import AssetBlock from './breakdown/AssetBlock'
 import AvailableAssetBlock from './breakdown/AvailableAssetBlock'
 import ButtonHrefLink from '../widgets/ButtonHrefLink.vue'
 import ButtonSimple from '../widgets/ButtonSimple'
-import Combobox from '../widgets/Combobox'
-import ErrorText from '../widgets/ErrorText'
+import ComboboxStyled from '../widgets/ComboboxStyled'
 import ImportModal from '../modals/ImportModal'
 import SearchField from '../widgets/SearchField.vue'
 import ShotLine from './breakdown/ShotLine'
 import Spinner from '../widgets/Spinner'
 
 export default {
-  name: 'asset-types',
+  name: 'breakdown',
 
   components: {
-    AssetBlock,
     AvailableAssetBlock,
     ButtonHrefLink,
     ButtonSimple,
-    Combobox,
-    ErrorText,
+    ComboboxStyled,
     ImportModal,
     SearchField,
     ShotLine,
@@ -182,11 +136,9 @@ export default {
       ],
       importCsvFormData: {},
       isLoading: false,
-      isSaving: false,
-      isSavingError: false,
       sequenceId: '',
       episodeId: '',
-      shotId: '',
+      selection: {},
       modals: {
         importing: false
       },
@@ -200,7 +152,7 @@ export default {
   },
 
   mounted () {
-    this.reset()
+    // this.reset()
     this.setLastProductionScreen('breakdown')
   },
 
@@ -217,6 +169,7 @@ export default {
       'castingSequenceOptions',
       'isAssetsLoading',
       'isShotsLoading',
+      'sequenceMap',
       'shots',
       'sequences',
       'shotMap',
@@ -226,7 +179,7 @@ export default {
       'castingSequenceShots',
       'isCastingSaveActive',
       'casting',
-      'castingAssetsByType',
+      'castingByType',
       'isCastingDirty',
       'isCastingSaveActive',
 
@@ -266,33 +219,32 @@ export default {
     ]),
 
     reset () {
+      this.isLoading = true
       setTimeout(() => {
         this.reloadShots()
       }, 100)
     },
 
     reloadShots () {
+      this.isLoading = true
       this.loadShots(() => {
         if (this.isTVShow) {
           if (this.currentEpisode) {
             this.episodeId = this.currentEpisode.id
           }
-
           this.setCastingEpisode(this.episodeId)
         } else {
           this.setCastingEpisode(null)
         }
-
         this.loadAssets(() => {
-          this.isLoading = true
-          this.shotId = this.$route.params.shot_id
-          this.setCastingShot({
-            shotId: this.shotId,
-            callback: () => {
-              this.isLoading = false
-            }
-          })
+          this.isLoading = false
           this.displayMoreAssets()
+
+          const selection = {}
+          this.castingSequenceShots.forEach((shot) => {
+            selection[shot.id] = false
+          })
+          this.selection = selection
         })
       })
     },
@@ -301,49 +253,71 @@ export default {
       this.setAssetSearch(searchQuery)
     },
 
-    selectShot (shotId) {
-      let route = {
-        name: 'breakdown-shot',
-        params: {
-          production_id: this.currentProduction.id,
-          shot_id: shotId
-        }
+    selectShot (shotId, event) {
+      if (!event.ctrlKey && !event.shitKey) {
+        this.clearSelection()
       }
 
-      if (this.currentEpisode) {
-        route.name = 'episode-breakdown-shot'
-        route.params.episode_id = this.currentEpisode.id
+      if (this.previousShotId && event.shiftKey) {
+        this.selectRange(this.previousShotId, shotId)
       }
-      this.$router.push(route)
+
+      this.previousShotId = shotId
+      this.selection[shotId] = true
     },
 
-    onSaveClicked () {
-      this.isSaving = true
-      this.isSavingError = false
-      this.saveCasting((err) => {
-        if (err) this.isSavingError = true
-        this.isSaving = false
+    clearSelection () {
+      Object.keys(this.selection)
+        .filter(k => this.selection[k])
+        .forEach((shotId) => {
+          this.selection[shotId] = false
+        })
+    },
+
+    selectRange (previousShotId, shotId) {
+      const keys = Object.keys(this.selection)
+      const previousIndex = keys.findIndex(k => k === previousShotId)
+      const index = keys.findIndex(k => k === shotId)
+
+      let indexRange = []
+      if (previousIndex < index) indexRange = range(previousIndex, index)
+      else indexRange = range(index, previousIndex)
+
+      indexRange.forEach((i) => {
+        if (i > 0) this.selection[keys[i]] = true
       })
     },
 
     addOneAsset (assetId) {
-      this.addAssetToCasting({ assetId, nbOccurences: 1 })
-      this.saveCasting()
+      Object.keys(this.selection)
+        .filter(key => this.selection[key])
+        .forEach((shotId) => {
+          this.addAssetToCasting({ shotId, assetId, nbOccurences: 1 })
+          this.saveCasting(shotId)
+            .catch(console.error)
+        })
     },
 
     addTenAssets (assetId) {
-      this.addAssetToCasting({ assetId, nbOccurences: 10 })
-      this.saveCasting()
+      Object.keys(this.selection)
+        .filter(key => this.selection[key])
+        .forEach((shotId) => {
+          this.addAssetToCasting({ shotId, assetId, nbOccurences: 10 })
+          this.saveCasting(shotId)
+            .catch(console.error)
+        })
     },
 
-    removeOneAsset (assetId) {
-      this.removeAssetFromCasting({ assetId, nbOccurences: 1 })
-      this.saveCasting()
+    removeOneAsset (assetId, shotId) {
+      this.removeAssetFromCasting({ shotId, assetId, nbOccurences: 1 })
+      this.saveCasting(shotId)
+        .catch(console.error)
     },
 
-    removeTenAssets (assetId) {
-      this.removeAssetFromCasting({ assetId, nbOccurences: 10 })
-      this.saveCasting()
+    removeTenAssets (assetId, shotId) {
+      this.removeAssetFromCasting({ shotId, assetId, nbOccurences: 10 })
+      this.saveCasting(shotId)
+        .catch(console.error)
     },
 
     onAssetListScroll (event, position) {
@@ -376,52 +350,51 @@ export default {
           this.reloadShots()
         })
         .catch(() => {
-          console.log('bad 2')
           this.loading.importing = false
           this.errors.importing = true
         })
+    },
+
+    updateUrl () {
+      const sequenceId = this.$route.params.sequence_id
+      if (sequenceId !== this.sequenceId) {
+        const route = {
+          name: 'breakdown-sequence',
+          params: {
+            production_id: this.currentProduction.id,
+            sequence_id: this.sequenceId
+          }
+        }
+        if (this.currentEpisode) {
+          route.name = `episode-${route.name}`
+          route.params.episode_id = this.currentEpisode.id
+        }
+        this.$router.push(route)
+      }
     }
   },
 
   watch: {
-    $route () {
-      const shotId = this.$route.params.shot_id
-      if (shotId && this.shotId !== shotId) {
-        this.shotId = shotId
-      }
-    },
-
-    shotId () {
-      if (this.shotId) {
-        this.isLoading = true
-        this.setCastingShot({
-          shotId: this.shotId,
-          callback: () => {
-            this.isLoading = false
-          }
-        })
-      }
-    },
+    $route () {},
 
     sequenceId () {
-      this.setCastingSequence(this.sequenceId)
-    },
-
-    episodeId () {
-      if (this.episodeId !== this.$route.params.episode_id) {
-        // this.reloadShots()
+      if (this.sequences && this.sequences.length > 0) {
+        this.setCastingSequence(this.sequenceId)
+        this.updateUrl()
       }
     },
 
+    episodeId () {},
+
     castingSequenceOptions () {
-      console.log('options changed', this.castingSequenceOptions)
-      if (this.castingSequenceOptions.length > 0) {
-        const shot = this.shotMap[this.shotId]
-        if (this.shotId && shot) {
-          this.sequenceId = shot.sequence_id
-        } else {
-          this.sequenceId = this.castingSequenceOptions[0].value
-        }
+      const sequenceId = this.$route.params.sequence_id
+      if (
+        sequenceId &&
+        this.sequenceMap[sequenceId]
+      ) {
+        this.sequenceId = sequenceId
+      } else if (this.castingSequenceOptions.length > 0) {
+        this.sequenceId = this.castingSequenceOptions[0].value
       } else {
         this.sequenceId = ''
       }
@@ -432,7 +405,11 @@ export default {
     },
 
     currentEpisode () {
-      if (this.currentEpisode && this.episodeId !== this.currentEpisode.id) {
+      if (
+        this.currentEpisode &&
+        this.episodeId !== this.currentEpisode.id &&
+        !this.isLoading
+      ) {
         this.reset()
       }
     },
@@ -494,18 +471,15 @@ export default {
   margin-left: 0.5em;
 }
 
-.breakdown-column:first-child {
-  max-width: 250px;
-  margin-left: 0;
-}
-
 .shot-column {
 }
 
 .casting-column {
+  flex: 1;
 }
 
 .assets-column {
+  max-width: 460px;
 }
 
 .asset-type,
@@ -515,11 +489,6 @@ export default {
   border-bottom: 1px solid $light-grey;
   font-size: 1.2em;
   margin-bottom: 1em;
-}
-
-.type-assets:not(:first-child),
-.sequence-shots:not(:first-child) {
-  margin-top: 2em;
 }
 
 .asset-list {
@@ -534,5 +503,9 @@ export default {
 
 .shots-title {
   font-weight: bold;
+}
+
+.filters-area {
+  margin-bottom: 2em;
 }
 </style>

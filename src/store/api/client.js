@@ -49,6 +49,40 @@ const client = {
     })
   },
 
+  ppost (path, data, callback) {
+    return new Promise((resolve, reject) => {
+      superagent
+        .post(path)
+        .send(data)
+        .end((err, res) => {
+          if (res.statusCode === 401) {
+            errors.backToLogin()
+            reject(err)
+          } else {
+            if (err) reject(err)
+            else resolve(res.body)
+          }
+        })
+    })
+  },
+
+  pput (path, data, callback) {
+    return new Promise((resolve, reject) => {
+      superagent
+        .put(path)
+        .send(data)
+        .end((err, res) => {
+          if (res.statusCode === 401) {
+            errors.backToLogin()
+            reject(err)
+          } else {
+            if (err) reject(err)
+            else resolve(res.body)
+          }
+        })
+    })
+  },
+
   getModel (modelName, modelId) {
     return new Promise((resolve, reject) => {
       const path = `/api/data/${modelName}/${modelId}`

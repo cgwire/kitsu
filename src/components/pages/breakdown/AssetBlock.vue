@@ -1,14 +1,13 @@
 <template>
 <div
-  :id="'casting-' + asset.id"
   :class="{
     asset: true,
     big: true,
     casted: true,
     active: active
   }"
+  :title="asset.name"
 >
-
   <div
     class="asset-add"
     @click="removeOneAsset"
@@ -21,24 +20,19 @@
     >
   - 10
   </div>
-
-  <div class="asset-picture" v-if="asset.preview_file_id.length > 0">
+  <div class="asset-picture" v-if="asset.preview_file_id">
     <img
       v-lazy="'/api/pictures/thumbnails-square/preview-files/' + asset.preview_file_id + '.png'"
     />
+    <span class="nb-occurences" v-if="nbOccurences > 1">
+      {{ nbOccurences }}
+    </span>
   </div>
-  <div class="asset-picture" v-else>
+  <div class="asset-nb-occurences" v-else>
     <span class="empty-picture">
-      no pic
+      {{ asset.name }}
     </span>
   </div>
-  <p class="asset-name">
-    {{ asset.name }}
-    <span v-if="nbOccurences > 1">
-    ({{ nbOccurences }})
-    </span>
-  </p>
-
 </div>
 </template>
 
@@ -68,12 +62,10 @@ export default {
 
   methods: {
     removeOneAsset (event) {
-      let assetId = event.target.parentElement.id.substring('casting-'.length)
-      this.$emit('remove-one', assetId)
+      this.$emit('remove-one', this.asset.asset_id)
     },
     removeTenAssets (event) {
-      let assetId = event.target.parentElement.id.substring('casting-'.length)
-      this.$emit('remove-ten', assetId)
+      this.$emit('remove-ten', this.asset.asset_id)
     }
   }
 }
@@ -94,7 +86,6 @@ export default {
   width: 60px;
   height: 60px;
   margin-right: 1em;
-  margin-bottom: 4em;
   font-size: 0.8em;
   cursor: default;
   background: $white-grey;
@@ -102,16 +93,16 @@ export default {
 }
 
 .asset.big {
-  width: 80px;
-  height: 80px;
+  width: 40px;
+  height: 40px;
 }
 
 .asset-add {
   position: relative;
   top: 0;
   left: 0;
-  width: 60px;
-  height: 30px;
+  width: 30px;
+  height: 15px;
   background: #F1E4FF;
   display: flex;
   align-items: center;
@@ -127,8 +118,8 @@ export default {
   top: 0;
   left: 0;
   margin-top: 0px;
-  width: 60px;
-  height: 30px;
+  width: 30px;
+  height: 15px;
   background: #E1D4F9;
   display: flex;
   align-items: center;
@@ -140,13 +131,13 @@ export default {
 }
 
 .big .asset-add {
-  width: 80px;
-  height: 40px;
+  width: 40px;
+  height: 20px;
 }
 
 .big .asset-add-10 {
-  width: 80px;
-  height: 40px;
+  width: 40px;
+  height: 20px;
 }
 
 .asset.active {
@@ -160,15 +151,19 @@ export default {
 
 .asset-picture {
   position: relative;
-  top: -80px;
+  top: -40px;
   left: 0;
   display: flex;
   text-align: center;
   justify-content: center;
   align-items: center;
   z-index: 2;
-  width: 80px;
-  height: 80px;
+  width: 40px;
+  height: 40px;
+
+  img {
+    border-radius: 5px;
+  }
 }
 
 .asset-name {
@@ -179,10 +174,18 @@ export default {
 }
 
 .nb-occurences {
-  margin-left: 0.4em;
+  background: rgba(160, 160, 180, 0.8);
+  font-size: 0.8em;
+  border-radius: 2px;
+  color: white;
+  position: absolute;
+  padding: 2px;
+  right: 2px;
+  bottom: 2px;
 }
 
 .asset.casted {
   background: $purple;
+  border-radius: 5px;
 }
 </style>
