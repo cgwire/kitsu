@@ -669,7 +669,7 @@ const mutations = {
       state.currentProduction.team.some(
         pId => pId === personId
       )
-    if (!isTeamMember) {
+    if (!isTeamMember && state.currentProduction) {
       state.currentProduction.team.push(personId)
     }
   },
