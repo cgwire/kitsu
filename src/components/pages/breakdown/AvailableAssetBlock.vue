@@ -142,6 +142,8 @@ export default {
   z-index: 2;
   width: 60px;
   height: 60px;
+  word-break: break-all;
+  font-size: 0.8em;
 
   img {
     border-radius: 8px;

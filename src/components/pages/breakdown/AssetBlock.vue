@@ -6,7 +6,7 @@
     casted: true,
     active: active
   }"
-  :title="asset.name"
+  :title="`${asset.name} (${nbOccurences})`"
 >
   <div
     class="asset-add"
@@ -28,9 +28,9 @@
       {{ nbOccurences }}
     </span>
   </div>
-  <div class="asset-nb-occurences" v-else>
+  <div class="asset-picture" v-else>
     <span class="empty-picture">
-      {{ asset.name }}
+      {{ asset.name }} ({{ nbOccurences }})
     </span>
   </div>
 </div>
@@ -160,6 +160,8 @@ export default {
   z-index: 2;
   width: 40px;
   height: 40px;
+  word-break: break-all;
+  font-size: 0.8em;
 
   img {
     border-radius: 5px;

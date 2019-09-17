@@ -152,7 +152,9 @@ export default {
   },
 
   mounted () {
-    // this.reset()
+    if (!this.isLoading) {
+      this.reset()
+    }
     this.setLastProductionScreen('breakdown')
   },
 
