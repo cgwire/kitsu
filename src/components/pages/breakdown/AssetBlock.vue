@@ -111,6 +111,9 @@ export default {
   font-size: 1.2em;
   opacity: 0;
   z-index: 3;
+  border-top-left-radius: 8px;
+  border-top-right-radius: 8px;
+  font-size: 0.9em;
 }
 
 .asset-add-10 {
@@ -128,6 +131,9 @@ export default {
   font-size: 1.2em;
   opacity: 0;
   z-index: 3;
+  border-bottom-left-radius: 8px;
+  border-bottom-right-radius: 8px;
+  font-size: 0.9em;
 }
 
 .big .asset-add {

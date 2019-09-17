@@ -241,14 +241,17 @@ export default {
         this.loadAssets(() => {
           this.isLoading = false
           this.displayMoreAssets()
-
-          const selection = {}
-          this.castingSequenceShots.forEach((shot) => {
-            selection[shot.id] = false
-          })
-          this.selection = selection
+          this.resetSelection()
         })
       })
+    },
+
+    resetSelection () {
+      const selection = {}
+      this.castingSequenceShots.forEach((shot) => {
+        selection[shot.id] = false
+      })
+      this.selection = selection
     },
 
     onSearchChange (searchQuery) {
@@ -264,7 +267,7 @@ export default {
         this.selectRange(this.previousShotId, shotId)
       }
 
-      this.previousShotId = shotId
+      if (!this.previousShotId || !event.shiftKey) this.previousShotId = shotId
       this.selection[shotId] = true
     },
 
@@ -285,8 +288,9 @@ export default {
       if (previousIndex < index) indexRange = range(previousIndex, index)
       else indexRange = range(index, previousIndex)
 
+      console.log(indexRange)
       indexRange.forEach((i) => {
-        if (i > 0) this.selection[keys[i]] = true
+        if (i >= 0) this.selection[keys[i]] = true
       })
     },
 
@@ -383,6 +387,7 @@ export default {
       if (this.sequences && this.sequences.length > 0) {
         this.setCastingSequence(this.sequenceId)
         this.updateUrl()
+        this.resetSelection()
       }
     },
 

@@ -84,12 +84,18 @@ export default {
 }
 </script>
 <style lang="scss" scoped>
-.dark .shot:hover {
-  background-color: #56595F;
-}
+.dark {
+  .shot:hover {
+    background-color: $mid-grey;
+  }
 
-.dark .shot.selected {
-  background-color: #8F91EB;
+  .shot.selected {
+    background-color: $dark-purple;
+  }
+
+  .asset-type-name {
+    color: $light-grey-light;
+  }
 }
 
 .asset-list {
@@ -97,13 +103,14 @@ export default {
   padding-left: 1em;
 }
 
-.asset-type-line {
-  padding-bottom: 0.5em;
+.asset-type-line:not(:first-child) {
+  margin-top: 0.5em;
 }
 
 .shot-name {
   width: 100px;
   padding-left: 0.4em;
+  padding-top: 0;
 }
 
 .asset-type-name {
@@ -115,7 +122,7 @@ export default {
 
 .shot {
   font-size: 1.1em;
-  padding: 0.5em 0 0.2em 0.2em;
+  padding: 0.5em;
   border-bottom: 1px solid $light-grey;
   cursor: pointer;
 }

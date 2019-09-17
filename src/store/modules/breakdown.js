@@ -62,9 +62,6 @@ const actions = {
   },
 
   setCastingEpisode ({ commit, rootState }, episodeId) {
-    if (!episodeId) {
-      return console.error('EpisodeId is undefined, no casting can be set.')
-    }
     let sequences = rootState.shots.sequences
     commit(CASTING_SET_SEQUENCES, sequences)
     commit(CASTING_SET_EPISODE, episodeId)
