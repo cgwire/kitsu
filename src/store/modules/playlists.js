@@ -258,6 +258,7 @@ const mutations = {
       shot.preview_file_id = preview.id
       shot.preview_file_extension = preview.extension
       shot.preview_file_annotations = preview.annotations
+      shot.preview_file_task_id = preview.task_id
     }
     shot.preview_files = previewFiles
   },
