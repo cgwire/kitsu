@@ -325,7 +325,8 @@ export default {
     addShotToCurrentShots (previewFile, playlistShotMap) {
       const shot = this.shotMap[previewFile.shot_id]
       if (shot) {
-        const entityName = shot.tasks ? shot.tasks[0].entity_name : shot.name
+        const entityName =
+          shot.tasks.length > 0 ? shot.tasks[0].entity_name : shot.name
         const playlistShot = {
           id: previewFile.shot_id,
           name: shot.name,
