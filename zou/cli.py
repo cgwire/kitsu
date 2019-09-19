@@ -93,6 +93,19 @@ def stamp_db():
 
 
 @cli.command()
+def reset_migrations():
+    "Set the database schema revision to first one."
+
+    from zou.app import app
+    with app.app_context():
+        import zou
+        directory = os.path.join(
+            os.path.dirname(zou.__file__), "migrations"
+        )
+        flask_migrate.stamp(directory=directory, revision="base")
+
+
+@cli.command()
 @click.argument("email")
 @click.option('--password', default="default")
 def create_admin(email, password):
