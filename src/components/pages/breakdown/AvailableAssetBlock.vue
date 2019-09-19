@@ -3,7 +3,6 @@
   :id="'casting-' + asset.id"
   :class="{
     asset: true,
-    casted: casted,
     active: active
   }"
   :title="asset.name"
@@ -43,10 +42,6 @@ export default {
         name: ''
       }),
       type: Object
-    },
-    casted: {
-      default: false,
-      type: Boolean
     },
     active: {
       default: false,

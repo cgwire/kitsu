@@ -204,6 +204,7 @@ const initialState = {
   displayedAssetTypesLength: 0,
   assetTypeSearchText: '',
   assetTypeStats: {},
+  assetTypes: [],
 
   isAssetsLoading: false,
   isAssetsLoadingError: false,

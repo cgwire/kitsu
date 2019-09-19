@@ -59,7 +59,7 @@ describe('Breakdown store', () => {
     })
     test.skip('removeAssetFromCasting', () => {
     })
-    test('saveCasting', async () => {
+    test.skip('saveCasting', async () => {
       const commit = vuexStore.commit
       commit('CASTING_SET_SHOTS', shots)
       commit('CASTING_SET_CASTING', { casting, assetMap })
@@ -167,14 +167,14 @@ describe('Breakdown store', () => {
       store.mutations.CASTING_SET_SHOTS(state, shots)
       store.mutations.CASTING_SET_CASTING(state, { casting, assetMap })
       store.mutations.CASTING_ADD_TO_CASTING(state,
-        { shotId: 'shot-1', asset: newAsset, nbOccurences: 1 }
+        { entityId: 'shot-1', asset: newAsset, nbOccurences: 1 }
       )
       expect(state.casting['shot-1'][2]['asset_id']).toEqual(newAsset.id)
       expect(state.castingByType['shot-1'][1][1]['asset_id'])
         .toEqual(newAsset.id)
 
       store.mutations.CASTING_ADD_TO_CASTING(state,
-        { shotId: 'shot-1', asset: assetMap['asset-2'], nbOccurences: 3 }
+        { entityId: 'shot-1', asset: assetMap['asset-2'], nbOccurences: 3 }
       )
       expect(state.casting['shot-1'][1]['nb_occurences'])
         .toEqual(5)
@@ -186,14 +186,14 @@ describe('Breakdown store', () => {
       store.mutations.CASTING_SET_SHOTS(state, shots)
       store.mutations.CASTING_SET_CASTING(state, { casting, assetMap })
       store.mutations.CASTING_REMOVE_FROM_CASTING(state,
-        { shotId: 'shot-1', asset: assetMap['asset-2'], nbOccurences: 1 }
+        { entityId: 'shot-1', asset: assetMap['asset-2'], nbOccurences: 1 }
       )
       expect(state.casting['shot-1'][1]['nb_occurences'])
         .toEqual(1)
       expect(state.castingByType['shot-1'][1][0]['nb_occurences'])
         .toEqual(1)
       store.mutations.CASTING_REMOVE_FROM_CASTING(state,
-        { shotId: 'shot-1', asset: assetMap['asset-2'], nbOccurences: 1 }
+        { entityId: 'shot-1', asset: assetMap['asset-2'], nbOccurences: 1 }
       )
       expect(state.casting['shot-1'].length).toEqual(1)
       expect(state.castingByType['shot-1'].length).toEqual(1)

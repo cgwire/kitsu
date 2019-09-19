@@ -1,13 +1,26 @@
 <template>
   <div class="breakdown page">
-    <div class="breakdown-columns mt1">
+    <div class="breakdown-columns">
 
       <div class="breakdown-column casting-column">
         <div class="flexrow mb1">
           <combobox-styled
+            class="mr1"
+            :label="$t('main.for')"
+            :options="castingTypeOptions"
+            v-model="castingType"
+          />
+          <combobox-styled
             :label="$t('shots.fields.sequence')"
             :options="castingSequenceOptions"
             v-model="sequenceId"
+            v-if="isShotCasting"
+          />
+          <combobox-styled
+            :label="$t('tasks.fields.asset_type')"
+            :options="castingAssetTypesOptions"
+            v-model="assetTypeId"
+            v-if="isAssetCasting"
           />
           <span class="filler"></span>
           <button-simple
@@ -25,18 +38,18 @@
             :path="exportUrlPath"
           />
         </div>
-        <spinner class="mt1" v-if="isShotsLoading" />
-        <div class="mt1" v-else>
+        <spinner class="mt1" v-if="isLoading" />
+        <div class="" v-else>
           <shot-line
-            :key="shot.id"
-            :shot-id="shot.id"
-            :selected="selection[shot.id]"
-            :name="shot.name"
-            :assets="castingByType[shot.id] || []"
+            :key="entity.id"
+            :entity-id="entity.id"
+            :selected="selection[entity.id]"
+            :name="entity.name"
+            :assets="castingByType[entity.id] || []"
             @remove-one="removeOneAsset"
             @remove-ten="removeTenAssets"
-            @click="selectShot"
-            v-for="shot in castingSequenceShots"
+            @click="selectEntity"
+            v-for="entity in castingEntities"
           />
         </div>
       </div>
@@ -72,7 +85,6 @@
             <available-asset-block
               :key="asset.id"
               :asset="asset"
-              :casted="casting[asset.id] !== undefined"
               :active="Object.keys(selection).length > 0"
               @add-one="addOneAsset"
               @add-ten="addTenAssets"
@@ -125,6 +137,18 @@ export default {
 
   data () {
     return {
+      assetTypeId: '',
+      castingType: 'shot',
+      castingTypeOptions: [
+        {
+          label: this.$t('shots.title'),
+          value: 'shot'
+        },
+        {
+          label: this.$t('assets.title'),
+          value: 'asset'
+        }
+      ],
       csvColumns: [
         'Episode',
         'Parent',
@@ -134,18 +158,18 @@ export default {
         'Occurences',
         'Label'
       ],
+      episodeId: '',
       importCsvFormData: {},
       isLoading: false,
-      sequenceId: '',
-      episodeId: '',
       selection: {},
-      modals: {
+      sequenceId: '',
+      errors: {
         importing: false
       },
       loading: {
         importing: false
       },
-      errors: {
+      modals: {
         importing: false
       }
     }
@@ -162,30 +186,27 @@ export default {
     ...mapGetters([
       'assetMap',
       'assetsByType',
+      'casting',
+      'castingAssetTypeAssets',
+      'castingAssetTypesOptions',
+      'castingByType',
+      'castingCurrentShot',
+      'castingSequenceId',
+      'castingSequenceOptions',
+      'castingSequenceShots',
       'currentEpisode',
       'currentProduction',
       'displayedShots',
-      'isTVShow',
-
       'getEpisodeOptions',
-      'castingSequenceOptions',
+      'isCastingSaveActive',
+      'isCurrentUserManager',
       'isAssetsLoading',
       'isShotsLoading',
+      'isTVShow',
+      'sequences',
       'sequenceMap',
       'shots',
-      'sequences',
-      'shotMap',
-
-      'castingSequenceId',
-      'castingCurrentShot',
-      'castingSequenceShots',
-      'isCastingSaveActive',
-      'casting',
-      'castingByType',
-      'isCastingDirty',
-      'isCastingSaveActive',
-
-      'isCurrentUserManager'
+      'shotMap'
     ]),
 
     availableAssetsByType () {
@@ -201,6 +222,18 @@ export default {
       return (
         `/api/export/csv/projects/${this.currentProduction.id}/casting.csv`
       )
+    },
+
+    isAssetCasting () {
+      return this.castingType === 'asset'
+    },
+
+    isShotCasting () {
+      return this.castingType === 'shot'
+    },
+
+    castingEntities () {
+      return this.isShotCasting ? this.castingSequenceShots : this.castingAssetTypeAssets
     }
   },
 
@@ -213,6 +246,8 @@ export default {
       'removeAssetFromCasting',
       'saveCasting',
       'setAssetSearch',
+      'setCastingAssetType',
+      'setCastingAssetTypes',
       'setCastingEpisode',
       'setCastingSequence',
       'setCastingShot',
@@ -241,6 +276,7 @@ export default {
         this.loadAssets(() => {
           this.isLoading = false
           this.displayMoreAssets()
+          this.setCastingAssetTypes()
           this.resetSelection()
         })
       })
@@ -248,9 +284,15 @@ export default {
 
     resetSelection () {
       const selection = {}
-      this.castingSequenceShots.forEach((shot) => {
-        selection[shot.id] = false
-      })
+      if (this.isShotCasting) {
+        this.castingSequenceShots.forEach((shot) => {
+          selection[shot.id] = false
+        })
+      } else {
+        this.castingAssetTypeAssets.forEach((asset) => {
+          selection[asset.id] = false
+        })
+      }
       this.selection = selection
     },
 
@@ -258,17 +300,17 @@ export default {
       this.setAssetSearch(searchQuery)
     },
 
-    selectShot (shotId, event) {
+    selectEntity (entityId, event) {
       if (!event.ctrlKey && !event.shitKey) {
         this.clearSelection()
       }
 
-      if (this.previousShotId && event.shiftKey) {
-        this.selectRange(this.previousShotId, shotId)
+      if (this.previousEntityId && event.shiftKey) {
+        this.selectRange(this.previousEntityId, entityId)
       }
 
-      if (!this.previousShotId || !event.shiftKey) this.previousShotId = shotId
-      this.selection[shotId] = true
+      if (!this.previousEntityId || !event.shiftKey) this.previousEntityId = entityId
+      this.selection[entityId] = true
     },
 
     clearSelection () {
@@ -279,16 +321,15 @@ export default {
         })
     },
 
-    selectRange (previousShotId, shotId) {
+    selectRange (previousEntityId, entityId) {
       const keys = Object.keys(this.selection)
-      const previousIndex = keys.findIndex(k => k === previousShotId)
-      const index = keys.findIndex(k => k === shotId)
+      const previousIndex = keys.findIndex(k => k === previousEntityId)
+      const index = keys.findIndex(k => k === entityId)
 
       let indexRange = []
       if (previousIndex < index) indexRange = range(previousIndex, index)
       else indexRange = range(index, previousIndex)
 
-      console.log(indexRange)
       indexRange.forEach((i) => {
         if (i >= 0) this.selection[keys[i]] = true
       })
@@ -297,9 +338,9 @@ export default {
     addOneAsset (assetId) {
       Object.keys(this.selection)
         .filter(key => this.selection[key])
-        .forEach((shotId) => {
-          this.addAssetToCasting({ shotId, assetId, nbOccurences: 1 })
-          this.saveCasting(shotId)
+        .forEach((entityId) => {
+          this.addAssetToCasting({ entityId, assetId, nbOccurences: 1 })
+          this.saveCasting(entityId)
             .catch(console.error)
         })
     },
@@ -307,22 +348,22 @@ export default {
     addTenAssets (assetId) {
       Object.keys(this.selection)
         .filter(key => this.selection[key])
-        .forEach((shotId) => {
-          this.addAssetToCasting({ shotId, assetId, nbOccurences: 10 })
-          this.saveCasting(shotId)
+        .forEach((entityId) => {
+          this.addAssetToCasting({ entityId, assetId, nbOccurences: 10 })
+          this.saveCasting(entityId)
             .catch(console.error)
         })
     },
 
-    removeOneAsset (assetId, shotId) {
-      this.removeAssetFromCasting({ shotId, assetId, nbOccurences: 1 })
-      this.saveCasting(shotId)
+    removeOneAsset (assetId, entityId) {
+      this.removeAssetFromCasting({ entityId, assetId, nbOccurences: 1 })
+      this.saveCasting(entityId)
         .catch(console.error)
     },
 
-    removeTenAssets (assetId, shotId) {
-      this.removeAssetFromCasting({ shotId, assetId, nbOccurences: 10 })
-      this.saveCasting(shotId)
+    removeTenAssets (assetId, entityId) {
+      this.removeAssetFromCasting({ entityId, assetId, nbOccurences: 10 })
+      this.saveCasting(entityId)
         .catch(console.error)
     },
 
@@ -362,15 +403,34 @@ export default {
     },
 
     updateUrl () {
-      const sequenceId = this.$route.params.sequence_id
-      if (sequenceId !== this.sequenceId) {
-        const route = {
-          name: 'breakdown-sequence',
-          params: {
-            production_id: this.currentProduction.id,
-            sequence_id: this.sequenceId
+      let isChange = false
+      let route = {}
+      if (this.isAssetCasting) {
+        const assetTypeId = this.$route.params.asset_type_id
+        if (assetTypeId !== this.assetTypeId) {
+          isChange = true
+          route = {
+            name: 'breakdown-asset-type',
+            params: {
+              production_id: this.currentProduction.id,
+              asset_type_id: this.assetTypeId
+            }
           }
         }
+      } else {
+        const sequenceId = this.$route.params.sequence_id
+        if (sequenceId !== this.sequenceId) {
+          isChange = true
+          route = {
+            name: 'breakdown-sequence',
+            params: {
+              production_id: this.currentProduction.id,
+              sequence_id: this.sequenceId
+            }
+          }
+        }
+      }
+      if (isChange) {
         if (this.currentEpisode) {
           route.name = `episode-${route.name}`
           route.params.episode_id = this.currentEpisode.id
@@ -383,6 +443,21 @@ export default {
   watch: {
     $route () {},
 
+    castingType () {
+      if (this.isShotCasting && this.sequences.length > 0) {
+        this.sequenceId = this.sequences[0].id
+      }
+      if (this.isAssetCasting && this.castingAssetTypesOptions.length > 0) {
+        const assetTypeId = this.$route.params.asset_type_id
+        this.castingType = 'asset'
+        if (assetTypeId) {
+          this.assetTypeId = assetTypeId
+        } else if (this.castingAssetTypesOptions.length > 0) {
+          this.assetTypeId = this.castingAssetTypesOptions[0].value
+        }
+      }
+    },
+
     sequenceId () {
       if (this.sequences && this.sequences.length > 0) {
         this.setCastingSequence(this.sequenceId)
@@ -391,19 +466,43 @@ export default {
       }
     },
 
+    assetTypeId () {
+      if (this.castingAssetTypesOptions) {
+        this.setCastingAssetType(this.assetTypeId)
+        this.updateUrl()
+        this.resetSelection()
+      }
+    },
+
     episodeId () {},
 
     castingSequenceOptions () {
-      const sequenceId = this.$route.params.sequence_id
-      if (
-        sequenceId &&
-        this.sequenceMap[sequenceId]
-      ) {
-        this.sequenceId = sequenceId
-      } else if (this.castingSequenceOptions.length > 0) {
-        this.sequenceId = this.castingSequenceOptions[0].value
-      } else {
-        this.sequenceId = ''
+      if (this.$route.path.indexOf('asset-type') < 0) {
+        const sequenceId = this.$route.params.sequence_id
+        if (
+          sequenceId &&
+          this.sequenceMap[sequenceId]
+        ) {
+          this.sequenceId = sequenceId
+        } else if (this.castingSequenceOptions.length > 0) {
+          this.sequenceId = this.castingSequenceOptions[0].value
+        } else {
+          this.sequenceId = ''
+        }
+      }
+    },
+
+    castingAssetTypesOptions () {
+      if (this.$route.path.indexOf('asset-type') > 0) {
+        const assetTypeId = this.$route.params.asset_type_id
+        this.castingType = 'asset'
+        if (assetTypeId) {
+          this.assetTypeId = assetTypeId
+        } else if (this.castingAssetTypesOptions.length > 0) {
+          this.assetTypeId = this.castingAssetTypesOptions[0].value
+        } else {
+          this.assetTypeId = ''
+        }
       }
     },
 
@@ -465,6 +564,7 @@ export default {
   display: flex;
   flex-direction: row;
   overflow-y: auto;
+  margin-top: 0.5em;
 }
 
 .breakdown-column {
@@ -475,10 +575,10 @@ export default {
   border: 1px solid #EEE;
   box-shadow: 0px 0px 6px #E0E0E0;
   border-radius: 1em;
-  margin-left: 0.5em;
-}
 
-.shot-column {
+  &:not(:first-child) {
+    margin-left: 0.5em;
+  }
 }
 
 .casting-column {

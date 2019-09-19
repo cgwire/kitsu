@@ -149,6 +149,7 @@ export default {
     edit: 'Edit',
     empty_comment: 'Empty comment',
     end_date: 'End date',
+    for: 'For',
     go_productions: 'Go to productions',
     history: 'history',
     info: 'Information',

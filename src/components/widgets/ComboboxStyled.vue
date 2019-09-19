@@ -124,6 +124,10 @@ export default {
           this.selectedOption = this.options[0]
         }
       }
+    },
+
+    value () {
+      this.selectedOption = this.options.find(o => o.value === this.value)
     }
   }
 }
@@ -169,7 +173,6 @@ export default {
 }
 
 .selected-line {
-  text-transform: uppercase;
   flex: 1;
 }
 
@@ -179,7 +182,6 @@ export default {
   cursor: pointer;
   margin: 0;
   padding: 0.5em;
-  text-transform: uppercase;
 
   &:hover {
     background: $purple;

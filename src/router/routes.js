@@ -389,6 +389,11 @@ export const routes = [
             path: 'sequences/:sequence_id',
             component: Breakdown,
             name: 'breakdown-sequence'
+          },
+          {
+            path: 'asset-types/:asset_type_id',
+            component: Breakdown,
+            name: 'breakdown-asset-type'
           }
         ]
       },
@@ -585,6 +590,11 @@ export const routes = [
             path: 'sequences/:sequence_id',
             component: Breakdown,
             name: 'episode-breakdown-sequence'
+          },
+          {
+            path: 'asset-types/:asset_type_id',
+            component: Breakdown,
+            name: 'episode-breakdown-asset-type'
           }
         ]
       },
