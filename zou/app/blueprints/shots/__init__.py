@@ -23,7 +23,6 @@ from .resources import (
     ProjectSequencesResource,
     ProjectEpisodesResource,
     ProjectEpisodeStatsResource,
-    ProjectEntityLinksResource,
 
     EpisodeResource,
     EpisodesResource,
@@ -39,14 +38,6 @@ from .resources import (
     SequenceScenesResource,
     SequenceTasksResource,
     SequenceTaskTypesResource,
-
-    ShotAssetInstancesResource,
-    RemoveShotAssetInstanceResource,
-    SceneAssetInstancesResource,
-    SceneCameraInstancesResource,
-
-    CastingResource,
-    SequenceCastingResource
 )
 
 
@@ -89,18 +80,6 @@ routes = [
     (
         "/data/projects/<project_id>/episodes/stats",
         ProjectEpisodeStatsResource
-    ),
-
-    ("/data/shots/<shot_id>/casting", CastingResource),
-    ("/data/sequences/<sequence_id>/casting", SequenceCastingResource),
-    ("/data/projects/<project_id>/entity-links", ProjectEntityLinksResource),
-
-    ("/data/scenes/<scene_id>/asset-instances", SceneAssetInstancesResource),
-    ("/data/scenes/<scene_id>/camera-instances", SceneCameraInstancesResource),
-    ("/data/shots/<shot_id>/asset-instances", ShotAssetInstancesResource),
-    (
-        "/data/shots/<shot_id>/asset-instances/<asset_instance_id>",
-        RemoveShotAssetInstanceResource
     )
 ]
 

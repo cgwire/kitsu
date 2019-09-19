@@ -7,6 +7,7 @@ from flask import Blueprint
 
 from .blueprints.assets import blueprint as assets_blueprint
 from .blueprints.auth import blueprint as auth_blueprint
+from .blueprints.breakdown import blueprint as breakdown_blueprint
 from .blueprints.crud import blueprint as crud_blueprint
 from .blueprints.events import blueprint as events_blueprint
 from .blueprints.export import blueprint as export_blueprint
@@ -42,6 +43,7 @@ def configure_api_routes(app):
     """
     app.register_blueprint(auth_blueprint)
     app.register_blueprint(assets_blueprint)
+    app.register_blueprint(breakdown_blueprint)
     app.register_blueprint(crud_blueprint)
     app.register_blueprint(export_blueprint)
     app.register_blueprint(events_blueprint)
