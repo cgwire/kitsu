@@ -111,8 +111,8 @@ export default {
   font-size: 1.2em;
   opacity: 0;
   z-index: 3;
-  border-top-left-radius: 8px;
-  border-top-right-radius: 8px;
+  border-top-left-radius: 5px;
+  border-top-right-radius: 5px;
   font-size: 0.9em;
 }
 
@@ -131,8 +131,8 @@ export default {
   font-size: 1.2em;
   opacity: 0;
   z-index: 3;
-  border-bottom-left-radius: 8px;
-  border-bottom-right-radius: 8px;
+  border-bottom-left-radius: 5px;
+  border-bottom-right-radius: 5px;
   font-size: 0.9em;
 }
 

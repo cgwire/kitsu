@@ -4,10 +4,13 @@ import { sortAssets } from '../../lib/sorting'
 import { groupEntitiesByParents } from '../../lib/models'
 
 import {
-  CASTING_SET_SEQUENCE,
+  CASTING_SET_ASSET_TYPES,
+  CASTING_SET_ASSET_TYPE,
+  CASTING_SET_ASSETS,
   CASTING_SET_EPISODE,
   CASTING_SET_CASTING,
   CASTING_SET_SHOTS,
+  CASTING_SET_SEQUENCE,
   CASTING_SET_SEQUENCES,
 
   CASTING_ADD_TO_CASTING,
@@ -23,8 +26,10 @@ const initialState = {
   castingSequenceId: '',
   castingShotId: 0,
   castingSequenceShots: [],
+  castingAssetTypeAssets: [],
   castingEpisodeSequences: [],
   castingSequenceOptions: [],
+  castingAssetTypesOptions: [],
 
   castingCurrentShot: null,
   casting: {},
@@ -36,7 +41,9 @@ const getters = {
   castingEpisodeSequences: state => state.castingEpisodeSequences,
   castingSequenceId: state => state.castingSequenceId,
   castingSequenceShots: state => state.castingSequenceShots,
+  castingAssetTypeAssets: state => state.castingAssetTypeAssets,
   castingSequenceOptions: state => state.castingSequenceOptions,
+  castingAssetTypesOptions: state => state.castingAssetTypesOptions,
 
   casting: state => state.casting,
   castingByType: state => state.castingByType,
@@ -49,48 +56,76 @@ const actions = {
     if (!sequenceId) {
       return console.error('SequenceId is undefined, no casting can be set.')
     }
+    const production = rootState.productions.currentProduction
     const assetMap = rootState.assets.assetMap
     const shots =
       Object.values(rootState.shots.shotMap)
         .filter((shot) => shot.sequence_id === sequenceId)
     commit(CASTING_SET_SEQUENCE, sequenceId)
     commit(CASTING_SET_SHOTS, shots)
-    return breakdownApi.getSequenceCasting(sequenceId)
+    return breakdownApi.getSequenceCasting(production.id, sequenceId)
+      .then((casting) => {
+        commit(CASTING_SET_CASTING, { casting, assetMap })
+      })
+  },
+
+  setCastingAssetType ({ commit, rootState }, assetTypeId) {
+    if (!assetTypeId) {
+      return console.error('assetTypeId is undefined, no casting can be set.')
+    }
+    const production = rootState.productions.currentProduction
+    const assetMap = rootState.assets.assetMap
+    const assets =
+      Object.values(rootState.assets.assetMap)
+        .filter((asset) => asset.asset_type_id === assetTypeId)
+    commit(CASTING_SET_ASSET_TYPE, assetTypeId)
+    commit(CASTING_SET_ASSETS, assets)
+    return breakdownApi.getAssetTypeCasting(production.id, assetTypeId)
       .then((casting) => {
         commit(CASTING_SET_CASTING, { casting, assetMap })
       })
   },
 
   setCastingEpisode ({ commit, rootState }, episodeId) {
-    let sequences = rootState.shots.sequences
+    const sequences = rootState.shots.sequences
     commit(CASTING_SET_SEQUENCES, sequences)
     commit(CASTING_SET_EPISODE, episodeId)
   },
 
-  addAssetToCasting ({ commit, rootState }, { shotId, assetId, nbOccurences }) {
+  setCastingAssetTypes ({ commit, rootState }) {
+    const assetTypes = rootState.assets.assetTypes
+    commit(CASTING_SET_ASSET_TYPES, assetTypes)
+  },
+
+  addAssetToCasting (
+    { commit, rootState },
+    { entityId, assetId, nbOccurences }
+  ) {
     const asset = rootState.assets.assetMap[assetId]
-    commit(CASTING_ADD_TO_CASTING, { shotId, asset, nbOccurences })
+    commit(CASTING_ADD_TO_CASTING, { entityId, asset, nbOccurences })
   },
 
   removeAssetFromCasting (
-    { commit, rootState }, { shotId, assetId, nbOccurences }
+    { commit, rootState },
+    { entityId, assetId, nbOccurences }
   ) {
     const asset = rootState.assets.assetMap[assetId]
-    commit(CASTING_REMOVE_FROM_CASTING, { shotId, asset, nbOccurences })
+    commit(CASTING_REMOVE_FROM_CASTING, { entityId, asset, nbOccurences })
   },
 
-  saveCasting ({ commit }, shotId) {
-    if (!shotId) {
+  saveCasting ({ commit, rootGetters }, entityId) {
+    if (!entityId) {
       return console.error('ShotId is undefined, no casting can be saved.')
     }
+    const production = rootGetters.currentProduction
     const casting = []
-    Object.values(state.casting[shotId]).forEach((asset) => {
+    Object.values(state.casting[entityId]).forEach((asset) => {
       casting.push({
         asset_id: asset.asset_id,
         nb_occurences: asset.nb_occurences || 1
       })
     })
-    return breakdownApi.updateCasting(shotId, casting)
+    return breakdownApi.updateCasting(production.id, entityId, casting)
   },
 
   uploadCastingFile ({ commit, state, rootGetters }, formData) {
@@ -108,6 +143,18 @@ const mutations = {
     shots.forEach((shot) => {
       casting[shot.id] = []
       castingByType[shot.id] = []
+    })
+    state.casting = casting
+    state.castingByType = castingByType
+  },
+
+  [CASTING_SET_ASSETS] (state, assets) {
+    const casting = []
+    const castingByType = []
+    state.castingAssetTypeAssets = assets
+    assets.forEach((asset) => {
+      casting[asset.id] = []
+      castingByType[asset.id] = []
     })
     state.casting = casting
     state.castingByType = castingByType
@@ -135,6 +182,27 @@ const mutations = {
     })
   },
 
+  [CASTING_SET_ASSET_TYPES] (state, assetTypes) {
+    state.castingAssetTypesOptions = assetTypes.map((assetType) => {
+      const route = {
+        name: 'breakdown-asset-type',
+        params: {
+          production_id: assetType.project_id,
+          asset_type_id: assetType.id
+        }
+      }
+      if (assetType.episode_id) {
+        route.name = `episode-${route.name}`
+        route.params.episode_id = assetType.episode_id
+      }
+      return {
+        label: assetType.name,
+        value: assetType.id,
+        route: route
+      }
+    })
+  },
+
   [CASTING_SET_SEQUENCE] (state, sequenceId) {
     state.castingSequenceId = sequenceId
   },
@@ -143,23 +211,27 @@ const mutations = {
     state.castingEpisodeId = episodeId
   },
 
+  [CASTING_SET_ASSET_TYPE] (state, assetTypeId) {
+    state.castingAssetTypeId = assetTypeId
+  },
+
   [CASTING_SET_CASTING] (state, { casting, assetMap }) {
-    const shotCastingByType = {}
-    const shotCastingKeys = Object.keys(casting)
-    shotCastingKeys.forEach((shotId) => {
-      const shotCasting = casting[shotId]
-      shotCastingByType[shotId] =
-        groupEntitiesByParents(shotCasting, 'asset_type_name')
+    const entityCastingByType = {}
+    const entityCastingKeys = Object.keys(casting)
+    entityCastingKeys.forEach((entityId) => {
+      const entityCasting = casting[entityId]
+      entityCastingByType[entityId] =
+        groupEntitiesByParents(entityCasting, 'asset_type_name')
     })
     Object.assign(state.casting, casting)
     state.casting = { ...state.casting }
-    Object.assign(state.castingByType, shotCastingByType)
+    Object.assign(state.castingByType, entityCastingByType)
     state.castingByType = { ...state.castingByType }
   },
 
-  [CASTING_ADD_TO_CASTING] (state, { shotId, asset, nbOccurences }) {
-    if (!state.casting[shotId]) state.casting[shotId] = []
-    const previousAsset = state.casting[shotId].find(
+  [CASTING_ADD_TO_CASTING] (state, { entityId, asset, nbOccurences }) {
+    if (!state.casting[entityId]) state.casting[entityId] = []
+    const previousAsset = state.casting[entityId].find(
       a => a.asset_id === asset.id
     )
     if (previousAsset) {
@@ -173,27 +245,27 @@ const mutations = {
         nb_occurences: nbOccurences,
         preview_file_id: asset.preview_file_id
       }
-      state.casting[shotId].push(newAsset)
+      state.casting[entityId].push(newAsset)
     }
-    state.casting[shotId] = sortAssets(state.casting[shotId])
-    state.castingByType[shotId] =
-      groupEntitiesByParents(state.casting[shotId], 'asset_type_name')
+    state.casting[entityId] = sortAssets(state.casting[entityId])
+    state.castingByType[entityId] =
+      groupEntitiesByParents(state.casting[entityId], 'asset_type_name')
   },
 
-  [CASTING_REMOVE_FROM_CASTING] (state, { shotId, asset, nbOccurences }) {
-    const previousAsset = state.casting[shotId].find(
+  [CASTING_REMOVE_FROM_CASTING] (state, { entityId, asset, nbOccurences }) {
+    const previousAsset = state.casting[entityId].find(
       a => a.asset_id === asset.id
     )
     if (previousAsset) {
       previousAsset.nb_occurences -= nbOccurences
       if (previousAsset.nb_occurences < 1) {
-        delete state.casting[shotId][asset.id]
-        state.casting[shotId] = state.casting[shotId].filter(
+        delete state.casting[entityId][asset.id]
+        state.casting[entityId] = state.casting[entityId].filter(
           a => a.asset_id !== asset.id
         )
       }
-      state.castingByType[shotId] = groupEntitiesByParents(
-        state.casting[shotId], 'asset_type_name'
+      state.castingByType[entityId] = groupEntitiesByParents(
+        state.casting[entityId], 'asset_type_name'
       )
     }
   },

@@ -1,6 +1,6 @@
 <template>
 <div
-  :id="shotId"
+  :id="entityId"
   :class="{
     shot: true,
     selected: selected,
@@ -48,7 +48,7 @@ import AssetBlock from './AssetBlock'
 export default {
   name: 'shot-line',
   props: {
-    shotId: {
+    entityId: {
       default: '',
       type: String
     },
@@ -72,13 +72,13 @@ export default {
 
   methods: {
     onClicked (event) {
-      this.$emit('click', this.shotId, event)
+      this.$emit('click', this.entityId, event)
     },
     removeOneAsset (assetId) {
-      this.$emit('remove-one', assetId, this.shotId)
+      this.$emit('remove-one', assetId, this.entityId)
     },
     removeTenAssets (assetId) {
-      this.$emit('remove-ten', assetId, this.shotId)
+      this.$emit('remove-ten', assetId, this.entityId)
     }
   }
 }
