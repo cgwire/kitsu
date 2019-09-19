@@ -18,6 +18,7 @@ class BreakdownTestCase(ApiDBTestCase):
         self.generate_fixture_asset_character()
 
     def test_update_casting(self):
+        self.project_id = str(self.project.id)
         self.shot_id = str(self.shot.id)
         self.asset_id = str(self.asset.id)
         self.asset_character_id = str(self.asset_character.id)
@@ -26,7 +27,10 @@ class BreakdownTestCase(ApiDBTestCase):
         self.sequence_name = self.sequence.name
         self.episode_name = self.episode.name
 
-        casting = self.get("/data/shots/%s/casting" % self.shot_id)
+        casting = self.get("/data/projects/%s/entities/%s/casting" % (
+            self.project_id,
+            self.shot_id
+        ))
         self.assertListEqual(casting, [])
         newCasting = [
             {
@@ -39,9 +43,16 @@ class BreakdownTestCase(ApiDBTestCase):
             }
         ]
         path = "/data/shots/%s/casting" % str(self.shot_id)
+        path = "/data/projects/%s/entities/%s/casting" % (
+            self.project_id,
+            self.shot_id
+        )
         self.put(path, newCasting, 200)
 
-        casting = self.get("/data/shots/%s/casting" % self.shot_id)
+        casting = self.get("/data/projects/%s/entities/%s/casting" % (
+            self.project_id,
+            self.shot_id
+        ))
         casting = sorted(casting, key=lambda x: x["nb_occurences"])
         self.assertEqual(casting[0]["asset_id"], newCasting[0]["asset_id"])
         self.assertEqual(

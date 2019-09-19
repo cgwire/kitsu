@@ -52,10 +52,9 @@ def get_casting(shot_id):
 
 def get_sequence_casting(sequence_id):
     """
-    Return all assets and their number of occurences listed in shots
-    (or asset for set dressing) of given sequence.
-    Result is returned as a map where keys are shot IDs and values are casting
-    for given shot.
+    Return all assets and their number of occurences listed in shots of given
+    sequence.  Result is returned as a map where keys are shot IDs and values
+    are casting for given shot.
     """
     castings = {}
     Shot = aliased(Entity, name="shot")
@@ -83,13 +82,45 @@ def get_sequence_casting(sequence_id):
     return castings
 
 
-
-def update_casting(shot_id, casting):
+def get_asset_type_casting(project_id, asset_type_id):
     """
-    Update casting for given shot. Casting is an array of dictionaries made of
+    Return all assets and their number of occurences listed in asset of given
+    asset type. Result is returned as a map where keys are asset IDs and values
+    are casting for given asset.
+    """
+    castings = {}
+    Asset = aliased(Entity, name="asset")
+    links = EntityLink.query \
+        .join(Asset, EntityLink.entity_in_id == Asset.id) \
+        .join(Entity, EntityLink.entity_out_id == Entity.id) \
+        .join(EntityType, Entity.entity_type_id == EntityType.id) \
+        .filter(Asset.project_id == project_id) \
+        .filter(Asset.entity_type_id == asset_type_id) \
+        .filter(Entity.canceled != True) \
+        .add_columns(Entity.name, EntityType.name, Entity.preview_file_id) \
+        .order_by(EntityType.name, Entity.name)
+
+    for (link, entity_name, entity_type_name, entity_preview_file_id) in links:
+        asset_id = str(link.entity_in_id)
+        if asset_id not in castings:
+            castings[asset_id] = []
+        castings[asset_id].append({
+            "asset_id": fields.serialize_value(link.entity_out_id),
+            "name": entity_name,
+            "asset_name": entity_name,
+            "asset_type_name": entity_type_name,
+            "preview_file_id": fields.serialize_value(entity_preview_file_id),
+            "nb_occurences": link.nb_occurences
+        })
+    return castings
+
+
+def update_casting(entity_id, casting):
+    """
+    Update casting for given entity. Casting is an array of dictionaries made of
     two fields: `asset_id` and `nb_occurences`.
     """
-    entity = entities_service.get_entity_raw(shot_id)
+    entity = entities_service.get_entity_raw(entity_id)
     entity.update({"entities_out": []})
     casting_ids = []
     for cast in casting:

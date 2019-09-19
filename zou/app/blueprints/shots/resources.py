@@ -458,40 +458,6 @@ class SequenceShotsResource(Resource):
         return shots_service.get_shots(criterions)
 
 
-class CastingResource(Resource):
-
-    @jwt_required
-    def get(self, shot_id):
-        """
-        Resource to retrieve the casting of a given shot.
-        """
-        shot = shots_service.get_shot(shot_id)
-        user_service.check_project_access(shot["project_id"])
-        return breakdown_service.get_casting(shot_id)
-
-    @jwt_required
-    def put(self, shot_id):
-        """
-        Resource to allow the modification of assets linked to a shot.
-        """
-        casting = request.json
-        shot = shots_service.get_shot(shot_id)
-        user_service.check_project_access(shot["project_id"])
-        return breakdown_service.update_casting(shot_id, casting)
-
-
-class SequenceCastingResource(Resource):
-
-    @jwt_required
-    def get(self, sequence_id):
-        """
-        Resource to retrieve the casting of shots from given sequence.
-        """
-        sequence = shots_service.get_sequence(sequence_id)
-        user_service.check_project_access(sequence["project_id"])
-        return breakdown_service.get_sequence_casting(sequence_id)
-
-
 class ProjectScenesResource(Resource):
 
     @jwt_required
@@ -562,92 +528,6 @@ class SceneTasksResource(Resource):
         return tasks_service.get_tasks_for_scene(scene_id)
 
 
-class ShotAssetInstancesResource(Resource, ArgsMixin):
-
-    @jwt_required
-    def get(self, shot_id):
-        """
-        Retrieve all asset instances linked to shot.
-        """
-        shot = shots_service.get_shot(shot_id)
-        user_service.check_project_access(shot["project_id"])
-        return breakdown_service.get_asset_instances_for_shot(shot_id)
-
-    @jwt_required
-    def post(self, shot_id):
-        """
-        Add an asset instance to given shot.
-        """
-        args = self.get_args([
-            ("asset_instance_id", None, True)
-        ])
-        shot = shots_service.get_shot(shot_id)
-        user_service.check_project_access(shot["project_id"])
-        shot = breakdown_service.add_asset_instance_to_shot(
-            shot_id,
-            args["asset_instance_id"]
-        )
-        return shot, 201
-
-
-class RemoveShotAssetInstanceResource(Resource, ArgsMixin):
-
-    @jwt_required
-    def delete(self, shot_id, asset_instance_id):
-        """
-        Remove an asset instance from given shot.
-        """
-        shot = shots_service.get_shot(shot_id)
-        user_service.check_project_access(shot["project_id"])
-        shot = breakdown_service.remove_asset_instance_for_shot(
-            shot_id,
-            asset_instance_id
-        )
-        return '', 204
-
-
-class SceneAssetInstancesResource(Resource, ArgsMixin):
-
-    @jwt_required
-    def get(self, scene_id):
-        """
-        Retrieve all asset instances linked to scene.
-        """
-        scene = shots_service.get_scene(scene_id)
-        user_service.check_project_access(scene["project_id"])
-        return breakdown_service.get_asset_instances_for_scene(scene_id)
-
-    @jwt_required
-    def post(self, scene_id):
-        """
-        Create an asset instance on given scene.
-        """
-        args = self.get_args([
-            ("asset_id", None, True),
-            ("description", None, False)
-        ])
-        scene = shots_service.get_scene(scene_id)
-        user_service.check_project_access(scene["project_id"])
-        asset_instance = breakdown_service.add_asset_instance_to_scene(
-            scene_id,
-            args["asset_id"],
-            args["description"]
-        )
-        return asset_instance, 201
-
-
-class SceneCameraInstancesResource(Resource):
-
-    @jwt_required
-    def get(self, scene_id):
-        """
-        Retrieve all asset instances linked to scene.
-        """
-        scene = shots_service.get_scene(scene_id)
-        user_service.check_project_access(scene["project_id"])
-        return breakdown_service.get_camera_instances_for_scene(scene_id)
-
-
 class SceneShotsResource(Resource, ArgsMixin):
 
     @jwt_required
@@ -682,16 +562,3 @@ class RemoveShotFromSceneResource(Resource):
         shot = shots_service.get_shot(shot_id)
         scenes_service.remove_shot_from_scene(scene, shot)
         return '', 204
-
-
-class ProjectEntityLinksResource(Resource):
-    """
-    Retrieve all entity links related to given project.
-    It's mainly used for synchronisation purpose.
-    """
-
-    @jwt_required
-    def get(self, project_id):
-        permissions.check_admin_permissions()
-        projects_service.get_project(project_id)
-        return entities_service.get_entity_links_for_project(project_id)
