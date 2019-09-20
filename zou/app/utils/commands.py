@@ -331,3 +331,9 @@ def import_last_changes_from_another_instance(target, login, password):
     print("Syncing started.")
     sync_service.run_last_events_sync()
     print("Syncing ended.")
+
+
+def download_file_from_storage():
+    sync_service.download_entity_thumbnails_from_storage()
+    sync_service.download_preview_files_from_storage()
+

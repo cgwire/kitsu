@@ -30,6 +30,8 @@ from zou.app.models.task_status import TaskStatus
 from zou.app.models.task_type import TaskType
 from zou.app.models.time_spent import TimeSpent
 
+from zou.app.stores import file_store
+from flask_fs.backends.local import LocalBackend
 from zou.app.utils import events
 
 logger = logging.getLogger()
@@ -263,6 +265,7 @@ def sync_entries(model_name, model):
         "persons"
     ]:
         instances = gazu.client.fetch_all(model_name)
+        model.create_from_import_list(instances)
     else:
         page = 1
         init = True
@@ -453,3 +456,116 @@ def forward_base_event(event_name, event_type, data):
     data["sync"] = True
     logger.info("Forward event: %s" % full_event_name)
     events.emit(full_event_name, data)
+
+
+def download_entity_thumbnails_from_storage():
+    """
+    Download all thumbnail files for non preview entries from object storage
+    and store them locally.
+    """
+    for project in Project.query.all():
+        download_entity_thumbnail(project)
+    for organisation in Organisation.query.all():
+        download_entity_thumbnail(organisation)
+    for person in Person.query.all():
+        download_entity_thumbnail(person)
+
+
+def download_preview_files_from_storage():
+    """
+    Download all thumbnail and original files for preview entries from object
+    storage and store them locally.
+    """
+    for preview_file in PreviewFile.query.all():
+        download_preview(preview_file)
+
+
+def download_entity_thumbnail(entity):
+    """
+    Download thumbnail file for given entity from object storage and store it
+    locally.
+    """
+    preview_folder = os.getenv("PREVIEW_FOLDER", "/opt/zou/previews")
+    local = LocalBackend("local", {
+        "root": os.path.join(preview_folder, "pictures")
+    })
+
+    file_path = local.path("thumbnails-" + str(entity.id))
+    if entity.has_avatar:
+        try:
+            os.makedirs(os.path.dirname(file_path))
+        except:
+            pass
+        with open(file_path, "wb") as tmp_file:
+            for chunk in file_store.open_picture(
+                "thumbnails",
+                str(entity.id)
+            ):
+                tmp_file.write(chunk)
+
+
+def download_file(file_path, prefix, dl_func, preview_file_id):
+    """
+    Download preview file for given preview from object storage and store it
+    locally.
+    """
+    dirname = os.path.dirname(file_path)
+    if not os.path.exists(dirname):
+        os.makedirs(dirname)
+    try:
+        with open(file_path, "wb") as tmp_file:
+            for chunk in dl_func(prefix, preview_file_id):
+                tmp_file.write(chunk)
+        print("%s downloaded" % file_path)
+    except:
+        pass
+
+
+def download_preview(preview_file):
+    """
+    Download all files link to preview file entry: orginal file and variants.
+    """
+    print("download preview %s (%s)" % (
+        preview_file.id,
+        preview_file.extension)
+    )
+
+    preview_folder = os.getenv("PREVIEW_FOLDER", "/opt/zou/previews")
+    local_picture = LocalBackend("local", {
+        "root": os.path.join(preview_folder, "pictures")
+    })
+    local_movie = LocalBackend("local", {
+        "root": os.path.join(preview_folder, "movies")
+    })
+    local_file = LocalBackend("local", {
+        "root": os.path.join(preview_folder, "files")
+    })
+
+    is_movie = preview_file.extension == "mp4"
+    is_picture = preview_file.extension == "png"
+    is_file = not is_movie and not is_picture
+
+    preview_file_id = str(preview_file.id)
+    file_key = "previews-%s" % preview_file_id
+    if is_file:
+        file_path = local_file.path(file_key)
+        dl_func = file_store.open_picture
+    elif is_movie:
+        file_path = local_movie.path(file_key)
+        dl_func = file_store.open_movie
+    else:
+        file_path = local_picture.path(file_key)
+        dl_func = file_store.open_file
+
+    if is_movie or is_picture:
+        for prefix in [
+            "thumbnails",
+            "thumbnails-square",
+            "original"
+        ]:
+            dl_func = file_store.open_picture
+            file_path = \
+                local_picture.path("%s-%s" % (prefix, str(preview_file.id)))
+            download_file(file_path, prefix, dl_func, preview_file_id)
+
+    download_file(file_path, "previews", dl_func, preview_file_id)

@@ -395,5 +395,13 @@ def sync_last_events(target):
     commands.import_last_changes_from_another_instance(target, login, password)
 
 
+@cli.command()
+def download_storage_files():
+    """
+    Download all files from a Swift object storage and store them in a local
+    storage.
+    """
+    commands.download_file_from_storage()
+
 if __name__ == '__main__':
     cli()
