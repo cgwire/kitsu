@@ -38,4 +38,6 @@ redis_url = get_redis_url()
 (app, socketio) = create_app(redis_url)
 
 if __name__ == "main":
-    socketio.run(app, debug=False, port=config["EVENT_STREAM_PORT"])
+    socketio.run(app, debug=False,
+                 host=config["EVENT_STREAM_HOST"],
+                 port=config["EVENT_STREAM_PORT"])
