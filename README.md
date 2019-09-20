@@ -47,8 +47,6 @@ and consider strong qualities and good developer experience to matter a lot.
 Our extensive experience allows studios to get better at managing production
 and doing software. They can focus more on the artistic work.
 
-ocus more on the artistic work.
-
 Visit [cg-wire.com](https://cg-wire.com) for more information.
 
 [![CGWire Logo](https://zou.cg-wire.com/cgwire.png)](https://cg-wire.com)
