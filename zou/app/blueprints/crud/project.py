@@ -40,6 +40,7 @@ class ProjectResource(BaseModelResource):
 
     def __init__(self):
         BaseModelResource.__init__(self, Project)
+        self.protected_fields.append("team")
 
     def check_read_permissions(self, project):
         user_service.check_project_access(project["id"])
