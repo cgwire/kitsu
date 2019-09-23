@@ -583,7 +583,7 @@ export default {
           .toISOString()
           .substr(14, 5) + milliseconds
       } catch (err) {
-        console.log(err)
+        console.error(err)
         return '00:00.00'
       }
     },
@@ -749,7 +749,7 @@ export default {
     },
 
     saveAnnotations () {
-      const currentTime = roundToFrame(this.video.currentTime, this.fps)
+      const currentTime = roundToFrame(this.video.currentTime, this.fps) || 0
       const annotation = this.getAnnotation(currentTime)
       const annotations = this.getNewAnnotations(currentTime, annotation)
       this.$emit('annotationchanged', {
@@ -759,11 +759,11 @@ export default {
     },
 
     loadAnnotation (annotation) {
-      if (!annotation || !annotation.time) {
+      if (!annotation) {
         console.error('Annotations are malformed and cannot be loaded.')
         return
       }
-      let currentTime = annotation.time
+      let currentTime = annotation.time || 0
       currentTime = roundToFrame(currentTime, this.fps)
       this.video.pause()
 

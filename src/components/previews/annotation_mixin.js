@@ -39,6 +39,7 @@ export const annotationMixin = {
         annotation.drawing = this.fabricCanvas.toJSON(['canvasWidth'])
         annotation.width = this.fabricCanvas.width
         annotation.height = this.fabricCanvas.height
+        annotation.time = currentTime
         if (annotation.drawing && annotation.drawing.objects.length < 1) {
           const index = this.annotations.findIndex(
             (annotation) => annotation.time === currentTime

@@ -1076,7 +1076,7 @@ export default {
 
     loadAnnotation (annotation) {
       this.pause()
-      const currentTime = annotation.time
+      const currentTime = annotation.time || 0
       this.rawPlayer.setCurrentTime(currentTime)
       if (this.isComparing) {
         this.$refs['raw-player-comparison'].setCurrentTime(currentTime)
@@ -1141,7 +1141,7 @@ export default {
     },
 
     saveAnnotations () {
-      const currentTime = roundToFrame(this.currentTimeRaw, this.fps)
+      const currentTime = roundToFrame(this.currentTimeRaw, this.fps) || 0
       if (!this.annotations) return
       const annotation = this.getAnnotation(currentTime)
       const annotations = this.getNewAnnotations(currentTime, annotation)
