@@ -81,6 +81,7 @@ EVENT_HANDLERS_FOLDER = os.getenv(
 )
 TMP_DIR = os.getenv("TMP_DIR", os.path.join(os.sep, "tmp", "zou"))
 
+EVENT_STREAM_HOST = os.getenv("EVENT_STREAM_HOST", "localhost")
 EVENT_STREAM_PORT = os.getenv("EVENT_STREAM_PORT", 5001)
 
 FS_BACKEND = os.getenv("FS_BACKEND", "local")

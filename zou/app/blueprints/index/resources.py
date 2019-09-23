@@ -40,8 +40,10 @@ class BaseStatusResource(Resource):
 
         is_es_up = True
         try:
-            requests.get("http://localhost:%s" % config.EVENT_STREAM_PORT)
-        except:
+            requests.get("http://{host}:{port}".format(
+                host=config.EVENT_STREAM_HOST,
+                port=config.EVENT_STREAM_PORT))
+        except Exception:
             is_es_up = False
 
         version = __version__
