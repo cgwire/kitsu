@@ -334,11 +334,14 @@ def sync_entity_thumbnails(project, model_name):
     for result in results:
         if result.get("preview_file_id") is not None:
             entity = Entity.get(result["id"])
-            entity.update({
-                "preview_file_id": result["preview_file_id"],
-                "updated_at": result["updated_at"]
-            })
-            total += 1
+            try:
+                entity.update({
+                    "preview_file_id": result["preview_file_id"],
+                    "updated_at": result["updated_at"]
+                })
+                total += 1
+            except sqlalchemy.exc.IntegrityError:
+                logger.error("An error occured", exc_info=1)
     logger.info("    %s %s thumbnails synced." % (total, model_name))
 
 
