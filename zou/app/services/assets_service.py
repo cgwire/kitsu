@@ -49,6 +49,23 @@ def build_asset_type_filter():
     return ~Entity.entity_type_id.in_(ids_to_exclude)
 
 
+def build_entity_type_asset_type_filter():
+    """
+    Generate a query filter to filter entity types that are asset types (it
+    means not shot, not sequence, not episode and not scene)
+    """
+    shot_type = shots_service.get_shot_type()
+    scene_type = shots_service.get_scene_type()
+    sequence_type = shots_service.get_sequence_type()
+    episode_type = shots_service.get_episode_type()
+    return ~EntityType.id.in_([
+        shot_type["id"],
+        scene_type["id"],
+        sequence_type["id"],
+        episode_type["id"]
+    ])
+
+
 def get_assets(criterions={}):
     """
     Get all assets for given criterions.
@@ -194,7 +211,7 @@ def get_asset_types(criterions={}):
     Retrieve all asset types available.
     """
     query = EntityType.query \
-        .filter(build_asset_type_filter())
+        .filter(build_entity_type_asset_type_filter())
     query = query_utils.apply_criterions_to_db_query(Entity, query, criterions)
     return EntityType.serialize_list(query.all(), obj_type="AssetType")
 
@@ -456,6 +473,7 @@ def remove_asset(asset_id, force=False):
 
     if is_tasks_related and not force:
         asset.update({"canceled": True})
+        clear_asset_cache(str(asset_id))
         events.emit("asset:update", {
             "asset_id": asset_id
         })
@@ -464,8 +482,9 @@ def remove_asset(asset_id, force=False):
         tasks = Task.query.filter_by(entity_id=asset_id).all()
         for task in tasks:
             deletion_service.remove_task(task.id, force=True)
-            tasks_service.delete_task_cache(str(task.id))
+            tasks_service.clear_task_cache(str(task.id))
         asset.delete()
+        clear_asset_cache(str(asset_id))
         events.emit("asset:delete", {
             "asset_id": asset_id
         })

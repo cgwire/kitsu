@@ -660,7 +660,7 @@ class DeleteAllTasksForTaskTypeResource(Resource):
             task_type_id
         )
         for task_id in task_ids:
-            tasks_service.delete_task_cache(task_id)
+            tasks_service.clear_task_cache(task_id)
         return '', 204
 
 

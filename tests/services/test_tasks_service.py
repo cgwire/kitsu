@@ -176,7 +176,7 @@ class TaskServiceTestCase(ApiDBTestCase):
         self.assertRaises(
             TaskNotFoundException,
             tasks_service.get_task,
-            self.task_id
+            str(self.task_id)
         )
 
     def test_get_tasks_for_sequence(self):

@@ -696,7 +696,7 @@ def remove_shot(shot_id, force=False):
         tasks = Task.query.filter_by(entity_id=shot_id).all()
         for task in tasks:
             deletion_service.remove_task(task.id, force=True)
-            tasks_service.delete_task_cache(str(task.id))
+            tasks_service.clear_task_cache(str(task.id))
 
         subscriptions = Subscription.query.filter_by(entity_id=shot_id).all()
         for subscription in subscriptions:

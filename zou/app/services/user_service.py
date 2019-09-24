@@ -295,7 +295,8 @@ def check_belong_to_project(project_id):
     if project_id is None:
         return False
 
-    project = projects_service.get_project(project_id)
+    project = projects_service.get_project(str(project_id))
+    print(project["team"])
     current_user = persons_service.get_current_user()
     if current_user["id"] in project["team"]:
         return True

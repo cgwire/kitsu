@@ -78,7 +78,7 @@ class AssetServiceTestCase(ApiDBTestCase):
         self.assertRaises(
             AssetNotFoundException,
             assets_service.get_asset,
-            self.asset.id
+            str(self.asset.id)
         )
 
     def test_get_asset_full(self):
