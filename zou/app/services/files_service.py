@@ -612,13 +612,13 @@ def get_preview_files_for_task(task_id):
     return fields.serialize_models(previews)
 
 
-def create_preview_file(
+def create_preview_file_raw(
     name,
     revision,
     task_id,
     person_id,
-    is_movie,
-    source="webgui"
+    source="webgui",
+    extension="mp4"
 ):
     return PreviewFile.create(
         name=name,
@@ -626,7 +626,25 @@ def create_preview_file(
         source=source,
         task_id=task_id,
         person_id=person_id,
-        is_movie=is_movie
+        extension=extension
+    )
+
+
+def create_preview_file(
+    name,
+    revision,
+    task_id,
+    person_id,
+    source="webgui",
+    extension="mp4"
+):
+    return create_preview_file_raw(
+        name,
+        revision,
+        task_id,
+        person_id,
+        source,
+        extension
     ).serialize()
 
 
@@ -645,6 +663,7 @@ def update_output_file(output_file_id, data):
 def update_preview_file(preview_file_id, data):
     preview_file = get_preview_file_raw(preview_file_id)
     preview_file.update(data)
+    events.emit("preview-file:update", {"preview_file_id": preview_file_id})
     return preview_file.serialize()
 
 
@@ -728,7 +747,27 @@ def get_output_files_for_output_type_and_asset_instance(
 def remove_preview_file(preview_file_id):
     preview_file = get_preview_file_raw(preview_file_id)
     preview_file.delete()
-    events.emit("preview_file:deletion", {
+    events.emit("preview_file:delete", {
         "preview_file_id": preview_file_id
     })
     return preview_file.serialize()
+
+
+def get_project_from_preview_file(preview_file_id):
+    """
+    Get project dict of related preview file.
+    """
+    preview_file = get_preview_file_raw(preview_file_id)
+    task = Task.get(preview_file.task_id)
+    project = Project.get(task.project_id)
+    return project.serialize()
+
+
+def get_preview_files_for_project(project_id, page=-1):
+    """
+    Return all preview files for given project.
+    """
+    query = PreviewFile.query \
+       .join(Task) \
+       .filter(Task.project_id == project_id)
+    return query_utils.get_paginated_results(query, page)
