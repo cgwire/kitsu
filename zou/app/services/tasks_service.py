@@ -43,22 +43,18 @@ from zou.app.services import (
 
 def clear_task_status_cache(task_status_id):
     cache.cache.delete_memoized(get_task_status, task_status_id)
-    cache.cache.delete_memoized(get_task_status_raw, task_status_id)
 
 
 def clear_task_type_cache(task_type_id):
     cache.cache.delete_memoized(get_task_type, task_type_id)
-    cache.cache.delete_memoized(get_task_type_raw, task_type_id)
 
 
 def clear_task_cache(task_id):
     cache.cache.delete_memoized(get_task, task_id)
-    cache.cache.delete_memoized(get_task_raw, task_id)
 
 
 def clear_comment_cache(comment_id):
     cache.cache.delete_memoized(get_comment, comment_id)
-    cache.cache.delete_memoized(get_comment_raw, comment_id)
 
 
 def get_done_status():

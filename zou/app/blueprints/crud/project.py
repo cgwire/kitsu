@@ -52,9 +52,13 @@ class ProjectResource(BaseModelResource):
             )
             project_dict["first_episode_id"] = \
                 fields.serialize_value(episode["id"])
+        projects_service.clear_project_cache(project_dict["id"])
         return project_dict
 
     def clean_get_result(self, data):
         project_status = ProjectStatus.get(data["project_status_id"])
         data["project_status_name"] = project_status.name
         return data
+
+    def post_delete(self, project_dict):
+        projects_service.clear_project_cache(project_dict["id"])

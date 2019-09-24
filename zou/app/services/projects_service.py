@@ -12,12 +12,19 @@ from zou.app.services.exception import (
     MetadataDescriptorNotFoundException
 )
 
-from zou.app.utils import fields, events
+from zou.app.utils import fields, events, cache
 
 from sqlalchemy.exc import StatementError
 from sqlalchemy.orm.exc import ObjectDeletedError
 
 
+def clear_project_cache(project_id):
+    cache.cache.delete_memoized(get_project, project_id)
+    cache.cache.delete_memoized(get_project_by_name)
+    cache.cache.delete_memoized(open_projects)
+
+
+@cache.memoize_function(120)
 def open_projects(name=None):
     """
     Return all open projects. Allow to filter projects by name.
@@ -96,6 +103,7 @@ def get_or_create_open_status():
     return get_or_create_status("Open")
 
 
+@cache.memoize_function(120)
 def get_open_status():
     """
     Return open status. If it does not exist, it creates it.
@@ -103,6 +111,7 @@ def get_open_status():
     get_or_create_status("Open")
 
 
+@cache.memoize_function(120)
 def get_closed_status():
     """
     Return closed status. If it does not exist, it creates it.
@@ -168,6 +177,7 @@ def get_project_raw(project_id):
     return project
 
 
+@cache.memoize_function(120)
 def get_project(project_id):
     """
     Get project matching given id, as a dict. Raises an exception if project is
@@ -176,6 +186,7 @@ def get_project(project_id):
     return get_project_raw(project_id).serialize()
 
 
+@cache.memoize_function(120)
 def get_project_by_name(project_name):
     """
     Get project matching given name. Raises an exception if project is not
@@ -195,6 +206,7 @@ def update_project(project_id, data):
     """
     project = get_project_raw(project_id)
     project.update(data)
+    clear_project_cache(project_id)
     events.emit("project:update", {
         "project_id": project_id
     })
@@ -209,6 +221,7 @@ def add_team_member(project_id, person_id):
     person = Person.get(person_id)
     project.team.append(person)
     project.save()
+    clear_project_cache(project_id)
     events.emit("project:update", {"project_id": project_id})
     return project.serialize()
 
@@ -221,6 +234,7 @@ def remove_team_member(project_id, person_id):
     person = Person.get(person_id)
     project.team.remove(person)
     project.save()
+    clear_project_cache(project_id)
     events.emit("project:update", {"project_id": project_id})
     return project.serialize()
 
@@ -294,7 +308,7 @@ def update_metadata_descriptor(metadata_descriptor_id, changes):
 
 def remove_metadata_descriptor(metadata_descriptor_id):
     """
-    Deletee metadata descriptor and related informations.
+    Delete metadata descriptor and related informations.
     """
     descriptor = get_metadata_descriptor_raw(metadata_descriptor_id)
     entities = Entity.get_all_by(project_id=descriptor.project_id)
