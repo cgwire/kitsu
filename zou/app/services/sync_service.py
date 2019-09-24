@@ -565,9 +565,9 @@ def download_preview(preview_file):
             "thumbnails-square",
             "original"
         ]:
-            dl_func = file_store.open_picture
+            pic_dl_func = file_store.open_picture
             pic_file_path = \
                 local_picture.path("%s-%s" % (prefix, str(preview_file.id)))
-            download_file(pic_file_path, prefix, dl_func, preview_file_id)
+            download_file(pic_file_path, prefix, pic_dl_func, preview_file_id)
 
     download_file(file_path, "previews", dl_func, preview_file_id)
