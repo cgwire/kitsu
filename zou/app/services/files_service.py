@@ -23,7 +23,7 @@ from zou.app.services.exception import (
     EntryAlreadyExistsException
 )
 
-from zou.app.utils import fields, events
+from zou.app.utils import fields, events, query as query_utils
 
 from sqlalchemy import desc, func
 from sqlalchemy.exc import StatementError, IntegrityError
