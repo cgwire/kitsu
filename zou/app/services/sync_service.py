@@ -494,11 +494,10 @@ def download_entity_thumbnail(entity):
     })
 
     file_path = local.path("thumbnails-" + str(entity.id))
+    dirname = os.path.dirname(file_path)
     if entity.has_avatar:
-        try:
-            os.makedirs(os.path.dirname(file_path))
-        except:
-            pass
+        if not os.path.exists(dirname):
+            os.makedirs(dirname)
         with open(file_path, "wb") as tmp_file:
             for chunk in file_store.open_picture(
                 "thumbnails",
@@ -567,8 +566,8 @@ def download_preview(preview_file):
             "original"
         ]:
             dl_func = file_store.open_picture
-            file_path = \
+            pic_file_path = \
                 local_picture.path("%s-%s" % (prefix, str(preview_file.id)))
-            download_file(file_path, prefix, dl_func, preview_file_id)
+            download_file(pic_file_path, prefix, dl_func, preview_file_id)
 
     download_file(file_path, "previews", dl_func, preview_file_id)
