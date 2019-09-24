@@ -61,6 +61,9 @@ class TaskResource(BaseModelResource):
     def check_update_permissions(self, task, data):
         user_service.check_manager_project_access(task["project_id"])
 
+    def post_update(self, instance_dict):
+        tasks_service.clear_task_cache(instance_dict["id"])
+
     @jwt_required
     def delete(self, instance_id):
         """
@@ -77,6 +80,7 @@ class TaskResource(BaseModelResource):
             instance_dict = instance.serialize()
             self.check_delete_permissions(instance_dict)
             deletion_service.remove_task(instance_id, force=args["force"])
+            tasks_service.clear_task_cache(instance_id)
             self.post_delete(instance_dict)
 
         except IntegrityError as exception:

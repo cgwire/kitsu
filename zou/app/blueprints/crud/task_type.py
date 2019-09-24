@@ -1,5 +1,6 @@
 from zou.app.models.task_type import TaskType
 from zou.app.services.exception import ArgumentsException
+from zou.app.services import tasks_service
 
 from .base import BaseModelResource, BaseModelsResource
 
@@ -39,3 +40,9 @@ class TaskTypeResource(BaseModelResource):
                     "A task type with similar name already exists"
                 )
         return data
+
+    def post_update(self, instance_dict):
+        tasks_service.clear_task_type_cache(instance_dict["id"])
+
+    def post_delete(self, instance_dict):
+        tasks_service.clear_task_type_cache(instance_dict["id"])

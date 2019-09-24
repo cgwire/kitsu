@@ -27,6 +27,7 @@ class CommentResource(BaseModelResource):
 
     def post_update(self, instance_dict):
         comment = tasks_service.reset_mentions(instance_dict)
+        tasks_service.clear_comment_cache(comment["id"])
         notifications_service.reset_notifications_for_mentions(comment)
         return comment
 
@@ -55,4 +56,5 @@ class CommentResource(BaseModelResource):
         task = tasks_service.get_task(comment["object_id"])
         user_service.check_project_access(task["project_id"])
         deletion_service.remove_comment(comment["id"])
+        tasks_service.clear_comment_cache(comment["id"])
         return '', 204

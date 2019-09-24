@@ -110,7 +110,7 @@ class ImportShotgunShotsResource(BaseImportShotgunResource):
             shot.update(data)
             shot.data.update(data["data"])
             shot.save()
-
+            shots_service.clear_shot_cache(str(shot.id))
             current_app.logger.info("Shot updated: %s" % shot)
 
         return shot

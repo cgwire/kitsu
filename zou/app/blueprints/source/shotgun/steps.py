@@ -3,6 +3,7 @@ from flask_restful import Resource, current_app
 from zou.app.models.department import Department
 from zou.app.models.task_type import TaskType
 from zou.app.utils import colors
+from zou.app.services import tasks_service
 
 from zou.app.blueprints.source.shotgun.base import (
     BaseImportShotgunResource,
@@ -77,6 +78,7 @@ class ImportShotgunStepsResource(BaseImportShotgunResource):
                 data.pop("for_entity", None)
                 data.pop("department_id", None)
             task_type.update(data)
+            tasks_service.clear_task_type_cache(str(task_type.id))
             current_app.logger.info("Task Type updated: %s" % task_type)
         return task_type
 

@@ -249,5 +249,8 @@ def remove_tasks_for_project_and_task_type(project_id, task_type_id):
     tasks = Task.query.filter_by(
         project_id=project_id, task_type_id=task_type_id
     )
+    task_ids = []
     for task in tasks:
         remove_task(task.id, force=True)
+        task_ids.append(str(task.id))
+    return task_ids

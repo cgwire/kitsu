@@ -21,7 +21,7 @@ from zou.app.models.project import Project
 from zou.app.models.entity_type import EntityType
 from zou.app.models.preview_file import PreviewFile
 
-from zou.app.utils import fields, query as query_utils
+from zou.app.utils import cache, fields, query as query_utils
 
 from zou.app.services.exception import (
     CommentNotFoundException,
@@ -39,6 +39,26 @@ from zou.app.services import (
     persons_service,
     shots_service
 )
+
+
+def clear_task_status_cache(task_status_id):
+    cache.cache.delete_memoized(get_task_status, task_status_id)
+    cache.cache.delete_memoized(get_task_status_raw, task_status_id)
+
+
+def clear_task_type_cache(task_type_id):
+    cache.cache.delete_memoized(get_task_type, task_type_id)
+    cache.cache.delete_memoized(get_task_type_raw, task_type_id)
+
+
+def clear_task_cache(task_id):
+    cache.cache.delete_memoized(get_task, task_id)
+    cache.cache.delete_memoized(get_task_raw, task_id)
+
+
+def clear_comment_cache(comment_id):
+    cache.cache.delete_memoized(get_comment, comment_id)
+    cache.cache.delete_memoized(get_comment_raw, comment_id)
 
 
 def get_done_status():
@@ -64,6 +84,7 @@ def get_todo_status():
     return get_or_create_status("Todo")
 
 
+@cache.memoize_function(1200)
 def get_task_status_raw(task_status_id):
     """
     Get task status matching given id as an active record.
@@ -75,6 +96,7 @@ def get_task_status_raw(task_status_id):
     )
 
 
+@cache.memoize_function(1200)
 def get_task_status(task_status_id):
     """
     Get task status matching given id  as a dictionary.
@@ -106,6 +128,7 @@ def get_department_from_task(task_id):
     return get_department(task_type.department_id)
 
 
+@cache.memoize_function(1200)
 def get_task_type_raw(task_type_id):
     """
     Get task type matching given id as an active record.
@@ -121,6 +144,7 @@ def get_task_type_raw(task_type_id):
     return task_type
 
 
+@cache.memoize_function(1200)
 def get_task_type(task_type_id):
     """
     Get task type matching given id as a dictionary.
@@ -128,6 +152,7 @@ def get_task_type(task_type_id):
     return get_task_type_raw(task_type_id).serialize()
 
 
+@cache.memoize_function(120)
 def get_task_raw(task_id):
     """
     Get task matching given id as an active record.
@@ -143,6 +168,7 @@ def get_task_raw(task_id):
     return task
 
 
+@cache.memoize_function(120)
 def get_task(task_id):
     """
     Get task matching given id as a dictionary.
@@ -409,6 +435,7 @@ def get_comments(task_id):
     return comments
 
 
+@cache.memoize_function(120)
 def get_comment_raw(comment_id):
     """
     Return comment matching give id as an active record.
@@ -423,6 +450,7 @@ def get_comment_raw(comment_id):
     return comment
 
 
+@cache.memoize_function(120)
 def get_comment(comment_id):
     """
     Return comment matching give id as an active record.
@@ -487,6 +515,7 @@ def get_comment_mentions(object_id, text):
 def delete_comment(comment_id):
     comment = get_comment_raw(comment_id)
     comment.delete()
+    clear_comment_cache(comment_id)
     events.emit("comment:delete", {
         "comment_id": comment_id,
     })
@@ -709,6 +738,7 @@ def update_task(task_id, data):
         data["end_date"] = datetime.datetime.now()
 
     task.update(data)
+    clear_task_cache(task_id)
     events.emit("task:update", {
         "task_id": task_id
     })
@@ -751,6 +781,7 @@ def update_task_status(task_status_id, data):
     """
     task_status = get_task_status_raw(task_status_id)
     task_status.update(data)
+    clear_task_status_cache(task_status_id)
     events.emit("task_status:update", {
         "task_status_id": task_status_id
     })
@@ -843,6 +874,7 @@ def create_or_update_time_spent(task_id, person_id, date, duration, add=False):
     for time_spent in time_spents:
         task.duration += time_spent.duration
     task.save()
+    clear_task_cache(task_id)
     events.emit("task:update", {"task_id": task_id})
 
     return time_spent.serialize()
@@ -867,13 +899,14 @@ def clear_assignation(task_id):
     task = get_task_raw(task_id)
     assignees = [person.serialize() for person in task.assignees]
     task.update({"assignees": []})
+    clear_task_cache(task_id)
     task_dict = task.serialize()
     for assignee in assignees:
         events.emit("task:unassign", {
             "person_id": assignee["id"],
             "task_id": task_id
         })
-        events.emit("task:update", {"task_id": task_id})
+    events.emit("task:update", {"task_id": task_id})
     return task_dict
 
 
@@ -890,6 +923,7 @@ def assign_task(task_id, person_id):
         "task_id": task.id,
         "person_id": person.id
     })
+    clear_task_cache(task_id)
     events.emit("task:update", {"task_id": task_id})
     return task_dict
 
@@ -913,6 +947,7 @@ def start_task(task_id):
             new_data["real_start_date"] = datetime.datetime.now()
 
         task.update(new_data)
+        clear_task_cache(task_id)
         events.emit("task:start", {
             "task_id": task_id,
             "previous_task_status_id": task_dict_before["task_status_id"],
@@ -941,6 +976,7 @@ def task_to_review(
     if change_status:
         task.update({"task_status_id": to_review_status["id"]})
         task.save()
+        clear_task_cache(task_id)
 
     project = Project.get(task.project_id)
     entity = Entity.get(task.entity_id)

@@ -83,6 +83,7 @@ class ImportShotgunAssetsResource(BaseImportShotgunResource):
                 data["shotgun_id"]
             )
             entity.update(data)
+            assets_service.clear_asset_cache(str(entity.id))
             current_app.logger.info("Entity updated: %s" % entity)
         except AssetNotFoundException:
             if data.get("entity_type_id", None) is not None:
@@ -101,6 +102,7 @@ class ImportShotgunAssetsResource(BaseImportShotgunResource):
                 asset = assets_service.get_asset_by_shotgun_id(key)
                 data = {"entities_out": self.parent_map[key]}
                 assets_service.update_asset(asset["id"], data)
+                assets_service.clear_asset_cache(asset["id"])
             except AssetNotFoundException:
                 pass
 
@@ -110,7 +112,9 @@ class ImportShotgunAssetsResource(BaseImportShotgunResource):
 class ImportRemoveShotgunAssetResource(ImportRemoveShotgunBaseResource):
 
     def __init__(self):
-        ImportRemoveShotgunBaseResource.__init__(self, Entity, self.delete_func)
+        ImportRemoveShotgunBaseResource.__init__(
+            self, Entity, self.delete_func
+        )
 
     def delete_func(self, asset):
         try:

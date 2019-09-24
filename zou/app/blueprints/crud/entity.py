@@ -6,7 +6,7 @@ from flask_jwt_extended import jwt_required
 from sqlalchemy.exc import IntegrityError, StatementError
 
 from zou.app.models.entity import Entity
-from zou.app.services import user_service, shots_service
+from zou.app.services import assets_service, shots_service, user_service
 from zou.app.utils import events
 
 from werkzeug.exceptions import NotFound
@@ -28,6 +28,11 @@ class EntityEventMixin(object):
     def emit_event(self, event_name, entity_dict):
         instance_id = entity_dict["id"]
         type_name = self.get_type_name(entity_dict)
+        if event_name in ["update", "delete"]:
+            if type_name == "shot":
+                shots_service.clear_shot_cache(instance_id)
+            if type_name == "asset":
+                assets_service.clear_asset_cache(instance_id)
         events.emit(
             "%s:%s" % (type_name, event_name),
             {

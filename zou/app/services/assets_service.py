@@ -1,6 +1,6 @@
 from sqlalchemy.exc import StatementError
 
-from zou.app.utils import events, fields
+from zou.app.utils import events, fields, cache
 from zou.app.utils import query as query_utils
 
 from zou.app.models.entity import Entity
@@ -24,11 +24,17 @@ from zou.app.services.exception import (
 )
 
 
+def clear_asset_cache(asset_id):
+    cache.cache.delete_memoized(get_asset, asset_id)
+    cache.cache.delete_memoized(get_full_asset, asset_id)
+
+
 def build_asset_type_filter():
     """
     Generate a query filter to filter entity that are assets (it means not shot,
     not sequence, not episode and not scene)
     """
+    cache.cache.delete_memoized(build_asset_type_filter)
     shot_type = shots_service.get_shot_type()
     scene_type = shots_service.get_scene_type()
     sequence_type = shots_service.get_sequence_type()
@@ -41,23 +47,6 @@ def build_asset_type_filter():
     if scene_type is not None:
         ids_to_exclude.append(scene_type["id"])
     return ~Entity.entity_type_id.in_(ids_to_exclude)
-
-
-def build_entity_type_asset_type_filter():
-    """
-    Generate a query filter to filter entity types that are asset types (it
-    means not shot, not sequence, not episode and not scene)
-    """
-    shot_type = shots_service.get_shot_type()
-    scene_type = shots_service.get_scene_type()
-    sequence_type = shots_service.get_sequence_type()
-    episode_type = shots_service.get_episode_type()
-    return ~EntityType.id.in_([
-        shot_type["id"],
-        scene_type["id"],
-        sequence_type["id"],
-        episode_type["id"]
-    ])
 
 
 def get_assets(criterions={}):
@@ -205,7 +194,7 @@ def get_asset_types(criterions={}):
     Retrieve all asset types available.
     """
     query = EntityType.query \
-        .filter(build_entity_type_asset_type_filter())
+        .filter(build_asset_type_filter())
     query = query_utils.apply_criterions_to_db_query(Entity, query, criterions)
     return EntityType.serialize_list(query.all(), obj_type="AssetType")
 
@@ -258,6 +247,7 @@ def get_asset_raw(entity_id):
     return entity
 
 
+@cache.memoize_function(10)
 def get_asset(entity_id):
     """
     Return a given asset as a dict.
@@ -284,6 +274,7 @@ def get_raw_asset_by_shotgun_id(shotgun_id):
     return get_asset_raw(asset["id"])
 
 
+@cache.memoize_function(3)
 def get_full_asset(asset_id):
     """
     Return asset matching given id with additional information (project name,
@@ -469,9 +460,11 @@ def remove_asset(asset_id, force=False):
             "asset_id": asset_id
         })
     else:
+        from zou.app.services import tasks_service
         tasks = Task.query.filter_by(entity_id=asset_id).all()
         for task in tasks:
             deletion_service.remove_task(task.id, force=True)
+            tasks_service.delete_task_cache(str(task.id))
         asset.delete()
         events.emit("asset:delete", {
             "asset_id": asset_id

@@ -27,27 +27,32 @@ from zou.app.services.exception import (
 )
 
 
-@cache.memoize_function(120)
+def clear_shot_cache(shot_id):
+    cache.cache.delete_memoized(get_shot, shot_id)
+    cache.cache.delete_memoized(get_full_shot, shot_id)
+
+
+@cache.memoize_function(1200)
 def get_episode_type():
     return entities_service.get_entity_type_by_name("Episode")
 
 
-@cache.memoize_function(120)
+@cache.memoize_function(1200)
 def get_sequence_type():
     return entities_service.get_entity_type_by_name("Sequence")
 
 
-@cache.memoize_function(120)
+@cache.memoize_function(1200)
 def get_shot_type():
     return entities_service.get_entity_type_by_name("Shot")
 
 
-@cache.memoize_function(120)
+@cache.memoize_function(1200)
 def get_scene_type():
     return entities_service.get_entity_type_by_name("Scene")
 
 
-@cache.memoize_function(120)
+@cache.memoize_function(1200)
 def get_camera_type():
     return entities_service.get_entity_type_by_name("Camera")
 
@@ -294,6 +299,7 @@ def get_shot_raw(shot_id):
     return shot
 
 
+@cache.memoize_function(10)
 def get_shot(shot_id):
     """
     Return given shot as a dictionary.
@@ -301,6 +307,7 @@ def get_shot(shot_id):
     return get_shot_raw(shot_id).serialize(obj_type="Shot")
 
 
+@cache.memoize_function(3)
 def get_full_shot(shot_id):
     """
     Return given shot as a dictionary with extra data like project and
@@ -680,19 +687,23 @@ def remove_shot(shot_id, force=False):
 
     if is_tasks_related and not force:
         shot.update({"canceled": True})
+        clear_shot_cache(shot_id)
         events.emit("shot:update", {
             "shot_id": shot_id
         })
     else:
+        from zou.app.services import tasks_service
         tasks = Task.query.filter_by(entity_id=shot_id).all()
         for task in tasks:
             deletion_service.remove_task(task.id, force=True)
+            tasks_service.delete_task_cache(str(task.id))
 
         subscriptions = Subscription.query.filter_by(entity_id=shot_id).all()
         for subscription in subscriptions:
             subscription.delete()
 
         shot.delete()
+        clear_shot_cache(shot_id)
         events.emit("shot:delete", {
             "shot_id": shot_id
         })
@@ -839,6 +850,7 @@ def update_shot(shot_id, data_dict):
     """
     shot = get_shot_raw(shot_id)
     shot.update(data_dict)
+    clear_shot_cache(shot_id)
     events.emit("shot:update", {
         "shot_id": shot_id
     })

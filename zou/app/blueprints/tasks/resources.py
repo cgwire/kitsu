@@ -199,6 +199,7 @@ class TaskCommentResource(Resource):
         task = tasks_service.get_task(task_id)
         user_service.check_project_access(task["project_id"])
         deletion_service.remove_comment(comment_id)
+        tasks_service.clear_comment_cache(comment_id)
         return '', 204
 
 
@@ -654,10 +655,12 @@ class DeleteAllTasksForTaskTypeResource(Resource):
     def delete(self, project_id, task_type_id):
         permissions.check_admin_permissions()
         projects_service.get_project(project_id)
-        deletion_service.remove_tasks_for_project_and_task_type(
+        task_ids = deletion_service.remove_tasks_for_project_and_task_type(
             project_id,
             task_type_id
         )
+        for task_id in task_ids:
+            tasks_service.delete_task_cache(task_id)
         return '', 204
 
 
