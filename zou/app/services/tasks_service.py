@@ -84,7 +84,6 @@ def get_todo_status():
     return get_or_create_status("Todo")
 
 
-@cache.memoize_function(1200)
 def get_task_status_raw(task_status_id):
     """
     Get task status matching given id as an active record.
@@ -128,7 +127,6 @@ def get_department_from_task(task_id):
     return get_department(task_type.department_id)
 
 
-@cache.memoize_function(1200)
 def get_task_type_raw(task_type_id):
     """
     Get task type matching given id as an active record.
@@ -152,7 +150,6 @@ def get_task_type(task_type_id):
     return get_task_type_raw(task_type_id).serialize()
 
 
-@cache.memoize_function(120)
 def get_task_raw(task_id):
     """
     Get task matching given id as an active record.
@@ -435,7 +432,6 @@ def get_comments(task_id):
     return comments
 
 
-@cache.memoize_function(120)
 def get_comment_raw(comment_id):
     """
     Return comment matching give id as an active record.
