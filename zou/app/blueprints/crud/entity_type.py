@@ -2,6 +2,7 @@ from .base import BaseModelResource, BaseModelsResource
 
 from zou.app.models.entity_type import EntityType
 from zou.app.utils import events
+from zou.app.services import entities_service
 
 
 class EntityTypesResource(BaseModelsResource):
@@ -29,3 +30,9 @@ class EntityTypeResource(BaseModelResource):
 
     def emit_delete_event(self, instance_dict):
         events.emit("asset-type:delete", {"asset_type_id": instance_dict["id"]})
+
+    def post_update(self, instance_dict):
+        entities_service.clear_entity_type_cache(instance_dict["id"])
+
+    def post_delete(self, instance_dict):
+        tasks_service.clear_entity_type_cache(instance_dict["id"])

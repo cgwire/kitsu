@@ -24,10 +24,14 @@ from zou.app.services.exception import (
     EntryAlreadyExistsException
 )
 
-from zou.app.utils import fields, events, query as query_utils
+from zou.app.utils import cache, fields, events, query as query_utils
 
 from sqlalchemy import desc
 from sqlalchemy.exc import StatementError, IntegrityError
+
+
+def clear_preview_file_cache(preview_file_id):
+    cache.cache.delete_memoized(get_preview_file, preview_file_id)
 
 
 def get_default_status():
@@ -480,6 +484,7 @@ def get_preview_file_raw(preview_file_id):
     return preview_file
 
 
+@cache.memoize_function(240)
 def get_preview_file(preview_file_id):
     """
     Get preview file as dict.
@@ -551,6 +556,7 @@ def update_output_file(output_file_id, data):
 def update_preview_file(preview_file_id, data):
     preview_file = get_preview_file_raw(preview_file_id)
     preview_file.update(data)
+    clear_preview_file_cache(preview_file_id)
     events.emit("preview-file:update", {"preview_file_id": preview_file_id})
     return preview_file.serialize()
 

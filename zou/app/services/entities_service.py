@@ -1,6 +1,5 @@
 from zou.app.services import base_service
-from zou.app.utils import events
-from zou.app.utils import fields
+from zou.app.utils import cache, events, fields
 
 from zou.app.models.entity import Entity, EntityLink
 from zou.app.models.entity_type import EntityType
@@ -15,6 +14,12 @@ from zou.app.services.exception import (
 )
 
 
+def clear_entity_type_cache(entity_type_id):
+    cache.cache.delete_memoized(get_entity_type, entity_type_id)
+    cache.cache.delete_memoized(get_entity_type_by_name)
+
+
+@cache.memoize_function(240)
 def get_entity_type(entity_type_id):
     """
     Return an entity type matching given id, as a dict. Raises an exception
@@ -27,6 +32,7 @@ def get_entity_type(entity_type_id):
     ).serialize()
 
 
+@cache.memoize_function(240)
 def get_entity_type_by_name(name):
     """
     Return entity type maching *name*. If it doesn't exist, it creates it.
@@ -186,4 +192,3 @@ def get_entities_and_tasks(criterions={}):
                 task_map[task_id]["assignees"].append(str(person_id))
 
     return list(entity_map.values())
-

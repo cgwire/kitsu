@@ -20,6 +20,7 @@ from zou.app.utils import fields, movie_utils, events
 
 from zou.app.services import (
     base_service,
+    files_service,
     projects_service,
     shots_service,
     tasks_service,
@@ -249,9 +250,10 @@ def retrieve_playlist_tmp_files(playlist):
         if "preview_file_id" in shot \
            and shot["preview_file_id"] is not None \
            and len(shot["preview_file_id"]) > 0:
-            preview_file = PreviewFile.get(shot["preview_file_id"])
+            preview_file = \
+                files_service.get_preview_file(shot["preview_file_id"])
             if preview_file is not None and preview_file.extension == "mp4":
-                preview_file_ids.append(preview_file.id)
+                preview_file_ids.append(preview_file["id"])
 
     file_paths = []
     for preview_file_id in preview_file_ids:

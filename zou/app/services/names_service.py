@@ -1,9 +1,8 @@
 import slugify
 
-from zou.app.models.entity import Entity
 from zou.app.models.organisation import Organisation
-from zou.app.models.entity_type import EntityType
 from zou.app.services import (
+    entities_service,
     files_service,
     projects_service,
     tasks_service,
@@ -17,24 +16,24 @@ def get_full_entity_name(entity_id):
     the result is "Episode name / Sequence name / Shot name". If it's an
     asset the result is "Asset type name / Asset name".
     """
-    entity = Entity.get(entity_id)
+    entity = entities_service.get_entity(entity_id)
     episode_id = None
-    if shots_service.is_shot(entity.serialize()):
-        sequence = Entity.get(entity.parent_id)
+    if shots_service.is_shot(entity):
+        sequence = entities_service.get_entity(entity.parent_id)
         if sequence.parent_id is None:
-            name = "%s / %s" % (sequence.name, entity.name)
+            name = "%s / %s" % (sequence["name"], entity["name"])
         else:
-            episode = Entity.get(sequence.parent_id)
-            episode_id = str(episode.id)
+            episode = entities_service.get_entity(sequence.parent_id)
+            episode_id = episode["id"]
             name = "%s / %s / %s" % (
-                episode.name,
-                sequence.name,
-                entity.name
+                episode["name"],
+                sequence["name"],
+                entity["name"]
             )
     else:
-        asset_type = EntityType.get(entity.entity_type_id)
-        episode_id = entity.source_id
-        name = "%s / %s" % (asset_type.name, entity.name)
+        asset_type = entities_service.get_entity_type(entity["entity_type_id"])
+        episode_id = entity["source_id"]
+        name = "%s / %s" % (asset_type["name"], entity["name"])
     return (name, episode_id)
 
 

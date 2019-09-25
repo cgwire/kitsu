@@ -402,13 +402,12 @@ def get_comments(task_id):
         }
 
         if comment.preview_file_id is not None:
-            preview = PreviewFile.get(comment.preview_file_id)
+            preview = files_service.get_preview_file(comment.preview_file_id)
             comment_dict["previews"] = [{
                 "id": str(preview.id),
-                "revision": preview.revision,
-                "is_movie": preview.is_movie,
-                "extension": preview.extension,
-                "annotations": preview.annotations
+                "revision": preview["revision"],
+                "extension": preview["extension"],
+                "annotations": preview["annotations"]
             }]
         else:
             comment_dict["previews"] = []
@@ -420,7 +419,6 @@ def get_comments(task_id):
                 comment_dict["previews"].append({
                     "id": str(preview.id),
                     "revision": preview.revision,
-                    "is_movie": preview.is_movie,
                     "extension": preview.extension,
                     "annotations": preview.annotations
                 })
