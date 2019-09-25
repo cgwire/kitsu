@@ -209,7 +209,7 @@
           <td class="framein" v-if="isFrameIn && isShowInfos">
             {{ shot.data && shot.data.frame_in ? shot.data.frame_in : ''}}
           </td>
-          <td class="frameout" v-if="isFrameIn && isShowInfos">
+          <td class="frameout" v-if="isFrameOut && isShowInfos">
             {{ shot.data && shot.data.frame_out ? shot.data.frame_out : ''}}
           </td>
           <td class="fps" v-if="isFps && isShowInfos">
