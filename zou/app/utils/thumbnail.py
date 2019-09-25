@@ -21,6 +21,10 @@ def save_file(tmp_folder, instance_id, file_to_save):
     file_name = instance_id + extension.lower()
     file_path = os.path.join(tmp_folder, file_name)
     file_to_save.save(file_path)
+    im = Image.open(file_path)
+    if im.mode == "CMYK":
+        im = im.convert("RGB")
+    im.save(file_path, "PNG")
     return file_path
 
 def convert_jpg_to_png(file_source_path):
