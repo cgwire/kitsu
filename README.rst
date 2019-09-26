@@ -93,3 +93,5 @@ Visit `cg-wire.com <https://cg-wire.com>`__ for more information.
    :target: https://www.les-fees-speciales.coop
 .. |NKI Logo| image:: https://www.cg-wire.com/images/logo-nki.png
    :target: https://www.nki.tv
+.. |Solidanim Logo| image:: https://www.cg-wire.com/images/logo-solidanim.png
+   :target: https://www.solidanim.com
