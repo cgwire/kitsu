@@ -95,11 +95,11 @@ class RouteOutputFilesTestCase(ApiDBTestCase):
             "/data/entities/%s/output-files/last-revisions" % self.asset.id
         )
 
-        assert(self.output_file_geometry.serialize() in output_files)
-        assert(self.output_file_cache.serialize() in output_files)
-        assert(self.output_file_texture.serialize() in output_files)
-        assert(self.output_file_render_1.serialize() in output_files)
-        assert(self.output_file_render_2.serialize() in output_files)
+        self.assertIn(self.output_file_geometry.serialize(), output_files)
+        self.assertIn(self.output_file_cache.serialize(), output_files)
+        self.assertIn(self.output_file_texture.serialize(), output_files)
+        self.assertIn(self.output_file_render_1.serialize(), output_files)
+        self.assertIn(self.output_file_render_2.serialize(), output_files)
 
     def test_get_entity_output_types(self):
         self.generate_output_files()
@@ -487,9 +487,7 @@ class RouteOutputFilesTestCase(ApiDBTestCase):
                 shot_id
             )
         )
-        assert(
-            output_file["id"] in [f['id'] for f in result]
-        )
+        self.assertIn(output_file["id"], [f['id'] for f in result])
 
     def test_new_asset_asset_instance_output(self):
         self.generate_fixture_asset_types()
