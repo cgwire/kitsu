@@ -19,11 +19,11 @@ def get_full_entity_name(entity_id):
     entity = entities_service.get_entity(entity_id)
     episode_id = None
     if shots_service.is_shot(entity):
-        sequence = entities_service.get_entity(entity.parent_id)
-        if sequence.parent_id is None:
+        sequence = entities_service.get_entity(entity["parent_id"])
+        if sequence["parent_id"] is None:
             name = "%s / %s" % (sequence["name"], entity["name"])
         else:
-            episode = entities_service.get_entity(sequence.parent_id)
+            episode = entities_service.get_entity(sequence["parent_id"])
             episode_id = episode["id"]
             name = "%s / %s / %s" % (
                 episode["name"],
