@@ -16,10 +16,6 @@ export default {
     return client.getModel('assets', assetId)
   },
 
-  getCastIn (asset, callback) {
-    client.get(`/api/data/assets/${asset.id}/cast-in`, callback)
-  },
-
   newAsset (asset, callback) {
     const data = {
       name: asset.name,

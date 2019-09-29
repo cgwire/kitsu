@@ -1,7 +1,8 @@
 import Vue from 'vue'
 import moment from 'moment'
-import shotsApi from '../api/shots'
+import breakdownApi from '../api/breakdown'
 import peopleApi from '../api/people'
+import shotsApi from '../api/shots'
 import tasksStore from './tasks'
 import peopleStore from './people'
 import taskTypesStore from './tasktypes'
@@ -489,14 +490,12 @@ const actions = {
       .catch((err) => console.error(err))
   },
 
-  loadShotCasting ({ commit, rootGetters }, { shot, callback }) {
+  loadShotCasting ({ commit, rootGetters }, shot) {
     const assetMap = rootGetters.assetMap
-    shotsApi.getCasting(shot, (err, casting) => {
-      if (!err) {
+    return breakdownApi.getShotCasting(shot)
+      .then((casting) => {
         commit(LOAD_SHOT_CASTING_END, { shot, casting, assetMap })
-      }
-      if (callback) callback(err, casting)
-    })
+      })
   },
 
   newShot ({ commit, dispatch, rootGetters }, { shot, callback }) {

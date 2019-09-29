@@ -127,7 +127,7 @@
                 :with-link="false"
               />
               <div>
-                <span>{{ asset.name }}</span>
+                <span>{{ asset.asset_name }}</span>
                 <span v-if="asset.nb_occurences > 1">
                   ({{ asset.nb_occurences }})
                 </span>
@@ -224,32 +224,26 @@ export default {
 
     if (!this.currentShot) {
       this.loadShot(this.route.params.shot_id)
-        .then((shot) => {
+        .then(() => {
           this.currentShot = this.getCurrentShot()
-          this.loadShotCasting({
-            shot: this.currentShot,
-            callback: (err, casting) => {
-              if (err) {
-                this.casting.isError = true
-              } else {
-                this.casting.isError = false
-              }
-              this.casting.isLoading = true
-            }
-          })
+          return this.loadShotCasting(this.currentShot)
+        })
+        .then(() => {
+          this.casting.isLoading = false
+        })
+        .catch((err) => {
+          this.casting.isError = true
+          console.error(err)
         })
     } else {
-      this.loadShotCasting({
-        shot: this.currentShot,
-        callback: (err, casting) => {
-          if (err) {
-            this.casting.isError = true
-          } else {
-            this.casting.isError = false
-          }
-          this.casting.isLoading = true
-        }
-      })
+      this.loadShotCasting(this.currentShot)
+        .then(() => {
+          this.casting.isLoading = false
+        })
+        .catch((err) => {
+          this.casting.isError = true
+          console.error(err)
+        })
     }
   },
 

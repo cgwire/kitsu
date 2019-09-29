@@ -22,5 +22,16 @@ export default {
   postCastingCsv (production, formData) {
     const path = `/api/import/csv/projects/${production.id}/casting`
     return client.ppost(path, formData)
+  },
+
+  getAssetCastIn (asset) {
+    return client.pget(`/api/data/assets/${asset.id}/cast-in`)
+  },
+
+  getShotCasting (shot) {
+    const path =
+      `/api/data/projects/${shot.project_id}/entities/` +
+      `${shot.id}/casting`
+    return client.pget(path)
   }
 }

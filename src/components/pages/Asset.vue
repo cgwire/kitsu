@@ -62,10 +62,11 @@
   </div>
 
   <div class="asset-casted-in">
-    <page-subtitle :text="$t('assets.cast_in')"></page-subtitle>
+    <page-subtitle :text="$t('assets.cast_in')" />
     <div v-if="currentAsset">
       <div
-        v-if="currentAsset.castInShotsBySequence && currentAsset.castInShotsBySequence[0].length > 0"
+        v-if="currentAsset.castInShotsBySequence &&
+              currentAsset.castInShotsBySequence[0].length > 0"
       >
         <div
           class="sequence-shots"
@@ -96,7 +97,7 @@
                 :with-link="false"
               />
               <div>
-                <span>{{ shot.name }}</span>
+                <span>{{ shot.shot_name }}</span>
                 <span v-if="shot.nb_occurences > 1">
                   ({{ shot.nb_occurences }})
                 </span>
@@ -190,37 +191,27 @@ export default {
     this.castIn.isError = false
 
     if (!this.currentAsset) {
-      this.loadAsset({
-        assetId: this.route.params.asset_id,
-        callback: (err) => {
-          if (!err) {
-            this.currentAsset = this.getCurrentAsset()
-            this.loadAssetCastIn({
-              asset: this.currentAsset,
-              callback: (err, castIn) => {
-                if (err) {
-                  this.castIn.isError = true
-                } else {
-                  this.castIn.isError = false
-                }
-                this.castIn.isLoading = true
-              }
-            })
-          }
-        }
-      })
+      this.loadAsset(this.route.params.asset_id)
+        .then(() => {
+          this.currentAsset = this.getCurrentAsset()
+          return this.loadAssetCastIn(this.currentAsset)
+        })
+        .then(() => {
+          this.castIn.isLoading = false
+        })
+        .catch((err) => {
+          this.castIn.isError = true
+          console.error(err)
+        })
     } else {
-      this.loadAssetCastIn({
-        asset: this.currentAsset,
-        callback: (err, castIn) => {
-          if (err) {
-            this.castIn.isError = true
-          } else {
-            this.castIn.isError = false
-          }
-          this.castIn.isLoading = true
-        }
-      })
+      this.loadAssetCastIn(this.currentAsset)
+        .then(() => {
+          this.castIn.isLoading = false
+        })
+        .catch((err) => {
+          this.castIn.isError = true
+          console.error(err)
+        })
     }
   },
 
