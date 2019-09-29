@@ -218,6 +218,7 @@ def get_cast_in(asset_id):
     links = EntityLink.query \
         .filter_by(entity_out_id=asset_id) \
         .filter(Entity.canceled != True) \
+        .filter(assets_service.build_entity_type_asset_type_filter()) \
         .join(Entity, EntityLink.entity_in_id == Entity.id) \
         .join(EntityType, EntityType.id == Entity.entity_type_id) \
         .add_columns(
