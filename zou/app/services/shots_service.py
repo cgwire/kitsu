@@ -238,13 +238,13 @@ def get_shots_and_tasks(criterions={}):
                 "fps": shot.data.get("fps", None),
                 "preview_file_id": str(shot.preview_file_id or ""),
                 "episode_id": str(episode_id),
-                "episode_name": episode_name,
+                "episode_name": episode_name or "",
                 "sequence_id": str(sequence_id),
                 "sequence_name": sequence_name,
                 "canceled": shot.canceled,
                 "data": fields.serialize_value(shot.data),
                 "tasks": [],
-                    "project_id": str(project_id),
+                "project_id": str(project_id),
                 "project_name": project_name
             }
 
