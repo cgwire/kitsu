@@ -30,13 +30,14 @@
   </div>
   <div class="asset-picture" v-else>
     <span class="empty-picture">
-      {{ asset.name }} ({{ nbOccurences }})
+      {{ shortenName(asset.name) }} ({{ nbOccurences }})
     </span>
   </div>
 </div>
 </template>
 
 <script>
+import stringHelpers from '../../../lib/string'
 export default {
   name: 'asset-block',
   props: {
@@ -64,8 +65,13 @@ export default {
     removeOneAsset (event) {
       this.$emit('remove-one', this.asset.asset_id)
     },
+
     removeTenAssets (event) {
       this.$emit('remove-ten', this.asset.asset_id)
+    },
+
+    shortenName (name) {
+      return stringHelpers.shortenText(name, 13)
     }
   }
 }
