@@ -403,5 +403,14 @@ def download_storage_files():
     """
     commands.download_file_from_storage()
 
+
+@cli.command()
+def dump_database():
+    """
+    Dump database described in Zou environment variables.
+    """
+    commands.dump_database()
+
+
 if __name__ == '__main__':
     cli()

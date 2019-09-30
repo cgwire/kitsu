@@ -3,7 +3,9 @@
 import os
 import json
 import datetime
+import gzip
 
+from sh import pg_dump
 
 from ldap3 import Server, Connection, ALL, NTLM, SIMPLE
 from zou.app.utils import thumbnail as thumbnail_utils
@@ -337,3 +339,21 @@ def download_file_from_storage():
     sync_service.download_entity_thumbnails_from_storage()
     sync_service.download_preview_files_from_storage()
 
+
+def dump_database():
+    DB_HOST = os.getenv("DB_HOST", "localhost")
+    DB_PORT = os.getenv("DB_PORT", "5432")
+    DB_USERNAME = os.getenv("DB_USERNAME", "postgres")
+    DB_PASSWORD = os.getenv("DB_PASSWORD", "mysecretpassword")
+    DB_DATABASE = os.getenv("DB_DATABASE", "zoudb")
+
+    now = datetime.datetime.now().strftime("%Y-%m-%d")
+    with gzip.open("zou-db-backup-%s.gz" % now, "wb") as archive:
+        pg_dump(
+            "-h", DB_HOST,
+            "-p", DB_PORT,
+            "-U", DB_USERNAME,
+            DB_DATABASE,
+            _out=archive,
+            _env={"PGPASSWORD": DB_PASSWORD}
+        )
