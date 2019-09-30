@@ -55,7 +55,8 @@ export const routes = [
       const browser = Bowser.getParser(window.navigator.userAgent)
       const isValidBrowser = browser.satisfies({
         chrome: '>20.1.1432',
-        firefox: '>31'
+        firefox: '>31',
+        vivaldi: '>2.8'
       })
       if (!isValidBrowser) {
         return next({ name: 'wrong-browser' })
