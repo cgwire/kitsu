@@ -1045,7 +1045,8 @@ def get_comments_for_project(project_id, page=0):
     """
     query = Comment.query \
         .join(Task, Task.id == Comment.object_id) \
-        .filter(Task.project_id == project_id)
+        .filter(Task.project_id == project_id) \
+        .order_by(Comment.updated_at.desc())
     return query_utils.get_paginated_results(query, page)
 
 
@@ -1064,5 +1065,6 @@ def get_tasks_for_project(project_id, page=0):
     Return all tasks for given project.
     """
     query = Task.query \
-        .filter(Task.project_id == project_id)
+        .filter(Task.project_id == project_id) \
+        .order_by(Task.updated_at.desc())
     return query_utils.get_paginated_results(query, page)

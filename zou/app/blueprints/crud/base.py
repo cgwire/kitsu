@@ -30,6 +30,7 @@ class BaseModelsResource(Resource):
         offset = (page - 1) * limit
 
         nb_pages = int(math.ceil(total / float(limit)))
+        query = query.order_by(self.model.updated_at.desc())
         query = query.limit(limit)
         query = query.offset(offset)
 
@@ -148,7 +149,7 @@ class BaseModelsResource(Resource):
                 return {
                     "error": True,
                     "message": "One of the value of the filter has not the "
-                            "proper format: %s" % exception.message
+                               "proper format: %s" % exception.message
                 }, 400
             else:
                 raise exception

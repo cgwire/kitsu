@@ -662,6 +662,7 @@ def get_preview_files_for_project(project_id, page=-1):
     Return all preview files for given project.
     """
     query = PreviewFile.query \
-       .join(Task) \
-       .filter(Task.project_id == project_id)
+        .join(Task) \
+        .filter(Task.project_id == project_id) \
+        .order_by(desc(PreviewFile.updated_at))
     return query_utils.get_paginated_results(query, page)

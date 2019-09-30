@@ -372,5 +372,6 @@ def get_notifications_for_project(project_id, page=0):
     """
     query = Notification.query \
         .join(Task) \
-        .filter(Task.project_id == project_id)
+        .filter(Task.project_id == project_id) \
+        .order_by(Notification.updated_at.desc())
     return query_utils.get_paginated_results(query, page)
