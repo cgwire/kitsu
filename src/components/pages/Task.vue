@@ -581,7 +581,7 @@ export default {
         const type = this.currentTask.entity_type_name
         let entityName =
           this.currentTask.full_entity_name || this.currentTask.entity_name
-        if (this.isSingleEpisode && type === 'Shot') {
+        if (this.isTVShow && type === 'Shot') {
           entityName = entityName
             .split('/')
             .splice(1)
