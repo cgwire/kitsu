@@ -6,10 +6,11 @@ from zou.app import app
 from zou.app.services import files_service
 from zou.app.models.software import Software
 from zou.app.services.exception import (
-    WorkingFileNotFoundException,
-    SoftwareNotFoundException,
+    EntryAlreadyExistsException,
     OutputFileNotFoundException,
-    EntryAlreadyExistsException
+    PreviewFileNotFoundException,
+    SoftwareNotFoundException,
+    WorkingFileNotFoundException,
 )
 
 
@@ -453,3 +454,34 @@ class FileServiceTestCase(ApiDBTestCase):
                 representation="max"
             )
         self.assertEqual(len(output_files), 3)
+
+    def test_get_project_from_preview_file(self):
+        project_id = str(self.project.id)
+        self.generate_fixture_preview_file()
+        project = files_service.get_project_from_preview_file(
+            self.preview_file.id
+        )
+        self.assertEqual(project["id"], project_id)
+
+    def test_remove_preview_file(self):
+        self.generate_fixture_preview_file()
+        preview_file_id = self.preview_file.id
+        files_service.remove_preview_file(preview_file_id)
+        self.assertRaises(
+            PreviewFileNotFoundException,
+            files_service.get_preview_file,
+            preview_file_id
+        )
+
+
+
+    def test_get_preview_files_for_project(self):
+        project_id = str(self.project.id)
+        self.generate_fixture_project_standard()
+        project_2_id = str(self.project_standard.id)
+        self.generate_fixture_preview_file()
+        preview_files = files_service.get_preview_files_for_project(project_id)
+        self.assertEqual(len(preview_files), 1)
+        preview_files = \
+            files_service.get_preview_files_for_project(project_2_id)
+        self.assertEqual(len(preview_files), 0)
