@@ -872,6 +872,59 @@ class InstanceOutputTypeOutputFilesResource(Resource):
             )
 
 
+class EntityOutputFilesResource(Resource):
+    """
+    Get all output files for given asset instance and given output type.
+    """
+
+    @jwt_required
+    def get(self, entity_id):
+        entity = entities_service.get_entity(entity_id)
+        user_service.check_project_access(entity["project_id"])
+
+        task_type_id = request.args.get("task_type_id")
+        output_type_id = request.args.get("output_type_id")
+        name = request.args.get("name")
+        representation = request.args.get("representation")
+
+        return \
+            files_service.get_output_files_for_entity(
+                entity['id'],
+                task_type_id=task_type_id,
+                output_type_id=output_type_id,
+                name=name,
+                representation=representation
+            )
+
+
+class InstanceOutputFilesResource(Resource):
+    """
+    Get all output files for given asset instance and given output type.
+    """
+
+    @jwt_required
+    def get(self, asset_instance_id):
+        asset_instance = assets_service.get_asset_instance(asset_instance_id)
+        asset = assets_service.get_asset(asset_instance["asset_id"])
+        user_service.check_project_access(asset["project_id"])
+
+        temporal_entity_id = request.args.get("temporal_entity_id")
+        task_type_id = request.args.get("task_type_id")
+        output_type_id = request.args.get("output_type_id")
+        name = request.args.get("name")
+        representation = request.args.get("representation")
+
+        return \
+            files_service.get_output_files_for_instance(
+                asset_instance['id'],
+                temporal_entity_id=temporal_entity_id,
+                task_type_id=task_type_id,
+                output_type_id=output_type_id,
+                name=name,
+                representation=representation
+            )
+
+
 class FileResource(Resource):
     """
     Get information about a file that could be a working file as much as an

@@ -22,6 +22,8 @@ from .resources import (
     LastInstanceOutputFilesResource,
     InstanceOutputTypesResource,
     InstanceOutputTypeOutputFilesResource,
+    EntityOutputFilesResource,
+    InstanceOutputFilesResource,
 
     SetTreeResource,
 
@@ -90,6 +92,14 @@ routes = [
     (
         "/data/entities/<entity_id>/output-types/<output_type_id>/output-files",
         EntityOutputTypeOutputFilesResource
+    ),
+    (
+        "/data/entities/<entity_id>/output-files",
+        EntityOutputFilesResource
+    ),
+    (
+        "/data/asset-instances/<asset_instance_id>/output-files",
+        InstanceOutputFilesResource
     ),
     (
         "/data/entities/<entity_id>/output-file-path",

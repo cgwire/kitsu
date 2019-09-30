@@ -94,26 +94,12 @@ class RouteOutputFilesTestCase(ApiDBTestCase):
         output_files = self.get(
             "/data/entities/%s/output-files/last-revisions" % self.asset.id
         )
-        self.assertEqual(
-            output_files[str(self.geometry_id)]["main"],
-            self.output_file_geometry.serialize()
-        )
-        self.assertEqual(
-            output_files[str(self.cache_type_id)]["main"],
-            self.output_file_cache.serialize()
-        )
-        self.assertEqual(
-            output_files[str(self.tx_type_id)]["main"],
-            self.output_file_texture.serialize()
-        )
-        self.assertEqual(
-            output_files[str(self.render_id)]["main"],
-            self.output_file_render_1.serialize()
-        )
-        self.assertEqual(
-            output_files[str(self.render_id)]["variant-1"],
-            self.output_file_render_2.serialize()
-        )
+
+        self.assertIn(self.output_file_geometry.serialize(), output_files)
+        self.assertIn(self.output_file_cache.serialize(), output_files)
+        self.assertIn(self.output_file_texture.serialize(), output_files)
+        self.assertIn(self.output_file_render_1.serialize(), output_files)
+        self.assertIn(self.output_file_render_2.serialize(), output_files)
 
     def test_get_entity_output_types(self):
         self.generate_output_files()
@@ -501,10 +487,7 @@ class RouteOutputFilesTestCase(ApiDBTestCase):
                 shot_id
             )
         )
-        self.assertEqual(
-            result[self.cache_type_id]["main"]["id"],
-            output_file["id"]
-        )
+        self.assertIn(output_file["id"], [f['id'] for f in result])
 
     def test_new_asset_asset_instance_output(self):
         self.generate_fixture_asset_types()
@@ -619,9 +602,8 @@ class RouteOutputFilesTestCase(ApiDBTestCase):
                 asset_id
             )
         )
-        self.assertEqual(
-            result[self.tx_type_id]["main"]["id"],
-            output_file["id"]
+        assert(
+            output_file["id"] in [f['id'] for f in result]
         )
 
 
