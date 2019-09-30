@@ -126,9 +126,7 @@ class AddPreviewResource(Resource):
         user_service.check_project_access(task["project_id"])
 
         comment = tasks_service.get_comment(comment_id)
-        tasks_service.get_task_status(
-            comment["task_status_id"]
-        )
+        tasks_service.get_task_status(comment["task_status_id"])
         person = persons_service.get_current_user()
         preview_file = tasks_service.add_preview_file_to_comment(
             comment_id, person["id"], task_id

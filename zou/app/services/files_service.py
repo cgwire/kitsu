@@ -5,6 +5,7 @@ from zou.app.models.working_file import WorkingFile
 from zou.app.models.output_file import OutputFile
 from zou.app.models.output_type import OutputType
 from zou.app.models.preview_file import PreviewFile
+from zou.app.models.project import Project
 from zou.app.models.software import Software
 from zou.app.models.task import Task
 

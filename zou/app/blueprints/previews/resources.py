@@ -172,8 +172,8 @@ class CreatePreviewFilePictureResource(Resource):
             try:
                 self.save_movie_preview(instance_id, uploaded_file)
             except Exception as e:
-                current_app.logger.error(e)
-                current_app.logger.info("Normalization failed.")
+                current_app.logger.error(e, exc_info=1)
+                current_app.logger.error("Normalization failed.")
                 deletion_service.remove_preview_file_by_id(instance_id)
                 abort(400, "Normalization failed.")
             preview_file = files_service.update_preview_file(
@@ -675,10 +675,7 @@ class CreateOrganisationThumbnailResource(BaseCreatePictureResource):
 class OrganisationThumbnailResource(BasePictureResource):
 
     def __init__(self):
-        BasePictureResource.__init__(
-            self,
-            "organisations"
-        )
+        BasePictureResource.__init__(self, "organisations")
 
     def is_exist(self, organisation_id):
         return True
