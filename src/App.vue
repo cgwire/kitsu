@@ -626,6 +626,11 @@ body {
   .hero .control .icon {
     color: #555;
   }
+
+  .v-autocomplete-input {
+    background: $dark-grey;
+    color: white;
+  }
 } // End dark theme
 
 #app .router-link-active {
