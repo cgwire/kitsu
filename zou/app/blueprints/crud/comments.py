@@ -36,7 +36,7 @@ class CommentResource(BaseModelResource):
             return True
         else:
             comment = self.get_model_or_404(instance["id"])
-            task = tasks_service.get_task(comment.object_id)
+            task = tasks_service.get_task(str(comment.object_id))
             return user_service.check_project_access(task["project_id"])
 
     def check_update_permissions(self, instance, data):
