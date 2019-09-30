@@ -1,9 +1,13 @@
+import datetime
+import gzip
 import logging
 import os
 import sys
 
 import gazu
 import sqlalchemy
+
+from sh import pg_dump
 
 from zou.app.models.build_job import BuildJob
 from zou.app.models.custom_action import CustomAction
@@ -571,3 +575,26 @@ def download_preview(preview_file):
             download_file(pic_file_path, prefix, pic_dl_func, preview_file_id)
 
     download_file(file_path, "previews", dl_func, preview_file_id)
+
+
+def generate_db_backup(host, port, user, password, database):
+    now = datetime.datetime.now().strftime("%Y-%m-%d")
+    filename = "%s-zou-db-backup" % now
+    with gzip.open(filename, "wb") as archive:
+        pg_dump(
+            "-h", host,
+            "-p", port,
+            "-U", user,
+            database,
+            _out=archive,
+            _env={"PGPASSWORD": password}
+        )
+    return filename
+
+
+def store_db_backup(filename):
+    file_store.add_file(
+        "dbbackup",
+        filename,
+        filename
+    )

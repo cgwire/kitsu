@@ -3,9 +3,7 @@
 import os
 import json
 import datetime
-import gzip
 
-from sh import pg_dump
 
 from ldap3 import Server, Connection, ALL, NTLM, SIMPLE
 from zou.app.utils import thumbnail as thumbnail_utils
@@ -346,14 +344,7 @@ def dump_database():
     DB_USERNAME = os.getenv("DB_USERNAME", "postgres")
     DB_PASSWORD = os.getenv("DB_PASSWORD", "mysecretpassword")
     DB_DATABASE = os.getenv("DB_DATABASE", "zoudb")
-
-    now = datetime.datetime.now().strftime("%Y-%m-%d")
-    with gzip.open("zou-db-backup-%s.gz" % now, "wb") as archive:
-        pg_dump(
-            "-h", DB_HOST,
-            "-p", DB_PORT,
-            "-U", DB_USERNAME,
-            DB_DATABASE,
-            _out=archive,
-            _env={"PGPASSWORD": DB_PASSWORD}
-        )
+    filename = sync_service.generate_db_backup(
+        DB_HOST, DB_PORT, DB_USERNAME, DB_PASSWORD, DB_DATABASE
+    )
+    sync_service.store_db_backup(filename)
