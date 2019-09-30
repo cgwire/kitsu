@@ -67,7 +67,8 @@ export default {
 
     unlistedPeople () {
       return this.people.filter((person) => {
-        return !this.currentProduction.team.includes(person.id)
+        return !this.currentProduction.team.includes(person.id) &&
+          person.active
       })
     }
   },
