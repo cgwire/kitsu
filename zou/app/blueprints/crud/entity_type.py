@@ -35,4 +35,4 @@ class EntityTypeResource(BaseModelResource):
         entities_service.clear_entity_type_cache(instance_dict["id"])
 
     def post_delete(self, instance_dict):
-        tasks_service.clear_entity_type_cache(instance_dict["id"])
+        entities_service.clear_entity_type_cache(instance_dict["id"])
