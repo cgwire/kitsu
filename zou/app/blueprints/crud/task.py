@@ -42,11 +42,11 @@ class TasksResource(BaseModelsResource):
             return instance.serialize(), 201
 
         except TypeError as exception:
-            current_app.logger.error(str(exception))
+            current_app.logger.error(str(exception), exc_info=1)
             return {"message": str(exception)}, 400
 
         except IntegrityError as exception:
-            current_app.logger.error(str(exception))
+            current_app.logger.error(str(exception), exc_info=1)
             return {"message": "Task already exists."}, 400
 
 
@@ -84,7 +84,7 @@ class TaskResource(BaseModelResource):
             self.post_delete(instance_dict)
 
         except IntegrityError as exception:
-            current_app.logger.error(str(exception))
+            current_app.logger.error(str(exception), exc_info=1)
             return {"message": str(exception)}, 400
 
         return '', 204

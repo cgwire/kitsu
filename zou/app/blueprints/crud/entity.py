@@ -104,21 +104,21 @@ class EntityResource(BaseModelResource, EntityEventMixin):
             return entity_dict, 200
 
         except StatementError as exception:
-            current_app.logger.error(str(exception))
+            current_app.logger.error(str(exception), exc_info=1)
             return {"error": True, "message": str(exception)}, 400
         except TypeError as exception:
-            current_app.logger.error(str(exception))
+            current_app.logger.error(str(exception), exc_info=1)
             return {"error": True, "message": str(exception)}, 400
         except IntegrityError as exception:
-            current_app.logger.error(str(exception))
+            current_app.logger.error(str(exception), exc_info=1)
             return {"error": True, "message": str(exception)}, 400
         except StatementError as exception:
-            current_app.logger.error(str(exception))
+            current_app.logger.error(str(exception), exc_info=1)
             return {"error": True, "message": str(exception)}, 400
         except NotFound as exception:
             return {"error": True, "message": str(exception)}, 404
         except Exception as exception:
-            current_app.logger.error(str(exception))
+            current_app.logger.error(str(exception), exc_info=1)
             return {"error": True, "message": str(exception)}, 400
 
     def emit_update_event(self, entity_dict):

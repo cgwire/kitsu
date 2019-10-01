@@ -174,19 +174,19 @@ class BaseModelsResource(Resource):
             return instance_dict, 201
 
         except TypeError as exception:
-            current_app.logger.error(str(exception))
+            current_app.logger.error(str(exception), exc_info=1)
             return {"message": str(exception)}, 400
 
         except IntegrityError as exception:
-            current_app.logger.error(str(exception))
+            current_app.logger.error(str(exception), exc_info=1)
             return {"message": str(exception)}, 400
 
         except StatementError as exception:
-            current_app.logger.error(str(exception))
+            current_app.logger.error(str(exception), exc_info=1)
             return {"message": str(exception)}, 400
 
         except ArgumentsException as exception:
-            current_app.logger.error(str(exception))
+            current_app.logger.error(str(exception), exc_info=1)
             return {"message": str(exception)}, 400
 
     def emit_create_event(self, instance_dict):
@@ -249,7 +249,7 @@ class BaseModelResource(Resource):
             result = self.clean_get_result(result)
 
         except StatementError as exception:
-            current_app.logger.error(str(exception))
+            current_app.logger.error(str(exception), exc_info=1)
             return {"message": str(exception)}, 400
         return result, 200
 
@@ -281,19 +281,19 @@ class BaseModelResource(Resource):
             return instance_dict, 200
 
         except TypeError as exception:
-            current_app.logger.error(str(exception))
+            current_app.logger.error(str(exception), exc_info=1)
             return {"message": str(exception)}, 400
 
         except IntegrityError as exception:
-            current_app.logger.error(str(exception))
+            current_app.logger.error(str(exception), exc_info=1)
             return {"message": str(exception)}, 400
 
         except StatementError as exception:
-            current_app.logger.error(str(exception))
+            current_app.logger.error(str(exception), exc_info=1)
             return {"message": str(exception)}, 400
 
         except ArgumentsException as exception:
-            current_app.logger.error(str(exception))
+            current_app.logger.error(str(exception), exc_info=1)
             return {"message": str(exception)}, 400
 
     @jwt_required
