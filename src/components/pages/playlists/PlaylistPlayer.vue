@@ -1030,14 +1030,9 @@ export default {
     },
 
     clearCanvas () {
-      this.fabricCanvas.clear()
-      /*
       if (this.fabricCanvas) {
-        this.fabricCanvas.getObjects().forEach((obj) => {
-          this.fabricCanvas.remove(obj)
-        })
+        this.fabricCanvas.clear()
       }
-      */
     },
 
     onAnnotateClicked () {
@@ -1216,6 +1211,7 @@ export default {
       this.playingShotIndex = 0
       this.pause()
       this.rawPlayer.setCurrentTime(0)
+      this.currentTimeRaw = 0
       this.updateProgressBar()
       this.updateTaskPanel()
       this.rebuildComparisonOptions()

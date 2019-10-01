@@ -33,7 +33,7 @@
             {{ playlist.name }}
             </span>
             <span class="playlist-date">
-            {{ formatDate(playlist.created_at)}}
+            {{ formatDate(playlist.updated_at)}}
             </span>
           </router-link>
         </div>
@@ -727,7 +727,7 @@ export default {
 .playlist-item {
   display: block;
   background: white;
-  padding: 1em;
+  padding: 0.4em;
   margin: 0.2em;
   border: 1px solid $white-grey;
   box-shadow: 0px 0px 6px #DDD;
