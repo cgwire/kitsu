@@ -598,3 +598,92 @@ def store_db_backup(filename):
         filename,
         filename
     )
+
+
+def upload_entity_thumbnails_to_storage():
+    """
+    Upload all thumbnail files for non preview entries to object storage.
+    """
+    for project in Project.query.all():
+        upload_entity_thumbnail(project)
+    for organisation in Organisation.query.all():
+        upload_entity_thumbnail(organisation)
+    for person in Person.query.all():
+        upload_entity_thumbnail(person)
+
+
+def upload_preview_files_to_storage():
+    """
+    Upload all thumbnail and original files for preview entries to object
+    storage.
+    """
+    for preview_file in PreviewFile.query.all():
+        upload_preview(preview_file)
+
+
+def upload_entity_thumbnail(entity):
+    """
+    Upload thumbnail file for given entity to object storage.
+    """
+    preview_folder = os.getenv("PREVIEW_FOLDER", "/opt/zou/previews")
+    local = LocalBackend("local", {
+        "root": os.path.join(preview_folder, "pictures")
+    })
+
+    file_path = local.path("thumbnails-" + str(entity.id))
+    if entity.has_avatar:
+        file_store.add_picture(
+            "thumbnails",
+            str(entity.id),
+            file_path
+        )
+
+
+def upload_preview(preview_file):
+    """
+    Upload all files link to preview file entry: orginal file and variants.
+    """
+    print("upload preview %s (%s)" % (
+        preview_file.id,
+        preview_file.extension)
+    )
+
+    preview_folder = os.getenv("PREVIEW_FOLDER", "/opt/zou/previews")
+    local_picture = LocalBackend("local", {
+        "root": os.path.join(preview_folder, "pictures")
+    })
+    local_movie = LocalBackend("local", {
+        "root": os.path.join(preview_folder, "movies")
+    })
+    local_file = LocalBackend("local", {
+        "root": os.path.join(preview_folder, "files")
+    })
+
+    is_movie = preview_file.extension == "mp4"
+    is_picture = preview_file.extension == "png"
+    is_file = not is_movie and not is_picture
+
+    preview_file_id = str(preview_file.id)
+    file_key = "previews-%s" % preview_file_id
+    if is_file:
+        file_path = local_file.path(file_key)
+        ul_func = file_store.add_picture
+    elif is_movie:
+        file_path = local_movie.path(file_key)
+        ul_func = file_store.add_movie
+    else:
+        file_path = local_picture.path(file_key)
+        ul_func = file_store.add_file
+
+    if is_movie or is_picture:
+        for prefix in [
+            "thumbnails",
+            "thumbnails-square",
+            "original"
+        ]:
+            pic_file_path = \
+                local_picture.path("%s-%s" % (prefix, str(preview_file.id)))
+            file_store.add_picture(prefix, preview_file_id, pic_file_path)
+
+    ul_func(prefix, preview_file_id, file_path)
+    print("%s uploaded" % file_path)

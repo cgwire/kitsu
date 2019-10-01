@@ -166,7 +166,11 @@ def get_task(task_id):
     """
     Get task matching given id as a dictionary.
     """
-    return get_task_raw(task_id).serialize()
+    task = get_task_raw(task_id).serialize()
+    if task is None:
+        clear_task_cache(task_id)
+        task = get_task_raw(task_id).serialize()
+    return task
 
 
 def get_task_by_shotgun_id(shotgun_id):
