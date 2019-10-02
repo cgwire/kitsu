@@ -162,7 +162,7 @@ export default {
     return {
       currentProductionId: this.$route.params.production_id,
       currentEpisodeId: this.$route.params.episode_id,
-      currentProjectSection: this.getCurrentSectionFromRoute(),
+      currentProjectSection: null,
       kitsuVersion: version,
       silent: false
     }
@@ -477,6 +477,11 @@ export default {
 
     currentEpisodeId () {
       if (!this.silent) this.updateRoute()
+      const section = this.getCurrentSectionFromRoute()
+      this.currentProjectSection = null
+      this.$nextTick(() => {
+        this.currentProjectSection = section
+      })
     },
 
     currentProjectSection () {
