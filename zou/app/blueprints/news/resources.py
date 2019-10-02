@@ -54,7 +54,4 @@ class ProjectSingleNewsResource(Resource):
     def get(self, project_id, news_id):
         projects_service.get_project(project_id)
         user_service.check_project_access(project_id)
-        return news_service.get_last_news_for_project(
-            project_id,
-            news_id=news_id
-        )
+        return news_service.get_news(project_id, news_id)
