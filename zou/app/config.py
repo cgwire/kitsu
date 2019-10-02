@@ -99,3 +99,8 @@ LDAP_BASE_DN = os.getenv("LDAP_BASE_DN", "cn=Users,dc=zou,dc=local")
 LDAP_DOMAIN = os.getenv("LDAP_DOMAIN", "zou.local")
 LDAP_FALLBACK = os.getenv("LDAP_FALLBACK", False)
 LDAP_IS_AD = os.getenv("LDAP_IS_AD", False)
+
+LOGS_MODE = os.getenv("LOGS_MODE", "default")
+LOGS_HOST = os.getenv("LOGS_HOST", "localhost")
+LOGS_PORT = os.getenv("LOGS_PORT", 2202)
+LOGS_TOKEN = os.getenv("LOGS_TOKEN")
