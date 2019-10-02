@@ -18,13 +18,15 @@ from .services.exception import (
     WrongIdFormatException,
     WrongParameterException
 )
-from .utils import fs
+from .utils import fs, logs
 
 from zou.app.utils import cache
 
 
 app = Flask(__name__)
 app.config.from_object(config)
+
+logs.configure_logs(app)
 
 if not app.config["FILE_TREE_FOLDER"]:
     # Default file_trees are included in Python package: use root_path
@@ -33,7 +35,6 @@ if not app.config["FILE_TREE_FOLDER"]:
 
 if not app.config["PREVIEW_FOLDER"]:
     app.config["PREVIEW_FOLDER"] = os.path.join(app.instance_path, 'previews')
-
 
 db = SQLAlchemy(app)
 migrate = Migrate(app, db)  # DB schema migration features
@@ -117,6 +118,7 @@ def configure_auth():
 def load_api():
     from . import api
     api.configure(app)
+
     fs.mkdir_p(app.config["TMP_DIR"])
     configure_auth()
 

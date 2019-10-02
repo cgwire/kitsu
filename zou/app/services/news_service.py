@@ -5,7 +5,7 @@ from zou.app.models.preview_file import PreviewFile
 from zou.app.models.project import Project
 from zou.app.models.task import Task
 
-from zou.app.utils import events, fields
+from zou.app.utils import cache, events, fields
 from zou.app.services import (
     names_service,
     tasks_service
@@ -152,3 +152,8 @@ def get_last_news_for_project(
             "entity_preview_file_id": entity_preview_file_id
         }))
     return result
+
+
+@cache.memoize_function(120)
+def get_news(project_id, news_id):
+    return get_last_news_for_project(project_id, news_id=news_id)
