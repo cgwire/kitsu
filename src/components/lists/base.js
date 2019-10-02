@@ -29,7 +29,7 @@ export const entityListMixin = {
         const taskTypeA = this.taskTypeMap[a]
         const taskTypeB = this.taskTypeMap[b]
         if (taskTypeA.priority === taskTypeB.priority) {
-          return taskTypeA.name.localeCompare(taskTypeB)
+          return taskTypeA.name.localeCompare(taskTypeB.name)
         } else if (taskTypeA.priority > taskTypeB.priority) {
           return 1
         } else {
