@@ -32,7 +32,7 @@
             <span>
             {{ playlist.name }}
             </span>
-            <span class="playlist-date">
+            <span class="playlist-date" title="last modified">
             {{ formatDate(playlist.updated_at)}}
             </span>
           </router-link>
