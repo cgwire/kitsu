@@ -1,6 +1,6 @@
 {
   "name": "kitsu",
-  "version": "0.10.37",
+  "version": "0.10.38",
   "description": "Production Management Software (user interface)",
   "author": "Frank Rousseau <frank@cg-wire.com>",
   "scripts": {
