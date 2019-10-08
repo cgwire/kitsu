@@ -48,15 +48,21 @@ export const buildTaskIndex = (tasks) => {
  * entity name, the words appearing into it, the task status name.
  * The result is an array of tasks.
  */
-export const buildSupervisorTaskIndex = (tasks) => {
+export const buildSupervisorTaskIndex = (tasks, personMap) => {
   const index = {}
   const taskIndex = {}
   tasks.forEach((task) => {
-    let stringToIndex = task.entity_name
-      .replace(/_/g, ' ').replace(/-/g, ' ')
+    let stringToIndex = task
+      .entity_name
+      .replace(/_/g, ' ')
+      .replace(/-/g, ' ')
     let words = stringToIndex.split(' ').concat([
       task.task_status_short_name
     ])
+    task.assignees.forEach((personId) => {
+      const person = personMap[personId]
+      words.push(person.first_name, person.last_name)
+    })
     indexWords(index, taskIndex, task, words)
   })
   return index
