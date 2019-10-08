@@ -576,6 +576,7 @@ export default {
       asset_type: 'Asset type',
       assignees: 'Assignees',
       end_date: 'End date',
+      due_date: 'Due date',
       duration: 'Duration',
       entity: 'Entity',
       entity_name: 'Name',

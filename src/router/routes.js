@@ -500,7 +500,14 @@ export const routes = [
       {
         path: 'productions/:production_id/:type/task-types/:task_type_id',
         component: TaskType,
-        name: 'task-type'
+        name: 'task-type',
+        children: [
+          {
+            name: 'task-type-schedule',
+            path: 'schedule',
+            component: TaskType
+          }
+        ]
       },
 
       {
@@ -705,7 +712,14 @@ export const routes = [
       {
         path: 'productions/:production_id/episodes/:episode_id/:type/task-types/:task_type_id',
         component: TaskType,
-        name: 'episode-task-type'
+        name: 'episode-task-type',
+        children: [
+          {
+            path: 'schedule',
+            component: TaskType,
+            name: 'episode-task-type-schedule'
+          }
+        ]
       },
 
       {
