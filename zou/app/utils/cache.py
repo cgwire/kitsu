@@ -3,12 +3,12 @@ This module is a wrapper for flask_caching. It configures it and rename
 the memoize function. The aim with that cache is to minimize the requests
 made on the target database.
 """
-
 import redis
 
+from functools import wraps
+from flask_caching import Cache
 from zou.app import config
 
-from flask_caching import Cache
 
 cache = None
 
@@ -19,7 +19,7 @@ try:
         db=config.MEMOIZE_DB_INDEX,
         decode_responses=True
     )
-    redis_cache.get('test')
+    redis_cache.get("test")
     cache = Cache(config={
         "CACHE_TYPE": "redis",
         "CACHE_REDIS_HOST": config.KEY_VALUE_STORE["host"],
@@ -30,11 +30,28 @@ try:
 # This is needed to run tests which. This way they do not require a Redis
 # instance to work properly
 except redis.ConnectionError:
+    from flask import current_app
+    current_app.logger.error("Redis cache configuration failed.")
+
     cache = Cache(config={
         "CACHE_TYPE": "simple"
     })
 
 memoize_function = cache.memoize
+
+
+def memoize_function(function, timeout=120):
+    function = cache.memoize(function, timeout)
+
+    @wraps(function)
+    def wrapper(*args, **kwargs):
+        result = function(*args, **kwargs)
+        if result is None:
+            cache.delete_memoized(function)
+            result = function(*args, **kwargs)
+        return result
+
+    return wrapper
 
 
 def clear():
