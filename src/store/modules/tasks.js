@@ -26,6 +26,7 @@ import {
   NEW_TASK_COMMENT_END,
   NEW_TASK_END,
   EDIT_TASK_END,
+  EDIT_TASK_DATES,
 
   CREATE_TASKS_END,
   DELETE_TASK_END,
@@ -394,6 +395,12 @@ const actions = {
     })
   },
 
+  updateTask ({ commit }, { taskId, data }) {
+    return tasksApi.updateTask(taskId, data, () => {
+      commit(EDIT_TASK_DATES, { taskId, data })
+    })
+  },
+
   changeSelectedEstimations ({ commit, state, rootGetters }, estimation) {
     return new Promise((resolve, reject) => {
       async.eachSeries(Object.keys(state.selectedTasks), (taskId, next) => {
@@ -401,9 +408,7 @@ const actions = {
         const taskType = rootGetters.taskTypeMap[task.task_type_id]
         if (task && task.estimation !== estimation) {
           tasksApi.updateTask(taskId, { estimation }, (err, task) => {
-            if (!err) {
-              commit(EDIT_TASK_END, { task, taskType })
-            }
+            if (!err) commit(EDIT_TASK_END, { task, taskType })
             next(err)
           })
         } else {
@@ -1021,6 +1026,11 @@ const mutations = {
         retake_count: task.retake_count
       })
     }
+  },
+
+  [EDIT_TASK_DATES] (state, { taskId, data }) {
+    const task = state.taskMap[taskId]
+    Object.assign(task, data)
   },
 
   [ASSIGN_TASKS] (state, { selectedTaskIds, personId }) {
