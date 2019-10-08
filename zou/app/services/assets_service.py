@@ -134,6 +134,8 @@ def get_assets_and_tasks(criterions={}, page=1):
             Task.retake_count,
             Task.real_start_date,
             Task.end_date,
+            Task.start_date,
+            Task.due_date,
             Task.last_comment_date,
             assignees_table.columns.person
         ) \
@@ -162,7 +164,9 @@ def get_assets_and_tasks(criterions={}, page=1):
         task_duration,
         task_retake_count,
         task_real_start_date,
-        task_real_end_date,
+        task_end_date,
+        task_start_date,
+        task_due_date,
         task_last_comment_date,
         person_id
     ) in query.all():
@@ -200,8 +204,14 @@ def get_assets_and_tasks(criterions={}, page=1):
                     "real_start_date": fields.serialize_value(
                         task_real_start_date
                     ),
-                    "real_end_date": fields.serialize_value(
-                        task_real_end_date
+                    "end_date": fields.serialize_value(
+                        task_end_date
+                    ),
+                    "start_date": fields.serialize_value(
+                        task_start_date
+                    ),
+                    "due_date": fields.serialize_value(
+                        task_due_date
                     ),
                     "last_comment_date": fields.serialize_value(
                         task_last_comment_date
