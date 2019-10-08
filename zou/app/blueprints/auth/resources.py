@@ -110,7 +110,7 @@ def on_identity_loaded(sender, identity):
             current_app.logger.error("Identity loading timed out")
             return wrong_auth_handler()
         except Exception as exception:
-            current_app.logger.error(exception)
+            current_app.logger.error(exception, exc_info=1)
             if hasattr(exception, 'message'):
                 current_app.logger.error(exception.message)
             return wrong_auth_handler()
@@ -268,7 +268,7 @@ class LoginResource(Resource):
                 "message": "User is unactive, he cannot log in."
             }, 400
         except OperationalError as exception:
-            current_app.logger.error(exception)
+            current_app.logger.error(exception, exc_info=1)
             return {
                 "error": True,
                 "login": False,

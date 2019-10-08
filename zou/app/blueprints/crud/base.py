@@ -313,11 +313,11 @@ class BaseModelResource(Resource):
             self.post_delete(instance_dict)
 
         except IntegrityError as exception:
-            current_app.logger.error(str(exception))
+            current_app.logger.error(str(exception), exc_info=1)
             return {"message": str(exception)}, 400
 
         except StatementError as exception:
-            current_app.logger.error(str(exception))
+            current_app.logger.error(str(exception), exc_info=1)
             return {"message": str(exception)}, 400
 
         return '', 204
