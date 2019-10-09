@@ -129,6 +129,7 @@
           :hierarchy="schedule.scheduleItems"
           :zoom-level=schedule.zoomLevel
           :height="schedule.scheduleHeight"
+          :is-loading="loading.entities"
           @item-changed="saveScheduleItem"
           @root-element-expanded="expandPersonElement"
           ref="schedule-widget"
@@ -701,16 +702,26 @@ export default {
     },
 
     saveScheduleItem (item) {
-      if (item.startDate && item.endDate) {
-        item.parentElement.startDate = this.getMinDate(item.parentElement)
-        item.parentElement.endDate = this.getMaxDate(item.parentElement)
-        this.updateTask({
-          taskId: item.id,
-          data: {
-            start_date: item.startDate.format('YYYY-MM-DD'),
-            due_date: item.endDate.format('YYYY-MM-DD')
+      if (!this.$options.savingBuffer) this.$options.savingBuffer = {}
+      if (!this.$options.savingBuffer[item.id]) {
+        this.$options.savingBuffer[item.id] = item
+        setTimeout(() => {
+          item = { ...this.$options.savingBuffer[item.id] }
+          if (item.startDate && item.endDate) {
+            item.parentElement.startDate = this.getMinDate(item.parentElement)
+            item.parentElement.endDate = this.getMaxDate(item.parentElement)
+            this.updateTask({
+              taskId: item.id,
+              data: {
+                start_date: item.startDate.format('YYYY-MM-DD'),
+                due_date: item.endDate.format('YYYY-MM-DD')
+              }
+            })
           }
-        })
+          this.$options.savingBuffer[item.id] = undefined
+        }, 1000)
+      } else {
+        this.$options.savingBuffer[item.id] = item
       }
     },
 
