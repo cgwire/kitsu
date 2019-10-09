@@ -539,12 +539,15 @@ export default {
 
     resetScheduleItems () {
       const taskAssignationMap = this.buildAssignationMap()
-      const scheduleItems = this.scheduleTeam
+      let scheduleItems = this.scheduleTeam
         .map(person => this.buildPersonElement(person, taskAssignationMap))
         .filter(item => item.children.length > 0)
-        .concat([
+
+      if (taskAssignationMap.unassigned.length !== 0) {
+        scheduleItems = scheduleItems.concat([
           this.buildPersonElement({ id: 'unassigned' }, taskAssignationMap)
         ])
+      }
       this.resetScheduleDates()
       this.schedule.scheduleItems = scheduleItems
     },
