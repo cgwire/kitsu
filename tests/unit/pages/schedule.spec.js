@@ -160,7 +160,7 @@ describe('Schedule', () => {
         expect(wrapper.vm.timelineContent.style.width).toEqual('7980px')
         expect(wrapper.vm.timelineContentWrapper.style.height)
           .toEqual('-250px')
-        expect(wrapper.vm.entityList.style.height).toEqual('-227px')
+        expect(wrapper.vm.entityList.style.height).toEqual('-169px')
       })
     })
 
@@ -178,7 +178,8 @@ describe('Schedule', () => {
       beforeEach(() => {
         timeElement = {
           startDate: moment('2019-08-15', 'YYYY-MM-DD'),
-          endDate: moment('2019-09-03', 'YYYY-MM-DD')
+          endDate: moment('2019-09-03', 'YYYY-MM-DD'),
+          editable: true
         }
       })
 
@@ -221,7 +222,8 @@ describe('Schedule', () => {
     describe('Browsing', () => {
       const timeElement = {
         startDate: moment('2019-08-15', 'YYYY-MM-DD'),
-        endDate: moment('2019-09-01', 'YYYY-MM-DD')
+        endDate: moment('2019-09-01', 'YYYY-MM-DD'),
+        editable: true
       }
       const event = { clientX: 100 }
       test('startBrowsing', () => {
@@ -249,7 +251,8 @@ describe('Schedule', () => {
     describe('Timebars', () => {
       const timeElement = {
         startDate: moment('2019-08-15', 'YYYY-MM-DD'),
-        endDate: moment('2019-09-01', 'YYYY-MM-DD')
+        endDate: moment('2019-09-01', 'YYYY-MM-DD'),
+        editable: true
       }
       const event = { clientX: 100 }
       test('moveTimebar', () => {
@@ -362,10 +365,21 @@ describe('Schedule', () => {
       test('timebarStyle', () => {
         let timebarStyle = wrapper.vm.timebarStyle({
           startDate: moment('2019-08-15', 'YYYY-MM-DD'),
-          endDate: moment('2019-09-01', 'YYYY-MM-DD')
+          endDate: moment('2019-09-01', 'YYYY-MM-DD'),
+          editable: true
         })
         expect(timebarStyle).toEqual({
           'cursor': 'ew-resize',
+          'left': (33 * 60 + 5) + 'px',
+          'width': 12 * 60 - 10 + 'px'
+        })
+        timebarStyle = wrapper.vm.timebarStyle({
+          startDate: moment('2019-08-15', 'YYYY-MM-DD'),
+          endDate: moment('2019-09-01', 'YYYY-MM-DD'),
+          editable: false
+        })
+        expect(timebarStyle).toEqual({
+          'cursor': 'default',
           'left': (33 * 60 + 5) + 'px',
           'width': 12 * 60 - 10 + 'px'
         })

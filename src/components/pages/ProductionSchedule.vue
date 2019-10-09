@@ -112,7 +112,7 @@ export default {
       startDate: moment(),
       selectedStartDate: null,
       selectedEndDate: null,
-      zoomLevel: 3,
+      zoomLevel: 2,
       zoomOptions: [
         { label: '1', value: 1 },
         { label: '2', value: 2 },
@@ -346,7 +346,6 @@ export default {
 
 .project-dates {
   border-bottom: 1px solid #EEE;
-  margin-left: 235px;
   padding-bottom: 1em;
 
   .field {

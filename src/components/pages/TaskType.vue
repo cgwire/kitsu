@@ -112,15 +112,14 @@
         v-if="isActiveTab('schedule')"
       >
         <schedule
-          :start-date="startDate"
-          :end-date="endDate"
-          :hierarchy="scheduleItems"
-          :no-milestone="true"
-          :zoom-level=zoomLevel
-          :height="scheduleHeight"
+          :start-date="schedule.startDate"
+          :end-date="schedule.endDate"
+          :hierarchy="schedule.scheduleItems"
+          :zoom-level=schedule.zoomLevel
+          :height="schedule.scheduleHeight"
           @item-changed="saveScheduleItem"
           @root-element-expanded="expandPersonElement"
-          ref="schedule"
+          ref="schedule-widget"
         />
       </div>
     </div>
@@ -141,6 +140,7 @@
 import { mapGetters, mapActions } from 'vuex'
 import firstBy from 'thenby'
 import moment from 'moment'
+
 import csv from '../../lib/csv'
 import { sortPeople } from '../../lib/sorting'
 import { buildSupervisorTaskIndex, indexSearch } from '../../lib/indexing'
@@ -153,6 +153,7 @@ import {
 } from '../../lib/filtering'
 
 import { formatListMixin } from '../lists/format_mixin.js'
+
 import { ChevronLeftIcon } from 'vue-feather-icons'
 import ButtonSimple from '../widgets/ButtonSimple'
 import Combobox from '../widgets/Combobox'
@@ -187,24 +188,32 @@ export default {
       activeTab: 'tasks',
       currentSort: 'entity_name',
       currentTask: null,
-      endDate: moment().add('months', 3),
       isAssets: true,
       tasks: [],
       selection: {},
-      scheduleItems: [],
-      scheduleHeight: 800,
-      startDate: moment().add('months', -1),
-      zoomLevel: 1,
-      zoomOptions: [
-        { label: '1', value: 1 },
-        { label: '2', value: 2 },
-        { label: '3', value: 3 }
-      ],
+      errors: {
+        entities: false
+      },
       loading: {
         entities: false
       },
-      errors: {
-        entities: false
+      schedule: {
+        currentColor: 'neutral',
+        endDate: moment().add('months', 3),
+        scheduleItems: [],
+        scheduleHeight: 800,
+        startDate: moment().add('months', -1),
+        zoomLevel: 1,
+        zoomOptions: [
+          { label: '1', value: 1 },
+          { label: '2', value: 2 },
+          { label: '3', value: 3 }
+        ],
+        colorOptions: [
+          { label: 'Neutral', value: 'neutral' },
+          { label: 'Status', value: 'status' },
+          { label: 'Late', value: 'late' }
+        ]
       }
     }
   },
@@ -227,7 +236,6 @@ export default {
     setTimeout(() => {
       this.initData(false)
     }, 100)
-    this.resetScheduleHeight()
     window.addEventListener('resize', this.resetScheduleHeight)
   },
 
@@ -281,6 +289,18 @@ export default {
       }
     },
 
+    // Paths
+
+    tasksPath () {
+      return this.getRoute('task-type')
+    },
+
+    schedulePath () {
+      return this.getRoute('task-type-schedule')
+    },
+
+    // Helpers
+
     sortOptions () {
       return [
         'entity_name',
@@ -301,14 +321,6 @@ export default {
       } else {
         return this.taskSearchQueries
       }
-    },
-
-    tasksPath () {
-      return this.getRoute('task-type')
-    },
-
-    schedulePath () {
-      return this.getRoute('task-type-schedule')
     },
 
     scheduleTeam () {
@@ -358,9 +370,18 @@ export default {
       }
     },
 
-    changeSearch (searchQuery) {
-      this.$refs['task-search-field'].setValue(searchQuery.search_query)
-      this.$refs['task-search-field'].$emit('change', searchQuery.search_query)
+    // Tabs
+
+    isActiveTab (tab) {
+      return this.activeTab === tab
+    },
+
+    updateActiveTab () {
+      if (this.$route.path.indexOf('schedule') > 0) {
+        this.activeTab = 'schedule'
+      } else {
+        this.activeTab = 'tasks'
+      }
     },
 
     getRoute (section) {
@@ -381,16 +402,11 @@ export default {
       return route
     },
 
-    isActiveTab (tab) {
-      return this.activeTab === tab
-    },
+    // Search
 
-    updateActiveTab () {
-      if (this.$route.path.indexOf('schedule') > 0) {
-        this.activeTab = 'schedule'
-      } else {
-        this.activeTab = 'tasks'
-      }
+    changeSearch (searchQuery) {
+      this.$refs['task-search-field'].setValue(searchQuery.search_query)
+      this.$refs['task-search-field'].$emit('change', searchQuery.search_query)
     },
 
     onSearchChange (query) {
@@ -419,6 +435,27 @@ export default {
       }
       this.clearSelectedTasks()
     },
+
+    saveSearchQuery (searchQuery) {
+      const entityType = this.isAssets ? 'Asset' : 'Shot'
+      this.saveTaskSearch({ searchQuery, entityType })
+        .then(() => {
+        })
+        .catch((err) => {
+          if (err) console.log('error')
+        })
+    },
+
+    removeSearchQuery (searchQuery) {
+      this.removeTaskSearch(searchQuery)
+        .then(() => {
+        })
+        .catch((err) => {
+          if (err) console.log('error')
+        })
+    },
+
+    // Tasks
 
     onTaskSelected (task) {
       this.currentTask = task
@@ -471,25 +508,6 @@ export default {
       )
     },
 
-    saveSearchQuery (searchQuery) {
-      const entityType = this.isAssets ? 'Asset' : 'Shot'
-      this.saveTaskSearch({ searchQuery, entityType })
-        .then(() => {
-        })
-        .catch((err) => {
-          if (err) console.log('error')
-        })
-    },
-
-    removeSearchQuery (searchQuery) {
-      this.removeTaskSearch(searchQuery)
-        .then(() => {
-        })
-        .catch((err) => {
-          if (err) console.log('error')
-        })
-    },
-
     onExportClick () {
       const taskLines = this.$refs['task-list'].getTableData()
       const nameData = [
@@ -505,7 +523,7 @@ export default {
       csv.buildCsvFile(name, taskLines)
     },
 
-    // Planning
+    // Schedule
 
     resetScheduleItems () {
       const taskAssignationMap = this.buildAssignationMap()
@@ -516,13 +534,13 @@ export default {
           this.buildPersonElement({ id: 'unassigned' }, taskAssignationMap)
         ])
       this.resetScheduleDates()
-      this.scheduleItems = scheduleItems
+      this.schedule.scheduleItems = scheduleItems
     },
 
     resetScheduleDates () {
-      let mainStartDate = this.startDate
-      let mainEndDate = this.endDate
-      this.scheduleItems.forEach((personElement) => {
+      let mainStartDate = this.schedule.startDate
+      let mainEndDate = this.schedule.endDate
+      this.schedule.scheduleItems.forEach((personElement) => {
         if (!mainStartDate || mainStartDate.isAfter(personElement.startDate)) {
           mainStartDate = personElement.startDate.clone()
         }
@@ -530,8 +548,8 @@ export default {
           mainEndDate = personElement.endDate.clone()
         }
       })
-      this.startDate = mainStartDate
-      this.endDate = mainEndDate
+      this.schedule.startDate = mainStartDate
+      this.schedule.endDate = mainEndDate
     },
 
     buildAssignationMap () {
@@ -698,7 +716,6 @@ export default {
           maxDate = item.endDate
         }
       })
-      console.log('maxDate', maxDate.format('YYYY-MM-DD'))
       return maxDate.clone()
     },
 
@@ -711,8 +728,8 @@ export default {
         if (this.isActiveTab('schedule')) {
           const pageHeight = this.$refs['page'].offsetHeight
           const headerHeight = this.$refs['header'].offsetHeight
-          this.scheduleHeight = pageHeight - headerHeight + 20
-          this.$refs['schedule'].resetScheduleSize()
+          this.schedule.scheduleHeight = pageHeight - headerHeight + 20
+          this.$refs['schedule-widget'].resetScheduleSize()
         }
       })
     }
@@ -734,8 +751,15 @@ export default {
       this.clearSelectedTasks()
     },
 
+    'schedule.currentColor' () {
+      this.resetScheduleItems()
+    },
+
     activeTab () {
-      if (this.isActiveTab('schedule')) this.resetScheduleItems()
+      if (this.isActiveTab('schedule')) {
+        this.resetScheduleItems()
+        this.resetScheduleHeight()
+      }
     }
   },
 

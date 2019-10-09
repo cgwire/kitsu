@@ -316,12 +316,13 @@
  */
 import { mapGetters, mapActions } from 'vuex'
 import moment from 'moment-timezone'
+
 import colors from '../../../lib/colors'
 
+import { ChevronRightIcon, ChevronDownIcon, Edit2Icon } from 'vue-feather-icons'
 import EditMilestoneModal from '../../modals/EditMilestoneModal'
 import PeopleAvatar from '../../widgets/PeopleAvatar'
 import Spinner from '../../widgets/Spinner'
-import { ChevronRightIcon, ChevronDownIcon, Edit2Icon } from 'vue-feather-icons'
 
 export default {
   name: 'schedule',
@@ -344,10 +345,10 @@ export default {
         date: moment()
       },
       timelineDisplayedDaysIndex: {},
-      modals: {
+      errors: {
         edit: false
       },
-      errors: {
+      modals: {
         edit: false
       },
       loading: {
@@ -361,18 +362,6 @@ export default {
       type: Object,
       required: true
     },
-    hierarchy: {
-      default: () => [],
-      type: Array
-    },
-    startDate: {
-      type: Object,
-      required: true
-    },
-    zoomLevel: {
-      type: Number,
-      default: 2
-    },
     isError: {
       type: Boolean,
       default: false
@@ -384,6 +373,18 @@ export default {
     height: {
       type: Number,
       default: 0
+    },
+    hierarchy: {
+      default: () => [],
+      type: Array
+    },
+    startDate: {
+      type: Object,
+      required: true
+    },
+    zoomLevel: {
+      type: Number,
+      default: 2
     }
   },
 
@@ -506,6 +507,8 @@ export default {
       return this.$refs['timeline-position']
     },
 
+    // Styles
+
     scheduleClass () {
       const className = {
         schedule: true,
@@ -528,6 +531,7 @@ export default {
     },
 
     milestoneTooltipStyle () {
+      // arbitrary calculus
       return { left: (-40 - 10 * (3 - this.zoomLevel)) + 'px' }
     }
   },
@@ -572,6 +576,17 @@ export default {
       this.timelinePosition.style.left = position + 'px'
     },
 
+    isValidItemDates (startDate, endDate) {
+      return (
+        startDate &&
+        endDate &&
+        startDate.isAfter(this.startDate) &&
+        endDate.isBefore(this.endDate) &&
+        startDate.isBefore(endDate) &&
+        endDate.isAfter(startDate)
+      )
+    },
+
     changeDates (event) {
       const change = event.clientX - this.initialClientX - this.cellWidth / 2
       const dayChange = Math.ceil(change / this.cellWidth)
@@ -595,17 +610,6 @@ export default {
           this.$emit('item-changed', this.currentElement)
         }
       }
-    },
-
-    isValidItemDates (startDate, endDate) {
-      return (
-        startDate &&
-        endDate &&
-        startDate.isAfter(this.startDate) &&
-        endDate.isBefore(this.endDate) &&
-        startDate.isBefore(endDate) &&
-        endDate.isAfter(startDate)
-      )
     },
 
     changeStartDate (event) {
@@ -649,6 +653,63 @@ export default {
       if (this.isValidItemDates(this.currentElement.startDate, newEndDate)) {
         this.currentElement.endDate = newEndDate
         this.$emit('item-changed', this.currentElement)
+      }
+    },
+
+    moveTimebar (timeElement, event) {
+      if (
+        !this.isChangeStartDate &&
+        !this.isChangeEndDate &&
+        timeElement.editable
+      ) {
+        this.isChangeDates = true
+        this.isChangeStartDate = false
+        this.isChangeEnd = false
+        this.currentElement = timeElement
+        this.lastStartDate = timeElement.startDate.clone()
+        this.lastEndDate = timeElement.endDate.clone()
+        this.initialClientX = event.clientX
+        document.body.style.cursor = 'ew-resize'
+      }
+    },
+
+    moveTimebarLeftSide (timeElement, event) {
+      if (
+        !this.isChangeDates &&
+        !this.isChangeEndDate &&
+        timeElement.editable
+      ) {
+        this.isChangeDates = false
+        this.isChangeStartDate = true
+        this.isChangeEndDate = false
+        this.currentElement = timeElement
+        if (!timeElement.endDate) {
+          timeElement.endDate = timeElement.startDate.clone().add('days', 1)
+        }
+        this.lastStartDate = timeElement.startDate.clone()
+        this.lastEndDate = timeElement.endDate.clone()
+        this.initialClientX = event.clientX
+        document.body.style.cursor = 'w-resize'
+      }
+    },
+
+    moveTimebarRightSide (timeElement, event) {
+      if (
+        !this.isChangeDates &&
+        !this.isChangeStartDate &&
+        timeElement.editable
+      ) {
+        this.isChangeDates = false
+        this.isChangeStartDate = false
+        this.isChangeEndDate = true
+        this.currentElement = timeElement
+        if (!timeElement.endDate) {
+          timeElement.endDate = timeElement.startDate.clone().add('days', 1)
+        }
+        this.lastStartDate = timeElement.startDate.clone()
+        this.lastEndDate = timeElement.endDate.clone()
+        this.initialClientX = event.clientX
+        document.body.style.cursor = 'e-resize'
       }
     },
 
@@ -715,63 +776,6 @@ export default {
       this.isChangeDates = false
       this.isBrowsingX = false
       this.isBrowsingY = false
-    },
-
-    moveTimebar (timeElement, event) {
-      if (
-        !this.isChangeStartDate &&
-        !this.isChangeEndDate &&
-        timeElement.editable
-      ) {
-        this.isChangeDates = true
-        this.isChangeStartDate = false
-        this.isChangeEnd = false
-        this.currentElement = timeElement
-        this.lastStartDate = timeElement.startDate.clone()
-        this.lastEndDate = timeElement.endDate.clone()
-        this.initialClientX = event.clientX
-        document.body.style.cursor = 'ew-resize'
-      }
-    },
-
-    moveTimebarLeftSide (timeElement, event) {
-      if (
-        !this.isChangeDates &&
-        !this.isChangeEndDate &&
-        timeElement.editable
-      ) {
-        this.isChangeDates = false
-        this.isChangeStartDate = true
-        this.isChangeEndDate = false
-        this.currentElement = timeElement
-        if (!timeElement.endDate) {
-          timeElement.endDate = timeElement.startDate.clone().add('days', 1)
-        }
-        this.lastStartDate = timeElement.startDate.clone()
-        this.lastEndDate = timeElement.endDate.clone()
-        this.initialClientX = event.clientX
-        document.body.style.cursor = 'w-resize'
-      }
-    },
-
-    moveTimebarRightSide (timeElement, event) {
-      if (
-        !this.isChangeDates &&
-        !this.isChangeStartDate &&
-        timeElement.editable
-      ) {
-        this.isChangeDates = false
-        this.isChangeStartDate = false
-        this.isChangeEndDate = true
-        this.currentElement = timeElement
-        if (!timeElement.endDate) {
-          timeElement.endDate = timeElement.startDate.clone().add('days', 1)
-        }
-        this.lastStartDate = timeElement.startDate.clone()
-        this.lastEndDate = timeElement.endDate.clone()
-        this.initialClientX = event.clientX
-        document.body.style.cursor = 'e-resize'
-      }
     },
 
     // Helpers
@@ -842,7 +846,7 @@ export default {
         left: this.getTimebarLeft(timeElement) + 'px',
         width: this.getTimebarWidth(timeElement) + 'px',
         cursor: timeElement.editable ? 'ew-resize' : 'default',
-        background: rootElement.color
+        background: timeElement.color || rootElement.color
       }
     },
 
@@ -966,9 +970,6 @@ export default {
     },
     height () {
       this.$nextTick(this.resetScheduleSize)
-    },
-
-    milestones () {
     }
   }
 }
