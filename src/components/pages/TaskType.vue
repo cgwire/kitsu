@@ -63,24 +63,29 @@
             />
           </div>
           <div class="filler"></div>
-          <div
-            class="flexrow-item sorting-combobox"
-          >
-            <combobox
-              :label="$t('main.sorted_by')"
-              :options="sortOptions"
-              locale-key-prefix="tasks.fields."
-              v-model="currentSort"
-              v-if="isActiveTab('tasks')"
-            />
-            <combobox-number
-              class="flexrow-item zoom-level"
-              :label="$t('schedule.zoom_level')"
-              :options="zoomOptions"
-              v-model="zoomLevel"
-              v-if="isActiveTab('schedule')"
-            />
-          </div>
+          <combobox
+            class="flexrow-item"
+            :label="$t('main.sorted_by')"
+            :options="sortOptions"
+            locale-key-prefix="tasks.fields."
+            v-model="currentSort"
+            v-if="isActiveTab('tasks')"
+          />
+          <combobox
+            class="flexrow-item"
+            :label="$t('tasks.colors.title')"
+            :options="schedule.colorOptions"
+            locale-key-prefix="tasks.colors."
+            v-model="schedule.currentColor"
+            v-if="isActiveTab('schedule')"
+          />
+          <combobox-number
+            class="flexrow-item zoom-level"
+            :label="$t('schedule.zoom_level')"
+            :options="schedule.zoomOptions"
+            v-model="schedule.zoomLevel"
+            v-if="isActiveTab('schedule')"
+          />
         </div>
       </div>
       <div class="query-list">
@@ -247,9 +252,12 @@ export default {
       'shotMap',
       'shotsPath',
       'taskSearchQueries',
+      'taskStatusMap',
       'taskMap',
       'user'
     ]),
+
+    // Meta
 
     assetTasks () {
       return this.getTasks(Object.values(this.assetMap))
@@ -632,6 +640,7 @@ export default {
           man_days: estimation,
           editable: this.isCurrentUserManager,
           parentElement: personElement,
+          color: this.getTaskElementColor(task, endDate),
           children: []
         }
       })
@@ -642,6 +651,20 @@ export default {
         man_days: manDays
       })
       return personElement
+    },
+
+    getTaskElementColor (task, endDate) {
+      if (this.schedule.currentColor === 'status') {
+        return this.taskStatusMap[task.task_status_id].color
+      } else if (this.schedule.currentColor === 'late') {
+        const isLate = (
+          !this.taskStatusMap[task.task_status_id].is_done &&
+          endDate.isBefore(moment())
+        )
+        return isLate ? '#FF3860' : null
+      } else {
+        return null
+      }
     },
 
     saveScheduleItem (item) {

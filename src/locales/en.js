@@ -594,6 +594,12 @@ export default {
       task_status_short_name: 'Status',
       task_type: 'Type'
     },
+    colors: {
+      title: 'Coloring',
+      neutral: 'Neutral',
+      status: 'Status color',
+      late: 'Late in red'
+    },
     priority: {
       emergency: 'Emergency',
       normal: 'Normal',
