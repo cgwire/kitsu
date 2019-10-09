@@ -30,9 +30,6 @@ try:
 # This is needed to run tests which. This way they do not require a Redis
 # instance to work properly
 except redis.ConnectionError:
-    from flask import current_app
-    current_app.logger.error("Redis cache configuration failed.")
-
     cache = Cache(config={
         "CACHE_TYPE": "simple"
     })
