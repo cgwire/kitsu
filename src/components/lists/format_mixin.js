@@ -30,6 +30,18 @@ export const formatListMixin = {
 
     formatBoolean (booleanValue) {
       return booleanValue ? this.$t('main.yes') : this.$t('main.no')
+    },
+
+    formatEstimation (estimation) {
+      if (estimation) {
+        if (estimation < 10) {
+          return estimation
+        } else {
+          return this.formatDuration(estimation)
+        }
+      } else {
+        return 0
+      }
     }
   }
 }

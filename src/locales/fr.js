@@ -526,6 +526,7 @@ export default {
     no_task_selected: 'Pas de tâche sélectionnée',
     no_comment: 'Il n\'y a pas de commentaires pour cette tâche.',
     no_assignation_right: 'vous n\'êtes pas autorisé à gérer les assigations.',
+    number: 'tâche | tâches',
     next: 'Suivante',
     preview: 'Pré-visualisation',
     previous: 'Précédente',
@@ -545,10 +546,12 @@ export default {
       asset_type: 'Type d\'asset',
       assignees: 'Assignés',
       duration: 'Duration',
+      due_date: 'Pour le',
       end_date: 'Date de fin',
       estimation: 'Estimation',
       entity: 'Entité',
       entity_name: 'Nom',
+      frames: 'Frames',
       last_comment_date: 'Dernier comm.',
       priority: 'Priorité',
       production: 'Prod',
@@ -558,8 +561,14 @@ export default {
       sequence: 'Séquence',
       task_status: 'Statut',
       last_comment: 'Dernier commentaire',
-      last_status_short_name: 'Statut',
+      task_status_short_name: 'Statut',
       task_type: 'Type'
+    },
+    colors: {
+      title: 'Coloration',
+      neutral: 'Neutre',
+      status: 'Couleur des status',
+      late: 'En retard en rouge'
     },
     priority: {
       emergency: 'Urgence',

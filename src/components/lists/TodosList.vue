@@ -21,6 +21,9 @@
           <th class="estimation">
             {{ $t('tasks.fields.estimation').substring(0, 3) }}.
           </th>
+          <th class="due-date">
+            {{ $t('tasks.fields.due_date') }}
+          </th>
           <th class="status">
             {{ $t('tasks.fields.task_status') }}
           </th>
@@ -81,6 +84,9 @@
           />
           <td class="estimation">
             {{ formatDuration(entry.estimation) }}
+          </td>
+          <td class="due-date">
+            {{ formatDate(entry.due_date) }}
           </td>
           <validation-cell
             class="status unselectable"
@@ -443,6 +449,11 @@ export default {
 .estimation {
   width: 60px;
   min-width: 60px;
+}
+
+.due-date {
+  width: 110px;
+  min-width: 110px;
 }
 
 th.last-comment {

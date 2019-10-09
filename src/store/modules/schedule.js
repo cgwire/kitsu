@@ -81,9 +81,7 @@ const mutations = {
   },
 
   [REMOVE_MILESTONE] (state, milestone) {
-    const tmpMilestones = { ...state.milestones }
-    delete tmpMilestones[milestone.date]
-    state.milestones = tmpMilestones
+    delete state.milestones[milestone.date.format('YYYY-MM-DD')]
   },
 
   [RESET_ALL] (state) {

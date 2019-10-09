@@ -112,7 +112,7 @@ export default {
       startDate: moment(),
       selectedStartDate: null,
       selectedEndDate: null,
-      zoomLevel: 3,
+      zoomLevel: 2,
       zoomOptions: [
         { label: '1', value: 1 },
         { label: '2', value: 2 },
@@ -137,6 +137,7 @@ export default {
       'currentEpisode',
       'currentProduction',
       'isCurrentUserAdmin',
+      'isCurrentUserManager',
       'isTVShow',
       'taskTypeMap',
       'timezone',
@@ -169,14 +170,26 @@ export default {
         .then((scheduleItems) => {
           scheduleItems = scheduleItems.map((item) => {
             const taskType = this.taskTypeMap[item.task_type_id]
+            let startDate, endDate
+            if (item.start_date) {
+              startDate = moment(item.start_date, 'YYYY-MM-DD', 'en')
+            } else {
+              startDate = moment()
+            }
+            if (item.end_date) {
+              endDate = moment(item.end_date, 'YYYY-MM-DD', 'en')
+            } else {
+              endDate = startDate.clone().add(1, 'days')
+            }
             return {
               ...item,
               color: taskType.color,
               for_shots: taskType.for_shots,
               name: taskType.name,
               priority: taskType.priority,
-              startDate: moment(item.start_date, 'YYYY-MM-DD'),
-              endDate: moment(item.end_date, 'YYYY-MM-DD'),
+              startDate: startDate,
+              endDate: endDate,
+              editable: this.isCurrentUserManager,
               expanded: false,
               loading: false,
               children: []
@@ -214,12 +227,24 @@ export default {
 
     convertScheduleItems (scheduleItems) {
       return scheduleItems.map((item) => {
+        let startDate, endDate
+        if (item.start_date) {
+          startDate = moment(item.start_date, 'YYYY-MM-DD', 'en')
+        } else {
+          startDate = moment()
+        }
+        if (item.end_date) {
+          endDate = moment(item.end_date, 'YYYY-MM-DD', 'en')
+        } else {
+          endDate = startDate.clone().add(1, 'days')
+        }
         return {
           ...item,
-          startDate: moment(item.start_date, 'YYYY-MM-DD', 'en'),
-          endDate: moment(item.end_date, 'YYYY-MM-DD', 'en'),
+          startDate: startDate,
+          endDate: endDate,
           expanded: false,
           loading: false,
+          editable: this.isCurrentUserManager,
           children: []
         }
       })
@@ -321,7 +346,6 @@ export default {
 
 .project-dates {
   border-bottom: 1px solid #EEE;
-  margin-left: 235px;
   padding-bottom: 1em;
 
   .field {
