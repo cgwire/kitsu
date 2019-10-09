@@ -500,6 +500,8 @@ class TaskFullResource(Resource):
         if task is None:
             tasks_service.clear_task_cache(task_id)
             task = tasks_service.get_task(task_id)
+        if task is None:
+            raise TaskNotFoundException
         user_service.check_project_access(task["project_id"])
 
         task_type = tasks_service.get_task_type(task["task_type_id"])

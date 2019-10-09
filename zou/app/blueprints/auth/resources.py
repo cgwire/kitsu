@@ -91,6 +91,9 @@ def on_identity_loaded(sender, identity):
             if hasattr(identity.user, "id"):
                 identity.provides.add(UserNeed(identity.user["id"]))
 
+            if identity.user is None:
+                raise PersonNotFoundException
+
             if identity.user["role"] == "admin":
                 identity.provides.add(RoleNeed("admin"))
                 identity.provides.add(RoleNeed("manager"))
