@@ -265,7 +265,7 @@
               >
                 <div
                   class="timebar"
-                  :title="childElement.name"
+                  :title="childElement.name + ' (' + childElement.startDate.format('DD-MM') + ' - ' + childElement.endDate.format('DD-MM') + ')'"
                   :style="timebarChildStyle(childElement, rootElement, true)"
                 >
                   <div
@@ -781,17 +781,17 @@ export default {
     // Helpers
 
     businessDiff (startDate, endDate) {
-      const first = startDate.clone().endOf('week')
-      const last = endDate.clone().startOf('week')
+      const first = startDate.clone().endOf('isoweek')
+      const last = endDate.clone().startOf('isoweek')
       const diff = last.diff(first, 'days')
 
       if (endDate.diff(startDate, 'days') > 6) {
         const days = diff * 5 / 7
 
-        let wfirst = first.day() - startDate.day()
-        if (startDate.day() === 0) --wfirst
+        let wfirst = first.isoWeekday() - startDate.isoWeekday()
+        if (startDate.isoWeekday() === 0) --wfirst
 
-        let wlast = endDate.day() - last.day()
+        let wlast = endDate.isoWeekday() - last.isoWeekday()
         if (endDate.day() === 6) --wlast
 
         return Math.ceil(wfirst + days + wlast - 1)

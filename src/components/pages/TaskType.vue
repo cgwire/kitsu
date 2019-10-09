@@ -1,4 +1,5 @@
 <template>
+
 <div class="task-type columns fixed-page">
   <div class="column main-column">
     <div class="task-type page" ref="page">
@@ -63,29 +64,40 @@
             />
           </div>
           <div class="filler"></div>
-          <combobox
+          <div
             class="flexrow-item"
-            :label="$t('main.sorted_by')"
-            :options="sortOptions"
-            locale-key-prefix="tasks.fields."
-            v-model="currentSort"
             v-if="isActiveTab('tasks')"
-          />
-          <combobox
+          >
+            <combobox
+              :label="$t('main.sorted_by')"
+              :options="sortOptions"
+              locale-key-prefix="tasks.fields."
+              v-model="currentSort"
+            />
+          </div>
+          <div
+            class="flexrow-item color-option"
+            v-if="isActiveTab('schedule')"
+          >
+            <combobox
+              class="flexrow-item"
+              :label="$t('tasks.colors.title')"
+              :options="schedule.colorOptions"
+              locale-key-prefix="tasks.colors."
+              v-model="schedule.currentColor"
+            />
+          </div>
+          <div
             class="flexrow-item"
-            :label="$t('tasks.colors.title')"
-            :options="schedule.colorOptions"
-            locale-key-prefix="tasks.colors."
-            v-model="schedule.currentColor"
             v-if="isActiveTab('schedule')"
-          />
-          <combobox-number
-            class="flexrow-item zoom-level"
-            :label="$t('schedule.zoom_level')"
-            :options="schedule.zoomOptions"
-            v-model="schedule.zoomLevel"
-            v-if="isActiveTab('schedule')"
-          />
+          >
+            <combobox-number
+              :label="$t('schedule.zoom_level')"
+              :options="schedule.zoomOptions"
+              v-model="schedule.zoomLevel"
+              v-if="isActiveTab('schedule')"
+            />
+          </div>
         </div>
       </div>
       <div class="query-list">
@@ -617,15 +629,15 @@ export default {
 
         let startDate = moment()
         if (task.start_date) {
-          startDate = moment(task.start_date, 'YYYY-MM-DD', 'en')
+          startDate = moment(task.start_date, 'YYYY-MM-DD')
         } else if (task.real_start_date) {
-          startDate = moment(task.real_start_date, 'YYYY-MM-DD', 'en')
+          startDate = moment(task.real_start_date, 'YYYY-MM-DD')
         }
 
         if (task.due_date) {
-          endDate = moment(task.due_date, 'YYYY-MM-DD', 'en')
+          endDate = moment(task.due_date, 'YYYY-MM-DD')
         } else if (task.end_date) {
-          endDate = moment(task.end_date, 'YYYY-MM-DD', 'en')
+          endDate = moment(task.end_date, 'YYYY-MM-DD')
         } else if (task.estimation) {
           endDate = startDate.add('days', estimation)
         }
@@ -700,7 +712,7 @@ export default {
     },
 
     getMinDate (personElement) {
-      let minDate = moment()
+      let minDate = this.schedule.endDate.clone()
       personElement.children.forEach((item) => {
         if (item.startDate && item.startDate.isBefore(minDate)) {
           minDate = item.startDate
@@ -710,7 +722,7 @@ export default {
     },
 
     getMaxDate (personElement) {
-      let maxDate = moment()
+      let maxDate = this.schedule.startDate.clone()
       personElement.children.forEach((item) => {
         if (item.endDate && item.endDate.isAfter(maxDate)) {
           maxDate = item.endDate
