@@ -56,16 +56,23 @@
             type="number"
             placeholder="0"
             @input="$emit('item-changed', rootElement)"
+            v-if="!rootElement.avatar && rootElement.editable"
             v-model="rootElement.man_days"
-            v-if="!rootElement.avatar"
           />
           <span
             class="man-days-unit flexrow-item"
-            v-if="rootElement.avatar"
+            v-if="!rootElement.avatar && rootElement.editable"
+          >
+            {{ $t('schedule.md') }}
+          </span>
+          <span
+            class="man-days-unit flexrow-item"
+            v-if="rootElement.avatar || !rootElement.editable"
           >
             {{ rootElement.man_days }}
             {{ $t('schedule.md') }}
           </span>
+
         </div>
         <div
           class="children"
