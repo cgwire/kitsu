@@ -28,7 +28,13 @@
         v-for="rootElement in hierarchy"
       >
         <div
-          class="entity-line entity-name flexrow"
+          :class="{
+            'entity-line': true,
+            'entity-name': true,
+            flexrow: true,
+            root: true,
+            expanded: rootElement.expanded
+          }"
           :style="entityLineStyle(rootElement)"
         >
           <span
@@ -1324,6 +1330,15 @@ export default {
   display: flex;
   align-items: center;
   line-height: 1.1em;
+
+  &.root {
+    border-top-left-radius: 1em;
+    border-bottom-left-radius: 1em;
+  }
+
+  &.root.expanded {
+    border-bottom-left-radius: 0em;
+  }
 
   span {
     color: white;
