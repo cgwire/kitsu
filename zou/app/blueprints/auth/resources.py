@@ -188,7 +188,7 @@ class LoginResource(Resource):
             user = auth_service.check_auth(app, email, password)
             del user["password"]
 
-            if password == "default":
+            if auth_service.is_default_password(app, password):
                 token = uuid.uuid4()
                 auth_tokens_store.add(
                     "reset-%s" % token,
@@ -214,6 +214,7 @@ class LoginResource(Resource):
                 'HTTP_X_REAL_IP',
                 request.remote_addr
             )
+
             if is_from_browser(request.user_agent):
                 organisation = persons_service.get_organisation()
                 response = jsonify({
@@ -278,6 +279,7 @@ class LoginResource(Resource):
                 "message": "Database doesn't seem reachable."
             }, 500
         except Exception as exception:
+            current_app.logger.error(exception, exc_info=1)
             if hasattr(exception, "message"):
                 message = exception.message
             else:

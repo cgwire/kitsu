@@ -203,3 +203,8 @@ def revoke_tokens(app, jti):
         'true',
         app.config["JWT_ACCESS_TOKEN_EXPIRES"]
     )
+
+def is_default_password(app, password):
+    return \
+        password == "default" and \
+        app.config["AUTH_STRATEGY"] != "auth_local_no_password"
