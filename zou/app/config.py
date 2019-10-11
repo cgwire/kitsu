@@ -45,6 +45,10 @@ DATABASE = {
 }
 SQLALCHEMY_DATABASE_URI = str(dbhelpers.get_db_uri())
 SQLALCHEMY_TRACK_MODIFICATIONS = True
+SQLALCHEMY_ENGINE_OPTIONS = {
+    'pool_size': os.getenv('POOL_SIZE', 30),
+    'max_overflow': os.getenv('MAX_OVERFLOW', 60)
+}
 
 NB_RECORDS_PER_PAGE = 100
 

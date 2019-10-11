@@ -519,6 +519,7 @@ def get_last_output_files_for_entity(
         query = query.filter(OutputFile.representation == representation)
 
     query = query.filter(OutputFile.entity_id == entity_id)
+    query = query.filter(OutputFile.asset_instance_id == None)
 
     # query
     output_files = query.all()

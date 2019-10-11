@@ -321,6 +321,8 @@ def get_folder_path_template(tree, mode, entity):
             return tree[mode]["folder_path"]["sequence"]
         elif shots_service.is_scene(entity):
             return tree[mode]["folder_path"]["scene"]
+        elif shots_service.is_episode(entity):
+            return tree[mode]["folder_path"]["episode"]
         else:
             return tree[mode]["folder_path"]["asset"]
     except KeyError:
@@ -340,6 +342,8 @@ def get_file_name_template(tree, mode, entity):
             return tree[mode]["file_name"]["sequence"]
         elif shots_service.is_scene(entity):
             return tree[mode]["file_name"]["scene"]
+        elif shots_service.is_episode(entity):
+            return tree[mode]["file_name"]["episode"]
         else:
             return tree[mode]["file_name"]["asset"]
     except KeyError:
