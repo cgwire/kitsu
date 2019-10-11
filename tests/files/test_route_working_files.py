@@ -219,3 +219,29 @@ class WorkingFilesTestCase(ApiDBTestCase):
             comment_data,
             400
         )
+
+    def test_get_working_files_for_entity(self):
+        entity = self.asset
+
+        # previous
+        previous_files = self.get(
+            "/data/entities/%s/working-files" % entity.id
+        )
+
+        # add fixture
+        new_working_file = self.generate_fixture_working_file(
+            name="test_get_working_files_for_entity",
+        )
+
+        new_files = self.get(
+            "/data/entities/%s/working-files" % entity.id
+        )
+
+        self.assertEqual(
+            len(previous_files) + 1,
+            len(new_files)
+        )
+        self.assertIn(
+            new_working_file.id,
+            [f.serialize()['id'] for f in new_files]
+        )
