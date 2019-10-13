@@ -129,6 +129,7 @@ export default {
       'isShotsLoading',
       'isShotsLoadingError',
       'isTVShow',
+      'searchSequenceFilters',
       'sequences',
       'sequenceMap',
       'sequencesPath',
@@ -320,6 +321,10 @@ export default {
             this.initialLoading = false
           })
       }
+    },
+
+    searchSequenceFilters () {
+      this.computeSequenceStats()
     }
   },
 

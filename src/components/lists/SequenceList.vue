@@ -73,6 +73,7 @@
           <td class="description"></td>
 
           <stats-cell
+            class="all-validation"
             :colors="chartColors('all', 'all')"
             :data="chartData('all', 'all')"
             :frames-data="chartData('all', 'all', 'frames')"
@@ -385,5 +386,11 @@ th.actions {
 
 .info img {
   max-width: 80vh;
+}
+
+td {
+  min-width: 170px;
+  max-width: 170px;
+  width: 170px;
 }
 </style>

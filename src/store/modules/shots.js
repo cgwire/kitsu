@@ -265,6 +265,7 @@ const initialState = {
   sequenceListScrollPosition: 0,
   episodeListScrollPosition: 0,
 
+  searchSequenceFilters: [],
   shotValidationColumns: []
 }
 
@@ -344,6 +345,8 @@ const getters = {
     return shotsBySequence
   },
 
+  searchSequenceFilters: state => state.searchSequenceFilters,
+
   getSequenceOptions: state => state.sequences.map(
     (sequence) => { return { label: sequence.name, value: sequence.id } }
   ),
@@ -395,7 +398,7 @@ const actions = {
   loadEpisodes ({ commit, state, rootGetters }, callback) {
     const currentProduction = rootGetters.currentProduction
     shotsApi.getEpisodes(currentProduction, (err, episodes) => {
-      if (err) console.log(err)
+      if (err) console.error(err)
       commit(LOAD_EPISODES_END, episodes)
       if (callback) callback()
     })
@@ -752,8 +755,11 @@ const actions = {
     })
   },
 
-  setSequenceSearch ({ commit }, searchQuery) {
-    commit(SET_SEQUENCE_SEARCH, searchQuery)
+  setSequenceSearch ({ commit, rootGetters }, sequenceSearch) {
+    commit(SET_SEQUENCE_SEARCH, {
+      sequenceSearch,
+      production: rootGetters.currentProduction
+    })
   },
 
   setSequenceListScrollPosition ({ commit }, scrollPosition) {
@@ -1182,10 +1188,18 @@ const mutations = {
     })
   },
 
-  [SET_SEQUENCE_SEARCH] (state, sequenceSearch) {
+  [SET_SEQUENCE_SEARCH] (state, { sequenceSearch, production }) {
     const keywords = getKeyWords(sequenceSearch)
     const result =
       indexSearch(state.sequenceIndex, keywords) || state.sequences
+
+    state.searchSequenceFilters = getFilters(
+      cache.shotIndex,
+      [],
+      [],
+      production.descriptors,
+      sequenceSearch
+    )
     state.displayedSequences = result.slice(0, PAGE_SIZE)
     state.displayedSequencesLength = result.length
     state.sequenceSearchText = sequenceSearch
@@ -1456,8 +1470,12 @@ const mutations = {
   },
 
   [COMPUTE_SEQUENCE_STATS] (state, { taskMap, taskStatusMap }) {
+    let shots = cache.shots
+    if (state.searchSequenceFilters.length > 0) {
+      shots = applyFilters(cache.shots, state.searchSequenceFilters, {})
+    }
     state.sequenceStats = computeStats(
-      cache.shots,
+      shots,
       'sequence_id',
       taskStatusMap,
       taskMap
