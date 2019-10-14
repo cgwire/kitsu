@@ -78,7 +78,11 @@ const csv = {
   buildCsvFile (name, entries) {
     const lineArray = []
     entries.forEach((infoArray) => {
-      const line = infoArray.join(';')
+      const sanitizedCells = infoArray.map((cell) => {
+        cellString = `${cell || ''}`
+        return `"${cellString.replace(/"/g, '')}"`
+      })
+      const line = sanitizedCells.join(';')
       lineArray.push(line)
     })
     const csvContent = 'data:text/csv;charset=utf-8,' + lineArray.join('\n')
