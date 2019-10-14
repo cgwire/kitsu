@@ -452,6 +452,7 @@ export default {
 
   schedule: {
     title: 'Calendario',
+    title_main: 'Calendario principal',
     overall_man_days: 'Días-hombre',
     md: 'md',
     zoom_level: 'Nivel de zoom',

@@ -353,6 +353,21 @@ export default {
     }
   },
 
+  schedule: {
+    md: 'jh',
+    overall_man_days: 'Jours Homme',
+    title: 'Planning',
+    title_main: 'Planning principal',
+    zoom_level: 'Niveau de zoom',
+    milestone: {
+      add_milestone: 'Ajouter milestone',
+      delete_milestone: 'Supprimer milestone',
+      edit_milestone: 'Modifier milestone',
+      error: 'Error',
+      name: 'Name'
+    }
+  },
+
   sequences: {
     all_sequences: 'Toutes les séquences',
     title: 'Stats séquences',
@@ -390,20 +405,6 @@ export default {
   server_down: {
     text: 'Contactez votre fournisseur, votre administrateur système ou votre département informatique pour comprendre ce qui ne va pas.',
     title: 'Kitsu a rencontré une erreur en communiquant avec son API de données.'
-  },
-
-  schedule: {
-    md: 'jh',
-    overall_man_days: 'Jours Homme',
-    title: 'Planning',
-    zoom_level: 'Niveau de zoom',
-    milestone: {
-      add_milestone: 'Ajouter milestone',
-      delete_milestone: 'Supprimer milestone',
-      edit_milestone: 'Modifier milestone',
-      error: 'Error',
-      name: 'Name'
-    }
   },
 
   shots: {

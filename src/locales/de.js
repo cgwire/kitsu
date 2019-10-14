@@ -452,6 +452,7 @@ export default {
 
   schedule: {
     title: 'Zeitplan',
+    title_main: 'Hauptterminplan',
     overall_man_days: 'Manntage',
     md: 'md',
     zoom_level: 'Zoomstufe',

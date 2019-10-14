@@ -452,6 +452,7 @@ export default {
 
   schedule: {
     title: 'Schedule',
+    title_main: 'Main Schedule',
     overall_man_days: 'Man-days',
     md: 'md',
     zoom_level: 'Zoom level',
