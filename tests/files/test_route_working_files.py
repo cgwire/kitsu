@@ -73,7 +73,7 @@ class WorkingFilesTestCase(ApiDBTestCase):
     def test_new_working_file(self):
         task = Task.get(self.task_id)
         self.assertEqual(len(task.assignees), 1)
-        self.assertNotEquals(self.user["id"], str(task.assignees[0].id))
+        self.assertNotEqual(self.user["id"], str(task.assignees[0].id))
 
         path = "/data/tasks/%s/working-files/new" % self.task_id
         working_file = self.post(path, {
@@ -221,27 +221,17 @@ class WorkingFilesTestCase(ApiDBTestCase):
         )
 
     def test_get_working_files_for_entity(self):
-        entity = self.asset
+        entity_id = str(self.asset.id)
+        self.generate_fixture_working_file(name="test_file_for_entity")
+        self.generate_fixture_working_file(name="test_file_for_entity_02")
+        self.generate_fixture_asset_types()
+        self.generate_fixture_asset_character()
+        self.asset = self.asset_character
+        self.generate_fixture_task()
+        self.generate_fixture_working_file(name="test_file_for_character")
 
-        # previous
-        previous_files = self.get(
-            "/data/entities/%s/working-files" % entity.id
-        )
+        new_files = self.get("/data/entities/%s/working-files" % entity_id)
 
-        # add fixture
-        new_working_file = self.generate_fixture_working_file(
-            name="test_get_working_files_for_entity",
-        )
-
-        new_files = self.get(
-            "/data/entities/%s/working-files" % entity.id
-        )
-
-        self.assertEqual(
-            len(previous_files) + 1,
-            len(new_files)
-        )
-        self.assertIn(
-            new_working_file.id,
-            [f.serialize()['id'] for f in new_files]
-        )
+        self.assertEqual(len(new_files), 2)
+        for new_file in new_files:
+            self.assertEqual(new_file["entity_id"], entity_id)

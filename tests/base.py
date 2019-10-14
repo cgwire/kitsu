@@ -313,6 +313,7 @@ class ApiDBTestCase(ApiTestCase):
             project_id=self.project.id,
             entity_type_id=self.asset_type_character.id
         )
+        return self.asset_character
 
     def generate_fixture_asset_camera(self):
         self.asset_camera = Entity.create(
