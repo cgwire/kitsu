@@ -58,6 +58,7 @@
               :person="rootElement"
               :is-link="false"
               :size="30"
+              :no-cache="true"
               v-else
             />
           </span>
