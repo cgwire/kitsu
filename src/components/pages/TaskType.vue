@@ -443,6 +443,7 @@ export default {
           if (keywords.length > 0) {
             tasks = indexSearch(this.$options.taskIndex, keywords)
           } else {
+            this.resetTasks()
             tasks = this.tasks
           }
           tasks = applyFilters(tasks, filters, this.taskMap)
