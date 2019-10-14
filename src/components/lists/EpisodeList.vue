@@ -15,7 +15,7 @@
             class="validation validation-cell"
             :style="getValidationStyle(columnId)"
             :key="taskTypeMap[columnId].id"
-            v-for="columnId in sortedValidationColumns">
+            v-for="columnId in validationColumns">
             <router-link
               :to="taskTypePath(columnId)"
             >
@@ -81,7 +81,7 @@
             :frames-data="chartData('all', columnId, 'frames')"
             :countMode="countMode"
             :displayMode="displayMode"
-            v-for="columnId in sortedValidationColumns"
+            v-for="columnId in validationColumns"
           />
 
           <td class="actions"></td>
@@ -121,7 +121,7 @@
             :frames-data="chartData(entry.id, columnId, 'frames')"
             :countMode="countMode"
             :displayMode="displayMode"
-            v-for="columnId in sortedValidationColumns"
+            v-for="columnId in validationColumns"
             v-if="isStats(entry.id, columnId)"
           />
           <td

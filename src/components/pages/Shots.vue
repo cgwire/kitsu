@@ -27,21 +27,18 @@
                 class="flexrow-item"
                 :title="$t('main.csv.import_file')"
                 icon="upload"
-                :is-responsive="true"
                 @click="showImportModal"
               />
-              <button-href-link
+              <button-simple
                 class="flexrow-item"
-                :title="$t('main.csv.export_file')"
                 icon="download"
-                :is-responsive="true"
-                :path="'/api/export/csv/projects/' + currentProduction.id + '/shots.csv'"
+                :title="$t('main.csv.export_file')"
+                @click="onExportClick"
               />
               <button-simple
                 class="flexrow-item"
                 :text="$t('shots.manage')"
                 icon="plus"
-                :is-responsive="true"
                 @click="showManageShots"
               />
             </div>
@@ -186,10 +183,12 @@
 </template>
 
 <script>
+import moment from 'moment'
 import { mapGetters, mapActions } from 'vuex'
+import csv from '../../lib/csv'
+import { slugify } from '../../lib/string'
 
 import AddMetadataModal from '../modals/AddMetadataModal'
-import ButtonHrefLink from '../widgets/ButtonHrefLink'
 import ButtonSimple from '../widgets/ButtonSimple'
 import CreateTasksModal from '../modals/CreateTasksModal'
 import DeleteModal from '../modals/DeleteModal'
@@ -209,7 +208,6 @@ export default {
 
   components: {
     AddMetadataModal,
-    ButtonHrefLink,
     ButtonSimple,
     CreateTasksModal,
     DeleteModal,
@@ -282,6 +280,10 @@ export default {
       'episodeMap',
       'episodes',
       'isCurrentUserManager',
+      'isFrameIn',
+      'isFrameOut',
+      'isFps',
+      'isTime',
       'isShotsLoading',
       'isShotsLoadingError',
       'isShowAssignations',
@@ -349,6 +351,7 @@ export default {
   methods: {
     ...mapActions([
       'addMetadataDescriptor',
+      'getShotsCsvLines',
       'deleteAllTasks',
       'deleteMetadataDescriptor',
       'hideAssignations',
@@ -636,20 +639,12 @@ export default {
 
     saveSearchQuery (searchQuery) {
       this.saveShotSearch(searchQuery)
-        .then(() => {
-        })
-        .catch((err) => {
-          if (err) console.log('error')
-        })
+        .catch(console.error)
     },
 
     removeSearchQuery (searchQuery) {
       this.removeShotSearch(searchQuery)
-        .then(() => {
-        })
-        .catch((err) => {
-          if (err) console.log('error')
-        })
+        .catch(console.error)
     },
 
     resizeHeaders () {
@@ -696,6 +691,52 @@ export default {
 
     hideCreateTasksModal () {
       this.modals.isCreateTasksDisplayed = false
+    },
+
+    onExportClick () {
+      this.getShotsCsvLines()
+        .then((shotLines) => {
+          const nameData = [
+            moment().format('YYYY-MM-DD'),
+            'kitsu',
+            this.currentProduction.name,
+            this.$t('shots.title')
+          ]
+          if (this.currentEpisode) {
+            nameData.splice(3, 0, this.currentEpisode.name)
+          }
+          const name = slugify(nameData.join('_'))
+          const headers = [
+            this.$t('shots.fields.name'),
+            this.$t('shots.fields.description')
+          ]
+          this.currentProduction
+            .descriptors
+            .filter(d => d.entity_type === 'Shot')
+            .forEach((descriptor) => {
+              headers.push(descriptor.field_name)
+            })
+          headers.push(this.$t('shots.fields.nb_frames'))
+          if (this.isFrameIn) {
+            headers.push(this.$t('shots.fields.frame_in'))
+          }
+          if (this.isFrameOut) {
+            headers.push(this.$t('shots.fields.frame_out'))
+          }
+          if (this.isFps) {
+            headers.push(this.$t('shots.fields.fps'))
+          }
+          if (this.isTime) {
+            headers.push(this.$t('shots.fields.time_spent'))
+          }
+          if (this.isTime) headers.push('Time Spent')
+          this.shotValidationColumns
+            .filter(d => d.entity_type === 'Asset')
+            .forEach((taskTypeId) => {
+              headers.push(this.taskTypeMap[taskTypeId].name)
+            })
+          csv.buildCsvFile(name, [headers].concat(shotLines))
+        })
     }
   },
 

@@ -139,6 +139,8 @@ import {
 
   SAVE_SHOT_SEARCH_END,
   REMOVE_SHOT_SEARCH_END,
+  SAVE_SEQUENCE_SEARCH_END,
+  REMOVE_SEQUENCE_SEARCH_END,
 
   COMPUTE_SEQUENCE_STATS,
   COMPUTE_EPISODE_STATS,
@@ -203,6 +205,12 @@ const helpers = {
       displayedShotsTimeSpent: timeSpent,
       displayedShotsFrames: nbFrames
     })
+  },
+
+  sortValidationColumns (validationColumns, shotFilledColumns, taskTypeMap) {
+    let columns = [...validationColumns]
+    columns = columns.filter(c => shotFilledColumns[c])
+    return sortValidationColumns(columns, taskTypeMap)
   }
 }
 
@@ -212,6 +220,7 @@ const initialState = {
   episodes: [],
   shotSearchText: '',
   shotSearchQueries: [],
+  sequenceSearchQueries: [],
   sequenceSearchText: '',
   sequenceStats: {},
   episodeSearchText: '',
@@ -265,6 +274,7 @@ const initialState = {
   sequenceListScrollPosition: 0,
   episodeListScrollPosition: 0,
 
+  searchSequenceFilters: [],
   shotValidationColumns: []
 }
 
@@ -284,6 +294,7 @@ const getters = {
   currentEpisode: state => state.currentEpisode,
 
   shotSearchQueries: state => state.shotSearchQueries,
+  sequenceSearchQueries: state => state.sequenceSearchQueries,
   shotMap: state => state.shotMap,
 
   isFps: state => state.isFps,
@@ -344,6 +355,8 @@ const getters = {
     return shotsBySequence
   },
 
+  searchSequenceFilters: state => state.searchSequenceFilters,
+
   getSequenceOptions: state => state.sequences.map(
     (sequence) => { return { label: sequence.name, value: sequence.id } }
   ),
@@ -395,7 +408,7 @@ const actions = {
   loadEpisodes ({ commit, state, rootGetters }, callback) {
     const currentProduction = rootGetters.currentProduction
     shotsApi.getEpisodes(currentProduction, (err, episodes) => {
-      if (err) console.log(err)
+      if (err) console.error(err)
       commit(LOAD_EPISODES_END, episodes)
       if (callback) callback()
     })
@@ -733,6 +746,46 @@ const actions = {
     })
   },
 
+  saveSequenceSearch ({ commit, rootGetters }, searchQuery) {
+    return new Promise((resolve, reject) => {
+      const query = state.sequenceSearchQueries.find(
+        (query) => query.name === searchQuery
+      )
+      const production = rootGetters.currentProduction
+
+      if (!query) {
+        peopleApi.createFilter(
+          'sequence',
+          searchQuery,
+          searchQuery,
+          production.id,
+          null,
+          (err, searchQuery) => {
+            commit(SAVE_SEQUENCE_SEARCH_END, { searchQuery, production })
+            if (err) {
+              reject(err)
+            } else {
+              resolve(searchQuery)
+            }
+          }
+        )
+      } else {
+        resolve()
+      }
+    })
+  },
+
+  removeSequenceSearch ({ commit, rootGetters }, searchQuery) {
+    return new Promise((resolve, reject) => {
+      const production = rootGetters.currentProduction
+      peopleApi.removeFilter(searchQuery, (err) => {
+        commit(REMOVE_SEQUENCE_SEARCH_END, { searchQuery, production })
+        if (err) reject(err)
+        else resolve()
+      })
+    })
+  },
+
   initSequences ({ commit, dispatch, state, rootState, rootGetters }) {
     return new Promise((resolve, reject) => {
       const productionId = rootState.route.params.production_id
@@ -752,8 +805,11 @@ const actions = {
     })
   },
 
-  setSequenceSearch ({ commit }, searchQuery) {
-    commit(SET_SEQUENCE_SEARCH, searchQuery)
+  setSequenceSearch ({ commit, rootGetters }, sequenceSearch) {
+    commit(SET_SEQUENCE_SEARCH, {
+      sequenceSearch,
+      production: rootGetters.currentProduction
+    })
   },
 
   setSequenceListScrollPosition ({ commit }, scrollPosition) {
@@ -822,6 +878,41 @@ const actions = {
     } else {
       dispatch('loadEpisodeStats', rootGetters.currentProduction.id)
     }
+  },
+
+  getShotsCsvLines ({ state, rootGetters }) {
+    const production = rootGetters.currentProduction
+    let shots = cache.shots
+    if (cache.result && cache.result.length > 0) {
+      shots = cache.result
+    }
+    const lines = shots.map((shot) => {
+      const shotLine = [
+        shot.name,
+        shot.description
+      ]
+      production
+        .descriptors
+        .filter(d => d.entity_type === 'Shot')
+        .forEach((descriptor) => {
+          shotLine.push(shot.data[descriptor.field_name])
+        })
+      shotLine.push(shot.nb_frames)
+      if (state.isFrameIn) shotLine.push(shot.data.frame_in)
+      if (state.isFrameOut) shotLine.push(shot.data.frame_out)
+      if (state.isFps) shotLine.push(shot.data.fps)
+      if (state.isTime) shotLine.push(shot.timeSpent)
+      state.shotValidationColumns.forEach((validationColumn) => {
+        const task = rootGetters.taskMap[shot.validations[validationColumn]]
+        if (task) {
+          shotLine.push(task.task_status_short_name)
+        } else {
+          shotLine.push('')
+        }
+      })
+      return shotLine
+    })
+    return lines
   }
 }
 
@@ -923,25 +1014,24 @@ const mutations = {
 
       state.shotMap[shot.id] = shot
     })
-
-    state.shotValidationColumns = sortValidationColumns(
-      Object.values(validationColumns), taskTypeMap
-    )
     const displayedShots = shots.slice(0, PAGE_SIZE)
+    const filledColumns = getFilledColumns(displayedShots)
 
-    Object.assign(state, {
-      isShotsLoading: false,
-      isShotsLoadingError: false,
-      nbValidationColumns: state.shotValidationColumns.length,
+    state.shotValidationColumns = helpers.sortValidationColumns(
+      Object.values(validationColumns), filledColumns, taskTypeMap
+    )
 
-      isFps: isFps,
-      isFrameIn: isFrameIn,
-      isFrameOut: isFrameOut,
-      isTime: isTime,
+    state.nbValidationColumns = state.shotValidationColumns.length
+    state.isFps = isFps
+    state.isFrameIn = isFrameIn
+    state.isFrameOut = isFrameOut
+    state.isTime = isTime
 
-      displayedShots: displayedShots,
-      shotFilledColumns: getFilledColumns(displayedShots)
-    })
+    state.isShotsLoading = false
+    state.isShotsLoadingError = false
+
+    state.displayedShots = displayedShots
+    state.shotFilledColumns = filledColumns
 
     const maxX = state.displayedShots.length
     const maxY = state.nbValidationColumns
@@ -952,6 +1042,12 @@ const mutations = {
       state.shotSearchQueries = userFilters.shot[production.id]
     } else {
       state.shotSearchQueries = []
+    }
+
+    if (userFilters.sequence && userFilters.sequence[production.id]) {
+      state.sequenceSearchQueries = userFilters.sequence[production.id]
+    } else {
+      state.sequenceSearchQueries = []
     }
   },
 
@@ -967,6 +1063,17 @@ const mutations = {
     if (queryIndex >= 0) {
       state.shotSearchQueries.splice(queryIndex, 1)
     }
+  },
+
+  [SAVE_SEQUENCE_SEARCH_END] (state, { searchQuery }) {
+    state.sequenceSearchQueries.push(searchQuery)
+    state.sequenceSearchQueries = sortByName(state.sequenceSearchQueries)
+  },
+
+  [REMOVE_SEQUENCE_SEARCH_END] (state, { searchQuery }) {
+    state.sequenceSearchQueries = state
+      .sequenceSearchQueries
+      .filter((query) => query.name !== searchQuery.name)
   },
 
   [LOAD_SEQUENCES_END] (state, sequences) {
@@ -1182,10 +1289,18 @@ const mutations = {
     })
   },
 
-  [SET_SEQUENCE_SEARCH] (state, sequenceSearch) {
+  [SET_SEQUENCE_SEARCH] (state, { sequenceSearch, production }) {
     const keywords = getKeyWords(sequenceSearch)
     const result =
       indexSearch(state.sequenceIndex, keywords) || state.sequences
+
+    state.searchSequenceFilters = getFilters(
+      cache.shotIndex,
+      [],
+      [],
+      production.descriptors.filter(d => d.entity_type === 'Shot'),
+      sequenceSearch
+    )
     state.displayedSequences = result.slice(0, PAGE_SIZE)
     state.displayedSequencesLength = result.length
     state.sequenceSearchText = sequenceSearch
@@ -1456,8 +1571,12 @@ const mutations = {
   },
 
   [COMPUTE_SEQUENCE_STATS] (state, { taskMap, taskStatusMap }) {
+    let shots = cache.shots
+    if (state.searchSequenceFilters.length > 0) {
+      shots = applyFilters(cache.shots, state.searchSequenceFilters, {})
+    }
     state.sequenceStats = computeStats(
-      cache.shots,
+      shots,
       'sequence_id',
       taskStatusMap,
       taskMap

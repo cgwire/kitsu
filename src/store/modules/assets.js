@@ -179,6 +179,12 @@ const helpers = {
     asset.validations = validations
     asset.timeSpent = timeSpent
     return asset
+  },
+
+  sortValidationColumns (validationColumns, assetFilledColumns, taskTypeMap) {
+    let columns = [...validationColumns]
+    columns = columns.filter(c => assetFilledColumns[c])
+    return sortValidationColumns(columns, taskTypeMap)
   }
 }
 
@@ -525,6 +531,39 @@ const actions = {
 
   setAssetTypeSearch ({ commit }, searchQuery) {
     commit(SET_ASSET_TYPE_SEARCH, searchQuery)
+  },
+
+  getAssetsCsvLines ({ state, rootGetters }) {
+    const production = rootGetters.currentProduction
+    const episodeMap = rootGetters.episodeMap
+    let assets = cache.assets
+    if (cache.result && cache.result.length > 0) {
+      assets = cache.result
+    }
+    const lines = assets.map((asset) => {
+      const assetLine = [
+        asset.episode_id ? episodeMap[asset.episode_id].name : '',
+        asset.name,
+        asset.description
+      ]
+      production
+        .descriptors
+        .filter(d => d.entity_type === 'Shot')
+        .forEach((descriptor) => {
+          assetLine.push(asset.data[descriptor.field_name])
+        })
+      if (state.isTime) assetLine.push(asset.timeSpent)
+      state.assetValidationColumns.forEach((validationColumn) => {
+        const task = rootGetters.taskMap[asset.validations[validationColumn]]
+        if (task) {
+          assetLine.push(task.task_status_short_name)
+        } else {
+          assetLine.push('')
+        }
+      })
+      return assetLine
+    })
+    return lines
   }
 }
 
@@ -591,28 +630,27 @@ const mutations = {
     })
     const assetTypes = Object.values(assetTypeMap)
     cache.assetTypeIndex = buildNameIndex(assetTypes)
+    const displayedAssets = cache.assets.slice(0, PAGE_SIZE)
+    const filledColumns = getFilledColumns(displayedAssets)
 
-    state.assetValidationColumns = sortValidationColumns(
+    state.assetValidationColumns = helpers.sortValidationColumns(
       Object.values(validationColumns),
+      filledColumns,
       taskTypeMap
     )
+    state.isAssetTime = isTime
 
-    const displayedAssets = cache.assets.slice(0, PAGE_SIZE)
-    Object.assign(state, {
-      isAssetTime: isTime,
+    state.isAssetsLoading = false
+    state.isAssetsLoadingError = false
+    state.nbValidationColumns = state.assetValidationColumns.length
 
-      isAssetsLoading: false,
-      isAssetsLoadingError: false,
-      nbValidationColumns: state.assetValidationColumns.length,
+    state.displayedAssets = displayedAssets
+    state.displayedAssetsLength = cache.assets ? cache.assets.length : 0
+    state.assetFilledColumns = getFilledColumns(displayedAssets)
 
-      displayedAssets: displayedAssets,
-      displayedAssetsLength: cache.assets ? cache.assets.length : 0,
-      assetFilledColumns: getFilledColumns(displayedAssets),
-
-      assetTypes: assetTypes,
-      displayedAssetTypes: assetTypes,
-      displayedAssetTypesLength: assetTypes.length
-    })
+    state.assetTypes = assetTypes
+    state.displayedAssetTypes = assetTypes
+    state.displayedAssetTypesLength = assetTypes.length
 
     const maxX = state.displayedAssets.length
     const maxY = state.nbValidationColumns

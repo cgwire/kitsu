@@ -28,7 +28,13 @@
         v-for="rootElement in hierarchy"
       >
         <div
-          class="entity-line entity-name flexrow"
+          :class="{
+            'entity-line': true,
+            'entity-name': true,
+            flexrow: true,
+            root: true,
+            expanded: rootElement.expanded
+          }"
           :style="entityLineStyle(rootElement)"
         >
           <span
@@ -521,19 +527,19 @@ export default {
         schedule: true,
         unselectable: true
       }
-      className['zoom-level-' + this.zoomLevel] = true
+      className[`zoom-level-${this.zoomLevel}`] = true
       return className
     },
 
     timelinePositionStyle () {
-      return { width: this.cellWidth + 'px' }
+      return { width: `${this.cellWidth}px` }
     },
 
     timelineTodayPositionStyle () {
       const today = moment()
       return {
-        width: this.cellWidth + 'px',
-        left: (this.getTimebarLeft({ startDate: today }) - 5) + 'px'
+        width: `${this.cellWidth}px`,
+        left: `${this.getTimebarLeft({ startDate: today }) - 5}px`
       }
     },
 
@@ -1324,6 +1330,15 @@ export default {
   display: flex;
   align-items: center;
   line-height: 1.1em;
+
+  &.root {
+    border-top-left-radius: 1em;
+    border-bottom-left-radius: 1em;
+  }
+
+  &.root.expanded {
+    border-bottom-left-radius: 0em;
+  }
 
   span {
     color: white;

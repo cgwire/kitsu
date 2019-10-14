@@ -214,12 +214,13 @@ export const getDescFilters = (descriptors, queryText) => {
       if (descriptorName[0] === '[') {
         descriptorName = descriptorName.substring(1, descriptorName.length - 1)
       }
-      const descriptors = descriptorNameIndex[descriptorName.toLowerCase()]
+      const matchedDescriptors =
+        descriptorNameIndex[descriptorName.toLowerCase()]
       const excluding = value.startsWith('-')
       if (excluding) value = value.substring(1)
-      if (descriptors) {
+      if (matchedDescriptors) {
         results.push({
-          descriptor: descriptors[0],
+          descriptor: matchedDescriptors[0],
           value,
           type: 'descriptor',
           excluding

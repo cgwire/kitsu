@@ -13,7 +13,7 @@
             class="validation validation-cell"
             :style="getValidationStyle(columnId)"
             :key="columnId"
-            v-for="columnId in sortedValidationColumns"
+            v-for="columnId in validationColumns"
             v-if="!isLoading"
           >
             <router-link
@@ -73,6 +73,7 @@
           <td class="description"></td>
 
           <stats-cell
+            class="all-validation"
             :colors="chartColors('all', 'all')"
             :data="chartData('all', 'all')"
             :frames-data="chartData('all', 'all', 'frames')"
@@ -88,7 +89,7 @@
             :frames-data="chartData('all', columnId, 'frames')"
             :countMode="countMode"
             :displayMode="displayMode"
-            v-for="columnId in sortedValidationColumns"
+            v-for="columnId in validationColumns"
           />
 
           <td class="actions">
@@ -130,7 +131,7 @@
             :countMode="countMode"
             :displayMode="displayMode"
             v-if="isStats(entry.id, columnId)"
-            v-for="columnId in sortedValidationColumns"
+            v-for="columnId in validationColumns"
           />
           <td
             :style="getValidationStyle(columnId)"
@@ -385,5 +386,11 @@ th.actions {
 
 .info img {
   max-width: 80vh;
+}
+
+td {
+  min-width: 170px;
+  max-width: 170px;
+  width: 170px;
 }
 </style>

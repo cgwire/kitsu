@@ -27,22 +27,19 @@
               class="flexrow-item"
               :title="$t('main.csv.import_file')"
               icon="upload"
-              :is-responsive="true"
               :path="importPath"
               @click="showImportModal"
             />
-            <button-href-link
+            <button-simple
               class="flexrow-item"
-              :title="$t('main.csv.export_file')"
               icon="download"
-              :is-responsive="true"
-              :path="'/api/export/csv/projects/' + currentProduction.id + '/assets.csv'"
+              :title="$t('main.csv.export_file')"
+              @click="onExportClick"
             />
             <button-link
               class="flexrow-item"
               :text="$t('assets.new_asset')"
               icon="plus"
-              :is-responsive="true"
               :path="newAssetPath"
             />
             </div>
@@ -178,11 +175,13 @@
 </template>
 
 <script>
+import moment from 'moment'
 import { mapGetters, mapActions } from 'vuex'
+import csv from '../../lib/csv'
+import { slugify } from '../../lib/string'
 
 import AssetList from '../lists/AssetList'
 import AddMetadataModal from '../modals/AddMetadataModal'
-import ButtonHrefLink from '../widgets/ButtonHrefLink'
 import ButtonLink from '../widgets/ButtonLink'
 import ButtonSimple from '../widgets/ButtonSimple'
 import CreateTasksModal from '../modals/CreateTasksModal'
@@ -203,7 +202,6 @@ export default {
     AssetList,
     AddMetadataModal,
     ButtonLink,
-    ButtonHrefLink,
     ButtonSimple,
     CreateTasksModal,
     DeleteModal,
@@ -286,6 +284,7 @@ export default {
       'isAssetsLoading',
       'isAssetsLoadingError',
       'isCurrentUserManager',
+      'isTime',
       'isTVShow',
       'nbSelectedTasks',
       'restoreAsset',
@@ -351,6 +350,7 @@ export default {
   methods: {
     ...mapActions([
       'addMetadataDescriptor',
+      'getAssetsCsvLines',
       'deleteAllTasks',
       'deleteMetadataDescriptor',
       'loadAssets',
@@ -713,6 +713,41 @@ export default {
 
     hideCreateTasksModal () {
       this.modals.isCreateTasksDisplayed = false
+    },
+
+    onExportClick () {
+      this.getAssetsCsvLines()
+        .then((assetLines) => {
+          const nameData = [
+            moment().format('YYYY-MM-DD'),
+            'kitsu',
+            this.currentProduction.name,
+            this.$t('assets.title')
+          ]
+          if (this.currentEpisode) {
+            nameData.splice(3, 0, this.currentEpisode.name)
+          }
+          const name = slugify(nameData.join('_'))
+          const headers = [
+            this.$t('assets.fields.episode'),
+            this.$t('assets.fields.name'),
+            this.$t('assets.fields.description')
+          ]
+          this.currentProduction
+            .descriptors
+            .filter(d => d.entity_type === 'Asset')
+            .forEach((descriptor) => {
+              headers.push(descriptor.field_name)
+            })
+          if (this.isTime) {
+            headers.push(this.$t('shots.fields.time_spent'))
+          }
+          if (this.isTime) headers.push('Time Spent')
+          this.assetValidationColumns.forEach((taskTypeId) => {
+            headers.push(this.taskTypeMap[taskTypeId].name)
+          })
+          csv.buildCsvFile(name, [headers].concat(assetLines))
+        })
     }
   },
 

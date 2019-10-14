@@ -10,7 +10,7 @@
             class="validation"
             :style="getValidationStyle(columnId)"
             :key="columnId"
-            v-for="columnId in sortedValidationColumns"
+            v-for="columnId in validationColumns"
             v-if="!isLoading"
           >
             <router-link
@@ -83,7 +83,7 @@
             :colors="chartColors('all', columnId)"
             :data="chartData('all', columnId)"
             :displayMode="displayMode"
-            v-for="columnId in sortedValidationColumns"
+            v-for="columnId in validationColumns"
           />
 
           <td class="actions">
@@ -117,7 +117,7 @@
             :data="chartData(entry.id, columnId)"
             :displayMode="displayMode"
             v-if="isStats(entry.id, columnId)"
-            v-for="columnId in sortedValidationColumns"
+            v-for="columnId in validationColumns"
           />
           <td
             :style="getValidationStyle(columnId)"
