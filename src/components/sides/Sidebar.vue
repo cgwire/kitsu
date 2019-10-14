@@ -1,6 +1,6 @@
 <template>
   <div class="navbar">
-    <aside v-bind:class="{'hidden': isSidebarHidden}">
+    <aside :class="{'hidden': isSidebarHidden}">
       <div>
         <router-link
            class="home-link"
@@ -55,6 +55,12 @@
            <p @click="toggleSidebar()">
              <router-link :to="{name: 'timesheets'}">
              {{ $t("timesheets.title") }}
+             </router-link>
+           </p>
+
+           <p @click="toggleSidebar()">
+             <router-link :to="{name: 'main-schedule'}">
+             {{ $t("schedule.title_main") }}
              </router-link>
            </p>
          </div>

@@ -48,10 +48,17 @@
             class="avatar flexrow-item"
             v-if="rootElement.avatar"
           >
+            <production-name
+              :project="rootElement"
+              :only-avatar="true"
+              :size="30"
+              v-if="rootElement.type === 'Project'"
+            />
             <people-avatar
               :person="rootElement"
               :is-link="false"
               :size="30"
+              v-else
             />
           </span>
           <span class="filler flexrow-item root-element-name">
@@ -335,6 +342,7 @@ import colors from '../../../lib/colors'
 import { ChevronRightIcon, ChevronDownIcon, Edit2Icon } from 'vue-feather-icons'
 import EditMilestoneModal from '../../modals/EditMilestoneModal'
 import PeopleAvatar from '../../widgets/PeopleAvatar'
+import ProductionName from '../../widgets/ProductionName'
 import Spinner from '../../widgets/Spinner'
 
 export default {
@@ -345,6 +353,7 @@ export default {
     Edit2Icon,
     EditMilestoneModal,
     PeopleAvatar,
+    ProductionName,
     Spinner
   },
 
@@ -417,7 +426,6 @@ export default {
 
   computed: {
     ...mapGetters([
-      'isCurrentUserAdmin',
       'milestones'
     ]),
 
@@ -890,8 +898,6 @@ export default {
     },
 
     expandChildElement (element) {
-      if (element) {
-      }
     },
 
     childNameStyle (rootElement, index) {
@@ -961,7 +967,8 @@ export default {
     },
 
     addMilestoneTitle (day) {
-      return `${this.$t('schedule.milestone.add_milestone')} ${day.format('YYYY-MM-DD')}`
+      return `${this.$t('schedule.milestone.add_milestone')} ` +
+             `${day.format('YYYY-MM-DD')}`
     }
   },
 
@@ -1359,6 +1366,12 @@ export default {
 
   .man-days-unit {
     font-size: 0.7em;
+  }
+
+  .avatar {
+    box-shadow: 0px 0px 6px 0px rgba(0, 0, 0, 0.3);
+    margin: 0;
+    padding: 0;
   }
 }
 

@@ -22,6 +22,7 @@ import Shots from '../components/pages/Shots'
 import Team from '../components/pages/Team'
 import TaskType from '../components/pages/TaskType'
 import Timesheets from '../components/pages/Timesheets'
+import MainSchedule from '../components/pages/MainSchedule'
 import Todos from '../components/pages/Todos'
 
 const AssetTypes = () => import('../components/pages/AssetTypes')
@@ -207,6 +208,12 @@ export const routes = [
             name: 'person-tab'
           }
         ]
+      },
+
+      {
+        path: '/main-schedule',
+        component: MainSchedule,
+        name: 'main-schedule'
       },
 
       {
