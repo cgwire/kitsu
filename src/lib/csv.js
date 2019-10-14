@@ -79,7 +79,7 @@ const csv = {
     const lineArray = []
     entries.forEach((infoArray) => {
       const sanitizedCells = infoArray.map((cell) => {
-        cellString = `${cell || ''}`
+        const cellString = `${cell || ''}`
         return `"${cellString.replace(/"/g, '')}"`
       })
       const line = sanitizedCells.join(';')
