@@ -1,8 +1,11 @@
 from collections import OrderedDict
 
+from flask import current_app
+
 from zou.app.stores import publisher_store
 from zou.app.models.event import ApiEvent
 from zou.app.utils import fields
+
 
 handlers = {}
 
@@ -69,7 +72,10 @@ def emit(event, data={}, persist=True):
             from zou.app.stores.queue_store.job_queue import enqueue
             enqueue(func.handle_event, data)
         else:
-            func.handle_event(data)
+            try:
+                func.handle_event(data)
+            except Exception:
+                current_app.logger.error("Error handling event", exc_info=1)
 
 
 def save_event(event, data):
