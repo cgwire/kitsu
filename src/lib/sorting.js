@@ -114,10 +114,12 @@ export const sortValidationColumns = (columns, taskTypeMap) => {
   return columns.sort((a, b) => {
     const taskTypeA = taskTypeMap[a]
     const taskTypeB = taskTypeMap[b]
-    if (taskTypeA.priority !== taskTypeB.priority) {
-      return taskTypeA.priority > taskTypeB.priority
-    } else {
+    if (taskTypeA.priority === taskTypeB.priority) {
       return taskTypeA.name.localeCompare(taskTypeB.name)
+    } else if (taskTypeA.priority > taskTypeB.priority) {
+      return 1
+    } else {
+      return -1
     }
   })
 }

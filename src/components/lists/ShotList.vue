@@ -85,7 +85,7 @@
             }"
             :key="columnId"
             :style="getValidationStyle(columnId)"
-            v-for="columnId in sortedValidationColumns"
+            v-for="columnId in validationColumns"
             v-if="!isLoading && (!hiddenColumns[columnId] || isShowInfos)"
           >
             <div class="flexrow">
@@ -232,7 +232,7 @@
             :is-assignees="isShowAssignations"
             @select="onTaskSelected"
             @unselect="onTaskUnselected"
-            v-for="(columnId, j) in sortedValidationColumns"
+            v-for="(columnId, j) in validationColumns"
             v-if="!isLoading && (!hiddenColumns[columnId] || isShowInfos)"
           />
           <row-actions

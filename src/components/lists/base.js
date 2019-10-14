@@ -17,26 +17,6 @@ export const entityListMixin = {
   },
 
   computed: {
-    sortedValidationColumns () {
-      let columns = [...this.validationColumns]
-      if (this.assetFilledColumns) {
-        columns = columns.filter(c => this.assetFilledColumns[c])
-      } else if (this.shotFilledColumns) {
-        columns = columns.filter(c => this.shotFilledColumns[c])
-      }
-
-      return columns.sort((a, b) => {
-        const taskTypeA = this.taskTypeMap[a]
-        const taskTypeB = this.taskTypeMap[b]
-        if (taskTypeA.priority === taskTypeB.priority) {
-          return taskTypeA.name.localeCompare(taskTypeB.name)
-        } else if (taskTypeA.priority > taskTypeB.priority) {
-          return 1
-        } else {
-          return -1
-        }
-      })
-    }
   },
 
   methods: {

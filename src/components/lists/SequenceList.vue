@@ -13,7 +13,7 @@
             class="validation validation-cell"
             :style="getValidationStyle(columnId)"
             :key="columnId"
-            v-for="columnId in sortedValidationColumns"
+            v-for="columnId in validationColumns"
             v-if="!isLoading"
           >
             <router-link
@@ -89,7 +89,7 @@
             :frames-data="chartData('all', columnId, 'frames')"
             :countMode="countMode"
             :displayMode="displayMode"
-            v-for="columnId in sortedValidationColumns"
+            v-for="columnId in validationColumns"
           />
 
           <td class="actions">
@@ -131,7 +131,7 @@
             :countMode="countMode"
             :displayMode="displayMode"
             v-if="isStats(entry.id, columnId)"
-            v-for="columnId in sortedValidationColumns"
+            v-for="columnId in validationColumns"
           />
           <td
             :style="getValidationStyle(columnId)"

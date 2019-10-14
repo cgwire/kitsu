@@ -160,6 +160,7 @@ import { buildSupervisorTaskIndex, indexSearch } from '../../lib/indexing'
 import { slugify } from '../../lib/string'
 import {
   applyFilters,
+  getDescFilters,
   getExcludingKeyWords,
   getKeyWords,
   getTaskFilters
@@ -425,11 +426,19 @@ export default {
     onSearchChange (query) {
       if (query && query.length !== 1) {
         query = query.toLowerCase().trim()
+        const descriptors = this.currentProduction.descriptors
+          .filter(d => d.entityType === this.isAssets ? 'Asset' : 'Shot')
         const keywords = getKeyWords(query) || []
         const excludingKeyWords = getExcludingKeyWords(query) || []
-        if (keywords.length > 0 || excludingKeyWords.length > 0) {
+        const descFilters = getDescFilters(descriptors, query)
+        if (
+          keywords.length > 0 ||
+          excludingKeyWords.length > 0 ||
+          descFilters.length > 0
+        ) {
           let tasks = []
           const filters = getTaskFilters(this.$options.taskIndex, query)
+            .concat(descFilters)
           if (keywords.length > 0) {
             tasks = indexSearch(this.$options.taskIndex, keywords)
           } else {
@@ -502,6 +511,8 @@ export default {
       entities.forEach((entity) => {
         entity.tasks.forEach((taskId) => {
           const task = this.taskMap[taskId]
+          // Hack to allow filtering on linked entity metadata.
+          task.data = entity.data
           if (task && task.task_type_id === this.currentTaskType.id) {
             tasks.push(task)
           }
