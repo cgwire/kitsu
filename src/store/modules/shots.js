@@ -891,8 +891,7 @@ const actions = {
         shot.name,
         shot.description
       ]
-      production
-        .descriptors
+      sortByName([...production.descriptors])
         .filter(d => d.entity_type === 'Shot')
         .forEach((descriptor) => {
           shotLine.push(shot.data[descriptor.field_name])

@@ -546,13 +546,12 @@ const actions = {
         asset.name,
         asset.description
       ]
-      production
-        .descriptors
-        .filter(d => d.entity_type === 'Shot')
+      sortByName([ ...production.descriptors ])
+        .filter(d => d.entity_type === 'Asset')
         .forEach((descriptor) => {
           assetLine.push(asset.data[descriptor.field_name])
         })
-      if (state.isTime) assetLine.push(asset.timeSpent)
+      if (state.isAssetTime) assetLine.push(asset.timeSpent)
       state.assetValidationColumns.forEach((validationColumn) => {
         const task = rootGetters.taskMap[asset.validations[validationColumn]]
         if (task) {

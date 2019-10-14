@@ -178,6 +178,7 @@
 import moment from 'moment'
 import { mapGetters, mapActions } from 'vuex'
 import csv from '../../lib/csv'
+import { sortByName } from '../../lib/sorting'
 import { slugify } from '../../lib/string'
 
 import AssetList from '../lists/AssetList'
@@ -284,7 +285,7 @@ export default {
       'isAssetsLoading',
       'isAssetsLoadingError',
       'isCurrentUserManager',
-      'isTime',
+      'isAssetTime',
       'isTVShow',
       'nbSelectedTasks',
       'restoreAsset',
@@ -733,16 +734,14 @@ export default {
             this.$t('assets.fields.name'),
             this.$t('assets.fields.description')
           ]
-          this.currentProduction
-            .descriptors
+          sortByName([ ...this.currentProduction.descriptors ])
             .filter(d => d.entity_type === 'Asset')
             .forEach((descriptor) => {
               headers.push(descriptor.field_name)
             })
-          if (this.isTime) {
+          if (this.isAssetTime) {
             headers.push(this.$t('shots.fields.time_spent'))
           }
-          if (this.isTime) headers.push('Time Spent')
           this.assetValidationColumns.forEach((taskTypeId) => {
             headers.push(this.taskTypeMap[taskTypeId].name)
           })

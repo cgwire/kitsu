@@ -186,6 +186,7 @@
 import moment from 'moment'
 import { mapGetters, mapActions } from 'vuex'
 import csv from '../../lib/csv'
+import { sortByName } from '../../lib/sorting'
 import { slugify } from '../../lib/string'
 
 import AddMetadataModal from '../modals/AddMetadataModal'
@@ -710,8 +711,7 @@ export default {
             this.$t('shots.fields.name'),
             this.$t('shots.fields.description')
           ]
-          this.currentProduction
-            .descriptors
+          sortByName([...this.currentProduction.descriptors])
             .filter(d => d.entity_type === 'Shot')
             .forEach((descriptor) => {
               headers.push(descriptor.field_name)
@@ -729,7 +729,6 @@ export default {
           if (this.isTime) {
             headers.push(this.$t('shots.fields.time_spent'))
           }
-          if (this.isTime) headers.push('Time Spent')
           this.shotValidationColumns
             .forEach((taskTypeId) => {
               headers.push(this.taskTypeMap[taskTypeId].name)
