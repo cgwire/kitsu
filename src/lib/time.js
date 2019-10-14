@@ -48,3 +48,35 @@ export const getWeekRange = (year, currentYear) => {
     return range(1, 52)
   }
 }
+
+export const getFirstStartDate = (items) => {
+  let startDate = moment()
+  items.forEach((item) => {
+    if (item.startDate.isBefore(startDate)) startDate = item.startDate.clone()
+  })
+  return startDate
+}
+
+export const getLastEndDate = (items) => {
+  let endDate = moment().add(3, 'months')
+  items.forEach((item) => {
+    if (item.endDate.isAfter(endDate)) endDate = item.endDate.clone()
+  })
+  return endDate
+}
+
+export const getStartDateFromString = (startDateString) => {
+  if (startDateString) {
+    return moment(startDateString, 'YYYY-MM-DD', 'en')
+  } else {
+    return moment()
+  }
+}
+
+export const getEndDateFromString = (startDate, endDateString) => {
+  if (endDateString) {
+    return moment(endDateString, 'YYYY-MM-DD', 'en')
+  } else {
+    return startDate.clone().add('days', 1)
+  }
+}
