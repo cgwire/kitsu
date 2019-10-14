@@ -1095,7 +1095,7 @@ const mutations = {
       sequenceMap: sequenceMap,
       sequences: sortedSequences,
       sequenceIndex: buildSequenceIndex(sortedSequences),
-      displayedSequences: sortedSequences.slice(0, PAGE_SIZE),
+      displayedSequences: sortedSequences.slice(0, PAGE_SIZE * 2),
       displayedSequencesLength: sortedSequences.length
     })
   },
@@ -1301,7 +1301,7 @@ const mutations = {
       production.descriptors.filter(d => d.entity_type === 'Shot'),
       sequenceSearch
     )
-    state.displayedSequences = result.slice(0, PAGE_SIZE)
+    state.displayedSequences = result.slice(0, PAGE_SIZE * 2)
     state.displayedSequencesLength = result.length
     state.sequenceSearchText = sequenceSearch
   },
