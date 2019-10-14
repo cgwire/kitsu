@@ -731,7 +731,6 @@ export default {
           }
           if (this.isTime) headers.push('Time Spent')
           this.shotValidationColumns
-            .filter(d => d.entity_type === 'Asset')
             .forEach((taskTypeId) => {
               headers.push(this.taskTypeMap[taskTypeId].name)
             })
