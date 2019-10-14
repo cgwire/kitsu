@@ -99,6 +99,7 @@
         <tr
           :key="entry.id"
           v-for="entry in entries"
+          v-if="isEntryStats(entry.id)"
         >
 
           <td class="name">
@@ -260,6 +261,16 @@ export default {
     isStats (entryId, columnId) {
       return this.sequenceStats[entryId] &&
              this.sequenceStats[entryId][columnId]
+    },
+
+    isEntryStats (entryId) {
+      if (!this.sequenceStats[entryId] && this.sequenceSearchText) return false
+      if (!this.sequenceStats[entryId]) return true
+      let isStats = false
+      Object.keys(this.sequenceStats[entryId]).forEach((statKey) => {
+        isStats = isStats || this.sequenceStats[entryId][statKey]
+      })
+      return isStats
     },
 
     onHeaderScroll (event, position) {
