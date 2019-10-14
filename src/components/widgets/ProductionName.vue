@@ -9,18 +9,24 @@
          class="flexrow-item avatar has-text-centered"
          v-if="withAvatar"
          v-bind:style="{
-         background: getAvatarColor(project),
-         width: size + 'px',
-         height: size + 'px',
-         'font-size': (size - 15) + 'px',
-         'line-height': size + 'px'
-      }">
+           background: getAvatarColor(project),
+           width: size + 'px',
+           height: size + 'px',
+           'font-size': (size - 15) + 'px',
+           'line-height': size + 'px'
+         }"
+       >
         <span v-if="!project.has_avatar">
           {{ generateAvatar(project) }}
         </span>
-        <span v-else>
-          <img :src="getThumbnailPath(project)" />
-        </span>
+        <img
+          :src="getThumbnailPath(project)"
+          :style="{
+            width: size + 'px',
+            height: size + 'px'
+          }"
+          v-else
+        />
       </div>
       <span class="flexrow-item" v-if="!onlyAvatar">
         {{ project.name }}
@@ -116,5 +122,9 @@ export default {
 
 .avatar {
   margin-right: 0.3em;
+}
+
+.flexrow-item {
+  margin: 0;
 }
 </style>
