@@ -1091,13 +1091,11 @@ const mutations = {
       }
     })
     const sortedSequences = sortSequences(sequences)
-    Object.assign(state, {
-      sequenceMap: sequenceMap,
-      sequences: sortedSequences,
-      sequenceIndex: buildSequenceIndex(sortedSequences),
-      displayedSequences: sortedSequences.slice(0, PAGE_SIZE * 2),
-      displayedSequencesLength: sortedSequences.length
-    })
+    state.sequenceMap = sequenceMap
+    state.sequences = sortedSequences
+    state.sequenceIndex = buildSequenceIndex(sortedSequences)
+    state.displayedSequences = sortedSequences.slice(0, PAGE_SIZE * 2)
+    state.displayedSequencesLength = sortedSequences.length
   },
 
   [LOAD_EPISODES_END] (state, episodes) {
