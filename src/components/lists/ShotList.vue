@@ -559,9 +559,9 @@ th.actions {
 }
 
 .fps {
-  min-width: 50px;
-  max-width: 50px;
-  width: 50px;
+  min-width: 60px;
+  max-width: 60px;
+  width: 60px;
 }
 
 .description {
