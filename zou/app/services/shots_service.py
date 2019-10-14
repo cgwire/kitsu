@@ -243,24 +243,29 @@ def get_shots_and_tasks(criterions={}):
         shot.data = shot.data or {}
 
         if shot_id not in shot_map:
+
             shot_map[shot_id] = {
-                "id": str(shot.id),
-                "name": shot.name,
-                "description": shot.description,
-                "nb_frames": shot.nb_frames,
-                "frame_in": shot.data.get("frame_in", None),
-                "frame_out": shot.data.get("frame_out", None),
-                "fps": shot.data.get("fps", None),
-                "preview_file_id": str(shot.preview_file_id or ""),
-                "episode_id": str(episode_id),
-                "episode_name": episode_name or "",
-                "sequence_id": str(sequence_id),
-                "sequence_name": sequence_name,
                 "canceled": shot.canceled,
                 "data": fields.serialize_value(shot.data),
-                "tasks": [],
+                "description": shot.description,
+                "entity_type_id": str(shot.entity_type_id),
+                "episode_id": str(episode_id),
+                "episode_name": episode_name or "",
+                "fps": shot.data.get("fps", None),
+                "frame_in": shot.data.get("frame_in", None),
+                "frame_out": shot.data.get("frame_out", None),
+                "id": str(shot.id),
+                "name": shot.name,
+                "nb_frames": shot.nb_frames,
+                "parent_id": str(shot.parent_id),
+                "preview_file_id": str(shot.preview_file_id or ""),
                 "project_id": str(project_id),
-                "project_name": project_name
+                "project_name": project_name,
+                "sequence_id": str(sequence_id),
+                "sequence_name": sequence_name,
+                "source_id": str(shot.source_id),
+                "tasks": [],
+                "type": "Shot"
             }
 
         if task_id is not None:
