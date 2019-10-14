@@ -4,7 +4,9 @@
       <search-field
         class="flexrow-item mt1"
         ref="sequence-search-field"
+        :can-save="true"
         @change="onSearchChange"
+        @save="saveSearchQuery"
         placeholder="ex: e01 s01 anim=wip"
       />
       <combobox
@@ -27,6 +29,14 @@
         class="flexrow-item"
         icon="download"
         @click="exportStatisticsToCsv"
+      />
+    </div>
+
+    <div class="query-list mt1">
+      <search-query-list
+        :queries="sequenceSearchQueries"
+        @changesearch="changeSearch"
+        @removesearch="removeSearchQuery"
       />
     </div>
 
@@ -76,6 +86,7 @@ import Combobox from '../widgets/Combobox'
 import DeleteModal from '../modals/DeleteModal'
 import EditSequenceModal from '../modals/EditSequenceModal'
 import SearchField from '../widgets/SearchField'
+import SearchQueryList from '../widgets/SearchQueryList'
 import SequenceList from '../lists/SequenceList.vue'
 
 export default {
@@ -87,6 +98,7 @@ export default {
     DeleteModal,
     EditSequenceModal,
     SearchField,
+    SearchQueryList,
     SequenceList
   },
 
@@ -135,6 +147,7 @@ export default {
       'sequencesPath',
       'sequenceStats',
       'sequenceSearchText',
+      'sequenceSearchQueries',
       'sequenceListScrollPosition',
       'shotValidationColumns',
       'taskTypeMap',
@@ -163,6 +176,8 @@ export default {
       'hideAssignations',
       'initSequences',
       'loadComment',
+      'removeSequenceSearch',
+      'saveSequenceSearch',
       'setLastProductionScreen',
       'setSequenceSearch',
       'setSequenceListScrollPosition',
@@ -262,6 +277,23 @@ export default {
     onSearchChange (event) {
       const searchQuery = this.$refs['sequence-search-field'].getValue()
       this.setSequenceSearch(searchQuery)
+    },
+
+    changeSearch (searchQuery) {
+      this.$refs['sequence-search-field'].setValue(searchQuery.search_query)
+      this.$refs['sequence-search-field']
+        .$emit('change', searchQuery.search_query)
+      this.resizeHeaders()
+    },
+
+    saveSearchQuery (searchQuery) {
+      this.saveSequenceSearch(searchQuery)
+        .catch(console.error)
+    },
+
+    removeSearchQuery (searchQuery) {
+      this.removeSequenceSearch(searchQuery)
+        .catch(console.error)
     },
 
     saveScrollPosition (scrollPosition) {

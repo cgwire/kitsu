@@ -639,20 +639,12 @@ export default {
 
     saveSearchQuery (searchQuery) {
       this.saveShotSearch(searchQuery)
-        .then(() => {
-        })
-        .catch((err) => {
-          if (err) console.log('error')
-        })
+        .catch(console.error)
     },
 
     removeSearchQuery (searchQuery) {
       this.removeShotSearch(searchQuery)
-        .then(() => {
-        })
-        .catch((err) => {
-          if (err) console.log('error')
-        })
+        .catch(console.error)
     },
 
     resizeHeaders () {

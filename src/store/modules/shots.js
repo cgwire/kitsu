@@ -139,6 +139,8 @@ import {
 
   SAVE_SHOT_SEARCH_END,
   REMOVE_SHOT_SEARCH_END,
+  SAVE_SEQUENCE_SEARCH_END,
+  REMOVE_SEQUENCE_SEARCH_END,
 
   COMPUTE_SEQUENCE_STATS,
   COMPUTE_EPISODE_STATS,
@@ -218,6 +220,7 @@ const initialState = {
   episodes: [],
   shotSearchText: '',
   shotSearchQueries: [],
+  sequenceSearchQueries: [],
   sequenceSearchText: '',
   sequenceStats: {},
   episodeSearchText: '',
@@ -291,6 +294,7 @@ const getters = {
   currentEpisode: state => state.currentEpisode,
 
   shotSearchQueries: state => state.shotSearchQueries,
+  sequenceSearchQueries: state => state.sequenceSearchQueries,
   shotMap: state => state.shotMap,
 
   isFps: state => state.isFps,
@@ -742,6 +746,46 @@ const actions = {
     })
   },
 
+  saveSequenceSearch ({ commit, rootGetters }, searchQuery) {
+    return new Promise((resolve, reject) => {
+      const query = state.sequenceSearchQueries.find(
+        (query) => query.name === searchQuery
+      )
+      const production = rootGetters.currentProduction
+
+      if (!query) {
+        peopleApi.createFilter(
+          'sequence',
+          searchQuery,
+          searchQuery,
+          production.id,
+          null,
+          (err, searchQuery) => {
+            commit(SAVE_SEQUENCE_SEARCH_END, { searchQuery, production })
+            if (err) {
+              reject(err)
+            } else {
+              resolve(searchQuery)
+            }
+          }
+        )
+      } else {
+        resolve()
+      }
+    })
+  },
+
+  removeSequenceSearch ({ commit, rootGetters }, searchQuery) {
+    return new Promise((resolve, reject) => {
+      const production = rootGetters.currentProduction
+      peopleApi.removeFilter(searchQuery, (err) => {
+        commit(REMOVE_SEQUENCE_SEARCH_END, { searchQuery, production })
+        if (err) reject(err)
+        else resolve()
+      })
+    })
+  },
+
   initSequences ({ commit, dispatch, state, rootState, rootGetters }) {
     return new Promise((resolve, reject) => {
       const productionId = rootState.route.params.production_id
@@ -999,6 +1043,12 @@ const mutations = {
     } else {
       state.shotSearchQueries = []
     }
+
+    if (userFilters.sequence && userFilters.sequence[production.id]) {
+      state.sequenceSearchQueries = userFilters.sequence[production.id]
+    } else {
+      state.sequenceSearchQueries = []
+    }
   },
 
   [SAVE_SHOT_SEARCH_END] (state, { searchQuery }) {
@@ -1013,6 +1063,17 @@ const mutations = {
     if (queryIndex >= 0) {
       state.shotSearchQueries.splice(queryIndex, 1)
     }
+  },
+
+  [SAVE_SEQUENCE_SEARCH_END] (state, { searchQuery }) {
+    state.sequenceSearchQueries.push(searchQuery)
+    state.sequenceSearchQueries = sortByName(state.sequenceSearchQueries)
+  },
+
+  [REMOVE_SEQUENCE_SEARCH_END] (state, { searchQuery }) {
+    state.sequenceSearchQueries = state
+      .sequenceSearchQueries
+      .filter((query) => query.name !== searchQuery.name)
   },
 
   [LOAD_SEQUENCES_END] (state, sequences) {
