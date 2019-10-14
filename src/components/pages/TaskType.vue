@@ -323,6 +323,7 @@ export default {
         'estimation',
         'duration',
         'retake_count',
+        'due_date',
         'real_start_date',
         'real_end_date',
         'last_comment_date'
@@ -523,11 +524,15 @@ export default {
 
     sortTasks (tasks) {
       if (!tasks) tasks = this.tasks
-      const isName = ['task_status_short_name', 'entity_name'].includes(
+      const isDesc = [
+        'task_status_short_name',
+        'entity_name',
+        'due_date'
+      ].includes(
         this.currentSort
       )
       return tasks.sort(
-        firstBy(this.currentSort, isName ? 1 : -1)
+        firstBy(this.currentSort, isDesc ? 1 : -1)
           .thenBy('entity_name')
       )
     },
