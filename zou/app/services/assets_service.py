@@ -333,7 +333,6 @@ def get_full_asset(asset_id):
         del asset["nb_frames"]
         del asset["parent_id"]
         del asset["entities_in"]
-        del asset["entity_type_id"]
         asset.update(assets[0])
         return asset
     else:
