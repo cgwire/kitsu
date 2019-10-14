@@ -203,6 +203,12 @@ const helpers = {
       displayedShotsTimeSpent: timeSpent,
       displayedShotsFrames: nbFrames
     })
+  },
+
+  sortValidationColumns (validationColumns, shotFilledColumns, taskTypeMap) {
+    let columns = [...validationColumns]
+    columns = columns.filter(c => shotFilledColumns[c])
+    return sortValidationColumns(columns, taskTypeMap)
   }
 }
 
@@ -828,6 +834,41 @@ const actions = {
     } else {
       dispatch('loadEpisodeStats', rootGetters.currentProduction.id)
     }
+  },
+
+  getShotsCsvLines ({ state, rootGetters }) {
+    const production = rootGetters.currentProduction
+    let shots = cache.shots
+    if (cache.result && cache.result.length > 0) {
+      shots = cache.result
+    }
+    const lines = shots.map((shot) => {
+      const shotLine = [
+        shot.name,
+        shot.description
+      ]
+      production
+        .descriptors
+        .filter(d => d.entity_type === 'Shot')
+        .forEach((descriptor) => {
+          shotLine.push(shot.data[descriptor.field_name])
+        })
+      shotLine.push(shot.nb_frames)
+      if (state.isFrameIn) shotLine.push(shot.data.frame_in)
+      if (state.isFrameOut) shotLine.push(shot.data.frame_out)
+      if (state.isFps) shotLine.push(shot.data.fps)
+      if (state.isTime) shotLine.push(shot.timeSpent)
+      state.shotValidationColumns.forEach((validationColumn) => {
+        const task = rootGetters.taskMap[shot.validations[validationColumn]]
+        if (task) {
+          shotLine.push(task.task_status_short_name)
+        } else {
+          shotLine.push('')
+        }
+      })
+      return shotLine
+    })
+    return lines
   }
 }
 
@@ -929,25 +970,24 @@ const mutations = {
 
       state.shotMap[shot.id] = shot
     })
-
-    state.shotValidationColumns = sortValidationColumns(
-      Object.values(validationColumns), taskTypeMap
-    )
     const displayedShots = shots.slice(0, PAGE_SIZE)
+    const filledColumns = getFilledColumns(displayedShots)
 
-    Object.assign(state, {
-      isShotsLoading: false,
-      isShotsLoadingError: false,
-      nbValidationColumns: state.shotValidationColumns.length,
+    state.shotValidationColumns = helpers.sortValidationColumns(
+      Object.values(validationColumns), filledColumns, taskTypeMap
+    )
 
-      isFps: isFps,
-      isFrameIn: isFrameIn,
-      isFrameOut: isFrameOut,
-      isTime: isTime,
+    state.nbValidationColumns = state.shotValidationColumns.length
+    state.isFps = isFps
+    state.isFrameIn = isFrameIn
+    state.isFrameOut = isFrameOut
+    state.isTime = isTime
 
-      displayedShots: displayedShots,
-      shotFilledColumns: getFilledColumns(displayedShots)
-    })
+    state.isShotsLoading = false
+    state.isShotsLoadingError = false
+
+    state.displayedShots = displayedShots
+    state.shotFilledColumns = filledColumns
 
     const maxX = state.displayedShots.length
     const maxY = state.nbValidationColumns
@@ -1197,7 +1237,7 @@ const mutations = {
       cache.shotIndex,
       [],
       [],
-      production.descriptors,
+      production.descriptors.filter(d => d.entity_type === 'Shot'),
       sequenceSearch
     )
     state.displayedSequences = result.slice(0, PAGE_SIZE)
