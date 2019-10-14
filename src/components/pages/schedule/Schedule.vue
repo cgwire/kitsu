@@ -527,19 +527,19 @@ export default {
         schedule: true,
         unselectable: true
       }
-      className['zoom-level-' + this.zoomLevel] = true
+      className[`zoom-level-${this.zoomLevel}`] = true
       return className
     },
 
     timelinePositionStyle () {
-      return { width: this.cellWidth + 'px' }
+      return { width: `${this.cellWidth}px` }
     },
 
     timelineTodayPositionStyle () {
       const today = moment()
       return {
-        width: this.cellWidth + 'px',
-        left: (this.getTimebarLeft({ startDate: today }) - 5) + 'px'
+        width: `${this.cellWidth}px`,
+        left: `${this.getTimebarLeft({ startDate: today }) - 5}px`
       }
     },
 

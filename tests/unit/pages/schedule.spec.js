@@ -122,6 +122,14 @@ describe('Schedule', () => {
   })
 
   describe('Getters', () => {
+    test('cellWidth', () => {
+      let width = wrapper.vm.cellWidth
+      expect(width).toEqual(60)
+      wrapper.setProps({ zoomLevel: 1 })
+      width = wrapper.vm.cellWidth
+      expect(width).toEqual(20)
+    })
+
     test('daysToDisplay', () => {
       const days = wrapper.vm.daysAvailable
       expect(days.length).toEqual(185)
@@ -149,6 +157,41 @@ describe('Schedule', () => {
       expect(daysIndex['2019-08-01']).toEqual(23)
       expect(daysIndex['2019-07-01']).toEqual(0)
       expect(daysIndex['2019-08-15']).toEqual(33)
+    })
+
+    test('totalManDays', () => {
+      expect(wrapper.vm.totalManDays).toEqual(0)
+    })
+
+    test('scheduleClass', () => {
+      expect(wrapper.vm.scheduleClass).toEqual({
+        schedule: true,
+        unselectable: true,
+        'zoom-level-3': true
+      })
+    })
+
+    test('timelinePositionStyle', () => {
+      wrapper.setProps({ zoomLevel: 3 })
+      expect(wrapper.vm.timelinePositionStyle).toEqual({
+        width: '60px'
+      })
+    })
+
+    test('timelineTodayPositionStyle', () => {
+      const left = wrapper.vm.businessDiff(wrapper.vm.startDate, moment()) * 60
+      wrapper.setProps({ zoomLevel: 3 })
+      expect(wrapper.vm.timelineTodayPositionStyle).toEqual({
+        width: '60px',
+        left: `${left}px`
+      })
+    })
+
+    test('milestoneTooltipStyle', () => {
+      wrapper.setProps({ zoomLevel: 3 })
+      expect(wrapper.vm.milestoneTooltipStyle).toEqual({
+        left: '-40px'
+      })
     })
   })
 
@@ -217,6 +260,19 @@ describe('Schedule', () => {
         expect(wrapper.vm.timelineContentWrapper.scrollTop).toEqual(50)
         expect(wrapper.vm.entityList.scrollTop).toEqual(50)
       })
+
+      test.skip('onMouseMove', () => {
+      })
+      test.skip('updatePositionBarPosition', () => {
+      })
+      test.skip('isValidItemDates', () => {
+      })
+      test.skip('onTimelineScroll', () => {
+      })
+      test.skip('scrollScheduleLeft', () => {
+      })
+      test.skip('scrollScrollToToday', () => {
+      })
     })
 
     describe('Browsing', () => {
@@ -245,6 +301,8 @@ describe('Schedule', () => {
       test('startBrowsingY', () => {
         wrapper.vm.startBrowsingY()
         expect(wrapper.vm.isBrowsingY).toBeTruthy()
+      })
+      test.skip('stopBrowsing', () => {
       })
     })
 
@@ -405,6 +463,9 @@ describe('Schedule', () => {
           'left': (33 * 60 + 5) + 'px',
           'width': 14 * 60 - 10 + 'px'
         })
+      })
+      
+      test.skip('timebarStyle', () => {
       })
 
       test('getTimebarLeft', () => {
