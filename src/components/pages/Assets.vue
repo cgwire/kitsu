@@ -742,9 +742,10 @@ export default {
           if (this.isAssetTime) {
             headers.push(this.$t('shots.fields.time_spent'))
           }
-          this.assetValidationColumns.forEach((taskTypeId) => {
-            headers.push(this.taskTypeMap[taskTypeId].name)
-          })
+          this.assetValidationColumns
+            .forEach((taskTypeId) => {
+              headers.push(this.taskTypeMap[taskTypeId].name)
+            })
           csv.buildCsvFile(name, [headers].concat(assetLines))
         })
     }

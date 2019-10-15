@@ -209,7 +209,6 @@ const helpers = {
 
   sortValidationColumns (validationColumns, shotFilledColumns, taskTypeMap) {
     let columns = [...validationColumns]
-    columns = columns.filter(c => shotFilledColumns[c])
     return sortValidationColumns(columns, taskTypeMap)
   }
 }
@@ -901,14 +900,15 @@ const actions = {
       if (state.isFrameOut) shotLine.push(shot.data.frame_out)
       if (state.isFps) shotLine.push(shot.data.fps)
       if (state.isTime) shotLine.push(shot.timeSpent)
-      state.shotValidationColumns.forEach((validationColumn) => {
-        const task = rootGetters.taskMap[shot.validations[validationColumn]]
-        if (task) {
-          shotLine.push(task.task_status_short_name)
-        } else {
-          shotLine.push('')
-        }
-      })
+      state.shotValidationColumns
+        .forEach((validationColumn) => {
+          const task = rootGetters.taskMap[shot.validations[validationColumn]]
+          if (task) {
+            shotLine.push(task.task_status_short_name)
+          } else {
+            shotLine.push('')
+          }
+        })
       return shotLine
     })
     return lines

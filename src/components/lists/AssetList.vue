@@ -75,8 +75,7 @@
             }"
             :key="columnId"
             :style="getValidationStyle(columnId)"
-            v-for="columnId in validationColumns"
-            v-if="!isLoading && (!hiddenColumns[columnId] || isShowInfos)"
+            v-for="columnId in displayedValidationColumns"
           >
             <div class="flexrow">
               <router-link
@@ -216,8 +215,8 @@
             :is-assignees="isShowAssignations"
             @select="onTaskSelected"
             @unselect="onTaskUnselected"
-            v-for="(columnId, j) in validationColumns"
-            v-if="!hiddenColumns[columnId] || isShowInfos"
+            v-for="(columnId, j) in displayedValidationColumns"
+            v-if="!isLoading"
           />
           <row-actions v-if="isCurrentUserManager"
             :entry="asset"
@@ -355,6 +354,13 @@ export default {
           this.displayedAssetsLength > 0
         )
       )
+    },
+
+    displayedValidationColumns () {
+      return this.validationColumns.filter((columnId) => {
+        return this.assetFilledColumns[columnId] &&
+          (!this.hiddenColumns[columnId] || this.isShowInfos)
+      })
     }
   },
 

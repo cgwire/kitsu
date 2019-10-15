@@ -295,6 +295,7 @@ export default {
       'sequences',
       'selectedTasks',
       'shotMap',
+      'shotFilledColumns',
       'shotsCsvFormData',
       'shotSearchQueries',
       'shotSearchText',

@@ -85,8 +85,7 @@
             }"
             :key="columnId"
             :style="getValidationStyle(columnId)"
-            v-for="columnId in validationColumns"
-            v-if="!isLoading && (!hiddenColumns[columnId] || isShowInfos)"
+            v-for="columnId in displayedValidationColumns"
           >
             <div class="flexrow">
               <router-link
@@ -232,8 +231,8 @@
             :is-assignees="isShowAssignations"
             @select="onTaskSelected"
             @unselect="onTaskUnselected"
-            v-for="(columnId, j) in validationColumns"
-            v-if="!isLoading && (!hiddenColumns[columnId] || isShowInfos)"
+            v-for="(columnId, j) in displayedValidationColumns"
+            v-if="!isLoading"
           />
           <row-actions
             :entry="shot"
@@ -394,6 +393,13 @@ export default {
           this.displayedShotsLength > 0
         )
       )
+    },
+
+    displayedValidationColumns () {
+      return this.validationColumns.filter((columnId) => {
+        return this.shotFilledColumns[columnId] &&
+          (!this.hiddenColumns[columnId] || this.isShowInfos)
+      })
     }
   },
 

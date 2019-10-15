@@ -183,7 +183,6 @@ const helpers = {
 
   sortValidationColumns (validationColumns, assetFilledColumns, taskTypeMap) {
     let columns = [...validationColumns]
-    columns = columns.filter(c => assetFilledColumns[c])
     return sortValidationColumns(columns, taskTypeMap)
   }
 }
@@ -552,14 +551,15 @@ const actions = {
           assetLine.push(asset.data[descriptor.field_name])
         })
       if (state.isAssetTime) assetLine.push(asset.timeSpent)
-      state.assetValidationColumns.forEach((validationColumn) => {
-        const task = rootGetters.taskMap[asset.validations[validationColumn]]
-        if (task) {
-          assetLine.push(task.task_status_short_name)
-        } else {
-          assetLine.push('')
-        }
-      })
+      state.assetValidationColumns
+        .forEach((validationColumn) => {
+          const task = rootGetters.taskMap[asset.validations[validationColumn]]
+          if (task) {
+            assetLine.push(task.task_status_short_name)
+          } else {
+            assetLine.push('')
+          }
+        })
       return assetLine
     })
     return lines
@@ -570,6 +570,7 @@ const mutations = {
   [CLEAR_ASSETS] (state) {
     cache.assets = []
     state.assetMap = {}
+    cache.result = []
     state.assetValidationColumns = []
 
     cache.assetIndex = {}
@@ -581,6 +582,7 @@ const mutations = {
 
   [LOAD_ASSETS_START] (state) {
     cache.assets = []
+    cache.result = []
     state.assetMap = {}
     state.isAssetsLoading = true
     state.isAssetsLoadingError = false
@@ -645,7 +647,7 @@ const mutations = {
 
     state.displayedAssets = displayedAssets
     state.displayedAssetsLength = cache.assets ? cache.assets.length : 0
-    state.assetFilledColumns = getFilledColumns(displayedAssets)
+    state.assetFilledColumns = filledColumns
 
     state.assetTypes = assetTypes
     state.displayedAssetTypes = assetTypes
@@ -887,6 +889,7 @@ const mutations = {
     )
     let result = indexSearch(cache.assetIndex, keywords) || cache.assets
     result = applyFilters(result, filters, taskMap)
+    cache.result = result
 
     const displayedAssets = result.slice(0, PAGE_SIZE)
     const maxX = displayedAssets.length
@@ -1053,6 +1056,7 @@ const mutations = {
   [RESET_ALL] (state) {
     cache.assets = []
     cache.assetIndex = {}
+    cache.result = []
 
     Object.assign(state, { ...initialState })
   }
