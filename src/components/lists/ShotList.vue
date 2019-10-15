@@ -86,6 +86,7 @@
             :key="columnId"
             :style="getValidationStyle(columnId)"
             v-for="columnId in displayedValidationColumns"
+            v-if="!isLoading"
           >
             <div class="flexrow">
               <router-link
