@@ -144,7 +144,7 @@
             {{ formatDate(task.real_start_date) }}
           </td>
           <td class="real-end-date">
-            {{ formatDate(task.real_end_date) }}
+            {{ formatDate(task.end_date) }}
           </td>
           <td class="last-comment-date">
             {{ formatDate(task.last_comment_date) }}
@@ -445,11 +445,11 @@ export default {
           this.getEntity(task.entity.id).name,
           task.task_status_short_name,
           assignees,
-          task.estimation,
+          this.formatDuration(task.estimation),
           this.formatDuration(task.duration),
           task.retake_count,
           this.formatDate(task.real_start_date),
-          this.formatDate(task.real_end_date),
+          this.formatDate(task.end_date),
           this.formatDate(task.last_comment_date)
         ]
         if (!this.isAssets) {
