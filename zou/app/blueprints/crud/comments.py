@@ -35,8 +35,12 @@ class CommentResource(BaseModelResource):
         if permissions.has_admin_permissions():
             return True
         else:
+            task_id = str(comment.object_id)
             comment = self.get_model_or_404(instance["id"])
-            task = tasks_service.get_task(str(comment.object_id))
+            task = tasks_service.get_task(task_id)
+            if task is None:
+                tasks_service.clear_task_cache(task_id)
+                task = tasks_service.get_task(task_id)
             return user_service.check_project_access(task["project_id"])
 
     def check_update_permissions(self, instance, data):
