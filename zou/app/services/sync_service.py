@@ -578,8 +578,11 @@ def download_preview(preview_file):
 
 
 def generate_db_backup(host, port, user, password, database):
+    """
+    Generate a Postgres dump file from the database.
+    """
     now = datetime.datetime.now().strftime("%Y-%m-%d")
-    filename = "%s-zou-db-backup" % now
+    filename = "%s-zou-db-backup.dump" % now
     with gzip.open(filename, "wb") as archive:
         pg_dump(
             "-h", host,
@@ -593,11 +596,18 @@ def generate_db_backup(host, port, user, password, database):
 
 
 def store_db_backup(filename):
-    file_store.add_file(
-        "dbbackup",
-        filename,
-        filename
-    )
+    """
+    Store given file located in the same directory, inside the files bucket
+    using the `dbbackup` prefix.
+    """
+    from zou.app import app
+
+    with app.app_context():
+        file_store.add_file(
+            "dbbackup",
+            filename,
+            filename
+        )
 
 
 def upload_entity_thumbnails_to_storage():
