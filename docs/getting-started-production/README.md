@@ -576,7 +576,8 @@ Type your comments, and hit **Enter** key to add another line on your checklist.
 
 ![checklist](../img/getting-started/checklist_detailed.png)
 
-You can also **tag** someone of the team in the comments. Type the `@`and it opens a sub-menu with the list of the team. 
+You can also **tag** someone of the team in the comments. Type the `@`and it opens 
+a sub-menu with the list of the team. 
 
 ![Tag someone](../img/getting-started/tag_team.png)
 
@@ -601,7 +602,8 @@ Once you have clicked on the button, you see the thumbnail appears, and the butt
 You may need to reduce a task type column in a global page. For example, you may be 
 only interested in layout and animation but not so much about the shipment for the client.
 
-Close to each task type name, you can click on the arrow ![Arrow](../img/getting-started/arrow.png) to unfold a submenu. 
+Close to each task type name, you can click on the arrow 
+![Arrow](../img/getting-started/arrow.png) to unfold a submenu. 
 
 You can choose to **Minimize** or **Delete** the task type.
 
@@ -615,9 +617,11 @@ Once the column is minimized, only colored dots show the status.
 You can also hide all the non-essential column, like **Description**, **Custom column**, 
 also, the minimize columns.
 
-Just click on the **Hide additional information** ![minimize button](../img/getting-started/minimize.png) button on the top right of the page.
+Just click on the **Hide additional information** 
+![minimize button](../img/getting-started/minimize.png) button on the top right of the page.
 
-To make the information reappear, click on the same button,![maximize button](../img/getting-started/maximize.png) it won't have the grey highlight.
+To make the information reappear, click on the same button,
+![maximize button](../img/getting-started/maximize.png) it won't have the grey highlight.
 
 
 ## The timesheets
@@ -646,6 +650,45 @@ You can also set up the number of working hours per day.
 Go back to the main menu, and select **Settings**. 
 
 ![Setting](../img/getting-started/setting.png)
+
+
+## Production Schedule
+
+As Production you can set the global schedule for your production. 
+
+On the drop-down menu choose **SCHEDULE**
+![Menu Schedule](../img/getting-started/menu_schedule.png)
+
+On top of the schedule, you can define the start date (1), and the end date (2). 
+Click on the box to open the calendar and pick a date.
+You can add your global man day as on your quote.
+
+![Production Schedule](../img/getting-started/production_schedule.png)
+
+You can define, on the Gantt Schedule, the start and end date of each task type. 
+The task types are the ones you have already added on your production.
+
+Put your cursor on the start date, the cursor will change as a double arrow. Then drag and slide the start date.
+Do the same for the end date. 
+
+![Production Schedule gantt](../img/getting-started/schedule_production_task_type.png)
+
+Once you have define all the start and end dates of the taks types, your schedule should look like the example.
+
+![Production Schedule gantt filled](../img/getting-started/production_schedule_task_type_complete.png)
+
+Once it's done, you can unfold each task type and access to a level of detail : asset type for the assets, 
+sequences for the shots.
+
+![Production Schedule unfold task type](../img/getting-started/production_schedule_unfold.png)
+
+You can set the start and end date the same way than for the task type. You can define the work period for all the asset types.
+
+![Production Schedule task type asset](../img/getting-started/production_schedule_task_type_detail.png)
+
+You can do the same for the shots part. You can determine the start and end date for the sequences.
+
+![Production Schedule task type sequence](../img/getting-started/production_schedule_task_type_detail_sequence.png)
 
 
 
