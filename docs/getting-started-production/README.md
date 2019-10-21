@@ -657,6 +657,7 @@ Go back to the main menu, and select **Settings**.
 As Production you can set the global schedule for your production. 
 
 On the drop-down menu choose **SCHEDULE**
+
 ![Menu Schedule](../img/getting-started/menu_schedule.png)
 
 On top of the schedule, you can define the start date (1), and the end date (2). 
