@@ -316,7 +316,7 @@ the middle section, it is your selection for the shot (2).
 
 So now you have to select the shot you want to cast. You can also choose multiple shots at the same time. Click on the first shot, hold the **shift** key and click on the last shot of your selection.
 
-![breakdown bulk](../img/getting-started/breakdown_general_bulk_select.png)
+
 
 Then click on the assets you want
 to assign: characters, backgrounds, ... from the right part (3). 
@@ -347,7 +347,6 @@ continue with the breakdown.
 
 Now your **Breakdown** page should look like this.
 
-![breakdown add asset bulk](../img/getting-started/breakdown_general_bulk_select_full.png)
 
 
 You can also import or export your breakdown list, with a `.csv`file.
