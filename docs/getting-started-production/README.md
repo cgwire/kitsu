@@ -631,6 +631,7 @@ As Production you can use the main menu to check the timesheets.
 Open the main menu with the ![main button](../img/getting-started/main_button.png) button. 
 
 On the menu choose the **Timesheets** page.
+
 ![main button](../img/getting-started/timesheet_menu.png)
 
 ![main button](../img/getting-started/timesheet_day.png)
@@ -662,7 +663,7 @@ On the drop-down menu choose **SCHEDULE**
 
 On top of the schedule, you can define the start date (1), and the end date (2). 
 Click on the box to open the calendar and pick a date.
-You can add your global man day as on your quote.
+You can add your global man-days as on your quote.
 
 ![Production Schedule](../img/getting-started/production_schedule.png)
 
@@ -690,6 +691,27 @@ You can set the start and end date the same way than for the task type. You can 
 You can do the same for the shots part. You can determine the start and end date for the sequences.
 
 ![Production Schedule task type sequence](../img/getting-started/production_schedule_task_type_detail_sequence.png)
+
+You can add a milestone by hovering a date. A ![Production Schedule task type sequence](../img/getting-started/production_schedule_add_milestone_plus.png) appears, 
+
+![Production Schedule task type sequence](../img/production_schedule_add_milestone.png)
+
+When you click, a popup window appears, and ask you to add a name to the milestone.
+
+![Production Schedule task type sequence](../img/production_schedule_add_milestone_name.png)
+
+You can see a small black dot and a vertical line as a display of the milestone.
+If you hoover the little black dot, the name of the milestone appears.
+
+![Production Schedule task type sequence](../img/production_schedule_milestone.png)
+
+You can change the name of the milestone if you click on the ![Production Schedule task type sequence](../img/edit_button.png), or anywhere on the milestone name.
+
+From there on can rename the milestone, or delete it.
+
+![Production Schedule task type sequence](../img/production_schedule_edit_milestone.png)
+
+
 
 
 
