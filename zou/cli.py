@@ -406,9 +406,19 @@ def download_storage_files():
 @cli.command()
 def dump_database():
     """
-    Dump database described in Zou environment variables.
+    Dump database described in Zou environment variables and save it to
+    configured object storage.
     """
     commands.dump_database()
+
+
+@cli.command()
+@click.option("--days", default=None)
+def upload_files_to_cloud_storage(days):
+    """
+    Upload all files related to previews to configured object storage.
+    """
+    commands.upload_files_to_cloud_storage(days)
 
 
 if __name__ == '__main__':

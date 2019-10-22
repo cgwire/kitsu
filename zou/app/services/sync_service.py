@@ -36,7 +36,7 @@ from zou.app.models.time_spent import TimeSpent
 
 from zou.app.stores import file_store
 from flask_fs.backends.local import LocalBackend
-from zou.app.utils import events
+from zou.app.utils import events, date_helpers
 
 logger = logging.getLogger()
 logger.setLevel(logging.INFO)
@@ -610,24 +610,36 @@ def store_db_backup(filename):
         )
 
 
-def upload_entity_thumbnails_to_storage():
+def upload_entity_thumbnails_to_storage(days=None):
     """
     Upload all thumbnail files for non preview entries to object storage.
     """
-    for project in Project.query.all():
-        upload_entity_thumbnail(project)
-    for organisation in Organisation.query.all():
-        upload_entity_thumbnail(organisation)
-    for person in Person.query.all():
-        upload_entity_thumbnail(person)
+    upload_entity_thumbnails(Project, days)
+    upload_entity_thumbnails(Organisation, days)
+    upload_entity_thumbnails(Person, days)
 
 
-def upload_preview_files_to_storage():
+def upload_entity_thumbnails(model, days=None):
+    query = model.query
+    if days is not None:
+        limit_date = date_helpers.get_date_from_now(int(days))
+        query = query.filter(model.updated_at >= limit_date)
+
+    for entity in query.all():
+        upload_entity_thumbnail(entity)
+
+
+def upload_preview_files_to_storage(days=None):
     """
     Upload all thumbnail and original files for preview entries to object
     storage.
     """
-    for preview_file in PreviewFile.query.all():
+    query = PreviewFile.query
+    if days is not None:
+        limit_date = date_helpers.get_date_from_now(int(days))
+        query = query.filter(PreviewFile.updated_at >= limit_date)
+
+    for preview_file in query.all():
         upload_preview(preview_file)
 
 
@@ -647,6 +659,7 @@ def upload_entity_thumbnail(entity):
             str(entity.id),
             file_path
         )
+        print("%s uploaded" % file_path)
 
 
 def upload_preview(preview_file):
@@ -675,15 +688,18 @@ def upload_preview(preview_file):
 
     preview_file_id = str(preview_file.id)
     file_key = "previews-%s" % preview_file_id
-    if is_file:
-        file_path = local_file.path(file_key)
+    if is_picture:
+        file_path = local_picture.path(file_key)
         ul_func = file_store.add_picture
+        exists_func = file_store.exists_picture
     elif is_movie:
         file_path = local_movie.path(file_key)
         ul_func = file_store.add_movie
-    else:
-        file_path = local_picture.path(file_key)
+        exists_func = file_store.exists_movie
+    elif is_file:
+        file_path = local_file.path(file_key)
         ul_func = file_store.add_file
+        exists_func = file_store.exists_file
 
     if is_movie or is_picture:
         for prefix in [
@@ -693,7 +709,10 @@ def upload_preview(preview_file):
         ]:
             pic_file_path = \
                 local_picture.path("%s-%s" % (prefix, str(preview_file.id)))
-            file_store.add_picture(prefix, preview_file_id, pic_file_path)
+            if os.path.exists(pic_file_path) and \
+               not file_store.exists_picture(prefix, preview_file_id):
+                file_store.add_picture(prefix, preview_file_id, pic_file_path)
 
-    ul_func(prefix, preview_file_id, file_path)
+    if os.path.exists(file_path) and not exists_func(prefix, preview_file_id):
+        ul_func(prefix, preview_file_id, file_path)
     print("%s uploaded" % file_path)

@@ -348,3 +348,8 @@ def dump_database():
         DB_HOST, DB_PORT, DB_USERNAME, DB_PASSWORD, DB_DATABASE
     )
     sync_service.store_db_backup(filename)
+
+
+def upload_files_to_cloud_storage(days):
+    sync_service.upload_entity_thumbnails_to_storage(days)
+    sync_service.upload_preview_files_to_storage(days)
