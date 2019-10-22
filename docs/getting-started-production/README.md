@@ -13,7 +13,7 @@ Then validate by clicking on **Confirm**.
 ![Add a production](../img/getting-started/add_production.png)
 
 To navigate through Kitsu sections, you need to use the sidebar. you can 
-access it through the 3 lines button on top of the screen 
+access it through the three lines button on top of the screen 
 ![Main button](../img/getting-started/main_button.png).  It opens a menu on
 the left part of the screen. We want to see the production list. 
 So in below **Studio** section, click on the **PRODUCTIONS** button. 
@@ -22,7 +22,7 @@ So in below **Studio** section, click on the **PRODUCTIONS** button.
 
 There, you can see all the productions you have created, their type and their status (open
 for an Active Production, or Closed if not Active). When your cursor is above a
-production line you can see 2 news icons on the right part of the line :
+production line you can see two news icons on the right part of the line :
 **edit** ![Edit button](../img/getting-started/edit_button.png) and **delete**
 ![Delete button](../img/getting-started/delete_button.png).
 
@@ -34,7 +34,7 @@ You can add some specific information as the **FPS** (Frames per second),
 the **Ratio** and the **Resolution** of the picture.
 
 NB: The default avatar for a production is the first letter displayed on a
-colored background. You can change with a picture if you want.
+colored background. You can change it with a picture if you want.
 
 ![Edit the details of a production](../img/getting-started/production_edit_popup.png)
 
@@ -47,11 +47,11 @@ breakdown and the creation of the assets. It allows you to list your assets,
 dispatch the work to the CG artists, and follow the progress of each related
 tasks.
 
-Let's begin with the asset page. You can access it via the drop-down menu on top of the page 
+Let's begin with the asset page. You can access it via the drop-down menu on top of the page. 
 
 ![Drop down menu asset](../img/getting-started/drop_down_menu.png).
 
-On the asset page click on **Add assets**.
+On the asset page, click on **Add assets**.
 
 ![Asset page first time](../img/getting-started/add_assets_first.png)
 
@@ -69,7 +69,7 @@ can change the asset type, and keep adding assets.
 
 You can see the newly created asset appearing on the background, every time you click on **Confirm and stay**. After you added your last asset, click
 on **Confirm**, it saves the asset and closes the window. If you don't have
-more asset to add, click on **Close**, it cancels the window.
+more assets to add, click on **Close**, it cancels the window.
 
 For now, the assets are linked with the first episode, or with the Main Pack.
 
@@ -100,7 +100,7 @@ validate it by **Confirm** button.
 You added tasks to all the assets.
 
 
-If you want to delete a task,If some assets don't match the task (as environment and setup), click on the menu to change the action (1), 
+If you want to delete a task, If some assets don't match the task (as environment and setup), click on the menu to change the action (1), 
 then select the **delete tasks** (2) on the left top
 of the page.
 ![Delete button](../img/getting-started/delete_task.png) 
@@ -124,7 +124,7 @@ Then, click on the **+ Add a new employee** button.
 A creation window opens. You can enter the first (1) and last name (2), the email
 (which is **mandatory** to create the account) (3), the phone number (4) and
 define the role of the employee: **CG artist**, **Supervisor**,
-**Administrator** or **Client** (5).  If the artist is working right now keep
+**Administrator** or **Client** (5).  If the artist is working right now, keep
 him as active, otherwise select no. Validate by clicking **Confirm** button.
 
 ![Create a new employee](../img/getting-started/create_employee.png)
@@ -143,7 +143,7 @@ On the drop-down menu on the top of the page, select the **TEAM** page.
 
 ![Drop down menu team](../img/getting-started/drop_down_menu_team.png) 
 
-On the **Team** page you can see all the assignations for a specific project.
+On the **Team** page, you can see all the assignations for a specific project.
 If you want to check another project team, you need to switch the project
 on the top of the page.
 
@@ -155,7 +155,7 @@ can select his name on the search box (or type his name), and validate with
 
 ## Assign tasks to a CG artist
 
-We can now get back to the **ASSETS** page via the drop-down menu
+We can now get back to the **ASSETS** page via the drop-down menu.
 
 ![Drop down menu asset](../img/getting-started/drop_down_menu_asset.png).
 
@@ -170,15 +170,15 @@ The **Action Menu** on top of the screen appears.
 ![Blue menu](../img/getting-started/blue_menu.png)
 
 You can now do the assignation. Click on the text input, and you see
-the list of available people. Click on a person name to perform to select
-him. Then click on the confirmation button to perform the assignation.
+the list of available people. Click on a person's name to perform to select
+him. Then click on the confirmation button to complete the assignation.
 
 ![Selected people](../img/getting-started/select_people.png)
 
 You can assign several tasks to the same person in one step (1). Once you have
 the blue menu visible, keep **ctrl** on your keyboard pressed and select
-multiple tasks. You can even use the **shift** key to select a range of tasks
-(2). When you have selected everything you need, apply with the **Confirm**
+multiple tasks. You can even use the **shift** key to choose a range of tasks
+(2). When you have chosen everything you need, apply with the **Confirm**
 button.  
 
 ![Assigned multiple people](../img/getting-started/assigned_multiple.png)
@@ -200,7 +200,7 @@ Once you assigned someone, he is part of the production team. Depending
 on his position (CG Artist, Supervisor), he only sees the production where
 he's assigned. 
 
-Now, everybody knows what to do, and who is doing what!
+Now, everybody knows what to do and who is doing what!
 
 ## Add an estimation for a task
 
@@ -255,9 +255,9 @@ A new pop up opens, as for the creation of the assets.
 You can now create the episodes, the sequences, and shots.
 
 Enter the first episode using your code name, for example, e01, then click
-on the **add** button (1).  Do the same for the sequence, for example, sq01,
+on the **add** button (1).  Do the same for the sequence, for instance, sq01,
 then **add** (2), and now the shots: sh001, then again **add** (3).
-You can also define a padding for your shots.
+You can also define padding for your shots.
 
 ![Manage shots](../img/getting-started/manage_shot.png)
 
@@ -284,11 +284,11 @@ icon on the right of the line ![Delete button](../img/getting-started/delete_but
 If you need to import back this shot, click on the restore button 
 ![Restore button](../img/getting-started/restore_button.png).
 
-We can now associate tasks to the shots. Same way than for the assets, click on
+We can now associate tasks with the shots. Same way than for the assets, click on
 the **+Add tasks** button ![Add task button](../img/getting-started/add_task_button.png)
 on the top of the spreadsheet. 
 
-A new pop-up opens and let you choose what task you want to add. All the
+A new pop-up opens and lets you choose what task you want to add. All the
 shots are linked to the tasks.
 
 ![List of tasks for the shots](../img/getting-started/task_shots.png)
@@ -298,18 +298,18 @@ each shot.
 
 ## Create a breakdown list
 
-Fill the breakdown, help you for the assembly of the shots. With the
+Fill the breakdown, help you with the assembly of the shots. With the
 breakdown, you have all the details of the assets you need to add to create your
 shot. We are sure to omit nothing.
 
-On the drop-down menu choose **BREAKDOWN**.
+On the drop-down menu, choose **BREAKDOWN**.
 
 ![drop down Menu breakdown](../img/getting-started/drop_down_menu_breakdown.png)
 
 On the left part of the breakdown page is the episode/sequence/shot menu (1),
 you can choose between the ones you have created. They are the right part of
 the screen; all the assets available created for this production (3). Moreover, in
-the middle part, it is your selection for the shot (2).
+the middle section, it is your selection for the shot (2).
 
 ![Breakdown page](../img/getting-started/breakdown_general.png)
 
@@ -318,13 +318,13 @@ Click on the shot sh001 on the left part (1), then click on the assets you want
 to assign: characters, backgrounds, ... from the right part (3). 
 
 When you pass over the asset, you can see a **+1** or **+10**. It's the number
-of time you add this asset. You can click as many times as you need on it.
+of times you add this asset. You can click as many times as you need on it.
 
 ![Breakdown add asset](../img/getting-started/breakdown_add_asset.png)
 
-You can now see the asset appearing on the middle part of the screen (2). Next
-to the name of the asset is the number of time it has been added. On this
-example, we have added 2 times the character asset Paul.
+You can now see the asset appearing in the middle part of the screen (2). Next
+to the name of the asset is the number of times it has been added. In this
+example, we have added two times the character asset Paul.
 
 If you add twice an asset by mistake, you have to go on the middle part of
 the screen, on your selection of assets for this shot (2). From there click on
@@ -344,11 +344,11 @@ Now your **Breakdown** page should look like this.
 ![Breakdown page fill](../img/getting-started/breakdown_full.png)
 
 
-You can also import or export your breakdownlist, with a `.csv`file.
+You can also import or export your breakdown list, with a `.csv`file.
 
 Click on the **import** button ![Import button](../img/getting-started/import.png)
 
-We can now assign people on the shots tasks. If the animation and so, are done
+We can now assign people to the shots tasks. If the animation and so, are done
 elsewhere, you can create an account for this studio and assign it to tasks.
 They can see your progress.
 
@@ -357,7 +357,7 @@ If you want to see a detail of a shot, click on its name.
 ![Shot detail](../img/getting-started/shot_detail.png)
 
 A new page opens with the list of the tasks, the assignation, and the list
-of assets that appears on this shot (**Shot casting**).
+of assets that appear on this shot (**Shot casting**).
  
 ![Shot detail page](../img/getting-started/shot_detail_page.png)
  
@@ -365,9 +365,9 @@ of assets that appears on this shot (**Shot casting**).
 ## Add the Frameranges
 
 At this stage of the production, the animatic should be done. Meaning you have
-the length (**framerange In** and **framerange Out**) for each shot. You can
-add this information on the spreadsheet.  This way, you are sure that all
-the frames a calculated and none are missing, or over computed.
+the length (**frame range In** and **frame range Out**) for each shot. You can
+add this information to the spreadsheet.  This way, you are sure that all
+the frames a calculated, and none are missing, or over computed.
 
 You may also be able to add a camera as an asset!
 
@@ -394,12 +394,12 @@ Click on the **+** near the Description column.
 
 ![Custom Column](../img/getting-started/add_column_custom.png)
 
-You may have extra information to add on your pages as: the **level of difficulties**,
+You may have extra information to add on your pages as the **level of difficulties**,
 the **name of the studios**, when a production is split, etc.
 
-In the custom column, you can store all kind of information: a **list of value** or a **free value**.
+In the custom column, you can store all kinds of information: a **list of value** or a **free value**.
 
-The **free value** is different on each entity.
+The **free value** is different for each entity.
 
 The **list of value** gives you the same choice for each entity. Moreover, it has to be filled now. 
 
@@ -452,9 +452,9 @@ or an `.obj` file. All can be reviewed from the browser.
 Other files like `.pdf`, `.zip`, `.rar`, `.ma` or `.mb` however, they need to be
 downloaded to be reviewed.
 
-If you have defined a **FPS** for the production, Kitsu will conform the uploaded video to this FPS.
+If you have defined a **FPS** for the production, Kitsu will conform to the uploaded video to this FPS.
 
-Otherwise the video will be compressed to 1080P, and 30mbits/sec. 
+Otherwise, the video will be compressed to 1080P, and 30mbits/sec. 
 
 Click on the "Attach preview" button, the explorer opens and lets you choose your file.
 
@@ -468,12 +468,12 @@ You can also **drag & drop** the file in the comment section.
 
 ![attach preview drag drop](../img/getting-started/drag_drop_preview.png)
 
-Once you have uploaded an image, you have the possibility to add another one.
+Once you have uploaded an image, you can add another one.
 
 ![attach preview drag drop](../img/getting-started/
 upload_several_pictures.png)
 
-The **Add preview** popup opens, and ask you to choose a file.
+The **Add preview** pop-up opens and asks you to choose a file.
 
 You can navigate through the pictures uploaded.
 
@@ -515,7 +515,7 @@ Click on the name on the left on the action menu, and choose
 
 ![Change priority](../img/getting-started/change_priority.png)
 
-There are 4 levels of priority: **Normal**, that is the fundamental level of all the
+There are four levels of priority: **Normal**, that is the fundamental level of all the
 tasks, **High**, **Very High**, or **Emergency**. Save the changes with the
 **Confirm** button.
 
@@ -536,7 +536,7 @@ more there are, the more urgent the task is.
 
 ## Perform a review
 
-When a CG artist needs a review, he change the status of his task to ![wfa](../img/getting-started/wfa_icon.png).
+When a CG artist needs a review, he changes the status of his task to ![wfa](../img/getting-started/wfa_icon.png).
 
 Click on the status (1) to open the right panel and start the review. 
 
@@ -563,12 +563,12 @@ If you need to delete your line, click again on the **pencil** icon, the cursor 
 Select the line with the directional cross, and then press the **delete** icon ![Delete line](../img/getting-started/delete_line.png)
 
 
-From there you can change the status to ![Retake](../img/getting-started/retake_icon.png) if you want that the CG artist
+From there, you can change the status to ![Retake](../img/getting-started/retake_icon.png) if you want that the CG artist
 performs some changes. 
 
 You can add a **checklist** to your comments.
 
-You need to first post your retake comments. Then the **ADD CHECKLIST** appears.
+You need first to post your retake comments. Then the **ADD CHECKLIST** appears.
 
 ![add checklist](../img/getting-started/add_checklist.png)
 
@@ -576,8 +576,7 @@ Type your comments, and hit **Enter** key to add another line on your checklist.
 
 ![checklist](../img/getting-started/checklist_detailed.png)
 
-You can also **tag** someone of the team in the comments. Type the `@`and it opens 
-a sub-menu with the list of the team. 
+You can also **tag** someone of the team in the comments. Type the `@`and it opens a sub-menu with the list of the team. 
 
 ![Tag someone](../img/getting-started/tag_team.png)
 
@@ -589,12 +588,12 @@ that his work is validated.
 
 You can use the preview as a **thumbnail** on the asset or shot spreadsheet. It
 helps to recognize the assets/shots on the main pages. 
-On the list page, click on the status you want, then on the right pannel, click on **Preview** button (1).
+On the list page, click on the status you want, then on the right panel, click on **Preview** button (1).
 
 ![History](../img/getting-started/pannel_history.png)
 
 
-Once you have clicked on the button, you see the thumbnail appears, and the button turn gray.
+Once you have clicked on the button, you see the thumbnail appears, and the button turns gray.
 
 
 ## Simplify the global page
@@ -615,7 +614,7 @@ Once the column is minimized, only colored dots show the status.
 
 
 You can also hide all the non-essential column, like **Description**, **Custom column**, 
-also, the minimize columns.
+even the minimize columns.
 
 Just click on the **Hide additional information** 
 ![minimize button](../img/getting-started/minimize.png) button on the top right of the page.
@@ -626,11 +625,11 @@ To make the information reappear, click on the same button,
 
 ## The timesheets
 
-As Production you can use the main menu to check the timesheets.
+As production you can use the main menu to check the timesheets.
 
 Open the main menu with the ![main button](../img/getting-started/main_button.png) button. 
 
-On the menu choose the **Timesheets** page.
+On the menu, choose the **Timesheets** page.
 
 ![main button](../img/getting-started/timesheet_menu.png)
 
@@ -646,7 +645,7 @@ Per week, Kitsu highlights the overdue time per CG Artist.
 
 If you click on a number, a side panel opens with the details of the time spent per task this week.
 
-You can also set up the number of working hours per day. 
+You can also set up a number of working hours per day. 
 
 Go back to the main menu, and select **Settings**. 
 
@@ -655,7 +654,7 @@ Go back to the main menu, and select **Settings**.
 
 ## Production Schedule
 
-As Production you can set the global schedule for your production. 
+As production you can set the global schedule for your production. 
 
 On the drop-down menu choose **SCHEDULE**
 
@@ -668,18 +667,18 @@ You can add your global man-days as on your quote.
 ![Production Schedule](../img/getting-started/production_schedule.png)
 
 You can define, on the Gantt Schedule, the start and end date of each task type. 
-The task types are the ones you have already added on your production.
+The task types are the ones you have already added to your production.
 
-Put your cursor on the start date, the cursor will change as a double arrow. Then drag and slide the start date.
+Put your cursor on the start date, and the cursor will change as a double arrow. Then drag and slide the start date.
 Do the same for the end date. 
 
 ![Production Schedule gantt](../img/getting-started/schedule_production_task_type.png)
 
-Once you have define all the start and end dates of the taks types, your schedule should look like the example.
+Once you have defined all the start and end dates of the task types, your schedule should look like the example.
 
-![Production Schedule gantt filled](../img/getting-started/production_schedule_task_type_complete.png)
+![Production Schedule Gantt filled](../img/getting-started/production_schedule_task_type_complete.png)
 
-Once it's done, you can unfold each task type and access to a level of detail : asset type for the assets, 
+Once it's done, you can unfold each task type and access to a level of detail: asset type for the assets, 
 sequences for the shots.
 
 ![Production Schedule unfold task type](../img/getting-started/production_schedule_unfold.png)
@@ -688,7 +687,7 @@ You can set the start and end date the same way than for the task type. You can 
 
 ![Production Schedule task type asset](../img/getting-started/production_schedule_task_type_detail.png)
 
-You can do the same for the shots part. You can determine the start and end date for the sequences.
+You can do the same for the shots task types. You can determine the start and end date for the sequences.
 
 ![Production Schedule task type sequence](../img/getting-started/production_schedule_task_type_detail_sequence.png)
 
@@ -696,7 +695,7 @@ You can add a milestone by hovering a date. A ![Production Schedule add a milest
 
 ![Production Schedule add a milestone](../img/getting-started/production_schedule_add_milestone.png)
 
-When you click, a popup window appears, and ask you to add a name to the milestone.
+When you click, a pop-up window appears and asks you to add a name to the milestone.
 
 ![Production Schedule name of a milestone](../img/getting-started/production_schedule_add_milestone_name.png)
 
@@ -707,11 +706,56 @@ If you hoover the little black dot, the name of the milestone appears.
 
 You can change the name of the milestone if you click on the ![Edit button](../img/getting-started/edit_button.png), or anywhere on the milestone name.
 
-From there on can rename the milestone, or delete it.
+From there on can rename the milestone or delete it.
 
 ![Production Schedule edit milestone](../img/getting-started/production_schedule_edit_milestone.png)
 
 
+## Task Type Schedule
+
+If you need more details than in the production schedule, you can go to the **Task Type** page.
+
+![Task type page](../img/getting-started/global_view_asset_task_export.png)
+
+You can notice there are two tabs on the page, Tasks and **Schedule**. Click on the ![Task type schedule tab](../img/getting-started/task_type_tab_schedule.png) 
+
+On this page, you will be able to do the schedule per CG Artist and per asset (or shot, depending on the task type).
+
+![Task type page schedule default](../img/getting-started/task_type_schedule_emplty.png)
 
 
+Put your cursor on the start date, and the cursor will change as a double arrow. Then drag and slide the start date.
+Do the same for the end date. 
 
+You can use the search bar (1) as on the other pages: you can search **status** 
+(no need to add the name of the task type as you already are on a specific task type page), 
+per **asset type** (or sequence), per **asset name** (or shot name), and per **CG Artist name**.
+
+You can also reduce or expand each CG Artist (2) section, to ease the reading of the schedule.
+
+And you can change the color of the bar in the Gantt diagram (3). Per default, the **coloring** is set in Neutral.
+
+But you can the color of the bar, depending on what you need.
+
+![Task type page schedule coloring](../img/getting-started/task_type_schedule_coloring.png)
+
+**Status color** will change the color of the bar based on their status. For example Blue is for WIP, red is for RETAKE, 
+purple for Waiting For Approval, green is for Done.
+
+![Task type page schedule coloring status](../img/getting-started/task_type_schedule_coloring_status.png)
+
+In a glimpse, you can see the state of your elements and team.
+
+**Late in red** display the bar that is not validated yet, but they are behind schedule.
+
+![Task type page schedule coloring late in red](../img/getting-started/task_type_schedule_coloring_late.png)
+
+The Gantt diagram has an impact on the other pages on Kistu.
+
+The **due date** will be displayed on the **Tasks** tab of the task type page.
+
+![Task type page schedule due date](../img/getting-started/task_type_schedule_due_date.png)
+
+But you can also see the **Due date** on the **Todo Page** of a CG Artist.
+
+![Task type page schedule CG artist due date](../img/getting-started/task_type_schedule_due_date_todo.png)
