@@ -449,6 +449,9 @@ def get_episode_raw(episode_id):
     Return given episode as an active record.
     """
     episode_type = get_episode_type()
+    if episode_type is None:
+        episode_type = get_episode_type()
+
     try:
         episode = Entity.get_by(
             entity_type_id=episode_type["id"],
