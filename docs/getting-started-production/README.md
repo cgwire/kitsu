@@ -312,11 +312,11 @@ you can choose between the ones you have created. They are the right part of
 the screen; all the assets available created for this production (3). Moreover, in
 the middle section, it is your selection for the shot (2).
 
-![Breakdown page](../img/getting-started/breakdown_general.png)
+![Breakdown page](../img/getting-started/breakdown_general_empty.png)
 
 So now you have to select the shot you want to cast. You can also choose multiple shots at the same time. Click on the first shot, hold the **shift** key and click on the last shot of your selection.
 
-![Breakdown page global](../img/getting-started/breakdown_general_bulk_select.png)
+![Breakdown page global bulk select](../img/getting-started/breakdown_general_bulk_select.png)
 
 Then click on the assets you want
 to assign: characters, backgrounds, ... from the right part (3). 
