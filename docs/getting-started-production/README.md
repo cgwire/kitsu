@@ -692,24 +692,24 @@ You can do the same for the shots part. You can determine the start and end date
 
 ![Production Schedule task type sequence](../img/getting-started/production_schedule_task_type_detail_sequence.png)
 
-You can add a milestone by hovering a date. A ![Production Schedule task type sequence](../img/getting-started/production_schedule_add_milestone_plus.png) appears, 
+You can add a milestone by hovering a date. A ![Production Schedule add a milestone logo](../img/getting-started/production_schedule_add_milestone_plus.png) appears, 
 
-![Production Schedule task type sequence](../img/production_schedule_add_milestone.png)
+![Production Schedule add a milestone](../img/getting-started/production_schedule_add_milestone.png)
 
 When you click, a popup window appears, and ask you to add a name to the milestone.
 
-![Production Schedule task type sequence](../img/production_schedule_add_milestone_name.png)
+![Production Schedule name of a milestone](../img/getting-started/production_schedule_add_milestone_name.png)
 
 You can see a small black dot and a vertical line as a display of the milestone.
 If you hoover the little black dot, the name of the milestone appears.
 
-![Production Schedule task type sequence](../img/production_schedule_milestone.png)
+![Production Schedule global view milestone](../img/getting-started/production_schedule_milestone.png)
 
-You can change the name of the milestone if you click on the ![Production Schedule task type sequence](../img/edit_button.png), or anywhere on the milestone name.
+You can change the name of the milestone if you click on the ![Edit button](../img/getting-started/edit_button.png), or anywhere on the milestone name.
 
 From there on can rename the milestone, or delete it.
 
-![Production Schedule task type sequence](../img/production_schedule_edit_milestone.png)
+![Production Schedule edit milestone](../img/getting-started/production_schedule_edit_milestone.png)
 
 
 
