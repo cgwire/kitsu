@@ -36,8 +36,8 @@ The central part for you, on **Kitsu**, is the **My tasks** page.
 It's the first landing page when you log in.
 
 
-You can see per **Production** (1) the **Entity** (2) you are assigned to, the
-**Status** (3) of the tasks you are working on and their **priority** (4). 
+You can see per **Production** (1) the **Entity** (2) you are assigned to, the **Due date** (3), the
+**Status** (4) of the tasks you are working on and their **priority** (5). 
  
 ![My tasks page](../img/getting-started/my_task_page.png)
 
