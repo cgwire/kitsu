@@ -314,11 +314,11 @@ the middle section, it is your selection for the shot (2).
 
 ![Breakdown page](../img/getting-started/breakdown_general.png)
 
-So now you have to select the shot you want to cast. You can also select multiple shots at the same time. Click on the first shot, hold the **shift** key and click on the last shot of your selection.
+So now you have to select the shot you want to cast. You can also choose multiple shots at the same time. Click on the first shot, hold the **shift** key and click on the last shot of your selection.
 
 Then click on the assets you want
 to assign: characters, backgrounds, ... from the right part (3). 
-If you have selected multiple shots, your selection will be applied on the multiple shots as well.
+If you have selected multiple shots, your selection will be applied to the numerous shots, as well.
 
 When you pass over the asset, you can see a **+1** or **+10**. It's the number
 of times you add this asset. You can click as many times as you need on it.
@@ -329,7 +329,7 @@ You can now see the asset appearing in the middle part of the screen (2). Next
 to the name of the asset is the number of times it has been added. In this
 example, we have added two times the character asset Oti.
 
-![Breakdown add asset bulk](../img/getting-started/breakdown_general_bulk_select_full.png)
+![breakdown add asset bulk](../img/getting-started/breakdown_general_bulk_select_full.png)
 
 
 If you add twice an asset by mistake, you have to go on the middle part of
@@ -367,6 +367,17 @@ of assets that appear on this shot (**Shot casting**).
  
 ![Shot detail page](../img/getting-started/shot_detail_page.png)
  
+You can also make a breakdown list for your assets if you need to assemble them and keep track of the separated parts.
+
+On the top left corner of the screen, choose **Asset** In the drop-down menu, below **FOR**.
+
+![Shot detail page](../img/getting-started/breakdown_asset_menu.png)
+
+You now have access to a second drop-down menu, where you can choose your asset type: **Character**, **Environment**, **Props**, **FX**, ...
+
+![Shot detail page](../img/getting-started/bbreakdown_asset_menu_type.png)
+
+You can fill the asset breakdown page, the same way than the shots. Select one or more assets on the left part, then add the elements from the right part.
 
 ## Add the Frameranges
 
