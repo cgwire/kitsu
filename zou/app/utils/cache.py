@@ -51,5 +51,9 @@ def memoize_function(function, timeout=120):
     return wrapper
 
 
+def invalidate(*args):
+    cache.delete_memoized(*args)
+
+
 def clear():
     cache.clear()
