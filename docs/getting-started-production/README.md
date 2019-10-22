@@ -316,6 +316,8 @@ the middle section, it is your selection for the shot (2).
 
 So now you have to select the shot you want to cast. You can also choose multiple shots at the same time. Click on the first shot, hold the **shift** key and click on the last shot of your selection.
 
+![Breakdown page global](../img/getting-started/breakdown_general_bulk_select.png)
+
 Then click on the assets you want
 to assign: characters, backgrounds, ... from the right part (3). 
 If you have selected multiple shots, your selection will be applied to the numerous shots, as well.
@@ -327,9 +329,7 @@ of times you add this asset. You can click as many times as you need on it.
 
 You can now see the asset appearing in the middle part of the screen (2). Next
 to the name of the asset is the number of times it has been added. In this
-example, we have added two times the character asset Oti.
-
-![breakdown add asset bulk](../img/getting-started/breakdown_general_bulk_select_full.png)
+example, we have added two times the character asset Llama.
 
 
 If you add twice an asset by mistake, you have to go on the middle part of
@@ -347,7 +347,7 @@ continue with the breakdown.
 
 Now your **Breakdown** page should look like this.
 
-![Breakdown page](../img/getting-started/breakdown_genera_bulk_select.png)
+![breakdown add asset bulk](../img/getting-started/breakdown_general_bulk_select_full.png)
 
 
 You can also import or export your breakdown list, with a `.csv`file.
