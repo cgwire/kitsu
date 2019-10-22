@@ -231,10 +231,11 @@ To go further in detail with the Supervisor view :
 
 - (4) Kitsu calculate the sum of the timesheet fed by the artists
 - (5) The number of back and forth with the retake status
-- (6)(7) the wip and validation dates are automatically filled
-- (8) the Last comment section help you to keep an eye on the last activity of this task type.
+- (6) The Due date is linked to the task type schedule
+- (7)(8) the wip and validation dates are automatically filled
+- (9) the Last comment section help you to keep an eye on the last activity of this task type.
 
-(4) to (8) is automatically filled.
+(4) to (9) is automatically filled.
  
 
 ## Create sequences and shots
