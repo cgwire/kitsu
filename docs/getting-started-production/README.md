@@ -784,24 +784,24 @@ Everybody has access to this page, but only the **Studio Manager** can modify it
 
 ## Main Schedude
 
-As a production manager you have access to the Studio Schedule.
-The schedules of all the production are in one place, and help you to better prepare your productions.
+As a production manager, you have access to the Studio Schedule.
+The schedules of all the production are in one place, and help you to prepare your productions better.
 
 Go to the main menu ( ![Main menu button](../img/getting-started/main_button.png) ) and click on **Main Schedule** under the **Studio** section.
 
 ![Main Menu Schedule](../img/getting-started/main_menu_schedule.png)
 
 You see all your production in one line (start and end date of the production).
-You can also have the total of the main-day you have plan to use during this timeframe.
+You can also have a total of the main-day you have planned to use during this timeframe.
 You can also see the **milestones** that you have defined for each production.
 
 ![Main Menu Schedule](../img/getting-started/main_schedule_fold.png)
 
 You can unfold each production to see the detail of each task type.
-The color is the same than of the column on the global pages.
+The color is the same as the column on the global pages.
 
 ![Main Menu Schedule](../img/getting-started/main_schedule_unfold.png)
 
-**An important thing to keep in mind**: you can't modify your production schedule from this page. You will have to go back to the production schedule page you want to modify to do it.
+**An important thing to keep in mind**: you can't modify your production schedule from this page. You will have to go back to the production schedule page you want to adjust to doing it.
 
 Only the **Studio Manager** has access to this page.
