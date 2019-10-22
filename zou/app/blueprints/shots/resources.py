@@ -29,6 +29,9 @@ class ShotResource(Resource):
         Retrieve given shot.
         """
         shot = shots_service.get_full_shot(shot_id)
+        if shot is None:
+            shots_service.clear_shot_cache(shot_id)
+            shot = shots_service.get_full_shot(shot_id)
         user_service.check_project_access(shot["project_id"])
         return shot
 

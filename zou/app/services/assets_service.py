@@ -78,6 +78,7 @@ def build_entity_type_asset_type_filter():
     ids_to_exclude = get_temporal_type_ids()
     return ~EntityType.id.in_(ids_to_exclude)
 
+
 def get_assets(criterions={}):
     """
     Get all assets for given criterions.
@@ -322,7 +323,11 @@ def get_full_asset(asset_id):
     assets = get_assets_and_tasks({"id": asset_id})
     if len(assets) > 0:
         asset = get_asset(asset_id)
-        asset_type = get_asset_type(asset["entity_type_id"])
+        asset_type_id = asset["entity_type_id"]
+        asset_type = get_asset_type(asset_type_id)
+        if asset_type is None:
+            cache.cache.delete_memoized(get_asset_type, asset_type_id)
+            asset_type = get_asset_type(asset_type_id)
         project = Project.get(asset["project_id"])
 
         asset["project_name"] = project.name
