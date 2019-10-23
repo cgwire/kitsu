@@ -713,6 +713,7 @@ def upload_preview(preview_file):
                not file_store.exists_picture(prefix, preview_file_id):
                 file_store.add_picture(prefix, preview_file_id, pic_file_path)
 
+    prefix = "previews"
     if os.path.exists(file_path) and not exists_func(prefix, preview_file_id):
         ul_func(prefix, preview_file_id, file_path)
     print("%s uploaded" % file_path)
