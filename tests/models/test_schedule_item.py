@@ -65,6 +65,13 @@ class ScheduleItemTestCase(ApiDBTestCase):
         self.assertEqual(data["end_date"][:10], schedule_item_again["end_date"])
         self.put_404("data/schedule-items/%s" % fields.gen_uuid(), data)
 
+    def test_update_schedule_item_wrong_man_days(self):
+        schedule_item = self.get_first("data/schedule-items")
+        data = {
+            "man_days": ""
+        }
+        self.put("data/schedule-items/%s" % schedule_item["id"], data)
+
     def test_delete_schedule_item(self):
         schedule_items = self.get("data/schedule-items")
         self.assertEqual(len(schedule_items), 3)
