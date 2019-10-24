@@ -37,13 +37,12 @@ class EntityEventMixin(object):
             "%s:%s" % (type_name, event_name),
             {
                 "%s_id" % type_name: instance_id,
-                "project_id": entity_dict["project_id"]
-            }
+                "project_id": entity_dict["project_id"],
+            },
         )
 
 
 class EntitiesResource(BaseModelsResource, EntityEventMixin):
-
     def __init__(self):
         BaseModelsResource.__init__(self, Entity)
 
@@ -55,7 +54,6 @@ class EntitiesResource(BaseModelsResource, EntityEventMixin):
 
 
 class EntityResource(BaseModelResource, EntityEventMixin):
-
     def __init__(self):
         BaseModelResource.__init__(self, Entity)
         self.protected_fields += [
@@ -64,7 +62,7 @@ class EntityResource(BaseModelResource, EntityEventMixin):
             "entities_in",
             "entities_out",
             "type",
-            "shotgun_id"
+            "shotgun_id",
         ]
 
     def check_read_permissions(self, entity):

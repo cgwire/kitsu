@@ -5,7 +5,6 @@ from .base import BaseModelResource, BaseModelsResource
 
 
 class MilestonesResource(BaseModelsResource):
-
     def __init__(self):
         BaseModelsResource.__init__(self, Milestone)
 
@@ -14,7 +13,6 @@ class MilestonesResource(BaseModelsResource):
 
 
 class MilestoneResource(BaseModelResource):
-
     def __init__(self):
         BaseModelResource.__init__(self, Milestone)
 

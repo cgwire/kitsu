@@ -7,14 +7,10 @@ from zou.app.models.search_filter import SearchFilter
 from zou.app.services import persons_service
 from zou.app.utils import permissions
 
-from .base import (
-    BaseModelsResource,
-    BaseModelResource
-)
+from .base import BaseModelsResource, BaseModelResource
 
 
 class PersonsResource(BaseModelsResource):
-
     def __init__(self):
         BaseModelsResource.__init__(self, Person)
 
@@ -35,12 +31,9 @@ class PersonsResource(BaseModelsResource):
 
 
 class PersonResource(BaseModelResource):
-
     def __init__(self):
         BaseModelResource.__init__(self, Person)
-        self.protected_fields += [
-            "password"
-        ]
+        self.protected_fields += ["password"]
 
     def check_read_permissions(self, instance):
         return True

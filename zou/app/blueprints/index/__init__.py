@@ -9,14 +9,14 @@ from .resources import (
     IndexResource,
     InfluxStatusResource,
     StatusResource,
-    TxtStatusResource
+    TxtStatusResource,
 )
 
 routes = [
     ("/", IndexResource),
     ("/status", StatusResource),
     ("/status/influx", InfluxStatusResource),
-    ("/status.txt", TxtStatusResource)
+    ("/status.txt", TxtStatusResource),
 ]
 
 blueprint = Blueprint("index", "index")

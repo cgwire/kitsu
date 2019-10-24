@@ -7,59 +7,59 @@ from zou.app.utils.api import configure_api_from_blueprint
 
 from .shotgun.project import (
     ImportShotgunProjectsResource,
-    ImportRemoveShotgunProjectResource
+    ImportRemoveShotgunProjectResource,
 )
 from .shotgun.person import (
     ImportShotgunPersonsResource,
-    ImportRemoveShotgunPersonResource
+    ImportRemoveShotgunPersonResource,
 )
 from .shotgun.shot import (
     ImportShotgunShotsResource,
-    ImportRemoveShotgunShotResource
+    ImportRemoveShotgunShotResource,
 )
 from .shotgun.scene import (
     ImportShotgunScenesResource,
-    ImportRemoveShotgunSceneResource
+    ImportRemoveShotgunSceneResource,
 )
 from .shotgun.sequence import (
     ImportShotgunSequencesResource,
-    ImportRemoveShotgunSequenceResource
+    ImportRemoveShotgunSequenceResource,
 )
 from .shotgun.episode import (
     ImportShotgunEpisodesResource,
-    ImportRemoveShotgunEpisodeResource
+    ImportRemoveShotgunEpisodeResource,
 )
 from .shotgun.assets import (
     ImportShotgunAssetsResource,
-    ImportRemoveShotgunAssetResource
+    ImportRemoveShotgunAssetResource,
 )
 from .shotgun.steps import (
     ImportShotgunStepsResource,
-    ImportRemoveShotgunStepResource
+    ImportRemoveShotgunStepResource,
 )
 from .shotgun.status import (
     ImportShotgunStatusResource,
-    ImportRemoveShotgunStatusResource
+    ImportRemoveShotgunStatusResource,
 )
 from .shotgun.tasks import (
     ImportShotgunTasksResource,
-    ImportRemoveShotgunTaskResource
+    ImportRemoveShotgunTaskResource,
 )
 from .shotgun.versions import (
     ImportShotgunVersionsResource,
-    ImportRemoveShotgunVersionResource
+    ImportRemoveShotgunVersionResource,
 )
 from .shotgun.import_errors import (
     ShotgunImportErrorsResource,
-    ShotgunImportErrorResource
+    ShotgunImportErrorResource,
 )
 from .shotgun.notes import (
     ImportShotgunNotesResource,
-    ImportRemoveShotgunNoteResource
+    ImportRemoveShotgunNoteResource,
 )
 from .shotgun.team import (
     ImportShotgunProjectConnectionsResource,
-    ImportRemoveShotgunProjectConnectionResource
+    ImportRemoveShotgunProjectConnectionResource,
 )
 
 from .csv.persons import PersonsCsvImportResource
@@ -81,8 +81,10 @@ routes = [
     ("/import/shotgun/versions", ImportShotgunVersionsResource),
     ("/import/shotgun/notes", ImportShotgunNotesResource),
     ("/import/shotgun/errors", ShotgunImportErrorsResource),
-    ("/import/shotgun/projectconnections",
-     ImportShotgunProjectConnectionsResource),
+    (
+        "/import/shotgun/projectconnections",
+        ImportShotgunProjectConnectionsResource,
+    ),
     ("/import/shotgun/errors/<error_id>", ShotgunImportErrorResource),
     ("/import/shotgun/remove/project", ImportRemoveShotgunProjectResource),
     ("/import/shotgun/remove/person", ImportRemoveShotgunPersonResource),
@@ -91,18 +93,19 @@ routes = [
     ("/import/shotgun/remove/episode", ImportRemoveShotgunEpisodeResource),
     ("/import/shotgun/remove/sequence", ImportRemoveShotgunSequenceResource),
     ("/import/shotgun/remove/asset", ImportRemoveShotgunAssetResource),
-    ("/import/shotgun/remove/projectconnection",
-     ImportRemoveShotgunProjectConnectionResource),
+    (
+        "/import/shotgun/remove/projectconnection",
+        ImportRemoveShotgunProjectConnectionResource,
+    ),
     ("/import/shotgun/remove/step", ImportRemoveShotgunStepResource),
     ("/import/shotgun/remove/status", ImportRemoveShotgunStatusResource),
     ("/import/shotgun/remove/task", ImportRemoveShotgunTaskResource),
     ("/import/shotgun/remove/note", ImportRemoveShotgunNoteResource),
     ("/import/shotgun/remove/version", ImportRemoveShotgunVersionResource),
-
     ("/import/csv/persons", PersonsCsvImportResource),
     ("/import/csv/projects/<project_id>/assets", AssetsCsvImportResource),
     ("/import/csv/projects/<project_id>/shots", ShotsCsvImportResource),
-    ("/import/csv/projects/<project_id>/casting", CastingCsvImportResource)
+    ("/import/csv/projects/<project_id>/casting", CastingCsvImportResource),
 ]
 
 blueprint = Blueprint("/import", "import")

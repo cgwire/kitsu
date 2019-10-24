@@ -4,7 +4,6 @@ from .base import BaseModelResource, BaseModelsResource
 
 
 class TaskStatusesResource(BaseModelsResource):
-
     def __init__(self):
         BaseModelsResource.__init__(self, TaskStatus)
 
@@ -13,7 +12,6 @@ class TaskStatusesResource(BaseModelsResource):
 
 
 class TaskStatusResource(BaseModelResource):
-
     def __init__(self):
         BaseModelResource.__init__(self, TaskStatus)
 

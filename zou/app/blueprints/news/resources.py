@@ -1,15 +1,10 @@
 from flask_restful import Resource, reqparse
 from flask_jwt_extended import jwt_required
 
-from zou.app.services import (
-    news_service,
-    projects_service,
-    user_service
-)
+from zou.app.services import news_service, projects_service, user_service
 
 
 class ProjectNewsResource(Resource):
-
     @jwt_required
     def get(self, project_id):
         (
@@ -17,7 +12,7 @@ class ProjectNewsResource(Resource):
             task_type_id,
             task_status_id,
             page,
-            page_size
+            page_size,
         ) = self.get_arguments()
         projects_service.get_project(project_id)
         user_service.check_project_access(project_id)
@@ -27,7 +22,7 @@ class ProjectNewsResource(Resource):
             task_type_id=task_type_id,
             task_status_id=task_status_id,
             page=page,
-            page_size=page_size
+            page_size=page_size,
         )
 
     def get_arguments(self):
@@ -44,12 +39,11 @@ class ProjectNewsResource(Resource):
             args["task_type_id"],
             args["task_status_id"],
             args["page"],
-            args["page_size"]
+            args["page_size"],
         )
 
 
 class ProjectSingleNewsResource(Resource):
-
     @jwt_required
     def get(self, project_id, news_id):
         projects_service.get_project(project_id)

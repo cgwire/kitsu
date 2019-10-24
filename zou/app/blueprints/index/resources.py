@@ -12,15 +12,11 @@ from zou.app.services import projects_service
 
 
 class IndexResource(Resource):
-
     def get(self):
-        return {
-            "api": app.config["APP_NAME"],
-            "version": __version__
-        }
+        return {"api": app.config["APP_NAME"], "version": __version__}
+
 
 class BaseStatusResource(Resource):
-
     def get_status(self):
         is_db_up = True
         try:
@@ -34,7 +30,7 @@ class BaseStatusResource(Resource):
                 host=config.KEY_VALUE_STORE["host"],
                 port=config.KEY_VALUE_STORE["port"],
                 db=config.AUTH_TOKEN_BLACKLIST_KV_INDEX,
-                decode_responses=True
+                decode_responses=True,
             )
             store.get("test")
         except redis.ConnectionError:
@@ -42,9 +38,11 @@ class BaseStatusResource(Resource):
 
         is_es_up = True
         try:
-            requests.get("http://{host}:{port}".format(
-                host=config.EVENT_STREAM_HOST,
-                port=config.EVENT_STREAM_PORT))
+            requests.get(
+                "http://{host}:{port}".format(
+                    host=config.EVENT_STREAM_HOST, port=config.EVENT_STREAM_PORT
+                )
+            )
         except Exception:
             is_es_up = False
 
@@ -52,45 +50,25 @@ class BaseStatusResource(Resource):
 
         api_name = app.config["APP_NAME"]
 
-        return (
-            api_name,
-            version,
-            is_db_up,
-            is_kv_up,
-            is_es_up
-        )
+        return (api_name, version, is_db_up, is_kv_up, is_es_up)
 
 
 class StatusResource(BaseStatusResource):
-
     def get(self):
-        (
-            api_name,
-            version,
-            is_db_up,
-            is_kv_up,
-            is_es_up
-        ) = self.get_status()
+        (api_name, version, is_db_up, is_kv_up, is_es_up) = self.get_status()
 
         return {
             "name": api_name,
             "version": version,
             "database-up": is_db_up,
             "key-value-store-up": is_kv_up,
-            "event-stream-up": is_es_up
+            "event-stream-up": is_es_up,
         }
 
 
 class TxtStatusResource(BaseStatusResource):
-
     def get(self):
-        (
-            api_name,
-            version,
-            is_db_up,
-            is_kv_up,
-            is_es_up
-        ) = self.get_status()
+        (api_name, version, is_db_up, is_kv_up, is_es_up) = self.get_status()
 
         text = """name: %s
 version: %s
@@ -102,25 +80,18 @@ key-value-store-up: %s
             version,
             "up" if is_db_up else "down",
             "up" if is_kv_up else "down",
-            "up" if is_es_up else "down"
+            "up" if is_es_up else "down",
         )
-        return Response(text, mimetype='text')
+        return Response(text, mimetype="text")
 
 
 class InfluxStatusResource(BaseStatusResource):
-
     def get(self):
-        (
-            api_name,
-            version,
-            is_db_up,
-            is_kv_up,
-            is_es_up
-        ) = self.get_status()
+        (api_name, version, is_db_up, is_kv_up, is_es_up) = self.get_status()
 
         return {
             "database-up": int(is_db_up),
             "key-value-store-up": int(is_kv_up),
             "event-stream-up": int(is_es_up),
-            "time": datetime.timestamp(datetime.now())
+            "time": datetime.timestamp(datetime.now()),
         }

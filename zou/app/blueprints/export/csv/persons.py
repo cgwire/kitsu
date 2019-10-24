@@ -4,7 +4,6 @@ from zou.app.models.person import Person
 
 
 class PersonsCsvExport(BaseCsvExport):
-
     def __init__(self):
         BaseCsvExport.__init__(self, Person)
         self.file_name = "people_export"
@@ -21,5 +20,5 @@ class PersonsCsvExport(BaseCsvExport):
             person.first_name,
             person.email,
             person.phone,
-            person.role
+            person.role,
         ]

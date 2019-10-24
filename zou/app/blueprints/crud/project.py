@@ -7,7 +7,6 @@ from .base import BaseModelResource, BaseModelsResource
 
 
 class ProjectsResource(BaseModelsResource):
-
     def __init__(self):
         BaseModelsResource.__init__(self, Project)
 
@@ -31,13 +30,13 @@ class ProjectsResource(BaseModelsResource):
         project_dict = project.serialize()
         if project.production_type == "tvshow":
             episode = shots_service.create_episode(project.id, "E01")
-            project_dict["first_episode_id"] = \
-                fields.serialize_value(episode["id"])
+            project_dict["first_episode_id"] = fields.serialize_value(
+                episode["id"]
+            )
         return project_dict
 
 
 class ProjectResource(BaseModelResource):
-
     def __init__(self):
         BaseModelResource.__init__(self, Project)
         self.protected_fields.append("team")
@@ -50,8 +49,9 @@ class ProjectResource(BaseModelResource):
             episode = shots_service.get_or_create_first_episode(
                 project_dict["id"]
             )
-            project_dict["first_episode_id"] = \
-                fields.serialize_value(episode["id"])
+            project_dict["first_episode_id"] = fields.serialize_value(
+                episode["id"]
+            )
         projects_service.clear_project_cache(project_dict["id"])
         return project_dict
 

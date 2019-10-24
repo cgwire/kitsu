@@ -8,7 +8,7 @@ from zou.app.services import (
     entities_service,
     projects_service,
     shots_service,
-    user_service
+    user_service,
 )
 
 from zou.app.mixin import ArgsMixin
@@ -16,7 +16,6 @@ from zou.app.utils import permissions
 
 
 class CastingResource(Resource):
-
     @jwt_required
     def get(self, project_id, entity_id):
         """
@@ -36,7 +35,6 @@ class CastingResource(Resource):
 
 
 class SequenceCastingResource(Resource):
-
     @jwt_required
     def get(self, project_id, sequence_id):
         """
@@ -48,7 +46,6 @@ class SequenceCastingResource(Resource):
 
 
 class AssetTypeCastingResource(Resource):
-
     @jwt_required
     def get(self, project_id, asset_type_id):
         """
@@ -57,13 +54,11 @@ class AssetTypeCastingResource(Resource):
         user_service.check_project_access(project_id)
         assets_service.get_asset_type(asset_type_id)
         return breakdown_service.get_asset_type_casting(
-            project_id,
-            asset_type_id
+            project_id, asset_type_id
         )
 
 
 class ShotAssetInstancesResource(Resource, ArgsMixin):
-
     @jwt_required
     def get(self, shot_id):
         """
@@ -78,20 +73,16 @@ class ShotAssetInstancesResource(Resource, ArgsMixin):
         """
         Add an asset instance to given shot.
         """
-        args = self.get_args([
-            ("asset_instance_id", None, True)
-        ])
+        args = self.get_args([("asset_instance_id", None, True)])
         shot = shots_service.get_shot(shot_id)
         user_service.check_project_access(shot["project_id"])
         shot = breakdown_service.add_asset_instance_to_shot(
-            shot_id,
-            args["asset_instance_id"]
+            shot_id, args["asset_instance_id"]
         )
         return shot, 201
 
 
 class RemoveShotAssetInstanceResource(Resource, ArgsMixin):
-
     @jwt_required
     def delete(self, shot_id, asset_instance_id):
         """
@@ -100,14 +91,12 @@ class RemoveShotAssetInstanceResource(Resource, ArgsMixin):
         shot = shots_service.get_shot(shot_id)
         user_service.check_project_access(shot["project_id"])
         shot = breakdown_service.remove_asset_instance_for_shot(
-            shot_id,
-            asset_instance_id
+            shot_id, asset_instance_id
         )
-        return '', 204
+        return "", 204
 
 
 class SceneAssetInstancesResource(Resource, ArgsMixin):
-
     @jwt_required
     def get(self, scene_id):
         """
@@ -122,22 +111,18 @@ class SceneAssetInstancesResource(Resource, ArgsMixin):
         """
         Create an asset instance on given scene.
         """
-        args = self.get_args([
-            ("asset_id", None, True),
-            ("description", None, False)
-        ])
+        args = self.get_args(
+            [("asset_id", None, True), ("description", None, False)]
+        )
         scene = shots_service.get_scene(scene_id)
         user_service.check_project_access(scene["project_id"])
         asset_instance = breakdown_service.add_asset_instance_to_scene(
-            scene_id,
-            args["asset_id"],
-            args["description"]
+            scene_id, args["asset_id"], args["description"]
         )
         return asset_instance, 201
 
 
 class SceneCameraInstancesResource(Resource):
-
     @jwt_required
     def get(self, scene_id):
         """
@@ -149,7 +134,6 @@ class SceneCameraInstancesResource(Resource):
 
 
 class ProjectEntityLinksResource(Resource):
-
     @jwt_required
     def get(self, project_id):
         """

@@ -11,7 +11,6 @@ from zou.app.models.entity_type import EntityType
 
 
 class TasksCsvExport(BaseCsvExport):
-
     def __init__(self):
         BaseCsvExport.__init__(self, Task)
 
@@ -31,14 +30,12 @@ class TasksCsvExport(BaseCsvExport):
             "Start date",
             "Real start date",
             "Due date",
-            "Task Status"
+            "Task Status",
         ]
 
     def build_query(self):
         query = self.model.query.order_by(
-            Project.name,
-            TaskType.name,
-            Task.name,
+            Project.name, TaskType.name, Task.name
         )
         query = query.join(Project)
         query = query.join(TaskType)
@@ -60,7 +57,7 @@ class TasksCsvExport(BaseCsvExport):
             Department.name,
             TaskType.name,
             EntityType.name,
-            Entity.name
+            Entity.name,
         )
 
         return query

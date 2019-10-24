@@ -6,7 +6,6 @@ from .base import BaseModelResource, BaseModelsResource
 
 
 class TaskTypesResource(BaseModelsResource):
-
     def __init__(self):
         BaseModelsResource.__init__(self, TaskType)
 
@@ -24,7 +23,6 @@ class TaskTypesResource(BaseModelsResource):
 
 
 class TaskTypeResource(BaseModelResource):
-
     def __init__(self):
         BaseModelResource.__init__(self, TaskType)
 

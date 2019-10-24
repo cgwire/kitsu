@@ -4,19 +4,15 @@ from flask_jwt_extended import jwt_required
 from zou.app.mixin import ArgsMixin
 from zou.app.utils import fields, permissions
 
-from zou.app.services import (
-    events_service
-)
+from zou.app.services import events_service
 
 
 class EventsResource(Resource, ArgsMixin):
-
     @jwt_required
     def get(self):
-        args = self.get_args([
-            ("before", None, None),
-            ("page_size", 100, False)
-        ])
+        args = self.get_args(
+            [("before", None, None), ("page_size", 100, False)]
+        )
         permissions.check_manager_permissions()
         before = None
         if args["before"] is not None:
@@ -26,13 +22,11 @@ class EventsResource(Resource, ArgsMixin):
 
 
 class LoginLogsResource(Resource, ArgsMixin):
-
     @jwt_required
     def get(self):
-        args = self.get_args([
-            ("before", None, None),
-            ("page_size", 100, False)
-        ])
+        args = self.get_args(
+            [("before", None, None), ("page_size", 100, False)]
+        )
         permissions.check_manager_permissions()
         before = None
         if args["before"] is not None:

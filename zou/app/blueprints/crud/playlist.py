@@ -5,7 +5,6 @@ from .base import BaseModelResource, BaseModelsResource
 
 
 class PlaylistsResource(BaseModelsResource):
-
     def __init__(self):
         BaseModelsResource.__init__(self, Playlist)
 
@@ -17,7 +16,6 @@ class PlaylistsResource(BaseModelsResource):
 
 
 class PlaylistResource(BaseModelResource):
-
     def __init__(self):
         BaseModelResource.__init__(self, Playlist)
 

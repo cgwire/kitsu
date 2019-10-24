@@ -24,19 +24,46 @@ from zou.app.utils import (
     events,
     movie_utils,
     permissions,
-    thumbnail as thumbnail_utils
+    thumbnail as thumbnail_utils,
 )
 
 
 ALLOWED_PICTURE_EXTENSION = [".png", ".jpg", ".jpeg", ".PNG", ".JPG", ".JPEG"]
 ALLOWED_MOVIE_EXTENSION = [
-    ".mp4", ".mov", ".wmv", ".m4v", ".MP4", ".MOV", ".WMV", ".M4V"
+    ".mp4",
+    ".mov",
+    ".wmv",
+    ".m4v",
+    ".MP4",
+    ".MOV",
+    ".WMV",
+    ".M4V",
 ]
 ALLOWED_FILE_EXTENSION = [
-    ".obj", ".pdf", ".ma", ".mb", ".ai", ".rar", ".zip", ".blend",
-    ".OBJ", ".PDF", ".MA", ".MB", ".AI", ".RAR", ".ZIP", ".BLEND",
-    ".comp", ".psd", ".hip", ".exr",
-    ".COMP", ".PSD", ".HIP", ".EXR"
+    ".obj",
+    ".pdf",
+    ".ma",
+    ".mb",
+    ".ai",
+    ".rar",
+    ".zip",
+    ".blend",
+    ".OBJ",
+    ".PDF",
+    ".MA",
+    ".MB",
+    ".AI",
+    ".RAR",
+    ".ZIP",
+    ".BLEND",
+    ".comp",
+    ".psd",
+    ".hip",
+    ".exr",
+    ".COMP",
+    ".PSD",
+    ".HIP",
+    ".EXR",
 ]
 
 
@@ -44,7 +71,7 @@ def send_standard_file(
     preview_file_id,
     extension,
     mimetype="application/octet-stream",
-    as_attachment=False
+    as_attachment=False,
 ):
     return send_storage_file(
         file_store.get_local_file_path,
@@ -53,7 +80,7 @@ def send_standard_file(
         preview_file_id,
         extension,
         mimetype=mimetype,
-        as_attachment=as_attachment
+        as_attachment=as_attachment,
     )
 
 
@@ -65,7 +92,7 @@ def send_movie_file(preview_file_id, as_attachment=False):
         preview_file_id,
         "mp4",
         mimetype="video/mp4",
-        as_attachment=as_attachment
+        as_attachment=as_attachment,
     )
 
 
@@ -77,7 +104,7 @@ def send_picture_file(prefix, preview_file_id, as_attachment=False):
         preview_file_id,
         "png",
         mimetype="image/png",
-        as_attachment=as_attachment
+        as_attachment=as_attachment,
     )
 
 
@@ -88,25 +115,21 @@ def send_storage_file(
     preview_file_id,
     extension,
     mimetype="application/octet-stream",
-    as_attachment=False
+    as_attachment=False,
 ):
     """
     Send file from storage. If it's not a local storage, cache the file in
     a temporary folder before sending it. It accepts conditional headers.
     """
     file_path = fs.get_file_path(
-        config,
-        get_local_path,
-        open_file,
-        prefix,
-        preview_file_id,
-        extension
+        config, get_local_path, open_file, prefix, preview_file_id, extension
     )
 
     attachment_filename = ""
     if as_attachment:
-        attachment_filename = \
-            names_service.get_preview_file_name(preview_file_id)
+        attachment_filename = names_service.get_preview_file_name(
+            preview_file_id
+        )
 
     try:
         return flask_send_file(
@@ -114,25 +137,27 @@ def send_storage_file(
             conditional=True,
             mimetype=mimetype,
             as_attachment=as_attachment,
-            attachment_filename=attachment_filename
+            attachment_filename=attachment_filename,
         )
     except IOError as e:
         current_app.logger.error(e)
-        return {
-            "error": True,
-            "message": "File not found for: %s %s" % (
-                prefix,
-                preview_file_id
-            )
-        }, 404
+        return (
+            {
+                "error": True,
+                "message": "File not found for: %s %s"
+                % (prefix, preview_file_id),
+            },
+            404,
+        )
     except FileNotFound:
-        return {
-            "error": True,
-            "message": "File not found for: %s %s" % (
-                prefix,
-                preview_file_id
-            )
-        }, 404
+        return (
+            {
+                "error": True,
+                "message": "File not found for: %s %s"
+                % (prefix, preview_file_id),
+            },
+            404,
+        )
 
 
 class CreatePreviewFilePictureResource(Resource):
@@ -160,10 +185,7 @@ class CreatePreviewFilePictureResource(Resource):
             self.save_picture_preview(instance_id, uploaded_file)
             preview_file = files_service.update_preview_file(
                 instance_id,
-                {
-                    "extension": "png",
-                    "original_name": original_file_name
-                }
+                {"extension": "png", "original_name": original_file_name},
             )
             self.emit_app_preview_event(instance_id)
             return preview_file, 201
@@ -178,10 +200,7 @@ class CreatePreviewFilePictureResource(Resource):
                 abort(400, "Normalization failed.")
             preview_file = files_service.update_preview_file(
                 instance_id,
-                {
-                    "extension": "mp4",
-                    "original_name": original_file_name
-                }
+                {"extension": "mp4", "original_name": original_file_name},
             )
             self.emit_app_preview_event(instance_id)
             return preview_file, 201
@@ -192,15 +211,16 @@ class CreatePreviewFilePictureResource(Resource):
                 instance_id,
                 {
                     "extension": extension[1:],
-                    "original_name": original_file_name
-                }
+                    "original_name": original_file_name,
+                },
             )
             self.emit_app_preview_event(instance_id)
             return preview_file, 201
 
         else:
             current_app.logger.info(
-                "Wrong file format, extension: %s", extension)
+                "Wrong file format, extension: %s", extension
+            )
             deletion_service.remove_preview_file_by_id(instance_id)
             abort(400, "Wrong file format, extension: %s" % extension)
 
@@ -211,9 +231,7 @@ class CreatePreviewFilePictureResource(Resource):
         """
         tmp_folder = current_app.config["TMP_DIR"]
         original_tmp_path = thumbnail_utils.save_file(
-            tmp_folder,
-            instance_id,
-            uploaded_file
+            tmp_folder, instance_id, uploaded_file
         )
         return self.save_variants(original_tmp_path, instance_id)
 
@@ -224,9 +242,7 @@ class CreatePreviewFilePictureResource(Resource):
         """
         tmp_folder = current_app.config["TMP_DIR"]
         uploaded_movie_path = movie_utils.save_file(
-            tmp_folder,
-            instance_id,
-            uploaded_file
+            tmp_folder, instance_id, uploaded_file
         )
 
         project = files_service.get_project_from_preview_file(instance_id)
@@ -261,8 +277,7 @@ class CreatePreviewFilePictureResource(Resource):
         Build variants of a picture file and save them in the main storage.
         """
         variants = thumbnail_utils.generate_preview_variants(
-            original_tmp_path,
-            instance_id
+            original_tmp_path, instance_id
         )
         variants.append(("original", original_tmp_path))
         for (name, path) in variants:
@@ -276,26 +291,25 @@ class CreatePreviewFilePictureResource(Resource):
         Emit an event, each time a preview is added.
         """
         preview_file = files_service.get_preview_file(preview_file_id)
-        comment = tasks_service.get_comment_by_preview_file_id(
-            preview_file_id
-        )
+        comment = tasks_service.get_comment_by_preview_file_id(preview_file_id)
         comment_id = None
-        events.emit("preview-file:update", {
-            "preview_file_id": preview_file["id"]
-        })
+        events.emit(
+            "preview-file:update", {"preview_file_id": preview_file["id"]}
+        )
 
         if comment is not None:
             comment_id = comment["id"]
-            events.emit("comment:update", {
-                "comment_id": comment_id
-            })
-            events.emit("preview-file:add-file", {
-                "comment_id": comment_id,
-                "task_id": preview_file["task_id"],
-                "preview_file_id": preview_file["id"],
-                "revision": preview_file["revision"],
-                "extension": preview_file["extension"]
-            })
+            events.emit("comment:update", {"comment_id": comment_id})
+            events.emit(
+                "preview-file:add-file",
+                {
+                    "comment_id": comment_id,
+                    "task_id": preview_file["task_id"],
+                    "preview_file_id": preview_file["id"],
+                    "revision": preview_file["revision"],
+                    "extension": preview_file["extension"],
+                },
+            )
 
     def is_allowed(self, preview_file_id):
         """
@@ -362,10 +376,7 @@ class PreviewFileMovieDownloadResource(PreviewFileMovieResource):
             abort(403)
 
         try:
-            return send_movie_file(
-                instance_id,
-                as_attachment=True
-            )
+            return send_movie_file(instance_id, as_attachment=True)
         except FileNotFound:
             current_app.logger.error("File was not found for: %s" % instance_id)
             abort(404)
@@ -435,23 +446,16 @@ class PreviewFileDownloadResource(PreviewFileResource):
         try:
             if extension == "png":
                 return send_picture_file(
-                    "original",
-                    instance_id,
-                    as_attachment=True
+                    "original", instance_id, as_attachment=True
                 )
             elif extension == "pdf":
                 mimetype = "application/pdf"
                 return send_standard_file(
-                    instance_id,
-                    extension,
-                    mimetype,
-                    as_attachment=True
+                    instance_id, extension, mimetype, as_attachment=True
                 )
             else:
                 return send_standard_file(
-                    instance_id,
-                    extension,
-                    as_attachment=True
+                    instance_id, extension, as_attachment=True
                 )
         except FileNotFound:
             current_app.logger.error("File was not found for: %s" % instance_id)
@@ -498,7 +502,6 @@ class BasePreviewPictureResource(Resource):
 
 
 class PreviewFileThumbnailResource(BasePreviewPictureResource):
-
     def __init__(self):
         BasePreviewPictureResource.__init__(self, "thumbnails")
 
@@ -513,13 +516,11 @@ class PreviewFilePreviewResource(BasePreviewPictureResource):
 
 
 class PreviewFileThumbnailSquareResource(BasePreviewPictureResource):
-
     def __init__(self):
         BasePreviewPictureResource.__init__(self, "thumbnails-square")
 
 
 class PreviewFileOriginalResource(BasePreviewPictureResource):
-
     def __init__(self):
         BasePreviewPictureResource.__init__(self, "original")
 
@@ -544,7 +545,7 @@ class BaseCreatePictureResource(Resource):
         if config.FS_BACKEND != "local":
             file_path = os.path.join(
                 config.TMP_DIR,
-                "cache-%s-%s.%s" % ("thumbnails", preview_file_id, "png")
+                "cache-%s-%s.%s" % ("thumbnails", preview_file_id, "png"),
             )
             if os.path.exists(file_path):
                 os.remove(file_path)
@@ -561,23 +562,18 @@ class BaseCreatePictureResource(Resource):
         tmp_folder = current_app.config["TMP_DIR"]
         uploaded_file = request.files["file"]
         thumbnail_path = thumbnail_utils.save_file(
-            tmp_folder,
-            instance_id,
-            uploaded_file
+            tmp_folder, instance_id, uploaded_file
         )
         thumbnail_path = thumbnail_utils.turn_into_thumbnail(
-            thumbnail_path,
-            size=self.size
+            thumbnail_path, size=self.size
         )
         file_store.add_picture("thumbnails", instance_id, thumbnail_path)
         os.remove(thumbnail_path)
         self.clear_cache_file(instance_id)
 
-        thumbnail_url_path = \
-            thumbnail_utils.url_path(
-                self.data_type,
-                instance_id
-            )
+        thumbnail_url_path = thumbnail_utils.url_path(
+            self.data_type, instance_id
+        )
 
         return {"thumbnail_path": thumbnail_url_path}, 201
 
@@ -613,49 +609,37 @@ class BasePictureResource(Resource):
 
 
 class CreatePersonThumbnailResource(BaseCreatePictureResource):
-
     def __init__(self):
         BaseCreatePictureResource.__init__(
-            self,
-            "persons",
-            thumbnail_utils.BIG_SQUARE_SIZE
+            self, "persons", thumbnail_utils.BIG_SQUARE_SIZE
         )
 
     def is_exist(self, person_id):
         return persons_service.get_person(person_id) is not None
 
     def check_permissions(self, instance_id):
-        is_current_user = \
+        is_current_user = (
             persons_service.get_current_user()["id"] != instance_id
+        )
         if is_current_user and not permissions.has_manager_permissions():
             raise permissions.PermissionDenied
 
     def prepare_creation(self, instance_id):
-        return persons_service.update_person(
-            instance_id,
-            {"has_avatar": True}
-        )
+        return persons_service.update_person(instance_id, {"has_avatar": True})
 
 
 class PersonThumbnailResource(BasePictureResource):
-
     def __init__(self):
-        BasePictureResource.__init__(
-            self,
-            "persons"
-        )
+        BasePictureResource.__init__(self, "persons")
 
     def is_exist(self, person_id):
         return persons_service.get_person(person_id) is not None
 
 
 class CreateOrganisationThumbnailResource(BaseCreatePictureResource):
-
     def __init__(self):
         BaseCreatePictureResource.__init__(
-            self,
-            "organisations",
-            thumbnail_utils.BIG_SQUARE_SIZE
+            self, "organisations", thumbnail_utils.BIG_SQUARE_SIZE
         )
 
     def is_exist(self, organisation_id):
@@ -667,13 +651,11 @@ class CreateOrganisationThumbnailResource(BaseCreatePictureResource):
 
     def prepare_creation(self, organisation_id):
         return persons_service.update_organisation(
-            organisation_id,
-            {"has_avatar": True}
+            organisation_id, {"has_avatar": True}
         )
 
 
 class OrganisationThumbnailResource(BasePictureResource):
-
     def __init__(self):
         BasePictureResource.__init__(self, "organisations")
 
@@ -682,12 +664,9 @@ class OrganisationThumbnailResource(BasePictureResource):
 
 
 class CreateProjectThumbnailResource(BaseCreatePictureResource):
-
     def __init__(self):
         BaseCreatePictureResource.__init__(
-            self,
-            "projects",
-            thumbnail_utils.SQUARE_SIZE
+            self, "projects", thumbnail_utils.SQUARE_SIZE
         )
 
     def is_exist(self, project_id):
@@ -695,13 +674,11 @@ class CreateProjectThumbnailResource(BaseCreatePictureResource):
 
     def prepare_creation(self, instance_id):
         return projects_service.update_project(
-            instance_id,
-            {"has_avatar": True}
+            instance_id, {"has_avatar": True}
         )
 
 
 class ProjectThumbnailResource(BasePictureResource):
-
     def __init__(self):
         BasePictureResource.__init__(self, "projects")
 
@@ -717,13 +694,11 @@ class ProjectThumbnailResource(BasePictureResource):
 
 
 class SetMainPreviewResource(Resource):
-
     @jwt_required
     def put(self, entity_id, preview_file_id):
         preview_file = files_service.get_preview_file(preview_file_id)
         task = tasks_service.get_task(preview_file["task_id"])
         user_service.check_project_access(task["project_id"])
         return entities_service.update_entity_preview(
-            entity_id,
-            preview_file_id
+            entity_id, preview_file_id
         )

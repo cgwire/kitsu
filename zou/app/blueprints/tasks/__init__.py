@@ -5,35 +5,29 @@ from .resources import (
     TaskFullResource,
     TaskForEntityResource,
     DeleteAllTasksForTaskTypeResource,
-
     TaskAssignResource,
     TasksAssignResource,
     ClearAssignationResource,
     PersonTasksResource,
     PersonDoneTasksResource,
-
     TaskStartResource,
     ToReviewResource,
-
     CommentTaskResource,
     TaskCommentsResource,
     TaskCommentResource,
     TaskPreviewsResource,
     AddPreviewResource,
     AddExtraPreviewResource,
-
     ProjectCommentsResource,
     ProjectNotificationsResource,
     ProjectPreviewFilesResource,
     ProjectSubscriptionsResource,
     ProjectTasksResource,
-
     CreateShotTasksResource,
     CreateAssetTasksResource,
-
     GetTimeSpentResource,
     SetTimeSpentResource,
-    AddTimeSpentResource
+    AddTimeSpentResource,
 )
 
 
@@ -46,18 +40,17 @@ routes = [
     ("/data/persons/<person_id>/done-tasks", PersonDoneTasksResource),
     (
         "/data/entities/<entity_id>/task-types/<task_type_id>/tasks",
-        TaskForEntityResource
+        TaskForEntityResource,
     ),
     (
         "/data/projects/<project_id>/task-types/<task_type_id>/tasks/",
-        DeleteAllTasksForTaskTypeResource
+        DeleteAllTasksForTaskTypeResource,
     ),
     ("/data/projects/<project_id>/comments", ProjectCommentsResource),
     ("/data/projects/<project_id>/notifications", ProjectNotificationsResource),
     ("/data/projects/<project_id>/preview-files", ProjectPreviewFilesResource),
     ("/data/projects/<project_id>/subscriptions", ProjectSubscriptionsResource),
     ("/data/projects/<project_id>/tasks", ProjectTasksResource),
-
     ("/actions/tasks/<task_id>/comment", CommentTaskResource),
     ("/actions/tasks/<task_id>/assign", TaskAssignResource),
     ("/actions/tasks/clear-assignation", ClearAssignationResource),
@@ -66,33 +59,30 @@ routes = [
     ("/actions/tasks/<task_id>/time-spents/<date>", GetTimeSpentResource),
     (
         "/actions/tasks/<task_id>/time-spents/<date>/persons/<person_id>",
-        SetTimeSpentResource
+        SetTimeSpentResource,
     ),
     (
         "/actions/tasks/<task_id>/time-spents/<date>/persons/<person_id>/add",
-        AddTimeSpentResource
+        AddTimeSpentResource,
     ),
     (
         "/actions/tasks/<task_id>/comments/<comment_id>/add-preview",
-        AddPreviewResource
+        AddPreviewResource,
     ),
     (
         "/actions/tasks/<task_id>/comments/<comment_id>/preview-files/"
         "<preview_file_id>",
-        AddExtraPreviewResource
+        AddExtraPreviewResource,
     ),
-    (
-        "/actions/tasks/<task_id>/to-review",
-        ToReviewResource
-    ),
+    ("/actions/tasks/<task_id>/to-review", ToReviewResource),
     (
         "/actions/task-types/<task_type_id>/shots/create-tasks",
-        CreateShotTasksResource
+        CreateShotTasksResource,
     ),
     (
         "/actions/task-types/<task_type_id>/assets/create-tasks",
-        CreateAssetTasksResource
-    )
+        CreateAssetTasksResource,
+    ),
 ]
 
 blueprint = Blueprint("tasks", "tasks")

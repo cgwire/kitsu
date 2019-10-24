@@ -7,13 +7,11 @@ from sqlalchemy.exc import IntegrityError
 
 
 class ShotsCsvImportResource(BaseCsvProjectImportResource):
-
     def prepare_import(self, project_id):
         self.episodes = {}
         self.sequences = {}
         self.descriptor_fields = self.get_descriptor_field_map(
-            project_id,
-            "Shot"
+            project_id, "Shot"
         )
 
     def import_row(self, row, project_id):
@@ -33,18 +31,16 @@ class ShotsCsvImportResource(BaseCsvProjectImportResource):
 
         episode_key = "%s-%s" % (project_id, episode_name)
         if episode_key not in self.episodes:
-            self.episodes[episode_key] = \
-                shots_service.get_or_create_episode(project_id, episode_name)
+            self.episodes[episode_key] = shots_service.get_or_create_episode(
+                project_id, episode_name
+            )
 
         sequence_key = "%s-%s-%s" % (project_id, episode_name, sequence_name)
         if sequence_key not in self.sequences:
             episode = self.episodes[episode_key]
-            self.sequences[sequence_key] = \
-                shots_service.get_or_create_sequence(
-                    project_id,
-                    episode["id"],
-                    sequence_name
-                )
+            self.sequences[sequence_key] = shots_service.get_or_create_sequence(
+                project_id, episode["id"], sequence_name
+            )
         sequence_id = self.get_id_from_cache(self.sequences, sequence_key)
 
         shot_type = shots_service.get_shot_type()
@@ -56,7 +52,7 @@ class ShotsCsvImportResource(BaseCsvProjectImportResource):
                     project_id=project_id,
                     parent_id=sequence_id,
                     entity_type_id=shot_type["id"],
-                    data=data
+                    data=data,
                 )
             else:
                 entity = Entity.create(
@@ -66,7 +62,7 @@ class ShotsCsvImportResource(BaseCsvProjectImportResource):
                     parent_id=sequence_id,
                     entity_type_id=shot_type["id"],
                     nb_frames=nb_frames,
-                    data=data
+                    data=data,
                 )
 
         except IntegrityError:
@@ -74,7 +70,7 @@ class ShotsCsvImportResource(BaseCsvProjectImportResource):
                 name=shot_name,
                 project_id=project_id,
                 parent_id=sequence_id,
-                entity_type_id=shot_type["id"]
+                entity_type_id=shot_type["id"],
             )
 
         return entity.serialize()

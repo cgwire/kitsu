@@ -8,7 +8,6 @@ from zou.app.models.data_import_error import DataImportError
 
 
 class ShotgunImportErrorsResource(Resource):
-
     def __init__(self):
         Resource.__init__(self)
 
@@ -20,16 +19,12 @@ class ShotgunImportErrorsResource(Resource):
 
     @jwt_required
     def post(self):
-        error = DataImportError(
-            event_data=request.json,
-            source="shotgun"
-        )
+        error = DataImportError(event_data=request.json, source="shotgun")
         error.save()
         return error.serialize(), 201
 
 
 class ShotgunImportErrorResource(Resource):
-
     def __init__(self):
         Resource.__init__(self)
 

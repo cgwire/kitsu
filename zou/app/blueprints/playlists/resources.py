@@ -13,14 +13,13 @@ from zou.app.services import (
     persons_service,
     projects_service,
     shots_service,
-    user_service
+    user_service,
 )
 from zou.app.stores import file_store, queue_store
 from zou.app.utils import fs
 
 
 class ProjectPlaylistsResource(Resource):
-
     @jwt_required
     def get(self, project_id):
         user_service.check_project_access(project_id)
@@ -28,7 +27,6 @@ class ProjectPlaylistsResource(Resource):
 
 
 class EpisodePlaylistsResource(Resource):
-
     @jwt_required
     def get(self, project_id, episode_id):
         user_service.check_project_access(project_id)
@@ -37,7 +35,6 @@ class EpisodePlaylistsResource(Resource):
 
 
 class ProjectPlaylistResource(Resource):
-
     @jwt_required
     def get(self, project_id, playlist_id):
         user_service.check_project_access(project_id)
@@ -47,7 +44,6 @@ class ProjectPlaylistResource(Resource):
 
 
 class EntityPreviewsResource(Resource):
-
     @jwt_required
     def get(self, entity_id):
         """
@@ -61,7 +57,6 @@ class EntityPreviewsResource(Resource):
 
 
 class PlaylistDownloadResource(Resource):
-
     @jwt_required
     def get(self, playlist_id, build_job_id):
         playlist = playlists_service.get_playlist(playlist_id)
@@ -70,10 +65,7 @@ class PlaylistDownloadResource(Resource):
         user_service.check_project_access(playlist["project_id"])
 
         if build_job["status"] != "succeeded":
-            return {
-                "error": True,
-                "message": "Build is not finished"
-            }, 400
+            return {"error": True, "message": "Build is not finished"}, 400
         else:
             movie_file_path = fs.get_file_path(
                 config,
@@ -81,7 +73,7 @@ class PlaylistDownloadResource(Resource):
                 file_store.open_movie,
                 "playlists",
                 build_job_id,
-                "mp4"
+                "mp4",
             )
             context_name = slugify.slugify(project["name"], separator="_")
             if project["production_type"] == "tvshow":
@@ -90,22 +82,22 @@ class PlaylistDownloadResource(Resource):
                     episode["name"], separator="_"
                 )
             attachment_filename = "%s_%s_%s.mp4" % (
-                slugify.slugify(build_job["created_at"], separator="")
-                       .replace("t", "_"),
+                slugify.slugify(build_job["created_at"], separator="").replace(
+                    "t", "_"
+                ),
                 context_name,
-                slugify.slugify(playlist["name"], separator="_")
+                slugify.slugify(playlist["name"], separator="_"),
             )
             return flask_send_file(
                 movie_file_path,
                 conditional=True,
                 mimetype="video/mp4",
                 as_attachment=True,
-                attachment_filename=attachment_filename
+                attachment_filename=attachment_filename,
             )
 
 
 class BuildPlaylistMovieResource(Resource):
-
     @jwt_required
     def get(self, playlist_id):
         playlist = playlists_service.get_playlist(playlist_id)
@@ -115,8 +107,8 @@ class BuildPlaylistMovieResource(Resource):
             current_user = persons_service.get_current_user()
             queue_store.job_queue.enqueue(
                 playlists_service.build_playlist_job,
-                args=(playlist, current_user["email"],),
-                job_timeout=7200
+                args=(playlist, current_user["email"]),
+                job_timeout=7200,
             )
             return {"job": "running"}
         else:
@@ -125,7 +117,6 @@ class BuildPlaylistMovieResource(Resource):
 
 
 class PlaylistZipDownloadResource(Resource):
-
     @jwt_required
     def get(self, playlist_id):
         playlist = playlists_service.get_playlist(playlist_id)
@@ -141,7 +132,7 @@ class PlaylistZipDownloadResource(Resource):
             )
         attachment_filename = "%s_%s.zip" % (
             context_name,
-            slugify.slugify(playlist["name"], separator="_")
+            slugify.slugify(playlist["name"], separator="_"),
         )
 
         return flask_send_file(
@@ -149,12 +140,11 @@ class PlaylistZipDownloadResource(Resource):
             conditional=True,
             mimetype="application/zip",
             as_attachment=True,
-            attachment_filename=attachment_filename
+            attachment_filename=attachment_filename,
         )
 
 
 class BuildJobResource(Resource):
-
     @jwt_required
     def get(self, playlist_id, build_job_id):
         playlist = playlists_service.get_playlist(playlist_id)

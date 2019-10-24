@@ -4,10 +4,7 @@ from flask import abort
 from flask_restful import Resource, reqparse
 from flask_jwt_extended import jwt_required
 
-from zou.app.services import (
-    persons_service,
-    time_spents_service
-)
+from zou.app.services import persons_service, time_spents_service
 from zou.app.utils import auth, permissions, csv_utils
 from zou.app.services.exception import WrongDateFormatException
 
@@ -29,26 +26,20 @@ class NewPersonResource(Resource):
             data["last_name"],
             data["phone"],
             role=data["role"],
-            desktop_login=data["desktop_login"]
+            desktop_login=data["desktop_login"],
         )
         return person, 201
 
     def get_arguments(self):
         parser = reqparse.RequestParser()
         parser.add_argument(
-            "email",
-            help="The email is required.",
-            required=True
+            "email", help="The email is required.", required=True
         )
         parser.add_argument(
-            "first_name",
-            help="The first name is required.",
-            required=True
+            "first_name", help="The first name is required.", required=True
         )
         parser.add_argument(
-            "last_name",
-            help="The last name is required.",
-            required=True
+            "last_name", help="The last name is required.", required=True
         )
         parser.add_argument("phone", default="")
         parser.add_argument("role", default="user")
@@ -62,11 +53,14 @@ class DesktopLoginsResource(Resource):
     Allow to create and retrieve desktop login logs. Desktop login logs can only
     be created by current user.
     """
+
     @jwt_required
     def get(self, person_id):
         current_user = persons_service.get_current_user()
-        if current_user["id"] != person_id and \
-           not permissions.has_manager_permissions():
+        if (
+            current_user["id"] != person_id
+            and not permissions.has_manager_permissions()
+        ):
             raise permissions.PermissionDenied
 
         persons_service.get_person(person_id)
@@ -77,13 +71,14 @@ class DesktopLoginsResource(Resource):
         arguments = self.get_arguments()
 
         current_user = persons_service.get_current_user()
-        if current_user["id"] != person_id and \
-           not permissions.has_admin_permissions():
+        if (
+            current_user["id"] != person_id
+            and not permissions.has_admin_permissions()
+        ):
             raise permissions.PermissionDenied
 
         desktop_login_log = persons_service.create_desktop_login_logs(
-            person_id,
-            arguments["date"]
+            person_id, arguments["date"]
         )
 
         return desktop_login_log, 201
@@ -131,9 +126,7 @@ class PersonMonthTimeSpentsResource(Resource):
         permissions.check_admin_permissions()
         try:
             return time_spents_service.get_month_time_spents(
-                person_id,
-                year,
-                month
+                person_id, year, month
             )
         except WrongDateFormatException:
             abort(404)
@@ -149,9 +142,7 @@ class PersonWeekTimeSpentsResource(Resource):
         permissions.check_admin_permissions()
         try:
             return time_spents_service.get_week_time_spents(
-                person_id,
-                year,
-                week
+                person_id, year, week
             )
         except WrongDateFormatException:
             abort(404)
@@ -167,10 +158,7 @@ class PersonDayTimeSpentsResource(Resource):
         permissions.check_admin_permissions()
         try:
             return time_spents_service.get_day_time_spents(
-                person_id,
-                year,
-                month,
-                day
+                person_id, year, month, day
             )
         except WrongDateFormatException:
             abort(404)
@@ -214,11 +202,9 @@ class InvitePersonResource(Resource):
     """
     Sends an email to given person to invite him/her to connect to Kitsu
     """
+
     @jwt_required
     def get(self, person_id):
         permissions.check_admin_permissions()
         persons_service.invite_person(person_id)
-        return {
-            "success": True,
-            "message": "Email sent"
-        }
+        return {"success": True, "message": "Email sent"}

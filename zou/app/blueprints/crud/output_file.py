@@ -8,7 +8,6 @@ from .base import BaseModelsResource, BaseModelResource
 
 
 class OutputFilesResource(BaseModelsResource):
-
     def __init__(self):
         BaseModelsResource.__init__(self, OutputFile)
 
@@ -19,15 +18,15 @@ class OutputFilesResource(BaseModelsResource):
         if permissions.has_admin_permissions():
             return query
         else:
-            query = query \
-                .join(Entity, OutputFile.entity_id == Entity.id) \
-                .join(Project) \
+            query = (
+                query.join(Entity, OutputFile.entity_id == Entity.id)
+                .join(Project)
                 .filter(user_service.build_related_projects_filter())
+            )
             return query
 
 
 class OutputFileResource(BaseModelResource):
-
     def __init__(self):
         BaseModelResource.__init__(self, OutputFile)
 

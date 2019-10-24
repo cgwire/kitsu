@@ -5,12 +5,11 @@ from zou.app.utils import colors
 from zou.app.services import tasks_service
 from zou.app.blueprints.source.shotgun.base import (
     BaseImportShotgunResource,
-    ImportRemoveShotgunBaseResource
+    ImportRemoveShotgunBaseResource,
 )
 
 
 class ImportShotgunStatusResource(BaseImportShotgunResource):
-
     def import_entry(self, data):
         task_status = self.get_existing_status(data)
         if task_status is None:
@@ -32,7 +31,7 @@ class ImportShotgunStatusResource(BaseImportShotgunResource):
             "name": sg_status["name"],
             "short_name": sg_status["code"],
             "shotgun_id": sg_status["id"],
-            "color": colors.rgb_to_hex(color)
+            "color": colors.rgb_to_hex(color),
         }
 
     def get_existing_status(self, data):
@@ -43,6 +42,5 @@ class ImportShotgunStatusResource(BaseImportShotgunResource):
 
 
 class ImportRemoveShotgunStatusResource(ImportRemoveShotgunBaseResource):
-
     def __init__(self):
         ImportRemoveShotgunBaseResource.__init__(self, TaskStatus)

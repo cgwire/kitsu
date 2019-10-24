@@ -5,7 +5,6 @@ from zou.app.services import assets_service, shots_service, breakdown_service
 
 
 class CastingCsvImportResource(BaseCsvProjectImportResource):
-
     def prepare_import(self, project_id):
         self.asset_type_map = {}
         self.asset_map = {}
@@ -52,11 +51,9 @@ class CastingCsvImportResource(BaseCsvProjectImportResource):
 
     def import_row(self, row, project_id):
         asset_key = slugify("%s%s" % (row["Asset Type"], row["Asset"]))
-        target_key = slugify("%s%s%s" % (
-            row["Episode"],
-            row["Parent"],
-            row["Name"]
-        ))
+        target_key = slugify(
+            "%s%s%s" % (row["Episode"], row["Parent"], row["Name"])
+        )
         occurences = 1
         if len(row["Occurences"]) > 0:
             occurences = int(row["Occurences"])
@@ -69,8 +66,5 @@ class CastingCsvImportResource(BaseCsvProjectImportResource):
 
         if asset_id is not None and target_id is not None:
             breakdown_service.create_casting_link(
-                target_id,
-                asset_id,
-                occurences,
-                label
+                target_id, asset_id, occurences, label
             )

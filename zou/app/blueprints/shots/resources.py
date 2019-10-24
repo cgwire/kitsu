@@ -10,19 +10,16 @@ from zou.app.services import (
     scenes_service,
     shots_service,
     tasks_service,
-    user_service
+    user_service,
 )
 
 from zou.app.mixin import ArgsMixin
 from zou.app.utils import query, permissions
 
-from zou.app.services.exception import (
-    ShotNotFoundException
-)
+from zou.app.services.exception import ShotNotFoundException
 
 
 class ShotResource(Resource):
-
     @jwt_required
     def get(self, shot_id):
         """
@@ -55,11 +52,10 @@ class ShotResource(Resource):
         except permissions.PermissionDenied:
             abort(403)
 
-        return '', 204
+        return "", 204
 
 
 class SceneResource(Resource):
-
     @jwt_required
     def get(self, scene_id):
         """
@@ -77,11 +73,10 @@ class SceneResource(Resource):
         scene = shots_service.get_scene(scene_id)
         user_service.check_manager_project_access(scene["project_id"])
         shots_service.remove_scene(scene_id)
-        return '', 204
+        return "", 204
 
 
 class ShotsResource(Resource):
-
     @jwt_required
     def get(self):
         """
@@ -98,7 +93,6 @@ class ShotsResource(Resource):
 
 
 class AllShotsResource(Resource):
-
     @jwt_required
     def get(self):
         """
@@ -115,7 +109,6 @@ class AllShotsResource(Resource):
 
 
 class ScenesResource(Resource):
-
     @jwt_required
     def get(self):
         """
@@ -128,7 +121,6 @@ class ScenesResource(Resource):
 
 
 class ShotAssetsResource(Resource):
-
     @jwt_required
     def get(self, shot_id):
         """
@@ -140,7 +132,6 @@ class ShotAssetsResource(Resource):
 
 
 class ShotTaskTypesResource(Resource):
-
     @jwt_required
     def get(self, shot_id):
         """
@@ -152,7 +143,6 @@ class ShotTaskTypesResource(Resource):
 
 
 class ShotTasksResource(Resource):
-
     @jwt_required
     def get(self, shot_id):
         """
@@ -164,7 +154,6 @@ class ShotTasksResource(Resource):
 
 
 class ShotPreviewsResource(Resource):
-
     @jwt_required
     def get(self, shot_id):
         """
@@ -178,7 +167,6 @@ class ShotPreviewsResource(Resource):
 
 
 class SequenceTasksResource(Resource):
-
     @jwt_required
     def get(self, sequence_id):
         """
@@ -190,7 +178,6 @@ class SequenceTasksResource(Resource):
 
 
 class SequenceTaskTypesResource(Resource):
-
     @jwt_required
     def get(self, sequence_id):
         """
@@ -202,7 +189,6 @@ class SequenceTaskTypesResource(Resource):
 
 
 class ShotsAndTasksResource(Resource):
-
     @jwt_required
     def get(self):
         """
@@ -215,7 +201,6 @@ class ShotsAndTasksResource(Resource):
 
 
 class SceneAndTasksResource(Resource):
-
     @jwt_required
     def get(self):
         """
@@ -224,12 +209,11 @@ class SceneAndTasksResource(Resource):
         """
         criterions = query.get_query_criterions_from_request(request)
         user_service.check_project_access(criterions.get("project_id", None))
-        criterions['entity_type_id'] = shots_service.get_scene_type()['id']
+        criterions["entity_type_id"] = shots_service.get_scene_type()["id"]
         return entities_service.get_entities_and_tasks(criterions)
 
 
 class SequenceAndTasksResource(Resource):
-
     @jwt_required
     def get(self):
         """
@@ -238,12 +222,11 @@ class SequenceAndTasksResource(Resource):
         """
         criterions = query.get_query_criterions_from_request(request)
         user_service.check_project_access(criterions.get("project_id", None))
-        criterions['entity_type_id'] = shots_service.get_sequence_type()['id']
+        criterions["entity_type_id"] = shots_service.get_sequence_type()["id"]
         return entities_service.get_entities_and_tasks(criterions)
 
 
 class EpisodeAndTasksResource(Resource):
-
     @jwt_required
     def get(self):
         """
@@ -252,12 +235,11 @@ class EpisodeAndTasksResource(Resource):
         """
         criterions = query.get_query_criterions_from_request(request)
         user_service.check_project_access(criterions.get("project_id", None))
-        criterions['entity_type_id'] = shots_service.get_episode_type()['id']
+        criterions["entity_type_id"] = shots_service.get_episode_type()["id"]
         return entities_service.get_entities_and_tasks(criterions)
 
 
 class ProjectShotsResource(Resource):
-
     @jwt_required
     def get(self, project_id):
         """
@@ -277,10 +259,7 @@ class ProjectShotsResource(Resource):
         user_service.check_manager_project_access(project_id)
 
         shot = shots_service.create_shot(
-            project_id,
-            sequence_id,
-            name,
-            data=data
+            project_id, sequence_id, name, data=data
         )
         return shot, 201
 
@@ -295,7 +274,6 @@ class ProjectShotsResource(Resource):
 
 
 class ProjectSequencesResource(Resource):
-
     @jwt_required
     def get(self, project_id):
         """
@@ -313,11 +291,7 @@ class ProjectSequencesResource(Resource):
         (episode_id, name) = self.get_arguments()
         projects_service.get_project(project_id)
         user_service.check_manager_project_access(project_id)
-        sequence = shots_service.create_sequence(
-            project_id,
-            episode_id,
-            name
-        )
+        sequence = shots_service.create_sequence(project_id, episode_id, name)
         return sequence, 201
 
     def get_arguments(self):
@@ -329,7 +303,6 @@ class ProjectSequencesResource(Resource):
 
 
 class ProjectEpisodesResource(Resource):
-
     @jwt_required
     def get(self, project_id):
         """
@@ -357,7 +330,6 @@ class ProjectEpisodesResource(Resource):
 
 
 class ProjectEpisodeStatsResource(Resource):
-
     @jwt_required
     def get(self, project_id):
         """
@@ -370,7 +342,6 @@ class ProjectEpisodeStatsResource(Resource):
 
 
 class EpisodeResource(Resource):
-
     @jwt_required
     def get(self, episode_id):
         """
@@ -382,7 +353,6 @@ class EpisodeResource(Resource):
 
 
 class EpisodesResource(Resource):
-
     @jwt_required
     def get(self):
         """
@@ -395,7 +365,6 @@ class EpisodesResource(Resource):
 
 
 class EpisodeSequencesResource(Resource):
-
     @jwt_required
     def get(self, episode_id):
         """
@@ -410,7 +379,6 @@ class EpisodeSequencesResource(Resource):
 
 
 class EpisodeTaskTypesResource(Resource):
-
     @jwt_required
     def get(self, episode_id):
         """
@@ -422,7 +390,6 @@ class EpisodeTaskTypesResource(Resource):
 
 
 class EpisodeTasksResource(Resource):
-
     @jwt_required
     def get(self, episode_id):
         """
@@ -434,7 +401,6 @@ class EpisodeTasksResource(Resource):
 
 
 class SequenceResource(Resource):
-
     @jwt_required
     def get(self, sequence_id):
         """
@@ -446,7 +412,6 @@ class SequenceResource(Resource):
 
 
 class SequencesResource(Resource):
-
     @jwt_required
     def get(self):
         """
@@ -464,7 +429,6 @@ class SequencesResource(Resource):
 
 
 class SequenceShotsResource(Resource):
-
     @jwt_required
     def get(self, sequence_id):
         """
@@ -479,7 +443,6 @@ class SequenceShotsResource(Resource):
 
 
 class ProjectScenesResource(Resource):
-
     @jwt_required
     def get(self, project_id):
         """
@@ -497,11 +460,7 @@ class ProjectScenesResource(Resource):
         (sequence_id, name) = self.get_arguments()
         projects_service.get_project(project_id)
         user_service.check_manager_project_access(project_id)
-        scene = shots_service.create_scene(
-            project_id,
-            sequence_id,
-            name
-        )
+        scene = shots_service.create_scene(project_id, sequence_id, name)
         return scene, 201
 
     def get_arguments(self):
@@ -513,7 +472,6 @@ class ProjectScenesResource(Resource):
 
 
 class SequenceScenesResource(Resource):
-
     @jwt_required
     def get(self, sequence_id):
         """
@@ -525,7 +483,6 @@ class SequenceScenesResource(Resource):
 
 
 class SceneTaskTypesResource(Resource):
-
     @jwt_required
     def get(self, scene_id):
         """
@@ -537,7 +494,6 @@ class SceneTaskTypesResource(Resource):
 
 
 class SceneTasksResource(Resource):
-
     @jwt_required
     def get(self, scene_id):
         """
@@ -549,7 +505,6 @@ class SceneTasksResource(Resource):
 
 
 class SceneShotsResource(Resource, ArgsMixin):
-
     @jwt_required
     def get(self, scene_id):
         """
@@ -564,9 +519,7 @@ class SceneShotsResource(Resource, ArgsMixin):
         """
         Mark given scene as source of given shot.
         """
-        args = self.get_args([
-            ("shot_id", None, True)
-        ])
+        args = self.get_args([("shot_id", None, True)])
         scene = shots_service.get_scene(scene_id)
         user_service.check_project_access(scene["project_id"])
         shot = shots_service.get_shot(args["shot_id"])
@@ -574,11 +527,10 @@ class SceneShotsResource(Resource, ArgsMixin):
 
 
 class RemoveShotFromSceneResource(Resource):
-
     @jwt_required
     def delete(self, scene_id, shot_id):
         scene = shots_service.get_scene(scene_id)
         user_service.check_project_access(scene["project_id"])
         shot = shots_service.get_shot(shot_id)
         scenes_service.remove_shot_from_scene(scene, shot)
-        return '', 204
+        return "", 204

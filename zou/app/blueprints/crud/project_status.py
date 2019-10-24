@@ -3,7 +3,6 @@ from .base import BaseModelResource, BaseModelsResource
 
 
 class ProjectStatussResource(BaseModelsResource):
-
     def __init__(self):
         BaseModelsResource.__init__(self, ProjectStatus)
 
@@ -12,7 +11,6 @@ class ProjectStatussResource(BaseModelsResource):
 
 
 class ProjectStatusResource(BaseModelResource):
-
     def __init__(self):
         BaseModelResource.__init__(self, ProjectStatus)
 

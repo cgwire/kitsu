@@ -3,7 +3,6 @@ from .base import BaseModelResource, BaseModelsResource
 
 
 class FileStatusesResource(BaseModelsResource):
-
     def __init__(self):
         BaseModelsResource.__init__(self, FileStatus)
 
@@ -12,7 +11,6 @@ class FileStatusesResource(BaseModelsResource):
 
 
 class FileStatusResource(BaseModelResource):
-
     def __init__(self):
         BaseModelResource.__init__(self, FileStatus)
 

@@ -14,54 +14,47 @@ from .resources import (
     ProductionAssetTypesScheduleItemsResource,
     ProductionEpisodesScheduleItemsResource,
     ProductionSequencesScheduleItemsResource,
-    ProductionTimeSpentsResource
+    ProductionTimeSpentsResource,
 )
 
 routes = [
     ("/data/projects/open", OpenProjectsResource),
     ("/data/projects/all", AllProjectsResource),
-
     ("/data/projects/<project_id>/team", ProductionTeamResource),
     (
         "/data/projects/<project_id>/team/<person_id>",
-        ProductionTeamRemoveResource
+        ProductionTeamRemoveResource,
     ),
     (
         "/data/projects/<project_id>/metadata-descriptors",
-        ProductionMetadataDescriptorsResource
+        ProductionMetadataDescriptorsResource,
     ),
     (
         "/data/projects/<project_id>/metadata-descriptors/<descriptor_id>",
-        ProductionMetadataDescriptorResource
+        ProductionMetadataDescriptorResource,
     ),
-    (
-        "/data/projects/<project_id>/milestones",
-        ProductionMilestonesResource
-    ),
+    ("/data/projects/<project_id>/milestones", ProductionMilestonesResource),
     (
         "/data/projects/<project_id>/schedule-items",
-        ProductionScheduleItemsResource
+        ProductionScheduleItemsResource,
     ),
     (
         "/data/projects/<project_id>/schedule-items/task-types",
-        ProductionTaskTypeScheduleItemsResource
+        ProductionTaskTypeScheduleItemsResource,
     ),
     (
         "/data/projects/<project_id>/schedule-items/<task_type_id>/asset-types",
-        ProductionAssetTypesScheduleItemsResource
+        ProductionAssetTypesScheduleItemsResource,
     ),
     (
         "/data/projects/<project_id>/schedule-items/<task_type_id>/episodes",
-        ProductionEpisodesScheduleItemsResource
+        ProductionEpisodesScheduleItemsResource,
     ),
     (
         "/data/projects/<project_id>/schedule-items/<task_type_id>/sequences",
-        ProductionSequencesScheduleItemsResource
+        ProductionSequencesScheduleItemsResource,
     ),
-    (
-        "/data/projects/<project_id>/time-spents",
-        ProductionTimeSpentsResource
-    )
+    ("/data/projects/<project_id>/time-spents", ProductionTimeSpentsResource),
 ]
 
 blueprint = Blueprint("projects", "projects")

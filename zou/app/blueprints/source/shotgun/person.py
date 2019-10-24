@@ -2,17 +2,14 @@ from flask_restful import current_app
 
 from zou.app.models.person import Person
 from zou.app.utils import auth
-from zou.app.blueprints.source.shotgun.exception import (
-    ShotgunEntryImportFailed
-)
+from zou.app.blueprints.source.shotgun.exception import ShotgunEntryImportFailed
 from zou.app.blueprints.source.shotgun.base import (
     BaseImportShotgunResource,
-    ImportRemoveShotgunBaseResource
+    ImportRemoveShotgunBaseResource,
 )
 
 
 class ImportShotgunPersonsResource(BaseImportShotgunResource):
-
     def __init__(self):
         BaseImportShotgunResource.__init__(self)
 
@@ -34,7 +31,7 @@ class ImportShotgunPersonsResource(BaseImportShotgunResource):
             "shotgun_id": sg_person["id"],
             "desktop_login": sg_person["login"],
             "active": is_active,
-            "role": role
+            "role": role,
         }
 
     def import_entry(self, data):
@@ -60,6 +57,5 @@ class ImportShotgunPersonsResource(BaseImportShotgunResource):
 
 
 class ImportRemoveShotgunPersonResource(ImportRemoveShotgunBaseResource):
-
     def __init__(self):
         ImportRemoveShotgunBaseResource.__init__(self, Person)

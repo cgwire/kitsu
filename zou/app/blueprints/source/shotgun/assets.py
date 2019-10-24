@@ -8,21 +8,20 @@ from zou.app.models.entity_type import EntityType
 
 from zou.app.blueprints.source.shotgun.base import (
     BaseImportShotgunResource,
-    ImportRemoveShotgunBaseResource
+    ImportRemoveShotgunBaseResource,
 )
 
 from zou.app.services import (
     assets_service,
     deletion_service,
     tasks_service,
-    files_service
+    files_service,
 )
 
 from zou.app.services.exception import AssetNotFoundException
 
 
 class ImportShotgunAssetsResource(BaseImportShotgunResource):
-
     def __init__(self):
         BaseImportShotgunResource.__init__(self)
 
@@ -35,13 +34,15 @@ class ImportShotgunAssetsResource(BaseImportShotgunResource):
 
     def extract_entity_type_names(self, sg_assets):
         return {
-            x["sg_asset_type"] for x in sg_assets
+            x["sg_asset_type"]
+            for x in sg_assets
             if x["sg_asset_type"] is not None
         }
 
     def extract_data(self, sg_asset):
-        entity_type_id = \
-            self.entity_type_ids.get(sg_asset["sg_asset_type"], None)
+        entity_type_id = self.entity_type_ids.get(
+            sg_asset["sg_asset_type"], None
+        )
         project_id = self.project_ids.get(sg_asset["project"]["id"], None)
         parent_shotgun_ids = [
             asset["id"] for asset in sg_asset.get("parents", [])
@@ -53,7 +54,7 @@ class ImportShotgunAssetsResource(BaseImportShotgunResource):
             "description": sg_asset["description"],
             "entity_type_id": entity_type_id,
             "project_id": project_id,
-            "parent_shotgun_ids": parent_shotgun_ids
+            "parent_shotgun_ids": parent_shotgun_ids,
         }
 
     def import_entry(self, data):
@@ -110,11 +111,8 @@ class ImportShotgunAssetsResource(BaseImportShotgunResource):
 
 
 class ImportRemoveShotgunAssetResource(ImportRemoveShotgunBaseResource):
-
     def __init__(self):
-        ImportRemoveShotgunBaseResource.__init__(
-            self, Entity, self.delete_func
-        )
+        ImportRemoveShotgunBaseResource.__init__(self, Entity, self.delete_func)
 
     def delete_func(self, asset):
         try:
@@ -133,9 +131,7 @@ class ImportRemoveShotgunAssetResource(ImportRemoveShotgunBaseResource):
     def is_working_files_linked(self, tasks):
         is_working_files = False
         for task in tasks:
-            working_files = files_service.get_working_files_for_task(
-                task["id"]
-            )
+            working_files = files_service.get_working_files_for_task(task["id"])
             if len(working_files) > 0:
                 is_working_files = True
                 break

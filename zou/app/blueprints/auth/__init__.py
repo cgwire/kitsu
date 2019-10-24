@@ -8,7 +8,7 @@ from .resources import (
     ChangePasswordResource,
     RegistrationResource,
     RefreshTokenResource,
-    ResetPasswordResource
+    ResetPasswordResource,
 )
 
 routes = [

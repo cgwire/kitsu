@@ -4,7 +4,6 @@ from .base import BaseModelResource, BaseModelsResource
 
 
 class OrganisationsResource(BaseModelsResource):
-
     def __init__(self):
         BaseModelsResource.__init__(self, Organisation)
 
@@ -16,7 +15,6 @@ class OrganisationsResource(BaseModelsResource):
 
 
 class OrganisationResource(BaseModelResource):
-
     def __init__(self):
         BaseModelResource.__init__(self, Organisation)
 

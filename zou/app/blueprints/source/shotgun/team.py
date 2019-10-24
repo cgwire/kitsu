@@ -6,12 +6,11 @@ from zou.app.models.person import Person
 
 from zou.app.blueprints.source.shotgun.base import (
     BaseImportShotgunResource,
-    ImportRemoveShotgunBaseResource
+    ImportRemoveShotgunBaseResource,
 )
 
 
 class ImportShotgunProjectConnectionsResource(BaseImportShotgunResource):
-
     def __init__(self):
         BaseImportShotgunResource.__init__(self)
 
@@ -25,7 +24,7 @@ class ImportShotgunProjectConnectionsResource(BaseImportShotgunResource):
         data = {
             "shotgun_id": sg_project_user_connection["id"],
             "project_shotgun_id": sg_project["id"],
-            "person_shotgun_id": sg_user["id"]
+            "person_shotgun_id": sg_user["id"],
         }
         return data
 
@@ -54,6 +53,5 @@ class ImportShotgunProjectConnectionsResource(BaseImportShotgunResource):
 class ImportRemoveShotgunProjectConnectionResource(
     ImportRemoveShotgunBaseResource
 ):
-
     def __init__(self):
         ImportRemoveShotgunBaseResource.__init__(self, ProjectPersonLink)

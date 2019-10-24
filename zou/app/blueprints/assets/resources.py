@@ -9,12 +9,11 @@ from zou.app.services import (
     shots_service,
     breakdown_service,
     tasks_service,
-    user_service
+    user_service,
 )
 
 
 class AssetResource(Resource):
-
     @jwt_required
     def get(self, asset_id):
         """
@@ -35,11 +34,10 @@ class AssetResource(Resource):
         user_service.check_manager_project_access(asset["project_id"])
 
         assets_service.remove_asset(asset_id, force=force)
-        return '', 204
+        return "", 204
 
 
 class AllAssetsResource(Resource):
-
     @jwt_required
     def get(self):
         """
@@ -52,7 +50,6 @@ class AllAssetsResource(Resource):
 
 
 class AllAssetsAliasResource(Resource):
-
     @jwt_required
     def get(self):
         """
@@ -65,7 +62,6 @@ class AllAssetsAliasResource(Resource):
 
 
 class AssetsAndTasksResource(Resource):
-
     @jwt_required
     def get(self):
         """
@@ -86,7 +82,6 @@ class AssetsAndTasksResource(Resource):
 
 
 class AssetTypeResource(Resource):
-
     @jwt_required
     def get(self, asset_type_id):
         """
@@ -96,7 +91,6 @@ class AssetTypeResource(Resource):
 
 
 class AssetTypesResource(Resource):
-
     @jwt_required
     def get(self):
         """
@@ -108,7 +102,6 @@ class AssetTypesResource(Resource):
 
 
 class ProjectAssetTypesResource(Resource):
-
     @jwt_required
     def get(self, project_id):
         """
@@ -119,7 +112,6 @@ class ProjectAssetTypesResource(Resource):
 
 
 class ShotAssetTypesResource(Resource):
-
     @jwt_required
     def get(self, shot_id):
         """
@@ -131,7 +123,6 @@ class ShotAssetTypesResource(Resource):
 
 
 class ProjectAssetsResource(Resource):
-
     @jwt_required
     def get(self, project_id):
         """
@@ -144,7 +135,6 @@ class ProjectAssetsResource(Resource):
 
 
 class ProjectAssetTypeAssetsResource(Resource):
-
     @jwt_required
     def get(self, project_id, asset_type_id):
         """
@@ -158,7 +148,6 @@ class ProjectAssetTypeAssetsResource(Resource):
 
 
 class AssetAssetsResource(Resource):
-
     @jwt_required
     def get(self, asset_id):
         """
@@ -170,7 +159,6 @@ class AssetAssetsResource(Resource):
 
 
 class AssetTasksResource(Resource):
-
     @jwt_required
     def get(self, asset_id):
         """
@@ -182,7 +170,6 @@ class AssetTasksResource(Resource):
 
 
 class AssetTaskTypesResource(Resource):
-
     @jwt_required
     def get(self, asset_id):
         """
@@ -194,33 +181,20 @@ class AssetTaskTypesResource(Resource):
 
 
 class NewAssetResource(Resource):
-
     @jwt_required
     def post(self, project_id, asset_type_id):
-        (
-            name,
-            description,
-            data,
-            source_id
-        ) = self.get_arguments()
+        (name, description, data, source_id) = self.get_arguments()
 
         user_service.check_manager_project_access(project_id)
         asset = assets_service.create_asset(
-            project_id,
-            asset_type_id,
-            name,
-            description,
-            data,
-            source_id
+            project_id, asset_type_id, name, description, data, source_id
         )
         return asset, 201
 
     def get_arguments(self):
         parser = reqparse.RequestParser()
         parser.add_argument(
-            "name",
-            help="The asset name is required.",
-            required=True
+            "name", help="The asset name is required.", required=True
         )
         parser.add_argument("description")
         parser.add_argument("data", type=dict, default={})
@@ -230,12 +204,11 @@ class NewAssetResource(Resource):
             args["name"],
             args.get("description", ""),
             args["data"],
-            args["source_id"]
+            args["source_id"],
         )
 
 
 class AssetCastingResource(Resource):
-
     @jwt_required
     def get(self, asset_id):
         """
@@ -257,7 +230,6 @@ class AssetCastingResource(Resource):
 
 
 class AssetCastInResource(Resource):
-
     @jwt_required
     def get(self, asset_id):
         """
@@ -269,7 +241,6 @@ class AssetCastInResource(Resource):
 
 
 class AssetShotAssetInstancesResource(Resource):
-
     @jwt_required
     def get(self, asset_id):
         """
@@ -281,7 +252,6 @@ class AssetShotAssetInstancesResource(Resource):
 
 
 class AssetSceneAssetInstancesResource(Resource):
-
     @jwt_required
     def get(self, asset_id):
         """
@@ -293,7 +263,6 @@ class AssetSceneAssetInstancesResource(Resource):
 
 
 class AssetAssetInstancesResource(Resource, ArgsMixin):
-
     @jwt_required
     def get(self, asset_id):
         """
@@ -308,15 +277,15 @@ class AssetAssetInstancesResource(Resource, ArgsMixin):
         """
         Create an asset instance inside given asset.
         """
-        args = self.get_args([
-            ("asset_to_instantiate_id", None, True),
-            ("description", None, False)
-        ])
+        args = self.get_args(
+            [
+                ("asset_to_instantiate_id", None, True),
+                ("description", None, False),
+            ]
+        )
         asset = assets_service.get_asset(asset_id)
         user_service.check_project_access(asset["project_id"])
         asset_instance = breakdown_service.add_asset_instance_to_asset(
-            asset_id,
-            args["asset_to_instantiate_id"],
-            args["description"]
+            asset_id, args["asset_to_instantiate_id"], args["description"]
         )
         return asset_instance, 201

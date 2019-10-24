@@ -8,7 +8,7 @@ from zou.app.services import (
     projects_service,
     schedule_service,
     tasks_service,
-    user_service
+    user_service,
 )
 from zou.app.utils import permissions, fields
 from zou.app.services.exception import WrongParameterException
@@ -66,14 +66,12 @@ class ProductionTeamResource(Resource, ArgsMixin):
 
     @jwt_required
     def post(self, project_id):
-        args = self.get_args([
-            ("person_id", "", True)
-        ])
+        args = self.get_args([("person_id", "", True)])
         user_service.check_manager_project_access(project_id)
-        return projects_service.add_team_member(
-            project_id,
-            args["person_id"]
-        ), 201
+        return (
+            projects_service.add_team_member(project_id, args["person_id"]),
+            201,
+        )
 
 
 class ProductionTeamRemoveResource(Resource):
@@ -85,7 +83,7 @@ class ProductionTeamRemoveResource(Resource):
     def delete(self, project_id, person_id):
         user_service.check_manager_project_access(project_id)
         projects_service.remove_team_member(project_id, person_id)
-        return '', 204
+        return "", 204
 
 
 class ProductionMetadataDescriptorsResource(Resource, ArgsMixin):
@@ -101,11 +99,13 @@ class ProductionMetadataDescriptorsResource(Resource, ArgsMixin):
 
     @jwt_required
     def post(self, project_id):
-        args = self.get_args([
-            ("entity_type", "Asset", False),
-            ("name", "", True),
-            ("choices", [], False, "append")
-        ])
+        args = self.get_args(
+            [
+                ("entity_type", "Asset", False),
+                ("name", "", True),
+                ("choices", [], False, "append"),
+            ]
+        )
         permissions.check_admin_permissions()
 
         if args["entity_type"] not in ["Asset", "Shot"]:
@@ -114,16 +114,14 @@ class ProductionMetadataDescriptorsResource(Resource, ArgsMixin):
             )
 
         if len(args["name"]) == 0:
-            raise WrongParameterException(
-                "Name cannot be empty.",
-            )
+            raise WrongParameterException("Name cannot be empty.")
 
-        return projects_service.add_metadata_descriptor(
-            project_id,
-            args["entity_type"],
-            args["name"],
-            args["choices"]
-        ), 201
+        return (
+            projects_service.add_metadata_descriptor(
+                project_id, args["entity_type"], args["name"], args["choices"]
+            ),
+            201,
+        )
 
 
 class ProductionMetadataDescriptorResource(Resource, ArgsMixin):
@@ -139,10 +137,9 @@ class ProductionMetadataDescriptorResource(Resource, ArgsMixin):
 
     @jwt_required
     def put(self, project_id, descriptor_id):
-        args = self.get_args([
-            ("name", "", False),
-            ("choices", [], False, "append")
-        ])
+        args = self.get_args(
+            [("name", "", False), ("choices", [], False, "append")]
+        )
         permissions.check_admin_permissions()
 
         if len(args["name"]) == 0:
@@ -154,7 +151,7 @@ class ProductionMetadataDescriptorResource(Resource, ArgsMixin):
     def delete(self, project_id, descriptor_id):
         permissions.check_admin_permissions()
         projects_service.remove_metadata_descriptor(descriptor_id)
-        return '', 204
+        return "", 204
 
 
 class ProductionTimeSpentsResource(Resource):
@@ -210,8 +207,7 @@ class ProductionAssetTypesScheduleItemsResource(Resource):
     def get(self, project_id, task_type_id):
         user_service.check_project_access(project_id)
         return schedule_service.get_asset_types_schedule_items(
-            project_id,
-            task_type_id
+            project_id, task_type_id
         )
 
 
@@ -224,8 +220,7 @@ class ProductionEpisodesScheduleItemsResource(Resource):
     def get(self, project_id, task_type_id):
         user_service.check_project_access(project_id)
         return schedule_service.get_episodes_schedule_items(
-            project_id,
-            task_type_id
+            project_id, task_type_id
         )
 
 
@@ -238,6 +233,5 @@ class ProductionSequencesScheduleItemsResource(Resource):
     def get(self, project_id, task_type_id):
         user_service.check_project_access(project_id)
         return schedule_service.get_sequences_schedule_items(
-            project_id,
-            task_type_id
+            project_id, task_type_id
         )

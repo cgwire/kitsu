@@ -20,7 +20,7 @@ routes = [
     ("/export/csv/persons.csv", PersonsCsvExport),
     ("/export/csv/projects.csv", ProjectsCsvExport),
     ("/export/csv/tasks.csv", TasksCsvExport),
-    ("/export/csv/task-types.csv", TaskTypesCsvExport)
+    ("/export/csv/task-types.csv", TaskTypesCsvExport),
 ]
 
 blueprint = Blueprint("export", "export")

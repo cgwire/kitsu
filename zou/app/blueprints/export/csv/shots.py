@@ -8,13 +8,12 @@ from zou.app.services import (
     shots_service,
     projects_service,
     tasks_service,
-    user_service
+    user_service,
 )
 from zou.app.utils import csv_utils
 
 
 class ShotsCsvExport(Resource):
-
     @jwt_required
     def get(self, project_id):
         project = projects_service.get_project(project_id)
@@ -53,26 +52,22 @@ class ShotsCsvExport(Resource):
             "Nb Frames",
             "Frame In",
             "Frame Out",
-            "FPS"
+            "FPS",
         ]
 
-        metadata_headers = [
-            name for (name, field_name) in metadata_infos
-        ]
+        metadata_headers = [name for (name, field_name) in metadata_infos]
 
         return headers + metadata_headers + validation_columns
 
     def get_shots_data(self, project_id):
-        results = shots_service.get_shots_and_tasks({
-            "project_id": project_id
-        })
+        results = shots_service.get_shots_and_tasks({"project_id": project_id})
         return sorted(
             results,
             key=lambda shot: (
                 shot["episode_name"],
                 shot["sequence_name"],
-                shot["name"]
-            )
+                shot["name"],
+            ),
         )
 
     def build_row(self, result, metadata_infos, validation_columns):
@@ -86,7 +81,7 @@ class ShotsCsvExport(Resource):
             result["nb_frames"],
             result.get("data", {}).get("frame_in", ""),
             result.get("data", {}).get("frame_out", ""),
-            result.get("data", {}).get("fps", "")
+            result.get("data", {}).get("fps", ""),
         ]
         task_map = {}
 
@@ -111,16 +106,17 @@ class ShotsCsvExport(Resource):
                 task_type = self.task_type_map[task["task_type_id"]]
                 validation_map[task_type["name"]] = {
                     "name": task_type["name"],
-                    "priority": task_type["priority"]
+                    "priority": task_type["priority"],
                 }
 
         validation_columns = [
-            validation["name"] for validation in sorted(
+            validation["name"]
+            for validation in sorted(
                 validation_map.values(),
                 key=lambda validation: (
                     validation["priority"],
-                    validation["name"]
-                )
+                    validation["name"],
+                ),
             )
         ]
 
@@ -129,16 +125,14 @@ class ShotsCsvExport(Resource):
     def get_metadata_infos(self, project_id):
         descriptors = [
             descriptor
-            for descriptor
-            in projects_service.get_metadata_descriptors(project_id)
+            for descriptor in projects_service.get_metadata_descriptors(
+                project_id
+            )
             if descriptor["entity_type"] == "Shot"
         ]
 
         columns = [
-            (
-                descriptor["name"],
-                descriptor["field_name"]
-            )
+            (descriptor["name"], descriptor["field_name"])
             for descriptor in descriptors
         ]
 

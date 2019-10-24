@@ -3,7 +3,6 @@ from .base import BaseModelResource, BaseModelsResource
 
 
 class DepartmentsResource(BaseModelsResource):
-
     def __init__(self):
         BaseModelsResource.__init__(self, Department)
 
@@ -12,7 +11,6 @@ class DepartmentsResource(BaseModelsResource):
 
 
 class DepartmentResource(BaseModelResource):
-
     def __init__(self):
         BaseModelResource.__init__(self, Department)
 

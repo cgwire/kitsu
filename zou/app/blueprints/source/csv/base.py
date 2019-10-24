@@ -12,7 +12,6 @@ from zou.app.services import user_service, projects_service
 
 
 class BaseCsvImportResource(Resource):
-
     def __init__(self):
         Resource.__init__(self)
 
@@ -33,10 +32,10 @@ class BaseCsvImportResource(Resource):
                 return result, 201
             except KeyError as e:
                 print(e)
-                return {
-                    "error": True,
-                    "message": "A column is missing: %s" % e
-                }, 400
+                return (
+                    {"error": True, "message": "A column is missing: %s" % e},
+                    400,
+                )
 
     def run_import(self, file_path, delimiter):
         result = []
@@ -72,7 +71,6 @@ class BaseCsvImportResource(Resource):
 
 
 class BaseCsvProjectImportResource(BaseCsvImportResource):
-
     @jwt_required
     def post(self, project_id):
         uploaded_file = request.files["file"]
@@ -89,10 +87,10 @@ class BaseCsvProjectImportResource(BaseCsvImportResource):
                 result = self.run_import(project_id, file_path, ";")
                 return result, 201
             except KeyError as e:
-                return {
-                    "error": True,
-                    "message": "A column is missing: %s" % e
-                }, 400
+                return (
+                    {"error": True, "message": "A column is missing: %s" % e},
+                    400,
+                )
 
     def run_import(self, project_id, file_path, delimiter):
         result = []

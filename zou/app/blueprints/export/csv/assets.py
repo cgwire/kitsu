@@ -6,13 +6,12 @@ from zou.app.services import (
     assets_service,
     projects_service,
     user_service,
-    tasks_service
+    tasks_service,
 )
 from zou.app.utils import csv_utils
 
 
 class AssetsCsvExport(Resource):
-
     @jwt_required
     def get(self, project_id):
         self.task_type_map = tasks_service.get_task_type_map()
@@ -41,17 +40,9 @@ class AssetsCsvExport(Resource):
         user_service.check_project_access(project_id)
 
     def build_headers(self, metadata_infos, validation_headers):
-        headers = [
-            "Project",
-            "Type",
-            "Name",
-            "Description",
-            "Time Spent",
-        ]
+        headers = ["Project", "Type", "Name", "Description", "Time Spent"]
 
-        metadata_headers = [
-            name for (name, field_name) in metadata_infos
-        ]
+        metadata_headers = [name for (name, field_name) in metadata_infos]
 
         return headers + metadata_headers + validation_headers
 
@@ -61,7 +52,7 @@ class AssetsCsvExport(Resource):
             result["asset_type_name"],
             result["name"],
             result["description"],
-            self.get_time_spent(result)
+            self.get_time_spent(result),
         ]
         task_map = {}
 
@@ -80,12 +71,11 @@ class AssetsCsvExport(Resource):
         return row
 
     def get_assets_data(self, project_id):
-        results = assets_service.get_assets_and_tasks({
-            "project_id": project_id
-        })
+        results = assets_service.get_assets_and_tasks(
+            {"project_id": project_id}
+        )
         return sorted(
-            results,
-            key=lambda asset: (asset["asset_type_name"], asset["name"])
+            results, key=lambda asset: (asset["asset_type_name"], asset["name"])
         )
 
     def get_validation_columns(self, results):
@@ -96,13 +86,17 @@ class AssetsCsvExport(Resource):
                 task_type = self.task_type_map[task["task_type_id"]]
                 task_type_map[task_type["name"]] = {
                     "name": task_type["name"],
-                    "priority": task_type["priority"]
+                    "priority": task_type["priority"],
                 }
 
         validation_columns = [
-            task_type["name"] for task_type in sorted(
+            task_type["name"]
+            for task_type in sorted(
                 task_type_map.values(),
-                key=lambda task_type: (task_type["priority"], task_type["name"])
+                key=lambda task_type: (
+                    task_type["priority"],
+                    task_type["name"],
+                ),
             )
         ]
 
@@ -111,16 +105,14 @@ class AssetsCsvExport(Resource):
     def get_metadata_infos(self, project_id):
         descriptors = [
             descriptor
-            for descriptor
-            in projects_service.get_metadata_descriptors(project_id)
+            for descriptor in projects_service.get_metadata_descriptors(
+                project_id
+            )
             if descriptor["entity_type"] == "Asset"
         ]
 
         columns = [
-            (
-                descriptor["name"],
-                descriptor["field_name"]
-            )
+            (descriptor["name"], descriptor["field_name"])
             for descriptor in descriptors
         ]
 

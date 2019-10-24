@@ -5,13 +5,12 @@ from zou.app.models.entity import Entity
 from zou.app.services import shots_service
 from zou.app.blueprints.source.shotgun.base import (
     BaseImportShotgunResource,
-    ImportRemoveShotgunBaseResource
+    ImportRemoveShotgunBaseResource,
 )
 from zou.app.blueprints.source.shotgun.exception import ShotgunEntryImportFailed
 
 
 class ImportShotgunSequencesResource(BaseImportShotgunResource):
-
     def prepare_import(self):
         self.sequence_type = shots_service.get_sequence_type()
         self.project_map = Project.get_id_map(field="name")
@@ -35,7 +34,7 @@ class ImportShotgunSequencesResource(BaseImportShotgunResource):
             "description": sg_sequence["description"],
             "project_id": project_id,
             "parent_id": episode_id,
-            "entity_type_id": self.sequence_type["id"]
+            "entity_type_id": self.sequence_type["id"],
         }
 
     def get_project(self, sg_sequence):
@@ -48,14 +47,14 @@ class ImportShotgunSequencesResource(BaseImportShotgunResource):
     def import_entry(self, data):
         sequence = Entity.get_by(
             shotgun_id=data["shotgun_id"],
-            entity_type_id=self.sequence_type["id"]
+            entity_type_id=self.sequence_type["id"],
         )
 
         similar_sequence = Entity.get_by(
             name=data["name"],
             parent_id=data["parent_id"],
             project_id=data["project_id"],
-            entity_type_id=self.sequence_type["id"]
+            entity_type_id=self.sequence_type["id"],
         )
 
         if sequence is None and similar_sequence is None:
@@ -68,10 +67,12 @@ class ImportShotgunSequencesResource(BaseImportShotgunResource):
                 sequence.update(data)
                 sequence.save()
             else:
-                sequence.update({
-                    "description": data["description"],
-                    "shotgun_id": data["shotgun_id"]
-                })
+                sequence.update(
+                    {
+                        "description": data["description"],
+                        "shotgun_id": data["shotgun_id"],
+                    }
+                )
                 sequence.save()
             current_app.logger.info("Sequence updated: %s" % sequence)
 
@@ -79,10 +80,7 @@ class ImportShotgunSequencesResource(BaseImportShotgunResource):
 
 
 class ImportRemoveShotgunSequenceResource(ImportRemoveShotgunBaseResource):
-
     def __init__(self):
         ImportRemoveShotgunBaseResource.__init__(
-            self,
-            Entity,
-            entity_type_id=shots_service.get_sequence_type()["id"]
+            self, Entity, entity_type_id=shots_service.get_sequence_type()["id"]
         )

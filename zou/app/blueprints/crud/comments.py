@@ -7,7 +7,7 @@ from zou.app.services import (
     notifications_service,
     persons_service,
     tasks_service,
-    user_service
+    user_service,
 )
 from zou.app.utils import permissions
 
@@ -15,13 +15,11 @@ from .base import BaseModelResource, BaseModelsResource
 
 
 class CommentsResource(BaseModelsResource):
-
     def __init__(self):
         BaseModelsResource.__init__(self, Comment)
 
 
 class CommentResource(BaseModelResource):
-
     def __init__(self):
         BaseModelResource.__init__(self, Comment)
 
@@ -61,4 +59,4 @@ class CommentResource(BaseModelResource):
         user_service.check_project_access(task["project_id"])
         deletion_service.remove_comment(comment["id"])
         tasks_service.clear_comment_cache(comment["id"])
-        return '', 204
+        return "", 204

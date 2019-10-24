@@ -8,12 +8,11 @@ from zou.app.models.person import Person
 
 from zou.app.blueprints.source.shotgun.base import (
     BaseImportShotgunResource,
-    ImportRemoveShotgunBaseResource
+    ImportRemoveShotgunBaseResource,
 )
 
 
 class ImportShotgunNotesResource(BaseImportShotgunResource):
-
     def prepare_import(self):
         self.person_ids = Person.get_id_map()
 
@@ -31,8 +30,7 @@ class ImportShotgunNotesResource(BaseImportShotgunResource):
         task = Task.get_by(shotgun_id=sg_note["tasks"][0]["id"])
         person_id = self.person_ids.get(sg_note["user"]["id"], None)
         date = datetime.datetime.strptime(
-            sg_note["created_at"][:19],
-            "%Y-%m-%dT%H:%M:%S"
+            sg_note["created_at"][:19], "%Y-%m-%dT%H:%M:%S"
         )
 
         return {
@@ -41,7 +39,7 @@ class ImportShotgunNotesResource(BaseImportShotgunResource):
             "object_id": task.id,
             "object_type": "Task",
             "person_id": person_id,
-            "created_at": date
+            "created_at": date,
         }
 
     def import_entry(self, data):
@@ -58,6 +56,5 @@ class ImportShotgunNotesResource(BaseImportShotgunResource):
 
 
 class ImportRemoveShotgunNoteResource(ImportRemoveShotgunBaseResource):
-
     def __init__(self):
         ImportRemoveShotgunBaseResource.__init__(self, Comment)

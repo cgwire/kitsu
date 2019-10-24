@@ -7,14 +7,13 @@ from zou.app.services import file_tree_service, projects_service
 
 from zou.app.blueprints.source.shotgun.base import (
     BaseImportShotgunResource,
-    ImportRemoveShotgunBaseResource
+    ImportRemoveShotgunBaseResource,
 )
 
 from zou.app.services.exception import WrongFileTreeFileException
 
 
 class ImportShotgunProjectsResource(BaseImportShotgunResource):
-
     def __init__(self):
         BaseImportShotgunResource.__init__(self)
 
@@ -35,16 +34,14 @@ class ImportShotgunProjectsResource(BaseImportShotgunResource):
             "project_status_id": project_status_id,
             "name": sg_project["name"],
             "shotgun_id": sg_project["id"],
-            "data": {}
+            "data": {},
         }
 
         data["data"] = custom_fields
         return data
 
     def is_custom_field(self, name):
-        non_custom_fields = [
-            "sg_status",
-        ]
+        non_custom_fields = ["sg_status"]
         return name[:3] == "sg_" and name not in non_custom_fields
 
     def import_entry(self, data):
@@ -76,6 +73,5 @@ class ImportShotgunProjectsResource(BaseImportShotgunResource):
 
 
 class ImportRemoveShotgunProjectResource(ImportRemoveShotgunBaseResource):
-
     def __init__(self):
         ImportRemoveShotgunBaseResource.__init__(self, Project)

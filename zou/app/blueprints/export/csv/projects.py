@@ -5,7 +5,6 @@ from zou.app.models.project import Project
 
 
 class ProjectsCsvExport(BaseCsvExport):
-
     def __init__(self):
         BaseCsvExport.__init__(self, Project)
 
@@ -20,7 +19,4 @@ class ProjectsCsvExport(BaseCsvExport):
 
     def build_row(self, project_data):
         (project, project_status_name) = project_data
-        return [
-            project.name,
-            project_status_name
-        ]
+        return [project.name, project_status_name]

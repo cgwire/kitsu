@@ -7,12 +7,11 @@ from zou.app.services import shots_service
 
 from zou.app.blueprints.source.shotgun.base import (
     BaseImportShotgunResource,
-    ImportRemoveShotgunBaseResource
+    ImportRemoveShotgunBaseResource,
 )
 
 
 class ImportShotgunShotsResource(BaseImportShotgunResource):
-
     def __init__(self):
         BaseImportShotgunResource.__init__(self)
 
@@ -40,12 +39,9 @@ class ImportShotgunShotsResource(BaseImportShotgunResource):
             "entity_type_id": shot_type["id"],
             "parent_id": sequence_id,
             "source_id": scene_id,
-            "entities_out": assets
+            "entities_out": assets,
         }
-        data_field_content = {
-            "frame_in": frame_in,
-            "frame_out": frame_out,
-        }
+        data_field_content = {"frame_in": frame_in, "frame_out": frame_out}
         custom_fields.update(data_field_content)
         data["data"] = custom_fields
         return data
@@ -86,17 +82,13 @@ class ImportShotgunShotsResource(BaseImportShotgunResource):
         return assets
 
     def is_custom_field(self, name):
-        non_custom_fields = [
-            "sg_cut_in",
-            "sg_cut_out",
-            "sg_sequence",
-        ]
+        non_custom_fields = ["sg_cut_in", "sg_cut_out", "sg_sequence"]
         return name[:3] == "sg_" and name not in non_custom_fields
 
     def import_entry(self, data):
         shot = Entity.get_by(
             shotgun_id=data["shotgun_id"],
-            entity_type_id=shots_service.get_shot_type()["id"]
+            entity_type_id=shots_service.get_shot_type()["id"],
         )
 
         if shot is None:
@@ -117,10 +109,7 @@ class ImportShotgunShotsResource(BaseImportShotgunResource):
 
 
 class ImportRemoveShotgunShotResource(ImportRemoveShotgunBaseResource):
-
     def __init__(self):
         ImportRemoveShotgunBaseResource.__init__(
-            self,
-            Entity,
-            entity_type_id=shots_service.get_shot_type()["id"]
+            self, Entity, entity_type_id=shots_service.get_shot_type()["id"]
         )

@@ -8,7 +8,7 @@ from zou.app.services.exception import (
     TaskNotFoundException,
     PersonNotFoundException,
     MalformedFileTreeException,
-    WrongDateFormatException
+    WrongDateFormatException,
 )
 from zou.app.services import (
     assets_service,
@@ -22,7 +22,7 @@ from zou.app.services import (
     projects_service,
     shots_service,
     tasks_service,
-    user_service
+    user_service,
 )
 from zou.app.utils import query, permissions
 from zou.app.mixin import ArgsMixin
@@ -38,11 +38,7 @@ class CommentTaskResource(Resource):
 
     @jwt_required
     def post(self, task_id):
-        (
-            task_status_id,
-            comment,
-            person_id
-        ) = self.get_arguments()
+        (task_status_id, comment, person_id) = self.get_arguments()
 
         task = tasks_service.get_task(task_id)
         if task is None:
@@ -62,18 +58,18 @@ class CommentTaskResource(Resource):
             object_type="Task",
             task_status_id=task_status_id,
             person_id=person["id"],
-            text=comment
+            text=comment,
         )
 
         status_changed = task_status_id != task["task_status_id"]
         new_data = {
             "task_status_id": task_status_id,
-            "last_comment_date": comment["created_at"]
+            "last_comment_date": comment["created_at"],
         }
         if status_changed:
             if task_status["is_retake"]:
                 retake_count = task["retake_count"]
-                if retake_count is None or retake_count == 'NoneType':
+                if retake_count is None or retake_count == "NoneType":
                     retake_count = 0
                 new_data["retake_count"] = retake_count + 1
 
@@ -82,8 +78,10 @@ class CommentTaskResource(Resource):
             else:
                 new_data["end_date"] = None
 
-            if task_status["short_name"] == "wip" \
-               and task["real_start_date"] is None:
+            if (
+                task_status["short_name"] == "wip"
+                and task["real_start_date"] is None
+            ):
                 new_data["real_start_date"] = datetime.datetime.now()
 
         tasks_service.update_task(task_id, new_data)
@@ -102,19 +100,13 @@ class CommentTaskResource(Resource):
     def get_arguments(self):
         parser = reqparse.RequestParser()
         parser.add_argument(
-            "task_status_id",
-            required=True,
-            help="Task Status ID is missing"
+            "task_status_id", required=True, help="Task Status ID is missing"
         )
         parser.add_argument("comment", default="")
         parser.add_argument("person_id", default="")
         args = parser.parse_args()
 
-        return (
-            args["task_status_id"],
-            args["comment"],
-            args["person_id"]
-        )
+        return (args["task_status_id"], args["comment"], args["person_id"])
 
 
 class AddPreviewResource(Resource):
@@ -160,10 +152,8 @@ class AddExtraPreviewResource(Resource):
     def delete(self, task_id, comment_id, preview_file_id):
         task = tasks_service.get_task(task_id)
         user_service.check_project_access(task["project_id"])
-        deletion_service.remove_preview_file_by_id(
-            preview_file_id
-        )
-        return '', 204
+        deletion_service.remove_preview_file_by_id(preview_file_id)
+        return "", 204
 
 
 class TaskPreviewsResource(Resource):
@@ -201,7 +191,7 @@ class TaskCommentResource(Resource):
         user_service.check_project_access(task["project_id"])
         deletion_service.remove_comment(comment_id)
         tasks_service.clear_comment_cache(comment_id)
-        return '', 204
+        return "", 204
 
 
 class PersonTasksResource(Resource):
@@ -248,9 +238,7 @@ class CreateShotTasksResource(Resource):
         user_service.check_manager_project_access(criterions["project_id"])
         shots = shots_service.get_shots(criterions)
         task_type = tasks_service.get_task_type(task_type_id)
-        tasks = [
-            tasks_service.create_task(task_type, shot) for shot in shots
-        ]
+        tasks = [tasks_service.create_task(task_type, shot) for shot in shots]
         return tasks, 201
 
 
@@ -269,8 +257,7 @@ class CreateAssetTasksResource(Resource):
         assets = assets_service.get_assets(criterions)
         task_type = tasks_service.get_task_type(task_type_id)
         tasks = [
-            tasks_service.create_task(task_type, asset)
-            for asset in assets
+            tasks_service.create_task(task_type, asset) for asset in assets
         ]
         return tasks, 201
 
@@ -288,7 +275,7 @@ class ToReviewResource(Resource):
             comment,
             name,
             revision,
-            change_status
+            change_status,
         ) = self.get_arguments()
 
         try:
@@ -300,18 +287,10 @@ class ToReviewResource(Resource):
             else:
                 person = persons_service.get_current_user()
 
-            preview_path = self.get_preview_path(
-                task,
-                name,
-                revision
-            )
+            preview_path = self.get_preview_path(task, name, revision)
 
             task = tasks_service.task_to_review(
-                task["id"],
-                person,
-                comment,
-                preview_path,
-                change_status
+                task["id"], person, comment, preview_path, change_status
             )
         except PersonNotFoundException:
             return {"error": True, "message": "Cannot find given person."}, 400
@@ -321,24 +300,15 @@ class ToReviewResource(Resource):
     def get_preview_path(self, task, name, revision):
         try:
             folder_path = file_tree_service.get_working_folder_path(
-                task,
-                name=name,
-                mode="preview",
-                revision=revision
+                task, name=name, mode="preview", revision=revision
             )
             file_name = file_tree_service.get_working_file_name(
-                task,
-                name=name,
-                mode="preview",
-                revision=revision
+                task, name=name, mode="preview", revision=revision
             )
         except MalformedFileTreeException:  # No template for preview files.
             return {"folder_path": "", "file_name": ""}
 
-        return {
-            "folder_path": folder_path,
-            "file_name": file_name
-        }
+        return {"folder_path": folder_path, "file_name": file_name}
 
     def get_arguments(self):
         parser = reqparse.RequestParser()
@@ -354,7 +324,7 @@ class ToReviewResource(Resource):
             args["comment"],
             args["name"],
             args["revision"],
-            args["change_status"]
+            args["change_status"],
         )
 
 
@@ -384,12 +354,10 @@ class ClearAssignationResource(Resource):
             "task_ids",
             help="Tasks list required.",
             required=True,
-            action="append"
+            action="append",
         )
         args = parser.parse_args()
-        return (
-            args["task_ids"]
-        )
+        return args["task_ids"]
 
 
 class TasksAssignResource(Resource):
@@ -412,9 +380,7 @@ class TasksAssignResource(Resource):
                 task = self.assign_task(task_id, person_id)
                 author = persons_service.get_current_user()
                 notifications_service.create_assignation_notification(
-                    task_id,
-                    person_id,
-                    author["id"]
+                    task_id, person_id, author["id"]
                 )
                 tasks.append(task)
             except TaskNotFoundException:
@@ -423,10 +389,7 @@ class TasksAssignResource(Resource):
                 return {"error": "Assignee doesn't exist in database."}, 400
 
         if len(tasks) > 0:
-            projects_service.add_team_member(
-                tasks[0]["project_id"],
-                person_id
-            )
+            projects_service.add_team_member(tasks[0]["project_id"], person_id)
 
         return tasks
 
@@ -436,12 +399,10 @@ class TasksAssignResource(Resource):
             "task_ids",
             help="Tasks list required.",
             required=True,
-            action="append"
+            action="append",
         )
         args = parser.parse_args()
-        return (
-            args["task_ids"]
-        )
+        return args["task_ids"]
 
     def assign_task(self, task_id, person_id):
         return tasks_service.assign_task(task_id, person_id)
@@ -462,13 +423,9 @@ class TaskAssignResource(Resource):
 
             self.assign_task(task_id, person_id)
             notifications_service.create_assignation_notification(
-                task_id,
-                person_id
+                task_id, person_id
             )
-            projects_service.add_team_member(
-                task["project_id"],
-                person_id
-            )
+            projects_service.add_team_member(task["project_id"], person_id)
         except PersonNotFoundException:
             return {"error": "Assignee doesn't exist in database."}, 400
 
@@ -477,15 +434,11 @@ class TaskAssignResource(Resource):
     def get_arguments(self):
         parser = reqparse.RequestParser()
         parser.add_argument(
-            "person_id",
-            help="Assignee ID required.",
-            required=True
+            "person_id", help="Assignee ID required.", required=True
         )
         args = parser.parse_args()
 
-        return (
-            args.get("person_id", "")
-        )
+        return args.get("person_id", "")
 
     def assign_task(self, task_id, person_id):
         return tasks_service.assign_task(task_id, person_id)
@@ -516,15 +469,17 @@ class TaskFullResource(Resource):
         for assignee_id in task["assignees"]:
             assignees.append(persons_service.get_person(assignee_id))
 
-        task.update({
-            "entity": entity,
-            "task_type": task_type,
-            "task_status": task_status,
-            "project": project,
-            "entity_type": entity_type,
-            "persons": assignees,
-            "type": "Task"
-        })
+        task.update(
+            {
+                "entity": entity,
+                "task_type": task_type,
+                "task_status": task_status,
+                "project": project,
+                "entity_type": entity_type,
+                "persons": assignees,
+                "type": "Task",
+            }
+        )
 
         try:
             assigner = persons_service.get_person(task["assigner_id"])
@@ -565,8 +520,7 @@ class TaskForEntityResource(Resource):
         entity = entities_service.get_entity(entity_id)
         user_service.check_project_access(entity["project_id"])
         return tasks_service.get_tasks_for_entity_and_task_type(
-            entity_id,
-            task_type_id
+            entity_id, task_type_id
         )
 
 
@@ -586,8 +540,8 @@ class SetTimeSpentResource(Resource):
             time_spent = tasks_service.create_or_update_time_spent(
                 task_id,
                 person_id,
-                datetime.datetime.strptime(date, '%Y-%m-%d'),
-                args["duration"]
+                datetime.datetime.strptime(date, "%Y-%m-%d"),
+                args["duration"],
             )
             return time_spent, 201
         except ValueError:
@@ -617,11 +571,7 @@ class AddTimeSpentResource(Resource):
 
             persons_service.get_person(person_id)
             time_spent = tasks_service.create_or_update_time_spent(
-                task_id,
-                person_id,
-                date,
-                args["duration"],
-                add=True
+                task_id, person_id, date, args["duration"], add=True
             )
             return time_spent, 201
         except ValueError:
@@ -662,12 +612,11 @@ class DeleteAllTasksForTaskTypeResource(Resource):
         permissions.check_admin_permissions()
         projects_service.get_project(project_id)
         task_ids = deletion_service.remove_tasks_for_project_and_task_type(
-            project_id,
-            task_type_id
+            project_id, task_type_id
         )
         for task_id in task_ids:
             tasks_service.clear_task_cache(task_id)
-        return '', 204
+        return "", 204
 
 
 class ProjectSubscriptionsResource(Resource):
@@ -695,8 +644,7 @@ class ProjectNotificationsResource(Resource, ArgsMixin):
         projects_service.get_project(project_id)
         page = self.get_page()
         return notifications_service.get_notifications_for_project(
-            project_id,
-            page
+            project_id, page
         )
 
 

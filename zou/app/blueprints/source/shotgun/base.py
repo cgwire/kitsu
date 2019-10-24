@@ -3,15 +3,9 @@ from flask_restful import Resource, current_app
 from flask_jwt_extended import jwt_required
 
 from zou.app.utils import fields, permissions
-from zou.app.blueprints.source.shotgun.exception import (
-    ShotgunEntryImportFailed
-)
+from zou.app.blueprints.source.shotgun.exception import ShotgunEntryImportFailed
 
-from zou.app.services import (
-    assets_service,
-    shots_service,
-    tasks_service
-)
+from zou.app.services import assets_service, shots_service, tasks_service
 
 from zou.app.services.exception import (
     AssetNotFoundException,
@@ -19,14 +13,13 @@ from zou.app.services.exception import (
     SceneNotFoundException,
     SequenceNotFoundException,
     ShotNotFoundException,
-    TaskNotFoundException
+    TaskNotFoundException,
 )
 
 from sqlalchemy.exc import IntegrityError, DataError
 
 
 class BaseImportShotgunResource(Resource):
-
     def __init__(self):
         Resource.__init__(self)
 
@@ -53,15 +46,13 @@ class BaseImportShotgunResource(Resource):
             except IntegrityError as exception:
                 current_app.logger.error(exception)
                 current_app.logger.error(
-                    "Data information are duplicated or wrong: %s" %
-                    sg_entry
+                    "Data information are duplicated or wrong: %s" % sg_entry
                 )
                 raise
             except DataError as exception:
                 current_app.logger.error(exception)
                 current_app.logger.error(
-                    "Data cannot be stored (schema error)" %
-                    sg_entry
+                    "Data cannot be stored (schema error)" % sg_entry
                 )
                 raise
 
@@ -97,47 +88,48 @@ class BaseImportShotgunResource(Resource):
         return self.get_instance_id(
             tasks_service.get_task_by_shotgun_id,
             task_sg_id,
-            TaskNotFoundException
+            TaskNotFoundException,
         )
 
     def get_asset_id(self, asset_sg_id):
         return self.get_instance_id(
             assets_service.get_asset_by_shotgun_id,
             asset_sg_id,
-            AssetNotFoundException
+            AssetNotFoundException,
         )
 
     def get_shot_id(self, shot_sg_id):
         return self.get_instance_id(
             shots_service.get_shot_by_shotgun_id,
             shot_sg_id,
-            ShotNotFoundException
+            ShotNotFoundException,
         )
 
     def get_scene_id(self, scene_sg_id):
         return self.get_instance_id(
             shots_service.get_scene_by_shotgun_id,
             scene_sg_id,
-            SceneNotFoundException
+            SceneNotFoundException,
         )
 
     def get_sequence_id(self, sequence_sg_id):
         return self.get_instance_id(
             shots_service.get_sequence_by_shotgun_id,
             sequence_sg_id,
-            SequenceNotFoundException
+            SequenceNotFoundException,
         )
 
     def get_episode_id(self, episode_sg_id):
         return self.get_instance_id(
             shots_service.get_episode_by_shotgun_id,
             episode_sg_id,
-            EpisodeNotFoundException
+            EpisodeNotFoundException,
         )
 
     def extract_custom_data(self, sg_shot):
         return {
-            k: v for k, v in sg_shot.items()
+            k: v
+            for k, v in sg_shot.items()
             if self.is_custom_field(k) and v is not None
         }
 
@@ -146,7 +138,6 @@ class BaseImportShotgunResource(Resource):
 
 
 class ImportRemoveShotgunBaseResource(Resource):
-
     def __init__(self, model, delete_func=None, entity_type_id=None):
         Resource.__init__(self)
         self.model = model
@@ -161,7 +152,7 @@ class ImportRemoveShotgunBaseResource(Resource):
         if instance is not None:
             result = {
                 "removed_instance_id": str(instance.id),
-                "success": self.delete_instance(instance)
+                "success": self.delete_instance(instance),
             }
         else:
             result = {"success": True}
@@ -171,8 +162,7 @@ class ImportRemoveShotgunBaseResource(Resource):
     def get_instance(self, sg_model):
         if self.entity_type_id is not None:
             instance = self.model.get_by(
-                shotgun_id=sg_model["id"],
-                entity_type_id=self.entity_type_id
+                shotgun_id=sg_model["id"], entity_type_id=self.entity_type_id
             )
         else:
             instance = self.model.get_by(shotgun_id=sg_model["id"])

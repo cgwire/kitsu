@@ -7,12 +7,11 @@ from zou.app.services import tasks_service
 
 from zou.app.blueprints.source.shotgun.base import (
     BaseImportShotgunResource,
-    ImportRemoveShotgunBaseResource
+    ImportRemoveShotgunBaseResource,
 )
 
 
 class ImportShotgunStepsResource(BaseImportShotgunResource):
-
     def __init__(self):
         Resource.__init__(self)
 
@@ -25,7 +24,7 @@ class ImportShotgunStepsResource(BaseImportShotgunResource):
             "shotgun_id": sg_step["id"],
             "color": color,
             "department_name": department_name,
-            "for_entity": sg_step.get("entity_type", "Asset")
+            "for_entity": sg_step.get("entity_type", "Asset"),
         }
 
     def extract_color(self, sg_step):
@@ -46,7 +45,7 @@ class ImportShotgunStepsResource(BaseImportShotgunResource):
         if department is None:
             department_data = {
                 "name": data["department_name"],
-                "color": data["color"]
+                "color": data["color"],
             }
             department = Department(**department_data)
             department.save()
@@ -59,8 +58,7 @@ class ImportShotgunStepsResource(BaseImportShotgunResource):
         data["department_id"] = department.id
         if task_type is None:
             task_type = TaskType.get_by(
-                name=data["name"],
-                for_entity=data["for_entity"]
+                name=data["name"], for_entity=data["for_entity"]
             )
 
         if task_type is None:
@@ -71,7 +69,7 @@ class ImportShotgunStepsResource(BaseImportShotgunResource):
             existing_task_type = TaskType.get_by(
                 name=data["name"],
                 for_entity=data["for_entity"],
-                department_id=data["department_id"]
+                department_id=data["department_id"],
             )
             if existing_task_type is not None:
                 data.pop("name", None)
@@ -84,6 +82,5 @@ class ImportShotgunStepsResource(BaseImportShotgunResource):
 
 
 class ImportRemoveShotgunStepResource(ImportRemoveShotgunBaseResource):
-
     def __init__(self):
         ImportRemoveShotgunBaseResource.__init__(self, TaskType)

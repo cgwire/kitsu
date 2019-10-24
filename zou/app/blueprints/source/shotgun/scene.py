@@ -7,12 +7,11 @@ from zou.app.services import shots_service
 
 from zou.app.blueprints.source.shotgun.base import (
     BaseImportShotgunResource,
-    ImportRemoveShotgunBaseResource
+    ImportRemoveShotgunBaseResource,
 )
 
 
 class ImportShotgunScenesResource(BaseImportShotgunResource):
-
     def __init__(self):
         BaseImportShotgunResource.__init__(self)
 
@@ -30,7 +29,7 @@ class ImportShotgunScenesResource(BaseImportShotgunResource):
             "shotgun_id": sg_scene["id"],
             "project_id": project_id,
             "entity_type_id": scene_type["id"],
-            "parent_id": sequence_id
+            "parent_id": sequence_id,
         }
         return data
 
@@ -43,16 +42,18 @@ class ImportShotgunScenesResource(BaseImportShotgunResource):
     def get_sequence(self, sg_scene):
         sequence_id = None
         sequence_key = "sequence_sg_scenes_1_sequences"
-        if sequence_key in sg_scene and \
-           sg_scene[sequence_key] is not None and \
-           len(sg_scene[sequence_key]) > 0:
+        if (
+            sequence_key in sg_scene
+            and sg_scene[sequence_key] is not None
+            and len(sg_scene[sequence_key]) > 0
+        ):
             sequence_id = self.get_sequence_id(sg_scene[sequence_key][0]["id"])
         return sequence_id
 
     def import_entry(self, data):
         scene = Entity.get_by(
             shotgun_id=data["shotgun_id"],
-            entity_type_id=shots_service.get_scene_type()["id"]
+            entity_type_id=shots_service.get_scene_type()["id"],
         )
 
         if scene is None:
@@ -72,10 +73,7 @@ class ImportShotgunScenesResource(BaseImportShotgunResource):
 
 
 class ImportRemoveShotgunSceneResource(ImportRemoveShotgunBaseResource):
-
     def __init__(self):
         ImportRemoveShotgunBaseResource.__init__(
-            self,
-            Entity,
-            entity_type_id=shots_service.get_scene_type()["id"]
+            self, Entity, entity_type_id=shots_service.get_scene_type()["id"]
         )

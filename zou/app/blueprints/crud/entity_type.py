@@ -6,7 +6,6 @@ from zou.app.services import entities_service
 
 
 class EntityTypesResource(BaseModelsResource):
-
     def __init__(self):
         BaseModelsResource.__init__(self, EntityType)
 
@@ -18,7 +17,6 @@ class EntityTypesResource(BaseModelsResource):
 
 
 class EntityTypeResource(BaseModelResource):
-
     def __init__(self):
         BaseModelResource.__init__(self, EntityType)
 

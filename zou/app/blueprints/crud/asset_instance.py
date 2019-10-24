@@ -7,13 +7,11 @@ from .base import BaseModelResource, BaseModelsResource
 
 
 class AssetInstancesResource(BaseModelsResource):
-
     def __init__(self):
         BaseModelsResource.__init__(self, AssetInstance)
 
 
 class AssetInstanceResource(BaseModelResource):
-
     def __init__(self):
         BaseModelResource.__init__(self, AssetInstance)
         self.protected_fields.append("number")

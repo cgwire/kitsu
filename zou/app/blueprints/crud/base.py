@@ -13,7 +13,6 @@ from zou.app.services.exception import ArgumentsException
 
 
 class BaseModelsResource(Resource):
-
     def __init__(self, model):
         Resource.__init__(self)
         self.model = model
@@ -26,7 +25,7 @@ class BaseModelsResource(Resource):
 
     def paginated_entries(self, query, page):
         total = query.count()
-        limit = current_app.config['NB_RECORDS_PER_PAGE']
+        limit = current_app.config["NB_RECORDS_PER_PAGE"]
         offset = (page - 1) * limit
 
         nb_pages = int(math.ceil(total / float(limit)))
@@ -41,7 +40,7 @@ class BaseModelsResource(Resource):
                 "nb_pages": nb_pages,
                 "limit": limit,
                 "offset": offset,
-                "page": page
+                "page": page,
             }
         else:
             result = {
@@ -50,7 +49,7 @@ class BaseModelsResource(Resource):
                 "nb_pages": nb_pages,
                 "limit": limit,
                 "offset": offset,
-                "page": page
+                "page": page,
             }
         return result
 
@@ -69,7 +68,7 @@ class BaseModelsResource(Resource):
                 is_many_to_many_field = isinstance(
                     expr, orm.properties.RelationshipProperty
                 )
-                value_is_list = len(value) > 0 and value[0] == '['
+                value_is_list = len(value) > 0 and value[0] == "["
 
                 if key == "name" and field_key is not None:
                     name_filter.append(value)
@@ -91,7 +90,7 @@ class BaseModelsResource(Resource):
             many_join_filter,
             in_filter,
             name_filter,
-            criterions
+            criterions,
         ) = self.build_filters(options)
 
         query = self.model.query.filter_by(**criterions)
@@ -145,12 +144,15 @@ class BaseModelsResource(Resource):
                 else:
                     return self.all_entries(query)
         except StatementError as exception:
-            if hasattr(exception, 'message'):
-                return {
-                    "error": True,
-                    "message": "One of the value of the filter has not the "
-                               "proper format: %s" % exception.message
-                }, 400
+            if hasattr(exception, "message"):
+                return (
+                    {
+                        "error": True,
+                        "message": "One of the value of the filter has not the "
+                        "proper format: %s" % exception.message,
+                    },
+                    400,
+                )
             else:
                 raise exception
         except permissions.PermissionDenied:
@@ -190,20 +192,15 @@ class BaseModelsResource(Resource):
 
     def emit_create_event(self, instance_dict):
         return events.emit(
-            "%s:new" % self.model.__tablename__.replace('_', '-'),
-            {"%s_id" % self.model.__tablename__: instance_dict["id"]}
+            "%s:new" % self.model.__tablename__.replace("_", "-"),
+            {"%s_id" % self.model.__tablename__: instance_dict["id"]},
         )
 
 
 class BaseModelResource(Resource):
-
     def __init__(self, model):
         Resource.__init__(self)
-        self.protected_fields = [
-            "id",
-            "created_at",
-            "updated_at"
-        ]
+        self.protected_fields = ["id", "created_at", "updated_at"]
         self.model = model
 
     def get_model_or_404(self, instance_id):
@@ -319,16 +316,16 @@ class BaseModelResource(Resource):
             current_app.logger.error(str(exception), exc_info=1)
             return {"message": str(exception)}, 400
 
-        return '', 204
+        return "", 204
 
     def emit_update_event(self, instance_dict):
         return events.emit(
-            "%s:update" % self.model.__tablename__.replace('_', '-'),
-            {"%s_id" % self.model.__tablename__: instance_dict["id"]}
+            "%s:update" % self.model.__tablename__.replace("_", "-"),
+            {"%s_id" % self.model.__tablename__: instance_dict["id"]},
         )
 
     def emit_delete_event(self, instance_dict):
         return events.emit(
-            "%s:delete" % self.model.__tablename__.replace('_', '-'),
-            {"%s_id" % self.model.__tablename__: instance_dict["id"]}
+            "%s:delete" % self.model.__tablename__.replace("_", "-"),
+            {"%s_id" % self.model.__tablename__: instance_dict["id"]},
         )

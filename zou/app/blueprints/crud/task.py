@@ -14,7 +14,6 @@ from .base import BaseModelsResource, BaseModelResource
 
 
 class TasksResource(BaseModelsResource):
-
     def __init__(self):
         BaseModelsResource.__init__(self, Task)
 
@@ -30,7 +29,7 @@ class TasksResource(BaseModelsResource):
             assignees = None
 
             if is_assignees:
-                assignees = data['assignees']
+                assignees = data["assignees"]
                 persons = Person.query.filter(Person.id.in_(assignees)).all()
                 del data["assignees"]
 
@@ -51,7 +50,6 @@ class TasksResource(BaseModelsResource):
 
 
 class TaskResource(BaseModelResource):
-
     def __init__(self):
         BaseModelResource.__init__(self, Task)
 
@@ -87,4 +85,4 @@ class TaskResource(BaseModelResource):
             current_app.logger.error(str(exception), exc_info=1)
             return {"message": str(exception)}, 400
 
-        return '', 204
+        return "", 204

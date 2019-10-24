@@ -5,13 +5,12 @@ from zou.app.models.entity import Entity
 from zou.app.services import shots_service
 from zou.app.blueprints.source.shotgun.base import (
     BaseImportShotgunResource,
-    ImportRemoveShotgunBaseResource
+    ImportRemoveShotgunBaseResource,
 )
 from zou.app.blueprints.source.shotgun.exception import ShotgunEntryImportFailed
 
 
 class ImportShotgunEpisodesResource(BaseImportShotgunResource):
-
     def prepare_import(self):
         self.episode_type = shots_service.get_episode_type()
         self.project_map = Project.get_id_map(field="name")
@@ -26,7 +25,7 @@ class ImportShotgunEpisodesResource(BaseImportShotgunResource):
             "shotgun_id": sg_episode["id"],
             "description": sg_episode["description"],
             "project_id": project_id,
-            "entity_type_id": self.episode_type["id"]
+            "entity_type_id": self.episode_type["id"],
         }
 
     def get_project(self, sg_episode):
@@ -39,7 +38,7 @@ class ImportShotgunEpisodesResource(BaseImportShotgunResource):
     def import_entry(self, data):
         episode = Entity.get_by(
             shotgun_id=data["shotgun_id"],
-            entity_type_id=self.episode_type["id"]
+            entity_type_id=self.episode_type["id"],
         )
 
         if episode is None:
@@ -56,10 +55,7 @@ class ImportShotgunEpisodesResource(BaseImportShotgunResource):
 
 
 class ImportRemoveShotgunEpisodeResource(ImportRemoveShotgunBaseResource):
-
     def __init__(self):
         ImportRemoveShotgunBaseResource.__init__(
-            self,
-            Entity,
-            entity_type_id=shots_service.get_episode_type()["id"]
+            self, Entity, entity_type_id=shots_service.get_episode_type()["id"]
         )

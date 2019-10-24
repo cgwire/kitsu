@@ -10,12 +10,11 @@ from zou.app.services import deletion_service, tasks_service
 
 from zou.app.blueprints.source.shotgun.base import (
     BaseImportShotgunResource,
-    ImportRemoveShotgunBaseResource
+    ImportRemoveShotgunBaseResource,
 )
 
 
 class ImportShotgunTasksResource(BaseImportShotgunResource):
-
     def prepare_import(self):
         self.project_ids = Project.get_id_map()
         self.person_ids = Person.get_id_map()
@@ -51,7 +50,7 @@ class ImportShotgunTasksResource(BaseImportShotgunResource):
             "project_id": project_id,
             "entity_id": entity_id,
             "assigner_id": assigner_id,
-            "assignees": assignees
+            "assignees": assignees,
         }
 
     def get_entity_id(self, sg_entity):
@@ -91,7 +90,7 @@ class ImportShotgunTasksResource(BaseImportShotgunResource):
                 name=data["name"],
                 project_id=data["project_id"],
                 task_type_id=data["task_type_id"],
-                entity_id=data["entity_id"]
+                entity_id=data["entity_id"],
             )
 
         if task is None:
@@ -103,7 +102,7 @@ class ImportShotgunTasksResource(BaseImportShotgunResource):
                 name=data["name"],
                 project_id=data["project_id"],
                 task_type_id=data["task_type_id"],
-                entity_id=data["entity_id"]
+                entity_id=data["entity_id"],
             )
 
             if existing_task is not None:
@@ -120,13 +119,8 @@ class ImportShotgunTasksResource(BaseImportShotgunResource):
 
 
 class ImportRemoveShotgunTaskResource(ImportRemoveShotgunBaseResource):
-
     def __init__(self):
-        ImportRemoveShotgunBaseResource.__init__(
-            self,
-            Task,
-            self.delete_func
-        )
+        ImportRemoveShotgunBaseResource.__init__(self, Task, self.delete_func)
 
     def delete_func(self, entity):
         deletion_service.remove_task(entity.id)

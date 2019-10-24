@@ -6,12 +6,11 @@ from zou.app.models.person import Person
 
 from zou.app.blueprints.source.shotgun.base import (
     BaseImportShotgunResource,
-    ImportRemoveShotgunBaseResource
+    ImportRemoveShotgunBaseResource,
 )
 
 
 class ImportShotgunVersionsResource(BaseImportShotgunResource):
-
     def __init__(self):
         BaseImportShotgunResource.__init__(self)
 
@@ -29,23 +28,22 @@ class ImportShotgunVersionsResource(BaseImportShotgunResource):
             "name": sg_version["code"],
             "shotgun_id": sg_version["id"],
             "description": sg_version["description"],
-            "source": "Shotgun"
+            "source": "Shotgun",
         }
 
         if "user" in sg_version and sg_version["user"] is not None:
             data["person_id"] = self.person_ids.get(
-                sg_version["user"]["id"],
-                None
+                sg_version["user"]["id"], None
             )
 
         if sg_version["sg_task"] is not None:
             data["task_id"] = self.get_task_id(sg_version["sg_task"]["id"])
 
         if sg_version["sg_uploaded_movie"] is not None:
-            data["uploaded_movie_url"] = \
-                sg_version["sg_uploaded_movie"]["url"]
-            data["uploaded_movie_name"] = \
-                sg_version["sg_uploaded_movie"]["name"]
+            data["uploaded_movie_url"] = sg_version["sg_uploaded_movie"]["url"]
+            data["uploaded_movie_name"] = sg_version["sg_uploaded_movie"][
+                "name"
+            ]
 
         return data
 
@@ -53,8 +51,7 @@ class ImportShotgunVersionsResource(BaseImportShotgunResource):
         preview_file = PreviewFile.get_by(shotgun_id=data["shotgun_id"])
         if preview_file is None:
             preview_file = PreviewFile.get_by(
-                name=data["name"],
-                task_id=data["task_id"]
+                name=data["name"], task_id=data["task_id"]
             )
 
         if preview_file is None:
@@ -68,6 +65,5 @@ class ImportShotgunVersionsResource(BaseImportShotgunResource):
 
 
 class ImportRemoveShotgunVersionResource(ImportRemoveShotgunBaseResource):
-
     def __init__(self):
         ImportRemoveShotgunBaseResource.__init__(self, PreviewFile)
