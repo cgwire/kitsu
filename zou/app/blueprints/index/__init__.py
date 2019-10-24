@@ -5,11 +5,17 @@ keyword.
 from flask import Blueprint
 from zou.app.utils.api import configure_api_from_blueprint
 
-from .resources import IndexResource, StatusResource, TxtStatusResource
+from .resources import (
+    IndexResource,
+    InfluxStatusResource,
+    StatusResource,
+    TxtStatusResource
+)
 
 routes = [
     ("/", IndexResource),
     ("/status", StatusResource),
+    ("/status/influx", InfluxStatusResource),
     ("/status.txt", TxtStatusResource)
 ]
 

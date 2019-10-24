@@ -1,6 +1,8 @@
 import redis
 import requests
 
+from datetime import datetime
+
 from flask import Response
 from flask_restful import Resource
 from zou import __version__
@@ -103,3 +105,22 @@ key-value-store-up: %s
             "up" if is_es_up else "down"
         )
         return Response(text, mimetype='text')
+
+
+class InfluxStatusResource(BaseStatusResource):
+
+    def get(self):
+        (
+            api_name,
+            version,
+            is_db_up,
+            is_kv_up,
+            is_es_up
+        ) = self.get_status()
+
+        return {
+            "database-up": int(is_db_up),
+            "key-value-store-up": int(is_kv_up),
+            "event-stream-up": int(is_es_up),
+            "time": datetime.timestamp(datetime.now())
+        }
