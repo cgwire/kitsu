@@ -44,7 +44,7 @@ def get_paginated_results(query, page):
         entries = query.all()
         return fields.serialize_list(entries)
     else:
-        limit = app.config['NB_RECORDS_PER_PAGE']
+        limit = app.config["NB_RECORDS_PER_PAGE"]
         total = query.count()
         offset = (page - 1) * limit
 
@@ -52,14 +52,14 @@ def get_paginated_results(query, page):
         query = query.limit(limit)
         query = query.offset(offset)
 
-        if (total < offset):
+        if total < offset:
             result = {
                 "data": [],
                 "total": 0,
                 "nb_pages": nb_pages,
                 "limit": limit,
                 "offset": offset,
-                "page": page
+                "page": page,
             }
         else:
             result = {
@@ -68,6 +68,6 @@ def get_paginated_results(query, page):
                 "nb_pages": nb_pages,
                 "limit": limit,
                 "offset": offset,
-                "page": page
+                "page": page,
             }
         return result

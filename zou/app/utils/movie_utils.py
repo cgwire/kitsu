@@ -26,12 +26,9 @@ def generate_thumbnail(movie_path):
     file_target_name = "%s.png" % file_source_name[:-4]
     file_target_path = os.path.join(folder_path, file_target_name)
 
-    ffmpeg \
-        .input(movie_path, ss="00:00:00") \
-        .output(file_target_path, vframes=1) \
-        .run(
-            quiet=True
-        )
+    ffmpeg.input(movie_path, ss="00:00:00").output(
+        file_target_path, vframes=1
+    ).run(quiet=True)
     return file_target_path
 
 
@@ -66,24 +63,19 @@ def normalize_movie(movie_path, fps="24.00", width=None, height=1080):
         width = width + 1
 
     try:
-        ffmpeg \
-            .input(movie_path) \
-            .output(
-                file_target_path,
-                pix_fmt='yuv420p',
-                format="mp4",
-                r=fps,
-                b="28M",
-                preset="medium",
-                vcodec="libx264",
-                s="%sx%s" % (width, height)
-            ) \
-            .run(
-                quiet=False,
-                capture_stderr=True
-            )
+        ffmpeg.input(movie_path).output(
+            file_target_path,
+            pix_fmt="yuv420p",
+            format="mp4",
+            r=fps,
+            b="28M",
+            preset="medium",
+            vcodec="libx264",
+            s="%sx%s" % (width, height),
+        ).run(quiet=False, capture_stderr=True)
     except ffmpeg.Error as exc:
         from flask import current_app
+
         current_app.logger.error(exc.stderr)
         raise
 
@@ -91,11 +83,7 @@ def normalize_movie(movie_path, fps="24.00", width=None, height=1080):
 
 
 def build_playlist_movie(
-    tmp_file_paths,
-    movie_file_path,
-    width=None,
-    height=1080,
-    fps="24.00"
+    tmp_file_paths, movie_file_path, width=None, height=1080, fps="24.00"
 ):
     """
     Build a single movie file from a playlist.
@@ -109,26 +97,20 @@ def build_playlist_movie(
         for tmp_file_path, file_name in tmp_file_paths:
             in_file = ffmpeg.input(tmp_file_path)
             in_files.append(
-                in_file['v']
-                    .filter('setsar', '1/1')
-                    .filter('scale', width, height)
+                in_file["v"]
+                .filter("setsar", "1/1")
+                .filter("scale", width, height)
             )
-            in_files.append(in_file['a'])
+            in_files.append(in_file["a"])
         joined = ffmpeg.concat(*in_files, v=1, a=1).node
         video = joined[0]
         audio = joined[1]
 
         try:
-            ffmpeg \
-                .output(audio, video, movie_file_path) \
-                .overwrite_output() \
-                .run()
+            ffmpeg.output(
+                audio, video, movie_file_path
+            ).overwrite_output().run()
         except Exception as e:
             print(e)
-            return {
-                "success": False,
-                "message": str(e)
-            }
-    return {
-        "success": True
-    }
+            return {"success": False, "message": str(e)}
+    return {"success": True}

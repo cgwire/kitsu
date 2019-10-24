@@ -14,12 +14,10 @@ from zou.app.services import (
     projects_service,
     shots_service,
     sync_service,
-    tasks_service
+    tasks_service,
 )
 
-from zou.app.services.exception import (
-    PersonNotFoundException
-)
+from zou.app.services.exception import PersonNotFoundException
 
 
 def clean_auth_tokens():
@@ -76,65 +74,71 @@ def init_data():
     concept = tasks_service.get_or_create_department("Concept")
     layout = tasks_service.get_or_create_department("Layout")
 
-    tasks_service.get_or_create_task_type(
-        concept, "Concept", "#8D6E63", 1)
-    tasks_service.get_or_create_task_type(
-        modeling, "Modeling", "#78909C", 2)
-    tasks_service.get_or_create_task_type(
-        modeling, "Shading", "#64B5F6", 3)
-    tasks_service.get_or_create_task_type(
-        animation, "Rigging", "#9CCC65", 4)
+    tasks_service.get_or_create_task_type(concept, "Concept", "#8D6E63", 1)
+    tasks_service.get_or_create_task_type(modeling, "Modeling", "#78909C", 2)
+    tasks_service.get_or_create_task_type(modeling, "Shading", "#64B5F6", 3)
+    tasks_service.get_or_create_task_type(animation, "Rigging", "#9CCC65", 4)
 
     tasks_service.get_or_create_task_type(
-        concept, "Storyboard", "#43A047",
-        priority=1, for_shots=True, for_entity="Shot")
+        concept,
+        "Storyboard",
+        "#43A047",
+        priority=1,
+        for_shots=True,
+        for_entity="Shot",
+    )
     tasks_service.get_or_create_task_type(
-        layout, "Layout", "#7CB342",
-        priority=2, for_shots=True, for_entity="Shot")
+        layout,
+        "Layout",
+        "#7CB342",
+        priority=2,
+        for_shots=True,
+        for_entity="Shot",
+    )
     tasks_service.get_or_create_task_type(
-        animation, "Animation", "#009688",
-        priority=3, for_shots=True, for_entity="Shot")
+        animation,
+        "Animation",
+        "#009688",
+        priority=3,
+        for_shots=True,
+        for_entity="Shot",
+    )
     tasks_service.get_or_create_task_type(
-        compositing, "Lighting", "#F9A825",
-        priority=4, for_shots=True, for_entity="Shot")
+        compositing,
+        "Lighting",
+        "#F9A825",
+        priority=4,
+        for_shots=True,
+        for_entity="Shot",
+    )
     tasks_service.get_or_create_task_type(
-        fx, "FX", "#26C6DA",
-        priority=5, for_shots=True, for_entity="Shot")
+        fx, "FX", "#26C6DA", priority=5, for_shots=True, for_entity="Shot"
+    )
     tasks_service.get_or_create_task_type(
-        compositing, "Rendering", "#F06292",
-        priority=6, for_shots=True, for_entity="Shot")
+        compositing,
+        "Rendering",
+        "#F06292",
+        priority=6,
+        for_shots=True,
+        for_entity="Shot",
+    )
     tasks_service.get_or_create_task_type(
-        compositing, "Compositing", "#ff5252",
-        priority=7, for_shots=True, for_entity="Shot")
+        compositing,
+        "Compositing",
+        "#ff5252",
+        priority=7,
+        for_shots=True,
+        for_entity="Shot",
+    )
     print("Task types initialized.")
 
+    tasks_service.get_or_create_status("Todo", "todo", "#f5f5f5")
+    tasks_service.get_or_create_status("Work In Progress", "wip", "#3273dc")
+    tasks_service.get_or_create_status("Waiting For Approval", "wfa", "#ab26ff")
     tasks_service.get_or_create_status(
-        "Todo",
-        "todo",
-        "#f5f5f5"
+        "Retake", "retake", "#ff3860", is_retake=True
     )
-    tasks_service.get_or_create_status(
-        "Work In Progress",
-        "wip",
-        "#3273dc"
-    )
-    tasks_service.get_or_create_status(
-        "Waiting For Approval",
-        "wfa",
-        "#ab26ff"
-    )
-    tasks_service.get_or_create_status(
-        "Retake",
-        "retake",
-        "#ff3860",
-        is_retake=True
-    )
-    tasks_service.get_or_create_status(
-        "Done",
-        "done",
-        "#22d160",
-        is_done=True
-    )
+    tasks_service.get_or_create_status("Done", "done", "#22d160", is_done=True)
     print("Task status initialized.")
 
 
@@ -160,30 +164,28 @@ def sync_with_ldap_server():
 
     def search_ad_users(conn, excluded_accounts):
         attributes = [
-            "givenName", "sn", "sAMAccountName", "mail", "thumbnailPhoto"
+            "givenName",
+            "sn",
+            "sAMAccountName",
+            "mail",
+            "thumbnailPhoto",
         ]
-        conn.search(
-            LDAP_BASE_DN,
-            '(objectclass=person)',
-            attributes=attributes
-        )
+        conn.search(LDAP_BASE_DN, "(objectclass=person)", attributes=attributes)
         return [
             {
                 "first_name": clean_value(entry.givenName),
                 "last_name": clean_value(entry.sn),
                 "email": clean_value(entry.mail),
                 "desktop_login": clean_value(entry.sAMAccountName),
-                "thumbnail": entry.thumbnailPhoto.raw_values
+                "thumbnail": entry.thumbnailPhoto.raw_values,
             }
             for entry in conn.entries
             if clean_value(entry.sAMAccountName) not in excluded_accounts
         ]
 
     def search_ldap_users(conn, excluded_accounts):
-        attributes = [
-            "givenName", "sn", "mail", "cn", "uid"
-        ]
-        conn.search(LDAP_BASE_DN, '(objectclass=person)', attributes=attributes)
+        attributes = ["givenName", "sn", "mail", "cn", "uid"]
+        conn.search(LDAP_BASE_DN, "(objectclass=person)", attributes=attributes)
         return [
             {
                 "first_name": clean_value(entry.givenName),
@@ -212,7 +214,7 @@ def sync_with_ldap_server():
             password=LDAP_PASSWORD,
             authentication=authentication,
             raise_exceptions=True,
-            auto_bind=True
+            auto_bind=True,
         )
 
         if LDAP_IS_AD:
@@ -247,7 +249,7 @@ def sync_with_ldap_server():
                     "default".encode("utf-8"),
                     first_name,
                     last_name,
-                    desktop_login=desktop_login
+                    desktop_login=desktop_login,
                 )
                 print("User %s created." % desktop_login)
 
@@ -255,11 +257,14 @@ def sync_with_ldap_server():
                 person = persons_service.get_person_by_desktop_login(
                     desktop_login
                 )
-                persons_service.update_person(person["id"], {
-                    "email": email,
-                    "first_name": first_name,
-                    "last_name": last_name
-                })
+                persons_service.update_person(
+                    person["id"],
+                    {
+                        "email": email,
+                        "first_name": first_name,
+                        "last_name": last_name,
+                    },
+                )
                 print("User %s updated." % desktop_login)
 
             if len(thumbnail) > 0:
@@ -267,6 +272,7 @@ def sync_with_ldap_server():
 
     def save_thumbnail(person, thumbnail):
         from zou.app import app
+
         with app.app_context():
             thumbnail_path = "/tmp/ldap_th.jpg"
             with open(thumbnail_path, "wb") as th_file:
@@ -275,18 +281,13 @@ def sync_with_ldap_server():
                 thumbnail_path
             )
             thumbnail_utils.turn_into_thumbnail(
-                thumbnail_png_path,
-                size=thumbnail_utils.BIG_SQUARE_SIZE
+                thumbnail_png_path, size=thumbnail_utils.BIG_SQUARE_SIZE
             )
             file_store.add_picture(
-                "thumbnails",
-                person["id"],
-                thumbnail_png_path
+                "thumbnails", person["id"], thumbnail_png_path
             )
             os.remove(thumbnail_png_path)
-            persons_service.update_person(person["id"], {
-                "has_avatar": True
-            })
+            persons_service.update_person(person["id"], {"has_avatar": True})
 
     ldap_users = get_ldap_users()
     update_person_list_with_ldap_users(ldap_users)
@@ -309,11 +310,7 @@ def run_sync_change_daemon(event_target, target, login, password, logs_dir):
     related data and save it in the current instance.
     """
     event_client = sync_service.init_events_listener(
-        target,
-        event_target,
-        login,
-        password,
-        logs_dir
+        target, event_target, login, password, logs_dir
     )
     sync_service.add_main_sync_listeners(event_client)
     sync_service.add_project_sync_listeners(event_client)

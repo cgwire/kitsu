@@ -67,9 +67,11 @@ def emit(event, data={}, persist=True):
         save_event(event, data)
 
     from zou.app.config import ENABLE_JOB_QUEUE
+
     for func in event_handlers.values():
         if ENABLE_JOB_QUEUE:
             from zou.app.stores.queue_store.job_queue import enqueue
+
             enqueue(func.handle_event, data)
         else:
             try:
@@ -84,13 +86,10 @@ def save_event(event, data):
     """
     try:
         from zou.app.services.persons_service import get_current_user_raw
+
         person = get_current_user_raw()
         person_id = person.id
     except:
         person_id = None
 
-    return ApiEvent.create(
-        name=event,
-        data=data,
-        user_id=person_id
-    )
+    return ApiEvent.create(name=event, data=data, user_id=person_id)

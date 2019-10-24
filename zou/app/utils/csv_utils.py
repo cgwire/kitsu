@@ -27,7 +27,7 @@ def build_csv_file_name(file_name):
     """
     return "%s_%s" % (
         slugify(config.APP_NAME, separator="_"),
-        slugify(file_name, separator="_")
+        slugify(file_name, separator="_"),
     )
 
 
@@ -45,7 +45,8 @@ def build_csv_headers(csv_response, file_name):
     """
     Build HTTP response headers needed to return CSV content as a file.
     """
-    csv_response.headers["Content-Disposition"] = \
+    csv_response.headers["Content-Disposition"] = (
         "attachment; filename=%s.csv" % file_name
+    )
     csv_response.headers["Content-type"] = "text/csv"
     return csv_response

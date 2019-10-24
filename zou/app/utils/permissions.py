@@ -1,8 +1,8 @@
 from flask_principal import RoleNeed, Permission
 from werkzeug.exceptions import Forbidden
 
-admin_permission = Permission(RoleNeed('admin'))
-manager_permission = Permission(RoleNeed('manager'))
+admin_permission = Permission(RoleNeed("admin"))
+manager_permission = Permission(RoleNeed("manager"))
 
 
 class PermissionDenied(Forbidden):

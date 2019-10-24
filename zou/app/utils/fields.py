@@ -42,7 +42,7 @@ def serialize_value(value):
     elif value is None:
         return None
     elif isinstance(value, object):
-        if hasattr(value, 'serialize'):
+        if hasattr(value, "serialize"):
             return value.serialize()
         else:
             return value
