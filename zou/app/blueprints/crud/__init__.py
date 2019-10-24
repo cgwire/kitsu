@@ -10,8 +10,12 @@ from .entity import EntityResource, EntitiesResource
 from .entity_type import EntityTypesResource, EntityTypeResource
 from .event import EventsResource, EventResource
 from .file_status import FileStatusesResource, FileStatusResource
+from .metadata_descriptor import (
+    MetadataDescriptorsResource,
+    MetadataDescriptorResource
+)
 from .milestone import MilestonesResource, MilestoneResource
-from .notifications import NotificationsResource, NotificationResource
+from .notification import NotificationsResource, NotificationResource
 from .organisation import OrganisationsResource, OrganisationResource
 from .output_file import OutputFilesResource, OutputFileResource
 from .output_type import OutputTypeResource, OutputTypesResource
@@ -22,7 +26,8 @@ from .playlist import PlaylistsResource, PlaylistResource
 from .project import ProjectResource, ProjectsResource
 from .project_status import ProjectStatusResource, ProjectStatussResource
 from .schedule_item import ScheduleItemsResource, ScheduleItemResource
-from .search_filters import SearchFiltersResource, SearchFilterResource
+from .subscription import SubscriptionsResource, SubscriptionResource
+from .search_filter import SearchFiltersResource, SearchFilterResource
 from .software import SoftwaresResource, SoftwareResource
 from .task_type import TaskTypesResource, TaskTypeResource
 from .task_status import TaskStatusesResource, TaskStatusResource
@@ -86,6 +91,10 @@ routes = [
     ("/data/news/<instance_id>", NewsResource),
     ("/data/milestones/", MilestonesResource),
     ("/data/milestones/<instance_id>", MilestoneResource),
+    ("/data/metadata-descriptors/", MetadataDescriptorsResource),
+    ("/data/metadata-descriptors/<instance_id>", MetadataDescriptorResource),
+    ("/data/subscriptions/", SubscriptionsResource),
+    ("/data/subscriptions/<instance_id>", SubscriptionResource),
 ]
 
 blueprint = Blueprint("/data", "data")
