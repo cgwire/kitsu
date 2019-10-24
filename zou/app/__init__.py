@@ -16,7 +16,7 @@ from .stores import auth_tokens_store
 from .services.exception import (
     PersonNotFoundException,
     WrongIdFormatException,
-    WrongParameterException
+    WrongParameterException,
 )
 from .utils import fs, logs
 
@@ -30,11 +30,10 @@ logs.configure_logs(app)
 
 if not app.config["FILE_TREE_FOLDER"]:
     # Default file_trees are included in Python package: use root_path
-    app.config["FILE_TREE_FOLDER"] = os.path.join(app.root_path,
-                                                  'file_trees')
+    app.config["FILE_TREE_FOLDER"] = os.path.join(app.root_path, "file_trees")
 
 if not app.config["PREVIEW_FOLDER"]:
-    app.config["PREVIEW_FOLDER"] = os.path.join(app.instance_path, 'previews')
+    app.config["PREVIEW_FOLDER"] = os.path.join(app.instance_path, "previews")
 
 db = SQLAlchemy(app)
 migrate = Migrate(app, db)  # DB schema migration features
@@ -60,38 +59,35 @@ def page_not_found(error):
 
 @app.errorhandler(WrongIdFormatException)
 def id_parameter_format_error(error):
-    return jsonify(
-        error=True,
-        message="One of the ID sent in parameter is not properly formatted."
-    ), 400
+    return (
+        jsonify(
+            error=True,
+            message="One of the ID sent in parameter is not properly formatted.",
+        ),
+        400,
+    )
 
 
 @app.errorhandler(WrongParameterException)
 def wrong_parameter(error):
-    return jsonify(
-        error=True,
-        message=str(error)
-    ), 400
+    return jsonify(error=True, message=str(error)), 400
 
 
 @app.errorhandler(ExpiredSignatureError)
 def wrong_token_signature(error):
-    return jsonify(
-        error=True,
-        message=str(error)
-    ), 401
+    return jsonify(error=True, message=str(error)), 401
 
 
 if not config.DEBUG:
+
     @app.errorhandler(Exception)
     def server_error(error):
         stacktrace = traceback.format_exc()
         current_app.logger.error(stacktrace)
-        return jsonify(
-            error=True,
-            message=str(error),
-            stacktrace=stacktrace
-        ), 500
+        return (
+            jsonify(error=True, message=str(error), stacktrace=stacktrace),
+            500,
+        )
 
 
 def configure_auth():
@@ -108,7 +104,7 @@ def configure_auth():
             if user is not None:
                 identity_changed.send(
                     current_app._get_current_object(),
-                    identity=Identity(user["id"])
+                    identity=Identity(user["id"]),
                 )
             return user
         except PersonNotFoundException:
@@ -117,9 +113,11 @@ def configure_auth():
 
 def load_api():
     from . import api
+
     api.configure(app)
 
     fs.mkdir_p(app.config["TMP_DIR"])
     configure_auth()
+
 
 load_api()

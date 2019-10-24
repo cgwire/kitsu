@@ -3,6 +3,7 @@ from flask_socketio import SocketIO
 from zou.app import config
 
 from gevent import monkey
+
 monkey.patch_all()
 
 
@@ -18,7 +19,7 @@ def create_app(redis_url):
     app = Flask(__name__)
     app.config["SECRET_KEY"] = config.SECRET_KEY
 
-    @app.route('/')
+    @app.route("/")
     def index():
         return jsonify({"name": "%s Event stream" % config.APP_NAME})
 
@@ -26,7 +27,7 @@ def create_app(redis_url):
     def connected():
         app.logger.info("New websocket client connected")
 
-    @socketio.on_error('/events')
+    @socketio.on_error("/events")
     def on_error(error):
         app.logger.error(error)
 
@@ -38,6 +39,9 @@ redis_url = get_redis_url()
 (app, socketio) = create_app(redis_url)
 
 if __name__ == "main":
-    socketio.run(app, debug=False,
-                 host=config["EVENT_STREAM_HOST"],
-                 port=config["EVENT_STREAM_PORT"])
+    socketio.run(
+        app,
+        debug=False,
+        host=config["EVENT_STREAM_HOST"],
+        port=config["EVENT_STREAM_PORT"],
+    )

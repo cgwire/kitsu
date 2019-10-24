@@ -13,8 +13,8 @@ SECRET_KEY = os.getenv("SECRET_KEY", "mysecretkey")
 AUTH_STRATEGY = os.getenv("AUTH_STRATEGY", "auth_local_classic")
 
 KEY_VALUE_STORE = {
-  "host": os.getenv("KV_HOST", "localhost"),
-  "port": os.getenv("KV_PORT", "6379"),
+    "host": os.getenv("KV_HOST", "localhost"),
+    "port": os.getenv("KV_PORT", "6379"),
 }
 AUTH_TOKEN_BLACKLIST_KV_INDEX = 0
 MEMOIZE_DB_INDEX = 1
@@ -27,27 +27,25 @@ JWT_BLACKLIST_ENABLED = True
 JWT_BLACKLIST_TOKEN_CHECKS = ["access", "refresh"]
 JWT_ACCESS_TOKEN_EXPIRES = datetime.timedelta(days=7)
 JWT_REFRESH_TOKEN_EXPIRES = datetime.timedelta(days=15)
-JWT_TOKEN_LOCATION = ['cookies', 'headers']
-JWT_REFRESH_COOKIE_PATH = '/auth/refresh-token'
+JWT_TOKEN_LOCATION = ["cookies", "headers"]
+JWT_REFRESH_COOKIE_PATH = "/auth/refresh-token"
 JWT_COOKIE_CSRF_PROTECT = False
 JWT_SESSION_COOKIE = False
 
-RESTFUL_JSON = {
-    "ensure_ascii": False
-}
+RESTFUL_JSON = {"ensure_ascii": False}
 DATABASE = {
     "drivername": os.getenv("DB_DRIVER", "postgresql"),
     "host": os.getenv("DB_HOST", "localhost"),
     "port": os.getenv("DB_PORT", "5432"),
     "username": os.getenv("DB_USERNAME", "postgres"),
     "password": os.getenv("DB_PASSWORD", "mysecretpassword"),
-    "database": os.getenv("DB_DATABASE", "zoudb")
+    "database": os.getenv("DB_DATABASE", "zoudb"),
 }
 SQLALCHEMY_DATABASE_URI = str(dbhelpers.get_db_uri())
 SQLALCHEMY_TRACK_MODIFICATIONS = True
 SQLALCHEMY_ENGINE_OPTIONS = {
-    'pool_size': os.getenv('DB_POOL_SIZE', 30),
-    'max_overflow': os.getenv('DB_MAX_OVERFLOW', 60)
+    "pool_size": os.getenv("DB_POOL_SIZE", 30),
+    "max_overflow": os.getenv("DB_MAX_OVERFLOW", 60),
 }
 
 NB_RECORDS_PER_PAGE = 100
@@ -60,8 +58,7 @@ DEFAULT_FILE_STATUS = "To review"
 DEFAULT_FILE_TREE = os.getenv("DEFAULT_FILE_TREE", "default")
 FILE_TREE_FOLDER = os.getenv("FILE_TREE_FOLDER")
 PREVIEW_FOLDER = os.getenv(
-    "PREVIEW_FOLDER",
-    os.getenv("THUMBNAIL_FOLDER", "previews")
+    "PREVIEW_FOLDER", os.getenv("THUMBNAIL_FOLDER", "previews")
 )
 
 MAIL_SERVER = os.getenv("MAIL_SERVER", "localhost")
@@ -75,13 +72,9 @@ MAIL_DEFAULT_SENDER = os.getenv("MAIL_DEFAULT_SENDER", "no-reply@cg-wire.com")
 DOMAIN_NAME = os.getenv("DOMAIN_NAME", "localhost:8080")
 DOMAIN_PROTOCOL = os.getenv("DOMAIN_PROTOCOL", "https")
 
-PLUGIN_FOLDER = os.getenv(
-    "PLUGIN_FOLDER",
-    os.path.join(os.getcwd(), "plugins")
-)
+PLUGIN_FOLDER = os.getenv("PLUGIN_FOLDER", os.path.join(os.getcwd(), "plugins"))
 EVENT_HANDLERS_FOLDER = os.getenv(
-    "EVENT_HANDLERS_FOLDER",
-    os.path.join(os.getcwd(), "event_handlers")
+    "EVENT_HANDLERS_FOLDER", os.path.join(os.getcwd(), "event_handlers")
 )
 TMP_DIR = os.getenv("TMP_DIR", os.path.join(os.sep, "tmp", "zou"))
 

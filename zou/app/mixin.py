@@ -18,10 +18,7 @@ class ArgsMixin(object):
                 (name, default, required) = descriptor
 
             parser.add_argument(
-                name,
-                required=required,
-                default=default,
-                action=action
+                name, required=required, default=default, action=action
             )
 
         return parser.parse_args()

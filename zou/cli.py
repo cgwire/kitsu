@@ -7,10 +7,7 @@ import click
 from sqlalchemy.exc import IntegrityError
 
 from zou.app.utils import dbhelpers, auth, commands
-from zou.app.services import (
-    persons_service,
-    tasks_service
-)
+from zou.app.services import persons_service, tasks_service
 
 
 @click.group()
@@ -24,11 +21,11 @@ def init_db():
 
     print("Creating database and tables...")
     from zou.app import app
+
     with app.app_context():
         import zou
-        directory = os.path.join(
-            os.path.dirname(zou.__file__), "migrations"
-        )
+
+        directory = os.path.join(os.path.dirname(zou.__file__), "migrations")
         flask_migrate.upgrade(directory=directory)
     print("Database and tables created.")
 
@@ -41,11 +38,11 @@ def migrate_db():
     """
 
     from zou.app import app
+
     with app.app_context():
         import zou
-        directory = os.path.join(
-            os.path.dirname(zou.__file__), "migrations"
-        )
+
+        directory = os.path.join(os.path.dirname(zou.__file__), "migrations")
         flask_migrate.migrate(directory=directory)
 
 
@@ -71,11 +68,11 @@ def upgrade_db():
     "Upgrade database schema."
 
     from zou.app import app
+
     with app.app_context():
         import zou
-        directory = os.path.join(
-            os.path.dirname(zou.__file__), "migrations"
-        )
+
+        directory = os.path.join(os.path.dirname(zou.__file__), "migrations")
         flask_migrate.upgrade(directory=directory)
 
 
@@ -84,11 +81,11 @@ def stamp_db():
     "Set the database schema revision to current one."
 
     from zou.app import app
+
     with app.app_context():
         import zou
-        directory = os.path.join(
-            os.path.dirname(zou.__file__), "migrations"
-        )
+
+        directory = os.path.join(os.path.dirname(zou.__file__), "migrations")
         flask_migrate.stamp(directory=directory)
 
 
@@ -97,17 +94,17 @@ def reset_migrations():
     "Set the database schema revision to first one."
 
     from zou.app import app
+
     with app.app_context():
         import zou
-        directory = os.path.join(
-            os.path.dirname(zou.__file__), "migrations"
-        )
+
+        directory = os.path.join(os.path.dirname(zou.__file__), "migrations")
         flask_migrate.stamp(directory=directory, revision="base")
 
 
 @cli.command()
 @click.argument("email")
-@click.option('--password', default="default")
+@click.option("--password", default="default")
 def create_admin(email, password):
     "Create an admin user to allow usage of the API when database is empty."
     "Set password is 'default'."
@@ -118,11 +115,7 @@ def create_admin(email, password):
             auth.validate_email(email)
         password = auth.encrypt_password(password)
         persons_service.create_person(
-            email,
-            password,
-            "Super",
-            "Admin",
-            role="admin"
+            email, password, "Super", "Admin", role="admin"
         )
         print("Admin successfully created.")
 
@@ -141,30 +134,31 @@ def create_admin(email, password):
         sys.exit(1)
 
 
-@cli.command('clean_auth_tokens')
+@cli.command("clean_auth_tokens")
 def clean_auth_tokens():
     "Remove revoked and expired tokens."
     commands.clean_auth_tokens()
 
 
-@cli.command('clear_all_auth_tokens')
+@cli.command("clear_all_auth_tokens")
 def clear_all_auth_tokens():
     "Remove all authentication tokens."
     commands.clear_all_auth_tokens()
 
 
-@cli.command('init_data')
+@cli.command("init_data")
 def init_data():
     "Generates minimal data set required to run Kitsu."
     commands.init_data()
 
 
-@cli.command('set_default_password')
+@cli.command("set_default_password")
 @click.argument("email")
 def set_default_password(email):
     "Set the password of given user as default"
     from zou.app.services import persons_service
     from zou.app.utils import auth
+
     password = auth.encrypt_password("default")
     persons_service.update_password(email, password)
 
@@ -183,9 +177,9 @@ def patch_set_done_flag_on_task_status():
     Patch to run after upgrade from 0.4.8 or lower to 0.4.9 or superior.
     """
     for task_status in tasks_service.get_task_statuses():
-        tasks_service.update_task_status(task_status["id"], {
-            "is_done": task_status["short_name"] == "done"
-        })
+        tasks_service.update_task_status(
+            task_status["id"], {"is_done": task_status["short_name"] == "done"}
+        )
 
 
 @cli.command()
@@ -195,11 +189,10 @@ def patch_scene_asset_instance():
     It concerns only casting based on instances.
     """
     from zou.app.models.asset_instance import AssetInstance
+
     for asset_instance in AssetInstance.query.all():
         try:
-            asset_instance.update({
-                "scene_id": asset_instance.entity_id
-            })
+            asset_instance.update({"scene_id": asset_instance.entity_id})
         except:
             print(asset_instance.serialize())
 
@@ -216,16 +209,14 @@ def patch_file_storage():
     from zou.app.services import files_service
 
     with app.app.app_context():
-        if hasattr(config, "THUMBNAIL_FOLDER",):
+        if hasattr(config, "THUMBNAIL_FOLDER"):
             preview_folder = config.THUMBNAIL_FOLDER
         else:
             preview_folder = config.PREVIEW_FOLDER
 
         print("Looking for existing file in %s" % preview_folder)
         originals_folder = os.path.join(
-            preview_folder,
-            "preview-files",
-            "originals"
+            preview_folder, "preview-files", "originals"
         )
 
         if os.path.exists(originals_folder):
@@ -241,19 +232,17 @@ def patch_file_storage():
 
                     if extension == "png":
                         file_store.add_picture(
-                            "originals",
-                            instance_id,
-                            file_path
+                            "originals", instance_id, file_path
                         )
                     elif extension == "mp4":
                         file_store.add_movie("previews", instance_id, file_path)
                     else:
                         file_store.add_file("previews", instance_id, file_path)
 
-                    print("Original file stored: (%s, %s)" % (
-                        instance_id,
-                        extension
-                    ))
+                    print(
+                        "Original file stored: (%s, %s)"
+                        % (instance_id, extension)
+                    )
                     try:
                         files_service.update_preview_file(
                             instance_id, {"exstension": extension}
@@ -275,18 +264,11 @@ def patch_file_storage():
                         file_path = os.path.join(subfolder, filename)
                         instance_id = filename.split(".")[0]
 
-                        file_store.add_picture(
-                            prefix,
-                            instance_id,
-                            file_path
-                        )
+                        file_store.add_picture(prefix, instance_id, file_path)
                         print("%s file stored: %s" % (prefix, instance_id))
 
         for prefix in ["persons", "projects"]:
-            folder = os.path.join(
-                preview_folder,
-                prefix
-            )
+            folder = os.path.join(preview_folder, prefix)
 
             if os.path.exists(folder):
                 for filename in os.listdir(folder):
@@ -302,11 +284,10 @@ def patch_task_type_allow_timelog():
     Patch to run after upgrade from 0.7.3 or lower to 0.7.4 or superior.
     """
     from zou.app.models.task_type import TaskType
+
     for task_type in TaskType.query.all():
         try:
-            task_type.update({
-                "allow_timelog": True
-            })
+            task_type.update({"allow_timelog": True})
         except:
             print(task_type.serialize())
 
@@ -319,12 +300,14 @@ def patch_team():
     from zou.app.models.project import Project
     from zou.app.models.person import Person
     from zou.app.models.task import Task
+
     for project in Project.query.all():
         for person in Person.query.all():
-            task = Task.query \
-              .filter(Task.project_id == project.id) \
-              .filter(Task.assignees.contains(person)) \
-              .first()
+            task = (
+                Task.query.filter(Task.project_id == project.id)
+                .filter(Task.assignees.contains(person))
+                .first()
+            )
             if task is not None:
                 project.team.append(person)
                 project.save()
@@ -373,11 +356,7 @@ def sync_changes(event_target, target, logs_directory):
     login = os.getenv("SYNC_LOGIN")
     password = os.getenv("SYNC_PASSWORD")
     commands.run_sync_change_daemon(
-        event_target,
-        target,
-        login,
-        password,
-        logs_directory
+        event_target, target, login, password, logs_directory
     )
 
 
@@ -421,5 +400,5 @@ def upload_files_to_cloud_storage(days):
     commands.upload_files_to_cloud_storage(days)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     cli()

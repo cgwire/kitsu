@@ -69,6 +69,7 @@ def register_event_handlers(app):
     sys.path.insert(0, app.config["EVENT_HANDLERS_FOLDER"])
     try:
         import event_handlers
+
         events.register_all(event_handlers.event_map)
     except ImportError:
         # Event handlers folder is not properly configured.
@@ -96,10 +97,8 @@ def load_plugin_modules(plugin_folder):
     return [
         __import__(file_name)
         for file_name in os.listdir(plugin_folder)
-        if os.path.isdir(
-            os.path.join(plugin_folder, file_name)
-        ) and
-        file_name != "__pycache__"
+        if os.path.isdir(os.path.join(plugin_folder, file_name))
+        and file_name != "__pycache__"
     ]
 
 
@@ -112,13 +111,12 @@ def load_plugin(app, plugin):
     routes = [
         ("/plugins%s" % route_path, resource)
         for (route_path, resource) in plugin.routes
-        if len(route_path) > 0 and route_path[0] == '/'
+        if len(route_path) > 0 and route_path[0] == "/"
     ]
     plugin.routes = routes
     plugin.blueprint = Blueprint(plugin.name, plugin.name)
     plugin.api = api_utils.configure_api_from_blueprint(
-        plugin.blueprint,
-        plugin.routes
+        plugin.blueprint, plugin.routes
     )
     app.register_blueprint(plugin.blueprint)
     app.logger.info("Plugin %s loaded." % plugin.name)
