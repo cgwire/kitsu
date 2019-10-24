@@ -84,7 +84,7 @@ class CommentTaskResource(Resource):
             ):
                 new_data["real_start_date"] = datetime.datetime.now()
 
-        tasks_service.update_task(task_id, new_data)
+        task = tasks_service.update_task(task_id, new_data)
 
         notifications_service.create_notifications_for_task_and_comment(
             task, comment, change=status_changed

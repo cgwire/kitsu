@@ -337,6 +337,7 @@ class UserContextRoutesTestCase(ApiDBTestCase):
     def test_get_notifications(self):
         person_id = str(self.person.id)
         tasks_service.assign_task(self.task.id, self.user_id)
+        self.task_dict = self.task.serialize()
         self.generate_fixture_comment()
         notifications_service.create_notifications_for_task_and_comment(
             self.task_dict,
@@ -350,6 +351,7 @@ class UserContextRoutesTestCase(ApiDBTestCase):
     def test_get_notification(self):
         tasks_service.assign_task(self.task.id, self.user_id)
         self.generate_fixture_comment()
+        self.task_dict = self.task.serialize()
         notifications_service.create_notifications_for_task_and_comment(
             self.task_dict,
             self.comment
