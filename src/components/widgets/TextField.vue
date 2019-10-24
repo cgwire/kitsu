@@ -9,6 +9,7 @@
       :type="type"
       :value="value"
       :disabled="disabled"
+      :maxlength="maxlength"
       min="0"
       @input="updateValue()"
       @keyup.enter="emitEnter()"
@@ -57,6 +58,10 @@ export default {
     buttonLabel: {
       default: '',
       type: String
+    },
+    maxlength: {
+      default: 524288,
+      type: Number
     }
   },
 
