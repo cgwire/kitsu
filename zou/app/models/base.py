@@ -9,9 +9,7 @@ from zou.app.utils import fields
 class BaseMixin(object):
 
     id = db.Column(
-        UUIDType(binary=False),
-        primary_key=True,
-        default=fields.gen_uuid
+        UUIDType(binary=False), primary_key=True, default=fields.gen_uuid
     )
 
     # Audit fields
@@ -19,7 +17,7 @@ class BaseMixin(object):
     updated_at = db.Column(
         db.DateTime,
         default=datetime.datetime.utcnow,
-        onupdate=datetime.datetime.utcnow
+        onupdate=datetime.datetime.utcnow,
     )
 
     def __repr__(self):

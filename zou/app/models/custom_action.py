@@ -9,6 +9,7 @@ class CustomAction(db.Model, BaseMixin, SerializerMixin):
     They are mainly aimed at being used by the web frontend to allow studio
     to make custom HTTP calls.
     """
+
     name = db.Column(db.String(80), nullable=False)
     url = db.Column(db.String(400))
     entity_type = db.Column(db.String(40), default="all")

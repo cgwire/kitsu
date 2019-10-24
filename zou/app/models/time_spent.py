@@ -8,22 +8,19 @@ class TimeSpent(db.Model, BaseMixin, SerializerMixin):
     """
     Describes the time spent by someone on a task.
     """
+
     duration = db.Column(db.Integer, nullable=False)
     date = db.Column(db.Date, nullable=False)
 
-    task_id = \
-        db.Column(UUIDType(binary=False), db.ForeignKey('task.id'), index=True)
+    task_id = db.Column(
+        UUIDType(binary=False), db.ForeignKey("task.id"), index=True
+    )
     person_id = db.Column(
-        UUIDType(binary=False),
-        db.ForeignKey('person.id'),
-        index=True
+        UUIDType(binary=False), db.ForeignKey("person.id"), index=True
     )
 
     __table_args__ = (
         db.UniqueConstraint(
-            'person_id',
-            'task_id',
-            'date',
-            name='time_spent_uc'
+            "person_id", "task_id", "date", name="time_spent_uc"
         ),
     )

@@ -9,6 +9,7 @@ class TaskType(db.Model, BaseMixin, SerializerMixin):
     """
     Categorize tasks in domain areas: modeling, animation, etc.
     """
+
     name = db.Column(db.String(40), nullable=False)
     short_name = db.Column(db.String(20))
     color = db.Column(db.String(7), default="#FFFFFF")
@@ -19,15 +20,11 @@ class TaskType(db.Model, BaseMixin, SerializerMixin):
     shotgun_id = db.Column(db.Integer, index=True)
 
     department_id = db.Column(
-        UUIDType(binary=False),
-        db.ForeignKey("department.id")
+        UUIDType(binary=False), db.ForeignKey("department.id")
     )
 
     __table_args__ = (
         db.UniqueConstraint(
-            'name',
-            'for_entity',
-            'department_id',
-            name='task_type_uc'
+            "name", "for_entity", "department_id", name="task_type_uc"
         ),
     )

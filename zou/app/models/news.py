@@ -9,30 +9,31 @@ class News(db.Model, BaseMixin, SerializerMixin):
     """
     A notification is stored each time a comment is posted.
     """
+
     change = db.Column(db.Boolean, nullable=False, default=False)
     author_id = db.Column(
         UUIDType(binary=False),
-        db.ForeignKey('person.id'),
+        db.ForeignKey("person.id"),
         nullable=False,
-        index=True
+        index=True,
     )
     comment_id = db.Column(
         UUIDType(binary=False),
-        db.ForeignKey('comment.id'),
+        db.ForeignKey("comment.id"),
         nullable=True,
-        index=True
+        index=True,
     )
     task_id = db.Column(
         UUIDType(binary=False),
-        db.ForeignKey('task.id'),
+        db.ForeignKey("task.id"),
         nullable=False,
-        index=True
+        index=True,
     )
     preview_file_id = db.Column(
         UUIDType(binary=False),
-        db.ForeignKey('preview_file.id'),
+        db.ForeignKey("preview_file.id"),
         nullable=True,
-        index=True
+        index=True,
     )
 
     @classmethod
@@ -45,7 +46,7 @@ class News(db.Model, BaseMixin, SerializerMixin):
             "author_id": data["author_id"],
             "comment_id": data["comment_id"],
             "preview_file_id": data["preview_file_id"],
-            "task_id": data["task_id"]
+            "task_id": data["task_id"],
         }
         previous_data = cls.get(data["id"])
         if previous_data is None:

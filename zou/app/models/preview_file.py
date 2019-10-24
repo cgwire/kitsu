@@ -12,6 +12,7 @@ class PreviewFile(db.Model, BaseMixin, SerializerMixin):
     Describes a file which is aimed at being reviewed. It is not a publication
     neither a working file.
     """
+
     name = db.Column(db.String(250))
     original_name = db.Column(db.String(250))
     revision = db.Column(db.Integer(), default=1)
@@ -31,27 +32,16 @@ class PreviewFile(db.Model, BaseMixin, SerializerMixin):
     annotations = db.Column(JSONB)
 
     task_id = db.Column(
-        UUIDType(binary=False),
-        db.ForeignKey("task.id"),
-        index=True
+        UUIDType(binary=False), db.ForeignKey("task.id"), index=True
     )
-    person_id = db.Column(
-        UUIDType(binary=False),
-        db.ForeignKey("person.id")
-    )
+    person_id = db.Column(UUIDType(binary=False), db.ForeignKey("person.id"))
 
     source_file_id = db.Column(
-        UUIDType(binary=False),
-        db.ForeignKey("output_file.id")
+        UUIDType(binary=False), db.ForeignKey("output_file.id")
     )
 
     __table_args__ = (
-        db.UniqueConstraint(
-            "name",
-            "task_id",
-            "revision",
-            name="preview_uc"
-        ),
+        db.UniqueConstraint("name", "task_id", "revision", name="preview_uc"),
     )
 
     def __repr__(self):

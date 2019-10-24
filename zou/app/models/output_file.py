@@ -14,6 +14,7 @@ class OutputFile(db.Model, BaseMixin, SerializerMixin):
     publication.
     It is linked to a working file, an entity and a task type.
     """
+
     shotgun_id = db.Column(db.Integer())
 
     name = db.Column(db.String(250), nullable=False)
@@ -31,46 +32,28 @@ class OutputFile(db.Model, BaseMixin, SerializerMixin):
     data = db.Column(JSONB)
 
     file_status_id = db.Column(
-        UUIDType(binary=False),
-        db.ForeignKey("file_status.id"),
-        nullable=False
+        UUIDType(binary=False), db.ForeignKey("file_status.id"), nullable=False
     )
-    entity_id = db.Column(
-        UUIDType(binary=False),
-        db.ForeignKey("entity.id")
-    )
+    entity_id = db.Column(UUIDType(binary=False), db.ForeignKey("entity.id"))
     asset_instance_id = db.Column(
-        UUIDType(binary=False),
-        db.ForeignKey("asset_instance.id"),
-        index=True
+        UUIDType(binary=False), db.ForeignKey("asset_instance.id"), index=True
     )
     output_type_id = db.Column(
-        UUIDType(binary=False),
-        db.ForeignKey("output_type.id"),
-        index=True
+        UUIDType(binary=False), db.ForeignKey("output_type.id"), index=True
     )
     task_type_id = db.Column(
-        UUIDType(binary=False),
-        db.ForeignKey("task_type.id"),
-        index=True
+        UUIDType(binary=False), db.ForeignKey("task_type.id"), index=True
     )
-    person_id = db.Column(
-        UUIDType(binary=False),
-        db.ForeignKey("person.id")
-    )
+    person_id = db.Column(UUIDType(binary=False), db.ForeignKey("person.id"))
     source_file_id = db.Column(
-        UUIDType(binary=False),
-        db.ForeignKey("working_file.id"),
+        UUIDType(binary=False), db.ForeignKey("working_file.id")
     )
-    source_file = relationship(
-        "WorkingFile",
-        back_populates="outputs"
-    )
+    source_file = relationship("WorkingFile", back_populates="outputs")
     temporal_entity_id = db.Column(
         UUIDType(binary=False),
         db.ForeignKey("entity.id"),
         default=None,
-        nullable=True
+        nullable=True,
     )
 
     __table_args__ = (
@@ -83,7 +66,7 @@ class OutputFile(db.Model, BaseMixin, SerializerMixin):
             "temporal_entity_id",
             "representation",
             "revision",
-            name="output_file_uc"
+            name="output_file_uc",
         ),
     )
 

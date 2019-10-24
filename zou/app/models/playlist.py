@@ -12,6 +12,7 @@ class Playlist(db.Model, BaseMixin, SerializerMixin):
     Describes a playlist. The goal is to discuss around a defined set of
     shipped materials in a meeting.
     """
+
     name = db.Column(db.String(80), nullable=False)
     shots = db.Column(JSONB)
 
@@ -22,10 +23,7 @@ class Playlist(db.Model, BaseMixin, SerializerMixin):
 
     __table_args__ = (
         db.UniqueConstraint(
-            "name",
-            "project_id",
-            "episode_id",
-            name="playlist_uc"
+            "name", "project_id", "episode_id", name="playlist_uc"
         ),
     )
 

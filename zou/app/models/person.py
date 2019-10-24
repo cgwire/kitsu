@@ -14,16 +14,10 @@ from zou.app.utils import auth
 
 department_link = db.Table(
     "department_link",
+    db.Column("person_id", UUIDType(binary=False), db.ForeignKey("person.id")),
     db.Column(
-        "person_id",
-        UUIDType(binary=False),
-        db.ForeignKey("person.id")
+        "department_id", UUIDType(binary=False), db.ForeignKey("department.id")
     ),
-    db.Column(
-        "department_id",
-        UUIDType(binary=False),
-        db.ForeignKey("department.id")
-    )
 )
 
 
@@ -31,6 +25,7 @@ class Person(db.Model, BaseMixin, SerializerMixin):
     """
     Describe a member of the studio (and an API user).
     """
+
     first_name = db.Column(db.String(80), nullable=False)
     last_name = db.Column(db.String(80), nullable=False)
     email = db.Column(EmailType, unique=True)
@@ -43,8 +38,7 @@ class Person(db.Model, BaseMixin, SerializerMixin):
     desktop_login = db.Column(db.String(80))
     shotgun_id = db.Column(db.Integer, unique=True)
     timezone = db.Column(
-        TimezoneType(backend="pytz"),
-        default=pytz_timezone("Europe/Paris")
+        TimezoneType(backend="pytz"), default=pytz_timezone("Europe/Paris")
     )
     locale = db.Column(LocaleType, default=Locale("en", "US"))
     data = db.Column(JSONB)
@@ -55,10 +49,7 @@ class Person(db.Model, BaseMixin, SerializerMixin):
     notifications_slack_enabled = db.Column(db.Boolean(), default=False)
     notifications_slack_userid = db.Column(db.String(60), default="")
 
-    skills = db.relationship(
-        "Department",
-        secondary=department_link
-    )
+    skills = db.relationship("Department", secondary=department_link)
 
     def __repr__(self):
         if sys.version_info[0] < 3:
@@ -67,10 +58,7 @@ class Person(db.Model, BaseMixin, SerializerMixin):
             return "<Person %s>" % self.full_name()
 
     def full_name(self):
-        return "%s %s" % (
-            self.first_name,
-            self.last_name
-        )
+        return "%s %s" % (self.first_name, self.last_name)
 
     def serialize(self, obj_type="Person"):
         data = SerializerMixin.serialize(self, "Person")
