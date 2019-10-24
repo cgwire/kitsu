@@ -88,7 +88,6 @@ def create_notifications_for_task_and_comment(task, comment, change=False):
     For given task and comment, create a notification for every assignee
     to the task and to every person participating to this task.
     """
-    task = tasks_service.get_task(task["id"])
     recipient_ids = get_notification_recipients(task)
     recipient_ids.remove(comment["person_id"])
     author_id = comment["person_id"]
