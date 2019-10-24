@@ -707,19 +707,21 @@ const mutations = {
   },
 
   [REMOVE_ASSET] (state, assetToDelete) {
-    delete state.assetMap[assetToDelete.id]
-    cache.assets = removeModelFromList(cache.assets, assetToDelete)
-    state.displayedAssets =
-      removeModelFromList(state.displayedAssets, assetToDelete)
-    if (assetToDelete.timeSpent) {
-      state.displayedAssetsTimeSpent -= assetToDelete.timeSpent
+    if (state.assetMap[assetToDelete.id]) {
+      delete state.assetMap[assetToDelete.id]
+      cache.assets = removeModelFromList(cache.assets, assetToDelete)
+      state.displayedAssets =
+        removeModelFromList(state.displayedAssets, assetToDelete)
+      if (assetToDelete.timeSpent) {
+        state.displayedAssetsTimeSpent -= assetToDelete.timeSpent
+      }
+      state.assetFilledColumns = getFilledColumns(state.displayedAssets)
+      state.displayedAssetsLength = Math.max(
+        state.displayedAssetsLength - 1,
+        0
+      )
+      cache.assetIndex = buildAssetIndex(cache.assets)
     }
-    state.assetFilledColumns = getFilledColumns(state.displayedAssets)
-    state.displayedAssetsLength = Math.max(
-      state.displayedAssetsLength - 1,
-      0
-    )
-    cache.assetIndex = buildAssetIndex(cache.assets)
   },
 
   [ASSET_CSV_FILE_SELECTED] (state, formData) {

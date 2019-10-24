@@ -1335,6 +1335,8 @@ export default {
         previewId = this.currentTaskPreviews[0].id
       }
       this.currentPreviewId = previewId
+      this.currentPreviewPath = this.getOriginalPath()
+      this.currentPreviewDlPath = this.getOriginalDlPath()
     }
   },
 

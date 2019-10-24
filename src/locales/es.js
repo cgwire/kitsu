@@ -155,6 +155,7 @@ export default {
     info: 'Información',
     or: 'o',
     no: 'No',
+    loading: 'Carga...',
     loading_data: 'Carga de datos',
     loading_error: 'Se ha producido un error al cargar los datos.',
     logout: 'Cierre de sesión',

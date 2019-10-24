@@ -315,7 +315,7 @@ export default {
     },
 
     onKeyDown (event) {
-      if (this.tasks.length > 0 && event.ctrlKey) {
+      if (this.tasks.length > 0 && event.altKey) {
         let index = this.lastSelection ? this.lastSelection : 0
         if ([37, 38].includes(event.keyCode)) {
           index = (index - 1) < 0 ? index = this.tasks.length - 1 : index - 1

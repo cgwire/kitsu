@@ -7,7 +7,6 @@
   <div class="modal-content">
 
     <div class="box">
-
       <h1 class="title" v-if="assetTypeToEdit && assetTypeToEdit.id">
         {{ $t("asset_types.edit_title") }} {{ assetTypeToEdit.name }}
       </h1>
@@ -19,14 +18,18 @@
         <text-field
           ref="nameField"
           :label="$t('asset_types.fields.name')"
+          :maxlength="30"
           v-model="form.name"
           @enter="runConfirmation"
           v-focus
-        >
-        </text-field>
+        />
       </form>
 
-      <p class="has-text-right">
+      <p class="error has-text-right info-message" v-if="isError">
+        {{ $t("assets.edit_fail") }}
+      </p>
+
+      <div class="has-text-right mt1">
         <a
           :class="{
             button: true,
@@ -42,7 +45,7 @@
           class="button is-link">
           {{ $t("main.cancel") }}
         </router-link>
-      </p>
+      </div>
     </div>
 
   </div>
@@ -66,7 +69,6 @@ export default {
     'cancelRoute',
     'isLoading',
     'isError',
-    'errorText',
     'assetTypeToEdit'
   ],
 

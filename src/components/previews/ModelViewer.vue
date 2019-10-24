@@ -1,5 +1,5 @@
 <template>
-<div>
+<div ref="container">
   <div
     ref="model-viewer"
     id="model-viewer"
@@ -9,6 +9,7 @@
   >
   </div>
   <div class="viewer-actions flexrow">
+    <span v-if="isLoading">{{ $t('main.loading') }}</span>
     <span class="filler"></span>
     <a
       :href="previewDlPath"
@@ -46,6 +47,12 @@ export default {
     MaximizeIcon
   },
 
+  data () {
+    return {
+      isLoading: false
+    }
+  },
+
   props: {
     previewUrl: {
       default: '',
@@ -68,26 +75,38 @@ export default {
   computed: {
     element () {
       return this.$refs['model-viewer']
+    },
+
+    container () {
+      return this.$refs['container']
     }
   },
 
   methods: {
     goFullScreen () {
       goFullScreen(this.element)
+    },
+
+    loadObject () {
+      console.log('start')
+      this.isLoading = true
+      loadObject(this.scene, this.previewUrl, null, () => {
+        this.isLoading = false
+      })
     }
   },
 
   mounted () {
     setTimeout(() => {
       this.scene = prepareScene(this.element)
-      loadObject(this.scene, this.previewUrl)
+      this.loadObject()
     }, 100)
   },
 
   watch: {
     previewUrl () {
       clearScene(this.scene)
-      loadObject(this.scene, this.previewUrl)
+      this.loadObject()
     },
 
     light () {

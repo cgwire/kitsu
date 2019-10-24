@@ -902,9 +902,11 @@ export default {
     },
 
     resetCanvasSize () {
-      const width = this.$refs['movie'].offsetWidth
-      const height = this.$refs['movie'].offsetHeight
-      this.fabricCanvas.setDimensions({ width, height })
+      if (this.$refs['movie']) {
+        const width = this.$refs['movie'].offsetWidth
+        const height = this.$refs['movie'].offsetHeight
+        this.fabricCanvas.setDimensions({ width, height })
+      }
     }
   },
 

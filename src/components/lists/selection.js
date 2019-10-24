@@ -11,7 +11,7 @@ export const selectionListMixin = {
       const i = lastSelection.x
       const j = lastSelection.y
       let validationCell = null
-      if (event.ctrlKey) {
+      if (event.altKey) {
         if (event.keyCode === 37) {
           validationCell = this.select(i, j - 1)
         } else if (event.keyCode === 38) {
