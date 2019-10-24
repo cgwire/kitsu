@@ -58,6 +58,7 @@
             </div>
             <div
               :key="'news-' + news.id"
+              :ref="'news-' + news.id"
               v-for="news in dayList"
             >
               <div v-if="previewMode === 'comments'">
@@ -351,6 +352,7 @@ export default {
     this.taskStatusId =
       localStorage.getItem('news:task-status-id') || ''
     this.$options.silent = false
+    window.addEventListener('keydown', this.onKeyDown, false)
 
     if (
       (
@@ -364,6 +366,10 @@ export default {
     ) {
       this.init()
     }
+  },
+
+  beforeDestroy () {
+    window.removeEventListener('keydown', this.onKeyDown)
   },
 
   computed: {
@@ -421,6 +427,21 @@ export default {
       'loadTask'
     ]),
 
+    onKeyDown (event) {
+      if (this.newsList && this.newsList.length > 0 && event.altKey) {
+        let index = this.lastSelection ? this.lastSelection : 0
+        if ([37, 38].includes(event.keyCode)) {
+          index =
+            (index - 1) < 0 ? index = this.newsList.length - 1 : index - 1
+          this.onNewsSelected(this.newsList[index])
+        } else if ([39, 40].includes(event.keyCode)) {
+          index =
+            (index + 1) >= this.newsList.length ? index = 0 : index + 1
+          this.onNewsSelected(this.newsList[index])
+        }
+      }
+    },
+
     loadFollowingNews () {
       if (!this.loading.more && !this.loading.news) {
         this.loading.more = true
@@ -465,6 +486,7 @@ export default {
 
     onNewsSelected (news) {
       this.loading.currentTask = true
+      this.lastSelection = this.newsList.findIndex(n => n.id === news.id)
       this.loadTask({
         taskId: news.task_id,
         callback: (err, task) => {
@@ -474,6 +496,36 @@ export default {
           this.currentNewsId = news.id
         }
       })
+      this.scrollToLine(news)
+    },
+
+    scrollToLine (news) {
+      const newsLine = this.$refs[`news-${news.id}`]
+      if (newsLine && this.$refs.body) {
+        const margin = 30
+        const rect = newsLine[0].getBoundingClientRect()
+        const listRect = this.$refs.body.getBoundingClientRect()
+        const isBelow = rect.bottom > listRect.bottom - margin
+        const isAbove = rect.top < listRect.top + margin
+
+        if (isBelow) {
+          const scrollingRequired = rect.bottom - listRect.bottom + margin
+          this.setScrollPosition(
+            this.$refs.body.scrollTop + scrollingRequired
+          )
+        } else if (isAbove) {
+          const scrollingRequired = listRect.top - rect.top + margin
+          this.setScrollPosition(
+            this.$refs.body.scrollTop - scrollingRequired
+          )
+        }
+      }
+    },
+
+    setScrollPosition (scrollPosition) {
+      if (this.$refs.body) {
+        this.$refs.body.scrollTop = scrollPosition
+      }
     },
 
     init () {
