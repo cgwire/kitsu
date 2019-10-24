@@ -1,16 +1,10 @@
 import flask_bcrypt as bcrypt
 
 from flask_jwt_extended import get_jti
-from ldap3 import (
-    Server,
-    Connection,
-    ALL,
-    NTLM,
-    SIMPLE
-)
+from ldap3 import Server, Connection, ALL, NTLM, SIMPLE
 from ldap3.core.exceptions import (
     LDAPSocketOpenError,
-    LDAPInvalidCredentialsResult
+    LDAPInvalidCredentialsResult,
 )
 
 from zou.app.services import persons_service
@@ -19,7 +13,7 @@ from zou.app.services.exception import (
     WrongPasswordException,
     WrongUserException,
     NoAuthStrategyConfigured,
-    UnactiveUserException
+    UnactiveUserException,
 )
 from zou.app.stores import auth_tokens_store
 
@@ -69,7 +63,7 @@ def check_credentials(email, password, app=None):
             raise WrongPasswordException()
 
     try:
-        password_hash = person["password"] or u''
+        password_hash = person["password"] or u""
 
         if bcrypt.check_password_hash(password_hash, password):
             return person
@@ -81,9 +75,7 @@ def check_credentials(email, password, app=None):
             raise WrongPasswordException()
     except ValueError:
         if app is not None:
-            app.logger.error(
-                "Wrong password for: %s" % person["full_name"]
-            )
+            app.logger.error("Wrong password for: %s" % person["full_name"])
         raise WrongPasswordException()
 
 
@@ -125,19 +117,19 @@ def ldap_auth_strategy(email, password, app):
     try:
         ldap_server = "%s:%s" % (
             app.config["LDAP_HOST"],
-            app.config["LDAP_PORT"]
+            app.config["LDAP_PORT"],
         )
         server = Server(ldap_server, get_info=ALL)
         if app.config["LDAP_IS_AD"]:
             user = "%s\%s" % (
                 app.config["LDAP_DOMAIN"],
-                person["desktop_login"]
+                person["desktop_login"],
             )
             authentication = NTLM
         else:
             user = "uid=%s,%s" % (
                 person["desktop_login"],
-                app.config["LDAP_BASE_DN"]
+                app.config["LDAP_BASE_DN"],
             )
             authentication = SIMPLE
 
@@ -146,7 +138,7 @@ def ldap_auth_strategy(email, password, app):
             user=user,
             password=password,
             authentication=authentication,
-            raise_exceptions=True
+            raise_exceptions=True,
         )
         conn.bind()
         return person
@@ -180,17 +172,13 @@ def register_tokens(app, access_token, refresh_token=None):
     """
     access_jti = get_jti(encoded_token=access_token)
     auth_tokens_store.add(
-        access_jti,
-        'false',
-        app.config["JWT_ACCESS_TOKEN_EXPIRES"]
+        access_jti, "false", app.config["JWT_ACCESS_TOKEN_EXPIRES"]
     )
 
     if refresh_token is not None:
         refresh_jti = get_jti(encoded_token=refresh_token)
         auth_tokens_store.add(
-            refresh_jti,
-            'false',
-            app.config["JWT_REFRESH_TOKEN_EXPIRES"]
+            refresh_jti, "false", app.config["JWT_REFRESH_TOKEN_EXPIRES"]
         )
 
 
@@ -198,13 +186,11 @@ def revoke_tokens(app, jti):
     """
     Remove access and refresh tokens from auth token store.
     """
-    auth_tokens_store.add(
-        jti,
-        'true',
-        app.config["JWT_ACCESS_TOKEN_EXPIRES"]
-    )
+    auth_tokens_store.add(jti, "true", app.config["JWT_ACCESS_TOKEN_EXPIRES"])
+
 
 def is_default_password(app, password):
-    return \
-        password == "default" and \
-        app.config["AUTH_STRATEGY"] != "auth_local_no_password"
+    return (
+        password == "default"
+        and app.config["AUTH_STRATEGY"] != "auth_local_no_password"
+    )

@@ -6,7 +6,7 @@ from zou.app.services import (
     files_service,
     projects_service,
     tasks_service,
-    shots_service
+    shots_service,
 )
 
 
@@ -28,7 +28,7 @@ def get_full_entity_name(entity_id):
             name = "%s / %s / %s" % (
                 episode["name"],
                 sequence["name"],
-                entity["name"]
+                entity["name"],
             )
     else:
         asset_type = entities_service.get_entity_type(entity["entity_type_id"])
@@ -48,21 +48,21 @@ def get_preview_file_name(preview_file_id):
     task = tasks_service.get_task(preview_file["task_id"])
     task_type = tasks_service.get_task_type(task["task_type_id"])
     project = projects_service.get_project(task["project_id"])
-    (entity_name, _) = get_full_entity_name(
-        task["entity_id"]
-    )
+    (entity_name, _) = get_full_entity_name(task["entity_id"])
 
-    if organisation.use_original_file_name \
-       and preview_file.get("original_name", None) is not None:
+    if (
+        organisation.use_original_file_name
+        and preview_file.get("original_name", None) is not None
+    ):
         name = preview_file["original_name"]
     else:
         name = "%s_%s_%s_v%s" % (
             project["name"],
             entity_name,
             task_type["name"],
-            preview_file["revision"]
+            preview_file["revision"],
         )
     return "%s.%s" % (
         slugify.slugify(name, separator="_"),
-        preview_file["extension"]
+        preview_file["extension"],
     )

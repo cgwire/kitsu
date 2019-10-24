@@ -9,7 +9,7 @@ from zou.app.models.project_status import ProjectStatus
 from zou.app.services import base_service
 from zou.app.services.exception import (
     ProjectNotFoundException,
-    MetadataDescriptorNotFoundException
+    MetadataDescriptorNotFoundException,
 )
 
 from zou.app.utils import fields, events, cache
@@ -29,11 +29,12 @@ def open_projects(name=None):
     """
     Return all open projects. Allow to filter projects by name.
     """
-    query = Project.query \
-        .join(ProjectStatus) \
-        .outerjoin(MetadataDescriptor) \
-        .filter(ProjectStatus.name.in_(("Active", "open", "Open"))) \
+    query = (
+        Project.query.join(ProjectStatus)
+        .outerjoin(MetadataDescriptor)
+        .filter(ProjectStatus.name.in_(("Active", "open", "Open")))
         .order_by(Project.name)
+    )
 
     if name is not None:
         query = query.filter(Project.name == name)
@@ -54,24 +55,28 @@ def get_projects_with_extra_data(query):
         descriptors = MetadataDescriptor.get_all_by(project_id=project.id)
         project_dict["descriptors"] = []
         for descriptor in descriptors:
-            project_dict["descriptors"].append({
-                "id": fields.serialize_value(descriptor.id),
-                "name": descriptor.name,
-                "field_name": descriptor.field_name,
-                "choices": descriptor.choices,
-                "entity_type": descriptor.entity_type
-            })
+            project_dict["descriptors"].append(
+                {
+                    "id": fields.serialize_value(descriptor.id),
+                    "name": descriptor.name,
+                    "field_name": descriptor.field_name,
+                    "choices": descriptor.choices,
+                    "entity_type": descriptor.entity_type,
+                }
+            )
 
         if project.production_type == "tvshow":
-            first_episode = Entity.query \
-                .join(EntityType) \
-                .filter(EntityType.name == 'Episode') \
-                .filter(Entity.project_id == project.id) \
-                .order_by(Entity.name) \
+            first_episode = (
+                Entity.query.join(EntityType)
+                .filter(EntityType.name == "Episode")
+                .filter(Entity.project_id == project.id)
+                .order_by(Entity.name)
                 .first()
+            )
             if first_episode is not None:
-                project_dict["first_episode_id"] = \
-                    fields.serialize_value(first_episode.id)
+                project_dict["first_episode_id"] = fields.serialize_value(
+                    first_episode.id
+                )
 
         projects.append(project_dict)
     return projects
@@ -81,10 +86,11 @@ def get_projects():
     """
     Return all projects. Allow to filter projects by name.
     """
-    query = Project.query \
-        .join(ProjectStatus) \
-        .add_columns(ProjectStatus.name) \
+    query = (
+        Project.query.join(ProjectStatus)
+        .add_columns(ProjectStatus.name)
         .order_by(Project.name)
+    )
 
     result = []
     for entry in query.all():
@@ -125,10 +131,7 @@ def get_or_create_status(name):
     """
     project_status = ProjectStatus.get_by(name=name)
     if project_status is None:
-        project_status = ProjectStatus(
-            name=name,
-            color="#000000"
-        )
+        project_status = ProjectStatus(name=name, color="#000000")
         project_status.save()
     return project_status.serialize()
 
@@ -153,10 +156,7 @@ def get_or_create_project(name):
     project = Project.get_by(name=name)
     if project is None:
         open_status = get_or_create_open_status()
-        project = Project(
-            name=name,
-            project_status_id=open_status["id"]
-        )
+        project = Project(name=name, project_status_id=open_status["id"])
         project.save()
     return project.serialize()
 
@@ -207,9 +207,7 @@ def update_project(project_id, data):
     project = get_project_raw(project_id)
     project.update(data)
     clear_project_cache(project_id)
-    events.emit("project:update", {
-        "project_id": project_id
-    })
+    events.emit("project:update", {"project_id": project_id})
     return project.serialize()
 
 
@@ -245,12 +243,13 @@ def add_metadata_descriptor(project_id, entity_type, name, choices):
         entity_type=entity_type,
         name=name,
         choices=choices,
-        field_name=slugify.slugify(name, separator="_")
+        field_name=slugify.slugify(name, separator="_"),
     )
 
-    events.emit("metadata-descriptor:new", {
-        "metadata_descriptor_id": str(descriptor.id)
-    })
+    events.emit(
+        "metadata-descriptor:new",
+        {"metadata_descriptor_id": str(descriptor.id)},
+    )
     return descriptor.serialize()
 
 
@@ -258,10 +257,13 @@ def get_metadata_descriptors(project_id):
     """
     Get all metadata descriptors for given project and entity type.
     """
-    descriptors = MetadataDescriptor.query \
-        .filter(MetadataDescriptor.project_id == project_id) \
-        .order_by(MetadataDescriptor.name) \
+    descriptors = (
+        MetadataDescriptor.query.filter(
+            MetadataDescriptor.project_id == project_id
+        )
+        .order_by(MetadataDescriptor.name)
         .all()
+    )
     return fields.serialize_models(descriptors)
 
 
@@ -272,7 +274,7 @@ def get_metadata_descriptor_raw(metadata_descriptor_id):
     return base_service.get_instance(
         MetadataDescriptor,
         metadata_descriptor_id,
-        MetadataDescriptorNotFoundException
+        MetadataDescriptorNotFoundException,
     )
 
 
@@ -296,13 +298,12 @@ def update_metadata_descriptor(metadata_descriptor_id, changes):
             value = metadata.pop(descriptor.field_name, None)
             if value is not None:
                 metadata[changes["field_name"]] = value
-                entity.update({
-                    "data": metadata
-                })
+                entity.update({"data": metadata})
     descriptor.update(changes)
-    events.emit("metadata-descriptor:update", {
-        "metadata_descriptor_id": str(descriptor.id)
-    })
+    events.emit(
+        "metadata-descriptor:update",
+        {"metadata_descriptor_id": str(descriptor.id)},
+    )
     return descriptor.serialize()
 
 
@@ -316,14 +317,13 @@ def remove_metadata_descriptor(metadata_descriptor_id):
         metadata = fields.serialize_value(entity.data)
         if metadata is not None:
             metadata.pop(descriptor.field_name, None)
-            entity.update({
-                "data": metadata
-            })
+            entity.update({"data": metadata})
     try:
         descriptor.delete()
     except ObjectDeletedError:
         pass
-    events.emit("metadata-descriptor:delete", {
-        "metadata_descriptor_id": str(descriptor.id)
-    })
+    events.emit(
+        "metadata-descriptor:delete",
+        {"metadata_descriptor_id": str(descriptor.id)},
+    )
     return descriptor.serialize()

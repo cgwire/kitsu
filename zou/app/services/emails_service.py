@@ -6,7 +6,7 @@ from zou.app.services import (
     names_service,
     persons_service,
     projects_service,
-    tasks_service
+    tasks_service,
 )
 from zou.app.stores import queue_store
 
@@ -21,7 +21,7 @@ def send_notification(person_id, subject, message):
         if config.ENABLE_JOB_QUEUE:
             queue_store.job_queue.enqueue(
                 emails.send_email,
-                args=(subject, message + get_signature(), person.email)
+                args=(subject, message + get_signature(), person.email),
             )
         else:
             emails.send_email(subject, message, person.email)
@@ -32,8 +32,7 @@ def send_notification(person_id, subject, message):
         token = organisation.get("chat_token_slack", "")
         if config.ENABLE_JOB_QUEUE:
             queue_store.job_queue.enqueue(
-                chats.send_to_slack,
-                args=(token, userid, message)
+                chats.send_to_slack, args=(token, userid, message)
             )
         else:
             chats.send_to_slack(token, userid, message)
@@ -53,7 +52,7 @@ def send_comment_notification(person_id, author_id, comment, task):
         subject = "[Kitsu] %s - %s commented on %s" % (
             task_status["short_name"],
             author["first_name"],
-            task_name
+            task_name,
         )
         message = """%s wrote a comment on %s and changed the status to %s:
 
@@ -66,7 +65,7 @@ To reply connect to this URL:
             task_name,
             task_status["short_name"],
             comment["text"],
-            task_url
+            task_url,
         )
         send_notification(person_id, subject, message)
 
@@ -83,7 +82,7 @@ def send_mention_notification(person_id, author_id, comment, task):
         (author, task_name, task_url) = get_task_descriptors(author_id, task)
         subject = "[Kitsu] %s mentioned you on %s" % (
             author["first_name"],
-            task_name
+            task_name,
         )
         message = """%s mentioned you in a comment on %s:
 
@@ -95,7 +94,7 @@ To reply connect to this URL:
             author["full_name"],
             task_name,
             comment["text"],
-            task_url
+            task_url,
         )
         return send_notification(person_id, subject, message)
     else:
@@ -118,7 +117,7 @@ def send_assignation_notification(person_id, author_id, task):
     """ % (
             author["full_name"],
             task_name,
-            task_url
+            task_url,
         )
         return send_notification(person_id, subject, message)
     return True
@@ -129,10 +128,13 @@ def get_signature():
     Build signature for Zou emails.
     """
     organisation = persons_service.get_organisation()
-    return """
+    return (
+        """
 Best,
 
-%s Team""" % organisation["name"]
+%s Team"""
+        % organisation["name"]
+    )
 
 
 def get_task_descriptors(person_id, task):
@@ -156,7 +158,7 @@ def get_task_descriptors(person_id, task):
     task_name = "%s / %s / %s" % (
         project["name"],
         entity_name,
-        task_type["name"]
+        task_type["name"],
     )
     task_url = "%s://%s/productions/%s%s/%s/tasks/%s" % (
         config.DOMAIN_PROTOCOL,
@@ -164,6 +166,6 @@ def get_task_descriptors(person_id, task):
         task["project_id"],
         episode_segment,
         entity_type,
-        task["id"]
+        task["id"],
     )
     return (author, task_name, task_url)

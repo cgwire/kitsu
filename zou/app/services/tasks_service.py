@@ -29,7 +29,7 @@ from zou.app.services.exception import (
     TaskStatusNotFoundException,
     TaskTypeNotFoundException,
     DepartmentNotFoundException,
-    WrongDateFormatException
+    WrongDateFormatException,
 )
 
 from zou.app.services import (
@@ -37,7 +37,7 @@ from zou.app.services import (
     base_service,
     files_service,
     persons_service,
-    shots_service
+    shots_service,
 )
 
 
@@ -59,9 +59,7 @@ def clear_comment_cache(comment_id):
 
 def get_done_status():
     return get_or_create_status(
-        app.config["DONE_TASK_STATUS"],
-        "done",
-        is_done=True
+        app.config["DONE_TASK_STATUS"], "done", is_done=True
     )
 
 
@@ -70,10 +68,7 @@ def get_wip_status():
 
 
 def get_to_review_status():
-    return get_or_create_status(
-        app.config["TO_REVIEW_TASK_STATUS"],
-        "pndng"
-    )
+    return get_or_create_status(app.config["TO_REVIEW_TASK_STATUS"], "pndng")
 
 
 def get_todo_status():
@@ -85,9 +80,7 @@ def get_task_status_raw(task_status_id):
     Get task status matching given id as an active record.
     """
     return base_service.get_instance(
-        TaskStatus,
-        task_status_id,
-        TaskStatusNotFoundException
+        TaskStatus, task_status_id, TaskStatusNotFoundException
     )
 
 
@@ -224,23 +217,21 @@ def get_task_dicts_for_entity(entity_id):
     Return all tasks related to given entity. Add extra information like
     project name, task type name, etc.
     """
-    query = Task.query.order_by(Task.name) \
-        .filter_by(entity_id=entity_id) \
-        .join(Project) \
-        .join(TaskType) \
-        .join(TaskStatus) \
-        .join(Entity, Task.entity_id == Entity.id) \
-        .join(EntityType) \
-        .add_columns(Project.name) \
-        .add_columns(TaskType.name) \
-        .add_columns(TaskStatus.name) \
-        .add_columns(EntityType.name) \
-        .add_columns(Entity.name) \
-        .order_by(
-            Project.name,
-            TaskType.name,
-            EntityType.name,
-            Entity.name)
+    query = (
+        Task.query.order_by(Task.name)
+        .filter_by(entity_id=entity_id)
+        .join(Project)
+        .join(TaskType)
+        .join(TaskStatus)
+        .join(Entity, Task.entity_id == Entity.id)
+        .join(EntityType)
+        .add_columns(Project.name)
+        .add_columns(TaskType.name)
+        .add_columns(TaskStatus.name)
+        .add_columns(EntityType.name)
+        .add_columns(Entity.name)
+        .order_by(Project.name, TaskType.name, EntityType.name, Entity.name)
+    )
 
     results = []
 
@@ -251,7 +242,7 @@ def get_task_dicts_for_entity(entity_id):
             task_type_name,
             task_status_name,
             entity_type_name,
-            entity_name
+            entity_name,
         ) = entry
 
         task = task_object.serialize()
@@ -303,10 +294,9 @@ def get_task_types_for_entity(entity_id):
     """
     Return all task types for which there is a task related to given entity.
     """
-    task_types = TaskType.query \
-        .join(Task, Entity) \
-        .filter(Entity.id == entity_id) \
-        .all()
+    task_types = (
+        TaskType.query.join(Task, Entity).filter(Entity.id == entity_id).all()
+    )
     return fields.serialize_models(task_types)
 
 
@@ -314,11 +304,12 @@ def get_task_types_for_project(project_id):
     """
     Return all task types for which there is a task related to given project.
     """
-    task_types = TaskType.query \
-        .join(Task) \
-        .filter(Task.project_id == project_id) \
-        .distinct(TaskType.id) \
+    task_types = (
+        TaskType.query.join(Task)
+        .filter(Task.project_id == project_id)
+        .distinct(TaskType.id)
         .all()
+    )
     return fields.serialize_models(task_types)
 
 
@@ -336,11 +327,11 @@ def get_next_preview_revision(task_id):
     """
     Get upcoming revision for preview files of given task.
     """
-    preview_files = PreviewFile.query.filter_by(
-        task_id=task_id
-    ).order_by(
-        PreviewFile.revision.desc()
-    ).all()
+    preview_files = (
+        PreviewFile.query.filter_by(task_id=task_id)
+        .order_by(PreviewFile.revision.desc())
+        .all()
+    )
     revision = 1
     if len(preview_files) > 0:
         revision = preview_files[0].revision + 1
@@ -364,17 +355,19 @@ def get_comments(task_id):
     Return all comments related to given task.
     """
     comments = []
-    query = Comment.query.order_by(Comment.created_at.desc()) \
-        .filter_by(object_id=task_id) \
-        .join(Person, TaskStatus) \
+    query = (
+        Comment.query.order_by(Comment.created_at.desc())
+        .filter_by(object_id=task_id)
+        .join(Person, TaskStatus)
         .add_columns(
             TaskStatus.name,
             TaskStatus.short_name,
             TaskStatus.color,
             Person.first_name,
             Person.last_name,
-            Person.has_avatar
+            Person.has_avatar,
         )
+    )
 
     for result in query.all():
         (
@@ -384,7 +377,7 @@ def get_comments(task_id):
             task_status_color,
             person_first_name,
             person_last_name,
-            person_has_avatar
+            person_has_avatar,
         ) = result
 
         comment_dict = comment.serialize()
@@ -392,36 +385,37 @@ def get_comments(task_id):
             "first_name": person_first_name,
             "last_name": person_last_name,
             "has_avatar": person_has_avatar,
-            "id": str(comment.person_id)
+            "id": str(comment.person_id),
         }
         comment_dict["task_status"] = {
             "name": task_status_name,
             "short_name": task_status_short_name,
             "color": task_status_color,
-            "id": str(comment.task_status_id)
+            "id": str(comment.task_status_id),
         }
 
         if comment.preview_file_id is not None:
             preview = files_service.get_preview_file(comment.preview_file_id)
-            comment_dict["previews"] = [{
-                "id": str(preview.id),
-                "revision": preview["revision"],
-                "extension": preview["extension"],
-                "annotations": preview["annotations"]
-            }]
+            comment_dict["previews"] = [
+                {
+                    "id": str(preview.id),
+                    "revision": preview["revision"],
+                    "extension": preview["extension"],
+                    "annotations": preview["annotations"],
+                }
+            ]
         else:
             comment_dict["previews"] = []
-            previews = sorted(
-                comment.previews,
-                key=lambda x: x.created_at
-            )
+            previews = sorted(comment.previews, key=lambda x: x.created_at)
             for preview in previews:
-                comment_dict["previews"].append({
-                    "id": str(preview.id),
-                    "revision": preview.revision,
-                    "extension": preview.extension,
-                    "annotations": preview.annotations
-                })
+                comment_dict["previews"].append(
+                    {
+                        "id": str(preview.id),
+                        "revision": preview.revision,
+                        "extension": preview.extension,
+                        "annotations": preview.annotations,
+                    }
+                )
         comments.append(comment_dict)
     return comments
 
@@ -454,9 +448,9 @@ def get_comment_by_preview_file_id(preview_file_id):
     Return comment related to given preview file as a dict.
     """
     preview_file = files_service.get_preview_file_raw(preview_file_id)
-    comment = Comment.query \
-        .filter(Comment.previews.contains(preview_file)) \
-        .first()
+    comment = Comment.query.filter(
+        Comment.previews.contains(preview_file)
+    ).first()
     if comment is not None:
         return comment.serialize()
     else:
@@ -464,11 +458,7 @@ def get_comment_by_preview_file_id(preview_file_id):
 
 
 def create_comment(
-    object_id,
-    task_status_id,
-    person_id,
-    text,
-    object_type="Task"
+    object_id, task_status_id, person_id, text, object_type="Task"
 ):
     """
     Create a new comment for given object (by default, it considers this object
@@ -480,11 +470,9 @@ def create_comment(
         task_status_id=task_status_id,
         person_id=person_id,
         mentions=get_comment_mentions(object_id, text),
-        text=text
+        text=text,
     )
-    events.emit("comment:new", {
-        "comment_id": comment.id,
-    })
+    events.emit("comment:new", {"comment_id": comment.id})
     return comment.serialize()
 
 
@@ -506,9 +494,7 @@ def delete_comment(comment_id):
     comment = get_comment_raw(comment_id)
     comment.delete()
     clear_comment_cache(comment_id)
-    events.emit("comment:delete", {
-        "comment_id": comment_id,
-    })
+    events.emit("comment:delete", {"comment_id": comment_id})
     return comment.serialize()
 
 
@@ -516,10 +502,11 @@ def get_tasks_for_entity_and_task_type(entity_id, task_type_id):
     """
     For a task type, returns all tasks related to given entity.
     """
-    tasks = Task.query \
-        .filter_by(entity_id=entity_id, task_type_id=task_type_id) \
-        .order_by(Task.name) \
+    tasks = (
+        Task.query.filter_by(entity_id=entity_id, task_type_id=task_type_id)
+        .order_by(Task.name)
         .all()
+    )
     return Task.serialize_list(tasks)
 
 
@@ -544,11 +531,7 @@ def get_person_done_tasks(person_id, projects):
     """
     Return all finished tasks performed by a person.
     """
-    return get_person_tasks(
-        person_id,
-        projects,
-        is_done=True
-    )
+    return get_person_tasks(person_id, projects, is_done=True)
 
 
 def get_person_tasks(person_id, projects, is_done=None):
@@ -558,16 +541,16 @@ def get_person_tasks(person_id, projects, is_done=None):
     person = Person.get(person_id)
     project_ids = [project["id"] for project in projects]
 
-    Sequence = aliased(Entity, name='sequence')
-    Episode = aliased(Entity, name='episode')
-    query = Task.query \
-        .join(Project, TaskType, TaskStatus) \
-        .join(Entity, Entity.id == Task.entity_id) \
-        .join(EntityType, EntityType.id == Entity.entity_type_id) \
-        .outerjoin(Sequence, Sequence.id == Entity.parent_id) \
-        .outerjoin(Episode, Episode.id == Sequence.parent_id) \
-        .filter(Task.assignees.contains(person)) \
-        .filter(Project.id.in_(project_ids)) \
+    Sequence = aliased(Entity, name="sequence")
+    Episode = aliased(Entity, name="episode")
+    query = (
+        Task.query.join(Project, TaskType, TaskStatus)
+        .join(Entity, Entity.id == Task.entity_id)
+        .join(EntityType, EntityType.id == Entity.entity_type_id)
+        .outerjoin(Sequence, Sequence.id == Entity.parent_id)
+        .outerjoin(Episode, Episode.id == Sequence.parent_id)
+        .filter(Task.assignees.contains(person))
+        .filter(Project.id.in_(project_ids))
         .add_columns(
             Project.name,
             Project.has_avatar,
@@ -584,13 +567,14 @@ def get_person_tasks(person_id, projects, is_done=None):
             TaskStatus.name,
             TaskType.color,
             TaskStatus.color,
-            TaskStatus.short_name
+            TaskStatus.short_name,
         )
+    )
 
     if is_done:
-        query = query \
-            .filter(TaskStatus.is_done == True) \
-            .order_by(Task.end_date.desc(), TaskType.name, Entity.name)
+        query = query.filter(TaskStatus.is_done == True).order_by(
+            Task.end_date.desc(), TaskType.name, Entity.name
+        )
     else:
         query = query.filter(TaskStatus.is_done == False)
 
@@ -612,7 +596,7 @@ def get_person_tasks(person_id, projects, is_done=None):
         task_status_name,
         task_type_color,
         task_status_color,
-        task_status_short_name
+        task_status_short_name,
     ) in query.all():
         if entity_preview_file_id is None:
             entity_preview_file_id = ""
@@ -624,36 +608,39 @@ def get_person_tasks(person_id, projects, is_done=None):
             episode_id = entity_source_id
 
         task_dict = task.serialize()
-        task_dict.update({
-            "project_name": project_name,
-            "project_id": str(task.project_id),
-            "project_has_avatar": project_has_avatar,
-            "entity_id": str(entity_id),
-            "entity_name": entity_name,
-            "entity_description": entity_description,
-            "entity_preview_file_id": str(entity_preview_file_id),
-            "entity_source_id": str(entity_source_id),
-            "entity_type_name": entity_type_name,
-            "sequence_name": sequence_name,
-            "episode_id": str(episode_id),
-            "episode_name": episode_name,
-            "task_estimation": task.estimation,
-            "task_due_date": fields.serialize_value(task.due_date),
-            "task_type_name": task_type_name,
-            "task_status_name": task_status_name,
-            "task_type_color": task_type_color,
-            "task_status_color": task_status_color,
-            "task_status_short_name": task_status_short_name
-        })
+        task_dict.update(
+            {
+                "project_name": project_name,
+                "project_id": str(task.project_id),
+                "project_has_avatar": project_has_avatar,
+                "entity_id": str(entity_id),
+                "entity_name": entity_name,
+                "entity_description": entity_description,
+                "entity_preview_file_id": str(entity_preview_file_id),
+                "entity_source_id": str(entity_source_id),
+                "entity_type_name": entity_type_name,
+                "sequence_name": sequence_name,
+                "episode_id": str(episode_id),
+                "episode_name": episode_name,
+                "task_estimation": task.estimation,
+                "task_due_date": fields.serialize_value(task.due_date),
+                "task_type_name": task_type_name,
+                "task_status_name": task_status_name,
+                "task_type_color": task_type_color,
+                "task_status_color": task_status_color,
+                "task_status_short_name": task_status_short_name,
+            }
+        )
         tasks.append(task_dict)
 
     task_ids = [task["id"] for task in tasks]
 
     task_comment_map = {}
-    comments = Comment.query \
-        .filter(Comment.object_id.in_(task_ids)) \
-        .order_by(Comment.object_id, Comment.created_at) \
+    comments = (
+        Comment.query.filter(Comment.object_id.in_(task_ids))
+        .order_by(Comment.object_id, Comment.created_at)
         .all()
+    )
 
     task_id = None
     for comment in comments:
@@ -662,7 +649,7 @@ def get_person_tasks(person_id, projects, is_done=None):
             task_comment_map[task_id] = {
                 "text": comment.text,
                 "date": fields.serialize_value(comment.created_at),
-                "person_id": fields.serialize_value(comment.person_id)
+                "person_id": fields.serialize_value(comment.person_id),
             }
     for task in tasks:
         if task["id"] in task_comment_map:
@@ -697,22 +684,22 @@ def create_task(task_type, entity, name="main"):
             task_status_id=task_status["id"],
             entity_id=entity["id"],
             assigner_id=current_user_id,
-            assignees=[]
+            assignees=[],
         )
         task_dict = task.serialize()
-        task_dict.update({
-            "task_status_id": task_status["id"],
-            "task_status_name": task_status["name"],
-            "task_status_short_name": task_status["short_name"],
-            "task_status_color": task_status["color"],
-            "task_type_id": task_type["id"],
-            "task_type_name": task_type["name"],
-            "task_type_color": task_type["color"],
-            "task_type_priority": task_type["priority"]
-        })
-        events.emit("task:new", {
-            "task_id": task.id
-        })
+        task_dict.update(
+            {
+                "task_status_id": task_status["id"],
+                "task_status_name": task_status["name"],
+                "task_status_short_name": task_status["short_name"],
+                "task_status_color": task_status["color"],
+                "task_type_id": task_type["id"],
+                "task_type_name": task_type["name"],
+                "task_type_color": task_type["color"],
+                "task_type_priority": task_type["priority"],
+            }
+        )
+        events.emit("task:new", {"task_id": task.id})
         return task_dict
 
     except IntegrityError:
@@ -730,18 +717,12 @@ def update_task(task_id, data):
 
     task.update(data)
     clear_task_cache(task_id)
-    events.emit("task:update", {
-        "task_id": task_id
-    })
+    events.emit("task:update", {"task_id": task_id})
     return task.serialize()
 
 
 def get_or_create_status(
-    name,
-    short_name="",
-    color="#f5f5f5",
-    is_done=False,
-    is_retake=False
+    name, short_name="", color="#f5f5f5", is_done=False, is_retake=False
 ):
     """
     Create a new task status if it doesn't exist. If it exists, it returns the
@@ -758,11 +739,9 @@ def get_or_create_status(
             color=color,
             is_reviewable=True,
             is_done=is_done,
-            is_retake=is_retake
+            is_retake=is_retake,
         )
-        events.emit("task_status:new", {
-            "task_status_id": task_status.id
-        })
+        events.emit("task_status:new", {"task_status_id": task_status.id})
     return task_status.serialize()
 
 
@@ -773,9 +752,7 @@ def update_task_status(task_status_id, data):
     task_status = get_task_status_raw(task_status_id)
     task_status.update(data)
     clear_task_status_cache(task_status_id)
-    events.emit("task_status:update", {
-        "task_status_id": task_status_id
-    })
+    events.emit("task_status:update", {"task_status_id": task_status_id})
     return task_status.serialize()
 
 
@@ -786,14 +763,9 @@ def get_or_create_department(name):
     """
     department = Department.get_by(name=name)
     if department is None:
-        department = Department(
-            name=name,
-            color="#000000"
-        )
+        department = Department(name=name, color="#000000")
         department.save()
-        events.emit("department:new", {
-            "department_id": department.id
-        })
+        events.emit("department:new", {"department_id": department.id})
     return department.serialize()
 
 
@@ -805,7 +777,7 @@ def get_or_create_task_type(
     for_shots=False,
     for_entity="Asset",
     short_name="",
-    shotgun_id=None
+    shotgun_id=None,
 ):
     """
     Create a new task type if it doesn't exist. If it exists, it returns the
@@ -820,11 +792,9 @@ def get_or_create_task_type(
             color=color,
             priority=priority,
             for_shots=for_shots,
-            shotgun_id=shotgun_id
+            shotgun_id=shotgun_id,
         )
-        events.emit("task_type:new", {
-            "task_type_id": task_type.id
-        })
+        events.emit("task_type:new", {"task_type_id": task_type.id})
     return task_type.serialize()
 
 
@@ -835,9 +805,7 @@ def create_or_update_time_spent(task_id, person_id, date, duration, add=False):
     """
     try:
         time_spent = TimeSpent.get_by(
-            task_id=task_id,
-            person_id=person_id,
-            date=date
+            task_id=task_id, person_id=person_id, date=date
         )
     except DataError:
         raise WrongDateFormatException
@@ -852,10 +820,7 @@ def create_or_update_time_spent(task_id, person_id, date, duration, add=False):
         events.emit("time-spent:update", {"time_spent_id": str(time_spent.id)})
     else:
         time_spent = TimeSpent.create(
-            task_id=task_id,
-            person_id=person_id,
-            date=date,
-            duration=duration
+            task_id=task_id, person_id=person_id, date=date, duration=duration
         )
         events.emit("time-spent:new", {"time_spent_id": str(time_spent.id)})
 
@@ -893,10 +858,9 @@ def clear_assignation(task_id):
     clear_task_cache(task_id)
     task_dict = task.serialize()
     for assignee in assignees:
-        events.emit("task:unassign", {
-            "person_id": assignee["id"],
-            "task_id": task_id
-        })
+        events.emit(
+            "task:unassign", {"person_id": assignee["id"], "task_id": task_id}
+        )
     events.emit("task:update", {"task_id": task_id})
     return task_dict
 
@@ -910,10 +874,7 @@ def assign_task(task_id, person_id):
     task.assignees.append(person)
     task.save()
     task_dict = task.serialize()
-    events.emit("task:assign", {
-        "task_id": task.id,
-        "person_id": person.id
-    })
+    events.emit("task:assign", {"task_id": task.id, "person_id": person.id})
     clear_task_cache(task_id)
     events.emit("task:update", {"task_id": task_id})
     return task_dict
@@ -926,9 +887,9 @@ def start_task(task_id):
     """
     task = get_task_raw(task_id)
     wip_status = get_wip_status()
-    task_is_not_already_wip = \
-        task.task_status_id is None \
-        or task.task_status_id != wip_status["id"]
+    task_is_not_already_wip = (
+        task.task_status_id is None or task.task_status_id != wip_status["id"]
+    )
 
     if task_is_not_already_wip:
         task_dict_before = task.serialize()
@@ -939,22 +900,21 @@ def start_task(task_id):
 
         task.update(new_data)
         clear_task_cache(task_id)
-        events.emit("task:start", {
-            "task_id": task_id,
-            "previous_task_status_id": task_dict_before["task_status_id"],
-            "real_start_date": task.real_start_date,
-            "shotgun_id": task_dict_before["shotgun_id"]
-        })
+        events.emit(
+            "task:start",
+            {
+                "task_id": task_id,
+                "previous_task_status_id": task_dict_before["task_status_id"],
+                "real_start_date": task.real_start_date,
+                "shotgun_id": task_dict_before["shotgun_id"],
+            },
+        )
 
     return task.serialize()
 
 
 def task_to_review(
-    task_id,
-    person,
-    comment,
-    preview_path={},
-    change_status=True
+    task_id, person, comment, preview_path={}, change_status=True
 ):
     """
     Change the task status to "waiting for approval" if it is not already the
@@ -981,18 +941,21 @@ def task_to_review(
     task_dict_after["comment"] = comment
     task_dict_after["preview_path"] = preview_path
 
-    events.emit("task:to-review", {
-        "task_id": task_id,
-        "task_shotgun_id": task_dict_before["shotgun_id"],
-        "entity_type_name": entity_type.name,
-        "previous_task_status_id": task_dict_before["task_status_id"],
-        "entity_shotgun_id": entity.shotgun_id,
-        "project_shotgun_id": project.shotgun_id,
-        "person_shotgun_id": person["shotgun_id"],
-        "comment": comment,
-        "preview_path": preview_path,
-        "change_status": change_status
-    })
+    events.emit(
+        "task:to-review",
+        {
+            "task_id": task_id,
+            "task_shotgun_id": task_dict_before["shotgun_id"],
+            "entity_type_name": entity_type.name,
+            "previous_task_status_id": task_dict_before["task_status_id"],
+            "entity_shotgun_id": entity.shotgun_id,
+            "project_shotgun_id": project.shotgun_id,
+            "person_shotgun_id": person["shotgun_id"],
+            "comment": comment,
+            "preview_path": preview_path,
+            "change_status": change_status,
+        },
+    )
 
     return task_dict_after
 
@@ -1010,30 +973,20 @@ def add_preview_file_to_comment(comment_id, person_id, task_id, revision=0):
         revision = comment.previews[0].revision
 
     preview_file = files_service.create_preview_file_raw(
-        str(uuid.uuid4())[:13],
-        revision,
-        task_id,
-        person_id
+        str(uuid.uuid4())[:13], revision, task_id, person_id
     )
-    events.emit("preview-file:create", {
-        "preview_file_id": preview_file.id
-    })
+    events.emit("preview-file:create", {"preview_file_id": preview_file.id})
     comment.previews.append(preview_file)
     comment.save()
     if news is not None:
         news.update({"preview_file_id": preview_file.id})
-    events.emit("comment:update", {
-        "comment_id": comment.id
-    })
+    events.emit("comment:update", {"comment_id": comment.id})
     return preview_file.serialize()
 
 
 def reset_mentions(comment):
     task = get_task(comment["object_id"])
-    mentions = get_comment_mentions(
-        task["id"],
-        comment["text"]
-    )
+    mentions = get_comment_mentions(task["id"], comment["text"])
     comment_to_update = Comment.get(comment["id"])
     comment_to_update.mentions = mentions
     comment_to_update.save()
@@ -1044,10 +997,11 @@ def get_comments_for_project(project_id, page=0):
     """
     Return all comments for given project.
     """
-    query = Comment.query \
-        .join(Task, Task.id == Comment.object_id) \
-        .filter(Task.project_id == project_id) \
+    query = (
+        Comment.query.join(Task, Task.id == Comment.object_id)
+        .filter(Task.project_id == project_id)
         .order_by(Comment.updated_at.desc())
+    )
     return query_utils.get_paginated_results(query, page)
 
 
@@ -1055,9 +1009,7 @@ def get_time_spents_for_project(project_id, page=0):
     """
     Return all time spents for given project.
     """
-    query = TimeSpent.query \
-        .join(Task) \
-        .filter(Task.project_id == project_id)
+    query = TimeSpent.query.join(Task).filter(Task.project_id == project_id)
     return query_utils.get_paginated_results(query, page)
 
 
@@ -1065,7 +1017,7 @@ def get_tasks_for_project(project_id, page=0):
     """
     Return all tasks for given project.
     """
-    query = Task.query \
-        .filter(Task.project_id == project_id) \
-        .order_by(Task.updated_at.desc())
+    query = Task.query.filter(Task.project_id == project_id).order_by(
+        Task.updated_at.desc()
+    )
     return query_utils.get_paginated_results(query, page)

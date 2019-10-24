@@ -29,9 +29,10 @@ def get_or_create_instance_by_name(model, **kwargs):
     instance = model.get_by(name=kwargs["name"])
     if instance is None:
         instance = model.create(**kwargs)
-        events.emit("%s:new" % model.__tablename__, {
-            "%s_id" % model.__tablename__: instance.id
-        })
+        events.emit(
+            "%s:new" % model.__tablename__,
+            {"%s_id" % model.__tablename__: instance.id},
+        )
     return instance.serialize()
 
 

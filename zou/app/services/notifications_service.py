@@ -8,13 +8,8 @@ from zou.app.models.subscription import Subscription
 from zou.app.models.task import Task
 from zou.app.models.task_type import TaskType
 
-from zou.app.services import (
-    emails_service,
-    tasks_service
-)
-from zou.app.services.exception import (
-    PersonNotFoundException
-)
+from zou.app.services import emails_service, tasks_service
+from zou.app.services.exception import PersonNotFoundException
 from zou.app.utils import events, fields, query as query_utils
 
 
@@ -25,7 +20,7 @@ def create_notification(
     task_id=None,
     read=False,
     change=False,
-    type="comment"
+    type="comment",
 ):
     """
     Create a new notification for given person and comment.
@@ -37,7 +32,7 @@ def create_notification(
         author_id=author_id,
         comment_id=comment_id,
         task_id=task_id,
-        type=type
+        type=type,
     )
     return notification.serialize()
 
@@ -83,8 +78,7 @@ def get_sequence_subscriptions(task):
     entity = Entity.get(task["entity_id"])
     if entity is not None and entity.parent_id is not None:
         sequence_subscriptions = Subscription.get_all_by(
-            task_type_id=task["task_type_id"],
-            entity_id=entity.parent_id
+            task_type_id=task["task_type_id"], entity_id=entity.parent_id
         )
     return sequence_subscriptions
 
@@ -108,18 +102,19 @@ def create_notifications_for_task_and_comment(task, comment, change=False):
                 task_id=comment["object_id"],
                 read=False,
                 change=change,
-                type="comment"
+                type="comment",
             )
             emails_service.send_comment_notification(
-                recipient_id,
-                author_id,
-                comment,
-                task
+                recipient_id, author_id, comment, task
             )
-            events.emit("notification:new", {
-                "notification_id": notification["id"],
-                "person_id": recipient_id
-            }, persist=False)
+            events.emit(
+                "notification:new",
+                {
+                    "notification_id": notification["id"],
+                    "person_id": recipient_id,
+                },
+                persist=False,
+            )
         except PersonNotFoundException:
             pass
 
@@ -130,18 +125,19 @@ def create_notifications_for_task_and_comment(task, comment, change=False):
                 comment_id=comment["id"],
                 author_id=comment["person_id"],
                 task_id=comment["object_id"],
-                type="mention"
+                type="mention",
             )
             emails_service.send_mention_notification(
-                recipient_id,
-                author_id,
-                comment,
-                task
+                recipient_id, author_id, comment, task
             )
-            events.emit("notification:new", {
-                "notification_id": notification["id"],
-                "person_id": recipient_id
-            }, persist=False)
+            events.emit(
+                "notification:new",
+                {
+                    "notification_id": notification["id"],
+                    "person_id": recipient_id,
+                },
+                persist=False,
+            )
 
     return recipient_ids
 
@@ -152,10 +148,7 @@ def reset_notifications_for_mentions(comment):
     to the comment and recreate notifications for the mentions listed in the
     comment.
     """
-    Notification.delete_all_by(
-        type="mention",
-        comment_id=comment["id"]
-    )
+    Notification.delete_all_by(type="mention", comment_id=comment["id"])
     notifications = []
     task = tasks_service.get_task(comment["object_id"])
     author_id = comment["person_id"]
@@ -165,19 +158,17 @@ def reset_notifications_for_mentions(comment):
             comment_id=comment["id"],
             author_id=author_id,
             task_id=comment["object_id"],
-            type="mention"
+            type="mention",
         )
         emails_service.send_mention_notification(
-            recipient_id,
-            author_id,
-            comment,
-            task
+            recipient_id, author_id, comment, task
         )
         notifications.append(notification)
-        events.emit("notification:new", {
-            "notification_id": notification["id"],
-            "person_id": recipient_id
-        }, persist=False)
+        events.emit(
+            "notification:new",
+            {"notification_id": notification["id"], "person_id": recipient_id},
+            persist=False,
+        )
     return notifications
 
 
@@ -191,20 +182,16 @@ def create_assignation_notification(task_id, person_id, author_id=None):
 
     if str(author_id) != person_id:
         notification = create_notification(
-            person_id,
-            author_id=author_id,
-            task_id=task_id,
-            type="assignation"
+            person_id, author_id=author_id, task_id=task_id, type="assignation"
         )
         emails_service.send_assignation_notification(
-            person_id,
-            author_id,
-            task.serialize()
+            person_id, author_id, task.serialize()
         )
-        events.emit("notification:new", {
-            "notification_id": notification["id"],
-            "person_id": person_id
-        }, persist=False)
+        events.emit(
+            "notification:new",
+            {"notification_id": notification["id"], "person_id": person_id},
+            persist=False,
+        )
         return notification
     else:
         return None
@@ -215,10 +202,7 @@ def get_task_subscription_raw(person_id, task_id):
     Return subscription matching given person and task.
     """
     try:
-        subscription = Subscription.get_by(
-            person_id=person_id,
-            task_id=task_id
-        )
+        subscription = Subscription.get_by(person_id=person_id, task_id=task_id)
         return subscription
     except StatementError:
         return None
@@ -238,10 +222,7 @@ def subscribe_to_task(person_id, task_id):
     """
     subscription = get_task_subscription_raw(person_id, task_id)
     if subscription is None:
-        subscription = Subscription.create(
-            person_id=person_id,
-            task_id=task_id
-        )
+        subscription = Subscription.create(person_id=person_id, task_id=task_id)
     return subscription.serialize()
 
 
@@ -265,7 +246,7 @@ def get_sequence_subscription_raw(person_id, sequence_id, task_type_id):
         subscription = Subscription.get_by(
             person_id=person_id,
             entity_id=sequence_id,
-            task_type_id=task_type_id
+            task_type_id=task_type_id,
         )
         return subscription
     except StatementError:
@@ -278,9 +259,7 @@ def has_sequence_subscription(person_id, sequence_id, task_type_id):
     type.
     """
     subscription = get_sequence_subscription_raw(
-        person_id,
-        sequence_id,
-        task_type_id
+        person_id, sequence_id, task_type_id
     )
     return subscription is not None
 
@@ -290,15 +269,13 @@ def subscribe_to_sequence(person_id, sequence_id, task_type_id):
     Add a subscription entry for given person, sequence and task type.
     """
     subscription = get_sequence_subscription_raw(
-        person_id,
-        sequence_id,
-        task_type_id
+        person_id, sequence_id, task_type_id
     )
     if subscription is None:
         subscription = Subscription.create(
             person_id=person_id,
             entity_id=sequence_id,
-            task_type_id=task_type_id
+            task_type_id=task_type_id,
         )
     return subscription.serialize()
 
@@ -308,9 +285,7 @@ def unsubscribe_from_sequence(person_id, sequence_id, task_type_id):
     Remove subscription entry for given person, sequence and task type.
     """
     subscription = get_sequence_subscription_raw(
-        person_id,
-        sequence_id,
-        task_type_id
+        person_id, sequence_id, task_type_id
     )
     if subscription is not None:
         subscription.delete()
@@ -324,16 +299,17 @@ def get_all_sequence_subscriptions(person_id, project_id, task_type_id):
     Return list of sequence ids for which given person has subscribed for
     given project and task type.
     """
-    subscriptions = Subscription.query \
-        .join(Entity) \
-        .join(Project) \
-        .filter(Project.id == project_id) \
-        .filter(TaskType.id == task_type_id) \
+    subscriptions = (
+        Subscription.query.join(Entity)
+        .join(Project)
+        .filter(Project.id == project_id)
+        .filter(TaskType.id == task_type_id)
         .all()
+    )
 
-    return fields.serialize_value([
-        subscription.entity_id for subscription in subscriptions
-    ])
+    return fields.serialize_value(
+        [subscription.entity_id for subscription in subscriptions]
+    )
 
 
 def delete_notifications_for_comment(comment_id):
@@ -351,18 +327,16 @@ def get_last_notifications(notification_type=None):
     query = Notification.query
     if notification_type is not None:
         query = query.filter_by(type=notification_type)
-    return fields.serialize_value(
-        query.limit(100).all()
-    )
+    return fields.serialize_value(query.limit(100).all())
 
 
 def get_subscriptions_for_project(project_id):
     """
     Return all subscriptions for given project.
     """
-    subscriptions = Subscription.query \
-        .join(Task) \
-        .filter(Task.project_id == project_id)
+    subscriptions = Subscription.query.join(Task).filter(
+        Task.project_id == project_id
+    )
     return fields.serialize_list(subscriptions)
 
 
@@ -370,8 +344,9 @@ def get_notifications_for_project(project_id, page=0):
     """
     Return all notifications for given project.
     """
-    query = Notification.query \
-        .join(Task) \
-        .filter(Task.project_id == project_id) \
+    query = (
+        Notification.query.join(Task)
+        .filter(Task.project_id == project_id)
         .order_by(Notification.updated_at.desc())
+    )
     return query_utils.get_paginated_results(query, page)

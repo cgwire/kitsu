@@ -8,11 +8,7 @@ from zou.app.models.entity_type import EntityType
 
 from zou.app.utils import fields, events
 
-from zou.app.services import (
-    assets_service,
-    entities_service,
-    shots_service
-)
+from zou.app.services import assets_service, entities_service, shots_service
 
 """
 Breakdown can be represented in two ways:
@@ -31,22 +27,27 @@ def get_casting(shot_id):
     (or asset for set dressing).
     """
     casting = []
-    links = EntityLink.query \
-        .filter_by(entity_in_id=shot_id) \
-        .join(Entity, EntityLink.entity_out_id == Entity.id) \
-        .join(EntityType, Entity.entity_type_id == EntityType.id) \
-        .filter(Entity.canceled != True) \
-        .add_columns(Entity.name, EntityType.name, Entity.preview_file_id) \
+    links = (
+        EntityLink.query.filter_by(entity_in_id=shot_id)
+        .join(Entity, EntityLink.entity_out_id == Entity.id)
+        .join(EntityType, Entity.entity_type_id == EntityType.id)
+        .filter(Entity.canceled != True)
+        .add_columns(Entity.name, EntityType.name, Entity.preview_file_id)
         .order_by(EntityType.name, Entity.name)
+    )
 
     for (link, entity_name, entity_type_name, entity_preview_file_id) in links:
-        casting.append({
-            "asset_id": fields.serialize_value(link.entity_out_id),
-            "asset_name": entity_name,
-            "asset_type_name": entity_type_name,
-            "preview_file_id": fields.serialize_value(entity_preview_file_id),
-            "nb_occurences": link.nb_occurences
-        })
+        casting.append(
+            {
+                "asset_id": fields.serialize_value(link.entity_out_id),
+                "asset_name": entity_name,
+                "asset_type_name": entity_type_name,
+                "preview_file_id": fields.serialize_value(
+                    entity_preview_file_id
+                ),
+                "nb_occurences": link.nb_occurences,
+            }
+        )
     return casting
 
 
@@ -58,27 +59,32 @@ def get_sequence_casting(sequence_id):
     """
     castings = {}
     Shot = aliased(Entity, name="shot")
-    links = EntityLink.query \
-        .join(Shot, EntityLink.entity_in_id == Shot.id) \
-        .join(Entity, EntityLink.entity_out_id == Entity.id) \
-        .join(EntityType, Entity.entity_type_id == EntityType.id) \
-        .filter(Shot.parent_id == sequence_id) \
-        .filter(Entity.canceled != True) \
-        .add_columns(Entity.name, EntityType.name, Entity.preview_file_id) \
+    links = (
+        EntityLink.query.join(Shot, EntityLink.entity_in_id == Shot.id)
+        .join(Entity, EntityLink.entity_out_id == Entity.id)
+        .join(EntityType, Entity.entity_type_id == EntityType.id)
+        .filter(Shot.parent_id == sequence_id)
+        .filter(Entity.canceled != True)
+        .add_columns(Entity.name, EntityType.name, Entity.preview_file_id)
         .order_by(EntityType.name, Entity.name)
+    )
 
     for (link, entity_name, entity_type_name, entity_preview_file_id) in links:
         shot_id = str(link.entity_in_id)
         if shot_id not in castings:
             castings[shot_id] = []
-        castings[shot_id].append({
-            "asset_id": fields.serialize_value(link.entity_out_id),
-            "name": entity_name,
-            "asset_name": entity_name,
-            "asset_type_name": entity_type_name,
-            "preview_file_id": fields.serialize_value(entity_preview_file_id),
-            "nb_occurences": link.nb_occurences
-        })
+        castings[shot_id].append(
+            {
+                "asset_id": fields.serialize_value(link.entity_out_id),
+                "name": entity_name,
+                "asset_name": entity_name,
+                "asset_type_name": entity_type_name,
+                "preview_file_id": fields.serialize_value(
+                    entity_preview_file_id
+                ),
+                "nb_occurences": link.nb_occurences,
+            }
+        )
     return castings
 
 
@@ -90,28 +96,33 @@ def get_asset_type_casting(project_id, asset_type_id):
     """
     castings = {}
     Asset = aliased(Entity, name="asset")
-    links = EntityLink.query \
-        .join(Asset, EntityLink.entity_in_id == Asset.id) \
-        .join(Entity, EntityLink.entity_out_id == Entity.id) \
-        .join(EntityType, Entity.entity_type_id == EntityType.id) \
-        .filter(Asset.project_id == project_id) \
-        .filter(Asset.entity_type_id == asset_type_id) \
-        .filter(Entity.canceled != True) \
-        .add_columns(Entity.name, EntityType.name, Entity.preview_file_id) \
+    links = (
+        EntityLink.query.join(Asset, EntityLink.entity_in_id == Asset.id)
+        .join(Entity, EntityLink.entity_out_id == Entity.id)
+        .join(EntityType, Entity.entity_type_id == EntityType.id)
+        .filter(Asset.project_id == project_id)
+        .filter(Asset.entity_type_id == asset_type_id)
+        .filter(Entity.canceled != True)
+        .add_columns(Entity.name, EntityType.name, Entity.preview_file_id)
         .order_by(EntityType.name, Entity.name)
+    )
 
     for (link, entity_name, entity_type_name, entity_preview_file_id) in links:
         asset_id = str(link.entity_in_id)
         if asset_id not in castings:
             castings[asset_id] = []
-        castings[asset_id].append({
-            "asset_id": fields.serialize_value(link.entity_out_id),
-            "name": entity_name,
-            "asset_name": entity_name,
-            "asset_type_name": entity_type_name,
-            "preview_file_id": fields.serialize_value(entity_preview_file_id),
-            "nb_occurences": link.nb_occurences
-        })
+        castings[asset_id].append(
+            {
+                "asset_id": fields.serialize_value(link.entity_out_id),
+                "name": entity_name,
+                "asset_name": entity_name,
+                "asset_type_name": entity_type_name,
+                "preview_file_id": fields.serialize_value(
+                    entity_preview_file_id
+                ),
+                "nb_occurences": link.nb_occurences,
+            }
+        )
     return castings
 
 
@@ -126,27 +137,19 @@ def update_casting(entity_id, casting):
     for cast in casting:
         if "asset_id" in cast and "nb_occurences" in cast:
             create_casting_link(
-                entity.id,
-                cast["asset_id"],
-                cast["nb_occurences"]
+                entity.id, cast["asset_id"], cast["nb_occurences"]
             )
     entity_id = str(entity.id)
     if shots_service.is_shot(entity.serialize()):
-        events.emit("shot:casting-update", {
-            "shot": entity_id,
-            "casting": casting_ids
-        })
-        events.emit("shot:update", {
-            "shot_id": entity_id,
-        })
+        events.emit(
+            "shot:casting-update", {"shot": entity_id, "casting": casting_ids}
+        )
+        events.emit("shot:update", {"shot_id": entity_id})
     else:
-        events.emit("asset:casting-update", {
-            "asset": entity_id,
-            "casting": casting_ids
-        })
-        events.emit("asset:update", {
-            "asset_id": entity_id
-        })
+        events.emit(
+            "asset:casting-update", {"asset": entity_id, "casting": casting_ids}
+        )
+        events.emit("asset:update", {"asset_id": entity_id})
     return casting
 
 
@@ -154,22 +157,16 @@ def create_casting_link(entity_in_id, asset_id, nb_occurences=1, label=""):
     """
     Add a link between given entity and given asset.
     """
-    link = EntityLink.get_by(
-        entity_in_id=entity_in_id,
-        entity_out_id=asset_id
-    )
+    link = EntityLink.get_by(entity_in_id=entity_in_id, entity_out_id=asset_id)
     if link is None:
         link = EntityLink.create(
             entity_in_id=entity_in_id,
             entity_out_id=asset_id,
             nb_occurences=nb_occurences,
-            label=label
+            label=label,
         )
     else:
-        link.update({
-            "nb_occurences": nb_occurences,
-            "label": label
-        })
+        link.update({"nb_occurences": nb_occurences, "label": label})
     return link
 
 
@@ -180,30 +177,24 @@ def get_cast_in(asset_id):
     cast_in = []
     Sequence = aliased(Entity, name="sequence")
     Episode = aliased(Entity, name="episode")
-    links = EntityLink.query \
-        .filter_by(entity_out_id=asset_id) \
-        .filter(Entity.canceled != True) \
-        .join(Entity, EntityLink.entity_in_id == Entity.id) \
-        .join(Sequence, Entity.parent_id == Sequence.id) \
-        .outerjoin(Episode, Sequence.parent_id == Episode.id) \
+    links = (
+        EntityLink.query.filter_by(entity_out_id=asset_id)
+        .filter(Entity.canceled != True)
+        .join(Entity, EntityLink.entity_in_id == Entity.id)
+        .join(Sequence, Entity.parent_id == Sequence.id)
+        .outerjoin(Episode, Sequence.parent_id == Episode.id)
         .add_columns(
-            Entity.name,
-            Sequence.name,
-            Episode.name,
-            Entity.preview_file_id
-        ) \
-        .order_by(
-            Episode.name,
-            Sequence.name,
-            Entity.name
+            Entity.name, Sequence.name, Episode.name, Entity.preview_file_id
         )
+        .order_by(Episode.name, Sequence.name, Entity.name)
+    )
 
     for (
         link,
         entity_name,
         sequence_name,
         episode_name,
-        entity_preview_file_id
+        entity_preview_file_id,
     ) in links:
         shot = {
             "shot_id": fields.serialize_value(link.entity_in_id),
@@ -211,38 +202,27 @@ def get_cast_in(asset_id):
             "sequence_name": sequence_name,
             "episode_name": episode_name,
             "preview_file_id": fields.serialize_value(entity_preview_file_id),
-            "nb_occurences": link.nb_occurences
+            "nb_occurences": link.nb_occurences,
         }
         cast_in.append(shot)
 
-    links = EntityLink.query \
-        .filter_by(entity_out_id=asset_id) \
-        .filter(Entity.canceled != True) \
-        .filter(assets_service.build_entity_type_asset_type_filter()) \
-        .join(Entity, EntityLink.entity_in_id == Entity.id) \
-        .join(EntityType, EntityType.id == Entity.entity_type_id) \
-        .add_columns(
-            Entity.name,
-            EntityType.name,
-            Entity.preview_file_id
-        ) \
-        .order_by(
-            EntityType.name,
-            Entity.name
-        )
+    links = (
+        EntityLink.query.filter_by(entity_out_id=asset_id)
+        .filter(Entity.canceled != True)
+        .filter(assets_service.build_entity_type_asset_type_filter())
+        .join(Entity, EntityLink.entity_in_id == Entity.id)
+        .join(EntityType, EntityType.id == Entity.entity_type_id)
+        .add_columns(Entity.name, EntityType.name, Entity.preview_file_id)
+        .order_by(EntityType.name, Entity.name)
+    )
 
-    for (
-        link,
-        entity_name,
-        entity_type_name,
-        entity_preview_file_id
-    ) in links:
+    for (link, entity_name, entity_type_name, entity_preview_file_id) in links:
         shot = {
             "asset_id": fields.serialize_value(link.entity_in_id),
             "asset_name": entity_name,
             "asset_type_name": entity_type_name,
             "preview_file_id": fields.serialize_value(entity_preview_file_id),
-            "nb_occurences": link.nb_occurences
+            "nb_occurences": link.nb_occurences,
         }
         cast_in.append(shot)
 
@@ -256,17 +236,14 @@ def get_asset_instances_for_scene(scene_id, asset_type_id=None):
     Asset instances are a different way to represent the casting of a shot.
     They allow to track precisely output files generated when building a shot.
     """
-    query = AssetInstance.query \
-        .filter(AssetInstance.scene_id == scene_id) \
-        .order_by(
-            AssetInstance.asset_id,
-            AssetInstance.number
-        )
+    query = AssetInstance.query.filter(
+        AssetInstance.scene_id == scene_id
+    ).order_by(AssetInstance.asset_id, AssetInstance.number)
 
     if asset_type_id is not None:
-        query = query \
-            .join(Entity, AssetInstance.asset_id == Entity.id) \
-            .filter(Entity.entity_type_id == asset_type_id)
+        query = query.join(Entity, AssetInstance.asset_id == Entity.id).filter(
+            Entity.entity_type_id == asset_type_id
+        )
 
     asset_instances = query.all()
 
@@ -308,10 +285,11 @@ def get_shot_asset_instances_for_asset(asset_id):
     """
     Return asset instances casted in a shot for given asset.
     """
-    asset_instances = AssetInstance.query \
-        .filter(AssetInstance.asset_id == asset_id) \
-        .order_by(AssetInstance.asset_id, AssetInstance.number) \
+    asset_instances = (
+        AssetInstance.query.filter(AssetInstance.asset_id == asset_id)
+        .order_by(AssetInstance.asset_id, AssetInstance.number)
         .all()
+    )
 
     result = {}
     for asset_instance in asset_instances:
@@ -328,10 +306,11 @@ def get_scene_asset_instances_for_asset(asset_id):
     """
     Return all asset instances of an asset casted in layout scenes.
     """
-    asset_instances = AssetInstance.query \
-        .filter(AssetInstance.asset_id == asset_id) \
-        .order_by(AssetInstance.asset_id, AssetInstance.number) \
+    asset_instances = (
+        AssetInstance.query.filter(AssetInstance.asset_id == asset_id)
+        .order_by(AssetInstance.asset_id, AssetInstance.number)
         .all()
+    )
 
     result = {}
     for asset_instance in asset_instances:
@@ -355,11 +334,12 @@ def add_asset_instance_to_scene(scene_id, asset_id, description=""):
     """
     Create a new asset instance for given asset and scene.
     """
-    instance = AssetInstance.query \
-        .filter(AssetInstance.scene_id == scene_id) \
-        .filter(AssetInstance.asset_id == asset_id) \
-        .order_by(desc(AssetInstance.number)) \
+    instance = (
+        AssetInstance.query.filter(AssetInstance.scene_id == scene_id)
+        .filter(AssetInstance.asset_id == asset_id)
+        .order_by(desc(AssetInstance.number))
         .first()
+    )
 
     number = 1
     if instance is not None:
@@ -371,14 +351,17 @@ def add_asset_instance_to_scene(scene_id, asset_id, description=""):
         scene_id=scene_id,
         number=number,
         name=name,
-        description=description
+        description=description,
     ).serialize()
 
-    events.emit("asset_instance:new", {
-        "scene_id": scene_id,
-        "asset_id": asset_id,
-        "asset_instance_id": asset_instance["id"]
-    })
+    events.emit(
+        "asset_instance:new",
+        {
+            "scene_id": scene_id,
+            "asset_id": asset_id,
+            "asset_instance_id": asset_instance["id"],
+        },
+    )
     return asset_instance
 
 
@@ -391,10 +374,10 @@ def add_asset_instance_to_shot(shot_id, asset_instance_id):
     shot.instance_casting.append(asset_instance)
     shot.save()
 
-    events.emit("asset_instance:add-to-shot", {
-        "shot_id": shot_id,
-        "asset_instance_id": asset_instance_id
-    })
+    events.emit(
+        "asset_instance:add-to-shot",
+        {"shot_id": shot_id, "asset_instance_id": asset_instance_id},
+    )
     return shot.serialize()
 
 
@@ -406,10 +389,10 @@ def remove_asset_instance_for_shot(shot_id, asset_instance_id):
     asset_instance = assets_service.get_asset_instance_raw(asset_instance_id)
     shot.instance_casting.remove(asset_instance)
     shot.save()
-    events.emit("asset_instance:remove-from-shot", {
-        "shot_id": shot_id,
-        "asset_instance_id": asset_instance_id
-    })
+    events.emit(
+        "asset_instance:remove-from-shot",
+        {"shot_id": shot_id, "asset_instance_id": asset_instance_id},
+    )
     return shot.serialize()
 
 
@@ -431,17 +414,14 @@ def get_asset_instances_for_asset(asset_id, asset_type_id=None):
     Asset instances for asset are used for environment (instantiation of props)
     or for props (instantiation of sub props).
     """
-    query = AssetInstance.query \
-        .filter(AssetInstance.target_asset_id == asset_id) \
-        .order_by(
-            AssetInstance.asset_id,
-            AssetInstance.number
-        )
+    query = AssetInstance.query.filter(
+        AssetInstance.target_asset_id == asset_id
+    ).order_by(AssetInstance.asset_id, AssetInstance.number)
 
     if asset_type_id is not None:
-        query = query \
-            .join(Entity, AssetInstance.asset_id == Entity.id) \
-            .filter(Entity.entity_type_id == asset_type_id)
+        query = query.join(Entity, AssetInstance.asset_id == Entity.id).filter(
+            Entity.entity_type_id == asset_type_id
+        )
 
     asset_instances = query.all()
 
@@ -455,18 +435,17 @@ def get_asset_instances_for_asset(asset_id, asset_type_id=None):
 
 
 def add_asset_instance_to_asset(
-    asset_id,
-    asset_to_instantiate_id,
-    description=""
+    asset_id, asset_to_instantiate_id, description=""
 ):
     """
     Create a new asset instance for given asset and scene.
     """
-    instance = AssetInstance.query \
-        .filter(AssetInstance.target_asset_id == asset_id) \
-        .filter(AssetInstance.asset_id == asset_to_instantiate_id) \
-        .order_by(desc(AssetInstance.number)) \
+    instance = (
+        AssetInstance.query.filter(AssetInstance.target_asset_id == asset_id)
+        .filter(AssetInstance.asset_id == asset_to_instantiate_id)
+        .order_by(desc(AssetInstance.number))
         .first()
+    )
 
     number = 1
     if instance is not None:
@@ -478,14 +457,17 @@ def add_asset_instance_to_asset(
         target_asset_id=asset_id,
         number=number,
         name=name,
-        description=description
+        description=description,
     ).serialize()
 
-    events.emit("asset_instance:new", {
-        "asset_id": asset_id,
-        "asset_instantiated": asset_to_instantiate_id,
-        "asset_instance_id": asset_instance["id"]
-    })
+    events.emit(
+        "asset_instance:new",
+        {
+            "asset_id": asset_id,
+            "asset_instantiated": asset_to_instantiate_id,
+            "asset_instance_id": asset_instance["id"],
+        },
+    )
     return asset_instance
 
 

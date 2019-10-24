@@ -18,13 +18,13 @@ from zou.app.services import (
     files_service,
     shots_service,
     projects_service,
-    tasks_service
+    tasks_service,
 )
 from zou.app.services.exception import (
     MalformedFileTreeException,
     WrongFileTreeFileException,
     WrongPathFormatException,
-    TaskNotFoundException
+    TaskNotFoundException,
 )
 
 ALLOWED_FIELDS = ["short_name", "name", "number"]
@@ -37,7 +37,7 @@ def get_working_file_path(
     output_type=None,
     name="",
     revision=1,
-    sep=os.sep
+    sep=os.sep,
 ):
     """
     Return working file path based on given paramaters. The task is mandatory
@@ -51,7 +51,7 @@ def get_working_file_path(
         software=software,
         output_type=output_type,
         name=name,
-        revision=revision
+        revision=revision,
     )
     folder = get_working_folder_path(
         task,
@@ -60,7 +60,7 @@ def get_working_file_path(
         output_type=output_type,
         name=name,
         revision=revision,
-        sep=sep
+        sep=sep,
     )
     return join_path(folder, file_name, sep)
 
@@ -73,7 +73,7 @@ def get_output_file_path(
     task_type=None,
     name="",
     revision=1,
-    sep=os.sep
+    sep=os.sep,
 ):
     file_name = get_output_file_name(
         entity,
@@ -92,18 +92,13 @@ def get_output_file_path(
         task_type=task_type,
         name=name,
         revision=revision,
-        sep=sep
+        sep=sep,
     )
     return join_path(folder, file_name, sep)
 
 
 def get_working_file_name(
-    task,
-    mode="working",
-    software=None,
-    output_type=None,
-    name="",
-    revision=1
+    task, mode="working", software=None, output_type=None, name="", revision=1
 ):
     entity = entities_service.get_entity(task["entity_id"])
     project = get_project(entity)
@@ -116,7 +111,7 @@ def get_working_file_name(
         task=task,
         software=software,
         name=name,
-        revision=revision
+        revision=revision,
     )
 
     return u"%s" % file_name
@@ -130,7 +125,7 @@ def get_output_file_name(
     task_type=None,
     name="",
     revision=1,
-    nb_elements=1
+    nb_elements=1,
 ):
     project = get_project(entity)
     tree = get_tree_from_project(project)
@@ -143,7 +138,7 @@ def get_output_file_name(
         software=software,
         output_type=output_type,
         name=name,
-        revision=revision
+        revision=revision,
     )
 
     if nb_elements > 1:
@@ -160,7 +155,7 @@ def get_instance_file_name(
     mode="output",
     name="main",
     revision=1,
-    nb_elements=1
+    nb_elements=1,
 ):
     asset = entities_service.get_entity(asset_instance["asset_id"])
     project = get_project(temporal_entity)
@@ -175,7 +170,7 @@ def get_instance_file_name(
         name=name,
         asset_instance=asset_instance,
         asset=asset,
-        revision=revision
+        revision=revision,
     )
 
     if nb_elements > 1:
@@ -191,7 +186,7 @@ def get_working_folder_path(
     output_type=None,
     name="",
     revision=1,
-    sep=os.sep
+    sep=os.sep,
 ):
     entity = entities_service.get_entity(task["entity_id"])
     project = get_project(entity)
@@ -207,7 +202,7 @@ def get_working_folder_path(
         software=software,
         name=name,
         revision=revision,
-        style=style
+        style=style,
     )
     folder_path = change_folder_path_separators(folder_path, sep)
 
@@ -223,7 +218,7 @@ def get_output_folder_path(
     name="",
     representation="",
     revision=1,
-    sep=os.sep
+    sep=os.sep,
 ):
     project = get_project(entity)
     tree = get_tree_from_project(project)
@@ -240,7 +235,7 @@ def get_output_folder_path(
         name=name,
         representation=representation,
         revision=revision,
-        style=style
+        style=style,
     )
     folder_path = change_folder_path_separators(folder_path, sep)
 
@@ -264,11 +259,7 @@ def get_instance_folder_path(
     root_path = get_root_path(tree, mode, sep)
     style = tree[mode]["folder_path"].get("style", "")
 
-    folder_template = get_folder_path_template(
-        tree,
-        mode,
-        asset_instance
-    )
+    folder_template = get_folder_path_template(tree, mode, asset_instance)
 
     folder_path = update_variable(
         folder_template,
@@ -281,7 +272,7 @@ def get_instance_folder_path(
         task_type=task_type,
         revision=revision,
         representation=representation,
-        asset=asset
+        asset=asset,
     )
     folder_path = change_folder_path_separators(folder_path, sep)
 
@@ -299,7 +290,8 @@ def get_tree_from_project(project):
 def get_tree_from_file(tree_name):
     try:
         tree_path = os.path.join(
-            app.config["FILE_TREE_FOLDER"], "%s.json" % tree_name)
+            app.config["FILE_TREE_FOLDER"], "%s.json" % tree_name
+        )
         tree_string = open(tree_path).read()
     except IOError:
         raise WrongFileTreeFileException(
@@ -361,7 +353,7 @@ def get_file_name_root(
     name="main",
     asset_instance=None,
     asset=None,
-    revision=1
+    revision=1,
 ):
     if asset_instance is None:
         file_name_template = get_file_name_template(tree, mode, entity)
@@ -378,7 +370,7 @@ def get_file_name_root(
         name=name,
         asset_instance=asset_instance,
         asset=asset,
-        revision=revision
+        revision=revision,
     )
     file_name = slugify(file_name, separator="_")
     file_name = apply_style(file_name, tree[mode]["file_name"].get("style", ""))
@@ -422,9 +414,9 @@ def update_variable(
     name="",
     representation="",
     revision=1,
-    style="lowercase"
+    style="lowercase",
 ):
-    variables = re.findall('<([\w\.]*)>', template)
+    variables = re.findall("<([\w\.]*)>", template)
 
     render = template
     for variable in variables:
@@ -450,13 +442,13 @@ def update_variable(
             asset=asset,
             representation=representation,
             revision=revision,
-            field=field
+            field=field,
         )
 
         if data is not None:
             render = render.replace(
                 "<%s>" % variable,
-                apply_style(slugify(data, separator="_"), style)
+                apply_style(slugify(data, separator="_"), style),
             )
     return render
 
@@ -473,7 +465,7 @@ def get_folder_from_datatype(
     asset=None,
     representation="",
     revision=1,
-    field="name"
+    field="name",
 ):
     if datatype == "Project":
         folder = get_folder_from_project(entity)
@@ -609,9 +601,7 @@ def get_folder_from_temporal_entity(entity):
 
 def get_folder_from_temporal_entity_type(entity):
     if entity is not None:
-        entity_type = entities_service.get_entity_type(
-            entity["entity_type_id"]
-        )
+        entity_type = entities_service.get_entity_type(entity["entity_type_id"])
         folder = entity_type["name"].lower()
     else:
         raise MalformedFileTreeException("Given temporal entity type is null.")
@@ -705,26 +695,19 @@ def get_shot_task_from_path(file_path, project, mode="working", sep="/"):
             "%s doesn't match %s" % (file_path, template)
         )
 
-    data_names = extract_variable_values_from_path(
-        elements,
-        template_elements
-    )
+    data_names = extract_variable_values_from_path(elements, template_elements)
 
     shot = guess_shot(
         project,
         data_names.get(PathTokens.EPISODE, ""),
         data_names.get(PathTokens.SEQUENCE, ""),
-        data_names.get(PathTokens.SHOT, "")
+        data_names.get(PathTokens.SHOT, ""),
     )
     task_type = guess_task_type(
         data_names.get(PathTokens.DEPARTMENT, ""),
         data_names.get(PathTokens.TASK_TYPE, ""),
     )
-    task = guess_task(
-        shot,
-        task_type,
-        data_names.get(PathTokens.TASK, ""),
-    )
+    task = guess_task(shot, task_type, data_names.get(PathTokens.TASK, ""))
 
     return task.serialize()
 
@@ -740,25 +723,18 @@ def get_asset_task_from_path(file_path, project, mode="working", sep="/"):
             "%s doesn't match %s" % (file_path, template)
         )
 
-    data_names = extract_variable_values_from_path(
-        elements,
-        template_elements
-    )
+    data_names = extract_variable_values_from_path(elements, template_elements)
 
     asset = guess_asset(
         project,
         data_names.get(PathTokens.ASSET_TYPE, ""),
-        data_names.get(PathTokens.ASSET, "")
+        data_names.get(PathTokens.ASSET, ""),
     )
     task_type = guess_task_type(
         data_names.get(PathTokens.DEPARTMENT, ""),
         data_names.get(PathTokens.TASK_TYPE, ""),
     )
-    task = guess_task(
-        asset,
-        task_type,
-        data_names.get(PathTokens.TASK, ""),
-    )
+    task = guess_task(asset, task_type, data_names.get(PathTokens.TASK, ""))
 
     return task.serialize()
 
@@ -771,7 +747,7 @@ def extract_variable_values_from_path(elements, template_elements):
 
         if token is not None:
             data_type = token.group()
-            data_type = data_type[1:len(data_type) - 1]
+            data_type = data_type[1 : len(data_type) - 1]
             value = elements[i].replace("_", " ")
             value = value.capitalize()
             data_names[data_type] = value
@@ -802,7 +778,7 @@ def get_asset_template_folders(project, mode="working", sep="/"):
 def get_path_folders(project, file_path, mode="working", sep="/"):
     tree = get_tree_from_project(project)
     root = get_root_path(tree, mode, sep)
-    file_path = file_path[len(root):]
+    file_path = file_path[len(root) :]
     return file_path.split(sep)
 
 
@@ -813,7 +789,7 @@ def guess_shot(project, episode_name, sequence_name, shot_name):
         episode = Entity.get_by(
             name=episode_name,
             entity_type_id=shots_service.get_episode_type()["id"],
-            project_id=project["id"]
+            project_id=project["id"],
         )
         if episode is not None:
             episode_id = episode.id
@@ -824,7 +800,7 @@ def guess_shot(project, episode_name, sequence_name, shot_name):
             name=sequence_name,
             entity_type_id=shots_service.get_sequence_type()["id"],
             parent_id=episode_id,
-            project_id=project["id"]
+            project_id=project["id"],
         )
         if sequence is not None:
             sequence_id = sequence.id
@@ -836,12 +812,10 @@ def guess_shot(project, episode_name, sequence_name, shot_name):
             name=shot_name,
             entity_type_id=shots_service.get_shot_type()["id"],
             parent_id=sequence_id,
-            project_id=project["id"]
+            project_id=project["id"],
         )
     else:
-        raise WrongPathFormatException(
-            "Shot name was not found in given path"
-        )
+        raise WrongPathFormatException("Shot name was not found in given path")
     return shot
 
 
@@ -849,9 +823,7 @@ def guess_asset(project, asset_type_name, asset_name):
 
     asset_type_id = None
     if len(asset_type_name) > 0:
-        asset_type = EntityType.get_by(
-            name=asset_type_name
-        )
+        asset_type = EntityType.get_by(name=asset_type_name)
         if asset_type is not None:
             asset_type_id = asset_type.id
 
@@ -859,7 +831,7 @@ def guess_asset(project, asset_type_name, asset_name):
         asset = Entity.get_by(
             name=asset_name,
             entity_type_id=asset_type_id,
-            project_id=project["id"]
+            project_id=project["id"],
         )
     else:
         raise WrongPathFormatException(
@@ -870,9 +842,7 @@ def guess_asset(project, asset_type_name, asset_name):
 
 
 def guess_task_type(department_name, task_type_name):
-    criterions = {
-        "name": task_type_name
-    }
+    criterions = {"name": task_type_name}
     if len(department_name) > 0:
         criterions["department_id"] = Department.get_by(name=department_name).id
 
@@ -881,14 +851,9 @@ def guess_task_type(department_name, task_type_name):
 
 def guess_task(entity, task_type, task_name):
     if entity is None:
-        raise WrongPathFormatException(
-            "No asset or shot found in given path."
-        )
+        raise WrongPathFormatException("No asset or shot found in given path.")
 
-    criterions = {
-        "entity_id": entity.id,
-        "task_type_id": task_type.id
-    }
+    criterions = {"entity_id": entity.id, "task_type_id": task_type.id}
     if len(task_name) > 0:
         criterions["name"] = task_name
 

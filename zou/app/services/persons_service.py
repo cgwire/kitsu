@@ -15,9 +15,7 @@ from zou.app.models.person import Person
 from zou.app.utils import fields, events, cache, emails
 from zou.app import config
 
-from zou.app.services.exception import (
-    PersonNotFoundException
-)
+from zou.app.services.exception import PersonNotFoundException
 
 
 def clear_person_cache():
@@ -38,11 +36,12 @@ def get_active_persons():
     """
     Return all person with flag active set to True.
     """
-    persons = Person.query \
-        .filter_by(active=True) \
-        .order_by(Person.first_name) \
-        .order_by(Person.last_name) \
+    persons = (
+        Person.query.filter_by(active=True)
+        .order_by(Person.first_name)
+        .order_by(Person.last_name)
         .all()
+    )
     return fields.serialize_models(persons)
 
 
@@ -148,7 +147,7 @@ def create_person(
     last_name,
     phone="",
     role="user",
-    desktop_login=""
+    desktop_login="",
 ):
     """
     Create a new person entry in the database. No operation are performed on
@@ -163,11 +162,9 @@ def create_person(
         last_name=last_name,
         phone=phone,
         role=role,
-        desktop_login=desktop_login
+        desktop_login=desktop_login,
     )
-    events.emit("person:new", {
-        "person_id": person.id
-    })
+    events.emit("person:new", {"person_id": person.id})
     clear_person_cache()
     return person.serialize()
 
@@ -190,9 +187,7 @@ def update_person(person_id, data):
     if "email" in data and data["email"] is not None:
         data["email"] = data["email"].strip()
     person.update(data)
-    events.emit("person:update", {
-        "person_id": person_id
-    })
+    events.emit("person:update", {"person_id": person_id})
     clear_person_cache()
     return person.serialize()
 
@@ -204,9 +199,7 @@ def delete_person(person_id):
     person = Person.get(person_id)
     person_dict = person.serialize()
     person.delete()
-    events.emit("person:delete", {
-        "person_id": person_id
-    })
+    events.emit("person:delete", {"person_id": person_id})
     clear_person_cache()
     return person_dict
 
@@ -215,10 +208,11 @@ def get_desktop_login_logs(person_id):
     """
     Get all logs for user desktop logins.
     """
-    logs = DesktopLoginLog.query \
-        .filter(DesktopLoginLog.person_id == person_id) \
-        .order_by(DesktopLoginLog.date.desc()) \
+    logs = (
+        DesktopLoginLog.query.filter(DesktopLoginLog.person_id == person_id)
+        .order_by(DesktopLoginLog.date.desc())
         .all()
+    )
     return fields.serialize_list(logs)
 
 
@@ -226,10 +220,7 @@ def create_desktop_login_logs(person_id, date):
     """
     Add a new log entry for desktop logins.
     """
-    return DesktopLoginLog.create(
-        person_id=person_id,
-        date=date
-    ).serialize()
+    return DesktopLoginLog.create(person_id=person_id, date=date).serialize()
 
 
 def get_presence_logs(year, month):
@@ -250,12 +241,15 @@ def get_presence_logs(year, month):
     for person in persons:
         row = [person["full_name"]]
         row += ["" for i in range(1, limit + 1)]
-        logs = DesktopLoginLog.query \
-            .filter(DesktopLoginLog.person_id == person["id"]) \
-            .filter(DesktopLoginLog.date >= start_date) \
-            .filter(DesktopLoginLog.date < end_date) \
-            .order_by(DesktopLoginLog.date) \
+        logs = (
+            DesktopLoginLog.query.filter(
+                DesktopLoginLog.person_id == person["id"]
+            )
+            .filter(DesktopLoginLog.date >= start_date)
+            .filter(DesktopLoginLog.date < end_date)
+            .order_by(DesktopLoginLog.date)
             .all()
+        )
 
         for log in logs:
             day = log.date.day
@@ -276,7 +270,7 @@ def invite_person(person_id):
     organisation = get_organisation()
     person = get_person_raw(person_id)
     subject = "You are invited by %s to join their Kitsu production tracker" % (
-      organisation["name"]
+        organisation["name"]
     )
     body = """Hello %s,
 
@@ -298,7 +292,7 @@ Thank you and see you soon on Kitsu,
         organisation["name"],
         config.DOMAIN_NAME,
         person.email,
-        organisation["name"]
+        organisation["name"],
     )
     emails.send_email(subject, body, person.email)
 
@@ -319,7 +313,5 @@ def update_organisation(organisation_id, data):
     """
     organisation = Organisation.get(organisation_id)
     organisation.update(data)
-    events.emit("organisation:update", {
-        "organisation_id": organisation_id
-    })
+    events.emit("organisation:update", {"organisation_id": organisation_id})
     return organisation.present()

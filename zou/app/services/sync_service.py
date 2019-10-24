@@ -75,7 +75,7 @@ event_name_model_map = {
     "task": Task,
     "task-status": TaskStatus,
     "task-type": TaskType,
-    "time-spent": TimeSpent
+    "time-spent": TimeSpent,
 }
 
 event_name_model_path_map = {
@@ -108,7 +108,7 @@ event_name_model_path_map = {
     "task": "tasks",
     "task-status": "task-status",
     "task-type": "task-types",
-    "time-spent": "time-spents"
+    "time-spent": "time-spents",
 }
 
 project_events = [
@@ -128,7 +128,7 @@ project_events = [
     "notification",
     "entity-link",
     "news",
-    "milestone"
+    "milestone",
 ]
 
 main_events = [
@@ -140,7 +140,7 @@ main_events = [
     "task-status",
     "custom-action",
     "asset-type",
-    "project"
+    "project",
 ]
 
 special_events = [
@@ -148,7 +148,7 @@ special_events = [
     "preview-file:set-main",
     "shot:casting-update",
     "task:unassign",
-    "task:assign"
+    "task:assign",
 ]
 
 
@@ -264,10 +264,7 @@ def sync_entries(model_name, model):
     """
     instances = []
 
-    if model_name in [
-        "organisations",
-        "persons"
-    ]:
+    if model_name in ["organisations", "persons"]:
         instances = gazu.client.fetch_all(model_name)
         model.create_from_import_list(instances)
     else:
@@ -275,9 +272,7 @@ def sync_entries(model_name, model):
         init = True
         results = {"nb_pages": 2}
         while init or results["nb_pages"] >= page:
-            results = gazu.client.fetch_all(
-                "%s?page=%d" % (model_name, page)
-            )
+            results = gazu.client.fetch_all("%s?page=%d" % (model_name, page))
             instances += results["data"]
             page += 1
             init = False
@@ -299,7 +294,7 @@ def sync_project_entries(project, model_name, model):
         "tasks",
         "comments",
         "notifications",
-        "preview-files"
+        "preview-files",
     ]:
         results = gazu.client.fetch_all(
             "projects/%s/%s" % (project["id"], model_name)
@@ -339,10 +334,12 @@ def sync_entity_thumbnails(project, model_name):
         if result.get("preview_file_id") is not None:
             entity = Entity.get(result["id"])
             try:
-                entity.update({
-                    "preview_file_id": result["preview_file_id"],
-                    "updated_at": result["updated_at"]
-                })
+                entity.update(
+                    {
+                        "preview_file_id": result["preview_file_id"],
+                        "updated_at": result["updated_at"],
+                    }
+                )
                 total += 1
             except sqlalchemy.exc.IntegrityError:
                 logger.error("An error occured", exc_info=1)
@@ -385,17 +382,17 @@ def add_sync_listeners(event_client, model_name, event_name, model):
     gazu.events.add_listener(
         event_client,
         "%s:new" % event_name,
-        create_entry(model_name, event_name, model, "new")
+        create_entry(model_name, event_name, model, "new"),
     )
     gazu.events.add_listener(
         event_client,
         "%s:update" % event_name,
-        create_entry(model_name, event_name, model, "update")
+        create_entry(model_name, event_name, model, "update"),
     )
     gazu.events.add_listener(
         event_client,
         "%s:delete" % event_name,
-        delete_entry(model_name, event_name, model)
+        delete_entry(model_name, event_name, model),
     )
 
 
@@ -406,10 +403,11 @@ def create_entry(model_name, event_name, model, event_type):
     event. Data are retrived through the HTTP client.
     It's useful to generate callbacks for event listener.
     """
+
     def create(data):
         if data.get("sync", False):
             return
-        model_id_field_name = event_name.replace('-', "_") + "_id"
+        model_id_field_name = event_name.replace("-", "_") + "_id"
         model_id = data[model_id_field_name]
         try:
             instance = gazu.client.fetch_one(model_name, model_id)
@@ -422,6 +420,7 @@ def create_entry(model_name, event_name, model, event_type):
         except gazu.exception.RouteNotFoundException as e:
             logger.error("Route not found: %s" % e)
             logger.error("Fail %s created/updated %s" % (event_name, model_id))
+
     return create
 
 
@@ -431,13 +430,15 @@ def delete_entry(model_name, event_name, model):
     is retrieved.
     It's useful to generate callbacks for event listener.
     """
+
     def delete(data):
         if data.get("sync", False):
             return
-        model_id = data[event_name.replace('-', "_") + "_id"]
+        model_id = data[event_name.replace("-", "_") + "_id"]
         model.delete_all_by(id=model_id)
         forward_base_event(event_name, "delete", data)
         logger.info("Deletion: %s %s" % (model_name, model_id))
+
     return delete
 
 
@@ -447,11 +448,13 @@ def forward_event(event_name):
     given event name to the local event brodcaster.
     It's useful to generate callbacks for event listener.
     """
+
     def forward(data):
         if not data.get("sync", False):
             data["sync"] = True
             logger.info("Forward event: %s" % event_name)
             events.emit(event_name, data, persist=False)
+
     return forward
 
 
@@ -493,9 +496,9 @@ def download_entity_thumbnail(entity):
     locally.
     """
     preview_folder = os.getenv("PREVIEW_FOLDER", "/opt/zou/previews")
-    local = LocalBackend("local", {
-        "root": os.path.join(preview_folder, "pictures")
-    })
+    local = LocalBackend(
+        "local", {"root": os.path.join(preview_folder, "pictures")}
+    )
 
     file_path = local.path("thumbnails-" + str(entity.id))
     dirname = os.path.dirname(file_path)
@@ -503,10 +506,7 @@ def download_entity_thumbnail(entity):
         if not os.path.exists(dirname):
             os.makedirs(dirname)
         with open(file_path, "wb") as tmp_file:
-            for chunk in file_store.open_picture(
-                "thumbnails",
-                str(entity.id)
-            ):
+            for chunk in file_store.open_picture("thumbnails", str(entity.id)):
                 tmp_file.write(chunk)
 
 
@@ -531,21 +531,20 @@ def download_preview(preview_file):
     """
     Download all files link to preview file entry: orginal file and variants.
     """
-    print("download preview %s (%s)" % (
-        preview_file.id,
-        preview_file.extension)
+    print(
+        "download preview %s (%s)" % (preview_file.id, preview_file.extension)
     )
 
     preview_folder = os.getenv("PREVIEW_FOLDER", "/opt/zou/previews")
-    local_picture = LocalBackend("local", {
-        "root": os.path.join(preview_folder, "pictures")
-    })
-    local_movie = LocalBackend("local", {
-        "root": os.path.join(preview_folder, "movies")
-    })
-    local_file = LocalBackend("local", {
-        "root": os.path.join(preview_folder, "files")
-    })
+    local_picture = LocalBackend(
+        "local", {"root": os.path.join(preview_folder, "pictures")}
+    )
+    local_movie = LocalBackend(
+        "local", {"root": os.path.join(preview_folder, "movies")}
+    )
+    local_file = LocalBackend(
+        "local", {"root": os.path.join(preview_folder, "files")}
+    )
 
     is_movie = preview_file.extension == "mp4"
     is_picture = preview_file.extension == "png"
@@ -564,14 +563,11 @@ def download_preview(preview_file):
         dl_func = file_store.open_file
 
     if is_movie or is_picture:
-        for prefix in [
-            "thumbnails",
-            "thumbnails-square",
-            "original"
-        ]:
+        for prefix in ["thumbnails", "thumbnails-square", "original"]:
             pic_dl_func = file_store.open_picture
-            pic_file_path = \
-                local_picture.path("%s-%s" % (prefix, str(preview_file.id)))
+            pic_file_path = local_picture.path(
+                "%s-%s" % (prefix, str(preview_file.id))
+            )
             download_file(pic_file_path, prefix, pic_dl_func, preview_file_id)
 
     download_file(file_path, "previews", dl_func, preview_file_id)
@@ -585,12 +581,15 @@ def generate_db_backup(host, port, user, password, database):
     filename = "%s-zou-db-backup.dump" % now
     with gzip.open(filename, "wb") as archive:
         pg_dump(
-            "-h", host,
-            "-p", port,
-            "-U", user,
+            "-h",
+            host,
+            "-p",
+            port,
+            "-U",
+            user,
             database,
             _out=archive,
-            _env={"PGPASSWORD": password}
+            _env={"PGPASSWORD": password},
         )
     return filename
 
@@ -603,11 +602,7 @@ def store_db_backup(filename):
     from zou.app import app
 
     with app.app_context():
-        file_store.add_file(
-            "dbbackup",
-            filename,
-            filename
-        )
+        file_store.add_file("dbbackup", filename, filename)
 
 
 def upload_entity_thumbnails_to_storage(days=None):
@@ -648,17 +643,13 @@ def upload_entity_thumbnail(entity):
     Upload thumbnail file for given entity to object storage.
     """
     preview_folder = os.getenv("PREVIEW_FOLDER", "/opt/zou/previews")
-    local = LocalBackend("local", {
-        "root": os.path.join(preview_folder, "pictures")
-    })
+    local = LocalBackend(
+        "local", {"root": os.path.join(preview_folder, "pictures")}
+    )
 
     file_path = local.path("thumbnails-" + str(entity.id))
     if entity.has_avatar:
-        file_store.add_picture(
-            "thumbnails",
-            str(entity.id),
-            file_path
-        )
+        file_store.add_picture("thumbnails", str(entity.id), file_path)
         print("%s uploaded" % file_path)
 
 
@@ -666,21 +657,18 @@ def upload_preview(preview_file):
     """
     Upload all files link to preview file entry: orginal file and variants.
     """
-    print("upload preview %s (%s)" % (
-        preview_file.id,
-        preview_file.extension)
-    )
+    print("upload preview %s (%s)" % (preview_file.id, preview_file.extension))
 
     preview_folder = os.getenv("PREVIEW_FOLDER", "/opt/zou/previews")
-    local_picture = LocalBackend("local", {
-        "root": os.path.join(preview_folder, "pictures")
-    })
-    local_movie = LocalBackend("local", {
-        "root": os.path.join(preview_folder, "movies")
-    })
-    local_file = LocalBackend("local", {
-        "root": os.path.join(preview_folder, "files")
-    })
+    local_picture = LocalBackend(
+        "local", {"root": os.path.join(preview_folder, "pictures")}
+    )
+    local_movie = LocalBackend(
+        "local", {"root": os.path.join(preview_folder, "movies")}
+    )
+    local_file = LocalBackend(
+        "local", {"root": os.path.join(preview_folder, "files")}
+    )
 
     is_movie = preview_file.extension == "mp4"
     is_picture = preview_file.extension == "png"
@@ -702,15 +690,13 @@ def upload_preview(preview_file):
         exists_func = file_store.exists_file
 
     if is_movie or is_picture:
-        for prefix in [
-            "thumbnails",
-            "thumbnails-square",
-            "original"
-        ]:
-            pic_file_path = \
-                local_picture.path("%s-%s" % (prefix, str(preview_file.id)))
-            if os.path.exists(pic_file_path) and \
-               not file_store.exists_picture(prefix, preview_file_id):
+        for prefix in ["thumbnails", "thumbnails-square", "original"]:
+            pic_file_path = local_picture.path(
+                "%s-%s" % (prefix, str(preview_file.id))
+            )
+            if os.path.exists(pic_file_path) and not file_store.exists_picture(
+                prefix, preview_file_id
+            ):
                 file_store.add_picture(prefix, preview_file_id, pic_file_path)
 
     prefix = "previews"

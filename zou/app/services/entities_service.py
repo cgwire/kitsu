@@ -10,7 +10,7 @@ from zou.app.models.task import Task
 from zou.app.services.exception import (
     PreviewFileNotFoundException,
     EntityNotFoundException,
-    EntityTypeNotFoundException
+    EntityTypeNotFoundException,
 )
 
 
@@ -26,9 +26,7 @@ def get_entity_type(entity_type_id):
     if nothing is found.
     """
     return base_service.get_instance(
-        EntityType,
-        entity_type_id,
-        EntityTypeNotFoundException
+        EntityType, entity_type_id, EntityTypeNotFoundException
     ).serialize()
 
 
@@ -48,11 +46,7 @@ def get_entity_raw(entity_id):
     Return an entity type matching given id, as an active record. Raises an
     exception if nothing is found.
     """
-    return base_service.get_instance(
-        Entity,
-        entity_id,
-        EntityNotFoundException
-    )
+    return base_service.get_instance(Entity, entity_id, EntityNotFoundException)
 
 
 def get_entity(entity_id):
@@ -61,9 +55,7 @@ def get_entity(entity_id):
     nothing is found.
     """
     return base_service.get_instance(
-        Entity,
-        entity_id,
-        EntityNotFoundException
+        Entity, entity_id, EntityNotFoundException
     ).serialize()
 
 
@@ -81,17 +73,18 @@ def update_entity_preview(entity_id, preview_file_id):
         raise PreviewFileNotFoundException
 
     entity.update({"preview_file_id": preview_file.id})
-    events.emit("preview-file:set-main", {
-        "entity_id": entity_id,
-        "preview_file_id": preview_file_id
-    })
+    events.emit(
+        "preview-file:set-main",
+        {"entity_id": entity_id, "preview_file_id": preview_file_id},
+    )
     entity_type = EntityType.get(entity.entity_type_id)
     entity_type_name = "asset"
     if entity_type.name in ["Shot", "Scene", "Sequence", "Episode"]:
         entity_type_name = entity_type.name.lower()
-    events.emit("%s:update" % entity_type_name, {
-        "%s_id" % entity_type_name: str(entity.id)
-    })
+    events.emit(
+        "%s:update" % entity_type_name,
+        {"%s_id" % entity_type_name: str(entity.id)},
+    )
     return entity.serialize()
 
 
@@ -100,11 +93,12 @@ def get_entities_for_project(project_id, entity_type_id, obj_type="Entity"):
     Retrieve all entities related to given project of which entity is entity
     type.
     """
-    result = Entity.query \
-        .filter(Entity.entity_type_id == entity_type_id) \
-        .filter(Entity.project_id == project_id) \
-        .order_by(Entity.name) \
+    result = (
+        Entity.query.filter(Entity.entity_type_id == entity_type_id)
+        .filter(Entity.project_id == project_id)
+        .order_by(Entity.name)
         .all()
+    )
     return Entity.serialize_list(result, obj_type=obj_type)
 
 
@@ -112,10 +106,11 @@ def get_entity_links_for_project(project_id):
     """
     Retrieve entity links for
     """
-    result = EntityLink.query \
-        .join(Entity, EntityLink.entity_in_id == Entity.id) \
-        .filter(Entity.project_id == project_id) \
+    result = (
+        EntityLink.query.join(Entity, EntityLink.entity_in_id == Entity.id)
+        .filter(Entity.project_id == project_id)
         .all()
+    )
     return Entity.serialize_list(result)
 
 
@@ -127,21 +122,20 @@ def get_entities_and_tasks(criterions={}):
     task_map = {}
 
     query = (
-        Entity.query
-        .outerjoin(Task, Task.entity_id == Entity.id)
+        Entity.query.outerjoin(Task, Task.entity_id == Entity.id)
         .outerjoin(assignees_table)
         .add_columns(
             Task.id,
             Task.task_type_id,
             Task.task_status_id,
             Task.priority,
-            assignees_table.columns.person
+            assignees_table.columns.person,
         )
     )
 
     if "entity_type_id" in criterions:
-        query = (
-            query.filter(Entity.entity_type_id == criterions["entity_type_id"])
+        query = query.filter(
+            Entity.entity_type_id == criterions["entity_type_id"]
         )
 
     if "project_id" in criterions:
@@ -153,7 +147,7 @@ def get_entities_and_tasks(criterions={}):
         task_type_id,
         task_status_id,
         task_priority,
-        person_id
+        person_id,
     ) in query.all():
         entity_id = str(entity.id)
 
@@ -170,7 +164,7 @@ def get_entities_and_tasks(criterions={}):
                 "preview_file_id": str(entity.preview_file_id or ""),
                 "canceled": entity.canceled,
                 "data": fields.serialize_value(entity.data),
-                "tasks": []
+                "tasks": [],
             }
 
         if task_id is not None:
@@ -182,7 +176,7 @@ def get_entities_and_tasks(criterions={}):
                     "task_status_id": str(task_status_id),
                     "task_type_id": str(task_type_id),
                     "priority": task_priority or 0,
-                    "assignees": []
+                    "assignees": [],
                 }
                 task_map[task_id] = task_dict
                 entity_dict = entity_map[entity_id]

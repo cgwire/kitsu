@@ -40,9 +40,7 @@ def remove_comment(comment_id):
             remove_preview_file(preview)
 
         reset_task_data(comment.object_id)
-        events.emit("comment:delete", {
-            "comment_id": comment.id
-        })
+        events.emit("comment:delete", {"comment_id": comment.id})
         return comment.serialize()
     else:
         raise CommentNotFoundException
@@ -55,30 +53,28 @@ def reset_task_data(task_id):
     last_comment_date = None
     end_date = None
     task_status_id = TaskStatus.get_by(short_name="todo").id
-    comments = Comment.query \
-        .join(TaskStatus) \
-        .filter(Comment.object_id == task_id) \
-        .order_by(Comment.created_at) \
+    comments = (
+        Comment.query.join(TaskStatus)
+        .filter(Comment.object_id == task_id)
+        .order_by(Comment.created_at)
         .add_columns(
-            TaskStatus.is_retake,
-            TaskStatus.is_done,
-            TaskStatus.short_name
-        ) \
+            TaskStatus.is_retake, TaskStatus.is_done, TaskStatus.short_name
+        )
         .all()
+    )
 
     previous_is_retake = False
     for (
         comment,
         task_status_is_retake,
         task_status_is_done,
-        task_status_short_name
+        task_status_short_name,
     ) in comments:
         if task_status_is_retake and not previous_is_retake:
             retake_count += 1
         previous_is_retake = task_status_is_retake
 
-        if task_status_short_name.lower() == "wip" \
-           and real_start_date is None:
+        if task_status_short_name.lower() == "wip" and real_start_date is None:
             real_start_date = comment.created_at
 
         if task_status_is_done:
@@ -94,17 +90,17 @@ def reset_task_data(task_id):
     for time_spent in time_spents:
         duration += time_spent.duration
 
-    task.update({
-        "duration": duration,
-        "retake_count": retake_count,
-        "real_start_date": real_start_date,
-        "last_comment_date": last_comment_date,
-        "end_date": end_date,
-        "task_status_id": task_status_id
-    })
-    events.emit("task:update", {
-        "task_id": task.id
-    })
+    task.update(
+        {
+            "duration": duration,
+            "retake_count": retake_count,
+            "real_start_date": real_start_date,
+            "last_comment_date": last_comment_date,
+            "end_date": end_date,
+            "task_status_id": task_status_id,
+        }
+    )
+    events.emit("task:update", {"task_id": task.id})
     return task.serialize()
 
 
@@ -155,9 +151,7 @@ def remove_task(task_id, force=False):
             news.delete()
 
     task.delete()
-    events.emit("task:delete", {
-        "task_id": task_id
-    })
+    events.emit("task:delete", {"task_id": task_id})
     return task.serialize()
 
 
@@ -203,7 +197,7 @@ def clear_picture_files(preview_file_id):
         "originals",
         "thumbnails",
         "thumbnails-square",
-        "previews"
+        "previews",
     ]:
         try:
             file_store.remove_picture(image_type, preview_file_id)
@@ -220,11 +214,7 @@ def clear_movie_files(preview_file_id):
         file_store.remove_movie("previews", preview_file_id)
     except:
         pass
-    for image_type in [
-        "thumbnails",
-        "thumbnails-square",
-        "previews"
-    ]:
+    for image_type in ["thumbnails", "thumbnails-square", "previews"]:
         try:
             file_store.remove_picture(image_type, preview_file_id)
         except:

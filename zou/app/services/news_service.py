@@ -6,10 +6,7 @@ from zou.app.models.project import Project
 from zou.app.models.task import Task
 
 from zou.app.utils import cache, events, fields
-from zou.app.services import (
-    names_service,
-    tasks_service
-)
+from zou.app.services import names_service, tasks_service
 
 
 def create_news(
@@ -17,7 +14,7 @@ def create_news(
     author_id=None,
     task_id=None,
     preview_file_id=None,
-    change=False
+    change=False,
 ):
     """
     Create a new news for given person and comment.
@@ -27,7 +24,7 @@ def create_news(
         author_id=author_id,
         comment_id=comment_id,
         preview_file_id=preview_file_id,
-        task_id=task_id
+        task_id=task_id,
     )
     return news.serialize()
 
@@ -43,14 +40,17 @@ def create_news_for_task_and_comment(task, comment, change=False):
         preview_file_id=comment["preview_file_id"],
         author_id=comment["person_id"],
         task_id=comment["object_id"],
-        change=change
+        change=change,
     )
-    events.emit("news:new", {
-        "news_id": news["id"],
-        "project_id": task["project_id"],
-        "task_status_id": comment["task_status_id"],
-        "task_type_id": task["task_type_id"]
-    })
+    events.emit(
+        "news:new",
+        {
+            "news_id": news["id"],
+            "project_id": task["project_id"],
+            "task_status_id": comment["task_status_id"],
+            "task_type_id": task["task_type_id"],
+        },
+    )
     return news
 
 
@@ -74,7 +74,7 @@ def get_last_news_for_project(
     task_type_id=None,
     task_status_id=None,
     page=1,
-    page_size=50
+    page_size=50,
 ):
     """
     Return last 100 user notifications. Add related information to make it
@@ -82,14 +82,14 @@ def get_last_news_for_project(
     """
     offset = (page - 1) * page_size
 
-    query = News.query \
-        .order_by(News.created_at.desc()) \
-        .join(Task, News.task_id == Task.id) \
-        .join(Project) \
-        .join(Entity, Task.entity_id == Entity.id) \
-        .outerjoin(Comment, News.comment_id == Comment.id) \
-        .outerjoin(PreviewFile, News.preview_file_id == PreviewFile.id) \
-        .filter(Task.project_id == project_id) \
+    query = (
+        News.query.order_by(News.created_at.desc())
+        .join(Task, News.task_id == Task.id)
+        .join(Project)
+        .join(Entity, Task.entity_id == Entity.id)
+        .outerjoin(Comment, News.comment_id == Comment.id)
+        .outerjoin(PreviewFile, News.preview_file_id == PreviewFile.id)
+        .filter(Task.project_id == project_id)
         .add_columns(
             Project.id,
             Project.name,
@@ -98,8 +98,9 @@ def get_last_news_for_project(
             Comment.task_status_id,
             Task.entity_id,
             PreviewFile.extension,
-            Entity.preview_file_id
+            Entity.preview_file_id,
         )
+    )
 
     if news_id is not None:
         query = query.filter(News.id == news_id)
@@ -127,30 +128,35 @@ def get_last_news_for_project(
         task_status_id,
         task_entity_id,
         preview_file_extension,
-        entity_preview_file_id
+        entity_preview_file_id,
     ) in news_list:
-        (full_entity_name, episode_id) = \
-            names_service.get_full_entity_name(task_entity_id)
+        (full_entity_name, episode_id) = names_service.get_full_entity_name(
+            task_entity_id
+        )
 
-        result.append(fields.serialize_dict({
-            "id": news.id,
-            "type": "News",
-            "author_id": news.author_id,
-            "comment_id": news.comment_id,
-            "task_id": news.task_id,
-            "task_type_id": task_type_id,
-            "task_status_id": task_status_id,
-            "task_entity_id": task_entity_id,
-            "preview_file_id": news.preview_file_id,
-            "preview_file_extension": preview_file_extension,
-            "project_id": project_id,
-            "project_name": project_name,
-            "created_at": news.created_at,
-            "change": news.change,
-            "full_entity_name": full_entity_name,
-            "episode_id": episode_id,
-            "entity_preview_file_id": entity_preview_file_id
-        }))
+        result.append(
+            fields.serialize_dict(
+                {
+                    "id": news.id,
+                    "type": "News",
+                    "author_id": news.author_id,
+                    "comment_id": news.comment_id,
+                    "task_id": news.task_id,
+                    "task_type_id": task_type_id,
+                    "task_status_id": task_status_id,
+                    "task_entity_id": task_entity_id,
+                    "preview_file_id": news.preview_file_id,
+                    "preview_file_extension": preview_file_extension,
+                    "project_id": project_id,
+                    "project_name": project_name,
+                    "created_at": news.created_at,
+                    "change": news.change,
+                    "full_entity_name": full_entity_name,
+                    "episode_id": episode_id,
+                    "entity_preview_file_id": entity_preview_file_id,
+                }
+            )
+        )
     return result
 
 
