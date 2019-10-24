@@ -155,6 +155,7 @@ export default {
     info: 'Informationen',
     or: 'oder',
     no: 'Nein',
+    loading: 'Laden...',
     loading_data: 'Laden von Daten',
     loading_error: 'Beim Laden von Daten ist ein Fehler aufgetreten.',
     logout: 'Abmeldung',

@@ -155,6 +155,7 @@ export default {
     info: 'Information',
     or: 'or',
     no: 'No',
+    loading: 'Loading...',
     loading_data: 'Loading data',
     loading_error: 'An error occured while loading data.',
     logout: 'Logout',

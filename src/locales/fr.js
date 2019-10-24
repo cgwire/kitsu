@@ -138,6 +138,7 @@ export default {
     go_productions: 'Aller aux productions',
     history: 'Historique',
     info: 'Information',
+    loading: 'Chargement...',
     loading_data: 'Chargement des données',
     loading_error: 'Une erreur est survenue en chargeant les données.',
     logout: 'Se déconnecter',

@@ -422,8 +422,15 @@ export default {
 
     currentPreviewId () {
       const index = this.currentPreviewIndex
-      return this.taskPreviews &&
-        this.taskPreviews.length > 0 ? this.taskPreviews[index].id : null
+      if (
+        this.taskPreviews &&
+        this.taskPreviews.length > 0 &&
+        this.taskPreviews[index]
+      ) {
+        return this.taskPreviews[index].id
+      } else {
+        return null
+      }
     },
 
     extension () {
@@ -696,6 +703,8 @@ export default {
 
     onPreviewChanged (index) {
       this.currentPreviewIndex = index
+      this.currentPreviewPath = this.getOriginalPath()
+      this.currentPreviewDlPath = this.getOriginalDlPath()
     },
 
     setCurrentPreviewAsEntityThumbnail () {
@@ -800,7 +809,7 @@ export default {
   watch: {
     task () {
       this.attachedFileName = ''
-      this.currentIndex = 0
+      this.currentPreviewIndex = 0
       this.loadTaskData()
     },
 
