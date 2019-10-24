@@ -4,6 +4,7 @@ from zou.app.utils.api import configure_api_from_blueprint
 from .resources import (
     ShotResource,
     ShotsResource,
+    AllShotsResource,
     ShotsAndTasksResource,
     ShotAssetsResource,
     ShotTaskTypesResource,
@@ -42,6 +43,7 @@ from .resources import (
 
 
 routes = [
+    ("/data/shots", AllShotsResource),
     ("/data/shots/all", ShotsResource),
     ("/data/shots/with-tasks", ShotsAndTasksResource),
     ("/data/shots/<shot_id>", ShotResource),

@@ -51,6 +51,19 @@ class AllAssetsResource(Resource):
         return assets_service.get_assets(criterions)
 
 
+class AllAssetsAliasResource(Resource):
+
+    @jwt_required
+    def get(self):
+        """
+        Retrieve all entities that are not shot or sequence.
+        Adds project name and asset type name.
+        """
+        criterions = query.get_query_criterions_from_request(request)
+        user_service.check_project_access(criterions.get("project_id", None))
+        return assets_service.get_assets(criterions)
+
+
 class AssetsAndTasksResource(Resource):
 
     @jwt_required

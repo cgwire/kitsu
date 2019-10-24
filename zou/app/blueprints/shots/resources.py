@@ -97,6 +97,23 @@ class ShotsResource(Resource):
         return shots_service.get_shots(criterions)
 
 
+class AllShotsResource(Resource):
+
+    @jwt_required
+    def get(self):
+        """
+        Retrieve all shot entries. Filters can be specified in the query string.
+        """
+        criterions = query.get_query_criterions_from_request(request)
+        if "sequence_id" in criterions:
+            sequence = shots_service.get_sequence(criterions["sequence_id"])
+            criterions["project_id"] = sequence["project_id"]
+            criterions["parent_id"] = sequence["id"]
+            del criterions["sequence_id"]
+        user_service.check_project_access(criterions.get("project_id", None))
+        return shots_service.get_shots(criterions)
+
+
 class ScenesResource(Resource):
 
     @jwt_required
