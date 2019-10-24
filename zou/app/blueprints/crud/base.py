@@ -167,8 +167,7 @@ class BaseModelsResource(Resource):
             data = request.json
             self.check_create_permissions(data)
             data = self.update_data(data)
-            instance = self.model(**data)
-            instance.save()
+            instance = self.model.create(**data)
             instance_dict = self.post_creation(instance)
             self.emit_create_event(instance_dict)
             return instance_dict, 201
