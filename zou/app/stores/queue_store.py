@@ -11,12 +11,13 @@ try:
             host=config.KEY_VALUE_STORE["host"],
             port=config.KEY_VALUE_STORE["port"],
             db=config.KV_JOB_DB_INDEX,
-            decode_responses=True
+            decode_responses=True,
         )
         queue_store.get("test")
 except redis.ConnectionError:
     try:
         import fakeredis
+
         revoked_tokens_store = fakeredis.FakeStrictRedis()
     except:
         sys.exit(1)

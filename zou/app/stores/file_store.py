@@ -9,7 +9,7 @@ from zou.app import app
 
 
 def read(self, filename):
-    with self.open(filename, 'rb') as f:
+    with self.open(filename, "rb") as f:
         return f.read()
 
 
@@ -20,11 +20,7 @@ def path(self, filename):
     folder_three = file_name[3:6]
 
     path = os.path.join(
-        self.root,
-        folder_one,
-        folder_two,
-        folder_three,
-        file_name
+        self.root, folder_one, folder_two, folder_three, file_name
     )
     return path
 
@@ -34,6 +30,7 @@ def init_swift(self, name, config):
     Hack needed because Flask FS backend supports only swift 1.0 authentication.
     """
     import swiftclient
+
     super(SwiftBackend, self).__init__(name, config)
 
     self.conn = swiftclient.Connection(
@@ -43,8 +40,8 @@ def init_swift(self, name, config):
         auth_version="2.0",
         os_options={
             "tenant_name": config.tenant_name,
-            "region_name": config.region_name
-        }
+            "region_name": config.region_name,
+        },
     )
     self.conn.put_container(self.name)
 
@@ -76,7 +73,7 @@ def make_read_generator(bucket, key):
 def make_storage(bucket):
     return fs.Storage(
         "%s%s" % (app.config.get("FS_BUCKET_PREFIX", ""), bucket),
-        overwrite=True
+        overwrite=True,
     )
 
 
@@ -97,7 +94,7 @@ def clear():
 
 def add_picture(prefix, id, path):
     key = make_key(prefix, id)
-    with open(path, 'rb') as fd:
+    with open(path, "rb") as fd:
         return pictures.write(key, fd)
 
 
@@ -132,7 +129,7 @@ def get_local_picture_path(prefix, id):
 
 def add_movie(prefix, id, path):
     key = make_key(prefix, id)
-    with open(path, 'rb') as fd:
+    with open(path, "rb") as fd:
         return movies.write(key, fd)
 
 
@@ -167,7 +164,7 @@ def get_local_movie_path(prefix, id):
 
 def add_file(prefix, id, path):
     key = make_key(prefix, id)
-    with open(path, 'rb') as fd:
+    with open(path, "rb") as fd:
         return files.write(key, fd)
 
 

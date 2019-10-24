@@ -27,10 +27,7 @@ def init():
 
     try:
         publisher_store = redis.StrictRedis(
-            host=host,
-            port=port,
-            db=redis_db,
-            decode_responses=True
+            host=host, port=port, db=redis_db, decode_responses=True
         )
         publisher_store.get("test")
         socketio = SocketIO(message_queue=redis_url)

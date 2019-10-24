@@ -9,12 +9,13 @@ try:
         host=config.KEY_VALUE_STORE["host"],
         port=config.KEY_VALUE_STORE["port"],
         db=config.AUTH_TOKEN_BLACKLIST_KV_INDEX,
-        decode_responses=True
+        decode_responses=True,
     )
-    revoked_tokens_store.get('test')
+    revoked_tokens_store.get("test")
 except redis.ConnectionError:
     try:
         import fakeredis
+
         revoked_tokens_store = fakeredis.FakeStrictRedis()
     except:
         print("Cannot access to the required Redis instance")
@@ -33,7 +34,7 @@ def get(key):
     Retrieve auth token corresponding at given key.
     """
     value = revoked_tokens_store.get(key)
-    if value is not None and hasattr(value, 'decode'):
+    if value is not None and hasattr(value, "decode"):
         value = value.decode("utf-8")
     return value
 
@@ -50,7 +51,7 @@ def keys():
     Get all keys available in the store.
     """
     keys = revoked_tokens_store.keys()
-    if len(keys) > 0 and hasattr(keys[0], 'decode'):
+    if len(keys) > 0 and hasattr(keys[0], "decode"):
         return [x.decode("utf-8") for x in revoked_tokens_store.keys()]
     else:
         return [x for x in revoked_tokens_store.keys()]
