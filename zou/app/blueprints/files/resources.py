@@ -745,7 +745,12 @@ class LastEntityOutputFilesResource(Resource):
     def get(self, entity_id):
         entity = entities_service.get_entity(entity_id)
         user_service.check_project_access(entity["project_id"])
-        return files_service.get_last_output_files_for_entity(entity["id"])
+        return files_service.get_last_output_files_for_entity(
+            entity["id"],
+            output_type_id=request.args.get("output_type_id", None),
+            task_type_id=request.args.get("task_type_id", None),
+            representation=request.args.get("representation", None),
+        )
 
 
 class LastInstanceOutputFilesResource(Resource):
