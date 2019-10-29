@@ -458,6 +458,7 @@ export default {
       'isCurrentUserManager',
       'nbSelectedTasks',
       'nbSelectedValidations',
+      'organisation',
       'people',
       'personMap',
       'selectedTasks',
@@ -616,7 +617,8 @@ export default {
 
     confirmEstimationChange () {
       this.isChangeEstimationLoading = true
-      const estimation = Math.floor(this.estimation * 8 * 60)
+      const nbHoursByDay = this.organisation.hours_by_day
+      const estimation = Math.floor(this.estimation * nbHoursByDay * 60)
       this.changeSelectedEstimations(estimation)
         .then(() => {
           this.isChangeEstimationLoading = false
