@@ -122,6 +122,10 @@ export default {
   .search-input {
     color: white;
   }
+
+  .search-input::placeholder {
+    color: $grey;
+  }
 }
 
 .erase-search {
