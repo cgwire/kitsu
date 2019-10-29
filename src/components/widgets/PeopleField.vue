@@ -49,7 +49,7 @@ export default {
         this.searchText =
           this.$refs.autocomplete.$el.children[0].children[0].value
         if (!this.item && this.searchText.length === 0) {
-          this.items = this.people
+          this.items = []
         }
       })
   },
@@ -81,7 +81,7 @@ export default {
     },
 
     update (searchText) {
-      if (searchText) {
+      if (searchText && searchText.length > 0) {
         const result = indexSearch(this.index, [searchText])
         this.items = result
       } else {
@@ -95,6 +95,11 @@ export default {
 
     clear () {
       this.item = null
+    },
+
+    focus () {
+      const inputEl = this.$el.querySelector('.v-autocomplete-input')
+      if (inputEl) inputEl.focus()
     }
   },
 
@@ -114,11 +119,19 @@ export default {
 }
 </script>
 
-<style>
+<style lang="scss">
 .dark .v-autocomplete .v-autocomplete-input-group .v-autocomplete-input {
   background-color: $dark-grey-light;
   border-color: $dark-grey;
   color: $white-grey;
+
+  &:active {
+    border: 1px solid $green;
+  }
+
+  &:hover {
+    border: 1px solid $green;
+  }
 }
 
 .dark .v-autocomplete .v-autocomplete-input-group .v-autocomplete-input:focus {
@@ -148,8 +161,20 @@ export default {
 
 .v-autocomplete .v-autocomplete-input-group .v-autocomplete-input {
   width: 300px;
-  padding: 0.5em;
-  margin-bottom: 3px;
+  margin-bottom: 1px;
   border: 1px solid $light-grey;
+  border-radius: 5px;
+  padding: 0.5em;
+
+  &:active {
+    border: 1px solid $green;
+    border-left-bottom-radius: 0px;
+    border-right-bottom-radius: 0px;
+
+  }
+
+  &:hover {
+    border: 1px solid $green;
+  }
 }
 </style>

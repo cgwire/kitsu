@@ -21,7 +21,11 @@
               {{ $tc('tasks.assign', nbSelectedTasks, {nbSelectedTasks}) }}
             </div>
             <div class="flexrow-item combobox-item">
-              <people-field :people="currentTeam" v-model="person" />
+              <people-field
+                ref="assignation-field"
+                :people="currentTeam"
+                v-model="person"
+              />
             </div>
             <div class="" v-if="isAssignationLoading">
               <spinner :is-white="true" :size="25" />
@@ -105,7 +109,7 @@
             <div class="flexrow-item strong bigger hide-small-screen">
               {{ $t('tasks.change_priority') }}
             </div>
-            <div class="flexrow-item combobox-item">
+            <div class="flexrow-item priority-combobox">
               <combobox
                 :options="priorityOptions"
                 v-model="priority"
@@ -765,6 +769,14 @@ export default {
       }
     },
 
+    selectedBar () {
+      if (this.selectedBar === 'assignation') {
+        this.$nextTick(() => {
+          this.$refs['assignation-field'].focus()
+        })
+      }
+    },
+
     currentProduction () {
       this.setCurrentTeam()
     },
@@ -893,6 +905,14 @@ div.combobox-item {
 
 .comment-text {
   padding: 8px;
+}
+
+.priority-combobox {
+  margin-top: -5px;
+}
+
+.confirm-button {
+  margin-top: 2px;
 }
 
 @media screen and (max-width: 768px) {
