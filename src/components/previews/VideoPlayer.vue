@@ -92,6 +92,10 @@
          {{ maxDuration }}
         </span>
 
+        <span class="flexrow-item time-indicator mr1">
+          ({{ currentFrame }})
+        </span>
+
         <button
           :class="{
             button: true,
@@ -229,6 +233,7 @@ export default {
     return {
       annotations: [],
       currentTime: '00:00.00',
+      currentTimeRaw: 0,
       fabricCanvas: null,
       isComparing: false,
       isDrawing: false,
@@ -268,6 +273,7 @@ export default {
 
         window.addEventListener('keydown', this.onKeyDown, false)
         window.addEventListener('resize', this.onWindowResize)
+        this.video.addEventListener('timeupdate', this.onTimeUpdate)
       }
     }, 0)
   },
@@ -282,6 +288,11 @@ export default {
     ...mapGetters([
       'currentProduction'
     ]),
+
+    currentFrame () {
+      console.log(this.currentTimeRaw, parseInt(this.fps))
+      return `${Math.floor(this.currentTimeRaw * this.fps)}`.padStart(3, '0')
+    },
 
     canvas () {
       return this.$refs['annotation-canvas']
@@ -503,6 +514,14 @@ export default {
           }
         }
         if (!this.readOnly) this.resetCanvas()
+      }
+    },
+
+    onTimeUpdate (time) {
+      if (this.video) {
+        this.currentTimeRaw = this.video.currentTime
+      } else {
+        this.currentTimeRaw = 0
       }
     },
 
