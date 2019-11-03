@@ -62,9 +62,19 @@
               v-else
             />
           </span>
-          <span class="filler flexrow-item root-element-name">
+          <span
+            class="filler flexrow-item root-element-name"
+            v-if="!rootElement.route"
+          >
             {{ rootElement.name }}
           </span>
+          <router-link
+            class="filler flexrow-item root-element-name"
+            :to="rootElement.route"
+            v-else
+          >
+            {{ rootElement.name }}
+          </router-link>
           <input
             class="flexrow-item"
             type="number"
@@ -1489,6 +1499,7 @@ export default {
 
 .root-element-name {
   padding-left: 10px;
+  color: white;
 }
 
 .date-widget {

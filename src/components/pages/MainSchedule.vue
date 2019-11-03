@@ -66,6 +66,7 @@ import { mapGetters, mapActions } from 'vuex'
 import moment from 'moment-timezone'
 import { en, fr } from 'vuejs-datepicker/dist/locale'
 import Datepicker from 'vuejs-datepicker'
+import { getProductionSchedulePath } from '../../lib/path'
 
 import {
   getFirstStartDate,
@@ -160,6 +161,7 @@ export default {
           expanded: false,
           loading: false,
           editable: false,
+          route: getProductionSchedulePath(item.id),
           children: []
         }
       })
