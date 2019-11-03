@@ -170,7 +170,7 @@ def sync_with_ldap_server():
             "mail",
             "thumbnailPhoto",
         ]
-        conn.search(LDAP_BASE_DN, "(objectclass=person)", attributes=attributes)
+        conn.search(LDAP_BASE_DN, "(objectCategory=person)", attributes=attributes)
         return [
             {
                 "first_name": clean_value(entry.givenName),
