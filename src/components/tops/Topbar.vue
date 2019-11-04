@@ -7,9 +7,13 @@
 
     <nav class="nav">
       <div class="nav-left">
-        <a class="nav-item sidebar-button" id="toggle-menu-button"
+        <a
+           class="nav-item sidebar-button"
+           id="toggle-menu-button"
            @click='toggleSidebar()'
-           v-bind:class="{'selected': !isSidebarHidden}">
+           :class="{'selected': !isSidebarHidden}"
+           v-if="!isCurrentUserClient"
+        >
           ≡
         </a>
 
@@ -476,6 +480,17 @@ export default {
   watch: {
     $route () {
       const productionId = this.$route.params.production_id
+      /*
+      const episodeId = this.$route.params.episode_id
+      if (
+        this.currentProduction.id !== productionId &&
+        (
+          (!this.currentEpisode && episodeId) ||
+          this.currentEpisode.id !== episodeId
+        )
+      ) {
+      }
+      */
       this.updateContext(productionId)
     },
 

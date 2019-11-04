@@ -282,28 +282,39 @@ export default {
     },
 
     loadShotsData (callback) {
-      this.loadShots(() => {
+      const loadPlaylists = () => {
         if (this.episodes.length > 0 || !this.isTVShow) {
           this.setAdditionSequences()
         }
         this.loadPlaylistsData()
         if (callback) callback()
-      })
+      }
+
+      if (this.sequences.length === 0) {
+        this.loadShots(loadPlaylists)
+      } else {
+        loadPlaylists()
+      }
     },
 
     loadPlaylistsData () {
-      this.loading.playlists = true
-      this.loadPlaylists((err) => {
-        if (err) this.errors.loadPlaylists = true
-        this.loading.playlists = false
-        if (!err) {
-          this.setCurrentPlaylist(() => {
-            if (!this.currentPlaylist || !this.currentPlaylist.id) {
-              this.goFirstPlaylist()
-            }
-          })
-        }
-      })
+      const setFirstPlaylist = () => {
+        this.setCurrentPlaylist(() => {
+          if (!this.currentPlaylist || !this.currentPlaylist.id) {
+            this.goFirstPlaylist()
+          }
+        })
+      }
+      if (this.playlists.length === 0) {
+        this.loading.playlists = true
+        this.loadPlaylists((err) => {
+          if (err) this.errors.loadPlaylists = true
+          this.loading.playlists = false
+          if (!err) setFirstPlaylist()
+        })
+      } else {
+        setFirstPlaylist()
+      }
     },
 
     rebuildCurrentShots () {
@@ -581,6 +592,8 @@ export default {
     },
 
     currentProduction () {
+      this.$store.commit('LOAD_SEQUENCES_END', [])
+      this.$store.commit('LOAD_PLAYLISTS_END', [])
       this.loadShotsData(() => {
         this.setAdditionSequences()
         this.resetPlaylist()
@@ -588,6 +601,8 @@ export default {
     },
 
     currentEpisode () {
+      this.$store.commit('LOAD_SEQUENCES_END', [])
+      this.$store.commit('LOAD_PLAYLISTS_END', [])
       if (this.currentEpisode) {
         this.loadShotsData(() => {
           this.setAdditionSequences()
@@ -709,6 +724,7 @@ export default {
 }
 
 .page .columns {
+  margin-top: 0px;
   margin-bottom: 0;
   overflow-y: auto;
   flex: 1;
@@ -718,7 +734,7 @@ export default {
   max-width: 300px;
   background: #F4F5F9;
   overflow-y: auto;
-  padding: 2em 1em 1em 2em;
+  padding: 1em 1em 1em 2em;
   border-right: 1px solid #DDD;
   box-shadow: 0px 0px 6px #F0F0F0;
   z-index: 201;
@@ -789,7 +805,7 @@ span.thumbnail-picture {
   padding: 0 1em;
 
   .subtitle {
-    margin-top: 1.5em;
+    margin-top: 1em;
   }
 }
 
@@ -802,10 +818,13 @@ span.thumbnail-picture {
 }
 
 .playlist-column {
-  margin-top: 10px;
   padding: 0;
   overflow: hidden;
   flex: 1;
+}
+
+.playlist-column:last-child {
+  padding-right: 1em;
 }
 
 .playlist-date {
