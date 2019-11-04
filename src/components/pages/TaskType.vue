@@ -566,8 +566,8 @@ export default {
           this.buildPersonElement({ id: 'unassigned' }, taskAssignationMap)
         ])
       }
-      this.resetScheduleDates()
       this.schedule.scheduleItems = scheduleItems
+      this.resetScheduleDates()
     },
 
     resetScheduleDates () {
@@ -581,7 +581,7 @@ export default {
           mainEndDate = personElement.endDate.clone()
         }
       })
-      this.schedule.startDate = mainStartDate
+      this.schedule.startDate = mainStartDate.add('days', -1)
       this.schedule.endDate = mainEndDate
     },
 

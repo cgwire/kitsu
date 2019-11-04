@@ -62,9 +62,19 @@
               v-else
             />
           </span>
-          <span class="filler flexrow-item root-element-name">
+          <span
+            class="filler flexrow-item root-element-name"
+            v-if="!rootElement.route"
+          >
             {{ rootElement.name }}
           </span>
+          <router-link
+            class="filler flexrow-item root-element-name"
+            :to="rootElement.route"
+            v-else
+          >
+            {{ rootElement.name }}
+          </router-link>
           <input
             class="flexrow-item"
             type="number"
@@ -609,16 +619,27 @@ export default {
       )
     },
 
+    getDisplayedDaysIndex (date) {
+      if (date.isoWeekday() === 6) {
+        date = date.add('days', -1)
+      }
+      if (date.isoWeekday() === 7) {
+        date = date.add('days', -2)
+      }
+      const dateString = date.format('YYYY-MM-DD')
+      return this.displayedDaysIndex[dateString]
+    },
+
     changeDates (event) {
       const change = event.clientX - this.initialClientX - this.cellWidth / 2
       const dayChange = Math.ceil(change / this.cellWidth)
 
-      const startDateString = this.lastStartDate.format('YYYY-MM-DD')
-      const endDateString = this.lastEndDate.format('YYYY-MM-DD')
-      const startDateIndex = this.displayedDaysIndex[startDateString]
-      const endDateIndex = this.displayedDaysIndex[endDateString]
+      const startDate = this.lastStartDate
+      const endDate = this.lastEndDate
+      const startDateIndex = this.getDisplayedDaysIndex(startDate)
+      const endDateIndex = this.getDisplayedDaysIndex(endDate)
       const length = endDateIndex - startDateIndex
-      let currentIndex = this.displayedDaysIndex[startDateString]
+      let currentIndex = this.getDisplayedDaysIndex(startDate)
 
       currentIndex += dayChange
       if (currentIndex < 0) currentIndex = 0
@@ -638,11 +659,10 @@ export default {
       const change = event.clientX - this.initialClientX + this.cellWidth / 2
       const dayChange = Math.floor(change / this.cellWidth)
 
-      const startDateString = this.lastStartDate.format('YYYY-MM-DD')
-      const endDateString =
-        this.currentElement.endDate.format('YYYY-MM-DD')
-      let currentIndex = this.displayedDaysIndex[startDateString]
-      let endDateIndex = this.displayedDaysIndex[endDateString]
+      const startDate = this.lastStartDate
+      const endDate = this.currentElement.endDate
+      let currentIndex = this.getDisplayedDaysIndex(startDate)
+      let endDateIndex = this.getDisplayedDaysIndex(endDate)
 
       currentIndex += dayChange
       if (currentIndex > endDateIndex) currentIndex = endDateIndex - 1
@@ -659,11 +679,10 @@ export default {
       const change = event.clientX - this.initialClientX + this.cellWidth / 2
       const dayChange = Math.ceil(change / this.cellWidth)
 
-      const startDateString =
-        this.currentElement.startDate.format('YYYY-MM-DD')
-      const endDateString = this.lastEndDate.format('YYYY-MM-DD')
-      let startDateIndex = this.displayedDaysIndex[startDateString]
-      let currentIndex = this.displayedDaysIndex[endDateString]
+      const startDate = this.currentElement.startDate
+      const endDate = this.lastEndDate
+      let startDateIndex = this.getDisplayedDaysIndex(startDate)
+      let currentIndex = this.getDisplayedDaysIndex(endDate)
 
       currentIndex += dayChange - 1
       if (currentIndex < startDateIndex) currentIndex = startDateIndex + 1
@@ -1480,6 +1499,7 @@ export default {
 
 .root-element-name {
   padding-left: 10px;
+  color: white;
 }
 
 .date-widget {

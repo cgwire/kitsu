@@ -87,6 +87,7 @@ import { en, fr } from 'vuejs-datepicker/dist/locale'
 import Datepicker from 'vuejs-datepicker'
 
 import { sortScheduleItems } from '../../lib/sorting'
+import { getTaskTypeSchedulePath } from '../../lib/path'
 
 import ComboboxNumber from '../widgets/ComboboxNumber'
 import TaskInfo from '../sides/TaskInfo'
@@ -181,6 +182,7 @@ export default {
             } else {
               endDate = startDate.clone().add(1, 'days')
             }
+
             return {
               ...item,
               color: taskType.color,
@@ -192,6 +194,12 @@ export default {
               editable: this.isCurrentUserManager,
               expanded: false,
               loading: false,
+              route: getTaskTypeSchedulePath(
+                taskType.id,
+                this.currentProduction.id,
+                this.currentEpisode ? this.currentEpisode.id : null,
+                taskType.for_shots ? 'shots' : 'assets'
+              ),
               children: []
             }
           })

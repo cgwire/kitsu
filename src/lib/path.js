@@ -74,3 +74,40 @@ export const getEntityPath = (entityId, productionId, section, episodeId) => {
 
   return route
 }
+
+const getProductionRoute = (name, productionId) => {
+  return {
+    name: name,
+    params: {
+      production_id: productionId
+    }
+  }
+}
+
+const episodifyRoute = (route, episodeId) => {
+  if (episodeId) {
+    route.name = `episode-${route.name}`
+    route.params.episode_id = episodeId
+  }
+  return route
+}
+
+const getContextRoute = (name, productionId, episodeId) => {
+  return episodifyRoute(getProductionRoute(name, productionId), episodeId)
+}
+
+export const getTaskTypeSchedulePath = (
+  taskTypeId,
+  productionId,
+  episodeId,
+  type
+) => {
+  const route = getContextRoute('task-type-schedule', productionId, episodeId)
+  route.params.task_type_id = taskTypeId
+  route.params.type = type
+  return route
+}
+
+export const getProductionSchedulePath = (productionId) => {
+  return getProductionRoute('schedule', productionId)
+}
