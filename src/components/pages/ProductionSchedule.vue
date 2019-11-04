@@ -197,7 +197,7 @@ export default {
               route: getTaskTypeSchedulePath(
                 taskType.id,
                 this.currentProduction.id,
-                this.currentEpisode.id,
+                this.currentEpisode ? this.currentEpisode.id : null,
                 taskType.for_shots ? 'shots' : 'assets'
               ),
               children: []

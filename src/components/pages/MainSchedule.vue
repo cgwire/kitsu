@@ -49,7 +49,7 @@
       :zoom-level="zoomLevel"
       :is-loading="loading.schedule"
       :is-error="errors.schedule"
-      @item-changed="saveScheduleItem"
+      @item-changed="onScheduleItemChanged"
       @change-zoom="changeZoom"
       @root-element-expanded="expandProductionElement"
     />
@@ -131,6 +131,7 @@ export default {
 
   methods: {
     ...mapActions([
+      'editProduction',
       'loadScheduleItems',
       'saveScheduleItem'
     ]),
@@ -160,7 +161,7 @@ export default {
           endDate: endDate,
           expanded: false,
           loading: false,
-          editable: false,
+          editable: true,
           route: getProductionSchedulePath(item.id),
           children: []
         }
@@ -181,7 +182,7 @@ export default {
           endDate: endDate,
           expanded: false,
           loading: false,
-          editable: false,
+          editable: true,
           children: []
         }
       })
@@ -199,6 +200,20 @@ export default {
           })
       } else {
         productionElement.expanded = false
+      }
+    },
+
+    onScheduleItemChanged (item) {
+      if (item.type !== 'Project') {
+        this.saveScheduleItem(item)
+      } else {
+        this.editProduction({
+          data: {
+            id: item.id,
+            start_date: item.startDate.format('YYYY-MM-DD'),
+            end_date: item.endDate.format('YYYY-MM-DD')
+          }
+        })
       }
     }
   },
