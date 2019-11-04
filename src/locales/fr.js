@@ -464,13 +464,14 @@ export default {
     new_task_status: 'Ajouter un statut de tâche',
     title: 'Statuts de tâche',
     fields: {
-      name: 'Nom',
-      short_name: 'Nom court',
       color: 'Couleur',
+      is_artist_allowed: 'Autorisé aux artistes',
+      is_client_allowed: 'Autorisé aux clents',
+      is_done: 'Est terminé',
       is_retake: 'A valeur de retake',
       is_reviewable: 'Est vérifiable',
-      is_done: 'Est terminé',
-      is_artist_allowed: 'Autorisé aux artistes'
+      name: 'Nom',
+      short_name: 'Nom court'
     }
   },
 

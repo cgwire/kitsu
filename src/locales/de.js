@@ -410,6 +410,7 @@ export default {
     title: 'Aufgabenstatus',
     fields: {
       is_artist_allowed: 'Ist der Künstler erlaubt',
+      is_client_allowed: 'Ist der Kunde erlaubt',
       color: 'Farbe',
       is_done: 'Ist erledigt',
       is_reviewable: 'Ist überprüfbar',

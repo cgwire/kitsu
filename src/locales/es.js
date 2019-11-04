@@ -409,8 +409,9 @@ export default {
     new_task_status: 'Añadir un status de tarea',
     title: 'Estado de la tarea',
     fields: {
-      is_artist_allowed: 'Se permite al artista',
       color: 'Color',
+      is_artist_allowed: 'Se permite al artista',
+      is_client_allowed: 'Se permite al cliente',
       is_done: 'Se hace',
       is_reviewable: 'Es revisable',
       is_retake: 'Tiene valor de retomar',

@@ -114,6 +114,9 @@ const mutations = {
       if (taskStatus.is_artist_allowed === null) {
         taskStatus.is_artist_allowed = true
       }
+      if (taskStatus.is_client_allowed === null) {
+        taskStatus.is_client_allowed = false
+      }
       state.taskStatusMap[taskStatus.id] = taskStatus
     })
   },

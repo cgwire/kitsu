@@ -410,6 +410,7 @@ export default {
     title: 'Task Status',
     fields: {
       is_artist_allowed: 'Is artist allowed',
+      is_client_allowed: 'Is client allowed',
       color: 'Color',
       is_done: 'Is done',
       is_reviewable: 'Is reviewable',

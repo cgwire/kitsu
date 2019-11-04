@@ -19,6 +19,9 @@
           <th class="is-artist-allowed">
             {{ $t('task_status.fields.is_artist_allowed') }}
           </th>
+          <th class="is-client-allowed">
+            {{ $t('task_status.fields.is_client_allowed') }}
+          </th>
           <th class="actions"></th>
         </tr>
       </thead>
@@ -46,6 +49,9 @@
           </td>
           <td class="is-artist-allowed">
             {{ formatBoolean(entry.is_artist_allowed) }}
+          </td>
+          <td class="is-client-allowed">
+            {{ formatBoolean(entry.is_client_allowed) }}
           </td>
           <row-actions
             :entry-id="entry.id"
@@ -124,7 +130,8 @@ export default {
 .is-reviewable,
 .is-done,
 .is-retake,
-.is-artist-allowed {
+.is-artist-allowed,
+.is-client-allowed {
   width: 140px;
   min-width: 140px;
 }
