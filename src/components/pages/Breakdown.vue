@@ -39,7 +39,7 @@
           />
         </div>
         <spinner class="mt1" v-if="isLoading" />
-        <div class="" v-else>
+        <div class="mt1" v-else>
           <shot-line
             :key="entity.id"
             :entity-id="entity.id"
