@@ -1,8 +1,10 @@
 from flask_principal import RoleNeed, Permission
 from werkzeug.exceptions import Forbidden
+from zou.app.services import persons_service
 
 admin_permission = Permission(RoleNeed("admin"))
 manager_permission = Permission(RoleNeed("manager"))
+client_permission = Permission(RoleNeed("client"))
 
 
 class PermissionDenied(Forbidden):
@@ -21,6 +23,13 @@ def has_admin_permissions():
     Return True if user is admin or manager.
     """
     return admin_permission.can()
+
+
+def has_client_permissions():
+    """
+    Return True if user is client.
+    """
+    return client_permission.can()
 
 
 def check_manager_permissions():
