@@ -361,6 +361,7 @@ export default {
       'getTaskComment',
       'getTaskComments',
       'getTaskPreviews',
+      'isCurrentUserClient',
       'isCurrentUserManager',
       'isSingleEpisode',
       'isTVShow',
@@ -400,9 +401,13 @@ export default {
     },
 
     isCommentingAllowed () {
-      return this.isCurrentUserManager || this.task.assignees.find(
+      const isManager = this.isCurrentUserManager
+      const isAssigned = this.task.assignees.find(
         (personId) => personId === this.user.id
       )
+      const isClientInPlaylist =
+        this.$route.path.indexOf('playlist') > 0 && this.isCurrentUserClient
+      return isManager || isAssigned || isClientInPlaylist
     },
 
     isSetThumbnailAllowed () {
