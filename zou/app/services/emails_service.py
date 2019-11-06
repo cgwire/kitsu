@@ -11,20 +11,24 @@ from zou.app.services import (
 from zou.app.stores import queue_store
 
 
-def send_notification(person_id, subject, message):
+def send_notification(person_id, subject, messages):
     """
     Send email notification to given person. Use the job queue if it is
     activated.
     """
     person = persons_service.get_person_raw(person_id)
+    email_message = messages["email_message"]
+    slack_message = messages["slack_message"]
     if person.notifications_enabled:
         if config.ENABLE_JOB_QUEUE:
             queue_store.job_queue.enqueue(
                 emails.send_email,
-                args=(subject, message + get_signature(), person.email),
+                args=(subject, email_message + get_signature(), person.email),
             )
         else:
-            emails.send_email(subject, message, person.email)
+            emails.send_email(
+                subject, email_message + get_signature(), person.email
+            )
 
     if person.notifications_slack_enabled:
         organisation = persons_service.get_organisation()
@@ -32,10 +36,10 @@ def send_notification(person_id, subject, message):
         token = organisation.get("chat_token_slack", "")
         if config.ENABLE_JOB_QUEUE:
             queue_store.job_queue.enqueue(
-                chats.send_to_slack, args=(token, userid, message)
+                chats.send_to_slack, args=(token, userid, slack_message)
             )
         else:
-            chats.send_to_slack(token, userid, message)
+            chats.send_to_slack(token, userid, slack_message)
 
     return True
 
@@ -54,20 +58,48 @@ def send_comment_notification(person_id, author_id, comment, task):
             author["first_name"],
             task_name,
         )
-        message = """%s wrote a comment on %s and changed the status to %s:
+        if len(comment["text"]) > 0:
+            email_message = """<strong>%s</strong> wrote a comment on <a href="%s">%s</a> and set the status to <strong>%s</strong>.
 
-"%s"
-
-To reply connect to this URL:
-%s
+<em>%s</em>
 """ % (
-            author["full_name"],
-            task_name,
-            task_status["short_name"],
-            comment["text"],
-            task_url,
-        )
-        send_notification(person_id, subject, message)
+                author["full_name"],
+                task_url,
+                task_name,
+                task_status["short_name"],
+                comment["text"],
+            )
+            slack_message = """*%s* wrote a comment on <%s|%s> and set the status to *%s*.
+
+_%s_
+""" % (
+                author["full_name"],
+                task_url,
+                task_name,
+                task_status["short_name"],
+                comment["text"],
+            )
+
+        else:
+            email_message = """<strong>%s</strong> set changed status of <a href="%s">%s</a> to <strong>%s</strong>.
+""" % (
+                author["full_name"],
+                task_url,
+                task_name,
+                task_status["short_name"],
+            )
+            slack_message = """*%s* set changed status of <%s|%s> to *%s*.
+""" % (
+                author["full_name"],
+                task_url,
+                task_name,
+                task_status["short_name"],
+            )
+        messages = {
+            "email_message": email_message,
+            "slack_message": slack_message
+        }
+        send_notification(person_id, subject, messages)
 
     return True
 
@@ -84,19 +116,30 @@ def send_mention_notification(person_id, author_id, comment, task):
             author["first_name"],
             task_name,
         )
-        message = """%s mentioned you in a comment on %s:
+        email_message = """<strong>%s</strong> mentioned you in a comment on <a href="%s">%s</a>:
 
-"%s"
-
-To reply connect to this URL:
-%s
+<em>%s</em>
 """ % (
             author["full_name"],
+            task_url,
             task_name,
             comment["text"],
-            task_url,
         )
-        return send_notification(person_id, subject, message)
+        slack_message = """*%s* mentioned you in a comment on <%s|%s>.
+
+_%s_
+""" % (
+            author["full_name"],
+            task_url,
+            task_name,
+            comment["text"],
+        )
+
+        messages = {
+            "email_message": email_message,
+            "slack_message": slack_message
+        }
+        return send_notification(person_id, subject, messages)
     else:
         return True
 
@@ -110,16 +153,25 @@ def send_assignation_notification(person_id, author_id, task):
     if person.notifications_enabled or person.notifications_slack_enabled:
         (author, task_name, task_url) = get_task_descriptors(author_id, task)
         subject = "[Kitsu] You were assigned to %s" % task_name
-        message = """ %s assigned you to %s.
-
-    To see the task details connect to this URL:
-    %s
-    """ % (
-            author["full_name"],
-            task_name,
-            task_url,
-        )
-        return send_notification(person_id, subject, message)
+        email_message = \
+            """<strong>%s</strong> assigned you to <a href="%s">%s</a>.
+""" % (
+                author["full_name"],
+                task_url,
+                task_name,
+            )
+        slack_message = \
+            """*%s* assigned you to <%s|%s>.
+""" % (
+                author["full_name"],
+                task_url,
+                task_name,
+            )
+        messages = {
+            "email_message": email_message,
+            "slack_message": slack_message
+        }
+        return send_notification(person_id, subject, messages)
     return True
 
 
