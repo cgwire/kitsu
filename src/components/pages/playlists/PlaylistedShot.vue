@@ -16,11 +16,9 @@
         >
           <x-icon />
         </span>
-        <entity-thumbnail
-          class="shot-thumbnail"
-          :empty-width="150"
-          :empty-height="103"
-          :entity="shot"
+        <light-entity-thumbnail
+          :width="150"
+          :height="103"
           :preview-file-id="previewFileId"
         />
       </div>
@@ -31,12 +29,12 @@
         class="preview-choice"
         v-if="taskTypeOptions.length > 0"
       >
-        <combobox
+        <light-combobox
           :options="taskTypeOptions"
           :disabled="!isCurrentUserManager"
           v-model="taskTypeId"
         />
-        <combobox
+        <light-combobox
           class="version-combo"
           :options="previewFileOptions"
           :disabled="!isCurrentUserManager"
@@ -64,15 +62,15 @@ import firstBy from 'thenby'
 import { mapGetters } from 'vuex'
 import { XIcon } from 'vue-feather-icons'
 
-import Combobox from '../../widgets/Combobox'
-import EntityThumbnail from '../../widgets/EntityThumbnail'
+import LightCombobox from '../../widgets/LightCombobox'
+import LightEntityThumbnail from '../../widgets/LightEntityThumbnail'
 
 export default {
   name: 'playlisted-shot',
 
   components: {
-    Combobox,
-    EntityThumbnail,
+    LightCombobox,
+    LightEntityThumbnail,
     XIcon
   },
 
@@ -250,6 +248,7 @@ export default {
 
 .thumbnail-wrapper {
   position: relative;
+  cursor: pointer;
 }
 
 .field {
