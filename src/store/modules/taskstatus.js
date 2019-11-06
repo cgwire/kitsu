@@ -33,6 +33,10 @@ const getters = {
   taskStatusForCurrentUser: (state, getters, rootState, rootGetters) => {
     if (rootGetters.isCurrentUserManager) {
       return state.taskStatus
+    } else if (rootGetters.isCurrentUserClient) {
+      return state.taskStatus.filter(taskStatus => {
+        return taskStatus.is_client_allowed
+      })
     } else {
       return state.taskStatus.filter(taskStatus => {
         return taskStatus.is_artist_allowed
