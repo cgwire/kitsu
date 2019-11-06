@@ -33,18 +33,34 @@ from zou.app.services.exception import (
 )
 
 
-def all_playlists_for_project(project_id):
+def all_playlists_for_project(project_id, for_client):
     """
     Return all playlists created for given project.
     """
-    return fields.serialize_value(Playlist.get_all_by(project_id=project_id))
+    result = []
+    if for_client:
+        playlists = Playlist.get_all_by(project_id=project_id, for_client=True)
+    else:
+        playlists = Playlist.get_all_by(project_id=project_id)
+    for playlist in fields.serialize_value(playlists):
+        del playlist["shots"]
+        result.append(playlist)
+    return result
 
 
-def all_playlists_for_episode(episode_id):
+def all_playlists_for_episode(episode_id, for_client):
     """
     Return all playlists created for given project.
     """
-    return fields.serialize_value(Playlist.get_all_by(episode_id=episode_id))
+    result = []
+    if for_client:
+        playlists = Playlist.get_all_by(episode_id=episode_id, for_client=True)
+    else:
+        playlists = Playlist.get_all_by(episode_id=episode_id)
+    for playlist in fields.serialize_value(playlists):
+        del playlist["shots"]
+        result.append(playlist)
+    return result
 
 
 def get_playlist_with_preview_file_revisions(playlist_id):

@@ -23,7 +23,10 @@ class ProjectPlaylistsResource(Resource):
     @jwt_required
     def get(self, project_id):
         user_service.check_project_access(project_id)
-        return playlists_service.all_playlists_for_project(project_id)
+        return playlists_service.all_playlists_for_project(
+            project_id,
+            permissions.has_client_permissions()
+        )
 
 
 class EpisodePlaylistsResource(Resource):
@@ -31,7 +34,10 @@ class EpisodePlaylistsResource(Resource):
     def get(self, project_id, episode_id):
         user_service.check_project_access(project_id)
         shots_service.get_episode(episode_id)
-        return playlists_service.all_playlists_for_episode(episode_id)
+        return playlists_service.all_playlists_for_episode(
+            episode_id,
+            permissions.has_client_permissions()
+        )
 
 
 class ProjectPlaylistResource(Resource):

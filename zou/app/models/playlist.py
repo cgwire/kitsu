@@ -18,6 +18,7 @@ class Playlist(db.Model, BaseMixin, SerializerMixin):
 
     project_id = db.Column(UUIDType(binary=False), db.ForeignKey("project.id"))
     episode_id = db.Column(UUIDType(binary=False), db.ForeignKey("entity.id"))
+    for_client = db.Column(db.Boolean(), default=True)
 
     build_jobs = relationship("BuildJob")
 
