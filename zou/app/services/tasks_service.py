@@ -25,6 +25,7 @@ from zou.app.utils import cache, fields, query as query_utils
 
 from zou.app.services.exception import (
     CommentNotFoundException,
+    PersonNotFoundException,
     TaskNotFoundException,
     TaskStatusNotFoundException,
     TaskTypeNotFoundException,
@@ -37,7 +38,9 @@ from zou.app.services import (
     base_service,
     files_service,
     persons_service,
+    projects_service,
     shots_service,
+    entities_service
 )
 
 
@@ -51,6 +54,7 @@ def clear_task_type_cache(task_type_id):
 
 def clear_task_cache(task_id):
     cache.cache.delete_memoized(get_task, task_id)
+    cache.cache.delete_memoized(get_full_task, task_id)
 
 
 def clear_comment_cache(comment_id):
@@ -1021,3 +1025,41 @@ def get_tasks_for_project(project_id, page=0):
         Task.updated_at.desc()
     )
     return query_utils.get_paginated_results(query, page)
+
+
+@cache.memoize_function(120)
+def get_full_task(task_id):
+    task = get_task(task_id)
+    task_type = get_task_type(task["task_type_id"])
+    project = projects_service.get_project(task["project_id"])
+    task_status = get_task_status(task["task_status_id"])
+    entity = entities_service.get_entity(task["entity_id"])
+    entity_type = entities_service.get_entity_type(entity["entity_type_id"])
+    assignees = []
+    for assignee_id in task["assignees"]:
+        assignees.append(persons_service.get_person(assignee_id))
+
+    task.update({
+        "entity": entity,
+        "task_type": task_type,
+        "task_status": task_status,
+        "project": project,
+        "entity_type": entity_type,
+        "persons": assignees,
+        "type": "Task",
+    })
+
+    try:
+        assigner = persons_service.get_person(task["assigner_id"])
+        task["assigner"] = assigner
+    except PersonNotFoundException:
+        pass
+
+    if entity["parent_id"] is not None:
+        sequence = shots_service.get_sequence(entity["parent_id"])
+        task["sequence"] = sequence
+        if sequence["parent_id"] is not None:
+            episode = shots_service.get_episode(sequence["parent_id"])
+            task["episode"] = episode
+
+    return task
