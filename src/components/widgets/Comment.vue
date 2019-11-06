@@ -476,6 +476,7 @@ a.revision:hover {
     margin-right: 0.5em;
     margin-top: 4px;
     width: 100%;
+    min-height: 20px;
     border: 1px solid transparent;
 
     &:focus,
