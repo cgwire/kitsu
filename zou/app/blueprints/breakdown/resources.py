@@ -30,7 +30,7 @@ class CastingResource(Resource):
         Resource to allow the modification of assets linked to an entity.
         """
         casting = request.json
-        user_service.check_project_access(project_id)
+        user_service.check_manager_project_access(project_id)
         return breakdown_service.update_casting(entity_id, casting)
 
 
