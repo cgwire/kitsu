@@ -25,15 +25,16 @@
             :to="getPlaylistPath(playlist.id)"
             :class="{
               'playlist-item': true,
+              'for-client': playlist.for_client,
               selected: playlist.id === currentPlaylist.id
             }"
             v-for="playlist in playlists"
           >
             <span>
-            {{ playlist.name }}
+              {{ playlist.name }}
             </span>
             <span class="playlist-date" title="last modified">
-            {{ formatDate(playlist.updated_at)}}
+              {{ formatDate(playlist.updated_at)}}
             </span>
           </router-link>
         </div>
@@ -58,6 +59,7 @@
           @remove-shot="removeShot"
           @order-change="onOrderChange"
           @annotationchanged="onAnnotationChanged"
+          @for-client-changed="onForClientChanged"
         />
       </div>
 
@@ -146,11 +148,13 @@
             @click.prevent="addShotToPlaylist(shot)"
             v-for="shot in sequenceShots"
           >
-            <entity-thumbnail
-              :entity="shot"
-              :empty-width="150"
-              :empty-height="100"
-            />
+            <span class="thumbnail-wrapper">
+              <light-entity-thumbnail
+                :preview-file-id="shot.preview_file_id"
+                :width="150"
+                :height="100"
+              />
+            </span>
             {{ shot.name }}
           </div>
         </div>
@@ -169,7 +173,7 @@ import {
 } from '../../lib/models'
 
 import Combobox from '../widgets/Combobox'
-import EntityThumbnail from '../widgets/EntityThumbnail'
+import LightEntityThumbnail from '../widgets/LightEntityThumbnail'
 import ErrorText from '../widgets/ErrorText'
 import PageSubtitle from '../widgets/PageSubtitle'
 import PlaylistPlayer from './playlists/PlaylistPlayer'
@@ -180,7 +184,7 @@ export default {
 
   components: {
     Combobox,
-    EntityThumbnail,
+    LightEntityThumbnail,
     ErrorText,
     PageSubtitle,
     PlaylistPlayer,
@@ -249,6 +253,7 @@ export default {
       'addShotPreviewToPlaylist',
       'changePlaylistOrder',
       'changePlaylistPreview',
+      'editPlaylist',
       'getPending',
       'loadPlaylist',
       'loadPlaylists',
@@ -570,6 +575,15 @@ export default {
     onAnnotationChanged ({ preview, annotations }) {
       const taskId = preview.task_id
       this.updatePreviewAnnotation({ taskId, preview, annotations })
+    },
+
+    onForClientChanged (forClient) {
+      this.editPlaylist({
+        data: {
+          id: this.currentPlaylist.id,
+          for_client: forClient
+        }
+      })
     }
   },
 
@@ -693,10 +707,19 @@ export default {
 <style lang="scss" scoped>
 .dark {
   .playlist-item {
-    background: #46494F;
+    background: $dark-grey-lightmore;
     box-shadow: 0px 0px 6px #333;
     border-color: $dark-grey;
     color: $white-grey;
+
+    &.for-client {
+      background: $purple-grey;
+      border: 1px solid $dark-grey;
+    }
+
+    &.selected {
+      border-right: 3px solid $dark-green;
+    }
   }
 
   .playlist-list-column {
@@ -748,6 +771,11 @@ export default {
   border: 1px solid $white-grey;
   box-shadow: 0px 0px 6px #DDD;
   color: $grey-strong;
+
+  &.for-client {
+    background: $purple-light;
+    border: 1px solid $purple;
+  }
 }
 
 .playlist-item.selected {
@@ -831,5 +859,8 @@ span.thumbnail-picture {
   display: block;
   color: $grey;
   font-size: 0.8em;
+}
+
+.thumbnail-wrapper {
 }
 </style>

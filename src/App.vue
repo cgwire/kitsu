@@ -654,11 +654,11 @@ body {
 }
 
 th.actions {
-  min-width: 100px;
+  min-width: 120px;
 }
 
 td.actions {
-  min-width: 100px;
+  min-width: 120px;
 }
 
 ul {
@@ -1200,8 +1200,6 @@ tbody:last-child .empty-line:last-child {
 }
 
 .thumbnail-picture {
-  margin-left: 0.3em;
-  margin-top: 7px;
   border: 1px solid #CCC;
 }
 
