@@ -354,7 +354,7 @@ def get_time_spents(task_id):
     return result
 
 
-def get_comments(task_id):
+def get_comments(task_id, is_client=False, is_manager=False):
     """
     Return all comments related to given task.
     """
@@ -372,6 +372,12 @@ def get_comments(task_id):
             Person.has_avatar,
         )
     )
+
+    if is_client:
+        query = query.filter(Person.role == "client")
+
+    if not is_client and not is_manager:
+        query = query.filter(Person.role != "client")
 
     for result in query.all():
         (
@@ -642,6 +648,8 @@ def get_person_tasks(person_id, projects, is_done=None):
     task_comment_map = {}
     comments = (
         Comment.query.filter(Comment.object_id.in_(task_ids))
+        .join(Person)
+        .filter(Person.role != "client")
         .order_by(Comment.object_id, Comment.created_at)
         .all()
     )
