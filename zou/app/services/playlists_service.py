@@ -33,12 +33,13 @@ from zou.app.services.exception import (
 )
 
 
-def all_playlists_for_project(project_id, for_client):
+def all_playlists_for_project(project_id, for_client=False):
     """
     Return all playlists created for given project.
     """
     result = []
     if for_client:
+        print("toto")
         playlists = Playlist.get_all_by(project_id=project_id, for_client=True)
     else:
         playlists = Playlist.get_all_by(project_id=project_id)
@@ -48,7 +49,7 @@ def all_playlists_for_project(project_id, for_client):
     return result
 
 
-def all_playlists_for_episode(episode_id, for_client):
+def all_playlists_for_episode(episode_id, for_client=False):
     """
     Return all playlists created for given project.
     """
@@ -63,7 +64,7 @@ def all_playlists_for_episode(episode_id, for_client):
     return result
 
 
-def get_playlist_with_preview_file_revisions(playlist_id):
+def get_playlist_with_preview_file_revisions(playlist_id=False):
     """
     Return given playlist. Shot list is augmented with all previews available
     for a given shot.

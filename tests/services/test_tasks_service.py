@@ -437,6 +437,11 @@ class TaskServiceTestCase(ApiDBTestCase):
         )
         self.assertEqual(mentions[0], self.person)
 
+    def test_get_comments(self):
+        self.generate_fixture_comment()
+        comments = tasks_service.get_comments(self.task_id)
+        self.assertEqual(len(comments), 1)
+
     def test_create_comment(self):
         comment = tasks_service.create_comment(
             self.task_id,

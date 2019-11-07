@@ -26,7 +26,7 @@ class PlaylistsServiceTestCase(ApiDBTestCase):
         self.project_dict = self.sequence.serialize()
 
     def generate_fixture_playlist(self):
-        self.playlist = Playlist.create(
+        Playlist.create(
             name="Playlist 1",
             shots={},
             project_id=self.project.id,
@@ -37,31 +37,49 @@ class PlaylistsServiceTestCase(ApiDBTestCase):
             shots={},
             project_id=self.project_standard.id
         )
-        self.playlist = Playlist.create(
+        Playlist.create(
             name="Playlist 3",
+            shots={},
+            project_id=self.project.id,
+            episode_id=self.episode_2.id
+        )
+        self.playlist = Playlist.create(
+            name="Playlist 4",
             shots={},
             project_id=self.project.id,
             episode_id=self.episode_2.id
         )
         return self.playlist.serialize()
 
-    def test_get_playlist_for_project(self):
+    def test_get_playlists_for_project(self):
         self.generate_fixture_playlist()
         playlists = playlists_service.all_playlists_for_project(self.project.id)
-        self.assertEqual(len(playlists), 2)
+        self.assertEqual(len(playlists), 3)
         self.assertTrue(
-            "Playlist 2" not in [playlists[0]["name"], playlists[1]["name"]]
+            "Playlist 2" not in [
+                playlists[0]["name"], playlists[1]["name"], playlists[2]["name"]
+            ]
         )
+        self.playlist.update({"for_client": True})
+        playlists = playlists_service.all_playlists_for_project(
+            self.project.id, True
+        )
+        self.assertEqual(len(playlists), 1)
 
     def test_get_playlist_for_episode(self):
         self.generate_fixture_playlist()
-        playlists = playlists_service.all_playlists_for_episode(self.episode.id)
+        playlists = playlists_service.all_playlists_for_episode(
+            self.episode_2.id)
+        self.assertEqual(len(playlists), 2)
+        self.assertEqual(playlists[0]["name"], "Playlist 3")
+        self.playlist.update({"for_client": True})
+        playlists = playlists_service.all_playlists_for_project(
+            self.project.id, True
+        )
         self.assertEqual(len(playlists), 1)
-        self.assertEqual(playlists[0]["name"], "Playlist 1")
 
-    def test_get_playlist(self):
-        pass
     """
+    def test_get_playlist(self):
     def test_retrieve_playlist_tmp_files(self):
     def test_get_playlist_with_preview_file_revisions(self):
     def test_set_preview_files_for_shots(self):
