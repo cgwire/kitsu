@@ -177,12 +177,15 @@ class TaskCommentsResource(Resource):
     def get(self, task_id):
         task = tasks_service.get_task(task_id)
         user_service.check_project_access(task["project_id"])
-        return tasks_service.get_comments(task_id)
+        is_client = permissions.has_client_permissions()
+        is_manager = permissions.has_manager_permissions()
+        return tasks_service.get_comments(task_id, is_client, is_manager)
 
 
 class TaskCommentResource(Resource):
     """
     Remove given comment and update linked task accordingly.
+    TODO: make deletion authorization stronger
     """
 
     @jwt_required

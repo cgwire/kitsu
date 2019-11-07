@@ -342,6 +342,16 @@ def check_manager_project_access(project_id):
     return is_allowed
 
 
+def check_playlist_access(playlist):
+    check_project_access(playlist["project_id"])
+    is_manager = permissions.has_manager_permissions()
+    is_client = permissions.has_manager_permissions()
+    has_client_access = is_client and playlist["for_client"]
+    if not is_manager and not has_client_access:
+        raise permissions.PermissionDenied
+    return True
+
+
 def get_filters():
     """
     Retrieve search filters used by current user. It groups them by
