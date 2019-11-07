@@ -36,8 +36,12 @@ export default {
   },
 
   updatePlaylist (playlist, callback) {
-    const data = {
-      name: playlist.name
+    const data = {}
+    if (playlist.name) {
+      data.name = playlist.name
+    }
+    if (playlist.for_client !== undefined) {
+      data.for_client = playlist.for_client
     }
     if (playlist.shots) {
       data.shots = playlist.shots

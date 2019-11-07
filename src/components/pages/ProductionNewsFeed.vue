@@ -712,7 +712,7 @@ export default {
 
 .news {
   background: $white-grey-light;
-  width: 100%;
+  width: calc(100% - 9px);
   padding: 0;
   overflow-y: auto;
   height: 100%;

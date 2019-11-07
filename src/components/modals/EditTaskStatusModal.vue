@@ -42,6 +42,10 @@
           :label="$t('task_status.fields.is_artist_allowed')"
           v-model="form.is_artist_allowed"
         />
+        <combobox-boolean
+          :label="$t('task_status.fields.is_client_allowed')"
+          v-model="form.is_client_allowed"
+        />
 
         <color-field
           ref="colorField"
@@ -167,7 +171,8 @@ export default {
           is_reviewable: String(this.taskStatusToEdit.is_reviewable),
           is_done: String(this.taskStatusToEdit.is_done),
           is_retake: String(this.taskStatusToEdit.is_retake || false),
-          is_artist_allowed: String(this.taskStatusToEdit.is_artist_allowed)
+          is_artist_allowed: String(this.taskStatusToEdit.is_artist_allowed),
+          is_client_allowed: String(this.taskStatusToEdit.is_client_allowed)
         }
       }
     }

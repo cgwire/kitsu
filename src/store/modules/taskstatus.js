@@ -33,6 +33,10 @@ const getters = {
   taskStatusForCurrentUser: (state, getters, rootState, rootGetters) => {
     if (rootGetters.isCurrentUserManager) {
       return state.taskStatus
+    } else if (rootGetters.isCurrentUserClient) {
+      return state.taskStatus.filter(taskStatus => {
+        return taskStatus.is_client_allowed
+      })
     } else {
       return state.taskStatus.filter(taskStatus => {
         return taskStatus.is_artist_allowed
@@ -113,6 +117,9 @@ const mutations = {
     taskStatus.forEach((taskStatus) => {
       if (taskStatus.is_artist_allowed === null) {
         taskStatus.is_artist_allowed = true
+      }
+      if (taskStatus.is_client_allowed === null) {
+        taskStatus.is_client_allowed = false
       }
       state.taskStatusMap[taskStatus.id] = taskStatus
     })

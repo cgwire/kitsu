@@ -790,7 +790,10 @@ export default {
     },
 
     $route () {
-      this.clearSelectedTasks()
+      this.selectedTaskIds = Object.keys(this.selectedTasks)
+      if (this.nbSelectedTasks > 0) {
+        this.clearSelectedTasks()
+      }
     }
   }
 }

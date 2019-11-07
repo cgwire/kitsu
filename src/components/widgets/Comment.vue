@@ -67,6 +67,12 @@
         <img src="../../assets/illustrations/validated.png" />
       </p>
       <p
+        class="error"
+        v-if="comment.text && !isCurrentUserClient"
+      >
+        {{ $t('comments.comment_from_client') }}
+      </p>
+      <p
         v-html="renderComment(comment.text, comment.mentions, personMap)"
         class="comment-text"
         v-if="comment.text"
@@ -188,6 +194,7 @@ export default {
   computed: {
     ...mapGetters([
       'currentProduction',
+      'isCurrentUserClient',
       'user',
       'personMap',
       'taskMap',
@@ -476,6 +483,7 @@ a.revision:hover {
     margin-right: 0.5em;
     margin-top: 4px;
     width: 100%;
+    min-height: 20px;
     border: 1px solid transparent;
 
     &:focus,

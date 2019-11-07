@@ -25,15 +25,16 @@
             :to="getPlaylistPath(playlist.id)"
             :class="{
               'playlist-item': true,
+              'for-client': playlist.for_client,
               selected: playlist.id === currentPlaylist.id
             }"
             v-for="playlist in playlists"
           >
             <span>
-            {{ playlist.name }}
+              {{ playlist.name }}
             </span>
             <span class="playlist-date" title="last modified">
-            {{ formatDate(playlist.updated_at)}}
+              {{ formatDate(playlist.updated_at)}}
             </span>
           </router-link>
         </div>
@@ -58,6 +59,7 @@
           @remove-shot="removeShot"
           @order-change="onOrderChange"
           @annotationchanged="onAnnotationChanged"
+          @for-client-changed="onForClientChanged"
         />
       </div>
 
@@ -146,11 +148,13 @@
             @click.prevent="addShotToPlaylist(shot)"
             v-for="shot in sequenceShots"
           >
-            <entity-thumbnail
-              :entity="shot"
-              :empty-width="150"
-              :empty-height="100"
-            />
+            <span class="thumbnail-wrapper">
+              <light-entity-thumbnail
+                :preview-file-id="shot.preview_file_id"
+                :width="150"
+                :height="100"
+              />
+            </span>
             {{ shot.name }}
           </div>
         </div>
@@ -169,7 +173,7 @@ import {
 } from '../../lib/models'
 
 import Combobox from '../widgets/Combobox'
-import EntityThumbnail from '../widgets/EntityThumbnail'
+import LightEntityThumbnail from '../widgets/LightEntityThumbnail'
 import ErrorText from '../widgets/ErrorText'
 import PageSubtitle from '../widgets/PageSubtitle'
 import PlaylistPlayer from './playlists/PlaylistPlayer'
@@ -180,7 +184,7 @@ export default {
 
   components: {
     Combobox,
-    EntityThumbnail,
+    LightEntityThumbnail,
     ErrorText,
     PageSubtitle,
     PlaylistPlayer,
@@ -249,6 +253,7 @@ export default {
       'addShotPreviewToPlaylist',
       'changePlaylistOrder',
       'changePlaylistPreview',
+      'editPlaylist',
       'getPending',
       'loadPlaylist',
       'loadPlaylists',
@@ -282,28 +287,39 @@ export default {
     },
 
     loadShotsData (callback) {
-      this.loadShots(() => {
+      const loadPlaylists = () => {
         if (this.episodes.length > 0 || !this.isTVShow) {
           this.setAdditionSequences()
         }
         this.loadPlaylistsData()
         if (callback) callback()
-      })
+      }
+
+      if (this.sequences.length === 0) {
+        this.loadShots(loadPlaylists)
+      } else {
+        loadPlaylists()
+      }
     },
 
     loadPlaylistsData () {
-      this.loading.playlists = true
-      this.loadPlaylists((err) => {
-        if (err) this.errors.loadPlaylists = true
-        this.loading.playlists = false
-        if (!err) {
-          this.setCurrentPlaylist(() => {
-            if (!this.currentPlaylist || !this.currentPlaylist.id) {
-              this.goFirstPlaylist()
-            }
-          })
-        }
-      })
+      const setFirstPlaylist = () => {
+        this.setCurrentPlaylist(() => {
+          if (!this.currentPlaylist || !this.currentPlaylist.id) {
+            this.goFirstPlaylist()
+          }
+        })
+      }
+      if (this.playlists.length === 0) {
+        this.loading.playlists = true
+        this.loadPlaylists((err) => {
+          if (err) this.errors.loadPlaylists = true
+          this.loading.playlists = false
+          if (!err) setFirstPlaylist()
+        })
+      } else {
+        setFirstPlaylist()
+      }
     },
 
     rebuildCurrentShots () {
@@ -559,6 +575,15 @@ export default {
     onAnnotationChanged ({ preview, annotations }) {
       const taskId = preview.task_id
       this.updatePreviewAnnotation({ taskId, preview, annotations })
+    },
+
+    onForClientChanged (forClient) {
+      this.editPlaylist({
+        data: {
+          id: this.currentPlaylist.id,
+          for_client: forClient
+        }
+      })
     }
   },
 
@@ -581,6 +606,8 @@ export default {
     },
 
     currentProduction () {
+      this.$store.commit('LOAD_SEQUENCES_END', [])
+      this.$store.commit('LOAD_PLAYLISTS_END', [])
       this.loadShotsData(() => {
         this.setAdditionSequences()
         this.resetPlaylist()
@@ -588,6 +615,8 @@ export default {
     },
 
     currentEpisode () {
+      this.$store.commit('LOAD_SEQUENCES_END', [])
+      this.$store.commit('LOAD_PLAYLISTS_END', [])
       if (this.currentEpisode) {
         this.loadShotsData(() => {
           this.setAdditionSequences()
@@ -678,10 +707,19 @@ export default {
 <style lang="scss" scoped>
 .dark {
   .playlist-item {
-    background: #46494F;
+    background: $dark-grey-lightmore;
     box-shadow: 0px 0px 6px #333;
     border-color: $dark-grey;
     color: $white-grey;
+
+    &.for-client {
+      background: $purple-grey;
+      border: 1px solid $dark-grey;
+    }
+
+    &.selected {
+      border-right: 3px solid $dark-green;
+    }
   }
 
   .playlist-list-column {
@@ -709,6 +747,7 @@ export default {
 }
 
 .page .columns {
+  margin-top: 0px;
   margin-bottom: 0;
   overflow-y: auto;
   flex: 1;
@@ -718,7 +757,7 @@ export default {
   max-width: 300px;
   background: #F4F5F9;
   overflow-y: auto;
-  padding: 2em 1em 1em 2em;
+  padding: 1em 1em 1em 2em;
   border-right: 1px solid #DDD;
   box-shadow: 0px 0px 6px #F0F0F0;
   z-index: 201;
@@ -732,6 +771,11 @@ export default {
   border: 1px solid $white-grey;
   box-shadow: 0px 0px 6px #DDD;
   color: $grey-strong;
+
+  &.for-client {
+    background: $purple-light;
+    border: 1px solid $purple;
+  }
 }
 
 .playlist-item.selected {
@@ -789,7 +833,7 @@ span.thumbnail-picture {
   padding: 0 1em;
 
   .subtitle {
-    margin-top: 1.5em;
+    margin-top: 1em;
   }
 }
 
@@ -802,15 +846,21 @@ span.thumbnail-picture {
 }
 
 .playlist-column {
-  margin-top: 10px;
   padding: 0;
   overflow: hidden;
   flex: 1;
+}
+
+.playlist-column:last-child {
+  padding-right: 1em;
 }
 
 .playlist-date {
   display: block;
   color: $grey;
   font-size: 0.8em;
+}
+
+.thumbnail-wrapper {
 }
 </style>

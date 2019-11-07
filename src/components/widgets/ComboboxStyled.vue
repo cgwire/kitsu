@@ -1,5 +1,5 @@
 <template>
-<div class="field">
+<div>
   <label class="label" v-if="label.length > 0">
     {{ label }}
   </label>
@@ -150,8 +150,7 @@ export default {
 
 .combo {
   background: $white;
-  min-width: 120px;
-  width: 120px;
+  max-width: 200px;
   border: 1px solid $light-grey-light;
   border-radius: 0.5em;
   user-select: none;

@@ -7,9 +7,13 @@
 
     <nav class="nav">
       <div class="nav-left">
-        <a class="nav-item sidebar-button" id="toggle-menu-button"
+        <a
+           class="nav-item sidebar-button"
+           id="toggle-menu-button"
            @click='toggleSidebar()'
-           v-bind:class="{'selected': !isSidebarHidden}">
+           :class="{'selected': !isSidebarHidden}"
+           v-if="!isCurrentUserClient"
+        >
           ≡
         </a>
 
@@ -190,6 +194,7 @@ export default {
       'currentProduction',
       'episodes',
       'episodeOptions',
+      'isCurrentUserClient',
       'isDarkTheme',
       'isSidebarHidden',
       'isUserMenuHidden',
@@ -244,18 +249,25 @@ export default {
     },
 
     navigationOptions () {
-      const options = [
+      let options = [
         { label: this.$t('assets.title'), value: 'assets' },
         { label: this.$t('shots.title'), value: 'shots' },
         { label: this.$t('sequences.title'), value: 'sequences' },
         { label: this.$t('episodes.title'), value: 'episodes' },
-        { label: this.$t('asset_types.production_title'), value: 'assetTypes' },
-        { label: this.$t('breakdown.title'), value: 'breakdown' },
-        { label: this.$t('playlists.title'), value: 'playlists' },
-        { label: this.$t('people.team'), value: 'team' },
-        { label: this.$t('news.title'), value: 'newsFeed' },
-        { label: this.$t('schedule.title'), value: 'schedule' }
+        {
+          label: this.$t('asset_types.production_title'), value: 'assetTypes'
+        },
+        { label: this.$t('playlists.title'), value: 'playlists' }
       ]
+
+      if (!this.isCurrentUserClient) {
+        options = options.concat([
+          { label: this.$t('news.title'), value: 'newsFeed' },
+          { label: this.$t('breakdown.title'), value: 'breakdown' },
+          { label: this.$t('schedule.title'), value: 'schedule' },
+          { label: this.$t('people.team'), value: 'team' }
+        ])
+      }
       if (!this.isTVShow) { // Remove episode Section from the list.
         options.splice(3, 1)
       }
@@ -468,6 +480,17 @@ export default {
   watch: {
     $route () {
       const productionId = this.$route.params.production_id
+      /*
+      const episodeId = this.$route.params.episode_id
+      if (
+        this.currentProduction.id !== productionId &&
+        (
+          (!this.currentEpisode && episodeId) ||
+          this.currentEpisode.id !== episodeId
+        )
+      ) {
+      }
+      */
       this.updateContext(productionId)
     },
 

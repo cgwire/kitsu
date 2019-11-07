@@ -201,6 +201,7 @@ export default {
   border: 1px solid $light-grey-light;
   z-index: 200;
   margin-left: -1px;
+  min-height: 100px;
   max-height: 180px;
   top: 33px;
   left: 0;

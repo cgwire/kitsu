@@ -51,6 +51,7 @@ export default {
     add_checklist: 'Ajout checklist',
     add_comment: 'Ajouter un commentaire...',
     add_preview: 'Attacher un fichier',
+    comment_from_client: 'Commentaire du client',
     edit_title: 'Modifier le commentaire',
     empty_text: 'Ce commentaire est vide',
     no_file_attached: 'Aucun fichier attaché',
@@ -211,6 +212,8 @@ export default {
     delete_error: 'Une erreur est survenue en supprimant la playlist.',
     download_zip: 'Télécharger en .zip',
     edit_title: 'Modifier la playlist',
+    for_client: 'Pour le client',
+    for_studio: 'Pour le studio',
     no_preview: 'Aucun preview',
     remove: 'enlever',
     loading_error: 'Une erreur serveur est apparue, les playlists ne peuvent pas être chargées.',
@@ -464,13 +467,14 @@ export default {
     new_task_status: 'Ajouter un statut de tâche',
     title: 'Statuts de tâche',
     fields: {
-      name: 'Nom',
-      short_name: 'Nom court',
       color: 'Couleur',
+      is_artist_allowed: 'Autorisé aux artistes',
+      is_client_allowed: 'Autorisé aux clents',
+      is_done: 'Est terminé',
       is_retake: 'A valeur de retake',
       is_reviewable: 'Est vérifiable',
-      is_done: 'Est terminé',
-      is_artist_allowed: 'Autorisé aux artistes'
+      name: 'Nom',
+      short_name: 'Nom court'
     }
   },
 

@@ -5,16 +5,45 @@
     <span class="flexrow-item playlist-name">
       {{ playlist.name }}
     </span>
+    <div class="flexrow-item" v-if="isCurrentUserManager">
+      <combobox-styled
+        :options="forClientOptions"
+        v-model="forClient"
+      />
+    </div>
     <button-simple
       @click="showEditModal"
       class="edit-button playlist-button flexrow-item"
       icon="edit"
+      v-if="isCurrentUserManager"
     />
     <button-simple
       @click="showDeleteModal"
       class="delete-button playlist-button flexrow-item"
       icon="delete"
+      v-if="isCurrentUserManager"
     />
+    <span class="flexrow-item">
+      {{ nbCommentedShots }}
+      /
+      {{ shotList.length }}
+    </span>
+    <div
+      class="progress flexrow-item"
+      v-if="isCurrentUserClient && shotList.length > 0"
+    >
+      <span
+        ref="review-progress-bar"
+        :class="{
+          'progress-bar': false,
+          complete: nbCommentedShots === shotList.length
+        }"
+        :style="{
+          width: Math.round(100 * nbCommentedShots / shotList.length) + 'px'
+        }"
+      >
+      </span>
+    </div>
   </div>
 
   <div class="filler flexrow video-container" ref="video-container">
@@ -206,6 +235,7 @@
           hidden: isDlButtonsHidden
         }"
         @click="onBuildClicked"
+        v-if="isCurrentUserManager"
       >
         {{ $t('playlists.build_mp4') }}
       </span>
@@ -328,6 +358,7 @@ import { roundToFrame } from '../../../lib/video'
 import AnnotationBar from './AnnotationBar'
 import ButtonSimple from '../../widgets/ButtonSimple'
 import Combobox from '../../widgets/Combobox'
+import ComboboxStyled from '../../widgets/ComboboxStyled'
 import DeleteModal from '../../modals/DeleteModal'
 import EditPlaylistModal from '../../modals/EditPlaylistModal'
 import PlaylistedShot from './PlaylistedShot'
@@ -345,6 +376,7 @@ export default {
     AnnotationBar,
     ButtonSimple,
     Combobox,
+    ComboboxStyled,
     DeleteModal,
     EditPlaylistModal,
     PlaylistedShot,
@@ -373,6 +405,7 @@ export default {
       annotations: [],
       currentTime: '00:00.00',
       currentTimeRaw: 0,
+      forClient: 'false',
       fabricCanvas: null,
       isDlButtonsHidden: true,
       isCommentsHidden: true,
@@ -401,7 +434,11 @@ export default {
         playlists: false,
         editPlaylist: false,
         deletePlaylist: false
-      }
+      },
+      forClientOptions: [
+        { label: this.$t('playlists.for_client'), value: 'true' },
+        { label: this.$t('playlists.for_studio'), value: 'false' }
+      ]
     }
   },
 
@@ -411,7 +448,7 @@ export default {
     this.$nextTick(() => {
       window.addEventListener('keydown', this.onKeyDown, false)
       window.addEventListener('resize', this.onWindowResize)
-      this.$el.onmousemove = this.onMouseMove
+      if (!this.$el.nomousemove) this.$el.onmousemove = this.onMouseMove
       this.setupCanvas()
     })
   },
@@ -419,11 +456,14 @@ export default {
   beforeDestroy () {
     window.removeEventListener('keydown', this.onKeyDown)
     window.removeEventListener('resize', this.onWindowResize)
+    this.$el.onmousemove = null
   },
 
   computed: {
     ...mapGetters([
       'currentProduction',
+      'isCurrentUserClient',
+      'isCurrentUserManager',
       'taskMap',
       'taskTypeMap',
       'user'
@@ -495,6 +535,11 @@ export default {
 
     timezone () {
       return this.user.timezone || moment.tz.guess()
+    },
+
+    nbCommentedShots () {
+      const isCommentedByClient = shot => shot.is_commented
+      return this.shotList.filter(isCommentedByClient).length
     }
   },
 
@@ -547,10 +592,12 @@ export default {
     displayBars () {
       this.$refs['header'].style.display = 'flex'
       this.$refs['button-bar'].style.display = 'flex'
-      this.$refs['playlist-progress'].style.display = 'flex'
+      if (this.$refs['button-bar']) {
+        this.$refs['playlist-progress'].style.display = 'flex'
+        this.$refs['button-bar'].style.opacity = 1
+        this.$refs['playlist-progress'].style.opacity = 1
+      }
       this.$refs['header'].style.opacity = 1
-      this.$refs['button-bar'].style.opacity = 1
-      this.$refs['playlist-progress'].style.opacity = 1
       this.$refs['container'].style.cursor = 'default'
     },
 
@@ -1239,7 +1286,17 @@ export default {
       this.resetHeight()
     },
 
+    forClient () {
+      const forClient = this.forClient === 'true'
+      console.log(forClient, this.playlist.for_client)
+      if (this.playlist.for_client !== forClient) {
+        console.log('emit', forClient)
+        this.$emit('for-client-changed', forClient)
+      }
+    },
+
     playlist () {
+      this.forClient = Boolean(this.playlist.for_client).toString()
       this.$nextTick(() => {
         this.updateProgressBar()
       })
@@ -1409,7 +1466,7 @@ progress {
   display: block;
 }
 
-.progress  span#progress-bar {
+.progress span#progress-bar {
   width: 100%;
   border-radius: 0;
   margin: 0;
@@ -1522,5 +1579,23 @@ progress {
 .spinner {
   margin-top: 80px;
   margin-left: 1em;
+}
+
+.progress {
+  width: 100px;
+  height: 10px;
+  margin-right: 1em;
+  border-radius: 5px;
+  background: $grey;
+
+  span {
+    background: $dark-purple;
+    height: 10px;
+    display: block;
+
+    &.complete {
+      background: $green;
+    }
+  }
 }
 </style>

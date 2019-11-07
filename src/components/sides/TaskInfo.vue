@@ -348,8 +348,10 @@ export default {
   },
 
   beforeDestroy () {
-    const lastComment = `${this.$refs['add-comment'].text}`
-    this.$store.commit('SET_LAST_COMMENT_DRAFT', lastComment)
+    if (this.$refs['add-comment']) {
+      const lastComment = `${this.$refs['add-comment'].text}`
+      this.$store.commit('SET_LAST_COMMENT_DRAFT', lastComment)
+    }
   },
 
   computed: {
@@ -359,6 +361,7 @@ export default {
       'getTaskComment',
       'getTaskComments',
       'getTaskPreviews',
+      'isCurrentUserClient',
       'isCurrentUserManager',
       'isSingleEpisode',
       'isTVShow',
@@ -398,9 +401,13 @@ export default {
     },
 
     isCommentingAllowed () {
-      return this.isCurrentUserManager || this.task.assignees.find(
+      const isManager = this.isCurrentUserManager
+      const isAssigned = this.task.assignees.find(
         (personId) => personId === this.user.id
       )
+      const isClientInPlaylist =
+        this.$route.path.indexOf('playlist') > 0 && this.isCurrentUserClient
+      return isManager || isAssigned || isClientInPlaylist
     },
 
     isSetThumbnailAllowed () {
