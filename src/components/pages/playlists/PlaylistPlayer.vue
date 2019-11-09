@@ -23,7 +23,10 @@
       icon="delete"
       v-if="isCurrentUserManager"
     />
-    <span class="flexrow-item">
+    <!--span
+      class="flexrow-item"
+      v-if="isCurrentUserClient && shotList.length > 0"
+    >
       {{ nbCommentedShots }}
       /
       {{ shotList.length }}
@@ -43,7 +46,7 @@
         }"
       >
       </span>
-    </div>
+    </div-->
   </div>
 
   <div class="filler flexrow video-container" ref="video-container">
