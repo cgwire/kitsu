@@ -299,12 +299,14 @@ export default {
     },
 
     resizeHeaders () {
-      if (this.$refs['body-tbody'] &&
-          this.$refs['body-tbody'].children.length > 0) {
-        const sequenceWidth =
-          this.$refs['body-tbody'].children[0].children[0].offsetWidth
-        this.$refs['th-sequence'].style = `min-width: ${sequenceWidth}px`
-      }
+      this.$nextTick(() => {
+        if (this.$refs['body-tbody'] &&
+            this.$refs['body-tbody'].children.length > 0) {
+          const sequenceWidth =
+            this.$refs['body-tbody'].children[0].children[0].offsetWidth
+          this.$refs['th-sequence'].style = `min-width: ${sequenceWidth}px`
+        }
+      })
     },
 
     editPath (sequenceId) {
