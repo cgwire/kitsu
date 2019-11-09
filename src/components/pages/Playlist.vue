@@ -330,7 +330,9 @@ export default {
           this.addShotToCurrentShots(shotPreview, tmpShots)
         })
       }
-      this.currentShots = tmpShots
+      this.$nextTick(() => {
+        this.currentShots = tmpShots
+      })
     },
 
     /*
