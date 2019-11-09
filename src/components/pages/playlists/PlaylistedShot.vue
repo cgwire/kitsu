@@ -29,12 +29,13 @@
         class="preview-choice"
         v-if="taskTypeOptions.length > 0"
       >
-        <light-combobox
+        <combobox
+          ref="task-type-combobox"
           :options="taskTypeOptions"
           :disabled="!isCurrentUserManager"
           v-model="taskTypeId"
         />
-        <light-combobox
+        <combobox
           class="version-combo"
           :options="previewFileOptions"
           :disabled="!isCurrentUserManager"
@@ -62,14 +63,14 @@ import firstBy from 'thenby'
 import { mapGetters } from 'vuex'
 import { XIcon } from 'vue-feather-icons'
 
-import LightCombobox from '../../widgets/LightCombobox'
+import Combobox from '../../widgets/Combobox'
 import LightEntityThumbnail from '../../widgets/LightEntityThumbnail'
 
 export default {
   name: 'playlisted-shot',
 
   components: {
-    LightCombobox,
+    Combobox,
     LightEntityThumbnail,
     XIcon
   },
