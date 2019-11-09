@@ -25,7 +25,7 @@
             :to="getPlaylistPath(playlist.id)"
             :class="{
               'playlist-item': true,
-              'for-client': playlist.for_client,
+              'for-client': playlist.for_client || false,
               selected: playlist.id === currentPlaylist.id
             }"
             v-for="playlist in playlists"
