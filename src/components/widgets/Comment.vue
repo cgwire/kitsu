@@ -68,7 +68,7 @@
       </p>
       <p
         class="error"
-        v-if="comment.text && !isCurrentUserClient"
+        v-if="personMap[comment.person_id].role === 'client'"
       >
         {{ $t('comments.comment_from_client') }}
       </p>
@@ -194,7 +194,6 @@ export default {
   computed: {
     ...mapGetters([
       'currentProduction',
-      'isCurrentUserClient',
       'user',
       'personMap',
       'taskMap',
