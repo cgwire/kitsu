@@ -32,13 +32,11 @@
         <combobox
           ref="task-type-combobox"
           :options="taskTypeOptions"
-          :disabled="!isCurrentUserManager"
           v-model="taskTypeId"
         />
         <combobox
           class="version-combo"
           :options="previewFileOptions"
-          :disabled="!isCurrentUserManager"
           v-model="previewFileId"
         />
       </div>
