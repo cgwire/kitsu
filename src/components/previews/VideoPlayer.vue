@@ -290,8 +290,7 @@ export default {
     ]),
 
     currentFrame () {
-      console.log(this.currentTimeRaw, parseInt(this.fps))
-      return `${Math.floor(this.currentTimeRaw * this.fps)}`.padStart(3, '0')
+      return `${Math.ceil(this.currentTimeRaw * this.fps)}`.padStart(3, '0')
     },
 
     canvas () {
