@@ -23,7 +23,7 @@ class PlaylistResource(BaseModelResource):
         user_service.check_project_access(playlist)
 
     def check_update_permissions(self, playlist, data):
-        user_service.check_playlist_access(playlist)
+        user_service.check_project_access(playlist["project_id"])
 
     def delete(self, instance_id):
         playlists_service.remove_playlist(instance_id)
