@@ -542,6 +542,7 @@ const actions = {
     const lines = assets.map((asset) => {
       const assetLine = [
         asset.episode_id ? episodeMap[asset.episode_id].name : '',
+        asset.asset_type_name,
         asset.name,
         asset.description
       ]

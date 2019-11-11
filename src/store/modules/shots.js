@@ -887,6 +887,7 @@ const actions = {
     }
     const lines = shots.map((shot) => {
       const shotLine = [
+        shot.sequence_name,
         shot.name,
         shot.description
       ]

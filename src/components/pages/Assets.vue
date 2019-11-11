@@ -731,6 +731,7 @@ export default {
           const name = slugify(nameData.join('_'))
           const headers = [
             this.$t('assets.fields.episode'),
+            this.$t('assets.fields.type'),
             this.$t('assets.fields.name'),
             this.$t('assets.fields.description')
           ]

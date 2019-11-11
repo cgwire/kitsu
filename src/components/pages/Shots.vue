@@ -709,6 +709,7 @@ export default {
           }
           const name = slugify(nameData.join('_'))
           const headers = [
+            this.$t('shots.fields.sequence'),
             this.$t('shots.fields.name'),
             this.$t('shots.fields.description')
           ]
