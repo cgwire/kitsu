@@ -169,8 +169,9 @@ def sync_with_ldap_server():
             "sAMAccountName",
             "mail",
             "thumbnailPhoto",
+            "userAccountControl"
         ]
-        conn.search(LDAP_BASE_DN, "(objectclass=person)", attributes=attributes)
+        conn.search(LDAP_BASE_DN, "(objectCategory=person)", attributes=attributes)
         return [
             {
                 "first_name": clean_value(entry.givenName),
@@ -180,7 +181,11 @@ def sync_with_ldap_server():
                 "thumbnail": entry.thumbnailPhoto.raw_values,
             }
             for entry in conn.entries
-            if clean_value(entry.sAMAccountName) not in excluded_accounts
+            # Only return active normal accounts
+            # 512 = Normal account (512)
+            # 66048 = Normal account + dont expire password (65536 + 512)
+            # for more information https://support.microsoft.com/en-us/help/305144/how-to-use-useraccountcontrol-to-manipulate-user-account-properties
+            if clean_value(entry.sAMAccountName) not in excluded_accounts and clean_value(entry.userAccountControl) in ['512', '66048']
         ]
 
     def search_ldap_users(conn, excluded_accounts):
