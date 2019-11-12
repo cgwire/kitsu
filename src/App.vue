@@ -73,6 +73,7 @@ export default {
       'loadAssetType',
       'loadComment',
       'loadEpisode',
+      'loadOpenProductions',
       'loadPerson',
       'loadPersonTasks',
       'loadProduction',
@@ -129,6 +130,8 @@ export default {
       'project:update' (eventData) {
         if (this.productionMap[eventData.project_id]) {
           this.loadProduction(eventData.project_id)
+        } else {
+          this.loadOpenProductions()
         }
       },
 
