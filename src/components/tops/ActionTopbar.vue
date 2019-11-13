@@ -202,6 +202,9 @@
             <div class="flexrow-item" v-else>
               <spinner :is-white="true" />
             </div>
+            <div class="flexrow-item error" v-if="errors.deleteTask">
+              {{ $t('tasks.delete_error') }}
+            </div>
           </div>
         </div>
 
@@ -448,7 +451,10 @@ export default {
           label: this.$t('tasks.priority.emergency'),
           value: '3'
         }
-      ]
+      ],
+      errors: {
+        deleteTask: false
+      }
     }
   },
 
@@ -648,12 +654,15 @@ export default {
 
     confirmTaskDeletion () {
       this.isDeletionLoading = true
+      this.errors.deleteTask = false
       this.deleteSelectedTasks()
         .then(() => {
           this.isDeletionLoading = false
         })
         .catch((err) => {
           console.error(err)
+          this.isDeletionLoading = false
+          this.errors.deleteTask = true
         })
     },
 
