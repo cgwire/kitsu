@@ -260,9 +260,9 @@ def retrieve_playlist_tmp_files(playlist):
     preview_file_ids = []
     for shot in playlist["shots"]:
         if (
-            "preview_file_id" in shot
-            and shot["preview_file_id"] is not None
-            and len(shot["preview_file_id"]) > 0
+            "preview_file_id" in shot and
+            shot["preview_file_id"] is not None and
+            len(shot["preview_file_id"]) > 0
         ):
             preview_file = files_service.get_preview_file(
                 shot["preview_file_id"]
@@ -309,7 +309,7 @@ def build_playlist_zip_file(playlist):
     return zip_file_path
 
 
-def build_playlist_movie_file(playlist):
+def build_playlist_movie_file(playlist, app=None):
     """
     Build a movie for all files for a given playlist into the temporary folder.
     """
@@ -323,7 +323,10 @@ def build_playlist_movie_file(playlist):
     result = movie_utils.build_playlist_movie(
         tmp_file_paths, movie_file_path, width, height, fps
     )
-    file_store.add_movie("playlists", job["id"], movie_file_path)
+    if result["success"] == True:
+        file_store.add_movie("playlists", job["id"], movie_file_path)
+    elif app is not None:
+        current_app.logger.error(result["message"])
     end_build_job(playlist, job, result)
     return job
 
