@@ -480,17 +480,6 @@ export default {
   watch: {
     $route () {
       const productionId = this.$route.params.production_id
-      /*
-      const episodeId = this.$route.params.episode_id
-      if (
-        this.currentProduction.id !== productionId &&
-        (
-          (!this.currentEpisode && episodeId) ||
-          this.currentEpisode.id !== episodeId
-        )
-      ) {
-      }
-      */
       this.updateContext(productionId)
     },
 
