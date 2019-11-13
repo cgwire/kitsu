@@ -37,20 +37,6 @@ except redis.ConnectionError:
 memoize_function = cache.memoize
 
 
-def memoize_function(function, timeout=120):
-    function = cache.memoize(function, timeout)
-
-    @wraps(function)
-    def wrapper(*args, **kwargs):
-        result = function(*args, **kwargs)
-        if result is None:
-            cache.delete_memoized(function)
-            result = function(*args, **kwargs)
-        return result
-
-    return wrapper
-
-
 def invalidate(*args):
     cache.delete_memoized(*args)
 
