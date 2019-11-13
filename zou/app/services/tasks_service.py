@@ -405,6 +405,7 @@ def get_comments(task_id, is_client=False, is_manager=False):
         }
 
         if comment.preview_file_id is not None:
+            # Legacy stuff, should not be used anymore.
             preview = files_service.get_preview_file(comment.preview_file_id)
             comment_dict["previews"] = [
                 {
@@ -1043,9 +1044,10 @@ def get_full_task(task_id):
     task_status = get_task_status(task["task_status_id"])
     entity = entities_service.get_entity(task["entity_id"])
     entity_type = entities_service.get_entity_type(entity["entity_type_id"])
-    assignees = []
-    for assignee_id in task["assignees"]:
-        assignees.append(persons_service.get_person(assignee_id))
+    assignees = [
+        persons_service.get_person(assignee_id)
+        for assignee_id in task["assignees"]
+    ]
 
     task.update({
         "entity": entity,
