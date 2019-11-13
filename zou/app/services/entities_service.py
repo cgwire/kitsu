@@ -49,6 +49,7 @@ def get_entity_raw(entity_id):
     return base_service.get_instance(Entity, entity_id, EntityNotFoundException)
 
 
+@cache.memoize_function(120)
 def get_entity(entity_id):
     """
     Return an entity type matching given id, as a dict. Raises an exception if
