@@ -78,6 +78,9 @@ class ApiTestCase(unittest.TestCase):
     def log_in_cg_artist(self):
         self.log_in(self.user_cg_artist["email"])
 
+    def log_in_cg_artist(self):
+        self.log_in(self.user_client["email"])
+
     def log_out(self):
         try:
             self.get("auth/logout")
@@ -502,6 +505,17 @@ class ApiDBTestCase(ApiTestCase):
         ).serialize()
         return self.user_cg_artist
 
+    def generate_fixture_user_client(self):
+        self.user_client = Person.create(
+            first_name="John",
+            last_name="Did4",
+            role="client",
+            email=u"john.did.client@gmail.com",
+            password=auth.encrypt_password("mypassword")
+        ).serialize()
+        return self.user_client
+
+
     def generate_fixture_person(
         self,
         first_name="John",
@@ -725,11 +739,13 @@ class ApiDBTestCase(ApiTestCase):
         self.project.save()
         return self.shot_task_standard
 
-    def generate_fixture_comment(self):
+    def generate_fixture_comment(self, person=None):
+        if person is None:
+            person = self.person.serialize()
         self.comment = tasks_service.create_comment(
             self.task.id,
             self.task_status.id,
-            self.person.id,
+            person["id"],
             "first comment"
         )
         return self.comment
