@@ -78,7 +78,7 @@ class ApiTestCase(unittest.TestCase):
     def log_in_cg_artist(self):
         self.log_in(self.user_cg_artist["email"])
 
-    def log_in_cg_artist(self):
+    def log_in_client(self):
         self.log_in(self.user_client["email"])
 
     def log_out(self):
