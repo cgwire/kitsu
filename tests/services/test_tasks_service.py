@@ -438,8 +438,16 @@ class TaskServiceTestCase(ApiDBTestCase):
         self.assertEqual(mentions[0], self.person)
 
     def test_get_comments(self):
+        self.generate_fixture_user_client()
         self.generate_fixture_comment()
-        comments = tasks_service.get_comments(self.task_id)
+        self.generate_fixture_comment()
+        self.generate_fixture_comment(person=self.user_client)
+        self.generate_fixture_comment()
+        comments = tasks_service.get_comments(self.task_id, is_manager=True)
+        self.assertEqual(len(comments), 4)
+        comments = tasks_service.get_comments(self.task_id, is_manager=False)
+        self.assertEqual(len(comments), 3)
+        comments = tasks_service.get_comments(self.task_id, is_client=True)
         self.assertEqual(len(comments), 1)
 
     def test_create_comment(self):
@@ -450,3 +458,14 @@ class TaskServiceTestCase(ApiDBTestCase):
             "Test @John Doe"
         )
         self.assertEqual(comment["mentions"][0], str(self.person.id))
+
+    def test_get_full_task(self):
+        task = tasks_service.get_full_task(self.task.id)
+        self.assertEqual(task["project"]["name"], self.project.name)
+        self.assertEqual(task["assigner"]["id"], str(self.assigner.id))
+        self.assertEqual(task["persons"][0]["id"], str(self.person.id))
+        self.assertEqual(task["task_status"]["id"], str(self.task_status.id))
+        self.assertEqual(task["task_type"]["id"], str(self.task_type.id))
+
+        task = tasks_service.get_full_task(self.shot_task.id)
+        self.assertEqual(task["sequence"]["id"], str(self.sequence.id))
