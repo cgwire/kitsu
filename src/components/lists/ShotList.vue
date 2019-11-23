@@ -22,15 +22,9 @@
         <tr>
           <th class="thumbnail"></th>
           <th class="name shot-name" ref="th-shot" >
-            {{ $t('shots.fields.name') }}
-          </th>
-          <th
-            class="description"
-            v-if="!isCurrentUserClient && isShowInfos"
-          >
             <div class="flexrow">
               <span class="flexrow-item">
-                {{ $t('shots.fields.description') }}
+                {{ $t('shots.fields.name') }}
               </span>
               <button-simple
                 class="is-small flexrow"
@@ -42,6 +36,12 @@
             </div>
           </th>
           <th
+            class="description"
+            v-if="!isCurrentUserClient && isShowInfos && isShotDescription"
+          >
+            {{ $t('shots.fields.description') }}
+          </th>
+          <th
             class="metadata-descriptor"
             :key="descriptor.id"
             v-for="descriptor in shotMetadataDescriptors"
@@ -49,7 +49,7 @@
           >
             <div class="flexrow">
               <span class="flexrow-item descriptor-name">
-              {{ descriptor.name }}
+                {{ descriptor.name }}
               </span>
               <chevron-down-icon
                 @click="showMetadataHeaderMenu(descriptor.id, $event)"
@@ -185,7 +185,7 @@
           <description-cell
             class="description"
             :entry="shot"
-            v-if="!isCurrentUserClient && isShowInfos"
+            v-if="!isCurrentUserClient && isShowInfos && isShotDescription"
           />
           <td
             class="metadata-descriptor"
@@ -337,6 +337,7 @@ export default {
       'isFrameIn',
       'isFrameOut',
       'isSingleEpisode',
+      'isShotDescription',
       'isShowAssignations',
       'isShowInfos',
       'isTime',
