@@ -1,4 +1,3 @@
-import async from 'async'
 import store from '../store'
 
 import {
@@ -11,29 +10,17 @@ import {
  */
 const init = (callback) => {
   store.commit(DATA_LOADING_START)
-  const storeActions = [
-    'loadProductionStatus',
-    'loadTaskStatuses',
-    'loadAssetTypes',
-    'loadTaskTypes',
-    'loadPeople',
-    'loadOpenProductions',
-    'loadCustomActions',
-    'loadUserSearchFilters',
-    'loadNotifications'
-  ]
-
-  async.mapSeries(storeActions, store.dispatch, (err) => {
-    if (err) {
-      console.log('An init operation failed: ', err)
-    }
-
-    // We run login success mutation when done because init
-    // happens either after successful login or at first connexion
-    // when the user have an active session.
-    store.commit(DATA_LOADING_END)
-    callback()
-  })
+  store.dispatch('loadContext')
+    .then(() => {
+      // We run login success mutation when done because init
+      // happens either after successful login or at first connexion
+      // when the user have an active session.
+      store.commit(DATA_LOADING_END)
+      callback()
+    })
+    .catch((err) => {
+      console.error('An init operation failed: ', err)
+    })
 }
 
 export default init

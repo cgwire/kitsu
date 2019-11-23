@@ -252,5 +252,9 @@ export default {
         else resolve(tasks)
       })
     })
+  },
+
+  getContext () {
+    return client.pget('/api/data/user/context')
   }
 }
