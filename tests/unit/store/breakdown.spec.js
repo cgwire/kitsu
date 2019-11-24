@@ -5,6 +5,10 @@ import store from '../../../src/store/modules/breakdown'
 import breakdownApi from '../../../src/store/api/breakdown'
 
 breakdownApi.updateCasting = jest.fn()
+breakdownApi.getSequenceCasting = jest.fn()
+breakdownApi.getSequenceCasting.mockImplementation(
+  () => Promise.resolve([])
+)
 
 const localVue = createLocalVue()
 localVue.use(Vuex)
@@ -12,13 +16,23 @@ const vuexStore = new Vuex.Store(store)
 
 
 describe('Breakdown store', () => {
-  let state, shots, assetCasting, casting, assetMap
+  let state, shots, assetCasting, casting, assetMap, production, shotMap
 
   beforeEach(() => {
     state = {}
     shots = [
-      { id: 'shot-1', name: 'SH01', sequence_name: 'SE01' },
-      { id: 'shot-2', name: 'SH02', sequence_name: 'SE02' }
+      {
+        id: 'shot-1',
+        name: 'SH01',
+        sequence_name: 'SE01',
+        sequence_id: 'sequence-1'
+      },
+      {
+        id: 'shot-2',
+        name: 'SH02',
+        sequence_name: 'SE02',
+        sequence_id: 'sequence-2'
+      }
     ]
     assetCasting = [
       {
@@ -43,7 +57,15 @@ describe('Breakdown store', () => {
     casting = {
       'shot-1': assetCasting,
       'shot-2': []
+    },
+    production = {
+      id: 'production-1',
+      name: 'Caminandes'
     }
+    const entityMapReducer = (acc, entity) => {
+      acc[entity.id] = entity ; return acc
+    }
+    shotMap = shots.reduce(entityMapReducer, {})
   })
 
   describe('Getters', () => {
@@ -51,7 +73,14 @@ describe('Breakdown store', () => {
   })
 
   describe('Actions', () => {
-    test.skip('setCastingSequence', () => {
+    test('setCastingSequence', async () => {
+      const commit = vuexStore.commit
+      const rootState = {
+        productions: { currentProduction: production },
+        assets: { assetMap },
+        shots: { shotMap }
+      }
+      await store.actions.setCastingSequence({ commit, rootState }, 'shot-1')
     })
     test.skip('setCastingEpisode', () => {
     })
@@ -229,8 +258,8 @@ describe('Breakdown store', () => {
       store.mutations.LOAD_ASSET_CAST_IN_END(state, { asset, castIn: shots })
       expect(asset.castIn).toEqual(shots)
       expect(asset.castInShotsBySequence).toEqual([
-        [{ id: 'shot-1', name: 'SH01', sequence_name: 'SE01' }],
-        [{ id: 'shot-2', name: 'SH02', sequence_name: 'SE02' }]
+        [{ id: 'shot-1', name: 'SH01', sequence_name: 'SE01', sequence_id: 'sequence-1' }],
+        [{ id: 'shot-2', name: 'SH02', sequence_name: 'SE02', sequence_id: 'sequence-2' }]
       ])
     })
   })
