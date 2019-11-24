@@ -17,7 +17,7 @@
           </div>
 
           <div class="level-right">
-            <div class="flexrow">
+            <div class="flexrow" v-if="!isCurrentUserClient">
               <show-assignations-button class="flexrow-item" />
               <show-infos-button class="flexrow-item" />
               <div class="flexrow-item"></div>
@@ -280,6 +280,7 @@ export default {
       'editShot',
       'episodeMap',
       'episodes',
+      'isCurrentUserClient',
       'isCurrentUserManager',
       'isFrameIn',
       'isFrameOut',

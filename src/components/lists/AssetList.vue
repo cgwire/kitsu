@@ -24,16 +24,10 @@
             {{ $t('assets.fields.episode') }}
           </th>
           <th class="thumbnail" ref="th-thumbnail"></th>
-          <th class="name" ref="th-name">{{ $t('assets.fields.name') }}</th>
-
-          <th
-            class="description"
-            ref="th-description"
-            v-if="!isCurrentUserClient && isShowInfos"
-          >
+          <th class="name" ref="th-name">
             <div class="flexrow">
               <span class="flexrow-item">
-              {{ $t('assets.fields.description') }}
+                {{ $t('assets.fields.name') }}
               </span>
               <button-simple
                 class="is-small flexrow-item"
@@ -43,6 +37,14 @@
                 v-if="isCurrentUserAdmin && !isLoading"
               />
             </div>
+          </th>
+
+          <th
+            class="description"
+            ref="th-description"
+            v-if="!isCurrentUserClient && isShowInfos && isAssetDescription"
+          >
+            {{ $t('assets.fields.description') }}
           </th>
 
           <th
@@ -180,7 +182,7 @@
           </td>
           <description-cell
             class="description"
-            v-if="!isCurrentUserClient && isShowInfos"
+            v-if="!isCurrentUserClient && isShowInfos && isAssetDescription"
             :entry="asset"
           />
           <td
@@ -317,6 +319,7 @@ export default {
       'currentProduction',
       'displayedAssetsLength',
       'nbSelectedTasks',
+      'isAssetDescription',
       'isCurrentUserAdmin',
       'isCurrentUserClient',
       'isCurrentUserManager',

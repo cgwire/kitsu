@@ -32,13 +32,14 @@
       @confirm="confirmEditProduction"
     />
 
-    <delete-modal
+    <hard-delete-modal
       :active="modals.isDeleteDisplayed"
       :is-loading="deleteProduction.isLoading"
       :is-error="deleteProduction.isError"
-      :cancel-route="'/productions'"
+      :cancel-route="{name: 'productions'}"
       :text="deleteText()"
       :error-text="$t('productions.delete_error')"
+      :lock-text="currentLockText"
       @confirm="confirmDeleteProduction"
     />
 
@@ -49,7 +50,7 @@
 import { mapGetters, mapActions } from 'vuex'
 import ProductionList from '../lists/ProductionList'
 import EditProductionModal from '../modals/EditProductionModal'
-import DeleteModal from '../modals/DeleteModal'
+import HardDeleteModal from '../modals/HardDeleteModal'
 import ButtonLink from '../widgets/ButtonLink'
 import PageTitle from '../widgets/PageTitle'
 
@@ -58,7 +59,7 @@ export default {
 
   components: {
     ButtonLink,
-    DeleteModal,
+    HardDeleteModal,
     EditProductionModal,
     PageTitle,
     ProductionList
@@ -85,7 +86,15 @@ export default {
       'isProductionsLoadingError',
       'productionAvatarFormData',
       'productions'
-    ])
+    ]),
+
+    currentLockText () {
+      if (this.productionToDelete) {
+        return this.productionToDelete.name
+      } else {
+        return ''
+      }
+    }
   },
 
   created () {

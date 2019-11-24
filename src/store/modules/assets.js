@@ -214,6 +214,7 @@ const initialState = {
 
   isAssetsLoading: false,
   isAssetsLoadingError: false,
+  isAssetDescription: false,
   isAssetTime: false,
   assetsCsvFormData: null,
 
@@ -281,6 +282,7 @@ const getters = {
   assetCreated: state => state.assetCreated,
 
   isAssetTime: state => state.isAssetTime,
+  isAssetDescription: state => state.isAssetDescription,
 
   assetsCsvFormData: state => state.assetsCsvFormData
 }
@@ -612,6 +614,7 @@ const mutations = {
     const validationColumns = {}
     const assetTypeMap = {}
     let isTime = false
+    let isDescription = false
     assets = sortAssets(assets)
     cache.assets = assets
     cache.assetIndex = buildAssetIndex(assets)
@@ -629,6 +632,7 @@ const mutations = {
       )
       state.assetMap[asset.id] = asset
       if (!isTime && asset.timeSpent > 0) isTime = true
+      if (!isDescription && asset.description) isDescription = true
     })
     const assetTypes = Object.values(assetTypeMap)
     cache.assetTypeIndex = buildNameIndex(assetTypes)
@@ -641,6 +645,7 @@ const mutations = {
       taskTypeMap
     )
     state.isAssetTime = isTime
+    state.isAssetDescription = isDescription
 
     state.isAssetsLoading = false
     state.isAssetsLoadingError = false
@@ -780,6 +785,9 @@ const mutations = {
     state.editAsset = {
       isLoading: false,
       isError: false
+    }
+    if (asset.description && !state.isAssetDescription) {
+      state.isAssetDescription = true
     }
     cache.assetIndex = buildAssetIndex(cache.assets)
   },

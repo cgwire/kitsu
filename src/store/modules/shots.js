@@ -232,6 +232,7 @@ const initialState = {
   isFrameIn: false,
   isFrameOut: false,
   isTime: false,
+  isShotDescription: false,
 
   displayedShots: [],
   displayedShotsLength: 0,
@@ -300,6 +301,7 @@ const getters = {
   isFrameIn: state => state.isFrameIn,
   isFrameOut: state => state.isFrameOut,
   isTime: state => state.isTime,
+  isShotDescription: state => state.isShotDescription,
 
   shotSearchText: state => state.shotSearchText,
   sequenceSearchText: state => state.sequenceSearchText,
@@ -972,6 +974,7 @@ const mutations = {
     let isFps = false
     let isFrameIn = false
     let isFrameOut = false
+    let isDescription = false
     let isTime = false
     shots = sortShots(shots)
     cache.shots = shots
@@ -1011,6 +1014,7 @@ const mutations = {
       if (!isFrameIn && shot.data.frame_in) isFrameIn = true
       if (!isFrameOut && shot.data.frame_out) isFrameOut = true
       if (!isTime && shot.timeSpent > 0) isTime = true
+      if (!isDescription && shot.description) isDescription = true
 
       state.shotMap[shot.id] = shot
     })
@@ -1026,6 +1030,7 @@ const mutations = {
     state.isFrameIn = isFrameIn
     state.isFrameOut = isFrameOut
     state.isTime = isTime
+    state.isShotDescription = isDescription
 
     state.isShotsLoading = false
     state.isShotsLoadingError = false
@@ -1182,6 +1187,9 @@ const mutations = {
     if (newShot.data.fps) state.isFps = true
     if (newShot.data.frame_in) state.isFrameIn = true
     if (newShot.data.frame_out) state.isFrameOut = true
+    if (shot.description && !state.isShotDescription) {
+      state.isShotDescription = true
+    }
   },
 
   [EDIT_SEQUENCE_START] (state, data) {},

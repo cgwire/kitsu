@@ -56,6 +56,15 @@ import {
   SAVE_SHOT_SEARCH_END,
   REMOVE_ASSET_SEARCH_END,
 
+  LOAD_PRODUCTION_STATUS_END,
+  LOAD_TASK_STATUSES_END,
+  LOAD_TASK_TYPES_END,
+  LOAD_PEOPLE_END,
+  LOAD_CUSTOM_ACTIONS_END,
+  LOAD_ASSET_TYPES_END,
+  LOAD_NOTIFICATIONS_END,
+  LOAD_OPEN_PRODUCTIONS_END,
+
   RESET_ALL
 } from '../mutation-types'
 
@@ -262,6 +271,21 @@ const actions = {
 
   setTodoListScrollPosition ({ commit, rootGetters }, scrollPosition) {
     commit(SET_TODO_LIST_SCROLL_POSITION, scrollPosition)
+  },
+
+  loadContext ({ commit }, callback) {
+    return peopleApi.getContext()
+      .then((context) => {
+        commit(LOAD_USER_FILTERS_END, context.search_filters)
+        commit(LOAD_PRODUCTION_STATUS_END, context.project_status)
+        commit(LOAD_TASK_STATUSES_END, context.task_status)
+        commit(LOAD_TASK_TYPES_END, context.task_types)
+        commit(LOAD_PEOPLE_END, context.persons)
+        commit(LOAD_CUSTOM_ACTIONS_END, context.custom_actions)
+        commit(LOAD_ASSET_TYPES_END, context.asset_types)
+        commit(LOAD_NOTIFICATIONS_END, context.notifications)
+        commit(LOAD_OPEN_PRODUCTIONS_END, context.projects)
+      })
   }
 }
 

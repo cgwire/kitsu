@@ -1,4 +1,5 @@
 <template>
+
 <div :class="{
   'modal': true,
   'delete-modal': true,
