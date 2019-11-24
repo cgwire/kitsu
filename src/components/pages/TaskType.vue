@@ -325,7 +325,7 @@ export default {
         'retake_count',
         'due_date',
         'real_start_date',
-        'real_end_date',
+        'end_date',
         'last_comment_date'
       ].map((name) => ({ label: name, value: name }))
     },
