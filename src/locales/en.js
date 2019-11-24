@@ -581,7 +581,7 @@ export default {
     fields: {
       asset_type: 'Asset type',
       assignees: 'Assignees',
-      end_date: 'End date',
+      end_date: 'Validation date',
       due_date: 'Due date',
       duration: 'Duration',
       entity: 'Entity',
