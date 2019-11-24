@@ -67,10 +67,11 @@
         <img src="../../assets/illustrations/validated.png" />
       </p>
       <p
-        class="error"
         v-if="personMap[comment.person_id].role === 'client'"
       >
-        {{ $t('comments.comment_from_client') }}
+        <span class="client-comment">
+          {{ $t('comments.comment_from_client') }}
+        </span>
       </p>
       <p
         v-html="renderComment(comment.text, comment.mentions, personMap)"
@@ -354,8 +355,15 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-.dark .comment-text {
-  color: $white-grey;
+.dark {
+  .comment-text {
+    color: $white-grey;
+  }
+
+  .client-comment {
+    background: #C4677B;
+    color: white;
+  }
 }
 
 .comment {
@@ -515,6 +523,15 @@ a.revision:hover {
       width: 20px;
     }
   }
+}
+
+.client-comment {
+  border-radius: 4px;
+  background: $red + 190%;
+  color: desaturate($red - 30%, 20%);
+  font-size: 0.8em;
+  padding: 0.3em 0.6em;
+  text-transform: uppercase;
 }
 
 @media screen and (max-width: 768px) {
