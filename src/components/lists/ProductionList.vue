@@ -61,10 +61,7 @@
               name: 'edit-production',
               params: {production_edit_id: entry.id}
             }"
-            :delete-route="{
-              name: 'delete-production',
-              params: {production_delete_id: entry.id}
-            }"
+            :hide-delete="true"
           />
         </tr>
       </tbody>
