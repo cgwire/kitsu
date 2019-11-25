@@ -50,7 +50,7 @@ export default {
   },
 
   deleteProduction (production, callback) {
-    client.del(`/api/data/projects/${production.id}`, callback)
+    client.del(`/api/data/projects/${production.id}?force=true`, callback)
   },
 
   addPersonToTeam (productionId, personId) {
