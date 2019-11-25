@@ -9,11 +9,21 @@ the following elements installed:
 * A [Zou development instance](https://zou.cg-wire.com/development/) up and running on port 5000
 * A [Zou Events development instance](https://zou.cg-wire.com/development/) up and running on port 5001 (optional)
 
-Eventually you can use our [Docker image]() but it will require you to give two
+### With Docker image
+
+Eventually you can use our [Docker image](https://hub.docker.com/r/cgwire/cgwire) but it will require you to give two
 environment variables: 
 
 * `KITSU_API_TARGET` (default: http://localhost:5000): The URL where the API can be reached.
 * `KITSU_EVENT_TARGET` (default: http://localhost:5001): The URL where the event stream can be reached.
+
+In that case, you must run the development environment with (see below): 
+
+```
+KITSU_API_TARGET=http://localhost/api KITSU_EVENT_TARGET=http://localhost npm run serve
+```
+
+The credentials for the Docker image are: admin@example.com / mysecretpassword
 
 ## Develop
 
