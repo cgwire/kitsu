@@ -786,7 +786,7 @@ const mutations = {
       isLoading: false,
       isError: false
     }
-    if (asset.description && !state.isAssetDescription) {
+    if (newAsset.description && !state.isAssetDescription) {
       state.isAssetDescription = true
     }
     cache.assetIndex = buildAssetIndex(cache.assets)
