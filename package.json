@@ -63,6 +63,7 @@
     "babel-loader": "8.0.5",
     "core-js": "2.6.9",
     "eslint": "5.16.0",
+    "eslint-plugin-jest": "23.0.4",
     "eslint-plugin-vue": "5.2.2",
     "localStorage": "1.0.4",
     "ncu": "0.2.1",
