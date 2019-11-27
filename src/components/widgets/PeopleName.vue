@@ -6,12 +6,14 @@
 
 <script>
 import { mapGetters, mapActions } from 'vuex'
-
 export default {
   name: 'person-name',
-  props: [
-    'person'
-  ],
+  props: {
+    person: {
+      type: Object,
+      required: true
+    }
+  },
   computed: {
     ...mapGetters([
     ])
