@@ -22,6 +22,7 @@
     >
       <span
         class="tag"
+        :title="taskStatus.name"
         :style="{
           background: backgroundColor,
           color: color
