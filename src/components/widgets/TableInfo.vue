@@ -13,7 +13,7 @@
 import Spinner from './Spinner'
 
 export default {
-  name: 'table-footer',
+  name: 'table-info',
   components: {
     Spinner
   },
