@@ -9,15 +9,25 @@
     'border-left': '6px solid ' + comment.task_status.color
   }"
 >
-  <div class="media">
-  <figure class="media-left">
-    <people-avatar class="level-item" :person="comment.person" />
+  <div class="flexrow">
+  <figure class="flexrow-item comment-left">
+    <people-avatar class="" :person="comment.person" />
+    <span class="filler"></span>
+    <span
+      class="task-status-name"
+      :style="{
+        color: comment.task_status.color
+      }"
+      v-if="comment.task_status.short_name !== 'todo'"
+    >
+      {{ comment.task_status.short_name }}
+    </span>
   </figure>
 
-  <div class="media-content">
+  <div class="flexrow-item comment-content">
     <div class="content">
       <div class="comment-person flexrow">
-        <div class="flexrow-item">
+        <div class="flexrow-item infos">
           <strong class="">
             <people-name class="" :person="comment.person" />
           </strong>
@@ -32,7 +42,7 @@
             {{ $t('comments.revision') }} {{ comment.previews[0].revision }}
           </router-link>
         </div>
-        <span class="filler"></span>
+        <div class="filler"></div>
         <div class="flexrow-item menu-wrapper">
           <chevron-down-icon
             class="menu-icon"
@@ -532,6 +542,30 @@ a.revision:hover {
   font-size: 0.8em;
   padding: 0.3em 0.6em;
   text-transform: uppercase;
+}
+
+.task-status-name {
+  font-size: 0.8em;
+  text-transform: uppercase;
+}
+
+.flexrow {
+  align-items: stretch;
+}
+
+.comment-left {
+  display: flex;
+  flex-direction: column;
+  padding: 0.5em 0 0.5em 0.5em;
+}
+
+.comment-content {
+  padding: 0.5em;
+  flex: 1;
+}
+
+.infos {
+  padding-top: 0.3em;
 }
 
 @media screen and (max-width: 768px) {
