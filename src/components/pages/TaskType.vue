@@ -559,6 +559,7 @@ export default {
       const taskAssignationMap = this.buildAssignationMap()
       let scheduleItems = this.scheduleTeam
         .map(person => this.buildPersonElement(person, taskAssignationMap))
+        .filter(item => item)
         .filter(item => item.children.length > 0)
 
       if (taskAssignationMap.unassigned.length !== 0) {
@@ -588,7 +589,7 @@ export default {
     buildAssignationMap () {
       const taskAssignationMap = { unassigned: [] }
       this.scheduleTeam.forEach((person) => {
-        taskAssignationMap[person.id] = []
+        if (person) taskAssignationMap[person.id] = []
       })
       this.tasks.forEach((task) => {
         if (task.assignees.length > 0) {
@@ -606,6 +607,8 @@ export default {
     },
 
     buildPersonElement (person, taskAssignationMap) {
+      if (!person) return null
+
       let manDays = 0
       let minStartDate
       let maxEndDate
