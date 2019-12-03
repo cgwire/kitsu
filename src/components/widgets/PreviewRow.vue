@@ -29,11 +29,6 @@ export default {
       type: Boolean,
       default: false
     },
-    taskId: {
-      type: String,
-      default: ''
-    },
-
     previewPath: {
       type: Object,
       default: () => {}
