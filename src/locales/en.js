@@ -96,7 +96,7 @@ export default {
   episodes: {
     all_episodes: 'All episodes',
     delete_error: 'An error occured while deleting this episode. There are probably data linked to it. Are you sure this episode has no sequence linked to it?',
-    delete_text: 'Are you sure you want to remove {name} from your database?',
+    delete_text: 'Are you sure you want to remove {name} from your database? Every related shots and previews will be deleted. Pleas confirm by typing the episode name below.',
     edit_title: 'Edit episode',
     empty_list: 'There is no episode in the production. What about creating some?',
     empty_list_client: 'There is no episode in this production.',
@@ -227,7 +227,7 @@ export default {
     add_member_to_team: 'Add a member to the team: ',
     create_invite: 'Create and send invitation',
     delete_error: 'An error occured while deleting this person. There are probably data linked to it. Are you sure this person has no assignation or wrote no comment?',
-    delete_text: 'Are you sure you want to remove {personName} from your database?',
+    delete_text: 'Are you sure you want to remove {personName} from your database? Every related comments and previews will be deleted. Pleas confirm by typing the full person name below.',
     edit_title: 'Edit person',
     empty_team: 'There is no one listed in the project team.',
     invite: 'Send invitation',
@@ -441,7 +441,7 @@ export default {
 
   sequences: {
     all_sequences: 'All sequences',
-    delete_text: 'Are you sure you want to remove {name} from your database?',
+    delete_text: 'Are you sure you want to remove {name} from your database? Every related shots and previews will be deleted. Please confirm by typing the sequence name below.',
     delete_error: 'An error occured while deleting this sequence. There are probably data linked to it. Are you sure this sequence has no shot linked to it?',
     edit_title: 'Edit sequence',
     empty_list: 'There is no sequence in the production. What about creating some?',

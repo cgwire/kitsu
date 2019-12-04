@@ -526,8 +526,9 @@ export default {
   },
 
   metaInfo () {
+    const pageTitle = this.$t('breakdown.title')
     return {
-      title: `${this.currentProduction.name} ${this.$t('breakdown.title')} - Kitsu`
+      title: `${this.currentProduction.name} ${pageTitle} - Kitsu`
     }
   }
 }

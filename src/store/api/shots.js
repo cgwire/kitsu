@@ -114,11 +114,11 @@ export default {
   },
 
   deleteSequence (sequence, callback) {
-    client.del(`/api/data/entities/${sequence.id}`, callback)
+    client.del(`/api/data/sequences/${sequence.id}?force=true`, callback)
   },
 
   deleteEpisode (episode, callback) {
-    client.del(`/api/data/entities/${episode.id}`, callback)
+    client.del(`/api/data/episodes/${episode.id}?force=true`, callback)
   },
 
   restoreShot (shot, callback) {

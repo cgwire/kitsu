@@ -62,13 +62,14 @@
       @confirm="confirmEditSequence"
     />
 
-    <delete-modal
+    <hard-delete-modal
       :active="modals.isDeleteDisplayed"
       :is-loading="loading.del"
       :is-error="errors.del"
       :text="deleteText()"
       :error-text="$t('sequences.delete_error')"
       :cancel-route="sequencesPath"
+      :lock-text="sequenceToDelete ? sequenceToDelete.name : ''"
       @confirm="confirmDeleteSequence"
     />
 
@@ -83,7 +84,7 @@ import { slugify } from '../../lib/string'
 
 import ButtonSimple from '../widgets/ButtonSimple'
 import Combobox from '../widgets/Combobox'
-import DeleteModal from '../modals/DeleteModal'
+import HardDeleteModal from '../modals/HardDeleteModal'
 import EditSequenceModal from '../modals/EditSequenceModal'
 import SearchField from '../widgets/SearchField'
 import SearchQueryList from '../widgets/SearchQueryList'
@@ -95,7 +96,7 @@ export default {
   components: {
     ButtonSimple,
     Combobox,
-    DeleteModal,
+    HardDeleteModal,
     EditSequenceModal,
     SearchField,
     SearchQueryList,
