@@ -6,17 +6,16 @@ import breakdownApi from '../../../src/store/api/breakdown'
 
 breakdownApi.updateCasting = jest.fn()
 breakdownApi.getSequenceCasting = jest.fn()
-breakdownApi.getSequenceCasting.mockImplementation(
-  () => Promise.resolve([])
-)
 
 const localVue = createLocalVue()
 localVue.use(Vuex)
 const vuexStore = new Vuex.Store(store)
+const commit = vuexStore.commit
 
 
 describe('Breakdown store', () => {
   let state, shots, assetCasting, casting, assetMap, production, shotMap
+  let sequences, expectedSequenceOptions, rootState, rootGetters
 
   beforeEach(() => {
     state = {}
@@ -33,6 +32,10 @@ describe('Breakdown store', () => {
         sequence_name: 'SE02',
         sequence_id: 'sequence-2'
       }
+    ]
+    sequences = [
+      { id: 'sequence-1', project_id: 'production-1', name: 'SE01' },
+      { id: 'sequence-2', project_id: 'production-1', name: 'SE02' }
     ]
     assetCasting = [
       {
@@ -52,7 +55,15 @@ describe('Breakdown store', () => {
     ]
     assetMap = {
       'asset-1': assetCasting[0],
-      'asset-2': assetCasting[1]
+      'asset-2': assetCasting[1],
+      'asset-3': {
+        id: 'asset-3',
+        asset_name: 'Asset 3',
+        asset_type_name: 'Props',
+        name: 'Asset 3',
+        nb_occurences: 1,
+        preview_file_id: undefined
+      }
     }
     casting = {
       'shot-1': assetCasting,
@@ -66,6 +77,39 @@ describe('Breakdown store', () => {
       acc[entity.id] = entity ; return acc
     }
     shotMap = shots.reduce(entityMapReducer, {})
+    expectedSequenceOptions = [{
+      label: 'SE01',
+      value: 'sequence-1',
+      route: {
+        name: 'breakdown-sequence',
+        params: {
+          production_id: 'production-1',
+          sequence_id: 'sequence-1'
+        }
+      }
+    },
+    {
+      label: 'SE02',
+      value: 'sequence-2',
+      route: {
+        name: 'breakdown-sequence',
+        params: {
+          production_id: 'production-1',
+          sequence_id: 'sequence-2'
+        }
+      }
+    }]
+    rootState = {
+      productions: { currentProduction: production },
+      assets: { assetMap },
+      shots: { shotMap, sequences }
+    }
+    rootGetters = {
+      currentProduction: production
+    }
+    breakdownApi.getSequenceCasting.mockImplementation(
+      () => Promise.resolve({ 'shot-1': assetCasting })
+    )
   })
 
   describe('Getters', () => {
@@ -74,26 +118,47 @@ describe('Breakdown store', () => {
 
   describe('Actions', () => {
     test('setCastingSequence', async () => {
-      const commit = vuexStore.commit
-      const rootState = {
-        productions: { currentProduction: production },
-        assets: { assetMap },
-        shots: { shotMap }
-      }
-      await store.actions.setCastingSequence({ commit, rootState }, 'shot-1')
+      await store.actions.setCastingSequence(
+        { commit, rootState }, 'sequence-1'
+      )
+      expect(vuexStore.state.castingSequenceId).toEqual('sequence-1')
+      expect(vuexStore.state.castingSequenceShots).toEqual([shots[0]])
+      expect(vuexStore.state.casting['shot-1']).toEqual(assetCasting)
     })
-    test.skip('setCastingEpisode', () => {
+    test('setCastingEpisode', async () => {
+      await store.actions.setCastingEpisode(
+        { commit, rootState }, 'episode-1'
+      )
+      expect(vuexStore.state.castingEpisodeId).toEqual('episode-1')
+      expect(vuexStore.state.castingSequenceOptions)
+        .toEqual(expectedSequenceOptions)
     })
-    test.skip('addAssetToCasting', () => {
+    test('addAssetToCasting', async () => {
+      await store.actions.addAssetToCasting({ commit, rootState }, {
+        entityId: 'shot-1',
+        assetId: 'asset-3',
+        nbOccurences: 3
+      })
+      expect(vuexStore.state.casting['shot-1'][2]['asset_id'])
+				.toEqual('asset-3')
+      expect(vuexStore.state.castingByType['shot-1'][1][1]['asset_id'])
+        .toEqual('asset-3')
     })
-    test.skip('removeAssetFromCasting', () => {
+    test('removeAssetFromCasting', async () => {
+      await store.actions.removeAssetFromCasting({ commit, rootState }, {
+        entityId: 'shot-1',
+				assetId: 'asset-2',
+        nbOccurences: 1
+      })
+      expect(vuexStore.state.casting['shot-1'][1]['nb_occurences'])
+        .toEqual(1)
+      expect(vuexStore.state.castingByType['shot-1'][1][0]['nb_occurences'])
+        .toEqual(1)
     })
-    test.skip('saveCasting', async () => {
-      const commit = vuexStore.commit
-      commit('CASTING_SET_SHOTS', shots)
-      commit('CASTING_SET_CASTING', { casting, assetMap })
-      await store.actions.saveCasting({ commit }, 'shot-1')
+    test('saveCasting', async () => {
+      await store.actions.saveCasting({ commit, rootGetters }, 'shot-1')
       expect(breakdownApi.updateCasting).toHaveBeenCalledWith(
+        'production-1',
         'shot-1',
         [{
           'asset_id': 'asset-1',
@@ -101,7 +166,11 @@ describe('Breakdown store', () => {
         },
         {
           'asset_id': 'asset-2',
-          'nb_occurences': 2
+          'nb_occurences': 1
+        },
+        {
+          'asset_id': 'asset-3',
+          'nb_occurences': 3
         }]
       )
     })
@@ -118,36 +187,10 @@ describe('Breakdown store', () => {
     })
 
     test('CASTING_SET_SEQUENCES', () => {
-      const sequences = [
-        { id: 'sequence-1', project_id: 'production-1', name: 'SE01' },
-        { id: 'sequence-2', project_id: 'production-1', name: 'SE02' }
-      ]
       store.mutations.CASTING_SET_SEQUENCES(state, sequences)
       expect(state.castingEpisodeSequences).toEqual(sequences)
-      expect(state.castingSequenceOptions).toEqual([
-        {
-          label: 'SE01',
-          value: 'sequence-1',
-          route: {
-            name: 'breakdown-sequence',
-            params: {
-              production_id: 'production-1',
-              sequence_id: 'sequence-1'
-            }
-          }
-        },
-        {
-          label: 'SE02',
-          value: 'sequence-2',
-          route: {
-            name: 'breakdown-sequence',
-            params: {
-              production_id: 'production-1',
-              sequence_id: 'sequence-2'
-            }
-          }
-        }
-      ])
+      expect(state.castingSequenceOptions)
+        .toEqual(expectedSequenceOptions)
     })
 
     test('CASTING_SET_SEQUENCE', () => {
@@ -258,8 +301,22 @@ describe('Breakdown store', () => {
       store.mutations.LOAD_ASSET_CAST_IN_END(state, { asset, castIn: shots })
       expect(asset.castIn).toEqual(shots)
       expect(asset.castInShotsBySequence).toEqual([
-        [{ id: 'shot-1', name: 'SH01', sequence_name: 'SE01', sequence_id: 'sequence-1' }],
-        [{ id: 'shot-2', name: 'SH02', sequence_name: 'SE02', sequence_id: 'sequence-2' }]
+        [
+          {
+            id: 'shot-1',
+            name: 'SH01',
+            sequence_name: 'SE01',
+            sequence_id: 'sequence-1'
+          }
+        ],
+        [
+          {
+            id: 'shot-2',
+            name: 'SH02',
+            sequence_name: 'SE02',
+            sequence_id: 'sequence-2'
+          }
+        ]
       ])
     })
   })
