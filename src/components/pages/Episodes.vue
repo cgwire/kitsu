@@ -52,12 +52,13 @@
       @confirm="confirmEditEpisode"
     />
 
-    <delete-modal
+    <hard-delete-modal
       :active="modals.isDeleteDisplayed"
       :is-loading="loading.del"
       :is-error="errors.del"
       :text="deleteText()"
       :error-text="$t('episodes.delete_error')"
+      :lock-text="episodeToDelete ? episodeToDelete.name : ''"
       :cancel-route="episodesPath"
       @confirm="confirmDeleteEpisode"
     />
@@ -72,7 +73,7 @@ import { slugify } from '../../lib/string'
 
 import ButtonSimple from '../widgets/ButtonSimple'
 import Combobox from '../widgets/Combobox'
-import DeleteModal from '../modals/DeleteModal'
+import HardDeleteModal from '../modals/HardDeleteModal'
 import EditEpisodeModal from '../modals/EditEpisodeModal'
 import EpisodeList from '../lists/EpisodeList.vue'
 import SearchField from '../widgets/SearchField'
@@ -85,7 +86,7 @@ export default {
     Combobox,
     EpisodeList,
     EditEpisodeModal,
-    DeleteModal,
+    HardDeleteModal,
     SearchField
   },
 

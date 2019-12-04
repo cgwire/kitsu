@@ -48,10 +48,7 @@
               name: 'edit-person',
               params: {person_id: entry.id}
             }"
-            :delete-route="{
-              name: 'delete-person',
-              params: {person_id: entry.id}
-            }"
+            :hide-delete="true"
           >
           </row-actions>
           <td class="actions" v-else>

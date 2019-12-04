@@ -53,7 +53,6 @@ export default {
   methods: {
     addOneAsset (event) {
       if (this.active) {
-        console.log(this.asset)
         this.$emit('add-one', this.asset.id)
       }
     },

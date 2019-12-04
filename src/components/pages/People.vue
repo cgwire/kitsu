@@ -64,19 +64,20 @@
       :is-error="isEditLoadingError"
       :is-invitation-success="success.invite"
       :is-invitation-error="errors.invite"
-      :cancel-route="'/people'"
+      :cancel-route="{ name: 'people'}"
       @confirm="confirmEditPeople"
       @confirm-invite="confirmCreateAndInvite"
       @invite="confirmInvite"
     />
 
-    <delete-modal
+    <hard-delete-modal
       :active="isDeleteModalShown"
       :is-loading="isDeleteLoading"
       :is-error="isDeleteLoadingError"
-      :cancel-route="'/people'"
+      :cancel-route="{ name: 'people'}"
       :text="deleteText"
       :error-text="$t('people.delete_error')"
+      :lock-text="personToDelete ? personToDelete.full_name : ''"
       @confirm="confirmDeletePeople"
     />
 
@@ -86,13 +87,13 @@
 <script>
 import { mapGetters, mapActions } from 'vuex'
 
-import PeopleList from '../lists/PeopleList'
-import DeleteModal from '../modals/DeleteModal'
-import EditPersonModal from '../modals/EditPersonModal'
-import ImportModal from '../modals/ImportModal'
 import ButtonLink from '../widgets/ButtonLink'
 import ButtonHrefLink from '../widgets/ButtonHrefLink'
 import ButtonSimple from '../widgets/ButtonSimple'
+import EditPersonModal from '../modals/EditPersonModal'
+import HardDeleteModal from '../modals/HardDeleteModal'
+import ImportModal from '../modals/ImportModal'
+import PeopleList from '../lists/PeopleList'
 import PageTitle from '../widgets/PageTitle'
 import SearchField from '../widgets/SearchField'
 
@@ -103,7 +104,7 @@ export default {
     ButtonHrefLink,
     ButtonSimple,
     EditPersonModal,
-    DeleteModal,
+    HardDeleteModal,
     ImportModal,
     PageTitle,
     PeopleList,

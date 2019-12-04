@@ -93,7 +93,7 @@ export default {
   episodes: {
     all_episodes: 'Tous les épisodes',
     edit_title: 'Éditer épisode',
-    delete_text: 'Etes vous sûr de vouloir retirer {name} de la base de données ?',
+    delete_text: 'Etes vous sûr de vouloir retirer {name} de la base de données ? Tous les plans et préviz liés seront supprimés. Pour confirmer, tapez le nom de l\'épisode en dessous',
     delete_error: 'Une erreur est survenue en créant le plan, êtes vous sûr que la séquence n\'a plus aucun lien ?',
     empty_list: 'Il n\'y a pas d\'épisodes dans la production. Voulez vous en créer ?',
     new_episode: 'Nouvel épisode',
@@ -235,7 +235,7 @@ export default {
     active: 'Présents',
     add_member_to_team: 'Ajouter un membre à l\'équipe: ',
     create_invite: 'Créer et envoyer une invitation',
-    delete_text: 'Êtes vous sûr de vouloir retirer {personName} de la base de données?',
+    delete_text: 'Êtes vous sûr de vouloir retirer {personName} de la base de données? Tous les commentaires et préviz liés seront supprimés. Pour confirmer, tapez le nom complet de la personne en dessous',
     delete_error: 'Une erreur est survenue lors de la suppression. Il y a probablement des données liées à elle. Etes vous sur que cette personne n\'a aucune tâche assignée et n\'a fait aucun commentaire ?',
     edit_title: 'Modifier les informations de',
     empty_team: 'Personne n\'a été affecté à cette production.',
@@ -378,7 +378,7 @@ export default {
     number: 'séquence | séquences',
     new_sequence: 'Nouvelle séquence',
     edit_title: 'Éditer séquence',
-    delete_text: 'Etes vous sûr de vouloir retirer {name} de la base de données ?',
+    delete_text: 'Etes vous sûr de vouloir retirer {name} de la base de données ? Tous les plans et préviz liés seront supprimés. Pour confirmer, tapez le nom de la séquence en dessous',
     delete_error: 'Une erreur est survenue en créant le plan, êtes vous sûr que la séquence n\'a plus aucun lien ?',
     empty_list: 'Il n\'y a pas de séquence dans la production. Voulez vous en créer ?',
     fields: {

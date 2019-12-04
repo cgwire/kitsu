@@ -112,7 +112,7 @@ export default {
   },
 
   deletePerson (personId, callback) {
-    client.del(`/api/data/persons/${personId}`, callback)
+    client.del(`/api/data/persons/${personId}?force=true`, callback)
   },
 
   postCsv (formData, callback) {
