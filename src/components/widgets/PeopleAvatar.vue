@@ -38,30 +38,30 @@
     </router-link>
   </span>
 
-<span
-  class="avatar has-text-centered"
-  :title="person.full_name"
-  :style="{
-    background: person.color,
-    width: size +'px',
-    height: size + 'px',
-    'font-size': fontSize + 'px'
-  }"
-  v-else
->
-  <img
-    :src="avatarPath"
-    v-if="person.has_avatar && noCache"
-  />
-  <img
-    v-lazy="avatarPath"
-    :key="avatarKey"
-    v-else-if="person.has_avatar"
-  />
-  <span v-else>
-    {{ initials }}
+  <span
+    class="avatar has-text-centered"
+    :title="person.full_name"
+    :style="{
+      background: person.color,
+      width: size +'px',
+      height: size + 'px',
+      'font-size': fontSize + 'px'
+    }"
+    v-else
+  >
+    <img
+      :src="avatarPath"
+      v-if="person.has_avatar && noCache"
+    />
+    <img
+      v-lazy="avatarPath"
+      :key="avatarKey"
+      v-else-if="person.has_avatar"
+    />
+    <span v-else>
+      {{ initials }}
+    </span>
   </span>
-</span>
 </template>
 
 <script>
