@@ -122,7 +122,7 @@
           </a>
         </li>
         <li>
-          <a href="https://trello.com/b/TGi6LZNa/kitsu-roadmap" target="_blank">
+          <a href="https://cgwire.canny.io" target="_blank">
             Roadmap
           </a>
         </li>
