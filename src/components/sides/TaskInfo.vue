@@ -628,9 +628,11 @@ export default {
       return this.otherPreviews
     },
 
-    selectFile (formData) {
-      this.loadPreviewFileFormData(formData)
-      this.attachedFileName = formData.get('file').name
+    selectFile (forms) {
+      this.loadPreviewFileFormData(forms)
+      this.attachedFileName = forms
+        .map((form) => form.get('file').name)
+        .join(', ')
     },
 
     createExtraPreview () {

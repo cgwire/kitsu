@@ -61,6 +61,8 @@ import {
   UPDATE_COMMENT_CHECKLIST,
   SET_LAST_COMMENT_DRAFT,
 
+  REMOVE_FIRST_PREVIEW_FILE_TO_UPLOAD,
+
   RESET_ALL
 } from '../mutation-types'
 
@@ -82,7 +84,7 @@ const initialState = {
   isShowInfos: true,
 
   isSavingCommentPreview: false,
-  previewFormData: null,
+  previewForms: [],
 
   lastCommentDraft: ''
 }
@@ -136,7 +138,7 @@ const getters = {
   isShowAssignations: state => state.isShowAssignations,
   isShowInfos: state => state.isShowInfos,
   taskEntityPreviews: state => state.taskEntityPreviews,
-  previewFormData: state => state.previewFormData,
+  previewForms: state => state.previewForms,
   isSavingCommentPreview: state => state.isSavingCommentPreview,
   lastCommentDraft: state => state.lastCommentDraft
 }
@@ -470,7 +472,7 @@ const actions = {
   },
 
   commentTaskWithPreview (
-    { commit, getters, state },
+    { commit, getters, state, dispatch },
     { taskId, commentText, taskStatusId, callback }
   ) {
     const data = { taskId, taskStatusId, comment: commentText }
@@ -487,8 +489,9 @@ const actions = {
           if (err && callback) {
             callback(err)
           } else {
-            tasksApi.uploadPreview(preview.id, state.previewFormData, (err, preview) => {
-              if (!err) {
+            const firstForm = state.previewForms[0]
+            tasksApi.uploadPreview(preview.id, firstForm, (err, preview) => {
+              const end = () => {
                 commit(NEW_TASK_COMMENT_END, { comment, taskId })
                 commit(ADD_PREVIEW_END, {
                   preview,
@@ -497,7 +500,29 @@ const actions = {
                   comment
                 })
               }
-              if (callback) callback(err, preview)
+              if (err) {
+                if (callback) callback(err, preview)
+              } else {
+                end()
+                if (state.previewForms.length > 1) {
+                  commit(REMOVE_FIRST_PREVIEW_FILE_TO_UPLOAD)
+                  async.eachSeries(state.previewForms, (form, next) => {
+                    dispatch('addCommentExtraPreview', {
+                      taskId,
+                      commentId: comment.id,
+                      previewId: preview.id,
+                      callback: () => {
+                        commit(REMOVE_FIRST_PREVIEW_FILE_TO_UPLOAD)
+                        next()
+                      }
+                    })
+                  }, () => {
+                    if (callback) callback(err, preview)
+                  })
+                } else {
+                  if (callback) callback(err, preview)
+                }
+              }
             })
           }
         })
@@ -513,7 +538,7 @@ const actions = {
       if (err && callback) {
         callback(err)
       } else {
-        tasksApi.uploadPreview(preview.id, state.previewFormData, (err) => {
+        tasksApi.uploadPreview(preview.id, state.previewForms[0], (err) => {
           if (!err) {
             const comment = getters.getTaskComment(taskId, commentId)
             preview.extension = 'png'
@@ -538,21 +563,6 @@ const actions = {
           resolve()
         })
         .catch(reject)
-    })
-  },
-
-  changeCommentPreview ({ commit, state }, {
-    comment, preview, taskId, callback
-  }) {
-    const fileName = state.previewFormData.get('file').name
-    const extension = fileName.slice(fileName.length - 4)
-    preview.extension = extension
-
-    tasksApi.uploadPreview(preview.id, state.previewFormData, (err) => {
-      if (!err) {
-        commit(CHANGE_PREVIEW_END, { comment, preview })
-      }
-      if (callback) callback(err, extension)
     })
   },
 
@@ -635,8 +645,8 @@ const actions = {
     commit(SET_IS_SHOW_INFOS, false)
   },
 
-  loadPreviewFileFormData ({ commit }, previewFormData) {
-    commit('PREVIEW_FILE_SELECTED', previewFormData)
+  loadPreviewFileFormData ({ commit }, previewForms) {
+    commit('PREVIEW_FILE_SELECTED', previewForms)
   },
 
   addSelectedTask ({ commit }, task) {
@@ -860,8 +870,8 @@ const mutations = {
     oldComment.text = comment.text
   },
 
-  [PREVIEW_FILE_SELECTED] (state, formData) {
-    state.previewFormData = formData
+  [PREVIEW_FILE_SELECTED] (state, forms) {
+    state.previewForms = forms
   },
 
   [ADD_PREVIEW_START] (state) {
@@ -1123,6 +1133,10 @@ const mutations = {
 
   [SET_LAST_COMMENT_DRAFT] (state, lastCommentDraft) {
     state.lastCommentDraft = lastCommentDraft
+  },
+
+  [REMOVE_FIRST_PREVIEW_FILE_TO_UPLOAD] (state) {
+    state.previewForms = state.previewForms.splice(1)
   },
 
   [RESET_ALL] (state, shots) {

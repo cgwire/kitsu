@@ -13,7 +13,8 @@
       >
       </canvas>
     </div>
-    <img ref="picture" :src="picturePath" />
+    <img ref="picture" :src="pictureDlPath" v-if="isFullScreen" />
+    <img ref="picture" :src="picturePath" v-else />
     <spinner v-if="isLoading"/>
   </div>
 
@@ -191,7 +192,7 @@ export default {
 
     picturePath () {
       const previewId = this.preview.previews[this.currentIndex - 1].id
-      return `/api/pictures/originals/preview-files/${previewId}.png`
+      return `/api/pictures/previews/preview-files/${previewId}.png`
     },
 
     pictureDlPath () {

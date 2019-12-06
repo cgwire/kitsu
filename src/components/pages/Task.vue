@@ -225,18 +225,6 @@
       @confirm="createExtraPreview"
     />
 
-    <add-preview-modal
-      ref="change-preview-modal"
-      :active="modals.changePreview"
-      :is-loading="loading.changePreview"
-      :is-error="errors.changePreview"
-      :cancel-route="taskPath()"
-      :form-data="changePreviewFormData"
-      :is-editing="true"
-      @fileselected="selectFile"
-      @confirm="changePreview"
-    />
-
     <edit-comment-modal
       :active="modals.editComment"
       :is-loading="loading.editComment"
@@ -330,7 +318,6 @@ export default {
         addPreview: false,
         addExtraPreview: false,
         deleteExtraPreview: false,
-        changePreview: false,
         deleteTask: false,
         deleteComment: false,
         editComment: false
@@ -339,7 +326,6 @@ export default {
         addComment: false,
         addPreview: false,
         addExtraPreview: false,
-        changePreview: false,
         setPreview: false,
         deleteTask: false,
         deleteComment: false,
@@ -349,7 +335,6 @@ export default {
         addComment: false,
         addPreview: false,
         addExtraPreview: false,
-        changePreview: false,
         setPreview: false,
         deleteTask: false,
         deleteComment: false,
@@ -362,7 +347,6 @@ export default {
       otherPreviews: [],
       addPreviewFormData: null,
       addExtraPreviewFormData: null,
-      changePreviewFormData: null,
       isSubscribed: false,
       currentPreviewPath: '',
       currentPreviewDlPath: ''
@@ -960,23 +944,22 @@ export default {
         addPreview: false,
         addExtraPreview: false,
         deleteExtraPreview: false,
-        changePreview: false,
         deleteTask: false,
         deleteComment: false,
         editComment: false
       }
-      if (path.indexOf('change-preview') > 0) {
-        this.modals.changePreview = true
-      } else if (
+      if (
         path.indexOf('delete') > 0 && path.indexOf('comments') < 0
       ) {
         this.modals.deleteTask = true
       }
     },
 
-    selectFile (formData) {
-      this.loadPreviewFileFormData(formData)
-      this.attachedFileName = formData.get('file').name
+    selectFile (forms) {
+      this.loadPreviewFileFormData(forms)
+      this.attachedFileName = forms
+        .map((form) => form.get('file').name)
+        .join(', ')
     },
 
     createPreview () {
@@ -1025,27 +1008,6 @@ export default {
               this.$refs['preview-picture'].displayLast()
             }, 0)
             this.modals.addExtraPreview = false
-          }
-        }
-      })
-    },
-
-    changePreview () {
-      const preview = this.currentTaskComments[0].preview
-      this.errors.changePreview = false
-      this.loading.changePreview = true
-
-      this.changeCommentPreview({
-        preview: preview,
-        taskId: this.currentTask.id,
-        comment: this.currentTaskComments[0],
-        callback: (err, extension) => {
-          this.loading.changePreview = false
-          if (err) {
-            this.errors.changePreview = true
-          } else {
-            this.$refs['change-preview-modal'].reset()
-            this.resetPreview(preview)
           }
         }
       })
