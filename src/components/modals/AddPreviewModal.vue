@@ -107,7 +107,17 @@ export default {
 
     onFileSelected (forms) {
       this.forms = forms
-      this.$emit('fileselected', forms)
+      const isMultipleSelection = forms.length > 1
+      const allPictureFiles = forms.reduce((acc, form) => {
+        const filename = form.get('file').name
+        const extension = filename.substring(filename.length - 3)
+        return acc && ['png', 'jpg'].includes(extension)
+      }, true)
+      if (isMultipleSelection && !allPictureFiles) {
+        this.reset()
+      } else {
+        this.$emit('fileselected', forms)
+      }
     },
 
     reset () {

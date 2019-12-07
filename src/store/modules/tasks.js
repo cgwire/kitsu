@@ -244,13 +244,11 @@ const actions = {
     })
   },
 
-  commentTask ({ commit, state }, { taskId, taskStatusId, comment, callback }) {
-    tasksApi.commentTask({ taskId, taskStatusId, comment }, (err, comment) => {
-      if (!err) {
+  commentTask ({ commit, state }, { taskId, taskStatusId, comment }) {
+    return tasksApi.commentTask({ taskId, taskStatusId, comment })
+      .then((comment) => {
         commit(NEW_TASK_COMMENT_END, { comment, taskId })
-      }
-      if (callback) callback(err, comment)
-    })
+      })
   },
 
   loadComment ({ commit, state }, { commentId, callback }) {
@@ -361,11 +359,10 @@ const actions = {
         actions.commentTask({ commit, state }, {
           taskId: taskId,
           taskStatusId: taskStatusId,
-          comment: comment || '',
-          callback: (err) => {
-            next(err)
-          }
+          comment: comment || ''
         })
+          .then(next)
+          .catch((err) => next(err))
       } else {
         next()
       }
@@ -477,82 +474,64 @@ const actions = {
   ) {
     const data = { taskId, taskStatusId, comment: commentText }
     commit(ADD_PREVIEW_START)
-    tasksApi.commentTask(data, (err, comment) => {
-      if (err) {
-        callback(err)
-      } else {
+    let newComment
+    return tasksApi.commentTask(data)
+      .then((comment) => {
+        newComment = comment
         const previewData = {
           taskId,
-          commentId: comment.id
+          commentId: newComment.id
         }
-        tasksApi.addPreview(previewData, (err, preview) => {
-          if (err && callback) {
-            callback(err)
-          } else {
-            const firstForm = state.previewForms[0]
-            tasksApi.uploadPreview(preview.id, firstForm, (err, preview) => {
-              const end = () => {
-                commit(NEW_TASK_COMMENT_END, { comment, taskId })
-                commit(ADD_PREVIEW_END, {
-                  preview,
-                  taskId,
-                  commentId: comment.id,
-                  comment
-                })
-              }
-              if (err) {
-                if (callback) callback(err, preview)
-              } else {
-                end()
-                if (state.previewForms.length > 1) {
-                  commit(REMOVE_FIRST_PREVIEW_FILE_TO_UPLOAD)
-                  async.eachSeries(state.previewForms, (form, next) => {
-                    dispatch('addCommentExtraPreview', {
-                      taskId,
-                      commentId: comment.id,
-                      previewId: preview.id,
-                      callback: () => {
-                        commit(REMOVE_FIRST_PREVIEW_FILE_TO_UPLOAD)
-                        next()
-                      }
-                    })
-                  }, () => {
-                    if (callback) callback(err, preview)
-                  })
-                } else {
-                  if (callback) callback(err, preview)
-                }
-              }
-            })
-          }
+        return tasksApi.addPreview(previewData)
+      }).then((preview) => {
+        const firstForm = state.previewForms[0]
+        return tasksApi.uploadPreview(preview.id, firstForm)
+      }).then((preview) => {
+        commit(NEW_TASK_COMMENT_END, { comment: newComment, taskId })
+        commit(ADD_PREVIEW_END, {
+          preview,
+          taskId,
+          commentId: newComment.id,
+          comment: newComment
         })
-      }
-    })
+        if (state.previewForms.length > 1) {
+          commit(REMOVE_FIRST_PREVIEW_FILE_TO_UPLOAD)
+          dispatch('addCommentExtraPreview', {
+            taskId,
+            commentId: newComment.id,
+            previewId: preview.id
+          })
+        }
+        return Promise.resolve(newComment, preview)
+      })
   },
 
   addCommentExtraPreview (
     { commit, getters, state },
-    { taskId, commentId, previewId, callback }
+    { taskId, commentId, previewId }
   ) {
-    tasksApi.addExtraPreview(previewId, taskId, commentId, (err, preview) => {
-      if (err && callback) {
-        callback(err)
-      } else {
-        tasksApi.uploadPreview(preview.id, state.previewForms[0], (err) => {
-          if (!err) {
-            const comment = getters.getTaskComment(taskId, commentId)
-            preview.extension = 'png'
-            commit(ADD_PREVIEW_END, {
-              preview,
-              taskId,
-              commentId,
-              comment
-            })
-          }
-          if (callback) callback(err, preview)
+    const addPreview = (form) => {
+      return tasksApi
+        .addExtraPreview(previewId, taskId, commentId)
+        .then((preview) => {
+          return tasksApi.uploadPreview(preview.id, form)
         })
-      }
-    })
+        .then((preview) => {
+          const comment = getters.getTaskComment(taskId, commentId)
+          preview.extension = 'png'
+          commit(ADD_PREVIEW_END, {
+            preview,
+            taskId,
+            commentId,
+            comment
+          })
+        })
+    }
+    state.previewForms.reduce((accumulatorPromise, form) => {
+      return accumulatorPromise.then(() => {
+        return addPreview(form)
+      })
+    }, Promise.resolve())
   },
 
   deleteTaskPreview ({ commit, state }, { taskId, commentId, previewId }) {

@@ -892,33 +892,28 @@ export default {
     },
 
     addComment (comment, taskStatusId) {
-      const finalize = (err, preview) => {
-        if (err) {
-          this.errors.addComment = true
-        } else {
-          this.$refs['add-preview-modal'].reset()
-          this.reset()
-          if (preview && preview.type === 'PreviewFile') {
-            this.resetPreview(preview)
-          }
-          this.attachedFileName = ''
-        }
-        this.loading.addComment = false
-      }
       const params = {
         taskId: this.currentTask.id,
         taskStatusId: taskStatusId,
         commentText: comment,
-        comment: comment,
-        callback: finalize
+        comment: comment
       }
+      let action = 'commentTask'
+      if (this.attachedFileName) action = 'commentTaskWithPreview'
       this.loading.addComment = true
       this.errors.addComment = false
-      if (this.attachedFileName) {
-        this.commentTaskWithPreview(params)
-      } else {
-        this.commentTask(params)
-      }
+      this.$store.dispatch(action, params)
+        .then(() => {
+          this.$refs['add-preview-modal'].reset()
+          this.reset()
+          this.attachedFileName = ''
+          this.loading.addComment = false
+        })
+        .catch((err) => {
+          console.error(err)
+          this.errors.addComment = true
+          this.loading.addComment = false
+        })
     },
 
     reset () {
@@ -990,27 +985,28 @@ export default {
       this.addCommentExtraPreview({
         taskId: this.currentTask.id,
         previewId: this.currentPreview.id,
-        commentId: comment.id,
-        callback: (err, preview) => {
-          this.loading.addExtraPreview = false
-          if (err) {
-            this.errors.addExtraPreview = true
-          } else {
-            this.$refs['add-extra-preview-modal'].reset()
-            if (this.currentPreview) {
-              this.resetPreview(this.currentPreview)
-            } else {
-              this.resetPreview({
-                id: previewId
-              })
-            }
-            setTimeout(() => {
-              this.$refs['preview-picture'].displayLast()
-            }, 0)
-            this.modals.addExtraPreview = false
-          }
-        }
+        commentId: comment.id
       })
+        .then(() => {
+          this.loading.addExtraPreview = false
+          if (this.currentPreview) {
+            this.resetPreview(this.currentPreview)
+          } else {
+            this.resetPreview({
+              id: previewId
+            })
+          }
+          this.modals.addExtraPreview = false
+          this.$refs['add-extra-preview-modal'].reset()
+          setTimeout(() => {
+            this.$refs['preview-picture'].displayLast()
+          }, 0)
+        })
+        .catch((err) => {
+          console.error(err)
+          this.errors.addExtraPreview = true
+          this.loading.addExtraPreview = false
+        })
     },
 
     resetPreview (preview) {

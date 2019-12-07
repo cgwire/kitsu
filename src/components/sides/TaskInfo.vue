@@ -562,30 +562,28 @@ export default {
     },
 
     addComment (comment, taskStatusId) {
-      const finalize = (err, preview) => {
-        if (err) {
-          this.errors.addComment = true
-        } else {
-          this.$refs['add-preview-modal'].reset()
-          this.reset()
-          this.attachedFileName = ''
-        }
-        this.loading.addComment = false
-      }
       const params = {
         taskId: this.task.id,
         taskStatusId: taskStatusId,
         commentText: comment,
-        comment: comment,
-        callback: finalize
+        comment: comment
       }
+      let action = 'commentTask'
+      if (this.attachedFileName) action = 'commentTaskWithPreview'
       this.loading.addComment = true
       this.errors.addComment = false
-      if (this.attachedFileName) {
-        this.commentTaskWithPreview(params)
-      } else {
-        this.commentTask(params)
-      }
+      this.$store.dispatch(action, params)
+        .then(() => {
+          this.$refs['add-preview-modal'].reset()
+          this.reset()
+          this.attachedFileName = ''
+          this.loading.addComment = false
+        })
+        .catch((err) => {
+          console.error(err)
+          this.errors.addComment = true
+          this.loading.addComment = false
+        })
     },
 
     reset () {
@@ -642,21 +640,22 @@ export default {
       this.addCommentExtraPreview({
         taskId: this.task.id,
         commentId: this.taskComments[0].id,
-        previewId: this.taskPreviews[index].id,
-        callback: (err, preview) => {
-          this.loading.addExtraPreview = false
-          if (err) {
-            this.errors.addExtraPreview = true
-          } else {
-            this.$refs['add-extra-preview-modal'].reset()
-            this.reset()
-            setTimeout(() => {
-              this.$refs['preview-picture'].displayLast()
-            }, 0)
-            this.modals.addExtraPreview = false
-          }
-        }
+        previewId: this.taskPreviews[index].id
       })
+        .then(() => {
+          this.loading.addExtraPreview = false
+          this.$refs['add-extra-preview-modal'].reset()
+          this.reset()
+          setTimeout(() => {
+            this.$refs['preview-picture'].displayLast()
+          }, 0)
+          this.modals.addExtraPreview = false
+        })
+        .catch((err) => {
+          console.error(err)
+          this.loading.addExtraPreview = false
+          this.errors.addExtraPreview = true
+        })
     },
 
     onPreviewAdded (eventData) {
