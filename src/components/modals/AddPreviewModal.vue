@@ -34,7 +34,7 @@
             button: true,
             'is-primary': true,
             'is-loading': isLoading,
-            'is-disabled': formData == undefined
+            'is-disabled': forms == undefined
           }"
           @click="$emit('confirm')">
           {{ $t("main.confirmation") }}
@@ -88,12 +88,12 @@ export default {
 
   data () {
     return {
-      formData: null
+      forms: null
     }
   },
 
   mounted () {
-    this.formData = null
+    this.forms = null
   },
 
   computed: {
@@ -105,14 +105,24 @@ export default {
     ...mapActions([
     ]),
 
-    onFileSelected (formData) {
-      this.formData = formData
-      this.$emit('fileselected', formData)
+    onFileSelected (forms) {
+      this.forms = forms
+      const isMultipleSelection = forms.length > 1
+      const allPictureFiles = forms.reduce((acc, form) => {
+        const filename = form.get('file').name
+        const extension = filename.substring(filename.length - 3)
+        return acc && ['png', 'jpg'].includes(extension)
+      }, true)
+      if (isMultipleSelection && !allPictureFiles) {
+        this.reset()
+      } else {
+        this.$emit('fileselected', forms)
+      }
     },
 
     reset () {
       this.$refs['preview-field'].reset()
-      this.formData = null
+      this.forms = null
     }
   },
 

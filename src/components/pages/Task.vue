@@ -225,18 +225,6 @@
       @confirm="createExtraPreview"
     />
 
-    <add-preview-modal
-      ref="change-preview-modal"
-      :active="modals.changePreview"
-      :is-loading="loading.changePreview"
-      :is-error="errors.changePreview"
-      :cancel-route="taskPath()"
-      :form-data="changePreviewFormData"
-      :is-editing="true"
-      @fileselected="selectFile"
-      @confirm="changePreview"
-    />
-
     <edit-comment-modal
       :active="modals.editComment"
       :is-loading="loading.editComment"
@@ -330,7 +318,6 @@ export default {
         addPreview: false,
         addExtraPreview: false,
         deleteExtraPreview: false,
-        changePreview: false,
         deleteTask: false,
         deleteComment: false,
         editComment: false
@@ -339,7 +326,6 @@ export default {
         addComment: false,
         addPreview: false,
         addExtraPreview: false,
-        changePreview: false,
         setPreview: false,
         deleteTask: false,
         deleteComment: false,
@@ -349,7 +335,6 @@ export default {
         addComment: false,
         addPreview: false,
         addExtraPreview: false,
-        changePreview: false,
         setPreview: false,
         deleteTask: false,
         deleteComment: false,
@@ -362,7 +347,6 @@ export default {
       otherPreviews: [],
       addPreviewFormData: null,
       addExtraPreviewFormData: null,
-      changePreviewFormData: null,
       isSubscribed: false,
       currentPreviewPath: '',
       currentPreviewDlPath: ''
@@ -908,33 +892,28 @@ export default {
     },
 
     addComment (comment, taskStatusId) {
-      const finalize = (err, preview) => {
-        if (err) {
-          this.errors.addComment = true
-        } else {
-          this.$refs['add-preview-modal'].reset()
-          this.reset()
-          if (preview && preview.type === 'PreviewFile') {
-            this.resetPreview(preview)
-          }
-          this.attachedFileName = ''
-        }
-        this.loading.addComment = false
-      }
       const params = {
         taskId: this.currentTask.id,
         taskStatusId: taskStatusId,
         commentText: comment,
-        comment: comment,
-        callback: finalize
+        comment: comment
       }
+      let action = 'commentTask'
+      if (this.attachedFileName) action = 'commentTaskWithPreview'
       this.loading.addComment = true
       this.errors.addComment = false
-      if (this.attachedFileName) {
-        this.commentTaskWithPreview(params)
-      } else {
-        this.commentTask(params)
-      }
+      this.$store.dispatch(action, params)
+        .then(() => {
+          this.$refs['add-preview-modal'].reset()
+          this.reset()
+          this.attachedFileName = ''
+          this.loading.addComment = false
+        })
+        .catch((err) => {
+          console.error(err)
+          this.errors.addComment = true
+          this.loading.addComment = false
+        })
     },
 
     reset () {
@@ -960,23 +939,22 @@ export default {
         addPreview: false,
         addExtraPreview: false,
         deleteExtraPreview: false,
-        changePreview: false,
         deleteTask: false,
         deleteComment: false,
         editComment: false
       }
-      if (path.indexOf('change-preview') > 0) {
-        this.modals.changePreview = true
-      } else if (
+      if (
         path.indexOf('delete') > 0 && path.indexOf('comments') < 0
       ) {
         this.modals.deleteTask = true
       }
     },
 
-    selectFile (formData) {
-      this.loadPreviewFileFormData(formData)
-      this.attachedFileName = formData.get('file').name
+    selectFile (forms) {
+      this.loadPreviewFileFormData(forms)
+      this.attachedFileName = forms
+        .map((form) => form.get('file').name)
+        .join(', ')
     },
 
     createPreview () {
@@ -1007,48 +985,28 @@ export default {
       this.addCommentExtraPreview({
         taskId: this.currentTask.id,
         previewId: this.currentPreview.id,
-        commentId: comment.id,
-        callback: (err, preview) => {
+        commentId: comment.id
+      })
+        .then(() => {
           this.loading.addExtraPreview = false
-          if (err) {
-            this.errors.addExtraPreview = true
+          if (this.currentPreview) {
+            this.resetPreview(this.currentPreview)
           } else {
-            this.$refs['add-extra-preview-modal'].reset()
-            if (this.currentPreview) {
-              this.resetPreview(this.currentPreview)
-            } else {
-              this.resetPreview({
-                id: previewId
-              })
-            }
-            setTimeout(() => {
-              this.$refs['preview-picture'].displayLast()
-            }, 0)
-            this.modals.addExtraPreview = false
+            this.resetPreview({
+              id: previewId
+            })
           }
-        }
-      })
-    },
-
-    changePreview () {
-      const preview = this.currentTaskComments[0].preview
-      this.errors.changePreview = false
-      this.loading.changePreview = true
-
-      this.changeCommentPreview({
-        preview: preview,
-        taskId: this.currentTask.id,
-        comment: this.currentTaskComments[0],
-        callback: (err, extension) => {
-          this.loading.changePreview = false
-          if (err) {
-            this.errors.changePreview = true
-          } else {
-            this.$refs['change-preview-modal'].reset()
-            this.resetPreview(preview)
-          }
-        }
-      })
+          this.modals.addExtraPreview = false
+          this.$refs['add-extra-preview-modal'].reset()
+          setTimeout(() => {
+            this.$refs['preview-picture'].displayLast()
+          }, 0)
+        })
+        .catch((err) => {
+          console.error(err)
+          this.errors.addExtraPreview = true
+          this.loading.addExtraPreview = false
+        })
     },
 
     resetPreview (preview) {

@@ -50,15 +50,14 @@ export default {
     client.get(`/api/data/tasks/${taskId}/previews`, callback)
   },
 
-  commentTask (data, callback) {
+  commentTask (data) {
     const commentData = {
       task_status_id: data.taskStatusId,
       comment: data.comment
     }
-    client.post(
+    return client.ppost(
       `/api/actions/tasks/${data.taskId}/comment`,
-      commentData,
-      callback
+      commentData
     )
   },
 
@@ -112,36 +111,28 @@ export default {
     )
   },
 
-  addPreview (data, callback) {
+  addPreview (data) {
     const taskId = data.taskId
     const commentId = data.commentId
-    client.post(
+    return client.ppost(
       `/api/actions/tasks/${taskId}/comments/${commentId}/add-preview`,
-      {},
-      callback
+      {}
     )
   },
 
-  addExtraPreview (previewId, taskId, commentId, callback) {
-    client.post(
+  addExtraPreview (previewId, taskId, commentId) {
+    return client.ppost(
       `/api/actions/tasks/${taskId}/comments/${commentId}/preview-files/` +
       `${previewId}`,
-      {},
-      callback
+      {}
     )
   },
 
-  deletePreview (taskId, commentId, previewId, callback) {
-    return new Promise((resolve, reject) => {
-      client.del(
-        `/api/actions/tasks/${taskId}/comments/${commentId}/preview-files/` +
-        `${previewId}`,
-        (err, preview) => {
-          if (err) reject(err)
-          else resolve(preview)
-        }
-      )
-    })
+  deletePreview (taskId, commentId, previewId) {
+    return client.pdel(
+      `/api/actions/tasks/${taskId}/comments/${commentId}/preview-files/` +
+      `${previewId}`
+    )
   },
 
   setPreview (entityId, previewId, callback) {
@@ -152,11 +143,10 @@ export default {
     )
   },
 
-  uploadPreview (previewId, formData, callback) {
-    client.post(
+  uploadPreview (previewId, formData) {
+    return client.ppost(
       `/api/pictures/preview-files/${previewId}`,
-      formData,
-      callback
+      formData
     )
   },
 
