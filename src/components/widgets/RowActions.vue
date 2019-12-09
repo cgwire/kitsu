@@ -2,6 +2,7 @@
 <td class="actions has-text-right">
   <router-link
     class="button"
+    data-test="button-edit"
     :to="editRoute"
     v-if="!hideEdit && !entry.canceled"
   >
@@ -10,6 +11,7 @@
 
   <router-link
     class="button"
+    data-test="button-restore"
     :to="restoreRoute"
     v-if="entry.canceled"
   >
@@ -18,6 +20,7 @@
 
   <router-link
     class="button"
+    data-test="button-delete-admin"
     :to="deleteRoute"
     v-if="!hideDelete && !entry.canceled && isCurrentUserAdmin"
   >
@@ -26,6 +29,7 @@
 
   <router-link
     class="button"
+    data-test="button-delete"
     :to="deleteRoute"
     v-else-if="!hideDelete"
   >
