@@ -1,12 +1,12 @@
 <template>
 <div
   class="has-text-centered"
-  :style="style"
+  :style="sizeStyle"
   v-if="isWhite"
 >
   <img src="../../assets/spinner-white.svg">
 </div>
-<div class="has-text-centered" :style="style" v-else>
+<div class="has-text-centered" :style="sizeStyle" v-else>
   <img src="../../assets/spinner.svg">
 </div>
 </template>
@@ -15,14 +15,6 @@
 export default {
   name: 'spinner',
 
-  data () {
-    return {
-      style: {
-        width: this.size ? this.size + 'px' : 'auto'
-      }
-    }
-  },
-
   props: {
     isWhite: {
       type: Boolean,
@@ -30,6 +22,14 @@ export default {
     },
     size: {
       type: Number
+    }
+  },
+
+  computed: {
+    sizeStyle: function () {
+      return {
+        width: this.size ? this.size + 'px' : 'auto'
+      }
     }
   }
 }
