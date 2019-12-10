@@ -22,6 +22,7 @@
   <div class="asset-picture" v-if="asset.preview_file_id.length > 0">
     <img
       v-lazy="'/api/pictures/thumbnails-square/preview-files/' + asset.preview_file_id + '.png'"
+      alt=""
     />
   </div>
   <div class="asset-picture" v-else>
