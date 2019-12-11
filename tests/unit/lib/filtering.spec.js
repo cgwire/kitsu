@@ -241,16 +241,16 @@ describe('lib/filtering', () => {
       expect(filter.descriptor.id).toEqual('descriptor-1')
     })
 
-    it('withavatar in query case', () => {
+    it('withthumbnail in query case', () => {
       let filters = getFilters(
         entryIndex,
         taskTypes,
         taskStatuses,
         descriptors,
-        'withavatar'
+        'withthumbnail'
       )
       expect(filters.length).toEqual(1)
-      expect(filters[0].type).toEqual('avatar')
+      expect(filters[0].type).toEqual('thumbnail')
       expect(filters[0].excluding).toEqual(false)
 
       filters = getFilters(
@@ -258,12 +258,11 @@ describe('lib/filtering', () => {
         taskTypes,
         taskStatuses,
         descriptors,
-        '-withavatar'
+        '-withthumbnail'
       )
       expect(filters.length).toEqual(1)
-      expect(filters[0].type).toEqual('avatar')
+      expect(filters[0].type).toEqual('thumbnail')
       expect(filters[0].excluding).toEqual(true)
-
     })
   })
 
@@ -471,11 +470,11 @@ describe('lib/filtering', () => {
       expect(results.length).toEqual(4)
     })
 
-    it('withavatar', () => {
+    it('withthumbnail', () => {
       const filters = [
         {
           excluding: false,
-          type: 'avatar'
+          type: 'thumbnail'
         }
       ]
       let results = applyFilters(
@@ -486,11 +485,11 @@ describe('lib/filtering', () => {
       expect(results.length).toEqual(2)
     })
 
-    it('-withavatar', () => {
+    it('-withthumbnail', () => {
       const filters = [
         {
           excluding: true,
-          type: 'avatar'
+          type: 'thumbnail'
         }
       ]
       let results = applyFilters(
