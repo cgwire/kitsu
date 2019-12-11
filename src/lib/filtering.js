@@ -14,7 +14,7 @@ export const applyFilters = (entries, filters, taskMap) => {
   const isAssignation = { assignation: true }
   const isExclusion = { exclusion: true }
   const isDescriptor = { descriptor: true }
-  const isAvatar = { avatar: true }
+  const isAvatar = { thumbnail: true }
 
   if (filters && filters.length > 0) {
     return entries.filter((entry) => {
@@ -78,7 +78,7 @@ export const getKeyWords = (queryText) => {
       .replace(EQUAL_REGEX, '')
       .split(' ')
       .filter((query) => {
-        return query.length > 0 && query[0] !== '-' && query !== 'withavatar'
+        return query.length > 0 && query[0] !== '-' && query !== 'withthumbnail'
       })
   }
 }
@@ -93,7 +93,7 @@ export const getExcludingKeyWords = (queryText) => {
     .split(' ')
     .filter((keyword) => {
       return (
-        keyword.length > 0 && keyword[0] === '-' && keyword !== '-withavatar'
+        keyword.length > 0 && keyword[0] === '-' && keyword !== '-withthumbnail'
       )
     })
     .map(keyword => keyword.substring(1))
@@ -111,9 +111,9 @@ export const getFilters = (
 ) => {
   let filters = getTaskTypeFilters(taskTypes, taskStatuses, query)
   const descFilters = getDescFilters(descriptors, query)
-  const avatarFilters = getAvatarFilters(query) || []
+  const thumbnailFilters = getThumbnailFilters(query) || []
   const excludingKeywords = getExcludingKeyWords(query) || []
-  filters = filters.concat(descFilters).concat(avatarFilters)
+  filters = filters.concat(descFilters).concat(thumbnailFilters)
   excludingKeywords.forEach((keyword) => {
     let excludedMap = {}
     let excludedEntries = indexSearch(entryIndex, [keyword]) || []
@@ -241,16 +241,16 @@ export const getDescFilters = (descriptors, queryText) => {
   return results
 }
 
-export const getAvatarFilters = (queryText) => {
+export const getThumbnailFilters = (queryText) => {
   const results = []
-  if (queryText.indexOf('-withavatar') > -1) {
+  if (queryText.indexOf('-withthumbnail') > -1) {
     results.push({
-      type: 'avatar',
+      type: 'thumbnail',
       excluding: true
     })
-  } else if (queryText.indexOf('withavatar') > -1) {
+  } else if (queryText.indexOf('withthumbnail') > -1) {
     results.push({
-      type: 'avatar',
+      type: 'thumbnail',
       excluding: false
     })
   }
