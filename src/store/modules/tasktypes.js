@@ -53,6 +53,12 @@ const getters = {
     return state.taskTypeMap[rootState.route.params.task_type_id] || {}
   },
 
+  assetTaskTypes: state => state.taskTypes
+    .filter((taskType) => !taskType.for_shots),
+
+  shotTaskTypes: state => state.taskTypes
+    .filter((taskType) => taskType.for_shots),
+
   getTaskTypeOptions: state => state.taskTypes.map(
     (type) => { return { label: type.name, value: type.id } }
   ),

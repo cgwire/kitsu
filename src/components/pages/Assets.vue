@@ -25,9 +25,14 @@
             <div class="flexrow" v-if="isCurrentUserManager">
             <button-simple
               class="flexrow-item"
+              :title="$t('entities.thumbnails.title')"
+              icon="image"
+              @click="showAddThumbnailsModal"
+            />
+            <button-simple
+              class="flexrow-item"
               :title="$t('main.csv.import_file')"
               icon="upload"
-              :path="importPath"
               @click="showImportModal"
             />
             <button-simple
@@ -171,18 +176,30 @@
     @cancel="modals.isAddMetadataDisplayed = false"
     @confirm="confirmAddMetadata"
   />
+
+  <add-thumbnails-modal
+    ref="add-thumbnails-modal"
+    :active="modals.isAddThumbnailsDisplayed"
+    :is-loading="loading.addThumbnails"
+    :is-error="errors.addThumbnails"
+    @cancel="hideAddThumbnailsModal"
+    @confirm="confirmAddThumbnails"
+  />
 </div>
 </template>
 
 <script>
 import moment from 'moment'
+
 import { mapGetters, mapActions } from 'vuex'
 import csv from '../../lib/csv'
+import func from '../../lib/func'
 import { sortByName } from '../../lib/sorting'
 import { slugify } from '../../lib/string'
 
 import AssetList from '../lists/AssetList'
 import AddMetadataModal from '../modals/AddMetadataModal'
+import AddThumbnailsModal from '../modals/AddThumbnailsModal'
 import ButtonLink from '../widgets/ButtonLink'
 import ButtonSimple from '../widgets/ButtonSimple'
 import CreateTasksModal from '../modals/CreateTasksModal'
@@ -202,6 +219,7 @@ export default {
   components: {
     AssetList,
     AddMetadataModal,
+    AddThumbnailsModal,
     ButtonLink,
     ButtonSimple,
     CreateTasksModal,
@@ -221,6 +239,7 @@ export default {
       initialLoading: true,
       modals: {
         isAddMetadataDisplayed: false,
+        isAddThumbnailsDisplayed: false,
         isCreateTasksDisplayed: false,
         isDeleteDisplayed: false,
         isDeleteAllTasksDisplayed: false,
@@ -230,6 +249,7 @@ export default {
       },
       loading: {
         addMetadata: false,
+        addThumbnails: false,
         creatingTasks: false,
         deleteAllTasks: false,
         deleteMetadata: false,
@@ -240,6 +260,7 @@ export default {
       },
       errors: {
         addMetadata: false,
+        addThumbnails: false,
         deleteMetadata: false,
         creatingTasks: false,
         importing: false
@@ -298,8 +319,8 @@ export default {
       return this.getPath('new-asset')
     },
 
-    importPath () {
-      return this.getPath('import-assets')
+    addThumbnailsModal () {
+      return this.$refs['add-thumbnails-modal']
     }
   },
 
@@ -352,15 +373,17 @@ export default {
   methods: {
     ...mapActions([
       'addMetadataDescriptor',
-      'getAssetsCsvLines',
+      'commentTaskWithPreview',
       'deleteAllTasks',
       'deleteMetadataDescriptor',
+      'getAssetsCsvLines',
       'loadAssets',
       'loadComment',
       'removeAssetSearch',
       'saveAssetSearch',
       'setLastProductionScreen',
-      'setAssetSearch'
+      'setAssetSearch',
+      'setPreview'
     ]),
 
     confirmNewAssetStay (form) {
@@ -570,6 +593,7 @@ export default {
       } else {
         this.modals = {
           isAddMetadataDisplayed: false,
+          isAddThumbnailsDisplayed: false,
           isCreateTasksDisplayed: false,
           isDeleteAllTasksDisplayed: false,
           isDeleteDisplayed: false,
@@ -684,6 +708,36 @@ export default {
         })
     },
 
+    confirmAddThumbnails (forms) {
+      const addPreview = (form) => {
+        this.addThumbnailsModal.markLoading(form.task.entity_id)
+        return this.commentTaskWithPreview({
+          taskId: form.task.id,
+          commentText: '',
+          taskStatusId: form.task.task_status_id,
+          form: form
+        })
+          .then(({ newComment, preview }) => {
+            return this.setPreview({
+              taskId: form.task.id,
+              entityId: form.task.entity_id,
+              previewId: preview.id
+            })
+          })
+          .then(() => {
+            this.addThumbnailsModal.markUploaded(form.task.entity_id)
+            return Promise.resolve()
+          })
+      }
+
+      this.loading.addThumbnails = true
+      func.runPromiseMapAsSeries(forms, addPreview)
+        .then(() => {
+          this.loading.addThumbnails = false
+          this.modals.isAddThumbnailsDisplayed = false
+        })
+    },
+
     onAddMetadataClicked () {
       this.descriptorToEdit = {}
       this.modals.isAddMetadataDisplayed = true
@@ -715,6 +769,14 @@ export default {
 
     hideCreateTasksModal () {
       this.modals.isCreateTasksDisplayed = false
+    },
+
+    showAddThumbnailsModal () {
+      this.modals.isAddThumbnailsDisplayed = true
+    },
+
+    hideAddThumbnailsModal () {
+      this.modals.isAddThumbnailsDisplayed = false
     },
 
     onExportClick () {

@@ -93,6 +93,17 @@ export default {
     }
   },
 
+  entities: {
+    thumbnails: {
+      select_files: 'Select Files',
+      selected_files: 'Selected Files',
+      select_task_type: 'Select Task Type',
+      upload: 'Add Thumbnails',
+      title: 'Add Thumbnails',
+      error: 'An error occured while uploading thumbnails'
+    }
+  },
+
   episodes: {
     all_episodes: 'All episodes',
     delete_error: 'An error occured while deleting this episode. There are probably data linked to it. Are you sure this episode has no sequence linked to it?',

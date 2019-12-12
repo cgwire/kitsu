@@ -136,10 +136,9 @@ export default {
   },
 
   setPreview (entityId, previewId, callback) {
-    client.put(
+    return client.pput(
       `/api/actions/entities/${entityId}/set-main-preview/${previewId}`,
-      {},
-      callback
+      {}
     )
   },
 

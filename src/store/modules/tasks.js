@@ -470,7 +470,7 @@ const actions = {
 
   commentTaskWithPreview (
     { commit, getters, state, dispatch },
-    { taskId, commentText, taskStatusId, callback }
+    { taskId, commentText, taskStatusId, form }
   ) {
     const data = { taskId, taskStatusId, comment: commentText }
     commit(ADD_PREVIEW_START)
@@ -484,8 +484,8 @@ const actions = {
         }
         return tasksApi.addPreview(previewData)
       }).then((preview) => {
-        const firstForm = state.previewForms[0]
-        return tasksApi.uploadPreview(preview.id, firstForm)
+        if (!form) form = state.previewForms[0]
+        return tasksApi.uploadPreview(preview.id, form)
       }).then((preview) => {
         commit(NEW_TASK_COMMENT_END, { comment: newComment, taskId })
         commit(ADD_PREVIEW_END, {
@@ -502,7 +502,7 @@ const actions = {
             previewId: preview.id
           })
         }
-        return Promise.resolve(newComment, preview)
+        return Promise.resolve({ newComment, preview })
       })
   },
 
@@ -545,16 +545,14 @@ const actions = {
     })
   },
 
-  setPreview ({ commit, state }, { taskId, entityId, previewId, callback }) {
+  setPreview ({ commit, state }, { taskId, entityId, previewId }) {
     const taskMap = state.taskMap
-    tasksApi.setPreview(entityId, previewId, (err, entity) => {
-      if (err && callback) {
-        callback(err)
-      } else if (callback) {
+    return tasksApi
+      .setPreview(entityId, previewId)
+      .then((entity) => {
         commit(SET_PREVIEW, { taskId, entityId, previewId, taskMap })
-        callback(err, entity)
-      }
-    })
+        Promise.resolve()
+      })
   },
 
   updatePreviewAnnotation ({ commit, state }, {
@@ -571,7 +569,7 @@ const actions = {
           resolve()
         })
         .catch((err) => {
-          console.log(err)
+          console.error(err)
           reject(err)
         })
     })
@@ -866,23 +864,25 @@ const mutations = {
       extension: preview.extension
     }
 
-    const existingPreview = state.taskPreviews[taskId].find(
-      (p) => p.revision === preview.revision
-    )
+    if (state.taskPreviews[taskId]) {
+      const existingPreview = state.taskPreviews[taskId].find(
+        (p) => p.revision === preview.revision
+      )
 
-    if (existingPreview) {
-      const existingSubPreview =
-        existingPreview.previews.find((p) => p.id === newPreview.id)
-      if (!existingSubPreview) {
-        existingPreview.previews.push(newPreview)
+      if (existingPreview) {
+        const existingSubPreview =
+          existingPreview.previews.find((p) => p.id === newPreview.id)
+        if (!existingSubPreview) {
+          existingPreview.previews.push(newPreview)
+        }
+      } else {
+        newPreview.previews = [{ ...newPreview }]
+        state.taskPreviews[taskId] =
+          [newPreview].concat(state.taskPreviews[taskId])
+
+        comment.preview = newPreview
+        comment.previews = [newPreview]
       }
-    } else {
-      newPreview.previews = [{ ...newPreview }]
-      state.taskPreviews[taskId] =
-        [newPreview].concat(state.taskPreviews[taskId])
-
-      comment.preview = newPreview
-      comment.previews = [newPreview]
     }
   },
 
