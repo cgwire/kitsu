@@ -5,7 +5,7 @@
     big: true,
     casted: true,
     active: active,
-    tagged: tag
+    tagged: true
   }"
   :title="`${asset.name} (${nbOccurences})`"
 >
@@ -38,38 +38,23 @@
     </div>
   </div>
   <div class="asset-tag"
-    v-if="tag"
     @click="onEditTagClicked"
   >
-    {{tag}}
+    {{ asset.label || $t('breakdown.options.fixed') }}
   </div>
-  <edit-tag-modal
-    :active="modals.isEditTagDisplayed"
-    :is-loading="loading.EditTag"
-    :is-loading-stay="loading.EditTag"
-    :tag="tag"
-    @cancel="modals.isEditTagDisplayed = false"
-    @confirm="confirmEditTag"
-  />
 </div>
 </template>
 
 <script>
 import stringHelpers from '../../../lib/string'
-import EditTagModal from '../../modals/EditTagModal'
 
 export default {
   name: 'asset-block',
-  components: {
-    EditTagModal
-  },
+  components: {},
 
   data () {
     return {
       initialLoading: true,
-      modals: {
-        isEditTagDisplayed: false
-      },
       loading: {
         EditTag: false
       }
@@ -90,10 +75,6 @@ export default {
     active: {
       default: true,
       type: Boolean
-    },
-    tag: {
-      default: 'fixed',
-      type: String
     }
   },
 
@@ -113,13 +94,8 @@ export default {
       return stringHelpers.shortenText(name, 13)
     },
 
-    confirmEditTag (form) {
-      this.$emit('edit-tag', this.asset.tag)
-      this.modals.isEditTagDisplayed = false
-    },
-
     onEditTagClicked () {
-      this.modals.isEditTagDisplayed = true
+      this.$emit('edit-tag', this.asset, this.asset.label)
     }
   }
 }

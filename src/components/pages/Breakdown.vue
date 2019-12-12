@@ -46,6 +46,7 @@
             :selected="selection[entity.id]"
             :name="entity.name"
             :assets="castingByType[entity.id] || []"
+            @edit-tag="onEditTagClicked"
             @remove-one="removeOneAsset"
             @remove-ten="removeTenAssets"
             @click="selectEntity"
@@ -105,6 +106,17 @@
       @confirm="uploadImportFile"
       @cancel="hideImportModal"
     />
+
+    <edit-tag-modal
+      ref="edit-tag-modal"
+      :active="modals.isEditTagDisplayed"
+      :is-loading="loading.editTag"
+      :is-error="loading.editError"
+      :asset="editedAsset"
+      :tag="editedAssetLinkTag"
+      @cancel="modals.isEditTagDisplayed = false"
+      @confirm="confirmEditTag"
+    />
   </div>
 </template>
 
@@ -116,6 +128,7 @@ import AvailableAssetBlock from './breakdown/AvailableAssetBlock'
 import ButtonHrefLink from '../widgets/ButtonHrefLink.vue'
 import ButtonSimple from '../widgets/ButtonSimple'
 import ComboboxStyled from '../widgets/ComboboxStyled'
+import EditTagModal from '../modals/EditTagModal'
 import ImportModal from '../modals/ImportModal'
 import SearchField from '../widgets/SearchField.vue'
 import ShotLine from './breakdown/ShotLine'
@@ -129,6 +142,7 @@ export default {
     ButtonHrefLink,
     ButtonSimple,
     ComboboxStyled,
+    EditTagModal,
     ImportModal,
     SearchField,
     ShotLine,
@@ -158,18 +172,24 @@ export default {
         'Occurences',
         'Label'
       ],
+      editedAsset: null,
+      editedEntityId: null,
+      editedAssetLinkTag: null,
       episodeId: '',
       importCsvFormData: {},
       isLoading: false,
       selection: {},
       sequenceId: '',
       errors: {
+        editTag: false,
         importing: false
       },
       loading: {
+        editTag: false,
         importing: false
       },
       modals: {
+        isEditTagDisplayed: false,
         importing: false
       }
     }
@@ -234,6 +254,10 @@ export default {
 
     castingEntities () {
       return this.isShotCasting ? this.castingSequenceShots : this.castingAssetTypeAssets
+    },
+
+    editTagModal () {
+      return this.$refs['edit-tag-modal']
     }
   },
 
@@ -251,6 +275,7 @@ export default {
       'setCastingEpisode',
       'setCastingSequence',
       'setCastingShot',
+      'setAssetLinkLabel',
       'setLastProductionScreen',
       'uploadCastingFile'
     ]),
@@ -437,6 +462,32 @@ export default {
         }
         this.$router.push(route)
       }
+    },
+
+    onEditTagClicked (asset, tag, entityId) {
+      this.editedAsset = asset
+      this.editedEntityId = entityId
+      this.editedAssetLinkTag = tag
+      this.modals.isEditTagDisplayed = true
+    },
+
+    confirmEditTag (form) {
+      const tag = form.tag
+      this.loading.editTag = true
+      this.setAssetLinkLabel({
+        label: tag,
+        asset: this.editedAsset,
+        targetEntityId: this.editedEntityId
+      })
+        .then(() => {
+          this.modals.isEditTagDisplayed = false
+          this.loading.editTag = false
+        })
+        .catch((err) => {
+          console.error(err)
+          this.errors.editTag = true
+          this.loading.editTag = false
+        })
     }
   },
 

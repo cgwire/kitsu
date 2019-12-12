@@ -16,8 +16,8 @@
           ref="typeField"
           :label="$t('breakdown.tag')"
           :options="typeOptions"
-          :value="tag"
           @enter="confirm"
+          v-model="form.tag"
           v-focus
         />
 
@@ -53,11 +53,11 @@ export default {
       type: Boolean,
       default: false
     },
-    isLoading: {
+    isError: {
       type: Boolean,
       default: false
     },
-    isError: {
+    isLoading: {
       type: Boolean,
       default: false
     },
@@ -66,11 +66,15 @@ export default {
     }
   },
 
+  mounted () {
+    this.form.tag = this.tag
+  },
+
   data () {
     return {
+      asset: null,
       form: {
-        name: '',
-        values: []
+        tag: 'fixed'
       },
       typeOptions: [
         {
@@ -96,6 +100,12 @@ export default {
 
     confirm () {
       return this.$emit('confirm', this.form)
+    }
+  },
+
+  watch: {
+    tag () {
+      this.form.tag = this.tag
     }
   }
 }
