@@ -45,7 +45,13 @@ export default {
   breakdown: {
     all_assets: 'All available assets',
     empty: 'Empty casting',
-    title: 'Breakdown'
+    title: 'Breakdown',
+    edit_tag: 'Change the asset\'s tag',
+    tag: 'Tag',
+    options: {
+      fixed: 'fixed',
+      animate: 'animate'
+    }
   },
 
   comments: {

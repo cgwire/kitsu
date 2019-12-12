@@ -37,14 +37,44 @@
       </span>
     </div>
   </div>
-  <div class="asset-tag" v-if="tag">{{tag}}</div>
+  <div class="asset-tag"
+    v-if="tag"
+    @click="onEditTagClicked"
+  >
+    {{tag}}
+  </div>
+  <edit-tag-modal
+    :active="modals.isEditTagDisplayed"
+    :is-loading="loading.EditTag"
+    :is-loading-stay="loading.EditTag"
+    :tag="tag"
+    @cancel="modals.isEditTagDisplayed = false"
+    @confirm="confirmEditTag"
+  />
 </div>
 </template>
 
 <script>
 import stringHelpers from '../../../lib/string'
+import EditTagModal from '../../modals/EditTagModal'
+
 export default {
   name: 'asset-block',
+  components: {
+    EditTagModal
+  },
+
+  data () {
+    return {
+      initialLoading: true,
+      modals: {
+        isEditTagDisplayed: false
+      },
+      loading: {
+        EditTag: false
+      }
+    }
+  },
   props: {
     asset: {
       default: () => ({
@@ -81,6 +111,15 @@ export default {
 
     shortenName (name) {
       return stringHelpers.shortenText(name, 13)
+    },
+
+    confirmEditTag (form) {
+      this.$emit('edit-tag', this.asset.tag)
+      this.modals.isEditTagDisplayed = false
+    },
+
+    onEditTagClicked () {
+      this.modals.isEditTagDisplayed = true
     }
   }
 }
@@ -199,6 +238,7 @@ export default {
   padding-top: 5px;
   border-bottom-left-radius: 5px;
   border-bottom-right-radius: 5px;
+  color: $white;
 }
 
 .nb-occurences {
