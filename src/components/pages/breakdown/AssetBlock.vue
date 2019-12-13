@@ -102,11 +102,11 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-.dark .asset {
+.dark .asset-picture {
   background-color: $dark-grey-lightest;
 }
 
-.dark .asset.casted,
+.dark .asset.casted .asset-picture,
 .dark .asset .asset-add,
 .dark .asset .asset-add-10 {
   background-color: $purple-strong;
@@ -118,7 +118,6 @@ export default {
   flex-direction: row;
   max-height: 60px;
   margin-right: 1em;
-  background: $white-grey;
   font-size: 0.8em;
   word-wrap: break-word;
   border-radius: 5px;
@@ -186,6 +185,7 @@ export default {
   z-index: 1;
   width: 100%;
   height: 100%;
+  background: $white-grey;
   word-break: break-all;
   font-size: 0.8em;
 
