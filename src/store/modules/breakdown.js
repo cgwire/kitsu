@@ -307,10 +307,7 @@ const mutations = {
   [CASTING_SET_LINK_LABEL] (state, { label, asset, targetEntityId }) {
     const link = state.casting[targetEntityId]
       .find(link => link.asset_id === asset.asset_id)
-    console.log(asset.id)
     link.label = label
-    console.log(link)
-    console.log(state.casting)
   },
 
   [RESET_ALL] (state) {
