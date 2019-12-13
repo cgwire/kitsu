@@ -46,8 +46,8 @@ export default {
     all_assets: 'All available assets',
     empty: 'Empty casting',
     title: 'Breakdown',
-    edit_tag: 'Change the asset\'s tag',
-    tag: 'Tag',
+    edit_label: 'Change the asset\'s label',
+    label: 'Label',
     options: {
       fixed: 'fixed',
       animate: 'animate'

@@ -45,8 +45,8 @@ export default {
     all_assets: 'Tous les assets disponibles',
     empty: 'Casting vide',
     title: 'Casting',
-    edit_tag: 'Changer le tag de l\'asset',
-    tag: 'Tag',
+    edit_label: 'Changer le label de l\'asset',
+    label: 'Label',
     options: {
       fixed: 'fixe',
       animate: 'animé'

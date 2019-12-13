@@ -26,7 +26,7 @@
           :key="asset.id"
           :asset="asset"
           :nb-occurences="asset.nb_occurences"
-          @edit-tag="onEditTagClicked"
+          @edit-label="onEditLabelClicked"
           @remove-one="removeOneAsset"
           @remove-ten="removeTenAssets"
           v-for="asset in typeAssets"
@@ -75,8 +75,8 @@ export default {
     onClicked (event) {
       this.$emit('click', this.entityId, event)
     },
-    onEditTagClicked (asset, tag) {
-      this.$emit('edit-tag', asset, tag, this.entityId)
+    onEditLabelClicked (asset, label) {
+      this.$emit('edit-label', asset, label, this.entityId)
     },
     removeOneAsset (assetId) {
       this.$emit('remove-one', assetId, this.entityId)

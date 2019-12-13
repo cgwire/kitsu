@@ -5,7 +5,7 @@
     big: true,
     casted: true,
     active: active,
-    tagged: true
+    labelled: true
   }"
   :title="`${asset.name} (${nbOccurences})`"
 >
@@ -37,10 +37,10 @@
       </span>
     </div>
   </div>
-  <div class="asset-tag"
-    @click="onEditTagClicked"
+  <div class="asset-label"
+    @click="onEditLabelClicked"
   >
-    {{ asset.label || $t('breakdown.options.fixed') }}
+    {{ asset.label || $t('breakdown.options.animate') }}
   </div>
 </div>
 </template>
@@ -56,7 +56,7 @@ export default {
     return {
       initialLoading: true,
       loading: {
-        EditTag: false
+        EditLabel: false
       }
     }
   },
@@ -94,8 +94,8 @@ export default {
       return stringHelpers.shortenText(name, 13)
     },
 
-    onEditTagClicked () {
-      this.$emit('edit-tag', this.asset, this.asset.label)
+    onEditLabelClicked () {
+      this.$emit('edit-label', this.asset, this.asset.label)
     }
   }
 }
@@ -123,7 +123,7 @@ export default {
   border-radius: 5px;
 }
 
-.tagged {
+.labelled {
   margin-right: 2em;
 }
 
@@ -201,7 +201,7 @@ export default {
   top: -75px;
 }
 
-.asset-tag {
+.asset-label {
   font-size: .7em;
   text-align: center;
   transform: rotate(-90deg) translateX(-25%) translateY(calc(-50% - 5px));

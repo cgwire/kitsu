@@ -8,16 +8,16 @@
   <div class="modal-content">
     <div class="box content">
       <h1 class="title">
-        {{ $t('breakdown.edit_tag') }}
+        {{ $t('breakdown.edit_label') }}
       </h1>
 
       <form v-on:submit.prevent>
         <combobox
           ref="typeField"
-          :label="$t('breakdown.tag')"
+          :label="$t('breakdown.label')"
           :options="typeOptions"
           @enter="confirm"
-          v-model="form.tag"
+          v-model="form.label"
           v-focus
         />
 
@@ -40,7 +40,7 @@ import Combobox from '../widgets/Combobox'
 import ModalFooter from './ModalFooter'
 
 export default {
-  name: 'edit-tag-modal',
+  name: 'edit-label-modal',
   mixins: [modalMixin],
 
   components: {
@@ -61,20 +61,20 @@ export default {
       type: Boolean,
       default: false
     },
-    tag: {
+    label: {
       type: String
     }
   },
 
   mounted () {
-    this.form.tag = this.tag
+    this.form.label = this.label
   },
 
   data () {
     return {
       asset: null,
       form: {
-        tag: 'fixed'
+        label: 'animate'
       },
       typeOptions: [
         {
@@ -104,8 +104,8 @@ export default {
   },
 
   watch: {
-    tag () {
-      this.form.tag = this.tag
+    label () {
+      this.form.label = this.label
     }
   }
 }

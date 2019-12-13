@@ -46,7 +46,7 @@
             :selected="selection[entity.id]"
             :name="entity.name"
             :assets="castingByType[entity.id] || []"
-            @edit-tag="onEditTagClicked"
+            @edit-label="onEditLabelClicked"
             @remove-one="removeOneAsset"
             @remove-ten="removeTenAssets"
             @click="selectEntity"
@@ -107,15 +107,15 @@
       @cancel="hideImportModal"
     />
 
-    <edit-tag-modal
-      ref="edit-tag-modal"
-      :active="modals.isEditTagDisplayed"
-      :is-loading="loading.editTag"
+    <edit-label-modal
+      ref="edit-label-modal"
+      :active="modals.isEditLabelDisplayed"
+      :is-loading="loading.editLabel"
       :is-error="loading.editError"
       :asset="editedAsset"
-      :tag="editedAssetLinkTag"
-      @cancel="modals.isEditTagDisplayed = false"
-      @confirm="confirmEditTag"
+      :label="editedAssetLinkLabel"
+      @cancel="modals.isEditLabelDisplayed = false"
+      @confirm="confirmEditLabel"
     />
   </div>
 </template>
@@ -128,7 +128,7 @@ import AvailableAssetBlock from './breakdown/AvailableAssetBlock'
 import ButtonHrefLink from '../widgets/ButtonHrefLink.vue'
 import ButtonSimple from '../widgets/ButtonSimple'
 import ComboboxStyled from '../widgets/ComboboxStyled'
-import EditTagModal from '../modals/EditTagModal'
+import EditLabelModal from '../modals/EditLabelModal'
 import ImportModal from '../modals/ImportModal'
 import SearchField from '../widgets/SearchField.vue'
 import ShotLine from './breakdown/ShotLine'
@@ -142,7 +142,7 @@ export default {
     ButtonHrefLink,
     ButtonSimple,
     ComboboxStyled,
-    EditTagModal,
+    EditLabelModal,
     ImportModal,
     SearchField,
     ShotLine,
@@ -174,22 +174,22 @@ export default {
       ],
       editedAsset: null,
       editedEntityId: null,
-      editedAssetLinkTag: null,
+      editedAssetLinkLabel: null,
       episodeId: '',
       importCsvFormData: {},
       isLoading: false,
       selection: {},
       sequenceId: '',
       errors: {
-        editTag: false,
+        editLabel: false,
         importing: false
       },
       loading: {
-        editTag: false,
+        editLabel: false,
         importing: false
       },
       modals: {
-        isEditTagDisplayed: false,
+        isEditLabelDisplayed: false,
         importing: false
       }
     }
@@ -256,8 +256,8 @@ export default {
       return this.isShotCasting ? this.castingSequenceShots : this.castingAssetTypeAssets
     },
 
-    editTagModal () {
-      return this.$refs['edit-tag-modal']
+    editLabelModal () {
+      return this.$refs['edit-label-modal']
     }
   },
 
@@ -464,29 +464,29 @@ export default {
       }
     },
 
-    onEditTagClicked (asset, tag, entityId) {
+    onEditLabelClicked (asset, label, entityId) {
       this.editedAsset = asset
       this.editedEntityId = entityId
-      this.editedAssetLinkTag = tag
-      this.modals.isEditTagDisplayed = true
+      this.editedAssetLinkLabel = label
+      this.modals.isEditLabelDisplayed = true
     },
 
-    confirmEditTag (form) {
-      const tag = form.tag
-      this.loading.editTag = true
+    confirmEditLabel (form) {
+      const label = form.label
+      this.loading.editLabel = true
       this.setAssetLinkLabel({
-        label: tag,
+        label: label,
         asset: this.editedAsset,
         targetEntityId: this.editedEntityId
       })
         .then(() => {
-          this.modals.isEditTagDisplayed = false
-          this.loading.editTag = false
+          this.modals.isEditLabelDisplayed = false
+          this.loading.editLabel = false
         })
         .catch((err) => {
           console.error(err)
-          this.errors.editTag = true
-          this.loading.editTag = false
+          this.errors.editLabel = true
+          this.loading.editLabel = false
         })
     }
   },
