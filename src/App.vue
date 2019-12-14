@@ -661,7 +661,7 @@ th.actions {
 }
 
 td.actions {
-  min-width: 120px;
+  min-width: 160px;
 }
 
 ul {
@@ -707,6 +707,7 @@ tr .actions p {
   margin-bottom: 0;
 }
 
+tr .actions button,
 tr td.actions a {
   opacity: 0;
   color: #999;
@@ -716,6 +717,7 @@ tr th.actions a {
   color: #999;
 }
 
+tr:hover .actions button,
 tr:hover .actions a {
   opacity: 1
 }

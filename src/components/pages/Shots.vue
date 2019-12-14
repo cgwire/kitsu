@@ -73,6 +73,7 @@
         @add-metadata="onAddMetadataClicked"
         @delete-metadata="onDeleteMetadataClicked"
         @edit-metadata="onEditMetadataClicked"
+        @shot-history="showShotHistoryModal"
         @add-shots="showManageShots"
       />
     </div>
@@ -194,6 +195,12 @@
     @cancel="hideAddThumbnailsModal"
     @confirm="confirmAddThumbnails"
   />
+
+  <shot-history-modal
+    :active="modals.isShotHistoryDisplayed"
+    :shot="historyShot"
+    @cancel="hideShotHistoryModal"
+  />
 </div>
 </template>
 
@@ -218,6 +225,7 @@ import SearchField from '../widgets/SearchField'
 import SearchQueryList from '../widgets/SearchQueryList'
 import ShowAssignationsButton from '../widgets/ShowAssignationsButton'
 import ShowInfosButton from '../widgets/ShowInfosButton'
+import ShotHistoryModal from '../modals/ShotHistoryModal'
 import ShotList from '../lists/ShotList.vue'
 import TaskInfo from '../sides/TaskInfo.vue'
 
@@ -236,6 +244,7 @@ export default {
     ManageShotsModal,
     SearchField,
     SearchQueryList,
+    ShotHistoryModal,
     ShowAssignationsButton,
     ShowInfosButton,
     ShotList,
@@ -245,6 +254,20 @@ export default {
   data () {
     return {
       initialLoading: true,
+      deleteAllTasksLockText: null,
+      descriptorToEdit: {},
+      historyShot: {},
+      shotToDelete: null,
+      shotToEdit: null,
+      columns: [
+        'Episode',
+        'Sequence',
+        'Name',
+        'Description',
+        'FPS',
+        'Frame In',
+        'Frame Out'
+      ],
       modals: {
         isAddMetadataDisplayed: false,
         isAddThumbnailsDisplayed: false,
@@ -255,7 +278,8 @@ export default {
         isImportDisplayed: false,
         isManageDisplayed: false,
         isNewDisplayed: false,
-        isRestoreDisplayed: false
+        isRestoreDisplayed: false,
+        isShotHistoryDisplayed: false
       },
       loading: {
         addMetadata: false,
@@ -274,20 +298,7 @@ export default {
         creatingTasks: false,
         deleteAllTasks: false,
         importing: false
-      },
-      descriptorToEdit: {},
-      shotToDelete: null,
-      shotToEdit: null,
-      columns: [
-        'Episode',
-        'Sequence',
-        'Name',
-        'Description',
-        'FPS',
-        'Frame In',
-        'Frame Out'
-      ],
-      deleteAllTasksLockText: null
+      }
     }
   },
 
@@ -757,6 +768,15 @@ export default {
 
     hideAddThumbnailsModal () {
       this.modals.isAddThumbnailsDisplayed = false
+    },
+
+    showShotHistoryModal (shot) {
+      this.historyShot = shot
+      this.modals.isShotHistoryDisplayed = true
+    },
+
+    hideShotHistoryModal () {
+      this.modals.isShotHistoryDisplayed = false
     },
 
     onExportClick () {

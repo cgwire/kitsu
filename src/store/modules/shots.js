@@ -915,6 +915,10 @@ const actions = {
       return shotLine
     })
     return lines
+  },
+
+  loadShotHistory ({ commit, state }, shotId) {
+    return shotsApi.loadShotHistory(shotId)
   }
 }
 

@@ -240,6 +240,8 @@
             :edit-route="editPath(shot.id)"
             :restore-route="restorePath(shot.id)"
             :delete-route="deletePath(shot.id)"
+            :hide-history="false"
+            @history-clicked="$emit('shot-history', shot)"
             v-if="isCurrentUserManager"
           />
           <td class="actions" v-else></td>
@@ -520,7 +522,7 @@ export default {
 }
 
 .actions {
-  min-width: 100px;
+  min-width: 140px;
 }
 
 th.actions {

@@ -136,5 +136,10 @@ export default {
 
   getEpisodeStats (productionId) {
     return client.pget(`/api/data/projects/${productionId}/episodes/stats`)
+  },
+
+  loadShotHistory (shotId) {
+    return client.pget(`/api/data/shots/${shotId}/versions`)
   }
+
 }
