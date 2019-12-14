@@ -401,9 +401,7 @@ th.actions {
   max-width: 80vh;
 }
 
-td {
-  min-width: 170px;
-  max-width: 170px;
-  width: 170px;
+.actions {
+  width: 100%;
 }
 </style>
