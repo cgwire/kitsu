@@ -101,12 +101,14 @@ export default {
 
   entities: {
     thumbnails: {
+      error: 'An error occured while uploading thumbnails',
+      explaination: 'Adding a thumbnail requires to set a new preview. In order to set several thumbnails at the same time, you must chose first a task type that will be used to create the new previews. The thumbnails will be set from this new preview.',
+      explaination_two: 'Then you have to select the files you want to upload. To find the right entities, the file names must match the following pattern: "parent name entity name".',
       select_files: 'Select Files',
       selected_files: 'Selected Files',
       select_task_type: 'Select Task Type',
-      upload: 'Add Thumbnails',
       title: 'Add Thumbnails',
-      error: 'An error occured while uploading thumbnails'
+      upload: 'Add Thumbnails'
     }
   },
 

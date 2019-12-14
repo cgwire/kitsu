@@ -96,6 +96,18 @@ export default {
     }
   },
 
+  entities: {
+    thumbnails: {
+      error: 'Une erreur s\'est produite en téléversant les vignettes',
+
+      select_files: 'Sélectionner les fichiers',
+      selected_files: 'Fichiers sélectionnés',
+      select_task_type: 'Sélectionner un type de tâche',
+      title: 'Ajouter des vignettes',
+      upload: 'Téléverser des vignettes'
+    }
+  },
+
   episodes: {
     all_episodes: 'Tous les épisodes',
     edit_title: 'Éditer épisode',

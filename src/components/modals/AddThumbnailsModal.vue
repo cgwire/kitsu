@@ -11,11 +11,19 @@
         {{ $t('entities.thumbnails.title') }}
       </h1>
 
+      <p>
+        {{ $t('entities.thumbnails.explaination') }}
+      </p>
+
       <combobox-task-type
         :label="$t('entities.thumbnails.select_task_type')"
         :task-type-list="taskTypeList"
         v-model="taskTypeId"
       />
+
+      <p>
+        {{ $t('entities.thumbnails.explaination_two') }}
+      </p>
 
       <label class="label">
         {{ $t('entities.thumbnails.select_files') }}
@@ -153,6 +161,9 @@ export default {
       if (this.taskTypeList.length > 0) {
         this.taskTypeId = this.taskTypeList[0].id
       }
+      this.$refs['preview-field'].reset()
+      this.thumbnailList = []
+      this.loading = {}
       this.uploaded = {}
     },
 
@@ -205,9 +216,11 @@ export default {
         .map((form) => {
           const asset = this.entityMap[this.slugifyFilename(form)]
           const url = this.prepareImagePreview(form)
+          const parentName =
+            this.isAssets ? asset.asset_type_name : asset.sequence_name
           form.asset = asset
           return {
-            parentName: asset.asset_type_name,
+            parentName,
             name: asset.name,
             id: asset.id,
             src: url
@@ -285,5 +298,9 @@ export default {
     max-height: 33px;
     max-width: 50px;
   }
+}
+
+.modal-content {
+  max-height: 900px;
 }
 </style>
