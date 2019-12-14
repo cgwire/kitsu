@@ -78,12 +78,12 @@ export default {
       },
       typeOptions: [
         {
-          label: this.$t('breakdown.options.fixed'),
-          value: 'fixed'
-        },
-        {
           label: this.$t('breakdown.options.animate'),
           value: 'animate'
+        },
+        {
+          label: this.$t('breakdown.options.fixed'),
+          value: 'fixed'
         }
       ]
     }
