@@ -104,7 +104,7 @@ export default {
               params: { token: err.token }
             })
           } else {
-            console.log(err)
+            console.error(err)
           }
         }
         if (success) this.$router.push('/')

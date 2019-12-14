@@ -490,7 +490,7 @@ export default {
       this.loadTask({
         taskId: news.task_id,
         callback: (err, task) => {
-          if (err) console.log(err)
+          if (err) console.error(err)
           this.loading.currentTask = false
           this.currentTask = task
           this.currentNewsId = news.id

@@ -751,7 +751,7 @@ export default {
         this.loadTask({
           taskId: this.route.params.task_id,
           callback: (err, task) => {
-            if (err) console.log(err)
+            if (err) console.error(err)
 
             let loadingFunction = this.loadAssets
 
@@ -786,7 +786,7 @@ export default {
                     this.loadTaskSubscribed({
                       taskId: this.route.params.task_id,
                       callback: (err, subscribed) => {
-                        if (err) console.log(err)
+                        if (err) console.error(err)
                         this.isSubscribed = subscribed
                       }
                     })
@@ -814,7 +814,7 @@ export default {
               this.loadTaskSubscribed({
                 taskId: this.route.params.task_id,
                 callback: (err, subscribed) => {
-                  if (err) console.log(err)
+                  if (err) console.error(err)
                   this.isSubscribed = subscribed
                 }
               })

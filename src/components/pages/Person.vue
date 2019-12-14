@@ -301,7 +301,7 @@ export default {
         personId: this.person.id,
         date: this.selectedDate,
         callback: (err) => {
-          if (err) console.log(err)
+          if (err) console.error(err)
           this.isTasksLoading = false
           this.isTasksLoadingError = false
           setTimeout(() => {
@@ -348,7 +348,7 @@ export default {
         .then(() => {
         })
         .catch((err) => {
-          if (err) console.log(err)
+          if (err) console.error(err)
         })
     },
 
@@ -357,7 +357,7 @@ export default {
         .then(() => {
         })
         .catch((err) => {
-          if (err) console.log(err)
+          if (err) console.error(err)
         })
     },
 

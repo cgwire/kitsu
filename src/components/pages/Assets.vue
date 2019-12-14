@@ -646,7 +646,7 @@ export default {
         .then(() => {
         })
         .catch((err) => {
-          if (err) console.log('error')
+          if (err) console.error(err)
         })
     },
 
@@ -655,7 +655,7 @@ export default {
         .then(() => {
         })
         .catch((err) => {
-          if (err) console.log('error')
+          if (err) console.error(err)
         })
     },
 

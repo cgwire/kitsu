@@ -416,7 +416,7 @@ export default {
           playlist,
           callback: (err, playlist) => {
             this.loading.playlist = false
-            if (err) console.log(err)
+            if (err) console.error(err)
             this.currentPlaylist = playlist
             this.rebuildCurrentShots()
             if (callback) callback()

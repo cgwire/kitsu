@@ -377,7 +377,7 @@ const actions = {
         Promise.all(createTaskPromises).then(() => {
           if (callback) callback()
         }).catch((err) => {
-          console.log(err)
+          console.error(err)
         })
       }
     })

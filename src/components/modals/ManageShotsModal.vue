@@ -322,7 +322,7 @@ export default {
           this.newEpisode({
             episode,
             callback: (err, episode) => {
-              if (err) console.log(err)
+              if (err) console.error(err)
               this.loading.addEpisode = false
               this.selectEpisode(episode.id)
               this.names.episode = stringHelpers.generateNextName(episode.name)
@@ -348,7 +348,7 @@ export default {
           this.newSequence({
             sequence,
             callback: (err, sequence) => {
-              if (err) console.log(err)
+              if (err) console.error(err)
               this.loading.addSequence = false
               this.selectEpisode(this.selectedEpisodeId)
               this.selectSequence(sequence.id)
@@ -375,7 +375,7 @@ export default {
           this.newShot({
             shot,
             callback: (err) => {
-              if (err) console.log(err)
+              if (err) console.error(err)
               this.loading.addShot = false
               this.selectSequence(this.selectedSequenceId)
               this.names.shot = stringHelpers.generateNextName(

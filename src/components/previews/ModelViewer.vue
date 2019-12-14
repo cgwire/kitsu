@@ -88,7 +88,6 @@ export default {
     },
 
     loadObject () {
-      console.log('start')
       this.isLoading = true
       loadObject(this.scene, this.previewUrl, null, () => {
         this.isLoading = false

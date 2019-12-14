@@ -571,7 +571,7 @@ export default {
           .toISOString()
           .substr(14, 5) + milliseconds
       } catch (err) {
-        console.log(err)
+        console.error(err)
         return '00:00.00'
       }
     },
@@ -1291,9 +1291,7 @@ export default {
 
     forClient () {
       const forClient = this.forClient === 'true'
-      console.log(forClient, this.playlist.for_client)
       if (this.playlist.for_client !== forClient) {
-        console.log('emit', forClient)
         this.$emit('for-client-changed', forClient)
       }
     },

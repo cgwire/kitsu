@@ -306,7 +306,7 @@ export default {
         if (this.$refs['sequence-list']) {
           this.$refs['sequence-list'].resizeHeaders()
         }
-      }, 0)
+      }, 100)
     },
 
     exportStatisticsToCsv () {

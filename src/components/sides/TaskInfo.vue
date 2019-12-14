@@ -543,13 +543,13 @@ export default {
           entityId: this.task.entity_id,
           callback: (err) => {
             if (err) {
-              console.log(err)
+              console.error(err)
               this.errors.task = true
             } else {
               this.loadTaskSubscribed({
                 taskId: this.task.id,
                 callback: (err, subscribed) => {
-                  if (err) console.log(err)
+                  if (err) console.error(err)
                   this.loading.task = false
                   this.reset()
                   this.isSubscribed = subscribed

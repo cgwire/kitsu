@@ -141,7 +141,6 @@ export default {
     },
 
     isAssets () {
-      console.log(this.$route.path.indexOf('assets'))
       return this.$route.path.indexOf('assets') > -1
     }
   },

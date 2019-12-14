@@ -296,7 +296,7 @@ export default {
       this.loadTask({
         taskId: notification.task_id,
         callback: (err, task) => {
-          if (err) console.log(err)
+          if (err) console.error(err)
           this.loading.currentTask = false
           this.currentTask = task
           this.currentNotificationId = notification.id
