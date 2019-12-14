@@ -240,6 +240,30 @@ describe('lib/filtering', () => {
       expect(filter.value).toEqual('big')
       expect(filter.descriptor.id).toEqual('descriptor-1')
     })
+
+    it('withthumbnail in query case', () => {
+      let filters = getFilters(
+        entryIndex,
+        taskTypes,
+        taskStatuses,
+        descriptors,
+        'withthumbnail'
+      )
+      expect(filters.length).toEqual(1)
+      expect(filters[0].type).toEqual('thumbnail')
+      expect(filters[0].excluding).toEqual(false)
+
+      filters = getFilters(
+        entryIndex,
+        taskTypes,
+        taskStatuses,
+        descriptors,
+        '-withthumbnail'
+      )
+      expect(filters.length).toEqual(1)
+      expect(filters[0].type).toEqual('thumbnail')
+      expect(filters[0].excluding).toEqual(true)
+    })
   })
 
   describe('applyFilters', () => {
@@ -261,17 +285,20 @@ describe('lib/filtering', () => {
       {
         name: 'SH01', sequence_name: 'S01', episode_name: 'E01', id: 'shot-1',
         data: {color: 'blue'},
-        validations: {'task-type-1': 'task-1'}
+        validations: {'task-type-1': 'task-1'},
+        preview_file_id: 'preview-file-1'
       },
       {
         name: 'SH02', sequence_name: 'S01', episode_name: 'E01', id: 'shot-2',
         data: {color: 'blue'},
-        validations: {'task-type-1': 'task-2'}
+        validations: {'task-type-1': 'task-2'},
+        preview_file_id: 'preview-file-2'
       },
       {
         name: 'SH01', sequence_name: 'S02', episode_name: 'E01', id: 'shot-3',
         data: {color: 'blue'},
-        validations: {'task-type-1': 'task-3'}
+        validations: {'task-type-1': 'task-3'},
+        preview_file_id: ''
       },
       {
         name: 'SH01', sequence_name: 'S01', episode_name: 'E02', id: 'shot-4',
@@ -441,6 +468,36 @@ describe('lib/filtering', () => {
         taskMap
       )
       expect(results.length).toEqual(4)
+    })
+
+    it('withthumbnail', () => {
+      const filters = [
+        {
+          excluding: false,
+          type: 'thumbnail'
+        }
+      ]
+      let results = applyFilters(
+        entries,
+        filters,
+        taskMap
+      )
+      expect(results.length).toEqual(2)
+    })
+
+    it('-withthumbnail', () => {
+      const filters = [
+        {
+          excluding: true,
+          type: 'thumbnail'
+        }
+      ]
+      let results = applyFilters(
+        entries,
+        filters,
+        taskMap
+      )
+      expect(results.length).toEqual(3)
     })
   })
 })

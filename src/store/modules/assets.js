@@ -244,6 +244,7 @@ const state = {
 }
 
 const getters = {
+  assets: state => cache.assets,
   assetMap: state => state.assetMap,
   assetSearchText: state => state.assetSearchText,
   assetSearchQueries: state => state.assetSearchQueries,
@@ -1077,5 +1078,6 @@ export default {
   state,
   getters,
   actions,
-  mutations
+  mutations,
+  cache
 }

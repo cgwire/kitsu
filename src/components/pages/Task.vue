@@ -1024,14 +1024,15 @@ export default {
       this.$store.dispatch('setPreview', {
         taskId: this.currentTask.id,
         entityId: this.currentTask.entity.id,
-        previewId: this.currentPreviewId,
-        callback: (err) => {
-          if (err) {
-            this.errors.setPreview = true
-          }
-          this.loading.setPreview = false
-        }
+        previewId: this.currentPreviewId
       })
+        .then(() => {
+          this.loading.setPreview = false
+        })
+        .catch((err) => {
+          console.error(err)
+          this.errors.setPreview = true
+        })
     },
 
     setOtherPreviews () {

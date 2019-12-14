@@ -19,6 +19,8 @@ import {
   LOAD_SHOT_CASTING_END,
   LOAD_ASSET_CAST_IN_END,
 
+  CASTING_SET_LINK_LABEL,
+
   RESET_ALL
 } from '../mutation-types'
 
@@ -122,7 +124,8 @@ const actions = {
     Object.values(state.casting[entityId]).forEach((asset) => {
       casting.push({
         asset_id: asset.asset_id,
-        nb_occurences: asset.nb_occurences || 1
+        nb_occurences: asset.nb_occurences || 1,
+        label: asset.label
       })
     })
     return breakdownApi.updateCasting(production.id, entityId, casting)
@@ -131,6 +134,14 @@ const actions = {
   uploadCastingFile ({ commit, state, rootGetters }, formData) {
     const currentProduction = rootGetters.currentProduction
     return breakdownApi.postCastingCsv(currentProduction, formData)
+  },
+
+  setAssetLinkLabel (
+    { commit, dispatch, state, rootGetters },
+    { label, asset, targetEntityId }
+  ) {
+    commit(CASTING_SET_LINK_LABEL, { label, asset, targetEntityId })
+    return dispatch('saveCasting', targetEntityId)
   }
 }
 
@@ -291,6 +302,12 @@ const mutations = {
       'castInShotsBySequence',
       groupEntitiesByParents(castIn, 'sequence_name')
     )
+  },
+
+  [CASTING_SET_LINK_LABEL] (state, { label, asset, targetEntityId }) {
+    const link = state.casting[targetEntityId]
+      .find(link => link.asset_id === asset.asset_id)
+    link.label = label
   },
 
   [RESET_ALL] (state) {

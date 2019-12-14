@@ -14,6 +14,7 @@ export const applyFilters = (entries, filters, taskMap) => {
   const isAssignation = { assignation: true }
   const isExclusion = { exclusion: true }
   const isDescriptor = { descriptor: true }
+  const isAvatar = { thumbnail: true }
 
   if (filters && filters.length > 0) {
     return entries.filter((entry) => {
@@ -50,6 +51,12 @@ export const applyFilters = (entries, filters, taskMap) => {
             isOk = false
           }
           if (filter.excluding) isOk = !isOk
+        } else if (isAvatar[filter.type]) {
+          const hasAvatar =
+            entry.preview_file_id !== '' &&
+            entry.preview_file_id !== undefined &&
+            entry.preview_file_id !== null
+          isOk = filter.excluding ? !hasAvatar : hasAvatar
         }
       })
       return isOk
@@ -71,7 +78,7 @@ export const getKeyWords = (queryText) => {
       .replace(EQUAL_REGEX, '')
       .split(' ')
       .filter((query) => {
-        return query.length > 0 && query[0] !== '-'
+        return query.length > 0 && query[0] !== '-' && query !== 'withthumbnail'
       })
   }
 }
@@ -85,7 +92,9 @@ export const getExcludingKeyWords = (queryText) => {
     .replace(EQUAL_REGEX, '')
     .split(' ')
     .filter((keyword) => {
-      return keyword.length > 0 && keyword[0] === '-'
+      return (
+        keyword.length > 0 && keyword[0] === '-' && keyword !== '-withthumbnail'
+      )
     })
     .map(keyword => keyword.substring(1))
 }
@@ -102,8 +111,9 @@ export const getFilters = (
 ) => {
   let filters = getTaskTypeFilters(taskTypes, taskStatuses, query)
   const descFilters = getDescFilters(descriptors, query)
+  const thumbnailFilters = getThumbnailFilters(query) || []
   const excludingKeywords = getExcludingKeyWords(query) || []
-  filters = filters.concat(descFilters)
+  filters = filters.concat(descFilters).concat(thumbnailFilters)
   excludingKeywords.forEach((keyword) => {
     let excludedMap = {}
     let excludedEntries = indexSearch(entryIndex, [keyword]) || []
@@ -226,6 +236,22 @@ export const getDescFilters = (descriptors, queryText) => {
           excluding
         })
       }
+    })
+  }
+  return results
+}
+
+export const getThumbnailFilters = (queryText) => {
+  const results = []
+  if (queryText.indexOf('-withthumbnail') > -1) {
+    results.push({
+      type: 'thumbnail',
+      excluding: true
+    })
+  } else if (queryText.indexOf('withthumbnail') > -1) {
+    results.push({
+      type: 'thumbnail',
+      excluding: false
     })
   }
   return results

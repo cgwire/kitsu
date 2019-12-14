@@ -1470,7 +1470,7 @@ const mutations = {
       shot.preview_file_id = previewId
       shot.tasks.forEach((taskId) => {
         const task = taskMap[taskId]
-        task.entity.preview_file_id = previewId
+        if (task) task.entity.preview_file_id = previewId
       })
     }
   },
@@ -1736,5 +1736,6 @@ export default {
   state,
   getters,
   actions,
-  mutations
+  mutations,
+  cache
 }

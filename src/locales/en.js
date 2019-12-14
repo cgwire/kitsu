@@ -45,7 +45,13 @@ export default {
   breakdown: {
     all_assets: 'All available assets',
     empty: 'Empty casting',
-    title: 'Breakdown'
+    title: 'Breakdown',
+    edit_label: 'Change the asset\'s label',
+    label: 'Label',
+    options: {
+      fixed: 'fixed',
+      animate: 'animate'
+    }
   },
 
   comments: {
@@ -90,6 +96,17 @@ export default {
       all: 'All',
       shot: 'Shot',
       asset: 'Asset'
+    }
+  },
+
+  entities: {
+    thumbnails: {
+      select_files: 'Select Files',
+      selected_files: 'Selected Files',
+      select_task_type: 'Select Task Type',
+      upload: 'Add Thumbnails',
+      title: 'Add Thumbnails',
+      error: 'An error occured while uploading thumbnails'
     }
   },
 

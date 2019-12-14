@@ -25,6 +25,12 @@
             <div class="flexrow" v-if="isCurrentUserManager">
               <button-simple
                 class="flexrow-item"
+                :title="$t('entities.thumbnails.title')"
+                icon="image"
+                @click="showAddThumbnailsModal"
+              />
+              <button-simple
+                class="flexrow-item"
                 :title="$t('main.csv.import_file')"
                 icon="upload"
                 @click="showImportModal"
@@ -179,6 +185,15 @@
     @cancel="closeMetadataModal"
     @confirm="confirmAddMetadata"
   />
+
+  <add-thumbnails-modal
+    ref="add-thumbnails-modal"
+    :active="modals.isAddThumbnailsDisplayed"
+    :is-loading="loading.addThumbnails"
+    :is-error="errors.addThumbnails"
+    @cancel="hideAddThumbnailsModal"
+    @confirm="confirmAddThumbnails"
+  />
 </div>
 </template>
 
@@ -186,10 +201,12 @@
 import moment from 'moment'
 import { mapGetters, mapActions } from 'vuex'
 import csv from '../../lib/csv'
+import func from '../../lib/func'
 import { sortByName } from '../../lib/sorting'
 import { slugify } from '../../lib/string'
 
 import AddMetadataModal from '../modals/AddMetadataModal'
+import AddThumbnailsModal from '../modals/AddThumbnailsModal'
 import ButtonSimple from '../widgets/ButtonSimple'
 import CreateTasksModal from '../modals/CreateTasksModal'
 import DeleteModal from '../modals/DeleteModal'
@@ -209,6 +226,7 @@ export default {
 
   components: {
     AddMetadataModal,
+    AddThumbnailsModal,
     ButtonSimple,
     CreateTasksModal,
     DeleteModal,
@@ -229,6 +247,7 @@ export default {
       initialLoading: true,
       modals: {
         isAddMetadataDisplayed: false,
+        isAddThumbnailsDisplayed: false,
         isCreateTasksDisplayed: false,
         isDeleteDisplayed: false,
         isDeleteMetadataDisplayed: false,
@@ -240,6 +259,7 @@ export default {
       },
       loading: {
         addMetadata: false,
+        addThumbnails: false,
         creatingTasks: false,
         creatingTasksStay: false,
         deleteAllTasks: false,
@@ -304,7 +324,11 @@ export default {
       'shotValidationColumns',
       'shotListScrollPosition',
       'taskTypeMap'
-    ])
+    ]),
+
+    addThumbnailsModal () {
+      return this.$refs['add-thumbnails-modal']
+    }
   },
 
   created () {
@@ -354,15 +378,17 @@ export default {
   methods: {
     ...mapActions([
       'addMetadataDescriptor',
-      'getShotsCsvLines',
+      'commentTaskWithPreview',
       'deleteAllTasks',
       'deleteMetadataDescriptor',
+      'getShotsCsvLines',
       'hideAssignations',
       'loadShots',
       'loadComment',
       'removeShotSearch',
       'saveShotSearch',
       'setLastProductionScreen',
+      'setPreview',
       'setShotSearch',
       'showAssignations',
       'uploadShotFile'
@@ -482,6 +508,35 @@ export default {
           }
         }
       })
+    },
+
+    confirmAddThumbnails (forms) {
+      const addPreview = (form) => {
+        this.addThumbnailsModal.markLoading(form.task.entity_id)
+        return this.commentTaskWithPreview({
+          taskId: form.task.id,
+          commentText: '',
+          taskStatusId: form.task.task_status_id,
+          form: form
+        })
+          .then(({ newComment, preview }) => {
+            return this.setPreview({
+              taskId: form.task.id,
+              entityId: form.task.entity_id,
+              previewId: preview.id
+            })
+          })
+          .then(() => {
+            this.addThumbnailsModal.markUploaded(form.task.entity_id)
+            return Promise.resolve()
+          })
+      }
+      this.loading.addThumbnails = true
+      func.runPromiseMapAsSeries(forms, addPreview)
+        .then(() => {
+          this.loading.addThumbnails = false
+          this.modals.isAddThumbnailsDisplayed = false
+        })
     },
 
     confirmCreateTasks (form) {
@@ -694,6 +749,14 @@ export default {
 
     hideCreateTasksModal () {
       this.modals.isCreateTasksDisplayed = false
+    },
+
+    showAddThumbnailsModal () {
+      this.modals.isAddThumbnailsDisplayed = true
+    },
+
+    hideAddThumbnailsModal () {
+      this.modals.isAddThumbnailsDisplayed = false
     },
 
     onExportClick () {

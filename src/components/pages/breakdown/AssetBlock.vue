@@ -4,42 +4,62 @@
     asset: true,
     big: true,
     casted: true,
-    active: active
+    active: active,
+    labelled: true
   }"
   :title="`${asset.name} (${nbOccurences})`"
 >
-  <div
-    class="asset-add"
-    @click="removeOneAsset"
-  >
-  - 1
-  </div>
-  <div
-    class="asset-add-10"
-    @click="removeTenAssets"
+  <div class="asset-wrapper">
+    <div
+      class="asset-add"
+      @click="removeOneAsset"
     >
-  - 10
+    - 1
+    </div>
+    <div
+      class="asset-add-10"
+      @click="removeTenAssets"
+      >
+    - 10
+    </div>
+    <div class="asset-picture" v-if="asset.preview_file_id">
+      <img
+        v-lazy="'/api/pictures/thumbnails-square/preview-files/' + asset.preview_file_id + '.png'"
+        alt=""
+      />
+      <span class="nb-occurences" v-if="nbOccurences > 1">
+        {{ nbOccurences }}
+      </span>
+    </div>
+    <div class="asset-picture" v-else>
+      <span class="empty-picture">
+        {{ shortenName(asset.name) }} ({{ nbOccurences }})
+      </span>
+    </div>
   </div>
-  <div class="asset-picture" v-if="asset.preview_file_id">
-    <img
-      v-lazy="'/api/pictures/thumbnails-square/preview-files/' + asset.preview_file_id + '.png'"
-    />
-    <span class="nb-occurences" v-if="nbOccurences > 1">
-      {{ nbOccurences }}
-    </span>
-  </div>
-  <div class="asset-picture" v-else>
-    <span class="empty-picture">
-      {{ shortenName(asset.name) }} ({{ nbOccurences }})
-    </span>
+  <div class="asset-label"
+    @click="onEditLabelClicked"
+  >
+    {{ asset.label || $t('breakdown.options.animate') }}
   </div>
 </div>
 </template>
 
 <script>
 import stringHelpers from '../../../lib/string'
+
 export default {
   name: 'asset-block',
+  components: {},
+
+  data () {
+    return {
+      initialLoading: true,
+      loading: {
+        EditLabel: false
+      }
+    }
+  },
   props: {
     asset: {
       default: () => ({
@@ -72,88 +92,81 @@ export default {
 
     shortenName (name) {
       return stringHelpers.shortenText(name, 13)
+    },
+
+    onEditLabelClicked () {
+      this.$emit('edit-label', this.asset, this.asset.label)
     }
   }
 }
 </script>
 
 <style lang="scss" scoped>
-.dark .asset {
+.dark .asset-picture {
   background-color: $dark-grey-lightest;
 }
 
-.dark .asset.casted,
+.dark .asset.casted .asset-picture,
 .dark .asset .asset-add,
 .dark .asset .asset-add-10 {
-  background-color: #8F91EB;
+  background-color: $purple-strong;
 }
 
 .asset {
-  width: 60px;
-  height: 60px;
+  position: relative;
+  display: flex;
+  flex-direction: row;
+  max-height: 60px;
   margin-right: 1em;
   font-size: 0.8em;
-  cursor: default;
-  background: $white-grey;
   word-wrap: break-word;
+  border-radius: 5px;
 }
 
-.asset.big {
-  width: 40px;
-  height: 40px;
+.labelled {
+  margin-right: 2em;
 }
 
-.asset-add {
+.casted {
+  background: $purple;
+}
+
+.asset-wrapper {
+  display: flex;
+  flex-direction: column;
   position: relative;
-  top: 0;
-  left: 0;
-  width: 30px;
-  height: 15px;
-  background: #F1E4FF;
+  width: 60px;
+  border-radius: 5px;
+  overflow: hidden;
+}
+
+.big {
+  height: 40px;
+
+  .asset-wrapper {
+    width: 40px;
+  }
+}
+
+.active {
+  cursor: pointer;
+}
+
+.asset-add,
+.asset-add-10 {
+  flex: 0 0 50%;
   display: flex;
   align-items: center;
   justify-content: center;
+  background: $light-purple;
   font-weight: bold;
-  font-size: 1.2em;
-  opacity: 0;
-  z-index: 3;
-  border-top-left-radius: 5px;
-  border-top-right-radius: 5px;
   font-size: 0.9em;
+  opacity: 0;
+  z-index: 2;
 }
 
 .asset-add-10 {
-  position: relative;
-  top: 0;
-  left: 0;
-  margin-top: 0px;
-  width: 30px;
-  height: 15px;
-  background: #E1D4F9;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-weight: bold;
-  font-size: 1.2em;
-  opacity: 0;
-  z-index: 3;
-  border-bottom-left-radius: 5px;
-  border-bottom-right-radius: 5px;
-  font-size: 0.9em;
-}
-
-.big .asset-add {
-  width: 40px;
-  height: 20px;
-}
-
-.big .asset-add-10 {
-  width: 40px;
-  height: 20px;
-}
-
-.asset.active {
-  cursor: pointer;
+  background: $purple;
 }
 
 .asset.active:hover .asset-add,
@@ -162,16 +175,17 @@ export default {
 }
 
 .asset-picture {
-  position: relative;
-  top: -40px;
+  position: absolute;
+  top: 0;
   left: 0;
   display: flex;
   text-align: center;
   justify-content: center;
   align-items: center;
-  z-index: 2;
-  width: 40px;
-  height: 40px;
+  z-index: 1;
+  width: 100%;
+  height: 100%;
+  background: $white-grey;
   word-break: break-all;
   font-size: 0.8em;
 
@@ -187,6 +201,22 @@ export default {
   top: -75px;
 }
 
+.asset-label {
+  font-size: .7em;
+  text-align: center;
+  transform: rotate(-90deg) translateX(-25%) translateY(calc(-50% - 5px));
+  position: absolute;
+  left: 100%;
+  top: 0;
+  background: $dark-green;
+  width: 40px;
+  height: 20px;
+  padding-top: 5px;
+  border-bottom-left-radius: 5px;
+  border-bottom-right-radius: 5px;
+  color: $white;
+}
+
 .nb-occurences {
   background: rgba(160, 160, 180, 0.8);
   font-size: 0.8em;
@@ -196,10 +226,5 @@ export default {
   padding: 2px;
   right: 2px;
   bottom: 2px;
-}
-
-.asset.casted {
-  background: $purple;
-  border-radius: 5px;
 }
 </style>

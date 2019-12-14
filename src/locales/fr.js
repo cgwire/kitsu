@@ -44,7 +44,13 @@ export default {
   breakdown: {
     all_assets: 'Tous les assets disponibles',
     empty: 'Casting vide',
-    title: 'Casting'
+    title: 'Casting',
+    edit_label: 'Changer le label de l\'asset',
+    label: 'Label',
+    options: {
+      fixed: 'fixe',
+      animate: 'animé'
+    }
   },
 
   comments: {
