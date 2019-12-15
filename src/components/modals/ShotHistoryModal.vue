@@ -10,7 +10,6 @@
       <h1 class="title">
         {{ $t('shots.history') }}
       </h1>
-      <spinner v-if="isLoading" />
 
       <table class="table" ref="headerWrapper">
         <thead class="table-header">
@@ -31,6 +30,7 @@
         <table class="table">
           <tbody class="table-body">
             <tr
+              class="shot-version"
               :key="version.id"
               v-for="version in versions"
             >
@@ -121,6 +121,24 @@ export default {
     ]),
 
     reset () {
+      this.versions = []
+      this.isError = false
+      this.isLoading = false
+    },
+
+    loadData () {
+      this.isError = false
+      this.isLoading = true
+      return this.loadShotHistory(this.shot.id)
+        .then((versions) => {
+          this.versions = versions
+          this.isLoading = false
+        })
+        .catch((err) => {
+          console.error(err)
+          this.isLoading = false
+          this.isError = true
+        })
     },
 
     formatDate (dateString) {
@@ -132,18 +150,7 @@ export default {
     active () {
       if (this.active) {
         this.reset()
-        this.isError = false
-        this.isLoading = true
-        this.loadShotHistory(this.shot.id)
-          .then((versions) => {
-            this.versions = versions
-            this.isLoading = false
-          })
-          .catch((err) => {
-            console.error(err)
-            this.isLoading = false
-            this.isError = true
-          })
+        this.loadData()
       }
     }
   }
