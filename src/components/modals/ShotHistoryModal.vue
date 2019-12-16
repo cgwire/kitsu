@@ -75,7 +75,6 @@ import { mapGetters, mapActions } from 'vuex'
 import { modalMixin } from './base_modal'
 import { formatDate } from '../../lib/time'
 
-import Spinner from '../widgets/Spinner'
 import TableInfo from '../widgets/TableInfo'
 
 export default {
@@ -83,7 +82,6 @@ export default {
   mixins: [modalMixin],
 
   components: {
-    Spinner,
     TableInfo
   },
 

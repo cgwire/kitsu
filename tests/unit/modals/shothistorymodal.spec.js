@@ -45,10 +45,6 @@ describe('ShotHistoryModal', () => {
       }
     })
 
-    getters = {
-      castingSequenceOptions: []
-    }
-
     wrapper = shallowMount(ShotHistoryModal, {
       store,
       getters,
