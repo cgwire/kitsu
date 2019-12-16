@@ -33,6 +33,7 @@
         ref="preview-field"
         :accept="extensions"
         @fileselected="onFileSelected"
+        :multiple="true"
       />
 
       <label class="label mt2" v-if="thumbnailList.length > 0">

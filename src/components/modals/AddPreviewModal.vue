@@ -22,6 +22,7 @@
         ref="preview-field"
         :accept="extensions"
         @fileselected="onFileSelected"
+        :multiple="true"
       />
 
       <p class="error" v-if="isError">

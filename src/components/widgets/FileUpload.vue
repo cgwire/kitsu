@@ -10,7 +10,7 @@
           :disabled="isSaving"
           @change="filesChange($event.target.name, $event.target.files)"
           class="input-file"
-          multiple
+          :multiple="multiple"
         >
       </div>
     </form>
@@ -28,6 +28,10 @@ export default {
     accept: {
       default: '.csv',
       type: String
+    },
+    multiple: {
+      default: false,
+      type: Boolean
     }
   },
   data () {
@@ -48,7 +52,11 @@ export default {
         formData.append(this.uploadFieldName, file, file.name)
         forms.push(formData)
       }
-      this.$emit('fileselected', forms)
+      if (this.multiple) {
+        this.$emit('fileselected', forms)
+      } else {
+        this.$emit('fileselected', forms[0])
+      }
     },
     reset () {
       this.isSaving = false
