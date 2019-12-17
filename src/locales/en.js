@@ -298,6 +298,7 @@ export default {
   playlists: {
     add_shots: 'Add shots',
     add_sequence: 'Add whole sequence',
+    add_episode: 'Add whole episode',
     available_build: 'Available builds',
     build_daily: 'Daily pending',
     build_weekly: 'All Pending',

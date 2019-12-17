@@ -99,6 +99,18 @@
             >
               {{ $t('playlists.build_daily') }}
             </button>
+            <button
+              v-if="isTVShow"
+              :class="{
+                button: true,
+                'add-sequence': true,
+                'is-loading': this.loading.addEpisode
+              }"
+              :disabled="isAdditionLoading"
+              @click="addEpisodePending"
+            >
+              {{ $t('playlists.add_episode') }}
+            </button>
 
             <div
               class="mt1"
@@ -209,6 +221,7 @@ export default {
         playlists: false,
         addPlaylist: false,
         addDaily: false,
+        addEpisode: false,
         addSequence: false,
         addWeekly: false,
         deletePlaylist: false
@@ -234,6 +247,7 @@ export default {
       'playlistsPath',
       'playlistMap',
       'sequences',
+      'shotsByEpisode',
       'shotMap',
       'taskTypeMap'
     ]),
@@ -242,7 +256,8 @@ export default {
       return (
         this.loading.addSequence ||
         this.loading.addWeekly ||
-        this.loading.addDaily
+        this.loading.addDaily ||
+        this.loading.addEpisode
       )
     }
   },
@@ -535,6 +550,16 @@ export default {
             this.$options.silent = false
           })
         })
+    },
+
+    addEpisodePending () {
+      this.loading.addEpisode = true
+      this.$options.silent = true
+      const shots = [].concat(...this.shotsByEpisode).reverse()
+      this.addShots(shots, () => {
+        this.loading.addEpisode = false
+        this.$options.silent = false
+      })
     },
 
     addShots (shots, callback) {

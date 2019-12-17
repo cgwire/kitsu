@@ -223,6 +223,7 @@ export default {
   playlists: {
     add_shots: 'Sélectonner les plans',
     add_sequence: 'Ajouter séquence',
+    add_episode: 'Ajouter l\'épisode',
     available_build: 'Builds disponibles',
     build_daily: 'Valid. quotidienne',
     build_weekly: 'Valid. hebodomadaire',
