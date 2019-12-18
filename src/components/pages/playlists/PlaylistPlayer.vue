@@ -195,6 +195,17 @@
     />
     <span class="filler"></span>
 
+    <transition name="slide-fade">
+      <input
+        v-show="isDrawing"
+        type="color"
+        :class="{
+          'color-picker': true
+        }"
+        v-model="color"
+        @change="onChangeColor"
+      />
+    </transition>
     <button-simple
       :class="{
         'playlist-button': true,
@@ -406,6 +417,7 @@ export default {
   data () {
     return {
       annotations: [],
+      color: '#ff3860',
       currentTime: '00:00.00',
       currentTimeRaw: 0,
       forClient: 'false',
@@ -1085,6 +1097,10 @@ export default {
       }
     },
 
+    onChangeColor () {
+      this.fabricCanvas.freeDrawingBrush.color = this.color
+    },
+
     onAnnotateClicked () {
       this.showCanvas()
       if (this.isDrawing) {
@@ -1109,7 +1125,7 @@ export default {
         width: 400,
         height: 400
       })
-      this.fabricCanvas.freeDrawingBrush.color = '#ff3860'
+      this.fabricCanvas.freeDrawingBrush.color = this.color
       this.fabricCanvas.freeDrawingBrush.width = 4
       this.fabricCanvas.on('object:moved', this.saveAnnotations)
       this.fabricCanvas.on('mouse:up', () => {
@@ -1148,7 +1164,7 @@ export default {
           left: obj.left * scaleMultiplierX,
           top: obj.top * scaleMultiplierY,
           fill: 'transparent',
-          stroke: '#ff3860',
+          stroke: this.fabricCanvas.freeDrawingBrush.color = this.color,
           strokeWidth: 4,
           radius: obj.radius,
           width: obj.width,
@@ -1598,5 +1614,20 @@ progress {
       background: $green;
     }
   }
+}
+.color-picker {
+  width: 1.5rem;
+  height: 1.5rem;
+  border: 1px solid $white;
+}
+.slide-fade-enter-active {
+  transition: all .3s ease;
+}
+.slide-fade-leave-active {
+  transition: all .5s cubic-bezier(1.0, 0.5, 0.8, 1.0);
+}
+.slide-fade-enter, .slide-fade-leave-to {
+  transform: translateX(1.5rem);
+  opacity: 0;
 }
 </style>
