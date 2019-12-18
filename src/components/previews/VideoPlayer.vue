@@ -134,6 +134,15 @@
           <x-icon class="icon" />
         </button>
 
+        <color-picker
+          :isActive="isDrawing"
+          :isOpen="isShowingPalette"
+          :color="this.color"
+          :palette="this.palette"
+          @TogglePalette="onPickColor"
+          @change="onChangeColor"
+        />
+
         <button
           :class="{
             button: true,
@@ -183,6 +192,7 @@ import {
 
 import { roundToFrame } from '../../lib/video'
 import AnnotationBar from '../pages/playlists/AnnotationBar'
+import ColorPicker from '../widgets/ColorPicker'
 import Combobox from '../widgets/Combobox'
 import Spinner from '../widgets/Spinner'
 
@@ -194,6 +204,7 @@ export default {
 
   components: {
     AnnotationBar,
+    ColorPicker,
     CopyIcon,
     Combobox,
     DownloadIcon,
@@ -232,11 +243,14 @@ export default {
   data () {
     return {
       annotations: [],
+      palette: ['#ff3860', '#008732', '#5E60BA', '#f57f17'],
+      color: '#ff3860',
       currentTime: '00:00.00',
       currentTimeRaw: 0,
       fabricCanvas: null,
       isComparing: false,
       isDrawing: false,
+      isShowingPalette: false,
       isLoading: false,
       isPlaying: false,
       isRepeating: false,
@@ -543,7 +557,7 @@ export default {
         width: 100,
         height: 100
       })
-      this.fabricCanvas.freeDrawingBrush.color = '#ff3860'
+      this.fabricCanvas.freeDrawingBrush.color = this.color
       this.fabricCanvas.freeDrawingBrush.width = 4
       return this.fabricCanvas
     },
@@ -718,6 +732,20 @@ export default {
       if (obj) obj.set({ strokeWidth: 8 / (obj.scaleX + obj.scaleY) })
     },
 
+    onPickColor () {
+      if (this.isShowingPalette) {
+        this.isShowingPalette = false
+      } else {
+        this.isShowingPalette = true
+      }
+    },
+
+    onChangeColor (newValue) {
+      this.color = newValue
+      this.fabricCanvas.freeDrawingBrush.color = this.color
+      this.isShowingPalette = false
+    },
+
     onPencilAnnotateClicked () {
       if (this.isDrawing) {
         this.fabricCanvas.isDrawingMode = false
@@ -809,7 +837,7 @@ export default {
           left: obj.left * scaleMultiplierX,
           top: obj.top * scaleMultiplierY,
           fill: 'transparent',
-          stroke: '#ff3860',
+          stroke: obj.stroke,
           strokeWidth: 4,
           radius: obj.radius,
           width: obj.width,
