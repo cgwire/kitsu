@@ -195,17 +195,15 @@
     />
     <span class="filler"></span>
 
-    <transition name="slide-fade">
-      <input
-        v-show="isDrawing"
-        type="color"
-        :class="{
-          'color-picker': true
-        }"
-        v-model="color"
-        @change="onChangeColor"
-      />
-    </transition>
+    <color-picker
+      :isActive="isDrawing"
+      :isOpen="isShowingPalette"
+      :color="this.color"
+      :palette="this.palette"
+      @TogglePalette="onPickColor"
+      @change="onChangeColor"
+    />
+
     <button-simple
       :class="{
         'playlist-button': true,
@@ -371,6 +369,7 @@ import { fabric } from 'fabric'
 import { roundToFrame } from '../../../lib/video'
 import AnnotationBar from './AnnotationBar'
 import ButtonSimple from '../../widgets/ButtonSimple'
+import ColorPicker from '../../widgets/ColorPicker'
 import Combobox from '../../widgets/Combobox'
 import ComboboxStyled from '../../widgets/ComboboxStyled'
 import DeleteModal from '../../modals/DeleteModal'
@@ -389,6 +388,7 @@ export default {
   components: {
     AnnotationBar,
     ButtonSimple,
+    ColorPicker,
     Combobox,
     ComboboxStyled,
     DeleteModal,
@@ -417,6 +417,7 @@ export default {
   data () {
     return {
       annotations: [],
+      palette: ['#ff3860', '#008732', '#5E60BA', '#f57f17'],
       color: '#ff3860',
       currentTime: '00:00.00',
       currentTimeRaw: 0,
@@ -426,6 +427,7 @@ export default {
       isCommentsHidden: true,
       isComparing: false,
       isDrawing: false,
+      isShowingPalette: false,
       isPlaying: false,
       isShotsHidden: false,
       maxDuration: '00:00.00',
@@ -1097,8 +1099,18 @@ export default {
       }
     },
 
-    onChangeColor () {
+    onPickColor () {
+      if (this.isShowingPalette) {
+        this.isShowingPalette = false
+      } else {
+        this.isShowingPalette = true
+      }
+    },
+
+    onChangeColor (newValue) {
+      this.color = newValue
       this.fabricCanvas.freeDrawingBrush.color = this.color
+      this.isShowingPalette = false
     },
 
     onAnnotateClicked () {
@@ -1164,7 +1176,7 @@ export default {
           left: obj.left * scaleMultiplierX,
           top: obj.top * scaleMultiplierY,
           fill: 'transparent',
-          stroke: this.fabricCanvas.freeDrawingBrush.color = this.color,
+          stroke: obj.stroke,
           strokeWidth: 4,
           radius: obj.radius,
           width: obj.width,

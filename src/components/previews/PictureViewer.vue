@@ -69,6 +69,15 @@
         <x-icon class="icon" />
       </button>
 
+      <color-picker
+        :isActive="isDrawing"
+        :isOpen="isShowingPalette"
+        :color="this.color"
+        :palette="this.palette"
+        @TogglePalette="onPickColor"
+        @change="onChangeColor"
+      />
+
       <button
         :class="{
           button: true,
@@ -114,6 +123,7 @@ import {
   XIcon
 } from 'vue-feather-icons'
 import Spinner from '../widgets/Spinner'
+import ColorPicker from '../widgets/ColorPicker'
 
 export default {
   name: 'picture-viewer',
@@ -121,6 +131,7 @@ export default {
   components: {
     ChevronLeftIcon,
     ChevronRightIcon,
+    ColorPicker,
     DownloadIcon,
     Edit2Icon,
     MaximizeIcon,
@@ -148,8 +159,11 @@ export default {
   data () {
     return {
       currentIndex: 1,
+      palette: ['#ff3860', '#008732', '#5E60BA', '#f57f17'],
+      color: '#ff3860',
       isLoading: true,
       isDrawing: false,
+      isShowingPalette: false,
       annotations:
         this.preview.annotations ? [...this.preview.annotations] : [],
       fabricCanvas: null
@@ -286,7 +300,7 @@ export default {
           height: height
         })
 
-        fabricCanvas.freeDrawingBrush.color = '#ff3860'
+        fabricCanvas.freeDrawingBrush.color = this.color
         fabricCanvas.freeDrawingBrush.width = 4
 
         fabricCanvas.off('object:scaling', this.onScaled)
@@ -348,6 +362,20 @@ export default {
 
     onDeleteClicked () {
       this.deleteSelection()
+    },
+
+    onPickColor () {
+      if (this.isShowingPalette) {
+        this.isShowingPalette = false
+      } else {
+        this.isShowingPalette = true
+      }
+    },
+
+    onChangeColor (newValue) {
+      this.color = newValue
+      this.fabricCanvas.freeDrawingBrush.color = this.color
+      this.isShowingPalette = false
     },
 
     onPencilAnnotateClicked () {
@@ -468,7 +496,7 @@ export default {
             left: obj.left * scaleMultiplierX,
             top: obj.top * scaleMultiplierY,
             fill: 'transparent',
-            stroke: '#ff3860',
+            stroke: obj.stroke,
             radius: obj.radius * scaleMultiplierX,
             width: obj.width,
             height: obj.height,
