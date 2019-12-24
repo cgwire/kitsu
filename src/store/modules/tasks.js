@@ -148,6 +148,8 @@ const actions = {
     tasksApi.getTask(taskId, (err, task) => {
       if (!err) {
         commit(LOAD_TASK_END, task)
+      } else {
+        console.error(err)
       }
       if (callback) callback(err, task)
     })
@@ -535,14 +537,11 @@ const actions = {
   },
 
   deleteTaskPreview ({ commit, state }, { taskId, commentId, previewId }) {
-    return new Promise((resolve, reject) => {
-      tasksApi.deletePreview(taskId, commentId, previewId)
-        .then(() => {
-          commit(DELETE_PREVIEW_END, { taskId, previewId })
-          resolve()
-        })
-        .catch(reject)
-    })
+    return tasksApi.deletePreview(taskId, commentId, previewId)
+      .then(() => {
+        commit(DELETE_PREVIEW_END, { taskId, previewId })
+        Promise.resolve(previewId)
+      })
   },
 
   setPreview ({ commit, state }, { taskId, entityId, previewId }) {
@@ -1010,6 +1009,7 @@ const mutations = {
         duration: task.duration,
         real_start_date: task.real_start_date,
         end_date: task.end_date,
+        due_date: task.due_date,
         real_end_date: task.end_date,
         last_comment_date: task.last_comment_date,
         retake_count: task.retake_count
