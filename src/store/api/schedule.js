@@ -93,11 +93,12 @@ export default {
       if (!scheduleItem.endDate) {
         scheduleItem.endDate = scheduleItem.startDate.add('days', 1).clone()
       }
+      const manDays = scheduleItem.man_days
       const data = {
         start_date: scheduleItem.startDate.format('YYYY-MM-DD'),
-        end_date: scheduleItem.endDate.format('YYYY-MM-DD'),
-        man_days: scheduleItem.man_days
+        end_date: scheduleItem.endDate.format('YYYY-MM-DD')
       }
+      if (manDays) data.man_days = parseInt(manDays)
       client.put(
         `/api/data/schedule-items/${scheduleItem.id}`,
         data,
