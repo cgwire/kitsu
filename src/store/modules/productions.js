@@ -470,9 +470,11 @@ const mutations = {
   },
 
   [EDIT_PRODUCTION_END] (state, newProduction) {
-    const production = state.productionMap[newProduction.id]
     const productionStatus = getters.getProductionStatus(state)(
       newProduction.project_status_id
+    )
+    const production = state.productions.find(
+      (production) => production.id === newProduction.id
     )
     const openProduction = state.openProductions.find(
       (openProduction) => openProduction.id === newProduction.id
@@ -492,7 +494,6 @@ const mutations = {
           state.openProductions.splice(openProductionIndex, 1)
         // Status change from close to open
         } else if (openProductionIndex < 0) {
-          state.openProductions.push(production)
           state.openProductions = sortByName(state.openProductions)
         }
       }
