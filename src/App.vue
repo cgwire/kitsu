@@ -707,7 +707,7 @@ tr .actions p {
   margin-bottom: 0;
 }
 
-tr .actions button,
+tr td.actions button,
 tr td.actions a {
   opacity: 0;
   color: #999;
