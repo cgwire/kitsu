@@ -83,6 +83,22 @@ const client = {
     })
   },
 
+  pdel (path, callback) {
+    return new Promise((resolve, reject) => {
+      superagent
+        .del(path)
+        .end((err, res) => {
+          if (res.statusCode === 401) {
+            errors.backToLogin()
+            reject(err)
+          } else {
+            if (err) reject(err)
+            else resolve(res.body)
+          }
+        })
+    })
+  },
+
   getModel (modelName, modelId) {
     return new Promise((resolve, reject) => {
       const path = `/api/data/${modelName}/${modelId}`
