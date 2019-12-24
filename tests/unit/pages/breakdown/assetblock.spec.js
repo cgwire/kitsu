@@ -1,8 +1,10 @@
 import i18n from '../../../../src/lib/i18n'
 import { shallowMount, createLocalVue } from '@vue/test-utils'
 import AssetBlock from '../../../../src/components/pages/breakdown/AssetBlock'
+import VueLazyLoad from 'vue-lazyload'
 
 const localVue = createLocalVue()
+localVue.use(VueLazyLoad)
 
 localVue.prototype.$locale = {
   change (locale) {
