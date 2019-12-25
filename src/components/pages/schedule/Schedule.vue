@@ -612,10 +612,10 @@ export default {
       return (
         startDate &&
         endDate &&
-        startDate.isAfter(this.startDate) &&
-        endDate.isBefore(this.endDate) &&
-        startDate.isBefore(endDate) &&
-        endDate.isAfter(startDate)
+        startDate.isSameOrAfter(this.startDate.clone().add(-1, 'hour')) &&
+        endDate.isSameOrBefore(this.endDate) &&
+        startDate.isSameOrBefore(endDate) &&
+        endDate.isSameOrAfter(startDate)
       )
     },
 
