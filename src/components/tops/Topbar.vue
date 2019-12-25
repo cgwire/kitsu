@@ -473,7 +473,11 @@ export default {
       this.currentProductionId = productionId
       this.currentEpisodeId = episodeId
       this.currentProjectSection = section
-      this.silent = false
+      this.currentProjectSection = null
+      this.$nextTick(() => {
+        this.currentProjectSection = section
+        this.silent = false
+      })
     }
   },
 
