@@ -665,7 +665,7 @@ export default {
       let endDateIndex = this.getDisplayedDaysIndex(endDate)
 
       currentIndex += dayChange
-      if (currentIndex > endDateIndex) currentIndex = endDateIndex - 1
+      if (currentIndex > endDateIndex) currentIndex = endDateIndex
       if (currentIndex < 0) currentIndex = 0
 
       let newStartDate = this.displayedDays[currentIndex]
@@ -685,7 +685,7 @@ export default {
       let currentIndex = this.getDisplayedDaysIndex(endDate)
 
       currentIndex += dayChange - 1
-      if (currentIndex < startDateIndex) currentIndex = startDateIndex + 1
+      if (currentIndex < startDateIndex) currentIndex = startDateIndex
       if (currentIndex > this.displayedDaysIndex.length) {
         currentIndex = this.displayedDaysIndex.length - 1
       }
@@ -907,8 +907,12 @@ export default {
           timeElement.startDate.clone().add(1, 'days')
         ) ||
         this.startDate.clone().add(1, 'days')
-      let lengthDiff = this.businessDiff(startDate, endDate) || 1
-      return (lengthDiff + 1) * this.cellWidth - 10
+      let lengthDiff = this.businessDiff(startDate, endDate)
+      if (lengthDiff > 0) {
+        return (lengthDiff + 1) * this.cellWidth - 10
+      } else {
+        return this.cellWidth - 10
+      }
     },
 
     // Children
