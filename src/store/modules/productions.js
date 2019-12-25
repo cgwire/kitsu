@@ -512,9 +512,11 @@ const mutations = {
     } else {
       state.productions.push(newProduction)
       state.productionMap[newProduction.id] = newProduction
-      state.openProductions.push(newProduction)
+      if (!openProduction) {
+        state.openProductions.push(newProduction)
+        state.openProductions = sortByName(state.openProductions)
+      }
       state.productions = sortProductions(state.productions)
-      state.openProductions = sortByName(state.openProductions)
     }
     state.editProduction = {
       isLoading: false,
