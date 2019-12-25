@@ -8,7 +8,7 @@
       <div
          class="flexrow-item avatar has-text-centered"
          v-if="withAvatar"
-         v-bind:style="{
+         :style="{
            background: getAvatarColor(project),
            width: size + 'px',
            height: size + 'px',
@@ -28,7 +28,7 @@
           v-else
         />
       </div>
-      <span class="flexrow-item" v-if="!onlyAvatar">
+      <span class="flexrow-item avatar-name" v-if="!onlyAvatar">
         {{ project.name }}
       </span>
     </router-link>
@@ -120,11 +120,11 @@ export default {
   color: inherit;
 }
 
-.avatar {
-  margin-right: 0.3em;
-}
-
 .flexrow-item {
   margin: 0;
+}
+
+.avatar-name {
+  margin-left: 0.8em;
 }
 </style>
