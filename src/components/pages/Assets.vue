@@ -792,12 +792,12 @@ export default {
             nameData.splice(3, 0, this.currentEpisode.name)
           }
           const name = slugify(nameData.join('_'))
-          const headers = [
-            this.$t('assets.fields.episode'),
+          let headers = this.isTVShow ? [this.$t('assets.fields.type')] : []
+          headers = headers.concat([
             this.$t('assets.fields.type'),
             this.$t('assets.fields.name'),
             this.$t('assets.fields.description')
-          ]
+          ])
           sortByName([ ...this.currentProduction.descriptors ])
             .filter(d => d.entity_type === 'Asset')
             .forEach((descriptor) => {

@@ -83,7 +83,8 @@ describe('ProductionSchedule', () => {
     userStore = {
       getters: {
         user: () => ({ id: 'user-1', timezone: 'Europe/Paris' }),
-        isCurrentUserAdmin: () => true
+        isCurrentUserAdmin: () => true,
+        isCurrentUserManager: () => true
       },
       actions: {
         editProduction (production) {
@@ -151,6 +152,7 @@ describe('ProductionSchedule', () => {
         end_date: '2019-09-01'
       }])
       expect(item[0]).toEqual({
+        editable: true,
         name: 'Characters',
         start_date: '2019-08-15',
         end_date: '2019-09-01',

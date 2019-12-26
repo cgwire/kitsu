@@ -543,12 +543,17 @@ const actions = {
       assets = cache.result
     }
     const lines = assets.map((asset) => {
-      const assetLine = [
-        asset.episode_id ? episodeMap[asset.episode_id].name : '',
+      let assetLine = []
+      if (rootGetters.isTVShow) {
+        assetLine.push(
+          asset.episode_id ? episodeMap[asset.episode_id].name : 'All'
+        )
+      }
+      assetLine = assetLine.concat([
         asset.asset_type_name,
         asset.name,
         asset.description
-      ]
+      ])
       sortByName([ ...production.descriptors ])
         .filter(d => d.entity_type === 'Asset')
         .forEach((descriptor) => {

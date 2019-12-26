@@ -1,14 +1,15 @@
 import { shallowMount, createLocalVue } from '@vue/test-utils'
+import vuescroll from 'vue-scroll'
 import Vuex from 'vuex'
 import i18n from '../../../src/lib/i18n'
 import Breakdown from '../../../src/components/pages/Breakdown'
 
 const localVue = createLocalVue()
 localVue.use(Vuex)
-
+localVue.use(vuescroll)
 
 describe('Breakdown', () => {
-  let store, userStore, shotStore, castingStore, productionStore
+  let store, assetStore, userStore, shotStore, castingStore, productionStore
   let wrapper
   let getters
 
@@ -24,6 +25,16 @@ describe('Breakdown', () => {
     productionStore = {
       getters: {
         currentProduction: () => ({ id: 'production-1', name: 'Prod 1' })
+      },
+      actions: {
+      }
+    }
+    assetStore = {
+      getters: {
+        assetsByType: () => ([]),
+        castingAssetTypesOptions: () => ([]),
+        currentEpisode: () => ([]),
+        isAssetsLoading: () => ([])
       },
       actions: {
       }
@@ -48,6 +59,7 @@ describe('Breakdown', () => {
     store = new Vuex.Store({
       strict: true,
       modules: {
+        assets: assetStore,
         breakdown: castingStore,
         productions: productionStore,
         shots: shotStore,

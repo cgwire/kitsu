@@ -501,7 +501,11 @@ export default {
     },
 
     lastFivePreviews () {
-      return this.taskPreviews.slice(0, 5)
+      if (this.taskPreviews) {
+        return this.taskPreviews.slice(0, 5)
+      } else {
+        return []
+      }
     },
 
     panelStyle () {
@@ -511,6 +515,7 @@ export default {
     },
 
     pinnedCount () {
+      if (!this.taskComments) return 0
       return this.taskComments.filter(c => c.pinned).length
     }
   },

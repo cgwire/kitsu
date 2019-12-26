@@ -22,7 +22,15 @@ export const selectionListMixin = {
           validationCell = this.select(i + 1, j)
         }
         this.scrollToValidationCell(validationCell)
+        this.stopEvent(event)
       }
+    },
+
+    stopEvent (e) {
+      if (!e) e = window.event
+      e.stopPropagation()
+      e.cancelBubble = true
+      e.returnValue = false
     },
 
     setScrollPosition (scrollPosition) {

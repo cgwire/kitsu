@@ -108,9 +108,9 @@ export default {
     return {
       currentTask: null,
       overallManDays: 0,
-      endDate: moment().add(6, 'months'),
+      endDate: moment().add(6, 'months').endOf('day'),
       scheduleItems: [],
-      startDate: moment(),
+      startDate: moment().startOf('day'),
       selectedStartDate: null,
       selectedEndDate: null,
       zoomLevel: 2,

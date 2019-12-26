@@ -162,7 +162,9 @@ export default {
       if (this.taskTypeList.length > 0) {
         this.taskTypeId = this.taskTypeList[0].id
       }
-      this.$refs['preview-field'].reset()
+      if (this.$refs['preview-field'].reset) { // Needed for tests
+        this.$refs['preview-field'].reset()
+      }
       this.thumbnailList = []
       this.loading = {}
       this.uploaded = {}

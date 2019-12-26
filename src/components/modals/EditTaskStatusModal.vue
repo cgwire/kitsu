@@ -27,6 +27,7 @@
           ref="shortNameField"
           input-class="task-status-short-name"
           :label="$t('task_status.fields.short_name')"
+          :maxlength="8"
           v-model="form.short_name"
           v-focus
         />
