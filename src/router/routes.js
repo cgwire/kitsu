@@ -36,6 +36,7 @@ const Playlist = () => import('../components/pages/Playlist')
 const Productions = () => import('../components/pages/Productions')
 const ProductionAssetTypes = () => import('../components/pages/ProductionAssetTypes')
 const ProductionSchedule = () => import('../components/pages/ProductionSchedule')
+const ProductionQuota = () => import('../components/pages/ProductionQuota')
 const Profile = () => import('../components/pages/Profile')
 const ResetPassword = () => import('../components/pages/ResetPassword')
 const ResetChangePassword = () => import('../components/pages/ResetChangePassword')
@@ -373,6 +374,12 @@ export const routes = [
         path: 'productions/:production_id/schedule',
         component: ProductionSchedule,
         name: 'schedule'
+      },
+
+      {
+        path: 'productions/:production_id/quota',
+        component: ProductionQuota,
+        name: 'quota'
       },
 
       {
