@@ -222,6 +222,16 @@ export const routes = [
         name: 'timesheets',
         children: [
           {
+            path: 'year/:year',
+            component: Timesheets,
+            name: 'timesheets-year'
+          },
+          {
+            path: 'year/:year/persons/:person_id',
+            component: Timesheets,
+            name: 'timesheets-year-person'
+          },
+          {
             path: 'month/:year',
             component: Timesheets,
             name: 'timesheets-month'

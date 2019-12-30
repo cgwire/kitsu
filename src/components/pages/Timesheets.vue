@@ -16,6 +16,7 @@
             :label="$t('timesheets.year')"
             :options="yearOptions"
             v-model="yearString"
+            v-if="detailLevelString !== 'year'"
           />
 
           <combobox
@@ -102,6 +103,10 @@ export default {
         {
           label: 'Month',
           value: 'month'
+        },
+        {
+          label: 'Year',
+          value: 'year'
         }
       ],
 
@@ -228,6 +233,7 @@ export default {
       if (this.$route.path.indexOf('week') > 0) this.detailLevel = 'week'
       if (this.$route.path.indexOf('month') > 0) this.detailLevel = 'month'
       if (this.$route.path.indexOf('day') > 0) this.detailLevel = 'day'
+      if (this.$route.path.indexOf('year') > 0) this.detailLevel = 'year'
 
       this.currentPerson = this.getCurrentPerson()
       this.detailLevelString = this.detailLevel
@@ -346,6 +352,13 @@ export default {
             params: {
               year: this.currentYear,
               month: this.currentMonth
+            }
+          })
+        } else if (this.detailLevelString === 'year') {
+          this.$router.push({
+            name: 'timesheets-year',
+            params: {
+              year: this.currentYear
             }
           })
         }

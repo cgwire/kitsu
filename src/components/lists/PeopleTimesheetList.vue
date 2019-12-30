@@ -9,6 +9,15 @@
           </th>
 
           <th
+            class="time year"
+            :key="'year-' + year"
+            v-for="year in yearRange"
+            v-if="detailLevel === 'year'"
+          >
+            {{ year }}
+          </th>
+
+          <th
             class="time month"
             :key="'month-' + month"
             v-for="month in monthRange"
@@ -51,6 +60,35 @@
       <tbody>
           <tr v-for="person in people" :key="person.id">
           <people-name-cell class="name" :person="person" />
+
+          <td
+            :class="{
+              time: true,
+              year: true,
+              selected: isYearSelected(person.id, year)
+            }"
+            :key="'year-' + year + '-' + person.id"
+            v-for="year in yearRange"
+            v-if="detailLevel === 'year'"
+          >
+            <router-link
+              class="duration"
+              :to="{
+                name: 'timesheets-year-person',
+                params: {
+                  person_id: person.id,
+                  year: year
+                }
+              }"
+              v-if="yearDuration(year, person.id) > 0"
+            >
+              {{ yearDuration(year, person.id) }}
+            </router-link>
+            <span v-else>
+            -
+            </span>
+          </td>
+
           <td
             :class="{
               time: true,
@@ -165,7 +203,8 @@ import {
   monthToString,
   getMonthRange,
   getWeekRange,
-  getDayRange
+  getDayRange,
+  range
 } from '../../lib/time'
 import PeopleNameCell from '../cells/PeopleNameCell'
 import TableInfo from '../widgets/TableInfo'
@@ -230,6 +269,10 @@ export default {
       'route'
     ]),
 
+    yearRange () {
+      return range(2018, moment().year())
+    },
+
     monthRange () {
       return getMonthRange(this.year, this.currentYear, this.currentMonth)
     },
@@ -257,6 +300,11 @@ export default {
     },
 
     monthToString,
+
+    yearDuration (year, personId) {
+      const yearString = `${year}`
+      return this.getDuration(yearString, personId)
+    },
 
     monthDuration (month, personId) {
       const monthString = `${month}`
@@ -313,6 +361,15 @@ export default {
         this.$route.params.year === year &&
         this.$route.params.month === month
       )
+    },
+
+    isYearSelected (personId, year) {
+      return (
+        this.$route.params.person_id &&
+        this.$route.params.person_id === personId &&
+        this.$route.params.year === year
+      )
+    },
 
     getWeekTitle (week) {
       const beginning = moment(this.currentYear + '-' + week, 'YYYY-W')
@@ -361,6 +418,11 @@ export default {
   &.month {
     width: 80px;
     min-width: 80px;
+  }
+
+  &.year {
+    width: 90px;
+    min-width: 90px;
   }
 }
 
