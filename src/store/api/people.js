@@ -228,6 +228,10 @@ export default {
     })
   },
 
+  getYearTable (year) {
+    return client.pget(`/api/data/persons/time-spents/year-table`)
+  },
+
   getAggregatedPersonTimeSpents (
     personId,
     detailLevel,
@@ -239,7 +243,9 @@ export default {
     return new Promise((resolve, reject) => {
       let path = `/api/data/persons/${personId}/time-spents/`
 
-      if (detailLevel === 'month') {
+      if (detailLevel === 'year') {
+        path += `year/${year}`
+      } else if (detailLevel === 'month') {
         path += `month/${year}/${month}`
       } else if (detailLevel === 'week') {
         path += `week/${year}/${week}`

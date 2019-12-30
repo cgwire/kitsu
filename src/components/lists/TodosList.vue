@@ -21,6 +21,9 @@
           <th class="estimation">
             {{ $t('tasks.fields.estimation').substring(0, 3) }}.
           </th>
+          <th class="estimation">
+            {{ $t('tasks.fields.duration').substring(0, 3) }}.
+          </th>
           <th class="due-date">
             {{ $t('tasks.fields.due_date') }}
           </th>
@@ -84,6 +87,9 @@
           />
           <td class="estimation">
             {{ formatDuration(entry.estimation) }}
+          </td>
+          <td class="estimation">
+            {{ formatDuration(entry.time) }}
           </td>
           <td class="due-date">
             {{ formatDate(entry.due_date) }}
