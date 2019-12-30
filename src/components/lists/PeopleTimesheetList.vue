@@ -19,6 +19,7 @@
 
           <th
             class="daytime"
+            :title="getWeekTitle(week)"
             :key="'week-' + week"
             v-for="week in weekRange"
             v-if="detailLevel === 'week'"
@@ -179,16 +180,6 @@ export default {
 
   data () {
     return {
-      detailOptions: [
-        {
-          label: 'Day',
-          value: 'day'
-        },
-        {
-          label: 'Month',
-          value: 'month'
-        }
-      ],
       currentMonth: moment().month() + 1,
       currentYear: moment().year(),
       currentWeek: moment().week()
@@ -322,6 +313,11 @@ export default {
         this.$route.params.year === year &&
         this.$route.params.month === month
       )
+
+    getWeekTitle (week) {
+      const beginning = moment(this.currentYear + '-' + week, 'YYYY-W')
+      const end = beginning.clone().add(6, 'days')
+      return beginning.format('YYYY-MM-DD') + ' - ' + end.format('YYYY-MM-DD')
     }
   },
 
