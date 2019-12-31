@@ -17,6 +17,15 @@
         <div class="header-cell row-cell">1</div>
         <div class="header-cell row-cell">2</div>
         <div class="header-cell row-cell">3</div>
+        <div class="header-cell row-cell">4</div>
+        <div class="header-cell row-cell">5</div>
+        <div class="header-cell row-cell">6</div>
+        <div class="header-cell row-cell">7</div>
+        <div class="header-cell row-cell">8</div>
+        <div class="header-cell row-cell">9</div>
+        <div class="header-cell row-cell">10</div>
+        <div class="header-cell row-cell">11</div>
+        <div class="header-cell row-cell">12</div>
       </div>
       <div class="quota-row" v-for="(user, i) in users" :key="user.name + '-' + i">
         <template v-for="(day, i) in user.days">
@@ -52,6 +61,42 @@ export default {
             third: {
               day: 3,
               quota: 22
+            },
+            fourth: {
+              day: 1,
+              quota: 24
+            },
+            fifth: {
+              day: 2,
+              quota: 23
+            },
+            sixth: {
+              day: 3,
+              quota: 22
+            },
+            seventh: {
+              day: 1,
+              quota: 24
+            },
+            eighth: {
+              day: 2,
+              quota: 23
+            },
+            nineth: {
+              day: 3,
+              quota: 22
+            },
+            tenth: {
+              day: 1,
+              quota: 24
+            },
+            eleventh: {
+              day: 2,
+              quota: 23
+            },
+            twelveth: {
+              day: 3,
+              quota: 22
             }
           }
         },
@@ -71,6 +116,42 @@ export default {
             third: {
               day: 3,
               quota: 22
+            },
+            fourth: {
+              day: 1,
+              quota: 24
+            },
+            fifth: {
+              day: 2,
+              quota: 23
+            },
+            sixth: {
+              day: 3,
+              quota: 22
+            },
+            seventh: {
+              day: 1,
+              quota: 24
+            },
+            eighth: {
+              day: 2,
+              quota: 23
+            },
+            nineth: {
+              day: 3,
+              quota: 22
+            },
+            tenth: {
+              day: 1,
+              quota: 24
+            },
+            eleventh: {
+              day: 2,
+              quota: 23
+            },
+            twelveth: {
+              day: 3,
+              quota: 22
             }
           }
         },
@@ -88,6 +169,42 @@ export default {
               quota: 23
             },
             third: {
+              day: 3,
+              quota: 22
+            },
+            fourth: {
+              day: 1,
+              quota: 24
+            },
+            fifth: {
+              day: 2,
+              quota: 23
+            },
+            sixth: {
+              day: 3,
+              quota: 22
+            },
+            seventh: {
+              day: 1,
+              quota: 24
+            },
+            eighth: {
+              day: 2,
+              quota: 23
+            },
+            nineth: {
+              day: 3,
+              quota: 22
+            },
+            tenth: {
+              day: 1,
+              quota: 24
+            },
+            eleventh: {
+              day: 2,
+              quota: 23
+            },
+            twelveth: {
               day: 3,
               quota: 22
             }
@@ -141,6 +258,7 @@ export default {
     width: 4rem;
     padding: 1rem;
     border-bottom: 1px solid $dark-grey;
+    flex: 0 0 auto;
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
