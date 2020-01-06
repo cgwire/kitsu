@@ -1,11 +1,11 @@
 import client from './client'
 
 export default {
-  getTaskTypes (callback) {
-    client.get('/api/data/task-types', callback)
+  getTaskTypes () {
+    return client.pget('/api/data/task-types')
   },
 
-  newTaskType (taskType, callback) {
+  newTaskType (taskType) {
     const data = {
       name: taskType.name,
       color: taskType.color,
@@ -13,10 +13,10 @@ export default {
       for_shots: Boolean(taskType.for_shots === 'true'),
       allow_timelog: Boolean(taskType.allow_timelog === 'true')
     }
-    client.post('/api/data/task-types/', data, callback)
+    return client.ppost('/api/data/task-types/', data)
   },
 
-  updateTaskType (taskType, callback) {
+  updateTaskType (taskType) {
     const data = {
       name: taskType.name,
       color: taskType.color,
@@ -24,22 +24,14 @@ export default {
       for_shots: Boolean(taskType.for_shots === 'true'),
       allow_timelog: Boolean(taskType.allow_timelog === 'true')
     }
-    client.put(`/api/data/task-types/${taskType.id}`, data, callback)
+    return client.pput(`/api/data/task-types/${taskType.id}`, data)
   },
 
-  deleteTaskType (taskType, callback) {
-    client.del(`/api/data/task-types/${taskType.id}`, callback)
+  deleteTaskType (taskType) {
+    return client.pdel(`/api/data/task-types/${taskType.id}`)
   },
 
-  getTaskType (taskTypeId, callback) {
-    client.get(`/api/data/task-types/${taskTypeId}`, callback)
-  },
-
-  getSequenceSubscriptions (projectId, taskTypeId, callback) {
-    client.get(
-      `/api/data/user/projects/${projectId}/task-types/${taskTypeId}/` +
-      `sequence-subscriptions`,
-      callback
-    )
+  getTaskType (taskTypeId) {
+    return client.pget(`/api/data/task-types/${taskTypeId}`)
   }
 }

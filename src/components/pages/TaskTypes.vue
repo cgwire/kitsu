@@ -82,8 +82,6 @@ export default {
 
   computed: {
     ...mapGetters([
-      'editTaskType',
-      'deleteTaskType',
       'getTaskType',
       'taskTypes'
     ])
@@ -92,15 +90,22 @@ export default {
   mounted () {
     this.loading.taskTypes = true
     this.errors.taskTypes = false
-    this.loadTaskTypes((err) => {
-      if (!err) this.handleModalsDisplay()
-      else this.errors.taskTypes = true
-      this.loading.taskTypes = false
-    })
+    this.loadTaskTypes()
+      .then(() => {
+        this.handleModalsDisplay()
+        this.loading.taskTypes = false
+      })
+      .catch((err) => {
+        console.error(err)
+        this.loading.taskTypes = false
+        this.errors.taskTypes = true
+      })
   },
 
   methods: {
     ...mapActions([
+      'editTaskType',
+      'deleteTaskType',
       'loadTaskTypes'
     ]),
 
@@ -111,24 +116,18 @@ export default {
         form.id = this.taskTypeToEdit.id
       }
 
-      this.$store.dispatch(action, {
-        data: form,
-        callback: (err) => {
-          if (!err) {
-            this.modals.isNewDisplayed = false
-            this.$router.push('/task-types')
-          }
-        }
-      })
+      this.$store.dispatch(action, form)
+        .then(() => {
+          this.modals.isNewDisplayed = false
+          this.$router.push('/task-types')
+        })
     },
 
     confirmDeleteTaskType () {
-      this.$store.dispatch('deleteTaskType', {
-        taskType: this.taskTypeToDelete,
-        callback: (err) => {
-          if (!err) this.modals.isDeleteDisplayed = false
-        }
-      })
+      this.deleteTaskType(this.taskTypeToDelete)
+        .then(() => {
+          this.modals.isDeleteDisplayed = false
+        })
     },
 
     deleteText () {

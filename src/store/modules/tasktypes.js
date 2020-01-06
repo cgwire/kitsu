@@ -82,48 +82,68 @@ const getters = {
 
 const actions = {
 
-  loadTaskTypes ({ commit, state }, callback) {
+  loadTaskTypes ({ commit, state }) {
     commit(LOAD_TASK_TYPES_START)
-    taskTypesApi.getTaskTypes((err, taskTypes) => {
-      if (err) commit(LOAD_TASK_TYPES_ERROR)
-      else commit(LOAD_TASK_TYPES_END, taskTypes)
-      if (callback) callback(err)
-    })
+    return taskTypesApi.getTaskTypes()
+      .then((taskTypes) => {
+        commit(LOAD_TASK_TYPES_END, taskTypes)
+        Promise.resolve(taskTypes)
+      })
+      .catch((err) => {
+        console.error(err)
+        Promise.reject(err)
+      })
   },
 
   loadTaskType ({ commit, state }, taskTypeId) {
-    taskTypesApi.getTaskType(taskTypeId, (err, taskType) => {
-      if (err) console.error(err)
-      else commit(EDIT_TASK_TYPE_END, taskType)
-    })
+    return taskTypesApi.getTaskType(taskTypeId)
+      .then((taskType) => {
+        commit(EDIT_TASK_TYPE_END, taskType)
+        Promise.resolve(taskType)
+      })
+      .catch((err) => {
+        console.error(err)
+        Promise.reject(err)
+      })
   },
 
-  newTaskType ({ commit, state }, payload) {
-    commit(EDIT_TASK_TYPE_START, payload.data)
-    taskTypesApi.newTaskType(payload.data, (err, taskType) => {
-      if (err) commit(EDIT_TASK_TYPE_ERROR)
-      else commit(EDIT_TASK_TYPE_END, taskType)
-      if (payload.callback) payload.callback(err)
-    })
+  newTaskType ({ commit, state }, data) {
+    commit(EDIT_TASK_TYPE_START, data)
+    taskTypesApi.newTaskType(data)
+      .then((taskType) => {
+        commit(EDIT_TASK_TYPE_END, taskType)
+        Promise.resolve(taskType)
+      })
+      .catch((err) => {
+        console.error(err)
+        commit(EDIT_TASK_TYPE_ERROR)
+      })
   },
 
-  editTaskType ({ commit, state }, payload) {
+  editTaskType ({ commit, state }, data) {
     commit(EDIT_TASK_TYPE_START)
-    taskTypesApi.updateTaskType(payload.data, (err, taskType) => {
-      if (err) commit(EDIT_TASK_TYPE_ERROR)
-      else commit(EDIT_TASK_TYPE_END, taskType)
-      if (payload.callback) payload.callback(err)
-    })
+    taskTypesApi.updateTaskType(data)
+      .then((taskType) => {
+        commit(EDIT_TASK_TYPE_END, taskType)
+        Promise.resolve(taskType)
+      })
+      .catch((err) => {
+        console.error(err)
+        commit(EDIT_TASK_TYPE_ERROR)
+      })
   },
 
-  deleteTaskType ({ commit, state }, payload) {
+  deleteTaskType ({ commit, state }, taskType) {
     commit(DELETE_TASK_TYPE_START)
-    const taskType = payload.taskType
-    taskTypesApi.deleteTaskType(taskType, (err) => {
-      if (err) commit(DELETE_TASK_TYPE_ERROR)
-      else commit(DELETE_TASK_TYPE_END, taskType)
-      if (payload.callback) payload.callback(err)
-    })
+    taskTypesApi.deleteTaskType(taskType)
+      .then(() => {
+        commit(DELETE_TASK_TYPE_END, taskType)
+        Promise.resolve()
+      })
+      .catch((err) => {
+        console.error(err)
+        commit(DELETE_TASK_TYPE_ERROR)
+      })
   },
 
   initTaskType ({ commit, dispatch, state, rootState, rootGetters }, force) {
