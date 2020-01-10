@@ -919,6 +919,24 @@ const actions = {
 
   loadShotHistory ({ commit, state }, shotId) {
     return shotsApi.loadShotHistory(shotId)
+  },
+
+  computeQuota ({ commit, state, rootGetters }, { taskTypeId, detailLevel }) {
+    const quotas = {}
+    cache.shots.forEach((shot) => {
+      const task = rootGetters.taskMap[shot.validations[taskTypeId]]
+      if (task && rootGetters.taskStatusMap[task.task_status_id].is_done) {
+        const endDateString = moment(task.end_date, 'YYYY-MM-DD').format('YYYY-MM-DD') // à développer
+        task.assignees.forEach(personId => {
+          if (!quotas[personId]) quotas[personId] = {}
+          if (!quotas[personId][endDateString]) quotas[personId][endDateString] = 0
+          if (shot.nb_frames) {
+            quotas[personId][endDateString] += shot.nb_frames
+          }
+        })
+      }
+    })
+    return Promise.resolve(quotas)
   }
 }
 
