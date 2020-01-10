@@ -36,7 +36,7 @@ const Playlist = () => import('../components/pages/Playlist')
 const Productions = () => import('../components/pages/Productions')
 const ProductionAssetTypes = () => import('../components/pages/ProductionAssetTypes')
 const ProductionSchedule = () => import('../components/pages/ProductionSchedule')
-const ProductionQuota = () => import('../components/pages/ProductionQuota')
+const Quota = () => import('../components/pages/ProductionQuota')
 const Profile = () => import('../components/pages/Profile')
 const ResetPassword = () => import('../components/pages/ResetPassword')
 const ResetChangePassword = () => import('../components/pages/ResetChangePassword')
@@ -378,8 +378,40 @@ export const routes = [
 
       {
         path: 'productions/:production_id/quota',
-        component: ProductionQuota,
-        name: 'quota'
+        component: Quota,
+        name: 'quota',
+        children: [
+          {
+            path: 'month/:year',
+            component: Quota,
+            name: 'quota-month'
+          },
+          {
+            path: 'month/:year/:month/persons/:person_id',
+            component: Quota,
+            name: 'quota-month-person'
+          },
+          {
+            path: 'week/:year',
+            component: Quota,
+            name: 'quota-week'
+          },
+          {
+            path: 'week/:year/:week/persons/:person_id',
+            component: Quota,
+            name: 'quota-week-person'
+          },
+          {
+            path: 'day/:year/:month',
+            component: Quota,
+            name: 'quota-day'
+          },
+          {
+            path: 'day/:year/:month/:day/persons/:person_id',
+            component: Quota,
+            name: 'quota-day-person'
+          }
+        ]
       },
 
       {
