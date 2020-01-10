@@ -7,11 +7,11 @@
   >
     <div class="flexrow filters">
       <div class="flexrow-item">
-        <combobox
+        <combobox-task-type
           class="flexrow-item"
           :label="$t('quota.type_label')"
-          :options="typeOptions"
-          v-model="type"
+          :task-type-list="shotTaskTypes"
+          v-model="taskTypeId"
         />
       </div>
       <div class="flexrow-item">
@@ -19,66 +19,68 @@
           class="flexrow-item"
           :label="$t('quota.detail_label')"
           :options="detailLevelOptions"
-          v-model="detailLevel"
+          v-model="detailLevelString"
         />
       </div>
-      <div class="flexrow-item">
-        <combobox-number
-          class="flexrow-item"
-          :label="$t('quota.year_label')"
-          :options="yearsOptions"
-          v-model="years"
-        />
-      </div>
-      <div class="flexrow-item">
+
+      <combobox
+        class="flexrow-item"
+        :label="$t('quota.month_label')"
+        :options="monthOptions"
+        v-model="monthString"
+        v-if="detailLevelString === 'day'"
+      />
+
+      <combobox
+        class="flexrow-item"
+        :label="$t('quota.year_label')"
+        :options="yearOptions"
+        v-model="yearString"
+      />
+
+      <!-- <div class="flexrow-item">
         <combobox
           class="flexrow-item"
           :label="$t('quota.count_label')"
           :options="countModeOptions"
           v-model="countMode"
         />
-      </div>
+      </div> -->
     </div>
 
-    <quota />
+    <quota
+      :taskTypeId="taskTypeId"
+      :detailLevel="detailLevelString"
+      :year="currentYear"
+      :month="currentMonth"
+      :week="currentWeek"
+      :day="currentDay"
+      :currentPerson="currentPerson"
+    />
   </div>
 </div>
 
 </template>
 
 <script>
+import moment from 'moment-timezone'
+import { monthToString, range } from '../../lib/time'
+import { mapGetters } from 'vuex'
 import Combobox from '../widgets/Combobox'
-import ComboboxNumber from '../widgets/ComboboxNumber'
+import ComboboxTaskType from '../widgets/ComboboxTaskType'
 import Quota from './quota/Quota'
 
 export default {
   name: 'production-quota',
   components: {
     Combobox,
-    ComboboxNumber,
+    ComboboxTaskType,
     Quota
   },
 
   data () {
     return {
-      typeOptions: [
-        { label: 'Storyboard', value: 'storyboard' },
-        { label: 'Layout', value: 'layout' },
-        { label: 'Previz', value: 'previz' },
-        { label: 'Anim Blocking', value: 'animeblocking' },
-        { label: 'Animation', value: 'animation' },
-        { label: 'Cleanup', value: 'cleanup' },
-        { label: 'FX', value: 'fx' },
-        { label: 'Render', value: 'render' },
-        { label: 'Compositing', value: 'compositin' }
-      ],
-      yearsOptions: [
-        { label: '2020', value: 2020 },
-        { label: '2019', value: 2019 },
-        { label: '2018', value: 2018 },
-        { label: '2017', value: 2017 },
-        { label: '2016', value: 2016 }
-      ],
+      taskTypeId: '',
       countModeOptions: [
         { label: 'Frames', value: 'frames' },
         { label: 'Seconds', value: 'seconds' }
@@ -87,15 +89,167 @@ export default {
         { label: 'Day', value: 'day' },
         { label: 'Week', value: 'week' },
         { label: 'Month', value: 'month' }
-      ]
+      ],
+      detailLevelString: 'day',
+      detailLevel: 'day',
+
+      yearString: `${moment().year()}`,
+      monthString: `${moment().month() + 1}`,
+
+      currentYear: moment().year(),
+      currentMonth: moment().month() + 1,
+      currentWeek: moment().week(),
+      currentDay: moment().date(),
+      currentPerson: this.getCurrentPerson(),
+
+      isLoading: false,
+      isLoadingError: false
     }
   },
 
-  mounted () {
+  created () {
+    this.loadRoute()
+  },
 
+  mounted () {
+    this.taskTypeId = this.shotTaskTypes[0].id
   },
 
   computed: {
+    ...mapGetters([
+      'shotTaskTypes',
+      'personMap'
+    ]),
+    yearOptions () {
+      const year = 2018
+      const currentYear = moment().year()
+      return range(year, currentYear)
+        .map(year => ({
+          label: year,
+          value: `${year}`
+        }))
+    },
+    monthOptions () {
+      const currentYear = `${moment().year()}`
+      const month = 1
+      const currentMonth = moment().month() + 1
+      let monthRange = range(month, 12)
+      if (currentYear === this.yearString) {
+        monthRange = range(month, currentMonth)
+      }
+
+      return monthRange.map(month => ({
+        label: monthToString(month),
+        value: `${month}`
+      }))
+    }
+  },
+
+  methods: {
+    getCurrentPerson () {
+      const personId = this.$route.params.person_id
+      if (personId && this.personMap) {
+        return this.personMap[personId]
+      } else {
+        return {}
+      }
+    },
+    loadRoute () {
+      const { month, year, week, day } = this.$route.params
+
+      if (this.$route.path.indexOf('week') > 0) this.detailLevel = 'week'
+      if (this.$route.path.indexOf('month') > 0) this.detailLevel = 'month'
+      if (this.$route.path.indexOf('day') > 0) this.detailLevel = 'day'
+
+      this.currentPerson = this.getCurrentPerson()
+      this.detailLevelString = this.detailLevel
+      if (month) {
+        this.currentMonth = Number(month)
+        this.monthString = `${month}`
+      }
+      if (year) {
+        this.currentYear = Number(year)
+        this.yearString = `${year}`
+      }
+      if (week) {
+        this.currentWeek = Number(week)
+        this.weekString = `${week}`
+      }
+      if (day) {
+        this.currentDay = Number(day)
+      }
+    }
+  },
+
+  watch: {
+    detailLevelString () {
+      if (this.detailLevel !== this.detailLevelString) {
+        if (this.detailLevelString === 'month') {
+          this.$router.push({
+            name: 'quota-month',
+            params: {
+              year: this.currentYear
+            }
+          })
+        } else if (this.detailLevelString === 'week') {
+          this.$router.push({
+            name: 'quota-week',
+            params: {
+              year: this.currentYear
+            }
+          })
+        } else if (this.detailLevelString === 'day') {
+          this.$router.push({
+            name: 'quota-day',
+            params: {
+              year: this.currentYear,
+              month: this.currentMonth
+            }
+          })
+        }
+      }
+    },
+    yearString () {
+      const year = Number(this.yearString)
+      const currentMonth = moment().month() + 1
+      if (this.currentYear !== year) {
+        if (this.detailLevel === 'month') {
+          this.$router.push({
+            name: 'quota-month',
+            params: { year }
+          })
+        } else if (this.detailLevel === 'week') {
+          this.$router.push({
+            name: 'quota-week',
+            params: { year }
+          })
+        } else {
+          this.$router.push({
+            name: 'quota-day',
+            params: {
+              year: year,
+              month: Math.min(Number(this.monthString), currentMonth)
+            }
+          })
+        }
+      }
+    },
+
+    monthString () {
+      if (this.currentMonth !== Number(this.monthString)) {
+        this.$router.push({
+          name: 'quota-day',
+          params: {
+            year: this.currentYear,
+            month: Number(this.monthString)
+          }
+        })
+      }
+    },
+
+    $route () {
+      this.loadRoute()
+    }
   }
 }
 </script>

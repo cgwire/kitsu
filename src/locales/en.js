@@ -493,10 +493,13 @@ export default {
   quota: {
     title: 'Quota',
     name: 'Name',
+    quota_day: 'Quota per day',
     quota_week: 'Quota per week',
+    quota_month: 'Quota per month',
     average: 'Average',
     type_label: 'Type',
     detail_label: 'Detail level',
+    month_label: 'Month',
     year_label: 'Year',
     count_label: 'Count mode'
   },
