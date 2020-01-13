@@ -18,7 +18,24 @@
           {{ personMap[key].full_name }}
         </div>
         <div class="row-cell row-cell--weekly">{{ '-' }}</div>
-        <div class="row-cell row-cell--average">{{ '-' }}</div>
+        <div
+          class="row-cell row-cell--average"
+          v-if="detailLevel === 'month'"
+        >
+          {{ quotaMap[key].average[year] || '-' }}
+        </div>
+        <div
+          class="row-cell row-cell--average"
+          v-if="detailLevel === 'week'"
+        >
+          {{ quotaMap[key].average[year] || '-' }}
+        </div>
+        <div
+          class="row-cell row-cell--average"
+          v-if="detailLevel === 'day'"
+        >
+          {{ quotaMap[key].average[year+'-'+month.toString().padStart(2, '0')] || '-' }}
+        </div>
       </div>
     </div>
     <div class="quota-scrolled" v-if="this.quotaLength > 0 && !isLoading">
