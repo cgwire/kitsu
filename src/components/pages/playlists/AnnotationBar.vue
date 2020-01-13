@@ -40,7 +40,22 @@ export default {
         const progressCoordinates = progressBar.getBoundingClientRect()
         width = progressCoordinates.width
       }
-      return width * factor - 3
+      width = width * factor - 3
+      if (width >= this.width) {
+        console.log(this.isFullScreen())
+        width -= this.isFullScreen() ? 9 : 6
+      }
+      return width
+    },
+
+    isFullScreen () {
+      return !!(
+        document.fullScreen ||
+        document.webkitIsFullScreen ||
+        document.mozFullScreen ||
+        document.msFullscreenElement ||
+        document.fullscreenElement
+      )
     }
   }
 }
