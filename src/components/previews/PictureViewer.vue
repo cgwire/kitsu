@@ -74,7 +74,7 @@
         :isOpen="isShowingPalette"
         :color="this.color"
         :palette="this.palette"
-        @TogglePalette="onPickColor"
+        @toggle-palette="onPickColor"
         @change="onChangeColor"
       />
 

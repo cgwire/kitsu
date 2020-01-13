@@ -3,13 +3,13 @@
   <transition name="slide">
     <button
       type="button"
-      v-show="isActive"
       :class="{
         'color-picker': true
       }"
       :title="color"
       :style="{ color: color }"
-      @click="$emit('TogglePalette')"
+      @click="togglePalette"
+      v-show="isActive"
     />
   </transition>
   <div
@@ -26,8 +26,8 @@
     >
       <input
         type="radio"
-        :value="newColor = shade"
-        v-model="radioButtonValue"
+        :value="shade"
+        @click="onColorPicked(shade)"
       />
     </label>
   </div>
@@ -48,10 +48,6 @@ export default {
       type: Boolean,
       default: false
     },
-    isOpen: {
-      type: Boolean,
-      default: false
-    },
     color: {
       type: String
     },
@@ -62,18 +58,21 @@ export default {
 
   data () {
     return {
-      newColor: this.color
+      isOpen: false
     }
   },
 
   computed: {
-    radioButtonValue: {
-      get: function () {
-        return this.value
-      },
-      set: function () {
-        this.$emit('change', this.newColor)
-      }
+  },
+
+  methods: {
+    togglePalette () {
+      this.isOpen = !this.isOpen
+    },
+
+    onColorPicked (shade) {
+      this.$emit('change', shade)
+      this.isOpen = false
     }
   }
 }
@@ -104,7 +103,7 @@ export default {
 }
 .color-palette {
   position: absolute;
-  z-index: 300;
+  z-index: 900;
   left: 0;
   bottom: calc(100% - .25rem);
   background-color: $dark-grey-light;
