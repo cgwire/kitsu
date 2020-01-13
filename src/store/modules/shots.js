@@ -923,15 +923,32 @@ const actions = {
 
   computeQuota ({ commit, state, rootGetters }, { taskTypeId, detailLevel }) {
     const quotas = {}
+    const average = 'average'
+    let endDateString = ''
+    let averagePeriod = ''
+
     cache.shots.forEach((shot) => {
       const task = rootGetters.taskMap[shot.validations[taskTypeId]]
       if (task && rootGetters.taskStatusMap[task.task_status_id].is_done) {
-        const endDateString = moment(task.end_date, 'YYYY-MM-DD').format('YYYY-MM-DD') // à développer
+        if (detailLevel === 'day') {
+          endDateString = moment(task.end_date, 'YYYY-MM-DD').format('YYYY-MM-DD')
+          averagePeriod = moment(endDateString, 'YYYY-MM').format('YYYY-MM')
+        } else if (detailLevel === 'month') {
+          endDateString = moment(task.end_date, 'YYYY-MM').format('YYYY-MM')
+          averagePeriod = moment(endDateString, 'YYYY').format('YYYY')
+        } else if (detailLevel === 'week') {
+          endDateString = moment(task.end_date, 'YYYY-MM-DD').format('GGGG-W')
+          averagePeriod = moment(endDateString, 'YYYY').format('GGGG')
+        }
         task.assignees.forEach(personId => {
           if (!quotas[personId]) quotas[personId] = {}
           if (!quotas[personId][endDateString]) quotas[personId][endDateString] = 0
+          if (!quotas[personId][average]) quotas[personId][average] = {}
+          if (!quotas[personId][average][averagePeriod]) quotas[personId][average][averagePeriod] = 0
+
           if (shot.nb_frames) {
             quotas[personId][endDateString] += shot.nb_frames
+            quotas[personId][average][averagePeriod] += shot.nb_frames
           }
         })
       }
