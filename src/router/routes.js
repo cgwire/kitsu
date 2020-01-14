@@ -382,37 +382,32 @@ export const routes = [
         name: 'quota',
         children: [
           {
-            path: ':mode',
-            component: Quota,
-            name: 'quota-mode'
-          },
-          {
-            path: ':mode/month/:year',
+            path: 'month/:year',
             component: Quota,
             name: 'quota-month'
           },
           {
-            path: ':mode/month/:year/:month/persons/:person_id',
+            path: 'month/:year/:month/persons/:person_id',
             component: Quota,
             name: 'quota-month-person'
           },
           {
-            path: ':mode/week/:year',
+            path: 'week/:year',
             component: Quota,
             name: 'quota-week'
           },
           {
-            path: ':mode/week/:year/:week/persons/:person_id',
+            path: 'week/:year/:week/persons/:person_id',
             component: Quota,
             name: 'quota-week-person'
           },
           {
-            path: ':mode/day/:year/:month',
+            path: 'day/:year/:month',
             component: Quota,
             name: 'quota-day'
           },
           {
-            path: ':mode/day/:year/:month/:day/persons/:person_id',
+            path: 'day/:year/:month/:day/persons/:person_id',
             component: Quota,
             name: 'quota-day-person'
           }
@@ -425,37 +420,32 @@ export const routes = [
         name: 'episode-quota',
         children: [
           {
-            path: ':mode',
-            component: Quota,
-            name: 'episode-quota-mode'
-          },
-          {
-            path: ':mode/month/:year',
+            path: 'month/:year',
             component: Quota,
             name: 'episode-quota-month'
           },
           {
-            path: ':mode/month/:year/:month/persons/:person_id',
+            path: 'month/:year/:month/persons/:person_id',
             component: Quota,
             name: 'episode-quota-month-person'
           },
           {
-            path: ':mode/week/:year',
+            path: 'week/:year',
             component: Quota,
             name: 'episode-quota-week'
           },
           {
-            path: ':mode/week/:year/:week/persons/:person_id',
+            path: 'week/:year/:week/persons/:person_id',
             component: Quota,
             name: 'episode-quota-week-person'
           },
           {
-            path: ':mode/day/:year/:month',
+            path: 'day/:year/:month',
             component: Quota,
             name: 'episode-quota-day'
           },
           {
-            path: ':mode/day/:year/:month/:day/persons/:person_id',
+            path: 'day/:year/:month/:day/persons/:person_id',
             component: Quota,
             name: 'episode-quota-day-person'
           }
