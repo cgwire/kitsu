@@ -921,14 +921,18 @@ const actions = {
     return shotsApi.loadShotHistory(shotId)
   },
 
-  computeQuota ({ commit, state, rootGetters }, { taskTypeId, detailLevel }) {
+  computeQuota (
+    { commit, state, rootGetters },
+    { taskTypeId, detailLevel, countMode }) {
     const quotas = {}
     const average = 'average'
     let endDateString = ''
     let averagePeriod = ''
+    let quotaUnit = 0
 
     cache.shots.forEach((shot) => {
       const task = rootGetters.taskMap[shot.validations[taskTypeId]]
+      const production = rootGetters.currentProduction
       if (task && rootGetters.taskStatusMap[task.task_status_id].is_done) {
         if (detailLevel === 'day') {
           endDateString = moment(task.end_date, 'YYYY-MM-DD').format('YYYY-MM-DD')
@@ -947,8 +951,13 @@ const actions = {
           if (!quotas[personId][average][averagePeriod]) quotas[personId][average][averagePeriod] = 0
 
           if (shot.nb_frames) {
-            quotas[personId][endDateString] += shot.nb_frames
-            quotas[personId][average][averagePeriod] += shot.nb_frames
+            if (countMode === 'seconds') {
+              quotaUnit = Math.round((shot.nb_frames / (production.fps || shot.fps || 25)) * 100) / 100
+            } else {
+              quotaUnit = shot.nb_frames
+            }
+            quotas[personId][endDateString] += quotaUnit
+            quotas[personId][average][averagePeriod] += quotaUnit
           }
         })
       }

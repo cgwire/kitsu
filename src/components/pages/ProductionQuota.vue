@@ -38,14 +38,14 @@
         v-model="yearString"
       />
 
-      <!-- <div class="flexrow-item">
+      <div class="flexrow-item">
         <combobox
           class="flexrow-item"
           :label="$t('quota.count_label')"
           :options="countModeOptions"
           v-model="countMode"
         />
-      </div> -->
+      </div>
     </div>
 
     <quota
@@ -56,6 +56,7 @@
       :week="currentWeek"
       :day="currentDay"
       :currentPerson="currentPerson"
+      :countMode="currentMode"
     />
   </div>
 </div>
@@ -81,6 +82,7 @@ export default {
   data () {
     return {
       taskTypeId: '',
+      countMode: 'frames',
       countModeOptions: [
         { label: 'Frames', value: 'frames' },
         { label: 'Seconds', value: 'seconds' }
@@ -101,6 +103,7 @@ export default {
       currentWeek: moment().week(),
       currentDay: moment().date(),
       currentPerson: this.getCurrentPerson(),
+      currentMode: 'frames',
 
       isLoading: false,
       isLoadingError: false
@@ -155,7 +158,7 @@ export default {
       }
     },
     loadRoute () {
-      const { month, year, week, day } = this.$route.params
+      const { mode, month, year, week, day } = this.$route.params
 
       if (this.$route.path.indexOf('week') > 0) this.detailLevel = 'week'
       if (this.$route.path.indexOf('month') > 0) this.detailLevel = 'month'
@@ -163,6 +166,10 @@ export default {
 
       this.currentPerson = this.getCurrentPerson()
       this.detailLevelString = this.detailLevel
+      if (mode) {
+        this.countMode = mode
+        this.currentMode = this.countMode
+      }
       if (month) {
         this.currentMonth = Number(month)
         this.monthString = `${month}`
@@ -188,14 +195,16 @@ export default {
           this.$router.push({
             name: 'quota-month',
             params: {
-              year: this.currentYear
+              year: this.currentYear,
+              mode: this.currentMode
             }
           })
         } else if (this.detailLevelString === 'week') {
           this.$router.push({
             name: 'quota-week',
             params: {
-              year: this.currentYear
+              year: this.currentYear,
+              mode: this.currentMode
             }
           })
         } else if (this.detailLevelString === 'day') {
@@ -203,7 +212,8 @@ export default {
             name: 'quota-day',
             params: {
               year: this.currentYear,
-              month: this.currentMonth
+              month: this.currentMonth,
+              mode: this.currentMode
             }
           })
         }
@@ -216,19 +226,26 @@ export default {
         if (this.detailLevel === 'month') {
           this.$router.push({
             name: 'quota-month',
-            params: { year }
+            params: {
+              year: this.currentYear,
+              mode: this.currentMode
+            }
           })
         } else if (this.detailLevel === 'week') {
           this.$router.push({
             name: 'quota-week',
-            params: { year }
+            params: {
+              year: this.currentYear,
+              mode: this.currentMode
+            }
           })
         } else {
           this.$router.push({
             name: 'quota-day',
             params: {
               year: year,
-              month: Math.min(Number(this.monthString), currentMonth)
+              month: Math.min(Number(this.monthString), currentMonth),
+              mode: this.currentMode
             }
           })
         }
@@ -241,9 +258,22 @@ export default {
           name: 'quota-day',
           params: {
             year: this.currentYear,
-            month: Number(this.monthString)
+            month: Number(this.monthString),
+            mode: this.currentMode
           }
         })
+      }
+    },
+
+    countMode () {
+      if (this.currentMode !== this.countMode) {
+        this.$router.push({
+          name: 'quota-mode',
+          params: {
+            mode: this.countMode
+          }
+        })
+        this.currentMode = this.countMode
       }
     },
 

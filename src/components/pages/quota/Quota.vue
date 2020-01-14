@@ -131,6 +131,11 @@ export default {
       default: 'day',
       required: true
     },
+    countMode: {
+      type: String,
+      default: 'frames',
+      required: true
+    },
     year: {
       type: Number,
       default: 0
@@ -199,7 +204,8 @@ export default {
           if (this.taskTypeId) {
             this.computeQuota({
               taskTypeId: this.taskTypeId,
-              detailLevel: this.detailLevel
+              detailLevel: this.detailLevel,
+              countMode: this.countMode
             })
               .then(quotas => {
                 this.quotaMap = quotas
@@ -221,6 +227,9 @@ export default {
       }
     },
     detailLevel () {
+      this.loadData()
+    },
+    countMode () {
       this.loadData()
     }
   }
