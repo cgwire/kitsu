@@ -158,7 +158,8 @@ export default {
       }
     },
     loadRoute () {
-      const { mode, month, year, week, day } = this.$route.params
+      const { month, year, week, day } = this.$route.params
+      const { countMode } = this.$route.query
 
       if (this.$route.path.indexOf('week') > 0) this.detailLevel = 'week'
       if (this.$route.path.indexOf('month') > 0) this.detailLevel = 'month'
@@ -166,8 +167,8 @@ export default {
 
       this.currentPerson = this.getCurrentPerson()
       this.detailLevelString = this.detailLevel
-      if (mode) {
-        this.countMode = mode
+      if (countMode) {
+        this.countMode = countMode
         this.currentMode = this.countMode
       }
       if (month) {
@@ -195,16 +196,20 @@ export default {
           this.$router.push({
             name: 'quota-month',
             params: {
-              year: this.currentYear,
-              mode: this.currentMode
+              year: this.currentYear
+            },
+            query: {
+              countMode: this.countMode
             }
           })
         } else if (this.detailLevelString === 'week') {
           this.$router.push({
             name: 'quota-week',
             params: {
-              year: this.currentYear,
-              mode: this.currentMode
+              year: this.currentYear
+            },
+            query: {
+              countMode: this.countMode
             }
           })
         } else if (this.detailLevelString === 'day') {
@@ -212,8 +217,10 @@ export default {
             name: 'quota-day',
             params: {
               year: this.currentYear,
-              month: this.currentMonth,
-              mode: this.currentMode
+              month: this.currentMonth
+            },
+            query: {
+              countMode: this.countMode
             }
           })
         }
@@ -227,16 +234,21 @@ export default {
           this.$router.push({
             name: 'quota-month',
             params: {
-              year: this.currentYear,
-              mode: this.currentMode
+              year: year
+            },
+            query: {
+              countMode: this.countMode
             }
           })
         } else if (this.detailLevel === 'week') {
+          console.log(this.currentYear)
           this.$router.push({
             name: 'quota-week',
             params: {
-              year: this.currentYear,
-              mode: this.currentMode
+              year: year
+            },
+            query: {
+              countMode: this.countMode
             }
           })
         } else {
@@ -244,8 +256,10 @@ export default {
             name: 'quota-day',
             params: {
               year: year,
-              month: Math.min(Number(this.monthString), currentMonth),
-              mode: this.currentMode
+              month: Math.min(Number(this.monthString), currentMonth)
+            },
+            query: {
+              countMode: this.countMode
             }
           })
         }
@@ -258,8 +272,10 @@ export default {
           name: 'quota-day',
           params: {
             year: this.currentYear,
-            month: Number(this.monthString),
-            mode: this.currentMode
+            month: Number(this.monthString)
+          },
+          query: {
+            countMode: this.countMode
           }
         })
       }
@@ -268,9 +284,9 @@ export default {
     countMode () {
       if (this.currentMode !== this.countMode) {
         this.$router.push({
-          name: 'quota-mode',
-          params: {
-            mode: this.countMode
+          name: this.$route.name,
+          query: {
+            countMode: this.countMode
           }
         })
         this.currentMode = this.countMode
