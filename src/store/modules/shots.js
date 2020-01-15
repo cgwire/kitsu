@@ -155,6 +155,13 @@ const cache = {
 }
 
 const helpers = {
+  computeAverage (total, number, items) {
+    if (items > 1) {
+      return (total * (items - 1) + number) / items
+    } else {
+      return number
+    }
+  },
   getTask (taskId) {
     return tasksStore.state.taskMap[taskId]
   },
@@ -927,7 +934,8 @@ const actions = {
     const quotas = {}
     const average = 'average'
     let endDateString = ''
-    let averagePeriod = ''
+    let period = ''
+    let averageCounter = {}
     let quotaUnit = 0
 
     cache.shots.forEach((shot) => {
@@ -936,19 +944,21 @@ const actions = {
       if (task && rootGetters.taskStatusMap[task.task_status_id].is_done) {
         if (detailLevel === 'day') {
           endDateString = moment(task.end_date, 'YYYY-MM-DD').format('YYYY-MM-DD')
-          averagePeriod = moment(endDateString, 'YYYY-MM').format('YYYY-MM')
+          period = moment(endDateString, 'YYYY-MM').format('YYYY-MM')
         } else if (detailLevel === 'month') {
           endDateString = moment(task.end_date, 'YYYY-MM').format('YYYY-MM')
-          averagePeriod = moment(endDateString, 'YYYY').format('YYYY')
+          period = moment(endDateString, 'YYYY').format('YYYY')
         } else if (detailLevel === 'week') {
           endDateString = moment(task.end_date, 'YYYY-MM-DD').format('GGGG-W')
-          averagePeriod = moment(endDateString, 'YYYY').format('GGGG')
+          period = moment(endDateString, 'YYYY').format('GGGG')
         }
         task.assignees.forEach(personId => {
           if (!quotas[personId]) quotas[personId] = {}
           if (!quotas[personId][endDateString]) quotas[personId][endDateString] = 0
           if (!quotas[personId][average]) quotas[personId][average] = {}
-          if (!quotas[personId][average][averagePeriod]) quotas[personId][average][averagePeriod] = 0
+          if (!quotas[personId][average][period]) quotas[personId][average][period] = 0
+          if (!averageCounter[personId]) averageCounter[personId] = {}
+          if (!averageCounter[personId][period]) averageCounter[personId][period] = 0
 
           if (shot.nb_frames) {
             if (countMode === 'seconds') {
@@ -956,8 +966,9 @@ const actions = {
             } else {
               quotaUnit = shot.nb_frames
             }
+            averageCounter[personId][period]++
             quotas[personId][endDateString] += quotaUnit
-            quotas[personId][average][averagePeriod] += quotaUnit
+            quotas[personId][average][period] = helpers.computeAverage(quotas[personId][average][period], quotaUnit, averageCounter[personId][period])
           }
         })
       }
