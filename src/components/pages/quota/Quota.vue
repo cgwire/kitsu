@@ -1,6 +1,9 @@
 <template>
   <div class="quota">
-    <div class="quota-fixed" v-if="this.quotaLength > 0 && !isLoading">
+    <div
+      class="quota-fixed"
+      v-if="this.quotaLength > 0 && !isLoading"
+    >
       <div class="quota-header quota-row">
         <div class="header-cell row-cell row-cell--name">
           {{ $t('quota.name') }}
@@ -12,7 +15,11 @@
           {{ $t('quota.average') }}
         </div>
       </div>
-      <div class="quota-row" v-for="(people, key, i) in quotaMap" :key="'-' + i">
+      <div
+        class="quota-row"
+        v-for="(people, key, i) in quotaMap"
+        :key="'-' + i"
+      >
         <div class="row-cell row-cell--name">
           <people-avatar :size="30" :person="personMap[key]"/>
           {{ personMap[key].full_name }}
@@ -22,23 +29,26 @@
           class="row-cell row-cell--average"
           v-if="detailLevel === 'month'"
         >
-          {{ quotaMap[key].average[year] || '-' }}
+          {{ getQuotaAverage (key, {year: year}) }}
         </div>
         <div
           class="row-cell row-cell--average"
           v-if="detailLevel === 'week'"
         >
-          {{ quotaMap[key].average[year] || '-' }}
+          {{ getQuotaAverage (key, {year: year}) }}
         </div>
         <div
           class="row-cell row-cell--average"
           v-if="detailLevel === 'day'"
         >
-          {{ quotaMap[key].average[year+'-'+month.toString().padStart(2, '0')] || '-' }}
+          {{ getQuotaAverage (key, {year: year, month: month}) }}
         </div>
       </div>
     </div>
-    <div class="quota-scrolled" v-if="this.quotaLength > 0 && !isLoading">
+    <div
+      class="quota-scrolled"
+      v-if="this.quotaLength > 0 && !isLoading"
+    >
       <div class="quota-header quota-row">
         <div
           class="header-cell row-cell"
@@ -66,27 +76,31 @@
           {{ day }}
         </div>
       </div>
-      <div class="quota-row" v-for="(people, key, i) in quotaMap" :key="'-' + i">
+      <div
+        class="quota-row"
+        v-for="(people, key, i) in quotaMap"
+        :key="'-' + i"
+      >
         <div class="row-cell"
           v-for="month in monthRange"
           :key="'month-' + month"
           v-if="detailLevel === 'month'"
         >
-          {{ quotaMap[key][year+'-'+ month.toString().padStart(2, '0')] || '-'}}
+          {{ getQuota(key, {year: year, month: month}) }}
         </div>
         <div class="row-cell"
           v-for="week in weekRange"
           :key="'week-' + week"
           v-if="detailLevel === 'week'"
         >
-          {{ quotaMap[key][year+'-'+week] || '-'}}
+          {{ getQuota(key, {year: year, week: week}) }}
         </div>
         <div class="row-cell"
           v-for="day in dayRange"
           :key="'day-' + day"
           v-if="detailLevel === 'day'"
         >
-          {{ quotaMap[key][year+'-'+ month.toString().padStart(2, '0') +'-'+day] || '-'}}
+          {{ getQuota(key, {year: year, month: month, day: day}) }}
         </div>
       </div>
     </div>
@@ -217,7 +231,27 @@ export default {
         }
       })
     },
-    monthToString
+    monthToString,
+
+    getQuota (personId, options) {
+      var opt = options || {}
+      if (options.day) {
+        return this.quotaMap[personId][opt.year + '-' + opt.month.toString().padStart(2, '0') + '-' + opt.day] || '-'
+      } else if (opt.week) {
+        return this.quotaMap[personId][opt.year + '-' + opt.week] || '-'
+      } else {
+        return this.quotaMap[personId][opt.year + '-' + opt.month.toString().padStart(2, '0')] || '-'
+      }
+    },
+
+    getQuotaAverage (personId, options) {
+      var opt = options || {}
+      if (opt.month) {
+        return this.quotaMap[personId].average[opt.year + '-' + opt.month.toString().padStart(2, '0')] || '-'
+      } else {
+        return this.quotaMap[personId].average[opt.year] || '-'
+      }
+    }
   },
 
   watch: {
