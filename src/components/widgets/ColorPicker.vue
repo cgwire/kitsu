@@ -38,11 +38,6 @@
 export default {
   name: 'colorpicker',
 
-  model: {
-    prop: 'checked',
-    event: 'change'
-  },
-
   props: {
     isActive: {
       type: Boolean,
