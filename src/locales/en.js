@@ -501,7 +501,10 @@ export default {
     detail_label: 'Detail level',
     month_label: 'Month',
     year_label: 'Year',
-    count_label: 'Count mode'
+    count_label: 'Count mode',
+    details_name: 'Name',
+    details_frames: 'Frames',
+    details_seconds: 'Seconds'
   },
 
   shots: {

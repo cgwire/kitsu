@@ -8,9 +8,9 @@
         <div class="header-cell row-cell row-cell--name">
           {{ $t('quota.name') }}
         </div>
-        <div class="header-cell row-cell row-cell--weekly">
+        <!-- <div class="header-cell row-cell row-cell--weekly">
           {{ $t('quota.quota_week') }}
-        </div>
+        </div> -->
         <div class="header-cell row-cell row-cell--average">
           {{ $t('quota.average') }}
         </div>
@@ -24,24 +24,24 @@
           <people-avatar :size="30" :person="personMap[key]"/>
           {{ personMap[key].full_name }}
         </div>
-        <div class="row-cell row-cell--weekly">{{ '-' }}</div>
+        <!-- <div class="row-cell row-cell--weekly">{{ '-' }}</div> -->
         <div
           class="row-cell row-cell--average"
           v-if="detailLevel === 'month'"
         >
-          {{ getQuotaAverage (key, {year: year}) }}
+          {{ getQuotaAverage (key, {year}) }}
         </div>
         <div
           class="row-cell row-cell--average"
           v-if="detailLevel === 'week'"
         >
-          {{ getQuotaAverage (key, {year: year}) }}
+          {{ getQuotaAverage (key, {year}) }}
         </div>
         <div
           class="row-cell row-cell--average"
           v-if="detailLevel === 'day'"
         >
-          {{ getQuotaAverage (key, {year: year, month: month}) }}
+          {{ getQuotaAverage (key, {year, month}) }}
         </div>
       </div>
     </div>
@@ -86,23 +86,75 @@
           :key="'month-' + month"
           v-if="detailLevel === 'month'"
         >
-          {{ getQuota(key, {year: year, month: month}) }}
+          <button
+            type="button"
+            class="quota-button"
+            v-if="getQuota(key, {year, month})"
+          >
+            {{ getQuota(key, {year, month}) }}
+          </button>
+          <span v-else>-</span>
         </div>
         <div class="row-cell"
           v-for="week in weekRange"
           :key="'week-' + week"
           v-if="detailLevel === 'week'"
         >
-          {{ getQuota(key, {year: year, week: week}) }}
+          <button
+            type="button"
+            class="quota-button"
+            v-if="getQuota(key, {year, week})"
+          >
+            {{ getQuota(key, {year, week}) }}
+          </button>
+          <span v-else>-</span>
         </div>
         <div class="row-cell"
           v-for="day in dayRange"
           :key="'day-' + day"
           v-if="detailLevel === 'day'"
         >
-          {{ getQuota(key, {year: year, month: month, day: day}) }}
+          <button
+            type="button"
+            :class="{
+              'quota-button': true,
+              'is-selected': selected === key+day
+            }"
+            v-if="getQuota(key, {year, month, day})"
+            @click="getDetails(key, key+day, {year, month, day})"
+          >
+            {{ getQuota(key, {year, month, day}) }}
+          </button>
+          <span v-else>-</span>
         </div>
       </div>
+    </div>
+    <div
+      class="quota-fixed quota-panel"
+      v-if="isPanelShown"
+    >
+      <h2 class="details-title">{{ detailsTitle }}</h2>
+      <table class="details">
+        <thead>
+          <tr>
+            <th>{{ $t('quota.details_name') }}</th>
+            <th>{{
+              this.countMode === 'seconds'
+                ? $t('quota.details_seconds')
+                : $t('quota.details_frames') }}
+            </th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr
+            v-for="shot in detailsMap"
+            :key="'shot-'+shot"
+          >
+            <td>{{ shot.name }}</td>
+            <td>{{ shot.nb_frames}}</td>
+          </tr>
+        </tbody>
+      </table>
     </div>
     <table-info
       :is-loading="isLoading"
@@ -174,9 +226,13 @@ export default {
       isError: false,
       quotaMap: {},
       quotaLength: 0,
+      detailsTitle: '',
+      detailsMap: {},
       currentMonth: moment().month() + 1,
       currentYear: moment().year(),
-      currentWeek: moment().week()
+      currentWeek: moment().week(),
+      selected: undefined,
+      isPanelShown: false
     }
   },
 
@@ -207,7 +263,8 @@ export default {
   methods: {
     ...mapActions([
       'loadShots',
-      'computeQuota'
+      'computeQuota',
+      'getPeriodDetails'
     ]),
     loadData () {
       this.loadShots((err) => {
@@ -225,7 +282,27 @@ export default {
                 this.quotaMap = quotas
                 this.isLoading = false
                 this.quotaLength = Object.keys(this.quotaMap).length
-                console.debug('method', this.quotaMap)
+              })
+          }
+        }
+      })
+    },
+    loadDetails (personId, dateString) {
+      this.loadShots((err) => {
+        this.isLoading = true
+        if (err) {
+          console.error(err)
+        } else {
+          if (this.taskTypeId) {
+            this.getPeriodDetails({
+              taskTypeId: this.taskTypeId,
+              detailLevel: this.detailLevel,
+              personId,
+              dateString
+            })
+              .then(shots => {
+                this.detailsMap = shots
+                this.isLoading = false
               })
           }
         }
@@ -236,11 +313,11 @@ export default {
     getQuota (personId, options) {
       var opt = options || {}
       if (options.day) {
-        return this.quotaMap[personId][opt.year + '-' + opt.month.toString().padStart(2, '0') + '-' + opt.day] || '-'
+        return this.quotaMap[personId][opt.year + '-' + opt.month.toString().padStart(2, '0') + '-' + opt.day]
       } else if (opt.week) {
-        return this.quotaMap[personId][opt.year + '-' + opt.week] || '-'
+        return this.quotaMap[personId][opt.year + '-' + opt.week]
       } else {
-        return this.quotaMap[personId][opt.year + '-' + opt.month.toString().padStart(2, '0')] || '-'
+        return this.quotaMap[personId][opt.year + '-' + opt.month.toString().padStart(2, '0')]
       }
     },
 
@@ -251,6 +328,14 @@ export default {
       } else {
         return this.quotaMap[personId].average[opt.year] || '-'
       }
+    },
+
+    getDetails (personId, id, options) {
+      var opt = options || {}
+      this.selected = id
+      this.isPanelShown = true
+      this.detailsTitle = moment(opt.year + '-' + opt.month.toString().padStart(2, '0') + '-' + opt.day, 'YYYY-MM-DD').format('DD MMM YYYY')
+      this.loadDetails(personId, opt.year + '-' + opt.month.toString().padStart(2, '0') + '-' + opt.day)
     }
   },
 
@@ -275,11 +360,20 @@ export default {
     .quota {
       color: $white;
     }
-    .row-cell {
+    .quota-panel {
+      border-left-color: $dark-grey-light;
+    }
+    .row-cell,
+    .details tr {
       border-bottom-color: $dark-grey-light;
     }
-    .quota-row:nth-child(odd):not(.quota-header) .row-cell {
+    .quota-row:nth-child(odd):not(.quota-header) .row-cell,
+    .details tbody tr:nth-child(even) {
       background-color: $dark-grey-lightmore;
+    }
+    .details td,
+    .details th {
+      color: $white;
     }
   }
   .quota {
@@ -300,6 +394,10 @@ export default {
     flex: 1 1 auto;
     overflow: hidden;
     overflow-x: auto;
+  }
+  .quota-panel {
+    padding: 1rem;
+    border-left: 1px solid $light-grey-light;
   }
   .quota-row {
     display: flex;
@@ -342,5 +440,44 @@ export default {
   }
   .row-cell--average {
     width: 8rem;
+  }
+  .quota-button {
+    border-radius: .5rem;
+    padding: .5rem;
+    background: transparent;
+    border: 0;
+    cursor: pointer;
+    color: inherit;
+    font-size: inherit;
+    &:hover,
+    &:focus,
+    &.is-selected {
+      background-color: $dark-grey-lightest;
+    }
+  }
+  .details {
+    min-width: 14rem;
+    td, th {
+      color: $dark-grey;
+      font-size: .8rem;
+      padding: .25rem;
+      text-align: center;
+      &:first-child {
+        text-align: left;
+      }
+    }
+    tr {
+      border-bottom: 1px solid $light-grey-light;
+    }
+    tbody {
+      tr:nth-child(even) {
+        background-color: $white-grey-light;
+      }
+    }
+  }
+  .details-title {
+    font-size: 1.2rem;
+    font-weight: bold;
+    margin-bottom: 1.5rem;
   }
 </style>

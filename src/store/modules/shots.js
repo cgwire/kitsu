@@ -974,6 +974,26 @@ const actions = {
       }
     })
     return Promise.resolve(quotas)
+  },
+
+  getPeriodDetails (
+    { commit, state, rootGetters },
+    { taskTypeId, detailLevel, personId, dateString }) {
+    const taskStatusMap = rootGetters.taskStatusMap
+
+    const shots = cache.shots.filter((shot) => {
+      const task = rootGetters.taskMap[shot.validations[taskTypeId]]
+      const taskStatus = taskStatusMap[task.task_status_id]
+      const endDateString = moment(task.end_date, 'YYYY-MM-DD').format('YYYY-MM-DD')
+
+      return (
+        task &&
+        taskStatus.is_done &&
+        task.assignees.includes(personId) &&
+        endDateString === dateString
+      )
+    })
+    return Promise.resolve(shots)
   }
 }
 
