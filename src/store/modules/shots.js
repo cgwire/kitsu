@@ -29,6 +29,9 @@ import {
   computeStats
 } from '../../lib/stats'
 import {
+  frameToSeconds
+} from '../../lib/video'
+import {
   buildShotIndex,
   buildSequenceIndex,
   buildEpisodeIndex,
@@ -149,19 +152,16 @@ import {
   RESET_ALL
 } from '../mutation-types'
 
+const AVERAGE = 'average'
+const COUNT = 'count'
+const TOTAL = 'total'
+
 const cache = {
   shots: [],
   shotIndex: []
 }
 
 const helpers = {
-  computeAverage (total, number, items) {
-    if (items > 1) {
-      return (total * (items - 1) + number) / items
-    } else {
-      return number
-    }
-  },
   getTask (taskId) {
     return tasksStore.state.taskMap[taskId]
   },
@@ -217,6 +217,48 @@ const helpers = {
   sortValidationColumns (validationColumns, shotFilledColumns, taskTypeMap) {
     let columns = [...validationColumns]
     return sortValidationColumns(columns, taskTypeMap)
+  },
+
+  getPeriod (task, detailLevel) {
+    const endDateString = helpers.getTaskEndDate(task, detailLevel)
+    let period
+    if (detailLevel === 'day') {
+      period = moment(endDateString, 'YYYY-MM').format('YYYY-MM')
+    } else if (detailLevel === 'month') {
+      period = moment(endDateString, 'YYYY').format('YYYY')
+    } else if (detailLevel === 'week') {
+      period = moment(endDateString, 'YYYY').format('GGGG')
+    }
+    return period
+  },
+
+  getTaskEndDate (task, detailLevel) {
+    let endDateString
+    if (detailLevel === 'day') {
+      endDateString = moment(task.end_date, 'YYYY-MM-DD').format('YYYY-MM-DD')
+    } else if (detailLevel === 'month') {
+      endDateString = moment(task.end_date, 'YYYY-MM').format('YYYY-MM')
+    } else if (detailLevel === 'week') {
+      endDateString = moment(task.end_date, 'YYYY-MM-DD').format('GGGG-W')
+    }
+    return endDateString
+  },
+
+  initQuota (quotas, personId, endDateString, period) {
+    if (!quotas[personId]) quotas[personId] = {}
+    const personQuotas = quotas[personId]
+
+    if (!personQuotas[endDateString]) personQuotas[endDateString] = 0
+    if (!personQuotas[AVERAGE]) personQuotas[AVERAGE] = {}
+    if (!personQuotas[AVERAGE][period]) personQuotas[AVERAGE][period] = 0
+    if (!personQuotas[COUNT]) personQuotas[COUNT] = {}
+    if (!personQuotas[COUNT][period]) {
+      personQuotas[COUNT][period] = 0
+    }
+    if (!personQuotas[TOTAL]) personQuotas[TOTAL] = {}
+    if (!personQuotas[TOTAL][period]) personQuotas[TOTAL][period] = 0
+
+    return personQuotas
   }
 }
 
@@ -931,44 +973,32 @@ const actions = {
   computeQuota (
     { commit, state, rootGetters },
     { taskTypeId, detailLevel, countMode }) {
+    const taskMap = rootGetters.taskMap
+    const taskStatusMap = rootGetters.taskStatusMap
+    const production = rootGetters.currentProduction
     const quotas = {}
-    const average = 'average'
-    let endDateString = ''
-    let period = ''
-    let averageCounter = {}
-    let quotaUnit = 0
 
     cache.shots.forEach((shot) => {
-      const task = rootGetters.taskMap[shot.validations[taskTypeId]]
-      const production = rootGetters.currentProduction
-      if (task && rootGetters.taskStatusMap[task.task_status_id].is_done) {
-        if (detailLevel === 'day') {
-          endDateString = moment(task.end_date, 'YYYY-MM-DD').format('YYYY-MM-DD')
-          period = moment(endDateString, 'YYYY-MM').format('YYYY-MM')
-        } else if (detailLevel === 'month') {
-          endDateString = moment(task.end_date, 'YYYY-MM').format('YYYY-MM')
-          period = moment(endDateString, 'YYYY').format('YYYY')
-        } else if (detailLevel === 'week') {
-          endDateString = moment(task.end_date, 'YYYY-MM-DD').format('GGGG-W')
-          period = moment(endDateString, 'YYYY').format('GGGG')
-        }
-        task.assignees.forEach(personId => {
-          if (!quotas[personId]) quotas[personId] = {}
-          if (!quotas[personId][endDateString]) quotas[personId][endDateString] = 0
-          if (!quotas[personId][average]) quotas[personId][average] = {}
-          if (!quotas[personId][average][period]) quotas[personId][average][period] = 0
-          if (!averageCounter[personId]) averageCounter[personId] = {}
-          if (!averageCounter[personId][period]) averageCounter[personId][period] = 0
+      const task = taskMap[shot.validations[taskTypeId]]
+      const isTaskFinished = task && taskStatusMap[task.task_status_id].is_done
+      if (isTaskFinished) {
+        const period = helpers.getPeriod(task, detailLevel)
+        const endDateString = helpers.getTaskEndDate(task, detailLevel)
 
+        task.assignees.forEach(personId => {
+          const personQuotas =
+            helpers.initQuota(quotas, personId, endDateString, period)
           if (shot.nb_frames) {
+            let quota = shot.nb_frames
             if (countMode === 'seconds') {
-              quotaUnit = Math.round((shot.nb_frames / (production.fps || shot.fps || 25)) * 100) / 100
-            } else {
-              quotaUnit = shot.nb_frames
+              quota = frameToSeconds(shot.nb_frames, production, shot)
             }
-            averageCounter[personId][period]++
-            quotas[personId][endDateString] += quotaUnit
-            quotas[personId][average][period] = helpers.computeAverage(quotas[personId][average][period], quotaUnit, averageCounter[personId][period])
+            const isNewQuotaDay = personQuotas[endDateString] === 0
+            if (isNewQuotaDay) personQuotas[COUNT][period]++
+            personQuotas[endDateString] += quota
+            personQuotas[TOTAL][period] += quota
+            personQuotas[AVERAGE][period] =
+              personQuotas[TOTAL][period] / personQuotas[COUNT][period]
           }
         })
       }
