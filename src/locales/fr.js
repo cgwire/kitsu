@@ -401,7 +401,8 @@ export default {
     type_label: 'Type',
     detail_label: 'Niveau de détail',
     year_label: 'Année',
-    count_label: 'Mode de comptage'
+    count_label: 'Mode de comptage',
+    no_quota: 'Il n\'y a pas de quota pour ce type de tâche.'
   },
 
   sequences: {

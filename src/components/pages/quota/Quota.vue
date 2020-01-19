@@ -129,6 +129,14 @@
         </div>
       </div>
     </div>
+
+    <div
+      class="has-text-centered empty-quota"
+      v-if="this.quotaLength === 0 && !isLoading"
+    >
+      <p class="info">{{ $t('quota.no_quota') }}</p>
+    </div>
+
     <div
       class="quota-fixed quota-panel"
       v-if="isPanelShown"
@@ -476,9 +484,14 @@ export default {
       }
     }
   }
+
   .details-title {
     font-size: 1.2rem;
     font-weight: bold;
     margin-bottom: 1.5rem;
+  }
+
+  .empty-quota {
+    width: 100%;
   }
 </style>

@@ -499,12 +499,12 @@ export default {
     average: 'Average',
     type_label: 'Type',
     detail_label: 'Detail level',
+    details_name: 'Detail',
+    details_seconds: 'Seconds',
     month_label: 'Month',
     year_label: 'Year',
     count_label: 'Count mode',
-    details_name: 'Name',
-    details_frames: 'Frames',
-    details_seconds: 'Seconds'
+    no_quota: 'There is no quota for this task type.'
   },
 
   shots: {
