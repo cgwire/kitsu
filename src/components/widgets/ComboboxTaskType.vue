@@ -37,6 +37,10 @@
       </div>
     </div>
   </div>
+  <combobox-mask
+    :displayed="showTaskTypeList"
+    @click="toggleTaskTypeList"
+  />
 </div>
 
 </template>
@@ -45,6 +49,7 @@
 import { mapGetters } from 'vuex'
 import { ChevronDownIcon } from 'vue-feather-icons'
 
+import ComboboxMask from './ComboboxMask'
 import TaskTypeName from './TaskTypeName'
 
 export default {
@@ -52,6 +57,7 @@ export default {
 
   components: {
     ChevronDownIcon,
+    ComboboxMask,
     TaskTypeName
   },
 
@@ -171,7 +177,7 @@ export default {
   width: 170px;
   position: absolute;
   border: 1px solid $light-grey-light;
-  z-index: 200;
+  z-index: 300;
   margin-left: -1px;
   max-height: 120px;
   overflow-y: auto;
