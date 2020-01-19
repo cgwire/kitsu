@@ -8,9 +8,6 @@
         <div class="header-cell row-cell row-cell--name">
           {{ $t('quota.name') }}
         </div>
-        <!-- <div class="header-cell row-cell row-cell--weekly">
-          {{ $t('quota.quota_week') }}
-        </div> -->
         <div class="header-cell row-cell row-cell--average">
           {{ $t('quota.average') }}
         </div>
@@ -24,7 +21,6 @@
           <people-avatar :size="30" :person="personMap[key]"/>
           {{ personMap[key].full_name }}
         </div>
-        <!-- <div class="row-cell row-cell--weekly">{{ '-' }}</div> -->
         <div
           class="row-cell row-cell--average"
           v-if="detailLevel === 'month'"
@@ -159,7 +155,7 @@
             :key="'shot-'+shot"
           >
             <td>{{ shot.name }}</td>
-            <td>{{ shot.nb_frames}}</td>
+            <td>{{ shot.nb_frames }}</td>
           </tr>
         </tbody>
       </table>
@@ -318,33 +314,41 @@ export default {
     },
     monthToString,
 
-    getQuota (personId, options) {
-      var opt = options || {}
-      if (options.day) {
-        return this.quotaMap[personId][opt.year + '-' + opt.month.toString().padStart(2, '0') + '-' + opt.day]
+    getQuota (personId, opt = {}) {
+      if (opt.day) {
+        const yearKey =
+          `${opt.year}-${opt.month.toString().padStart(2, '0')}-${opt.day}`
+        return this.quotaMap[personId][yearKey]
       } else if (opt.week) {
-        return this.quotaMap[personId][opt.year + '-' + opt.week]
+        const weekKey = `${opt.year}-${opt.week}`
+        return this.quotaMap[personId][weekKey]
       } else {
-        return this.quotaMap[personId][opt.year + '-' + opt.month.toString().padStart(2, '0')]
+        const dayKey = `${opt.year}-${opt.month.toString().padStart(2, '0')}`
+        return this.quotaMap[personId][dayKey]
       }
     },
 
-    getQuotaAverage (personId, options) {
-      var opt = options || {}
+    getQuotaAverage (personId, opt = {}) {
+      let average
       if (opt.month) {
-        const month = opt.year + '-' + opt.month.toString().padStart(2, '0')
-        return this.quotaMap[personId].average[month].toFixed(2) || '-'
-      } else {
-        return this.quotaMap[personId].average[opt.year].toFixed(2) || '-'
+        const monthKey = opt.year + '-' + opt.month.toString().padStart(2, '0')
+        average = this.quotaMap[personId].average[monthKey]
+      } else if (opt.week) {
+        const weekKey = `${opt.year}-${opt.week}`
+        average = this.quotaMap[personId].average[weekKey]
+      } else if (this.quotaMap[personId].average) {
+        average = this.quotaMap[personId].average[opt.year]
       }
+      return average ? average.toFixed(2) : '-'
     },
 
-    getDetails (personId, id, options) {
-      var opt = options || {}
+    getDetails (personId, id, opt = {}) {
       this.selected = id
       this.isPanelShown = true
-      this.detailsTitle = moment(opt.year + '-' + opt.month.toString().padStart(2, '0') + '-' + opt.day, 'YYYY-MM-DD').format('DD MMM YYYY')
-      this.loadDetails(personId, opt.year + '-' + opt.month.toString().padStart(2, '0') + '-' + opt.day)
+      const date =
+        `${opt.year}-${opt.month.toString().padStart(2, '0')}-${opt.day}`
+      this.detailsTitle = moment(date, 'YYYY-MM-DD').format('DD MMM YYYY')
+      this.loadDetails(personId, date)
     }
   },
 
@@ -385,6 +389,7 @@ export default {
       color: $white;
     }
   }
+
   .quota {
     display: flex;
     flex-direction: row;
@@ -392,11 +397,13 @@ export default {
     max-width: 100%;
     color: $dark-grey;
   }
+
   .quota-fixed {
     display: flex;
     flex-direction: column;
     flex: 0 0 auto;
   }
+
   .quota-scrolled {
     display: flex;
     flex-direction: column;
@@ -404,15 +411,18 @@ export default {
     overflow: hidden;
     overflow-x: auto;
   }
+
   .quota-panel {
     padding: 1rem;
     border-left: 1px solid $light-grey-light;
   }
+
   .quota-row {
     display: flex;
     flex-direction: row;
     flex-wrap: nowrap;
   }
+
   .row-cell {
     display: flex;
     flex-direction: row;
@@ -428,15 +438,19 @@ export default {
     text-overflow: ellipsis;
     white-space: nowrap;
   }
+
   .quota-row:nth-child(odd):not(.quota-header) .row-cell {
     background-color: $white-grey-light;
   }
+
   .quota-row:last-child .row-cell {
     border: 0;
   }
+
   .header-cell {
     font-weight: bold;
   }
+
   .row-cell--name {
     width: 12rem;
     justify-content: flex-start;
@@ -444,12 +458,15 @@ export default {
       margin-right: .5rem;
     }
   }
+
   .row-cell--weekly {
     width: 10rem;
   }
+
   .row-cell--average {
     width: 8rem;
   }
+
   .quota-button {
     border-radius: .5rem;
     padding: .5rem;
@@ -464,6 +481,7 @@ export default {
       background-color: $dark-grey-lightest;
     }
   }
+
   .details {
     min-width: 14rem;
     td, th {

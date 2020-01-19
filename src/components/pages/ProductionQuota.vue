@@ -157,6 +157,7 @@ export default {
         return {}
       }
     },
+
     loadRoute () {
       const { month, year, week, day } = this.$route.params
       const { countMode } = this.$route.query
