@@ -270,27 +270,22 @@ export default {
       'computeQuota',
       'getPeriodDetails'
     ]),
+
     loadData () {
-      this.loadShots((err) => {
-        this.isLoading = true
-        if (err) {
-          console.error(err)
-        } else {
-          if (this.taskTypeId) {
-            this.computeQuota({
-              taskTypeId: this.taskTypeId,
-              detailLevel: this.detailLevel,
-              countMode: this.countMode
-            })
-              .then(quotas => {
-                this.quotaMap = quotas
-                this.isLoading = false
-                this.quotaLength = Object.keys(this.quotaMap).length
-              })
-          }
-        }
-      })
+      if (this.taskTypeId) {
+        this.computeQuota({
+          taskTypeId: this.taskTypeId,
+          detailLevel: this.detailLevel,
+          countMode: this.countMode
+        })
+          .then(quotas => {
+            this.quotaMap = quotas
+            this.isLoading = false
+            this.quotaLength = Object.keys(this.quotaMap).length
+          })
+      }
     },
+
     loadDetails (personId, dateString) {
       this.loadShots((err) => {
         this.isLoading = true
@@ -358,10 +353,16 @@ export default {
         this.loadData()
       }
     },
+
     detailLevel () {
       this.loadData()
     },
+
     countMode () {
+      this.loadData()
+    },
+
+    shotMap () {
       this.loadData()
     }
   }

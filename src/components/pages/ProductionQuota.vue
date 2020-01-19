@@ -66,7 +66,7 @@
 <script>
 import moment from 'moment-timezone'
 import { monthToString, range } from '../../lib/time'
-import { mapGetters } from 'vuex'
+import { mapGetters, mapActions } from 'vuex'
 import Combobox from '../widgets/Combobox'
 import ComboboxTaskType from '../widgets/ComboboxTaskType'
 import Quota from './quota/Quota'
@@ -115,14 +115,18 @@ export default {
   },
 
   mounted () {
-    this.taskTypeId = this.shotTaskTypes[0].id
+    const key = `quota:${this.currentProduction.id}:task-type-id`
+    this.taskTypeId = localStorage.getItem(key) || this.shotTaskTypes[0].id
   },
 
   computed: {
     ...mapGetters([
+      'currentEpisode',
+      'currentProduction',
       'shotTaskTypes',
       'personMap'
     ]),
+
     yearOptions () {
       const year = 2018
       const currentYear = moment().year()
@@ -132,6 +136,7 @@ export default {
           value: `${year}`
         }))
     },
+
     monthOptions () {
       const currentYear = `${moment().year()}`
       const month = 1
@@ -149,6 +154,11 @@ export default {
   },
 
   methods: {
+    ...mapActions([
+      'computeQuota',
+      'loadShots'
+    ]),
+
     getCurrentPerson () {
       const personId = this.$route.params.person_id
       if (personId && this.personMap) {
@@ -191,6 +201,7 @@ export default {
   },
 
   watch: {
+
     detailLevelString () {
       if (this.detailLevel !== this.detailLevelString) {
         if (this.detailLevelString === 'month') {
@@ -227,6 +238,7 @@ export default {
         }
       }
     },
+
     yearString () {
       const year = Number(this.yearString)
       const currentMonth = moment().month() + 1
@@ -292,6 +304,25 @@ export default {
         })
         this.currentMode = this.countMode
       }
+    },
+
+    taskTypeId () {
+      const key = `quota:${this.currentProduction.id}:task-type-id`
+      localStorage.setItem(key, this.taskTypeId)
+    },
+
+    currentProduction () {
+      this.isLoading = true
+      this.loadShots(() => {
+        this.isLoading = false
+      })
+    },
+
+    currentEpisode () {
+      this.isLoading = true
+      this.loadShots(() => {
+        this.isLoading = false
+      })
     },
 
     $route () {
