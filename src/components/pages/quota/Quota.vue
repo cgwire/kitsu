@@ -29,19 +29,19 @@
           class="row-cell row-cell--average"
           v-if="detailLevel === 'month'"
         >
-          {{ getQuotaAverage (key, {year}) }}
+          {{ getQuotaAverage(key, { year }) }}
         </div>
         <div
           class="row-cell row-cell--average"
           v-if="detailLevel === 'week'"
         >
-          {{ getQuotaAverage (key, {year}) }}
+          {{ getQuotaAverage(key, { year }) }}
         </div>
         <div
           class="row-cell row-cell--average"
           v-if="detailLevel === 'day'"
         >
-          {{ getQuotaAverage (key, {year, month}) }}
+          {{ getQuotaAverage(key, { year, month }) }}
         </div>
       </div>
     </div>
@@ -324,9 +324,10 @@ export default {
     getQuotaAverage (personId, options) {
       var opt = options || {}
       if (opt.month) {
-        return this.quotaMap[personId].average[opt.year + '-' + opt.month.toString().padStart(2, '0')] || '-'
+        const month = opt.year + '-' + opt.month.toString().padStart(2, '0')
+        return this.quotaMap[personId].average[month].toFixed(2) || '-'
       } else {
-        return this.quotaMap[personId].average[opt.year] || '-'
+        return this.quotaMap[personId].average[opt.year].toFixed(2) || '-'
       }
     },
 
