@@ -59,8 +59,24 @@
       :countMode="currentMode"
     />
   </div>
+  <div
+    class="column side-column"
+    v-if="showInfo"
+  >
+    <people-quota-info
+      :person="currentPerson"
+      :year="currentYear"
+      :month="currentMonth"
+      :week="currentWeek"
+      :day="currentDay"
+      :is-loading="false"
+      :is-loading-error="false"
+      :shots="personShots"
+      :count-mode="countMode"
+      @close="hideSideInfo"
+    />
+  </div>
 </div>
-
 </template>
 
 <script>
@@ -70,12 +86,14 @@ import { mapGetters, mapActions } from 'vuex'
 import Combobox from '../widgets/Combobox'
 import ComboboxTaskType from '../widgets/ComboboxTaskType'
 import Quota from './quota/Quota'
+import PeopleQuotaInfo from '../sides/PeopleQuotaInfo'
 
 export default {
   name: 'production-quota',
   components: {
     Combobox,
     ComboboxTaskType,
+    PeopleQuotaInfo,
     Quota
   },
 
@@ -92,12 +110,6 @@ export default {
         { label: 'Week', value: 'week' },
         { label: 'Month', value: 'month' }
       ],
-      detailLevelString: 'day',
-      detailLevel: 'day',
-
-      yearString: `${moment().year()}`,
-      monthString: `${moment().month() + 1}`,
-
       currentYear: moment().year(),
       currentMonth: moment().month() + 1,
       currentWeek: moment().week(),
@@ -105,18 +117,21 @@ export default {
       currentPerson: this.getCurrentPerson(),
       currentMode: 'frames',
 
+      detailLevelString: 'day',
+      detailLevel: 'day',
+
       isLoading: false,
-      isLoadingError: false
+      isLoadingError: false,
+      monthString: `${moment().month() + 1}`,
+
+      personShots: [],
+      showInfo: false,
+      yearString: `${moment().year()}`
     }
   },
 
-  created () {
-    this.loadRoute()
-  },
-
   mounted () {
-    const key = `quota:${this.currentProduction.id}:task-type-id`
-    this.taskTypeId = localStorage.getItem(key) || this.shotTaskTypes[0].id
+    this.loadRoute()
   },
 
   computed: {
@@ -156,6 +171,7 @@ export default {
   methods: {
     ...mapActions([
       'computeQuota',
+      'getPersonShots',
       'loadShots'
     ]),
 
@@ -170,7 +186,7 @@ export default {
 
     loadRoute () {
       const { month, year, week, day } = this.$route.params
-      const { countMode } = this.$route.query
+      const { countMode, taskTypeId } = this.$route.query
 
       if (this.$route.path.indexOf('week') > 0) this.detailLevel = 'week'
       if (this.$route.path.indexOf('month') > 0) this.detailLevel = 'month'
@@ -181,6 +197,13 @@ export default {
       if (countMode) {
         this.countMode = countMode
         this.currentMode = this.countMode
+      }
+      if (taskTypeId) {
+        this.taskTypeId = taskTypeId
+      } else {
+        const key = `quota:${this.currentProduction.id}:task-type-id`
+        this.taskTypeId =
+          localStorage.getItem(key) || this.shotTaskTypes[0].id
       }
       if (month) {
         this.currentMonth = Number(month)
@@ -197,11 +220,36 @@ export default {
       if (day) {
         this.currentDay = Number(day)
       }
+
+      if (this.$route.path.indexOf('person') > 0) {
+        this.getPersonShots({
+          personId: this.currentPerson.id,
+          detailLevel: this.detailLevel,
+          taskTypeId: this.taskTypeId,
+          year,
+          month,
+          week,
+          day
+        })
+          .then(shots => {
+            this.personShots = shots
+            this.showSideInfo()
+          })
+      } else {
+        this.hideSideInfo()
+      }
+    },
+
+    showSideInfo () {
+      this.showInfo = true
+    },
+
+    hideSideInfo () {
+      this.showInfo = false
     }
   },
 
   watch: {
-
     detailLevelString () {
       if (this.detailLevel !== this.detailLevelString) {
         if (this.detailLevelString === 'month') {
@@ -297,7 +345,6 @@ export default {
     countMode () {
       if (this.currentMode !== this.countMode) {
         this.$router.push({
-          name: this.$route.name,
           query: {
             countMode: this.countMode
           }
@@ -309,11 +356,17 @@ export default {
     taskTypeId () {
       const key = `quota:${this.currentProduction.id}:task-type-id`
       localStorage.setItem(key, this.taskTypeId)
+      this.$router.push({
+        query: {
+          taskTypeId: this.taskTypeId
+        }
+      })
     },
 
     currentProduction () {
       this.isLoading = true
       this.loadShots(() => {
+        this.loadRoute()
         this.isLoading = false
       })
     },
@@ -321,6 +374,7 @@ export default {
     currentEpisode () {
       this.isLoading = true
       this.loadShots(() => {
+        this.loadRoute()
         this.isLoading = false
       })
     },
@@ -369,5 +423,9 @@ export default {
 
 .zoom-level {
   margin-top: -10px;
+}
+
+.side-column {
+  margin: 0;
 }
 </style>

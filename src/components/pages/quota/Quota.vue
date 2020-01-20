@@ -43,13 +43,14 @@
     </div>
     <div
       class="quota-scrolled"
+      ref="body"
       v-if="this.quotaLength > 0 && !isLoading"
     >
       <div class="quota-header quota-row">
         <div
           class="header-cell row-cell"
-          v-for="month in monthRange"
           :key="'month-' + month"
+          v-for="month in monthRange"
           v-if="detailLevel === 'month'"
         >
           {{ monthToString(month) }}
@@ -74,54 +75,90 @@
       </div>
       <div
         class="quota-row"
-        v-for="(people, key, i) in quotaMap"
-        :key="'-' + i"
+        v-for="(people, key) in quotaMap"
+        :key="key"
       >
-        <div class="row-cell"
-          v-for="month in monthRange"
+        <div
+          :class="{
+            'row-cell': true,
+            selected: isMonthSelected(key, year, month)
+          }"
           :key="'month-' + month"
+          v-for="month in monthRange"
           v-if="detailLevel === 'month'"
         >
-          <button
-            type="button"
+          <router-link
             class="quota-button"
+            :to="{
+              name: 'quota-month-person',
+              params: {
+                person_id: key,
+                year: year,
+                month: month
+              }
+            }"
             v-if="getQuota(key, {year, month})"
           >
             {{ getQuota(key, {year, month}) }}
-          </button>
+          </router-link>
           <span v-else>-</span>
         </div>
-        <div class="row-cell"
-          v-for="week in weekRange"
+
+        <div
+          :class="{
+            'row-cell': true,
+            selected: isWeekSelected(key, year, week)
+          }"
           :key="'week-' + week"
+          v-for="week in weekRange"
           v-if="detailLevel === 'week'"
         >
-          <button
-            type="button"
+          <router-link
             class="quota-button"
+            :to="{
+              name: 'quota-week-person',
+              params: {
+                person_id: key,
+                year: year,
+                week: week
+              }
+            }"
             v-if="getQuota(key, {year, week})"
           >
             {{ getQuota(key, {year, week}) }}
-          </button>
-          <span v-else>-</span>
+          </router-link>
+          <span v-else>
+          -
+          </span>
         </div>
-        <div class="row-cell"
-          v-for="day in dayRange"
+
+        <div
+          :class="{
+            'row-cell': true,
+            selected: isDaySelected(key, year, month, day)
+          }"
           :key="'day-' + day"
+          v-for="day in dayRange"
           v-if="detailLevel === 'day'"
         >
-          <button
-            type="button"
-            :class="{
-              'quota-button': true,
-              'is-selected': selected === key+day
+          <router-link
+            class="quota-button"
+            :to="{
+              name: 'quota-day-person',
+              params: {
+                person_id: key,
+                year: year,
+                month: month,
+                day: day
+              }
             }"
             v-if="getQuota(key, {year, month, day})"
-            @click="getDetails(key, key+day, {year, month, day})"
           >
             {{ getQuota(key, {year, month, day}) }}
-          </button>
-          <span v-else>-</span>
+          </router-link>
+          <span v-else>
+          -
+          </span>
         </div>
       </div>
     </div>
@@ -133,33 +170,6 @@
       <p class="info">{{ $t('quota.no_quota') }}</p>
     </div>
 
-    <div
-      class="quota-fixed quota-panel"
-      v-if="isPanelShown"
-    >
-      <h2 class="details-title">{{ detailsTitle }}</h2>
-      <table class="details">
-        <thead>
-          <tr>
-            <th>{{ $t('quota.details_name') }}</th>
-            <th>{{
-              this.countMode === 'seconds'
-                ? $t('quota.details_seconds')
-                : $t('quota.details_frames') }}
-            </th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr
-            v-for="shot in detailsMap"
-            :key="'shot-'+shot"
-          >
-            <td>{{ shot.name }}</td>
-            <td>{{ shot.nb_frames }}</td>
-          </tr>
-        </tbody>
-      </table>
-    </div>
     <table-info
       :is-loading="isLoading"
       :is-error="isError"
@@ -182,13 +192,10 @@ import {
 
 export default {
   name: 'quota',
+
   components: {
     PeopleAvatar,
     TableInfo
-  },
-
-  mounted () {
-    this.loadData()
   },
 
   props: {
@@ -226,18 +233,22 @@ export default {
 
   data () {
     return {
+      currentMonth: moment().month() + 1,
+      currentYear: moment().year(),
+      currentWeek: moment().week(),
+      detailsTitle: '',
+      detailsMap: {},
+      isPanelShown: false,
       isLoading: false,
       isError: false,
       quotaMap: {},
       quotaLength: 0,
-      detailsTitle: '',
-      detailsMap: {},
-      currentMonth: moment().month() + 1,
-      currentYear: moment().year(),
-      currentWeek: moment().week(),
-      selected: undefined,
-      isPanelShown: false
+      selected: undefined
     }
+  },
+
+  mounted () {
+    this.loadData()
   },
 
   computed: {
@@ -337,13 +348,32 @@ export default {
       return average ? average.toFixed(2) : '-'
     },
 
-    getDetails (personId, id, opt = {}) {
-      this.selected = id
-      this.isPanelShown = true
-      const date =
-        `${opt.year}-${opt.month.toString().padStart(2, '0')}-${opt.day}`
-      this.detailsTitle = moment(date, 'YYYY-MM-DD').format('DD MMM YYYY')
-      this.loadDetails(personId, date)
+    isDaySelected (personId, year, month, day) {
+      return (
+        this.$route.params.person_id &&
+        this.$route.params.person_id === personId &&
+        this.$route.params.year === year &&
+        this.$route.params.month === month &&
+        this.$route.params.day === day
+      )
+    },
+
+    isWeekSelected (personId, year, week) {
+      return (
+        this.$route.params.person_id &&
+        this.$route.params.person_id === personId &&
+        this.$route.params.year === year &&
+        this.$route.params.week === week
+      )
+    },
+
+    isMonthSelected (personId, year, month) {
+      return (
+        this.$route.params.person_id &&
+        this.$route.params.person_id === personId &&
+        this.$route.params.year === year &&
+        this.$route.params.month === month
+      )
     }
   },
 
@@ -364,6 +394,13 @@ export default {
 
     shotMap () {
       this.loadData()
+    },
+
+    route () {
+      const els = document.getElementsByClassName('selected')
+      if (els.length === 0) { // selected element is not visible
+        this.$refs.body.scrollLeft += 350
+      }
     }
   }
 }
@@ -388,6 +425,14 @@ export default {
     .details td,
     .details th {
       color: $white;
+    }
+
+    .weekend {
+      background-color: $dark-grey;
+    }
+
+   .quota-button:hover {
+      color: #333;
     }
   }
 
@@ -513,4 +558,14 @@ export default {
   .empty-quota {
     width: 100%;
   }
+
+  .selected .quota-button {
+    background: $purple;
+    color: #333;
+  }
+
+  .quota-button:hover {
+    background: #BBEEBB;
+  }
+
 </style>

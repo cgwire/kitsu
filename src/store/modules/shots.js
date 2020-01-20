@@ -175,20 +175,23 @@ const helpers = {
     return peopleStore.state.personMap[personId]
   },
 
+  getShotName (shot) {
+    let shotName = `${shot.sequence_name} / ${shot.name}`
+    if (shot.episode_name) {
+      shotName = `${shot.episode_name} / ${shotName}`
+    }
+    return shotName
+  },
+
   populateTask (task, shot, production) {
     task.name = helpers.getTaskType(task.task_type_id).priority.toString()
     task.task_status_short_name =
       helpers.getTaskStatus(task.task_status_id).short_name
 
-    let entityName = `${shot.sequence_name} / ${shot.name}`
-    if (shot.episode_name) {
-      entityName = `${shot.episode_name} / ${entityName}`
-    }
-
+    let shotName = helpers.getShotName(shot)
     Object.assign(task, {
       project_id: shot.production_id,
-
-      entity_name: entityName,
+      entity_name: shotName,
       entity_type_name: 'Shot',
       sequence_name: shot.sequence_name,
       entity: {
@@ -227,9 +230,21 @@ const helpers = {
     } else if (detailLevel === 'month') {
       period = moment(endDateString, 'YYYY').format('YYYY')
     } else if (detailLevel === 'week') {
-      period = moment(endDateString, 'YYYY').format('GGGG')
+      period = moment(endDateString, 'YYYY-MM-DD').format('GGGG')
     }
     return period
+  },
+
+  getDateFromParameters ({ detailLevel, year, week, month, day }) {
+    if (detailLevel === 'day') {
+      return `${year}-${month.toString().padStart(2, '0')}-${day}`
+    } else if (detailLevel === 'month') {
+      return `${year}-${month.toString().padStart(2, '0')}`
+    } else if (detailLevel === 'week') {
+      return `${year}-${week}`
+    } else {
+      return `${year}`
+    }
   },
 
   getTaskEndDate (task, detailLevel) {
@@ -1006,23 +1021,34 @@ const actions = {
     return Promise.resolve(quotas)
   },
 
-  getPeriodDetails (
+  getPersonShots (
     { commit, state, rootGetters },
-    { taskTypeId, detailLevel, personId, dateString }) {
+    { taskTypeId, detailLevel, personId, year, month, week, day }
+  ) {
     const taskStatusMap = rootGetters.taskStatusMap
+    const dateString = helpers.getDateFromParameters({
+      detailLevel, year, month, week, day
+    })
 
     const shots = cache.shots.filter((shot) => {
       const task = rootGetters.taskMap[shot.validations[taskTypeId]]
-      const taskStatus = taskStatusMap[task.task_status_id]
-      const endDateString = moment(task.end_date, 'YYYY-MM-DD').format('YYYY-MM-DD')
-
-      return (
-        task &&
-        taskStatus.is_done &&
-        task.assignees.includes(personId) &&
-        endDateString === dateString
-      )
+      if (task) {
+        const taskStatus = taskStatusMap[task.task_status_id]
+        const endDateString = helpers.getTaskEndDate(task, detailLevel)
+        return (
+          task &&
+          taskStatus.is_done &&
+          task.assignees.includes(personId) &&
+          endDateString === dateString
+        )
+      } else {
+        return false
+      }
     })
+      .map(shot => ({
+        ...shot,
+        full_name: helpers.getShotName(shot)
+      }))
     return Promise.resolve(shots)
   }
 }
