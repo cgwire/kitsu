@@ -403,10 +403,12 @@ export default {
       this.loadData()
     },
 
-    route () {
+    $route () {
       const els = document.getElementsByClassName('selected')
       if (els.length === 0) { // selected element is not visible
-        this.$refs.body.scrollLeft += 350
+        setTimeout(() => {
+          this.$refs.body.scrollLeft += 380
+        }, 100)
       }
     }
   }
