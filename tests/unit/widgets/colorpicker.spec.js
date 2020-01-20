@@ -22,7 +22,7 @@ describe('ColorPicker', () => {
     })
 
     it('should open the palette', () => {
-      wrapper.setProps({ isOpen: true })
+      wrapper.find('button').trigger('click')
       expect(palette.isVisible()).toBe(true)
       expect(labels.at(0).element.style.color).toMatch('rgb(255, 255, 255)')
       expect(labels.at(1).element.style.color).toMatch('rgb(255, 0, 0)')
