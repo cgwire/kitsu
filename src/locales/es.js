@@ -386,6 +386,24 @@ export default {
     }
   },
 
+  quota: {
+    average: 'Promedio',
+    count_label: 'Modo de conteo',
+    detail_label: 'Nivel de detalle',
+    nombre_detalles: 'Nombre',
+    details_seconds: 'Segundos',
+    details_frames: 'Frames',
+    month_label: 'Mes',
+    no_quota: 'No hay cuota para este tipo de tarea',
+    name: 'Nombre',
+    quota_day: 'Cuota por día',
+    quota_week: 'Cuota por semana',
+    quota_month: 'Cuota por mes',
+    year_label: 'Año',
+    title: 'Cupos',
+    type_label: 'Tipo'
+  },
+
   settings: {
     change_logo: 'Cambiar logotipo',
     integrations: 'Integraciones',

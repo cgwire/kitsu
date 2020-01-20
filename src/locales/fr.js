@@ -394,15 +394,21 @@ export default {
   },
 
   quota: {
-    title: 'Quota',
-    name: 'Nom',
-    quota_week: 'Quota par semaine',
     average: 'Moyenne',
-    type_label: 'Type',
-    detail_label: 'Niveau de détail',
-    year_label: 'Année',
     count_label: 'Mode de comptage',
-    no_quota: 'Il n\'y a pas de quota pour ce type de tâche.'
+    detail_label: 'Niveau de détail',
+    details_name: 'Nom',
+    details_seconds: 'Secondes',
+    details_frames: 'Frames',
+    month_label: 'Mois',
+    no_quota: 'Il n\'y a pas de quota pour ce type de tâche.',
+    name: 'Nom',
+    quota_day: 'Quota par jour',
+    quota_week: 'Quota par semaine',
+    quota_month: 'Quota par mois',
+    year_label: 'Année',
+    title: 'Quotas',
+    type_label: 'Type'
   },
 
   sequences: {

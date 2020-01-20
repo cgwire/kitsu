@@ -491,21 +491,21 @@ export default {
   },
 
   quota: {
-    title: 'Quota',
-    name: 'Name',
-    quota_day: 'Quota per day',
-    quota_week: 'Quota per week',
-    quota_month: 'Quota per month',
     average: 'Average',
-    type_label: 'Type',
+    count_label: 'Count mode',
     detail_label: 'Detail level',
     details_name: 'Name',
     details_seconds: 'Seconds',
     details_frames: 'Frames',
     month_label: 'Month',
+    no_quota: 'There is no quota for this task type.',
+    name: 'Name',
+    quota_day: 'Quota per day',
+    quota_week: 'Quota per week',
+    quota_month: 'Quota per month',
     year_label: 'Year',
-    count_label: 'Count mode',
-    no_quota: 'There is no quota for this task type.'
+    title: 'Quota',
+    type_label: 'Type'
   },
 
   shots: {

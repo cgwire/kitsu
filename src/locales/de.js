@@ -386,6 +386,24 @@ export default {
     }
   },
 
+  quota: {
+    average: 'Durchschnitt',
+    count_label: 'Zählmodus',
+    detail_label: 'Detaillierungsgrad',
+    details_name: 'Name',
+    details_seconds: 'Sekunden',
+    details_frames: 'Frames',
+    month_label: 'Monat',
+    no_quota: 'Für diese Art von Aufgaben gibt es keine Quote.',
+    name: 'Nom',
+    quota_day: 'Quote pro Tag',
+    quota_week: 'Quote pro Woche',
+    quota_month: 'Quote pro Monat',
+    year_label: 'Jahr',
+    title: 'Quoten',
+    type_label: 'Typ'
+  },
+
   settings: {
     change_logo: 'Logo ändern',
     integrations: 'Integrationen',
