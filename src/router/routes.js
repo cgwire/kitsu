@@ -36,6 +36,7 @@ const Playlist = () => import('../components/pages/Playlist')
 const Productions = () => import('../components/pages/Productions')
 const ProductionAssetTypes = () => import('../components/pages/ProductionAssetTypes')
 const ProductionSchedule = () => import('../components/pages/ProductionSchedule')
+const ProductionQuota = () => import('../components/pages/ProductionQuota')
 const Profile = () => import('../components/pages/Profile')
 const ResetPassword = () => import('../components/pages/ResetPassword')
 const ResetChangePassword = () => import('../components/pages/ResetChangePassword')
@@ -373,6 +374,82 @@ export const routes = [
         path: 'productions/:production_id/schedule',
         component: ProductionSchedule,
         name: 'schedule'
+      },
+
+      {
+        path: 'productions/:production_id/quota',
+        component: ProductionQuota,
+        name: 'quota',
+        children: [
+          {
+            path: 'month/:year',
+            component: ProductionQuota,
+            name: 'quota-month'
+          },
+          {
+            path: 'month/:year/:month/persons/:person_id',
+            component: ProductionQuota,
+            name: 'quota-month-person'
+          },
+          {
+            path: 'week/:year',
+            component: ProductionQuota,
+            name: 'quota-week'
+          },
+          {
+            path: 'week/:year/:week/persons/:person_id',
+            component: ProductionQuota,
+            name: 'quota-week-person'
+          },
+          {
+            path: 'day/:year/:month',
+            component: ProductionQuota,
+            name: 'quota-day'
+          },
+          {
+            path: 'day/:year/:month/:day/persons/:person_id',
+            component: ProductionQuota,
+            name: 'quota-day-person'
+          }
+        ]
+      },
+
+      {
+        path: 'productions/:production_id/episodes/:episode_id/quota',
+        component: ProductionQuota,
+        name: 'episode-quota',
+        children: [
+          {
+            path: 'month/:year',
+            component: ProductionQuota,
+            name: 'episode-quota-month'
+          },
+          {
+            path: 'month/:year/:month/persons/:person_id',
+            component: ProductionQuota,
+            name: 'episode-quota-month-person'
+          },
+          {
+            path: 'week/:year',
+            component: ProductionQuota,
+            name: 'episode-quota-week'
+          },
+          {
+            path: 'week/:year/:week/persons/:person_id',
+            component: ProductionQuota,
+            name: 'episode-quota-week-person'
+          },
+          {
+            path: 'day/:year/:month',
+            component: ProductionQuota,
+            name: 'episode-quota-day'
+          },
+          {
+            path: 'day/:year/:month/:day/persons/:person_id',
+            component: ProductionQuota,
+            name: 'episode-quota-day-person'
+          }
+        ]
       },
 
       {

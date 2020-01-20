@@ -490,6 +490,24 @@ export default {
     }
   },
 
+  quota: {
+    title: 'Quota',
+    name: 'Name',
+    quota_day: 'Quota per day',
+    quota_week: 'Quota per week',
+    quota_month: 'Quota per month',
+    average: 'Average',
+    type_label: 'Type',
+    detail_label: 'Detail level',
+    details_name: 'Name',
+    details_seconds: 'Seconds',
+    details_frames: 'Frames',
+    month_label: 'Month',
+    year_label: 'Year',
+    count_label: 'Count mode',
+    no_quota: 'There is no quota for this task type.'
+  },
+
   shots: {
     casting: 'Shot casting',
     creation_explaination: 'To add shots you need first to create an episode and a sequence. Type an episode name in the bottom of the left column then click on add to create a new episode. Select this episode and repeat the same operation for sequence. Finally select a sequence and type a shot name in the field in the bottom of the right column. Click on the add button below. Your first shot was created. You can now add many more! If it\'s not a TV Show, you have to directly create a sequence.',

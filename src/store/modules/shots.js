@@ -29,6 +29,9 @@ import {
   computeStats
 } from '../../lib/stats'
 import {
+  frameToSeconds
+} from '../../lib/video'
+import {
   buildShotIndex,
   buildSequenceIndex,
   buildEpisodeIndex,
@@ -149,6 +152,10 @@ import {
   RESET_ALL
 } from '../mutation-types'
 
+const AVERAGE = 'average'
+const COUNT = 'count'
+const TOTAL = 'total'
+
 const cache = {
   shots: [],
   shotIndex: []
@@ -168,20 +175,23 @@ const helpers = {
     return peopleStore.state.personMap[personId]
   },
 
+  getShotName (shot) {
+    let shotName = `${shot.sequence_name} / ${shot.name}`
+    if (shot.episode_name) {
+      shotName = `${shot.episode_name} / ${shotName}`
+    }
+    return shotName
+  },
+
   populateTask (task, shot, production) {
     task.name = helpers.getTaskType(task.task_type_id).priority.toString()
     task.task_status_short_name =
       helpers.getTaskStatus(task.task_status_id).short_name
 
-    let entityName = `${shot.sequence_name} / ${shot.name}`
-    if (shot.episode_name) {
-      entityName = `${shot.episode_name} / ${entityName}`
-    }
-
+    let shotName = helpers.getShotName(shot)
     Object.assign(task, {
       project_id: shot.production_id,
-
-      entity_name: entityName,
+      entity_name: shotName,
       entity_type_name: 'Shot',
       sequence_name: shot.sequence_name,
       entity: {
@@ -210,6 +220,60 @@ const helpers = {
   sortValidationColumns (validationColumns, shotFilledColumns, taskTypeMap) {
     let columns = [...validationColumns]
     return sortValidationColumns(columns, taskTypeMap)
+  },
+
+  getPeriod (task, detailLevel) {
+    const endDateString = helpers.getTaskEndDate(task, detailLevel)
+    let period
+    if (detailLevel === 'day') {
+      period = moment(endDateString, 'YYYY-MM').format('YYYY-MM')
+    } else if (detailLevel === 'month') {
+      period = moment(endDateString, 'YYYY').format('YYYY')
+    } else if (detailLevel === 'week') {
+      period = moment(endDateString, 'YYYY-MM-DD').format('GGGG')
+    }
+    return period
+  },
+
+  getDateFromParameters ({ detailLevel, year, week, month, day }) {
+    if (detailLevel === 'day') {
+      return `${year}-${month.toString().padStart(2, '0')}-${day}`
+    } else if (detailLevel === 'month') {
+      return `${year}-${month.toString().padStart(2, '0')}`
+    } else if (detailLevel === 'week') {
+      return `${year}-${week}`
+    } else {
+      return `${year}`
+    }
+  },
+
+  getTaskEndDate (task, detailLevel) {
+    let endDateString
+    if (detailLevel === 'day') {
+      endDateString = moment(task.end_date, 'YYYY-MM-DD').format('YYYY-MM-DD')
+    } else if (detailLevel === 'month') {
+      endDateString = moment(task.end_date, 'YYYY-MM').format('YYYY-MM')
+    } else if (detailLevel === 'week') {
+      endDateString = moment(task.end_date, 'YYYY-MM-DD').format('GGGG-W')
+    }
+    return endDateString
+  },
+
+  initQuota (quotas, personId, endDateString, period) {
+    if (!quotas[personId]) quotas[personId] = {}
+    const personQuotas = quotas[personId]
+
+    if (!personQuotas[endDateString]) personQuotas[endDateString] = 0
+    if (!personQuotas[AVERAGE]) personQuotas[AVERAGE] = {}
+    if (!personQuotas[AVERAGE][period]) personQuotas[AVERAGE][period] = 0
+    if (!personQuotas[COUNT]) personQuotas[COUNT] = {}
+    if (!personQuotas[COUNT][period]) {
+      personQuotas[COUNT][period] = 0
+    }
+    if (!personQuotas[TOTAL]) personQuotas[TOTAL] = {}
+    if (!personQuotas[TOTAL][period]) personQuotas[TOTAL][period] = 0
+
+    return personQuotas
   }
 }
 
@@ -919,6 +983,73 @@ const actions = {
 
   loadShotHistory ({ commit, state }, shotId) {
     return shotsApi.loadShotHistory(shotId)
+  },
+
+  computeQuota (
+    { commit, state, rootGetters },
+    { taskTypeId, detailLevel, countMode }) {
+    const taskMap = rootGetters.taskMap
+    const taskStatusMap = rootGetters.taskStatusMap
+    const production = rootGetters.currentProduction
+    const quotas = {}
+
+    cache.shots.forEach((shot) => {
+      const task = taskMap[shot.validations[taskTypeId]]
+      const isTaskFinished = task && taskStatusMap[task.task_status_id].is_done
+      if (isTaskFinished) {
+        const period = helpers.getPeriod(task, detailLevel)
+        const endDateString = helpers.getTaskEndDate(task, detailLevel)
+
+        task.assignees.forEach(personId => {
+          const personQuotas =
+            helpers.initQuota(quotas, personId, endDateString, period)
+          if (shot.nb_frames) {
+            let quota = shot.nb_frames
+            if (countMode === 'seconds') {
+              quota = frameToSeconds(shot.nb_frames, production, shot)
+            }
+            const isNewQuotaDay = personQuotas[endDateString] === 0
+            if (isNewQuotaDay) personQuotas[COUNT][period]++
+            personQuotas[endDateString] += quota
+            personQuotas[TOTAL][period] += quota
+            personQuotas[AVERAGE][period] =
+              personQuotas[TOTAL][period] / personQuotas[COUNT][period]
+          }
+        })
+      }
+    })
+    return Promise.resolve(quotas)
+  },
+
+  getPersonShots (
+    { commit, state, rootGetters },
+    { taskTypeId, detailLevel, personId, year, month, week, day }
+  ) {
+    const taskStatusMap = rootGetters.taskStatusMap
+    const dateString = helpers.getDateFromParameters({
+      detailLevel, year, month, week, day
+    })
+
+    const shots = cache.shots.filter((shot) => {
+      const task = rootGetters.taskMap[shot.validations[taskTypeId]]
+      if (task) {
+        const taskStatus = taskStatusMap[task.task_status_id]
+        const endDateString = helpers.getTaskEndDate(task, detailLevel)
+        return (
+          task &&
+          taskStatus.is_done &&
+          task.assignees.includes(personId) &&
+          endDateString === dateString
+        )
+      } else {
+        return false
+      }
+    })
+      .map(shot => ({
+        ...shot,
+        full_name: helpers.getShotName(shot)
+      }))
+    return Promise.resolve(shots)
   }
 }
 

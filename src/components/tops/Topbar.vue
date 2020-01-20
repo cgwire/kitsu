@@ -265,6 +265,7 @@ export default {
           { label: this.$t('news.title'), value: 'newsFeed' },
           { label: this.$t('breakdown.title'), value: 'breakdown' },
           { label: this.$t('schedule.title'), value: 'schedule' },
+          { label: this.$t('quota.title'), value: 'quota' },
           { label: this.$t('people.team'), value: 'team' }
         ])
       }

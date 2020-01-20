@@ -55,7 +55,7 @@ import TaskTypeName from '../widgets/TaskTypeName'
 import { sortByName } from '../../lib/sorting'
 
 export default {
-  name: 'todos-list',
+  name: 'timespent-task-list',
 
   components: {
     TableInfo,

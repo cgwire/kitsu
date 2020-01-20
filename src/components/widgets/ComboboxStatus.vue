@@ -48,6 +48,10 @@
       </div>
     </div>
   </div>
+  <combobox-mask
+    :displayed="showStatusList"
+    @click="toggleStatusList"
+  />
 </div>
 </template>
 
@@ -56,12 +60,14 @@ import { mapGetters } from 'vuex'
 import { ChevronDownIcon } from 'vue-feather-icons'
 
 import colors from '../../lib/colors'
+import ComboboxMask from './ComboboxMask'
 
 export default {
   name: 'combobox-status',
 
   components: {
-    ChevronDownIcon
+    ChevronDownIcon,
+    ComboboxMask
   },
 
   data () {
@@ -199,7 +205,7 @@ export default {
   width: 120px;
   position: absolute;
   border: 1px solid $light-grey-light;
-  z-index: 200;
+  z-index: 300;
   margin-left: -1px;
   min-height: 100px;
   max-height: 180px;
