@@ -205,8 +205,12 @@ export default {
   overflow-y: auto;
   position: absolute;
   top: 38px;
-  width: 120px;
+  width: inherit;
   z-index: 200;
+
+  .option-line {
+    padding-right: 27px;
+  }
 }
 
 .c-mask {
