@@ -135,6 +135,7 @@
         <div
           :class="{
             'row-cell': true,
+            weekend: isWeekend(year, month, day),
             selected: isDaySelected(key, year, month, day)
           }"
           :key="'day-' + day"
@@ -282,6 +283,12 @@ export default {
       'getPeriodDetails'
     ]),
 
+    isWeekend (year, month, day) {
+      let date = moment(`${year}-${month}-${day}`)
+      if (day < 10) date = moment(`${year}-${month}-0${day}`)
+      return [0, 6].includes(date.day())
+    },
+
     loadData () {
       if (this.taskTypeId) {
         this.computeQuota({
@@ -414,23 +421,16 @@ export default {
     .quota-panel {
       border-left-color: $dark-grey-light;
     }
-    .row-cell,
-    .details tr {
+    .row-cell {
       border-bottom-color: $dark-grey-light;
     }
-    .quota-row:nth-child(odd):not(.quota-header) .row-cell,
-    .details tbody tr:nth-child(even) {
+    .quota-row:nth-child(odd):not(.quota-header) .row-cell {
       background-color: $dark-grey-lightmore;
     }
-    .details td,
-    .details th {
-      color: $white;
-    }
-
-    .weekend {
+    .row-cell.weekend,
+    .quota-row:nth-child(odd):not(.quota-header) .row-cell.weekend {
       background-color: $dark-grey;
     }
-
    .quota-button:hover {
       color: #333;
     }
@@ -475,14 +475,19 @@ export default {
     align-items: center;
     justify-content: center;
     width: 4rem;
-    padding: 1rem;
     height: 4rem;
     max-height: 4rem;
+    padding: 1rem;
     border-bottom: 1px solid $light-grey-light;
     flex: 0 0 auto;
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
+  }
+
+  .header-cell {
+    height: auto;
+    max-height: auto;
   }
 
   .quota-row:nth-child(odd):not(.quota-header) .row-cell {
@@ -495,6 +500,9 @@ export default {
 
   .header-cell {
     font-weight: bold;
+    font-size: 0.9em;
+    color: $grey-strong;
+    padding: 0.5rem;
   }
 
   .row-cell--name {
@@ -568,4 +576,8 @@ export default {
     background: #BBEEBB;
   }
 
+  .row-cell.weekend,
+  .quota-row:nth-child(odd):not(.quota-header) .row-cell.weekend {
+    background-color: $white-grey;
+  }
 </style>
