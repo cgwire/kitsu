@@ -10,7 +10,7 @@ jobs:
     name: Build
     runs-on: ubuntu-latest
     steps:
-    - name: executing remote ssh commands using password
+    - name: Deploy on staging server
       uses: appleboy/ssh-action@master
       with:
        host: ${{ secrets.HOST }}
