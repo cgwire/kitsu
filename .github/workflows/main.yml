@@ -1,6 +1,9 @@
 name: Deploy Kitsu to staging environment
 
-on: [push]
+on:
+  push:
+    branches:
+      - master
 
 jobs:
 
@@ -14,4 +17,4 @@ jobs:
        host: ${{ secrets.HOST }}
        username: ${{ secrets.USERNAME }}
        key: ${{ secrets.KEY }}
-       script: cd /opt/kitsu && git pull --rebase origin master
+       script: cd /opt/kitsu && git pull --rebase origin master && npm run build
