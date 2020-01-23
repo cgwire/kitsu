@@ -61,6 +61,7 @@
           <span class="label">{{ $t("productions.picture") }}</span>
           <file-upload
             ref="fileField"
+            :label="$t('main.csv.upload_file')"
             accept=".png,.jpg,.jpeg"
             @fileselected="onFileSelected"
           />

@@ -11,7 +11,7 @@
         {{ $t("main.csv.import_title") }}
       </h1>
 
-      <p class="description" v-on:submit.prevent>
+      <p class="description">
         {{ $t("main.csv.required_fields") }}
         <ul>
           <li v-for="column in columns" :key="column">
@@ -24,7 +24,10 @@
         {{ $t("main.csv.select_file") }}
       </p>
 
-      <file-upload @fileselected="onFileSelected" />
+      <file-upload
+        @fileselected="onFileSelected"
+        :label="$t('main.csv.upload_file')"
+      />
 
       <modal-footer
         :error-text="$t('main.csv.error_upload')"
@@ -96,7 +99,7 @@ export default {
       this.$emit('fileselected', formData)
     },
     onConfirmClicked () {
-      this.$emit('confirm')
+      this.$emit('confirm', this.formData)
     }
   },
 

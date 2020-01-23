@@ -20,6 +20,7 @@
 
       <file-upload
         ref="preview-field"
+        :label="$t('main.csv.upload_file')"
         :accept="extensions"
         @fileselected="onFileSelected"
         :multiple="true"

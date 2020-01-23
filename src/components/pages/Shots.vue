@@ -153,15 +153,24 @@
     @confirm="confirmDeleteAllTasks"
   />
 
+  <preview-modal
+    :active="modals.isPreviewDisplayed"
+    :is-loading="loading.importing"
+    :is-error="errors.importing"
+    :form-data="parsedCSV"
+    @reupload="reuploadFile"
+    @cancel="hidePreviewModal"
+    @confirm="uploadImportFile"
+  />
+
   <import-modal
     :active="modals.isImportDisplayed"
     :is-loading="loading.importing"
     :is-error="errors.importing"
-    :form-data="shotsCsvFormData"
     :columns="columns"
     @cancel="hideImportModal"
     @fileselected="selectFile"
-    @confirm="uploadImportFile"
+    @confirm="previewImportFile"
   />
 
   <create-tasks-modal
@@ -206,6 +215,7 @@
 
 <script>
 import moment from 'moment'
+import Papa from 'papaparse'
 import { mapGetters, mapActions } from 'vuex'
 import csv from '../../lib/csv'
 import func from '../../lib/func'
@@ -218,6 +228,7 @@ import ButtonSimple from '../widgets/ButtonSimple'
 import CreateTasksModal from '../modals/CreateTasksModal'
 import DeleteModal from '../modals/DeleteModal'
 import EditShotModal from '../modals/EditShotModal'
+import PreviewModal from '../modals/PreviewModal'
 import ImportModal from '../modals/ImportModal'
 import HardDeleteModal from '../modals/HardDeleteModal'
 import ManageShotsModal from '../modals/ManageShotsModal'
@@ -239,6 +250,7 @@ export default {
     CreateTasksModal,
     DeleteModal,
     EditShotModal,
+    PreviewModal,
     ImportModal,
     HardDeleteModal,
     ManageShotsModal,
@@ -259,6 +271,7 @@ export default {
       historyShot: {},
       shotToDelete: null,
       shotToEdit: null,
+      parsedCSV: null,
       columns: [
         'Episode',
         'Sequence',
@@ -275,6 +288,7 @@ export default {
         isDeleteDisplayed: false,
         isDeleteMetadataDisplayed: false,
         isDeleteAllTasksDisplayed: false,
+        isPreviewDisplayed: false,
         isImportDisplayed: false,
         isManageDisplayed: false,
         isNewDisplayed: false,
@@ -659,6 +673,31 @@ export default {
       this.$store.commit('SHOT_CSV_FILE_SELECTED', formData)
     },
 
+    processCSVFile (file, config) {
+      return new Promise((resolve, reject) => {
+        Papa.parse(file, {
+          config: config,
+          error: reject,
+          complete: (results) => {
+            resolve(results.data)
+          }
+        })
+      })
+    },
+
+    previewImportFile (formData) {
+      this.loading.importing = true
+      this.errors.importing = false
+      const file = formData.get('file')
+      this.processCSVFile(file)
+        .then((results) => {
+          this.parsedCSV = results
+          this.hideImportModal()
+          this.loading.importing = false
+          this.showPreviewModal()
+        })
+    },
+
     uploadImportFile () {
       this.loading.importing = true
       this.errors.importing = false
@@ -675,6 +714,11 @@ export default {
           this.errors.importing = true
         }
       })
+    },
+
+    reuploadFile () {
+      this.hidePreviewModal()
+      this.showImportModal()
     },
 
     onDeleteAllTasksClicked (taskTypeId) {
@@ -752,6 +796,14 @@ export default {
 
     hideImportModal () {
       this.modals.isImportDisplayed = false
+    },
+
+    showPreviewModal () {
+      this.modals.isPreviewDisplayed = true
+    },
+
+    hidePreviewModal () {
+      this.modals.isPreviewDisplayed = false
     },
 
     showCreateTasksModal () {

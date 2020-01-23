@@ -17,6 +17,7 @@
 
       <file-upload
         ref="uploadAvatarField"
+        :label="$t('main.csv.upload_file')"
         @fileselected="onFileSelected"
         accept=".png,.jpg,.jpeg"
       />
