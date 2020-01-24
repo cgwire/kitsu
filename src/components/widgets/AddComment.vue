@@ -216,11 +216,13 @@ export default {
     },
 
     onDrop (event) {
+      const forms = []
       for (let i = 0; i < event.dataTransfer.files.length; i++) {
         const form = new FormData()
         form.append('file', event.dataTransfer.files[i])
-        this.$emit('file-drop', form)
+        forms.push(form)
       }
+      this.$emit('file-drop', forms)
       this.isDragging = false
     }
   },
