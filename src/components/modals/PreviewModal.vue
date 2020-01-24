@@ -35,46 +35,29 @@
         <table class="preview">
           <thead>
             <tr class="preview-headers">
-              <th>
+              <th
+                v-for="(cell, index) in parsedCSV[0]"
+                :key="`header-${index}`"
+              >
                 <combobox
+                  :hasError="hasNoMatch(cell)"
                   :options="columnOptions"
-                />
-              </th>
-              <th>
-                <combobox
-                  :options="columnOptions"
-                />
-              </th>
-              <th>
-                <combobox
-                  :options="columnOptions"
-                />
-              </th>
-              <th>
-                <combobox
-                  :options="columnOptions"
-                />
-              </th>
-              <th>
-                <combobox
-                  :options="columnOptions"
-                />
-              </th>
-              <th>
-                <combobox
-                  :options="columnOptions"
+                  :value="cellValue(cell)"
                 />
               </th>
             </tr>
           </thead>
           <tbody>
-            <tr>
-              <td>data</td>
-              <td>data</td>
-              <td>data</td>
-              <td>data</td>
-              <td>data</td>
-              <td>data</td>
+            <tr
+              v-for="(line, index) in startFrom(parsedCSV, 1)"
+              :key="`line-${index}`"
+            >
+              <td
+                v-for="(cell, index) in line"
+                :key="`cell-${index}`"
+              >
+                {{ cell || '-' }}
+              </td>
             </tr>
           </tbody>
         </table>
@@ -119,18 +102,25 @@ export default {
 
   data () {
     return {
+      columnOptions: [
+        { label: 'Choose', value: 'none' },
+        { label: 'Name', value: 'name' },
+        { label: 'Sequence', value: 'sequence' },
+        { label: 'Description', value: 'description' },
+        { label: 'Time', value: 'time' },
+        { label: 'Frames', value: 'frames' },
+        { label: 'Frame IN', value: 'frame_in' },
+        { label: 'Frame OUT', value: 'frame_out' },
+        { label: 'Storyboard', value: 'storyboard' },
+        { label: 'Layout', value: 'layout' },
+        { label: 'Animation', value: 'animation' },
+        { label: 'Render', value: 'render' },
+        { label: 'Compositing', value: 'compositing' }
+      ],
       formData: null,
       form: {
         name: ''
-      },
-      columnOptions: [
-        { label: 'Episodes', value: 'episodes' },
-        { label: 'Sequences', value: 'sequences' },
-        { label: 'Shots', value: 'shots' },
-        { label: 'Description', value: 'description' },
-        { label: 'Frame IN', value: 'frame_in' },
-        { label: 'Frame OUT', value: 'frame_out' }
-      ]
+      }
     }
   },
 
@@ -139,7 +129,7 @@ export default {
       type: Boolean,
       default: false
     },
-    columns: {
+    parsedCSV: {
       type: Array,
       default: () => []
     },
@@ -150,10 +140,6 @@ export default {
     isError: {
       type: Boolean,
       default: false
-    },
-    parsedCSV: {
-      type: Array,
-      default: () => []
     }
   },
 
@@ -169,19 +155,25 @@ export default {
   methods: {
     ...mapActions([
     ]),
-    onFileSelected (formData) {
-      this.formData = formData
-      this.$emit('fileselected', formData)
+    cellValue (data) {
+      return data.toLowerCase()
+    },
+    hasNoMatch (data) {
+      const values = []
+      this.columnOptions.forEach(item => values.push(item.value))
+      const results = values.find(item => item === data.toLowerCase())
+      console.log(results)
+      if (results === undefined) { return true }
     },
     onConfirmClicked () {
       this.$emit('confirm')
     },
     onReupload () {
       this.$emit('reupload')
+    },
+    startFrom (arr, index) {
+      return arr.slice(index)
     }
-  },
-
-  watch: {
   }
 }
 </script>
@@ -201,7 +193,9 @@ export default {
   }
 }
 .modal-content {
+  margin: 6rem auto 1.4rem;
   max-width: calc(100vw - 4rem);
+  max-height: calc(100% - 6rem);
   width: auto;
 }
 .modal-content .box p.text {

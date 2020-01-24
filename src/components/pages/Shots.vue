@@ -157,7 +157,7 @@
     :active="modals.isPreviewDisplayed"
     :is-loading="loading.importing"
     :is-error="errors.importing"
-    :form-data="parsedCSV"
+    :parsedCSV="parsedCSV"
     @reupload="reuploadFile"
     @cancel="hidePreviewModal"
     @confirm="uploadImportFile"
@@ -271,7 +271,7 @@ export default {
       historyShot: {},
       shotToDelete: null,
       shotToEdit: null,
-      parsedCSV: null,
+      parsedCSV: [],
       columns: [
         'Episode',
         'Sequence',
