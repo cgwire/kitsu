@@ -196,6 +196,7 @@ import csv from '../../lib/csv'
 import func from '../../lib/func'
 import { sortByName } from '../../lib/sorting'
 import { slugify } from '../../lib/string'
+import { searchMixin } from '../mixins/search'
 
 import AssetList from '../lists/AssetList'
 import AddMetadataModal from '../modals/AddMetadataModal'
@@ -215,6 +216,7 @@ import TaskInfo from '../sides/TaskInfo.vue'
 
 export default {
   name: 'assets',
+  mixins: [searchMixin],
 
   components: {
     AssetList,
@@ -321,6 +323,10 @@ export default {
 
     addThumbnailsModal () {
       return this.$refs['add-thumbnails-modal']
+    },
+
+    searchField () {
+      return this.$refs['asset-search-field']
     }
   },
 
@@ -330,7 +336,7 @@ export default {
 
   mounted () {
     if (this.assetSearchText.length > 0) {
-      this.$refs['asset-search-field'].setValue(this.assetSearchText)
+      this.searchField.setValue(this.assetSearchText)
     }
     this.$refs['asset-list'].setScrollPosition(
       this.assetListScrollPosition
@@ -346,14 +352,15 @@ export default {
         this.loadAssets((err) => {
           if (!err) {
             this.handleModalsDisplay()
-            this.onSearchChange()
             setTimeout(() => {
+              this.setSearchFromUrl()
+              this.onSearchChange()
               if (this.$refs['asset-list']) {
                 this.$refs['asset-list'].setScrollPosition(
                   this.assetListScrollPosition
                 )
               }
-            }, 500)
+            }, 400)
           }
           setTimeout(() => {
             this.initialLoading = false
@@ -632,13 +639,8 @@ export default {
       if (searchQuery.length !== 1) {
         this.setAssetSearch(searchQuery)
         this.resizeHeaders()
+        this.setSearchInUrl()
       }
-    },
-
-    changeSearch (searchQuery) {
-      this.$refs['asset-search-field'].setValue(searchQuery.search_query)
-      this.$refs['asset-search-field'].$emit('change', searchQuery.search_query)
-      this.resizeHeaders()
     },
 
     saveSearchQuery (searchQuery) {

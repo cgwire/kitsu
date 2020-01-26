@@ -212,6 +212,8 @@ import func from '../../lib/func'
 import { sortByName } from '../../lib/sorting'
 import { slugify } from '../../lib/string'
 
+import { searchMixin } from '../mixins/search'
+
 import AddMetadataModal from '../modals/AddMetadataModal'
 import AddThumbnailsModal from '../modals/AddThumbnailsModal'
 import ButtonSimple from '../widgets/ButtonSimple'
@@ -231,6 +233,7 @@ import TaskInfo from '../sides/TaskInfo.vue'
 
 export default {
   name: 'shots',
+  mixins: [searchMixin],
 
   components: {
     AddMetadataModal,
@@ -337,6 +340,10 @@ export default {
       'taskTypeMap'
     ]),
 
+    searchField () {
+      return this.$refs['shot-search-field']
+    },
+
     addThumbnailsModal () {
       return this.$refs['add-thumbnails-modal']
     }
@@ -365,10 +372,11 @@ export default {
           }, 200)
           this.resizeHeaders()
           if (!err) {
-            this.onSearchChange()
             this.handleModalsDisplay()
             setTimeout(() => {
               this.resizeHeaders()
+              this.setSearchFromUrl()
+              this.onSearchChange()
               this.$refs['shot-list'].setScrollPosition(
                 this.shotListScrollPosition
               )
@@ -686,10 +694,11 @@ export default {
     },
 
     onSearchChange (event) {
-      const searchQuery = this.$refs['shot-search-field'].getValue()
+      const searchQuery = this.searchField.getValue()
       if (searchQuery.length !== 1) {
         this.setShotSearch(searchQuery)
         this.resizeHeaders()
+        this.setSearchInUrl()
       }
     },
 
@@ -698,12 +707,6 @@ export default {
         'SET_SHOT_LIST_SCROLL_POSITION',
         scrollPosition
       )
-    },
-
-    changeSearch (searchQuery) {
-      this.$refs['shot-search-field'].setValue(searchQuery.search_query)
-      this.$refs['shot-search-field'].$emit('change', searchQuery.search_query)
-      this.resizeHeaders()
     },
 
     saveSearchQuery (searchQuery) {

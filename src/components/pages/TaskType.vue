@@ -153,6 +153,7 @@
 import { mapGetters, mapActions } from 'vuex'
 import firstBy from 'thenby'
 import moment from 'moment'
+import { searchMixin } from '../mixins/search'
 
 import csv from '../../lib/csv'
 import { sortPeople } from '../../lib/sorting'
@@ -181,7 +182,7 @@ import TaskTypeName from '../widgets/TaskTypeName'
 
 export default {
   name: 'task-type-page',
-  mixins: [formatListMixin],
+  mixins: [formatListMixin, searchMixin],
   components: {
     ButtonSimple,
     ChevronLeftIcon,
@@ -213,10 +214,10 @@ export default {
       },
       schedule: {
         currentColor: 'neutral',
-        endDate: moment().add('months', 3),
+        endDate: moment().add(3, 'months'),
         scheduleItems: [],
         scheduleHeight: 800,
-        startDate: moment().add('months', -1),
+        startDate: moment().add(-1, 'months'),
         zoomLevel: 1,
         zoomOptions: [
           { label: '1', value: 1 },
@@ -343,6 +344,10 @@ export default {
         return this.personMap[personId]
       })
       return sortPeople(scheduleTeam)
+    },
+
+    searchField () {
+      return this.$refs['task-search-field']
     }
   },
 
@@ -361,9 +366,7 @@ export default {
     initData (force) {
       this.resetTasks()
       this.resetTaskIndex()
-      if (this.$refs['task-searc-field']) {
-        this.$refs['task-search-field'].focus()
-      }
+      this.focusSearchField()
       if (this.tasks.length === 0) {
         this.loading.entities = true
         this.errors.entities = false
@@ -372,7 +375,12 @@ export default {
             this.loading.entities = false
             this.resetTasks()
             this.resetTaskIndex()
-            this.$refs['task-search-field'].focus()
+            this.searchField.focus()
+            setTimeout(() => {
+              this.setSearchFromUrl()
+              const searchQuery = this.searchField.getValue()
+              if (searchQuery) this.onSearchChange(searchQuery)
+            }, 200)
             if (this.isActiveTab('schedule')) this.resetScheduleItems()
           })
           .catch((err) => {
@@ -419,11 +427,6 @@ export default {
 
     // Search
 
-    changeSearch (searchQuery) {
-      this.$refs['task-search-field'].setValue(searchQuery.search_query)
-      this.$refs['task-search-field'].$emit('change', searchQuery.search_query)
-    },
-
     onSearchChange (query) {
       if (query && query.length !== 1) {
         query = query.toLowerCase().trim()
@@ -457,6 +460,7 @@ export default {
         this.resetTasks()
         if (this.isActiveTab('schedule')) this.resetScheduleItems()
       }
+      this.setSearchInUrl()
       this.clearSelectedTasks()
     },
 
@@ -582,7 +586,7 @@ export default {
           mainEndDate = personElement.endDate.clone()
         }
       })
-      this.schedule.startDate = mainStartDate.add('days', -1)
+      this.schedule.startDate = mainStartDate.add(-1, 'days')
       this.schedule.endDate = mainEndDate
     },
 
@@ -663,17 +667,17 @@ export default {
         } else if (task.end_date) {
           endDate = moment(task.end_date, 'YYYY-MM-DD')
         } else if (task.estimation) {
-          endDate = startDate.add('days', estimation)
+          endDate = startDate.add(estimation, 'days')
         }
         if (!endDate || endDate.isBefore(startDate)) {
           const nbDays = startDate.isoWeekday() === 5 ? 3 : 1
-          endDate = startDate.add('days', nbDays)
+          endDate = startDate.add(nbDays, 'days')
         }
 
         if (!startDate) startDate = moment()
         if (!endDate.isAfter(startDate)) {
           const nbDays = startDate.isoWeekday() === 5 ? 3 : 1
-          endDate = startDate.clone().add('days', nbDays)
+          endDate = startDate.clone().add(nbDays, 'days')
         }
 
         if (estimation) manDays += parseInt(estimation)
@@ -783,7 +787,6 @@ export default {
 
   watch: {
     $route () {
-      this.initData(true)
       this.updateActiveTab()
     },
 
