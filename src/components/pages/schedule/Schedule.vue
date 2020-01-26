@@ -621,10 +621,10 @@ export default {
 
     getDisplayedDaysIndex (date) {
       if (date.isoWeekday() === 6) {
-        date = date.add('days', -1)
+        date = date.add(-1, 'days')
       }
       if (date.isoWeekday() === 7) {
-        date = date.add('days', -2)
+        date = date.add(-2, 'days')
       }
       const dateString = date.format('YYYY-MM-DD')
       return this.displayedDaysIndex[dateString]
@@ -633,6 +633,14 @@ export default {
     changeDates (event) {
       const change = event.clientX - this.initialClientX - this.cellWidth / 2
       const dayChange = Math.ceil(change / this.cellWidth)
+
+      if (this.lastStartDate.isBefore(this.startDate)) {
+        this.lastStartDate = this.startDate.clone()
+      }
+
+      if (this.lastEndDate.isBefore(this.startDate)) {
+        this.lastEndDate = this.startDate.clone().add(1, 'days')
+      }
 
       const startDate = this.lastStartDate
       const endDate = this.lastEndDate
@@ -678,6 +686,18 @@ export default {
     changeEndDate (event) {
       const change = event.clientX - this.initialClientX + this.cellWidth / 2
       const dayChange = Math.ceil(change / this.cellWidth)
+
+      if (this.currentElement.startDate.isBefore(this.startDate)) {
+        this.currentElement.startDate = this.startDate.clone()
+      }
+
+      if (this.currentElement.endDate.isBefore(this.startDate)) {
+        this.currentElement.endDate = this.startDate.clone().add(1, 'days')
+      }
+
+      if (this.lastEndDate.isBefore(this.startDate)) {
+        this.lastEndDate = this.startDate.clone().add(1, 'days')
+      }
 
       const startDate = this.currentElement.startDate
       const endDate = this.lastEndDate
@@ -725,7 +745,7 @@ export default {
         this.isChangeEndDate = false
         this.currentElement = timeElement
         if (!timeElement.endDate) {
-          timeElement.endDate = timeElement.startDate.clone().add('days', 1)
+          timeElement.endDate = timeElement.startDate.clone().add(1, 'days')
         }
         this.lastStartDate = timeElement.startDate.clone()
         this.lastEndDate = timeElement.endDate.clone()
@@ -745,7 +765,7 @@ export default {
         this.isChangeEndDate = true
         this.currentElement = timeElement
         if (!timeElement.endDate) {
-          timeElement.endDate = timeElement.startDate.clone().add('days', 1)
+          timeElement.endDate = timeElement.startDate.clone().add(1, 'days')
         }
         this.lastStartDate = timeElement.startDate.clone()
         this.lastEndDate = timeElement.endDate.clone()
