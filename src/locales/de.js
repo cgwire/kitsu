@@ -109,6 +109,14 @@ export default {
     }
   },
 
+  keyboard: {
+    altdown: 'Verschiebt die Auswahl einer Aufgabe nach unten',
+    altleft: 'Verschiebt die Auswahl einer Aufgabe nach links',
+    altright: 'Verschiebt die Auswahl einer Aufgabe nach rechts',
+    altup: 'Verschiebt die Auswahl einer Aufgabe nach oben',
+    shortcuts: 'Klavierklavier'
+  },
+
   login: {
     forgot_password: 'Passwort vergessen?',
     login: 'Einloggen',

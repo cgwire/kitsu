@@ -128,6 +128,14 @@ export default {
     }
   },
 
+  keyboard: {
+    altdown: 'Move task selection down',
+    altleft: 'Move task selection to left',
+    altright: 'Move task selection to right',
+    altup: 'Move task selection up',
+    shortcuts: 'Shortcuts'
+  },
+
   login: {
     forgot_password: 'Forgot password?',
     login: 'Log in',
@@ -191,6 +199,7 @@ export default {
     start_date: 'Start date',
     sorted_by: 'Tasks sorted by',
     studio: 'Studio',
+    tutorials: 'Tutorials',
     user: 'User',
     white_theme: 'White Theme',
     yes: 'Yes',
@@ -291,7 +300,7 @@ export default {
       admin: 'Studio Manager',
       client: 'Client',
       manager: 'Supervisor',
-      user: 'CG Artist'
+      user: 'Artist'
     }
   },
 

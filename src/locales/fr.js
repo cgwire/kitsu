@@ -123,6 +123,14 @@ export default {
     }
   },
 
+  keyboard: {
+    altdown: 'Déplace la sélection d\'une tâche vers le bas',
+    altleft: 'Déplace la sélection d\'une tâche vers la gauche',
+    altright: 'Déplace la sélection d\'une tâche vers la droite',
+    altup: 'Déplace la sélection d\'une tâche vers le haut',
+    shortcuts: 'Raccourcis claviers'
+  },
+
   login: {
     login: 'Se connecter',
     login_failed: 'La connexion a échoué, vérifiez vos identifiants',
