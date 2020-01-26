@@ -89,14 +89,14 @@
         >
           <router-link
             class="quota-button"
-            :to="{
+            :to="episodifyRoute({
               name: 'quota-month-person',
               params: {
                 person_id: key,
                 year: year,
                 month: month
               }
-            }"
+            })"
             v-if="getQuota(key, {year, month})"
           >
             {{ getQuota(key, {year, month}) }}
@@ -115,14 +115,14 @@
         >
           <router-link
             class="quota-button"
-            :to="{
+            :to="episodifyRoute({
               name: 'quota-week-person',
               params: {
                 person_id: key,
                 year: year,
                 week: week
               }
-            }"
+            })"
             v-if="getQuota(key, {year, week})"
           >
             {{ getQuota(key, {year, week}) }}
@@ -144,7 +144,7 @@
         >
           <router-link
             class="quota-button"
-            :to="{
+            :to="episodifyRoute({
               name: 'quota-day-person',
               params: {
                 person_id: key,
@@ -152,7 +152,7 @@
                 month: month,
                 day: day
               }
-            }"
+            })"
             v-if="getQuota(key, {year, month, day})"
           >
             {{ getQuota(key, {year, month, day}) }}
@@ -182,6 +182,7 @@
 
 import moment from 'moment-timezone'
 import { mapGetters, mapActions } from 'vuex'
+import { episodifyRoute } from '../../../lib/path'
 import PeopleAvatar from '../../widgets/PeopleAvatar'
 import TableInfo from '../../widgets/TableInfo'
 import {
@@ -254,6 +255,7 @@ export default {
 
   computed: {
     ...mapGetters([
+      'currentEpisode',
       'shotMap',
       'personMap'
     ]),
@@ -291,6 +293,13 @@ export default {
       'computeQuota',
       'getPeriodDetails'
     ]),
+
+    episodifyRoute (route) {
+      if (this.currentEpisode) {
+        episodifyRoute(route, this.currentEpisode.id)
+      }
+      return route
+    },
 
     isWeekend (year, month, day) {
       let date = moment(`${year}-${month}-${day}`)

@@ -178,7 +178,7 @@ export default {
       }
       if (this.currentEpisode) {
         route.name = `episode-${route.name}`
-        route.parameters.episode_id = this.currentEpisode.id
+        route.params.episode_id = this.currentEpisode.id
       }
       return route
     }
