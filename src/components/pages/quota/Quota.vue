@@ -14,8 +14,8 @@
       </div>
       <div
         class="quota-row"
-        v-for="(people, key, i) in quotaMap"
-        :key="'-' + i"
+        v-for="key in personIds"
+        :key="'name-' + key"
       >
         <div class="row-cell row-cell--name">
           <people-avatar :size="30" :person="personMap[key]"/>
@@ -75,7 +75,7 @@
       </div>
       <div
         class="quota-row"
-        v-for="(people, key) in quotaMap"
+        v-for="key in personIds"
         :key="key"
       >
         <div
@@ -273,6 +273,15 @@ export default {
 
     weekRange () {
       return getWeekRange(this.year, this.currentYear, this.currentWeek)
+    },
+
+    personIds () {
+      const personIds = Object.keys(this.quotaMap)
+      return personIds.sort((a, b) => {
+        const personAName = this.personMap[a].full_name
+        const personBName = this.personMap[b].full_name
+        return personAName.localeCompare(personBName)
+      })
     }
   },
 
