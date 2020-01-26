@@ -89,7 +89,7 @@
             {{ formatDuration(entry.estimation) }}
           </td>
           <td class="estimation">
-            {{ formatDuration(entry.time) }}
+            {{ formatDuration(entry.duration) }}
           </td>
           <td class="due-date">
             {{ formatDate(entry.due_date) }}

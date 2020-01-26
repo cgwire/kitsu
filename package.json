@@ -3,6 +3,8 @@
   "version": "0.11.10",
   "description": "Production Management Software (user interface)",
   "author": "Frank Rousseau <frank@cg-wire.com>",
+  "repository": "https://github.com/cgwire/kitsu",
+  "license": "AGPL v3.0",
   "scripts": {
     "serve": "vue-cli-service serve",
     "build": "vue-cli-service build",
@@ -38,7 +40,7 @@
     "vue-i18n": "8.14.0",
     "vue-infinite-scroll": "2.0.2",
     "vue-lazyload": "1.3.2",
-    "vue-meta": "2.2.0",
+    "vue-meta": "2.2.2",
     "vue-router": "3.1.3",
     "vue-scroll": "2.1.12",
     "vue-slider-component": "3.0.40",

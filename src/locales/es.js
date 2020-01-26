@@ -109,6 +109,14 @@ export default {
     }
   },
 
+  keyboard: {
+    altdown: 'Mueve la selección de una tarea hacia abajo',
+    altleft: 'Mueve la selección de una tarea a la izquierda',
+    altright: 'Mueve la selección de una tarea a la derecha',
+    altup: 'Mueve la selección de una tarea hacia arriba',
+    shortcuts: 'Atajos de teclado'
+  },
+
   login: {
     forgot_password: '¿Olvidó su contraseña?',
     login: 'Iniciar sesión',

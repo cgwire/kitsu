@@ -118,6 +118,18 @@
         </li>
         <li>
           <a href="https://slack.cg-wire.com" target="_blank">
+            {{ $t('main.tutorials') }}
+          </a>
+        </li>
+        <li>
+          <a
+            @click="display.shortcutModal = true"
+          >
+            {{ $t('keyboard.shortcuts') }}
+          </a>
+        </li>
+        <li>
+          <a href="https://slack.cg-wire.com" target="_blank">
             Slack
           </a>
         </li>
@@ -139,6 +151,12 @@
         </li>
       </ul>
     </nav>
+
+    <shortcut-modal
+      :active="display.shortcutModal"
+      @cancel="display.shortcutModal = false"
+    />
+
   </div>
 </template>
 
@@ -150,6 +168,7 @@ import Combobox from '../widgets/Combobox'
 import NotificationBell from '../widgets/NotificationBell'
 import PeopleAvatar from '../widgets/PeopleAvatar'
 import PeopleName from '../widgets/PeopleName'
+import ShortcutModal from '../modals/ShortcutModal'
 import { version } from '../../../package.json'
 
 export default {
@@ -159,7 +178,8 @@ export default {
     ChevronLeftIcon,
     NotificationBell,
     PeopleName,
-    PeopleAvatar
+    PeopleAvatar,
+    ShortcutModal
   },
 
   data () {
@@ -168,7 +188,11 @@ export default {
       currentEpisodeId: this.$route.params.episode_id,
       currentProjectSection: null,
       kitsuVersion: version,
-      silent: false
+      silent: false,
+
+      display: {
+        shortcutModal: false
+      }
     }
   },
 

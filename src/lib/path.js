@@ -84,7 +84,7 @@ const getProductionRoute = (name, productionId) => {
   }
 }
 
-const episodifyRoute = (route, episodeId) => {
+export const episodifyRoute = (route, episodeId) => {
   if (episodeId) {
     route.name = `episode-${route.name}`
     route.params.episode_id = episodeId
