@@ -96,15 +96,27 @@
       </div>
     </div>
 
+    <preview-modal
+      :active="modals.isPreviewDisplayed"
+      :is-loading="loading.importing"
+      :is-error="errors.importing"
+      :parsedCSV="parsedCSV"
+      :form-data="importCsvFormData"
+      @reupload="reuploadFile"
+      @cancel="hidePreviewModal"
+      @confirm="uploadImportFile"
+    />
+
     <import-modal
+      ref="import-modal"
       :active="modals.importing"
       :is-loading="loading.importing"
       :is-error="errors.importing"
       :form-data="importCsvFormData"
       :columns="csvColumns"
-      @fileselected="selectFile"
-      @confirm="uploadImportFile"
       @cancel="hideImportModal"
+      @fileselected="selectFile"
+      @confirm="previewImportFile"
     />
 
     <edit-label-modal
@@ -123,12 +135,13 @@
 <script>
 import { mapGetters, mapActions } from 'vuex'
 import { range } from '../../lib/time'
-
+import Papa from 'papaparse'
 import AvailableAssetBlock from './breakdown/AvailableAssetBlock'
 import ButtonHrefLink from '../widgets/ButtonHrefLink.vue'
 import ButtonSimple from '../widgets/ButtonSimple'
 import ComboboxStyled from '../widgets/ComboboxStyled'
 import EditLabelModal from '../modals/EditLabelModal'
+import PreviewModal from '../modals/PreviewModal'
 import ImportModal from '../modals/ImportModal'
 import SearchField from '../widgets/SearchField.vue'
 import ShotLine from './breakdown/ShotLine'
@@ -144,6 +157,7 @@ export default {
     ComboboxStyled,
     EditLabelModal,
     ImportModal,
+    PreviewModal,
     SearchField,
     ShotLine,
     Spinner
@@ -190,8 +204,10 @@ export default {
       },
       modals: {
         isEditLabelDisplayed: false,
+        isPreviewDisplayed: false,
         importing: false
-      }
+      },
+      parsedCSV: []
     }
   },
 
@@ -408,6 +424,14 @@ export default {
       this.modals.importing = false
     },
 
+    showPreviewModal () {
+      this.modals.isPreviewDisplayed = true
+    },
+
+    hidePreviewModal () {
+      this.modals.isPreviewDisplayed = false
+    },
+
     selectFile (formData) {
       this.importCsvFormData = formData
     },
@@ -418,13 +442,46 @@ export default {
       this.uploadCastingFile(this.importCsvFormData)
         .then(() => {
           this.loading.importing = false
-          this.hideImportModal()
+          this.hidePreviewModal()
           this.reloadShots()
         })
         .catch(() => {
           this.loading.importing = false
           this.errors.importing = true
         })
+    },
+
+    processCSVFile (file, config) {
+      return new Promise((resolve, reject) => {
+        Papa.parse(file, {
+          config: config,
+          error: reject,
+          complete: (results) => {
+            resolve(results.data)
+          }
+        })
+      })
+    },
+
+    previewImportFile (formData) {
+      this.loading.importing = true
+      this.errors.importing = false
+      this.formData = formData
+      const file = formData.get('file')
+      this.processCSVFile(file)
+        .then((results) => {
+          this.parsedCSV = results
+          this.hideImportModal()
+          this.loading.importing = false
+          this.showPreviewModal()
+        })
+    },
+
+    reuploadFile () {
+      this.hidePreviewModal()
+      this.$store.commit('SHOT_CSV_FILE_SELECTED', null)
+      this.$refs['import-modal'].reset()
+      this.showImportModal()
     },
 
     updateUrl () {

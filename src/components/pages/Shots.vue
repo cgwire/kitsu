@@ -169,7 +169,7 @@
     :active="modals.isImportDisplayed"
     :is-loading="loading.importing"
     :is-error="errors.importing"
-    :form-data="formData"
+    :form-data="shotsCsvFormData"
     :columns="columns"
     @cancel="hideImportModal"
     @fileselected="selectFile"
@@ -253,10 +253,10 @@ export default {
     CreateTasksModal,
     DeleteModal,
     EditShotModal,
-    PreviewModal,
     ImportModal,
     HardDeleteModal,
     ManageShotsModal,
+    PreviewModal,
     SearchField,
     SearchQueryList,
     ShotHistoryModal,
@@ -710,7 +710,7 @@ export default {
       this.uploadShotFile((err) => {
         if (!err) {
           this.loading.importing = false
-          this.hideImportModal()
+          this.hidePreviewModal()
           this.loadShots(() => {
             this.resizeHeaders()
           })
