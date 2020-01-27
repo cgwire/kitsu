@@ -8,7 +8,6 @@
       :class="{
         select: true,
         'is-top': this.isTop,
-        'has-error': this.hasError
       }"
     >
       <select
@@ -52,10 +51,6 @@ export default {
     localeKeyPrefix: {
       default: '',
       type: String
-    },
-    hasError: {
-      type: Boolean,
-      default: false
     },
     isTop: {
       default: false,
@@ -128,9 +123,5 @@ export default {
   border-right: 0;
   border-top: 0;
   margin-top: -4px;
-}
-
-.has-error select {
-  border: 1px solid $red;
 }
 </style>

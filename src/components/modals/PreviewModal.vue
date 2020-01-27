@@ -39,11 +39,7 @@
                 v-for="(cell, index) in parsedCSV[0]"
                 :key="`header-${index}`"
               >
-                <combobox
-                  :hasError="hasNoMatch(cell)"
-                  :options="columnOptions"
-                  :value="cellValue(cell)"
-                />
+              {{ cell || '-' }}
               </th>
             </tr>
           </thead>
@@ -86,7 +82,6 @@
 import { mapGetters, mapActions } from 'vuex'
 import { modalMixin } from './base_modal'
 import TextField from '../widgets/TextField'
-import Combobox from '../widgets/Combobox'
 import ButtonSimple from '../widgets/ButtonSimple'
 import ModalFooter from './ModalFooter'
 
@@ -96,7 +91,6 @@ export default {
   components: {
     ButtonSimple,
     TextField,
-    Combobox,
     ModalFooter
   },
 
@@ -155,16 +149,6 @@ export default {
   methods: {
     ...mapActions([
     ]),
-    cellValue (data) {
-      return data.toLowerCase()
-    },
-    hasNoMatch (data) {
-      const values = []
-      this.columnOptions.forEach(item => values.push(item.value))
-      const results = values.find(item => item === data.toLowerCase())
-      console.log(results)
-      if (results === undefined) { return true }
-    },
     onConfirmClicked () {
       this.$emit('confirm')
     },
