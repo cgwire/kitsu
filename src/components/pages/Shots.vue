@@ -158,15 +158,18 @@
     :is-loading="loading.importing"
     :is-error="errors.importing"
     :parsedCSV="parsedCSV"
+    :form-data="shotsCsvFormData"
     @reupload="reuploadFile"
     @cancel="hidePreviewModal"
     @confirm="uploadImportFile"
   />
 
   <import-modal
+    ref="import-modal"
     :active="modals.isImportDisplayed"
     :is-loading="loading.importing"
     :is-error="errors.importing"
+    :form-data="formData"
     :columns="columns"
     @cancel="hideImportModal"
     @fileselected="selectFile"
@@ -271,6 +274,7 @@ export default {
       historyShot: {},
       shotToDelete: null,
       shotToEdit: null,
+      formData: null,
       parsedCSV: [],
       columns: [
         'Episode',
@@ -688,6 +692,7 @@ export default {
     previewImportFile (formData) {
       this.loading.importing = true
       this.errors.importing = false
+      this.formData = formData
       const file = formData.get('file')
       this.processCSVFile(file)
         .then((results) => {
@@ -718,6 +723,8 @@ export default {
 
     reuploadFile () {
       this.hidePreviewModal()
+      this.$store.commit('SHOT_CSV_FILE_SELECTED', null)
+      this.$refs['import-modal'].reset()
       this.showImportModal()
     },
 

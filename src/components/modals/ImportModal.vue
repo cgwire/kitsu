@@ -27,6 +27,7 @@
       <file-upload
         @fileselected="onFileSelected"
         :label="$t('main.csv.upload_file')"
+        ref="inputFile"
       />
 
       <modal-footer
@@ -100,11 +101,13 @@ export default {
     },
     onConfirmClicked () {
       this.$emit('confirm', this.formData)
+    },
+    reset () {
+      this.$refs.inputFile.reset()
     }
   },
 
-  watch: {
-  }
+  watch: {}
 }
 </script>
 
