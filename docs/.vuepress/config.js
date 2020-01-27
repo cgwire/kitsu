@@ -12,7 +12,9 @@ module.exports = {
        ['/', 'Introduction'],
        '/getting-started-production/',
        '/getting-started-artist/',
-       ['/faq/', 'FAQ']
+       ['/faq/', 'FAQ'],
+       '/permissions/',
+       '/slack/'
      ]
    },
    {
