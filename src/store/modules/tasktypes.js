@@ -149,36 +149,26 @@ const actions = {
   initTaskType ({ commit, dispatch, state, rootState, rootGetters }, force) {
     return new Promise((resolve, reject) => {
       if (rootGetters.currentTaskType.for_shots) {
-        taskTypesApi.getSequenceSubscriptions(
-          rootGetters.currentProduction.id,
-          rootGetters.currentTaskType.id,
-          (err, sequenceIds) => {
-            if (err) reject(err)
-            else {
-              commit(LOAD_SEQUENCE_SUBSCRIPTION_END, sequenceIds)
-              if (Object.keys(rootGetters.shotMap).length < 2 || force) {
-                if (rootGetters.episodes.length === 0 && rootGetters.isTVShow) {
-                  dispatch('loadEpisodes', (err) => {
-                    if (err) reject(err)
-                    else {
-                      dispatch('loadShots', (err) => {
-                        if (err) reject(err)
-                        else resolve()
-                      })
-                    }
-                  })
-                } else {
-                  dispatch('loadShots', (err) => {
-                    if (err) reject(err)
-                    else resolve()
-                  })
-                }
-              } else {
-                resolve()
+        if (Object.keys(rootGetters.shotMap).length < 2 || force) {
+          if (rootGetters.episodes.length === 0 && rootGetters.isTVShow) {
+            dispatch('loadEpisodes', (err) => {
+              if (err) reject(err)
+              else {
+                dispatch('loadShots', (err) => {
+                  if (err) reject(err)
+                  else resolve()
+                })
               }
-            }
+            })
+          } else {
+            dispatch('loadShots', (err) => {
+              if (err) reject(err)
+              else resolve()
+            })
           }
-        )
+        } else {
+          resolve()
+        }
       } else {
         if (Object.keys(rootGetters.assetMap).length < 2 || force) {
           dispatch('loadAssets', (err) => {

@@ -375,11 +375,11 @@ export default {
             this.loading.entities = false
             this.resetTasks()
             this.resetTaskIndex()
-            this.searchField.focus()
+            this.focusSearchField()
+            const searchQuery = this.searchField.getValue()
+            if (searchQuery) this.onSearchChange(searchQuery)
             setTimeout(() => {
               this.setSearchFromUrl()
-              const searchQuery = this.searchField.getValue()
-              if (searchQuery) this.onSearchChange(searchQuery)
             }, 200)
             if (this.isActiveTab('schedule')) this.resetScheduleItems()
           })
@@ -428,6 +428,7 @@ export default {
     // Search
 
     onSearchChange (query) {
+      console.log(query)
       if (query && query.length !== 1) {
         query = query.toLowerCase().trim()
         const descriptors = this.currentProduction.descriptors

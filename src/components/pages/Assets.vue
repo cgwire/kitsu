@@ -369,14 +369,12 @@ export default {
           if (!err) {
             this.handleModalsDisplay()
             setTimeout(() => {
-              this.setSearchFromUrl()
-              this.onSearchChange()
               if (this.$refs['asset-list']) {
                 this.$refs['asset-list'].setScrollPosition(
                   this.assetListScrollPosition
                 )
               }
-            }, 400)
+            }, 500)
           }
           setTimeout(() => {
             this.initialLoading = false
@@ -904,6 +902,8 @@ export default {
         this.loadAssets((err) => {
           this.initialLoading = false
           this.resizeHeaders()
+          this.setSearchFromUrl()
+          this.onSearchChange()
           if (!err) {
             this.handleModalsDisplay()
           }
@@ -922,6 +922,8 @@ export default {
             this.handleModalsDisplay()
             this.initialLoading = false
             this.resizeHeaders()
+            this.setSearchFromUrl()
+            this.onSearchChange()
           }
         })
       }

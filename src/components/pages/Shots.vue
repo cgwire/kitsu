@@ -393,8 +393,6 @@ export default {
             this.handleModalsDisplay()
             setTimeout(() => {
               this.resizeHeaders()
-              this.setSearchFromUrl()
-              this.onSearchChange()
               this.$refs['shot-list'].setScrollPosition(
                 this.shotListScrollPosition
               )
@@ -915,6 +913,8 @@ export default {
       if (!this.isTVShow) {
         this.loadShots((err) => {
           this.initialLoading = false
+          this.setSearchFromUrl()
+          this.onSearchChange()
           this.resizeHeaders()
           if (!err) {
             this.handleModalsDisplay()
@@ -927,6 +927,8 @@ export default {
       if (this.isTVShow && this.currentEpisode) {
         this.initialLoading = true
         this.loadShots((err) => {
+          this.setSearchFromUrl()
+          this.onSearchChange()
           this.initialLoading = false
           this.resizeHeaders()
           if (!err) {
