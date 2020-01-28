@@ -31,12 +31,12 @@
         </div>
       </div>
 
-      <div class="preview-container">
-        <table class="preview">
+      <div class="render-container">
+        <table class="render">
           <thead>
-            <tr class="preview-headers">
+            <tr class="render-headers">
               <th
-                v-for="(cell, index) in parsedCSV[0]"
+                v-for="(cell, index) in parsedCsv[0]"
                 :key="`header-${index}`"
               >
               {{ cell || '-' }}
@@ -45,7 +45,7 @@
           </thead>
           <tbody>
             <tr
-              v-for="(line, index) in startFrom(parsedCSV, 1)"
+              v-for="(line, index) in startFrom(parsedCsv, 1)"
               :key="`line-${index}`"
             >
               <td
@@ -59,7 +59,7 @@
         </table>
       </div>
 
-      <div class="preview-footer">
+      <div class="render-footer">
         <button-simple
           :text="$t('main.csv.preview_reupload')"
           @click="onReupload"
@@ -86,7 +86,7 @@ import ButtonSimple from '../widgets/ButtonSimple'
 import ModalFooter from './ModalFooter'
 
 export default {
-  name: 'preview-modal',
+  name: 'import-render-modal',
   mixins: [modalMixin],
   components: {
     ButtonSimple,
@@ -123,7 +123,7 @@ export default {
       type: Boolean,
       default: false
     },
-    parsedCSV: {
+    parsedCsv: {
       type: Array,
       default: () => []
     },
@@ -164,13 +164,13 @@ export default {
 
 <style lang="scss" scoped>
 .dark {
-  .preview-container {
-    .preview {
+  .render-container {
+    .render {
       border: 1px solid $dark-grey-light;
       th, td {
         color: $white;
       }
-      tr:not(.preview-headers):hover {
+      tr:not(.render-headers):hover {
         background-color: $dark-grey-lightmore;
       }
     }
@@ -196,14 +196,14 @@ export default {
     flex: 1 1 50%;
   }
 }
-.preview-container {
+.render-container {
   overflow: auto;
-  .preview-headers {
+  .render-headers {
     .field {
       margin: 0;
     }
   }
-  .preview {
+  .render {
     width: 100%;
     border: 1px solid $light-grey-light;
     th, td {
@@ -214,12 +214,12 @@ export default {
     tr:hover {
       background: none;
     }
-    tr:not(.preview-headers):hover {
+    tr:not(.render-headers):hover {
       background-color: $white-grey-light;
     }
   }
 }
-.preview-footer {
+.render-footer {
   display: flex;
   align-items: center;
   justify-content: space-between;

@@ -153,14 +153,14 @@
     @confirm="confirmDeleteAllTasks"
   />
 
-  <preview-modal
-    :active="modals.isPreviewDisplayed"
+  <import-render-modal
+    :active="modals.isImportRenderDisplayed"
     :is-loading="loading.importing"
     :is-error="errors.importing"
-    :parsedCSV="parsedCSV"
+    :parsed-csv="parsedCSV"
     :form-data="shotsCsvFormData"
-    @reupload="reuploadFile"
-    @cancel="hidePreviewModal"
+    @reupload="resetImport"
+    @cancel="hideImportRenderModal"
     @confirm="uploadImportFile"
   />
 
@@ -173,7 +173,7 @@
     :columns="columns"
     @cancel="hideImportModal"
     @fileselected="selectFile"
-    @confirm="previewImportFile"
+    @confirm="renderImportFile"
   />
 
   <create-tasks-modal
@@ -231,7 +231,7 @@ import ButtonSimple from '../widgets/ButtonSimple'
 import CreateTasksModal from '../modals/CreateTasksModal'
 import DeleteModal from '../modals/DeleteModal'
 import EditShotModal from '../modals/EditShotModal'
-import PreviewModal from '../modals/PreviewModal'
+import ImportRenderModal from '../modals/ImportRenderModal'
 import ImportModal from '../modals/ImportModal'
 import HardDeleteModal from '../modals/HardDeleteModal'
 import ManageShotsModal from '../modals/ManageShotsModal'
@@ -256,7 +256,7 @@ export default {
     ImportModal,
     HardDeleteModal,
     ManageShotsModal,
-    PreviewModal,
+    ImportRenderModal,
     SearchField,
     SearchQueryList,
     ShotHistoryModal,
@@ -292,7 +292,7 @@ export default {
         isDeleteDisplayed: false,
         isDeleteMetadataDisplayed: false,
         isDeleteAllTasksDisplayed: false,
-        isPreviewDisplayed: false,
+        isImportRenderDisplayed: false,
         isImportDisplayed: false,
         isManageDisplayed: false,
         isNewDisplayed: false,
@@ -689,7 +689,7 @@ export default {
       })
     },
 
-    previewImportFile (formData) {
+    renderImportFile (formData) {
       this.loading.importing = true
       this.errors.importing = false
       this.formData = formData
@@ -699,7 +699,7 @@ export default {
           this.parsedCSV = results
           this.hideImportModal()
           this.loading.importing = false
-          this.showPreviewModal()
+          this.showImportRenderModal()
         })
     },
 
@@ -710,7 +710,7 @@ export default {
       this.uploadShotFile((err) => {
         if (!err) {
           this.loading.importing = false
-          this.hidePreviewModal()
+          this.hideImportRenderModal()
           this.loadShots(() => {
             this.resizeHeaders()
           })
@@ -721,8 +721,8 @@ export default {
       })
     },
 
-    reuploadFile () {
-      this.hidePreviewModal()
+    resetImport () {
+      this.hideImportRenderModal()
       this.$store.commit('SHOT_CSV_FILE_SELECTED', null)
       this.$refs['import-modal'].reset()
       this.showImportModal()
@@ -805,12 +805,12 @@ export default {
       this.modals.isImportDisplayed = false
     },
 
-    showPreviewModal () {
-      this.modals.isPreviewDisplayed = true
+    showImportRenderModal () {
+      this.modals.isImportRenderDisplayed = true
     },
 
-    hidePreviewModal () {
-      this.modals.isPreviewDisplayed = false
+    hideImportRenderModal () {
+      this.modals.isImportRenderDisplayed = false
     },
 
     showCreateTasksModal () {

@@ -96,14 +96,14 @@
       </div>
     </div>
 
-    <preview-modal
-      :active="modals.isPreviewDisplayed"
+    <import-render-modal
+      :active="modals.isImportRenderDisplayed"
       :is-loading="loading.importing"
       :is-error="errors.importing"
-      :parsedCSV="parsedCSV"
+      :parsed-csv="parsedCSV"
       :form-data="importCsvFormData"
-      @reupload="reuploadFile"
-      @cancel="hidePreviewModal"
+      @reupload="resetImport"
+      @cancel="hideImportRenderModal"
       @confirm="uploadImportFile"
     />
 
@@ -116,7 +116,7 @@
       :columns="csvColumns"
       @cancel="hideImportModal"
       @fileselected="selectFile"
-      @confirm="previewImportFile"
+      @confirm="renderImportFile"
     />
 
     <edit-label-modal
@@ -141,7 +141,7 @@ import ButtonHrefLink from '../widgets/ButtonHrefLink.vue'
 import ButtonSimple from '../widgets/ButtonSimple'
 import ComboboxStyled from '../widgets/ComboboxStyled'
 import EditLabelModal from '../modals/EditLabelModal'
-import PreviewModal from '../modals/PreviewModal'
+import ImportRenderModal from '../modals/ImportRenderModal'
 import ImportModal from '../modals/ImportModal'
 import SearchField from '../widgets/SearchField.vue'
 import ShotLine from './breakdown/ShotLine'
@@ -157,7 +157,7 @@ export default {
     ComboboxStyled,
     EditLabelModal,
     ImportModal,
-    PreviewModal,
+    ImportRenderModal,
     SearchField,
     ShotLine,
     Spinner
@@ -204,7 +204,7 @@ export default {
       },
       modals: {
         isEditLabelDisplayed: false,
-        isPreviewDisplayed: false,
+        isImportRenderDisplayed: false,
         importing: false
       },
       parsedCSV: []
@@ -424,12 +424,12 @@ export default {
       this.modals.importing = false
     },
 
-    showPreviewModal () {
-      this.modals.isPreviewDisplayed = true
+    showImportRenderModal () {
+      this.modals.isImportRenderDisplayed = true
     },
 
-    hidePreviewModal () {
-      this.modals.isPreviewDisplayed = false
+    hideImportRenderModal () {
+      this.modals.isImportRenderDisplayed = false
     },
 
     selectFile (formData) {
@@ -442,7 +442,7 @@ export default {
       this.uploadCastingFile(this.importCsvFormData)
         .then(() => {
           this.loading.importing = false
-          this.hidePreviewModal()
+          this.hideImportRenderModal()
           this.reloadShots()
         })
         .catch(() => {
@@ -463,7 +463,7 @@ export default {
       })
     },
 
-    previewImportFile (formData) {
+    renderImportFile (formData) {
       this.loading.importing = true
       this.errors.importing = false
       this.formData = formData
@@ -473,12 +473,12 @@ export default {
           this.parsedCSV = results
           this.hideImportModal()
           this.loading.importing = false
-          this.showPreviewModal()
+          this.showImportRenderModal()
         })
     },
 
-    reuploadFile () {
-      this.hidePreviewModal()
+    resetImport () {
+      this.hideImportRenderModal()
       this.$store.commit('SHOT_CSV_FILE_SELECTED', null)
       this.$refs['import-modal'].reset()
       this.showImportModal()

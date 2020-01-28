@@ -143,14 +143,14 @@
     @confirm="confirmDeleteMetadata"
   />
 
-  <preview-modal
-    :active="modals.isPreviewDisplayed"
+  <import-render-modal
+    :active="modals.isImportRenderDisplayed"
     :is-loading="loading.importing"
     :is-error="errors.importing"
-    :parsedCSV="parsedCSV"
+    :parsed-csv="parsedCSV"
     :form-data="assetsCsvFormData"
-    @reupload="reuploadFile"
-    @cancel="hidePreviewModal"
+    @reupload="resetImport"
+    @cancel="hideImportRenderModal"
     @confirm="uploadImportFile"
   />
 
@@ -162,7 +162,7 @@
     :form-data="assetsCsvFormData"
     :columns="columns"
     @fileselected="selectFile"
-    @confirm="previewImportFile"
+    @confirm="renderImportFile"
     @cancel="hideImportModal"
   />
 
@@ -218,7 +218,7 @@ import CreateTasksModal from '../modals/CreateTasksModal'
 import DeleteModal from '../modals/DeleteModal'
 import EditAssetModal from '../modals/EditAssetModal'
 import ImportModal from '../modals/ImportModal'
-import PreviewModal from '../modals/PreviewModal'
+import ImportRenderModal from '../modals/ImportRenderModal'
 import HardDeleteModal from '../modals/HardDeleteModal'
 import SearchField from '../widgets/SearchField'
 import SearchQueryList from '../widgets/SearchQueryList'
@@ -240,7 +240,7 @@ export default {
     EditAssetModal,
     HardDeleteModal,
     ImportModal,
-    PreviewModal,
+    ImportRenderModal,
     SearchField,
     SearchQueryList,
     ShowAssignationsButton,
@@ -259,7 +259,7 @@ export default {
         isDeleteAllTasksDisplayed: false,
         isDeleteMetadataDisplayed: false,
         isImportDisplayed: false,
-        isPreviewDisplayed: false,
+        isImportRenderDisplayed: false,
         isNewDisplayed: false
       },
       loading: {
@@ -637,7 +637,7 @@ export default {
       })
     },
 
-    previewImportFile (formData) {
+    renderImportFile (formData) {
       this.loading.importing = true
       this.errors.importing = false
       this.formData = formData
@@ -647,7 +647,7 @@ export default {
           this.parsedCSV = results
           this.hideImportModal()
           this.loading.importing = false
-          this.showPreviewModal()
+          this.showImportRenderModal()
         })
     },
 
@@ -661,7 +661,7 @@ export default {
           this.loadAssets(() => {
             this.resizeHeaders()
           })
-          this.hidePreviewModal()
+          this.hideImportRenderModal()
         } else {
           this.loading.importing = false
           this.errors.importing = true
@@ -669,8 +669,8 @@ export default {
       })
     },
 
-    reuploadFile () {
-      this.hidePreviewModal()
+    resetImport () {
+      this.hideImportRenderModal()
       this.$store.commit('SHOT_CSV_FILE_SELECTED', null)
       this.$refs['import-modal'].reset()
       this.showImportModal()
@@ -812,12 +812,12 @@ export default {
       this.modals.isImportDisplayed = false
     },
 
-    showPreviewModal () {
-      this.modals.isPreviewDisplayed = true
+    showImportRenderModal () {
+      this.modals.isImportRenderDisplayed = true
     },
 
-    hidePreviewModal () {
-      this.modals.isPreviewDisplayed = false
+    hideImportRenderModal () {
+      this.modals.isImportRenderDisplayed = false
     },
 
     showCreateTasksModal () {

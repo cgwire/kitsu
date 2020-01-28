@@ -45,14 +45,14 @@
       :is-error="isPeopleLoadingError"
     />
 
-    <preview-modal
-      :active="modals.isPreviewDisplayed"
+    <import-render-modal
+      :active="modals.isImportRenderDisplayed"
       :is-loading="isImportPeopleLoading"
       :is-error="isImportPeopleLoadingError"
-      :parsedCSV="parsedCSV"
+      :parsed-csv="parsedCSV"
       :form-data="personCsvFormData"
-      @reupload="reuploadFile"
-      @cancel="hidePreviewModal"
+      @reupload="resetImport"
+      @cancel="hideImportRenderModal"
       @confirm="uploadImportFile"
     />
 
@@ -65,7 +65,7 @@
       :columns="csvColumns"
       @cancel="hideImportModal"
       @fileselected="selectFile"
-      @confirm="previewImportFile"
+      @confirm="renderImportFile"
     />
 
     <edit-person-modal
@@ -107,7 +107,7 @@ import ButtonSimple from '../widgets/ButtonSimple'
 import EditPersonModal from '../modals/EditPersonModal'
 import HardDeleteModal from '../modals/HardDeleteModal'
 import ImportModal from '../modals/ImportModal'
-import PreviewModal from '../modals/PreviewModal'
+import ImportRenderModal from '../modals/ImportRenderModal'
 import PeopleList from '../lists/PeopleList'
 import PageTitle from '../widgets/PageTitle'
 import SearchField from '../widgets/SearchField'
@@ -123,7 +123,7 @@ export default {
     ImportModal,
     PageTitle,
     PeopleList,
-    PreviewModal,
+    ImportRenderModal,
     SearchField
   },
 
@@ -139,7 +139,7 @@ export default {
       },
       modals: {
         importModal: false,
-        isPreviewDisplayed: false
+        isImportRenderDisplayed: false
       },
       parsedCSV: [],
       success: {
@@ -220,7 +220,7 @@ export default {
       this.$store.dispatch('uploadPersonFile', (err) => {
         if (!err) {
           this.$store.dispatch('loadPeople')
-          this.hidePreviewModal()
+          this.hideImportRenderModal()
         }
       })
     },
@@ -237,19 +237,19 @@ export default {
       })
     },
 
-    previewImportFile (formData) {
+    renderImportFile (formData) {
       this.formData = formData
       const file = formData.get('file')
       this.processCSVFile(file)
         .then((results) => {
           this.parsedCSV = results
           this.hideImportModal()
-          this.showPreviewModal()
+          this.showImportRenderModal()
         })
     },
 
-    reuploadFile () {
-      this.hidePreviewModal()
+    resetImport () {
+      this.hideImportRenderModal()
       this.$store.commit('SHOT_CSV_FILE_SELECTED', null)
       this.$refs['import-modal'].reset()
       this.showImportModal()
@@ -353,12 +353,12 @@ export default {
       this.modals.importModal = false
     },
 
-    showPreviewModal () {
-      this.modals.isPreviewDisplayed = true
+    showImportRenderModal () {
+      this.modals.isImportRenderDisplayed = true
     },
 
-    hidePreviewModal () {
-      this.modals.isPreviewDisplayed = false
+    hideImportRenderModal () {
+      this.modals.isImportRenderDisplayed = false
     }
   },
 
