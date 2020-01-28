@@ -178,6 +178,7 @@ export default {
     edit: 'Edit',
     empty_comment: 'Empty comment',
     end_date: 'End date',
+    files_selected: 'files selected',
     for: 'For',
     go_productions: 'Go to productions',
     history: 'history',
@@ -209,7 +210,13 @@ export default {
       import_file: 'Import',
       import_title: 'Import data from a CSV file',
       required_fields: 'Your CSV file requires the following columns',
-      select_file: 'Please select a file from one of your folder:'
+      select_file: 'Please select a file from one of your folder:',
+      upload_file: 'Browse',
+      preview_episode_name: 'Episode name',
+      preview_title: 'Preview of your imported data',
+      preview_description: 'Upload a .csv file to populate your board with posts. You can optionally create new columns.',
+      preview_required: 'NB: The first row must be the header',
+      preview_reupload: 'Reupload .CSV file'
     }
   },
 

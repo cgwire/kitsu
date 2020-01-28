@@ -45,15 +45,27 @@
       :is-error="isPeopleLoadingError"
     />
 
+    <import-render-modal
+      :active="modals.isImportRenderDisplayed"
+      :is-loading="isImportPeopleLoading"
+      :is-error="isImportPeopleLoadingError"
+      :parsed-csv="parsedCSV"
+      :form-data="personCsvFormData"
+      @reupload="resetImport"
+      @cancel="hideImportRenderModal"
+      @confirm="uploadImportFile"
+    />
+
     <import-modal
+      ref="import-modal"
       :active="modals.importModal"
       :is-loading="isImportPeopleLoading"
       :is-error="isImportPeopleLoadingError"
       :form-data="personCsvFormData"
       :columns="csvColumns"
-      @fileselected="selectFile"
-      @confirm="uploadImportFile"
       @cancel="hideImportModal"
+      @fileselected="selectFile"
+      @confirm="renderImportFile"
     />
 
     <edit-person-modal
@@ -85,6 +97,8 @@
 </template>
 
 <script>
+import Papa from 'papaparse'
+
 import { mapGetters, mapActions } from 'vuex'
 
 import ButtonLink from '../widgets/ButtonLink'
@@ -93,6 +107,7 @@ import ButtonSimple from '../widgets/ButtonSimple'
 import EditPersonModal from '../modals/EditPersonModal'
 import HardDeleteModal from '../modals/HardDeleteModal'
 import ImportModal from '../modals/ImportModal'
+import ImportRenderModal from '../modals/ImportRenderModal'
 import PeopleList from '../lists/PeopleList'
 import PageTitle from '../widgets/PageTitle'
 import SearchField from '../widgets/SearchField'
@@ -108,6 +123,7 @@ export default {
     ImportModal,
     PageTitle,
     PeopleList,
+    ImportRenderModal,
     SearchField
   },
 
@@ -122,8 +138,10 @@ export default {
         invite: false
       },
       modals: {
-        importModal: false
+        importModal: false,
+        isImportRenderDisplayed: false
       },
+      parsedCSV: [],
       success: {
         invite: false
       },
@@ -202,9 +220,39 @@ export default {
       this.$store.dispatch('uploadPersonFile', (err) => {
         if (!err) {
           this.$store.dispatch('loadPeople')
-          this.hideImportModal()
+          this.hideImportRenderModal()
         }
       })
+    },
+
+    processCSVFile (file, config) {
+      return new Promise((resolve, reject) => {
+        Papa.parse(file, {
+          config: config,
+          error: reject,
+          complete: (results) => {
+            resolve(results.data)
+          }
+        })
+      })
+    },
+
+    renderImportFile (formData) {
+      this.formData = formData
+      const file = formData.get('file')
+      this.processCSVFile(file)
+        .then((results) => {
+          this.parsedCSV = results
+          this.hideImportModal()
+          this.showImportRenderModal()
+        })
+    },
+
+    resetImport () {
+      this.hideImportRenderModal()
+      this.$store.commit('SHOT_CSV_FILE_SELECTED', null)
+      this.$refs['import-modal'].reset()
+      this.showImportModal()
     },
 
     addPersonFilter (newFilter) {
@@ -303,6 +351,14 @@ export default {
 
     hideImportModal () {
       this.modals.importModal = false
+    },
+
+    showImportRenderModal () {
+      this.modals.isImportRenderDisplayed = true
+    },
+
+    hideImportRenderModal () {
+      this.modals.isImportRenderDisplayed = false
     }
   },
 

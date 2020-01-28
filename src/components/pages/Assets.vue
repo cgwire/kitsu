@@ -143,14 +143,26 @@
     @confirm="confirmDeleteMetadata"
   />
 
+  <import-render-modal
+    :active="modals.isImportRenderDisplayed"
+    :is-loading="loading.importing"
+    :is-error="errors.importing"
+    :parsed-csv="parsedCSV"
+    :form-data="assetsCsvFormData"
+    @reupload="resetImport"
+    @cancel="hideImportRenderModal"
+    @confirm="uploadImportFile"
+  />
+
   <import-modal
+    ref="import-modal"
     :active="modals.isImportDisplayed"
     :is-loading="loading.importing"
     :is-error="errors.importing"
     :form-data="assetsCsvFormData"
     :columns="columns"
     @fileselected="selectFile"
-    @confirm="uploadImportFile"
+    @confirm="renderImportFile"
     @cancel="hideImportModal"
   />
 
@@ -190,7 +202,7 @@
 
 <script>
 import moment from 'moment'
-
+import Papa from 'papaparse'
 import { mapGetters, mapActions } from 'vuex'
 import csv from '../../lib/csv'
 import func from '../../lib/func'
@@ -207,6 +219,7 @@ import CreateTasksModal from '../modals/CreateTasksModal'
 import DeleteModal from '../modals/DeleteModal'
 import EditAssetModal from '../modals/EditAssetModal'
 import ImportModal from '../modals/ImportModal'
+import ImportRenderModal from '../modals/ImportRenderModal'
 import HardDeleteModal from '../modals/HardDeleteModal'
 import SearchField from '../widgets/SearchField'
 import SearchQueryList from '../widgets/SearchQueryList'
@@ -229,6 +242,7 @@ export default {
     EditAssetModal,
     HardDeleteModal,
     ImportModal,
+    ImportRenderModal,
     SearchField,
     SearchQueryList,
     ShowAssignationsButton,
@@ -247,6 +261,7 @@ export default {
         isDeleteAllTasksDisplayed: false,
         isDeleteMetadataDisplayed: false,
         isImportDisplayed: false,
+        isImportRenderDisplayed: false,
         isNewDisplayed: false
       },
       loading: {
@@ -285,7 +300,8 @@ export default {
         'Name',
         'Description'
       ],
-      deleteAllTasksLockText: null
+      deleteAllTasksLockText: null,
+      parsedCSV: []
     }
   },
 
@@ -616,6 +632,32 @@ export default {
       this.$store.commit('ASSET_CSV_FILE_SELECTED', formData)
     },
 
+    processCSVFile (file, config) {
+      return new Promise((resolve, reject) => {
+        Papa.parse(file, {
+          config: config,
+          error: reject,
+          complete: (results) => {
+            resolve(results.data)
+          }
+        })
+      })
+    },
+
+    renderImportFile (formData) {
+      this.loading.importing = true
+      this.errors.importing = false
+      this.formData = formData
+      const file = formData.get('file')
+      this.processCSVFile(file)
+        .then((results) => {
+          this.parsedCSV = results
+          this.hideImportModal()
+          this.loading.importing = false
+          this.showImportRenderModal()
+        })
+    },
+
     uploadImportFile () {
       this.loading.importing = true
       this.errors.importing = false
@@ -626,12 +668,19 @@ export default {
           this.loadAssets(() => {
             this.resizeHeaders()
           })
-          this.hideImportModal()
+          this.hideImportRenderModal()
         } else {
           this.loading.importing = false
           this.errors.importing = true
         }
       })
+    },
+
+    resetImport () {
+      this.hideImportRenderModal()
+      this.$store.commit('SHOT_CSV_FILE_SELECTED', null)
+      this.$refs['import-modal'].reset()
+      this.showImportModal()
     },
 
     onSearchChange () {
@@ -763,6 +812,14 @@ export default {
 
     hideImportModal () {
       this.modals.isImportDisplayed = false
+    },
+
+    showImportRenderModal () {
+      this.modals.isImportRenderDisplayed = true
+    },
+
+    hideImportRenderModal () {
+      this.modals.isImportRenderDisplayed = false
     },
 
     showCreateTasksModal () {

@@ -2,16 +2,31 @@
   <div class="file-upload-wrapper">
     <form enctype="multipart/form-data" novalidate>
       <div class="dropbox">
-        <input
-          type="file"
-          ref="uploadInput"
-          :accept="accept"
-          :name="uploadFieldName"
-          :disabled="isSaving"
-          @change="filesChange($event.target.name, $event.target.files)"
-          class="input-file"
-          :multiple="multiple"
+        <label
+          :class="{
+            button: true,
+            'is-primary': isPrimary,
+          }">
+          {{ label }}
+          <input
+            type="file"
+            ref="uploadInput"
+            :accept="accept"
+            :name="uploadFieldName"
+            :disabled="isSaving"
+            @change="filesChange($event.target.name, $event.target.files)"
+            class="visuallyhidden"
+            :multiple="multiple"
+          >
+        </label>
+        <span class="file-upload-status" v-if="this.uploadedFiles.length > 1">
+          {{this.uploadedFiles.length}} {{ $tc('main.files_selected') }}
+        </span>
+        <span class="file-upload-status"
+          v-if="this.uploadedFiles.length === 1"
         >
+          {{this.uploadedFiles[0]}}
+        </span>
       </div>
     </form>
   </div>
@@ -21,17 +36,25 @@
 export default {
   name: 'file-upload',
   props: {
-    uploadFieldName: {
-      default: 'file',
-      type: String
-    },
     accept: {
       default: '.csv',
       type: String
     },
+    isPrimary: {
+      default: true,
+      type: Boolean
+    },
+    label: {
+      type: String,
+      required: true
+    },
     multiple: {
       default: false,
       type: Boolean
+    },
+    uploadFieldName: {
+      default: 'file',
+      type: String
     }
   },
   data () {
@@ -51,6 +74,7 @@ export default {
         const formData = new FormData()
         formData.append(this.uploadFieldName, file, file.name)
         forms.push(formData)
+        this.uploadedFiles.push(file.name)
       }
       if (this.multiple) {
         this.$emit('fileselected', forms)
@@ -73,4 +97,12 @@ export default {
 
 <style lang="scss" scoped>
 .file-upload-wrapper {}
+.dropbox {
+  display: flex;
+  align-items: center;
+}
+.file-upload-status {
+  margin-left: .5rem;
+  font-style: italic;
+}
 </style>

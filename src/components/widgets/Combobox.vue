@@ -7,7 +7,7 @@
     <span
       :class="{
         select: true,
-        'is-top': this.isTop
+        'is-top': this.isTop,
       }"
     >
       <select
@@ -108,11 +108,14 @@ export default {
   height: 3em;
 }
 
+.select {
+  height: auto;
+}
 .select::after {
   border: 1px solid $green;
   border-right: 0;
   border-top: 0;
-  margin-top: -2px;
+  margin-top: -4px;
 }
 
 .select.is-top::after {
