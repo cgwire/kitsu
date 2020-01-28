@@ -8,33 +8,35 @@
             Kitsu
           </h1>
         </div>
-        <div class="field mt1">
-          <p class="control has-icon">
-            <input
-              class="input is-medium email"
-              type="text"
-              :placeholder="$t('login.fields.email')"
-              @input="updateEmail"
-              @keyup.enter="confirmLogIn"
-              v-focus >
-            <span class="icon">
-              <mail-icon width=20 height=20 />
-            </span>
-          </p>
-        </div>
-        <div class="field">
-          <p class="control has-icon">
-            <input
-              class="input is-medium password"
-              type="password"
-              :placeholder="$t('login.fields.password')"
-              @input="updatePassword"
-              @keyup.enter="confirmLogIn">
-            <span class="icon">
-              <lock-icon width=20 height=20 />
-            </span>
-          </p>
-        </div>
+        <form>
+          <div class="field mt1">
+            <p class="control has-icon">
+              <input
+                class="input is-medium email"
+                type="text"
+                :placeholder="$t('login.fields.email')"
+                @input="updateEmail"
+                @keyup.enter="confirmLogIn"
+                v-focus >
+              <span class="icon">
+                <mail-icon width=20 height=20 />
+              </span>
+            </p>
+          </div>
+          <div class="field">
+            <p class="control has-icon">
+              <input
+                class="input is-medium password"
+                type="password"
+                :placeholder="$t('login.fields.password')"
+                @input="updatePassword"
+                @keyup.enter="confirmLogIn">
+              <span class="icon">
+                <lock-icon width=20 height=20 />
+              </span>
+            </p>
+          </div>
+        </form>
         <p class="control">
           <a v-bind:class="{
             button: true,
