@@ -24,11 +24,13 @@ export const searchMixin = {
 
     setSearchInUrl () {
       const searchQuery = this.searchField.getValue()
-      this.$router.push({
-        query: {
-          search: searchQuery
-        }
-      })
+      if (this.$route.query.search !== searchQuery) {
+        this.$router.push({
+          query: {
+            search: searchQuery
+          }
+        })
+      }
     },
 
     changeSearch (searchQuery) {
