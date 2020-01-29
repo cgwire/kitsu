@@ -17,4 +17,4 @@ jobs:
        username: ${{ secrets.USERNAME }}
        key: ${{ secrets.KEY }}
        port: ${{ secrets.PORT }}
-       script: cd /opt/kitsu && git pull --rebase origin master && npm run build
+       script: cd /opt/kitsu && git pull --rebase origin master && npm i && npm run build
