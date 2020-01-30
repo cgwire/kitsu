@@ -632,7 +632,7 @@ export default {
       this.$store.commit('ASSET_CSV_FILE_SELECTED', formData)
     },
 
-    processCSVFile (file, config) {
+    processCSV (file, config) {
       return new Promise((resolve, reject) => {
         Papa.parse(file, {
           config: config,
