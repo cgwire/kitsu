@@ -1,33 +1,35 @@
 <template>
-<div class="color-wrapper">
+<div class="pencil-wrapper">
   <transition name="slide">
     <button
       type="button"
+      class="pencil-picker"
+      :title="pencil"
       :class="{
-        'color-picker': true
+        medium: pencil === 'medium',
+        small: pencil === 'small'
       }"
-      :title="color"
-      :style="{ color: color }"
       @click="togglePalette"
       v-show="isActive"
     />
   </transition>
   <div
     v-show="isActive && isOpen"
-    :class="{
-      'color-palette': true,
-    }"
+    class="pencil-palette"
   >
     <label
-      v-for="shade in palette"
-      :key="shade"
-      :title="shade"
-      :style="{ color: shade }"
+      v-for="pencil in palette"
+      :key="pencil"
+      :title="pencil"
+      :class="{
+        medium: pencil === 'medium',
+        small: pencil === 'small'
+      }"
     >
       <input
         type="radio"
-        :value="shade"
-        @click="onColorPicked(shade)"
+        :value="pencil"
+        @click="onPencilPicked(pencil)"
       />
     </label>
   </div>
@@ -36,14 +38,14 @@
 
 <script>
 export default {
-  name: 'colorpicker',
+  name: 'pencilpicker',
 
   props: {
     isActive: {
       type: Boolean,
       default: false
     },
-    color: {
+    pencil: {
       type: String
     },
     palette: {
@@ -65,8 +67,8 @@ export default {
       this.isOpen = !this.isOpen
     },
 
-    onColorPicked (shade) {
-      this.$emit('change', shade)
+    onPencilPicked (width) {
+      this.$emit('change', width)
       this.isOpen = false
     }
   }
@@ -74,28 +76,43 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-.color-wrapper {
+.pencil-wrapper {
   position: relative;
 }
-.color-picker {
+.pencil-picker {
   padding: 0;
   background-color: transparent;
   cursor: pointer;
 }
-.preview .color-picker {
-  background-color: $dark-grey;
+.pencil-picker {
+  background-color: transparent;
 }
-.color-picker::before,
-.color-palette label::before {
+.pencil-picker::before,
+.pencil-palette label::before {
   display: block;
   content: '';
-  margin: .25rem;
+  margin: .4rem;
   width: 1rem;
   height: 1rem;
   border-radius: 50%;
-  background-color: currentColor;
+  background-color: $light-grey;
 }
-.color-palette {
+
+.pencil-picker.medium::before,
+.pencil-palette label.medium::before {
+  margin: .5rem;
+  width: .7rem;
+  height: .7rem;
+}
+
+.pencil-picker.small::before,
+.pencil-palette label.small::before {
+  margin: .55rem;
+  width: .5rem;
+  height: .5rem;
+}
+
+.pencil-palette {
   position: absolute;
   z-index: 900;
   left: 0;
@@ -103,15 +120,15 @@ export default {
   background-color: $dark-grey-light;
   border-radius: 5px;
 }
-.preview .color-palette {
+.preview .pencil-palette {
   background-color: $dark-grey;
 }
-.color-palette label {
+.pencil-palette label {
   display: block;
   margin: .5rem 0;
   cursor: pointer;
 }
-.color-palette input {
+.pencil-palette input {
   display: none;
 }
 .slide-enter-active {

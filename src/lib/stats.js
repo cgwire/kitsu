@@ -7,8 +7,8 @@ export const getChartData = (mainStats, entryId, columnId, dataType = 'count') =
   const valueField = dataType === 'count' ? 'count' : 'frames'
   return Object.keys(statusData)
     .map((taskStatusId) => {
-      let data = statusData[taskStatusId]
-      let color = data.name === 'todo' ? '#6F727A' : data.color
+      const data = statusData[taskStatusId]
+      const color = data.name === 'todo' ? '#6F727A' : data.color
       return [data.name, data[valueField], color]
     })
     .sort((a, b) => {

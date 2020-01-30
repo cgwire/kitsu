@@ -195,6 +195,27 @@
     />
     <span class="filler"></span>
 
+    <button-simple
+      class="playlist-button flexrow-item"
+      icon="undo"
+      @click="undoLastAction"
+    />
+
+    <button-simple
+      class="playlist-button flexrow-item"
+      icon="redo"
+      @click="redoLastAction"
+    />
+
+    <pencil-picker
+      :isActive="isDrawing"
+      :isOpen="isShowingPencilPalette"
+      :pencil="pencil"
+      :palette="this.pencilPalette"
+      @toggle-palette="onPickPencil"
+      @change="onChangePencil"
+    />
+
     <color-picker
       :isActive="isDrawing"
       :isOpen="isShowingPalette"
@@ -374,6 +395,7 @@ import Combobox from '../../widgets/Combobox'
 import ComboboxStyled from '../../widgets/ComboboxStyled'
 import DeleteModal from '../../modals/DeleteModal'
 import EditPlaylistModal from '../../modals/EditPlaylistModal'
+import PencilPicker from '../../widgets/PencilPicker'
 import PlaylistedShot from './PlaylistedShot'
 import RawVideoPlayer from './RawVideoPlayer'
 import Spinner from '../../widgets/Spinner'
@@ -393,6 +415,7 @@ export default {
     ComboboxStyled,
     DeleteModal,
     EditPlaylistModal,
+    PencilPicker,
     PlaylistedShot,
     RawVideoPlayer,
     Spinner,
@@ -417,7 +440,6 @@ export default {
   data () {
     return {
       annotations: [],
-      palette: ['#ff3860', '#008732', '#5E60BA', '#f57f17'],
       color: '#ff3860',
       currentTime: '00:00.00',
       currentTimeRaw: 0,
@@ -428,10 +450,14 @@ export default {
       isComparing: false,
       isDrawing: false,
       isShowingPalette: false,
+      isShowingPencilPalette: false,
       isPlaying: false,
       isShotsHidden: false,
       maxDuration: '00:00.00',
       maxDurationRaw: 0,
+      palette: ['#ff3860', '#008732', '#5E60BA', '#f57f17'],
+      pencil: 'big',
+      pencilPalette: ['big', 'medium', 'small'],
       playingShotIndex: 0,
       shotList: [],
       shotListToCompare: [],
@@ -466,7 +492,8 @@ export default {
       window.addEventListener('keydown', this.onKeyDown, false)
       window.addEventListener('resize', this.onWindowResize)
       if (!this.$el.nomousemove) this.$el.onmousemove = this.onMouseMove
-      this.setupCanvas()
+      this.setupFabricCanvas()
+      this.resetCanvas()
     })
   },
 
@@ -607,26 +634,26 @@ export default {
     },
 
     displayBars () {
-      this.$refs['header'].style.display = 'flex'
+      this.$refs.header.style.display = 'flex'
       this.$refs['button-bar'].style.display = 'flex'
       if (this.$refs['button-bar']) {
         this.$refs['playlist-progress'].style.display = 'flex'
         this.$refs['button-bar'].style.opacity = 1
         this.$refs['playlist-progress'].style.opacity = 1
       }
-      this.$refs['header'].style.opacity = 1
-      this.$refs['container'].style.cursor = 'default'
+      this.$refs.header.style.opacity = 1
+      this.container.style.cursor = 'default'
     },
 
     hideBars () {
-      this.$refs['header'].style.opacity = 0
+      this.$refs.header.style.opacity = 0
       this.$refs['button-bar'].style.opacity = 0
       this.$refs['playlist-progress'].style.opacity = 0
       setTimeout(() => {
-        this.$refs['header'].style.display = 'none'
+        this.$refs.header.style.display = 'none'
         this.$refs['button-bar'].style.display = 'none'
         this.$refs['playlist-progress'].style.display = 'none'
-        this.$refs['container'].style.cursor = 'none'
+        this.container.style.cursor = 'none'
       }, 500)
     },
 
@@ -900,6 +927,12 @@ export default {
           event.preventDefault()
           event.stopPropagation()
           this.onPlayPauseClicked()
+        } else if (event.ctrlKey && event.altKey && event.keyCode === 68) {
+          this.onAnnotateClicked()
+        } else if (event.ctrlKey && event.keyCode === 90) {
+          this.undoLastAction()
+        } else if (event.altKey && event.keyCode === 82) {
+          this.redoLastAction()
         }
       }
     },
@@ -922,7 +955,7 @@ export default {
     },
 
     onCommentClicked () {
-      let height = this.$refs['video-container'].offsetHeight
+      const height = this.$refs['video-container'].offsetHeight
       this.isCommentsHidden = !this.isCommentsHidden
       if (!this.isCommentsHidden) {
         this.$refs['task-info'].$el.style.height = `${height}px`
@@ -966,12 +999,12 @@ export default {
       if (buttonBar && buttonBar.style.opacity !== 1) {
         this.displayBars()
       }
-      let isMovieFullScreen =
+      const isMovieFullScreen =
         this.isFullScreen() && this.isShotsHidden && this.isCommentsHidden
       if (isMovieFullScreen) {
         if (this.timer) clearTimeout(this.timer)
         this.timer = setTimeout(() => {
-          let isMovieFullScreen =
+          const isMovieFullScreen =
             this.isFullScreen() && this.isShotsHidden && this.isCommentsHidden
           if (isMovieFullScreen) this.hideBars()
         }, 2000)
@@ -1002,8 +1035,8 @@ export default {
 
     resetHeight () {
       this.$nextTick(() => {
-        let height = this.$refs['container'].offsetHeight
-        height -= this.$refs['header'].offsetHeight
+        let height = this.container.offsetHeight
+        height -= this.$refs.header.offsetHeight
         height -= this.$refs['playlist-progress'].offsetHeight
         if (this.$refs['button-bar']) {
           height -= this.$refs['button-bar'].offsetHeight
@@ -1099,20 +1132,6 @@ export default {
       }
     },
 
-    onPickColor () {
-      if (this.isShowingPalette) {
-        this.isShowingPalette = false
-      } else {
-        this.isShowingPalette = true
-      }
-    },
-
-    onChangeColor (newValue) {
-      this.color = newValue
-      this.fabricCanvas.freeDrawingBrush.color = this.color
-      this.isShowingPalette = false
-    },
-
     onAnnotateClicked () {
       this.showCanvas()
       if (this.isDrawing) {
@@ -1130,21 +1149,6 @@ export default {
 
     hideCanvas () {
       this.canvas.style.display = 'none'
-    },
-
-    setupCanvas () {
-      this.fabricCanvas = new fabric.Canvas('annotation-canvas', {
-        width: 400,
-        height: 400
-      })
-      this.fabricCanvas.freeDrawingBrush.color = this.color
-      this.fabricCanvas.freeDrawingBrush.width = 4
-      this.fabricCanvas.on('object:moved', this.saveAnnotations)
-      this.fabricCanvas.on('mouse:up', () => {
-        if (this.isDrawing) this.saveAnnotations()
-      })
-      this.resetCanvas()
-      this.fabricCanvas.renderAll()
     },
 
     loadAnnotation (annotation) {
@@ -1177,7 +1181,7 @@ export default {
           top: obj.top * scaleMultiplierY,
           fill: 'transparent',
           stroke: obj.stroke,
-          strokeWidth: 4,
+          strokeWidth: obj.strokeWidth,
           radius: obj.radius,
           width: obj.width,
           height: obj.height,
@@ -1193,7 +1197,7 @@ export default {
             obj.path,
             {
               ...base,
-              strokeWidth: 3 * strokeMultiplier,
+              strokeWidth: obj.strokeWidth * strokeMultiplier,
               canvasWidth: obj.canvasWidth
             }
           )
@@ -1234,11 +1238,6 @@ export default {
       this.deleteSelection()
     },
 
-    deleteSelection () {
-      this.fabricCanvas.remove(this.fabricCanvas.getActiveObject())
-      this.saveAnnotations()
-    },
-
     getAnnotation (time) {
       time = roundToFrame(time, this.fps)
       if (this.annotations) {
@@ -1267,6 +1266,7 @@ export default {
   watch: {
     playingShotIndex () {
       this.updateTaskPanel()
+      this.resetUndoStacks()
     },
 
     isComparing () {

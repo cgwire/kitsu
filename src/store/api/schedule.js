@@ -19,7 +19,7 @@ export default {
         task_type_id: milestone.task_type_id,
         project_id: production.id
       }
-      client.post(`/api/data/milestones`, data, (err, milestone) => {
+      client.post('/api/data/milestones', data, (err, milestone) => {
         if (err) reject(err)
         else resolve(milestone)
       })

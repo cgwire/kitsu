@@ -6,7 +6,7 @@ export default {
     if (episode) {
       path += `/episodes/${episode.id}/playlists`
     } else {
-      path += `/playlists`
+      path += '/playlists'
     }
     client.get(path, callback)
   },

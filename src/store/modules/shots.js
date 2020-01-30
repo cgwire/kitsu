@@ -188,7 +188,7 @@ const helpers = {
     task.task_status_short_name =
       helpers.getTaskStatus(task.task_status_id).short_name
 
-    let shotName = helpers.getShotName(shot)
+    const shotName = helpers.getShotName(shot)
     Object.assign(task, {
       project_id: shot.production_id,
       entity_name: shotName,
@@ -218,7 +218,7 @@ const helpers = {
   },
 
   sortValidationColumns (validationColumns, shotFilledColumns, taskTypeMap) {
-    let columns = [...validationColumns]
+    const columns = [...validationColumns]
     return sortValidationColumns(columns, taskTypeMap)
   },
 
@@ -407,7 +407,7 @@ const getters = {
     let sequenceShots = []
     let previousShot = null
 
-    for (let shot of Object.values(state.shotMap)) {
+    for (const shot of Object.values(state.shotMap)) {
       if (previousShot && shot.sequence_name !== previousShot.sequence_name) {
         shotsBySequence.push(sequenceShots.slice(0))
         sequenceShots = []

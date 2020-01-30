@@ -13,7 +13,7 @@
       >
       </canvas>
     </div>
-    <img ref="picture" :src="pictureDlPath" v-if="isFullScreen" />
+    <img ref="picture" :src="pictureDlPath" v-if="true" />
     <img ref="picture" :src="picturePath" v-else />
     <spinner v-if="isLoading"/>
   </div>
@@ -61,6 +61,20 @@
     </div>
 
     <div class="right flexrow">
+      <button-simple
+        class="playlist-button flexrow-item"
+        icon="undo"
+        @click="undoLastAction"
+        v-if="fullScreen && !readOnly"
+      />
+
+      <button-simple
+        class="playlist-button flexrow-item"
+        icon="redo"
+        @click="redoLastAction"
+        v-if="fullScreen && !readOnly"
+      />
+
       <button
         class="button flexrow-item"
         @click="onDeleteClicked"
@@ -69,11 +83,20 @@
         <x-icon class="icon" />
       </button>
 
+      <pencil-picker
+        :isActive="isDrawing"
+        :isOpen="isShowingPencilPalette"
+        :pencil="pencil"
+        :palette="pencilPalette"
+        @toggle-palette="onPickPencil"
+        @change="onChangePencil"
+      />
+
       <color-picker
         :isActive="isDrawing"
         :isOpen="isShowingPalette"
-        :color="this.color"
-        :palette="this.palette"
+        :color="color"
+        :palette="palette"
         @toggle-palette="onPickColor"
         @change="onChangeColor"
       />
@@ -122,24 +145,31 @@ import {
   TrashIcon,
   XIcon
 } from 'vue-feather-icons'
-import Spinner from '../widgets/Spinner'
+import { fullScreenMixin } from '../mixins/fullscreen'
+import { annotationMixin } from '../previews/annotation_mixin'
+import ButtonSimple from '../widgets/ButtonSimple'
 import ColorPicker from '../widgets/ColorPicker'
+import PencilPicker from '../widgets/PencilPicker'
+import Spinner from '../widgets/Spinner'
 
 export default {
   name: 'picture-viewer',
 
   components: {
+    ButtonSimple,
     ChevronLeftIcon,
     ChevronRightIcon,
     ColorPicker,
     DownloadIcon,
     Edit2Icon,
     MaximizeIcon,
+    PencilPicker,
     PlusIcon,
     Spinner,
     TrashIcon,
     XIcon
   },
+  mixins: [annotationMixin, fullScreenMixin],
 
   props: {
     preview: {
@@ -158,15 +188,18 @@ export default {
 
   data () {
     return {
+      annotations:
+        this.preview.annotations ? [...this.preview.annotations] : [],
       currentIndex: 1,
-      palette: ['#ff3860', '#008732', '#5E60BA', '#f57f17'],
       color: '#ff3860',
+      fabricCanvas: null,
+      fullScreen: false,
       isLoading: true,
       isDrawing: false,
       isShowingPalette: false,
-      annotations:
-        this.preview.annotations ? [...this.preview.annotations] : [],
-      fabricCanvas: null
+      palette: ['#ff3860', '#008732', '#5E60BA', '#f57f17'],
+      pencil: 'big',
+      pencilPalette: ['big', 'medium', 'small']
     }
   },
 
@@ -184,6 +217,13 @@ export default {
       }
       window.addEventListener('keydown', this.onKeyDown)
       window.addEventListener('resize', this.onWindowResize)
+      const events = [
+        'webkitfullscreenchange',
+        'mozfullscreenchange',
+        'fullscreenchange',
+        'msfullscreenchange'
+      ]
+      events.forEach(eventName => window.addEventListener(eventName, this.exitHandler))
     }, 0)
   },
 
@@ -214,17 +254,6 @@ export default {
       return `/api/pictures/originals/preview-files/${previewId}/download`
     },
 
-    isFullScreenEnabled () {
-      return !!(
-        document.fullscreenEnabled ||
-        document.mozFullScreenEnabled ||
-        document.msFullscreenEnabled ||
-        document.webkitSupportsFullscreen ||
-        document.webkitFullscreenEnabled ||
-        document.createElement('picture').webkitRequestFullScreen
-      )
-    },
-
     currentPreview () {
       return this.preview.previews[this.currentIndex - 1]
     }
@@ -237,15 +266,8 @@ export default {
   },
 
   methods: {
-
-    isFullScreen () {
-      return !!(
-        document.fullScreen ||
-        document.webkitIsFullScreen ||
-        document.mozFullScreen ||
-        document.msFullscreenElement ||
-        document.fullscreenElement
-      )
+    exitHandler () {
+      if (!this.isFullScreen() && this.fullScreen) this.fullScreen = false
     },
 
     mountPicture () {
@@ -253,6 +275,30 @@ export default {
       this.container.style.height = this.getDefaultHeight() + 'px'
       this.loadAnnotation(0)
       this.$nextTick(this.fixCanvasSize)
+    },
+
+    setupFabricCanvas () {
+      if (!this.readOnly) {
+        const dimensions = this.getDimensions()
+        const width = dimensions.width
+        const height = dimensions.height
+        const fabricCanvas = new fabric.Canvas('annotation-canvas')
+
+        this.container.style.height = this.getDefaultHeight() + 'px'
+        fabricCanvas.setDimensions({
+          width: width,
+          height: height
+        })
+
+        fabricCanvas.freeDrawingBrush.color = this.color
+        fabricCanvas.freeDrawingBrush.width = 4
+
+        fabricCanvas.off('object:moved', this.saveAnnotations)
+        fabricCanvas.on('object:moved', this.saveAnnotations)
+        fabricCanvas.off('mouse:up', this.onMouseUp)
+        fabricCanvas.on('mouse:up', this.onMouseUp)
+        this.fabricCanvas = fabricCanvas
+      }
     },
 
     clearCanvas () {
@@ -287,37 +333,6 @@ export default {
       return { width, height }
     },
 
-    setupFabricCanvas () {
-      if (!this.readOnly) {
-        const dimensions = this.getDimensions()
-        const width = dimensions.width
-        const height = dimensions.height
-        const fabricCanvas = new fabric.Canvas('annotation-canvas')
-
-        this.container.style.height = this.getDefaultHeight() + 'px'
-        fabricCanvas.setDimensions({
-          width: width,
-          height: height
-        })
-
-        fabricCanvas.freeDrawingBrush.color = this.color
-        fabricCanvas.freeDrawingBrush.width = 4
-
-        fabricCanvas.off('object:scaling', this.onScaled)
-        fabricCanvas.on('object:scaling', this.onScaled)
-        fabricCanvas.off('object:scaled', this.onScaled)
-        fabricCanvas.on('object:scaled', this.onScaled)
-        fabricCanvas.off('object:moved', this.saveAnnotations)
-        fabricCanvas.off('object:moved', this.saveAnnotations)
-        fabricCanvas.on('object:moved', this.saveAnnotations)
-        fabricCanvas.off('object:scaled', this.saveAnnotations)
-        fabricCanvas.on('object:scaled', this.saveAnnotations)
-        fabricCanvas.off('mouse:up', this.onMouseUp)
-        fabricCanvas.on('mouse:up', this.onMouseUp)
-        this.fabricCanvas = fabricCanvas
-      }
-    },
-
     onAddPreviewClicked () {
       this.$emit('add-preview')
     },
@@ -345,6 +360,7 @@ export default {
         document.msExitFullscreen()
       }
       this.container.setAttribute('data-fullscreen', !!false)
+      this.fullScreen = false
     },
 
     setFullScreen () {
@@ -358,6 +374,7 @@ export default {
         this.container.msRequestFullscreen()
       }
       this.container.setAttribute('data-fullscreen', !!true)
+      this.fullScreen = true
     },
 
     onDeleteClicked () {
@@ -403,8 +420,16 @@ export default {
     },
 
     onKeyDown (event) {
-      if (event.keyCode === 46 && this.fabricCanvas) {
-        this.deleteSelection()
+      if (!['INPUT', 'TEXTAREA'].includes(event.target.tagName)) {
+        if (event.keyCode === 46 && this.fabricCanvas) {
+          this.deleteSelection()
+        } else if (event.ctrlKey && event.altKey && event.keyCode === 68) {
+          this.onAnnotateClicked()
+        } else if (event.ctrlKey && event.keyCode === 90) {
+          this.undoLastAction()
+        } else if (event.altKey && event.keyCode === 82) {
+          this.redoLastAction()
+        }
       }
     },
 
@@ -412,15 +437,10 @@ export default {
       if (this.isDrawing) this.saveAnnotations()
     },
 
-    onScaled (event) {
-      const obj = event.target
-      if (obj) obj.set({ strokeWidth: 8 / (obj.scaleX + obj.scaleY) })
-    },
-
     saveAnnotations () {
       // Annotation are aimed to be used mainly by videos. That's why
       // annotations are stored in a list.
-      const annotation = this.getAnnotation(0)
+      let annotation = { ...this.getAnnotation(0) }
 
       this.fabricCanvas.getObjects().forEach((obj) => {
         if (obj.type === 'path') {
@@ -436,6 +456,7 @@ export default {
             tr: false,
             mtr: false
           })
+          obj.hasControls = false
         }
       })
 
@@ -444,16 +465,15 @@ export default {
         annotation.width = this.fabricCanvas.width
         annotation.height = this.fabricCanvas.height
       } else {
-        this.annotations = []
-        const dimensions = this.getDimensions()
-        const annotation = {
+        annotation = {
           time: 0,
-          width: dimensions.width,
-          height: dimensions.height,
+          width: this.fabricCanvas.width,
+          height: this.fabricCanvas.height,
           drawing: this.fabricCanvas.toJSON(['canvasWidth'])
         }
-        this.annotations.push(annotation)
       }
+      this.annotations = []
+      this.annotations.push(annotation)
 
       this.$emit('annotation-changed', {
         preview: this.currentPreview,
@@ -483,6 +503,7 @@ export default {
         const dimensions = this.getDimensions()
         let scaleMultiplierX = 1
         let scaleMultiplierY = 1
+
         if (annotation.width) {
           scaleMultiplierX = dimensions.width / annotation.width
           scaleMultiplierY = dimensions.width / annotation.width
@@ -497,6 +518,7 @@ export default {
             top: obj.top * scaleMultiplierY,
             fill: 'transparent',
             stroke: obj.stroke,
+            strokeWidth: obj.strokeWidth,
             radius: obj.radius * scaleMultiplierX,
             width: obj.width,
             height: obj.height,
@@ -506,13 +528,13 @@ export default {
           if (obj.type === 'path') {
             let strokeMultiplier = 1
             if (obj.canvasWidth) {
-              strokeMultiplier = obj.canvasWidth / dimensions.width
+              strokeMultiplier = annotation.width / dimensions.width
             }
             const path = new fabric.Path(
               obj.path,
               {
                 ...base,
-                strokeWidth: 3 * strokeMultiplier,
+                strokeWidth: obj.strokeWidth * strokeMultiplier,
                 canvasWidth: obj.canvasWidth
               }
             )

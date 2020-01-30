@@ -4,7 +4,7 @@ export default {
 
   getOrganisation () {
     return new Promise((resolve, reject) => {
-      client.get(`/api/data/organisations`, (err, organisations) => {
+      client.get('/api/data/organisations', (err, organisations) => {
         if (err) reject(err)
         else {
           let organisation = {
@@ -73,7 +73,7 @@ export default {
         role: person.role,
         active: person.active
       }
-      client.post(`/api/data/persons/new`, data, (err, person) => {
+      client.post('/api/data/persons/new', data, (err, person) => {
         if (err) reject(err)
         else resolve(person)
       })
@@ -229,7 +229,7 @@ export default {
   },
 
   getYearTable (year) {
-    return client.pget(`/api/data/persons/time-spents/year-table`)
+    return client.pget('/api/data/persons/time-spents/year-table')
   },
 
   getAggregatedPersonTimeSpents (

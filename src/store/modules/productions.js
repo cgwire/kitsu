@@ -75,7 +75,7 @@ const initialState = {
   teamPath: { name: 'open-productions' }
 }
 
-let state = { ...initialState }
+const state = { ...initialState }
 
 const helpers = {
   getProductionComponentPath (routeName, productionId, episodeId) {

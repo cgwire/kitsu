@@ -93,8 +93,7 @@ const helpers = {
         const randomHash = Math.random().toString(36).substring(7)
         Vue.set(person, 'uniqueHash', randomHash)
         person.avatarPath =
-          `/api/pictures/thumbnails/persons/${person.id}` +
-          `.png`
+          `/api/pictures/thumbnails/persons/${person.id}.png`
       }
     }
     return person

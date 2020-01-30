@@ -130,8 +130,8 @@ export default {
 
   keyboard: {
     altdown: 'Move task selection down',
-    altleft: 'Move task selection to left',
-    altright: 'Move task selection to right',
+    altleft: 'Move task selection left',
+    altright: 'Move task selection right',
     altup: 'Move task selection up',
     shortcuts: 'Shortcuts'
   },

@@ -259,7 +259,7 @@ export default {
     lastSectionPath () {
       const production = this.lastProduction
       const section = this.lastProductionScreen
-      let route = {
+      const route = {
         name: section,
         params: {
           production_id: production.id
@@ -371,7 +371,7 @@ export default {
       let episodeId = this.currentEpisodeId
       let isTVShow = !!this.currentEpisodeId
 
-      let route = {
+      const route = {
         name: section,
         params: {
           production_id: this.currentProductionId
@@ -405,9 +405,7 @@ export default {
         route.name = 'assets'
       }
 
-      if (
-        route.params.production_id
-      ) {
+      if (route.params.production_id) {
         this.$router.push(route)
       }
     },

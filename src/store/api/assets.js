@@ -28,7 +28,7 @@ export default {
       data.source_id = asset.source_id
     }
 
-    client.post(`/api/data/entities/`, data, callback)
+    client.post('/api/data/entities/', data, callback)
   },
 
   updateAsset (asset, callback) {

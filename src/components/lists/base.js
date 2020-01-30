@@ -69,7 +69,7 @@ export const entityListMixin = {
       const taskType = this.taskTypeMap[columnId]
       return {
         'border-left': `1px solid ${taskType.color}`,
-        'background': this.getBackground(taskType.color)
+        background: this.getBackground(taskType.color)
       }
     },
 
@@ -171,7 +171,7 @@ export const entityListMixin = {
         headerMenuEl.className = 'header-menu hidden'
       } else {
         headerMenuEl.className = 'header-menu'
-        let headerElement = event.srcElement.parentNode.parentNode
+        const headerElement = event.srcElement.parentNode.parentNode
         const headerBox = headerElement.getBoundingClientRect()
         const left = headerBox.left + 11
         const top = headerBox.bottom + 10

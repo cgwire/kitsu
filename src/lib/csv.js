@@ -48,7 +48,7 @@ const csv = {
     } else if (detailLevel === 'day') {
       range = getDayRange(year, month, currentYear, currentMonth)
     }
-    for (let unit in range) headers.push(unit)
+    for (const unit in range) headers.push(unit)
     return headers
   },
 

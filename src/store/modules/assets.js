@@ -182,7 +182,7 @@ const helpers = {
   },
 
   sortValidationColumns (validationColumns, assetFilledColumns, taskTypeMap) {
-    let columns = [...validationColumns]
+    const columns = [...validationColumns]
     return sortValidationColumns(columns, taskTypeMap)
   }
 }
@@ -554,7 +554,7 @@ const actions = {
         asset.name,
         asset.description
       ])
-      sortByName([ ...production.descriptors ])
+      sortByName([...production.descriptors])
         .filter(d => d.entity_type === 'Asset')
         .forEach((descriptor) => {
           assetLine.push(asset.data[descriptor.field_name])
@@ -1054,7 +1054,7 @@ const mutations = {
 
   [SET_ASSET_TYPE_SEARCH] (state, searchQuery) {
     const keywords = getKeyWords(searchQuery)
-    let result =
+    const result =
       indexSearch(cache.assetTypeIndex, keywords) || state.assetTypes
 
     Object.assign(state, {

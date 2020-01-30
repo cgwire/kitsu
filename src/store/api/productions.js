@@ -23,7 +23,7 @@ export default {
       project_status_id: production.project_status_id,
       production_type: production.production_type
     }
-    client.post(`/api/data/projects/`, data, callback)
+    client.post('/api/data/projects/', data, callback)
   },
 
   updateProduction (production, callback) {
