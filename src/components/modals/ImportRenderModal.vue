@@ -33,6 +33,13 @@
 
       <div class="render-container">
         <table class="render">
+          <colgroup>
+            <col
+              v-for="(cell, index) in parsedCsv[0]"
+              :key="`col-${index}`"
+              :class="stateColumn(cell, columns)"
+            />
+          </colgroup>
           <thead>
             <tr class="render-headers">
               <th
@@ -96,21 +103,21 @@ export default {
 
   data () {
     return {
-      columnOptions: [
-        { label: 'Choose', value: 'none' },
-        { label: 'Name', value: 'name' },
-        { label: 'Sequence', value: 'sequence' },
-        { label: 'Description', value: 'description' },
-        { label: 'Time', value: 'time' },
-        { label: 'Frames', value: 'frames' },
-        { label: 'Frame IN', value: 'frame_in' },
-        { label: 'Frame OUT', value: 'frame_out' },
-        { label: 'Storyboard', value: 'storyboard' },
-        { label: 'Layout', value: 'layout' },
-        { label: 'Animation', value: 'animation' },
-        { label: 'Render', value: 'render' },
-        { label: 'Compositing', value: 'compositing' }
-      ],
+      // columnOptions: [
+      //   { label: 'Choose', value: 'none' },
+      //   { label: 'Name', value: 'name' },
+      //   { label: 'Sequence', value: 'sequence' },
+      //   { label: 'Description', value: 'description' },
+      //   { label: 'Time', value: 'time' },
+      //   { label: 'Frames', value: 'frames' },
+      //   { label: 'Frame IN', value: 'frame_in' },
+      //   { label: 'Frame OUT', value: 'frame_out' },
+      //   { label: 'Storyboard', value: 'storyboard' },
+      //   { label: 'Layout', value: 'layout' },
+      //   { label: 'Animation', value: 'animation' },
+      //   { label: 'Render', value: 'render' },
+      //   { label: 'Compositing', value: 'compositing' }
+      // ],
       formData: null,
       form: {
         name: ''
@@ -124,6 +131,10 @@ export default {
       default: false
     },
     parsedCsv: {
+      type: Array,
+      default: () => []
+    },
+    columns: {
       type: Array,
       default: () => []
     },
@@ -157,6 +168,11 @@ export default {
     },
     startFrom (arr, index) {
       return arr.slice(index)
+    },
+    stateColumn (data, list) {
+      if (!list.includes(data)) {
+        return 'ignored'
+      }
     }
   }
 }
@@ -174,6 +190,9 @@ export default {
         background-color: $dark-grey-lightmore;
       }
     }
+  }
+  .ignored {
+    background-color: rgba($light-grey-light, .6)
   }
 }
 .modal-content {
@@ -224,5 +243,8 @@ export default {
   align-items: center;
   justify-content: space-between;
   margin-top: 2rem;
+}
+.ignored {
+  background-color: rgba($light-grey-light, .6)
 }
 </style>
