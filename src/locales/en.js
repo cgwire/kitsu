@@ -205,18 +205,22 @@ export default {
     white_theme: 'White Theme',
     yes: 'Yes',
     csv: {
+      error_upload: 'An error occured while uploading your CSV.',
       export_file: 'Export',
-      error_upload: 'An error occured while uploading your CSV file.',
       import_file: 'Import',
-      import_title: 'Import data from a CSV file',
-      required_fields: 'Your CSV file requires the following columns',
-      select_file: 'Please select a file from one of your folder:',
-      upload_file: 'Browse',
+      import_title: 'Import data from a CSV',
+      paste: 'Paste',
+      paste_code: 'Please paste here your CSV data:',
       preview_episode_name: 'Episode name',
       preview_title: 'Preview of your imported data',
       preview_description: 'Upload a .csv file to populate your board with posts. You can optionally create new columns.',
       preview_required: 'NB: The first row must be the header',
-      preview_reupload: 'Reupload .CSV file'
+      preview_reupload: 'Reupload .CSV file',
+      required_fields: 'Your CSV requires the following columns',
+      select_file: 'Please select a file from one of your folder:',
+      tab_select_file: 'Upload a CSV file',
+      tab_paste_code: 'Paste a CSV data',
+      upload_file: 'Browse'
     }
   },
 
