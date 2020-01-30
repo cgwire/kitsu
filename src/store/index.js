@@ -23,7 +23,7 @@ import tasks from './modules/tasks'
 
 Vue.use(Vuex)
 
-let modules = {
+const modules = {
   assetTypes,
   assets,
   breakdown,

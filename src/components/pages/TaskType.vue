@@ -508,7 +508,7 @@ export default {
           this.shotTasks, this.personMap
         )
       }
-      this.$options.taskIndex['me'] =
+      this.$options.taskIndex.me =
         indexSearch(this.$options.taskIndex, this.user.full_name.split(' '))
     },
 
@@ -776,8 +776,8 @@ export default {
     resetScheduleHeight () {
       this.$nextTick(() => {
         if (this.isActiveTab('schedule')) {
-          const pageHeight = this.$refs['page'].offsetHeight
-          const headerHeight = this.$refs['header'].offsetHeight
+          const pageHeight = this.$refs.page.offsetHeight
+          const headerHeight = this.$refs.header.offsetHeight
           this.schedule.scheduleHeight = pageHeight - headerHeight + 20
           this.$refs['schedule-widget'].resetScheduleSize()
         }

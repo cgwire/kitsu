@@ -27,7 +27,7 @@ export default {
   },
 
   getEpisodes (production, callback) {
-    let path = `/api/data/projects/${production.id}/episodes`
+    const path = `/api/data/projects/${production.id}/episodes`
     client.get(path, callback)
   },
 

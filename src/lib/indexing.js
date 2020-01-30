@@ -31,9 +31,9 @@ export const buildTaskIndex = (tasks) => {
   const index = {}
   const taskIndex = {}
   tasks.forEach((task) => {
-    let stringToIndex =
+    const stringToIndex =
       task.full_entity_name.replace(/_/g, ' ').replace(/-/g, ' ')
-    let words = stringToIndex.split(' ').concat([
+    const words = stringToIndex.split(' ').concat([
       task.task_type_name,
       task.task_status_short_name,
       task.project_name
@@ -52,11 +52,11 @@ export const buildSupervisorTaskIndex = (tasks, personMap) => {
   const index = {}
   const taskIndex = {}
   tasks.forEach((task) => {
-    let stringToIndex = task
+    const stringToIndex = task
       .entity_name
       .replace(/_/g, ' ')
       .replace(/-/g, ' ')
-    let words = stringToIndex.split(' ').concat([
+    const words = stringToIndex.split(' ').concat([
       task.task_status_short_name
     ])
     task.assignees.forEach((personId) => {
@@ -94,7 +94,7 @@ export const buildShotIndex = (shots) => {
   const index = {}
   const shotIndex = {}
   shots.forEach((shot) => {
-    let words = [shot.name, shot.sequence_name, shot.episode_name]
+    const words = [shot.name, shot.sequence_name, shot.episode_name]
     indexWords(index, shotIndex, shot, words)
   })
   return index
@@ -109,7 +109,7 @@ export const buildSequenceIndex = (sequences) => {
   const index = {}
   const sequenceIndex = {}
   sequences.forEach((sequence) => {
-    let words = [sequence.name, sequence.episode_name]
+    const words = [sequence.name, sequence.episode_name]
     indexWords(index, sequenceIndex, sequence, words)
   })
   return index
@@ -124,7 +124,7 @@ export const buildEpisodeIndex = (episodes) => {
   const index = {}
   const episodeIndex = {}
   episodes.forEach((episode) => {
-    let words = [episode.name]
+    const words = [episode.name]
     indexWords(index, episodeIndex, episode, words)
   })
   return index
@@ -178,10 +178,10 @@ const indexSearchWord = (index, word) => {
  * with current key).
  */
 const indexWords = (index, entryIndex, entry, words) => {
-  for (let word of words) {
+  for (const word of words) {
     let currentString = ''
     if (word) {
-      for (let character of word) {
+      for (const character of word) {
         currentString += character.toLowerCase()
         if (index[currentString] === undefined) {
           index[currentString] = []

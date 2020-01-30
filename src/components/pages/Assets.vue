@@ -408,7 +408,7 @@ export default {
     ]),
 
     confirmNewAssetStay (form) {
-      let action = 'newAsset'
+      const action = 'newAsset'
       this.loading.stay = true
       this.editAsset.isSuccess = false
       this.editAsset.isError = false
@@ -729,7 +729,7 @@ export default {
     },
 
     getPath (section) {
-      let route = {
+      const route = {
         name: section,
         params: {
           production_id: this.currentProduction.id
@@ -871,7 +871,7 @@ export default {
             this.$t('assets.fields.name'),
             this.$t('assets.fields.description')
           ])
-          sortByName([ ...this.currentProduction.descriptors ])
+          sortByName([...this.currentProduction.descriptors])
             .filter(d => d.entity_type === 'Asset')
             .forEach((descriptor) => {
               headers.push(descriptor.field_name)

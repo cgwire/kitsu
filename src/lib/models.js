@@ -64,7 +64,7 @@ export const groupEntitiesByParents = (entities, parentNameField) => {
   let parentEntities = []
   let previousEntity = null
 
-  for (let entity of entities) {
+  for (const entity of entities) {
     if (
       previousEntity &&
       entity[parentNameField] !== previousEntity[parentNameField]

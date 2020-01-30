@@ -10,7 +10,7 @@ export default {
   },
 
   getTaskStatuses (callback) {
-    client.get(`/api/data/task-status`, callback)
+    client.get('/api/data/task-status', callback)
   },
 
   getTaskSubscribed (taskId, callback) {
@@ -184,7 +184,7 @@ export default {
 
   unassignTasks (selectedTaskIds, callback) {
     client.put(
-      `/api/actions/tasks/clear-assignation`,
+      '/api/actions/tasks/clear-assignation',
       { task_ids: selectedTaskIds },
       callback
     )

@@ -793,7 +793,7 @@ export default {
     },
 
     getPath (section) {
-      let route = {
+      const route = {
         name: section,
         params: {
           production_id: this.currentProduction.id

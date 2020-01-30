@@ -10,7 +10,7 @@ const initialState = {
   milestones: {}
 }
 
-let state = { ...initialState }
+const state = { ...initialState }
 
 const getters = {
   milestones: (state) => state.milestones

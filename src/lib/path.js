@@ -7,7 +7,7 @@ export const getTaskPath = (
 ) => {
   const productionId =
     task.project_id ? task.project_id : production.id
-  let route = {
+  const route = {
     name: 'task',
     params: {
       production_id: productionId,
@@ -54,7 +54,7 @@ export const getTaskEntityPath = (task, episodeId) => {
 }
 
 export const getEntityPath = (entityId, productionId, section, episodeId) => {
-  let route = {
+  const route = {
     name: section,
     params: {
       production_id: productionId

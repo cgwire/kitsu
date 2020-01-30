@@ -115,8 +115,8 @@ export const getFilters = (
   const excludingKeywords = getExcludingKeyWords(query) || []
   filters = filters.concat(descFilters).concat(thumbnailFilters)
   excludingKeywords.forEach((keyword) => {
-    let excludedMap = {}
-    let excludedEntries = indexSearch(entryIndex, [keyword]) || []
+    const excludedMap = {}
+    const excludedEntries = indexSearch(entryIndex, [keyword]) || []
     excludedEntries.forEach((entry) => {
       excludedMap[entry.id] = true
     })
@@ -135,8 +135,8 @@ export const getTaskFilters = (entryIndex, query) => {
   const filters = []
   const excludingKeywords = getExcludingKeyWords(query) || []
   excludingKeywords.forEach((keyword) => {
-    let excludedMap = {}
-    let excludedEntries = indexSearch(entryIndex, [keyword]) || []
+    const excludedMap = {}
+    const excludedEntries = indexSearch(entryIndex, [keyword]) || []
     excludedEntries.forEach((entry) => {
       excludedMap[entry.id] = true
     })

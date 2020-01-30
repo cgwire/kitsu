@@ -415,8 +415,7 @@ const mutations = {
       state.user.has_avatar = true
       Vue.set(state.user, 'uniqueHash', randomHash)
       state.user.avatarPath =
-        `/api/pictures/thumbnails/persons/${state.user.id}` +
-        `.png`
+        `/api/pictures/thumbnails/persons/${state.user.id}.png`
     }
   },
 
