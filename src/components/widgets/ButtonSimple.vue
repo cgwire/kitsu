@@ -4,6 +4,14 @@
   :title="title"
   @click="$emit('click')"
 >
+  <corner-left-down-icon
+    :class="iconClass"
+    v-if="icon === 'undo'"
+  />
+  <corner-right-down-icon
+    :class="iconClass"
+    v-if="icon === 'redo'"
+  />
   <plus-icon
     :class="iconClass"
     v-if="icon === 'plus'"
@@ -97,6 +105,8 @@
 import {
   ChevronLeftIcon,
   ChevronRightIcon,
+  CornerLeftDownIcon,
+  CornerRightDownIcon,
   CopyIcon,
   DownloadIcon,
   EditIcon,
@@ -121,6 +131,8 @@ export default {
   components: {
     ChevronLeftIcon,
     ChevronRightIcon,
+    CornerLeftDownIcon,
+    CornerRightDownIcon,
     CopyIcon,
     DownloadIcon,
     EditIcon,
