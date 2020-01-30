@@ -20,15 +20,28 @@
         </ul>
       </p>
 
-      <p>
-        {{ $t("main.csv.select_file") }}
-      </p>
-
-      <file-upload
-        @fileselected="onFileSelected"
-        :label="$t('main.csv.upload_file')"
-        ref="inputFile"
-      />
+      <tabs @update="onTabUpdate">
+        <tab :name="$t('main.csv.tab_select_file')" :selected="true">
+          <p>
+            {{ $t("main.csv.select_file") }}
+          </p>
+          <file-upload
+            @fileselected="onFileSelected"
+            :label="$t('main.csv.upload_file')"
+            ref="inputFile"
+          />
+        </tab>
+        <tab :name="$t('main.csv.tab_paste_code')">
+          <p>
+            {{ $t("main.csv.paste_code") }}
+          </p>
+          <textarea
+            class="paste-area"
+            :placeholder="pasteAreaPlacholder"
+            v-model="pastedCode"
+          ></textarea>
+        </tab>
+      </tabs>
 
       <modal-footer
         :error-text="$t('main.csv.error_upload')"
@@ -49,18 +62,24 @@ import { mapGetters, mapActions } from 'vuex'
 import { modalMixin } from './base_modal'
 import FileUpload from '../widgets/FileUpload.vue'
 import ModalFooter from './ModalFooter'
+import Tabs from '../widgets/Tabs'
+import Tab from '../widgets/Tab'
 
 export default {
   name: 'import-people-modal',
   mixins: [modalMixin],
   components: {
     FileUpload,
-    ModalFooter
+    ModalFooter,
+    Tabs,
+    Tab
   },
 
   data () {
     return {
-      formData: null
+      formData: null,
+      pastedCode: '',
+      tabs: []
     }
   },
 
@@ -89,25 +108,43 @@ export default {
 
   computed: {
     ...mapGetters([
-    ])
+    ]),
+    pasteAreaPlacholder () {
+      let placeholder = this.columns.toString()
+      placeholder = placeholder.replace(/,/g, ';')
+      return placeholder
+    }
   },
 
   methods: {
     ...mapActions([
     ]),
+    onTabUpdate (tabs) {
+      this.tabs = tabs
+    },
     onFileSelected (formData) {
       this.formData = formData
       this.$emit('fileselected', formData)
     },
     onConfirmClicked () {
-      this.$emit('confirm', this.formData)
+      let mode = ''
+      let data = null
+      if (this.tabs[0].isActive === true) {
+        data = this.formData
+        mode = 'file'
+      } else if (this.tabs[1].isActive === true) {
+        data = this.pastedCode
+        mode = 'text'
+      }
+      this.$emit('confirm', data, mode)
     },
     reset () {
       this.$refs.inputFile.reset()
     }
   },
 
-  watch: {}
+  watch: {
+  }
 }
 </script>
 
@@ -122,5 +159,13 @@ export default {
 
 .description {
   margin-bottom: 1em;
+}
+
+.paste-area {
+  margin: 0 0 1rem;
+  width: 100%;
+  min-height: 10rem;
+  padding: .5rem;
+  resize: vertical;
 }
 </style>

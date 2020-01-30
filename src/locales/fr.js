@@ -186,12 +186,23 @@ export default {
     white_theme: 'Thème blanc',
     yes: 'oui',
     csv: {
-      import_file: 'Importer',
+      error_upload: 'Une erreur est survenue en téleversant votre fichier .csv.',
       export_file: 'Exporter',
+      import_file: 'Importer',
       import_title: 'Importer depuis un .csv',
+      paste: 'Coller',
+      paste_code: 'Coller vos données CSV :',
+      preview_episode_name: 'Nom de l\'épisode',
+      preview_title: 'Aperçu de vos données à importer',
+      preview_description: 'Importer un fichier .csv pour peupler votre board avec des posts. Vous pouvez aussi ajouter de nouvelles colonnes.',
+      preview_required: 'Note: La première ligne doit spécifier les entêtes.',
+      preview_reupload: 'Réimporter un fichier .CSV',
       required_fields: 'Le fichier CSV à importer doit comporter les colonnes suivantes :',
       select_file: 'Sélectionner un fichier depuis votre dossier :',
-      error_upload: 'Une erreur est survenue en téleversant votre fichier .csv.'
+      tab_select_file: 'Importer un fichier CSV',
+      tab_paste_code: 'Coller des données CSV',
+      upload_file: 'Parcourir'
+
     }
   },
 

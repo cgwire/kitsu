@@ -13,7 +13,7 @@
             ref="uploadInput"
             :accept="accept"
             :name="uploadFieldName"
-            :disabled="isSaving"
+            :disabled="isSaving || disabled"
             @change="filesChange($event.target.name, $event.target.files)"
             class="visuallyhidden"
             :multiple="multiple"
@@ -55,6 +55,10 @@ export default {
     uploadFieldName: {
       default: 'file',
       type: String
+    },
+    disabled: {
+      type: Boolean,
+      default: false
     }
   },
   data () {
