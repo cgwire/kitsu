@@ -225,7 +225,7 @@ export default {
       })
     },
 
-    processCSVFile (file, config) {
+    processCSV (file, config) {
       return new Promise((resolve, reject) => {
         Papa.parse(file, {
           config: config,
