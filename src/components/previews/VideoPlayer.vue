@@ -77,7 +77,7 @@
             active: isRepeating
           }"
           @click="onRepeatClicked"
-          v-if="!light || readOnly"
+          v-if="isFullScreen()"
         >
           <repeat-icon class="icon smaller" />
         </button>
@@ -128,18 +128,43 @@
       <div class="right flexrow">
         <button
           class="button flexrow-item"
+          @click="undoLastAction"
+          v-if="!readOnly && isFullScreen()"
+        >
+          <corner-left-down-icon class="icon" />
+        </button>
+
+        <button
+          class="button flexrow-item"
+          @click="redoLastAction"
+          v-if="!readOnly && isFullScreen()"
+        >
+          <corner-right-down-icon class="icon" />
+        </button>
+
+        <button
+          class="button flexrow-item"
           @click="onDeleteClicked"
           v-if="!readOnly && isFullScreenEnabled"
         >
           <x-icon class="icon" />
         </button>
 
+        <pencil-picker
+          :isActive="isDrawing"
+          :isOpen="isShowingPencilPalette"
+          :pencil="pencil"
+          :palette="this.pencilPalette"
+          @toggle-palette="onPickPencil"
+          @change="onChangePencil"
+        />
+
         <color-picker
           :isActive="isDrawing"
           :isOpen="isShowingPalette"
-          :color="this.color"
-          :palette="this.palette"
-          @TogglePalette="onPickColor"
+          :color="color"
+          :palette="palette"
+          @toggle-palette="onPickColor"
           @change="onChangeColor"
         />
 
@@ -181,6 +206,8 @@ import { mapGetters } from 'vuex'
 import { fabric } from 'fabric'
 import {
   CopyIcon,
+  CornerLeftDownIcon,
+  CornerRightDownIcon,
   DownloadIcon,
   Edit2Icon,
   MaximizeIcon,
@@ -193,6 +220,7 @@ import {
 import { roundToFrame } from '../../lib/video'
 import AnnotationBar from '../pages/playlists/AnnotationBar'
 import ColorPicker from '../widgets/ColorPicker'
+import PencilPicker from '../widgets/PencilPicker'
 import Combobox from '../widgets/Combobox'
 import Spinner from '../widgets/Spinner'
 
@@ -205,6 +233,9 @@ export default {
   components: {
     AnnotationBar,
     ColorPicker,
+    CornerLeftDownIcon,
+    CornerRightDownIcon,
+    PencilPicker,
     CopyIcon,
     Combobox,
     DownloadIcon,
@@ -244,13 +275,14 @@ export default {
     return {
       annotations: [],
       palette: ['#ff3860', '#008732', '#5E60BA', '#f57f17'],
+      pencilPalette: ['big', 'medium', 'small'],
       color: '#ff3860',
+      pencil: 'big',
       currentTime: '00:00.00',
       currentTimeRaw: 0,
       fabricCanvas: null,
       isComparing: false,
       isDrawing: false,
-      isShowingPalette: false,
       isLoading: false,
       isPlaying: false,
       isRepeating: false,
@@ -544,24 +576,6 @@ export default {
       }
     },
 
-    setupFabricCanvas () {
-      if (this.readOnly) return
-
-      this.fabricCanvas = new fabric.Canvas('annotation-canvas')
-      this.fabricCanvas.on('object:moved', this.saveAnnotations)
-      this.fabricCanvas.on('object:scaled', this.saveAnnotations)
-      this.fabricCanvas.on('mouse:up', () => {
-        if (this.isDrawing) this.saveAnnotations()
-      })
-      this.fabricCanvas.setDimensions({
-        width: 100,
-        height: 100
-      })
-      this.fabricCanvas.freeDrawingBrush.color = this.color
-      this.fabricCanvas.freeDrawingBrush.width = 4
-      return this.fabricCanvas
-    },
-
     play () {
       this.clearCanvas()
       this.isPlaying = true
@@ -586,7 +600,7 @@ export default {
     },
 
     goPreviousFrame () {
-      let newTime = this.video.currentTime - 1 / this.fps
+      const newTime = this.video.currentTime - 1 / this.fps
       if (newTime < 0) {
         this.setCurrentTime(0)
       } else {
@@ -597,7 +611,7 @@ export default {
     },
 
     goNextFrame () {
-      let newTime = this.video.currentTime + 1 / this.fps
+      const newTime = this.video.currentTime + 1 / this.fps
       if (newTime > this.video.duration) {
         this.setCurrentTime(this.video.duration)
       } else {
@@ -727,25 +741,6 @@ export default {
       }
     },
 
-    onScaled (event) {
-      const obj = event.target
-      if (obj) obj.set({ strokeWidth: 8 / (obj.scaleX + obj.scaleY) })
-    },
-
-    onPickColor () {
-      if (this.isShowingPalette) {
-        this.isShowingPalette = false
-      } else {
-        this.isShowingPalette = true
-      }
-    },
-
-    onChangeColor (newValue) {
-      this.color = newValue
-      this.fabricCanvas.freeDrawingBrush.color = this.color
-      this.isShowingPalette = false
-    },
-
     onPencilAnnotateClicked () {
       if (this.isDrawing) {
         this.fabricCanvas.isDrawingMode = false
@@ -783,6 +778,14 @@ export default {
           this.goNextFrame()
         } else if (event.keyCode === 32) {
           this.onPlayPauseClicked()
+        } else if (event.keyCode === 68) {
+          this.onPencilAnnotateClicked()
+        } else if (event.ctrlKey && event.altKey && event.keyCode === 68) {
+          this.onAnnotateClicked()
+        } else if (event.ctrlKey && event.keyCode === 90) {
+          this.undoLastAction()
+        } else if (event.altKey && event.keyCode === 82) {
+          this.redoLastAction()
         }
       }
     },
@@ -838,7 +841,7 @@ export default {
           top: obj.top * scaleMultiplierY,
           fill: 'transparent',
           stroke: obj.stroke,
-          strokeWidth: 4,
+          strokeWidth: obj.strokeWidth,
           radius: obj.radius,
           width: obj.width,
           height: obj.height,
@@ -854,7 +857,7 @@ export default {
             obj.path,
             {
               ...base,
-              strokeWidth: 3 * strokeMultiplier,
+              strokeWidth: obj.strokeWidth * strokeMultiplier,
               canvasWidth: obj.canvasWidth
             }
           )
@@ -894,13 +897,8 @@ export default {
         cursor: 'pointer',
         position: 'relative',
         display: 'inline-block',
-        'left': this.getTimelinePosition(annotation.time, index) + 'px'
+        left: this.getTimelinePosition(annotation.time, index) + 'px'
       }
-    },
-
-    deleteSelection () {
-      this.fabricCanvas.remove(this.fabricCanvas.getActiveObject())
-      this.saveAnnotations()
     },
 
     setDefaultComparisonTaskType () {
@@ -948,9 +946,9 @@ export default {
     },
 
     resetCanvasSize () {
-      if (this.$refs['movie']) {
-        const width = this.$refs['movie'].offsetWidth
-        const height = this.$refs['movie'].offsetHeight
+      if (this.$refs.movie) {
+        const width = this.$refs.movie.offsetWidth
+        const height = this.$refs.movie.offsetHeight
         this.fabricCanvas.setDimensions({ width, height })
       }
     }

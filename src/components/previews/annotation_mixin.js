@@ -1,8 +1,17 @@
 import { mapGetters } from 'vuex'
+import { fabric } from 'fabric'
 
 export const annotationMixin = {
 
+  data () {
+    return {
+      isShowingPalette: false,
+      isShowingPencilPalette: false
+    }
+  },
+
   created () {
+    this.resetUndoStacks()
   },
 
   mounted () {
@@ -17,6 +26,11 @@ export const annotationMixin = {
   },
 
   methods: {
+    resetUndoStacks () {
+      this.$options.doneActionStack = []
+      this.$options.undoneActionStack = []
+    },
+
     getNewAnnotations (currentTime, annotation) {
       this.fabricCanvas.getObjects().forEach((obj) => {
         if (obj.type === 'path') {
@@ -60,6 +74,118 @@ export const annotationMixin = {
       const annotations = []
       this.annotations.forEach(a => annotations.push({ ...a }))
       return annotations
+    },
+
+    onPickPencil () {
+      this.isShowingPencilPalette = !this.isShowingPencilPalette
+    },
+
+    onPickColor () {
+      this.isShowingPalette = !this.isShowingPalette
+    },
+
+    onChangeColor (color) {
+      this.color = color
+      this.fabricCanvas.freeDrawingBrush.color = this.color
+      this.isShowingPalette = false
+    },
+
+    onChangePencil (pencil) {
+      this.pencil = pencil
+      const converter = {
+        big: 4,
+        medium: 2,
+        small: 1
+      }
+      const strokeWidth = converter[pencil]
+      this.fabricCanvas.freeDrawingBrush.width = strokeWidth
+      this.isShowingPalette = false
+    },
+
+    stackAddAction ({ target }) {
+      this.$options.doneActionStack.push({ type: 'add', obj: target })
+    },
+
+    undoLastAction () {
+      const action = this.$options.doneActionStack.pop()
+      if (action) {
+        if (action.type === 'add') {
+          this.deleteObject(action.obj)
+        } else if (action.type === 'remove') {
+          this.addObject(action.obj)
+        }
+        this.$options.doneActionStack.pop()
+        this.$options.undoneActionStack.push(action)
+      }
+    },
+
+    redoLastAction () {
+      const action = this.$options.undoneActionStack.pop()
+      if (action) {
+        if (action.type === 'add') {
+          this.addObject(action.obj)
+        } else if (action.type === 'remove') {
+          this.deleteObject(action.obj)
+        }
+      }
+    },
+
+    deleteSelection () {
+      const activeObject = this.fabricCanvas.getActiveObject()
+      this.deleteObject(activeObject)
+    },
+
+    deleteObject (activeObject) {
+      if (activeObject._objects) {
+        activeObject._objects.forEach((obj) => {
+          this.fabricCanvas.remove(obj)
+        })
+      } else {
+        this.fabricCanvas.remove(activeObject)
+      }
+      this.$options.doneActionStack.push({
+        type: 'remove', obj: activeObject
+      })
+      this.saveAnnotations()
+    },
+
+    addObject (activeObject) {
+      if (activeObject._objects) {
+        activeObject._objects.forEach((obj) => {
+          this.fabricCanvas.add(obj)
+          this.$options.doneActionStack.pop()
+        })
+      } else {
+        this.fabricCanvas.add(activeObject)
+      }
+      this.$options.doneActionStack.push({ type: 'add', obj: activeObject })
+      this.saveAnnotations()
+    },
+
+    clearUndoneStack () {
+      this.$options.undoneActionStack = []
+    },
+
+    setupFabricCanvas () {
+      if (this.readOnly) return
+
+      this.fabricCanvas = new fabric.Canvas('annotation-canvas')
+      this.fabricCanvas.on('object:moved', this.saveAnnotations)
+      this.fabricCanvas.on('object:scaled', this.saveAnnotations)
+      this.fabricCanvas.on('object:added', this.stackAddAction)
+      this.fabricCanvas.on('mouse:up', () => {
+        if (this.isDrawing) {
+          this.clearUndoneStack()
+          this.saveAnnotations()
+        }
+      })
+      this.fabricCanvas.setDimensions({
+        width: 100,
+        height: 100
+      })
+      this.fabricCanvas.freeDrawingBrush.color = this.color
+      this.fabricCanvas.freeDrawingBrush.width = 4
+      return this.fabricCanvas
     }
   }
 }

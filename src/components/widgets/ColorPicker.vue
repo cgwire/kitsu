@@ -80,7 +80,6 @@ export default {
 .color-picker {
   padding: 0;
   background-color: transparent;
-  height: 2.3rem;
   cursor: pointer;
 }
 .preview .color-picker {
