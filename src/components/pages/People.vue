@@ -51,6 +51,7 @@
       :is-error="isImportPeopleLoadingError"
       :parsed-csv="parsedCSV"
       :form-data="personCsvFormData"
+      :columns="csvColumns"
       @reupload="resetImport"
       @cancel="hideImportRenderModal"
       @confirm="uploadImportFile"
