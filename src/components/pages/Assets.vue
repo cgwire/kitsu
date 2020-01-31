@@ -620,6 +620,7 @@ export default {
           isDeleteDisplayed: false,
           isDeleteMetadataDisplayed: false,
           isImportDisplayed: false,
+          isImportRenderDisplayed: false,
           isNewDisplayed: false,
           isRestoreDisplayed: false
         }
