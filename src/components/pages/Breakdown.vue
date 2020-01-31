@@ -102,6 +102,7 @@
       :is-error="errors.importing"
       :parsed-csv="parsedCSV"
       :form-data="importCsvFormData"
+      :columns="csvColumns"
       @reupload="resetImport"
       @cancel="hideImportRenderModal"
       @confirm="uploadImportFile"

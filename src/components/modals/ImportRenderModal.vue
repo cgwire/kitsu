@@ -27,7 +27,17 @@
             :label="$t('main.csv.preview_episode_name')"
             v-model="form.name"
             v-focus
+            v-show="isTVShow"
           />
+          <h2 class="legend-title">{{ $t('main.csv.legend') }}</h2>
+          <dl class="legend">
+            <dt></dt>
+            <dd>{{ $t('main.csv.legend_ok') }}</dd>
+            <dt class="ignored"></dt>
+            <dd>{{ $t('main.csv.legend_ignored') }}</dd>
+            <dt class="missing"></dt>
+            <dd>{{ $t('main.csv.legend_missing') }}</dd>
+          </dl>
         </div>
       </div>
 
@@ -39,6 +49,11 @@
               :key="`col-${index}`"
               :class="stateColumn(cell, columns)"
             />
+            <col
+              v-for="item in missingColumns"
+              :key="`col-missing-${item}`"
+              class="missing"
+            />
           </colgroup>
           <thead>
             <tr class="render-headers">
@@ -47,6 +62,12 @@
                 :key="`header-${index}`"
               >
               {{ cell || '-' }}
+              </th>
+              <th
+                v-for="cell in missingColumns"
+                :key="`header-${cell}`"
+              >
+              {{ cell }}
               </th>
             </tr>
           </thead>
@@ -60,6 +81,12 @@
                 :key="`cell-${index}`"
               >
                 {{ cell || '-' }}
+              </td>
+              <td
+                v-for="cell in missingColumns"
+                :key="`cell-${cell}`"
+              >
+                {{ '-' }}
               </td>
             </tr>
           </tbody>
@@ -103,21 +130,6 @@ export default {
 
   data () {
     return {
-      // columnOptions: [
-      //   { label: 'Choose', value: 'none' },
-      //   { label: 'Name', value: 'name' },
-      //   { label: 'Sequence', value: 'sequence' },
-      //   { label: 'Description', value: 'description' },
-      //   { label: 'Time', value: 'time' },
-      //   { label: 'Frames', value: 'frames' },
-      //   { label: 'Frame IN', value: 'frame_in' },
-      //   { label: 'Frame OUT', value: 'frame_out' },
-      //   { label: 'Storyboard', value: 'storyboard' },
-      //   { label: 'Layout', value: 'layout' },
-      //   { label: 'Animation', value: 'animation' },
-      //   { label: 'Render', value: 'render' },
-      //   { label: 'Compositing', value: 'compositing' }
-      // ],
       formData: null,
       form: {
         name: ''
@@ -154,7 +166,15 @@ export default {
 
   computed: {
     ...mapGetters([
-    ])
+      'isTVShow'
+    ]),
+    missingColumns () {
+      if (this.parsedCsv.length !== 0) {
+        return this.columns.filter(item => !this.parsedCsv[0].includes(item))
+      } else {
+        return undefined
+      }
+    }
   },
 
   methods: {
@@ -182,8 +202,8 @@ export default {
 .dark {
   .render-container {
     .render {
-      border: 1px solid $dark-grey-light;
       th, td {
+        border: 1px solid $dark-grey-lightest;
         color: $white;
       }
       tr:not(.render-headers):hover {
@@ -191,8 +211,16 @@ export default {
       }
     }
   }
+  .legend-title {
+    color: $white;
+  }
+  .legend {
+    dt {
+      border: 1px solid $dark-grey-lightest;
+    }
+  }
   .ignored {
-    background-color: rgba($light-grey-light, .6)
+    background-color: $dark-grey
   }
 }
 .modal-content {
@@ -244,7 +272,26 @@ export default {
   justify-content: space-between;
   margin-top: 2rem;
 }
+.legend-title {
+  font-size: 1.2rem;
+}
+.legend {
+  display: flex;
+  align-items: center;
+  dt {
+    display: inline-block;
+    width: 1.5rem;
+    height: 1.5rem;
+    border: 1px solid $light-grey-light;
+  }
+  dd {
+    margin: 0 1rem 0 .5rem;
+  }
+}
 .ignored {
   background-color: rgba($light-grey-light, .6)
+}
+.missing {
+  background-color: rgba($red, .6)
 }
 </style>
