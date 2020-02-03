@@ -563,13 +563,13 @@ export default {
     },
 
     getPreviewPath (news) {
-      let previewId = news.preview_file_id
+      const previewId = news.preview_file_id
       const extension = news.preview_file_extension
       return `/api/pictures/originals/preview-files/${previewId}.${extension}`
     },
 
     getPreviewDlPath (news) {
-      let previewId = news.preview_file_id
+      const previewId = news.preview_file_id
       return `/api/pictures/originals/preview-files/${previewId}/download`
     },
 

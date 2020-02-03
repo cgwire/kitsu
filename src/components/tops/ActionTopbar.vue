@@ -553,11 +553,11 @@ export default {
 
     currentMenuLabel () {
       const labels = {
-        'assignation': 'menu.assign_tasks',
-        'estimations': 'menu.set_estimations',
+        assignation: 'menu.assign_tasks',
+        estimations: 'menu.set_estimations',
         'change-status': 'menu.change_status',
-        'priorities': 'menu.change_priority',
-        'tasks': 'menu.create_tasks',
+        priorities: 'menu.change_priority',
+        tasks: 'menu.create_tasks',
         'delete-tasks': 'menu.delete_tasks',
         'custom-actions': 'menu.run_custom_action'
       }
@@ -747,7 +747,7 @@ export default {
         let isShotSelected = false
         let isAssetSelected = false
 
-        for (let taskId of Object.keys(this.selectedTasks)) {
+        for (const taskId of Object.keys(this.selectedTasks)) {
           const task = this.selectedTasks[taskId]
           if (task.sequence_name) {
             isShotSelected = true

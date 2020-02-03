@@ -167,7 +167,7 @@ export default {
     ]),
 
     episodeOptions () {
-      let options = this.episodes.map((episode) => {
+      const options = this.episodes.map((episode) => {
         return {
           label: episode.name,
           value: episode.id

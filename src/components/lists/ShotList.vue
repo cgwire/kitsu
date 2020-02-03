@@ -367,7 +367,7 @@ export default {
     },
 
     manageShotsPath () {
-      let route = {
+      const route = {
         name: 'manage-shots',
         params: {
           production_id: this.currentProduction.id
@@ -477,7 +477,7 @@ export default {
     },
 
     getPath (section, shotId) {
-      let route = {
+      const route = {
         name: section,
         params: {
           production_id: this.currentProduction.id

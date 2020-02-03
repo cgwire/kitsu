@@ -287,7 +287,7 @@ export default {
     },
 
     getPlaylistPath (playlistId, section) {
-      let route = {
+      const route = {
         name: section ? `${section}-playlist` : 'playlist',
         params: {
           production_id: this.currentProduction.id,
@@ -664,7 +664,7 @@ export default {
       return {
         title: `${this.currentProduction ? this.currentProduction.name : ''}` +
                ` ${this.$t('playlists.title')}` +
-               ` - Kitsu`
+               ' - Kitsu'
       }
     }
   },

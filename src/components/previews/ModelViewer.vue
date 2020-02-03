@@ -78,7 +78,7 @@ export default {
     },
 
     container () {
-      return this.$refs['container']
+      return this.$refs.container
     }
   },
 

@@ -139,7 +139,7 @@ export default {
 
     reset () {
       this.title = this.organisation.name
-      this.logoPath = `/api/pictures/thumbnails/organisations/` +
+      this.logoPath = '/api/pictures/thumbnails/organisations/' +
         `${this.organisation.id}.png?t=` + new Date().toISOString()
     }
   },

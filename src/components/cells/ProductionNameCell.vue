@@ -98,7 +98,7 @@ export default {
     ]),
 
     productionRoute () {
-      let route = {
+      const route = {
         name: this.lastProductionScreen,
         params: {
           production_id: this.entry.id

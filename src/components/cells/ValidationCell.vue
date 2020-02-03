@@ -253,7 +253,7 @@ export default {
     changeStyle (background) {
       const border =
         this.isBorder ? '1px solid ' + this.column.color : 'none'
-      this.$refs['cell'].style =
+      this.$refs.cell.style =
         `border-left: ${border}; background: ${background};`
     },
 

@@ -175,7 +175,7 @@ export default {
     taskPath (task) {
       const productionId =
         this.task.project_id ? this.task.project_id : this.currentProduction.id
-      let route = {
+      const route = {
         name: 'task',
         params: {
           production_id: productionId,

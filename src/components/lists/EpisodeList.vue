@@ -300,7 +300,7 @@ export default {
     },
 
     taskTypePath (taskTypeId) {
-      let route = {
+      const route = {
         name: 'task-type',
         params: {
           production_id: this.currentProduction.id,
@@ -310,7 +310,7 @@ export default {
       }
 
       if (this.isTVShow) {
-        route.name = `episode-task-type`
+        route.name = 'episode-task-type'
         route.params.episode_id = this.currentEpisode.id
       }
 
@@ -318,7 +318,7 @@ export default {
     },
 
     getPath (section, episodeId) {
-      let route = {
+      const route = {
         name: section,
         params: {
           production_id: this.currentProduction.id,

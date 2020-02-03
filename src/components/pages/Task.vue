@@ -424,7 +424,7 @@ export default {
           entityId = this.currentTask.entity_id
         }
 
-        let route = {
+        const route = {
           name: type === 'Shot' ? 'shot' : 'asset',
           params: {
             production_id: this.currentTask.project_id
@@ -451,7 +451,7 @@ export default {
     },
 
     entityList () {
-      let entity = this.displayedShots.find((entity) => {
+      const entity = this.displayedShots.find((entity) => {
         return entity.id === this.currentTask.entity_id
       })
       if (entity) {
@@ -464,7 +464,7 @@ export default {
     previousEntity () {
       if (this.currentTask) {
         const taskTypeId = this.currentTask.task_type_id
-        let entityIndex = this.entityList.findIndex((entity) => {
+        const entityIndex = this.entityList.findIndex((entity) => {
           return entity.id === this.currentTask.entity_id
         })
         let firstTraversal = false
@@ -514,7 +514,7 @@ export default {
       if (this.currentTask) {
         const taskTypeId = this.currentTask.task_type_id
         let firstTraversal = false
-        let entityIndex = this.entityList.findIndex((entity) => {
+        const entityIndex = this.entityList.findIndex((entity) => {
           return entity.id === this.currentTask.entity_id
         })
 
@@ -599,7 +599,7 @@ export default {
 
     isMovie () {
       if (this.currentTaskPreviews) {
-        let previewId = this.route.params.preview_id
+        const previewId = this.route.params.preview_id
         let currentPreview = this.currentTaskPreviews[0]
         if (previewId) {
           currentPreview = this.currentTaskPreviews.find((preview) => {
@@ -614,7 +614,7 @@ export default {
 
     extension () {
       if (this.currentTaskPreviews) {
-        let previewId = this.route.params.preview_id
+        const previewId = this.route.params.preview_id
         let currentPreview = this.currentTaskPreviews[0]
         if (previewId) {
           currentPreview = this.currentTaskPreviews.find((preview) => {
@@ -669,7 +669,7 @@ export default {
 
     currentPreview () {
       let currentPreview = this.currentTaskPreviews[0]
-      let previewId = this.route.params.preview_id
+      const previewId = this.route.params.preview_id
       if (previewId) {
         currentPreview = this.currentTaskPreviews.find((preview) => {
           return preview.id === previewId
@@ -716,7 +716,7 @@ export default {
 
     getEntityPage () {
       if (this.currentTask) {
-        let route = {
+        const route = {
           name: this.$route.params.type,
           params: { production_id: this.currentTask.project_id }
         }
@@ -741,7 +741,7 @@ export default {
     },
 
     loadTaskData () {
-      let task = this.getCurrentTask()
+      const task = this.getCurrentTask()
       if (!task) {
         this.taskLoading = {
           isLoading: true,

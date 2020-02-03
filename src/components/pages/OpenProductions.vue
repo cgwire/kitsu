@@ -174,7 +174,7 @@ export default {
     },
 
     sectionPath (production, section) {
-      let route = {
+      const route = {
         name: section,
         params: {
           production_id: production.id

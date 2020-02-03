@@ -36,7 +36,7 @@ export default {
   },
   computed: {
     label () {
-      let label = `v${this.preview.revision}`
+      const label = `v${this.preview.revision}`
       return label
     }
   },

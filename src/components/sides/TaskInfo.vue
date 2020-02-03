@@ -382,7 +382,7 @@ export default {
 
     title () {
       if (this.task) {
-        let entityName =
+        const entityName =
           this.task.full_entity_name || this.task.entity_name
         return `${entityName}`
       } else {
@@ -609,13 +609,13 @@ export default {
     },
 
     getOriginalPath () {
-      let previewId = this.currentPreviewId
+      const previewId = this.currentPreviewId
       const extension = this.extension ? this.extension : 'png'
       return `/api/pictures/originals/preview-files/${previewId}.${extension}`
     },
 
     getOriginalDlPath () {
-      let previewId = this.currentPreviewId
+      const previewId = this.currentPreviewId
       return `/api/pictures/originals/preview-files/${previewId}/download`
     },
 

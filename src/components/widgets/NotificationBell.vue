@@ -39,7 +39,7 @@ export default {
         if (this.isWhite) {
           return {
             'has-no-notifications': true,
-            'white': true
+            white: true
           }
         } else {
           return { 'has-no-notifications': true }

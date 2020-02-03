@@ -446,14 +446,14 @@ export default {
 
     daysAvailable () {
       const days = []
-      let day = this.startDate.clone().add(-1, 'days')
+      const day = this.startDate.clone().add(-1, 'days')
       let dayDate = day.toDate()
-      let endDayDate = this.endDate.toDate()
+      const endDayDate = this.endDate.toDate()
       dayDate.isoweekday = day.isoWeekday()
       dayDate.monthday = day.month()
 
       while (dayDate < endDayDate) {
-        let nextDay = new Date(Number(dayDate))
+        const nextDay = new Date(Number(dayDate))
         nextDay.setDate(dayDate.getDate() + 1) // Add 1 day
 
         nextDay.isoweekday = dayDate.isoweekday + 1
@@ -469,7 +469,7 @@ export default {
         }
         if ([6, 7].includes(nextDay.isoweekday)) nextDay.weekend = true
 
-        let momentDay = moment(nextDay)
+        const momentDay = moment(nextDay)
         momentDay.newWeek = nextDay.newWeek
         momentDay.newMonth = nextDay.newMonth
         momentDay.weekend = nextDay.weekend
@@ -520,7 +520,7 @@ export default {
     },
 
     schedule () {
-      return this.$refs['schedule']
+      return this.$refs.schedule
     },
 
     timelineContent () {
@@ -652,9 +652,9 @@ export default {
       currentIndex += dayChange
       if (currentIndex < 0) currentIndex = 0
 
-      let newStartDate = this.displayedDays[currentIndex]
+      const newStartDate = this.displayedDays[currentIndex]
       if (newStartDate) {
-        let newEndDate = this.displayedDays[currentIndex + length]
+        const newEndDate = this.displayedDays[currentIndex + length]
         if (this.isValidItemDates(newStartDate, newEndDate)) {
           this.currentElement.startDate = newStartDate
           this.currentElement.endDate = newEndDate
@@ -670,13 +670,13 @@ export default {
       const startDate = this.lastStartDate
       const endDate = this.currentElement.endDate
       let currentIndex = this.getDisplayedDaysIndex(startDate)
-      let endDateIndex = this.getDisplayedDaysIndex(endDate)
+      const endDateIndex = this.getDisplayedDaysIndex(endDate)
 
       currentIndex += dayChange
       if (currentIndex > endDateIndex) currentIndex = endDateIndex
       if (currentIndex < 0) currentIndex = 0
 
-      let newStartDate = this.displayedDays[currentIndex]
+      const newStartDate = this.displayedDays[currentIndex]
       if (this.isValidItemDates(newStartDate, this.currentElement.endDate)) {
         this.currentElement.startDate = newStartDate
         this.$emit('item-changed', this.currentElement)
@@ -701,7 +701,7 @@ export default {
 
       const startDate = this.currentElement.startDate
       const endDate = this.lastEndDate
-      let startDateIndex = this.getDisplayedDaysIndex(startDate)
+      const startDateIndex = this.getDisplayedDaysIndex(startDate)
       let currentIndex = this.getDisplayedDaysIndex(endDate)
 
       currentIndex += dayChange - 1
@@ -710,7 +710,7 @@ export default {
         currentIndex = this.displayedDaysIndex.length - 1
       }
 
-      let newEndDate = this.displayedDays[currentIndex]
+      const newEndDate = this.displayedDays[currentIndex]
       if (this.isValidItemDates(this.currentElement.startDate, newEndDate)) {
         this.currentElement.endDate = newEndDate
         this.$emit('item-changed', this.currentElement)
@@ -783,7 +783,7 @@ export default {
 
     scrollScheduleLeft (event) {
       const previousLeft = this.timelineContentWrapper.scrollLeft
-      let newLeft = previousLeft - event.movementX
+      const newLeft = previousLeft - event.movementX
       this.timelineContentWrapper.scrollLeft = newLeft
       this.timelineHeader.scrollLeft = newLeft
     },
@@ -857,7 +857,7 @@ export default {
 
         return Math.ceil(wfirst + days + wlast - 1)
       } else {
-        let day = moment(startDate)
+        const day = moment(startDate)
         let businessDays = 0
         while (day.isBefore(endDate, 'day')) {
           if (day.day() !== 0 && day.day() !== 6) businessDays++
@@ -913,7 +913,7 @@ export default {
 
     getTimebarLeft (timeElement) {
       const startDate = timeElement.startDate || this.startDate
-      let startDiff = this.businessDiff(this.startDate, startDate) || 0
+      const startDiff = this.businessDiff(this.startDate, startDate) || 0
       return ((startDiff) * this.cellWidth) + 5
     },
 
@@ -927,7 +927,7 @@ export default {
           timeElement.startDate.clone().add(1, 'days')
         ) ||
         this.startDate.clone().add(1, 'days')
-      let lengthDiff = this.businessDiff(startDate, endDate)
+      const lengthDiff = this.businessDiff(startDate, endDate)
       if (lengthDiff > 0) {
         return (lengthDiff + 1) * this.cellWidth - 10
       } else {
@@ -948,7 +948,7 @@ export default {
       const isOdd = index % 2 === 0
       const level = isOdd ? 0.7 : 0.9
       return {
-        'background': colors.lightenColor(rootElement.color, level)
+        background: colors.lightenColor(rootElement.color, level)
       }
     },
 

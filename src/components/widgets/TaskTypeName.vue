@@ -40,7 +40,7 @@ export default {
     },
 
     taskTypePath () {
-      let route = {
+      const route = {
         name: 'task-type',
         params: {
           production_id: this.productionId,

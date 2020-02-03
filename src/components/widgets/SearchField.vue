@@ -95,11 +95,11 @@ export default {
     },
 
     setFocusedStyle () {
-      this.$refs['wrapper'].className = 'flexrow search-field-wrapper focused'
+      this.$refs.wrapper.className = 'flexrow search-field-wrapper focused'
     },
 
     unsetFocusedStyle () {
-      this.$refs['wrapper'].className = 'flexrow search-field-wrapper'
+      this.$refs.wrapper.className = 'flexrow search-field-wrapper'
     }
   }
 }

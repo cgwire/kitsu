@@ -126,7 +126,7 @@ export default {
   mounted () {
     this.form = Object.assign(this.form, this.organisation)
     this.organisationLogoKey = 'key' + new Date().toISOString()
-    this.organisationLogoPath = `/api/pictures/thumbnails/organisations/` +
+    this.organisationLogoPath = '/api/pictures/thumbnails/organisations/' +
                                 `${this.organisation.id}.png`
   },
 
@@ -171,7 +171,7 @@ export default {
             this.loading.saveAvatar = false
             this.modals.avatar = false
             this.organisationLogoPath =
-              `/api/pictures/thumbnails/organisations/` +
+              '/api/pictures/thumbnails/organisations/' +
               `${this.organisation.id}.png?t=` + new Date().toISOString()
           }, 500)
         })

@@ -217,7 +217,7 @@ export default {
     },
 
     newAssetPath () {
-      let route = {
+      const route = {
         name: 'new-asset',
         params: {
           production_id: this.currentProduction.id
@@ -266,7 +266,7 @@ export default {
     },
 
     taskTypePath (taskTypeId) {
-      let route = {
+      const route = {
         name: 'task-type',
         params: {
           production_id: this.currentProduction.id,

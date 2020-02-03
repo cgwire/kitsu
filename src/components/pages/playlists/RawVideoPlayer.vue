@@ -111,7 +111,7 @@ export default {
     },
 
     goPreviousFrame () {
-      let newTime = this.currentPlayer.currentTime - 1 / this.fps
+      const newTime = this.currentPlayer.currentTime - 1 / this.fps
       if (newTime < 0) {
         this.setCurrentTime(0)
       } else {
@@ -120,7 +120,7 @@ export default {
     },
 
     goNextFrame () {
-      let newTime = this.currentPlayer.currentTime + 1 / this.fps
+      const newTime = this.currentPlayer.currentTime + 1 / this.fps
       if (newTime > this.currentPlayer.duration) {
         this.setCurrentTime(this.video.duration)
       } else {
@@ -187,7 +187,7 @@ export default {
     },
 
     playNext () {
-      let nextIndex = this.getNextIndex(this.currentIndex)
+      const nextIndex = this.getNextIndex(this.currentIndex)
       this.currentIndex = nextIndex
       this.$emit('shot-change', this.currentIndex)
 
@@ -201,9 +201,9 @@ export default {
 
     resetHeight () {
       this.$nextTick(() => {
-        if (this.currentPlayer) this.currentPlayer.style.height = `0px`
-        if (this.nextPlayer) this.nextPlayer.style.height = `0px`
-        let height = this.container.offsetHeight
+        if (this.currentPlayer) this.currentPlayer.style.height = '0px'
+        if (this.nextPlayer) this.nextPlayer.style.height = '0px'
+        const height = this.container.offsetHeight
         if (this.currentPlayer) this.currentPlayer.style.height = `${height}px`
         if (this.nextPlayer) this.nextPlayer.style.height = `${height}px`
       })

@@ -108,9 +108,9 @@ export default {
         }
 
         projects[task.project_id][task.task_type_id].push({
-          'id': task.id,
-          'name': name,
-          'duration': task.duration
+          id: task.id,
+          name: name,
+          duration: task.duration
         })
       })
 

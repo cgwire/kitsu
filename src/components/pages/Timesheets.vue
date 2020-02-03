@@ -254,9 +254,9 @@ export default {
       }
 
       const detailLevelHasChanged = previousDetailLevel !== this.detailLevel
-      let monthHasChanged =
+      const monthHasChanged =
         previousMonth.localeCompare(`${this.currentMonth}`) !== 0
-      let yearHasChanged =
+      const yearHasChanged =
         previousYear.localeCompare(`${this.currentYear}`) !== 0
 
       if (this.$route.path.indexOf('person') > 0) {

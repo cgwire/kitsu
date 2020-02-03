@@ -275,7 +275,7 @@ export default {
     },
 
     getPath (name) {
-      let route = {
+      const route = {
         name: name,
         params: {
           task_id: this.comment.object_id,
