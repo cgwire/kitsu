@@ -144,6 +144,9 @@ export default {
   },
 
   watch: {
+    active () {
+      this.reset()
+    }
   }
 }
 </script>
