@@ -490,10 +490,9 @@ You can also **drag & drop** the file in the comment section.
 
 ![attach preview drag drop](../img/getting-started/drag_drop_preview.png)
 
-Once you have uploaded an image, you can add another one.
+You can add multiple image at the same time, or, once you have uploaded an image, you can add another one.
 
-![attach preview drag drop](../img/getting-started/
-upload_several_pictures.png)
+![attach preview drag drop](../img/getting-started/upload_several_pictures.png)
 
 The **Add preview** pop-up opens and asks you to choose a file.
 
@@ -501,6 +500,7 @@ You can navigate through the pictures uploaded.
 
 ![attach preview drag drop](../img/getting-started/
 upload_second_pictures.png)
+
 
 ## Validation per batch
 
@@ -573,7 +573,7 @@ You can compare two task type or version side by side when you click on the **Co
 
 ![compare button](../img/getting-started/compare_version.png)
 
-You can draw directly on the preview with the **pencil** tool ![Pencil](../img/getting-started/draw.png).
+You can draw directly on the preview with the **pencil** tool and select a color ![Pencil](../img/getting-started/draw.png). 
 
 ![review drawing](../img/getting-started/review_comment.png)
 
@@ -616,6 +616,19 @@ On the list page, click on the status you want, then on the right panel, click o
 
 
 Once you have clicked on the button, you see the thumbnail appears, and the button turns gray.
+
+## Add batch of thumbnail
+
+You can use the **Add Thumbnails** button ![Add thumbnails button](../img/getting-started/add_thumbnails.png) on the global page to massively import thumbnails.
+
+
+![History](../img/getting-started/add_thumbnails_menu.png)
+
+A new pop-up opens and ask you to choose for which task types the thumbnails will be linked.
+
+**Thumbnails batch import only accept images files**
+
+You have to name your thumbnails as: sequence_shot.
 
 
 ## Simplify the global page
