@@ -1,5 +1,11 @@
 <template>
-  <div class="file-upload-wrapper">
+  <div
+    class="file-upload-wrapper"
+    ref="wrapper"
+    @drop="onDrop"
+    @dragover="onDragover"
+    @dragleave="onDragleave"
+  >
     <form enctype="multipart/form-data" novalidate>
       <div class="dropbox">
         <label
@@ -20,12 +26,12 @@
           >
         </label>
         <span class="file-upload-status" v-if="this.uploadedFiles.length > 1">
-          {{this.uploadedFiles.length}} {{ $tc('main.files_selected') }}
+          {{ this.uploadedFiles.length }} {{ $tc('main.files_selected') }}
         </span>
         <span class="file-upload-status"
           v-if="this.uploadedFiles.length === 1"
         >
-          {{this.uploadedFiles[0]}}
+          {{ this.uploadedFiles[0] }}
         </span>
       </div>
     </form>
@@ -61,6 +67,7 @@ export default {
       default: false
     }
   },
+
   data () {
     return {
       isInitial: true,
@@ -68,8 +75,23 @@ export default {
       uploadedFiles: []
     }
   },
+
+  mounted () {
+    this.reset()
+    const events = [
+      'drag', 'dragstart', 'dragend', 'dragover',
+      'dragenter', 'dragleave', 'drop'
+    ]
+    events.forEach((evt) => {
+      this.$refs.wrapper.addEventListener(evt, (e) => {
+        e.preventDefault()
+        e.stopPropagation()
+      })
+    })
+  },
+
   computed: {},
-  watch: {},
+
   methods: {
     filesChange (name, files) {
       const forms = []
@@ -91,11 +113,26 @@ export default {
       this.isInitial = true
       this.uploadedFiles = []
       this.$refs.uploadInput.value = ''
+    },
+
+    onDragover () {
+      this.isDragging = true
+    },
+
+    onDragleave () {
+      this.isDragging = false
+    },
+
+    onDrop (event) {
+      if (event.dataTransfer.files) {
+        this.isDragging = false
+        this.isSaving = false
+        this.filesChange('file', event.dataTransfer.files)
+      }
     }
   },
-  mounted () {
-    this.reset()
-  }
+
+  watch: {}
 }
 </script>
 
