@@ -942,8 +942,21 @@ export default {
       this.lastCall = this.lastCall || 0
       if (now - this.lastCall > 600) {
         this.lastCall = now
-        this.$nextTick(this.resetHeight)
+        this.$nextTick(() => {
+          this.resetHeight()
+          this.reloadAnnotations()
+        })
       }
+    },
+
+    reloadAnnotations () {
+      const annotations = this.annotations.map(a => ({ ...a }))
+      this.annotations = []
+      setTimeout(() => {
+        this.annotations = annotations
+        const annotation = this.getAnnotation(this.currentTimeRaw)
+        if (annotation) this.loadAnnotation(annotation)
+      }, 200)
     },
 
     onFilmClicked () {
