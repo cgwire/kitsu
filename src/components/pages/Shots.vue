@@ -285,6 +285,7 @@ export default {
         'Sequence',
         'Name',
         'Description',
+        'Nb Frames',
         'FPS',
         'Frame In',
         'Frame Out'
@@ -870,27 +871,27 @@ export default {
           }
           const name = slugify(nameData.join('_'))
           const headers = [
-            this.$t('shots.fields.sequence'),
-            this.$t('shots.fields.name'),
-            this.$t('shots.fields.description')
+            'Sequence',
+            'Name',
+            'Description'
           ]
           sortByName([...this.currentProduction.descriptors])
             .filter(d => d.entity_type === 'Shot')
             .forEach((descriptor) => {
-              headers.push(descriptor.field_name)
+              headers.push('Descriptor')
             })
-          headers.push(this.$t('shots.fields.nb_frames'))
+          headers.push('Nb Frames')
           if (this.isFrameIn) {
-            headers.push(this.$t('shots.fields.frame_in'))
+            headers.push('Frame In')
           }
           if (this.isFrameOut) {
-            headers.push(this.$t('shots.fields.frame_out'))
+            headers.push('Frame Out')
           }
           if (this.isFps) {
-            headers.push(this.$t('shots.fields.fps'))
+            headers.push('FPS')
           }
           if (this.isTime) {
-            headers.push(this.$t('shots.fields.time_spent'))
+            headers.push('Time spent')
           }
           this.shotValidationColumns
             .forEach((taskTypeId) => {

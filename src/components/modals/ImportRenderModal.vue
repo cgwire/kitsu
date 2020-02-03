@@ -21,14 +21,14 @@
           </p>
         </div>
         <div class="flex-item">
-          <text-field
+          <!--text-field
             ref="nameField"
             input-class="task-status-name"
             :label="$t('main.csv.preview_episode_name')"
             v-model="form.name"
             v-focus
             v-show="isTVShow"
-          />
+          /-->
           <h2 class="legend-title">{{ $t('main.csv.legend') }}</h2>
           <dl class="legend">
             <dt></dt>
@@ -115,7 +115,7 @@
 <script>
 import { mapGetters, mapActions } from 'vuex'
 import { modalMixin } from './base_modal'
-import TextField from '../widgets/TextField'
+// import TextField from '../widgets/TextField'
 import ButtonSimple from '../widgets/ButtonSimple'
 import ModalFooter from './ModalFooter'
 
@@ -124,7 +124,7 @@ export default {
   mixins: [modalMixin],
   components: {
     ButtonSimple,
-    TextField,
+    // TextField,
     ModalFooter
   },
 

@@ -148,7 +148,7 @@ export default {
       },
       csvColumns: [
         'First Name',
-        'Last Name',
+        'Last Name',
         'Email',
         'Phone'
       ]
