@@ -217,7 +217,7 @@ export default {
       paste_code: 'Please paste here your CSV data:',
       preview_episode_name: 'Episode name',
       preview_title: 'Preview of your imported data',
-      preview_description: 'Upload a .csv file to populate your board with posts. You can optionally create new columns.',
+      preview_description: 'Upload a .csv file to populate your board with posts.',
       preview_required: 'NB: The first row must be the header',
       preview_reupload: 'Reupload .CSV file',
       required_fields: 'Your CSV requires the following columns',
