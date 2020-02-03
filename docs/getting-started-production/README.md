@@ -402,6 +402,9 @@ Now the frame range appears on the general spreadsheet of the shot page.
 
 ![Shot framerange detail](../img/getting-started/shot_framerange_detail.png)
 
+You can have access to the shot values history too.
+
+![Shot Values History](../img/getting-started/shot_values_history.png)
 
 ## Add Custom columns
 
@@ -409,12 +412,12 @@ To add more information on the general spreadsheet pages, you have to create a
 **Custom column**.
 
 
-Click on the **+** near the Description column.
+Click on the **+** near the Name column.
 
 ![Custom Column](../img/getting-started/add_column_custom.png)
 
 You may have extra information to add on your pages as the **level of difficulties**,
-the **name of the studios**, when a production is split, etc.
+the **name of the studios**, when a production is splitted, etc.
 
 In the custom column, you can store all kinds of information: a **list of value** or a **free value**.
 
