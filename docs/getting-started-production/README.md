@@ -61,7 +61,7 @@ It asks you to choose the asset **Type** (1): Camera, Characters, Environment,
 FX, Props, ...  
 Let's start with an environment. You select the **Episode** (2), or the main pack (**All**).
 We give it a **Name** (3) and enter a description that helps the designer to know what to do, and later to
-identify the asset easily.
+identify the asset quickly.
 If you have multiple assets to create, click on **Confirm and stay**. You
 can change the asset type, and keep adding assets. 
 
@@ -321,7 +321,7 @@ So now you have to select the shot you want to cast. You can also choose multipl
 
 Then click on the assets you want
 to assign: characters, backgrounds, ... from the right part (3). 
-If you have selected multiple shots, your selection will be applied to the numerous shots, as well.
+If you have selected multiple shots, your selection is applied to the numerous shots, as well.
 
 When you pass over the asset, you can see a **+1** or **+10**. It's the number
 of times you add this asset. You can click as many times as you need on it.
@@ -417,7 +417,7 @@ Click on the **+** near the Name column.
 ![Custom Column](../img/getting-started/add_column_custom.png)
 
 You may have extra information to add on your pages as the **level of difficulties**,
-the **name of the studios**, when a production is splitted, etc.
+the **name of the studios**, when a production is split, etc.
 
 In the custom column, you can store all kinds of information: a **list of value** or a **free value**.
 
@@ -474,9 +474,9 @@ or an `.obj` file. All can be reviewed from the browser.
 Other files like `.pdf`, `.zip`, `.rar`, `.ma` or `.mb` however, they need to be
 downloaded to be reviewed.
 
-If you have defined a **FPS** for the production, Kitsu will conform to the uploaded video to this FPS.
+If you have defined a **FPS** for the production, Kitsu conforms to the uploaded video to this FPS.
 
-Otherwise, the video will be compressed to 1080P, and 30mbits/sec. 
+Otherwise, the video is compressed to 1080P, and 30mbits/sec. 
 
 Click on the "Attach preview" button, the explorer opens and lets you choose your file.
 
@@ -490,7 +490,7 @@ You can also **drag & drop** the file in the comment section.
 
 ![attach preview drag drop](../img/getting-started/drag_drop_preview.png)
 
-You can add multiple image at the same time, or, once you have uploaded an image, you can add another one.
+You can add multiple images at the same time, or, once you have uploaded an image, you can add another one.
 
 ![attach preview drag drop](../img/getting-started/upload_several_pictures.png)
 
@@ -617,18 +617,18 @@ On the list page, click on the status you want, then on the right panel, click o
 
 Once you have clicked on the button, you see the thumbnail appears, and the button turns gray.
 
-## Add batch of thumbnail
+## Add batch of thumbnails
 
 You can use the **Add Thumbnails** button ![Add thumbnails button](../img/getting-started/add_thumbnails.png) on the global page to massively import thumbnails.
 
 
 ![History](../img/getting-started/add_thumbnails_menu.png)
 
-A new pop-up opens and ask you to choose for which task types the thumbnails will be linked.
+A new pop-up opens and asks you to choose which task types the thumbnails are linked.
 
 **Thumbnails batch import only accept images files**
 
-You have to name your thumbnails as: sequence_shot.
+You have to name your thumbnails as sequence_shot.
 
 
 ## Simplify the global page
@@ -660,7 +660,7 @@ To make the information reappear, click on the same button,
 
 ## The timesheets
 
-As production you can use the main menu to check the timesheets.
+As Studio Manager, you can use the main menu to check the timesheets.
 
 Open the main menu with the ![main button](../img/getting-started/main_button.png) button. 
 
@@ -689,7 +689,7 @@ Go back to the main menu, and select **Settings**.
 
 ## Production Schedule
 
-As production you can set the global schedule for your production. 
+As production, you can set the global schedule for your production. 
 
 On the drop-down menu choose **SCHEDULE**
 
@@ -704,7 +704,7 @@ You can add your global man-days as on your quote.
 You can define, on the Gantt Schedule, the start and end date of each task type. 
 The task types are the ones you have already added to your production.
 
-Put your cursor on the start date, and the cursor will change as a double arrow. Then drag and slide the start date.
+Put your cursor on the start date; the cursor changes as a double arrow. Then drag and slide the start date.
 Do the same for the end date. 
 
 ![Production Schedule gantt](../img/getting-started/schedule_production_task_type.png)
@@ -755,12 +755,12 @@ If you need more details than in the production schedule, you can go to the **Ta
 
 You can notice there are two tabs on the page, Tasks and **Schedule**. Click on the ![Task type schedule tab](../img/getting-started/task_type_tab_schedule.png) 
 
-On this page, you will be able to do the schedule per CG Artist and per asset (or shot, depending on the task type).
+On this page, you can do the schedule per CG Artist and per asset (or shot, depending on the task type).
 
 ![Task type page schedule default](../img/getting-started/task_type_schedule_emplty.png)
 
 
-Put your cursor on the start date, and the cursor will change as a double arrow. Then drag and slide the start date.
+Put your cursor on the start date, and the cursor changes as a double arrow. Then drag and slide the start date.
 Do the same for the end date. 
 
 You can use the search bar (1) as on the other pages: you can search **status** 
@@ -775,7 +775,7 @@ But you can the color of the bar, depending on what you need.
 
 ![Task type page schedule coloring](../img/getting-started/task_type_schedule_coloring.png)
 
-**Status color** will change the color of the bar based on their status. For example Blue is for WIP, red is for RETAKE, 
+**Status color** changes the color of the bar based on their status. For example Blue is for WIP, red is for RETAKE, 
 purple for Waiting For Approval, green is for Done.
 
 ![Task type page schedule coloring status](../img/getting-started/task_type_schedule_coloring_status.png)
@@ -788,7 +788,7 @@ In a glimpse, you can see the state of your elements and team.
 
 The Gantt diagram has an impact on the other pages on Kistu.
 
-The **due date** will be displayed on the **Tasks** tab of the task type page.
+The **due date** is displayed on the **Tasks** tab of the task type page.
 
 ![Task type page schedule due date](../img/getting-started/task_type_schedule_due_date.png)
 
@@ -798,7 +798,8 @@ But you can also see the **Due date** on the **Todo Page** of a CG Artist.
 
 Everybody has access to this page, but only the **Studio Manager** can modify it.
 
-## Main Schedude
+
+## Main Schedule
 
 As a production manager, you have access to the Studio Schedule.
 The schedules of all the production are in one place, and help you to prepare your productions better.
@@ -818,6 +819,21 @@ The color is the same as the column on the global pages.
 
 ![Main Menu Schedule](../img/getting-started/main_schedule_unfold.png)
 
-**An important thing to keep in mind**: you can't modify your production schedule from this page. You will have to go back to the production schedule page you want to adjust to doing it.
+**An important thing to keep in mind**: you can't modify your production schedule from this page. You have to go back to the production schedule page you want to adjust to doing it.
 
 Only the **Studio Manager** has access to this page.
+
+
+## Quotas stat
+
+Kitsu grabs the number of frames (or seconds) validated per day/week/month per CG Artist.
+
+![Quotat stat page](../img/getting-started/quotas_week)
+
+**1**: Select the Task Type
+
+**2**: Select the level of details, Day, Week or Month
+
+**3**: Select the count mode, per Frames or per Seconds.
+
+At any time, you can click on a number and see its detail on the right pannel.
