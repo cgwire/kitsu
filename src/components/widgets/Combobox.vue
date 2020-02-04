@@ -11,7 +11,10 @@
       }"
     >
       <select
-        class="select-input"
+        :class="{
+          'select-input': true,
+          error: this.error
+        }"
         ref="select"
         :disabled="disabled"
         @keyup.enter="emitEnter()"
@@ -57,6 +60,10 @@ export default {
       type: Boolean
     },
     disabled: {
+      default: false,
+      type: Boolean
+    },
+    error: {
       default: false,
       type: Boolean
     }
@@ -123,5 +130,9 @@ export default {
   border-right: 0;
   border-top: 0;
   margin-top: -4px;
+}
+
+.error {
+  border-color: $red;
 }
 </style>

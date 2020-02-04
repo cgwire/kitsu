@@ -47,10 +47,10 @@
             <col
               v-for="(cell, index) in parsedCsv[0]"
               :key="`col-${index}`"
-              :class="stateColumn(cell, columns)"
+              :class="stateColumn(cell)"
             />
             <col
-              v-for="item in missingColumns"
+              v-for="item in columnsRequired"
               :key="`col-missing-${item}`"
               class="missing"
             />
@@ -61,10 +61,19 @@
                 v-for="(cell, index) in parsedCsv[0]"
                 :key="`header-${index}`"
               >
+              <div class="render-select">
+                <combobox
+                  :options="columnOptions"
+                  :value="cell"
+                  :error="isDuplicated(index)"
+                  v-model="columnSelect[index]"
+                  @input="checkForDuplicate"
+                />
+              </div>
               {{ cell || '-' }}
               </th>
               <th
-                v-for="cell in missingColumns"
+                v-for="cell in columnsRequired"
                 :key="`header-${cell}`"
               >
               {{ cell }}
@@ -83,7 +92,7 @@
                 {{ cell || '-' }}
               </td>
               <td
-                v-for="cell in missingColumns"
+                v-for="cell in columnsRequired"
                 :key="`cell-${cell}`"
               >
                 {{ '-' }}
@@ -116,6 +125,7 @@
 import { mapGetters, mapActions } from 'vuex'
 import { modalMixin } from './base_modal'
 // import TextField from '../widgets/TextField'
+import Combobox from '../widgets/Combobox'
 import ButtonSimple from '../widgets/ButtonSimple'
 import ModalFooter from './ModalFooter'
 
@@ -124,12 +134,14 @@ export default {
   mixins: [modalMixin],
   components: {
     ButtonSimple,
+    Combobox,
     // TextField,
     ModalFooter
   },
 
   data () {
     return {
+      duplicates: [],
       formData: null,
       form: {
         name: ''
@@ -166,32 +178,77 @@ export default {
 
   computed: {
     ...mapGetters([
-      'isTVShow'
+      'isTVShow',
+      'shotMetadataDescriptors'
     ]),
-    missingColumns () {
+
+    columnsRequired () {
       if (this.parsedCsv.length !== 0) {
         return this.columns.filter(item => !this.parsedCsv[0].includes(item))
       } else {
         return undefined
       }
+    },
+
+    columnsAllowed () {
+      let list = [...this.columns]
+      this.shotMetadataDescriptors.forEach(item => {
+        if (!list.includes(item.name)) {
+          list.push(item.name)
+        }
+      })
+      return list
+    },
+
+    columnOptions () {
+      let options = [{
+        label: this.$t('main.csv.choose'),
+        value: this.$t('main.csv.unknown')
+      }]
+      this.columnsAllowed.forEach(item => {
+        options.push({ label: item, value: item })
+      })
+      return options
+    },
+
+    columnSelect () {
+      return this.parsedCsv[0]
     }
   },
 
   methods: {
     ...mapActions([
     ]),
+
     onConfirmClicked () {
-      this.$emit('confirm')
+      this.$emit('confirm', this.parsedCsv)
     },
+
     onReupload () {
       this.$emit('reupload')
     },
+
     startFrom (arr, index) {
       return arr.slice(index)
     },
-    stateColumn (data, list) {
-      if (!list.includes(data)) {
+
+    stateColumn (data) {
+      if (!this.columnsAllowed.includes(data)) {
         return 'ignored'
+      }
+    },
+
+    checkForDuplicate () {
+      const ignoredItem = this.$t('main.csv.unknown')
+      this.duplicates =
+        this.columnSelect.filter(
+          (item, index) => this.columnSelect.indexOf(item) !== index
+        ).filter(item => item !== ignoredItem)
+    },
+
+    isDuplicated (index) {
+      if (this.duplicates.includes(this.columnSelect[index])) {
+        return true
       }
     }
   }
@@ -210,6 +267,9 @@ export default {
         background-color: $dark-grey-lightmore;
       }
     }
+  }
+  .render-select {
+    border-color: $dark-grey-lightest;
   }
   .legend-title {
     color: $white;
@@ -265,6 +325,11 @@ export default {
       background-color: $white-grey-light;
     }
   }
+}
+.render-select {
+  margin-bottom: .75rem;
+  padding-bottom: .75rem;
+  border-bottom: 1px solid $light-grey-light;
 }
 .render-footer {
   display: flex;

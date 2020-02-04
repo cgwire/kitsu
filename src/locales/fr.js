@@ -186,6 +186,8 @@ export default {
     white_theme: 'Thème blanc',
     yes: 'oui',
     csv: {
+      choose: 'Choisir',
+      unknown: 'Colonne inconnue',
       error_upload: 'Une erreur est survenue en téleversant votre fichier .csv.',
       export_file: 'Exporter',
       import_file: 'Importer',

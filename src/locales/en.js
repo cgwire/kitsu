@@ -205,6 +205,8 @@ export default {
     white_theme: 'White Theme',
     yes: 'Yes',
     csv: {
+      choose: 'Choose',
+      unknown: 'Unknown column',
       error_upload: 'An error occured while uploading your CSV.',
       export_file: 'Export',
       import_file: 'Import',

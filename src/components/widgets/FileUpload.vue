@@ -75,7 +75,6 @@ export default {
       uploadedFiles: []
     }
   },
-
   mounted () {
     this.reset()
     const events = [
@@ -89,9 +88,7 @@ export default {
       })
     })
   },
-
   computed: {},
-
   methods: {
     filesChange (name, files) {
       const forms = []
@@ -131,7 +128,6 @@ export default {
       }
     }
   },
-
   watch: {}
 }
 </script>

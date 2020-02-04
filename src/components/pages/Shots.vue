@@ -173,7 +173,6 @@
     :form-data="shotsCsvFormData"
     :columns="columns"
     @cancel="hideImportModal"
-    @fileselected="selectFile"
     @confirm="renderImport"
   />
 
@@ -681,10 +680,6 @@ export default {
       }
     },
 
-    selectFile (formData) {
-      this.$store.commit('SHOT_CSV_FILE_SELECTED', formData)
-    },
-
     processCSV (data, config) {
       return new Promise((resolve, reject) => {
         Papa.parse(data, {
@@ -703,33 +698,26 @@ export default {
       this.formData = data
       if (mode === 'file') {
         data = data.get('file')
-        this.processCSV(data)
-          .then((results) => {
-            this.parsedCSV = results
-            this.hideImportModal()
-            this.loading.importing = false
-            this.showImportRenderModal()
-          })
-      } else if (mode === 'text') {
-        const formData = new FormData()
-        const filename = 'import.csv'
-        this.processCSV(data)
-          .then((results) => {
-            this.parsedCSV = results
-            this.hideImportModal()
-            this.loading.importing = false
-            this.showImportRenderModal()
-            const file =
-              new File([results.join('\n')], filename, { type: 'text/csv' })
-            formData.append('file', file)
-            this.$store.commit('SHOT_CSV_FILE_SELECTED', formData)
-          })
       }
+      this.processCSV(data)
+        .then((results) => {
+          this.parsedCSV = results
+          this.hideImportModal()
+          this.loading.importing = false
+          this.showImportRenderModal()
+        })
     },
 
-    uploadImportFile () {
+    uploadImportFile (data) {
+      const formData = new FormData()
+      const filename = 'import.csv'
+      const file = new File([data.join('\n')], filename, { type: 'text/csv' })
+
+      formData.append('file', file)
+
       this.loading.importing = true
       this.errors.importing = false
+      this.$store.commit('SHOT_CSV_FILE_SELECTED', formData)
 
       this.uploadShotFile((err) => {
         if (!err) {
