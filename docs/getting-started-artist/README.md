@@ -36,8 +36,8 @@ The central part for you, on **Kitsu**, is the **My tasks** page.
 It's the first landing page when you log in.
 
 
-You can see per **Production** (1) the **Entity** (2) you are assigned to, the **Due date** (3), the
-**Status** (4) of the tasks you are working on and their **priority** (5). 
+You can see per **Production** (1) the **Entity** (2) you are assigned to, but also the **Estimation** time (3), and the **Duration** (4) you already spend, the **Due date** (5), the
+**Status** (6) of the tasks you are working on and their **priority** (7). 
  
 ![My tasks page](../img/getting-started/my_task_page.png)
 
@@ -110,10 +110,9 @@ Each time you add a new revision, the previous versions are still available.
 
 ![Preview v2](../img/getting-started/previewv2.png)
 
-Once you have uploaded an image, you have the possibility to add another one.
+You can add multiple images at the same time, or, once you have uploaded an image, you can add another one.
 
-![attach preview drag drop](../img/getting-started/
-upload_several_pictures.png)
+![attach preview drag drop](../img/getting-started/upload_several_pictures.png)
 
 The **Add preview** popup opens, and ask you to choose a file.
 
