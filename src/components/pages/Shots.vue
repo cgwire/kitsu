@@ -734,6 +734,7 @@ export default {
     },
 
     resetImport () {
+      this.errors.importing = false
       this.hideImportRenderModal()
       this.$store.commit('SHOT_CSV_FILE_SELECTED', null)
       this.$refs['import-modal'].reset()
