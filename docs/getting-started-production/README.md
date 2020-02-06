@@ -617,7 +617,7 @@ On the list page, click on the status you want, then on the right panel, click o
 
 Once you have clicked on the button, you see the thumbnail appears, and the button turns gray.
 
-## Add batch of thumbnails
+## Add batch of thumbnails 
 
 You can use the **Add Thumbnails** button ![Add thumbnails button](../img/getting-started/add_thumbnails.png) on the global page to massively import thumbnails.
 
@@ -828,7 +828,7 @@ Only the **Studio Manager** has access to this page.
 
 Kitsu grabs the number of frames (or seconds) validated per day/week/month per CG Artist.
 
-![Quotat stat page](../img/getting-started/quotas_week)
+![Quotat stat page](../img/getting-started/quotas_week.png)
 
 **1**: Select the Task Type
 
