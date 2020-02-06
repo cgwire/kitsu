@@ -692,6 +692,12 @@ export default {
       })
     },
 
+    cleanUpCsv (data) {
+      return data[0].forEach((item, index, data) => {
+        data[index] = item[0].toUpperCase() + item.slice(1)
+      })
+    },
+
     renderImport (data, mode) {
       this.loading.importing = true
       this.errors.importing = false
@@ -701,6 +707,7 @@ export default {
       }
       this.processCSV(data)
         .then((results) => {
+          this.cleanUpCsv(results)
           this.parsedCSV = results
           this.hideImportModal()
           this.loading.importing = false
