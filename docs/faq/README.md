@@ -107,8 +107,7 @@ task (page supervisor).
 ### Asset overview page
 
 
-The other way is to go to the **
-Asset Types Stats** page. You can go there with the drop-down menu on top of a page.
+The other way is to go to the **Asset Types Stats** page. You can go there with the drop-down menu on top of a page.
 
 ![Drop down menu](../img/faq/drop_down_menu_stat.png)
 
