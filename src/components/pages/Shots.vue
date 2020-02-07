@@ -279,16 +279,6 @@ export default {
       shotToEdit: null,
       formData: null,
       parsedCSV: [],
-      columns: [
-        'Episode',
-        'Sequence',
-        'Name',
-        'Description',
-        'Nb Frames',
-        'FPS',
-        'Frame In',
-        'Frame Out'
-      ],
       modals: {
         isAddMetadataDisplayed: false,
         isAddThumbnailsDisplayed: false,
@@ -365,7 +355,24 @@ export default {
 
     addThumbnailsModal () {
       return this.$refs['add-thumbnails-modal']
+    },
+
+    columns () {
+      const collection = [
+        'Sequence',
+        'Name',
+        'Description',
+        'Nb Frames',
+        'FPS',
+        'Frame In',
+        'Frame Out'
+      ]
+      if (this.isTVShow) {
+        collection.push('Episode')
+      }
+      return collection
     }
+
   },
 
   created () {
