@@ -5,7 +5,7 @@
     width: props.width + 'px',
     height: props.height + 'px'
   }"
-  v-lazy="'/api/pictures/thumbnails/preview-files/' + props.previewFileId + '.png'"
+  v-lazy="'/api/pictures/' + props.type + '/preview-files/' + props.previewFileId + '.png'"
   :key="props.previewFileId"
   v-bind="data.attrs"
   v-if="props.previewFileId"
@@ -41,6 +41,10 @@ export default {
     height: {
       default: 50,
       type: Number
+    },
+    type: {
+      default: 'thumbnails',
+      type: String
     }
   }
 }
