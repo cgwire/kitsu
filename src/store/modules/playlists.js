@@ -226,14 +226,12 @@ const mutations = {
 
   [EDIT_PLAYLIST_END] (state, newPlaylist) {
     const playlist = state.playlistMap[newPlaylist.id]
-
     if (playlist && playlist.id) {
       Object.assign(playlist, newPlaylist)
     } else {
-      state.playlists.push(newPlaylist)
+      state.playlists = [newPlaylist].concat(state.playlists)
       state.playlistMap[newPlaylist.id] = newPlaylist
     }
-    state.playlists = sortPlaylists(state.playlists)
   },
 
   [DELETE_PLAYLIST_START] (state) {
