@@ -31,11 +31,13 @@
       >
         <combobox
           ref="task-type-combobox"
+          :thin="true"
           :options="taskTypeOptions"
           v-model="taskTypeId"
         />
         <combobox
           class="version-combo"
+          :thin="true"
           :options="previewFileOptions"
           v-model="previewFileId"
         />
@@ -255,7 +257,7 @@ export default {
 }
 
 .version-combo {
-  margin-top: 0.6em;
+  margin-top: 0.1em;
 }
 
 .remove-button {
