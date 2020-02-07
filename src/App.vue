@@ -1487,6 +1487,25 @@ tbody:last-child .empty-line:last-child {
   height: 100%;
 }
 
+.dark .close-button:hover {
+  background: $dark-grey-lightest;
+}
+
+.close-button {
+  cursor: pointer;
+  display: inline-block;
+  text-align: center;
+  padding-top: 3px;
+  width: 30px;
+  height: 30px;
+}
+
+.close-button:hover {
+  display: inline-block;
+  background: $white-grey;
+  border-radius: 50%;
+}
+
 @media screen and (max-width: 1000px) {
   .button .icon.is-small {
     margin-right: 0;
