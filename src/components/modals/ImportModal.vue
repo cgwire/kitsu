@@ -124,7 +124,6 @@ export default {
     },
     onFileSelected (formData) {
       this.formData = formData
-      this.$emit('fileselected', formData)
     },
     onConfirmClicked () {
       let mode = ''
