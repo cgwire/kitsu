@@ -35,8 +35,8 @@ export default {
     getAnnotationPosition (annotation) {
       const factor = annotation.time / this.maxDurationRaw
       let width = this.width
-      if (width === 0) {
-        const progressBar = this.$parent.progress
+      const progressBar = this.$parent.progress
+      if (width === 0 && progressBar) {
         const progressCoordinates = progressBar.getBoundingClientRect()
         width = progressCoordinates.width
       }
