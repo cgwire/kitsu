@@ -1161,17 +1161,7 @@ export default {
 }
 
 .entity-name-list {
-  padding-top: 97px;
-}
-
-.total-man-days {
-  position: fixed;
-  background: white;
-  padding-top: 57px;
-  padding-right: 5px;
-  min-width: 300px;
-  height: 97px;
-  z-index: 2;
+  padding-top: 85px;
 }
 
 .entity-line {
@@ -1434,8 +1424,15 @@ export default {
 }
 
 .total-man-days {
-  padding-bottom: 10px;
+  position: fixed;
+  background: white;
   margin-right: 0.5em;
+  padding-top: 55px;
+  padding-right: 5px;
+  padding-bottom: 10px;
+  min-width: 300px;
+  height: 77px;
+  z-index: 2;
 
   .total-value {
     font-size: 20px;
