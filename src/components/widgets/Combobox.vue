@@ -12,6 +12,7 @@
     >
       <select
         :class="{
+          thin: thin,
           'select-input': true,
           error: this.error
         }"
@@ -66,6 +67,10 @@ export default {
     error: {
       default: false,
       type: Boolean
+    },
+    thin: {
+      default: false,
+      type: Boolean
     }
   },
 
@@ -113,6 +118,11 @@ export default {
 
 .select-input {
   height: 3em;
+
+  &.thin {
+    height: 2.35em;
+    width: 150px;
+  }
 }
 
 .select {
