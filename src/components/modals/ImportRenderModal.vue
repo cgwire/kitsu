@@ -191,7 +191,7 @@ export default {
     },
 
     columnsAllowed () {
-      let list = [...this.columns]
+      const list = [...this.columns]
       this.shotMetadataDescriptors.forEach(item => {
         if (!list.includes(item.name)) {
           list.push(item.name)
@@ -201,7 +201,7 @@ export default {
     },
 
     columnOptions () {
-      let options = [{
+      const options = [{
         label: this.$t('main.csv.choose'),
         value: this.$t('main.csv.unknown')
       }]
