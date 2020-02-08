@@ -116,7 +116,6 @@
       :form-data="importCsvFormData"
       :columns="csvColumns"
       @cancel="hideImportModal"
-      @fileselected="selectFile"
       @confirm="renderImport"
     />
 
@@ -433,13 +432,51 @@ export default {
       this.modals.isImportRenderDisplayed = false
     },
 
-    selectFile (formData) {
-      this.importCsvFormData = formData
+    processCSV (data, config) {
+      return new Promise((resolve, reject) => {
+        Papa.parse(data, {
+          config: config,
+          error: reject,
+          complete: (results) => {
+            resolve(results.data)
+          }
+        })
+      })
     },
 
-    uploadImportFile () {
+    cleanUpCsv (data) {
+      return data[0].forEach((item, index, data) => {
+        data[index] = item[0].toUpperCase() + item.slice(1)
+      })
+    },
+
+    renderImport (data, mode) {
       this.loading.importing = true
       this.errors.importing = false
+      if (mode === 'file') {
+        data = data.get('file')
+      }
+      this.processCSV(data)
+        .then((results) => {
+          this.cleanUpCsv(results)
+          this.parsedCSV = results
+          this.hideImportModal()
+          this.loading.importing = false
+          this.showImportRenderModal()
+        })
+    },
+
+    uploadImportFile (data) {
+      const formData = new FormData()
+      const filename = 'import.csv'
+      const file = new File([data.join('\n')], filename, { type: 'text/csv' })
+
+      formData.append('file', file)
+
+      this.loading.importing = true
+      this.errors.importing = false
+      this.importCsvFormData = formData
+
       this.uploadCastingFile(this.importCsvFormData)
         .then(() => {
           this.loading.importing = false
@@ -452,51 +489,10 @@ export default {
         })
     },
 
-    processCSV (file, config) {
-      return new Promise((resolve, reject) => {
-        Papa.parse(file, {
-          config: config,
-          error: reject,
-          complete: (results) => {
-            resolve(results.data)
-          }
-        })
-      })
-    },
-
-    renderImport (data, mode) {
-      this.loading.importing = true
-      this.errors.importing = false
-      this.formData = data
-      if (mode === 'file') {
-        data = data.get('file')
-        this.processCSV(data)
-          .then((results) => {
-            this.parsedCSV = results
-            this.hideImportModal()
-            this.loading.importing = false
-            this.showImportRenderModal()
-          })
-      } else if (mode === 'text') {
-        const formData = new FormData()
-        const filename = 'import.csv'
-        this.processCSV(data)
-          .then((results) => {
-            this.parsedCSV = results
-            this.hideImportModal()
-            this.loading.importing = false
-            this.showImportRenderModal()
-            const file =
-              new File([results.join('\n')], filename, { type: 'text/csv' })
-            formData.append('file', file)
-            this.$store.commit('SHOT_CSV_FILE_SELECTED', formData)
-          })
-      }
-    },
-
     resetImport () {
+      this.errors.importing = false
       this.hideImportRenderModal()
-      this.$store.commit('SHOT_CSV_FILE_SELECTED', null)
+      this.importCsvFormData = undefined
       this.$refs['import-modal'].reset()
       this.showImportModal()
     },
