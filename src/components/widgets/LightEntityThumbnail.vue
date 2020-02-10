@@ -2,8 +2,8 @@
 <img
   class="thumbnail-picture"
   :style="{
-    width: props.width + 'px',
-    height: props.height + 'px'
+    width: props.width,
+    height: props.height
   }"
   v-lazy="'/api/pictures/' + props.type + '/preview-files/' + props.previewFileId + '.png'"
   :key="props.previewFileId"
@@ -16,8 +16,8 @@
     'thumbnail-empty': true
   }"
   :style="{
-    width: props.width + 'px',
-    height: props.height + 'px',
+    width: props.width,
+    height: props.emptyHeight ? props.emptyHeight : props.height,
   }"
   v-bind="data.attrs"
   v-else>
@@ -35,12 +35,15 @@ export default {
       type: String
     },
     width: {
-      default: 150,
-      type: Number
+      default: '150px',
+      type: String
     },
     height: {
-      default: 50,
-      type: Number
+      default: '50px',
+      type: String
+    },
+    emptyHeight: {
+      type: String
     },
     type: {
       default: 'thumbnails',
