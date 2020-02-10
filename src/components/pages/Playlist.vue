@@ -341,7 +341,7 @@ export default {
         deletePlaylist: false,
         editPlaylist: false,
         playlist: false,
-        playlists: false
+        playlists: true
       },
       errors: {
         addPlaylist: false,
@@ -441,6 +441,7 @@ export default {
     },
 
     loadShotsData (callback) {
+      this.loading.playlists = true
       const loadPlaylists = () => {
         this.loadPlaylistsData()
         if (callback) callback()
@@ -469,6 +470,7 @@ export default {
           if (!err) setFirstPlaylist()
         })
       } else {
+        this.loading.playlists = false
         setFirstPlaylist()
       }
     },
@@ -520,7 +522,6 @@ export default {
             shot.preview_file_annotations
         }
         Vue.set(playlistShotMap, previewFile.shot_id, playlistShot)
-        console.log(this.currentShots[shot.id])
         return playlistShot
       } else {
         return null
@@ -745,6 +746,8 @@ export default {
       if (searchQuery.length > 1) {
         this.setShotSearch(searchQuery)
         this.displayMoreShots()
+        this.displayMoreShots()
+        this.displayMoreShots()
       } else {
         this.setShotSearch('')
       }
@@ -861,7 +864,8 @@ export default {
 
     isAddingShot () {
       if (!this.isAddingShot) {
-        this.resetPlaylist()
+        this.clearCurrentPlaylist()
+        this.setCurrentPlaylist()
       }
     }
   },
@@ -970,9 +974,15 @@ export default {
     box-shadow: 0px 0px 6px #333;
   }
 
+  .playlist-column {
+    button,
+    h2.sequence-title {
+      color: white;
+    }
+  }
+
   .playlist-column.no-selection {
     background: $dark-grey-light;
-    overflow-x: scroll;
 
     h2 {
       color: white;

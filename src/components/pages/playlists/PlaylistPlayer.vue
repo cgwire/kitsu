@@ -1072,8 +1072,6 @@ export default {
       this.resetCanvasSize()
       this.fabricCanvas.renderAll()
       this.clearCanvas()
-      const annotation = this.getAnnotation(this.currentTimeRaw)
-      if (annotation) this.loadAnnotation(annotation)
     },
 
     resetCanvasSize () {

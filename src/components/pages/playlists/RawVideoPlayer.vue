@@ -81,7 +81,6 @@ export default {
 
   methods: {
     emitLoadedEvent (event) {
-      console.log('metatada')
       this.$emit('metadata-loaded', event)
     },
 
