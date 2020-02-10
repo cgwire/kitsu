@@ -302,7 +302,6 @@ export default {
             }
           })
         } else if (this.detailLevel === 'week') {
-          console.log(this.currentYear)
           this.$router.push({
             name: 'quota-week',
             params: {
