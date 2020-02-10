@@ -293,10 +293,15 @@ export default {
         fabricCanvas.freeDrawingBrush.color = this.color
         fabricCanvas.freeDrawingBrush.width = 4
 
-        fabricCanvas.off('object:moved', this.saveAnnotations)
-        fabricCanvas.on('object:moved', this.saveAnnotations)
-        fabricCanvas.off('mouse:up', this.onMouseUp)
-        fabricCanvas.on('mouse:up', this.onMouseUp)
+        fabricCanvas.off('object:added', this.stackAddAction)
+        fabricCanvas.on('object:added', this.stackAddAction)
+        fabricCanvas.on('mouse:up', () => {
+          if (this.isDrawing) {
+            this.clearUndoneStack()
+            this.saveAnnotations()
+          }
+        })
+
         this.fabricCanvas = fabricCanvas
       }
     },
@@ -433,10 +438,6 @@ export default {
       }
     },
 
-    onMouseUp () {
-      if (this.isDrawing) this.saveAnnotations()
-    },
-
     saveAnnotations () {
       // Annotation are aimed to be used mainly by videos. That's why
       // annotations are stored in a list.
@@ -523,7 +524,9 @@ export default {
             width: obj.width,
             height: obj.height,
             scaleX: obj.scaleX * scaleMultiplierX,
-            scaleY: obj.scaleY * scaleMultiplierY
+            scaleY: obj.scaleY * scaleMultiplierY,
+            lockMovementX: true,
+            lockMovementY: true
           }
           if (obj.type === 'path') {
             let strokeMultiplier = 1
@@ -550,14 +553,10 @@ export default {
               mtr: false
             })
             this.fabricCanvas.add(path)
+            this.$options.doneActionStack.pop()
           }
         })
       }
-    },
-
-    deleteSelection () {
-      this.fabricCanvas.remove(this.fabricCanvas.getActiveObject())
-      this.saveAnnotations()
     },
 
     reloadAnnotations () {
@@ -643,10 +642,12 @@ export default {
       } else {
         this.reset()
       }
+      this.resetUndoStacks()
     },
 
     currentIndex () {
       this.reset()
+      this.resetUndoStacks()
     },
 
     light () {
