@@ -88,7 +88,7 @@
             />
           </div>
           <div
-            class="flexrow-item"
+            class="flexrow-item zoom-level"
             v-if="isActiveTab('schedule')"
           >
             <combobox-number
@@ -909,5 +909,9 @@ export default {
 
 .task-type-schedule {
   flex: 1;
+}
+
+.zoom-level {
+  margin-top: -8px;
 }
 </style>

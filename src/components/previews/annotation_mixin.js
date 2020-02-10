@@ -104,6 +104,8 @@ export const annotationMixin = {
 
     stackAddAction ({ target }) {
       this.$options.doneActionStack.push({ type: 'add', obj: target })
+      target.lockMovementX = true
+      target.lockMovementY = true
     },
 
     undoLastAction () {
@@ -136,7 +138,7 @@ export const annotationMixin = {
     },
 
     deleteObject (activeObject) {
-      if (activeObject._objects) {
+      if (activeObject && activeObject._objects) {
         activeObject._objects.forEach((obj) => {
           this.fabricCanvas.remove(obj)
         })

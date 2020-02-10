@@ -30,7 +30,8 @@ export default {
     const data = {
       name: playlist.name,
       project_id: playlist.production_id,
-      episode_id: playlist.episode_id
+      episode_id: playlist.episode_id,
+      for_client: playlist.for_client
     }
     client.post('/api/data/playlists/', data, callback)
   },

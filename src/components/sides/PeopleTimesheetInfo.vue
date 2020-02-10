@@ -181,10 +181,6 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-.dark .close-button:hover {
-  background: $dark-grey-lightest;
-}
-
 .data-list {
   padding-bottom: 5em;
 }
@@ -201,20 +197,5 @@ export default {
 
 .close {
   text-align: right;
-}
-
-.close-button {
-  cursor: pointer;
-  display: inline-block;
-  text-align: center;
-  padding-top: 3px;
-  width: 30px;
-  height: 30px;
-}
-
-.close-button:hover {
-  display: inline-block;
-  background: $white-grey;
-  border-radius: 50%;
 }
 </style>

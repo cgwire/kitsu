@@ -247,18 +247,24 @@ export default {
 
   playlists: {
     add_shots: 'Sélectonner les plans',
-    add_sequence: 'Ajouter séquence',
     add_episode: 'Ajouter l\'épisode',
+    add_movie: 'Ajouter tout le film',
+    add_sequence: 'Ajouter séquence',
     available_build: 'Builds disponibles',
     build_daily: 'Valid. quotidienne',
     build_weekly: 'Valid. hebodomadaire',
-    build_mp4: 'Construire .mp4',
+    build_mp4: 'Construire .mp4 (beta)',
+    client_playlist: 'Playlist Client',
+    created_at: 'Créé le :',
+    created_title: 'Créer playlist',
     delete_text: 'Êtes vous sûr de vouloir supprimer {name} de la base de données ?',
     delete_error: 'Une erreur est survenue en supprimant la playlist.',
     download_zip: 'Télécharger en .zip',
     edit_title: 'Modifier la playlist',
     for_client: 'Pour le client',
     for_studio: 'Pour le studio',
+    last_creation: 'Dernière créations',
+    last_modification: 'Dernière modifications',
     no_preview: 'Aucun preview',
     remove: 'enlever',
     loading_error: 'Une erreur serveur est apparue, les playlists ne peuvent pas être chargées.',
@@ -271,8 +277,10 @@ export default {
     select_shot: 'Sélectionnez un plan dans la colonne de droite',
     select_playlist: 'Sélectionnez une playlist dans la colonne de gauche',
     title: 'Playlists',
+    updated_at: 'Mis à jour le:',
     fields: {
-      name: 'Nom'
+      name: 'Nom',
+      for_client: 'A partager avec'
     }
   },
 

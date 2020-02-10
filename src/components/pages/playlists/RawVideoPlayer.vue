@@ -48,11 +48,13 @@ export default {
   // to a HTML5 limitation related to video height.
   mounted () {
     this.resetHeight()
+    this.$refs.player1.addEventListener('loadedmetadata', this.emitLoadedEvent)
     window.addEventListener('resize', this.resetHeight)
   },
 
   beforeDestroy () {
     window.removeEventListener('resize', this.resetHeight)
+    this.$refs.player1.removeEventListener('loadedmetadata', this.emitLoadedEvent)
   },
 
   computed: {
@@ -78,6 +80,10 @@ export default {
   },
 
   methods: {
+    emitLoadedEvent (event) {
+      this.$emit('metadata-loaded', event)
+    },
+
     getMoviePath (previewId) {
       return `/api/movies/originals/preview-files/${previewId}.mp4`
     },
@@ -238,6 +244,26 @@ export default {
 
     updateMaxDuration () {
       this.$emit('max-duration-update', this.currentPlayer.duration)
+    },
+
+    getWidth () {
+      return this.currentPlayer.offsetWidth
+    },
+
+    getHeight () {
+      return this.currentPlayer.offsetHeight
+    },
+
+    getVideoRatio () {
+      return this.getVideoWidth() / this.getVideoHeight()
+    },
+
+    getVideoWidth () {
+      return this.currentPlayer.videoWidth
+    },
+
+    getVideoHeight () {
+      return this.currentPlayer.videoHeight
     }
   },
 

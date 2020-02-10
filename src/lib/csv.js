@@ -1,3 +1,4 @@
+import Papa from 'papaparse'
 import {
   getDayRange,
   getMonthRange,
@@ -184,6 +185,19 @@ const csv = {
       entries.push([''])
     })
     return entries
+  },
+
+  processCSV: (data, config) => {
+    return new Promise((resolve, reject) => {
+      Papa.parse(data, {
+        config: config,
+        encoding: 'ISO-8859-1',
+        error: reject,
+        complete: (results) => {
+          resolve(results.data)
+        }
+      })
+    })
   }
 }
 

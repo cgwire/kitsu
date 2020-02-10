@@ -97,10 +97,10 @@
 </template>
 
 <script>
-import Papa from 'papaparse'
 
 import { mapGetters, mapActions } from 'vuex'
 
+import csv from '../../lib/csv'
 import ButtonLink from '../widgets/ButtonLink'
 import ButtonHrefLink from '../widgets/ButtonHrefLink'
 import ButtonSimple from '../widgets/ButtonSimple'
@@ -216,18 +216,6 @@ export default {
       'peopleSearchChange'
     ]),
 
-    processCSV (data, config) {
-      return new Promise((resolve, reject) => {
-        Papa.parse(data, {
-          config: config,
-          error: reject,
-          complete: (results) => {
-            resolve(results.data)
-          }
-        })
-      })
-    },
-
     cleanUpCsv (data) {
       return data[0].forEach((item, index, data) => {
         data[index] = item[0].toUpperCase() + item.slice(1)
@@ -241,7 +229,7 @@ export default {
       if (mode === 'file') {
         data = data.get('file')
       }
-      this.processCSV(data)
+      csv.processCSV(data)
         .then((results) => {
           this.cleanUpCsv(results)
           this.parsedCSV = results

@@ -7,10 +7,10 @@
   <div class="modal-content">
     <div class="box">
       <h1 class="title" v-if="playlistToEdit && playlistToEdit.id">
-        {{ $t("playlists.edit_title") }} {{ playlistToEdit.name }}
+        {{ $t("playlists.edit_title") }}
       </h1>
       <h1 class="title" v-else>
-        {{ $t("playlists.no_playlist") }}
+        {{ $t("playlists.create_title") }}
       </h1>
 
       <form v-on:submit.prevent>
@@ -20,8 +20,12 @@
           v-model="form.name"
           @enter="runConfirmation"
           v-focus
-        >
-        </text-field>
+        />
+        <combobox
+          :label="$t('playlists.fields.for_client')"
+          :options="forClientOptions"
+          v-model="forClient"
+        />
       </form>
 
       <p class="has-text-right">
@@ -50,6 +54,7 @@
 </template>
 
 <script>
+import Combobox from '../widgets/Combobox'
 import TextField from '../widgets/TextField'
 
 import { modalMixin } from './base_modal'
@@ -58,6 +63,7 @@ export default {
   name: 'edit-playlist-modal',
   mixins: [modalMixin],
   components: {
+    Combobox,
     TextField
   },
 
@@ -69,9 +75,30 @@ export default {
     'playlistToEdit'
   ],
 
+  data () {
+    return {
+      forClient: 'false',
+      forClientOptions: [
+        { label: this.$t('playlists.for_client'), value: 'true' },
+        { label: this.$t('playlists.for_studio'), value: 'false' }
+      ],
+      form: {
+        name: this.playlistToEdit.name,
+        for_client: this.playlistToEdit.for_client
+      }
+    }
+  },
+
+  methods: {
+    runConfirmation () {
+      this.form.for_client = this.forClient === 'true'
+      this.$emit('confirm', this.form)
+    }
+  },
+
   watch: {
     playlistToEdit () {
-      if (this.playlistToEdit && this.playlistToEdit.id) {
+      if (this.playlistToEdit) {
         this.form.name = this.playlistToEdit.name
       } else {
         this.form = {
@@ -82,32 +109,11 @@ export default {
 
     active () {
       if (this.active) {
+        this.forClient = this.playlistToEdit.for_client ? 'true' : 'false'
         setTimeout(() => {
           this.$refs.nameField.focus()
         }, 100)
       }
-    }
-  },
-
-  data () {
-    if (this.playlistToEdit && this.playlistToEdit.id) {
-      return {
-        form: {
-          name: this.playlistToEdit.name
-        }
-      }
-    } else {
-      return {
-        form: {
-          name: ''
-        }
-      }
-    }
-  },
-
-  methods: {
-    runConfirmation () {
-      this.$emit('confirm', this.form)
     }
   }
 }

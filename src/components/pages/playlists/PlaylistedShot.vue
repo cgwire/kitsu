@@ -17,8 +17,8 @@
           <x-icon />
         </span>
         <light-entity-thumbnail
-          :width="150"
-          :height="103"
+          width="150px"
+          height="103px"
           :preview-file-id="previewFileId"
         />
       </div>
@@ -31,11 +31,13 @@
       >
         <combobox
           ref="task-type-combobox"
+          :thin="true"
           :options="taskTypeOptions"
           v-model="taskTypeId"
         />
         <combobox
           class="version-combo"
+          :thin="true"
           :options="previewFileOptions"
           v-model="previewFileId"
         />
@@ -255,7 +257,7 @@ export default {
 }
 
 .version-combo {
-  margin-top: 0.6em;
+  margin-top: 0.1em;
 }
 
 .remove-button {
