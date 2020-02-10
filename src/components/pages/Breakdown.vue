@@ -135,7 +135,7 @@
 <script>
 import { mapGetters, mapActions } from 'vuex'
 import { range } from '../../lib/time'
-import Papa from 'papaparse'
+import csv from '../../lib/csv'
 import AvailableAssetBlock from './breakdown/AvailableAssetBlock'
 import ButtonHrefLink from '../widgets/ButtonHrefLink.vue'
 import ButtonSimple from '../widgets/ButtonSimple'
@@ -432,18 +432,6 @@ export default {
       this.modals.isImportRenderDisplayed = false
     },
 
-    processCSV (data, config) {
-      return new Promise((resolve, reject) => {
-        Papa.parse(data, {
-          config: config,
-          error: reject,
-          complete: (results) => {
-            resolve(results.data)
-          }
-        })
-      })
-    },
-
     cleanUpCsv (data) {
       return data[0].forEach((item, index, data) => {
         data[index] = item[0].toUpperCase() + item.slice(1)
@@ -456,7 +444,7 @@ export default {
       if (mode === 'file') {
         data = data.get('file')
       }
-      this.processCSV(data)
+      csv.processCSV(data)
         .then((results) => {
           this.cleanUpCsv(results)
           this.parsedCSV = results

@@ -202,7 +202,6 @@
 
 <script>
 import moment from 'moment'
-import Papa from 'papaparse'
 import { mapGetters, mapActions } from 'vuex'
 import csv from '../../lib/csv'
 import func from '../../lib/func'
@@ -627,18 +626,6 @@ export default {
       }
     },
 
-    processCSV (data, config) {
-      return new Promise((resolve, reject) => {
-        Papa.parse(data, {
-          config: config,
-          error: reject,
-          complete: (results) => {
-            resolve(results.data)
-          }
-        })
-      })
-    },
-
     cleanUpCsv (data) {
       return data[0].forEach((item, index, data) => {
         data[index] = item[0].toUpperCase() + item.slice(1)
@@ -652,7 +639,7 @@ export default {
       if (mode === 'file') {
         data = data.get('file')
       }
-      this.processCSV(data)
+      csv.processCSV(data)
         .then((results) => {
           this.cleanUpCsv(results)
           this.parsedCSV = results
@@ -863,7 +850,7 @@ export default {
             nameData.splice(3, 0, this.currentEpisode.name)
           }
           const name = slugify(nameData.join('_'))
-          let headers = this.isTVShow ? [this.$t('assets.fields.type')] : []
+          let headers = this.isTVShow ? ['Episode'] : []
           headers = headers.concat([
             this.$t('assets.fields.type'),
             this.$t('assets.fields.name'),
@@ -883,6 +870,15 @@ export default {
             })
           csv.buildCsvFile(name, [headers].concat(assetLines))
         })
+    },
+
+    resetCsVColumns () {
+      const columns = this.isTVShow ? ['Episode'] : []
+      this.columns = columns.concat([
+        'Type',
+        'Name',
+        'Description'
+      ])
     }
   },
 
@@ -894,6 +890,7 @@ export default {
     currentProduction () {
       this.$refs['asset-search-field'].setValue('')
       this.$store.commit('SET_ASSET_LIST_SCROLL_POSITION', 0)
+      this.resetCsVColumns()
 
       if (!this.isTVShow) {
         this.initialLoading = true
