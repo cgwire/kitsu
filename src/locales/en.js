@@ -325,16 +325,22 @@ export default {
     add_shots: 'Add shots',
     add_sequence: 'Add whole sequence',
     add_episode: 'Add whole episode',
+    add_movie: 'Add whole movie',
     available_build: 'Available builds',
     build_daily: 'Daily pending',
     build_weekly: 'All Pending',
-    build_mp4: 'Build .mp4',
+    build_mp4: 'Build .mp4 (beta)',
+    client_playlist: 'Client Playlist',
+    created_at: 'Created at:',
+    create_title: 'Create playlist',
     delete_text: 'Are you sure you want to remove {name} from your database?',
     delete_error: 'An error occured while deleting this playlist.',
     download_zip: 'Download .zip',
-    for_client: 'For the client',
-    for_studio: 'For the Studio',
+    for_client: 'The client',
+    for_studio: 'The Studio',
     edit_title: 'Edit playlist',
+    last_creation: 'Last creations',
+    last_modification: 'Last modifications',
     loading_error: 'A server error occured. Playlists cannot be loaded.',
     new_playlist: 'Add a playlist',
     no_build: 'No build',
@@ -347,9 +353,11 @@ export default {
     select_shot: 'Please select a shot in the right column',
     select_playlist: 'Please select a playlist in the left column',
     title: 'Playlists',
+    updated_at: 'Updated at:',
     remove: 'remove',
     fields: {
-      name: 'Name'
+      name: 'Name',
+      for_client: 'To be shared with'
     }
   },
 

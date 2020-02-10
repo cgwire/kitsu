@@ -7,7 +7,7 @@
   <div class="modal-content">
     <div class="box">
       <h1 class="title" v-if="playlistToEdit && playlistToEdit.id">
-        {{ $t("playlists.edit_title") }} {{ playlistToEdit.name }}
+        {{ $t("playlists.edit_title") }}
       </h1>
       <h1 class="title" v-else>
         {{ $t("playlists.create_title") }}

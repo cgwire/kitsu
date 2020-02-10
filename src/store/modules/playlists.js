@@ -107,7 +107,7 @@ const actions = {
     playlistsApi.updatePlaylist(data, (err, playlist) => {
       if (err) commit(EDIT_PLAYLIST_ERROR)
       else commit(EDIT_PLAYLIST_END, playlist)
-      if (callback) callback(err)
+      if (callback) callback(err, playlist)
     })
   },
 

@@ -286,17 +286,24 @@ export default {
 
   playlists: {
     add_shots: 'Schüsse hinzufügen',
-    add_sequence: 'Ganze Sequenz hinzufügen',
+    add_episode: 'Ganze tpisode hinzufügen',
+    add_movie: 'Ganze film hinzufügen',
+    add_sequence: 'Ganze sequenz hinzufügen',
     available_build: 'Verfügbare Builds',
     build_daily: 'Täglich ausstehend',
     build_weekly: 'Alle ausstehend',
     build_mp4: 'Build .mp4',
+    client_playlist: 'Kunde Playlist',
+    created_at: 'Erstellen Sie die:',
+    create_title: 'Playlist erstellen',
     delete_text: 'Sind Sie sicher, dass Sie {name} aus Ihrer Datenbank entfernen möchten?',
     delete_error: 'Beim Löschen dieser Playlist ist ein Fehler aufgetreten.',
     download_zip: 'Download.zip',
     edit_title: 'Wiedergabeliste bearbeiten',
-    for_client: 'Für der Kunde',
-    for_studio: 'Für das Studio',
+    for_client: 'Der Kunde',
+    for_studio: 'Das Studio',
+    last_creation: 'Neueste kreationen',
+    last_modification: 'Neueste änderungen',
     loading_error: 'Es ist ein Serverfehler aufgetreten. Wiedergabelisten können nicht geladen werden.',
     new_playlist: 'Eine Wiedergabeliste hinzufügen',
     no_build: 'Kein Build',
@@ -309,9 +316,11 @@ export default {
     select_shot: 'Bitte wählen Sie einen Schuss in der rechten Spalte aus.',
     select_playlist: 'Bitte wählen Sie eine Playlist in der linken Spalte aus.',
     title: 'Wiedergabelisten',
+    updated_at: 'Geändert am',
     remove: 'entfernen',
     fields: {
-      name: 'Name'
+      name: 'Name',
+      for_client: 'Zum teilen mit'
     }
   },
 

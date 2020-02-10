@@ -1,18 +1,29 @@
 <template>
 
-<div ref="container" class="playlist-player dark">
+<div
+  ref="container"
+  :class="{
+    dark: true,
+    'full-height': !isAddingShot,
+    'playlist-player': true
+  }"
+>
   <div class="playlist-header flexrow" ref="header">
+    <div class="flexrow-item for-client" v-if="playlist && playlist.for_client">
+      {{ $t('playlists.client_playlist') }}
+    </div>
     <span class="flexrow-item playlist-name">
       {{ playlist.name }}
     </span>
-    <div class="flexrow-item" v-if="isCurrentUserManager">
-      <combobox-styled
-        :options="forClientOptions"
-        v-model="forClient"
-      />
-    </div>
     <button-simple
-      @click="showEditModal"
+      @click="$emit('show-add-shots')"
+      class="playlist-button add-shots-button flexrow-item"
+      icon="plus"
+      text="Add Shots"
+      v-if="isCurrentUserManager && !isAddingShot"
+    />
+    <button-simple
+      @click="$emit('edit-clicked')"
       class="edit-button playlist-button flexrow-item"
       icon="edit"
       v-if="isCurrentUserManager"
@@ -49,11 +60,16 @@
     </div-->
   </div>
 
-  <div class="filler flexrow video-container" ref="video-container">
+  <div
+    class="filler flexrow video-container"
+    ref="video-container"
+    v-if="!isAddingShot"
+  >
     <raw-video-player
       class="raw-player"
       ref="raw-player"
       :shots="shotList"
+      @metadata-loaded="onMetadataLoaded"
       @shot-change="onShotChange"
       @time-update="onTimeUpdate"
       @max-duration-update="onMaxDurationUpdate"
@@ -86,12 +102,9 @@
   </div>
 
   <div
-    class="progress-cursor"
-    ref="progress-cursor"
-  ></div>
-  <div
     class="playlist-progress"
     ref="playlist-progress"
+    v-if="!isAddingShot"
   >
     <div class="video-progress">
       <progress
@@ -114,13 +127,13 @@
     :annotations="annotations"
     :max-duration-raw="maxDurationRaw"
     @select-annotation="loadAnnotation"
-    v-if="playlist.id"
+    v-if="playlist.id && !isAddingShot"
   />
 
   <div
     class="playlist-footer flexrow"
     ref="button-bar"
-    v-if="playlist.id"
+    v-if="playlist.id && !isAddingShot"
   >
     <button-simple
       class="button playlist-button flexrow-item"
@@ -139,6 +152,7 @@
     </span>
     <span class="flexrow-item time-indicator">
     /
+
     </span>
     <span class="flexrow-item time-indicator">
       {{ maxDuration }}
@@ -357,15 +371,6 @@
     </div>
   </div>
 
-  <edit-playlist-modal
-    :active="modals.edit"
-    :is-loading="loading.editPlaylist"
-    :is-error="errors.editError"
-    :playlist-to-edit="playlist"
-    @cancel="hideEditModal"
-    @confirm="confirmEditPlaylist"
-  />
-
   <delete-modal
     :active="modals.delete"
     :is-loading="loading.deletePlaylist"
@@ -392,9 +397,7 @@ import AnnotationBar from './AnnotationBar'
 import ButtonSimple from '../../widgets/ButtonSimple'
 import ColorPicker from '../../widgets/ColorPicker'
 import Combobox from '../../widgets/Combobox'
-import ComboboxStyled from '../../widgets/ComboboxStyled'
 import DeleteModal from '../../modals/DeleteModal'
-import EditPlaylistModal from '../../modals/EditPlaylistModal'
 import PencilPicker from '../../widgets/PencilPicker'
 import PlaylistedShot from './PlaylistedShot'
 import RawVideoPlayer from './RawVideoPlayer'
@@ -412,9 +415,7 @@ export default {
     ButtonSimple,
     ColorPicker,
     Combobox,
-    ComboboxStyled,
     DeleteModal,
-    EditPlaylistModal,
     PencilPicker,
     PlaylistedShot,
     RawVideoPlayer,
@@ -432,6 +433,10 @@ export default {
       default: () => {}
     },
     isLoading: {
+      type: Boolean,
+      default: false
+    },
+    isAddingShot: {
       type: Boolean,
       default: false
     }
@@ -618,7 +623,7 @@ export default {
     },
 
     getTimelinePosition (time, index) {
-      if (this.$refs.movie) {
+      if (this.$refs.movie && this.progress) {
         let position = Math.round(
           (time / this.$refs.movie.duration) * this.progress.offsetWidth
         )
@@ -634,15 +639,17 @@ export default {
     },
 
     displayBars () {
-      this.$refs.header.style.display = 'flex'
-      this.$refs['button-bar'].style.display = 'flex'
       if (this.$refs['button-bar']) {
-        this.$refs['playlist-progress'].style.display = 'flex'
-        this.$refs['button-bar'].style.opacity = 1
-        this.$refs['playlist-progress'].style.opacity = 1
+        this.$refs.header.style.display = 'flex'
+        this.$refs['button-bar'].style.display = 'flex'
+        if (this.$refs['button-bar']) {
+          this.$refs['playlist-progress'].style.display = 'flex'
+          this.$refs['button-bar'].style.opacity = 1
+          this.$refs['playlist-progress'].style.opacity = 1
+        }
+        this.$refs.header.style.opacity = 1
+        this.container.style.cursor = 'default'
       }
-      this.$refs.header.style.opacity = 1
-      this.container.style.cursor = 'default'
     },
 
     hideBars () {
@@ -655,14 +662,6 @@ export default {
         this.$refs['playlist-progress'].style.display = 'none'
         this.container.style.cursor = 'none'
       }, 500)
-    },
-
-    showEditModal () {
-      this.modals.edit = true
-    },
-
-    hideEditModal () {
-      this.modals.edit = false
     },
 
     showDeleteModal () {
@@ -687,31 +686,18 @@ export default {
       })
     },
 
-    confirmEditPlaylist (form) {
-      this.loading.editPlaylist = true
-      this.errors.editPlaylist = false
-      this.editPlaylist({
-        data: {
-          name: form.name,
-          id: this.playlist.id
-        },
-        callback: (err) => {
-          if (err) this.errors.editPlaylist = true
-          this.loading.editPlaylist = false
-          this.modals.edit = false
-          this.playlist.name = form.name
-        }
-      })
-    },
-
     updateProgressBar () {
-      const factor = this.currentTimeRaw / this.maxDurationRaw
-      this.progress.value = this.currentTimeRaw
-      this.progressBar.style.width = Math.floor(factor * 100) + '%'
-      const progressCoordinates = this.progress.getBoundingClientRect()
-      const x = progressCoordinates.width * factor + progressCoordinates.x
-      this.progressCursor.style.left = Math.round(x - 7) + 'px'
-      this.progressCursor.style.top = Math.round(progressCoordinates.y - 3) + 'px'
+      if (this.progress) {
+        const factor = this.currentTimeRaw / this.maxDurationRaw
+        this.progress.value = this.currentTimeRaw
+        this.progressBar.style.width = Math.floor(factor * 100) + '%'
+        /*
+        const progressCoordinates = this.progress.getBoundingClientRect()
+        const x = progressCoordinates.width * factor + progressCoordinates.x
+        this.progressCursor.style.left = Math.round(x - 7) + 'px'
+        this.progressCursor.style.top = Math.round(progressCoordinates.y - 3) + 'px'
+        */
+      }
     },
 
     updateTaskPanel () {
@@ -767,7 +753,7 @@ export default {
 
     pause () {
       this.showCanvas()
-      this.rawPlayer.pause()
+      if (this.rawPlayer) this.rawPlayer.pause()
       if (this.isComparing) this.$refs['raw-player-comparison'].pause()
       this.isPlaying = false
     },
@@ -942,10 +928,11 @@ export default {
       this.lastCall = this.lastCall || 0
       if (now - this.lastCall > 600) {
         this.lastCall = now
-        this.$nextTick(() => {
+        setTimeout(() => {
           this.resetHeight()
+          this.resetCanvas()
           this.reloadAnnotations()
-        })
+        }, 100)
       }
     },
 
@@ -1004,7 +991,9 @@ export default {
     onMaxDurationUpdate (duration) {
       this.maxDurationRaw = duration
       this.maxDuration = this.formatTime(duration)
-      this.progress.setAttribute('max', this.maxDurationRaw)
+      if (this.progress) {
+        this.progress.setAttribute('max', this.maxDurationRaw)
+      }
     },
 
     onMouseMove () {
@@ -1048,9 +1037,11 @@ export default {
 
     resetHeight () {
       this.$nextTick(() => {
-        let height = this.container.offsetHeight
-        height -= this.$refs.header.offsetHeight
-        height -= this.$refs['playlist-progress'].offsetHeight
+        let height = this.container ? this.container.offsetHeight : 0
+        height -= this.$refs.header ? this.$refs.header.offsetHeight : 0
+        if (this.$refs['playlist-progress']) {
+          height -= this.$refs['playlist-progress'].offsetHeight
+        }
         if (this.$refs['button-bar']) {
           height -= this.$refs['button-bar'].offsetHeight
         }
@@ -1060,11 +1051,13 @@ export default {
         if (this.$refs['playlist-annotation']) {
           height -= this.$refs['playlist-annotation'].$el.offsetHeight
         }
-        this.$refs['video-container'].style.height = `${height}px`
+        if (this.$refs['video-container']) {
+          this.$refs['video-container'].style.height = `${height}px`
+        }
         if (!this.isCommentsHidden) {
           this.$refs['task-info'].$el.style.height = `${height}px`
         }
-        this.rawPlayer.resetHeight()
+        if (this.rawPlayer) this.rawPlayer.resetHeight()
         if (this.isComparing) {
           this.$refs['raw-player-comparison'].resetHeight()
         }
@@ -1085,9 +1078,26 @@ export default {
 
     resetCanvasSize () {
       if (this.rawPlayer) {
-        const width = this.rawPlayer.$el.offsetWidth
-        const height = this.rawPlayer.$el.offsetHeight
-        this.fabricCanvas.setDimensions({ width, height })
+        this.$nextTick(() => {
+          if (this.$refs['canvas-wrapper']) {
+            const ratio = this.rawPlayer.getVideoRatio()
+            const fullWidth = this.rawPlayer.$el.offsetWidth
+            const fullHeight = this.rawPlayer.$el.offsetHeight
+            const width = ratio ? fullHeight * ratio : fullWidth
+            if (fullWidth > width) {
+              const left = Math.round((fullWidth - width) / 2)
+              this.$refs['canvas-wrapper'].style.left = left + 'px'
+              this.$refs['canvas-wrapper'].style.top = '0px'
+              this.fabricCanvas.setDimensions({ width, height: fullHeight })
+            } else {
+              const height = ratio ? Math.round(fullWidth / ratio) : fullHeight
+              const top = Math.round((fullHeight - height) / 2)
+              this.$refs['canvas-wrapper'].style.left = '0px'
+              this.$refs['canvas-wrapper'].style.top = top + 'px'
+              this.fabricCanvas.setDimensions({ width: fullWidth, height })
+            }
+          }
+        })
       }
     },
 
@@ -1157,77 +1167,79 @@ export default {
     },
 
     showCanvas () {
-      this.canvas.style.display = 'block'
+      if (this.canvas) this.canvas.style.display = 'block'
     },
 
     hideCanvas () {
-      this.canvas.style.display = 'none'
+      if (this.canvas) this.canvas.style.display = 'none'
     },
 
     loadAnnotation (annotation) {
       this.pause()
       const currentTime = annotation.time || 0
-      this.rawPlayer.setCurrentTime(currentTime)
-      if (this.isComparing) {
-        this.$refs['raw-player-comparison'].setCurrentTime(currentTime)
-      }
-      this.currentTimeRaw = currentTime
-      this.updateProgressBar()
-
-      this.fabricCanvas.isDrawingMode = false
-      this.isDrawing = false
-      this.clearCanvas()
-
-      let scaleMultiplierX = 1
-      let scaleMultiplierY = 1
-      if (annotation.width) {
-        scaleMultiplierX = this.fabricCanvas.width / annotation.width
-        scaleMultiplierY = this.fabricCanvas.width / annotation.width
-      }
-      if (annotation.height) {
-        scaleMultiplierY = this.fabricCanvas.height / annotation.height
-      }
-
-      annotation.drawing.objects.forEach((obj) => {
-        const base = {
-          left: obj.left * scaleMultiplierX,
-          top: obj.top * scaleMultiplierY,
-          fill: 'transparent',
-          stroke: obj.stroke,
-          strokeWidth: obj.strokeWidth,
-          radius: obj.radius,
-          width: obj.width,
-          height: obj.height,
-          scaleX: obj.scaleX * scaleMultiplierX,
-          scaleY: obj.scaleY * scaleMultiplierY
+      if (this.rawPlayer) {
+        this.rawPlayer.setCurrentTime(currentTime)
+        if (this.isComparing) {
+          this.$refs['raw-player-comparison'].setCurrentTime(currentTime)
         }
-        if (obj.type === 'path') {
-          let strokeMultiplier = 1
-          if (obj.canvasWidth) {
-            strokeMultiplier = obj.canvasWidth / this.fabricCanvas.width
+        this.currentTimeRaw = currentTime
+        this.updateProgressBar()
+
+        this.fabricCanvas.isDrawingMode = false
+        this.isDrawing = false
+        this.clearCanvas()
+
+        let scaleMultiplierX = 1
+        let scaleMultiplierY = 1
+        if (annotation.width) {
+          scaleMultiplierX = this.fabricCanvas.width / annotation.width
+          scaleMultiplierY = this.fabricCanvas.width / annotation.width
+        }
+        if (annotation.height) {
+          scaleMultiplierY = this.fabricCanvas.height / annotation.height
+        }
+
+        annotation.drawing.objects.forEach((obj) => {
+          const base = {
+            left: obj.left * scaleMultiplierX,
+            top: obj.top * scaleMultiplierY,
+            fill: 'transparent',
+            stroke: obj.stroke,
+            strokeWidth: obj.strokeWidth,
+            radius: obj.radius,
+            width: obj.width,
+            height: obj.height,
+            scaleX: obj.scaleX * scaleMultiplierX,
+            scaleY: obj.scaleY * scaleMultiplierY
           }
-          const path = new fabric.Path(
-            obj.path,
-            {
-              ...base,
-              strokeWidth: obj.strokeWidth * strokeMultiplier,
-              canvasWidth: obj.canvasWidth
+          if (obj.type === 'path') {
+            let strokeMultiplier = 1
+            if (obj.canvasWidth) {
+              strokeMultiplier = obj.canvasWidth / this.fabricCanvas.width
             }
-          )
-          path.setControlsVisibility({
-            mt: false,
-            mb: false,
-            ml: false,
-            mr: false,
-            bl: false,
-            br: false,
-            tl: false,
-            tr: false,
-            mtr: false
-          })
-          this.fabricCanvas.add(path)
-        }
-      })
+            const path = new fabric.Path(
+              obj.path,
+              {
+                ...base,
+                strokeWidth: obj.strokeWidth * strokeMultiplier,
+                canvasWidth: obj.canvasWidth
+              }
+            )
+            path.setControlsVisibility({
+              mt: false,
+              mb: false,
+              ml: false,
+              mr: false,
+              bl: false,
+              br: false,
+              tl: false,
+              tr: false,
+              mtr: false
+            })
+            this.fabricCanvas.add(path)
+          }
+        })
+      }
     },
 
     saveAnnotations () {
@@ -1273,6 +1285,12 @@ export default {
     onRemoveBuildJob (job) {
       job.playlist_id = this.playlist.id
       this.removeBuildJob(job)
+    },
+
+    onMetadataLoaded (event) {
+      this.$nextTick(() => {
+        this.resetCanvasSize()
+      })
     }
   },
 
@@ -1301,7 +1319,7 @@ export default {
       this.shotList = Object.values(this.shots)
       this.playingShotIndex = 0
       this.pause()
-      this.rawPlayer.setCurrentTime(0)
+      if (this.rawPlayer) this.rawPlayer.setCurrentTime(0)
       this.currentTimeRaw = 0
       this.updateProgressBar()
       this.updateTaskPanel()
@@ -1309,7 +1327,7 @@ export default {
       this.clearCanvas()
       this.annotations = []
       if (this.shotList.length === 0) {
-        this.rawPlayer.clear()
+        if (this.rawPlayer) this.rawPlayer.clear()
         if (this.isComparing) {
           this.$refs['raw-player-comparison'].clear()
         }
@@ -1328,6 +1346,7 @@ export default {
         })
       }
       this.resetHeight()
+      this.resetCanvas()
     },
 
     forClient () {
@@ -1341,6 +1360,13 @@ export default {
       this.forClient = Boolean(this.playlist.for_client).toString()
       this.$nextTick(() => {
         this.updateProgressBar()
+        this.clearCanvas()
+      })
+    },
+
+    isAddingShot () {
+      this.$nextTick(() => {
+        this.updateProgressBar()
       })
     }
   }
@@ -1348,9 +1374,12 @@ export default {
 </script>
 
 <style lang="scss" scoped>
+.full-height {
+  height: 100%;
+}
+
 .playlist-player {
   background: $dark-grey;
-  height: 100%;
   display: flex;
   flex-direction: column;
 
@@ -1367,6 +1396,12 @@ export default {
 
     &.active {
       color: $green;
+    }
+
+    &.add-shots-button {
+      border: 1px solid $dark-grey-strong;
+      border-radius: 10px;
+      margin-right: 0.5em;
     }
   }
 }
@@ -1400,6 +1435,7 @@ export default {
   border-top: 1px solid $dark-grey-strong;
   padding: 0.5em;
   overflow-x: auto;
+  min-height: 600px;
   align-items: flex-start;
   height: 240px;
   min-height: 240px;
@@ -1472,6 +1508,7 @@ export default {
 }
 
 .canvas-wrapper {
+  margin: auto;
   position: absolute;
   top: 0;
   left: 0;
@@ -1640,19 +1677,37 @@ progress {
     }
   }
 }
+
 .color-picker {
   width: 1.5rem;
   height: 1.5rem;
   border: 1px solid $white;
 }
+
 .slide-fade-enter-active {
   transition: all .3s ease;
 }
+
 .slide-fade-leave-active {
   transition: all .5s cubic-bezier(1.0, 0.5, 0.8, 1.0);
 }
+
 .slide-fade-enter, .slide-fade-leave-to {
   transform: translateX(1.5rem);
   opacity: 0;
+}
+
+.for-client {
+  background: $dark-purple-strong;
+  border: 2px solid $dark-purple-strong;
+  color: $white;
+  padding: 0.3em;
+  margin-left: 1em;
+  margin-right: 0;
+  border-radius: 5px;
+}
+
+#annotation-canvas {
+  margin: auto;
 }
 </style>

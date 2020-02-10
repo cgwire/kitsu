@@ -287,16 +287,23 @@ export default {
   playlists: {
     add_shots: 'Añadir tomas',
     add_sequence: 'Añadir secuencia completa',
+    add_episode: 'Añadir episodio completa',
+    add_movie: 'Añadir film completa',
     available_build: 'Construcciones disponibles',
     build_daily: 'Diario pendiente',
     build_weekly: 'Todos Pendientes',
     build_mp4: 'Construir .mp4',
+    client_playlist: 'Playlist clave',
+    created_at: 'Creado en:',
+    created_title: 'Crear playlist',
     delete_text: '¿Está seguro de que desea eliminar {name} de su base de datos?',
     delete_error: 'Se ha producido un error al eliminar esta lista de reproducción.',
     download_zip: 'Descargar.zip',
     edit_title: 'Editar lista de reproducción',
-    for_client: 'Para el cliente',
-    for_studio: 'Para el estudio',
+    for_client: 'El cliente',
+    for_studio: 'El estudio',
+    last_creation: 'Ultimas creaciones',
+    last_modification: 'Ultimas modificaciones',
     loading_error: 'Se ha producido un error en el servidor. Las listas de reproducción no se pueden cargar.',
     new_playlist: 'Añadir una lista de reproducción',
     no_build: 'Sin construcción',
@@ -309,9 +316,11 @@ export default {
     select_shot: 'Por favor, seleccione una toma en la columna de la derecha',
     select_playlist: 'Por favor, seleccione una lista de reproducción en la columna de la izquierda',
     title: 'Listas de reproducción',
+    updated_at: 'Actualizado en:',
     remove: 'quitar',
     fields: {
-      name: 'Nombre'
+      name: 'Nombre',
+      for_client: 'Par compartir con'
     }
   },
 

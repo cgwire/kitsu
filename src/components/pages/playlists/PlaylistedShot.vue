@@ -17,8 +17,8 @@
           <x-icon />
         </span>
         <light-entity-thumbnail
-          :width="150"
-          :height="103"
+          width="150px"
+          height="103px"
           :preview-file-id="previewFileId"
         />
       </div>
