@@ -57,7 +57,7 @@
       :zoom-level="zoomLevel"
       :is-loading="loading.schedule"
       :is-error="errors.schedule"
-      @item-changed="saveScheduleItem"
+      @item-changed="scheduleItemChanged"
       @change-zoom="changeZoom"
       @root-element-expanded="expandTaskTypeElement"
     />
@@ -233,7 +233,7 @@ export default {
       this.loadData()
     },
 
-    convertScheduleItems (scheduleItems) {
+    convertScheduleItems (taskTypeElement, scheduleItems) {
       return scheduleItems.map((item) => {
         let startDate, endDate
         if (item.start_date) {
@@ -253,7 +253,8 @@ export default {
           expanded: false,
           loading: false,
           editable: this.isCurrentUserManager,
-          children: []
+          children: [],
+          parentElement: taskTypeElement
         }
       })
     },
@@ -276,7 +277,10 @@ export default {
         this[action](parameters)
           .then((scheduleItems) => {
             taskTypeElement.loading = false
-            taskTypeElement.children = this.convertScheduleItems(scheduleItems)
+            taskTypeElement.children = this.convertScheduleItems(
+              taskTypeElement,
+              scheduleItems
+            )
           })
           .catch((err) => {
             console.error(err)
@@ -284,6 +288,42 @@ export default {
             taskTypeElement.children = []
           })
       }
+    },
+
+    scheduleItemChanged (item) {
+      if (item.startDate && item.endDate && item.parentElement) {
+        item.parentElement.startDate = this.getMinDate(item.parentElement)
+        item.parentElement.endDate = this.getMaxDate(item.parentElement)
+        this.saveScheduleItem(item.parentElement)
+      } else if (!item.parentElement) {
+        const minDate = this.getMinDate(item)
+        const maxDate = this.getMaxDate(item)
+        if (item.startDate.isAfter(minDate)) item.startDate = minDate
+        if (item.endDate.isBefore(maxDate)) {
+          item.endDate = maxDate.add(-1, 'days')
+        }
+      }
+      this.saveScheduleItem(item)
+    },
+
+    getMinDate (parentElement) {
+      let minDate = this.endDate.clone()
+      parentElement.children.forEach((item) => {
+        if (item.startDate && item.startDate.isBefore(minDate)) {
+          minDate = item.startDate
+        }
+      })
+      return minDate.clone()
+    },
+
+    getMaxDate (parentElement) {
+      let maxDate = this.startDate.clone()
+      parentElement.children.forEach((item) => {
+        if (item.endDate && item.endDate.isAfter(maxDate)) {
+          maxDate = item.endDate
+        }
+      })
+      return maxDate.clone()
     }
   },
 
