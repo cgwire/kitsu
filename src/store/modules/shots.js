@@ -1012,6 +1012,12 @@ const actions = {
             if (isNewQuotaDay) personQuotas[COUNT][period]++
             personQuotas[endDateString] += quota
             personQuotas[TOTAL][period] += quota
+            if (countMode === 'seconds') {
+              personQuotas[TOTAL][period] =
+                Math.round(personQuotas[TOTAL][period] * 100) / 100
+              personQuotas[endDateString] =
+                Math.round(personQuotas[endDateString] * 100) / 100
+            }
             personQuotas[AVERAGE][period] =
               personQuotas[TOTAL][period] / personQuotas[COUNT][period]
           }
