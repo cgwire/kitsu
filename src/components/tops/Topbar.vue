@@ -465,9 +465,11 @@ export default {
       const routeEpisodeId = this.$route.params.episode_id
       if (this.isTVShow) {
         if (
-          !this.currentEpisode ||
-          this.currentEpisodeId !== routeEpisodeId ||
-          this.currentEpisode.id !== routeEpisodeId
+          (
+            !this.currentEpisode ||
+            this.currentEpisodeId !== routeEpisodeId ||
+            this.currentEpisode.id !== routeEpisodeId
+          ) && !routeEpisodeId
         ) {
           this.setCurrentEpisode(routeEpisodeId)
         }
