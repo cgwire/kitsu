@@ -198,6 +198,7 @@ export default {
       legend_missing: 'Colonne manquante',
       paste: 'Coller',
       paste_code: 'Coller vos données CSV :',
+      preview: 'Aperçu',
       preview_episode_name: 'Nom de l\'épisode',
       preview_title: 'Aperçu de vos données à importer',
       preview_description: 'Importer un fichier .csv pour peupler votre board avec des posts. Vous pouvez aussi ajouter de nouvelles colonnes.',
