@@ -447,7 +447,7 @@ export default {
         if (callback) callback()
       }
 
-      if (this.sequences.length === 0) {
+      if (this.displayedShots.length === 0) {
         this.loadShots(loadPlaylists)
       } else {
         loadPlaylists()
@@ -739,6 +739,9 @@ export default {
     },
 
     toggleAddShots () {
+      if (this.isAddingShot) {
+        this.resetPlaylist()
+      }
       this.isAddingShot = !this.isAddingShot
     },
 
@@ -826,11 +829,9 @@ export default {
   },
 
   mounted () {
-    setTimeout(() => { // Needed to ensure playlist is loaded after topbar
-      this.loadShotsData(() => {
-        this.resetPlaylist()
-      })
-    }, 0)
+    this.loadShotsData(() => {
+      this.resetPlaylist()
+    })
   },
 
   watch: {
@@ -864,8 +865,6 @@ export default {
 
     isAddingShot () {
       if (!this.isAddingShot) {
-        this.clearCurrentPlaylist()
-        this.setCurrentPlaylist()
       }
     }
   },
