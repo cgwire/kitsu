@@ -14,13 +14,13 @@
       }"
       @click="$emit('confirm')"
     >
-      {{ $t("main.confirmation") }}
+      {{ confirmLabel || $t("main.confirmation") }}
     </a>
     <button
       @click="$emit('cancel')"
       class="button is-link"
     >
-      {{ $t("main.cancel") }}
+      {{ cancelLabel || $t('main.cancel') }}
     </button>
   </p>
 </div>
@@ -35,6 +35,14 @@ export default {
   components: {},
 
   props: {
+    cancelLabel: {
+      type: String,
+      default: ''
+    },
+    confirmLabel: {
+      type: String,
+      default: ''
+    },
     errorText: {
       type: String,
       default: ''

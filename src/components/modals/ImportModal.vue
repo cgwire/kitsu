@@ -44,6 +44,7 @@
       </tabs>
 
       <modal-footer
+        :confirm-label="$t('main.csv.preview')"
         :error-text="$t('main.csv.error_upload')"
         :is-loading="isLoading"
         :is-disabled="formData === undefined"

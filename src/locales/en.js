@@ -217,6 +217,7 @@ export default {
       legend_missing: 'Missing column',
       paste: 'Paste',
       paste_code: 'Please paste here your CSV data:',
+      preview: 'Preview',
       preview_episode_name: 'Episode name',
       preview_title: 'Preview of your imported data',
       preview_description: 'Upload a .csv file to populate your board with posts.',
