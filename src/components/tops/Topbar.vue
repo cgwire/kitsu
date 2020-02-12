@@ -469,7 +469,7 @@ export default {
             !this.currentEpisode ||
             this.currentEpisodeId !== routeEpisodeId ||
             this.currentEpisode.id !== routeEpisodeId
-          ) && !routeEpisodeId
+          ) && routeEpisodeId
         ) {
           this.setCurrentEpisode(routeEpisodeId)
         }
