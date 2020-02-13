@@ -43,6 +43,8 @@
             <dd>{{ $t('main.csv.legend_ignored') }}</dd>
             <dt class="missing"></dt>
             <dd>{{ $t('main.csv.legend_missing') }}</dd>
+            <dt class="overwrite"></dt>
+            <dd>{{ $t('main.csv.legend_overwrite') }}</dd>
           </dl>
         </div>
       </div>
@@ -367,5 +369,12 @@ export default {
 }
 .missing {
   background-color: rgba($red, .6)
+}
+.overwrite {
+  background-color: rgba($orange, .8);
+
+  &:hover td {
+    background-color: rgba($orange, .5);
+  }
 }
 </style>
