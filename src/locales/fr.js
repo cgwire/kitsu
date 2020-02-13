@@ -209,8 +209,11 @@ export default {
       select_file: 'Sélectionner un fichier depuis votre dossier :',
       tab_select_file: 'Importer un fichier CSV',
       tab_paste_code: 'Coller des données CSV',
-      upload_file: 'Parcourir'
-
+      upload_file: 'Parcourir',
+      options: {
+        title: 'Options',
+        update: 'Mettre à jour les données'
+      }
     }
   },
 

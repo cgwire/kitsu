@@ -228,7 +228,11 @@ export default {
       select_file: 'Please select a file from one of your folder:',
       tab_select_file: 'Upload a CSV file',
       tab_paste_code: 'Paste a CSV data',
-      upload_file: 'Browse'
+      upload_file: 'Browse',
+      options: {
+        title: 'Options',
+        update: 'Update existing data'
+      }
     }
   },
 

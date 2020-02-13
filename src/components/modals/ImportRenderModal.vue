@@ -29,6 +29,12 @@
             v-focus
             v-show="isTVShow"
           /-->
+          <h2 class="legend-title">{{ $t('main.csv.options.title') }}</h2>
+          <checkbox
+            :toggle="true"
+            :label="$t('main.csv.options.update')"
+            v-model="updateData"
+          />
           <h2 class="legend-title">{{ $t('main.csv.legend') }}</h2>
           <dl class="legend">
             <dt></dt>
@@ -126,6 +132,7 @@ import { mapGetters, mapActions } from 'vuex'
 import { modalMixin } from './base_modal'
 // import TextField from '../widgets/TextField'
 import Combobox from '../widgets/Combobox'
+import Checkbox from '../widgets/Checkbox'
 import ButtonSimple from '../widgets/ButtonSimple'
 import ModalFooter from './ModalFooter'
 
@@ -135,6 +142,7 @@ export default {
   components: {
     ButtonSimple,
     Combobox,
+    Checkbox,
     // TextField,
     ModalFooter
   },
@@ -145,7 +153,8 @@ export default {
       formData: null,
       form: {
         name: ''
-      }
+      },
+      updateData: false
     }
   },
 
@@ -221,7 +230,7 @@ export default {
     ]),
 
     onConfirmClicked () {
-      this.$emit('confirm', this.parsedCsv)
+      this.$emit('confirm', this.parsedCsv, this.updateData)
     },
 
     onReupload () {

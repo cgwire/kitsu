@@ -726,7 +726,7 @@ export default {
         })
     },
 
-    uploadImportFile (data) {
+    uploadImportFile (data, toUpdate) {
       const formData = new FormData()
       const filename = 'import.csv'
       const file = new File([data.join('\n')], filename, { type: 'text/csv' })
