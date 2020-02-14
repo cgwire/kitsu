@@ -221,6 +221,33 @@ export const entityListMixin = {
           }
         })
       }
+    },
+
+    onSortByTaskTypeClicked () {
+      const taskTypeId = this.lastHeaderMenuDisplayed
+      this.$emit('change-sort', {
+        type: 'status',
+        column: taskTypeId,
+        name: this.taskTypeMap[taskTypeId].name
+      })
+      this.showHeaderMenu()
+    },
+
+    onSortByMetadataClicked () {
+      const columnId = this.lastMetadaDataHeaderMenuDisplayed
+      const column =
+        this.currentProduction.descriptors.find(d => d.id === columnId)
+      this.$emit('change-sort', {
+        type: 'metadata',
+        column: column.field_name,
+        name: column.name
+      })
+      this.showMetadataHeaderMenu()
+    },
+
+    getGroupKey (group, i, fieldName) {
+      const key = group[0] ? group[0][fieldName] + group[0].canceled : ''
+      return `${i}-${key}`
     }
   }
 }

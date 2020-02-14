@@ -7,6 +7,7 @@
     :is-current-user-admin="isCurrentUserAdmin"
     @minimize-clicked="onMinimizeColumnToggled()"
     @delete-all-clicked="onDeleteAllTasksClicked()"
+    @sort-by-clicked="onSortByTaskTypeClicked()"
   />
 
   <table-metadata-header-menu
@@ -14,6 +15,7 @@
     :is-current-user-admin="isCurrentUserAdmin"
     @edit-clicked="onEditMetadataClicked()"
     @delete-clicked="onDeleteMetadataClicked()"
+    @sort-by-clicked="onSortByMetadataClicked()"
   />
 
   <div class="table-header-wrapper">
@@ -55,7 +57,7 @@
           >
             <div class="flexrow">
               <span class="flexrow-item descriptor-name">
-              {{ descriptor.name }}
+                {{ descriptor.name }}
               </span>
               <chevron-down-icon
                 @click="showMetadataHeaderMenu(descriptor.id, $event)"
@@ -153,7 +155,7 @@
       <tbody
         class="tbody"
         ref="body-tbody"
-        :key="group[0] ? group[0].asset_type_id + group[0].canceled : ''"
+        :key="getGroupKey(group, k, 'asset_type_id')"
         v-for="(group, k) in displayedAssets"
       >
         <tr class="type-header">

@@ -11,13 +11,7 @@ export const sortAssets = (assets) => {
 export const sortShots = (shots) => {
   return shots.sort(
     firstBy('canceled')
-      .thenBy((a, b) => {
-        if (a.episode_name) {
-          return a.episode_name.localeCompare(b.episode_name)
-        } else {
-          return 0
-        }
-      })
+      .thenBy(sortByEpisode)
       .thenBy((a, b) => a.sequence_name.localeCompare(b.sequence_name))
       .thenBy((a, b) => a.name.localeCompare(b.name))
   )
@@ -131,4 +125,77 @@ export const sortScheduleItems = (scheduleItems, taskTypeMap) => {
       .thenBy('name')
       .thenBy('start_date')
   )
+}
+
+export const sortAssetResult = (
+  result,
+  sorting,
+  taskStatusMap,
+  taskTypeMap,
+  taskMap
+) => {
+  if (sorting && sorting.length > 0) {
+    const sortInfo = sorting[0]
+    let sortEntities = sortByTaskType(taskMap, sortInfo)
+    if (sortInfo.type === 'metadata') sortEntities = sortByMetadata(sortInfo)
+    result = result.sort(
+      firstBy('canceled')
+        .thenBy(sortEntities)
+        .thenBy((a, b) => a.asset_type_name.localeCompare(b.asset_type_name))
+        .thenBy((a, b) => a.name.localeCompare(b.name))
+    )
+  } else {
+    result = sortAssets(result)
+  }
+  return result
+}
+
+export const sortShotResult = (
+  result,
+  sorting,
+  taskStatusMap,
+  taskTypeMap,
+  taskMap
+) => {
+  if (sorting && sorting.length > 0) {
+    const sortInfo = sorting[0]
+    let sortEntities = sortByTaskType(taskMap, sortInfo)
+    if (sortInfo.type === 'metadata') sortEntities = sortByMetadata(sortInfo)
+    result = result.sort(
+      firstBy('canceled')
+        .thenBy(sortEntities)
+        .thenBy(sortByEpisode)
+        .thenBy((a, b) => a.sequence_name.localeCompare(b.sequence_name))
+        .thenBy((a, b) => a.name.localeCompare(b.name))
+    )
+  } else {
+    result = sortShots(result)
+  }
+  return result
+}
+
+const sortByMetadata = (sortInfo) => (a, b) => {
+  const dataA = a.data[sortInfo.column] ? a.data[sortInfo.column] : ''
+  const dataB = b.data[sortInfo.column] ? b.data[sortInfo.column] : ''
+  if (!dataA) return 1
+  if (!dataB) return -1
+  return dataA.localeCompare(dataB)
+}
+
+const sortByTaskType = (taskMap, sortInfo) => (a, b) => {
+  const taskA = a.validations[sortInfo.column]
+  const taskB = b.validations[sortInfo.column]
+  if (!taskA) return -1
+  if (!taskB) return 1
+  const taskStatusA = taskMap[taskA].task_status_short_name
+  const taskStatusB = taskMap[taskB].task_status_short_name
+  return taskStatusA.localeCompare(taskStatusB)
+}
+
+const sortByEpisode = (a, b) => {
+  if (a.episode_name) {
+    return a.episode_name.localeCompare(b.episode_name)
+  } else {
+    return 0
+  }
 }

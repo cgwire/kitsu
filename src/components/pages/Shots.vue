@@ -61,20 +61,26 @@
         </div>
       </div>
 
+      <sorting-info
+        :label="$t('main.sorted_by')"
+        :sorting="shotSorting"
+        @clear-sorting="onChangeSortClicked(null)"
+      />
       <shot-list
         ref="shot-list"
         :displayed-shots="displayedShotsBySequence"
         :is-loading="isShotsLoading || initialLoading"
         :is-error="isShotsLoadingError"
         :validation-columns="shotValidationColumns"
-        @create-tasks="showCreateTasksModal"
-        @scroll="saveScrollPosition"
-        @delete-all-tasks="onDeleteAllTasksClicked"
         @add-metadata="onAddMetadataClicked"
+        @add-shots="showManageShots"
+        @change-sort="onChangeSortClicked"
+        @create-tasks="showCreateTasksModal"
+        @delete-all-tasks="onDeleteAllTasksClicked"
         @delete-metadata="onDeleteMetadataClicked"
         @edit-metadata="onEditMetadataClicked"
+        @scroll="saveScrollPosition"
         @shot-history="showShotHistoryModal"
-        @add-shots="showManageShots"
       />
     </div>
   </div>
@@ -225,6 +231,7 @@ import { sortByName } from '../../lib/sorting'
 import { slugify } from '../../lib/string'
 
 import { searchMixin } from '../mixins/search'
+import { entityListMixin } from '../mixins/entities'
 
 import AddMetadataModal from '../modals/AddMetadataModal'
 import AddThumbnailsModal from '../modals/AddThumbnailsModal'
@@ -238,6 +245,7 @@ import HardDeleteModal from '../modals/HardDeleteModal'
 import ManageShotsModal from '../modals/ManageShotsModal'
 import SearchField from '../widgets/SearchField'
 import SearchQueryList from '../widgets/SearchQueryList'
+import SortingInfo from '../widgets/SortingInfo'
 import ShowAssignationsButton from '../widgets/ShowAssignationsButton'
 import ShowInfosButton from '../widgets/ShowInfosButton'
 import ShotHistoryModal from '../modals/ShotHistoryModal'
@@ -246,7 +254,7 @@ import TaskInfo from '../sides/TaskInfo.vue'
 
 export default {
   name: 'shots',
-  mixins: [searchMixin],
+  mixins: [searchMixin, entityListMixin],
 
   components: {
     AddMetadataModal,
@@ -261,6 +269,7 @@ export default {
     ImportRenderModal,
     SearchField,
     SearchQueryList,
+    SortingInfo,
     ShotHistoryModal,
     ShowAssignationsButton,
     ShowInfosButton,
@@ -345,6 +354,7 @@ export default {
       'shotsPath',
       'shotValidationColumns',
       'shotListScrollPosition',
+      'shotSorting',
       'taskTypeMap'
     ]),
 
@@ -420,6 +430,7 @@ export default {
   methods: {
     ...mapActions([
       'addMetadataDescriptor',
+      'changeShotSort',
       'commentTaskWithPreview',
       'deleteAllTasks',
       'deleteMetadataDescriptor',
@@ -812,38 +823,6 @@ export default {
       this.modals.isManageDisplayed = false
     },
 
-    showImportModal () {
-      this.modals.isImportDisplayed = true
-    },
-
-    hideImportModal () {
-      this.modals.isImportDisplayed = false
-    },
-
-    showImportRenderModal () {
-      this.modals.isImportRenderDisplayed = true
-    },
-
-    hideImportRenderModal () {
-      this.modals.isImportRenderDisplayed = false
-    },
-
-    showCreateTasksModal () {
-      this.modals.isCreateTasksDisplayed = true
-    },
-
-    hideCreateTasksModal () {
-      this.modals.isCreateTasksDisplayed = false
-    },
-
-    showAddThumbnailsModal () {
-      this.modals.isAddThumbnailsDisplayed = true
-    },
-
-    hideAddThumbnailsModal () {
-      this.modals.isAddThumbnailsDisplayed = false
-    },
-
     showShotHistoryModal (shot) {
       this.historyShot = shot
       this.modals.isShotHistoryDisplayed = true
@@ -895,7 +874,12 @@ export default {
             })
           csv.buildCsvFile(name, [headers].concat(shotLines))
         })
+    },
+
+    onChangeSortClicked (sortInfo) {
+      this.changeShotSort(sortInfo)
     }
+
   },
 
   watch: {

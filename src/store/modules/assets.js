@@ -10,8 +10,9 @@ import peopleStore from './people'
 
 import { PAGE_SIZE } from '../../lib/pagination'
 import {
-  sortByName,
+  sortAssetResult,
   sortAssets,
+  sortByName,
   sortTasks,
   sortValidationColumns
 } from '../../lib/sorting'
@@ -93,6 +94,8 @@ import {
 
   SET_ASSET_TYPE_SEARCH,
   COMPUTE_ASSET_TYPE_STATS,
+
+  CHANGE_ASSET_SORT,
 
   RESET_ALL
 } from '../mutation-types'
@@ -184,6 +187,50 @@ const helpers = {
   sortValidationColumns (validationColumns, assetFilledColumns, taskTypeMap) {
     const columns = [...validationColumns]
     return sortValidationColumns(columns, taskTypeMap)
+  },
+
+  buildResult (state, {
+    assetSearch,
+    production,
+    sorting,
+    taskStatusMap,
+    taskTypeMap,
+    taskMap
+  }) {
+    const taskTypes = Object.values(taskTypeMap)
+    const taskStatuses = Object.keys(taskStatusMap).map((id) => {
+      return taskStatusMap[id]
+    })
+
+    const query = assetSearch
+    const keywords = getKeyWords(query) || []
+    const filters = getFilters(
+      cache.assetIndex,
+      taskTypes,
+      taskStatuses,
+      production.descriptors || [],
+      query
+    )
+    let result = indexSearch(cache.assetIndex, keywords) || cache.assets
+    result = applyFilters(result, filters, taskMap)
+    result = sortAssetResult(
+      result,
+      sorting,
+      taskStatusMap,
+      taskTypeMap,
+      taskMap
+    )
+    cache.result = result
+
+    const displayedAssets = result.slice(0, PAGE_SIZE)
+    const maxX = displayedAssets.length
+    const maxY = state.nbValidationColumns
+
+    state.displayedAssets = displayedAssets
+    state.assetFilledColumns = getFilledColumns(displayedAssets)
+    state.displayedAssetsLength = result ? result.length : 0
+    state.assetSearchText = query
+    state.assetSelectionGrid = buildSelectionGrid(maxX, maxY)
   }
 }
 
@@ -205,6 +252,7 @@ const initialState = {
   assetSearchText: '',
   assetSelectionGrid: {},
   assetSearchQueries: [],
+  assetSorting: [],
 
   displayedAssetTypes: [],
   displayedAssetTypesLength: 0,
@@ -263,6 +311,7 @@ const getters = {
   assetTypeSearchText: state => state.assetTypeSearchText,
   assetTypeStats: state => state.assetTypeStats,
   assetTypeListScrollPosition: state => state.assetTypeListScrollPosition,
+  assetSorting: state => state.assetSorting,
 
   assetListScrollPosition: state => state.assetListScrollPosition,
 
@@ -447,7 +496,7 @@ const actions = {
     })
   },
 
-  setAssetSearch ({ commit, rootGetters }, assetSearch) {
+  setAssetSearch ({ commit, state, rootGetters }, assetSearch) {
     const taskStatusMap = rootGetters.taskStatusMap
     const taskTypeMap = rootGetters.taskTypeMap
     const taskMap = rootGetters.taskMap
@@ -572,6 +621,17 @@ const actions = {
       return assetLine
     })
     return lines
+  },
+
+  changeAssetSort ({ commit, rootGetters }, sortInfo) {
+    const taskStatusMap = rootGetters.taskStatus
+    const taskTypeMap = rootGetters.taskTypeMap
+    const taskMap = rootGetters.taskMap
+    const production = rootGetters.currentProduction
+    const sorting = sortInfo ? [sortInfo] : []
+    commit(CHANGE_ASSET_SORT, {
+      taskStatusMap, taskTypeMap, taskMap, production, sorting
+    })
   }
 }
 
@@ -887,36 +947,10 @@ const mutations = {
   [NEW_TASK_COMMENT_END] (state, { comment, taskId }) {
   },
 
-  [SET_ASSET_SEARCH] (
-    state, { assetSearch, taskStatusMap, taskTypeMap, taskMap, production }
-  ) {
-    const taskTypes = Object.values(taskTypeMap)
-    const taskStatuses = Object.keys(taskStatusMap).map((id) => {
-      return taskStatusMap[id]
-    })
-
-    const query = assetSearch
-    const keywords = getKeyWords(query) || []
-    const filters = getFilters(
-      cache.assetIndex,
-      taskTypes,
-      taskStatuses,
-      production.descriptors || [],
-      query
-    )
-    let result = indexSearch(cache.assetIndex, keywords) || cache.assets
-    result = applyFilters(result, filters, taskMap)
-    cache.result = result
-
-    const displayedAssets = result.slice(0, PAGE_SIZE)
-    const maxX = displayedAssets.length
-    const maxY = state.nbValidationColumns
-
-    state.displayedAssets = displayedAssets
-    state.assetFilledColumns = getFilledColumns(displayedAssets)
-    state.displayedAssetsLength = result ? result.length : 0
-    state.assetSearchText = query
-    state.assetSelectionGrid = buildSelectionGrid(maxX, maxY)
+  [SET_ASSET_SEARCH] (state, payload) {
+    const sorting = state.assetSorting
+    payload.sorting = sorting
+    helpers.buildResult(state, payload)
   },
 
   [SAVE_ASSET_SEARCH_END] (state, { searchQuery }) {
@@ -1068,6 +1102,16 @@ const mutations = {
     state.assetTypeStats = computeStats(
       cache.assets, 'asset_type_id', taskStatusMap, taskMap
     )
+  },
+
+  [CHANGE_ASSET_SORT] (state, {
+    taskStatusMap, taskTypeMap, taskMap, production, sorting
+  }) {
+    const assetSearch = state.assetSearchText
+    state.assetSorting = sorting
+    helpers.buildResult(state, {
+      assetSearch, taskStatusMap, taskTypeMap, taskMap, production, sorting
+    })
   },
 
   [RESET_ALL] (state) {

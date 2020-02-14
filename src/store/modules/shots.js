@@ -11,6 +11,7 @@ import { PAGE_SIZE } from '../../lib/pagination'
 import {
   sortByName,
   sortSequences,
+  sortShotResult,
   sortShots,
   sortTasks,
   sortValidationColumns
@@ -149,6 +150,8 @@ import {
   COMPUTE_EPISODE_STATS,
   SET_EPISODE_STATS,
 
+  CHANGE_SHOT_SORT,
+
   RESET_ALL
 } from '../mutation-types'
 
@@ -274,6 +277,50 @@ const helpers = {
     if (!personQuotas[TOTAL][period]) personQuotas[TOTAL][period] = 0
 
     return personQuotas
+  },
+
+  buildResult (state, {
+    shotSearch,
+    production,
+    sorting,
+    taskStatusMap,
+    taskTypeMap,
+    taskMap
+  }) {
+    const taskTypes = Object.values(taskTypeMap)
+    const taskStatuses = Object.values(taskStatusMap)
+
+    const query = shotSearch
+    const keywords = getKeyWords(query) || []
+    const filters = getFilters(
+      cache.shotIndex,
+      taskTypes,
+      taskStatuses,
+      production.descriptors,
+      query
+    )
+    let result = indexSearch(cache.shotIndex, keywords) || cache.shots
+    result = applyFilters(result, filters, taskMap)
+    result = sortShotResult(
+      result,
+      sorting,
+      taskStatusMap,
+      taskTypeMap,
+      taskMap
+    )
+    cache.result = result
+
+    const displayedShots = result.slice(0, PAGE_SIZE)
+    const maxX = displayedShots.length
+    const maxY = state.nbValidationColumns
+
+    helpers.setListStats(state, result)
+    Object.assign(state, {
+      displayedShots: displayedShots,
+      shotFilledColumns: getFilledColumns(displayedShots),
+      shotSearchText: shotSearch,
+      shotSelectionGrid: buildSelectionGrid(maxX, maxY)
+    })
   }
 }
 
@@ -288,6 +335,7 @@ const initialState = {
   sequenceStats: {},
   episodeSearchText: '',
   episodeStats: {},
+  shotSorting: [],
 
   currentEpisode: null,
   episodeValidationColumns: [],
@@ -360,6 +408,7 @@ const getters = {
   shotSearchQueries: state => state.shotSearchQueries,
   sequenceSearchQueries: state => state.sequenceSearchQueries,
   shotMap: state => state.shotMap,
+  shotSorting: state => state.shotSorting,
 
   isFps: state => state.isFps,
   isFrameIn: state => state.isFrameIn,
@@ -1056,6 +1105,17 @@ const actions = {
         full_name: helpers.getShotName(shot)
       }))
     return Promise.resolve(shots)
+  },
+
+  changeShotSort ({ commit, rootGetters }, sortInfo) {
+    const taskStatusMap = rootGetters.taskStatus
+    const taskTypeMap = rootGetters.taskTypeMap
+    const taskMap = rootGetters.taskMap
+    const production = rootGetters.currentProduction
+    const sorting = sortInfo ? [sortInfo] : []
+    commit(CHANGE_SHOT_SORT, {
+      taskStatusMap, taskTypeMap, taskMap, production, sorting
+    })
   }
 }
 
@@ -1403,37 +1463,10 @@ const mutations = {
 
   [NEW_TASK_COMMENT_END] (state, { comment, taskId }) {},
 
-  [SET_SHOT_SEARCH] (
-    state,
-    { shotSearch, taskStatusMap, taskMap, taskTypeMap, production }
-  ) {
-    const taskTypes = Object.values(taskTypeMap)
-    const taskStatuses = Object.values(taskStatusMap)
-
-    const query = shotSearch
-    const keywords = getKeyWords(query) || []
-    const filters = getFilters(
-      cache.shotIndex,
-      taskTypes,
-      taskStatuses,
-      production.descriptors,
-      query
-    )
-    let result = indexSearch(cache.shotIndex, keywords) || cache.shots
-    result = applyFilters(result, filters, taskMap)
-    cache.result = result
-
-    const displayedShots = result.slice(0, PAGE_SIZE)
-    const maxX = displayedShots.length
-    const maxY = state.nbValidationColumns
-
-    helpers.setListStats(state, result)
-    Object.assign(state, {
-      displayedShots: displayedShots,
-      shotFilledColumns: getFilledColumns(displayedShots),
-      shotSearchText: shotSearch,
-      shotSelectionGrid: buildSelectionGrid(maxX, maxY)
-    })
+  [SET_SHOT_SEARCH] (state, payload) {
+    const sorting = state.shotSorting
+    payload.sorting = sorting
+    helpers.buildResult(state, payload)
   },
 
   [SET_SEQUENCE_SEARCH] (state, { sequenceSearch, production }) {
@@ -1862,6 +1895,16 @@ const mutations = {
 
   [CANCEL_SHOT] (state, shot) {
     shot.canceled = true
+  },
+
+  [CHANGE_SHOT_SORT] (state, {
+    taskStatusMap, taskTypeMap, taskMap, production, sorting
+  }) {
+    const shotSearch = state.shotSearchText
+    state.shotSorting = sorting
+    helpers.buildResult(state, {
+      shotSearch, taskStatusMap, taskTypeMap, taskMap, production, sorting
+    })
   },
 
   [RESET_ALL] (state) {
