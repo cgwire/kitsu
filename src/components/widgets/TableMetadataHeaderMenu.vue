@@ -7,6 +7,11 @@
       {{ $t('main.edit')}}
     </div>
     <div
+      @click="$emit('sort-by-clicked')"
+    >
+      {{ $t('main.sort_by')}}
+    </div>
+    <div
       class="error"
       @click="$emit('delete-clicked')"
       v-if="isCurrentUserAdmin"

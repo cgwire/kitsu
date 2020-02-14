@@ -9,6 +9,11 @@
       <span v-else>{{ $t('main.minimize') }}</span>
     </div>
     <div
+      @click="$emit('sort-by-clicked')"
+    >
+      {{ $t('main.sort_by')}}
+    </div>
+    <div
       class="error"
       @click="$emit('delete-all-clicked')"
       v-if="isCurrentUserAdmin"

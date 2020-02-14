@@ -260,6 +260,8 @@ export const UPDATE_ASSET = 'UPDATE_ASSET'
 export const REMOVE_ASSET = 'REMOVE_ASSET'
 export const CANCEL_ASSET = 'CANCEL_ASSET'
 
+export const CHANGE_ASSET_SORT = 'CHANGE_ASSET_SORT'
+
 // Shots
 //
 export const CLEAR_SHOTS = 'CLEAR_SHOTS'
@@ -357,6 +359,8 @@ export const RESET_PRODUCTION_PATH = 'RESET_PRODUCTION_PATH'
 
 export const DATA_LOADING_START = 'DATA_LOADING_START'
 export const DATA_LOADING_END = 'DATA_LOADING_END'
+
+export const CHANGE_SHOT_SORT = 'CHANGE_SHOT_SORT'
 
 // Profile and auth
 

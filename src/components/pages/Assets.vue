@@ -60,18 +60,24 @@
         </div>
       </div>
 
+      <sorting-info
+        :label="$t('main.sorted_by')"
+        :sorting="assetSorting"
+        @clear-sorting="onChangeSortClicked(null)"
+      />
       <asset-list
         ref="asset-list"
         :displayed-assets="displayedAssetsByType"
         :is-loading="isAssetsLoading || initialLoading"
         :is-error="isAssetsLoadingError"
         :validation-columns="assetValidationColumns"
-        @create-tasks="showCreateTasksModal"
-        @scroll="saveScrollPosition"
-        @delete-all-tasks="onDeleteAllTasksClicked"
         @add-metadata="onAddMetadataClicked"
+        @change-sort="onChangeSortClicked"
+        @create-tasks="showCreateTasksModal"
+        @delete-all-tasks="onDeleteAllTasksClicked"
         @delete-metadata="onDeleteMetadataClicked"
         @edit-metadata="onEditMetadataClicked"
+        @scroll="saveScrollPosition"
       />
     </div>
   </div>
@@ -208,6 +214,7 @@ import func from '../../lib/func'
 import { sortByName } from '../../lib/sorting'
 import { slugify } from '../../lib/string'
 import { searchMixin } from '../mixins/search'
+import { entityListMixin } from '../mixins/entities'
 
 import AssetList from '../lists/AssetList'
 import AddMetadataModal from '../modals/AddMetadataModal'
@@ -222,13 +229,14 @@ import ImportRenderModal from '../modals/ImportRenderModal'
 import HardDeleteModal from '../modals/HardDeleteModal'
 import SearchField from '../widgets/SearchField'
 import SearchQueryList from '../widgets/SearchQueryList'
+import SortingInfo from '../widgets/SortingInfo'
 import ShowAssignationsButton from '../widgets/ShowAssignationsButton'
 import ShowInfosButton from '../widgets/ShowInfosButton'
 import TaskInfo from '../sides/TaskInfo.vue'
 
 export default {
   name: 'assets',
-  mixins: [searchMixin],
+  mixins: [searchMixin, entityListMixin],
 
   components: {
     AssetList,
@@ -246,6 +254,7 @@ export default {
     SearchQueryList,
     ShowAssignationsButton,
     ShowInfosButton,
+    SortingInfo,
     TaskInfo
   },
 
@@ -329,6 +338,7 @@ export default {
       'nbSelectedTasks',
       'restoreAsset',
       'selectedTasks',
+      'assetSorting',
       'taskTypeMap'
     ]),
 
@@ -393,6 +403,7 @@ export default {
   methods: {
     ...mapActions([
       'addMetadataDescriptor',
+      'changeAssetSort',
       'commentTaskWithPreview',
       'deleteAllTasks',
       'deleteMetadataDescriptor',
@@ -811,38 +822,6 @@ export default {
       this.modals.isAddMetadataDisplayed = true
     },
 
-    showImportModal () {
-      this.modals.isImportDisplayed = true
-    },
-
-    hideImportModal () {
-      this.modals.isImportDisplayed = false
-    },
-
-    showImportRenderModal () {
-      this.modals.isImportRenderDisplayed = true
-    },
-
-    hideImportRenderModal () {
-      this.modals.isImportRenderDisplayed = false
-    },
-
-    showCreateTasksModal () {
-      this.modals.isCreateTasksDisplayed = true
-    },
-
-    hideCreateTasksModal () {
-      this.modals.isCreateTasksDisplayed = false
-    },
-
-    showAddThumbnailsModal () {
-      this.modals.isAddThumbnailsDisplayed = true
-    },
-
-    hideAddThumbnailsModal () {
-      this.modals.isAddThumbnailsDisplayed = false
-    },
-
     onExportClick () {
       this.getAssetsCsvLines()
         .then((assetLines) => {
@@ -885,6 +864,10 @@ export default {
         'Name',
         'Description'
       ])
+    },
+
+    onChangeSortClicked (sortInfo) {
+      this.changeAssetSort(sortInfo)
     }
   },
 
