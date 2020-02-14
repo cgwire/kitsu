@@ -248,6 +248,7 @@ export default {
   },
 
   playlists: {
+    add_selection: 'Ajouter la sélection',
     add_shots: 'Sélectonner les plans',
     add_episode: 'Ajouter l\'épisode',
     add_movie: 'Ajouter tout le film',

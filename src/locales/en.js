@@ -324,6 +324,7 @@ export default {
   },
 
   playlists: {
+    add_selection: 'Add selection',
     add_shots: 'Add shots',
     add_sequence: 'Add whole sequence',
     add_episode: 'Add whole episode',

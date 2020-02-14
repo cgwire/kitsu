@@ -286,6 +286,7 @@ export default {
   },
 
   playlists: {
+    add_selection: 'Añade la selección',
     add_shots: 'Añadir tomas',
     add_sequence: 'Añadir secuencia completa',
     add_episode: 'Añadir episodio completa',

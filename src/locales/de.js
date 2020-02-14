@@ -286,8 +286,9 @@ export default {
   },
 
   playlists: {
-    add_shots: 'Schüsse hinzufügen',
-    add_episode: 'Ganze tpisode hinzufügen',
+    add_selection: 'Auswahl hinzufügen',
+    add_shots: 'Shots hinzufügen',
+    add_episode: 'Ganze episode hinzufügen',
     add_movie: 'Ganze film hinzufügen',
     add_sequence: 'Ganze sequenz hinzufügen',
     available_build: 'Verfügbare Builds',
