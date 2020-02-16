@@ -339,10 +339,6 @@ const actions = {
           descriptor
         )
           .then((descriptor) => {
-            commit(ADD_METADATA_DESCRIPTOR_END, {
-              production: state.currentProduction,
-              descriptor
-            })
             resolve()
           })
           .catch(reject)

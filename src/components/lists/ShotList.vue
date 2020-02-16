@@ -14,6 +14,7 @@
     ref="headerMetadataMenu"
     :is-current-user-admin="isCurrentUserAdmin"
     @edit-clicked="onEditMetadataClicked()"
+    @delete-clicked="onDeleteMetadataClicked()"
     @sort-by-clicked="onSortByMetadataClicked()"
   />
 
