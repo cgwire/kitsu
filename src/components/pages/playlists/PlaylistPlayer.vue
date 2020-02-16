@@ -941,8 +941,7 @@ export default {
       this.annotations = []
       setTimeout(() => {
         this.annotations = annotations
-        const annotation = this.getAnnotation(this.currentTimeRaw)
-        if (annotation) this.loadAnnotation(annotation)
+        this.reloadCurrentAnnotation()
       }, 200)
     },
 
@@ -954,6 +953,11 @@ export default {
       })
     },
 
+    reloadCurrentAnnotation () {
+      const annotation = this.getAnnotation(this.currentTimeRaw)
+      if (annotation) this.loadAnnotation(annotation)
+    },
+
     onCommentClicked () {
       const height = this.$refs['video-container'].offsetHeight
       this.isCommentsHidden = !this.isCommentsHidden
@@ -963,6 +967,7 @@ export default {
       this.$nextTick(() => {
         this.$refs['task-info'].focusCommentTextarea()
         this.resetHeight()
+        setTimeout(this.reloadCurrentAnnotation, 300)
       })
     },
 
