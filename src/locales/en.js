@@ -216,6 +216,7 @@ export default {
       legend_ok: 'Recognized data',
       legend_ignored: 'Ignored data',
       legend_missing: 'Missing data',
+      legend_disabled: 'Disabled data',
       legend_overwrite: 'Data that will be updated',
       paste: 'Paste',
       paste_code: 'Please paste here your CSV data:',

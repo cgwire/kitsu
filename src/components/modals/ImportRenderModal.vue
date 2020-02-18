@@ -43,6 +43,8 @@
             <dd>{{ $t('main.csv.legend_ignored') }}</dd>
             <dt class="missing"></dt>
             <dd>{{ $t('main.csv.legend_missing') }}</dd>
+            <dt class="disabled"></dt>
+            <dd>{{ $t('main.csv.legend_disabled') }}</dd>
             <dt class="overwrite"></dt>
             <dd>{{ $t('main.csv.legend_overwrite') }}</dd>
           </dl>
@@ -90,6 +92,10 @@
           </thead>
           <tbody>
             <tr
+              :class="{
+                overwrite: updateData && existingData(index),
+                disabled: !updateData && existingData(index)
+              }"
               v-for="(line, index) in startFrom(parsedCsv, 1)"
               :key="`line-${index}`"
             >
@@ -173,6 +179,14 @@ export default {
       type: Array,
       default: () => []
     },
+    dataMatchers: {
+      type: Array,
+      default: () => []
+    },
+    database: {
+      type: Array,
+      default: () => []
+    },
     isLoading: {
       type: Boolean,
       default: false
@@ -224,6 +238,14 @@ export default {
 
     columnSelect () {
       return this.parsedCsv[0]
+    },
+
+    indexMatchers () {
+      const indexes = []
+      this.dataMatchers.forEach(item => {
+        indexes.push(this.parsedCsv[0].indexOf(item))
+      })
+      return indexes
     }
   },
 
@@ -261,6 +283,20 @@ export default {
       if (this.duplicates.includes(this.columnSelect[index])) {
         return true
       }
+    },
+    existingData (index) {
+      const csv = this.parsedCsv[index]
+      const db = this.database
+      const columns = this.indexMatchers
+      let itemName = ''
+
+      columns.forEach(col => {
+        itemName += csv[col]
+      })
+
+      if (db.includes(itemName)) {
+        return true
+      }
     }
   }
 }
@@ -292,6 +328,15 @@ export default {
   }
   .ignored {
     background-color: $dark-grey
+  }
+  .disabled {
+    background: repeating-linear-gradient(
+      -45deg,
+      rgba($dark-grey, .6),
+      rgba($dark-grey, .6) 2px,
+      transparent 2px,
+      transparent 10px
+    );
   }
 }
 .modal-content {
@@ -354,6 +399,7 @@ export default {
 .legend {
   display: flex;
   align-items: center;
+  flex-wrap: wrap;
   dt {
     display: inline-block;
     width: 1.5rem;
@@ -370,11 +416,21 @@ export default {
 .missing {
   background-color: rgba($red, .6)
 }
+.disabled {
+  opacity: .4;
+  background: repeating-linear-gradient(
+  -45deg,
+  rgba($light-grey-light, .7),
+  rgba($light-grey-light, .7) 2px,
+  transparent 2px,
+  transparent 10px
+);
+}
 .overwrite {
-  background-color: rgba($orange, .8);
+  background-color: rgba($blue, .6);
 
   &:hover td {
-    background-color: rgba($orange, .5);
+    background-color: rgba($blue, .4);
   }
 }
 </style>
