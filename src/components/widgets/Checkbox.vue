@@ -78,6 +78,11 @@ export default {
       color: $light-grey;
     }
   }
+  .toggle label {
+    &:before {
+      background-color: $mid-grey;
+    }
+  }
 }
 .checkbox-field {
   display: inline-flex;
@@ -126,13 +131,13 @@ export default {
        border-radius: .75rem;
        width: 2.6rem;
        height: 1.5rem;
-       background-color: transparent;
+       background-color: $light-grey;
        transition: background-color 200ms ease-in;
     }
     &:after {
       width: 1.3rem;
       height: 1.3rem;
-      background-color: white;
+      background-color: $white;
       border-radius: 50%;
       transition: left 150ms ease-in;
     }
