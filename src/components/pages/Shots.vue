@@ -166,6 +166,8 @@
     :parsed-csv="parsedCSV"
     :form-data="shotsCsvFormData"
     :columns="columns"
+    :dataMatchers="dataMatchers"
+    :database="filteredShots"
     @reupload="resetImport"
     @cancel="hideImportRenderModal"
     @confirm="uploadImportFile"
@@ -380,8 +382,34 @@ export default {
         collection.push('Episode')
       }
       return collection
-    }
+    },
 
+    dataMatchers () {
+      const collection = [
+        'Sequence',
+        'Name'
+      ]
+      if (this.isTVShow) {
+        collection.push('Episode')
+      }
+      return collection
+    },
+
+    filteredShots () {
+      const shots = []
+      this.displayedShotsBySequence.forEach(sequence => {
+        sequence.forEach(item => {
+          let shot = ''
+          shot += item.sequence_name
+          shot += item.name
+          if (this.isTVShow) {
+            shot += item.episode_name
+          }
+          shots.push(shot)
+        })
+      })
+      return shots
+    }
   },
 
   created () {

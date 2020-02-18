@@ -52,6 +52,8 @@
       :parsed-csv="parsedCSV"
       :form-data="personCsvFormData"
       :columns="csvColumns"
+      :dataMatchers="dataMatchers"
+      :database="filteredPeople"
       @reupload="resetImport"
       @cancel="hideImportRenderModal"
       @confirm="uploadImportFile"
@@ -150,6 +152,10 @@ export default {
         'Last Name',
         'Email',
         'Phone'
+      ],
+      dataMatchers: [
+        'First Name',
+        'Last Name'
       ]
     }
   },
@@ -203,6 +209,17 @@ export default {
       } else {
         return ''
       }
+    },
+
+    filteredPeople () {
+      const persons = []
+      this.displayedPeople.forEach(people => {
+        let person = ''
+        person += people.first_name
+        person += people.last_name
+        persons.push(person)
+      })
+      return persons
     }
   },
 
