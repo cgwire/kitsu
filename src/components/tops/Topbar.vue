@@ -117,7 +117,10 @@
           </a>
         </li>
         <li>
-          <a href="https://slack.cg-wire.com" target="_blank">
+          <a
+            href="https://www.youtube.com/playlist?list=PLp_1gB5ZBHXqnQgZ4TCrAt7smxesaDo29"
+            target="_blank"
+          >
             {{ $t('main.tutorials') }}
           </a>
         </li>
