@@ -39,7 +39,6 @@ colored background. You can change it with a picture if you want.
 ![Edit the details of a production](../img/getting-started/production_edit_popup.png)
 
 
-
 ## Create some assets
 
 So, now you have the first script for your production. It's time to do the
@@ -87,42 +86,40 @@ On the main asset page, to extend the description, click on the first words
 ## Create assets from a csv spreadsheet file
 
 You may have already your asset list ready in a spreadsheet file.
-With Kitsu you have 2 ways to import them, the first is to import a `.csv` file directlyn the second is to copy paste your data directly into Kitsu.
+With Kitsu you have 2 ways to import them, the first is to import a `.csv` file directly, the second is to copy paste your data directly into Kitsu.
 
 First save your spreadsheet as a `.csv` file.
 
-Then, go back to the asset page on Kitsu, and click on the **Import** icon 
+Then, go back to the asset page on Kitsu, and click on the **Import** icon.
 ![Import Icon](../img/getting-started/import.png)
 
-A pop-up window **Import data from a CSV** opens, click on **Browse** to pick your `.csv` file
+A pop-up window **Import data from a CSV** opens, click on **Browse** to pick your `.csv` file.
 
 ![Import csv file](../img/getting-started/import_csv_asset.png)
 
 To see the result, click on the **Preview** button.
- 
-![Import data copy paste data](../img/getting-started/import_pastcsvdata2_asset.png)
   
-You can check and adjust the name of the column with the preview of your data.
+You can check and adjust the name of the columns with the preview of your data.
  
-NB: the **Episode** column is only mandatory for a **TV Show** production
+NB: the **Episode** column is only mandatory for a **TV Show** production.
  
 ![Import data copy paste data](../img/getting-started/import_preview_data.png)
 
-Once your are good, click on the **Confirm** button, to import your data into Kitsu.
+Once everything is good, click on the **Confirm** button, to import your data into Kitsu.
 
 Now, you have all your assets imported into Kitsu.
 
 ![Import data copy paste data](../img/getting-started/import_result_asset.png)
 
 
-## Create assets with copy/past a spreadsheet file
+## Create assets with copy/paste a spreadsheet file
 
 Open you spreadsheet, select your data and copy them.
 
 ![Import copy data](../img/getting-started/import_copypas_asset.png)
 
 Then, go back to the asset page on Kitsu, and click on the **Import** icon 
-![Import Icon](../img/getting-started/import.png)
+![Import Icon](../img/getting-started/import.png).
 
 A pop-up window **Import data from a CSV** opens, click on the **Paste a CSV data** tab.
 
@@ -132,13 +129,13 @@ There you can paste your previously selected data, and see the result with the *
  
 ![Import data copy paste data](../img/getting-started/import_pastcsvdata2_asset.png)
   
-You can check and adjust the name of the column with the preview of your data.
+You can check and adjust the name of the columns with the preview of your data.
  
-NB: the **Episode** column is only mandatory for a **TV Show** production
+NB: the **Episode** column is only mandatory for a **TV Show** production.
  
 ![Import data copy paste data](../img/getting-started/import_preview_data.png)
 
-Once your are good, click on the **Confirm** button, to import your data into Kitsu.
+Once everything is good, click on the **Confirm** button, to import your data into Kitsu.
 
 Now, you have all your assets imported into Kitsu.
 
@@ -301,10 +298,13 @@ To go further in detail with the Supervisor view :
 (4) to (9) is automatically filled.
  
 
-## Create sequences and shots
+## Create (episodes) sequences and shots
 
 It's time to do the breakdown of the storyboard. Meaning you can create
 the sequences and the shots of the episode and associate assets to them.
+
+Nb: Episodes are onlu mandatory for **TV Show** Production.
+
 
 You need to go to the **Shots** page: you can use the
 drop-down menu and click on the **SHOTS**.
@@ -359,6 +359,67 @@ shots are linked to the tasks.
 
 Now we can do the breakdown of the storyboard, meaning associate the assets to
 each shot. 
+
+
+
+## Create shots from a csv spreadsheet file
+
+You may have already your shots list ready in a spreadsheet file.
+With Kitsu you have 2 ways to import them, the first is to import a `.csv` file directly, the second is to copy paste your data directly into Kitsu.
+
+First save your spreadsheet as a `.csv` file.
+
+Then, go back to the shot page on Kitsu, and click on the **Import** icon.
+![Import Icon](../img/getting-started/import.png)
+
+A pop-up window **Import data from a CSV** opens, click on **Browse** to pick your `.csv` file.
+
+![Import csv file](../img/getting-started/import_csv_shot.png)
+
+To see the result, click on the **Preview** button.
+  
+You can check and adjust the name of the columns with the preview of your data.
+ 
+NB: the **Episode** column is only mandatory for a **TV Show** production.
+ 
+![Import data copy paste data](../img/getting-started/import_preview_data_shot.png)
+
+Once everything is good, click on the **Confirm** button, to import your data into Kitsu.
+
+Now, you have all your assets imported into Kitsu.
+
+![Import data copy paste data](../img/getting-started/import_result_shot.png)
+
+
+## Create shots with copy/pastr a spreadsheet file
+
+Open you spreadsheet, select your data and copy them.
+
+![Import copy data](../img/getting-started/import_copypas_shot.png)
+
+Then, go back to the asset page on Kitsu, and click on the **Import** icon 
+![Import Icon](../img/getting-started/import.png).
+
+A pop-up window **Import data from a CSV** opens, click on the **Paste a CSV data** tab.
+
+![Import data copy paste tab](../img/getting-started/import_pastcsvdata_shot.png)
+ 
+There you can paste your previously selected data, and see the result with the **Preview** button.
+ 
+![Import data copy paste data](../img/getting-started/import_pastcsvdata2_shot.png)
+  
+You can check and adjust the name of the columns with the preview of your data.
+ 
+NB: the **Episode** column is only mandatory for a **TV Show** production.
+ 
+![Import data copy paste data](../img/getting-started/import_preview_data_shot.png)
+
+Once everything is good, click on the **Confirm** button, to import your data into Kitsu.
+
+Now, you have all your assets imported into Kitsu.
+
+![Import data copy paste data](../img/getting-started/import_result_shot.png)
+
 
 
 ## Create a breakdown list
