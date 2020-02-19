@@ -1,4 +1,4 @@
-import Vue from 'Vue'
+import Vue from 'vue'
 import { shallowMount } from '@vue/test-utils'
 import ColorPicker from '../../../src/components/widgets/ColorPicker'
 

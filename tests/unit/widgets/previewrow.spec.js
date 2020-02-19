@@ -1,4 +1,4 @@
-import Vue from 'Vue'
+import Vue from 'vue'
 import { mount, createLocalVue } from '@vue/test-utils'
 import PreviewRow from '../../../src/components/widgets/PreviewRow'
 import ButtonLink from '../../../src/components/widgets/ButtonLink'

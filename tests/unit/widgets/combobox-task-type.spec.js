@@ -1,4 +1,4 @@
-import Vue from 'Vue'
+import Vue from 'vue'
 import { mount, createLocalVue } from '@vue/test-utils'
 import ComboboxTaskType from '../../../src/components/widgets/ComboboxTaskType'
 import Vuex from 'vuex'

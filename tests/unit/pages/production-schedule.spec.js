@@ -1,4 +1,4 @@
-import Vue from 'Vue'
+import Vue from 'vue'
 import { shallowMount, createLocalVue } from '@vue/test-utils'
 import vuescroll from 'vue-scroll'
 import Vuex from 'vuex'
