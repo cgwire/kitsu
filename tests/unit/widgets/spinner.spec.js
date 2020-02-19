@@ -1,3 +1,4 @@
+import Vue from 'Vue'
 import { shallowMount } from '@vue/test-utils'
 import Spinner from '../../../src/components/widgets/Spinner'
 
@@ -15,14 +16,20 @@ describe('Spinner', () => {
       expect(wrapper.element.children[0].src).toMatch(new RegExp('spinner.svg$'))
     })
 
-    it('should be 30px wide', () => {
+    it('should be 30px wide', done => {
       wrapper.setProps({ size: 30 })
-      expect(wrapper.element.style.width).toMatch('30px')
+      Vue.nextTick(() => {
+        expect(wrapper.element.style.width).toMatch('30px')
+        done()
+      })
     })
 
-    it('should be white', () => {
+    it('should be white', done => {
       wrapper.setProps({ isWhite: true })
-      expect(wrapper.element.children[0].src).toMatch(new RegExp('spinner-white.svg$'))
+      Vue.nextTick(() => {
+        expect(wrapper.element.children[0].src).toMatch(new RegExp('spinner-white.svg$'))
+        done()
+      })
     })
   })
 })
