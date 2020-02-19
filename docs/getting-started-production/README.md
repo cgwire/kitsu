@@ -305,7 +305,6 @@ the sequences and the shots of the episode and associate assets to them.
 
 Nb: Episodes are onlu mandatory for **TV Show** Production.
 
-
 You need to go to the **Shots** page: you can use the
 drop-down menu and click on the **SHOTS**.
 
@@ -361,7 +360,6 @@ Now we can do the breakdown of the storyboard, meaning associate the assets to
 each shot. 
 
 
-
 ## Create shots from a csv spreadsheet file
 
 You may have already your shots list ready in a spreadsheet file.
@@ -386,7 +384,7 @@ NB: the **Episode** column is only mandatory for a **TV Show** production.
 
 Once everything is good, click on the **Confirm** button, to import your data into Kitsu.
 
-Now, you have all your assets imported into Kitsu.
+Now, you have all your shots imported into Kitsu.
 
 ![Import data copy paste data](../img/getting-started/import_result_shot.png)
 
@@ -397,7 +395,7 @@ Open you spreadsheet, select your data and copy them.
 
 ![Import copy data](../img/getting-started/import_copypas_shot.png)
 
-Then, go back to the asset page on Kitsu, and click on the **Import** icon 
+Then, go back to the shot page on Kitsu, and click on the **Import** icon 
 ![Import Icon](../img/getting-started/import.png).
 
 A pop-up window **Import data from a CSV** opens, click on the **Paste a CSV data** tab.
@@ -416,7 +414,7 @@ NB: the **Episode** column is only mandatory for a **TV Show** production.
 
 Once everything is good, click on the **Confirm** button, to import your data into Kitsu.
 
-Now, you have all your assets imported into Kitsu.
+Now, you have all your shots imported into Kitsu.
 
 ![Import data copy paste data](../img/getting-started/import_result_shot.png)
 
@@ -488,21 +486,21 @@ You can fill the asset breakdown page, the same way than the shots. Select one o
 
 ## Create a breakdown list from a CSV file
 
-You may have already your breakdown list ready in a spreadsheet file. With Kitsu you have 2 ways to import it, the first is to import a .csv file directly, the second is to copy paste your data directly into Kitsu.
+You may have already your breakdown list ready in a spreadsheet file. With Kitsu you have 2 ways to import it, the first is to import a .`csv` file directly, the second is to copy paste your data directly into Kitsu.
 
-First save your spreadsheet as a .csv file following Kitsu's recommandation.
+First save your spreadsheet as a `.csv` file following Kitsu's recommandation.
 
 Click on the **import** button ![Import button](../img/getting-started/import.png)
 
-A pop-up window **Import data from a CSV** opens, click on Browse to pick your `.csv` file.
+A pop-up window **Import data from a CSV** opens, click on **Browse** to pick your `.csv` file.
 
 ![Breakdown import csv file](../img/getting-started/import_breakdown_csv_file.png)
 
-To see the result, click on the Preview button.
+To see the result, click on the **Preview** button.
 
 You can check and adjust the name of the columns with the preview of your data.
 
-NB: the Episode column is only mandatory for a TV Show production.
+NB: the **Episode** column is only mandatory for a **TV Show** production.
 
 ![Breakdown import Preview](../img/getting-started/import_breakdown_preview.png)
 
