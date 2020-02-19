@@ -1,3 +1,4 @@
+import Vue from 'vue'
 import { shallowMount, createLocalVue } from '@vue/test-utils'
 import Vuex from 'vuex'
 import i18n from '../../../src/lib/i18n'
@@ -6,7 +7,6 @@ import TableInfo from '../../../src/components/widgets/TableInfo'
 
 const localVue = createLocalVue()
 localVue.use(Vuex)
-
 
 describe('ShotHistoryModal', () => {
   let store, shotStore
@@ -62,21 +62,24 @@ describe('ShotHistoryModal', () => {
       const modal = wrapper.find(ShotHistoryModal)
       const tableInfo = wrapper.find(TableInfo)
       expect(tableInfo.props().isLoading).toBe(false)
-      expect(modal.findAll('.shot-version').length).toBe(0)
+      expect(modal.findAll('.shot-version')).toHaveLength(0)
     })
-    it('spinner on loading', () => {
+    it('spinner on loading', done => {
       wrapper.setData({ isLoading: true })
-      const modal = wrapper.find(ShotHistoryModal)
-      const tableInfo = wrapper.find(TableInfo)
-      expect(tableInfo.props().isLoading).toBe(true)
-      expect(modal.findAll('.shot-version').length).toBe(0)
+      Vue.nextTick(() => {
+        const modal = wrapper.find(ShotHistoryModal)
+        const tableInfo = wrapper.find(TableInfo)
+        expect(tableInfo.props().isLoading).toBe(true)
+        expect(modal.findAll('.shot-version')).toHaveLength(0)
+        done()
+      })
     })
     it('data loaded', async () => {
       await wrapper.vm.loadData()
       const modal = wrapper.find(ShotHistoryModal)
       const tableInfo = wrapper.find(TableInfo)
       expect(tableInfo.props().isLoading).toBe(false)
-      expect(modal.findAll('.shot-version').length).toBe(2)
+      expect(modal.findAll('.shot-version')).toHaveLength(2)
     })
   })
 })

@@ -1,3 +1,4 @@
+import Vue from 'vue'
 import { shallowMount, createLocalVue } from '@vue/test-utils'
 import Vuex from 'vuex'
 import i18n from '../../../src/lib/i18n'
@@ -59,15 +60,21 @@ describe('ShowInfosButton', () => {
       expect(wrapper.element.getAttribute('title')).toMatch('Hide additional information')
     })
 
-    it('should trigger a function on click', () => {
+    it('should trigger a function on click', done => {
       const button = wrapper.find('button')
       button.trigger('click')
-      expect(actions.hideInfos).toHaveBeenCalled()
+      Vue.nextTick(() => {
+        expect(actions.hideInfos).toHaveBeenCalled()
+        done()
+      })
     })
 
-    it('should be Off', () => {
+    it('should be Off', done => {
       store.commit('toggleState')
-      expect(wrapper.element.getAttribute('title')).toMatch('Show additional information')
+      Vue.nextTick(() => {
+        expect(wrapper.element.getAttribute('title')).toMatch('Show additional information')
+        done()
+      })
     })
   })
 })

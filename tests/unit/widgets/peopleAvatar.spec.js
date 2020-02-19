@@ -1,3 +1,4 @@
+import Vue from 'vue'
 import { mount, createLocalVue } from '@vue/test-utils'
 import PeopleAvatar from '../../../src/components/widgets/PeopleAvatar'
 import VueRouter from 'vue-router'
@@ -45,7 +46,7 @@ describe('PeopleAvatar', () => {
       expect(wrapper.find('.avatar-link').exists()).toBe(false)
     })
 
-    it('should use cache for images', () => {
+    it('should use cache for images', done => {
       wrapper.setProps({
         person: {
           has_avatar: true,
@@ -53,8 +54,11 @@ describe('PeopleAvatar', () => {
           uniqueHash: '1337'
         }
       })
-      expect(wrapper.element.children[0].src).toMatch(new RegExp(/img.png\?unique=1337$/))
-      expect(wrapper.props('avatarKey')).toBeUndefined()
+      Vue.nextTick(() => {
+        expect(wrapper.element.children[0].src).toMatch(new RegExp(/img.png\?unique=1337$/))
+        expect(wrapper.props('avatarKey')).toBeUndefined()
+        done()
+      })
     })
 
     it('should display an avatar with a width & height of 30px', () => {

@@ -1,10 +1,10 @@
+import Vue from 'vue'
 import { shallowMount, createLocalVue } from '@vue/test-utils'
 import vuescroll from 'vue-scroll'
 import Vuex from 'vuex'
 import moment from 'moment'
 
 import i18n from '../../../src/lib/i18n'
-import { range } from '../../../src/lib/time'
 
 import ProductionSchedule from '../../../src/components/pages/ProductionSchedule'
 
@@ -17,10 +17,8 @@ localVue.directive('focus', {
   }
 })
 
-
 describe('ProductionSchedule', () => {
   let store
-  let newsStore
   let productionStore
   let taskStore
   let taskStatusStore
@@ -58,21 +56,21 @@ describe('ProductionSchedule', () => {
       actions: {
         loadTask: jest.fn()
       }
-    },
+    }
     taskStatusStore = {
       getters: {
         taskStatus: () => []
       },
       actions: {
       }
-    },
+    }
     taskTypeStore = {
       getters: {
         taskTypes: () => []
       },
       actions: {
       }
-    },
+    }
     productionStore = {
       getters: {
         currentProduction: () => ({ id: 'production-1', name: 'Prod 1' })
@@ -130,7 +128,6 @@ describe('ProductionSchedule', () => {
     })
   })
 
-
   describe('Mount', () => {
     test('mounted', () => {
     })
@@ -145,22 +142,25 @@ describe('ProductionSchedule', () => {
     test('onBodyScroll', () => {
     })
 
-    test('convertScheduleItems', () => {
-      let item = wrapper.vm.convertScheduleItems([{
+    test('convertScheduleItems', done => {
+      const item = wrapper.vm.convertScheduleItems(undefined, [{
         name: 'Characters',
         start_date: '2019-08-15',
         end_date: '2019-09-01'
       }])
-      expect(item[0]).toEqual({
-        editable: true,
-        name: 'Characters',
-        start_date: '2019-08-15',
-        end_date: '2019-09-01',
-        startDate: moment('2019-08-15', 'YYYY-MM-DD', 'en'),
-        endDate: moment('2019-09-01', 'YYYY-MM-DD', 'en'),
-        expanded: false,
-        loading: false,
-        children: []
+      Vue.nextTick(() => {
+        expect(item[0]).toEqual({
+          editable: true,
+          name: 'Characters',
+          start_date: '2019-08-15',
+          end_date: '2019-09-01',
+          startDate: moment('2019-08-15', 'YYYY-MM-DD', 'en'),
+          endDate: moment('2019-09-01', 'YYYY-MM-DD', 'en'),
+          expanded: false,
+          loading: false,
+          children: []
+        })
+        done()
       })
     })
   })

@@ -1,3 +1,4 @@
+import Vue from 'vue'
 import { shallowMount, createLocalVue } from '@vue/test-utils'
 import Vuex from 'vuex'
 import i18n from '../../../src/lib/i18n'
@@ -59,15 +60,21 @@ describe('ShowAssignationsButton', () => {
       expect(wrapper.element.getAttribute('title')).toMatch('Hide assignations')
     })
 
-    it('should trigger a function on click', () => {
+    it('should trigger a function on click', done => {
       const button = wrapper.find('button')
       button.trigger('click')
-      expect(actions.hideAssignations).toHaveBeenCalled()
+      Vue.nextTick(() => {
+        expect(actions.hideAssignations).toHaveBeenCalled()
+        done()
+      })
     })
 
-    it('should be Off', () => {
+    it('should be Off', done => {
       store.commit('toggleState')
-      expect(wrapper.element.getAttribute('title')).toMatch('Show assignations')
+      Vue.nextTick(() => {
+        expect(wrapper.element.getAttribute('title')).toMatch('Show assignations')
+        done()
+      })
     })
   })
 })

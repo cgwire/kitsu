@@ -1,3 +1,4 @@
+import Vue from 'vue'
 import { shallowMount } from '@vue/test-utils'
 import ColorPicker from '../../../src/components/widgets/ColorPicker'
 
@@ -21,12 +22,15 @@ describe('ColorPicker', () => {
       expect(palette.isVisible()).toBe(false)
     })
 
-    it('should open the palette', () => {
+    it('should open the palette', done => {
       wrapper.find('button').trigger('click')
-      expect(palette.isVisible()).toBe(true)
-      expect(labels.at(0).element.style.color).toMatch('rgb(255, 255, 255)')
-      expect(labels.at(1).element.style.color).toMatch('rgb(255, 0, 0)')
-      expect(labels.at(2).element.style.color).toMatch('rgb(204, 204, 204)')
+      Vue.nextTick(() => {
+        expect(palette.isVisible()).toBe(true)
+        expect(labels.at(0).element.style.color).toMatch('rgb(255, 255, 255)')
+        expect(labels.at(1).element.style.color).toMatch('rgb(255, 0, 0)')
+        expect(labels.at(2).element.style.color).toMatch('rgb(204, 204, 204)')
+        done()
+      })
     })
   })
 })

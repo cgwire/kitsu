@@ -1,3 +1,4 @@
+import Vue from 'vue'
 import { mount, createLocalVue } from '@vue/test-utils'
 import ComboboxTaskType from '../../../src/components/widgets/ComboboxTaskType'
 import Vuex from 'vuex'
@@ -5,9 +6,7 @@ import Vuex from 'vuex'
 const localVue = createLocalVue()
 localVue.use(Vuex)
 
-
 describe('ComboboxTaskType', () => {
-
   let taskTypeStore
   let store
   let wrapper
@@ -58,7 +57,6 @@ describe('ComboboxTaskType', () => {
       store,
       localVue
     })
-
   })
 
   describe('Mount', () => {
@@ -70,14 +68,19 @@ describe('ComboboxTaskType', () => {
         },
         store
       })
+      const lines = emptyWrapper.findAll('.task-type-line')
+      expect(lines).toHaveLength(0)
     })
 
-    test('Ensure task type list', () => {
+    test('Ensure task type list', done => {
       let lines = wrapper.findAll('.task-type-line')
-      expect(lines.length).toEqual(0)
+      expect(lines).toHaveLength(0)
       wrapper.vm.toggleTaskTypeList()
-      lines = wrapper.findAll('.task-type-line')
-      expect(lines.length).toEqual(2)
+      Vue.nextTick(() => {
+        lines = wrapper.findAll('.task-type-line')
+        expect(lines).toHaveLength(2)
+        done()
+      })
     })
   })
 
