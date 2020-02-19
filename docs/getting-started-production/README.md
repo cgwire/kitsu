@@ -391,7 +391,7 @@ Now, you have all your assets imported into Kitsu.
 ![Import data copy paste data](../img/getting-started/import_result_shot.png)
 
 
-## Create shots with copy/pastr a spreadsheet file
+## Create shots with copy/paste a spreadsheet file
 
 Open you spreadsheet, select your data and copy them.
 
@@ -474,24 +474,6 @@ Now your **Breakdown** page should look like this.
 
 ![breakdown add asset bulk](../img/getting-started/breakdown_general_bulk_select_full.png)
 
-
-You can also import or export your breakdown list, with a `.csv`file.
-
-Click on the **import** button ![Import button](../img/getting-started/import.png)
-
-We can now assign people to the shots tasks. If the animation and so, are done
-elsewhere, you can create an account for this studio and assign it to tasks.
-They can see your progress.
-
-If you want to see a detail of a shot, click on its name. 
-
-![Shot detail](../img/getting-started/shot_detail.png)
-
-A new page opens with the list of the tasks, the assignation, and the list
-of assets that appear on this shot (**Shot casting**).
- 
-![Shot detail page](../img/getting-started/shot_detail_page.png)
- 
 You can also make a breakdown list for your assets if you need to assemble them and keep track of the separated parts.
 
 On the top left corner of the screen, choose **Asset** in the drop-down menu, below **FOR**.
@@ -503,6 +485,75 @@ You now have access to a second drop-down menu, where you can choose your asset 
 ![Breakdown asset type](../img/getting-started/breakdown_asset_menu_type.png)
 
 You can fill the asset breakdown page, the same way than the shots. Select one or more assets on the left part, then add the elements from the right part.
+
+## Create a breakdown list from a CSV file
+
+You may have already your breakdown list ready in a spreadsheet file. With Kitsu you have 2 ways to import it, the first is to import a .csv file directly, the second is to copy paste your data directly into Kitsu.
+
+First save your spreadsheet as a .csv file following Kitsu's recommandation.
+
+Click on the **import** button ![Import button](../img/getting-started/import.png)
+
+A pop-up window Import data from a CSV opens, click on Browse to pick your `.csv` file.
+
+![Breakdown import csv file](../img/getting-started/import_breakdown_csv_file.png)
+
+To see the result, click on the Preview button.
+
+You can check and adjust the name of the columns with the preview of your data.
+
+NB: the Episode column is only mandatory for a TV Show production.
+
+![Breakdown import Preview](../img/getting-started/import_breakdown_preview.png)
+
+Once everything is good, click on the **Confirm** button, to import your data into Kitsu.
+
+Now, you have your breakdown imported into Kitsu.
+
+![Breakdown import Preview](../img/getting-started/breakdown_general_bulk_select_full.png)
+
+
+## Create a breakdown list with copy/paste a spreadsheet file
+
+Open you spreadsheet, select your data and copy them.
+
+![Import copy data](../img/getting-started/import_copypas_breakdown.png)
+
+Then, go back to the breakdown page on Kitsu, and click on the **Import** icon 
+![Import Icon](../img/getting-started/import.png).
+
+A pop-up window **Import data from a CSV** opens, click on the **Paste a CSV data** tab.
+
+![Import data copy paste tab](../img/getting-started//import_breakdown_csv_file.png)
+ 
+There you can paste your previously selected data, and see the result with the **Preview** button.
+ 
+![Import data copy paste data](../img/getting-started/import_breakdown_preview.png)
+  
+You can check and adjust the name of the columns with the preview of your data.
+ 
+NB: the **Episode** column is only mandatory for a **TV Show** production.
+ 
+![Import data copy paste data](../img/getting-started/import_preview_data_shot.png)
+
+Once everything is good, click on the **Confirm** button, to import your data into Kitsu.
+
+Now, you have all your assets imported into Kitsu.
+
+![Import data copy paste data](../img/getting-started/breakdown_general_bulk_select_full.png)
+
+
+## See detail of a shot
+
+If you want to see a detail of a shot, click on its name. 
+
+![Shot detail](../img/getting-started/shot_detail.png)
+
+A new page opens with the list of the tasks, the assignation, and the list
+of assets that appear on this shot (**Shot casting**).
+ 
+![Shot detail page](../img/getting-started/shot_detail_page.png)
+ 
 
 
 ## Add the Frameranges
