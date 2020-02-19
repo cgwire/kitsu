@@ -253,6 +253,7 @@ export default {
     add_episode: 'Ajouter l\'épisode',
     add_movie: 'Ajouter tout le film',
     add_sequence: 'Ajouter séquence',
+    apply_task_type_change: 'Cela positionnera la dernière révision du type de tâche donné pour tous les plans.',
     available_build: 'Builds disponibles',
     build_daily: 'Valid. quotidienne',
     build_weekly: 'Valid. hebodomadaire',
@@ -279,6 +280,7 @@ export default {
     no_shot_for_production: 'Il n\'y pas de plan pour cette production',
     select_shot: 'Sélectionnez un plan dans la colonne de droite',
     select_playlist: 'Sélectionnez une playlist dans la colonne de gauche',
+    select_task_type: 'Changer le type de tâche pour tous les plans',
     title: 'Playlists',
     updated_at: 'Mis à jour le:',
     fields: {

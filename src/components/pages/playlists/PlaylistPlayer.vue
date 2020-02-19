@@ -211,6 +211,12 @@
 
     <button-simple
       class="playlist-button flexrow-item"
+      icon="layers"
+      @click="showTaskTypeModal"
+    />
+
+    <button-simple
+      class="playlist-button flexrow-item"
       icon="undo"
       @click="undoLastAction"
     />
@@ -380,6 +386,14 @@
     @confirm="confirmRemovePlaylist"
     @cancel="hideDeleteModal"
   />
+
+  <select-task-type-modal
+    :active="modals.taskType"
+    :task-type-list="shotTaskTypes"
+    @confirm="confirmChangeTaskType"
+    @cancel="hideTaskTypeModal"
+  />
+
 </div>
 </template>
 
@@ -401,6 +415,7 @@ import DeleteModal from '../../modals/DeleteModal'
 import PencilPicker from '../../widgets/PencilPicker'
 import PlaylistedShot from './PlaylistedShot'
 import RawVideoPlayer from './RawVideoPlayer'
+import SelectTaskTypeModal from '../../modals/SelectTaskTypeModal'
 import Spinner from '../../widgets/Spinner'
 import TaskInfo from '../../sides/TaskInfo'
 
@@ -419,6 +434,7 @@ export default {
     PencilPicker,
     PlaylistedShot,
     RawVideoPlayer,
+    SelectTaskTypeModal,
     Spinner,
     TaskInfo
   },
@@ -471,7 +487,8 @@ export default {
       taskTypeToCompare: null,
       modals: {
         edit: false,
-        delete: false
+        delete: false,
+        taskType: false
       },
       loading: {
         playlists: false,
@@ -515,6 +532,7 @@ export default {
       'isCurrentUserManager',
       'taskMap',
       'taskTypeMap',
+      'shotTaskTypes',
       'user'
     ]),
 
@@ -594,6 +612,7 @@ export default {
 
   methods: {
     ...mapActions([
+      'changePlaylistType',
       'deletePlaylist',
       'editPlaylist',
       'removeBuildJob',
@@ -1034,6 +1053,10 @@ export default {
 
     onPreviewChanged (shot, previewFileId) {
       this.$emit('preview-changed', shot, previewFileId)
+      const localShot = this.shotList.find(s => s.id === shot.id)
+      localShot.preview_file_id = previewFileId
+      this.reloadCurrentShot()
+      this.rawPlayer.loadNextShot()
     },
 
     onShotDropped (info) {
@@ -1294,6 +1317,19 @@ export default {
       this.$nextTick(() => {
         this.resetCanvasSize()
       })
+    },
+
+    showTaskTypeModal () {
+      this.modals.taskType = true
+    },
+
+    hideTaskTypeModal () {
+      this.modals.taskType = false
+    },
+
+    confirmChangeTaskType (taskTypeId) {
+      this.$emit('task-type-changed', taskTypeId)
+      this.modals.taskType = false
     }
   },
 

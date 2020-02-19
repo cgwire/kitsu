@@ -144,6 +144,10 @@ export default {
       this.$emit('shot-change', this.currentIndex)
     },
 
+    reloadCurrentShot () {
+      this.loadShot(this.currentIndex)
+    },
+
     loadShot (index = 0) {
       if (index < this.shots.length) {
         const nextIndex = this.getNextIndex(index)
@@ -247,23 +251,24 @@ export default {
     },
 
     getWidth () {
-      return this.currentPlayer.offsetWidth
+      return this.currentPlayer ? this.currentPlayer.offsetWidth : 0
     },
 
     getHeight () {
-      return this.currentPlayer.offsetHeight
+      return this.currentPlayer ? this.currentPlayer.offsetHeight : 0
     },
 
     getVideoRatio () {
-      return this.getVideoWidth() / this.getVideoHeight()
+      const height = this.getVideoHeight()
+      return height ? this.getVideoWidth() / height : 0
     },
 
     getVideoWidth () {
-      return this.currentPlayer.videoWidth
+      return this.currentPlayer ? this.currentPlayer.videoWidth : 0
     },
 
     getVideoHeight () {
-      return this.currentPlayer.videoHeight
+      return this.currentPlayer ? this.currentPlayer.videoHeight : 0
     }
   },
 
