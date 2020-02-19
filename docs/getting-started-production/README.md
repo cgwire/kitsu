@@ -494,7 +494,7 @@ First save your spreadsheet as a .csv file following Kitsu's recommandation.
 
 Click on the **import** button ![Import button](../img/getting-started/import.png)
 
-A pop-up window Import data from a CSV opens, click on Browse to pick your `.csv` file.
+A pop-up window **Import data from a CSV** opens, click on Browse to pick your `.csv` file.
 
 ![Breakdown import csv file](../img/getting-started/import_breakdown_csv_file.png)
 
@@ -534,7 +534,7 @@ You can check and adjust the name of the columns with the preview of your data.
  
 NB: the **Episode** column is only mandatory for a **TV Show** production.
  
-![Import data copy paste data](../img/getting-started/import_preview_data_shot.png)
+![Import data copy paste data](../img/getting-started/import_breakdown_preview.png)
 
 Once everything is good, click on the **Confirm** button, to import your data into Kitsu.
 
