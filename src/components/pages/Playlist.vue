@@ -134,6 +134,7 @@
           @edit-clicked="showEditModal"
           @show-add-shots="toggleAddShots"
           @preview-changed="onPreviewChanged"
+          @task-type-changed="onTaskTypeChanged"
           @playlist-deleted="goFirstPlaylist"
           @remove-shot="removeShot"
           @order-change="onOrderChange"
@@ -181,6 +182,17 @@
                 {{ $t('playlists.add_selection') }}
               </button>
               <span class="filler"></span>
+              <button
+                :class="{
+                  button: true,
+                  'add-sequence': true,
+                  'is-loading': this.loading.addDaily
+                }"
+                :disabled="isAdditionLoading"
+                @click="addDailyPending"
+              >
+                {{ $t('playlists.build_daily') }}
+              </button>
               <button
                 :class="{
                   button: true,
@@ -405,6 +417,7 @@ export default {
       'addShotPreviewToPlaylist',
       'changePlaylistOrder',
       'changePlaylistPreview',
+      'changePlaylistType',
       'displayMoreShots',
       'editPlaylist',
       'getPending',
@@ -825,6 +838,16 @@ export default {
         for_client: false
       }
       this.modals.isEditDisplayed = false
+    },
+
+    onTaskTypeChanged (taskTypeId) {
+      this.changePlaylistType({
+        playlist: this.currentPlaylist,
+        taskTypeId,
+        callback: () => {
+          this.rebuildCurrentShots()
+        }
+      })
     }
   },
 

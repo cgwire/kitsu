@@ -83,7 +83,6 @@ export default {
   },
 
   mounted () {
-    this.selectedTaskType = this.taskType
   },
 
   computed: {

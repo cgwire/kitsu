@@ -88,6 +88,10 @@
     :class="iconClass"
     v-if="icon === 'pencil'"
   />
+  <layers-icon
+    :class="iconClass"
+    v-if="icon === 'layers'"
+  />
 
   <span
     :class="{
@@ -113,6 +117,7 @@ import {
   Edit2Icon,
   FilmIcon,
   ImageIcon,
+  LayersIcon,
   MaximizeIcon,
   MessageSquareIcon,
   PauseIcon,
@@ -139,6 +144,7 @@ export default {
     Edit2Icon,
     FilmIcon,
     ImageIcon,
+    LayersIcon,
     MaximizeIcon,
     MessageSquareIcon,
     PauseIcon,

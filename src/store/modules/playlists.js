@@ -22,6 +22,7 @@ import {
 
   CHANGE_PLAYLIST_PREVIEW,
   CHANGE_PLAYLIST_ORDER,
+  CHANGE_PLAYLIST_TYPE,
   ADD_SHOT_TO_PLAYLIST,
   REMOVE_SHOT_FROM_PLAYLIST,
   LOAD_SHOT_PREVIEW_FILES_END,
@@ -188,6 +189,13 @@ const actions = {
 
   runPlaylistBuild ({ commit }, playlist) {
     playlistsApi.runPlaylistBuild(playlist)
+  },
+
+  changePlaylistType (
+    { commit, dispatch }, { playlist, taskTypeId, callback }
+  ) {
+    commit(CHANGE_PLAYLIST_TYPE, { playlist, taskTypeId })
+    return dispatch('editPlaylist', { data: playlist, callback })
   }
 }
 
@@ -323,6 +331,21 @@ const mutations = {
   [REMOVE_BUILD_JOB] (state, job) {
     const playlist = state.playlistMap[job.playlist_id]
     Vue.set(playlist, 'build_jobs', removeModelFromList(playlist.build_jobs, job))
+  },
+
+  [CHANGE_PLAYLIST_TYPE] (state, { playlist, taskTypeId }) {
+    if (playlist) {
+      playlist.shots.forEach((shot) => {
+        if (shot.preview_files[taskTypeId]) {
+          const previewFile = shot.preview_files[taskTypeId][0]
+          shot.preview_file_id = previewFile.id
+          shot.preview_file_extension = previewFile.extension
+          shot.preview_file_annotations = previewFile.annotations
+          shot.extension = previewFile.extension
+          shot.annotations = previewFile.annotations
+        }
+      })
+    }
   },
 
   [RESET_ALL] (state) {

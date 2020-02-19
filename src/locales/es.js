@@ -287,10 +287,11 @@ export default {
 
   playlists: {
     add_selection: 'Añade la selección',
-    add_shots: 'Añadir tomas',
+    add_shots: 'Añadir shots',
     add_sequence: 'Añadir secuencia completa',
     add_episode: 'Añadir episodio completa',
     add_movie: 'Añadir film completa',
+    apply_task_type_change: 'Esto posicionará la última revisión para el tipo de tarea dada en todos los shots.',
     available_build: 'Construcciones disponibles',
     build_daily: 'Diario pendiente',
     build_weekly: 'Todos Pendientes',
@@ -317,6 +318,7 @@ export default {
     no_shot_for_sequence: 'No hay ninguna toma para esta secuencia',
     select_shot: 'Por favor, seleccione una toma en la columna de la derecha',
     select_playlist: 'Por favor, seleccione una lista de reproducción en la columna de la izquierda',
+    select_task_type: 'Cambiar el tipo de tarea para todos los planes',
     title: 'Listas de reproducción',
     updated_at: 'Actualizado en:',
     remove: 'quitar',
