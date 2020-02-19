@@ -1,3 +1,4 @@
+import Vue from 'Vue'
 import { mount, createLocalVue } from '@vue/test-utils'
 import PreviewRow from '../../../src/components/widgets/PreviewRow'
 import ButtonLink from '../../../src/components/widgets/ButtonLink'
@@ -29,14 +30,20 @@ describe('PreviewRow', () => {
       expect(link.attributes('href')).toEqual('#/')
     })
 
-    it('should have a valid link', () => {
+    it('should have a valid link', done => {
       wrapper.setProps({ previewPath: '/path/to/' })
-      expect(link.attributes('href')).toEqual('#/path/to/')
+      Vue.nextTick(() => {
+        expect(link.attributes('href')).toEqual('#/path/to/')
+        done()
+      })
     })
 
-    it('should have a selected class', () => {
+    it('should have a selected class', done => {
       wrapper.setProps({ selected: true })
-      expect(wrapper.classes('selected')).toBe(true)
+      Vue.nextTick(() => {
+        expect(wrapper.classes('selected')).toBe(true)
+        done()
+      })
     })
   })
 })
