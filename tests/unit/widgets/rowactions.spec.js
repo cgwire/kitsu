@@ -1,3 +1,4 @@
+import Vue from 'Vue'
 import { shallowMount, createLocalVue } from '@vue/test-utils'
 import Vuex from 'vuex'
 import VueRouter from 'vue-router'
@@ -61,40 +62,49 @@ describe('RowActions', () => {
       expect(buttonDelete.exists()).toBe(false)
     })
 
-    it('should only display Restore & Delete buttons', () => {
+    it('should only display Restore & Delete buttons', done => {
       wrapper.setProps({ entry: { canceled: true } })
-      buttonEdit = wrapper.findAll('[data-test="button-edit"]')
-      buttonRestore = wrapper.findAll('[data-test="button-restore"]')
-      buttonDelete = wrapper.findAll('[data-test="button-delete"]')
-      buttonDeleteAdmin = wrapper.findAll('[data-test="button-delete-admin"]')
-      expect(buttonEdit.exists()).toBe(false)
-      expect(buttonRestore.exists()).toBe(true)
-      expect(buttonDeleteAdmin.exists()).toBe(false)
-      expect(buttonDelete.exists()).toBe(true)
+      Vue.nextTick(() => {
+        buttonEdit = wrapper.findAll('[data-test="button-edit"]')
+        buttonRestore = wrapper.findAll('[data-test="button-restore"]')
+        buttonDelete = wrapper.findAll('[data-test="button-delete"]')
+        buttonDeleteAdmin = wrapper.findAll('[data-test="button-delete-admin"]')
+        expect(buttonEdit.exists()).toBe(false)
+        expect(buttonRestore.exists()).toBe(true)
+        expect(buttonDeleteAdmin.exists()).toBe(false)
+        expect(buttonDelete.exists()).toBe(true)
+        done()
+      })
     })
 
-    it('should only display Delete Admin button', () => {
+    it('should only display Delete Admin button', done => {
       wrapper.setProps({ hideEdit: true })
-      buttonEdit = wrapper.findAll('[data-test="button-edit"]')
-      buttonRestore = wrapper.findAll('[data-test="button-restore"]')
-      buttonDelete = wrapper.findAll('[data-test="button-delete"]')
-      buttonDeleteAdmin = wrapper.findAll('[data-test="button-delete-admin"]')
-      expect(buttonEdit.exists()).toBe(false)
-      expect(buttonRestore.exists()).toBe(false)
-      expect(buttonDeleteAdmin.exists()).toBe(true)
-      expect(buttonDelete.exists()).toBe(false)
+      Vue.nextTick(() => {
+        buttonEdit = wrapper.findAll('[data-test="button-edit"]')
+        buttonRestore = wrapper.findAll('[data-test="button-restore"]')
+        buttonDelete = wrapper.findAll('[data-test="button-delete"]')
+        buttonDeleteAdmin = wrapper.findAll('[data-test="button-delete-admin"]')
+        expect(buttonEdit.exists()).toBe(false)
+        expect(buttonRestore.exists()).toBe(false)
+        expect(buttonDeleteAdmin.exists()).toBe(true)
+        expect(buttonDelete.exists()).toBe(false)
+        done()
+      })
     })
 
-    it('should only display Edit button', () => {
+    it('should only display Edit button', done => {
       wrapper.setProps({ hideDelete: true })
-      buttonEdit = wrapper.findAll('[data-test="button-edit"]')
-      buttonRestore = wrapper.findAll('[data-test="button-restore"]')
-      buttonDelete = wrapper.findAll('[data-test="button-delete"]')
-      buttonDeleteAdmin = wrapper.findAll('[data-test="button-delete-admin"]')
-      expect(buttonEdit.exists()).toBe(true)
-      expect(buttonRestore.exists()).toBe(false)
-      expect(buttonDeleteAdmin.exists()).toBe(false)
-      expect(buttonDelete.exists()).toBe(false)
+      Vue.nextTick(() => {
+        buttonEdit = wrapper.findAll('[data-test="button-edit"]')
+        buttonRestore = wrapper.findAll('[data-test="button-restore"]')
+        buttonDelete = wrapper.findAll('[data-test="button-delete"]')
+        buttonDeleteAdmin = wrapper.findAll('[data-test="button-delete-admin"]')
+        expect(buttonEdit.exists()).toBe(true)
+        expect(buttonRestore.exists()).toBe(false)
+        expect(buttonDeleteAdmin.exists()).toBe(false)
+        expect(buttonDelete.exists()).toBe(false)
+        done()
+      })
     })
   })
 })
