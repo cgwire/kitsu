@@ -36,18 +36,28 @@
             v-model="updateData"
           />
           <h2 class="legend-title">{{ $t('main.csv.legend') }}</h2>
-          <dl class="legend">
-            <dt></dt>
-            <dd>{{ $t('main.csv.legend_ok') }}</dd>
-            <dt class="ignored"></dt>
-            <dd>{{ $t('main.csv.legend_ignored') }}</dd>
-            <dt class="missing"></dt>
-            <dd>{{ $t('main.csv.legend_missing') }}</dd>
-            <dt class="disabled"></dt>
-            <dd>{{ $t('main.csv.legend_disabled') }}</dd>
-            <dt class="overwrite"></dt>
-            <dd>{{ $t('main.csv.legend_overwrite') }}</dd>
-          </dl>
+          <ul class="legend">
+            <li class="legend-definition">
+              <span class="legend-term"></span>
+              {{ $t('main.csv.legend_ok') }}
+            </li>
+            <li class="legend-definition">
+              <span class="legend-term ignored"></span>
+              {{ $t('main.csv.legend_ignored') }}
+            </li>
+            <li class="legend-definition">
+              <span class="legend-term missing"></span>
+              {{ $t('main.csv.legend_missing') }}
+            </li>
+            <li class="legend-definition">
+              <span class="legend-term disabled"></span>
+              {{ $t('main.csv.legend_disabled') }}
+            </li>
+            <li class="legend-definition">
+              <span class="legend-term overwrite"></span>
+              {{ $t('main.csv.legend_overwrite') }}
+            </li>
+          </ul>
         </div>
       </div>
 
@@ -321,10 +331,8 @@ export default {
   .legend-title {
     color: $white;
   }
-  .legend {
-    dt {
-      border: 1px solid $dark-grey-lightest;
-    }
+  .legend-term {
+    border: 1px solid $dark-grey-lightest;
   }
   .ignored {
     background-color: $dark-grey
@@ -397,18 +405,24 @@ export default {
   font-size: 1.2rem;
 }
 .legend {
+  margin: 0;
+  padding: 0;
+  list-style: none;
   display: flex;
   align-items: center;
   flex-wrap: wrap;
-  dt {
-    display: inline-block;
-    width: 1.5rem;
-    height: 1.5rem;
-    border: 1px solid $light-grey-light;
-  }
-  dd {
-    margin: 0 1rem 0 .5rem;
-  }
+}
+.legend-term {
+  display: inline-block;
+  margin-right: .5rem;
+  width: 1.5rem;
+  height: 1.5rem;
+  border: 1px solid $light-grey-light;
+}
+.legend-definition {
+  display: flex;
+  align-items: center;
+  margin: 0 1rem .5rem 0;
 }
 .ignored {
   background-color: rgba($light-grey-light, .6)
