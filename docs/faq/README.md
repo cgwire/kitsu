@@ -386,27 +386,28 @@ You can find the **Playlists** page on the drop-down menu.
 
 ![Playlist main menu](../img/faq/drop_down_menu_playlist.png)
 
-The **playlist** page is separated into 3 parts: 
+The **playlist** page is separated into 2 parts: 
 
 * (1) The playlist list where you can **create** a playlist, or load an existing one.
-* (2) The shots of the current playlist. 
-* (3) The **shots** you want to show.
+* (2) The last created playlists and the last modified playlists
 
 ![Playlist page](../img/faq/playlist_page.png)
 
 Start by creating a **Playlist** 
 ![Playlist add button](../img/faq/playlist_add_button.png), You default name
-is the date and the hour. You can change it later via the
-**edit** button ![Edit button](../img/faq/edit_button.png). 
+is the date and the hour. You can change it immediately. You can also choose if the playlist
+will be shared with the studio or the client.
 
 ![Playlist add page](../img/faq/playlist_add_page.png)
 
-Once the playlist created, via the right panel, you can select which shots to add
-to your playlist.  Start by selecting the **episode** and the **sequence**.
-The sequences shots are now listed. Click on the shots you want to add to the
-playlist to see them playlisted.
+Once the playlist created, via the search/filter bar, you can select which shots to add
+to your playlist. You can also choose to add the whole movie.
 
-The shots appear on the middle part of the screen. Every change are 
+You can use the same filter than on the global shot/asset page. For example you can select all the 
+WFA short for the animation stage.
+You have to type **animation=wfa** in the search bar. Valid your selection with the **Add selection** button.
+
+The shots appear on the top part of the screen. Every change are 
 automatically saved.
 
 ![Playlist page](../img/faq/playlist_example.png)
