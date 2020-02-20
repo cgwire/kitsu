@@ -325,6 +325,12 @@ it is not crossed anymore ![Notification on](../img/faq/notification_on.png)
 meaning you are now following this task and receive notification about
 it. 
 
+On your profil page you can also choose to receive your notification per Email, or per Slack.
+
+![notification](../img/faq/profil_pannel_notif.png)
+
+(see https://kitsu.cg-wire.com/slack/#create-a-kitsu-application-in-slack)
+
 ### How to not be notified anymore?
 
 If you don't want to follow a task anymore, click on the **eye** button
@@ -372,7 +378,7 @@ You can also select a specific **status** or a specific **task type**.
 
 Moreover, you can also comment and review any previews from this page.
 
-![newsfeed preview comment(../img/faq/newsfeed_preview_comment.png)
+![newsfeed preview comment](../img/faq/newsfeed_preview_comment.png)
 
 ------------------------------------
 
