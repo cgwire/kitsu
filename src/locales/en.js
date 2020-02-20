@@ -213,9 +213,11 @@ export default {
       import_file: 'Import',
       import_title: 'Import data from a CSV',
       legend: 'Legend',
-      legend_ok: 'Recognized column',
-      legend_ignored: 'Ignored column',
-      legend_missing: 'Missing column',
+      legend_ok: 'Recognized data',
+      legend_ignored: 'Ignored data',
+      legend_missing: 'Missing data',
+      legend_disabled: 'Disabled data',
+      legend_overwrite: 'Data that will be updated',
       paste: 'Paste',
       paste_code: 'Please paste here your CSV data:',
       preview: 'Preview',
@@ -228,7 +230,11 @@ export default {
       select_file: 'Please select a file from one of your folder:',
       tab_select_file: 'Upload a CSV file',
       tab_paste_code: 'Paste a CSV data',
-      upload_file: 'Browse'
+      upload_file: 'Browse',
+      options: {
+        title: 'Options',
+        update: 'Update existing data'
+      }
     }
   },
 

@@ -103,6 +103,8 @@
       :parsed-csv="parsedCSV"
       :form-data="importCsvFormData"
       :columns="csvColumns"
+      :dataMatchers="dataMatchers"
+      :database="filteredCasting"
       @reupload="resetImport"
       @cancel="hideImportRenderModal"
       @confirm="uploadImportFile"
@@ -185,6 +187,12 @@ export default {
         'Asset',
         'Occurences',
         'Label'
+      ],
+      dataMatchers: [
+        'Episode',
+        'Name',
+        'Asset Type',
+        'Asset'
       ],
       editedAsset: null,
       editedEntityId: null,
@@ -274,6 +282,20 @@ export default {
 
     editLabelModal () {
       return this.$refs['edit-label-modal']
+    },
+
+    filteredCasting () {
+      const casting = []
+      this.castingEntities.forEach(entity => {
+        this.castingByType[entity.id].forEach(type => {
+          type.forEach(item => {
+            const castKey =
+              `${item.asset_name}${item.asset_type_name}${item.name}`
+            casting[castKey] = true
+          })
+        })
+      })
+      return casting
     }
   },
 

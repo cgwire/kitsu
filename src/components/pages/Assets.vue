@@ -156,6 +156,8 @@
     :parsed-csv="parsedCSV"
     :form-data="assetsCsvFormData"
     :columns="columns"
+    :dataMatchers="dataMatchers"
+    :database="filteredAssets"
     @reupload="resetImport"
     @cancel="hideImportRenderModal"
     @confirm="uploadImportFile"
@@ -308,6 +310,10 @@ export default {
         'Name',
         'Description'
       ],
+      dataMatchers: [
+        'Type',
+        'Name'
+      ],
       deleteAllTasksLockText: null,
       parsedCSV: []
     }
@@ -352,6 +358,17 @@ export default {
 
     searchField () {
       return this.$refs['asset-search-field']
+    },
+
+    filteredAssets () {
+      const assets = []
+      this.displayedAssetsByType.forEach(type => {
+        type.forEach(item => {
+          const assetKey = `${item.asset_type_name}${item.name}`
+          assets[assetKey] = true
+        })
+      })
+      return assets
     }
   },
 

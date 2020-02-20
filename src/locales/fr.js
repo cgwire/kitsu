@@ -194,9 +194,11 @@ export default {
       import_file: 'Importer',
       import_title: 'Importer depuis un .csv',
       legend: 'Légende',
-      legend_ok: 'Colonne reconnue',
-      legend_ignored: 'Colonne ignorée',
-      legend_missing: 'Colonne manquante',
+      legend_ok: 'Données reconnue',
+      legend_ignored: 'Données ignorée',
+      legend_missing: 'Données manquante',
+      legend_disabled: 'Données désactivées',
+      legend_overwrite: 'Données qui seront mises à jour',
       paste: 'Coller',
       paste_code: 'Coller vos données CSV :',
       preview: 'Aperçu',
@@ -209,8 +211,11 @@ export default {
       select_file: 'Sélectionner un fichier depuis votre dossier :',
       tab_select_file: 'Importer un fichier CSV',
       tab_paste_code: 'Coller des données CSV',
-      upload_file: 'Parcourir'
-
+      upload_file: 'Parcourir',
+      options: {
+        title: 'Options',
+        update: 'Mettre à jour les données'
+      }
     }
   },
 

@@ -29,15 +29,35 @@
             v-focus
             v-show="isTVShow"
           /-->
+          <h2 class="legend-title">{{ $t('main.csv.options.title') }}</h2>
+          <checkbox
+            :toggle="true"
+            :label="$t('main.csv.options.update')"
+            v-model="updateData"
+          />
           <h2 class="legend-title">{{ $t('main.csv.legend') }}</h2>
-          <dl class="legend">
-            <dt></dt>
-            <dd>{{ $t('main.csv.legend_ok') }}</dd>
-            <dt class="ignored"></dt>
-            <dd>{{ $t('main.csv.legend_ignored') }}</dd>
-            <dt class="missing"></dt>
-            <dd>{{ $t('main.csv.legend_missing') }}</dd>
-          </dl>
+          <ul class="legend">
+            <li class="legend-definition">
+              <span class="legend-term"></span>
+              {{ $t('main.csv.legend_ok') }}
+            </li>
+            <li class="legend-definition">
+              <span class="legend-term ignored"></span>
+              {{ $t('main.csv.legend_ignored') }}
+            </li>
+            <li class="legend-definition">
+              <span class="legend-term missing"></span>
+              {{ $t('main.csv.legend_missing') }}
+            </li>
+            <li class="legend-definition">
+              <span class="legend-term disabled"></span>
+              {{ $t('main.csv.legend_disabled') }}
+            </li>
+            <li class="legend-definition">
+              <span class="legend-term overwrite"></span>
+              {{ $t('main.csv.legend_overwrite') }}
+            </li>
+          </ul>
         </div>
       </div>
 
@@ -82,6 +102,10 @@
           </thead>
           <tbody>
             <tr
+              :class="{
+                overwrite: updateData && existingData(index),
+                disabled: !updateData && existingData(index)
+              }"
               v-for="(line, index) in startFrom(parsedCsv, 1)"
               :key="`line-${index}`"
             >
@@ -126,6 +150,7 @@ import { mapGetters, mapActions } from 'vuex'
 import { modalMixin } from './base_modal'
 // import TextField from '../widgets/TextField'
 import Combobox from '../widgets/Combobox'
+import Checkbox from '../widgets/Checkbox'
 import ButtonSimple from '../widgets/ButtonSimple'
 import ModalFooter from './ModalFooter'
 
@@ -135,6 +160,7 @@ export default {
   components: {
     ButtonSimple,
     Combobox,
+    Checkbox,
     // TextField,
     ModalFooter
   },
@@ -145,7 +171,8 @@ export default {
       formData: null,
       form: {
         name: ''
-      }
+      },
+      updateData: false
     }
   },
 
@@ -159,6 +186,14 @@ export default {
       default: () => []
     },
     columns: {
+      type: Array,
+      default: () => []
+    },
+    dataMatchers: {
+      type: Array,
+      default: () => []
+    },
+    database: {
       type: Array,
       default: () => []
     },
@@ -213,6 +248,14 @@ export default {
 
     columnSelect () {
       return this.parsedCsv[0]
+    },
+
+    indexMatchers () {
+      const indexes = []
+      this.dataMatchers.forEach(item => {
+        indexes.push(this.parsedCsv[0].indexOf(item))
+      })
+      return indexes
     }
   },
 
@@ -221,7 +264,7 @@ export default {
     ]),
 
     onConfirmClicked () {
-      this.$emit('confirm', this.parsedCsv)
+      this.$emit('confirm', this.parsedCsv, this.updateData)
     },
 
     onReupload () {
@@ -250,6 +293,18 @@ export default {
       if (this.duplicates.includes(this.columnSelect[index])) {
         return true
       }
+    },
+    existingData (index) {
+      const csv = this.parsedCsv[index]
+      const db = this.database
+      const columns = this.indexMatchers
+      let itemName = ''
+
+      columns.forEach(col => {
+        itemName += csv[col]
+      })
+
+      return db[itemName]
     }
   }
 }
@@ -274,13 +329,20 @@ export default {
   .legend-title {
     color: $white;
   }
-  .legend {
-    dt {
-      border: 1px solid $dark-grey-lightest;
-    }
+  .legend-term {
+    border: 1px solid $dark-grey-lightest;
   }
   .ignored {
     background-color: $dark-grey
+  }
+  .disabled {
+    background: repeating-linear-gradient(
+      -45deg,
+      rgba($dark-grey, .6),
+      rgba($dark-grey, .6) 2px,
+      transparent 2px,
+      transparent 10px
+    );
   }
 }
 .modal-content {
@@ -341,22 +403,46 @@ export default {
   font-size: 1.2rem;
 }
 .legend {
+  margin: 0;
+  padding: 0;
+  list-style: none;
   display: flex;
   align-items: center;
-  dt {
-    display: inline-block;
-    width: 1.5rem;
-    height: 1.5rem;
-    border: 1px solid $light-grey-light;
-  }
-  dd {
-    margin: 0 1rem 0 .5rem;
-  }
+  flex-wrap: wrap;
+}
+.legend-term {
+  display: inline-block;
+  margin-right: .5rem;
+  width: 1.5rem;
+  height: 1.5rem;
+  border: 1px solid $light-grey-light;
+}
+.legend-definition {
+  display: flex;
+  align-items: center;
+  margin: 0 1rem .5rem 0;
 }
 .ignored {
   background-color: rgba($light-grey-light, .6)
 }
 .missing {
   background-color: rgba($red, .6)
+}
+.disabled {
+  opacity: .4;
+  background: repeating-linear-gradient(
+  -45deg,
+  rgba($light-grey-light, .7),
+  rgba($light-grey-light, .7) 2px,
+  transparent 2px,
+  transparent 10px
+);
+}
+.overwrite {
+  background-color: rgba($blue, .6);
+
+  &:hover td {
+    background-color: rgba($blue, .4);
+  }
 }
 </style>
