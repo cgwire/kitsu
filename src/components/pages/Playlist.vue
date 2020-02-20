@@ -694,7 +694,7 @@ export default {
       this.loading.addMovie = true
       this.$options.silent = true
       const shots = Object.values(this.shotMap)
-      this.addShots(shots, () => {
+      this.addShots(shots.reverse(), () => {
         this.loading.addMovie = false
         this.$options.silent = false
       })
