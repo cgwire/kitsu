@@ -169,7 +169,7 @@ Now that we have created all the assets and related tasks, we can now add the
 artists to the team and assign tasks to them.
 
 
-## Add a CG Artist to the team
+## Add a new employee
 
 Each artist required an account. Go to the drop-down menu ![Main
 menu](../img/getting-started/main_button.png), and under the **Studio**
@@ -197,7 +197,71 @@ All the people are now part of your studio. They are added to a specific
 production when you assign them to a task on a production. Otherwise, they
 won't have access to anything.
 
-You can also add someone to a production without assigning him a task.
+
+## Add employees from a csv spreadsheet file
+
+You may have already your employee list ready in a spreadsheet file.
+With Kitsu you have 2 ways to import them, the first is to import a `.csv` file directly, the second is to copy paste your data directly into Kitsu.
+
+First save your spreadsheet as a `.csv` file.
+
+Then, go back to the people page on Kitsu, and click on the **Import** icon.
+![Import Icon](../img/getting-started/import.png)
+
+A pop-up window **Import data from a CSV** opens, click on **Browse** to pick your `.csv` file.
+
+![Import csv file](../img/getting-started/import_csv_people.png)
+
+To see the result, click on the **Preview** button.
+  
+You can check and adjust the name of the columns with the preview of your data.
+
+NB: the **Role** column is not mandatory.
+ 
+![Import data copy paste data](../img/getting-started/import_preview_data_people.png)
+
+Once everything is good, click on the **Confirm** button, to import your data into Kitsu.
+
+Now, you have all your people imported into Kitsu.
+
+![Import data copy paste data](../img/getting-started/import_result_people.png)
+
+
+## Create assets with copy/paste a spreadsheet file
+
+Open you spreadsheet, select your data and copy them.
+
+![Import copy data](../img/getting-started/import_copypas_people.png)
+
+Then, go back to the people page on Kitsu, and click on the **Import** icon 
+![Import Icon](../img/getting-started/import.png).
+
+A pop-up window **Import data from a CSV** opens, click on the **Paste a CSV data** tab.
+
+![Import data copy paste tab](../img/getting-started/import_pastcsvdata_people.png)
+ 
+There you can paste your previously selected data, and see the result with the **Preview** button.
+ 
+![Import data copy paste data](../img/getting-started/import_pastcsvdata2_people.png)
+  
+You can check and adjust the name of the columns with the preview of your data.
+ 
+NB: the **Role** column is not mandatory.
+ 
+![Import data copy paste data](../img/getting-started/import_preview_data_people.png)
+
+Once everything is good, click on the **Confirm** button, to import your data into Kitsu.
+
+Now, you have all your assets imported into Kitsu.
+
+![Import data copy paste data](../img/getting-started/import_result_people.png)
+
+
+
+
+## Add a CG Artist to the team
+
+You need to add someone to a production to assign him a task.
 
 On the drop-down menu on the top of the page, select the **TEAM** page.
 
@@ -212,6 +276,7 @@ on the top of the page.
 You can also add someone to a production without assigning him to a task, you
 can select his name on the search box (or type his name), and validate with
 **add**.
+
 
 ## Assign tasks to a CG artist
 
@@ -261,6 +326,7 @@ on his position (CG Artist, Supervisor), he only sees the production where
 he's assigned. 
 
 Now, everybody knows what to do and who is doing what!
+
 
 ## Add an estimation for a task
 
@@ -417,7 +483,6 @@ Once everything is good, click on the **Confirm** button, to import your data in
 Now, you have all your shots imported into Kitsu.
 
 ![Import data copy paste data](../img/getting-started/import_result_shot.png)
-
 
 
 ## Create a breakdown list
@@ -684,7 +749,7 @@ You can select multiple shots or assets, by pressing the **crtl** or
 
 Then go to the **Change status** section on the action menu.
 
-![action menu status](../img/getting-started/blue_menu_status.png.png
+![action menu status](../img/getting-started/blue_menu_status.png)
 
 Choose the new status for your selected tasks (1). You can also add a comment for all the selected tasks (2)
 You validate the new status with the **Confirm** button.
