@@ -364,10 +364,8 @@ export default {
       const assets = []
       this.displayedAssetsByType.forEach(type => {
         type.forEach(item => {
-          let asset = ''
-          asset += item.asset_type_name
-          asset += item.name
-          assets.push(asset)
+          const assetKey = `${item.asset_type_name}${item.name}`
+          assets[assetKey] = true
         })
       })
       return assets

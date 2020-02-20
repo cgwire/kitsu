@@ -289,11 +289,9 @@ export default {
       this.castingEntities.forEach(entity => {
         this.castingByType[entity.id].forEach(type => {
           type.forEach(item => {
-            let cast = ''
-            cast += item.asset_name
-            cast += item.asset_type_name
-            cast += item.name
-            casting.push(cast)
+            const castKey =
+              `${item.asset_name}${item.asset_type_name}${item.name}`
+            casting[castKey] = true
           })
         })
       })

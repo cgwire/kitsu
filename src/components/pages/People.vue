@@ -214,10 +214,8 @@ export default {
     filteredPeople () {
       const persons = []
       this.displayedPeople.forEach(people => {
-        let person = ''
-        person += people.first_name
-        person += people.last_name
-        persons.push(person)
+        const personKey = `${people.first_name}${people.last_name}`
+        persons[personKey] = true
       })
       return persons
     }

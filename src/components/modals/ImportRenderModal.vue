@@ -304,9 +304,7 @@ export default {
         itemName += csv[col]
       })
 
-      if (db.includes(itemName)) {
-        return true
-      }
+      return db[itemName]
     }
   }
 }

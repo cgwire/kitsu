@@ -399,13 +399,9 @@ export default {
       const shots = []
       this.displayedShotsBySequence.forEach(sequence => {
         sequence.forEach(item => {
-          let shot = ''
-          shot += item.sequence_name
-          shot += item.name
-          if (this.isTVShow) {
-            shot += item.episode_name
-          }
-          shots.push(shot)
+          const shotKey =
+              `${item.sequence_name}${item.name}${item.episode_name}`
+          shots[shotKey] = true
         })
       })
       return shots
