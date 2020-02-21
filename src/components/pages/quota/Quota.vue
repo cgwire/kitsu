@@ -241,7 +241,7 @@ export default {
       detailsTitle: '',
       detailsMap: {},
       isPanelShown: false,
-      isLoading: false,
+      isLoading: true,
       isError: false,
       quotaMap: {},
       quotaLength: 0,
@@ -250,12 +250,27 @@ export default {
   },
 
   mounted () {
-    this.loadData()
+    if (Object.keys(this.shotMap).length < 2) {
+      setTimeout(() => {
+        this.loadShots((err) => {
+          setTimeout(() => {
+            this.isLoading = false
+          }, 200)
+          if (!err) {
+            this.loadData()
+          }
+        })
+      }, 100)
+    } else {
+      if (!this.isShotsLoading) this.isLoading = false
+      this.loadData()
+    }
   },
 
   computed: {
     ...mapGetters([
       'currentEpisode',
+      'isShotsLoading',
       'shotMap',
       'personMap'
     ]),
