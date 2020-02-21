@@ -390,7 +390,7 @@ export default {
         'Name'
       ]
       if (this.isTVShow) {
-        collection.push('Episode')
+        collection.unshift('Episode')
       }
       return collection
     },
@@ -399,8 +399,10 @@ export default {
       const shots = {}
       this.displayedShotsBySequence.forEach(sequence => {
         sequence.forEach(item => {
-          const shotKey =
-              `${item.episode_name}${item.sequence_name}${item.name}`
+          let shotKey = `${item.sequence_name}${item.name}`
+          if (this.isTVShow) {
+            shotKey = item.episode_name + shotKey
+          }
           shots[shotKey] = true
         })
       })
