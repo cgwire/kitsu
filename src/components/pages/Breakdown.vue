@@ -285,7 +285,7 @@ export default {
     },
 
     filteredCasting () {
-      const casting = []
+      const casting = {}
       this.castingEntities.forEach(entity => {
         this.castingByType[entity.id].forEach(type => {
           type.forEach(item => {

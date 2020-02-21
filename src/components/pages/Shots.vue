@@ -379,7 +379,7 @@ export default {
         'Frame Out'
       ]
       if (this.isTVShow) {
-        collection.push('Episode')
+        collection.unshift('Episode')
       }
       return collection
     },
@@ -396,11 +396,11 @@ export default {
     },
 
     filteredShots () {
-      const shots = []
+      const shots = {}
       this.displayedShotsBySequence.forEach(sequence => {
         sequence.forEach(item => {
           const shotKey =
-              `${item.sequence_name}${item.name}${item.episode_name}`
+              `${item.episode_name}${item.sequence_name}${item.name}`
           shots[shotKey] = true
         })
       })
@@ -761,18 +761,19 @@ export default {
       this.errors.importing = false
       this.$store.commit('SHOT_CSV_FILE_SELECTED', formData)
 
-      this.uploadShotFile((err) => {
-        if (!err) {
+      this.uploadShotFile(toUpdate)
+        .then(() => {
           this.loading.importing = false
           this.hideImportRenderModal()
           this.loadShots(() => {
             this.resizeHeaders()
           })
-        } else {
+        })
+        .catch((err) => {
+          console.error(err)
           this.loading.importing = false
           this.errors.importing = true
-        }
-      })
+        })
     },
 
     resetImport () {
@@ -877,7 +878,7 @@ export default {
           sortByName([...this.currentProduction.descriptors])
             .filter(d => d.entity_type === 'Shot')
             .forEach((descriptor) => {
-              headers.push('Descriptor')
+              headers.push(descriptor.name)
             })
           headers.push('Nb Frames')
           if (this.isFrameIn) {

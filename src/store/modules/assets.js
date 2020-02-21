@@ -487,13 +487,14 @@ const actions = {
     })
   },
 
-  uploadAssetFile ({ commit, state }, callback) {
-    const currentProduction = helpers.getCurrentProduction()
+  uploadAssetFile ({ commit, state }, toUpdate) {
+    const production = helpers.getCurrentProduction()
     commit(IMPORT_ASSETS_START)
-    assetsApi.postCsv(currentProduction, state.assetsCsvFormData, (err) => {
-      commit(IMPORT_ASSETS_END)
-      if (callback) callback(err)
-    })
+    return assetsApi.postCsv(production, state.assetsCsvFormData, toUpdate)
+      .then(() => {
+        commit(IMPORT_ASSETS_END)
+        Promise.resolve()
+      })
   },
 
   setAssetSearch ({ commit, state, rootGetters }, assetSearch) {

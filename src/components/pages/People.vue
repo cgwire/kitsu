@@ -151,11 +151,11 @@ export default {
         'First Name',
         'Last Name',
         'Email',
-        'Phone'
+        'Phone',
+        'Role'
       ],
       dataMatchers: [
-        'First Name',
-        'Last Name'
+        'Email'
       ]
     }
   },
@@ -212,9 +212,9 @@ export default {
     },
 
     filteredPeople () {
-      const persons = []
-      this.displayedPeople.forEach(people => {
-        const personKey = `${people.first_name}${people.last_name}`
+      const persons = {}
+      this.displayedPeople.forEach(person => {
+        const personKey = person.email
         persons[personKey] = true
       })
       return persons
@@ -228,7 +228,8 @@ export default {
       'newPerson',
       'newPersonAndInvite',
       'loadPeople',
-      'peopleSearchChange'
+      'peopleSearchChange',
+      'uploadPersonFile'
     ]),
 
     cleanUpCsv (data) {
@@ -260,7 +261,7 @@ export default {
         })
     },
 
-    uploadImportFile (data) {
+    uploadImportFile (data, toUpdate) {
       const formData = new FormData()
       const filename = 'import.csv'
       const file = new File([data.join('\n')], filename, { type: 'text/csv' })
@@ -271,15 +272,16 @@ export default {
       this.errors.importing = false
       this.$store.commit('PERSON_CSV_FILE_SELECTED', formData)
 
-      this.$store.dispatch('uploadPersonFile', (err) => {
-        if (!err) {
+      this.uploadPersonFile(toUpdate)
+        .then(() => {
           this.$store.dispatch('loadPeople')
           this.hideImportRenderModal()
-        } else {
+        })
+        .catch((err) => {
+          console.error(err)
           this.loading.importing = false
           this.errors.importing = true
-        }
-      })
+        })
     },
 
     resetImport () {

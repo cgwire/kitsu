@@ -58,9 +58,9 @@ export default {
     client.put(`/api/data/entities/${asset.id}`, data, callback)
   },
 
-  postCsv (production, formData, callback) {
-    client.post(
-      `/api/import/csv/projects/${production.id}/assets`, formData, callback
-    )
+  postCsv (production, formData, toUpdate) {
+    let path = `/api/import/csv/projects/${production.id}/assets`
+    if (toUpdate) path += '?update=true'
+    return client.ppost(path, formData)
   }
 }

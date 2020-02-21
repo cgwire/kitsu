@@ -126,12 +126,10 @@ export default {
     client.put(`/api/data/entities/${shot.id}`, data, callback)
   },
 
-  postCsv (production, formData, callback) {
-    client.post(
-      `/api/import/csv/projects/${production.id}/shots`,
-      formData,
-      callback
-    )
+  postCsv (production, formData, toUpdate) {
+    let path = `/api/import/csv/projects/${production.id}/shots`
+    if (toUpdate) path += '?update=true'
+    return client.ppost(path, formData)
   },
 
   getEpisodeStats (productionId) {

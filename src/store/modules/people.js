@@ -326,15 +326,17 @@ const actions = {
     })
   },
 
-  uploadPersonFile ({ commit, state }, callback) {
+  uploadPersonFile ({ commit, state }, toUpdate) {
     commit(IMPORT_PEOPLE_START)
-    peopleApi.postCsv(state.personCsvFormData, (err) => {
-      if (err) {
+    return peopleApi.postCsv(state.personCsvFormData, toUpdate)
+      .then(() => {
+        commit(IMPORT_PEOPLE_END)
+        Promise.resolve()
+      })
+      .catch((err) => {
         commit(IMPORT_PEOPLE_ERROR)
-      }
-      commit(IMPORT_PEOPLE_END)
-      if (callback) callback(err)
-    })
+        Promise.reject(err)
+      })
   },
 
   loadPersonTasks (

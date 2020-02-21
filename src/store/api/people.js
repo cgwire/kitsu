@@ -115,8 +115,10 @@ export default {
     client.del(`/api/data/persons/${personId}?force=true`, callback)
   },
 
-  postCsv (formData, callback) {
-    client.post('/api/import/csv/persons', formData, callback)
+  postCsv (formData, toUpdate) {
+    let path = '/api/import/csv/persons'
+    if (toUpdate) path += '?update=true'
+    return client.ppost(path, formData)
   },
 
   postAvatar (userId, formData, callback) {
