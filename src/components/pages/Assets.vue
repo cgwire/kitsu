@@ -361,7 +361,7 @@ export default {
     },
 
     filteredAssets () {
-      const assets = []
+      const assets = {}
       this.displayedAssetsByType.forEach(type => {
         type.forEach(item => {
           const assetKey = `${item.asset_type_name}${item.name}`
@@ -431,7 +431,8 @@ export default {
       'saveAssetSearch',
       'setLastProductionScreen',
       'setAssetSearch',
-      'setPreview'
+      'setPreview',
+      'uploadAssetFile'
     ]),
 
     confirmNewAssetStay (form) {
@@ -683,7 +684,7 @@ export default {
         })
     },
 
-    uploadImportFile (data) {
+    uploadImportFile (data, toUpdate) {
       const formData = new FormData()
       const filename = 'import.csv'
       const file = new File([data.join('\n')], filename, { type: 'text/csv' })
@@ -694,18 +695,19 @@ export default {
       this.errors.importing = false
       this.$store.commit('ASSET_CSV_FILE_SELECTED', formData)
 
-      this.$store.dispatch('uploadAssetFile', (err) => {
-        if (!err) {
+      this.uploadAssetFile(toUpdate)
+        .then(() => {
           this.loading.importing = false
           this.hideImportRenderModal()
           this.loadAssets(() => {
             this.resizeHeaders()
           })
-        } else {
+        })
+        .catch((err) => {
+          console.error(err)
           this.loading.importing = false
           this.errors.importing = true
-        }
-      })
+        })
     },
 
     resetImport () {
@@ -861,7 +863,7 @@ export default {
           sortByName([...this.currentProduction.descriptors])
             .filter(d => d.entity_type === 'Asset')
             .forEach((descriptor) => {
-              headers.push(descriptor.field_name)
+              headers.push(descriptor.name)
             })
           if (this.isAssetTime) {
             headers.push(this.$t('shots.fields.time_spent'))

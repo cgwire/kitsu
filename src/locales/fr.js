@@ -197,7 +197,7 @@ export default {
       legend_ok: 'Données reconnue',
       legend_ignored: 'Données ignorée',
       legend_missing: 'Données manquante',
-      legend_disabled: 'Données désactivées',
+      legend_disabled: 'Données qui ne seront pas mises à jour',
       legend_overwrite: 'Données qui seront mises à jour',
       paste: 'Coller',
       paste_code: 'Coller vos données CSV :',

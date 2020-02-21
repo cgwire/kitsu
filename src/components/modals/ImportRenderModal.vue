@@ -14,28 +14,17 @@
       <div class="description">
         <div class="flex-item">
           <p>
-            {{ $t("main.csv.preview_description") }}
-          </p>
-          <p>
+            {{ $t("main.csv.preview_description") }} <br />
             {{ $t("main.csv.preview_required") }}
           </p>
-        </div>
-        <div class="flex-item">
-          <!--text-field
-            ref="nameField"
-            input-class="task-status-name"
-            :label="$t('main.csv.preview_episode_name')"
-            v-model="form.name"
-            v-focus
-            v-show="isTVShow"
-          /-->
           <h2 class="legend-title">{{ $t('main.csv.options.title') }}</h2>
           <checkbox
             :toggle="true"
             :label="$t('main.csv.options.update')"
             v-model="updateData"
           />
-          <h2 class="legend-title">{{ $t('main.csv.legend') }}</h2>
+        </div>
+        <div class="flex-item">
           <ul class="legend">
             <li class="legend-definition">
               <span class="legend-term"></span>
@@ -107,6 +96,7 @@
                 disabled: !updateData && existingData(index)
               }"
               v-for="(line, index) in startFrom(parsedCsv, 1)"
+              v-if="line && line.length > 1"
               :key="`line-${index}`"
             >
               <td
@@ -194,8 +184,8 @@ export default {
       default: () => []
     },
     database: {
-      type: Array,
-      default: () => []
+      type: Object,
+      default: () => {}
     },
     isLoading: {
       type: Boolean,
@@ -295,15 +285,13 @@ export default {
       }
     },
     existingData (index) {
-      const csv = this.parsedCsv[index]
+      const csv = this.parsedCsv[index + 1]
       const db = this.database
       const columns = this.indexMatchers
       let itemName = ''
-
       columns.forEach(col => {
         itemName += csv[col]
       })
-
       return db[itemName]
     }
   }
@@ -418,6 +406,7 @@ export default {
   border: 1px solid $light-grey-light;
 }
 .legend-definition {
+  width: 100%;
   display: flex;
   align-items: center;
   margin: 0 1rem .5rem 0;

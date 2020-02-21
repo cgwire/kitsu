@@ -783,13 +783,14 @@ const actions = {
     })
   },
 
-  uploadShotFile ({ commit, state, rootGetters }, callback) {
+  uploadShotFile ({ commit, state, rootGetters }, toUpdate) {
     commit(IMPORT_SHOTS_START)
-    const currentProduction = rootGetters.currentProduction
-    shotsApi.postCsv(currentProduction, state.shotsCsvFormData, (err) => {
-      commit(IMPORT_SHOTS_END)
-      if (callback) callback(err)
-    })
+    const production = rootGetters.currentProduction
+    return shotsApi.postCsv(production, state.shotsCsvFormData, toUpdate)
+      .then(() => {
+        commit(IMPORT_SHOTS_END)
+        Promise.resolve()
+      })
   },
 
   displayMoreShots ({ commit, rootGetters }) {

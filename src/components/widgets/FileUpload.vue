@@ -97,7 +97,11 @@ export default {
         const formData = new FormData()
         formData.append(this.uploadFieldName, file, file.name)
         forms.push(formData)
-        this.uploadedFiles.push(file.name)
+        if (this.multiple) {
+          this.uploadedFiles.push(file.name)
+        } else {
+          this.uploadedFiles = [file.name]
+        }
       }
       if (this.multiple) {
         this.$emit('fileselected', forms)
