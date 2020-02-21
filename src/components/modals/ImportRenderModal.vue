@@ -17,12 +17,14 @@
             {{ $t("main.csv.preview_description") }} <br />
             {{ $t("main.csv.preview_required") }}
           </p>
-          <h2 class="legend-title">{{ $t('main.csv.options.title') }}</h2>
-          <checkbox
-            :toggle="true"
-            :label="$t('main.csv.options.update')"
-            v-model="updateData"
-          />
+          <div v-show="!disableUpdate">
+            <h2 class="legend-title">{{ $t('main.csv.options.title') }}</h2>
+            <checkbox
+              :toggle="true"
+              :label="$t('main.csv.options.update')"
+              v-model="updateData"
+            />
+          </div>
         </div>
         <div class="flex-item">
           <ul class="legend">
@@ -42,7 +44,7 @@
               <span class="legend-term disabled"></span>
               {{ $t('main.csv.legend_disabled') }}
             </li>
-            <li class="legend-definition">
+            <li v-show="!disableUpdate" class="legend-definition">
               <span class="legend-term overwrite"></span>
               {{ $t('main.csv.legend_overwrite') }}
             </li>
@@ -186,6 +188,10 @@ export default {
     database: {
       type: Object,
       default: () => {}
+    },
+    disableUpdate: {
+      type: Boolean,
+      default: false
     },
     isLoading: {
       type: Boolean,

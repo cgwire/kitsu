@@ -105,6 +105,7 @@
       :columns="csvColumns"
       :dataMatchers="dataMatchers"
       :database="filteredCasting"
+      :disable-update=true
       @reupload="resetImport"
       @cancel="hideImportRenderModal"
       @confirm="uploadImportFile"
