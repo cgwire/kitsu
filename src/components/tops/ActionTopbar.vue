@@ -175,10 +175,28 @@
               >
                 {{ $t('main.confirmation') }}
               </button>
-
               <div class="" v-if="isCreationLoading">
                 <spinner :is-white="true" />
               </div>
+            </div>
+          </div>
+        </div>
+
+        <div
+          class="flexrow-item"
+          v-if="selectedBar === 'playlists'"
+        >
+          <div class="flexrow">
+            <div class="flexrow-item strong bigger hide-small-screen">
+              {{ $t('playlists.create_for_selection') }}
+            </div>
+            <div class="flexrow-item">
+              <button
+                class="button is-success confirm-button"
+                @click="confirmPlaylistGeneration"
+              >
+                {{ $t('main.confirmation') }}
+              </button>
             </div>
           </div>
         </div>
@@ -361,6 +379,14 @@
 
         <div
           class="more-menu-item"
+          v-if="isCurrentViewShot && !isCurrentViewTaskType"
+          @click="selectBar('playlists')"
+        >
+          {{ $t('menu.generate_playlists') }}
+        </div>
+
+        <div
+          class="more-menu-item"
           v-if="isCurrentViewAsset || isCurrentViewShot"
           @click="selectBar('delete-tasks')"
         >
@@ -385,6 +411,12 @@
       @click="toggleMenu"
     >
     </div>
+
+    <view-playlist-modal
+      :active="modals.playlist"
+      :task-ids="selectedTaskIds"
+      @cancel="hidePlaylistModal"
+    />
   </div>
 
 </template>
@@ -397,6 +429,7 @@ import { ChevronDownIcon, XIcon } from 'vue-feather-icons'
 import Combobox from '../widgets/Combobox'
 import ComboboxModel from '../widgets/ComboboxModel'
 import ComboboxStatus from '../widgets/ComboboxStatus'
+import ViewPlaylistModal from '../modals/ViewPlaylistModal'
 import NotificationBell from '../widgets/NotificationBell'
 import PeopleField from '../widgets/PeopleField'
 import Spinner from '../widgets/Spinner'
@@ -412,7 +445,8 @@ export default {
     NotificationBell,
     PeopleField,
     Spinner,
-    XIcon
+    XIcon,
+    ViewPlaylistModal
   },
 
   data () {
@@ -428,12 +462,15 @@ export default {
       isCreationLoading: false,
       isDeletionLoading: false,
       isMoreMenuDisplayed: true,
-      selectedBar: 'assignation',
       person: null,
       priority: '0',
+      selectedBar: 'assignation',
       selectedTaskIds: [],
       taskStatusId: '',
       statusComment: '',
+      modals: {
+        playlist: false
+      },
       priorityOptions: [
         {
           label: this.$t('tasks.priority.normal'),
@@ -557,6 +594,7 @@ export default {
         estimations: 'menu.set_estimations',
         'change-status': 'menu.change_status',
         priorities: 'menu.change_priority',
+        playlists: 'menu.generate_playlists',
         tasks: 'menu.create_tasks',
         'delete-tasks': 'menu.delete_tasks',
         'custom-actions': 'menu.run_custom_action'
@@ -666,6 +704,14 @@ export default {
         })
     },
 
+    confirmPlaylistGeneration () {
+      this.modals.playlist = true
+    },
+
+    hidePlaylistModal () {
+      this.modals.playlist = false
+    },
+
     clearAssignation () {
       this.isAssignationLoading = true
       this.unassignSelectedTasks({
@@ -715,6 +761,14 @@ export default {
         },
         url: this.customAction.url
       })
+    },
+
+    onKeyDown (event) {
+      if (event.keyCode === 27) {
+        if (!this.modals.playlist) {
+          this.$store.commit('CLEAR_SELECTED_TASKS')
+        }
+      }
     }
   },
 
@@ -726,6 +780,7 @@ export default {
   watch: {
     isHidden () {
       if (!this.isHidden) {
+        window.addEventListener('keydown', this.onKeyDown)
         const prefix = this.storagePrefix
         const lastSelection = localStorage.getItem(`${prefix}-selected-bar`)
         if (lastSelection) {
@@ -737,6 +792,8 @@ export default {
             this.selectedBar = 'change-status'
           }
         }
+      } else {
+        window.removeEventListener('keydown', this.onKeyDown)
       }
     },
 

@@ -543,9 +543,13 @@ export default {
         }
       }
       if (isChange) {
-        if (this.currentEpisode) {
+        let episodeId = this.$route.params.episode_id
+        if (!episodeId && this.currentEpisode) {
+          episodeId = this.currentEpisode.id
+        }
+        if (episodeId) {
           route.name = `episode-${route.name}`
-          route.params.episode_id = this.currentEpisode.id
+          route.params.episode_id = episodeId
         }
         this.$router.push(route)
       }
