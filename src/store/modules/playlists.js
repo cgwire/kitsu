@@ -196,6 +196,11 @@ const actions = {
   ) {
     commit(CHANGE_PLAYLIST_TYPE, { playlist, taskTypeId })
     return dispatch('editPlaylist', { data: playlist, callback })
+  },
+
+  loadTempPlaylist ({ commit, dispatch, rootGetters }, taskIds) {
+    const production = rootGetters.currentProduction
+    return playlistsApi.loadTempPlaylist(production, taskIds)
   }
 }
 

@@ -171,7 +171,8 @@ export const annotationMixin = {
     setupFabricCanvas () {
       if (this.readOnly) return
 
-      this.fabricCanvas = new fabric.Canvas('annotation-canvas')
+      const canvasId = this.$refs['annotation-canvas'].id
+      this.fabricCanvas = new fabric.Canvas(canvasId)
       this.fabricCanvas.on('object:moved', this.saveAnnotations)
       this.fabricCanvas.on('object:scaled', this.saveAnnotations)
       this.fabricCanvas.on('object:added', this.stackAddAction)

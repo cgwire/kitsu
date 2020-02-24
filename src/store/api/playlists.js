@@ -72,5 +72,10 @@ export default {
         else resolve()
       })
     })
+  },
+
+  loadTempPlaylist (production, taskIds) {
+    const path = `/api/data/projects/${production.id}/playlists/temp`
+    return client.ppost(path, { task_ids: taskIds })
   }
 }
