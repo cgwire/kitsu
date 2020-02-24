@@ -125,8 +125,9 @@ export default {
   height: 100%;
   width: 100%;
 
-  .modal-box {
-    height: 100vh;
+  .box {
+    background: #3D4048;
+    height: calc(100vh - 40px);
   }
 }
 </style>
