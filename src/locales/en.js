@@ -244,6 +244,7 @@ export default {
     change_status: 'Change status',
     create_tasks: 'Create tasks',
     delete_tasks: 'Delete tasks',
+    generate_playlists: 'Generate playlists',
     run_custom_action: 'Run custom action',
     set_estimations: 'Set estimations'
   },
@@ -341,8 +342,9 @@ export default {
     build_weekly: 'All Pending',
     build_mp4: 'Build .mp4 (beta)',
     client_playlist: 'Client Playlist',
-    created_at: 'Created at:',
+    create_for_selection: 'Generate a playlist for shot selection',
     create_title: 'Create playlist',
+    created_at: 'Created at:',
     delete_text: 'Are you sure you want to remove {name} from your database?',
     delete_error: 'An error occured while deleting this playlist.',
     download_zip: 'Download .zip',

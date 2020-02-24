@@ -64,11 +64,4 @@ new Vue({
   store
 })
 
-// Catch escape command
-document.addEventListener('keyup', (evt) => {
-  if (evt.keyCode === 27) {
-    store.commit('CLEAR_SELECTED_TASKS')
-  }
-})
-
 Vue.config.keyCodes.backspace = 8

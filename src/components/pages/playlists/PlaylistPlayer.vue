@@ -8,7 +8,7 @@
     'playlist-player': true
   }"
 >
-  <div class="playlist-header flexrow" ref="header">
+  <div class="playlist-header flexrow" ref="header" v-if="!tempMode">
     <div class="flexrow-item for-client" v-if="playlist && playlist.for_client">
       {{ $t('playlists.client_playlist') }}
     </div>
@@ -34,30 +34,6 @@
       icon="delete"
       v-if="isCurrentUserManager"
     />
-    <!--span
-      class="flexrow-item"
-      v-if="isCurrentUserClient && shotList.length > 0"
-    >
-      {{ nbCommentedShots }}
-      /
-      {{ shotList.length }}
-    </span>
-    <div
-      class="progress flexrow-item"
-      v-if="isCurrentUserClient && shotList.length > 0"
-    >
-      <span
-        ref="review-progress-bar"
-        :class="{
-          'progress-bar': false,
-          complete: nbCommentedShots === shotList.length
-        }"
-        :style="{
-          width: Math.round(100 * nbCommentedShots / shotList.length) + 'px'
-        }"
-      >
-      </span>
-    </div-->
   </div>
 
   <div
@@ -82,7 +58,7 @@
     />
     <div class="canvas-wrapper" ref="canvas-wrapper">
       <canvas
-        id="annotation-canvas"
+        id="playlist-annotation-canvas"
         ref="annotation-canvas"
         class="canvas"
       >
@@ -199,7 +175,7 @@
       }"
       icon="compare"
       @click="onCompareClicked"
-      v-if="taskTypeOptions"
+      v-if="taskTypeOptions && !tempMode"
     />
     <combobox
       class="playlist-button flexrow-item comparison-list"
@@ -213,6 +189,7 @@
       class="playlist-button flexrow-item"
       icon="layers"
       @click="showTaskTypeModal"
+      v-if="!tempMode"
     />
 
     <button-simple
@@ -270,7 +247,11 @@
       icon="film"
     />
 
-    <div class="flexrow-item playlist-button" style="position: relative">
+    <div
+      class="flexrow-item playlist-button"
+      style="position: relative"
+      v-if="!tempMode"
+    >
       <a
         :class="{
           'dl-button': true,
@@ -455,6 +436,10 @@ export default {
     isAddingShot: {
       type: Boolean,
       default: false
+    },
+    tempMode: {
+      type: Boolean,
+      default: false
     }
   },
 
@@ -464,7 +449,6 @@ export default {
       color: '#ff3860',
       currentTime: '00:00.00',
       currentTimeRaw: 0,
-      forClient: 'false',
       fabricCanvas: null,
       isDlButtonsHidden: true,
       isCommentsHidden: true,
@@ -659,14 +643,16 @@ export default {
 
     displayBars () {
       if (this.$refs['button-bar']) {
-        this.$refs.header.style.display = 'flex'
-        this.$refs['button-bar'].style.display = 'flex'
+        if (this.$refs.header) {
+          this.$refs.header.style.display = 'flex'
+          this.$refs.header.style.opacity = 1
+        }
         if (this.$refs['button-bar']) {
-          this.$refs['playlist-progress'].style.display = 'flex'
+          this.$refs['button-bar'].style.display = 'flex'
           this.$refs['button-bar'].style.opacity = 1
+          this.$refs['playlist-progress'].style.display = 'flex'
           this.$refs['playlist-progress'].style.opacity = 1
         }
-        this.$refs.header.style.opacity = 1
         this.container.style.cursor = 'default'
       }
     },
@@ -1052,11 +1038,11 @@ export default {
     },
 
     onPreviewChanged (shot, previewFileId) {
+      this.pause()
       this.$emit('preview-changed', shot, previewFileId)
       const localShot = this.shotList.find(s => s.id === shot.id)
       localShot.preview_file_id = previewFileId
-      this.reloadCurrentShot()
-      this.rawPlayer.loadNextShot()
+      this.rawPlayer.reloadCurrentShot()
     },
 
     onShotDropped (info) {
@@ -1065,7 +1051,10 @@ export default {
 
     resetHeight () {
       this.$nextTick(() => {
-        let height = this.container ? this.container.offsetHeight : 0
+        let height = window.innerHeight - 90
+        if (!this.tempMode) {
+          height = this.container ? this.container.offsetHeight : 0
+        }
         height -= this.$refs.header ? this.$refs.header.offsetHeight : 0
         if (this.$refs['playlist-progress']) {
           height -= this.$refs['playlist-progress'].offsetHeight
@@ -1103,7 +1092,7 @@ export default {
     },
 
     resetCanvasSize () {
-      if (this.rawPlayer) {
+      if (this.rawPlayer && this.fabricCanvas) {
         this.$nextTick(() => {
           if (this.$refs['canvas-wrapper']) {
             const ratio = this.rawPlayer.getVideoRatio()
@@ -1386,13 +1375,6 @@ export default {
       }
       this.resetHeight()
       this.resetCanvas()
-    },
-
-    forClient () {
-      const forClient = this.forClient === 'true'
-      if (this.playlist.for_client !== forClient) {
-        this.$emit('for-client-changed', forClient)
-      }
     },
 
     playlist () {
@@ -1746,7 +1728,7 @@ progress {
   border-radius: 5px;
 }
 
-#annotation-canvas {
+#playlist-annotation-canvas {
   margin: auto;
 }
 </style>
