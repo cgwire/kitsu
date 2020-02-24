@@ -113,6 +113,8 @@ export default {
             this.isLoading = false
           })
           .catch(console.error)
+      } else {
+        this.playlistPlayer.pause()
       }
     }
   }
