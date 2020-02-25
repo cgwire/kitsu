@@ -506,6 +506,7 @@ const mutations = {
       Object.assign(production, newProduction)
       if (openProduction) Object.assign(openProduction, newProduction)
     } else {
+      newProduction.team = []
       state.productions.push(newProduction)
       state.productionMap[newProduction.id] = newProduction
       if (!openProduction) {
