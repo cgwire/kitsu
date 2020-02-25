@@ -1,7 +1,7 @@
 <template>
 <div ref="container" class="picture-player">
   <div ref="picture-wrapper" class="picture-wrapper">
-    <div class="canvas-wrapper">
+    <div ref="canvas-wrapper" class="canvas-wrapper">
       <canvas
         :style="{
           display: 'block'
@@ -13,7 +13,7 @@
       >
       </canvas>
     </div>
-    <img ref="picture" :src="pictureDlPath" v-if="true" />
+    <img ref="picture" :src="pictureDlPath" v-if="isFullScreen()" />
     <img ref="picture" :src="picturePath" v-else />
     <spinner v-if="isLoading"/>
   </div>
@@ -271,8 +271,10 @@ export default {
     },
 
     mountPicture () {
-      if (!this.fabricCanvas) this.setupFabricCanvas()
       this.container.style.height = this.getDefaultHeight() + 'px'
+      if (!this.fabricCanvas) {
+        this.setupFabricCanvas()
+      }
       this.loadAnnotation(0)
       this.$nextTick(this.fixCanvasSize)
     },
@@ -613,21 +615,9 @@ export default {
       this.picture.height = height
       if (this.fabricCanvas) {
         this.fabricCanvas.setDimensions({ width, height })
-        let elements = document.getElementsByClassName('canvas-container')
-        for (let i = 0; i < elements.length; i++) {
-          const element = elements[i]
-          element.style.width = width + 'px'
-          element.style.height = height + 'px'
-          element.style.margin = 'auto'
-        }
-        elements = document.getElementsByClassName('upper-canvas')
-        for (let i = 0; i < elements.length; i++) {
-          const element = elements[i]
-          element.style.width = width + 'px'
-          element.style.height = height + 'px'
-          element.setAttribute('width', width)
-          element.setAttribute('height', height)
-        }
+        const containerWidth = this.container.offsetWidth
+        const margin = Math.round((containerWidth - width) / 2)
+        this.$refs['canvas-wrapper'].style.left = margin + 'px'
         setTimeout(() => {
           this.fabricCanvas.calcOffset()
         }, 10)
