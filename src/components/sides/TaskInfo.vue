@@ -91,9 +91,11 @@
                 <video-player
                   :preview="currentPreview"
                   :entity-preview-files="taskEntityPreviews"
+                  :last-preview-files="lastFiveMoviePreviews"
                   :task-type-map="taskTypeMap"
                   :light="!isWide"
                   @annotationchanged="onAnnotationChanged"
+                  @change-current-preview="changeCurrentPreview"
                   ref="preview-movie"
                 />
               </div>
@@ -508,6 +510,15 @@ export default {
       }
     },
 
+    lastFiveMoviePreviews () {
+      if (this.taskPreviews) {
+        const isMovie = previewFile => previewFile.extension === 'mp4'
+        return this.taskPreviews.filter(isMovie).slice(0, 5)
+      } else {
+        return []
+      }
+    },
+
     panelStyle () {
       return {
         width: this.isWide ? 700 : 350
@@ -718,6 +729,15 @@ export default {
       this.currentPreviewIndex = index
       this.currentPreviewPath = this.getOriginalPath()
       this.currentPreviewDlPath = this.getOriginalDlPath()
+    },
+
+    changeCurrentPreview (previewFile) {
+      const index = this.taskPreviews.findIndex(p => p.id === previewFile.id)
+      if (index || index === 0) {
+        this.currentPreviewIndex = index
+        this.currentPreviewPath = this.getOriginalPath()
+        this.currentPreviewDlPath = this.getOriginalDlPath()
+      }
     },
 
     setCurrentPreviewAsEntityThumbnail () {

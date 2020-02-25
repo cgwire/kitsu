@@ -126,6 +126,20 @@
       </div>
 
       <div class="right flexrow">
+        <div class="flexrow flexrow-item" v-if="isFullScreen()">
+          <span
+            :class="{
+              'previous-preview-file': true,
+              'current-preview-file': previewFile.revision === preview.revision
+            }"
+            :key="`last-preview-${previewFile.id}`"
+            @click="changeCurrentPreview(previewFile)"
+            v-for="previewFile in lastPreviewFiles"
+          >
+            {{ previewFile.revision }}
+          </span>
+        </div>
+
         <button
           class="button flexrow-item"
           @click="undoLastAction"
@@ -268,6 +282,10 @@ export default {
     readOnly: {
       type: Boolean,
       default: false
+    },
+    lastPreviewFiles: {
+      type: Array,
+      default: () => []
     }
   },
 
@@ -951,6 +969,10 @@ export default {
         const height = this.$refs.movie.offsetHeight
         this.fabricCanvas.setDimensions({ width, height })
       }
+    },
+
+    changeCurrentPreview (previewFile) {
+      this.$emit('change-current-preview', previewFile)
     }
   },
 
@@ -1124,5 +1146,23 @@ progress {
 
 .buttons .comparison-button {
   margin-left: 1em;
+}
+
+.previous-preview-file {
+  padding: 1px 8px;
+  margin-right: 0.4em;
+  border: 1px solid $grey;
+  border-radius: 50%;
+  cursor: pointer;
+}
+
+.current-preview-file {
+  padding: 1px 8px;
+  margin-right: 0.4em;
+  border: 1px solid $grey;
+  border-radius: 50%;
+  cursor: pointer;
+  background: $purple-strong;
+  transition: 0.3s background ease;
 }
 </style>
