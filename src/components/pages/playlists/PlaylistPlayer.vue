@@ -184,7 +184,7 @@
       :title="$t('playlists.actions.split_screen')"
       icon="compare"
       @click="onCompareClicked"
-      v-if="taskTypeOptions && !tempMode"
+      v-if="taskTypeOptions"
     />
     <combobox
       class="playlist-button flexrow-item comparison-list"
