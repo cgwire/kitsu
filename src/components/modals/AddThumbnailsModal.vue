@@ -305,6 +305,7 @@ export default {
 }
 
 .modal-content {
-  max-height: 900px;
+  max-height: calc(100vh - 7rem);
+  margin-top: 3rem;
 }
 </style>
