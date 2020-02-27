@@ -67,6 +67,7 @@ export default {
   position: relative;
   background: $dark-grey;
   overflow: hidden;
+  flex-shrink: 0;
 }
 
 .annotation-mark {
