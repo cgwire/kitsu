@@ -25,12 +25,14 @@
     <button-simple
       @click="$emit('edit-clicked')"
       class="edit-button playlist-button flexrow-item"
+      :title="$t('playlists.actions.rename')"
       icon="edit"
       v-if="isCurrentUserManager"
     />
     <button-simple
       @click="showDeleteModal"
       class="delete-button playlist-button flexrow-item"
+      :title="$t('playlists.actions.delete')"
       icon="delete"
       v-if="isCurrentUserManager"
     />
@@ -114,12 +116,14 @@
     <button-simple
       class="button playlist-button flexrow-item"
       @click="onPlayClicked"
+      :title="$t('playlists.actions.play')"
       icon="play"
       v-if="!isPlaying"
     />
     <button-simple
       class="button playlist-button flexrow-item"
       @click="onPlayClicked"
+      :title="$t('playlists.actions.pause')"
       icon="pause"
       v-else
     />
@@ -139,11 +143,13 @@
     <button-simple
       class="button playlist-button flexrow-item"
       @click="onPreviousFrameClicked"
+      :title="$t('playlists.actions.previous_frame')"
       icon="left"
     />
     <button-simple
       class="button playlist-button flexrow-item"
       @click="onNextFrameClicked"
+      :title="$t('playlists.actions.next_frame')"
       icon="right"
     />
 
@@ -159,11 +165,13 @@
     <button-simple
       class="button playlist-button flexrow-item"
       @click="onPlayPreviousShotClicked"
+      :title="$t('playlists.actions.previous_shot')"
       icon="back"
     />
     <button-simple
       class="playlist-button flexrow-item"
       @click="onPlayNextShotClicked"
+      :title="$t('playlists.actions.next_shot')"
       icon="forward"
     />
     <button-simple
@@ -173,6 +181,7 @@
         'playlist-button': true,
         active: isComparing
       }"
+      :title="$t('playlists.actions.split_screen')"
       icon="compare"
       @click="onCompareClicked"
       v-if="taskTypeOptions && !tempMode"
@@ -195,54 +204,71 @@
     <button-simple
       class="playlist-button flexrow-item"
       icon="undo"
+      :title="$t('playlists.actions.annotation_undo')"
       @click="undoLastAction"
     />
 
     <button-simple
       class="playlist-button flexrow-item"
+      :title="$t('playlists.actions.annotation_redo')"
       icon="redo"
       @click="redoLastAction"
     />
 
-    <pencil-picker
-      :isActive="isDrawing"
-      :isOpen="isShowingPencilPalette"
-      :pencil="pencil"
-      :palette="this.pencilPalette"
-      @toggle-palette="onPickPencil"
-      @change="onChangePencil"
-    />
+    <transition name="slide">
+      <div
+        class="annotation-tools"
+        v-show="isDrawing"
+      >
+        <pencil-picker
+          :isOpen="isShowingPencilPalette"
+          :pencil="pencil"
+          :sizes="this.pencilPalette"
+          @toggle-palette="onPickPencil"
+          @change="onChangePencil"
+        />
 
-    <color-picker
-      :isActive="isDrawing"
-      :isOpen="isShowingPalette"
-      :color="this.color"
-      :palette="this.palette"
-      @TogglePalette="onPickColor"
-      @change="onChangeColor"
-    />
-
+        <color-picker
+          :isOpen="isShowingPalette"
+          :color="this.color"
+          :palette="this.palette"
+          @TogglePalette="onPickColor"
+          @change="onChangeColor"
+        />
+      </div>
+    </transition>
     <button-simple
       :class="{
         'playlist-button': true,
         'flexrow-item': true,
         active: isDrawing
       }"
+      :title="$t('playlists.actions.annotation')"
       @click="onAnnotateClicked"
       icon="pencil"
     />
     <button-simple
       class="playlist-button flexrow-item"
       icon="remove"
+      :title="$t('playlists.actions.annotation_delete')"
       @click="onDeleteClicked"
+    />
+    <div class="separator"></div>
+    <button-simple
+      class="playlist-button flexrow-item"
+      :title="$t('playlists.actions.change_task_type')"
+      icon="layers"
+      @click="showTaskTypeModal"
     />
     <button-simple
       class="button playlist-button flexrow-item"
+      :title="$t('playlists.actions.comments')"
       @click="onCommentClicked"
       icon="comment"
     />
     <button-simple
       class="playlist-button flexrow-item"
+      :title="$t('playlists.actions.shotlist')"
       @click="onFilmClicked"
       icon="film"
     />
@@ -316,6 +342,7 @@
       </div>
       <button-simple
         class="playlist-button"
+        :title="$t('playlists.actions.download')"
         icon="download"
         @click="toggleDlButtons"
       />
@@ -323,6 +350,7 @@
 
     <button-simple
       class="button playlist-button flexrow-item"
+      :title="$t('playlists.actions.fullscreen')"
       @click="onFullscreenClicked"
       icon="maximize"
       v-if="isFullScreenEnabled"
@@ -1699,23 +1727,29 @@ progress {
   }
 }
 
-.color-picker {
-  width: 1.5rem;
-  height: 1.5rem;
-  border: 1px solid $white;
+.separator {
+  margin: .5rem;
+  &:before {
+    content: '';
+    border-left: 1px solid $dark-grey-lightest;
+    height: .5rem;
+  }
 }
 
-.slide-fade-enter-active {
+.annotation-tools {
+  display: flex;
+  align-items: stretch;
+  height: 100%;
+}
+
+.slide-enter-active {
   transition: all .3s ease;
 }
-
-.slide-fade-leave-active {
-  transition: all .5s cubic-bezier(1.0, 0.5, 0.8, 1.0);
+.slide-leave-active {
+  transition: all .3s ease;
 }
-
-.slide-fade-enter, .slide-fade-leave-to {
-  transform: translateX(1.5rem);
-  opacity: 0;
+.slide-enter, .slide-leave-to {
+  transform: translateX(100%);
 }
 
 .for-client {

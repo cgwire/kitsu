@@ -1,26 +1,23 @@
 <template>
 <div class="pencil-wrapper">
-  <transition name="slide">
-    <button
-      type="button"
-      class="pencil-picker"
-      :title="pencil"
-      :class="{
-        medium: pencil === 'medium',
-        small: pencil === 'small'
-      }"
-      @click="togglePalette"
-      v-show="isActive"
-    />
-  </transition>
+  <button
+    type="button"
+    class="pencil-picker"
+    :title="$t(`playlists.actions.annotation_${pencil}`)"
+    :class="{
+      medium: pencil === 'medium',
+      small: pencil === 'small'
+    }"
+    @click="togglePalette"
+  />
   <div
-    v-show="isActive && isOpen"
+    v-show="isOpen"
     class="pencil-palette"
   >
     <label
-      v-for="pencil in palette"
+      v-for="pencil in sizes"
       :key="pencil"
-      :title="pencil"
+      :title="$t(`playlists.actions.annotation_${pencil}`)"
       :class="{
         medium: pencil === 'medium',
         small: pencil === 'small'
@@ -41,14 +38,10 @@ export default {
   name: 'pencilpicker',
 
   props: {
-    isActive: {
-      type: Boolean,
-      default: false
-    },
     pencil: {
       type: String
     },
-    palette: {
+    sizes: {
       type: Array
     }
   },
@@ -78,6 +71,7 @@ export default {
 <style lang="scss" scoped>
 .pencil-wrapper {
   position: relative;
+  display: inline-flex;
 }
 .pencil-picker {
   padding: 0;
@@ -86,12 +80,13 @@ export default {
 }
 .pencil-picker {
   background-color: transparent;
+  min-width: 1.5rem
 }
 .pencil-picker::before,
 .pencil-palette label::before {
   display: block;
   content: '';
-  margin: .4rem;
+  margin: .4rem auto;
   width: 1rem;
   height: 1rem;
   border-radius: 50%;
@@ -100,14 +95,14 @@ export default {
 
 .pencil-picker.medium::before,
 .pencil-palette label.medium::before {
-  margin: .5rem;
+  margin: .5rem auto;
   width: .7rem;
   height: .7rem;
 }
 
 .pencil-picker.small::before,
 .pencil-palette label.small::before {
-  margin: .55rem;
+  margin: .55rem auto;
   width: .5rem;
   height: .5rem;
 }
@@ -119,6 +114,7 @@ export default {
   bottom: calc(100% - .25rem);
   background-color: $dark-grey-light;
   border-radius: 5px;
+  padding: 0 .25rem;
 }
 .preview .pencil-palette {
   background-color: $dark-grey;
@@ -130,14 +126,5 @@ export default {
 }
 .pencil-palette input {
   display: none;
-}
-.slide-enter-active {
-  transition: all .3s ease;
-}
-.slide-leave-active {
-  transition: all .3s ease;
-}
-.slide-enter, .slide-leave-to {
-  transform: translateX(1.5rem);
 }
 </style>

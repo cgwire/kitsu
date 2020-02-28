@@ -291,6 +291,29 @@ export default {
     fields: {
       name: 'Nom',
       for_client: 'A partager avec'
+    },
+    actions: {
+      rename: 'Renommer la playlist',
+      delete: 'Supprimer la playlist',
+      fullscreen: 'Plein écran',
+      download: 'Télécharger…',
+      shotlist: 'Montrer/Cacher la liste des shots',
+      comments: 'Montrer/Cacher les commentaires',
+      annotation: 'Annotation',
+      annotation_delete: 'Supprimer l\'annotation',
+      annotation_redo: 'Refaire annotation',
+      annotation_undo: 'Annuler annotation',
+      annotation_big: 'Gros',
+      annotation_medium: 'Moyen',
+      annotation_small: 'Petit',
+      change_task_type: 'Changer le task type',
+      split_screen: 'Partager l\'écran',
+      next_shot: 'Prochain shot',
+      previous_shot: 'Shot précédent',
+      next_frame: 'Prochaine frame',
+      previous_frame: 'Frame précédente',
+      play: 'Lecture',
+      pause: 'Pause'
     }
   },
 

@@ -1,19 +1,16 @@
 <template>
 <div class="color-wrapper">
-  <transition name="slide">
-    <button
-      type="button"
-      :class="{
-        'color-picker': true
-      }"
-      :title="color"
-      :style="{ color: color }"
-      @click="togglePalette"
-      v-show="isActive"
-    />
-  </transition>
+  <button
+    type="button"
+    :class="{
+      'color-picker': true
+    }"
+    :title="color"
+    :style="{ color: color }"
+    @click="togglePalette"
+  />
   <div
-    v-show="isActive && isOpen"
+    v-show="isOpen"
     :class="{
       'color-palette': true,
     }"
@@ -39,10 +36,6 @@ export default {
   name: 'colorpicker',
 
   props: {
-    isActive: {
-      type: Boolean,
-      default: false
-    },
     color: {
       type: String
     },
@@ -76,6 +69,7 @@ export default {
 <style lang="scss" scoped>
 .color-wrapper {
   position: relative;
+  display: inline-flex;
 }
 .color-picker {
   padding: 0;
@@ -113,14 +107,5 @@ export default {
 }
 .color-palette input {
   display: none;
-}
-.slide-enter-active {
-  transition: all .3s ease;
-}
-.slide-leave-active {
-  transition: all .3s ease;
-}
-.slide-enter, .slide-leave-to {
-  transform: translateX(1.5rem);
 }
 </style>
