@@ -371,6 +371,29 @@ export default {
     fields: {
       name: 'Name',
       for_client: 'To be shared with'
+    },
+    actions: {
+      rename: 'Rename playlist',
+      delete: 'Delete playlist',
+      fullscreen: 'Fullscreen',
+      download: 'Download…',
+      shotlist: 'Show/Hide shot list',
+      comments: 'Show/Hide comments',
+      annotation: 'Annotation',
+      annotation_delete: 'Delete annotation',
+      annotation_redo: 'Redo annotation',
+      annotation_undo: 'Undo annotation',
+      annotation_big: 'Big',
+      annotation_medium: 'Medium',
+      annotation_small: 'Small',
+      change_task_type: 'Change task type',
+      split_screen: 'Split screen',
+      next_shot: 'Next shot',
+      previous_shot: 'Previous shot',
+      next_frame: 'Next frame',
+      previous_frame: 'Previous frame',
+      play: 'Play',
+      pause: 'Pause'
     }
   },
 
