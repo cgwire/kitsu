@@ -1067,6 +1067,21 @@ export default {
     },
 
     onShotDropped (info) {
+      const playlistEl = this.$refs['playlisted-shots']
+      const scrollLeft = playlistEl.scrollLeft
+
+      const shotToMove = this.shotList.find(s => s.id === info.after)
+      const toMoveIndex = this.shotList.findIndex(s => s.id === info.after)
+      let targetIndex = this.shotList.findIndex(s => s.id === info.before)
+      if (toMoveIndex >= 0 && targetIndex >= 0) {
+        this.shotList.splice(toMoveIndex, 1)
+        if (toMoveIndex > targetIndex) targetIndex++
+        this.shotList.splice(targetIndex, 0, shotToMove)
+      }
+
+      this.$nextTick(() => {
+        playlistEl.scrollLeft = scrollLeft
+      })
       this.$emit('order-change', info)
     },
 
