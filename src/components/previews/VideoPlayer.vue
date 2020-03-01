@@ -164,23 +164,28 @@
           <x-icon class="icon" />
         </button>
 
-        <pencil-picker
-          :isActive="isDrawing"
-          :isOpen="isShowingPencilPalette"
-          :pencil="pencil"
-          :palette="this.pencilPalette"
-          @toggle-palette="onPickPencil"
-          @change="onChangePencil"
-        />
+        <transition name="slide">
+          <div
+            class="annotation-tools"
+            v-show="isDrawing"
+          >
+            <pencil-picker
+              :isOpen="isShowingPencilPalette"
+              :pencil="pencil"
+              :sizes="this.pencilPalette"
+              @toggle-palette="onPickPencil"
+              @change="onChangePencil"
+            />
 
-        <color-picker
-          :isActive="isDrawing"
-          :isOpen="isShowingPalette"
-          :color="color"
-          :palette="palette"
-          @toggle-palette="onPickColor"
-          @change="onChangeColor"
-        />
+            <color-picker
+              :isOpen="isShowingPalette"
+              :color="this.color"
+              :palette="this.palette"
+              @TogglePalette="onPickColor"
+              @change="onChangeColor"
+            />
+          </div>
+        </transition>
 
         <button
           :class="{
@@ -1164,5 +1169,24 @@ progress {
   cursor: pointer;
   background: $purple-strong;
   transition: 0.3s background ease;
+}
+
+.annotation-tools {
+  align-items: stretch;
+  display: flex;
+  height: 33px;
+  background: $dark-grey;
+}
+
+.slide-enter-active {
+  transition: all .3s ease;
+}
+
+.slide-leave-active {
+  transition: all .3s ease;
+}
+
+.slide-enter, .slide-leave-to {
+  transform: translateX(100%);
 }
 </style>
