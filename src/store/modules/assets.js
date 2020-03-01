@@ -684,6 +684,7 @@ const mutations = {
     let isDescription = false
     assets = sortAssets(assets)
     cache.assets = assets
+    cache.result = assets
     cache.assetIndex = buildAssetIndex(assets)
     state.assetMap = {}
 
@@ -976,25 +977,7 @@ const mutations = {
     taskMap,
     production
   }) {
-    let assets
-    if (state.assetSearchText.length > 0) {
-      const taskTypes = Object.values(taskTypeMap)
-      const taskStatuses = Object.values(taskStatusMap)
-      const query = state.assetSearchText
-      const keywords = getKeyWords(query) || []
-      const filters = getFilters(
-        cache.assetIndex,
-        taskTypes,
-        taskStatuses,
-        production.descriptors || [],
-        query
-      )
-      assets = indexSearch(cache.assetIndex, keywords) || cache.assets
-      assets = applyFilters(assets, filters, taskMap)
-    } else {
-      assets = cache.assets
-    }
-
+    const assets = cache.result
     state.displayedAssets = assets.slice(
       0,
       state.displayedAssets.length + PAGE_SIZE

@@ -1180,6 +1180,7 @@ const mutations = {
     let isTime = false
     shots = sortShots(shots)
     cache.shots = shots
+    cache.result = shots
     cache.shotIndex = buildShotIndex(shots)
 
     state.shotMap = {}
@@ -1573,22 +1574,7 @@ const mutations = {
     taskMap,
     production
   }) {
-    let shots = cache.shots
-    if (state.shotSearchText.length > 0) {
-      const taskTypes = Object.values(taskTypeMap)
-      const taskStatuses = Object.values(taskStatusMap)
-      const query = state.shotSearchText
-      const keywords = getKeyWords(query) || []
-      const filters = getFilters(
-        cache.shotIndex,
-        taskTypes,
-        taskStatuses,
-        production.descriptors || [],
-        query
-      )
-      shots = indexSearch(cache.shotIndex, keywords) || cache.shots
-      shots = applyFilters(shots, filters, taskMap)
-    }
+    const shots = cache.result
     state.displayedShots = shots.slice(
       0,
       state.displayedShots.length + PAGE_SIZE
