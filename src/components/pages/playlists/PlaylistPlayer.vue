@@ -196,13 +196,6 @@
 
     <button-simple
       class="playlist-button flexrow-item"
-      icon="layers"
-      @click="showTaskTypeModal"
-      v-if="!tempMode"
-    />
-
-    <button-simple
-      class="playlist-button flexrow-item"
       icon="undo"
       :title="$t('playlists.actions.annotation_undo')"
       @click="undoLastAction"
