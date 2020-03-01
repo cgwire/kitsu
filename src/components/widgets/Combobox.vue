@@ -120,7 +120,7 @@ export default {
   height: 3em;
 
   &.thin {
-    height: 2.35em;
+    height: 2.1em;
     width: 150px;
   }
 }

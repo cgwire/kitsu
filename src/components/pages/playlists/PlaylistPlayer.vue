@@ -361,7 +361,7 @@
   >
     <spinner class="spinner" v-if="isLoading" />
     <div
-      class="flexrow-item has-text-centered"
+      class="flexrow-item has-text-centered playlisted-wrapper"
       :key="shot.id"
       v-for="(shot, index) in shotList"
       v-else
@@ -1490,7 +1490,7 @@ export default {
 
 .playlisted-shots {
   border-top: 1px solid $dark-grey-strong;
-  padding: 0.5em;
+  padding: 0.4em 0em 0 0.4em;
   overflow-x: auto;
   min-height: 600px;
   align-items: flex-start;
@@ -1772,5 +1772,9 @@ progress {
 
 #playlist-annotation-canvas {
   margin: auto;
+}
+
+.playlisted-wrapper {
+  margin-right: 0;
 }
 </style>

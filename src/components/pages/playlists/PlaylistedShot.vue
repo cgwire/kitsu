@@ -170,14 +170,17 @@ export default {
 
     onDragleave () {
       this.dropArea.style.background = 'transparent'
+      this.dropArea.style.width = '15px'
     },
 
     onDragover () {
-      this.dropArea.style.background = '#00B242'
+      // this.dropArea.style.background = '#00B242'
+      this.dropArea.style.width = '60px'
     },
 
     onDropped (shotId) {
-      this.$refs['drop-area'].style.background = 'transparent'
+      this.dropArea.style.background = 'transparent'
+      this.dropArea.style.width = '15px'
       this.$emit('shot-dropped', {
         before: this.shot.id,
         after: shotId
@@ -226,17 +229,21 @@ export default {
 }
 
 .drop-area {
-  width: 10px;
-  margin-left: 10px;
+  width: 15px;
   height: 100%;
+  transition: width 0.3s ease;
 }
 
 .playlisted-shot {
   border-top: 3px solid transparent;
+  border-radius: 5px;
+  border: 1px solid dark;
+  box-shadow: 2px 2px 2px $dark-grey-strong;
+  background: $dark-grey-lighter;
   display: flex;
   flex-direction: column;
   min-width: 150px;
-  padding:0;
+  padding: 4px 4px;
 
   &.playing {
     border-top: 3px solid $green;
@@ -250,6 +257,10 @@ export default {
 .thumbnail-wrapper {
   position: relative;
   cursor: pointer;
+
+  img {
+    border-radius: 5px;
+  }
 }
 
 .field {
