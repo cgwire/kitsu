@@ -215,6 +215,7 @@ const mutations = {
 
     if (taskType && taskType.id) {
       Object.assign(taskType, newTaskType)
+      state.taskTypes = sortTaskTypes(state.taskTypes)
     } else {
       state.taskTypes.push(newTaskType)
       state.taskTypes = sortTaskTypes(state.taskTypes)

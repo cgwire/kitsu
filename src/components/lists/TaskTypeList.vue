@@ -22,13 +22,19 @@
 
   <div class="table-body" v-scroll="onBodyScroll">
     <table class="table splitted-table">
-      <tbody>
-        <tr class="type-header">
+      <draggable
+        v-model="assetsItems"
+        draggable=".tasktype-item"
+        tag="tbody"
+        :sort="true"
+        @end="updatePriorityAssets"
+      >
+        <tr class="type-header" slot="header">
           <td colspan="30">
             {{ $t('assets.title') }}
           </td>
         </tr>
-        <tr v-for="taskType in assetTaskTypes" :key="taskType.id">
+        <tr class="tasktype-item" v-for="taskType in assetsItems" :key="taskType.id">
           <task-type-name class="name" :entry="taskType" />
           <td class="priority">{{ taskType.priority }}</td>
           <td class="allow-timelog">
@@ -46,17 +52,23 @@
             }"
           />
         </tr>
-      </tbody>
+      </draggable>
     </table>
 
     <table class="table splitted-table">
-      <tbody>
-        <tr class="type-header">
+      <draggable
+        v-model="shotsItems"
+        draggable=".tasktype-item"
+        tag="tbody"
+        :sort="true"
+        @end="updatePriorityShots"
+      >
+        <tr class="type-header" slot="header">
           <td colspan="30">
             {{ $t('shots.title') }}
           </td>
         </tr>
-        <tr v-for="taskType in shotTaskTypes" :key="taskType.id">
+        <tr class="tasktype-item" v-for="taskType in shotsItems" :key="taskType.id">
           <task-type-name class="name" :entry="taskType" />
           <td class="priority">{{ taskType.priority }}</td>
           <td class="allow-timelog">
@@ -74,8 +86,7 @@
             }"
           />
         </tr>
-      </tbody>
-
+      </draggable>
     </table>
   </div>
 
@@ -88,6 +99,7 @@
 
 <script>
 import { mapGetters, mapActions } from 'vuex'
+import draggable from 'vuedraggable'
 import RowActions from '../widgets/RowActions'
 import TableInfo from '../widgets/TableInfo'
 import TaskTypeName from '../cells/TaskTypeName'
@@ -102,14 +114,20 @@ export default {
   ],
 
   data () {
-    return {}
+    return {
+      assetsItems: [],
+      shotsItems: []
+    }
   },
 
   components: {
+    draggable,
     RowActions,
     TableInfo,
     TaskTypeName
   },
+
+  mounted () {},
 
   computed: {
     ...mapGetters([
@@ -130,6 +148,47 @@ export default {
 
     onBodyScroll (event, position) {
       this.$refs.headerWrapper.style.left = `-${position.scrollLeft}px`
+    },
+
+    updatePriorityAssets () {
+      this.assetsItems.forEach((item, index) => {
+        index += 1
+        const form = {
+          id: item.id,
+          name: item.name,
+          priority: String(index),
+          allow_timelog: String(item.allow_timelog || 'true')
+        }
+        item.priority = index
+        this.$emit('update', form)
+      })
+    },
+
+    updatePriorityShots () {
+      this.shotsItems.forEach((item, index) => {
+        index += 1
+        const form = {
+          id: item.id,
+          name: item.name,
+          priority: String(index),
+          for_shots: String(item.for_shots || 'true'),
+          allow_timelog: String(item.allow_timelog || 'true')
+        }
+        item.priority = index
+        this.$emit('update', form)
+      })
+    }
+  },
+
+  watch: {
+    entries: {
+      immediate: true,
+      handler () {
+        setTimeout(() => {
+          this.assetsItems = JSON.parse(JSON.stringify(this.assetTaskTypes))
+          this.shotsItems = JSON.parse(JSON.stringify(this.shotTaskTypes))
+        }, 100)
+      }
     }
   }
 }

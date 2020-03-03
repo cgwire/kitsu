@@ -20,12 +20,14 @@
       :entries="taskTypes"
       :is-loading="loading.taskTypes"
       :is-error="errors.taskTypes"
+      @update="updatePriority"
     />
 
     <edit-task-type-modal
       :active="modals.isNewDisplayed"
       :is-loading="editTaskType.isLoading"
       :is-error="editTaskType.isError"
+      :entries="taskTypes"
       :cancel-route="'/task-types'"
       :task-type-to-edit="taskTypeToEdit"
       @confirm="confirmEditTaskType"
@@ -123,10 +125,20 @@ export default {
         })
     },
 
+    updatePriority (form) {
+      setTimeout(() => {
+        this.$store.dispatch('editTaskType', form)
+          .then(() => {
+            this.loadTaskTypes()
+          })
+      }, 100)
+    },
+
     confirmDeleteTaskType () {
       this.deleteTaskType(this.taskTypeToDelete)
         .then(() => {
           this.modals.isDeleteDisplayed = false
+          this.$router.push('/task-types')
         })
     },
 

@@ -24,12 +24,6 @@
           v-focus
         />
         <combobox
-          :label="$t('task_types.fields.priority')"
-          :options="priorityOptions"
-          @enter="confirmClicked"
-          v-model="form.priority"
-        />
-        <combobox
           :label="$t('task_types.fields.dedicated_to')"
           :options="dedicatedToOptions"
           @enter="confirmClicked"
@@ -77,7 +71,6 @@ import { mapGetters, mapActions } from 'vuex'
 import TextField from '../widgets/TextField'
 import Combobox from '../widgets/Combobox.vue'
 import ColorField from '../widgets/ColorField'
-import { range } from '../../lib/time'
 
 export default {
   name: 'edit-task-type-modal',
@@ -95,7 +88,8 @@ export default {
     'isLoading',
     'isError',
     'errorText',
-    'taskTypeToEdit'
+    'taskTypeToEdit',
+    'entries'
   ],
 
   watch: {
@@ -104,7 +98,6 @@ export default {
         this.form = {
           name: this.taskTypeToEdit.name,
           color: this.taskTypeToEdit.color,
-          priority: String(this.taskTypeToEdit.priority),
           for_shots: String(this.taskTypeToEdit.for_shots),
           allow_timelog: String(this.taskTypeToEdit.allow_timelog || 'true')
         }
@@ -121,9 +114,6 @@ export default {
         for_shots: 'false',
         allow_timelog: 'false'
       },
-      priorityOptions: range(1, 100).map((v) => {
-        return { label: `${v}`, value: `${v}` }
-      }),
       dedicatedToOptions: [
         { label: this.$t('assets.title'), value: 'false' },
         { label: this.$t('shots.title'), value: 'true' }
@@ -145,7 +135,15 @@ export default {
   methods: {
     ...mapActions([
     ]),
+    newPriority (forShots) {
+      if (forShots === 'true') {
+        return this.entries.filter(taskType => taskType.for_shots).length + 1
+      } else {
+        return this.entries.filter(taskType => !taskType.for_shots).length + 1
+      }
+    },
     confirmClicked () {
+      this.form.priority = this.newPriority(this.form.for_shots)
       this.$emit('confirm', this.form)
     },
     isEditing () {
