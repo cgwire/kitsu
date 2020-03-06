@@ -129,6 +129,7 @@
                 :light="!isWide"
                 @annotation-changed="onAnnotationChanged"
                 @add-preview="onAddExtraPreview"
+                @remove-extra-preview="onRemoveExtraPreview"
                 ref="preview-picture"
                 v-else-if="isPicturePreview"
               />
@@ -236,6 +237,16 @@
       @confirm="confirmDeleteTaskComment"
       @cancel="onCancelDeleteComment"
     />
+
+    <delete-modal
+      :active="modals.deleteExtraPreview"
+      :is-loading="loading.deleteExtraPreview"
+      :is-error="errors.deleteExtraPreview"
+      :text="$t('tasks.delete_preview')"
+      :error-text="$t('tasks.delete_preview_error')"
+      @cancel="onCancelRemoveExtraPreview"
+      @confirm="confirmDeleteTaskPreview"
+    />
   </div>
 
   <div class="side task-info has-text-centered" v-else>
@@ -323,6 +334,7 @@ export default {
         addExtraPreview: false,
         editComment: false,
         deleteComment: false,
+        confirmDeleteTaskPreview: false,
         task: false
       },
       loading: {
@@ -331,13 +343,15 @@ export default {
         addExtraPreview: false,
         editComment: false,
         deleteComment: false,
+        confirmDeleteTaskPreview: false,
         task: false
       },
       modals: {
         addPreview: false,
         addExtraPreview: false,
         editComment: false,
-        deleteComment: false
+        deleteComment: false,
+        deleteExtraPreview: false
       }
     }
   },
@@ -537,6 +551,7 @@ export default {
       'commentTask',
       'commentTaskWithPreview',
       'deleteTaskComment',
+      'deleteTaskPreview',
       'editTaskComment',
       'loadPreviewFileFormData',
       'loadTask',
@@ -717,6 +732,15 @@ export default {
       this.modals.addExtraPreview = true
     },
 
+    onRemoveExtraPreview (preview) {
+      this.currentExtraPreviewId = preview.id
+      this.modals.deleteExtraPreview = true
+    },
+
+    onCancelRemoveExtraPreview () {
+      this.modals.deleteExtraPreview = false
+    },
+
     onClosePreview () {
       this.modals.addPreview = false
     },
@@ -836,6 +860,35 @@ export default {
           }
         }
       })
+    },
+
+    getCurrentTaskComments () {
+      return this.getTaskComments(this.task.id)
+    },
+
+    confirmDeleteTaskPreview () {
+      this.loading.deleteExtraPreview = true
+      this.errors.deleteExtraPreview = false
+      const previewId = this.currentExtraPreviewId
+      const comment = this.getCurrentTaskComments().find((comment) => {
+        return comment.previews.findIndex((p) => p.id === previewId) >= 0
+      })
+
+      this.$refs['preview-picture'].displayFirst()
+      this.deleteTaskPreview({
+        taskId: this.task.id,
+        commentId: comment.id,
+        previewId
+      })
+        .then(() => {
+          this.loading.deleteExtraPreview = false
+          this.modals.deleteExtraPreview = false
+        })
+        .catch((err) => {
+          console.error(err)
+          this.loading.deleteExtraPreview = false
+          this.errors.deleteExtraPreview = true
+        })
     }
   },
 
