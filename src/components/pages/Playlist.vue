@@ -224,6 +224,8 @@
         <div
           class="addition-section"
           v-if="isCurrentUserManager && isAddingShot"
+          v-scroll="onBodyScroll"
+          ref="shotList"
         >
           <spinner
             class="mt2"
@@ -231,6 +233,7 @@
             v-if="isShotsLoading"
           />
           <div
+            ref="shotListContent"
             v-else
           >
             <div>
@@ -730,6 +733,15 @@ export default {
       })
     },
 
+    onBodyScroll (event, position) {
+      const maxHeight =
+        this.$refs.shotListContent.scrollHeight -
+        this.$refs.shotList.offsetHeight
+      if (maxHeight < position.scrollTop) {
+        this.displayMoreShots()
+      }
+    },
+
     onOrderChange (info) {
       this.changePlaylistOrder({
         playlist: this.currentPlaylist,
@@ -761,8 +773,6 @@ export default {
     onSearchChange (searchQuery) {
       if (searchQuery.length > 1) {
         this.setShotSearch(searchQuery)
-        this.displayMoreShots()
-        this.displayMoreShots()
         this.displayMoreShots()
       } else {
         this.setShotSearch('')
