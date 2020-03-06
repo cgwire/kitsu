@@ -151,17 +151,18 @@ export default {
     },
 
     updatePriorityAssets () {
+      const forms = []
       this.assetsItems.forEach((item, index) => {
         index += 1
         const form = {
           id: item.id,
           name: item.name,
-          priority: String(index),
-          allow_timelog: String(item.allow_timelog || 'true')
+          priority: String(index)
         }
         item.priority = index
-        this.$emit('update', form)
+        forms.push(form)
       })
+      this.$emit('update-priorities', forms)
     },
 
     updatePriorityShots () {
@@ -170,9 +171,7 @@ export default {
         const form = {
           id: item.id,
           name: item.name,
-          priority: String(index),
-          for_shots: String(item.for_shots || 'true'),
-          allow_timelog: String(item.allow_timelog || 'true')
+          priority: String(index)
         }
         item.priority = index
         this.$emit('update', form)
@@ -221,5 +220,9 @@ export default {
 
 .color {
   width: 100px;
+}
+
+tr {
+  cursor: pointer;
 }
 </style>

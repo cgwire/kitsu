@@ -20,7 +20,7 @@
       :entries="taskTypes"
       :is-loading="loading.taskTypes"
       :is-error="errors.taskTypes"
-      @update="updatePriority"
+      @update-priorities="updatePriorities"
     />
 
     <edit-task-type-modal
@@ -48,6 +48,7 @@
 
 <script>
 import { mapGetters, mapActions } from 'vuex'
+import func from '../../lib/func'
 import ButtonLink from '../widgets/ButtonLink'
 import DeleteModal from '../modals/DeleteModal'
 import EditTaskTypeModal from '../modals/EditTaskTypeModal'
@@ -117,28 +118,41 @@ export default {
         action = 'editTaskType'
         form.id = this.taskTypeToEdit.id
       }
-
       this.$store.dispatch(action, form)
         .then(() => {
           this.modals.isNewDisplayed = false
-          this.$router.push('/task-types')
+          this.$router.push({ name: 'task-types' })
         })
     },
 
-    updatePriority (form) {
-      setTimeout(() => {
-        this.$store.dispatch('editTaskType', form)
+    updatePriorities (forms) {
+      forms.forEach((form) => {
+        this.$store.commit('EDIT_TASK_TYPE_END', form)
+      })
+      this.savePriorities(forms)
+    },
+
+    savePriorities (forms) {
+      const now = new Date().getTime()
+      this.lastCall = this.lastCall || 0
+      if (now - this.lastCall > 1000 && !this.isSaving) {
+        this.lastCall = now
+        this.isSaving = true
+        func.runPromiseMapAsSeries(forms, this.editTaskType)
           .then(() => {
-            this.loadTaskTypes()
+            this.isSaving = false
+            if (this.newSaveCall) this.savePriorities(forms)
           })
-      }, 100)
+      } else {
+        this.newSaveCall = true
+      }
     },
 
     confirmDeleteTaskType () {
       this.deleteTaskType(this.taskTypeToDelete)
         .then(() => {
           this.modals.isDeleteDisplayed = false
-          this.$router.push('/task-types')
+          this.$router.push({ name: 'task-types' })
         })
     },
 

@@ -240,9 +240,7 @@ export default {
       },
 
       'task-type:update' (eventData) {
-        if (this.taskTypeMap[eventData.task_type_id]) {
-          this.loadTaskType(eventData.task_type_id)
-        }
+        // Do nothing to avoid side effects when reordering task types.
       },
 
       'task-type:delete' (eventData) {

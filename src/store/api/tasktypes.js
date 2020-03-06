@@ -19,10 +19,16 @@ export default {
   updateTaskType (taskType) {
     const data = {
       name: taskType.name,
-      color: taskType.color,
-      priority: Number(taskType.priority),
-      for_shots: Boolean(taskType.for_shots === 'true'),
-      allow_timelog: Boolean(taskType.allow_timelog === 'true')
+      color: taskType.color
+    }
+    if (taskType.priority && taskType.priority > 0) {
+      data.priority = Number(taskType.priority)
+    }
+    if (taskType.allow_timelog !== undefined) {
+      data.allow_timelog = Boolean(taskType.allow_timelog === 'true')
+    }
+    if (taskType.for_shots !== undefined) {
+      data.for_shots = Boolean(taskType.for_shots === 'true')
     }
     return client.pput(`/api/data/task-types/${taskType.id}`, data)
   },

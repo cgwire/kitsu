@@ -29,9 +29,8 @@
           @enter="confirmClicked"
           v-model="form.for_shots"
         />
-        <combobox
+        <combobox-boolean
           :label="$t('task_types.fields.allow_timelog')"
-          :options="allowTimelogOptions"
           @enter="confirmClicked"
           v-model="form.allow_timelog"
         />
@@ -70,12 +69,14 @@
 import { mapGetters, mapActions } from 'vuex'
 import TextField from '../widgets/TextField'
 import Combobox from '../widgets/Combobox.vue'
+import ComboboxBoolean from '../widgets/ComboboxBoolean.vue'
 import ColorField from '../widgets/ColorField'
 
 export default {
   name: 'edit-task-type-modal',
   components: {
     Combobox,
+    ComboboxBoolean,
     TextField,
     ColorField
   },
@@ -98,8 +99,8 @@ export default {
         this.form = {
           name: this.taskTypeToEdit.name,
           color: this.taskTypeToEdit.color,
-          for_shots: String(this.taskTypeToEdit.for_shots),
-          allow_timelog: String(this.taskTypeToEdit.allow_timelog || 'true')
+          for_shots: String(this.taskTypeToEdit.for_shots === true),
+          allow_timelog: String(this.taskTypeToEdit.allow_timelog === true)
         }
       }
     }
@@ -109,18 +110,13 @@ export default {
     return {
       form: {
         name: '',
-        color: '$grey999',
-        priority: '',
+        color: '$grey',
         for_shots: 'false',
         allow_timelog: 'false'
       },
       dedicatedToOptions: [
         { label: this.$t('assets.title'), value: 'false' },
         { label: this.$t('shots.title'), value: 'true' }
-      ],
-      allowTimelogOptions: [
-        { label: this.$t('main.yes'), value: 'true' },
-        { label: this.$t('main.no'), value: 'false' }
       ]
     }
   },
@@ -135,6 +131,7 @@ export default {
   methods: {
     ...mapActions([
     ]),
+
     newPriority (forShots) {
       if (forShots === 'true') {
         return this.entries.filter(taskType => taskType.for_shots).length + 1
@@ -142,10 +139,14 @@ export default {
         return this.entries.filter(taskType => !taskType.for_shots).length + 1
       }
     },
+
     confirmClicked () {
-      this.form.priority = this.newPriority(this.form.for_shots)
+      if (!this.isEditing) {
+        this.form.priority = this.newPriority(this.form.for_shots)
+      }
       this.$emit('confirm', this.form)
     },
+
     isEditing () {
       return this.taskTypeToEdit && this.taskTypeToEdit.id
     }

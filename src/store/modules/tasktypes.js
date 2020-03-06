@@ -211,16 +211,15 @@ const mutations = {
   },
 
   [EDIT_TASK_TYPE_END] (state, newTaskType) {
-    const taskType = getters.getTaskType(state)(newTaskType.id)
+    const taskType = state.taskTypeMap[newTaskType.id]
 
     if (taskType && taskType.id) {
       Object.assign(taskType, newTaskType)
-      state.taskTypes = sortTaskTypes(state.taskTypes)
     } else {
       state.taskTypes.push(newTaskType)
-      state.taskTypes = sortTaskTypes(state.taskTypes)
+      state.taskTypeMap[newTaskType.id] = newTaskType
     }
-    state.taskTypeMap[newTaskType.id] = newTaskType
+    state.taskTypes = sortTaskTypes(state.taskTypes)
     state.editTaskType = {
       isLoading: false,
       isError: false
