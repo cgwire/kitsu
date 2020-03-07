@@ -687,7 +687,8 @@ export default {
     uploadImportFile (data, toUpdate) {
       const formData = new FormData()
       const filename = 'import.csv'
-      const file = new File([data.join('\n')], filename, { type: 'text/csv' })
+      const csvContent = csv.turnEntriesToCsvString(data)
+      const file = new File([csvContent], filename, { type: 'text/csv' })
 
       formData.append('file', file)
 
@@ -697,8 +698,8 @@ export default {
 
       this.uploadAssetFile(toUpdate)
         .then(() => {
-          this.loading.importing = false
           this.hideImportRenderModal()
+          this.loading.importing = false
           this.loadAssets(() => {
             this.resizeHeaders()
           })

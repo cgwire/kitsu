@@ -76,7 +76,7 @@ const csv = {
     return entries
   },
 
-  buildCsvFile (name, entries) {
+  turnEntriesToCsvString (entries) {
     const lineArray = []
     entries.forEach((infoArray) => {
       const sanitizedCells = infoArray.map((cell) => {
@@ -86,14 +86,19 @@ const csv = {
       const line = sanitizedCells.join(';')
       lineArray.push(line)
     })
-    const csvContent = 'data:text/csv;charset=utf-8,' + lineArray.join('\n')
-    const encodedUri = encodeURI(csvContent)
+    return lineArray.join('\n')
+  },
+
+  buildCsvFile (name, entries) {
+    const csvContent = csv.turnEntriesToCsvString(entries)
+    const result = 'data:text/csv;charset=utf-8,' + csvContent
+    const encodedUri = encodeURI(result)
     const link = document.createElement('a')
     link.setAttribute('href', encodedUri)
     link.setAttribute('download', `${name}.csv`)
     document.body.appendChild(link)
     link.click()
-    return lineArray
+    return csvContent
   },
 
   generateStatReports (
