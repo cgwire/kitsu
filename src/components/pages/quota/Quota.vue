@@ -360,16 +360,20 @@ export default {
     },
     monthToString,
 
+    dateDigit (date) {
+      return date.toString().padStart(2, '0')
+    },
+
     getQuota (personId, opt = {}) {
       if (opt.day) {
         const yearKey =
-          `${opt.year}-${opt.month.toString().padStart(2, '0')}-${opt.day}`
+          `${opt.year}-${this.dateDigit(opt.month)}-${this.dateDigit(opt.day)}`
         return this.quotaMap[personId][yearKey]
       } else if (opt.week) {
         const weekKey = `${opt.year}-${opt.week}`
         return this.quotaMap[personId][weekKey]
       } else {
-        const dayKey = `${opt.year}-${opt.month.toString().padStart(2, '0')}`
+        const dayKey = `${opt.year}-${this.dateDigit(opt.month)}`
         return this.quotaMap[personId][dayKey]
       }
     },
@@ -377,7 +381,7 @@ export default {
     getQuotaAverage (personId, opt = {}) {
       let average
       if (opt.month) {
-        const monthKey = opt.year + '-' + opt.month.toString().padStart(2, '0')
+        const monthKey = opt.year + '-' + this.dateDigit(opt.month)
         average = this.quotaMap[personId].average[monthKey]
       } else if (opt.week) {
         const weekKey = `${opt.year}-${opt.week}`
