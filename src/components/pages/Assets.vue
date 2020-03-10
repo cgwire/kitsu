@@ -688,6 +688,7 @@ export default {
       const formData = new FormData()
       const filename = 'import.csv'
       const csvContent = csv.turnEntriesToCsvString(data)
+      console.log(csvContent)
       const file = new File([csvContent], filename, { type: 'text/csv' })
 
       formData.append('file', file)
