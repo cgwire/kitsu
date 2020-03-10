@@ -650,6 +650,7 @@ export default {
 
 .nav-right {
   padding-right: 0;
+  flex-grow: 0;
 }
 
 .context-selector-label {
