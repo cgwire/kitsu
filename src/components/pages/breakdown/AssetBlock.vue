@@ -13,13 +13,15 @@
     <div
       class="asset-add"
       @click="removeOneAsset"
+      v-if="!readOnly"
     >
     - 1
     </div>
     <div
       class="asset-add-10"
       @click="removeTenAssets"
-      >
+      v-if="!readOnly"
+    >
     - 10
     </div>
     <div class="asset-picture" v-if="asset.preview_file_id">
@@ -75,6 +77,10 @@ export default {
     active: {
       default: true,
       type: Boolean
+    },
+    readOnly: {
+      default: false,
+      type: Boolean
     }
   },
 
@@ -95,7 +101,9 @@ export default {
     },
 
     onEditLabelClicked () {
-      this.$emit('edit-label', this.asset, this.asset.label)
+      if (!this.readOnly) {
+        this.$emit('edit-label', this.asset, this.asset.label)
+      }
     }
   }
 }

@@ -26,6 +26,7 @@
           :key="asset.id"
           :asset="asset"
           :nb-occurences="asset.nb_occurences"
+          :read-only="readOnly"
           @edit-label="onEditLabelClicked"
           @remove-one="removeOneAsset"
           @remove-ten="removeTenAssets"
@@ -64,6 +65,10 @@ export default {
     assets: {
       default: () => [],
       type: Array
+    },
+    readOnly: {
+      default: false,
+      type: Boolean
     }
   },
 
