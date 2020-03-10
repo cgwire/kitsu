@@ -46,6 +46,7 @@
             :selected="selection[entity.id]"
             :name="entity.name"
             :assets="castingByType[entity.id] || []"
+            :read-only="!isCurrentUserManager"
             @edit-label="onEditLabelClicked"
             @remove-one="removeOneAsset"
             @remove-ten="removeTenAssets"
