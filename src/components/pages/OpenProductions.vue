@@ -346,6 +346,12 @@ a.secondary:hover {
   margin-top: 2em;
 }
 
+.open-productions.page {
+  height: auto;
+  min-height: 100vh;
+  padding-bottom: 3em;
+}
+
 @media screen and (max-width: 768px) {
   .title {
     margin-top: 1em;
