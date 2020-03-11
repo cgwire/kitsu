@@ -28,6 +28,14 @@
         v-focus
       />
 
+      <combobox-boolean
+        ref="hiddenField"
+        :label="$t('assets.fields.hidden_from_client')"
+        v-model="form.hiddenFromClient"
+        @enter="confirm"
+        v-focus
+      />
+
       <div v-if="type === 'choices'">
         <p class="strong">
           {{ $t('productions.metadata.available_values') }}
@@ -85,6 +93,7 @@ import { modalMixin } from './base_modal'
 import { remove } from '../../lib/models'
 
 import Combobox from '../widgets/Combobox'
+import ComboboxBoolean from '../widgets/ComboboxBoolean'
 import ModalFooter from './ModalFooter'
 import TextField from '../widgets/TextField'
 
@@ -94,6 +103,7 @@ export default {
 
   components: {
     Combobox,
+    ComboboxBoolean,
     ModalFooter,
     TextField
   },
@@ -121,6 +131,7 @@ export default {
     return {
       form: {
         name: '',
+        hiddenFromClient: false,
         values: []
       },
       valueToAdd: '',
