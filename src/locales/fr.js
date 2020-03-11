@@ -37,7 +37,8 @@ export default {
       name: 'Nom',
       production: 'Prod',
       time_spent: 'Jours',
-      type: 'Type'
+      type: 'Type',
+      hidden_from_client: 'Caché au client'
     }
   },
 

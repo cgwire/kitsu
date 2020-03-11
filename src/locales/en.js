@@ -24,7 +24,8 @@ export default {
       name: 'Name',
       production: 'Prod',
       time_spent: 'Time',
-      type: 'Type'
+      type: 'Type',
+      hidden_from_client: 'Hidden from client'
     }
   },
 

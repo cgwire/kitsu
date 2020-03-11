@@ -47,7 +47,7 @@
             class="metadata-descriptor"
             :key="descriptor.id"
             v-for="descriptor in shotMetadataDescriptors"
-            v-if="!isCurrentUserClient && isShowInfos"
+            v-if="isShowInfos"
           >
             <div class="flexrow">
               <span class="flexrow-item descriptor-name">
@@ -193,7 +193,7 @@
             class="metadata-descriptor"
             :key="shot.id + '-' + descriptor.id"
             v-for="descriptor in shotMetadataDescriptors"
-            v-if="!isCurrentUserClient && isShowInfos"
+            v-if="isShowInfos"
           >
             {{ shot.data ? shot.data[descriptor.field_name] : '' }}
           </td>
