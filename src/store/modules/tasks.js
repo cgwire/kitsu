@@ -244,10 +244,12 @@ const actions = {
 
   loadTaskEntityPreviewFiles ({ commit, state }, { callback, entityId }) {
     const entity = { id: entityId }
-    playlistsApi.getEntityPreviewFiles(entity, (err, previewFiles) => {
-      commit(LOAD_TASK_ENTITY_PREVIEW_FILES_END, previewFiles)
-      if (callback) callback(err)
-    })
+    playlistsApi.getEntityPreviewFiles(entity)
+      .then((previewFiles) => {
+        commit(LOAD_TASK_ENTITY_PREVIEW_FILES_END, previewFiles)
+        callback()
+      })
+      .catch(callback)
   },
 
   commentTask ({ commit, state }, { taskId, taskStatusId, comment }) {

@@ -22,7 +22,11 @@ export const annotationMixin = {
 
   computed: {
     ...mapGetters([
-    ])
+    ]),
+
+    annotationCanvas () {
+      return this.$refs['annotation-canvas']
+    }
   },
 
   methods: {
@@ -170,8 +174,9 @@ export const annotationMixin = {
 
     setupFabricCanvas () {
       if (this.readOnly) return
+      if (!this.annotationCanvas) return
 
-      const canvasId = this.$refs['annotation-canvas'].id
+      const canvasId = this.annotationCanvas.id
       this.fabricCanvas = new fabric.Canvas(canvasId)
       this.fabricCanvas.on('object:moved', this.saveAnnotations)
       this.fabricCanvas.on('object:scaled', this.saveAnnotations)

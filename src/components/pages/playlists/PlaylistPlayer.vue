@@ -4,7 +4,7 @@
   ref="container"
   :class="{
     dark: true,
-    'full-height': !isAddingShot,
+    'full-height': !isAddingEntity,
     'playlist-player': true
   }"
 >
@@ -16,16 +16,16 @@
       {{ playlist.name }}
     </span>
     <button-simple
-      @click="$emit('show-add-shots')"
-      class="playlist-button add-shots-button flexrow-item"
+      @click="$emit('show-add-entities')"
+      class="playlist-button add-entities-button flexrow-item"
       icon="plus"
-      text="Add Shots"
-      v-if="isCurrentUserManager && !isAddingShot"
+      :text="addEntitiesText"
+      v-if="isCurrentUserManager && !isAddingEntity"
     />
     <button-simple
       @click="$emit('edit-clicked')"
       class="edit-button playlist-button flexrow-item"
-      :title="$t('playlists.actions.rename')"
+      :title="$t('playlists.actions.edit')"
       icon="edit"
       v-if="isCurrentUserManager"
     />
@@ -41,15 +41,15 @@
   <div
     class="filler flexrow video-container"
     ref="video-container"
-    v-if="!isAddingShot"
+    v-if="!isAddingEntity"
   >
     <raw-video-player
       class="raw-player"
       ref="raw-player"
-      :shots="shotList"
+      :entities="entityList"
       :is-repeating="isRepeating"
       @metadata-loaded="onMetadataLoaded"
-      @shot-change="onShotChange"
+      @entity-change="onEntityChange"
       @time-update="onTimeUpdate"
       @max-duration-update="onMaxDurationUpdate"
     />
@@ -58,7 +58,7 @@
       :is-repeating="isRepeating"
       ref="raw-player-comparison"
       :muted="true"
-      :shots="shotListToCompare"
+      :entities="entityListToCompare"
       v-if="isComparing"
     />
     <div class="canvas-wrapper" ref="canvas-wrapper">
@@ -84,7 +84,7 @@
   <div
     class="playlist-progress"
     ref="playlist-progress"
-    v-if="!isAddingShot"
+    v-if="!isAddingEntity"
   >
     <div class="video-progress">
       <progress
@@ -107,13 +107,13 @@
     :annotations="annotations"
     :max-duration-raw="maxDurationRaw"
     @select-annotation="loadAnnotation"
-    v-if="playlist.id && !isAddingShot"
+    v-if="playlist.id && !isAddingEntity"
   />
 
   <div
     class="playlist-footer flexrow"
     ref="button-bar"
-    v-if="playlist.id && !isAddingShot"
+    v-if="playlist.id && !isAddingEntity"
   >
     <button-simple
       class="button playlist-button flexrow-item"
@@ -169,23 +169,23 @@
     />
 
     <span class="flexrow-item time-indicator">
-      {{ shotList.length > 0 ? playingShotIndex + 1 : 0 }}
+      {{ entityList.length > 0 ? playingEntityIndex + 1 : 0 }}
     </span>
     <span class="flexrow-item time-indicator">
     /
     </span>
     <span class="flexrow-item time-indicator mr1">
-      {{ shotList.length }}
+      {{ entityList.length }}
     </span>
     <button-simple
       class="button playlist-button flexrow-item"
-      @click="onPlayPreviousShotClicked"
+      @click="onPlayPreviousEntityClicked"
       :title="$t('playlists.actions.previous_shot')"
       icon="back"
     />
     <button-simple
       class="playlist-button flexrow-item"
-      @click="onPlayNextShotClicked"
+      @click="onPlayNextEntityClicked"
       :title="$t('playlists.actions.next_shot')"
       icon="forward"
     />
@@ -276,7 +276,7 @@
     />
     <button-simple
       class="playlist-button flexrow-item"
-      :title="$t('playlists.actions.shotlist')"
+      :title="$t('playlists.actions.entity_list')"
       @click="onFilmClicked"
       icon="film"
     />
@@ -367,29 +367,29 @@
 
   <div
     :class="{
-      'playlisted-shots': true,
+      'playlisted-entities': true,
       flexrow: true,
-      hidden: isShotsHidden
+      hidden: isEntitiesHidden
     }"
-    ref="playlisted-shots"
+    ref="playlisted-entities"
     v-if="playlist.id"
   >
     <spinner class="spinner" v-if="isLoading" />
     <div
       class="flexrow-item has-text-centered playlisted-wrapper"
-      :key="shot.id"
-      v-for="(shot, index) in shotList"
+      :key="entity.id"
+      v-for="(entity, index) in entityList"
       v-else
     >
-      <playlisted-shot
-        :ref="'shot-' + index"
+      <playlisted-entity
+        :ref="'entity-' + index"
         :index="index"
-        :shot="shot"
-        :is-playing="playingShotIndex === index"
-        @play-click="playShot"
-        @remove-shot="removeShot"
+        :entity="entity"
+        :is-playing="playingEntityIndex === index"
+        @play-click="playEntity"
+        @remove-entity="removeEntity"
         @preview-changed="onPreviewChanged"
-        @shot-dropped="onShotDropped"
+        @entity-dropped="onEntityDropped"
       />
     </div>
   </div>
@@ -406,7 +406,7 @@
 
   <select-task-type-modal
     :active="modals.taskType"
-    :task-type-list="shotTaskTypes"
+    :task-type-list="entityTaskTypes"
     @confirm="confirmChangeTaskType"
     @cancel="hideTaskTypeModal"
   />
@@ -431,7 +431,7 @@ import ColorPicker from '../../widgets/ColorPicker'
 import Combobox from '../../widgets/Combobox'
 import DeleteModal from '../../modals/DeleteModal'
 import PencilPicker from '../../widgets/PencilPicker'
-import PlaylistedShot from './PlaylistedShot'
+import PlaylistedEntity from './PlaylistedEntity'
 import RawVideoPlayer from './RawVideoPlayer'
 import SelectTaskTypeModal from '../../modals/SelectTaskTypeModal'
 import Spinner from '../../widgets/Spinner'
@@ -450,7 +450,7 @@ export default {
     Combobox,
     DeleteModal,
     PencilPicker,
-    PlaylistedShot,
+    PlaylistedEntity,
     RawVideoPlayer,
     SelectTaskTypeModal,
     Spinner,
@@ -463,7 +463,7 @@ export default {
       type: Object,
       default: () => {}
     },
-    shots: {
+    entities: {
       type: Object,
       default: () => {}
     },
@@ -471,7 +471,11 @@ export default {
       type: Boolean,
       default: false
     },
-    isAddingShot: {
+    isAddingEntity: {
+      type: Boolean,
+      default: false
+    },
+    isAssetPlaylist: {
       type: Boolean,
       default: false
     },
@@ -496,15 +500,15 @@ export default {
       isRepeating: false,
       isShowingPalette: false,
       isShowingPencilPalette: false,
-      isShotsHidden: false,
+      isEntitiesHidden: false,
       maxDuration: '00:00.00',
       maxDurationRaw: 0,
       palette: ['#ff3860', '#008732', '#5E60BA', '#f57f17'],
       pencil: 'big',
       pencilPalette: ['big', 'medium', 'small'],
-      playingShotIndex: 0,
-      shotList: [],
-      shotListToCompare: [],
+      playingEntityIndex: 0,
+      entityList: [],
+      entityListToCompare: [],
       task: null,
       taskTypeOptions: [],
       taskTypeToCompare: null,
@@ -531,7 +535,11 @@ export default {
   },
 
   mounted () {
-    this.shotList = Object.values(this.shots)
+    if (this.entities) {
+      this.entityList = Object.values(this.entities)
+    } else {
+      this.entityList = []
+    }
     this.updateProgressBar()
     this.$nextTick(() => {
       window.addEventListener('keydown', this.onKeyDown, false)
@@ -550,6 +558,7 @@ export default {
 
   computed: {
     ...mapGetters([
+      'assetTaskTypes',
       'currentProduction',
       'isCurrentUserClient',
       'isCurrentUserManager',
@@ -575,20 +584,48 @@ export default {
       return `/api/data/playlists/${this.playlist.id}/download/zip`
     },
 
+    currentFrame () {
+      return `${Math.floor(this.currentTimeRaw * this.fps)}`.padStart(3, '0')
+    },
+
+    deleteText () {
+      if (this.playlist) {
+        return this.$t('playlists.delete_text', { name: this.playlist.name })
+      } else {
+        return ''
+      }
+    },
+
+    timezone () {
+      return this.user.timezone || moment.tz.guess()
+    },
+
+    entityTaskTypes () {
+      if (this.playlist.for_entity === 'asset') {
+        return this.assetTaskTypes
+      } else {
+        return this.shotTaskTypes
+      }
+    },
+
+    addEntitiesText () {
+      if (this.isAssetPlaylist) {
+        return this.$t('playlists.add_assets')
+      } else {
+        return this.$t('playlists.add_shots')
+      }
+    },
+
+    fps () {
+      return this.currentProduction.fps || 24
+    },
+
     canvas () {
       return this.$refs['canvas-wrapper']
     },
 
     container () {
       return this.$refs.container
-    },
-
-    currentFrame () {
-      return `${Math.floor(this.currentTimeRaw * this.fps)}`.padStart(3, '0')
-    },
-
-    fps () {
-      return this.currentProduction.fps || 24
     },
 
     rawPlayer () {
@@ -613,23 +650,6 @@ export default {
 
     video () {
       return this.$refs.movie
-    },
-
-    deleteText () {
-      if (this.playlist) {
-        return this.$t('playlists.delete_text', { name: this.playlist.name })
-      } else {
-        return ''
-      }
-    },
-
-    timezone () {
-      return this.user.timezone || moment.tz.guess()
-    },
-
-    nbCommentedShots () {
-      const isCommentedByClient = shot => shot.is_commented
-      return this.shotList.filter(isCommentedByClient).length
     }
   },
 
@@ -735,35 +755,29 @@ export default {
         const factor = this.currentTimeRaw / this.maxDurationRaw
         this.progress.value = this.currentTimeRaw
         this.progressBar.style.width = Math.floor(factor * 100) + '%'
-        /*
-        const progressCoordinates = this.progress.getBoundingClientRect()
-        const x = progressCoordinates.width * factor + progressCoordinates.x
-        this.progressCursor.style.left = Math.round(x - 7) + 'px'
-        this.progressCursor.style.top = Math.round(progressCoordinates.y - 3) + 'px'
-        */
       }
     },
 
     updateTaskPanel () {
-      if (this.shotList.length > 0) {
-        const shot = this.shotList[this.playingShotIndex]
-        if (shot) this.task = this.taskMap[shot.preview_file_task_id]
+      if (this.entityList.length > 0) {
+        const entity = this.entityList[this.playingEntityIndex]
+        if (entity) this.task = this.taskMap[entity.preview_file_task_id]
         else this.task = null
       } else {
         this.task = null
       }
     },
 
-    scrollToShot (index) {
-      const shotEl = this.$refs['shot-' + index]
-      if (shotEl && shotEl[0]) {
-        const shotWidget = shotEl[0].$el
-        const playlistEl = this.$refs['playlisted-shots']
-        const shot = this.shotList[index]
-        this.annotations = shot.preview_file_annotations || []
-        if (shotWidget) {
+    scrollToEntity (index) {
+      const entityEl = this.$refs['entity-' + index]
+      if (entityEl && entityEl[0]) {
+        const entityWidget = entityEl[0].$el
+        const playlistEl = this.$refs['playlisted-entities']
+        const entity = this.entityList[index]
+        this.annotations = entity.preview_file_annotations || []
+        if (entityWidget) {
           const margin = 30
-          const rect = shotWidget.getBoundingClientRect()
+          const rect = entityWidget.getBoundingClientRect()
           const listRect = playlistEl.getBoundingClientRect()
           const isRight = rect.right > listRect.right - margin
           const isLeft = rect.left < listRect.left - margin
@@ -780,8 +794,8 @@ export default {
     },
 
     scrollToRight () {
-      if (this.shotList.length > 0) {
-        this.scrollToShot(this.shotList.length - 1)
+      if (this.entityList.length > 0) {
+        this.scrollToEntity(this.entityList.length - 1)
       }
     },
 
@@ -803,17 +817,17 @@ export default {
       this.isPlaying = false
     },
 
-    playShot (shotIndex) {
-      const shot = this.shotList[shotIndex]
+    playEntity (entityIndex) {
+      const entity = this.entityList[entityIndex]
       this.hideCanvas()
       this.clearCanvas()
-      if (shot.preview_file_extension === 'mp4') {
-        this.annotations = shot.preview_file_annotations || []
-        this.playingShotIndex = shotIndex
-        this.scrollToShot(this.playingShotIndex)
-        this.rawPlayer.loadShot(shotIndex)
+      if (entity.preview_file_extension === 'mp4') {
+        this.annotations = entity.preview_file_annotations || []
+        this.playingEntityIndex = entityIndex
+        this.scrollToEntity(this.playingEntityIndex)
+        this.rawPlayer.loadEntity(entityIndex)
         if (this.isComparing) {
-          this.$refs['raw-player-comparison'].loadShot(shotIndex)
+          this.$refs['raw-player-comparison'].loadEntity(entityIndex)
         }
         if (this.isPlaying) {
           this.rawPlayer.play()
@@ -844,11 +858,11 @@ export default {
       if (annotation) this.loadAnnotation(annotation)
     },
 
-    removeShot (shot) {
-      this.$emit('remove-shot', shot)
+    removeEntity (entity) {
+      this.$emit('remove-entity', entity)
       this.$options.silent = true
-      const shotIndex = this.shotList.findIndex(s => s.id === shot.id)
-      this.shotList.splice(shotIndex, 1)
+      const entityIndex = this.entityList.findIndex(s => s.id === entity.id)
+      this.entityList.splice(entityIndex, 1)
       setTimeout(() => {
         this.$options.silent = false
       }, 1000)
@@ -909,18 +923,18 @@ export default {
       this.goNextFrame()
     },
 
-    onPlayPreviousShotClicked () {
-      this.rawPlayer.loadPreviousShot()
+    onPlayPreviousEntityClicked () {
+      this.rawPlayer.loadPreviousEntity()
       if (this.isComparing) {
-        this.$refs['raw-player-comparison'].loadPreviousShot()
+        this.$refs['raw-player-comparison'].loadPreviousEntity()
       }
       if (this.isPlaying) this.play()
     },
 
-    onPlayNextShotClicked () {
-      this.rawPlayer.loadNextShot()
+    onPlayNextEntityClicked () {
+      this.rawPlayer.loadNextEntity()
       if (this.isComparing) {
-        this.$refs['raw-player-comparison'].loadNextShot()
+        this.$refs['raw-player-comparison'].loadNextEntity()
       }
       if (this.isPlaying) this.play()
     },
@@ -995,10 +1009,10 @@ export default {
     },
 
     onFilmClicked () {
-      this.isShotsHidden = !this.isShotsHidden
+      this.isEntitiesHidden = !this.isEntitiesHidden
       this.$nextTick(() => {
         this.resetHeight()
-        this.scrollToShot(this.playingShotIndex)
+        this.scrollToEntity(this.playingEntityIndex)
       })
     },
 
@@ -1056,50 +1070,50 @@ export default {
         this.displayBars()
       }
       const isMovieFullScreen =
-        this.isFullScreen() && this.isShotsHidden && this.isCommentsHidden
+        this.isFullScreen() && this.isEntitiesHidden && this.isCommentsHidden
       if (isMovieFullScreen) {
         if (this.timer) clearTimeout(this.timer)
         this.timer = setTimeout(() => {
           const isMovieFullScreen =
-            this.isFullScreen() && this.isShotsHidden && this.isCommentsHidden
+            this.isFullScreen() && this.isEntitiesHidden && this.isCommentsHidden
           if (isMovieFullScreen) this.hideBars()
         }, 2000)
       }
     },
 
-    onShotChange (shotIndex) {
-      this.playingShotIndex = shotIndex
+    onEntityChange (entityIndex) {
+      this.playingEntityIndex = entityIndex
       if (this.rawPlayerComparison) {
         const comparisonIndex = this.rawPlayerComparison.playingIndex
-        if (comparisonIndex < shotIndex) {
+        if (comparisonIndex < entityIndex) {
           this.rawPlayerComparison.playNext()
         } else {
           this.rawPlayerComparison.setCurrentTime(0)
           this.rawPlayerComparison.play()
         }
       }
-      if (!this.$options.silent) this.scrollToShot(this.playingShotIndex)
+      if (!this.$options.silent) this.scrollToEntity(this.playingEntityIndex)
     },
 
-    onPreviewChanged (shot, previewFileId) {
+    onPreviewChanged (entity, previewFileId) {
       this.pause()
-      this.$emit('preview-changed', shot, previewFileId)
-      const localShot = this.shotList.find(s => s.id === shot.id)
-      localShot.preview_file_id = previewFileId
-      this.rawPlayer.reloadCurrentShot()
+      this.$emit('preview-changed', entity, previewFileId)
+      const localEntity = this.entityList.find(s => s.id === entity.id)
+      localEntity.preview_file_id = previewFileId
+      if (this.rawPlayer) this.rawPlayer.reloadCurrentEntity()
     },
 
-    onShotDropped (info) {
-      const playlistEl = this.$refs['playlisted-shots']
+    onEntityDropped (info) {
+      const playlistEl = this.$refs['playlisted-entities']
       const scrollLeft = playlistEl.scrollLeft
 
-      const shotToMove = this.shotList.find(s => s.id === info.after)
-      const toMoveIndex = this.shotList.findIndex(s => s.id === info.after)
-      let targetIndex = this.shotList.findIndex(s => s.id === info.before)
+      const entityToMove = this.entityList.find(s => s.id === info.after)
+      const toMoveIndex = this.entityList.findIndex(s => s.id === info.after)
+      let targetIndex = this.entityList.findIndex(s => s.id === info.before)
       if (toMoveIndex >= 0 && targetIndex >= 0) {
-        this.shotList.splice(toMoveIndex, 1)
+        this.entityList.splice(toMoveIndex, 1)
         if (toMoveIndex > targetIndex) targetIndex++
-        this.shotList.splice(targetIndex, 0, shotToMove)
+        this.entityList.splice(targetIndex, 0, entityToMove)
       }
 
       this.$nextTick(() => {
@@ -1121,8 +1135,8 @@ export default {
         if (this.$refs['button-bar']) {
           height -= this.$refs['button-bar'].offsetHeight
         }
-        if (this.$refs['playlisted-shots']) {
-          height -= this.$refs['playlisted-shots'].offsetHeight
+        if (this.$refs['playlisted-entities']) {
+          height -= this.$refs['playlisted-entities'].offsetHeight
         }
         if (this.$refs['playlist-annotation']) {
           height -= this.$refs['playlist-annotation'].$el.offsetHeight
@@ -1176,13 +1190,13 @@ export default {
     },
 
     rebuildComparisonOptions () {
-      const shots = Object.values(this.shots)
-      if (shots.length > 0) {
-        let taskTypeIds = Object.keys(shots[0].preview_files)
-        Object.values(this.shots).forEach((shot) => {
-          const shotTaskTypeIds = Object.keys(shot.preview_files)
+      const entities = Object.values(this.entities)
+      if (entities.length > 0) {
+        let taskTypeIds = Object.keys(entities[0].preview_files)
+        entities.forEach((entity) => {
+          const entityTaskTypeIds = Object.keys(entity.preview_files)
           taskTypeIds = taskTypeIds.filter(
-            value => shotTaskTypeIds.includes(value)
+            value => entityTaskTypeIds.includes(value)
           )
         })
         this.taskTypeOptions = taskTypeIds.map((taskTypeId) => {
@@ -1199,26 +1213,26 @@ export default {
       }
     },
 
-    rebuildShotListToCompare () {
+    rebuildEntityListToCompare () {
       if (this.taskTypeToCompare) {
-        this.shotListToCompare = this.shotList.map((shot) => {
-          const preview = shot.preview_files[this.taskTypeToCompare][0]
+        this.entityListToCompare = this.entityList.map((entity) => {
+          const preview = entity.preview_files[this.taskTypeToCompare][0]
           return ({
             preview_file_id: preview.id,
             preview_file_extension: 'mp4'
           })
         })
       } else {
-        this.buildShotListToCompare = []
+        this.buildEntityListToCompare = []
       }
     },
 
     resetComparison () {
-      this.rebuildShotListToCompare()
+      this.rebuildEntityListToCompare()
       this.$nextTick(() => {
         this.pause()
         const player = this.$refs['raw-player-comparison']
-        player.loadShot(this.playingShotIndex)
+        player.loadEntity(this.playingEntityIndex)
         player.setCurrentTime(this.currentTimeRaw)
       })
     },
@@ -1321,11 +1335,11 @@ export default {
       if (!this.annotations) return
       const annotation = this.getAnnotation(currentTime)
       const annotations = this.getNewAnnotations(currentTime, annotation)
-      const shot = this.shotList[this.playingShotIndex]
+      const entity = this.entityList[this.playingEntityIndex]
       const preview = {
-        id: shot.preview_file_id,
-        task_id: shot.preview_file_task_id,
-        annotations: shot.preview_file_annotations
+        id: entity.preview_file_id,
+        task_id: entity.preview_file_task_id,
+        annotations: entity.preview_file_annotations
       }
       this.$emit('annotationchanged', {
         preview: preview,
@@ -1382,7 +1396,7 @@ export default {
   },
 
   watch: {
-    playingShotIndex () {
+    playingEntityIndex () {
       this.updateTaskPanel()
       this.resetUndoStacks()
     },
@@ -1400,11 +1414,12 @@ export default {
       }
     },
 
-    shots () {
-      const playlistEl = this.$refs['playlisted-shots']
+    entities () {
+      console.log('entities changed !')
+      const playlistEl = this.$refs['playlisted-entities']
       const scrollLeft = playlistEl ? playlistEl.scrollLeft : 0
-      this.shotList = Object.values(this.shots)
-      this.playingShotIndex = 0
+      this.entityList = Object.values(this.entities)
+      this.playingEntityIndex = 0
       this.pause()
       if (this.rawPlayer) this.rawPlayer.setCurrentTime(0)
       this.currentTimeRaw = 0
@@ -1413,7 +1428,8 @@ export default {
       this.rebuildComparisonOptions()
       this.clearCanvas()
       this.annotations = []
-      if (this.shotList.length === 0) {
+      console.log(this.entityList.length)
+      if (this.entityList.length === 0) {
         if (this.rawPlayer) this.rawPlayer.clear()
         if (this.isComparing) {
           this.$refs['raw-player-comparison'].clear()
@@ -1422,10 +1438,10 @@ export default {
         this.maxDuration = '00:00.00'
       } else {
         if (
-          this.shotList[0].preview_file_extension !== 'mp4'
+          this.entityList[0].preview_file_extension !== 'mp4'
         ) {
           this.$nextTick(() => {
-            this.rawPlayer.loadNextShot()
+            this.rawPlayer.loadNextEntity()
           })
         }
         this.$nextTick(() => {
@@ -1444,7 +1460,7 @@ export default {
       })
     },
 
-    isAddingShot () {
+    isAddingEntity () {
       this.$nextTick(() => {
         this.updateProgressBar()
       })
@@ -1478,7 +1494,7 @@ export default {
       color: $green;
     }
 
-    &.add-shots-button {
+    &.add-entities-button {
       border: 1px solid $dark-grey-strong;
       border-radius: 10px;
       margin-right: 0.5em;
@@ -1504,14 +1520,14 @@ export default {
   }
 }
 
-.playlisted-shots,
+.playlisted-entities,
 .playlist-progress,
 .playlist-footer {
   background: $dark-grey-light;
   color: $white-grey;
 }
 
-.playlisted-shots {
+.playlisted-entities {
   border-top: 1px solid $dark-grey-strong;
   padding: 0.4em 0em 0 0.4em;
   overflow-x: auto;

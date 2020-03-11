@@ -9,9 +9,10 @@
       <playlist-player
         ref="playlist-player"
         :playlist="currentPlaylist"
-        :shots="currentShots"
+        :entities="currentEntities"
         :is-loading="isLoading"
         :temp-mode="true"
+        :is-asset-playlist="isAssetPlaylist"
         @annotationchanged="onAnnotationChanged"
         v-if="!isPlaylistPage"
       />
@@ -49,9 +50,10 @@ export default {
     return {
       currentPlaylist: {
         id: 'temp',
-        name: 'Temporary playlist'
+        name: 'Temporary playlist',
+        shots: []
       },
-      currentShots: {},
+      currentEntities: {},
       isLoading: false
     }
   },
@@ -73,6 +75,13 @@ export default {
 
     playlistPlayer () {
       return this.$refs['playlist-player']
+    },
+
+    isAssetPlaylist () {
+      if (this.currentPlaylist.shots.length > 0) {
+        return this.currentPlaylist.shots.sequence_name === undefined
+      }
+      return false
     }
   },
 
@@ -87,13 +96,15 @@ export default {
       this.updatePreviewAnnotation({ taskId, preview, annotations })
     },
 
-    setupShots (shots) {
-      const shotMap = {}
-      shots.forEach((shot) => {
-        shotMap[shot.id] = shot
+    setupEntities (entities) {
+      const entityMap = {}
+      entities.forEach((entity) => {
+        entityMap[entity.id] = entity
       })
-      this.currentShots = shotMap
-      this.currentPlaylist.shots = this.currentShots
+      console.log('setupEntities, step 1')
+      this.currentPlaylist.shots = entityMap
+      this.currentEntities = entityMap
+      console.log('setupEntities, step 2', entityMap)
     },
 
     initPlaylistPlayer () {
@@ -104,17 +115,20 @@ export default {
   watch: {
     active () {
       if (this.active) {
-        this.currentShots = {}
+        this.currentEntities = {}
         this.initPlaylistPlayer()
         this.isLoading = true
         this.loadTempPlaylist(this.taskIds)
-          .then((shots) => {
-            this.setupShots(shots)
+          .then((entities) => {
+            console.log('entities lodaed', entities)
+            this.setupEntities(entities)
             this.isLoading = false
+            console.log(this.currentEntites)
           })
           .catch(console.error)
       } else {
         this.playlistPlayer.pause()
+        this.currentEntities = {}
       }
     }
   }

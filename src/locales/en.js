@@ -332,6 +332,7 @@ export default {
   },
 
   playlists: {
+    add_assets: 'Add assets',
     add_selection: 'Add selection',
     add_shots: 'Add shots',
     add_sequence: 'Add whole sequence',
@@ -358,7 +359,7 @@ export default {
     new_playlist: 'Add a playlist',
     no_build: 'No build',
     no_playlist: 'There is currently no playlist for this project.',
-    no_preview: 'No preview for this shot',
+    no_preview: 'No preview',
     no_selection: 'Please select a playlist on the left.',
     no_sequence_for_episode: 'There is no sequence for this episode',
     no_shot_for_production: 'There is no shot for this production',
@@ -371,14 +372,15 @@ export default {
     remove: 'remove',
     fields: {
       name: 'Name',
+      for_entity: 'Select entity to display',
       for_client: 'To be shared with'
     },
     actions: {
-      rename: 'Rename playlist',
+      edit: 'Edit playlist',
       delete: 'Delete playlist',
       fullscreen: 'Fullscreen',
       download: 'Download…',
-      shotlist: 'Show/Hide shot list',
+      entity_list: 'Show/Hide entity list',
       comments: 'Show/Hide comments',
       annotation: 'Annotation',
       annotation_delete: 'Delete annotation',

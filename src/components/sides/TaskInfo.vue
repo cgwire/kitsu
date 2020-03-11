@@ -569,10 +569,12 @@ export default {
       if (this.task) {
         this.loading.task = true
         this.errors.task = false
+        console.log('loading')
         this.loadTaskComments({
           taskId: this.task.id,
           entityId: this.task.entity_id,
           callback: (err) => {
+            console.log('loading end')
             if (err) {
               console.error(err)
               this.errors.task = true
@@ -896,6 +898,7 @@ export default {
     task () {
       this.attachedFileName = ''
       this.currentPreviewIndex = 0
+      console.log('load comments')
       this.loadTaskData()
     },
 

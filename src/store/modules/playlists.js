@@ -23,9 +23,10 @@ import {
   CHANGE_PLAYLIST_PREVIEW,
   CHANGE_PLAYLIST_ORDER,
   CHANGE_PLAYLIST_TYPE,
-  ADD_SHOT_TO_PLAYLIST,
-  REMOVE_SHOT_FROM_PLAYLIST,
-  LOAD_SHOT_PREVIEW_FILES_END,
+
+  ADD_ENTITY_TO_PLAYLIST,
+  REMOVE_ENTITY_FROM_PLAYLIST,
+  LOAD_ENTITY_PREVIEW_FILES_END,
 
   ADD_NEW_JOB,
   MARK_JOB_AS_DONE,
@@ -90,8 +91,8 @@ const actions = {
     })
   },
 
-  loadShotPreviewFiles ({ commit }, shot) {
-    return playlistsApi.getShotPreviewFiles(shot)
+  loadEntityPreviewFiles ({ commit }, entity) {
+    return playlistsApi.getEntityPreviewFiles(entity)
   },
 
   newPlaylist ({ commit }, { data, callback }) {
@@ -121,33 +122,39 @@ const actions = {
     })
   },
 
-  addShotPreviewToPlaylist (
-    { commit, dispatch }, { playlist, shot, previewFiles, callback }
+  pushEntityToPlaylist (
+    { commit, dispatch }, { playlist, entity, previewFiles, callback }
   ) {
     return new Promise((resolve, reject) => {
-      commit(LOAD_SHOT_PREVIEW_FILES_END, { playlist, shot, previewFiles })
-      commit(ADD_SHOT_TO_PLAYLIST, { playlist, shot })
+      commit(LOAD_ENTITY_PREVIEW_FILES_END, { playlist, entity, previewFiles })
+      commit(ADD_ENTITY_TO_PLAYLIST, { playlist, entity })
+      console.log('ok')
       dispatch('editPlaylist', {
         data: playlist,
-        callback: () => {
+        callback: (err) => {
+          console.log('err', err)
+          if (err) reject(err)
+          /*
           const previewFile = {
-            shot_id: shot.id,
-            id: shot.preview_file_id,
-            extension: shot.preview_file_extension,
-            annotations: shot.preview_file_annotations,
-            task_id: shot.preview_file_task_id,
+            entity_id: entity.id,
+            id: entity.preview_file_id,
+            extension: entity.preview_file_extension,
+            annotations: entity.preview_file_annotations,
+            task_id: entity.preview_file_task_id,
             preview_files: previewFiles
           }
-          resolve(previewFile)
+          */
+          console.log('toto', entity)
+          resolve(entity)
         }
       })
     })
   },
 
-  removeShotPreviewFromPlaylist (
-    { commit, dispatch }, { playlist, shot, callback }
+  removeEntityPreviewFromPlaylist (
+    { commit, dispatch }, { playlist, entity, callback }
   ) {
-    commit(REMOVE_SHOT_FROM_PLAYLIST, { playlist, shot })
+    commit(REMOVE_ENTITY_FROM_PLAYLIST, { playlist, entity })
     dispatch('editPlaylist', { data: playlist, callback })
   },
 
@@ -160,11 +167,11 @@ const actions = {
 
   changePlaylistPreview (
     { commit, dispatch },
-    { playlist, shot, previewFileId, callback }
+    { playlist, entity, previewFileId, callback }
   ) {
     commit(CHANGE_PLAYLIST_PREVIEW, {
       playlist,
-      shotId: shot.id,
+      entityId: entity.id,
       previewFileId
     })
     dispatch('editPlaylist', { data: playlist, callback })
@@ -216,7 +223,7 @@ const mutations = {
     state.playlists = sortPlaylists(state.playlists)
     state.playlistMap = {}
     playlists.forEach((playlist) => {
-      if (!playlist.shots) playlist.shots = []
+      if (!playlist.entities) playlist.entities = []
       state.playlistMap[playlist.id] = playlist
     })
   },
@@ -256,7 +263,7 @@ const mutations = {
     delete state.playlistMap[playlistToDelete.id]
   },
 
-  [LOAD_SHOT_PREVIEW_FILES_END] (state, { playlist, shot, previewFiles }) {
+  [LOAD_ENTITY_PREVIEW_FILES_END] (state, { playlist, entity, previewFiles }) {
     let previewFileList = []
     Object.keys(previewFiles).forEach(taskTypeId => {
       previewFiles[taskTypeId].forEach(previewFile => {
@@ -266,53 +273,53 @@ const mutations = {
     previewFileList = sortByDate(previewFileList)
     if (previewFileList.length > 0) {
       const preview = previewFileList[0]
-      shot.preview_file_id = preview.id
-      shot.preview_file_extension = preview.extension
-      shot.preview_file_annotations = preview.annotations
-      shot.preview_file_task_id = preview.task_id
+      entity.preview_file_id = preview.id
+      entity.preview_file_extension = preview.extension
+      entity.preview_file_annotations = preview.annotations
+      entity.preview_file_task_id = preview.task_id
     }
-    shot.preview_files = previewFiles
+    entity.preview_files = previewFiles
   },
 
-  [ADD_SHOT_TO_PLAYLIST] (state, { playlist, shot }) {
+  [ADD_ENTITY_TO_PLAYLIST] (state, { playlist, entity }) {
     if (!playlist.shots) playlist.shots = []
     playlist.shots.push({
-      shot_id: shot.id,
-      preview_file_id: shot.preview_file_id,
-      preview_file_extension: shot.preview_file_extension,
-      preview_file_annotations: shot.preview_file_annotations,
-      preview_files: shot.preview_files
+      entity_id: entity.id,
+      preview_file_id: entity.preview_file_id,
+      preview_file_extension: entity.preview_file_extension,
+      preview_file_annotations: entity.preview_file_annotations,
+      preview_files: entity.preview_files
     })
   },
 
-  [REMOVE_SHOT_FROM_PLAYLIST] (state, { playlist, shot }) {
+  [REMOVE_ENTITY_FROM_PLAYLIST] (state, { playlist, entity }) {
     if (!playlist.shots) playlist.shots = []
-    const shotPlaylistToDeleteIndex = playlist.shots.findIndex(
-      (shotPlaylist) => shotPlaylist.shot_id === shot.id
+    const entityPlaylistToDeleteIndex = playlist.shots.findIndex(
+      (entityPlaylist) => entityPlaylist.entity_id === entity.id
     )
-    playlist.shots.splice(shotPlaylistToDeleteIndex, 1)
+    playlist.shots.splice(entityPlaylistToDeleteIndex, 1)
   },
 
   [CHANGE_PLAYLIST_ORDER] (state, { playlist, info }) {
-    const shotToMove = playlist.shots.find(
-      (shotPlaylist) => shotPlaylist.shot_id === info.after
+    const entityToMove = playlist.shots.find(
+      (entityPlaylist) => entityPlaylist.entity_id === info.after
     )
-    const shotToMoveIndex = playlist.shots.findIndex(
-      (shotPlaylist) => shotPlaylist.shot_id === info.after
+    const entityToMoveIndex = playlist.shots.findIndex(
+      (entityPlaylist) => entityPlaylist.entity_id === info.after
     )
     let targetShotIndex = playlist.shots.findIndex(
-      (shotPlaylist) => shotPlaylist.shot_id === info.before
+      (entityPlaylist) => entityPlaylist.entity_id === info.before
     )
-    if (shotToMoveIndex >= 0 && targetShotIndex >= 0) {
-      playlist.shots.splice(shotToMoveIndex, 1)
-      if (shotToMoveIndex > targetShotIndex) targetShotIndex++
-      playlist.shots.splice(targetShotIndex, 0, shotToMove)
+    if (entityToMoveIndex >= 0 && targetShotIndex >= 0) {
+      playlist.shots.splice(entityToMoveIndex, 1)
+      if (entityToMoveIndex > targetShotIndex) targetShotIndex++
+      playlist.shots.splice(targetShotIndex, 0, entityToMove)
     }
   },
 
-  [CHANGE_PLAYLIST_PREVIEW] (state, { playlist, shotId, previewFileId }) {
-    const shotToChange = playlist.shots.find((shot) => shot.shot_id === shotId)
-    shotToChange.preview_file_id = previewFileId
+  [CHANGE_PLAYLIST_PREVIEW] (state, { playlist, entityId, previewFileId }) {
+    const entityToChange = playlist.shots.find((entity) => entity.entity_id === entityId)
+    entityToChange.preview_file_id = previewFileId
   },
 
   [ADD_NEW_JOB] (state, job) {
@@ -340,14 +347,14 @@ const mutations = {
 
   [CHANGE_PLAYLIST_TYPE] (state, { playlist, taskTypeId }) {
     if (playlist) {
-      playlist.shots.forEach((shot) => {
-        if (shot.preview_files[taskTypeId]) {
-          const previewFile = shot.preview_files[taskTypeId][0]
-          shot.preview_file_id = previewFile.id
-          shot.preview_file_extension = previewFile.extension
-          shot.preview_file_annotations = previewFile.annotations
-          shot.extension = previewFile.extension
-          shot.annotations = previewFile.annotations
+      playlist.shots.forEach((entity) => {
+        if (entity.preview_files[taskTypeId]) {
+          const previewFile = entity.preview_files[taskTypeId][0]
+          entity.preview_file_id = previewFile.id
+          entity.preview_file_extension = previewFile.extension
+          entity.preview_file_annotations = previewFile.annotations
+          entity.extension = previewFile.extension
+          entity.annotations = previewFile.annotations
         }
       })
     }

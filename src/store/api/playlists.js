@@ -16,14 +16,9 @@ export default {
     client.get(path, callback)
   },
 
-  getShotPreviewFiles (shot) {
-    const path = `/api/data/shots/${shot.id}/preview-files`
-    return client.pget(path)
-  },
-
   getEntityPreviewFiles (entity, callback) {
     const path = `/api/data/playlists/entities/${entity.id}/preview-files`
-    client.get(path, callback)
+    return client.pget(path)
   },
 
   newPlaylist (playlist, callback) {
@@ -31,22 +26,21 @@ export default {
       name: playlist.name,
       project_id: playlist.production_id,
       episode_id: playlist.episode_id,
-      for_client: playlist.for_client
+      for_client: playlist.for_client,
+      for_entity: playlist.for_entity
     }
+    console.log(data)
     client.post('/api/data/playlists/', data, callback)
   },
 
   updatePlaylist (playlist, callback) {
     const data = {}
-    if (playlist.name) {
-      data.name = playlist.name
-    }
+    if (playlist.name) data.name = playlist.name
     if (playlist.for_client !== undefined) {
       data.for_client = playlist.for_client
     }
-    if (playlist.shots) {
-      data.shots = playlist.shots
-    }
+    if (playlist.shots) data.shots = playlist.shots
+    if (playlist.for_entity) data.for_entity = playlist.for_entity
     client.put(`/api/data/playlists/${playlist.id}`, data, callback)
   },
 
