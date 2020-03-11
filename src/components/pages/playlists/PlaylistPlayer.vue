@@ -47,6 +47,7 @@
       class="raw-player"
       ref="raw-player"
       :shots="shotList"
+      :is-repeating="isRepeating"
       @metadata-loaded="onMetadataLoaded"
       @shot-change="onShotChange"
       @time-update="onTimeUpdate"
@@ -54,7 +55,9 @@
     />
     <raw-video-player
       class="raw-player"
+      :is-repeating="isRepeating"
       ref="raw-player-comparison"
+      :muted="true"
       :shots="shotListToCompare"
       v-if="isComparing"
     />
@@ -66,7 +69,6 @@
       >
       </canvas>
     </div>
-
     <task-info
       ref="task-info"
       :class="{
@@ -127,6 +129,19 @@
       icon="pause"
       v-else
     />
+
+    <button
+      :class="{
+        button: true,
+        'flexrow-item': true,
+        'playlist-button': true,
+        active: isRepeating
+      }"
+      @click="onRepeatClicked"
+    >
+      <repeat-icon class="icon is-small" style="margin-top: 1px"/>
+    </button>
+
     <span class="flexrow-item time-indicator">
       {{ currentTime }}
     </span>
@@ -407,6 +422,7 @@
 import moment from 'moment-timezone'
 import { mapActions, mapGetters } from 'vuex'
 import { fabric } from 'fabric'
+import { RepeatIcon } from 'vue-feather-icons'
 
 import { roundToFrame } from '../../../lib/video'
 import AnnotationBar from './AnnotationBar'
@@ -438,7 +454,8 @@ export default {
     RawVideoPlayer,
     SelectTaskTypeModal,
     Spinner,
-    TaskInfo
+    TaskInfo,
+    RepeatIcon
   },
 
   props: {
@@ -475,9 +492,10 @@ export default {
       isCommentsHidden: true,
       isComparing: false,
       isDrawing: false,
+      isPlaying: false,
+      isRepeating: false,
       isShowingPalette: false,
       isShowingPencilPalette: false,
-      isPlaying: false,
       isShotsHidden: false,
       maxDuration: '00:00.00',
       maxDurationRaw: 0,
@@ -779,8 +797,9 @@ export default {
 
     pause () {
       this.showCanvas()
+      const comparisonPlayer = this.$refs['raw-player-comparison']
       if (this.rawPlayer) this.rawPlayer.pause()
-      if (this.isComparing) this.$refs['raw-player-comparison'].pause()
+      if (comparisonPlayer) comparisonPlayer.pause()
       this.isPlaying = false
     },
 
@@ -912,6 +931,10 @@ export default {
       } else {
         this.pause()
       }
+    },
+
+    onRepeatClicked () {
+      this.isRepeating = !this.isRepeating
     },
 
     onFullscreenClicked () {
@@ -1123,7 +1146,7 @@ export default {
 
     resetCanvas () {
       this.resetCanvasSize()
-      this.fabricCanvas.renderAll()
+      if (this.fabricCanvas) this.fabricCanvas.renderAll()
       this.clearCanvas()
     },
 

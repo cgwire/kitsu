@@ -3,11 +3,13 @@
   <video
     ref="player1"
     preload="auto"
+    :muted="muted"
     @ended="playNext"
   />
   <video
     ref="player2"
     preload="auto"
+    :muted="muted"
     @ended="playNext"
   />
 </div>
@@ -32,6 +34,14 @@ export default {
     shots: {
       type: Array,
       default: () => []
+    },
+    muted: {
+      type: Boolean,
+      default: false
+    },
+    isRepeating: {
+      type: Boolean,
+      default: false
     }
   },
 
@@ -197,16 +207,21 @@ export default {
     },
 
     playNext () {
-      const nextIndex = this.getNextIndex(this.currentIndex)
-      this.currentIndex = nextIndex
-      this.$emit('shot-change', this.currentIndex)
+      if (this.isRepeating) {
+        this.currentPlayer.currentTime = 0
+        this.currentPlayer.play()
+      } else {
+        const nextIndex = this.getNextIndex(this.currentIndex)
+        this.currentIndex = nextIndex
+        this.$emit('shot-change', this.currentIndex)
 
-      this.currentPlayer.style.display = 'none'
-      this.nextPlayer.style.display = 'block'
-      this.nextPlayer.play()
+        this.currentPlayer.style.display = 'none'
+        this.nextPlayer.style.display = 'block'
+        this.nextPlayer.play()
 
-      this.switchPlayers()
-      this.updateMaxDuration()
+        this.switchPlayers()
+        this.updateMaxDuration()
+      }
     },
 
     resetHeight () {
