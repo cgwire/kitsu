@@ -53,7 +53,7 @@
             class="metadata-descriptor"
             :key="descriptor.id"
             v-for="descriptor in assetMetadataDescriptors"
-            v-if="!isCurrentUserClient && isShowInfos"
+            v-if="isShowInfos"
           >
             <div class="flexrow">
               <span class="flexrow-item descriptor-name">
@@ -191,7 +191,7 @@
             class="metadata-descriptor"
             :key="asset.id + '-' + descriptor.id"
             v-for="descriptor in assetMetadataDescriptors"
-            v-if="!isCurrentUserClient && isShowInfos"
+            v-if="isShowInfos"
           >
             {{ asset.data ? asset.data[descriptor.field_name] : '' }}
           </td>

@@ -25,7 +25,7 @@ export default {
       production: 'Prod',
       time_spent: 'Time',
       type: 'Type',
-      hidden_from_client: 'Hidden from client'
+      hidden_from_client: 'Displayed to client'
     }
   },
 

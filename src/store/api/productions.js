@@ -86,6 +86,7 @@ export default {
       const data = {
         name: descriptor.name,
         choices: descriptor.values,
+        for_client: descriptor.for_client === 'true',
         entity_type: descriptor.entity_type
       }
       client.post(
@@ -117,6 +118,7 @@ export default {
         id: descriptor.id,
         name: descriptor.name,
         choices: descriptor.values,
+        for_client: descriptor.for_client === 'true',
         entity_type: descriptor.entity_type
       }
       client.put(

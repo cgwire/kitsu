@@ -31,7 +31,7 @@
       <combobox-boolean
         ref="hiddenField"
         :label="$t('assets.fields.hidden_from_client')"
-        v-model="form.hiddenFromClient"
+        v-model="form.for_client"
         @enter="confirm"
         v-focus
       />
@@ -131,7 +131,7 @@ export default {
     return {
       form: {
         name: '',
-        hiddenFromClient: false,
+        for_client: 'false',
         values: []
       },
       valueToAdd: '',
@@ -202,7 +202,8 @@ export default {
         this.form = {
           id: this.descriptorToEdit.id,
           name: `${this.descriptorToEdit.name}`,
-          values: [...this.descriptorToEdit.choices]
+          values: [...this.descriptorToEdit.choices],
+          for_client: this.descriptorToEdit.for_client ? 'true' : 'false'
         }
       }
       this.type = this.form.values.length > 0 ? 'choices' : 'free'

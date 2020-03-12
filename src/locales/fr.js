@@ -38,7 +38,7 @@ export default {
       production: 'Prod',
       time_spent: 'Jours',
       type: 'Type',
-      hidden_from_client: 'Caché au client'
+      hidden_from_client: 'Visible par le client'
     }
   },
 
