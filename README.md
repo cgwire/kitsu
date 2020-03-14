@@ -2,10 +2,7 @@
 
 # Kitsu, CG Production Manager
 
-Kitsu is a web tool to improve validation tracking in CG productions. By
-offering a clean UI and shared database, efficient communication with
-shareholders of production, such as CG artists, 
-production managers, TDs, supervisors, and clients is enabled.
+Kitsu is a web application to track the progress of your productions. It improves the communication between all stakeholders of the production. Which leads to better pictures and faster deliveries. 
 
 [![Build
 badge](https://travis-ci.org/cgwire/kitsu.svg?branch=master)](https://travis-ci.org/cgwire/kitsu)
