@@ -463,6 +463,12 @@ export default {
       this.displayMoreShots()
     },
 
+    // Remaining function for retrocompatibility
+    resizeHeaders () {
+      return true
+    },
+    //
+
     taskTypePath (taskTypeId) {
       if (this.isTVShow && this.currentEpisode) {
         return {

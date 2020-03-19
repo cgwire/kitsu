@@ -431,11 +431,9 @@ export default {
           setTimeout(() => {
             this.initialLoading = false
           }, 200)
-          this.resizeHeaders()
           if (!err) {
             this.handleModalsDisplay()
             setTimeout(() => {
-              this.resizeHeaders()
               this.$refs['shot-list'].setScrollPosition(
                 this.shotListScrollPosition
               )
@@ -445,7 +443,6 @@ export default {
       }, 100)
     } else {
       if (!this.isShotsLoading) this.initialLoading = false
-      this.resizeHeaders()
       this.onSearchChange()
       this.$refs['shot-list'].setScrollPosition(
         this.shotListScrollPosition
@@ -556,9 +553,7 @@ export default {
       this.deleteAllTasks({ projectId, taskTypeId })
         .then(() => {
           this.loading.deleteAllTasks = false
-          this.loadShots(() => {
-            this.resizeHeaders()
-          })
+          this.loadShots()
           this.$router.push(this.shotsPath)
         }).catch((err) => {
           console.error(err)
@@ -643,9 +638,7 @@ export default {
           if (err) {
             this.errors.creatingTasks = true
           } else {
-            this.loadShots(() => {
-              this.resizeHeaders()
-            })
+            this.loadShots()
           }
           callback(err)
         }
@@ -768,9 +761,7 @@ export default {
         .then(() => {
           this.loading.importing = false
           this.hideImportRenderModal()
-          this.loadShots(() => {
-            this.resizeHeaders()
-          })
+          this.loadShots()
         })
         .catch((err) => {
           console.error(err)
@@ -799,7 +790,6 @@ export default {
       const searchQuery = this.searchField.getValue()
       if (searchQuery.length !== 1) {
         this.setShotSearch(searchQuery)
-        this.resizeHeaders()
         this.setSearchInUrl()
       }
     },
@@ -819,14 +809,6 @@ export default {
     removeSearchQuery (searchQuery) {
       this.removeShotSearch(searchQuery)
         .catch(console.error)
-    },
-
-    resizeHeaders () {
-      setTimeout(() => {
-        if (this.$refs['shot-list']) {
-          this.$refs['shot-list'].resizeHeaders()
-        }
-      }, 0)
     },
 
     getPath (section) {
@@ -925,7 +907,6 @@ export default {
           this.initialLoading = false
           this.setSearchFromUrl()
           this.onSearchChange()
-          this.resizeHeaders()
           if (!err) {
             this.handleModalsDisplay()
           }
@@ -940,16 +921,11 @@ export default {
           this.setSearchFromUrl()
           this.onSearchChange()
           this.initialLoading = false
-          this.resizeHeaders()
           if (!err) {
             this.handleModalsDisplay()
           }
         })
       }
-    },
-
-    displayedShots () {
-      this.resizeHeaders()
     }
   },
 
