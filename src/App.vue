@@ -1197,13 +1197,25 @@ tbody:last-child .empty-line:last-child {
     }
   }
 
-  .validation-cell {
+  .validation-cell,
+  .hidden-validation-cell {
     padding: 0;
     background-color: var(--background);
   }
 
   .validation-content {
     padding: 0.5rem 0.75rem;
+  }
+  .hidden-validation-cell {
+    .validation-content {
+      padding: 0.5rem 0.3rem;
+    }
+    .datatable-dropdown {
+      display: none;
+    }
+    .header-icon {
+      margin: 0 auto;
+    }
   }
 
   .datatable-row-header {
@@ -1221,6 +1233,7 @@ tbody:last-child .empty-line:last-child {
 }
 
 .datatable-row {
+  user-select: none;
   &,
   & .datatable-row-header {
     background-color: var(--background);
@@ -1273,6 +1286,12 @@ tbody:last-child .empty-line:last-child {
     &:last-child {
       border-right: 1px solid var(--border);
     }
+  }
+  .hidden-validation-cell {
+    min-width: 30px;
+    max-width: 30px;
+    width: 30px;
+    padding: .3rem;
   }
 }
 

@@ -1,6 +1,10 @@
 <template>
 <div class="data-list">
-  <div class="datatable-wrapper">
+  <div
+    class="datatable-wrapper"
+    ref="body"
+    v-scroll="onBodyScroll"
+  >
 
     <table-header-menu
       ref="headerMenu"
@@ -19,7 +23,9 @@
       @sort-by-clicked="onSortByMetadataClicked()"
     />
 
-    <table class="datatable" ref="headerWrapper">
+    <table
+      class="datatable"
+    >
       <thead class="datatable-head">
         <tr>
           <th
@@ -131,7 +137,6 @@
       </thead>
       <tbody
         class="datatable-body"
-        ref="body-tbody"
         :key="getGroupKey(group, k, 'sequence_id')"
         v-for="(group, k) in displayedShots"
         v-if="!isLoading && isListVisible"
@@ -445,12 +450,7 @@ export default {
       'displayMoreShots'
     ]),
 
-    onHeaderScroll (event, position) {
-      this.$refs.tableWrapper.scrollLeft = position.scrollLeft
-    },
-
     onBodyScroll (event, position) {
-      this.$refs.headerWrapper.style.left = `-${position.scrollLeft}px`
       this.$emit('scroll', position.scrollTop)
       const maxHeight =
         this.$refs.body.scrollHeight - this.$refs.body.offsetHeight
@@ -461,13 +461,6 @@ export default {
 
     loadMoreShots () {
       this.displayMoreShots()
-      this.$nextTick(this.resizeHeaders)
-    },
-
-    resizeHeaders () {
-      this.resizeSplittedTableHeaders([
-        { index: 1, name: 'shot' }
-      ])
     },
 
     taskTypePath (taskTypeId) {
@@ -552,6 +545,7 @@ export default {
 
 .datatable-wrapper {
   overflow: auto;
+  margin-bottom: 1rem;
 }
 .project {
   min-width: 60px;
@@ -665,55 +659,17 @@ span.thumbnail-empty {
   background: #F3F3F3;
 }
 
-.info {
-  margin-top: 2em;
-}
-
-.hidden-validation-cell {
-  min-width: 30px;
-  max-width: 30px;
-  width: 30px;
-  padding: 4px;
-}
-
-tbody {
-  user-select: none;
-}
-
 .metadata-descriptor {
   min-width: 120px;
   max-width: 120px;
   width: 120px;
 }
 
-.table th {
-  vertical-align: middle;
-}
-
-.header-icon {
-  min-width: 15px;
-}
-
-th {
-  word-break: break-all
+.info {
+  margin-top: 2em;
 }
 
 .info img {
   max-width: 80vh;
-}
-
-tbody:last-child .empty-line:last-child {
-  border: 0;
-}
-
-.table-body .table .empty-line {
-  background: inherit;
-}
-
-.empty-line {
-  border-right: 0;
-  border-left: 0;
-  height: 1em;
-  color: red;
 }
 </style>
