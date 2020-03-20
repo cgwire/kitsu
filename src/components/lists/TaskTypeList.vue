@@ -166,6 +166,7 @@ export default {
     },
 
     updatePriorityShots () {
+      const forms = []
       this.shotsItems.forEach((item, index) => {
         index += 1
         const form = {
@@ -174,8 +175,9 @@ export default {
           priority: String(index)
         }
         item.priority = index
-        this.$emit('update', form)
+        forms.push(form)
       })
+      this.$emit('update-priorities', forms)
     }
   },
 
