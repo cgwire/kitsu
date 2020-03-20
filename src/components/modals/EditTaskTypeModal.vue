@@ -28,6 +28,7 @@
           :options="dedicatedToOptions"
           @enter="confirmClicked"
           v-model="form.for_shots"
+           v-if="!isEditing"
         />
         <combobox-boolean
           :label="$t('task_types.fields.allow_timelog')"
