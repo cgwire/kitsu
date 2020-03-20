@@ -224,6 +224,14 @@ export default {
   width: 100px;
 }
 
+.tasktype-item[draggable=false] {
+  cursor: grab;
+}
+
+.tasktype-item[draggable=true] {
+  cursor: grabbing;
+}
+
 tr {
   cursor: pointer;
 }
