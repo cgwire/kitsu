@@ -8,7 +8,7 @@
 
     <div class="box">
 
-      <h1 class="title" v-if="isEditing()">
+      <h1 class="title" v-if="isEditing">
         {{ $t("task_types.edit_title") }} {{ taskTypeToEdit.name }}
       </h1>
       <h1 class="title" v-else>
@@ -28,6 +28,7 @@
           :options="dedicatedToOptions"
           @enter="confirmClicked"
           v-model="form.for_shots"
+           v-if="!isEditing"
         />
         <combobox-boolean
           :label="$t('task_types.fields.allow_timelog')"
@@ -125,7 +126,10 @@ export default {
     ...mapGetters([
       'taskTypes',
       'taskTypeStatusOptions'
-    ])
+    ]),
+    isEditing () {
+      return this.taskTypeToEdit && this.taskTypeToEdit.id
+    }
   },
 
   methods: {
@@ -145,10 +149,6 @@ export default {
         this.form.priority = this.newPriority(this.form.for_shots)
       }
       this.$emit('confirm', this.form)
-    },
-
-    isEditing () {
-      return this.taskTypeToEdit && this.taskTypeToEdit.id
     }
   }
 }
