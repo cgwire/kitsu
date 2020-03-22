@@ -1,29 +1,38 @@
 <template>
 <div class="data-list">
+  <div
+    class="datatable-wrapper"
+    ref="body"
+    v-scroll="onBodyScroll"
+  >
 
-  <table-header-menu
-    ref="headerMenu"
-    :is-minimized="hiddenColumns[lastHeaderMenuDisplayed]"
-    :is-current-user-admin="isCurrentUserAdmin"
-    @minimize-clicked="onMinimizeColumnToggled()"
-    @delete-all-clicked="onDeleteAllTasksClicked()"
-    @sort-by-clicked="onSortByTaskTypeClicked()"
-  />
+    <table-header-menu
+      ref="headerMenu"
+      :is-minimized="hiddenColumns[lastHeaderMenuDisplayed]"
+      :is-current-user-admin="isCurrentUserAdmin"
+      @minimize-clicked="onMinimizeColumnToggled()"
+      @delete-all-clicked="onDeleteAllTasksClicked()"
+      @sort-by-clicked="onSortByTaskTypeClicked()"
+    />
 
-  <table-metadata-header-menu
-    ref="headerMetadataMenu"
-    :is-current-user-admin="isCurrentUserAdmin"
-    @edit-clicked="onEditMetadataClicked()"
-    @delete-clicked="onDeleteMetadataClicked()"
-    @sort-by-clicked="onSortByMetadataClicked()"
-  />
+    <table-metadata-header-menu
+      ref="headerMetadataMenu"
+      :is-current-user-admin="isCurrentUserAdmin"
+      @edit-clicked="onEditMetadataClicked()"
+      @delete-clicked="onDeleteMetadataClicked()"
+      @sort-by-clicked="onSortByMetadataClicked()"
+    />
 
-  <div class="table-header-wrapper">
-    <table class="table table-header" ref="headerWrapper">
-      <thead>
+    <table
+      class="datatable"
+    >
+      <thead class="datatable-head">
         <tr>
-          <th class="thumbnail"></th>
-          <th class="name shot-name" ref="th-shot" >
+          <th
+            scope="col"
+            class="name shot-name datatable-row-header"
+            ref="th-shot"
+          >
             <div class="flexrow">
               <span class="flexrow-item">
                 {{ $t('shots.fields.name') }}
@@ -38,19 +47,21 @@
             </div>
           </th>
           <th
+            scope="col"
             class="description"
             v-if="!isCurrentUserClient && isShowInfos && isShotDescription"
           >
             {{ $t('shots.fields.description') }}
           </th>
           <th
+            scope="col"
             class="metadata-descriptor"
             :key="descriptor.id"
             v-for="descriptor in shotMetadataDescriptors"
             v-if="isShowInfos"
           >
             <div class="flexrow">
-              <span class="flexrow-item descriptor-name">
+              <span class="flexrow-item datatable-dropdown">
                 {{ descriptor.name }}
               </span>
               <chevron-down-icon
@@ -61,42 +72,48 @@
           </th>
 
           <th
+            scope="col"
             ref="th-spent"
             class="time-spent"
             v-if="!isCurrentUserClient && isShowInfos && isTime"
            >
             {{ $t('shots.fields.time_spent') }}
           </th>
-          <th class="frames" v-if="isShowInfos">
+          <th scope="col" class="frames" v-if="isShowInfos">
             {{ $t('shots.fields.nb_frames') }}
           </th>
-          <th class="framein" v-if="isFrameIn && isShowInfos">
+          <th scope="col" class="framein" v-if="isFrameIn && isShowInfos">
             {{ $t('shots.fields.frame_in') }}
           </th>
-          <th class="frameout" v-if="isFrameOut && isShowInfos">
+          <th scope="col" class="frameout" v-if="isFrameOut && isShowInfos">
             {{ $t('shots.fields.frame_out') }}
           </th>
-          <th class="fps" v-if="isFps && isShowInfos">
+          <th scope="col" class="fps" v-if="isFps && isShowInfos">
             {{ $t('shots.fields.fps') }}
           </th>
 
           <th
+            scope="col"
             :class="{
               'validation-cell': !hiddenColumns[columnId],
               'hidden-validation-cell': hiddenColumns[columnId]
             }"
             :key="columnId"
-            :style="getValidationStyle(columnId)"
             v-for="columnId in displayedValidationColumns"
             v-if="!isLoading"
           >
-            <div class="flexrow">
+            <div
+              class="flexrow validation-content"
+              :style="getValidationStyle(columnId)"
+            >
               <router-link
-                class="flexrow-item validation-name"
+                class="flexrow-item datatable-dropdown"
                 style="margin-right: 0;"
                 :to="taskTypePath(columnId)"
               >
-                {{ !hiddenColumns[columnId] ? taskTypeMap[columnId].name : '' }}
+                {{ !hiddenColumns[columnId]
+                  ? taskTypeMap[columnId].name
+                  : '' }}
               </router-link>
               <chevron-down-icon
                 @click="showHeaderMenu(columnId, $event)"
@@ -104,7 +121,7 @@
               />
             </div>
           </th>
-          <th class="actions">
+          <th scope="col" class="actions">
             <button-simple
               :class="{
                 'is-small': true,
@@ -118,72 +135,43 @@
           </th>
         </tr>
       </thead>
-    </table>
-  </div>
-
-  <table-info
-    :is-loading="isLoading"
-    :is-error="isError"
-  />
-
-  <div
-    class="has-text-centered"
-    v-if="isEmptyList && !isCurrentUserClient && !isLoading"
-  >
-    <p class="info">
-      <img src="../../assets/illustrations/empty_shot.png" />
-    </p>
-    <p class="info">{{ $t('shots.empty_list') }}</p>
-    <button-simple
-      class="level-item big-button"
-      :text="$t('shots.new_shots')"
-      @click="$emit('add-shots')"
-    />
-  </div>
-  <div
-    class="has-text-centered"
-    v-if="isEmptyList && isCurrentUserClient && !isLoading"
-  >
-    <p class="info">
-      <img src="../../assets/illustrations/empty_shot.png" />
-    </p>
-    <p class="info">{{ $t('shots.empty_list_client') }}</p>
-  </div>
-
-  <div
-    ref="body"
-    class="table-body"
-    v-scroll="onBodyScroll"
-    v-if="!isLoading"
-  >
-    <table
-      class="table splitted-table unselectable"
-      v-if="isListVisible"
-    >
       <tbody
-        class="tbody"
-        ref="body-tbody"
+        class="datatable-body"
         :key="getGroupKey(group, k, 'sequence_id')"
         v-for="(group, k) in displayedShots"
+        v-if="!isLoading && isListVisible"
       >
-        <tr class="type-header">
-          <td colspan="30">
-            {{ group[0] ? group[0].sequence_name : '' }}
-          </td>
+        <tr class="datatable-type-header">
+          <th
+            scope="rowgroup"
+            :colspan="visibleColumns"
+          >
+            <span class="datatable-row-header">
+              {{ group[0] ? group[0].sequence_name : '' }}
+            </span>
+          </th>
         </tr>
         <tr
+          class="datatable-row"
+          scope="row"
           :key="shot.id"
           :class="{canceled: shot.canceled}"
           v-for="(shot, i) in group"
         >
-          <td class="thumbnail">
-            <entity-thumbnail :entity="shot" />
-          </td>
-          <td :class="{'shot-name': true, name: true, bold: !shot.canceled}">
-            <router-link :to="shotPath(shot.id)">
-              {{ shot.name }}
-            </router-link>
-          </td>
+          <th
+            :class="{
+              'datatable-row-header': true,
+              'shot-name': true,
+              name: true,
+              bold: !shot.canceled}"
+            >
+            <div class="flexrow">
+              <entity-thumbnail :entity="shot" />
+              <router-link :to="shotPath(shot.id)">
+                {{ shot.name }}
+              </router-link>
+            </div>
+          </th>
           <description-cell
             class="description"
             :entry="shot"
@@ -248,9 +236,36 @@
           />
           <td class="actions" v-else></td>
         </tr>
-        <tr class="empty-line"><td colspan="30"></td></tr>
       </tbody>
     </table>
+  </div>
+  <table-info
+    :is-loading="isLoading"
+    :is-error="isError"
+  />
+
+  <div
+    class="has-text-centered"
+    v-if="isEmptyList && !isCurrentUserClient && !isLoading"
+  >
+    <p class="info">
+      <img src="../../assets/illustrations/empty_shot.png" />
+    </p>
+    <p class="info">{{ $t('shots.empty_list') }}</p>
+    <button-simple
+      class="level-item big-button"
+      :text="$t('shots.new_shots')"
+      @click="$emit('add-shots')"
+    />
+  </div>
+  <div
+    class="has-text-centered"
+    v-if="isEmptyList && isCurrentUserClient && !isLoading"
+  >
+    <p class="info">
+      <img src="../../assets/illustrations/empty_shot.png" />
+    </p>
+    <p class="info">{{ $t('shots.empty_list_client') }}</p>
   </div>
 
   <p
@@ -401,6 +416,27 @@ export default {
       )
     },
 
+    visibleColumns () {
+      let count = 2
+      count += !this.isCurrentUserClient &&
+        this.isShowInfos &&
+        this.isShotDescription
+        ? 1
+        : 0
+      count += this.shotMetadataDescriptors.length
+      count += !this.isCurrentUserClient &&
+        this.isShowInfos &&
+        this.isTime
+        ? 1
+        : 0
+      count += this.isShowInfos ? 1 : 0
+      count += this.isShowInfos && this.isFrameIn ? 1 : 0
+      count += this.isShowInfos && this.isFrameOut ? 1 : 0
+      count += this.isShowInfos && this.isFps ? 1 : 0
+      count += this.displayedValidationColumns.length
+      return count
+    },
+
     displayedValidationColumns () {
       return this.validationColumns.filter((columnId) => {
         return this.shotFilledColumns[columnId] &&
@@ -414,12 +450,7 @@ export default {
       'displayMoreShots'
     ]),
 
-    onHeaderScroll (event, position) {
-      this.$refs.tableWrapper.scrollLeft = position.scrollLeft
-    },
-
     onBodyScroll (event, position) {
-      this.$refs.headerWrapper.style.left = `-${position.scrollLeft}px`
       this.$emit('scroll', position.scrollTop)
       const maxHeight =
         this.$refs.body.scrollHeight - this.$refs.body.offsetHeight
@@ -430,14 +461,13 @@ export default {
 
     loadMoreShots () {
       this.displayMoreShots()
-      this.$nextTick(this.resizeHeaders)
     },
 
+    // Remaining function for retrocompatibility
     resizeHeaders () {
-      this.resizeSplittedTableHeaders([
-        { index: 1, name: 'shot' }
-      ])
+      return true
     },
+    //
 
     taskTypePath (taskTypeId) {
       if (this.isTVShow && this.currentEpisode) {
@@ -518,6 +548,11 @@ export default {
 </script>
 
 <style lang="scss" scoped>
+
+.datatable-wrapper {
+  overflow: auto;
+  margin-bottom: 1rem;
+}
 .project {
   min-width: 60px;
   width: 60px;
@@ -630,55 +665,17 @@ span.thumbnail-empty {
   background: #F3F3F3;
 }
 
-.info {
-  margin-top: 2em;
-}
-
-.hidden-validation-cell {
-  min-width: 30px;
-  max-width: 30px;
-  width: 30px;
-  padding: 4px;
-}
-
-tbody {
-  user-select: none;
-}
-
 .metadata-descriptor {
   min-width: 120px;
   max-width: 120px;
   width: 120px;
 }
 
-.table th {
-  vertical-align: middle;
-}
-
-.header-icon {
-  min-width: 15px;
-}
-
-th {
-  word-break: break-all
+.info {
+  margin-top: 2em;
 }
 
 .info img {
   max-width: 80vh;
-}
-
-tbody:last-child .empty-line:last-child {
-  border: 0;
-}
-
-.table-body .table .empty-line {
-  background: inherit;
-}
-
-.empty-line {
-  border-right: 0;
-  border-left: 0;
-  height: 1em;
-  color: red;
 }
 </style>

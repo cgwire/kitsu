@@ -31,3 +31,28 @@ $dark-purple: #5E60BA;
 $dark-purple-strong: #4A4A6F;
 $blue-light: #92A9FA;
 $blue: #7289DA;
+
+
+:root {
+  --background: #FFFFFF;
+  --background-rgb: 255, 255, 255;
+  --background-alt: #F6F6F6;
+  --background-alt-rgb: 246, 246, 246;
+  --background-hover: #F0FFF0;
+  --background-hover-rgb: 240, 255, 240;
+  --border: #DBDBDB;
+  --border-alt: #DBDBDB;
+  --text: #7A7A7A;
+}
+
+.dark {
+  --background: #36393F;
+  --background-rgb: 54, 57, 63;
+  --background-alt: #46494F;
+  --background-alt-rgb: 70, 73, 79;
+  --background-hover: #5E6169;
+  --background-hover-rgb: 94, 97, 105;
+  --border: #25282E;
+  --border-alt: #666666;
+  --text: #EEEEEE;
+}
