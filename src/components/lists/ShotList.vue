@@ -183,7 +183,12 @@
             v-for="descriptor in shotMetadataDescriptors"
             v-if="isShowInfos"
           >
-            {{ shot.data ? shot.data[descriptor.field_name] : '' }}
+            <div
+              class="ellipsis"
+              :title="shot.data ? shot.data[descriptor.field_name] : ''"
+            >
+              {{ shot.data ? shot.data[descriptor.field_name] : '' }}
+            </div>
           </td>
           <td
             class="time-spent"
@@ -645,17 +650,6 @@ td.sequence {
 
 .canceled {
   text-decoration: line-through;
-}
-
-.thumbnail {
-  min-width: 50px;
-  max-width: 50px;
-  width: 50px;
-  padding: 0;
-}
-
-.thumbnail img {
-  margin-top: 5px;
 }
 
 span.thumbnail-empty {

@@ -1,5 +1,6 @@
 <template>
 <a
+  class="thumbnail-wrapper"
   :href="originalPath"
   target="_blank"
   :style="{

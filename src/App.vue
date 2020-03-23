@@ -1175,9 +1175,15 @@ tbody:last-child .empty-line:last-child {
     position: sticky;
   }
   .datatable-row {
+    .thumbnail-wrapper,
     .thumbnail-picture,
     .thumbnail-picture.thumbnail-empty {
       margin: .35rem .35rem .35rem 0;
+    }
+    .thumbnail-wrapper {
+      .thumbnail-picture {
+        margin: 0;
+      }
     }
   }
 }
@@ -1287,6 +1293,9 @@ tbody:last-child .empty-line:last-child {
       border-right: 1px solid var(--border);
     }
   }
+  td {
+    white-space: normal;
+  }
   .hidden-validation-cell {
     min-width: 30px;
     max-width: 30px;
@@ -1343,6 +1352,11 @@ tbody:last-child .empty-line:last-child {
 
 .datatable tbody:first-of-type .datatable-type-header th::before {
   display: none;
+}
+
+.ellipsis {
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .header-icon {
