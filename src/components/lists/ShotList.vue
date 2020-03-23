@@ -183,7 +183,12 @@
             v-for="descriptor in shotMetadataDescriptors"
             v-if="isShowInfos"
           >
-            {{ shot.data ? shot.data[descriptor.field_name] : '' }}
+            <div
+              class="ellipsis"
+              :title="shot.data ? shot.data[descriptor.field_name] : ''"
+            >
+              {{ shot.data ? shot.data[descriptor.field_name] : '' }}
+            </div>
           </td>
           <td
             class="time-spent"

@@ -1293,6 +1293,9 @@ tbody:last-child .empty-line:last-child {
       border-right: 1px solid var(--border);
     }
   }
+  td {
+    white-space: normal;
+  }
   .hidden-validation-cell {
     min-width: 30px;
     max-width: 30px;
@@ -1349,6 +1352,11 @@ tbody:last-child .empty-line:last-child {
 
 .datatable tbody:first-of-type .datatable-type-header th::before {
   display: none;
+}
+
+.ellipsis {
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .header-icon {
