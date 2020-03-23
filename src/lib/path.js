@@ -92,6 +92,17 @@ export const episodifyRoute = (route, episodeId) => {
   return route
 }
 
+export const getPlaylistPath = (prodId, episodeId, playlistId, section) => {
+  const route = {
+    name: section ? `${section}-playlist` : 'playlist',
+    params: {
+      production_id: prodId,
+      playlist_id: playlistId
+    }
+  }
+  return episodifyRoute(route, episodeId)
+}
+
 const getContextRoute = (name, productionId, episodeId) => {
   return episodifyRoute(getProductionRoute(name, productionId), episodeId)
 }

@@ -128,35 +128,34 @@
         <playlist-player
           ref="playlist-player"
           :playlist="currentPlaylist"
-          :shots="currentShots"
+          :entities="currentEntities"
           :is-loading="loading.playlist"
-          :is-adding-shot="isAddingShot"
+          :is-adding-entity="isAddingEntity"
+          :is-asset-playlist="isAssetPlaylist"
           @edit-clicked="showEditModal"
-          @show-add-shots="toggleAddShots"
+          @show-add-entities="toggleAddEntities"
           @preview-changed="onPreviewChanged"
           @task-type-changed="onTaskTypeChanged"
           @playlist-deleted="goFirstPlaylist"
-          @remove-shot="removeShot"
+          @remove-entity="removeEntity"
           @order-change="onOrderChange"
           @annotationchanged="onAnnotationChanged"
           @for-client-changed="onForClientChanged"
         />
 
         <div
-          v-if="isCurrentUserManager && isAddingShot"
+          v-if="isCurrentUserManager && isAddingEntity"
         >
           <div class="addition-header">
             <div class="flexrow">
               <page-subtitle
                 class="flexrow-item"
-                :text="$t('playlists.add_shots')"
+                :text="addEntitiesText"
               />
               <span class="filler"></span>
-              <button
-              />
               <a
                 class="close-button"
-                @click="toggleAddShots"
+                @click="toggleAddEntities"
               >
                 <x-icon />
               </a>
@@ -167,7 +166,7 @@
                 ref="search-field"
                 :can-save="false"
                 @change="onSearchChange"
-                placeholder="ex: seq01 anim=wfa"
+                :placeholder="isAssetPlaylist ? 'chars mode=wfa' : 'ex: seq01 anim=wfa'"
               />
               <button
                 :class="{
@@ -177,7 +176,7 @@
                 }"
                 :disabled="isAdditionLoading"
                 @click="addCurrentSelection"
-                v-if="shotSearchText"
+                v-if="isAddSearchVisible"
               >
                 {{ $t('playlists.add_selection') }}
               </button>
@@ -190,6 +189,7 @@
                 }"
                 :disabled="isAdditionLoading"
                 @click="addDailyPending"
+                v-if="!isAssetPlaylist"
               >
                 {{ $t('playlists.build_daily') }}
               </button>
@@ -201,7 +201,7 @@
                 }"
                 :disabled="isAdditionLoading"
                 @click="addEpisodePending"
-                v-if="isTVShow"
+                v-if="isTVShow && !isAssetPlaylist"
               >
                 {{ $t('playlists.add_episode') }}
               </button>
@@ -213,7 +213,7 @@
                 }"
                 :disabled="isAdditionLoading"
                 @click="addMovie"
-                v-else
+                v-else-if="!isAssetPlaylist"
               >
                 {{ $t('playlists.add_movie') }}
               </button>
@@ -223,26 +223,66 @@
 
         <div
           class="addition-section"
-          v-if="isCurrentUserManager && isAddingShot"
+          v-if="isCurrentUserManager && isAddingEntity"
           v-scroll="onBodyScroll"
-          ref="shotList"
+          ref="List"
         >
           <spinner
             class="mt2"
-            key="shot-loader"
-            v-if="isShotsLoading"
+            key="entity-loader"
+            v-if="isShotsLoading || isAssetsLoading"
           />
           <div
-            ref="shotListContent"
+            ref="entityListContent"
             v-else
           >
-            <div>
+            <div v-if="isAssetPlaylist">
+              <div
+                :key="'asset-type-' + i"
+                v-for="(typeAssets, i) in displayedAssetsByType"
+              >
+                <h2
+                  class="entity-group-title"
+                  v-if="typeAssets.length > 0"
+                >
+                  {{ typeAssets[0].asset_type_name }}
+                  <!--button
+                    class="button"
+                    @click="addAsset(sequenceShots)"
+                    :key="'add-sequence-button-' + sequenceShots[0].sequence_id"
+                    v-if="isCurrentUserManager"
+                  >
+                    {{ $t('playlists.add_sequence') }}
+                  </button-->
+                </h2>
+                <div
+                 class="addition-entities"
+                >
+                  <div
+                    :class="{
+                      'addition-shot': true
+                    }"
+                    :key="asset.id"
+                    @click.prevent="addEntityToPlaylist(asset)"
+                    v-for="asset in typeAssets"
+                  >
+                      <light-entity-thumbnail
+                        :preview-file-id="asset.preview_file_id"
+                        width="150px"
+                        height="100px"
+                      />
+                    <span class="playlisted-shot-name">{{ asset.name }}</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div v-else>
               <div
                 :key="'sequence-' + i"
                 v-for="(sequenceShots, i) in displayedShotsBySequence"
               >
                 <h2
-                  class="sequence-title"
+                  class="entity-group-title"
                   v-if="sequenceShots.length > 0"
                 >
                    {{ sequenceShots[0].sequence_name }}
@@ -256,15 +296,15 @@
                   </button>
                 </h2>
                 <div
-                 class="addition-shots"
+                 class="addition-entities"
                 >
                   <div
                     :class="{
                       'addition-shot': true,
-                      playlisted: currentShots[shot.id] !== undefined
+                      playlisted: currentEntities[shot.id] !== undefined
                     }"
                     :key="shot.id"
-                    @click.prevent="addShotToPlaylist(shot)"
+                    @click.prevent="addEntityToPlaylist(shot)"
                     v-for="shot in sequenceShots"
                   >
                       <light-entity-thumbnail
@@ -295,12 +335,12 @@
   </div>
 </template>
 <script>
-import Vue from 'vue'
 import firstBy from 'thenby'
 import moment from 'moment-timezone'
 import { mapGetters, mapActions } from 'vuex'
 import { PlusIcon, XIcon } from 'vue-feather-icons'
 import { formatDate } from '../../lib/time'
+import { getPlaylistPath } from '../../lib/path'
 import {
   updateModelFromList,
   removeModelFromList
@@ -332,16 +372,12 @@ export default {
   data () {
     return {
       currentPlaylist: { name: this.$t('playlists.no_selection') },
-      currentShot: 0,
-      currentShots: {},
-      isAddingShot: true,
+      currentEntities: {},
+      isAddingEntity: true,
       playlistToEdit: {
         name: `${moment().format('YYYY-MM-DD HH:mm:ss')}`,
         for_client: false
       },
-      sequenceId: null,
-      sequenceOptions: [],
-      sequenceShots: [],
       modals: {
         isDeleteDisplayed: false,
         isEditDisplayed: false
@@ -369,19 +405,21 @@ export default {
 
   computed: {
     ...mapGetters([
+      'assetMap',
+      'assetSearchText',
       'currentEpisode',
       'currentProduction',
+      'displayedAssets',
+      'displayedAssetsByType',
       'displayedShots',
       'displayedShotsBySequence',
-      'episodes',
+      'isAssetsLoading',
+      'isCurrentUserManager',
       'isShotsLoading',
       'isTVShow',
-      'isCurrentUserManager',
       'playlistMap',
       'playlists',
       'playlistsPath',
-      'playlistMap',
-      'sequences',
       'shotsByEpisode',
       'shotSearchText',
       'shotMap',
@@ -394,6 +432,17 @@ export default {
         this.loading.addWeekly ||
         this.loading.addDaily ||
         this.loading.addEpisode
+      )
+    },
+
+    isAssetPlaylist () {
+      return this.currentPlaylist.for_entity === 'asset'
+    },
+
+    isAddSearchVisible () {
+      return (
+        (this.isAssetPlaylist && this.assetSearchText) ||
+        (!this.isAssetPlaylist && this.shotSearchText)
       )
     },
 
@@ -411,62 +460,73 @@ export default {
 
     playlistPlayer () {
       return this.$refs['playlist-player']
+    },
+
+    addEntitiesText () {
+      if (this.isAssetPlaylist) {
+        return this.$t('playlists.add_assets')
+      } else {
+        return this.$t('playlists.add_shots')
+      }
     }
   },
 
   methods: {
     ...mapActions([
       'addNewBuildJob',
-      'addShotPreviewToPlaylist',
+      'pushEntityToPlaylist',
       'changePlaylistOrder',
       'changePlaylistPreview',
       'changePlaylistType',
+      'displayMoreAssets',
       'displayMoreShots',
       'editPlaylist',
       'getPending',
       'loadPlaylist',
       'loadPlaylists',
-      'loadShotPreviewFiles',
+      'loadEntityPreviewFiles',
       'loadShots',
+      'loadAssets',
       'markBuildJobAsDone',
       'newPlaylist',
       'refreshPlaylist',
-      'removeShotPreviewFromPlaylist',
+      'removeEntityPreviewFromPlaylist',
       'removeBuildJobFromList',
+      'setAssetSearch',
       'setShotSearch',
       'updatePreviewAnnotation'
     ]),
+
+    // Helpers
 
     formatDate (dateString) {
       return formatDate(dateString)
     },
 
     getPlaylistPath (playlistId, section) {
-      const route = {
-        name: section ? `${section}-playlist` : 'playlist',
-        params: {
-          production_id: this.currentProduction.id,
-          playlist_id: playlistId
-        }
-      }
-      if (this.isTVShow && this.currentEpisode) {
-        route.name = `episode-${route.name}`
-        route.params.episode_id = this.currentEpisode.id
-      }
-      return route
+      return getPlaylistPath(
+        this.currentProduction.id,
+        this.currentEpisode ? this.currentEpisode.id : null,
+        playlistId,
+        section
+      )
     },
 
-    loadShotsData (callback) {
-      this.loading.playlists = true
-      const loadPlaylists = () => {
-        this.loadPlaylistsData()
-        if (callback) callback()
-      }
+    // Data loading
 
+    loadShotsData (callback) {
       if (this.displayedShots.length === 0) {
-        this.loadShots(loadPlaylists)
+        this.loadShots(callback)
       } else {
-        loadPlaylists()
+        callback()
+      }
+    },
+
+    loadAssetsData (callback) {
+      if (this.displayedAssets.length === 0) {
+        this.loadAssets(callback)
+      } else {
+        callback()
       }
     },
 
@@ -491,67 +551,53 @@ export default {
       }
     },
 
-    rebuildCurrentShots () {
-      this.currentShots = {}
-      const tmpShots = {}
+    // Playlist build
+
+    rebuildCurrentEntities () {
+      this.currentEntities = {}
+      const tmpEntities = {}
       if (this.currentPlaylist && this.currentPlaylist.shots) {
-        this.currentPlaylist.shots.forEach((shotPreview) => {
-          this.addShotToCurrentShots(shotPreview, tmpShots)
+        this.currentPlaylist.shots.forEach((entity) => {
+          const playlistEntity = this.convertEntityToPlaylistFormat(entity)
+          if (playlistEntity) tmpEntities[playlistEntity.id] = playlistEntity
         })
       }
       this.$nextTick(() => {
-        this.currentShots = tmpShots
+        this.currentEntities = tmpEntities
       })
     },
 
-    /*
-     * Add to current playlist the shot related to given preview.
-     * Use given preview as current preview for this shot and store other
-     * previews in given shot.
-     */
-    addShotToCurrentShots (previewFile, playlistShotMap) {
-      const shot = this.shotMap[previewFile.shot_id]
-      if (shot) {
-        const entityName =
-          shot.tasks.length > 0 ? shot.tasks[0].entity_name : shot.name
-        const playlistShot = {
-          id: previewFile.shot_id,
-          name: shot.name,
-          sequence_name: shot.sequence_name,
-          entity_name: entityName,
-          preview_files: previewFile.preview_files,
+    convertEntityToPlaylistFormat (entityInfo) {
+      let entity
+      if (this.isAssetPlaylist) {
+        entity = this.assetMap[entityInfo.id]
+      } else {
+        entity = this.shotMap[entityInfo.id]
+      }
+      if (entity) {
+        const playlistEntity = {
+          id: entityInfo.id,
+          name: entity.name,
+          parent_name: entity.sequence_name || entity.asset_type_name,
+          preview_files: entityInfo.preview_files,
           preview_file_id:
-            previewFile.id ||
-            previewFile.preview_file_id ||
-            shot.preview_file_id,
+            entityInfo.preview_file_id ||
+            entity.preview_file_id,
           preview_file_extension:
-            previewFile.extension ||
-            previewFile.preview_file_extension ||
-            shot.preview_file_extension,
+            entityInfo.preview_file_extension ||
+            entity.preview_file_extension,
           preview_file_task_id:
-            previewFile.task_id ||
-            previewFile.preview_file_task_id ||
-            shot.preview_file_task_id,
+            entityInfo.task_id ||
+            entityInfo.preview_file_task_id ||
+            entity.preview_file_task_id,
           preview_file_annotations:
-            previewFile.annotations ||
-            previewFile.preview_file_annotations ||
-            shot.preview_file_annotations
+            entityInfo.preview_file_annotations ||
+            entity.preview_file_annotations
         }
-        Vue.set(playlistShotMap, previewFile.shot_id, playlistShot)
-        return playlistShot
+        return playlistEntity
       } else {
         return null
       }
-    },
-
-    clearCurrentPlaylist () {
-      this.currentPlaylist = {}
-      this.currentShots = {}
-    },
-
-    resetPlaylist () {
-      this.clearCurrentPlaylist()
-      this.setCurrentPlaylist()
     },
 
     setCurrentPlaylist (callback) {
@@ -565,7 +611,7 @@ export default {
             this.loading.playlist = false
             if (err) console.error(err)
             this.currentPlaylist = playlist
-            this.rebuildCurrentShots()
+            this.rebuildCurrentEntities()
             if (callback) callback()
           }
         })
@@ -577,70 +623,66 @@ export default {
       }
     },
 
-    goFirstPlaylist () {
-      if (this.playlists.length > 0) {
-        this.$router.push({
-          name: 'playlist',
-          params: {
-            production_id: this.currentProduction.id,
-            playlist_id: this.playlists[0].id
-          }
+    addEntity (entity) {
+      return this.loadEntityPreviewFiles(entity)
+        .then(previewFiles => {
+          return this.addToStorePlaylistAndSave(previewFiles, entity)
         })
-      } else {
-        this.$router.push(this.playlistsPath)
-      }
-    },
-
-    clearAdditionColumn () {
-      this.sequenceOptions = []
-      this.sequenceId = null
-    },
-
-    addShot (shot) {
-      return this.loadShotPreviewFiles(shot)
-        .then(previewFiles => this.addShotPreviewToPlaylist({
-          playlist: this.currentPlaylist,
-          previewFiles: previewFiles,
-          shot: { ...shot }
-        }))
-        .then((shotPreview) => {
-          return new Promise((resolve, reject) => {
-            const playlistShot =
-              this.addShotToCurrentShots(shotPreview, this.currentShots)
-            this.$refs['playlist-player'].shotList.push(playlistShot)
-            this.$nextTick(() => {
-              this.$refs['playlist-player'].scrollToRight()
-              resolve()
-            })
-          })
-        })
+        .then(this.addToPlayerPlaylist)
         .catch((err) => console.error(err))
     },
 
-    addShotToPlaylist (shot) {
-      if (!this.currentShots[shot.id]) {
-        this.$options.silent = true
-        this.addShot(shot)
-          .then(() => {
-            this.playlistPlayer.scrollToRight()
-            setTimeout(() => {
-              this.$options.silent = false
-            }, 500)
-          })
+    addToStorePlaylistAndSave (previewFiles, entity) {
+      return this.pushEntityToPlaylist({
+        playlist: this.currentPlaylist,
+        previewFiles: previewFiles,
+        entity: { ...entity }
+      })
+    },
+
+    addToPlayerPlaylist (entity) {
+      const playlistEntity = this.convertEntityToPlaylistFormat(entity)
+      this.currentEntities[playlistEntity.id] = playlistEntity
+      this.playlistPlayer.entityList.push(playlistEntity)
+      this.$nextTick(() => {
+        this.playlistPlayer.scrollToRight()
+      })
+    },
+
+    addEntityToPlaylist (entity) {
+      if (!this.currentEntities[entity.id]) {
+        this.addEntity(entity)
+          .then(this.playlistPlayer.scrollToRight())
       }
     },
 
-    addCurrentSelection (sequenceShots) {
-      this.$options.silent = true
-      const currentShotMap = {}
-      this.displayedShots.forEach((shot) => {
-        currentShotMap[shot.id] = true
+    removeEntity (entity) {
+      this.removeEntityPreviewFromPlaylist({
+        playlist: this.currentPlaylist,
+        entity,
+        callback: () => {
+          delete this.currentEntities[entity.id]
+        }
       })
-      const shots = Object.values(this.shotMap)
-        .filter(s => currentShotMap[s.id] === true)
-        .reverse()
+    },
 
-      this.addShots(shots, () => {
+    clearCurrentPlaylist () {
+      this.currentPlaylist = {}
+      this.currentShots = {}
+    },
+
+    resetPlaylist () {
+      this.clearCurrentPlaylist()
+      this.setCurrentPlaylist()
+    },
+
+    // Addition Helpers
+
+    addCurrentSelection () {
+      this.$options.silent = true
+      const entities =
+        this.isAssetPlaylist ? this.displayedAssets : this.displayedShots
+      this.addEntities([...entities].reverse(), () => {
         this.$options.silent = false
       })
     },
@@ -653,7 +695,7 @@ export default {
           .sort(firstBy('name'))
           .reverse()
         this.$options.silent = true
-        this.addShots(shots, () => {
+        this.addEntities(shots, () => {
           this.$options.silent = false
         })
       }
@@ -664,7 +706,7 @@ export default {
       this.loading.addWeekly = true
       this.getPending(false)
         .then((shots) => {
-          this.addShots(shots.reverse(), () => {
+          this.addEntities(shots.reverse(), () => {
             this.loading.addWeekly = false
             this.$options.silent = false
           })
@@ -676,7 +718,7 @@ export default {
       this.$options.silent = true
       this.getPending(true)
         .then((shots) => {
-          this.addShots(shots.reverse(), () => {
+          this.addEntities(shots.reverse(), () => {
             this.loading.addDaily = false
             this.$options.silent = false
           })
@@ -687,7 +729,7 @@ export default {
       this.loading.addEpisode = true
       this.$options.silent = true
       const shots = [].concat(...this.shotsByEpisode).reverse()
-      this.addShots(shots, () => {
+      this.addEntities(shots, () => {
         this.loading.addEpisode = false
         this.$options.silent = false
       })
@@ -697,49 +739,32 @@ export default {
       this.loading.addMovie = true
       this.$options.silent = true
       const shots = Object.values(this.shotMap)
-      this.addShots(shots.reverse(), () => {
+      this.addEntities(shots.reverse(), () => {
         this.loading.addMovie = false
         this.$options.silent = false
       })
     },
 
-    addShots (shots, callback) {
-      if (shots && shots.length > 0) {
-        const shot = shots.pop()
-        this.addShot(shot)
+    addEntities (entities, callback) {
+      if (entities && entities.length > 0) {
+        const entity = entities.pop()
+        this.addEntity(entity)
           .then(() => {
-            this.addShots(shots, callback)
+            this.addEntities(entities, callback)
           })
       } else {
         callback()
       }
     },
 
-    removeShot (shot) {
-      this.removeShotPreviewFromPlaylist({
-        playlist: this.currentPlaylist,
-        shot,
-        callback: () => {
-          delete this.currentShots[shot.id]
-        }
-      })
-    },
+    // Save data
 
-    onPreviewChanged (shot, previewFileId) {
+    onPreviewChanged (entity, previewFileId) {
       this.changePlaylistPreview({
         playlist: this.currentPlaylist,
-        shot,
+        entity,
         previewFileId
       })
-    },
-
-    onBodyScroll (event, position) {
-      const maxHeight =
-        this.$refs.shotListContent.scrollHeight -
-        this.$refs.shotList.offsetHeight
-      if (maxHeight < position.scrollTop) {
-        this.displayMoreShots()
-      }
     },
 
     onOrderChange (info) {
@@ -754,6 +779,28 @@ export default {
       this.updatePreviewAnnotation({ taskId, preview, annotations })
     },
 
+    // Search
+
+    onSearchChange (searchQuery) {
+      if (searchQuery.length > 1) {
+        if (this.isAssetPlaylist) {
+          this.setAssetSearch(searchQuery)
+          this.displayMoreAssets()
+        } else {
+          this.setShotSearch(searchQuery)
+          this.displayMoreShots()
+        }
+      } else {
+        if (this.isAssetPlaylist) {
+          this.setAssetSearch('')
+        } else {
+          this.setShotSearch('')
+        }
+      }
+    },
+
+    // Playlist list
+
     onForClientChanged (forClient) {
       this.editPlaylist({
         data: {
@@ -763,54 +810,12 @@ export default {
       })
     },
 
-    toggleAddShots () {
-      if (this.isAddingShot) {
-        this.resetPlaylist()
-      }
-      this.isAddingShot = !this.isAddingShot
-    },
-
-    onSearchChange (searchQuery) {
-      if (searchQuery.length > 1) {
-        this.setShotSearch(searchQuery)
-        this.displayMoreShots()
-      } else {
-        this.setShotSearch('')
-      }
-    },
-
-    confirmEditPlaylist (form) {
-      if (this.playlistToEdit.id) {
-        form.id = this.currentPlaylist.id
-        this.runEditPlaylist(form)
-      } else {
-        this.runAddPlaylist(form)
-      }
-    },
-
-    runEditPlaylist (form) {
-      this.loading.editPlaylist = true
-      this.errors.editPlaylist = false
-      this.editPlaylist({
-        data: {
-          name: form.name,
-          for_client: form.for_client,
-          id: form.id
-        },
-        callback: (err, playlist) => {
-          if (err) this.errors.editPlaylist = true
-          this.loading.editPlaylist = false
-          this.modals.isEditDisplayed = false
-          Object.assign(this.currentPlaylist, playlist)
-        }
-      })
-    },
-
     runAddPlaylist (form) {
       const newPlaylist = {
         name: form.name,
         production_id: this.currentProduction.id,
-        for_client: form.for_client
+        for_client: form.for_client,
+        for_entity: form.for_entity
       }
       if (this.isTVShow && this.currentEpisode) {
         newPlaylist.episode_id = this.currentEpisode.id
@@ -827,6 +832,78 @@ export default {
         }
       })
     },
+
+    confirmEditPlaylist (form) {
+      if (this.playlistToEdit.id) {
+        form.id = this.currentPlaylist.id
+        this.runEditPlaylist(form)
+      } else {
+        this.runAddPlaylist(form)
+      }
+    },
+
+    runEditPlaylist (form) {
+      this.loading.editPlaylist = true
+      this.errors.editPlaylist = false
+      this.editPlaylist({
+        data: {
+          id: form.id,
+          for_client: form.for_client,
+          for_entity: form.for_entity,
+          name: form.name
+        },
+        callback: (err, playlist) => {
+          if (err) this.errors.editPlaylist = true
+          this.loading.editPlaylist = false
+          this.modals.isEditDisplayed = false
+          Object.assign(this.currentPlaylist, playlist)
+        }
+      })
+    },
+
+    goFirstPlaylist () {
+      if (this.playlists.length > 0) {
+        this.$router.push({
+          name: 'playlist',
+          params: {
+            production_id: this.currentProduction.id,
+            playlist_id: this.playlists[0].id
+          }
+        })
+      } else {
+        this.$router.push(this.playlistsPath)
+      }
+    },
+
+    // Changes
+
+    toggleAddEntities () {
+      if (this.isAddingEntity) {
+        this.resetPlaylist()
+      }
+      this.isAddingEntity = !this.isAddingEntity
+    },
+
+    onTaskTypeChanged (taskTypeId) {
+      this.changePlaylistType({
+        playlist: this.currentPlaylist,
+        taskTypeId,
+        callback: () => {
+          this.rebuildCurrentEntities()
+        }
+      })
+    },
+
+    onBodyScroll (event, position) {
+      const maxHeight =
+        this.$refs.entityListContent.scrollHeight -
+        this.$refs.entityListContent.offsetHeight
+      if (maxHeight < position.scrollTop) {
+        this.displayMoreShots()
+      }
+    },
+
+    // Modals
 
     showAddModal () {
       this.playlistToEdit = {
@@ -850,21 +927,21 @@ export default {
       this.modals.isEditDisplayed = false
     },
 
-    onTaskTypeChanged (taskTypeId) {
-      this.changePlaylistType({
-        playlist: this.currentPlaylist,
-        taskTypeId,
-        callback: () => {
-          this.rebuildCurrentShots()
-        }
+    // Loading
+
+    reloadAll () {
+      this.loadShotsData(() => {
+        this.loadAssetsData(() => {
+          this.loadPlaylistsData(() => {
+            this.resetPlaylist()
+          })
+        })
       })
     }
   },
 
   mounted () {
-    this.loadShotsData(() => {
-      this.resetPlaylist()
-    })
+    this.reloadAll()
   },
 
   watch: {
@@ -874,30 +951,22 @@ export default {
 
     currentPlaylist () {
       if (this.currentPlaylist.shots) {
-        this.isAddingShot = this.currentPlaylist.shots.length === 0
+        this.isAddingEntity =
+          Object.keys(this.currentPlaylist.shots).length === 0
+      } else {
+        this.isAddingEntity = true
       }
     },
 
     currentProduction () {
-      this.$store.commit('LOAD_SEQUENCES_END', [])
       this.$store.commit('LOAD_PLAYLISTS_END', [])
-      this.loadShotsData(() => {
-        this.resetPlaylist()
-      })
+      this.reloadAll()
     },
 
     currentEpisode () {
-      this.$store.commit('LOAD_SEQUENCES_END', [])
       this.$store.commit('LOAD_PLAYLISTS_END', [])
       if (this.currentEpisode) {
-        this.loadShotsData(() => {
-          this.resetPlaylist()
-        })
-      }
-    },
-
-    isAddingShot () {
-      if (!this.isAddingShot) {
+        this.reloadAll()
       }
     }
   },
@@ -927,20 +996,6 @@ export default {
       },
 
       'playlist:update' (eventData) {
-        if (
-          this.playlistMap[eventData.playlist_id] &&
-          !this.$options.silent
-        ) {
-          /*
-          this.refreshPlaylist(eventData.playlist_id)
-            .then((playlist) => {
-              if (this.currentPlaylist.id === playlist.id) {
-                Object.assign(this.currentPlaylist, playlist)
-                this.rebuildCurrentShots()
-              }
-            })
-          */
-        }
       },
 
       'playlist:delete' (eventData) {
@@ -1008,7 +1063,7 @@ export default {
 
   .playlist-column {
     button,
-    h2.sequence-title {
+    h2.entity-group-title {
       color: white;
     }
   }
@@ -1083,7 +1138,7 @@ export default {
   width: 100%;
 }
 
-.addition-shots {
+.addition-entities {
   display: flex;
   flex-wrap: wrap;
   align-items: flex-start;
@@ -1134,10 +1189,6 @@ span.thumbnail-picture {
   }
 }
 
-.select-sequence-combobox {
-  margin-bottom: 1em;
-}
-
 .add-sequence {
   margin-bottom: 0.4em;
 }
@@ -1162,7 +1213,7 @@ span.thumbnail-picture {
   font-size: 0.8em;
 }
 
-.sequence-title {
+.entity-group-title {
   border-bottom: 1px solid $light-grey-light;
   color: $grey;
   margin: 1em;

@@ -1,9 +1,9 @@
 <template>
 <div class="flexrow wrapper">
-  <drag @drag="onDragged" :transfer-data="shot.id">
+  <drag @drag="onDragged" :transfer-data="entity.id">
     <div
       :class="{
-        'playlisted-shot': true,
+        'playlisted-entity': true,
         playing: isPlaying
       }"
     >
@@ -23,7 +23,9 @@
         />
       </div>
 
-      <div class="shot-title">{{ shot.sequence_name }} / {{ shot.name }}</div>
+      <div class="entity-title">
+        {{ entity.parent_name }} / {{ entity.name }}
+      </div>
 
       <div
         class="preview-choice"
@@ -55,8 +57,8 @@
 
 <script>
 /*
- * Widget to describe a shot listed in a playlist. It allows to select a given
- * prevision for a given task type for current shot.
+ * Widget to describe an entity listed in a playlist. It allows to select a
+ * given prevision for a given task type for current entity.
  * It fires events about drag'n'drop reordering too.
  */
 import firstBy from 'thenby'
@@ -67,7 +69,7 @@ import Combobox from '../../widgets/Combobox'
 import LightEntityThumbnail from '../../widgets/LightEntityThumbnail'
 
 export default {
-  name: 'playlisted-shot',
+  name: 'playlisted-entity',
 
   components: {
     Combobox,
@@ -78,7 +80,7 @@ export default {
   data () {
     return {
       taskTypeId: null,
-      previewFileId: this.shot.preview_file_id
+      previewFileId: this.entity.preview_file_id
     }
   },
 
@@ -91,7 +93,7 @@ export default {
       default: false,
       type: Boolean
     },
-    shot: {
+    entity: {
       default: () => {},
       type: Object
     }
@@ -113,8 +115,8 @@ export default {
     },
 
     taskTypeOptions () {
-      return Object
-        .keys(this.shot.preview_files)
+      return this.entity.preview_files ? Object
+        .keys(this.entity.preview_files)
         .map(id => this.taskTypeMap[id])
         .sort(firstBy('priority', 1).thenBy('name'))
         .map((taskType) => {
@@ -122,11 +124,11 @@ export default {
             label: taskType.name,
             value: taskType.id
           }
-        })
+        }) : []
     },
 
     previewFileOptions () {
-      const previewFiles = this.shot.preview_files[this.taskTypeId] || []
+      const previewFiles = this.entity.preview_files[this.taskTypeId] || []
       return previewFiles.map(previewFile => ({
         label: `v${previewFile.revision}`,
         value: previewFile.id
@@ -137,7 +139,7 @@ export default {
   methods: {
     getTaskTypeIdForPreviewFile (taskTypeIds, previewFileId) {
       return taskTypeIds.find((taskTypeId) => {
-        const previewFiles = this.shot.preview_files[taskTypeId]
+        const previewFiles = this.entity.preview_files[taskTypeId]
         return previewFiles.some(previewFile => {
           return previewFile.id === previewFileId
         })
@@ -146,18 +148,28 @@ export default {
 
     setCurrentParameters () {
       // Find task type matching current preview.
-      const taskTypeIds = Object.keys(this.shot.preview_files)
+      const taskTypeIds = Object.keys(this.entity.preview_files)
       if (taskTypeIds.length > 0) {
-        if (this.shot.preview_file_id) {
+        if (this.entity.preview_file_id) {
           this.taskTypeId = this.getTaskTypeIdForPreviewFile(
             taskTypeIds,
-            this.shot.preview_file_id
+            this.entity.preview_file_id
           )
         }
         if (!this.taskTypeId) {
           this.taskTypeId = taskTypeIds[0]
         }
       }
+    },
+
+    onPlayClick () {
+      this.$emit('play-click', this.index)
+    },
+
+    onRemoveClick (event) {
+      event.preventDefault()
+      event.stopPropagation()
+      this.$emit('remove-entity', this.entity)
     },
 
     setListeners () {
@@ -174,27 +186,16 @@ export default {
     },
 
     onDragover () {
-      // this.dropArea.style.background = '#00B242'
       this.dropArea.style.width = '60px'
     },
 
-    onDropped (shotId) {
+    onDropped (entityId) {
       this.dropArea.style.background = 'transparent'
       this.dropArea.style.width = '15px'
-      this.$emit('shot-dropped', {
-        before: this.shot.id,
-        after: shotId
+      this.$emit('entity-dropped', {
+        before: this.entity.id,
+        after: entityId
       })
-    },
-
-    onPlayClick () {
-      this.$emit('play-click', this.index)
-    },
-
-    onRemoveClick (event) {
-      event.preventDefault()
-      event.stopPropagation()
-      this.$emit('remove-shot', this.shot)
     }
   },
 
@@ -203,13 +204,13 @@ export default {
       // Set current preview was last preview selected. If there is no preview
       // matching this task type, it selects the first preview available for
       // this task type.
-      const previewFiles = this.shot.preview_files[this.taskTypeId]
+      const previewFiles = this.entity.preview_files[this.taskTypeId]
       if (previewFiles && previewFiles.length > 0) {
         const isPreviewFile = previewFiles.some(previewFile => {
-          return previewFile.id === this.shot.preview_file_id
+          return previewFile.id === this.entity.preview_file_id
         })
         if (isPreviewFile) {
-          this.previewFileId = this.shot.preview_file_id
+          this.previewFileId = this.entity.preview_file_id
         } else {
           this.previewFileId = previewFiles[0].id
         }
@@ -217,7 +218,7 @@ export default {
     },
 
     previewFileId () {
-      this.$emit('preview-changed', this.shot, this.previewFileId)
+      this.$emit('preview-changed', this.entity, this.previewFileId)
     }
   }
 }
@@ -234,7 +235,7 @@ export default {
   transition: width 0.3s ease;
 }
 
-.playlisted-shot {
+.playlisted-entity {
   border-top: 3px solid transparent;
   border-radius: 5px;
   border: 1px solid dark;
@@ -250,7 +251,7 @@ export default {
   }
 }
 
-.shot-title {
+.entity-title {
   margin-bottom: 0.6em;
 }
 

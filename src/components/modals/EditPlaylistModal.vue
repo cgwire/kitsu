@@ -6,7 +6,7 @@
   <div class="modal-background"></div>
   <div class="modal-content">
     <div class="box">
-      <h1 class="title" v-if="playlistToEdit && playlistToEdit.id">
+      <h1 class="title" v-if="isEditing">
         {{ $t("playlists.edit_title") }}
       </h1>
       <h1 class="title" v-else>
@@ -25,6 +25,12 @@
           :label="$t('playlists.fields.for_client')"
           :options="forClientOptions"
           v-model="forClient"
+        />
+        <combobox
+          :label="$t('playlists.fields.for_entity')"
+          :options="forEntityOptions"
+          v-model="form.for_entity"
+          v-if="!isEditing"
         />
       </form>
 
@@ -82,10 +88,21 @@ export default {
         { label: this.$t('playlists.for_client'), value: 'true' },
         { label: this.$t('playlists.for_studio'), value: 'false' }
       ],
+      forEntityOptions: [
+        { label: this.$t('assets.title'), value: 'asset' },
+        { label: this.$t('shots.title'), value: 'shot' }
+      ],
       form: {
         name: this.playlistToEdit.name,
+        for_entity: this.playlistToEdit.for_entity || 'shot',
         for_client: this.playlistToEdit.for_client
       }
+    }
+  },
+
+  computed: {
+    isEditing () {
+      return this.playlistToEdit && this.playlistToEdit.id
     }
   },
 
@@ -93,23 +110,30 @@ export default {
     runConfirmation () {
       this.form.for_client = this.forClient === 'true'
       this.$emit('confirm', this.form)
+    },
+
+    resetForm () {
+      if (this.isEditing) {
+        this.form.name = this.playlistToEdit.name
+        this.form.for_entity = this.playlistToEdit.for_entity
+      } else {
+        this.form = {
+          for_entity: 'shot',
+          for_client: 'false'
+        }
+      }
     }
   },
 
   watch: {
     playlistToEdit () {
-      if (this.playlistToEdit) {
-        this.form.name = this.playlistToEdit.name
-      } else {
-        this.form = {
-          name: ''
-        }
-      }
+      this.resetForm()
     },
 
     active () {
       if (this.active) {
         this.forClient = this.playlistToEdit.for_client ? 'true' : 'false'
+        this.resetForm()
         setTimeout(() => {
           this.$refs.nameField.focus()
         }, 100)

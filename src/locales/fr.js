@@ -254,8 +254,9 @@ export default {
   },
 
   playlists: {
+    add_assets: 'Ajouter des assets',
     add_selection: 'Ajouter la sélection',
-    add_shots: 'Sélectonner les plans',
+    add_shots: 'Ajouter des plans',
     add_episode: 'Ajouter l\'épisode',
     add_movie: 'Ajouter tout le film',
     add_sequence: 'Ajouter séquence',
@@ -275,7 +276,7 @@ export default {
     for_studio: 'Pour le studio',
     last_creation: 'Dernière créations',
     last_modification: 'Dernière modifications',
-    no_preview: 'Aucun preview',
+    no_preview: 'Aucune préviz',
     remove: 'enlever',
     loading_error: 'Une erreur serveur est apparue, les playlists ne peuvent pas être chargées.',
     new_playlist: 'Ajouter une playlist',
@@ -291,14 +292,10 @@ export default {
     updated_at: 'Mis à jour le:',
     fields: {
       name: 'Nom',
-      for_client: 'A partager avec'
+      for_client: 'A partager avec',
+      for_entity: 'Sélectionne le type d\'entité à afficher'
     },
     actions: {
-      rename: 'Renommer la playlist',
-      delete: 'Supprimer la playlist',
-      fullscreen: 'Plein écran',
-      download: 'Télécharger…',
-      shotlist: 'Montrer/Cacher la liste des shots',
       comments: 'Montrer/Cacher les commentaires',
       annotation: 'Annotation',
       annotation_delete: 'Supprimer l\'annotation',
@@ -308,6 +305,11 @@ export default {
       annotation_medium: 'Moyen',
       annotation_small: 'Petit',
       change_task_type: 'Changer le task type',
+      delete: 'Supprimer la playlist',
+      download: 'Télécharger…',
+      edit: 'Modifier la playlist',
+      entity_list: 'Montrer/Cacher la liste d\'entités',
+      fullscreen: 'Plein écran',
       split_screen: 'Partager l\'écran',
       next_shot: 'Prochain shot',
       previous_shot: 'Shot précédent',
