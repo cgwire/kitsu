@@ -51,7 +51,8 @@ export default {
       currentPlaylist: {
         id: 'temp',
         name: 'Temporary playlist',
-        shots: []
+        shots: [],
+        for_entity: 'shot'
       },
       currentEntities: {},
       isLoading: false
@@ -120,10 +121,13 @@ export default {
         this.isLoading = true
         this.loadTempPlaylist(this.taskIds)
           .then((entities) => {
-            console.log('entities lodaed', entities)
             this.setupEntities(entities)
             this.isLoading = false
-            console.log(this.currentEntites)
+            if (this.isAssetPlaylist) {
+              this.currentPlaylist.for_entity = 'asset'
+            } else {
+              this.currentPlaylist.for_entity = 'shot'
+            }
           })
           .catch(console.error)
       } else {
