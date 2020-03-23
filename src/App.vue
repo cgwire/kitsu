@@ -1175,9 +1175,15 @@ tbody:last-child .empty-line:last-child {
     position: sticky;
   }
   .datatable-row {
+    .thumbnail-wrapper,
     .thumbnail-picture,
     .thumbnail-picture.thumbnail-empty {
       margin: .35rem .35rem .35rem 0;
+    }
+    .thumbnail-wrapper {
+      .thumbnail-picture {
+        margin: 0;
+      }
     }
   }
 }

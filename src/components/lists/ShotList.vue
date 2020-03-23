@@ -647,17 +647,6 @@ td.sequence {
   text-decoration: line-through;
 }
 
-.thumbnail {
-  min-width: 50px;
-  max-width: 50px;
-  width: 50px;
-  padding: 0;
-}
-
-.thumbnail img {
-  margin-top: 5px;
-}
-
 span.thumbnail-empty {
   display: block;
   width: 50px;
