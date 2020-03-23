@@ -128,23 +128,11 @@ const actions = {
     return new Promise((resolve, reject) => {
       commit(LOAD_ENTITY_PREVIEW_FILES_END, { playlist, entity, previewFiles })
       commit(ADD_ENTITY_TO_PLAYLIST, { playlist, entity })
-      console.log('ok')
       dispatch('editPlaylist', {
         data: playlist,
         callback: (err) => {
           console.log('err', err)
           if (err) reject(err)
-          /*
-          const previewFile = {
-            entity_id: entity.id,
-            id: entity.preview_file_id,
-            extension: entity.preview_file_extension,
-            annotations: entity.preview_file_annotations,
-            task_id: entity.preview_file_task_id,
-            preview_files: previewFiles
-          }
-          */
-          console.log('toto', entity)
           resolve(entity)
         }
       })

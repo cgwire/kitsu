@@ -267,6 +267,7 @@
       :title="$t('playlists.actions.change_task_type')"
       icon="layers"
       @click="showTaskTypeModal"
+      v-if="!tempMode"
     />
     <button-simple
       class="button playlist-button flexrow-item"
@@ -1415,7 +1416,6 @@ export default {
     },
 
     entities () {
-      console.log('entities changed !')
       const playlistEl = this.$refs['playlisted-entities']
       const scrollLeft = playlistEl ? playlistEl.scrollLeft : 0
       this.entityList = Object.values(this.entities)
@@ -1428,7 +1428,6 @@ export default {
       this.rebuildComparisonOptions()
       this.clearCanvas()
       this.annotations = []
-      console.log(this.entityList.length)
       if (this.entityList.length === 0) {
         if (this.rawPlayer) this.rawPlayer.clear()
         if (this.isComparing) {
