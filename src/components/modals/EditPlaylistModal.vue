@@ -118,6 +118,7 @@ export default {
         this.form.for_entity = this.playlistToEdit.for_entity
       } else {
         this.form = {
+          name: this.playlistToEdit.name,
           for_entity: 'shot',
           for_client: 'false'
         }
