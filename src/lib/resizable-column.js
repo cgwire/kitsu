@@ -32,7 +32,7 @@ export default {
             })
           })
 
-          div.addEventListener('mouseup', function (e) {
+          document.addEventListener('mouseup', function (e) {
             curCol = undefined
             pageX = undefined
             curColWidth = undefined
