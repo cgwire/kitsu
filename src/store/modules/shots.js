@@ -186,6 +186,10 @@ const helpers = {
     return shotName
   },
 
+  dateDigit (date) {
+    return date.toString().padStart(2, '0')
+  },
+
   populateTask (task, shot, production) {
     task.name = helpers.getTaskType(task.task_type_id).priority.toString()
     task.task_status_short_name =
@@ -240,9 +244,9 @@ const helpers = {
 
   getDateFromParameters ({ detailLevel, year, week, month, day }) {
     if (detailLevel === 'day') {
-      return `${year}-${month.toString().padStart(2, '0')}-${day}`
+      return `${year}-${helpers.dateDigit(month)}-${helpers.dateDigit(day)}`
     } else if (detailLevel === 'month') {
-      return `${year}-${month.toString().padStart(2, '0')}`
+      return `${year}-${helpers.dateDigit(month)}`
     } else if (detailLevel === 'week') {
       return `${year}-${week}`
     } else {
