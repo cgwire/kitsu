@@ -23,10 +23,11 @@
       @sort-by-clicked="onSortByMetadataClicked()"
     />
 
-    <table
-      class="datatable"
-    >
-      <thead class="datatable-head">
+    <table class="datatable">
+      <thead
+        class="datatable-head"
+        v-columns-resizable
+      >
         <tr>
           <th
             scope="col"
