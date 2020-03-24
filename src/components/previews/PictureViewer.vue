@@ -13,7 +13,8 @@
       >
       </canvas>
     </div>
-    <img ref="picture" :src="pictureDlPath" v-if="isFullScreen()" />
+    <img ref="picture" :src="pictureGifPath" v-if="isGif" />
+    <img ref="picture" :src="pictureDlPath" v-else-if="isFullScreen()" />
     <img ref="picture" :src="picturePath" v-else />
     <spinner v-if="isLoading"/>
   </div>
@@ -46,7 +47,7 @@
       <button
         class="button flexrow-item"
         @click="onAddPreviewClicked"
-        v-if="!readOnly"
+        v-if="preview.extension !== 'gif'"
       >
         <plus-icon class="icon" />
       </button>
@@ -259,8 +260,17 @@ export default {
       return `/api/pictures/originals/preview-files/${previewId}/download`
     },
 
+    pictureGifPath () {
+      const previewId = this.preview.previews[this.currentIndex - 1].id
+      return `/api/pictures/originals/preview-files/${previewId}.gif`
+    },
+
     currentPreview () {
       return this.preview.previews[this.currentIndex - 1]
+    },
+
+    isGif () {
+      return this.preview.extension === 'gif'
     }
   },
 

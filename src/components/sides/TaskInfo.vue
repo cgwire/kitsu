@@ -44,7 +44,7 @@
           :disabled="!isSetThumbnailAllowed"
           :title="$t('tasks.set_preview')"
           @click="setCurrentPreviewAsEntityThumbnail"
-          v-if="isCurrentUserManager && isPreview"
+          v-if="isCurrentUserManager && isPreview && extension !== 'gif'"
         />
         <subscribe-button
           class="flexrow-item"
@@ -430,7 +430,8 @@ export default {
       return this.currentPreviewId &&
         this.task &&
         this.task.entity &&
-        this.currentPreviewId !== this.task.entity.preview_file_id
+        this.currentPreviewId !== this.task.entity.preview_file_id &&
+        this.extension !== 'gif'
     },
 
     currentTaskType () {
@@ -472,7 +473,6 @@ export default {
           'pdf',
           'psd',
           'rar',
-          'gif',
           'ae',
           'fla',
           'flv',
@@ -488,7 +488,7 @@ export default {
 
     isPicturePreview () {
       return this.taskPreviews &&
-       this.taskPreviews.length > 0 && this.extension === 'png'
+       this.taskPreviews.length > 0 && ['png', 'gif'].includes(this.extension)
     },
 
     is3DModelPreview () {
