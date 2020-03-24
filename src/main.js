@@ -3,6 +3,7 @@ import { sync } from 'vuex-router-sync'
 
 import App from './App'
 import i18n from './lib/i18n'
+import resizableColumn from './lib/resizable-column'
 import router from './router'
 import store from './store'
 
@@ -23,6 +24,7 @@ import 'v-autocomplete/dist/v-autocomplete.css'
 Vue.config.productionTip = false
 Vue.use(Autocomplete)
 Vue.use(Meta)
+Vue.use(resizableColumn)
 Vue.use(VTooltip)
 Vue.use(VueChartkick, { adapter: Chart })
 Vue.use(VueCookie)

@@ -1170,7 +1170,8 @@ tbody:last-child .empty-line:last-child {
   white-space: nowrap;
   text-align: left;
   border-collapse: separate;
-  width: calc(100% - 1px);
+  min-width: calc(100% - 1px);
+  width: auto;
   th {
     position: sticky;
   }
@@ -1352,6 +1353,23 @@ tbody:last-child .empty-line:last-child {
 
 .datatable tbody:first-of-type .datatable-type-header th::before {
   display: none;
+}
+
+.resizable {
+  th {
+    .resizable-knob {
+      position: absolute;
+      right: 0;
+      top: 0;
+      bottom: 0;
+      width: .3rem;
+      background: transparent;
+      cursor: col-resize;
+    }
+    &:hover .resizable-knob {
+      background: var(--border);
+    }
+  }
 }
 
 .ellipsis {
