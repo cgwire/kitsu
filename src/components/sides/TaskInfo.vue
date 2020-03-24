@@ -472,6 +472,11 @@ export default {
           'pdf',
           'psd',
           'rar',
+          'gif',
+          'ae',
+          'fla',
+          'flv',
+          'swf',
           'zip'
         ].includes(this.extension)
     },
