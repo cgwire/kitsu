@@ -11,7 +11,7 @@ export default {
           el.className += ' resizable'
         }
 
-        const ths = el.querySelectorAll('th')
+        const ths = el.getElementsByClassName('metadata-descriptor')
 
         ths.forEach((item) => {
           if (!item.getElementsByClassName('resizable-knob').length > 0) {
