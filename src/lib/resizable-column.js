@@ -2,6 +2,11 @@ export default {
   install (Vue) {
     Vue.directive('columns-resizable', {
       componentUpdated (el) {
+        if (!el.id) {
+          console.error('Resizable headers must be in a thead with an id')
+          return
+        }
+
         if (!el.classList.contains('resizable')) {
           el.className += ' resizable'
         }
@@ -13,12 +18,16 @@ export default {
             const div = document.createElement('div')
             div.className = 'resizable-knob'
             item.appendChild(div)
-            setListeners(div)
+            setListeners(item, div)
+          }
+          if (localStorage.getItem(`${el.id}-${item.textContent}`)) {
+            item.style.minWidth =
+              localStorage.getItem(`${el.id}-${item.textContent}`)
           }
         })
 
-        function setListeners (div) {
-          var pageX, curCol, curColWidth
+        function setListeners (item, div) {
+          let pageX, curCol, curColWidth
           div.addEventListener('mousedown', function (e) {
             curCol = e.target.parentElement
             pageX = e.pageX
@@ -26,8 +35,10 @@ export default {
 
             document.addEventListener('mousemove', function (e) {
               if (curCol) {
-                var diffX = e.pageX - pageX
-                curCol.style.minWidth = (curColWidth + diffX) + 'px'
+                const diffX = e.pageX - pageX
+                const newWidth = (curColWidth + diffX) + 'px'
+                curCol.style.minWidth = newWidth
+                localStorage.setItem(`${el.id}-${item.textContent}`, newWidth)
               }
             })
           })

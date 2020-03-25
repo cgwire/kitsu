@@ -27,6 +27,7 @@
       <thead
         class="datatable-head"
         v-columns-resizable
+        id="datatable-shot"
       >
         <tr>
           <th
