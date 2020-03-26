@@ -21,17 +21,19 @@
         <span class="asset-type-name flexrow-item">
           {{ typeAssets.length > 0 ? typeAssets[0].asset_type_name : '' }}
         </span>
-        <asset-block
-          class="flexrow-item"
-          :key="asset.id"
-          :asset="asset"
-          :nb-occurences="asset.nb_occurences"
-          :read-only="readOnly"
-          @edit-label="onEditLabelClicked"
-          @remove-one="removeOneAsset"
-          @remove-ten="removeTenAssets"
-          v-for="asset in typeAssets"
-        />
+        <div class="asset-type-items flexrow-item">
+          <asset-block
+            class="flexrow-item"
+            :key="asset.id"
+            :asset="asset"
+            :nb-occurences="asset.nb_occurences"
+            :read-only="readOnly"
+            @edit-label="onEditLabelClicked"
+            @remove-one="removeOneAsset"
+            @remove-ten="removeTenAssets"
+            v-for="asset in typeAssets"
+          />
+        </div>
       </div>
       <div
         class="asset-type-line flexrow empty"
@@ -120,18 +122,30 @@ export default {
   width: 100px;
   padding-left: 0.4em;
   padding-top: 0;
+  flex: 0 0 100px;
 }
 
 .asset-type-name {
+  display: flex;
+  flex: 0 0 130px;
+  align-items: center;
+  align-self: flex-start;
+  margin-right: 1em;
+  width: 130px;
+  height: 40px;
   color: $grey;
   text-transform: uppercase;
-  width: 130px;
-  margin-right: 1em;
+}
+
+.asset-type-items {
+  flex: 1 1 auto;
+  display: flex;
+  flex-wrap: wrap;
 }
 
 .shot {
   font-size: 1.1em;
-  padding: 0.5em;
+  padding: .5em .5em 0;
   border-bottom: 1px solid $light-grey;
   cursor: pointer;
 }
