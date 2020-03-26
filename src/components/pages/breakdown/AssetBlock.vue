@@ -125,7 +125,7 @@ export default {
   display: flex;
   flex-direction: row;
   max-height: 60px;
-  margin-right: 1em;
+  margin: 0 1em .5em 0;
   font-size: 0.8em;
   word-wrap: break-word;
   border-radius: 5px;
