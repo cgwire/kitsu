@@ -260,12 +260,7 @@ export default {
              this.episodeStats[entryId][columnId]
     },
 
-    onHeaderScroll (event, position) {
-      this.$refs.tableWrapper.scrollLeft = position.scrollLeft
-    },
-
     onBodyScroll (event, position) {
-      this.$refs.headerWrapper.style.left = `-${position.scrollLeft}px`
       this.$emit('scroll', position.scrollTop)
       const maxHeight =
         this.$refs.body.scrollHeight - this.$refs.body.offsetHeight

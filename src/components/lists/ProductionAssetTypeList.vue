@@ -261,7 +261,6 @@ export default {
     },
 
     onBodyScroll (event, position) {
-      this.$refs.headerWrapper.style.left = `-${position.scrollLeft}px`
       this.$emit('scroll', position.scrollTop)
     },
 
