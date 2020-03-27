@@ -1,31 +1,26 @@
 <template>
 <div class="data-list">
-  <div style="overflow: hidden">
-    <table class="table table-header" ref="headerWrapper">
-      <thead>
+  <div class="datatable-wrapper">
+    <table class="datatable">
+      <thead class="datatable-head">
         <tr>
-          <th class="name">
+          <th scope="col" class="name datatable-row-header">
           {{ $t("people.list.name") }}
           </th>
-          <th class="email">
+          <th scope="col" class="email">
           {{ $t("people.list.email") }}
           </th>
-          <th class="phone">
+          <th scope="col" class="phone">
           {{ $t("people.list.phone") }}
           </th>
-          <th class="role">
+          <th scope="col" class="role">
           {{ $t("people.list.role") }}
           </th>
-          <th class="actions"></th>
+          <th scope="col" class="actions"></th>
         </tr>
       </thead>
-    </table>
-  </div>
-
-  <div class="table-body" v-scroll="onBodyScroll" v-if="!isEmpty">
-    <table class="table">
-      <tbody>
-        <tr v-for="entry in entries" :key="entry.id">
+      <tbody class="datatable-body" v-if="!isEmpty">
+        <tr class="datatable-row" v-for="entry in entries" :key="entry.id">
           <people-name-cell class="name" :person="entry" />
           <td class="email">{{ entry.email }}</td>
           <td class="phone">{{ entry.phone }}</td>
@@ -47,11 +42,9 @@
     </table>
   </div>
 
-  <div class="table-body" v-if="isEmpty">
-    <p class="has-text-centered mt2" v-if="isEmpty">
-      {{ $t('people.empty_team') }}
-    </p>
-  </div>
+  <p class="has-text-centered mt2" v-if="isEmpty">
+    {{ $t('people.empty_team') }}
+  </p>
 
   <p class="has-text-centered footer-info">
     {{ entries.length }} {{ $tc('people.persons', entries.length) }}
@@ -90,16 +83,21 @@ export default {
 
     removePerson (person) {
       this.removePersonFromTeam(person)
-    },
-
-    onBodyScroll (event, position) {
-      this.$refs.headerWrapper.style.left = `-${position.scrollLeft}px`
     }
   }
 }
 </script>
 
 <style lang="scss" scoped>
+
+.datatable-wrapper {
+  overflow: auto;
+  margin-bottom: 1rem;
+}
+.datatable-body tr:first-child th,
+.datatable-body tr:first-child td {
+  border-top: 0;
+}
 .name {
   width: 230px;
   min-width: 230px;
@@ -109,7 +107,7 @@ export default {
   min-width: 300px;
 }
 .phone {
-  width: 140px;
+  width: 200px;
   min-width: 140px;
 }
 .role {
