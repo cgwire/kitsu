@@ -1,74 +1,51 @@
 <template>
 <div class="data-list">
-  <div class="table-header-wrapper">
-    <table class="table table-header" ref="headerWrapper">
-      <thead>
+  <div
+    class="datatable-wrapper"
+    ref="body"
+    v-scroll="onBodyScroll"
+  >
+    <table class="datatable">
+      <thead class="datatable-head">
         <tr>
-          <th class="name" ref="th-sequence">
+          <th scope="col" class="name datatable-row-header" ref="th-sequence">
             {{ $t('shots.fields.sequence') }}
           </th>
-          <th class="description">{{ $t('shots.fields.description') }}</th>
-          <th class="validation">{{ $t('main.all') }}</th>
+          <th scope="col" class="description">{{ $t('shots.fields.description') }}</th>
+          <th scope="col" class="validation">{{ $t('main.all') }}</th>
           <th
+            scope="col"
             class="validation validation-cell"
-            :style="getValidationStyle(columnId)"
             :key="columnId"
             v-for="columnId in validationColumns"
             v-if="!isLoading"
           >
-            <router-link
-              :to="taskTypePath(columnId)"
+            <div
+              class="flexrow validation-content"
+              :style="getValidationStyle(columnId)"
             >
-              {{ taskTypeMap[columnId].name }}
-            </router-link>
+              <router-link
+                :to="taskTypePath(columnId)"
+              >
+                {{ taskTypeMap[columnId].name }}
+              </router-link>
+            </div>
           </th>
-          <th class="actions">
-          </th>
+          <th scope="col" class="actions"></th>
         </tr>
       </thead>
-    </table>
-  </div>
-
-  <table-info
-    :is-loading="isLoading"
-    :is-error="isError"
-  />
-
-  <div
-    class="has-text-centered"
-    v-if="isEmptyList && !isCurrentUserClient && !isLoading"
-  >
-    <p class="info">
-      <img src="../../assets/illustrations/empty_shot.png" />
-    </p>
-    <p class="info">{{ $t('sequences.empty_list') }}</p>
-  </div>
-  <div
-    class="has-text-centered"
-    v-if="isEmptyList && isCurrentUserClient && !isLoading"
-  >
-    <p class="info">
-      <img src="../../assets/illustrations/empty_shot.png" />
-    </p>
-    <p class="info">{{ $t('sequences.empty_list_client') }}</p>
-  </div>
-
-  <div
-    ref="body"
-    class="table-body"
-    v-scroll="onBodyScroll"
-    v-if="!isLoading"
-  >
-    <table class="table">
-      <tbody ref="body-tbody">
+      <tbody
+        class="datatable-body"
+        v-if="!isLoading"
+      >
 
         <tr
-          class="all-line"
+          class="all-line datatable-row"
           v-if="showAll && !isEmptyList"
         >
-          <td class="name">
+          <th scope="row" class="name datatable-row-header">
             {{ $t('sequences.all_sequences') }}
-          </td>
+          </th>
 
           <td class="description"></td>
 
@@ -92,19 +69,19 @@
             v-for="columnId in validationColumns"
           />
 
-          <td class="actions">
-          </td>
+          <td class="actions"></td>
         </tr>
 
         <tr
+          class="datatable-row"
           :key="entry.id"
           v-for="entry in entries"
           v-if="isEntryStats(entry.id)"
         >
 
-          <td class="name">
+          <th scope="row" class="name datatable-row-header">
             {{ entry.name }}
-          </td>
+          </th>
 
           <td class="description">
             {{ entry.description }}
@@ -145,11 +122,34 @@
             :edit-route="editPath(entry.id)"
             :delete-route="deletePath(entry.id)"
           />
-          <td class="actions" v-else>
-          </td>
+          <td class="actions" v-else></td>
         </tr>
       </tbody>
     </table>
+  </div>
+
+  <table-info
+    :is-loading="isLoading"
+    :is-error="isError"
+  />
+
+  <div
+    class="has-text-centered"
+    v-if="isEmptyList && !isCurrentUserClient && !isLoading"
+  >
+    <p class="info">
+      <img src="../../assets/illustrations/empty_shot.png" />
+    </p>
+    <p class="info">{{ $t('sequences.empty_list') }}</p>
+  </div>
+  <div
+    class="has-text-centered"
+    v-if="isEmptyList && isCurrentUserClient && !isLoading"
+  >
+    <p class="info">
+      <img src="../../assets/illustrations/empty_shot.png" />
+    </p>
+    <p class="info">{{ $t('sequences.empty_list_client') }}</p>
   </div>
 
   <p
@@ -273,12 +273,7 @@ export default {
       return isStats
     },
 
-    onHeaderScroll (event, position) {
-      this.$refs.tableWrapper.scrollLeft = position.scrollLeft
-    },
-
     onBodyScroll (event, position) {
-      this.$refs.headerWrapper.style.left = `-${position.scrollLeft}px`
       this.$emit('scroll', position.scrollTop)
       const maxHeight =
         this.$refs.body.scrollHeight - this.$refs.body.offsetHeight
@@ -289,7 +284,6 @@ export default {
 
     loadMoreSequences () {
       this.displayMoreSequences()
-      this.$nextTick(this.resizeHeaders)
     },
 
     setScrollPosition (scrollPosition) {
@@ -298,16 +292,11 @@ export default {
       }
     },
 
+    // Remaining function for retrocompatibility
     resizeHeaders () {
-      this.$nextTick(() => {
-        if (this.$refs['body-tbody'] &&
-            this.$refs['body-tbody'].children.length > 0) {
-          const sequenceWidth =
-            this.$refs['body-tbody'].children[0].children[0].offsetWidth
-          this.$refs['th-sequence'].style = `min-width: ${sequenceWidth}px`
-        }
-      })
+      return true
     },
+    //
 
     editPath (sequenceId) {
       return this.getPath('edit-sequence', sequenceId)
@@ -358,6 +347,16 @@ export default {
 </script>
 
 <style lang="scss" scoped>
+
+.datatable-wrapper {
+  overflow: auto;
+  margin-bottom: 1rem;
+}
+
+.datatable-body tr:first-child th,
+.datatable-body tr:first-child td {
+  border-top: 0;
+}
 .episode {
   min-width: 100px;
   width: 100px;

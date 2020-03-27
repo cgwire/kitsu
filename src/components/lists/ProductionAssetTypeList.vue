@@ -1,75 +1,52 @@
 <template>
 <div class="data-list">
-  <div class="table-header-wrapper">
-    <table class="table table-header" ref="headerWrapper">
-      <thead>
+  <div
+    class="datatable-wrapper"
+    ref="body"
+    v-scroll="onBodyScroll"
+  >
+    <table class="datatable">
+      <thead class="datatable-head">
         <tr>
-          <th class="name">{{ $t('asset_types.fields.name') }}</th>
-          <th class="validation">{{ $t('main.all') }}</th>
           <th
-            class="validation"
-            :style="getValidationStyle(columnId)"
+            scope="col"
+            class="name datatable-row-header"
+          >
+            {{ $t('asset_types.fields.name') }}
+          </th>
+          <th scope="col" class="validation">{{ $t('main.all') }}</th>
+          <th
+            scope="col"
+            class="validation validation-cell"
             :key="columnId"
             v-for="columnId in validationColumns"
             v-if="!isLoading"
           >
-            <router-link
-              :to="taskTypePath(columnId)"
+            <div
+              class="flexrow validation-content"
+              :style="getValidationStyle(columnId)"
             >
-              {{ taskTypeMap[columnId].name }}
-            </router-link>
+              <router-link
+                :to="taskTypePath(columnId)"
+              >
+                {{ taskTypeMap[columnId].name }}
+              </router-link>
+            </div>
           </th>
-          <th class="actions"></th>
+          <th scope="col" class="actions"></th>
         </tr>
       </thead>
-    </table>
-  </div>
-
-  <table-info
-    :is-loading="isLoading"
-    :is-error="isError"
-  />
-
-  <div
-    class="has-text-centered"
-    v-if="isEmptyList && !isCurrentUserClient && !isLoading"
-  >
-    <p class="info">
-      <img src="../../assets/illustrations/empty_asset.png" />
-    </p>
-    <p class="info">{{ $t('assets.empty_list') }}</p>
-    <button-link
-      class="level-item big-button"
-      :text="$t('assets.new_asset')"
-      :path="newAssetPath"
-    />
-  </div>
-  <div
-    class="has-text-centered"
-    v-if="isEmptyList && isCurrentUserClient && !isLoading"
-  >
-    <p class="info">
-      <img src="../../assets/illustrations/empty_asset.png" />
-    </p>
-    <p class="info">{{ $t('assets.empty_list_client') }}</p>
-  </div>
-
-  <div
-    ref="body"
-    class="table-body"
-    v-scroll="onBodyScroll"
-    v-if="!isLoading"
-  >
-    <table class="table">
-      <tbody>
-
+      <tbody
+        class="datatable-body"
+        v-if="!isLoading"
+      >
         <tr
-          class="all-line"
+          class="all-line datatable-row"
           v-if="showAll && !isEmptyList"
         >
-          <td class="name">
+          <th scope="row" class="name datatable-row-header">
             {{ $t('asset_types.all_asset_types') }}
-          </td>
+          </th>
 
           <stats-cell
             :colors="chartColors('all', 'all')"
@@ -86,18 +63,18 @@
             v-for="columnId in validationColumns"
           />
 
-          <td class="actions">
-          </td>
+          <td class="actions"></td>
         </tr>
 
         <tr
+          class="datatable-row"
           :key="entry.id"
           v-for="entry in entries"
         >
 
-          <td class="name">
+          <th scope="row" class="name datatable-row-header">
             {{ entry.name }}
-          </td>
+          </th>
 
           <stats-cell
             :colors="chartColors(entry.id, 'all')"
@@ -129,6 +106,35 @@
         </tr>
       </tbody>
     </table>
+  </div>
+
+  <table-info
+    :is-loading="isLoading"
+    :is-error="isError"
+  />
+
+  <div
+    class="has-text-centered"
+    v-if="isEmptyList && !isCurrentUserClient && !isLoading"
+  >
+    <p class="info">
+      <img src="../../assets/illustrations/empty_asset.png" />
+    </p>
+    <p class="info">{{ $t('assets.empty_list') }}</p>
+    <button-link
+      class="level-item big-button"
+      :text="$t('assets.new_asset')"
+      :path="newAssetPath"
+    />
+  </div>
+  <div
+    class="has-text-centered"
+    v-if="isEmptyList && isCurrentUserClient && !isLoading"
+  >
+    <p class="info">
+      <img src="../../assets/illustrations/empty_asset.png" />
+    </p>
+    <p class="info">{{ $t('assets.empty_list_client') }}</p>
   </div>
 
   <p
@@ -255,7 +261,6 @@ export default {
     },
 
     onBodyScroll (event, position) {
-      this.$refs.headerWrapper.style.left = `-${position.scrollLeft}px`
       this.$emit('scroll', position.scrollTop)
     },
 
@@ -290,6 +295,16 @@ export default {
 </script>
 
 <style lang="scss" scoped>
+
+.datatable-wrapper {
+  overflow: auto;
+  margin-bottom: 1rem;
+}
+
+.datatable-body tr:first-child th,
+.datatable-body tr:first-child td {
+  border-top: 0;
+}
 .name {
   min-width: 200px;
   width: 200px;
