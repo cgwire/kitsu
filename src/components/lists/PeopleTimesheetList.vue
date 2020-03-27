@@ -1,14 +1,18 @@
 <template>
 <div class="data-list">
-  <div class="table-header-wrapper">
-    <table class="table table-header" ref="headerWrapper">
-      <thead>
+  <div
+    class="datatable-wrapper"
+    ref="body"
+  >
+    <table class="datatable">
+      <thead class="datatable-head">
         <tr>
-          <th class="name">
+          <th scope="col" class="name datatable-row-header">
             {{ $t("people.list.name") }}
           </th>
 
           <th
+            scope="col"
             class="time year"
             :key="'year-' + year"
             v-for="year in yearRange"
@@ -18,6 +22,7 @@
           </th>
 
           <th
+            scope="col"
             class="time month"
             :key="'month-' + month"
             v-for="month in monthRange"
@@ -27,6 +32,7 @@
           </th>
 
           <th
+            scope="col"
             class="daytime"
             :title="getWeekTitle(week)"
             :key="'week-' + week"
@@ -37,6 +43,7 @@
           </th>
 
           <th
+            scope="col"
             class="daytime"
             :key="'day-' + day"
             v-for="day in dayRange"
@@ -44,21 +51,18 @@
           >
             {{ day }}
           </th>
-          <th class="actions"></th>
+          <th scope="col" class="actions"></th>
         </tr>
       </thead>
-    </table>
-  </div>
-
-  <table-info
-    :is-loading="isLoading"
-    :is-error="isError"
-  />
-
-  <div class="table-body" v-scroll="onBodyScroll" v-if="!isLoading" ref="body">
-    <table class="table">
-      <tbody>
-          <tr v-for="person in people" :key="person.id">
+      <tbody
+        class="datatable-body"
+        v-if="!isLoading"
+      >
+        <tr
+          class="datatable-row"
+          v-for="person in people"
+          :key="person.id"
+        >
           <people-name-cell class="name" :person="person" />
 
           <td
@@ -186,6 +190,11 @@
     </table>
   </div>
 
+  <table-info
+    :is-loading="isLoading"
+    :is-error="isError"
+  />
+
   <p
     class="has-text-centered footer-info"
     v-if="!isLoading"
@@ -295,10 +304,6 @@ export default {
     ...mapActions([
     ]),
 
-    onBodyScroll (event, position) {
-      this.$refs.headerWrapper.style.left = `-${position.scrollLeft}px`
-    },
-
     monthToString,
 
     yearDuration (year, personId) {
@@ -379,10 +384,6 @@ export default {
   },
 
   watch: {
-    detailLevel () {
-      this.$refs.headerWrapper.style.left = 0
-    },
-
     route () {
       const els = document.getElementsByClassName('selected')
       if (els.length === 0) { // selected element is not visible
@@ -394,6 +395,15 @@ export default {
 </script>
 
 <style lang="scss" scoped>
+
+.datatable-wrapper {
+  overflow: auto;
+  margin-bottom: 1rem;
+}
+.datatable-body tr:first-child th,
+.datatable-body tr:first-child td {
+  border-top: 0;
+}
 .dark .weekend {
   background-color: $dark-grey;
 }
@@ -439,10 +449,6 @@ export default {
 
 th.actions {
   padding: 0;
-}
-
-th.actions,
-.table td.actions {
   width: 100%;
   min-width: auto;
 }
