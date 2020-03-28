@@ -33,7 +33,7 @@
               </strong>
               <combobox
                 class="context-selector"
-                :options="navigationOptions"
+                :options="sectionOptions"
                 :is-top="true"
                 v-model="currentProjectSection"
               />
@@ -44,7 +44,7 @@
               </strong>
               <combobox
                 class="context-selector"
-                :options="episodeOptions"
+                :options="currentEpisodeOptions"
                 :is-top="true"
                 v-model="currentEpisodeId"
                 v-if="isEpisodeContext"
@@ -189,7 +189,7 @@ export default {
     return {
       currentProductionId: this.$route.params.production_id,
       currentEpisodeId: this.$route.params.episode_id,
-      currentProjectSection: null,
+      currentProjectSection: 'assets',
       kitsuVersion: version,
       silent: false,
 
@@ -235,6 +235,22 @@ export default {
       'user'
     ]),
 
+    // Asset pages require a all section and a main pack section.
+    currentEpisodeOptions () {
+      if (['assets', 'assetTypes'].includes(this.currentProjectSection)) {
+        return [
+          { label: this.$t('main.all'), value: 'all' },
+          { label: 'Main Pack', value: 'main' }
+        ].concat(this.episodeOptions)
+      } else if (['playlists'].includes(this.currentProjectSection)) {
+        return [
+          { label: 'Main Pack', value: 'main' }
+        ].concat(this.episodeOptions)
+      } else {
+        return this.episodeOptions
+      }
+    },
+
     isShotPage () {
       return this.$route.params.episode_id
     },
@@ -275,7 +291,7 @@ export default {
       return route
     },
 
-    navigationOptions () {
+    sectionOptions () {
       let options = [
         { label: this.$t('assets.title'), value: 'assets' },
         { label: this.$t('shots.title'), value: 'shots' },
@@ -287,6 +303,7 @@ export default {
         { label: this.$t('playlists.title'), value: 'playlists' }
       ]
 
+      // Show these sections to studio members only.
       if (!this.isCurrentUserClient) {
         options = options.concat([
           { label: this.$t('news.title'), value: 'newsFeed' },
@@ -327,89 +344,21 @@ export default {
     getCurrentSectionFromRoute () {
       let name = ''
       const segments = this.$route.path.split('/')
-      if (this.isTVShow) {
-        name = segments[5]
-      }
+      if (this.isTVShow) name = segments[5]
       if (!name) {
         name = segments[3]
-
-        if (name === 'episodes' && segments.length === 6) {
-          name = segments[5]
-        }
+        if (name === 'episodes' && segments.length === 6) name = segments[5]
       }
-
       if (name === 'asset-types') name = 'assetTypes'
       if (name === 'news-feed') name = 'newsFeed'
       return name
     },
 
-    updateRoute () {
-      const sectionFromRoute = this.getCurrentSectionFromRoute()
-      let section = this.currentProjectSection
-
-      const isProperContext =
-        section &&
-        this.$route.path.indexOf('manage') < 0
-
-      const isContextChanged =
-        section !== sectionFromRoute ||
-        this.$route.params.production_id !== this.currentProductionId ||
-        (
-          this.currentEpisodeId &&
-          this.$route.params.episode_id &&
-          this.$route.params.episode_id !== this.currentEpisodeId
-        )
-
-      if (section && section === 'newsFeed') section = 'news-feed'
-
-      if (isProperContext && isContextChanged) {
-        if (section === 'assetTypes') section = 'production-asset-types'
-        this.pushContextRoute(section)
-      }
-
-      return this.$route.path
-    },
-
-    pushContextRoute (section) {
-      let episodeId = this.currentEpisodeId
-      let isTVShow = !!this.currentEpisodeId
-
-      const route = {
-        name: section,
-        params: {
-          production_id: this.currentProductionId
-        }
-      }
-
-      if (
-        this.productionMap[this.currentProductionId] &&
-        (
-          this.$route.params.production_id !== this.currentProductionId ||
-          !episodeId
-        )
-      ) {
-        episodeId =
-          this.productionMap[this.currentProductionId].first_episode_id
-        isTVShow =
-          this.productionMap[this.currentProductionId].production_type === 'tvshow'
-      }
-
-      const isEpisodeContext =
-        isTVShow &&
-        section !== 'team' &&
-        section !== 'news-feed' &&
-        section !== 'schedule' &&
-        section !== 'episodes'
-
-      if (isEpisodeContext) {
-        route.name = `episode-${section}`
-        route.params.episode_id = episodeId
-      } else if (section === 'episodes' && !isTVShow) {
-        route.name = 'assets'
-      }
-
-      if (route.params.production_id) {
-        this.$router.push(route)
+    updateContext (productionId) {
+      if (!productionId) {
+        this.clearContext()
+      } else {
+        this.setProductionFromRoute()
       }
     },
 
@@ -426,57 +375,64 @@ export default {
     setProductionFromRoute () {
       const routeProductionId = this.$route.params.production_id
       const routeEpisodeId = this.$route.params.episode_id
-      if (!this.currentProduction ||
-          this.currentProductionId !== routeProductionId ||
-          this.currentProduction.id !== routeProductionId
-      ) {
-        this.setProduction(routeProductionId)
-        if (this.isTVShow) {
-          this.loadEpisodes(() => {
-            this.setEpisodeFromRoute()
-            this.updateComboFromRoute()
-          })
-        } else {
-          this.clearEpisodes()
-          this.updateComboFromRoute()
-        }
-      } else if (
-        this.episodes.length < 2 &&
+
+      if (this.isProductionChanged(routeProductionId)) {
+        this.configureProduction(routeProductionId)
+      } else if (this.isEpisodeChanged(routeEpisodeId)) {
+        this.configureEpisode(routeEpisodeId)
+      } else {
+        this.updateCombosFromRoute()
+      }
+    },
+
+    configureProduction (routeProductionId) {
+      this.setProduction(routeProductionId)
+      if (this.isTVShow) {
+        this.loadEpisodes(() => {
+          this.updateCombosFromRoute()
+        })
+      } else {
+        this.clearEpisodes()
+        this.updateCombosFromRoute()
+      }
+    },
+
+    configureEpisode (routeEpisodeId) {
+      if (this.episodes.length < 2) {
+        this.loadEpisodes(() => {
+          this.setEpisodeFromRoute()
+          this.updateCombosFromRoute()
+        })
+      } else {
+        this.setEpisodeFromRoute()
+        this.updateCombosFromRoute()
+      }
+    },
+
+    isProductionChanged (productionId) {
+      return (
+        !this.currentProduction ||
+        this.currentProductionId !== productionId ||
+        this.currentProduction.id !== productionId
+      )
+    },
+
+    isEpisodeChanged (episodeId) {
+      return (
         this.isTVShow &&
         (
           !this.currentEpisode ||
-          this.currentEpisode.id !== routeEpisodeId
+          this.currentEpisodeId !== episodeId ||
+          this.currentEpisode.id !== episodeId
         )
-      ) {
-        // This loading is required when the production is the first production
-        // it is already set as current production but episodes are not
-        // loaded.
-        this.loadEpisodes(() => {
-          this.setEpisodeFromRoute()
-          this.updateComboFromRoute()
-        })
-      } else {
-        if (this.assetsPath.name === 'open-productions' && routeProductionId) {
-          this.setProduction(routeProductionId)
-        }
-        this.setEpisodeFromRoute()
-        this.updateComboFromRoute()
-      }
+      )
     },
 
     setEpisodeFromRoute () {
       const routeEpisodeId = this.$route.params.episode_id
-      if (this.isTVShow) {
-        if (
-          (
-            !this.currentEpisode ||
-            this.currentEpisodeId !== routeEpisodeId ||
-            this.currentEpisode.id !== routeEpisodeId
-          ) && routeEpisodeId
-        ) {
-          this.setCurrentEpisode(routeEpisodeId)
-        }
-      } else {
+      if (this.isEpisodeChanged(routeEpisodeId)) {
+        this.setCurrentEpisode(routeEpisodeId)
+      } else if (!routeEpisodeId) {
         this.silent = true
         this.clearEpisodes()
         this.currentEpisodeId = null
@@ -484,28 +440,79 @@ export default {
       }
     },
 
-    updateContext (productionId) {
-      if (!productionId) {
-        this.clearContext()
-      } else {
-        this.setProductionFromRoute()
-      }
-    },
-
-    updateComboFromRoute () {
+    updateCombosFromRoute () {
       const productionId = this.$route.params.production_id
       const episodeId = this.$route.params.episode_id
       const section = this.getCurrentSectionFromRoute()
-
       this.silent = true
       this.currentProductionId = productionId
-      this.currentEpisodeId = episodeId
       this.currentProjectSection = section
       this.currentProjectSection = null
       this.$nextTick(() => {
         this.currentProjectSection = section
-        this.silent = false
+        this.currentEpisodeId = null
+        this.$nextTick(() => {
+          this.currentEpisodeId = episodeId
+          this.silent = false
+        })
       })
+    },
+
+    updateRoute () {
+      if (this.silent) return
+
+      const productionId = this.$route.params.production_id
+      const episodeId = this.$route.params.episode_id
+      const sectionFromRoute = this.getCurrentSectionFromRoute()
+      let section = this.currentProjectSection
+
+      const isProperContext =
+        section &&
+        this.$route.path.indexOf('manage') < 0
+
+      const isContextChanged =
+        section !== sectionFromRoute ||
+        productionId !== this.currentProductionId ||
+        (
+          this.currentEpisodeId &&
+          episodeId &&
+          episodeId !== this.currentEpisodeId
+        )
+
+      if (isProperContext && isContextChanged) {
+        if (section === 'newsFeed') section = 'news-feed'
+        if (section === 'assetTypes') section = 'production-asset-types'
+        this.pushContextRoute(section)
+      }
+    },
+
+    pushContextRoute (section) {
+      const episodeId = this.currentEpisodeId
+      const isTVShow = !!this.currentEpisodeId
+      let route = {
+        name: section,
+        params: {
+          production_id: this.currentProductionId
+        }
+      }
+      route = this.episodifyRoute(route, section, episodeId, isTVShow)
+      if (route.params.production_id) this.$router.push(route)
+    },
+
+    episodifyRoute (route, section, episodeId, isTVShow) {
+      const isEpisodeContext =
+        isTVShow &&
+        section !== 'team' &&
+        section !== 'news-feed' &&
+        section !== 'schedule' &&
+        section !== 'episodes'
+      if (isEpisodeContext) {
+        route.name = `episode-${section}`
+        route.params.episode_id = episodeId
+      } else if (section === 'episodes' && !isTVShow) {
+        route.name = 'assets'
+      }
+      return route
     }
   },
 
@@ -516,20 +523,38 @@ export default {
     },
 
     currentProductionId () {
-      if (!this.silent) this.updateRoute()
-    },
-
-    currentEpisodeId () {
-      if (!this.silent) this.updateRoute()
-      const section = this.getCurrentSectionFromRoute()
-      this.currentProjectSection = null
-      this.$nextTick(() => {
-        this.currentProjectSection = section
-      })
+      this.updateRoute()
     },
 
     currentProjectSection () {
-      if (!this.silent) this.updateRoute()
+      const isPlaylistSection =
+        ['playlists'].includes(this.currentProjectSection)
+      const isNotAssetSection =
+        !['assets', 'assetTypes'].includes(this.currentProjectSection)
+      const isAssetEpisode =
+        ['all', 'main'].includes(this.currentEpisodeId)
+
+      if (isAssetEpisode) {
+        if (isPlaylistSection) {
+          this.currentEpisodeId = 'main'
+        } else if (isNotAssetSection) {
+          this.currentEpisodeId =
+            this.episodes.length > 0 ? this.episodes[0].id : null
+        }
+      }
+      this.updateRoute()
+    },
+
+    currentEpisodeId () {
+      this.updateRoute()
+    },
+
+    currentEpisode () {
+      if (!this.currentEpisode) {
+        this.currentEpisodeId = null
+      } else if (this.currentEpisodeId !== this.currentEpisode.id) {
+        this.currentEpisodeId = this.currentEpisode.id
+      }
     }
   },
 

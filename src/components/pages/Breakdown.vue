@@ -289,13 +289,15 @@ export default {
     filteredCasting () {
       const casting = {}
       this.castingEntities.forEach(entity => {
-        this.castingByType[entity.id].forEach(type => {
-          type.forEach(item => {
-            const castKey =
-              `${item.asset_name}${item.asset_type_name}${item.name}`
-            casting[castKey] = true
+        if (this.castingByType[entity.id]) {
+          this.castingByType[entity.id].forEach(type => {
+            type.forEach(item => {
+              const castKey =
+                `${item.asset_name}${item.asset_type_name}${item.name}`
+              casting[castKey] = true
+            })
           })
-        })
+        }
       })
       return casting
     }
@@ -338,12 +340,13 @@ export default {
         } else {
           this.setCastingEpisode(null)
         }
-        this.loadAssets(() => {
-          this.isLoading = false
-          this.displayMoreAssets()
-          this.setCastingAssetTypes()
-          this.resetSelection()
-        })
+        this.loadAssets(true)
+          .then(() => {
+            this.isLoading = false
+            this.displayMoreAssets()
+            this.setCastingAssetTypes()
+            this.resetSelection()
+          })
       })
     },
 
@@ -563,7 +566,7 @@ export default {
       this.modals.isEditLabelDisplayed = true
     },
 
-    confirmEditLabel (form) {
+    confirmEditLabel (form = {}) {
       const label = form.label
       this.loading.editLabel = true
       this.setAssetLinkLabel({

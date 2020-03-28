@@ -753,7 +753,10 @@ export default {
           callback: (err, task) => {
             if (err) console.error(err)
 
-            let loadingFunction = this.loadAssets
+            let loadingFunction = (callback) => {
+              this.loadAssets()
+                .then(callback)
+            }
 
             if (task.entity_type_name === 'Shot') {
               loadingFunction = (callback) => {

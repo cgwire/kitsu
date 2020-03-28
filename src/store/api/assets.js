@@ -1,7 +1,7 @@
 import client from './client'
 
 export default {
-  getAssets (production, episode, callback) {
+  getAssets (production, episode) {
     let path = '/api/data/assets/with-tasks'
     if (production) {
       path += `?project_id=${production.id}`
@@ -9,7 +9,7 @@ export default {
     if (episode) {
       path += `&episode_id=${episode.id}`
     }
-    client.get(path, callback)
+    return client.pget(path)
   },
 
   getAsset (assetId) {

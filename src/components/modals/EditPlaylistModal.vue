@@ -63,6 +63,7 @@
 import Combobox from '../widgets/Combobox'
 import TextField from '../widgets/TextField'
 
+import { mapGetters } from 'vuex'
 import { modalMixin } from './base_modal'
 
 export default {
@@ -88,21 +89,34 @@ export default {
         { label: this.$t('playlists.for_client'), value: 'true' },
         { label: this.$t('playlists.for_studio'), value: 'false' }
       ],
-      forEntityOptions: [
-        { label: this.$t('assets.title'), value: 'asset' },
-        { label: this.$t('shots.title'), value: 'shot' }
-      ],
       form: {
         name: this.playlistToEdit.name,
-        for_entity: this.playlistToEdit.for_entity || 'shot',
+        for_entity: this.playlistToEdit.for_entity || 'asset',
         for_client: this.playlistToEdit.for_client
       }
     }
   },
 
   computed: {
+    ...mapGetters([
+      'currentEpisode'
+    ]),
+
     isEditing () {
       return this.playlistToEdit && this.playlistToEdit.id
+    },
+
+    forEntityOptions () {
+      if (this.currentEpisode && this.currentEpisode.id === 'main') {
+        return [
+          { label: this.$t('assets.title'), value: 'asset' }
+        ]
+      } else {
+        return [
+          { label: this.$t('assets.title'), value: 'asset' },
+          { label: this.$t('shots.title'), value: 'shot' }
+        ]
+      }
     }
   },
 
@@ -119,7 +133,7 @@ export default {
       } else {
         this.form = {
           name: this.playlistToEdit.name,
-          for_entity: 'shot',
+          for_entity: 'asset',
           for_client: 'false'
         }
       }

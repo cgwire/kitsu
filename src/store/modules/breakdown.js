@@ -16,6 +16,7 @@ import {
   CASTING_ADD_TO_CASTING,
   CASTING_REMOVE_FROM_CASTING,
 
+  LOAD_SHOTS_START,
   LOAD_SHOT_CASTING_END,
   LOAD_ASSET_CAST_IN_END,
 
@@ -146,6 +147,9 @@ const actions = {
 }
 
 const mutations = {
+  [LOAD_SHOTS_START] (state) {
+    Object.assign(state, initialState)
+  },
 
   [CASTING_SET_SHOTS] (state, shots) {
     const casting = []

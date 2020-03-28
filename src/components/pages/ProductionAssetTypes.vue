@@ -93,11 +93,7 @@ export default {
     this.setDefaultSearchText()
     this.setDefaultListScrollPosition()
     setTimeout(() => {
-      this.initAssetTypes()
-        .then(this.handleModalsDisplay)
-        .then(() => {
-          this.initialLoading = false
-        })
+      this.reset()
     }, 100)
   },
 
@@ -158,34 +154,28 @@ export default {
         this.assetTypeMap,
         this.countMode
       )
+    },
+
+    reset () {
+      this.initialLoading = true
+      this.$refs['asset-type-search-field'].setValue('')
+      this.loadAssets()
+        .then(this.handleModalsDisplay)
+        .then(() => {
+          this.computeAssetTypeStats()
+          this.setAssetTypeListScrollPosition(0)
+          this.initialLoading = false
+        })
     }
   },
 
   watch: {
     currentProduction () {
-      this.$refs['asset-type-search-field'].setValue('')
-
-      if (!this.isTVShow) {
-        this.initialLoading = true
-        this.loadAssets(() => {
-          this.computeAssetTypeStats()
-          this.setAssetTypeListScrollPosition(0)
-          this.initialLoading = false
-        })
-      }
+      if (!this.isTVShow) this.reset()
     },
 
     currentEpisode () {
-      if (this.isTVShow) {
-        this.initialLoading = true
-        this.$refs['asset-type-search-field'].setValue('')
-        this.setAssetTypeListScrollPosition(0)
-
-        this.loadAssets(() => {
-          this.computeAssetTypeStats()
-          this.initialLoading = false
-        })
-      }
+      if (this.isTVShow) this.reset()
     }
   },
 
