@@ -539,7 +539,12 @@ const actions = {
     const taskMap = rootGetters.taskMap
     const personMap = rootGetters.personMap
     const isTVShow = rootGetters.isTVShow
-    const episode = isTVShow ? rootGetters.currentEpisode : null
+    let episode = isTVShow ? rootGetters.currentEpisode : null
+
+    if (episode && ['all', 'main'].includes(episode.id)) {
+      episode = state.episodes.length > 0 ? state.episodes[0] : null
+      commit(SET_CURRENT_EPISODE, episode.id)
+    }
 
     if (isTVShow && !episode) {
       return callback()
@@ -1724,7 +1729,13 @@ const mutations = {
 
   [SET_CURRENT_EPISODE] (state, episodeId) {
     if (episodeId) {
-      state.currentEpisode = state.episodeMap[episodeId]
+      if (episodeId === 'main') {
+        state.currentEpisode = { id: 'main' }
+      } else if (episodeId === 'all') {
+        state.currentEpisode = { id: 'all' }
+      } else {
+        state.currentEpisode = state.episodeMap[episodeId]
+      }
     }
   },
 

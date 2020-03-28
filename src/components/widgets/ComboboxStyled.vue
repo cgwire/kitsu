@@ -16,7 +16,7 @@
       <div
         class="selected-line flexrow-item"
       >
-        {{ selectedOption.label }}
+        {{ selectedOption ? selectedOption.label : '' }}
       </div>
       <chevron-down-icon class="down-icon flexrow-item"/>
     </div>

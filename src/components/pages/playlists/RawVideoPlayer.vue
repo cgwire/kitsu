@@ -172,11 +172,13 @@ export default {
     },
 
     goNextFrame () {
-      const newTime = this.currentPlayer.currentTime + 1 / this.fps
-      if (newTime > this.currentPlayer.duration) {
-        this.setCurrentTime(this.video.duration)
-      } else {
-        this.setCurrentTime(newTime)
+      if (this.currentPlayer) {
+        const newTime = this.currentPlayer.currentTime + 1 / this.fps
+        if (newTime > this.currentPlayer.duration) {
+          this.setCurrentTime(this.video.duration)
+        } else {
+          this.setCurrentTime(newTime)
+        }
       }
     },
 

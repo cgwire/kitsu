@@ -339,35 +339,42 @@ const getters = {
 
 const actions = {
 
-  loadAssets ({ commit, state, rootGetters }, callback) {
+  loadAssets ({ commit, state, rootGetters }, all = false) {
     const production = rootGetters.currentProduction
     const userFilters = rootGetters.userFilters
     const personMap = rootGetters.personMap
-    const episode = rootGetters.currentEpisode
+    let episode = rootGetters.currentEpisode
     const isTVShow = rootGetters.isTVShow
     const taskTypeMap = rootGetters.taskTypeMap
     const taskMap = rootGetters.taskMap
 
     if (isTVShow && !episode) {
-      if (callback) return callback()
-      else return null
+      return Promise.resolve([])
     }
 
     if (state.isAssetsLoading) {
-      return callback()
+      return Promise.resolve([])
+    }
+
+    if (all) {
+      episode = null // Do not filter by episode
     }
 
     commit(LOAD_ASSETS_START)
-    assetsApi.getAssets(production, episode, (err, assets) => {
-      if (err) commit(LOAD_ASSETS_ERROR)
-      else {
+    return assetsApi.getAssets(production, episode)
+      .then((assets) => {
         commit(
           LOAD_ASSETS_END,
           { production, assets, userFilters, personMap, taskMap, taskTypeMap }
+
         )
-      }
-      if (callback) callback(err)
-    })
+        return Promise.resolve(assets)
+      })
+      .catch((err) => {
+        console.error('an error occured while loading assets', err)
+        commit(LOAD_ASSETS_ERROR)
+        return Promise.resolve([])
+      })
   },
 
   loadAsset ({ commit, state, rootGetters }, assetId) {
@@ -558,17 +565,12 @@ const actions = {
   },
 
   initAssetTypes ({ commit, dispatch, state, rootState, rootGetters }) {
-    return new Promise((resolve, reject) => {
-      dispatch('setLastProductionScreen', 'production-asset-types')
-      dispatch('loadAssets', (err) => {
-        if (err) {
-          reject(err)
-        } else {
-          dispatch('computeAssetTypeStats')
-          resolve()
-        }
+    dispatch('setLastProductionScreen', 'production-asset-types')
+    return dispatch('loadAssets')
+      .then(() => {
+        dispatch('computeAssetTypeStats')
+        return Promise.resolve()
       })
-    })
   },
 
   setAssetTypeListScrollPosition ({ commit }) {

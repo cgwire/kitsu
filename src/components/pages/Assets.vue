@@ -391,22 +391,19 @@ export default {
       )
     ) {
       setTimeout(() => {
-        this.loadAssets((err) => {
-          if (!err) {
+        this.loadAssets()
+          .then(() => {
             this.handleModalsDisplay()
             setTimeout(() => {
+              this.initialLoading = false
+              this.resizeHeaders()
               if (this.$refs['asset-list']) {
                 this.$refs['asset-list'].setScrollPosition(
                   this.assetListScrollPosition
                 )
               }
             }, 500)
-          }
-          setTimeout(() => {
-            this.initialLoading = false
-            this.resizeHeaders()
-          }, 200)
-        })
+          })
       }, 0)
     } else {
       if (!this.isAssetsLoading) this.initialLoading = false
@@ -527,9 +524,8 @@ export default {
           if (err) {
             this.errors.creatingTasks = true
           } else {
-            this.loadAssets(() => {
-              this.resizeHeaders()
-            })
+            this.loadAssets()
+              .then(this.resizeHeaders)
           }
           callback(err)
         }
@@ -544,9 +540,8 @@ export default {
       this.deleteAllTasks({ projectId, taskTypeId })
         .then(() => {
           this.loading.deleteAllTasks = false
-          this.loadAssets(() => {
-            this.resizeHeaders()
-          })
+          this.loadAssets()
+            .then(this.resizeHeaders)
           this.$router.push(this.assetsPath)
         }).catch((err) => {
           console.error(err)
@@ -688,7 +683,6 @@ export default {
       const formData = new FormData()
       const filename = 'import.csv'
       const csvContent = csv.turnEntriesToCsvString(data)
-      console.log(csvContent)
       const file = new File([csvContent], filename, { type: 'text/csv' })
 
       formData.append('file', file)
@@ -701,9 +695,8 @@ export default {
         .then(() => {
           this.hideImportRenderModal()
           this.loading.importing = false
-          this.loadAssets(() => {
-            this.resizeHeaders()
-          })
+          this.loadAssets()
+            .then(this.resizeHeaders)
         })
         .catch((err) => {
           console.error(err)
@@ -889,6 +882,18 @@ export default {
 
     onChangeSortClicked (sortInfo) {
       this.changeAssetSort(sortInfo)
+    },
+
+    reset () {
+      this.initialLoading = true
+      this.loadAssets()
+        .then(() => {
+          this.handleModalsDisplay()
+          this.initialLoading = false
+          this.resizeHeaders()
+          this.setSearchFromUrl()
+          this.onSearchChange()
+        })
     }
   },
 
@@ -902,36 +907,13 @@ export default {
       this.$store.commit('SET_ASSET_LIST_SCROLL_POSITION', 0)
       this.resetCsVColumns()
 
-      if (!this.isTVShow) {
-        this.initialLoading = true
-        this.loadAssets((err) => {
-          this.initialLoading = false
-          this.resizeHeaders()
-          this.setSearchFromUrl()
-          this.onSearchChange()
-          if (!err) {
-            this.handleModalsDisplay()
-          }
-        })
-      }
+      if (!this.isTVShow) this.reset()
     },
 
     currentEpisode () {
       this.$refs['asset-search-field'].setValue('')
       this.$store.commit('SET_ASSET_LIST_SCROLL_POSITION', 0)
-
-      if (this.isTVShow && this.currentEpisode) {
-        this.initialLoading = true
-        this.loadAssets((err) => {
-          if (!err) {
-            this.handleModalsDisplay()
-            this.initialLoading = false
-            this.resizeHeaders()
-            this.setSearchFromUrl()
-            this.onSearchChange()
-          }
-        })
-      }
+      if (this.isTVShow && this.currentEpisode) this.reset()
     },
 
     displayedAssets () {

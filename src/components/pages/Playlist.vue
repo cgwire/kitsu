@@ -516,17 +516,23 @@ export default {
 
     loadShotsData (callback) {
       if (this.displayedShots.length === 0) {
-        this.loadShots(callback)
+        console.log('playlists loadShotsData', this.currentEpisode)
+        if (this.currentEpisode &&
+            this.currentEpisode.id === 'main') {
+          callback()
+        } else {
+          this.loadShots(callback)
+        }
       } else {
         callback()
       }
     },
 
     loadAssetsData (callback) {
-      if (this.displayedAssets.length === 0) {
-        this.loadAssets(callback)
+      if (this.isTVShow || this.displayedAssets.length === 0) {
+        return this.loadAssets()
       } else {
-        callback()
+        return Promise.resolve()
       }
     },
 
@@ -931,11 +937,12 @@ export default {
 
     reloadAll () {
       this.loadShotsData(() => {
-        this.loadAssetsData(() => {
-          this.loadPlaylistsData(() => {
-            this.resetPlaylist()
+        this.loadAssetsData()
+          .then(() => {
+            this.loadPlaylistsData(() => {
+              this.resetPlaylist()
+            })
           })
-        })
       })
     }
   },

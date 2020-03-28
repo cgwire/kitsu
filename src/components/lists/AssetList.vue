@@ -158,7 +158,7 @@
           v-for="(asset, i) in group"
         >
           <td class="episode" v-if="isTVShow">
-            {{ episodeMap[asset.episode_id] ? episodeMap[asset.episode_id].name : $t('main.all') }}
+            {{ episodeMap[asset.episode_id] ? episodeMap[asset.episode_id].name : 'MP' }}
           </td>
           <th
             :class="{

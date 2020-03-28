@@ -1048,7 +1048,7 @@ export default {
     },
 
     onTimeUpdate () {
-      if (this.rawPlayer.currentPlayer) {
+      if (this.rawPlayer && this.rawPlayer.currentPlayer) {
         this.currentTimeRaw = this.rawPlayer.currentPlayer.currentTime
       } else {
         this.currentTimeRaw = 0
