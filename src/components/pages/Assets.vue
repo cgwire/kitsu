@@ -396,7 +396,6 @@ export default {
             this.handleModalsDisplay()
             setTimeout(() => {
               this.initialLoading = false
-              this.resizeHeaders()
               if (this.$refs['asset-list']) {
                 this.$refs['asset-list'].setScrollPosition(
                   this.assetListScrollPosition
@@ -446,7 +445,6 @@ export default {
             this.resetLightEditModal()
             this.$refs['edit-asset-modal'].focusName()
             this.editAsset.isSuccess = true
-            this.resizeHeaders()
           } else {
             this.loading.edit = false
           }
@@ -470,7 +468,6 @@ export default {
             this.loading.edit = false
             this.modals.isNewDisplayed = false
             this.$router.push(this.assetsPath)
-            this.resizeHeaders()
           } else {
             this.loading.edit = false
             this.editAsset.isCreateError = true
@@ -525,7 +522,6 @@ export default {
             this.errors.creatingTasks = true
           } else {
             this.loadAssets()
-              .then(this.resizeHeaders)
           }
           callback(err)
         }
@@ -541,7 +537,6 @@ export default {
         .then(() => {
           this.loading.deleteAllTasks = false
           this.loadAssets()
-            .then(this.resizeHeaders)
           this.$router.push(this.assetsPath)
         }).catch((err) => {
           console.error(err)
@@ -696,7 +691,6 @@ export default {
           this.hideImportRenderModal()
           this.loading.importing = false
           this.loadAssets()
-            .then(this.resizeHeaders)
         })
         .catch((err) => {
           console.error(err)
@@ -717,7 +711,6 @@ export default {
       const searchQuery = this.$refs['asset-search-field'].getValue()
       if (searchQuery.length !== 1) {
         this.setAssetSearch(searchQuery)
-        this.resizeHeaders()
         this.setSearchInUrl()
       }
     },
@@ -756,14 +749,6 @@ export default {
         route.params.episode_id = this.currentEpisode.id
       }
       return route
-    },
-
-    resizeHeaders () {
-      setTimeout(() => {
-        if (this.$refs['asset-list']) {
-          this.$refs['asset-list'].resizeHeaders()
-        }
-      }, 0)
     },
 
     onDeleteAllTasksClicked (taskTypeId) {
@@ -890,7 +875,6 @@ export default {
         .then(() => {
           this.handleModalsDisplay()
           this.initialLoading = false
-          this.resizeHeaders()
           this.setSearchFromUrl()
           this.onSearchChange()
         })
@@ -917,7 +901,6 @@ export default {
     },
 
     displayedAssets () {
-      this.resizeHeaders()
     }
   },
 
