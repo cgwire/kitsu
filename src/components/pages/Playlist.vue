@@ -468,6 +468,25 @@ export default {
       } else {
         return this.$t('playlists.add_shots')
       }
+    },
+
+    tvShowPageTitle () {
+      const productionName =
+        this.currentProduction ? this.currentProduction.name : ''
+      let episodeName = ''
+      if (this.currentEpisode) {
+        episodeName = this.currentEpisode.name
+        if (this.currentEpisode.id === 'all') episodeName = this.$t('main.all')
+        if (this.currentEpisode.id === 'main') episodeName = 'Main Pack'
+      }
+      return `${productionName} - ${episodeName}` +
+             ` | ${this.$t('playlists.title')} - Kitsu`
+    },
+
+    shortPageTitle () {
+      const productionName =
+        this.currentProduction ? this.currentProduction.name : ''
+      return `${productionName} ${this.$t('playlists.title')} - Kitsu`
     }
   },
 
@@ -978,22 +997,6 @@ export default {
     }
   },
 
-  metaInfo () {
-    if (this.isTVShow) {
-      return {
-        title: `${this.currentProduction ? this.currentProduction.name : ''} ` +
-               `- ${this.currentEpisode ? this.currentEpisode.name : ''} |` +
-               ` ${this.$t('playlists.title')} - Kitsu`
-      }
-    } else {
-      return {
-        title: `${this.currentProduction ? this.currentProduction.name : ''}` +
-               ` ${this.$t('playlists.title')}` +
-               ' - Kitsu'
-      }
-    }
-  },
-
   socket: {
     events: {
       'playlist:new' (eventData) {
@@ -1039,6 +1042,14 @@ export default {
             })
         }
       }
+    }
+  },
+
+  metaInfo () {
+    if (this.isTVShow) {
+      return { title: this.tvShowPageTitle }
+    } else {
+      return { title: this.shortPageTitle }
     }
   }
 }
