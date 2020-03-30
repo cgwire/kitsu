@@ -319,6 +319,47 @@ export default {
     }
   },
 
+  created () {
+    this.setLastProductionScreen('assets')
+  },
+
+  mounted () {
+    if (this.assetSearchText.length > 0) {
+      this.searchField.setValue(this.assetSearchText)
+    }
+    this.$refs['asset-list'].setScrollPosition(
+      this.assetListScrollPosition
+    )
+    if (
+      Object.keys(this.assetMap).length < 2 ||
+      (
+        this.assetValidationColumns.length > 0 &&
+        !Object.keys(this.assetMap)[0].validations
+      )
+    ) {
+      setTimeout(() => {
+        this.loadAssets()
+          .then(() => {
+            this.handleModalsDisplay()
+            setTimeout(() => {
+              this.initialLoading = false
+              if (this.$refs['asset-list']) {
+                this.$refs['asset-list'].setScrollPosition(
+                  this.assetListScrollPosition
+                )
+              }
+            }, 500)
+          })
+      }, 0)
+    } else {
+      if (!this.isAssetsLoading) this.initialLoading = false
+      this.onSearchChange()
+      this.$refs['asset-list'].setScrollPosition(
+        this.assetListScrollPosition
+      )
+    }
+  },
+
   computed: {
     ...mapGetters([
       'assetMap',
@@ -369,47 +410,27 @@ export default {
         })
       })
       return assets
-    }
-  },
+    },
 
-  created () {
-    this.setLastProductionScreen('assets')
-  },
+    // Page titles
 
-  mounted () {
-    if (this.assetSearchText.length > 0) {
-      this.searchField.setValue(this.assetSearchText)
-    }
-    this.$refs['asset-list'].setScrollPosition(
-      this.assetListScrollPosition
-    )
-    if (
-      Object.keys(this.assetMap).length < 2 ||
-      (
-        this.assetValidationColumns.length > 0 &&
-        !Object.keys(this.assetMap)[0].validations
-      )
-    ) {
-      setTimeout(() => {
-        this.loadAssets()
-          .then(() => {
-            this.handleModalsDisplay()
-            setTimeout(() => {
-              this.initialLoading = false
-              if (this.$refs['asset-list']) {
-                this.$refs['asset-list'].setScrollPosition(
-                  this.assetListScrollPosition
-                )
-              }
-            }, 500)
-          })
-      }, 0)
-    } else {
-      if (!this.isAssetsLoading) this.initialLoading = false
-      this.onSearchChange()
-      this.$refs['asset-list'].setScrollPosition(
-        this.assetListScrollPosition
-      )
+    tvShowPageTitle () {
+      const productionName =
+        this.currentProduction ? this.currentProduction.name : ''
+      let episodeName = ''
+      if (this.currentEpisode) {
+        episodeName = this.currentEpisode.name
+        if (this.currentEpisode.id === 'all') episodeName = this.$t('main.all')
+        if (this.currentEpisode.id === 'main') episodeName = 'Main Pack'
+      }
+      return `${productionName} - ${episodeName}` +
+             ` | ${this.$t('assets.title')} - Kitsu`
+    },
+
+    shortPageTitle () {
+      const productionName =
+        this.currentProduction ? this.currentProduction.name : ''
+      return `${productionName} ${this.$t('assets.title')} - Kitsu`
     }
   },
 
@@ -906,15 +927,9 @@ export default {
 
   metaInfo () {
     if (this.isTVShow) {
-      return {
-        title: `${this.currentProduction ? this.currentProduction.name : ''}` +
-               ` - ${this.currentEpisode ? this.currentEpisode.name : ''}` +
-               ` | ${this.$t('assets.title')} - Kitsu`
-      }
+      return { title: this.tvShowPageTitle }
     } else {
-      return {
-        title: `${this.currentProduction.name} ${this.$t('assets.title')} - Kitsu`
-      }
+      return { title: this.shortPageTitle }
     }
   }
 }
