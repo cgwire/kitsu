@@ -1,181 +1,185 @@
 <template>
-  <div class="quota">
-    <div
-      class="quota-fixed"
-      v-if="this.quotaLength > 0 && !isLoading"
-    >
-      <div class="quota-header quota-row">
-        <div class="header-cell row-cell row-cell--name">
-          {{ $t('quota.name') }}
-        </div>
-        <div class="header-cell row-cell row-cell--average">
-          {{ $t('quota.average') }}
-        </div>
-      </div>
-      <div
-        class="quota-row"
-        v-for="key in personIds"
-        :key="'name-' + key"
+<div class="data-list">
+  <div
+    class="datatable-wrapper"
+    ref="body"
+  >
+    <table class="datatable">
+      <thead class="datatable-head">
+        <tr>
+          <th
+            scope="col"
+            class="name datatable-row-header"
+            ref="rowHeaderName"
+          >
+            {{ $t('quota.name') }}
+          </th>
+          <th
+            scope="col"
+            class="average datatable-row-header"
+            :style="{left: averageColumnX}"
+          >
+            {{ $t('quota.average') }}
+          </th>
+          <th
+            scope="col"
+            :key="'month-' + month"
+            v-for="month in monthRange"
+            v-if="detailLevel === 'month'"
+          >
+            {{ monthToString(month) }}
+          </th>
+          <th
+            scope="col"
+            :key="'week-' + week"
+            v-for="week in weekRange"
+            v-if="detailLevel === 'week'"
+          >
+            {{ week }}
+          </th>
+
+          <th
+            scope="col"
+            :key="'day-' + day"
+            v-for="day in dayRange"
+            v-if="detailLevel === 'day'"
+          >
+            {{ day }}
+          </th>
+        </tr>
+      </thead>
+      <tbody
+        class="datatable-body"
+        v-if="this.quotaLength > 0 && !isLoading"
       >
-        <div class="row-cell row-cell--name">
-          <people-avatar :size="30" :person="personMap[key]"/>
-          {{ personMap[key].full_name }}
-        </div>
-        <div
-          class="row-cell row-cell--average"
-          v-if="detailLevel === 'month'"
+        <tr
+          class="datatable-row"
+          v-for="key in personIds"
+          :key="'name-' + key"
         >
-          {{ getQuotaAverage(key, { year }) }}
-        </div>
-        <div
-          class="row-cell row-cell--average"
-          v-if="detailLevel === 'week'"
-        >
-          {{ getQuotaAverage(key, { year }) }}
-        </div>
-        <div
-          class="row-cell row-cell--average"
-          v-if="detailLevel === 'day'"
-        >
-          {{ getQuotaAverage(key, { year, month }) }}
-        </div>
-      </div>
-    </div>
-    <div
-      class="quota-scrolled"
-      ref="body"
-      v-if="this.quotaLength > 0 && !isLoading"
-    >
-      <div class="quota-header quota-row">
-        <div
-          class="header-cell row-cell"
-          :key="'month-' + month"
-          v-for="month in monthRange"
-          v-if="detailLevel === 'month'"
-        >
-          {{ monthToString(month) }}
-        </div>
-        <div
-          class="header-cell row-cell"
-          :key="'week-' + week"
-          v-for="week in weekRange"
-          v-if="detailLevel === 'week'"
-        >
-          {{ week }}
-        </div>
-
-        <div
-          class="header-cell row-cell"
-          :key="'day-' + day"
-          v-for="day in dayRange"
-          v-if="detailLevel === 'day'"
-        >
-          {{ day }}
-        </div>
-      </div>
-      <div
-        class="quota-row"
-        v-for="key in personIds"
-        :key="key"
-      >
-        <div
-          :class="{
-            'row-cell': true,
-            selected: isMonthSelected(key, year, month)
-          }"
-          :key="'month-' + month"
-          v-for="month in monthRange"
-          v-if="detailLevel === 'month'"
-        >
-          <router-link
-            class="quota-button"
-            :to="episodifyRoute({
-              name: 'quota-month-person',
-              params: {
-                person_id: key,
-                year: year,
-                month: month
-              }
-            })"
-            v-if="getQuota(key, {year, month})"
+          <th scope="row" class="name datatable-row-header">
+            <div class="flexrow">
+              <people-avatar :size="30" :person="personMap[key]"/>
+              {{ personMap[key].full_name }}
+            </div>
+          </th>
+          <td
+            class="average datatable-row-header"
+            :style="{left: averageColumnX}"
+            v-if="detailLevel === 'month'"
           >
-            {{ getQuota(key, {year, month}) }}
-          </router-link>
-          <span v-else>-</span>
-        </div>
-
-        <div
-          :class="{
-            'row-cell': true,
-            selected: isWeekSelected(key, year, week)
-          }"
-          :key="'week-' + week"
-          v-for="week in weekRange"
-          v-if="detailLevel === 'week'"
-        >
-          <router-link
-            class="quota-button"
-            :to="episodifyRoute({
-              name: 'quota-week-person',
-              params: {
-                person_id: key,
-                year: year,
-                week: week
-              }
-            })"
-            v-if="getQuota(key, {year, week})"
+            {{ getQuotaAverage(key, { year }) }}
+          </td>
+          <td
+            class="average datatable-row-header"
+            :style="{left: averageColumnX}"
+            v-if="detailLevel === 'week'"
           >
-            {{ getQuota(key, {year, week}) }}
-          </router-link>
-          <span v-else>
-          -
-          </span>
-        </div>
-
-        <div
-          :class="{
-            'row-cell': true,
-            weekend: isWeekend(year, month, day),
-            selected: isDaySelected(key, year, month, day)
-          }"
-          :key="'day-' + day"
-          v-for="day in dayRange"
-          v-if="detailLevel === 'day'"
-        >
-          <router-link
-            class="quota-button"
-            :to="episodifyRoute({
-              name: 'quota-day-person',
-              params: {
-                person_id: key,
-                year: year,
-                month: month,
-                day: day
-              }
-            })"
-            v-if="getQuota(key, {year, month, day})"
+            {{ getQuotaAverage(key, { year }) }}
+          </td>
+          <td
+            class="average datatable-row-header"
+            :style="{left: averageColumnX}"
+            v-if="detailLevel === 'day'"
           >
-            {{ getQuota(key, {year, month, day}) }}
-          </router-link>
-          <span v-else>
-          -
-          </span>
-        </div>
-      </div>
-    </div>
+            {{ getQuotaAverage(key, { year, month }) }}
+          </td>
+          <td
+            :class="{
+              selected: isMonthSelected(key, year, month)
+            }"
+            :key="'month-' + month"
+            v-for="month in monthRange"
+            v-if="detailLevel === 'month'"
+          >
+            <router-link
+              class="quota-button"
+              :to="episodifyRoute({
+                name: 'quota-month-person',
+                params: {
+                  person_id: key,
+                  year: year,
+                  month: month
+                }
+              })"
+              v-if="getQuota(key, {year, month})"
+            >
+              {{ getQuota(key, {year, month}) }}
+            </router-link>
+            <span v-else>-</span>
+          </td>
 
-    <div
-      class="has-text-centered empty-quota"
-      v-if="this.quotaLength === 0 && !isLoading"
-    >
-      <p class="info">{{ $t('quota.no_quota') }}</p>
-    </div>
+          <td
+            :class="{
+              selected: isWeekSelected(key, year, week)
+            }"
+            :key="'week-' + week"
+            v-for="week in weekRange"
+            v-if="detailLevel === 'week'"
+          >
+            <router-link
+              class="quota-button"
+              :to="episodifyRoute({
+                name: 'quota-week-person',
+                params: {
+                  person_id: key,
+                  year: year,
+                  week: week
+                }
+              })"
+              v-if="getQuota(key, {year, week})"
+            >
+              {{ getQuota(key, {year, week}) }}
+            </router-link>
+            <span v-else>
+            -
+            </span>
+          </td>
 
-    <table-info
-      :is-loading="isLoading"
-      :is-error="isError"
-    />
+          <td
+            :class="{
+              weekend: isWeekend(year, month, day),
+              selected: isDaySelected(key, year, month, day)
+            }"
+            :key="'day-' + day"
+            v-for="day in dayRange"
+            v-if="detailLevel === 'day'"
+          >
+            <router-link
+              class="quota-button"
+              :to="episodifyRoute({
+                name: 'quota-day-person',
+                params: {
+                  person_id: key,
+                  year: year,
+                  month: month,
+                  day: day
+                }
+              })"
+              v-if="getQuota(key, {year, month, day})"
+            >
+              {{ getQuota(key, {year, month, day}) }}
+            </router-link>
+            <span v-else>
+            -
+            </span>
+          </td>
+        </tr>
+      </tbody>
+    </table>
   </div>
+  <div
+    class="has-text-centered empty-quota"
+    v-if="this.quotaLength === 0 && !isLoading"
+  >
+    <p class="info">{{ $t('quota.no_quota') }}</p>
+  </div>
+
+  <table-info
+    :is-loading="isLoading"
+    :is-error="isError"
+  />
+</div>
 </template>
 
 <script>
@@ -245,7 +249,8 @@ export default {
       isError: false,
       quotaMap: {},
       quotaLength: 0,
-      selected: undefined
+      selected: undefined,
+      averageColumnX: '12rem'
     }
   },
 
@@ -333,6 +338,7 @@ export default {
             this.quotaMap = quotas
             this.isLoading = false
             this.quotaLength = Object.keys(this.quotaMap).length
+            this.calcAverageColumnX()
           })
       }
     },
@@ -418,6 +424,12 @@ export default {
         this.$route.params.year === year &&
         this.$route.params.month === month
       )
+    },
+
+    calcAverageColumnX () {
+      if (this.quotaLength > 0) {
+        this.averageColumnX = `${this.$refs.rowHeaderName.offsetWidth}px`
+      }
     }
   },
 
@@ -453,21 +465,9 @@ export default {
 </script>
 
 <style lang="scss" scoped>
+
   .dark {
-    .quota {
-      color: $white;
-    }
-    .quota-panel {
-      border-left-color: $dark-grey-light;
-    }
-    .row-cell {
-      border-bottom-color: $dark-grey-light;
-    }
-    .quota-row:nth-child(odd):not(.quota-header) .row-cell {
-      background-color: $dark-grey-lightmore;
-    }
-    .row-cell.weekend,
-    .quota-row:nth-child(odd):not(.quota-header) .row-cell.weekend {
+    .weekend {
       background-color: $dark-grey;
     }
    .quota-button:hover {
@@ -475,89 +475,46 @@ export default {
     }
   }
 
-  .quota {
-    display: flex;
-    flex-direction: row;
-    overflow: hidden;
-    max-width: 100%;
-    color: $dark-grey;
+  .data-list {
+    margin-top: 0;
   }
 
-  .quota-fixed {
-    display: flex;
-    flex-direction: column;
-    flex: 0 0 auto;
+  .datatable-wrapper {
+    overflow: auto;
+    margin-bottom: 1rem;
   }
 
-  .quota-scrolled {
-    display: flex;
-    flex-direction: column;
-    flex: 1 1 auto;
-    overflow: hidden;
-    overflow-x: auto;
-  }
-
-  .quota-panel {
-    padding: 1rem;
-    border-left: 1px solid $light-grey-light;
-  }
-
-  .quota-row {
-    display: flex;
-    flex-direction: row;
-    flex-wrap: nowrap;
-  }
-
-  .row-cell {
-    display: flex;
-    flex-direction: row;
-    align-items: center;
-    justify-content: center;
-    width: 4rem;
-    height: 4rem;
-    max-height: 4rem;
-    padding: 1rem;
-    border-bottom: 1px solid $light-grey-light;
-    flex: 0 0 auto;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-  }
-
-  .header-cell {
-    height: auto;
-    max-height: auto;
-  }
-
-  .quota-row:nth-child(odd):not(.quota-header) .row-cell {
-    background-color: $white-grey-light;
-  }
-
-  .quota-row:last-child .row-cell {
-    border: 0;
-  }
-
-  .header-cell {
-    font-weight: bold;
-    font-size: 0.9em;
-    color: $grey-strong;
-    padding: 0.5rem;
-  }
-
-  .row-cell--name {
-    width: 12rem;
-    justify-content: flex-start;
-    .avatar {
-      margin-right: .5rem;
+  .datatable {
+    min-width: auto;
+    .name {
+      min-width: 12rem;
+      text-align: left;
+      justify-content: flex-start;
+      .avatar {
+        margin-right: .5rem;
+      }
+    }
+    .average {
+      width: 8rem;
+    }
+    th,
+    td {
+      text-align: center
     }
   }
 
-  .row-cell--weekly {
-    width: 10rem;
+  .datatable-head th {
+    min-width: 4rem;
   }
 
-  .row-cell--average {
-    width: 8rem;
+  .datatable-body th {
+    padding: 1rem;
+  }
+
+  .datatable-body {
+    th, td {
+      border: 0;
+    }
   }
 
   .quota-button {
@@ -575,33 +532,6 @@ export default {
     }
   }
 
-  .details {
-    min-width: 14rem;
-    td, th {
-      color: $dark-grey;
-      font-size: .8rem;
-      padding: .25rem;
-      text-align: center;
-      &:first-child {
-        text-align: left;
-      }
-    }
-    tr {
-      border-bottom: 1px solid $light-grey-light;
-    }
-    tbody {
-      tr:nth-child(even) {
-        background-color: $white-grey-light;
-      }
-    }
-  }
-
-  .details-title {
-    font-size: 1.2rem;
-    font-weight: bold;
-    margin-bottom: 1.5rem;
-  }
-
   .empty-quota {
     width: 100%;
   }
@@ -615,8 +545,7 @@ export default {
     background: #BBEEBB;
   }
 
-  .row-cell.weekend,
-  .quota-row:nth-child(odd):not(.quota-header) .row-cell.weekend {
+  .weekend {
     background-color: $white-grey;
   }
 </style>
