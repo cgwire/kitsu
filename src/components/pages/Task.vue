@@ -195,7 +195,7 @@
               @add-preview="onAddExtraPreview"
               @remove-extra-preview="showRemoveExtraPreviewModal"
               ref="preview-picture"
-              v-else-if="currentTaskPreviews && currentTaskPreviews.length > 0 && extension === 'png'"
+              v-else-if="currentTaskPreviews && currentTaskPreviews.length > 0 && ['png', 'gif'].includes(this.extension)"
             />
           </div>
         </div>
