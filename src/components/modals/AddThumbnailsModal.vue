@@ -48,9 +48,17 @@
       >
         <img
           class="flexrow-item"
+          src="../../assets/icons/movie-thumbnail.png"
+          width="150"
+          height="100"
+          v-if="!thumbnailInfo.src"
+        />
+        <img
+          class="flexrow-item"
           :src="thumbnailInfo.src"
           width="150"
           height="100"
+          v-if="thumbnailInfo.src"
         />
         <span class="flexrow-item">
           {{ thumbnailInfo.parentName }} / {{ thumbnailInfo.name }}
@@ -115,7 +123,7 @@ export default {
 
   data () {
     return {
-      extensions: '.png,.jpg',
+      extensions: '.png,.jpg,.mp4,.mov',
       forms: [],
       loading: {},
       taskTypeId: null,
@@ -239,7 +247,10 @@ export default {
     },
 
     prepareImagePreview (form) {
-      return window.URL.createObjectURL(form.get('file'))
+      if (form.get('file').type.startsWith('image')) {
+        return window.URL.createObjectURL(form.get('file'))
+      }
+      return undefined
       /*
       const canvas = document.createElement('img')
       const img = document.createElement('img')
