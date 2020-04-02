@@ -17,8 +17,8 @@
         <text-field
           ref="nameField"
           :label="$t('playlists.fields.name')"
-          v-model="form.name"
           @enter="runConfirmation"
+          v-model="form.name"
           v-focus
         />
         <combobox
@@ -92,7 +92,8 @@ export default {
       form: {
         name: this.playlistToEdit.name,
         for_entity: this.playlistToEdit.for_entity || 'asset',
-        for_client: this.playlistToEdit.for_client
+        for_client: this.playlistToEdit.for_client,
+        is_for_all: this.currentEpisode && this.currentEpisode.id === 'all'
       }
     }
   },
@@ -107,7 +108,8 @@ export default {
     },
 
     forEntityOptions () {
-      if (this.currentEpisode && this.currentEpisode.id === 'main') {
+      if (this.currentEpisode &&
+          ['main', 'all'].includes(this.currentEpisode.id)) {
         return [
           { label: this.$t('assets.title'), value: 'asset' }
         ]
@@ -130,11 +132,13 @@ export default {
       if (this.isEditing) {
         this.form.name = this.playlistToEdit.name
         this.form.for_entity = this.playlistToEdit.for_entity
+        this.form.is_for_all = this.currentEpisode && this.currentEpisode.id === 'all'
       } else {
         this.form = {
           name: this.playlistToEdit.name,
           for_entity: 'asset',
-          for_client: 'false'
+          for_client: 'false',
+          is_for_all: this.currentEpisode && this.currentEpisode.id === 'all'
         }
       }
     }

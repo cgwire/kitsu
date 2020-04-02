@@ -512,6 +512,7 @@ export default {
       'removeEntityPreviewFromPlaylist',
       'removeBuildJobFromList',
       'setAssetSearch',
+      'setCurrentEpisode',
       'setShotSearch',
       'updatePreviewAnnotation'
     ]),
@@ -536,7 +537,8 @@ export default {
     loadShotsData (callback) {
       if (this.displayedShots.length === 0) {
         if (this.currentEpisode &&
-            this.currentEpisode.id === 'main') {
+            (this.currentEpisode.id === 'main' ||
+            this.currentEpisode.id === 'all')) {
           callback()
         } else {
           this.loadShots(callback)
@@ -839,7 +841,8 @@ export default {
         name: form.name,
         production_id: this.currentProduction.id,
         for_client: form.for_client,
-        for_entity: form.for_entity
+        for_entity: form.for_entity,
+        is_for_all: form.is_for_all
       }
       if (this.isTVShow && this.currentEpisode) {
         newPlaylist.episode_id = this.currentEpisode.id

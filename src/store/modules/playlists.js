@@ -131,7 +131,6 @@ const actions = {
       dispatch('editPlaylist', {
         data: playlist,
         callback: (err) => {
-          console.log('err', err)
           if (err) reject(err)
           resolve(entity)
         }

@@ -27,9 +27,9 @@ export default {
       project_id: playlist.production_id,
       episode_id: playlist.episode_id,
       for_client: playlist.for_client,
-      for_entity: playlist.for_entity
+      for_entity: playlist.for_entity,
+      is_for_all: playlist.is_for_all
     }
-    console.log(data)
     client.post('/api/data/playlists/', data, callback)
   },
 
