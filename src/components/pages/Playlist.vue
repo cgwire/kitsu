@@ -535,7 +535,6 @@ export default {
 
     loadShotsData (callback) {
       if (this.displayedShots.length === 0) {
-        console.log('playlists loadShotsData', this.currentEpisode)
         if (this.currentEpisode &&
             this.currentEpisode.id === 'main') {
           callback()
@@ -924,7 +923,11 @@ export default {
         this.$refs.entityListContent.scrollHeight -
         this.$refs.entityListContent.offsetHeight
       if (maxHeight < position.scrollTop) {
-        this.displayMoreShots()
+        if (this.isAssetPlaylist) {
+          this.displayMoreAssets()
+        } else {
+          this.displayMoreShots()
+        }
       }
     },
 
