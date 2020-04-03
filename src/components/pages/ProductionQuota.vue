@@ -81,8 +81,10 @@
 
 <script>
 import moment from 'moment-timezone'
-import { monthToString, range } from '../../lib/time'
 import { mapGetters, mapActions } from 'vuex'
+
+import { monthToString, range } from '../../lib/time'
+import { episodifyRoute } from '../../lib/path'
 import Combobox from '../widgets/Combobox'
 import ComboboxTaskType from '../widgets/ComboboxTaskType'
 import Quota from './quota/Quota'
@@ -252,38 +254,19 @@ export default {
   watch: {
     detailLevelString () {
       if (this.detailLevel !== this.detailLevelString) {
-        if (this.detailLevelString === 'month') {
-          this.$router.push({
-            name: 'quota-month',
-            params: {
-              year: this.currentYear
-            },
-            query: {
-              countMode: this.countMode
-            }
-          })
-        } else if (this.detailLevelString === 'week') {
-          this.$router.push({
-            name: 'quota-week',
-            params: {
-              year: this.currentYear
-            },
-            query: {
-              countMode: this.countMode
-            }
-          })
-        } else if (this.detailLevelString === 'day') {
-          this.$router.push({
-            name: 'quota-day',
-            params: {
-              year: this.currentYear,
-              month: this.currentMonth
-            },
-            query: {
-              countMode: this.countMode
-            }
-          })
+        const route = {
+          name: `quota-${this.detailLevelString}`,
+          params: {
+            year: this.currentYear
+          },
+          query: {
+            countMode: this.countMode
+          }
         }
+        if (this.detailLevelString === 'day') {
+          route.params.month = this.currentMonth
+        }
+        this.$router.push(episodifyRoute(route, this.currentEpisode.id))
       }
     },
 
@@ -291,44 +274,25 @@ export default {
       const year = Number(this.yearString)
       const currentMonth = moment().month() + 1
       if (this.currentYear !== year) {
-        if (this.detailLevel === 'month') {
-          this.$router.push({
-            name: 'quota-month',
-            params: {
-              year: year
-            },
-            query: {
-              countMode: this.countMode
-            }
-          })
-        } else if (this.detailLevel === 'week') {
-          this.$router.push({
-            name: 'quota-week',
-            params: {
-              year: year
-            },
-            query: {
-              countMode: this.countMode
-            }
-          })
-        } else {
-          this.$router.push({
-            name: 'quota-day',
-            params: {
-              year: year,
-              month: Math.min(Number(this.monthString), currentMonth)
-            },
-            query: {
-              countMode: this.countMode
-            }
-          })
+        const route = {
+          name: `quota-${this.detailLevelString}`,
+          params: {
+            year: year
+          },
+          query: {
+            countMode: this.countMode
+          }
         }
+        if (this.detailLevelString === 'day') {
+          route.params.month = `${Math.min(Number(this.monthString), currentMonth)}`
+        }
+        this.$router.push(episodifyRoute(route, this.currentEpisode.id))
       }
     },
 
     monthString () {
       if (this.currentMonth !== Number(this.monthString)) {
-        this.$router.push({
+        const route = {
           name: 'quota-day',
           params: {
             year: this.currentYear,
@@ -337,7 +301,8 @@ export default {
           query: {
             countMode: this.countMode
           }
-        })
+        }
+        this.$router.push(episodifyRoute(route, this.currentEpisode.id))
       }
     },
 
