@@ -1,5 +1,9 @@
 <template>
-<div class="field">
+<div
+  :class="{
+    field: true,
+    'field--narrow': narrow
+  }">
   <label class="label" v-if="label.length > 0">
     {{ label }}
   </label>
@@ -88,6 +92,10 @@ export default {
     value: {
       default: '',
       type: String
+    },
+    narrow: {
+      default: false,
+      type: Boolean
     }
   },
 
@@ -173,6 +181,11 @@ export default {
 
 .status-combo:hover {
   border: 1px solid $green;
+}
+
+.field--narrow .status-combo {
+  padding: 0;
+  margin: 0;
 }
 
 .selected-status-line {

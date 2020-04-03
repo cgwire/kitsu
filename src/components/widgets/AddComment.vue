@@ -69,16 +69,22 @@
           </em>
         </span>
       </div>
-      <div class="flexrow mt1">
-        <div class="filler"></div>
-        <div class="flexrow-item status-combo-wrapper">
-          <combobox-status
-            class="status-selector"
-            :task-status-list="taskStatus"
-            v-model="task_status_id"
-          />
-        </div>
-        <div class="flexrow-item post-button-wrapper">
+      <group-button class="mt1">
+        <combobox-status
+          class="status-selector"
+          :narrow="true"
+          :task-status-list="taskStatus"
+          v-model="task_status_id"
+        />
+        <button-simple
+          :class="{
+            'button': true,
+            'active': commentImage
+          }"
+          icon="image"
+          @click="$emit('add-comment-image')"
+        >
+        </button-simple>
         <button
           :class="{
             'button': true,
@@ -92,8 +98,7 @@
         >
           {{ $t('comments.post_status') }}
         </button>
-        </div>
-      </div>
+      </group-button>
       <div
         class="error pull-right"
         v-if="isError"
@@ -108,6 +113,8 @@
 import AtTa from 'vue-at/dist/vue-at-textarea'
 import ComboboxStatus from './ComboboxStatus'
 import PeopleAvatar from './PeopleAvatar'
+import GroupButton from './GroupButton'
+import ButtonSimple from './ButtonSimple'
 
 export default {
   name: 'add-comment',
@@ -115,13 +122,16 @@ export default {
   components: {
     AtTa,
     ComboboxStatus,
-    PeopleAvatar
+    PeopleAvatar,
+    GroupButton,
+    ButtonSimple
   },
 
   data () {
     return {
       isDragging: false,
       text: '',
+      commentImage: false,
       task_status_id: this.task.task_status_id
     }
   },
@@ -285,6 +295,10 @@ export default {
 
 .button.is-primary {
   border-radius: 2em;
+}
+
+.button.active {
+  background: rgba($green, .5);
 }
 
 .status-selector {
