@@ -84,7 +84,6 @@ const csv = {
         return `"${cellString.replace(/"/g, '')}"`
       })
       const line = sanitizedCells.join(';')
-      console.log(line)
       if (line.length > 2) lineArray.push(line)
     })
     return lineArray.join('\n')

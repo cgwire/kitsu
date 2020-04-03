@@ -340,7 +340,7 @@
       >
         <div
           class="more-menu-item"
-          v-if="isCurrentViewAsset || isCurrentViewShot"
+          v-if="(isCurrentViewAsset || isCurrentViewShot) && isCurrentUserManager"
           @click="selectBar('assignation')"
         >
           {{ $t('menu.assign_tasks') }}
@@ -349,13 +349,14 @@
         <div
           class="more-menu-item"
           @click="selectBar('change-status')"
+          v-if="isCurrentUserManager"
         >
           {{ $t('menu.change_status') }}
         </div>
 
         <div
           class="more-menu-item"
-          v-if="isCurrentViewAsset || isCurrentViewShot || isCurrentViewPerson"
+          v-if="(isCurrentViewAsset || isCurrentViewShot || isCurrentViewPerson) && isCurrentUserManager"
           @click="selectBar('priorities')"
         >
           {{ $t('menu.change_priority') }}
@@ -363,7 +364,7 @@
 
         <div
           class="more-menu-item"
-          v-if="isCurrentViewTaskType || isCurrentViewPerson"
+          v-if="(isCurrentViewTaskType || isCurrentViewPerson) && isCurrentUserManager"
           @click="selectBar('estimations')"
         >
           {{ $t('menu.set_estimations') }}
@@ -371,7 +372,7 @@
 
         <div
           class="more-menu-item"
-          v-if="(isCurrentViewAsset || isCurrentViewShot) && !isCurrentViewTaskType"
+          v-if="((isCurrentViewAsset || isCurrentViewShot) && !isCurrentViewTaskType) && isCurrentUserManager"
           @click="selectBar('tasks')"
         >
           {{ $t('menu.create_tasks') }}
@@ -387,7 +388,7 @@
 
         <div
           class="more-menu-item"
-          v-if="isCurrentViewAsset || isCurrentViewShot"
+          v-if="(isCurrentViewAsset || isCurrentViewShot) && isCurrentUserManager"
           @click="selectBar('delete-tasks')"
         >
           {{ $t('menu.delete_tasks') }}
@@ -395,7 +396,7 @@
 
         <div
           class="more-menu-item"
-          v-if="!isCurrentViewTaskType"
+          v-if="!isCurrentViewTaskType && isCurrentUserManager"
           @click="selectBar('custom-actions')"
         >
           {{ $t('menu.run_custom_action') }}
@@ -523,9 +524,6 @@ export default {
         this.isCurrentViewAsset ||
         this.isCurrentViewTodos ||
         this.isCurrentViewShot
-      ) ||
-      (
-        !this.isCurrentViewTodos && !this.isCurrentUserManager
       )
     },
 

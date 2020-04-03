@@ -102,10 +102,8 @@ export default {
       entities.forEach((entity) => {
         entityMap[entity.id] = entity
       })
-      console.log('setupEntities, step 1')
       this.currentPlaylist.shots = entityMap
       this.currentEntities = entityMap
-      console.log('setupEntities, step 2', entityMap)
     },
 
     initPlaylistPlayer () {

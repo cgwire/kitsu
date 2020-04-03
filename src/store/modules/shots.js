@@ -525,9 +525,10 @@ const actions = {
 
   loadEpisodes ({ commit, state, rootGetters }, callback) {
     const currentProduction = rootGetters.currentProduction
+    const routeEpisodeId = rootGetters.route.params.episode_id
     shotsApi.getEpisodes(currentProduction, (err, episodes) => {
       if (err) console.error(err)
-      commit(LOAD_EPISODES_END, episodes)
+      commit(LOAD_EPISODES_END, { episodes, routeEpisodeId })
       if (callback) callback()
     })
   },
@@ -1315,7 +1316,7 @@ const mutations = {
     state.displayedSequencesLength = sortedSequences.length
   },
 
-  [LOAD_EPISODES_END] (state, episodes) {
+  [LOAD_EPISODES_END] (state, { episodes, routeEpisodeId }) {
     const episodeMap = {}
     if (!episodes) episodes = []
     episodes.forEach((episode) => {
@@ -1329,7 +1330,15 @@ const mutations = {
     state.displayedEpisodesLength = state.episodes.length
 
     if (state.episodes.length > 0) {
-      state.currentEpisode = state.episodes[0]
+      if (routeEpisodeId === 'all') {
+        state.currentEpisode = { id: 'all' }
+      } else if (routeEpisodeId === 'main') {
+        state.currentEpisode = { id: 'main' }
+      } else if (routeEpisodeId) {
+        state.currentEpisode = state.episodeMap[routeEpisodeId]
+      } else {
+        state.currentEpisode = state.episodes[0]
+      }
     } else {
       state.currentEpisode = null
     }

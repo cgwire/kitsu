@@ -235,15 +235,20 @@ export default {
       'user'
     ]),
 
+    assetSections () {
+      return ['assets', 'assetTypes', 'playlists']
+    },
+
     // Asset pages require a all section and a main pack section.
     currentEpisodeOptions () {
-      if (['assets', 'assetTypes'].includes(this.currentProjectSection)) {
+      if (this.assetSections.includes(this.currentProjectSection)) {
         return [
           { label: this.$t('main.all'), value: 'all' },
           { label: 'Main Pack', value: 'main' }
         ].concat(this.episodeOptions)
       } else if (['playlists'].includes(this.currentProjectSection)) {
         return [
+          { label: this.$t('main.all'), value: 'all' },
           { label: 'Main Pack', value: 'main' }
         ].concat(this.episodeOptions)
       } else {
@@ -527,17 +532,13 @@ export default {
     },
 
     currentProjectSection () {
-      const isPlaylistSection =
-        ['playlists'].includes(this.currentProjectSection)
       const isNotAssetSection =
-        !['assets', 'assetTypes'].includes(this.currentProjectSection)
+        !this.assetSections.includes(this.currentProjectSection)
       const isAssetEpisode =
         ['all', 'main'].includes(this.currentEpisodeId)
 
       if (isAssetEpisode) {
-        if (isPlaylistSection) {
-          this.currentEpisodeId = 'main'
-        } else if (isNotAssetSection) {
+        if (isNotAssetSection) {
           this.currentEpisodeId =
             this.episodes.length > 0 ? this.episodes[0].id : null
         }
