@@ -91,7 +91,7 @@ export default {
       ],
       form: {
         name: this.playlistToEdit.name,
-        for_entity: this.playlistToEdit.for_entity || 'asset',
+        for_entity: this.playlistToEdit.for_entity || this.defaultForEntity,
         for_client: this.playlistToEdit.for_client,
         is_for_all: this.currentEpisode && this.currentEpisode.id === 'all'
       }
@@ -119,6 +119,12 @@ export default {
           { label: this.$t('shots.title'), value: 'shot' }
         ]
       }
+    },
+
+    defaultForEntity () {
+      const isAssetEpisode =
+        this.currentEpisode && ['all', 'main'].includes(this.currentEpisode)
+      return isAssetEpisode ? 'asset' : 'shot'
     }
   },
 
@@ -136,7 +142,7 @@ export default {
       } else {
         this.form = {
           name: this.playlistToEdit.name,
-          for_entity: 'asset',
+          for_entity: this.defaultForEntity,
           for_client: 'false',
           is_for_all: this.currentEpisode && this.currentEpisode.id === 'all'
         }
