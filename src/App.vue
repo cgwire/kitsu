@@ -1172,15 +1172,18 @@ tbody:last-child .empty-line:last-child {
   border-collapse: separate;
   min-width: calc(100% - 1px);
   width: auto;
+
   th {
     position: sticky;
   }
+
   .datatable-row {
     .thumbnail-wrapper,
     .thumbnail-picture,
     .thumbnail-picture.thumbnail-empty {
       margin: .35rem .35rem .35rem 0;
     }
+
     .thumbnail-wrapper {
       .thumbnail-picture {
         margin: 0;
@@ -1188,6 +1191,7 @@ tbody:last-child .empty-line:last-child {
     }
   }
 }
+
 .datatable-head {
   th {
     top: 0;
@@ -1259,8 +1263,8 @@ tbody:last-child .empty-line:last-child {
   &:nth-child(2n) .datatable-row-header::after {
     background: linear-gradient(
       90deg,
-      rgba(var(--background-alt-rgb),1) 0%,
-      rgba(var(--background-alt-rgb),.7) 50%,
+      rgba(var(--background-alt-rgb),0.5) 0%,
+      rgba(var(--background-alt-rgb),.3) 50%,
       rgba(var(--background-alt-rgb),0) 100%
     );
   }
@@ -1268,8 +1272,8 @@ tbody:last-child .empty-line:last-child {
   &:hover .datatable-row-header::after {
     background: linear-gradient(
       90deg,
-      rgba(var(--background-hover-rgb),1) 0%,
-      rgba(var(--background-hover-rgb),.7) 50%,
+      rgba(var(--background-hover-rgb),.5) 0%,
+      rgba(var(--background-hover-rgb),.3) 50%,
       rgba(var(--background-hover-rgb),0) 100%
     );
   }
@@ -1319,8 +1323,9 @@ tbody:last-child .empty-line:last-child {
     width: 1rem;
     background: linear-gradient(
       90deg,
-      rgba(var(--background-rgb),1) 0%,
-      rgba(var(--background-rgb),.7) 50%,
+      rgba(var(--background-rgb),.7) 0%,
+      rgba(var(--background-rgb),.3) 50%,
+      rgba(var(--background-rgb),.1) 20%,
       rgba(var(--background-rgb),0) 100%
     );
   }

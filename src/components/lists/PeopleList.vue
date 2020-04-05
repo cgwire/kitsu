@@ -150,6 +150,11 @@ export default {
 </script>
 
 <style lang="scss" scoped>
+.dark {
+  .table tbody th.name {
+    border-color: #25282E;
+  }
+}
 .name {
   width: 230px;
   min-width: 230px;
