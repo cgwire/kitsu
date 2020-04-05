@@ -12,26 +12,36 @@
       </h1>
 
       <div
-        class="shortcut"
-        :key="`shortcut-${i}`"
-        v-for="(shortcut, i) in shortcuts"
+        class="mt2"
+        :key="shortcutGroup.label"
+        v-for="shortcutGroup in shortcutGroups"
       >
+        <h3>
+          {{ $t(shortcutGroup.label) }}
+        </h3>
+
         <div
-          class="shortcut-key-wrapper"
+          class="shortcut"
+          :key="`shortcut-${i}`"
+          v-for="(shortcut, i) in shortcutGroup.shortcuts"
         >
           <div
-            :key="`shortcut-key-${i}-${j}`"
-            v-for="(key, j) in shortcut.keys"
+            class="shortcut-key-wrapper"
           >
-            <span class="shortcut-key">{{ key }}</span>
-            <span
-              class="shortcut-plus"
-              v-if="j !== shortcut.keys.length - 1"
-             >+
-             </span>
+            <div
+              :key="`shortcut-key-${i}-${j}`"
+              v-for="(key, j) in shortcut.keys"
+            >
+              <span class="shortcut-key">{{ key }}</span>
+              <span
+                class="shortcut-plus"
+                v-if="j !== shortcut.keys.length - 1"
+               >+
+               </span>
+            </div>
           </div>
+          <span class="shortcut-text">{{ shortcut.text }}</span>
         </div>
-        <span class="shortcut-text">{{ shortcut.text }}</span>
       </div>
 
       <div class="has-text-right modal-footer">
@@ -67,23 +77,50 @@ export default {
 
   data () {
     return {
-      shortcuts: [
+      shortcutGroups: [
         {
-          keys: ['Alt', '←'],
-          text: this.$t('keyboard.altleft')
+          label: 'keyboard.navigation',
+          shortcuts: [
+            {
+              keys: ['Alt', '←'],
+              text: this.$t('keyboard.altleft')
+            },
+            {
+              keys: ['Alt', '↑'],
+              text: this.$t('keyboard.altup')
+            },
+            {
+              keys: ['Alt', '→'],
+              text: this.$t('keyboard.altright')
+            },
+            {
+              keys: ['Alt', '↓'],
+              text: this.$t('keyboard.altdown')
+            }
+          ]
         },
         {
-          keys: ['Alt', '↑'],
-          text: this.$t('keyboard.altup')
-        },
-        {
-          keys: ['Alt', '→'],
-          text: this.$t('keyboard.altright')
-        },
-        {
-          keys: ['Alt', '↓'],
-          text: this.$t('keyboard.altdown')
+          label: 'keyboard.annotations',
+          shortcuts: [
+            {
+              keys: ['Ctrl', 'z'],
+              text: this.$t('keyboard.undo')
+            },
+            {
+              keys: ['Alt', 'r'],
+              text: this.$t('keyboard.redo')
+            },
+            {
+              keys: ['Alt', 'd'],
+              text: this.$t('keyboard.draw')
+            },
+            {
+              keys: ['Suppr'],
+              text: this.$t('keyboard.remove_annotation')
+            }
+          ]
         }
+
       ]
     }
   },

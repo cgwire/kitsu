@@ -114,6 +114,12 @@ export default {
     altleft: 'Mueve la selección de una tarea a la izquierda',
     altright: 'Mueve la selección de una tarea a la derecha',
     altup: 'Mueve la selección de una tarea hacia arriba',
+    annotations: 'Anotaciones',
+    draw: 'Activar el modo de dibujo',
+    navigation: 'Navegación',
+    redo: 'Redo',
+    remove_annotation: 'Eliminar anotación',
+    undo: 'Undo',
     shortcuts: 'Atajos de teclado'
   },
 

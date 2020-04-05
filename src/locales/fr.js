@@ -129,6 +129,12 @@ export default {
     altleft: 'Déplace la sélection d\'une tâche vers la gauche',
     altright: 'Déplace la sélection d\'une tâche vers la droite',
     altup: 'Déplace la sélection d\'une tâche vers le haut',
+    annotations: 'Annotations',
+    draw: 'Démarre le mode dessin',
+    navigation: 'Navigation',
+    redo: 'Redo',
+    undo: 'Undo',
+    remove_annotation: 'Supprimme l\'annotation sélectionnée',
     shortcuts: 'Raccourcis claviers'
   },
 

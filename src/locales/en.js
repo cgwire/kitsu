@@ -134,6 +134,12 @@ export default {
     altleft: 'Move task selection left',
     altright: 'Move task selection right',
     altup: 'Move task selection up',
+    annotations: 'Annotations',
+    draw: 'Set draw mode on',
+    navigation: 'Navigation',
+    redo: 'Redo',
+    undo: 'Undo',
+    remove_annotation: 'Remove annotation',
     shortcuts: 'Shortcuts'
   },
 

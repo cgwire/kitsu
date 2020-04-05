@@ -114,7 +114,13 @@ export default {
     altleft: 'Verschiebt die Auswahl einer Aufgabe nach links',
     altright: 'Verschiebt die Auswahl einer Aufgabe nach rechts',
     altup: 'Verschiebt die Auswahl einer Aufgabe nach oben',
-    shortcuts: 'Klavierklavier'
+    annotations: 'Anmerkungen',
+    draw: 'Zeichnungsmodus einschalten',
+    navigation: 'Navigation',
+    redo: 'Redo',
+    remove_annotation: 'Annotation entfernen',
+    undo: 'Undo',
+    shortcuts: 'Tastaturkürzel'
   },
 
   login: {
