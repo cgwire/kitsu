@@ -370,9 +370,11 @@ export default {
     clearContext () {
       this.silent = true
       this.currentProductionId = null
-      this.currentEpisodeId = null
       this.currentProjectSection = null
-      this.setCurrentEpisode(null)
+      if (!this.isTVShow) {
+        this.setCurrentEpisode(null)
+        this.currentEpisodeId = null
+      }
       this.setProduction(null)
       this.silent = false
     },
@@ -436,7 +438,9 @@ export default {
     setEpisodeFromRoute () {
       const routeEpisodeId = this.$route.params.episode_id
       if (this.isEpisodeChanged(routeEpisodeId)) {
-        this.setCurrentEpisode(routeEpisodeId)
+        if (routeEpisodeId && this.isTVShow) {
+          this.setCurrentEpisode(routeEpisodeId)
+        }
       } else if (!routeEpisodeId) {
         this.silent = true
         this.clearEpisodes()
@@ -518,6 +522,32 @@ export default {
         route.name = 'assets'
       }
       return route
+    },
+
+    resetEpisodeForTVShow () {
+      const isNotAssetSection =
+        !this.assetSections.includes(this.currentProjectSection)
+      const isAssetEpisode =
+        ['all', 'main'].includes(this.currentEpisodeId)
+
+      // Set current episode to first episode if it's not related to assets.
+      if (isAssetEpisode) {
+        if (isNotAssetSection) {
+          this.currentEpisodeId =
+            this.episodes.length > 0 ? this.episodes[0].id : null
+        }
+      }
+
+      // If no episode is set, select the first one.
+      if (!this.currentEpisode && this.isTVShow) {
+        if (!this.currentEpisodeId) {
+          this.currentEpisodeId =
+            this.episodes.length > 0 ? this.episodes[0].id : null
+        }
+        this.setCurrentEpisode(this.currentEpisodeId)
+      } else if (!this.currentEpisodeId && this.isTVShow) {
+        this.currentEpisodeId = this.currentEpisode.id
+      }
     }
   },
 
@@ -528,25 +558,18 @@ export default {
     },
 
     currentProductionId () {
+      this.resetEpisodeForTVShow()
       this.updateRoute()
     },
 
     currentProjectSection () {
-      const isNotAssetSection =
-        !this.assetSections.includes(this.currentProjectSection)
-      const isAssetEpisode =
-        ['all', 'main'].includes(this.currentEpisodeId)
-
-      if (isAssetEpisode) {
-        if (isNotAssetSection) {
-          this.currentEpisodeId =
-            this.episodes.length > 0 ? this.episodes[0].id : null
-        }
-      }
+      if (this.silent) return
+      this.resetEpisodeForTVShow()
       this.updateRoute()
     },
 
     currentEpisodeId () {
+      if (this.silent) return
       this.updateRoute()
     },
 
