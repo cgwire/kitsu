@@ -11,22 +11,12 @@ export default {
           el.className += ' resizable'
         }
 
-        const ths = el.getElementsByClassName('metadata-descriptor')
+        const nameThs = Array.from(el.getElementsByClassName('name'))
+        const metaThs =
+          Array.from(el.getElementsByClassName('metadata-descriptor'))
+        const ths = nameThs.concat(metaThs)
 
-        ths.forEach((item) => {
-          if (!item.getElementsByClassName('resizable-knob').length > 0) {
-            const div = document.createElement('div')
-            div.className = 'resizable-knob'
-            item.appendChild(div)
-            setListeners(item, div)
-          }
-          if (localStorage.getItem(`${el.id}-${item.textContent}`)) {
-            item.style.minWidth =
-              localStorage.getItem(`${el.id}-${item.textContent}`)
-          }
-        })
-
-        function setListeners (item, div) {
+        const setListeners = (item, div) => {
           let pageX, curCol, curColWidth
           div.addEventListener('mousedown', function (e) {
             curCol = e.target.parentElement
@@ -50,6 +40,19 @@ export default {
             document.onmousemove = null
           })
         }
+
+        ths.forEach((item) => {
+          if (!item.getElementsByClassName('resizable-knob').length > 0) {
+            const div = document.createElement('div')
+            div.className = 'resizable-knob'
+            item.appendChild(div)
+            setListeners(item, div)
+          }
+          if (localStorage.getItem(`${el.id}-${item.textContent}`)) {
+            item.style.minWidth =
+              localStorage.getItem(`${el.id}-${item.textContent}`)
+          }
+        })
       }
     })
   }
