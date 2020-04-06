@@ -20,15 +20,15 @@ export default {
     const data = {
       name: asset.name,
       description: asset.description,
-      entity_type_id: asset.entity_type_id,
-      project_id: asset.project_id,
       data: asset.data
     }
     if (asset.source_id !== 'null') {
       data.source_id = asset.source_id
     }
 
-    client.post('/api/data/entities/', data, callback)
+    const path = `/api/data/projects/${asset.project_id}/asset-types/` +
+                 `${asset.entity_type_id}/assets/new`
+    client.post(path, data, callback)
   },
 
   updateAsset (asset, callback) {
