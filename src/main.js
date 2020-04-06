@@ -3,7 +3,7 @@ import { sync } from 'vuex-router-sync'
 
 import App from './App'
 import i18n from './lib/i18n'
-import resizableColumn from './lib/resizable-column'
+import resizableColumn from './directives/resizable-column'
 import router from './router'
 import store from './store'
 
