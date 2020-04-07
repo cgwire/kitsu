@@ -63,6 +63,7 @@ export default {
     pin: 'Pin',
     pinned: 'Pinned',
     revision: 'Überarbeitung',
+    text: 'Text',
     unpin: 'Unbekannt',
     validated: 'Validiert!',
     validation_required: 'Validierung erforderlich',

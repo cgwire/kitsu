@@ -69,7 +69,7 @@ export default {
     revision: 'révision',
     set_status_to: 'Positionner le statut à',
     unpin: 'Désépingler',
-    text: 'Text',
+    text: 'Texte',
     validated: 'Validé !',
     validation_required: 'Validation requise',
     fields: {

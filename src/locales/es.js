@@ -63,6 +63,7 @@ export default {
     pin: 'Alfiler',
     pinned: 'inmovilizado',
     revision: 'modificación',
+    text: 'Texto',
     unpin: 'Desenganchar',
     validated: 'Validado!',
     validation_required: 'Validación Requerida',
