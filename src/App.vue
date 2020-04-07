@@ -1260,24 +1260,6 @@ tbody:last-child .empty-line:last-child {
     background-color: var(--background-hover);
   }
 
-  &:nth-child(2n) .datatable-row-header::after {
-    background: linear-gradient(
-      90deg,
-      rgba(var(--background-alt-rgb),0.5) 0%,
-      rgba(var(--background-alt-rgb),.3) 50%,
-      rgba(var(--background-alt-rgb),0) 100%
-    );
-  }
-
-  &:hover .datatable-row-header::after {
-    background: linear-gradient(
-      90deg,
-      rgba(var(--background-hover-rgb),.5) 0%,
-      rgba(var(--background-hover-rgb),.3) 50%,
-      rgba(var(--background-hover-rgb),0) 100%
-    );
-  }
-
   &:last-child th,
   &:last-child td {
     border-bottom: 1px solid var(--border);
@@ -1312,21 +1294,22 @@ tbody:last-child .empty-line:last-child {
 .datatable-row-header {
   position: sticky;
   left: 0;
+  border-right: 1px solid rgba(var(--border-rgb), .5);
 
   &::after {
     content: '';
     display: block;
     position: absolute;
-    left: 100%;
+    left: calc(100% + 1px);
     top: 0;
     bottom: 0;
-    width: 1rem;
+    width: .75rem;
     background: linear-gradient(
       90deg,
-      rgba(var(--background-rgb),.7) 0%,
-      rgba(var(--background-rgb),.3) 50%,
-      rgba(var(--background-rgb),.1) 20%,
-      rgba(var(--background-rgb),0) 100%
+      rgba(var(--border-rgb),.4) 0%,
+      rgba(var(--border-rgb),.3) 20%,
+      rgba(var(--border-rgb),.2) 50%,
+      rgba(var(--border-rgb),0) 100%
     );
   }
 }
@@ -1342,16 +1325,6 @@ tbody:last-child .empty-line:last-child {
       text-indent: .3rem;
       font-size: 1.1em;
       color: var(--text);
-    }
-
-    &::before {
-      content: '';
-      display: block;
-      position: absolute;
-      top: calc(1rem - 1px);
-      left: 0;
-      width: 100%;
-      border-top: 1px solid var(--border);
     }
   }
 }
