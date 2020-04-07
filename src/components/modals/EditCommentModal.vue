@@ -11,7 +11,16 @@
       </h1>
 
       <form v-on:submit.prevent>
+        <combo-box-status
+          :label="$t('task_status.title')"
+          :task-status-list="taskStatusForCurrentUser"
+          v-model="form.task_status_id"
+        />
+
         <div class="field">
+        <label class="label">
+          {{ $t('comments.text') }}
+        </label>
           <at-ta
             :members="team"
             name-key="full_name"
@@ -70,13 +79,17 @@
 </template>
 
 <script>
+import { mapGetters } from 'vuex'
+
 import AtTa from 'vue-at/dist/vue-at-textarea'
+import ComboBoxStatus from '../widgets/ComboboxStatus.vue'
 import PeopleAvatar from '../widgets/PeopleAvatar'
 
 export default {
   name: 'edit-comment-modal',
   components: {
     AtTa,
+    ComboBoxStatus,
     PeopleAvatar
   },
 
@@ -89,40 +102,28 @@ export default {
     'team'
   ],
 
-  watch: {
-    commentToEdit () {
-      if (this.commentToEdit && this.commentToEdit.id) {
-        this.form.text = this.commentToEdit.text
-      } else {
-        this.form = {
-          text: ''
-        }
-      }
-    },
-
-    active () {
-      if (this.active) {
-        setTimeout(() => {
-          this.$refs.textField.focus()
-        }, 100)
-      }
-    }
-  },
-
   data () {
     if (this.commentToEdit && this.commentToEdit.id) {
       return {
         form: {
-          text: this.commentToEdit.text
+          text: this.commentToEdit.text,
+          task_status_id: this.commentToEdit.task_status_id
         }
       }
     } else {
       return {
         form: {
-          text: ''
+          text: '',
+          task_status_id: null
         }
       }
     }
+  },
+
+  computed: {
+    ...mapGetters([
+      'taskStatusForCurrentUser'
+    ])
   },
 
   methods: {
@@ -132,6 +133,28 @@ export default {
           id: this.commentToEdit.id,
           ...this.form
         })
+      }
+    }
+  },
+
+  watch: {
+    commentToEdit () {
+      if (this.commentToEdit && this.commentToEdit.id) {
+        this.form.text = this.commentToEdit.text
+        this.form.task_status_id = this.commentToEdit.task_status_id
+      } else {
+        this.form = {
+          text: '',
+          task_status_id: null
+        }
+      }
+    },
+
+    active () {
+      if (this.active) {
+        setTimeout(() => {
+          this.$refs.textField.focus()
+        }, 100)
       }
     }
   }

@@ -449,7 +449,7 @@ const actions = {
 
   editTaskComment ({ commit }, { taskId, comment, checklist, callback }) {
     if (checklist) {
-      commit(UPDATE_COMMENT_CHECKLIST, { taskId, comment, checklist })
+      commit(UPDATE_COMMENT_CHECKLIST, { comment, checklist })
     }
     tasksApi.editTaskComment(comment, (err, comment) => {
       if (!err) {
@@ -849,7 +849,11 @@ const mutations = {
     const oldComment = state.taskComments[taskId].find(
       c => c.id === comment.id
     )
-    oldComment.text = comment.text
+    Object.assign(oldComment, {
+      text: comment.text,
+      task_status_id: comment.task_status_id,
+      task_status: state.taskStatusMap[comment.task_status_id]
+    })
   },
 
   [PREVIEW_FILE_SELECTED] (state, forms) {

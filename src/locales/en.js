@@ -73,6 +73,7 @@ export default {
     unpin: 'Unpin',
     validated: 'Validated!',
     validation_required: 'Validation Required',
+    text: 'Text',
     set_status_to: 'Set status to',
     fields: {
       text: 'text'
