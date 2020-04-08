@@ -12,7 +12,21 @@
   <div class="flexrow">
   <figure class="flexrow-item comment-left">
     <people-avatar class="" :person="comment.person" />
-    <span class="filler"></span>
+    <div class="comment-like">
+      <button
+        :class="{
+          'like-button': true,
+          'like-button--empty': comment.like === undefined ? true : false
+        }"
+        type="button"
+        :title="isLikedBy"
+        @click="likeComment(comment)"
+        disabled="comment.person_id !== user.id"
+      >
+        <thumbs-up-icon size="1.2x"/>
+        {{comment.like || 0}}
+      </button>
+    </div>
     <span
       class="task-status-name"
       :style="{
@@ -68,7 +82,10 @@
         </router-link>
       </div>
 
-      <p v-if="comment.task_status.name === 'Done'">
+      <p
+        class="comment-text"
+        v-if="comment.task_status.name === 'Done'"
+      >
         <span :style="{'color': comment.task_status.color}">
           {{ $t('comments.validated') }}
         </span>
@@ -152,7 +169,8 @@ import { remove } from '../../lib/models'
 import {
   CheckSquareIcon,
   ChevronDownIcon,
-  SquareIcon
+  SquareIcon,
+  ThumbsUpIcon
 } from 'vue-feather-icons'
 import CommentMenu from './CommentMenu.vue'
 import PeopleAvatar from './PeopleAvatar.vue'
@@ -166,7 +184,8 @@ export default {
     CommentMenu,
     PeopleAvatar,
     PeopleName,
-    SquareIcon
+    SquareIcon,
+    ThumbsUpIcon
   },
 
   data () {
@@ -266,6 +285,9 @@ export default {
     isChangeChecklistAllowed () {
       return this.taskStatus.is_retake &&
         this.user.id === this.comment.person_id
+    },
+    isLikedBy () {
+      return 'John Doe, etc…'
     }
   },
 
@@ -353,6 +375,12 @@ export default {
       }
     },
 
+    likeComment (comment) {
+      console.log(comment.person)
+      console.log('like by', this.user.id)
+      // this.$emit('like-comment', comment.id, this.user.id)
+    },
+
     renderComment
   },
 
@@ -394,7 +422,8 @@ export default {
 }
 
 .content .comment-person {
-  margin-bottom: 0.3em;
+  min-height: 40px;
+  margin-bottom: 0;
 }
 
 .comment-date {
@@ -415,7 +444,7 @@ a.revision:hover {
 }
 
 .comment-text {
-  margin-top: 1em;
+  margin-top: .5rem;
   word-break: break-word;
   hyphens: auto;
   hyphenate-limit-chars: 8 6 2;
@@ -545,6 +574,7 @@ a.revision:hover {
 }
 
 .task-status-name {
+  margin-top: auto;
   font-size: 0.8em;
   text-transform: uppercase;
 }
@@ -559,13 +589,46 @@ a.revision:hover {
   padding: 0.5em 0 0.5em 0.5em;
 }
 
+.like-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: space-between;
+  border-radius: .5rem;
+  border: 0;
+  margin: .5rem 0;
+  width: 100%;
+  padding: .3rem .5rem;
+  background-color: transparent;
+  color: inherit;
+  cursor: pointer;
+
+  &:hover,
+  &:focus {
+    background-color: $dark-grey-lightest;
+  }
+
+  &[disabled] {
+    pointer-events: none;
+  }
+}
+
+.like-button--empty {
+  opacity: .5;
+
+  &:hover,
+  &:focus {
+    opacity: 1;
+  }
+}
+
 .comment-content {
   padding: 0.5em;
   flex: 1;
 }
 
 .infos {
-  padding-top: 0.3em;
+  display: flex;
+  align-items: center;
 }
 
 @media screen and (max-width: 768px) {
