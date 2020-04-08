@@ -199,6 +199,7 @@
 
   <add-thumbnails-modal
     ref="add-thumbnails-modal"
+    parent="assets"
     :active="modals.isAddThumbnailsDisplayed"
     :is-loading="loading.addThumbnails"
     :is-error="errors.addThumbnails"

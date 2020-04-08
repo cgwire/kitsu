@@ -105,7 +105,9 @@ export default {
     thumbnails: {
       error: 'An error occured while uploading thumbnails',
       explaination: 'Adding a thumbnail requires to set a new preview. In order to set several thumbnails at the same time, you must chose first a task type that will be used to create the new previews. The thumbnails will be set from this new preview.',
-      explaination_two: 'Then you have to select the files you want to upload. To find the right entities, the file names must match the following pattern: "parent name entity name".',
+      explaination_two: 'Then you have to select the files you want to upload. To find the right entities, the file names must match the following pattern:',
+      shots_pattern: '"SequenceName ShotName" eg. SQ01_SH01.',
+      assets_pattern: '"AssetType AssetName" eg. Environment_Forest.',
       select_files: 'Select Files',
       selected_files: 'Selected Files',
       select_task_type: 'Select Task Type',

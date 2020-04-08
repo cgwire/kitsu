@@ -23,6 +23,7 @@
 
       <p>
         {{ $t('entities.thumbnails.explaination_two') }}
+        {{ $t(`entities.thumbnails.${parent}_pattern`) }}
       </p>
 
       <label class="label">
@@ -118,6 +119,10 @@ export default {
     isError: {
       type: Boolean,
       default: false
+    },
+    parent: {
+      type: String,
+      required: true
     }
   },
 
