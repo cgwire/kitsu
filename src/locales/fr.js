@@ -101,7 +101,10 @@ export default {
   entities: {
     thumbnails: {
       error: 'Une erreur s\'est produite en téléversant les vignettes',
-
+      explaination: 'L\'ajout d\'une vignette nécessite de publier un nouvel aperçu. Afin de définir plusieurs vignettes en même temps, vous devez d\'abord choisir un type de tâche qui sera utilisé pour publier les nouveaux aperçus. Les vignettes seront définies à partir de ce nouvel aperçu.',
+      explaination_two: 'Ensuite, vous devez sélectionner les fichiers que vous voulez télécharger. Pour trouver les bonnes entités, les noms de fichiers doivent correspondre au modèle suivant :',
+      shots_pattern: '"SequenceName ShotName" ex. SQ01_SH01.',
+      assets_pattern: '"AssetType AssetName" ex. Environnement_Forêt.',
       select_files: 'Sélectionner les fichiers',
       selected_files: 'Fichiers sélectionnés',
       select_task_type: 'Sélectionner un type de tâche',
