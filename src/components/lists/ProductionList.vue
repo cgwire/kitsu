@@ -1,48 +1,43 @@
 <template>
 <div class="data-list">
-  <div style="overflow: hidden">
-    <table class="table table-header" ref="headerWrapper">
-      <thead>
+  <div class="datatable-wrapper">
+    <table class="datatable">
+      <thead class="datatable-head">
         <tr>
-          <th class="project">&nbsp;</th>
-          <th class="name">{{ $t('productions.fields.name') }}</th>
-          <th class="type">{{ $t('productions.fields.type') }}</th>
-          <th class="fps">{{ $t('productions.fields.fps') }}</th>
-          <th class="ratio">{{ $t('productions.fields.ratio') }}</th>
-          <th class="resolution">{{ $t('productions.fields.resolution') }}</th>
-          <th class="actions"></th>
+          <th scope="col" class="name datatable-row-header">
+            {{ $t('productions.fields.name') }}
+          </th>
+          <th scope="col" class="type">{{ $t('productions.fields.type') }}</th>
+          <th scope="col" class="fps">{{ $t('productions.fields.fps') }}</th>
+          <th scope="col" class="ratio">
+            {{ $t('productions.fields.ratio') }}
+          </th>
+          <th scope="col" class="resolution">
+            {{ $t('productions.fields.resolution') }}
+          </th>
+          <th scope="col" class="actions"></th>
         </tr>
       </thead>
-    </table>
-  </div>
-
-  <table-info
-    :is-loading="isLoading"
-    :is-error="isError"
-  >
-  </table-info>
-
-  <div class="table-body" v-scroll="onBodyScroll">
-    <table class="table splitted-table">
-      <tbody>
-        <tr class="type-header">
-          <td colspan="30">
-            {{ $t('productions.status.open') }}
-          </td>
+      <tbody class="datatable-body">
+        <tr class="datatable-type-header">
+          <th scope="rowgroup" colspan="6">
+            <span class="datatable-row-header">
+              {{ $t('productions.status.open') }}
+            </span>
+          </th>
         </tr>
-        <tr v-for="entry in openProductions" :key="entry.id">
-          <production-name-cell
-            class="project"
-            :only-avatar="true"
-            :entry="entry"
-            :last-production-screen="lastProductionScreen"
-          />
-          <production-name-cell
-            class="name"
-            :with-avatar="false"
-            :entry="entry"
-            :last-production-screen="lastProductionScreen"
-          />
+        <tr
+          class="datatable-row"
+          v-for="entry in openProductions"
+          :key="entry.id"
+        >
+          <th class="name datatable-row-header" scope="row">
+            <production-name-cell
+              :with-avatar="true"
+              :entry="entry"
+              :last-production-screen="lastProductionScreen"
+            />
+          </th>
           <td class="type">
             {{ $t('productions.type.' + (entry.production_type || 'short')) }}
           </td>
@@ -65,29 +60,26 @@
           />
         </tr>
       </tbody>
-    </table>
-    <table class="table splitted-table" v-if="closedProductions.length > 0">
-      <tbody>
-        <tr class="type-header">
-          <td colspan="30">
-            {{ $t('productions.status.closed') }}
-          </td>
+      <tbody v-if="closedProductions.length > 0">
+        <tr class="datatable-type-header">
+          <th scope="rowgroup" colspan="6">
+            <span class="datatable-row-header">
+              {{ $t('productions.status.closed') }}
+            </span>
+          </th>
         </tr>
-        <tr v-for="entry in closedProductions" :key="entry.id">
-          <production-name-cell
-            class="project"
-            :only-avatar="true"
-            :entry="entry"
-            :no-link="true"
-            :last-production-screen="lastProductionScreen"
-          />
-          <production-name-cell
-            class="name"
-            :with-avatar="false"
-            :entry="entry"
-            :no-link="true"
-            :last-production-screen="lastProductionScreen"
-          />
+        <tr
+          class="datatable-row"
+          v-for="entry in closedProductions"
+          :key="entry.id"
+        >
+          <th class="name datatable-row-header" scope="row">
+            <production-name-cell
+              :with-avatar="true"
+              :entry="entry"
+              :last-production-screen="lastProductionScreen"
+            />
+          </th>
           <td class="type">
             {{ $t('productions.type.' + (entry.production_type || 'short')) }}
           </td>
@@ -115,6 +107,12 @@
       </tbody>
     </table>
   </div>
+
+  <table-info
+    :is-loading="isLoading"
+    :is-error="isError"
+  >
+  </table-info>
 
   <p class="has-text-centered nb-productions">
     {{ entries.length }} {{ $tc('productions.number', entries.length) }}
@@ -170,18 +168,15 @@ export default {
         Closed: 'productions.status.closed'
       }
       return statusMap[originalStatus]
-    },
-    onBodyScroll (event, position) {
-      this.$refs.headerWrapper.style.left = `-${position.scrollLeft}px`
     }
   }
 }
 </script>
 
 <style lang="scss" scoped>
-.project {
-  min-width: 60px;
-  width: 60px;
+.datatable-wrapper {
+  overflow: auto;
+  margin-bottom: 1rem;
 }
 
 .name {

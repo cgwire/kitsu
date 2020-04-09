@@ -1,58 +1,57 @@
 <template>
-<td class="production-name">
-  <div
-    class="flexrow"
-    v-tooltip="tooltipOptions"
+<div
+  class="flexrow production-name"
+  v-tooltip="tooltipOptions"
+>
+  <router-link
+    class="flexrow flexrow-item"
+    :to="productionRoute"
+    v-if="!noLink"
   >
-    <router-link
-      :to="productionRoute"
-      v-if="!noLink"
-    >
-      <div
-         class="flexrow-item avatar has-text-centered"
-         v-if="withAvatar"
-         v-bind:style="{
-         background: getAvatarColor(entry),
-         width: size + 'px',
-         height: size + 'px',
-         'font-size': (size - 15) + 'px',
-         'line-height': size + 'px'
-      }">
-        <span v-if="!entry.has_avatar">
-          {{ generateAvatar(entry) }}
-        </span>
-        <span v-else>
-          <img :src="getThumbnailPath(entry)" />
-        </span>
-      </div>
-      <span class="flexrow-item" v-if="!onlyAvatar">
-        {{ entry.name }}
+    <div
+       class="flexrow-item avatar has-text-centered"
+       v-if="withAvatar"
+       v-bind:style="{
+       background: getAvatarColor(entry),
+       width: size + 'px',
+       height: size + 'px',
+       'font-size': (size - 15) + 'px',
+       'line-height': size + 'px'
+    }">
+      <span v-if="!entry.has_avatar">
+        {{ generateAvatar(entry) }}
       </span>
-    </router-link>
-    <div v-else>
-      <div
-         class="flexrow-item avatar has-text-centered"
-         v-if="withAvatar"
-         v-bind:style="{
-         background: getAvatarColor(entry),
-         width: size + 'px',
-         height: size + 'px',
-         'font-size': (size - 15) + 'px',
-         'line-height': size + 'px'
-      }">
-        <span v-if="!entry.has_avatar">
-          {{ generateAvatar(entry) }}
-        </span>
-        <span v-else>
-          <img :src="getThumbnailPath(entry)" />
-        </span>
-      </div>
-      <span class="flexrow-item" v-if="!onlyAvatar">
-        {{ entry.name }}
+      <span v-else>
+        <img :src="getThumbnailPath(entry)" />
       </span>
     </div>
+    <span class="flexrow-item" v-if="!onlyAvatar">
+      {{ entry.name }}
+    </span>
+  </router-link>
+  <div class="flexrow flexrow-item" v-else>
+    <div
+       class="flexrow-item avatar has-text-centered"
+       v-if="withAvatar"
+       v-bind:style="{
+       background: getAvatarColor(entry),
+       width: size + 'px',
+       height: size + 'px',
+       'font-size': (size - 15) + 'px',
+       'line-height': size + 'px'
+    }">
+      <span v-if="!entry.has_avatar">
+        {{ generateAvatar(entry) }}
+      </span>
+      <span v-else>
+        <img :src="getThumbnailPath(entry)" />
+      </span>
+    </div>
+    <span class="flexrow-item" v-if="!onlyAvatar">
+      {{ entry.name }}
+    </span>
   </div>
-</td>
+</div>
 </template>
 
 <script>
