@@ -1365,7 +1365,7 @@ tbody:last-child .empty-line:last-child {
 }
 
 .flexrow-item {
-  margin-right: 1em;
+  margin-right: 1rem;
 
   &.no-margin {
     margin-right: 0;
