@@ -1,42 +1,39 @@
 <template>
 <div class="data-list">
-  <div style="overflow: hidden">
-    <table class="table table-header" ref="headerWrapper">
-      <thead>
+  <div
+    class="datatable-wrapper"
+    ref="body"
+    v-scroll="onBodyScroll"
+  >
+    <table class="datatable">
+      <thead class="datatable-head">
         <tr>
-          <th class="name">
+          <th scope="col" class="name datatable-row-header">
             {{ $t("people.list.name") }}
           </th>
-          <th class="email">
+          <th scope="col" class="email">
             {{ $t("people.list.email") }}
           </th>
-          <th class="phone">
+          <th scope="col" class="phone">
             {{ $t("people.list.phone") }}
           </th>
-          <th class="role">
+          <th scope="col" class="role">
             {{ $t("people.list.role") }}
           </th>
-          <th class="actions"></th>
+          <th scope="col" class="actions"></th>
         </tr>
       </thead>
-    </table>
-  </div>
-
-  <table-info
-    :is-loading="isLoading"
-    :is-error="isError"
-  />
-
-  <div class="table-body" v-scroll="onBodyScroll">
-
-    <table class="table splitted-table" v-if="activePeople.length > 0">
-      <tbody>
-        <tr class="type-header">
-          <td colspan="30">
-            {{ $t('people.active') }}
-          </td>
+      <tbody class="datatable-body" v-if="activePeople.length > 0">
+        <tr class="datatable-type-header">
+          <th scope="rowgroup" colspan="5">
+            <span class="datatable-row-header">{{ $t('people.active') }}</span>
+          </th>
         </tr>
-        <tr v-for="entry in activePeople" :key="entry.id">
+        <tr
+          class="datatable-row"
+          v-for="entry in activePeople"
+          :key="entry.id"
+        >
           <people-name-cell class="name" :person="entry" />
           <td class="email">{{ entry.email }}</td>
           <td class="phone">{{ entry.phone }}</td>
@@ -55,16 +52,17 @@
           </td>
         </tr>
       </tbody>
-    </table>
-
-    <table class="table splitted-table" v-if="unactivePeople.length > 0">
-      <tbody>
-        <tr class="type-header">
-          <td colspan="30">
-            {{ $t('people.unactive') }}
-          </td>
+      <tbody class="datatable-body" v-if="unactivePeople.length > 0">
+        <tr class="datatable-type-header">
+          <th scope="rowgroup" colspan="5">
+            <span class="datatable-row-header">{{ $t('people.unactive') }}</span>
+          </th>
         </tr>
-        <tr v-for="entry in unactivePeople" :key="entry.id">
+        <tr
+          class="datatable-row"
+          v-for="entry in unactivePeople"
+          :key="entry.id"
+        >
           <people-name-cell class="name" :person="entry" />
           <td class="email">{{ entry.email }}</td>
           <td class="phone">{{ entry.phone }}</td>
@@ -87,6 +85,11 @@
       </tbody>
     </table>
   </div>
+
+  <table-info
+    :is-loading="isLoading"
+    :is-error="isError"
+  />
 
   <p class="has-text-centered footer-info" v-if="!isLoading">
     {{ entries.length }} {{ $tc('people.persons', entries.length) }}
@@ -143,18 +146,19 @@ export default {
     },
 
     onBodyScroll (event, position) {
-      this.$refs.headerWrapper.style.left = `-${position.scrollLeft}px`
+      this.$refs.body.style.left = `-${position.scrollLeft}px`
     }
   }
 }
 </script>
 
 <style lang="scss" scoped>
-.dark {
-  .table tbody th.name {
-    border-color: #25282E;
-  }
+
+.datatable-wrapper {
+  overflow: auto;
+  margin-bottom: 1rem;
 }
+
 .name {
   width: 230px;
   min-width: 230px;
@@ -164,8 +168,8 @@ export default {
   min-width: 300px;
 }
 .phone {
-  width: 140px;
-  min-width: 140px;
+  width: 200px;
+  min-width: 200px;
 }
 .role {
   width: 125px;

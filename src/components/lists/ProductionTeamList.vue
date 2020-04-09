@@ -108,7 +108,7 @@ export default {
 }
 .phone {
   width: 200px;
-  min-width: 140px;
+  min-width: 200px;
 }
 .role {
   width: 125px;
