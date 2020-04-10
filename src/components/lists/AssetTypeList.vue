@@ -1,26 +1,15 @@
 <template>
 <div class="data-list">
-  <div style="overflow: hidden">
-    <table class="table table-header" ref="headerWrapper">
-      <thead>
+  <div class="datatable-wrapper">
+    <table class="datatable">
+      <thead class="datatable-head">
         <tr>
-          <th class="name">{{ $t('asset_types.fields.name') }}</th>
-          <th class="actions"></th>
+          <th scope="col" class="name">{{ $t('asset_types.fields.name') }}</th>
+          <th scope="col" class="actions"></th>
         </tr>
       </thead>
-    </table>
-  </div>
-
-  <table-info
-    :is-loading="isLoading"
-    :is-error="isError"
-  >
-  </table-info>
-
-  <div class="table-body" v-scroll="onBodyScroll" v-if="entries.length > 0">
-    <table class="table">
-      <tbody>
-        <tr v-for="entry in entries" :key="entry.id">
+      <tbody class="datatable-body" v-if="entries.length > 0">
+        <tr class="datatable-row" v-for="entry in entries" :key="entry.id">
           <td class="name">
              {{ entry.name }}
           </td>
@@ -39,6 +28,12 @@
       </tbody>
     </table>
   </div>
+
+  <table-info
+    :is-loading="isLoading"
+    :is-error="isError"
+  >
+  </table-info>
 
   <p class="has-text-centered nb-asset-types">
     {{ entries.length }} {{ $tc('asset_types.number', entries.length) }}
@@ -72,15 +67,18 @@ export default {
   },
   methods: {
     ...mapActions([
-    ]),
-    onBodyScroll (event, position) {
-      this.$refs.headerWrapper.style.left = `-${position.scrollLeft}px`
-    }
+    ])
   }
 }
 </script>
 
 <style lang="scss" scoped>
+
+.datatable-body tr:first-child th,
+.datatable-body tr:first-child td {
+  border-top: 0;
+}
+
 .name {
   width: 300px;
   padding: 1em;
