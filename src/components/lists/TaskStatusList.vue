@@ -1,42 +1,32 @@
 <template>
 <div class="data-list">
-  <div style="overflow: hidden">
-    <table class="table table-header" ref="headerWrapper">
-      <thead>
+  <div class="datatable-wrapper">
+    <table class="datatable">
+      <thead class="datatable-head">
         <tr>
-          <th class="name">
+          <th scope="col" class="name">
             {{ $t('task_status.fields.name') }}
           </th>
-          <th class="short-name">
+          <th scope="col" class="short-name">
             {{ $t('task_status.fields.short_name') }}
           </th>
-          <th class="is-done">
+          <th scope="col" class="is-done">
             {{ $t('task_status.fields.is_done') }}
           </th>
-          <th class="is-retake">
+          <th scope="col" class="is-retake">
             {{ $t('task_status.fields.is_retake') }}
           </th>
-          <th class="is-artist-allowed">
+          <th scope="col" class="is-artist-allowed">
             {{ $t('task_status.fields.is_artist_allowed') }}
           </th>
-          <th class="is-client-allowed">
+          <th scope="col" class="is-client-allowed">
             {{ $t('task_status.fields.is_client_allowed') }}
           </th>
-          <th class="actions"></th>
+          <th scope="col" class="actions"></th>
         </tr>
       </thead>
-    </table>
-  </div>
-
-  <table-info
-    :is-loading="isLoading"
-    :is-error="isError"
-  />
-
-  <div class="table-body" v-scroll="onBodyScroll">
-    <table class="table">
-      <tbody>
-        <tr v-for="entry in entries" :key="entry.id">
+      <tbody class="datatable-body">
+        <tr class="datatable-row" v-for="entry in entries" :key="entry.id">
           <td class="name">
             {{ entry.name }}
           </td>
@@ -70,6 +60,11 @@
       </tbody>
     </table>
   </div>
+
+  <table-info
+    :is-loading="isLoading"
+    :is-error="isError"
+  />
 
   <p class="has-text-centered nb-task-status">
     {{ entries.length }} {{ $tc('task_status.number', entries.length) }}
@@ -107,16 +102,18 @@ export default {
   },
   methods: {
     ...mapActions([
-    ]),
-
-    onBodyScroll (event, position) {
-      this.$refs.headerWrapper.style.left = `-${position.scrollLeft}px`
-    }
+    ])
   }
 }
 </script>
 
 <style lang="scss" scoped>
+
+.datatable-body tr:first-child th,
+.datatable-body tr:first-child td {
+  border-top: 0;
+}
+
 .name {
   width: 200px;
   min-width: 200px;
